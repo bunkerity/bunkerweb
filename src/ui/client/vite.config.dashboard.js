@@ -47,7 +47,7 @@ export default defineConfig({
         instances: resolve(__dirname, "./dashboard/pages/instances/index.html"),
         global_config: resolve(
           __dirname,
-          "./dashboard/pages/global-config/index.html"
+          "./dashboard/pages/global-config/index.html",
         ),
         jobs: resolve(__dirname, "./dashboard/pages/jobs/index.html"),
         services: resolve(__dirname, "./dashboard/pages/services/index.html"),

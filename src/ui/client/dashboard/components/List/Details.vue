@@ -5,7 +5,7 @@ import Text from "@components/Widget/Text.vue";
 import Filter from "@components/Widget/Filter.vue";
 import Grid from "@components/Widget/Grid.vue";
 import MessageUnmatch from "@components/Message/Unmatch.vue";
-/** 
+/**
 *  @name List/Details.vue
 *  @description This component is a list of items separate on two columns : one for the title, and other for a list of popovers related to the plugin (type, link...)
 *  @example
@@ -110,8 +110,8 @@ function indexPending(id) {
           data.upIndex === id
             ? 'up'
             : data.pendingIndex.includes(id)
-            ? 'pending'
-            : '',
+              ? 'pending'
+              : '',
         ]"
         v-bind="item.attrs || {}"
         @focusin="indexUp(id)"

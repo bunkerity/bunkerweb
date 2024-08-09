@@ -4,7 +4,7 @@ Vite.js will be use to build needed pages and resources (CSS, JS...) for the Bun
 
 # Structure
 
-We have two main folders : 
+We have two main folders :
 - `dashboard` with a multi page approach, this part is used to dev main pages on the dashboard. Use `vite.config.dashboard.js`.
 - `setup` that is special because we need a all-in-one HTML file for the setup page. Use `vite.config.setup.js`.
 
@@ -21,4 +21,4 @@ In case you want to run the BunkerWeb UI, try to update front-end and get the mo
 
 # Prod mode
 
-You only have to run a basic `docker-compose` and `src/ui/Dockerfile` will build the front automatically. 
+You only have to run a basic `docker-compose` and `src/ui/Dockerfile` will build the front automatically.

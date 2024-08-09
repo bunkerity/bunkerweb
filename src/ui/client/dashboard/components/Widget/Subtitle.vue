@@ -98,8 +98,8 @@ onMounted(() => {
       props.uppercase
         ? 'uppercase'
         : props.lowercase
-        ? 'lowercase'
-        : 'capitalize-first',
+          ? 'lowercase'
+          : 'capitalize-first',
       props.subtitleClass,
     ]"
   >

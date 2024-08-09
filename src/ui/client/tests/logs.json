@@ -1,68 +1,65 @@
 [
-    {
-        "type": "card",
-        "containerColumns": {
-            "pc": 12,
-            "tablet": 12,
-            "mobile": 12
-        },
-        "widgets": [
-            {
-                "type": "Title",
-                "data": {
-                    "title": "logs_title"
-                }
+  {
+    "type": "card",
+    "containerColumns": {
+      "pc": 12,
+      "tablet": 12,
+      "mobile": 12
+    },
+    "widgets": [
+      {
+        "type": "Title",
+        "data": {
+          "title": "logs_title"
+        }
+      },
+      {
+        "type": "Fields",
+        "data": {
+          "setting": {
+            "id": "logs-select-file",
+            "label": "logs_select_file",
+            "inpType": "select",
+            "name": "logs-select-file",
+            "onlyDown": true,
+            "value": "",
+            "values": ["file1", "file2"],
+            "columns": {
+              "pc": 4,
+              "tablet": 6,
+              "mobile": 12
             },
-            {
-                "type": "Fields",
-                "data": {
-                    "setting": {
-                        "id": "logs-select-file",
-                        "label": "logs_select_file",
-                        "inpType": "select",
-                        "name": "logs-select-file",
-                        "onlyDown": true,
-                        "value": "",
-                        "values": [
-                            "file1",
-                            "file2"
-                        ],
-                        "columns": {
-                            "pc": 4,
-                            "tablet": 6,
-                            "mobile": 12
-                        },
-                        "maxBtnChars": 20,
-                        "attrs": {
-                            "data-log": "true"
-                        },
-                        "popovers": [
-                            {
-                                "iconName": "info",
-                                "text": "logs_select_file_info"
-                            }
-                        ]
-                    }
-                }
+            "maxBtnChars": 20,
+            "attrs": {
+              "data-log": "true"
             },
-            {
-                "type": "Fields",
-                "data": {
-                    "setting": {
-                        "containerClass": "mt-4",
-                        "id": "logs-file-content",
-                        "label": "logs_file_content",
-                        "inpType": "editor",
-                        "name": "logs-file-content",
-                        "value": "gefesfesfsefes",
-                        "columns": {
-                            "pc": 12,
-                            "tablet": 12,
-                            "mobile": 12
-                        }
-                    }
-                }
+            "popovers": [
+              {
+                "iconName": "info",
+                "text": "logs_select_file_info"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "type": "Fields",
+        "data": {
+          "setting": {
+            "containerClass": "mt-4",
+            "id": "logs-file-content",
+            "label": "logs_file_content",
+            "inpType": "editor",
+            "name": "logs-file-content",
+            "value": "gefesfesfsefes",
+            "columns": {
+              "pc": 12,
+              "tablet": 12,
+              "mobile": 12
             }
-        ]
-    }
+          }
+        }
+      }
+    ]
+  }
 ]

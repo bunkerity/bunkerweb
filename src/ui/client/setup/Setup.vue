@@ -2,7 +2,7 @@
 import { reactive, onBeforeMount, onMounted } from "vue";
 import BuilderSetup from "@components/Builder/Setup.vue";
 
-/** 
+/**
 *  @name Page/Setup.vue
 *  @description This component is the setup page.
   This page displays all steps to setup BunkerWeb.

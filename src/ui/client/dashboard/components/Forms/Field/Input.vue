@@ -224,7 +224,7 @@ onMounted(() => {
           props.placeholder
             ? $t(
                 props.placeholder,
-                $t('dashboard_placeholder', props.placeholder)
+                $t('dashboard_placeholder', props.placeholder),
               )
             : ''
         "

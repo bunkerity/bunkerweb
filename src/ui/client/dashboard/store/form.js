@@ -103,12 +103,12 @@ export const createFormStore = (storeName, formType) => {
 
       // Get the index of plugin using pluginId
       const index = templateBase.value.findIndex(
-        (plugin) => plugin.id === pluginId
+        (plugin) => plugin.id === pluginId,
       );
 
       // For back end, we need to keep the group but updating values to default in order to delete it
       for (const [settName, setting] of Object.entries(
-        templateBase.value[index].multiples[multName][groupName]
+        templateBase.value[index].multiples[multName][groupName],
       )) {
         setting.value = setting.default;
       }
@@ -132,18 +132,18 @@ export const createFormStore = (storeName, formType) => {
 
       // Get the index of plugin using pluginId
       const index = templateBase.value.findIndex(
-        (plugin) => plugin.id === pluginId
+        (plugin) => plugin.id === pluginId,
       );
       // Get the right multiple schema
       const multipleSchema = JSON.parse(
-        JSON.stringify(templateBase.value[index]?.multiples_schema[multName])
+        JSON.stringify(templateBase.value[index]?.multiples_schema[multName]),
       );
       const newMultiple = {};
 
       // Get the highest id in Object.keys(plugin?.multiples[multName])
       const nextGroupId =
         Math.max(
-          ...Object.keys(templateBase.value[index]?.multiples[multName])
+          ...Object.keys(templateBase.value[index]?.multiples[multName]),
         ) + 1;
 
       // Set the default values as value
@@ -199,7 +199,7 @@ export const createFormStore = (storeName, formType) => {
   *  @name _useUpdateTemp
   *  @description This function will check if the target is a setting input-like field.
   *  In case it is, it will get the id and value for each field case, this will allow to update the template settings.
-  *  @example 
+  *  @example
     template = [
     {
       name: "test",

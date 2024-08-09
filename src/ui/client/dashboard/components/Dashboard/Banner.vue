@@ -43,7 +43,7 @@ const banner = reactive({
       // I want to match everything inside class and replace it
       data[index].content = item.content.replace(
         /class='(.+?)'|class="(.+?)"/g,
-        'class="banner-item-text"'
+        'class="banner-item-text"',
       );
     });
     return data;
@@ -83,7 +83,7 @@ function setupBanner() {
       // Refetch after one hour
       sessionStorage.setItem(
         "bannerRefetch",
-        Math.round(new Date().getTime() / 1000) + 3600
+        Math.round(new Date().getTime() / 1000) + 3600,
       );
       banner.api = res.data[0].data;
       if (banner.api.length > 0) {

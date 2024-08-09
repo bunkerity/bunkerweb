@@ -1,1058 +1,1035 @@
 [
-    {
-        "type": "card",
-        "containerColumns": {
-            "pc": 12,
-            "tablet": 12,
-            "mobile": 12
-        },
-        "widgets": [
-            {
+  {
+    "type": "card",
+    "containerColumns": {
+      "pc": 12,
+      "tablet": 12,
+      "mobile": 12
+    },
+    "widgets": [
+      {
+        "type": "Title",
+        "data": {
+          "title": "services_title"
+        }
+      },
+      {
+        "type": "Button",
+        "data": {
+          "id": "services-new",
+          "text": "services_new",
+          "color": "success",
+          "size": "normal",
+          "iconName": "plus",
+          "iconColor": "white",
+          "modal": {
+            "widgets": [
+              {
                 "type": "Title",
                 "data": {
-                    "title": "services_title"
+                  "title": "services_new_title"
                 }
-            },
-            {
-                "type": "Button",
+              },
+              {
+                "type": "Text",
                 "data": {
-                    "id": "services-new",
-                    "text": "services_new",
-                    "color": "success",
-                    "size": "normal",
-                    "iconName": "plus",
-                    "iconColor": "white",
-                    "modal": {
-                        "widgets": [
-                            {
-                                "type": "Title",
-                                "data": {
-                                    "title": "services_new_title"
-                                }
-                            },
-                            {
-                                "type": "Text",
-                                "data": {
-                                    "text": "services_new_subtitle"
-                                }
-                            },
-                            {
-                                "type": "ButtonGroup",
-                                "data": {
-                                    "buttons": [
-                                        {
-                                            "id": "new-service-btn-new",
-                                            "text": "services_mode_easy",
-                                            "disabled": false,
-                                            "color": "info",
-                                            "size": "normal",
-                                            "attrs": {
-                                                "role": "link",
-                                                "data-link": "modes?mode=easy"
-                                            }
-                                        },
-                                        {
-                                            "id": "new-service-btn-new",
-                                            "text": "services_mode_advanced",
-                                            "disabled": false,
-                                            "color": "info",
-                                            "size": "normal",
-                                            "attrs": {
-                                                "role": "link",
-                                                "data-link": "modes?mode=advanced"
-                                            }
-                                        },
-                                        {
-                                            "id": "new-service-btn-new",
-                                            "text": "services_mode_raw",
-                                            "disabled": false,
-                                            "color": "info",
-                                            "size": "normal",
-                                            "attrs": {
-                                                "role": "link",
-                                                "data-link": "modes?mode=raw"
-                                            }
-                                        }
-                                    ]
-                                }
-                            },
-                            {
-                                "type": "ButtonGroup",
-                                "data": {
-                                    "buttons": [
-                                        {
-                                            "id": "close-service-btn-new",
-                                            "text": "action_close",
-                                            "disabled": false,
-                                            "color": "close",
-                                            "size": "normal",
-                                            "attrs": {
-                                                "data-close-modal": ""
-                                            }
-                                        }
-                                    ]
-                                }
-                            }
-                        ]
+                  "text": "services_new_subtitle"
+                }
+              },
+              {
+                "type": "ButtonGroup",
+                "data": {
+                  "buttons": [
+                    {
+                      "id": "new-service-btn-new",
+                      "text": "services_mode_easy",
+                      "disabled": false,
+                      "color": "info",
+                      "size": "normal",
+                      "attrs": {
+                        "role": "link",
+                        "data-link": "modes?mode=easy"
+                      }
                     },
-                    "containerClass": "col-span-12 flex justify-center"
+                    {
+                      "id": "new-service-btn-new",
+                      "text": "services_mode_advanced",
+                      "disabled": false,
+                      "color": "info",
+                      "size": "normal",
+                      "attrs": {
+                        "role": "link",
+                        "data-link": "modes?mode=advanced"
+                      }
+                    },
+                    {
+                      "id": "new-service-btn-new",
+                      "text": "services_mode_raw",
+                      "disabled": false,
+                      "color": "info",
+                      "size": "normal",
+                      "attrs": {
+                        "role": "link",
+                        "data-link": "modes?mode=raw"
+                      }
+                    }
+                  ]
                 }
+              },
+              {
+                "type": "ButtonGroup",
+                "data": {
+                  "buttons": [
+                    {
+                      "id": "close-service-btn-new",
+                      "text": "action_close",
+                      "disabled": false,
+                      "color": "close",
+                      "size": "normal",
+                      "attrs": {
+                        "data-close-modal": ""
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          "containerClass": "col-span-12 flex justify-center"
+        }
+      },
+      {
+        "type": "Table",
+        "data": {
+          "title": "services_table_title",
+          "minWidth": "md",
+          "header": [
+            "services_table_name",
+            "services_table_method",
+            "services_table_actions"
+          ],
+          "positions": [4, 4, 4],
+          "items": [
+            [
+              {
+                "name": "app1.example.com",
+                "type": "Text",
+                "data": {
+                  "text": "app1.example.com"
+                }
+              },
+              {
+                "method": "scheduler",
+                "type": "Text",
+                "data": {
+                  "text": "scheduler"
+                }
+              },
+              {
+                "type": "ButtonGroup",
+                "data": {
+                  "buttons": [
+                    {
+                      "id": "open-modal-plugins-0",
+                      "text": "plugins",
+                      "hideText": true,
+                      "color": "success",
+                      "size": "normal",
+                      "iconName": "eye",
+                      "iconColor": "white",
+                      "modal": {
+                        "widgets": [
+                          {
+                            "type": "Title",
+                            "data": {
+                              "title": "services_plugins_title"
+                            }
+                          },
+                          {
+                            "type": "Table",
+                            "data": {
+                              "title": "services_settings_table_title",
+                              "minWidth": "",
+                              "header": [
+                                "services_settings_table_name",
+                                "services_settings_table_status"
+                              ],
+                              "positions": [8, 4],
+                              "items": [
+                                [
+                                  {
+                                    "type": "Text",
+                                    "data": {
+                                      "text": "REVERSE PROXY"
+                                    }
+                                  },
+                                  {
+                                    "type": "Icons",
+                                    "data": {
+                                      "iconName": "check"
+                                    }
+                                  }
+                                ],
+                                [
+                                  {
+                                    "type": "Text",
+                                    "data": {
+                                      "text": "SERVE FILES"
+                                    }
+                                  },
+                                  {
+                                    "type": "Icons",
+                                    "data": {
+                                      "iconName": "cross"
+                                    }
+                                  }
+                                ],
+                                [
+                                  {
+                                    "type": "Text",
+                                    "data": {
+                                      "text": "REMOTE PHP"
+                                    }
+                                  },
+                                  {
+                                    "type": "Icons",
+                                    "data": {
+                                      "iconName": "cross"
+                                    }
+                                  }
+                                ],
+                                [
+                                  {
+                                    "type": "Text",
+                                    "data": {
+                                      "text": "AUTO LETS ENCRYPT"
+                                    }
+                                  },
+                                  {
+                                    "type": "Icons",
+                                    "data": {
+                                      "iconName": "cross"
+                                    }
+                                  }
+                                ],
+                                [
+                                  {
+                                    "type": "Text",
+                                    "data": {
+                                      "text": "CUSTOM SSL"
+                                    }
+                                  },
+                                  {
+                                    "type": "Icons",
+                                    "data": {
+                                      "iconName": "cross"
+                                    }
+                                  }
+                                ],
+                                [
+                                  {
+                                    "type": "Text",
+                                    "data": {
+                                      "text": "MODSECURITY"
+                                    }
+                                  },
+                                  {
+                                    "type": "Icons",
+                                    "data": {
+                                      "iconName": "check"
+                                    }
+                                  }
+                                ],
+                                [
+                                  {
+                                    "type": "Text",
+                                    "data": {
+                                      "text": "BAD BEHAVIOR"
+                                    }
+                                  },
+                                  {
+                                    "type": "Icons",
+                                    "data": {
+                                      "iconName": "check"
+                                    }
+                                  }
+                                ],
+                                [
+                                  {
+                                    "type": "Text",
+                                    "data": {
+                                      "text": "LIMIT REQ"
+                                    }
+                                  },
+                                  {
+                                    "type": "Icons",
+                                    "data": {
+                                      "iconName": "check"
+                                    }
+                                  }
+                                ],
+                                [
+                                  {
+                                    "type": "Text",
+                                    "data": {
+                                      "text": "DNSBL"
+                                    }
+                                  },
+                                  {
+                                    "type": "Icons",
+                                    "data": {
+                                      "iconName": "check"
+                                    }
+                                  }
+                                ]
+                              ],
+                              "filters": []
+                            }
+                          },
+                          {
+                            "type": "ButtonGroup",
+                            "data": {
+                              "buttons": [
+                                {
+                                  "id": "close-service-btn-app1.example.com",
+                                  "text": "action_close",
+                                  "disabled": false,
+                                  "color": "close",
+                                  "size": "normal",
+                                  "attrs": {
+                                    "data-close-modal": ""
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "attrs": {
+                        "data-server-name": "app1.example.com"
+                      },
+                      "id": "open-modal-manage-0",
+                      "text": "manage",
+                      "hideText": true,
+                      "color": "edit",
+                      "size": "normal",
+                      "iconName": "pen",
+                      "iconColor": "white",
+                      "modal": {
+                        "widgets": [
+                          {
+                            "type": "Title",
+                            "data": {
+                              "title": "services_edit_title"
+                            }
+                          },
+                          {
+                            "type": "Text",
+                            "data": {
+                              "text": "services_edit_subtitle"
+                            }
+                          },
+                          {
+                            "type": "Text",
+                            "data": {
+                              "bold": true,
+                              "text": "app1.example.com"
+                            }
+                          },
+                          {
+                            "type": "ButtonGroup",
+                            "data": {
+                              "buttons": [
+                                {
+                                  "id": "edit-service-btn-app1.example.com",
+                                  "text": "services_mode_easy",
+                                  "disabled": false,
+                                  "color": "info",
+                                  "size": "normal",
+                                  "attrs": {
+                                    "role": "link",
+                                    "data-link": "modes?service_name=app1.example.com&mode=easy"
+                                  }
+                                },
+                                {
+                                  "id": "edit-service-btn-app1.example.com",
+                                  "text": "services_mode_advanced",
+                                  "disabled": false,
+                                  "color": "info",
+                                  "size": "normal",
+                                  "attrs": {
+                                    "role": "link",
+                                    "data-link": "modes?service_name=app1.example.com&mode=advanced"
+                                  }
+                                },
+                                {
+                                  "id": "edit-service-btn-app1.example.com",
+                                  "text": "services_mode_raw",
+                                  "disabled": false,
+                                  "color": "info",
+                                  "size": "normal",
+                                  "attrs": {
+                                    "role": "link",
+                                    "data-link": "modes?service_name=app1.example.com&mode=raw"
+                                  }
+                                }
+                              ]
+                            }
+                          },
+                          {
+                            "type": "ButtonGroup",
+                            "data": {
+                              "buttons": [
+                                {
+                                  "id": "close-service-btn-app1.example.com",
+                                  "text": "action_close",
+                                  "disabled": false,
+                                  "color": "close",
+                                  "size": "normal",
+                                  "attrs": {
+                                    "data-close-modal": ""
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "attrs": {
+                        "data-server-name": "app1.example.com",
+                        "data-is-draft": "no"
+                      },
+                      "id": "open-modal-draft-0",
+                      "text": "online",
+                      "hideText": true,
+                      "color": "blue",
+                      "size": "normal",
+                      "iconName": "globe",
+                      "iconColor": "white",
+                      "modal": {
+                        "widgets": [
+                          {
+                            "type": "Title",
+                            "data": {
+                              "title": "services_draft_title"
+                            }
+                          },
+                          {
+                            "type": "Text",
+                            "data": {
+                              "text": "services_online_subtitle"
+                            }
+                          },
+                          {
+                            "type": "Text",
+                            "data": {
+                              "bold": true,
+                              "text": "services_online_switch_subtitle"
+                            }
+                          },
+                          {
+                            "type": "ButtonGroup",
+                            "data": {
+                              "buttons": [
+                                {
+                                  "id": "close-service-btn-app1.example.com",
+                                  "text": "action_close",
+                                  "disabled": false,
+                                  "color": "close",
+                                  "size": "normal",
+                                  "attrs": {
+                                    "data-close-modal": ""
+                                  }
+                                },
+                                {
+                                  "id": "draft-service-btn-app1.example.com",
+                                  "text": "action_switch",
+                                  "disabled": false,
+                                  "color": "success",
+                                  "size": "normal",
+                                  "attrs": {
+                                    "data-submit-form": "{\"SERVER_NAME\" : app1.example.com, \"OLD_SERVER_NAME\" : app1.example.com, \"operation\" : \"edit\", \"IS_DRAFT\" : no }"
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "attrs": {
+                        "data-server-name": "app1.example.com"
+                      },
+                      "id": "open-modal-delete-0",
+                      "text": "delete",
+                      "disabled": true,
+                      "hideText": true,
+                      "color": "red",
+                      "size": "normal",
+                      "iconName": "trash",
+                      "iconColor": "white",
+                      "modal": {
+                        "widgets": [
+                          {
+                            "type": "Title",
+                            "data": {
+                              "title": "services_delete_title"
+                            }
+                          },
+                          {
+                            "type": "Text",
+                            "data": {
+                              "text": "services_delete_subtitle"
+                            }
+                          },
+                          {
+                            "type": "Text",
+                            "data": {
+                              "text": "app1.example.com",
+                              "bold": true
+                            }
+                          },
+                          {
+                            "type": "ButtonGroup",
+                            "data": {
+                              "buttons": [
+                                {
+                                  "id": "close-service-btn-app1.example.com",
+                                  "text": "action_close",
+                                  "disabled": false,
+                                  "color": "close",
+                                  "size": "normal",
+                                  "attrs": {
+                                    "data-close-modal": ""
+                                  }
+                                },
+                                {
+                                  "id": "delete-service-btn-app1.example.com",
+                                  "text": "action_delete",
+                                  "disabled": false,
+                                  "color": "delete",
+                                  "size": "normal",
+                                  "attrs": {
+                                    "data-submit-form": "{\"SERVER_NAME\" : app1.example.com, \"operation\" : \"delete\" }"
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            ],
+            [
+              {
+                "name": "www.example.com",
+                "type": "Text",
+                "data": {
+                  "text": "www.example.com"
+                }
+              },
+              {
+                "method": "ui",
+                "type": "Text",
+                "data": {
+                  "text": "ui"
+                }
+              },
+              {
+                "type": "ButtonGroup",
+                "data": {
+                  "buttons": [
+                    {
+                      "id": "open-modal-plugins-1",
+                      "text": "plugins",
+                      "hideText": true,
+                      "color": "success",
+                      "size": "normal",
+                      "iconName": "eye",
+                      "iconColor": "white",
+                      "modal": {
+                        "widgets": [
+                          {
+                            "type": "Title",
+                            "data": {
+                              "title": "services_plugins_title"
+                            }
+                          },
+                          {
+                            "type": "Table",
+                            "data": {
+                              "title": "services_settings_table_title",
+                              "minWidth": "",
+                              "header": [
+                                "services_settings_table_name",
+                                "services_settings_table_status"
+                              ],
+                              "positions": [8, 4],
+                              "items": [
+                                [
+                                  {
+                                    "type": "Text",
+                                    "data": {
+                                      "text": "REVERSE PROXY"
+                                    }
+                                  },
+                                  {
+                                    "type": "Icons",
+                                    "data": {
+                                      "iconName": "check"
+                                    }
+                                  }
+                                ],
+                                [
+                                  {
+                                    "type": "Text",
+                                    "data": {
+                                      "text": "SERVE FILES"
+                                    }
+                                  },
+                                  {
+                                    "type": "Icons",
+                                    "data": {
+                                      "iconName": "cross"
+                                    }
+                                  }
+                                ],
+                                [
+                                  {
+                                    "type": "Text",
+                                    "data": {
+                                      "text": "REMOTE PHP"
+                                    }
+                                  },
+                                  {
+                                    "type": "Icons",
+                                    "data": {
+                                      "iconName": "cross"
+                                    }
+                                  }
+                                ],
+                                [
+                                  {
+                                    "type": "Text",
+                                    "data": {
+                                      "text": "AUTO LETS ENCRYPT"
+                                    }
+                                  },
+                                  {
+                                    "type": "Icons",
+                                    "data": {
+                                      "iconName": "cross"
+                                    }
+                                  }
+                                ],
+                                [
+                                  {
+                                    "type": "Text",
+                                    "data": {
+                                      "text": "CUSTOM SSL"
+                                    }
+                                  },
+                                  {
+                                    "type": "Icons",
+                                    "data": {
+                                      "iconName": "cross"
+                                    }
+                                  }
+                                ],
+                                [
+                                  {
+                                    "type": "Text",
+                                    "data": {
+                                      "text": "MODSECURITY"
+                                    }
+                                  },
+                                  {
+                                    "type": "Icons",
+                                    "data": {
+                                      "iconName": "check"
+                                    }
+                                  }
+                                ],
+                                [
+                                  {
+                                    "type": "Text",
+                                    "data": {
+                                      "text": "BAD BEHAVIOR"
+                                    }
+                                  },
+                                  {
+                                    "type": "Icons",
+                                    "data": {
+                                      "iconName": "check"
+                                    }
+                                  }
+                                ],
+                                [
+                                  {
+                                    "type": "Text",
+                                    "data": {
+                                      "text": "LIMIT REQ"
+                                    }
+                                  },
+                                  {
+                                    "type": "Icons",
+                                    "data": {
+                                      "iconName": "check"
+                                    }
+                                  }
+                                ],
+                                [
+                                  {
+                                    "type": "Text",
+                                    "data": {
+                                      "text": "DNSBL"
+                                    }
+                                  },
+                                  {
+                                    "type": "Icons",
+                                    "data": {
+                                      "iconName": "check"
+                                    }
+                                  }
+                                ]
+                              ],
+                              "filters": []
+                            }
+                          },
+                          {
+                            "type": "ButtonGroup",
+                            "data": {
+                              "buttons": [
+                                {
+                                  "id": "close-service-btn-www.example.com",
+                                  "text": "action_close",
+                                  "disabled": false,
+                                  "color": "close",
+                                  "size": "normal",
+                                  "attrs": {
+                                    "data-close-modal": ""
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "attrs": {
+                        "data-server-name": "www.example.com"
+                      },
+                      "id": "open-modal-manage-1",
+                      "text": "manage",
+                      "hideText": true,
+                      "color": "edit",
+                      "size": "normal",
+                      "iconName": "pen",
+                      "iconColor": "white",
+                      "modal": {
+                        "widgets": [
+                          {
+                            "type": "Title",
+                            "data": {
+                              "title": "services_edit_title"
+                            }
+                          },
+                          {
+                            "type": "Text",
+                            "data": {
+                              "text": "services_edit_subtitle"
+                            }
+                          },
+                          {
+                            "type": "Text",
+                            "data": {
+                              "bold": true,
+                              "text": "www.example.com"
+                            }
+                          },
+                          {
+                            "type": "ButtonGroup",
+                            "data": {
+                              "buttons": [
+                                {
+                                  "id": "edit-service-btn-www.example.com",
+                                  "text": "services_mode_easy",
+                                  "disabled": false,
+                                  "color": "info",
+                                  "size": "normal",
+                                  "attrs": {
+                                    "role": "link",
+                                    "data-link": "modes?service_name=www.example.com&mode=easy"
+                                  }
+                                },
+                                {
+                                  "id": "edit-service-btn-www.example.com",
+                                  "text": "services_mode_advanced",
+                                  "disabled": false,
+                                  "color": "info",
+                                  "size": "normal",
+                                  "attrs": {
+                                    "role": "link",
+                                    "data-link": "modes?service_name=www.example.com&mode=advanced"
+                                  }
+                                },
+                                {
+                                  "id": "edit-service-btn-www.example.com",
+                                  "text": "services_mode_raw",
+                                  "disabled": false,
+                                  "color": "info",
+                                  "size": "normal",
+                                  "attrs": {
+                                    "role": "link",
+                                    "data-link": "modes?service_name=www.example.com&mode=raw"
+                                  }
+                                }
+                              ]
+                            }
+                          },
+                          {
+                            "type": "ButtonGroup",
+                            "data": {
+                              "buttons": [
+                                {
+                                  "id": "close-service-btn-www.example.com",
+                                  "text": "action_close",
+                                  "disabled": false,
+                                  "color": "close",
+                                  "size": "normal",
+                                  "attrs": {
+                                    "data-close-modal": ""
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "attrs": {
+                        "data-server-name": "www.example.com",
+                        "data-is-draft": "yes"
+                      },
+                      "id": "open-modal-draft-1",
+                      "text": "draft",
+                      "hideText": true,
+                      "color": "blue",
+                      "size": "normal",
+                      "iconName": "document",
+                      "iconColor": "white",
+                      "modal": {
+                        "widgets": [
+                          {
+                            "type": "Title",
+                            "data": {
+                              "title": "services_draft_title"
+                            }
+                          },
+                          {
+                            "type": "Text",
+                            "data": {
+                              "text": "services_draft_subtitle"
+                            }
+                          },
+                          {
+                            "type": "Text",
+                            "data": {
+                              "bold": true,
+                              "text": "services_draft_switch_subtitle"
+                            }
+                          },
+                          {
+                            "type": "ButtonGroup",
+                            "data": {
+                              "buttons": [
+                                {
+                                  "id": "close-service-btn-www.example.com",
+                                  "text": "action_close",
+                                  "disabled": false,
+                                  "color": "close",
+                                  "size": "normal",
+                                  "attrs": {
+                                    "data-close-modal": ""
+                                  }
+                                },
+                                {
+                                  "id": "draft-service-btn-www.example.com",
+                                  "text": "action_switch",
+                                  "disabled": false,
+                                  "color": "success",
+                                  "size": "normal",
+                                  "attrs": {
+                                    "data-submit-form": "{\"SERVER_NAME\" : www.example.com, \"OLD_SERVER_NAME\" : www.example.com, \"operation\" : \"edit\", \"IS_DRAFT\" : yes }"
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "attrs": {
+                        "data-server-name": "www.example.com"
+                      },
+                      "id": "open-modal-delete-1",
+                      "text": "delete",
+                      "disabled": false,
+                      "hideText": true,
+                      "color": "red",
+                      "size": "normal",
+                      "iconName": "trash",
+                      "iconColor": "white",
+                      "modal": {
+                        "widgets": [
+                          {
+                            "type": "Title",
+                            "data": {
+                              "title": "services_delete_title"
+                            }
+                          },
+                          {
+                            "type": "Text",
+                            "data": {
+                              "text": "services_delete_subtitle"
+                            }
+                          },
+                          {
+                            "type": "Text",
+                            "data": {
+                              "text": "www.example.com",
+                              "bold": true
+                            }
+                          },
+                          {
+                            "type": "ButtonGroup",
+                            "data": {
+                              "buttons": [
+                                {
+                                  "id": "close-service-btn-www.example.com",
+                                  "text": "action_close",
+                                  "disabled": false,
+                                  "color": "close",
+                                  "size": "normal",
+                                  "attrs": {
+                                    "data-close-modal": ""
+                                  }
+                                },
+                                {
+                                  "id": "delete-service-btn-www.example.com",
+                                  "text": "action_delete",
+                                  "disabled": false,
+                                  "color": "delete",
+                                  "size": "normal",
+                                  "attrs": {
+                                    "data-submit-form": "{\"SERVER_NAME\" : www.example.com, \"operation\" : \"delete\" }"
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          ],
+          "filters": [
+            {
+              "filter": "table",
+              "filterName": "keyword",
+              "type": "keyword",
+              "value": "",
+              "keys": ["name"],
+              "field": {
+                "id": "services-keyword",
+                "value": "",
+                "type": "text",
+                "name": "services-keyword",
+                "label": "services_search",
+                "placeholder": "inp_keyword",
+                "isClipboard": false,
+                "popovers": [
+                  {
+                    "text": "services_search_desc",
+                    "iconName": "info"
+                  }
+                ],
+                "columns": {
+                  "pc": 3,
+                  "tablet": 4,
+                  "mobile": 12
+                }
+              }
             },
             {
-                "type": "Table",
-                "data": {
-                    "title": "services_table_title",
-                    "minWidth": "md",
-                    "header": [
-                        "services_table_name",
-                        "services_table_method",
-                        "services_table_actions"
-                    ],
-                    "positions": [
-                        4,
-                        4,
-                        4
-                    ],
-                    "items": [
-                        [
-                            {
-                                "name": "app1.example.com",
-                                "type": "Text",
-                                "data": {
-                                    "text": "app1.example.com"
-                                }
-                            },
-                            {
-                                "method": "scheduler",
-                                "type": "Text",
-                                "data": {
-                                    "text": "scheduler"
-                                }
-                            },
-                            {
-                                "type": "ButtonGroup",
-                                "data": {
-                                    "buttons": [
-                                        {
-                                            "id": "open-modal-plugins-0",
-                                            "text": "plugins",
-                                            "hideText": true,
-                                            "color": "success",
-                                            "size": "normal",
-                                            "iconName": "eye",
-                                            "iconColor": "white",
-                                            "modal": {
-                                                "widgets": [
-                                                    {
-                                                        "type": "Title",
-                                                        "data": {
-                                                            "title": "services_plugins_title"
-                                                        }
-                                                    },
-                                                    {
-                                                        "type": "Table",
-                                                        "data": {
-                                                            "title": "services_settings_table_title",
-                                                            "minWidth": "",
-                                                            "header": [
-                                                                "services_settings_table_name",
-                                                                "services_settings_table_status"
-                                                            ],
-                                                            "positions": [
-                                                                8,
-                                                                4
-                                                            ],
-                                                            "items": [
-                                                                [
-                                                                    {
-                                                                        "type": "Text",
-                                                                        "data": {
-                                                                            "text": "REVERSE PROXY"
-                                                                        }
-                                                                    },
-                                                                    {
-                                                                        "type": "Icons",
-                                                                        "data": {
-                                                                            "iconName": "check"
-                                                                        }
-                                                                    }
-                                                                ],
-                                                                [
-                                                                    {
-                                                                        "type": "Text",
-                                                                        "data": {
-                                                                            "text": "SERVE FILES"
-                                                                        }
-                                                                    },
-                                                                    {
-                                                                        "type": "Icons",
-                                                                        "data": {
-                                                                            "iconName": "cross"
-                                                                        }
-                                                                    }
-                                                                ],
-                                                                [
-                                                                    {
-                                                                        "type": "Text",
-                                                                        "data": {
-                                                                            "text": "REMOTE PHP"
-                                                                        }
-                                                                    },
-                                                                    {
-                                                                        "type": "Icons",
-                                                                        "data": {
-                                                                            "iconName": "cross"
-                                                                        }
-                                                                    }
-                                                                ],
-                                                                [
-                                                                    {
-                                                                        "type": "Text",
-                                                                        "data": {
-                                                                            "text": "AUTO LETS ENCRYPT"
-                                                                        }
-                                                                    },
-                                                                    {
-                                                                        "type": "Icons",
-                                                                        "data": {
-                                                                            "iconName": "cross"
-                                                                        }
-                                                                    }
-                                                                ],
-                                                                [
-                                                                    {
-                                                                        "type": "Text",
-                                                                        "data": {
-                                                                            "text": "CUSTOM SSL"
-                                                                        }
-                                                                    },
-                                                                    {
-                                                                        "type": "Icons",
-                                                                        "data": {
-                                                                            "iconName": "cross"
-                                                                        }
-                                                                    }
-                                                                ],
-                                                                [
-                                                                    {
-                                                                        "type": "Text",
-                                                                        "data": {
-                                                                            "text": "MODSECURITY"
-                                                                        }
-                                                                    },
-                                                                    {
-                                                                        "type": "Icons",
-                                                                        "data": {
-                                                                            "iconName": "check"
-                                                                        }
-                                                                    }
-                                                                ],
-                                                                [
-                                                                    {
-                                                                        "type": "Text",
-                                                                        "data": {
-                                                                            "text": "BAD BEHAVIOR"
-                                                                        }
-                                                                    },
-                                                                    {
-                                                                        "type": "Icons",
-                                                                        "data": {
-                                                                            "iconName": "check"
-                                                                        }
-                                                                    }
-                                                                ],
-                                                                [
-                                                                    {
-                                                                        "type": "Text",
-                                                                        "data": {
-                                                                            "text": "LIMIT REQ"
-                                                                        }
-                                                                    },
-                                                                    {
-                                                                        "type": "Icons",
-                                                                        "data": {
-                                                                            "iconName": "check"
-                                                                        }
-                                                                    }
-                                                                ],
-                                                                [
-                                                                    {
-                                                                        "type": "Text",
-                                                                        "data": {
-                                                                            "text": "DNSBL"
-                                                                        }
-                                                                    },
-                                                                    {
-                                                                        "type": "Icons",
-                                                                        "data": {
-                                                                            "iconName": "check"
-                                                                        }
-                                                                    }
-                                                                ]
-                                                            ],
-                                                            "filters": []
-                                                        }
-                                                    },
-                                                    {
-                                                        "type": "ButtonGroup",
-                                                        "data": {
-                                                            "buttons": [
-                                                                {
-                                                                    "id": "close-service-btn-app1.example.com",
-                                                                    "text": "action_close",
-                                                                    "disabled": false,
-                                                                    "color": "close",
-                                                                    "size": "normal",
-                                                                    "attrs": {
-                                                                        "data-close-modal": ""
-                                                                    }
-                                                                }
-                                                            ]
-                                                        }
-                                                    }
-                                                ]
-                                            }
-                                        },
-                                        {
-                                            "attrs": {
-                                                "data-server-name": "app1.example.com"
-                                            },
-                                            "id": "open-modal-manage-0",
-                                            "text": "manage",
-                                            "hideText": true,
-                                            "color": "edit",
-                                            "size": "normal",
-                                            "iconName": "pen",
-                                            "iconColor": "white",
-                                            "modal": {
-                                                "widgets": [
-                                                    {
-                                                        "type": "Title",
-                                                        "data": {
-                                                            "title": "services_edit_title"
-                                                        }
-                                                    },
-                                                    {
-                                                        "type": "Text",
-                                                        "data": {
-                                                            "text": "services_edit_subtitle"
-                                                        }
-                                                    },
-                                                    {
-                                                        "type": "Text",
-                                                        "data": {
-                                                            "bold": true,
-                                                            "text": "app1.example.com"
-                                                        }
-                                                    },
-                                                    {
-                                                        "type": "ButtonGroup",
-                                                        "data": {
-                                                            "buttons": [
-                                                                {
-                                                                    "id": "edit-service-btn-app1.example.com",
-                                                                    "text": "services_mode_easy",
-                                                                    "disabled": false,
-                                                                    "color": "info",
-                                                                    "size": "normal",
-                                                                    "attrs": {
-                                                                        "role": "link",
-                                                                        "data-link": "modes?service_name=app1.example.com&mode=easy"
-                                                                    }
-                                                                },
-                                                                {
-                                                                    "id": "edit-service-btn-app1.example.com",
-                                                                    "text": "services_mode_advanced",
-                                                                    "disabled": false,
-                                                                    "color": "info",
-                                                                    "size": "normal",
-                                                                    "attrs": {
-                                                                        "role": "link",
-                                                                        "data-link": "modes?service_name=app1.example.com&mode=advanced"
-                                                                    }
-                                                                },
-                                                                {
-                                                                    "id": "edit-service-btn-app1.example.com",
-                                                                    "text": "services_mode_raw",
-                                                                    "disabled": false,
-                                                                    "color": "info",
-                                                                    "size": "normal",
-                                                                    "attrs": {
-                                                                        "role": "link",
-                                                                        "data-link": "modes?service_name=app1.example.com&mode=raw"
-                                                                    }
-                                                                }
-                                                            ]
-                                                        }
-                                                    },
-                                                    {
-                                                        "type": "ButtonGroup",
-                                                        "data": {
-                                                            "buttons": [
-                                                                {
-                                                                    "id": "close-service-btn-app1.example.com",
-                                                                    "text": "action_close",
-                                                                    "disabled": false,
-                                                                    "color": "close",
-                                                                    "size": "normal",
-                                                                    "attrs": {
-                                                                        "data-close-modal": ""
-                                                                    }
-                                                                }
-                                                            ]
-                                                        }
-                                                    }
-                                                ]
-                                            }
-                                        },
-                                        {
-                                            "attrs": {
-                                                "data-server-name": "app1.example.com",
-                                                "data-is-draft": "no"
-                                            },
-                                            "id": "open-modal-draft-0",
-                                            "text": "online",
-                                            "hideText": true,
-                                            "color": "blue",
-                                            "size": "normal",
-                                            "iconName": "globe",
-                                            "iconColor": "white",
-                                            "modal": {
-                                                "widgets": [
-                                                    {
-                                                        "type": "Title",
-                                                        "data": {
-                                                            "title": "services_draft_title"
-                                                        }
-                                                    },
-                                                    {
-                                                        "type": "Text",
-                                                        "data": {
-                                                            "text": "services_online_subtitle"
-                                                        }
-                                                    },
-                                                    {
-                                                        "type": "Text",
-                                                        "data": {
-                                                            "bold": true,
-                                                            "text": "services_online_switch_subtitle"
-                                                        }
-                                                    },
-                                                    {
-                                                        "type": "ButtonGroup",
-                                                        "data": {
-                                                            "buttons": [
-                                                                {
-                                                                    "id": "close-service-btn-app1.example.com",
-                                                                    "text": "action_close",
-                                                                    "disabled": false,
-                                                                    "color": "close",
-                                                                    "size": "normal",
-                                                                    "attrs": {
-                                                                        "data-close-modal": ""
-                                                                    }
-                                                                },
-                                                                {
-                                                                    "id": "draft-service-btn-app1.example.com",
-                                                                    "text": "action_switch",
-                                                                    "disabled": false,
-                                                                    "color": "success",
-                                                                    "size": "normal",
-                                                                    "attrs": {
-                                                                        "data-submit-form": "{\"SERVER_NAME\" : app1.example.com, \"OLD_SERVER_NAME\" : app1.example.com, \"operation\" : \"edit\", \"IS_DRAFT\" : no }"
-                                                                    }
-                                                                }
-                                                            ]
-                                                        }
-                                                    }
-                                                ]
-                                            }
-                                        },
-                                        {
-                                            "attrs": {
-                                                "data-server-name": "app1.example.com"
-                                            },
-                                            "id": "open-modal-delete-0",
-                                            "text": "delete",
-                                            "disabled": true,
-                                            "hideText": true,
-                                            "color": "red",
-                                            "size": "normal",
-                                            "iconName": "trash",
-                                            "iconColor": "white",
-                                            "modal": {
-                                                "widgets": [
-                                                    {
-                                                        "type": "Title",
-                                                        "data": {
-                                                            "title": "services_delete_title"
-                                                        }
-                                                    },
-                                                    {
-                                                        "type": "Text",
-                                                        "data": {
-                                                            "text": "services_delete_subtitle"
-                                                        }
-                                                    },
-                                                    {
-                                                        "type": "Text",
-                                                        "data": {
-                                                            "text": "app1.example.com",
-                                                            "bold": true
-                                                        }
-                                                    },
-                                                    {
-                                                        "type": "ButtonGroup",
-                                                        "data": {
-                                                            "buttons": [
-                                                                {
-                                                                    "id": "close-service-btn-app1.example.com",
-                                                                    "text": "action_close",
-                                                                    "disabled": false,
-                                                                    "color": "close",
-                                                                    "size": "normal",
-                                                                    "attrs": {
-                                                                        "data-close-modal": ""
-                                                                    }
-                                                                },
-                                                                {
-                                                                    "id": "delete-service-btn-app1.example.com",
-                                                                    "text": "action_delete",
-                                                                    "disabled": false,
-                                                                    "color": "delete",
-                                                                    "size": "normal",
-                                                                    "attrs": {
-                                                                        "data-submit-form": "{\"SERVER_NAME\" : app1.example.com, \"operation\" : \"delete\" }"
-                                                                    }
-                                                                }
-                                                            ]
-                                                        }
-                                                    }
-                                                ]
-                                            }
-                                        }
-                                    ]
-                                }
-                            }
-                        ],
-                        [
-                            {
-                                "name": "www.example.com",
-                                "type": "Text",
-                                "data": {
-                                    "text": "www.example.com"
-                                }
-                            },
-                            {
-                                "method": "ui",
-                                "type": "Text",
-                                "data": {
-                                    "text": "ui"
-                                }
-                            },
-                            {
-                                "type": "ButtonGroup",
-                                "data": {
-                                    "buttons": [
-                                        {
-                                            "id": "open-modal-plugins-1",
-                                            "text": "plugins",
-                                            "hideText": true,
-                                            "color": "success",
-                                            "size": "normal",
-                                            "iconName": "eye",
-                                            "iconColor": "white",
-                                            "modal": {
-                                                "widgets": [
-                                                    {
-                                                        "type": "Title",
-                                                        "data": {
-                                                            "title": "services_plugins_title"
-                                                        }
-                                                    },
-                                                    {
-                                                        "type": "Table",
-                                                        "data": {
-                                                            "title": "services_settings_table_title",
-                                                            "minWidth": "",
-                                                            "header": [
-                                                                "services_settings_table_name",
-                                                                "services_settings_table_status"
-                                                            ],
-                                                            "positions": [
-                                                                8,
-                                                                4
-                                                            ],
-                                                            "items": [
-                                                                [
-                                                                    {
-                                                                        "type": "Text",
-                                                                        "data": {
-                                                                            "text": "REVERSE PROXY"
-                                                                        }
-                                                                    },
-                                                                    {
-                                                                        "type": "Icons",
-                                                                        "data": {
-                                                                            "iconName": "check"
-                                                                        }
-                                                                    }
-                                                                ],
-                                                                [
-                                                                    {
-                                                                        "type": "Text",
-                                                                        "data": {
-                                                                            "text": "SERVE FILES"
-                                                                        }
-                                                                    },
-                                                                    {
-                                                                        "type": "Icons",
-                                                                        "data": {
-                                                                            "iconName": "cross"
-                                                                        }
-                                                                    }
-                                                                ],
-                                                                [
-                                                                    {
-                                                                        "type": "Text",
-                                                                        "data": {
-                                                                            "text": "REMOTE PHP"
-                                                                        }
-                                                                    },
-                                                                    {
-                                                                        "type": "Icons",
-                                                                        "data": {
-                                                                            "iconName": "cross"
-                                                                        }
-                                                                    }
-                                                                ],
-                                                                [
-                                                                    {
-                                                                        "type": "Text",
-                                                                        "data": {
-                                                                            "text": "AUTO LETS ENCRYPT"
-                                                                        }
-                                                                    },
-                                                                    {
-                                                                        "type": "Icons",
-                                                                        "data": {
-                                                                            "iconName": "cross"
-                                                                        }
-                                                                    }
-                                                                ],
-                                                                [
-                                                                    {
-                                                                        "type": "Text",
-                                                                        "data": {
-                                                                            "text": "CUSTOM SSL"
-                                                                        }
-                                                                    },
-                                                                    {
-                                                                        "type": "Icons",
-                                                                        "data": {
-                                                                            "iconName": "cross"
-                                                                        }
-                                                                    }
-                                                                ],
-                                                                [
-                                                                    {
-                                                                        "type": "Text",
-                                                                        "data": {
-                                                                            "text": "MODSECURITY"
-                                                                        }
-                                                                    },
-                                                                    {
-                                                                        "type": "Icons",
-                                                                        "data": {
-                                                                            "iconName": "check"
-                                                                        }
-                                                                    }
-                                                                ],
-                                                                [
-                                                                    {
-                                                                        "type": "Text",
-                                                                        "data": {
-                                                                            "text": "BAD BEHAVIOR"
-                                                                        }
-                                                                    },
-                                                                    {
-                                                                        "type": "Icons",
-                                                                        "data": {
-                                                                            "iconName": "check"
-                                                                        }
-                                                                    }
-                                                                ],
-                                                                [
-                                                                    {
-                                                                        "type": "Text",
-                                                                        "data": {
-                                                                            "text": "LIMIT REQ"
-                                                                        }
-                                                                    },
-                                                                    {
-                                                                        "type": "Icons",
-                                                                        "data": {
-                                                                            "iconName": "check"
-                                                                        }
-                                                                    }
-                                                                ],
-                                                                [
-                                                                    {
-                                                                        "type": "Text",
-                                                                        "data": {
-                                                                            "text": "DNSBL"
-                                                                        }
-                                                                    },
-                                                                    {
-                                                                        "type": "Icons",
-                                                                        "data": {
-                                                                            "iconName": "check"
-                                                                        }
-                                                                    }
-                                                                ]
-                                                            ],
-                                                            "filters": []
-                                                        }
-                                                    },
-                                                    {
-                                                        "type": "ButtonGroup",
-                                                        "data": {
-                                                            "buttons": [
-                                                                {
-                                                                    "id": "close-service-btn-www.example.com",
-                                                                    "text": "action_close",
-                                                                    "disabled": false,
-                                                                    "color": "close",
-                                                                    "size": "normal",
-                                                                    "attrs": {
-                                                                        "data-close-modal": ""
-                                                                    }
-                                                                }
-                                                            ]
-                                                        }
-                                                    }
-                                                ]
-                                            }
-                                        },
-                                        {
-                                            "attrs": {
-                                                "data-server-name": "www.example.com"
-                                            },
-                                            "id": "open-modal-manage-1",
-                                            "text": "manage",
-                                            "hideText": true,
-                                            "color": "edit",
-                                            "size": "normal",
-                                            "iconName": "pen",
-                                            "iconColor": "white",
-                                            "modal": {
-                                                "widgets": [
-                                                    {
-                                                        "type": "Title",
-                                                        "data": {
-                                                            "title": "services_edit_title"
-                                                        }
-                                                    },
-                                                    {
-                                                        "type": "Text",
-                                                        "data": {
-                                                            "text": "services_edit_subtitle"
-                                                        }
-                                                    },
-                                                    {
-                                                        "type": "Text",
-                                                        "data": {
-                                                            "bold": true,
-                                                            "text": "www.example.com"
-                                                        }
-                                                    },
-                                                    {
-                                                        "type": "ButtonGroup",
-                                                        "data": {
-                                                            "buttons": [
-                                                                {
-                                                                    "id": "edit-service-btn-www.example.com",
-                                                                    "text": "services_mode_easy",
-                                                                    "disabled": false,
-                                                                    "color": "info",
-                                                                    "size": "normal",
-                                                                    "attrs": {
-                                                                        "role": "link",
-                                                                        "data-link": "modes?service_name=www.example.com&mode=easy"
-                                                                    }
-                                                                },
-                                                                {
-                                                                    "id": "edit-service-btn-www.example.com",
-                                                                    "text": "services_mode_advanced",
-                                                                    "disabled": false,
-                                                                    "color": "info",
-                                                                    "size": "normal",
-                                                                    "attrs": {
-                                                                        "role": "link",
-                                                                        "data-link": "modes?service_name=www.example.com&mode=advanced"
-                                                                    }
-                                                                },
-                                                                {
-                                                                    "id": "edit-service-btn-www.example.com",
-                                                                    "text": "services_mode_raw",
-                                                                    "disabled": false,
-                                                                    "color": "info",
-                                                                    "size": "normal",
-                                                                    "attrs": {
-                                                                        "role": "link",
-                                                                        "data-link": "modes?service_name=www.example.com&mode=raw"
-                                                                    }
-                                                                }
-                                                            ]
-                                                        }
-                                                    },
-                                                    {
-                                                        "type": "ButtonGroup",
-                                                        "data": {
-                                                            "buttons": [
-                                                                {
-                                                                    "id": "close-service-btn-www.example.com",
-                                                                    "text": "action_close",
-                                                                    "disabled": false,
-                                                                    "color": "close",
-                                                                    "size": "normal",
-                                                                    "attrs": {
-                                                                        "data-close-modal": ""
-                                                                    }
-                                                                }
-                                                            ]
-                                                        }
-                                                    }
-                                                ]
-                                            }
-                                        },
-                                        {
-                                            "attrs": {
-                                                "data-server-name": "www.example.com",
-                                                "data-is-draft": "yes"
-                                            },
-                                            "id": "open-modal-draft-1",
-                                            "text": "draft",
-                                            "hideText": true,
-                                            "color": "blue",
-                                            "size": "normal",
-                                            "iconName": "document",
-                                            "iconColor": "white",
-                                            "modal": {
-                                                "widgets": [
-                                                    {
-                                                        "type": "Title",
-                                                        "data": {
-                                                            "title": "services_draft_title"
-                                                        }
-                                                    },
-                                                    {
-                                                        "type": "Text",
-                                                        "data": {
-                                                            "text": "services_draft_subtitle"
-                                                        }
-                                                    },
-                                                    {
-                                                        "type": "Text",
-                                                        "data": {
-                                                            "bold": true,
-                                                            "text": "services_draft_switch_subtitle"
-                                                        }
-                                                    },
-                                                    {
-                                                        "type": "ButtonGroup",
-                                                        "data": {
-                                                            "buttons": [
-                                                                {
-                                                                    "id": "close-service-btn-www.example.com",
-                                                                    "text": "action_close",
-                                                                    "disabled": false,
-                                                                    "color": "close",
-                                                                    "size": "normal",
-                                                                    "attrs": {
-                                                                        "data-close-modal": ""
-                                                                    }
-                                                                },
-                                                                {
-                                                                    "id": "draft-service-btn-www.example.com",
-                                                                    "text": "action_switch",
-                                                                    "disabled": false,
-                                                                    "color": "success",
-                                                                    "size": "normal",
-                                                                    "attrs": {
-                                                                        "data-submit-form": "{\"SERVER_NAME\" : www.example.com, \"OLD_SERVER_NAME\" : www.example.com, \"operation\" : \"edit\", \"IS_DRAFT\" : yes }"
-                                                                    }
-                                                                }
-                                                            ]
-                                                        }
-                                                    }
-                                                ]
-                                            }
-                                        },
-                                        {
-                                            "attrs": {
-                                                "data-server-name": "www.example.com"
-                                            },
-                                            "id": "open-modal-delete-1",
-                                            "text": "delete",
-                                            "disabled": false,
-                                            "hideText": true,
-                                            "color": "red",
-                                            "size": "normal",
-                                            "iconName": "trash",
-                                            "iconColor": "white",
-                                            "modal": {
-                                                "widgets": [
-                                                    {
-                                                        "type": "Title",
-                                                        "data": {
-                                                            "title": "services_delete_title"
-                                                        }
-                                                    },
-                                                    {
-                                                        "type": "Text",
-                                                        "data": {
-                                                            "text": "services_delete_subtitle"
-                                                        }
-                                                    },
-                                                    {
-                                                        "type": "Text",
-                                                        "data": {
-                                                            "text": "www.example.com",
-                                                            "bold": true
-                                                        }
-                                                    },
-                                                    {
-                                                        "type": "ButtonGroup",
-                                                        "data": {
-                                                            "buttons": [
-                                                                {
-                                                                    "id": "close-service-btn-www.example.com",
-                                                                    "text": "action_close",
-                                                                    "disabled": false,
-                                                                    "color": "close",
-                                                                    "size": "normal",
-                                                                    "attrs": {
-                                                                        "data-close-modal": ""
-                                                                    }
-                                                                },
-                                                                {
-                                                                    "id": "delete-service-btn-www.example.com",
-                                                                    "text": "action_delete",
-                                                                    "disabled": false,
-                                                                    "color": "delete",
-                                                                    "size": "normal",
-                                                                    "attrs": {
-                                                                        "data-submit-form": "{\"SERVER_NAME\" : www.example.com, \"operation\" : \"delete\" }"
-                                                                    }
-                                                                }
-                                                            ]
-                                                        }
-                                                    }
-                                                ]
-                                            }
-                                        }
-                                    ]
-                                }
-                            }
-                        ]
-                    ],
-                    "filters": [
-                        {
-                            "filter": "table",
-                            "filterName": "keyword",
-                            "type": "keyword",
-                            "value": "",
-                            "keys": [
-                                "name"
-                            ],
-                            "field": {
-                                "id": "services-keyword",
-                                "value": "",
-                                "type": "text",
-                                "name": "services-keyword",
-                                "label": "services_search",
-                                "placeholder": "inp_keyword",
-                                "isClipboard": false,
-                                "popovers": [
-                                    {
-                                        "text": "services_search_desc",
-                                        "iconName": "info"
-                                    }
-                                ],
-                                "columns": {
-                                    "pc": 3,
-                                    "tablet": 4,
-                                    "mobile": 12
-                                }
-                            }
-                        },
-                        {
-                            "filter": "table",
-                            "filterName": "method",
-                            "type": "select",
-                            "value": "all",
-                            "keys": [
-                                "method"
-                            ],
-                            "field": {
-                                "id": "services-methods",
-                                "value": "all",
-                                "values": [
-                                    "ui",
-                                    "scheduler"
-                                ],
-                                "name": "services-methods",
-                                "onlyDown": true,
-                                "label": "services_methods",
-                                "popovers": [
-                                    {
-                                        "text": "services_methods_desc",
-                                        "iconName": "info"
-                                    }
-                                ],
-                                "columns": {
-                                    "pc": 3,
-                                    "tablet": 4,
-                                    "mobile": 12
-                                }
-                            }
-                        },
-                        {
-                            "filter": "table",
-                            "filterName": "draft",
-                            "type": "select",
-                            "value": "all",
-                            "keys": [
-                                "draft"
-                            ],
-                            "field": {
-                                "id": "services-draft",
-                                "value": "all",
-                                "values": [
-                                    "all",
-                                    "online",
-                                    "draft"
-                                ],
-                                "name": "services-draft",
-                                "onlyDown": true,
-                                "label": "services_draft",
-                                "popovers": [
-                                    {
-                                        "text": "services_draft_desc",
-                                        "iconName": "info"
-                                    }
-                                ],
-                                "columns": {
-                                    "pc": 3,
-                                    "tablet": 4,
-                                    "mobile": 12
-                                }
-                            }
-                        }
-                    ]
+              "filter": "table",
+              "filterName": "method",
+              "type": "select",
+              "value": "all",
+              "keys": ["method"],
+              "field": {
+                "id": "services-methods",
+                "value": "all",
+                "values": ["ui", "scheduler"],
+                "name": "services-methods",
+                "onlyDown": true,
+                "label": "services_methods",
+                "popovers": [
+                  {
+                    "text": "services_methods_desc",
+                    "iconName": "info"
+                  }
+                ],
+                "columns": {
+                  "pc": 3,
+                  "tablet": 4,
+                  "mobile": 12
                 }
+              }
+            },
+            {
+              "filter": "table",
+              "filterName": "draft",
+              "type": "select",
+              "value": "all",
+              "keys": ["draft"],
+              "field": {
+                "id": "services-draft",
+                "value": "all",
+                "values": ["all", "online", "draft"],
+                "name": "services-draft",
+                "onlyDown": true,
+                "label": "services_draft",
+                "popovers": [
+                  {
+                    "text": "services_draft_desc",
+                    "iconName": "info"
+                  }
+                ],
+                "columns": {
+                  "pc": 3,
+                  "tablet": 4,
+                  "mobile": 12
+                }
+              }
             }
-        ]
-    }
+          ]
+        }
+      }
+    ]
+  }
 ]

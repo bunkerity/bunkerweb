@@ -177,7 +177,7 @@ class Editor {
         try {
           // Get all elements with the same tabindex
           const elements = document.querySelectorAll(
-            `[tabindex="${contentIndex}"]`
+            `[tabindex="${contentIndex}"]`,
           );
           // Get index of the current element
           const index = Array.from(elements).indexOf(document.activeElement);
@@ -185,14 +185,14 @@ class Editor {
           if (elements[index - 1]) return elements[index - 1].focus();
           // Else try to find tabIndex + 1 element
           const prevElements = document.querySelectorAll(
-            `[tabindex="${+contentIndex - 1}"]`
+            `[tabindex="${+contentIndex - 1}"]`,
           );
           // Else find the highest tabindex element in a limit of +20
           let maxTabIndex = -10;
           let currTabIndex = +contentIndex - 1;
           while (currTabIndex > maxTabIndex) {
             const minElements = document.querySelectorAll(
-              `[tabindex="${currTabIndex}"]`
+              `[tabindex="${currTabIndex}"]`,
             );
             if (minElements[0]) return minElements[0].focus();
             currTabIndex++;
@@ -211,7 +211,7 @@ class Editor {
         try {
           // Get all elements with the same tabindex
           const elements = document.querySelectorAll(
-            `[tabindex="${contentIndex}"]`
+            `[tabindex="${contentIndex}"]`,
           );
           // Get index of the current element
           const index = Array.from(elements).indexOf(document.activeElement);
@@ -222,7 +222,7 @@ class Editor {
           let currTabIndex = +contentIndex + 1;
           while (currTabIndex < maxTabIndex) {
             const maxElements = document.querySelectorAll(
-              `[tabindex="${currTabIndex}"]`
+              `[tabindex="${currTabIndex}"]`,
             );
             if (maxElements[0]) return maxElements[0].focus();
             currTabIndex++;
@@ -286,7 +286,7 @@ function removeErrCSS() {
   setTimeout(() => {
     try {
       const styleEditors = document.querySelectorAll(
-        '[style*="font-optical-sizing"]'
+        '[style*="font-optical-sizing"]',
       );
 
       styleEditors.forEach((editor) => {

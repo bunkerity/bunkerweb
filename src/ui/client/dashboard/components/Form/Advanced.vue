@@ -357,8 +357,8 @@ onUnmounted(() => {
         data.isReqErr || data.isRegErr
           ? true
           : advancedForm.isUpdateData
-          ? false
-          : true
+            ? false
+            : true
       "
       @click="advancedForm.submit()"
     />

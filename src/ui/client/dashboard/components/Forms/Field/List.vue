@@ -222,8 +222,8 @@ function openSelect() {
     const canBeDown = props.onlyDown
       ? true
       : fieldContainerRect.bottom + selectDropRect.height < parentRect.bottom
-      ? true
-      : false;
+        ? true
+        : false;
 
     if (!canBeDown) {
       selectDropdown.value.style.top = `-${
@@ -429,7 +429,7 @@ const emits = defineEmits(["inp"]);
             props.placeholder
               ? $t(
                   props.placeholder,
-                  $t('dashboard_placeholder', props.placeholder)
+                  $t('dashboard_placeholder', props.placeholder),
                 )
               : ''
           "

@@ -172,7 +172,7 @@ watch(
   () => {
     getOverflow();
     setUnmatchWidth();
-  }
+  },
 );
 
 onMounted(() => {

@@ -36,7 +36,7 @@ function redirectPlugin() {
 
       window.location.href = `./${pluginId}`;
     },
-    true
+    true,
   );
 }
 
@@ -81,7 +81,7 @@ function deletePlugin() {
       modalPluginName.textContent = deleteData.name;
       modal.classList.remove("hidden");
     },
-    true
+    true,
   );
 }
 

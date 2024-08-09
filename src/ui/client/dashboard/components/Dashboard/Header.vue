@@ -52,8 +52,8 @@ onMounted(() => {
                 `dashboard_${header.currPath}`,
                 $t(
                   "dashboard_placeholder",
-                  $t("dashboard_placeholder", header.currPath)
-                )
+                  $t("dashboard_placeholder", header.currPath),
+                ),
               )
             }}
           </h2>
@@ -67,8 +67,8 @@ onMounted(() => {
                   `dashboard_${header.lastPath}`,
                   $t(
                     "dashboard_placeholder",
-                    $t("dashboard_placeholder", header.lastPath)
-                  )
+                    $t("dashboard_placeholder", header.lastPath),
+                  ),
                 )
               }}
             </li>

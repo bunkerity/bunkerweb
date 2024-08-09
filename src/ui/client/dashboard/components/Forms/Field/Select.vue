@@ -171,10 +171,10 @@ const select = reactive({
   isValid: !props.required
     ? true
     : props.requiredValues.length <= 0
-    ? true
-    : props.requiredValues.includes(props.value)
-    ? true
-    : false,
+      ? true
+      : props.requiredValues.includes(props.value)
+        ? true
+        : false,
 });
 
 const selectBtn = ref();
@@ -212,8 +212,8 @@ function toggleSelect() {
       const canBeDown = props.onlyDown
         ? true
         : fieldContainerRect.bottom + selectDropRect.height < parentRect.bottom
-        ? true
-        : false;
+          ? true
+          : false;
 
       if (!canBeDown) {
         selectDropdown.value.style.top = `-${
@@ -252,10 +252,10 @@ function changeValue(newValue) {
   select.isValid = !props.required
     ? true
     : props.requiredValues.length <= 0
-    ? true
-    : props.requiredValues.includes(newValue)
-    ? true
-    : false;
+      ? true
+      : props.requiredValues.includes(newValue)
+        ? true
+        : false;
   closeSelect();
   return newValue;
 }

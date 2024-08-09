@@ -141,7 +141,7 @@ onMounted(() => {
     btnEl.value.setAttribute("aria-controls", btn.modalId);
     btnEl.value.setAttribute(
       "aria-expanded",
-      props.openModal ? "true" : "false"
+      props.openModal ? "true" : "false",
     );
   }
 });
@@ -153,7 +153,7 @@ watch(
     if (typeof props.modal === "object") {
       btnEl.value.setAttribute("aria-expanded", value ? "true" : "false");
     }
-  }
+  },
 );
 </script>
 

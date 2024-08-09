@@ -385,7 +385,7 @@ def create_widget(title: str, desc: str, params: List[dict]):
             add_keys_not_default += f"""("{param_name}", {param_name}, {param_default}),"""
 
         if add_keys_not_default:
-            add_keys_not_default = f"""    
+            add_keys_not_default = f"""
     # List of params that will be add only if not default value
     list_params = [{add_keys_not_default.rstrip(',')}]
     for param in list_params:
@@ -395,7 +395,7 @@ def create_widget(title: str, desc: str, params: List[dict]):
         widget_function = f"""
 def {f_title}_widget(
 {params_str}
-    ): 
+    ):
 {desc}
 {data}
 {add_keys_not_default}

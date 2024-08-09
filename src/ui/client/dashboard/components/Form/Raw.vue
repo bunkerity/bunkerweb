@@ -78,7 +78,7 @@ watch(
     setTimeout(() => {
       data.isRender = true;
     }, 50);
-  }
+  },
 );
 
 /**

@@ -52,7 +52,7 @@ function loadNews() {
       ) {
         sessionStorage.setItem(
           "lastRefetch",
-          Math.round(new Date().getTime() / 1000) + 3600
+          Math.round(new Date().getTime() / 1000) + 3600,
         );
         sessionStorage.setItem("lastNews", JSON.stringify(reverseData));
       }

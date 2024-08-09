@@ -51,12 +51,12 @@ const props = defineProps({
         props.isValid
           ? $t("inp_input_valid")
           : props.isNoMatch
-          ? $t("inp_input_no_match")
-          : props.isValueTaken
-          ? $t("inp_input_error_taken")
-          : !props.isValue
-          ? $t("inp_input_error_required")
-          : $t("inp_input_error")
+            ? $t("inp_input_no_match")
+            : props.isValueTaken
+              ? $t("inp_input_error_taken")
+              : !props.isValue
+                ? $t("inp_input_error_required")
+                : $t("inp_input_error")
       }}
     </p>
   </div>

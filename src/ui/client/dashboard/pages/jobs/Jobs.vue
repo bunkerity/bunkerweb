@@ -83,7 +83,7 @@ function downloadCacheEvent() {
       a.click();
       document.body.removeChild(a);
     },
-    true
+    true,
   );
 }
 

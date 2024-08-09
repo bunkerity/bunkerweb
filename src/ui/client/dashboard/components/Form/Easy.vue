@@ -102,7 +102,7 @@ watch(
   () => props.template,
   () => {
     setup();
-  }
+  },
 );
 
 /**

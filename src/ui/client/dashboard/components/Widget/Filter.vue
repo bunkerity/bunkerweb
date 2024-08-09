@@ -79,7 +79,7 @@ watch(
   () => {
     filterData();
   },
-  { deep: true }
+  { deep: true },
 );
 
 /**

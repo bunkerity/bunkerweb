@@ -99,7 +99,7 @@ function getLocalLang() {
     navigator.languages &&
     navigator.languages > 0 &&
     availablesLangs.indexOf(
-      navigator.languages[0].split("-")[0].toLowerCase()
+      navigator.languages[0].split("-")[0].toLowerCase(),
     ) !== -1
   ) {
     return navigator.languages[0].split("-")[0].toLowerCase();
