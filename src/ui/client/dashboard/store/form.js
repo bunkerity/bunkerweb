@@ -89,7 +89,7 @@ export const createFormStore = (storeName, formType) => {
 
     /**
      *  @name delMultiple
-     *  @description This function will delete a group of multiples in the template.
+     *  @description This function is a wrapper for any mode that will delete a group of multiples in the template.
      *  The way the backend is working is that to delete a group, we need to send the group name with all default values.
      *  This function needs to be call from the multiples component parent with the template and the group name to delete.
      *  We will update the values of the group to default values.
@@ -100,6 +100,27 @@ export const createFormStore = (storeName, formType) => {
      */
     function delMultiple(pluginId, multName, groupName) {
       if (!_isFormTypeAllowed(["advanced", "easy"])) return;
+
+      if (type.value === "advanced")
+        return _delMultipleAdvanced(pluginId, multName, groupName);
+
+      if (type.value === "easy")
+        return _delMultipleEasy(pluginId, multName, groupName);
+    }
+
+    /**
+     *  @name _delMultipleAdvanced
+     *  @description This function will delete a group of multiples in the template.
+     *  The way the backend is working is that to delete a group, we need to send the group name with all default values.
+     *  This function needs to be call from the multiples component parent with the template and the group name to delete.
+     *  We will update the values of the group to default values.
+     *  @param {string} pluginId - id of the plugin on the template array.
+     *  @param {string} multName - Input id to update
+     *  @param {string|number} groupName - Input value to update
+     *  @returns {void}
+     */
+    function _delMultipleAdvanced(pluginId, multName, groupName) {
+      if (!_isFormTypeAllowed(["advanced"])) return;
 
       // Get the index of plugin using pluginId
       const index = templateBase.value.findIndex(
@@ -115,6 +136,45 @@ export const createFormStore = (storeName, formType) => {
 
       // For UI, we can delete the group to avoid rendering it
       delete templateUI.value[index].multiples[multName][groupName];
+      _updateTempState();
+    }
+
+    /**
+     *  @name _delMultipleEasy
+     *  @description This function will delete a group of multiples in the template.
+     *  The way the backend is working is that to delete a group, we need to send the group name with all default values.
+     *  This function needs to be call from the multiples component parent with the template and the group name to delete.
+     *  We will update the values of the group to default values.
+     *  @param {string} pluginId - id of the plugin on the template array.
+     *  @param {string} multName - Input id to update
+     *  @param {string|number} groupName - Input value to update
+     *  @returns {void}
+     */
+    function _delMultipleEasy(pluginId, multName, groupName) {
+      if (!_isFormTypeAllowed(["easy"])) return;
+
+      for (let i = 0; i < templateBase.value.length; i++) {
+        const step = templateBase.value[i];
+        if (!"plugins" in step) continue;
+        const plugins = step.plugins;
+        // Get the index of plugin using pluginId
+        const index = plugins.findIndex((plugin) => plugin.id === pluginId);
+        if (index < 0) continue;
+
+        // For back end, we need to keep the group but updating values to default in order to delete it
+        for (const [settName, setting] of Object.entries(
+          templateBase.value[i]["plugins"][index].multiples[multName][groupName]
+        )) {
+          setting.value = setting.default;
+        }
+
+        // For UI, we can delete the group to avoid rendering it
+        delete templateUI.value[i]["plugins"][index].multiples[multName][
+          groupName
+        ];
+        break;
+      }
+
       _updateTempState();
     }
 
@@ -188,7 +248,6 @@ export const createFormStore = (storeName, formType) => {
     function _addMultipleEasy(pluginId, multName) {
       if (!_isFormTypeAllowed(["easy"])) return;
 
-      console.log(pluginId, multName);
       for (let i = 0; i < templateBase.value.length; i++) {
         const step = templateBase.value[i];
         if (!"plugins" in step) continue;
