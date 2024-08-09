@@ -92,152 +92,112 @@ function useSubmitForm(data) {
  *  @returns {array} - Array with error flags and error details
  */
 function useCheckPluginsValidity(template, mode) {
-  if (mode === "advanced") return _checkAdvancedValidity(template);
-  if (mode === "easy") return _checkEasyValidity(template);
+  // Case advanced, the template is a list of plugins so we can check and return directly
+  if (mode === "advanced") {
+    return _checkSettingsValidityFromPlugins(template, mode);
+  }
+
+  // Case easy mode, there is a list of plugins in each step so we need to iterate over the steps
+  if (mode === "easy") {
+    let data = [];
+    for (let stepId = 0; stepId < template.length; stepId++) {
+      const step = template[stepId];
+
+      if (!("plugins" in step)) continue;
+
+      // Check regular settings
+      const plugins = step?.plugins;
+      data = _checkSettingsValidityFromPlugins(plugins, stepId);
+      // data[0] is isRegErr, data[1] is isReqErr
+      if (data[0] || data[1]) return data;
+    }
+    return data;
+  }
 }
 
 /**
- *  @name _checkAdvancedValidity
- *  @description  Check if plugin settings are valid based on the advanced mode.
- *  @param {dict|array} template - Template with plugins list and detail settings
- *  @returns {array} - Array with error flags and error details
- */
-function _checkAdvancedValidity(template) {
-  let isRegErr = false;
-  let isReqErr = false;
-  let settingErr = "";
-  let pluginErr = "";
-  let settingNameErr = "";
-  let id = 0;
-
-  // Check regular settings
-  for (let i = 0; i < template.length; i++) {
-    id = i;
-    const plugin = template[i];
-    if (!("settings" in plugin)) continue;
-    for (const [key, value] of Object.entries(plugin.settings)) {
-      [isRegErr, isReqErr, settingErr, settingNameErr, pluginErr] =
-        _isSettingValid(key, value);
-      if (isRegErr || isReqErr) break;
-    }
-  }
-  if (isRegErr || isReqErr)
-    return [isRegErr, isReqErr, settingErr, settingNameErr, pluginErr, id];
-
-  // Case no error before, check multiples
-  for (let i = 0; i < template.length; i++) {
-    id = i;
-    const plugin = template[i];
-    if (!("multiples" in plugin)) continue;
-    for (const [multName, multGroups] of Object.entries(plugin.multiples)) {
-      for (const [multGroup, multSettings] of Object.entries(multGroups)) {
-        for (const [key, value] of Object.entries(multSettings)) {
-          [isRegErr, isReqErr, settingErr, settingNameErr, pluginErr] =
-            _isSettingValid(key, value);
-          if (isRegErr || isReqErr) break;
-        }
-      }
-    }
-  }
-  return [isRegErr, isReqErr, settingErr, settingNameErr, pluginErr, id];
-}
-
-/**
- *  @name _checkEasyValidity
- *  @description  Check if plugin settings are valid based on the easy mode.
- *  @param {dict|array} template - Template with plugins list and detail settings
- *  @returns {array} - Array with error flags and error details
- */
-function _checkEasyValidity(template) {
-  let isRegErr = false;
-  let isReqErr = false;
-  let settingErr = "";
-  let pluginErr = "";
-  let settingNameErr = "";
-  let id = 0;
-
-  // Check regular settings
-  for (let i = 0; i < template.length; i++) {
-    const step = template[i];
-    id = i;
-    if (!("plugins" in step)) continue;
-    for (let j = 0; j < step.plugins; j++) {
-      const plugin = step.plugins[j];
-      const settings = plugin?.settings;
-      if (!settings) continue;
-      for (const [key, value] of Object.entries(settings)) {
-        [isRegErr, isReqErr, settingErr, settingNameErr, pluginErr] =
-          _isSettingValid(key, value, plugin.id);
-        if (isRegErr || isReqErr) break;
-      }
-      if (isRegErr || isReqErr) break;
-    }
-  }
-
-  if (isRegErr || isReqErr)
-    return [isRegErr, isReqErr, settingErr, settingNameErr, pluginErr, id];
-
-  // Case no error before, check multiples
-  for (let i = 0; i < template.length; i++) {
-    const step = template[i];
-    id = i;
-    if (!("plugins" in step)) continue;
-    const plugins = step?.plugins;
-    for (let j = 0; j < plugins.length; j++) {
-      const plugin = plugins[j];
-      if (!("multiples" in plugin)) continue;
-      for (const [multName, multGroups] of Object.entries(plugin.multiples)) {
-        for (const [multGroup, multSettings] of Object.entries(multGroups)) {
-          for (const [key, value] of Object.entries(multSettings)) {
-            [isRegErr, isReqErr, settingErr, settingNameErr, pluginErr] =
-              _isSettingValid(key, value, plugin);
-
-            if (isRegErr || isReqErr) break;
-          }
-          if (isRegErr || isReqErr) break;
-        }
-        if (isRegErr || isReqErr) break;
-      }
-    }
-    if (isRegErr || isReqErr) break;
-  }
-  return [isRegErr, isReqErr, settingErr, settingNameErr, pluginErr, id];
-}
-
-/**
- *  @name _MultipleSettingEasy
- *  @description  Loop and access multiples settings in the easy mode.
+ *  @name _checkSettingsValidityFromPlugins
+ *  @description  Access regular settings from a plugin and return the error flags and error details.
  *  @param {object|array} template - The template to check
  *  @param {function(key, value, plugin)} callback - Callback function that will access the key, value, and plugin
  *  @returns {any} - Return the result of the callback function
  */
-function _isSettingValid(key, value, pluginName) {
-  let is_reg_valid = true;
-  let is_req_valid = true;
+function _checkSettingsValidityFromPlugins(plugins, id = 0) {
+  let isRegErr = false;
+  let isReqErr = false;
+  let settingErr = "";
+  let pluginErr = "";
+  let settingNameErr = "";
 
-  if (value.required && !value.value) is_req_valid = false;
+  [isRegErr, isReqErr, settingErr, settingNameErr, pluginErr] =
+    _checkRegularSettingsValidityFromPlugins(plugins);
+  if (isRegErr || isReqErr)
+    return [isRegErr, isReqErr, settingErr, settingNameErr, pluginErr, id];
 
-  if (value.pattern && value.value) {
-    const regex = new RegExp(value.pattern);
-    if (!regex.test(value.value)) is_reg_valid = false;
+  // CHeck multiples settings
+  [isRegErr, isReqErr, settingErr, settingNameErr, pluginErr] =
+    _checkMultipleSettingsValidityFromPlugins(plugins);
+  if (isRegErr || isReqErr)
+    return [isRegErr, isReqErr, settingErr, settingNameErr, pluginErr, id];
+
+  return [isRegErr, isReqErr, settingErr, settingNameErr, pluginErr, id];
+}
+
+/**
+ *  @name _checkRegularSettingsValidityFromPlugins
+ *  @description  Access regular settings from a plugin and return the error flags and error details.
+ *  @param {object|array} template - The template to check
+ *  @param {function(key, value, plugin)} callback - Callback function that will access the key, value, and plugin
+ *  @returns {any} - Return the result of the callback function
+ */
+function _checkRegularSettingsValidityFromPlugins(plugins) {
+  let result;
+  for (let j = 0; j < plugins.length; j++) {
+    const plugin = plugins[j];
+    if (!("settings" in plugin)) continue;
+    const settings = plugin?.settings;
+    for (const [key, value] of Object.entries(settings)) {
+      result = _isSettingValid(key, value, plugin.name);
+      if (result.stop) return result.data;
+    }
   }
+  // fallback
+  return result?.data ? result.data : [];
+}
 
-  const isRegErr = is_reg_valid ? false : true;
-  const isReqErr = is_req_valid ? false : true;
-  const settingErr = isRegErr || isRegErr ? key : "";
-  const settingNameErr = isRegErr || isRegErr ? value.name : "";
-  const pluginErr = isRegErr || isRegErr ? pluginName : "";
-
-  return [isRegErr, isReqErr, settingErr, settingNameErr, pluginErr];
+/**
+ *  @name _checkMultipleSettingsValidityFromPlugins
+ *  @description  Access multiple settings from a plugin and return the error flags and error details.
+ *  @param {object|array} template - The template to check
+ *  @param {function(key, value, plugin)} callback - Callback function that will access the key, value, and plugin
+ *  @returns {any} - Return the result of the callback function
+ */
+function _checkMultipleSettingsValidityFromPlugins(plugins) {
+  let result;
+  for (let j = 0; j < plugins.length; j++) {
+    const plugin = plugins[j];
+    if (!("multiples" in plugin)) continue;
+    for (const [multName, multGroups] of Object.entries(plugin.multiples)) {
+      for (const [multGroup, multSettings] of Object.entries(multGroups)) {
+        for (const [key, value] of Object.entries(multSettings)) {
+          result = _isSettingValid(key, value, plugin.name);
+          if (result.stop) return result.data;
+        }
+      }
+    }
+  }
+  // fallback
+  return result?.data ? result.data : [];
 }
 
 /**
  *  @name _isSettingValid
  *  @description  Check if the setting is valid based on the pattern and required flags.
+ * This function is a callback of a _checkMultipleSettingsValidityFromPlugins function or similar.
  *  @param {key} str - The name of the setting
  *  @param {object} value - Setting value used to check if it's valid
  *  @param {pluginName} str - The name of the plugin
- *  @returns {bool} - Array with error flags and error details
+ *  @returns {object} - Return object with a stop bool key to stop the loop and a data key with the result
  */
 function _isSettingValid(key, value, pluginName) {
   let is_reg_valid = true;
@@ -256,7 +216,10 @@ function _isSettingValid(key, value, pluginName) {
   const settingNameErr = isRegErr || isRegErr ? value.name : "";
   const pluginErr = isRegErr || isRegErr ? pluginName : "";
 
-  return [isRegErr, isReqErr, settingErr, settingNameErr, pluginErr];
+  return {
+    stop: isRegErr || isReqErr ? true : false,
+    data: [isRegErr, isReqErr, settingErr, settingNameErr, pluginErr],
+  };
 }
 
 /**
