@@ -3173,8 +3173,10 @@ class Database:
 
             return {
                 "hostname": instance.hostname,
+                "name": instance.name,
                 "port": instance.port,
                 "server_name": instance.server_name,
+                "type": instance.type,
                 "status": instance.status,
                 "method": instance.method,
                 "creation_date": instance.creation_date,
