@@ -46,3 +46,4 @@ def raw_mode_builder(templates: list[dict], plugins: list, global_config: dict, 
         }
     ]
     return builder
+

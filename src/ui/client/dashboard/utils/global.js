@@ -152,7 +152,7 @@ function useEqualStr(type, compare) {
   try {
     return String(type).toLowerCase() === compare.toLowerCase() ? true : false;
   } catch (e) {
-    console.log(e);
+    console.error(e);
     return false;
   }
 }

@@ -72,7 +72,6 @@ export const createFormStore = (storeName, formType) => {
       templateUI.value = JSON.parse(JSON.stringify(tempData));
       templateUIFormat.value = templateUI.value;
       _updateTempState();
-      console.log("format", formattedData.value);
     }
 
     /**

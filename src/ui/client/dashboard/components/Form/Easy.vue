@@ -101,7 +101,6 @@ const data = reactive({
 watch(
   () => props.template,
   () => {
-    console.log("Template changed");
     setup();
   }
 );

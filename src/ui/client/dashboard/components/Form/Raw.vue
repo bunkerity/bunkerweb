@@ -1,5 +1,5 @@
 <script setup>
-import { defineProps, reactive, onMounted, computed, onBeforeMount } from "vue";
+import { defineProps, reactive, onMounted, onBeforeMount, watch } from "vue";
 import Container from "@components/Widget/Container.vue";
 import Title from "@components/Widget/Title.vue";
 import Subtitle from "@components/Widget/Subtitle.vue";
@@ -60,7 +60,26 @@ const props = defineProps({
 
 const data = reactive({
   isValid: true,
+  // This will be use to unmount and remount the editor (create a new editor instance because it is vanilla js)
+  isRender: true,
 });
+
+watch(
+  () => props.template,
+  () => {
+    // Unmount editor
+    data.isRender = false;
+    // Prepare data
+    rawForm.setRawData(json2raw(props.template), true);
+    updateRaw(rawForm.rawData);
+    rawForm.setOperation(props.operation);
+    rawForm.setOldServerName(props.oldServerName);
+    // Remount, wait some time to be sure the editor is unmounted
+    setTimeout(() => {
+      data.isRender = true;
+    }, 50);
+  }
+);
 
 /**
  *  @name updateRaw
@@ -184,6 +203,7 @@ onMounted(() => {
 
     <Container class="form-raw-editor-container layout-settings">
       <Editor
+        v-if="data.isRender"
         @inp="(v) => updateRaw(v)"
         v-bind="editorData"
         :value="rawForm.rawData"
