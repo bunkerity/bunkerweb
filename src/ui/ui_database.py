@@ -216,7 +216,7 @@ class UIDatabase(Database):
             )
 
             for code in totp_recovery_codes or []:
-                session.add(UserRecoveryCodes(user_name=username, code=hashpw(code.encode("utf-8"), gensalt(rounds=8)).decode("utf-8")))
+                session.add(UserRecoveryCodes(user_name=username, code=hashpw(code.encode("utf-8"), gensalt(rounds=10)).decode("utf-8")))
 
             try:
                 session.commit()
@@ -358,7 +358,7 @@ class UIDatabase(Database):
             session.query(UserRecoveryCodes).filter_by(user_name=username).delete()
 
             for code in codes:
-                session.add(UserRecoveryCodes(user_name=username, code=hashpw(code.encode("utf-8"), gensalt(rounds=8)).decode("utf-8")))
+                session.add(UserRecoveryCodes(user_name=username, code=hashpw(code.encode("utf-8"), gensalt(rounds=10)).decode("utf-8")))
 
             try:
                 session.commit()
