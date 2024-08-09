@@ -13,6 +13,7 @@ import Title from "@components/Widget/Title.vue";
 import Subtitle from "@components/Widget/Subtitle.vue";
 import Button from "@components/Widget/Button.vue";
 import Text from "@components/Widget/Text.vue";
+import GroupMultiple from "@components/Forms/Group/Multiple.vue";
 import MessageUnmatch from "@components/Message/Unmatch.vue";
 import { v4 as uuidv4 } from "uuid";
 import { useCheckPluginsValidity } from "@utils/global.js";
@@ -113,7 +114,7 @@ watch(
  */
 function setValidity() {
   const [isRegErr, isReqErr, settingErr, settingNameErr, pluginErr, id] =
-    useCheckPluginsValidity(easyForm.templateUI);
+    useCheckPluginsValidity(easyForm.templateUI, "easy");
 
   data.stepErr = id + 1;
   data.isRegErr = isRegErr;
@@ -220,11 +221,21 @@ onUnmounted(() => {
           <Subtitle type="content" :subtitle="step.subtitle" />
 
           <Container class="layout-settings min-h-[300px]">
-            <template
-              v-for="(setting, name, index) in step.settings"
-              :key="name"
-            >
-              <Fields :setting="setting" />
+            <template v-for="plugin in step.plugins">
+              <template
+                v-for="(setting, name, index) in plugin.settings"
+                :key="name"
+              >
+                <Fields :setting="setting" />
+              </template>
+              <GroupMultiple
+                @delete="
+                  (multName, groupName) =>
+                    easyForm.delMultiple(plugin.id, multName, groupName)
+                "
+                @add="(multName) => easyForm.addMultiple(plugin.id, multName)"
+                :multiples="plugin.multiples"
+              />
             </template>
           </Container>
         </Container>

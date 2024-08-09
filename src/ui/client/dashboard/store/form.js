@@ -103,12 +103,12 @@ export const createFormStore = (storeName, formType) => {
 
       // Get the index of plugin using pluginId
       const index = templateBase.value.findIndex(
-        (plugin) => plugin.id === pluginId,
+        (plugin) => plugin.id === pluginId
       );
 
       // For back end, we need to keep the group but updating values to default in order to delete it
       for (const [settName, setting] of Object.entries(
-        templateBase.value[index].multiples[multName][groupName],
+        templateBase.value[index].multiples[multName][groupName]
       )) {
         setting.value = setting.default;
       }
@@ -120,7 +120,7 @@ export const createFormStore = (storeName, formType) => {
 
     /**
      *  @name addMultiple
-     *  @description This function will add a group of multiple in the template with default values.
+     *  @description This function is a wrapper for any mode that will add a group of multiple in the template with default values.
      *  Each plugin has a key "multiples_schema" with each multiples group and their default values.
      *  We will retrieve the wanted multiple group and add it on the "multiples" key that contains the multiples that apply to the plugin.
      *  @param {string} pluginId - id of the plugin on the template array.
@@ -129,21 +129,37 @@ export const createFormStore = (storeName, formType) => {
      */
     function addMultiple(pluginId, multName) {
       if (!_isFormTypeAllowed(["advanced", "easy"])) return;
+      if (type.value === "advanced")
+        return _addMultipleAdvanced(pluginId, multName);
+      if (type.value === "easy") return _addMultipleEasy(pluginId, multName);
+    }
+
+    /**
+     *  @name _addMultipleAdvanced
+     *  @description This function will add a group of multiple in the template with default values.
+     *  Each plugin has a key "multiples_schema" with each multiples group and their default values.
+     *  We will retrieve the wanted multiple group and add it on the "multiples" key that contains the multiples that apply to the plugin.
+     *  @param {string} pluginId - id of the plugin on the template array.
+     *  @param {string} multName - multiple group name to add
+     *  @returns {void}
+     */
+    function _addMultipleAdvanced(pluginId, multName) {
+      if (!_isFormTypeAllowed(["advanced"])) return;
 
       // Get the index of plugin using pluginId
       const index = templateBase.value.findIndex(
-        (plugin) => plugin.id === pluginId,
+        (plugin) => plugin.id === pluginId
       );
       // Get the right multiple schema
       const multipleSchema = JSON.parse(
-        JSON.stringify(templateBase.value[index]?.multiples_schema[multName]),
+        JSON.stringify(templateBase.value[index]?.multiples_schema[multName])
       );
       const newMultiple = {};
 
       // Get the highest id in Object.keys(plugin?.multiples[multName])
       const nextGroupId =
         Math.max(
-          ...Object.keys(templateBase.value[index]?.multiples[multName]),
+          ...Object.keys(templateBase.value[index]?.multiples[multName])
         ) + 1;
 
       // Set the default values as value
@@ -157,6 +173,64 @@ export const createFormStore = (storeName, formType) => {
       // We need to show the new group on UI too
       templateUI.value[index].multiples[multName][nextGroupId] = newMultiple;
       updateCount.value++;
+      _updateTempState();
+    }
+
+    /**
+     *  @name _addMultipleEasy
+     *  @description This function will add a group of multiple in the template with default values.
+     *  Each plugin has a key "multiples_schema" with each multiples group and their default values.
+     *  We will retrieve the wanted multiple group and add it on the "multiples" key that contains the multiples that apply to the plugin.
+     *  @param {string} pluginId - id of the plugin on the template array.
+     *  @param {string} multName - multiple group name to add
+     *  @returns {void}
+     */
+    function _addMultipleEasy(pluginId, multName) {
+      if (!_isFormTypeAllowed(["easy"])) return;
+
+      console.log(pluginId, multName);
+      for (let i = 0; i < templateBase.value.length; i++) {
+        const step = templateBase.value[i];
+        if (!"plugins" in step) continue;
+        const plugins = step.plugins;
+        // Get the index of plugin using pluginId
+        const index = plugins.findIndex((plugin) => plugin.id === pluginId);
+        // Case no plugin found, continue
+        if (index < 0) continue;
+
+        // Get the right multiple schema
+        const multipleSchema = JSON.parse(
+          JSON.stringify(
+            templateBase.value[i]["plugins"][index]?.multiples_schema[multName]
+          )
+        );
+        const newMultiple = {};
+
+        // Get the highest id in Object.keys(plugin?.multiples[multName])
+        const nextGroupId =
+          Math.max(
+            ...Object.keys(
+              templateBase.value[i]["plugins"][index]?.multiples[multName]
+            )
+          ) + 1;
+
+        // Set the default values as value
+        for (const [key, value] of Object.entries(multipleSchema)) {
+          value.value = value.default;
+          newMultiple[`${key}${nextGroupId > 0 ? "_" + nextGroupId : ""}`] =
+            value;
+        }
+        // Add new group as first key of plugin.multiples.multName
+        templateBase.value[i]["plugins"][index].multiples[multName][
+          nextGroupId
+        ] = newMultiple;
+        // We need to show the new group on UI too
+        templateUI.value[i]["plugins"][index].multiples[multName][nextGroupId] =
+          newMultiple;
+        updateCount.value++;
+        break;
+      }
+
       _updateTempState();
     }
 
@@ -219,10 +293,12 @@ export const createFormStore = (storeName, formType) => {
       if (!_isFormTypeAllowed(["advanced", "easy"])) return;
 
       const templates = [templateBase.value, templateUI.value];
+
       // Filter to avoid multiple calls
-      if (!e.target.closest("[data-is='form']")) return;
+      if (!e.target?.closest("[data-is='form']")) return;
       if (e.type === "change" && e.target.tagName === "INPUT") return;
       // Wait some ms that previous update logic is done like datepicker
+
       setTimeout(() => {
         let inpId, inpValue;
 
@@ -246,7 +322,6 @@ export const createFormStore = (storeName, formType) => {
 
         // Case target is not an input-like
         if (!inpId) return;
-
         // update settings
         _useUpdateTempSettings(templates, inpId, inpValue, e.target);
         _useUpdateTempMultiples(templates, inpId, inpValue, e.target);
@@ -256,7 +331,7 @@ export const createFormStore = (storeName, formType) => {
 
     /**
      *  @name _useUpdateTempSettings
-     *  @description This function will loop on template settings in order to update the setting value.
+     *  @description This function is a wrapper to work with any mode that will loop on template settings in order to update the setting value.
      *  This will check each plugin.settings (what I call regular) instead of other type of settings like multiples (in plugin.multiples).
      *  This function needs to be call in _useUpdateTemp.
      *  @param {array} templates - Templates array with plugins list and detail settings
@@ -269,6 +344,29 @@ export const createFormStore = (storeName, formType) => {
 
       // Case get data-group attribute, this is not a regular setting
       if (target.closest("[data-group]")) return;
+
+      if (type.value === "easy")
+        return _useUpdateTempSettingsEasy(templates, inpId, inpValue, target);
+      if (type.value === "advanced")
+        return _useUpdateTempSettingsAdvanced(
+          templates,
+          inpId,
+          inpValue,
+          target
+        );
+    }
+
+    /**
+     *  @name _useUpdateTempSettingsAdvanced
+     *  @description This function will loop on template settings in order to update the setting value.
+     *  This will check each plugin.settings (what I call regular) instead of other type of settings like multiples (in plugin.multiples).
+     *  @param {array} templates - Templates array with plugins list and detail settings
+     *  @param {string|number} inpId - Input id to update
+     *  @param {string|number} inpValue - Input value to update
+     *  @returns {void}
+     */
+    function _useUpdateTempSettingsAdvanced(templates, inpId, inpValue) {
+      if (!_isFormTypeAllowed(["advanced"])) return;
 
       for (let i = 0; i < templates.length; i++) {
         const template = templates[i];
@@ -292,19 +390,90 @@ export const createFormStore = (storeName, formType) => {
     }
 
     /**
+     *  @name _useUpdateTempSettingsEasy
+     *  @description This function will loop on template settings in order to update the setting value.
+     *  This will check each plugin.settings (what I call regular) instead of other type of settings like multiples (in plugin.multiples).
+     *  @param {array} templates - Templates array with plugins list and detail settings
+     *  @param {string|number} inpId - Input id to update
+     *  @param {string|number} inpValue - Input value to update
+     *  @returns {void}
+     */
+    function _useUpdateTempSettingsEasy(templates, inpId, inpValue) {
+      if (!_isFormTypeAllowed(["easy"])) return;
+
+      for (let i = 0; i < templates.length; i++) {
+        const template = templates[i];
+
+        // Try to update settings
+        let isSettingUpdated = false;
+
+        for (let i = 0; i < template.length; i++) {
+          const step = template[i];
+          if (!("plugins" in step)) continue;
+          const plugins = step.plugins;
+          if (plugins.length <= 0) continue;
+
+          for (let j = 0; j < plugins.length; j++) {
+            const plugin = plugins[j];
+            const settings = plugin?.settings;
+            if (!settings) continue;
+            for (const [key, value] of Object.entries(settings)) {
+              if (value.id === inpId) {
+                value.value = inpValue;
+                isSettingUpdated = true;
+                break;
+              }
+            }
+            if (isSettingUpdated) break;
+          }
+          if (isSettingUpdated) break;
+        }
+      }
+    }
+
+    /**
      *  @name _useUpdateTempMultiples
-     *  @description This function will loop on template multiples in order to update the setting value.
+     *  @description This function is wrapper for any mode that will loop on template multiples in order to update the setting value.
      *  This will check each plugin.multiples that can be found in the template.
      *  This function needs to be call in _useUpdateTemp.
      *  @param {array} templates - Templates array with plugins list and detail settings
      *  @param {string|number} inpId - Input id to update
      *  @param {string|number} inpValue - Input value to update
+     *  @param {event} target - Target element that trigger the event
      *  @returns {void}
      */
     function _useUpdateTempMultiples(templates, inpId, inpValue, target) {
       if (!_isFormTypeAllowed(["advanced", "easy"])) return;
       // Case get data-group attribute, this is not a regular setting
       if (!target.closest("[data-group='multiple']")) return;
+
+      if (type.value === "easy")
+        return _useUpdateTempMultiplesEasy(templates, inpId, inpValue, target);
+      if (type.value === "advanced")
+        return _useUpdateTempMultiplesAdvanced(
+          templates,
+          inpId,
+          inpValue,
+          target
+        );
+    }
+
+    /**
+     *  @name _useUpdateTempMultiplesAdvanced
+     *  @description This function will loop on template multiples in order to update the setting value.
+     *  This will check each plugin.multiples that can be found in the template.
+     *  @param {array} templates - Templates array with plugins list and detail settings
+     *  @param {string|number} inpId - Input id to update
+     *  @param {string|number} inpValue - Input value to update
+     *  @param {event} target - Target element that trigger the event
+     *  @returns {void}
+     */
+    function _useUpdateTempMultiplesAdvanced(
+      templates,
+      inpId,
+      inpValue,
+      target
+    ) {
       const multName =
         target
           .closest("[data-group='multiple']")
@@ -321,6 +490,7 @@ export const createFormStore = (storeName, formType) => {
         // Case we found the inpId, we update the value
         // Case we didn't find existing inpId, we create a new one
         let isSettingUpdated = false;
+
         for (let i = 0; i < template.length; i++) {
           const plugin = template[i];
           const multiples = plugin?.multiples;
@@ -336,6 +506,61 @@ export const createFormStore = (storeName, formType) => {
             value.value = inpValue;
             isSettingUpdated = true;
             break;
+          }
+          if (isSettingUpdated) break;
+        }
+      }
+    }
+
+    /**
+     *  @name _useUpdateTempMultiplesEasy
+     *  @description This function will loop on template multiples in order to update the setting value.
+     *  This will check each plugin.multiples that can be found in the template.
+     *  @param {array} templates - Templates array with plugins list and detail settings
+     *  @param {string|number} inpId - Input id to update
+     *  @param {string|number} inpValue - Input value to update
+     *  @param {event} target - Target element that trigger the event
+     *  @returns {void}
+     */
+    function _useUpdateTempMultiplesEasy(templates, inpId, inpValue, target) {
+      const multName =
+        target
+          .closest("[data-group='multiple']")
+          .getAttribute("data-mult-name") || "";
+      const groupName =
+        target
+          .closest("[data-group='multiple']")
+          .getAttribute("data-group-name") || "";
+
+      for (let i = 0; i < templates.length; i++) {
+        const template = templates[i];
+
+        // Try to update settings
+        let isSettingUpdated = false;
+
+        for (let i = 0; i < template.length; i++) {
+          const step = template[i];
+          if (!("plugins" in step)) continue;
+          const plugins = step.plugins;
+          if (plugins.length <= 0) continue;
+
+          for (let j = 0; j < plugins.length; j++) {
+            const plugin = plugins[j];
+            const multiples = plugin?.multiples;
+            // Case no multiples, continue
+            if (!multiples || Object.keys(multiples).length <= 0) continue;
+            // Check if can find mult name in multiples
+            if (!(multName in multiples)) continue;
+            // Check if can find group name in multiples
+            if (!(groupName in multiples[multName])) continue;
+            const settings = multiples[multName][groupName];
+            for (const [key, value] of Object.entries(settings)) {
+              if (value.id !== inpId) continue;
+              value.value = inpValue;
+              isSettingUpdated = true;
+              break;
+            }
+            if (isSettingUpdated) break;
           }
           if (isSettingUpdated) break;
         }

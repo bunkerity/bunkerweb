@@ -241,7 +241,7 @@ function updateStates() {
  */
 function setValidity() {
   const [isRegErr, isReqErr, settingErr, settingNameErr, pluginErr, id] =
-    useCheckPluginsValidity(advancedForm.templateBase);
+    useCheckPluginsValidity(advancedForm.templateBase, "advanced");
   data.isRegErr = isRegErr;
   data.isReqErr = isReqErr;
   data.settingErr = settingErr;
@@ -357,8 +357,8 @@ onUnmounted(() => {
         data.isReqErr || data.isRegErr
           ? true
           : advancedForm.isUpdateData
-            ? false
-            : true
+          ? false
+          : true
       "
       @click="advancedForm.submit()"
     />

@@ -73,7 +73,7 @@ function useSubmitForm(data) {
 
 /**
  *  @name useCheckPluginsValidity
- *  @description  Check all items keys if at least one match exactly the filter value.
+ *  @description  This is a wrapper that will call the correct function to check if plugin settings are valid based on the template and mode.
  *  @example
  *    const template = [
  *      {
@@ -88,9 +88,28 @@ function useSubmitForm(data) {
  *      },
  *    ];
  *  @param template - Template with plugins list and detail settings
+ *  @param {string} mode - Mode to check, can be "advanced", "easy"...
  *  @returns {array} - Array with error flags and error details
  */
-function useCheckPluginsValidity(template) {
+function useCheckPluginsValidity(template, mode) {
+  let isRegErr = false;
+  let isReqErr = false;
+  let settingErr = "";
+  let pluginErr = "";
+  let settingNameErr = "";
+  let id = 0;
+
+  if (mode === "advanced") return useCheckAdvancedValidity(template);
+  if (mode === "easy") return useCheckEasyValidity(template);
+}
+
+/**
+ *  @name useCheckAdvancedValidity
+ *  @description  Check if plugin settings are valid based on the advanced mode.
+ *  @param template - Template with plugins list and detail settings
+ *  @returns {array} - Array with error flags and error details
+ */
+function useCheckAdvancedValidity(template) {
   let isRegErr = false;
   let isReqErr = false;
   let settingErr = "";
@@ -120,6 +139,56 @@ function useCheckPluginsValidity(template) {
       }
     }
   });
+
+  return [isRegErr, isReqErr, settingErr, settingNameErr, pluginErr, id];
+}
+
+/**
+ *  @name useCheckEasyValidity
+ *  @description  Check if plugin settings are valid based on the easy mode.
+ *  @param template - Template with plugins list and detail settings
+ *  @returns {array} - Array with error flags and error details
+ */
+function useCheckEasyValidity(template) {
+  let isRegErr = false;
+  let isReqErr = false;
+  let settingErr = "";
+  let pluginErr = "";
+  let settingNameErr = "";
+  let id = 0;
+
+  for (let i = 0; i < template.length; i++) {
+    const step = template[i];
+    id = i;
+    if (!("plugins" in step)) continue;
+    const plugins = step.plugins;
+    if (plugins.length <= 0) continue;
+
+    for (let j = 0; j < plugins.length; j++) {
+      const plugin = plugins[j];
+      const settings = plugin?.settings;
+      if (!settings) continue;
+      for (const [key, value] of Object.entries(settings)) {
+        if (value.required && !value.value) {
+          isReqErr = true;
+          settingErr = key;
+          settingNameErr = value.name;
+          pluginErr = plugin.name;
+          break;
+        }
+        if (value.pattern && value.value) {
+          const regex = new RegExp(value.pattern);
+          if (!regex.test(value.value)) {
+            isRegErr = true;
+            settingErr = key;
+            settingNameErr = value.name;
+            pluginErr = plugin.name;
+            break;
+          }
+        }
+      }
+    }
+  }
 
   return [isRegErr, isReqErr, settingErr, settingNameErr, pluginErr, id];
 }
