@@ -120,37 +120,44 @@ def set_easy(template: list, plugins_base: list, settings: dict, is_new: bool) -
     Prepare the easy form based on the template and plugins data.
     We need to loop on each steps and prepare settings and configs for each step.
     """
+
     template_settings = template.get("settings")
     plugins = copy.deepcopy(plugins_base)
+    # Copy of the plugins base data
+    plugins = copy.deepcopy(plugins_base)
+    # Update settings with global config data
+    for plugin in plugins:
+        loop_id = 0
+        total_settings = len(plugin.get("settings"))
+        for setting, value in plugin.get("settings").items():
+            loop_id += 1
+            value = format_setting(setting, value, total_settings, loop_id, template_settings, settings, is_new)
+
+    set_multiples(template, plugins, settings)
+
     steps = template.get("steps")
-    print(steps)
     for step in steps:
         step_settings = step.get("settings", {})
-        # Loop on step settings to set the settings value
-        loop_id = 0
-        step_settings_output = {}
-        for setting in step_settings:
-            loop_id += 1
-            # Get relate setting from plugins using setting name
-            plugin = next(
-                (plugin for plugin in plugins if setting in plugin.get("settings")),
-                None,
-            )
 
-            if not plugin:
-                continue
+        for plugin in plugins:
+            step_settings_output = {}
+            for setting, value in plugin.get("settings").items():
+                if setting not in step_settings:
+                    continue
 
-            if not plugin.get("settings").get(setting):
-                continue
+                step_settings_output[setting] = value
+            
+            # Case at least one key in step settings, we can add the plugin settings to the step
+            if len(step_settings_output) and not "plugins" in step:
+                step["plugins"] = []
+            
+            if len(step_settings_output):
+                step_plugin = copy.deepcopy(plugin)
+                step_plugin["settings"] = step_settings_output
+                step["plugins"].append(step_plugin)
 
-            plugin_setting = copy.deepcopy(plugin.get("settings").get(setting))
-
-            plugin_setting = format_setting(setting, plugin_setting, len(step_settings), loop_id, template_settings, settings, is_new)
-
-            step_settings_output[setting] = plugin_setting
-
-        step["settings"] = step_settings_output
-
+        # remove settings key form step
+        step.pop("settings", None)
     return steps
 
 
