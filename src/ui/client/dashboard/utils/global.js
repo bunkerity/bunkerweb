@@ -87,29 +87,22 @@ function useSubmitForm(data) {
  *        },
  *      },
  *    ];
- *  @param template - Template with plugins list and detail settings
+ *  @param {dict|array} template - Template with plugins list and detail settings
  *  @param {string} mode - Mode to check, can be "advanced", "easy"...
  *  @returns {array} - Array with error flags and error details
  */
 function useCheckPluginsValidity(template, mode) {
-  let isRegErr = false;
-  let isReqErr = false;
-  let settingErr = "";
-  let pluginErr = "";
-  let settingNameErr = "";
-  let id = 0;
-
-  if (mode === "advanced") return useCheckAdvancedValidity(template);
-  if (mode === "easy") return useCheckEasyValidity(template);
+  if (mode === "advanced") return _checkAdvancedValidity(template);
+  if (mode === "easy") return _checkEasyValidity(template);
 }
 
 /**
- *  @name useCheckAdvancedValidity
+ *  @name _checkAdvancedValidity
  *  @description  Check if plugin settings are valid based on the advanced mode.
- *  @param template - Template with plugins list and detail settings
+ *  @param {dict|array} template - Template with plugins list and detail settings
  *  @returns {array} - Array with error flags and error details
  */
-function useCheckAdvancedValidity(template) {
+function _checkAdvancedValidity(template) {
   let isRegErr = false;
   let isReqErr = false;
   let settingErr = "";
@@ -117,80 +110,153 @@ function useCheckAdvancedValidity(template) {
   let settingNameErr = "";
   let id = 0;
 
-  template.forEach((plugin, index) => {
-    id = index;
-    for (const [key, value] of Object.entries(plugin.settings)) {
-      if (value.required && !value.value) {
-        isReqErr = true;
-        settingErr = key;
-        settingNameErr = value.name;
-        pluginErr = plugin.name;
-        break;
-      }
-      if (value.pattern && value.value) {
-        const regex = new RegExp(value.pattern);
-        if (!regex.test(value.value)) {
-          isRegErr = true;
-          settingErr = key;
-          settingNameErr = value.name;
-          pluginErr = plugin.name;
-          break;
-        }
-      }
-    }
-  });
-
-  return [isRegErr, isReqErr, settingErr, settingNameErr, pluginErr, id];
-}
-
-/**
- *  @name useCheckEasyValidity
- *  @description  Check if plugin settings are valid based on the easy mode.
- *  @param template - Template with plugins list and detail settings
- *  @returns {array} - Array with error flags and error details
- */
-function useCheckEasyValidity(template) {
-  let isRegErr = false;
-  let isReqErr = false;
-  let settingErr = "";
-  let pluginErr = "";
-  let settingNameErr = "";
-  let id = 0;
-
+  // Check regular settings
   for (let i = 0; i < template.length; i++) {
-    const step = template[i];
     id = i;
-    if (!("plugins" in step)) continue;
-    const plugins = step.plugins;
-    if (plugins.length <= 0) continue;
+    const plugin = template[i];
+    if (!("settings" in plugin)) continue;
+    for (const [key, value] of Object.entries(plugin.settings)) {
+      [isRegErr, isReqErr, settingErr, settingNameErr, pluginErr] =
+        _isSettingValid(key, value);
+      if (isRegErr || isReqErr) break;
+    }
+  }
+  if (isRegErr || isReqErr)
+    return [isRegErr, isReqErr, settingErr, settingNameErr, pluginErr, id];
 
-    for (let j = 0; j < plugins.length; j++) {
-      const plugin = plugins[j];
-      const settings = plugin?.settings;
-      if (!settings) continue;
-      for (const [key, value] of Object.entries(settings)) {
-        if (value.required && !value.value) {
-          isReqErr = true;
-          settingErr = key;
-          settingNameErr = value.name;
-          pluginErr = plugin.name;
-          break;
-        }
-        if (value.pattern && value.value) {
-          const regex = new RegExp(value.pattern);
-          if (!regex.test(value.value)) {
-            isRegErr = true;
-            settingErr = key;
-            settingNameErr = value.name;
-            pluginErr = plugin.name;
-            break;
-          }
+  // Case no error before, check multiples
+  for (let i = 0; i < template.length; i++) {
+    id = i;
+    const plugin = template[i];
+    if (!("multiples" in plugin)) continue;
+    for (const [multName, multGroups] of Object.entries(plugin.multiples)) {
+      for (const [multGroup, multSettings] of Object.entries(multGroups)) {
+        for (const [key, value] of Object.entries(multSettings)) {
+          [isRegErr, isReqErr, settingErr, settingNameErr, pluginErr] =
+            _isSettingValid(key, value);
+          if (isRegErr || isReqErr) break;
         }
       }
     }
   }
-
   return [isRegErr, isReqErr, settingErr, settingNameErr, pluginErr, id];
+}
+
+/**
+ *  @name _checkEasyValidity
+ *  @description  Check if plugin settings are valid based on the easy mode.
+ *  @param {dict|array} template - Template with plugins list and detail settings
+ *  @returns {array} - Array with error flags and error details
+ */
+function _checkEasyValidity(template) {
+  let isRegErr = false;
+  let isReqErr = false;
+  let settingErr = "";
+  let pluginErr = "";
+  let settingNameErr = "";
+  let id = 0;
+
+  // Check regular settings
+  for (let i = 0; i < template.length; i++) {
+    const step = template[i];
+    id = i;
+    if (!("plugins" in step)) continue;
+    for (let j = 0; j < step.plugins; j++) {
+      const plugin = step.plugins[j];
+      const settings = plugin?.settings;
+      if (!settings) continue;
+      for (const [key, value] of Object.entries(settings)) {
+        [isRegErr, isReqErr, settingErr, settingNameErr, pluginErr] =
+          _isSettingValid(key, value, plugin.id);
+        if (isRegErr || isReqErr) break;
+      }
+      if (isRegErr || isReqErr) break;
+    }
+  }
+
+  if (isRegErr || isReqErr)
+    return [isRegErr, isReqErr, settingErr, settingNameErr, pluginErr, id];
+
+  // Case no error before, check multiples
+  for (let i = 0; i < template.length; i++) {
+    const step = template[i];
+    id = i;
+    if (!("plugins" in step)) continue;
+    const plugins = step?.plugins;
+    for (let j = 0; j < plugins.length; j++) {
+      const plugin = plugins[j];
+      if (!("multiples" in plugin)) continue;
+      for (const [multName, multGroups] of Object.entries(plugin.multiples)) {
+        for (const [multGroup, multSettings] of Object.entries(multGroups)) {
+          for (const [key, value] of Object.entries(multSettings)) {
+            [isRegErr, isReqErr, settingErr, settingNameErr, pluginErr] =
+              _isSettingValid(key, value, plugin);
+
+            if (isRegErr || isReqErr) break;
+          }
+          if (isRegErr || isReqErr) break;
+        }
+        if (isRegErr || isReqErr) break;
+      }
+    }
+    if (isRegErr || isReqErr) break;
+  }
+  return [isRegErr, isReqErr, settingErr, settingNameErr, pluginErr, id];
+}
+
+/**
+ *  @name _MultipleSettingEasy
+ *  @description  Loop and access multiples settings in the easy mode.
+ *  @param {object|array} template - The template to check
+ *  @param {function(key, value, plugin)} callback - Callback function that will access the key, value, and plugin
+ *  @returns {any} - Return the result of the callback function
+ */
+function _isSettingValid(key, value, pluginName) {
+  let is_reg_valid = true;
+  let is_req_valid = true;
+
+  if (value.required && !value.value) is_req_valid = false;
+
+  if (value.pattern && value.value) {
+    const regex = new RegExp(value.pattern);
+    if (!regex.test(value.value)) is_reg_valid = false;
+  }
+
+  const isRegErr = is_reg_valid ? false : true;
+  const isReqErr = is_req_valid ? false : true;
+  const settingErr = isRegErr || isRegErr ? key : "";
+  const settingNameErr = isRegErr || isRegErr ? value.name : "";
+  const pluginErr = isRegErr || isRegErr ? pluginName : "";
+
+  return [isRegErr, isReqErr, settingErr, settingNameErr, pluginErr];
+}
+
+/**
+ *  @name _isSettingValid
+ *  @description  Check if the setting is valid based on the pattern and required flags.
+ *  @param {key} str - The name of the setting
+ *  @param {object} value - Setting value used to check if it's valid
+ *  @param {pluginName} str - The name of the plugin
+ *  @returns {bool} - Array with error flags and error details
+ */
+function _isSettingValid(key, value, pluginName) {
+  let is_reg_valid = true;
+  let is_req_valid = true;
+
+  if (value.required && !value.value) is_req_valid = false;
+
+  if (value.pattern && value.value) {
+    const regex = new RegExp(value.pattern);
+    if (!regex.test(value.value)) is_reg_valid = false;
+  }
+
+  const isRegErr = is_reg_valid ? false : true;
+  const isReqErr = is_req_valid ? false : true;
+  const settingErr = isRegErr || isRegErr ? key : "";
+  const settingNameErr = isRegErr || isRegErr ? value.name : "";
+  const pluginErr = isRegErr || isRegErr ? pluginName : "";
+
+  return [isRegErr, isReqErr, settingErr, settingNameErr, pluginErr];
 }
 
 /**
