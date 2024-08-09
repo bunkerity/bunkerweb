@@ -1,6 +1,6 @@
 # See https://pre-commit.com for more information
 # See https://pre-commit.com/hooks.html for more hooks
-exclude: (^LICENSE.md$|^src/VERSION$|^env/|^src/(bw/misc/root-ca.pem$|deps/src/|common/core/modsecurity/files|ui/static/(js/(editor/|utils/purify/|tsparticles\.bundle\.min\.js)|css/dashboard\.css))|\.(svg|drawio|patch\d?|ascii|tf|tftpl|key)$)
+exclude: (^src/ui/client|^LICENSE.md$|^src/VERSION$|^env/|^src/(bw/misc/root-ca.pem$|deps/src/|common/core/modsecurity/files|ui/static/(js/(editor/|utils/purify/|tsparticles\.bundle\.min\.js)|css/dashboard\.css))|\.(svg|drawio|patch\d?|ascii|tf|tftpl|key)$)
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: 2c9f875913ee60ca25ce70243dc24d5b6415598c # frozen: v4.6.0

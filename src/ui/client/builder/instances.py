@@ -1,5 +1,9 @@
 from .utils.widgets import instance_widget
 
+from typing import List
+
+# from src.instance import Instance
+
 
 def instances_builder(instances: List[Instance]) -> str:
     """
@@ -9,8 +13,8 @@ def instances_builder(instances: List[Instance]) -> str:
 
     for instance in instances:
         # setup actions buttons
-        actions = ["reload", "stop"] if instance.status == "up"  else ["start"]
-            
+        actions = ["reload", "stop"] if instance.status == "up" else ["start"]
+
         buttons = [
             {
                 "attrs": {

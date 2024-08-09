@@ -6,6 +6,8 @@ from pathlib import Path
 from re import sub
 from typing import List
 
+from utils import run_command
+
 # get current directory
 current_directory = Path.cwd()
 # needed dirs
@@ -45,29 +47,6 @@ def set_dashboard():
 def set_setup():
     """Utils to run needed steps to set the setup page (all-in-one html page)"""
     move_template(opt_dir_setup_page, ui_dir_templates)
-
-
-def run_command(command: List[str]) -> int:
-    """Utils to run a subprocess command. This is usefull to run npm commands to build vite project"""
-    print(f"Running command: {command}", flush=True)
-    try:
-        process = Popen(command, stdout=PIPE, stderr=PIPE, cwd=current_directory.as_posix(), shell=not bool(getenv("DOCKERFILE", "")))
-        while process.poll() is None:
-            if process.stdout is not None:
-                for line in process.stdout:
-                    print(line.decode("utf-8").strip(), flush=True)
-
-        if process.returncode != 0:
-            print("Error while running command", flush=True)
-            print(process.stdout.read().decode("utf-8"), flush=True)
-            print(process.stderr.read().decode("utf-8"), flush=True)
-            return 1
-    except BaseException as e:
-        print(f"Error while running command: {e}", flush=True)
-        return 1
-
-    print("Command executed successfully", flush=True)
-    return 0
 
 
 def remove_dir(directory: Path):
@@ -153,9 +132,10 @@ def add_legacy():
 
 def add_builder_and_widgets():
     # First we want to generate widgets by executing "widgets_generator.py" that is on same level
-    if run_command(["/usr/bin/python3", "widgets_generator.py"]):
-        if run_command(["python", "widgets_generator.py"]):
-            exit(1) 
+    if run_command(["/usr/bin/python3", "widgets_generator.py"], current_directory):
+        if run_command(["python3", "widgets_generator.py"], current_directory):
+            if run_command(["python", "widgets_generator.py"], current_directory):
+                exit(1)
 
     # Create output folders
     copytree(builder_dir_pages.as_posix(), ui_dir_builder.as_posix())
@@ -164,14 +144,18 @@ def add_builder_and_widgets():
         # I want to replace "from .utils." by "from builder.utils."
         content = file.read_text()
         content = content.replace("from .utils.", "from builder.utils.")
-        content = """from os.path import join, sep
+        content = content.replace("# from src.", "from src.")
+        content = (
+            """from os.path import join, sep
 from sys import path as sys_path
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("api",), ("db",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
-""" + content
+"""
+            + content
+        )
         file.write_text(content)
 
     copytree(builder_dir_utils.as_posix(), ui_dir_builder_utils.as_posix())
@@ -184,14 +168,14 @@ def build():
     add_legacy()
     # Only install packages if not already installed
     if not current_directory.joinpath("node_modules").exists():
-        if run_command(["/usr/bin/npm", "install"]):
-            if run_command(["npm", "install"]):
+        if run_command(["/usr/bin/npm", "install"], current_directory):
+            if run_command(["npm", "install"], current_directory):
                 exit(1)
-    if run_command(["/usr/bin/npm", "run", "build-dashboard"]):
-        if run_command(["npm", "run", "build-dashboard"]):
+    if run_command(["/usr/bin/npm", "run", "build-dashboard"], current_directory):
+        if run_command(["npm", "run", "build-dashboard"], current_directory):
             exit(1)
     set_dashboard()
-    # run_command(["/usr/bin/npm", "run", "build-setup"])
+    # run_command(["/usr/bin/npm", "run", "build-setup"], current_directory)
     # set_setup()
     add_builder_and_widgets()
 

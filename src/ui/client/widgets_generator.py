@@ -1,10 +1,14 @@
+from os import cpu_count
 from os.path import abspath
 from pathlib import Path
-from subprocess import Popen, PIPE
+from threading import Semaphore, Thread
+from traceback import format_exc
 from typing import List
 from shutil import rmtree
 from re import search, sub
 from typing import Union
+
+from utils import run_command
 
 # We want to get path of the folder where our components are
 # The path is "../src/client/dashboard/src/components" from here
@@ -13,36 +17,15 @@ inputFolder = abspath("../client/dashboard/components")
 outputFolderMd = abspath("../client/.widgets-md")
 outputFolderPy = abspath("../client/.widgets")
 outputFolderWidgets = abspath("../client/builder/utils")
-components_path_to_exclude = ("\components\Icons\\", "components\Forms\Error\\", "\components\Dashboard\\", "\components\Builder\\")
-
-
-def run_command(command: List[str]) -> int:
-    """Utils to run a subprocess command. This is usefull to run npm commands to build vite project"""
-    print(f"Running command: {command}", flush=True)
-    try:
-        process = Popen(command, stdout=PIPE, stderr=PIPE, shell=True, text=True)
-        while process.poll() is None:
-            if process.stdout is not None:
-                for line in process.stdout:
-                    print(line.strip(), flush=True)
-
-        if process.returncode != 0:
-            print("Error while running command", flush=True)
-            print(process.stdout.read(), flush=True)
-            print(process.stderr.read(), flush=True)
-            return 1
-    except BaseException as e:
-        print(f"Error while running command: {e}", flush=True)
-        return 1
-
-    print("Command executed successfully", flush=True)
-    return 0
+components_path_to_exclude = ("components/Icons", "components/Forms/Error", "components/Dashboard", "components/Builder")
 
 
 def install_npm_packages():
     """Install all packages needed to run the script"""
     # Install documentation package
-    run_command("npm install -g documentation")
+    if run_command(["/usr/bin/npm", "install", "-g", "documentation"]):
+        if run_command(["npm", "install", "-g", "documentation"]):
+            exit(1)
 
 
 def reset():
@@ -51,7 +34,6 @@ def reset():
     rmtree(outputFolderMd, ignore_errors=True)
     # Remove all files from the output folder
     rmtree(outputFolderPy, ignore_errors=True)
-
 
 
 def vue2js():
@@ -65,7 +47,7 @@ def vue2js():
             continue
 
         # Exclude some files
-        if any(folder_path in str(folder) for folder_path in components_path_to_exclude):
+        if any(folder_path in folder.as_posix() for folder_path in components_path_to_exclude):
             continue
 
         # Read the file content
@@ -73,8 +55,8 @@ def vue2js():
         # Get only the content between <script setup> and </script> tag
         script = data.split("<script setup>")[1].split("</script>")[0]
         # Get index of jsdoc comments
-        first_doc_index_start = script.index("/**")
-        first_doc_index_end = script.index("*/")
+        first_doc_index_start = script.find("/**")
+        first_doc_index_end = script.find("*/")
         if first_doc_index_start != -1 and first_doc_index_end != -1:
             # get content before first_doc_index_end
             script = script[first_doc_index_start : first_doc_index_end + 2]
@@ -87,33 +69,40 @@ def vue2js():
 
 def js2md():
     """Run a command to render markdown from JS files"""
-    # Get all files from the output folder
-    files = list(Path(outputFolderMd).rglob("*"))
-    process_list = []
-    # Create a markdown file for each JS file
-    for file in files:
-        # Run a process `documentation build <filename> -f md > <filename>.md
-        command = f"documentation build {file} -f md > {file.with_suffix('.md')}"
-        # Run the command
-        # I want to run this command async
-        process = Popen(command, stdout=PIPE, stderr=PIPE, shell=True, text=True)
-        process_list.append(process)
+    semaphore = Semaphore(cpu_count())
 
-    # Wait that all processes are done
-    for process in process_list:
-        process.wait()
+    def convert_json_to_md(file: Path):
+        semaphore.acquire()
+        # Run the command
+        output = run_command(["documentation", "build", file.as_posix(), "-f", "md"], with_output=True)
+        if output == 1:
+            print("Error while running command", flush=True)
+            exit(1)
+
+        # Create a new file with the same name but with .md extension
+        file.with_suffix(".md").write_text(output)
+        semaphore.release()
+
+    threads = []
+    # Create a markdown file for each JS file
+    for file in Path(outputFolderMd).rglob("*"):
+        threads.append(Thread(target=convert_json_to_md, args=(file,)))
+
+    for thread in threads:
+        thread.start()
+
+    for thread in threads:
+        thread.join()
+
     # Remove js files after
-    for file in files:
-        file.unlink()
+    # rmtree(outputFolderMd, ignore_errors=True)
 
 
 def formatMd():
     """Format each markdown file to remove useless data and format some data like params"""
-    # Get all files from the output folder
-    files = list(Path(outputFolderMd).rglob("*"))
     # Create order using the tag title path of each file
     order = []
-    for file in files:
+    for file in Path(outputFolderMd).rglob("*"):
         try:
             # Get the title from first line
             data = file.read_text()
@@ -122,8 +111,9 @@ def formatMd():
             # Remove ### Table of contents
             data = data.replace("### Table of Contents", "")
             # Remove everything before the first ## tag
-            index = data.index("## ")
-            data = data[index:]
+            if "## " in data:
+                index = data.index("## ")
+                data = data[index:]
 
             # I want to loop on each line
             lines = data.split("\n")
@@ -132,8 +122,8 @@ def formatMd():
                 # remove space (so &#x20 or &#32)
                 line = line.replace("&#x20", "").replace("&#32", "")
 
-                if line.startswith("#") and ".vue" in line and "\.vue" in line:
-                    line = line.replace("\.vue", ".vue")
+                if line.startswith("#") and ".vue" in line and "\\.vue" in line:
+                    line = line.replace("\\.vue", ".vue")
 
                 # Case not a param, keep the line as is
                 if not line.startswith("*"):
@@ -158,18 +148,18 @@ def formatMd():
             data = "\n".join(line_result)
             # update the file with the new content
             file.write_text(data)
-        except:
-            print("Error while parsing file", str(file.name))
-            continue
+        except BaseException:
+            print(format_exc(), flush=True)
+            print("Error while parsing file", str(file.name), flush=True)
+            exit(1)
 
 
 def md2py():
     # create py folder if not exists
     Path(outputFolderPy).mkdir(parents=True, exist_ok=True)
     # Get all files from the output folder
-    files = list(Path(outputFolderMd).rglob("*"))
     # Create order using the tag title path of each file
-    for file in files:
+    for file in Path(outputFolderMd).rglob("*"):
         data = file.read_text()
         # Get the title from first line, after the ## tag
         try:
@@ -183,13 +173,13 @@ def md2py():
             widget = create_widget(title, desc, params)
             Path(f"{outputFolderPy}/{title.capitalize()}.py").write_text(widget)
 
-        except BaseException as e:
-            print(e)
-            print("Error while parsing file", str(file.name))
-            continue
+        except BaseException:
+            print(format_exc(), flush=True)
+            print("Error while parsing file", str(file.name), flush=True)
+            exit(1)
 
     # Remove widgets-md
-    # rmtree(outputFolderMd, ignore_errors=True)
+    rmtree(outputFolderMd, ignore_errors=True)
 
 
 def get_py_title(data: str) -> str:
@@ -262,9 +252,9 @@ def get_py_params(data: str) -> Union[str, bool]:
 
         # remove default key if None
         return list_params
-    except BaseException as e:
-        print(e)
-        print("Error while parsing params")
+    except BaseException:
+        print(format_exc(), flush=True)
+        print("Error while parsing params", flush=True)
 
 
 def convert_params(params: List[dict]) -> List[dict]:
@@ -329,9 +319,9 @@ def convert_params(params: List[dict]) -> List[dict]:
         convert_params = sorted(convert_params, key=lambda x: x.get("type") is not None)
 
         return convert_params
-    except BaseException as e:
-        print(e)
-        print("Error while converting params")
+    except BaseException:
+        print(format_exc(), flush=True)
+        print("Error while converting params", flush=True)
 
 
 def create_widget(title: str, desc: str, params: List[dict]):
@@ -401,10 +391,9 @@ def {f_title}_widget(
     return {{ "type" : "{title.lower().capitalize()}", "data" : data }}
         """
         return widget_function
-
-    except BaseException as e:
-        print(e)
-        print("Error while creating widget")
+    except BaseException:
+        print(format_exc(), flush=True)
+        print("Error while creating widget", flush=True)
 
 
 def merge_widgets():
@@ -423,8 +412,7 @@ def add_key_value(data, key, value, default):
     data[key] = value
         """
     # get all files from the output folder
-    files = list(Path(outputFolderPy).rglob("*"))
-    for file in files:
+    for file in Path(outputFolderPy).rglob("*.py"):
         data = file.read_text()
         content += data
         content += "\n"
@@ -436,16 +424,12 @@ def add_key_value(data, key, value, default):
 
     Path(f"{outputFolderWidgets}/widgets.py").write_text(content)
 
-    # Remove py folder
-    rmtree(outputFolderPy, ignore_errors=True)
-    # Remove md folder
-    rmtree(outputFolderMd, ignore_errors=True)
 
-
-# install_npm_packages()
+install_npm_packages()
 reset()
 vue2js()
 js2md()
 formatMd()
 md2py()
 merge_widgets()
+# reset()
