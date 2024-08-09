@@ -18,7 +18,7 @@ import { onMounted, reactive, ref } from "vue";
  *  @param {boolean} [uppercase=false] - If the text should be uppercase or not.
  *  @param {string} [tag="p"] - The tag of the text. Can be p, span, div, h1, h2, h3, h4, h5, h6
  *  @param {boolean|object} [icon=false] - The icon to add before the text. If true, will add a default icon. If object, will add the icon with the name and the color.
- *  @param {object} [attrs={}] - List of attributs to add to the text.
+ *  @param {object} [attrs={}] - List of attributes to add to the text.
  */
 
 const props = defineProps({

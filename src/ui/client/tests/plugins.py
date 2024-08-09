@@ -3012,7 +3012,7 @@ def plugins_builder(plugins, data={}):
             "default",
             "ui",
         )
-        # Defaut data
+        # Default data
         plugin_detail = {
             "text": plugin.get("name"),
             "type": plugin.get("type", "").lower(),

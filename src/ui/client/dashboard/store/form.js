@@ -76,7 +76,7 @@ export const createFormStore = (storeName, formType) => {
 
     /**
      *  @name setRawData
-     *  @description Set raw data that can be usefull for the form.
+     *  @description Set raw data that can be useful for the form.
      *  @param {array} data - Template with plugins list and detail settings
      *  @param {boolean} [force=false] - Template with plugins list and detail settings
      *  @returns {void}
@@ -164,7 +164,7 @@ export const createFormStore = (storeName, formType) => {
      *  @name useListenTempFields
      *  @description  This will add an handler to all needed event listeners to listen to input, select... fields in order to update the template settings.
      *  @example
-     *  function hander(e) {
+     *  function handler(e) {
      *    // some code before calling _useUpdateTemp
      *    if (!e.target.closest("[data-advanced-form-plugin]")) return;
      *    _useUpdateTemp(e, data.base);
@@ -182,7 +182,7 @@ export const createFormStore = (storeName, formType) => {
      *  @name useUnlistenTempFields
      *  @description  This will stop listening to input, select... fields. Performance optimization and avoid duplicate calls conflicts.
      *  @example
-     *  function hander(e) {
+     *  function handler(e) {
      *    // some code before calling _useUpdateTemp
      *    if (!e.target.closest("[data-advanced-form-plugin]")) return;
      *    _useUpdateTemp(e, data.base);
@@ -267,7 +267,7 @@ export const createFormStore = (storeName, formType) => {
     function _useUpdateTempSettings(templates, inpId, inpValue, target) {
       if (!_isFormTypeAllowed(["advanced", "easy"])) return;
 
-      // Case get data-group attribut, this is not a regular setting
+      // Case get data-group attribute, this is not a regular setting
       if (target.closest("[data-group]")) return;
 
       for (let i = 0; i < templates.length; i++) {
@@ -303,7 +303,7 @@ export const createFormStore = (storeName, formType) => {
      */
     function _useUpdateTempMultiples(templates, inpId, inpValue, target) {
       if (!_isFormTypeAllowed(["advanced", "easy"])) return;
-      // Case get data-group attribut, this is not a regular setting
+      // Case get data-group attribute, this is not a regular setting
       if (!target.closest("[data-group='multiple']")) return;
       const multName =
         target

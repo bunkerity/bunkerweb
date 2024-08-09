@@ -71,7 +71,7 @@ function deletePlugin() {
       deleteData.type = e.target
         .closest("[data-plugin-type]")
         .getAttribute("data-plugin-type");
-      // Attach data to submit button (need to check attributs data-delete-plugin-submit)
+      // Attach data to submit button (need to check attributes data-delete-plugin-submit)
       const submitBtn = document.querySelector("[data-delete-plugin-submit]");
       submitBtn.setAttribute("data-submit-form", JSON.stringify(deleteData));
 

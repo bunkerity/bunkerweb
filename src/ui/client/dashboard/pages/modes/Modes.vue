@@ -7,7 +7,7 @@ import { useGlobal } from "@utils/global";
 /**
  *  @name Page/Modes.vue
  *  @description This component is the modes page.
- *  This page displays the raw form and additionnal actions to manage or create a service.
+ *  This page displays the raw form and additional actions to manage or create a service.
  */
 
 const modes = reactive({

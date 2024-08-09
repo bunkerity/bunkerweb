@@ -207,7 +207,7 @@ function filterMultiplesSettings(filterSettings, template) {
       continue;
     for (const [multName, multGroups] of Object.entries(plugin.multiples)) {
       for (const [groupName, groupSettings] of Object.entries(multGroups)) {
-        // Check if inpid is mathing a groupSettings key
+        // Check if inpid is matching a groupSettings key
         for (const [key, value] of Object.entries(groupSettings)) {
           multiples.push({
             ...value,

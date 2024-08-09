@@ -172,7 +172,7 @@ const buttonNext = {
 
 onMounted(() => {
   setup();
-  // I want updatInp to access event, data.base and the container attribut
+  // I want updatInp to access event, data.base and the container attribute
   easyForm.useListenTempFields();
   window.addEventListener("input", listenToValidate);
 });

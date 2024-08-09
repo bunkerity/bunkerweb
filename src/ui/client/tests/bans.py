@@ -59,7 +59,7 @@ bans = [
         "ban_end": 1719393920,
     },
 ]
-# Reoder bans dict
+# Reorder bans dict
 for ban in bans:
     ban.pop("date")
     ban["ip"] = ban.pop("ip")

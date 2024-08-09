@@ -157,7 +157,7 @@ def services_action(
     operation: str = "",
     title: str = "",
     subtitle: str = "",
-    additionnal: str = "",
+    additional: str = "",
     is_draft: Union[bool, None] = None,
     service: dict = None,
 ) -> dict:
@@ -221,13 +221,13 @@ def services_action(
             },
         )
 
-    if additionnal:
+    if additional:
         content.append(
             {
                 "type": "Text",
                 "data": {
                     "bold": True,
-                    "text": additionnal,
+                    "text": additional,
                 },
             }
         )
@@ -334,7 +334,7 @@ def get_services_list(services):
                                 operation="edit",
                                 title="services_edit_title",
                                 subtitle="services_edit_subtitle",
-                                additionnal=server_name,
+                                additional=server_name,
                             ),
                         },
                         {
@@ -351,7 +351,7 @@ def get_services_list(services):
                                 operation="draft",
                                 title="services_draft_title",
                                 subtitle="services_draft_subtitle" if is_draft else "services_online_subtitle",
-                                additionnal="services_draft_switch_subtitle" if is_draft else "services_online_switch_subtitle",
+                                additional="services_draft_switch_subtitle" if is_draft else "services_online_switch_subtitle",
                                 is_draft=is_draft,
                             ),
                         },

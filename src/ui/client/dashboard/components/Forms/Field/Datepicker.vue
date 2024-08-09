@@ -47,7 +47,7 @@ import "@assets/css/flatpickr.dark.min.css";
  *  @param {array} popovers - List of popovers to display more information
  *  @param {object} [attrs={}] - Additional attributes to add to the field
  *  @param {string} [inpType="datepicker"]  - The type of the field, useful when we have multiple fields in the same container to display the right field
- *  @param {number<timestamp>} [value=""] - Default date when instanciate
+ *  @param {number<timestamp>} [value=""] - Default date when instantiate
  *  @param {number<timestamp>} [minDate=""] - Impossible to pick a date before this date.
  *  @param {number<timestamp>} [maxDate=""] - Impossible to pick a date after this date.
  *  @param {boolean} [isClipboard=true] - allow to copy the timestamp value

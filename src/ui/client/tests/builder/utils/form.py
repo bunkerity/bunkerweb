@@ -243,7 +243,7 @@ def get_multiple_from_template(template, multiples):
         # loop on settings of a multiple group
         for mult_name, mult_settings in multiple_plugin.items():
 
-            # Check if at least one settign is matching a multiple setting
+            # Check if at least one setting is matching a multiple setting
             if not format_setting in mult_settings:
                 continue
 
@@ -307,7 +307,7 @@ def get_multiple_from_settings(settings, multiples):
         # loop on settings of a multiple group
         for mult_name, mult_settings in multiple_plugins.items():
 
-            # Check if at least one settign is matching a multiple setting
+            # Check if at least one setting is matching a multiple setting
             if not format_setting in mult_settings:
                 continue
 
@@ -473,7 +473,7 @@ def format_setting(
     if "multiple" in value:
         return value
 
-    # Else, we can add additionnal final data
+    # Else, we can add additional final data
     value["method"] = settings.get(name, {}).get("method", "ui")
     value["containerClass"] = f"z-{total_settings - loop_id}"
 

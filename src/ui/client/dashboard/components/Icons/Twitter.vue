@@ -2,8 +2,8 @@
 import { defineProps, reactive, onBeforeMount } from "vue";
 import { useUUID } from "@utils/global.js";
 /**
- *  @name Icons/Twiiter.vue
- *  @description This component is a svg icon representing Twiiter.
+ *  @name Icons/Twitter.vue
+ *  @description This component is a svg icon representing Twitter.
  *  @example
  *  {
  *    color: 'info',

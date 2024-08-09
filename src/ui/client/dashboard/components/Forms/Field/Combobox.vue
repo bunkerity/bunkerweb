@@ -54,7 +54,7 @@ import { useUUID } from "@utils/global.js";
  *  @param {object} [columns={"pc": "12", "tablet": "12", "mobile": "12"}] - Field has a grid system. This allow to get multiple field in the same row if needed.
  *  @param {boolean} [hideLabel=false]
  *  @param {boolean} [onlyDown=false] - If the dropdown should check the bottom of the
- *  @param {boolean} [overflowAttrEl=""] - Attribut to select the container the element has to check for overflow
+ *  @param {boolean} [overflowAttrEl=""] - Attribute to select the container the element has to check for overflow
  *  @param {string} [containerClass=""]
  *  @param {string} [inpClass=""]
  *  @param {string} [headerClass=""]

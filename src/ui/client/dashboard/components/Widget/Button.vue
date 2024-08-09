@@ -36,10 +36,10 @@ import { useUUID } from "@utils/global.js";
  *  @param {string} [iconColor=""] - Color we want to apply to the icon. If falsy value, default icon color is applied.
  *  @param {string} [size="normal"] - Can be of size sm || normal || lg || xl
  *  @param {string} [iconName=""] - Name in lowercase of icons store on /Icons. If falsy value, no icon displayed.
- *  @param {Object} [attrs={}] - List of attributs to add to the button. Some attributs will conduct to additionnal script
+ *  @param {Object} [attrs={}] - List of attributes to add to the button. Some attributes will conduct to additional script
  *  @param {Object|boolean} [modal=false] - We can link the button to a Modal component. We need to pass the widgets inside the modal. Button click will open the modal.
  *  @param {string|number} [tabId=contentIndex] - The tabindex of the field, by default it is the contentIndex
- *  @param {string} [containerClass=""] - Additionnal class to the container
+ *  @param {string} [containerClass=""] - Additional class to the container
  */
 
 const props = defineProps({

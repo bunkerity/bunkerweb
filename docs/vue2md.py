@@ -15,7 +15,7 @@ outputFile = abspath("../docs")
 
 
 def run_command(command: List[str]) -> int:
-    """Utils to run a subprocess command. This is usefull to run npm commands to build vite project"""
+    """Utils to run a subprocess command. This is useful to run npm commands to build vite project"""
     print(f"Running command: {command}", flush=True)
     try:
         process = Popen(command, stdout=PIPE, stderr=PIPE, shell=True, text=True)

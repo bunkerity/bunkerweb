@@ -7,7 +7,7 @@ import { useUUID } from "@utils/global.js";
 /**
  *  @name Forms/Feature/Clipboard.vue
  *  @description This component can be add to some fields to allow to copy the value of the field.
- *  Additionnal clipboardClass and copyClass can be added to fit the parent container.
+ *  Additional clipboardClass and copyClass can be added to fit the parent container.
  *  @example
  *  {
  *    id: 'test-input',

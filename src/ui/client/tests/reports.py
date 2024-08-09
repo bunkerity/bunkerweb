@@ -77,7 +77,7 @@ reports = [
     },
 ]
 
-# Reoder reports to get in order "date", "ip", "country", "method", "url", "code", "user_agent", "reason", "data"
+# Reorder reports to get in order "date", "ip", "country", "method", "url", "code", "user_agent", "reason", "data"
 for report in reports:
     report["date"] = report.pop("date")
     report["ip"] = report.pop("ip")

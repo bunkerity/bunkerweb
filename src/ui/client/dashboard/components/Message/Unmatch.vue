@@ -5,7 +5,7 @@ import Text from "@components/Widget/Text.vue";
 /**
  *  @name Message/Unmatch.vue
  *  @description Display a default message "no match" with dedicated icon.
- *  The message text can be overriden by passing a text prop.
+ *  The message text can be overridden by passing a text prop.
  *  @example
  *  {
  *    text: "dashboard_no_match",

@@ -236,6 +236,40 @@ Case there is already a focused element inside the modal, avoid to focus it agai
 
 Returns **void**;
 
+### Modes.vue
+
+This component is lightweight builder containing only the necessary components to create a service mode page.
+
+#### Parameters
+
+-   `builder` **array** Array of containers and widgets
+
+#### Examples
+
+```javascript
+[
+    {
+      type: "card",
+      containerColumns: { pc: 12, tablet: 12, mobile: 12 },
+      widgets: [
+                {
+                  type: "Title",
+                  data : {
+                    title: "dashboard_global_config",
+                    type: "card"
+                  },
+                },
+                {
+                  type: "Raw",
+                  data: {
+                    template: {},
+                  },
+                },
+      ],
+    },
+];
+```
+
 ### PLugin.vue
 
 This component is lightweight builder containing only the necessary components to create the plugins page.
@@ -650,6 +684,12 @@ Returns **void**;
 
 Returns **void**;
 
+### Feedback.vue
+
+This component will display server feedbacks from the user.
+This component is working with flash messages under the hood.
+This will display an ephemeral on the bottom right of the page and a sidebar with all the feedbacks.
+
 ### Footer.vue
 
 This component is a footer that display essential links.
@@ -723,11 +763,30 @@ Toggle menu when we are on mobile device (else always visible).
 
 Returns **void**;
 
+### News.vue
+
+This component will display news from BunkerWeb blog and allow users to subscribe to the newsletter.
+Case the news API is not available, it will display a message.
+
+## loadNews
+
+Retrieve blog news from storage or fetch from the API.
+
+Returns **void**;
+
 ##  Form
 
 ### Advanced.vue
 
 This component is used to create a complete advanced form with plugin selection.
+
+#### Parameters
+
+-   `template` **object** Template object with plugin and settings data.
+-   `containerClass` **string** Container
+-   `operation` **string** Operation type (edit, new, delete). (optional, default `"edit"`)
+-   `oldServerName` **string** Old server name. This is a server name before any changes. (optional, default `""`)
+-   `columns` **object** Columns object.
 
 #### Examples
 
@@ -814,7 +873,10 @@ This component is used to create a complete easy form with plugin selection.
 
 #### Parameters
 
+-   `template` **object** Template object with plugin and settings data.
 -   `containerClass` **string** Container
+-   `operation` **string** Operation type (edit, new, delete). (optional, default `"edit"`)
+-   `oldServerName` **string** Old server name. This is a server name before any changes. (optional, default `""`)
 -   `columns` **object** Columns object.
 
 #### Examples
@@ -846,7 +908,6 @@ This component is used to create a complete easy form with plugin selection.
         },
   ],
 }
--  @param {object} template - Template object with plugin and settings data.
 ```
 
 ## setValidity
@@ -855,6 +916,131 @@ Check template settings and return if there is any error.
 Error will disabled save button and display an error message.
 
 Returns **void**;
+
+## setup
+
+Setup the needed data for the component to work properly.
+
+Returns **void**;
+
+## listenToValidate
+
+Setup the needed data for the component to work properly.
+
+Returns **void**;
+
+### Fields.vue
+
+This component wraps all available fields for a form.
+
+#### Parameters
+
+-   `setting` **object** Setting needed to render a field.
+
+#### Examples
+
+```javascript
+{
+   columns : {"pc": 6, "tablet": 12, "mobile": 12},
+   id:"test-check",
+   value: "yes",
+   label: "Checkbox",
+   name: "checkbox",
+   required: true,
+   hideLabel: false,
+   inpType: "checkbox",
+   headerClass: "text-red-500"
+   popovers : [
+     {
+       text: "This is a popover text",
+       iconName: "info",
+     },
+   ]
+ }
+```
+
+### Raw.vue
+
+This component is used to create a complete raw form with settings as JSON format.
+
+#### Parameters
+
+-   `template` **object** Template object with plugin and settings data.
+-   `operation` **string** Operation type (edit, new, delete). (optional, default `"edit"`)
+-   `oldServerName` **string** Old server name. This is a server name before any changes. (optional, default `""`)
+-   `containerClass` **string** Container
+-   `columns` **object** Columns object.
+
+#### Examples
+
+```javascript
+{
+   "IS_LOADING": "no",
+   "NGINX_PREFIX": "/etc/nginx/",
+   "HTTP_PORT": "8080",
+   "HTTPS_PORT": "8443",
+   "MULTISITE": "yes"
+  }
+```
+
+## updateRaw
+
+Get the raw data from editor, update the raw store with it and check if it is valid JSON.
+
+#### Parameters
+
+-   `v` **string** The raw data to update.
+
+Returns **void**;
+
+## json2raw
+
+Convert a JSON object to a raw string that can be passed to the editor.
+This will convert JSON to key value pairs (format key=value).
+This is only used at first mount when there is no raw data.
+
+#### Parameters
+
+-   `json` **string** The template json to convert
+
+Returns **[string][9]** The raw string
+
+### Templates.vue
+
+This component is used to create a complete  settings form with all modes (advanced, raw, easy).
+
+#### Parameters
+
+-   `templates` **object** List of advanced templates that contains settings. Must be a dict with mode as key, then the template name as key with a list of data (different for each modes).
+-   `operation` **string** Operation type (edit, new, delete). (optional, default `"edit"`)
+-   `oldServerName` **string** Old server name. This is a server name before any changes. (optional, default `""`)
+
+#### Examples
+
+```javascript
+{
+   advanced : {
+     default : [{SETTING_1}, {SETTING_2}...],
+     low : [{SETTING_1}, {SETTING_2}...],
+   },
+   easy : {
+     default : [...],
+     low : [...],
+   }
+ }
+```
+
+## getFirstTemplateName
+
+Get the first template name from the first mode.
+
+Returns **[string][7]** The first template name
+
+## getFirstTemplateName
+
+Get the first mode name from the first key in props.templates dict.
+
+Returns **[string][7]** The first mode name
 
 ##  Forms
 
@@ -914,7 +1100,7 @@ We can used it as a fixed alert or we can use it in a container as a list.
 #### Clipboard.vue
 
 This component can be add to some fields to allow to copy the value of the field.
-Additionnal clipboardClass and copyClass can be added to fit the parent container.
+Additional clipboardClass and copyClass can be added to fit the parent container.
 
 ##### Parameters
 
@@ -955,7 +1141,7 @@ It is mainly use in forms.
 -   `inpType` **string** The type of the field, useful when we have multiple fields in the same container to display the right field (optional, default `"checkbox"`)
 -   `disabled` **boolean**  (optional, default `false`)
 -   `required` **boolean**  (optional, default `false`)
--   `columns` **object** Field has a grid system. This allow to get multiple field in the same row if needed. (optional, default `{"pc":"12","tablet":"12","mobile":"12}`)
+-   `columns` **object** Field has a grid system. This allow to get multiple field in the same row if needed. (optional, default `{"pc":"12","tablet":"12","mobile":"12"}`)
 -   `hideLabel` **boolean**  (optional, default `false`)
 -   `containerClass` **string**  (optional, default `""`)
 -   `headerClass` **string**  (optional, default `""`)
@@ -1011,10 +1197,10 @@ We can also add popover to display more information.
 -   `disabled` **boolean**  (optional, default `false`)
 -   `required` **boolean**  (optional, default `false`)
 -   `requiredValues` **array** values that need to be selected to be valid, works only if required is true (optional, default `[]`)
--   `columns` **object** Field has a grid system. This allow to get multiple field in the same row if needed. (optional, default `{"pc":"12","tablet":"12","mobile":"12}`)
+-   `columns` **object** Field has a grid system. This allow to get multiple field in the same row if needed. (optional, default `{"pc":"12","tablet":"12","mobile":"12"}`)
 -   `hideLabel` **boolean**  (optional, default `false`)
 -   `onlyDown` **boolean** If the dropdown should check the bottom of the (optional, default `false`)
--   `overflowAttrEl` **boolean** Attribut to select the container the element has to check for overflow (optional, default `""`)
+-   `overflowAttrEl` **boolean** Attribute to select the container the element has to check for overflow (optional, default `""`)
 -   `containerClass` **string**  (optional, default `""`)
 -   `inpClass` **string**  (optional, default `""`)
 -   `headerClass` **string**  (optional, default `""`)
@@ -1122,12 +1308,12 @@ It is mainly use in forms.
 -   `popovers` **array** List of popovers to display more information
 -   `attrs` **object** Additional attributes to add to the field (optional, default `{}`)
 -   `inpType` **string** The type of the field, useful when we have multiple fields in the same container to display the right field (optional, default `"datepicker"`)
--   `value` **number\<timestamp>** Default date when instanciate (optional, default `""`)
+-   `value` **number\<timestamp>** Default date when instantiate (optional, default `""`)
 -   `minDate` **number\<timestamp>** Impossible to pick a date before this date. (optional, default `""`)
 -   `maxDate` **number\<timestamp>** Impossible to pick a date after this date. (optional, default `""`)
 -   `isClipboard` **boolean** allow to copy the timestamp value (optional, default `true`)
 -   `hideLabel` **boolean**  (optional, default `false`)
--   `columns` **object** Field has a grid system. This allow to get multiple field in the same row if needed. (optional, default `{"pc":"12","tablet":"12","mobile":"12}`)
+-   `columns` **object** Field has a grid system. This allow to get multiple field in the same row if needed. (optional, default `{"pc":"12","tablet":"12","mobile":"12"}`)
 -   `disabled` **boolean**  (optional, default `false`)
 -   `required` **boolean**  (optional, default `false`)
 -   `headerClass` **string**  (optional, default `""`)
@@ -1266,7 +1452,7 @@ It is mainly use in forms.
 -   `attrs` **object** Additional attributes to add to the field (optional, default `{}`)
 -   `popovers` **array?** List of popovers to display more information
 -   `inpType` **string** The type of the field, useful when we have multiple fields in the same container to display the right field (optional, default `"editor"`)
--   `columns` **object** Field has a grid system. This allow to get multiple field in the same row if needed. (optional, default `{"pc":"12","tablet":"12","mobile":"12}`)
+-   `columns` **object** Field has a grid system. This allow to get multiple field in the same row if needed. (optional, default `{"pc":"12","tablet":"12","mobile":"12"}`)
 -   `pattern` **string**  (optional, default `""`)
 -   `disabled` **boolean**  (optional, default `false`)
 -   `required` **boolean**  (optional, default `false`)
@@ -1323,7 +1509,7 @@ It is mainly use in forms.
 -   `attrs` **object** Additional attributes to add to the field (optional, default `{}`)
 -   `popovers` **array?** List of popovers to display more information
 -   `inpType` **string** The type of the field, useful when we have multiple fields in the same container to display the right field (optional, default `"input"`)
--   `columns` **object** Field has a grid system. This allow to get multiple field in the same row if needed. (optional, default `{"pc":"12","tablet":"12","mobile":"12}`)
+-   `columns` **object** Field has a grid system. This allow to get multiple field in the same row if needed. (optional, default `{"pc":"12","tablet":"12","mobile":"12"}`)
 -   `disabled` **boolean**  (optional, default `false`)
 -   `required` **boolean**  (optional, default `false`)
 -   `placeholder` **string**  (optional, default `""`)
@@ -1379,10 +1565,10 @@ It is mainly use in forms.
 -   `disabled` **boolean**  (optional, default `false`)
 -   `required` **boolean**  (optional, default `false`)
 -   `requiredValues` **array** values that need to be selected to be valid, works only if required is true (optional, default `[]`)
--   `columns` **object** Field has a grid system. This allow to get multiple field in the same row if needed. (optional, default `{"pc":"12","tablet":"12","mobile":"12}`)
+-   `columns` **object** Field has a grid system. This allow to get multiple field in the same row if needed. (optional, default `{"pc":"12","tablet":"12","mobile":"12"}`)
 -   `hideLabel` **boolean**  (optional, default `false`)
 -   `onlyDown` **boolean** If the dropdown should check the bottom of the container (optional, default `false`)
--   `overflowAttrEl` **boolean** Attribut to select the container the element has to check for overflow (optional, default `""`)
+-   `overflowAttrEl` **boolean** Attribute to select the container the element has to check for overflow (optional, default `""`)
 -   `containerClass` **string**  (optional, default `""`)
 -   `inpClass` **string**  (optional, default `""`)
 -   `headerClass` **string**  (optional, default `""`)
@@ -1485,7 +1671,7 @@ This component under the hood is rendering default fields but by group with poss
 ##### Parameters
 
 -   `multiples` **object<object>** The multiples settings to display. This needs to be a dict of settings using default field format.
--   `columns` **object** Field has a grid system. This allow to get multiple field in the same row if needed. (optional, default `{"pc":"12","tablet":"12","mobile":"12}`)
+-   `columns` **object** Field has a grid system. This allow to get multiple field in the same row if needed. (optional, default `{"pc":"12","tablet":"12","mobile":"12"}`)
 -   `containerClass` **string** Additionnal class to add to the container (optional, default `""`)
 -   `tadId` **string** The tabindex of the field, by default it is the contentIndex (optional, default `contentIndex`)
 
@@ -2351,9 +2537,9 @@ This component is a svg icon representing no trespassing.
  }
 ```
 
-### Twiiter.vue
+### Twitter.vue
 
-This component is a svg icon representing Twiiter.
+This component is a svg icon representing Twitter.
 
 #### Parameters
 
@@ -2397,7 +2583,7 @@ This component is a list of items separate on two columns : one for the title, a
 
 -   `details` **string** List of details item that contains a text, disabled state, attrs and list of popovers. We can also add a disabled key to disable the item.
 -   `filters` **array** List of filters to apply on the list of items. (optional, default `[]`)
--   `columns` **columns** Determine the position of the items in the grid system. (optional, default `{pc:4,tablet:6,mobile:12}`)
+-   `columns` **columns** Determine the position of the items in the grid system. (optional, default `{"pc":"4","tablet":"6","mobile":"12"}`)
 
 #### Examples
 
@@ -2451,7 +2637,7 @@ This component is used to display key value information in a list.
 #### Parameters
 
 -   `pairs` **array** The list of key value information. The key and value can be a translation key or a raw text.
--   `columns` **object** Determine the  position of the items in the grid system. (optional, default `{pc:12,tablet:12,mobile:12}`)
+-   `columns` **object** Determine the  position of the items in the grid system. (optional, default `{"pc":"12","tablet":"12","mobile":"12"}`)
 
 #### Examples
 
@@ -2469,7 +2655,7 @@ This component is used to display key value information in a list.
 ### Unmatch.vue
 
 Display a default message "no match" with dedicated icon.
-The message text can be overriden by passing a text prop.
+The message text can be overridden by passing a text prop.
 
 #### Parameters
 
@@ -2501,10 +2687,10 @@ This component is a standard button.
 -   `iconColor` **string** Color we want to apply to the icon. If falsy value, default icon color is applied. (optional, default `""`)
 -   `size` **string** Can be of size sm || normal || lg || xl (optional, default `"normal"`)
 -   `iconName` **string** Name in lowercase of icons store on /Icons. If falsy value, no icon displayed. (optional, default `""`)
--   `attrs` **Object** List of attributs to add to the button. Some attributs will conduct to additionnal script (optional, default `{}`)
+-   `attrs` **Object** List of attributes to add to the button. Some attributes will conduct to additional script (optional, default `{}`)
 -   `modal` **(Object | boolean)** We can link the button to a Modal component. We need to pass the widgets inside the modal. Button click will open the modal. (optional, default `false`)
 -   `tabId` **(string | number)** The tabindex of the field, by default it is the contentIndex (optional, default `contentIndex`)
--   `containerClass` **string** Additionnal class to the container (optional, default `""`)
+-   `containerClass` **string** Additional class to the container (optional, default `""`)
 
 #### Examples
 
@@ -2894,6 +3080,7 @@ This component is a general subtitle wrapper.
 -   `color` **string** The color of the subtitle between error, success, warning, info or tailwind color (optional, default `""`)
 -   `bold` **boolean** If the subtitle should be bold or not. (optional, default `false`)
 -   `uppercase` **boolean** If the subtitle should be uppercase or not. (optional, default `false`)
+-   `lowercase` **boolean** If the subtitle should be lowercase or not. (optional, default `false`)
 -   `subtitleClass` **string** Additional class, useful when component is used directly on a grid system (optional, default `""`)
 
 #### Examples
@@ -3001,7 +3188,7 @@ This component is used for regular paragraph.
 -   `uppercase` **boolean** If the text should be uppercase or not. (optional, default `false`)
 -   `tag` **string** The tag of the text. Can be p, span, div, h1, h2, h3, h4, h5, h6 (optional, default `"p"`)
 -   `icon` **(boolean | object)** The icon to add before the text. If true, will add a default icon. If object, will add the icon with the name and the color. (optional, default `false`)
--   `attrs` **object** List of attributs to add to the text. (optional, default `{}`)
+-   `attrs` **object** List of attributes to add to the text. (optional, default `{}`)
 
 #### Examples
 
@@ -3024,6 +3211,7 @@ This component is a general title wrapper.
 -   `tag` **string** The tag of the title. Can be h1, h2, h3, h4, h5, h6 or p. If empty, will be determine by the type of title. (optional, default `""`)
 -   `color` **string** The color of the title between error, success, warning, info or tailwind color (optional, default `""`)
 -   `uppercase` **boolean** If the title should be uppercase or not. (optional, default `false`)
+-   `lowercase` **boolean** If the title should be lowercase or not. (optional, default `false`)
 -   `titleClass` **string** Additional class, useful when component is used directly on a grid system (optional, default `""`)
 
 #### Examples
@@ -3037,47 +3225,6 @@ This component is a general title wrapper.
    tag: "h2"
  }
 ```
-
-## bannerStore
-
--   @name Dashboard/News.vue
--   @description This component will display news from BunkerWeb blog and allow users to subscribe to the newsletter.
-    Case the news API is not available, it will display a message.
-
-## loadNews
-
-Returns **void**;
-
-## feedback
-
--   @name Dashboard/Feedback.vue
--   @description This component will display server feedbacks from the user.
-    This component is working with flash messages under the hood.
-    This will display an ephemeral on the bottom right of the page and a sidebar with all the feedbacks.
-
-## props
-
--   @name Form/Fields.vue
--   @description This component wraps all available fields for a form.
--   @example
-    {
-    columns : {"pc": 6, "tablet": 12, "mobile": 12},
-    id:"test-check",
-    value: "yes",
-    label: "Checkbox",
-    name: "checkbox",
-    required: true,
-    hideLabel: false,
-    inpType: "checkbox",
-    headerClass: "text-red-500"
-    popovers : \[
-    {
-    text: "This is a popover text",
-    iconName: "info",
-    },
-    ]
-    }
--   @param {object} setting - Setting needed to render a field.
 
 ## props
 
@@ -3142,69 +3289,9 @@ This component is lightweight builder containing only the necessary components t
 
 ## props
 
--   @name Form/Templates.vue
--   @description This component is used to create a complete  settings form with all modes (advanced, raw, easy).
--   @example
-    {
-    advanced : {
-    default : \[{SETTING\_1}, {SETTING\_2}...],
-    low : \[{SETTING\_1}, {SETTING\_2}...],
-    },
-    easy : {
-    default : \[...],
-    low : \[...],
-    }
-    }
--   @param {object} templates - List of advanced templates that contains settings. Must be a dict with mode as key, then the template name as key with a list of data (different for each modes).
-
-## getFirstTemplateName
-
--   @name getFirstTemplateName
--   @description Get the first template name from the first mode.
--   @returns {string} - The first template name
-
-## getFirstModeName
-
--   @name getFirstTemplateName
--   @description Get the first mode name from the first key in props.templates dict.
--   @returns {string} - The first mode name
-
-## rawForm
-
--   @name Form/Raw\.vue
--   @description This component is used to create a complete raw form with settings as JSON format.
--   @example
-    {
-    "IS\_LOADING": "no",
-    "NGINX\_PREFIX": "/etc/nginx/",
-    "HTTP\_PORT": "8080",
-    "HTTPS\_PORT": "8443",
-    "MULTISITE": "yes"
-    }
--   @param {object} template - Template object with plugin and settings data.
--   @param {string} containerClass - Container
--   @param {object} columns - Columns object.
-
-## updateRaw
-
--   @name updateRaw
--   @description Get the raw data from editor, update the raw store with it and check if it is valid JSON.
--   @param {string} v - The raw data to update.
--   @returns {void}
+This component is lightweight builder containing only the necessary components to create the logs page.
 
 #### Parameters
 
--   `v` ;
+-   `builder` **array** Array of containers and widgets
 
-## json2raw
-
--   @name json2raw
--   @description Convert a JSON object to a raw string that can be passed to the editor.
-    This will convert JSON to key value pairs (format key=value).
-    This is only used at first mount when there is no raw data.
--   @param {string} json  - The template json to convert
--   @returns {string} - The raw string
-
-#### Parameters
-
--   `json` ;

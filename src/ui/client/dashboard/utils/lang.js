@@ -8,7 +8,7 @@ import fr from "@lang/fr.json" assert { type: "json" };
  *  @description This file contains utils to manage the language of the application.
  *  This is here that we retrieve json files to add translations.
  *  This lang.js works with vue-i18n.
- *  We need to instanciate the i18n object in the main file of the application inside /pages.
+ *  We need to instantiate the i18n object in the main file of the application inside /pages.
  */
 
 const availablesLangs = ["en", "fr"];
@@ -75,8 +75,8 @@ function getI18n(pagesArr = []) {
 
 /**
  *  @name getLocalLang
- *  @description  This will return the user langage checking the store, the browser, or the default lang.
- *  @returns {string} - The user langage.
+ *  @description  This will return the user language checking the store, the browser, or the default lang.
+ *  @returns {string} - The user language.
  */
 function getLocalLang() {
   // get store lang, or local, or default
