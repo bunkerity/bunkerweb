@@ -18,6 +18,7 @@
     "flag-icons": "^6.15.0",
     "flatpickr": "^4.6.13",
     "pinia": "^2.1.6",
+    "tabulator-tables": "^6.2.5",
     "vite-plugin-singlefile": "^2.0.2",
     "vue": "^3.3.8"
   },
