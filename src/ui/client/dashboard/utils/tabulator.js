@@ -1,3 +1,5 @@
+import { contentIndex } from "@utils/tabindex.js";
+
 /**
  *  @name utils/tabulator.js
  *  @description This file contains utils to work with the tabulator library and Vue instance.
@@ -89,4 +91,54 @@ function _sortText(column, formatName) {
   column.sorter = "string";
 }
 
-export { addColumnsSorter, addColumnsWidth };
+/**
+ *  @name a18yTable
+ *  @description Wrapper to add some accessibility to the table.
+ *  @returns {void}
+ */
+function a18yTable() {
+  _a18ySortable();
+  _a18yFooter();
+}
+
+/**
+ *  @name _a18ySortable
+ *  @description Allow the user to get to the sortable header by pressing the tab key.
+ *  The user can then press the enter key to sort the column.
+ *  @returns {void}
+ */
+function _a18ySortable() {
+  const sortableHeaders = document.querySelectorAll(
+    ".tabulator-col.tabulator-sortable .tabulator-col-sorter"
+  );
+  for (let i = 0; i < sortableHeaders.length; i++) {
+    // Try to get child or keep current
+    const sortableHeader = sortableHeaders[i].closest(".tabulator-col-content");
+    if (!sortableHeader.hasAttribute("role"))
+      sortableHeader.setAttribute("role", "button");
+    sortableHeader.setAttribute("tabindex", contentIndex);
+    sortableHeader.setAttribute("data-sort", "true");
+  }
+  // Add eventlistener to make sort working with enter key
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && e.target.getAttribute("data-sort") === "true") {
+      e.target.click();
+    }
+  });
+}
+
+/**
+ *  @name _a18yFooter
+ *  @description Update pagination tabindex to get continuity in the tab order in the table footer.
+ *  @returns {void}
+ */
+function _a18yFooter() {
+  const tableFooter = document.querySelector(".tabulator-footer");
+  // query button and select tag
+  const interactiveElements = tableFooter.querySelectorAll("button, select");
+  for (let i = 0; i < interactiveElements.length; i++) {
+    interactiveElements[i].setAttribute("tabindex", contentIndex);
+  }
+}
+
+export { addColumnsSorter, addColumnsWidth, a18yTable };
