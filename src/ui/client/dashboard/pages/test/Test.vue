@@ -7,98 +7,89 @@ import Button from "@components/Widget/Button.vue";
 import ButtonGroup from "@components/Widget/ButtonGroup.vue";
 import { TabulatorFull as Tabulator } from "tabulator-tables"; //import Tabulator library
 import { useEqualStr } from "@utils/global.js";
-import { addSorter } from "@utils/tabulator.js";
+import { addColumnsSorter, addColumnsWidth } from "@utils/tabulator.js";
 
 // TODO : ADD JSDOC COMPONENT
 
 const customComponents = ["Icons", "Text", "Fields", "Button", "ButtonGroup"];
+
+const datepicker = ref({
+  setting: {
+    id: "test-date",
+    columns: { pc: 6, tablet: 12, mobile: 12 },
+    disabled: false,
+    required: true,
+    value: 1735682600000,
+    minDate: 1735682600000,
+    maxDate: 1735689600000,
+    inpClass: "text-center",
+    inpType: "",
+    popovers: [
+      {
+        text: "This is a popover text",
+        iconName: "info",
+      },
+    ],
+  },
+});
 
 const props = defineProps({
   columns: {
     type: Array,
     required: true,
     default: [
-      { title: "Name", field: "name", width: 150 },
+      { title: "Name", field: "name" },
       { title: "Icon", field: "icon", formatter: "icons" },
+      { title: "Fields", field: "fields", formatter: "fields", width: 300 },
     ],
   },
   data: {
     type: Array,
     required: false,
     default: [
-      { id: 1, name: "Oli Bob", icon: { iconName: "box", color: "amber" } },
       {
-        id: 2,
-        name: "Mary May",
-        icon: { iconName: "document", color: "blue" },
-      },
-      {
-        id: 3,
-        name: "Christine Lobowski",
+        id: 1,
+        name: "Oli Bob",
         icon: { iconName: "box", color: "amber" },
-      },
-      {
-        id: 4,
-        name: "Brendon Philips",
-        icon: { iconName: "document", color: "blue" },
-      },
-      {
-        id: 5,
-        name: "Margret Marmajuke",
-        icon: { iconName: "box", color: "amber" },
-      },
-      {
-        id: 6,
-        name: "Frank Harbours",
-        icon: { iconName: "document", color: "blue" },
-      },
-      {
-        id: 7,
-        name: "Jamie Newhart",
-        icon: { iconName: "box", color: "amber" },
-      },
-      {
-        id: 8,
-        name: "Gemma Jane",
-        icon: { iconName: "document", color: "blue" },
-      },
-      { id: 9, name: "Emily Sykes", icon: { iconName: "box", color: "amber" } },
-      {
-        id: 10,
-        name: "James Newman",
-        icon: { iconName: "document", color: "blue" },
-      },
-      {
-        id: 11,
-        name: "James Newman",
-        icon: { iconName: "document", color: "blue" },
-      },
-      {
-        id: 12,
-        name: "James Newman",
-        icon: { iconName: "document", color: "blue" },
-      },
-      {
-        id: 13,
-        name: "James Newman",
-        icon: { iconName: "document", color: "blue" },
-      },
-      {
-        id: 14,
-        name: "James Newman",
-        icon: { iconName: "document", color: "blue" },
-      },
-      {
-        id: 15,
-        name: "James Newman",
-        icon: { iconName: "document", color: "blue" },
-      },
-      {
-        id: 16,
-        name: "James Newman",
-        icon: { iconName: "document", color: "blue" },
+        fields: {
+          setting: {
+            id: "test-date",
+            columns: { pc: 6, tablet: 12, mobile: 12 },
+            disabled: false,
+            name: "date",
+            label: "date",
+
+            hideLabel: true,
+            required: true,
+            value: 1723308217544,
+
+            inpClass: "text-center",
+            inpType: "datepicker",
+            popovers: [
+              {
+                text: "This is a popover text",
+                iconName: "info",
+              },
+            ],
+          },
+        },
       },
     ],
+  },
+  rowHeight: {
+    type: Number,
+    required: false,
+    default: 0,
+  },
+  colMinWidth: {
+    type: Number,
+    required: false,
+    default: 100,
+  },
+  colMaxWidth: {
+    type: Number,
+    required: false,
+    default: 0,
   },
   isPagination: {
     type: Boolean,
@@ -134,11 +125,15 @@ const table = reactive({
     const opts = {
       data: table.data, //link data to table
       reactiveData: true, //enable data reactivity
+      autoResize: true, // prevent auto resizing of table
+      resizableRows: true, // this option takes a boolean value (default = false)
     };
+
+    if (props.rowHeight) opts.rowHeight = props.rowHeight;
 
     // columns formatting
     let columns = JSON.parse(JSON.stringify(table.columns));
-    columns = addSortComponents(columns);
+    columns = formatColumns(columns);
     opts.columns = columns;
 
     if (props.isPagination) {
@@ -152,6 +147,22 @@ const table = reactive({
     return opts;
   }),
 });
+
+/**
+ *  @name formatColumns
+ *  @description This will add some key to columns that can be passed from props like minWidth or maxWidth.
+ *  Case key already exists, this will override it.
+ *  @param {array} columns -  The columns are the list of columns that we want to check.
+ *  @returns {array} - Return the columns with the custom sort added.
+ */
+function formatColumns(columns) {
+  for (let i = 0; i < columns.length; i++) {
+    const column = columns[i];
+    addColumnsSorter(column);
+    addColumnsWidth(column, props.colMinWidth, props.colMaxWidth);
+  }
+  return columns;
+}
 
 /**
  *  @name addCustomComponent
@@ -188,24 +199,6 @@ function addComponentsFormats() {
     };
   }
   Tabulator.extendModule("format", "formatters", formatOpts);
-}
-
-/**
- *  @name addSortComponents
- *  @description Check every columns and add a custom sort for some components, so this is link to customComponents list and previous formatters set.
- *  @example For Icons, we will add a custom sorter that will check between iconNames.
- *  @param {array} columns -  The columns are the list of columns that we want to check.
- *  @returns {array} - Return the columns with the custom sort added.
- */
-function addSortComponents(columns) {
-  for (let i = 0; i < columns.length; i++) {
-    const column = columns[i];
-    if (!("formatter" in column)) continue;
-    const formatName = column.formatter.toLowerCase();
-
-    addSorter(column, formatName);
-  }
-  return columns;
 }
 
 onMounted(() => {
