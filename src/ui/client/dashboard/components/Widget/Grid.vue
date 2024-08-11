@@ -1,4 +1,6 @@
 <script setup>
+import { useDisplayStore } from "@store/global.js";
+import { defineProps, watch, reactive } from "vue";
 /**
  *  @name Widget/Grid.vue
  *  @description This component is a basic container that can be used to wrap other components.
@@ -11,6 +13,7 @@
  *    gridClass: "items-start"
  *  }
  *  @param {string} [gridClass="items-start"] - Additional class
+ *  @param {array} [display=[]] - Array need to be of format ["groupName", "compId"] in order to be displayed using the display store. More info on the display store itslef.
  */
 
 const props = defineProps({
@@ -19,11 +22,39 @@ const props = defineProps({
     required: false,
     default: "items-start",
   },
+  display: {
+    type: Array,
+    required: false,
+    default: [],
+  },
 });
+
+const displayStore = useDisplayStore();
+
+const container = reactive({
+  // Check if component display is related to the displayStore
+  isDisplay: props.display.length
+    ? displayStore.isCurrentDisplay(props.display[0], props.display[1])
+    : true,
+});
+
+// Case we have set a display group name and component id, the component id must match the current display id for the same group name to be displayed.
+if (props.display.length) {
+  watch(displayStore.display, (val) => {
+    container.isDisplay = displayStore.isCurrentDisplay(
+      props.display[0],
+      props.display[1]
+    );
+  });
+}
 </script>
 
 <template>
-  <div data-grid :class="[props.gridClass, 'layout-grid']">
+  <div
+    v-if="container.isDisplay"
+    data-grid
+    :class="[props.gridClass, 'layout-grid']"
+  >
     <slot></slot>
   </div>
 </template>

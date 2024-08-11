@@ -11,7 +11,7 @@ export const useBannerStore = defineStore("banner", () => {
   const isBanner = ref(true);
   const bannerClass = ref("banner");
 
-  async function setBannerVisible(bool) {
+  function setBannerVisible(bool) {
     isBanner.value = bool;
     bannerClass.value = bool ? "banner" : "no-banner";
   }
@@ -28,11 +28,48 @@ export const useBannerStore = defineStore("banner", () => {
 export const useReadonlyStore = defineStore("readonly", () => {
   const isReadOnly = ref(true);
 
-  async function setReadOnly(bool) {
+  function setReadOnly(bool) {
     isReadOnly.value = bool;
   }
 
   return { isReadOnly, setReadOnly };
+});
+
+/**
+ *  @name useDisplayStore
+ *  @description This store is used to share the display state of the components.
+ *  This store will handle key-value with the display group name and the current component display name.
+ *  This will allow to show or hide components based on the display group name. This is useful with tabs of after a button action to show a specific component.
+ *  Because of builder approach, we can't directly update the display state on components (like in buttons) unless in dedicated tabs component.
+ *  In case we can't update state on component, we need to declare the store on the page level, and add a script to switch the state by listening to components with classic selectors.
+ *  @returns {object} - Object with the display data.
+ */
+export const useDisplayStore = defineStore("display", () => {
+  const display = ref({});
+
+  function setDisplay(groupName, componentName) {
+    display.value[groupName] = componentName;
+  }
+
+  function getDisplayByGroupName(groupName) {
+    return display.value[groupName];
+  }
+
+  function getDisplays() {
+    return display.value;
+  }
+
+  function isCurrentDisplay(groupName, componentName) {
+    return display.value[groupName] === componentName;
+  }
+
+  return {
+    display,
+    setDisplay,
+    getDisplayByGroupName,
+    getDisplays,
+    isCurrentDisplay,
+  };
 });
 
 /**
@@ -44,7 +81,7 @@ export const useReadonlyStore = defineStore("readonly", () => {
 export const useTableStore = defineStore("table", () => {
   const tables = ref({});
 
-  async function setTable(id, tabulatorInstance) {
+  function setTable(id, tabulatorInstance) {
     tables.value[id] = tabulatorInstance;
   }
 

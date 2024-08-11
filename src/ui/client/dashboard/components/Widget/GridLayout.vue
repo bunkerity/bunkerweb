@@ -1,7 +1,8 @@
 <script setup>
-import { computed, ref, onMounted, reactive, onBeforeMount } from "vue";
+import { computed, ref, onMounted, reactive, onBeforeMount, watch } from "vue";
 import { contentIndex } from "@utils/tabindex.js";
 import { useUUID } from "@utils/global.js";
+import { useDisplayStore } from "@store/global.js";
 
 /**
  *  @name Widget/GridLayout.vue
@@ -14,7 +15,8 @@ import { useUUID } from "@utils/global.js";
  *    type: "card",
  *    title: "Test",
  *    columns: { pc: 12, tablet: 12, mobile: 12},
- *    gridLayoutClass: "items-start"
+ *    gridLayoutClass: "items-start",
+ *   display: ["main", 1],
  *  }
  *  @param {string} [type="card"] - Type of layout component, we can have "card"
  *  @param {string} [id=uuidv4()] - Id of the layout component, will be used to identify the component.
@@ -22,6 +24,7 @@ import { useUUID } from "@utils/global.js";
  *  @param {string} [link=""] - Will transform the container tag from a div to an a tag with the link as href. Useful with card type.
  *  @param {object} [columns={"pc": 12, "tablet": 12, "mobile": 12}] - Work with grid system { pc: 12, tablet: 12, mobile: 12}
  *  @param {string} [gridLayoutClass="items-start"] - Additional class
+ *  @param {array} [display=[]] - Array need to be of format ["groupName", "compId"] in order to be displayed using the display store. More info on the display store itslef.
  *  @param {string} [tabId=contentIndex] - Case the container is converted to an anchor with a link, we can define the tabId, by default it is the contentIndex
  */
 
@@ -65,11 +68,32 @@ const props = defineProps({
     required: false,
     default: "items-start",
   },
+  display: {
+    type: Array,
+    required: false,
+    default: [],
+  },
 });
+
+const displayStore = useDisplayStore();
 
 const container = reactive({
   id: "",
+  // Check if component display is related to the displayStore
+  isDisplay: props.display.length
+    ? displayStore.isCurrentDisplay(props.display[0], props.display[1])
+    : true,
 });
+
+// Case we have set a display group name and component id, the component id must match the current display id for the same group name to be displayed.
+if (props.display.length) {
+  watch(displayStore.display, (val) => {
+    container.isDisplay = displayStore.isCurrentDisplay(
+      props.display[0],
+      props.display[1]
+    );
+  });
+}
 
 const containerClass = computed(() => {
   if (props.type === "card") return "layout-card";
@@ -100,6 +124,7 @@ onMounted(() => {
 
 <template>
   <component
+    v-if="container.isDisplay"
     ref="flowEl"
     :id="container.id"
     :is="props.link ? 'a' : 'div'"

@@ -1,6 +1,6 @@
 <script setup>
-import { computed } from "vue";
-
+import { useDisplayStore } from "@store/global.js";
+import { defineProps, watch, computed, reactive } from "vue";
 /**
  *  @name Widget/Container.vue
  *  @description This component is a basic container that can be used to wrap other components.
@@ -15,6 +15,7 @@ import { computed } from "vue";
  *  @param {string} [containerClass=""] - Additional class
  *  @param {object|boolean} [columns=false] - Work with grid system { pc: 12, tablet: 12, mobile: 12}
  *  @param {string} [tag="div"] - The tag for the container
+ *  @param {array} [display=[]] - Array need to be of format ["groupName", "compId"] in order to be displayed using the display store. More info on the display store itslef.
  */
 
 const props = defineProps({
@@ -33,7 +34,31 @@ const props = defineProps({
     required: false,
     default: "div",
   },
+  display: {
+    type: Array,
+    required: false,
+    default: [],
+  },
 });
+
+const displayStore = useDisplayStore();
+
+const container = reactive({
+  // Check if component display is related to the displayStore
+  isDisplay: props.display.length
+    ? displayStore.isCurrentDisplay(props.display[0], props.display[1])
+    : true,
+});
+
+// Case we have set a display group name and component id, the component id must match the current display id for the same group name to be displayed.
+if (props.display.length) {
+  watch(displayStore.display, (val) => {
+    container.isDisplay = displayStore.isCurrentDisplay(
+      props.display[0],
+      props.display[1]
+    );
+  });
+}
 
 const gridClass = computed(() => {
   return props.columns
@@ -44,6 +69,7 @@ const gridClass = computed(() => {
 
 <template>
   <component
+    v-if="container.isDisplay"
     :is="props.tag"
     data-container
     :class="[props.containerClass ? props.containerClass : '', gridClass]"
