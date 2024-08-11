@@ -5,6 +5,10 @@ import GridLayout from "@components/Widget/GridLayout.vue";
 import DashboardLayout from "@components/Dashboard/Layout.vue";
 import Tabulator from "@components/Widget/Tabulator.vue";
 import { useEqualStr } from "@utils/global.js";
+import { useTableStore } from "@store/global.js";
+import { onMounted } from "vue";
+
+const tableStore = useTableStore();
 /**
  * @name Builder/Bans.vue
  * @description This component is lightweight builder containing only the necessary components to create the bans page.
@@ -104,6 +108,7 @@ const builder = [
       {
         type: "Tabulator",
         data: {
+          id: "table-test",
           columns: columns,
           items: items,
         },
@@ -111,6 +116,14 @@ const builder = [
     ],
   },
 ];
+
+onMounted(() => {
+  setTimeout(() => {
+    const table = tableStore.getTableById("table-test");
+    console.log(table);
+    table.setFilter("text", "keywords", "fesfs");
+  }, 1000);
+});
 </script>
 
 <template>

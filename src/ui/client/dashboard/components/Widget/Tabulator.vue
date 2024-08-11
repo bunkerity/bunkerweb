@@ -12,12 +12,20 @@ import {
   addColumnsWidth,
   a18yTable,
 } from "@utils/tabulator.js";
+import { useTableStore } from "@store/global.js";
+
+const tableStore = useTableStore();
 
 // TODO : ADD JSDOC COMPONENT
 
 const customComponents = ["Icons", "Text", "Fields", "Button", "ButtonGroup"];
 
 const props = defineProps({
+  id: {
+    type: String,
+    required: true,
+    default: "table-component",
+  },
   columns: {
     type: Array,
     required: true,
@@ -160,6 +168,8 @@ onMounted(() => {
   table.instance.on("tableBuilt", () => {
     table.instance.redraw();
     a18yTable(table.instance);
+    // Add table instance to store in order to use it in other components
+    tableStore.setTable(props.id, table.instance);
   });
 });
 
