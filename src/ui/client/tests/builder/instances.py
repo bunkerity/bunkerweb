@@ -1,7 +1,7 @@
 from .utils.widgets import instance_widget
 
 
-def instances_builder(instances: List[Instance]) -> str:
+def instances_builder(instances) -> str:
     """
     It returns the needed format from data to render the instances page in JSON format for the Vue.js builder
     """
@@ -9,8 +9,8 @@ def instances_builder(instances: List[Instance]) -> str:
 
     for instance in instances:
         # setup actions buttons
-        actions = ["reload", "stop"] if instance.status == "up"  else ["start"]
-            
+        actions = ["reload", "stop"] if instance.status == "up" else ["start"]
+
         buttons = [
             {
                 "attrs": {

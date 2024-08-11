@@ -7,7 +7,7 @@ from typing import List
 from shutil import rmtree
 from re import search, sub
 from typing import Union
-
+from time import sleep
 from utils import run_command
 
 # We want to get path of the folder where our components are

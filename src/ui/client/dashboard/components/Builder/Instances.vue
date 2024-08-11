@@ -3,6 +3,7 @@
 import Grid from "@components/Widget/Grid.vue";
 import GridLayout from "@components/Widget/GridLayout.vue";
 import Instance from "@components/Widget/Instance.vue";
+import Tabulator from "@components/Widget/Tabulator.vue";
 import { useEqualStr } from "@utils/global.js";
 
 /**
@@ -60,6 +61,10 @@ const props = defineProps({
       <template v-for="(widget, index) in container.widgets" :key="index">
         <Instance
           v-if="useEqualStr(widget.type, 'Instance')"
+          v-bind="widget.data"
+        />
+        <Tabulator
+          v-else-if="useEqualStr(widget.type, 'Tabulator')"
           v-bind="widget.data"
         />
       </template>

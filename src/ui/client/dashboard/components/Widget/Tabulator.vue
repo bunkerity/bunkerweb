@@ -57,7 +57,7 @@ const props = defineProps({
   colMinWidth: {
     type: Number,
     required: false,
-    default: 100,
+    default: 150,
   },
   colMaxWidth: {
     type: Number,
@@ -101,7 +101,7 @@ const table = reactive({
       reactiveData: true, //enable data reactivity
       autoResize: true, // prevent auto resizing of table
       resizableRows: true, // this option takes a boolean value (default = false)
-      layout: "fitDataFill",
+      layout: "fitColumns",
     };
 
     if (props.rowHeight) opts.rowHeight = props.rowHeight;
