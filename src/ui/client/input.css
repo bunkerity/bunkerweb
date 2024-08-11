@@ -4871,7 +4871,7 @@ body.tabulator-print-fullscreen-hide > *:not(.tabulator-print-fullscreen) {
 .dark .tabulator .tabulator-footer .tabulator-paginator,
 .dark .tabulator .tabulator-header,
 .dark .tabulator .tabulator-header .tabulator-col {
-  background: #334155;
+  background: #344767;
   color: #e5e7eb;
 }
 
@@ -4884,18 +4884,18 @@ body.tabulator-print-fullscreen-hide > *:not(.tabulator-print-fullscreen) {
 .dark .tabulator .tabulator-footer .tabulator-page-size,
 .dark .tabulator .tabulator-footer .tabulator-page-size option {
   color: #e5e7eb;
-  background: #334155;
+  background: #344767;
 }
 
 .dark .tabulator .tabulator-tableholder .tabulator-table .tabulator-row,
 .dark .tabulator .tabulator-header .tabulator-calcs-holder {
   color: #e5e7eb;
-  background: #64748b;
+  background: #111c44;
   border-color: #e5e7eb !important;
 }
 
 .dark .tabulator.striped .tabulator-row:nth-child(even) {
-  background-color: #4b5563 !important;
+  background-color: #051139 !important;
 }
 
 /* sort button styles */
@@ -4906,7 +4906,7 @@ body.tabulator-print-fullscreen-hide > *:not(.tabulator-print-fullscreen) {
   .tabulator-col.tabulator-sortable[aria-sort="none"]
   .tabulator-col-content
   .tabulator-col-sorter {
-  color: #6b7280;
+  color: #94a3b8;
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -4917,7 +4917,7 @@ body.tabulator-print-fullscreen-hide > *:not(.tabulator-print-fullscreen) {
     .tabulator-col-content
     .tabulator-col-sorter.tabulator-col-sorter-element
     .tabulator-arrow:hover {
-    border-bottom: 6px solid #6b7280;
+    border-bottom: 6px solid #94a3b8;
   }
 }
 
@@ -4928,7 +4928,7 @@ body.tabulator-print-fullscreen-hide > *:not(.tabulator-print-fullscreen) {
   .tabulator-col-content
   .tabulator-col-sorter
   .tabulator-arrow {
-  border-bottom: 6px solid #6b7280;
+  border-bottom: 6px solid #94a3b8;
 }
 
 .dark
@@ -4937,7 +4937,7 @@ body.tabulator-print-fullscreen-hide > *:not(.tabulator-print-fullscreen) {
   .tabulator-col.tabulator-sortable[aria-sort="ascending"]
   .tabulator-col-content
   .tabulator-col-sorter {
-  color: #bbb;
+  color: #e2e8f0;
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -4948,7 +4948,7 @@ body.tabulator-print-fullscreen-hide > *:not(.tabulator-print-fullscreen) {
     .tabulator-col-content
     .tabulator-col-sorter.tabulator-col-sorter-element
     .tabulator-arrow:hover {
-    border-bottom: 6px solid #bbb;
+    border-bottom: 6px solid #e2e8f0;
   }
 }
 
@@ -4959,7 +4959,7 @@ body.tabulator-print-fullscreen-hide > *:not(.tabulator-print-fullscreen) {
   .tabulator-col-content
   .tabulator-col-sorter
   .tabulator-arrow {
-  border-bottom: 6px solid #bbb;
+  border-bottom: 6px solid #e2e8f0;
 }
 
 .dark
@@ -4968,7 +4968,7 @@ body.tabulator-print-fullscreen-hide > *:not(.tabulator-print-fullscreen) {
   .tabulator-col.tabulator-sortable[aria-sort="descending"]
   .tabulator-col-content
   .tabulator-col-sorter {
-  color: #bbb;
+  color: #e2e8f0;
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -4979,7 +4979,7 @@ body.tabulator-print-fullscreen-hide > *:not(.tabulator-print-fullscreen) {
     .tabulator-col-content
     .tabulator-col-sorter.tabulator-col-sorter-element
     .tabulator-arrow:hover {
-    border-top: 6px solid #bbb;
+    border-top: 6px solid #e2e8f0;
   }
 }
 
@@ -4990,8 +4990,8 @@ body.tabulator-print-fullscreen-hide > *:not(.tabulator-print-fullscreen) {
   .tabulator-col-content
   .tabulator-col-sorter
   .tabulator-arrow {
-  border-top: 6px solid #bbb;
-  color: #bbb;
+  border-top: 6px solid #e2e8f0;
+  color: #e2e8f0;
 }
 
 /* hover styles */
@@ -5039,7 +5039,7 @@ body.tabulator-print-fullscreen-hide > *:not(.tabulator-print-fullscreen) {
   .tabulator-table
   .tabulator-row
   .tabulator-cell.active {
-  background: #334155 !important;
+  background: #344767 !important;
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -5110,6 +5110,6 @@ body.tabulator-print-fullscreen-hide > *:not(.tabulator-print-fullscreen) {
     .tabulator-col.tabulator-sortable.tabulator-col-sorter-element:hover,
   .dark .tabulator-row.tabulator-selectable:hover,
   .dark .tabulator.striped .tabulator-row:nth-child(even):hover {
-    background: #1f2937 !important;
+    background: #475569 !important;
   }
 }
