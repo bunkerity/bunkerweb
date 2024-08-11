@@ -4636,7 +4636,7 @@ body.tabulator-print-fullscreen-hide > *:not(.tabulator-print-fullscreen) {
 }
 
 .tabulator.striped .tabulator-row:nth-child(even) {
-  background-color: #f2f2f2;
+  background-color: #f6f6f6;
 }
 
 .tabulator.celled {
@@ -4894,7 +4894,7 @@ body.tabulator-print-fullscreen-hide > *:not(.tabulator-print-fullscreen) {
   border-color: #e5e7eb !important;
 }
 
-.dark .tabulator-row:nth-child(even) {
+.dark .tabulator.striped .tabulator-row:nth-child(even) {
   background-color: #4b5563 !important;
 }
 
@@ -5108,7 +5108,8 @@ body.tabulator-print-fullscreen-hide > *:not(.tabulator-print-fullscreen) {
     .tabulator
     .tabulator-header
     .tabulator-col.tabulator-sortable.tabulator-col-sorter-element:hover,
-  .dark .tabulator-row.tabulator-selectable:hover {
+  .dark .tabulator-row.tabulator-selectable:hover,
+  .dark .tabulator.striped .tabulator-row:nth-child(even):hover {
     background: #1f2937 !important;
   }
 }

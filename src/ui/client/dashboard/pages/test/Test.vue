@@ -29,7 +29,45 @@ const tableStore = useTableStore();
 
 const columns = [
   { title: "Name", field: "text", formatter: "text" },
-  { title: "Icon", field: "icon", formatter: "icons" },
+  {
+    title: "Icon",
+    field: "icon",
+    formatter: "icons",
+  },
+];
+
+// Because we are going to use built-in filters, we can't use the Filter component
+// So we need this format in order to create under the hood fields that will be linked to the tabulator filter
+// We need to pass on the setting key the same props as the Fields component. For example a "=" tabulator filter will be used with a select field, this one need "values" array to work.
+// type : Choose between available tabulator built-in filters ("keywords", "like", "!=", ">", "<", ">=", "<=", "in", "regex", "!=")
+const filters = [
+  {
+    type: "like",
+    fields: ["text"],
+    setting: {
+      id: "test-input",
+      name: "test-input",
+      label: "Test input",
+      value: "",
+      inpType: "input",
+      columns: { pc: 3, tablet: 4, mobile: 12 },
+    },
+  },
+  {
+    type: "=",
+    fields: ["icon"],
+    setting: {
+      id: "test-select",
+      name: "test-select",
+      label: "Test select",
+      value: "all",
+      values: ["all", "box", "document"],
+      setting: { inpType: "input" },
+      inpType: "select",
+      columns: { pc: 3, tablet: 4, mobile: 12 },
+      onlyDown: true,
+    },
+  },
 ];
 
 const items = [
@@ -111,19 +149,20 @@ const builder = [
           id: "table-test",
           columns: columns,
           items: items,
+          filters: filters,
         },
       },
     ],
   },
 ];
-
-onMounted(() => {
-  setTimeout(() => {
-    const table = tableStore.getTableById("table-test");
-    console.log(table);
-    table.setFilter("text", "keywords", "fesfs");
-  }, 1000);
-});
+// Interact with table instance from another component
+// onMounted(() => {
+//   setTimeout(() => {
+//     const table = tableStore.getTableById("table-test");
+//     console.log(table);
+//     table.setFilter("text", "keywords", "fesfs");
+//   }, 1000);
+// });
 </script>
 
 <template>

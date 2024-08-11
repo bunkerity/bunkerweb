@@ -40,7 +40,7 @@ import { useUUID } from "@utils/global.js";
  *    ],
  *  }
  *  @param {string} [id=uuidv4()] - Unique id
- *  @param {string} type - text, email, password, number, tel, url
+ *  @param {string} [type="text"] - text, email, password, number, tel, url
  *  @param {string} label - The label of the field. Can be a translation key or by default raw text.
  *  @param {string} name - The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.*  @param {string} label
  *  @param {string} value
@@ -79,7 +79,8 @@ const props = defineProps({
   },
   type: {
     type: String,
-    required: true,
+    required: false,
+    default: "text",
   },
   attrs: {
     type: Object,
@@ -224,7 +225,7 @@ onMounted(() => {
           props.placeholder
             ? $t(
                 props.placeholder,
-                $t('dashboard_placeholder', props.placeholder),
+                $t('dashboard_placeholder', props.placeholder)
               )
             : ''
         "

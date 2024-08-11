@@ -38,10 +38,14 @@ const props = defineProps({
     default: {},
   },
 });
+
+// emits
+const emit = defineEmits(["inp"]);
 </script>
 
 <template>
   <Checkbox
+    @inp="(value) => $emit('inp', value)"
     v-if="props.setting.inpType === 'checkbox'"
     :id="props.setting.id || ''"
     :columns="props.setting.columns || false"
@@ -60,6 +64,7 @@ const props = defineProps({
     :attrs="props.setting.attrs || {}"
   />
   <Select
+    @inp="(value) => $emit('inp', value)"
     v-if="props.setting.inpType === 'select'"
     :id="props.setting.id || ''"
     :columns="props.setting.columns || false"
@@ -83,6 +88,7 @@ const props = defineProps({
     :attrs="props.setting.attrs || {}"
   />
   <Datepicker
+    @inp="(value) => $emit('inp', value)"
     v-if="props.setting.inpType === 'datepicker'"
     :id="props.setting.id || ''"
     :columns="props.setting.columns || false"
@@ -104,6 +110,7 @@ const props = defineProps({
     :attrs="props.setting.attrs || {}"
   />
   <Input
+    @inp="(value) => $emit('inp', value)"
     v-if="props.setting.inpType === 'input'"
     :id="props.setting.id || ''"
     :columns="props.setting.columns || false"
@@ -127,6 +134,7 @@ const props = defineProps({
     :attrs="props.setting.attrs || {}"
   />
   <Editor
+    @inp="(value) => $emit('inp', value)"
     v-if="props.setting.inpType === 'editor'"
     :id="props.setting.id || ''"
     :columns="props.setting.columns || false"

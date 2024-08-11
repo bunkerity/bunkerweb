@@ -141,4 +141,192 @@ function _a18yFooter() {
   }
 }
 
-export { addColumnsSorter, addColumnsWidth, a18yTable };
+/**
+ *  @name applyTableFilter
+ *  @description Apply setting filter to the tabulator instance.
+ *  We can't easily add filter after another, so we need to remove the previous one and add all new ones at once.
+ *  @example { "filter-1" : { type: "keywords", fields: ["text", "icon"], setting: {}, value : "test" }}
+ *  @param {object} tableInstance - The table instance to apply the filter.
+ *  @param {object} filters -  All filters to apply to the table.
+ *  @param {string|number|regex} value - The value to apply to the filter.
+ *  @returns {void}
+ */
+function applyTableFilter(tableInstance, filters) {
+  // loop on dict filters
+  const filtersSend = [];
+  for (const [key, filter] of Object.entries(filters)) {
+    const inpType = filter.setting.inpType;
+    const filterType = filter.type;
+    const value = filter.value;
+    const fields = filter.fields;
+
+    // Cases we don't want to apply filter
+    if (value === "") continue;
+    if (value === "all" && inpType === "select") continue;
+
+    // format value if needed
+    if (filterType === "number") value = +value;
+    if (filterType === "regex") value = new RegExp(value, "i");
+    for (let i = 0; i < fields.length; i++) {
+      filtersSend.push({ field: fields[i], type: filterType, value: value });
+    }
+  }
+  tableInstance.setFilter(filtersSend);
+}
+
+/**
+ *  @name overrideDefaultFilters
+ *  @description Create isomorphic filters for the tabulator library.
+ *  Override default filters retrieving the right value for each custom components.
+ *  @returns {object} - The custom filter function.
+ */
+function overrideDefaultFilters() {
+  //
+  const getRightKey = (rowValue) => {
+    const buttons = rowValue?.buttons
+      ? rowValue?.buttons?.map((btn) => btn.text).join(" ")
+      : null;
+
+    return (
+      rowValue?.iconName?.toLowerCase() ||
+      rowValue?.value?.toLowerCase() ||
+      rowValue?.text.toLowerCase() ||
+      buttons ||
+      rowValue
+    );
+  };
+
+  return {
+    //equal to
+    "=": function (filterVal, rowVal, rowData, filterParams) {
+      const value = getRightKey(rowVal);
+      return value == filterVal ? true : false;
+    },
+
+    //less than
+    "<": function (filterVal, rowVal, rowData, filterParams) {
+      const value = getRightKey(rowVal);
+      return value < filterVal ? true : false;
+    },
+
+    //less than or equal to
+    "<=": function (filterVal, rowVal, rowData, filterParams) {
+      const value = getRightKey(rowVal);
+      return value <= filterVal ? true : false;
+    },
+
+    //greater than
+    ">": function (filterVal, rowVal, rowData, filterParams) {
+      const value = getRightKey(rowVal);
+      return value > filterVal ? true : false;
+    },
+
+    //greater than or equal to
+    ">=": function (filterVal, rowVal, rowData, filterParams) {
+      const value = getRightKey(rowVal);
+      return value >= filterVal ? true : false;
+    },
+
+    //not equal to
+    "!=": function (filterVal, rowVal, rowData, filterParams) {
+      const value = getRightKey(rowVal);
+      return value != filterVal ? true : false;
+    },
+
+    regex: function (filterVal, rowVal, rowData, filterParams) {
+      const value = getRightKey(rowVal);
+
+      if (typeof filterVal == "string") filterVal = new RegExp(filterVal);
+
+      return filterVal.test(value);
+    },
+
+    //contains the string
+    like: function (filterVal, rowVal, rowData, filterParams) {
+      const value = getRightKey(rowVal);
+
+      if (filterVal === null || typeof filterVal === "undefined")
+        return value === filterVal ? true : false;
+
+      if (typeof value !== "undefined" && value !== null)
+        return (
+          String(value).toLowerCase().indexOf(filterVal.toLowerCase()) > -1
+        );
+
+      return false;
+    },
+
+    //contains the keywords
+    keywords: function (filterVal, rowVal, rowData, filterParams) {
+      let value = getRightKey(rowVal);
+      const keywords = filterVal
+        .toLowerCase()
+        .split(
+          typeof filterParams.separator === "undefined"
+            ? " "
+            : filterParams.separator
+        );
+
+      value = String(
+        value === null || typeof value === "undefined" ? "" : value
+      ).toLowerCase();
+
+      const matches = [];
+
+      keywords.forEach((keyword) => {
+        if (value.includes(keyword)) {
+          matches.push(true);
+        }
+      });
+
+      return filterParams.matchAll
+        ? matches.length === keywords.length
+        : !!matches.length;
+    },
+
+    //starts with the string
+    starts: function (filterVal, rowVal, rowData, filterParams) {
+      const value = getRightKey(rowVal);
+
+      if (filterVal === null || typeof filterVal === "undefined")
+        return value === filterVal ? true : false;
+
+      if (typeof value !== "undefined" && value !== null)
+        return String(value).toLowerCase().startsWith(filterVal.toLowerCase());
+
+      return false;
+    },
+
+    //ends with the string
+    ends: function (filterVal, rowVal, rowData, filterParams) {
+      const value = getRightKey(rowVal);
+
+      if (filterVal === null || typeof filterVal === "undefined")
+        return value === filterVal ? true : false;
+
+      if (typeof value !== "undefined" && value !== null)
+        return String(value).toLowerCase().endsWith(filterVal.toLowerCase());
+
+      return false;
+    },
+
+    //in array
+    in: function (filterVal, rowVal, rowData, filterParams) {
+      const value = getRightKey(rowVal);
+
+      if (Array.isArray(filterVal))
+        return filterVal.length ? filterVal.indexOf(value) > -1 : true;
+
+      console.warn("Filter Error - filter value is not an array:", filterVal);
+      return false;
+    },
+  };
+}
+
+export {
+  addColumnsSorter,
+  addColumnsWidth,
+  a18yTable,
+  applyTableFilter,
+  overrideDefaultFilters,
+};

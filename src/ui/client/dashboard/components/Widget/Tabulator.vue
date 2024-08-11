@@ -5,12 +5,15 @@ import Text from "@components/Widget/Text.vue";
 import Fields from "@components/Form/Fields.vue";
 import Button from "@components/Widget/Button.vue";
 import ButtonGroup from "@components/Widget/ButtonGroup.vue";
+import Container from "@components/Widget/Container.vue";
 import { TabulatorFull as Tabulator } from "tabulator-tables"; //import Tabulator library
 import { useEqualStr } from "@utils/global.js";
 import {
   addColumnsSorter,
   addColumnsWidth,
   a18yTable,
+  applyTableFilter,
+  overrideDefaultFilters,
 } from "@utils/tabulator.js";
 import { useTableStore } from "@store/global.js";
 
@@ -25,6 +28,16 @@ const props = defineProps({
     type: String,
     required: true,
     default: "table-component",
+  },
+  isStriped: {
+    type: Boolean,
+    required: false,
+    default: true,
+  },
+  filters: {
+    type: Array,
+    required: false,
+    default: [],
   },
   columns: {
     type: Array,
@@ -78,6 +91,7 @@ const tableEl = ref(null); //reference to your table element
 const table = reactive({
   test: true,
   instance: null,
+  filters: {},
   columns: props.columns,
   items: props.items,
   customComponents: [],
@@ -144,13 +158,15 @@ function addCustomComponent(type, values, elDOM) {
 }
 
 /**
- *  @name addComponentsFormats
- *  @description Add all custom components on a list to later add them to each tabulator cell.
- *  We are using the Tabulart.extendModule() that allow use to execute a custom function when we are matching a custom formatter.
- *  We need to define on rows the formatter that we want to use to render the custom component.
+ *  @name extendTabulator
+ *  @description Wrapper that will do some extend or override  on the Tabulator instance:
+ *  1 - Add custom components to a list in order to render them and teleport them when formatting the cell.
+ *  2 - Add custom formatters for each custom components in order to force Tabulator to render empty string.
+ *  3 - Override default filters to add custom filters for each custom components (because  we need to access a specific key in the props object).
+ *  We are using the Tabular.extendModule() that allow use to do this.
  *  @returns {void}
  */
-function addComponentsFormats() {
+function extendTabulator() {
   const formatOpts = {};
   for (let i = 0; i < customComponents.length; i++) {
     const module = customComponents[i];
@@ -160,10 +176,27 @@ function addComponentsFormats() {
     };
   }
   Tabulator.extendModule("format", "formatters", formatOpts);
+  Tabulator.extendModule("filter", "filters", overrideDefaultFilters());
+}
+
+/**
+ *  @name filterTable
+ *  @description We can't directly send the current filter input to filter the table because the Tabulator will filter everything at once.
+ *  So we need to get the value and store on the table.filters dict to merge all filters and apply them at once.
+ *  We will use the applyTableFilter() to apply the filters. Additionnal checks (like empty value) are done on the applyTableFilter() function.
+ *  @param {object} tableInstance -  The tableInstance is the current table instance.
+ *  @param {object} filter -  the filter dict is here the setting filter data
+ *  @param {string} value -  the value is the current value return by the filter input.
+ *  @returns {void}
+ */
+function filterTable(filter, value = "") {
+  // Merge all filters
+  table.filters[filter.setting.id] = { ...filter, value: value };
+  applyTableFilter(table.instance, table.filters);
 }
 
 onMounted(() => {
-  addComponentsFormats();
+  extendTabulator();
   table.instance = new Tabulator(tableEl.value, table.options);
   table.instance.on("tableBuilt", () => {
     table.instance.redraw();
@@ -180,7 +213,19 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div data-is="table" ref="tableEl"></div>
+  <Container :containerClass="'layout-settings'">
+    <template v-for="filter in props.filters">
+      <Fields
+        :setting="filter.setting"
+        @inp="(value) => filterTable(filter, value)"
+      />
+    </template>
+  </Container>
+  <div
+    :class="[props.isStriped ? 'striped' : '']"
+    data-is="table"
+    ref="tableEl"
+  ></div>
   <template
     :key="table.customComponents"
     v-for="comp in table.customComponents"
