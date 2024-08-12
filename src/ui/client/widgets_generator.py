@@ -125,6 +125,9 @@ def formatMd():
                 if line.startswith("#") and ".vue" in line and "\\.vue" in line:
                     line = line.replace("\\.vue", ".vue")
 
+                # Escape the \ character
+                line = line.replace("\\", "\\\\")
+
                 # Case not a param, keep the line as is
                 if not line.startswith("*"):
                     line_result.append(line)
