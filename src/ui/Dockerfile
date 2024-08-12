@@ -24,7 +24,6 @@ RUN export MAKEFLAGS="-j$(nproc)" && \
 # Install node and npm to build vite frontend
 RUN apk add --no-cache nodejs npm
 
-COPY src/ui/builder ui/builder
 COPY src/ui/client ui/client
 
 # This will build the frontend and add files to the UI folder
