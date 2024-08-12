@@ -31,11 +31,23 @@ Because the web UI is a web application, the recommended installation procedure 
     * Do not open the web UI on the Internet without any further restrictions
     * Apply settings listed in the [security tuning section](security-tuning.md) of the documentation
 
-    **Please note that using HTTPS in front the web UI is mandatory since version 1.6.0-beta of BunkerWeb.**
+    **Please note that using HTTPS in front the web UI is mandatory since version 1.5.8 of BunkerWeb.**
 
 !!! info "Multisite mode"
 
     The usage of the web UI implies enabling the [multisite mode](concepts.md#multisite-mode).
+
+!!! tip "web UI specific environment variables"
+
+    The web UI uses the following environment variables :
+
+    - `OVERRIDE_ADMIN_CREDS` : set it to `yes` to enable the override even if the admin credentials are already set (default is `no`).
+    - `ADMIN_USERNAME` : username to access the web UI.
+    - `ADMIN_PASSWORD` : password to access the web UI.
+    - `FLASK_SECRET` : a secret key used to encrypt the session cookie (if not set, a random key will be generated).
+    - `TOTP_SECRETS` : a list of TOTP secrets separated by spaces or a dictionary (e.g. : `{"1": "mysecretkey"}` or `mysecretkey` or `mysecretkey mysecretkey1`). **We strongly recommend you to set this variable if you want to use 2FA, as it will be used to encrypt the TOTP secret keys** (if not set, a random number of secret keys will be generated). Check out the [passlib documentation](https://passlib.readthedocs.io/en/stable/narr/totp-tutorial.html#application-secrets) for more information.
+
+    The web UI will use these variables to authenticate you and handle the 2FA feature.
 
 ## Setup wizard
 
@@ -78,72 +90,58 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
     Here is the docker-compose boilerplate that you can use (don't forget to edit the `changeme` data) :
 
     ```yaml
-    version: "3.5"
-
     services:
       bunkerweb:
         image: bunkerity/bunkerweb:1.6.0-beta
         ports:
-          - 80:8080
-          - 443:8443
-        labels:
-          - "bunkerweb.INSTANCE=yes"
+          - "80:8080/tcp"
+          - "443:8443/tcp"
+          - "443:8443/udp" # For QUIC / HTTP3 support
         environment:
-          - SERVER_NAME=
-          - MULTISITE=yes
-          - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
-          - UI_HOST=http://bw-ui:7000 # Change it if needed
+          API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24" # Make sure to set the correct IP range so the scheduler can send the configuration to the instance
         networks:
           - bw-universe
           - bw-services
 
       bw-scheduler:
         image: bunkerity/bunkerweb-scheduler:1.6.0-beta
-        depends_on:
-          - bunkerweb
-          - bw-docker
         environment:
-          - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db # Remember to set a stronger password for the database
-          - DOCKER_HOST=tcp://bw-docker:2375
+          BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
+          SERVER_NAME: ""
+          MULTISITE: "yes"
+          API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24" # We mirror the API_WHITELIST_IP from the bunkerweb service
+          DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Remember to set a stronger password for the database
+          UI_HOST: "http://bw-ui:7000" # Change it if needed
+        volumes:
+          - bw-data:/data # This is used to persist the cache and other data like the backups
         networks:
           - bw-universe
-          - bw-docker
-
-      bw-docker:
-        image: tecnativa/docker-socket-proxy:nightly
-        volumes:
-          - /var/run/docker.sock:/var/run/docker.sock:ro
-        environment:
-          - CONTAINERS=1
-          - LOG_LEVEL=warning
-        networks:
-          - bw-docker
+          - bw-db
 
       bw-ui:
         image: bunkerity/bunkerweb-ui:1.6.0-beta
-        depends_on:
-          - bw-docker
         environment:
-          - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db # Remember to set a stronger password for the database
-          - DOCKER_HOST=tcp://bw-docker:2375
+          DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Remember to set a stronger password for the database
+          TOTP_SECRETS: "mysecret" # Remember to set a stronger secret key (see the Prerequisites section)
         networks:
           - bw-universe
-          - bw-docker
+          - bw-db
 
       bw-db:
-        image: mariadb:10.10
+        image: mariadb:11
         environment:
-          - MYSQL_RANDOM_ROOT_PASSWORD=yes
-          - MYSQL_DATABASE=db
-          - MYSQL_USER=bunkerweb
-          - MYSQL_PASSWORD=changeme # Remember to set a stronger password for the database
+          MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+          MYSQL_DATABASE: "db"
+          MYSQL_USER: "bunkerweb"
+          MYSQL_PASSWORD: "changeme" # Remember to set a stronger password for the database
         volumes:
-          - bw-data:/var/lib/mysql
+          - bw-db:/var/lib/mysql
         networks:
-          - bw-docker
+          - bw-db
 
     volumes:
       bw-data:
+      bw-db:
 
     networks:
       bw-universe:
@@ -154,8 +152,8 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
             - subnet: 10.20.30.0/24
       bw-services:
         name: bw-services
-      bw-docker:
-        name: bw-docker
+      bw-db:
+        name: bw-db
     ```
 
 === "Docker autoconf"
@@ -169,88 +167,86 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
     Here is the docker-compose boilerplate that you can use (don't forget to edit the `changeme` data) :
 
     ```yaml
-    version: "3.5"
-
     services:
       bunkerweb:
         image: bunkerity/bunkerweb:1.6.0-beta
         ports:
-          - 80:8080
-          - 443:8443
+          - "80:8080/tcp"
+          - "443:8443/tcp"
+          - "443:8443/udp" # For QUIC / HTTP3 support
         labels:
-          - "bunkerweb.INSTANCE=yes"
+          - "bunkerweb.INSTANCE=yes" # We set the instance label to allow the autoconf to detect the instance
         environment:
-          - SERVER_NAME=
-          - AUTOCONF_MODE=yes
-          - MULTISITE=yes
-          - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
-          - UI_HOST=http://bw-ui:7000 # Change it if needed
+          AUTOCONF_MODE: "yes"
+          API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
         networks:
           - bw-universe
           - bw-services
 
+      bw-scheduler:
+        image: bunkerity/bunkerweb-scheduler:1.6.0-beta
+        environment:
+          BUNKERWEB_INSTANCES: ""
+          SERVER_NAME: ""
+          AUTOCONF_MODE: "yes"
+          API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+          DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Remember to set a stronger password for the database
+          MULTISITE: "yes"
+          UI_HOST: "http://bw-ui:7000" # Change it if needed
+        volumes:
+          - bw-data:/data # This is used to persist the cache and other data like the backups
+        networks:
+          - bw-universe
+          - bw-db
+
       bw-autoconf:
         image: bunkerity/bunkerweb-autoconf:1.6.0-beta
         depends_on:
-          - bunkerweb
           - bw-docker
         environment:
-          - AUTOCONF_MODE=yes
-          - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db # Remember to set a stronger password for the database
-          - DOCKER_HOST=tcp://bw-docker:2375
+          DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Remember to set a stronger password for the database
+          AUTOCONF_MODE: "yes"
+          DOCKER_HOST: "tcp://bw-docker:2375"
         networks:
           - bw-universe
           - bw-docker
-
-      bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.0-beta
-        depends_on:
-          - bunkerweb
-          - bw-docker
-        environment:
-          - AUTOCONF_MODE=yes
-          - DOCKER_HOST=tcp://bw-docker:2375
-          - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db # Remember to set a stronger password for the database
-        networks:
-          - bw-universe
-          - bw-docker
+          - bw-db
 
       bw-docker:
         image: tecnativa/docker-socket-proxy:nightly
         volumes:
           - /var/run/docker.sock:/var/run/docker.sock:ro
         environment:
-          - CONTAINERS=1
-          - LOG_LEVEL=warning
+          CONTAINERS: "1"
+          LOG_LEVEL: "warning"
         networks:
           - bw-docker
 
       bw-db:
-        image: mariadb:10.10
+        image: mariadb:11
         environment:
-          - MYSQL_RANDOM_ROOT_PASSWORD=yes
-          - MYSQL_DATABASE=db
-          - MYSQL_USER=bunkerweb
-          - MYSQL_PASSWORD=changeme # Remember to set a stronger password for the database
+          MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+          MYSQL_DATABASE: "db"
+          MYSQL_USER: "bunkerweb"
+          MYSQL_PASSWORD: "changeme" # Remember to set a stronger password for the database
         volumes:
-          - bw-data:/var/lib/mysql
+          - bw-db:/var/lib/mysql
         networks:
-          - bw-docker
+          - bw-db
 
       bw-ui:
         image: bunkerity/bunkerweb-ui:1.6.0-beta
-        networks:
-          bw-docker:
-          bw-universe:
-            aliases:
-              - bw-ui
         environment:
-          - AUTOCONF_MODE=yes
-          - DOCKER_HOST=tcp://bw-docker:2375
-          - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db # Remember to set a stronger password for the database
+          DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Remember to set a stronger password for the database
+          AUTOCONF_MODE: "yes"
+          TOTP_SECRETS: "mysecret" # Remember to set a stronger secret key (see the Prerequisites section)
+        networks:
+          - bw-universe
+          - bw-db
 
     volumes:
       bw-data:
+      bw-db:
 
     networks:
       bw-universe:
@@ -263,6 +259,8 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
         name: bw-services
       bw-docker:
         name: bw-docker
+      bw-db:
+        name: bw-db
     ```
 
 === "Swarm"
@@ -276,8 +274,6 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
     Here is the stack boilerplate that you can use (don't forget to edit the `changeme` data) :
 
     ```yaml
-    version: "3.5"
-
     services:
       bunkerweb:
         image: bunkerity/bunkerweb:1.6.0-beta
@@ -290,14 +286,13 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
             target: 8443
             mode: host
             protocol: tcp
+          - published: 443
+            target: 8443
+            mode: host
+            protocol: udp # For QUIC / HTTP3 support
         environment:
-          - SERVER_NAME=
-          - SWARM_MODE=yes
-          - MULTISITE=yes
-          - USE_REDIS=yes
-          - REDIS_HOST=bw-redis
-          - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
-          - UI_HOST=http://bw-ui:7000 # Change it if needed
+          SWARM_MODE: "yes"
+          API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
         networks:
           - bw-universe
           - bw-services
@@ -309,27 +304,46 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
           labels:
             - "bunkerweb.INSTANCE=yes"
 
+      bw-scheduler:
+        image: bunkerity/bunkerweb-scheduler:1.6.0-beta
+        environment:
+          BUNKERWEB_INSTANCES: ""
+          SERVER_NAME: ""
+          SWARM_MODE: "yes"
+          API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+          DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Remember to set a stronger password for the database
+          MULTISITE: "yes"
+          USE_REDIS: "yes"
+          REDIS_HOST: "bw-redis"
+          UI_HOST: "http://bw-ui:7000" # Change it if needed
+        volumes:
+          - bw-data:/data # This is used to persist the cache and other data like the backups
+        networks:
+          - bw-universe
+          - bw-db
+
       bw-autoconf:
         image: bunkerity/bunkerweb-autoconf:1.6.0-beta
         environment:
-          - SWARM_MODE=yes
-          - DOCKER_HOST=tcp://bw-docker:2375
-          - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db # Remember to set a stronger password for the database
+          DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Remember to set a stronger password for the database
+          SWARM_MODE: "yes"
+          DOCKER_HOST: "tcp://bw-docker:2375"
         networks:
           - bw-universe
           - bw-docker
+          - bw-db
 
       bw-docker:
         image: tecnativa/docker-socket-proxy:nightly
         volumes:
           - /var/run/docker.sock:/var/run/docker.sock:ro
         environment:
-          - CONFIGS=1
-          - CONTAINERS=1
-          - SERVICES=1
-          - SWARM=1
-          - TASKS=1
-          - LOG_LEVEL=warning
+          CONFIGS: "1"
+          CONTAINERS: "1"
+          SERVICES: "1"
+          SWARM: "1"
+          TASKS: "1"
+          LOG_LEVEL: "warning"
         networks:
           - bw-docker
         deploy:
@@ -337,27 +351,17 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
             constraints:
               - "node.role == manager"
 
-      bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.0-beta
-        environment:
-          - SWARM_MODE=yes
-          - DOCKER_HOST=tcp://bw-docker:2375
-          - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db # Remember to set a stronger password for the database
-        networks:
-          - bw-universe
-          - bw-docker
-
       bw-db:
-        image: mariadb:10.10
+        image: mariadb:11
         environment:
-          - MYSQL_RANDOM_ROOT_PASSWORD=yes
-          - MYSQL_DATABASE=db
-          - MYSQL_USER=bunkerweb
-          - MYSQL_PASSWORD=changeme
+          MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+          MYSQL_DATABASE: "db"
+          MYSQL_USER: "bunkerweb"
+          MYSQL_PASSWORD: "changeme" # Remember to set a stronger password for the database
         volumes:
-          - bw-data:/var/lib/mysql
+          - bw-db:/var/lib/mysql
         networks:
-          - bw-docker
+          - bw-db
 
       bw-redis:
         image: redis:7-alpine
@@ -367,14 +371,15 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
       bw-ui:
         image: bunkerity/bunkerweb-ui:1.6.0-beta
         environment:
-          - SWARM_MODE=yes
-          - DOCKER_HOST=tcp://bw-docker:2375
-          - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db # Remember to set a stronger password for the database
+          DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Remember to set a stronger password for the database
+          SWARM_MODE: "yes"
+          TOTP_SECRETS: "mysecret" # Remember to set a stronger secret key (see the Prerequisites section)
         networks:
           - bw-universe
-          - bw-docker
+          - bw-db
 
     volumes:
+      bw-db:
       bw-data:
 
     networks:
@@ -393,11 +398,15 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
         name: bw-docker
         driver: overlay
         attachable: true
+      bw-db:
+        name: bw-db
+        driver: overlay
+        attachable: true
     ```
 
 === "Kubernetes"
 
-    If you want to use the setup wizard, you will need to set the `UI_HOST` setting to the HTTP endpoint of your web UI SERVICE. For example, if your web UI service is named `svc-bunkerweb-ui` and is listening on the `7000` port, you will need to set the `UI_HOST` setting to `http://svc-bunkerweb-ui:7000`.
+    If you want to use the setup wizard, you will need to set the `UI_HOST` setting to the HTTP endpoint of your web UI SERVICE. For example, if your web UI service is named `svc-bunkerweb-ui` and is listening on the `7000` port, you will need to set the `UI_HOST` setting to `http://svc-bunkerweb-ui.default.svc.cluster.local:7000` (don't forget to replace the namespace and the service name accordingly).
 
     !!! tip "Accessing the setup wizard"
 
@@ -418,16 +427,6 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
         resources: ["ingresses"]
         verbs: ["get", "watch", "list"]
     ---
-    apiVersion: rbac.authorization.k8s.io/v1
-    kind: Role
-    metadata:
-      namespace: default
-      name: role-bunkerweb-logs
-    rules:
-      - apiGroups: [""]
-        resources: ["pods/log"]
-        verbs: ["get"]
-    ---
     apiVersion: v1
     kind: ServiceAccount
     metadata:
@@ -446,20 +445,6 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
     roleRef:
       kind: ClusterRole
       name: cr-bunkerweb
-      apiGroup: rbac.authorization.k8s.io
-    ---
-    apiVersion: rbac.authorization.k8s.io/v1
-    kind: RoleBinding
-    metadata:
-      name: rolebinding-bunkerweb-logs
-      namespace: default
-    subjects:
-      - kind: ServiceAccount
-        name: sa-bunkerweb
-        namespace: default
-    roleRef:
-      kind: Role
-      name: role-bunkerweb-logs
       apiGroup: rbac.authorization.k8s.io
     ---
     apiVersion: apps/v1
@@ -503,22 +488,9 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
                 # e.g. : kube-dns.kube-system.svc.cluster.local
                 - name: DNS_RESOLVERS
                   value: "coredns.kube-system.svc.cluster.local"
-                - name: USE_API
-                  value: "yes"
                 # 10.0.0.0/8 is the cluster internal subnet
                 - name: API_WHITELIST_IP
                   value: "127.0.0.0/8 10.0.0.0/8"
-                - name: SERVER_NAME
-                  value: ""
-                - name: MULTISITE
-                  value: "yes"
-                - name: USE_REDIS
-                  value: "yes"
-                - name: REDIS_HOST
-                  value: "svc-bunkerweb-redis.default.svc.cluster.local"
-                # Change it if needed
-                - name: UI_HOST
-                  value: "http://svc-bunkerweb-ui:7000"
               livenessProbe:
                 exec:
                   command:
@@ -561,7 +533,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
                 - name: KUBERNETES_MODE
                   value: "yes"
                 - name: DATABASE_URI
-                  value: "mariadb+pymysql://bunkerweb:changeme@svc-bunkerweb-db:3306/db"
+                  value: "mariadb+pymysql://bunkerweb:changeme@svc-bunkerweb-db:3306/db" # Remember to set a stronger password for the database
     ---
     apiVersion: apps/v1
     kind: Deployment
@@ -588,7 +560,27 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
                 - name: KUBERNETES_MODE
                   value: "yes"
                 - name: DATABASE_URI
-                  value: "mariadb+pymysql://bunkerweb:changeme@svc-bunkerweb-db:3306/db"
+                  value: "mariadb+pymysql://bunkerweb:changeme@svc-bunkerweb-db:3306/db" # Remember to set a stronger password for the database
+                # replace with your DNS resolvers
+                # e.g. : kube-dns.kube-system.svc.cluster.local
+                - name: DNS_RESOLVERS
+                  value: "coredns.kube-system.svc.cluster.local"
+                # 10.0.0.0/8 is the cluster internal subnet
+                - name: API_WHITELIST_IP
+                  value: "127.0.0.0/8 10.0.0.0/8"
+                - name: BUNKERWEB_INSTANCES
+                  value: ""
+                - name: SERVER_NAME
+                  value: ""
+                - name: MULTISITE
+                  value: "yes"
+                - name: USE_REDIS
+                  value: "yes"
+                # replace with your Redis host
+                - name: REDIS_HOST
+                  value: "svc-bunkerweb-redis.default.svc.cluster.local"
+                - name: UI_HOST
+                  value: "http://svc-bunkerweb-ui.default.svc.cluster.local:7000" # Change it if needed
     ---
     apiVersion: apps/v1
     kind: Deployment
@@ -629,7 +621,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
         spec:
           containers:
             - name: bunkerweb-db
-              image: mariadb:10.10
+              image: mariadb:11
               imagePullPolicy: Always
               env:
                 - name: MYSQL_RANDOM_ROOT_PASSWORD
@@ -639,9 +631,9 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
                 - name: MYSQL_USER
                   value: "bunkerweb"
                 - name: MYSQL_PASSWORD
-                  value: "changeme"
+                  value: "changeme" # Remember to set a stronger password for the database
               volumeMounts:
-                - mountPath: /var/lib/mysql
+                - mountPath: "/var/lib/mysql"
                   name: vol-db
           volumes:
             - name: vol-db
@@ -671,9 +663,11 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
               imagePullPolicy: Always
               env:
                 - name: KUBERNETES_MODE
-                  value: "YES"
+                  value: "yes"
                 - name: DATABASE_URI
-                  value: "mariadb+pymysql://bunkerweb:testor@svc-bunkerweb-db:3306/db"
+                  value: "mariadb+pymysql://bunkerweb:changeme@svc-bunkerweb-db:3306/db" # Remember to set a stronger password for the database
+                - name: TOTP_SECRETS
+                  value: "mysecret" # Remember to set a stronger secret key (see the Prerequisites section)
     ---
     apiVersion: v1
     kind: Service
@@ -736,7 +730,6 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
       resources:
         requests:
           storage: 5Gi
-      volumeName: pv-bunkerweb
     ```
 
 === "Linux"
@@ -790,6 +783,16 @@ When your BunkerWeb instance has upgraded to the PRO version, you will see your 
 
     The web UI will use these variables to authenticate you.
 
+!!! tip "Generating recommended secrets"
+
+    To generate a valid password, we recommend you to use a password manager or a password generator.
+
+    You can generate a valid totp secrets dictionary using the following command (you will need the `passlib` package) :
+
+    ```shell
+    python3 -c "from passlib import totp; import random; print(' '.join(totp.generate_secret() for _ in range(random.randint(1, 5))))"
+    ```
+
 !!! warning "Lost password/username"
 
     In case you forgot your UI credentials, you can reset them from the CLI following [the steps described in the troubleshooting section](troubleshooting.md#web-ui).
@@ -807,7 +810,10 @@ Please note that when your username or password is updated, you will be logout f
 
 !!! warning "Lost secret key"
 
-    In case you lost your secret key, you can disable 2FA from the CLI following [the steps described in the troubleshooting section](troubleshooting.md#web-ui).
+    In case you lost your secret key, two options are available :
+
+    - You can recover your account using one of the provided recovery codes when you enabled 2FA (a recovery code can only be used once).
+    - You can disable 2FA from the CLI following [the steps described in the troubleshooting section](troubleshooting.md#web-ui).
 
 You can power-up your login security by adding **Two-Factor Authentication (2FA)** to your account. By doing so, an extra code will be needed in addition to your password.
 
@@ -823,6 +829,12 @@ The following steps are needed to enable the TOTP feature from the web UI :
 
 !!! info "Secret key refresh"
     A new secret key is **generated each time** you visit the page or submit the form. In case something went wrong (e.g. : expired TOTP code), you will need to copy the new secret key to your authenticator app until 2FA is successfully enabled.
+
+!!! tip "Recovery codes"
+
+    When you enable 2FA, you will be provided with **5 recovery codes**. These codes can be used to recover your account in case you have lost your TOTP secret key. Each code can only be used once. **These codes will only be shown once so make sure to store them in a safe place**.
+
+    If you ever lose your recovery codes, **you can refresh them via the TOTP section of the account management page**. Please note that the old recovery codes will be invalidated.
 
 Once enabled, 2FA authentication can be disabled at the same place.
 
@@ -856,11 +868,9 @@ After a successful login/password combination, you will be prompted to enter you
     docker build -t my-bunkerweb-ui -f src/ui/Dockerfile .
     ```
 
-    The following environment variables are used to configure the web UI container :
+    !!! tip "Environment variables"
 
-    - `ADMIN_USERNAME` : username to access the web UI
-    - `ADMIN_PASSWORD` : password to access the web UI
-    - `OVERRIDE_ADMIN_CREDS` : force override the admin credentials even if we already have a user in the database (default = `no`)
+        Please read the [Prerequisites](#prerequisites) section to check out all the environment variables you can set to customize the web UI.
 
     Accessing the web UI through BunkerWeb is a classical [reverse proxy setup](quickstart-guide.md#protect-http-applications). We recommend you to connect BunkerWeb and web UI using a dedicated network (like `bw-universe` also used by the scheduler) so it won't be on the same network of your web services for obvious security reasons. Please note that the web UI container is listening on the `7000` port.
 
@@ -871,83 +881,70 @@ After a successful login/password combination, you will be prompted to enter you
     Here is the docker-compose boilerplate that you can use (don't forget to edit the `changeme` data) :
 
     ```yaml
-    version: "3.5"
-
     services:
       bunkerweb:
         image: bunkerity/bunkerweb:1.6.0-beta
         ports:
-          - 80:8080
-          - 443:8443
-        labels:
-          - "bunkerweb.INSTANCE=yes"
+          - "80:8080/tcp"
+          - "443:8443/tcp"
+          - "443:8443/udp" # For QUIC / HTTP3 support
         environment:
-          - SERVER_NAME=www.example.com
-          - MULTISITE=yes
-          - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db # Remember to set a stronger password for the database
-          - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
-          - DISABLE_DEFAULT_SERVER=yes
-          - USE_CLIENT_CACHE=yes
-          - USE_GZIP=yes
-          - www.example.com_USE_UI=yes
-          - www.example.com_USE_REVERSE_PROXY=yes
-          - www.example.com_REVERSE_PROXY_URL=/changeme
-          - www.example.com_REVERSE_PROXY_HOST=http://bw-ui:7000
-          - www.example.com_INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504
-          - www.example.com_MAX_CLIENT_SIZE=50m
+          API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24" # Make sure to set the correct IP range so the scheduler can send the configuration to the instance
         networks:
           - bw-universe
           - bw-services
 
       bw-scheduler:
         image: bunkerity/bunkerweb-scheduler:1.6.0-beta
-        depends_on:
-          - bunkerweb
-          - bw-docker
         environment:
-          - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db # Remember to set a stronger password for the database
-          - DOCKER_HOST=tcp://bw-docker:2375
+          BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
+          SERVER_NAME: "www.example.com"
+          MULTISITE: "yes"
+          API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24" # We mirror the API_WHITELIST_IP from the bunkerweb service
+          DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Remember to set a stronger password for the database
+          SERVE_FILES: "no"
+          DISABLE_DEFAULT_SERVER: "yes"
+          USE_CLIENT_CACHE: "yes"
+          USE_GZIP: "yes"
+          www.example.com_USE_UI: "yes"
+          www.example.com_USE_REVERSE_PROXY: "yes"
+          www.example.com_REVERSE_PROXY_URL: "/changeme" # Remember to set a stronger URI
+          www.example.com_REVERSE_PROXY_HOST: "http://bw-ui:7000" # The web UI container is listening on the 7000 port by default
+          www.example.com_INTERCEPTED_ERROR_CODES: "400 404 405 413 429 500 501 502 503 504"
+          www.example.com_GENERATE_SELF_SIGNED_SSL: "yes"
+          www.example.com_MAX_CLIENT_SIZE: "50m"
+        volumes:
+          - bw-data:/data # This is used to persist the cache and other data like the backups
         networks:
           - bw-universe
-          - bw-docker
-
-      bw-docker:
-        image: tecnativa/docker-socket-proxy:nightly
-        volumes:
-          - /var/run/docker.sock:/var/run/docker.sock:ro
-        environment:
-          - CONTAINERS=1
-          - LOG_LEVEL=warning
-        networks:
-          - bw-docker
+          - bw-db
 
       bw-ui:
         image: bunkerity/bunkerweb-ui:1.6.0-beta
-        depends_on:
-          - bw-docker
         environment:
-          - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db # Remember to set a stronger password for the database
-          - DOCKER_HOST=tcp://bw-docker:2375
-          - ADMIN_USERNAME=changeme
-          - ADMIN_PASSWORD=changeme # Remember to set a stronger password for the changeme user
+          DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Remember to set a stronger password for the database
+          ADMIN_USERNAME: "changeme"
+          ADMIN_PASSWORD: "changeme" # Remember to set a stronger password for the changeme user
+          TOTP_SECRETS: "mysecret" # Remember to set a stronger secret key (see the Prerequisites section)
         networks:
           - bw-universe
-          - bw-docker
+          - bw-db
 
       bw-db:
-        image: mariadb:10.10
+        image: mariadb:11
         environment:
-          - MYSQL_RANDOM_ROOT_PASSWORD=yes
-          - MYSQL_DATABASE=db
-          - MYSQL_USER=bunkerweb
-          - MYSQL_PASSWORD=changeme # Remember to set a stronger password for the database
+          MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+          MYSQL_DATABASE: "db"
+          MYSQL_USER: "bunkerweb"
+          MYSQL_PASSWORD: "changeme" # Remember to set a stronger password for the database
         volumes:
-          - bw-data:/var/lib/mysql
+          - bw-db:/var/lib/mysql
         networks:
-          - bw-docker
+          - bw-db
 
     volumes:
       bw-data:
+      bw-db:
 
     networks:
       bw-universe:
@@ -958,8 +955,8 @@ After a successful login/password combination, you will be prompted to enter you
             - subnet: 10.20.30.0/24
       bw-services:
         name: bw-services
-      bw-docker:
-        name: bw-docker
+      bw-db:
+        name: bw-db
     ```
 
 === "Docker autoconf"
@@ -978,11 +975,9 @@ After a successful login/password combination, you will be prompted to enter you
     docker build -t my-bunkerweb-ui -f src/ui/Dockerfile .
     ```
 
-    The following environment variables are used to configure the web UI container :
+    !!! tip "Environment variables"
 
-    - `ADMIN_USERNAME` : username to access the web UI
-    - `ADMIN_PASSWORD` : password to access the web UI
-    - `OVERRIDE_ADMIN_CREDS` : force override the admin credentials even if we already have a user in the database (default = `no`)
+        Please read the [Prerequisites](#prerequisites) section to check out all the environment variables you can set to customize the web UI.
 
     Accessing the web UI through BunkerWeb is a classical [reverse proxy setup](quickstart-guide.md#protect-http-applications). We recommend you to connect BunkerWeb and web UI using a dedicated network (like `bw-universe` also used by the scheduler and autoconf) so it won't be on the same network of your web services for obvious security reasons. Please note that the web UI container is listening on the `7000` port.
 
@@ -993,87 +988,80 @@ After a successful login/password combination, you will be prompted to enter you
     Here is the docker-compose boilerplate that you can use (don't forget to edit the `changeme` data) :
 
     ```yaml
-    version: "3.5"
-
     services:
       bunkerweb:
         image: bunkerity/bunkerweb:1.6.0-beta
         ports:
-          - 80:8080
-          - 443:8443
+          - "80:8080/tcp"
+          - "443:8443/tcp"
+          - "443:8443/udp" # For QUIC / HTTP3 support
         labels:
-          - "bunkerweb.INSTANCE=yes"
+          - "bunkerweb.INSTANCE=yes" # We set the instance label to allow the autoconf to detect the instance
         environment:
-          - SERVER_NAME=
-          - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db
-          - AUTOCONF_MODE=yes
-          - MULTISITE=yes
-          - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
+          AUTOCONF_MODE: "yes"
+          API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
         networks:
           - bw-universe
           - bw-services
 
+      bw-scheduler:
+        image: bunkerity/bunkerweb-scheduler:1.6.0-beta
+        environment:
+          BUNKERWEB_INSTANCES: ""
+          SERVER_NAME: ""
+          AUTOCONF_MODE: "yes"
+          API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+          DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Remember to set a stronger password for the database
+          MULTISITE: "yes"
+        volumes:
+          - bw-data:/data # This is used to persist the cache and other data like the backups
+        networks:
+          - bw-universe
+          - bw-db
+
       bw-autoconf:
         image: bunkerity/bunkerweb-autoconf:1.6.0-beta
         depends_on:
-          - bunkerweb
           - bw-docker
         environment:
-          - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db
-          - AUTOCONF_MODE=yes
-          - DOCKER_HOST=tcp://bw-docker:2375
+          DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Remember to set a stronger password for the database
+          AUTOCONF_MODE: "yes"
+          DOCKER_HOST: "tcp://bw-docker:2375"
         networks:
           - bw-universe
           - bw-docker
-
-      bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.0-beta
-        depends_on:
-          - bunkerweb
-          - bw-docker
-        environment:
-          - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db
-          - DOCKER_HOST=tcp://bw-docker:2375
-          - AUTOCONF_MODE=yes
-        networks:
-          - bw-universe
-          - bw-docker
+          - bw-db
 
       bw-docker:
         image: tecnativa/docker-socket-proxy:nightly
         volumes:
           - /var/run/docker.sock:/var/run/docker.sock:ro
         environment:
-          - CONTAINERS=1
-          - LOG_LEVEL=warning
+          CONTAINERS: "1"
+          LOG_LEVEL: "warning"
         networks:
           - bw-docker
 
       bw-db:
-        image: mariadb:10.10
+        image: mariadb:11
         environment:
-          - MYSQL_RANDOM_ROOT_PASSWORD=yes
-          - MYSQL_DATABASE=db
-          - MYSQL_USER=bunkerweb
-          - MYSQL_PASSWORD=changeme
+          MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+          MYSQL_DATABASE: "db"
+          MYSQL_USER: "bunkerweb"
+          MYSQL_PASSWORD: "changeme" # Remember to set a stronger password for the database
         volumes:
-          - bw-data:/var/lib/mysql
+          - bw-db:/var/lib/mysql
         networks:
-          - bw-docker
+          - bw-db
 
       bw-ui:
         image: bunkerity/bunkerweb-ui:1.6.0-beta
-        networks:
-          bw-docker:
-          bw-universe:
-            aliases:
-              - bw-ui
         environment:
-          - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db
-          - DOCKER_HOST=tcp://bw-docker:2375
-          - AUTOCONF_MODE=yes
-          - ADMIN_USERNAME=admin
-          - ADMIN_PASSWORD=changeme
+          DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Remember to set a stronger password for the database
+          AUTOCONF_MODE: "yes"
+          ADMIN_USERNAME: "changeme"
+          ADMIN_PASSWORD: "changeme" # Remember to set a stronger password for the changeme user
+          TOTP_SECRETS: "mysecret" # Remember to set a stronger secret key (see the Prerequisites section)
         labels:
           - "bunkerweb.SERVER_NAME=www.example.com"
           - "bunkerweb.USE_UI=yes"
@@ -1081,9 +1069,15 @@ After a successful login/password combination, you will be prompted to enter you
           - "bunkerweb.REVERSE_PROXY_URL=/changeme"
           - "bunkerweb.REVERSE_PROXY_HOST=http://bw-ui:7000"
           - "bunkerweb.INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504"
+          - "bunkerweb.GENERATE_SELF_SIGNED_SSL=yes"
           - "bunkerweb.MAX_CLIENT_SIZE=50m"
+        networks:
+          - bw-universe
+          - bw-db
+
     volumes:
       bw-data:
+      bw-db:
 
     networks:
       bw-universe:
@@ -1096,6 +1090,8 @@ After a successful login/password combination, you will be prompted to enter you
         name: bw-services
       bw-docker:
         name: bw-docker
+      bw-db:
+        name: bw-db
     ```
 
 === "Swarm"
@@ -1114,11 +1110,9 @@ After a successful login/password combination, you will be prompted to enter you
     docker build -t my-bunkerweb-ui -f src/ui/Dockerfile .
     ```
 
-    The following environment variables are used to configure the web UI container :
+    !!! tip "Environment variables"
 
-    - `ADMIN_USERNAME` : username to access the web UI
-    - `ADMIN_PASSWORD` : password to access the web UI
-    - `OVERRIDE_ADMIN_CREDS` : force override the admin credentials even if we already have a user in the database (default = `no`)
+        Please read the [Prerequisites](#prerequisites) section to check out all the environment variables you can set to customize the web UI.
 
     Accessing the web UI through BunkerWeb is a classical [reverse proxy setup](quickstart-guide.md#protect-http-applications). We recommend you to connect BunkerWeb and web UI using a dedicated network (like `bw-universe` also used by the scheduler and autoconf) so it won't be on the same network of your web services for obvious security reasons. Please note that the web UI container is listening on the `7000` port.
 
@@ -1129,8 +1123,6 @@ After a successful login/password combination, you will be prompted to enter you
     Here is the stack boilerplate that you can use (don't forget to edit the `changeme` data) :
 
     ```yaml
-    version: "3.5"
-
     services:
       bunkerweb:
         image: bunkerity/bunkerweb:1.6.0-beta
@@ -1143,14 +1135,13 @@ After a successful login/password combination, you will be prompted to enter you
             target: 8443
             mode: host
             protocol: tcp
+          - published: 443
+            target: 8443
+            mode: host
+            protocol: udp # For QUIC / HTTP3 support
         environment:
-          - SERVER_NAME=
-          - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db
-          - SWARM_MODE=yes
-          - MULTISITE=yes
-          - USE_REDIS=yes
-          - REDIS_HOST=bw-redis
-          - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
+          SWARM_MODE: "yes"
+          API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
         networks:
           - bw-universe
           - bw-services
@@ -1162,27 +1153,45 @@ After a successful login/password combination, you will be prompted to enter you
           labels:
             - "bunkerweb.INSTANCE=yes"
 
+      bw-scheduler:
+        image: bunkerity/bunkerweb-scheduler:1.6.0-beta
+        environment:
+          BUNKERWEB_INSTANCES: ""
+          SERVER_NAME: ""
+          SWARM_MODE: "yes"
+          API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+          DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Remember to set a stronger password for the database
+          MULTISITE: "yes"
+          USE_REDIS: "yes"
+          REDIS_HOST: "bw-redis"
+        volumes:
+          - bw-data:/data # This is used to persist the cache and other data like the backups
+        networks:
+          - bw-universe
+          - bw-db
+
       bw-autoconf:
         image: bunkerity/bunkerweb-autoconf:1.6.0-beta
         environment:
-          - SWARM_MODE=yes
-          - DOCKER_HOST=tcp://bw-docker:2375
-          - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db
+          DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Remember to set a stronger password for the database
+          SWARM_MODE: "yes"
+          DOCKER_HOST: "tcp://bw-docker:2375"
         networks:
           - bw-universe
           - bw-docker
+          - bw-db
 
       bw-docker:
         image: tecnativa/docker-socket-proxy:nightly
         volumes:
           - /var/run/docker.sock:/var/run/docker.sock:ro
         environment:
-          - CONFIGS=1
-          - CONTAINERS=1
-          - SERVICES=1
-          - SWARM=1
-          - TASKS=1
-          - LOG_LEVEL=warning
+          CONFIGS: "1"
+          CONTAINERS: "1"
+          SERVICES: "1"
+          SWARM: "1"
+          TASKS: "1"
+          LOG_LEVEL: "warning"
         networks:
           - bw-docker
         deploy:
@@ -1190,27 +1199,17 @@ After a successful login/password combination, you will be prompted to enter you
             constraints:
               - "node.role == manager"
 
-      bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.0-beta
-        environment:
-          - SWARM_MODE=yes
-          - DOCKER_HOST=tcp://bw-docker:2375
-          - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db
-        networks:
-          - bw-universe
-          - bw-docker
-
       bw-db:
-        image: mariadb:10.10
+        image: mariadb:11
         environment:
-          - MYSQL_RANDOM_ROOT_PASSWORD=yes
-          - MYSQL_DATABASE=db
-          - MYSQL_USER=bunkerweb
-          - MYSQL_PASSWORD=changeme
+          MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+          MYSQL_DATABASE: "db"
+          MYSQL_USER: "bunkerweb"
+          MYSQL_PASSWORD: "changeme" # Remember to set a stronger password for the database
         volumes:
-          - bw-data:/var/lib/mysql
+          - bw-db:/var/lib/mysql
         networks:
-          - bw-docker
+          - bw-db
 
       bw-redis:
         image: redis:7-alpine
@@ -1220,14 +1219,14 @@ After a successful login/password combination, you will be prompted to enter you
       bw-ui:
         image: bunkerity/bunkerweb-ui:1.6.0-beta
         environment:
-          - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db # Remember to set a stronger password for the database
-          - DOCKER_HOST=tcp://bw-docker:2375
-          - SWARM_MODE=yes
-          - ADMIN_USERNAME=changeme
-          - ADMIN_PASSWORD=changeme # Remember to set a stronger password for the changeme user
+          DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Remember to set a stronger password for the database
+          SWARM_MODE: "yes"
+          ADMIN_USERNAME: "changeme"
+          ADMIN_PASSWORD: "changeme" # Remember to set a stronger password for the changeme user
+          TOTP_SECRETS: "mysecret" # Remember to set a stronger secret key (see the Prerequisites section)
         networks:
           - bw-universe
-          - bw-docker
+          - bw-db
         deploy:
           labels:
             - "bunkerweb.SERVER_NAME=www.example.com"
@@ -1237,8 +1236,11 @@ After a successful login/password combination, you will be prompted to enter you
             - "bunkerweb.REVERSE_PROXY_HOST=http://bw-ui:7000"
             - "bunkerweb.REVERSE_PROXY_INTERCEPT_ERRORS=no"
             - "bunkerweb.INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504"
+            - "bunkerweb.GENERATE_SELF_SIGNED_SSL=yes"
             - "bunkerweb.MAX_CLIENT_SIZE=50m"
+
     volumes:
+      bw-db:
       bw-data:
 
     networks:
@@ -1257,17 +1259,19 @@ After a successful login/password combination, you will be prompted to enter you
         name: bw-docker
         driver: overlay
         attachable: true
+      bw-db:
+        name: bw-db
+        driver: overlay
+        attachable: true
     ```
 
 === "Kubernetes"
 
     The web UI can be deployed using a dedicated container which is available on [Docker Hub](https://hub.docker.com/r/bunkerity/bunkerweb-ui) as a standard [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/).
 
-    The following environment variables are used to configure the web UI container :
+    !!! tip "Environment variables"
 
-    - `ADMIN_USERNAME` : username to access the web UI
-    - `ADMIN_PASSWORD` : password to access the web UI
-    - `OVERRIDE_ADMIN_CREDS` : force override the admin credentials even if we already have a user in the database (default = `no`)
+        Please read the [Prerequisites](#prerequisites) section to check out all the environment variables you can set to customize the web UI.
 
     Accessing the web UI through BunkerWeb is a classical [reverse proxy setup](quickstart-guide.md#protect-http-applications). Network segmentation between web UI and web services is not covered in this documentation. Please note that the web UI container is listening on the `7000` port.
 
@@ -1290,16 +1294,6 @@ After a successful login/password combination, you will be prompted to enter you
         resources: ["ingresses"]
         verbs: ["get", "watch", "list"]
     ---
-    apiVersion: rbac.authorization.k8s.io/v1
-    kind: Role
-    metadata:
-      namespace: default
-      name: role-bunkerweb-logs
-    rules:
-      - apiGroups: [""]
-        resources: ["pods/log"]
-        verbs: ["get"]
-    ---
     apiVersion: v1
     kind: ServiceAccount
     metadata:
@@ -1318,20 +1312,6 @@ After a successful login/password combination, you will be prompted to enter you
     roleRef:
       kind: ClusterRole
       name: cr-bunkerweb
-      apiGroup: rbac.authorization.k8s.io
-    ---
-    apiVersion: rbac.authorization.k8s.io/v1
-    kind: RoleBinding
-    metadata:
-      name: rolebinding-bunkerweb-logs
-      namespace: default
-    subjects:
-      - kind: ServiceAccount
-        name: sa-bunkerweb
-        namespace: default
-    roleRef:
-      kind: Role
-      name: role-bunkerweb-logs
       apiGroup: rbac.authorization.k8s.io
     ---
     apiVersion: apps/v1
@@ -1375,19 +1355,9 @@ After a successful login/password combination, you will be prompted to enter you
                 # e.g. : kube-dns.kube-system.svc.cluster.local
                 - name: DNS_RESOLVERS
                   value: "coredns.kube-system.svc.cluster.local"
-                - name: USE_API
-                  value: "yes"
                 # 10.0.0.0/8 is the cluster internal subnet
                 - name: API_WHITELIST_IP
                   value: "127.0.0.0/8 10.0.0.0/8"
-                - name: SERVER_NAME
-                  value: ""
-                - name: MULTISITE
-                  value: "yes"
-                - name: USE_REDIS
-                  value: "yes"
-                - name: REDIS_HOST
-                  value: "svc-bunkerweb-redis.default.svc.cluster.local"
               livenessProbe:
                 exec:
                   command:
@@ -1430,7 +1400,7 @@ After a successful login/password combination, you will be prompted to enter you
                 - name: KUBERNETES_MODE
                   value: "yes"
                 - name: DATABASE_URI
-                  value: "mariadb+pymysql://bunkerweb:changeme@svc-bunkerweb-db:3306/db"
+                  value: "mariadb+pymysql://bunkerweb:changeme@svc-bunkerweb-db:3306/db" # Remember to set a stronger password for the database
     ---
     apiVersion: apps/v1
     kind: Deployment
@@ -1457,7 +1427,25 @@ After a successful login/password combination, you will be prompted to enter you
                 - name: KUBERNETES_MODE
                   value: "yes"
                 - name: DATABASE_URI
-                  value: "mariadb+pymysql://bunkerweb:changeme@svc-bunkerweb-db:3306/db"
+                  value: "mariadb+pymysql://bunkerweb:changeme@svc-bunkerweb-db:3306/db" # Remember to set a stronger password for the database
+                # replace with your DNS resolvers
+                # e.g. : kube-dns.kube-system.svc.cluster.local
+                - name: DNS_RESOLVERS
+                  value: "coredns.kube-system.svc.cluster.local"
+                # 10.0.0.0/8 is the cluster internal subnet
+                - name: API_WHITELIST_IP
+                  value: "127.0.0.0/8 10.0.0.0/8"
+                - name: BUNKERWEB_INSTANCES
+                  value: ""
+                - name: SERVER_NAME
+                  value: ""
+                - name: MULTISITE
+                  value: "yes"
+                - name: USE_REDIS
+                  value: "yes"
+                # replace with your Redis host
+                - name: REDIS_HOST
+                  value: "svc-bunkerweb-redis.default.svc.cluster.local"
     ---
     apiVersion: apps/v1
     kind: Deployment
@@ -1498,7 +1486,7 @@ After a successful login/password combination, you will be prompted to enter you
         spec:
           containers:
             - name: bunkerweb-db
-              image: mariadb:10.10
+              image: mariadb:11
               imagePullPolicy: Always
               env:
                 - name: MYSQL_RANDOM_ROOT_PASSWORD
@@ -1508,9 +1496,9 @@ After a successful login/password combination, you will be prompted to enter you
                 - name: MYSQL_USER
                   value: "bunkerweb"
                 - name: MYSQL_PASSWORD
-                  value: "changeme"
+                  value: "changeme" # Remember to set a stronger password for the database
               volumeMounts:
-                - mountPath: /var/lib/mysql
+                - mountPath: "/var/lib/mysql"
                   name: vol-db
           volumes:
             - name: vol-db
@@ -1539,14 +1527,16 @@ After a successful login/password combination, you will be prompted to enter you
               image: bunkerity/bunkerweb-ui:1.6.0-beta
               imagePullPolicy: Always
               env:
-                - name: ADMIN_USERNAME
-                  value: "changeme"
-                - name: "ADMIN_PASSWORD"
-                  value: "changeme"
                 - name: KUBERNETES_MODE
-                  value: "YES"
+                  value: "yes"
                 - name: DATABASE_URI
-                  value: "mariadb+pymysql://bunkerweb:testor@svc-bunkerweb-db:3306/db"
+                  value: "mariadb+pymysql://bunkerweb:changeme@svc-bunkerweb-db:3306/db" # Remember to set a stronger password for the database
+                - name: ADMIN_USERNAME
+                  value: changeme
+                - name: ADMIN_PASSWORD
+                  value: "changeme" # Remember to set a stronger password for the ui user
+                - name: TOTP_SECRETS
+                  value: "mysecret" # Remember to set a stronger secret key (see the Prerequisites section)
     ---
     apiVersion: v1
     kind: Service
@@ -1609,7 +1599,6 @@ After a successful login/password combination, you will be prompted to enter you
       resources:
         requests:
           storage: 5Gi
-      volumeName: pv-bunkerweb
     ---
     apiVersion: networking.k8s.io/v1
     kind: Ingress
@@ -1620,8 +1609,9 @@ After a successful login/password combination, you will be prompted to enter you
         bunkerweb.io/www.example.com_USE_CLIENT_CACHE: "yes"
         bunkerweb.io/www.example.com_USE_GZIP: "yes"
         bunkerweb.io/www.example.com_USE_UI: "yes"
-        bunkerweb.io/www.example.com_INTERCEPTED_ERROR_CODES: '400 404 405 413 429 500 501 502 503 504'
-        bunkerweb.io/www.example.com_MAX_CLIENT_SIZE: '50m'
+        bunkerweb.io/www.example.com_INTERCEPTED_ERROR_CODES: "400 404 405 413 429 500 501 502 503 504"
+        bunkerweb.io/www.example.com_GENERATE_SELF_SIGNED_SSL: "yes"
+        bunkerweb.io/www.example.com_MAX_CLIENT_SIZE: "50m"
     spec:
       rules:
         - host: www.example.com
@@ -1651,8 +1641,12 @@ After a successful login/password combination, you will be prompted to enter you
     ```conf
     ADMIN_USERNAME=changeme
     ADMIN_PASSWORD=changeme
-    OVERRIDE_ADMIN_CREDS=no
+    TOTP_SECRETS=mysecret
     ```
+
+    Replace the `changeme` data with your own values.
+
+    Remember to set a stronger secret key for the `TOTP_SECRETS` variable, check the [Prerequisites](#prerequisites) section for more information.
 
     Each time you edit the `/etc/bunkerweb/ui.env` file, you will need to restart the service :
 
@@ -1676,6 +1670,7 @@ After a successful login/password combination, you will be prompted to enter you
     www.example.com_REVERSE_PROXY_URL=/changeme
     www.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:7000
     www.example.com_INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504
+    www.example.com_GENERATE_SELF_SIGNED_SSL=yes
     www.example.com_MAX_CLIENT_SIZE=50m
     ```
 

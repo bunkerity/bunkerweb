@@ -77,3 +77,12 @@ examples/web-ui/docker-compose.yml:hashicorp-tf-password:52
 examples/wordpress/docker-compose.yml:hashicorp-tf-password:72
 examples/wordpress/docker-compose.yml:hashicorp-tf-password:75
 examples/web-ui/docker-compose.yml:hashicorp-tf-password:64
+docs/web-ui.md:hashicorp-tf-password:136
+docs/web-ui.md:hashicorp-tf-password:231
+docs/web-ui.md:hashicorp-tf-password:360
+docs/web-ui.md:hashicorp-tf-password:927
+docs/web-ui.md:hashicorp-tf-password:939
+docs/web-ui.md:hashicorp-tf-password:1051
+docs/web-ui.md:hashicorp-tf-password:1063
+docs/web-ui.md:hashicorp-tf-password:1208
+docs/web-ui.md:hashicorp-tf-password:1225
