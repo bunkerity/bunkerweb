@@ -243,6 +243,32 @@ add_ban_action = (
 
 def bans_builder(bans: list, reasons: list, remains: list) -> list:
     return [
+        # Tabs is button group with display value and a size tab inside a tabs container
+        {
+            type: "tabs",
+            "widgets": [
+                button_group(
+                    buttons=[
+                        button(
+                            text="bans_tab_list",
+                            display=["main", 1],
+                            isTab=True,
+                            size="tab",
+                            iconColor="white",
+                            iconName="list",
+                        ),
+                        button(
+                            text="bans_tab_add",
+                            display=["main", 2],
+                            isTab=True,
+                            size="tab",
+                            iconColor="white",
+                            iconName="plus",
+                        ),
+                    ]
+                )
+            ],
+        },
         {
             "type": "card",
             "display": ["main", 1],
