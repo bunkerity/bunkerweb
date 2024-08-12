@@ -1,7 +1,7 @@
 import json
 import base64
 
-from builder.utils.widgets import button, button_group, title, text, tabulator
+from builder.utils.widgets import button, button_group, title, text, tabulator, input
 
 columns = [
     {"title": "Name", "field": "name", "formatter": "text"},
@@ -28,7 +28,7 @@ filters = [
         "setting": {
             "id": "input-search-host-name",
             "name": "input-search-host-name",
-            "label": "Search (host)name",
+            "label": "instances_search_host_name",  # keep it (a18n)
             "value": "",
             "inpType": "input",
             "columns": {"pc": 3, "tablet": 4, " mobile": 12},
@@ -40,9 +40,9 @@ filters = [
         "setting": {
             "id": "select-type",
             "name": "select-type",
-            "label": "Select type",
-            "value": "all",
-            "values": ["all", "type1", "type2"],
+            "label": "instances_select_type",  # keep it (a18n)
+            "value": "all",  # keep "all"
+            "values": ["all", "type1", "type2"],  # keep "all" but add your types
             "inpType": "select",
             "onlyDown": True,
             "columns": {"pc": 3, "tablet": 4, " mobile": 12},
@@ -54,9 +54,9 @@ filters = [
         "setting": {
             "id": "select-method",
             "name": "select-method",
-            "label": "Select method",
-            "value": "all",
-            "values": ["all", "method1", "method2"],
+            "label": "instances_select_method",  # keep it (a18n)
+            "value": "all",  # keep "all"
+            "values": ["all", "method1", "method2"],  # keep "all" but add your methods
             "inpType": "select",
             "onlyDown": True,
             "columns": {"pc": 3, "tablet": 4, " mobile": 12},
@@ -68,8 +68,8 @@ actions = (
     {
         "buttons": [
             button(
-                id="ping-instance-INSTANCE_NAME",
-                text="action_ping",
+                id="ping-instance-INSTANCE_NAME",  # replace INSTANCE_NAME by the instance name
+                text="action_ping",  # keep it (a18n)
                 color="success",
                 size="normal",
                 hideText=True,
@@ -77,24 +77,26 @@ actions = (
                 iconColor="white",
                 modal={
                     "widgets": [
-                        title(title="instances_ping_title"),
-                        text(text="instances_ping_subtitle"),
-                        text(bold=True, text="INSTANCE_NAME"),
+                        title(title="instances_ping_title"),  # keep it (a18n)
+                        text(text="instances_ping_subtitle"),  # keep it (a18n)
+                        text(bold=True, text="INSTANCE_NAME"),  # replace INSTANCE_NAME by the instance name
                         button_group(
                             buttons=[
                                 button(
-                                    id="close-ping-btn-INSTANCE_NAME",
-                                    text="action_close",
+                                    id="close-ping-btn-INSTANCE_NAME",  # replace INSTANCE_NAME by the instance name
+                                    text="action_close",  # keep it (a18n)
                                     color="close",
                                     size="normal",
-                                    attrs={"data-close-modal": ""},
+                                    attrs={"data-close-modal": ""},  # a11y
                                 )["data"],
                                 button(
-                                    id="ping-btn-INSTANCE_NAME",
-                                    text="action_ping",
+                                    id="ping-btn-INSTANCE_NAME",  # replace INSTANCE_NAME by the instance name
+                                    text="action_ping",  # keep it (a18n)
                                     color="info",
                                     size="normal",
-                                    attrs={"data-submit-form": '{"instance_name" : ", "instance_hostname" : "", "operation" : "ping" }'},
+                                    attrs={
+                                        "data-submit-form": '{"instance_name" : ", "instance_hostname" : "", "operation" : "ping" }'
+                                    },  # replace values by needed ones for ping operation, data-submit-form attributs will parse and submit values to the form
                                 )["data"],
                             ]
                         ),
@@ -102,8 +104,8 @@ actions = (
                 },
             ),
             button(
-                id="delete-instance-INSTANCE_NAME",
-                text="action_delete",
+                id="delete-instance-INSTANCE_NAME",  # replace INSTANCE_NAME by the instance name
+                text="action_delete",  # keep it (a18n)
                 color="success",
                 size="normal",
                 hideText=True,
@@ -111,24 +113,26 @@ actions = (
                 iconColor="white",
                 modal={
                     "widgets": [
-                        title(title="instances_delete_title"),
-                        text(text="instances_delete_subtitle"),
-                        text(bold=True, text="INSTANCE_NAME"),
+                        title(title="instances_delete_title"),  # keep it (a18n)
+                        text(text="instances_delete_subtitle"),  # keep it (a18n)
+                        text(bold=True, text="INSTANCE_NAME"),  # replace INSTANCE_NAME by the instance name
                         button_group(
                             buttons=[
                                 button(
-                                    id="close-delete-btn-INSTANCE_NAME",
-                                    text="action_close",
+                                    id="close-delete-btn-INSTANCE_NAME",  # replace INSTANCE_NAME by the instance name
+                                    text="action_close",  # keep it (a18n)
                                     color="close",
                                     size="normal",
-                                    attrs={"data-close-modal": ""},
+                                    attrs={"data-close-modal": ""},  # a11y
                                 )["data"],
                                 button(
-                                    id="delete-btn-INSTANCE_NAME",
-                                    text="action_delete",
+                                    id="delete-btn-INSTANCE_NAME",  # replace INSTANCE_NAME by the instance name
+                                    text="action_delete",  # keep it (a18n)
                                     color="info",
                                     size="normal",
-                                    attrs={"data-submit-form": '{"instance_name" : ", "instance_hostname" : "", "operation" : "delete" }'},
+                                    attrs={
+                                        "data-submit-form": '{"instance_name" : ", "instance_hostname" : "", "operation" : "delete" }'
+                                    },  # replace values by needed ones for ping operation, data-submit-form attributs will parse and submit values
                                 )["data"],
                             ]
                         ),
@@ -153,7 +157,28 @@ items = [
 ]
 
 
-instance_create_form = {}
+instance_create_form_widgets = [
+    input(
+        id="instance-name",
+        name="instance-name",
+        label="instances_name",  # keep it (a18n)
+        value="",
+        columns={"pc": 3, "tablet": 4, " mobile": 12},
+    ),
+    input(
+        id="instance-hostname",
+        name="instance-hostname",
+        label="instances_hostname",  # keep it (a18n)
+        value="",
+        columns={"pc": 3, "tablet": 4, " mobile": 12},
+    ),
+    button(
+        id="create-instance",
+        text="action_create",  # keep it (a18n)
+        color="success",
+        size="normal",
+    ),
+]
 
 builder = [
     {
@@ -171,28 +196,7 @@ builder = [
     {
         "type": "card",
         "display": ["main", 2],
-        "widgets": [
-            input(
-                id="instance-name",
-                name="instance-name",
-                label="instances_name",
-                value="",
-                columns={"pc": 3, "tablet": 4, " mobile": 12},
-            ),
-            input(
-                id="instance-hostname",
-                name="instance-hostname",
-                label="instances_hostname",
-                value="",
-                columns={"pc": 3, "tablet": 4, " mobile": 12},
-            ),
-            button(
-                id="create-instance",
-                text="action_create",
-                color="success",
-                size="normal",
-            ),
-        ],
+        "widgets": instance_create_form_widgets,
     },
 ]
 

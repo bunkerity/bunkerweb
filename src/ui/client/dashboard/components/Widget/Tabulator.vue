@@ -11,7 +11,7 @@ import { useEqualStr } from "@utils/global.js";
 import {
   addColumnsSorter,
   addColumnsWidth,
-  a18yTable,
+  a11yTable,
   applyTableFilter,
   overrideDefaultFilters,
 } from "@utils/tabulator.js";
@@ -200,7 +200,7 @@ onMounted(() => {
   table.instance = new Tabulator(tableEl.value, table.options);
   table.instance.on("tableBuilt", () => {
     table.instance.redraw();
-    a18yTable(table.instance);
+    a11yTable(table.instance);
     // Add table instance to store in order to use it in other components
     tableStore.setTable(props.id, table.instance);
   });

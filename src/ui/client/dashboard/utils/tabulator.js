@@ -92,22 +92,22 @@ function _sortText(column, formatName) {
 }
 
 /**
- *  @name a18yTable
+ *  @name a11yTable
  *  @description Wrapper to add some accessibility to the table.
  *  @returns {void}
  */
-function a18yTable() {
-  _a18ySortable();
-  _a18yFooter();
+function a11yTable() {
+  _a11ySortable();
+  _a11yFooter();
 }
 
 /**
- *  @name _a18ySortable
+ *  @name _a11ySortable
  *  @description Allow the user to get to the sortable header by pressing the tab key.
  *  The user can then press the enter key to sort the column.
  *  @returns {void}
  */
-function _a18ySortable() {
+function _a11ySortable() {
   const sortableHeaders = document.querySelectorAll(
     ".tabulator-col.tabulator-sortable .tabulator-col-sorter"
   );
@@ -128,11 +128,11 @@ function _a18ySortable() {
 }
 
 /**
- *  @name _a18yFooter
+ *  @name _a11yFooter
  *  @description Update pagination tabindex to get continuity in the tab order in the table footer.
  *  @returns {void}
  */
-function _a18yFooter() {
+function _a11yFooter() {
   const tableFooter = document.querySelector(".tabulator-footer");
   // query button and select tag
   const interactiveElements = tableFooter.querySelectorAll("button, select");
@@ -326,7 +326,7 @@ function overrideDefaultFilters() {
 export {
   addColumnsSorter,
   addColumnsWidth,
-  a18yTable,
+  a11yTable,
   applyTableFilter,
   overrideDefaultFilters,
 };
