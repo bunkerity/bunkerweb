@@ -22,7 +22,7 @@ columns = [
 ]
 
 
-def instances_filter(healths: Healths, types: list = [], methods: list = []) -> list:
+def instances_filter(healths: str, types: list = [], methods: list = []) -> list:  # healths = "up", "down", "loading"
     filters = [
         {
             "type": "like",

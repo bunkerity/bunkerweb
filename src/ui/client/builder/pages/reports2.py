@@ -1,5 +1,5 @@
-from builder.utils.table import add_column, format_field
-from builder.utils.widgets import datepicker_widget, text_widget, tabulator_widget
+from .utils.table import add_column, format_field
+from .utils.widgets import datepicker_widget, text_widget, tabulator_widget
 
 reports_columns = [
     add_column(title="Date", field="date", formatter="fields"),
@@ -55,7 +55,7 @@ def reports_filters(reasons: list = [], countries: list = [], methods: list = []
         },
     ]
 
-    if reasons.length >= 2:
+    if len(reasons) >= 2:
         reports_filters.append(
             {
                 "type": "=",
@@ -73,7 +73,7 @@ def reports_filters(reasons: list = [], countries: list = [], methods: list = []
             }
         )
 
-    if countries.length >= 2:
+    if len(countries) >= 2:
         reports_filters.append(
             {
                 "type": "=",
@@ -91,7 +91,7 @@ def reports_filters(reasons: list = [], countries: list = [], methods: list = []
             }
         )
 
-    if methods.length >= 2:
+    if len(methods) >= 2:
         reports_filters.append(
             {
                 "type": "=",
@@ -109,7 +109,7 @@ def reports_filters(reasons: list = [], countries: list = [], methods: list = []
             }
         )
 
-    if codes.length >= 2:
+    if len(codes) >= 2:
         reports_filters.append(
             {
                 "type": "=",
@@ -130,7 +130,8 @@ def reports_filters(reasons: list = [], countries: list = [], methods: list = []
     return reports_filters
 
 
-def report_item(id: int, date_timestamp: int, ip: str, country: str, method: str, url: str, code: str, user_agent: str, reason: str, data: str) -> dict:
+# date = timestamp
+def report_item(id: int, date: int, ip: str, country: str, method: str, url: str, code: str, user_agent: str, reason: str, data: str) -> dict:
     return (
         {
             "date": format_field(
@@ -139,8 +140,7 @@ def report_item(id: int, date_timestamp: int, ip: str, country: str, method: str
                     name=f"datepicker-date-{id}",
                     label="reports_date",  # keep it (a18n)
                     hideLabel=True,
-                    inputType="datepicker",
-                    value=date_timestamp,
+                    value=date,
                     disabled=True,  # Readonly
                 )
             ),
@@ -157,7 +157,7 @@ def report_item(id: int, date_timestamp: int, ip: str, country: str, method: str
 
 
 def reports_builder(reports: list, reasons: list = [], countries: list = [], methods: list = [], codes: list = []) -> str:
-    reports_items = [report_item(**report) for report in reports]
+    reports_items = [report_item(**report, id=index) for index, report in enumerate(reports)]
     return [
         {
             "type": "card",

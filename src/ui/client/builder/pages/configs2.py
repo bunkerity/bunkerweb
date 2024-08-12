@@ -1,6 +1,3 @@
-from enum import Enum
-
-
 from .utils.widgets import (
     input_widget,
     select_widget,
