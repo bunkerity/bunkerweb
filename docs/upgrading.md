@@ -414,6 +414,14 @@ The default value of some settings have changed and we have added many other set
 
 We added a new feature called **templates**. Templates provide a structured and standardized approach to defining settings and custom configurations, check the [concepts/templates](concepts.md#templates) section for more information.
 
+### Autoconf namespaces
+
+We added a **namespace** feature to the autoconf integrations. Namespaces allow you to group your instances and apply settings only to them. Check the following sections according to your Integration for more information:
+
+- [Autoconf/namespaces](integrations.md#namespaces)
+- [Kubernetes/namespaces](integrations.md#namespaces_1)
+- [Swarm/namespaces](integrations.md#namespaces_2)
+
 ## Upgrade from 1.4.X
 
 !!! warning "Read this if you were a 1.4.X user"
