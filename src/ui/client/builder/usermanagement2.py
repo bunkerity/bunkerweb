@@ -1,17 +1,17 @@
 import json
 import base64
 
-from builder.utils.widgets import button, button_group, title, text, tabulator, fields, upload, input, combobox, checkbox, select, editor
+from builder.utils.widgets import button, button_group, title, text, tabulator, fields, upload, input, combobox, checkbox, select, editor, datepicker
 
 
+# TODO : REMOVE operation by custom endpoint
 def generate_form(
-    id: str = "",
-    filename: str = "",
-    type: str = "",
-    is_global: bool = False,
-    services: list = [],
-    config_value: str = "",
+    username: str = "",
+    password: str = "",
+    email: str = "",
     is_new: bool = True,
+    role: str = "",
+    roles: list = [],
     display_index: int = 1,
 ):
 
@@ -21,74 +21,53 @@ def generate_form(
             "display": ["main", display_index],  # Allow to toggle between each form using displayStore
             "widgets": [
                 input(
-                    id=id,  # replace conf-id by value to use in the form for submit
-                    name=id,  # replace conf-id by value to use in the form for submit
-                    label="configs_filename",  # keep it (a18n)
-                    value=filename,  # empty if new or replace by the filename value to edit (.conf excluded)
+                    id=f"username-{'new' if is_new else username}",
+                    name="username",
+                    label="users_filename",  # keep it (a18n)
+                    value="" if is_new else username,
+                    pattern="",  # add your pattern if needed
+                    columns={"pc": 3, "tablet": 4, " mobile": 12},
+                ),
+                input(
+                    id=f"password-{'new' if is_new else username}",
+                    name="password",
+                    label="users_password",  # keep it (a18n)
+                    value="" if is_new else password,
                     pattern="",  # add your pattern if needed
                     columns={"pc": 3, "tablet": 4, " mobile": 12},
                 ),
                 # Select between available types
                 select(
                     {
-                        "id": "select-type",
-                        "name": "select-type",
-                        "label": "configs_types",  # keep it (a18n)
-                        "value": type,  # empty if new else set current type
-                        "values": ["http", "modsec"],  # set all available types
+                        "id": "select-role",
+                        "name": "select-role",
+                        "label": "users_role",  # keep it (a18n)
+                        "value": role,  # current role
+                        "values": roles,
                         "inpType": "select",
                         "onlyDown": True,
-                        "columns": {"pc": 3, "tablet": 4, " mobile": 12},
-                    },
-                ),
-                # Add script on Page.vue to disabled listcheck in case checkbox is checked
-                # This checkbox is priority over services checklist
-                # Check or not to used globally the conf
-                checkbox(
-                    id="config-global",
-                    name="config-global",
-                    label="configs_global",  # keep it (a18n)
-                    value="yes" if is_global else "no",  # no if new, else it depends of the current conf
-                    columns={"pc": 3, "tablet": 4, " mobile": 12},
-                ),
-                # Case checkbox is checked, this checklist will be ignored on server
-                # Combobox ATM but will be replace by a checklist
-                # set services list ATM, we will update by a checklist with [{value : "service1", is_check : bool}, ...]
-                combobox(
-                    {
-                        "id": "combo-services",
-                        "name": "combo-services",
-                        "label": "configs_types",  # keep it (a18n)
-                        "value": "",  # empty if new else set current type
-                        "values": services,  # set services list ATM, we will update by a checklist with [{value : "service1", is_check : bool}, ...]
-                        "inpType": "select",
-                        "onlyDown": True,
-                        "columns": {"pc": 3, "tablet": 4, " mobile": 12},
-                    },
-                ),
-                # Editor to edit the conf
-                editor(
-                    {
-                        "id": "config-value",
-                        "name": "config-value",
-                        "label": "configs_value",  # keep it (a18n)
-                        "value": config_value,  # empty if new else set current type
-                        "inpType": "editor",
                         "columns": {"pc": 3, "tablet": 4, " mobile": 12},
                     },
                 ),
                 input(
                     id="operation",
                     name="operation",
-                    label="configs_operation",  # keep it (a18n)
+                    label="users_operation",  # keep it (a18n)
                     value="new" if is_new else "edit",  # "new" if new or "edit" if edit
                     pattern="",  # add your pattern if needed
                     columns={"pc": 3, "tablet": 4, " mobile": 12},
                     inputClass="hidden",  # hide it
                 ),
+                input(
+                    id="old_username",
+                    name="old_username",
+                    label="users_old_username",  # keep it (a18n)
+                    value=username,  # "new" if new or "edit" if edit
+                    inputClass="hidden",  # hide it
+                ),
                 button(
-                    id="update-config",
-                    text="action_create",  # action_new if new or action_edit if edit
+                    id="update-user",
+                    text="action_save",  # action_new if new or action_edit if edit
                     color="success",
                     size="normal",
                 ),
@@ -108,15 +87,14 @@ def get_forms():
     return forms
 
 
-configs_columns = [
-    {"title": "Name", "field": "name", "formatter": "text"},
-    {"title": "Type", "field": "type", "formatter": "text"},
-    {"title": "global", "field": "global", "formatter": "text"},
-    {
-        "title": "services",
-        "field": "services",
-        "formatter": "buttonGroup",
-    },  # We will display a button with a modal that show all services apply. Case global, show all services.
+users_columns = [
+    {"title": "Username", "field": "username", "formatter": "text"},
+    {"title": "Role", "field": "role", "formatter": "text"},
+    {"title": "Creation date", "field": "creation_date", "formatter": "fields"},  # datepicker
+    {"title": "Last login", "field": "last_login", "formatter": "fields"},  # datepicker of last login
+    {"title": "Last login IP", "field": "last_login_ip", "formatter": "fields"},  # datepicker of last login
+    {"title": "Login count", "field": "login_count", "formatter": "fields"},  # datepicker of last login
+    {"title": "totp (state)", "field": "totp", "formatter": "icons"},  # icon check or cross
     {
         "title": "actions",
         "field": "actions",
@@ -125,14 +103,14 @@ configs_columns = [
 ]
 
 
-configs_filters = [
+users_filters = [
     {
         "type": "like",
-        "fields": ["name"],
+        "fields": ["username"],
         "setting": {
-            "id": "input-search-name",
-            "name": "input-search-name",
-            "label": "configs_search_name",  # keep it (a18n)
+            "id": "input-search-username",
+            "username": "input-search-username",
+            "label": "users_search_username",  # keep it (a18n)
             "value": "",
             "inpType": "input",
             "columns": {"pc": 3, "tablet": 4, " mobile": 12},
@@ -140,13 +118,13 @@ configs_filters = [
     },
     {
         "type": "=",
-        "fields": ["type"],
+        "fields": ["role"],
         "setting": {
-            "id": "select-type",
-            "name": "select-type",
-            "label": "configs_select_type",  # keep it (a18n)
+            "id": "select-role",
+            "name": "select-role",
+            "label": "users_select_role",  # keep it (a18n)
             "value": "all",  # keep "all"
-            "values": ["all", "antibot"],  # keep "all" and add your types
+            "values": ["all", "antibot"],  # keep "all" and add your roles
             "inpType": "select",
             "onlyDown": True,
             "columns": {"pc": 3, "tablet": 4, " mobile": 12},
@@ -154,11 +132,11 @@ configs_filters = [
     },
     {
         "type": "=",
-        "fields": ["global"],
+        "fields": ["totp"],
         "setting": {
-            "id": "select-global",
-            "name": "select-global",
-            "label": "configs_select_global",  # keep it (a18n)
+            "id": "select-totp",
+            "name": "select-totp",
+            "label": "users_select_totp",  # keep it (a18n)
             "value": "all",  # keep "all"
             "values": ["all", "yes", "no"],  # keep
             "inpType": "select",
@@ -169,11 +147,19 @@ configs_filters = [
 ]
 
 
-configs_items = [
+users_items = [
     {
-        "name": text(text="Name")["data"],  # replace Name by real name
-        "type": text(text="Type")["data"],  # replace Type by real type
-        "global": text(text="global")["data"],  # replace global by real global ("yes" or "no")
+        "username": text(text="Name")["data"],  # replace Name by real name
+        "role": text(text="Role")["data"],  # replace Role by real role
+        "creation_date": datepicker(
+            id="datepicker-date-id",  # replace id by unique id
+            name="datepicker-date-id",  # replace by unique id
+            label="reports_date",  # keep it (a18n)
+            hideLabel=True,
+            inputType="datepicker",
+            value="my_date",  # replace my_date by timestamp value
+            disabled=True,  # Readonly
+        )["data"],
         "services": button_group(
             buttons=[
                 button(
@@ -181,13 +167,13 @@ configs_items = [
                     type="button",
                     iconName="disk",
                     iconColor="white",
-                    text="configs_show_services",  # keep it (a18n)
+                    text="users_show_services",  # keep it (a18n)
                     color="orange",
                     size="normal",
                     modal={
                         "widgets": [
-                            title(title="configs_services_title"),  # keep it (a18n)
-                            text(text="configs_services_subtitle"),  # keep it (a18n)
+                            title(title="users_services_title"),  # keep it (a18n)
+                            text(text="users_services_subtitle"),  # keep it (a18n)
                             tabulator(
                                 id="table-services-confname",  # replace confname by real conf name
                                 columns=[{"title": "id", "field": "id", "formatter": "text"}, {"title": "Name", "field": "name", "formatter": "text"}],
@@ -205,7 +191,7 @@ configs_items = [
                                         "setting": {
                                             "id": "input-search-service",
                                             "name": "input-search-service",
-                                            "label": "configs_search_service",  # keep it (a18n)
+                                            "label": "users_search_service",  # keep it (a18n)
                                             "value": "",
                                             "inpType": "input",
                                             "columns": {"pc": 3, "tablet": 4, " mobile": 12},
@@ -237,7 +223,7 @@ configs_items = [
                     type="button",
                     iconName="pen",
                     iconColor="white",
-                    text="configs_edit_config",  # keep it (a18n)
+                    text="users_edit_config",  # keep it (a18n)
                     hideText=True,
                     color="yellow",
                     size="normal",
@@ -249,14 +235,14 @@ configs_items = [
                     type="button",
                     iconName="trash",
                     iconColor="white",
-                    text="configs_delete_config",  # keep it (a18n)
+                    text="users_delete_config",  # keep it (a18n)
                     hideText=True,
                     color="error",
                     size="normal",
                     modal={
                         "widgets": [
-                            title(title="configs_delete_title"),  # keep it (a18n)
-                            text(text="configs_delete_subtitle"),  # keep it (a18n)
+                            title(title="users_delete_title"),  # keep it (a18n)
+                            text(text="users_delete_subtitle"),  # keep it (a18n)
                             button_group(
                                 buttons=[
                                     button(
@@ -293,9 +279,9 @@ builder = [
         "widgets": [
             tabulator(
                 id="table-core-plugins",
-                columns=configs_columns,
-                items=configs_items,
-                filters=configs_filters,
+                columns=users_columns,
+                items=users_items,
+                filters=users_filters,
             ),
             get_forms(),
         ],

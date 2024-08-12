@@ -1,6 +1,8 @@
 import json
 import base64
 
+# TODO : REMOVE operation by custom endpoint
+
 from builder.utils.widgets import button, button_group, title, text, tabulator, input
 
 columns = [
@@ -10,6 +12,7 @@ columns = [
     {"title": "Method", "field": "method", "formatter": "text"},
     {"title": "Creation date", "field": "creation_date", "formatter": "text"},
     {"title": "Last seen", "field": "last_seen", "formatter": "text"},
+    {"title": "health", "field": "health", "formatter": "text"},  # up, down, loading
     {
         "title": "Actions",
         "field": "actions",
@@ -157,6 +160,7 @@ items = [
 ]
 
 
+# TODO : Add warning that port and server_name will be override by scheduler
 instance_create_form_widgets = [
     input(
         id="instance-name",

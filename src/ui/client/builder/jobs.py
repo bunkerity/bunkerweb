@@ -1,290 +1,226 @@
-from .utils.widgets import title_widget, table_widget
+import json
+import base64
+
+from builder.jobs import jobs_builder
 
 
-def jobs_builder(jobs):
+jobs = {
+    "anonymous-report": {
+        "plugin_id": "misc",
+        "every": "day",
+        "reload": False,
+        "history": [{"start_date": "07/08/2024, 01:10:03 PM", "end_date": "07/08/2024, 01:10:04 PM", "success": True}],
+        "cache": [],
+    },
+    "backup-data": {
+        "plugin_id": "backup",
+        "every": "day",
+        "reload": False,
+        "history": [{"start_date": "07/08/2024, 01:10:02 PM", "end_date": "07/08/2024, 01:10:03 PM", "success": True}],
+        "cache": [],
+    },
+    "blacklist-download": {
+        "plugin_id": "blacklist",
+        "every": "hour",
+        "reload": True,
+        "history": [{"start_date": "07/08/2024, 01:10:01 PM", "end_date": "07/08/2024, 01:10:02 PM", "success": True}],
+        "cache": [],
+    },
+    "bunkernet-data": {
+        "plugin_id": "bunkernet",
+        "every": "day",
+        "reload": True,
+        "history": [{"start_date": "07/08/2024, 01:10:02 PM", "end_date": "07/08/2024, 01:10:03 PM", "success": True}],
+        "cache": [],
+    },
+    "bunkernet-register": {
+        "plugin_id": "bunkernet",
+        "every": "hour",
+        "reload": True,
+        "history": [{"start_date": "07/08/2024, 01:10:02 PM", "end_date": "07/08/2024, 01:10:02 PM", "success": True}],
+        "cache": [],
+    },
+    "certbot-new": {
+        "plugin_id": "letsencrypt",
+        "every": "once",
+        "reload": False,
+        "history": [{"start_date": "07/08/2024, 01:10:02 PM", "end_date": "07/08/2024, 01:10:03 PM", "success": True}],
+        "cache": [],
+    },
+    "certbot-renew": {
+        "plugin_id": "letsencrypt",
+        "every": "day",
+        "reload": True,
+        "history": [{"start_date": "07/08/2024, 01:10:03 PM", "end_date": "07/08/2024, 01:10:03 PM", "success": True}],
+        "cache": [],
+    },
+    "cleanup-excess-jobs-runs": {
+        "plugin_id": "db",
+        "every": "day",
+        "reload": False,
+        "history": [{"start_date": "07/08/2024, 01:10:02 PM", "end_date": "07/08/2024, 01:10:03 PM", "success": True}],
+        "cache": [],
+    },
+    "coreruleset-nightly": {
+        "plugin_id": "modsecurity",
+        "every": "day",
+        "reload": True,
+        "history": [{"start_date": "07/08/2024, 01:10:01 PM", "end_date": "07/08/2024, 01:10:03 PM", "success": True}],
+        "cache": [],
+    },
+    "custom-cert": {
+        "plugin_id": "customcert",
+        "every": "day",
+        "reload": True,
+        "history": [{"start_date": "07/08/2024, 01:10:02 PM", "end_date": "07/08/2024, 01:10:03 PM", "success": True}],
+        "cache": [],
+    },
+    "default-server-cert": {
+        "plugin_id": "misc",
+        "every": "once",
+        "reload": False,
+        "history": [{"start_date": "07/08/2024, 01:10:02 PM", "end_date": "07/08/2024, 01:10:03 PM", "success": True}],
+        "cache": [
+            {
+                "service_id": None,
+                "file_name": "default-server-cert.pem",
+                "last_update": "07/08/2024, 01:10:03 PM",
+                "checksum": "203da9e16dabe522a3080c3b9efc5c2dc8054f47e98d995fe1812f4c498b4feb519ef080b7dfeaba0095c1393793815c23f22072daf5703b02762504b211db20",
+            },
+            {
+                "service_id": None,
+                "file_name": "default-server-cert.key",
+                "last_update": "07/08/2024, 01:10:03 PM",
+                "checksum": "7f86b1fffb8fe2011365d76e5a0955344a03c3bdb7b04aff13f8ad5b6178804290c0cd6c8f29dda9e981e3193cf5acda2a92f72312d514514305b8485667d573",
+            },
+        ],
+    },
+    "download-crs-plugins": {
+        "plugin_id": "modsecurity",
+        "every": "day",
+        "reload": True,
+        "history": [{"start_date": "07/08/2024, 01:10:03 PM", "end_date": "07/08/2024, 01:10:03 PM", "success": True}],
+        "cache": [],
+    },
+    "download-plugins": {
+        "plugin_id": "misc",
+        "every": "once",
+        "reload": False,
+        "history": [
+            {"start_date": "07/08/2024, 01:10:04 PM", "end_date": "07/08/2024, 01:10:05 PM", "success": True},
+            {"start_date": "07/08/2024, 01:09:59 PM", "end_date": "07/08/2024, 01:10:00 PM", "success": True},
+        ],
+        "cache": [],
+    },
+    "download-pro-plugins": {
+        "plugin_id": "pro",
+        "every": "day",
+        "reload": True,
+        "history": [
+            {"start_date": "07/08/2024, 01:10:02 PM", "end_date": "07/08/2024, 01:10:04 PM", "success": True},
+            {"start_date": "07/08/2024, 01:10:00 PM", "end_date": "07/08/2024, 01:10:01 PM", "success": False},
+        ],
+        "cache": [],
+    },
+    "failover-backup": {
+        "plugin_id": "jobs",
+        "every": "once",
+        "reload": False,
+        "history": [{"start_date": "07/08/2024, 01:10:07 PM", "end_date": "07/08/2024, 01:10:08 PM", "success": True}],
+        "cache": [
+            {
+                "service_id": None,
+                "file_name": "folder:/var/tmp/bunkerweb/failover.tgz",
+                "last_update": "07/08/2024, 01:10:14 PM",
+                "checksum": "d22a7a696d4b44bcef6a3ac06b2d7e2b2de128243000f58202c0e82b0bf54510ade7329eca14ca478a28d46201410ea1fd8002349b7b9aa51dd0d07d2fb2f51e",
+            }
+        ],
+    },
+    "greylist-download": {
+        "plugin_id": "greylist",
+        "every": "hour",
+        "reload": True,
+        "history": [{"start_date": "07/08/2024, 01:10:02 PM", "end_date": "07/08/2024, 01:10:03 PM", "success": True}],
+        "cache": [],
+    },
+    "mmdb-asn": {
+        "plugin_id": "jobs",
+        "every": "day",
+        "reload": True,
+        "history": [{"start_date": "07/08/2024, 01:10:04 PM", "end_date": "07/08/2024, 01:10:06 PM", "success": True}],
+        "cache": [
+            {
+                "service_id": None,
+                "file_name": "asn.mmdb",
+                "last_update": "07/08/2024, 01:10:05 PM",
+                "checksum": "0beed65a84e63cf5dd6753ecc1aa6399dddaf5eb24fb22839f4cd72cbc9805cddf72be068649d111a3c21e2ac7de4a6f930c859286a25a7e937da017406d2596",
+            }
+        ],
+    },
+    "mmdb-country": {
+        "plugin_id": "jobs",
+        "every": "day",
+        "reload": True,
+        "history": [{"start_date": "07/08/2024, 01:10:02 PM", "end_date": "07/08/2024, 01:10:04 PM", "success": True}],
+        "cache": [
+            {
+                "service_id": None,
+                "file_name": "country.mmdb",
+                "last_update": "07/08/2024, 01:10:03 PM",
+                "checksum": "5f0d2e2c92840747886924adc1e6ff3668882990e0cd8a4d60750fe1bddb66c3e175c8717d073b48ebda41cce4c505d434dc2a6a469823fcd41c62c4f875b212",
+            }
+        ],
+    },
+    "realip-download": {
+        "plugin_id": "realip",
+        "every": "hour",
+        "reload": True,
+        "history": [{"start_date": "07/08/2024, 01:10:02 PM", "end_date": "07/08/2024, 01:10:03 PM", "success": True}],
+        "cache": [],
+    },
+    "self-signed": {
+        "plugin_id": "selfsigned",
+        "every": "day",
+        "reload": True,
+        "history": [{"start_date": "07/08/2024, 01:10:02 PM", "end_date": "07/08/2024, 01:10:03 PM", "success": True}],
+        "cache": [
+            {
+                "service_id": "www.example.com",
+                "file_name": "cert.pem",
+                "last_update": "07/08/2024, 01:10:03 PM",
+                "checksum": "fc33700719f6a58336e3c3b735ad3fdf0b15ebd0afbe6b4a3b02a4a92e0ab4f1761409a7a1d1ca965d59b4196a81c1d150a12ae0170f7bb3a1bc7cf02300fbe9",
+            },
+            {
+                "service_id": "www.example.com",
+                "file_name": "key.pem",
+                "last_update": "07/08/2024, 01:10:03 PM",
+                "checksum": "0e6eee34ab7b2a41cb21e49ebd35ce29a1b8d12b55aad3911b6357c73792eef7084fbb4eeba8bff73eb7a8789b5f486f6edb6d4b1c38a54bd0dcee1bf438f23d",
+            },
+        ],
+    },
+    "update-check": {
+        "plugin_id": "jobs",
+        "every": "day",
+        "reload": False,
+        "history": [{"start_date": "07/08/2024, 01:10:06 PM", "end_date": "07/08/2024, 01:10:07 PM", "success": True}],
+        "cache": [],
+    },
+    "whitelist-download": {
+        "plugin_id": "whitelist",
+        "every": "hour",
+        "reload": True,
+        "history": [{"start_date": "07/08/2024, 01:10:02 PM", "end_date": "07/08/2024, 01:10:02 PM", "success": True}],
+        "cache": [],
+    },
+}
 
-    jobs_list = get_jobs_list(jobs)
+output = jobs_builder(jobs)
 
-    intervals = ["all"]
+# store on a file
+with open("jobs.json", "w") as f:
+    json.dump(output, f, indent=4)
+output_base64_bytes = base64.b64encode(bytes(json.dumps(output), "utf-8"))
+output_base64_string = output_base64_bytes.decode("ascii")
 
-    # loop on each job
-    for job in jobs_list:
-        # loop on each item
-        for item in job:
-            # get the interval if not already in intervals
-            if item.get("every") and item.get("every") not in intervals:
-                intervals.append(item.get("every"))
-
-    builder = [
-        {
-            "type": "card",
-            "containerColumns": {"pc": 12, "tablet": 12, "mobile": 12},
-            "widgets": [
-                title_widget("jobs_title"),
-                table_widget(
-                    positions=[3, 2, 1, 1, 1, 1, 3],
-                    header=[
-                        "jobs_table_name",
-                        "jobs_table_plugin_id",
-                        "jobs_table_interval",
-                        "jobs_table_reload",
-                        "jobs_table_success",
-                        "jobs_table_history",
-                        "jobs_table_cache_downloadable",
-                    ],
-                    items=jobs_list,
-                    filters=[
-                        {
-                            "filter": "table",
-                            "filterName": "keyword",
-                            "type": "keyword",
-                            "value": "",
-                            "keys": ["name", "plugin_id"],
-                            "field": {
-                                "id": "jobs-keyword",
-                                "value": "",
-                                "type": "text",
-                                "name": "jobs-keyword",
-                                "label": "jobs_search",
-                                "placeholder": "inp_keyword",
-                                "isClipboard": False,
-                                "popovers": [
-                                    {
-                                        "text": "jobs_search_desc",
-                                        "iconName": "info",
-                                    },
-                                ],
-                                "columns": {"pc": 3, "tablet": 4, "mobile": 12},
-                            },
-                        },
-                        {
-                            "filter": "table",
-                            "filterName": "every",
-                            "type": "select",
-                            "value": "all",
-                            "keys": ["every"],
-                            "field": {
-                                "id": "jobs-every",
-                                "value": "all",
-                                "values": intervals,
-                                "name": "jobs-every",
-                                "onlyDown": True,
-                                "label": "jobs_interval",
-                                "popovers": [
-                                    {
-                                        "text": "jobs_interval_desc",
-                                        "iconName": "info",
-                                    },
-                                ],
-                                "columns": {"pc": 3, "tablet": 4, "mobile": 12},
-                            },
-                        },
-                        {
-                            "filter": "table",
-                            "filterName": "reload",
-                            "type": "select",
-                            "value": "all",
-                            "keys": ["reload"],
-                            "field": {
-                                "id": "jobs-last-run",
-                                "value": "all",
-                                "values": ["all", "success", "failed"],
-                                "name": "jobs-last-run",
-                                "onlyDown": True,
-                                "label": "jobs_reload",
-                                "popovers": [
-                                    {
-                                        "text": "jobs_reload_desc",
-                                        "iconName": "info",
-                                    },
-                                ],
-                                "columns": {"pc": 3, "tablet": 4, "mobile": 12},
-                            },
-                        },
-                        {
-                            "filter": "table",
-                            "filterName": "success",
-                            "type": "select",
-                            "value": "all",
-                            "keys": ["success"],
-                            "field": {
-                                "id": "jobs-success",
-                                "value": "all",
-                                "values": ["all", "success", "failed"],
-                                "name": "jobs-success",
-                                "onlyDown": True,
-                                "label": "jobs_success",
-                                "popovers": [
-                                    {
-                                        "text": "jobs_success_desc",
-                                        "iconName": "info",
-                                    },
-                                ],
-                                "columns": {"pc": 3, "tablet": 4, "mobile": 12},
-                            },
-                        },
-                    ],
-                    minWidth="lg",
-                    title="jobs_table_title",
-                ),
-            ],
-        }
-    ]
-
-    return builder
-
-
-def get_jobs_list(jobs):
-    data = []
-    # loop on each dict
-    for key, value in jobs.items():
-        item = []
-        item.append({"name": key, "type": "Text", "data": {"text": key}})
-        # loop on each value
-        for k, v in value.items():
-            # override widget type for some keys
-            if k in ("reload", "history"):
-                is_success = v if k == "reload" else v[0].get("success")
-                item.append(
-                    {
-                        k: "success" if is_success else "failed",
-                        "type": "Icons",
-                        "data": {
-                            "iconName": "check" if is_success else "cross",
-                        },
-                    }
-                )
-
-                if k not in ("history"):
-                    continue
-
-            if k in ("plugin_id", "every"):
-                item.append({k: v, "type": "Text", "data": {"text": v}})
-                continue
-
-            if k in ("history"):
-                items = []
-                for hist in v:
-                    items.append(
-                        [
-                            {
-                                "type": "Text",
-                                "data": {
-                                    "text": hist["start_date"],
-                                },
-                            },
-                            {
-                                "type": "Text",
-                                "data": {
-                                    "text": hist["end_date"],
-                                },
-                            },
-                            {
-                                "type": "Icons",
-                                "data": {
-                                    "iconName": "check" if hist["success"] else "cross",
-                                },
-                            },
-                        ]
-                    )
-
-                item.append(
-                    {
-                        "type": "Button",
-                        "data": {
-                            "id": f"open-modal-history-{k}",
-                            "text": "jobs_history",
-                            "hideText": True,
-                            "color": "blue",
-                            "size": "normal",
-                            "iconName": "document",
-                            "iconColor": "white",
-                            "modal": {
-                                "widgets": [
-                                    {"type": "Title", "data": {"title": key}},
-                                    {"type": "Subtitle", "data": {"subtitle": "jobs_history_subtitle"}},
-                                    {
-                                        "type": "Table",
-                                        "data": {
-                                            "title": "jobs_history_table_title",
-                                            "minWidth": "",
-                                            "header": [
-                                                "jobs_table_start_run",
-                                                "jobs_table_end_run",
-                                                "jobs_table_success",
-                                            ],
-                                            "positions": [5, 5, 2],
-                                            "items": items,
-                                        },
-                                    },
-                                    {
-                                        "type": "ButtonGroup",
-                                        "data": {
-                                            "buttons": [
-                                                {
-                                                    "id": f"close-history-{k}",
-                                                    "text": "action_close",
-                                                    "color": "close",
-                                                    "size": "normal",
-                                                    "attrs": {"data-close-modal": ""},
-                                                }
-                                            ]
-                                        },
-                                    },
-                                ]
-                            },
-                        },
-                    }
-                )
-
-            if k in ("cache") and len(v) <= 0:
-                item.append({k: v, "type": "Text", "data": {"text": ""}})
-                continue
-
-            if k in ("cache") and len(v) > 0:
-                files = []
-                # loop on each cache item
-                for cache in v:
-                    file_name = f"{cache['file_name']} [{cache['service_id']}]" if cache["service_id"] else f"{cache['file_name']}"
-                    files.append(file_name)
-
-                item.append(
-                    {
-                        k: " ".join(files),
-                        "type": "Fields",
-                        "data": {
-                            "setting": {
-                                "attrs": {
-                                    "data-plugin-id": value.get("plugin_id", ""),
-                                    "data-job-name": key,
-                                },
-                                "id": f"{key}_cache",
-                                "label": f"{key}_cache",
-                                "hideLabel": True,
-                                "inpType": "select",
-                                "name": f"{key}_cache",
-                                "value": "download file",
-                                "values": files,
-                                "columns": {
-                                    "pc": 12,
-                                    "tablet": 12,
-                                    "mobile": 12,
-                                },
-                                "overflowAttrEl": "data-table-body",
-                                "containerClass": "table download-cache-file",
-                                "maxBtnChars": 16,
-                                "popovers": [
-                                    {
-                                        "iconName": "info",
-                                        "text": "jobs_download_cache_file",
-                                    },
-                                ],
-                            }
-                        },
-                    }
-                )
-                continue
-
-        data.append(item)
-
-    return data
+with open("jobs.txt", "w") as f:
+    f.write(output_base64_string)

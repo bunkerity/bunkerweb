@@ -1,6 +1,8 @@
 import json
 import base64
 
+# TODO : REMOVE operation by custom endpoint
+
 from builder.utils.widgets import button, button_group, title, text, tabulator, fields, upload, datepicker, input, select
 
 bans_columns = [
@@ -33,7 +35,7 @@ bans_filters = [
             "name": "select-ban-reason",
             "label": "bans_select_reason",  # keep it (a18n)
             "value": "all",  # keep "all"
-            "values": ["all", "antibot"],  # keep "all" and add your reasons
+            "values": ["all", "antibot"],  # keep "all" and add your reasons dynamically
             "inpType": "select",
             "onlyDown": True,
             "columns": {"pc": 3, "tablet": 4, " mobile": 12},
@@ -165,7 +167,7 @@ builder = [
         "display": ["main", 1],
         "widgets": [
             tabulator(
-                id="table-core-plugins",
+                id="table-bans-list",
                 columns=bans_columns,
                 items=bans_items,
                 filters=bans_filters,

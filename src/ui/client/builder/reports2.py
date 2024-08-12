@@ -3,10 +3,13 @@ import base64
 
 from builder.utils.widgets import button, button_group, title, text, tabulator, fields, upload, datepicker
 
+# TODO : REMOVE operation by custom endpoint
+
 reports_columns = [
     {"title": "Date", "field": "date", "formatter": "fields"},  # datepicker
     {"title": "IP", "field": "ip", "formatter": "text"},
     {"title": "Country", "field": "country", "formatter": "text"},
+    {"title": "Server name", "field": "server_name", "formatter": "text"},
     {"title": "Method", "field": "method", "formatter": "text"},
     {"title": "URL", "field": "url", "formatter": "text"},
     {"title": "Code", "field": "code", "formatter": "text"},

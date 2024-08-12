@@ -1,4 +1,4 @@
-from os import cpu_count
+from os import cpu_count, getpid
 from os.path import abspath
 from pathlib import Path
 from threading import Semaphore, Thread
@@ -73,15 +73,23 @@ def js2md():
 
     def convert_json_to_md(file: Path):
         semaphore.acquire()
-        # Run the command
-        output = run_command(["documentation", "build", file.as_posix(), "-f", "md"], with_output=True)
-        if output == 1:
-            print("Error while running command", flush=True)
-            exit(1)
+        print(f"Acquiring Semaphore for: {getpid()} (file {file})", flush=True)
+        try:
+            # Run the command
+            output = run_command(["documentation", "build", file.as_posix(), "-f", "md"], with_output=True)
+            if output == 1:
+                print("Error while running command", flush=True)
+                exit(1)
 
-        # Create a new file with the same name but with .md extension
-        file.with_suffix(".md").write_text(output)
-        semaphore.release()
+            # Create a new file with the same name but with .md extension
+            file.with_suffix(".md").write_text(output)
+        except BaseException:
+            print(format_exc(), flush=True)
+            print("Error while running documentation", str(file.name), flush=True)
+            exit(1)
+        finally:
+            print(f"Releasing Semaphore for: {getpid()} (file {file})", flush=True)
+            semaphore.release()
 
     threads = []
     # Create a markdown file for each JS file

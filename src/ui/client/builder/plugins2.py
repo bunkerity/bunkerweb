@@ -1,17 +1,24 @@
 import json
 import base64
 
+# TODO : REMOVE operation by custom endpoint
+
 from builder.utils.widgets import button, button_group, title, text, tabulator, fields, upload, checkbox
 
-core_columns = [
+
+# Here all plugins unless external
+core_pro_columns = [
     {"title": "Name", "field": "name", "formatter": "text"},
     {"title": "Description", "field": "description", "formatter": "text"},
+    {"title": "Type", "field": "type", "formatter": "text"},
+    {"title": "version", "field": "version", "formatter": "text"},
+    {"title": "stream", "field": "type", "stream": "text"},  # "yes" "no" "partial"
     {"title": "Documentation page", "field": "documentation_page", "formatter": "buttonGroup"},
     {"title": "Plugin page", "field": "plugin_page", "formatter": "buttonGroup"},
 ]
 
 
-core_filters = [
+core_pro_filters = [
     {
         "type": "like",
         "fields": ["name"],
@@ -27,7 +34,7 @@ core_filters = [
 ]
 
 
-core_items = [
+core_pro_items = [
     {
         "name": text(text="Name")["data"],
         "description": text(text="Description")["data"],
@@ -63,24 +70,25 @@ core_items = [
 ]
 
 
-register_columns = [
+registry_columns = [
     {"title": "Select", "field": "select", "formatter": "fields"},  # checkbox
     {"title": "Name", "field": "name", "formatter": "text"},
     {"title": "Description", "field": "description", "formatter": "text"},
-    {"title": "Type", "field": "type", "formatter": "text"},
     {"title": "Install", "field": "install", "formatter": "text"},
     {"title": "Documentation page", "field": "documentation_page", "formatter": "buttonGroup"},
+    {"title": "version", "field": "version", "formatter": "text"},
+    {"title": "stream", "field": "type", "stream": "text"},  # "yes" "no" "partial"
     {"title": "Plugin page", "field": "plugin_page", "formatter": "buttonGroup"},
 ]
 
 
-register_filters = [
+registry_filters = [
     {
         "type": "like",
         "fields": ["name"],
         "setting": {
-            "id": "input-search-register-name",
-            "name": "input-search-register-name",
+            "id": "input-search-registry-name",
+            "name": "input-search-registry-name",
             "label": "plugins_search_name",  # keep it (a18n)
             "value": "",
             "inpType": "input",
@@ -91,8 +99,8 @@ register_filters = [
         "type": "=",
         "fields": ["type"],
         "setting": {
-            "id": "select-register-type",
-            "name": "select-register-type",
+            "id": "select-registry-type",
+            "name": "select-registry-type",
             "label": "plugins_select_type",  # keep it (a18n)
             "value": "all",
             "values": ["all", "pro", "external"],
@@ -105,8 +113,8 @@ register_filters = [
         "type": "=",
         "fields": ["install"],
         "setting": {
-            "id": "select-register-install",
-            "name": "select-register-install",
+            "id": "select-registry-install",
+            "name": "select-registry-install",
             "label": "plugins_select_install",  # keep it (a18n)
             "value": "all",
             "values": ["all", "yes", "no"],
@@ -118,7 +126,7 @@ register_filters = [
 ]
 
 
-register_items = [
+registry_items = [
     {
         "select": checkbox(
             inputType="checkbox",
@@ -164,6 +172,7 @@ register_items = [
     },
 ]
 
+# Here all plugins with type external
 upload_columns = [
     {"title": "Select", "field": "select", "formatter": "fields"},  # checkbox
     {"title": "Name", "field": "name", "formatter": "text"},
@@ -241,9 +250,9 @@ builder = [
         "widgets": [
             tabulator(
                 id="table-core-plugins",
-                columns=core_columns,
-                items=core_items,
-                filters=core_filters,
+                columns=core_pro_columns,
+                items=core_pro_items,
+                filters=core_pro_filters,
             )
         ],
     },
@@ -252,10 +261,10 @@ builder = [
         "display": ["main", 2],
         "widgets": [
             tabulator(
-                id="table-register-plugins",
-                columns=register_columns,
-                items=register_items,
-                filters=register_filters,
+                id="table-registry-plugins",
+                columns=registry_columns,
+                items=registry_items,
+                filters=registry_filters,
             )
         ],
     },

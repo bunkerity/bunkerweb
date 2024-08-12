@@ -1,7 +1,7 @@
 import json
 import base64
 
-from pages.global_config import global_config_builder
+from builder.global_config import global_config_builder
 
 # Default plugins from docker-compose.ui.yml
 plugins = [

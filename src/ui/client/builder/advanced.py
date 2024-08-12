@@ -1,7 +1,7 @@
 import json
 import base64
 
-from pages.advanced_mode import advanced_mode_builder
+from builder.advanced_mode import advanced_mode_builder
 
 # Default plugins from docker-compose.ui.yml
 plugins = [

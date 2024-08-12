@@ -146,7 +146,7 @@ import Container from "@components/Widget/Container.vue";
  *          }
  *        }
  *    },
- *  @param {object<object>} multiples - The multiples settings to display. This needs to be a dict of settings using default field format.
+ *  @param {object} multiples - The multiples settings to display. This needs to be a dict of settings using default field format.
  *  @param {object} [columns={"pc": "12", "tablet": "12", "mobile": "12"}] - Field has a grid system. This allow to get multiple field in the same row if needed.
  *  @param {string} [containerClass=""] - Additionnal class to add to the container
  *  @param {string} [tadId=contentIndex] - The tabindex of the field, by default it is the contentIndex
