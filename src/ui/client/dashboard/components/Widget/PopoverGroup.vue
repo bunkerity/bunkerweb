@@ -20,8 +20,8 @@ import Popover from "@components/Widget/Popover.vue";
  *      },
  *    ],
  *  }
- *  @param {array} popovers - List of popovers to display. Popover component is used.
- *  @param {string} [groupClasss=""] - Additional class for the flex container
+ *  @param {Array} popovers - List of popovers to display. Popover component is used.
+ *  @param {String} [groupClasss=""] - Additional class for the flex container
  */
 
 const props = defineProps({

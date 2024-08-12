@@ -18,14 +18,14 @@ import { useDisplayStore } from "@store/global.js";
  *    gridLayoutClass: "items-start",
  *   display: ["main", 1],
  *  }
- *  @param {string} [type="card"] - Type of layout component, we can have "card"
- *  @param {string} [id=uuidv4()] - Id of the layout component, will be used to identify the component.
- *  @param {string} [title=""] - Title of the layout component, will be displayed at the top if exists. Type of layout component will determine the style of the title.
- *  @param {string} [link=""] - Will transform the container tag from a div to an a tag with the link as href. Useful with card type.
- *  @param {object} [columns={"pc": 12, "tablet": 12, "mobile": 12}] - Work with grid system { pc: 12, tablet: 12, mobile: 12}
- *  @param {string} [gridLayoutClass="items-start"] - Additional class
- *  @param {array} [display=[]] - Array need two values : "groupName" in index 0 and "compId" in index 1 in order to be displayed using the display store. More info on the display store itslef.
- *  @param {string} [tabId=contentIndex] - Case the container is converted to an anchor with a link, we can define the tabId, by default it is the contentIndex
+ *  @param {String} [type="card"] - Type of layout component, we can have "card"
+ *  @param {String} [id=uuidv4()] - Id of the layout component, will be used to identify the component.
+ *  @param {String} [title=""] - Title of the layout component, will be displayed at the top if exists. Type of layout component will determine the style of the title.
+ *  @param {String} [link=""] - Will transform the container tag from a div to an a tag with the link as href. Useful with card type.
+ *  @param {Object} [columns={"pc": 12, "tablet": 12, "mobile": 12}] - Work with grid system { pc: 12, tablet: 12, mobile: 12}
+ *  @param {String} [gridLayoutClass="items-start"] - Additional class
+ *  @param {Array} [display=[]] - Array need two values : "groupName" in index 0 and "compId" in index 1 in order to be displayed using the display store. More info on the display store itslef.
+ *  @param {String} [tabId=contentIndex] - Case the container is converted to an anchor with a link, we can define the tabId, by default it is the contentIndex
  */
 
 const props = defineProps({

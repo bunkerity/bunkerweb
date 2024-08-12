@@ -19,11 +19,11 @@ import Icons from "@components/Widget/Icons.vue";
  *    link: "/users",
  *    subtitleColor: "info",
  *  }
- *  @param {string} title - The title of the stat. Can be a translation key or by default raw text.
- *  @param {string|number} stat - The value
- *  @param {string} [subtitle=""] - The subtitle of the stat. Can be a translation key or by default raw text.
- *  @param {string} [iconName=""] - A top-right icon to display between icon available in Icons/Stat. Case falsy value, no icon displayed. The icon name is the name of the file without the extension on lowercase.
- *  @param {string} [subtitleColor="info"] - The color of the subtitle between error, success, warning, info
+ *  @param {String} title - The title of the stat. Can be a translation key or by default raw text.
+ *  @param {String|Number} stat - The value
+ *  @param {String} [subtitle=""] - The subtitle of the stat. Can be a translation key or by default raw text.
+ *  @param {String} [iconName=""] - A top-right icon to display between icon available in Icons/Stat. Case falsy value, no icon displayed. The icon name is the name of the file without the extension on lowercase.
+ *  @param {String} [subtitleColor="info"] - The color of the subtitle between error, success, warning, info
  */
 
 const props = defineProps({

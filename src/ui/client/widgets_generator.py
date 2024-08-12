@@ -281,10 +281,14 @@ def get_py_params(data: str) -> Union[str, bool]:
 def convert_params(params: List[dict]) -> List[dict]:
     convert_types = {
         "string": "str",
+        "timestamp": "int",
+        "element": "dict",
+        "event": "dict",
         "number": "int",
         "boolean": "bool",
         "array": "list",
         "object": "dict",
+        "function": "callable",
     }
 
     convert_values = {

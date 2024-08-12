@@ -26,7 +26,7 @@ function getAllLang() {
  *  @name getAllLangCurrPage
  *  @description   Filter the needed translations for the current page in order to reduce the size of the i18n object.
  *  @example ["dashboard", "settings", "profile"]
- *  @param {array} pagesArr -  Array of strings with the names of the prefixes of the translations needed.
+ *  @param {Array} pagesArr -  Array of strings with the names of the prefixes of the translations needed.
  *  @returns {object} - Object with the languages data for the current page.
  */
 function getAllLangCurrPage(pagesArr) {
@@ -48,7 +48,7 @@ function getAllLangCurrPage(pagesArr) {
  *  @name getI18n
  *  @description  Return the i18n object with the translations needed for the current page for all available languages.
  *  @example ["dashboard", "settings", "profile"]
- *  @param {array} pagesArr -  Array of strings with the names of the prefixes of the translations needed.
+ *  @param {Array} pagesArr -  Array of strings with the names of the prefixes of the translations needed.
  *  @returns {object} - Object with the i18n object.
  */
 function getI18n(pagesArr = []) {
@@ -99,7 +99,7 @@ function getLocalLang() {
     navigator.languages &&
     navigator.languages > 0 &&
     availablesLangs.indexOf(
-      navigator.languages[0].split("-")[0].toLowerCase(),
+      navigator.languages[0].split("-")[0].toLowerCase()
     ) !== -1
   ) {
     return navigator.languages[0].split("-")[0].toLowerCase();

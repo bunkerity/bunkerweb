@@ -80,7 +80,7 @@ import Table from "@components/Widget/Table.vue";
  *       }
  *   ]
  * ];
- *  @param {array} widgets - Array of containers and widgets
+ *  @param {Array} widgets - Array of containers and widgets
  */
 
 const props = defineProps({

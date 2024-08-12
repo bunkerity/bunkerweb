@@ -8,10 +8,10 @@ import { useUUID } from "@utils/global.js";
  *  {
  *    color: 'info',
  *  }
- *  @param {string} [iconClass="icon-default"] - The class of the icon.
- *  @param {any} [value=""] - Attach a value to icon. Useful on some cases like table filtering using icons.
- *  @param {string} [color="success"] - The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker').
- *  @param {boolean} [disabled=false] - If true, the icon will be disabled.
+ *  @param {String} [iconClass="icon-default"] - The class of the icon.
+ *  @param {Any} [value=""] - Attach a value to icon. Useful on some cases like table filtering using icons.
+ *  @param {String} [color="success"] - The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker').
+ *  @param {Boolean} [disabled=false] - If true, the icon will be disabled.
  */
 
 const props = defineProps({

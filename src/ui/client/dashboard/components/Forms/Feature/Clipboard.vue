@@ -16,11 +16,11 @@ import { useUUID } from "@utils/global.js";
  *    clipboadClass: 'mx-2',
  *    copyClass: 'mt-2',
  *  }
- *  @param {id} [id=uuidv4()] - Unique id
- *  @param {isClipboard} [isClipboard=false] - Display a clipboard button to copy a value
- *  @param {valueToCopy} [valueToCopy=""] - The value to copy
- *  @param {clipboadClass} [clipboadClass=""] - Additional class for the clipboard container. Useful to fit the component in a specific container.
- *  @param {copyClass} [copyClass=""] - The class of the copy message. Useful to fit the component in a specific container.
+ *  @param {String} [id=uuidv4()] - Unique id
+ *  @param {Boolean} [isClipboard=false] - Display a clipboard button to copy a value
+ *  @param {String} [valueToCopy=""] - The value to copy
+ *  @param {String} [clipboadClass=""] - Additional class for the clipboard container. Useful to fit the component in a specific container.
+ *  @param {String} [copyClass=""] - The class of the copy message. Useful to fit the component in a specific container.
  */
 
 const { text, copy, copied, isSupported } = useClipboard({ legacy: true });

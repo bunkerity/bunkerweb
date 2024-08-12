@@ -8,10 +8,10 @@ import { contentIndex } from "@utils/tabindex.js";
 /**
  *  @name addColumnsWidth
  *  @description Add min and max width to the column object in case we have the right format.
- *  @param {object} column -  The column object to update in case we have the right format.
- *  @param {string|number} [colMinWidth=0] - The minimum width for the column. Case 0 or invalid, will be ignored.
- *  @param {string|number} [colMaxWidth=0] - The minimum width for the column. Case 0 or invalid, will be ignored.
- *  @returns {void}
+ *  @param {Object} column -  The column object to update in case we have the right format.
+ *  @param {String|Number} [colMinWidth=0] - The minimum width for the column. Case 0 or invalid, will be ignored.
+ *  @param {String|Number} [colMaxWidth=0] - The minimum width for the column. Case 0 or invalid, will be ignored.
+ *  @returns {Void}
  */
 function addColumnsWidth(column, colMinWidth = 0, colMaxWidth = 0) {
   try {
@@ -26,9 +26,8 @@ function addColumnsWidth(column, colMinWidth = 0, colMaxWidth = 0) {
  *  @name addColumnsSorter
  *  @description This is a wrapper that will execute every sorter function in order to add a new sorter to the tabulator library.
  *  @example { title: "Icon", field: "icon", formatter: "icons" }
- *  @param {object} column -  The column object to update in case we have the right format.
- *  @param {formatName} column - Check if the current column format is the right one.
- *  @returns {void}
+ *  @param {Object} column -  The column object to update in case we have the right format.
+ *  @returns {Void}
  */
 function addColumnsSorter(column) {
   if (!("formatter" in column)) return;
@@ -41,9 +40,9 @@ function addColumnsSorter(column) {
  *  @name _sortIcons
  *  @description Add sorter for Icons components in the tabulator.
  *  @example { title: "Icon", field: "icon", formatter: "icons" }
- *  @param {object} column -  The column object to update in case we have the right format.
- *  @param {formatName} column - Check if the current column format is the right one.
- *  @returns {void}
+ *  @param {Object} column -  The column object to update in case we have the right format.
+ *  @param {String} formatName - Check if the current column format is the right one.
+ *  @returns {Void}
  */
 function _sortIcons(column, formatName) {
   if (formatName !== "icons") return;
@@ -82,9 +81,9 @@ function _sortIcons(column, formatName) {
  *  @name _sortText
  *  @description Add sorter for Text components in the tabulator. Under the hood, this will use the default tabulator sorter for strings.
  *  @example { title: "Icon", field: "icon", formatter: "icons" }
- *  @param {object} column -  The column object to update in case we have the right format.
- *  @param {formatName} column - Check if the current column format is the right one.
- *  @returns {void}
+ *  @param {Object} column -  The column object to update in case we have the right format.
+ *  @param {String} column - Check if the current column format is the right one.
+ *  @returns {Void}
  */
 function _sortText(column, formatName) {
   if (formatName !== "text") return;
@@ -94,7 +93,7 @@ function _sortText(column, formatName) {
 /**
  *  @name a11yTable
  *  @description Wrapper to add some accessibility to the table.
- *  @returns {void}
+ *  @returns {Void}
  */
 function a11yTable() {
   _a11ySortable();
@@ -105,7 +104,7 @@ function a11yTable() {
  *  @name _a11ySortable
  *  @description Allow the user to get to the sortable header by pressing the tab key.
  *  The user can then press the enter key to sort the column.
- *  @returns {void}
+ *  @returns {Void}
  */
 function _a11ySortable() {
   const sortableHeaders = document.querySelectorAll(
@@ -130,7 +129,7 @@ function _a11ySortable() {
 /**
  *  @name _a11yFooter
  *  @description Update pagination tabindex to get continuity in the tab order in the table footer.
- *  @returns {void}
+ *  @returns {Void}
  */
 function _a11yFooter() {
   const tableFooter = document.querySelector(".tabulator-footer");
@@ -146,10 +145,10 @@ function _a11yFooter() {
  *  @description Apply setting filter to the tabulator instance.
  *  We can't easily add filter after another, so we need to remove the previous one and add all new ones at once.
  *  @example { "filter-1" : { type: "keywords", fields: ["text", "icon"], setting: {}, value : "test" }}
- *  @param {object} tableInstance - The table instance to apply the filter.
- *  @param {object} filters -  All filters to apply to the table.
- *  @param {string|number|regex} value - The value to apply to the filter.
- *  @returns {void}
+ *  @param {Object} tableInstance - The table instance to apply the filter.
+ *  @param {Object} filters -  All filters to apply to the table.
+ *  @param {String|Number|Regex} value - The value to apply to the filter.
+ *  @returns {Void}
  */
 function applyTableFilter(tableInstance, filters) {
   // loop on dict filters

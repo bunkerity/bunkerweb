@@ -39,26 +39,26 @@ import { useUUID } from "@utils/global.js";
  *      },
  *    ]
  *  }
- *  @param {string} [id=uuidv4()] - Unique id
- *  @param {string} label - The label of the field. Can be a translation key or by default raw text.
- *  @param {string} name - The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.
- *  @param {string} value
- *  @param {array} values
- *  @param {object} [attrs={}] - Additional attributes to add to the field
- *  @param {string} [maxBtnChars=""] - Max char to display in the dropdown button handler.
- *  @param {array} [popovers=[]] - List of popovers to display more information
- *  @param {string} [inpType="select"]  - The type of the field, useful when we have multiple fields in the same container to display the right field
- *  @param {boolean} [disabled=false]
- *  @param {boolean} [required=false]
- *  @param {array} [requiredValues=[]] - values that need to be selected to be valid, works only if required is true
- *  @param {object} [columns={"pc": "12", "tablet": "12", "mobile": "12"}] - Field has a grid system. This allow to get multiple field in the same row if needed.
- *  @param {boolean} [hideLabel=false]
- *  @param {boolean} [onlyDown=false] - If the dropdown should check the bottom of the
- *  @param {boolean} [overflowAttrEl=""] - Attribute to select the container the element has to check for overflow
- *  @param {string} [containerClass=""]
- *  @param {string} [inpClass=""]
- *  @param {string} [headerClass=""]
- *  @param {string|number} [tabId=contentIndex] - The tabindex of the field, by default it is the contentIndex
+ *  @param {String} [id=uuidv4()] - Unique id
+ *  @param {String} label - The label of the field. Can be a translation key or by default raw text.
+ *  @param {String} name - The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.
+ *  @param {String} value
+ *  @param {Array} values
+ *  @param {Object} [attrs={}] - Additional attributes to add to the field
+ *  @param {String} [maxBtnChars=""] - Max char to display in the dropdown button handler.
+ *  @param {Array} [popovers=[]] - List of popovers to display more information
+ *  @param {String} [inpType="select"]  - The type of the field, useful when we have multiple fields in the same container to display the right field
+ *  @param {Boolean} [disabled=false]
+ *  @param {Boolean} [required=false]
+ *  @param {Array} [requiredValues=[]] - values that need to be selected to be valid, works only if required is true
+ *  @param {Object} [columns={"pc": "12", "tablet": "12", "mobile": "12"}] - Field has a grid system. This allow to get multiple field in the same row if needed.
+ *  @param {Boolean} [hideLabel=false]
+ *  @param {Boolean} [onlyDown=false] - If the dropdown should check the bottom of the
+ *  @param {Boolean} [overflowAttrEl=""] - Attribute to select the container the element has to check for overflow
+ *  @param {String} [containerClass=""]
+ *  @param {String} [inpClass=""]
+ *  @param {String} [headerClass=""]
+ *  @param {String|Number} [tabId=contentIndex] - The tabindex of the field, by default it is the contentIndex
  */
 
 const props = defineProps({
@@ -204,7 +204,7 @@ const selectDropdown = ref();
 /**
  *  @name toggleSelect
  *  @description This will toggle the custom select dropdown component.
- *  @returns {void}
+ *  @returns {Void}
  */
 function toggleSelect() {
   select.isOpen = select.isOpen ? false : true;
@@ -254,7 +254,7 @@ function toggleSelect() {
 /**
  *  @name closeSelect
  *  @description This will close the custom select dropdown component.
- *  @returns {void}
+ *  @returns {Void}
  */
 function closeSelect() {
   select.isOpen = false;
@@ -264,7 +264,7 @@ function closeSelect() {
  *  @name changeValue
  *  @description This will change the value of the select when a new value is selected from dropdown button.
  *  Check the validity of the select too. Close select after it.
- *  @param {string} newValue - The new value to set to the select.
+ *  @param {String} newValue - The new value to set to the select.
  *  @returns {string} - The new value of the select
  */
 function changeValue(newValue) {
@@ -287,8 +287,8 @@ function changeValue(newValue) {
  *  @name closeOutside
  *  @description This function is linked to a click event and will check if the target is part of the select component.
  *  Case not and select is open, will close the select.
- *  @param {event} e - The event object.
- *  @returns {void}
+ *  @param {Event} e - The event object.
+ *  @returns {Void}
  */
 function closeOutside(e) {
   try {
@@ -303,8 +303,8 @@ function closeOutside(e) {
 /**
  *  @name closeScroll
  *  @description This function is linked to a scroll event and will close the select in case a scroll is detected and the scroll is not the dropdown.
- *  @param {event} e - The event object.
- *  @returns {void}
+ *  @param {Event} e - The event object.
+ *  @returns {Void}
  */
 function closeScroll(e) {
   if (!e.target) return;
@@ -322,8 +322,8 @@ function closeScroll(e) {
 /**
  *  @name closeEscape
  *  @description This function is linked to a key event and will close the select in case "Escape" key is pressed.
- *  @param {event} e - The event object.
- *  @returns {void}
+ *  @param {Event} e - The event object.
+ *  @returns {Void}
  */
 function closeEscape(e) {
   if (e.key !== "Escape") return;
@@ -334,8 +334,8 @@ function closeEscape(e) {
  *  @name closeTab
  *  @description This function is linked to a key event and will listen to tabindex change.
  *  In case the new tabindex is not part of the select component, will close the select.
- *  @param {event} e - The event object.
- *  @returns {void}
+ *  @param {Event} e - The event object.
+ *  @returns {Void}
  */
 function closeTab(e) {
   if (e.key !== "Tab" && e.key !== "Shift-Tab") return;

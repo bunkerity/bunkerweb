@@ -11,14 +11,14 @@ import { computed, onMounted, reactive, ref } from "vue";
  *    color : "info",
  *    tag: "h2"
  *  }
- *  @param {string} subtitle -  Can be a translation key or by default raw text.
- *  @param {string} [type="card"] - The type of title between "container", "card", "content", "min" or "stat"
- *  @param {string} [tag=""] - The tag of the subtitle. Can be h1, h2, h3, h4, h5, h6 or p. If empty, will be determine by the type of subtitle.
- *  @param {string} [color=""] - The color of the subtitle between error, success, warning, info or tailwind color
- *  @param {boolean} [bold=false] - If the subtitle should be bold or not.
- *  @param {boolean} [uppercase=false] - If the subtitle should be uppercase or not.
- *  @param {boolean} [lowercase=false] - If the subtitle should be lowercase or not.
- *  @param {string} [subtitleClass=""] - Additional class, useful when component is used directly on a grid system
+ *  @param {String} subtitle -  Can be a translation key or by default raw text.
+ *  @param {String} [type="card"] - The type of title between "container", "card", "content", "min" or "stat"
+ *  @param {String} [tag=""] - The tag of the subtitle. Can be h1, h2, h3, h4, h5, h6 or p. If empty, will be determine by the type of subtitle.
+ *  @param {String} [color=""] - The color of the subtitle between error, success, warning, info or tailwind color
+ *  @param {Boolean} [bold=false] - If the subtitle should be bold or not.
+ *  @param {Boolean} [uppercase=false] - If the subtitle should be uppercase or not.
+ *  @param {Boolean} [lowercase=false] - If the subtitle should be lowercase or not.
+ *  @param {String} [subtitleClass=""] - Additional class, useful when component is used directly on a grid system
  */
 
 const props = defineProps({
@@ -98,8 +98,8 @@ onMounted(() => {
       props.uppercase
         ? 'uppercase'
         : props.lowercase
-          ? 'lowercase'
-          : 'capitalize-first',
+        ? 'lowercase'
+        : 'capitalize-first',
       props.subtitleClass,
     ]"
   >

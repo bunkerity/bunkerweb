@@ -10,8 +10,8 @@ import Text from "@components/Widget/Text.vue";
  *  {
  *    text: "dashboard_no_match",
  *  }
- *  @param {string} text - The text to display
- *  @param {string} [unmatchClass=""] - The class to apply to the message. If not provided, the class will be based on the parent component.
+ *  @param {String} text - The text to display
+ *  @param {String} [unmatchClass=""] - The class to apply to the message. If not provided, the class will be based on the parent component.
  */
 
 const props = defineProps({

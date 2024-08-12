@@ -19,11 +19,11 @@ def advanced_widget(
     
     PARAMETERS
     
-    -   `template` **object** Template object with plugin and settings data.
+    -   `template` **Object** Template object with plugin and settings data.
     -   `containerClass` **string** Container
     -   `operation` **string** Operation type (edit, new, delete). (optional, default `"edit"`)
     -   `oldServerName` **string** Old server name. This is a server name before any changes. (optional, default `""`)
-    -   `columns` **object** Columns object.
+    -   `columns` **Object** Columns object.
     
     EXAMPLE
     
@@ -92,20 +92,20 @@ def button_widget(
     
     PARAMETERS
     
-    -   `id` **string** Unique id of the button (optional, default `uuidv4()`)
-    -   `text` **string** Content of the button. Can be a translation key or by default raw text.
-    -   `display` **array** Case display, we will update the display store with the given array. Useful when we want to use button as tabs. (optional, default `[]`)
-    -   `type` **string** Can be of type button || submit (optional, default `"button"`)
-    -   `disabled` **boolean**  (optional, default `false`)
-    -   `hideText` **boolean** Hide text to only display icon (optional, default `false`)
-    -   `color` **string**  (optional, default `"primary"`)
-    -   `iconColor` **string** Color we want to apply to the icon. If falsy value, default icon color is applied. (optional, default `""`)
-    -   `size` **string** Can be of size sm || normal || lg || xl or tab (optional, default `"normal"`)
-    -   `iconName` **string** Name in lowercase of icons store on /Icons. If falsy value, no icon displayed. (optional, default `""`)
+    -   `id` **String** Unique id of the button (optional, default `uuidv4()`)
+    -   `text` **String** Content of the button. Can be a translation key or by default raw text.
+    -   `display` **Array** Case display, we will update the display store with the given array. Useful when we want to use button as tabs. (optional, default `[]`)
+    -   `type` **String** Can be of type button || submit (optional, default `"button"`)
+    -   `disabled` **Boolean**  (optional, default `false`)
+    -   `hideText` **Boolean** Hide text to only display icon (optional, default `false`)
+    -   `color` **String**  (optional, default `"primary"`)
+    -   `iconColor` **String** Color we want to apply to the icon. If falsy value, default icon color is applied. (optional, default `""`)
+    -   `size` **String** Can be of size sm || normal || lg || xl or tab (optional, default `"normal"`)
+    -   `iconName` **String** Name in lowercase of icons store on /Icons. If falsy value, no icon displayed. (optional, default `""`)
     -   `attrs` **Object** List of attributes to add to the button. Some attributes will conduct to additional script (optional, default `{}`)
     -   `modal` **(Object | boolean)** We can link the button to a Modal component. We need to pass the widgets inside the modal. Button click will open the modal. (optional, default `false`)
-    -   `tabId` **(string | number)** The tabindex of the field, by default it is the contentIndex (optional, default `contentIndex`)
-    -   `containerClass` **string** Additional class to the container (optional, default `""`)
+    -   `tabId` **(String | Number)** The tabindex of the field, by default it is the contentIndex (optional, default `contentIndex`)
+    -   `containerClass` **String** Additional class to the container (optional, default `""`)
     
     EXAMPLE
     
@@ -146,8 +146,8 @@ def button_group_widget(
     
     PARAMETERS
     
-    -   `buttons` **array** List of buttons to display. Button component is used.
-    -   `boutonGroupClass` **string** Additional class for the flex container (optional, default `""`)
+    -   `buttons` **Array** List of buttons to display. Button component is used.
+    -   `boutonGroupClass` **String** Additional class for the flex container (optional, default `""`)
     
     EXAMPLE
     
@@ -202,8 +202,8 @@ def cell_widget(
     
     PARAMETERS
     
-    -   `type` **string** The type of the cell. This needs to be a Vue component.
-    -   `data` **object** The data to display in the cell. This needs to be the props of the Vue component.
+    -   `type` **String** The type of the cell. This needs to be a Vue component.
+    -   `data` **Object** The data to display in the cell. This needs to be the props of the Vue component.
     
     EXAMPLE
     
@@ -233,12 +233,12 @@ def cell_widget(
         
 
 def checkbox_widget(
-    popovers,
     label: str,
     name: str,
     value: str,
     id: str = "",
     attrs: dict = {},
+    popovers: list = [],
     inpType: str = "checkbox",
     disabled: bool = False,
     required: bool = False,
@@ -256,21 +256,21 @@ def checkbox_widget(
     
     PARAMETERS
     
-    -   `id` **string** Unique id (optional, default `uuidv4()`)
-    -   `label` **string** The label of the field. Can be a translation key or by default raw text.
-    -   `name` **string** The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.
-    -   `value` **string**;
-    -   `attrs` **object** Additional attributes to add to the field (optional, default `{}`)
-    -   `popovers` **array?** List of popovers to display more information
-    -   `inpType` **string** The type of the field, useful when we have multiple fields in the same container to display the right field (optional, default `"checkbox"`)
-    -   `disabled` **boolean**  (optional, default `false`)
-    -   `required` **boolean**  (optional, default `false`)
-    -   `columns` **object** Field has a grid system. This allow to get multiple field in the same row if needed. (optional, default `{"pc":"12","tablet":"12","mobile":"12"}`)
-    -   `hideLabel` **boolean**  (optional, default `false`)
-    -   `containerClass` **string**  (optional, default `""`)
-    -   `headerClass` **string**  (optional, default `""`)
-    -   `inpClass` **string**  (optional, default `""`)
-    -   `tabId` **(string | number)** The tabindex of the field, by default it is the contentIndex (optional, default `contentIndex`)
+    -   `id` **String** Unique id (optional, default `uuidv4()`)
+    -   `label` **String** The label of the field. Can be a translation key or by default raw text.
+    -   `name` **String** The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.
+    -   `value` **String**;
+    -   `attrs` **Object** Additional attributes to add to the field (optional, default `{}`)
+    -   `popovers` **Array** List of popovers to display more information (optional, default `[]`)
+    -   `inpType` **String** The type of the field, useful when we have multiple fields in the same container to display the right field (optional, default `"checkbox"`)
+    -   `disabled` **Boolean**  (optional, default `false`)
+    -   `required` **Boolean**  (optional, default `false`)
+    -   `columns` **Object** Field has a grid system. This allow to get multiple field in the same row if needed. (optional, default `{"pc":"12","tablet":"12","mobile":"12"}`)
+    -   `hideLabel` **Boolean**  (optional, default `false`)
+    -   `containerClass` **String**  (optional, default `""`)
+    -   `headerClass` **String**  (optional, default `""`)
+    -   `inpClass` **String**  (optional, default `""`)
+    -   `tabId` **(String | Number)** The tabindex of the field, by default it is the contentIndex (optional, default `contentIndex`)
     
     EXAMPLE
     
@@ -295,7 +295,6 @@ def checkbox_widget(
     """
 
     data = {
-        "popovers" : popovers,
         "label" : label,
         "name" : name,
         "value" : value,
@@ -303,7 +302,7 @@ def checkbox_widget(
 
 
     # List of params that will be add only if not default value
-    list_params = [("id", id, ""),("attrs", attrs, {}),("inpType", inpType, "checkbox"),("disabled", disabled, False),("required", required, False),("columns", columns, {"pc":"12","tablet":"12","mobile":"12"}),("hideLabel", hideLabel, False),("containerClass", containerClass, ""),("headerClass", headerClass, ""),("inpClass", inpClass, ""),("tabId", tabId, "")]
+    list_params = [("id", id, ""),("attrs", attrs, {}),("popovers", popovers, []),("inpType", inpType, "checkbox"),("disabled", disabled, False),("required", required, False),("columns", columns, {"pc":"12","tablet":"12","mobile":"12"}),("hideLabel", hideLabel, False),("containerClass", containerClass, ""),("headerClass", headerClass, ""),("inpClass", inpClass, ""),("tabId", tabId, "")]
     for param in list_params:
         add_key_value(data, param[0], param[1], param[2])
 
@@ -311,11 +310,11 @@ def checkbox_widget(
         
 
 def clipboard_widget(
-    id,
-    isClipboard,
-    valueToCopy,
-    clipboadClass,
-    copyClass
+    id: str = "",
+    isClipboard: bool = False,
+    valueToCopy: str = "",
+    clipboadClass: str = "",
+    copyClass: str = ""
     ):
     """    
     This component can be add to some fields to allow to copy the value of the field.
@@ -323,11 +322,11 @@ def clipboard_widget(
     
     PARAMETERS
     
-    -   `id` **id** Unique id (optional, default `uuidv4()`)
-    -   `isClipboard` **isClipboard** Display a clipboard button to copy a value (optional, default `false`)
-    -   `valueToCopy` **valueToCopy** The value to copy (optional, default `""`)
-    -   `clipboadClass` **clipboadClass** Additional class for the clipboard container. Useful to fit the component in a specific container. (optional, default `""`)
-    -   `copyClass` **copyClass** The class of the copy message. Useful to fit the component in a specific container. (optional, default `""`)
+    -   `id` **String** Unique id (optional, default `uuidv4()`)
+    -   `isClipboard` **Boolean** Display a clipboard button to copy a value (optional, default `false`)
+    -   `valueToCopy` **String** The value to copy (optional, default `""`)
+    -   `clipboadClass` **String** Additional class for the clipboard container. Useful to fit the component in a specific container. (optional, default `""`)
+    -   `copyClass` **String** The class of the copy message. Useful to fit the component in a specific container. (optional, default `""`)
     
     EXAMPLE
     
@@ -354,7 +353,6 @@ def clipboard_widget(
         
 
 def combobox_widget(
-    popovers,
     label: str,
     name: str,
     value: str,
@@ -362,6 +360,7 @@ def combobox_widget(
     id: str = "",
     attrs: dict = {},
     maxBtnChars: str = "",
+    popovers: list = [],
     inpType: str = "select",
     disabled: bool = False,
     required: bool = False,
@@ -382,26 +381,26 @@ def combobox_widget(
     
     PARAMETERS
     
-    -   `id` **string** Unique id (optional, default `uuidv4()`)
-    -   `label` **string** The label of the field. Can be a translation key or by default raw text.
-    -   `name` **string** The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.
-    -   `value` **string**;
-    -   `values` **array**;
-    -   `attrs` **object** Additional attributes to add to the field (optional, default `{}`)
-    -   `maxBtnChars` **string** Max char to display in the dropdown button handler. (optional, default `""`)
-    -   `popovers` **array?** List of popovers to display more information
-    -   `inpType` **string** The type of the field, useful when we have multiple fields in the same container to display the right field (optional, default `"select"`)
-    -   `disabled` **boolean**  (optional, default `false`)
-    -   `required` **boolean**  (optional, default `false`)
-    -   `requiredValues` **array** values that need to be selected to be valid, works only if required is true (optional, default `[]`)
-    -   `columns` **object** Field has a grid system. This allow to get multiple field in the same row if needed. (optional, default `{"pc":"12","tablet":"12","mobile":"12"}`)
-    -   `hideLabel` **boolean**  (optional, default `false`)
-    -   `onlyDown` **boolean** If the dropdown should check the bottom of the (optional, default `false`)
-    -   `overflowAttrEl` **boolean** Attribute to select the container the element has to check for overflow (optional, default `""`)
-    -   `containerClass` **string**  (optional, default `""`)
-    -   `inpClass` **string**  (optional, default `""`)
-    -   `headerClass` **string**  (optional, default `""`)
-    -   `tabId` **(string | number)** The tabindex of the field, by default it is the contentIndex (optional, default `contentIndex`)
+    -   `id` **String** Unique id (optional, default `uuidv4()`)
+    -   `label` **String** The label of the field. Can be a translation key or by default raw text.
+    -   `name` **String** The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.
+    -   `value` **String**;
+    -   `values` **Array**;
+    -   `attrs` **Object** Additional attributes to add to the field (optional, default `{}`)
+    -   `maxBtnChars` **String** Max char to display in the dropdown button handler. (optional, default `""`)
+    -   `popovers` **Array** List of popovers to display more information (optional, default `[]`)
+    -   `inpType` **String** The type of the field, useful when we have multiple fields in the same container to display the right field (optional, default `"select"`)
+    -   `disabled` **Boolean**  (optional, default `false`)
+    -   `required` **Boolean**  (optional, default `false`)
+    -   `requiredValues` **Array** values that need to be selected to be valid, works only if required is true (optional, default `[]`)
+    -   `columns` **Object** Field has a grid system. This allow to get multiple field in the same row if needed. (optional, default `{"pc":"12","tablet":"12","mobile":"12"}`)
+    -   `hideLabel` **Boolean**  (optional, default `false`)
+    -   `onlyDown` **Boolean** If the dropdown should check the bottom of the (optional, default `false`)
+    -   `overflowAttrEl` **Boolean** Attribute to select the container the element has to check for overflow (optional, default `""`)
+    -   `containerClass` **String**  (optional, default `""`)
+    -   `inpClass` **String**  (optional, default `""`)
+    -   `headerClass` **String**  (optional, default `""`)
+    -   `tabId` **(String | Number)** The tabindex of the field, by default it is the contentIndex (optional, default `contentIndex`)
     
     EXAMPLE
     
@@ -426,7 +425,6 @@ def combobox_widget(
     """
 
     data = {
-        "popovers" : popovers,
         "label" : label,
         "name" : name,
         "value" : value,
@@ -435,7 +433,7 @@ def combobox_widget(
 
 
     # List of params that will be add only if not default value
-    list_params = [("id", id, ""),("attrs", attrs, {}),("maxBtnChars", maxBtnChars, ""),("inpType", inpType, "select"),("disabled", disabled, False),("required", required, False),("requiredValues", requiredValues, []),("columns", columns, {"pc":"12","tablet":"12","mobile":"12"}),("hideLabel", hideLabel, False),("onlyDown", onlyDown, False),("overflowAttrEl", overflowAttrEl, ""),("containerClass", containerClass, ""),("inpClass", inpClass, ""),("headerClass", headerClass, ""),("tabId", tabId, "")]
+    list_params = [("id", id, ""),("attrs", attrs, {}),("maxBtnChars", maxBtnChars, ""),("popovers", popovers, []),("inpType", inpType, "select"),("disabled", disabled, False),("required", required, False),("requiredValues", requiredValues, []),("columns", columns, {"pc":"12","tablet":"12","mobile":"12"}),("hideLabel", hideLabel, False),("onlyDown", onlyDown, False),("overflowAttrEl", overflowAttrEl, ""),("containerClass", containerClass, ""),("inpClass", inpClass, ""),("headerClass", headerClass, ""),("tabId", tabId, "")]
     for param in list_params:
         add_key_value(data, param[0], param[1], param[2])
 
@@ -456,10 +454,10 @@ def container_widget(
     
     PARAMETERS
     
-    -   `containerClass` **string** Additional class (optional, default `""`)
-    -   `columns` **(object | boolean)** Work with grid system { pc: 12, tablet: 12, mobile: 12} (optional, default `false`)
-    -   `tag` **string** The tag for the container (optional, default `"div"`)
-    -   `display` **array** Array need two values : "groupName" in index 0 and "compId" in index 1 in order to be displayed using the display store. More info on the display store itslef. (optional, default `[]`)
+    -   `containerClass` **String** Additional class (optional, default `""`)
+    -   `columns` **(Object | boolean)** Work with grid system { pc: 12, tablet: 12, mobile: 12} (optional, default `false`)
+    -   `tag` **String** The tag for the container (optional, default `"div"`)
+    -   `display` **Array** Array need two values : "groupName" in index 0 and "compId" in index 1 in order to be displayed using the display store. More info on the display store itslef. (optional, default `[]`)
     
     EXAMPLE
     
@@ -483,15 +481,15 @@ def container_widget(
         
 
 def datepicker_widget(
-    value,
-    minDate,
-    maxDate,
     label: str,
     name: str,
-    popovers: list,
     id: str = "",
+    popovers: list = [],
     attrs: dict = {},
     inpType: str = "datepicker",
+    value: int = "",
+    minDate: int = "",
+    maxDate: int = "",
     isClipboard: bool = True,
     hideLabel: bool = False,
     columns: dict = {"pc":"12","tablet":"12","mobile":"12"},
@@ -509,23 +507,23 @@ def datepicker_widget(
     
     PARAMETERS
     
-    -   `id` **string** Unique id (optional, default `uuidv4()`)
-    -   `label` **string** The label of the field. Can be a translation key or by default raw text.
-    -   `name` **string** The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.
-    -   `popovers` **array** List of popovers to display more information
-    -   `attrs` **object** Additional attributes to add to the field (optional, default `{}`)
-    -   `inpType` **string** The type of the field, useful when we have multiple fields in the same container to display the right field (optional, default `"datepicker"`)
-    -   `value` **timestamp** Default date when instantiate (optional, default `""`)
-    -   `minDate` **timestamp** Impossible to pick a date before this date. (optional, default `""`)
-    -   `maxDate` **timestamp** Impossible to pick a date after this date. (optional, default `""`)
-    -   `isClipboard` **boolean** allow to copy the timestamp value (optional, default `true`)
-    -   `hideLabel` **boolean**  (optional, default `false`)
-    -   `columns` **object** Field has a grid system. This allow to get multiple field in the same row if needed. (optional, default `{"pc":"12","tablet":"12","mobile":"12"}`)
-    -   `disabled` **boolean**  (optional, default `false`)
-    -   `required` **boolean**  (optional, default `false`)
-    -   `headerClass` **string**  (optional, default `""`)
-    -   `containerClass` **string**  (optional, default `""`)
-    -   `tabId` **(string | number)** The tabindex of the field, by default it is the contentIndex (optional, default `contentIndex`)
+    -   `id` **String** Unique id (optional, default `uuidv4()`)
+    -   `label` **String** The label of the field. Can be a translation key or by default raw text.
+    -   `name` **String** The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.
+    -   `popovers` **Array** List of popovers to display more information (optional, default `[]`)
+    -   `attrs` **Object** Additional attributes to add to the field (optional, default `{}`)
+    -   `inpType` **String** The type of the field, useful when we have multiple fields in the same container to display the right field (optional, default `"datepicker"`)
+    -   `value` **Timestamp** Default date when instantiate (optional, default `""`)
+    -   `minDate` **Timestamp** Impossible to pick a date before this date. (optional, default `""`)
+    -   `maxDate` **Timestamp** Impossible to pick a date after this date. (optional, default `""`)
+    -   `isClipboard` **Boolean** allow to copy the timestamp value (optional, default `true`)
+    -   `hideLabel` **Boolean**  (optional, default `false`)
+    -   `columns` **Object** Field has a grid system. This allow to get multiple field in the same row if needed. (optional, default `{"pc":"12","tablet":"12","mobile":"12"}`)
+    -   `disabled` **Boolean**  (optional, default `false`)
+    -   `required` **Boolean**  (optional, default `false`)
+    -   `headerClass` **String**  (optional, default `""`)
+    -   `containerClass` **String**  (optional, default `""`)
+    -   `tabId` **(String | Number)** The tabindex of the field, by default it is the contentIndex (optional, default `contentIndex`)
     
     EXAMPLE
     
@@ -552,12 +550,11 @@ def datepicker_widget(
     data = {
         "label" : label,
         "name" : name,
-        "popovers" : popovers,
        }
 
 
     # List of params that will be add only if not default value
-    list_params = [("value", value, ""),("minDate", minDate, ""),("maxDate", maxDate, ""),("id", id, ""),("attrs", attrs, {}),("inpType", inpType, "datepicker"),("isClipboard", isClipboard, True),("hideLabel", hideLabel, False),("columns", columns, {"pc":"12","tablet":"12","mobile":"12"}),("disabled", disabled, False),("required", required, False),("headerClass", headerClass, ""),("containerClass", containerClass, ""),("tabId", tabId, "")]
+    list_params = [("id", id, ""),("popovers", popovers, []),("attrs", attrs, {}),("inpType", inpType, "datepicker"),("value", value, ""),("minDate", minDate, ""),("maxDate", maxDate, ""),("isClipboard", isClipboard, True),("hideLabel", hideLabel, False),("columns", columns, {"pc":"12","tablet":"12","mobile":"12"}),("disabled", disabled, False),("required", required, False),("headerClass", headerClass, ""),("containerClass", containerClass, ""),("tabId", tabId, "")]
     for param in list_params:
         add_key_value(data, param[0], param[1], param[2])
 
@@ -627,11 +624,11 @@ def easy_widget(
     
     PARAMETERS
     
-    -   `template` **object** Template object with plugin and settings data.
+    -   `template` **Object** Template object with plugin and settings data.
     -   `containerClass` **string** Container
     -   `operation` **string** Operation type (edit, new, delete). (optional, default `"edit"`)
     -   `oldServerName` **string** Old server name. This is a server name before any changes. (optional, default `""`)
-    -   `columns` **object** Columns object.
+    -   `columns` **Object** Columns object.
     
     EXAMPLE
     
@@ -680,12 +677,12 @@ def easy_widget(
         
 
 def editor_widget(
-    popovers,
     label: str,
     name: str,
     value: str,
     id: str = "",
     attrs: dict = {},
+    popovers: list = [],
     inpType: str = "editor",
     columns: dict = {"pc":"12","tablet":"12","mobile":"12"},
     pattern: str = "",
@@ -705,23 +702,23 @@ def editor_widget(
     
     PARAMETERS
     
-    -   `id` **string** Unique id (optional, default `uuidv4()`)
-    -   `label` **string** The label of the field. Can be a translation key or by default raw text.
-    -   `name` **string** The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.
-    -   `value` **string**;
-    -   `attrs` **object** Additional attributes to add to the field (optional, default `{}`)
-    -   `popovers` **array?** List of popovers to display more information
-    -   `inpType` **string** The type of the field, useful when we have multiple fields in the same container to display the right field (optional, default `"editor"`)
-    -   `columns` **object** Field has a grid system. This allow to get multiple field in the same row if needed. (optional, default `{"pc":"12","tablet":"12","mobile":"12"}`)
-    -   `pattern` **string**  (optional, default `""`)
-    -   `disabled` **boolean**  (optional, default `false`)
-    -   `required` **boolean**  (optional, default `false`)
-    -   `isClipboard` **boolean** allow to copy the input value (optional, default `true`)
-    -   `hideLabel` **boolean**  (optional, default `false`)
-    -   `containerClass` **string**  (optional, default `""`)
-    -   `editorClass` **string**  (optional, default `""`)
-    -   `headerClass` **string**  (optional, default `""`)
-    -   `tabId` **(string | number)** The tabindex of the field, by default it is the contentIndex (optional, default `contentIndex`)
+    -   `id` **String** Unique id (optional, default `uuidv4()`)
+    -   `label` **String** The label of the field. Can be a translation key or by default raw text.
+    -   `name` **String** The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.
+    -   `value` **String**;
+    -   `attrs` **Object** Additional attributes to add to the field (optional, default `{}`)
+    -   `popovers` **Array** List of popovers to display more information (optional, default `[]`)
+    -   `inpType` **String** The type of the field, useful when we have multiple fields in the same container to display the right field (optional, default `"editor"`)
+    -   `columns` **Object** Field has a grid system. This allow to get multiple field in the same row if needed. (optional, default `{"pc":"12","tablet":"12","mobile":"12"}`)
+    -   `pattern` **String**  (optional, default `""`)
+    -   `disabled` **Boolean**  (optional, default `false`)
+    -   `required` **Boolean**  (optional, default `false`)
+    -   `isClipboard` **Boolean** allow to copy the input value (optional, default `true`)
+    -   `hideLabel` **Boolean**  (optional, default `false`)
+    -   `containerClass` **String**  (optional, default `""`)
+    -   `editorClass` **String**  (optional, default `""`)
+    -   `headerClass` **String**  (optional, default `""`)
+    -   `tabId` **(String | Number)** The tabindex of the field, by default it is the contentIndex (optional, default `contentIndex`)
     
     EXAMPLE
     
@@ -740,7 +737,6 @@ def editor_widget(
     """
 
     data = {
-        "popovers" : popovers,
         "label" : label,
         "name" : name,
         "value" : value,
@@ -748,7 +744,7 @@ def editor_widget(
 
 
     # List of params that will be add only if not default value
-    list_params = [("id", id, ""),("attrs", attrs, {}),("inpType", inpType, "editor"),("columns", columns, {"pc":"12","tablet":"12","mobile":"12"}),("pattern", pattern, ""),("disabled", disabled, False),("required", required, False),("isClipboard", isClipboard, True),("hideLabel", hideLabel, False),("containerClass", containerClass, ""),("editorClass", editorClass, ""),("headerClass", headerClass, ""),("tabId", tabId, "")]
+    list_params = [("id", id, ""),("attrs", attrs, {}),("popovers", popovers, []),("inpType", inpType, "editor"),("columns", columns, {"pc":"12","tablet":"12","mobile":"12"}),("pattern", pattern, ""),("disabled", disabled, False),("required", required, False),("isClipboard", isClipboard, True),("hideLabel", hideLabel, False),("containerClass", containerClass, ""),("editorClass", editorClass, ""),("headerClass", headerClass, ""),("tabId", tabId, "")]
     for param in list_params:
         add_key_value(data, param[0], param[1], param[2])
 
@@ -756,10 +752,10 @@ def editor_widget(
         
 
 def field_widget(
-    popovers,
     label: str,
     id: str,
     name: str,
+    popovers: list = [],
     required: bool = False,
     hideLabel: bool = False,
     headerClass: str = ""
@@ -771,13 +767,13 @@ def field_widget(
     
     PARAMETERS
     
-    -   `label` **string** The label of the field. Can be a translation key or by default raw text.
-    -   `id` **string** The id of the field. This is used to link the label to the field.
-    -   `name` **string** The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.
-    -   `popovers` **array?** List of popovers to display more information
-    -   `required` **boolean**  (optional, default `false`)
-    -   `hideLabel` **boolean**  (optional, default `false`)
-    -   `headerClass` **string**  (optional, default `""`)
+    -   `label` **String** The label of the field. Can be a translation key or by default raw text.
+    -   `id` **String** The id of the field. This is used to link the label to the field.
+    -   `name` **String** The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.
+    -   `popovers` **Array** List of popovers to display more information (optional, default `[]`)
+    -   `required` **Boolean**  (optional, default `false`)
+    -   `hideLabel` **Boolean**  (optional, default `false`)
+    -   `headerClass` **String**  (optional, default `""`)
     
     EXAMPLE
     
@@ -797,7 +793,6 @@ def field_widget(
     """
 
     data = {
-        "popovers" : popovers,
         "label" : label,
         "id" : id,
         "name" : name,
@@ -805,7 +800,7 @@ def field_widget(
 
 
     # List of params that will be add only if not default value
-    list_params = [("required", required, False),("hideLabel", hideLabel, False),("headerClass", headerClass, "")]
+    list_params = [("popovers", popovers, []),("required", required, False),("hideLabel", hideLabel, False),("headerClass", headerClass, "")]
     for param in list_params:
         add_key_value(data, param[0], param[1], param[2])
 
@@ -820,7 +815,7 @@ def fields_widget(
     
     PARAMETERS
     
-    -   `setting` **object** Setting needed to render a field.
+    -   `setting` **Object** Setting needed to render a field.
     
     EXAMPLE
     
@@ -870,9 +865,9 @@ def filter_widget(
     
     PARAMETERS
     
-    -   `filters` **array** Fields with additional data to be used as filters. (optional, default `[]`)
-    -   `data` **(object | array)** Data object or array to filter. Emit a filter event with the filtered data. (optional, default `{}`)
-    -   `containerClass` **string** Additional class for the container. (optional, default `""`)
+    -   `filters` **Array** Fields with additional data to be used as filters. (optional, default `[]`)
+    -   `data` **(Object | Array)** Data object or array to filter. Emit a filter event with the filtered data. (optional, default `{}`)
+    -   `containerClass` **String** Additional class for the container. (optional, default `""`)
     
     EXAMPLE
     
@@ -928,8 +923,8 @@ def grid_widget(
     
     PARAMETERS
     
-    -   `gridClass` **string** Additional class (optional, default `"items-start"`)
-    -   `display` **array** Array need two values : "groupName" in index 0 and "compId" in index 1 in order to be displayed using the display store. More info on the display store itslef. (optional, default `[]`)
+    -   `gridClass` **String** Additional class (optional, default `"items-start"`)
+    -   `display` **Array** Array need two values : "groupName" in index 0 and "compId" in index 1 in order to be displayed using the display store. More info on the display store itslef. (optional, default `[]`)
     
     EXAMPLE
     
@@ -970,14 +965,14 @@ def grid_layout_widget(
     
     PARAMETERS
     
-    -   `type` **string** Type of layout component, we can have "card" (optional, default `"card"`)
-    -   `id` **string** Id of the layout component, will be used to identify the component. (optional, default `uuidv4()`)
-    -   `title` **string** Title of the layout component, will be displayed at the top if exists. Type of layout component will determine the style of the title. (optional, default `""`)
-    -   `link` **string** Will transform the container tag from a div to an a tag with the link as href. Useful with card type. (optional, default `""`)
-    -   `columns` **object** Work with grid system { pc: 12, tablet: 12, mobile: 12} (optional, default `{"pc":12,"tablet":12,"mobile":12}`)
-    -   `gridLayoutClass` **string** Additional class (optional, default `"items-start"`)
-    -   `display` **array** Array need two values : "groupName" in index 0 and "compId" in index 1 in order to be displayed using the display store. More info on the display store itslef. (optional, default `[]`)
-    -   `tabId` **string** Case the container is converted to an anchor with a link, we can define the tabId, by default it is the contentIndex (optional, default `contentIndex`)
+    -   `type` **String** Type of layout component, we can have "card" (optional, default `"card"`)
+    -   `id` **String** Id of the layout component, will be used to identify the component. (optional, default `uuidv4()`)
+    -   `title` **String** Title of the layout component, will be displayed at the top if exists. Type of layout component will determine the style of the title. (optional, default `""`)
+    -   `link` **String** Will transform the container tag from a div to an a tag with the link as href. Useful with card type. (optional, default `""`)
+    -   `columns` **Object** Work with grid system { pc: 12, tablet: 12, mobile: 12} (optional, default `{"pc":12,"tablet":12,"mobile":12}`)
+    -   `gridLayoutClass` **String** Additional class (optional, default `"items-start"`)
+    -   `display` **Array** Array need two values : "groupName" in index 0 and "compId" in index 1 in order to be displayed using the display store. More info on the display store itslef. (optional, default `[]`)
+    -   `tabId` **String** Case the container is converted to an anchor with a link, we can define the tabId, by default it is the contentIndex (optional, default `contentIndex`)
     
     EXAMPLE
     
@@ -1018,12 +1013,12 @@ def icons_widget(
     
     PARAMETERS
     
-    -   `iconName` **string** The name of the icon to display. The icon name is the name of the file without the extension on lowercase.
-    -   `iconClass` **string** Class to apply to the icon. In case the icon is related to a widget, the widget will set the right class automatically. (optional, default `"base"`)
-    -   `color` **string** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `""`)
-    -   `isStick` **boolean** If true, the icon will be stick to the top right of the parent container. (optional, default `false`)
-    -   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
-    -   `value` **any** Attach a value to icon. Useful on some cases like table filtering using icons. (optional, default `""`)
+    -   `iconName` **String** The name of the icon to display. The icon name is the name of the file without the extension on lowercase.
+    -   `iconClass` **String** Class to apply to the icon. In case the icon is related to a widget, the widget will set the right class automatically. (optional, default `"base"`)
+    -   `color` **String** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `""`)
+    -   `isStick` **Boolean** If true, the icon will be stick to the top right of the parent container. (optional, default `false`)
+    -   `disabled` **Boolean** If true, the icon will be disabled. (optional, default `false`)
+    -   `value` **Any** Attach a value to icon. Useful on some cases like table filtering using icons. (optional, default `""`)
     
     EXAMPLE
     
@@ -1079,26 +1074,26 @@ def input_widget(
     
     PARAMETERS
     
-    -   `id` **string** Unique id (optional, default `uuidv4()`)
-    -   `type` **string** text, email, password, number, tel, url (optional, default `"text"`)
-    -   `label` **string** The label of the field. Can be a translation key or by default raw text.
-    -   `name` **string** The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.
-    -   `value` **string**;
-    -   `attrs` **object** Additional attributes to add to the field (optional, default `{}`)
-    -   `popovers` **array** List of popovers to display more information (optional, default `[]`)
-    -   `inpType` **string** The type of the field, useful when we have multiple fields in the same container to display the right field (optional, default `"input"`)
-    -   `columns` **object** Field has a grid system. This allow to get multiple field in the same row if needed. (optional, default `{"pc":"12","tablet":"12","mobile":"12"}`)
-    -   `disabled` **boolean**  (optional, default `false`)
-    -   `required` **boolean**  (optional, default `false`)
-    -   `placeholder` **string**  (optional, default `""`)
-    -   `pattern` **string**  (optional, default `"(?.*)"`)
-    -   `isClipboard` **boolean** allow to copy the input value (optional, default `true`)
-    -   `readonly` **boolean** allow to read only the input value (optional, default `false`)
-    -   `hideLabel` **boolean**  (optional, default `false`)
-    -   `containerClass` **string**  (optional, default `""`)
-    -   `inpClass` **string**  (optional, default `""`)
-    -   `headerClass` **string**  (optional, default `""`)
-    -   `tabId` **(string | number)** The tabindex of the field, by default it is the contentIndex (optional, default `contentIndex`)
+    -   `id` **String** Unique id (optional, default `uuidv4()`)
+    -   `type` **String** text, email, password, number, tel, url (optional, default `"text"`)
+    -   `label` **String** The label of the field. Can be a translation key or by default raw text.
+    -   `name` **String** The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.
+    -   `value` **String**;
+    -   `attrs` **Object** Additional attributes to add to the field (optional, default `{}`)
+    -   `popovers` **Array** List of popovers to display more information (optional, default `[]`)
+    -   `inpType` **String** The type of the field, useful when we have multiple fields in the same container to display the right field (optional, default `"input"`)
+    -   `columns` **Object** Field has a grid system. This allow to get multiple field in the same row if needed. (optional, default `{"pc":"12","tablet":"12","mobile":"12"}`)
+    -   `disabled` **Boolean**  (optional, default `false`)
+    -   `required` **Boolean**  (optional, default `false`)
+    -   `placeholder` **String**  (optional, default `""`)
+    -   `pattern` **String**  (optional, default `"(?.*)"`)
+    -   `isClipboard` **Boolean** allow to copy the input value (optional, default `true`)
+    -   `readonly` **Boolean** allow to read only the input value (optional, default `false`)
+    -   `hideLabel` **Boolean**  (optional, default `false`)
+    -   `containerClass` **String**  (optional, default `""`)
+    -   `inpClass` **String**  (optional, default `""`)
+    -   `headerClass` **String**  (optional, default `""`)
+    -   `tabId` **(String | Number)** The tabindex of the field, by default it is the contentIndex (optional, default `contentIndex`)
     
     EXAMPLE
     
@@ -1149,10 +1144,10 @@ def instance_widget(
     
     PARAMETERS
     
-    -   `title` **string**;
-    -   `status` **string**;
-    -   `details` **array** List of details to display
-    -   `buttons` **array** List of buttons to display
+    -   `title` **String**;
+    -   `status` **String**;
+    -   `details` **Array** List of details to display
+    -   `buttons` **Array** List of buttons to display
     
     EXAMPLE
     
@@ -1192,7 +1187,6 @@ def instance_widget(
         
 
 def list_widget(
-    popovers,
     label: str,
     name: str,
     value: str,
@@ -1200,6 +1194,7 @@ def list_widget(
     attrs: dict = {},
     separator: str = " ",
     maxBtnChars: str = "",
+    popovers: list = [],
     inpType: str = "list",
     disabled: bool = False,
     required: bool = False,
@@ -1218,25 +1213,25 @@ def list_widget(
     
     PARAMETERS
     
-    -   `id` **string** Unique id (optional, default `uuidv4()`)
-    -   `label` **string** The label of the field. Can be a translation key or by default raw text.
-    -   `name` **string** The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.
-    -   `value` **string**;
-    -   `attrs` **object** Additional attributes to add to the field (optional, default `{}`)
-    -   `separator` **string** Separator to split the value, by default it is a space (optional, default `" "`)
-    -   `maxBtnChars` **string** Max char to display in the dropdown button handler. (optional, default `""`)
-    -   `popovers` **array?** List of popovers to display more information
-    -   `inpType` **string** The type of the field, useful when we have multiple fields in the same container to display the right field (optional, default `"list"`)
-    -   `disabled` **boolean**  (optional, default `false`)
-    -   `required` **boolean**  (optional, default `false`)
-    -   `columns` **object** Field has a grid system. This allow to get multiple field in the same row if needed. (optional, default `{"pc":"12","tablet":"12","mobile":"12"}`)
-    -   `hideLabel` **boolean**  (optional, default `false`)
-    -   `onlyDown` **boolean** If the dropdown should stay down (optional, default `false`)
-    -   `overflowAttrEl` **boolean** Attribute the element has to check for overflow (optional, default `""`)
-    -   `containerClass` **string**  (optional, default `""`)
-    -   `inpClass` **string**  (optional, default `""`)
-    -   `headerClass` **string**  (optional, default `""`)
-    -   `tabId` **(string | number)** The tabindex of the field, by default it is the contentIndex (optional, default `contentIndex`)
+    -   `id` **String** Unique id (optional, default `uuidv4()`)
+    -   `label` **String** The label of the field. Can be a translation key or by default raw text.
+    -   `name` **String** The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.
+    -   `value` **String**;
+    -   `attrs` **Object** Additional attributes to add to the field (optional, default `{}`)
+    -   `separator` **String** Separator to split the value, by default it is a space (optional, default `" "`)
+    -   `maxBtnChars` **String** Max char to display in the dropdown button handler. (optional, default `""`)
+    -   `popovers` **Array** List of popovers to display more information (optional, default `[]`)
+    -   `inpType` **String** The type of the field, useful when we have multiple fields in the same container to display the right field (optional, default `"list"`)
+    -   `disabled` **Boolean**  (optional, default `false`)
+    -   `required` **Boolean**  (optional, default `false`)
+    -   `columns` **Object** Field has a grid system. This allow to get multiple field in the same row if needed. (optional, default `{"pc":"12","tablet":"12","mobile":"12"}`)
+    -   `hideLabel` **Boolean**  (optional, default `false`)
+    -   `onlyDown` **Boolean** If the dropdown should stay down (optional, default `false`)
+    -   `overflowAttrEl` **Boolean** Attribute the element has to check for overflow (optional, default `""`)
+    -   `containerClass` **String**  (optional, default `""`)
+    -   `inpClass` **String**  (optional, default `""`)
+    -   `headerClass` **String**  (optional, default `""`)
+    -   `tabId` **(String | Number)** The tabindex of the field, by default it is the contentIndex (optional, default `contentIndex`)
     
     EXAMPLE
     
@@ -1257,7 +1252,6 @@ def list_widget(
     """
 
     data = {
-        "popovers" : popovers,
         "label" : label,
         "name" : name,
         "value" : value,
@@ -1265,7 +1259,7 @@ def list_widget(
 
 
     # List of params that will be add only if not default value
-    list_params = [("id", id, ""),("attrs", attrs, {}),("separator", separator, " "),("maxBtnChars", maxBtnChars, ""),("inpType", inpType, "list"),("disabled", disabled, False),("required", required, False),("columns", columns, {"pc":"12","tablet":"12","mobile":"12"}),("hideLabel", hideLabel, False),("onlyDown", onlyDown, False),("overflowAttrEl", overflowAttrEl, ""),("containerClass", containerClass, ""),("inpClass", inpClass, ""),("headerClass", headerClass, ""),("tabId", tabId, "")]
+    list_params = [("id", id, ""),("attrs", attrs, {}),("separator", separator, " "),("maxBtnChars", maxBtnChars, ""),("popovers", popovers, []),("inpType", inpType, "list"),("disabled", disabled, False),("required", required, False),("columns", columns, {"pc":"12","tablet":"12","mobile":"12"}),("hideLabel", hideLabel, False),("onlyDown", onlyDown, False),("overflowAttrEl", overflowAttrEl, ""),("containerClass", containerClass, ""),("inpClass", inpClass, ""),("headerClass", headerClass, ""),("tabId", tabId, "")]
     for param in list_params:
         add_key_value(data, param[0], param[1], param[2])
 
@@ -1282,7 +1276,7 @@ def modal_widget(
     
     PARAMETERS
     
-    -   `widgets` **array** Array of containers and widgets
+    -   `widgets` **Array** Array of containers and widgets
     
     EXAMPLE
     
@@ -1364,10 +1358,10 @@ def multiple_widget(
     
     PARAMETERS
     
-    -   `multiples` **object** The multiples settings to display. This needs to be a dict of settings using default field format.
-    -   `columns` **object** Field has a grid system. This allow to get multiple field in the same row if needed. (optional, default `{"pc":"12","tablet":"12","mobile":"12"}`)
-    -   `containerClass` **string** Additionnal class to add to the container (optional, default `""`)
-    -   `tadId` **string** The tabindex of the field, by default it is the contentIndex (optional, default `contentIndex`)
+    -   `multiples` **Object** The multiples settings to display. This needs to be a dict of settings using default field format.
+    -   `columns` **Object** Field has a grid system. This allow to get multiple field in the same row if needed. (optional, default `{"pc":"12","tablet":"12","mobile":"12"}`)
+    -   `containerClass` **String** Additionnal class to add to the container (optional, default `""`)
+    -   `tadId` **String** The tabindex of the field, by default it is the contentIndex (optional, default `contentIndex`)
     
     EXAMPLE
     
@@ -1469,8 +1463,8 @@ def pairs_widget(
     
     PARAMETERS
     
-    -   `pairs` **array** The list of key value information. The key and value can be a translation key or a raw text.
-    -   `columns` **object** Determine the  position of the items in the grid system. (optional, default `{"pc":"12","tablet":"12","mobile":"12"}`)
+    -   `pairs` **Array** The list of key value information. The key and value can be a translation key or a raw text.
+    -   `columns` **Object** Determine the  position of the items in the grid system. (optional, default `{"pc":"12","tablet":"12","mobile":"12"}`)
     
     EXAMPLE
     
@@ -1510,13 +1504,13 @@ def popover_widget(
     
     PARAMETERS
     
-    -   `text` **string** Content of the popover. Can be a translation key or by default raw text.
-    -   `href` **string** Link of the anchor. By default it is a # link. (optional, default `"#"`)
-    -   `color` **string** Color of the icon between tailwind colors
-    -   `attrs` **object** List of attributs to add to the text. (optional, default `{}`)
-    -   `tag` **string** By default it is a anchor tag, but we can use other tag like div in case of popover on another anchor (optional, default `"a"`)
-    -   `iconClass` **string**  (optional, default `"icon-default"`)
-    -   `tabId` **(string | number)** The tabindex of the field, by default it is the contentIndex (optional, default `contentIndex`)
+    -   `text` **String** Content of the popover. Can be a translation key or by default raw text.
+    -   `href` **String** Link of the anchor. By default it is a # link. (optional, default `"#"`)
+    -   `color` **String** Color of the icon between tailwind colors
+    -   `attrs` **Object** List of attributs to add to the text. (optional, default `{}`)
+    -   `tag` **String** By default it is a anchor tag, but we can use other tag like div in case of popover on another anchor (optional, default `"a"`)
+    -   `iconClass` **String**  (optional, default `"icon-default"`)
+    -   `tabId` **(String | Number)** The tabindex of the field, by default it is the contentIndex (optional, default `contentIndex`)
     
     EXAMPLE
     
@@ -1554,8 +1548,8 @@ def popover_group_widget(
     
     PARAMETERS
     
-    -   `popovers` **array** List of popovers to display. Popover component is used.
-    -   `groupClasss` **string** Additional class for the flex container (optional, default `""`)
+    -   `popovers` **Array** List of popovers to display. Popover component is used.
+    -   `groupClasss` **String** Additional class for the flex container (optional, default `""`)
     
     EXAMPLE
     
@@ -1600,11 +1594,11 @@ def raw_widget(
     
     PARAMETERS
     
-    -   `template` **object** Template object with plugin and settings data.
-    -   `operation` **string** Operation type (edit, new, delete). (optional, default `"edit"`)
-    -   `oldServerName` **string** Old server name. This is a server name before any changes. (optional, default `""`)
-    -   `containerClass` **string** Container
-    -   `columns` **object** Columns object.
+    -   `template` **Object** Template object with plugin and settings data.
+    -   `operation` **String** Operation type (edit, new, delete). (optional, default `"edit"`)
+    -   `oldServerName` **String** Old server name. This is a server name before any changes. (optional, default `""`)
+    -   `containerClass` **String** Container
+    -   `columns` **Object** Columns object.
     
     EXAMPLE
     
@@ -1634,13 +1628,13 @@ def raw_widget(
         
 
 def select_widget(
-    popovers,
     label: str,
     name: str,
     value: str,
     values: list,
     id: str = "",
     attrs: dict = {},
+    popovers: list = [],
     inpType: str = "select",
     maxBtnChars: str = "",
     disabled: bool = False,
@@ -1663,26 +1657,26 @@ def select_widget(
     
     PARAMETERS
     
-    -   `id` **string** Unique id (optional, default `uuidv4()`)
-    -   `label` **string** The label of the field. Can be a translation key or by default raw text.
-    -   `name` **string** The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.
-    -   `value` **string**;
-    -   `values` **array**;
-    -   `attrs` **object** Additional attributes to add to the field (optional, default `{}`)
-    -   `popovers` **array?** List of popovers to display more information
-    -   `inpType` **string** The type of the field, useful when we have multiple fields in the same container to display the right field (optional, default `"select"`)
-    -   `maxBtnChars` **string** Max char to display in the dropdown button handler. (optional, default `""`)
-    -   `disabled` **boolean**  (optional, default `false`)
-    -   `required` **boolean**  (optional, default `false`)
-    -   `requiredValues` **array** values that need to be selected to be valid, works only if required is true (optional, default `[]`)
-    -   `columns` **object** Field has a grid system. This allow to get multiple field in the same row if needed. (optional, default `{"pc":"12","tablet":"12","mobile":"12"}`)
-    -   `hideLabel` **boolean**  (optional, default `false`)
-    -   `onlyDown` **boolean** If the dropdown should check the bottom of the container (optional, default `false`)
-    -   `overflowAttrEl` **boolean** Attribute to select the container the element has to check for overflow (optional, default `""`)
-    -   `containerClass` **string**  (optional, default `""`)
-    -   `inpClass` **string**  (optional, default `""`)
-    -   `headerClass` **string**  (optional, default `""`)
-    -   `tabId` **(string | number)** The tabindex of the field, by default it is the contentIndex (optional, default `contentIndex`)
+    -   `id` **String** Unique id (optional, default `uuidv4()`)
+    -   `label` **String** The label of the field. Can be a translation key or by default raw text.
+    -   `name` **String** The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.
+    -   `value` **String**;
+    -   `values` **Array**;
+    -   `attrs` **Object** Additional attributes to add to the field (optional, default `{}`)
+    -   `popovers` **Array** List of popovers to display more information (optional, default `[]`)
+    -   `inpType` **String** The type of the field, useful when we have multiple fields in the same container to display the right field (optional, default `"select"`)
+    -   `maxBtnChars` **String** Max char to display in the dropdown button handler. (optional, default `""`)
+    -   `disabled` **Boolean**  (optional, default `false`)
+    -   `required` **Boolean**  (optional, default `false`)
+    -   `requiredValues` **Array** values that need to be selected to be valid, works only if required is true (optional, default `[]`)
+    -   `columns` **Object** Field has a grid system. This allow to get multiple field in the same row if needed. (optional, default `{"pc":"12","tablet":"12","mobile":"12"}`)
+    -   `hideLabel` **Boolean**  (optional, default `false`)
+    -   `onlyDown` **Boolean** If the dropdown should check the bottom of the container (optional, default `false`)
+    -   `overflowAttrEl` **Boolean** Attribute to select the container the element has to check for overflow (optional, default `""`)
+    -   `containerClass` **String**  (optional, default `""`)
+    -   `inpClass` **String**  (optional, default `""`)
+    -   `headerClass` **String**  (optional, default `""`)
+    -   `tabId` **(String | Number)** The tabindex of the field, by default it is the contentIndex (optional, default `contentIndex`)
     
     EXAMPLE
     
@@ -1707,7 +1701,6 @@ def select_widget(
     """
 
     data = {
-        "popovers" : popovers,
         "label" : label,
         "name" : name,
         "value" : value,
@@ -1716,7 +1709,7 @@ def select_widget(
 
 
     # List of params that will be add only if not default value
-    list_params = [("id", id, ""),("attrs", attrs, {}),("inpType", inpType, "select"),("maxBtnChars", maxBtnChars, ""),("disabled", disabled, False),("required", required, False),("requiredValues", requiredValues, []),("columns", columns, {"pc":"12","tablet":"12","mobile":"12"}),("hideLabel", hideLabel, False),("onlyDown", onlyDown, False),("overflowAttrEl", overflowAttrEl, ""),("containerClass", containerClass, ""),("inpClass", inpClass, ""),("headerClass", headerClass, ""),("tabId", tabId, "")]
+    list_params = [("id", id, ""),("attrs", attrs, {}),("popovers", popovers, []),("inpType", inpType, "select"),("maxBtnChars", maxBtnChars, ""),("disabled", disabled, False),("required", required, False),("requiredValues", requiredValues, []),("columns", columns, {"pc":"12","tablet":"12","mobile":"12"}),("hideLabel", hideLabel, False),("onlyDown", onlyDown, False),("overflowAttrEl", overflowAttrEl, ""),("containerClass", containerClass, ""),("inpClass", inpClass, ""),("headerClass", headerClass, ""),("tabId", tabId, "")]
     for param in list_params:
         add_key_value(data, param[0], param[1], param[2])
 
@@ -1737,11 +1730,11 @@ def stat_widget(
     
     PARAMETERS
     
-    -   `title` **string** The title of the stat. Can be a translation key or by default raw text.
-    -   `stat` **(string | number)** The value
-    -   `subtitle` **string** The subtitle of the stat. Can be a translation key or by default raw text. (optional, default `""`)
-    -   `iconName` **string** A top-right icon to display between icon available in Icons/Stat. Case falsy value, no icon displayed. The icon name is the name of the file without the extension on lowercase. (optional, default `""`)
-    -   `subtitleColor` **string** The color of the subtitle between error, success, warning, info (optional, default `"info"`)
+    -   `title` **String** The title of the stat. Can be a translation key or by default raw text.
+    -   `stat` **(String | Number)** The value
+    -   `subtitle` **String** The subtitle of the stat. Can be a translation key or by default raw text. (optional, default `""`)
+    -   `iconName` **String** A top-right icon to display between icon available in Icons/Stat. Case falsy value, no icon displayed. The icon name is the name of the file without the extension on lowercase. (optional, default `""`)
+    -   `subtitleColor` **String** The color of the subtitle between error, success, warning, info (optional, default `"info"`)
     
     EXAMPLE
     
@@ -1780,9 +1773,9 @@ def status_widget(
     
     PARAMETERS
     
-    -   `id` **string** The id of the status icon.
-    -   `status` **string** The color of the icon between error, success, warning, info (optional, default `"info"`)
-    -   `statusClass` **string** Additional class, for example to use with grid system. (optional, default `""`)
+    -   `id` **String** The id of the status icon.
+    -   `status` **String** The color of the icon between error, success, warning, info (optional, default `"info"`)
+    -   `statusClass` **String** Additional class, for example to use with grid system. (optional, default `""`)
     
     EXAMPLE
     
@@ -1822,14 +1815,14 @@ def subtitle_widget(
     
     PARAMETERS
     
-    -   `subtitle` **string** Can be a translation key or by default raw text.
-    -   `type` **string** The type of title between "container", "card", "content", "min" or "stat" (optional, default `"card"`)
-    -   `tag` **string** The tag of the subtitle. Can be h1, h2, h3, h4, h5, h6 or p. If empty, will be determine by the type of subtitle. (optional, default `""`)
-    -   `color` **string** The color of the subtitle between error, success, warning, info or tailwind color (optional, default `""`)
-    -   `bold` **boolean** If the subtitle should be bold or not. (optional, default `false`)
-    -   `uppercase` **boolean** If the subtitle should be uppercase or not. (optional, default `false`)
-    -   `lowercase` **boolean** If the subtitle should be lowercase or not. (optional, default `false`)
-    -   `subtitleClass` **string** Additional class, useful when component is used directly on a grid system (optional, default `""`)
+    -   `subtitle` **String** Can be a translation key or by default raw text.
+    -   `type` **String** The type of title between "container", "card", "content", "min" or "stat" (optional, default `"card"`)
+    -   `tag` **String** The tag of the subtitle. Can be h1, h2, h3, h4, h5, h6 or p. If empty, will be determine by the type of subtitle. (optional, default `""`)
+    -   `color` **String** The color of the subtitle between error, success, warning, info or tailwind color (optional, default `""`)
+    -   `bold` **Boolean** If the subtitle should be bold or not. (optional, default `false`)
+    -   `uppercase` **Boolean** If the subtitle should be uppercase or not. (optional, default `false`)
+    -   `lowercase` **Boolean** If the subtitle should be lowercase or not. (optional, default `false`)
+    -   `subtitleClass` **String** Additional class, useful when component is used directly on a grid system (optional, default `""`)
     
     EXAMPLE
     
@@ -1875,15 +1868,15 @@ def table_widget(
     
     PARAMETERS
     
-    -   `title` **string** Determine the title of the table.
-    -   `header` **array** Determine the header of the table.
-    -   `positions` **array** Determine the position of each item in the table in a list of number based on 12 columns grid.
-    -   `items` **array** items to render in the table. This need to be an array (row) of array (cols) with a cell being a regular widget.
-    -   `filters` **array** Determine the filters of the table. (optional, default `[]`)
-    -   `minWidth` **string** Determine the minimum size of the table. Can be "base", "sm", "md", "lg", "xl". (optional, default `"base"`)
-    -   `containerClass` **string** Container additional class. (optional, default `""`)
-    -   `containerWrapClass` **string** Container wrap additional class. (optional, default `""`)
-    -   `tableClass` **string** Table additional class. (optional, default `""`)
+    -   `title` **String** Determine the title of the table.
+    -   `header` **Array** Determine the header of the table.
+    -   `positions` **Array** Determine the position of each item in the table in a list of number based on 12 columns grid.
+    -   `items` **Array** items to render in the table. This need to be an array (row) of array (cols) with a cell being a regular widget.
+    -   `filters` **Array** Determine the filters of the table. (optional, default `[]`)
+    -   `minWidth` **String** Determine the minimum size of the table. Can be "base", "sm", "md", "lg", "xl". (optional, default `"base"`)
+    -   `containerClass` **String** Container additional class. (optional, default `""`)
+    -   `containerWrapClass` **String** Container wrap additional class. (optional, default `""`)
+    -   `tableClass` **String** Table additional class. (optional, default `""`)
     
     EXAMPLE
     
@@ -2034,7 +2027,7 @@ def templates_widget(
     
     PARAMETERS
     
-    -   `templates` **object** List of advanced templates that contains settings. Must be a dict with mode as key, then the template name as key with a list of data (different for each modes).
+    -   `templates` **Object** List of advanced templates that contains settings. Must be a dict with mode as key, then the template name as key with a list of data (different for each modes).
     -   `operation` **string** Operation type (edit, new, delete). (optional, default `"edit"`)
     -   `oldServerName` **string** Old server name. This is a server name before any changes. (optional, default `""`)
     
@@ -2081,14 +2074,14 @@ def text_widget(
     
     PARAMETERS
     
-    -   `text` **string** The text value. Can be a translation key or by default raw text.
-    -   `textClass` **string** Style of text. Can be replace by any class starting by 'text-' like 'text-stat'. (optional, default `""`)
-    -   `color` **string** The color of the text between error, success, warning, info or tailwind color (optional, default `""`)
-    -   `bold` **boolean** If the text should be bold or not. (optional, default `false`)
-    -   `uppercase` **boolean** If the text should be uppercase or not. (optional, default `false`)
-    -   `tag` **string** The tag of the text. Can be p, span, div, h1, h2, h3, h4, h5, h6 (optional, default `"p"`)
-    -   `icon` **(boolean | object)** The icon to add before the text. If true, will add a default icon. If object, will add the icon with the name and the color. (optional, default `false`)
-    -   `attrs` **object** List of attributes to add to the text. (optional, default `{}`)
+    -   `text` **String** The text value. Can be a translation key or by default raw text.
+    -   `textClass` **String** Style of text. Can be replace by any class starting by 'text-' like 'text-stat'. (optional, default `""`)
+    -   `color` **String** The color of the text between error, success, warning, info or tailwind color (optional, default `""`)
+    -   `bold` **Boolean** If the text should be bold or not. (optional, default `false`)
+    -   `uppercase` **Boolean** If the text should be uppercase or not. (optional, default `false`)
+    -   `tag` **String** The tag of the text. Can be p, span, div, h1, h2, h3, h4, h5, h6 (optional, default `"p"`)
+    -   `icon` **(Boolean | Object)** The icon to add before the text. If true, will add a default icon. If object, will add the icon with the name and the color. (optional, default `false`)
+    -   `attrs` **Object** List of attributes to add to the text. (optional, default `{}`)
     
     EXAMPLE
     
@@ -2127,13 +2120,13 @@ def title_widget(
     
     PARAMETERS
     
-    -   `title` **string** Can be a translation key or by default raw text.
-    -   `type` **string** The type of title between "container", "card", "content", "min" or "stat" (optional, default `"card"`)
-    -   `tag` **string** The tag of the title. Can be h1, h2, h3, h4, h5, h6 or p. If empty, will be determine by the type of title. (optional, default `""`)
-    -   `color` **string** The color of the title between error, success, warning, info or tailwind color (optional, default `""`)
-    -   `uppercase` **boolean** If the title should be uppercase or not. (optional, default `false`)
-    -   `lowercase` **boolean** If the title should be lowercase or not. (optional, default `false`)
-    -   `titleClass` **string** Additional class, useful when component is used directly on a grid system (optional, default `""`)
+    -   `title` **String** Can be a translation key or by default raw text.
+    -   `type` **String** The type of title between "container", "card", "content", "min" or "stat" (optional, default `"card"`)
+    -   `tag` **String** The tag of the title. Can be h1, h2, h3, h4, h5, h6 or p. If empty, will be determine by the type of title. (optional, default `""`)
+    -   `color` **String** The color of the title between error, success, warning, info or tailwind color (optional, default `""`)
+    -   `uppercase` **Boolean** If the title should be uppercase or not. (optional, default `false`)
+    -   `lowercase` **Boolean** If the title should be lowercase or not. (optional, default `false`)
+    -   `titleClass` **String** Additional class, useful when component is used directly on a grid system (optional, default `""`)
     
     EXAMPLE
     
@@ -2170,8 +2163,8 @@ def unmatch_widget(
     
     PARAMETERS
     
-    -   `text` **string** The text to display
-    -   `unmatchClass` **string** The class to apply to the message. If not provided, the class will be based on the parent component. (optional, default `""`)
+    -   `text` **String** The text to display
+    -   `unmatchClass` **String** The class to apply to the message. If not provided, the class will be based on the parent component. (optional, default `""`)
     
     EXAMPLE
     

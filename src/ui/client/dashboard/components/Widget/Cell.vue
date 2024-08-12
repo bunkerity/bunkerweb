@@ -24,8 +24,8 @@ import { useEqualStr } from "@utils/global.js";
  *       attrs: { data-toggle: "modal", "data-target": "#modal"},
  *     }
  *  }
- *  @param {string} type - The type of the cell. This needs to be a Vue component.
- *  @param {object} data - The data to display in the cell. This needs to be the props of the Vue component.
+ *  @param {String} type - The type of the cell. This needs to be a Vue component.
+ *  @param {Object} data - The data to display in the cell. This needs to be the props of the Vue component.
  */
 
 const props = defineProps({

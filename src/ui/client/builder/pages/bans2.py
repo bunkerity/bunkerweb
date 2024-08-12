@@ -1,5 +1,5 @@
-from builder.utils.widgets import button_widget, button_group_widget, title_widget, text_widget, tabulator_widget, datepicker_widget
-from builder.utils.table import add_column, format_field
+from .utils.widgets import button_widget, button_group_widget, title_widget, text_widget, tabulator_widget, datepicker_widget
+from .utils.table import add_column, format_field
 
 bans_columns = [
     add_column(title="IP", field="ip", formatter="text"),
@@ -78,7 +78,6 @@ def ban_item(id: str, ip: str, reason: str, ban_start_date: int, ban_end_date: i
                     name=f"datepicker-ban-start-{id}",
                     label="bans_ban_start_date",  # keep it (a18n)
                     hideLabel=True,
-                    inputType="datepicker",
                     value=ban_start_date,
                     disabled=True,  # Readonly
                     columns={"pc": 12, "tablet": 12, " mobile": 12},
@@ -90,7 +89,6 @@ def ban_item(id: str, ip: str, reason: str, ban_start_date: int, ban_end_date: i
                     name=f"datepicker-ban-end-{id}",
                     label="bans_ban_end_date",  # keep it (a18n)
                     hideLabel=True,
-                    inputType="datepicker",
                     value=ban_end_date,
                     disabled=True,  # Readonly
                 )
@@ -133,9 +131,6 @@ default_add_ban = [
                 label="bans_add_ban_ip",  # keep it (a18n)
                 hideLabel=True,
                 value="",
-                type="text",
-                pattern="",  # replace by ip pattern
-                inputType="input",
                 columns={"pc": 12, "tablet": 12, " mobile": 12},
             )
         ),
@@ -145,7 +140,6 @@ default_add_ban = [
                 name="datepicker-add-ban-end-1",
                 label="bans_add_end_date",  # keep it (a18n)
                 hideLabel=True,
-                inputType="datepicker",
                 value="",
             )
         ),
@@ -156,7 +150,7 @@ default_add_ban = [
                     id="delete-ban-1",
                     type="button",
                     text="action_delete",  # keep it (a18n)
-                    hideLabel=True,
+                    hideText=True,
                     iconName="trash",
                     iconColor="white",
                     color="error",
@@ -269,7 +263,7 @@ def bans_builder(bans: list, reasons: list, remains: list) -> list:
     return [
         # Tabs is button group with display value and a size tab inside a tabs container
         {
-            type: "tabs",
+            "type": "tabs",
             "widgets": [button_group_widget(buttons=bans_tabs())],
         },
         {

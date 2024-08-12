@@ -34,8 +34,8 @@ import { onMounted, reactive, ref } from "vue";
  *      },
  *    ],
  *  }
- *  @param {array} buttons - List of buttons to display. Button component is used.
- *  @param {string} [boutonGroupClass=""] - Additional class for the flex container
+ *  @param {Array} buttons - List of buttons to display. Button component is used.
+ *  @param {String} [boutonGroupClass=""] - Additional class for the flex container
  */
 
 const props = defineProps({

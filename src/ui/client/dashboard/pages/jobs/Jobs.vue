@@ -28,8 +28,8 @@ onBeforeMount(() => {
 /**
  *  @name getLastArrItem
  *  @description Get the last item if the first and last characters are matching params.
- *  @param {string} startStr - The start string to check.
- *  @param {string} endStr - The end string to check.
+ *  @param {String} startStr - The start string to check.
+ *  @param {String} endStr - The end string to check.
  *  @returns {null|string} - The last item or null.
  */
 function getLastArrItem(startStr, endStr, array) {
@@ -42,7 +42,7 @@ function getLastArrItem(startStr, endStr, array) {
 /**
  *  @name downloadCacheEvent
  *  @description Get the needed cache file information from a job and create a download link to download the file.
- *  @returns {void}
+ *  @returns {Void}
  */
 function downloadCacheEvent() {
   window.addEventListener(
@@ -83,7 +83,7 @@ function downloadCacheEvent() {
       a.click();
       document.body.removeChild(a);
     },
-    true,
+    true
   );
 }
 

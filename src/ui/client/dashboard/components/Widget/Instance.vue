@@ -31,10 +31,10 @@ import ButtonGroup from "@components/Widget/ButtonGroup.vue";
  *      },
  *    ]
  *  }
- *  @param {string} title
- *  @param {string} status
- *  @param {array} details - List of details to display
- *  @param {array} buttons - List of buttons to display
+ *  @param {String} title
+ *  @param {String} status
+ *  @param {Array} details - List of details to display
+ *  @param {Array} buttons - List of buttons to display
  */
 
 const props = defineProps({

@@ -34,8 +34,8 @@
  *        description: "Whitelist IP",
  *    }
  *  ];
- *  @param {object} plugins - Object with the plugins data.
- *  @param {array} filters - Array with the filters data.
+ *  @param {Object} plugins - Object with the plugins data.
+ *  @param {Array} filters - Array with the filters data.
  *  @returns {array} - Array with the filtered data.
  */
 function useFilter(items, filters) {

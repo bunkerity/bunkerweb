@@ -11,7 +11,7 @@ import { v4 as uuidv4 } from "uuid";
  *  @description This function needs to be apply on global level and will do some logic related to form, attributes, and other global actions.
  *  For example, it will check if the target element has a data-link attribute and redirect the user to the define link.
  *  It will check if the target element has a data-submit-form attribute and try to parse it to submit the form.
- *  @returns {void}
+ *  @returns {Void}
  */
 function useGlobal() {
   window.addEventListener("click", useDataLinkAttr);
@@ -22,7 +22,7 @@ function useGlobal() {
  *  @name useSubmitAttr
  *  @description  This function needs to be attach to an event like a click event.
  *  This will check if the target element contains a data-submit-form attribute and try to parse it to submit the form.
- *  @returns {void}
+ *  @returns {Void}
  */
 function useSubmitAttr(e) {
   if (!e.target.hasAttribute("data-submit-form")) return;
@@ -46,9 +46,9 @@ function useSubmitAttr(e) {
  *    instance: "1",
  *    operation: "delete",
  *  }
- *  @param {object} data - Object with the form data to submit.
- *  @param {string} [submitEndpoint=""] - The endpoint to submit the form.
- *  @returns {void}
+ *  @param {Object} data - Object with the form data to submit.
+ *  @param {String} [submitEndpoint=""] - The endpoint to submit the form.
+ *  @returns {Void}
  */
 function useSubmitForm(data, submitEndpoint = "") {
   // Create a form element
@@ -79,8 +79,8 @@ function useSubmitForm(data, submitEndpoint = "") {
 /**
  *  @name useCheckPluginsValidity
  *  @description  This is a wrapper that will check the validity of the plugins settings based on the defined mode.
- *  @param {dict|array} template - Template with plugins list and detail settings
- *  @param {string} mode - Mode to check, can be "advanced", "easy"...
+ *  @param {Object|Array} template - Template with plugins list and detail settings
+ *  @param {String} mode - Mode to check, can be "advanced", "easy"...
  *  @returns {array} - Array with error flags and error details
  */
 function useCheckPluginsValidity(template, mode) {
@@ -110,8 +110,8 @@ function useCheckPluginsValidity(template, mode) {
 /**
  *  @name _checkSettingsValidityFromPlugins
  *  @description  Check settings from a list of plugins and return the error flags and error details.
- *  @param {object|array} template - The template to check
- *  @param {string|number} [id=0] - The id of the plugin or the current step.
+ *  @param {Object|Array} template - The template to check
+ *  @param {String|Number} [id=0] - The id of the plugin or the current step.
  *  @returns {array} - Return [isRegErr, isReqErr, settingErr, settingNameErr, pluginErr, id]
  */
 function _checkSettingsValidityFromPlugins(plugins, id = 0) {
@@ -138,7 +138,7 @@ function _checkSettingsValidityFromPlugins(plugins, id = 0) {
 /**
  *  @name _checkRegularSettingsValidityFromPlugins
  *  @description  Access regular settings from a plugin and return the error flags and error details.
- *  @param {object|array} template - The template to check
+ *  @param {Object|Array} template - The template to check
  *  @returns {array} - Return empty array or [isRegErr, isReqErr, settingErr, settingNameErr, pluginErr]
  */
 function _checkRegularSettingsValidityFromPlugins(plugins) {
@@ -159,7 +159,7 @@ function _checkRegularSettingsValidityFromPlugins(plugins) {
 /**
  *  @name _checkMultipleSettingsValidityFromPlugins
  *  @description  Access multiple settings from a plugin and return the error flags and error details.
- *  @param {object|array} template - The template to check
+ *  @param {Object|Array} template - The template to check
  *  @returns {array} - Return empty array or [isRegErr, isReqErr, settingErr, settingNameErr, pluginErr]
  */
 function _checkMultipleSettingsValidityFromPlugins(plugins) {
@@ -183,10 +183,10 @@ function _checkMultipleSettingsValidityFromPlugins(plugins) {
 /**
  *  @name _isSettingValid
  *  @description  Check if a setting is valid based on the pattern and required flags.
- *  @param {key} str - The name of the setting
- *  @param {object} value - Setting value used to check if it's valid
- *  @param {pluginName} str - The name of the plugin
- *  @returns {object} - Return object with {stop, data : [isRegErr, isReqErr, settingErr, settingNameErr, pluginErr]}
+ *  @param {String} key - The name of the setting
+ *  @param {Object} value - Setting value used to check if it's valid
+ *  @param {String} pluginName - The name of the plugin
+ *  @returns {Object} - Return object with {stop, data : [isRegErr, isReqErr, settingErr, settingNameErr, pluginErr]}
  */
 function _isSettingValid(key, value, pluginName) {
   let is_reg_valid = true;
@@ -216,7 +216,7 @@ function _isSettingValid(key, value, pluginName) {
  *  @description This function return a unique identifier using uuidv4 and a random number.
  *  Adding random number to avoid duplicate uuids when some components are rendered at the same time.
  *  We can pass a possible existing id, the function will only generate one if the id is empty.
- *  @param {string} [id=""] - Possible existing id, check if it's empty to generate a new one.
+ *  @param {String} [id=""] - Possible existing id, check if it's empty to generate a new one.
  *  @returns {string} - The unique identifier.
  */
 function useUUID(id = "") {
@@ -230,8 +230,8 @@ function useUUID(id = "") {
 /**
  *  @name useEqualStr
  *  @description Get the type of a widget and format it to lowercase if possible. Else return an empty string.
- *  @param {any} type - Try to convert the type to a string in lowercase to compare it with wanted value.
- *  @param {string} compare - The value to compare with, in general the component name.
+ *  @param {Any} type - Try to convert the type to a string in lowercase to compare it with wanted value.
+ *  @param {String} compare - The value to compare with, in general the component name.
  *  @returns {boolean} - True if matching, false if not.
  */
 function useEqualStr(type, compare) {
@@ -248,8 +248,8 @@ function useEqualStr(type, compare) {
  *  @name useDataLinkAttr
  *  @description Check from event if the target has a data-link attribute. Case it is, it will be used to redirect the user to the define link.
  * This is useful to avoid using the <a> tag and use a <div> or <button> instead.
- *  @param {event} e - The event to attach the function logic
- *  @returns {void}
+ *  @param {Event} e - The event to attach the function logic
+ *  @returns {Void}
  */
 function useDataLinkAttr(e) {
   if (!e.target.hasAttribute("data-link")) return;

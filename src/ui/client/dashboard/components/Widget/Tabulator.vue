@@ -163,7 +163,7 @@ const table = reactive({
  *  @name formatColumns
  *  @description This will add some key to columns that can be passed from props like minWidth or maxWidth.
  *  Case key already exists, this will override it.
- *  @param {array} columns -  The columns are the list of columns that we want to check.
+ *  @param {Array} columns -  The columns are the list of columns that we want to check.
  *  @returns {array} - Return the columns with the custom sort added.
  */
 function formatColumns(columns) {
@@ -180,10 +180,10 @@ function formatColumns(columns) {
  *  @description Utils to add needed data when we have a custom component.
  *  We will use the type to render the Vue component, the values to pass and the elDOM to teleport the component inside the right cell.
  *  @example { type: "Icons", values: { iconName: "box", color: "amber" }, elDOM: HTMLElement }
- *  @param {str} type -  The type is the name of the component.
- *  @param {object} values - The values are the props that we want to pass to the component.
+ *  @param {String} type -  The type is the name of the component.
+ *  @param {Object} values - The values are the props that we want to pass to the component.
  *  @param {HTMLElement} elDOM - The elDOM is the element where we want to teleport the component.
- *  @returns {void}
+ *  @returns {Void}
  */
 function addCustomComponent(type, values, elDOM) {
   table.customComponents.push({
@@ -200,7 +200,7 @@ function addCustomComponent(type, values, elDOM) {
  *  2 - Add custom formatters for each custom components in order to force Tabulator to render empty string.
  *  3 - Override default filters to add custom filters for each custom components (because  we need to access a specific key in the props object).
  *  We are using the Tabular.extendModule() that allow use to do this.
- *  @returns {void}
+ *  @returns {Void}
  */
 function extendTabulator() {
   const formatOpts = {};
@@ -220,10 +220,10 @@ function extendTabulator() {
  *  @description We can't directly send the current filter input to filter the table because the Tabulator will filter everything at once.
  *  So we need to get the value and store on the table.filters dict to merge all filters and apply them at once.
  *  We will use the applyTableFilter() to apply the filters. Additionnal checks (like empty value) are done on the applyTableFilter() function.
- *  @param {object} tableInstance -  The tableInstance is the current table instance.
- *  @param {object} filter -  the filter dict is here the setting filter data
- *  @param {string} value -  the value is the current value return by the filter input.
- *  @returns {void}
+ *  @param {Object} tableInstance -  The tableInstance is the current table instance.
+ *  @param {Object} filter -  the filter dict is here the setting filter data
+ *  @param {String} value -  the value is the current value return by the filter input.
+ *  @returns {Void}
  */
 function filterTable(filter, value = "") {
   // Merge all filters

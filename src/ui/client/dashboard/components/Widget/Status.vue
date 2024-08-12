@@ -11,9 +11,9 @@ import { useUUID } from "@utils/global.js";
  *    status: "success",
  *    statusClass: "col-span-12",
  *  }
- *  @param {string} id - The id of the status icon.
- *  @param {string} [status="info"] - The color of the icon between error, success, warning, info
- *  @param {string} [statusClass=""] - Additional class, for example to use with grid system.
+ *  @param {String} id - The id of the status icon.
+ *  @param {String} [status="info"] - The color of the icon between error, success, warning, info
+ *  @param {String} [statusClass=""] - Additional class, for example to use with grid system.
  */
 
 const props = defineProps({

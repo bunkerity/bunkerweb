@@ -25,7 +25,7 @@ healths = ["up", "down", "loading"]
 
 
 builder = instances_builder(instances)
-print("builder:", builder)
+
 # store on a file
 with open("instances2.json", "w") as f:
     json.dump(builder, f, indent=4)

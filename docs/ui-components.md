@@ -824,7 +824,7 @@ This component is used to create a complete advanced form with plugin selection.
 -   @name filter
 -   @description Get the filter data from the <Filter /> component and store the result in the advanced store.
     After that, update some UI states like disabled state.
--   @param {object} filterData - The filter data from the <Filter /> component.
+-   @param {Object} filterData - The filter data from the <Filter /> component.
 -   @returns {void}
 
 #### Parameters
@@ -849,7 +849,7 @@ Returns **void**;
 
 -   @name getFirstPlugin
 -   @description Get the first available plugin in the template.
--   @param {object} template - The template object.
+-   @param {Object} template - The template object.
 -   @returns {string} - The first plugin name.
 
 #### Parameters
@@ -860,7 +860,7 @@ Returns **void**;
 
 -   @name getPluginNames
 -   @description Get the first available plugin in the template.
--   @param {object} template - The template object.
+-   @param {Object} template - The template object.
 -   @returns {array} - The list of plugin names.
 
 #### Parameters

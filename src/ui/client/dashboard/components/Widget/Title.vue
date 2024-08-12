@@ -12,13 +12,13 @@ import { computed, onMounted, reactive, ref } from "vue";
  *    color : "info",
  *    tag: "h2"
  *  }
- *  @param {string} title -  Can be a translation key or by default raw text.
- *  @param {string} [type="card"] - The type of title between "container", "card", "content", "min" or "stat"
- *  @param {string} [tag=""] - The tag of the title. Can be h1, h2, h3, h4, h5, h6 or p. If empty, will be determine by the type of title.
- *  @param {string} [color=""] - The color of the title between error, success, warning, info or tailwind color
- *  @param {boolean} [uppercase=false] - If the title should be uppercase or not.
- *  @param {boolean} [lowercase=false] - If the title should be lowercase or not.
- *  @param {string} [titleClass=""] - Additional class, useful when component is used directly on a grid system
+ *  @param {String} title -  Can be a translation key or by default raw text.
+ *  @param {String} [type="card"] - The type of title between "container", "card", "content", "min" or "stat"
+ *  @param {String} [tag=""] - The tag of the title. Can be h1, h2, h3, h4, h5, h6 or p. If empty, will be determine by the type of title.
+ *  @param {String} [color=""] - The color of the title between error, success, warning, info or tailwind color
+ *  @param {Boolean} [uppercase=false] - If the title should be uppercase or not.
+ *  @param {Boolean} [lowercase=false] - If the title should be lowercase or not.
+ *  @param {String} [titleClass=""] - Additional class, useful when component is used directly on a grid system
  */
 
 const props = defineProps({
@@ -104,8 +104,8 @@ onMounted(() => {
       props.uppercase
         ? 'uppercase'
         : props.lowercase
-          ? 'lowercase'
-          : 'capitalize-first',
+        ? 'lowercase'
+        : 'capitalize-first',
     ]"
   >
     {{ $t(props.title, $t("dashboard_placeholder", props.title)) }}

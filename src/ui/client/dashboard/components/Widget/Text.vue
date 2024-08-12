@@ -11,14 +11,14 @@ import { onMounted, reactive, ref } from "vue";
  *    textClass: "text-3xl"
  *    attrs: { id: "paragraph" },
  *  }
- *  @param {string} text - The text value. Can be a translation key or by default raw text.
- *  @param {string} [textClass=""] - Style of text. Can be replace by any class starting by 'text-' like 'text-stat'.
- *  @param {string} [color=""] - The color of the text between error, success, warning, info or tailwind color
- *  @param {boolean} [bold=false] - If the text should be bold or not.
- *  @param {boolean} [uppercase=false] - If the text should be uppercase or not.
- *  @param {string} [tag="p"] - The tag of the text. Can be p, span, div, h1, h2, h3, h4, h5, h6
- *  @param {boolean|object} [icon=false] - The icon to add before the text. If true, will add a default icon. If object, will add the icon with the name and the color.
- *  @param {object} [attrs={}] - List of attributes to add to the text.
+ *  @param {String} text - The text value. Can be a translation key or by default raw text.
+ *  @param {String} [textClass=""] - Style of text. Can be replace by any class starting by 'text-' like 'text-stat'.
+ *  @param {String} [color=""] - The color of the text between error, success, warning, info or tailwind color
+ *  @param {Boolean} [bold=false] - If the text should be bold or not.
+ *  @param {Boolean} [uppercase=false] - If the text should be uppercase or not.
+ *  @param {String} [tag="p"] - The tag of the text. Can be p, span, div, h1, h2, h3, h4, h5, h6
+ *  @param {Boolean|Object} [icon=false] - The icon to add before the text. If true, will add a default icon. If object, will add the icon with the name and the color.
+ *  @param {Object} [attrs={}] - List of attributes to add to the text.
  */
 
 const props = defineProps({

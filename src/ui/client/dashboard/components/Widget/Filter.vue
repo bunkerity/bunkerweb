@@ -43,9 +43,9 @@ import { useFilter } from "@utils/filter.js";
  *        },
  *      },
  *    ]
- *  @param {array} [filters=[]] - Fields with additional data to be used as filters.
- *  @param {object|array} [data={}] - Data object or array to filter. Emit a filter event with the filtered data.
- *  @param {string} [containerClass=""] - Additional class for the container.
+ *  @param {Array} [filters=[]] - Fields with additional data to be used as filters.
+ *  @param {Object|Array} [data={}] - Data object or array to filter. Emit a filter event with the filtered data.
+ *  @param {String} [containerClass=""] - Additional class for the container.
  */
 
 const props = defineProps({
@@ -79,14 +79,14 @@ watch(
   () => {
     filterData();
   },
-  { deep: true },
+  { deep: true }
 );
 
 /**
  *  @name startFilter
  *  @description  Filter the given data using the available filters from a filter object.
- *  @param {object} filter - Filter object to apply.
- *  @param {string} value - Value to filter.
+ *  @param {Object} filter - Filter object to apply.
+ *  @param {String} value - Value to filter.
  *  @returns {emits} - Emit a filter event with the filtered data.
  */
 function startFilter(filter = {}, value) {
@@ -150,9 +150,9 @@ function startFilter(filter = {}, value) {
  *  @name filterData
  *  @description Add a buffer to wait for multiple inputs before filtering the data.
  *  Then filter data with the given filter and value.
- *  @param {object} filter - Filter object to apply.
- *  @param {string} value - Value to filter.
- *  @returns {void}
+ *  @param {Object} filter - Filter object to apply.
+ *  @param {String} value - Value to filter.
+ *  @returns {Void}
  */
 function filterData(filter = {}, value = null) {
   // Wait for buffer input
@@ -169,9 +169,9 @@ function filterData(filter = {}, value = null) {
 /**
  *  @name filterRegularSettings
  *  @description Allow to filter plugin settings from a regular template.
- *  @param {object} filterSettings - Filters to apply
- *  @param {object} template - Template to filter
- *  @returns {void}
+ *  @param {Object} filterSettings - Filters to apply
+ *  @param {Object} template - Template to filter
+ *  @returns {Void}
  */
 function filterRegularSettings(filterSettings, template) {
   template.forEach((plugin, id) => {
@@ -194,9 +194,9 @@ function filterRegularSettings(filterSettings, template) {
 /**
  *  @name filterMultiplesSettings
  *  @description Allow to filter plugin multiples settings from a regular template.
- *  @param {object} filterSettings - Filters to apply
- *  @param {object} template - Template to filter
- *  @returns {void}
+ *  @param {Object} filterSettings - Filters to apply
+ *  @param {Object} template - Template to filter
+ *  @returns {Void}
  */
 function filterMultiplesSettings(filterSettings, template) {
   const multiples = [];

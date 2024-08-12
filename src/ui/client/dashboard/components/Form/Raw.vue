@@ -20,11 +20,11 @@ import { useRawForm } from "@store/form.js";
  *    "HTTPS_PORT": "8443",
  *    "MULTISITE": "yes"
  *   }
- *  @param {object} template - Template object with plugin and settings data.
- *  @param {string} [operation="edit"] - Operation type (edit, new, delete).
- *  @param {string} [oldServerName=""] - Old server name. This is a server name before any changes.
- *  @param {string} containerClass - Container
- *  @param {object} columns - Columns object.
+ *  @param {Object} template - Template object with plugin and settings data.
+ *  @param {String} [operation="edit"] - Operation type (edit, new, delete).
+ *  @param {String} [oldServerName=""] - Old server name. This is a server name before any changes.
+ *  @param {String} containerClass - Container
+ *  @param {Object} columns - Columns object.
  */
 
 const rawForm = useRawForm();
@@ -78,14 +78,14 @@ watch(
     setTimeout(() => {
       data.isRender = true;
     }, 50);
-  },
+  }
 );
 
 /**
  *  @name updateRaw
  *  @description Get the raw data from editor, update the raw store with it and check if it is valid JSON.
- *  @param {string} v - The raw data to update.
- *  @returns {void}
+ *  @param {String} v - The raw data to update.
+ *  @returns {Void}
  */
 function updateRaw(v) {
   // Transform to a possible valid JSON
@@ -130,7 +130,7 @@ function updateRaw(v) {
  *  @description Convert a JSON object to a raw string that can be passed to the editor.
  *  This will convert JSON to key value pairs (format key=value).
  *  This is only used at first mount when there is no raw data.
- *  @param {string} json  - The template json to convert
+ *  @param {String} json  - The template json to convert
  *  @returns {string} - The raw string
  */
 function json2raw(json) {

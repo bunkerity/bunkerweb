@@ -29,20 +29,20 @@ import { useDisplayStore } from "@store/global.js";
  *    iconName: "modal",
  *    attrs: { data-toggle: "modal", "data-target": "#modal"},
  *  }
- *  @param {string} [id=uuidv4()] - Unique id of the button
- *  @param {string} text - Content of the button. Can be a translation key or by default raw text.
- *  @param {array} [display=[]] - Case display, we will update the display store with the given array. Useful when we want to use button as tabs.
- *  @param {string} [type="button"] - Can be of type button || submit
- *  @param {boolean} [disabled=false]
- *  @param {boolean} [hideText=false] - Hide text to only display icon
- *  @param {string} [color="primary"]
- *  @param {string} [iconColor=""] - Color we want to apply to the icon. If falsy value, default icon color is applied.
- *  @param {string} [size="normal"] - Can be of size sm || normal || lg || xl or tab
- *  @param {string} [iconName=""] - Name in lowercase of icons store on /Icons. If falsy value, no icon displayed.
+ *  @param {String} [id=uuidv4()] - Unique id of the button
+ *  @param {String} text - Content of the button. Can be a translation key or by default raw text.
+ *  @param {Array} [display=[]] - Case display, we will update the display store with the given array. Useful when we want to use button as tabs.
+ *  @param {String} [type="button"] - Can be of type button || submit
+ *  @param {Boolean} [disabled=false]
+ *  @param {Boolean} [hideText=false] - Hide text to only display icon
+ *  @param {String} [color="primary"]
+ *  @param {String} [iconColor=""] - Color we want to apply to the icon. If falsy value, default icon color is applied.
+ *  @param {String} [size="normal"] - Can be of size sm || normal || lg || xl or tab
+ *  @param {String} [iconName=""] - Name in lowercase of icons store on /Icons. If falsy value, no icon displayed.
  *  @param {Object} [attrs={}] - List of attributes to add to the button. Some attributes will conduct to additional script
  *  @param {Object|boolean} [modal=false] - We can link the button to a Modal component. We need to pass the widgets inside the modal. Button click will open the modal.
- *  @param {string|number} [tabId=contentIndex] - The tabindex of the field, by default it is the contentIndex
- *  @param {string} [containerClass=""] - Additional class to the container
+ *  @param {String|Number} [tabId=contentIndex] - The tabindex of the field, by default it is the contentIndex
+ *  @param {String} [containerClass=""] - Additional class to the container
  */
 
 const props = defineProps({
@@ -148,8 +148,8 @@ const btnEl = ref();
  *  @name handleClick
  *  @description Wrap all the logic to handle the click event on the button.
  *  This will prevent submit if not a submit button, open a modal if one is attached and update the display store if needed.
- *  @param {event} e - Event object
- *  @returns {void}
+ *  @param {Event} e - Event object
+ *  @returns {Void}
  */
 function handleClick(e) {
   if (e.target.getAttribute("type") !== "submit") e.preventDefault();

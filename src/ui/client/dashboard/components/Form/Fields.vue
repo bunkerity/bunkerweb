@@ -27,7 +27,7 @@ import { contentIndex } from "@utils/tabindex.js";
  *      },
  *    ]
  *  }
- *  @param {object} setting - Setting needed to render a field.
+ *  @param {Object} setting - Setting needed to render a field.
  */
 
 const props = defineProps({

@@ -84,10 +84,10 @@ import Container from "@components/Widget/Container.vue";
  *          }
  *        }
  *    },
- *  @param {object} multiples - The multiples settings to display. This needs to be a dict of settings using default field format.
- *  @param {object} [columns={"pc": "12", "tablet": "12", "mobile": "12"}] - Field has a grid system. This allow to get multiple field in the same row if needed.
- *  @param {string} [containerClass=""] - Additionnal class to add to the container
- *  @param {string} [tadId=contentIndex] - The tabindex of the field, by default it is the contentIndex
+ *  @param {Object} multiples - The multiples settings to display. This needs to be a dict of settings using default field format.
+ *  @param {Object} [columns={"pc": "12", "tablet": "12", "mobile": "12"}] - Field has a grid system. This allow to get multiple field in the same row if needed.
+ *  @param {String} [containerClass=""] - Additionnal class to add to the container
+ *  @param {String} [tadId=contentIndex] - The tabindex of the field, by default it is the contentIndex
  */
 
 const props = defineProps({
@@ -148,7 +148,7 @@ const emits = defineEmits(["delete", "add"]);
 /**
  *  @name setDeleteState
  *  @description Will determine if the group can be deleted. If at least one input is disabled, the delete button will be disabled.
- *  @param {object} group - The multiple group with all settings
+ *  @param {Object} group - The multiple group with all settings
  *  @returns {object} - Return delete button data
  */
 function setDeleteState(group) {
@@ -168,8 +168,8 @@ function setDeleteState(group) {
 /**
  *  @name setInvisible
  *  @description Will set a multiple group as invisible.
- *  @param {string|number} id - The multiple group with all settings
- *  @returns {void}
+ *  @param {String|Number} id - The multiple group with all settings
+ *  @returns {Void}
  */
 function setInvisible(id) {
   multiples.invisible.push(id);
@@ -178,8 +178,8 @@ function setInvisible(id) {
 /**
  *  @name delInvisible
  *  @description Will remove a multiple group from invisible list.
- *  @param {string|number} id - The multiple group with all settings
- *  @returns {void}
+ *  @param {String|Number} id - The multiple group with all settings
+ *  @returns {Void}
  */
 function delInvisible(id) {
   multiples.invisible = multiples.invisible.filter((v) => v !== id);
@@ -188,8 +188,8 @@ function delInvisible(id) {
 /**
  *  @name toggleVisible
  *  @description Will toggle a multiple group visibility.
- *  @param {string|number} id - The multiple group with all settings
- *  @returns {void}
+ *  @param {String|Number} id - The multiple group with all settings
+ *  @returns {Void}
  */
 function toggleVisible(id) {
   multiples.invisible.includes(id) ? delInvisible(id) : setInvisible(id);
@@ -198,9 +198,9 @@ function toggleVisible(id) {
 /**
  *  @name delGroup
  *  @description Will emit a delete event to the parent component. The parent will update the template and multiples, then the component will rerender.
- *  @param {string} multName - The multiple group name
- *  @param {string} groupName - The multiple group id
- *  @returns {void}
+ *  @param {String} multName - The multiple group name
+ *  @param {String} groupName - The multiple group id
+ *  @returns {Void}
  */
 function delGroup(multName, groupName) {
   emits("delete", multName, groupName);

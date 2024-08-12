@@ -49,11 +49,11 @@ import { useEasyForm } from "@store/form.js";
  *         },
  *   ],
  * }
- * @param {object} template - Template object with plugin and settings data.
+ * @param {Object} template - Template object with plugin and settings data.
  * @param {string} containerClass - Container
  * @param {string} [operation="edit"] - Operation type (edit, new, delete).
  * @param {string} [oldServerName=""] - Old server name. This is a server name before any changes.
- * @param {object} columns - Columns object.
+ * @param {Object} columns - Columns object.
  */
 
 const easyForm = useEasyForm();

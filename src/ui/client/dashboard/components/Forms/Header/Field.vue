@@ -20,13 +20,13 @@ import PopoverGroup from "@components/Widget/PopoverGroup.vue";
  *      },
  *    ],
  *  }
- *  @param {string} label - The label of the field. Can be a translation key or by default raw text.
- *  @param {string} id - The id of the field. This is used to link the label to the field.
- *  @param {string} name - The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.
- *  @param {array} [popovers=[]] - List of popovers to display more information
- *  @param {boolean} [required=false]
- *  @param {boolean} [hideLabel=false]
- *  @param {string} [headerClass=""]
+ *  @param {String} label - The label of the field. Can be a translation key or by default raw text.
+ *  @param {String} id - The id of the field. This is used to link the label to the field.
+ *  @param {String} name - The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.
+ *  @param {Array} [popovers=[]] - List of popovers to display more information
+ *  @param {Boolean} [required=false]
+ *  @param {Boolean} [hideLabel=false]
+ *  @param {String} [headerClass=""]
  */
 
 const props = defineProps({

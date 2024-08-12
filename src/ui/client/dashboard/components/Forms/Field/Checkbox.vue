@@ -29,21 +29,21 @@ import { useUUID } from "@utils/global.js";
  *      },
  *    ]
  *  }
- *  @param {string} [id=uuidv4()] - Unique id
- *  @param {string} label - The label of the field. Can be a translation key or by default raw text.
- *  @param {string} name - The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.
- *  @param {string} value
- *  @param {object} [attrs={}] - Additional attributes to add to the field
- *  @param {array} [popovers=[]] - List of popovers to display more information
- *  @param {string} [inpType="checkbox"]  - The type of the field, useful when we have multiple fields in the same container to display the right field
- *  @param {boolean} [disabled=false]
- *  @param {boolean} [required=false]
- *  @param {object} [columns={"pc": "12", "tablet": "12", "mobile": "12"}] - Field has a grid system. This allow to get multiple field in the same row if needed.
- *  @param {boolean} [hideLabel=false]
- *  @param {string} [containerClass=""]
- *  @param {string} [headerClass=""]
- *  @param {string} [inpClass=""]
- *  @param {string|number} [tabId=contentIndex] - The tabindex of the field, by default it is the contentIndex
+ *  @param {String} [id=uuidv4()] - Unique id
+ *  @param {String} label - The label of the field. Can be a translation key or by default raw text.
+ *  @param {String} name - The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.
+ *  @param {String} value
+ *  @param {Object} [attrs={}] - Additional attributes to add to the field
+ *  @param {Array} [popovers=[]] - List of popovers to display more information
+ *  @param {String} [inpType="checkbox"]  - The type of the field, useful when we have multiple fields in the same container to display the right field
+ *  @param {Boolean} [disabled=false]
+ *  @param {Boolean} [required=false]
+ *  @param {Object} [columns={"pc": "12", "tablet": "12", "mobile": "12"}] - Field has a grid system. This allow to get multiple field in the same row if needed.
+ *  @param {Boolean} [hideLabel=false]
+ *  @param {String} [containerClass=""]
+ *  @param {String} [headerClass=""]
+ *  @param {String} [inpClass=""]
+ *  @param {String|Number} [tabId=contentIndex] - The tabindex of the field, by default it is the contentIndex
  */
 
 const props = defineProps({

@@ -41,23 +41,23 @@ import "@assets/css/flatpickr.dark.min.css";
  *      },
  *    ],
  *  }
- *  @param {string} [id=uuidv4()] - Unique id
- *  @param {string} label - The label of the field. Can be a translation key or by default raw text.
- *  @param {string} name - The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.
- *  @param {array} popovers - List of popovers to display more information
- *  @param {object} [attrs={}] - Additional attributes to add to the field
- *  @param {string} [inpType="datepicker"]  - The type of the field, useful when we have multiple fields in the same container to display the right field
- *  @param {timestamp} [value=""] - Default date when instantiate
- *  @param {timestamp} [minDate=""] - Impossible to pick a date before this date.
- *  @param {timestamp} [maxDate=""] - Impossible to pick a date after this date.
- *  @param {boolean} [isClipboard=true] - allow to copy the timestamp value
- *  @param {boolean} [hideLabel=false]
- *  @param {object} [columns={"pc": "12", "tablet": "12", "mobile": "12"}] - Field has a grid system. This allow to get multiple field in the same row if needed.
- *  @param {boolean} [disabled=false]
- *  @param {boolean} [required=false]
- *  @param {string} [headerClass=""]
- *  @param {string} [containerClass=""]
- *  @param {string|number} [tabId=contentIndex] - The tabindex of the field, by default it is the contentIndex
+ *  @param {String} [id=uuidv4()] - Unique id
+ *  @param {String} label - The label of the field. Can be a translation key or by default raw text.
+ *  @param {String} name - The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.
+ *  @param {Array} [popovers=[]] - List of popovers to display more information
+ *  @param {Object} [attrs={}] - Additional attributes to add to the field
+ *  @param {String} [inpType="datepicker"]  - The type of the field, useful when we have multiple fields in the same container to display the right field
+ *  @param {Timestamp} [value=""] - Default date when instantiate
+ *  @param {Timestamp} [minDate=""] - Impossible to pick a date before this date.
+ *  @param {Timestamp} [maxDate=""] - Impossible to pick a date after this date.
+ *  @param {Boolean} [isClipboard=true] - allow to copy the timestamp value
+ *  @param {Boolean} [hideLabel=false]
+ *  @param {Object} [columns={"pc": "12", "tablet": "12", "mobile": "12"}] - Field has a grid system. This allow to get multiple field in the same row if needed.
+ *  @param {Boolean} [disabled=false]
+ *  @param {Boolean} [required=false]
+ *  @param {String} [headerClass=""]
+ *  @param {String} [containerClass=""]
+ *  @param {String|Number} [tabId=contentIndex] - The tabindex of the field, by default it is the contentIndex
  */
 
 const props = defineProps({
@@ -167,9 +167,9 @@ let datepicker;
 /**
  *  @name setMonthSelect
  *  @description Create a custom select for month dropdown and hide default one.
- *  @param {element} calendarEl - The calendar element.
- *  @param {string} id - The id of the datepicker.
- *  @returns {void}
+ *  @param {Element} calendarEl - The calendar element.
+ *  @param {String} id - The id of the datepicker.
+ *  @returns {Void}
  */
 function setMonthSelect(calendarEl, id) {
   // Hide default select and options
@@ -245,9 +245,9 @@ function setMonthSelect(calendarEl, id) {
 /**
  *  @name setPickerAtt
  *  @description Set attributes to the calendar element to make it more accessible.
- *  @param {element} calendarEl - The calendar element.
- *  @param {string|boolean} [id=false] - The id of the datepicker.
- *  @returns {void}
+ *  @param {Element} calendarEl - The calendar element.
+ *  @param {String|Boolean} [id=false] - The id of the datepicker.
+ *  @returns {Void}
  */
 function setPickerAtt(calendarEl, id = false) {
   // change error non-standard attributes
@@ -283,10 +283,10 @@ function setPickerAtt(calendarEl, id = false) {
  *  @description Handle events on the calendar element, like tabindex.
  *  This will update the tabindex and focus on the right element.
  *  This will update the custom select and options.
- *  @param {element} calendarEl - The calendar element.
- *  @param {string} id - The id of the datepicker.
- *  @param {object} datepicker - The datepicker instance.
- *  @returns {void}
+ *  @param {Element} calendarEl - The calendar element.
+ *  @param {String} id - The id of the datepicker.
+ *  @param {Object} datepicker - The datepicker instance.
+ *  @returns {Void}
  */
 function handleEvents(calendarEl, id, datepicker) {
   calendarEl.addEventListener("click", (e) => {
@@ -504,10 +504,10 @@ function handleEvents(calendarEl, id, datepicker) {
 /**
  *  @name toggleSelect
  *  @description Toggle the custom select dropdown.
- *  @param {element} calendarEl - The calendar element.
- *  @param {string} id - The id of the datepicker.
- *  @param {event} e - The event.
- *  @returns {void}
+ *  @param {Element} calendarEl - The calendar element.
+ *  @param {String} id - The id of the datepicker.
+ *  @param {Event} e - The event.
+ *  @returns {Void}
  */
 function toggleSelect(calendar, id, e) {
   if (e.target.hasAttribute("data-months-select")) {
@@ -523,10 +523,10 @@ function toggleSelect(calendar, id, e) {
 /**
  *  @name closeSelectByDefault
  *  @description Close the custom select dropdown by default.
- *  @param {element} calendarEl - The calendar element.
- *  @param {string} id - The id of the datepicker.
- *  @param {event} e - The event.
- *  @returns {void}
+ *  @param {Element} calendarEl - The calendar element.
+ *  @param {String} id - The id of the datepicker.
+ *  @param {Event} e - The event.
+ *  @returns {Void}
  */
 function closeSelectByDefault(calendar, id, e) {
   if (!e.target.hasAttribute("data-months-select")) {
@@ -541,11 +541,11 @@ function closeSelectByDefault(calendar, id, e) {
 /**
  *  @name updateMonth
  *  @description Update the month when click on custom select option.
- *  @param {element} calendarEl - The calendar element.
- *  @param {string} id - The id of the datepicker.
- *  @param {event} e - The event.
- *  @param {object} datepicker - The datepicker instance.
- *  @returns {void}
+ *  @param {Element} calendarEl - The calendar element.
+ *  @param {String} id - The id of the datepicker.
+ *  @param {Event} e - The event.
+ *  @param {Object} datepicker - The datepicker instance.
+ *  @returns {Void}
  */
 function updateMonth(calendar, id, e, datepicker) {
   if (e.target.hasAttribute("data-month")) {
@@ -581,9 +581,9 @@ function updateMonth(calendar, id, e, datepicker) {
 /**
  *  @name updateIndex
  *  @description Update the tabindex on the calendar element.
- *  @param {element} calendarEl - The calendar element.
- *  @param {string} target - The event target.
- *  @returns {void}
+ *  @param {Element} calendarEl - The calendar element.
+ *  @param {String} target - The event target.
+ *  @returns {Void}
  */
 function updateIndex(calendarEl, target) {
   if (target.hasAttribute("tabindex")) {
@@ -598,9 +598,9 @@ function updateIndex(calendarEl, target) {
 /**
  *  @name setIndex
  *  @description Set the tabindex on the calendar element to work with keyboard.
- *  @param {element} calendarEl - The calendar element.
- *  @param {string} tabindex - the tabindex to set.
- *  @returns {void}
+ *  @param {Element} calendarEl - The calendar element.
+ *  @param {String} tabindex - the tabindex to set.
+ *  @returns {Void}
  */
 function setIndex(calendarEl, tabindex) {
   try {

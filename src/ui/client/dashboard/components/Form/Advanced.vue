@@ -45,11 +45,11 @@ import { v4 as uuidv4 } from "uuid";
  *        },
  *      ],
  * }
- * @param {object} template - Template object with plugin and settings data.
+ * @param {Object} template - Template object with plugin and settings data.
  * @param {string} containerClass - Container
  * @param {string} [operation="edit"] - Operation type (edit, new, delete).
  * @param {string} [oldServerName=""] - Old server name. This is a server name before any changes.
- * @param {object} columns - Columns object.
+ * @param {Object} columns - Columns object.
  */
 
 const advancedForm = useAdvancedForm();
@@ -209,7 +209,7 @@ const filters = [
  **  @name filter
  **  @description Get the filter data from the <Filter /> component and store the result in the advanced store.
  *  After that, update some UI states like disabled state.
- **  @param {object} filterData - The filter data from the <Filter /> component.
+ **  @param {Object} filterData - The filter data from the <Filter /> component.
  **  @returns {void}
  */
 function filter(filterData) {
@@ -251,7 +251,7 @@ function setValidity() {
 /**
  **  @name getFirstPlugin
  **  @description Get the first available plugin in the template.
- **  @param {object} template - The template object.
+ **  @param {Object} template - The template object.
  **  @returns {string} - The first plugin name.
  */
 function getFirstPlugin(template) {
@@ -265,7 +265,7 @@ function getFirstPlugin(template) {
 /**
  **  @name getPluginNames
  **  @description Get the first available plugin in the template.
- **  @param {object} template - The template object.
+ **  @param {Object} template - The template object.
  **  @returns {array} - The list of plugin names.
  */
 function getPluginNames(template) {

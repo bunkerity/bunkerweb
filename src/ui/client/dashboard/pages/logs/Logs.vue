@@ -28,7 +28,7 @@ onBeforeMount(() => {
 /**
  *  @name getLogContent
  *  @description Redirect to the same page but with log name as query parameter to get the content of the log.
- *  @returns {void}
+ *  @returns {Void}
  */
 function getLogContent() {
   window.addEventListener(
@@ -47,7 +47,7 @@ function getLogContent() {
       // go to url
       location.href = url;
     },
-    true,
+    true
   );
 }
 

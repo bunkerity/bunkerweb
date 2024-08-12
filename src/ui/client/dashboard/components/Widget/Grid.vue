@@ -12,8 +12,8 @@ import { defineProps, watch, reactive } from "vue";
  *    columns: { pc: 12, tablet: 12, mobile: 12},
  *    gridClass: "items-start"
  *  }
- *  @param {string} [gridClass="items-start"] - Additional class
- *  @param {array} [display=[]] - Array need two values : "groupName" in index 0 and "compId" in index 1 in order to be displayed using the display store. More info on the display store itslef.
+ *  @param {String} [gridClass="items-start"] - Additional class
+ *  @param {Array} [display=[]] - Array need two values : "groupName" in index 0 and "compId" in index 1 in order to be displayed using the display store. More info on the display store itslef.
  */
 
 const props = defineProps({

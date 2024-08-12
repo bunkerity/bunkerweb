@@ -57,15 +57,15 @@ import Filter from "@components/Widget/Filter.vue";
  *      },
  *    ];
  *  }
- *  @param {string} title - Determine the title of the table.
- *  @param {array} header - Determine the header of the table.
- *  @param {array} positions - Determine the position of each item in the table in a list of number based on 12 columns grid.
- *  @param {array} items - items to render in the table. This need to be an array (row) of array (cols) with a cell being a regular widget.
- *  @param {array} [filters=[]] - Determine the filters of the table.
- *  @param {string} [minWidth="base"] - Determine the minimum size of the table. Can be "base", "sm", "md", "lg", "xl".
- *  @param {string} [containerClass=""] - Container additional class.
- *  @param {string} [containerWrapClass=""] - Container wrap additional class.
- *  @param {string} [tableClass=""] - Table additional class.
+ *  @param {String} title - Determine the title of the table.
+ *  @param {Array} header - Determine the header of the table.
+ *  @param {Array} positions - Determine the position of each item in the table in a list of number based on 12 columns grid.
+ *  @param {Array} items - items to render in the table. This need to be an array (row) of array (cols) with a cell being a regular widget.
+ *  @param {Array} [filters=[]] - Determine the filters of the table.
+ *  @param {String} [minWidth="base"] - Determine the minimum size of the table. Can be "base", "sm", "md", "lg", "xl".
+ *  @param {String} [containerClass=""] - Container additional class.
+ *  @param {String} [containerWrapClass=""] - Container wrap additional class.
+ *  @param {String} [tableClass=""] - Table additional class.
  */
 
 const props = defineProps({
@@ -139,7 +139,7 @@ const table = reactive({
 /**
  *  @name setUnmatchWidth
  *  @description Determine the width of the unmatch element based on the parent container.
- *  @returns {void}
+ *  @returns {Void}
  */
 function setUnmatchWidth() {
   try {
@@ -151,7 +151,7 @@ function setUnmatchWidth() {
 /**
  *  @name getOverflow
  *  @description Handle the overflow of the table and update padding in consequence.
- *  @returns {void}
+ *  @returns {Void}
  */
 function getOverflow() {
   setTimeout(() => {
@@ -172,7 +172,7 @@ watch(
   () => {
     getOverflow();
     setUnmatchWidth();
-  },
+  }
 );
 
 onMounted(() => {

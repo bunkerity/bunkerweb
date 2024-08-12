@@ -21,13 +21,13 @@ import Icons from "@components/Widget/Icons.vue";
  *    iconName: "info",
  *    attrs: { "data-popover": "test" },
  *  }
- *  @param {string} text - Content of the popover. Can be a translation key or by default raw text.
- *  @param {string} [href="#"] - Link of the anchor. By default it is a # link.
- *  @param {string} color - Color of the icon between tailwind colors
- *  @param {object} [attrs={}] - List of attributs to add to the text.
- *  @param {string} [tag="a"] - By default it is a anchor tag, but we can use other tag like div in case of popover on another anchor
- *  @param {string} [iconClass="icon-default"]
- *  @param {string|number} [tabId=contentIndex] - The tabindex of the field, by default it is the contentIndex
+ *  @param {String} text - Content of the popover. Can be a translation key or by default raw text.
+ *  @param {String} [href="#"] - Link of the anchor. By default it is a # link.
+ *  @param {String} color - Color of the icon between tailwind colors
+ *  @param {Object} [attrs={}] - List of attributs to add to the text.
+ *  @param {String} [tag="a"] - By default it is a anchor tag, but we can use other tag like div in case of popover on another anchor
+ *  @param {String} [iconClass="icon-default"]
+ *  @param {String|Number} [tabId=contentIndex] - The tabindex of the field, by default it is the contentIndex
  */
 
 const props = defineProps({
@@ -80,7 +80,7 @@ const popoverBtn = ref();
 /**
  *  @name showPopover
  *  @description Show the popover and set the position of the popover relative to the container.
- *  @returns {void}
+ *  @returns {Void}
  */
 function showPopover() {
   popover.isHover = true;
@@ -136,7 +136,7 @@ function showPopover() {
 /**
  *  @name hidePopover
  *  @description Hide the popover.
- *  @returns {void}
+ *  @returns {Void}
  */
 function hidePopover() {
   popover.isHover = false;

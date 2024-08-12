@@ -12,10 +12,10 @@ import { defineProps, watch, computed, reactive } from "vue";
  *    containerClass: "w-full h-full bg-white rounded shadow-md",
  *    columns: { pc: 12, tablet: 12, mobile: 12}
  *  }
- *  @param {string} [containerClass=""] - Additional class
- *  @param {object|boolean} [columns=false] - Work with grid system { pc: 12, tablet: 12, mobile: 12}
- *  @param {string} [tag="div"] - The tag for the container
- *  @param {array} [display=[]] - Array need two values : "groupName" in index 0 and "compId" in index 1 in order to be displayed using the display store. More info on the display store itslef.
+ *  @param {String} [containerClass=""] - Additional class
+ *  @param {Object|boolean} [columns=false] - Work with grid system { pc: 12, tablet: 12, mobile: 12}
+ *  @param {String} [tag="div"] - The tag for the container
+ *  @param {Array} [display=[]] - Array need two values : "groupName" in index 0 and "compId" in index 1 in order to be displayed using the display store. More info on the display store itslef.
  */
 
 const props = defineProps({

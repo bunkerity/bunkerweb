@@ -49,12 +49,12 @@ import Eye from "@components/Icons/Eye.vue";
  *    iconClass: 'base',
  *    color: 'amber',
  *  }
- *  @param {string} iconName - The name of the icon to display. The icon name is the name of the file without the extension on lowercase.
- *  @param {string} [iconClass="base"] - Class to apply to the icon. In case the icon is related to a widget, the widget will set the right class automatically.
- *  @param {string} [color=""] - The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker').
- *  @param {boolean} [isStick=false] - If true, the icon will be stick to the top right of the parent container.
- *  @param {boolean} [disabled=false] - If true, the icon will be disabled.
- *  @param {any} [value=""] - Attach a value to icon. Useful on some cases like table filtering using icons.
+ *  @param {String} iconName - The name of the icon to display. The icon name is the name of the file without the extension on lowercase.
+ *  @param {String} [iconClass="base"] - Class to apply to the icon. In case the icon is related to a widget, the widget will set the right class automatically.
+ *  @param {String} [color=""] - The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker').
+ *  @param {Boolean} [isStick=false] - If true, the icon will be stick to the top right of the parent container.
+ *  @param {Boolean} [disabled=false] - If true, the icon will be disabled.
+ *  @param {Any} [value=""] - Attach a value to icon. Useful on some cases like table filtering using icons.
  */
 
 const props = defineProps({

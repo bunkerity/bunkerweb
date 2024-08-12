@@ -65,8 +65,8 @@ const gridClass = computed(() => {
  *  @name indexUp
  *  @description   When we focus or pointerover an item, we will add a higher z-index than others items in order to avoid to crop popovers.
  *  In case we leave the item, for few moments the item will get an higher z-index than this in order to get a smooth transition.
- *  @param {string|number} id - The id of the item.
- *  @returns {void}
+ *  @param {String|Number} id - The id of the item.
+ *  @returns {Void}
  */
 function indexUp(id) {
   data.upIndex = id;
@@ -75,8 +75,8 @@ function indexUp(id) {
 /**
  *  @name indexPending
  *  @description  This will add a higher z-index for 100ms when cursor is out of the item in order to avoid to crop popovers.
- *  @param {string|number} id - The id of the item.
- *  @returns {void}
+ *  @param {String|Number} id - The id of the item.
+ *  @returns {Void}
  */
 function indexPending(id) {
   data.pendingIndex.push(id);
@@ -110,8 +110,8 @@ function indexPending(id) {
           data.upIndex === id
             ? 'up'
             : data.pendingIndex.includes(id)
-              ? 'pending'
-              : '',
+            ? 'pending'
+            : '',
         ]"
         v-bind="item.attrs || {}"
         @focusin="indexUp(id)"

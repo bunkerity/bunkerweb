@@ -23,7 +23,7 @@ import { v4 as uuidv4 } from "uuid";
  *      low : [...],
  *    }
  *  }
- * @param {object} templates - List of advanced templates that contains settings. Must be a dict with mode as key, then the template name as key with a list of data (different for each modes).
+ * @param {Object} templates - List of advanced templates that contains settings. Must be a dict with mode as key, then the template name as key with a list of data (different for each modes).
  * @param {string} [operation="edit"] - Operation type (edit, new, delete).
  * @param {string} [oldServerName=""] - Old server name. This is a server name before any changes.
  */
