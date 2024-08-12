@@ -97,6 +97,7 @@ if (props.display.length) {
 
 const containerClass = computed(() => {
   if (props.type === "card") return "layout-card";
+  if (props.type === "tabs") return "layout-tabs";
   return "";
 });
 
@@ -129,12 +130,7 @@ onMounted(() => {
     :id="container.id"
     :is="props.link ? 'a' : 'div'"
     :data-is="`${props.type}`"
-    :class="[
-      containerClass,
-      gridClass,
-      props.gridLayoutClass,
-      'layout-grid-layout',
-    ]"
+    :class="[containerClass, gridClass, props.gridLayoutClass]"
   >
     <slot></slot>
   </component>

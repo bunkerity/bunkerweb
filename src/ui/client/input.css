@@ -508,16 +508,16 @@ body {
 
 /* LAYOUT */
 
-.layout-grid-layout {
-  @apply px-6 py-4 overflow-hidden break-words grid grid-cols-12 w-full;
-}
-
 .layout-grid {
   @apply col-span-12 grid grid-cols-12 w-full relative;
 }
 
 .layout-card {
-  @apply overflow-visible relative transition dark:brightness-110 shadow-md bg-white dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border transform duration-300 ease-in-out;
+  @apply px-6 py-4 grid grid-cols-12 w-full overflow-visible relative transition dark:brightness-110 shadow-md bg-white dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border transform duration-300 ease-in-out;
+}
+
+.layout-tabs {
+  @apply overflow-visible  relative transition dark:brightness-110 transform duration-300 ease-in-out;
 }
 
 .layout-modal-container {
@@ -1150,6 +1150,10 @@ body {
   @apply flex justify-center items-center mx-4;
 }
 
+.button-group-tabs {
+  @apply col-span-12 flex justify-center items-center;
+}
+
 .button-group-multiple {
   @apply col-span-12 flex justify-center items-center mx-4;
 }
@@ -1391,7 +1395,17 @@ body {
 /* BTN */
 
 .btn {
-  @apply flex justify-center items-end leading-none tracking-wide dark:brightness-90 inline-block  font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer  leading-normal ease-in shadow-xs hover:-translate-y-px active:opacity-85 hover:shadow-md disabled:cursor-not-allowed dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400/0 dark:disabled:bg-gray-700 dark:disabled:border-gray-700/0 disabled:hover:translate-y-0 disabled:hover:bg-gray-400 disabled:hover:border-gray-400/0 dark:disabled:hover:translate-y-0 dark:disabled:hover:bg-gray-700 dark:disabled:hover:border-gray-700/0;
+  @apply w-full flex justify-center items-end tracking-wide dark:brightness-90 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer  leading-normal ease-in shadow-xs hover:-translate-y-px active:opacity-85 hover:shadow-md disabled:cursor-not-allowed dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400/0 dark:disabled:bg-gray-700 dark:disabled:border-gray-700/0 disabled:hover:translate-y-0 disabled:hover:bg-gray-400 disabled:hover:border-gray-400/0 dark:disabled:hover:translate-y-0 dark:disabled:hover:bg-gray-700 dark:disabled:hover:border-gray-700/0;
+}
+
+.btn.active:not([disabled]) {
+  @apply shadow-md brightness-90 dark:shadow-md dark:brightness-75;
+}
+
+/* BTN SIZE */
+
+.btn.tab {
+  @apply px-3 py-2.5;
 }
 
 .btn.xl {

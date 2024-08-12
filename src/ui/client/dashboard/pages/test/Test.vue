@@ -4,6 +4,7 @@ import Grid from "@components/Widget/Grid.vue";
 import GridLayout from "@components/Widget/GridLayout.vue";
 import DashboardLayout from "@components/Dashboard/Layout.vue";
 import Tabulator from "@components/Widget/Tabulator.vue";
+import ButtonGroup from "@components/Widget/ButtonGroup.vue";
 import { useEqualStr } from "@utils/global.js";
 import { useTableStore } from "@store/global.js";
 import { onMounted } from "vue";
@@ -140,8 +141,26 @@ const items = [
 
 const builder = [
   {
+    type: "tabs",
+    widgets: [
+      {
+        type: "ButtonGroup",
+        data: {
+          buttons: [
+            {
+              text: "test",
+              display: ["main", 0],
+              isTab: true,
+              size: "tab",
+              iconName: "globe",
+            },
+          ],
+        },
+      },
+    ],
+  },
+  {
     type: "card",
-    gridLayoutClass: "transparent",
     widgets: [
       {
         type: "Tabulator",
@@ -167,7 +186,6 @@ const builder = [
 
 <template>
   <DashboardLayout>
-    <div class="col-span-12 w-full border-b borber-b-white">f</div>
     <GridLayout
       v-for="(container, index) in builder"
       :key="index"
@@ -184,6 +202,10 @@ const builder = [
         <template v-for="(widget, index) in container.widgets" :key="index">
           <Tabulator
             v-if="useEqualStr(widget.type, 'Tabulator')"
+            v-bind="widget.data"
+          />
+          <ButtonGroup
+            v-if="useEqualStr(widget.type, 'ButtonGroup')"
             v-bind="widget.data"
           />
         </template>

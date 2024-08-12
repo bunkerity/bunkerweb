@@ -59,7 +59,7 @@ const groupEl = ref(null);
 
 onMounted(() => {
   group.class =
-    props.boutonGroupClass || groupEl?.value?.closest("[data-is]")
+    props.boutonGroupClass || groupEl?.value.closest("[data-is]")
       ? `button-group-${groupEl.value
           .closest("[data-is]")
           .getAttribute("data-is")}`
