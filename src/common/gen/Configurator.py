@@ -186,9 +186,9 @@ class Configurator:
             ret, err = self.__check_var(variable)
             if ret:
                 config[variable] = value
-            elif (
+            elif variable == "KUBERNETES_MODE" or (
                 "CUSTOM_CONF" not in variable
-                and not variable.startswith(("_", "PYTHON", "KUBERNETES_SERVICE_", "KUBERNETES_PORT_", "SVC_"))
+                and not variable.startswith(("_", "PYTHON", "KUBERNETES_", "SVC_", "LB_"))
                 and variable
                 not in (
                     "DOCKER_HOST",
