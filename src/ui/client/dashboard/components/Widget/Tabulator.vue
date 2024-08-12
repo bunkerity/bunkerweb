@@ -19,8 +19,44 @@ import { useTableStore } from "@store/global.js";
 
 const tableStore = useTableStore();
 
-// TODO : ADD JSDOC COMPONENT
-
+/**
+ *  @name Widget/Tabulator.vue
+ *  @description This component allow to display a table using the Tabulator library with utils and custom components around to work with (like filters).
+ *  Because we can't instantiate Vue component inside the Tabulator cell, I choose to send default component props to the cell and teleport the component inside the cell.
+ *  The created instance is store in the tableStore using the id as key in order to use it in other components.
+ *  UI : I created a formatter for each custom component that will return an empty string.
+ *  Sorting : because we aren't working with primitives but props object, each columns that have a custom component will have a custom sorter to avoid sorting error.
+ *  Filtering : I created isomorphic filters that will get the right data to check for each custom component object.
+ *  To apply a filter, we need to render a field that will be link to the filterTable() function.
+ *  A11y :I created a11yTable(), with sortable header tab index.
+ *  @example
+ *     filter =  [{
+ *             "type": "like", // isomorphic filter type
+ *             "fields": ["ip"], // fields to filter
+ *             // setting is a regular Fields props object
+ *             "setting": {
+ *                 "id": "input-search-ip",
+ *                 "name": "input-search-ip",
+ *                 "label": "bans_search_ip",  # keep it (a18n)
+ *                 "value": "",
+ *                 "inpType": "input",
+ *                 "columns": {"pc": 3, "tablet": 4, " mobile": 12},
+ *             },
+ *     }];
+ * @param {string} id - Unique id of the table
+ * @param {boolean} [isStriped=true] - Add striped class to the table
+ * @param {array} [filters=[]] - List of filters to display
+ * @param {array} columns - List of columns to display
+ * @param {array} items - List of items to display
+ * @param {number} [rowHeight= 0] - Case value is 0, this will be ignored.
+ * @param {number} [colMinWidth=150] - Minimum width for each col of  a row
+ * @param {number} [colMaxWidth=0] - Maximum width for each col of  a row. Case value is 0, this will be ignored.
+ * @param {boolean} [isPagination=true] - Add pagination to the table
+ * @param {number} [paginationSize=10] - Number of items per page
+ * @param {number} [paginationInitialPage=1] - Initial page
+ * @param {array} [paginationSizeSelector=[10, 25, 50, 100, true]] - Select number of items per page
+ * @returns {void}
+ */
 const customComponents = ["Icons", "Text", "Fields", "Button", "ButtonGroup"];
 
 const props = defineProps({
@@ -46,7 +82,7 @@ const props = defineProps({
   },
   items: {
     type: Array,
-    required: false,
+    required: true,
     default: [],
   },
   rowHeight: {

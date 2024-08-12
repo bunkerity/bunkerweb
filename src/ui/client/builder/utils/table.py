@@ -4,3 +4,7 @@ def add_column(title, field, formatter=""):
         return {"title": title, "field": field, "formatter": formatter}
 
     return {"title": title, "field": field}
+
+
+def format_field(field):
+    return {"setting": field["data"]}
