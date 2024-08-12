@@ -1,7 +1,7 @@
 import json
 import base64
 
-from builder.utils.widgets import button, button_group, title, text, tabulator, fields, upload
+from builder.utils.widgets import button, button_group, title, text, tabulator, fields, upload, checkbox
 
 core_columns = [
     {"title": "Name", "field": "name", "formatter": "text"},
@@ -120,7 +120,7 @@ register_filters = [
 
 register_items = [
     {
-        "select": fields(
+        "select": checkbox(
             inputType="checkbox",
             value="no",  # replace yes or no if installed or not
             label="plugin_is_installed",  # keep it (a18n)
@@ -191,7 +191,7 @@ upload_filters = [
 
 upload_items = [
     {
-        "select": fields(
+        "select": checkbox(
             inputType="checkbox",
             value="no",  # replace yes or no if installed or not
             label="plugin_is_installed",  # keep it (a18n)

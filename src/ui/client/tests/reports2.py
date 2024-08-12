@@ -1,7 +1,7 @@
 import json
 import base64
 
-from builder.utils.widgets import button, button_group, title, text, tabulator, fields, upload
+from builder.utils.widgets import button, button_group, title, text, tabulator, fields, upload, datepicker
 
 reports_columns = [
     {"title": "Date", "field": "date", "formatter": "fields"},  # datepicker
@@ -113,7 +113,7 @@ reports_filters = [
 
 reports_items = [
     {
-        "data": fields(
+        "data": datepicker(
             id="datepicker-date-id",  # replace id by unique id
             name="datepicker-date-id",  # replace by unique id
             label="reports_date",  # keep it (a18n)

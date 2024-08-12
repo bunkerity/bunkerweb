@@ -1,7 +1,7 @@
 import json
 import base64
 
-from builder.utils.widgets import button, button_group, title, text, tabulator, fields, upload
+from builder.utils.widgets import button, button_group, title, text, tabulator, fields, upload, datepicker, input, select
 
 bans_columns = [
     {"title": "IP", "field": "ip", "formatter": "text"},
@@ -59,7 +59,7 @@ bans_items = [
     {
         "ip": text(text="ban_ip")["data"],  # replace ban_ip by real ip
         "reason": text(text="Reason")["data"],  # replace Reason by real reason
-        "ban_start_date": fields(
+        "ban_start_date": datepicker(
             id="datepicker-ban-start-id",  # replace id by value to use on a form
             name="datepicker-ban-start-id",  # replace by value to use on a form
             label="bans_ban_start_date",  # keep it (a18n)
@@ -69,7 +69,7 @@ bans_items = [
             disabled=True,  # Readonly
             columns={"pc": 12, "tablet": 12, " mobile": 12},
         )["data"],
-        "ban_end_date": fields(
+        "ban_end_date": datepicker(
             id="datepicker-ban-end-id",  # replace id by value to use on a form
             name="datepicker-ban-end-id",  # replace by value to use on a form
             label="bans_ban_end_date",  # keep it (a18n)
@@ -92,7 +92,7 @@ bans_add_columns = [
 bans_add_items = [
     {
         "id": 1,
-        "ip": fields(
+        "ip": datepicker(
             id="datepicker-add-ban-ip-1",
             name="datepicker-add-ban-ip-1",
             label="bans_add_ban_ip",  # keep it (a18n)
@@ -103,7 +103,7 @@ bans_add_items = [
             inputType="input",
             columns={"pc": 12, "tablet": 12, " mobile": 12},
         )["data"],
-        "ban_end": fields(
+        "ban_end": datepicker(
             id="datepicker-add-ban-end-1",
             name="datepicker-add-ban-end-1",
             label="bans_add_end_date",  # keep it (a18n)
