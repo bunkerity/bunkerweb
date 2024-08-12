@@ -67,7 +67,7 @@ class Instance:
 
     def reload(self) -> str:
         try:
-            result = self.apiCaller.send_to_apis("POST", "/reload")
+            result = self.apiCaller.send_to_apis("POST", "/reload")[0]
         except BaseException as e:
             return f"Can't reload {self.hostname}: {e}"
 
@@ -78,7 +78,7 @@ class Instance:
     def start(self) -> str:
         raise NotImplementedError("Method not implemented yet")
         try:
-            result = self.apiCaller.send_to_apis("POST", "/start")
+            result = self.apiCaller.send_to_apis("POST", "/start")[0]
         except BaseException as e:
             return f"Can't start {self.hostname}: {e}"
 
@@ -88,7 +88,7 @@ class Instance:
 
     def stop(self) -> str:
         try:
-            result = self.apiCaller.send_to_apis("POST", "/stop")
+            result = self.apiCaller.send_to_apis("POST", "/stop")[0]
         except BaseException as e:
             return f"Can't stop {self.hostname}: {e}"
 
@@ -98,7 +98,7 @@ class Instance:
 
     def restart(self) -> str:
         try:
-            result = self.apiCaller.send_to_apis("POST", "/restart")
+            result = self.apiCaller.send_to_apis("POST", "/restart")[0]
         except BaseException as e:
             return f"Can't restart {self.hostname}: {e}"
 
@@ -108,7 +108,7 @@ class Instance:
 
     def ban(self, ip: str, exp: float, reason: str) -> str:
         try:
-            result = self.apiCaller.send_to_apis("POST", "/ban", data={"ip": ip, "exp": exp, "reason": reason})
+            result = self.apiCaller.send_to_apis("POST", "/ban", data={"ip": ip, "exp": exp, "reason": reason})[0]
         except BaseException as e:
             return f"Can't ban {ip} on {self.hostname}: {e}"
 
@@ -118,7 +118,7 @@ class Instance:
 
     def unban(self, ip: str) -> str:
         try:
-            result = self.apiCaller.send_to_apis("POST", "/unban", data={"ip": ip})
+            result = self.apiCaller.send_to_apis("POST", "/unban", data={"ip": ip})[0]
         except BaseException as e:
             return f"Can't unban {ip} on {self.hostname}: {e}"
 

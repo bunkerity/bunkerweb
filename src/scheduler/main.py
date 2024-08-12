@@ -460,7 +460,7 @@ def healthcheck_job():
                 api_caller.send_files(PRO_PLUGINS_PATH, "/pro_plugins")
                 api_caller.send_files(join(sep, "etc", "nginx"), "/confs")
                 api_caller.send_files(CACHE_PATH, "/cache")
-                if api_caller.send_to_apis("POST", "/reload"):
+                if api_caller.send_to_apis("POST", "/reload")[0]:
                     LOGGER.info(f"Successfully reloaded instance {bw_instance.endpoint}")
                 else:
                     LOGGER.error(f"Error while reloading instance {bw_instance.endpoint}")
@@ -789,7 +789,9 @@ if __name__ == "__main__":
                     for thread in threads:
                         thread.join()
 
-                    failed = not SCHEDULER.send_to_apis("POST", "/reload")
+                    failed = not SCHEDULER.send_to_apis("POST", "/reload")[
+                        0
+                    ]  # TODO: Check error message so we don't try to send failover if host is unreachable
                 elif INTEGRATION == "Linux":
                     # Reload nginx
                     LOGGER.info("Reloading nginx ...")
@@ -832,7 +834,8 @@ if __name__ == "__main__":
                             for thread in tmp_threads:
                                 thread.join()
 
-                        SCHEDULER.send_to_apis("POST", "/reload")
+                        if not SCHEDULER.send_to_apis("POST", "/reload")[0]:
+                            LOGGER.error("Error while reloading bunkerweb with failover configuration, skipping ...")
                 else:
                     LOGGER.info("Successfully reloaded bunkerweb")
                     # Update the failover path with the working configuration

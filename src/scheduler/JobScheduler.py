@@ -145,17 +145,17 @@ class JobScheduler(ApiCaller):
             reload = proc.returncode == 0
             if reload:
                 self.__logger.info("Successfully reloaded nginx")
-            else:
-                self.__logger.error(
-                    f"Error while reloading nginx - returncode: {proc.returncode} - error: {proc.stderr.decode() if proc.stderr else 'Missing stderr'}"
-                )
+                return True
+            self.__logger.error(
+                f"Error while reloading nginx - returncode: {proc.returncode} - error: {proc.stderr.decode() if proc.stderr else 'Missing stderr'}"
+            )
         else:
             self.__logger.info("Reloading nginx ...")
-            reload = self.send_to_apis("POST", "/reload")
+            reload = self.send_to_apis("POST", "/reload")[0]
             if reload:
                 self.__logger.info("Successfully reloaded nginx")
-            else:
-                self.__logger.error("Error while reloading nginx")
+                return True
+            self.__logger.error("Error while reloading nginx")
         return reload
 
     def __job_wrapper(self, path: str, plugin: str, name: str, file: str) -> int:
