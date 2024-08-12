@@ -819,7 +819,7 @@ def home():
     data_server_builder = home_builder(data)
     data_server_builder = base64.b64encode(bytes(json.dumps(data_server_builder), "utf-8")).decode("ascii")
 
-    return render_template("home.html", data_server_builder=json.dumps(data_server_builder))
+    return render_template("home.html", data_server_builder=data_server_builder)
 
 
 @app.route("/account", methods=["GET", "POST"])

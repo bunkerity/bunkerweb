@@ -24,7 +24,6 @@ import Icons from "@components/Widget/Icons.vue";
  *  @param {string} [subtitle=""] - The subtitle of the stat. Can be a translation key or by default raw text.
  *  @param {string} [iconName=""] - A top-right icon to display between icon available in Icons/Stat. Case falsy value, no icon displayed. The icon name is the name of the file without the extension on lowercase.
  *  @param {string} [subtitleColor="info"] - The color of the subtitle between error, success, warning, info
- *  @param {string} [statClass=""] - Additional class
  */
 
 const props = defineProps({
@@ -55,11 +54,6 @@ const props = defineProps({
     type: String,
     required: false,
     default: "info",
-  },
-  statClass: {
-    type: String,
-    required: false,
-    default: "",
   },
 });
 </script>

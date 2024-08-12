@@ -167,6 +167,7 @@ const builder = [
 
 <template>
   <DashboardLayout>
+    <div class="col-span-12 w-full border-b borber-b-white">f</div>
     <GridLayout
       v-for="(container, index) in builder"
       :key="index"

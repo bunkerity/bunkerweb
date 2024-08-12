@@ -69,6 +69,37 @@ def home_builder(data: dict) -> str:
         iconName="puzzle",
     )
 
-    builder = [version_card, version_num_card, instances_card, services_card, plugins_card]
-
+    builder = [
+        {
+            "type": "card",
+            "link": "https://panel.bunkerweb.io/?utm_campaign=self&utm_source=ui#pro",
+            "containerColumns": {"pc": 4, "tablet": 6, "mobile": 12},
+            "widgets": [version_card],
+        },
+        {
+            "type": "card",
+            "link": "https://github.com/bunkerity/bunkerweb",
+            "containerColumns": {"pc": 4, "tablet": 6, "mobile": 12},
+            "widgets": [version_num_card],
+        },
+        {
+            "type": "card",
+            "link": "instances",
+            "containerColumns": {"pc": 4, "tablet": 6, "mobile": 12},
+            "widgets": [instances_card],
+        },
+        {
+            "type": "card",
+            "link": "services",
+            "containerColumns": {"pc": 4, "tablet": 6, "mobile": 12},
+            "widgets": [services_card],
+        },
+        {
+            "type": "card",
+            "link": "plugins",
+            "containerColumns": {"pc": 4, "tablet": 6, "mobile": 12},
+            "widgets": [plugins_card],
+        },
+    ]
+    print(builder, flush=True)
     return builder

@@ -9,13 +9,7 @@ home = [
         "widgets": [
             {
                 "type": "Stat",
-                "data": {
-                    "title": "home_version",
-                    "subtitle": "home_upgrade_to_pro",
-                    "subtitleColor": "warning",
-                    "stat": "home_free",
-                    "iconName": "key",
-                },
+                "data": {"title": "home_version", "stat": "home_free", "subtitle": "home_upgrade_to_pro", "iconName": "key", "subtitleColor": "warning"},
             }
         ],
     },
@@ -28,66 +22,36 @@ home = [
                 "type": "Stat",
                 "data": {
                     "title": "home_version_number",
+                    "stat": "1.6.0-beta",
                     "subtitle": "home_update_available",
-                    "subtitleColor": "warning",
-                    "stat": "1.5.8",
                     "iconName": "wire",
+                    "subtitleColor": "warning",
                 },
             }
         ],
     },
     {
         "type": "card",
-        "link": "/instances",
+        "link": "instances",
         "containerColumns": {"pc": 4, "tablet": 6, "mobile": 12},
-        "widgets": [
-            {
-                "type": "Stat",
-                "data": {
-                    "title": "home_instances",
-                    "subtitle": "home_total_number",
-                    "subtitleColor": "info",
-                    "stat": 1,
-                    "iconName": "box",
-                },
-            }
-        ],
+        "widgets": [{"type": "Stat", "data": {"title": "home_instances", "stat": 1, "subtitle": "home_total_number", "iconName": "box"}}],
     },
     {
         "type": "card",
-        "link": "/services",
+        "link": "services",
         "containerColumns": {"pc": 4, "tablet": 6, "mobile": 12},
-        "widgets": [
-            {
-                "type": "Stat",
-                "data": {
-                    "title": "home_services",
-                    "subtitle": "home_all_methods_included",
-                    "subtitleColor": "info",
-                    "stat": 2,
-                    "iconName": "disk",
-                },
-            }
-        ],
+        "widgets": [{"type": "Stat", "data": {"title": "home_services", "stat": 2, "subtitle": "home_all_methods_included", "iconName": "disk"}}],
     },
     {
         "type": "card",
-        "link": "/plugins",
+        "link": "plugins",
         "containerColumns": {"pc": 4, "tablet": 6, "mobile": 12},
         "widgets": [
-            {
-                "type": "Stat",
-                "data": {
-                    "title": "home_plugins",
-                    "subtitle": "home_no_error",
-                    "subtitleColor": "success",
-                    "stat": "42",
-                    "iconName": "puzzle",
-                },
-            }
+            {"type": "Stat", "data": {"title": "home_plugins", "stat": 38, "subtitle": "home_no_error", "iconName": "puzzle", "subtitleColor": "success"}}
         ],
     },
 ]
+
 
 # store on a file
 with open("home.json", "w") as f:

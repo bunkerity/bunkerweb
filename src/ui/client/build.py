@@ -94,7 +94,7 @@ def move_template(folder: Path, target_folder: Path):
 
     for file in folder.rglob("index.html"):
         file_html = base_html
-        is_parts = any(part in file.parts for part in ("global-config", "jobs", "services", "modes", "logs", "instances"))
+        is_parts = any(part in file.parts for part in ("global-config", "jobs", "services", "modes", "logs", "instances", "home"))
         if is_parts:
             file_html = base_html.replace("data_server_builder[1:-1]", "data_server_builder")
 

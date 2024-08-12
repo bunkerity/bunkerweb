@@ -1810,8 +1810,7 @@ def stat_widget(
     stat: Union[str, int],
     subtitle: str = "",
     iconName: str = "",
-    subtitleColor: str = "info",
-    statClass: str = ""
+    subtitleColor: str = "info"
     ):
     """    
     This component is wrapper of all stat components.
@@ -1825,7 +1824,6 @@ def stat_widget(
     -   `subtitle` **string** The subtitle of the stat. Can be a translation key or by default raw text. (optional, default `""`)
     -   `iconName` **string** A top-right icon to display between icon available in Icons/Stat. Case falsy value, no icon displayed. The icon name is the name of the file without the extension on lowercase. (optional, default `""`)
     -   `subtitleColor` **string** The color of the subtitle between error, success, warning, info (optional, default `"info"`)
-    -   `statClass` **string** Additional class (optional, default `""`)
     
     EXAMPLE
     
@@ -1847,7 +1845,7 @@ def stat_widget(
 
 
     # List of params that will be add only if not default value
-    list_params = [("subtitle", subtitle, ""),("iconName", iconName, ""),("subtitleColor", subtitleColor, "info"),("statClass", statClass, "")]
+    list_params = [("subtitle", subtitle, ""),("iconName", iconName, ""),("subtitleColor", subtitleColor, "info")]
     for param in list_params:
         add_key_value(data, param[0], param[1], param[2])
 
