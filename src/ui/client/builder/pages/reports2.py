@@ -1,8 +1,3 @@
-import json
-import base64
-
-from builder.utils.widgets import button, button_group, title, text, tabulator, fields, upload, datepicker
-
 # TODO : REMOVE operation by custom endpoint
 
 reports_columns = [
@@ -114,52 +109,40 @@ reports_filters = [
     },
 ]
 
-reports_items = [
-    {
-        "date": datepicker(
-            id="datepicker-date-id",  # replace id by unique id
-            name="datepicker-date-id",  # replace by unique id
-            label="reports_date",  # keep it (a18n)
-            hideLabel=True,
-            inputType="datepicker",
-            value="my_date",  # replace my_date by timestamp value
-            disabled=True,  # Readonly
-        )["data"],
-        "ip": text(text="IP")["data"],
-        "country": text(text="Country")["data"],
-        "method": text(text="Method")["data"],
-        "url": text(text="URL")["data"],
-        "code": text(text="Code")["data"],
-        "user_agent": text(text="User agent")["data"],
-        "reason": text(text="Reason")["data"],
-        "data": text(text="Data")["data"],
-    },
-]
+# reports_items = [
+#     {
+#         "date": datepicker(
+#             id="datepicker-date-id",  # replace id by unique id
+#             name="datepicker-date-id",  # replace by unique id
+#             label="reports_date",  # keep it (a18n)
+#             hideLabel=True,
+#             inputType="datepicker",
+#             value="my_date",  # replace my_date by timestamp value
+#             disabled=True,  # Readonly
+#         )["data"],
+#         "ip": text(text="IP")["data"],
+#         "country": text(text="Country")["data"],
+#         "method": text(text="Method")["data"],
+#         "url": text(text="URL")["data"],
+#         "code": text(text="Code")["data"],
+#         "user_agent": text(text="User agent")["data"],
+#         "reason": text(text="Reason")["data"],
+#         "data": text(text="Data")["data"],
+#     },
+# ]
 
 
-builder = [
-    {
-        "type": "card",
-        "display": ["main", 1],
-        "widgets": [
-            tabulator(
-                id="table-core-plugins",
-                columns=reports_columns,
-                items=reports_items,
-                filters=reports_filters,
-            ),
-        ],
-    },
-]
-
-
-with open("reports2.json", "w") as f:
-    f.write(json.dumps(builder))
-
-output_base64_bytes = base64.b64encode(bytes(json.dumps(builder), "utf-8"))
-
-output_base64_string = output_base64_bytes.decode("ascii")
-
-
-with open("reports2.txt", "w") as f:
-    f.write(output_base64_string)
+# builder = [
+#     {
+#         "type": "card",
+#         "display": ["main", 1],
+#         "widgets": [
+#             tabulator(
+#                 id="table-core-plugins",
+#                 columns=reports_columns,
+#                 items=reports_items,
+#                 filters=reports_filters,
+#             ),
+#         ],
+#     },
+# ]

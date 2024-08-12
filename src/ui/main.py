@@ -49,6 +49,10 @@ from src.ui_data import UIData
 
 # TODO: rename to bans
 from builder.bans2 import bans_builder  # type: ignore
+
+# TODO: rename to reports
+from builder.reports2 import reports_columns, reports_filters  # type: ignore
+
 from builder.home import home_builder  # type: ignore
 from builder.instances import instances_builder  # type: ignore
 from builder.global_config import global_config_builder  # type: ignore
@@ -58,6 +62,8 @@ from builder.raw_mode import raw_mode_builder  # type: ignore
 from builder.advanced_mode import advanced_mode_builder  # type: ignore
 from builder.easy_mode import easy_mode_builder  # type: ignore
 from builder.logs import logs_builder  # type: ignore
+
+from builder.utils.widgets import tabulator, datepicker  # type: ignore
 
 from common_utils import get_version  # type: ignore
 from logger import setup_logger  # type: ignore
@@ -2034,33 +2040,49 @@ def logs():
 @login_required
 def reports():
     reports = app.bw_instances_utils.get_reports()
-    total_reports = len(reports)
-    reports = reports[:100]
+    tmp_reports_filters = reports_filters.copy()
 
     # Prepare data
-    reasons = {}
-    codes = {}
-    for i, report in enumerate(deepcopy(reports)):
-        reports[i]["date"] = datetime.fromtimestamp(floor(reports[i]["date"])).strftime("%d/%m/%Y %H:%M:%S")
-        # Get top reasons
-        if not report["reason"] in reasons:
-            reasons[report["reason"]] = 0
-        reasons[report["reason"]] = reasons[report["reason"]] + 1
-        # Get top status code
-        if not report["status"] in codes:
-            codes[report["status"]] = 0
-        codes[report["status"]] = codes[report["status"]] + 1
+    reports_items = []
+    for i, report in enumerate(reports):
+        report_item = {
+            "date": datepicker(
+                id=f"datepicker-date-{i}",
+                name=f"datepicker-date-{i}",
+                label="reports_date",  # keep it (a18n)
+                hideLabel=True,
+                inputType="datepicker",
+                value=str(floor(report.pop("date"))),  # replace my_date by timestamp value
+                disabled=True,  # Readonly
+            ),
+        } | report
+        reports_items.append(report_item)
 
-    top_reason = ([k for k, v in reasons.items() if v == max(reasons.values())] or [""])[0]
-    top_code = ([k for k, v in codes.items() if v == max(codes.values())] or [""])[0]
+        tmp_reports_filters[1]["setting"]["values"].add(report["reason"])
+        tmp_reports_filters[4]["setting"]["values"].add(report["country"])
+        tmp_reports_filters[5]["setting"]["values"].add(report["method"])
+        tmp_reports_filters[6]["setting"]["values"].add(report["code"])
 
-    return render_template(
-        "reports.html",
-        reports=reports,
-        total_reports=total_reports,
-        top_code=top_code,
-        top_reason=top_reason,
-    )
+    tmp_reports_filters[1]["setting"]["values"] = list(tmp_reports_filters[1]["setting"]["values"])
+    tmp_reports_filters[4]["setting"]["values"] = list(tmp_reports_filters[4]["setting"]["values"])
+    tmp_reports_filters[5]["setting"]["values"] = list(tmp_reports_filters[5]["setting"]["values"])
+    tmp_reports_filters[6]["setting"]["values"] = list(tmp_reports_filters[6]["setting"]["values"])
+
+    builder = [
+        {
+            "type": "card",
+            "display": ["main", 1],
+            "widgets": [
+                tabulator(
+                    id="table-core-plugins",
+                    columns=reports_columns,
+                    items=reports_items,
+                    filters=tmp_reports_filters,
+                ),
+            ],
+        },
+    ]
+    return render_template("reports.html", data_server_builder=b64encode(dumps(builder).encode("utf-8")).decode("ascii"))
 
 
 @app.route("/bans", methods=["GET", "POST"])
