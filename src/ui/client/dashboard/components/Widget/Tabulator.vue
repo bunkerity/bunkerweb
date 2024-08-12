@@ -54,7 +54,7 @@ const tableStore = useTableStore();
  * @param {boolean} [isPagination=true] - Add pagination to the table
  * @param {number} [paginationSize=10] - Number of items per page
  * @param {number} [paginationInitialPage=1] - Initial page
- * @param {array} [paginationSizeSelector=[10, 25, 50, 100, true]] - Select number of items per page
+ * @param {array} [paginationSizeSelector=[10, 25, 50, 100]] - Select number of items per page
  * @returns {void}
  */
 const customComponents = ["Icons", "Text", "Fields", "Button", "ButtonGroup"];
@@ -118,7 +118,7 @@ const props = defineProps({
   paginationSizeSelector: {
     type: Array,
     required: false,
-    default: [10, 25, 50, 100, true],
+    default: [10, 25, 50, 100],
   },
 });
 
@@ -152,7 +152,7 @@ const table = reactive({
       opts.paginationSize = props.paginationSize;
       opts.paginationInitialPage = props.paginationInitialPage;
       opts.paginationButtonCount = 2;
-      opts.paginationSizeSelector = props.paginationSizeSelector;
+      opts.paginationSizeSelector = props.paginationSizeSelector.concat([true]);
       opts.paginationCounter = "rows";
     }
     return opts;

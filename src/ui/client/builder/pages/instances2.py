@@ -1,9 +1,10 @@
-from builder.utils.widgets import button_widget, button_group_widget, title_widget, text_widget, tabulator_widget, input_widget, icons_widget
-from builder.utils.table import add_column
-from enum import StrEnum
+from .utils.widgets import button_widget, button_group_widget, title_widget, text_widget, tabulator_widget, input_widget, icons_widget
+from .utils.table import add_column
+
+from enum import Enum
 
 
-class Healths(StrEnum):
+class Healths(Enum):
     UP = "up"
     DOWN = "down"
     LOADING = "loading"
@@ -241,7 +242,7 @@ def instances_tabs():
     ]
 
 
-def instances_builder(instances: list, types: list = [], methods: list = []) -> list:
+def instances_builder(instances: list, types: list = [], methods: list = [], healths: list = []) -> list:
     items = []
     for instance in instances:
         items.append(
@@ -250,6 +251,7 @@ def instances_builder(instances: list, types: list = [], methods: list = []) -> 
                 hostname=instance.get("hostname"),
                 instance_type=instance.get("type"),
                 method=instance.get("method"),
+                health=instance.get("health"),
                 creation_date=instance.get("creation_date"),
                 last_seen=instance.get("last_seen"),
             )
@@ -258,7 +260,7 @@ def instances_builder(instances: list, types: list = [], methods: list = []) -> 
     return [
         # Tabs is button group with display value and a size tab inside a tabs container
         {
-            type: "tabs",
+            "type": "tabs",
             "widgets": [button_group_widget(buttons=instances_tabs())],
         },
         {
@@ -269,7 +271,7 @@ def instances_builder(instances: list, types: list = [], methods: list = []) -> 
                     id="table-instances",
                     columns=columns,
                     items=items,
-                    filters=instances_filter(types=types, methods=methods),
+                    filters=instances_filter(types=types, methods=methods, healths=healths),
                 )
             ],
         },

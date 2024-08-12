@@ -17,7 +17,7 @@ from utils import run_command
 inputFolder = abspath("../client/dashboard/components")
 outputFolderMd = abspath("../client/.widgets-md")
 outputFolderPy = abspath("../client/.widgets")
-outputFolderWidgets = abspath("../client/builder/utils")
+outputFolderWidgets = abspath("../client/builder/pages/utils")
 components_path_to_exclude = ("components/Icons", "components/Forms/Error", "components/Dashboard", "components/Builder")
 
 

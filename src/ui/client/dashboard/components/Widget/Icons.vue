@@ -54,6 +54,7 @@ import Eye from "@components/Icons/Eye.vue";
  *  @param {string} [color=""] - The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker').
  *  @param {boolean} [isStick=false] - If true, the icon will be stick to the top right of the parent container.
  *  @param {boolean} [disabled=false] - If true, the icon will be disabled.
+ *  @param {any} [value=""] - Attach a value to icon. Useful on some cases like table filtering using icons.
  */
 
 const props = defineProps({
@@ -63,6 +64,11 @@ const props = defineProps({
   },
   iconClass: {
     type: String,
+    required: false,
+    default: "",
+  },
+  value: {
+    type: [String, Number],
     required: false,
     default: "",
   },

@@ -21,7 +21,7 @@ ui_dir_templates = current_directory.parent.joinpath("templates")
 legacy_dir_static = current_directory.joinpath("legacy", "static")
 legacy_dir_templates = current_directory.joinpath("legacy", "templates")
 builder_dir_pages = current_directory.joinpath("builder", "pages")
-builder_dir_utils = current_directory.joinpath("builder", "utils")
+builder_dir_utils = current_directory.joinpath("builder", "pages", "utils")
 ui_dir_builder = current_directory.parent.joinpath("builder")
 ui_dir_builder_utils = current_directory.parent.joinpath("builder", "utils")
 
@@ -158,6 +158,8 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
         )
         file.write_text(content)
 
+    # remove utils folder
+    remove_dir(ui_dir_builder_utils)
     copytree(builder_dir_utils.as_posix(), ui_dir_builder_utils.as_posix())
 
 

@@ -44,7 +44,7 @@ import { useUUID } from "@utils/global";
  *  @param {string} value
  *  @param {array} values
  *  @param {object} [attrs={}] - Additional attributes to add to the field
- *  @param {array} [popovers] - List of popovers to display more information
+ *  @param {array} [popovers=[]] - List of popovers to display more information
  *  @param {string} [inpType="select"]  - The type of the field, useful when we have multiple fields in the same container to display the right field
  *  @param {string} [maxBtnChars=""] - Max char to display in the dropdown button handler.
  *  @param {boolean} [disabled=false]
@@ -171,10 +171,10 @@ const select = reactive({
   isValid: !props.required
     ? true
     : props.requiredValues.length <= 0
-      ? true
-      : props.requiredValues.includes(props.value)
-        ? true
-        : false,
+    ? true
+    : props.requiredValues.includes(props.value)
+    ? true
+    : false,
 });
 
 const selectBtn = ref();
@@ -212,8 +212,8 @@ function toggleSelect() {
       const canBeDown = props.onlyDown
         ? true
         : fieldContainerRect.bottom + selectDropRect.height < parentRect.bottom
-          ? true
-          : false;
+        ? true
+        : false;
 
       if (!canBeDown) {
         selectDropdown.value.style.top = `-${
@@ -252,10 +252,10 @@ function changeValue(newValue) {
   select.isValid = !props.required
     ? true
     : props.requiredValues.length <= 0
-      ? true
-      : props.requiredValues.includes(newValue)
-        ? true
-        : false;
+    ? true
+    : props.requiredValues.includes(newValue)
+    ? true
+    : false;
   closeSelect();
   return newValue;
 }

@@ -74,6 +74,7 @@ def advanced_widget(
 def button_widget(
     text: str,
     id: str = "",
+    display: list = [],
     type: str = "button",
     disabled: bool = False,
     hideText: bool = False,
@@ -93,12 +94,13 @@ def button_widget(
     
     -   `id` **string** Unique id of the button (optional, default `uuidv4()`)
     -   `text` **string** Content of the button. Can be a translation key or by default raw text.
+    -   `display` **array** Case display, we will update the display store with the given array. Useful when we want to use button as tabs. (optional, default `[]`)
     -   `type` **string** Can be of type button || submit (optional, default `"button"`)
     -   `disabled` **boolean**  (optional, default `false`)
     -   `hideText` **boolean** Hide text to only display icon (optional, default `false`)
     -   `color` **string**  (optional, default `"primary"`)
     -   `iconColor` **string** Color we want to apply to the icon. If falsy value, default icon color is applied. (optional, default `""`)
-    -   `size` **string** Can be of size sm || normal || lg || xl (optional, default `"normal"`)
+    -   `size` **string** Can be of size sm || normal || lg || xl or tab (optional, default `"normal"`)
     -   `iconName` **string** Name in lowercase of icons store on /Icons. If falsy value, no icon displayed. (optional, default `""`)
     -   `attrs` **Object** List of attributes to add to the button. Some attributes will conduct to additional script (optional, default `{}`)
     -   `modal` **(Object | boolean)** We can link the button to a Modal component. We need to pass the widgets inside the modal. Button click will open the modal. (optional, default `false`)
@@ -126,7 +128,7 @@ def button_widget(
 
 
     # List of params that will be add only if not default value
-    list_params = [("id", id, ""),("type", type, "button"),("disabled", disabled, False),("hideText", hideText, False),("color", color, "primary"),("iconColor", iconColor, ""),("size", size, "normal"),("iconName", iconName, ""),("attrs", attrs, {}),("modal", modal, False),("tabId", tabId, ""),("containerClass", containerClass, "")]
+    list_params = [("id", id, ""),("display", display, []),("type", type, "button"),("disabled", disabled, False),("hideText", hideText, False),("color", color, "primary"),("iconColor", iconColor, ""),("size", size, "normal"),("iconName", iconName, ""),("attrs", attrs, {}),("modal", modal, False),("tabId", tabId, ""),("containerClass", containerClass, "")]
     for param in list_params:
         add_key_value(data, param[0], param[1], param[2])
 
@@ -457,7 +459,7 @@ def container_widget(
     -   `containerClass` **string** Additional class (optional, default `""`)
     -   `columns` **(object | boolean)** Work with grid system { pc: 12, tablet: 12, mobile: 12} (optional, default `false`)
     -   `tag` **string** The tag for the container (optional, default `"div"`)
-    -   `display` **array** Array need to be of format \["groupName", "compId"] in order to be displayed using the display store. More info on the display store itslef. (optional, default `[]`)
+    -   `display` **array** Array need two values : "groupName" in index 0 and "compId" in index 1 in order to be displayed using the display store. More info on the display store itslef. (optional, default `[]`)
     
     EXAMPLE
     
@@ -513,9 +515,9 @@ def datepicker_widget(
     -   `popovers` **array** List of popovers to display more information
     -   `attrs` **object** Additional attributes to add to the field (optional, default `{}`)
     -   `inpType` **string** The type of the field, useful when we have multiple fields in the same container to display the right field (optional, default `"datepicker"`)
-    -   `value` **number\<timestamp>** Default date when instantiate (optional, default `""`)
-    -   `minDate` **number\<timestamp>** Impossible to pick a date before this date. (optional, default `""`)
-    -   `maxDate` **number\<timestamp>** Impossible to pick a date after this date. (optional, default `""`)
+    -   `value` **timestamp** Default date when instantiate (optional, default `""`)
+    -   `minDate` **timestamp** Impossible to pick a date before this date. (optional, default `""`)
+    -   `maxDate` **timestamp** Impossible to pick a date after this date. (optional, default `""`)
     -   `isClipboard` **boolean** allow to copy the timestamp value (optional, default `true`)
     -   `hideLabel` **boolean**  (optional, default `false`)
     -   `columns` **object** Field has a grid system. This allow to get multiple field in the same row if needed. (optional, default `{"pc":"12","tablet":"12","mobile":"12"}`)
@@ -705,7 +707,7 @@ def editor_widget(
     
     -   `id` **string** Unique id (optional, default `uuidv4()`)
     -   `label` **string** The label of the field. Can be a translation key or by default raw text.
-    -   `name` **string** The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.\*  @param {string} label
+    -   `name` **string** The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.
     -   `value` **string**;
     -   `attrs` **object** Additional attributes to add to the field (optional, default `{}`)
     -   `popovers` **array?** List of popovers to display more information
@@ -914,29 +916,6 @@ def filter_widget(
     return { "type" : "Filter", "data" : data }
         
 
-def format_columns_widget(
-    columns: list
-    ):
-    """    
-    This will add some key to columns that can be passed from props like minWidth or maxWidth.
-    Case key already exists, this will override it.
-    
-    PARAMETERS
-    
-    -   `columns` **array** The columns are the list of columns that we want to check.
-    
-    Returns **[array][3]** Return the columns with the custom sort added.
-    
-    """
-
-    data = {
-        "columns" : columns,
-       }
-
-
-    return { "type" : "Formatcolumns", "data" : data }
-        
-
 def grid_widget(
     gridClass: str = "items-start",
     display: list = []
@@ -950,7 +929,7 @@ def grid_widget(
     PARAMETERS
     
     -   `gridClass` **string** Additional class (optional, default `"items-start"`)
-    -   `display` **array** Array need to be of format \["groupName", "compId"] in order to be displayed using the display store. More info on the display store itslef. (optional, default `[]`)
+    -   `display` **array** Array need two values : "groupName" in index 0 and "compId" in index 1 in order to be displayed using the display store. More info on the display store itslef. (optional, default `[]`)
     
     EXAMPLE
     
@@ -997,7 +976,7 @@ def grid_layout_widget(
     -   `link` **string** Will transform the container tag from a div to an a tag with the link as href. Useful with card type. (optional, default `""`)
     -   `columns` **object** Work with grid system { pc: 12, tablet: 12, mobile: 12} (optional, default `{"pc":12,"tablet":12,"mobile":12}`)
     -   `gridLayoutClass` **string** Additional class (optional, default `"items-start"`)
-    -   `display` **array** Array need to be of format \["groupName", "compId"] in order to be displayed using the display store. More info on the display store itslef. (optional, default `[]`)
+    -   `display` **array** Array need two values : "groupName" in index 0 and "compId" in index 1 in order to be displayed using the display store. More info on the display store itslef. (optional, default `[]`)
     -   `tabId` **string** Case the container is converted to an anchor with a link, we can define the tabId, by default it is the contentIndex (optional, default `contentIndex`)
     
     EXAMPLE
@@ -1025,6 +1004,7 @@ def grid_layout_widget(
         
 
 def icons_widget(
+    value,
     iconName: str,
     iconClass: str = "base",
     color: str = "",
@@ -1043,6 +1023,7 @@ def icons_widget(
     -   `color` **string** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `""`)
     -   `isStick` **boolean** If true, the icon will be stick to the top right of the parent container. (optional, default `false`)
     -   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
+    -   `value` **any** Attach a value to icon. Useful on some cases like table filtering using icons. (optional, default `""`)
     
     EXAMPLE
     
@@ -1060,7 +1041,7 @@ def icons_widget(
 
 
     # List of params that will be add only if not default value
-    list_params = [("iconClass", iconClass, "base"),("color", color, ""),("isStick", isStick, False),("disabled", disabled, False)]
+    list_params = [("value", value, ""),("iconClass", iconClass, "base"),("color", color, ""),("isStick", isStick, False),("disabled", disabled, False)]
     for param in list_params:
         add_key_value(data, param[0], param[1], param[2])
 
@@ -1068,13 +1049,13 @@ def icons_widget(
         
 
 def input_widget(
-    popovers,
     label: str,
     name: str,
     value: str,
     id: str = "",
     type: str = "text",
     attrs: dict = {},
+    popovers: list = [],
     inpType: str = "input",
     columns: dict = {"pc":"12","tablet":"12","mobile":"12"},
     disabled: bool = False,
@@ -1101,10 +1082,10 @@ def input_widget(
     -   `id` **string** Unique id (optional, default `uuidv4()`)
     -   `type` **string** text, email, password, number, tel, url (optional, default `"text"`)
     -   `label` **string** The label of the field. Can be a translation key or by default raw text.
-    -   `name` **string** The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.\*  @param {string} label
+    -   `name` **string** The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.
     -   `value` **string**;
     -   `attrs` **object** Additional attributes to add to the field (optional, default `{}`)
-    -   `popovers` **array?** List of popovers to display more information
+    -   `popovers` **array** List of popovers to display more information (optional, default `[]`)
     -   `inpType` **string** The type of the field, useful when we have multiple fields in the same container to display the right field (optional, default `"input"`)
     -   `columns` **object** Field has a grid system. This allow to get multiple field in the same row if needed. (optional, default `{"pc":"12","tablet":"12","mobile":"12"}`)
     -   `disabled` **boolean**  (optional, default `false`)
@@ -1142,7 +1123,6 @@ def input_widget(
     """
 
     data = {
-        "popovers" : popovers,
         "label" : label,
         "name" : name,
         "value" : value,
@@ -1150,7 +1130,7 @@ def input_widget(
 
 
     # List of params that will be add only if not default value
-    list_params = [("id", id, ""),("type", type, "text"),("attrs", attrs, {}),("inpType", inpType, "input"),("columns", columns, {"pc":"12","tablet":"12","mobile":"12"}),("disabled", disabled, False),("required", required, False),("placeholder", placeholder, ""),("pattern", pattern, "(?.*)"),("isClipboard", isClipboard, True),("readonly", readonly, False),("hideLabel", hideLabel, False),("containerClass", containerClass, ""),("inpClass", inpClass, ""),("headerClass", headerClass, ""),("tabId", tabId, "")]
+    list_params = [("id", id, ""),("type", type, "text"),("attrs", attrs, {}),("popovers", popovers, []),("inpType", inpType, "input"),("columns", columns, {"pc":"12","tablet":"12","mobile":"12"}),("disabled", disabled, False),("required", required, False),("placeholder", placeholder, ""),("pattern", pattern, "(?.*)"),("isClipboard", isClipboard, True),("readonly", readonly, False),("hideLabel", hideLabel, False),("containerClass", containerClass, ""),("inpClass", inpClass, ""),("headerClass", headerClass, ""),("tabId", tabId, "")]
     for param in list_params:
         add_key_value(data, param[0], param[1], param[2])
 
@@ -1459,69 +1439,7 @@ def multiple_widget(
                          ],
                          "containerClass": "z-20"
                      },
-                     "REVERSE_PROXY_AUTH_REQUEST": {
-                         "context": "multisite",
-                         "default": "",
-                         "help": "Enable authentication using an external provider (value of auth_request directive).",
-                         "id": "reverse-proxy-auth-request",
-                         "label": "Reverse proxy auth request",
-                         "regex": "^(\\/[\\w\\].~:\\/?#\\[@!$\\&'\\(\\)*+,;=\\-]*|off)?$",
-                         "type": "text",
-                         "multiple": "reverse-proxy",
-                         "pattern": "^(\\/[\\w\\].~:\\/?#\\[@!$\\&'\\(\\)*+,;=\\-]*|off)?$",
-                         "inpType": "input",
-                         "name": "Reverse proxy auth request",
-                         "columns": {
-                             "pc": 4,
-                             "tablet": 6,
-                             "mobile": 12
-                         },
-                         "disabled": false,
-                         "value": "",
-                         "popovers": [
-                             {
-                                 "iconName": "disk",
-                                 "text": "inp_popover_multisite"
-                             },
-                             {
-                                 "iconName": "info",
-                                 "text": "Enable authentication using an external provider (value of auth_request directive)."
-                             }
-                         ],
-                         "containerClass": "z-19"
-                     },
-                     "REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL": {
-                         "context": "multisite",
-                         "default": "",
-                         "help": "Redirect clients to sign-in URL when using REVERSE_PROXY_AUTH_REQUEST (used when auth_request call returned 401).",
-                         "id": "reverse-proxy-auth-request-signin-url",
-                         "label": "Auth request signin URL",
-                         "regex": "^(https?:\\/\\/[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)?$",
-                         "type": "text",
-                         "multiple": "reverse-proxy",
-                         "pattern": "^(https?:\\/\\/[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)?$",
-                         "inpType": "input",
-                         "name": "Auth request signin URL",
-                         "columns": {
-                             "pc": 4,
-                             "tablet": 6,
-                             "mobile": 12
-                         },
-                         "disabled": false,
-                         "value": "",
-                         "popovers": [
-                             {
-                                 "iconName": "disk",
-                                 "text": "inp_popover_multisite"
-                             },
-                             {
-                                 "iconName": "info",
-                                 "text": "Redirect clients to sign-in URL when using REVERSE_PROXY_AUTH_REQUEST (used when auth_request call returned 401)."
-                             }
-                         ],
-                         "containerClass": "z-18"
-                       },
-                     },
+                   },
                  }
              }
            }
@@ -2030,6 +1948,80 @@ def table_widget(
         add_key_value(data, param[0], param[1], param[2])
 
     return { "type" : "Table", "data" : data }
+        
+
+def tabulator_widget(
+    id: str,
+    columns: list,
+    items: list,
+    isStriped: bool = True,
+    filters: list = [],
+    rowHeight: int = 0,
+    colMinWidth: int = 150,
+    colMaxWidth: int = 0,
+    isPagination: bool = True,
+    paginationSize: int = 10,
+    paginationInitialPage: int = 1,
+    paginationSizeSelector: list = [10,25,50,100]
+    ):
+    """    
+    This component allow to display a table using the Tabulator library with utils and custom components around to work with (like filters).
+    Because we can't instantiate Vue component inside the Tabulator cell, I choose to send default component props to the cell and teleport the component inside the cell.
+    The created instance is store in the tableStore using the id as key in order to use it in other components.
+    UI : I created a formatter for each custom component that will return an empty string.
+    Sorting : because we aren't working with primitives but props object, each columns that have a custom component will have a custom sorter to avoid sorting error.
+    Filtering : I created isomorphic filters that will get the right data to check for each custom component object.
+    To apply a filter, we need to render a field that will be link to the filterTable() function.
+    A11y :I created a11yTable(), with sortable header tab index.
+    
+    PARAMETERS
+    
+    -   `id` **string** Unique id of the table
+    -   `isStriped` **boolean** Add striped class to the table (optional, default `true`)
+    -   `filters` **array** List of filters to display (optional, default `[]`)
+    -   `columns` **array** List of columns to display
+    -   `items` **array** List of items to display
+    -   `rowHeight` **number** Case value is 0, this will be ignored. (optional, default `0`)
+    -   `colMinWidth` **number** Minimum width for each col of  a row (optional, default `150`)
+    -   `colMaxWidth` **number** Maximum width for each col of  a row. Case value is 0, this will be ignored. (optional, default `0`)
+    -   `isPagination` **boolean** Add pagination to the table (optional, default `true`)
+    -   `paginationSize` **number** Number of items per page (optional, default `10`)
+    -   `paginationInitialPage` **number** Initial page (optional, default `1`)
+    -   `paginationSizeSelector` **array** Select number of items per page (optional, default `[10,25,50,100]`)
+    
+    EXAMPLE
+    
+    filter =  [{
+                "type": "like", // isomorphic filter type
+                "fields": ["ip"], // fields to filter
+                // setting is a regular Fields props object
+                "setting": {
+                    "id": "input-search-ip",
+                    "name": "input-search-ip",
+                    "label": "bans_search_ip",  # keep it (a18n)
+                    "value": "",
+                    "inpType": "input",
+                    "columns": {"pc": 3, "tablet": 4, " mobile": 12},
+                },
+        }];
+    
+    Returns **void**;
+    
+    """
+
+    data = {
+        "id" : id,
+        "columns" : columns,
+        "items" : items,
+       }
+
+
+    # List of params that will be add only if not default value
+    list_params = [("isStriped", isStriped, True),("filters", filters, []),("rowHeight", rowHeight, 0),("colMinWidth", colMinWidth, 150),("colMaxWidth", colMaxWidth, 0),("isPagination", isPagination, True),("paginationSize", paginationSize, 10),("paginationInitialPage", paginationInitialPage, 1),("paginationSizeSelector", paginationSizeSelector, [10,25,50,100])]
+    for param in list_params:
+        add_key_value(data, param[0], param[1], param[2])
+
+    return { "type" : "Tabulator", "data" : data }
         
 
 def templates_widget(

@@ -34,7 +34,7 @@ import { useUUID } from "@utils/global.js";
  *  @param {string} name - The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.
  *  @param {string} value
  *  @param {object} [attrs={}] - Additional attributes to add to the field
- *  @param {array} [popovers] - List of popovers to display more information
+ *  @param {array} [popovers=[]] - List of popovers to display more information
  *  @param {string} [inpType="checkbox"]  - The type of the field, useful when we have multiple fields in the same container to display the right field
  *  @param {boolean} [disabled=false]
  *  @param {boolean} [required=false]

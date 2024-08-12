@@ -42,7 +42,7 @@ import ErrorDropdown from "@components/Forms/Error/Dropdown.vue";
  *  @param {object} [attrs={}] - Additional attributes to add to the field
  *  @param {string} [separator=" "] - Separator to split the value, by default it is a space
  *  @param {string} [maxBtnChars=""] - Max char to display in the dropdown button handler.
- *  @param {array} [popovers] - List of popovers to display more information
+ *  @param {array} [popovers=[]] - List of popovers to display more information
  *  @param {string} [inpType="list"]  - The type of the field, useful when we have multiple fields in the same container to display the right field
  *  @param {boolean} [disabled=false]
  *  @param {boolean} [required=false]
@@ -222,8 +222,8 @@ function openSelect() {
     const canBeDown = props.onlyDown
       ? true
       : fieldContainerRect.bottom + selectDropRect.height < parentRect.bottom
-        ? true
-        : false;
+      ? true
+      : false;
 
     if (!canBeDown) {
       selectDropdown.value.style.top = `-${
@@ -429,7 +429,7 @@ const emits = defineEmits(["inp"]);
             props.placeholder
               ? $t(
                   props.placeholder,
-                  $t('dashboard_placeholder', props.placeholder),
+                  $t('dashboard_placeholder', props.placeholder)
                 )
               : ''
           "
