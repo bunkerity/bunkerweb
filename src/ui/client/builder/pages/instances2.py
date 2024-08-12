@@ -1,14 +1,6 @@
 from .utils.widgets import button_widget, button_group_widget, title_widget, text_widget, tabulator_widget, input_widget, icons_widget
 from .utils.table import add_column
 
-from enum import Enum
-
-
-class Healths(Enum):
-    UP = "up"
-    DOWN = "down"
-    LOADING = "loading"
-
 
 columns = [
     add_column(title="Name", field="name", formatter="text"),

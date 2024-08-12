@@ -1,7 +1,8 @@
-import json
-import base64
+from utils import save_builder
 
-from builder.raw_mode import raw_mode_builder
+from pages.advanced_mode import advanced_mode_builder
+from pages.easy_mode import easy_mode_builder
+from pages.raw_mode import raw_mode_builder
 
 # Default plugins from docker-compose.ui.yml
 plugins = [
@@ -4303,11 +4304,10 @@ templates_ui = {
 }
 
 
-output = raw_mode_builder(templates_ui, plugins, global_config, total_config, service_name)
-with open("raw.json", "w") as f:
-    json.dump(output, f, indent=4)
+output_advanced = advanced_mode_builder(templates_ui, plugins, global_config, total_config, service_name)
+output_easy = easy_mode_builder(templates_ui, plugins, global_config, total_config, service_name)
+output_raw = raw_mode_builder(templates_ui, plugins, global_config, total_config, service_name)
 
-output_base64_bytes = base64.b64encode(bytes(json.dumps(output), "utf-8"))
-output_base64_string = output_base64_bytes.decode("ascii")
-with open("raw.txt", "w") as f:
-    f.write(output_base64_string)
+save_builder("advanced", output_advanced, update_page=False)
+save_builder("easy", output_easy, update_page=False)
+save_builder("raw", output_raw, update_page=False)

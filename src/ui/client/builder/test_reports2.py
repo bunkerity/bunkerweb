@@ -1,5 +1,4 @@
-import json
-import base64
+from utils import save_builder
 
 from pages.reports2 import reports_builder
 
@@ -47,15 +46,4 @@ reasons = list(reasons)
 
 builder = reports_builder(reports, reasons, countries, methods, codes)
 
-print("builder", builder)
-
-with open("test_reports2.json", "w") as f:
-    json.dump(builder, f, indent=4)
-
-output_base64_bytes = base64.b64encode(bytes(json.dumps(builder), "utf-8"))
-
-output_base64_string = output_base64_bytes.decode("ascii")
-
-
-with open("test_reports2.txt", "w") as f:
-    f.write(output_base64_string)
+save_builder("reports2", builder, update_page=False)

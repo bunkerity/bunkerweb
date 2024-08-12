@@ -1,6 +1,4 @@
-import json
-import base64
-
+from utils import save_builder
 from pages.bans2 import bans_builder
 
 bans = [
@@ -31,14 +29,5 @@ reasons = ["all", "antibot", "test"]
 remains = ["all", "hour(s)", "day(s)"]
 
 builder = bans_builder(bans, reasons, remains)
-print("builder", builder)
-with open("test_bans2.json", "w") as f:
-    json.dump(builder, f, indent=4)
 
-output_base64_bytes = base64.b64encode(bytes(json.dumps(builder), "utf-8"))
-
-output_base64_string = output_base64_bytes.decode("ascii")
-
-
-with open("test_bans2.txt", "w") as f:
-    f.write(output_base64_string)
+save_builder("bans2", builder)
