@@ -779,7 +779,8 @@ if __name__ == "__main__":
                         LOGGER.warning("No BunkerWeb instance found, skipping nginx configs sending ...")
 
             try:
-                failed = False
+                success = True
+                reachable = True
                 if SCHEDULER.apis:
                     # send cache
                     thread = Thread(target=send_nginx_cache)
@@ -789,9 +790,10 @@ if __name__ == "__main__":
                     for thread in threads:
                         thread.join()
 
-                    failed = not SCHEDULER.send_to_apis("POST", "/reload")[
-                        0
-                    ]  # TODO: Check error message so we don't try to send failover if host is unreachable
+                    success, responses = SCHEDULER.send_to_apis("POST", "/reload", response=True)
+                    if not success:
+                        LOGGER.debug(f"Error while reloading bunkerweb: {responses}")
+                        reachable = bool(responses)
                 elif INTEGRATION == "Linux":
                     # Reload nginx
                     LOGGER.info("Reloading nginx ...")
@@ -803,16 +805,19 @@ if __name__ == "__main__":
                         check=False,
                         stdout=PIPE,
                     )
-                    failed = proc.returncode != 0
+                    success = proc.returncode == 0
                 else:
                     LOGGER.warning("No BunkerWeb instance found, skipping bunkerweb reload ...")
+            except BaseException as e:
+                LOGGER.error(f"Exception while reloading after running jobs once scheduling : {e}")
 
-                try:
-                    SCHEDULER.db.set_metadata({"failover": failed})
-                except BaseException as e:
-                    LOGGER.error(f"Error while setting failover to true in the database: {e}")
+            try:
+                SCHEDULER.db.set_metadata({"failover": not success})
+            except BaseException as e:
+                LOGGER.error(f"Error while setting failover to true in the database: {e}")
 
-                if failed:
+            try:
+                if not success and reachable:
                     LOGGER.error("Error while reloading bunkerweb, failing over to last working configuration ...")
                     if (
                         not FAILOVER_PATH.joinpath("config").is_dir()
@@ -836,6 +841,8 @@ if __name__ == "__main__":
 
                         if not SCHEDULER.send_to_apis("POST", "/reload")[0]:
                             LOGGER.error("Error while reloading bunkerweb with failover configuration, skipping ...")
+                elif not reachable:
+                    LOGGER.warning("No BunkerWeb instance is reachable, skipping failover ...")
                 else:
                     LOGGER.info("Successfully reloaded bunkerweb")
                     # Update the failover path with the working configuration
@@ -845,8 +852,8 @@ if __name__ == "__main__":
                     copytree(CUSTOM_CONFIGS_PATH, FAILOVER_PATH.joinpath("custom_configs"))
                     copytree(CACHE_PATH, FAILOVER_PATH.joinpath("cache"))
                     Thread(target=JOB.cache_dir, args=(FAILOVER_PATH,), kwargs={"job_name": "failover-backup"}).start()
-            except:
-                LOGGER.error(f"Exception while reloading after running jobs once scheduling : {format_exc()}")
+            except BaseException as e:
+                LOGGER.error(f"Exception while executing failover logic : {e}")
 
             try:
                 ret = SCHEDULER.db.checked_changes(CHANGES, plugins_changes="all")

@@ -59,9 +59,9 @@ class ApiCaller:
                         else:
                             self.__logger.info(f"Successfully sent API request to {api.endpoint}{url}")
 
-                            if response:
-                                instance = api.endpoint.replace("http://", "").split(":")[0]
-                                responses[instance] = resp if isinstance(resp, dict) else resp.json()
+                        if resp and response:
+                            instance = api.endpoint.replace("http://", "").split(":")[0]
+                            responses[instance] = resp if isinstance(resp, dict) else resp.json()
                 except Exception as exc:
                     ret = False
                     self.__logger.error(f"API request generated an exception: {exc}")
