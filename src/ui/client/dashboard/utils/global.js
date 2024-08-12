@@ -28,7 +28,10 @@ function useSubmitAttr(e) {
   if (!e.target.hasAttribute("data-submit-form")) return;
   try {
     const data = JSON.parse(e.target.getAttribute("data-submit-form"));
-    useSubmitForm(data);
+    const submitEndpoint = e.target.hasAttribute("data-submit-endpoint")
+      ? e.target.getAttribute("data-submit-endpoint")
+      : "";
+    useSubmitForm(data, submitEndpoint);
   } catch (e) {
     console.error(e);
   }
@@ -44,13 +47,15 @@ function useSubmitAttr(e) {
  *    operation: "delete",
  *  }
  *  @param {object} data - Object with the form data to submit.
+ *  @param {string} [submitEndpoint=""] - The endpoint to submit the form.
  *  @returns {void}
  */
-function useSubmitForm(data) {
+function useSubmitForm(data, submitEndpoint = "") {
   // Create a form element
   const form = document.createElement("form");
   form.style.display = "none";
   form.method = "POST";
+  if (submitEndpoint) form.action = submitEndpoint;
   // Retrieve csrf token form data-crfs-token
   try {
     const csrfToken = document.querySelector("[data-csrf-token]");

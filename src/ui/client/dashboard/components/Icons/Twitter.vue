@@ -9,6 +9,7 @@ import { useUUID } from "@utils/global.js";
  *    color: 'info',
  *  }
  *  @param {string} [iconClass="icon-default"] - The class of the icon.
+ *  @param {any} [value=""] - Attach a value to icon. Useful on some cases like table filtering using icons.
  *  @param {string} [color="twitter"]
  *  @param {boolean} [disabled=false] - If true, the icon will be disabled.
  */
@@ -18,6 +19,11 @@ const props = defineProps({
     type: String,
     required: false,
     default: "icon-default",
+  },
+  value: {
+    type: [String, Number],
+    required: false,
+    default: "",
   },
   color: {
     type: String,
@@ -40,6 +46,7 @@ onBeforeMount(() => {
   <span :id="icon.id" class="sr-only">{{ $t("icons_twitter_desc") }}</span>
   <svg
     :data-color="icon.color"
+    :data-value="props.value"
     :aria-disabled="props.disabled ? 'true' : 'false'"
     data-svg="twitter"
     role="img"

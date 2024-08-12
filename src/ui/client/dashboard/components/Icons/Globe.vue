@@ -8,6 +8,7 @@ import { defineProps, reactive } from "vue";
  *    color: 'info',
  *  }
  *  @param {string} [iconClass="icon-default"] - The class of the icon.
+ *  @param {any} [value=""] - Attach a value to icon. Useful on some cases like table filtering using icons.
  *  @param {string} [color="blue"] - The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker').
  *  @param {boolean} [disabled=false] - If true, the icon will be disabled.
  */
@@ -17,6 +18,11 @@ const props = defineProps({
     type: String,
     required: false,
     default: "icon-default",
+  },
+  value: {
+    type: [String, Number],
+    required: false,
+    default: "",
   },
   color: {
     type: String,
@@ -33,6 +39,7 @@ const icon = reactive({
 <template>
   <svg
     :data-color="icon.color"
+    :data-value="props.value"
     :aria-disabled="props.disabled ? 'true' : 'false'"
     data-svg="globe"
     role="img"

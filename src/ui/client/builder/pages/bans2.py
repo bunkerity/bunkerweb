@@ -102,10 +102,10 @@ def ban_item(id: str, ip: str, reason: str, ban_start_date: int, ban_end_date: i
 
 def bans_items(items: list) -> list:
     items = []
-    for item in items:
+    for index, item in enumerate(items):
         items.append(
             ban_item(
-                id=item.get("id"),
+                id=index,
                 ip=item.get("ip"),
                 reason=item.get("reason"),
                 ban_start_date=item.get("ban_start_date"),
@@ -246,33 +246,31 @@ add_ban_action = (
 )
 
 
+def bans_tabs():
+    return [
+        button_widget(
+            text="bans_tab_list",
+            display=["main", 1],
+            size="tab",
+            iconColor="white",
+            iconName="list",
+        ),
+        button_widget(
+            text="bans_tab_add",
+            display=["main", 2],
+            size="tab",
+            iconColor="white",
+            iconName="plus",
+        ),
+    ]
+
+
 def bans_builder(bans: list, reasons: list, remains: list) -> list:
     return [
         # Tabs is button group with display value and a size tab inside a tabs container
         {
             type: "tabs",
-            "widgets": [
-                button_group_widget(
-                    buttons=[
-                        button_widget(
-                            text="bans_tab_list",
-                            display=["main", 1],
-                            isTab=True,
-                            size="tab",
-                            iconColor="white",
-                            iconName="list",
-                        ),
-                        button_widget(
-                            text="bans_tab_add",
-                            display=["main", 2],
-                            isTab=True,
-                            size="tab",
-                            iconColor="white",
-                            iconName="plus",
-                        ),
-                    ]
-                )
-            ],
+            "widgets": [button_group_widget(buttons=bans_tabs())],
         },
         {
             "type": "card",

@@ -1,5 +1,11 @@
 from enum import StrEnum
 
+
+class Global(StrEnum):
+    YES = "yes"
+    NO = "no"
+
+
 from builder.utils.widgets import (
     input_widget,
     select_widget,
@@ -11,14 +17,23 @@ from builder.utils.widgets import (
     title_widget,
     text_widget,
     tabulator_widget,
+    icons_widget,
 )
 
 from builder.utils.table import add_column
 
 
-class Global(StrEnum):
-    YES = "yes"
-    NO = "no"
+configs_columns = [
+    add_column(title="Name", field="name", formatter="text"),
+    add_column(title="Type", field="type", formatter="text"),
+    add_column(title="global", field="global", formatter="icons"),
+    add_column(
+        title="services", field="services", formatter="buttonGroup"
+    ),  # We will display a button with a modal that show all services apply. Case global, show all services.
+    add_column(
+        title="actions", field="actions", formatter="buttonGroup"
+    ),  # edit button that will switch to the form using display store + delete with modal to confirm
+]
 
 
 def config_form(
@@ -120,19 +135,6 @@ def config_form(
     )
 
 
-configs_columns = [
-    add_column(title="Name", field="name", formatter="text"),
-    add_column(title="Type", field="type", formatter="text"),
-    add_column(title="global", field="global", formatter="text"),
-    add_column(
-        title="services", field="services", formatter="buttonGroup"
-    ),  # We will display a button with a modal that show all services apply. Case global, show all services.
-    add_column(
-        title="actions", field="actions", formatter="buttonGroup"
-    ),  # edit button that will switch to the form using display store + delete with modal to confirm
-]
-
-
 def configs_filter(types: list):
     return [
         {
@@ -194,7 +196,7 @@ def config_item(filename: str, conf_type: str, is_global: Global, services: list
         {
             "name": text_widget(text=filename)["data"],
             "type": text_widget(text=conf_type)["data"],
-            "global": text_widget(text=is_global)["data"],
+            "global": icons_widget(iconName="check" if is_global == "yes" else "cross", value=is_global)["data"],
             "services": button_group_widget(
                 buttons=[
                     button_widget(

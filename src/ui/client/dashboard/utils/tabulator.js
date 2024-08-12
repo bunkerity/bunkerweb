@@ -188,8 +188,8 @@ function overrideDefaultFilters() {
       : null;
 
     return (
-      rowValue?.iconName?.toLowerCase() ||
-      rowValue?.value?.toLowerCase() ||
+      rowValue?.setting?.value ||
+      rowValue?.value.toLowerCase() ||
       rowValue?.text.toLowerCase() ||
       buttons ||
       rowValue
