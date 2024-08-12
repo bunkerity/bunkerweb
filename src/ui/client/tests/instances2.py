@@ -163,6 +163,7 @@ instance_create_form_widgets = [
         name="instance-name",
         label="instances_name",  # keep it (a18n)
         value="",
+        pattern="",  # add your pattern if needed
         columns={"pc": 3, "tablet": 4, " mobile": 12},
     ),
     input(
@@ -170,6 +171,7 @@ instance_create_form_widgets = [
         name="instance-hostname",
         label="instances_hostname",  # keep it (a18n)
         value="",
+        pattern="",  # add your pattern if needed
         columns={"pc": 3, "tablet": 4, " mobile": 12},
     ),
     button(
