@@ -47,9 +47,9 @@ import "@assets/css/flatpickr.dark.min.css";
  *  @param {array} popovers - List of popovers to display more information
  *  @param {object} [attrs={}] - Additional attributes to add to the field
  *  @param {string} [inpType="datepicker"]  - The type of the field, useful when we have multiple fields in the same container to display the right field
- *  @param {number<timestamp>} [value=""] - Default date when instantiate
- *  @param {number<timestamp>} [minDate=""] - Impossible to pick a date before this date.
- *  @param {number<timestamp>} [maxDate=""] - Impossible to pick a date after this date.
+ *  @param {timestamp} [value=""] - Default date when instantiate
+ *  @param {timestamp} [minDate=""] - Impossible to pick a date before this date.
+ *  @param {timestamp} [maxDate=""] - Impossible to pick a date after this date.
  *  @param {boolean} [isClipboard=true] - allow to copy the timestamp value
  *  @param {boolean} [hideLabel=false]
  *  @param {object} [columns={"pc": "12", "tablet": "12", "mobile": "12"}] - Field has a grid system. This allow to get multiple field in the same row if needed.
@@ -174,7 +174,7 @@ let datepicker;
 function setMonthSelect(calendarEl, id) {
   // Hide default select and options
   const defaultSelect = calendarEl.querySelector(
-    ".flatpickr-monthDropdown-months",
+    ".flatpickr-monthDropdown-months"
   );
   defaultSelect.classList.add("hidden");
   defaultSelect.setAttribute("aria-hidden", "true");
@@ -191,7 +191,7 @@ function setMonthSelect(calendarEl, id) {
   container.classList.add(
     "flatpickr-monthDropdown-months",
     "inline",
-    "relative",
+    "relative"
   );
   // Select-like
   const selectCustom = document.createElement("button");
@@ -220,7 +220,7 @@ function setMonthSelect(calendarEl, id) {
         "text-white",
         "py-1",
         "hover:brightness-125",
-        "focus:brightness-125",
+        "focus:brightness-125"
       );
       opt.setAttribute("data-month", option.value);
       opt.setAttribute("data-value", option.value);
@@ -252,7 +252,7 @@ function setMonthSelect(calendarEl, id) {
 function setPickerAtt(calendarEl, id = false) {
   // change error non-standard attributes
   const inps = calendarEl.querySelectorAll(
-    'input.numInput[type="number"][maxlength]',
+    'input.numInput[type="number"][maxlength]'
   );
   inps.forEach((inp) => {
     inp.setAttribute("data-maxlength", inp.getAttribute("maxlength"));
@@ -313,7 +313,7 @@ function handleEvents(calendarEl, id, datepicker) {
     ) {
       // Get update value
       const selectDefault = calendarEl.querySelector(
-        "select.flatpickr-monthDropdown-months",
+        "select.flatpickr-monthDropdown-months"
       );
 
       let monthValue;
@@ -377,7 +377,7 @@ function handleEvents(calendarEl, id, datepicker) {
     if (e.key === "Tab" && e.shiftKey) {
       e.preventDefault();
       const currActive = calendarEl.querySelector(
-        '[data-tabindex-active="true"]',
+        '[data-tabindex-active="true"]'
       );
       if (!currActive) return;
 
@@ -430,7 +430,7 @@ function handleEvents(calendarEl, id, datepicker) {
           //Focus previous element with a tabindex
           const currIndex = datepicker.input.getAttribute("tabindex");
           const elements = document.querySelectorAll(
-            `input[tabindex="${currIndex}"]`,
+            `input[tabindex="${currIndex}"]`
           );
           // Remove disabled elements
           const filtered = [];
@@ -470,7 +470,7 @@ function handleEvents(calendarEl, id, datepicker) {
         //Focus next element with a tabindex
         const currIndex = datepicker.input.getAttribute("tabindex");
         const elements = document.querySelectorAll(
-          `input[tabindex="${currIndex}"]`,
+          `input[tabindex="${currIndex}"]`
         );
         // Remove disabled elements
         const filtered = [];
@@ -515,7 +515,7 @@ function toggleSelect(calendar, id, e) {
     optCtnr.classList.toggle("hidden");
     optCtnr.setAttribute(
       "aria-hidden",
-      optCtnr.classList.contains("hidden") ? "true" : "false",
+      optCtnr.classList.contains("hidden") ? "true" : "false"
     );
   }
 }
@@ -567,7 +567,7 @@ function updateMonth(calendar, id, e, datepicker) {
     selectCustom.focus();
     // Click on default select to update
     const selectDefault = calendar.querySelector(
-      "select.flatpickr-monthDropdown-months",
+      "select.flatpickr-monthDropdown-months"
     );
     selectDefault.querySelectorAll("option").forEach((option) => {
       if (option.value === e.target.getAttribute("data-month")) {
@@ -623,14 +623,14 @@ function setIndex(calendarEl, tabindex) {
     const prevMonth = calendarEl.querySelector(".flatpickr-prev-month");
     const year = calendarEl.querySelector(".cur-year");
     const monthSelect = calendarEl.querySelector(
-      ".flatpickr-monthDropdown-months",
+      ".flatpickr-monthDropdown-months"
     );
     prevMonth.setAttribute("tabindex", tabindex);
     nextMonth.setAttribute("tabindex", tabindex);
     year.setAttribute("tabindex", tabindex);
     monthSelect.setAttribute("tabindex", tabindex);
     const months = calendarEl.querySelectorAll(
-      ".flatpickr-monthDropdown-month",
+      ".flatpickr-monthDropdown-month"
     );
     months.forEach((month) => {
       month.setAttribute("tabindex", tabindex);

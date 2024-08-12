@@ -24,7 +24,7 @@ import { useDisplayStore } from "@store/global.js";
  *  @param {string} [link=""] - Will transform the container tag from a div to an a tag with the link as href. Useful with card type.
  *  @param {object} [columns={"pc": 12, "tablet": 12, "mobile": 12}] - Work with grid system { pc: 12, tablet: 12, mobile: 12}
  *  @param {string} [gridLayoutClass="items-start"] - Additional class
- *  @param {array} [display=[]] - Array need to be of format ["groupName", "compId"] in order to be displayed using the display store. More info on the display store itslef.
+ *  @param {array} [display=[]] - Array need two values : "groupName" in index 0 and "compId" in index 1 in order to be displayed using the display store. More info on the display store itslef.
  *  @param {string} [tabId=contentIndex] - Case the container is converted to an anchor with a link, we can define the tabId, by default it is the contentIndex
  */
 

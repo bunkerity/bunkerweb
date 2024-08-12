@@ -79,69 +79,7 @@ import Container from "@components/Widget/Container.vue";
  *                      ],
  *                      "containerClass": "z-20"
  *                  },
- *                  "REVERSE_PROXY_AUTH_REQUEST": {
- *                      "context": "multisite",
- *                      "default": "",
- *                      "help": "Enable authentication using an external provider (value of auth_request directive).",
- *                      "id": "reverse-proxy-auth-request",
- *                      "label": "Reverse proxy auth request",
- *                      "regex": "^(\\/[\\w\\].~:\\/?#\\[@!$\\&'\\(\\)*+,;=\\-]*|off)?$",
- *                      "type": "text",
- *                      "multiple": "reverse-proxy",
- *                      "pattern": "^(\\/[\\w\\].~:\\/?#\\[@!$\\&'\\(\\)*+,;=\\-]*|off)?$",
- *                      "inpType": "input",
- *                      "name": "Reverse proxy auth request",
- *                      "columns": {
- *                          "pc": 4,
- *                          "tablet": 6,
- *                          "mobile": 12
- *                      },
- *                      "disabled": false,
- *                      "value": "",
- *                      "popovers": [
- *                          {
- *                              "iconName": "disk",
- *                              "text": "inp_popover_multisite"
- *                          },
- *                          {
- *                              "iconName": "info",
- *                              "text": "Enable authentication using an external provider (value of auth_request directive)."
- *                          }
- *                      ],
- *                      "containerClass": "z-19"
- *                  },
- *                  "REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL": {
- *                      "context": "multisite",
- *                      "default": "",
- *                      "help": "Redirect clients to sign-in URL when using REVERSE_PROXY_AUTH_REQUEST (used when auth_request call returned 401).",
- *                      "id": "reverse-proxy-auth-request-signin-url",
- *                      "label": "Auth request signin URL",
- *                      "regex": "^(https?:\\/\\/[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)?$",
- *                      "type": "text",
- *                      "multiple": "reverse-proxy",
- *                      "pattern": "^(https?:\\/\\/[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)?$",
- *                      "inpType": "input",
- *                      "name": "Auth request signin URL",
- *                      "columns": {
- *                          "pc": 4,
- *                          "tablet": 6,
- *                          "mobile": 12
- *                      },
- *                      "disabled": false,
- *                      "value": "",
- *                      "popovers": [
- *                          {
- *                              "iconName": "disk",
- *                              "text": "inp_popover_multisite"
- *                          },
- *                          {
- *                              "iconName": "info",
- *                              "text": "Redirect clients to sign-in URL when using REVERSE_PROXY_AUTH_REQUEST (used when auth_request call returned 401)."
- *                          }
- *                      ],
- *                      "containerClass": "z-18"
- *                    },
- *                  },
+ *                },
  *              }
  *          }
  *        }
