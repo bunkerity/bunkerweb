@@ -127,6 +127,7 @@ docker build -t my-scheduler -f src/scheduler/Dockerfile .
         environment:
           # This will set the API settings for the BunkerWeb container
           <<: *bw-api-env
+        restart: "unless-stopped"
         networks:
           - bw-universe
 
@@ -135,6 +136,7 @@ docker build -t my-scheduler -f src/scheduler/Dockerfile .
         environment:
           # This will set the API settings for the Scheduler container
           <<: *bw-api-env
+        restart: "unless-stopped"
         networks:
           - bw-universe
     ...
@@ -235,6 +237,7 @@ services:
       - "443:8443/udp" # QUIC
     environment:
       <<: *bw-api-env
+    restart: "unless-stopped"
     networks:
       - bw-services
       - bw-universe
@@ -244,6 +247,7 @@ services:
     environment:
       <<: *bw-api-env
       BUNKERWEB_INSTANCES: "bunkerweb" # This setting is mandatory to specify the BunkerWeb instance
+    restart: "unless-stopped"
     networks:
       - bw-universe
 ...
@@ -274,6 +278,7 @@ services:
       - "443:8443/udp" # QUIC
     environment:
       <<: *bw-api-env
+    restart: "unless-stopped"
     networks:
       - bw-universe
       - bw-services
@@ -288,6 +293,7 @@ services:
       SERVER_NAME: "www.example.com"
     volumes:
       - bw-data:/data
+    restart: "unless-stopped"
     networks:
       - bw-universe
 
@@ -566,6 +572,7 @@ services:
       - "bunkerweb.INSTANCE=yes" # Mandatory label for the autoconf service to identify the BunkerWeb instance
     environment:
       <<: *bw-env
+    restart: "unless-stopped"
     networks:
       - bw-universe
       - bw-services
@@ -580,6 +587,7 @@ services:
       DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Remember to set a stronger password for the database
     volumes:
       - bw-data:/data # This is used to persist data like the backups
+    restart: "unless-stopped"
     networks:
       - bw-universe
       - bw-db
@@ -593,6 +601,7 @@ services:
       AUTOCONF_MODE: "yes"
       DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Remember to set a stronger password for the database
       DOCKER_HOST: "tcp://bw-docker:2375" # The Docker socket
+    restart: "unless-stopped"
     networks:
       - bw-universe
       - bw-docker
@@ -605,6 +614,7 @@ services:
     environment:
       CONTAINERS: "1"
       LOG_LEVEL: "warning"
+    restart: "unless-stopped"
     networks:
       - bw-docker
 
@@ -617,6 +627,7 @@ services:
       MYSQL_PASSWORD: "changeme" # Remember to set a stronger password for the database
     volumes:
       - bw-db:/var/lib/mysql
+    restart: "unless-stopped"
     networks:
       - bw-db
 
@@ -654,9 +665,7 @@ services:
   myapp:
     image: mywebapp:4.2
     networks:
-      bw-services:
-        aliases:
-          - myapp
+      - bw-services
     labels:
       - "bunkerweb.MY_SETTING_1=value1"
       - "bunkerweb.MY_SETTING_2=value2"
@@ -676,9 +685,7 @@ services:
   myapp:
     image: mywebapp:4.2
     networks:
-      bw-services:
-        aliases:
-          - myapp
+      - bw-services
     labels:
       - "bunkerweb.NAMESPACE=my-namespace" # Set the namespace for the service
       - "bunkerweb.MY_SETTING_1=value1"
@@ -1186,6 +1193,7 @@ services:
         protocol: udp # QUIC
     environment:
       <<: *bw-env
+    restart: "unless-stopped"
     networks:
       - bw-universe
       - bw-services
@@ -1209,6 +1217,7 @@ services:
       REDIS_HOST: "bw-redis"
     volumes:
       - bw-data:/data # This is used to persist data like the backups
+    restart: "unless-stopped"
     networks:
       - bw-universe
       - bw-db
@@ -1223,6 +1232,7 @@ services:
       SWARM_MODE: "yes"
       DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Remember to set a stronger password for the database
       DOCKER_HOST: "tcp://bw-docker:2375" # The Docker socket
+    restart: "unless-stopped"
     networks:
       - bw-universe
       - bw-docker
@@ -1243,6 +1253,7 @@ services:
       LOG_LEVEL: "warning"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
+    restart: "unless-stopped"
     networks:
       - bw-docker
     deploy:
@@ -1259,6 +1270,7 @@ services:
       MYSQL_PASSWORD: "changeme" # Remember to set a stronger password for the database
     volumes:
       - bw-db:/var/lib/mysql
+    restart: "unless-stopped"
     networks:
       - bw-db
     deploy:
@@ -1268,6 +1280,7 @@ services:
 
   bw-redis:
     image: redis:7-alpine
+    restart: "unless-stopped"
     networks:
       - bw-universe
     deploy:
