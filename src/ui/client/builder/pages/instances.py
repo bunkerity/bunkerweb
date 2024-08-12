@@ -27,7 +27,6 @@ def instances_builder(instances: List[Instance]) -> str:
         ]
 
         instance = instance_widget(
-            containerColumns={"pc": 6, "tablet": 6, "mobile": 12},
             pairs=[
                 {"key": "instances_name", "value": instance.name},
                 {"key": "instances_hostname", "value": instance.hostname},

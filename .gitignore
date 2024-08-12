@@ -13,3 +13,4 @@ src/ui/client/static
 src/ui/client/templates
 src/ui/static
 src/ui/templates
+src/ui/builder

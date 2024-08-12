@@ -32,7 +32,6 @@ remains = ["all", "hour(s)", "day(s)"]
 
 builder = bans_builder(bans, reasons, remains)
 
-
 with open("bans2.json", "w") as f:
     f.write(json.dumps(builder))
 

@@ -20,7 +20,7 @@ import Icons from "@components/Widget/Icons.vue";
  *    subtitleColor: "info",
  *  }
  *  @param {string} title - The title of the stat. Can be a translation key or by default raw text.
- *  @param {string|number} value - The value of the stat
+ *  @param {string|number} stat - The value
  *  @param {string} [subtitle=""] - The subtitle of the stat. Can be a translation key or by default raw text.
  *  @param {string} [iconName=""] - A top-right icon to display between icon available in Icons/Stat. Case falsy value, no icon displayed. The icon name is the name of the file without the extension on lowercase.
  *  @param {string} [subtitleColor="info"] - The color of the subtitle between error, success, warning, info

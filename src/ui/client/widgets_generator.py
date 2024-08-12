@@ -1,13 +1,14 @@
 from os import cpu_count
 from os.path import abspath
 from pathlib import Path
+
+from subprocess import PIPE, Popen
 from threading import Semaphore, Thread
 from traceback import format_exc
 from typing import List
 from shutil import rmtree
 from re import search, sub
 from typing import Union
-from time import sleep
 from utils import run_command
 
 # We want to get path of the folder where our components are
@@ -67,35 +68,55 @@ def vue2js():
         dest.write_text(script)
 
 
+#
+# def js2md():
+#     """Run a command to render markdown from JS files"""
+#     semaphore = Semaphore(cpu_count())
+
+#     def convert_json_to_md(file: Path):
+#         semaphore.acquire()
+#         # Run the command
+#         output = run_command(["documentation", "build", file.as_posix(), "-f", "md"], with_output=True)
+#         if output == 1:
+#             print("Error while running command", flush=True)
+#             exit(1)
+
+#         # Create a new file with the same name but with .md extension
+#         file.with_suffix(".md").write_text(output)
+#         semaphore.release()
+
+#     threads = []
+#     # Create a markdown file for each JS file
+#     for file in Path(outputFolderMd).rglob("*"):
+#         threads.append(Thread(target=convert_json_to_md, args=(file,)))
+
+#     for thread in threads:
+#         thread.start()
+
+#     for thread in threads:
+#         thread.join()
+
+#     # Remove js files after
+#     # rmtree(outputFolderMd, ignore_errors=True)
+
+
 def js2md():
     """Run a command to render markdown from JS files"""
-    semaphore = Semaphore(cpu_count())
-
-    def convert_json_to_md(file: Path):
-        semaphore.acquire()
-        # Run the command
-        output = run_command(["documentation", "build", file.as_posix(), "-f", "md"], with_output=True)
-        if output == 1:
-            print("Error while running command", flush=True)
-            exit(1)
-
-        # Create a new file with the same name but with .md extension
-        file.with_suffix(".md").write_text(output)
-        semaphore.release()
-
-    threads = []
+    # Get all files from the output folder
+    files = list(Path(outputFolderMd).rglob("*"))
+    process_list = []
     # Create a markdown file for each JS file
-    for file in Path(outputFolderMd).rglob("*"):
-        threads.append(Thread(target=convert_json_to_md, args=(file,)))
+    for file in files:
+        # Run a process `documentation build <filename> -f md > <filename>.md
+        command = f"documentation build {file} -f md > {file.with_suffix('.md')}"
+        # Run the command
+        # I want to run this command async
+        process = Popen(command, stdout=PIPE, stderr=PIPE, shell=True, text=True)
+        process_list.append(process)
 
-    for thread in threads:
-        thread.start()
-
-    for thread in threads:
-        thread.join()
-
-    # Remove js files after
-    # rmtree(outputFolderMd, ignore_errors=True)
+    # Wait that all processes are done
+    for process in process_list:
+        process.wait()
 
 
 def formatMd():
@@ -432,4 +453,4 @@ js2md()
 formatMd()
 md2py()
 merge_widgets()
-# reset()
+reset()
