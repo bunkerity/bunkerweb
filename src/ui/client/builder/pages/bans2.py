@@ -10,7 +10,7 @@ bans_columns = [
 ]
 
 
-def bans_filters(reasons: list = ["all"], remains: list = ["all"]) -> list:
+def bans_filters(reasons: list = [], remains: list = []) -> list:
 
     filters = [
         {
@@ -28,7 +28,7 @@ def bans_filters(reasons: list = ["all"], remains: list = ["all"]) -> list:
     ]
 
     # Case  "all" ans
-    if len(reasons) >= 3:
+    if len(reasons) >= 2:
         filters.append(
             {
                 "type": "=",
@@ -38,7 +38,7 @@ def bans_filters(reasons: list = ["all"], remains: list = ["all"]) -> list:
                     "name": "select-ban-reason",
                     "label": "bans_select_reason",  # keep it (a18n)
                     "value": "all",  # keep "all"
-                    "values": reasons,  # keep "all" and add your reasons dynamically
+                    "values": ["all"] + reasons,  # keep "all" and add your reasons dynamically
                     "inpType": "select",
                     "onlyDown": True,
                     "columns": {"pc": 3, "tablet": 4, " mobile": 12},
@@ -46,7 +46,7 @@ def bans_filters(reasons: list = ["all"], remains: list = ["all"]) -> list:
             },
         )
 
-        if len(reasons) >= 3:
+        if len(reasons) >= 2:
             filters.append(
                 {
                     "type": "=",
@@ -56,7 +56,7 @@ def bans_filters(reasons: list = ["all"], remains: list = ["all"]) -> list:
                         "name": "select-ban-remain",
                         "label": "bans_select_remain",  # keep it (a18n)
                         "value": "all",  # keep "all"
-                        "values": remains,  # keep everything and format bans to fit in one remain category
+                        "values": ["all"] + remains,  # keep everything and format bans to fit in one remain category
                         "inpType": "select",
                         "onlyDown": True,
                         "columns": {"pc": 3, "tablet": 4, " mobile": 12},

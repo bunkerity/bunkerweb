@@ -155,7 +155,7 @@ def configs_filter(types: list):
                 "name": "select-type",
                 "label": "configs_select_type",  # keep it (a18n)
                 "value": "all",  # keep "all"
-                "values": types,
+                "values": ["all"] + types,
                 "inpType": "select",
                 "onlyDown": True,
                 "columns": {"pc": 3, "tablet": 4, " mobile": 12},

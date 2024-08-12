@@ -15,7 +15,7 @@ reports_columns = [
 ]
 
 
-def reports_filters(reasons: list = ["all"], countries: list = ["all"], methods: list = ["all"], codes: list = ["all"]) -> list:
+def reports_filters(reasons: list = [], countries: list = [], methods: list = [], codes: list = []) -> list:
     reports_filters = [
         {
             "type": "like",
@@ -55,7 +55,7 @@ def reports_filters(reasons: list = ["all"], countries: list = ["all"], methods:
         },
     ]
 
-    if reasons.length >= 3:
+    if reasons.length >= 2:
         reports_filters.append(
             {
                 "type": "=",
@@ -65,7 +65,7 @@ def reports_filters(reasons: list = ["all"], countries: list = ["all"], methods:
                     "name": "select-reason",
                     "label": "reports_select_reason",  # keep it (a18n)
                     "value": "all",  # keep "all"
-                    "values": reasons,
+                    "values": ["all"] + reasons,
                     "inpType": "select",
                     "onlyDown": True,
                     "columns": {"pc": 3, "tablet": 4, " mobile": 12},
@@ -73,7 +73,7 @@ def reports_filters(reasons: list = ["all"], countries: list = ["all"], methods:
             }
         )
 
-    if countries.length >= 3:
+    if countries.length >= 2:
         reports_filters.append(
             {
                 "type": "=",
@@ -83,7 +83,7 @@ def reports_filters(reasons: list = ["all"], countries: list = ["all"], methods:
                     "name": "select-country",
                     "label": "reports_select_country",  # keep it (a18n)
                     "value": "all",  # keep "all"
-                    "values": countries,
+                    "values": ["all"] + countries,
                     "inpType": "select",
                     "onlyDown": True,
                     "columns": {"pc": 3, "tablet": 4, " mobile": 12},
@@ -91,7 +91,7 @@ def reports_filters(reasons: list = ["all"], countries: list = ["all"], methods:
             }
         )
 
-    if methods.length >= 3:
+    if methods.length >= 2:
         reports_filters.append(
             {
                 "type": "=",
@@ -101,7 +101,7 @@ def reports_filters(reasons: list = ["all"], countries: list = ["all"], methods:
                     "name": "select-method",
                     "label": "reports_select_method",  # keep it (a18n)
                     "value": "all",  # keep "all"
-                    "values": methods,
+                    "values": ["all"] + methods,
                     "inpType": "select",
                     "onlyDown": True,
                     "columns": {"pc": 3, "tablet": 4, " mobile": 12},
@@ -109,7 +109,7 @@ def reports_filters(reasons: list = ["all"], countries: list = ["all"], methods:
             }
         )
 
-    if codes.length >= 3:
+    if codes.length >= 2:
         reports_filters.append(
             {
                 "type": "=",
@@ -119,7 +119,7 @@ def reports_filters(reasons: list = ["all"], countries: list = ["all"], methods:
                     "name": "select-code",
                     "label": "reports_select_code",  # keep it (a18n)
                     "value": "all",  # keep "all"
-                    "values": codes,
+                    "values": ["all"] + codes,
                     "inpType": "select",
                     "onlyDown": True,
                     "columns": {"pc": 3, "tablet": 4, " mobile": 12},
@@ -156,7 +156,7 @@ def report_item(id: int, date_timestamp: int, ip: str, country: str, method: str
     )
 
 
-def reports_builder(reports: list, reasons: list = ["all"], countries: list = ["all"], methods: list = ["all"], codes: list = ["all"]) -> str:
+def reports_builder(reports: list, reasons: list = [], countries: list = [], methods: list = [], codes: list = []) -> str:
     reports_items = [report_item(**report) for report in reports]
     return [
         {
