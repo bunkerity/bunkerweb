@@ -27,54 +27,43 @@ You will find more settings about reverse proxy in the [settings section](settin
     When using Docker integration, the easiest way of protecting an existing application is to add the web service in the `bw-services` network :
 
     ```yaml
-    version: "3.5"
+    x-bw-api-env: &bw-api-env
+      # We use an anchor to avoid repeating the same settings for both services
+      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
 
     services:
-
-      myapp:
-        image: nginxdemos/nginx-hello
-        networks:
-          - bw-services
-
       bunkerweb:
         image: bunkerity/bunkerweb:1.6.0-beta
         ports:
-          - 80:8080
-          - 443:8443
-        labels:
-          - "bunkerweb.INSTANCE=yes"
+          - "80:8080/tcp"
+          - "443:8443/tcp"
+          - "4443:8443/udp" # QUIC
         environment:
-          - SERVER_NAME=www.example.com
-          - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
-          - USE_REVERSE_PROXY=yes
-          - REVERSE_PROXY_URL=/
-          - REVERSE_PROXY_HOST=http://myapp:8080
+          <<: *bw-api-env
+        restart: "unless-stopped"
         networks:
           - bw-universe
           - bw-services
 
       bw-scheduler:
         image: bunkerity/bunkerweb-scheduler:1.6.0-beta
-        depends_on:
-          - bunkerweb
-          - bw-docker
-        volumes:
-          - bw-data:/data
         environment:
-          - DOCKER_HOST=tcp://bw-docker:2375
+          <<: *bw-api-env
+          BUNKERWEB_INSTANCES: "bunkerweb" # This setting is mandatory to specify the BunkerWeb instance
+          SERVER_NAME: "www.example.com"
+          USE_REVERSE_PROXY: "yes"
+          REVERSE_PROXY_URL: "/"
+          REVERSE_PROXY_HOST: "http://myapp:8080"
+        volumes:
+          - bw-data:/data # This volume is mandatory to store the scheduler data (sqlite database, backups, etc.)
+        restart: "unless-stopped"
         networks:
           - bw-universe
-          - bw-docker
 
-      bw-docker:
-        image: tecnativa/docker-socket-proxy:nightly
-        volumes:
-          - /var/run/docker.sock:/var/run/docker.sock:ro
-        environment:
-          - CONTAINERS=1
-          - LOG_LEVEL=warning
+      myapp:
+        image: nginxdemos/nginx-hello
         networks:
-          - bw-docker
+          - bw-services
 
     volumes:
       bw-data:
@@ -88,9 +77,6 @@ You will find more settings about reverse proxy in the [settings section](settin
             - subnet: 10.20.30.0/24
       bw-services:
         name: bw-services
-      bw-docker:
-        name: bw-docker
-
     ```
 
 === "Docker autoconf"
@@ -98,15 +84,11 @@ You will find more settings about reverse proxy in the [settings section](settin
     We will assume that you already have the [Docker autoconf integration](integrations.md#docker-autoconf) stack running on your machine and connected to a network called `bw-services` so you can connect your existing application and configure BunkerWeb with labels :
 
     ```yaml
-    version: '3.5'
-
     services:
       myapp:
     	  image: nginxdemos/nginx-hello
     	  networks:
-    	    bw-services:
-    		    aliases:
-    		      - myapp
+    	    - bw-services
     	  labels:
     	    - "bunkerweb.SERVER_NAME=www.example.com"
     	    - "bunkerweb.USE_REVERSE_PROXY=yes"
@@ -124,15 +106,11 @@ You will find more settings about reverse proxy in the [settings section](settin
     We will assume that you already have the [Swarm integration](integrations.md#swarm) stack running on your cluster and connected to a network called `bw-services` so you can connect your existing application and configure BunkerWeb with labels :
 
     ```yaml
-    version: "3"
-
     services:
       myapp:
         image: nginxdemos/nginx-hello
         networks:
-          bw-services:
-              aliases:
-                - myapp
+          - bw-services
         deploy:
           placement:
             constraints:
@@ -276,9 +254,42 @@ You will find more settings about reverse proxy in the [settings section](settin
     When using Docker integration, the easiest way of protecting an existing application is to add the web service in the `bw-services network` :
 
     ```yaml
-    version: "3.5"
+    x-bw-api-env: &bw-api-env
+      # We use an anchor to avoid repeating the same settings for all services
+      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
 
     services:
+      bunkerweb:
+        image: bunkerity/bunkerweb:1.6.0-beta
+        ports:
+          - "80:8080/tcp"
+          - "443:8443/tcp"
+          - "4443:8443/udp" # QUIC
+        environment:
+          <<: *bw-api-env
+        restart: "unless-stopped"
+        networks:
+          - bw-universe
+          - bw-services
+
+      bw-scheduler:
+        image: bunkerity/bunkerweb-scheduler:1.6.0-beta
+        environment:
+          <<: *bw-api-env
+          BUNKERWEB_INSTANCES: "bunkerweb" # This setting is mandatory to specify the BunkerWeb instance
+          SERVER_NAME: "app1.example.com app2.example.com app3.example.com"
+          MULTISITE: "yes"
+          USE_REVERSE_PROXY: "yes" # Will be applied to all server config
+          REVERSE_PROXY_URL: "/" # Will be applied to all server config
+          app1.example.com_REVERSE_PROXY_HOST: "http://myapp1:8080"
+          app2.example.com_REVERSE_PROXY_HOST: "http://myapp2:8080"
+          app3.example.com_REVERSE_PROXY_HOST: "http://myapp3:8080"
+        volumes:
+          - bw-data:/data # This volume is mandatory to store the scheduler data (sqlite database, backups, etc.)
+        restart: "unless-stopped"
+        networks:
+          - bw-universe
+
       myapp1:
         image: nginxdemos/nginx-hello
         networks:
@@ -293,49 +304,6 @@ You will find more settings about reverse proxy in the [settings section](settin
         image: nginxdemos/nginx-hello
         networks:
           - bw-services
-
-      bunkerweb:
-        image: bunkerity/bunkerweb:1.6.0-beta
-        ports:
-          - 80:8080
-          - 443:8443
-        labels:
-          - "bunkerweb.INSTANCE=yes"
-        environment:
-          - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
-          - MULTISITE=yes
-          - SERVER_NAME=app1.example.com app2.example.com app3.example.com
-          - USE_REVERSE_PROXY=yes # Will be applied to all server config
-          - REVERSE_PROXY_URL=/ # Will be applied to all server config
-          - app1.example.com_REVERSE_PROXY_HOST=http://myapp1:8080
-          - app2.example.com_REVERSE_PROXY_HOST=http://myapp2:8080
-          - app3.example.com_REVERSE_PROXY_HOST=http://myapp3:8080
-        networks:
-          - bw-universe
-          - bw-services
-
-      bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.0-beta
-        depends_on:
-          - bunkerweb
-          - bw-docker
-        volumes:
-          - bw-data:/data
-        environment:
-          - DOCKER_HOST=tcp://bw-docker:2375
-        networks:
-          - bw-universe
-          - bw-docker
-
-      bw-docker:
-        image: tecnativa/docker-socket-proxy:nightly
-        volumes:
-          - /var/run/docker.sock:/var/run/docker.sock:ro
-        environment:
-          - CONTAINERS=1
-          - LOG_LEVEL=warning
-        networks:
-          - bw-docker
 
     volumes:
       bw-data:
@@ -349,8 +317,6 @@ You will find more settings about reverse proxy in the [settings section](settin
             - subnet: 10.20.30.0/24
       bw-services:
         name: bw-services
-      bw-docker:
-        name: bw-docker
     ```
 
 === "Docker autoconf"
@@ -358,15 +324,11 @@ You will find more settings about reverse proxy in the [settings section](settin
     We will assume that you already have the [Docker autoconf integration](integrations.md#docker-autoconf) stack running on your machine and connected to a network called `bw-services` so you can connect your existing application and configure BunkerWeb with labels :
 
     ```yaml
-    version: '3.5'
-
     services:
       myapp1:
     	  image: nginxdemos/nginx-hello
     	  networks:
-    	    bw-services:
-    		    aliases:
-    		      - myapp1
+    	    - bw-services
     	  labels:
     	    - "bunkerweb.SERVER_NAME=app1.example.com"
     	    - "bunkerweb.USE_REVERSE_PROXY=yes"
@@ -376,9 +338,7 @@ You will find more settings about reverse proxy in the [settings section](settin
       myapp2:
     	  image: nginxdemos/nginx-hello
     	  networks:
-    	    bw-services:
-    		    aliases:
-    		      - myapp1
+    	    - bw-services
     	  labels:
     	    - "bunkerweb.SERVER_NAME=app2.example.com"
     	    - "bunkerweb.USE_REVERSE_PROXY=yes"
@@ -388,9 +348,7 @@ You will find more settings about reverse proxy in the [settings section](settin
       myapp3:
     	  image: nginxdemos/nginx-hello
     	  networks:
-    	    bw-services:
-    		    aliases:
-    		      - myapp3
+    	    - bw-services
     	  labels:
     	    - "bunkerweb.SERVER_NAME=app3.example.com"
     	    - "bunkerweb.USE_REVERSE_PROXY=yes"
@@ -408,15 +366,11 @@ You will find more settings about reverse proxy in the [settings section](settin
     We will assume that you already have the [Swarm integration](integrations.md#swarm) stack running on your cluster and connected to a network called `bw-services` so you can connect your existing application and configure BunkerWeb with labels :
 
     ```yaml
-    version: "3"
-
     services:
       myapp1:
         image: nginxdemos/nginx-hello
         networks:
-          bw-services:
-              aliases:
-                - myapp1
+          - bw-services
         deploy:
           placement:
             constraints:
@@ -430,9 +384,7 @@ You will find more settings about reverse proxy in the [settings section](settin
       myapp2:
         image: nginxdemos/nginx-hello
         networks:
-          bw-services:
-              aliases:
-                - myapp2
+          - bw-services
         deploy:
           placement:
             constraints:
@@ -446,9 +398,7 @@ You will find more settings about reverse proxy in the [settings section](settin
       myapp3:
         image: nginxdemos/nginx-hello
         networks:
-          bw-services:
-              aliases:
-                - myapp3
+          - bw-services
         deploy:
           placement:
             constraints:
@@ -515,8 +465,8 @@ You will find more settings about reverse proxy in the [settings section](settin
     metadata:
       name: ingress
       annotations:
-        bunkerweb.io/DUMMY_SETTING: "value"
-        bunkerweb.io/app1.example.com_DUMMY_SETTING: "value"
+        bunkerweb.io/DUMMY_SETTING: "value" # Will be applied to all ingress's services (app1, app2, app3)
+        bunkerweb.io/app1.example.com_DUMMY_SETTING: "value" # Will be applied to app1.example.com service only
     spec:
       rules:
         - host: app1.example.com
@@ -630,63 +580,63 @@ REAL_IP_HEADER=X-Forwarded-For
 
 === "Docker"
 
-    When starting the BunkerWeb container, you will need to add the settings :
+    When starting the Scheduler container, you will need to add the settings :
 
     ```yaml
-    mybunker:
-      image: bunkerity/bunkerweb:1.6.0-beta
+    bw-scheduler:
+      image: bunkerity/bunkerweb-scheduler:1.6.0-beta
       ...
       environment:
-        - USE_REAL_IP=yes
-        - REAL_IP_FROM=1.2.3.0/24 100.64.0.0/10
-        - REAL_IP_HEADER=X-Forwarded-For
+        USE_REAL_IP: "yes"
+        REAL_IP_FROM: "1.2.3.0/24 100.64.0.0/10"
+        REAL_IP_HEADER: "X-Forwarded-For"
       ...
     ```
 
 === "Docker autoconf"
 
-    Before running the [Docker autoconf integration](integrations.md#docker-autoconf) stack, you will need to add the settings for the BunkerWeb container :
+    Before running the [Docker autoconf integration](integrations.md#docker-autoconf) stack, you will need to add the settings for the Scheduler container :
 
     ```yaml
-    mybunker:
-      image: bunkerity/bunkerweb:1.6.0-beta
+    bw-scheduler:
+      image: bunkerity/bunkerweb-scheduler:1.6.0-beta
       ...
       environment:
-        - USE_REAL_IP=yes
-        - REAL_IP_FROM=1.2.3.0/24 100.64.0.0/10
-        - REAL_IP_HEADER=X-Forwarded-For
+        USE_REAL_IP: "yes"
+        REAL_IP_FROM: "1.2.3.0/24 100.64.0.0/10"
+        REAL_IP_HEADER: "X-Forwarded-For"
       ...
     ```
 
 === "Swarm"
 
-    Before running the [Swarm integration](integrations.md#swarm) stack, you will need to add the settings for the BunkerWeb service :
+    Before running the [Swarm integration](integrations.md#swarm) stack, you will need to add the settings for the Scheduler service :
 
     ```yaml
-    mybunker:
-      image: bunkerity/bunkerweb:1.6.0-beta
+    bw-scheduler:
+      image: bunkerity/bunkerweb-scheduler:1.6.0-beta
       ...
       environment:
-        - USE_REAL_IP=yes
-        - REAL_IP_FROM=1.2.3.0/24 100.64.0.0/10
-        - REAL_IP_HEADER=X-Forwarded-For
+        USE_REAL_IP: "yes"
+        REAL_IP_FROM: "1.2.3.0/24 100.64.0.0/10"
+        REAL_IP_HEADER: "X-Forwarded-For"
       ...
     ```
 
 === "Kubernetes"
 
-    You will need to add the settings to the environment variables of the BunkerWeb containers (doing it using the ingress is not supported because you will get into trouble when using things like Let's Encrypt) :
+    You will need to add the settings to the environment variables of the Scheduler containers (doing it using the ingress is not supported because you will get into trouble when using things like Let's Encrypt) :
 
     ```yaml
     apiVersion: apps/v1
-    kind: DaemonSet
+    kind: Deployment
     metadata:
-      name: bunkerweb
+      name: bunkerweb-scheduler
     spec:
         ...
         spec:
           containers:
-            - name: bunkerweb
+            - name: bunkerweb-scheduler
               ...
               env:
                 - name: USE_REAL_IP
@@ -734,49 +684,49 @@ REAL_IP_HEADER=proxy_protocol
 
 === "Docker"
 
-    When starting the BunkerWeb container, you will need to add the settings :
+    When starting the Scheduler container, you will need to add the settings :
 
     ```yaml
-    mybunker:
-      image: bunkerity/bunkerweb:1.6.0-beta
+    bw-scheduler:
+      image: bunkerity/bunkerweb-scheduler:1.6.0-beta
       ...
       environment:
-        - USE_REAL_IP=yes
-        - USE_PROXY_PROTOCOL=yes
-        - REAL_IP_FROM=1.2.3.0/24 100.64.0.0/10
-        - REAL_IP_HEADER=proxy_protocol
+        USE_REAL_IP: "yes"
+        USE_PROXY_PROTOCOL: "yes"
+        REAL_IP_FROM: "1.2.3.0/24 100.64.0.0/10"
+        REAL_IP_HEADER: "proxy_protocol"
       ...
     ```
 
 === "Docker autoconf"
 
-    Before running the [Docker autoconf integration](integrations.md#docker-autoconf) stack, you will need to add the settings for the BunkerWeb container :
+    Before running the [Docker autoconf integration](integrations.md#docker-autoconf) stack, you will need to add the settings for the Scheduler container :
 
     ```yaml
-    mybunker:
-      image: bunkerity/bunkerweb:1.6.0-beta
+    bw-scheduler:
+      image: bunkerity/bunkerweb-scheduler:1.6.0-beta
       ...
       environment:
-        - USE_REAL_IP=yes
-        - USE_PROXY_PROTOCOL=yes
-        - REAL_IP_FROM=1.2.3.0/24 100.64.0.0/10
-        - REAL_IP_HEADER=proxy_protocol
+        USE_REAL_IP: "yes"
+        USE_PROXY_PROTOCOL: "yes"
+        REAL_IP_FROM: "1.2.3.0/24 100.64.0.0/10"
+        REAL_IP_HEADER: "proxy_protocol"
       ...
     ```
 
 === "Swarm"
 
-    Before running the [Swarm integration](integrations.md#swarm) stack, you will need to add the settings for the BunkerWeb service :
+    Before running the [Swarm integration](integrations.md#swarm) stack, you will need to add the settings for the Scheduler service :
 
     ```yaml
-    mybunker:
-      image: bunkerity/bunkerweb:1.6.0-beta
+    bw-scheduler:
+      image: bunkerity/bunkerweb-scheduler:1.6.0-beta
       ...
       environment:
-        - USE_REAL_IP=yes
-        - USE_PROXY_PROTOCOL=yes
-        - REAL_IP_FROM=1.2.3.0/24 100.64.0.0/10
-        - REAL_IP_HEADER=proxy_protocol
+        USE_REAL_IP: "yes"
+        USE_PROXY_PROTOCOL: "yes"
+        REAL_IP_FROM: "1.2.3.0/24 100.64.0.0/10"
+        REAL_IP_HEADER: "proxy_protocol"
       ...
     ```
 
@@ -786,14 +736,14 @@ REAL_IP_HEADER=proxy_protocol
 
     ```yaml
     apiVersion: apps/v1
-    kind: DaemonSet
+    kind: Deployment
     metadata:
-      name: bunkerweb
+      name: bunkerweb-scheduler
     spec:
         ...
         spec:
           containers:
-            - name: bunkerweb
+            - name: bunkerweb-scheduler
               ...
               env:
                 - name: USE_REAL_IP
@@ -847,14 +797,57 @@ On top of that, the following specific settings are used :
 
 For complete list of settings regarding `stream` mode, please refer to the [settings](settings.md) section of the documentation.
 
+!!! tip "Testing"
+
+    To perform quick tests when stream mode is enabled you can use nc (netcat) :
+
+    ```shell
+    nc -v -z -w 3 app1.example.com 10000
+    ```
+
 === "Docker"
 
     When using Docker integration, the easiest way of protecting existing network applications is to add the services in the `bw-services` network :
 
     ```yaml
-    version: "3.5"
+    x-bw-api-env: &bw-api-env
+      # We use an anchor to avoid repeating the same settings for all services
+      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
 
     services:
+      bunkerweb:
+        image: bunkerity/bunkerweb:1.6.0-beta
+        ports:
+          - "80:8080" # Keep it if you want to use Let's Encrypt automation
+          - "10000:10000" # app1
+          - "20000:20000" # app2
+        labels:
+          - "bunkerweb.INSTANCE=yes"
+        environment:
+          <<: *bw-api-env
+        restart: "unless-stopped"
+        networks:
+          - bw-universe
+          - bw-services
+
+      bw-scheduler:
+        image: bunkerity/bunkerweb-scheduler:1.6.0-beta
+        volumes:
+          - bw-data:/data
+        environment:
+          <<: *bw-api-env
+          BUNKERWEB_INSTANCES: "bunkerweb" # This setting is mandatory to specify the BunkerWeb instance
+          SERVER_NAME: "app1.example.com app2.example.com"
+          MULTISITE: "yes"
+          USE_REVERSE_PROXY: "yes" # Will be applied to all services
+          SERVER_TYPE: "stream" # Will be applied to all services
+          app1.example.com_REVERSE_PROXY_HOST: "myapp1:9000"
+          app1.example.com_LISTEN_STREAM_PORT: "10000"
+          app2.example.com_REVERSE_PROXY_HOST: "myapp2:9000"
+          app2.example.com_LISTEN_STREAM_PORT: "20000"
+        restart: "unless-stopped"
+        networks:
+          - bw-universe
 
       myapp1:
         image: istio/tcp-echo-server:1.2
@@ -867,51 +860,6 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
         command: [ "9000", "app2" ]
         networks:
           - bw-services
-
-      bunkerweb:
-        image: bunkerity/bunkerweb:1.6.0-beta
-        ports:
-          - 80:8080 # Keep it if you want to use Let's Encrypt automation
-          - 10000:10000 # app1
-          - 20000:20000 # app2
-        labels:
-          - "bunkerweb.INSTANCE=yes"
-        environment:
-          - SERVER_NAME=app1.example.com app2.example.com
-          - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
-          - MULTISITE=yes
-          - USE_REVERSE_PROXY=yes # Will be applied to all services
-          - SERVER_TYPE=stream # Will be applied to all services
-          - app1.example.com_REVERSE_PROXY_HOST=myapp1:9000
-          - app1.example.com_LISTEN_STREAM_PORT=10000
-          - app2.example.com_REVERSE_PROXY_HOST=myapp2:9000
-          - app2.example.com_LISTEN_STREAM_PORT=20000
-        networks:
-          - bw-universe
-          - bw-services
-
-      bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.0-beta
-        depends_on:
-          - bunkerweb
-          - bw-docker
-        volumes:
-          - bw-data:/data
-        environment:
-          - DOCKER_HOST=tcp://bw-docker:2375
-        networks:
-          - bw-universe
-          - bw-docker
-
-      bw-docker:
-        image: tecnativa/docker-socket-proxy:nightly
-        volumes:
-          - /var/run/docker.sock:/var/run/docker.sock:ro
-        environment:
-          - CONTAINERS=1
-          - LOG_LEVEL=warning
-        networks:
-          - bw-docker
 
     volumes:
       bw-data:
@@ -925,9 +873,6 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
             - subnet: 10.20.30.0/24
       bw-services:
         name: bw-services
-      bw-docker:
-        name: bw-docker
-
     ```
 
 === "Docker autoconf"
@@ -935,33 +880,25 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
     Before running the [Docker autoconf integration](integrations.md#docker-autoconf) stack on your machine, you will need to edit the ports :
 
     ```yaml
-    version: "3.5"
-
     services:
-
       bunkerweb:
         image: bunkerity/bunkerweb:1.6.0-beta
         ports:
-          - 80:8080 # Keep it if you want to use Let's Encrypt automation
-          - 10000:10000 # app1
-          - 20000:20000 # app2
-
+          - "80:8080" # Keep it if you want to use Let's Encrypt automation
+          - "10000:10000" # app1
+          - "20000:20000" # app2
     ...
     ```
 
     Once the stack is running, you can connect your existing applications to the `bw-services` network and configure BunkerWeb with labels :
 
     ```yaml
-    version: '3.5'
-
     services:
       myapp1:
         image: istio/tcp-echo-server:1.2
         command: [ "9000", "app1" ]
         networks:
-          bw-services:
-            aliases:
-              - myapp1
+          - bw-services
         labels:
           - "bunkerweb.SERVER_NAME=app1.example.com"
           - "bunkerweb.SERVER_KIND=stream"
@@ -973,9 +910,7 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
         image: istio/tcp-echo-server:1.2
         command: [ "9000", "app2" ]
         networks:
-          bw-services:
-            aliases:
-              - myapp2
+          - bw-services
         labels:
           - "bunkerweb.SERVER_NAME=app2.example.com"
           - "bunkerweb.SERVER_KIND=stream"
@@ -994,8 +929,6 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
     Before running the [Swarm integration](integrations.md#swarm) stack on your machine, you will need to edit the ports :
 
     ```yaml
-    version: "3.5"
-
     services:
       bunkerweb:
         image: bunkerity/bunkerweb:1.6.0-beta
@@ -1021,8 +954,6 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
     Once the stack is running, you can connect your existing applications to the `bw-services` network and configure BunkerWeb with labels :
 
     ```yaml
-    version: '3.5'
-
     services:
 
       myapp1:
@@ -1143,8 +1074,8 @@ Some integrations provide more convenient ways to apply configurations, such as 
 
     ```yaml
     ...
-    mybunker:
-      image: bunkerity/bunkerweb:1.6.0-beta
+    bw-scheduler:
+      image: bunkerity/bunkerweb-scheduler:1.6.0-beta
       environment:
         - |
           CUSTOM_CONF_SERVER_HTTP_hello-world=
@@ -1415,9 +1346,42 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
     You can now run BunkerWeb, configure it for your PHP application and also run the PHP apps :
 
     ```yaml
-    version: "3.5"
+    x-bw-api-env: &bw-api-env
+      # We use an anchor to avoid repeating the same settings for all services
+      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
 
     services:
+      bunkerweb:
+        image: bunkerity/bunkerweb:1.6.0-beta
+        ports:
+          - "80:8080/tcp"
+          - "443:8443/tcp"
+          - "443:8443/udp" # QUIC
+        environment:
+          <<: *bw-api-env
+        volumes:
+          - ./www:/var/www/html
+        restart: "unless-stopped"
+        networks:
+          - bw-universe
+          - bw-services
+
+      bw-scheduler:
+        image: bunkerity/bunkerweb-scheduler:1.6.0-beta
+        environment:
+          <<: *bw-api-env
+          BUNKERWEB_INSTANCES: "bunkerweb" # This setting is mandatory to specify the BunkerWeb instance
+          SERVER_NAME: "app1.example.com app2.example.com"
+          MULTISITE: "yes"
+          REMOTE_PHP_PATH: "/app" # Will be applied to all services thanks to the MULTISITE setting
+          app1.example.com_REMOTE_PHP: "myapp1"
+          app2.example.com_REMOTE_PHP: "myapp2"
+          app3.example.com_REMOTE_PHP: "myapp3"
+        volumes:
+          - bw-data:/data
+        restart: "unless-stopped"
+        networks:
+          - bw-universe
 
       myapp1:
         image: php:fpm
@@ -1440,52 +1404,6 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
         networks:
           - bw-services
 
-      bunkerweb:
-        image: bunkerity/bunkerweb:1.6.0-beta
-        volumes:
-          - ./www:/var/www/html
-        ports:
-          - 80:8080
-          - 443:8443
-        labels:
-          - "bunkerweb.INSTANCE=yes"
-        environment:
-          - SERVER_NAME=app1.example.com app2.example.com
-          - MULTISITE=yes
-          - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
-          - app1.example.com_REMOTE_PHP=myapp1
-          - app1.example.com_REMOTE_PHP_PATH=/app
-          - app2.example.com_REMOTE_PHP=myapp2
-          - app2.example.com_REMOTE_PHP_PATH=/app
-          - app3.example.com_REMOTE_PHP=myapp3
-          - app3.example.com_REMOTE_PHP_PATH=/app
-        networks:
-          - bw-universe
-          - bw-services
-
-      bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.0-beta
-        depends_on:
-          - bunkerweb
-          - bw-docker
-        volumes:
-          - bw-data:/data
-        environment:
-          - DOCKER_HOST=tcp://bw-docker:2375
-        networks:
-          - bw-universe
-          - bw-docker
-
-      bw-docker:
-        image: tecnativa/docker-socket-proxy:nightly
-        volumes:
-          - /var/run/docker.sock:/var/run/docker.sock:ro
-        environment:
-          - CONTAINERS=1
-          - LOG_LEVEL=warning
-        networks:
-          - bw-docker
-
     volumes:
       bw-data:
 
@@ -1498,8 +1416,6 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
             - subnet: 10.20.30.0/24
       bw-services:
         name: bw-services
-      bw-docker:
-        name: bw-docker
     ```
 
 === "Docker autoconf"
@@ -1538,59 +1454,80 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
     When you start the BunkerWeb autoconf stack, mount the `www` folder into `/var/www/html` for the BunkerWeb container :
 
     ```yaml
-    version: '3.5'
+    x-bw-api-env: &bw-api-env
+      # We use an anchor to avoid repeating the same settings for all services
+      AUTOCONF_MODE: "yes"
+      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
 
     services:
       bunkerweb:
         image: bunkerity/bunkerweb:1.6.0-beta
-        volumes:
-          - ./www:/var/www/html
         labels:
           - "bunkerweb.INSTANCE=yes"
         environment:
-          - MULTISITE=yes
-          - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db # Remember to set a stronger password for the database
-          - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
+          <<: *bw-api-env
+        volumes:
+          - ./www:/var/www/html
+        restart: "unless-stopped"
         networks:
           - bw-universe
           - bw-services
 
       bw-scheduler:
         image: bunkerity/bunkerweb-scheduler:1.6.0-beta
+        environment:
+          <<: *bw-api-env
+          BUNKERWEB_INSTANCES: "" # We don't need to specify the BunkerWeb instance here as they are automatically detected by the autoconf service
+          SERVER_NAME: "" # The server name will be filled with services labels
+          MULTISITE: "yes" # Mandatory setting for autoconf
+          DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Remember to set a stronger password for the database
+        volumes:
+          - bw-data:/data # This is used to persist data like the backups
+        restart: "unless-stopped"
+        networks:
+          - bw-universe
+          - bw-db
+
+      bw-autoconf:
+        image: bunkerity/bunkerweb-autoconf:1.6.0-beta
         depends_on:
           - bunkerweb
           - bw-docker
         environment:
-          - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db # Remember to set a stronger password for the database
-          - DOCKER_HOST=tcp://bw-docker:2375
+          AUTOCONF_MODE: "yes"
+          DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Remember to set a stronger password for the database
+          DOCKER_HOST: "tcp://bw-docker:2375" # The Docker socket
+        restart: "unless-stopped"
         networks:
           - bw-universe
           - bw-docker
+          - bw-db
 
       bw-docker:
         image: tecnativa/docker-socket-proxy:nightly
         volumes:
           - /var/run/docker.sock:/var/run/docker.sock:ro
         environment:
-          - CONTAINERS=1
-          - LOG_LEVEL=warning
+          CONTAINERS: "1"
+          LOG_LEVEL: "warning"
         networks:
           - bw-docker
 
       bw-db:
-        image: mariadb:10.10
+        image: mariadb:11
         environment:
-          - MYSQL_RANDOM_ROOT_PASSWORD=yes
-          - MYSQL_DATABASE=db
-          - MYSQL_USER=bunkerweb
-          - MYSQL_PASSWORD=changeme # Remember to set a stronger password for the database
+          MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+          MYSQL_DATABASE: "db"
+          MYSQL_USER: "bunkerweb"
+          MYSQL_PASSWORD: "changeme" # Remember to set a stronger password for the database
         volumes:
-          - bw-data:/var/lib/mysql
+          - bw-db:/var/lib/mysql
         networks:
           - bw-docker
 
     volumes:
       bw-data:
+      bw-db:
 
     networks:
       bw-universe:
@@ -1886,17 +1823,12 @@ By default, BunkerWeb will only listen on IPv4 addresses and won't use IPv6 for 
     Once Docker is setup to support IPv6 you can add the `USE_IPV6` setting and configure the `bw-services` for IPv6 :
 
     ```yaml
-    version: '3.5'
-
     services:
-
-      bunkerweb:
-        image: bunkerity/bunkerweb:1.6.0-beta
+      bw-scheduler:
+        image: bunkerity/bunkerweb-scheduler:1.6.0-beta
         environment:
-          - USE_IPv6=yes
-
+          USE_IPv6: "yes"
     ...
-
     networks:
       bw-services:
         name: bw-services
@@ -1905,7 +1837,6 @@ By default, BunkerWeb will only listen on IPv4 addresses and won't use IPv6 for 
           config:
             - subnet: fd00:13:37::/48
               gateway: fd00:13:37::1
-
     ...
     ```
 
@@ -1931,17 +1862,12 @@ By default, BunkerWeb will only listen on IPv4 addresses and won't use IPv6 for 
     Once Docker is setup to support IPv6 you can add the `USE_IPV6` setting and configure the IPv6 for the `bw-services` network :
 
     ```yaml
-    version: '3.5'
-
     services:
-
-      bunkerweb:
-        image: bunkerity/bunkerweb:1.6.0-beta
+      bw-scheduler:
+        image: bunkerity/bunkerweb-scheduler:1.6.0-beta
         environment:
-          - USE_IPv6=yes
-
+          USE_IPv6: "yes"
     ...
-
     networks:
       bw-services:
         name: bw-services
@@ -1950,6 +1876,5 @@ By default, BunkerWeb will only listen on IPv4 addresses and won't use IPv6 for 
           config:
             - subnet: fd00:13:37::/48
               gateway: fd00:13:37::1
-
     ...
     ```
