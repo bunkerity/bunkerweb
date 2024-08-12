@@ -22,10 +22,10 @@ class Global(StrEnum):
 
 
 def config_form(
+    is_global: Global,
     filename: str = "",
     config_type: str = "",
     types: list = [],
-    is_global: bool = False,
     services: list = [],
     config_value: str = "",
     is_new: bool = False,
@@ -37,14 +37,14 @@ def config_form(
             "display": ["main", display_index],  # Allow to toggle between each form using displayStore
             "widgets": [
                 button_widget(
-                    id=f"back-btn-{filename}" if not is_new else "back-btn",
+                    id=f"back-btn-{filename}-global-{is_global}" if not is_new else "back-btn",
                     text="action_back",  # keep it (a18n)
                     color="info",
                     size="normal",
                     display=["main", 0] if not is_new else [],  # Return to list if edit
                 ),
                 input_widget(
-                    id=f"config-name-new" if is_new else f"config-name-{filename}",
+                    id=f"config-name-new" if is_new else f"config-name-{filename}-global-{is_global}",
                     name="config-name",
                     label="configs_filename",  # keep it (a18n)
                     value="" if is_new else filename,  # empty if new or replace by the filename value to edit (.conf excluded)
@@ -71,7 +71,7 @@ def config_form(
                     id="config-global",
                     name="config-global",
                     label="configs_global",  # keep it (a18n)
-                    value="yes" if is_global else "no",  # no if new, else it depends of the current conf
+                    value=is_global,  # no if new, else it depends of the current conf
                     columns={"pc": 3, "tablet": 4, " mobile": 12},
                 ),
                 # Case checkbox is checked, this checklist will be ignored on server
@@ -198,7 +198,7 @@ def config_item(filename: str, conf_type: str, is_global: Global, services: list
             "services": button_group_widget(
                 buttons=[
                     button_widget(
-                        id=f"services-btn-{filename}",
+                        id=f"services-btn-{filename}-global-{is_global}",
                         type="button",
                         iconName="disk",
                         iconColor="white",
@@ -210,7 +210,7 @@ def config_item(filename: str, conf_type: str, is_global: Global, services: list
                                 title_widget(title="configs_services_title"),  # keep it (a18n)
                                 text_widget(text="configs_services_subtitle"),  # keep it (a18n)
                                 tabulator_widget(
-                                    id=f"table-services-{filename}",
+                                    id=f"table-services-{filename}-global-{is_global}",
                                     columns=[{"title": "id", "field": "id", "formatter": "text"}, {"title": "Name", "field": "name", "formatter": "text"}],
                                     # Add every services that apply to the conf. All if global.
                                     items=services_items,
@@ -232,7 +232,7 @@ def config_item(filename: str, conf_type: str, is_global: Global, services: list
                                 button_group_widget(
                                     buttons=[
                                         button_widget(
-                                            id=f"close-services-btn-{filename}",
+                                            id=f"close-services-btn-{filename}-global-{is_global}",
                                             text="action_close",  # keep it (a18n)
                                             color="close",
                                             size="normal",
@@ -248,7 +248,7 @@ def config_item(filename: str, conf_type: str, is_global: Global, services: list
             "actions": button_group_widget(
                 buttons=[
                     button_widget(
-                        id=f"edit-{filename}",
+                        id=f"edit-{filename}-global-{is_global}",
                         type="button",
                         iconName="pen",
                         iconColor="white",
@@ -260,7 +260,7 @@ def config_item(filename: str, conf_type: str, is_global: Global, services: list
                     )["data"],
                     # Delete button with modal to confirm
                     button_widget(
-                        id=f"delete-{filename}",
+                        id=f"delete-{filename}-global-{is_global}",
                         type="button",
                         iconName="trash",
                         iconColor="white",
@@ -275,7 +275,7 @@ def config_item(filename: str, conf_type: str, is_global: Global, services: list
                                 button_group_widget(
                                     buttons=[
                                         button_widget(
-                                            id=f"close-delete-btn-{filename}",
+                                            id=f"close-delete-btn-{filename}-global-{is_global}",
                                             text="action_close",  # keep it (a18n)
                                             color="close",
                                             size="normal",
@@ -284,12 +284,12 @@ def config_item(filename: str, conf_type: str, is_global: Global, services: list
                                     ]
                                 ),
                                 button_widget(
-                                    id=f"delete-btn-{filename}",
+                                    id=f"delete-btn-{filename}-global-{is_global}",
                                     text="action_delete",  # keep it (a18n)
                                     color="delete",
                                     size="normal",
                                     attrs={
-                                        "data-submit-form": f"""{{"conf_name" : "{filename}", "conf_type" : "{conf_type}" }}""",
+                                        "data-submit-form": f"""{{"conf_name" : "{filename}-global-{is_global}", "conf_type" : "{conf_type}" }}""",
                                         "data-submit-endpoint": "/delete",
                                     },
                                 )["data"],
