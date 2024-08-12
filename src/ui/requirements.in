@@ -4,7 +4,7 @@ Flask==3.0.3
 Flask-Login==0.6.3
 Flask-Principal==0.4.0
 Flask-WTF==1.2.1
-gunicorn[gthread]==22.0.0
+gunicorn[gthread]==23.0.0
 passlib==1.7.4
 python-magic==0.4.27
 python_dateutil==2.9.0.post0
