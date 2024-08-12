@@ -128,7 +128,7 @@ actions = (
                                 button(
                                     id="delete-btn-INSTANCE_NAME",  # replace INSTANCE_NAME by the instance name
                                     text="action_delete",  # keep it (a18n)
-                                    color="info",
+                                    color="delete",
                                     size="normal",
                                     attrs={
                                         "data-submit-form": '{"instance_name" : ", "instance_hostname" : "", "operation" : "delete" }'
