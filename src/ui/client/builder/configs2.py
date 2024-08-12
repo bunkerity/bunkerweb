@@ -1,7 +1,7 @@
 import json
 import base64
 
-from builder.configs2 import configs_builder
+from pages.configs2 import configs_builder
 
 
 configs = [
@@ -28,9 +28,9 @@ configs = [
 config_types = ["http", "https", "socks4", "socks5"]
 
 builder = configs_builder(configs, config_types)
-
+print("builder", builder)
 with open("configs2.json", "w") as f:
-    f.write(json.dumps(builder))
+    json.dump(builder, f, indent=4)
 
 output_base64_bytes = base64.b64encode(bytes(json.dumps(builder), "utf-8"))
 

@@ -1,12 +1,7 @@
-from enum import StrEnum
+from enum import Enum
 
 
-class Global(StrEnum):
-    YES = "yes"
-    NO = "no"
-
-
-from builder.utils.widgets import (
+from .utils.widgets import (
     input_widget,
     select_widget,
     checkbox_widget,
@@ -20,7 +15,7 @@ from builder.utils.widgets import (
     icons_widget,
 )
 
-from builder.utils.table import add_column
+from .utils.table import add_column
 
 
 configs_columns = [
@@ -37,7 +32,7 @@ configs_columns = [
 
 
 def config_form(
-    is_global: Global,
+    is_global: str,  # "yes" or "no"
     filename: str = "",
     config_type: str = "",
     types: list = [],
@@ -68,16 +63,13 @@ def config_form(
                 ),
                 # Select between available types
                 select_widget(
-                    {
-                        "id": "select-type",
-                        "name": "select-type",
-                        "label": "configs_types",  # keep it (a18n)
-                        "value": "" if is_new else config_type,
-                        "values": types,  # set all available types like ["http", "modsec"]
-                        "inpType": "select",
-                        "onlyDown": True,
-                        "columns": {"pc": 3, "tablet": 4, " mobile": 12},
-                    },
+                    id="select-type",
+                    name="select-type",
+                    label="configs_types",  # keep it (a18n)
+                    value="" if is_new else config_type,
+                    values=types,  # set all available types like ["http", "modsec"]
+                    columns={"pc": 3, "tablet": 4, " mobile": 12},
+                    onlyDown=True,
                 ),
                 # Add script on Page.vue to disabled listcheck in case checkbox is checked
                 # This checkbox is priority over services checklist
@@ -93,27 +85,21 @@ def config_form(
                 # Combobox ATM but will be replace by a checklist
                 # set services list ATM, we will update by a checklist with [{value : "service1", is_check : bool}, ...]
                 combobox_widget(
-                    {
-                        "id": "combo-services",
-                        "name": "combo-services",
-                        "label": "configs_types",  # keep it (a18n)
-                        "value": "",
-                        "values": services,  # set services list ATM, we will update by a checklist with [{value : "service1", is_check : bool}, ...]
-                        "inpType": "select",
-                        "onlyDown": True,
-                        "columns": {"pc": 3, "tablet": 4, " mobile": 12},
-                    },
+                    id="combo-services",
+                    name="combo-services",
+                    label="configs_types",  # keep it (a18n)
+                    value="",
+                    values=services,  # set services list ATM, we will update by a checklist with [{value : "service1", is_check : bool}, ...]
+                    onlyDown=True,
+                    columns={"pc": 3, "tablet": 4, " mobile": 12},
                 ),
                 # Editor to edit the conf
                 editor_widget(
-                    {
-                        "id": "config-value",
-                        "name": "config-value",
-                        "label": "configs_value",  # keep it (a18n)
-                        "value": "" if is_new else config_value,
-                        "inpType": "editor",
-                        "columns": {"pc": 3, "tablet": 4, " mobile": 12},
-                    },
+                    id="config-value",
+                    name="config-value",
+                    label="configs_value",  # keep it (a18n)
+                    value="" if is_new else config_value,
+                    columns={"pc": 3, "tablet": 4, " mobile": 12},
                 ),
                 input_widget(
                     id="operation",
@@ -122,7 +108,7 @@ def config_form(
                     value="new" if is_new else "edit",
                     pattern="",  # add your pattern if needed
                     columns={"pc": 3, "tablet": 4, " mobile": 12},
-                    inputClass="hidden",  # hide it
+                    inpClass="hidden",  # hide it
                 ),
                 button_widget(
                     id="update-config",
@@ -180,7 +166,7 @@ def configs_filter(types: list):
     ]
 
 
-def config_item(filename: str, conf_type: str, is_global: Global, services: list, display_index: int):
+def config_item(filename: str, conf_type: str, is_global: str, services: list, display_index: int):
 
     services_items = []
     # get id
@@ -188,7 +174,7 @@ def config_item(filename: str, conf_type: str, is_global: Global, services: list
         services_items.append(
             {
                 "id": text_widget(text=index)["data"],
-                "name": text_widget(text=service.get("name"))["data"],
+                "name": text_widget(text=service)["data"],
             }
         )
 
@@ -309,7 +295,7 @@ def configs_builder(configs: list, config_types) -> list:
     configs_forms = []
 
     # Start adding the new config form
-    configs_forms.append(config_form(is_new=True, display_index=1, types=config_types))
+    configs_forms.append(config_form(is_new=True, display_index=1, types=config_types, is_global="no"))
     # display_index start at 2 because 1 is the new and 0 is the configs table
     for index, config in enumerate(configs):
         display_index = index + 2
@@ -324,9 +310,8 @@ def configs_builder(configs: list, config_types) -> list:
         )
         configs_forms.append(
             config_form(
-                id=config.get("id"),
                 filename=config.get("filename"),
-                type=config.get("type"),
+                config_type=config.get("type"),
                 types=config_types,
                 is_global=config.get("is_global"),
                 services=config.get("services"),
