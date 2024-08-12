@@ -1545,7 +1545,6 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
     You can now create your PHP-FPM containers, mount the correct subfolders and use labels to configure BunkerWeb :
 
     ```yaml
-    version: '3.5'
     services:
       myapp1:
           image: php:fpm
@@ -1633,8 +1632,6 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 	  When you start the BunkerWeb stack, mount the `/shared/www` folder into `/var/www/html` for the BunkerWeb container :
 
     ```yaml
-    version: "3.5"
-
     services:
       bunkerweb:
         image: bunkerity/bunkerweb:1.6.0-beta
@@ -1646,7 +1643,6 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
     You can now create your PHP-FPM services, mount the correct subfolders and use labels to configure BunkerWeb :
 
     ```yaml
-    version: '3.5'
       services:
         myapp1:
             image: php:fpm

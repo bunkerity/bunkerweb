@@ -87,7 +87,6 @@ The first step is to install the plugin by putting the plugin files inside the c
     Then you can mount the volume when starting your Docker stack :
 
     ```yaml
-    version: '3.5'
     services:
     ...
       bw-scheduler:
@@ -124,7 +123,6 @@ The first step is to install the plugin by putting the plugin files inside the c
     Then you can mount the volume when starting your Docker stack :
 
     ```yaml
-    version: '3.5'
     services:
     ...
       bw-scheduler:
@@ -163,7 +161,6 @@ The first step is to install the plugin by putting the plugin files inside the c
     Then you can mount the volume when starting your Swarm stack :
 
     ```yaml
-    version: '3.5'
     services:
     ...
       bw-scheduler:
@@ -263,6 +260,8 @@ plugin /
         ui / actions.py
              template.html
         jobs / my-job.py
+        templates / my-template.json
+                    my-template / configs / conf_type / conf_name.conf
         plugin.lua
         plugin.json
 ```
@@ -274,6 +273,8 @@ plugin /
 - **template.html** : custom plugin page you can access from ui
 
 - **jobs py file** : custom python files executed as jobs by the scheduler
+
+- **my-template.json** : add [custom templates](concepts.md#templates) for the plugin to override settings' default values and apply custom configurations in an easy way
 
 - **plugin.lua** : code to execute on NGINX using [NGINX LUA module](https://github.com/openresty/lua-nginx-module)
 
@@ -370,6 +371,10 @@ location /setting {
 ```
 
 `{{ DUMMY_SETTING }}` will be replaced by the value of the `DUMMY_SETTING` chosen by the user of the plugin.
+
+### Templates
+
+Check the [templates documentation](concepts.md#templates) for more information.
 
 ### LUA
 
