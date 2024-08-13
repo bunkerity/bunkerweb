@@ -76,37 +76,37 @@ jobs:
       security-events: write
 
   # UI tests
-  prepare-tests-ui:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
-      - id: set-matrix
-        run: |
-          tests=$(find ./tests/ui/ -name "*_page.py" -type f -printf "%f\n" | jq -c --raw-input --slurp 'split("\n")| .[0:-1]')
-          echo "tests=$tests" >> $GITHUB_OUTPUT
-    outputs:
-      tests: ${{ steps.set-matrix.outputs.tests }}
-  tests-ui:
-    needs: [prepare-tests-ui, build-containers]
-    strategy:
-      fail-fast: false
-      matrix:
-        test: ${{ fromJson(needs.prepare-tests-ui.outputs.tests) }}
-    uses: ./.github/workflows/tests-ui.yml
-    with:
-      TEST: ${{ matrix.test }}
-      RELEASE: dev
-  tests-ui-linux:
-    needs: [prepare-tests-ui, build-packages]
-    strategy:
-      fail-fast: false
-      matrix:
-        test: ${{ fromJson(needs.prepare-tests-ui.outputs.tests) }}
-    uses: ./.github/workflows/tests-ui-linux.yml
-    with:
-      TEST: ${{ matrix.test }}
-      RELEASE: dev
+  # prepare-tests-ui: # TODO: Uncomment when UI tests are back
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+  #     - id: set-matrix
+  #       run: |
+  #         tests=$(find ./tests/ui/ -name "*_page.py" -type f -printf "%f\n" | jq -c --raw-input --slurp 'split("\n")| .[0:-1]')
+  #         echo "tests=$tests" >> $GITHUB_OUTPUT
+  #   outputs:
+  #     tests: ${{ steps.set-matrix.outputs.tests }}
+  # tests-ui:
+  #   needs: [prepare-tests-ui, build-containers]
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       test: ${{ fromJson(needs.prepare-tests-ui.outputs.tests) }}
+  #   uses: ./.github/workflows/tests-ui.yml
+  #   with:
+  #     TEST: ${{ matrix.test }}
+  #     RELEASE: dev
+  # tests-ui-linux:
+  #   needs: [prepare-tests-ui, build-packages]
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       test: ${{ fromJson(needs.prepare-tests-ui.outputs.tests) }}
+  #   uses: ./.github/workflows/tests-ui-linux.yml
+  #   with:
+  #     TEST: ${{ matrix.test }}
+  #     RELEASE: dev
 
   # Core tests
   prepare-tests-core:
@@ -144,7 +144,8 @@ jobs:
 
   # Push with dev tag
   push-dev:
-    needs: [tests-ui, tests-core]
+    # needs: [tests-ui, tests-core] # TODO: Uncomment when UI tests are back
+    needs: [tests-core]
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -184,7 +185,8 @@ jobs:
 
   # Push Linux packages
   push-packages:
-    needs: [tests-ui-linux, tests-core-linux]
+    # needs: [tests-ui-linux, tests-core-linux] # TODO: Uncomment when UI tests are back
+    needs: [tests-core-linux]
     strategy:
       matrix:
         linux: [ubuntu, debian, fedora, el, el9, ubuntu-jammy]

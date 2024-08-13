@@ -135,7 +135,8 @@ def add_builder_and_widgets():
     if run_command(["/usr/bin/python3", "widgets_generator.py"], current_directory):
         if run_command(["python3", "widgets_generator.py"], current_directory):
             if run_command(["python", "widgets_generator.py"], current_directory):
-                exit(1)
+                if run_command(["/usr/bin/python3.9", "widgets_generator.py"], current_directory):
+                    exit(1)
 
     # Create output folders
     copytree(builder_dir_pages.as_posix(), ui_dir_builder.as_posix())
