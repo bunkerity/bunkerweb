@@ -139,6 +139,7 @@ const table = reactive({
       resizableRows: true, // this option takes a boolean value (default = false)
       resizableColumnFit: true, //maintain the fit of columns when resizing
       layout: "fitDataTable",
+      placeholder: "No Data Available", //display message to user on empty table
     };
 
     if (props.rowHeight) opts.rowHeight = props.rowHeight;

@@ -3267,6 +3267,7 @@ body {
   justify-content: center;
   min-width: 100%;
   width: 100%;
+  height: 100px;
 }
 
 .tabulator
@@ -3282,7 +3283,7 @@ body {
   display: inline-block;
   text-align: center;
   padding: 10px;
-  color: #ccc;
+  color: #67748e;
   font-weight: bold;
   font-size: 20px;
   white-space: normal;
@@ -4870,6 +4871,20 @@ body.tabulator-print-fullscreen-hide > *:not(.tabulator-print-fullscreen) {
 }
 
 /* TABULATOR DARK MODE */
+
+.dark
+  .tabulator
+  .tabulator-tableholder
+  .tabulator-placeholder
+  .tabulator-placeholder-contents {
+  display: inline-block;
+  text-align: center;
+  padding: 10px;
+  color: #ccc;
+  font-weight: bold;
+  font-size: 20px;
+  white-space: normal;
+}
 
 .dark .tabulator .tabulator-header,
 .dark .tabulator .tabulator-header .tabulator-col,
