@@ -37,6 +37,7 @@ import Close from "@components/Icons/Close.vue";
 import Pen from "@components/Icons/Pen.vue";
 import Document from "@components/Icons/Document.vue";
 import Eye from "@components/Icons/Eye.vue";
+import Uncheck from "@components/Icons/Uncheck.vue";
 
 /**
  *  @name Widget/Icons.vue
@@ -110,6 +111,7 @@ onMounted(() => {
       v-bind="icon"
     />
     <Box v-if="useEqualStr(props.iconName, 'box')" v-bind="icon" />
+    <Uncheck v-if="useEqualStr(props.iconName, 'uncheck')" v-bind="icon" />
     <Carton v-if="useEqualStr(props.iconName, 'carton')" v-bind="icon" />
     <Core v-if="useEqualStr(props.iconName, 'core')" v-bind="icon" />
     <External v-if="useEqualStr(props.iconName, 'external')" v-bind="icon" />

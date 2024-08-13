@@ -20,6 +20,15 @@ function addColumnsWidth(column, colMinWidth = 0, colMaxWidth = 0) {
       column.minWidth = colMinWidth;
     if (+colMaxWidth > 0 && !("maxWidth" in column))
       column.maxWidth = colMaxWidth;
+
+    // Check that minWidth is less than maxWidth
+    if (
+      "minWidth" in column &&
+      "maxWidth" in column &&
+      column.minWidth > column.maxWidth
+    ) {
+      column.minWidth = column.maxWidth;
+    }
   } catch (e) {
     console.error(e);
   }

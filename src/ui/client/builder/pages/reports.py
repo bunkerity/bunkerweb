@@ -168,7 +168,7 @@ def reports_builder(
     reports: list, reasons: Optional[list] = None, countries: Optional[list] = None, methods: Optional[list] = None, codes: Optional[list] = None
 ) -> str:
 
-    if reasons is None or len(reasons) == 0:
+    if reports is None or len(reports) == 0:
         return {
             "type": "card",
             "gridLayoutClass": "transparent",

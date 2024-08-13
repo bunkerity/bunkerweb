@@ -48,6 +48,8 @@ const tableStore = useTableStore();
  * @param {array} [filters=[]] - List of filters to display
  * @param {array} columns - List of columns to display
  * @param {array} items - List of items to display
+ * @param {array} [actionsButtons=[]] - Buttons group props to render buttons that will be after filters and before the table stick left.
+ * @param {string} [layout="fitDataTable"] - Layout of the table. "fitDataTable" useful with wide columns, "fitColumns" useful with narrow columns.
  * @param {number} [rowHeight= 0] - Case value is 0, this will be ignored.
  * @param {number} [colMinWidth=150] - Minimum width for each col of  a row
  * @param {number} [colMaxWidth=0] - Maximum width for each col of  a row. Case value is 0, this will be ignored.
@@ -84,6 +86,16 @@ const props = defineProps({
     type: Array,
     required: true,
     default: [],
+  },
+  actionsButtons: {
+    type: Object,
+    required: false,
+    default: [],
+  },
+  layout: {
+    type: String,
+    required: false,
+    default: "fitDataTable",
   },
   rowHeight: {
     type: Number,
@@ -138,7 +150,7 @@ const table = reactive({
       autoResize: true, // prevent auto resizing of table
       resizableRows: true, // this option takes a boolean value (default = false)
       resizableColumnFit: true, //maintain the fit of columns when resizing
-      layout: "fitDataTable",
+      layout: props.layout,
       placeholder: "No Data Available", //display message to user on empty table
     };
 
@@ -253,41 +265,49 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <Container :containerClass="'layout-settings'">
-    <template v-for="filter in props.filters">
-      <Fields
-        :setting="filter.setting"
-        @inp="(value) => filterTable(filter, value)"
-      />
+  <div data-is="table" class="layout-table">
+    <Container
+      v-if="props.filters.length"
+      :containerClass="'layout-table-settings'"
+    >
+      <template v-for="filter in props.filters">
+        <Fields
+          :setting="filter.setting"
+          @inp="(value) => filterTable(filter, value)"
+        />
+      </template>
+    </Container>
+    <ButtonGroup
+      v-if="props.actionsButtons.length"
+      :buttons="props.actionsButtons"
+    />
+    <div :class="[props.isStriped ? 'striped' : '']" ref="tableEl"></div>
+    <template
+      :key="table.customComponents"
+      v-for="comp in table.customComponents"
+    >
+      <Teleport :to="comp.elDOM">
+        <Icons
+          v-if="useEqualStr(comp.type, 'Icons')"
+          v-bind="{ ...comp.values }"
+        />
+        <Text
+          v-if="useEqualStr(comp.type, 'Text')"
+          v-bind="{ ...comp.values }"
+        />
+        <Fields
+          v-if="useEqualStr(comp.type, 'Fields')"
+          v-bind="{ ...comp.values }"
+        />
+        <Button
+          v-if="useEqualStr(comp.type, 'Button')"
+          v-bind="{ ...comp.values }"
+        />
+        <ButtonGroup
+          v-if="useEqualStr(comp.type, 'ButtonGroup')"
+          v-bind="{ ...comp.values }"
+        />
+      </Teleport>
     </template>
-  </Container>
-  <div
-    :class="[props.isStriped ? 'striped' : '']"
-    data-is="table"
-    ref="tableEl"
-  ></div>
-  <template
-    :key="table.customComponents"
-    v-for="comp in table.customComponents"
-  >
-    <Teleport :to="comp.elDOM">
-      <Icons
-        v-if="useEqualStr(comp.type, 'Icons')"
-        v-bind="{ ...comp.values }"
-      />
-      <Text v-if="useEqualStr(comp.type, 'Text')" v-bind="{ ...comp.values }" />
-      <Fields
-        v-if="useEqualStr(comp.type, 'Fields')"
-        v-bind="{ ...comp.values }"
-      />
-      <Button
-        v-if="useEqualStr(comp.type, 'Button')"
-        v-bind="{ ...comp.values }"
-      />
-      <ButtonGroup
-        v-if="useEqualStr(comp.type, 'ButtonGroup')"
-        v-bind="{ ...comp.values }"
-      />
-    </Teleport>
-  </template>
+  </div>
 </template>

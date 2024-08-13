@@ -2,10 +2,12 @@
 // Containers
 import Grid from "@components/Widget/Grid.vue";
 import GridLayout from "@components/Widget/GridLayout.vue";
+import Tabulator from "@components/Widget/Tabulator.vue";
+import Button from "@components/Widget/Button.vue";
+import ButtonGroup from "@components/Widget/ButtonGroup.vue";
+import Regular from "@components/Form/Regular.vue";
 import Title from "@components/Widget/Title.vue";
 import Subtitle from "@components/Widget/Subtitle.vue";
-import Table from "@components/Widget/Table.vue";
-import ListPairs from "@components/List/Pairs.vue";
 import MessageUnmatch from "@components/Message/Unmatch.vue";
 import { useEqualStr } from "@utils/global.js";
 
@@ -53,18 +55,29 @@ const props = defineProps({
     <Grid>
       <!-- widget element -->
       <template v-for="(widget, index) in container.widgets" :key="index">
-        <MessageUnmatch
-          v-if="useEqualStr(widget.type, 'MessageUnmatch')"
-          v-bind="widget.data"
-        />
         <Title v-if="useEqualStr(widget.type, 'Title')" v-bind="widget.data" />
         <Subtitle
           v-if="useEqualStr(widget.type, 'Subtitle')"
           v-bind="widget.data"
         />
-        <Table v-if="useEqualStr(widget.type, 'Table')" v-bind="widget.data" />
-        <ListPairs
-          v-if="useEqualStr(widget.type, 'ListPairs')"
+        <MessageUnmatch
+          v-if="useEqualStr(widget.type, 'MessageUnmatch')"
+          v-bind="widget.data"
+        />
+        <Tabulator
+          v-if="useEqualStr(widget.type, 'Tabulator')"
+          v-bind="widget.data"
+        />
+        <Button
+          v-if="useEqualStr(widget.type, 'Button')"
+          v-bind="widget.data"
+        />
+        <Regular
+          v-if="useEqualStr(widget.type, 'Regular')"
+          v-bind="widget.data"
+        />
+        <ButtonGroup
+          v-if="useEqualStr(widget.type, 'ButtonGroup')"
           v-bind="widget.data"
         />
       </template>

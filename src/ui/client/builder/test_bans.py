@@ -1,5 +1,5 @@
 from utils import save_builder
-from pages.bans2 import bans_builder
+from pages.bans import bans_builder
 
 bans = [
     {
@@ -30,4 +30,4 @@ remains = ["all", "hour(s)", "day(s)"]
 
 builder = bans_builder(bans, reasons, remains)
 
-save_builder("bans2", builder)
+save_builder(page_name="bans", output=builder, script_name="bans")

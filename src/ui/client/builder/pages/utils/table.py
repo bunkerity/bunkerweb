@@ -1,4 +1,4 @@
-def add_column(title, field, formatter="", minWidth=None):
+def add_column(title, field, formatter="", minWidth=None, maxWidth=None, visible=None):
 
     col = {"title": title, "field": field}
 
@@ -7,5 +7,11 @@ def add_column(title, field, formatter="", minWidth=None):
 
     if minWidth:
         col["minWidth"] = minWidth
+
+    if maxWidth:
+        col["maxWidth"] = maxWidth
+
+    if visible is not None:
+        col["visible"] = visible
 
     return col

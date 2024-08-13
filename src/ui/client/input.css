@@ -512,6 +512,14 @@ body {
   @apply col-span-12 grid grid-cols-12 w-full relative;
 }
 
+.layout-table {
+  @apply py-4 col-span-12 grid grid-cols-12 w-full relative;
+}
+
+.layout-table-settings {
+  @apply mb-4 sm:gap-x-8 gap-y-8 col-span-12 grid grid-cols-12 w-full relative;
+}
+
 .layout-card {
   @apply px-6 py-4 grid grid-cols-12 w-full overflow-visible relative transition dark:brightness-110 shadow-md bg-white dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border transform duration-300 ease-in-out;
 }
@@ -1146,6 +1154,10 @@ body {
 
 /* BTN GROUP */
 
+.button-group-card {
+  @apply col-span-12 flex justify-center items-center;
+}
+
 .button-group-content {
   @apply flex justify-center items-center mx-4;
 }
@@ -1175,7 +1187,7 @@ body {
 }
 
 .button-group-table {
-  @apply col-span-12 flex justify-start items-center mx-0;
+  @apply mb-4 col-span-12 flex justify-start items-center mx-0;
 }
 
 /* LIST COMPONENT */
@@ -4415,7 +4427,6 @@ body.tabulator-print-fullscreen-hide > *:not(.tabulator-print-fullscreen) {
 
 .tabulator {
   width: 100%;
-  margin: 1em 0em;
   border: 1px solid rgba(34, 36, 38, 0.15);
   box-shadow: none;
   border-radius: 0.28571rem;
