@@ -183,6 +183,12 @@ class InstancesUtils:
             instance.name for instance in instances or self.get_instances() if instance.status == "down" or instance.reload().startswith("Can't reload")
         ] or "Successfully reloaded instances"
 
+    def ban(self, ip: str, exp: float, reason: str, *, instances: Optional[List[Instance]] = None) -> Union[list[str], str]:
+        return [instance.name for instance in instances or self.get_instances() if instance.ban(ip, exp, reason).startswith("Can't ban")] or ""
+
+    def unban(self, ip: str, *, instances: Optional[List[Instance]] = None) -> Union[list[str], str]:
+        return [instance.name for instance in instances or self.get_instances() if instance.unban(ip).startswith("Can't unban")] or ""
+
     def get_bans(self, hostname: Optional[str] = None, *, instances: Optional[List[Instance]] = None) -> List[dict[str, Any]]:
         """Get unique bans from all instances or a specific instance and sort them by expiration date"""
 
