@@ -41,11 +41,13 @@ const props = defineProps({
     v-for="(container, index) in props.builder"
     :key="index"
     :gridLayoutClass="container.containerClass"
+    :maxWidthScreen="container.maxWidthScreen"
     :type="container.type"
     :title="container.title"
     :link="container.link"
     :columns="container.containerColumns"
     :id="container.id"
+    :display="container.display"
   >
     <!-- widget grid -->
     <Grid>

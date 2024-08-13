@@ -1,5 +1,5 @@
 import copy
-from typing import Union
+from typing import Union, Optional
 
 
 def get_setting_data(template_settings: dict, settings: dict, setting: str, value: dict, is_multiple_setting: bool = False, is_new: bool = False) -> tuple:
@@ -60,9 +60,9 @@ def get_plugins_multisite(plugins: list) -> list:
 
 
 def get_forms(
-    templates_ui: list = [],
-    plugins: list = [],
-    settings: dict = {},
+    templates_ui: Optional[list] = None,
+    plugins: Optional[list] = None,
+    settings: Optional[dict] = None,
     render_forms: tuple = ("advanced", "easy", "raw"),
     is_new: bool = False,
     only_multisite: bool = False,

@@ -3,10 +3,13 @@ import json
 import base64
 
 
-def save_builder(page_name: str, output: str, store_json: bool = True, update_page: bool = True):
+def save_builder(page_name: str, output: str, store_json: bool = True, update_page: bool = True, script_name: str = ""):
     if store_json:
         with open(f"test_{page_name.lower()}.json", "w") as f:
             json.dump(output, f, indent=4)
+
+    if not update_page:
+        return
 
     data = base64.b64encode(bytes(json.dumps(output), "utf-8"))
     data = data.decode("ascii")
@@ -39,7 +42,7 @@ def save_builder(page_name: str, output: str, store_json: bool = True, update_pa
       data-server-builder='{data}'
     ></div>
     <div id="app"></div>
-    <script type="module" src="{page_name.lower()}.js"></script>
+    <script type="module" src="{script_name or page_name.lower()}.js"></script>
   </body>
 </html>
 """

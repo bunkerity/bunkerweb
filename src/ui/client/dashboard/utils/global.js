@@ -29,7 +29,9 @@ function useSubmitAttr(e) {
   try {
     const data = JSON.parse(e.target.getAttribute("data-submit-form"));
     const submitEndpoint = e.target.hasAttribute("data-submit-endpoint")
-      ? e.target.getAttribute("data-submit-endpoint")
+      ? `${window.location.origin}${
+          window.location.pathname
+        }${e.target.getAttribute("data-submit-endpoint")}`
       : "";
     useSubmitForm(data, submitEndpoint);
   } catch (e) {

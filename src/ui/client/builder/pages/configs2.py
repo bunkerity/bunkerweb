@@ -11,7 +11,7 @@ from .utils.widgets import (
     tabulator_widget,
     icons_widget,
 )
-
+from typing import Optional
 from .utils.table import add_column
 
 
@@ -32,8 +32,8 @@ def config_form(
     is_global: str,  # "yes" or "no"
     filename: str = "",
     config_type: str = "",
-    types: list = [],
-    services: list = [],
+    types: Optional[list] = None,
+    services: Optional[list] = None,
     config_value: str = "",
     is_new: bool = False,
     display_index: int = 1,
@@ -64,7 +64,7 @@ def config_form(
                     name="select-type",
                     label="configs_types",  # keep it (a18n)
                     value="" if is_new else config_type,
-                    values=types,  # set all available types like ["http", "modsec"]
+                    values=types or [],  # set all available types like ["http", "modsec"]
                     columns={"pc": 3, "tablet": 4, " mobile": 12},
                     onlyDown=True,
                 ),
@@ -86,7 +86,7 @@ def config_form(
                     name="combo-services",
                     label="configs_types",  # keep it (a18n)
                     value="",
-                    values=services,  # set services list ATM, we will update by a checklist with [{value : "service1", is_check : bool}, ...]
+                    values=services or [],  # set services list ATM, we will update by a checklist with [{value : "service1", is_check : bool}, ...]
                     onlyDown=True,
                     columns={"pc": 3, "tablet": 4, " mobile": 12},
                 ),

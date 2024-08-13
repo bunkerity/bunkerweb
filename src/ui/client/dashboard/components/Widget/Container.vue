@@ -1,6 +1,6 @@
 <script setup>
 import { useDisplayStore } from "@store/global.js";
-import { defineProps, watch, computed, reactive } from "vue";
+import { defineProps, watch, computed, reactive, onMounted } from "vue";
 /**
  *  @name Widget/Container.vue
  *  @description This component is a basic container that can be used to wrap other components.
@@ -13,7 +13,7 @@ import { defineProps, watch, computed, reactive } from "vue";
  *    columns: { pc: 12, tablet: 12, mobile: 12}
  *  }
  *  @param {String} [containerClass=""] - Additional class
- *  @param {Object|boolean} [columns=false] - Work with grid system { pc: 12, tablet: 12, mobile: 12}
+ *  @param {Object|boolean} [columns={"pc": "12", "tablet": "12", "mobile": "12"}] - Work with grid system { pc: 12, tablet: 12, mobile: 12}
  *  @param {String} [tag="div"] - The tag for the container
  *  @param {Array} [display=[]] - Array need two values : "groupName" in index 0 and "compId" in index 1 in order to be displayed using the display store. More info on the display store itslef.
  */
@@ -25,9 +25,9 @@ const props = defineProps({
     default: "",
   },
   columns: {
-    type: [Object, Boolean],
+    type: Object,
     required: false,
-    default: false,
+    default: { pc: "12", tablet: "12", mobile: "12" },
   },
   tag: {
     type: String,
@@ -50,13 +50,23 @@ const container = reactive({
     : true,
 });
 
+/**
+ *  @name checkDisplay
+ *  @description Check if the current display value is matching the display store value.
+ *  @returns {Void}
+ */
+function checkDisplay() {
+  if (!props.display.length) return;
+  container.isDisplay = displayStore.isCurrentDisplay(
+    props.display[0],
+    props.display[1]
+  );
+}
+
 // Case we have set a display group name and component id, the component id must match the current display id for the same group name to be displayed.
 if (props.display.length) {
   watch(displayStore.display, (val) => {
-    container.isDisplay = displayStore.isCurrentDisplay(
-      props.display[0],
-      props.display[1]
-    );
+    checkDisplay();
   });
 }
 
@@ -69,7 +79,8 @@ const gridClass = computed(() => {
 
 <template>
   <component
-    v-if="container.isDisplay"
+    v-show="container.isDisplay"
+    :aria-hidden="container.isDisplay ? 'false' : 'true'"
     :is="props.tag"
     data-container
     :class="[props.containerClass ? props.containerClass : '', gridClass]"

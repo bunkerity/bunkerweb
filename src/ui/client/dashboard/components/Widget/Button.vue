@@ -157,21 +157,31 @@ function handleClick(e) {
     btn.openModal = true;
   }
   if (props.display.length) {
-    console.log("update", btn.isActive);
     displayStore.setDisplay(props.display[0], props.display[1]);
   }
+}
+
+/**
+ *  @name checkDisplay
+ *  @description Check if the current display value is matching the display store value.
+ *  @returns {Void}
+ */
+function checkDisplay() {
+  if (!props.display.length) return;
+  const isCurrent = displayStore.isCurrentDisplay(
+    props.display[0],
+    props.display[1]
+  );
+
+  btnEl.value.setAttribute("aria-controls", btn.modalId);
+  btnEl.value.setAttribute("aria-expanded", isCurrent ? "true" : "false");
+  btn.isActive = isCurrent ? true : false;
 }
 
 // Add a11y attributs and update when needed in case the button is related to a display group
 if (props.display.length) {
   watch(displayStore.display, (val) => {
-    const isCurrent = displayStore.isCurrentDisplay(
-      props.display[0],
-      props.display[1]
-    );
-    btnEl.value.setAttribute("aria-controls", btn.modalId);
-    btnEl.value.setAttribute("aria-expanded", isCurrent ? "true" : "false");
-    btn.isActive = isCurrent ? true : false;
+    checkDisplay();
   });
 }
 

@@ -46,10 +46,10 @@ import { v4 as uuidv4 } from "uuid";
  *      ],
  * }
  * @param {Object} template - Template object with plugin and settings data.
- * @param {string} containerClass - Container
+ * @param {string} [containerClass=""] - Container additional class
  * @param {string} [operation="edit"] - Operation type (edit, new, delete).
  * @param {string} [oldServerName=""] - Old server name. This is a server name before any changes.
- * @param {Object} columns - Columns object.
+ * @param {Object} [columns={ "pc": "12", "tablet": "12", "mobile": "12" }] - Columns object.
  */
 
 const advancedForm = useAdvancedForm();

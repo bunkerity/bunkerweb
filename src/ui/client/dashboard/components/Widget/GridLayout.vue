@@ -26,6 +26,7 @@ import { useDisplayStore } from "@store/global.js";
  *  @param {String} [gridLayoutClass="items-start"] - Additional class
  *  @param {Array} [display=[]] - Array need two values : "groupName" in index 0 and "compId" in index 1 in order to be displayed using the display store. More info on the display store itslef.
  *  @param {String} [tabId=contentIndex] - Case the container is converted to an anchor with a link, we can define the tabId, by default it is the contentIndex
+ * @param {string} [maxWidthScreen="lg"] - Max screen width for the settings based on the breakpoint (xs, sm, md, lg, xl, 2xl)
  */
 
 const props = defineProps({
@@ -73,6 +74,11 @@ const props = defineProps({
     required: false,
     default: [],
   },
+  maxWidthScreen: {
+    type: String,
+    required: false,
+    default: "2xl",
+  },
 });
 
 const displayStore = useDisplayStore();
@@ -85,13 +91,23 @@ const container = reactive({
     : true,
 });
 
+/**
+ *  @name checkDisplay
+ *  @description Check if the current display value is matching the display store value.
+ *  @returns {Void}
+ */
+function checkDisplay() {
+  if (!props.display.length) return;
+  container.isDisplay = displayStore.isCurrentDisplay(
+    props.display[0],
+    props.display[1]
+  );
+}
+
 // Case we have set a display group name and component id, the component id must match the current display id for the same group name to be displayed.
 if (props.display.length) {
   watch(displayStore.display, (val) => {
-    container.isDisplay = displayStore.isCurrentDisplay(
-      props.display[0],
-      props.display[1]
-    );
+    checkDisplay();
   });
 }
 
@@ -125,12 +141,18 @@ onMounted(() => {
 
 <template>
   <component
-    v-if="container.isDisplay"
+    v-show="container.isDisplay"
+    :aria-hidden="container.isDisplay ? 'false' : 'true'"
     ref="flowEl"
     :id="container.id"
     :is="props.link ? 'a' : 'div'"
     :data-is="`${props.type}`"
-    :class="[containerClass, gridClass, props.gridLayoutClass]"
+    :class="[
+      containerClass,
+      gridClass,
+      props.gridLayoutClass,
+      `max-w-screen-${props.maxWidthScreen}`,
+    ]"
   >
     <slot></slot>
   </component>

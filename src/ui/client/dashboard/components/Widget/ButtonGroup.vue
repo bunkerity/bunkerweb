@@ -59,7 +59,7 @@ const groupEl = ref(null);
 
 onMounted(() => {
   group.class =
-    props.boutonGroupClass || groupEl?.value.closest("[data-is]")
+    props.boutonGroupClass || groupEl?.value?.closest("[data-is]")
       ? `button-group-${groupEl.value
           .closest("[data-is]")
           .getAttribute("data-is")}`
@@ -85,7 +85,7 @@ onMounted(() => {
     <Button
       v-for="(button, id) in props.buttons"
       :key="button"
-      v-bind="button"
+      v-bind="button.data"
       :class="[id === props.buttons.length - 1 ? '' : 'mr-2']"
     />
   </div>

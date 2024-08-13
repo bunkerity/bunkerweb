@@ -123,7 +123,7 @@ body {
 }
 
 .content-wrap {
-  @apply grid gap-y-4 gap-3 sm:gap-4 lg:gap-4 grid-cols-12 w-full max-w-[1920px];
+  @apply grid gap-y-4 gap-3 sm:gap-4 lg:gap-4 grid-cols-12 w-full max-w-[1920px] justify-items-center;
 }
 
 /* HEADER */
@@ -1150,6 +1150,10 @@ body {
   @apply flex justify-center items-center mx-4;
 }
 
+.button-group-form {
+  @apply col-span-12 flex justify-center items-center;
+}
+
 .button-group-tabs {
   @apply col-span-12 flex justify-center items-center;
 }
@@ -1333,6 +1337,14 @@ body {
 }
 
 /* FORM */
+
+.form-regular-container {
+  @apply col-span-12 w-full mt-3 mb-2;
+}
+
+.form-regular-wrap {
+  @apply flex flex-col justify-center items-center;
+}
 
 .form-advanced-container {
   @apply col-span-12 w-full;
@@ -3344,7 +3356,6 @@ body {
 }
 
 .tabulator .tabulator-footer {
-  border-top: 1px solid #999;
   background-color: #f9fafb;
   color: #555;
   font-weight: bold;
@@ -3680,6 +3691,7 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
   outline: none;
+  height: unset !important;
 }
 
 .tabulator-row .tabulator-cell.tabulator-row-header {
@@ -4468,7 +4480,6 @@ body.tabulator-print-fullscreen-hide > *:not(.tabulator-print-fullscreen) {
 
 .tabulator .tabulator-footer {
   padding: 0.78571em 0.78571em;
-  border-top: 1px solid rgba(34, 36, 38, 0.15);
   box-shadow: none;
   background: #f9fafbc7;
   text-align: right;

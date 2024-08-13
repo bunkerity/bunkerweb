@@ -1,5 +1,5 @@
 
-from typing import Union
+from typing import Union, Optional
 
 # Add params to data dict only if value is not the default one
 def add_key_value(data, key, value, default):
@@ -9,10 +9,10 @@ def add_key_value(data, key, value, default):
         
 def advanced_widget(
     template: dict,
-    containerClass: str,
-    columns: dict,
+    containerClass: str = "",
     operation: str = "edit",
-    oldServerName: str = ""
+    oldServerName: str = "",
+    columns: dict = {"pc":"12","tablet":"12","mobile":"12"}
     ):
     """    
     This component is used to create a complete advanced form with plugin selection.
@@ -20,10 +20,10 @@ def advanced_widget(
     PARAMETERS
     
     -   `template` **Object** Template object with plugin and settings data.
-    -   `containerClass` **string** Container
+    -   `containerClass` **string** Container additional class (optional, default `""`)
     -   `operation` **string** Operation type (edit, new, delete). (optional, default `"edit"`)
     -   `oldServerName` **string** Old server name. This is a server name before any changes. (optional, default `""`)
-    -   `columns` **Object** Columns object.
+    -   `columns` **Object** Columns object. (optional, default `{"pc":"12","tablet":"12","mobile":"12"}`)
     
     EXAMPLE
     
@@ -58,13 +58,11 @@ def advanced_widget(
 
     data = {
         "template" : template,
-        "containerClass" : containerClass,
-        "columns" : columns,
        }
 
 
     # List of params that will be add only if not default value
-    list_params = [("operation", operation, "edit"),("oldServerName", oldServerName, "")]
+    list_params = [("containerClass", containerClass, ""),("operation", operation, "edit"),("oldServerName", oldServerName, ""),("columns", columns, {"pc":"12","tablet":"12","mobile":"12"})]
     for param in list_params:
         add_key_value(data, param[0], param[1], param[2])
 
@@ -74,7 +72,7 @@ def advanced_widget(
 def button_widget(
     text: str,
     id: str = "",
-    display: list = [],
+    display: Optional[list] = None,
     type: str = "button",
     disabled: bool = False,
     hideText: bool = False,
@@ -82,7 +80,7 @@ def button_widget(
     iconColor: str = "",
     size: str = "normal",
     iconName: str = "",
-    attrs: dict = {},
+    attrs: Optional[dict] = None,
     modal: Union[dict, bool] = False,
     tabId: Union[str, int] = "",
     containerClass: str = ""
@@ -128,7 +126,7 @@ def button_widget(
 
 
     # List of params that will be add only if not default value
-    list_params = [("id", id, ""),("display", display, []),("type", type, "button"),("disabled", disabled, False),("hideText", hideText, False),("color", color, "primary"),("iconColor", iconColor, ""),("size", size, "normal"),("iconName", iconName, ""),("attrs", attrs, {}),("modal", modal, False),("tabId", tabId, ""),("containerClass", containerClass, "")]
+    list_params = [("id", id, ""),("display", display, None),("type", type, "button"),("disabled", disabled, False),("hideText", hideText, False),("color", color, "primary"),("iconColor", iconColor, ""),("size", size, "normal"),("iconName", iconName, ""),("attrs", attrs, None),("modal", modal, False),("tabId", tabId, ""),("containerClass", containerClass, "")]
     for param in list_params:
         add_key_value(data, param[0], param[1], param[2])
 
@@ -237,8 +235,8 @@ def checkbox_widget(
     name: str,
     value: str,
     id: str = "",
-    attrs: dict = {},
-    popovers: list = [],
+    attrs: Optional[dict] = None,
+    popovers: Optional[list] = None,
     inpType: str = "checkbox",
     disabled: bool = False,
     required: bool = False,
@@ -302,7 +300,7 @@ def checkbox_widget(
 
 
     # List of params that will be add only if not default value
-    list_params = [("id", id, ""),("attrs", attrs, {}),("popovers", popovers, []),("inpType", inpType, "checkbox"),("disabled", disabled, False),("required", required, False),("columns", columns, {"pc":"12","tablet":"12","mobile":"12"}),("hideLabel", hideLabel, False),("containerClass", containerClass, ""),("headerClass", headerClass, ""),("inpClass", inpClass, ""),("tabId", tabId, "")]
+    list_params = [("id", id, ""),("attrs", attrs, None),("popovers", popovers, None),("inpType", inpType, "checkbox"),("disabled", disabled, False),("required", required, False),("columns", columns, {"pc":"12","tablet":"12","mobile":"12"}),("hideLabel", hideLabel, False),("containerClass", containerClass, ""),("headerClass", headerClass, ""),("inpClass", inpClass, ""),("tabId", tabId, "")]
     for param in list_params:
         add_key_value(data, param[0], param[1], param[2])
 
@@ -358,13 +356,13 @@ def combobox_widget(
     value: str,
     values: list,
     id: str = "",
-    attrs: dict = {},
+    attrs: Optional[dict] = None,
     maxBtnChars: str = "",
-    popovers: list = [],
+    popovers: Optional[list] = None,
     inpType: str = "select",
     disabled: bool = False,
     required: bool = False,
-    requiredValues: list = [],
+    requiredValues: Optional[list] = None,
     columns: dict = {"pc":"12","tablet":"12","mobile":"12"},
     hideLabel: bool = False,
     onlyDown: bool = False,
@@ -433,7 +431,7 @@ def combobox_widget(
 
 
     # List of params that will be add only if not default value
-    list_params = [("id", id, ""),("attrs", attrs, {}),("maxBtnChars", maxBtnChars, ""),("popovers", popovers, []),("inpType", inpType, "select"),("disabled", disabled, False),("required", required, False),("requiredValues", requiredValues, []),("columns", columns, {"pc":"12","tablet":"12","mobile":"12"}),("hideLabel", hideLabel, False),("onlyDown", onlyDown, False),("overflowAttrEl", overflowAttrEl, ""),("containerClass", containerClass, ""),("inpClass", inpClass, ""),("headerClass", headerClass, ""),("tabId", tabId, "")]
+    list_params = [("id", id, ""),("attrs", attrs, None),("maxBtnChars", maxBtnChars, ""),("popovers", popovers, None),("inpType", inpType, "select"),("disabled", disabled, False),("required", required, False),("requiredValues", requiredValues, None),("columns", columns, {"pc":"12","tablet":"12","mobile":"12"}),("hideLabel", hideLabel, False),("onlyDown", onlyDown, False),("overflowAttrEl", overflowAttrEl, ""),("containerClass", containerClass, ""),("inpClass", inpClass, ""),("headerClass", headerClass, ""),("tabId", tabId, "")]
     for param in list_params:
         add_key_value(data, param[0], param[1], param[2])
 
@@ -442,9 +440,9 @@ def combobox_widget(
 
 def container_widget(
     containerClass: str = "",
-    columns: Union[dict, bool] = False,
+    columns: Union[dict, bool] = {"pc":"12","tablet":"12","mobile":"12"},
     tag: str = "div",
-    display: list = []
+    display: Optional[list] = None
     ):
     """    
     This component is a basic container that can be used to wrap other components.
@@ -455,7 +453,7 @@ def container_widget(
     PARAMETERS
     
     -   `containerClass` **String** Additional class (optional, default `""`)
-    -   `columns` **(Object | boolean)** Work with grid system { pc: 12, tablet: 12, mobile: 12} (optional, default `false`)
+    -   `columns` **(Object | boolean)** Work with grid system { pc: 12, tablet: 12, mobile: 12} (optional, default `{"pc":"12","tablet":"12","mobile":"12"}`)
     -   `tag` **String** The tag for the container (optional, default `"div"`)
     -   `display` **Array** Array need two values : "groupName" in index 0 and "compId" in index 1 in order to be displayed using the display store. More info on the display store itslef. (optional, default `[]`)
     
@@ -473,7 +471,7 @@ def container_widget(
 
 
     # List of params that will be add only if not default value
-    list_params = [("containerClass", containerClass, ""),("columns", columns, False),("tag", tag, "div"),("display", display, [])]
+    list_params = [("containerClass", containerClass, ""),("columns", columns, {"pc":"12","tablet":"12","mobile":"12"}),("tag", tag, "div"),("display", display, None)]
     for param in list_params:
         add_key_value(data, param[0], param[1], param[2])
 
@@ -484,8 +482,8 @@ def datepicker_widget(
     label: str,
     name: str,
     id: str = "",
-    popovers: list = [],
-    attrs: dict = {},
+    popovers: Optional[list] = None,
+    attrs: Optional[dict] = None,
     inpType: str = "datepicker",
     value: int = "",
     minDate: int = "",
@@ -554,7 +552,7 @@ def datepicker_widget(
 
 
     # List of params that will be add only if not default value
-    list_params = [("id", id, ""),("popovers", popovers, []),("attrs", attrs, {}),("inpType", inpType, "datepicker"),("value", value, ""),("minDate", minDate, ""),("maxDate", maxDate, ""),("isClipboard", isClipboard, True),("hideLabel", hideLabel, False),("columns", columns, {"pc":"12","tablet":"12","mobile":"12"}),("disabled", disabled, False),("required", required, False),("headerClass", headerClass, ""),("containerClass", containerClass, ""),("tabId", tabId, "")]
+    list_params = [("id", id, ""),("popovers", popovers, None),("attrs", attrs, None),("inpType", inpType, "datepicker"),("value", value, ""),("minDate", minDate, ""),("maxDate", maxDate, ""),("isClipboard", isClipboard, True),("hideLabel", hideLabel, False),("columns", columns, {"pc":"12","tablet":"12","mobile":"12"}),("disabled", disabled, False),("required", required, False),("headerClass", headerClass, ""),("containerClass", containerClass, ""),("tabId", tabId, "")]
     for param in list_params:
         add_key_value(data, param[0], param[1], param[2])
 
@@ -564,7 +562,7 @@ def datepicker_widget(
 def details_widget(
     columns,
     details: str,
-    filters: list = []
+    filters: Optional[list] = None
     ):
     """    
     This component is a list of items separate on two columns : one for the title, and other for a list of popovers related to the plugin (type, link...)
@@ -605,7 +603,7 @@ def details_widget(
 
 
     # List of params that will be add only if not default value
-    list_params = [("columns", columns, {"pc":"4","tablet":"6","mobile":"12"}),("filters", filters, [])]
+    list_params = [("columns", columns, {"pc":"4","tablet":"6","mobile":"12"}),("filters", filters, None)]
     for param in list_params:
         add_key_value(data, param[0], param[1], param[2])
 
@@ -614,10 +612,10 @@ def details_widget(
 
 def easy_widget(
     template: dict,
-    containerClass: str,
-    columns: dict,
+    containerClass: str = "",
     operation: str = "edit",
-    oldServerName: str = ""
+    oldServerName: str = "",
+    columns: dict = {"pc":"12","tablet":"12","mobile":"12"}
     ):
     """    
     This component is used to create a complete easy form with plugin selection.
@@ -625,10 +623,10 @@ def easy_widget(
     PARAMETERS
     
     -   `template` **Object** Template object with plugin and settings data.
-    -   `containerClass` **string** Container
+    -   `containerClass` **string** Container additional class (optional, default `""`)
     -   `operation` **string** Operation type (edit, new, delete). (optional, default `"edit"`)
     -   `oldServerName` **string** Old server name. This is a server name before any changes. (optional, default `""`)
-    -   `columns` **Object** Columns object.
+    -   `columns` **Object** Columns object. (optional, default `{"pc":"12","tablet":"12","mobile":"12"}`)
     
     EXAMPLE
     
@@ -663,13 +661,11 @@ def easy_widget(
 
     data = {
         "template" : template,
-        "containerClass" : containerClass,
-        "columns" : columns,
        }
 
 
     # List of params that will be add only if not default value
-    list_params = [("operation", operation, "edit"),("oldServerName", oldServerName, "")]
+    list_params = [("containerClass", containerClass, ""),("operation", operation, "edit"),("oldServerName", oldServerName, ""),("columns", columns, {"pc":"12","tablet":"12","mobile":"12"})]
     for param in list_params:
         add_key_value(data, param[0], param[1], param[2])
 
@@ -681,8 +677,8 @@ def editor_widget(
     name: str,
     value: str,
     id: str = "",
-    attrs: dict = {},
-    popovers: list = [],
+    attrs: Optional[dict] = None,
+    popovers: Optional[list] = None,
     inpType: str = "editor",
     columns: dict = {"pc":"12","tablet":"12","mobile":"12"},
     pattern: str = "",
@@ -744,7 +740,7 @@ def editor_widget(
 
 
     # List of params that will be add only if not default value
-    list_params = [("id", id, ""),("attrs", attrs, {}),("popovers", popovers, []),("inpType", inpType, "editor"),("columns", columns, {"pc":"12","tablet":"12","mobile":"12"}),("pattern", pattern, ""),("disabled", disabled, False),("required", required, False),("isClipboard", isClipboard, True),("hideLabel", hideLabel, False),("containerClass", containerClass, ""),("editorClass", editorClass, ""),("headerClass", headerClass, ""),("tabId", tabId, "")]
+    list_params = [("id", id, ""),("attrs", attrs, None),("popovers", popovers, None),("inpType", inpType, "editor"),("columns", columns, {"pc":"12","tablet":"12","mobile":"12"}),("pattern", pattern, ""),("disabled", disabled, False),("required", required, False),("isClipboard", isClipboard, True),("hideLabel", hideLabel, False),("containerClass", containerClass, ""),("editorClass", editorClass, ""),("headerClass", headerClass, ""),("tabId", tabId, "")]
     for param in list_params:
         add_key_value(data, param[0], param[1], param[2])
 
@@ -755,7 +751,7 @@ def field_widget(
     label: str,
     id: str,
     name: str,
-    popovers: list = [],
+    popovers: Optional[list] = None,
     required: bool = False,
     hideLabel: bool = False,
     headerClass: str = ""
@@ -800,7 +796,7 @@ def field_widget(
 
 
     # List of params that will be add only if not default value
-    list_params = [("popovers", popovers, []),("required", required, False),("hideLabel", hideLabel, False),("headerClass", headerClass, "")]
+    list_params = [("popovers", popovers, None),("required", required, False),("hideLabel", hideLabel, False),("headerClass", headerClass, "")]
     for param in list_params:
         add_key_value(data, param[0], param[1], param[2])
 
@@ -848,7 +844,7 @@ def fields_widget(
         
 
 def filter_widget(
-    filters: list = [],
+    filters: Optional[list] = None,
     data: Union[dict, list] = {},
     containerClass: str = ""
     ):
@@ -904,7 +900,7 @@ def filter_widget(
 
 
     # List of params that will be add only if not default value
-    list_params = [("filters", filters, []),("data", data, {}),("containerClass", containerClass, "")]
+    list_params = [("filters", filters, None),("data", data, {}),("containerClass", containerClass, "")]
     for param in list_params:
         add_key_value(data, param[0], param[1], param[2])
 
@@ -913,7 +909,7 @@ def filter_widget(
 
 def grid_widget(
     gridClass: str = "items-start",
-    display: list = []
+    display: Optional[list] = None
     ):
     """    
     This component is a basic container that can be used to wrap other components.
@@ -940,7 +936,7 @@ def grid_widget(
 
 
     # List of params that will be add only if not default value
-    list_params = [("gridClass", gridClass, "items-start"),("display", display, [])]
+    list_params = [("gridClass", gridClass, "items-start"),("display", display, None)]
     for param in list_params:
         add_key_value(data, param[0], param[1], param[2])
 
@@ -954,8 +950,9 @@ def grid_layout_widget(
     link: str = "",
     columns: dict = {"pc":12,"tablet":12,"mobile":12},
     gridLayoutClass: str = "items-start",
-    display: list = [],
-    tabId: str = ""
+    display: Optional[list] = None,
+    tabId: str = "",
+    maxWidthScreen: str = "lg"
     ):
     """    
     This component is used for top level page layout.
@@ -973,6 +970,7 @@ def grid_layout_widget(
     -   `gridLayoutClass` **String** Additional class (optional, default `"items-start"`)
     -   `display` **Array** Array need two values : "groupName" in index 0 and "compId" in index 1 in order to be displayed using the display store. More info on the display store itslef. (optional, default `[]`)
     -   `tabId` **String** Case the container is converted to an anchor with a link, we can define the tabId, by default it is the contentIndex (optional, default `contentIndex`)
+    -   `maxWidthScreen` **string** Max screen width for the settings based on the breakpoint (xs, sm, md, lg, xl, 2xl) (optional, default `"lg"`)
     
     EXAMPLE
     
@@ -991,7 +989,7 @@ def grid_layout_widget(
 
 
     # List of params that will be add only if not default value
-    list_params = [("type", type, "card"),("id", id, ""),("title", title, ""),("link", link, ""),("columns", columns, {"pc":12,"tablet":12,"mobile":12}),("gridLayoutClass", gridLayoutClass, "items-start"),("display", display, []),("tabId", tabId, "")]
+    list_params = [("type", type, "card"),("id", id, ""),("title", title, ""),("link", link, ""),("columns", columns, {"pc":12,"tablet":12,"mobile":12}),("gridLayoutClass", gridLayoutClass, "items-start"),("display", display, None),("tabId", tabId, ""),("maxWidthScreen", maxWidthScreen, "lg")]
     for param in list_params:
         add_key_value(data, param[0], param[1], param[2])
 
@@ -1049,8 +1047,8 @@ def input_widget(
     value: str,
     id: str = "",
     type: str = "text",
-    attrs: dict = {},
-    popovers: list = [],
+    attrs: Optional[dict] = None,
+    popovers: Optional[list] = None,
     inpType: str = "input",
     columns: dict = {"pc":"12","tablet":"12","mobile":"12"},
     disabled: bool = False,
@@ -1125,65 +1123,11 @@ def input_widget(
 
 
     # List of params that will be add only if not default value
-    list_params = [("id", id, ""),("type", type, "text"),("attrs", attrs, {}),("popovers", popovers, []),("inpType", inpType, "input"),("columns", columns, {"pc":"12","tablet":"12","mobile":"12"}),("disabled", disabled, False),("required", required, False),("placeholder", placeholder, ""),("pattern", pattern, "(?.*)"),("isClipboard", isClipboard, True),("readonly", readonly, False),("hideLabel", hideLabel, False),("containerClass", containerClass, ""),("inpClass", inpClass, ""),("headerClass", headerClass, ""),("tabId", tabId, "")]
+    list_params = [("id", id, ""),("type", type, "text"),("attrs", attrs, None),("popovers", popovers, None),("inpType", inpType, "input"),("columns", columns, {"pc":"12","tablet":"12","mobile":"12"}),("disabled", disabled, False),("required", required, False),("placeholder", placeholder, ""),("pattern", pattern, "(?.*)"),("isClipboard", isClipboard, True),("readonly", readonly, False),("hideLabel", hideLabel, False),("containerClass", containerClass, ""),("inpClass", inpClass, ""),("headerClass", headerClass, ""),("tabId", tabId, "")]
     for param in list_params:
         add_key_value(data, param[0], param[1], param[2])
 
     return { "type" : "Input", "data" : data }
-        
-
-def instance_widget(
-    title: str,
-    status: str,
-    details: list,
-    buttons: list
-    ):
-    """    
-    This component is an instance widget.
-    This component is using the Container, TitleCard, IconStatus, ListPairs and ButtonGroup components.
-    
-    PARAMETERS
-    
-    -   `title` **String**;
-    -   `status` **String**;
-    -   `details` **Array** List of details to display
-    -   `buttons` **Array** List of buttons to display
-    
-    EXAMPLE
-    
-    {
-       id: "instance-1",
-       title: "Instance 1",
-       status: "success",
-       details: [
-         { key: "Version", value: "1.0.0" },
-         { key: "Status", value: "Running" },
-         { key: "Created", value: "2021-01-01" },
-       ],
-       buttons : [
-         {
-           id: "open-modal-btn",
-           text: "Open modal",
-           disabled: false,
-           hideText: true,
-           color: "green",
-           size: "normal",
-           iconName: "modal",
-         },
-       ]
-     }
-    
-    """
-
-    data = {
-        "title" : title,
-        "status" : status,
-        "details" : details,
-        "buttons" : buttons,
-       }
-
-
-    return { "type" : "Instance", "data" : data }
         
 
 def list_widget(
@@ -1191,10 +1135,10 @@ def list_widget(
     name: str,
     value: str,
     id: str = "",
-    attrs: dict = {},
+    attrs: Optional[dict] = None,
     separator: str = " ",
     maxBtnChars: str = "",
-    popovers: list = [],
+    popovers: Optional[list] = None,
     inpType: str = "list",
     disabled: bool = False,
     required: bool = False,
@@ -1259,7 +1203,7 @@ def list_widget(
 
 
     # List of params that will be add only if not default value
-    list_params = [("id", id, ""),("attrs", attrs, {}),("separator", separator, " "),("maxBtnChars", maxBtnChars, ""),("popovers", popovers, []),("inpType", inpType, "list"),("disabled", disabled, False),("required", required, False),("columns", columns, {"pc":"12","tablet":"12","mobile":"12"}),("hideLabel", hideLabel, False),("onlyDown", onlyDown, False),("overflowAttrEl", overflowAttrEl, ""),("containerClass", containerClass, ""),("inpClass", inpClass, ""),("headerClass", headerClass, ""),("tabId", tabId, "")]
+    list_params = [("id", id, ""),("attrs", attrs, None),("separator", separator, " "),("maxBtnChars", maxBtnChars, ""),("popovers", popovers, None),("inpType", inpType, "list"),("disabled", disabled, False),("required", required, False),("columns", columns, {"pc":"12","tablet":"12","mobile":"12"}),("hideLabel", hideLabel, False),("onlyDown", onlyDown, False),("overflowAttrEl", overflowAttrEl, ""),("containerClass", containerClass, ""),("inpClass", inpClass, ""),("headerClass", headerClass, ""),("tabId", tabId, "")]
     for param in list_params:
         add_key_value(data, param[0], param[1], param[2])
 
@@ -1494,7 +1438,7 @@ def popover_widget(
     text: str,
     color: str,
     href: str = "#",
-    attrs: dict = {},
+    attrs: Optional[dict] = None,
     tag: str = "a",
     iconClass: str = "icon-default",
     tabId: Union[str, int] = ""
@@ -1530,7 +1474,7 @@ def popover_widget(
 
 
     # List of params that will be add only if not default value
-    list_params = [("href", href, "#"),("attrs", attrs, {}),("tag", tag, "a"),("iconClass", iconClass, "icon-default"),("tabId", tabId, "")]
+    list_params = [("href", href, "#"),("attrs", attrs, None),("tag", tag, "a"),("iconClass", iconClass, "icon-default"),("tabId", tabId, "")]
     for param in list_params:
         add_key_value(data, param[0], param[1], param[2])
 
@@ -1584,10 +1528,10 @@ def popover_group_widget(
 
 def raw_widget(
     template: dict,
-    containerClass: str,
-    columns: dict,
     operation: str = "edit",
-    oldServerName: str = ""
+    oldServerName: str = "",
+    containerClass: str = "",
+    columns: dict = {"pc":"12","tablet":"12","mobile":"12"}
     ):
     """    
     This component is used to create a complete raw form with settings as JSON format.
@@ -1597,8 +1541,8 @@ def raw_widget(
     -   `template` **Object** Template object with plugin and settings data.
     -   `operation` **String** Operation type (edit, new, delete). (optional, default `"edit"`)
     -   `oldServerName` **String** Old server name. This is a server name before any changes. (optional, default `""`)
-    -   `containerClass` **String** Container
-    -   `columns` **Object** Columns object.
+    -   `containerClass` **string** Container additional class (optional, default `""`)
+    -   `columns` **Object** Columns object. (optional, default `{"pc":"12","tablet":"12","mobile":"12"}`)
     
     EXAMPLE
     
@@ -1614,17 +1558,78 @@ def raw_widget(
 
     data = {
         "template" : template,
-        "containerClass" : containerClass,
-        "columns" : columns,
        }
 
 
     # List of params that will be add only if not default value
-    list_params = [("operation", operation, "edit"),("oldServerName", oldServerName, "")]
+    list_params = [("operation", operation, "edit"),("oldServerName", oldServerName, ""),("containerClass", containerClass, ""),("columns", columns, {"pc":"12","tablet":"12","mobile":"12"})]
     for param in list_params:
         add_key_value(data, param[0], param[1], param[2])
 
     return { "type" : "Raw", "data" : data }
+        
+
+def regular_widget(
+    fields: dict,
+    buttons: dict,
+    containerClass: str = "",
+    endpoint: str = "",
+    maxWidthScreen: str = "lg",
+    columns: dict = {"pc":"12","tablet":"12","mobile":"12"}
+    ):
+    """    
+    This component is used to create a basic form with fields.
+    
+    PARAMETERS
+    
+    -   `fields` **Object** List of Fields component to display
+    -   `buttons` **Object** We need to send a regular ButtonGroup buttons prop
+    -   `containerClass` **string** Container additional class (optional, default `""`)
+    -   `endpoint` **string** Form endpoint. Case none, will be ignored. (optional, default `""`)
+    -   `maxWidthScreen` **string** Max screen width for the settings based on the breakpoint (xs, sm, md, lg, xl, 2xl) (optional, default `"lg"`)
+    -   `columns` **Object** Columns object. (optional, default `{"pc":"12","tablet":"12","mobile":"12"}`)
+    
+    EXAMPLE
+    
+    fields : [
+           {
+             columns: { pc: 6, tablet: 12, mobile: 12 },
+             id: "test-check",
+             value: "yes",
+             label: "Checkbox",
+             name: "checkbox",
+             required: true,
+             hideLabel: false,
+             headerClass: "text-red-500",
+             inpType: "checkbox",
+           },
+           {
+             id: "test-input",
+             value: "yes",
+             type: "text",
+             name: "test-input",
+             disabled: false,
+             required: true,
+             label: "Test input",
+             pattern: "(test)",
+             inpType: "input",
+           },
+         ],
+    
+    """
+
+    data = {
+        "fields" : fields,
+        "buttons" : buttons,
+       }
+
+
+    # List of params that will be add only if not default value
+    list_params = [("containerClass", containerClass, ""),("endpoint", endpoint, ""),("maxWidthScreen", maxWidthScreen, "lg"),("columns", columns, {"pc":"12","tablet":"12","mobile":"12"})]
+    for param in list_params:
+        add_key_value(data, param[0], param[1], param[2])
+
+    return { "type" : "Regular", "data" : data }
         
 
 def select_widget(
@@ -1633,13 +1638,13 @@ def select_widget(
     value: str,
     values: list,
     id: str = "",
-    attrs: dict = {},
-    popovers: list = [],
+    attrs: Optional[dict] = None,
+    popovers: Optional[list] = None,
     inpType: str = "select",
     maxBtnChars: str = "",
     disabled: bool = False,
     required: bool = False,
-    requiredValues: list = [],
+    requiredValues: Optional[list] = None,
     columns: dict = {"pc":"12","tablet":"12","mobile":"12"},
     hideLabel: bool = False,
     onlyDown: bool = False,
@@ -1709,7 +1714,7 @@ def select_widget(
 
 
     # List of params that will be add only if not default value
-    list_params = [("id", id, ""),("attrs", attrs, {}),("popovers", popovers, []),("inpType", inpType, "select"),("maxBtnChars", maxBtnChars, ""),("disabled", disabled, False),("required", required, False),("requiredValues", requiredValues, []),("columns", columns, {"pc":"12","tablet":"12","mobile":"12"}),("hideLabel", hideLabel, False),("onlyDown", onlyDown, False),("overflowAttrEl", overflowAttrEl, ""),("containerClass", containerClass, ""),("inpClass", inpClass, ""),("headerClass", headerClass, ""),("tabId", tabId, "")]
+    list_params = [("id", id, ""),("attrs", attrs, None),("popovers", popovers, None),("inpType", inpType, "select"),("maxBtnChars", maxBtnChars, ""),("disabled", disabled, False),("required", required, False),("requiredValues", requiredValues, None),("columns", columns, {"pc":"12","tablet":"12","mobile":"12"}),("hideLabel", hideLabel, False),("onlyDown", onlyDown, False),("overflowAttrEl", overflowAttrEl, ""),("containerClass", containerClass, ""),("inpClass", inpClass, ""),("headerClass", headerClass, ""),("tabId", tabId, "")]
     for param in list_params:
         add_key_value(data, param[0], param[1], param[2])
 
@@ -1854,7 +1859,7 @@ def table_widget(
     header: list,
     positions: list,
     items: list,
-    filters: list = [],
+    filters: Optional[list] = None,
     minWidth: str = "base",
     containerClass: str = "",
     containerWrapClass: str = "",
@@ -1936,7 +1941,7 @@ def table_widget(
 
 
     # List of params that will be add only if not default value
-    list_params = [("filters", filters, []),("minWidth", minWidth, "base"),("containerClass", containerClass, ""),("containerWrapClass", containerWrapClass, ""),("tableClass", tableClass, "")]
+    list_params = [("filters", filters, None),("minWidth", minWidth, "base"),("containerClass", containerClass, ""),("containerWrapClass", containerWrapClass, ""),("tableClass", tableClass, "")]
     for param in list_params:
         add_key_value(data, param[0], param[1], param[2])
 
@@ -1948,7 +1953,7 @@ def tabulator_widget(
     columns: list,
     items: list,
     isStriped: bool = True,
-    filters: list = [],
+    filters: Optional[list] = None,
     rowHeight: int = 0,
     colMinWidth: int = 150,
     colMaxWidth: int = 0,
@@ -2010,7 +2015,7 @@ def tabulator_widget(
 
 
     # List of params that will be add only if not default value
-    list_params = [("isStriped", isStriped, True),("filters", filters, []),("rowHeight", rowHeight, 0),("colMinWidth", colMinWidth, 150),("colMaxWidth", colMaxWidth, 0),("isPagination", isPagination, True),("paginationSize", paginationSize, 10),("paginationInitialPage", paginationInitialPage, 1),("paginationSizeSelector", paginationSizeSelector, [10,25,50,100])]
+    list_params = [("isStriped", isStriped, True),("filters", filters, None),("rowHeight", rowHeight, 0),("colMinWidth", colMinWidth, 150),("colMaxWidth", colMaxWidth, 0),("isPagination", isPagination, True),("paginationSize", paginationSize, 10),("paginationInitialPage", paginationInitialPage, 1),("paginationSizeSelector", paginationSizeSelector, [10,25,50,100])]
     for param in list_params:
         add_key_value(data, param[0], param[1], param[2])
 
@@ -2067,7 +2072,7 @@ def text_widget(
     uppercase: bool = False,
     tag: str = "p",
     icon: Union[bool, dict] = False,
-    attrs: dict = {}
+    attrs: Optional[dict] = None
     ):
     """    
     This component is used for regular paragraph.
@@ -2099,7 +2104,7 @@ def text_widget(
 
 
     # List of params that will be add only if not default value
-    list_params = [("textClass", textClass, ""),("color", color, ""),("bold", bold, False),("uppercase", uppercase, False),("tag", tag, "p"),("icon", icon, False),("attrs", attrs, {})]
+    list_params = [("textClass", textClass, ""),("color", color, ""),("bold", bold, False),("uppercase", uppercase, False),("tag", tag, "p"),("icon", icon, False),("attrs", attrs, None)]
     for param in list_params:
         add_key_value(data, param[0], param[1], param[2])
 

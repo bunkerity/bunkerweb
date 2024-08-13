@@ -316,7 +316,6 @@ def convert_params(params: List[dict]) -> List[dict]:
 
             # Case we have multiple types
             if param_type and param_type and "(" in param_type and "|" in param_type:
-                is_union = True
                 # We need to remove parenthesis
                 param_type = param_type.replace("(", "").replace(")", "")
                 # We need to split by |
@@ -333,6 +332,15 @@ def convert_params(params: List[dict]) -> List[dict]:
             default = param.get("default")
             if default and default in convert_values:
                 default = convert_values[default]
+
+            # When matching specific param and default
+            if param.get("type").lower().strip() == "array" and param.get("default") == "[]":
+                convert_type = "Optional[list]"
+                default = "None"
+
+            if param.get("type").lower().strip() == "object" and param.get("default") == "{}":
+                convert_type = "Optional[dict]"
+                default = "None"
 
             convert_params.append({"name": param.get("name"), "type": convert_type, "default": default})
 
@@ -428,7 +436,7 @@ def merge_widgets():
     Path(f"{outputFolderWidgets}/widgets.py").write_text("")
 
     content = """
-from typing import Union
+from typing import Union, Optional
 
 # Add params to data dict only if value is not the default one
 def add_key_value(data, key, value, default):

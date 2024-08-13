@@ -8,6 +8,12 @@ export default {
     "../setup/src/*.{js,vue,ts,jsx,tsx,mdx}",
   ],
   safelist: [
+    "max-w-screen-xs",
+    "max-w-screen-sm",
+    "max-w-screen-md",
+    "max-w-screen-lg",
+    "max-w-screen-xl",
+    "max-w-screen-2xl",
     "col-span-1",
     "col-span-2",
     "col-span-3",

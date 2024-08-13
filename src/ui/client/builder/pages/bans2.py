@@ -1,5 +1,7 @@
 from .utils.widgets import button_widget, button_group_widget, title_widget, text_widget, tabulator_widget, datepicker_widget
-from .utils.table import add_column, format_field
+from .utils.table import add_column
+from .utils.format import get_fields_from_field
+from typing import Optional
 
 bans_columns = [
     add_column(title="IP", field="ip", formatter="text"),
@@ -10,7 +12,7 @@ bans_columns = [
 ]
 
 
-def bans_filters(reasons: list = [], remains: list = []) -> list:
+def bans_filters(reasons: Optional[list] = None, remains: Optional[list] = None) -> list:
 
     filters = [
         {
@@ -28,7 +30,7 @@ def bans_filters(reasons: list = [], remains: list = []) -> list:
     ]
 
     # Case  "all" ans
-    if len(reasons) >= 2:
+    if reasons is not None and len(reasons) >= 2:
         filters.append(
             {
                 "type": "=",
@@ -46,7 +48,7 @@ def bans_filters(reasons: list = [], remains: list = []) -> list:
             },
         )
 
-        if len(reasons) >= 2:
+        if remains is not None and len(remains) >= 2:
             filters.append(
                 {
                     "type": "=",
@@ -72,7 +74,7 @@ def ban_item(id: str, ip: str, reason: str, ban_start_date: int, ban_end_date: i
         {
             "ip": text_widget(text=ip)["data"],
             "reason": text_widget(text=reason)["data"],
-            "ban_start_date": format_field(
+            "ban_start_date": get_fields_from_field(
                 datepicker_widget(
                     id=f"datepicker-ban-start-{id}",
                     name=f"datepicker-ban-start-{id}",
@@ -83,7 +85,7 @@ def ban_item(id: str, ip: str, reason: str, ban_start_date: int, ban_end_date: i
                     columns={"pc": 12, "tablet": 12, " mobile": 12},
                 )
             ),
-            "ban_end_date": format_field(
+            "ban_end_date": get_fields_from_field(
                 datepicker_widget(
                     id=f"datepicker-ban-end-{id}",
                     name=f"datepicker-ban-end-{id}",
@@ -124,7 +126,7 @@ bans_add_columns = [
 default_add_ban = [
     {
         "id": 1,
-        "ip": format_field(
+        "ip": get_fields_from_field(
             datepicker_widget(
                 id="datepicker-add-ban-ip-1",
                 name="datepicker-add-ban-ip-1",
@@ -134,7 +136,7 @@ default_add_ban = [
                 columns={"pc": 12, "tablet": 12, " mobile": 12},
             )
         ),
-        "ban_end": format_field(
+        "ban_end": get_fields_from_field(
             datepicker_widget(
                 id="datepicker-add-ban-end-1",
                 name="datepicker-add-ban-end-1",

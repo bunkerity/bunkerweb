@@ -71,7 +71,7 @@ const props = defineProps({
   columns: {
     type: [Object, Boolean],
     required: false,
-    default: false,
+    default: { pc: "12", tablet: "12", mobile: "12" },
   },
   name: {
     type: String,

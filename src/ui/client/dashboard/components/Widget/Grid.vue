@@ -1,6 +1,6 @@
 <script setup>
 import { useDisplayStore } from "@store/global.js";
-import { defineProps, watch, reactive } from "vue";
+import { defineProps, watch, reactive, onMounted } from "vue";
 /**
  *  @name Widget/Grid.vue
  *  @description This component is a basic container that can be used to wrap other components.
@@ -38,20 +38,31 @@ const container = reactive({
     : true,
 });
 
+/**
+ *  @name checkDisplay
+ *  @description Check if the current display value is matching the display store value.
+ *  @returns {Void}
+ */
+function checkDisplay() {
+  if (!props.display.length) return;
+  container.isDisplay = displayStore.isCurrentDisplay(
+    props.display[0],
+    props.display[1]
+  );
+}
+
 // Case we have set a display group name and component id, the component id must match the current display id for the same group name to be displayed.
 if (props.display.length) {
   watch(displayStore.display, (val) => {
-    container.isDisplay = displayStore.isCurrentDisplay(
-      props.display[0],
-      props.display[1]
-    );
+    checkDisplay();
   });
 }
 </script>
 
 <template>
   <div
-    v-if="container.isDisplay"
+    v-show="container.isDisplay"
+    :aria-hidden="container.isDisplay ? 'false' : 'true'"
     data-grid
     :class="[props.gridClass, 'layout-grid']"
   >

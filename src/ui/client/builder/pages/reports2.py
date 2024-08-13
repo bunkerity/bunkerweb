@@ -1,5 +1,7 @@
-from .utils.table import add_column, format_field
+from .utils.table import add_column
+from .utils.format import get_fields_from_field
 from .utils.widgets import datepicker_widget, text_widget, tabulator_widget
+from typing import Optional
 
 reports_columns = [
     add_column(title="Date", field="date", formatter="fields"),
@@ -15,7 +17,7 @@ reports_columns = [
 ]
 
 
-def reports_filters(reasons: list = [], countries: list = [], methods: list = [], codes: list = []) -> list:
+def reports_filters(reasons: Optional[list] = None, countries: Optional[list] = None, methods: Optional[list] = None, codes: Optional[list] = None) -> list:
     reports_filters = [
         {
             "type": "like",
@@ -55,7 +57,7 @@ def reports_filters(reasons: list = [], countries: list = [], methods: list = []
         },
     ]
 
-    if len(reasons) >= 2:
+    if reasons is not None and len(reasons) >= 2:
         reports_filters.append(
             {
                 "type": "=",
@@ -73,7 +75,7 @@ def reports_filters(reasons: list = [], countries: list = [], methods: list = []
             }
         )
 
-    if len(countries) >= 2:
+    if countries is not None and len(countries) >= 2:
         reports_filters.append(
             {
                 "type": "=",
@@ -91,7 +93,7 @@ def reports_filters(reasons: list = [], countries: list = [], methods: list = []
             }
         )
 
-    if len(methods) >= 2:
+    if methods is not None and len(methods) >= 2:
         reports_filters.append(
             {
                 "type": "=",
@@ -109,7 +111,7 @@ def reports_filters(reasons: list = [], countries: list = [], methods: list = []
             }
         )
 
-    if len(codes) >= 2:
+    if codes is not None and len(codes) >= 2:
         reports_filters.append(
             {
                 "type": "=",
@@ -134,7 +136,7 @@ def reports_filters(reasons: list = [], countries: list = [], methods: list = []
 def report_item(id: int, date: int, ip: str, country: str, method: str, url: str, code: str, user_agent: str, reason: str, data: str) -> dict:
     return (
         {
-            "date": format_field(
+            "date": get_fields_from_field(
                 datepicker_widget(
                     id=f"datepicker-date-{id}",
                     name=f"datepicker-date-{id}",
@@ -156,7 +158,9 @@ def report_item(id: int, date: int, ip: str, country: str, method: str, url: str
     )
 
 
-def reports_builder(reports: list, reasons: list = [], countries: list = [], methods: list = [], codes: list = []) -> str:
+def reports_builder(
+    reports: list, reasons: Optional[list] = None, countries: Optional[list] = None, methods: Optional[list] = None, codes: Optional[list] = None
+) -> str:
     reports_items = [report_item(**report, id=index) for index, report in enumerate(reports)]
     return [
         {

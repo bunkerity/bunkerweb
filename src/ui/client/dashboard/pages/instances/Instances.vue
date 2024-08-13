@@ -2,13 +2,19 @@
 import { reactive, onBeforeMount, onMounted } from "vue";
 import DashboardLayout from "@components/Dashboard/Layout.vue";
 import BuilderInstances from "@components/Builder/Instances.vue";
-import { useGlobal } from "@utils/global";
+import { useGlobal } from "@utils/global.js";
+import { useDisplayStore } from "@store/global.js";
 
 /**
 *  @name Page/Instances.vue
 *  @description This component is the instances page.
   This page displays current instances and allows to manage them.
+  We are using displayStore and setting ["main", 1] to display the instances list first.
 */
+
+// Set default store
+const displayStore = useDisplayStore();
+displayStore.setDisplay("main", 1);
 
 const instances = reactive({
   builder: "",

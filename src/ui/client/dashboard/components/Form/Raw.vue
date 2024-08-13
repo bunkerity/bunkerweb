@@ -23,8 +23,8 @@ import { useRawForm } from "@store/form.js";
  *  @param {Object} template - Template object with plugin and settings data.
  *  @param {String} [operation="edit"] - Operation type (edit, new, delete).
  *  @param {String} [oldServerName=""] - Old server name. This is a server name before any changes.
- *  @param {String} containerClass - Container
- *  @param {Object} columns - Columns object.
+ * @param {string} [containerClass=""] - Container additional class
+ * @param {Object} [columns={ "pc": "12", "tablet": "12", "mobile": "12" }] - Columns object.
  */
 
 const rawForm = useRawForm();
