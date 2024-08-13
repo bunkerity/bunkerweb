@@ -350,18 +350,20 @@ onUnmounted(() => {
         />
       </Container>
     </template>
-    <Button
-      v-if="Object.keys(advancedForm.templateUIFormat).length"
-      v-bind="buttonSave"
-      :disabled="
-        data.isReqErr || data.isRegErr
-          ? true
-          : advancedForm.isUpdateData
-          ? false
-          : true
-      "
-      @click="advancedForm.submit()"
-    />
+    <div class="button-group-form">
+      <Button
+        v-if="Object.keys(advancedForm.templateUIFormat).length"
+        v-bind="buttonSave"
+        :disabled="
+          data.isReqErr || data.isRegErr
+            ? true
+            : advancedForm.isUpdateData
+            ? false
+            : true
+        "
+        @click="advancedForm.submit()"
+      />
+    </div>
     <div class="flex justify-center items-center" data-is="form-error">
       <Text
         v-if="

@@ -11,7 +11,7 @@ import Container from "@components/Widget/Container.vue";
 import Fields from "@components/Form/Fields.vue";
 import Title from "@components/Widget/Title.vue";
 import Subtitle from "@components/Widget/Subtitle.vue";
-import Button from "@components/Widget/Button.vue";
+import ButtonGroup from "@components/Widget/ButtonGroup.vue";
 import Text from "@components/Widget/Text.vue";
 import GroupMultiple from "@components/Forms/Group/Multiple.vue";
 import MessageUnmatch from "@components/Message/Unmatch.vue";
@@ -240,7 +240,7 @@ onUnmounted(() => {
           </Container>
         </Container>
       </template>
-      <div class="flex justify-center items-center">
+      <div class="button-group-form">
         <Button
           @click="data.currStep = Math.max(data.currStep - 1, 0)"
           :disabled="data.isFirstStep"

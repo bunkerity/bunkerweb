@@ -10,6 +10,7 @@ def advanced_mode_builder(templates: list[dict], plugins: list, global_config: d
     builder = [
         {
             "type": "card",
+            "maxWidthScreen": "3xl",
             "containerColumns": {"pc": 12, "tablet": 12, "mobile": 12},
             "widgets": [
                 {

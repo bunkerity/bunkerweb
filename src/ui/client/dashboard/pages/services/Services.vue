@@ -33,8 +33,6 @@ onMounted(() => {
 
 <template>
   <DashboardLayout>
-    <div class="col-span-12 grid grid-cols-12 card">
-      <BuilderServices v-if="services.builder" :builder="services.builder" />
-    </div>
+    <BuilderServices v-if="services.builder" :builder="services.builder" />
   </DashboardLayout>
 </template>

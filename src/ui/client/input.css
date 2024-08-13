@@ -1155,7 +1155,7 @@ body {
 }
 
 .button-group-tabs {
-  @apply col-span-12 flex justify-center items-center;
+  @apply col-span-12 flex flex-col sm:flex-row justify-center items-center gap-2;
 }
 
 .button-group-multiple {

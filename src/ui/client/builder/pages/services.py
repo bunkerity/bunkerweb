@@ -1,6 +1,6 @@
 from typing import Union
 
-from .utils.widgets import title_widget, table_widget
+from .utils.widgets import title_widget, table_widget, button_group_widget, button_widget
 
 
 def services_builder(services):
@@ -11,23 +11,30 @@ def services_builder(services):
 
     builder = [
         {
-            "type": "card",
-            "containerColumns": {"pc": 12, "tablet": 12, "mobile": 12},
+            "type": "tabs",
+            "columns": {"pc": 4, "tablet": 4, "mobile": 4},
             "widgets": [
-                title_widget("services_title"),
-                {
-                    "type": "Button",
-                    "data": {
-                        "id": "services-new",
-                        "text": "services_new",
-                        "color": "success",
-                        "size": "normal",
-                        "iconName": "plus",
-                        "iconColor": "white",
-                        "modal": services_action(server_name="new", operation="new", title="services_new_title", subtitle="services_new_subtitle"),
-                        "containerClass": "col-span-12 flex justify-center",
-                    },
-                },
+                button_group_widget(
+                    buttons=[
+                        button_widget(
+                            id="services-new",
+                            text="services_new",
+                            color="success",
+                            size="normal",
+                            iconName="plus",
+                            iconColor="white",
+                            modal=services_action(server_name="new", operation="new", title="services_new_title", subtitle="services_new_subtitle"),
+                            containerClass="col-span-12 flex justify-center",
+                        )
+                    ]
+                )
+            ],
+        },
+        {
+            "type": "card",
+            "columns": {"pc": 4, "tablet": 4, "mobile": 4},
+            "widgets": [
+                title_widget(title="services_title"),
                 table_widget(
                     positions=[4, 4, 4],
                     header=[
@@ -163,43 +170,42 @@ def services_action(
 ) -> dict:
 
     buttons = [
-        {
-            "id": f"close-service-btn-{server_name}",
-            "text": "action_close",
-            "disabled": False,
-            "color": "close",
-            "size": "normal",
-            "attrs": {"data-close-modal": ""},
-        },
+        button_widget(
+            id=f"close-service-btn-{server_name}",
+            text="action_close",
+            color="close",
+            size="normal",
+            attrs={"data-close-modal": ""},
+        )
     ]
 
     if operation == "delete":
         buttons.append(
-            {
-                "id": f"{operation}-service-btn-{server_name}",
-                "text": f"action_{operation}",
-                "disabled": False,
-                "color": "delete",
-                "size": "normal",
-                "attrs": {
-                    "data-submit-form": f"""{{"SERVER_NAME" : "{server_name}", "operation" : "{operation}" }}""",
+            button_widget(
+                id=f"{operation}-service-btn-{server_name}",
+                text=f"action_{operation}",
+                color="delete",
+                size="normal",
+                attrs={
+                    "data-submit-form": f"""{{"SERVER_NAME" : "{server_name}" }}""",
+                    "data-submit-endpoint": f"/{operation}",
                 },
-            },
+            )
         )
 
     if operation == "draft":
         draft_value = "yes" if is_draft else "no"
         buttons.append(
-            {
-                "id": f"{operation}-service-btn-{server_name}",
-                "text": "action_switch",
-                "disabled": False,
-                "color": "success",
-                "size": "normal",
-                "attrs": {
-                    "data-submit-form": f"""{{"SERVER_NAME" : "{server_name}", "OLD_SERVER_NAME" : "{server_name}", "operation" : "edit", "IS_DRAFT" : "{draft_value}" }}""",
+            button_widget(
+                id=f"{operation}-service-btn-{server_name}",
+                text="action_switch",
+                color="success",
+                size="normal",
+                attrs={
+                    "data-submit-form": f"""{{"SERVER_NAME" : "{server_name}", "OLD_SERVER_NAME" : "{server_name}", "IS_DRAFT" : "{draft_value}" }}""",
+                    "data-submit-endpoint": f"/edit",
                 },
-            },
+            )
         )
 
     content = [
@@ -253,17 +259,16 @@ def services_action(
         mode_buttons = []
         for mode in modes:
             mode_buttons.append(
-                {
-                    "id": f"{operation}-service-btn-{server_name}",
-                    "text": f"services_mode_{mode}",
-                    "disabled": False,
-                    "color": "info",
-                    "size": "normal",
-                    "attrs": {
+                button_widget(
+                    id=f"{operation}-service-btn-{server_name}",
+                    text=f"services_mode_{mode}",
+                    color="info",
+                    size="normal",
+                    attrs={
                         "role": "link",
                         "data-link": f"modes?service_name={server_name}&mode={mode}" if operation != "new" else f"modes?mode={mode}",
                     },
-                },
+                )
             )
 
         content.append(
@@ -304,49 +309,49 @@ def get_services_list(services):
                 "type": "ButtonGroup",
                 "data": {
                     "buttons": [
-                        {
-                            "id": f"open-modal-plugins-{index}",
-                            "text": "plugins",
-                            "hideText": True,
-                            "color": "success",
-                            "size": "normal",
-                            "iconName": "eye",
-                            "iconColor": "white",
-                            "modal": services_action(
+                        button_widget(
+                            id=f"open-modal-plugins-{index}",
+                            text="plugins",
+                            hideText=True,
+                            color="success",
+                            size="normal",
+                            iconName="eye",
+                            iconColor="white",
+                            modal=services_action(
                                 server_name=server_name,
                                 operation="plugins",
                                 title="services_plugins_title",
                                 subtitle="",
                                 service=service,
                             ),
-                        },
-                        {
-                            "attrs": {"data-server-name": server_name},
-                            "id": f"open-modal-manage-{index}",
-                            "text": "manage",
-                            "hideText": True,
-                            "color": "edit",
-                            "size": "normal",
-                            "iconName": "pen",
-                            "iconColor": "white",
-                            "modal": services_action(
+                        ),
+                        button_widget(
+                            id=f"open-modal-manage-{index}",
+                            text="manage",
+                            hideText=True,
+                            color="edit",
+                            size="normal",
+                            iconName="pen",
+                            iconColor="white",
+                            modal=services_action(
                                 server_name=server_name,
                                 operation="edit",
                                 title="services_edit_title",
                                 subtitle="services_edit_subtitle",
                                 additional=server_name,
                             ),
-                        },
-                        {
-                            "attrs": {"data-server-name": server_name, "data-is-draft": "yes" if is_draft else "no"},
-                            "id": f"open-modal-draft-{index}",
-                            "text": "draft" if is_draft else "online",
-                            "hideText": True,
-                            "color": "blue",
-                            "size": "normal",
-                            "iconName": "document" if is_draft else "globe",
-                            "iconColor": "white",
-                            "modal": services_action(
+                            attrs={"data-server-name": server_name},
+                        ),
+                        button_widget(
+                            attrs={"data-server-name": server_name, "data-is-draft": "yes" if is_draft else "no"},
+                            id=f"open-modal-draft-{index}",
+                            text="draft" if is_draft else "online",
+                            hideText=True,
+                            color="blue",
+                            size="normal",
+                            iconName="document" if is_draft else "globe",
+                            iconColor="white",
+                            modal=services_action(
                                 server_name=server_name,
                                 operation="draft",
                                 title="services_draft_title",
@@ -354,21 +359,21 @@ def get_services_list(services):
                                 additional="services_draft_switch_subtitle" if is_draft else "services_online_switch_subtitle",
                                 is_draft=is_draft,
                             ),
-                        },
-                        {
-                            "attrs": {"data-server-name": server_name},
-                            "id": f"open-modal-delete-{index}",
-                            "text": "delete",
-                            "disabled": not is_deletable,
-                            "hideText": True,
-                            "color": "red",
-                            "size": "normal",
-                            "iconName": "trash",
-                            "iconColor": "white",
-                            "modal": services_action(
+                        ),
+                        button_widget(
+                            attrs={"data-server-name": server_name},
+                            id=f"open-modal-delete-{index}",
+                            text="delete",
+                            disabled=not is_deletable,
+                            hideText=True,
+                            color="red",
+                            size="normal",
+                            iconName="trash",
+                            iconColor="white",
+                            modal=services_action(
                                 server_name=server_name, operation="delete", title="services_delete_title", subtitle="services_delete_subtitle"
                             ),
-                        },
+                        ),
                     ]
                 },
             }

@@ -1,8 +1,5 @@
-import json
-import base64
-from typing import Union
-
-from builder.services import services_builder
+from utils import save_builder
+from pages.services import services_builder
 
 services = [
     {
@@ -36,11 +33,5 @@ services = [
 
 output = services_builder(services)
 
-# store on a file
-with open("services.json", "w") as f:
-    json.dump(output, f, indent=4)
-output_base64_bytes = base64.b64encode(bytes(json.dumps(output), "utf-8"))
-output_base64_string = output_base64_bytes.decode("ascii")
 
-with open("services.txt", "w") as f:
-    f.write(output_base64_string)
+save_builder("services", output, script_name="services")

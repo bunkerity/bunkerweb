@@ -60,8 +60,6 @@ onMounted(() => {
 
 <template>
   <DashboardLayout>
-    <div class="col-span-12 grid grid-cols-12 card">
-      <BuilderLogs v-if="logs.builder" :builder="logs.builder" />
-    </div>
+    <BuilderLogs v-if="logs.builder" :builder="logs.builder" />
   </DashboardLayout>
 </template>

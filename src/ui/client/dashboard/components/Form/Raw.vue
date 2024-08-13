@@ -209,12 +209,13 @@ onMounted(() => {
         :value="rawForm.rawData"
       />
     </Container>
-    <Button
-      @click="rawForm.submit()"
-      :disabled="data.isValid ? false : rawForm.isUpdateData ? false : true"
-      v-bind="buttonSave"
-    />
-
+    <div class="button-group-form">
+      <Button
+        @click="rawForm.submit()"
+        :disabled="data.isValid ? false : rawForm.isUpdateData ? false : true"
+        v-bind="buttonSave"
+      />
+    </div>
     <div class="flex justify-center items-center" data-is="form-error">
       <Text
         v-if="!data.isValid"
