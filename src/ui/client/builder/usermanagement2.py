@@ -26,7 +26,7 @@ def generate_form(
                     label="users_filename",  # keep it (a18n)
                     value="" if is_new else username,
                     pattern="",  # add your pattern if needed
-                    columns={"pc": 3, "tablet": 4, " mobile": 12},
+                    columns={"pc": 3, "tablet": 4, "mobile": 12},
                 ),
                 input(
                     id=f"password-{'new' if is_new else username}",
@@ -34,7 +34,7 @@ def generate_form(
                     label="users_password",  # keep it (a18n)
                     value="" if is_new else password,
                     pattern="",  # add your pattern if needed
-                    columns={"pc": 3, "tablet": 4, " mobile": 12},
+                    columns={"pc": 3, "tablet": 4, "mobile": 12},
                 ),
                 # Select between available types
                 select(
@@ -46,7 +46,7 @@ def generate_form(
                         "values": roles,
                         "inpType": "select",
                         "onlyDown": True,
-                        "columns": {"pc": 3, "tablet": 4, " mobile": 12},
+                        "columns": {"pc": 3, "tablet": 4, "mobile": 12},
                     },
                 ),
                 input(
@@ -55,7 +55,7 @@ def generate_form(
                     label="users_operation",  # keep it (a18n)
                     value="new" if is_new else "edit",  # "new" if new or "edit" if edit
                     pattern="",  # add your pattern if needed
-                    columns={"pc": 3, "tablet": 4, " mobile": 12},
+                    columns={"pc": 3, "tablet": 4, "mobile": 12},
                     inputClass="hidden",  # hide it
                 ),
                 input(
@@ -113,7 +113,7 @@ users_filters = [
             "label": "users_search_username",  # keep it (a18n)
             "value": "",
             "inpType": "input",
-            "columns": {"pc": 3, "tablet": 4, " mobile": 12},
+            "columns": {"pc": 3, "tablet": 4, "mobile": 12},
         },
     },
     {
@@ -127,7 +127,7 @@ users_filters = [
             "values": ["all", "antibot"],  # keep "all" and add your roles
             "inpType": "select",
             "onlyDown": True,
-            "columns": {"pc": 3, "tablet": 4, " mobile": 12},
+            "columns": {"pc": 3, "tablet": 4, "mobile": 12},
         },
     },
     {
@@ -141,7 +141,7 @@ users_filters = [
             "values": ["all", "yes", "no"],  # keep
             "inpType": "select",
             "onlyDown": True,
-            "columns": {"pc": 3, "tablet": 4, " mobile": 12},
+            "columns": {"pc": 3, "tablet": 4, "mobile": 12},
         },
     },
 ]
@@ -194,7 +194,7 @@ users_items = [
                                             "label": "users_search_service",  # keep it (a18n)
                                             "value": "",
                                             "inpType": "input",
-                                            "columns": {"pc": 3, "tablet": 4, " mobile": 12},
+                                            "columns": {"pc": 3, "tablet": 4, "mobile": 12},
                                         },
                                     },
                                 ],

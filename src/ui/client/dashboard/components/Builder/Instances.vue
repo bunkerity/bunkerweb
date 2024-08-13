@@ -8,6 +8,7 @@ import ButtonGroup from "@components/Widget/ButtonGroup.vue";
 import Regular from "@components/Form/Regular.vue";
 import Title from "@components/Widget/Title.vue";
 import Subtitle from "@components/Widget/Subtitle.vue";
+import MessageUnmatch from "@components/Message/Unmatch.vue";
 import { useEqualStr } from "@utils/global.js";
 
 /**
@@ -65,6 +66,15 @@ const props = defineProps({
     <Grid>
       <!-- widget element -->
       <template v-for="(widget, index) in container.widgets" :key="index">
+        <Title v-if="useEqualStr(widget.type, 'Title')" v-bind="widget.data" />
+        <Subtitle
+          v-if="useEqualStr(widget.type, 'Subtitle')"
+          v-bind="widget.data"
+        />
+        <MessageUnmatch
+          v-if="useEqualStr(widget.type, 'MessageUnmatch')"
+          v-bind="widget.data"
+        />
         <Tabulator
           v-if="useEqualStr(widget.type, 'Tabulator')"
           v-bind="widget.data"
@@ -79,11 +89,6 @@ const props = defineProps({
         />
         <ButtonGroup
           v-if="useEqualStr(widget.type, 'ButtonGroup')"
-          v-bind="widget.data"
-        />
-        <Title v-if="useEqualStr(widget.type, 'Title')" v-bind="widget.data" />
-        <Subtitle
-          v-if="useEqualStr(widget.type, 'Subtitle')"
           v-bind="widget.data"
         />
       </template>

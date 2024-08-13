@@ -8,6 +8,7 @@ import { contentIndex } from "@utils/tabindex.js";
 /**
  *  @name addColumnsWidth
  *  @description Add min and max width to the column object in case we have the right format.
+ *  Case already a custom max or min width, will be ignored.
  *  @param {Object} column -  The column object to update in case we have the right format.
  *  @param {String|Number} [colMinWidth=0] - The minimum width for the column. Case 0 or invalid, will be ignored.
  *  @param {String|Number} [colMaxWidth=0] - The minimum width for the column. Case 0 or invalid, will be ignored.
@@ -15,8 +16,10 @@ import { contentIndex } from "@utils/tabindex.js";
  */
 function addColumnsWidth(column, colMinWidth = 0, colMaxWidth = 0) {
   try {
-    if (+colMinWidth > 0) column.minWidth = colMinWidth;
-    if (+colMaxWidth > 0) column.maxWidth = colMaxWidth;
+    if (+colMinWidth > 0 && !("minWidth" in column))
+      column.minWidth = colMinWidth;
+    if (+colMaxWidth > 0 && !("maxWidth" in column))
+      column.maxWidth = colMaxWidth;
   } catch (e) {
     console.error(e);
   }

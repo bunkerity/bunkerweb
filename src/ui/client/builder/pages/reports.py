@@ -1,10 +1,10 @@
 from .utils.table import add_column
 from .utils.format import get_fields_from_field
-from .utils.widgets import datepicker_widget, text_widget, tabulator_widget
+from .utils.widgets import datepicker_widget, text_widget, tabulator_widget, title_widget, subtitle_widget, unmatch_widget
 from typing import Optional
 
 reports_columns = [
-    add_column(title="Date", field="date", formatter="fields"),
+    add_column(title="Date", field="date", formatter="fields", minWidth=250),
     add_column(title="IP", field="ip", formatter="text"),
     add_column(title="Country", field="country", formatter="text"),
     add_column(title="Server name", field="server_name", formatter="text"),
@@ -21,38 +21,20 @@ def reports_filters(reasons: Optional[list] = None, countries: Optional[list] = 
     reports_filters = [
         {
             "type": "like",
-            "fields": ["ip"],
-            "setting": {
-                "id": "input-search-ip",
-                "name": "input-search-ip",
-                "label": "reports_search_ip",  # keep it (a18n)
-                "value": "",
-                "inpType": "input",
-                "columns": {"pc": 3, "tablet": 4, " mobile": 12},
-            },
-        },
-        {
-            "type": "like",
-            "fields": ["url"],
-            "setting": {
-                "id": "input-search-url",
-                "name": "input-search-url",
-                "label": "reports_search_url",  # keep it (a18n)
-                "value": "",
-                "inpType": "input",
-                "columns": {"pc": 3, "tablet": 4, " mobile": 12},
-            },
-        },
-        {
-            "type": "like",
-            "fields": ["user_agent", "data"],
+            "fields": ["ip", "url", "user_agent", "data"],
             "setting": {
                 "id": "input-search-misc",
                 "name": "input-search-misc",
                 "label": "reports_search_misc",  # keep it (a18n)
                 "value": "",
                 "inpType": "input",
-                "columns": {"pc": 3, "tablet": 4, " mobile": 12},
+                "columns": {"pc": 3, "tablet": 4, "mobile": 12},
+                "popovers": [
+                    {
+                        "iconName": "info",
+                        "text": "reports_search_misc_desc",
+                    }
+                ],
             },
         },
     ]
@@ -70,7 +52,13 @@ def reports_filters(reasons: Optional[list] = None, countries: Optional[list] = 
                     "values": ["all"] + reasons,
                     "inpType": "select",
                     "onlyDown": True,
-                    "columns": {"pc": 3, "tablet": 4, " mobile": 12},
+                    "columns": {"pc": 3, "tablet": 4, "mobile": 12},
+                    "popovers": [
+                        {
+                            "iconName": "info",
+                            "text": "reports_select_reason_desc",
+                        }
+                    ],
                 },
             }
         )
@@ -88,7 +76,13 @@ def reports_filters(reasons: Optional[list] = None, countries: Optional[list] = 
                     "values": ["all"] + countries,
                     "inpType": "select",
                     "onlyDown": True,
-                    "columns": {"pc": 3, "tablet": 4, " mobile": 12},
+                    "columns": {"pc": 3, "tablet": 4, "mobile": 12},
+                    "popovers": [
+                        {
+                            "iconName": "info",
+                            "text": "reports_select_country_desc",
+                        }
+                    ],
                 },
             }
         )
@@ -106,7 +100,13 @@ def reports_filters(reasons: Optional[list] = None, countries: Optional[list] = 
                     "values": ["all"] + methods,
                     "inpType": "select",
                     "onlyDown": True,
-                    "columns": {"pc": 3, "tablet": 4, " mobile": 12},
+                    "columns": {"pc": 3, "tablet": 4, "mobile": 12},
+                    "popovers": [
+                        {
+                            "iconName": "info",
+                            "text": "reports_select_method_desc",
+                        }
+                    ],
                 },
             }
         )
@@ -124,7 +124,13 @@ def reports_filters(reasons: Optional[list] = None, countries: Optional[list] = 
                     "values": ["all"] + codes,
                     "inpType": "select",
                     "onlyDown": True,
-                    "columns": {"pc": 3, "tablet": 4, " mobile": 12},
+                    "columns": {"pc": 3, "tablet": 4, "mobile": 12},
+                    "popovers": [
+                        {
+                            "iconName": "info",
+                            "text": "reports_select_code_desc",
+                        }
+                    ],
                 },
             }
         )
@@ -133,39 +139,51 @@ def reports_filters(reasons: Optional[list] = None, countries: Optional[list] = 
 
 
 # date = timestamp
-def report_item(id: int, date: int, ip: str, country: str, method: str, url: str, code: str, user_agent: str, reason: str, data: str) -> dict:
-    return (
-        {
-            "date": get_fields_from_field(
-                datepicker_widget(
-                    id=f"datepicker-date-{id}",
-                    name=f"datepicker-date-{id}",
-                    label="reports_date",  # keep it (a18n)
-                    hideLabel=True,
-                    value=date,
-                    disabled=True,  # Readonly
-                )
-            ),
-            "ip": text_widget(text=ip)["data"],
-            "country": text_widget(text=country)["data"],
-            "method": text_widget(text=method)["data"],
-            "url": text_widget(text=url)["data"],
-            "code": text_widget(text=code)["data"],
-            "user_agent": text_widget(text=user_agent)["data"],
-            "reason": text_widget(text=reason)["data"],
-            "data": text_widget(text=data)["data"],
-        },
-    )
+def report_item(id: int, date: int, ip: str, country: str, method: str, url: str, code: str, user_agent: str, reason: str, data: str, server_name: str) -> dict:
+
+    return {
+        "date": get_fields_from_field(
+            datepicker_widget(
+                id=f"datepicker-date-{id}",
+                name=f"datepicker-date-{id}",
+                label="reports_date",  # keep it (a18n)
+                hideLabel=True,
+                value=date,
+                disabled=True,  # Readonly
+            )
+        ),
+        "server_name": text_widget(text=server_name)["data"],
+        "ip": text_widget(text=ip)["data"],
+        "country": text_widget(text=country)["data"],
+        "method": text_widget(text=method)["data"],
+        "url": text_widget(text=url)["data"],
+        "code": text_widget(text=code)["data"],
+        "user_agent": text_widget(text=user_agent)["data"],
+        "reason": text_widget(text=reason)["data"],
+        "data": text_widget(text=data)["data"],
+    }
 
 
 def reports_builder(
     reports: list, reasons: Optional[list] = None, countries: Optional[list] = None, methods: Optional[list] = None, codes: Optional[list] = None
 ) -> str:
+
+    if reasons is None or len(reasons) == 0:
+        return {
+            "type": "card",
+            "gridLayoutClass": "transparent",
+            "widgets": [
+                unmatch_widget(text="reports_not_found"),
+            ],
+        }
+
     reports_items = [report_item(**report, id=index) for index, report in enumerate(reports)]
     return [
         {
             "type": "card",
             "widgets": [
+                title_widget("reports_title"),  # keep it (a18n)
+                subtitle_widget("reports_subtitle"),  # keep it (a18n)
                 tabulator_widget(
                     id="table-core-plugins",
                     columns=reports_columns,

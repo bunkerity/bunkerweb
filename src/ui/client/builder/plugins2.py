@@ -28,7 +28,7 @@ core_pro_filters = [
             "label": "plugins_search_name",  # keep it (a18n)
             "value": "",
             "inpType": "input",
-            "columns": {"pc": 3, "tablet": 4, " mobile": 12},
+            "columns": {"pc": 3, "tablet": 4, "mobile": 12},
         },
     },
 ]
@@ -92,7 +92,7 @@ registry_filters = [
             "label": "plugins_search_name",  # keep it (a18n)
             "value": "",
             "inpType": "input",
-            "columns": {"pc": 3, "tablet": 4, " mobile": 12},
+            "columns": {"pc": 3, "tablet": 4, "mobile": 12},
         },
     },
     {
@@ -106,7 +106,7 @@ registry_filters = [
             "values": ["all", "pro", "external"],
             "inpType": "select",
             "onlyDown": True,
-            "columns": {"pc": 3, "tablet": 4, " mobile": 12},
+            "columns": {"pc": 3, "tablet": 4, "mobile": 12},
         },
     },
     {
@@ -120,7 +120,7 @@ registry_filters = [
             "values": ["all", "yes", "no"],
             "inpType": "select",
             "onlyDown": True,
-            "columns": {"pc": 3, "tablet": 4, " mobile": 12},
+            "columns": {"pc": 3, "tablet": 4, "mobile": 12},
         },
     },
 ]
@@ -135,7 +135,7 @@ registry_items = [
             hideLabel=True,
             id="checkbox-plugin-id",  # replace by plugin_id
             name="checkbox-plugin-id",  # replace by plugin_id
-            columns={"pc": 12, "tablet": 12, " mobile": 12},
+            columns={"pc": 12, "tablet": 12, "mobile": 12},
         )["data"],
         "name": text(text="Name")["data"],
         "description": text(text="Description")["data"],
@@ -192,7 +192,7 @@ upload_filters = [
             "label": "plugins_search_name",  # keep it (a18n)
             "value": "",
             "inpType": "input",
-            "columns": {"pc": 3, "tablet": 4, " mobile": 12},
+            "columns": {"pc": 3, "tablet": 4, "mobile": 12},
         },
     },
 ]
@@ -207,7 +207,7 @@ upload_items = [
             hideLabel=True,
             id="checkbox-plugin-id",  # replace by plugin_id
             name="checkbox-plugin-id",  # replace by plugin_id
-            columns={"pc": 12, "tablet": 12, " mobile": 12},
+            columns={"pc": 12, "tablet": 12, "mobile": 12},
         )["data"],
         "name": text(text="Name")["data"],
         "description": text(text="Description")["data"],

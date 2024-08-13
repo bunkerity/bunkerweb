@@ -1,6 +1,6 @@
 from utils import save_builder
 
-from pages.reports2 import reports_builder
+from pages.reports import reports_builder
 
 reports = [
     {
@@ -13,6 +13,7 @@ reports = [
         "user_agent": "Mozilla/5.0",
         "reason": "antibot",
         "data": "lore ipsum ad vitam aeternam",
+        "server_name": "localhost",
     },
     {
         "date": 1723491738000,
@@ -24,6 +25,7 @@ reports = [
         "user_agent": "Mozilla/0.1",
         "reason": "unknown",
         "data": "",
+        "server_name": "localhost",
     },
 ]
 
@@ -46,4 +48,4 @@ reasons = list(reasons)
 
 builder = reports_builder(reports, reasons, countries, methods, codes)
 
-save_builder("reports2", builder, update_page=False)
+save_builder(page_name="reports", output=builder, script_name="reports")

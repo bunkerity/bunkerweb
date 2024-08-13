@@ -56,7 +56,7 @@ def config_form(
                     label="configs_filename",  # keep it (a18n)
                     value="" if is_new else filename,  # empty if new or replace by the filename value to edit (.conf excluded)
                     pattern="",  # add your pattern if needed
-                    columns={"pc": 3, "tablet": 4, " mobile": 12},
+                    columns={"pc": 3, "tablet": 4, "mobile": 12},
                 ),
                 # Select between available types
                 select_widget(
@@ -65,7 +65,7 @@ def config_form(
                     label="configs_types",  # keep it (a18n)
                     value="" if is_new else config_type,
                     values=types or [],  # set all available types like ["http", "modsec"]
-                    columns={"pc": 3, "tablet": 4, " mobile": 12},
+                    columns={"pc": 3, "tablet": 4, "mobile": 12},
                     onlyDown=True,
                 ),
                 # Add script on Page.vue to disabled listcheck in case checkbox is checked
@@ -76,7 +76,7 @@ def config_form(
                     name="config-global",
                     label="configs_global",  # keep it (a18n)
                     value=is_global,  # no if new, else it depends of the current conf
-                    columns={"pc": 3, "tablet": 4, " mobile": 12},
+                    columns={"pc": 3, "tablet": 4, "mobile": 12},
                 ),
                 # Case checkbox is checked, this checklist will be ignored on server
                 # Combobox ATM but will be replace by a checklist
@@ -88,7 +88,7 @@ def config_form(
                     value="",
                     values=services or [],  # set services list ATM, we will update by a checklist with [{value : "service1", is_check : bool}, ...]
                     onlyDown=True,
-                    columns={"pc": 3, "tablet": 4, " mobile": 12},
+                    columns={"pc": 3, "tablet": 4, "mobile": 12},
                 ),
                 # Editor to edit the conf
                 editor_widget(
@@ -96,7 +96,7 @@ def config_form(
                     name="config-value",
                     label="configs_value",  # keep it (a18n)
                     value="" if is_new else config_value,
-                    columns={"pc": 3, "tablet": 4, " mobile": 12},
+                    columns={"pc": 3, "tablet": 4, "mobile": 12},
                 ),
                 input_widget(
                     id="operation",
@@ -104,7 +104,7 @@ def config_form(
                     label="configs_operation",  # keep it (a18n)
                     value="new" if is_new else "edit",
                     pattern="",  # add your pattern if needed
-                    columns={"pc": 3, "tablet": 4, " mobile": 12},
+                    columns={"pc": 3, "tablet": 4, "mobile": 12},
                     inpClass="hidden",  # hide it
                 ),
                 button_widget(
@@ -129,7 +129,7 @@ def configs_filter(types: list):
                 "label": "configs_search_name",  # keep it (a18n)
                 "value": "",
                 "inpType": "input",
-                "columns": {"pc": 3, "tablet": 4, " mobile": 12},
+                "columns": {"pc": 3, "tablet": 4, "mobile": 12},
             },
         },
         {
@@ -143,7 +143,7 @@ def configs_filter(types: list):
                 "values": ["all"] + types,
                 "inpType": "select",
                 "onlyDown": True,
-                "columns": {"pc": 3, "tablet": 4, " mobile": 12},
+                "columns": {"pc": 3, "tablet": 4, "mobile": 12},
             },
         },
         {
@@ -157,7 +157,7 @@ def configs_filter(types: list):
                 "values": ["all", "yes", "no"],  # keep
                 "inpType": "select",
                 "onlyDown": True,
-                "columns": {"pc": 3, "tablet": 4, " mobile": 12},
+                "columns": {"pc": 3, "tablet": 4, "mobile": 12},
             },
         },
     ]
@@ -209,7 +209,7 @@ def config_item(filename: str, conf_type: str, is_global: str, services: list, d
                                                 "label": "configs_search_service",  # keep it (a18n)
                                                 "value": "",
                                                 "inpType": "input",
-                                                "columns": {"pc": 3, "tablet": 4, " mobile": 12},
+                                                "columns": {"pc": 3, "tablet": 4, "mobile": 12},
                                             },
                                         },
                                     ],

@@ -40,7 +40,7 @@ const tableStore = useTableStore();
  *                 "label": "bans_search_ip",  # keep it (a18n)
  *                 "value": "",
  *                 "inpType": "input",
- *                 "columns": {"pc": 3, "tablet": 4, " mobile": 12},
+ *                 "columns": {"pc": 3, "tablet": 4, "mobile": 12},
  *             },
  *     }];
  * @param {string} id - Unique id of the table
@@ -137,7 +137,8 @@ const table = reactive({
       reactiveData: true, //enable data reactivity
       autoResize: true, // prevent auto resizing of table
       resizableRows: true, // this option takes a boolean value (default = false)
-      layout: "fitColumns",
+      resizableColumnFit: true, //maintain the fit of columns when resizing
+      layout: "fitDataTable",
     };
 
     if (props.rowHeight) opts.rowHeight = props.rowHeight;
@@ -235,10 +236,12 @@ onMounted(() => {
   extendTabulator();
   table.instance = new Tabulator(tableEl.value, table.options);
   table.instance.on("tableBuilt", () => {
-    table.instance.redraw();
     a11yTable(table.instance);
     // Add table instance to store in order to use it in other components
     tableStore.setTable(props.id, table.instance);
+    setTimeout(() => {
+      table.instance.redraw();
+    }, 100);
   });
 });
 

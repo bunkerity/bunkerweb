@@ -24,7 +24,7 @@ def bans_filters(reasons: Optional[list] = None, remains: Optional[list] = None)
                 "label": "bans_search_ip",  # keep it (a18n)
                 "value": "",
                 "inpType": "input",
-                "columns": {"pc": 3, "tablet": 4, " mobile": 12},
+                "columns": {"pc": 3, "tablet": 4, "mobile": 12},
             },
         },
     ]
@@ -43,7 +43,7 @@ def bans_filters(reasons: Optional[list] = None, remains: Optional[list] = None)
                     "values": ["all"] + reasons,  # keep "all" and add your reasons dynamically
                     "inpType": "select",
                     "onlyDown": True,
-                    "columns": {"pc": 3, "tablet": 4, " mobile": 12},
+                    "columns": {"pc": 3, "tablet": 4, "mobile": 12},
                 },
             },
         )
@@ -61,7 +61,7 @@ def bans_filters(reasons: Optional[list] = None, remains: Optional[list] = None)
                         "values": ["all"] + remains,  # keep everything and format bans to fit in one remain category
                         "inpType": "select",
                         "onlyDown": True,
-                        "columns": {"pc": 3, "tablet": 4, " mobile": 12},
+                        "columns": {"pc": 3, "tablet": 4, "mobile": 12},
                     },
                 },
             )
@@ -82,7 +82,7 @@ def ban_item(id: str, ip: str, reason: str, ban_start_date: int, ban_end_date: i
                     hideLabel=True,
                     value=ban_start_date,
                     disabled=True,  # Readonly
-                    columns={"pc": 12, "tablet": 12, " mobile": 12},
+                    columns={"pc": 12, "tablet": 12, "mobile": 12},
                 )
             ),
             "ban_end_date": get_fields_from_field(
@@ -133,7 +133,7 @@ default_add_ban = [
                 label="bans_add_ban_ip",  # keep it (a18n)
                 hideLabel=True,
                 value="",
-                columns={"pc": 12, "tablet": 12, " mobile": 12},
+                columns={"pc": 12, "tablet": 12, "mobile": 12},
             )
         ),
         "ban_end": get_fields_from_field(

@@ -1,6 +1,11 @@
-def add_column(title, field, formatter=""):
-    # don"t return formatter if ""
-    if formatter:
-        return {"title": title, "field": field, "formatter": formatter}
+def add_column(title, field, formatter="", minWidth=None):
 
-    return {"title": title, "field": field}
+    col = {"title": title, "field": field}
+
+    if formatter:
+        col["formatter"] = formatter
+
+    if minWidth:
+        col["minWidth"] = minWidth
+
+    return col
