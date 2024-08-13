@@ -8,7 +8,7 @@ from secrets import choice, token_urlsafe
 from string import ascii_letters, digits
 from sys import path as sys_path, modules as sys_modules
 from pathlib import Path
-from typing import Optional, Union
+from typing import Any, Dict, Optional, Tuple, Union
 from uuid import uuid4
 
 
@@ -51,7 +51,7 @@ from src.ui_data import UIData
 from builder.bans2 import bans_builder  # type: ignore
 
 # TODO: rename to reports
-from builder.reports2 import reports_columns, reports_filters  # type: ignore
+from builder.reports2 import reports_builder  # type: ignore
 
 from builder.home import home_builder  # type: ignore
 from builder.instances import instances_builder  # type: ignore
@@ -62,8 +62,6 @@ from builder.raw_mode import raw_mode_builder  # type: ignore
 from builder.advanced_mode import advanced_mode_builder  # type: ignore
 from builder.easy_mode import easy_mode_builder  # type: ignore
 from builder.logs import logs_builder  # type: ignore
-
-from builder.utils.widgets import tabulator, datepicker  # type: ignore
 
 from common_utils import get_version  # type: ignore
 from logger import setup_logger  # type: ignore
@@ -363,9 +361,11 @@ def run_action(plugin: str, function_name: str = "", *, tmp_dir: Optional[Path] 
 
 
 # TODO: move this to a utils file
-def verify_data_in_form(data: dict[str, Union[tuple, any]] = {}, err_message: str = "", redirect_url: str = "", next: bool = False) -> Union[bool, Response]:
+def verify_data_in_form(
+    data: Optional[Dict[str, Union[Tuple, Any]]] = None, err_message: str = "", redirect_url: str = "", next: bool = False
+) -> Union[bool, Response]:
     # Loop on each key in data
-    for key, values in data.items():
+    for key, values in (data or {}).items():
         if key not in request.form:
             return handle_error(f"Missing {key} in form", redirect_url, next, "error")
 
@@ -852,12 +852,11 @@ def account():
             if len(request.form["license"]) == 0:
                 return handle_error("The license key is empty", "account")
 
-            variable = {}
-            variable["PRO_LICENSE_KEY"] = request.form["license"]
+            variables = {"PRO_LICENSE_KEY": request.form["license"]}
 
-            variable = app.bw_config.check_variables(variable, {"PRO_LICENSE_KEY": request.form["license"]})
+            variables = app.bw_config.check_variables(variables, {"PRO_LICENSE_KEY": request.form["license"]})
 
-            if not variable:
+            if not variables:
                 return handle_error("The license key variable checks returned error", "account", True)
 
             # Force job to contact PRO API
@@ -872,7 +871,7 @@ def account():
             def update_global_config(threaded: bool = False):
                 wait_applying()
 
-                if not manage_bunkerweb("global_config", variable, threaded=threaded):
+                if not manage_bunkerweb("global_config", variables, threaded=threaded):
                     message = "Checking license key to upgrade."
                     if threaded:
                         app.data["TO_FLASH"].append({"content": message, "type": "success"})
@@ -2040,48 +2039,26 @@ def logs():
 @login_required
 def reports():
     reports = app.bw_instances_utils.get_reports()
-    tmp_reports_filters = reports_filters.copy()
+    reasons = set()
+    countries = set()
+    methods = set()
+    codes = set()
 
     # Prepare data
     reports_items = []
     for i, report in enumerate(reports):
         report_item = {
-            "date": datepicker(
-                id=f"datepicker-date-{i}",
-                name=f"datepicker-date-{i}",
-                label="reports_date",  # keep it (a18n)
-                hideLabel=True,
-                inputType="datepicker",
-                value=str(floor(report.pop("date"))),  # replace my_date by timestamp value
-                disabled=True,  # Readonly
-            ),
+            "id": str(i),
+            "date": str(floor(report.pop("date"))),
         } | report
         reports_items.append(report_item)
 
-        tmp_reports_filters[1]["setting"]["values"].add(report["reason"])
-        tmp_reports_filters[4]["setting"]["values"].add(report["country"])
-        tmp_reports_filters[5]["setting"]["values"].add(report["method"])
-        tmp_reports_filters[6]["setting"]["values"].add(report["code"])
+        reasons.add(report["reason"])
+        countries.add(report["country"])
+        methods.add(report["method"])
+        codes.add(report["code"])
 
-    tmp_reports_filters[1]["setting"]["values"] = list(tmp_reports_filters[1]["setting"]["values"])
-    tmp_reports_filters[4]["setting"]["values"] = list(tmp_reports_filters[4]["setting"]["values"])
-    tmp_reports_filters[5]["setting"]["values"] = list(tmp_reports_filters[5]["setting"]["values"])
-    tmp_reports_filters[6]["setting"]["values"] = list(tmp_reports_filters[6]["setting"]["values"])
-
-    builder = [
-        {
-            "type": "card",
-            "display": ["main", 1],
-            "widgets": [
-                tabulator(
-                    id="table-core-plugins",
-                    columns=reports_columns,
-                    items=reports_items,
-                    filters=tmp_reports_filters,
-                ),
-            ],
-        },
-    ]
+    builder = reports_builder(reports_items, list(reasons), list(countries), list(methods), list(codes))
     return render_template("reports.html", data_server_builder=b64encode(dumps(builder).encode("utf-8")).decode("ascii"))
 
 
@@ -2194,7 +2171,6 @@ def bans():
             return handle_error("Data must be a list of dict", "bans", False, "exception")
 
     if request.method == "POST" and request.form["operation"] == "unban":
-
         data = get_load_data()
 
         for unban in data:
@@ -2222,7 +2198,6 @@ def bans():
         return redirect(url_for("loading", next=url_for("bans"), message="Update bans"))
 
     if request.method == "POST" and request.form["operation"] == "ban":
-
         data = get_load_data()
 
         for ban in data:
@@ -2273,20 +2248,19 @@ def bans():
 
     # Get the last 100 bans
     bans = bans[:100]
-    reasons = {"all"}
-    remains = {"all"}
+    reasons = set()
+    remains = set()
 
     for ban in bans:
         exp = ban.pop("exp", 0)
         # Add remain
         remain = ("unknown", "unknown") if exp <= 0 else get_remain(exp)
         ban["remain"] = remain[0]
-        if remain[1] != "unknown":
-            remains.add(remain[1])
+        remains.add(remain[1])
         # Convert stamp to date
-        ban["ban_start"] = datetime.fromtimestamp(floor(ban["date"])).strftime("%d/%m/%Y %H:%M:%S")
-        ban["ban_end"] = datetime.fromtimestamp(floor(timestamp_now + exp)).strftime("%d/%m/%Y %H:%M:%S")
-        reasons.add(["reason"])
+        ban["ban_start_date"] = datetime.fromtimestamp(floor(ban["date"])).strftime("%d/%m/%Y %H:%M:%S")
+        ban["ban_end_date"] = datetime.fromtimestamp(floor(timestamp_now + exp)).strftime("%d/%m/%Y %H:%M:%S")
+        reasons.add(ban["reason"])
 
     builder = bans_builder(bans, list(reasons), list(remains))
     return render_template("bans.html", data_server_builder=b64encode(dumps(builder).encode("utf-8")).decode("ascii"))
