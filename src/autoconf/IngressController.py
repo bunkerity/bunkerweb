@@ -65,7 +65,7 @@ class IngressController(Controller):
 
         if not pod:
             self._logger.warning(f"Missing container bunkerweb in pod {controller_instance.metadata.name}")
-        else:
+        elif pod.env:
             for env in pod.env:
                 instance["env"][env.name] = env.value or ""
 
@@ -118,7 +118,10 @@ class IngressController(Controller):
                     self._logger.warning(f"Ignoring ingress rule with service {path.backend.service.name} : service not found.")
                     continue
 
-                reverse_proxy_host = f"http://{path.backend.service.name}.{namespace}.svc.cluster.local:{path.backend.service.port.number}"
+                reverse_proxy_host = f"http://{path.backend.service.name}.{namespace}.svc.cluster.local"
+                if path.backend.service.port.number != 80:
+                    reverse_proxy_host += f":{path.backend.service.port.number}"
+
                 service.update(
                     {
                         "USE_REVERSE_PROXY": "yes",
