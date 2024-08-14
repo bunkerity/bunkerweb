@@ -25,8 +25,8 @@ bans = [
     },
 ]
 
-reasons = ["all", "antibot", "test"]
-remains = ["all", "hour(s)", "day(s)"]
+reasons = ["antibot", "test"]
+remains = ["hour(s)", "day(s)"]
 
 builder = bans_builder(bans, reasons, remains)
 

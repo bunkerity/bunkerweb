@@ -201,6 +201,8 @@ onBeforeMount(() => {
 });
 
 onMounted(() => {
+  checkDisplay();
+
   // Case modal, add accessibility data
   if (typeof props.modal === "object") {
     btnEl.value.setAttribute("aria-controls", btn.modalId);

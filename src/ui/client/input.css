@@ -1426,33 +1426,33 @@ body {
 }
 
 .btn.active:not([disabled]) {
-  @apply shadow-md brightness-90 dark:shadow-md dark:brightness-75;
+  @apply shadow-md !brightness-75 dark:shadow-md dark:!brightness-75;
 }
 
 /* BTN SIZE */
 
 .btn.tab {
-  @apply px-3 py-2.5;
+  @apply px-3 py-2.5 text-lg;
 }
 
 .btn.xl {
-  @apply px-6 py-3;
+  @apply px-6 py-3 text-lg;
 }
 
 .btn.lg {
-  @apply px-4 py-2.5;
+  @apply px-4 py-2.5 text-lg;
 }
 
 .btn.normal {
-  @apply px-3 py-2;
+  @apply px-3 py-2 text-base;
 }
 
 .btn.sm {
-  @apply px-2 py-1;
+  @apply px-2 py-1 text-sm;
 }
 
 .btn.xs {
-  @apply px-1 py-0.5;
+  @apply px-1 py-0.5 text-sm;
 }
 
 .btn-svg {

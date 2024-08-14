@@ -136,7 +136,6 @@ const props = defineProps({
 const tableEl = ref(null); //reference to your table element
 
 const table = reactive({
-  test: true,
   instance: null,
   filters: {},
   columns: props.columns,
@@ -256,11 +255,6 @@ onMounted(() => {
     }, 100);
   });
 });
-
-onUnmounted(() => {
-  table.instance.destroy();
-  table.instance = null;
-});
 </script>
 
 <template>
@@ -281,6 +275,7 @@ onUnmounted(() => {
       :buttons="props.actionsButtons"
     />
     <div
+      v-show="table.customRender"
       :class="[props.isStriped ? 'striped' : '']"
       ref="tableEl"
       data-is="table-content"

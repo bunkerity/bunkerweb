@@ -223,6 +223,7 @@ function applyTableFilter(tableInstance, filters) {
   // loop on dict filters
   const filtersSend = [];
   for (const [key, filter] of Object.entries(filters)) {
+    const filters = [];
     const inpType = filter.setting.inpType;
     const filterType = filter.type;
     const value = filter.value;
@@ -236,8 +237,9 @@ function applyTableFilter(tableInstance, filters) {
     if (filterType === "number") value = +value;
     if (filterType === "regex") value = new RegExp(value, "i");
     for (let i = 0; i < fields.length; i++) {
-      filtersSend.push({ field: fields[i], type: filterType, value: value });
+      filters.push({ field: fields[i], type: filterType, value: value });
     }
+    filtersSend.push(filters);
   }
   tableInstance.setFilter(filtersSend);
 }
@@ -251,17 +253,15 @@ function applyTableFilter(tableInstance, filters) {
 function overrideDefaultFilters() {
   //
   const getRightKey = (rowValue) => {
-    const buttons = rowValue?.buttons
-      ? rowValue?.buttons?.map((btn) => btn.text).join(" ")
-      : null;
-
-    return (
+    const value =
+      rowValue?.buttons?.map((btn) => btn.data.text).join(" ") ||
       rowValue?.setting?.value ||
-      rowValue?.value.toLowerCase() ||
-      rowValue?.text.toLowerCase() ||
+      rowValue?.value?.toLowerCase() ||
+      rowValue?.text?.toLowerCase() ||
       buttons ||
-      rowValue
-    );
+      "";
+
+    return value;
   };
 
   return {
