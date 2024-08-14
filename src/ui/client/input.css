@@ -733,8 +733,8 @@ body {
   @apply h-6 w-6 relative pointer-events-none;
 }
 
-.icon-table:not([disabled]) {
-  @apply h-6 w-6 relative pointer-events-none;
+.icon-table-content {
+  @apply h-6.5 w-6.5 relative pointer-events-none;
 }
 
 .icon-list-details {

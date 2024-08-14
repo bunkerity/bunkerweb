@@ -44,6 +44,7 @@ def instances_filter(healths: str, types: Optional[list] = None, methods: Option
                         "text": "instances_search_popover",
                     }
                 ],
+                "fieldSize": "sm",
             },
         }
     ]

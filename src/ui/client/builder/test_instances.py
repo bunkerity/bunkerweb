@@ -31,7 +31,6 @@ types = ["static", "container"]
 methods = ["ui", "manual"]
 healths = ["up", "down", "loading"]
 
-
-builder = instances_builder(instances)
+builder = instances_builder(instances=instances, types=types, methods=methods, healths=healths)
 
 save_builder(page_name="instances", output=builder, script_name="instances")
