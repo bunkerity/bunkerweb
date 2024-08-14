@@ -96,8 +96,8 @@ function _baseSorter(aValue, bValue, params) {
 function _sortButtonGroup(column, formatName) {
   if (formatName !== "buttongroup") return;
   column.sorter = (a, b, aRow, bRow, column, dir, params) => {
-    const aButtons = a.buttons;
-    const bButtons = b.buttons;
+    const aButtons = a?.buttons;
+    const bButtons = b?.buttons;
 
     const aValue = aButtons.map((btn) => btn.data.text).join(" ") || "";
     const bValue = bButtons.map((btn) => btn.data.text).join(" ") || "";
@@ -241,6 +241,7 @@ function applyTableFilter(tableInstance, filters) {
     }
     filtersSend.push(filters);
   }
+
   tableInstance.setFilter(filtersSend);
 }
 
@@ -258,7 +259,6 @@ function overrideDefaultFilters() {
       rowValue?.setting?.value ||
       rowValue?.value?.toLowerCase() ||
       rowValue?.text?.toLowerCase() ||
-      buttons ||
       "";
 
     return value;
