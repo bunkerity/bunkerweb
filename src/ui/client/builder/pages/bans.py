@@ -115,6 +115,8 @@ def bans_filters(reasons: Optional[list] = None, remains: Optional[list] = None)
                 "value": "",
                 "inpType": "input",
                 "columns": {"pc": 3, "tablet": 4, "mobile": 12},
+                "fieldSize": "sm",
+                "isClipboard": True,
                 "popovers": [
                     {
                         "iconName": "info",
@@ -140,6 +142,7 @@ def bans_filters(reasons: Optional[list] = None, remains: Optional[list] = None)
                     "inpType": "select",
                     "onlyDown": True,
                     "columns": {"pc": 3, "tablet": 4, "mobile": 12},
+                    "fieldSize": "sm",
                     "popovers": [
                         {
                             "iconName": "info",
@@ -164,6 +167,7 @@ def bans_filters(reasons: Optional[list] = None, remains: Optional[list] = None)
                         "inpType": "select",
                         "onlyDown": True,
                         "columns": {"pc": 3, "tablet": 4, "mobile": 12},
+                        "fieldSize": "sm",
                         "popovers": [
                             {
                                 "iconName": "info",
@@ -232,6 +236,7 @@ def bans_list(bans: Optional[list] = None, reasons: Optional[list] = None, remai
                 actionsButtons=actions_table_list,
                 columns=bans_columns,
                 items=bans_items(bans),
+                itemsBeforePagination=20,
                 filters=bans_filters(reasons=reasons, remains=remains),
                 layout="fitColumns",
             ),
@@ -368,7 +373,12 @@ def bans_add() -> dict:
             title_widget("bans_add_title"),  # keep it (a18n)
             subtitle_widget("bans_add_subtitle"),  # keep it (a18n)
             tabulator_widget(
-                id="table-register-plugins", columns=bans_add_columns, items=default_add_ban, layout="fitColumns", actionsButtons=bans_add_table_actions
+                id="table-register-plugins",
+                columns=bans_add_columns,
+                items=default_add_ban,
+                layout="fitColumns",
+                actionsButtons=bans_add_table_actions,
+                itemsBeforePagination=20,
             ),
             add_ban_action,
         ],

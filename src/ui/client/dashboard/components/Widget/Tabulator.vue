@@ -42,21 +42,22 @@ const tableStore = useTableStore();
  *                 "columns": {"pc": 3, "tablet": 4, "mobile": 12},
  *             },
  *     }];
- * @param {string} id - Unique id of the table
- * @param {boolean} [isStriped=true] - Add striped class to the table
- * @param {array} [filters=[]] - List of filters to display
- * @param {array} columns - List of columns to display
- * @param {array} items - List of items to display
- * @param {array} [actionsButtons=[]] - Buttons group props to render buttons that will be after filters and before the table stick left.
- * @param {string} [layout="fitDataTable"] - Layout of the table. "fitDataTable" useful with wide columns, "fitColumns" useful with narrow columns.
- * @param {number} [rowHeight= 0] - Case value is 0, this will be ignored.
- * @param {number} [colMinWidth=150] - Minimum width for each col of  a row
- * @param {number} [colMaxWidth=0] - Maximum width for each col of  a row. Case value is 0, this will be ignored.
- * @param {boolean} [isPagination=true] - Add pagination to the table
- * @param {number} [paginationSize=10] - Number of items per page
- * @param {number} [paginationInitialPage=1] - Initial page
- * @param {array} [paginationSizeSelector=[10, 25, 50, 100]] - Select number of items per page
- * @returns {void}
+ * @param {String} id - Unique id of the table
+ * @param {Boolean} [isStriped=true] - Add striped class to the table
+ * @param {Array} [filters=[]] - List of filters to display
+ * @param {Array} columns - List of columns to display
+ * @param {Array} items - List of items to display
+ * @param {Array} [actionsButtons=[]] - Buttons group props to render buttons that will be after filters and before the table stick left.
+ * @param {String} [layout="fitDataTable"] - Layout of the table. "fitDataTable" useful with wide columns, "fitColumns" useful with narrow columns.
+ * @param {Number} [rowHeight= 0] - Case value is 0, this will be ignored.
+ * @param {Number} [colMinWidth=150] - Minimum width for each col of  a row
+ * @param {Number} [colMaxWidth=0] - Maximum width for each col of  a row. Case value is 0, this will be ignored.
+ * @param {Boolean} [isPagination=true] - Add pagination to the table
+ * @param {Number} [itemsBeforePagination=10] - Hide pagination unless number is reach.
+ * @param {Number} [paginationSize=10] - Number of items per page
+ * @param {Number} [paginationInitialPage=1] - Initial page
+ * @param {Array} [paginationSizeSelector=[10, 25, 50, 100]] - Select number of items per page
+ * @returns {Void}
  */
 const customComponents = ["Icons", "Text", "Fields", "Button", "ButtonGroup"];
 
@@ -121,6 +122,11 @@ const props = defineProps({
     required: false,
     default: 10,
   },
+  itemsBeforePagination: {
+    type: Number,
+    required: false,
+    default: 10,
+  },
   paginationInitialPage: {
     type: Number,
     required: false,
@@ -159,14 +165,13 @@ const table = reactive({
     columns = formatColumns(columns);
     opts.columns = columns;
 
-    if (props.isPagination) {
-      opts.pagination = true;
-      opts.paginationSize = props.paginationSize;
-      opts.paginationInitialPage = props.paginationInitialPage;
-      opts.paginationButtonCount = 2;
-      opts.paginationSizeSelector = props.paginationSizeSelector.concat([true]);
-      opts.paginationCounter = "rows";
-    }
+    opts.pagination = props.isPagination;
+    opts.paginationSize = props.paginationSize;
+    opts.paginationInitialPage = props.paginationInitialPage;
+    opts.paginationButtonCount = 2;
+    opts.paginationSizeSelector = props.paginationSizeSelector.concat([true]);
+    opts.paginationCounter = "rows";
+
     return opts;
   }),
 });
@@ -243,10 +248,37 @@ function filterTable(filter, value = "") {
   applyTableFilter(table.instance, table.filters);
 }
 
+/**
+ *  @name togglePagination
+ *  @description We can't directly show or hide pagination without creating instance, so we will handle it externally.
+ *  We will listen to table data, and check the number of items after a change and we will hide or show the pagination.
+ *  @returns {Void}
+ */
+function togglePagination() {
+  if (!props.isPagination || !props.itemsBeforePagination) return;
+
+  function toggle(currItems, itemsToShow) {
+    const isPagination = currItems.length >= itemsToShow ? true : false;
+
+    const footer = tableEl.value.querySelector(".tabulator-footer");
+    isPagination
+      ? footer.classList.remove("hidden")
+      : footer.classList.add("hidden");
+  }
+
+  toggle(props.items, props.itemsBeforePagination);
+
+  table.instance.on("dataChanged", (data) => {
+    toggle(data, props.itemsBeforePagination);
+  });
+}
+
 onMounted(() => {
   extendTabulator();
   table.instance = new Tabulator(tableEl.value, table.options);
   table.instance.on("tableBuilt", () => {
+    togglePagination();
+
     a11yTable(table.instance);
     // Add table instance to store in order to use it in other components
     tableStore.setTable(props.id, table.instance);
@@ -275,7 +307,6 @@ onMounted(() => {
       :buttons="props.actionsButtons"
     />
     <div
-      v-show="table.customRender"
       :class="[props.isStriped ? 'striped' : '']"
       ref="tableEl"
       data-is="table-content"

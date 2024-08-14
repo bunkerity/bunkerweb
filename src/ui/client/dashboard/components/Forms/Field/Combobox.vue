@@ -57,6 +57,7 @@ import { useUUID } from "@utils/global.js";
  *  @param {Boolean} [overflowAttrEl=""] - Attribute to select the container the element has to check for overflow
  *  @param {String} [containerClass=""]
  *  @param {String} [inpClass=""]
+ *  @param {String} [fieldSize="normal"] - Size between "normal" or "sm"
  *  @param {String} [headerClass=""]
  *  @param {String|Number} [tabId=contentIndex] - The tabindex of the field, by default it is the contentIndex
  */
@@ -72,6 +73,11 @@ const props = defineProps({
     type: [Object, Boolean],
     required: false,
     default: false,
+  },
+  fieldSize: {
+    type: String,
+    required: false,
+    default: "normal",
   },
   value: {
     type: String,
@@ -394,6 +400,7 @@ const emits = defineEmits(["inp"]);
       :label="props.label"
       :hideLabel="props.hideLabel"
       :headerClass="props.headerClass"
+      :fieldSize="props.fieldSize"
     />
 
     <select :id="inp.id" aria-hidden="true" :name="props.name" class="hidden">
@@ -431,6 +438,7 @@ const emits = defineEmits(["inp"]);
           'select-btn',
           select.isValid ? 'valid' : 'invalid',
           props.inpClass,
+          props.fieldSize,
         ]"
       >
         <span :id="`${inp.id}-text`" class="select-btn-name">

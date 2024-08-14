@@ -176,6 +176,14 @@ body {
   @apply z-20;
 }
 
+.input-header-container.normal {
+  @apply mb-1;
+}
+
+.input-header-container.sm {
+  @apply mb-0.5;
+}
+
 .no-popover.input-header-container {
   @apply flex justify-start;
 }
@@ -185,7 +193,15 @@ body {
 }
 
 .input-header-label {
-  @apply relative lowercase capitalize-first mb-1 transition duration-300 ease-in-out text-sm  font-bold m-0 dark:text-gray-300 mr-1;
+  @apply relative lowercase capitalize-first transition duration-300 ease-in-out font-bold  dark:text-gray-300;
+}
+
+.input-header-label.normal {
+  @apply text-sm m-0 mr-1;
+}
+
+.input-header-label.sm {
+  @apply text-xs m-0  mr-1;
 }
 
 .input-header-required-sign {
@@ -252,17 +268,33 @@ body {
     dark:disabled:text-gray-300;
 }
 
+.checkbox.normal {
+  @apply w-5 h-5;
+}
+
+.checkbox.sm {
+  @apply w-4.5 h-4.5;
+}
+
 .check.checkbox {
   @apply dark:aria-checked:disabled:bg-gray-800 aria-checked:disabled:border-gray-400/0 aria-checked:disabled:bg-gray-400 aria-checked:z-0 aria-checked:bg-gray-200 dark:aria-checked:bg-slate-600;
 }
 
 .checkbox-svg {
-  @apply z-10 pointer-events-none absolute fill-gray-700 dark:fill-gray-100 left-0 top-0 translate-x-[3px] translate-y-[7px] h-3.5 w-3.5;
+  @apply z-10 pointer-events-none absolute fill-gray-700 dark:fill-gray-100 left-0 top-0;
+}
+
+.checkbox-svg.normal {
+  @apply translate-x-[3px] translate-y-[7px] h-3.5 w-3.5;
+}
+
+.checkbox-svg.sm {
+  @apply translate-x-[3px] translate-y-[7px] h-3 w-3;
 }
 
 .select-btn {
   @apply relative dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400/0     disabled:cursor-not-allowed
-  dark:disabled:bg-gray-800 dark:disabled:border-gray-800/0 duration-300 ease-in-out dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 hover:border-gray-600 focus:border-gray-600 flex justify-between align-middle items-center text-left text-sm leading-5.6 w-full  rounded-lg border border-solid border-gray-400 bg-white bg-clip-padding px-1.5 py-1 md:px-2.5 md:py-1.5 font-normal text-gray-700 transition-all placeholder:text-gray-500;
+  dark:disabled:bg-gray-800 dark:disabled:border-gray-800/0 duration-300 ease-in-out dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 hover:border-gray-600 focus:border-gray-600 flex justify-between align-middle items-center text-left w-full  rounded-lg border border-solid border-gray-400 bg-white bg-clip-padding font-normal text-gray-700 transition-all placeholder:text-gray-500;
 }
 
 .select-btn-name {
@@ -290,11 +322,21 @@ body {
 }
 
 .select-dropdown-btn {
-  @apply outline-offset-[-4px] border-b border-l border-r border-gray-300 hover:brightness-90 bg-white text-gray-700 my-0 relative px-2 py-2  text-left align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-normal dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300;
+  @apply outline-offset-[-4px] border-b border-l border-r border-gray-300 hover:brightness-90 bg-white text-gray-700 relative text-left align-middle transition-all rounded-none cursor-pointer ease-in tracking-normal dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300;
 }
 
 .list-dropdown-btn {
-  @apply outline-offset-[-4px] border-b border-l border-r border-gray-300 hover:brightness-90 bg-white text-gray-700 my-0 relative px-2 py-2 flex justify-between align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-normal dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300;
+  @apply outline-offset-[-4px] border-b border-l border-r border-gray-300 hover:brightness-90 bg-white text-gray-700 relative flex justify-between align-middle transition-all rounded-none cursor-pointer leading-normal ease-in tracking-normal dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300;
+}
+
+.select-dropdown-btn.normal,
+.list-dropdown-btn.normal {
+  @apply my-0 px-2 py-2 text-sm leading-normal;
+}
+
+.select-dropdown-btn.sm,
+.list-dropdown-btn.sm {
+  @apply my-0 px-2 py-1 text-xs leading-normal;
 }
 
 .active.select-dropdown-btn {
@@ -331,13 +373,25 @@ body {
 }
 
 .input-combobox {
-  @apply hover:border-gray-600 outline-none dark:border-slate-600 dark:bg-slate-700 dark:text-gray-200 focus:border-gray-300/0 dark:focus:border-gray-600/0 focus:ring-1 focus:valid:ring-green-500 focus:invalid:ring-red-500 text-sm leading-5.6 ease-in block w-full appearance-none rounded-t-lg border border-solid border-gray-300 bg-white bg-clip-padding px-1.5 py-1 md:px-2.5 md:py-1.5 font-normal text-gray-700 transition-all placeholder:text-gray-500 disabled:cursor-not-allowed
+  @apply hover:border-gray-600 outline-none dark:border-slate-600 dark:bg-slate-700 dark:text-gray-200 focus:border-gray-300/0 dark:focus:border-gray-600/0 focus:ring-1 focus:valid:ring-green-500 focus:invalid:ring-red-500  ease-in block w-full appearance-none rounded-t-lg border border-solid border-gray-300 bg-white bg-clip-padding  font-normal text-gray-700 transition-all placeholder:text-gray-500 disabled:cursor-not-allowed
   disabled:bg-gray-400 disabled:border-gray-400/0 dark:disabled:bg-gray-800 dark:disabled:border-gray-800/0 dark:disabled:text-gray-300 disabled:text-gray-700;
 }
 
 .input-regular {
-  @apply hover:border-gray-600 outline-none dark:border-slate-600 dark:bg-slate-700 dark:text-gray-200 focus:border-gray-300/0 dark:focus:border-gray-600/0 focus:ring-1 focus:valid:ring-green-500 focus:invalid:ring-red-500 text-sm leading-5.6 ease-in block w-full  appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-1.5 py-1 md:px-2.5 md:py-1.5 font-normal text-gray-700 transition-all placeholder:text-gray-500     disabled:cursor-not-allowed
+  @apply hover:border-gray-600 outline-none dark:border-slate-600 dark:bg-slate-700 dark:text-gray-200 focus:border-gray-300/0 dark:focus:border-gray-600/0 focus:ring-1 focus:valid:ring-green-500 focus:invalid:ring-red-500  ease-in block w-full  appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding font-normal text-gray-700 transition-all placeholder:text-gray-500 disabled:cursor-not-allowed
   disabled:bg-gray-400 disabled:border-gray-400/0 dark:disabled:bg-gray-800 dark:disabled:border-gray-800/0 dark:disabled:text-gray-300 disabled:text-gray-700;
+}
+
+.input-regular.normal,
+.input-combobox.normal,
+.select-btn.normal {
+  @apply px-1.5 py-1 md:px-2.5 md:py-1.5 text-sm leading-5.6;
+}
+
+.input-regular.sm,
+.input-combobox.sm,
+.select-btn.sm {
+  @apply px-1.5 py-1 text-xs leading-[unset];
 }
 
 .input-regular-container {
@@ -353,7 +407,7 @@ body {
 }
 
 .input-editor {
-  @apply z-10 min-h-[200px] h-full w-full;
+  @apply z-10 min-h-[300px] h-full w-full;
 }
 
 .disabled.input-editor {
@@ -372,16 +426,28 @@ body {
   @apply top-2 right-6;
 }
 
-.datepicker-clip.input-clipboard-container {
+.datepicker-clip.input-clipboard-container.normal {
   @apply top-1 md:top-1.5 right-[2.25rem];
 }
 
-.pw-input-clip.input-clipboard-container {
+.pw-input-clip.input-clipboard-container.normal {
   @apply top-1 md:top-1.5 right-[2.25rem];
 }
 
-.no-pw-input-clip.input-clipboard-container {
+.no-pw-input-clip.input-clipboard-container.normal {
   @apply top-1 md:top-1.5 right-2;
+}
+
+.datepicker-clip.input-clipboard-container.sm {
+  @apply top-[0.2rem] right-[2.25rem];
+}
+
+.pw-input-clip.input-clipboard-container.sm {
+  @apply top-[0.2rem] right-[2.25rem];
+}
+
+.no-pw-input-clip.input-clipboard-container.sm {
+  @apply top-[0.2rem] right-2;
 }
 
 .input-clipboard-svg {
@@ -413,7 +479,15 @@ body {
 }
 
 .datepicker-svg {
-  @apply stroke-gray-800 dark:stroke-gray-300 w-6 h-6 opacity-[50%] pointer-events-none absolute top-1 md:top-1.5 right-2;
+  @apply stroke-gray-800 dark:stroke-gray-300 w-6 h-6 opacity-[50%] pointer-events-none absolute;
+}
+
+.datepicker-svg.normal {
+  @apply top-1 md:top-1.5 right-2;
+}
+
+.datepicker-svg.sm {
+  @apply top-[0.2rem] right-2;
 }
 
 .datepicker-clip.input-clipboard-copy {
@@ -517,7 +591,7 @@ body {
 }
 
 .layout-table-settings {
-  @apply mb-4 sm:gap-x-8 gap-y-8 col-span-12 grid grid-cols-12 w-full relative;
+  @apply mb-4 gap-y-4 sm:gap-x-4 md:gap-x-8 md:gap-y-8  col-span-12 grid grid-cols-12 w-full relative;
 }
 
 .layout-card {
@@ -553,7 +627,7 @@ body {
 }
 
 .layout-settings {
-  @apply py-4 sm:gap-x-8 gap-y-8 col-span-12 grid grid-cols-12 w-full relative;
+  @apply py-4  gap-y-4 sm:gap-x-4 md:gap-x-8 md:gap-y-8 col-span-12 grid grid-cols-12 w-full relative;
 }
 
 .layout-settings-multiple {

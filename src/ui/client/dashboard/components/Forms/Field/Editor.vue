@@ -50,9 +50,10 @@ import "@assets/script/editor/theme-dawn.js";
  *  @param {Boolean} [isClipboard=true] - allow to copy the input value
  *  @param {Boolean} [hideLabel=false]
  *  @param {String} [containerClass=""]
- *  @param {String} [editorClass=""]
+ *  @param {String} [inpClass=""]
  *  @param {String} [headerClass=""]
  *  @param {String|Number} [tabId=contentIndex] - The tabindex of the field, by default it is the contentIndex
+ *  @param {String} [fieldSize="normal"] - Size between "normal" or "sm"
  */
 
 const props = defineProps({
@@ -129,7 +130,7 @@ const props = defineProps({
     required: false,
     default: "",
   },
-  editorClass: {
+  inpClass: {
     type: String,
     required: false,
     default: "",
@@ -138,6 +139,11 @@ const props = defineProps({
     type: [String, Number],
     required: false,
     default: contentIndex,
+  },
+  fieldSize: {
+    type: String,
+    required: false,
+    default: "normal",
   },
 });
 
@@ -373,6 +379,7 @@ onUnmounted(() => {
       :id="`${editor.id}-editor`"
       :hideLabel="props.hideLabel"
       :headerClass="props.headerClass"
+      :fieldSize="props.fieldSize"
     />
 
     <div
@@ -390,7 +397,7 @@ onUnmounted(() => {
         :class="[
           'input-editor',
           props.disabled ? 'disabled' : 'enabled',
-          props.editorClass,
+          props.inpClass,
         ]"
         :aria-description="$t('inp_editor_desc')"
         :id="editor.id"

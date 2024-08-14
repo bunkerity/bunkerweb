@@ -39,6 +39,76 @@ const props = defineProps({
   },
 });
 
+/**
+ *  @name getDataByField
+ *  @description Retrieve share data and specific data for each fields in order to v-bind.
+ *  @param {Object} setting - Setting props
+ *  @param {String} fallbackInpType - The fallback to add fallback in some cases.
+ *  @returns {Object} - props object
+ */
+function getDataByField(setting, fallbackInpType) {
+  // Start by the base = setting share by all fields
+  const base = {
+    inpType: setting.inpType || fallbackInpType,
+    id: setting.id || "",
+    columns: setting.columns || { pc: "12", tablet: "12", mobile: "12" },
+    value: setting.value || "",
+    popovers: setting.popovers || [],
+    disabled: setting.disabled || false,
+    required: setting.required || false,
+    label: setting.label || null,
+    name: setting.name || null,
+    hideLabel: setting.hideLabel || false,
+    containerClass: setting.containerClass || "",
+    headerClass: setting.headerClass || "",
+    inpClass: setting.inpClass || "",
+    tabId: setting.tabId || contentIndex,
+    attrs: setting.attrs || {},
+    fieldSize: setting.fieldSize || "normal",
+  };
+
+  if (
+    setting.inpType === "select" ||
+    (!setting?.inpType && fallbackInpType === "select")
+  ) {
+    base["values"] = setting.values || [];
+    base["maxBtnChars"] = setting.maxBtnChars || 0;
+    base["requiredValues"] = setting.requiredValues || [];
+    base["onlyDown"] = setting.onlyDown || false;
+    base["overflowAttrEl"] = setting.overflowAttrEl || "";
+  }
+
+  if (
+    setting.inpType === "datepicker" ||
+    (!setting?.inpType && fallbackInpType === "datepicker")
+  ) {
+    base["minDate"] = setting.minDate || "";
+    base["maxDate"] = setting.maxDate || "";
+    base["isClipboard"] = setting.isClipboard || false;
+  }
+
+  if (
+    setting.inpType === "input" ||
+    (!setting?.inpType && fallbackInpType === "input")
+  ) {
+    base["type"] = setting.type || "text";
+    base["placeholder"] = setting.placeholder || "";
+    base["pattern"] = setting.pattern || "";
+    base["isClipboard"] = setting.isClipboard || false;
+    base["readonly"] = setting.readonly;
+  }
+
+  if (
+    setting.inpType === "editor" ||
+    (!setting?.inpType && fallbackInpType === "editor")
+  ) {
+    base["pattern"] = setting.pattern || "";
+    base["isClipboard"] = setting.isClipboard || false;
+  }
+
+  return base;
+}
+
 // emits
 const emit = defineEmits(["inp"]);
 </script>
@@ -47,111 +117,26 @@ const emit = defineEmits(["inp"]);
   <Checkbox
     @inp="(value) => $emit('inp', value)"
     v-if="props.setting.inpType === 'checkbox'"
-    :id="props.setting.id || ''"
-    :columns="props.setting.columns || { pc: '12', tablet: '12', mobile: '12' }"
-    :value="props.setting.value"
-    :popovers="props.setting.popovers || []"
-    :inpType="props.setting.inpType || 'checkbox'"
-    :disabled="props.setting.disabled || false"
-    :required="props.setting.required || false"
-    :label="props.setting.label"
-    :name="props.setting.name"
-    :hideLabel="props.setting.hideLabel || false"
-    :containerClass="props.setting.containerClass || ''"
-    :headerClass="props.setting.headerClass || ''"
-    :inpClass="props.setting.inpClass || ''"
-    :tabId="props.setting.tabId || contentIndex"
-    :attrs="props.setting.attrs || {}"
+    v-bind="{ ...getDataByField(props.setting, 'checkbox') }"
   />
   <Select
     @inp="(value) => $emit('inp', value)"
     v-if="props.setting.inpType === 'select'"
-    :id="props.setting.id || ''"
-    :columns="props.setting.columns || { pc: '12', tablet: '12', mobile: '12' }"
-    :value="props.setting.value"
-    :values="props.setting.values"
-    :inpType="props.setting.inpType || 'select'"
-    :maxBtnChars="props.setting.maxBtnChars || 0"
-    :disabled="props.setting.disabled || false"
-    :required="props.setting.required || false"
-    :requiredValues="props.setting.requiredValues || []"
-    :label="props.setting.label"
-    :name="props.setting.name"
-    :popovers="props.setting.popovers || []"
-    :onlyDown="props.setting.onlyDown || false"
-    :overflowAttrEl="props.setting.overflowAttrEl || ''"
-    :hideLabel="props.setting.hideLabel || false"
-    :containerClass="props.setting.containerClass || ''"
-    :headerClass="props.setting.headerClass || ''"
-    :inpClass="props.setting.inpClass || ''"
-    :tabId="props.setting.tabId || contentIndex"
-    :attrs="props.setting.attrs || {}"
+    v-bind="{ ...getDataByField(props.setting, 'select') }"
   />
   <Datepicker
     @inp="(value) => $emit('inp', value)"
     v-if="props.setting.inpType === 'datepicker'"
-    :id="props.setting.id || ''"
-    :columns="props.setting.columns || { pc: '12', tablet: '12', mobile: '12' }"
-    :value="props.setting.value || ''"
-    :minDate="props.setting.minDate || ''"
-    :maxDate="props.setting.maxDate || ''"
-    :inpType="props.setting.inpType || 'datepicker'"
-    :name="props.setting.name"
-    :label="props.setting.label"
-    :popovers="props.setting.popovers || []"
-    :isClipboard="props.setting.isClipboard || true"
-    :hideLabel="props.setting.hideLabel || false"
-    :containerClass="props.setting.containerClass || ''"
-    :headerClass="props.setting.headerClass || ''"
-    :inpClass="props.setting.inpClass || ''"
-    :disabled="props.setting.disabled || false"
-    :required="props.setting.required || false"
-    :tabId="props.setting.tabId || contentIndex"
-    :attrs="props.setting.attrs || {}"
+    v-bind="{ ...getDataByField(props.setting, 'datepicker') }"
   />
   <Input
     @inp="(value) => $emit('inp', value)"
     v-if="props.setting.inpType === 'input'"
-    :id="props.setting.id || ''"
-    :columns="props.setting.columns || { pc: '12', tablet: '12', mobile: '12' }"
-    :name="props.setting.name"
-    :type="props.setting.type"
-    :inpType="props.setting.inpType || 'input'"
-    :required="props.setting.required || false"
-    :disabled="props.setting.disabled || false"
-    :value="props.setting.value"
-    :placeholder="props.setting.placeholder || ''"
-    :pattern="props.setting.pattern || ''"
-    :isClipboard="props.setting.isClipboard || true"
-    :readonly="props.setting.readonly || false"
-    :label="props.setting.label"
-    :popovers="props.setting.popovers || []"
-    :hideLabel="props.setting.hideLabel || false"
-    :containerClass="props.setting.containerClass || ''"
-    :headerClass="props.setting.headerClass || ''"
-    :inpClass="props.setting.inpClass || ''"
-    :tabId="props.setting.tabId || contentIndex"
-    :attrs="props.setting.attrs || {}"
+    v-bind="{ ...getDataByField(props.setting, 'input') }"
   />
   <Editor
     @inp="(value) => $emit('inp', value)"
     v-if="props.setting.inpType === 'editor'"
-    :id="props.setting.id || ''"
-    :columns="props.setting.columns || { pc: '12', tablet: '12', mobile: '12' }"
-    :name="props.setting.name"
-    :inpType="props.setting.inpType || 'editor'"
-    :required="props.setting.required || false"
-    :disabled="props.setting.disabled || false"
-    :value="props.setting.value"
-    :pattern="props.setting.pattern || ''"
-    :isClipboard="props.setting.isClipboard || true"
-    :label="props.setting.label"
-    :popovers="props.setting.popovers || []"
-    :hideLabel="props.setting.hideLabel || false"
-    :containerClass="props.setting.containerClass || ''"
-    :headerClass="props.setting.headerClass || ''"
-    :editorClass="props.setting.editorClass || ''"
-    :tabId="props.setting.tabId || contentIndex"
-    :attrs="props.setting.attrs || {}"
+    v-bind="{ ...getDataByField(props.setting, 'editor') }"
   />
 </template>

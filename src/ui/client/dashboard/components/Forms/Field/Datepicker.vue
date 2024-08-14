@@ -57,6 +57,7 @@ import "@assets/css/flatpickr.dark.min.css";
  *  @param {Boolean} [required=false]
  *  @param {String} [headerClass=""]
  *  @param {String} [containerClass=""]
+ *  @param {String} [fieldSize="normal"] - Size between "normal" or "sm"
  *  @param {String|Number} [tabId=contentIndex] - The tabindex of the field, by default it is the contentIndex
  */
 
@@ -66,6 +67,11 @@ const props = defineProps({
     type: String,
     required: false,
     default: "",
+  },
+  fieldSize: {
+    type: String,
+    required: false,
+    default: "normal",
   },
   name: {
     type: String,
@@ -740,6 +746,7 @@ onUnmounted(() => {
       :id="date.id"
       :hideLabel="props.hideLabel"
       :headerClass="props.headerClass"
+      :fieldSize="props.fieldSize"
     />
 
     <div class="relative flex flex-col items-start">
@@ -754,6 +761,7 @@ onUnmounted(() => {
           'input-regular',
           props.inpClass,
           props.disabled ? 'cursor-not-allowed' : 'cursor-pointer',
+          props.fieldSize,
         ]"
         :id="date.id"
         :required="props.required || false"
@@ -770,7 +778,7 @@ onUnmounted(() => {
         viewBox="0 0 24 24"
         stroke-width="1.5"
         stroke="currentColor"
-        class="datepicker-svg"
+        :class="['datepicker-svg', props.fieldSize]"
       >
         <path
           stroke-linecap="round"
@@ -779,6 +787,7 @@ onUnmounted(() => {
         />
       </svg>
       <Clipboard
+        :fieldSize="props.fieldSize"
         :isClipboard="props.isClipboard"
         :valueToCopy="date.currStamp"
         :clipboardClass="'datepicker-clip'"

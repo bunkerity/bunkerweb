@@ -245,6 +245,7 @@ def checkbox_widget(
     containerClass: str = "",
     headerClass: str = "",
     inpClass: str = "",
+    fieldSize: str = "normal",
     tabId: Union[str, int] = ""
     ):
     """    
@@ -268,6 +269,7 @@ def checkbox_widget(
     -   `containerClass` **String**  (optional, default `""`)
     -   `headerClass` **String**  (optional, default `""`)
     -   `inpClass` **String**  (optional, default `""`)
+    -   `fieldSize` **String** Size between "normal" or "sm" (optional, default `"normal"`)
     -   `tabId` **(String | Number)** The tabindex of the field, by default it is the contentIndex (optional, default `contentIndex`)
     
     EXAMPLE
@@ -300,7 +302,7 @@ def checkbox_widget(
 
 
     # List of params that will be add only if not default value
-    list_params = [("id", id, ""),("attrs", attrs, None),("popovers", popovers, None),("inpType", inpType, "checkbox"),("disabled", disabled, False),("required", required, False),("columns", columns, {"pc":"12","tablet":"12","mobile":"12"}),("hideLabel", hideLabel, False),("containerClass", containerClass, ""),("headerClass", headerClass, ""),("inpClass", inpClass, ""),("tabId", tabId, "")]
+    list_params = [("id", id, ""),("attrs", attrs, None),("popovers", popovers, None),("inpType", inpType, "checkbox"),("disabled", disabled, False),("required", required, False),("columns", columns, {"pc":"12","tablet":"12","mobile":"12"}),("hideLabel", hideLabel, False),("containerClass", containerClass, ""),("headerClass", headerClass, ""),("inpClass", inpClass, ""),("fieldSize", fieldSize, "normal"),("tabId", tabId, "")]
     for param in list_params:
         add_key_value(data, param[0], param[1], param[2])
 
@@ -369,6 +371,7 @@ def combobox_widget(
     overflowAttrEl: bool = "",
     containerClass: str = "",
     inpClass: str = "",
+    fieldSize: str = "normal",
     headerClass: str = "",
     tabId: Union[str, int] = ""
     ):
@@ -397,6 +400,7 @@ def combobox_widget(
     -   `overflowAttrEl` **Boolean** Attribute to select the container the element has to check for overflow (optional, default `""`)
     -   `containerClass` **String**  (optional, default `""`)
     -   `inpClass` **String**  (optional, default `""`)
+    -   `fieldSize` **String** Size between "normal" or "sm" (optional, default `"normal"`)
     -   `headerClass` **String**  (optional, default `""`)
     -   `tabId` **(String | Number)** The tabindex of the field, by default it is the contentIndex (optional, default `contentIndex`)
     
@@ -431,7 +435,7 @@ def combobox_widget(
 
 
     # List of params that will be add only if not default value
-    list_params = [("id", id, ""),("attrs", attrs, None),("maxBtnChars", maxBtnChars, ""),("popovers", popovers, None),("inpType", inpType, "select"),("disabled", disabled, False),("required", required, False),("requiredValues", requiredValues, None),("columns", columns, {"pc":"12","tablet":"12","mobile":"12"}),("hideLabel", hideLabel, False),("onlyDown", onlyDown, False),("overflowAttrEl", overflowAttrEl, ""),("containerClass", containerClass, ""),("inpClass", inpClass, ""),("headerClass", headerClass, ""),("tabId", tabId, "")]
+    list_params = [("id", id, ""),("attrs", attrs, None),("maxBtnChars", maxBtnChars, ""),("popovers", popovers, None),("inpType", inpType, "select"),("disabled", disabled, False),("required", required, False),("requiredValues", requiredValues, None),("columns", columns, {"pc":"12","tablet":"12","mobile":"12"}),("hideLabel", hideLabel, False),("onlyDown", onlyDown, False),("overflowAttrEl", overflowAttrEl, ""),("containerClass", containerClass, ""),("inpClass", inpClass, ""),("fieldSize", fieldSize, "normal"),("headerClass", headerClass, ""),("tabId", tabId, "")]
     for param in list_params:
         add_key_value(data, param[0], param[1], param[2])
 
@@ -495,6 +499,7 @@ def datepicker_widget(
     required: bool = False,
     headerClass: str = "",
     containerClass: str = "",
+    fieldSize: str = "normal",
     tabId: Union[str, int] = ""
     ):
     """    
@@ -521,6 +526,7 @@ def datepicker_widget(
     -   `required` **Boolean**  (optional, default `false`)
     -   `headerClass` **String**  (optional, default `""`)
     -   `containerClass` **String**  (optional, default `""`)
+    -   `fieldSize` **String** Size between "normal" or "sm" (optional, default `"normal"`)
     -   `tabId` **(String | Number)** The tabindex of the field, by default it is the contentIndex (optional, default `contentIndex`)
     
     EXAMPLE
@@ -552,7 +558,7 @@ def datepicker_widget(
 
 
     # List of params that will be add only if not default value
-    list_params = [("id", id, ""),("popovers", popovers, None),("attrs", attrs, None),("inpType", inpType, "datepicker"),("value", value, ""),("minDate", minDate, ""),("maxDate", maxDate, ""),("isClipboard", isClipboard, True),("hideLabel", hideLabel, False),("columns", columns, {"pc":"12","tablet":"12","mobile":"12"}),("disabled", disabled, False),("required", required, False),("headerClass", headerClass, ""),("containerClass", containerClass, ""),("tabId", tabId, "")]
+    list_params = [("id", id, ""),("popovers", popovers, None),("attrs", attrs, None),("inpType", inpType, "datepicker"),("value", value, ""),("minDate", minDate, ""),("maxDate", maxDate, ""),("isClipboard", isClipboard, True),("hideLabel", hideLabel, False),("columns", columns, {"pc":"12","tablet":"12","mobile":"12"}),("disabled", disabled, False),("required", required, False),("headerClass", headerClass, ""),("containerClass", containerClass, ""),("fieldSize", fieldSize, "normal"),("tabId", tabId, "")]
     for param in list_params:
         add_key_value(data, param[0], param[1], param[2])
 
@@ -1061,6 +1067,7 @@ def input_widget(
     containerClass: str = "",
     inpClass: str = "",
     headerClass: str = "",
+    fieldSize: str = "normal",
     tabId: Union[str, int] = ""
     ):
     """    
@@ -1091,6 +1098,7 @@ def input_widget(
     -   `containerClass` **String**  (optional, default `""`)
     -   `inpClass` **String**  (optional, default `""`)
     -   `headerClass` **String**  (optional, default `""`)
+    -   `fieldSize` **String** Size between "normal" or "sm" (optional, default `"normal"`)
     -   `tabId` **(String | Number)** The tabindex of the field, by default it is the contentIndex (optional, default `contentIndex`)
     
     EXAMPLE
@@ -1123,7 +1131,7 @@ def input_widget(
 
 
     # List of params that will be add only if not default value
-    list_params = [("id", id, ""),("type", type, "text"),("attrs", attrs, None),("popovers", popovers, None),("inpType", inpType, "input"),("columns", columns, {"pc":"12","tablet":"12","mobile":"12"}),("disabled", disabled, False),("required", required, False),("placeholder", placeholder, ""),("pattern", pattern, "(?.*)"),("isClipboard", isClipboard, True),("readonly", readonly, False),("hideLabel", hideLabel, False),("containerClass", containerClass, ""),("inpClass", inpClass, ""),("headerClass", headerClass, ""),("tabId", tabId, "")]
+    list_params = [("id", id, ""),("type", type, "text"),("attrs", attrs, None),("popovers", popovers, None),("inpType", inpType, "input"),("columns", columns, {"pc":"12","tablet":"12","mobile":"12"}),("disabled", disabled, False),("required", required, False),("placeholder", placeholder, ""),("pattern", pattern, "(?.*)"),("isClipboard", isClipboard, True),("readonly", readonly, False),("hideLabel", hideLabel, False),("containerClass", containerClass, ""),("inpClass", inpClass, ""),("headerClass", headerClass, ""),("fieldSize", fieldSize, "normal"),("tabId", tabId, "")]
     for param in list_params:
         add_key_value(data, param[0], param[1], param[2])
 
@@ -1149,6 +1157,7 @@ def list_widget(
     containerClass: str = "",
     inpClass: str = "",
     headerClass: str = "",
+    fieldSize: str = "normal",
     tabId: Union[str, int] = ""
     ):
     """    
@@ -1175,6 +1184,7 @@ def list_widget(
     -   `containerClass` **String**  (optional, default `""`)
     -   `inpClass` **String**  (optional, default `""`)
     -   `headerClass` **String**  (optional, default `""`)
+    -   `fieldSize` **String** Size between "normal" or "sm" (optional, default `"normal"`)
     -   `tabId` **(String | Number)** The tabindex of the field, by default it is the contentIndex (optional, default `contentIndex`)
     
     EXAMPLE
@@ -1203,7 +1213,7 @@ def list_widget(
 
 
     # List of params that will be add only if not default value
-    list_params = [("id", id, ""),("attrs", attrs, None),("separator", separator, " "),("maxBtnChars", maxBtnChars, ""),("popovers", popovers, None),("inpType", inpType, "list"),("disabled", disabled, False),("required", required, False),("columns", columns, {"pc":"12","tablet":"12","mobile":"12"}),("hideLabel", hideLabel, False),("onlyDown", onlyDown, False),("overflowAttrEl", overflowAttrEl, ""),("containerClass", containerClass, ""),("inpClass", inpClass, ""),("headerClass", headerClass, ""),("tabId", tabId, "")]
+    list_params = [("id", id, ""),("attrs", attrs, None),("separator", separator, " "),("maxBtnChars", maxBtnChars, ""),("popovers", popovers, None),("inpType", inpType, "list"),("disabled", disabled, False),("required", required, False),("columns", columns, {"pc":"12","tablet":"12","mobile":"12"}),("hideLabel", hideLabel, False),("onlyDown", onlyDown, False),("overflowAttrEl", overflowAttrEl, ""),("containerClass", containerClass, ""),("inpClass", inpClass, ""),("headerClass", headerClass, ""),("fieldSize", fieldSize, "normal"),("tabId", tabId, "")]
     for param in list_params:
         add_key_value(data, param[0], param[1], param[2])
 
@@ -1652,6 +1662,7 @@ def select_widget(
     containerClass: str = "",
     inpClass: str = "",
     headerClass: str = "",
+    fieldSize: str = "normal",
     tabId: Union[str, int] = ""
     ):
     """    
@@ -1681,6 +1692,7 @@ def select_widget(
     -   `containerClass` **String**  (optional, default `""`)
     -   `inpClass` **String**  (optional, default `""`)
     -   `headerClass` **String**  (optional, default `""`)
+    -   `fieldSize` **String** Size between "normal" or "sm" (optional, default `"normal"`)
     -   `tabId` **(String | Number)** The tabindex of the field, by default it is the contentIndex (optional, default `contentIndex`)
     
     EXAMPLE
@@ -1714,7 +1726,7 @@ def select_widget(
 
 
     # List of params that will be add only if not default value
-    list_params = [("id", id, ""),("attrs", attrs, None),("popovers", popovers, None),("inpType", inpType, "select"),("maxBtnChars", maxBtnChars, ""),("disabled", disabled, False),("required", required, False),("requiredValues", requiredValues, None),("columns", columns, {"pc":"12","tablet":"12","mobile":"12"}),("hideLabel", hideLabel, False),("onlyDown", onlyDown, False),("overflowAttrEl", overflowAttrEl, ""),("containerClass", containerClass, ""),("inpClass", inpClass, ""),("headerClass", headerClass, ""),("tabId", tabId, "")]
+    list_params = [("id", id, ""),("attrs", attrs, None),("popovers", popovers, None),("inpType", inpType, "select"),("maxBtnChars", maxBtnChars, ""),("disabled", disabled, False),("required", required, False),("requiredValues", requiredValues, None),("columns", columns, {"pc":"12","tablet":"12","mobile":"12"}),("hideLabel", hideLabel, False),("onlyDown", onlyDown, False),("overflowAttrEl", overflowAttrEl, ""),("containerClass", containerClass, ""),("inpClass", inpClass, ""),("headerClass", headerClass, ""),("fieldSize", fieldSize, "normal"),("tabId", tabId, "")]
     for param in list_params:
         add_key_value(data, param[0], param[1], param[2])
 
@@ -1960,6 +1972,7 @@ def tabulator_widget(
     colMinWidth: int = 150,
     colMaxWidth: int = 0,
     isPagination: bool = True,
+    itemsBeforePagination: int = 10,
     paginationSize: int = 10,
     paginationInitialPage: int = 1,
     paginationSizeSelector: list = [10,25,50,100]
@@ -1976,20 +1989,21 @@ def tabulator_widget(
     
     PARAMETERS
     
-    -   `id` **string** Unique id of the table
-    -   `isStriped` **boolean** Add striped class to the table (optional, default `true`)
-    -   `filters` **array** List of filters to display (optional, default `[]`)
-    -   `columns` **array** List of columns to display
-    -   `items` **array** List of items to display
-    -   `actionsButtons` **array** Buttons group props to render buttons that will be after filters and before the table stick left. (optional, default `[]`)
-    -   `layout` **string** Layout of the table. "fitDataTable" useful with wide columns, "fitColumns" useful with narrow columns. (optional, default `"fitDataTable"`)
-    -   `rowHeight` **number** Case value is 0, this will be ignored. (optional, default `0`)
-    -   `colMinWidth` **number** Minimum width for each col of  a row (optional, default `150`)
-    -   `colMaxWidth` **number** Maximum width for each col of  a row. Case value is 0, this will be ignored. (optional, default `0`)
-    -   `isPagination` **boolean** Add pagination to the table (optional, default `true`)
-    -   `paginationSize` **number** Number of items per page (optional, default `10`)
-    -   `paginationInitialPage` **number** Initial page (optional, default `1`)
-    -   `paginationSizeSelector` **array** Select number of items per page (optional, default `[10,25,50,100]`)
+    -   `id` **String** Unique id of the table
+    -   `isStriped` **Boolean** Add striped class to the table (optional, default `true`)
+    -   `filters` **Array** List of filters to display (optional, default `[]`)
+    -   `columns` **Array** List of columns to display
+    -   `items` **Array** List of items to display
+    -   `actionsButtons` **Array** Buttons group props to render buttons that will be after filters and before the table stick left. (optional, default `[]`)
+    -   `layout` **String** Layout of the table. "fitDataTable" useful with wide columns, "fitColumns" useful with narrow columns. (optional, default `"fitDataTable"`)
+    -   `rowHeight` **Number** Case value is 0, this will be ignored. (optional, default `0`)
+    -   `colMinWidth` **Number** Minimum width for each col of  a row (optional, default `150`)
+    -   `colMaxWidth` **Number** Maximum width for each col of  a row. Case value is 0, this will be ignored. (optional, default `0`)
+    -   `isPagination` **Boolean** Add pagination to the table (optional, default `true`)
+    -   `itemsBeforePagination` **Number** Hide pagination unless number is reach. (optional, default `10`)
+    -   `paginationSize` **Number** Number of items per page (optional, default `10`)
+    -   `paginationInitialPage` **Number** Initial page (optional, default `1`)
+    -   `paginationSizeSelector` **Array** Select number of items per page (optional, default `[10,25,50,100]`)
     
     EXAMPLE
     
@@ -2007,7 +2021,7 @@ def tabulator_widget(
                 },
         }];
     
-    Returns **void**;
+    Returns **Void**;
     
     """
 
@@ -2019,7 +2033,7 @@ def tabulator_widget(
 
 
     # List of params that will be add only if not default value
-    list_params = [("isStriped", isStriped, True),("filters", filters, None),("actionsButtons", actionsButtons, None),("layout", layout, "fitDataTable"),("rowHeight", rowHeight, 0),("colMinWidth", colMinWidth, 150),("colMaxWidth", colMaxWidth, 0),("isPagination", isPagination, True),("paginationSize", paginationSize, 10),("paginationInitialPage", paginationInitialPage, 1),("paginationSizeSelector", paginationSizeSelector, [10,25,50,100])]
+    list_params = [("isStriped", isStriped, True),("filters", filters, None),("actionsButtons", actionsButtons, None),("layout", layout, "fitDataTable"),("rowHeight", rowHeight, 0),("colMinWidth", colMinWidth, 150),("colMaxWidth", colMaxWidth, 0),("isPagination", isPagination, True),("itemsBeforePagination", itemsBeforePagination, 10),("paginationSize", paginationSize, 10),("paginationInitialPage", paginationInitialPage, 1),("paginationSizeSelector", paginationSizeSelector, [10,25,50,100])]
     for param in list_params:
         add_key_value(data, param[0], param[1], param[2])
 

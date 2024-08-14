@@ -21,6 +21,7 @@ import { useUUID } from "@utils/global.js";
  *  @param {String} [valueToCopy=""] - The value to copy
  *  @param {String} [clipboadClass=""] - Additional class for the clipboard container. Useful to fit the component in a specific container.
  *  @param {String} [copyClass=""] - The class of the copy message. Useful to fit the component in a specific container.
+ *  @param {String} [fieldSize="normal"] - Size between "normal" or "sm"
  */
 
 const { text, copy, copied, isSupported } = useClipboard({ legacy: true });
@@ -30,6 +31,11 @@ const props = defineProps({
     type: String,
     required: false,
     default: "",
+  },
+  fieldSize: {
+    type: String,
+    required: false,
+    default: "normal",
   },
   isClipboard: {
     type: Boolean,
@@ -65,7 +71,11 @@ onBeforeMount(() => {
 <template>
   <div
     v-if="props.isClipboard"
-    :class="['input-clipboard-container', props.clipboardClass]"
+    :class="[
+      'input-clipboard-container',
+      props.clipboardClass,
+      props.fieldSize,
+    ]"
   >
     <button
       type="button"

@@ -53,6 +53,7 @@ import ErrorDropdown from "@components/Forms/Error/Dropdown.vue";
  *  @param {String} [containerClass=""]
  *  @param {String} [inpClass=""]
  *  @param {String} [headerClass=""]
+ *  @param {String} [fieldSize="normal"] - Size between "normal" or "sm"
  *  @param {String|Number} [tabId=contentIndex] - The tabindex of the field, by default it is the contentIndex
  */
 
@@ -62,6 +63,11 @@ const props = defineProps({
     type: String,
     required: false,
     default: "",
+  },
+  fieldSize: {
+    type: String,
+    required: false,
+    default: "normal",
   },
   columns: {
     type: [Object, Boolean],
@@ -394,6 +400,7 @@ const emits = defineEmits(["inp"]);
       :label="props.label"
       :hideLabel="props.hideLabel"
       :headerClass="props.headerClass"
+      :fieldSize="props.fieldSize"
     />
     <!--custom-->
     <div class="relative">
@@ -420,6 +427,7 @@ const emits = defineEmits(["inp"]);
               ? 'valid'
               : 'invalid',
             props.inpClass,
+            props.fieldSize,
           ]"
           @focusin="openSelect()"
           :required="props.required || false"
@@ -506,6 +514,7 @@ const emits = defineEmits(["inp"]);
               id === 0 ? 'first' : '',
               id === inp.values.length - 1 ? 'last' : '',
               'list-dropdown-btn',
+              props.fieldSize,
             ]"
             data-select-item
             :data-setting-id="inp.id"

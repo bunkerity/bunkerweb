@@ -43,6 +43,7 @@ import { useUUID } from "@utils/global.js";
  *  @param {String} [containerClass=""]
  *  @param {String} [headerClass=""]
  *  @param {String} [inpClass=""]
+ *  @param {String} [fieldSize="normal"] - Size between "normal" or "sm"
  *  @param {String|Number} [tabId=contentIndex] - The tabindex of the field, by default it is the contentIndex
  */
 
@@ -115,6 +116,11 @@ const props = defineProps({
     required: false,
     default: "",
   },
+  fieldSize: {
+    type: String,
+    required: false,
+    default: "normal",
+  },
   tabId: {
     type: [String, Number],
     required: false,
@@ -166,6 +172,7 @@ onMounted(() => {
       :id="checkbox.id"
       :hideLabel="props.hideLabel"
       :headerClass="props.headerClass"
+      :fieldSize="props.fieldSize"
     />
 
     <div class="checkbox-container">
@@ -184,6 +191,7 @@ onMounted(() => {
           checkbox.value === 'yes' ? 'check' : '',
           checkbox.isValid ? 'valid' : 'invalid',
           props.inpClass,
+          props.fieldSize,
         ]"
         type="checkbox"
         :value="checkbox.value"
@@ -194,7 +202,7 @@ onMounted(() => {
         role="img"
         aria-hidden="true"
         v-show="checkbox.value === 'yes'"
-        class="checkbox-svg"
+        :class="['checkbox-svg', props.fieldSize]"
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 512 512"
       >

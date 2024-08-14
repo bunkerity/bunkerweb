@@ -57,6 +57,7 @@ import { useUUID } from "@utils/global";
  *  @param {String} [containerClass=""]
  *  @param {String} [inpClass=""]
  *  @param {String} [headerClass=""]
+ *  @param {String} [fieldSize="normal"] - Size between "normal" or "sm"
  *  @param {String|Number} [tabId=contentIndex] - The tabindex of the field, by default it is the contentIndex
  */
 
@@ -66,6 +67,11 @@ const props = defineProps({
     type: String,
     required: false,
     default: "",
+  },
+  fieldSize: {
+    type: String,
+    required: false,
+    default: "normal",
   },
   columns: {
     type: [Object, Boolean],
@@ -366,6 +372,7 @@ const emits = defineEmits(["inp"]);
       :id="select.id"
       :hideLabel="props.hideLabel"
       :headerClass="props.headerClass"
+      :fieldSize="props.fieldSize"
     />
 
     <select :id="select.id" :name="props.name" class="hidden">
@@ -403,6 +410,7 @@ const emits = defineEmits(["inp"]);
           'select-btn',
           select.isValid ? 'valid' : 'invalid',
           props.inpClass,
+          props.fieldSize,
         ]"
       >
         <span :id="`${select.id}-text`" class="select-btn-name">
@@ -457,6 +465,7 @@ const emits = defineEmits(["inp"]);
               ? 'active'
               : '',
             'select-dropdown-btn',
+            props.fieldSize,
           ]"
           data-select-item
           :data-setting-id="select.id"

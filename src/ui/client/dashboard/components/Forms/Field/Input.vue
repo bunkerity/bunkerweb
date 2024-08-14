@@ -58,6 +58,7 @@ import { useUUID } from "@utils/global.js";
  *  @param {String} [containerClass=""]
  *  @param {String} [inpClass=""]
  *  @param {String} [headerClass=""]
+ *  @param {String} [fieldSize="normal"] - Size between "normal" or "sm"
  *  @param {String|Number} [tabId=contentIndex] - The tabindex of the field, by default it is the contentIndex
  */
 
@@ -67,6 +68,11 @@ const props = defineProps({
     type: String,
     required: false,
     default: "",
+  },
+  fieldSize: {
+    type: String,
+    required: false,
+    default: "normal",
   },
   columns: {
     type: [Object, Boolean],
@@ -198,6 +204,7 @@ onMounted(() => {
       :id="inp.id"
       :hideLabel="props.hideLabel"
       :headerClass="props.headerClass"
+      :fieldSize="props.fieldSize"
     />
 
     <div class="input-regular-container">
@@ -217,6 +224,7 @@ onMounted(() => {
           'input-regular',
           inp.isValid ? 'valid' : 'invalid',
           props.inpClass,
+          props.fieldSize,
         ]"
         :required="props.required || false"
         :readonly="props.readonly || false"
@@ -243,6 +251,7 @@ onMounted(() => {
       <Clipboard
         :isClipboard="props.isClipboard"
         :valueToCopy="inp.value"
+        :fieldSize="props.fieldSize"
         :clipboardClass="
           props.type === 'password' ? 'pw-input-clip' : 'no-pw-input-clip'
         "

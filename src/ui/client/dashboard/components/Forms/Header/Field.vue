@@ -27,6 +27,7 @@ import PopoverGroup from "@components/Widget/PopoverGroup.vue";
  *  @param {Boolean} [required=false]
  *  @param {Boolean} [hideLabel=false]
  *  @param {String} [headerClass=""]
+ *  @param {String} [fieldSize="normal"] - Size between "normal" or "sm" inherit from field
  */
 
 const props = defineProps({
@@ -60,6 +61,11 @@ const props = defineProps({
     type: String,
     required: false,
   },
+  fieldSize: {
+    type: String,
+    required: false,
+    default: "normal",
+  },
 });
 
 const labelEl = ref(null);
@@ -78,15 +84,19 @@ onMounted(() => {
       props.headerClass,
       'input-header-container',
       props.popovers.length ? 'popover' : 'no-popover',
+      props.fieldSize,
     ]"
     data-is="header-field"
   >
     <div>
       <label
         ref="labelEl"
-        :class="[props.label ? '' : 'sr-only']"
+        :class="[
+          'input-header-label',
+          props.label ? '' : 'sr-only',
+          props.fieldSize,
+        ]"
         :for="props.id"
-        class="input-header-label"
       >
         {{
           props.label
