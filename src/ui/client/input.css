@@ -1136,7 +1136,7 @@ body {
   @apply col-span-12 text-lg mb-0 font-bold text-gray-300 break-word;
 }
 
-.text-table {
+.text-table-content {
   @apply col-span-12 mb-0 dark:text-gray-300 break-word;
 }
 
@@ -1190,6 +1190,9 @@ body {
   @apply mb-4 col-span-12 flex justify-start items-center mx-0;
 }
 
+.button-group-table-content {
+  @apply col-span-12 flex justify-start items-center mx-0;
+}
 /* LIST COMPONENT */
 
 .list-pairs-container {

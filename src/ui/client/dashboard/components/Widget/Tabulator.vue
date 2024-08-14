@@ -3,7 +3,6 @@ import { ref, reactive, onMounted, Teleport, computed, onUnmounted } from "vue";
 import Icons from "@components/Widget/Icons.vue";
 import Text from "@components/Widget/Text.vue";
 import Fields from "@components/Form/Fields.vue";
-import Button from "@components/Widget/Button.vue";
 import ButtonGroup from "@components/Widget/ButtonGroup.vue";
 import Container from "@components/Widget/Container.vue";
 import { TabulatorFull as Tabulator } from "tabulator-tables"; //import Tabulator library
@@ -281,7 +280,11 @@ onUnmounted(() => {
       v-if="props.actionsButtons.length"
       :buttons="props.actionsButtons"
     />
-    <div :class="[props.isStriped ? 'striped' : '']" ref="tableEl"></div>
+    <div
+      :class="[props.isStriped ? 'striped' : '']"
+      ref="tableEl"
+      data-is="table-content"
+    ></div>
     <template
       :key="table.customComponents"
       v-for="comp in table.customComponents"
@@ -297,10 +300,6 @@ onUnmounted(() => {
         />
         <Fields
           v-if="useEqualStr(comp.type, 'Fields')"
-          v-bind="{ ...comp.values }"
-        />
-        <Button
-          v-if="useEqualStr(comp.type, 'Button')"
           v-bind="{ ...comp.values }"
         />
         <ButtonGroup

@@ -44,8 +44,85 @@ function addColumnsWidth(column, colMinWidth = 0, colMaxWidth = 0) {
 function addColumnsSorter(column) {
   if (!("formatter" in column)) return;
   const formatName = column.formatter.toLowerCase();
+  _sortButtonGroup(column, formatName);
+  _sortFields(column, formatName);
   _sortIcons(column, formatName);
   _sortText(column, formatName);
+}
+
+/**
+ *  @name _baseSorter
+ *  @description Base sorter we will use for each custom component.
+ *  @param {String} aValue - The value of the first row to compare.
+ *  @param {String} bValue -  The value of the second row to compare.
+ *  @returns {String|Number} - The result of the comparison
+ */
+function _baseSorter(aValue, bValue, params) {
+  let alignEmptyValues = params.alignEmptyValues;
+  let emptyAlign = 0;
+  let locale;
+
+  if (aValue && bValue) {
+    locale =
+      typeof params.locale == "boolean" ? this.langLocale() : params.locale;
+
+    return String(aValue)
+      .toLowerCase()
+      .localeCompare(String(bValue).toLowerCase(), locale);
+  }
+
+  if (!aValue) emptyAlign = !bValue ? 0 : -1;
+  if (!bValue) emptyAlign = 1;
+
+  //fix empty values in position
+  if (
+    (alignEmptyValues === "top" && dir === "desc") ||
+    (alignEmptyValues === "bottom" && dir === "asc")
+  ) {
+    emptyAlign *= -1;
+  }
+
+  return emptyAlign;
+}
+
+/**
+ *  @name _sortButtonGroup
+ *  @description Add sorter for ButtonGorup components in the tabulator. This will merge text from all buttons and sort them.
+ *  @example { title: "actions", field: "actions", formatter: "buttongroup" }
+ *  @param {Object} column -  The column object to update in case we have the right format.
+ *  @param {String} formatName - Check if the current column format is the right one.
+ *  @returns {Void}
+ */
+function _sortButtonGroup(column, formatName) {
+  if (formatName !== "buttongroup") return;
+  column.sorter = (a, b, aRow, bRow, column, dir, params) => {
+    const aButtons = a.buttons;
+    const bButtons = b.buttons;
+
+    const aValue = aButtons.map((btn) => btn.data.text).join(" ") || "";
+    const bValue = bButtons.map((btn) => btn.data.text).join(" ") || "";
+    return _baseSorter(aValue, bValue, params);
+  };
+}
+
+/**
+ *  @name _sortFields
+ *  @description Add sorter for Fields components in the tabulator. This will sort the fields by the value of the setting object.
+ *  @example { title: "Input", field: "input", formatter: "fields" }
+ *  @param {Object} column -  The column object to update in case we have the right format.
+ *  @param {String} formatName - Check if the current column format is the right one.
+ *  @returns {Void}
+ */
+function _sortFields(column, formatName) {
+  if (formatName !== "fields") return;
+  column.sorter = (a, b, aRow, bRow, column, dir, params) => {
+    const aSetting = a.setting;
+    const bSetting = b.setting;
+
+    const aValue = aSetting?.value || "";
+    const bValue = bSetting?.value || "";
+    return _baseSorter(aValue, bValue, params);
+  };
 }
 
 /**
@@ -59,33 +136,9 @@ function addColumnsSorter(column) {
 function _sortIcons(column, formatName) {
   if (formatName !== "icons") return;
   column.sorter = (a, b, aRow, bRow, column, dir, params) => {
-    const aName = a.iconName;
-    const bName = b.iconName;
-    let alignEmptyValues = params.alignEmptyValues;
-    let emptyAlign = 0;
-    let locale;
-
-    if (aName && bName) {
-      locale =
-        typeof params.locale == "boolean" ? this.langLocale() : params.locale;
-
-      return String(aName)
-        .toLowerCase()
-        .localeCompare(String(bName).toLowerCase(), locale);
-    }
-
-    if (!aName) emptyAlign = !bName ? 0 : -1;
-    if (!bName) emptyAlign = 1;
-
-    //fix empty values in position
-    if (
-      (alignEmptyValues === "top" && dir === "desc") ||
-      (alignEmptyValues === "bottom" && dir === "asc")
-    ) {
-      emptyAlign *= -1;
-    }
-
-    return emptyAlign;
+    const aValue = a.iconName;
+    const bValue = b.iconName;
+    return _baseSorter(aValue, bValue, params);
   };
 }
 
@@ -99,7 +152,11 @@ function _sortIcons(column, formatName) {
  */
 function _sortText(column, formatName) {
   if (formatName !== "text") return;
-  column.sorter = "string";
+  column.sorter = (a, b, aRow, bRow, column, dir, params) => {
+    const aValue = a.text;
+    const bValue = b.text;
+    return _baseSorter(aValue, bValue, params);
+  };
 }
 
 /**
