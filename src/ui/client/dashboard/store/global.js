@@ -48,7 +48,7 @@ export const useDisplayStore = defineStore("display", () => {
   const display = ref({});
 
   function setDisplay(groupName, componentName) {
-    display.value[groupName] = componentName;
+    display.value[groupName] = String(componentName);
   }
 
   function getDisplayByGroupName(groupName) {
@@ -60,7 +60,7 @@ export const useDisplayStore = defineStore("display", () => {
   }
 
   function isCurrentDisplay(groupName, componentName) {
-    return display.value[groupName] === componentName;
+    return display.value[groupName] === String(componentName);
   }
 
   return {

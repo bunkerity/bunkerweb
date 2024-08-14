@@ -26,6 +26,7 @@ def reports_filters(reasons: Optional[list] = None, countries: Optional[list] = 
                 "id": "input-search-misc",
                 "name": "input-search-misc",
                 "label": "reports_search_misc",  # keep it (a18n)
+                "placeholder": "reports_search_misc_placeholder",  # keep it (a18n)
                 "value": "",
                 "inpType": "input",
                 "columns": {"pc": 3, "tablet": 4, "mobile": 12},

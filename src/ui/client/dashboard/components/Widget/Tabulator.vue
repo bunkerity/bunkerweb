@@ -293,7 +293,7 @@ onMounted(() => {
   <div data-is="table" class="layout-table">
     <Container
       v-if="props.filters.length"
-      :containerClass="'layout-table-settings'"
+      :containerClass="'layout-settings-table'"
     >
       <template v-for="filter in props.filters">
         <Fields

@@ -216,12 +216,12 @@ onMounted(() => {
         v-bind="buttonSave"
       />
     </div>
-    <div class="flex justify-center items-center" data-is="form-error">
-      <Text
-        v-if="!data.isValid"
-        :text="'dashboard_raw_invalid'"
-        :textClass="'form-setting-error'"
-      />
+    <div
+      v-if="!data.isValid"
+      class="flex justify-center items-center"
+      data-is="form-error"
+    >
+      <Text :text="'dashboard_raw_invalid'" :textClass="'form-setting-error'" />
     </div>
   </Container>
 </template>

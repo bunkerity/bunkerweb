@@ -59,6 +59,7 @@ import { useUUID } from "@utils/global";
  *  @param {String} [headerClass=""]
  *  @param {String} [fieldSize="normal"] - Size between "normal" or "sm"
  *  @param {String|Number} [tabId=contentIndex] - The tabindex of the field, by default it is the contentIndex
+ *  @param {Boolean} [hideValidation=false] - If field should be validate and show error. Useful to disable it for filters.
  */
 
 const props = defineProps({
@@ -67,6 +68,11 @@ const props = defineProps({
     type: String,
     required: false,
     default: "",
+  },
+  hideValidation: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
   fieldSize: {
     type: String,
@@ -184,7 +190,6 @@ const select = reactive({
 });
 
 const selectBtn = ref();
-const selectWidth = ref("");
 const selectDropdown = ref();
 
 /**
@@ -345,15 +350,6 @@ onBeforeMount(() => {
   select.id = useUUID(props.id);
 });
 
-onMounted(() => {
-  selectWidth.value = `${selectBtn.value.clientWidth}px`;
-  window.addEventListener("resize", () => {
-    try {
-      selectWidth.value = `${selectBtn.value.clientWidth}px`;
-    } catch (err) {}
-  });
-});
-
 const emits = defineEmits(["inp"]);
 </script>
 
@@ -361,7 +357,7 @@ const emits = defineEmits(["inp"]);
   <Container
     :class="[select.isOpen ? 'z-[100]' : '']"
     data-field-container
-    :containerClass="`${props.containerClass}`"
+    :containerClass="`${props.containerClass} input-container`"
     :columns="props.columns"
   >
     <Header
@@ -446,7 +442,6 @@ const emits = defineEmits(["inp"]);
         :aria-expanded="select.isOpen ? 'true' : 'false'"
         ref="selectDropdown"
         role="radiogroup"
-        :style="{ width: selectWidth }"
         :id="`${select.id}-custom`"
         :class="[select.isOpen ? 'open' : 'close']"
         class="select-dropdown-container"
@@ -482,6 +477,7 @@ const emits = defineEmits(["inp"]);
         </button>
       </div>
       <ErrorField
+        v-if="props.showErrMsg"
         :errorClass="'select'"
         :isValid="select.isValid"
         :isValue="true"

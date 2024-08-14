@@ -364,13 +364,15 @@ onUnmounted(() => {
         @click="advancedForm.submit()"
       />
     </div>
-    <div class="flex justify-center items-center" data-is="form-error">
+    <div
+      v-if="
+        (Object.keys(advancedForm.templateUIFormat).length && data.isRegErr) ||
+        (Object.keys(advancedForm.templateUIFormat).length && data.isReqErr)
+      "
+      class="flex justify-center items-center"
+      data-is="form-error"
+    >
       <Text
-        v-if="
-          (Object.keys(advancedForm.templateUIFormat).length &&
-            data.isRegErr) ||
-          (Object.keys(advancedForm.templateUIFormat).length && data.isReqErr)
-        "
         :text="
           data.isReqErr
             ? $t('dashboard_advanced_required', {

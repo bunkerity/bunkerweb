@@ -60,14 +60,19 @@ import { useUUID } from "@utils/global.js";
  *  @param {String} [headerClass=""]
  *  @param {String} [fieldSize="normal"] - Size between "normal" or "sm"
  *  @param {String|Number} [tabId=contentIndex] - The tabindex of the field, by default it is the contentIndex
+ *  @param {Boolean} [showErrMsg=false] - Show additionnal required or invalid error message at the bottom of the input. Disable by default because help popover, label and outline color are enough for the user.
  */
-
 const props = defineProps({
   // id && value && method
   id: {
     type: String,
     required: false,
     default: "",
+  },
+  showErrMsg: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
   fieldSize: {
     type: String,
@@ -193,7 +198,7 @@ onMounted(() => {
 
 <template>
   <Container
-    :containerClass="`${props.containerClass}`"
+    :containerClass="`${props.containerClass} input-container`"
     :columns="props.columns"
   >
     <Header
@@ -297,6 +302,7 @@ onMounted(() => {
         </button>
       </div>
       <ErrorField
+        v-if="props.showErrMsg"
         :errorClass="'input'"
         :isValid="inp.isValid"
         :isValue="!!inp.value"

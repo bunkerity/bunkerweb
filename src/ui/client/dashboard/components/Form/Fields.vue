@@ -47,63 +47,65 @@ const props = defineProps({
  *  @returns {Object} - props object
  */
 function getDataByField(setting, fallbackInpType) {
+  console;
   // Start by the base = setting share by all fields
   const base = {
-    inpType: setting.inpType || fallbackInpType,
-    id: setting.id || "",
-    columns: setting.columns || { pc: "12", tablet: "12", mobile: "12" },
-    value: setting.value || "",
-    popovers: setting.popovers || [],
-    disabled: setting.disabled || false,
-    required: setting.required || false,
-    label: setting.label || null,
-    name: setting.name || null,
-    hideLabel: setting.hideLabel || false,
-    containerClass: setting.containerClass || "",
-    headerClass: setting.headerClass || "",
-    inpClass: setting.inpClass || "",
-    tabId: setting.tabId || contentIndex,
-    attrs: setting.attrs || {},
-    fieldSize: setting.fieldSize || "normal",
+    inpType: setting?.inpType || fallbackInpType,
+    id: setting?.id || "",
+    columns: setting?.columns || { pc: "12", tablet: "12", mobile: "12" },
+    value: setting?.value || "",
+    popovers: setting?.popovers || [],
+    disabled: setting?.disabled || false,
+    required: setting?.required || false,
+    label: setting?.label || null,
+    name: setting?.name || null,
+    hideLabel: setting?.hideLabel || false,
+    containerClass: setting?.containerClass || "",
+    headerClass: setting?.headerClass || "",
+    inpClass: setting?.inpClass || "",
+    tabId: setting?.tabId || contentIndex,
+    attrs: setting?.attrs || {},
+    fieldSize: setting?.fieldSize || "normal",
+    hideFeedbackError: setting?.hideFeedbackError || false,
   };
 
   if (
-    setting.inpType === "select" ||
+    setting?.inpType === "select" ||
     (!setting?.inpType && fallbackInpType === "select")
   ) {
-    base["values"] = setting.values || [];
-    base["maxBtnChars"] = setting.maxBtnChars || 0;
-    base["requiredValues"] = setting.requiredValues || [];
-    base["onlyDown"] = setting.onlyDown || false;
-    base["overflowAttrEl"] = setting.overflowAttrEl || "";
+    base["values"] = setting?.values || [];
+    base["maxBtnChars"] = setting?.maxBtnChars || 0;
+    base["requiredValues"] = setting?.requiredValues || [];
+    base["onlyDown"] = setting?.onlyDown || false;
+    base["overflowAttrEl"] = setting?.overflowAttrEl || "";
   }
 
   if (
-    setting.inpType === "datepicker" ||
+    setting?.inpType === "datepicker" ||
     (!setting?.inpType && fallbackInpType === "datepicker")
   ) {
-    base["minDate"] = setting.minDate || "";
-    base["maxDate"] = setting.maxDate || "";
-    base["isClipboard"] = setting.isClipboard || false;
+    base["minDate"] = setting?.minDate || "";
+    base["maxDate"] = setting?.maxDate || "";
+    base["isClipboard"] = setting?.isClipboard || false;
   }
 
   if (
-    setting.inpType === "input" ||
+    setting?.inpType === "input" ||
     (!setting?.inpType && fallbackInpType === "input")
   ) {
-    base["type"] = setting.type || "text";
-    base["placeholder"] = setting.placeholder || "";
-    base["pattern"] = setting.pattern || "";
-    base["isClipboard"] = setting.isClipboard || false;
-    base["readonly"] = setting.readonly;
+    base["type"] = setting?.type || "text";
+    base["placeholder"] = setting?.placeholder || "";
+    base["pattern"] = setting?.pattern || "";
+    base["isClipboard"] = setting?.isClipboard || false;
+    base["readonly"] = setting?.readonly;
   }
 
   if (
-    setting.inpType === "editor" ||
+    setting?.inpType === "editor" ||
     (!setting?.inpType && fallbackInpType === "editor")
   ) {
-    base["pattern"] = setting.pattern || "";
-    base["isClipboard"] = setting.isClipboard || false;
+    base["pattern"] = setting?.pattern || "";
+    base["isClipboard"] = setting?.isClipboard || false;
   }
 
   return base;

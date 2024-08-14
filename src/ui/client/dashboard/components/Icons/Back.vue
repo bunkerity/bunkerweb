@@ -1,8 +1,8 @@
 <script setup>
 import { defineProps, reactive } from "vue";
 /**
- *  @name Icons/Uncheck.vue
- *  @description This component is a svg icon representing uncheck.
+ *  @name Icons/Back.vue
+ *  @description This component is a svg icon representing back.
  *  @example
  *  {
  *    color: 'info',
@@ -41,7 +41,7 @@ const icon = reactive({
     :data-color="icon.color"
     :data-value="props.value"
     :aria-disabled="props.disabled ? 'true' : 'false'"
-    data-svg="uncheck"
+    data-svg="box"
     role="img"
     aria-hidden="true"
     :class="[props.iconClass, icon.color, 'fill dark:brightness-[125%]']"
@@ -51,7 +51,7 @@ const icon = reactive({
   >
     <path
       fill-rule="evenodd"
-      d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25Zm3 10.5a.75.75 0 0 0 0-1.5H9a.75.75 0 0 0 0 1.5h6Z"
+      d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25Zm-4.28 9.22a.75.75 0 0 0 0 1.06l3 3a.75.75 0 1 0 1.06-1.06l-1.72-1.72h5.69a.75.75 0 0 0 0-1.5h-5.69l1.72-1.72a.75.75 0 0 0-1.06-1.06l-3 3Z"
       clip-rule="evenodd"
     />
   </svg>

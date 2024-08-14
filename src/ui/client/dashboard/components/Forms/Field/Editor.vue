@@ -54,14 +54,19 @@ import "@assets/script/editor/theme-dawn.js";
  *  @param {String} [headerClass=""]
  *  @param {String|Number} [tabId=contentIndex] - The tabindex of the field, by default it is the contentIndex
  *  @param {String} [fieldSize="normal"] - Size between "normal" or "sm"
+ *  @param {Boolean} [showErrMsg=false] - Show additionnal required or invalid error message at the bottom of the input. Disable by default because help popover, label and outline color are enough for the user.
  */
-
 const props = defineProps({
   // id && value && method
   id: {
     type: String,
     required: false,
     default: "",
+  },
+  showErrMsg: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
   columns: {
     type: [Object, Boolean],
@@ -368,7 +373,7 @@ onUnmounted(() => {
 
 <template>
   <Container
-    :containerClass="`${props.containerClass}`"
+    :containerClass="`${props.containerClass} input-container`"
     :columns="props.columns"
   >
     <Header
@@ -410,6 +415,7 @@ onUnmounted(() => {
       />
     </div>
     <ErrorField
+      v-if="props.showErrMsg"
       :errorClass="'editor'"
       :isValid="editor.isValid"
       :isValue="!!editor.value"

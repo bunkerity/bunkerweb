@@ -59,14 +59,19 @@ import "@assets/css/flatpickr.dark.min.css";
  *  @param {String} [containerClass=""]
  *  @param {String} [fieldSize="normal"] - Size between "normal" or "sm"
  *  @param {String|Number} [tabId=contentIndex] - The tabindex of the field, by default it is the contentIndex
+ *  @param {Boolean} [showErrMsg=false] - Show additionnal required or invalid error message at the bottom of the input. Disable by default because help popover, label and outline color are enough for the user.
  */
-
 const props = defineProps({
   // id && type && disabled && required && value
   id: {
     type: String,
     required: false,
     default: "",
+  },
+  showErrMsg: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
   fieldSize: {
     type: String,
@@ -150,6 +155,7 @@ const props = defineProps({
     required: false,
     default: "",
   },
+
   tabId: {
     type: [String, Number],
     required: false,
@@ -735,7 +741,7 @@ onUnmounted(() => {
   <Container
     :class="[picker.isOpen ? 'z-[100]' : '']"
     v-if="props.inpType === 'datepicker'"
-    :containerClass="`${props.containerClass}`"
+    :containerClass="`${props.containerClass} input-container`"
     :columns="props.columns"
   >
     <Header
@@ -794,6 +800,7 @@ onUnmounted(() => {
         :copyClass="'datepicker-clip'"
       />
       <ErrorField
+        v-if="props.showErrMsg"
         :errorClass="'picker'"
         :isValid="date.isValid"
         :isValue="!!date.value"

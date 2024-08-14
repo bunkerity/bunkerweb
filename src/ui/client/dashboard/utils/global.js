@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
+import { useDisplayStore } from "@store/global.js";
 
 /**
  *  @name utils/global.js
@@ -16,6 +17,7 @@ import { v4 as uuidv4 } from "uuid";
 function useGlobal() {
   window.addEventListener("click", useDataLinkAttr);
   window.addEventListener("click", useSubmitAttr);
+  window.addEventListener("click", useHandleDisplay);
 }
 
 /**
@@ -257,6 +259,30 @@ function useDataLinkAttr(e) {
   if (!e.target.hasAttribute("data-link")) return;
   const link = e.target.getAttribute("data-link");
   window.location.href = link;
+}
+
+/**
+ *  @name useHandleDisplay
+ *  @description Listen to click event and check if the clicked element has a data-display-index attribute.
+ *  Case it has, we will update the display store with the data-display-index value.
+ *  @param {Event} e - The event to attach the function logic
+ *  @returns {Void}
+ */
+function useHandleDisplay(e) {
+  const displayStore = useDisplayStore();
+  if (
+    !e.target.hasAttribute("data-display-index") ||
+    !e.target.hasAttribute("data-display-group")
+  )
+    return;
+  try {
+    const index = e.target.getAttribute("data-display-index");
+    const group = e.target.getAttribute("data-display-group");
+    displayStore.setDisplay(group, index);
+  } catch (e) {
+    console.error(e);
+    console.error("Display index bad format");
+  }
 }
 
 export {

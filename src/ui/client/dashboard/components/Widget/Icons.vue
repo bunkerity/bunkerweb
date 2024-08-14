@@ -38,6 +38,7 @@ import Pen from "@components/Icons/Pen.vue";
 import Document from "@components/Icons/Document.vue";
 import Eye from "@components/Icons/Eye.vue";
 import Uncheck from "@components/Icons/Uncheck.vue";
+import Back from "@components/Icons/Back.vue";
 
 /**
  *  @name Widget/Icons.vue
@@ -110,6 +111,7 @@ onMounted(() => {
       v-if="useEqualStr(props.iconName, 'exclamation')"
       v-bind="icon"
     />
+    <Back v-if="useEqualStr(props.iconName, 'back')" v-bind="icon" />
     <Box v-if="useEqualStr(props.iconName, 'box')" v-bind="icon" />
     <Uncheck v-if="useEqualStr(props.iconName, 'uncheck')" v-bind="icon" />
     <Carton v-if="useEqualStr(props.iconName, 'carton')" v-bind="icon" />

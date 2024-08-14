@@ -258,9 +258,12 @@ onUnmounted(() => {
           v-bind="buttonSave"
         />
       </div>
-      <div class="flex justify-center items-center" data-is="form-error">
+      <div
+        v-if="data.isRegErr || data.isReqErr"
+        class="flex justify-center items-center"
+        data-is="form-error"
+      >
         <Text
-          v-if="data.isRegErr || data.isReqErr"
           :text="
             data.isReqErr
               ? $t('dashboard_easy_required', {

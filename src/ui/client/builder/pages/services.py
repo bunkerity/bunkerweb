@@ -65,6 +65,7 @@ def services_builder(services):
                                     },
                                 ],
                                 "columns": {"pc": 3, "tablet": 4, "mobile": 12},
+                                "fieldSize": "sm",
                             },
                         },
                         {
@@ -87,6 +88,7 @@ def services_builder(services):
                                     },
                                 ],
                                 "columns": {"pc": 3, "tablet": 4, "mobile": 12},
+                                "fieldSize": "sm",
                             },
                         },
                         {
@@ -109,6 +111,7 @@ def services_builder(services):
                                     },
                                 ],
                                 "columns": {"pc": 3, "tablet": 4, "mobile": 12},
+                                "fieldSize": "sm",
                             },
                         },
                     ],

@@ -55,6 +55,7 @@ def jobs_builder(jobs):
                                     },
                                 ],
                                 "columns": {"pc": 3, "tablet": 4, "mobile": 12},
+                                "fieldSize": "sm",
                             },
                         },
                         {
@@ -77,6 +78,7 @@ def jobs_builder(jobs):
                                     },
                                 ],
                                 "columns": {"pc": 3, "tablet": 4, "mobile": 12},
+                                "fieldSize": "sm",
                             },
                         },
                         {
@@ -99,6 +101,7 @@ def jobs_builder(jobs):
                                     },
                                 ],
                                 "columns": {"pc": 3, "tablet": 4, "mobile": 12},
+                                "fieldSize": "sm",
                             },
                         },
                         {
@@ -121,6 +124,7 @@ def jobs_builder(jobs):
                                     },
                                 ],
                                 "columns": {"pc": 3, "tablet": 4, "mobile": 12},
+                                "fieldSize": "sm",
                             },
                         },
                     ],

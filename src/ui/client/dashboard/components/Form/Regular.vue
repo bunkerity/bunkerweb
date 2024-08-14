@@ -101,16 +101,24 @@ onMounted(() => {
     :containerClass="`form-regular-container`"
   >
     <div class="form-regular-wrap">
-      <div :class="['layout-settings', `max-w-screen-${props.maxWidthScreen}`]">
+      <div
+        :class="[
+          'layout-settings-regular',
+          `max-w-screen-${props.maxWidthScreen}`,
+        ]"
+      >
         <template v-for="(field, key) in props.fields">
           <Fields :setting="field.setting" />
         </template>
       </div>
 
       <ButtonGroup :buttons="props.buttons" />
-      <div class="flex justify-center items-center" data-is="form-error">
+      <div
+        v-if="data.isRegErr || data.isReqErr"
+        class="flex justify-center items-center"
+        data-is="form-error"
+      >
         <Text
-          v-if="data.isRegErr || data.isReqErr"
           :text="
             data.isReqErr
               ? $t('dashboard_regular_required', {

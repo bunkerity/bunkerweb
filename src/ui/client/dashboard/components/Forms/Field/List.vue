@@ -55,14 +55,19 @@ import ErrorDropdown from "@components/Forms/Error/Dropdown.vue";
  *  @param {String} [headerClass=""]
  *  @param {String} [fieldSize="normal"] - Size between "normal" or "sm"
  *  @param {String|Number} [tabId=contentIndex] - The tabindex of the field, by default it is the contentIndex
+ *  @param {Boolean} [showErrMsg=false] - Show additionnal required or invalid error message at the bottom of the input. Disable by default because help popover, label and outline color are enough for the user.
  */
-
 const props = defineProps({
   // id && value && method
   id: {
     type: String,
     required: false,
     default: "",
+  },
+  showErrMsg: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
   fieldSize: {
     type: String,
@@ -197,7 +202,6 @@ const inp = reactive({
 });
 
 const inputEl = ref();
-const selectWidth = ref("");
 const selectDropdown = ref();
 
 /**
@@ -373,15 +377,6 @@ onBeforeMount(() => {
   inp.id = useUUID(props.id);
 });
 
-onMounted(() => {
-  selectWidth.value = `${inputEl.value.clientWidth}px`;
-  window.addEventListener("resize", () => {
-    try {
-      selectWidth.value = `${inputEl.value.clientWidth}px`;
-    } catch (err) {}
-  });
-});
-
 const emits = defineEmits(["inp"]);
 </script>
 
@@ -389,7 +384,7 @@ const emits = defineEmits(["inp"]);
   <Container
     data-field-container
     :class="[inp.isOpen ? 'z-[100]' : '']"
-    :containerClass="`${props.containerClass}`"
+    :containerClass="`${props.containerClass} input-container`"
     :columns="props.columns"
   >
     <Header
@@ -486,7 +481,6 @@ const emits = defineEmits(["inp"]);
         :aria-hidden="inp.isOpen ? 'false' : 'true'"
         :aria-expanded="inp.isOpen ? 'true' : 'false'"
         ref="selectDropdown"
-        :style="{ width: selectWidth }"
         :id="`${inp.id}-custom`"
         :class="[inp.isOpen ? 'open' : 'close']"
         class="list-dropdown-container"
@@ -538,9 +532,11 @@ const emits = defineEmits(["inp"]);
       <ErrorField
         :errorClass="'input'"
         v-if="
-          (!inp.isOpen && !inp.isMatching) ||
-          (!inp.isOpen && !inp.isEnterValid) ||
-          (!inp.isOpen && !inp.isValid)
+          props.showErrMsg
+            ? (!inp.isOpen && !inp.isMatching) ||
+              (!inp.isOpen && !inp.isEnterValid) ||
+              (!inp.isOpen && !inp.isValid)
+            : false
         "
         :isValid="inp.isValid && !inp.isEnterMatching && inp.isEnterValid"
         :isValue="props.required ? !!inp.value : true"

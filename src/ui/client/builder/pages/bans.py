@@ -112,10 +112,10 @@ def bans_filters(reasons: Optional[list] = None, remains: Optional[list] = None)
                 "id": "input-search-ip",
                 "name": "input-search-ip",
                 "label": "bans_search_ip",  # keep it (a18n)
+                "placeholder": "bans_search_ip_placeholder",  # keep it (a18n)
                 "value": "",
                 "inpType": "input",
                 "columns": {"pc": 3, "tablet": 4, "mobile": 12},
-                "fieldSize": "sm",
                 "isClipboard": True,
                 "popovers": [
                     {
@@ -123,6 +123,7 @@ def bans_filters(reasons: Optional[list] = None, remains: Optional[list] = None)
                         "text": "bans_search_ip_desc",
                     }
                 ],
+                "fieldSize": "sm",
             },
         },
     ]
@@ -208,7 +209,7 @@ def bans_list(bans: Optional[list] = None, reasons: Optional[list] = None, remai
             id="unselect-all-list",
             type="button",
             text="action_unselect_all",  # keep it (a18n)
-            color="delete",
+            color="info",
             iconColor="white",
             iconName="uncheck",
             size="sm",
@@ -248,6 +249,8 @@ def bans_list(bans: Optional[list] = None, reasons: Optional[list] = None, remai
                         text="action_unban",  # keep it (a18n)
                         color="success",
                         size="normal",
+                        iconName="uncheck",
+                        iconColor="white",
                         modal={
                             "widgets": [
                                 title_widget(title="bans_unban_title"),  # keep it (a18n)
@@ -265,6 +268,8 @@ def bans_list(bans: Optional[list] = None, reasons: Optional[list] = None, remai
                                             id="unban-btn-confirm",
                                             text="action_unban",  # keep it (a18n)
                                             color="success",
+                                            iconName="uncheck",
+                                            iconColor="white",
                                             size="normal",
                                             attrs={"data-unban": ""},
                                         ),
@@ -361,6 +366,8 @@ def bans_add() -> dict:
                 type="button",
                 text="action_save",  # keep it (a18n)
                 color="success",
+                iconName="plus",
+                iconColor="white",
                 size="normal",
             )
         ]

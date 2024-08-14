@@ -60,14 +60,19 @@ import { useUUID } from "@utils/global.js";
  *  @param {String} [fieldSize="normal"] - Size between "normal" or "sm"
  *  @param {String} [headerClass=""]
  *  @param {String|Number} [tabId=contentIndex] - The tabindex of the field, by default it is the contentIndex
+ *  @param {Boolean} [showErrMsg=false] - Show additionnal required or invalid error message at the bottom of the input. Disable by default because help popover, label and outline color are enough for the user.
  */
-
 const props = defineProps({
   // id && value && method
   id: {
     type: String,
     required: false,
     default: "",
+  },
+  showErrMsg: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
   columns: {
     type: [Object, Boolean],
@@ -389,7 +394,7 @@ const emits = defineEmits(["inp"]);
   <Container
     data-field-container
     :class="[select.isOpen ? 'z-[100]' : '']"
-    :containerClass="`${props.containerClass}`"
+    :containerClass="`${props.containerClass} input-container`"
     :columns="props.columns"
   >
     <Header
@@ -557,6 +562,7 @@ const emits = defineEmits(["inp"]);
         </div>
       </div>
       <ErrorField
+        v-if="props.showErrMsg"
         :errorClass="'combobox'"
         :isValid="select.isValid"
         :isValue="true"

@@ -35,6 +35,7 @@ def instances_filter(healths: str, types: Optional[list] = None, methods: Option
                 "id": "input-search-host-name",
                 "name": "input-search-host-name",
                 "label": "instances_search",  # keep it (a18n)
+                "placeholder": "instances_search_placeholder",  # keep it (a18n)
                 "value": "",
                 "inpType": "input",
                 "columns": {"pc": 3, "tablet": 4, "mobile": 12},
@@ -69,6 +70,7 @@ def instances_filter(healths: str, types: Optional[list] = None, methods: Option
                             "text": "instances_type_popover",
                         }
                     ],
+                    "fieldSize": "sm",
                 },
             }
         )
@@ -93,6 +95,7 @@ def instances_filter(healths: str, types: Optional[list] = None, methods: Option
                             "text": "instances_method_popover",
                         }
                     ],
+                    "fieldSize": "sm",
                 },
             },
         )
@@ -117,6 +120,7 @@ def instances_filter(healths: str, types: Optional[list] = None, methods: Option
                             "text": "instances_health_popover",
                         }
                     ],
+                    "fieldSize": "sm",
                 },
             },
         )
@@ -163,6 +167,8 @@ def instance_item(
                                 text="action_ping",  # keep it (a18n)
                                 color="info",
                                 size="normal",
+                                iconName="globe",
+                                iconColor="white",
                                 attrs={
                                     "data-submit-form": f"""{{"instance_name" : "{instance_name}", "instance_hostname" : "{hostname}" }}""",
                                     "data-submit-endpoint": "/ping",
@@ -204,6 +210,8 @@ def instance_item(
                                     text="action_delete",  # keep it (a18n)
                                     color="delete",
                                     size="normal",
+                                    iconName="trash",
+                                    iconColor="white",
                                     attrs={
                                         "data-submit-form": f"""{{ "instance_name" : "{instance_name}", "instance_hostname" : "{hostname}" }}""",
                                         "data-submit-endpoint": "/delete",
@@ -255,6 +263,13 @@ def instances_new_form() -> dict:
                             value="",
                             pattern="",  # add your pattern if needed
                             columns={"pc": 12, "tablet": 12, "mobile": 12},
+                            placeholder="instances_name_placeholder",  # keep it (a18n)
+                            popovers=[
+                                {
+                                    "iconName": "info",
+                                    "text": "instances_name_desc",
+                                }
+                            ],
                         )
                     ),
                     get_fields_from_field(
@@ -265,13 +280,22 @@ def instances_new_form() -> dict:
                             value="",
                             pattern="",  # add your pattern if needed
                             columns={"pc": 12, "tablet": 12, "mobile": 12},
+                            placeholder="instances_hostname_placeholder",  # keep it (a18n)
+                            popovers=[
+                                {
+                                    "iconName": "info",
+                                    "text": "instances_hostname_desc",
+                                }
+                            ],
                         )
                     ),
                 ],
                 buttons=[
                     button_widget(
                         id="create-instance-submit",
-                        text="action_save",
+                        text="action_create",
+                        iconName="plus",
+                        iconColor="white",
                         color="success",
                         size="normal",
                         type="submit",

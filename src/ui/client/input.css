@@ -172,6 +172,10 @@ body {
 }
 
 /* INPUT */
+.input-container {
+  @apply relative h-fit;
+}
+
 .input-header-container {
   @apply z-20;
 }
@@ -193,7 +197,7 @@ body {
 }
 
 .input-header-label {
-  @apply relative lowercase capitalize-first transition duration-300 ease-in-out font-bold  dark:text-gray-300;
+  @apply [word-break:break-word] relative lowercase capitalize-first transition duration-300 ease-in-out font-bold  dark:text-gray-300;
 }
 
 .input-header-label.normal {
@@ -213,35 +217,11 @@ body {
 }
 
 .input-error-msg {
-  @apply absolute text-red-500 text-[0.75rem] font-semibold mb-0 mt-0.5;
-}
-
-.input.input-error-msg {
-  @apply -bottom-5;
-}
-
-.picker.input-error-msg {
-  @apply -bottom-5;
-}
-
-.select.input-error-msg {
-  @apply -bottom-5;
-}
-
-.combobox.input-error-msg {
-  @apply -bottom-5;
-}
-
-.check.input-error-msg {
-  @apply -bottom-11;
-}
-
-.editor.input-error-msg {
-  @apply -bottom-3;
+  @apply relative text-red-500 text-[0.75rem] font-semibold m-0;
 }
 
 .valid.input-error-msg {
-  @apply pointer-events-none text-green-500 -z-10 opacity-0;
+  @apply pointer-events-none text-green-500 -z-10 hidden;
 }
 
 .input-list-add {
@@ -253,7 +233,7 @@ body {
 }
 
 .checkbox-container {
-  @apply relative z-10 mt-1;
+  @apply flex flex-col z-10;
 }
 
 .checkbox {
@@ -261,7 +241,7 @@ body {
     relative dark:border-slate-600 dark:bg-slate-700 z-10 w-5 h-5
     text-base rounded-1.4 duration-150 float-left
     appearance-none border border-gray-300 bg-white bg-contain bg-center
-    mt-1 bg-no-repeat align-top transition-all disabled:bg-gray-400
+    bg-no-repeat align-top transition-all disabled:bg-gray-400
     disabled:border-gray-400/0 dark:disabled:bg-gray-800
     disabled:cursor-not-allowed
     dark:disabled:border-gray-800/0 disabled:text-gray-700
@@ -284,12 +264,9 @@ body {
   @apply z-10 pointer-events-none absolute fill-gray-700 dark:fill-gray-100 left-0 top-0;
 }
 
-.checkbox-svg.normal {
-  @apply translate-x-[3px] translate-y-[7px] h-3.5 w-3.5;
-}
-
+.checkbox-svg.normal,
 .checkbox-svg.sm {
-  @apply translate-x-[3px] translate-y-[7px] h-3 w-3;
+  @apply translate-x-[3px] translate-y-[3px] h-3.5 w-3.5;
 }
 
 .select-btn {
@@ -314,11 +291,11 @@ body {
 }
 
 .select-dropdown-container {
-  @apply flex max-h-[200px] overflow-x-hidden overflow-y-auto flex-col w-fit mt-2;
+  @apply flex max-h-[200px] overflow-x-hidden overflow-y-auto flex-col w-full mt-2;
 }
 
 .list-dropdown-container {
-  @apply flex max-h-[200px] overflow-x-hidden overflow-y-auto flex-col w-fit mt-2;
+  @apply flex max-h-[200px] overflow-x-hidden overflow-y-auto flex-col w-full mt-2;
 }
 
 .select-dropdown-btn {
@@ -590,10 +567,6 @@ body {
   @apply py-4 col-span-12 grid grid-cols-12 w-full relative;
 }
 
-.layout-table-settings {
-  @apply mb-4 gap-y-4 sm:gap-x-4 md:gap-x-8 md:gap-y-8  col-span-12 grid grid-cols-12 w-full relative;
-}
-
 .layout-card {
   @apply px-6 py-4 grid grid-cols-12 w-full overflow-visible relative transition dark:brightness-110 shadow-md bg-white dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border transform duration-300 ease-in-out;
 }
@@ -627,7 +600,15 @@ body {
 }
 
 .layout-settings {
-  @apply py-4  gap-y-4 sm:gap-x-4 md:gap-x-8 md:gap-y-8 col-span-12 grid grid-cols-12 w-full relative;
+  @apply py-4 gap-y-4 md:gap-y-6 sm:gap-x-4 md:gap-x-6 col-span-12 grid grid-cols-12 w-full relative;
+}
+
+.layout-settings-regular {
+  @apply py-4 gap-y-4 sm:gap-x-4 md:gap-x-6 col-span-12 grid grid-cols-12 w-full relative;
+}
+
+.layout-settings-table {
+  @apply gap-y-2 sm:gap-x-4 md:gap-x-6 mb-3 col-span-12 grid grid-cols-12 w-full relative items-center;
 }
 
 .layout-settings-multiple {
@@ -1261,7 +1242,7 @@ body {
 }
 
 .button-group-table {
-  @apply mb-4 col-span-12 flex justify-start items-center mx-0;
+  @apply mb-3 col-span-12 flex justify-start items-center mx-0;
 }
 
 .button-group-table-content {
@@ -2026,6 +2007,10 @@ body {
 
 .btn.close:not([disabled]) {
   @apply bg-white text-red-500 border border-red-500 hover:border-red-500/80 focus:border-red-500/80 hover:text-red-500/80 focus:text-red-500/80;
+}
+
+.btn.back:not([disabled]) {
+  @apply bg-white text-sky-500 border border-sky-500 hover:border-sky-500/80 focus:border-sky-500/80 hover:text-sky-500/80 focus:text-sky-500/80;
 }
 
 .btn.delete:not([disabled]),
