@@ -29,6 +29,7 @@ def reports_filters(reasons: Optional[list] = None, countries: Optional[list] = 
                 "value": "",
                 "inpType": "input",
                 "columns": {"pc": 3, "tablet": 4, "mobile": 12},
+                "fieldSize": "sm",
                 "popovers": [
                     {
                         "iconName": "info",
@@ -53,6 +54,7 @@ def reports_filters(reasons: Optional[list] = None, countries: Optional[list] = 
                     "inpType": "select",
                     "onlyDown": True,
                     "columns": {"pc": 3, "tablet": 4, "mobile": 12},
+                    "fieldSize": "sm",
                     "popovers": [
                         {
                             "iconName": "info",
@@ -77,6 +79,7 @@ def reports_filters(reasons: Optional[list] = None, countries: Optional[list] = 
                     "inpType": "select",
                     "onlyDown": True,
                     "columns": {"pc": 3, "tablet": 4, "mobile": 12},
+                    "fieldSize": "sm",
                     "popovers": [
                         {
                             "iconName": "info",
@@ -101,6 +104,7 @@ def reports_filters(reasons: Optional[list] = None, countries: Optional[list] = 
                     "inpType": "select",
                     "onlyDown": True,
                     "columns": {"pc": 3, "tablet": 4, "mobile": 12},
+                    "fieldSize": "sm",
                     "popovers": [
                         {
                             "iconName": "info",
@@ -125,6 +129,7 @@ def reports_filters(reasons: Optional[list] = None, countries: Optional[list] = 
                     "inpType": "select",
                     "onlyDown": True,
                     "columns": {"pc": 3, "tablet": 4, "mobile": 12},
+                    "fieldSize": "sm",
                     "popovers": [
                         {
                             "iconName": "info",
