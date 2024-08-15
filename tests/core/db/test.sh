@@ -370,12 +370,11 @@ else
     sudo chmod -R 777 /etc/bunkerweb/plugins external bunkerweb
 fi
 
-tests="multisite upgrade"
-# tests="local multisite"
+tests="local multisite"
 
-# if [ "$integration" == "docker" ] ; then
-#     tests="$tests mariadb mysql postgres upgrade"
-# fi
+if [ "$integration" == "docker" ] ; then
+    tests="$tests mariadb mysql postgres upgrade"
+fi
 
 for test in $tests
 do
