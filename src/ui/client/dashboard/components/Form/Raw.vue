@@ -8,6 +8,7 @@ import Button from "@components/Widget/Button.vue";
 import Text from "@components/Widget/Text.vue";
 import { v4 as uuidv4 } from "uuid";
 import { useRawForm } from "@store/form.js";
+import { useDisplayStore } from "@store/global.js";
 
 /**
  *  @name Form/Raw.vue
@@ -27,6 +28,7 @@ import { useRawForm } from "@store/form.js";
  * @param {String} [endpoint=""] - Form endpoint. Case none, will be ignored.
  * @param {String} [method="POST"] - Http method to be used on form submit.
  * @param {Object} [columns={ "pc": "12", "tablet": "12", "mobile": "12" }] - Columns object.
+ * @param {Array} [display=[]] - Array need two values : "groupName" in index 0 and "compId" in index 1 in order to be displayed using the display store. More info on the display store itslef.
  */
 
 const rawForm = useRawForm();
@@ -68,13 +70,43 @@ const props = defineProps({
     required: false,
     default: { pc: 12, tablet: 12, mobile: 12 },
   },
+  display: {
+    type: Array,
+    required: false,
+    default: [],
+  },
 });
+
+const displayStore = useDisplayStore();
 
 const data = reactive({
   isValid: true,
   // This will be use to unmount and remount the editor (create a new editor instance because it is vanilla js)
   isRender: true,
+  isDisplay: props.display.length
+    ? displayStore.isCurrentDisplay(props.display[0], props.display[1])
+    : true,
 });
+
+/**
+ *  @name checkDisplay
+ *  @description Check if the current display value is matching the display store value.
+ *  @returns {Void}
+ */
+function checkDisplay() {
+  if (!props.display.length) return;
+  data.isDisplay = displayStore.isCurrentDisplay(
+    props.display[0],
+    props.display[1]
+  );
+}
+
+// Case we have set a display group name and component id, the component id must match the current display id for the same group name to be displayed.
+if (props.display.length) {
+  watch(displayStore.display, (val) => {
+    checkDisplay();
+  });
+}
 
 watch(
   () => props.template,
@@ -205,7 +237,7 @@ onMounted(() => {
 
 <template>
   <Container
-    data-raw-
+    v-if="data.isDisplay"
     data-is="form"
     :tag="'form'"
     method="POST"

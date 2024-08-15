@@ -41,7 +41,7 @@ def reports_filters(reasons: Optional[list] = None, countries: Optional[list] = 
         },
     ]
 
-    if reasons is not None and len(reasons) >= 2:
+    if reasons is not None and (isinstance(reasons, list) and len(reasons) >= 2):
         reports_filters.append(
             {
                 "type": "=",
@@ -66,7 +66,7 @@ def reports_filters(reasons: Optional[list] = None, countries: Optional[list] = 
             }
         )
 
-    if countries is not None and len(countries) >= 2:
+    if countries is not None and (isinstance(countries, list) and len(countries) >= 2):
         reports_filters.append(
             {
                 "type": "=",
@@ -91,7 +91,7 @@ def reports_filters(reasons: Optional[list] = None, countries: Optional[list] = 
             }
         )
 
-    if methods is not None and len(methods) >= 2:
+    if methods is not None and (isinstance(methods, list) and len(methods) >= 2):
         reports_filters.append(
             {
                 "type": "=",
@@ -116,7 +116,7 @@ def reports_filters(reasons: Optional[list] = None, countries: Optional[list] = 
             }
         )
 
-    if codes is not None and len(codes) >= 2:
+    if codes is not None and (isinstance(codes, list) and len(codes) >= 2):
         reports_filters.append(
             {
                 "type": "=",
@@ -185,7 +185,7 @@ def reports_builder(
     reports: list, reasons: Optional[list] = None, countries: Optional[list] = None, methods: Optional[list] = None, codes: Optional[list] = None
 ) -> str:
 
-    if reports is None or len(reports) == 0:
+    if reports is None or (isinstance(reports, list) and len(reports) == 0):
         return [fallback_message("reports_not_found")]
 
     reports_items = [report_item(**report, id=index) for index, report in enumerate(reports)]

@@ -72,7 +72,7 @@ def configs_filter(config_types: Optional[list] = None) -> list:  # healths = "u
         },
     ]
 
-    if config_types is not None and len(config_types) >= 2:
+    if config_types is not None and (isinstance(config_types, list) and len(config_types) >= 2):
         filters.append(
             {
                 "type": "=",
@@ -436,10 +436,10 @@ def fallback_message(msg: str, display: Optional[list] = None) -> dict:
 
 def configs_builder(configs: Optional[list] = None, config_types: Optional[list] = None, services: Optional[list] = None) -> list:
 
-    if config_types is None or len(config_types) == 0:
+    if config_types is None or (isinstance(config_types, list) and len(config_types) == 0):
         return [fallback_message(msg="configs_missing_types")]
 
-    if services is None or len(services) == 0:
+    if services is None or (isinstance(services, list) and len(services) == 0):
         return [fallback_message(msg="configs_missing_services")]
 
     configs_items = []
@@ -459,7 +459,7 @@ def configs_builder(configs: Optional[list] = None, config_types: Optional[list]
         )
     )
 
-    if configs is None or len(configs) == 0:
+    if configs is None or (isinstance(configs, list) and len(configs) == 0):
         return [
             # Tabs is button group with display value and a size tab inside a tabs container
             configs_tabs(),

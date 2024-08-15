@@ -13,7 +13,10 @@ import { onMounted, reactive, ref } from "vue";
  *  }
  *  @param {String} text - The text value. Can be a translation key or by default raw text.
  *  @param {String} [textClass=""] - Style of text. Can be replace by any class starting by 'text-' like 'text-stat'.
+ *  @param {String} [textIconContainerClass="col-span-12 flex justify-center items-center"] - Case we have icon with text, we wrap the text on a container with the icon. We can add a class to this container.
  *  @param {String} [color=""] - The color of the text between error, success, warning, info or tailwind color
+ *  @param {String} [iconName=""] - The name of the icon to display before the text.
+ *  @param {String} [iconColor=""] - The color of the icon.
  *  @param {Boolean} [bold=false] - If the text should be bold or not.
  *  @param {Boolean} [uppercase=false] - If the text should be uppercase or not.
  *  @param {String} [tag="p"] - The tag of the text. Can be p, span, div, h1, h2, h3, h4, h5, h6
@@ -30,6 +33,11 @@ const props = defineProps({
     type: String,
     required: false,
     default: "",
+  },
+  textIconContainerClass: {
+    type: String,
+    required: false,
+    default: "col-span-12 flex justify-center items-center",
   },
   color: {
     type: String,
@@ -51,10 +59,15 @@ const props = defineProps({
     required: false,
     default: "p",
   },
-  icon: {
-    type: [Boolean, Object],
+  iconName: {
+    type: String,
     required: false,
-    default: false,
+    default: "",
+  },
+  iconColor: {
+    type: String,
+    required: false,
+    default: "",
   },
   attrs: {
     type: Object,
@@ -75,15 +88,17 @@ onMounted(() => {
   // Check if next sibling is a
   const renderEl = textEl.value || textIconEl.value || null;
   text.class =
-    props.textClass || renderEl.closest("[data-is]")
-      ? `text-${renderEl.closest("[data-is]").getAttribute("data-is")}`
+    props.textClass || renderEl.closest("[data-is]:not([data-is='text'])")
+      ? `text-${renderEl
+          .closest("[data-is]:not([data-is='text'])")
+          .getAttribute("data-is")}`
       : "text-card";
 });
 </script>
 
 <template>
   <component
-    v-if="!props.icon"
+    v-if="!props.iconName"
     :is="props.tag"
     v-bind="props.attrs"
     ref="textEl"
@@ -98,8 +113,12 @@ onMounted(() => {
     {{ $t(props.text, $t("dashboard_placeholder", props.text)) }}
   </component>
 
-  <div :class="['flex justify-center items-center']" v-if="props.icon">
-    <Icons v-if="props.icon" v-bind="props.icon" />
+  <div
+    :class="[props.textIconContainerClass]"
+    v-if="props.iconName"
+    data-is="text"
+  >
+    <Icons v-bind="{ iconName: props.iconName, color: props.iconColor }" />
     <component
       ref="textIconEl"
       :is="props.tag"

@@ -36,6 +36,7 @@ from .utils.widgets import (
     regular_widget,
     unmatch_widget,
     pairs_widget,
+    image_widget,
 )
 from .utils.table import add_column
 from .utils.format import get_fields_from_field
@@ -55,7 +56,7 @@ def fallback_message(msg: str, display: Optional[list] = None) -> dict:
 
 def profile_info(user_profile: Optional[list] = None) -> dict:
 
-    if user_profile is None or len(user_profile) == 0:
+    if user_profile is None or (isinstance(user_profile, list) and len(user_profile) == 0):
         return fallback_message("profile_info_not_found", display=["main", 0])
 
     return {
@@ -67,9 +68,12 @@ def profile_info(user_profile: Optional[list] = None) -> dict:
                 title="profile_info_title",  # keep it (a18n)
             ),
             subtitle_widget(
-                subtitle="profile__info_subtitle",  # keep it (a18n)
+                subtitle="profile_info_subtitle",  # keep it (a18n)
             ),
-            pairs_widget(pairs=user_profile),
+            pairs_widget(
+                pairs=user_profile,
+                columns={"pc": 6, "tablet": 12, "mobile": 12},
+            ),
         ],
     }
 
@@ -86,16 +90,34 @@ def profile_account_form(email: str) -> dict:
             subtitle_widget(
                 subtitle="profile_account_subtitle",  # keep it (a18n)
             ),
+            button_group_widget(
+                buttons=[
+                    button_widget(
+                        text="profile_account_tab_email",
+                        display=["account", 0],
+                        size="normal",
+                        color="back",
+                    ),
+                    button_widget(
+                        text="profile_account_tab_password",
+                        display=["account", 1],
+                        size="normal",
+                        color="back",
+                    ),
+                ],
+                buttonGroupClass="bouton-group-card mt-2",
+            ),
             regular_widget(
+                display=["account", 0],
+                title="profile_account_form_email_title",
                 maxWidthScreen="xs",
-                endpoint="/totp-enable",
+                endpoint="/edit",
                 method="POST",
                 fields=[
                     get_fields_from_field(
                         input_widget(
                             id="profile-email",
                             name="email",
-                            type="password",
                             label="profile_email",  # keep it (a18n)
                             value=email,
                             pattern="",  # add your pattern if needed
@@ -111,63 +133,16 @@ def profile_account_form(email: str) -> dict:
                     ),
                     get_fields_from_field(
                         input_widget(
-                            id="profile-password",
-                            name="new_password",
-                            label="profile_password",  # keep it (a18n)
-                            value="",
-                            pattern="",  # add your pattern if needed
-                            columns={"pc": 12, "tablet": 12, "mobile": 12},
-                            placeholder="profile_password_placeholder",  # keep it (a18n)
-                            popovers=[
-                                {
-                                    "iconName": "exclamation",
-                                    "color": "yellow-darker",
-                                    "text": "profile_password_warning_desc",
-                                },
-                                {
-                                    "iconName": "info",
-                                    "text": "profile_password_desc",
-                                },
-                            ],
-                        )
-                    ),
-                    get_fields_from_field(
-                        input_widget(
-                            id="profile-password-confirm",
-                            name="new_password_confirm",
-                            label="profile_password_confirm",  # keep it (a18n)
-                            value="",
-                            pattern="",  # add your pattern if needed
-                            columns={"pc": 12, "tablet": 12, "mobile": 12},
-                            placeholder="profile_password_confirm_placeholder",  # keep it (a18n)
-                            popovers=[
-                                {
-                                    "iconName": "exclamation",
-                                    "color": "yellow-darker",
-                                    "text": "profile_password_confirm_warning_desc",
-                                },
-                                {
-                                    "iconName": "info",
-                                    "text": "profile_password_confirm_desc",
-                                },
-                            ],
-                        )
-                    ),
-                    get_fields_from_field(
-                        input_widget(
-                            id="profile-password",
+                            id="profile-password-email",
                             name="current_password",
                             label="profile_current_password",  # keep it (a18n)
                             value="",
+                            required=True,
+                            type="password",
                             pattern="",  # add your pattern if needed
                             columns={"pc": 12, "tablet": 12, "mobile": 12},
                             placeholder="profile_current_password_placeholder",  # keep it (a18n)
                             popovers=[
-                                {
-                                    "iconName": "exclamation",
-                                    "color": "yellow-darker",
-                                    "text": "profile_current_password_warning_desc",
-                                },
                                 {
                                     "iconName": "info",
                                     "text": "profile_current_password_desc",
@@ -179,13 +154,87 @@ def profile_account_form(email: str) -> dict:
                 buttons=[
                     button_widget(
                         id="profile-account-submit",
-                        text="action_update",
-                        iconName="plus",
+                        text="action_edit",
+                        iconName="pen",
                         iconColor="white",
-                        color="success",
+                        color="edit",
                         size="normal",
                         type="submit",
-                        containerClass="flex justify-center",
+                    )
+                ],
+            ),
+            regular_widget(
+                display=["account", 1],
+                title="profile_account_form_password_title",
+                maxWidthScreen="xs",
+                endpoint="/edit",
+                method="POST",
+                fields=[
+                    get_fields_from_field(
+                        input_widget(
+                            id="profile-password-account",
+                            name="new_password",
+                            label="profile_new_password",  # keep it (a18n)
+                            value="",
+                            type="password",
+                            pattern="",  # add your pattern if needed
+                            columns={"pc": 12, "tablet": 12, "mobile": 12},
+                            placeholder="profile_new_password_placeholder",  # keep it (a18n)
+                            popovers=[
+                                {
+                                    "iconName": "info",
+                                    "text": "profile_new_password_desc",
+                                },
+                            ],
+                        )
+                    ),
+                    get_fields_from_field(
+                        input_widget(
+                            id="profile-password-confirm",
+                            name="new_password_confirm",
+                            type="password",
+                            label="profile_new_password_confirm",  # keep it (a18n)
+                            value="",
+                            pattern="",  # add your pattern if needed
+                            columns={"pc": 12, "tablet": 12, "mobile": 12},
+                            placeholder="profile_new_password_confirm_placeholder",  # keep it (a18n)
+                            popovers=[
+                                {
+                                    "iconName": "info",
+                                    "text": "profile_new_password_confirm_desc",
+                                },
+                            ],
+                        )
+                    ),
+                    get_fields_from_field(
+                        input_widget(
+                            id="profile-password-update",
+                            name="current_password",
+                            label="profile_current_password",  # keep it (a18n)
+                            value="",
+                            type="password",
+                            required=True,
+                            pattern="",  # add your pattern if needed
+                            columns={"pc": 12, "tablet": 12, "mobile": 12},
+                            placeholder="profile_current_password_placeholder",  # keep it (a18n)
+                            popovers=[
+                                {
+                                    "iconName": "info",
+                                    "text": "profile_current_password_desc",
+                                },
+                            ],
+                        )
+                    ),
+                ],
+                buttons=[
+                    button_widget(
+                        id="profile-account-submit",
+                        text="action_edit",
+                        iconName="pen",
+                        iconColor="white",
+                        color="edit",
+                        size="normal",
+                        type="submit",
                     )
                 ],
             ),
@@ -200,11 +249,11 @@ def totp_enable_form(
 
     recovery_widgets = []
 
-    if is_recovery_refreshed and len(totp_recovery_codes) > 0:
+    if is_recovery_refreshed and (totp_recovery_codes is not None and (isinstance(totp_recovery_codes, list) and len(totp_recovery_codes) > 0)):
         recovery_widgets.append(pairs_widget(pairs=totp_recovery_codes))
 
-    if is_recovery_refreshed and totp_recovery_codes is None or len(totp_recovery_codes) == 0:
-        recovery_widgets.append(text_widget(text="profile_recovery_codes_refresh_but_not_found", color="error", iconName="", iconColor=""))
+    if is_recovery_refreshed and (totp_recovery_codes is None or (isinstance(totp_recovery_codes, list) and len(totp_recovery_codes) == 0)):
+        recovery_widgets.append(text_widget(text="profile_recovery_codes_refresh_but_not_found", iconName="", iconColor="error"))
 
     recovery_widgets.append(
         button_group_widget(
@@ -238,25 +287,25 @@ def totp_enable_form(
                 subtitle="profile_totp_subtitle",  # keep it (a18n)
             ),
             text_widget(
-                text="profile_totp_enable",  # keep it (a18n)
-                icon="check",
-                textClass="flex justify-center",
+                text="profile_totp_enable_state",  # keep it (a18n)
+                iconName="check",
+                iconColor="success",
+                textIconContainerClass="col-span-12 flex justify-center items-center mt-2",
             ),
             # totp secret (type password), totp code, password
             regular_widget(
-                title="profile_totp_disable_title",
-                subtitle="profile_totp_disable_subtitle",
+                title="profile_totp_disable_form_title",
                 maxWidthScreen="xs",
                 endpoint="/totp-disable",
                 method="POST",
                 fields=[
                     get_fields_from_field(
                         input_widget(
-                            id="profile-totp-code",
+                            id="profile-totp-code-enable",
                             name="totp_code",
                             label="profile_totp_code",  # keep it (a18n)
                             value="",
-                            isClipboard=True,
+                            required=True,
                             pattern="",  # add your pattern if needed
                             columns={"pc": 12, "tablet": 12, "mobile": 12},
                             placeholder="profile_totp_code_placeholder",  # keep it (a18n)
@@ -270,11 +319,11 @@ def totp_enable_form(
                     ),
                     get_fields_from_field(
                         input_widget(
-                            id="profile-totp-code",
+                            type="password",
+                            id="profile-totp-current-password",
                             name="current_password",
                             label="profile_current_password",  # keep it (a18n)
                             value="",
-                            isClipboard=True,
                             pattern="",  # add your pattern if needed
                             columns={"pc": 12, "tablet": 12, "mobile": 12},
                             placeholder="profile_current_password_placeholder",  # keep it (a18n)
@@ -290,9 +339,9 @@ def totp_enable_form(
                 buttons=[
                     button_widget(
                         id="profile-disable-submit",
-                        text="action_enable",
-                        iconName="plus",
-                        iconColor="check",
+                        text="action_disable",
+                        iconName="cross",
+                        iconColor="white",
                         color="success",
                         size="normal",
                         type="submit",
@@ -316,9 +365,10 @@ def totp_disable_form(totp_img: str = "", totp_secret: str = "") -> dict:
                 subtitle="profile_totp_subtitle",  # keep it (a18n)
             ),
             text_widget(
-                text="profile_totp_disable",  # keep it (a18n)
-                icon="cross",
-                textClass="flex justify-center",
+                text="profile_totp_disable_state",  # keep it (a18n)
+                iconName="uncheck",
+                iconColor="error",
+                textIconContainerClass="col-span-12 flex justify-center items-center mt-2",
             ),
             image_widget(
                 src=totp_img,
@@ -326,6 +376,7 @@ def totp_disable_form(totp_img: str = "", totp_secret: str = "") -> dict:
             ),
             # totp secret (type password), totp code, password
             regular_widget(
+                title="profile_totp_enable_form_title",
                 maxWidthScreen="xs",
                 endpoint="/edit",
                 method="POST",
@@ -351,11 +402,11 @@ def totp_disable_form(totp_img: str = "", totp_secret: str = "") -> dict:
                     ),
                     get_fields_from_field(
                         input_widget(
-                            id="profile-totp-code",
+                            id="profile-totp-code-disabled",
                             name="totp_code",
                             label="profile_totp_code",  # keep it (a18n)
                             value="",
-                            isClipboard=True,
+                            required=True,
                             pattern="",  # add your pattern if needed
                             columns={"pc": 12, "tablet": 12, "mobile": 12},
                             placeholder="profile_totp_code_placeholder",  # keep it (a18n)
@@ -373,7 +424,8 @@ def totp_disable_form(totp_img: str = "", totp_secret: str = "") -> dict:
                             name="current_password",
                             label="profile_current_password",  # keep it (a18n)
                             value="",
-                            isClipboard=True,
+                            required=True,
+                            type="password",
                             pattern="",  # add your pattern if needed
                             columns={"pc": 12, "tablet": 12, "mobile": 12},
                             placeholder="profile_current_password_placeholder",  # keep it (a18n)
@@ -391,7 +443,7 @@ def totp_disable_form(totp_img: str = "", totp_secret: str = "") -> dict:
                         id="profile-disable-submit",
                         text="action_enable",
                         iconName="plus",
-                        iconColor="check",
+                        iconColor="white",
                         color="success",
                         size="normal",
                         type="submit",
@@ -451,7 +503,7 @@ def fallback_message(msg: str, display: Optional[list] = None) -> dict:
 
 def profile_builder(user: Optional[dict] = None) -> list:
 
-    if user is None or len(user) == 0:
+    if user is None or (isinstance(user, list) and len(user) == 0):
         return [fallback_message("profile_user_not_found")]
 
     totp_data = user.get("totp", None)

@@ -14,7 +14,8 @@ def advanced_widget(
     endpoint: str = "",
     method: str = "POST",
     oldServerName: str = "",
-    columns: dict = {"pc":"12","tablet":"12","mobile":"12"}
+    columns: dict = {"pc":"12","tablet":"12","mobile":"12"},
+    display: Optional[list] = None
     ):
     """    
     This component is used to create a complete advanced form with plugin selection.
@@ -28,6 +29,7 @@ def advanced_widget(
     -   `method` **String** Http method to be used on form submit. (optional, default `"POST"`)
     -   `oldServerName` **String** Old server name. This is a server name before any changes. (optional, default `""`)
     -   `columns` **Object** Columns object. (optional, default `{"pc":"12","tablet":"12","mobile":"12"}`)
+    -   `display` **Array** Array need two values : "groupName" in index 0 and "compId" in index 1 in order to be displayed using the display store. More info on the display store itslef. (optional, default `[]`)
     
     EXAMPLE
     
@@ -66,7 +68,7 @@ def advanced_widget(
 
 
     # List of params that will be add only if not default value
-    list_params = [("containerClass", containerClass, ""),("operation", operation, "edit"),("endpoint", endpoint, ""),("method", method, "POST"),("oldServerName", oldServerName, ""),("columns", columns, {"pc":"12","tablet":"12","mobile":"12"})]
+    list_params = [("containerClass", containerClass, ""),("operation", operation, "edit"),("endpoint", endpoint, ""),("method", method, "POST"),("oldServerName", oldServerName, ""),("columns", columns, {"pc":"12","tablet":"12","mobile":"12"}),("display", display, None)]
     for param in list_params:
         add_key_value(data, param[0], param[1], param[2])
 
@@ -139,7 +141,7 @@ def button_widget(
 
 def button_group_widget(
     buttons: list,
-    boutonGroupClass: str = ""
+    buttonGroupClass: str = ""
     ):
     """    
     This component allow to display multiple buttons in the same row using flex.
@@ -149,7 +151,7 @@ def button_group_widget(
     PARAMETERS
     
     -   `buttons` **Array** List of buttons to display. Button component is used.
-    -   `boutonGroupClass` **String** Additional class for the flex container (optional, default `""`)
+    -   `buttonGroupClass` **String** Additional class for the flex container (optional, default `""`)
     
     EXAMPLE
     
@@ -188,7 +190,7 @@ def button_group_widget(
 
 
     # List of params that will be add only if not default value
-    list_params = [("boutonGroupClass", boutonGroupClass, "")]
+    list_params = [("buttonGroupClass", buttonGroupClass, "")]
     for param in list_params:
         add_key_value(data, param[0], param[1], param[2])
 
@@ -635,7 +637,8 @@ def easy_widget(
     endpoint: str = "",
     method: str = "POST",
     oldServerName: str = "",
-    columns: dict = {"pc":"12","tablet":"12","mobile":"12"}
+    columns: dict = {"pc":"12","tablet":"12","mobile":"12"},
+    display: Optional[list] = None
     ):
     """    
     This component is used to create a complete easy form with plugin selection.
@@ -649,6 +652,7 @@ def easy_widget(
     -   `method` **String** Http method to be used on form submit. (optional, default `"POST"`)
     -   `oldServerName` **String** Old server name. This is a server name before any changes. (optional, default `""`)
     -   `columns` **Object** Columns object. (optional, default `{"pc":"12","tablet":"12","mobile":"12"}`)
+    -   `display` **Array** Array need two values : "groupName" in index 0 and "compId" in index 1 in order to be displayed using the display store. More info on the display store itslef. (optional, default `[]`)
     
     EXAMPLE
     
@@ -687,7 +691,7 @@ def easy_widget(
 
 
     # List of params that will be add only if not default value
-    list_params = [("containerClass", containerClass, ""),("operation", operation, "edit"),("endpoint", endpoint, ""),("method", method, "POST"),("oldServerName", oldServerName, ""),("columns", columns, {"pc":"12","tablet":"12","mobile":"12"})]
+    list_params = [("containerClass", containerClass, ""),("operation", operation, "edit"),("endpoint", endpoint, ""),("method", method, "POST"),("oldServerName", oldServerName, ""),("columns", columns, {"pc":"12","tablet":"12","mobile":"12"}),("display", display, None)]
     for param in list_params:
         add_key_value(data, param[0], param[1], param[2])
 
@@ -1067,6 +1071,47 @@ def icons_widget(
         add_key_value(data, param[0], param[1], param[2])
 
     return { "type" : "Icons", "data" : data }
+        
+
+def image_widget(
+    src: str,
+    alt: str = "",
+    imgClass: str = "",
+    imgContainerClass: str = "",
+    attrs: Optional[dict] = None
+    ):
+    """    
+    This component is used for regular paragraph.
+    
+    PARAMETERS
+    
+    -   `src` **String** The src value of the image.
+    -   `alt` **String** The alt value of the image.  Can be a translation key or by default raw text. (optional, default `""`)
+    -   `imgClass` **String**  (optional, default `""`)
+    -   `imgContainerClass` **String**  (optional, default `""`)
+    -   `attrs` **Object** List of attributes to add to the image. (optional, default `{}`)
+    
+    EXAMPLE
+    
+    {
+       src: "https://via.placeholder.com/150",
+       alt: "My image",
+       attrs: { id: "paragraph" },
+     }
+    
+    """
+
+    data = {
+        "src" : src,
+       }
+
+
+    # List of params that will be add only if not default value
+    list_params = [("alt", alt, ""),("imgClass", imgClass, ""),("imgContainerClass", imgContainerClass, ""),("attrs", attrs, None)]
+    for param in list_params:
+        add_key_value(data, param[0], param[1], param[2])
+
+    return { "type" : "Image", "data" : data }
         
 
 def input_widget(
@@ -1569,7 +1614,8 @@ def raw_widget(
     containerClass: str = "",
     endpoint: str = "",
     method: str = "POST",
-    columns: dict = {"pc":"12","tablet":"12","mobile":"12"}
+    columns: dict = {"pc":"12","tablet":"12","mobile":"12"},
+    display: Optional[list] = None
     ):
     """    
     This component is used to create a complete raw form with settings as JSON format.
@@ -1583,6 +1629,7 @@ def raw_widget(
     -   `endpoint` **String** Form endpoint. Case none, will be ignored. (optional, default `""`)
     -   `method` **String** Http method to be used on form submit. (optional, default `"POST"`)
     -   `columns` **Object** Columns object. (optional, default `{"pc":"12","tablet":"12","mobile":"12"}`)
+    -   `display` **Array** Array need two values : "groupName" in index 0 and "compId" in index 1 in order to be displayed using the display store. More info on the display store itslef. (optional, default `[]`)
     
     EXAMPLE
     
@@ -1602,7 +1649,7 @@ def raw_widget(
 
 
     # List of params that will be add only if not default value
-    list_params = [("operation", operation, "edit"),("oldServerName", oldServerName, ""),("containerClass", containerClass, ""),("endpoint", endpoint, ""),("method", method, "POST"),("columns", columns, {"pc":"12","tablet":"12","mobile":"12"})]
+    list_params = [("operation", operation, "edit"),("oldServerName", oldServerName, ""),("containerClass", containerClass, ""),("endpoint", endpoint, ""),("method", method, "POST"),("columns", columns, {"pc":"12","tablet":"12","mobile":"12"}),("display", display, None)]
     for param in list_params:
         add_key_value(data, param[0], param[1], param[2])
 
@@ -1612,9 +1659,12 @@ def raw_widget(
 def regular_widget(
     fields: dict,
     buttons: dict,
+    title: str = "",
+    subtitle: str = "",
     containerClass: str = "",
     endpoint: str = "",
     method: str = "POST",
+    display: Optional[list] = None,
     maxWidthScreen: str = "lg",
     columns: dict = {"pc":"12","tablet":"12","mobile":"12"}
     ):
@@ -1623,11 +1673,14 @@ def regular_widget(
     
     PARAMETERS
     
+    -   `title` **String** Form title (optional, default `""`)
+    -   `subtitle` **String** Form subtitle (optional, default `""`)
     -   `fields` **Object** List of Fields component to display
     -   `buttons` **Object** We need to send a regular ButtonGroup buttons prop
     -   `containerClass` **String** Container additional class (optional, default `""`)
     -   `endpoint` **String** Form endpoint. Case none, will be ignored. (optional, default `""`)
     -   `method` **String** Http method to be used on form submit. (optional, default `"POST"`)
+    -   `display` **Array** Array need two values : "groupName" in index 0 and "compId" in index 1 in order to be displayed using the display store. More info on the display store itslef. (optional, default `[]`)
     -   `maxWidthScreen` **String** Max screen width for the settings based on the breakpoint (xs, sm, md, lg, xl, 2xl) (optional, default `"lg"`)
     -   `columns` **Object** Columns object. (optional, default `{"pc":"12","tablet":"12","mobile":"12"}`)
     
@@ -1667,7 +1720,7 @@ def regular_widget(
 
 
     # List of params that will be add only if not default value
-    list_params = [("containerClass", containerClass, ""),("endpoint", endpoint, ""),("method", method, "POST"),("maxWidthScreen", maxWidthScreen, "lg"),("columns", columns, {"pc":"12","tablet":"12","mobile":"12"})]
+    list_params = [("title", title, ""),("subtitle", subtitle, ""),("containerClass", containerClass, ""),("endpoint", endpoint, ""),("method", method, "POST"),("display", display, None),("maxWidthScreen", maxWidthScreen, "lg"),("columns", columns, {"pc":"12","tablet":"12","mobile":"12"})]
     for param in list_params:
         add_key_value(data, param[0], param[1], param[2])
 
@@ -2009,6 +2062,7 @@ def tabulator_widget(
     itemsBeforePagination: int = 10,
     paginationSize: int = 10,
     paginationInitialPage: int = 1,
+    paginationButtonCount: int = 3,
     paginationSizeSelector: list = [10,25,50,100]
     ):
     """    
@@ -2037,6 +2091,7 @@ def tabulator_widget(
     -   `itemsBeforePagination` **Number** Hide pagination unless number is reach. (optional, default `10`)
     -   `paginationSize` **Number** Number of items per page (optional, default `10`)
     -   `paginationInitialPage` **Number** Initial page (optional, default `1`)
+    -   `paginationButtonCount` **Number** Available pagination buttons (optional, default `3`)
     -   `paginationSizeSelector` **Array** Select number of items per page (optional, default `[10,25,50,100]`)
     
     EXAMPLE
@@ -2067,7 +2122,7 @@ def tabulator_widget(
 
 
     # List of params that will be add only if not default value
-    list_params = [("isStriped", isStriped, True),("filters", filters, None),("actionsButtons", actionsButtons, None),("layout", layout, "fitDataTable"),("rowHeight", rowHeight, 0),("colMinWidth", colMinWidth, 150),("colMaxWidth", colMaxWidth, 0),("isPagination", isPagination, True),("itemsBeforePagination", itemsBeforePagination, 10),("paginationSize", paginationSize, 10),("paginationInitialPage", paginationInitialPage, 1),("paginationSizeSelector", paginationSizeSelector, [10,25,50,100])]
+    list_params = [("isStriped", isStriped, True),("filters", filters, None),("actionsButtons", actionsButtons, None),("layout", layout, "fitDataTable"),("rowHeight", rowHeight, 0),("colMinWidth", colMinWidth, 150),("colMaxWidth", colMaxWidth, 0),("isPagination", isPagination, True),("itemsBeforePagination", itemsBeforePagination, 10),("paginationSize", paginationSize, 10),("paginationInitialPage", paginationInitialPage, 1),("paginationButtonCount", paginationButtonCount, 3),("paginationSizeSelector", paginationSizeSelector, [10,25,50,100])]
     for param in list_params:
         add_key_value(data, param[0], param[1], param[2])
 
@@ -2077,7 +2132,8 @@ def tabulator_widget(
 def templates_widget(
     templates: dict,
     operation: str = "edit",
-    oldServerName: str = ""
+    oldServerName: str = "",
+    display: Optional[list] = None
     ):
     """    
     This component is used to create a complete  settings form with all modes (advanced, raw, easy).
@@ -2087,6 +2143,7 @@ def templates_widget(
     -   `templates` **Object** List of advanced templates that contains settings. Must be a dict with mode as key, then the template name as key with a list of data (different for each modes).
     -   `operation` **String** Operation type (edit, new, delete). (optional, default `"edit"`)
     -   `oldServerName` **String** Old server name. This is a server name before any changes. (optional, default `""`)
+    -   `display` **Array** Array need two values : "groupName" in index 0 and "compId" in index 1 in order to be displayed using the display store. More info on the display store itslef. (optional, default `[]`)
     
     EXAMPLE
     
@@ -2109,7 +2166,7 @@ def templates_widget(
 
 
     # List of params that will be add only if not default value
-    list_params = [("operation", operation, "edit"),("oldServerName", oldServerName, "")]
+    list_params = [("operation", operation, "edit"),("oldServerName", oldServerName, ""),("display", display, None)]
     for param in list_params:
         add_key_value(data, param[0], param[1], param[2])
 
@@ -2119,7 +2176,10 @@ def templates_widget(
 def text_widget(
     text: str,
     textClass: str = "",
+    textIconContainerClass: str = "col-span-12 flex justify-center items-center",
     color: str = "",
+    iconName: str = "",
+    iconColor: str = "",
     bold: bool = False,
     uppercase: bool = False,
     tag: str = "p",
@@ -2133,7 +2193,10 @@ def text_widget(
     
     -   `text` **String** The text value. Can be a translation key or by default raw text.
     -   `textClass` **String** Style of text. Can be replace by any class starting by 'text-' like 'text-stat'. (optional, default `""`)
+    -   `textIconContainerClass` **String** Case we have icon with text, we wrap the text on a container with the icon. We can add a class to this container. (optional, default `"col-span-12 flex justify-center items-center"`)
     -   `color` **String** The color of the text between error, success, warning, info or tailwind color (optional, default `""`)
+    -   `iconName` **String** The name of the icon to display before the text. (optional, default `""`)
+    -   `iconColor` **String** The color of the icon. (optional, default `""`)
     -   `bold` **Boolean** If the text should be bold or not. (optional, default `false`)
     -   `uppercase` **Boolean** If the text should be uppercase or not. (optional, default `false`)
     -   `tag` **String** The tag of the text. Can be p, span, div, h1, h2, h3, h4, h5, h6 (optional, default `"p"`)
@@ -2156,7 +2219,7 @@ def text_widget(
 
 
     # List of params that will be add only if not default value
-    list_params = [("textClass", textClass, ""),("color", color, ""),("bold", bold, False),("uppercase", uppercase, False),("tag", tag, "p"),("icon", icon, False),("attrs", attrs, None)]
+    list_params = [("textClass", textClass, ""),("textIconContainerClass", textIconContainerClass, "col-span-12 flex justify-center items-center"),("color", color, ""),("iconName", iconName, ""),("iconColor", iconColor, ""),("bold", bold, False),("uppercase", uppercase, False),("tag", tag, "p"),("icon", icon, False),("attrs", attrs, None)]
     for param in list_params:
         add_key_value(data, param[0], param[1], param[2])
 
@@ -2212,6 +2275,8 @@ def title_widget(
 
 def unmatch_widget(
     text: str,
+    iconName: str = "search",
+    iconColor: str = "",
     unmatchClass: str = ""
     ):
     """    
@@ -2221,6 +2286,8 @@ def unmatch_widget(
     PARAMETERS
     
     -   `text` **String** The text to display
+    -   `iconName` **String** The icon to display (optional, default `"search"`)
+    -   `iconColor` **String** The color of the icon (optional, default `""`)
     -   `unmatchClass` **String** The class to apply to the message. If not provided, the class will be based on the parent component. (optional, default `""`)
     
     EXAMPLE
@@ -2237,7 +2304,7 @@ def unmatch_widget(
 
 
     # List of params that will be add only if not default value
-    list_params = [("unmatchClass", unmatchClass, "")]
+    list_params = [("iconName", iconName, "search"),("iconColor", iconColor, ""),("unmatchClass", unmatchClass, "")]
     for param in list_params:
         add_key_value(data, param[0], param[1], param[2])
 

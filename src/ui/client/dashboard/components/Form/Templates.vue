@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, defineProps, computed, onBeforeMount } from "vue";
+import { reactive, defineProps, computed, onBeforeMount, watch } from "vue";
 import Container from "@components/Widget/Container.vue";
 import Grid from "@components/Widget/Grid.vue";
 import Select from "@components/Forms/Field/Select.vue";
@@ -8,6 +8,7 @@ import Advanced from "@components/Form/Advanced.vue";
 import Raw from "@components/Form/Raw.vue";
 import Easy from "@components/Form/Easy.vue";
 import { v4 as uuidv4 } from "uuid";
+import { useDisplayStore } from "@store/global.js";
 
 /**
  *  @name Form/Templates.vue
@@ -26,6 +27,7 @@ import { v4 as uuidv4 } from "uuid";
  * @param {Object} templates - List of advanced templates that contains settings. Must be a dict with mode as key, then the template name as key with a list of data (different for each modes).
  * @param {String} [operation="edit"] - Operation type (edit, new, delete).
  * @param {String} [oldServerName=""] - Old server name. This is a server name before any changes.
+ * @param {Array} [display=[]] - Array need two values : "groupName" in index 0 and "compId" in index 1 in order to be displayed using the display store. More info on the display store itslef.
  */
 
 const props = defineProps({
@@ -44,7 +46,14 @@ const props = defineProps({
     required: false,
     default: "",
   },
+  display: {
+    type: Array,
+    required: false,
+    default: [],
+  },
 });
+
+const displayStore = useDisplayStore();
 
 const comboboxTemplate = {
   id: `combobox-template-${uuidv4()}`,
@@ -88,8 +97,30 @@ const data = reactive({
     if (!data.currModeName) return [];
     return Object.keys(props.templates[data.currModeName]);
   }),
+  isDisplay: props.display.length
+    ? displayStore.isCurrentDisplay(props.display[0], props.display[1])
+    : true,
 });
 
+/**
+ *  @name checkDisplay
+ *  @description Check if the current display value is matching the display store value.
+ *  @returns {Void}
+ */
+function checkDisplay() {
+  if (!props.display.length) return;
+  data.isDisplay = displayStore.isCurrentDisplay(
+    props.display[0],
+    props.display[1]
+  );
+}
+
+// Case we have set a display group name and component id, the component id must match the current display id for the same group name to be displayed.
+if (props.display.length) {
+  watch(displayStore.display, (val) => {
+    checkDisplay();
+  });
+}
 /**
  *  @name getFirstTemplateName
  *  @description Get the first template name from the first mode.
@@ -118,7 +149,7 @@ onBeforeMount(() => {
 
 <template>
   <Container
-    v-if="data.currModeName && data.currTemplateName"
+    v-if="data.isDisplay && data.currModeName && data.currTemplateName"
     :containerClass="`col-span-12 w-full ${
       data.templates.length > 1 ? '' : 'mb-3'
     }`"

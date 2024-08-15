@@ -11,13 +11,13 @@ import Container from "@components/Widget/Container.vue";
 import Fields from "@components/Form/Fields.vue";
 import Title from "@components/Widget/Title.vue";
 import Subtitle from "@components/Widget/Subtitle.vue";
-import ButtonGroup from "@components/Widget/ButtonGroup.vue";
 import Text from "@components/Widget/Text.vue";
 import GroupMultiple from "@components/Forms/Group/Multiple.vue";
 import Unmatch from "@components/Message/Unmatch.vue";
 import { v4 as uuidv4 } from "uuid";
 import { useCheckPluginsValidity } from "@utils/global.js";
 import { useEasyForm } from "@store/form.js";
+import { useDisplayStore } from "@store/global.js";
 
 /**
  * @name Form/Easy.vue
@@ -56,6 +56,7 @@ import { useEasyForm } from "@store/form.js";
  * @param {String} [method="POST"] - Http method to be used on form submit.
  * @param {String} [oldServerName=""] - Old server name. This is a server name before any changes.
  * @param {Object} [columns={ "pc": "12", "tablet": "12", "mobile": "12" }] - Columns object.
+ * @param {Array} [display=[]] - Array need two values : "groupName" in index 0 and "compId" in index 1 in order to be displayed using the display store. More info on the display store itslef.
  */
 
 const easyForm = useEasyForm();
@@ -97,7 +98,14 @@ const props = defineProps({
     required: false,
     default: { pc: 12, tablet: 12, mobile: 12 },
   },
+  display: {
+    type: Array,
+    required: false,
+    default: [],
+  },
 });
+
+const displayStore = useDisplayStore();
 
 const data = reactive({
   base: JSON.parse(JSON.stringify(props.template)),
@@ -109,8 +117,30 @@ const data = reactive({
   isReqErr: false,
   settingErr: "",
   stepErr: "",
+  isDisplay: props.display.length
+    ? displayStore.isCurrentDisplay(props.display[0], props.display[1])
+    : true,
 });
 
+/**
+ *  @name checkDisplay
+ *  @description Check if the current display value is matching the display store value.
+ *  @returns {Void}
+ */
+function checkDisplay() {
+  if (!props.display.length) return;
+  data.isDisplay = displayStore.isCurrentDisplay(
+    props.display[0],
+    props.display[1]
+  );
+}
+
+// Case we have set a display group name and component id, the component id must match the current display id for the same group name to be displayed.
+if (props.display.length) {
+  watch(displayStore.display, (val) => {
+    checkDisplay();
+  });
+}
 watch(
   () => props.template,
   () => {
@@ -202,6 +232,7 @@ onUnmounted(() => {
 
 <template>
   <Container
+    v-if="data.isDisplay"
     data-easy-form
     data-is="form"
     :tag="'form'"

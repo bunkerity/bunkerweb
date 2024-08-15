@@ -60,7 +60,7 @@ def users_filter(roles: Optional[list] = None, totp_states: Optional[list] = Non
         }
     ]
 
-    if roles is not None and len(roles) >= 2:
+    if roles is not None and (isinstance(roles, list) and len(roles) >= 2):
         filters.append(
             {
                 "type": "=",
@@ -85,7 +85,7 @@ def users_filter(roles: Optional[list] = None, totp_states: Optional[list] = Non
             }
         )
 
-    if totp_states is not None and len(totp_states) >= 2:
+    if totp_states is not None and (isinstance(totp_states, list) and len(totp_states) >= 2):
         filters.append(
             {
                 "type": "=",
@@ -399,14 +399,14 @@ def user_management_builder(
     users: Optional[list] = None, roles: Optional[list] = None, roles_form: Optional[list] = None, totp_states: Optional[list] = None
 ) -> list:
 
-    if roles is None or len(roles) == 0 or roles_form is None or len(roles_form) == 0:
+    if roles is None or (isinstance(roles, list) and len(roles) == 0) or roles_form is None or (isinstance(roles_form, list) and len(roles_form) == 0):
         return [fallback_message("user_management_missing_roles")]
 
     users_items = []
     users_forms = []
     users_forms.append(user_management_form(is_new=True, display_index=1, role="", username="", roles=roles_form))
 
-    if users is None or len(users) == 0:
+    if users is None or (isinstance(users, list) and len(users) == 0):
         return [
             # Tabs is button group with display value and a size tab inside a tabs container
             user_management_tabs(),

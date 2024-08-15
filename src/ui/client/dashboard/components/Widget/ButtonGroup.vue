@@ -35,7 +35,7 @@ import { onMounted, reactive, ref } from "vue";
  *    ],
  *  }
  *  @param {Array} buttons - List of buttons to display. Button component is used.
- *  @param {String} [boutonGroupClass=""] - Additional class for the flex container
+ *  @param {String} [buttonGroupClass=""] - Additional class for the flex container
  */
 
 const props = defineProps({
@@ -44,7 +44,7 @@ const props = defineProps({
     required: true,
     default: [],
   },
-  boutonGroupClass: {
+  buttonGroupClass: {
     type: String,
     required: false,
     default: "",
@@ -59,7 +59,7 @@ const groupEl = ref(null);
 
 onMounted(() => {
   group.class =
-    props.boutonGroupClass || groupEl?.value?.closest("[data-is]")
+    props.buttonGroupClass || groupEl?.value?.closest("[data-is]")
       ? `button-group-${groupEl.value
           .closest("[data-is]")
           .getAttribute("data-is")}`
@@ -79,7 +79,7 @@ onMounted(() => {
 <template>
   <div
     ref="groupEl"
-    :class="[group.class, props.boutonGroupClass]"
+    :class="[group.class, props.buttonGroupClass]"
     v-if="props.buttons.length > 0"
   >
     <Button

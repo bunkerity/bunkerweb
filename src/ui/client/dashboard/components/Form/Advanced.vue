@@ -1,5 +1,5 @@
 <script setup>
-import { defineProps, reactive, onMounted, onUnmounted, computed } from "vue";
+import { defineProps, reactive, onMounted, onUnmounted, watch } from "vue";
 import Unmatch from "@components/Message/Unmatch.vue";
 import Container from "@components/Widget/Container.vue";
 import Fields from "@components/Form/Fields.vue";
@@ -14,6 +14,7 @@ import { plugin_types } from "@utils/variables";
 import { useAdvancedForm } from "@store/form.js";
 import { useCheckPluginsValidity } from "@utils/global.js";
 import { v4 as uuidv4 } from "uuid";
+import { useDisplayStore } from "@store/global.js";
 
 /**
  *  @name Form/Advanced.vue
@@ -52,6 +53,7 @@ import { v4 as uuidv4 } from "uuid";
  * @param {String} [method="POST"] - Http method to be used on form submit.
  * @param {String} [oldServerName=""] - Old server name. This is a server name before any changes.
  * @param {Object} [columns={ "pc": "12", "tablet": "12", "mobile": "12" }] - Columns object.
+ * @param {Array} [display=[]] - Array need two values : "groupName" in index 0 and "compId" in index 1 in order to be displayed using the display store. More info on the display store itslef.
  */
 
 const advancedForm = useAdvancedForm();
@@ -93,7 +95,14 @@ const props = defineProps({
     required: false,
     default: { pc: 12, tablet: 12, mobile: 12 },
   },
+  display: {
+    type: Array,
+    required: false,
+    default: [],
+  },
 });
+
+const displayStore = useDisplayStore();
 
 const data = reactive({
   currPlugin: "",
@@ -103,7 +112,30 @@ const data = reactive({
   isReqErr: false,
   settingErr: "",
   pluginErr: "",
+  isDisplay: props.display.length
+    ? displayStore.isCurrentDisplay(props.display[0], props.display[1])
+    : true,
 });
+
+/**
+ *  @name checkDisplay
+ *  @description Check if the current display value is matching the display store value.
+ *  @returns {Void}
+ */
+function checkDisplay() {
+  if (!props.display.length) return;
+  data.isDisplay = displayStore.isCurrentDisplay(
+    props.display[0],
+    props.display[1]
+  );
+}
+
+// Case we have set a display group name and component id, the component id must match the current display id for the same group name to be displayed.
+if (props.display.length) {
+  watch(displayStore.display, (val) => {
+    checkDisplay();
+  });
+}
 
 const comboboxPlugin = {
   id: `advanced-combobox-${uuidv4()}`,
@@ -313,6 +345,7 @@ onUnmounted(() => {
 
 <template>
   <Container
+    v-if="data.isDisplay"
     data-advanced-form
     data-is="form"
     :tag="'form'"

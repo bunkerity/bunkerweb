@@ -616,7 +616,7 @@ body {
 }
 
 .layout-settings-regular {
-  @apply py-4 gap-y-4 sm:gap-x-4 md:gap-x-6 col-span-12 grid grid-cols-12 w-full relative;
+  @apply pt-2 pb-4 gap-y-4 sm:gap-x-4 md:gap-x-6 col-span-12 grid grid-cols-12 w-full relative;
 }
 
 .layout-settings-table {
@@ -641,6 +641,10 @@ body {
 }
 
 .msg-unmatch-form {
+  @apply col-span-12 w-full mx-2 my-4;
+}
+
+.msg-unmatch-form-regular {
   @apply col-span-12 w-full mx-2 my-4;
 }
 
@@ -714,6 +718,10 @@ body {
   @apply block w-8 h-8 pointer-events-none;
 }
 
+.icon-text {
+  @apply block w-6 h-6 pointer-events-none;
+}
+
 .icon-menu {
   @apply h-6 w-6 relative pointer-events-none;
 }
@@ -722,8 +730,12 @@ body {
   @apply h-6 w-6 relative pointer-events-none;
 }
 
-.icon-button {
+.icon-form-regular {
   @apply h-6 w-6 relative pointer-events-none;
+}
+
+.icon-button {
+  @apply h-6 w-6 relative pointer-events-none -translate-y-0.4;
 }
 
 .icon-table-content {
@@ -1192,7 +1204,7 @@ body {
 }
 
 .text-card {
-  @apply col-span-12 text-lg mb-0 dark:text-gray-300 break-word;
+  @apply col-span-12 text-base mb-0 dark:text-gray-300 break-word;
 }
 
 .text-unmatch {
@@ -1229,6 +1241,10 @@ body {
   @apply col-span-12 flex justify-center items-center;
 }
 
+.button-group-form-regular {
+  @apply col-span-12 flex justify-center items-center;
+}
+
 .button-group-tabs {
   @apply col-span-12 flex flex-col sm:flex-row justify-center items-center gap-2;
 }
@@ -1259,7 +1275,7 @@ body {
 /* LIST COMPONENT */
 
 .list-pairs-container {
-  @apply col-span-12 grid grid-cols-12 gap-2 my-4;
+  @apply col-span-12 grid grid-cols-12 gap-3 my-4;
 }
 
 .list-pairs-item {
@@ -1324,6 +1340,10 @@ body {
   @apply break-word w-full max-w-[80%] sm:max-w-[800px] col-span-12 font-bold dark:text-white/90 transition duration-300 ease-in-out text-xl text-[#344767] tracking-normal;
 }
 
+.title-form-regular {
+  @apply break-word w-full flex justify-center max-w-[80%] sm:max-w-[800px] col-span-12 font-bold dark:text-white/90 transition duration-300 ease-in-out text-xl text-[#344767] tracking-normal;
+}
+
 .title-content {
   @apply break-word w-full max-w-[80%] sm:max-w-[700px] col-span-12  font-bold dark:text-white/90 transition duration-300 ease-in-out text-lg text-[#344767];
 }
@@ -1356,11 +1376,16 @@ body {
   @apply mb-2;
 }
 
+.no-subtitle.title-form-regular {
+  @apply mb-0;
+}
+
 .no-subtitle.title-stat {
   @apply mb-0;
 }
 
 .is-subtitle.title-form,
+.is-subtitle.title-form-regular,
 .is-subtitle.title-card,
 .is-subtitle.title-void,
 .is-subtitle.title-modal,
@@ -1385,6 +1410,10 @@ body {
 }
 
 .subtitle-form {
+  @apply break-word dark:text-gray-300 col-span-12 break-words w-full max-w-[80%] sm:max-w-[800px] leading-normal text-[1.05rem] mb-0;
+}
+
+.subtitle-form-regular {
   @apply break-word dark:text-gray-300 col-span-12 break-words w-full max-w-[80%] sm:max-w-[800px] leading-normal text-[1.05rem] mb-0;
 }
 
@@ -1485,7 +1514,7 @@ body {
 /* BTN */
 
 .btn {
-  @apply w-full flex justify-center items-end tracking-wide dark:brightness-90 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer  leading-normal ease-in shadow-xs hover:-translate-y-px active:opacity-85 hover:shadow-md disabled:cursor-not-allowed dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400/0 dark:disabled:bg-gray-700 dark:disabled:border-gray-700/0 disabled:hover:translate-y-0 disabled:hover:bg-gray-400 disabled:hover:border-gray-400/0 dark:disabled:hover:translate-y-0 dark:disabled:hover:bg-gray-700 dark:disabled:hover:border-gray-700/0;
+  @apply w-full flex justify-center items-center tracking-wide dark:brightness-90 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer  leading-normal ease-in shadow-xs hover:-translate-y-px active:opacity-85 hover:shadow-md disabled:cursor-not-allowed dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400/0 dark:disabled:bg-gray-700 dark:disabled:border-gray-700/0 disabled:hover:translate-y-0 disabled:hover:bg-gray-400 disabled:hover:border-gray-400/0 dark:disabled:hover:translate-y-0 dark:disabled:hover:bg-gray-700 dark:disabled:hover:border-gray-700/0;
 }
 
 .btn.active:not([disabled]) {

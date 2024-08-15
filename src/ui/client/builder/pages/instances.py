@@ -50,7 +50,7 @@ def instances_filter(healths: str, types: Optional[list] = None, methods: Option
         }
     ]
 
-    if types is not None and len(types) >= 2:
+    if types is not None and (isinstance(types, list) and len(types) >= 2):
         filters.append(
             {
                 "type": "=",
@@ -75,7 +75,7 @@ def instances_filter(healths: str, types: Optional[list] = None, methods: Option
             }
         )
 
-    if methods is not None and len(methods) >= 2:
+    if methods is not None and (isinstance(methods, list) and len(methods) >= 2):
         filters.append(
             {
                 "type": "=",
@@ -100,7 +100,7 @@ def instances_filter(healths: str, types: Optional[list] = None, methods: Option
             },
         )
 
-    if healths is not None and len(healths) >= 2:
+    if healths is not None and (isinstance(healths, list) and len(healths) >= 2):
         filters.append(
             {
                 "type": "=",
@@ -396,7 +396,7 @@ def fallback_message(msg: str, display: Optional[list] = None) -> dict:
 
 def instances_list(instances: Optional[list] = None, types: Optional[list] = None, methods: Optional[list] = None, healths: Optional[list] = None) -> dict:
 
-    if instances is None or len(instances) == 0:
+    if instances is None or (isinstance(instances, list) and len(instances) == 0):
         return fallback_message(msg="instances_not_found", display=["main", 0])
 
     items = []

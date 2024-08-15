@@ -14,21 +14,19 @@ from pages.profile import profile_builder
 # - last_update (last time update user info)
 user = {
     "profile": [
-        {
-            "profile_username": "username",
-            "profile_email": "email",
-            "profile_created_method": "created_method",
-            "role": "admin",
-            "role_description": "role_description",
-            "permissions": "read, write, admin",
-            "creation_date": "date",
-            "last_update": "date",
-        }
+        {"key": "profile_username", "value": "username"},
+        {"key": "profile_email", "value": "email"},
+        {"key": "profile_created_method", "value": "created_method"},
+        {"key": "profile_role", "value": "admin"},
+        {"key": "profile_role_description", "value": "role_description"},
+        {"key": "profile_permissions", "value": "read, write, admin"},
+        {"key": "profile_creation_date", "value": "date"},
+        {"key": "profile_last_update", "value": "date"},
     ],
     "totp": {
         "is_totp": False,
         "totp_image": "",  # base 64 that will be add in an img tag src
-        "totp_recovery_codes": [{"0": "code_0"}, {"1": "code_1"}, {"2": "code_2"}],
+        "totp_recovery_codes": [{"key": "0", "value": "code_0"}, {"key": "1", "value": "code_1"}, {"key": "2", "value": "code_2"}],
         "is_recovery_refreshed": False,
         "totp_secret": "totp_secret",
     },

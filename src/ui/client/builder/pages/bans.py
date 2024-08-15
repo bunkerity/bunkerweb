@@ -83,7 +83,7 @@ def ban_item(id: str, ip: str, reason: str, ban_start_date: int, ban_end_date: i
 
 def bans_items(bans: Optional[list] = None) -> list:
 
-    if bans is None or len(bans) == 0:
+    if bans is None or (isinstance(bans, list) and len(bans) == 0):
         return []
 
     items = []
@@ -129,7 +129,7 @@ def bans_filters(reasons: Optional[list] = None, remains: Optional[list] = None)
     ]
 
     # Case  "all" ans
-    if reasons is not None and len(reasons) >= 2:
+    if reasons is not None and (isinstance(reasons, list) and len(reasons) >= 2):
         filters.append(
             {
                 "type": "=",
@@ -154,7 +154,7 @@ def bans_filters(reasons: Optional[list] = None, remains: Optional[list] = None)
             },
         )
 
-        if remains is not None and len(remains) >= 2:
+        if remains is not None and (isinstance(remains, list) and len(remains) >= 2):
             filters.append(
                 {
                     "type": "=",
@@ -195,7 +195,7 @@ def fallback_message(msg: str, display: Optional[list] = None) -> dict:
 
 def bans_list(bans: Optional[list] = None, reasons: Optional[list] = None, remains: Optional[list] = None) -> dict:
 
-    if bans is None or len(bans) == 0:
+    if bans is None or (isinstance(bans, list) and len(bans) == 0):
         return fallback_message(msg="bans_not_found", display=["main", 0])
 
     actions_table_list = [
