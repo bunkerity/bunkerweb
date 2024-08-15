@@ -322,9 +322,14 @@ def instances_new_form() -> dict:
                             placeholder="instances_hostname_placeholder",  # keep it (a18n)
                             popovers=[
                                 {
+                                    "iconName": "exclamation",
+                                    "iconColor": "yellow-darker",
+                                    "text": "instances_hostname_warning_desc",
+                                },
+                                {
                                     "iconName": "info",
                                     "text": "instances_hostname_desc",
-                                }
+                                },
                             ],
                         )
                     ),

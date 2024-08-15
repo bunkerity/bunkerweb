@@ -2172,7 +2172,15 @@ body {
   @apply bg-red-500;
 }
 
+.danger.bg-el {
+  @apply bg-red-500;
+}
+
 .warning.bg-el {
+  @apply bg-yellow-500;
+}
+
+.edit.bg-el {
   @apply bg-yellow-500;
 }
 
@@ -2325,7 +2333,15 @@ body {
   @apply fill-red-500;
 }
 
+.danger.fill {
+  @apply fill-red-500;
+}
+
 .warning.fill {
+  @apply fill-yellow-500;
+}
+
+.edit.fill {
   @apply fill-yellow-500;
 }
 

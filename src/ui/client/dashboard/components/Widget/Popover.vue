@@ -162,7 +162,7 @@ onMounted(() => {
     @pointerleave="hidePopover()"
     :class="['popover-btn']"
   >
-    <Icons :iconName="props.iconName" />
+    <Icons :iconName="props.iconName" :color="props.color" />
   </component>
   <div
     ref="popoverContainer"
