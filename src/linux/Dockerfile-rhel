@@ -1,4 +1,4 @@
-FROM redhat/ubi8:8.10@sha256:44d75007b39e0e1bbf1bcfd0721245add54c54c3f83903f8926fb4bef6827aa2 AS builder
+FROM redhat/ubi8:8.10@sha256:d5e2d1ddf34b573673581940f1341c7b3301ff8efde28f17100b31a3df7d94b6 AS builder
 
 ENV OS=rhel
 ENV NGINX_VERSION=1.26.1
@@ -81,7 +81,7 @@ WORKDIR /usr/share/bunkerweb
 COPY src/ui/src ui/src
 COPY src/ui/*.py ui/
 
-FROM redhat/ubi8:8.10@sha256:44d75007b39e0e1bbf1bcfd0721245add54c54c3f83903f8926fb4bef6827aa2
+FROM redhat/ubi8:8.10@sha256:d5e2d1ddf34b573673581940f1341c7b3301ff8efde28f17100b31a3df7d94b6
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
