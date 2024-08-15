@@ -658,6 +658,10 @@ local map_datafp = { -- Data processing, SIMD and FP.
 	}
       }
     }
+  },
+  { -- 010
+    shift = 0, mask = 0x81f8fc00,
+    [0x100e400] = "moviDdG"
   }
 }
 
@@ -830,6 +834,20 @@ local function parse_fpimm8(op)
   local exp = bxor(rshift(arshift(lshift(op, 12), 5), 24), 0x80) - 131
   local frac = 16+band(rshift(op, 13), 15)
   return sign * frac * 2^exp
+end
+
+local function decode_fpmovi(op)
+  local lo = rshift(op, 5)
+  local hi = rshift(op, 9)
+  lo = bor(band(lo, 1) * 0xff, band(lo, 2) * 0x7f80, band(lo, 4) * 0x3fc000,
+	   band(lo, 8) * 0x1fe00000)
+  hi = bor(band(hi, 1) * 0xff, band(hi, 0x80) * 0x1fe,
+	   band(hi, 0x100) * 0xff00, band(hi, 0x200) * 0x7f8000)
+  if hi ~= 0 then
+    return fmt_hex32(hi)..tohex(lo)
+  else
+    return fmt_hex32(lo)
+  end
 end
 
 local function prefer_bfx(sf, uns, imms, immr)
@@ -1131,6 +1149,8 @@ local function disass_ins(ctx)
       x = 0
     elseif p == "F" then
       x = parse_fpimm8(op)
+    elseif p == "G" then
+      x = "#0x"..decode_fpmovi(op)
     elseif p == "g" or p == "f" or p == "x" or p == "w" or
 	   p == "d" or p == "s" then
       -- These are handled in D/N/M/A.

@@ -513,7 +513,7 @@ typedef struct {
   o.sym_entry.strx = 1
   ffi.copy(o.space+1, symname)
 
-  -- Write Macho-O object file.
+  -- Write Mach-O object file.
   local fp = savefile(output, "wb")
   fp:write(ffi.string(o, mach_size))
   bcsave_tail(fp, output, s)
