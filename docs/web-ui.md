@@ -815,6 +815,7 @@ To keep the logs accessible from the web UI, you will need to use `syslog-ng` to
           www.example.com_INTERCEPTED_ERROR_CODES: "400 404 405 413 429 500 501 502 503 504"
           www.example.com_GENERATE_SELF_SIGNED_SSL: "yes"
           www.example.com_MAX_CLIENT_SIZE: "50m"
+          www.example.com_ALLOWED_METHODS: "GET|POST|PUT|DELETE"
         volumes:
           - bw-data:/data # This is used to persist the cache and other data like the backups
         restart: "unless-stopped"
@@ -978,6 +979,7 @@ To keep the logs accessible from the web UI, you will need to use `syslog-ng` to
           - "bunkerweb.INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504"
           - "bunkerweb.GENERATE_SELF_SIGNED_SSL=yes"
           - "bunkerweb.MAX_CLIENT_SIZE=50m"
+          - "bunkerweb.ALLOWED_METHODS=GET|POST|PUT|DELETE"
         logging:
           driver: syslog
           options:
@@ -1165,6 +1167,7 @@ To keep the logs accessible from the web UI, you will need to use `syslog-ng` to
             - "bunkerweb.INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504"
             - "bunkerweb.GENERATE_SELF_SIGNED_SSL=yes"
             - "bunkerweb.MAX_CLIENT_SIZE=50m"
+            - "bunkerweb.ALLOWED_METHODS=GET|POST|PUT|DELETE"
         logging:
           driver: syslog
           options:
@@ -1451,6 +1454,7 @@ After a successful login/password combination, you will be prompted to enter you
           www.example.com_INTERCEPTED_ERROR_CODES: "400 404 405 413 429 500 501 502 503 504"
           www.example.com_GENERATE_SELF_SIGNED_SSL: "yes"
           www.example.com_MAX_CLIENT_SIZE: "50m"
+          www.example.com_ALLOWED_METHODS: "GET|POST|PUT|DELETE"
         volumes:
           - bw-data:/data # This is used to persist the cache and other data like the backups
         networks:
@@ -1611,6 +1615,7 @@ After a successful login/password combination, you will be prompted to enter you
           - "bunkerweb.INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504"
           - "bunkerweb.GENERATE_SELF_SIGNED_SSL=yes"
           - "bunkerweb.MAX_CLIENT_SIZE=50m"
+          - "bunkerweb.ALLOWED_METHODS=GET|POST|PUT|DELETE"
         networks:
           - bw-universe
           - bw-db
@@ -1780,6 +1785,7 @@ After a successful login/password combination, you will be prompted to enter you
             - "bunkerweb.INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504"
             - "bunkerweb.GENERATE_SELF_SIGNED_SSL=yes"
             - "bunkerweb.MAX_CLIENT_SIZE=50m"
+            - "bunkerweb.ALLOWED_METHODS=GET|POST|PUT|DELETE"
 
     volumes:
       bw-db:
@@ -2154,6 +2160,7 @@ After a successful login/password combination, you will be prompted to enter you
         bunkerweb.io/www.example.com_INTERCEPTED_ERROR_CODES: "400 404 405 413 429 500 501 502 503 504"
         bunkerweb.io/www.example.com_GENERATE_SELF_SIGNED_SSL: "yes"
         bunkerweb.io/www.example.com_MAX_CLIENT_SIZE: "50m"
+        bunkerweb.io/www.example.com_ALLOWED_METHODS: "GET|POST|PUT|DELETE"
     spec:
       rules:
         - host: www.example.com
@@ -2214,6 +2221,7 @@ After a successful login/password combination, you will be prompted to enter you
     www.example.com_INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504
     www.example.com_GENERATE_SELF_SIGNED_SSL=yes
     www.example.com_MAX_CLIENT_SIZE=50m
+    www.example.com_ALLOWED_METHODS=GET|POST|PUT|DELETE
     ```
 
     Don't forget to reload the `bunkerweb` service :
