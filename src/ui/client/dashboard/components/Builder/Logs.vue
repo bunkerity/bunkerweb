@@ -4,7 +4,7 @@ import Grid from "@components/Widget/Grid.vue";
 import GridLayout from "@components/Widget/GridLayout.vue";
 import Title from "@components/Widget/Title.vue";
 import Fields from "@components/Form/Fields.vue";
-import MessageUnmatch from "@components/Message/Unmatch.vue";
+import Unmatch from "@components/Message/Unmatch.vue";
 import { useEqualStr } from "@utils/global.js";
 
 /**
@@ -39,8 +39,8 @@ const props = defineProps({
     <Grid>
       <!-- widget element -->
       <template v-for="(widget, index) in container.widgets" :key="index">
-        <MessageUnmatch
-          v-if="useEqualStr(widget.type, 'MessageUnmatch')"
+        <Unmatch
+          v-if="useEqualStr(widget.type, 'Unmatch')"
           v-bind="widget.data"
         />
 

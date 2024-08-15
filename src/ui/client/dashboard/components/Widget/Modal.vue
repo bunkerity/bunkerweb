@@ -16,7 +16,7 @@ import Text from "@components/Widget/Text.vue";
 import Subtitle from "@components/Widget/Subtitle.vue";
 import Button from "@components/Widget/Button.vue";
 import ButtonGroup from "@components/Widget/ButtonGroup.vue";
-import MessageUnmatch from "@components/Message/Unmatch.vue";
+import Unmatch from "@components/Message/Unmatch.vue";
 import Table from "@components/Widget/Table.vue";
 
 /**

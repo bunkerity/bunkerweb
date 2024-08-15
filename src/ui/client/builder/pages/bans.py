@@ -22,7 +22,7 @@ def bans_tabs():
                 buttons=[
                     button_widget(
                         text="bans_tab_list",
-                        display=["main", 1],
+                        display=["main", 0],
                         size="tab",
                         color="info",
                         iconColor="white",
@@ -31,7 +31,7 @@ def bans_tabs():
                     button_widget(
                         text="bans_tab_add",
                         color="success",
-                        display=["main", 2],
+                        display=["main", 1],
                         size="tab",
                         iconColor="white",
                         iconName="plus",
@@ -182,15 +182,21 @@ def bans_filters(reasons: Optional[list] = None, remains: Optional[list] = None)
     return filters
 
 
+def fallback_message(msg: str, display: Optional[list] = None) -> dict:
+
+    return {
+        "type": "void",
+        "display": display if display else [],
+        "widgets": [
+            unmatch_widget(text=msg),
+        ],
+    }
+
+
 def bans_list(bans: Optional[list] = None, reasons: Optional[list] = None, remains: Optional[list] = None) -> dict:
+
     if bans is None or len(bans) == 0:
-        return {
-            "type": "card",
-            "gridLayoutClass": "transparent",
-            "widgets": [
-                unmatch_widget(text="bans_not_found"),
-            ],
-        }
+        return fallback_message(msg="bans_not_found", display=["main", 0])
 
     actions_table_list = [
         # Need to create a script on Page.vue level to add a row on click
@@ -228,7 +234,7 @@ def bans_list(bans: Optional[list] = None, reasons: Optional[list] = None, remai
 
     return {
         "type": "card",
-        "display": ["main", 1],
+        "display": ["main", 0],
         "widgets": [
             title_widget("bans_list_title"),  # keep it (a18n)
             subtitle_widget("bans_list_subtitle"),  # keep it (a18n)
@@ -375,7 +381,7 @@ def bans_add() -> dict:
 
     return {
         "type": "card",
-        "display": ["main", 2],
+        "display": ["main", 1],
         "widgets": [
             title_widget("bans_add_title"),  # keep it (a18n)
             subtitle_widget("bans_add_subtitle"),  # keep it (a18n)

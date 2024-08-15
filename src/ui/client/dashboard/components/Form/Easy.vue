@@ -14,7 +14,7 @@ import Subtitle from "@components/Widget/Subtitle.vue";
 import ButtonGroup from "@components/Widget/ButtonGroup.vue";
 import Text from "@components/Widget/Text.vue";
 import GroupMultiple from "@components/Forms/Group/Multiple.vue";
-import MessageUnmatch from "@components/Message/Unmatch.vue";
+import Unmatch from "@components/Message/Unmatch.vue";
 import { v4 as uuidv4 } from "uuid";
 import { useCheckPluginsValidity } from "@utils/global.js";
 import { useEasyForm } from "@store/form.js";

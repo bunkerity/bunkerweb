@@ -424,7 +424,7 @@ def configs_tabs():
 
 def fallback_message(msg: str):
     return {
-        "type": "card",
+        "type": "void",
         "gridLayoutClass": "transparent",
         "widgets": [
             unmatch_widget(text=msg),
@@ -435,10 +435,10 @@ def fallback_message(msg: str):
 def configs_builder(configs: Optional[list] = None, config_types: Optional[list] = None, services: Optional[list] = None) -> list:
 
     if config_types is None or len(config_types) == 0:
-        return fallback_message("configs_missing_types")
+        return [fallback_message(msg="configs_missing_types")]
 
     if services is None or len(services) == 0:
-        return fallback_message("configs_missing_services")
+        return [fallback_message(msg="configs_missing_services")]
 
     configs_items = []
     configs_form = []
@@ -460,7 +460,7 @@ def configs_builder(configs: Optional[list] = None, config_types: Optional[list]
     if config is None or len(configs) == 0:
         return [
             # Tabs is button group with display value and a size tab inside a tabs container
-            user_management_tabs(),
+            configs_tabs(),
             fallback_message("user_management_users_not_found"),
         ] + configs_form
 
@@ -482,16 +482,20 @@ def configs_builder(configs: Optional[list] = None, config_types: Optional[list]
         )
         configs_form.append(
             config_form(
-                username=user.get("username"),
-                role=user.get("role"),
-                roles=roles_form,
+                config_types=config_types,
+                services=services,
+                is_global=config.get("is_global", ""),
+                filename=config.get("filename", ""),
+                config_type=config.get("type", ""),
+                config_value=config.get("value", ""),
+                config_services=config.get("config_services", []),
                 display_index=display_index,
             )
         )
 
     return [
         # Tabs is button group with display value and a size tab inside a tabs container
-        user_management_tabs(),
+        configs_tabs(),
         {
             "type": "card",
             "maxWidthScreen": "3xl",

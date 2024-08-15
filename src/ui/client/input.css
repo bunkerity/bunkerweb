@@ -621,7 +621,7 @@ body {
 
 /* MESSAGE */
 .msg-container {
-  @apply col-span-12 w-full;
+  @apply col-span-12 w-full py-4 flex justify-center items-center;
 }
 
 .msg-unmatch-card {
@@ -1184,11 +1184,7 @@ body {
 }
 
 .text-unmatch {
-  @apply col-span-12 text-lg mb-0 font-bold dark:text-gray-300 break-word;
-}
-
-.text-void {
-  @apply col-span-12 text-lg mb-0 font-bold text-gray-300 break-word;
+  @apply col-span-12 text-lg mb-0 mx-3 font-bold dark:text-gray-300 break-word;
 }
 
 .text-table-content {

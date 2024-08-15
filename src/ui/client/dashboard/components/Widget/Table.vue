@@ -1,7 +1,7 @@
 <script setup>
 import { reactive, computed, ref, onMounted, watch } from "vue";
 import { v4 as uuidv4 } from "uuid";
-import MessageUnmatch from "@components/Message/Unmatch.vue";
+import Unmatch from "@components/Message/Unmatch.vue";
 import Container from "@components/Widget/Container.vue";
 import Cell from "@components/Widget/Cell.vue";
 import Filter from "@components/Widget/Filter.vue";

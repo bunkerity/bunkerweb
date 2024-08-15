@@ -12,7 +12,7 @@ import { useDisplayStore } from "@store/global.js";
 
 // Set default store
 const displayStore = useDisplayStore();
-displayStore.setDisplay("main", 1);
+displayStore.setDisplay("main", 0);
 
 const bans = reactive({
   builder: "",

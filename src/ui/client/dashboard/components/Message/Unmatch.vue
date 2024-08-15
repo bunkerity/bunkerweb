@@ -1,5 +1,6 @@
 <script setup>
 import { onMounted, reactive, ref } from "vue";
+import Icons from "@components/Widget/Icons.vue";
 import Text from "@components/Widget/Text.vue";
 
 /**
@@ -11,6 +12,8 @@ import Text from "@components/Widget/Text.vue";
  *    text: "dashboard_no_match",
  *  }
  *  @param {String} text - The text to display
+ *  @param {String} [iconName="search"] - The icon to display
+ *  @param {String} [iconColor=""] - The color of the icon
  *  @param {String} [unmatchClass=""] - The class to apply to the message. If not provided, the class will be based on the parent component.
  */
 
@@ -18,6 +21,16 @@ const props = defineProps({
   text: {
     type: String,
     required: false,
+  },
+  iconName: {
+    type: String,
+    required: false,
+    default: "search",
+  },
+  iconColor: {
+    type: String,
+    required: false,
+    default: "",
   },
   unmatchClass: {
     type: String,
@@ -35,19 +48,12 @@ const msgEl = ref(null);
 
 onMounted(() => {
   msg.text = props.text || msg.text;
-  msg.class =
-    props.unmatchClass || msgEl.value.closest("[data-is]")
-      ? `msg-unmatch-${msgEl.value
-          .closest("[data-is]")
-          .getAttribute("data-is")}`
-      : "msg-unmatch-base";
 });
 </script>
 
 <template>
-  <div class="msg-container" ref="msgEl">
-    <div data-is="unmatch" :class="[msg.class]">
-      <Text :icon="{ iconName: 'search' }" :text="msg.text" />
-    </div>
+  <div data-is="unmatch" class="msg-container" ref="msgEl">
+    <Icons v-bind="{ iconName: props.iconName, color: props.iconColor }" />
+    <Text :text="msg.text" />
   </div>
 </template>

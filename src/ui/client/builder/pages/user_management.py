@@ -384,10 +384,11 @@ def user_management_tabs():
     }
 
 
-def fallback_message(msg: str):
+def fallback_message(msg: str, display: Optional[list] = None) -> dict:
+
     return {
-        "type": "card",
-        "gridLayoutClass": "transparent",
+        "type": "void",
+        "display": display if display else [],
         "widgets": [
             unmatch_widget(text=msg),
         ],
@@ -399,7 +400,7 @@ def user_management_builder(
 ) -> list:
 
     if roles is None or len(roles) == 0 or roles_form is None or len(roles_form) == 0:
-        return fallback_message("user_management_missing_roles")
+        return [fallback_message("user_management_missing_roles")]
 
     users_items = []
     users_forms = []
@@ -409,7 +410,7 @@ def user_management_builder(
         return [
             # Tabs is button group with display value and a size tab inside a tabs container
             user_management_tabs(),
-            fallback_message("user_management_users_not_found"),
+            fallback_message(msg="user_management_users_not_found", display=["main", 0]),
         ] + users_forms
 
     # Start adding the new config form

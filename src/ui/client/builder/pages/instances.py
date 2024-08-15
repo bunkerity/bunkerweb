@@ -255,7 +255,7 @@ def instance_item(
                                     iconColor="white",
                                     attrs={
                                         "data-submit-form": f"""{{ "instance_hostname" : "{hostname}" }}""",
-                                        "data-submit-endpoint": "/delete",
+                                        "data-submit-endpoint": f"/{hostname}",
                                         "data-submit-method": "DELETE",
                                     },
                                 ),
@@ -285,7 +285,7 @@ def instances_new_form() -> dict:
     return {
         "type": "card",
         "maxWidthScreen": "md",
-        "display": ["main", 2],
+        "display": ["main", 1],
         "widgets": [
             title_widget(
                 title="instances_create_title",  # keep it (a18n)
@@ -363,7 +363,7 @@ def instances_tabs():
                 buttons=[
                     button_widget(
                         text="instances_tab_list",
-                        display=["main", 1],
+                        display=["main", 0],
                         size="tab",
                         color="info",
                         iconColor="white",
@@ -372,7 +372,7 @@ def instances_tabs():
                     button_widget(
                         text="instances_tab_add",
                         color="success",
-                        display=["main", 2],
+                        display=["main", 1],
                         size="tab",
                         iconColor="white",
                         iconName="plus",
@@ -383,15 +383,21 @@ def instances_tabs():
     }
 
 
+def fallback_message(msg: str, display: Optional[list] = None) -> dict:
+
+    return {
+        "type": "void",
+        "display": display if display else [],
+        "widgets": [
+            unmatch_widget(text=msg),
+        ],
+    }
+
+
 def instances_list(instances: Optional[list] = None, types: Optional[list] = None, methods: Optional[list] = None, healths: Optional[list] = None) -> dict:
+
     if instances is None or len(instances) == 0:
-        return {
-            "type": "card",
-            "gridLayoutClass": "transparent",
-            "widgets": [
-                unmatch_widget(text="instances_not_found"),
-            ],
-        }
+        return fallback_message(msg="instances_not_found", display=["main", 0])
 
     items = []
 
@@ -410,7 +416,7 @@ def instances_list(instances: Optional[list] = None, types: Optional[list] = Non
 
     return {
         "type": "card",
-        "display": ["main", 1],
+        "display": ["main", 0],
         "widgets": [
             title_widget(
                 title="instances_list_title",  # keep it (a18n)

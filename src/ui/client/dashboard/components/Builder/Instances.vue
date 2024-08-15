@@ -8,7 +8,7 @@ import ButtonGroup from "@components/Widget/ButtonGroup.vue";
 import Regular from "@components/Form/Regular.vue";
 import Title from "@components/Widget/Title.vue";
 import Subtitle from "@components/Widget/Subtitle.vue";
-import MessageUnmatch from "@components/Message/Unmatch.vue";
+import Unmatch from "@components/Message/Unmatch.vue";
 import { useEqualStr } from "@utils/global.js";
 
 /**
@@ -71,8 +71,8 @@ const props = defineProps({
           v-if="useEqualStr(widget.type, 'Subtitle')"
           v-bind="widget.data"
         />
-        <MessageUnmatch
-          v-if="useEqualStr(widget.type, 'MessageUnmatch')"
+        <Unmatch
+          v-if="useEqualStr(widget.type, 'Unmatch')"
           v-bind="widget.data"
         />
         <Tabulator

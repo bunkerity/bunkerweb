@@ -46,6 +46,6 @@ methods = list(methods)
 codes = list(codes)
 reasons = list(reasons)
 
-builder = reports_builder(reports, reasons, countries, methods, codes)
+builder = reports_builder(reports=reports, reasons=reasons, countries=countries, methods=methods, codes=codes)
 
 save_builder(page_name="reports", output=builder, script_name="reports")

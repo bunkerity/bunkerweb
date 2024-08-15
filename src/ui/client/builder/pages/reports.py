@@ -170,18 +170,23 @@ def report_item(id: int, date: int, ip: str, country: str, method: str, url: str
     }
 
 
+def fallback_message(msg: str, display: Optional[list] = None) -> dict:
+
+    return {
+        "type": "void",
+        "display": display if display else [],
+        "widgets": [
+            unmatch_widget(text=msg),
+        ],
+    }
+
+
 def reports_builder(
     reports: list, reasons: Optional[list] = None, countries: Optional[list] = None, methods: Optional[list] = None, codes: Optional[list] = None
 ) -> str:
 
     if reports is None or len(reports) == 0:
-        return {
-            "type": "card",
-            "gridLayoutClass": "transparent",
-            "widgets": [
-                unmatch_widget(text="reports_not_found"),
-            ],
-        }
+        return [fallback_message("reports_not_found")]
 
     reports_items = [report_item(**report, id=index) for index, report in enumerate(reports)]
     return [
