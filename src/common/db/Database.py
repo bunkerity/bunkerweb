@@ -3164,6 +3164,27 @@ class Database:
 
         return ""
 
+    def update_instance(self, hostname: str, status: str) -> str:
+        """Update instance."""
+        with self._db_session() as session:
+            if self.readonly:
+                return "The database is read-only, the changes will not be saved"
+
+            db_instance = session.query(Instances).filter_by(hostname=hostname).first()
+
+            if db_instance is None:
+                return f"Instance {hostname} does not exist, will not be updated."
+
+            db_instance.status = status
+            db_instance.last_seen = datetime.now()
+
+            try:
+                session.commit()
+            except BaseException as e:
+                return f"An error occurred while updating the instance {hostname}.\n{e}"
+
+        return ""
+
     def get_instances(self, *, method: Optional[str] = None) -> List[Dict[str, Any]]:
         """Get instances."""
         with self._db_session() as session:

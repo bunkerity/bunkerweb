@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 
-from datetime import datetime, timezone
-from functools import partial
 from sqlalchemy import TEXT, Boolean, Column, DateTime, Enum, ForeignKey, Identity, Integer, LargeBinary, String, func
 from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy.schema import UniqueConstraint
@@ -208,7 +206,7 @@ class Instances(Base):
     status = Column(INSTANCE_STATUS_ENUM, nullable=False, default="loading")
     method = Column(METHODS_ENUM, nullable=False, default="manual")
     creation_date = Column(DateTime, nullable=False, server_default=func.now())
-    last_seen = Column(DateTime, nullable=True, server_default=func.now(), onupdate=partial(datetime.now, timezone.utc))
+    last_seen = Column(DateTime, nullable=True, server_default=func.now())
 
 
 class Bw_cli_commands(Base):
