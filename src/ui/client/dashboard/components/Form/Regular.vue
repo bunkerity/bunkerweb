@@ -33,6 +33,8 @@ import Text from "@components/Widget/Text.vue";
  *          inpType: "input",
  *        },
  *      ],
+ * @param {String} [title=""] - Form title
+ * @param {String} [subtitle=""] - Form subtitle
  * @param {Object} fields - List of Fields component to display
  * @param {Object} buttons - We need to send a regular ButtonGroup buttons prop
  * @param {String} [containerClass=""] - Container additional class
@@ -44,6 +46,16 @@ import Text from "@components/Widget/Text.vue";
 
 const props = defineProps({
   // id && value && method
+  title: {
+    type: String,
+    required: false,
+    default: "",
+  },
+  subtitle: {
+    type: String,
+    required: false,
+    default: "",
+  },
   fields: {
     type: Array,
     required: true,
@@ -107,6 +119,8 @@ onMounted(() => {
     :containerClass="`form-regular-container`"
   >
     <div class="form-regular-wrap">
+      <Title v-if="props.title" type="card" :title="props.title" />
+      <Subtitle v-if="props.subtitle" type="card" :subtitle="props.subtitle" />
       <div
         :class="[
           'layout-settings-regular',

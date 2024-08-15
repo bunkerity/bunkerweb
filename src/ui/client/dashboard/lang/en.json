@@ -172,6 +172,7 @@
   "action_toggle": "toggle {name}",
   "action_unban": "unban {name}",
   "action_entry": "entry {name}",
+  "action_update": "update {name}",
   "action_back": "back",
   "home_version": "version",
   "home_all_features_available": "all features are available",
