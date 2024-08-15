@@ -79,16 +79,21 @@ FROM ubuntu:24.04@sha256:562456a05a0dbd62a671c1854868862a4687bf979a96d48ae8e7666
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
 
+# Install fpm
+RUN apt-get update && \
+    apt-get -y install ruby ruby-dev rubygems build-essential autoconf libtool rpm binutils && \
+    gem install -N fpm
+
+# Cleanup
+RUN apt-get -f -y --auto-remove remove build-essential autoconf libtool && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
 # Copy dependencies
 COPY --from=builder --chown=0:101 /etc/nginx /etc/nginx
 COPY --from=builder --chown=0:101 /usr/share/bunkerweb /usr/share/bunkerweb
 
 WORKDIR /usr/share/bunkerweb
-
-# Install fpm
-RUN apt-get update && \
-    apt-get -y install ruby ruby-dev rubygems build-essential autoconf libtool rpm binutils && \
-    gem install -N fpm
 
 # Setup BW
 RUN cp helpers/bwcli /usr/bin/ && \
@@ -105,11 +110,6 @@ RUN cp helpers/bwcli /usr/bin/ && \
     find core/*/jobs/* -type f -exec chmod 750 {} \; && \
     find core/*/bwcli/* -type f -exec chmod 750 {} \; && \
     chmod 755 .
-
-# Cleanup
-RUN apt-get -f -y --auto-remove remove build-essential autoconf libtool && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
 
 COPY --chmod=660 src/bw/misc/asn.mmdb /var/tmp/bunkerweb/asn.mmdb
 COPY --chmod=660 src/bw/misc/country.mmdb /var/tmp/bunkerweb/country.mmdb

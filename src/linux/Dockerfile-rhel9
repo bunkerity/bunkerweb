@@ -89,12 +89,6 @@ FROM redhat/ubi9:9.4@sha256:1ee4d8c50d14d9c9e9229d9a039d793fcbc9aa803806d194c957
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
 
-# Copy dependencies
-COPY --from=builder --chown=0:101 /etc/nginx /etc/nginx
-COPY --from=builder --chown=0:101 /usr/share/bunkerweb /usr/share/bunkerweb
-
-WORKDIR /usr/share/bunkerweb
-
 # Install fpm
 RUN dnf install -y wget redhat-rpm-config rpm-build yum-utils gcc make && \
   wget https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm && \
@@ -102,6 +96,17 @@ RUN dnf install -y wget redhat-rpm-config rpm-build yum-utils gcc make && \
   dnf module -y reset ruby && dnf module -y enable ruby:3.1 && dnf module -y install ruby:3.1/common && \
   dnf install -y ruby-devel && \
   gem install fpm
+
+# Cleanup
+RUN dnf -y --setopt=install_weak_deps=False autoremove && \
+  dnf clean all && \
+  rm -rf /var/cache/dnf
+
+# Copy dependencies
+COPY --from=builder --chown=0:101 /etc/nginx /etc/nginx
+COPY --from=builder --chown=0:101 /usr/share/bunkerweb /usr/share/bunkerweb
+
+WORKDIR /usr/share/bunkerweb
 
 # Setup BW
 RUN cp helpers/bwcli /usr/bin/ && \
@@ -118,11 +123,6 @@ RUN cp helpers/bwcli /usr/bin/ && \
   find core/*/jobs/* -type f -exec chmod 750 {} \; && \
   find core/*/bwcli/* -type f -exec chmod 750 {} \; && \
   chmod 755 .
-
-# Cleanup
-RUN dnf -y --setopt=install_weak_deps=False autoremove && \
-  dnf clean all && \
-  rm -rf /var/cache/dnf
 
 COPY --chmod=660 src/bw/misc/asn.mmdb /var/tmp/bunkerweb/asn.mmdb
 COPY --chmod=660 src/bw/misc/country.mmdb /var/tmp/bunkerweb/country.mmdb
