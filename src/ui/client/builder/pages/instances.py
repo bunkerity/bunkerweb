@@ -204,9 +204,9 @@ def instance_item(
                             button_widget(
                                 id=f"reload-btn-{instance_name}",
                                 text="action_reload",  # keep it (a18n)
-                                color="info",
+                                color="success",
                                 size="normal",
-                                iconName="globe",
+                                iconName="refresh",
                                 iconColor="white",
                                 attrs={
                                     "data-submit-form": f"""{{ "instance_hostname" : "{hostname}" }}""",
