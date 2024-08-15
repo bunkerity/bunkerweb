@@ -92,10 +92,8 @@ void LJ_FASTCALL lj_buf_shrink(lua_State *L, SBuf *sb)
   char *b = sb->b;
   MSize osz = (MSize)(sb->e - b);
   if (osz > 2*LJ_MIN_SBUF) {
-    MSize n = (MSize)(sb->w - b);
     b = lj_mem_realloc(L, b, osz, (osz >> 1));
-    sb->b = b;
-    sb->w = b + n;
+    sb->w = sb->b = b;  /* Not supposed to keep data across shrinks. */
     sb->e = b + (osz >> 1);
   }
   lj_assertG_(G(sbufL(sb)), !sbufisext(sb), "YAGNI shrink SBufExt");

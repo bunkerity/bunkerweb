@@ -13,6 +13,7 @@
 #include "lualib.h"
 
 #include "lj_obj.h"
+#include "lj_err.h"
 #include "lj_lib.h"
 #include "lj_vm.h"
 #include "lj_prng.h"
@@ -183,7 +184,10 @@ LJLIB_PUSH(top-2)  /* Upvalue holds userdata with PRNGState. */
 LJLIB_CF(math_randomseed)
 {
   PRNGState *rs = (PRNGState *)(uddata(udataV(lj_lib_upvalue(L, 1))));
-  random_seed(rs, lj_lib_checknum(L, 1));
+  if (L->base != L->top)
+    random_seed(rs, lj_lib_checknum(L, 1));
+  else if (!lj_prng_seed_secure(rs))
+    lj_err_caller(L, LJ_ERR_PRNGSD);
   return 0;
 }
 
