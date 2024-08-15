@@ -170,7 +170,7 @@ def instance_item(
                                 iconName="globe",
                                 iconColor="white",
                                 attrs={
-                                    "data-submit-form": f"""{{"instance_name" : "{instance_name}", "instance_hostname" : "{hostname}" }}""",
+                                    "data-submit-form": f"""{{ "instance_hostname" : "{hostname}" }}""",
                                     "data-submit-endpoint": "/ping",
                                 },
                             ),
@@ -209,7 +209,7 @@ def instance_item(
                                 iconName="globe",
                                 iconColor="white",
                                 attrs={
-                                    "data-submit-form": f"""{{"instance_name" : "{instance_name}", "instance_hostname" : "{hostname}" }}""",
+                                    "data-submit-form": f"""{{ "instance_hostname" : "{hostname}" }}""",
                                     "data-submit-endpoint": "/reload",
                                 },
                             ),
@@ -252,7 +252,7 @@ def instance_item(
                                     iconName="trash",
                                     iconColor="white",
                                     attrs={
-                                        "data-submit-form": f"""{{ "instance_name" : "{instance_name}", "instance_hostname" : "{hostname}" }}""",
+                                        "data-submit-form": f"""{{ "instance_hostname" : "{hostname}" }}""",
                                         "data-submit-endpoint": "/delete",
                                     },
                                 ),
@@ -297,7 +297,7 @@ def instances_new_form() -> dict:
                     get_fields_from_field(
                         input_widget(
                             id="instance-name",
-                            name="instance-name",
+                            name="instance_name",
                             label="instances_name",  # keep it (a18n)
                             value="",
                             pattern="",  # add your pattern if needed
@@ -314,7 +314,7 @@ def instances_new_form() -> dict:
                     get_fields_from_field(
                         input_widget(
                             id="instance-hostname",
-                            name="instance-hostname",
+                            name="instance_hostname",
                             label="instances_hostname",  # keep it (a18n)
                             value="",
                             pattern="",  # add your pattern if needed
