@@ -2,4 +2,4 @@ fastapi==0.112.0
 redis==5.0.8
 requests==2.32.3
 selenium==4.23.1
-uvicorn[standard]==0.30.5
+uvicorn[standard]==0.30.6
