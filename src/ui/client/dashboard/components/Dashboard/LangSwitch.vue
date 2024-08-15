@@ -18,7 +18,7 @@ const lang = reactive({
  * @name updateLangStorage
  * @description This function will update the language in the session storage and reload the page.
  * On reload, we will retrieve the language from the session storage and set it.
- * @param {string} lang - The language to set.
+ * @param {String} lang - The language to set.
  * @returns {void}
  */
 function updateLangStorage(lang) {

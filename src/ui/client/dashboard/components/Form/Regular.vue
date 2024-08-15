@@ -35,9 +35,10 @@ import Text from "@components/Widget/Text.vue";
  *      ],
  * @param {Object} fields - List of Fields component to display
  * @param {Object} buttons - We need to send a regular ButtonGroup buttons prop
- * @param {string} [containerClass=""] - Container additional class
- * @param {string} [endpoint=""] - Form endpoint. Case none, will be ignored.
- * @param {string} [maxWidthScreen="lg"] - Max screen width for the settings based on the breakpoint (xs, sm, md, lg, xl, 2xl)
+ * @param {String} [containerClass=""] - Container additional class
+ * @param {String} [endpoint=""] - Form endpoint. Case none, will be ignored.
+ * @param {String} [method="POST"] - Http method to be used on form submit.
+ * @param {String} [maxWidthScreen="lg"] - Max screen width for the settings based on the breakpoint (xs, sm, md, lg, xl, 2xl)
  * @param {Object} [columns={ "pc": "12", "tablet": "12", "mobile": "12" }] - Columns object.
  */
 
@@ -62,6 +63,11 @@ const props = defineProps({
     type: String,
     required: false,
     default: "",
+  },
+  method: {
+    type: String,
+    required: false,
+    default: "POST",
   },
   containerClass: {
     type: String,
@@ -95,7 +101,7 @@ onMounted(() => {
   <Container
     data-is="form"
     :tag="'form'"
-    method="POST"
+    :method="props.method"
     :action="data.endpoint"
     :columns="props.columns"
     :containerClass="`form-regular-container`"

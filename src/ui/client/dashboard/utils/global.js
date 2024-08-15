@@ -30,12 +30,15 @@ function useSubmitAttr(e) {
   if (!e.target.hasAttribute("data-submit-form")) return;
   try {
     const data = JSON.parse(e.target.getAttribute("data-submit-form"));
-    const submitEndpoint = e.target.hasAttribute("data-submit-endpoint")
+    const endpoint = e.target.hasAttribute("data-submit-endpoint")
       ? `${window.location.origin}${
           window.location.pathname
         }${e.target.getAttribute("data-submit-endpoint")}`
       : "";
-    useSubmitForm(data, submitEndpoint);
+    const method = e.target.hasAttribute("data-submit-endpoint")
+      ? e.target.getAttribute("data-submit-method")
+      : "POST";
+    useSubmitForm(data, endpoint, method);
   } catch (e) {
     console.error(e);
   }
@@ -52,14 +55,15 @@ function useSubmitAttr(e) {
  *  }
  *  @param {Object} data - Object with the form data to submit.
  *  @param {String} [submitEndpoint=""] - The endpoint to submit the form.
+ *  @param {String} [method="POST"] - The http method
  *  @returns {Void}
  */
-function useSubmitForm(data, submitEndpoint = "") {
+function useSubmitForm(data, submitEndpoint = "", method = "POST") {
   // Create a form element
   const form = document.createElement("form");
   form.style.display = "none";
-  form.method = "POST";
-  if (submitEndpoint) form.action = submitEndpoint;
+  form.method = method;
+  form.action = submitEndpoint;
   // Retrieve csrf token form data-crfs-token
   try {
     const csrfToken = document.querySelector("[data-csrf-token]");

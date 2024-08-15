@@ -172,6 +172,7 @@ def instance_item(
                                 attrs={
                                     "data-submit-form": f"""{{ "instance_hostname" : "{hostname}" }}""",
                                     "data-submit-endpoint": "/ping",
+                                    "data-submit-method": "POST",
                                 },
                             ),
                         ]
@@ -211,6 +212,7 @@ def instance_item(
                                 attrs={
                                     "data-submit-form": f"""{{ "instance_hostname" : "{hostname}" }}""",
                                     "data-submit-endpoint": "/reload",
+                                    "data-submit-method": "POST",
                                 },
                             ),
                         ]
@@ -254,6 +256,7 @@ def instance_item(
                                     attrs={
                                         "data-submit-form": f"""{{ "instance_hostname" : "{hostname}" }}""",
                                         "data-submit-endpoint": "/delete",
+                                        "data-submit-method": "DELETE",
                                     },
                                 ),
                             ]
@@ -293,6 +296,7 @@ def instances_new_form() -> dict:
             regular_widget(
                 maxWidthScreen="xs",
                 endpoint="/add",
+                method="PUT",
                 fields=[
                     get_fields_from_field(
                         input_widget(
@@ -416,6 +420,7 @@ def instances_list(instances: Optional[list] = None, types: Optional[list] = Non
             ),
             tabulator_widget(
                 id="table-instances",
+                layout="fitDataFill",
                 columns=columns,
                 items=items,
                 filters=instances_filter(types=types, methods=methods, healths=healths),

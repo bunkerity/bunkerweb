@@ -11,6 +11,8 @@ def advanced_widget(
     template: dict,
     containerClass: str = "",
     operation: str = "edit",
+    endpoint: str = "",
+    method: str = "POST",
     oldServerName: str = "",
     columns: dict = {"pc":"12","tablet":"12","mobile":"12"}
     ):
@@ -20,9 +22,11 @@ def advanced_widget(
     PARAMETERS
     
     -   `template` **Object** Template object with plugin and settings data.
-    -   `containerClass` **string** Container additional class (optional, default `""`)
-    -   `operation` **string** Operation type (edit, new, delete). (optional, default `"edit"`)
-    -   `oldServerName` **string** Old server name. This is a server name before any changes. (optional, default `""`)
+    -   `containerClass` **String** Container additional class (optional, default `""`)
+    -   `operation` **String** Operation type (edit, new, delete). (optional, default `"edit"`)
+    -   `endpoint` **String** Form endpoint. Case none, will be ignored. (optional, default `""`)
+    -   `method` **String** Http method to be used on form submit. (optional, default `"POST"`)
+    -   `oldServerName` **String** Old server name. This is a server name before any changes. (optional, default `""`)
     -   `columns` **Object** Columns object. (optional, default `{"pc":"12","tablet":"12","mobile":"12"}`)
     
     EXAMPLE
@@ -62,7 +66,7 @@ def advanced_widget(
 
 
     # List of params that will be add only if not default value
-    list_params = [("containerClass", containerClass, ""),("operation", operation, "edit"),("oldServerName", oldServerName, ""),("columns", columns, {"pc":"12","tablet":"12","mobile":"12"})]
+    list_params = [("containerClass", containerClass, ""),("operation", operation, "edit"),("endpoint", endpoint, ""),("method", method, "POST"),("oldServerName", oldServerName, ""),("columns", columns, {"pc":"12","tablet":"12","mobile":"12"})]
     for param in list_params:
         add_key_value(data, param[0], param[1], param[2])
 
@@ -628,6 +632,8 @@ def easy_widget(
     template: dict,
     containerClass: str = "",
     operation: str = "edit",
+    endpoint: str = "",
+    method: str = "POST",
     oldServerName: str = "",
     columns: dict = {"pc":"12","tablet":"12","mobile":"12"}
     ):
@@ -637,9 +643,11 @@ def easy_widget(
     PARAMETERS
     
     -   `template` **Object** Template object with plugin and settings data.
-    -   `containerClass` **string** Container additional class (optional, default `""`)
-    -   `operation` **string** Operation type (edit, new, delete). (optional, default `"edit"`)
-    -   `oldServerName` **string** Old server name. This is a server name before any changes. (optional, default `""`)
+    -   `containerClass` **String** Container additional class (optional, default `""`)
+    -   `operation` **String** Operation type (edit, new, delete). (optional, default `"edit"`)
+    -   `endpoint` **String** Form endpoint. Case none, will be ignored. (optional, default `""`)
+    -   `method` **String** Http method to be used on form submit. (optional, default `"POST"`)
+    -   `oldServerName` **String** Old server name. This is a server name before any changes. (optional, default `""`)
     -   `columns` **Object** Columns object. (optional, default `{"pc":"12","tablet":"12","mobile":"12"}`)
     
     EXAMPLE
@@ -679,7 +687,7 @@ def easy_widget(
 
 
     # List of params that will be add only if not default value
-    list_params = [("containerClass", containerClass, ""),("operation", operation, "edit"),("oldServerName", oldServerName, ""),("columns", columns, {"pc":"12","tablet":"12","mobile":"12"})]
+    list_params = [("containerClass", containerClass, ""),("operation", operation, "edit"),("endpoint", endpoint, ""),("method", method, "POST"),("oldServerName", oldServerName, ""),("columns", columns, {"pc":"12","tablet":"12","mobile":"12"})]
     for param in list_params:
         add_key_value(data, param[0], param[1], param[2])
 
@@ -990,7 +998,7 @@ def grid_layout_widget(
     -   `gridLayoutClass` **String** Additional class (optional, default `"items-start"`)
     -   `display` **Array** Array need two values : "groupName" in index 0 and "compId" in index 1 in order to be displayed using the display store. More info on the display store itslef. (optional, default `[]`)
     -   `tabId` **String** Case the container is converted to an anchor with a link, we can define the tabId, by default it is the contentIndex (optional, default `contentIndex`)
-    -   `maxWidthScreen` **string** Max screen width for the settings based on the breakpoint (xs, sm, md, lg, xl, 2xl, 3xl) (optional, default `"2xl"`)
+    -   `maxWidthScreen` **String** Max screen width for the settings based on the breakpoint (xs, sm, md, lg, xl, 2xl, 3xl) (optional, default `"2xl"`)
     
     EXAMPLE
     
@@ -1559,6 +1567,8 @@ def raw_widget(
     operation: str = "edit",
     oldServerName: str = "",
     containerClass: str = "",
+    endpoint: str = "",
+    method: str = "POST",
     columns: dict = {"pc":"12","tablet":"12","mobile":"12"}
     ):
     """    
@@ -1569,7 +1579,9 @@ def raw_widget(
     -   `template` **Object** Template object with plugin and settings data.
     -   `operation` **String** Operation type (edit, new, delete). (optional, default `"edit"`)
     -   `oldServerName` **String** Old server name. This is a server name before any changes. (optional, default `""`)
-    -   `containerClass` **string** Container additional class (optional, default `""`)
+    -   `containerClass` **String** Container additional class (optional, default `""`)
+    -   `endpoint` **String** Form endpoint. Case none, will be ignored. (optional, default `""`)
+    -   `method` **String** Http method to be used on form submit. (optional, default `"POST"`)
     -   `columns` **Object** Columns object. (optional, default `{"pc":"12","tablet":"12","mobile":"12"}`)
     
     EXAMPLE
@@ -1590,7 +1602,7 @@ def raw_widget(
 
 
     # List of params that will be add only if not default value
-    list_params = [("operation", operation, "edit"),("oldServerName", oldServerName, ""),("containerClass", containerClass, ""),("columns", columns, {"pc":"12","tablet":"12","mobile":"12"})]
+    list_params = [("operation", operation, "edit"),("oldServerName", oldServerName, ""),("containerClass", containerClass, ""),("endpoint", endpoint, ""),("method", method, "POST"),("columns", columns, {"pc":"12","tablet":"12","mobile":"12"})]
     for param in list_params:
         add_key_value(data, param[0], param[1], param[2])
 
@@ -1602,6 +1614,7 @@ def regular_widget(
     buttons: dict,
     containerClass: str = "",
     endpoint: str = "",
+    method: str = "POST",
     maxWidthScreen: str = "lg",
     columns: dict = {"pc":"12","tablet":"12","mobile":"12"}
     ):
@@ -1612,9 +1625,10 @@ def regular_widget(
     
     -   `fields` **Object** List of Fields component to display
     -   `buttons` **Object** We need to send a regular ButtonGroup buttons prop
-    -   `containerClass` **string** Container additional class (optional, default `""`)
-    -   `endpoint` **string** Form endpoint. Case none, will be ignored. (optional, default `""`)
-    -   `maxWidthScreen` **string** Max screen width for the settings based on the breakpoint (xs, sm, md, lg, xl, 2xl) (optional, default `"lg"`)
+    -   `containerClass` **String** Container additional class (optional, default `""`)
+    -   `endpoint` **String** Form endpoint. Case none, will be ignored. (optional, default `""`)
+    -   `method` **String** Http method to be used on form submit. (optional, default `"POST"`)
+    -   `maxWidthScreen` **String** Max screen width for the settings based on the breakpoint (xs, sm, md, lg, xl, 2xl) (optional, default `"lg"`)
     -   `columns` **Object** Columns object. (optional, default `{"pc":"12","tablet":"12","mobile":"12"}`)
     
     EXAMPLE
@@ -1653,7 +1667,7 @@ def regular_widget(
 
 
     # List of params that will be add only if not default value
-    list_params = [("containerClass", containerClass, ""),("endpoint", endpoint, ""),("maxWidthScreen", maxWidthScreen, "lg"),("columns", columns, {"pc":"12","tablet":"12","mobile":"12"})]
+    list_params = [("containerClass", containerClass, ""),("endpoint", endpoint, ""),("method", method, "POST"),("maxWidthScreen", maxWidthScreen, "lg"),("columns", columns, {"pc":"12","tablet":"12","mobile":"12"})]
     for param in list_params:
         add_key_value(data, param[0], param[1], param[2])
 
@@ -2071,8 +2085,8 @@ def templates_widget(
     PARAMETERS
     
     -   `templates` **Object** List of advanced templates that contains settings. Must be a dict with mode as key, then the template name as key with a list of data (different for each modes).
-    -   `operation` **string** Operation type (edit, new, delete). (optional, default `"edit"`)
-    -   `oldServerName` **string** Old server name. This is a server name before any changes. (optional, default `""`)
+    -   `operation` **String** Operation type (edit, new, delete). (optional, default `"edit"`)
+    -   `oldServerName` **String** Old server name. This is a server name before any changes. (optional, default `""`)
     
     EXAMPLE
     

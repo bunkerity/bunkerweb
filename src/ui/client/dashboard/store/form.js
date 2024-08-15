@@ -35,6 +35,8 @@ export const createFormStore = (storeName, formType) => {
     // Get additionnal data for submit
     const operation = ref("");
     const oldServerName = ref("");
+    const endpoint = ref("");
+    const method = ref("POST");
 
     /**
      *  @name setOperation
@@ -640,7 +642,7 @@ export const createFormStore = (storeName, formType) => {
       data["operation"] = operation.value;
       data["OLD_SERVER_NAME"] = oldServerName.value;
       data["mode"] = type.value;
-      useSubmitForm(data);
+      useSubmitForm(data, endpoint, method);
     }
 
     /**

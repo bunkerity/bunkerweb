@@ -50,9 +50,11 @@ import { useEasyForm } from "@store/form.js";
  *   ],
  * }
  * @param {Object} template - Template object with plugin and settings data.
- * @param {string} [containerClass=""] - Container additional class
- * @param {string} [operation="edit"] - Operation type (edit, new, delete).
- * @param {string} [oldServerName=""] - Old server name. This is a server name before any changes.
+ * @param {String} [containerClass=""] - Container additional class
+ * @param {String} [operation="edit"] - Operation type (edit, new, delete).
+ * @param {String} [endpoint=""] - Form endpoint. Case none, will be ignored.
+ * @param {String} [method="POST"] - Http method to be used on form submit.
+ * @param {String} [oldServerName=""] - Old server name. This is a server name before any changes.
  * @param {Object} [columns={ "pc": "12", "tablet": "12", "mobile": "12" }] - Columns object.
  */
 
@@ -69,6 +71,16 @@ const props = defineProps({
     type: String,
     required: false,
     default: "edit",
+  },
+  endpoint: {
+    type: String,
+    required: false,
+    default: "",
+  },
+  method: {
+    type: String,
+    required: false,
+    default: "POST",
   },
   oldServerName: {
     type: String,
@@ -175,6 +187,10 @@ onMounted(() => {
   setup();
   // I want updatInp to access event, data.base and the container attribute
   easyForm.useListenTempFields();
+  easyForm.setOperation(props.operation);
+  easyForm.setOldServerName(props.oldServerName);
+  easyForm.setEndpoint(props.endpoint);
+  easyForm.setMethod(props.method);
   window.addEventListener("input", listenToValidate);
 });
 

@@ -26,7 +26,7 @@ import { useDisplayStore } from "@store/global.js";
  *  @param {String} [gridLayoutClass="items-start"] - Additional class
  *  @param {Array} [display=[]] - Array need two values : "groupName" in index 0 and "compId" in index 1 in order to be displayed using the display store. More info on the display store itslef.
  *  @param {String} [tabId=contentIndex] - Case the container is converted to an anchor with a link, we can define the tabId, by default it is the contentIndex
- * @param {string} [maxWidthScreen="2xl"] - Max screen width for the settings based on the breakpoint (xs, sm, md, lg, xl, 2xl, 3xl)
+ * @param {String} [maxWidthScreen="2xl"] - Max screen width for the settings based on the breakpoint (xs, sm, md, lg, xl, 2xl, 3xl)
  */
 
 const props = defineProps({

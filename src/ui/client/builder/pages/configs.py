@@ -6,6 +6,9 @@ from .utils.widgets import (
     text_widget,
     tabulator_widget,
     input_widget,
+    select_widget,
+    editor_widget,
+    checkbox_widget,
     icons_widget,
     regular_widget,
     unmatch_widget,
@@ -27,7 +30,7 @@ columns = [
 ]
 
 
-def configs_filter(types: Optional[list] = None) -> list:  # healths = "up", "down", "loading"
+def configs_filter(config_types: Optional[list] = None) -> list:  # healths = "up", "down", "loading"
     filters = [
         {
             "type": "like",
@@ -104,10 +107,7 @@ def configs_item(
     is_global: bool,  # "yes" or "no"
     filename: str = "",
     config_type: str = "",
-    types: Optional[list] = None,
-    services: Optional[list] = None,
-    config_value: str = "",
-    is_new: bool = False,
+    config_services: Optional[list] = None,
     display_index: int = 1,
 ):
     global_text = "yes" if is_global else "no"
@@ -169,7 +169,7 @@ def configs_item(
 
     services_items = []
     # get id
-    for index, service in enumerate(services):
+    for index, service in enumerate(config_services):
         services_items.append(
             {
                 "id": text_widget(text=index)["data"],
@@ -202,8 +202,8 @@ def configs_item(
                                         "type": "like",
                                         "fields": ["name"],
                                         "setting": {
-                                            "id": "input-search-service",
-                                            "name": "input-search-service",
+                                            "id": f"input-search-service-{filename}-{global_text}",
+                                            "name": f"input-search-service-{filename}-{global_text}",
                                             "label": "configs_search_service",  # keep it (a18n)
                                             "value": "",
                                             "inpType": "input",
@@ -237,26 +237,32 @@ def configs_item(
             iconName="check" if is_global == "up" else "cross" if is_global == "down" else "search",
             value=global_text,
         )["data"],
+        "services": services_detail,
         "actions": {"buttons": actions},
     }
 
 
-def configs_form(
+def config_form(
     is_global: bool,  # "yes" or "no"
-    filename: str = "",
-    config_type: str = "",
-    types: Optional[list] = None,
+    filename: str,
+    config_type: str,
+    config_value: str,
+    config_types: Optional[list] = None,
+    config_services: Optional[list] = None,
     services: Optional[list] = None,
-    config_value: str = "",
-    is_new: bool = False,
     display_index: int = 1,
+    is_new: bool = False,
 ) -> dict:
+    # difference between edit or new form
+    enabled_value_field_only = False if is_new else True
+    config_services = [] if is_global else config_services
     global_text = "yes" if is_global else "no"
+    filename = "new" if is_new else filename
 
     return {
         "type": "card",
         "maxWidthScreen": "md",
-        "display": ["main", 2],
+        "display": ["main", display_index],
         "widgets": [
             title_widget(
                 title="configs_create_title",  # keep it (a18n)
@@ -270,49 +276,117 @@ def configs_form(
                 fields=[
                     get_fields_from_field(
                         input_widget(
-                            id="instance-name",
-                            name="instance-name",
-                            label="configs_name",  # keep it (a18n)
+                            id=f"configs-name-{filename}-{global_text}",
+                            name="filename",
+                            label="configs_filename",  # keep it (a18n)
                             value="",
+                            required=True,
                             pattern="",  # add your pattern if needed
                             columns={"pc": 12, "tablet": 12, "mobile": 12},
-                            placeholder="configs_name_placeholder",  # keep it (a18n)
+                            placeholder="configs_filename_add_placeholder",  # keep it (a18n)
+                            disabled=enabled_value_field_only,
                             popovers=[
                                 {
+                                    "iconName": "yellow-darker",
+                                    "text": "configs_filename_add_warning_desc",  # can't add a service with same name and same type of existing one, will not be save.
+                                },
+                                {
                                     "iconName": "info",
-                                    "text": "configs_name_desc",
-                                }
+                                    "text": "configs_filename_add_desc",
+                                },
                             ],
                         )
                     ),
                     get_fields_from_field(
-                        input_widget(
-                            id="instance-hostname",
-                            name="instance-hostname",
-                            label="configs_hostname",  # keep it (a18n)
-                            value="",
-                            pattern="",  # add your pattern if needed
+                        select_widget(
+                            id=f"configs-type-{filename}-{global_text}",
+                            name="type",
+                            label="configs_type",  # keep it (a18n)
+                            value=config_type,
+                            values=config_types,
+                            required=True,
+                            requiredValues=config_types,
                             columns={"pc": 12, "tablet": 12, "mobile": 12},
-                            placeholder="configs_hostname_placeholder",  # keep it (a18n)
+                            disabled=enabled_value_field_only,
                             popovers=[
                                 {
                                     "iconName": "info",
-                                    "text": "configs_hostname_desc",
-                                }
+                                    "text": "configs_type_desc",
+                                },
+                            ],
+                        )
+                    ),
+                    get_fields_from_field(
+                        checkbox_widget(
+                            id=f"configs-global-{filename}-{global_text}",
+                            name="global",
+                            label="configs_global",  # keep it (a18n)
+                            value=is_global,
+                            disabled=enabled_value_field_only,
+                            pattern="",  # add your pattern if needed
+                            columns={"pc": 12, "tablet": 12, "mobile": 12},
+                            placeholder="configs_global_placeholder",  # keep it (a18n)
+                            popovers=[
+                                {
+                                    "iconName": "yellow-darker",
+                                    "text": "configs_global_warning_desc",  # if check, will apply to all services even if services are selected.
+                                },
+                                {
+                                    "iconName": "info",
+                                    "text": "configs_global_desc",
+                                },
+                            ],
+                        )
+                    ),
+                    get_fields_from_field(
+                        select_widget(
+                            id=f"configs-services-{filename}-{global_text}",
+                            name="services",
+                            label="configs_services",  # keep it (a18n)
+                            value=config_services,
+                            values=services,
+                            columns={"pc": 12, "tablet": 12, "mobile": 12},
+                            disabled=enabled_value_field_only,
+                            popovers=[
+                                {
+                                    "iconName": "info",
+                                    "text": "config_services_desc",
+                                },
+                            ],
+                        )
+                    ),
+                    get_fields_from_field(
+                        editor_widget(
+                            id=f"configs-value-{filename}-{global_text}",
+                            name="value",
+                            label="configs_value",  # keep it (a18n)
+                            value=config_value,
+                            pattern="",  # add your pattern if needed
+                            columns={"pc": 12, "tablet": 12, "mobile": 12},
+                            placeholder="configs_value_placeholder",  # keep it (a18n)
+                            disabled=enabled_value_field_only,
+                            popovers=[
+                                {
+                                    "iconName": "yellow-darker",
+                                    "text": "configs_value_warning_desc",  # config will not be save in case of script error
+                                },
+                                {
+                                    "iconName": "info",
+                                    "text": "configs_value_desc",
+                                },
                             ],
                         )
                     ),
                 ],
                 buttons=[
                     button_widget(
-                        id="create-instance-submit",
-                        text="action_create",
-                        iconName="plus",
+                        id=f"configs-submit-{filename}-{global_text}",
+                        text="action_create" if is_new else "action_edit",  # keep it (a18n)
+                        iconName="plus" if is_new else "pen",
                         iconColor="white",
-                        color="success",
+                        color="success" if is_new else "edit",
                         size="normal",
                         type="submit",
-                        containerClass="flex justify-center",
                     )
                 ],
             ),
@@ -328,7 +402,7 @@ def configs_tabs():
                 buttons=[
                     button_widget(
                         text="configs_tab_list",
-                        display=["main", 1],
+                        display=["main", 0],
                         size="tab",
                         color="info",
                         iconColor="white",
@@ -337,7 +411,7 @@ def configs_tabs():
                     button_widget(
                         text="configs_tab_add",
                         color="success",
-                        display=["main", 2],
+                        display=["main", 1],
                         size="tab",
                         iconColor="white",
                         iconName="plus",
@@ -348,55 +422,90 @@ def configs_tabs():
     }
 
 
-def configs_list(instances: Optional[list] = None, types: Optional[list] = None, methods: Optional[list] = None, healths: Optional[list] = None) -> dict:
-    if instances is None or len(instances) == 0:
-        return {
-            "type": "card",
-            "gridLayoutClass": "transparent",
-            "widgets": [
-                unmatch_widget(text="configs_not_found"),
-            ],
-        }
-
-    items = []
-
-    for instance in instances:
-        items.append(
-            instance_item(
-                instance_name=instance.get("name", ""),
-                hostname=instance.get("hostname", ""),
-                instance_type=instance.get("type", ""),
-                method=instance.get("method", ""),
-                health=instance.get("health", ""),
-                creation_date=instance.get("creation_date", ""),
-                last_seen=instance.get("last_seen", ""),
-            )
-        )
-
+def fallback_message(msg: str):
     return {
         "type": "card",
-        "display": ["main", 1],
+        "gridLayoutClass": "transparent",
         "widgets": [
-            title_widget(
-                title="configs_list_title",  # keep it (a18n)
-            ),
-            subtitle_widget(
-                subtitle="configs_list_subtitle",  # keep it (a18n)
-            ),
-            tabulator_widget(
-                id="table-instances",
-                columns=columns,
-                items=items,
-                filters=configs_filter(types=types, methods=methods, healths=healths),
-            ),
+            unmatch_widget(text=msg),
         ],
     }
 
 
-def configs_builder(instances: Optional[list] = None, types: Optional[list] = None, methods: Optional[list] = None, healths: Optional[list] = None) -> list:
+def configs_builder(configs: Optional[list] = None, config_types: Optional[list] = None, services: Optional[list] = None) -> list:
+
+    if config_types is None or len(config_types) == 0:
+        return fallback_message("configs_missing_types")
+
+    if services is None or len(services) == 0:
+        return fallback_message("configs_missing_services")
+
+    configs_items = []
+    configs_form = []
+    # Start adding the new config form
+    configs_form.append(
+        config_form(
+            is_new=True,
+            display_index=1,
+            is_global=True,
+            config_types=config_types,
+            services=services,
+            filename="",
+            config_type="",
+            config_value="",
+            config_services=[],
+        )
+    )
+
+    if config is None or len(configs) == 0:
+        return [
+            # Tabs is button group with display value and a size tab inside a tabs container
+            user_management_tabs(),
+            fallback_message("user_management_users_not_found"),
+        ] + configs_form
+
+    # Start adding the new config form
+    # display_index start at 2 because 1 is the new and 0 is the configs table
+    for index, config in enumerate(configs):
+        display_index = index + 2
+        configs_items.append(
+            configs_item(
+                is_global=config.get("is_global", ""),
+                filename=config.get("filename", ""),
+                config_services=config.get("config_services", ""),
+                config_type=config.get("config_type", ""),
+                health=config.get("health", ""),
+                creation_date=config.get("creation_date", ""),
+                last_seen=config.get("last_seen", ""),
+                display_index=display_index,
+            )
+        )
+        configs_form.append(
+            config_form(
+                username=user.get("username"),
+                role=user.get("role"),
+                roles=roles_form,
+                display_index=display_index,
+            )
+        )
+
     return [
         # Tabs is button group with display value and a size tab inside a tabs container
-        configs_tabs(),
-        configs_list(instances=instances, types=types, methods=methods, healths=healths),
-        configs_new_form(),
-    ]
+        user_management_tabs(),
+        {
+            "type": "card",
+            "maxWidthScreen": "3xl",
+            "display": ["main", 0],
+            "widgets": [
+                title_widget(title="user_management_list_title"),  # keep it (a18n)
+                subtitle_widget(subtitle="user_management_list_subtitle"),  # keep it (a18n)
+                tabulator_widget(
+                    id="table-configs",
+                    columns=columns,
+                    items=configs_items,
+                    layout="fitColumns",
+                    filters=configs_filter(config_types=config_types),
+                ),
+            ],
+        },
+    ] + configs_form

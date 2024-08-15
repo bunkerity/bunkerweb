@@ -23,7 +23,9 @@ import { useRawForm } from "@store/form.js";
  *  @param {Object} template - Template object with plugin and settings data.
  *  @param {String} [operation="edit"] - Operation type (edit, new, delete).
  *  @param {String} [oldServerName=""] - Old server name. This is a server name before any changes.
- * @param {string} [containerClass=""] - Container additional class
+ * @param {String} [containerClass=""] - Container additional class
+ * @param {String} [endpoint=""] - Form endpoint. Case none, will be ignored.
+ * @param {String} [method="POST"] - Http method to be used on form submit.
  * @param {Object} [columns={ "pc": "12", "tablet": "12", "mobile": "12" }] - Columns object.
  */
 
@@ -40,6 +42,16 @@ const props = defineProps({
     type: String,
     required: false,
     default: "edit",
+  },
+  endpoint: {
+    type: String,
+    required: false,
+    default: "",
+  },
+  method: {
+    type: String,
+    required: false,
+    default: "POST",
   },
   oldServerName: {
     type: String,
@@ -186,6 +198,8 @@ onBeforeMount(() => {
 onMounted(() => {
   rawForm.setOperation(props.operation);
   rawForm.setOldServerName(props.oldServerName);
+  rawForm.setEndpoint(props.endpoint);
+  rawForm.setMethod(props.method);
 });
 </script>
 
