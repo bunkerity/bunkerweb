@@ -130,6 +130,11 @@ function start() {
     SLAVE_MODE="$(grep "^SLAVE_MODE=" /etc/bunkerweb/variables.env | cut -d '=' -f 2)"
     export SLAVE_MODE
 
+    CUSTOM_LOG_LEVEL="$(grep "^CUSTOM_LOG_LEVEL=" /etc/bunkerweb/variables.env | cut -d '=' -f 2)"
+    export CUSTOM_LOG_LEVEL
+    LOG_LEVEL="$(grep "^LOG_LEVEL=" /etc/bunkerweb/variables.env | cut -d '=' -f 2)"
+    export LOG_LEVEL
+
     if [ "$MASTER_MODE" != "yes" ] ; then
         # Generate temp conf for jobs and start nginx
         DNS_RESOLVERS="$(grep "^DNS_RESOLVERS=" /etc/bunkerweb/variables.env | cut -d '=' -f 2)"
