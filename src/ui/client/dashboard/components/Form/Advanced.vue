@@ -335,7 +335,7 @@ onUnmounted(() => {
         @inp="data.currPlugin = $event"
       />
     </Filter>
-    <MessageUnmatch v-if="!Object.keys(advancedForm.templateUIFormat).length" />
+    <Unmatch v-if="!Object.keys(advancedForm.templateUIFormat).length" />
     <template v-for="(plugin, pluginId) in advancedForm.templateUIFormat">
       <Container
         data-is="content"

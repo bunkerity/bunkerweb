@@ -141,7 +141,7 @@ onMounted(() => {
 
 <template>
   <component
-    v-show="container.isDisplay"
+    v-if="container.isDisplay"
     :aria-hidden="container.isDisplay ? 'false' : 'true'"
     ref="flowEl"
     :id="container.id"
@@ -156,5 +156,4 @@ onMounted(() => {
   >
     <slot></slot>
   </component>
-  <!-- end card or elements on the document flow -->
 </template>

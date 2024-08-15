@@ -56,6 +56,7 @@ const tableStore = useTableStore();
  * @param {Number} [itemsBeforePagination=10] - Hide pagination unless number is reach.
  * @param {Number} [paginationSize=10] - Number of items per page
  * @param {Number} [paginationInitialPage=1] - Initial page
+ * @param {Number} [paginationButtonCount=3] - Available pagination buttons
  * @param {Array} [paginationSizeSelector=[10, 25, 50, 100]] - Select number of items per page
  * @returns {Void}
  */
@@ -137,12 +138,18 @@ const props = defineProps({
     required: false,
     default: [10, 25, 50, 100],
   },
+  paginationButtonCount: {
+    type: Number,
+    required: false,
+    default: 3,
+  },
 });
 
 const tableEl = ref(null); //reference to your table element
 
 const table = reactive({
   instance: null,
+  class: "layout-table",
   filters: {},
   columns: props.columns,
   items: props.items,
@@ -150,7 +157,7 @@ const table = reactive({
   options: computed(() => {
     const opts = {
       data: table.items, //link data to table
-      reactiveData: true, //enable data reactivity
+      reactiveData: false, //enable data reactivity
       autoResize: true, // prevent auto resizing of table
       resizableRows: true, // this option takes a boolean value (default = false)
       resizableColumnFit: true, //maintain the fit of columns when resizing
@@ -168,7 +175,7 @@ const table = reactive({
     opts.pagination = props.isPagination;
     opts.paginationSize = props.paginationSize;
     opts.paginationInitialPage = props.paginationInitialPage;
-    opts.paginationButtonCount = 2;
+    opts.paginationButtonCount = props.paginationButtonCount;
     opts.paginationSizeSelector = props.paginationSizeSelector.concat([true]);
     opts.paginationCounter = "rows";
 
@@ -258,14 +265,15 @@ function togglePagination() {
   if (!props.isPagination || !props.itemsBeforePagination) return;
 
   function toggle(currItems, itemsToShow) {
-    const isPagination = currItems.length >= itemsToShow ? true : false;
+    try {
+      const isPagination = currItems.length >= itemsToShow ? true : false;
 
-    const footer = tableEl.value.querySelector(".tabulator-footer");
-    isPagination
-      ? footer.classList.remove("hidden")
-      : footer.classList.add("hidden");
+      const footer = tableEl.value.querySelector(".tabulator-footer");
+      isPagination
+        ? footer.classList.remove("hidden")
+        : footer.classList.add("hidden");
+    } catch (e) {}
   }
-
   toggle(props.items, props.itemsBeforePagination);
 
   table.instance.on("dataChanged", (data) => {
@@ -274,18 +282,35 @@ function togglePagination() {
 }
 
 onMounted(() => {
-  extendTabulator();
-  table.instance = new Tabulator(tableEl.value, table.options);
-  table.instance.on("tableBuilt", () => {
-    togglePagination();
+  try {
+    extendTabulator();
+    table.instance = new Tabulator(tableEl.value, table.options);
+    table.instance.on("tableBuilt", () => {
+      if (!table.instance) return;
+      togglePagination();
+      a11yTable(table.instance);
+      // Add table instance to store in order to use it in other components
+      tableStore.setTable(props.id, table.instance);
+      setTimeout(() => {
+        if (!table.instance) return;
+        table.instance.redraw();
+      }, 100);
+    });
+  } catch (e) {}
 
-    a11yTable(table.instance);
-    // Add table instance to store in order to use it in other components
-    tableStore.setTable(props.id, table.instance);
-    setTimeout(() => {
-      table.instance.redraw();
-    }, 100);
-  });
+  // Update style base on the container
+  // get the closest data-is with a value not table
+  table.class += tableEl?.value?.closest("[data-is]:not([data-is='table'])")
+    ? tableEl?.value
+        ?.closest("[data-is]:not([data-is='table'])")
+        .getAttribute("data-is")
+    : "";
+});
+
+onUnmounted(() => {
+  if (!tableStore.isTable(props.id)) return;
+  const table = tableStore.getTableById(props.id);
+  table.destroy();
 });
 </script>
 

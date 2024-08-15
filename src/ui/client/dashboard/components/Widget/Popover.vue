@@ -95,7 +95,8 @@ function showPopover() {
   popoverContainer.value.style.transform = `translateX(-${
     popoverContainerRect.width / 2 -
     (popoverBtnRect.width * popoverGroupNums) / 2 -
-    popoverBtnRect.width * (popoverIndex - popoverGroupNums)
+    popoverBtnRect.width * (popoverIndex - popoverGroupNums) +
+    16
   }px) translateY(${
     popoverContainerRect.height / 2 - popoverBtnRect.height / 2 + 4
   }px)`;

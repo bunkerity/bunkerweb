@@ -79,7 +79,7 @@ const gridClass = computed(() => {
 
 <template>
   <component
-    v-show="container.isDisplay"
+    v-if="container.isDisplay"
     :aria-hidden="container.isDisplay ? 'false' : 'true'"
     :is="props.tag"
     data-container

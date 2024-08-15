@@ -243,9 +243,7 @@ def bans_builder(bans):
         builder.append(
             {
                 "type": "void",
-                "widgets": [
-                    {"type": "MessageUnmatch", "data": {"text": "bans_not_found"}}
-                ],
+                "widgets": [{"type": "Unmatch", "data": {"text": "bans_not_found"}}],
             }
         )
         return builder

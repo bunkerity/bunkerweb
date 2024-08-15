@@ -20,7 +20,7 @@ This component is lightweight builder containing only the necessary components t
     type: "card",
     gridLayoutClass: "transparent",
     widgets: [
-               { type: "MessageUnmatch",
+               { type: "Unmatch",
                  data: { text: "bans_not_found" }
               },
    ],
@@ -331,7 +331,7 @@ This component is lightweight builder containing only the necessary components t
     gridLayoutClass: "transparent",
     widgets: [
               {
-                type: "MessageUnmatch",
+                type: "Unmatch",
                 data: { text: "reports_not_found" }
               }
     ],

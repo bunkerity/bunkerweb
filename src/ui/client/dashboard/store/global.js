@@ -93,5 +93,13 @@ export const useTableStore = defineStore("table", () => {
     return tables.value;
   }
 
-  return { setTable, getTableById, getTables };
+  function removeTable(id) {
+    delete tables.value[id];
+  }
+
+  function isTable(id) {
+    return !!(id in tables.value);
+  }
+
+  return { setTable, getTableById, getTables, removeTable, isTable };
 });

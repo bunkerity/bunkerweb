@@ -7,7 +7,7 @@ def logs_builder(files: list[str] = [], current_file: str = "", raw_data: str = 
         builder = [
             {
                 "type": "void",
-                "widgets": [{"type": "MessageUnmatch", "data": {"text": "logs_no_files_found"}}],
+                "widgets": [{"type": "Unmatch", "data": {"text": "logs_no_files_found"}}],
             }
         ]
         return builder
@@ -47,7 +47,7 @@ def logs_builder(files: list[str] = [], current_file: str = "", raw_data: str = 
             {
                 "type": "card",
                 "containerColumns": {"pc": 12, "tablet": 12, "mobile": 12},
-                "widgets": [title_widget("logs_title"), file_select, {"type": "MessageUnmatch", "data": {"text": "logs_not_selected_or_not_found"}}],
+                "widgets": [title_widget("logs_title"), file_select, {"type": "Unmatch", "data": {"text": "logs_not_selected_or_not_found"}}],
             }
         ]
         return builder
@@ -67,7 +67,7 @@ def logs_builder(files: list[str] = [], current_file: str = "", raw_data: str = 
                     "tablet": 12,
                     "mobile": 12,
                 },
-                "editorClass" : "min-h-[500px]",
+                "editorClass": "min-h-[500px]",
             }
         },
     }

@@ -18,6 +18,7 @@ import Button from "@components/Widget/Button.vue";
 import ButtonGroup from "@components/Widget/ButtonGroup.vue";
 import Unmatch from "@components/Message/Unmatch.vue";
 import Table from "@components/Widget/Table.vue";
+import Tabulator from "@components/Widget/Tabulator.vue";
 
 /**
  *  @name Builder/Modal.vue
@@ -186,8 +187,12 @@ const emits = defineEmits(["close"]);
           <Grid>
             <!-- widget element -->
             <template v-for="(widget, index) in props.widgets">
-              <MessageUnmatch
-                v-if="useEqualStr(widget.type, 'MessageUnmatch')"
+              <Unmatch
+                v-if="useEqualStr(widget.type, 'Unmatch')"
+                v-bind="widget.data"
+              />
+              <Tabulator
+                v-if="useEqualStr(widget.type, 'Tabulator')"
                 v-bind="widget.data"
               />
               <Title

@@ -211,7 +211,7 @@ onUnmounted(() => {
   >
     <Title type="card" :title="'dashboard_easy_mode'" />
     <Subtitle type="card" :subtitle="'dashboard_easy_mode_subtitle'" />
-    <MessageUnmatch
+    <Unmatch
       v-if="easyForm.templateUIFormat.length <= 0"
       :text="'services_no_easy_mode'"
     />

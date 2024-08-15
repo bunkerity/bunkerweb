@@ -19,7 +19,7 @@ const tableStore = useTableStore();
  *     type: "card",
  *     gridLayoutClass: "transparent",
  *     widgets: [
- *                { type: "MessageUnmatch",
+ *                { type: "Unmatch",
  *                  data: { text: "bans_not_found" }
  *               },
  *    ],

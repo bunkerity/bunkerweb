@@ -61,7 +61,7 @@ if (props.display.length) {
 
 <template>
   <div
-    v-show="container.isDisplay"
+    v-if="container.isDisplay"
     :aria-hidden="container.isDisplay ? 'false' : 'true'"
     data-grid
     :class="[props.gridClass, 'layout-grid']"

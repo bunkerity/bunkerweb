@@ -18,7 +18,7 @@ import { useEqualStr } from "@utils/global.js";
  *     gridLayoutClass: "transparent",
  *     widgets: [
  *               {
- *                 type: "MessageUnmatch",
+ *                 type: "Unmatch",
  *                 data: { text: "reports_not_found" }
  *               }
  *     ],

@@ -20,12 +20,9 @@ from typing import Optional
 columns = [
     add_column(title="Name", field="name", formatter="text"),
     add_column(title="Type", field="type", formatter="text"),
-    add_column(title="global", field="global", formatter="icons"),
+    add_column(title="global", field="is_global", formatter="icons", maxWidth=160),
     add_column(
-        title="services", field="services", formatter="buttonGroup"
-    ),  # We will display a button with a modal that show all services apply. Case global, show all services.
-    add_column(
-        title="actions", field="actions", formatter="buttonGroup"
+        title="actions", field="actions", formatter="buttongroup"
     ),  # edit button that will switch to the form using display store + delete with modal to confirm
 ]
 
@@ -54,7 +51,7 @@ def configs_filter(config_types: Optional[list] = None) -> list:  # healths = "u
         },
         {
             "type": "=",
-            "fields": ["global"],
+            "fields": ["is_global"],
             "setting": {
                 "id": "select-global",
                 "name": "select-global",
@@ -75,7 +72,7 @@ def configs_filter(config_types: Optional[list] = None) -> list:  # healths = "u
         },
     ]
 
-    if types is not None and len(types) >= 2:
+    if config_types is not None and len(config_types) >= 2:
         filters.append(
             {
                 "type": "=",
@@ -85,7 +82,7 @@ def configs_filter(config_types: Optional[list] = None) -> list:  # healths = "u
                     "name": "select-type",
                     "label": "configs_select_type",  # keep it (a18n)
                     "value": "all",  # keep "all"
-                    "values": ["all"] + types,
+                    "values": ["all"] + config_types,
                     "inpType": "select",
                     "onlyDown": True,
                     "columns": {"pc": 3, "tablet": 4, "mobile": 12},
@@ -136,8 +133,8 @@ def configs_item(
             iconColor="white",
             modal={
                 "widgets": [
-                    title_widget(title="user_management_delete_title"),  # keep it (a18n)
-                    text_widget(text="user_management_delete_global_subtitle" if is_global else "user_management_delete_no_global_subtitle"),  # keep it (a18n)
+                    title_widget(title="configs_delete_title"),  # keep it (a18n)
+                    text_widget(text="configs_delete_global_subtitle" if is_global else "configs_delete_no_global_subtitle"),  # keep it (a18n)
                     text_widget(bold=True, text=filename),
                     button_group_widget(
                         buttons=[
@@ -167,6 +164,7 @@ def configs_item(
         ),
     ]
 
+    services_columns = [{"title": "id", "field": "id", "formatter": "text", "maxWidth": 100}, {"title": "Name", "field": "name", "formatter": "text"}]
     services_items = []
     # get id
     for index, service in enumerate(config_services):
@@ -177,68 +175,76 @@ def configs_item(
             }
         )
 
-    services_detail = (
-        button_group_widget(
-            buttons=[
-                button_widget(
-                    id=f"services-btn-{filename}-{global_text}",
-                    type="button",
-                    iconName="disk",
-                    iconColor="white",
-                    text="configs_show_services",  # keep it (a18n)
-                    color="orange",
-                    size="normal",
-                    modal={
-                        "widgets": [
-                            title_widget(title="configs_services_title"),  # keep it (a18n)
-                            text_widget(text="configs_services_subtitle"),  # keep it (a18n)
-                            tabulator_widget(
-                                id=f"table-services-{filename}-{global_text}",
-                                columns=[{"title": "id", "field": "id", "formatter": "text"}, {"title": "Name", "field": "name", "formatter": "text"}],
-                                # Add every services that apply to the conf. All if global.
-                                items=services_items,
-                                filters=[
-                                    {
-                                        "type": "like",
-                                        "fields": ["name"],
-                                        "setting": {
-                                            "id": f"input-search-service-{filename}-{global_text}",
-                                            "name": f"input-search-service-{filename}-{global_text}",
-                                            "label": "configs_search_service",  # keep it (a18n)
-                                            "value": "",
-                                            "inpType": "input",
-                                            "columns": {"pc": 3, "tablet": 4, "mobile": 12},
-                                        },
-                                    },
-                                ],
+    services_filter = [
+        {
+            "type": "like",
+            "fields": ["name"],
+            "setting": {
+                "id": f"input-search-service-{filename}-{global_text}",
+                "name": f"input-search-service-{filename}-{global_text}",
+                "label": "configs_search_service",  # keep it (a18n)
+                "value": "",
+                "columns": {"pc": 3, "tablet": 4, "mobile": 12},
+                "fieldSize": "sm",
+                "placeholder": "configs_search_service_placeholder",  # keep it (a18n)
+                "inpType": "input",
+                "popovers": [
+                    {
+                        "iconName": "info",
+                        "text": "configs_search_service_desc",
+                    }
+                ],
+            },
+        },
+    ]
+
+    services_detail = [
+        button_widget(
+            id=f"services-btn-{filename}-{global_text}",
+            type="button",
+            iconName="disk",
+            hideText=True,
+            iconColor="white",
+            text="configs_show_services",  # keep it (a18n)
+            color="orange",
+            size="normal",
+            modal={
+                "widgets": [
+                    title_widget(title="configs_services_title"),  # keep it (a18n)
+                    tabulator_widget(
+                        id=f"table-services-{filename}-{global_text}",
+                        layout="fitColumns",
+                        columns=services_columns,
+                        # Add every services that apply to the conf. All if global.
+                        items=services_items,
+                        filters=services_filter,
+                        paginationSize=5,
+                        paginationSizeSelector=[5, 10],
+                    ),
+                    button_group_widget(
+                        buttons=[
+                            button_widget(
+                                id=f"close-services-btn-{filename}-{global_text}",
+                                text="action_close",  # keep it (a18n)
+                                color="close",
+                                size="normal",
+                                attrs={"data-close-modal": ""},  # a11y
                             ),
-                            button_group_widget(
-                                buttons=[
-                                    button_widget(
-                                        id=f"close-services-btn-{filename}-{global_text}",
-                                        text="action_close",  # keep it (a18n)
-                                        color="close",
-                                        size="normal",
-                                        attrs={"data-close-modal": ""},  # a11y
-                                    )["data"],
-                                ]
-                            ),
-                        ],
-                    },
-                )["data"]
-            ]
-        ),
-    )
+                        ]
+                    ),
+                ],
+            },
+        )
+    ]
 
     return {
         "name": text_widget(text=filename)["data"],
         "type": text_widget(text=config_type)["data"],
         "is_global": icons_widget(
-            iconName="check" if is_global == "up" else "cross" if is_global == "down" else "search",
-            value=global_text,
+            iconName="check" if is_global else "cross",
+            value="yes" if is_global else "no",
         )["data"],
-        "services": services_detail,
-        "actions": {"buttons": actions},
+        "actions": {"buttons": services_detail + actions},
     }
 
 
@@ -258,6 +264,8 @@ def config_form(
     config_services = [] if is_global else config_services
     global_text = "yes" if is_global else "no"
     filename = "new" if is_new else filename
+    title = "configs_create_title" if is_new else "configs_edit_title"
+    subtitle = "configs_create_subtitle" if is_new else "configs_edit_subtitle"
 
     return {
         "type": "card",
@@ -265,13 +273,12 @@ def config_form(
         "display": ["main", display_index],
         "widgets": [
             title_widget(
-                title="configs_create_title",  # keep it (a18n)
+                title=title,  # keep it (a18n)
             ),
             subtitle_widget(
-                subtitle="configs_create_subtitle",  # keep it (a18n)
+                subtitle=subtitle,  # keep it (a18n)
             ),
             regular_widget(
-                maxWidthScreen="xs",
                 endpoint="/add",
                 fields=[
                     get_fields_from_field(
@@ -282,17 +289,17 @@ def config_form(
                             value="",
                             required=True,
                             pattern="",  # add your pattern if needed
-                            columns={"pc": 12, "tablet": 12, "mobile": 12},
-                            placeholder="configs_filename_add_placeholder",  # keep it (a18n)
+                            columns={"pc": 6, "tablet": 6, "mobile": 12},
+                            placeholder="configs_filename_placeholder",  # keep it (a18n)
                             disabled=enabled_value_field_only,
                             popovers=[
                                 {
                                     "iconName": "yellow-darker",
-                                    "text": "configs_filename_add_warning_desc",  # can't add a service with same name and same type of existing one, will not be save.
+                                    "text": "configs_filename_warning_desc",  # can't add a service with same name and same type of existing one, will not be save.
                                 },
                                 {
                                     "iconName": "info",
-                                    "text": "configs_filename_add_desc",
+                                    "text": "configs_filename_desc",
                                 },
                             ],
                         )
@@ -306,7 +313,7 @@ def config_form(
                             values=config_types,
                             required=True,
                             requiredValues=config_types,
-                            columns={"pc": 12, "tablet": 12, "mobile": 12},
+                            columns={"pc": 6, "tablet": 6, "mobile": 12},
                             disabled=enabled_value_field_only,
                             popovers=[
                                 {
@@ -317,40 +324,25 @@ def config_form(
                         )
                     ),
                     get_fields_from_field(
-                        checkbox_widget(
-                            id=f"configs-global-{filename}-{global_text}",
-                            name="global",
-                            label="configs_global",  # keep it (a18n)
-                            value=is_global,
-                            disabled=enabled_value_field_only,
-                            pattern="",  # add your pattern if needed
-                            columns={"pc": 12, "tablet": 12, "mobile": 12},
-                            placeholder="configs_global_placeholder",  # keep it (a18n)
-                            popovers=[
-                                {
-                                    "iconName": "yellow-darker",
-                                    "text": "configs_global_warning_desc",  # if check, will apply to all services even if services are selected.
-                                },
-                                {
-                                    "iconName": "info",
-                                    "text": "configs_global_desc",
-                                },
-                            ],
-                        )
-                    ),
-                    get_fields_from_field(
                         select_widget(
                             id=f"configs-services-{filename}-{global_text}",
                             name="services",
                             label="configs_services",  # keep it (a18n)
-                            value=config_services,
+                            value="",
                             values=services,
-                            columns={"pc": 12, "tablet": 12, "mobile": 12},
+                            required=True,
+                            requiredValues=services,
+                            columns={"pc": 6, "tablet": 6, "mobile": 12},
                             disabled=enabled_value_field_only,
                             popovers=[
                                 {
+                                    "iconName": "exclamation",
+                                    "color": "yellow-darker",
+                                    "text": "configs_services_warning_desc",  # if check, will apply to all services even if services are selected.
+                                },
+                                {
                                     "iconName": "info",
-                                    "text": "config_services_desc",
+                                    "text": "configs_services_desc",
                                 },
                             ],
                         )
@@ -361,10 +353,7 @@ def config_form(
                             name="value",
                             label="configs_value",  # keep it (a18n)
                             value=config_value,
-                            pattern="",  # add your pattern if needed
                             columns={"pc": 12, "tablet": 12, "mobile": 12},
-                            placeholder="configs_value_placeholder",  # keep it (a18n)
-                            disabled=enabled_value_field_only,
                             popovers=[
                                 {
                                     "iconName": "yellow-darker",
@@ -380,6 +369,18 @@ def config_form(
                 ],
                 buttons=[
                     button_widget(
+                        id=f"back-from-create-user-{filename}-{global_text}",
+                        text="action_back",
+                        color="back",
+                        iconName="back",
+                        size="normal",
+                        type="button",
+                        attrs={
+                            "data-display-index": 0,
+                            "data-display-group": "main",
+                        },
+                    ),
+                    button_widget(
                         id=f"configs-submit-{filename}-{global_text}",
                         text="action_create" if is_new else "action_edit",  # keep it (a18n)
                         iconName="plus" if is_new else "pen",
@@ -387,7 +388,7 @@ def config_form(
                         color="success" if is_new else "edit",
                         size="normal",
                         type="submit",
-                    )
+                    ),
                 ],
             ),
         ],
@@ -422,10 +423,11 @@ def configs_tabs():
     }
 
 
-def fallback_message(msg: str):
+def fallback_message(msg: str, display: Optional[list] = None) -> dict:
+
     return {
         "type": "void",
-        "gridLayoutClass": "transparent",
+        "display": display if display else [],
         "widgets": [
             unmatch_widget(text=msg),
         ],
@@ -457,11 +459,11 @@ def configs_builder(configs: Optional[list] = None, config_types: Optional[list]
         )
     )
 
-    if config is None or len(configs) == 0:
+    if configs is None or len(configs) == 0:
         return [
             # Tabs is button group with display value and a size tab inside a tabs container
             configs_tabs(),
-            fallback_message("user_management_users_not_found"),
+            fallback_message(msg="configs_not_found", display=["main", 0]),
         ] + configs_form
 
     # Start adding the new config form
@@ -474,9 +476,6 @@ def configs_builder(configs: Optional[list] = None, config_types: Optional[list]
                 filename=config.get("filename", ""),
                 config_services=config.get("config_services", ""),
                 config_type=config.get("config_type", ""),
-                health=config.get("health", ""),
-                creation_date=config.get("creation_date", ""),
-                last_seen=config.get("last_seen", ""),
                 display_index=display_index,
             )
         )
@@ -488,7 +487,7 @@ def configs_builder(configs: Optional[list] = None, config_types: Optional[list]
                 filename=config.get("filename", ""),
                 config_type=config.get("type", ""),
                 config_value=config.get("value", ""),
-                config_services=config.get("config_services", []),
+                config_services=config.get("configs_services", []),
                 display_index=display_index,
             )
         )
@@ -498,11 +497,11 @@ def configs_builder(configs: Optional[list] = None, config_types: Optional[list]
         configs_tabs(),
         {
             "type": "card",
-            "maxWidthScreen": "3xl",
+            "maxWidthScreen": "xl",
             "display": ["main", 0],
             "widgets": [
-                title_widget(title="user_management_list_title"),  # keep it (a18n)
-                subtitle_widget(subtitle="user_management_list_subtitle"),  # keep it (a18n)
+                title_widget(title="configs_list_title"),  # keep it (a18n)
+                subtitle_widget(subtitle="configs_list_subtitle"),  # keep it (a18n)
                 tabulator_widget(
                     id="table-configs",
                     columns=columns,

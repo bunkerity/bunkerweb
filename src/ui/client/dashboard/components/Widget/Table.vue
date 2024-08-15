@@ -252,7 +252,7 @@ onMounted(() => {
         :aria-hidden="table.itemsFormat.length ? 'true' : 'false'"
         class="table-unmatch"
       >
-        <MessageUnmatch
+        <Unmatch
           v-if="!table.itemsFormat.length"
           :style="{ maxWidth: unmatchWidth }"
           ref="unmatchEl"

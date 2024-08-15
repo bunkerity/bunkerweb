@@ -95,7 +95,7 @@ function indexPending(id) {
       :data="data.base"
       :filters="props.filters"
     />
-    <MessageUnmatch v-if="!data.format.length" />
+    <Unmatch v-if="!data.format.length" />
     <ul
       data-is="list-details"
       v-if="data.format.length"

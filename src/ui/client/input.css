@@ -308,12 +308,12 @@ body {
 
 .select-dropdown-btn.normal,
 .list-dropdown-btn.normal {
-  @apply my-0 px-2 py-1.5 text-sm leading-normal;
+  @apply my-0 px-2 py-2 text-sm leading-normal;
 }
 
 .select-dropdown-btn.sm,
 .list-dropdown-btn.sm {
-  @apply my-0 px-2 py-1 text-xs leading-normal;
+  @apply my-0 px-2 py-1.5 text-xs leading-normal;
 }
 
 .active.select-dropdown-btn {
@@ -564,7 +564,19 @@ body {
 }
 
 .layout-table {
-  @apply py-4 col-span-12 grid grid-cols-12 w-full relative;
+  @apply col-span-12 grid grid-cols-12 w-full relative;
+}
+
+.layout-table.card {
+  @apply py-4;
+}
+
+.layout-table.default {
+  @apply py-4;
+}
+
+.layout-table.modal {
+  @apply py-0;
 }
 
 .layout-card {
@@ -663,7 +675,7 @@ body {
 }
 
 .popover-text {
-  @apply whitespace-normal pointer-events-none text-center transition duration-300 ease-in-out font-semibold text-sm text-white dark:text-white m-0;
+  @apply [word-break:break-word] whitespace-normal pointer-events-none text-center transition duration-300 ease-in-out font-semibold text-sm text-white dark:text-white m-0;
 }
 
 .icon-container {
@@ -1188,7 +1200,7 @@ body {
 }
 
 .text-table-content {
-  @apply col-span-12 mb-0 dark:text-gray-300 break-word;
+  @apply col-span-12 mb-0 dark:text-gray-300 break-word whitespace-break-spaces;
 }
 
 .text-form-error {
