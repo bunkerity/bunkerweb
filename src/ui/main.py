@@ -8,7 +8,7 @@ from secrets import choice, token_urlsafe
 from string import ascii_letters, digits
 from sys import path as sys_path, modules as sys_modules
 from pathlib import Path
-from typing import Any, Dict, Optional, Tuple, Union
+from typing import Any, Dict, Literal, Optional, Tuple, Union
 from uuid import uuid4
 
 
@@ -47,21 +47,20 @@ from src.reverse_proxied import ReverseProxied
 from src.totp import Totp
 from src.ui_data import UIData
 
-# TODO: rename to bans
-from builder.bans2 import bans_builder  # type: ignore
+from builder.advanced_mode import advanced_mode_builder  # type: ignore
+from builder.bans import bans_builder  # type: ignore
 
-# TODO: rename to reports
-from builder.reports2 import reports_builder  # type: ignore
-
+# from builder.configs import configs_builder  # type: ignore
+from builder.easy_mode import easy_mode_builder  # type: ignore
+from builder.global_config import global_config_builder  # type: ignore
 from builder.home import home_builder  # type: ignore
 from builder.instances import instances_builder  # type: ignore
-from builder.global_config import global_config_builder  # type: ignore
 from builder.jobs import jobs_builder  # type: ignore
-from builder.services import services_builder  # type: ignore
-from builder.raw_mode import raw_mode_builder  # type: ignore
-from builder.advanced_mode import advanced_mode_builder  # type: ignore
-from builder.easy_mode import easy_mode_builder  # type: ignore
 from builder.logs import logs_builder  # type: ignore
+from builder.raw_mode import raw_mode_builder  # type: ignore
+from builder.reports import reports_builder  # type: ignore
+from builder.services import services_builder  # type: ignore
+
 
 from common_utils import get_version  # type: ignore
 from logger import setup_logger  # type: ignore
@@ -245,6 +244,12 @@ def manage_bunkerweb(method: str, *args, operation: str = "reloads", is_draft: b
             operation = instance.restart()
         else:
             operation = "The instance does not exist."
+    elif operation == "ping":
+        instance = Instance.from_hostname(args[0], app.db)
+        if instance:
+            operation = instance.ping()[0]
+        else:
+            operation = "The instance does not exist."
     elif not error:
         operation = "The scheduler will be in charge of applying the changes."
 
@@ -364,6 +369,9 @@ def run_action(plugin: str, function_name: str = "", *, tmp_dir: Optional[Path] 
 def verify_data_in_form(
     data: Optional[Dict[str, Union[Tuple, Any]]] = None, err_message: str = "", redirect_url: str = "", next: bool = False
 ) -> Union[bool, Response]:
+    app.logger.debug(f"Verifying data in form: {data}")
+    app.logger.debug(f"Request form: {request.form}")
+
     # Loop on each key in data
     for key, values in (data or {}).items():
         if key not in request.form:
@@ -987,49 +995,135 @@ def account():
     )
 
 
-@app.route("/instances", methods=["GET", "POST"])
+### * INSTANCES
+
+
+@app.route("/instances", methods=["GET"])
 @login_required
 def instances():
-    # Manage instances
-    if request.method == "POST":
+    instances = []
+    instances_types = set()
+    instances_methods = set()
+    instances_healths = set()
 
-        verify_data_in_form(data={"INSTANCE_ID": None}, err_message="Missing instance id parameter on /instances.", redirect_url="instances", next=True)
-        verify_data_in_form(
-            data={
-                "operation": (
-                    "reload",
-                    "start",
-                    "stop",
-                    "restart",
-                )
-            },
-            err_message="Missing operation parameter on /instances.",
-            redirect_url="instances",
-            next=True,
+    for instance in app.bw_instances_utils.get_instances():
+        instances.append(
+            {
+                "hostname": instance.hostname,
+                "name": instance.name,
+                "method": instance.method,
+                "health": instance.status,
+                "type": instance.type,
+                "creation_date": instance.creation_date.strftime("%Y-%m-%d %H:%M:%S"),
+                "last_seen": instance.last_seen.strftime("%Y-%m-%d %H:%M:%S"),
+            }
         )
 
-        app.data["RELOADING"] = True
-        app.data["LAST_RELOAD"] = time()
-        Thread(
-            target=manage_bunkerweb,
-            name="Reloading instances",
-            args=("instances", request.form["INSTANCE_ID"]),
-            kwargs={"operation": request.form["operation"], "threaded": True},
-        ).start()
+        instances_types.add(instance.type)
+        instances_methods.add(instance.method)
+        instances_healths.add(instance.status)
 
-        return redirect(
-            url_for(
-                "loading",
-                next=url_for("instances"),
-                message=(f"{request.form['operation'].title()}ing" if request.form["operation"] != "stop" else "Stopping") + " instance",
-            )
-        )
-
-    # Display instances
-    instances = app.bw_instances_utils.get_instances()
-
-    builder = instances_builder(instances)
+    builder = instances_builder(instances, list(instances_types), list(instances_methods), list(instances_healths))
     return render_template("instances.html", title="Instances", data_server_builder=b64encode(dumps(builder).encode("utf-8")).decode("ascii"))
+
+
+@app.route("/instances/new", methods=["PUT"])
+@login_required
+def instances_new():
+    verify_data_in_form(
+        data={"csrf_token": None},
+        err_message="Missing csrf_token parameter on /instances/new.",
+        redirect_url="instances",
+        next=True,
+    )
+    verify_data_in_form(
+        data={"instance_hostname": None},
+        err_message="Missing instance hostname parameter on /instances/new.",
+        redirect_url="instances",
+        next=True,
+    )
+    verify_data_in_form(
+        data={"instance_name": None},
+        err_message="Missing instance name parameter on /instances/new.",
+        redirect_url="instances",
+        next=True,
+    )
+
+    db_config = app.bw_config.get_config(global_only=True, methods=False, filtered_settings=("API_HTTP_PORT", "API_SERVER_NAME"))
+
+    instance = {
+        "hostname": request.form["instance_hostname"].replace("http://", "").replace("https://", ""),
+        "name": request.form["instance_name"],
+        "port": db_config["API_HTTP_PORT"],
+        "server_name": db_config["API_SERVER_NAME"],
+        "method": "ui",
+    }
+
+    for db_instance in app.bw_instances_utils.get_instances():
+        if db_instance.hostname == instance["hostname"]:
+            return handle_error(f"The hostname {instance['hostname']} is already in use.", "instances", True)
+
+    ret = app.db.add_instance(**instance)
+    if ret:
+        return handle_error(f"Couldn't create the instance in the database: {ret}", "instances", True)
+
+    return redirect(url_for("loading", next=url_for("instances"), message=f"Creating new instance {instance['hostname']}"))
+
+
+@app.route("/instances/<string:instance_hostname>", methods=["DELETE"])
+@login_required
+def instances_delete(instance_hostname: str):
+    verify_data_in_form(
+        data={"csrf_token": None},
+        err_message="Missing csrf_token parameter on /instances/delete.",
+        redirect_url="instances",
+        next=True,
+    )
+
+    delete_instance = None
+    for instance in app.bw_instances_utils.get_instances():
+        if instance.hostname == instance_hostname:
+            delete_instance = instance
+            break
+
+    if not delete_instance:
+        return handle_error(f"Instance {instance_hostname} not found.", "instances", True)
+    if delete_instance.method != "ui":
+        return handle_error(f"Instance {instance_hostname} is not a UI instance.", "instances", True)
+
+    ret = app.db.delete_instance(instance_hostname)
+    if ret:
+        return handle_error(f"Couldn't delete the instance in the database: {ret}", "instances", True)
+
+    return redirect(url_for("loading", next=url_for("instances"), message=f"Deleting instance {instance_hostname}"))
+
+
+@app.route("/instances/<string:action>", methods=["POST"])
+@login_required
+def instances_action(action: Literal["ping", "reload", "start", "stop", "restart"]):
+    verify_data_in_form(
+        data={"instance_hostname": None, "csrf_token": None},
+        err_message="Missing instance hostname parameter on /instances/reload.",
+        redirect_url="instances",
+        next=True,
+    )
+
+    app.data["RELOADING"] = True
+    app.data["LAST_RELOAD"] = time()
+    Thread(
+        target=manage_bunkerweb,
+        name=f"Reloading instance {request.form['instance_hostname']}",
+        args=("instances", request.form["instance_hostname"]),
+        kwargs={"operation": action, "threaded": True},
+    ).start()
+
+    return redirect(
+        url_for(
+            "loading",
+            next=url_for("instances"),
+            message=(f"{action.title()}ing" if action != "stop" else "Stopping") + " instance",
+        )
+    )
 
 
 def get_service_data(page_name: str):

@@ -3097,6 +3097,33 @@ class Database:
 
         return ""
 
+    def delete_instance(self, hostname: str, changed: Optional[bool] = True) -> str:
+        """Delete instance."""
+        with self._db_session() as session:
+            if self.readonly:
+                return "The database is read-only, the changes will not be saved"
+
+            db_instance = session.query(Instances).filter_by(hostname=hostname).first()
+
+            if db_instance is None:
+                return f"Instance {hostname} does not exist, will not be deleted."
+
+            session.delete(db_instance)
+
+            if changed:
+                with suppress(ProgrammingError, OperationalError):
+                    metadata = session.query(Metadata).get(1)
+                    if metadata is not None:
+                        metadata.instances_changed = True
+                        metadata.last_instances_change = datetime.now()
+
+            try:
+                session.commit()
+            except BaseException as e:
+                return f"An error occurred while deleting the instance {hostname}.\n{e}"
+
+        return ""
+
     def update_instances(self, instances: List[Dict[str, Any]], method: str, changed: Optional[bool] = True) -> str:
         """Update instances."""
         to_put = []
