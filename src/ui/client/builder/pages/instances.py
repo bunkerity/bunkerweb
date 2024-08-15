@@ -178,7 +178,46 @@ def instance_item(
                     ),
                 ],
             },
-        )
+        ),
+        button_widget(
+            id=f"reload-instance-{instance_name}",
+            text="action_reload",  # keep it (a18n)
+            color="success",
+            size="normal",
+            hideText=True,
+            iconName="refresh",
+            iconColor="white",
+            modal={
+                "widgets": [
+                    title_widget(title="instances_reload_title"),  # keep it (a18n)
+                    text_widget(text="instances_reload_subtitle"),  # keep it (a18n)
+                    text_widget(bold=True, text=instance_name),
+                    button_group_widget(
+                        buttons=[
+                            button_widget(
+                                id=f"close-reload-btn-{instance_name}",
+                                text="action_close",  # keep it (a18n)
+                                color="close",
+                                size="normal",
+                                attrs={"data-close-modal": ""},  # a11y
+                            ),
+                            button_widget(
+                                id=f"reload-btn-{instance_name}",
+                                text="action_reload",  # keep it (a18n)
+                                color="info",
+                                size="normal",
+                                iconName="globe",
+                                iconColor="white",
+                                attrs={
+                                    "data-submit-form": f"""{{"instance_name" : "{instance_name}", "instance_hostname" : "{hostname}" }}""",
+                                    "data-submit-endpoint": "/reload",
+                                },
+                            ),
+                        ]
+                    ),
+                ],
+            },
+        ),
     ]
 
     if method.strip() in ("ui", "manual", "default"):
@@ -381,8 +420,6 @@ def instances_list(instances: Optional[list] = None, types: Optional[list] = Non
 
 
 def instances_builder(instances: Optional[list] = None, types: Optional[list] = None, methods: Optional[list] = None, healths: Optional[list] = None) -> list:
-    items = []
-
     return [
         # Tabs is button group with display value and a size tab inside a tabs container
         instances_tabs(),

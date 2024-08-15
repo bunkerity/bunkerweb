@@ -12,8 +12,8 @@ import MessageUnmatch from "@components/Message/Unmatch.vue";
 import { useEqualStr } from "@utils/global.js";
 
 /**
- * @name Builder/UserManagement.vue
- * @description This component is lightweight builder containing only the necessary components to create the user management page.
+ * @name Builder/Configs.vue
+ * @description This component is lightweight builder containing only the necessary components to create the configs page.
  * @example
  * [
  *   {

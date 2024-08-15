@@ -1,6 +1,6 @@
 from utils import save_builder
 
-from pages.configs2 import configs_builder
+from pages.configs import configs_builder
 
 
 configs = [
@@ -28,4 +28,4 @@ config_types = ["http", "https", "socks4", "socks5"]
 
 builder = configs_builder(configs, config_types)
 
-save_builder("configs2", builder, update_page=False)
+save_builder(page_name="configs", output=builder, script_name="configs")

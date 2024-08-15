@@ -39,6 +39,7 @@ import Document from "@components/Icons/Document.vue";
 import Eye from "@components/Icons/Eye.vue";
 import Uncheck from "@components/Icons/Uncheck.vue";
 import Back from "@components/Icons/Back.vue";
+import Refresh from "@components/Icons/Refresh.vue";
 
 /**
  *  @name Widget/Icons.vue
@@ -111,6 +112,7 @@ onMounted(() => {
       v-if="useEqualStr(props.iconName, 'exclamation')"
       v-bind="icon"
     />
+    <Refresh v-if="useEqualStr(props.iconName, 'refresh')" v-bind="icon" />
     <Back v-if="useEqualStr(props.iconName, 'back')" v-bind="icon" />
     <Box v-if="useEqualStr(props.iconName, 'box')" v-bind="icon" />
     <Uncheck v-if="useEqualStr(props.iconName, 'uncheck')" v-bind="icon" />

@@ -35,28 +35,6 @@ onMounted(() => {
   // Set the page title
   useGlobal();
 });
-// const data = [
-// {
-//         type: "Instance",
-//         data: {
-//           details: [
-//             { key: <instances_hostname="hostname">, value: "www.example.com" },
-//             { key: <instances_method="method">, value: <dashboard_ui> or <dashboard_scheduler>...},
-//             { key: <instances_port="port">, value: "1084" },
-//             { key: <instances_status="status">, value: <instances_active="active"> or <instances_inactive="inactive"> },
-//           ],
-//           status: "success",
-//           title: "www.example.com",
-//           buttons: [
-//             {
-//               text: <action_*>,
-//               color: "edit",
-//               size: "normal",
-//             },
-//           ],
-//         },
-//       },
-// ];
 </script>
 
 <template>

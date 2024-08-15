@@ -1,22 +1,22 @@
 <script setup>
 import { reactive, onBeforeMount, onMounted } from "vue";
 import DashboardLayout from "@components/Dashboard/Layout.vue";
-import BuilderInstances from "@components/Builder/Instances.vue";
+import BuilderConfigs from "@components/Builder/Configs.vue";
 import { useGlobal } from "@utils/global.js";
 import { useDisplayStore } from "@store/global.js";
 
 /**
-*  @name Page/Instances.vue
-*  @description This component is the instances page.
-  This page displays current instances and allows to manage them.
+*  @name Page/Configs.vue
+*  @description This component is the configs page.
+  This page displays current users and allows to manage them.
   We are using displayStore and setting ["main", 1] to display the instances list first.
 */
 
 // Set default store
 const displayStore = useDisplayStore();
-displayStore.setDisplay("main", 1);
+displayStore.setDisplay("main", 0);
 
-const instances = reactive({
+const configs = reactive({
   builder: "",
 });
 
@@ -28,7 +28,7 @@ onBeforeMount(() => {
     dataEl && !dataEl.getAttribute(dataAtt).includes(dataAtt)
       ? JSON.parse(atob(dataEl.getAttribute(dataAtt)))
       : {};
-  instances.builder = data;
+  configs.builder = data;
 });
 
 onMounted(() => {
@@ -39,6 +39,6 @@ onMounted(() => {
 
 <template>
   <DashboardLayout>
-    <BuilderInstances v-if="instances.builder" :builder="instances.builder" />
+    <BuilderConfigs v-if="configs.builder" :builder="configs.builder" />
   </DashboardLayout>
 </template>

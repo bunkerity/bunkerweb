@@ -206,6 +206,8 @@
   "instances_method_popover": "Select the instance method.",
   "instances_health": "health",
   "instances_health_popover": "Select the instance health. Health is based on the last seen date.",
+  "instances_reload_title": "Reload instance",
+  "instances_reload_subtitle": "Are you sure to reload the following instance ?",
   "instances_ping_title": "Ping instance",
   "instances_ping_subtitle": "Ping will check instance health of the following instance.",
   "instances_delete_title": "Delete instance",
