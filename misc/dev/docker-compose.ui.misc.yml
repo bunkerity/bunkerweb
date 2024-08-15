@@ -8,9 +8,9 @@ services:
       context: ../..
       dockerfile: ./src/bw/Dockerfile
     ports:
-      - 8888:8080/tcp
-      - 8443:8443/tcp
-      - 8443:8443/udp
+      - 80:8080/tcp
+      - 443:8443/tcp
+      - 443:8443/udp
     environment:
       - API_WHITELIST_IP=127.0.0.0/24 10.20.30.0/24
     restart: "unless-stopped"
