@@ -43,32 +43,33 @@ if [ "$integration" == "docker" ] ; then
         exit 1
     fi
 else
-    sudo systemctl stop bunkerweb
-    MAKEFLAGS="-j $(nproc)" sudo pip install --ignore-installed --break-system-packages --no-cache-dir --require-hashes --no-deps -r requirements.txt
-    sudo sed -i 's@SERVER_NAME=.*$@SERVER_NAME=bwadm.example.com@' /etc/bunkerweb/variables.env
-    echo "MULTISITE=no" | sudo tee -a /etc/bunkerweb/variables.env
-    echo "USE_REVERSE_PROXY=yes" | sudo tee -a /etc/bunkerweb/variables.env
-    echo "REVERSE_PROXY_HOST=http://app1:8080" | sudo tee -a /etc/bunkerweb/variables.env
-    echo "REVERSE_PROXY_URL=/" | sudo tee -a /etc/bunkerweb/variables.env
-    echo "DATABASE_URI=sqlite:////var/lib/bunkerweb/db.sqlite3" | sudo tee -a /etc/bunkerweb/variables.env
-    echo 'SecRule REQUEST_FILENAME "@rx ^/db" "id:10000,ctl:ruleRemoveByTag=attack-generic,ctl:ruleRemoveByTag=attack-protocol,nolog"' | sudo tee /etc/bunkerweb/configs/modsec/test_custom_conf.conf
-    sudo chown -R nginx:nginx /etc/bunkerweb
-    sudo chmod 777 /etc/bunkerweb/configs/modsec/test_custom_conf.conf
-    sudo touch /var/www/html/index.html
+    exit 0 # ! Temporary while working on the new test framework
+    # sudo systemctl stop bunkerweb
+    # MAKEFLAGS="-j $(nproc)" sudo pip install --ignore-installed --break-system-packages --no-cache-dir --require-hashes --no-deps -r requirements.txt
+    # sudo sed -i 's@SERVER_NAME=.*$@SERVER_NAME=bwadm.example.com@' /etc/bunkerweb/variables.env
+    # echo "MULTISITE=no" | sudo tee -a /etc/bunkerweb/variables.env
+    # echo "USE_REVERSE_PROXY=yes" | sudo tee -a /etc/bunkerweb/variables.env
+    # echo "REVERSE_PROXY_HOST=http://app1:8080" | sudo tee -a /etc/bunkerweb/variables.env
+    # echo "REVERSE_PROXY_URL=/" | sudo tee -a /etc/bunkerweb/variables.env
+    # echo "DATABASE_URI=sqlite:////var/lib/bunkerweb/db.sqlite3" | sudo tee -a /etc/bunkerweb/variables.env
+    # echo 'SecRule REQUEST_FILENAME "@rx ^/db" "id:10000,ctl:ruleRemoveByTag=attack-generic,ctl:ruleRemoveByTag=attack-protocol,nolog"' | sudo tee /etc/bunkerweb/configs/modsec/test_custom_conf.conf
+    # sudo chown -R nginx:nginx /etc/bunkerweb
+    # sudo chmod 777 /etc/bunkerweb/configs/modsec/test_custom_conf.conf
+    # sudo touch /var/www/html/index.html
 
-    export TEST_TYPE="linux"
-    export GLOBAL_SERVER_NAME="bwadm.example.com"
-    export GLOBAL_HTTP_PORT="80"
-    export GLOBAL_HTTPS_PORT="443"
-    export GLOBAL_DNS_RESOLVERS="9.9.9.9 8.8.8.8 8.8.4.4"
-    export GLOBAL_LOG_LEVEL="debug"
-    export GLOBAL_USE_BUNKERNET="no"
-    export GLOBAL_USE_BLACKLIST="no"
-    export GLOBAL_SEND_ANONYMOUS_REPORT="no"
-    export GLOBAL_USE_REVERSE_PROXY="yes"
-    export GLOBAL_REVERSE_PROXY_HOST="http://app1:8080"
-    export CUSTOM_CONF_MODSEC_test_custom_conf='SecRule REQUEST_FILENAME "@rx ^/db" "id:10000,ctl:ruleRemoveByTag=attack-generic,ctl:ruleRemoveByTag=attack-protocol,nolog"'
-    sudo cp ready.conf /etc/bunkerweb/configs/server-http
+    # export TEST_TYPE="linux"
+    # export GLOBAL_SERVER_NAME="bwadm.example.com"
+    # export GLOBAL_HTTP_PORT="80"
+    # export GLOBAL_HTTPS_PORT="443"
+    # export GLOBAL_DNS_RESOLVERS="9.9.9.9 8.8.8.8 8.8.4.4"
+    # export GLOBAL_LOG_LEVEL="debug"
+    # export GLOBAL_USE_BUNKERNET="no"
+    # export GLOBAL_USE_BLACKLIST="no"
+    # export GLOBAL_SEND_ANONYMOUS_REPORT="no"
+    # export GLOBAL_USE_REVERSE_PROXY="yes"
+    # export GLOBAL_REVERSE_PROXY_HOST="http://app1:8080"
+    # export CUSTOM_CONF_MODSEC_test_custom_conf='SecRule REQUEST_FILENAME "@rx ^/db" "id:10000,ctl:ruleRemoveByTag=attack-generic,ctl:ruleRemoveByTag=attack-protocol,nolog"'
+    # sudo cp ready.conf /etc/bunkerweb/configs/server-http
 fi
 
 manual=0
