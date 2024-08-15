@@ -323,7 +323,7 @@ def instances_new_form() -> dict:
                             popovers=[
                                 {
                                     "iconName": "exclamation",
-                                    "iconColor": "yellow-darker",
+                                    "color": "yellow-darker",
                                     "text": "instances_hostname_warning_desc",
                                 },
                                 {

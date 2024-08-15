@@ -651,7 +651,7 @@ body {
 }
 
 .popover-container {
-  @apply pointer-events-none fixed max-w-[80vw] sm:max-w-[200px]  justify-center items-center dark:brightness-90 transition rounded-md p-3;
+  @apply pointer-events-none fixed max-w-[80vw] sm:max-w-[200px] w-full justify-center items-center dark:brightness-90 transition rounded-md p-3;
 }
 
 .open.popover-container {

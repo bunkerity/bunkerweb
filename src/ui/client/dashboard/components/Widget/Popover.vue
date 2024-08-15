@@ -87,9 +87,18 @@ function showPopover() {
 
   // Position popover relative to btn
   const popoverBtnRect = popoverBtn.value.getBoundingClientRect();
-  popoverContainer.value.style.right = `${
-    window.innerWidth - popoverBtnRect.left - popoverBtnRect.width / 1.5
-  }px`;
+  const popoverContainerRect = popoverContainer.value.getBoundingClientRect();
+  const popoverGroup =
+    popoverBtn.value.parentElement.querySelectorAll(".popover-btn");
+  const popoverGroupNums = popoverGroup.length;
+  const popoverIndex = Array.from(popoverGroup).indexOf(popoverBtn.value);
+  popoverContainer.value.style.transform = `translateX(-${
+    popoverContainerRect.width / 2 -
+    (popoverBtnRect.width * popoverGroupNums) / 2 -
+    popoverBtnRect.width * (popoverIndex - popoverGroupNums)
+  }px) translateY(${
+    popoverContainerRect.height / 2 - popoverBtnRect.height / 2 + 4
+  }px)`;
 
   // Show popover
   setTimeout(() => {
