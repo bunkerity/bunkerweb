@@ -297,11 +297,13 @@ onMounted(() => {
 
   // Update style base on the container
   // get the closest data-is with a value not table
-  table.class += tableEl?.value?.closest("[data-is]:not([data-is='table'])")
-    ? tableEl?.value
-        ?.closest("[data-is]:not([data-is='table'])")
-        .getAttribute("data-is")
-    : "";
+  table.class += tableEl?.value?.closest(
+    "[data-is]:not([data-is='table'], [data-is='table-content'])"
+  )
+    ? ` ${tableEl?.value
+        ?.closest("[data-is]:not([data-is='table'], [data-is='table-content'])")
+        .getAttribute("data-is")}`
+    : " default";
 });
 
 onUnmounted(() => {
@@ -312,7 +314,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div data-is="table" class="layout-table">
+  <div data-is="table" :class="[table.class]">
     <Container
       v-if="props.filters.length"
       :containerClass="'layout-settings-table'"
