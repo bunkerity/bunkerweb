@@ -30,7 +30,7 @@ def instances_filter(healths: str, types: Optional[list] = None, methods: Option
     filters = [
         {
             "type": "like",
-            "fields": ["name", "hostname"],
+            "fields": ["name"],
             "setting": {
                 "id": "input-search-host-name",
                 "name": "input-search-host-name",
@@ -397,7 +397,7 @@ def fallback_message(msg: str, display: Optional[list] = None) -> dict:
 def instances_list(instances: Optional[list] = None, types: Optional[list] = None, methods: Optional[list] = None, healths: Optional[list] = None) -> dict:
 
     if instances is None or (isinstance(instances, list) and len(instances) == 0):
-        return fallback_message(msg="instances_not_found", display=["main", 0])
+        return [fallback_message(msg="instances_not_found", display=["main", 0])]
 
     items = []
 
