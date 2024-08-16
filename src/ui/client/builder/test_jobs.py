@@ -1,8 +1,6 @@
-import json
-import base64
+from utils import save_builder
 
-from builder.jobs import jobs_builder
-
+from pages.jobs import jobs_builder
 
 jobs = {
     "anonymous-report": {
@@ -216,11 +214,4 @@ jobs = {
 
 output = jobs_builder(jobs)
 
-# store on a file
-with open("jobs.json", "w") as f:
-    json.dump(output, f, indent=4)
-output_base64_bytes = base64.b64encode(bytes(json.dumps(output), "utf-8"))
-output_base64_string = output_base64_bytes.decode("ascii")
-
-with open("jobs.txt", "w") as f:
-    f.write(output_base64_string)
+save_builder(page_name="jobs", output=output, script_name="jobs")

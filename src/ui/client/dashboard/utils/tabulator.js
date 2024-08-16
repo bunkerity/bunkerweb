@@ -101,6 +101,7 @@ function _sortButtonGroup(column, formatName) {
 
     const aValue = aButtons.map((btn) => btn.data.text).join(" ") || "";
     const bValue = bButtons.map((btn) => btn.data.text).join(" ") || "";
+    console.log(aValue, bValue);
     return _baseSorter(aValue, bValue, params);
   };
 }

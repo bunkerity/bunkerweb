@@ -1,19 +1,136 @@
-from .utils.widgets import title_widget, table_widget
+from .utils.widgets import (
+    button_widget,
+    button_group_widget,
+    title_widget,
+    subtitle_widget,
+    text_widget,
+    tabulator_widget,
+    input_widget,
+    icons_widget,
+    regular_widget,
+    select_widget,
+    unmatch_widget,
+)
+from .utils.table import add_column
+from .utils.format import get_fields_from_field
+from typing import Optional
+
+columns = [
+    add_column(title="Name", field="name", formatter="text"),
+    add_column(title="Plugin id", field="plugin_id", formatter="text"),
+    add_column(title="Interval", field="every", formatter="text"),
+    add_column(title="reload", field="reload", formatter="icons"),
+    add_column(title="success", field="success", formatter="icons"),
+    add_column(title="history", field="history", formatter="buttongroup"),
+    add_column(title="Cache", field="cache", formatter="buttongroup"),
+]
+
+
+def jobs_filter(intervals: Optional[list] = None) -> list:  # healths = "up", "down", "loading"
+
+    filters = [
+        {
+            "type": "=",
+            "fields": ["every"],
+            "setting": {
+                "id": "select-every",
+                "name": "select-every",
+                "label": "jobs_interval",  # keep it (a18n)
+                "value": "all",  # keep "all"
+                "values": intervals,
+                "inpType": "select",
+                "onlyDown": True,
+                "columns": {"pc": 3, "tablet": 4, "mobile": 12},
+                "popovers": [
+                    {
+                        "iconName": "info",
+                        "text": "jobs_interval_desc",
+                    }
+                ],
+                "fieldSize": "sm",
+            },
+        },
+        {
+            "type": "=",
+            "fields": ["reload"],
+            "setting": {
+                "id": "select-reload",
+                "name": "select-reload",
+                "label": "jobs_reload",  # keep it (a18n)
+                "value": "all",  # keep "all"
+                "values": ["all", "success", "failed"],
+                "inpType": "select",
+                "onlyDown": True,
+                "columns": {"pc": 3, "tablet": 4, "mobile": 12},
+                "popovers": [
+                    {
+                        "iconName": "info",
+                        "text": "jobs_reload_desc",
+                    }
+                ],
+                "fieldSize": "sm",
+            },
+        },
+        {
+            "type": "=",
+            "fields": ["success"],
+            "setting": {
+                "id": "select-success",
+                "name": "select-success",
+                "label": "jobs_success",  # keep it (a18n)
+                "value": "all",  # keep "all"
+                "values": ["all", "success", "failed"],
+                "inpType": "select",
+                "onlyDown": True,
+                "columns": {"pc": 3, "tablet": 4, "mobile": 12},
+                "popovers": [
+                    {
+                        "iconName": "info",
+                        "text": "jobs_success_desc",
+                    }
+                ],
+                "fieldSize": "sm",
+            },
+        },
+    ]
+
+    if intervals is not None and (isinstance(intervals, list) and len(intervals) > 0):
+        filters = [
+            {
+                "type": "like",
+                "fields": ["name", "plugin_id"],
+                "setting": {
+                    "id": "input-search",
+                    "name": "input-search",
+                    "label": "jobs_search",  # keep it (a18n)
+                    "placeholder": "inp_keyword",  # keep it (a18n)
+                    "value": "",
+                    "inpType": "input",
+                    "columns": {"pc": 3, "tablet": 4, "mobile": 12},
+                    "popovers": [
+                        {
+                            "iconName": "info",
+                            "text": "jobs_search_desc",
+                        }
+                    ],
+                    "fieldSize": "sm",
+                },
+            },
+        ] + filters
+
+    return filters
 
 
 def jobs_builder(jobs):
 
-    jobs_list = get_jobs_list(jobs)
-
     intervals = ["all"]
 
     # loop on each job
-    for job in jobs_list:
-        # loop on each item
-        for item in job:
-            # get the interval if not already in intervals
-            if item.get("every") and item.get("every") not in intervals:
-                intervals.append(item.get("every"))
+    for name, value in jobs.items():
+        if value.get("every") and value.get("every") not in intervals:
+            intervals.append(value.get("every"))
+
+    jobs_list = get_jobs_list(jobs)
 
     builder = [
         {
@@ -21,115 +138,12 @@ def jobs_builder(jobs):
             "containerColumns": {"pc": 12, "tablet": 12, "mobile": 12},
             "widgets": [
                 title_widget("jobs_title"),
-                table_widget(
-                    positions=[3, 2, 1, 1, 1, 1, 3],
-                    header=[
-                        "jobs_table_name",
-                        "jobs_table_plugin_id",
-                        "jobs_table_interval",
-                        "jobs_table_reload",
-                        "jobs_table_success",
-                        "jobs_table_history",
-                        "jobs_table_cache_downloadable",
-                    ],
+                tabulator_widget(
+                    id="table-list-jobs",
+                    layout="fitColumns",
+                    columns=columns,
                     items=jobs_list,
-                    filters=[
-                        {
-                            "filter": "table",
-                            "filterName": "keyword",
-                            "type": "keyword",
-                            "value": "",
-                            "keys": ["name", "plugin_id"],
-                            "field": {
-                                "id": "jobs-keyword",
-                                "value": "",
-                                "type": "text",
-                                "name": "jobs-keyword",
-                                "label": "jobs_search",
-                                "placeholder": "inp_keyword",
-                                "isClipboard": False,
-                                "popovers": [
-                                    {
-                                        "text": "jobs_search_desc",
-                                        "iconName": "info",
-                                    },
-                                ],
-                                "columns": {"pc": 3, "tablet": 4, "mobile": 12},
-                                "fieldSize": "sm",
-                            },
-                        },
-                        {
-                            "filter": "table",
-                            "filterName": "every",
-                            "type": "select",
-                            "value": "all",
-                            "keys": ["every"],
-                            "field": {
-                                "id": "jobs-every",
-                                "value": "all",
-                                "values": intervals,
-                                "name": "jobs-every",
-                                "onlyDown": True,
-                                "label": "jobs_interval",
-                                "popovers": [
-                                    {
-                                        "text": "jobs_interval_desc",
-                                        "iconName": "info",
-                                    },
-                                ],
-                                "columns": {"pc": 3, "tablet": 4, "mobile": 12},
-                                "fieldSize": "sm",
-                            },
-                        },
-                        {
-                            "filter": "table",
-                            "filterName": "reload",
-                            "type": "select",
-                            "value": "all",
-                            "keys": ["reload"],
-                            "field": {
-                                "id": "jobs-last-run",
-                                "value": "all",
-                                "values": ["all", "success", "failed"],
-                                "name": "jobs-last-run",
-                                "onlyDown": True,
-                                "label": "jobs_reload",
-                                "popovers": [
-                                    {
-                                        "text": "jobs_reload_desc",
-                                        "iconName": "info",
-                                    },
-                                ],
-                                "columns": {"pc": 3, "tablet": 4, "mobile": 12},
-                                "fieldSize": "sm",
-                            },
-                        },
-                        {
-                            "filter": "table",
-                            "filterName": "success",
-                            "type": "select",
-                            "value": "all",
-                            "keys": ["success"],
-                            "field": {
-                                "id": "jobs-success",
-                                "value": "all",
-                                "values": ["all", "success", "failed"],
-                                "name": "jobs-success",
-                                "onlyDown": True,
-                                "label": "jobs_success",
-                                "popovers": [
-                                    {
-                                        "text": "jobs_success_desc",
-                                        "iconName": "info",
-                                    },
-                                ],
-                                "columns": {"pc": 3, "tablet": 4, "mobile": 12},
-                                "fieldSize": "sm",
-                            },
-                        },
-                    ],
-                    minWidth="lg",
-                    title="jobs_table_title",
+                    filters=jobs_filter(intervals),
                 ),
             ],
         }
@@ -142,153 +156,166 @@ def get_jobs_list(jobs):
     data = []
     # loop on each dict
     for key, value in jobs.items():
-        item = []
-        item.append({"name": key, "type": "Text", "data": {"text": key}})
+        item = {"name": text_widget(text=key)["data"]}
+
         # loop on each value
         for k, v in value.items():
             # override widget type for some keys
             if k in ("reload", "history"):
                 is_success = v if k == "reload" else v[0].get("success")
-                item.append(
-                    {
-                        k: "success" if is_success else "failed",
-                        "type": "Icons",
-                        "data": {
-                            "iconName": "check" if is_success else "cross",
-                        },
-                    }
-                )
+                item["reload" if k == "reload" else "success"] = icons_widget(
+                    iconName="check" if is_success else "cross", value="success" if is_success else "failed"
+                )["data"]
 
                 if k not in ("history"):
                     continue
 
             if k in ("plugin_id", "every"):
-                item.append({k: v, "type": "Text", "data": {"text": v}})
+                item[k] = text_widget(text=v)["data"]
                 continue
 
             if k in ("history"):
+                history_columns = [
+                    add_column(title="Start date", field="start_date", formatter="text"),
+                    add_column(title="End date", field="end_date", formatter="text"),
+                    add_column(title="Success", field="success", formatter="icons"),
+                ]
+
                 items = []
                 for hist in v:
                     items.append(
-                        [
-                            {
-                                "type": "Text",
-                                "data": {
-                                    "text": hist["start_date"],
-                                },
-                            },
-                            {
-                                "type": "Text",
-                                "data": {
-                                    "text": hist["end_date"],
-                                },
-                            },
-                            {
-                                "type": "Icons",
-                                "data": {
-                                    "iconName": "check" if hist["success"] else "cross",
-                                },
-                            },
-                        ]
+                        {
+                            "start_date": text_widget(text=hist["start_date"])["data"],
+                            "end_date": text_widget(text=hist["end_date"])["data"],
+                            "success": icons_widget(iconName="check" if hist["success"] else "cross", value="success" if hist["success"] else "failed")["data"],
+                        }
                     )
 
-                item.append(
-                    {
-                        "type": "Button",
-                        "data": {
-                            "id": f"open-modal-history-{k}",
-                            "text": "jobs_history",
-                            "hideText": True,
-                            "color": "blue",
-                            "size": "normal",
-                            "iconName": "document",
-                            "iconColor": "white",
-                            "modal": {
+                item["history"] = button_group_widget(
+                    buttons=[
+                        button_widget(
+                            id=f"open-modal-history-{key}",
+                            text="jobs_history",
+                            hideText=True,
+                            color="success",
+                            size="normal",
+                            iconName="eye",
+                            iconColor="white",
+                            modal={
                                 "widgets": [
-                                    {"type": "Title", "data": {"title": key}},
-                                    {"type": "Subtitle", "data": {"subtitle": "jobs_history_subtitle"}},
-                                    {
-                                        "type": "Table",
-                                        "data": {
-                                            "title": "jobs_history_table_title",
-                                            "minWidth": "",
-                                            "header": [
-                                                "jobs_table_start_run",
-                                                "jobs_table_end_run",
-                                                "jobs_table_success",
-                                            ],
-                                            "positions": [5, 5, 2],
-                                            "items": items,
-                                        },
-                                    },
-                                    {
-                                        "type": "ButtonGroup",
-                                        "data": {
-                                            "buttons": [
-                                                {
-                                                    "id": f"close-history-{k}",
-                                                    "text": "action_close",
-                                                    "color": "close",
-                                                    "size": "normal",
-                                                    "attrs": {"data-close-modal": ""},
-                                                }
-                                            ]
-                                        },
-                                    },
+                                    title_widget(title="jobs_history_title"),
+                                    tabulator_widget(
+                                        id=f"history-{key}",
+                                        columns=history_columns,
+                                        items=items,
+                                        layout="fitDataFill",
+                                    ),
+                                    button_group_widget(
+                                        buttons=[
+                                            button_widget(
+                                                id=f"close-history-{key}",
+                                                text="action_close",
+                                                color="close",
+                                                size="normal",
+                                                attrs={"data-close-modal": ""},
+                                            )
+                                        ]
+                                    ),
                                 ]
                             },
-                        },
-                    }
-                )
+                        )
+                    ]
+                )["data"]
 
             if k in ("cache") and len(v) <= 0:
-                item.append({k: v, "type": "Text", "data": {"text": ""}})
+                item["cache"] = button_group_widget(
+                    buttons=[
+                        button_widget(
+                            id=f"open-modal-cache-{key}",
+                            text="jobs_no_cache",
+                            hideText=True,
+                            color="info",
+                            size="normal",
+                            iconName="document",
+                            iconColor="white",
+                            containerClass="hidden",
+                        )
+                    ]
+                )["data"]
                 continue
 
             if k in ("cache") and len(v) > 0:
                 files = []
                 # loop on each cache item
-                for cache in v:
+                for index, cache in enumerate(v):
                     file_name = f"{cache['file_name']} [{cache['service_id']}]" if cache["service_id"] else f"{cache['file_name']}"
-                    files.append(file_name)
-
-                item.append(
-                    {
-                        k: " ".join(files),
-                        "type": "Fields",
-                        "data": {
-                            "setting": {
-                                "attrs": {
-                                    "data-plugin-id": value.get("plugin_id", ""),
-                                    "data-job-name": key,
-                                },
-                                "id": f"{key}_cache",
-                                "label": f"{key}_cache",
-                                "hideLabel": True,
-                                "inpType": "select",
-                                "name": f"{key}_cache",
-                                "value": "download file",
-                                "values": files,
-                                "columns": {
-                                    "pc": 12,
-                                    "tablet": 12,
-                                    "mobile": 12,
-                                },
-                                "overflowAttrEl": "data-table-body",
-                                "containerClass": "table download-cache-file",
-                                "maxBtnChars": 16,
-                                "popovers": [
-                                    {
-                                        "iconName": "info",
-                                        "text": "jobs_download_cache_file",
-                                    },
+                    files.append(
+                        {
+                            "id": text_widget(text=index)["data"],
+                            "filename": text_widget(text=file_name)["data"],
+                            "download": button_group_widget(
+                                buttonGroupClass="button-group-table-content",
+                                buttons=[
+                                    button_widget(
+                                        id=f"{key}-cache",
+                                        text=f"action_download",
+                                        hideText=True,
+                                        color="info",
+                                        size="normal",
+                                        iconName="download",
+                                        iconColor="white",
+                                        attrs={
+                                            "data-plugin-id": value.get("plugin_id", ""),
+                                            "data-job-name": key,
+                                        },
+                                    ),
                                 ],
-                            }
-                        },
-                    }
-                )
+                            )["data"],
+                        }
+                    )
+
+                item["cache"] = button_group_widget(
+                    buttons=[
+                        button_widget(
+                            id=f"open-modal-cache-{key}",
+                            text="jobs_cache",
+                            hideText=True,
+                            color="info",
+                            size="normal",
+                            iconName="document",
+                            iconColor="white",
+                            modal={
+                                "widgets": [
+                                    title_widget(title="jobs_history_title"),
+                                    tabulator_widget(
+                                        id=f"cache-{key}",
+                                        columns=[
+                                            add_column(title="id", field="id", formatter="text", maxWidth=80),
+                                            add_column(title="File name", field="filename", formatter="text"),
+                                            add_column(title="Download", field="download", formatter="buttongroup"),
+                                        ],
+                                        items=files,
+                                        layout="fitDataFill",
+                                    ),
+                                    button_group_widget(
+                                        buttons=[
+                                            button_widget(
+                                                id=f"close-history-{key}",
+                                                text="action_close",
+                                                color="close",
+                                                size="normal",
+                                                attrs={"data-close-modal": ""},
+                                            )
+                                        ]
+                                    ),
+                                ]
+                            },
+                        )
+                    ]
+                )["data"]
                 continue
 
+        print(item)
         data.append(item)
 
     return data

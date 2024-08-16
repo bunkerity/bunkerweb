@@ -291,10 +291,7 @@ onMounted(() => {
       a11yTable(table.instance);
       // Add table instance to store in order to use it in other components
       tableStore.setTable(props.id, table.instance);
-      setTimeout(() => {
-        if (!table.instance) return;
-        table.instance.redraw();
-      }, 100);
+      table.instance.redraw();
     });
   } catch (e) {}
 

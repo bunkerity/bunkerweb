@@ -99,7 +99,7 @@ const props = defineProps({
           v-if="useEqualStr(widget.type, 'ButtonGroup')"
           v-bind="widget.data"
         />
-        <
+
         <Alert v-if="useEqualStr(widget.type, 'Alert')" v-bind="widget.data" />
         <Cell v-if="useEqualStr(widget.type, 'Cell')" v-bind="widget.data" />
         <Container
