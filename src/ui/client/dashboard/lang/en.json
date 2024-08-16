@@ -295,6 +295,8 @@
   "bans_select_reason_desc": "Reason is the plugin that triggered the ban.",
   "bans_select_remain": "Select remain",
   "bans_select_remain_desc": "Scale of remaining time before unban.",
+  "services_select_methods": "Select methods",
+  "services_select_draft": "Select draft",
   "services_new": "new service",
   "services_title": "Services",
   "services_table_name": "Name",

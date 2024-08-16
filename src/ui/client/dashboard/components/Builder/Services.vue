@@ -4,6 +4,7 @@ import Grid from "@components/Widget/Grid.vue";
 import GridLayout from "@components/Widget/GridLayout.vue";
 import Table from "@components/Widget/Table.vue";
 import Title from "@components/Widget/Title.vue";
+import Tabulator from "@components/Widget/Tabulator.vue";
 import ButtonGroup from "@components/Widget/ButtonGroup.vue";
 import Button from "@components/Widget/Button.vue";
 import { useEqualStr } from "@utils/global.js";
@@ -319,6 +320,10 @@ const props = defineProps({
     <Grid>
       <!-- widget element -->
       <template v-for="(widget, index) in container.widgets" :key="index">
+        <Tabulator
+          v-if="useEqualStr(widget.type, 'Tabulator')"
+          v-bind="widget.data"
+        />
         <Table v-if="useEqualStr(widget.type, 'Table')" v-bind="widget.data" />
         <ButtonGroup
           v-if="useEqualStr(widget.type, 'ButtonGroup')"
