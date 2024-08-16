@@ -133,7 +133,7 @@ def plugin_item(
                                     iconName="trash",
                                     iconColor="white",
                                     attrs={
-                                        "data-submit-form": f"""{{ "plugin" : "{name}", "type": "{plugin_type}" }}""",
+                                        "data-submit-form": f"""{{ "plugin_name" : "{name}", "type": "{plugin_type}" }}""",
                                         "data-submit-endpoint": "/delete",
                                         "data-submit-method": "DELETE",
                                     },

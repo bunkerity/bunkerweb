@@ -111,7 +111,7 @@ def profile_account_form(email: str) -> dict:
                 display=["account", 0],
                 title="profile_account_form_email_title",
                 maxWidthScreen="xs",
-                endpoint="/edit",
+                endpoint="/edit/email",
                 method="POST",
                 fields=[
                     get_fields_from_field(
@@ -167,7 +167,7 @@ def profile_account_form(email: str) -> dict:
                 display=["account", 1],
                 title="profile_account_form_password_title",
                 maxWidthScreen="xs",
-                endpoint="/edit",
+                endpoint="/edit/password",
                 method="POST",
                 fields=[
                     get_fields_from_field(
@@ -242,7 +242,7 @@ def profile_account_form(email: str) -> dict:
     }
 
 
-def totp_enable_form(
+def totp_enable(
     totp_recovery_codes: Optional[list] = None,
     is_recovery_refreshed: bool = False,
 ) -> dict:
@@ -352,7 +352,7 @@ def totp_enable_form(
     }
 
 
-def totp_disable_form(totp_img: str = "", totp_secret: str = "") -> dict:
+def totp_disable(totp_img: str = "", totp_secret: str = "") -> dict:
     return {
         "type": "card",
         "maxWidthScreen": "md",
@@ -378,7 +378,7 @@ def totp_disable_form(totp_img: str = "", totp_secret: str = "") -> dict:
             regular_widget(
                 title="profile_totp_enable_form_title",
                 maxWidthScreen="xs",
-                endpoint="/edit",
+                endpoint="/totp-enable",
                 method="POST",
                 fields=[
                     get_fields_from_field(
@@ -513,21 +513,16 @@ def profile_builder(user: Optional[dict] = None) -> list:
         totp_form = fallback_message("profile_totp_data_missing")
 
     if not totp_data.get("is_totp"):
-        totp_form = totp_disable_form(
+        totp_form = totp_disable(
             totp_img=totp_data.get("totp_image", ""),
             totp_secret=totp_data.get("totp_secret", ""),
         )
 
     if totp_data.get("is_totp"):
-        totp_form = totp_enable_form(
+        totp_form = totp_enable(
             totp_recovery_codes=totp_data.get("totp_recovery_codes", None),
             is_recovery_refreshed=totp_data.get("is_recovery_refreshed", False),
         )
-
-    totp_enable_form(
-        totp_recovery_codes=user.get("totp_recovery_codes", None),
-        is_recovery_refreshed=user.get("is_recovery_refreshed", False),
-    )
 
     return [
         # Tabs is button group with display value and a size tab inside a tabs container
