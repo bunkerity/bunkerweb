@@ -27,6 +27,7 @@ import { useDisplayStore } from "@store/global.js";
  * @param {Object} templates - List of advanced templates that contains settings. Must be a dict with mode as key, then the template name as key with a list of data (different for each modes).
  * @param {String} [operation="edit"] - Operation type (edit, new, delete).
  * @param {String} [oldServerName=""] - Old server name. This is a server name before any changes.
+ * @param {String|Boolean} [isDraft=false] - Is draft mode. "yes" or "no" to set a draft select. Else will be ignored.
  * @param {Array} [display=[]] - Array need two values : "groupName" in index 0 and "compId" in index 1 in order to be displayed using the display store. More info on the display store itslef.
  */
 
@@ -40,6 +41,11 @@ const props = defineProps({
     type: String,
     required: false,
     default: "edit",
+  },
+  isDraft: {
+    type: [String, Boolean],
+    required: false,
+    default: false,
   },
   oldServerName: {
     type: String,
@@ -70,6 +76,26 @@ const comboboxTemplate = {
       iconName: "info",
     },
   ],
+};
+
+const draftSelect = {
+  id: `draft-select-${uuidv4()}`,
+  name: `draft-select-${uuidv4()}`,
+  disabled: false,
+  required: false,
+  onlyDown: true,
+  maxBtnChars: 24,
+  value: props.isDraft,
+  values: ["yes", "no"],
+  containerClass: "setting",
+  label: "dashboard_draft",
+  popovers: [
+    {
+      text: "dashboard_draft_desc",
+      iconName: "info",
+    },
+  ],
+  columns: { pc: 3, tablet: 12, mobile: 12 },
 };
 
 const comboboxModes = {
@@ -173,6 +199,7 @@ onBeforeMount(() => {
         :values="data.modes"
         @inp="data.currModeName = $event"
       />
+      <Select data-draft-state v-if="props.isDraft" v-bind="draftSelect" />
     </Grid>
     <Advanced
       v-if="data.currModeName === 'advanced'"

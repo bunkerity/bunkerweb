@@ -4304,10 +4304,10 @@ templates_ui = {
 }
 
 
-output_advanced = advanced_mode_builder(templates_ui, plugins, global_config, total_config, service_name)
-output_easy = easy_mode_builder(templates_ui, plugins, global_config, total_config, service_name)
-output_raw = raw_mode_builder(templates_ui, plugins, global_config, total_config, service_name)
+output_advanced = advanced_mode_builder(templates=templates_ui, plugins=plugins, global_config=global_config, total_config=total_config, service_name=service_name, operation="edit", is_draft="yes", mode="advanced")
+# output_easy = easy_mode_builder(templates_ui, plugins, global_config, total_config, service_name)
+# output_raw = raw_mode_builder(templates_ui, plugins, global_config, total_config, service_name)
 
-save_builder("advanced", output_advanced, update_page=False)
-save_builder("easy", output_easy, update_page=False)
-save_builder("raw", output_raw, update_page=False)
+save_builder(page_name="modes", output=output_advanced, script_name="modes")
+# save_builder("easy", output_easy, update_page=False)
+# save_builder("raw", output_raw, update_page=False)

@@ -331,8 +331,8 @@ onMounted(() => {
   advancedForm.setTemplate(props.template);
   advancedForm.setOperation(props.operation);
   advancedForm.setOldServerName(props.oldServerName);
-  easyForm.setEndpoint(props.endpoint);
-  easyForm.setMethod(props.method);
+  advancedForm.setEndpoint(props.endpoint);
+  advancedForm.setMethod(props.method);
   updateStates();
   // I want updatInp to access event, data.base and the container attribute
   advancedForm.useListenTempFields();

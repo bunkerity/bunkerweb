@@ -34,6 +34,7 @@ export const createFormStore = (storeName, formType) => {
     const formattedData = ref({});
     // Get additionnal data for submit
     const operation = ref("");
+    const draftState = ref("");
     const oldServerName = ref("");
     const endpoint = ref("");
     const method = ref("POST");
@@ -46,6 +47,26 @@ export const createFormStore = (storeName, formType) => {
      */
     function setOperation(value) {
       operation.value = value;
+    }
+
+    /**
+     *  @name setMethod
+     *  @description Set the method when we will submit the form.
+     *  @param {String} method - Method to set
+     *  @returns {Void}
+     */
+    function setMethod(value) {
+      method.value = value;
+    }
+
+    /**
+     *  @name setEndpoint
+     *  @description Set the endpoint when we will submit the form.
+     *  @param {String} endpoint - Endpoint to set
+     *  @returns {Void}
+     */
+    function setEndpoint(value) {
+      endpoint.value = value;
     }
 
     /**
@@ -307,6 +328,7 @@ export const createFormStore = (storeName, formType) => {
      *  @returns {Void}
      */
     function useListenTempFields() {
+      window.addEventListener("click", _listenDraftSelect);
       if (!_isFormTypeAllowed(["advanced", "easy"])) return;
       window.addEventListener("input", _useUpdateTemp);
       window.addEventListener("change", _useUpdateTemp);
@@ -325,9 +347,23 @@ export const createFormStore = (storeName, formType) => {
      *  @returns {Void}
      */
     function useUnlistenTempFields() {
+      window.removeEventListener("click", _listenDraftSelect);
       if (!_isFormTypeAllowed(["advanced", "easy"])) return;
       window.removeEventListener("change", _useUpdateTemp);
       window.removeEventListener("click", _useUpdateTemp);
+    }
+
+    /**
+     *  @name _listenDraftSelect
+     *  @description Look for a draft select (with attribut data-draft-state) and update the draft state when changing the select value.
+     *  @param {Event} e - Event object, get it by default in the event listener.
+     *  @returns {Void}
+     */
+    function _listenDraftSelect(e) {
+      if (!e.target?.closest("[data-draft-state]")) return;
+      draftState.value = e.target
+        .closest("[data-draft-state]")
+        .querySelector("select").value;
     }
 
     /**
@@ -642,6 +678,7 @@ export const createFormStore = (storeName, formType) => {
       data["operation"] = operation.value;
       data["OLD_SERVER_NAME"] = oldServerName.value;
       data["mode"] = type.value;
+      data["IS_DRAFT"] = draftState.value;
       useSubmitForm(data, endpoint, method);
     }
 
@@ -750,6 +787,8 @@ export const createFormStore = (storeName, formType) => {
       setRawData,
       setOldServerName,
       setOperation,
+      setMethod,
+      setEndpoint,
       addMultiple,
       delMultiple,
       useListenTempFields,
