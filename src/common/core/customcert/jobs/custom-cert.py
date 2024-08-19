@@ -43,6 +43,7 @@ def check_cert(cert_file: Union[Path, bytes], key_file: Union[Path, bytes], firs
             cached, err = JOB.cache_file("cert.pem", cert_file, service_id=first_server, checksum=cert_hash, delete_file=False)
             if not cached:
                 LOGGER.error(f"Error while caching custom-cert cert.pem file : {err}")
+                return False, err
 
         key_hash = bytes_hash(key_file)
         old_hash = JOB.cache_hash("key.pem", service_id=first_server)
@@ -51,6 +52,7 @@ def check_cert(cert_file: Union[Path, bytes], key_file: Union[Path, bytes], firs
             cached, err = JOB.cache_file("key.pem", key_file, service_id=first_server, checksum=key_hash, delete_file=False)
             if not cached:
                 LOGGER.error(f"Error while caching custom-key key.pem file : {err}")
+                return False, err
 
         return ret, ""
     except BaseException as e:
@@ -98,6 +100,7 @@ try:
                     except BaseException:
                         LOGGER.exception(f"Error while decoding cert data, skipping server {first_server}...")
                         skipped_servers.append(first_server)
+                        status = 2
                         continue
 
                 if key_file:
@@ -108,6 +111,7 @@ try:
                     except BaseException:
                         LOGGER.exception(f"Error while decoding key data, skipping server {first_server}...")
                         skipped_servers.append(first_server)
+                        status = 2
                         continue
 
                 LOGGER.info(f"Checking certificate for {first_server} ...")
@@ -115,10 +119,12 @@ try:
                 if isinstance(err, BaseException):
                     LOGGER.error(f"Exception while checking {first_server}'s certificate, skipping ... \n{err}")
                     skipped_servers.append(first_server)
+                    status = 2
                     continue
                 elif err:
                     LOGGER.warning(f"Error while checking {first_server}'s certificate : {err}")
                     skipped_servers.append(first_server)
+                    status = 2
                     continue
                 elif need_reload:
                     LOGGER.info(f"Detected change in {first_server}'s certificate")
