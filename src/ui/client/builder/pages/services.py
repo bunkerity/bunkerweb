@@ -269,7 +269,7 @@ def services_action(
             }
         )
 
-    if operation == "edit" or operation == "new":
+    if operation == "edit" or operation == "new" or operation == "clone":
         modes = ("easy", "advanced", "raw")
         mode_buttons = []
         for mode in modes:
@@ -281,7 +281,7 @@ def services_action(
                     size="normal",
                     attrs={
                         "role": "link",
-                        "data-link": f"modes?service_name={server_name}&mode={mode}" if operation != "new" else f"modes?mode={mode}",
+                        "data-link": f"modes?service_name={'' if operation == 'new' else server_name}&mode={mode}&operation={operation}",
                     },
                 )
             )
@@ -340,7 +340,7 @@ def get_services_list(services):
                 ),
                 button_widget(
                     id=f"open-modal-manage-{index}",
-                    text="manage",
+                    text="action_manage",
                     hideText=True,
                     color="edit",
                     size="normal",
@@ -372,6 +372,23 @@ def get_services_list(services):
                         additional="services_draft_switch_subtitle" if is_draft else "services_online_switch_subtitle",
                         is_draft=is_draft,
                     ),
+                ),
+                button_widget(
+                    id=f"open-modal-clone-{index}",
+                    text="action_clone",
+                    hideText=True,
+                    color="sky",
+                    size="normal",
+                    iconName="clone",
+                    iconColor="white",
+                    modal=services_action(
+                        server_name=server_name,
+                        operation="clone",
+                        title="services_clone_title",
+                        subtitle="services_clone_subtitle",
+                        additional=server_name,
+                    ),
+                    attrs={"data-server-name": server_name},
                 ),
                 button_widget(
                     attrs={"data-server-name": server_name},

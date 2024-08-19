@@ -41,6 +41,8 @@ import Uncheck from "@components/Icons/Uncheck.vue";
 import Back from "@components/Icons/Back.vue";
 import Refresh from "@components/Icons/Refresh.vue";
 import Download from "@components/Icons/Download.vue";
+import Clone from "@components/Icons/Clone.vue";
+
 /**
  *  @name Widget/Icons.vue
  *  @description This component is a wrapper that contains all the icons available in the application (Icons folder).
@@ -112,6 +114,7 @@ onMounted(() => {
       v-if="useEqualStr(props.iconName, 'exclamation')"
       v-bind="icon"
     />
+    <Clone v-if="useEqualStr(props.iconName, 'clone')" v-bind="icon" />
     <Download v-if="useEqualStr(props.iconName, 'download')" v-bind="icon" />
     <Refresh v-if="useEqualStr(props.iconName, 'refresh')" v-bind="icon" />
     <Back v-if="useEqualStr(props.iconName, 'back')" v-bind="icon" />
