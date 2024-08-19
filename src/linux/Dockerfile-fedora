@@ -67,6 +67,7 @@ RUN rm -rf /usr/share/bunkerweb/ui/client
 
 WORKDIR /usr/share/bunkerweb
 
+COPY src/ui/pages ui/pages
 COPY src/ui/src ui/src
 COPY src/ui/*.py ui/
 
