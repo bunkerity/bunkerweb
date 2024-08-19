@@ -3,7 +3,7 @@
 ## Overview
 
 <p align="center">
-	<iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/Ao20SfvQyr4" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+ <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/Ao20SfvQyr4" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 </p>
 
 The "Web UI" is a web application that helps you manage your BunkerWeb instance using a user-friendly interface instead of the command-line one.
@@ -2229,3 +2229,282 @@ After a successful login/password combination, you will be prompted to enter you
     ```shell
     systemctl reload bunkerweb
     ```
+
+## UI development
+
+The web UI is moving from Flask to Vue.js using a builder approach. I will detail some steps and parts of the UI development process.
+
+### Create a dashboard page
+
+A dashboard page is a page that will have at build time a separate html and js file. Furthermore, the main.py file will need to be updated to include the new page.
+
+**1. Create page folder**
+
+For the example, we will create a page named `example`.
+
+First, you need to go to the `src/ui/client/dashboard/pages` folder and copy an existing page folder like `home` folder and rename it to `example`.
+
+Don't forget to rename the `Home.vue` file to `Example.vue`, and `home.js` to `example.js`.
+
+**2. Update page folder files**
+
+Open `example.js` file, you get something like this :
+
+```js
+import { createApp } from "vue"; // Utils
+import { createPinia } from "pinia"; // Global Vue.js store
+import { getI18n } from "@utils/lang.js"; // Get i18n
+import Home from "./Home.vue"; // Vue page app
+
+const pinia = createPinia();
+
+// We set the page as app, add pinia plugin, and we add the i18n module with wanted prefix key and mount the app
+// The i18n keys are in the src/ui/client/dashboard/lang folder
+createApp(Home)
+  .use(pinia)
+  .use(getI18n(["dashboard", "action", "inp", "icons", "home"]))
+  .mount("#app");
+```
+
+You need to update it like this :
+
+```js
+import { createApp } from "vue";
+import { createPinia } from "pinia";
+import { getI18n } from "@utils/lang.js";
+import Example from "./Example.vue";
+
+const pinia = createPinia();
+
+createApp(Example)
+  .use(pinia)
+  .use(getI18n(["dashboard", "action", "inp", "icons", "example"])) // get example prefix keys from lang folder
+  .mount("#app");
+```
+
+Open `Home.vue` file, you get something like this :
+
+```vue
+<script setup>
+import { reactive, onBeforeMount, onMounted } from "vue"; // built-in vue functions
+import DashboardLayout from "@components/Dashboard/Layout.vue"; // Dashboard base layout
+// BuilderHome is where we define the component to use for the current page
+// We will update it later
+import BuilderHome from "@components/Builder/Home.vue";
+// Global is utils for buttons or link actions
+import { useGlobal } from "@utils/global";
+
+
+// This is JSDOC
+/**
+*  @name Page/Home.vue
+*  @description This component is the home page.
+  This page displays an overview of multiple stats related to BunkerWeb.
+*/
+
+// Get data for builder logic
+const home = reactive({
+  builder: "",
+});
+
+onBeforeMount(() => {
+  // Get builder data
+  const dataAtt = "data-server-builder";
+  const dataEl = document.querySelector(`[${dataAtt}]`);
+  const data =
+    dataEl && !dataEl.getAttribute(dataAtt).includes(dataAtt)
+      ? JSON.parse(atob(dataEl.getAttribute(dataAtt)))
+      : {};
+  home.builder = data;
+});
+
+// Use utils when app is built
+onMounted(() => {
+  useGlobal();
+});
+</script>
+
+<template>
+<!-- Template part -->
+  <DashboardLayout>
+    <BuilderHome v-if="home.builder" :builder="home.builder" />
+  </DashboardLayout>
+</template>
+```
+
+You need to update it like this :
+
+```vue
+<script setup>
+import { reactive, onBeforeMount, onMounted } from "vue"; 
+import DashboardLayout from "@components/Dashboard/Layout.vue";
+// We will create it, or we can use
+// import BuilderCollection from "@components/Builder/Collection.vue";
+// to get all components but performance will be impacted
+import BuilderExample from "@components/Builder/Example.vue";
+import { useGlobal } from "@utils/global";
+
+/**
+*  @name Page/Example.vue
+*  @description This component is the Example page.
+*/
+
+// Get data for builder logic
+const example = reactive({
+  builder: "",
+});
+
+onBeforeMount(() => {
+  // Get builder data
+  const dataAtt = "data-server-builder";
+  const dataEl = document.querySelector(`[${dataAtt}]`);
+  const data =
+    dataEl && !dataEl.getAttribute(dataAtt).includes(dataAtt)
+      ? JSON.parse(atob(dataEl.getAttribute(dataAtt)))
+      : {};
+  example.builder = data;
+});
+
+// Use utils when app is built
+onMounted(() => {
+  useGlobal();
+});
+</script>
+
+<template>
+<!-- Template part -->
+  <DashboardLayout>
+    <BuilderExample v-if="example.builder" :builder="example.builder" />
+    <!-- alternative -->
+    <!-- <BuilderCollection v-if="example.builder" :builder="example.builder" /> -->
+  </DashboardLayout>
+</template>
+```
+
+Open `index.html` file, you get something like this :
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/x-icon" href="/img/favicon.ico" />
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/flag-icons.min.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BunkerWeb | Home</title>
+  </head>
+  <body>
+    <div
+      class="hidden"
+      data-server-global='{"username" : "admin", "plugins_page": [{"id" : "antibot", "name": "Antibot"}, {"id": "backup", "name" : "backup"}]}'
+    ></div>
+    <div
+      class="hidden"
+      data-server-flash='[{"type" : "success", "title" : "success", "message" : "Success feedback"}, {"type" : "error", "title" : "error", "message" : "Error feedback"}, {"type" : "warning", "title" : "warning", "message" : "Warning feedback"}, {"type" : "info", "title" : "info", "message" : "Info feedback"}]'
+    ></div>
+    <div
+      class="hidden"
+      data-server-builder=""
+    ></div>
+    <div id="app"></div>
+    <script type="module" src="home.js"></script>
+  </body>
+</html>
+```
+
+You need to change title and the script part like this :
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/x-icon" href="/img/favicon.ico" />
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/flag-icons.min.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BunkerWeb | Example</title>
+  </head>
+  <body>
+    <div
+      class="hidden"
+      data-server-global='{"username" : "admin", "plugins_page": [{"id" : "antibot", "name": "Antibot"}, {"id": "backup", "name" : "backup"}]}'
+    ></div>
+    <div
+      class="hidden"
+      data-server-flash='[{"type" : "success", "title" : "success", "message" : "Success feedback"}, {"type" : "error", "title" : "error", "message" : "Error feedback"}, {"type" : "warning", "title" : "warning", "message" : "Warning feedback"}, {"type" : "info", "title" : "info", "message" : "Info feedback"}]'
+    ></div>
+    <div
+      class="hidden"
+      data-server-builder=""
+    ></div>
+    <div id="app"></div>
+    <script type="module" src="example.js"></script>
+  </body>
+</html>
+```
+
+**2.1 Create custom builder (optional)**
+
+In case you don't want to use the `BuilderCollection` component but a custom and optimized one for your page, you need to create a new component in the `src/ui/client/dashboard/components/Builder` folder.
+
+You can copy an existing component like `Collection.vue` and rename it to `Example.vue`, and inside it, you can remove useless components (and add new ones if needed).
+
+**3. Access page on dev**
+
+Now you can start dev your page, go to `src/ui/client` and run the following command :
+
+```shell
+npm install &&
+npm run dev-dashboard
+```
+
+This will prepare vite and run a dev server, you can access your page on `http://localhost:3000/dashboard/pages/example/index.html`
+
+**4. Create page builder**
+
+The UI is using the JSdoc from components to generate a `widgets.py` that allow to create a component using python in a builder approach.
+In order to create a builder for the new page, you need to go to `src/ui/client/builder/pages` and you can start by copying an existing page folder like `home.py` and rename it to `example.py`.
+
+**4.1 Create test_builder (optional)**
+
+In case you want to test your page and the result of the builder, you can create a test file in the `src/ui/client/builder` folder.
+For example, you can copy the `test_bans.py` file and rename it to `test_example.py`.
+
+You can import your builder, and run the builder with raw data to see the result.
+You can also directly update the data on your dev page using the `save_builder` utils.
+
+**5. Add page to build**
+
+By default, the new pages will not be added to built app. We need to update the `vite.config.dashboard.js` file and inclue the new page on build :
+
+```js
+import { resolve } from "path";
+import { defineConfig } from "vite";
+import vue from "@vitejs/plugin-vue";
+import VueI18nPlugin from "@intlify/unplugin-vue-i18n/vite";
+import { comment } from "postcss";
+
+// https://vitejs.dev/config/
+export default defineConfig({
+  // ...
+  build: {
+    // ...
+    rollupOptions: {
+      input: {
+        // ...
+        // Add new page
+        example: resolve(__dirname, "./dashboard/pages/example/index.html"),
+      },
+    },
+  },
+});
+```
+
+**6. Update flask part**
+
+You need to know that pages and utils from `src/ui/client/builder/` will be accessible on built from the `main.py` file.
+In order to add the page, you can use the existing `src/ui/pages` folder and follow how they are import in the `main.py` file.
+
+After that, you will get the new page on the built app.
