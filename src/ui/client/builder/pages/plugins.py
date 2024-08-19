@@ -12,7 +12,7 @@ from .utils.widgets import (
 )
 from .utils.table import add_column
 from .utils.format import get_fields_from_field
-from typing import Optional
+from typing import List, Optional
 
 columns = [
     add_column(title="Name", field="name", formatter="text"),
@@ -23,7 +23,7 @@ columns = [
 ]
 
 
-def plugins_filter(types: Optional[list] = None) -> list:
+def plugins_filter(types: List[str]) -> list:
     filters = [
         {
             "type": "like",
@@ -47,7 +47,7 @@ def plugins_filter(types: Optional[list] = None) -> list:
         }
     ]
 
-    if types is not None and (isinstance(types, list) and len(types) >= 2):
+    if len(types) >= 2:
         filters.append(
             {
                 "type": "=",
@@ -165,24 +165,26 @@ def fallback_message(msg: str, display: Optional[list] = None) -> dict:
     }
 
 
-def plugins_list(plugins: Optional[list] = None, types: Optional[list] = None) -> dict:
+def plugins_list(plugins: Optional[list] = None) -> dict:
 
-    if plugins is None or (isinstance(plugins, list) and len(plugins) == 0):
+    if not plugins:
         return fallback_message(msg="plugins_not_found")
 
     items = []
+    types = set()
 
     for plugin in plugins:
         items.append(
             plugin_item(
-                name=plugin["name"],
+                name=plugin["id"],
                 version=plugin["version"],
                 description=plugin["description"],
-                is_deletable=plugin["is_deletable"],
-                page=plugin["page"],
+                is_deletable=plugin["method"] == "ui",
+                page=f"/plugins/{plugin['id']}" if plugin["page"] else "",
                 plugin_type=plugin["type"],
             )
         )
+        types.add(plugin["type"])
 
     return {
         "type": "card",
@@ -198,11 +200,11 @@ def plugins_list(plugins: Optional[list] = None, types: Optional[list] = None) -
                 layout="fitColumns",
                 columns=columns,
                 items=items,
-                filters=plugins_filter(types=types),
+                filters=plugins_filter(list(types)),
             ),
         ],
     }
 
 
-def plugins_builder(plugins: Optional[list] = None, types: Optional[list] = None) -> list:
-    return [plugins_list(plugins=plugins, types=types)]
+def plugins_builder(plugins: Optional[list] = None) -> list:
+    return [plugins_list(plugins=plugins)]

@@ -305,25 +305,9 @@ def plugins_page():
     if tmp_ui_path.is_dir():
         rmtree(tmp_ui_path, ignore_errors=True)
 
-    db_plugins = current_app.bw_config.get_plugins()
-    plugins = []
-    types = set()
+    db_plugins = current_app.db.get_plugins()
 
-    for plugin in db_plugins:
-        plugins.append(
-            {
-                "name": plugin["id"],
-                "version": plugin["version"],
-                "description": plugin["description"],
-                "type": plugin["type"],
-                "is_deletable": plugin["type"] == "ui",
-                "page": f"/plugins/{plugin['id']}" if plugin["page"] else "",
-            }
-        )
-
-        types.add(plugin["type"])
-
-    builder = plugins_builder(plugins, list(types))
+    builder = plugins_builder(db_plugins)
     return render_template("plugins.html", data_server_builder=b64encode(dumps(builder).encode("utf-8")).decode("ascii"))
 
 
