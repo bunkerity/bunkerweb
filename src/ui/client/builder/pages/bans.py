@@ -44,6 +44,7 @@ def bans_tabs():
 
 def ban_item(id: str, ip: str, reason: str, ban_start_date: int, ban_end_date: int, remain: str) -> dict:
     return {
+        "id": id,
         "check": get_fields_from_field(
             checkbox_widget(
                 id=f"check-ban-{id}",
@@ -52,6 +53,7 @@ def ban_item(id: str, ip: str, reason: str, ban_start_date: int, ban_end_date: i
                 hideLabel=True,
                 value="no",
                 columns={"pc": 12, "tablet": 12, "mobile": 12},
+                attrs={"data-ban-id": id},
             )
         ),
         "ip": text_widget(text=ip)["data"],

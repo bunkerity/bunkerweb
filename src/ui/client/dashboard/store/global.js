@@ -80,9 +80,22 @@ export const useDisplayStore = defineStore("display", () => {
  */
 export const useTableStore = defineStore("table", () => {
   const tables = ref({});
+  const tablesDefaultData = ref({});
 
   function setTable(id, tabulatorInstance) {
     tables.value[id] = tabulatorInstance;
+  }
+
+  function setDefaultTableData(id, data) {
+    tablesDefaultData.value[id] = data;
+  }
+
+  function getDefaultTableDataById(id) {
+    return tablesDefaultData.value[id];
+  }
+
+  function getDefaultTablesData() {
+    return tablesDefaultData.value;
   }
 
   function getTableById(id) {
@@ -101,5 +114,14 @@ export const useTableStore = defineStore("table", () => {
     return !!(id in tables.value);
   }
 
-  return { setTable, getTableById, getTables, removeTable, isTable };
+  return {
+    setTable,
+    getTableById,
+    getTables,
+    removeTable,
+    isTable,
+    setDefaultTableData,
+    getDefaultTableDataById,
+    getDefaultTablesData,
+  };
 });
