@@ -315,7 +315,7 @@ onBeforeMount(() => {
             menu.isDesktop ? menuIndex : menu.isActive ? menuIndex : '-1'
           "
           class="menu-account-link"
-          href="account"
+          href="profile"
           >{{ $t("dashboard_manage_account") }}</a
         >
       </div>
