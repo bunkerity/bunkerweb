@@ -3,9 +3,7 @@ const path = require("path");
 
 // Merge all components md on this file name
 const finalFile = "ui-components.md";
-// Where we have all SFC components
-// Where we want to output md components file
-const ouputFolder = path.join(__dirname, "components");
+
 
 // Format merge file
 function formatMd() {

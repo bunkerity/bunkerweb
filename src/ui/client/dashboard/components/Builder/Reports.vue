@@ -11,19 +11,6 @@ import { useEqualStr } from "@utils/global.js";
 /**
  * @name Builder/Reports.vue
  * @description This component is lightweight builder containing only the necessary components to create the reports page.
- * @example
- * [
- *   {
- *     type: "card",
- *     gridLayoutClass: "transparent",
- *     widgets: [
- *               {
- *                 type: "Unmatch",
- *                 data: { text: "reports_not_found" }
- *               }
- *     ],
- *   },
- * ];
  * @param {array} builder - Array of containers and widgets
  */
 

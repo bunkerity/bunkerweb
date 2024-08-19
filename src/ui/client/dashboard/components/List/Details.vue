@@ -6,32 +6,32 @@ import Filter from "@components/Widget/Filter.vue";
 import Grid from "@components/Widget/Grid.vue";
 import Unmatch from "@components/Message/Unmatch.vue";
 /**
-*  @name List/Details.vue
-*  @description This component is a list of items separate on two columns : one for the title, and other for a list of popovers related to the plugin (type, link...)
-*  @example
-  {
-  details : [{
-    text: "name",
-    disabled : false,
-    attrs: {
-      id: "id",
-      value: "value",
-    },
-    popovers: [
-      {
-        text: "This is a popover text",
-        iconName: "info",
-      },
-      {
-        text: "This is a popover text",
-        iconName: "info",
-      },
-    ],
-}]
-*  @param {string} details  - List of details item that contains a text, disabled state, attrs and list of popovers. We can also add a disabled key to disable the item.
-*  @param {array} [filters=[]] - List of filters to apply on the list of items.
-*  @param {columns} [columns={"pc": "4", "tablet": "6", "mobile": "12"}] - Determine the position of the items in the grid system.
-*/
+ *  @name List/Details.vue
+ *  @description This component is a list of items separate on two columns : one for the title, and other for a list of popovers related to the plugin (type, link...)
+ *  @example
+ *  {
+ *  details : [{
+ *    text: "name",
+ *    disabled : false,
+ *    attrs: {
+ *      id: "id",
+ *      value: "value",
+ *    },
+ *    popovers: [
+ *      {
+ *        text: "This is a popover text",
+ *        iconName: "info",
+ *      },
+ *      {
+ *        text: "This is a popover text",
+ *        iconName: "info",
+ *      },
+ *    ],
+ * }
+ *  @param {string} details  - List of details item that contains a text, disabled state, attrs and list of popovers. We can also add a disabled key to disable the item.
+ *  @param {array} [filters=[]] - List of filters to apply on the list of items.
+ *  @param {columns} [columns={"pc": "4", "tablet": "6", "mobile": "12"}] - Determine the position of the items in the grid system.
+ */
 
 const props = defineProps({
   details: {

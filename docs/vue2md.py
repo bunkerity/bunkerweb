@@ -4,6 +4,7 @@ from subprocess import Popen, PIPE
 from typing import List
 from shutil import rmtree
 from re import search
+from traceback import format_exc
 
 outputFilename = "ui-components.md"
 # We want to get path of the folder where our components are
@@ -12,6 +13,7 @@ outputFilename = "ui-components.md"
 inputFolder = abspath("../src/ui/client/dashboard/components")
 outputFolder = abspath("../docs/components")
 outputFile = abspath("../docs")
+components_path_to_exclude = ("components/Icons", "components/Forms/Error", "components/Dashboard", "components/Builder")
 
 
 def run_command(command: List[str]) -> int:
@@ -57,18 +59,30 @@ def vue2js():
     # Create outputFolder if not exists
     Path(outputFolder).mkdir(parents=True, exist_ok=True)
     # Get every subfolders from the input folder
-    print(Path(inputFolder).rglob("*"))
     for folder in Path(inputFolder).rglob("*"):
-        # Get only files
-        if folder.is_file() and folder.suffix == ".vue":
-            # Read the file content
-            data = folder.read_text()
-            # Get only the content between <script setup> and </script> tag
-            script = data.split("<script setup>")[1].split("</script>")[0]
-            # Create a file on the output folder with the same name but with .js extension
-            fileName = folder.name.replace(".vue", ".js")
-            dest = Path(outputFolder) / fileName
-            dest.write_text(script)
+        # Get only vue file
+        if not folder.is_file() or folder.suffix != ".vue":
+            continue
+
+        # Exclude some files
+        if any(folder_path in folder.as_posix() for folder_path in components_path_to_exclude):
+            continue
+
+        # Read the file content
+        data = folder.read_text()
+        # Get only the content between <script setup> and </script> tag
+        script = data.split("<script setup>")[1].split("</script>")[0]
+        # Get index of jsdoc comments
+        first_doc_index_start = script.find("/**")
+        first_doc_index_end = script.find("*/")
+        if first_doc_index_start != -1 and first_doc_index_end != -1:
+            # get content before first_doc_index_end
+            script = script[first_doc_index_start : first_doc_index_end + 2]
+
+        # Create a file on the output folder with the same name but with .js extension
+        fileName = folder.name.replace(".vue", ".js")
+        dest = Path(outputFolder) / fileName
+        dest.write_text(script)
 
 
 def js2md():
@@ -99,49 +113,55 @@ def formatMd():
     files = list(Path(outputFolder).rglob("*"))
 
     for file in files:
-        # Get the title from first line
-        data = file.read_text()
-        # Remove everything after a [1]: tag
-        data = data.split("[1]:")[0]
-        # Remove ### Table of contents
-        data = data.replace("### Table of Contents", "")
-        # Remove everything before the first ## tag
-        index = data.index("## ")
-        data = data[index:]
+        try:
+            # Get the title from first line
+            data = file.read_text()
+            # Remove everything after a [1]: tag
+            data = data.split("[1]:")[0]
+            # Remove ### Table of contents
+            data = data.replace("### Table of Contents", "")
+            # Remove everything before the first ## tag
+            if "## " in data:
+                index = data.index("## ")
+                data = data[index:]
 
-        # I want to loop on each line
-        lines = data.split("\n")
-        line_result = []
-        for line in lines:
-            # remove space (so &#x20 or &#32)
-            line = line.replace("&#x20", "").replace("&#32", "")
+            # I want to loop on each line
+            lines = data.split("\n")
+            line_result = []
+            for line in lines:
+                # remove space (so &#x20 or &#32)
+                line = line.replace("&#x20", "").replace("&#32", "")
 
-            if line.startswith("#") and ".vue" in line and "\.vue" in line:
-                line = line.replace("\.vue", ".vue")
+                if line.startswith("#") and ".vue" in line and "\\.vue" in line:
+                    line = line.replace("\\.vue", ".vue")
 
-            # Case not a param, keep the line as is
-            if not line.startswith("*"):
+                # Case not a param, keep the line as is
+                if not line.startswith("*"):
+                    line_result.append(line)
+                    continue
+
+                # get line without first char
+                line = "-" + line[1:]
+
+                # remove each **[string][num]** pattern in a param by **string**
+                reg = r"\[\w+\]\[\d+\]"
+                while search(reg, line):
+                    # get data of the pattern
+                    pattern = search(reg, line).group()
+                    # get content of first bracket
+                    content = pattern.split("][")[0].replace("[", "")
+                    line = line.replace(pattern, f"{content}")
+
                 line_result.append(line)
-                continue
 
-            # get line without first char
-            line = "-" + line[1:]
-
-            # remove each **[string][num]** pattern in a param by **string**
-            reg = r"\[\w+\]\[\d+\]"
-            while search(reg, line):
-                # get data of the pattern
-                pattern = search(reg, line).group()
-                # get content of first bracket
-                content = pattern.split("][")[0].replace("[", "")
-                line = line.replace(pattern, f"{content}")
-
-            line_result.append(line)
-
-        # I can merge the lines
-        data = "\n".join(line_result)
-        # update the file with the new content
-        file.write_text(data)
+            # I can merge the lines
+            data = "\n".join(line_result)
+            # update the file with the new content
+            file.write_text(data)
+        except BaseException:
+            print(format_exc(), flush=True)
+            print("Error while parsing file", str(file.name), flush=True)
+            exit(1)
 
 
 def mergeMd():

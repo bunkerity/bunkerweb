@@ -8,57 +8,8 @@ import Title from "@components/Widget/Title.vue";
 import { useEqualStr } from "@utils/global.js";
 
 /**
- **  @name Builder/Jobs.vue
+ * @name Builder/Jobs.vue
  * @description This component is lightweight builder containing only the necessary components to create the jobs page.
- * @example
- * [
- *     {
- *         "type": "card",
- *         "containerColumns": {
- *             "pc": 4,
- *             "tablet": 6,
- *             "mobile": 12
- *         },
- *         "widgets": [
- *             {
- *                 "type": "table",
- *                 "data": {
- *                     "title": "jobs_table_title",
- *                     "minWidth": "lg",
- *                     "header": [
- *                         "jobs_table_name",
- *                         "jobs_table_plugin_id",
- *                         "jobs_table_interval",
- *                         "jobs_table_last_run",
- *                         "jobs_table_success",
- *                         "jobs_table_last_run_date",
- *                         "jobs_table_cache"
- *                     ],
- *                     "positions": [
- *                         2,
- *                         2,
- *                         1,
- *                         1,
- *                         1,
- *                         3,
- *                         2
- *                     ],
- *                     "items": [
- *                         [
- *                             {
- *                                 "name": "anonymous-report",
- *                                 "type": "Text",
- *                                 "data": {
- *                                     "text": "anonymous-report"
- *                                 }
- *                             },
- *                         ],
- *                     ]
- *                 }
- *             }
- *         ]
- *     }
- * ]
  * @param {array} builder - Array of containers and widgets
  */
 

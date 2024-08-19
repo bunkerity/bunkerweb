@@ -14,38 +14,6 @@ import { useEqualStr } from "@utils/global.js";
 /**
  * @name Builder/PLugins.vue
  * @description This component is lightweight builder containing only the necessary components to create the plugins page.
- * @example
- * [
- *   {
- *     type: "card",
- *     containerColumns: { pc: 12, tablet: 12, mobile: 12 },
- *     widgets: [
- *     {
- *     type: "Title",
- *     data : {
- *       title: "dashboard_plugins",
- *       type: "card"
- *     },
- *     },
- *       {
- *         type: "ListDetails",
- *         data:   {
- *             text: "Plugin name",
- *             popovers: [
- *               {
- *                 text: "This is a popover text",
- *                 iconName: "info",
- *               },
- *               {
- *                 text: "This is a popover text",
- *                 iconName: "info",
- *               },
- *             ],
- *           },
- *       },
- *     ],
- *   },
- * ];
  * @param {array} builder - Array of containers and widgets
  */
 

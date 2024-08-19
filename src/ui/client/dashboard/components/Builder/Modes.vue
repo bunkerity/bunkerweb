@@ -11,28 +11,6 @@ import { useEqualStr } from "@utils/global.js";
 /**
  * @name Builder/Modes.vue
  * @description This component is lightweight builder containing only the necessary components to create a service mode page.
- * @example
- * [
- *     {
- *       type: "card",
- *       containerColumns: { pc: 12, tablet: 12, mobile: 12 },
- *       widgets: [
- *                 {
- *                   type: "Title",
- *                   data : {
- *                     title: "dashboard_global_config",
- *                     type: "card"
- *                   },
- *                 },
- *                 {
- *                   type: "Raw",
- *                   data: {
- *                     template: {},
- *                   },
- *                 },
- *       ],
- *     },
- * ];
  * @param {array} builder - Array of containers and widgets
  */
 

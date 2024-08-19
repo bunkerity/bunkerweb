@@ -8,26 +8,6 @@ import { useEqualStr } from "@utils/global.js";
 /**
  * @name Builder/Home.vue
  * @description This component is lightweight builder containing only the necessary components to create the home page.
- *@example
- * [
- * {
- *   type: "card",
- *   link : "https://panel.bunkerweb.io/?utm_campaign=self&utm_source=ui"
- *   containerColumns: { pc: 4, tablet: 6, mobile: 12 },
- *   widgets: [
- *     {
- *       type: "Stat",
- *       data: {
- *         title: "home_version",
- *         subtitle: "home_all_features_available" if is_pro_version else "home_upgrade_pro",
- *         subtitleColor: "success" is is_pro_version else "warning",
- *         stat: "home_pro" if is_pro_version else "home_free",
- *         iconName: "crown" if is_pro_version else "core",
- *       },
- *     },
- *   ],
- * },
- * ]
  * @param {array} builder - Array of containers and widgets
  */
 

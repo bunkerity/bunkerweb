@@ -17,8 +17,7 @@ import { useEqualStr } from "@utils/global.js";
 /**
  * @name Builder/Profile.vue
  * @description This component is lightweight builder containing only the necessary components to create the profile page.
- **  @example
- **  @param {array} builder - Array of containers and widgets
+ * @param {array} builder - Array of containers and widgets
  */
 
 const props = defineProps({

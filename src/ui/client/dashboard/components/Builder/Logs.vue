@@ -8,7 +8,7 @@ import Unmatch from "@components/Message/Unmatch.vue";
 import { useEqualStr } from "@utils/global.js";
 
 /**
- **  @name Builder/Logs.vue
+ * @name Builder/Logs.vue
  * @description This component is lightweight builder containing only the necessary components to create the logs page.
  * @param {array} builder - Array of containers and widgets
  */

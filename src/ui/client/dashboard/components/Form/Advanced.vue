@@ -253,7 +253,7 @@ const filters = [
  **  @name filter
  **  @description Get the filter data from the <Filter /> component and store the result in the advanced store.
  *  After that, update some UI states like disabled state.
- **  @param {Object} filterData - The filter data from the <Filter /> component.
+ *  @param {Object} filterData - The filter data from the <Filter /> component.
  **  @returns {void}
  */
 function filter(filterData) {
@@ -295,7 +295,7 @@ function setValidity() {
 /**
  **  @name getFirstPlugin
  **  @description Get the first available plugin in the template.
- **  @param {Object} template - The template object.
+ *  @param {Object} template - The template object.
  **  @returns {string} - The first plugin name.
  */
 function getFirstPlugin(template) {
@@ -309,7 +309,7 @@ function getFirstPlugin(template) {
 /**
  **  @name getPluginNames
  **  @description Get the first available plugin in the template.
- **  @param {Object} template - The template object.
+ *  @param {Object} template - The template object.
  **  @returns {array} - The list of plugin names.
  */
 function getPluginNames(template) {
