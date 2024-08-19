@@ -1,55 +1,25 @@
 #!/usr/bin/env python3
 
-from base64 import b64encode
-from io import BytesIO
 from os.path import join
-from threading import Lock
 from typing import List, Optional
 
 from bcrypt import checkpw, gensalt, hashpw
 from magic import Magic
-from qrcode.main import QRCode
 from regex import compile as re_compile
 
 USER_PASSWORD_RX = re_compile(r"^(?=.*?\p{Lowercase_Letter})(?=.*?\p{Uppercase_Letter})(?=.*?\d)(?=.*?[ !\"#$%&'()*+,./:;<=>?@[\\\]^_`{|}~-]).{8,}$")
-PLUGIN_KEYS = ["id", "name", "description", "version", "stream", "settings"]
-PLUGIN_ID_RX = re_compile(r"^[\w_-]{1,64}$")
-LOCK = Lock()
 
 
-def get_remain(seconds):
-    term = "minute(s)"
-    years, seconds = divmod(seconds, 60 * 60 * 24 * 365)
-    months, seconds = divmod(seconds, 60 * 60 * 24 * 30)
-    while months >= 12:
-        years += 1
-        months -= 12
-    days, seconds = divmod(seconds, 60 * 60 * 24)
-    hours, seconds = divmod(seconds, 60 * 60)
-    minutes, seconds = divmod(seconds, 60)
-    time_parts = []
-    if years > 0:
-        term = "year(s)"
-        time_parts.append(f"{int(years)} year{'' if years == 1 else 's'}")
-    if months > 0:
-        if term == "minute(s)":
-            term = "month(s)"
-        time_parts.append(f"{int(months)} month{'' if months == 1 else 's'}")
-    if days > 0:
-        if term == "minute(s)":
-            term = "day(s)"
-        time_parts.append(f"{int(days)} day{'' if days == 1 else 's'}")
-    if hours > 0:
-        if term == "minute(s)":
-            term = "hour(s)"
-        time_parts.append(f"{int(hours)} hour{'' if hours == 1 else 's'}")
-    if minutes > 0:
-        time_parts.append(f"{int(minutes)} minute{'' if minutes == 1 else 's'}")
+def check_settings(settings: dict, check: str) -> bool:
+    return any(setting["context"] == check for setting in settings.values())
 
-    if len(time_parts) > 1:
-        time_parts[-1] = f"and {time_parts[-1]}"
 
-    return " ".join(time_parts), term
+def gen_password_hash(password: str) -> bytes:
+    return hashpw(password.encode("utf-8"), gensalt(rounds=13))
+
+
+def check_password(password: str, hashed: bytes) -> bool:
+    return checkpw(password.encode("utf-8"), hashed)
 
 
 SHOWN_FILE_TYPES = ("text/plain", "text/html", "text/css", "text/javascript", "application/json", "application/xml")
@@ -209,25 +179,3 @@ def path_to_dict(
                 d["children"][[x["name"] for x in d["children"]].index(conf["plugin_id"])]["children"].append(file_info)
 
     return d
-
-
-def check_settings(settings: dict, check: str) -> bool:
-    return any(setting["context"] == check for setting in settings.values())
-
-
-def gen_password_hash(password: str) -> bytes:
-    return hashpw(password.encode("utf-8"), gensalt(rounds=13))
-
-
-def check_password(password: str, hashed: bytes) -> bool:
-    return checkpw(password.encode("utf-8"), hashed)
-
-
-def get_b64encoded_qr_image(data: str):
-    qr = QRCode(version=1, box_size=10, border=5)
-    qr.add_data(data)
-    qr.make(fit=True)
-    img = qr.make_image(fill_color="#0b5577", back_color="white")
-    buffered = BytesIO()
-    img.save(buffered)
-    return b64encode(buffered.getvalue()).decode("utf-8")

@@ -465,7 +465,6 @@
   "profile_username": "Username",
   "profile_created_method": "Created method",
   "profile_role": "Role",
-  "profile_role_description": "Role description",
   "profile_permissions": "Permissions",
   "profile_creation_date": "Creation date",
   "profile_last_update": "Last update",
@@ -473,5 +472,6 @@
   "profile_account_tab_email": "Email",
   "profile_account_tab_password": "Password",
   "profile_account_form_email_title": "Update email",
-  "profile_account_form_password_title": "Update password"
+  "profile_account_form_password_title": "Update password",
+  "profile_no_recovery_codes": "No recovery codes remaining, please refresh them."
 }

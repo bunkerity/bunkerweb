@@ -30,15 +30,12 @@ from .utils.widgets import (
     title_widget,
     subtitle_widget,
     text_widget,
-    tabulator_widget,
     input_widget,
-    icons_widget,
     regular_widget,
     unmatch_widget,
     pairs_widget,
     image_widget,
 )
-from .utils.table import add_column
 from .utils.format import get_fields_from_field
 from typing import Optional
 
@@ -249,11 +246,14 @@ def totp_enable(
 
     recovery_widgets = []
 
-    if is_recovery_refreshed and (totp_recovery_codes is not None and (isinstance(totp_recovery_codes, list) and len(totp_recovery_codes) > 0)):
+    if is_recovery_refreshed and (totp_recovery_codes is not None and totp_recovery_codes):
         recovery_widgets.append(pairs_widget(pairs=totp_recovery_codes))
 
-    if is_recovery_refreshed and (totp_recovery_codes is None or (isinstance(totp_recovery_codes, list) and len(totp_recovery_codes) == 0)):
+    if is_recovery_refreshed and not totp_recovery_codes:
         recovery_widgets.append(text_widget(text="profile_recovery_codes_refresh_but_not_found", iconName="", iconColor="error"))
+
+    if not is_recovery_refreshed and not totp_recovery_codes:
+        recovery_widgets.append(text_widget(text="profile_no_recovery_codes", iconName="", iconColor="error"))
 
     recovery_widgets.append(
         button_group_widget(
@@ -501,12 +501,10 @@ def fallback_message(msg: str, display: Optional[list] = None) -> dict:
     }
 
 
-def profile_builder(user: Optional[dict] = None) -> list:
+def profile_builder(user: Optional[object] = None, totp_data: Optional[dict] = None) -> list:
 
-    if user is None or (isinstance(user, list) and len(user) == 0):
+    if not user:
         return [fallback_message("profile_user_not_found")]
-
-    totp_data = user.get("totp", None)
 
     totp_form = None
     if totp_data is None or totp_data.get("is_totp", None) is None:
@@ -524,10 +522,20 @@ def profile_builder(user: Optional[dict] = None) -> list:
             is_recovery_refreshed=totp_data.get("is_recovery_refreshed", False),
         )
 
+    user_profile = [
+        {"key": "profile_username", "value": user.get_id()},
+        {"key": "profile_email", "value": user.email or ""},
+        {"key": "profile_created_method", "value": user.method},
+        {"key": "profile_role", "value": user.list_roles[0]},
+        {"key": "profile_permissions", "value": ", ".join(user.list_permissions)},
+        {"key": "profile_creation_date", "value": user.creation_date.strftime("%Y-%m-%d at %H:%M:%S %Z")},
+        {"key": "profile_last_update", "value": user.update_date.strftime("%Y-%m-%d at %H:%M:%S %Z")},
+    ]
+
     return [
         # Tabs is button group with display value and a size tab inside a tabs container
         profile_tabs(),
-        profile_info(user_profile=user.get("profile", None)),
-        profile_account_form(email=user.get("email", "")),
+        profile_info(user_profile=user_profile),
+        profile_account_form(email=user.email or ""),
         totp_form,
     ]

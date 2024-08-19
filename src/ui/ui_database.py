@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from logging import Logger
 from os import sep
 from os.path import join
@@ -47,7 +47,7 @@ class UIDatabase(Database):
 
             if db_version != bunkerweb_version:
                 self.logger.warning(f"UI tables version ({db_version}) is different from BunkerWeb version ({bunkerweb_version}), migrating them ...")
-                current_time = datetime.now()
+                current_time = datetime.now(timezone.utc)
                 error = True
                 while error:
                     try:
@@ -55,7 +55,7 @@ class UIDatabase(Database):
                         metadata.reflect(self.sql_engine)
                         error = False
                     except BaseException as e:
-                        if (datetime.now() - current_time).total_seconds() > 10:
+                        if (datetime.now(timezone.utc) - current_time).total_seconds() > 10:
                             raise e
                         sleep(1)
 

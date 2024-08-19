@@ -45,6 +45,7 @@ COPY src/common/settings.json settings.json
 COPY src/common/utils utils
 COPY src/common/helpers helpers
 COPY src/VERSION VERSION
+COPY src/ui/pages ui/pages
 COPY src/ui/src ui/src
 COPY src/ui/*.py ui/
 COPY --chmod=750 src/ui/entrypoint.sh ui/

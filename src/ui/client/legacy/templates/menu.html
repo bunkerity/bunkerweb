@@ -50,7 +50,7 @@
                 {{ username|truncate(10, True, '...') }}
             </h1>
             <a class="block underline mb-2 text-gray-600 dark:text-gray-400 text-sm text-center hover:brightness-90"
-               href="{% if current_endpoint == 'account' %}#{% else %}{{ url_for("account") }}{% endif %}">manage account
+               href="{% if current_endpoint == 'profile' %}#{% else %}{{ url_for("profile") }}{% endif %}">manage profile
             </a>
         </div>
         <hr class="h-px mt-0 bg-transparent bg-gradient-to-r from-transparent via-black/40 to-transparent dark:bg-gradient-to-r dark:from-transparent dark:via-white dark:to-transparent" />

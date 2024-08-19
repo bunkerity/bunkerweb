@@ -28,7 +28,6 @@ class AnonymousUser(AnonymousUserMixin):
     last_login_ip = None
     login_count = 0
     totp_secret = None
-    totp_refreshed = False
     creation_date = datetime.now(timezone.utc)
     update_date = datetime.now(timezone.utc)
     list_roles = []
@@ -58,7 +57,6 @@ class Users(Base, UserMixin):
 
     # 2FA
     totp_secret = Column(String(256), nullable=True)
-    totp_refreshed = Column(Boolean, nullable=False, default=False)
 
     creation_date = Column(DateTime(), nullable=False, server_default=func.now())
     update_date = Column(DateTime(), nullable=False, server_default=func.now(), onupdate=partial(datetime.now, timezone.utc))

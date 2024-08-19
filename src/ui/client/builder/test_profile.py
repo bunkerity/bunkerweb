@@ -18,7 +18,6 @@ user = {
         {"key": "profile_email", "value": "email"},
         {"key": "profile_created_method", "value": "created_method"},
         {"key": "profile_role", "value": "admin"},
-        {"key": "profile_role_description", "value": "role_description"},
         {"key": "profile_permissions", "value": "read, write, admin"},
         {"key": "profile_creation_date", "value": "date"},
         {"key": "profile_last_update", "value": "date"},
