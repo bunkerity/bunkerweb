@@ -2,8 +2,10 @@ from base64 import b64encode
 from json import dumps
 from math import floor
 
-from flask import Blueprint, current_app, render_template
+from flask import Blueprint, render_template
 from flask_login import login_required
+
+from dependencies import BW_INSTANCES_UTILS
 
 from builder.reports import reports_builder  # type: ignore
 
@@ -13,7 +15,7 @@ reports = Blueprint("reports", __name__)
 @reports.route("/reports", methods=["GET"])
 @login_required
 def reports_page():
-    reports = current_app.bw_instances_utils.get_reports()
+    reports = BW_INSTANCES_UTILS.get_reports()
     reasons = set()
     countries = set()
     methods = set()

@@ -4,9 +4,9 @@ from logging import debug
 from traceback import format_exc
 
 
-def pre_render(app, *args, **kwargs):
+def pre_render(*args, **kwargs):
     try:
-        backup_file = app.db.get_job_cache_file("backup-data", "backup.json")
+        backup_file = kwargs["db"].get_job_cache_file("backup-data", "backup.json")
         debug(f"backup_file: {backup_file}")
 
         data = loads(backup_file or "{}")

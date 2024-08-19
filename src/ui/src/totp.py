@@ -1,25 +1,47 @@
 from base64 import b64encode
 from io import BytesIO
+from json import JSONDecodeError, loads as json_loads
+from os import getenv
 from bcrypt import checkpw
-from typing import Dict, List, Optional, Union
-from flask import Flask
+from typing import List, Optional
 from passlib.totp import TOTP, MalformedTokenError, TokenError, TotpMatch
 from passlib.pwd import genword
 from qrcode import make
 from qrcode.image.svg import SvgImage
 
 from models import Users
+from dependencies import DATA
+from utils import LIB_DIR, LOGGER, stop
+
+
+TOTP_SECRETS = getenv("TOTP_SECRETS", "")
+if TOTP_SECRETS:
+    try:
+        TOTP_SECRETS = json_loads(TOTP_SECRETS)
+    except JSONDecodeError:
+        x = 1
+        tmp_secrets = {}
+        for secret in TOTP_SECRETS.strip().split(" "):
+            if secret:
+                tmp_secrets[x] = secret
+                x += 1
+        TOTP_SECRETS = tmp_secrets.copy()
+        del tmp_secrets
+
+if not TOTP_SECRETS:
+    if not LIB_DIR.joinpath(".totp_secrets.json").is_file():
+        LOGGER.error("The TOTP_SECRETS environment variable is missing and the .totp_secrets.json file is missing, exiting ...")
+        stop(1)
+    TOTP_SECRETS = json_loads(LIB_DIR.joinpath(".totp_secrets.json").read_text(encoding="utf-8"))
 
 
 class Totp:
-    def __init__(self, app: Flask, secrets: Dict[Union[str, int], str]):
+    def __init__(self):
         """Initialize a totp factory.
         secrets are used to encrypt the per-user totp_secret on disk.
         recovery_codes_keys are used to encrypt the per-user recovery codes on disk.
         """
-        # This should be a dict with at least one entry
-        self.app = app
-        self._totp = TOTP.using(secrets=secrets, issuer="BunkerWeb UI")
+        self._totp = TOTP.using(secrets=TOTP_SECRETS, issuer="BunkerWeb UI")
 
     def generate_totp_secret(self) -> str:
         """Create new user-unique totp_secret."""
@@ -73,10 +95,15 @@ class Totp:
 
     def get_last_counter(self, user: Users) -> Optional[int]:
         """Fetch stored last_counter from cache."""
-        return self.app.data.get("totp_last_counter", {}).get(user.get_id())
+        return DATA.get("totp_last_counter", {}).get(user.get_id())
 
     def set_last_counter(self, user: Users, tmatch: TotpMatch) -> None:
         """Cache last_counter."""
-        if "totp_last_counter" not in self.app.data:
-            self.app.data["totp_last_counter"] = {}
-        self.app.data["totp_last_counter"][user.get_id()] = tmatch.counter
+        if "totp_last_counter" not in DATA:
+            DATA["totp_last_counter"] = {}
+        DATA["totp_last_counter"][user.get_id()] = tmatch.counter
+
+
+totp = Totp()
+
+__all__ = ("totp",)

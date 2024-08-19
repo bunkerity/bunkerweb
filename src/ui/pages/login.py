@@ -1,15 +1,17 @@
 from datetime import datetime, timezone
 
-from flask import Blueprint, current_app, flash, redirect, render_template, request, session, url_for
+from flask import Blueprint, flash, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_user
 
+from dependencies import DB
+from utils import LOGGER
 
 login = Blueprint("login", __name__)
 
 
 @login.route("/login", methods=["GET", "POST"])
 def login_page():
-    admin_user = current_app.db.get_ui_user()
+    admin_user = DB.get_ui_user()
     if not admin_user:
         return redirect(url_for("setup.setup_page"))
     elif current_user.is_authenticated:  # type: ignore
@@ -17,9 +19,9 @@ def login_page():
 
     fail = False
     if request.method == "POST" and "username" in request.form and "password" in request.form:
-        current_app.logger.warning(f"Login attempt from {request.remote_addr} with username \"{request.form['username']}\"")
+        LOGGER.warning(f"Login attempt from {request.remote_addr} with username \"{request.form['username']}\"")
 
-        ui_user = current_app.db.get_ui_user(username=request.form["username"])
+        ui_user = DB.get_ui_user(username=request.form["username"])
         if ui_user and ui_user.username == request.form["username"] and ui_user.check_password(request.form["password"]):
             # log the user in
             session["user_agent"] = request.headers.get("User-Agent")
@@ -29,13 +31,13 @@ def login_page():
             ui_user.last_login_ip = request.remote_addr
             ui_user.login_count += 1
 
-            current_app.db.mark_ui_user_login(ui_user.username, ui_user.last_login_at, ui_user.last_login_ip)
+            DB.mark_ui_user_login(ui_user.username, ui_user.last_login_at, ui_user.last_login_ip)
 
             if not login_user(ui_user, remember=request.form.get("remember") == "on"):
                 flash("Couldn't log you in, please try again", "error")
                 return (render_template("login.html", error="Couldn't log you in, please try again"),)
 
-            current_app.logger.info(
+            LOGGER.info(
                 f"User {ui_user.username} logged in successfully for the {str(ui_user.login_count) + ('th' if 10 <= ui_user.login_count % 100 <= 20 else {1: 'st', 2: 'nd', 3: 'rd'}.get(ui_user.login_count % 10, 'th'))} time"
                 + (" with remember me" if request.form.get("remember") == "on" else "")
             )

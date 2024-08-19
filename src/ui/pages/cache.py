@@ -1,8 +1,9 @@
 from os.path import join, sep
 
-from flask import Blueprint, current_app, render_template
+from flask import Blueprint, render_template
 from flask_login import login_required
 
+from dependencies import BW_CONFIG, DB
 from utils import path_to_dict
 
 
@@ -18,10 +19,8 @@ def cache_page():  # TODO: refactor this function
             path_to_dict(
                 join(sep, "var", "cache", "bunkerweb"),
                 is_cache=True,
-                db_data=current_app.db.get_jobs_cache_files(),
-                services=current_app.bw_config.get_config(global_only=True, methods=False, filtered_settings=("SERVER_NAME",))
-                .get("SERVER_NAME", "")
-                .split(" "),
+                db_data=DB.get_jobs_cache_files(),
+                services=BW_CONFIG.get_config(global_only=True, methods=False, filtered_settings=("SERVER_NAME",)).get("SERVER_NAME", "").split(" "),
             )
         ],
     )

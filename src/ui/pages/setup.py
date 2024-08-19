@@ -4,8 +4,9 @@ from string import ascii_letters, digits
 from threading import Thread
 from time import time
 
-from flask import Blueprint, Response, current_app, flash, redirect, render_template, request, url_for
+from flask import Blueprint, Response, flash, redirect, render_template, request, url_for
 
+from dependencies import BW_CONFIG, DATA, DB
 from utils import USER_PASSWORD_RX, gen_password_hash
 
 from pages.utils import REVERSE_PROXY_PATH, handle_error, manage_bunkerweb
@@ -15,9 +16,9 @@ setup = Blueprint("setup", __name__)
 
 @setup.route("/setup", methods=["GET", "POST"])
 def setup_page():
-    db_config = current_app.bw_config.get_config(methods=False, filtered_settings=("SERVER_NAME", "MULTISITE", "USE_UI", "UI_HOST", "AUTO_LETS_ENCRYPT"))
+    db_config = BW_CONFIG.get_config(methods=False, filtered_settings=("SERVER_NAME", "MULTISITE", "USE_UI", "UI_HOST", "AUTO_LETS_ENCRYPT"))
 
-    admin_user = current_app.db.get_ui_user()
+    admin_user = DB.get_ui_user()
 
     ui_reverse_proxy = False
     for server_name in db_config["SERVER_NAME"].split(" "):
@@ -28,7 +29,7 @@ def setup_page():
             break
 
     if request.method == "POST":
-        if current_app.db.readonly:
+        if DB.readonly:
             return handle_error("Database is in read-only mode", "setup")
 
         required_keys = []
@@ -53,9 +54,7 @@ def setup_page():
                     "setup",
                 )
 
-            ret = current_app.db.create_ui_user(
-                request.form["admin_username"], gen_password_hash(request.form["admin_password"]), ["admin"], method="ui", admin=True
-            )
+            ret = DB.create_ui_user(request.form["admin_username"], gen_password_hash(request.form["admin_password"]), ["admin"], method="ui", admin=True)
             if ret:
                 return handle_error(f"Couldn't create the admin user in the database: {ret}", "setup", False, "error")
 
@@ -73,8 +72,8 @@ def setup_page():
             if not REVERSE_PROXY_PATH.match(request.form["ui_host"]):
                 return handle_error("The hostname is not valid.", "setup")
 
-            current_app.data["RELOADING"] = True
-            current_app.data["LAST_RELOAD"] = time()
+            DATA["RELOADING"] = True
+            DATA["LAST_RELOAD"] = time()
 
             config = {
                 "SERVER_NAME": request.form["server_name"],
@@ -95,7 +94,7 @@ def setup_page():
                 config["SELF_SIGNED_SSL_SUBJ"] = f"/CN={request.form['server_name']}/"
 
             if not config.get("MULTISITE", "no") == "yes":
-                current_app.bw_config.edit_global_conf({"MULTISITE": "yes"}, check_changes=False)
+                BW_CONFIG.edit_global_conf({"MULTISITE": "yes"}, check_changes=False)
 
             # deepcode ignore MissingAPI: We don't need to check to wait for the thread to finish
             Thread(

@@ -3,10 +3,12 @@ from json import dumps
 from threading import Thread
 from time import time
 from typing import Literal
-from flask import Blueprint, current_app, redirect, render_template, request, url_for
+from flask import Blueprint, redirect, render_template, request, url_for
 from flask_login import login_required
 
 from builder.instances import instances_builder  # type: ignore
+
+from dependencies import BW_CONFIG, BW_INSTANCES_UTILS, DATA, DB
 
 from pages.utils import handle_error, manage_bunkerweb, verify_data_in_form
 
@@ -22,7 +24,7 @@ def instances_page():
     instances_methods = set()
     instances_healths = set()
 
-    for instance in current_app.bw_instances_utils.get_instances():
+    for instance in BW_INSTANCES_UTILS.get_instances():
         instances.append(
             {
                 "hostname": instance.hostname,
@@ -65,7 +67,7 @@ def instances_new():
         next=True,
     )
 
-    db_config = current_app.bw_config.get_config(global_only=True, methods=False, filtered_settings=("API_HTTP_PORT", "API_SERVER_NAME"))
+    db_config = BW_CONFIG.get_config(global_only=True, methods=False, filtered_settings=("API_HTTP_PORT", "API_SERVER_NAME"))
 
     instance = {
         "hostname": request.form["instance_hostname"].replace("http://", "").replace("https://", ""),
@@ -75,11 +77,11 @@ def instances_new():
         "method": "ui",
     }
 
-    for db_instance in current_app.bw_instances_utils.get_instances():
+    for db_instance in BW_INSTANCES_UTILS.get_instances():
         if db_instance.hostname == instance["hostname"]:
             return handle_error(f"The hostname {instance['hostname']} is already in use.", "instances", True)
 
-    ret = current_app.db.add_instance(**instance)
+    ret = DB.add_instance(**instance)
     if ret:
         return handle_error(f"Couldn't create the instance in the database: {ret}", "instances", True)
 
@@ -97,7 +99,7 @@ def instances_delete(instance_hostname: str):
     )
 
     delete_instance = None
-    for instance in current_app.bw_instances_utils.get_instances():
+    for instance in BW_INSTANCES_UTILS.get_instances():
         if instance.hostname == instance_hostname:
             delete_instance = instance
             break
@@ -107,7 +109,7 @@ def instances_delete(instance_hostname: str):
     if delete_instance.method != "ui":
         return handle_error(f"Instance {instance_hostname} is not a UI instance.", "instances", True)
 
-    ret = current_app.db.delete_instance(instance_hostname)
+    ret = DB.delete_instance(instance_hostname)
     if ret:
         return handle_error(f"Couldn't delete the instance in the database: {ret}", "instances", True)
 
@@ -124,8 +126,8 @@ def instances_action(action: Literal["ping", "reload", "stop"]):  # TODO: see if
         next=True,
     )
 
-    current_app.data["RELOADING"] = True
-    current_app.data["LAST_RELOAD"] = time()
+    DATA["RELOADING"] = True
+    DATA["LAST_RELOAD"] = time()
     Thread(
         target=manage_bunkerweb,
         name=f"Reloading instance {request.form['instance_hostname']}",

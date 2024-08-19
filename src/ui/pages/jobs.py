@@ -2,11 +2,13 @@ from base64 import b64encode
 from io import BytesIO
 from json import dumps
 
-from flask import Blueprint, current_app, jsonify, render_template, request, send_file
+from flask import Blueprint, jsonify, render_template, request, send_file
 from flask_login import login_required
 from werkzeug.utils import secure_filename
 
 from builder.jobs import jobs_builder  # type: ignore
+
+from dependencies import DB
 
 jobs = Blueprint("jobs", __name__)
 
@@ -14,7 +16,7 @@ jobs = Blueprint("jobs", __name__)
 @jobs.route("/jobs", methods=["GET"])
 @login_required
 def jobs_page():
-    builder = jobs_builder(current_app.db.get_jobs())
+    builder = jobs_builder(DB.get_jobs())
     return render_template("jobs.html", data_server_builder=b64encode(dumps(builder).encode("utf-8")).decode("ascii"))
 
 
@@ -29,7 +31,7 @@ def jobs_download():
     if not plugin_id or not job_name or not file_name:
         return jsonify({"status": "ko", "message": "plugin_id, job_name and file_name are required"}), 422
 
-    cache_file = current_app.db.get_job_cache_file(job_name, file_name, service_id=service_id, plugin_id=plugin_id)
+    cache_file = DB.get_job_cache_file(job_name, file_name, service_id=service_id, plugin_id=plugin_id)
 
     if not cache_file:
         return jsonify({"status": "ko", "message": "file not found"}), 404

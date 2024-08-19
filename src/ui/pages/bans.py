@@ -4,11 +4,14 @@ from json import dumps, loads as json_loads
 from math import floor
 from time import time
 
-from flask import Blueprint, current_app, flash, redirect, render_template, request, url_for
+from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import login_required
 from redis import Redis, Sentinel
 
 from builder.bans import bans_builder  # type: ignore
+
+from dependencies import BW_CONFIG, BW_INSTANCES_UTILS, DB
+from utils import LOGGER
 
 from pages.utils import get_remain, handle_error, verify_data_in_form
 
@@ -20,7 +23,7 @@ bans = Blueprint("bans", __name__)
 def bans_page():
     if request.method == "POST":
 
-        if current_app.db.readonly:
+        if DB.readonly:
             return handle_error("Database is in read-only mode", "bans")
 
         # Check variables
@@ -28,7 +31,7 @@ def bans_page():
         verify_data_in_form(data={"data": None}, err_message="Missing data parameter on /bans.", redirect_url="bans")
 
     redis_client = None
-    db_config = current_app.bw_config.get_config(
+    db_config = BW_CONFIG.get_config(
         global_only=True,
         methods=False,
         filtered_settings=(
@@ -131,7 +134,7 @@ def bans_page():
                 unban = json_loads(unban.replace('"', '"').replace("'", '"'))
             except BaseException:
                 flash(f"Invalid unban: {unban}, skipping it ...", "error")
-                current_app.logger.exception(f"Couldn't unban {unban['ip']}")
+                LOGGER.exception(f"Couldn't unban {unban['ip']}")
                 continue
 
             if "ip" not in unban:
@@ -142,7 +145,7 @@ def bans_page():
                 if not redis_client.delete(f"bans_ip_{unban['ip']}"):
                     flash(f"Couldn't unban {unban['ip']} on redis", "error")
 
-            resp = current_app.bw_instances_utils.unban(unban["ip"])
+            resp = BW_INSTANCES_UTILS.unban(unban["ip"])
             if resp:
                 flash(f"Couldn't unban {unban['ip']} on the following instances: {', '.join(resp)}", "error")
             else:
@@ -173,7 +176,7 @@ def bans_page():
                     flash(f"Couldn't ban {ban['ip']} on redis", "error")
                 redis_client.expire(f"bans_ip_{ban['ip']}", int(ban_end))
 
-            resp = current_app.bw_instances_utils.ban(ban["ip"], ban_end, reason)
+            resp = BW_INSTANCES_UTILS.ban(ban["ip"], ban_end, reason)
             if resp:
                 flash(f"Couldn't ban {ban['ip']} on the following instances: {', '.join(resp)}", "error")
             else:
@@ -190,7 +193,7 @@ def bans_page():
                 continue
             exp = redis_client.ttl(key)
             bans.append({"ip": ip, "exp": exp} | json_loads(data))  # type: ignore
-    instance_bans = current_app.bw_instances_utils.get_bans()
+    instance_bans = BW_INSTANCES_UTILS.get_bans()
 
     # Prepare data
     timestamp_now = time()

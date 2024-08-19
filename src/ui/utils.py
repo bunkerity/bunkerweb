@@ -1,13 +1,45 @@
 #!/usr/bin/env python3
 
-from os.path import join
+from os import _exit, getenv
+from os.path import join, sep
+from pathlib import Path
+from subprocess import PIPE, Popen, call
 from typing import List, Optional
 
 from bcrypt import checkpw, gensalt, hashpw
 from magic import Magic
 from regex import compile as re_compile
 
+from logger import setup_logger  # type: ignore
+
+TMP_DIR = Path(sep, "var", "tmp", "bunkerweb")
+LIB_DIR = Path(sep, "var", "lib", "bunkerweb")
+
+LOGGER = setup_logger("UI", getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")))
+
 USER_PASSWORD_RX = re_compile(r"^(?=.*?\p{Lowercase_Letter})(?=.*?\p{Uppercase_Letter})(?=.*?\d)(?=.*?[ !\"#$%&'()*+,./:;<=>?@[\\\]^_`{|}~-]).{8,}$")
+PLUGIN_NAME_RX = re_compile(r"^[\w.-]{4,64}$")
+
+
+def stop_gunicorn():
+    p = Popen(["pgrep", "-f", "gunicorn"], stdout=PIPE)
+    out, _ = p.communicate()
+    pid = out.strip().decode().split("\n")[0]
+    call(["kill", "-SIGTERM", pid])
+
+
+def stop(status, _stop=True):
+    Path(sep, "var", "run", "bunkerweb", "ui.pid").unlink(missing_ok=True)
+    TMP_DIR.joinpath("ui.healthy").unlink(missing_ok=True)
+    if _stop is True:
+        stop_gunicorn()
+    _exit(status)
+
+
+def handle_stop(signum, frame):
+    LOGGER.info("Caught stop operation")
+    LOGGER.info("Stopping web ui ...")
+    stop(0, False)
 
 
 def check_settings(settings: dict, check: str) -> bool:

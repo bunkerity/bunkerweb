@@ -2,7 +2,7 @@ from base64 import b64encode
 from json import dumps
 from os.path import basename
 
-from flask import Blueprint, current_app, render_template
+from flask import Blueprint, render_template
 from flask_login import login_required
 from requests import get
 
@@ -10,6 +10,7 @@ from common_utils import get_version  # type: ignore
 
 from builder.home import home_builder  # type: ignore
 
+from dependencies import BW_CONFIG, BW_INSTANCES_UTILS, DB
 
 home = Blueprint("home", __name__)
 
@@ -37,8 +38,8 @@ def home_page():
     if r and r.status_code == 200:
         remote_version = basename(r.url).strip().replace("v", "")
 
-    config = current_app.bw_config.get_config(with_drafts=True, filtered_settings=("SERVER_NAME",))
-    instances = current_app.bw_instances_utils.get_instances()
+    config = BW_CONFIG.get_config(with_drafts=True, filtered_settings=("SERVER_NAME",))
+    instances = BW_INSTANCES_UTILS.get_instances()
 
     instance_health_count = 0
 
@@ -62,7 +63,7 @@ def home_page():
             services_autoconf_count += 1
         services += 1
 
-    metadata = current_app.db.get_metadata()
+    metadata = DB.get_metadata()
 
     data = {
         "check_version": not remote_version or get_version() == remote_version,
@@ -78,8 +79,8 @@ def home_page():
         "pro_status": metadata["pro_status"],
         "pro_services": metadata["pro_services"],
         "pro_overlapped": metadata["pro_overlapped"],
-        "plugins_number": len(current_app.bw_config.get_plugins()),
-        "plugins_errors": current_app.db.get_plugins_errors(),
+        "plugins_number": len(BW_CONFIG.get_plugins()),
+        "plugins_errors": DB.get_plugins_errors(),
     }
 
     builder = home_builder(data)

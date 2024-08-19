@@ -3,7 +3,7 @@ from traceback import format_exc
 
 def pre_render(**kwargs):
     try:
-        data = kwargs["app"].bw_instances_utils.get_metrics("country")
+        data = kwargs["bw_instances_utils"].get_metrics("country")
         return {
             "counter_failed_country": {
                 "value": data.get("counter_failed_country", 0),

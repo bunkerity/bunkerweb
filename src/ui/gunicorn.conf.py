@@ -7,7 +7,6 @@ from secrets import token_urlsafe
 from sys import exit, path as sys_path
 from time import sleep
 
-
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("api",), ("db",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
@@ -55,6 +54,8 @@ def on_starting(server):
     TMP_DIR.mkdir(parents=True, exist_ok=True)
     RUN_DIR.mkdir(parents=True, exist_ok=True)
     LIB_DIR.mkdir(parents=True, exist_ok=True)
+
+    TMP_DIR.joinpath("ui_data.json").write_text("{}", encoding="utf-8")
 
     LOGGER = setup_logger("UI", getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")))
 
@@ -191,3 +192,4 @@ def on_exit(server):
     RUN_DIR.joinpath("ui.pid").unlink(missing_ok=True)
     TMP_DIR.joinpath("ui.healthy").unlink(missing_ok=True)
     TMP_DIR.joinpath(".flask_secret").unlink(missing_ok=True)
+    TMP_DIR.joinpath("ui_data.json").unlink(missing_ok=True)

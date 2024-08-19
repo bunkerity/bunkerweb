@@ -32,7 +32,7 @@ INTEGRATIONS_ENUM = Enum(
     name="integrations_enum",
 )
 STREAM_TYPES_ENUM = Enum("no", "yes", "partial", name="stream_types_enum")
-PLUGIN_TYPES_ENUM = Enum("core", "external", "pro", name="plugin_types_enum")
+PLUGIN_TYPES_ENUM = Enum("core", "external", "ui", "pro", name="plugin_types_enum")
 PRO_STATUS_ENUM = Enum("active", "invalid", "expired", "suspended", name="pro_status_enum")
 INSTANCE_TYPE_ENUM = Enum("static", "container", "pod", name="instance_type_enum")
 INSTANCE_STATUS_ENUM = Enum("loading", "up", "down", name="instance_status_enum")

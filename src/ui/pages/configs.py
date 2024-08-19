@@ -2,10 +2,12 @@ from copy import deepcopy
 from os.path import join, sep
 
 from bs4 import BeautifulSoup
-from flask import Blueprint, current_app, flash, redirect, render_template, request, url_for
+from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import login_required
 
-from utils import path_to_dict
+from dependencies import BW_CONFIG, DATA, DB
+from utils import LOGGER, PLUGIN_NAME_RX, path_to_dict
+
 from pages.utils import handle_error, verify_data_in_form
 
 
@@ -15,10 +17,10 @@ configs = Blueprint("configs", __name__)
 @configs.route("/configs", methods=["GET", "POST"])
 @login_required
 def configs_page():  # TODO: refactor this function
-    db_configs = current_app.db.get_custom_configs()
+    db_configs = DB.get_custom_configs()
 
     if request.method == "POST":
-        if current_app.db.readonly:
+        if DB.readonly:
             return handle_error("Database is in read-only mode", "configs")
 
         operation = ""
@@ -39,10 +41,10 @@ def configs_page():  # TODO: refactor this function
 
         # TODO: revamp this to use a path but a form to edit the content
 
-        operation = current_app.bw_custom_configs.check_path(variables["path"])
+        # operation = BW_CUSTOM_CONFIGS.check_path(variables["path"])
 
-        if operation:
-            return handle_error(operation, "configs", True)
+        # if operation:
+        #     return handle_error(operation, "configs", True)
 
         old_name = variables.get("old_name", "").replace(".conf", "")
         name = variables.get("name", old_name).replace(".conf", "")
@@ -69,7 +71,7 @@ def configs_page():  # TODO: refactor this function
 
         # New or edit a config
         if request.form["operation"] in ("new", "edit"):
-            if not current_app.bw_custom_configs.check_name(name):
+            if not PLUGIN_NAME_RX.match(name):
                 return handle_error(
                     f"Invalid {variables['type']} name. (Can only contain numbers, letters, underscores, dots and hyphens (min 4 characters and max 64))",
                     "configs",
@@ -107,12 +109,12 @@ def configs_page():  # TODO: refactor this function
             del db_configs[index]
             operation = f"Deleted config {name}{f' for service {service_id}' if service_id else ''}"
 
-        error = current_app.db.save_custom_configs([config for config in db_configs if config["method"] == "ui"], "ui")
+        error = DB.save_custom_configs([config for config in db_configs if config["method"] == "ui"], "ui")
         if error:
-            current_app.logger.error(f"Could not save custom configs: {error}")
+            LOGGER.error(f"Could not save custom configs: {error}")
             return handle_error("Couldn't save custom configs", "configs", True)
 
-        current_app.data["CONFIG_CHANGED"] = True
+        DATA["CONFIG_CHANGED"] = True
 
         flash(operation)
 
@@ -124,9 +126,7 @@ def configs_page():  # TODO: refactor this function
             path_to_dict(
                 join(sep, "etc", "bunkerweb", "configs"),
                 db_data=db_configs,
-                services=current_app.bw_config.get_config(global_only=True, methods=False, filtered_settings=("SERVER_NAME",))
-                .get("SERVER_NAME", "")
-                .split(" "),
+                services=BW_CONFIG.get_config(global_only=True, methods=False, filtered_settings=("SERVER_NAME",)).get("SERVER_NAME", "").split(" "),
             )
         ],
     )

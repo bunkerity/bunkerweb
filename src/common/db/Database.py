@@ -2078,7 +2078,9 @@ class Database:
 
         return ""
 
-    def update_external_plugins(self, plugins: List[Dict[str, Any]], *, _type: Literal["external", "pro"] = "external", delete_missing: bool = True) -> str:
+    def update_external_plugins(
+        self, plugins: List[Dict[str, Any]], *, _type: Literal["external", "ui", "pro"] = "external", delete_missing: bool = True
+    ) -> str:
         """Update external plugins from the database"""
         to_put = []
         changes = False
@@ -2867,6 +2869,38 @@ class Database:
             except BaseException as e:
                 return str(e)
 
+        return ""
+
+    def delete_plugin(self, plugin_id: str, method: str) -> str:
+        """Delete a plugin from the database."""
+        with self._db_session() as session:
+            plugin = session.query(Plugins).filter_by(id=plugin_id, method=method).first()
+            if not plugin:
+                return f"Plugin with id {plugin_id} and method {method} not found"
+
+            session.query(Plugins).filter_by(id=plugin_id, method=method).delete()
+            session.query(Settings).filter_by(plugin_id=plugin_id).delete()
+            session.query(Selects).filter(Selects.setting_id.in_(session.query(Settings).filter_by(plugin_id=plugin_id).with_entities(Settings.id))).delete()
+            session.query(Jobs).filter_by(plugin_id=plugin_id).delete()
+            session.query(Jobs_cache).filter_by(plugin_id=plugin_id).delete()
+            session.query(Jobs_runs).filter_by(plugin_id=plugin_id).delete()
+            session.query(Plugin_pages).filter_by(plugin_id=plugin_id).delete()
+            session.query(Bw_cli_commands).filter_by(plugin_id=plugin_id).delete()
+            session.query(Templates).filter_by(plugin_id=plugin_id).delete()
+            session.query(Template_steps).filter(
+                Template_steps.template_id.in_(session.query(Templates).filter_by(plugin_id=plugin_id).with_entities(Templates.id))
+            ).delete()
+            session.query(Template_settings).filter(
+                Template_settings.template_id.in_(session.query(Templates).filter_by(plugin_id=plugin_id).with_entities(Templates.id))
+            ).delete()
+            session.query(Template_custom_configs).filter(
+                Template_custom_configs.template_id.in_(session.query(Templates).filter_by(plugin_id=plugin_id).with_entities(Templates.id))
+            ).delete()
+
+            try:
+                session.commit()
+            except BaseException as e:
+                return str(e)
         return ""
 
     def get_plugins(self, *, _type: Literal["all", "external", "pro"] = "all", with_data: bool = False) -> List[Dict[str, Any]]:

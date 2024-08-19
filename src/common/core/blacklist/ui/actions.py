@@ -11,7 +11,7 @@ def pre_render(**kwargs):
     }
 
     try:
-        data = kwargs["app"].bw_instances_utils.get_metrics("blacklist")
+        data = kwargs["bw_instances_utils"].get_metrics("blacklist")
         for key in metrics:
             metrics[key]["value"] = data.get(key, 0)
         return metrics

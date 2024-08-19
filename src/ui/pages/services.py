@@ -1,13 +1,14 @@
 from base64 import b64encode
 from json import dumps
 
-from flask import Blueprint, current_app, redirect, render_template, request, url_for
+from flask import Blueprint, redirect, render_template, request, url_for
 from flask_login import login_required
 
 from builder.services import services_builder  # type: ignore
 
-from pages.utils import get_service_data, handle_error, update_service
+from dependencies import DB
 
+from pages.utils import get_service_data, handle_error, update_service
 
 services = Blueprint("services", __name__)
 
@@ -16,7 +17,7 @@ services = Blueprint("services", __name__)
 @login_required
 def services_page():
     if request.method == "POST":
-        if current_app.db.readonly:
+        if DB.readonly:
             return handle_error("Database is in read-only mode", "services")
 
         config, variables, format_configs, server_name, old_server_name, operation, is_draft, was_draft, is_draft_unchanged, mode = get_service_data("services")
@@ -27,7 +28,7 @@ def services_page():
 
     # Display services
     services = []
-    tmp_config = current_app.db.get_config(methods=True, with_drafts=True).copy()
+    tmp_config = DB.get_config(methods=True, with_drafts=True).copy()
     service_names = tmp_config["SERVER_NAME"]["value"].split(" ")
 
     table_settings = (

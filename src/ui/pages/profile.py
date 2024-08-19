@@ -2,15 +2,17 @@ from base64 import b64encode
 from json import dumps
 from threading import Thread
 from time import time
-from flask import Blueprint, current_app, flash, redirect, render_template, request, url_for, session
+from flask import Blueprint, flash, redirect, render_template, request, url_for, session
 from flask_login import current_user, login_required, logout_user
 
 from builder.profile import profile_builder  # type: ignore
 
-from utils import USER_PASSWORD_RX, gen_password_hash
+from src.totp import totp as TOTP
+
+from dependencies import BW_CONFIG, DATA, DB
+from utils import LOGGER, USER_PASSWORD_RX, gen_password_hash
 
 from pages.utils import handle_error, manage_bunkerweb, verify_data_in_form, wait_applying
-
 
 profile = Blueprint("profile", __name__)
 
@@ -20,7 +22,7 @@ profile = Blueprint("profile", __name__)
 def profile_page():
     totp_recovery_codes = None
     if request.method == "POST":
-        if current_app.db.readonly:
+        if DB.readonly:
             return handle_error("Database is in read-only mode", "profile")
 
         verify_data_in_form(
@@ -38,18 +40,18 @@ def profile_page():
 
             variables = {"PRO_LICENSE_KEY": request.form["license"]}
 
-            variables = current_app.bw_config.check_variables(variables, {"PRO_LICENSE_KEY": request.form["license"]})
+            variables = BW_CONFIG.check_variables(variables, {"PRO_LICENSE_KEY": request.form["license"]})
 
             if not variables:
                 return handle_error("The license key variable checks returned error", "profile", True)
 
             # Force job to contact PRO API
             # by setting the last check to None
-            metadata = current_app.db.get_metadata()
+            metadata = DB.get_metadata()
             metadata["last_pro_check"] = None
-            current_app.db.set_pro_metadata(metadata)
+            DB.set_pro_metadata(metadata)
 
-            curr_changes = current_app.db.check_changes()
+            curr_changes = DB.check_changes()
 
             # Reload instances
             def update_global_config(threaded: bool = False):
@@ -58,16 +60,16 @@ def profile_page():
                 if not manage_bunkerweb("global_config", variables, threaded=threaded):
                     message = "Checking license key to upgrade."
                     if threaded:
-                        current_app.data["TO_FLASH"].append({"content": message, "type": "success"})
+                        DATA["TO_FLASH"].append({"content": message, "type": "success"})
                     else:
                         flash(message)
 
-            current_app.data["PRO_LOADING"] = True
-            current_app.data["CONFIG_CHANGED"] = True
+            DATA["PRO_LOADING"] = True
+            DATA["CONFIG_CHANGED"] = True
 
             if any(curr_changes.values()):
-                current_app.data["RELOADING"] = True
-                current_app.data["LAST_RELOAD"] = time()
+                DATA["RELOADING"] = True
+                DATA["LAST_RELOAD"] = time()
                 Thread(target=update_global_config, args=(True,)).start()
             else:
                 update_global_config()
@@ -119,25 +121,25 @@ def profile_page():
         if request.form["operation"] == "totp":
             verify_data_in_form(data={"totp_token": None}, err_message="Missing totp token parameter on /account.", redirect_url="profile")
 
-            if not current_app.totp.verify_totp(
+            if not TOTP.verify_totp(
                 request.form["totp_token"], totp_secret=session.get("tmp_totp_secret", ""), user=current_user
-            ) and not current_app.totp.verify_recovery_code(request.form["totp_token"], user=current_user):
+            ) and not TOTP.verify_recovery_code(request.form["totp_token"], user=current_user):
                 return handle_error("The totp token is invalid. (totp)", "profile")
 
             session["totp_validated"] = not bool(current_user.totp_secret)
             totp_secret = None if bool(current_user.totp_secret) else session.pop("tmp_totp_secret", "")
 
             if totp_secret and totp_secret != current_user.totp_secret:
-                totp_recovery_codes = current_app.totp.generate_recovery_codes()
+                totp_recovery_codes = TOTP.generate_recovery_codes()
                 flash(
                     "The recovery codes have been refreshed.\nPlease save them in a safe place. They will not be displayed again."
                     + "\n".join(totp_recovery_codes),
                     "info",
                 )  # TODO: Remove this when we have a way to display the recovery codes
 
-            current_app.logger.debug(f"totp recovery codes: {totp_recovery_codes or current_user.list_recovery_codes}")
+            LOGGER.debug(f"totp recovery codes: {totp_recovery_codes or current_user.list_recovery_codes}")
 
-        ret = current_app.db.update_ui_user(
+        ret = DB.update_ui_user(
             username,
             gen_password_hash(password),
             totp_secret,
@@ -159,8 +161,8 @@ def profile_page():
 
     totp_qr_image = ""
     if not bool(current_user.totp_secret):
-        session["tmp_totp_secret"] = current_app.totp.generate_totp_secret()
-        totp_qr_image = current_app.totp.generate_qrcode(current_user.get_id(), session["tmp_totp_secret"])
+        session["tmp_totp_secret"] = TOTP.generate_totp_secret()
+        totp_qr_image = TOTP.generate_qrcode(current_user.get_id(), session["tmp_totp_secret"])
 
     builder = profile_builder(
         current_user if current_user.is_authenticated else None,
@@ -169,7 +171,7 @@ def profile_page():
             "totp_image": totp_qr_image,
             "totp_recovery_codes": totp_recovery_codes or current_user.list_recovery_codes,
             "is_recovery_refreshed": bool(totp_recovery_codes),
-            "totp_secret": current_app.totp.get_totp_pretty_key(session.get("tmp_totp_secret", "")),
+            "totp_secret": TOTP.get_totp_pretty_key(session.get("tmp_totp_secret", "")),
         },
     )
 
