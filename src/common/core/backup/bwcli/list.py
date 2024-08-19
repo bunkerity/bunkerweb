@@ -23,7 +23,7 @@ try:
         for backup in backups:
             database = backup.name.split("-")[1]
             date = datetime.strptime("-".join(backup.stem.split("-")[2:]), "%Y-%m-%d_%H-%M-%S")
-            message += f"\n| {database:<10} | {date.strftime('%d/%m/%Y %H:%M:%S')} |"
+            message += f"\n| {database:<10} | {date.strftime('%Y/%m/%d %H:%M:%S %Z')} |"
         message += "\n+------------+---------------------+"
     else:
         message = f"No backup found in {BACKUP_DIR}"

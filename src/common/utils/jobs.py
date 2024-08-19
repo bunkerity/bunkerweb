@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from io import BytesIO
 from logging import Logger
 from os import getenv
@@ -144,7 +144,7 @@ class Job:
         try:
             cache_info = self.get_cache(name, job_name=job_name, service_id=service_id, plugin_id=plugin_id, with_info=True, with_data=False)
             if isinstance(cache_info, dict):
-                current_time = datetime.now().timestamp()
+                current_time = datetime.now(timezone.utc).timestamp()
                 if current_time < cache_info["last_update"]:
                     return False
                 is_cached = current_time - cache_info["last_update"] < EXPIRE_TIME[expire]

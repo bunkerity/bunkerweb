@@ -12,7 +12,7 @@ def pre_render(app, *args, **kwargs):
         data = loads(backup_file or "{}")
 
         if data.get("date", None):
-            data["date"] = datetime.fromisoformat(data["date"]).strftime("%Y-%m-%d %H:%M:%S")
+            data["date"] = datetime.fromisoformat(data["date"]).strftime("%Y-%m-%d %H:%M:%S %Z")
 
         return data
     except BaseException:

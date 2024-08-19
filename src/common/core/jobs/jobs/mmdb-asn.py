@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 from gzip import decompress
 from io import BytesIO
 from os import getenv, sep
@@ -62,7 +62,7 @@ try:
 
             if response and response.status_code == 200:
                 skip_dl = response.content.find(bytes_hash(job_cache["data"], algorithm="sha1").encode()) != -1
-            elif job_cache["last_update"] < (datetime.now() - timedelta(weeks=1)).timestamp():
+            elif job_cache["last_update"] < (datetime.now(timezone.utc) - timedelta(weeks=1)).timestamp():
                 LOGGER.warning("Unable to check if the cache file is the latest version from db-ip.com and file is older than 1 week, checking anyway...")
                 skip_dl = False
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from json import dumps, loads
 from os import getenv, sep
 from os.path import join
@@ -35,7 +35,7 @@ try:
     if last_backup_date:
         last_backup_date = datetime.fromisoformat(last_backup_date)
 
-    current_time = datetime.now()
+    current_time = datetime.now(timezone.utc)
     backup_period = getenv("BACKUP_SCHEDULE", "daily")
     PERIOD_STAMPS = {
         "daily": timedelta(days=1).total_seconds(),

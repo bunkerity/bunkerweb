@@ -2,7 +2,7 @@
 
 from contextlib import suppress
 from copy import deepcopy
-from datetime import datetime
+from datetime import datetime, timezone
 from functools import partial
 from glob import glob
 from json import loads
@@ -162,7 +162,7 @@ class JobScheduler(ApiCaller):
         self.__logger.info(f"Executing job {name} from plugin {plugin} ...")
         success = True
         ret = -1
-        start_date = datetime.now()
+        start_date = datetime.now(timezone.utc)
         try:
             proc = run(join(path, "jobs", file), stdin=DEVNULL, stderr=STDOUT, env=self.__env, check=False)
             ret = proc.returncode
@@ -171,7 +171,7 @@ class JobScheduler(ApiCaller):
             self.__logger.error(f"Exception while executing job {name} from plugin {plugin} :\n{format_exc()}")
             with self.__thread_lock:
                 self.__job_success = False
-        end_date = datetime.now()
+        end_date = datetime.now(timezone.utc)
 
         if ret == 1:
             with self.__thread_lock:
@@ -351,7 +351,7 @@ class JobScheduler(ApiCaller):
             except BaseException:
                 self.db.readonly = True
                 return True
-        elif not force and self.db.last_connection_retry and (datetime.now() - self.db.last_connection_retry).total_seconds() > 30:
+        elif not force and self.db.last_connection_retry and (datetime.now(timezone.utc) - self.db.last_connection_retry).total_seconds() > 30:
             return True
 
         if self.db.database_uri and self.db.readonly:

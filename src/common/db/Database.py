@@ -2,7 +2,7 @@
 
 from contextlib import contextmanager, suppress
 from copy import deepcopy
-from datetime import datetime
+from datetime import datetime, timezone
 from io import BytesIO
 from json import JSONDecodeError, loads
 from logging import Logger
@@ -168,7 +168,7 @@ class Database:
 
         DATABASE_RETRY_TIMEOUT = int(DATABASE_RETRY_TIMEOUT)
 
-        current_time = datetime.now()
+        current_time = datetime.now(timezone.utc)
         not_connected = True
         fallback = False
 
@@ -185,7 +185,7 @@ class Database:
 
                 not_connected = False
             except (OperationalError, DatabaseError) as e:
-                if (datetime.now() - current_time).total_seconds() > DATABASE_RETRY_TIMEOUT:
+                if (datetime.now(timezone.utc) - current_time).total_seconds() > DATABASE_RETRY_TIMEOUT:
                     if not fallback and self.database_uri_readonly:
                         self.logger.error(f"Can't connect to database after {DATABASE_RETRY_TIMEOUT} seconds. Falling back to read-only database connection")
                         self.sql_engine.dispose(close=True)
@@ -241,7 +241,7 @@ class Database:
 
     def retry_connection(self, *, readonly: bool = False, fallback: bool = False, log: bool = True, **kwargs) -> None:
         """Retry the connection to the database"""
-        self.last_connection_retry = datetime.now()
+        self.last_connection_retry = datetime.now(timezone.utc)
 
         if log:
             self.logger.debug(f"Retrying the connection to the database{' in read-only mode' if readonly else ''}{' with fallback' if fallback else ''} ...")
@@ -476,7 +476,7 @@ class Database:
                 if not metadata:
                     return "The metadata are not set yet, try again"
 
-                current_time = datetime.now()
+                current_time = datetime.now(timezone.utc)
 
                 if "config" in changes:
                     if not metadata.first_config_saved:
@@ -536,7 +536,7 @@ class Database:
                     db_ui_version = db_version
 
                 self.logger.warning(f"Database version ({db_version}) is different from Bunkerweb version ({bunkerweb_version}), migrating ...")
-                current_time = datetime.now()
+                current_time = datetime.now(timezone.utc)
                 error = True
                 # ? Wait for the metadata to be available
                 while error:
@@ -545,7 +545,7 @@ class Database:
                         metadata.reflect(self.sql_engine)
                         error = False
                     except BaseException as e:
-                        if (datetime.now() - current_time).total_seconds() > 10:
+                        if (datetime.now(timezone.utc) - current_time).total_seconds() > 10:
                             raise e
                         sleep(1)
 
@@ -1328,7 +1328,7 @@ class Database:
                         session.query(Custom_configs).filter(Custom_configs.service_id.in_(missing_ids)).delete()
                         session.query(Jobs_cache).filter(Jobs_cache.service_id.in_(missing_ids)).delete()
                         session.query(Metadata).filter_by(id=1).update(
-                            {Metadata.custom_configs_changed: True, Metadata.last_custom_configs_change: datetime.now()}
+                            {Metadata.custom_configs_changed: True, Metadata.last_custom_configs_change: datetime.now(timezone.utc)}
                         )
                         changed_services = True
 
@@ -1672,7 +1672,7 @@ class Database:
                     metadata = session.query(Metadata).get(1)
                     if metadata is not None:
                         metadata.custom_configs_changed = True
-                        metadata.last_custom_configs_change = datetime.now()
+                        metadata.last_custom_configs_change = datetime.now(timezone.utc)
 
             try:
                 session.add_all(to_put)
@@ -1994,7 +1994,7 @@ class Database:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
 
-            session.add(Jobs_runs(job_name=job_name, success=success, start_date=start_date, end_date=end_date or datetime.now()))
+            session.add(Jobs_runs(job_name=job_name, success=success, start_date=start_date, end_date=end_date or datetime.now(timezone.utc)))
 
             try:
                 session.commit()
@@ -2062,13 +2062,13 @@ class Database:
                         service_id=service_id,
                         file_name=file_name,
                         data=data,
-                        last_update=datetime.now(),
+                        last_update=datetime.now(timezone.utc),
                         checksum=checksum,
                     )
                 )
             else:
                 cache.data = data
-                cache.last_update = datetime.now()
+                cache.last_update = datetime.now(timezone.utc)
                 cache.checksum = checksum
 
             try:
@@ -2856,10 +2856,10 @@ class Database:
                     if metadata is not None:
                         if _type == "external":
                             metadata.external_plugins_changed = True
-                            metadata.last_external_plugins_change = datetime.now()
+                            metadata.last_external_plugins_change = datetime.now(timezone.utc)
                         elif _type == "pro":
                             metadata.pro_plugins_changed = True
-                            metadata.last_pro_plugins_change = datetime.now()
+                            metadata.last_pro_plugins_change = datetime.now(timezone.utc)
 
             try:
                 session.add_all(to_put)
@@ -2966,8 +2966,8 @@ class Database:
                     "reload": job.reload,
                     "history": [
                         {
-                            "start_date": job_run.start_date.strftime("%d/%m/%Y, %I:%M:%S %p"),
-                            "end_date": job_run.end_date.strftime("%d/%m/%Y, %I:%M:%S %p"),
+                            "start_date": job_run.start_date.strftime("%Y/%m/%d, %H:%M:%S %Z"),
+                            "end_date": job_run.end_date.strftime("%Y/%m/%d, %H:%M:%S %Z"),
                             "success": job_run.success,
                         }
                         for job_run in session.query(Jobs_runs)
@@ -2980,7 +2980,7 @@ class Database:
                         {
                             "service_id": cache.service_id,
                             "file_name": cache.file_name,
-                            "last_update": cache.last_update.strftime("%d/%m/%Y, %I:%M:%S %p") if cache.last_update else "Never",
+                            "last_update": cache.last_update.strftime("%Y/%m/%d, %H:%M:%S %Z") if cache.last_update else "Never",
                             "checksum": cache.checksum,
                         }
                         for cache in session.query(Jobs_cache)
@@ -3088,7 +3088,7 @@ class Database:
                     metadata = session.query(Metadata).get(1)
                     if metadata is not None:
                         metadata.instances_changed = True
-                        metadata.last_instances_change = datetime.now()
+                        metadata.last_instances_change = datetime.now(timezone.utc)
 
             try:
                 session.commit()
@@ -3115,7 +3115,7 @@ class Database:
                     metadata = session.query(Metadata).get(1)
                     if metadata is not None:
                         metadata.instances_changed = True
-                        metadata.last_instances_change = datetime.now()
+                        metadata.last_instances_change = datetime.now(timezone.utc)
 
             try:
                 session.commit()
@@ -3154,7 +3154,7 @@ class Database:
                     metadata = session.query(Metadata).get(1)
                     if metadata is not None:
                         metadata.instances_changed = True
-                        metadata.last_instances_change = datetime.now()
+                        metadata.last_instances_change = datetime.now(timezone.utc)
 
             try:
                 session.add_all(to_put)
@@ -3176,7 +3176,7 @@ class Database:
                 return f"Instance {hostname} does not exist, will not be updated."
 
             db_instance.status = status
-            db_instance.last_seen = datetime.now()
+            db_instance.last_seen = datetime.now(timezone.utc)
 
             try:
                 session.commit()
