@@ -2508,3 +2508,16 @@ You need to know that pages and utils from `src/ui/client/builder/` will be acce
 In order to add the page, you can use the existing `src/ui/pages` folder and follow how they are import in the `main.py` file.
 
 After that, you will get the new page on the built app.
+
+### Create a standalone page
+
+Standalone page is an all-in-one html file with js, css and any resources directly in the file. This is useful for pages that don't need to be part of the dashboard, or for pages that can't access to external resources like the setup page.
+
+A standalone is similar to a dashboard page, but the differences is that we need a specifig vite config file like `vite.config.standalone.js` that is using `viteSingleFile` plugin to enable a single file build.
+
+If you want to create your own standalone page, you can copy the standalone folder in `src/ui/client/standalone` and rename it to your page name.
+You need to create a vite config file based on the `vite.config.standalone.js` updating the build settings.
+
+In case you want to add the standalone page in built app, you need to update the `build.py` file, and add the output file on the `template` folder **AFTER** the other logic.
+
+Notice that standalone page is useful for custom plugins pages.
