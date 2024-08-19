@@ -1,4 +1,4 @@
-fastapi==0.112.0
+fastapi==0.112.1
 redis==5.0.8
 requests==2.32.3
 selenium==4.23.1
