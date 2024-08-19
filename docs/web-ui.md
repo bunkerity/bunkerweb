@@ -2521,3 +2521,19 @@ You need to create a vite config file based on the `vite.config.standalone.js` u
 In case you want to add the standalone page in built app, you need to update the `build.py` file, and add the output file on the `template` folder **AFTER** the other logic.
 
 Notice that standalone page is useful for custom plugins pages.
+
+### Utils
+
+Because the UI is using a builder approach, we need to create utils that will allow to interact with components or to allow actions without components interaction.
+
+The utils are located in the `src/ui/client/dashboard/utils` folder, you have the following utils :
+
+- **`global.js` :** You can find attributes based utils, this is utils that will listen to component attributes. It works well with some components and the `attrs` props. You can attach a link to a button to be redirect, or create a static value form to submit on click...
+- **`filter.js` :** Filter component utils only.
+- **`lang.js` :** All logic that is related to i18n, like getting the i18n instance, getting only needed keys, or getting the current language.
+- **`etc`**
+
+You have specific logic in `src/ui/client/dashboard/store` too :
+
+- **`form.js` :** Allow to share and execute specific logic for advanced, raw or easy mode.
+- **`global.js` :** Others share data and state. For example the `displayStore` is useful because it allows to show/hide an element after a button click.
