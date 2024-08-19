@@ -144,7 +144,7 @@ try:
         print(f"❌ Command failed, exiting ...\noutput: {result.output.decode()}\nexit_code: {result.exit_code}", flush=True)
         exit(1)
 
-    date = datetime.strptime("-".join(Path(file.decode()).stem.split("-")[2:]), "%Y-%m-%d_%H-%M-%S").strftime("%d/%m/%Y %H:%M:%S").encode()
+    date = datetime.strptime("-".join(Path(file.decode()).stem.split("-")[2:]), "%Y-%m-%d_%H-%M-%S").strftime("%Y/%m/%d %H:%M:%S").encode()
     found = False
     for line in result.output.splitlines():
         if date in line:
