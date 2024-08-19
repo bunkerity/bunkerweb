@@ -395,8 +395,6 @@
   "configs_select_type": "Select type",
   "configs_select_type_desc": "The type of the config will determine the config's context execution.",
   "configs_delete_title": "Delete config",
-  "configs_delete_global_subtitle": "Are you sure you want to delete the global config below ?",
-  "configs_delete_no_global_subtitle": "Are you sure you want to delete the config below ?",
   "configs_delete_subtitle": "Are you sure you want to delete the config below ?",
   "configs_search_service": "Search service",
   "configs_search_service_desc": "Search within services that are applying the config",

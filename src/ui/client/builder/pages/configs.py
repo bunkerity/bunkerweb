@@ -20,7 +20,7 @@ from typing import Optional
 columns = [
     add_column(title="Name", field="name", formatter="text"),
     add_column(title="Type", field="type", formatter="text"),
-    add_column(title="global", field="is_global", formatter="icons", maxWidth=160),
+    add_column(title="service", field="service", formatter="text", maxWidth=160),
     add_column(
         title="actions", field="actions", formatter="buttongroup"
     ),  # edit button that will switch to the form using display store + delete with modal to confirm
@@ -50,24 +50,23 @@ def configs_filter(config_types: Optional[list] = None) -> list:  # healths = "u
             },
         },
         {
-            "type": "=",
-            "fields": ["is_global"],
+            "type": "like",
+            "fields": ["service"],
             "setting": {
-                "id": "select-global",
-                "name": "select-global",
-                "label": "configs_select_global",  # keep it (a18n)
-                "value": "all",  # keep "all"
-                "values": ["all", "yes", "no"],  # keep
-                "inpType": "select",
-                "onlyDown": True,
+                "id": "input-search-service",
+                "name": "input-search-service",
+                "label": "configs_search_service",  # keep it (a18n)
+                "value": "",
+                "inpType": "input",
                 "columns": {"pc": 3, "tablet": 4, "mobile": 12},
                 "fieldSize": "sm",
                 "popovers": [
                     {
                         "iconName": "info",
-                        "text": "configs_select_global_desc",
+                        "text": "configs_search_service_desc",
                     }
                 ],
+                "placeholder": "configs_search_service_placeholder",  # keep it (a18n)
             },
         },
     ]
@@ -101,17 +100,15 @@ def configs_filter(config_types: Optional[list] = None) -> list:  # healths = "u
 
 
 def configs_item(
-    is_global: bool,  # "yes" or "no"
     filename: str = "",
     config_type: str = "",
-    config_services: Optional[list] = None,
+    service: str = "",
     display_index: int = 1,
 ):
-    global_text = "yes" if is_global else "no"
 
     actions = [
         button_widget(
-            id=f"edit-user-{filename}-{global_text}",
+            id=f"edit-user-{filename}-{service}",
             text="action_edit",  # keep it (a18n)
             color="edit",
             size="normal",
@@ -124,7 +121,7 @@ def configs_item(
             },
         ),
         button_widget(
-            id=f"delete-user-{filename}-{global_text}",
+            id=f"delete-user-{filename}-{service}",
             text="action_delete",  # keep it (a18n)
             color="error",
             size="normal",
@@ -134,26 +131,26 @@ def configs_item(
             modal={
                 "widgets": [
                     title_widget(title="configs_delete_title"),  # keep it (a18n)
-                    text_widget(text="configs_delete_global_subtitle" if is_global else "configs_delete_no_global_subtitle"),  # keep it (a18n)
+                    text_widget(text="configs_delete_subtitle"),  # keep it (a18n)
                     text_widget(bold=True, text=filename),
                     button_group_widget(
                         buttons=[
                             button_widget(
-                                id=f"close-delete-btn-{filename}-{global_text}",
+                                id=f"close-delete-btn-{filename}-{service}",
                                 text="action_close",  # keep it (a18n)
                                 color="close",
                                 size="normal",
                                 attrs={"data-close-modal": ""},  # a11y
                             ),
                             button_widget(
-                                id=f"delete-btn-{filename}-{global_text}",
+                                id=f"delete-btn-{filename}-{service}",
                                 text="action_delete",  # keep it (a18n)
                                 color="delete",
                                 size="normal",
                                 iconName="trash",
                                 iconColor="white",
                                 attrs={
-                                    "data-submit-form": f"""{{ "filename" : "{filename}", "is_global" : "{global_text}" }}""",
+                                    "data-submit-form": f"""{{ "filename" : "{filename}", "is_global" : "{service}" }}""",
                                     "data-submit-endpoint": "/delete",
                                 },
                             ),
@@ -164,105 +161,26 @@ def configs_item(
         ),
     ]
 
-    services_columns = [{"title": "id", "field": "id", "formatter": "text", "maxWidth": 100}, {"title": "Name", "field": "name", "formatter": "text"}]
-    services_items = []
-    # get id
-    for index, service in enumerate(config_services):
-        services_items.append(
-            {
-                "id": text_widget(text=index)["data"],
-                "name": text_widget(text=service)["data"],
-            }
-        )
-
-    services_filter = [
-        {
-            "type": "like",
-            "fields": ["name"],
-            "setting": {
-                "id": f"input-search-service-{filename}-{global_text}",
-                "name": f"input-search-service-{filename}-{global_text}",
-                "label": "configs_search_service",  # keep it (a18n)
-                "value": "",
-                "columns": {"pc": 3, "tablet": 4, "mobile": 12},
-                "fieldSize": "sm",
-                "placeholder": "configs_search_service_placeholder",  # keep it (a18n)
-                "inpType": "input",
-                "popovers": [
-                    {
-                        "iconName": "info",
-                        "text": "configs_search_service_desc",
-                    }
-                ],
-            },
-        },
-    ]
-
-    services_detail = [
-        button_widget(
-            id=f"services-btn-{filename}-{global_text}",
-            type="button",
-            iconName="disk",
-            hideText=True,
-            iconColor="white",
-            text="configs_show_services",  # keep it (a18n)
-            color="orange",
-            size="normal",
-            modal={
-                "widgets": [
-                    title_widget(title="configs_services_title"),  # keep it (a18n)
-                    tabulator_widget(
-                        id=f"table-services-{filename}-{global_text}",
-                        layout="fitColumns",
-                        columns=services_columns,
-                        # Add every services that apply to the conf. All if global.
-                        items=services_items,
-                        filters=services_filter,
-                        paginationSize=5,
-                        paginationSizeSelector=[5, 10],
-                    ),
-                    button_group_widget(
-                        buttons=[
-                            button_widget(
-                                id=f"close-services-btn-{filename}-{global_text}",
-                                text="action_close",  # keep it (a18n)
-                                color="close",
-                                size="normal",
-                                attrs={"data-close-modal": ""},  # a11y
-                            ),
-                        ]
-                    ),
-                ],
-            },
-        )
-    ]
-
     return {
         "name": text_widget(text=filename)["data"],
         "type": text_widget(text=config_type)["data"],
-        "is_global": icons_widget(
-            iconName="check" if is_global else "cross",
-            value="yes" if is_global else "no",
-        )["data"],
-        "actions": {"buttons": services_detail + actions},
+        "service": text_widget(text=service)["data"],
+        "actions": {"buttons": actions},
     }
 
 
 def config_form(
-    is_global: bool,  # "yes" or "no"
     filename: str,
     config_type: str,
     config_value: str,
     config_types: Optional[list] = None,
-    config_services: Optional[list] = None,
+    service: Optional[list] = None,
     services: Optional[list] = None,
     display_index: int = 1,
     is_new: bool = False,
 ) -> dict:
     # difference between edit or new form
     enabled_value_field_only = False if is_new else True
-    config_services = [] if is_global else config_services
-    global_text = "yes" if is_global else "no"
     filename = "new" if is_new else filename
     title = "configs_create_title" if is_new else "configs_edit_title"
     subtitle = "configs_create_subtitle" if is_new else "configs_edit_subtitle"
@@ -279,11 +197,11 @@ def config_form(
                 subtitle=subtitle,  # keep it (a18n)
             ),
             regular_widget(
-                endpoint="/add",
+                endpoint="/add" if is_new else "/edit",
                 fields=[
                     get_fields_from_field(
                         input_widget(
-                            id=f"configs-name-{filename}-{global_text}",
+                            id=f"configs-name-{filename}-{service}",
                             name="filename",
                             label="configs_filename",  # keep it (a18n)
                             value="",
@@ -292,6 +210,7 @@ def config_form(
                             columns={"pc": 6, "tablet": 6, "mobile": 12},
                             placeholder="configs_filename_placeholder",  # keep it (a18n)
                             disabled=enabled_value_field_only,
+                            containerClass="z-10",
                             popovers=[
                                 {
                                     "iconName": "yellow-darker",
@@ -306,7 +225,8 @@ def config_form(
                     ),
                     get_fields_from_field(
                         select_widget(
-                            id=f"configs-type-{filename}-{global_text}",
+                            containerClass="z-9",
+                            id=f"configs-type-{filename}-{service}",
                             name="type",
                             label="configs_type",  # keep it (a18n)
                             value=config_type,
@@ -325,10 +245,11 @@ def config_form(
                     ),
                     get_fields_from_field(
                         select_widget(
-                            id=f"configs-services-{filename}-{global_text}",
+                            containerClass="z-8",
+                            id=f"configs-services-{filename}-{service}",
                             name="services",
                             label="configs_services",  # keep it (a18n)
-                            value="",
+                            value=service,
                             values=services,
                             required=True,
                             requiredValues=services,
@@ -349,7 +270,8 @@ def config_form(
                     ),
                     get_fields_from_field(
                         editor_widget(
-                            id=f"configs-value-{filename}-{global_text}",
+                            containerClass="z-7",
+                            id=f"configs-value-{filename}-{service}",
                             name="value",
                             label="configs_value",  # keep it (a18n)
                             value=config_value,
@@ -369,7 +291,7 @@ def config_form(
                 ],
                 buttons=[
                     button_widget(
-                        id=f"back-from-create-user-{filename}-{global_text}",
+                        id=f"back-{filename}-{service}",
                         text="action_back",
                         color="back",
                         iconName="back",
@@ -381,7 +303,7 @@ def config_form(
                         },
                     ),
                     button_widget(
-                        id=f"configs-submit-{filename}-{global_text}",
+                        id=f"configs-submit-{filename}-{service}",
                         text="action_create" if is_new else "action_edit",  # keep it (a18n)
                         iconName="plus" if is_new else "pen",
                         iconColor="white",
@@ -447,15 +369,14 @@ def configs_builder(configs: Optional[list] = None, config_types: Optional[list]
     # Start adding the new config form
     configs_form.append(
         config_form(
+            service="",
             is_new=True,
             display_index=1,
-            is_global=True,
             config_types=config_types,
-            services=services,
             filename="",
             config_type="",
             config_value="",
-            config_services=[],
+            services=services,
         )
     )
 
@@ -472,9 +393,8 @@ def configs_builder(configs: Optional[list] = None, config_types: Optional[list]
         display_index = index + 2
         configs_items.append(
             configs_item(
-                is_global=config.get("is_global", ""),
                 filename=config.get("filename", ""),
-                config_services=config.get("config_services", ""),
+                service=config.get("service", ""),
                 config_type=config.get("config_type", ""),
                 display_index=display_index,
             )
@@ -482,12 +402,11 @@ def configs_builder(configs: Optional[list] = None, config_types: Optional[list]
         configs_form.append(
             config_form(
                 config_types=config_types,
-                services=services,
-                is_global=config.get("is_global", ""),
+                service=config.get("service", ""),
                 filename=config.get("filename", ""),
-                config_type=config.get("type", ""),
+                config_type=config.get("config_type", ""),
                 config_value=config.get("value", ""),
-                config_services=config.get("configs_services", []),
+                services=services,
                 display_index=display_index,
             )
         )
