@@ -9,6 +9,7 @@ from .utils.widgets import (
     icons_widget,
     regular_widget,
     unmatch_widget,
+    upload_widget,
 )
 from .utils.table import add_column
 from .utils.format import get_fields_from_field
@@ -47,7 +48,7 @@ def plugins_filter(types: List[str]) -> list:
         }
     ]
 
-    if len(types) >= 2:
+    if types is not None and (isinstance(types, list) and len(types) >= 2):
         filters.append(
             {
                 "type": "=",
@@ -165,13 +166,12 @@ def fallback_message(msg: str, display: Optional[list] = None) -> dict:
     }
 
 
-def plugins_list(plugins: Optional[list] = None) -> dict:
+def plugins_list(plugins: Optional[list] = None, types: Optional[list] = None) -> dict:
 
     if not plugins:
         return fallback_message(msg="plugins_not_found")
 
     items = []
-    types = set()
 
     for plugin in plugins:
         items.append(
@@ -179,15 +179,15 @@ def plugins_list(plugins: Optional[list] = None) -> dict:
                 name=plugin["id"],
                 version=plugin["version"],
                 description=plugin["description"],
-                is_deletable=plugin["method"] == "ui",
+                is_deletable=plugin["type"] in ("manual", "default", "ui", "external"),
                 page=f"/plugins/{plugin['id']}" if plugin["page"] else "",
                 plugin_type=plugin["type"],
             )
         )
-        types.add(plugin["type"])
 
     return {
         "type": "card",
+        "display": ["main", 0],
         "widgets": [
             title_widget(
                 title="plugins_list_title",  # keep it (a18n)
@@ -200,11 +200,71 @@ def plugins_list(plugins: Optional[list] = None) -> dict:
                 layout="fitColumns",
                 columns=columns,
                 items=items,
-                filters=plugins_filter(list(types)),
+                filters=plugins_filter(types),
             ),
         ],
     }
 
 
-def plugins_builder(plugins: Optional[list] = None) -> list:
-    return [plugins_list(plugins=plugins)]
+def plugins_tabs():
+    return {
+        "type": "tabs",
+        "widgets": [
+            button_group_widget(
+                buttons=[
+                    button_widget(
+                        text="plugins_list_tab",
+                        display=["main", 0],
+                        size="tab",
+                        color="info",
+                        iconColor="white",
+                        iconName="list",
+                    ),
+                    button_widget(
+                        text="plugins_upload_tab",
+                        color="success",
+                        display=["main", 1],
+                        size="tab",
+                        iconColor="white",
+                        iconName="plus",
+                    ),
+                ]
+            )
+        ],
+    }
+
+
+def plugins_upload():
+    return {
+        "type": "card",
+        "display": ["main", 1],
+        "widgets": [
+            title_widget(
+                title="plugins_upload_title",  # keep it (a18n)
+            ),
+            subtitle_widget(
+                subtitle="plugins_upload_subtitle",  # keep it (a18n)
+            ),
+            upload_widget(
+                maxScreenW="sm",
+            ),
+            button_group_widget(
+                buttons=[
+                    button_widget(
+                        text="action_reload",  # keep it (a18n)
+                        color="info",
+                        size="normal",
+                        attrs={
+                            "data-submit-data": "{}",
+                            "data-submit-endpoint": "",
+                        },
+                        disabled=True,
+                    ),
+                ]
+            ),
+        ],
+    }
+
+
+def plugins_builder(plugins: Optional[list] = None, types: Optional[list] = None) -> list:
+    return [plugins_tabs(), plugins_list(plugins=plugins, types=types), plugins_upload()]

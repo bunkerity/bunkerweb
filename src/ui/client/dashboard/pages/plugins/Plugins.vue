@@ -3,12 +3,17 @@ import { reactive, onBeforeMount, onMounted } from "vue";
 import DashboardLayout from "@components/Dashboard/Layout.vue";
 import BuilderPlugins from "@components/Builder/Plugins.vue";
 import { useGlobal } from "@utils/global.js";
+import { useDisplayStore } from "@store/global.js";
 
 /**
 *  @name Page/PLugins.vue
 *  @description This component is the plugin page.
   This page displays global information about plugins, and allow to delete or upload some plugins.
 */
+
+// Set default store
+const displayStore = useDisplayStore();
+displayStore.setDisplay("main", 0);
 
 const plugins = reactive({
   builder: "",

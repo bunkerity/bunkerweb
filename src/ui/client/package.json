@@ -15,6 +15,7 @@
     "@intlify/unplugin-vue-i18n": "^4.0.0",
     "@vueuse/core": "^10.11.0",
     "ace-builds": "^1.24.2",
+    "dompurify": "^3.1.6",
     "flag-icons": "^6.15.0",
     "flatpickr": "^4.6.13",
     "pinia": "^2.1.6",

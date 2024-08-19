@@ -2133,6 +2133,7 @@ def templates_widget(
     templates: dict,
     operation: str = "edit",
     oldServerName: str = "",
+    isDraft: Union[str, bool] = False,
     display: Optional[list] = None
     ):
     """    
@@ -2143,6 +2144,7 @@ def templates_widget(
     -   `templates` **Object** List of advanced templates that contains settings. Must be a dict with mode as key, then the template name as key with a list of data (different for each modes).
     -   `operation` **String** Operation type (edit, new, delete). (optional, default `"edit"`)
     -   `oldServerName` **String** Old server name. This is a server name before any changes. (optional, default `""`)
+    -   `isDraft` **(String | Boolean)** Is draft mode. "yes" or "no" to set a draft select. Else will be ignored. (optional, default `false`)
     -   `display` **Array** Array need two values : "groupName" in index 0 and "compId" in index 1 in order to be displayed using the display store. More info on the display store itslef. (optional, default `[]`)
     
     EXAMPLE
@@ -2166,7 +2168,7 @@ def templates_widget(
 
 
     # List of params that will be add only if not default value
-    list_params = [("operation", operation, "edit"),("oldServerName", oldServerName, ""),("display", display, None)]
+    list_params = [("operation", operation, "edit"),("oldServerName", oldServerName, ""),("isDraft", isDraft, False),("display", display, None)]
     for param in list_params:
         add_key_value(data, param[0], param[1], param[2])
 
@@ -2309,4 +2311,40 @@ def unmatch_widget(
         add_key_value(data, param[0], param[1], param[2])
 
     return { "type" : "Unmatch", "data" : data }
+        
+
+def upload_widget(
+    disabled: bool = False,
+    columns: dict = {"pc":"12","tablet":"12","mobile":"12"},
+    containerClass: str = "",
+    maxScreenW: str = "2xl"
+    ):
+    """    
+    This component is used to upload files to the server. ATM only used to upload plugins.
+    
+    PARAMETERS
+    
+    -   `disabled` **Boolean** If true, the upload will be disabled. (optional, default `False`)
+    -   `columns` **Object** Columns object. (optional, default `{"pc":"12","tablet":"12","mobile":"12"}`)
+    -   `containerClass` **String** Container additional class (optional, default `""`)
+    -   `maxScreenW` **String** Max screen width within sm, md, lg, xl, 2xl, 3xl (optional, default `"2xl"`)
+    
+    EXAMPLE
+    
+    {
+       disabled : True
+     }
+    
+    """
+
+    data = {
+       }
+
+
+    # List of params that will be add only if not default value
+    list_params = [("disabled", disabled, False),("columns", columns, {"pc":"12","tablet":"12","mobile":"12"}),("containerClass", containerClass, ""),("maxScreenW", maxScreenW, "2xl")]
+    for param in list_params:
+        add_key_value(data, param[0], param[1], param[2])
+
+    return { "type" : "Upload", "data" : data }
         

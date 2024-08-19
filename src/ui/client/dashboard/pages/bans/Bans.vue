@@ -152,8 +152,6 @@ function addBanHandler() {
         .querySelector(`#${tableAddbanId}`)
         .querySelectorAll(".tabulator-row");
 
-      console.log();
-
       for (let i = 0; i < tabulatorRows.length; i++) {
         const row = tabulatorRows[i];
         const ip = row.querySelector("input[name=ip]").value;
