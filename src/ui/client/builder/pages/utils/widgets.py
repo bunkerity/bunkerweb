@@ -875,6 +875,47 @@ def fields_widget(
     return { "type" : "Fields", "data" : data }
         
 
+def file_manager_widget(
+    data: dict,
+    baseFolder: str = "base",
+    columns: dict = {"pc":"12","tablet":"12","mobile":"12"},
+    containerClass: str = ""
+    ):
+    """    
+    File manager component. Useful with cache page.
+    
+    PARAMETERS
+    
+    -   `data` **Object** Can be a translation key or by default raw text.
+    -   `baseFolder` **String** The base folder to display by default (optional, default `"base"`)
+    -   `columns` **Object** Work with grid system { pc: 12, tablet: 12, mobile: 12} (optional, default `{"pc":"12","tablet":"12","mobile":"12"}`)
+    -   `containerClass` **String** Additional class (optional, default `""`)
+    
+    EXAMPLE
+    
+    {
+       title: "Total Users",
+       type: "card",
+       titleClass: "text-lg",
+       color : "info",
+       tag: "h2"
+     }
+    
+    """
+
+    data = {
+        "data" : data,
+       }
+
+
+    # List of params that will be add only if not default value
+    list_params = [("baseFolder", baseFolder, "base"),("columns", columns, {"pc":"12","tablet":"12","mobile":"12"}),("containerClass", containerClass, "")]
+    for param in list_params:
+        add_key_value(data, param[0], param[1], param[2])
+
+    return { "type" : "Filemanager", "data" : data }
+        
+
 def filter_widget(
     filters: Optional[list] = None,
     data: Union[dict, list] = {},

@@ -42,6 +42,7 @@ import Back from "@components/Icons/Back.vue";
 import Refresh from "@components/Icons/Refresh.vue";
 import Download from "@components/Icons/Download.vue";
 import Clone from "@components/Icons/Clone.vue";
+import Folder from "@components/Icons/Folder.vue";
 
 /**
  *  @name Widget/Icons.vue
@@ -114,6 +115,7 @@ onMounted(() => {
       v-if="useEqualStr(props.iconName, 'exclamation')"
       v-bind="icon"
     />
+    <Folder v-if="useEqualStr(props.iconName, 'folder')" v-bind="icon" />
     <Clone v-if="useEqualStr(props.iconName, 'clone')" v-bind="icon" />
     <Download v-if="useEqualStr(props.iconName, 'download')" v-bind="icon" />
     <Refresh v-if="useEqualStr(props.iconName, 'refresh')" v-bind="icon" />

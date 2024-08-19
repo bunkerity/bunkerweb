@@ -65,6 +65,8 @@ def create_dir(directory: Path):
 def create_base_dirs():
     """Create the base directories we will need to build front end and add them to flask app"""
     create_dir(opt_dir_dashboard)
+    create_dir(ui_dir_static)
+    create_dir(ui_dir_templates)
 
 
 def move_template(folder: Path, target_folder: Path):
@@ -168,7 +170,8 @@ def build():
     """All steps to build the front end and set it to the flask app"""
     reset()
     create_base_dirs()
-    add_legacy()
+    # add_legacy()
+
     # Only install packages if not already installed
     if not current_directory.joinpath("node_modules").exists():
         if run_command(["/usr/bin/npm", "install"], current_directory):

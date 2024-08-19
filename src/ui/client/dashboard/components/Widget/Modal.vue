@@ -103,6 +103,11 @@ const props = defineProps({
 
 const modalEl = ref();
 
+/**
+ *  @name useCloseModal
+ *  @description Emits the close event to close the modal.
+ *  @returns {void}
+ */
 function useCloseModal() {
   emits("close");
 }
@@ -128,11 +133,23 @@ function useFocusModal() {
   }, 1);
 }
 
+/**
+ *  @name modalKeyboardEvents
+ *  @description Handle the keyboard events for the modal.
+ *  @param {Event} e - The event object.
+ *  @returns {void}
+ */
 function modalKeyboardEvents(e) {
   if (e.key === "Escape") useCloseModal();
   if (e.key === "Tab" || e.key === "Shift-Tab") useFocusModal();
 }
 
+/**
+ *  @name modalClickEvents
+ *  @description Handle the click events for the modal.
+ *  @param {Event} e - The event object.
+ *  @returns {void}
+ */
 function modalClickEvents(e) {
   if (
     (e.target.closest("[data-modal]") !== modalEl.value && modalEl.value) ||
@@ -142,11 +159,21 @@ function modalClickEvents(e) {
   if (e.target.hasAttribute("data-close-modal")) useCloseModal();
 }
 
+/**
+ *  @name setEvents
+ *  @description Set the events for the modal when he is mounted.
+ *  @returns {void}
+ */
 function setEvents() {
   window.addEventListener("keydown", modalKeyboardEvents, true);
   window.addEventListener("click", modalClickEvents);
 }
 
+/**
+ *  @name unsetEvents
+ *  @description Unset the events for the modal when he is unmounted.
+ *  @returns {void}
+ */
 function unsetEvents() {
   window.removeEventListener("keydown", modalKeyboardEvents, true);
   window.removeEventListener("click", modalClickEvents);

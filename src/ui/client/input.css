@@ -648,6 +648,9 @@ body {
 .layout-settings-multiple-group {
   @apply mt-4 rounded border border-gray-500/50 dark:border-gray-500 p-4 sm:gap-x-8 gap-y-8 col-span-12 grid grid-cols-12 w-full relative bg-gray-200/50 dark:bg-gray-900/10;
 }
+.layout-file-manager {
+  @apply w-full pt-6 pb-4;
+}
 
 /* MESSAGE */
 .msg-container {
@@ -676,6 +679,28 @@ body {
 
 .msg-unmatch-table {
   @apply fixed col-span-12 flex mx-2 my-8 w-full;
+}
+
+/* FILE MANAGER  */
+
+.file-manager-btn {
+  @apply h-fit col-span-12 md:col-span-6 lg:col-span-4 m-2 py-2 px-4 flex justify-between items-center bg-gray-100 dark:bg-slate-700 rounded-xl hover:brightness-90;
+}
+
+.file-manager-breadcrumb {
+  @apply flex justify-start items-center mx-2 mb-2;
+}
+
+.file-manager-breadcrumb-base {
+  @apply dark:text-gray-300 text-gray-600 text-sm mr-3;
+}
+
+.file-manager-breadcrumb-btn {
+  @apply dark:text-gray-300 text-gray-600 after:float-right after:pl-2 after:text-gray-600 dark:after:text-gray-300 after:content-['/'] text-sm mr-3 hover:brightness-90;
+}
+
+.file-manager-content {
+  @apply grid grid-cols-12 w-full min-h-60;
 }
 
 /* POPOVER */
@@ -758,6 +783,10 @@ body {
 
 .icon-table-content {
   @apply h-6.5 w-6.5 relative pointer-events-none;
+}
+
+.icon-file-manager {
+  @apply h-6.5 w-6.5 relative pointer-events-none mr-1.5;
 }
 
 .icon-list-details {
@@ -1245,6 +1274,10 @@ body {
   @apply w-full col-span-12 mb-0 text-gray-700 dark:text-gray-300 break-word;
 }
 
+.text-file-manager {
+  @apply w-full col-span-12 flex justify-end items-center mb-0 text-gray-700 dark:text-gray-300 break-word;
+}
+
 /* BTN GROUP */
 
 .button-group-card {
@@ -1575,79 +1608,7 @@ body {
   @apply col-span-12 justify-center items-center mt-4;
 }
 
-/* FILE MANAGER */
-
-.file-manager-breadcrumb {
-  @apply flex flex-wrap bg-transparent rounded-lg md:mb-8 w-full;
-}
-
-.file-manager-breadcrumb-back-btn {
-  @apply mr-3 text-sm capitalize leading-normal dark:text-gray-500 text-gray-600 hover:brightness-75;
-}
-
-.file-manager-breadcrumb-back-svg {
-  @apply pointer-events-none w-4.5 h-4.5;
-}
-
-.file-manager-breadcrumb-item {
-  @apply leading-normal text-sm;
-}
-
-.file-manager-breadcrumb-item-btn {
-  @apply text-base mr-2 dark:text-gray-500 text-gray-600 after:float-right after:pl-2 after:text-gray-600 dark:after:text-gray-500 after:content-['/'] after:hover:brightness-125 hover:brightness-75;
-}
-
-.file-manager-item-container {
-  @apply relative w-full min-h-20  h-full transition rounded bg-gray-100 hover:bg-gray-300 dark:bg-slate-700 dark:hover:bg-slate-800;
-}
-
-.file-manager-item-nav {
-  @apply overflow-hidden w-full cursor-pointer relative min-h-20 max-h-20 py-0.5 sm:py-1 pl-12 sm:pl-16 pr-12 sm:pr-16 text-center break-words;
-}
-
-.file-manager-item-svg {
-  @apply absolute left-3 top-6 sm:top-5 h-8 w-8 sm:h-10 sm:w-10 fill-primary stroke-gray-100 dark:stroke-gray-600 dark:brightness-150;
-}
-
-.file-manager-item-name {
-  @apply max-h-8 pointer-events-none transition duration-300 ease-in-out dark:opacity-90  mx-7 mb-0  text-slate-700 dark:text-gray-300;
-}
-
-.base.file-manager-item-name {
-  @apply text-sm md:text-base;
-}
-
-.sm.file-manager-item-name {
-  @apply text-sm;
-}
-
-.xs.file-manager-item-name {
-  @apply text-[0.8rem];
-}
-
-.file-manager-item-dropdown {
-  @apply absolute flex-col z-110 w-48 right-0 top-0 translate-y-16 shadow border border-gray-300 dark:border-slate-600 rounded;
-}
-
-.file-manager-item-dropdown-btn {
-  @apply dark:brightness-125 dark:hover:brightness-100 flex justify-center items-center absolute h-full w-10 bg-primary fill-white first-letter:absolute top-0 -right-1 font-bold text-center text-white uppercase transition-all rounded-none rounded-r-lg cursor-pointer leading-normal text-xs ease-in tracking-tight-rem bg-150 bg-x-25 active:opacity-85;
-}
-
-.file-manager-item-btn {
-  @apply duration-300 border-b border-b-gray-300 hover:brightness-90 bg-white my-0 relative px-6 py-2 text-center align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 w-full  hover:bg-gray-100;
-}
-
-.first.file-manager-item-btn {
-  @apply rounded-t;
-}
-
-.last.file-manager-item-btn {
-  @apply border-none rounded-b;
-}
-
-.file-manager-item-btn-text {
-  @apply transition duration-300 ease-in-out text-gray-700 dark:text-gray-300 dark:opacity-80 ml-4 font-bold uppercase;
-}
+/* MODAL */
 
 .modal-container {
   @apply w-full h-screen fixed bg-gray-600/50 z-[10000] top-0 left-0 flex justify-center items-center;
@@ -2517,7 +2478,7 @@ body {
 }
 
 .dark-darker.fill {
-  @apply fill-slate-600  dark:fill-slate-500;
+  @apply fill-slate-600  dark:fill-gray-500;
 }
 
 .amber-darker.fill {
