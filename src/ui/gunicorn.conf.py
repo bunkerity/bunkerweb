@@ -48,9 +48,7 @@ loglevel = "debug" if DEBUG else LOG_LEVEL.lower()
 
 if DEBUG:
     reload = True
-    reload_extra_files = [file.as_posix() for file in Path(sep, "usr", "share", "bunkerweb", "ui", "templates").iterdir()] + [
-        file.as_posix() for file in Path(sep, "usr", "share", "bunkerweb", "ui", "pages").iterdir()
-    ]
+    reload_extra_files = [file.as_posix() for file in Path(sep, "usr", "share", "bunkerweb", "ui", "pages").glob("*.py")]
 
 
 def on_starting(server):
