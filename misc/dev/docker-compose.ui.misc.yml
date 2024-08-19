@@ -85,6 +85,7 @@ services:
       dockerfile: ./src/ui/Dockerfile
     volumes:
       - bw-logs:/var/log/bunkerweb
+      - ../../src/ui/pages:/usr/share/bunkerweb/ui/pages:ro
       - ../../src/ui/src:/usr/share/bunkerweb/ui/src:ro
       - ../../src/ui/gunicorn.conf.py:/usr/share/bunkerweb/ui/gunicorn.conf.py:ro
       - ../../src/ui/main.py:/usr/share/bunkerweb/ui/main.py:ro
