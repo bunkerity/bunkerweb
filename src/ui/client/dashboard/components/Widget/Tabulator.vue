@@ -334,6 +334,7 @@ onUnmounted(() => {
       :buttons="props.actionsButtons"
     />
     <div
+      :id="props.id"
       :class="[props.isStriped ? 'striped' : '']"
       ref="tableEl"
       data-is="table-content"

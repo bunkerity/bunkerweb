@@ -202,12 +202,14 @@ function _a11ySortable() {
  *  @returns {Void}
  */
 function _a11yFooter() {
-  const tableFooter = document.querySelector(".tabulator-footer");
-  // query button and select tag
-  const interactiveElements = tableFooter.querySelectorAll("button, select");
-  for (let i = 0; i < interactiveElements.length; i++) {
-    interactiveElements[i].setAttribute("tabindex", contentIndex);
-  }
+  try {
+    const tableFooter = document.querySelector(".tabulator-footer");
+    // query button and select tag
+    const interactiveElements = tableFooter.querySelectorAll("button, select");
+    for (let i = 0; i < interactiveElements.length; i++) {
+      interactiveElements[i].setAttribute("tabindex", contentIndex);
+    }
+  } catch (e) {}
 }
 
 /**

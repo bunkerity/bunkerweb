@@ -6,6 +6,7 @@ from .utils.widgets import (
     text_widget,
     tabulator_widget,
     unmatch_widget,
+    input_widget,
     datepicker_widget,
     checkbox_widget,
 )
@@ -323,16 +324,15 @@ def bans_add() -> dict:
     bans_add_columns = [
         add_column(title="IP", field="ip", formatter="fields"),
         add_column(title="Ban end", field="ban_end", formatter="fields"),
-        add_column(title="delete", field="delete", formatter="buttongroup", maxWidth=100),
     ]
 
     default_add_ban = [
         {
             "id": 1,
             "ip": get_fields_from_field(
-                datepicker_widget(
+                input_widget(
                     id="datepicker-add-ban-ip-1",
-                    name="datepicker-add-ban-ip-1",
+                    name="ip",
                     label="bans_add_ban_ip",  # keep it (a18n)
                     hideLabel=True,
                     value="",
@@ -342,28 +342,12 @@ def bans_add() -> dict:
             "ban_end": get_fields_from_field(
                 datepicker_widget(
                     id="datepicker-add-ban-end-1",
-                    name="datepicker-add-ban-end-1",
+                    name="ban_end",
                     label="bans_add_end_date",  # keep it (a18n)
                     hideLabel=True,
                     value="",
                 )
             ),
-            # Need to create a script on Page.vue level to retrive table data and remove by id
-            "delete": button_group_widget(
-                buttons=[
-                    button_widget(
-                        id="delete-ban-1",
-                        type="button",
-                        text="action_delete",  # keep it (a18n)
-                        hideText=True,
-                        iconName="trash",
-                        iconColor="white",
-                        color="error",
-                        size="normal",
-                        attrs={"data-delete-row": "1"},  # we will use this attrs to remove the row
-                    ),
-                ]
-            )["data"],
         }
     ]
 
@@ -388,12 +372,13 @@ def bans_add() -> dict:
             title_widget("bans_add_title"),  # keep it (a18n)
             subtitle_widget("bans_add_subtitle"),  # keep it (a18n)
             tabulator_widget(
-                id="table-register-plugins",
+                id="table-add-bans",
                 columns=bans_add_columns,
                 items=default_add_ban,
                 layout="fitColumns",
                 actionsButtons=bans_add_table_actions,
                 itemsBeforePagination=20,
+                isPagination=False,
             ),
             add_ban_action,
         ],
