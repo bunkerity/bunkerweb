@@ -305,9 +305,7 @@ def plugins_page():
     if tmp_ui_path.is_dir():
         rmtree(tmp_ui_path, ignore_errors=True)
 
-    db_plugins = current_app.db.get_plugins()
-
-    builder = plugins_builder(db_plugins)
+    builder = plugins_builder(current_app.db.get_plugins())
     return render_template("plugins.html", data_server_builder=b64encode(dumps(builder).encode("utf-8")).decode("ascii"))
 
 
