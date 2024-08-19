@@ -356,12 +356,6 @@ def delete_plugin():
         return {"status": "ko", "message": "Database is in read-only mode"}, 403
 
     verify_data_in_form(
-        data={"csrf_token": None},
-        err_message="Missing csrf_token parameter on /plugins/delete.",
-        redirect_url="plugins",
-        next=True,
-    )
-    verify_data_in_form(
         data={"plugin_name": None},
         err_message="Missing plugin name parameter on /plugins/delete.",
         redirect_url="plugins",

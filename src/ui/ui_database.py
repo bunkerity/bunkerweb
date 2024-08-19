@@ -226,7 +226,14 @@ class UIDatabase(Database):
         return ""
 
     def update_ui_user(
-        self, username: str, password: bytes, totp_secret: Optional[str], *, totp_recovery_codes: Optional[List[str]] = None, method: str = "manual"
+        self,
+        username: str,
+        password: bytes,
+        totp_secret: Optional[str],
+        *,
+        email: Optional[str] = None,
+        totp_recovery_codes: Optional[List[str]] = None,
+        method: str = "manual",
     ) -> str:
         """Update ui user."""
         totp_changed = False
@@ -240,6 +247,7 @@ class UIDatabase(Database):
 
             totp_changed = user.totp_secret != totp_secret
 
+            user.email = email
             user.password = password.decode("utf-8")
             user.totp_secret = totp_secret
             user.method = method
