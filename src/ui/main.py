@@ -57,6 +57,7 @@ from builder.home import home_builder  # type: ignore
 from builder.instances import instances_builder  # type: ignore
 from builder.jobs import jobs_builder  # type: ignore
 from builder.logs import logs_builder  # type: ignore
+from builder.plugins import plugins_builder  # type: ignore
 from builder.raw_mode import raw_mode_builder  # type: ignore
 from builder.reports import reports_builder  # type: ignore
 from builder.services import services_builder  # type: ignore
@@ -1847,24 +1848,13 @@ def plugins():
         rmtree(tmp_ui_path, ignore_errors=True)
 
     plugins = app.bw_config.get_plugins()
-    plugins_internal = 0
-    plugins_external = 0
-    plugins_pro = 0
+    types = set()
 
     for plugin in plugins:
-        if plugin["type"] == "external":
-            plugins_external += 1
-        elif plugin["type"] == "pro":
-            plugins_pro += 1
-        else:
-            plugins_internal += 1
+        types.add(plugin["type"])
 
-    return render_template(
-        "plugins.html",
-        plugins_count_internal=plugins_internal,
-        plugins_count_external=plugins_external,
-        plugins_count_pro=plugins_pro,
-    )
+    builder = plugins_builder(plugins, list(types))
+    return render_template("plugins.html", data_server_builder=b64encode(dumps(builder).encode("utf-8")).decode("ascii"))
 
 
 @app.route("/plugins/upload", methods=["POST"])
