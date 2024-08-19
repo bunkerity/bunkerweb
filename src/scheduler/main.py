@@ -2,7 +2,7 @@
 
 from argparse import ArgumentParser
 from contextlib import suppress
-from datetime import datetime
+from datetime import datetime, timezone
 from io import BytesIO
 from itertools import chain
 from json import load as json_load
@@ -97,8 +97,8 @@ MASTER_MODE = getenv("MASTER_MODE", "no") == "yes"
 
 
 def handle_stop(signum, frame):
-    current_time = datetime.now()
-    while APPLYING_CHANGES.is_set() and (datetime.now() - current_time).seconds < 30:
+    current_time = datetime.now(timezone.utc)
+    while APPLYING_CHANGES.is_set() and (datetime.now(timezone.utc) - current_time).seconds < 30:
         LOGGER.warning("Waiting for the changes to be applied before stopping ...")
         sleep(1)
 
@@ -898,7 +898,7 @@ if __name__ == "__main__":
                     scheduler_first_start = False
 
             if not HEALTHY_PATH.is_file():
-                HEALTHY_PATH.write_text(datetime.now().isoformat(), encoding="utf-8")
+                HEALTHY_PATH.write_text(datetime.now(timezone.utc).isoformat(), encoding="utf-8")
 
             APPLYING_CHANGES.clear()
             schedule_every(HEALTHCHECK_INTERVAL).seconds.do(healthcheck_job)
@@ -911,7 +911,7 @@ if __name__ == "__main__":
                     sleep(3 if SCHEDULER.db.readonly else 1)
                     run_pending()
                     SCHEDULER.run_pending()
-                    current_time = datetime.now()
+                    current_time = datetime.now(timezone.utc)
 
                     while DB_LOCK_FILE.is_file() and DB_LOCK_FILE.stat().st_ctime + 30 > current_time.timestamp():
                         LOGGER.debug("Database is locked, waiting for it to be unlocked (timeout: 30s) ...")
