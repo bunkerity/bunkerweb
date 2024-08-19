@@ -621,7 +621,7 @@ if __name__ == "__main__":
             # Check if any external or pro plugin has been added by the user
             assert SCHEDULER is not None, "SCHEDULER is not defined"
             LOGGER.info(f"Checking if there are any changes in {_type} plugins ...")
-            plugin_path = EXTERNAL_PLUGINS_PATH if _type == "external" else PRO_PLUGINS_PATH
+            plugin_path = PRO_PLUGINS_PATH if _type == "pro" else EXTERNAL_PLUGINS_PATH
             db_plugins = SCHEDULER.db.get_plugins(_type=_type)
             external_plugins = []
             tmp_external_plugins = []

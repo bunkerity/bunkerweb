@@ -295,9 +295,7 @@ class CLI(ApiCaller):
         command_path = (
             Path(sep, "usr", "share", "bunkerweb", "core", plugin_id)
             if plugin_type == "core"
-            else (
-                Path(sep, "etc", "bunkerweb", "plugins", plugin_id) if plugin_type == "external" else Path(sep, "etc", "bunkerweb", "pro", "plugins", plugin_id)
-            )
+            else (Path(sep, "etc", "bunkerweb", "pro", "plugins", plugin_id) if plugin_type == "pro" else Path(sep, "etc", "bunkerweb", "plugins", plugin_id))
         ).joinpath("bwcli", file_name)
 
         if not command_path.is_file():

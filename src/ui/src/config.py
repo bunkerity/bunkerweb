@@ -59,7 +59,7 @@ class Config:
             **self.__settings,
         }
 
-    def get_plugins(self, *, _type: Literal["all", "external", "pro"] = "all", with_data: bool = False) -> List[dict]:
+    def get_plugins(self, *, _type: Literal["all", "external", "ui", "pro"] = "all", with_data: bool = False) -> List[dict]:
         plugins = self.__db.get_plugins(_type=_type, with_data=with_data)
         plugins.sort(key=itemgetter("name"))
 

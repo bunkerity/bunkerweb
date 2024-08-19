@@ -121,7 +121,7 @@ def manage_bunkerweb(method: str, *args, operation: str = "reloads", is_draft: b
 def verify_data_in_form(
     data: Optional[Dict[str, Union[Tuple, Any]]] = None, err_message: str = "", redirect_url: str = "", next: bool = False
 ) -> Union[bool, Response]:
-    if not request.json:
+    if not request.form:
         return handle_error("Invalid request", redirect_url, next, "error")
 
     LOGGER.debug(f"Verifying data in form: {data}")

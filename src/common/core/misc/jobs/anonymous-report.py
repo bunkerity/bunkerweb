@@ -76,7 +76,7 @@ try:
     data["pro_plugins"] = []
 
     for plugin in JOB.db.get_plugins():
-        if plugin["type"] == "external":
+        if plugin["type"] in ("external", "ui"):
             data["external_plugins"].append(f"{plugin['id']}/{plugin['version']}")
         elif plugin["type"] == "pro":
             data["pro_plugins"].append(f"{plugin['id']}/{plugin['version']}")

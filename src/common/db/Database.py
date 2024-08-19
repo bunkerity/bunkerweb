@@ -2151,9 +2151,9 @@ class Database:
                         self.logger.warning(f'Plugin "{plugin["id"]}" already exists, but the method is different, skipping update')
                         continue
 
-                    if db_plugin.type not in ("external", "pro"):
+                    if db_plugin.type not in ("external", "ui", "pro"):
                         self.logger.warning(
-                            f"Plugin \"{plugin['id']}\" is not {_type}, skipping update (updating a non-external or non-pro plugin is forbidden for security reasons)",  # noqa: E501
+                            f"Plugin \"{plugin['id']}\" is not {_type}, skipping update (updating a non-external, non-ui or non-pro plugin is forbidden for security reasons)",  # noqa: E501
                         )
                         continue
 
@@ -2856,7 +2856,7 @@ class Database:
                 with suppress(ProgrammingError, OperationalError):
                     metadata = session.query(Metadata).get(1)
                     if metadata is not None:
-                        if _type == "external":
+                        if _type in ("external", "ui"):
                             metadata.external_plugins_changed = True
                             metadata.last_external_plugins_change = datetime.now(timezone.utc)
                         elif _type == "pro":
@@ -2897,13 +2897,23 @@ class Database:
                 Template_custom_configs.template_id.in_(session.query(Templates).filter_by(plugin_id=plugin_id).with_entities(Templates.id))
             ).delete()
 
+            with suppress(ProgrammingError, OperationalError):
+                metadata = session.query(Metadata).get(1)
+                if metadata is not None:
+                    if method in ("external", "ui"):
+                        metadata.external_plugins_changed = True
+                        metadata.last_external_plugins_change = datetime.now(timezone.utc)
+                    elif method == "pro":
+                        metadata.pro_plugins_changed = True
+                        metadata.last_pro_plugins_change = datetime.now(timezone.utc)
+
             try:
                 session.commit()
             except BaseException as e:
                 return str(e)
         return ""
 
-    def get_plugins(self, *, _type: Literal["all", "external", "pro"] = "all", with_data: bool = False) -> List[Dict[str, Any]]:
+    def get_plugins(self, *, _type: Literal["all", "external", "ui", "pro"] = "all", with_data: bool = False) -> List[Dict[str, Any]]:
         """Get all plugins from the database."""
         plugins = []
         with self._db_session() as session:
@@ -2912,7 +2922,9 @@ class Database:
                 entities.append(Plugins.data)  # type: ignore
 
             db_plugins = session.query(Plugins).with_entities(*entities)
-            if _type != "all":
+            if _type == "external":
+                db_plugins = db_plugins.filter(Plugins.method.in_(["external", "ui"]))
+            elif _type != "all":
                 db_plugins = db_plugins.filter_by(type=_type)
 
             for plugin in db_plugins:
