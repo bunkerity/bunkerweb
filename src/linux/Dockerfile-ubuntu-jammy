@@ -1,7 +1,7 @@
 FROM ubuntu:22.04@sha256:340d9b015b194dc6e2a13938944e0d016e57b9679963fdeb9ce021daac430221 AS builder
 
 ENV OS=ubuntu
-ENV NGINX_VERSION=1.26.1
+ENV NGINX_VERSION=1.26.2
 
 # Install Nginx and dependencies
 RUN apt update && \
@@ -11,7 +11,7 @@ RUN apt update && \
     echo "deb-src https://nginx.org/packages/ubuntu/ jammy nginx" >> /etc/apt/sources.list.d/nginx.list && \
     apt-key adv --keyserver keyserver.ubuntu.com --recv-keys ABF5BD827BD9BF62 && \
     apt-get update && \
-    apt-get install -y --no-install-recommends nginx=${NGINX_VERSION}-2~jammy
+    apt-get install -y --no-install-recommends nginx=${NGINX_VERSION}-1~jammy
 
 WORKDIR /tmp/bunkerweb/deps
 
