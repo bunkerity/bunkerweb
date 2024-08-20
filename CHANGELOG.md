@@ -2,6 +2,7 @@
 
 ## v1.6.0-beta - ????/??/??
 
+- [BUGFIX] Add HTTP3 specific modsec rule in web UI to avoid false positives
 - [FEATURE] Add support for the Coreruleset plugins via the USE_MODSECURITY_CRS_PLUGINS and the MODSECURITY_CRS_PLUGIN_URLS settings (it automatically downloads and installs the plugins like with BunkerWeb's external plugins). plugins can also be added manually via custom configuration files
 - [FEATURE] Add X_DNS_PREFETCH_CONTROL setting to control the DNS prefetching behavior via the X-DNS-Prefetch-Control header (default is off)
 - [FEATURE] Add new `securitytxt` plugin to manage the security.txt file from settings and serve it
@@ -9,16 +10,21 @@
 - [FEATURE] Jobs now have an history which the size can be controlled via the `DATABASE_MAX_JOBS_RUNS` setting (default is 10000) and it will be possible to see it in the web UI in a future release
 - [FEATURE] Add support for HTTP/3 connections limiting via the `HTTP3_CONNECTIONS_LIMIT` setting (default is 100) in the `limit` plugin
 - [FEATURE] Add new templating feature to allow to quickly override the default values of settings and custom configurations. You can also precise steps to follow in the UI to help the user configure services.
+- [FEATURE] Optimized the way the scheduler sends the configuration to the instances to make it faster and more reliable using a ThreadPoolExecutor
+- [FEATURE] Add the possibility to set a custom timezone for every service via the `TZ` environment variable (will apply to the logs and all date fields stored in the database). If not set, it will use the local timezone of the server.
 - [SCHEDULER] Refactor the scheduler to use the `BUNKERWEB_INSTANCES` (previously known as `OVERRIDE_INSTANCES`) environment variable instead of an integration specific system
 - [AUTOCONF] Add new `NAMESPACES` environment variable to allow setting the namespaces to watch for the autoconf feature which makes it possible to use multiple autoconf instances in the same cluster while keeping the configuration separated
 - [AUTOCONF] Add new `USE_KUBERNETES_FQDN` environment variable to allow using the full qualified domain name of the services in Kubernetes instead of the ip address for the hostname of instances (default is yes)
 - [UI] Start refactoring the UI to make it more modular and easier to maintain with migration from Jinja to Vue.js
 - [UI] Add a `remember me` feature to the login page so that the user can stay logged in for a longer period of time (expires after 31 days)
 - [UI] Add new `TOTP_SECRETS` setting to encrypt the TOTP secrets in the database (if not set, we generate a random amount of secrets via passlib.totp) - ⚠ We highly recommend setting this setting to a custom value to prevent the secrets from being erased when the volumes are deleted
-- [UI] Add new `MF_RECOVERY_CODES_KEYS` and `MF_ENCRYPT_RECOVERY_CODES` settings to allow setting the encryption keys for the recovery codes and to enable/disable the encryption of the recovery codes (default is yes and if no keys are set, we generate random keys via cryptography.fernet.Fernet) - ⚠ We highly recommend setting these settings to custom values to prevent the recovery codes from being erased when the volumes are deleted
 - [UI] Start adding roles and permissions to the UI to allow different users to have different permissions in a multi-user environment for the near future
 - [UI] Made 2FA feature more user-friendly and added recovery codes in case of lost access to the 2FA device
+- [UI] Refactored the way we handle logs in the UI to make it so that it no longer relies on Integration specific logics and instead always reads the files present in the `/var/log/bunkerweb` folder
+- [DOCS] Updated docs for all new features and changes
 - [MISC] Review security headers in the `headers` plugin to improve security
+- [MISC] Updated context of `realip`'s `USE_PROXY_PROTOCOL` setting to `global` as it was always applied globally even if set only on a service
+- [DEPS] Updated NGINX version to v1.26.2
 
 ## v1.5.9 - 2024/07/22
 
