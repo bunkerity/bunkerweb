@@ -16,7 +16,6 @@ from sqlalchemy import MetaData, inspect, text
 from sqlalchemy.orm import joinedload
 from sqlalchemy.exc import IntegrityError
 
-from common_utils import get_timezone  # type: ignore
 from Database import Database  # type: ignore
 from model import Metadata  # type: ignore
 
@@ -48,7 +47,7 @@ class UIDatabase(Database):
 
             if db_version != bunkerweb_version:
                 self.logger.warning(f"UI tables version ({db_version}) is different from BunkerWeb version ({bunkerweb_version}), migrating them ...")
-                current_time = datetime.now(get_timezone())
+                current_time = datetime.now()
                 error = True
                 while error:
                     try:
@@ -56,7 +55,7 @@ class UIDatabase(Database):
                         metadata.reflect(self.sql_engine)
                         error = False
                     except BaseException as e:
-                        if (datetime.now(get_timezone()) - current_time).total_seconds() > 10:
+                        if (datetime.now() - current_time).total_seconds() > 10:
                             raise e
                         sleep(1)
 
@@ -205,7 +204,7 @@ class UIDatabase(Database):
                     return f"Role {role} doesn't exist"
                 session.add(RolesUsers(user_name=username, role_name=role))
 
-            current_time = datetime.now(get_timezone())
+            current_time = datetime.now()
             session.add(
                 Users(
                     username=username,
@@ -255,7 +254,7 @@ class UIDatabase(Database):
             user.password = password.decode("utf-8")
             user.totp_secret = totp_secret
             user.method = method
-            user.update_date = datetime.now(get_timezone())
+            user.update_date = datetime.now()
 
             try:
                 session.commit()
@@ -318,7 +317,7 @@ class UIDatabase(Database):
             if session.query(Roles).with_entities(Roles.name).filter_by(name=name).first():
                 return f"Role {name} already exists"
 
-            session.add(Roles(name=name, description=description, update_datetime=datetime.now(get_timezone())))
+            session.add(Roles(name=name, description=description, update_datetime=datetime.now()))
 
             for permission in permissions:
                 if not session.query(Permissions).with_entities(Permissions.name).filter_by(name=permission).first():

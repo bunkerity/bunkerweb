@@ -13,8 +13,6 @@ if deps_path not in sys_path:
 
 from utils import acquire_db_lock, backup_database, BACKUP_DIR, DB_LOCK_FILE, LOGGER, restore_database
 
-from common_utils import get_timezone  # type: ignore
-
 status = 0
 
 try:
@@ -51,7 +49,7 @@ try:
         sys_exit(1)
 
     LOGGER.info("Backing up the current database before restoring the backup ...")
-    current_time = datetime.now(get_timezone())
+    current_time = datetime.now()
     tmp_backup_dir = Path(sep, "tmp", "bunkerweb", "backups")
     tmp_backup_dir.mkdir(parents=True, exist_ok=True)
     db = backup_database(current_time, backup_dir=tmp_backup_dir)

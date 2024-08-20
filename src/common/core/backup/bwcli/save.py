@@ -13,8 +13,6 @@ if deps_path not in sys_path:
 
 from utils import acquire_db_lock, backup_database, BACKUP_DIR, DB_LOCK_FILE, LOGGER
 
-from common_utils import get_timezone  # type: ignore
-
 status = 0
 
 try:
@@ -41,7 +39,7 @@ try:
         LOGGER.info(f"Creating directory {directory} as it does not exist")
         directory.mkdir(parents=True, exist_ok=True)
 
-    backup_database(datetime.now(get_timezone()), backup_dir=directory)
+    backup_database(datetime.now(), backup_dir=directory)
 except SystemExit as se:
     status = se.code
 except:

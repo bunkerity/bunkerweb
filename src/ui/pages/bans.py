@@ -8,8 +8,6 @@ from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import login_required
 from redis import Redis, Sentinel
 
-from common_utils import get_timezone  # type: ignore
-
 from builder.bans import bans_builder  # type: ignore
 
 from dependencies import BW_CONFIG, BW_INSTANCES_UTILS, DB
@@ -170,7 +168,7 @@ def bans_page():
                     ban_end = float(ban["ban_end"])
                 except ValueError:
                     continue
-                ban_end = (datetime.fromtimestamp(ban_end) - datetime.now(get_timezone())).total_seconds()
+                ban_end = (datetime.fromtimestamp(ban_end) - datetime.now()).total_seconds()
 
             if redis_client:
                 ok = redis_client.set(f"bans_ip_{ban['ip']}", dumps({"reason": reason, "date": time()}))

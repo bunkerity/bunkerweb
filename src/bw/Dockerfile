@@ -48,7 +48,7 @@ FROM nginx:1.26.2-alpine-slim@sha256:28967af9fa8d5e1c58a45feeb35e2f326bb6d99b120
 RUN umask 027
 
 # Install runtime dependencies
-RUN apk add --no-cache openssl pcre bash python3 yajl geoip libxml2 libgd curl
+RUN apk add --no-cache openssl pcre bash python3 yajl geoip libxml2 libgd curl tzdata
 
 # Fix CVEs
 RUN apk add --no-cache "busybox>=1.36.1-r17" "busybox-binsh>=1.36.1-r17" "ssl_client>=1.36.1-r17" # CVE-2023-42363 CVE-2023-42366

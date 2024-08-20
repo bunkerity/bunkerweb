@@ -14,7 +14,7 @@ from threading import Lock
 from traceback import format_exc
 from typing import Any, Dict, Literal, Optional, Tuple, Union
 
-from common_utils import bytes_hash, file_hash, get_timezone
+from common_utils import bytes_hash, file_hash
 
 LOCK = Lock()
 EXPIRE_TIME = {
@@ -144,7 +144,7 @@ class Job:
         try:
             cache_info = self.get_cache(name, job_name=job_name, service_id=service_id, plugin_id=plugin_id, with_info=True, with_data=False)
             if isinstance(cache_info, dict):
-                current_time = datetime.now(get_timezone()).timestamp()
+                current_time = datetime.now().timestamp()
                 if current_time < cache_info["last_update"]:
                     return False
                 is_cached = current_time - cache_info["last_update"] < EXPIRE_TIME[expire]

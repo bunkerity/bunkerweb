@@ -1,12 +1,9 @@
 from hashlib import new as new_hash
 from io import BytesIO
-from logging import error
-from os import environ, getenv, sep
+from os import getenv, sep
 from pathlib import Path
 from platform import machine
 from typing import Dict, Union
-
-from pytz import UnknownTimeZoneError, timezone
 
 
 def dict_to_frozenset(d):
@@ -91,12 +88,3 @@ def bytes_hash(bio: Union[str, bytes, BytesIO], *, algorithm: str = "sha512") ->
         _hash.update(data)
     bio.seek(0, 0)
     return _hash.hexdigest()
-
-
-def get_timezone():
-    try:
-        return timezone(getenv("TZ", "UTC"))
-    except UnknownTimeZoneError as e:
-        environ["TZ"] = "UTC"
-        error(f"Invalid timezone: {e}, using UTC instead")
-        return timezone("UTC")

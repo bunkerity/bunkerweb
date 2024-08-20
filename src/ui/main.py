@@ -18,8 +18,6 @@ from json import dumps
 from signal import SIGINT, signal, SIGTERM
 from time import time
 
-from common_utils import get_timezone  # type: ignore
-
 from src.reverse_proxied import ReverseProxied
 
 from pages.bans import bans
@@ -245,10 +243,7 @@ def before_request():
         if (
             DB.database_uri
             and DB.readonly
-            and (
-                datetime.now(get_timezone()) - datetime.fromisoformat(DATA.get("LAST_DATABASE_RETRY", "1970-01-01T00:00:00")).replace(tzinfo=get_timezone())
-                > timedelta(minutes=1)
-            )
+            and (datetime.now() - datetime.fromisoformat(DATA.get("LAST_DATABASE_RETRY", "1970-01-01T00:00:00")).astimezone() > timedelta(minutes=1))
         ):
             try:
                 DB.retry_connection(pool_timeout=1)
@@ -265,19 +260,19 @@ def before_request():
                             DB.retry_connection(fallback=True, pool_timeout=1)
                             DB.retry_connection(fallback=True, log=False)
                 DATA["READONLY_MODE"] = True
-            DATA["LAST_DATABASE_RETRY"] = DB.last_connection_retry.isoformat() if DB.last_connection_retry else datetime.now(get_timezone()).isoformat()
+            DATA["LAST_DATABASE_RETRY"] = DB.last_connection_retry.isoformat() if DB.last_connection_retry else datetime.now().isoformat()
         elif not DATA.get("READONLY_MODE", False) and request.method == "POST" and not ("/totp" in request.path or "/login" in request.path):
             try:
                 DB.test_write()
                 DATA["READONLY_MODE"] = False
             except BaseException:
                 DATA["READONLY_MODE"] = True
-                DATA["LAST_DATABASE_RETRY"] = DB.last_connection_retry.isoformat() if DB.last_connection_retry else datetime.now(get_timezone()).isoformat()
+                DATA["LAST_DATABASE_RETRY"] = DB.last_connection_retry.isoformat() if DB.last_connection_retry else datetime.now().isoformat()
         else:
             try:
                 DB.test_read()
             except BaseException:
-                DATA["LAST_DATABASE_RETRY"] = DB.last_connection_retry.isoformat() if DB.last_connection_retry else datetime.now(get_timezone()).isoformat()
+                DATA["LAST_DATABASE_RETRY"] = DB.last_connection_retry.isoformat() if DB.last_connection_retry else datetime.now().isoformat()
 
         DB.readonly = DATA.get("READONLY_MODE", False)
 

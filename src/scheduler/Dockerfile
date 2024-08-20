@@ -41,7 +41,7 @@ FROM python:3.12.5-alpine@sha256:c2f41e6a5a67bc39b95be3988dd19fbd05d1b82375c46d9
 RUN umask 027
 
 # Install runtime dependencies and add scheduler user
-RUN apk add --no-cache bash unzip libgcc libstdc++ libpq openssl libmagic mariadb-connector-c mariadb-client postgresql-client sqlite && \
+RUN apk add --no-cache bash unzip libgcc libstdc++ libpq openssl libmagic mariadb-connector-c mariadb-client postgresql-client sqlite tzdata && \
   addgroup -g 101 scheduler && \
   adduser -h /var/cache/nginx -g scheduler -s /bin/sh -G scheduler -D -H -u 101 scheduler
 

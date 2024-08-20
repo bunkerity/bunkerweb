@@ -37,7 +37,7 @@ FROM python:3.12.5-alpine@sha256:c2f41e6a5a67bc39b95be3988dd19fbd05d1b82375c46d9
 RUN umask 027
 
 # Install bash and create autoconf user
-RUN apk add --no-cache bash && \
+RUN apk add --no-cache bash tzdata && \
   addgroup -g 101 autoconf && \
   adduser -h /var/cache/autoconf -g autoconf -s /bin/sh -G autoconf -D -H -u 101 autoconf
 

@@ -18,7 +18,7 @@ from maxminddb import open_database
 from requests import RequestException, Response, get
 
 from logger import setup_logger  # type: ignore
-from common_utils import bytes_hash, get_timezone, file_hash  # type: ignore
+from common_utils import bytes_hash, file_hash  # type: ignore
 from jobs import Job  # type: ignore
 
 LOGGER = setup_logger("JOBS.mmdb-country", getenv("LOG_LEVEL", "INFO"))
@@ -62,7 +62,7 @@ try:
 
             if response and response.status_code == 200:
                 skip_dl = response.content.find(bytes_hash(job_cache["data"], algorithm="sha1").encode()) != -1
-            elif job_cache["last_update"] < (datetime.now(get_timezone()) - timedelta(weeks=1)).timestamp():
+            elif job_cache["last_update"] < (datetime.now() - timedelta(weeks=1)).timestamp():
                 LOGGER.warning("Unable to check if the cache file is the latest version from db-ip.com and file is older than 1 week, checking anyway...")
                 skip_dl = False
 

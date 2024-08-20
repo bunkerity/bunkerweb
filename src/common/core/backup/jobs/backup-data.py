@@ -16,8 +16,6 @@ from logger import setup_logger  # type: ignore
 from jobs import Job  # type: ignore
 from utils import backup_database
 
-from common_utils import get_timezone  # type: ignore
-
 LOGGER = setup_logger("BACKUP", getenv("LOG_LEVEL", "INFO"))
 status = 0
 
@@ -37,7 +35,7 @@ try:
     if last_backup_date:
         last_backup_date = datetime.fromisoformat(last_backup_date)
 
-    current_time = datetime.now(get_timezone())
+    current_time = datetime.now()
     backup_period = getenv("BACKUP_SCHEDULE", "daily")
     PERIOD_STAMPS = {
         "daily": timedelta(days=1).total_seconds(),

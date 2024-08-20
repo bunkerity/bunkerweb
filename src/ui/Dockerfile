@@ -56,7 +56,7 @@ FROM python:3.12.5-alpine@sha256:c2f41e6a5a67bc39b95be3988dd19fbd05d1b82375c46d9
 RUN umask 027
 
 # Install runtime dependencies and add ui user
-RUN apk add --no-cache bash unzip libmagic mariadb-connector-c mariadb-client postgresql-client sqlite && \
+RUN apk add --no-cache bash unzip libmagic mariadb-connector-c mariadb-client postgresql-client sqlite tzdata && \
   addgroup -g 101 ui && \
   adduser -h /var/cache/nginx -g ui -s /bin/bash -G ui -D -H -u 101 ui
 

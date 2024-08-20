@@ -27,7 +27,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 from dotenv import dotenv_values
 from schedule import every as schedule_every, run_pending
 
-from common_utils import bytes_hash, dict_to_frozenset, get_integration, get_timezone  # type: ignore
+from common_utils import bytes_hash, dict_to_frozenset, get_integration  # type: ignore
 from logger import setup_logger  # type: ignore
 from Database import Database  # type: ignore
 from JobScheduler import JobScheduler
@@ -97,8 +97,8 @@ MASTER_MODE = getenv("MASTER_MODE", "no") == "yes"
 
 
 def handle_stop(signum, frame):
-    current_time = datetime.now(get_timezone())
-    while APPLYING_CHANGES.is_set() and (datetime.now(get_timezone()) - current_time).seconds < 30:
+    current_time = datetime.now()
+    while APPLYING_CHANGES.is_set() and (datetime.now() - current_time).seconds < 30:
         LOGGER.warning("Waiting for the changes to be applied before stopping ...")
         sleep(1)
 
@@ -373,8 +373,12 @@ def run_in_slave_mode():  # TODO: Refactor this feature
             continue
         sleep(5)
 
+    tz = getenv("TZ")
+    if tz:
+        env["TZ"] = tz
+
     # Instantiate scheduler environment
-    SCHEDULER.env = env | {"TZ": getenv("TZ", "UTC"), "LOG_LEVEL": getenv("CUSTOM_LOG_LEVEL", env.get("LOG_LEVEL", "notice"))}
+    SCHEDULER.env = env | {"LOG_LEVEL": getenv("CUSTOM_LOG_LEVEL", env.get("LOG_LEVEL", "notice"))}
 
     threads = [
         Thread(target=generate_custom_configs),
@@ -561,9 +565,12 @@ if __name__ == "__main__":
 
         env = SCHEDULER.db.get_config()
         env["DATABASE_URI"] = SCHEDULER.db.database_uri
+        tz = getenv("TZ")
+        if tz:
+            env["TZ"] = tz
 
         # Instantiate scheduler environment
-        SCHEDULER.env = env | {"TZ": getenv("TZ", "UTC"), "LOG_LEVEL": getenv("CUSTOM_LOG_LEVEL", env.get("LOG_LEVEL", "notice"))}
+        SCHEDULER.env = env | {"LOG_LEVEL": getenv("CUSTOM_LOG_LEVEL", env.get("LOG_LEVEL", "notice"))}
 
         threads = []
 
@@ -685,8 +692,6 @@ if __name__ == "__main__":
 
         LOGGER.info("Running plugins download jobs ...")
 
-        # Update the environment variables of the scheduler
-        SCHEDULER.env = env | {"TZ": getenv("TZ", "UTC"), "LOG_LEVEL": getenv("CUSTOM_LOG_LEVEL", env.get("LOG_LEVEL", "notice"))}
         if not SCHEDULER.run_single("download-plugins"):
             LOGGER.warning("download-plugins job failed at first start, plugins settings set by the user may not be up to date ...")
         if not SCHEDULER.run_single("download-pro-plugins"):
@@ -729,6 +734,9 @@ if __name__ == "__main__":
             SCHEDULER.update_jobs()
             env = SCHEDULER.db.get_config()
             env["DATABASE_URI"] = SCHEDULER.db.database_uri
+            tz = getenv("TZ")
+            if tz:
+                env["TZ"] = tz
 
         LOGGER.info("Executing scheduler ...")
 
@@ -900,7 +908,7 @@ if __name__ == "__main__":
                     scheduler_first_start = False
 
             if not HEALTHY_PATH.is_file():
-                HEALTHY_PATH.write_text(datetime.now(get_timezone()).isoformat(), encoding="utf-8")
+                HEALTHY_PATH.write_text(datetime.now().isoformat(), encoding="utf-8")
 
             APPLYING_CHANGES.clear()
             schedule_every(HEALTHCHECK_INTERVAL).seconds.do(healthcheck_job)
@@ -913,7 +921,7 @@ if __name__ == "__main__":
                     sleep(3 if SCHEDULER.db.readonly else 1)
                     run_pending()
                     SCHEDULER.run_pending()
-                    current_time = datetime.now(get_timezone())
+                    current_time = datetime.now()
 
                     while DB_LOCK_FILE.is_file() and DB_LOCK_FILE.stat().st_ctime + 30 > current_time.timestamp():
                         LOGGER.debug("Database is locked, waiting for it to be unlocked (timeout: 30s) ...")
@@ -1043,6 +1051,9 @@ if __name__ == "__main__":
                     CHANGES.append("config")
                     env = SCHEDULER.db.get_config()
                     env["DATABASE_URI"] = SCHEDULER.db.database_uri
+                    tz = getenv("TZ")
+                    if tz:
+                        env["TZ"] = tz
 
     except:
         LOGGER.error(f"Exception while executing scheduler : {format_exc()}")

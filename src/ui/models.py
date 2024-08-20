@@ -6,8 +6,6 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
-from common_utils import get_timezone  # type: ignore
-
 from bcrypt import checkpw
 from flask_login import AnonymousUserMixin, UserMixin
 from sqlalchemy.orm import declarative_base, relationship
@@ -29,8 +27,8 @@ class AnonymousUser(AnonymousUserMixin):
     last_login_ip = None
     login_count = 0
     totp_secret = None
-    creation_date = datetime.now(get_timezone())
-    update_date = datetime.now(get_timezone())
+    creation_date = datetime.now()
+    update_date = datetime.now()
     list_roles = []
     list_permissions = []
     list_recovery_codes = []

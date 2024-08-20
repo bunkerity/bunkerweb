@@ -3,8 +3,6 @@ from datetime import datetime
 from flask import Blueprint, flash, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_user
 
-from common_utils import get_timezone  # type: ignore
-
 from dependencies import DB
 from utils import LOGGER
 
@@ -29,7 +27,7 @@ def login_page():
             session["user_agent"] = request.headers.get("User-Agent")
             session["totp_validated"] = False
 
-            ui_user.last_login_at = datetime.now(get_timezone())
+            ui_user.last_login_at = datetime.now()
             ui_user.last_login_ip = request.remote_addr
             ui_user.login_count += 1
 

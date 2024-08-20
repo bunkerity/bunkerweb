@@ -209,6 +209,7 @@ class Configurator:
                     "SHLVL",
                     "SERVER_SOFTWARE",
                     "NAMESPACE",
+                    "TZ",
                 )
             ):
                 self.__logger.warning(f"Ignoring variable {variable} : {err} - {value = !r}")
