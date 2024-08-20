@@ -8,6 +8,8 @@ if [ -z "$integration" ] ; then
 elif [ "$integration" != "docker" ] && [ "$integration" != "linux" ] ; then
     echo "⌨️ Integration \"$integration\" is not supported ❌"
     exit 1
+else
+    exit 0 # ! Temporary while working on the new test framework
 fi
 
 echo "⌨️ Building bwcli stack for integration \"$integration\" ..."

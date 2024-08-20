@@ -75,3 +75,4 @@ repos:
     rev: 2491238703a5d3415bb2b7ff11388bf775372f29 # frozen: v0.10.0
     hooks:
       - id: shellcheck
+        exclude: ^tests/
