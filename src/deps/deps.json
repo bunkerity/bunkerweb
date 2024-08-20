@@ -98,7 +98,7 @@
       "id": "lua-nginx-module",
       "name": "lua-nginx-module v0.10.27",
       "url": "https://github.com/openresty/lua-nginx-module.git",
-      "commit": "f44c18859050be5af314bae8f05660478af5e31d"
+      "commit": "ea09d92adf835e30cab8d79343c7b8266e888128"
     },
     {
       "id": "lua-resty-core",
@@ -227,7 +227,7 @@
       "id": "stream-lua-nginx-module",
       "name": "stream-lua-nginx-module v0.0.15",
       "url": "https://github.com/openresty/stream-lua-nginx-module.git",
-      "commit": "982ce5283172fd5ac5cba21bfc55b579568a0994"
+      "commit": "69f0cd762112a6e0cddb07f2b5192e9a65034a93"
     },
     {
       "id": "zlib",
