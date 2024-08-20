@@ -107,17 +107,17 @@ def on_starting(server):
         LOGGER.info("Database ui tables successfully updated")
 
     if not DB.get_ui_roles(as_dict=True):
-        ret = DB.create_ui_role("admin", "Admin can create account, manager software and read data.", ["manage", "write", "read"])
+        ret = DB.create_ui_role("admin", "Admins can create new users, edit and read the data.", ["manage", "write", "read"])
         if ret:
             LOGGER.error(f"Couldn't create the admin role in the database: {ret}")
             exit(1)
 
-        ret = DB.create_ui_role("writer", "Write can manage software and read data but can't create account.", ["write", "read"])
+        ret = DB.create_ui_role("writer", "Writers can edit and read the data but can't create new users.", ["write", "read"])
         if ret:
             LOGGER.error(f"Couldn't create the admin role in the database: {ret}")
             exit(1)
 
-        ret = DB.create_ui_role("reader", "Reader can read data but can't proceed to any actions.", ["read"])
+        ret = DB.create_ui_role("reader", "Readers can only read the data.", ["read"])
         if ret:
             LOGGER.error(f"Couldn't create the admin role in the database: {ret}")
             exit(1)
