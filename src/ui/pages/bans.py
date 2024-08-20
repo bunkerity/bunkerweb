@@ -1,5 +1,5 @@
 from base64 import b64encode
-from datetime import datetime, timezone
+from datetime import datetime
 from json import dumps, loads as json_loads
 from math import floor
 from time import time
@@ -7,6 +7,8 @@ from time import time
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import login_required
 from redis import Redis, Sentinel
+
+from common_utils import get_timezone  # type: ignore
 
 from builder.bans import bans_builder  # type: ignore
 
@@ -168,7 +170,7 @@ def bans_page():
                     ban_end = float(ban["ban_end"])
                 except ValueError:
                     continue
-                ban_end = (datetime.fromtimestamp(ban_end) - datetime.now(timezone.utc)).total_seconds()
+                ban_end = (datetime.fromtimestamp(ban_end) - datetime.now(get_timezone())).total_seconds()
 
             if redis_client:
                 ok = redis_client.set(f"bans_ip_{ban['ip']}", dumps({"reason": reason, "date": time()}))

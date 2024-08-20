@@ -1,16 +1,17 @@
-from datetime import datetime, timezone
-from functools import partial
+from datetime import datetime
 from os.path import join, sep
 from sys import path as sys_path
 
-for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("db",))]:
+for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("db",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
+
+from common_utils import get_timezone  # type: ignore
 
 from bcrypt import checkpw
 from flask_login import AnonymousUserMixin, UserMixin
 from sqlalchemy.orm import declarative_base, relationship
-from sqlalchemy import Boolean, DateTime, Column, Identity, Integer, String, ForeignKey, UnicodeText, func
+from sqlalchemy import Boolean, DateTime, Column, Identity, Integer, String, ForeignKey, UnicodeText
 
 
 from model import METHODS_ENUM  # type: ignore
@@ -28,8 +29,8 @@ class AnonymousUser(AnonymousUserMixin):
     last_login_ip = None
     login_count = 0
     totp_secret = None
-    creation_date = datetime.now(timezone.utc)
-    update_date = datetime.now(timezone.utc)
+    creation_date = datetime.now(get_timezone())
+    update_date = datetime.now(get_timezone())
     list_roles = []
     list_permissions = []
     list_recovery_codes = []
@@ -51,15 +52,15 @@ class Users(Base, UserMixin):
     admin = Column(Boolean, nullable=False, default=False)
 
     # Trackable
-    last_login_at = Column(DateTime(), nullable=True)
+    last_login_at = Column(DateTime(timezone=True), nullable=True)
     last_login_ip = Column(String(39), nullable=True)
     login_count = Column(Integer, default=0, nullable=False)
 
     # 2FA
     totp_secret = Column(String(256), nullable=True)
 
-    creation_date = Column(DateTime(), nullable=False, server_default=func.now())
-    update_date = Column(DateTime(), nullable=False, server_default=func.now(), onupdate=partial(datetime.now, timezone.utc))
+    creation_date = Column(DateTime(timezone=True), nullable=False)
+    update_date = Column(DateTime(timezone=True), nullable=False)
 
     roles = relationship("RolesUsers", back_populates="user", cascade="all")
     recovery_codes = relationship("UserRecoveryCodes", back_populates="user", cascade="all")
@@ -79,7 +80,7 @@ class Roles(Base):
 
     name = Column(String(64), primary_key=True)
     description = Column(String(256), nullable=False)
-    update_datetime = Column(DateTime(), nullable=False, server_default=func.now(), onupdate=partial(datetime.now, timezone.utc))
+    update_datetime = Column(DateTime(timezone=True), nullable=False)
 
     users = relationship("RolesUsers", back_populates="role", cascade="all")
     permissions = relationship("RolesPermissions", back_populates="role", cascade="all")

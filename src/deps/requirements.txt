@@ -12,9 +12,9 @@ click==8.1.7 \
     --hash=sha256:ae74fb96c20a0277a1d615f1e4d73c8414f5a98db8b799a7931d1582f3390c28 \
     --hash=sha256:ca9853ad459e787e2192211578cc907e7594e294c7ccc834310722b41b9ca6de
     # via pip-tools
-importlib-metadata==8.2.0 \
-    --hash=sha256:11901fa0c2f97919b288679932bb64febaeacf289d18ac84dd68cb2e74213369 \
-    --hash=sha256:72e8d4399996132204f9a16dcc751af254a48f8d1b20b9ff0f98d4a8f901e73d
+importlib-metadata==8.3.0 \
+    --hash=sha256:42817a4a0be5845d22c6e212db66a94ad261e2318d80b3e0d363894a79df2b67 \
+    --hash=sha256:9c8fa6e8ea0f9516ad5c8db9246a731c948193c7754d3babb0114a05b27dd364
     # via build
 packaging==24.1 \
     --hash=sha256:026ed72c8ed3fcce5bf8950572258698927fd1dbda10a5e981cdf0ac37f4f002 \
@@ -36,9 +36,9 @@ pyproject-hooks==1.1.0 \
     # via
     #   -r requirements.in
     #   pip-tools
-setuptools==72.2.0 \
-    --hash=sha256:80aacbf633704e9c8bfa1d99fa5dd4dc59573efcf9e4042c13d3bcef91ac2ef9 \
-    --hash=sha256:f11dd94b7bae3a156a95ec151f24e4637fb4fa19c878e4d191bfb8b2d82728c4
+setuptools==73.0.0 \
+    --hash=sha256:3c08705fadfc8c7c445cf4d98078f0fafb9225775b2b4e8447e40348f82597c0 \
+    --hash=sha256:f2bfcce7ae1784d90b04c57c2802e8649e1976530bb25dc72c2b078d3ecf4864
     # via
     #   build
     #   pip-tools

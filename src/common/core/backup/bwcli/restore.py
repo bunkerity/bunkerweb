@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from argparse import ArgumentParser
-from datetime import datetime, timezone
+from datetime import datetime
 from os.path import join, sep
 from pathlib import Path
 from sys import exit as sys_exit, path as sys_path
@@ -12,6 +12,8 @@ if deps_path not in sys_path:
     sys_path.append(deps_path)
 
 from utils import acquire_db_lock, backup_database, BACKUP_DIR, DB_LOCK_FILE, LOGGER, restore_database
+
+from common_utils import get_timezone  # type: ignore
 
 status = 0
 
@@ -49,7 +51,7 @@ try:
         sys_exit(1)
 
     LOGGER.info("Backing up the current database before restoring the backup ...")
-    current_time = datetime.now(timezone.utc)
+    current_time = datetime.now(get_timezone())
     tmp_backup_dir = Path(sep, "tmp", "bunkerweb", "backups")
     tmp_backup_dir.mkdir(parents=True, exist_ok=True)
     db = backup_database(current_time, backup_dir=tmp_backup_dir)

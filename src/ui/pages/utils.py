@@ -1,6 +1,6 @@
 from base64 import b64encode
 from copy import deepcopy
-from datetime import datetime, timezone
+from datetime import datetime
 from io import BytesIO
 from threading import Thread
 from time import sleep, time
@@ -9,6 +9,8 @@ from typing import Any, Dict, Optional, Tuple, Union
 from flask import Response, flash, redirect, request, url_for
 from qrcode.main import QRCode
 from regex import compile as re_compile
+
+from common_utils import get_timezone  # type: ignore
 
 from src.instance import Instance
 
@@ -23,9 +25,9 @@ PLUGIN_ID_RX = re_compile(r"^[\w_-]{1,64}$")
 
 
 def wait_applying():
-    current_time = datetime.now(timezone.utc)
+    current_time = datetime.now(get_timezone())
     ready = False
-    while not ready and (datetime.now(timezone.utc) - current_time).seconds < 120:
+    while not ready and (datetime.now(get_timezone()) - current_time).seconds < 120:
         db_metadata = DB.get_metadata()
         if isinstance(db_metadata, str):
             LOGGER.error(f"An error occurred when checking for changes in the database : {db_metadata}")

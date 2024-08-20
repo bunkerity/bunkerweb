@@ -2,7 +2,7 @@
 
 from contextlib import suppress
 from copy import deepcopy
-from datetime import datetime, timezone
+from datetime import datetime
 from functools import partial
 from glob import glob
 from json import loads
@@ -27,6 +27,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
+from common_utils import get_timezone  # type: ignore
 from Database import Database  # type: ignore
 from logger import setup_logger  # type: ignore
 from ApiCaller import ApiCaller  # type: ignore
@@ -162,7 +163,7 @@ class JobScheduler(ApiCaller):
         self.__logger.info(f"Executing job {name} from plugin {plugin} ...")
         success = True
         ret = -1
-        start_date = datetime.now(timezone.utc)
+        start_date = datetime.now(get_timezone())
         try:
             proc = run(join(path, "jobs", file), stdin=DEVNULL, stderr=STDOUT, env=self.__env, check=False)
             ret = proc.returncode
@@ -171,7 +172,7 @@ class JobScheduler(ApiCaller):
             self.__logger.error(f"Exception while executing job {name} from plugin {plugin} :\n{format_exc()}")
             with self.__thread_lock:
                 self.__job_success = False
-        end_date = datetime.now(timezone.utc)
+        end_date = datetime.now(get_timezone())
 
         if ret == 1:
             with self.__thread_lock:
@@ -351,7 +352,7 @@ class JobScheduler(ApiCaller):
             except BaseException:
                 self.db.readonly = True
                 return True
-        elif not force and self.db.last_connection_retry and (datetime.now(timezone.utc) - self.db.last_connection_retry).total_seconds() > 30:
+        elif not force and self.db.last_connection_retry and (datetime.now(get_timezone()) - self.db.last_connection_retry).total_seconds() > 30:
             return True
 
         if self.db.database_uri and self.db.readonly:

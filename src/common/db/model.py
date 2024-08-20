@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from sqlalchemy import TEXT, Boolean, Column, DateTime, Enum, ForeignKey, Identity, Integer, LargeBinary, String, func
+from sqlalchemy import TEXT, Boolean, Column, DateTime, Enum, ForeignKey, Identity, Integer, LargeBinary, String
 from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy.schema import UniqueConstraint
 
@@ -175,7 +175,7 @@ class Jobs_runs(Base):
     job_name = Column(String(128), ForeignKey("bw_jobs.name", onupdate="cascade", ondelete="cascade"), nullable=False)
     success = Column(Boolean, nullable=True, default=False)
     start_date = Column(DateTime(timezone=True), nullable=False)
-    end_date = Column(DateTime(timezone=True), nullable=True, server_default=func.now())
+    end_date = Column(DateTime(timezone=True), nullable=False)
 
     job = relationship("Jobs", back_populates="runs")
 
@@ -205,8 +205,8 @@ class Instances(Base):
     type = Column(INSTANCE_TYPE_ENUM, nullable=False, default="static")
     status = Column(INSTANCE_STATUS_ENUM, nullable=False, default="loading")
     method = Column(METHODS_ENUM, nullable=False, default="manual")
-    creation_date = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
-    last_seen = Column(DateTime(timezone=True), nullable=True, server_default=func.now())
+    creation_date = Column(DateTime(timezone=True), nullable=False)
+    last_seen = Column(DateTime(timezone=True), nullable=False)
 
 
 class Bw_cli_commands(Base):

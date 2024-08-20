@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from datetime import datetime, timezone
+from datetime import datetime
 from json import dumps, loads
 from os import environ, getenv
 from os.path import join, sep
@@ -16,7 +16,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
-from common_utils import bytes_hash  # type: ignore
+from common_utils import bytes_hash, get_timezone  # type: ignore
 from Database import Database  # type: ignore
 from logger import setup_logger  # type: ignore
 from model import Base  # type: ignore
@@ -30,7 +30,7 @@ DB_LOCK_FILE = Path(sep, "var", "lib", "bunkerweb", "db.lock")
 
 def acquire_db_lock():
     """Acquire the database lock to prevent concurrent access to the database."""
-    current_time = datetime.now(timezone.utc)
+    current_time = datetime.now(get_timezone())
     while DB_LOCK_FILE.is_file() and DB_LOCK_FILE.stat().st_ctime + 30 > current_time.timestamp():
         LOGGER.warning("Database is locked, waiting for it to be unlocked (timeout: 30s) ...")
         sleep(1)
@@ -46,9 +46,9 @@ def backup_database(current_time: datetime, db: Database = None, backup_dir: Pat
     backup_file = backup_dir.joinpath(f"backup-{database}-{current_time.strftime('%Y-%m-%d_%H-%M-%S')}.zip")
     LOGGER.debug(f"Backup file path: {backup_file}")
     stderr = "Table 'db.test_"
-    current_time = datetime.now(timezone.utc)
+    current_time = datetime.now(get_timezone())
 
-    while "Table 'db.test_" in stderr and (datetime.now(timezone.utc) - current_time).total_seconds() < 10:
+    while "Table 'db.test_" in stderr and (datetime.now(get_timezone()) - current_time).total_seconds() < 10:
         if database == "sqlite":
             match = DB_STRING_RX.search(db.database_uri)
             if not match:
@@ -94,7 +94,7 @@ def backup_database(current_time: datetime, db: Database = None, backup_dir: Pat
             LOGGER.error(f"Failed to dump the database: {stderr}")
             sys_exit(1)
 
-    if (datetime.now(timezone.utc) - current_time).total_seconds() >= 10:
+    if (datetime.now(get_timezone()) - current_time).total_seconds() >= 10:
         LOGGER.error("Failed to dump the database: Timeout reached")
         sys_exit(1)
 

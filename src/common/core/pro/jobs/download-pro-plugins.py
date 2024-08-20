@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from datetime import datetime, timezone
+from datetime import datetime
 from io import BytesIO
 from itertools import chain
 from os import getenv, sep
@@ -23,7 +23,7 @@ from requests import get
 
 from Database import Database  # type: ignore
 from logger import setup_logger  # type: ignore
-from common_utils import bytes_hash, get_os_info, get_integration, get_version  # type: ignore
+from common_utils import bytes_hash, get_os_info, get_integration, get_timezone, get_version  # type: ignore
 
 API_ENDPOINT = "https://api.bunkerweb.io"
 PREVIEW_ENDPOINT = "https://assets.bunkerity.com/bw-pro/preview"
@@ -95,7 +95,7 @@ def install_plugin(plugin_path: Path, db, preview: bool = True) -> bool:
 try:
     db = Database(LOGGER, sqlalchemy_string=getenv("DATABASE_URI"))
     db_metadata = db.get_metadata()
-    current_date = datetime.now(timezone.utc)
+    current_date = datetime.now(get_timezone())
     pro_license_key = getenv("PRO_LICENSE_KEY", "").strip()
 
     LOGGER.info("Checking BunkerWeb Pro status...")

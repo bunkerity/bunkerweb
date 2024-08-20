@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 from json import dumps, loads
 from os import getenv, sep
 from os.path import join
@@ -15,6 +15,8 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 from logger import setup_logger  # type: ignore
 from jobs import Job  # type: ignore
 from utils import backup_database
+
+from common_utils import get_timezone  # type: ignore
 
 LOGGER = setup_logger("BACKUP", getenv("LOG_LEVEL", "INFO"))
 status = 0
@@ -35,7 +37,7 @@ try:
     if last_backup_date:
         last_backup_date = datetime.fromisoformat(last_backup_date)
 
-    current_time = datetime.now(timezone.utc)
+    current_time = datetime.now(get_timezone())
     backup_period = getenv("BACKUP_SCHEDULE", "daily")
     PERIOD_STAMPS = {
         "daily": timedelta(days=1).total_seconds(),

@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 
 from contextlib import suppress
-from datetime import datetime, timezone
+from datetime import datetime
 from os import getenv
 from time import sleep
 from typing import Any, Dict, List, Optional
 
+from common_utils import get_timezone  # type: ignore
 from Database import Database  # type: ignore
 from logger import setup_logger  # type: ignore
 
@@ -82,9 +83,9 @@ class Config:
         )
 
     def wait_applying(self, startup: bool = False):
-        current_time = datetime.now(timezone.utc)
+        current_time = datetime.now(get_timezone())
         ready = False
-        while not ready and (datetime.now(timezone.utc) - current_time).seconds < 240:
+        while not ready and (datetime.now(get_timezone()) - current_time).seconds < 240:
             db_metadata = self._db.get_metadata()
             if isinstance(db_metadata, str):
                 if not startup:

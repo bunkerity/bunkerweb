@@ -9,7 +9,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 from flask import Flask, Response, flash, jsonify, make_response, redirect, render_template, request, session, url_for
 from flask_login import current_user, LoginManager, login_required, logout_user
 from flask_principal import ActionNeed, identity_loaded, Permission, Principal, RoleNeed, TypeNeed, UserNeed
@@ -17,6 +17,8 @@ from flask_wtf.csrf import CSRFProtect, CSRFError
 from json import dumps
 from signal import SIGINT, signal, SIGTERM
 from time import time
+
+from common_utils import get_timezone  # type: ignore
 
 from src.reverse_proxied import ReverseProxied
 
@@ -244,7 +246,7 @@ def before_request():
             DB.database_uri
             and DB.readonly
             and (
-                datetime.now(timezone.utc) - datetime.fromisoformat(DATA.get("LAST_DATABASE_RETRY", "1970-01-01T00:00:00")).replace(tzinfo=timezone.utc)
+                datetime.now(get_timezone()) - datetime.fromisoformat(DATA.get("LAST_DATABASE_RETRY", "1970-01-01T00:00:00")).replace(tzinfo=get_timezone())
                 > timedelta(minutes=1)
             )
         ):
@@ -263,19 +265,19 @@ def before_request():
                             DB.retry_connection(fallback=True, pool_timeout=1)
                             DB.retry_connection(fallback=True, log=False)
                 DATA["READONLY_MODE"] = True
-            DATA["LAST_DATABASE_RETRY"] = DB.last_connection_retry.isoformat() if DB.last_connection_retry else datetime.now(timezone.utc).isoformat()
+            DATA["LAST_DATABASE_RETRY"] = DB.last_connection_retry.isoformat() if DB.last_connection_retry else datetime.now(get_timezone()).isoformat()
         elif not DATA.get("READONLY_MODE", False) and request.method == "POST" and not ("/totp" in request.path or "/login" in request.path):
             try:
                 DB.test_write()
                 DATA["READONLY_MODE"] = False
             except BaseException:
                 DATA["READONLY_MODE"] = True
-                DATA["LAST_DATABASE_RETRY"] = DB.last_connection_retry.isoformat() if DB.last_connection_retry else datetime.now(timezone.utc).isoformat()
+                DATA["LAST_DATABASE_RETRY"] = DB.last_connection_retry.isoformat() if DB.last_connection_retry else datetime.now(get_timezone()).isoformat()
         else:
             try:
                 DB.test_read()
             except BaseException:
-                DATA["LAST_DATABASE_RETRY"] = DB.last_connection_retry.isoformat() if DB.last_connection_retry else datetime.now(timezone.utc).isoformat()
+                DATA["LAST_DATABASE_RETRY"] = DB.last_connection_retry.isoformat() if DB.last_connection_retry else datetime.now(get_timezone()).isoformat()
 
         DB.readonly = DATA.get("READONLY_MODE", False)
 

@@ -8,7 +8,6 @@ gunicorn[gthread]==23.0.0
 passlib==1.7.4
 python-magic==0.4.27
 python_dateutil==2.9.0.post0
-pytz==2024.1
 qrcode==7.4.2
 regex==2024.7.24
 werkzeug==3.0.3
