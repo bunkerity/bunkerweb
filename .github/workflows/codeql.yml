@@ -35,12 +35,12 @@ jobs:
           python -m pip install --no-cache-dir --require-hashes -r src/common/db/requirements.txt
           echo "CODEQL_PYTHON=$(which python)" >> $GITHUB_ENV
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@883d8588e56d1753a8a58c1c86e88976f0c23449 # v3.26.3
+        uses: github/codeql-action/init@f0f3afee809481da311ca3a6ff1ff51d81dbeb24 # v3.26.4
         with:
           languages: ${{ matrix.language }}
           config-file: ./.github/codeql.yml
           setup-python-dependencies: false
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@883d8588e56d1753a8a58c1c86e88976f0c23449 # v3.26.3
+        uses: github/codeql-action/analyze@f0f3afee809481da311ca3a6ff1ff51d81dbeb24 # v3.26.4
         with:
           category: "/language:${{matrix.language}}"
