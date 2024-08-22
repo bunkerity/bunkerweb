@@ -43,18 +43,6 @@ try:
         "monthly": timedelta(weeks=4).total_seconds(),
     }
 
-    if last_backup_date and last_backup_date.timestamp() + PERIOD_STAMPS[backup_period] > current_time.timestamp():
-        LOGGER.info(f"Backup already done within the last {backup_period} period, skipping backup ...")
-        sys_exit(0)
-
-    db_metadata = JOB.db.get_metadata()
-
-    if isinstance(db_metadata, str) or db_metadata["scheduler_first_start"]:
-        LOGGER.info("First start of the scheduler, skipping backup ...")
-        sys_exit(0)
-
-    backup_database(current_time, JOB.db, backup_dir)
-
     backup_rotation = int(getenv("BACKUP_ROTATION", "7"))
 
     # Get all backup files in the directory
@@ -62,6 +50,21 @@ try:
 
     # Sort the backup files by name
     sorted_files = sorted(backup_files)
+
+    already_done = last_backup_date and last_backup_date.timestamp() + PERIOD_STAMPS[backup_period] > current_time.timestamp()
+
+    if len(sorted_files) <= backup_rotation and already_done:
+        LOGGER.info(f"Backup already done within the last {backup_period} period, skipping backup ...")
+        sys_exit(0)
+
+    if not already_done:
+        db_metadata = JOB.db.get_metadata()
+
+        if isinstance(db_metadata, str) or db_metadata["scheduler_first_start"]:
+            LOGGER.info("First start of the scheduler, skipping backup ...")
+            sys_exit(0)
+
+        backup_database(current_time, JOB.db, backup_dir)
 
     # Check if the number of backup files exceeds the rotation limit
     if len(sorted_files) > backup_rotation:
