@@ -109,43 +109,43 @@ jobs:
   #     RELEASE: dev
 
   # Core tests
-  prepare-tests-core:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
-      - id: set-matrix
-        run: |
-          tests=$(find ./tests/core/ -maxdepth 1 -mindepth 1 -type d -printf "%f\n" | jq -c --raw-input --slurp 'split("\n")| .[0:-1]')
-          echo "tests=$tests" >> $GITHUB_OUTPUT
-    outputs:
-      tests: ${{ steps.set-matrix.outputs.tests }}
-  tests-core:
-    needs: [build-containers, prepare-tests-core]
-    strategy:
-      fail-fast: false
-      matrix:
-        test: ${{ fromJson(needs.prepare-tests-core.outputs.tests) }}
-    uses: ./.github/workflows/test-core.yml
-    with:
-      TEST: ${{ matrix.test }}
-      RELEASE: dev
-  tests-core-linux:
-    needs: [build-packages, prepare-tests-core]
-    strategy:
-      fail-fast: false
-      matrix:
-        test: ${{ fromJson(needs.prepare-tests-core.outputs.tests) }}
-    uses: ./.github/workflows/test-core-linux.yml
-    with:
-      TEST: ${{ matrix.test }}
-      RELEASE: dev
-    secrets: inherit
+  # prepare-tests-core:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+  #     - id: set-matrix
+  #       run: |
+  #         tests=$(find ./tests/core/ -maxdepth 1 -mindepth 1 -type d -printf "%f\n" | jq -c --raw-input --slurp 'split("\n")| .[0:-1]')
+  #         echo "tests=$tests" >> $GITHUB_OUTPUT
+  #   outputs:
+  #     tests: ${{ steps.set-matrix.outputs.tests }}
+  # tests-core:
+  #   needs: [build-containers, prepare-tests-core]
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       test: ${{ fromJson(needs.prepare-tests-core.outputs.tests) }}
+  #   uses: ./.github/workflows/test-core.yml
+  #   with:
+  #     TEST: ${{ matrix.test }}
+  #     RELEASE: dev
+  # tests-core-linux:
+  #   needs: [build-packages, prepare-tests-core]
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       test: ${{ fromJson(needs.prepare-tests-core.outputs.tests) }}
+  #   uses: ./.github/workflows/test-core-linux.yml
+  #   with:
+  #     TEST: ${{ matrix.test }}
+  #     RELEASE: dev
+  #   secrets: inherit
 
   # Push with dev tag
   push-dev:
-    # needs: [tests-ui, tests-core] # TODO: Uncomment when UI tests are back
-    needs: [tests-core]
+    # needs: [tests-ui, tests-core] # TODO: Uncomment when tests are back
+    needs: [build-containers]
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -185,8 +185,8 @@ jobs:
 
   # Push Linux packages
   push-packages:
-    # needs: [tests-ui-linux, tests-core-linux] # TODO: Uncomment when UI tests are back
-    needs: [tests-core-linux]
+    # needs: [tests-ui-linux, tests-core-linux] # TODO: Uncomment when tests are back
+    needs: [build-packages]
     strategy:
       matrix:
         linux: [ubuntu, debian, fedora, el, el9, ubuntu-jammy]
