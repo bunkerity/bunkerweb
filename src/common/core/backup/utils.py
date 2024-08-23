@@ -90,7 +90,7 @@ def backup_database(current_time: datetime, db: Database = None, backup_dir: Pat
             if database in ("mariadb", "mysql"):
                 LOGGER.info("Creating a backup for the MariaDB/MySQL database ...")
 
-                cmd = ["mysqldump", "-h", db_host, "-u", db_user, db_database_name]
+                cmd = ["mysqldump" if database == "mysql" else "mariadb-dump", "-h", db_host, "-u", db_user, db_database_name]
                 if db_port:
                     cmd.extend(["-P", db_port])
 
