@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from datetime import datetime, timedelta
-from json import dumps, loads
+from json import loads
 from os import getenv, sep
 from os.path import join
 from pathlib import Path
@@ -14,7 +14,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 
 from logger import setup_logger  # type: ignore
 from jobs import Job  # type: ignore
-from utils import backup_database
+from utils import backup_database, update_cache_file
 
 LOGGER = setup_logger("BACKUP", getenv("LOG_LEVEL", "INFO"))
 status = 0
@@ -33,7 +33,7 @@ try:
     last_backup = loads(JOB.get_cache("backup.json") or "{}")
     last_backup_date = last_backup.get("date", None)
     if last_backup_date:
-        last_backup_date = datetime.fromisoformat(last_backup_date)
+        last_backup_date = datetime.fromisoformat(last_backup_date).astimezone()
 
     current_time = datetime.now()
     backup_period = getenv("BACKUP_SCHEDULE", "daily")
@@ -43,15 +43,17 @@ try:
         "monthly": timedelta(weeks=4).total_seconds(),
     }
 
+    already_done = last_backup_date and last_backup_date.timestamp() + PERIOD_STAMPS[backup_period] > current_time.timestamp()
     backup_rotation = int(getenv("BACKUP_ROTATION", "7"))
 
-    # Get all backup files in the directory
-    backup_files = backup_dir.glob("backup-*.zip")
+    sorted_files = []
+    if already_done:
 
-    # Sort the backup files by name
-    sorted_files = sorted(backup_files)
+        # Get all backup files in the directory
+        backup_files = backup_dir.glob("backup-*.zip")
 
-    already_done = last_backup_date and last_backup_date.timestamp() + PERIOD_STAMPS[backup_period] > current_time.timestamp()
+        # Sort the backup files by name
+        sorted_files = sorted(backup_files)
 
     if len(sorted_files) <= backup_rotation and already_done:
         LOGGER.info(f"Backup already done within the last {backup_period} period, skipping backup ...")
@@ -66,6 +68,12 @@ try:
 
         backup_database(current_time, JOB.db, backup_dir)
 
+        # Get all backup files in the directory
+        backup_files = backup_dir.glob("backup-*.zip")
+
+        # Sort the backup files by name
+        sorted_files = sorted(backup_files)
+
     # Check if the number of backup files exceeds the rotation limit
     if len(sorted_files) > backup_rotation:
         # Calculate the number of files to remove
@@ -76,12 +84,7 @@ try:
             LOGGER.warning(f"Removing old backup file: {file}, as the rotation limit has been reached ...")
             file.unlink()
 
-    backup_files = sorted([file.name for file in backup_dir.glob("backup-*.zip")])
-
-    cached, err = JOB.cache_file("backup.json", dumps({"date": current_time.isoformat(), "files": backup_files}, indent=2).encode())
-    if not cached:
-        LOGGER.error(f"Failed to cache backup.json :\n{err}")
-        status = 2
+    update_cache_file(JOB.db, backup_dir)
 except SystemExit as e:
     status = e.code
 except:

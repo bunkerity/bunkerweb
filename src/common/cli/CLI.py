@@ -72,6 +72,10 @@ class CLI(ApiCaller):
 
         assert isinstance(self.__variables, dict), "Failed to get variables from database"
 
+        tz = getenv("TZ")
+        if tz:
+            self.__variables["TZ"] = tz
+
         self.__integration = get_integration()
         self.__use_redis = self.__get_variable("USE_REDIS", "no") == "yes"
         self.__redis = None

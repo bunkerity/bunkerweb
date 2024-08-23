@@ -5,7 +5,6 @@ from datetime import datetime
 from os.path import join, sep
 from pathlib import Path
 from sys import exit as sys_exit, path as sys_path
-from traceback import format_exc
 
 deps_path = join(sep, "usr", "share", "bunkerweb", "core", "backup")
 if deps_path not in sys_path:
@@ -58,8 +57,8 @@ try:
     restore_database(backup_file, db)
 except SystemExit as se:
     status = se.code
-except:
-    LOGGER.error(f"Error while executing backup restore command :\n{format_exc()}")
+except BaseException as e:
+    LOGGER.error(f"Error while executing backup restore command: {e}")
     status = 1
 finally:
     DB_LOCK_FILE.unlink(missing_ok=True)

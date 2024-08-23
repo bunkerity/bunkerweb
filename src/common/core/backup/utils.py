@@ -38,6 +38,21 @@ def acquire_db_lock():
     DB_LOCK_FILE.touch()
 
 
+def update_cache_file(db: Database, backup_dir: Path) -> str:
+    """Update the cache file in the database."""
+    backup_data = loads(db.get_job_cache_file("backup-data", "backup.json") or "{}")
+    backup_data["files"] = sorted([file.name for file in backup_dir.glob("backup-*.zip")])
+    content = dumps(backup_data, indent=2).encode()
+    checksum = bytes_hash(content)
+    err = db.upsert_job_cache(None, "backup.json", content, job_name="backup-data", checksum=checksum)
+    if err:
+        LOGGER.error(f"Failed to update the backup.json cache file: {err}")
+        return err
+
+    LOGGER.info("Backup cache file updated successfully")
+    return ""
+
+
 def backup_database(current_time: datetime, db: Database = None, backup_dir: Path = BACKUP_DIR) -> Database:
     """Backup the database."""
     db = db or Database(LOGGER)
@@ -102,14 +117,6 @@ def backup_database(current_time: datetime, db: Database = None, backup_dir: Pat
         zipf.writestr(backup_file.with_suffix(".sql").name, proc.stdout)
 
     backup_file.chmod(0o600)
-
-    backup_data = loads(db.get_job_cache_file("backup-data", "backup.json") or "{}")
-    backup_data["files"] = sorted([file.name for file in backup_dir.glob("backup-*.zip")])
-    content = dumps(backup_data, indent=2).encode()
-    checksum = bytes_hash(content)
-    err = db.upsert_job_cache(None, "backup.json", content, job_name="backup-data", checksum=checksum)
-    if err:
-        LOGGER.error(f"Failed to update the backup.json cache file: {err}")
 
     LOGGER.info(f"💾 Backup {backup_file.name} created successfully in {backup_dir}")
     return db
