@@ -1,0 +1,117 @@
+#bunkerweb 1.5.9 docker compose file with changes for photoprism app
+#Configured for custom ssl cert, autoconf, and BunkerWeb UI
+#photoprism specific lines indicated.
+
+services:
+  bunkerweb:
+    image: bunkerity/bunkerweb:1.5.9
+    ports:
+      - 80:8080
+      - 443:8443
+    labels:
+      - "bunkerweb.INSTANCE=yes"
+    environment:
+      - SERVER_NAME=photoprism.example.com  # replace with your domains
+      - UI_HOST=http://UiHost.example.com:7000
+      - DATABASE_URI=mariadb+pymysql://bunkerweb:DBPassword@bw-db:3306/db   # Remember to set a stronger password for the database
+      - AUTOCONF_MODE=yes
+      - MULTISITE=yes
+      - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
+      - USE_CLIENT_CACHE=yes
+      - USE_GZIP=yes
+      - USE_REVERSE_PROXY=yes
+      - AUTO_LETS_ENCRYPT=no    # using custom ssl certificate
+      - USE_CUSTOM_SSL=yes      # using custom ssl certificate
+      - CUSTOM_SSL_CERT=/ssl/fullchain.pem    # using custom ssl certificate
+      - CUSTOM_SSL_KEY=/ssl/privkey.pem       # using custom ssl certificate
+      - ALLOWED_METHODS=GET|POST|HEAD|DELETE|PUT|MKCOL|PROPFIND|PROPPATCH     #photoprism specific config - allow methods used by photoprism app and the PhotoSync android client
+      - MAX_CLIENT_SIZE=1024m   #photoprism specific config - Increase as needed, depending on the size of the videos you want to uppload
+      - LIMIT_REQ_RATE=20r/s    #photoprism specific config - possibly overkill, tune as needed. The default of 2r/s makes it impossible to play videos in photoprism
+    networks:
+      - bw-universe
+      - bw-services
+    volumes:
+      - /etc/bunkerweb/certs/fullchain.pem:/ssl/fullchain.pem:ro    # using custom ssl certificate
+      - /etc/bunkerweb/certs/privkey.pem:/ssl/privkey.pem:ro        # using custom ssl certificate
+
+  bw-autoconf:
+    image: bunkerity/bunkerweb-autoconf:1.5.9
+    depends_on:
+      - bunkerweb
+      - bw-docker
+    environment:
+      - DATABASE_URI=mariadb+pymysql://bunkerweb:DBPassword@bw-db:3306/db   # Remember to set a stronger password for the database
+      - AUTOCONF_MODE=yes
+      - DOCKER_HOST=tcp://bw-docker:2375
+    networks:
+      - bw-universe
+      - bw-docker
+
+  bw-scheduler:
+    image: bunkerity/bunkerweb-scheduler:1.5.9
+    depends_on:
+      - bunkerweb
+      - bw-docker
+    environment:
+      - DATABASE_URI=mariadb+pymysql://bunkerweb:DBPassword@bw-db:3306/db   # Remember to set a stronger password for the database
+      - DOCKER_HOST=tcp://bw-docker:2375
+      - AUTOCONF_MODE=yes
+    networks:
+      - bw-universe
+      - bw-docker
+    volumes:
+      - /etc/bunkerweb/certs/fullchain.pem:/ssl/fullchain.pem:ro      # using custom ssl certificate
+      - /etc/bunkerweb/certs/privkey.pem:/ssl/privkey.pem:ro          # using custom ssl certificate
+
+  bw-docker:
+    image: tecnativa/docker-socket-proxy:nightly
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - CONTAINERS=1
+      - LOG_LEVEL=warning
+    networks:
+      - bw-docker
+
+  bw-db:
+    image: mariadb:10.10
+    environment:
+      - MYSQL_RANDOM_ROOT_PASSWORD=yes
+      - MYSQL_DATABASE=db
+      - MYSQL_USER=bunkerweb
+      - MYSQL_PASSWORD=DBPassword   # Remember to set a stronger password for the database 
+    volumes:
+      - bw-data:/var/lib/mysql
+    networks:
+      - bw-docker
+
+  UiHost:
+    image: bunkerity/bunkerweb-ui:1.5.9
+    networks:
+      bw-docker:
+      bw-universe:
+        aliases:
+          - UiHost.example.com
+    environment:
+      - USE_CUSTOM_SSL=yes    # using custom ssl certificate
+      - CUSTOM_SSL_CERT=/ssl/fullchain.pem    # using custom ssl certificate
+      - CUSTOM_SSL_KEY=/ssl/privkey.pem       # using custom ssl certificate
+      - AUTOCONF_MODE=yes
+      - DOCKER_HOST=tcp://bw-docker:2375
+      - DATABASE_URI=mariadb+pymysql://bunkerweb:DBPassword@bw-db:3306/db # Remember to set a stronger password for the database
+
+volumes:
+  bw-data:
+  certs:
+
+networks:
+  bw-universe:
+    name: bw-universe
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.20.30.0/24
+  bw-services:
+    name: bw-services
+  bw-docker:
+    name: bw-docker
