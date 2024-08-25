@@ -20,4 +20,4 @@ If using the provided configuration with autoconf enabled, the photoprism app sh
 [PhotoprismDockerDocs]: https://docs.photoprism.app/getting-started/docker-compose/
 [PhotoprismComposeFile]: photoprism-compose.yml
 [BunkerwebComposeFile]: docker-compose.yml
-[AllowmediaConfig]: allowmedia.conf
+[AllowmediaConfig]: bw.data/configs/modsec-crs/allowmedia.conf
