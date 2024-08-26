@@ -21,18 +21,6 @@ RUN export MAKEFLAGS="-j$(nproc)" && \
   pip install --no-cache-dir --require-hashes --break-system-packages -r /tmp/requirements-deps.txt && \
   pip install --no-cache-dir --require-hashes --target deps/python $(for file in $(ls /tmp/req/requirements*.txt) ; do echo "-r ${file}" ; done | xargs)
 
-# Install node and npm to build vite frontend
-RUN apk add --no-cache nodejs npm
-
-COPY src/ui/client ui/client
-
-# This will build the frontend and add files to the UI folder
-WORKDIR /usr/share/bunkerweb/ui/client
-RUN DOCKERFILE=yes python3 build.py
-
-# We can delete the client folder after building the frontend
-RUN rm -rf /usr/share/bunkerweb/ui/client
-
 WORKDIR /usr/share/bunkerweb
 
 # Copy files
@@ -45,10 +33,7 @@ COPY src/common/settings.json settings.json
 COPY src/common/utils utils
 COPY src/common/helpers helpers
 COPY src/VERSION VERSION
-COPY src/ui/pages ui/pages
-COPY src/ui/src ui/src
-COPY src/ui/*.py ui/
-COPY --chmod=750 src/ui/entrypoint.sh ui/
+COPY src/ui ui
 
 FROM python:3.12.5-alpine@sha256:c2f41e6a5a67bc39b95be3988dd19fbd05d1b82375c46d9826c592cca014d4de
 
@@ -78,7 +63,8 @@ RUN echo "Docker" > INTEGRATION && \
   for dir in $(echo "pro/plugins configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/default-server-stream configs/modsec configs/modsec-crs") ; do mkdir "/data/${dir}" ; done && \
   chown -R root:ui INTEGRATION /data /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb && \
   chmod -R 770 /data /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb && \
-  chmod 750 gen/*.py ui/*.py ui/src/*.py helpers/*.sh deps/python/bin/* && \
+  chmod 750 gen/*.py ui/*.sh helpers/*.sh deps/python/bin/* && \
+  find ui -name "*.py" -type f -exec chmod 750 {} \; && \
   chmod 660 INTEGRATION && \
   ln -s /proc/1/fd/1 /var/log/bunkerweb/ui-access.log && \
   ln -s /proc/1/fd/2 /var/log/bunkerweb/ui.log

@@ -61,8 +61,8 @@ repos:
     hooks:
       - id: codespell
         name: Codespell Spell Checker
-        exclude: (^src/(ui/templates|common/core/.+/files|bw/loading)/.+.html|modsecurity-rules.conf.*|src/ui/static/js/lottie-web.min.js)$
-        entry: codespell --ignore-regex="(tabEl|Widgits)" --skip src/ui/static/js/utils/flatpickr.js,src/ui/static/css/style.css,CHANGELOG.md,CODE_OF_CONDUCT.md,src/ui/client/build.py
+        exclude: (^src/(ui/templates|common/core/.+/files|bw/loading)/.+.html|modsecurity-rules.conf.*|src/ui/app/static/(fonts|libs)/.+)$
+        entry: codespell --ignore-regex="(tabEl|Widgits)" --skip CHANGELOG.md,CODE_OF_CONDUCT.md,src/ui/client/build.py
         language: python
         types: [text]
 

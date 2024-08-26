@@ -1,0 +1,127 @@
+{% set current_endpoint = url_for(request.endpoint).split("/")[-1] %}
+<!doctype html>
+<html
+  lang="en"
+  class="light-style layout-navbar-fixed layout-menu-fixed"
+  data-theme="theme-default"
+>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
+    />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+    <meta name="description" content="BunkerWeb user interface" />
+    <meta name="author" content="Bunkerity" />
+    <title>BunkerWeb UI</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="img/favicon.ico" />
+
+    <!-- Fonts -->
+    <link
+      rel="stylesheet"
+      href="fonts/Public_sans.css"
+      nonce="{{ style_nonce }}"
+    />
+
+    <!-- Icons -->
+    <link
+      rel="stylesheet"
+      href="fonts/boxicons.min.css"
+      nonce="{{ style_nonce }}"
+    />
+
+    <!-- Core CSS -->
+    <link rel="stylesheet" href="css/core.css" nonce="{{ style_nonce }}" />
+    <link
+      rel="stylesheet"
+      href="css/theme-default.css"
+      nonce="{{ style_nonce }}"
+    />
+    <link rel="stylesheet" href="css/main.css" nonce="{{ style_nonce }}" />
+
+    <!-- Vendors CSS -->
+    <link
+      rel="stylesheet"
+      href="libs/perfect-scrollbar/perfect-scrollbar.css"
+      nonce="{{ style_nonce }}"
+    />
+    <link
+      rel="stylesheet"
+      href="libs/apexcharts/apexcharts.css"
+      nonce="{{ style_nonce }}"
+    />
+
+    <!-- Page CSS -->
+    <!-- Page -->
+    {% if current_endpoint == "login" or current_endpoint == "totp" %}
+    <link
+      rel="stylesheet"
+      href="css/pages/login.css"
+      nonce="{{ style_nonce }}"
+    />
+    {% elif current_endpoint == "loading" %}
+    <link
+      rel="stylesheet"
+      href="css/pages/loading.css"
+      nonce="{{ style_nonce }}"
+    />
+    {% endif %}
+
+    <!-- Helpers  -->
+    <script src="js/helpers.js" nonce="{{ script_nonce }}"></script>
+
+    <!-- Config  -->
+    <script src="js/config.js" nonce="{{ script_nonce }}"></script>
+  </head>
+  <body>
+    <!-- prettier-ignore -->
+    {% if current_endpoint != "loading" %}
+    {% include "flash.html"%}
+    {% endif %}
+    {% block page %}{% endblock %}
+
+    <!-- Vendors JS -->
+    <script src="libs/jquery/jquery.min.js" nonce="{{ script_nonce }}"></script>
+    <script src="libs/popper/popper.min.js" nonce="{{ script_nonce }}"></script>
+    <script
+      src="libs/bootstrap/bootstrap.bundle.min.js"
+      nonce="{{ script_nonce }}"
+    ></script>
+    <script
+      src="libs/perfect-scrollbar/perfect-scrollbar.min.js"
+      nonce="{{ script_nonce }}"
+    ></script>
+    <script src="libs/hammer/hammer.min.js" nonce="{{ script_nonce }}"></script>
+    <script
+      src="libs/masonry/masonry.pkgd.min.js"
+      nonce="{{ script_nonce }}"
+    ></script>
+    <script src="libs/purify/purify.min.js" nonce="{{ script_nonce }}"></script>
+
+    <!-- Core JS -->
+    <script src="js/menu.js" nonce="{{ script_nonce }}"></script>
+
+    <script
+      src="libs/apexcharts/apexcharts.min.js"
+      nonce="{{ script_nonce }}"
+    ></script>
+
+    <!-- Main JS -->
+    <script src="js/main.js" nonce="{{ script_nonce }}"></script>
+    <script
+      src="js/dashboards-analytics.js"
+      nonce="{{ script_nonce }}"
+    ></script>
+
+    <!-- Page JS -->
+    {% if current_endpoint == "profile" %}
+    <script src="js/pages/profile.js" nonce="{{ script_nonce }}"></script>
+    {% endif %}
+
+    <script async defer src="js/buttons.js"></script>
+  </body>
+</html>

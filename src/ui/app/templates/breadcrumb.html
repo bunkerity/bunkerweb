@@ -1,0 +1,22 @@
+<nav class="d-flex align-items-center" aria-label="breadcrumb">
+  <ol class="breadcrumb mb-0">
+    <!-- prettier-ignore -->
+    {% with breadcrumbs = url_for(request.endpoint).split("/") %}
+    {% with last_crumb = breadcrumbs[-1] %}
+    {% for breadcrumb in breadcrumbs[1:] %}
+    <li
+      class="breadcrumb-item {% if breadcrumb == last_crumb %}active{% endif %}"
+      {%
+      if
+      breadcrumb=""
+      ="last_crumb"
+      %}aria-current="page"
+      {%
+      endif
+      %}
+    >
+      <a href="{{ url_for(breadcrumb) }}">{{ breadcrumb }}</a>
+    </li>
+    {% endfor %} {% endwith %} {% endwith %}
+  </ol>
+</nav>

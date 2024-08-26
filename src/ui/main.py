@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 from contextlib import suppress
+from json import dumps
 from os import getenv, sep
 from os.path import join
 from secrets import token_urlsafe
+from signal import SIGINT, signal, SIGTERM
 from sys import path as sys_path
+from time import time
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("api",), ("db",))]:
     if deps_path not in sys_path:
@@ -14,39 +17,37 @@ from flask import Flask, Response, flash, jsonify, make_response, redirect, rend
 from flask_login import current_user, LoginManager, login_required, logout_user
 from flask_principal import ActionNeed, identity_loaded, Permission, Principal, RoleNeed, TypeNeed, UserNeed
 from flask_wtf.csrf import CSRFProtect, CSRFError
-from json import dumps
-from signal import SIGINT, signal, SIGTERM
-from time import time
+from werkzeug.routing.exceptions import BuildError
 
-from src.reverse_proxied import ReverseProxied
+from app.models.reverse_proxied import ReverseProxied
 
-from pages.bans import bans
-from pages.cache import cache
-from pages.configs import configs
-from pages.global_config import global_config
-from pages.home import home
-from pages.instances import instances
-from pages.jobs import jobs
-from pages.modes import modes
-from pages.login import login
-from pages.logout import logout, logout_page
-from pages.logs import logs
-from pages.plugins import plugins
-from pages.profile import profile
-from pages.reports import reports
-from pages.services import services
-from pages.setup import setup
-from pages.totp import totp
+from app.routes.bans import bans
+from app.routes.cache import cache
+from app.routes.configs import configs
+from app.routes.global_config import global_config
+from app.routes.home import home
+from app.routes.instances import instances
+from app.routes.jobs import jobs
+from app.routes.modes import modes
+from app.routes.login import login
+from app.routes.logout import logout, logout_page
+from app.routes.logs import logs
+from app.routes.plugins import plugins
+from app.routes.profile import profile
+from app.routes.reports import reports
+from app.routes.services import services
+from app.routes.setup import setup
+from app.routes.totp import totp
 
-from dependencies import BW_CONFIG, DATA, DB
-from models import AnonymousUser
-from utils import TMP_DIR, LOGGER, check_settings, handle_stop, stop
+from app.dependencies import BW_CONFIG, DATA, DB
+from app.models.models import AnonymousUser
+from app.utils import TMP_DIR, LOGGER, check_settings, get_latest_stable_release, handle_stop, stop
 
 signal(SIGINT, handle_stop)
 signal(SIGTERM, handle_stop)
 
 # Flask app
-app = Flask(__name__, static_url_path="/", static_folder="static", template_folder="templates")
+app = Flask(__name__, static_url_path="/", static_folder="app/static", template_folder="app/templates")
 
 with app.app_context():
     PROXY_NUMBERS = int(getenv("PROXY_NUMBERS", "1"))
@@ -85,12 +86,18 @@ with app.app_context():
     login_manager.login_view = "login.login_page"
     login_manager.anonymous_user = AnonymousUser
 
+    def custom_url_for(endpoint, **values):
+        try:
+            if endpoint not in ("index", "loading", "check", "check_reloading") and "_page" not in endpoint:
+                return url_for(f"{endpoint}.{endpoint}_page", **values)
+            return url_for(endpoint, **values)
+        except BuildError:
+            return "#"
+
     # Declare functions for jinja2
     app.jinja_env.globals.update(
         check_settings=check_settings,
-        url_for=lambda *args, **kwargs: url_for(
-            f"{args[0]}.{args[0]}_page" if args[0] not in ("index", "loading", "check", "check_reloading") and "_page" not in args[0] else args[0], **kwargs
-        ),
+        url_for=custom_url_for,
     )
 
     # CSRF protection
@@ -121,21 +128,21 @@ def inject_variables():
         flash("The last changes have been applied successfully.", "success")
         DATA["CONFIG_CHANGED"] = False
 
-    # Keep only plugins with a page to display on sidebar
-    plugins_page = [{"id": plugin.get("id"), "name": plugin.get("name")} for plugin in BW_CONFIG.get_plugins() if plugin.get("page", False)]
+    services = BW_CONFIG.get_config(global_only=True, methods=False, filtered_settings=("SERVER_NAME"))["SERVER_NAME"].split(" ")
 
     # check that is value is in tuple
     return dict(
-        data_server_global=dumps({"username": current_user.get_id() if current_user.is_authenticated else "", "plugins_page": plugins_page}),
         script_nonce=app.config["SCRIPT_NONCE"],
+        bw_version=metadata["version"],
+        latest_version=DATA.get("LATEST_VERSION", "unknown"),
         is_pro_version=metadata["is_pro"],
+        services=services,
         pro_status=metadata["pro_status"],
         pro_services=metadata["pro_services"],
         pro_expire=metadata["pro_expire"].strftime("%Y-%m-%d") if metadata["pro_expire"] else "Unknown",
         pro_overlapped=metadata["pro_overlapped"],
         plugins=BW_CONFIG.get_plugins(),
         pro_loading=DATA.get("PRO_LOADING", False),
-        bw_version=metadata["version"],
         is_readonly=DATA.get("READONLY_MODE", False),
         username=current_user.get_id() if current_user.is_authenticated else "",
     )
@@ -148,7 +155,7 @@ def set_security_headers(response):
     response.headers["Content-Security-Policy"] = (
         "object-src 'none';"
         + " frame-ancestors 'self';"
-        + " default-src 'self' https://www.bunkerweb.io https://assets.bunkerity.com https://bunkerity.us1.list-manage.com;"
+        + " default-src 'self' https://www.bunkerweb.io https://assets.bunkerity.com https://bunkerity.us1.list-manage.com https://api.github.com;"
         + f" script-src 'self' 'nonce-{app.config['SCRIPT_NONCE']}';"
         + " style-src 'self' 'unsafe-inline';"
         + " img-src 'self' data: https://assets.bunkerity.com;"
@@ -190,6 +197,20 @@ def load_user(username):
 
     if ui_user.totp_secret:
         ui_user.list_recovery_codes = [recovery_code.code for recovery_code in ui_user.recovery_codes]
+
+        if (
+            "totp-disable" not in request.path
+            and "totp-refresh" not in request.path
+            and session.get("totp_validated", False)
+            and not ui_user.list_recovery_codes
+        ):
+            flash(
+                f"""The two-factor authentication is enabled but no recovery codes are available, please refresh them:
+<div class="mt-2 pt-2 border-top border-white">
+    <a role='button' class='btn btn-sm btn-dark d-flex align-items-center' aria-pressed='true' href='{url_for('profile.profile_page')}'>here</a>
+</div>""",
+                "error",
+            )
 
     return ui_user
 
@@ -239,18 +260,29 @@ def before_request():
 
     app.config["SCRIPT_NONCE"] = token_urlsafe(32)
 
-    if not request.path.startswith(("/css", "/images", "/js", "/json", "/webfonts")):
+    if not request.path.startswith(("/css", "/img", "/js", "/fonts", "/libs")):
+        if datetime.now().astimezone() - datetime.fromisoformat(DATA.get("LATEST_VERSION_LAST_CHECK", "1970-01-01T00:00:00")).astimezone() > timedelta(hours=1):
+            DATA.update(
+                {
+                    "LATEST_VERSION": get_latest_stable_release(),
+                    "LATEST_VERSION_LAST_CHECK": datetime.now().isoformat(),
+                }
+            )
+
         if (
             DB.database_uri
             and DB.readonly
-            and (datetime.now() - datetime.fromisoformat(DATA.get("LAST_DATABASE_RETRY", "1970-01-01T00:00:00")).astimezone() > timedelta(minutes=1))
+            and (
+                datetime.now().astimezone() - datetime.fromisoformat(DATA.get("LAST_DATABASE_RETRY", "1970-01-01T00:00:00")).astimezone() > timedelta(minutes=1)
+            )
         ):
+            failed = False
             try:
                 DB.retry_connection(pool_timeout=1)
                 DB.retry_connection(log=False)
-                DATA["READONLY_MODE"] = False
                 LOGGER.info("The database is no longer read-only, defaulting to read-write mode")
             except BaseException:
+                failed = True
                 try:
                     DB.retry_connection(readonly=True, pool_timeout=1)
                     DB.retry_connection(readonly=True, log=False)
@@ -259,15 +291,23 @@ def before_request():
                         with suppress(BaseException):
                             DB.retry_connection(fallback=True, pool_timeout=1)
                             DB.retry_connection(fallback=True, log=False)
-                DATA["READONLY_MODE"] = True
-            DATA["LAST_DATABASE_RETRY"] = DB.last_connection_retry.isoformat() if DB.last_connection_retry else datetime.now().isoformat()
+            DATA.update(
+                {
+                    "READONLY_MODE": failed,
+                    "LAST_DATABASE_RETRY": DB.last_connection_retry.isoformat() if DB.last_connection_retry else datetime.now().isoformat(),
+                }
+            )
         elif not DATA.get("READONLY_MODE", False) and request.method == "POST" and not ("/totp" in request.path or "/login" in request.path):
             try:
                 DB.test_write()
                 DATA["READONLY_MODE"] = False
             except BaseException:
-                DATA["READONLY_MODE"] = True
-                DATA["LAST_DATABASE_RETRY"] = DB.last_connection_retry.isoformat() if DB.last_connection_retry else datetime.now().isoformat()
+                DATA.update(
+                    {
+                        "READONLY_MODE": True,
+                        "LAST_DATABASE_RETRY": DB.last_connection_retry.isoformat() if DB.last_connection_retry else datetime.now().isoformat(),
+                    }
+                )
         else:
             try:
                 DB.test_read()
@@ -281,21 +321,27 @@ def before_request():
 
         if current_user.is_authenticated:
             passed = True
+            last_user_session = DB.get_ui_user_last_session(username=current_user.get_id())
 
             # Case not login page, keep on 2FA before any other access
             if not session.get("totp_validated", False) and bool(current_user.totp_secret) and "/totp" not in request.path:
                 if not request.path.endswith("/login"):
                     return redirect(url_for("totp.totp_page", next=request.form.get("next")))
                 passed = False
-            elif current_user.last_login_ip != request.remote_addr:
+            elif last_user_session and last_user_session.ip != request.remote_addr:
                 LOGGER.warning(f"User {current_user.get_id()} tried to access his session with a different IP address.")
                 passed = False
-            elif session.get("user_agent") != request.headers.get("User-Agent"):
+            elif last_user_session and last_user_session.user_agent != request.headers.get("User-Agent"):
                 LOGGER.warning(f"User {current_user.get_id()} tried to access his session with a different User-Agent.")
                 passed = False
 
             if not passed:
                 return logout_page()
+
+            if "session_id" in session:
+                ret = DB.mark_ui_user_access(session["session_id"], datetime.now().astimezone())
+                if isinstance(ret, str):
+                    LOGGER.error(f"Couldn't mark the user access: {ret}")
 
 
 ### * MISC ROUTES * ###
@@ -338,6 +384,9 @@ def check_reloading():
                 flash(f["content"], "error")
             else:
                 flash(f["content"])
+
+            if "flash_messages" in session:
+                session["flash_messages"].append((f["content"], f["type"], datetime.now().strftime("%Y-%m-%d %H:%M:%S %Z")))
 
         DATA["TO_FLASH"] = []
 

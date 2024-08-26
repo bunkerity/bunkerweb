@@ -1,3 +1,4 @@
+from datetime import datetime
 from json import JSONDecodeError, dumps, loads
 from os import cpu_count, getenv, getpid, sep
 from os.path import join
@@ -16,8 +17,8 @@ from passlib import totp
 from common_utils import get_version  # type: ignore
 from logger import setup_logger  # type: ignore
 
-from ui_database import UIDatabase
-from utils import USER_PASSWORD_RX, check_password, gen_password_hash
+from app.models.ui_database import UIDatabase
+from app.utils import USER_PASSWORD_RX, check_password, gen_password_hash, get_latest_stable_release
 
 TMP_DIR = Path(sep, "var", "tmp", "bunkerweb")
 RUN_DIR = Path(sep, "var", "run", "bunkerweb")
@@ -47,15 +48,17 @@ loglevel = "debug" if DEBUG else LOG_LEVEL.lower()
 
 if DEBUG:
     reload = True
-    reload_extra_files = [file.as_posix() for file in Path(sep, "usr", "share", "bunkerweb", "ui", "pages").glob("*.py")]
+    reload_extra_files = [
+        file.as_posix()
+        for file in Path(sep, "usr", "share", "bunkerweb", "ui", "app").rglob("*")
+        if "__pycache__" not in file.parts and "static" not in file.parts
+    ]
 
 
 def on_starting(server):
     TMP_DIR.mkdir(parents=True, exist_ok=True)
     RUN_DIR.mkdir(parents=True, exist_ok=True)
     LIB_DIR.mkdir(parents=True, exist_ok=True)
-
-    TMP_DIR.joinpath("ui_data.json").write_text("{}", encoding="utf-8")
 
     LOGGER = setup_logger("UI", getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")))
 
@@ -65,6 +68,7 @@ def on_starting(server):
         TMP_DIR.joinpath(".flask_secret").write_text(token_urlsafe(32), encoding="utf-8")
 
     TOTP_SECRETS = getenv("TOTP_SECRETS", "")
+    invalid_totp_secrets = False
     if TOTP_SECRETS:
         try:
             TOTP_SECRETS = loads(TOTP_SECRETS)
@@ -77,6 +81,7 @@ def on_starting(server):
                     x += 1
             TOTP_SECRETS = tmp_secrets.copy()
             del tmp_secrets
+            invalid_totp_secrets = True
 
     if not TOTP_SECRETS:
         LOGGER.warning("The TOTP_SECRETS environment variable is missing, generating a random one ...")
@@ -134,6 +139,12 @@ def on_starting(server):
     env_admin_password = getenv("ADMIN_PASSWORD", "")
 
     if ADMIN_USER:
+        if not getenv("TOTP_SECRETS") or invalid_totp_secrets:
+            LOGGER.warning("The TOTP secrets have changed, removing admin TOTP secrets ...")
+            err = DB.update_ui_user(ADMIN_USER["username"], ADMIN_USER["password"], None, method=ADMIN_USER["method"])
+            if err:
+                LOGGER.error(f"Couldn't update the admin user in the database: {err}")
+
         LOGGER.debug(f"Admin user: {ADMIN_USER}")
         if env_admin_username or env_admin_password:
             override_admin_creds = getenv("OVERRIDE_ADMIN_CREDS", "no").lower() == "yes"
@@ -179,6 +190,18 @@ def on_starting(server):
         if ret:
             LOGGER.error(f"Couldn't create the admin user in the database: {ret}")
             exit(1)
+
+    latest_release = get_latest_stable_release()
+
+    if not latest_release:
+        LOGGER.error("Failed to fetch latest release information")
+        latest_version = "unknown"
+    else:
+        latest_version = latest_release["tag_name"].removeprefix("v")
+
+    TMP_DIR.joinpath("ui_data.json").write_text(
+        dumps({"LATEST_VERSION": latest_version, "LATEST_VERSION_LAST_CHECK": datetime.now().isoformat()}), encoding="utf-8"
+    )
 
     LOGGER.info("UI is ready")
 

@@ -1,0 +1,678 @@
+{% extends "dashboard.html" %} {% block content %}
+<!-- Content -->
+
+<div class="nav-align-top">
+  <ul class="nav nav-pills flex-column flex-md-row mb-6">
+    <li class="nav-item me-3" role="presentation">
+      <button
+        type="button"
+        class="nav-link active d-flex align-items-center"
+        role="tab"
+        data-bs-toggle="tab"
+        data-bs-target="#navs-pills-profile"
+        aria-controls="navs-pills-profile"
+        aria-selected="true"
+      >
+        <i class="tf-icons bx bx-user bx-sm me-2"></i>
+        <span class="d-none d-sm-inline">Profile</span>
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button
+        type="button"
+        class="nav-link d-flex align-items-center"
+        role="tab"
+        data-bs-toggle="tab"
+        data-bs-target="#navs-pills-sessions"
+        aria-controls="navs-pills-sessions"
+      >
+        <i class="tf-icons bx bx-link-alt bx-sm me-2"></i>
+        <span class="d-none d-sm-inline">Sessions</span>
+      </button>
+    </li>
+  </ul>
+</div>
+
+<div class="tab-content position-relative">
+  <div
+    class="tab-pane fade show active"
+    id="navs-pills-profile"
+    role="tabpanel"
+  >
+    <div class="d-flex row">
+      <div class="col-md-6">
+        <!-- Profile -->
+        <div class="card mb-4">
+          <h5 class="card-header">Edit Profile</h5>
+          <div class="card-body pb-4">
+            <form method="POST" action="{{ url_for('profile') }}/edit">
+              <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ csrf_token() }}"
+              />
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label for="username" class="form-label">Username</label>
+                  <input
+                    class="form-control"
+                    type="text"
+                    id="username"
+                    name="username"
+                    value="{{ current_user.get_id() }}"
+                    placeholder="john.doe@example.com"
+                    aria-label="Username"
+                    required
+                  />
+                </div>
+                <div class="col-md-6">
+                  <label for="email" class="form-label">E-mail</label>
+                  <input
+                    class="form-control"
+                    type="email"
+                    id="email"
+                    name="email"
+                    value="{{ current_user.email or '' }}"
+                    placeholder="john.doe@example.com"
+                    aria-label="E-mail"
+                  />
+                </div>
+                <div class="col-md-12 form-password-toggle">
+                  <label class="form-label" for="password"
+                    >Current password</label
+                  >
+                  <div class="input-group input-group-merge">
+                    <input
+                      type="password"
+                      id="password"
+                      class="form-control"
+                      name="password"
+                      placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
+                      aria-describedby="Current password"
+                      required
+                    />
+                    <span class="input-group-text cursor-pointer"
+                      ><i class="bx bx-hide"></i
+                    ></span>
+                  </div>
+                </div>
+              </div>
+              <div class="mt-4 justify-content-center d-flex">
+                <button type="submit" class="btn btn-primary me-2">
+                  Save Changes
+                </button>
+                <button type="reset" class="btn btn-outline-secondary">
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+        <!-- /Profile -->
+        <!-- Two-Factor Authentication (2FA) -->
+        <div class="card mb-4">
+          <h5 class="card-header text-center">
+            Two-Factor Authentication (2FA)
+          </h5>
+          <div class="card-body">
+            {% if not is_totp %}
+            <!-- Enable 2FA -->
+            <form method="POST" action="{{ url_for('profile') }}/totp-enable">
+              <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ csrf_token() }}"
+              />
+              <div class="row g-3">
+                <!-- QR Code Section -->
+                <div class="col-md-12 text-center">
+                  <h5 class="mb-0">Enable 2FA</h5>
+                  <img
+                    class="img-fluid"
+                    src="{{ totp_qr_image }}"
+                    alt="2FA QR Code"
+                    height="200"
+                    width="200"
+                  />
+                </div>
+                <div class="col-md-12 form-password-toggle">
+                  <label
+                    for="secret_token"
+                    class="form-label text-start d-block"
+                    >Secret Token</label
+                  >
+                  <div class="input-group input-group-merge">
+                    <input
+                      type="password"
+                      id="secret_token"
+                      name="secret_token"
+                      class="form-control"
+                      placeholder="Secret Token"
+                      value="{{ totp_secret }}"
+                      readonly
+                    />
+                    <span
+                      class="input-group-text cursor-pointer copy-to-clipboard"
+                    >
+                      <i class="bx bx-copy-alt copy-to-clipboard"></i>
+                    </span>
+                    <span class="input-group-text cursor-pointer">
+                      <i class="bx bx-hide"></i>
+                    </span>
+                  </div>
+                </div>
+                <div class="col-md-12">
+                  <label for="2fa_code" class="form-label text-start d-block"
+                    >2FA Code</label
+                  >
+                  <div class="input-group">
+                    <input
+                      class="form-control"
+                      type="text"
+                      id="totp_token"
+                      name="totp_token"
+                      placeholder="Enter code"
+                      aria-label="2FA Code"
+                      required
+                    />
+                  </div>
+                </div>
+                <div class="col-md-12 form-password-toggle">
+                  <label class="form-label" for="password"
+                    >Current password</label
+                  >
+                  <div class="input-group input-group-merge">
+                    <input
+                      type="password"
+                      id="password"
+                      class="form-control"
+                      name="password"
+                      placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
+                      aria-describedby="Current password"
+                      required
+                    />
+                    <span class="input-group-text cursor-pointer"
+                      ><i class="bx bx-hide"></i
+                    ></span>
+                  </div>
+                </div>
+              </div>
+              <div class="mt-4 justify-content-center d-flex">
+                <button type="submit" class="btn btn-primary">
+                  Enable TOTP
+                </button>
+              </div>
+            </form>
+            <!-- /Enable 2FA -->
+            {% else %}
+            <!-- Disable 2FA -->
+            <form method="POST" action="{{ url_for('profile') }}/totp-disable">
+              <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ csrf_token() }}"
+              />
+              <div class="row g-3">
+                <div class="col-md-12 text-center">
+                  <h5 class="mb-0">Disable 2FA</h5>
+                </div>
+                <div class="col-md-12">
+                  <label for="totp_token" class="form-label text-start d-block"
+                    >2FA Code or Recovery Code</label
+                  >
+                  <div class="input-group">
+                    <input
+                      class="form-control"
+                      type="text"
+                      id="totp_token"
+                      name="totp_token"
+                      placeholder="Enter code"
+                      aria-label="2FA Code or Recovery Code"
+                      required
+                    />
+                  </div>
+                </div>
+                <div class="col-md-12 form-password-toggle">
+                  <label class="form-label" for="password"
+                    >Current password</label
+                  >
+                  <div class="input-group input-group-merge">
+                    <input
+                      type="password"
+                      id="password"
+                      class="form-control"
+                      name="password"
+                      placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
+                      aria-describedby="Current password"
+                      required
+                    />
+                    <span class="input-group-text cursor-pointer"
+                      ><i class="bx bx-hide"></i
+                    ></span>
+                  </div>
+                </div>
+              </div>
+              <div class="mt-4 justify-content-center d-flex">
+                <button type="submit" class="btn btn-primary">
+                  Disable TOTP
+                </button>
+              </div>
+            </form>
+            <!-- /Disable 2FA -->
+            {% endif %}
+          </div>
+        </div>
+        <!-- /Two-Factor Authentication (2FA) -->
+      </div>
+      <div class="col-md-6">
+        <!-- Password -->
+        <div class="card mb-4">
+          <h5 class="card-header">Change Password</h5>
+          <div class="card-body pb-4">
+            <form
+              method="POST"
+              action="{{ url_for('profile') }}/edit"
+              autocomplete="off"
+            >
+              <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ csrf_token() }}"
+              />
+              <div class="row g-3">
+                <div class="col-md-12 form-password-toggle">
+                  <label for="new_password" class="form-label"
+                    >New Password</label
+                  >
+                  <div class="input-group input-group-merge">
+                    <input
+                      class="form-control"
+                      type="password"
+                      id="new_password"
+                      name="new_password"
+                      placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
+                      aria-label="New Password"
+                      autocomplete="off"
+                      required
+                      pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[ !&quot;#$%&'()*+,./:;<=>?@[\\\]^_`{|}~-]).{8,}$"
+                    />
+                    <span class="input-group-text cursor-pointer"
+                      ><i class="bx bx-hide"></i
+                    ></span>
+                  </div>
+                  <div class="mt-3">
+                    <ul class="list-unstyled" id="password-requirements">
+                      <li id="length-check">
+                        <i class="bx bx-x text-danger"></i> Your password must
+                        have at least 8 characters.
+                      </li>
+                      <li id="uppercase-check">
+                        <i class="bx bx-x text-danger"></i> Your password must
+                        have at least 1 uppercase letter.
+                      </li>
+                      <li id="number-check">
+                        <i class="bx bx-x text-danger"></i> Your password must
+                        have at least 1 number.
+                      </li>
+                      <li id="special-check">
+                        <i class="bx bx-x text-danger"></i> Your password must
+                        have at least 1 special character.
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+                <div class="col-md-12 form-password-toggle">
+                  <label for="new_password_confirm" class="form-label"
+                    >Confirm Password</label
+                  >
+                  <div class="input-group input-group-merge">
+                    <input
+                      class="form-control"
+                      type="password"
+                      id="new_password_confirm"
+                      name="new_password_confirm"
+                      placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
+                      aria-label="Confirm Password"
+                      autocomplete="off"
+                      required
+                      pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[ !&quot;#$%&'()*+,./:;<=>?@[\\\]^_`{|}~-]).{8,}$"
+                    />
+                    <span class="input-group-text cursor-pointer"
+                      ><i class="bx bx-hide"></i
+                    ></span>
+                  </div>
+                </div>
+                <div class="col-md-12 form-password-toggle">
+                  <label class="form-label" for="password"
+                    >Current password</label
+                  >
+                  <div class="input-group input-group-merge">
+                    <input
+                      type="password"
+                      id="password"
+                      class="form-control"
+                      name="password"
+                      placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
+                      aria-describedby="Current password"
+                      required
+                    />
+                    <span class="input-group-text cursor-pointer"
+                      ><i class="bx bx-hide"></i
+                    ></span>
+                  </div>
+                </div>
+              </div>
+              <div class="mt-4 justify-content-center d-flex">
+                <button type="submit" class="btn btn-primary me-2">
+                  Save Changes
+                </button>
+                <button type="reset" class="btn btn-outline-secondary">
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+        <!-- /Password -->
+        {% if is_totp %}
+        <!-- Refresh Recovery Codes -->
+        <div class="card mb-4">
+          <h5 class="card-header">Refresh Recovery Codes</h5>
+          <div class="card-body">
+            <div class="alert alert-danger text-center" role="alert">
+              <strong>Notice:</strong> Refreshing your recovery codes will
+              invalidate the previous ones.
+            </div>
+            <form
+              method="POST"
+              action="{{ url_for('profile') }}/totp-refresh"
+              autocomplete="off"
+            >
+              <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ csrf_token() }}"
+              />
+              <div class="row g-3">
+                <div class="col-md-12 form-password-toggle">
+                  <label class="form-label" for="password"
+                    >Current password</label
+                  >
+                  <div class="input-group input-group-merge">
+                    <input
+                      type="password"
+                      id="password"
+                      class="form-control"
+                      name="password"
+                      placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
+                      aria-describedby="Current password"
+                      required
+                    />
+                    <span class="input-group-text cursor-pointer"
+                      ><i class="bx bx-hide"></i
+                    ></span>
+                  </div>
+                </div>
+              </div>
+              <div class="mt-4 justify-content-center d-flex">
+                <button type="submit" class="btn btn-primary">
+                  Refresh Recovery Codes
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+        <!-- /Refresh Recovery Codes -->
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-pane fade" id="navs-pills-sessions" role="tabpanel">
+    <div class="d-flex row justify-content-center">
+      <form
+        method="POST"
+        action="{{ url_for('profile') }}/wipe-old-sessions"
+        class="col-md-8 mb-4"
+      >
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+        <div class="card mb-4">
+          <h5 class="card-header">Sessions</h5>
+          <div class="card-body">
+            <div class="row g-3">
+              <div class="col-md-12 form-password-toggle">
+                <label class="form-label" for="password"
+                  >Current password</label
+                >
+                <div class="input-group input-group-merge">
+                  <input
+                    type="password"
+                    id="password"
+                    class="form-control"
+                    name="password"
+                    placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
+                    aria-describedby="Current password"
+                    required
+                  />
+                  <span class="input-group-text cursor-pointer"
+                    ><i class="bx bx-hide"></i
+                  ></span>
+                </div>
+              </div>
+            </div>
+            <div class="mt-4 d-flex justify-content-center">
+              <button type="submit" class="btn btn-danger">
+                Wipe Old Sessions
+              </button>
+            </div>
+          </div>
+        </div>
+      </form>
+      {% for session in last_sessions %} {% set current_session = loop.index ==
+      1 %}
+      <div class="col-md-8 mb-4">
+        <div
+          class="card {% if current_session %}border-primary border-1 position-relative{% else %}border-secondary{% endif %} shadow-sm"
+        >
+          <div
+            class="card-header {% if current_session %}bg-primary text-white{% else %}bg-secondary{% endif %} d-flex justify-content-between align-items-center mb-2 p-3"
+          >
+            <div class="d-flex align-items-center">
+              <i
+                class="bx {% if current_session %}bx-star{% else %}bx-history{% endif %} me-2 {% if current_session %}text-warning{% else %}text-white{% endif %}"
+              ></i>
+              <h5 class="mb-0 text-white">
+                {% if current_session %}Session{% else %}Old session{% endif %}
+              </h5>
+            </div>
+            {% if current_session %}
+            <span class="badge bg-bw-green text-white fs-6">
+              <i class="bx bx-user-check"></i> Current Session
+            </span>
+            {% endif %}
+          </div>
+          <div class="card-body">
+            <div class="list-group list-group-flush">
+              <div class="list-group-item d-flex align-items-center">
+                <strong class="me-2">
+                  <i
+                    class="bx bx-window-alt {% if current_session %}text-primary{% else %}text-secondary{% endif %}"
+                  ></i>
+                  Browser:</strong
+                >
+                {% if session["browser"].startswith("Chrome") %}
+                <i class="bx bxl-chrome text-primary me-1"></i>
+                {% elif session["browser"].startswith("Firefox") %}
+                <i class="bx bxl-firefox text-primary me-1"></i>
+                {% elif session["browser"].startswith("Safari") %}
+                <i class="bx bxl-safari text-primary me-1"></i>
+                {% elif session["browser"].startswith("Edge") %}
+                <i class="bx bxl-edge text-primary me-1"></i>
+                {% elif session["browser"].startswith("Opera") %}
+                <i class="bx bxl-opera text-primary me-1"></i>
+                {% else %}
+                <i class="bx bxl-internet-explorer text-primary me-1"></i>
+                {% endif %} {{ session["browser"] }}
+              </div>
+              <div class="list-group-item d-flex align-items-center">
+                <strong class="me-2">
+                  <i
+                    class="bx bx-desktop {% if current_session %}text-primary{% else %}text-secondary{% endif %}"
+                  ></i>
+                  Operating System:</strong
+                >
+                {% if session["os"].startswith("Windows") %}
+                <i class="bx bxl-windows text-primary me-1"></i>
+                {% elif session["os"].startswith("Mac") %}
+                <i class="bx bxl-apple text-primary me-1"></i>
+                {% elif session["os"].startswith("Linux") %}
+                <i class="bx bxl-tux text-primary me-1"></i>
+                {% else %}
+                <i class="bx bx-desktop text-primary me-1"></i>
+                {% endif %} {{ session["os"] }}
+              </div>
+              <div
+                class="d-flex list-group-item form-password-toggle align-items-center"
+              >
+                <strong class="me-2">
+                  <i
+                    class="bx bx-network-chart {% if current_session %}text-primary{% else %}text-secondary{% endif %}"
+                  ></i>
+                  IP Address:
+                </strong>
+                <div
+                  class="input-group input-group-sm input-group-merge w-auto"
+                >
+                  <input
+                    id="ip"
+                    class="form-control"
+                    type="password"
+                    autocomplete="off"
+                    value="{{ session['ip'] }}"
+                    readonly
+                  />
+                  <span class="input-group-text cursor-pointer">
+                    <i class="bx bx-hide"></i>
+                  </span>
+                </div>
+              </div>
+              <div class="list-group-item d-flex align-items-center">
+                <strong class="me-2">
+                  <i
+                    class="bx bx-time {% if current_session %}text-primary{% else %}text-secondary{% endif %}"
+                  ></i>
+                  Creation date:</strong
+                >
+                {{ session["creation_date"] }}
+              </div>
+              <div class="list-group-item d-flex align-items-center">
+                <strong class="me-2">
+                  <i
+                    class="bx bx-time {% if current_session %}text-primary{% else %}text-secondary{% endif %}"
+                  ></i>
+                  Last Activity:</strong
+                >
+                {{ session["last_activity"] }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+{% if is_recovery_refreshed %}
+<div
+  class="modal fade"
+  id="modal-recovery-codes"
+  data-bs-backdrop="static"
+  tabindex="-1"
+  aria-hidden="true"
+  role="dialog"
+>
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Recovery Codes</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-danger text-center" role="alert">
+          <strong>Notice:</strong> These recovery codes will only be shown once.
+          Please ensure you save them securely.
+        </div>
+        <div class="alert alert-primary text-center" role="alert">
+          <strong>Important:</strong> Please save these recovery codes in a
+          secure location. You can use them to access your account if you lose
+          your authentication device.
+        </div>
+        <div class="row g-3">
+          {% for code in totp_recovery_codes %}
+          <div class="col-6">
+            <div
+              class="p-3 border rounded bg-light shadow-sm text-center recovery-code"
+            >
+              {{ code }}
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="modal-footer justify-content-center">
+        <button id="copy-codes-button" type="button" class="btn btn-primary">
+          Copy Codes
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<script nonce="{{ script_nonce }}">
+  document.addEventListener("DOMContentLoaded", function () {
+    var modalElement = document.getElementById("modal-recovery-codes");
+    var modal = new bootstrap.Modal(modalElement);
+    modal.show();
+
+    document
+      .getElementById("copy-codes-button")
+      .addEventListener("click", function () {
+        // Get all elements that have the class 'recovery-code'
+        var codeElements = document.querySelectorAll(".recovery-code");
+
+        // Initialize a string to store all the codes
+        var allCodes = "";
+
+        // Loop through each element and add the text content to the string
+        codeElements.forEach(function (element) {
+          allCodes += element.textContent.trim() + "\n";
+        });
+
+        // Copy the concatenated codes to the clipboard
+        navigator.clipboard
+          .writeText(allCodes)
+          .then(() => {
+            // Show tooltip
+            const button = $(this);
+            button.attr("data-bs-original-title", "Copied!").tooltip("show");
+
+            // Hide tooltip after 2 seconds
+            setTimeout(() => {
+              button.tooltip("hide").attr("data-bs-original-title", "");
+            }, 2000);
+          })
+          .catch((err) => {
+            console.error("Failed to copy text: ", err);
+          });
+      });
+  });
+</script>
+{% endif %}
+
+<!-- / Content -->
+{% endblock %}

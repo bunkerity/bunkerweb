@@ -51,6 +51,10 @@ services:
       DISABLE_DEFAULT_SERVER: "yes"
       USE_CLIENT_CACHE: "yes"
       USE_GZIP: "yes"
+      USE_MODSECURITY: "no"
+      USE_BAD_BEHAVIOR: "no"
+      USE_LIMIT_REQ: "no"
+      USE_LIMIT_CONN: "no"
       www.example.com_USE_UI: "yes"
       www.example.com_USE_REVERSE_PROXY: "yes"
       www.example.com_REVERSE_PROXY_URL: "/admin"
@@ -82,13 +86,9 @@ services:
       dockerfile: ./src/ui/Dockerfile
     volumes:
       - bw-logs:/var/log/bunkerweb
-      - ../../src/ui/pages:/usr/share/bunkerweb/ui/pages:ro
-      - ../../src/ui/src:/usr/share/bunkerweb/ui/src:ro
+      - ../../src/ui/app:/usr/share/bunkerweb/ui/app:ro
       - ../../src/ui/gunicorn.conf.py:/usr/share/bunkerweb/ui/gunicorn.conf.py:ro
       - ../../src/ui/main.py:/usr/share/bunkerweb/ui/main.py:ro
-      - ../../src/ui/models.py:/usr/share/bunkerweb/ui/models.py:ro
-      - ../../src/ui/ui_database.py:/usr/share/bunkerweb/ui/ui_database.py:ro
-      - ../../src/ui/utils.py:/usr/share/bunkerweb/ui/utils.py:ro
     environment:
       <<: *env
       ADMIN_USERNAME: "admin"

@@ -1,0 +1,51 @@
+{% extends "base.html" %} {% block page %}
+<div class="layout-wrapper bg-primary">
+  <div class="layout-container">
+    <div class="content-wrapper">
+      <div
+        class="container-xxl d-flex justify-content-center align-items-center min-vh-100"
+      >
+        <div class="layout-main-wrapper">
+          <div class="layout-main-placeholder">
+            <img
+              src="img/logo-menu-2.png"
+              class="img-fluid pulsating"
+              alt="Logo"
+            />
+          </div>
+          {% if message %}
+          <div class="layout-main-info">
+            <h2>{{ message }}</h2>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- / Content -->
+<script nonce="{{ script_nonce }}">
+  const reloading = setInterval(check_reloading, 2000);
+  check_reloading();
+
+  async function check_reloading() {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 2000);
+    const response = await fetch(
+      `${location.href.replace("/loading", "/check_reloading")}`,
+      { signal: controller.signal },
+    );
+
+    if (response.status === 200) {
+      res = await response.json();
+      if (res.reloading === false) {
+        clearInterval(reloading);
+        window.location.replace(
+          "{{ next }}" + (window.location.hash ? window.location.hash : ""),
+        );
+      }
+    }
+  }
+</script>
+{% endblock %}

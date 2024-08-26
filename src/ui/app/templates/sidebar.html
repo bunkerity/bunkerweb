@@ -1,0 +1,134 @@
+<div
+  class="offcanvas offcanvas-end"
+  tabindex="-1"
+  id="side-offcanvas"
+  data-bs-keyboard="false"
+  data-bs-backdrop="false"
+>
+  <div class="offcanvas-header">
+    <div class="nav-align-top">
+      <ul class="nav nav-pills nav-fill" role="tablist">
+        <li class="nav-item mb-1 mb-sm-0 me-3" role="presentation">
+          <button
+            type="button"
+            class="nav-link active"
+            role="tab"
+            data-bs-toggle="tab"
+            data-bs-target="#navs-pills-justified-news"
+            aria-controls="navs-pills-justified-news"
+            aria-selected="true"
+          >
+            <span class="d-none d-sm-block" id="news-pill"
+              ><i
+                class="tf-icons bx bx-news bx-xs me-1_5 align-text-bottom"
+              ></i>
+              News</span
+            ><i class="bx bx-news bx-xs d-sm-none"></i>
+          </button>
+        </li>
+        <li class="nav-item mb-1 mb-sm-0" role="presentation">
+          <button
+            type="button"
+            class="nav-link"
+            role="tab"
+            data-bs-toggle="tab"
+            data-bs-target="#navs-pills-justified-notifications"
+            aria-controls="navs-pills-justified-notifications"
+            aria-selected="false"
+            tabindex="-1"
+          >
+            <span class="d-none d-sm-block"
+              ><i
+                class="tf-icons bx bx-notification bx-xs me-1_5 align-text-bottom"
+              ></i>
+              Notifications</span
+            ><i class="bx bx-notification bx-xs d-sm-none"></i>
+          </button>
+        </li>
+      </ul>
+    </div>
+    <button
+      type="button"
+      class="btn-close text-reset"
+      data-bs-dismiss="offcanvas"
+      aria-label="Close"
+    ></button>
+  </div>
+  <div class="offcanvas-body px-0 position-relative">
+    <div class="tab-content position-relative">
+      <div
+        class="tab-pane fade show active"
+        id="navs-pills-justified-news"
+        role="tabpanel"
+      >
+        <div data-news-container class="flex-auto">
+          <p
+            class="text-center col-span-12 relative w-full p-4 text-primary rounded-lg fw-bold"
+          >
+            Impossible to connect to blog news.
+          </p>
+        </div>
+      </div>
+      <div
+        class="tab-pane fade"
+        id="navs-pills-justified-notifications"
+        role="tabpanel"
+      >
+        <p>
+          Donut dragée jelly pie halvah. Danish gingerbread bonbon cookie wafer
+          candy oat cake ice cream. Gummies halvah tootsie roll muffin biscuit
+          icing dessert gingerbread. Pastry ice cream cheesecake fruitcake.
+        </p>
+        <p class="mb-0">
+          Jelly-o jelly beans icing pastry cake cake lemon drops. Muffin muffin
+          pie tiramisu halvah cotton candy liquorice caramels.
+        </p>
+      </div>
+    </div>
+  </div>
+  <!-- Newsletter Signup Section -->
+  <div
+    class="newsletter-signup position-sticky bottom-0 start-0 w-100 p-4 bg-white border-top"
+  >
+    <h5 class="mb-3 text-dark">Join the Newsletter</h5>
+    <form
+      action="https://bunkerity.us1.list-manage.com/subscribe/post?u=ec5b1577cf427972b9bd491a6&amp;id=37076d9d67"
+      method="POST"
+      id="subscribe-newsletter"
+    >
+      <div class="mb-3">
+        <input
+          type="email"
+          id="newsletter-email"
+          name="EMAIL"
+          class="form-control"
+          placeholder="John.doe@example.com"
+          required
+        />
+      </div>
+      <div class="form-check mb-3">
+        <input
+          type="checkbox"
+          class="form-check-input"
+          id="newsletter-check"
+          name="newsletter-check"
+          required
+        />
+        <label class="form-check-label" for="privacyPolicyCheck">
+          I've read and agree to the
+          <a
+            class="fst-italic"
+            href="https://www.bunkerity.com/en/privacy-policy?utm_campaign=self&utm_source=ui"
+            target="_blank"
+            rel="noopener"
+            >privacy policy</a
+          >
+        </label>
+      </div>
+      <button type="submit" class="btn btn-primary w-100 text-uppercase">
+        Subscribe
+      </button>
+    </form>
+  </div>
+  <!-- End Newsletter Signup Section -->
+</div>
