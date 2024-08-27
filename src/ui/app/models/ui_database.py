@@ -47,7 +47,7 @@ class UIDatabase(Database):
 
             if db_version != bunkerweb_version:
                 self.logger.warning(f"UI tables version ({db_version}) is different from BunkerWeb version ({bunkerweb_version}), migrating them ...")
-                current_time = datetime.now()
+                current_time = datetime.now().astimezone()
                 error = True
                 while error:
                     try:
@@ -55,7 +55,7 @@ class UIDatabase(Database):
                         metadata.reflect(self.sql_engine)
                         error = False
                     except BaseException as e:
-                        if (datetime.now() - current_time).total_seconds() > 10:
+                        if (datetime.now().astimezone() - current_time).total_seconds() > 10:
                             raise e
                         sleep(1)
 
@@ -201,7 +201,7 @@ class UIDatabase(Database):
                     return f"Role {role} doesn't exist"
                 session.add(RolesUsers(user_name=username, role_name=role))
 
-            current_time = datetime.now()
+            current_time = datetime.now().astimezone()
             session.add(
                 Users(
                     username=username,
@@ -263,7 +263,7 @@ class UIDatabase(Database):
             user.password = password.decode("utf-8")
             user.totp_secret = totp_secret
             user.method = method
-            user.update_date = datetime.now()
+            user.update_date = datetime.now().astimezone()
 
             try:
                 session.commit()
@@ -354,7 +354,7 @@ class UIDatabase(Database):
             if session.query(Roles).with_entities(Roles.name).filter_by(name=name).first():
                 return f"Role {name} already exists"
 
-            session.add(Roles(name=name, description=description, update_datetime=datetime.now()))
+            session.add(Roles(name=name, description=description, update_datetime=datetime.now().astimezone()))
 
             for permission in permissions:
                 if not session.query(Permissions).with_entities(Permissions.name).filter_by(name=permission).first():
@@ -479,15 +479,10 @@ class UIDatabase(Database):
 
         return ""
 
-    def get_ui_user_last_session(self, username: str) -> Optional[UserSessions]:
-        """Get ui user last session."""
-        with self._db_session() as session:
-            return session.query(UserSessions).filter_by(user_name=username).order_by(UserSessions.creation_date.desc()).first()
-
     def get_ui_user_sessions(self, username: str) -> List[UserSessions]:
         """Get ui user sessions."""
         with self._db_session() as session:
-            return session.query(UserSessions).filter_by(user_name=username).order_by(UserSessions.creation_date.desc()).limit(10).all()
+            return session.query(UserSessions).filter_by(user_name=username).order_by(UserSessions.creation_date.desc()).all()
 
     def delete_ui_user_old_sessions(self, username: str) -> str:
         """Delete ui user old sessions."""

@@ -25,15 +25,13 @@ def login_page():
         ui_user = DB.get_ui_user(username=request.form["username"])
         if ui_user and ui_user.username == request.form["username"] and ui_user.check_password(request.form["password"]):
             # log the user in
+            session["creation_date"] = datetime.now().astimezone()
+            session["ip"] = request.remote_addr
+            session["user_agent"] = request.headers.get("User-Agent")
             session["totp_validated"] = False
             session["flash_messages"] = []
 
-            ret = DB.mark_ui_user_login(
-                ui_user.username,
-                datetime.now().astimezone(),
-                request.remote_addr,
-                request.headers.get("User-Agent"),
-            )
+            ret = DB.mark_ui_user_login(ui_user.username, session["creation_date"], session["ip"], session["user_agent"])
             if isinstance(ret, str):
                 LOGGER.error(f"Couldn't mark the user login: {ret}")
             else:

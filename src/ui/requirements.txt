@@ -52,9 +52,14 @@ flask==3.0.3 \
     --hash=sha256:ceb27b0af3823ea2737928a4d99d125a06175b8512c445cbd9a9ce200ef76842
     # via
     #   -r requirements.in
+    #   flask-executor
     #   flask-login
     #   flask-principal
     #   flask-wtf
+flask-executor==1.0.0 \
+    --hash=sha256:4bc113def5d9f1c7ff272ff7ba09f843468eab80469bdbd21625a111b2c8ae7b \
+    --hash=sha256:c044dc6393326a83351e69e4ddf3686270abffeac2b599260cebf0ea5d1e93de
+    # via -r requirements.in
 flask-login==0.6.3 \
     --hash=sha256:5e23d14a607ef12806c699590b89d0f0e0d67baeec599d75947bf9c147330333 \
     --hash=sha256:849b25b82a436bf830a054e74214074af59097171562ab10bfa999e6b78aae5d

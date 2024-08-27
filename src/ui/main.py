@@ -14,6 +14,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 
 from datetime import datetime, timedelta
 from flask import Flask, Response, flash, jsonify, make_response, redirect, render_template, request, session, url_for
+from flask_executor import Executor
 from flask_login import current_user, LoginManager, login_required, logout_user
 from flask_principal import ActionNeed, identity_loaded, Permission, Principal, RoleNeed, TypeNeed, UserNeed
 from flask_wtf.csrf import CSRFProtect, CSRFError
@@ -104,6 +105,9 @@ with app.app_context():
     csrf = CSRFProtect()
     csrf.init_app(app)
 
+    # Executor
+    executor = Executor(app)
+
 
 @app.context_processor
 def inject_variables():
@@ -146,42 +150,6 @@ def inject_variables():
         is_readonly=DATA.get("READONLY_MODE", False),
         username=current_user.get_id() if current_user.is_authenticated else "",
     )
-
-
-@app.after_request
-def set_security_headers(response):
-    """Set the security headers."""
-    # * Content-Security-Policy header to prevent XSS attacks
-    response.headers["Content-Security-Policy"] = (
-        "object-src 'none';"
-        + " frame-ancestors 'self';"
-        + " default-src 'self' https://www.bunkerweb.io https://assets.bunkerity.com https://bunkerity.us1.list-manage.com https://api.github.com;"
-        + f" script-src 'self' 'nonce-{app.config['SCRIPT_NONCE']}';"
-        + " style-src 'self' 'unsafe-inline';"
-        + " img-src 'self' data: https://assets.bunkerity.com;"
-        + " font-src 'self' data:;"
-        + " base-uri 'self';"
-        + " block-all-mixed-content;"
-        + (" connect-src *;" if request.path.startswith(("/check", "/setup")) else "")
-    )
-
-    if request.headers.get("X-Forwarded-Proto") == "https":
-        if not request.path.startswith("/setup/loading"):
-            response.headers["Content-Security-Policy"] += " upgrade-insecure-requests;"
-
-        # * Strict-Transport-Security header to force HTTPS if accessed via a reverse proxy
-        response.headers["Strict-Transport-Security"] = "max-age=63072000; includeSubDomains; preload"
-
-    # * X-Frames-Options header to prevent clickjacking
-    response.headers["X-Frame-Options"] = "DENY"
-
-    # * X-Content-Type-Options header to prevent MIME sniffing
-    response.headers["X-Content-Type-Options"] = "nosniff"
-
-    # * Referrer-Policy header to prevent leaking of sensitive data
-    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
-
-    return response
 
 
 @login_manager.user_loader
@@ -247,7 +215,57 @@ def handle_csrf_error(_):
     flash("Wrong CSRF token !", "error")
     if not current_user:
         return render_template("setup.html"), 403
-    return render_template("login.html", is_totp=bool(current_user.totp_secret)), 403
+    return render_template("login.html"), 403
+
+
+def update_latest_stable_release():
+    DATA["LATEST_VERSION"] = get_latest_stable_release()
+
+
+def check_database_state():
+    DATA.load_from_file()
+    if (
+        DB.database_uri
+        and DB.readonly
+        and (datetime.now().astimezone() - datetime.fromisoformat(DATA.get("LAST_DATABASE_RETRY", "1970-01-01T00:00:00")).astimezone() > timedelta(minutes=1))
+    ):
+        failed = False
+        try:
+            DB.retry_connection(pool_timeout=1)
+            DB.retry_connection(log=False)
+            LOGGER.info("The database is no longer read-only, defaulting to read-write mode")
+        except BaseException:
+            failed = True
+            try:
+                DB.retry_connection(readonly=True, pool_timeout=1)
+                DB.retry_connection(readonly=True, log=False)
+            except BaseException:
+                if DB.database_uri_readonly:
+                    with suppress(BaseException):
+                        DB.retry_connection(fallback=True, pool_timeout=1)
+                        DB.retry_connection(fallback=True, log=False)
+        DATA.update(
+            {
+                "READONLY_MODE": failed,
+                "LAST_DATABASE_RETRY": DB.last_connection_retry.isoformat() if DB.last_connection_retry else datetime.now().astimezone().isoformat(),
+            }
+        )
+    elif not DATA.get("READONLY_MODE", False) and request.method == "POST" and not ("/totp" in request.path or "/login" in request.path):
+        try:
+            DB.test_write()
+            DATA["READONLY_MODE"] = False
+        except BaseException:
+            DATA.update(
+                {
+                    "READONLY_MODE": True,
+                    "LAST_DATABASE_RETRY": DB.last_connection_retry.isoformat() if DB.last_connection_retry else datetime.now().astimezone().isoformat(),
+                }
+            )
+    else:
+        try:
+            DB.test_read()
+        except BaseException:
+            DATA["LAST_DATABASE_RETRY"] = DB.last_connection_retry.isoformat() if DB.last_connection_retry else datetime.now().astimezone().isoformat()
 
 
 @app.before_request
@@ -262,57 +280,10 @@ def before_request():
 
     if not request.path.startswith(("/css", "/img", "/js", "/fonts", "/libs")):
         if datetime.now().astimezone() - datetime.fromisoformat(DATA.get("LATEST_VERSION_LAST_CHECK", "1970-01-01T00:00:00")).astimezone() > timedelta(hours=1):
-            DATA.update(
-                {
-                    "LATEST_VERSION": get_latest_stable_release(),
-                    "LATEST_VERSION_LAST_CHECK": datetime.now().isoformat(),
-                }
-            )
+            DATA["LATEST_VERSION_LAST_CHECK"] = datetime.now().astimezone().isoformat()
+            executor.submit(update_latest_stable_release)
 
-        if (
-            DB.database_uri
-            and DB.readonly
-            and (
-                datetime.now().astimezone() - datetime.fromisoformat(DATA.get("LAST_DATABASE_RETRY", "1970-01-01T00:00:00")).astimezone() > timedelta(minutes=1)
-            )
-        ):
-            failed = False
-            try:
-                DB.retry_connection(pool_timeout=1)
-                DB.retry_connection(log=False)
-                LOGGER.info("The database is no longer read-only, defaulting to read-write mode")
-            except BaseException:
-                failed = True
-                try:
-                    DB.retry_connection(readonly=True, pool_timeout=1)
-                    DB.retry_connection(readonly=True, log=False)
-                except BaseException:
-                    if DB.database_uri_readonly:
-                        with suppress(BaseException):
-                            DB.retry_connection(fallback=True, pool_timeout=1)
-                            DB.retry_connection(fallback=True, log=False)
-            DATA.update(
-                {
-                    "READONLY_MODE": failed,
-                    "LAST_DATABASE_RETRY": DB.last_connection_retry.isoformat() if DB.last_connection_retry else datetime.now().isoformat(),
-                }
-            )
-        elif not DATA.get("READONLY_MODE", False) and request.method == "POST" and not ("/totp" in request.path or "/login" in request.path):
-            try:
-                DB.test_write()
-                DATA["READONLY_MODE"] = False
-            except BaseException:
-                DATA.update(
-                    {
-                        "READONLY_MODE": True,
-                        "LAST_DATABASE_RETRY": DB.last_connection_retry.isoformat() if DB.last_connection_retry else datetime.now().isoformat(),
-                    }
-                )
-        else:
-            try:
-                DB.test_read()
-            except BaseException:
-                DATA["LAST_DATABASE_RETRY"] = DB.last_connection_retry.isoformat() if DB.last_connection_retry else datetime.now().isoformat()
+        executor.submit(check_database_state)
 
         DB.readonly = DATA.get("READONLY_MODE", False)
 
@@ -321,27 +292,67 @@ def before_request():
 
         if current_user.is_authenticated:
             passed = True
-            last_user_session = DB.get_ui_user_last_session(username=current_user.get_id())
 
             # Case not login page, keep on 2FA before any other access
             if not session.get("totp_validated", False) and bool(current_user.totp_secret) and "/totp" not in request.path:
                 if not request.path.endswith("/login"):
                     return redirect(url_for("totp.totp_page", next=request.form.get("next")))
                 passed = False
-            elif last_user_session and last_user_session.ip != request.remote_addr:
+            elif session["ip"] != request.remote_addr:
                 LOGGER.warning(f"User {current_user.get_id()} tried to access his session with a different IP address.")
                 passed = False
-            elif last_user_session and last_user_session.user_agent != request.headers.get("User-Agent"):
+            elif session["user_agent"] != request.headers.get("User-Agent"):
                 LOGGER.warning(f"User {current_user.get_id()} tried to access his session with a different User-Agent.")
                 passed = False
 
             if not passed:
                 return logout_page()
 
-            if "session_id" in session:
-                ret = DB.mark_ui_user_access(session["session_id"], datetime.now().astimezone())
-                if isinstance(ret, str):
-                    LOGGER.error(f"Couldn't mark the user access: {ret}")
+
+def mark_user_access(session_id):
+    ret = DB.mark_ui_user_access(session_id, datetime.now().astimezone())
+    if ret:
+        LOGGER.error(f"Couldn't mark the user access: {ret}")
+    LOGGER.debug(f"Marked the user access for session {session_id}")
+
+
+@app.after_request
+def set_security_headers(response):
+    """Set the security headers."""
+    # * Content-Security-Policy header to prevent XSS attacks
+    response.headers["Content-Security-Policy"] = (
+        "object-src 'none';"
+        + " frame-ancestors 'self';"
+        + " default-src 'self' https://www.bunkerweb.io https://assets.bunkerity.com https://bunkerity.us1.list-manage.com https://api.github.com;"
+        + f" script-src 'self' 'nonce-{app.config['SCRIPT_NONCE']}';"
+        + " style-src 'self' 'unsafe-inline';"
+        + " img-src 'self' data: https://assets.bunkerity.com;"
+        + " font-src 'self' data:;"
+        + " base-uri 'self';"
+        + " block-all-mixed-content;"
+        + (" connect-src *;" if request.path.startswith(("/check", "/setup")) else "")
+    )
+
+    if request.headers.get("X-Forwarded-Proto") == "https":
+        if not request.path.startswith("/setup/loading"):
+            response.headers["Content-Security-Policy"] += " upgrade-insecure-requests;"
+
+        # * Strict-Transport-Security header to force HTTPS if accessed via a reverse proxy
+        response.headers["Strict-Transport-Security"] = "max-age=63072000; includeSubDomains; preload"
+
+    # * X-Frames-Options header to prevent clickjacking
+    response.headers["X-Frame-Options"] = "DENY"
+
+    # * X-Content-Type-Options header to prevent MIME sniffing
+    response.headers["X-Content-Type-Options"] = "nosniff"
+
+    # * Referrer-Policy header to prevent leaking of sensitive data
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+
+    if current_user.is_authenticated and "session_id" in session:
+        executor.submit(mark_user_access, session["session_id"])
+
+    return response
 
 
 ### * MISC ROUTES * ###
@@ -386,7 +397,7 @@ def check_reloading():
                 flash(f["content"])
 
             if "flash_messages" in session:
-                session["flash_messages"].append((f["content"], f["type"], datetime.now().strftime("%Y-%m-%d %H:%M:%S %Z")))
+                session["flash_messages"].append((f["content"], f["type"], datetime.now().astimezone().strftime("%Y-%m-%d %H:%M:%S %Z")))
 
         DATA["TO_FLASH"] = []
 

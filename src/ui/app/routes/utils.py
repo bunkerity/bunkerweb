@@ -23,9 +23,9 @@ PLUGIN_ID_RX = re_compile(r"^[\w_-]{1,64}$")
 
 
 def wait_applying():
-    current_time = datetime.now()
+    current_time = datetime.now().astimezone()
     ready = False
-    while not ready and (datetime.now() - current_time).seconds < 120:
+    while not ready and (datetime.now().astimezone() - current_time).seconds < 120:
         db_metadata = DB.get_metadata()
         if isinstance(db_metadata, str):
             LOGGER.error(f"An error occurred when checking for changes in the database : {db_metadata}")
@@ -112,7 +112,7 @@ def manage_bunkerweb(method: str, *args, operation: str = "reloads", is_draft: b
                 flash(f["content"])
 
             if "flash_messages" in session:
-                session["flash_messages"].append((f["content"], f["type"], datetime.now().strftime("%Y-%m-%d %H:%M:%S %Z")))
+                session["flash_messages"].append((f["content"], f["type"], datetime.now().astimezone().strftime("%Y-%m-%d %H:%M:%S %Z")))
 
         DATA["TO_FLASH"] = []
 

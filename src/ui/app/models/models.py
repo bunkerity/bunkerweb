@@ -23,8 +23,8 @@ class AnonymousUser(AnonymousUserMixin):
     method = "manual"
     admin = False
     totp_secret = None
-    creation_date = datetime.now()
-    update_date = datetime.now()
+    creation_date = datetime.now().astimezone()
+    update_date = datetime.now().astimezone()
     list_roles = []
     list_permissions = []
     list_recovery_codes = []

@@ -165,7 +165,8 @@ def bans_page():
                     ban_end = float(ban["ban_end"])
                 except ValueError:
                     continue
-                ban_end = (datetime.fromtimestamp(ban_end) - datetime.now()).total_seconds()
+                current_time = datetime.now().astimezone()
+                ban_end = (datetime.fromtimestamp(ban_end, tz=current_time.tzinfo) - current_time).total_seconds()
 
             if redis_client:
                 ok = redis_client.set(f"bans_ip_{ban['ip']}", dumps({"reason": reason, "date": time()}))

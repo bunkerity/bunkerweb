@@ -1,33 +1,34 @@
 <div class="toast-container position-fixed bottom-0 end-0 mb-3 me-3">
-  <!-- prettier-ignore -->
-  {% with messages = get_flashed_messages(with_categories=true) %}
-  {% if pro_overlapped %}
-    {% if messages.append(('error', 'You have more services than allowed by your pro license. Upgrade your license or move some services to draft mode to unlock your pro license.')) %} {% endif %}
-  {% endif %}
-  <!-- flash message-->
-  {% for category, message in messages %}
-  <div
-    class="bs-toast toast fade show {% if category == 'error' %}bg-danger{% elif category == 'warning' %}bg-warning{% else %}bg-primary text-white{% endif %}"
-    role="alert"
-    aria-live="assertive"
-    aria-atomic="true"
-  >
-    <div class="toast-header">
-      <i class="d-block w-px-20 h-auto rounded me-2 tf-icons bx bx-bell"></i>
-      <span class="fw-medium me-auto"
-        >{% if category == 'error' %}Error{% else %}Success{% endif %}</span
-      >
-      <small class="text-body-secondary">just now</small>
-      <button
-        type="button"
-        class="btn-close"
-        data-bs-dismiss="toast"
-        aria-label="Close"
-      ></button>
-    </div>
-    <div class="toast-body">{{ message|safe }}</div>
-  </div>
-  {% endfor %}
-  <!-- end flash message-->
-  {% endwith %}
+    <!-- prettier-ignore -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if pro_overlapped %}
+            {% if messages.append(('error', 'You have more services than allowed by your pro license. Upgrade your license or move some services to draft mode to unlock your pro license.')) %}
+            {% endif %}
+        {% endif %}
+        <!-- flash message-->
+        {% for category, message in messages %}
+            <div class="bs-toast toast fade show {% if category == 'error' %}bg-danger{% elif category == 'warning' %}bg-warning{% else %}bg-primary text-white{% endif %}"
+                 role="alert"
+                 aria-live="assertive"
+                 aria-atomic="true">
+                <div class="toast-header">
+                    <i class="d-block w-px-20 h-auto rounded me-2 tf-icons bx bx-bell"></i>
+                    <span class="fw-medium me-auto">
+                        {% if category == 'error' %}
+                            Error
+                        {% else %}
+                            Success
+                        {% endif %}
+                    </span>
+                    <small class="text-body-secondary">just now</small>
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="toast"
+                            aria-label="Close"></button>
+                </div>
+                <div class="toast-body">{{ message|safe }}</div>
+            </div>
+        {% endfor %}
+        <!-- end flash message-->
+    {% endwith %}
 </div>

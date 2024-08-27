@@ -200,7 +200,7 @@ def on_starting(server):
         latest_version = latest_release["tag_name"].removeprefix("v")
 
     TMP_DIR.joinpath("ui_data.json").write_text(
-        dumps({"LATEST_VERSION": latest_version, "LATEST_VERSION_LAST_CHECK": datetime.now().isoformat()}), encoding="utf-8"
+        dumps({"LATEST_VERSION": latest_version, "LATEST_VERSION_LAST_CHECK": datetime.now().astimezone().isoformat()}), encoding="utf-8"
     )
 
     LOGGER.info("UI is ready")

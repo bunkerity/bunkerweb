@@ -1,122 +1,88 @@
-{% extends "base.html" %} {% block page %}
-<!-- Layout wrapper -->
-<div class="layout-wrapper layout-content-navbar">
-  <div class="layout-container">
-    {% include "menu.html" %}
-    <!-- Layout container -->
-    <div class="layout-page">
-      {% include "navbar.html" %}
-      <!-- Content wrapper -->
-      <div class="content-wrapper">
-        <div class="container-xxl flex-grow-1 container-p-y">
-          <!-- prettier-ignore -->
-          <div class="d-flex justify-content-between align-items-center mb-5">
-            {% include "breadcrumb.html" %}
-            <ul class="d-flex mb-0 list-unstyled">
-              <li class="me-3">
-                <a
-                  role="button"
-                  class="btn btn-sm btn-outline-dark d-flex align-items-center"
-                  aria-pressed="true"
-                  href="https://panel.bunkerweb.io/order/support/?utm_campaign=self&utm_source=ui"
-                  target="_blank"
-                  rel="noopener"
-                >
-                  <span class="tf-icons bx bx-help-circle bx-18px me-2"></span>
-                  Need Help?
-                </a>
-              </li>
-              <li>
-                <a
-                  id="news-button"
-                  role="button"
-                  class="btn btn-sm btn-dark text-uppercase d-flex align-items-center position-relative"
-                  aria-pressed="true"
-                  href="javascript:void(0)"
-                  data-bs-toggle="offcanvas"
-                  data-bs-target="#side-offcanvas"
-                  aria-controls="side-offcanvas"
-                >
-                  News
-                </a>
-              </li>
-            </ul>
-          </div>
-          {% block content %}{% endblock %}
+{% extends "base.html" %}
+{% block page %}
+    <!-- Layout wrapper -->
+    <div class="layout-wrapper layout-content-navbar">
+        <div class="layout-container">
+            {% include "menu.html" %}
+            <!-- Layout container -->
+            <div class="layout-page">
+                {% include "navbar.html" %}
+                <!-- Content wrapper -->
+                <div class="content-wrapper">
+                    <div class="container-xxl flex-grow-1 container-p-y">
+                        <!-- prettier-ignore -->
+                        <div class="d-flex justify-content-between align-items-center mb-5">
+                            {% include "breadcrumb.html" %}
+                            <ul class="d-flex mb-0 list-unstyled">
+                                <li class="me-3">
+                                    <a role="button"
+                                       class="btn btn-sm btn-outline-dark d-flex align-items-center"
+                                       aria-pressed="true"
+                                       href="https://panel.bunkerweb.io/order/support/?utm_campaign=self&utm_source=ui"
+                                       target="_blank"
+                                       rel="noopener">
+                                        <span class="tf-icons bx bx-help-circle bx-18px me-2"></span>
+                                        Need Help?
+                                    </a>
+                                </li>
+                                <li>
+                                    <a id="news-button"
+                                       role="button"
+                                       class="btn btn-sm btn-dark text-uppercase d-flex align-items-center position-relative"
+                                       aria-pressed="true"
+                                       href="javascript:void(0)"
+                                       data-bs-toggle="offcanvas"
+                                       data-bs-target="#side-offcanvas"
+                                       aria-controls="side-offcanvas">News</a>
+                                </li>
+                            </ul>
+                        </div>
+                        {% block content %}{% endblock %}
+                    </div>
+                    <!-- prettier-ignore -->
+                    {% include "footer.html" %}
+                    {% include "sidebar.html" %}
+                    {% if not is_pro_version %}
+                        <div class="buy-now">
+                            <a class="btn btn-success btn-buy-now"
+                               role="button"
+                               aria-pressed="true"
+                               href="https://panel.bunkerweb.io/order/bunkerweb-pro/?utm_campaign=self&utm_source=ui"
+                               target="_blank"
+                               rel="noopener">
+                                <span class="tf-icons me-2 d-flex h-100 justify-content-center align-items-center">
+                                    <svg width="19"
+                                         height="15"
+                                         viewBox="0 0 19 15"
+                                         fill="none"
+                                         xmlns="http://www.w3.org/2000/svg">
+                                        <g clip-path="url(#clip0_226_466)">
+                                        <path d="M16.8356 1.98041L13.0948 3.96082H5.88436L2.16443 1.98041L5.80095 0H13.1991L16.8356 1.98041Z" fill="#349F53" />
+                                        <path d="M19 4.90339L14.542 7.42183L13.0948 3.96088L16.8356 1.98047L19 4.90339Z" fill="#227848" />
+                                        <path d="M19 4.90332L9.47913 15L14.5419 7.42176L19 4.90332Z" fill="#194B34" />
+                                        <path d="M5.88433 3.96088L4.30795 7.42183L0 4.90339L2.1644 1.98047L5.88433 3.96088Z" fill="#249C59" />
+                                        <path d="M9.47915 15L0 4.90332L4.30795 7.42176L9.47915 15Z" fill="#237F4C" />
+                                        <path d="M14.542 7.42175L9.47919 15L4.30798 7.42175H14.542Z" fill="#349F53" />
+                                        <path d="M14.542 7.42177H4.30798L5.88437 3.96082H13.0949L14.542 7.42177Z" fill="#65B278" />
+                                        </g>
+                                        <defs>
+                                        <clipPath id="clip0_226_466">
+                                        <rect width="19" height="15" fill="white" />
+                                        </clipPath>
+                                        </defs>
+                                    </svg>
+                                </span>
+                            Upgrade to Pro</a>
+                        </div>
+                    {% endif %}
+                    <div class="content-backdrop fade"></div>
+                </div>
+                <!-- Content wrapper -->
+            </div>
+            <!-- / Layout page -->
         </div>
-        <!-- prettier-ignore -->
-        {% include "footer.html" %}
-        {% include "sidebar.html" %}
-        {% if not is_pro_version %}
-        <div class="buy-now">
-          <a
-            class="btn btn-success btn-buy-now"
-            role="button"
-            aria-pressed="true"
-            href="https://panel.bunkerweb.io/order/bunkerweb-pro/?utm_campaign=self&utm_source=ui"
-            target="_blank"
-            rel="noopener"
-          >
-            <span
-              class="tf-icons me-2 d-flex h-100 justify-content-center align-items-center"
-            >
-              <svg
-                width="19"
-                height="15"
-                viewBox="0 0 19 15"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <g clip-path="url(#clip0_226_466)">
-                  <path
-                    d="M16.8356 1.98041L13.0948 3.96082H5.88436L2.16443 1.98041L5.80095 0H13.1991L16.8356 1.98041Z"
-                    fill="#349F53"
-                  />
-                  <path
-                    d="M19 4.90339L14.542 7.42183L13.0948 3.96088L16.8356 1.98047L19 4.90339Z"
-                    fill="#227848"
-                  />
-                  <path
-                    d="M19 4.90332L9.47913 15L14.5419 7.42176L19 4.90332Z"
-                    fill="#194B34"
-                  />
-                  <path
-                    d="M5.88433 3.96088L4.30795 7.42183L0 4.90339L2.1644 1.98047L5.88433 3.96088Z"
-                    fill="#249C59"
-                  />
-                  <path
-                    d="M9.47915 15L0 4.90332L4.30795 7.42176L9.47915 15Z"
-                    fill="#237F4C"
-                  />
-                  <path
-                    d="M14.542 7.42175L9.47919 15L4.30798 7.42175H14.542Z"
-                    fill="#349F53"
-                  />
-                  <path
-                    d="M14.542 7.42177H4.30798L5.88437 3.96082H13.0949L14.542 7.42177Z"
-                    fill="#65B278"
-                  />
-                </g>
-                <defs>
-                  <clipPath id="clip0_226_466">
-                    <rect width="19" height="15" fill="white" />
-                  </clipPath>
-                </defs></svg
-            ></span>
-            Upgrade to Pro</a
-          >
-        </div>
-        {% endif %}
-
-        <div class="content-backdrop fade"></div>
-      </div>
-      <!-- Content wrapper -->
+        <!-- Overlay -->
+        <div class="layout-overlay layout-menu-toggle"></div>
     </div>
-    <!-- / Layout page -->
-  </div>
-
-  <!-- Overlay -->
-  <div class="layout-overlay layout-menu-toggle"></div>
-</div>
-<!-- / Layout wrapper -->
+    <!-- / Layout wrapper -->
 {% endblock %}

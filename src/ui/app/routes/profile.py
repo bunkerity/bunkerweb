@@ -11,6 +11,25 @@ from app.routes.utils import handle_error, verify_data_in_form
 
 profile = Blueprint("profile", __name__)
 
+BROWSERS = {
+    "Chrome": "bxl-chrome",
+    "Firefox": "bxl-firefox",
+    "Safari": "bx-compass",
+    "Edge": "bxl-edge",
+    "Opera": "bxl-opera",
+    "Internet Explorer": "bxl-internet-explorer",
+}
+
+OS = {
+    "Windows": "bxl-windows",
+    "Mac": "bxl-apple",
+    "Linux": "bxl-tux",
+}
+
+DEVICES = {
+    "PC": "bx-desktop",
+}
+
 
 @profile.route("/profile", methods=["GET"])
 @login_required
@@ -23,15 +42,32 @@ def profile_page():
     last_sessions = []
     for db_session in DB.get_ui_user_sessions(current_user.username):
         ua_data = parse(db_session.user_agent)
-        last_sessions.append(
-            {
-                "browser": ua_data.get_browser(),
-                "os": ua_data.get_os(),
-                "ip": db_session.ip,
-                "creation_date": db_session.creation_date.strftime("%Y-%m-%d %H:%M:%S %Z"),
-                "last_activity": db_session.last_activity.strftime("%Y-%m-%d %H:%M:%S %Z"),
-            }
-        )
+        last_session = {
+            "current": db_session.id == session.get("session_id"),
+            "browser": ua_data.get_browser(),
+            "os": ua_data.get_os(),
+            "device": ua_data.get_device(),
+            "ip": db_session.ip,
+            "creation_date": db_session.creation_date.astimezone().strftime("%Y-%m-%d %H:%M:%S %Z"),
+            "last_activity": db_session.last_activity.astimezone().strftime("%Y-%m-%d %H:%M:%S %Z"),
+        }
+
+        for browser, icon in BROWSERS.items():
+            if browser in last_session["browser"]:
+                last_session["browser"] = f"<i class='bx {icon} text-primary'></i>&nbsp;{last_session['browser']}"
+                break
+
+        for os, icon in OS.items():
+            if os in last_session["os"]:
+                last_session["os"] = f"<i class='bx {icon} text-primary'></i>&nbsp;{last_session['os']}"
+                break
+
+        last_session["device"] = f"<i class='bx {DEVICES.get(last_session['device'], 'bx-mobile')} text-primary'></i>&nbsp;{last_session['device']}"
+
+        if last_session["current"] and last_sessions:
+            last_sessions.insert(0, last_session)
+            continue
+        last_sessions.append(last_session)
 
     return render_template(
         "profile.html",
