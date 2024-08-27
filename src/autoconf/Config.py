@@ -82,9 +82,9 @@ class Config:
         )
 
     def wait_applying(self, startup: bool = False):
-        current_time = datetime.now()
+        current_time = datetime.now().astimezone()
         ready = False
-        while not ready and (datetime.now() - current_time).seconds < 240:
+        while not ready and (datetime.now().astimezone() - current_time).seconds < 240:
             db_metadata = self._db.get_metadata()
             if isinstance(db_metadata, str):
                 if not startup:

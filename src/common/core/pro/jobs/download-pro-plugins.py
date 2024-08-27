@@ -95,7 +95,7 @@ def install_plugin(plugin_path: Path, db, preview: bool = True) -> bool:
 try:
     db = Database(LOGGER, sqlalchemy_string=getenv("DATABASE_URI"))
     db_metadata = db.get_metadata()
-    current_date = datetime.now()
+    current_date = datetime.now().astimezone()
     pro_license_key = getenv("PRO_LICENSE_KEY", "").strip()
 
     LOGGER.info("Checking BunkerWeb Pro status...")

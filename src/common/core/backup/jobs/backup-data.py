@@ -35,7 +35,7 @@ try:
     if last_backup_date:
         last_backup_date = datetime.fromisoformat(last_backup_date).astimezone()
 
-    current_time = datetime.now()
+    current_time = datetime.now().astimezone()
     backup_period = getenv("BACKUP_SCHEDULE", "daily")
     PERIOD_STAMPS = {
         "daily": timedelta(days=1).total_seconds(),

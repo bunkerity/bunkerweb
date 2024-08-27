@@ -48,7 +48,7 @@ try:
         sys_exit(1)
 
     LOGGER.info("Backing up the current database before restoring the backup ...")
-    current_time = datetime.now()
+    current_time = datetime.now().astimezone()
     tmp_backup_dir = Path(sep, "tmp", "bunkerweb", "backups")
     tmp_backup_dir.mkdir(parents=True, exist_ok=True)
     db = backup_database(current_time, backup_dir=tmp_backup_dir)
