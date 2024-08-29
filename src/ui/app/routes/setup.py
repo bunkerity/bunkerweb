@@ -77,14 +77,10 @@ def setup_page():
 
             config = {
                 "SERVER_NAME": request.form["server_name"],
-                "USE_UI": "yes",
+                "USE_TEMPLATE": "ui",
                 "USE_REVERSE_PROXY": "yes",
                 "REVERSE_PROXY_HOST": request.form["ui_host"],
                 "REVERSE_PROXY_URL": request.form["ui_url"] or "/",
-                "INTERCEPTED_ERROR_CODES": "400 404 405 413 429 500 501 502 503 504",
-                "ALLOWED_METHODS": "GET|POST|PUT|DELETE",
-                "MAX_CLIENT_SIZE": "50m",
-                "KEEP_UPSTREAM_HEADERS": "Content-Security-Policy Strict-Transport-Security X-Frame-Options X-Content-Type-Options Referrer-Policy",
             }
 
             if request.form.get("auto_lets_encrypt", "no") == "yes":

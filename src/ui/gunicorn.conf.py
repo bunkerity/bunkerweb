@@ -12,6 +12,10 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
+from gevent.monkey import patch_all
+
+patch_all()
+
 from passlib import totp
 
 from common_utils import get_version  # type: ignore
@@ -29,15 +33,21 @@ LOG_LEVEL = getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "info"))
 
 wsgi_app = "main:app"
 proc_name = "bunkerweb-ui"
-accesslog = "/var/log/bunkerweb/ui-access.log"
+accesslog = join(sep, "var", "log", "bunkerweb", "ui-access.log")
 access_log_format = '%({x-forwarded-for}i)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s"'
-errorlog = "/var/log/bunkerweb/ui.log"
+errorlog = join(sep, "var", "log", "bunkerweb", "ui.log")
 reuse_port = True
+chdir = join(sep, "usr", "share", "bunkerweb", "ui")
+umask = 0x027
 worker_tmp_dir = join(sep, "dev", "shm")
 tmp_upload_dir = join(sep, "var", "tmp", "bunkerweb", "ui")
 secure_scheme_headers = {}
+forwarded_allow_ips = "*"
+pythonpath = join(sep, "usr", "share", "bunkerweb", "deps", "python")
+proxy_allow_ips = "*"
+casefold_http_method = True
 workers = MAX_WORKERS
-worker_class = "gthread"
+worker_class = "gevent"
 threads = int(getenv("MAX_THREADS", MAX_WORKERS * 2))
 max_requests_jitter = min(8, MAX_WORKERS)
 graceful_timeout = 30

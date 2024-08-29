@@ -1,13 +1,14 @@
-from flask import Blueprint, flash, redirect, render_template, request, url_for, session
+from typing import Dict, Generator, Tuple, Union
+from flask import Blueprint, Response, flash, jsonify, redirect, render_template, request, stream_with_context, url_for, session
 from flask_login import current_user, login_required, logout_user
 from user_agents import parse
 
 from app.models.totp import totp as TOTP
 
-from app.dependencies import DB
+from app.dependencies import DATA, DB
 from app.utils import USER_PASSWORD_RX, gen_password_hash
 
-from app.routes.utils import handle_error, verify_data_in_form
+from app.routes.utils import cors_required, handle_error, verify_data_in_form
 
 profile = Blueprint("profile", __name__)
 
@@ -31,6 +32,46 @@ DEVICES = {
 }
 
 
+def get_last_sessions(page: int, per_page: int) -> Tuple[Generator[Dict[str, Union[str, bool]], None, None], int]:
+    db_sessions = DB.get_ui_user_sessions(current_user.username, session.get("session_id"))
+    total_sessions = len(db_sessions)
+
+    if total_sessions <= per_page:
+        per_page = total_sessions
+        page = 1
+    elif total_sessions <= (page - 1) * per_page:
+        page = total_sessions // per_page
+
+    def session_generator():
+        for db_session in db_sessions[(page - 1) * per_page : page * per_page]:  # noqa: E203
+            ua_data = parse(db_session.user_agent)
+            last_session = {
+                "current": db_session.id == session.get("session_id"),
+                "browser": ua_data.get_browser(),
+                "os": ua_data.get_os(),
+                "device": ua_data.get_device(),
+                "ip": db_session.ip,
+                "creation_date": db_session.creation_date.astimezone().strftime("%Y-%m-%d %H:%M:%S %Z"),
+                "last_activity": db_session.last_activity.astimezone().strftime("%Y-%m-%d %H:%M:%S %Z"),
+            }
+
+            for browser, icon in BROWSERS.items():
+                if browser in last_session["browser"]:
+                    last_session["browser"] = f"<i class='bx {icon} text-primary'></i>&nbsp;{last_session['browser']}"
+                    break
+
+            for os, icon in OS.items():
+                if os in last_session["os"]:
+                    last_session["os"] = f"<i class='bx {icon} text-primary'></i>&nbsp;{last_session['os']}"
+                    break
+
+            last_session["device"] = f"<i class='bx {DEVICES.get(last_session['device'], 'bx-mobile')} text-primary'></i>&nbsp;{last_session['device']}"
+
+            yield last_session
+
+    return session_generator(), total_sessions
+
+
 @profile.route("/profile", methods=["GET"])
 @login_required
 def profile_page():
@@ -39,35 +80,7 @@ def profile_page():
         session["tmp_totp_secret"] = TOTP.generate_totp_secret()
         totp_qr_image = TOTP.generate_qrcode(current_user.get_id(), session["tmp_totp_secret"])
 
-    last_sessions = []
-    for db_session in DB.get_ui_user_sessions(current_user.username):
-        ua_data = parse(db_session.user_agent)
-        last_session = {
-            "current": db_session.id == session.get("session_id"),
-            "browser": ua_data.get_browser(),
-            "os": ua_data.get_os(),
-            "device": ua_data.get_device(),
-            "ip": db_session.ip,
-            "creation_date": db_session.creation_date.astimezone().strftime("%Y-%m-%d %H:%M:%S %Z"),
-            "last_activity": db_session.last_activity.astimezone().strftime("%Y-%m-%d %H:%M:%S %Z"),
-        }
-
-        for browser, icon in BROWSERS.items():
-            if browser in last_session["browser"]:
-                last_session["browser"] = f"<i class='bx {icon} text-primary'></i>&nbsp;{last_session['browser']}"
-                break
-
-        for os, icon in OS.items():
-            if os in last_session["os"]:
-                last_session["os"] = f"<i class='bx {icon} text-primary'></i>&nbsp;{last_session['os']}"
-                break
-
-        last_session["device"] = f"<i class='bx {DEVICES.get(last_session['device'], 'bx-mobile')} text-primary'></i>&nbsp;{last_session['device']}"
-
-        if last_session["current"] and last_sessions:
-            last_sessions.insert(0, last_session)
-            continue
-        last_sessions.append(last_session)
+    last_sessions, total_sessions = get_last_sessions(1, 3)
 
     return render_template(
         "profile.html",
@@ -77,7 +90,32 @@ def profile_page():
         is_recovery_refreshed=session.pop("totp_refreshed", False),
         totp_secret=TOTP.get_totp_pretty_key(session.get("tmp_totp_secret", "")),
         last_sessions=last_sessions,
+        total_sessions=total_sessions,
     )
+
+
+@profile.route("/profile/sessions", methods=["GET"])
+@login_required
+@cors_required
+def get_sessions():
+    page = request.args.get("page", 1, type=int)
+
+    if page < 1:
+        return Response("Invalid page number", status=400)
+
+    session_generator = get_last_sessions(page, 3)[0]
+
+    def generate_stream():
+        yield "["
+        first = True
+        for session_data in session_generator:
+            if not first:
+                yield ","
+            first = False
+            yield jsonify(session_data).get_data(as_text=True)
+        yield "]"
+
+    return Response(stream_with_context(generate_stream()), content_type="application/json")
 
 
 @profile.route("/profile/totp-refresh", methods=["POST"])
@@ -246,20 +284,22 @@ def edit_profile():
     return redirect(url_for("profile.profile_page"))
 
 
-@profile.route("/profile/wipe-old-sessions", methods=["POST"])
+@profile.route("/profile/wipe-other-sessions", methods=["POST"])
 @login_required
 def wipe_old_sessions():
     if DB.readonly:
         return handle_error("Database is in read-only mode", "profile")
 
-    verify_data_in_form(data={"password": None}, err_message="Missing current password parameter on /profile/wipe-old-sessions.", redirect_url="profile")
+    verify_data_in_form(data={"password": None}, err_message="Missing current password parameter on /profile/wipe-other-sessions.", redirect_url="profile")
 
     if not current_user.check_password(request.form["password"]):
         return handle_error("The current password is incorrect.", "profile")
 
+    DATA["REVOKED_SESSIONS"] = [db_session.id for db_session in DB.get_ui_user_sessions(current_user.username) if db_session.id != session.get("session_id")]
+
     ret = DB.delete_ui_user_old_sessions(current_user.username)
     if ret:
-        return handle_error(f"Couldn't wipe the old sessions in the database: {ret}", "profile")
+        return handle_error(f"Couldn't wipe the other sessions in the database: {ret}", "profile")
 
-    flash("The old sessions have been successfully wiped.")
+    flash("The other sessions have been successfully wiped.")
     return redirect(url_for("profile.profile_page") + "#sessions")

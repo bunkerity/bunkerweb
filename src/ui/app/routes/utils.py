@@ -1,6 +1,7 @@
 from base64 import b64encode
 from copy import deepcopy
 from datetime import datetime
+from functools import wraps
 from io import BytesIO
 from threading import Thread
 from time import sleep, time
@@ -368,3 +369,14 @@ def update_service(config, variables, format_configs, server_name, old_server_na
         message = f"Deleting {'draft ' if was_draft and is_draft else ''}service {request.form.get('SERVER_NAME', '').split(' ')[0]}"
 
     return message
+
+
+def cors_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        fetch_mode = request.headers.get("Sec-Fetch-Mode")
+        if fetch_mode != "cors":
+            return Response("CORS request required", status=403)
+        return f(*args, **kwargs)
+
+    return decorated_function

@@ -34,6 +34,9 @@
         <link rel="stylesheet"
               href="libs/apexcharts/apexcharts.css"
               nonce="{{ style_nonce }}" />
+        <link rel="stylesheet"
+              href="libs/datatables/datatables.min.css"
+              nonce="{{ style_nonce }}" />
         <!-- Page CSS -->
         <!-- Page -->
         {% if current_endpoint == "login" or current_endpoint == "totp" %}
@@ -41,6 +44,10 @@
         {% elif current_endpoint == "loading" %}
             <link rel="stylesheet"
                   href="css/pages/loading.css"
+                  nonce="{{ style_nonce }}" />
+        {% elif current_endpoint == "profile" %}
+            <link rel="stylesheet"
+                  href="css/pages/profile.css"
                   nonce="{{ style_nonce }}" />
         {% endif %}
         <!-- Helpers  -->
@@ -64,15 +71,21 @@
         <script src="libs/hammer/hammer.min.js" nonce="{{ script_nonce }}"></script>
         <script src="libs/masonry/masonry.pkgd.min.js" nonce="{{ script_nonce }}"></script>
         <script src="libs/purify/purify.min.js" nonce="{{ script_nonce }}"></script>
+        <script src="libs/datatables/datatables.min.js" nonce="{{ script_nonce }}"></script>
         <!-- Core JS -->
         <script src="js/menu.js" nonce="{{ script_nonce }}"></script>
         <script src="libs/apexcharts/apexcharts.min.js" nonce="{{ script_nonce }}"></script>
         <!-- Main JS -->
         <script src="js/main.js" nonce="{{ script_nonce }}"></script>
+        {% if current_endpoint != "login" and current_endpoint != "totp" %}
+            <script async defer src="js/sidebar.js" nonce="{{ script_nonce }}"></script>
+        {% endif %}
         <script src="js/dashboards-analytics.js" nonce="{{ script_nonce }}"></script>
         <!-- Page JS -->
         {% if current_endpoint == "profile" %}
             <script src="js/pages/profile.js" nonce="{{ script_nonce }}"></script>
+        {% elif current_endpoint == "instances" %}
+            <script src="js/pages/instances.js" nonce="{{ script_nonce }}"></script>
         {% endif %}
         <script async defer src="js/buttons.js"></script>
     </body>

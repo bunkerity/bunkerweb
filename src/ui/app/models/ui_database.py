@@ -479,10 +479,18 @@ class UIDatabase(Database):
 
         return ""
 
-    def get_ui_user_sessions(self, username: str) -> List[UserSessions]:
+    def get_ui_user_sessions(self, username: str, current_session_id: Optional[str] = None) -> List[UserSessions]:
         """Get ui user sessions."""
         with self._db_session() as session:
-            return session.query(UserSessions).filter_by(user_name=username).order_by(UserSessions.creation_date.desc()).all()
+            if current_session_id:
+                return (
+                    session.query(UserSessions)
+                    .filter_by(user_name=username)
+                    .order_by(UserSessions.id == current_session_id, UserSessions.creation_date.desc())
+                    .all()
+                )
+            else:
+                return session.query(UserSessions).filter_by(user_name=username).order_by(UserSessions.creation_date.desc()).all()
 
     def delete_ui_user_old_sessions(self, username: str) -> str:
         """Delete ui user old sessions."""

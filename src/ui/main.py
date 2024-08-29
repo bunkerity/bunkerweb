@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from contextlib import suppress
+from datetime import datetime, timedelta
 from json import dumps
 from os import getenv, sep
 from os.path import join
@@ -12,7 +13,6 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
-from datetime import datetime, timedelta
 from flask import Flask, Response, flash, jsonify, make_response, redirect, render_template, request, session, url_for
 from flask_executor import Executor
 from flask_login import current_user, LoginManager, login_required, logout_user
@@ -65,13 +65,21 @@ with app.app_context():
 
     app.config["SESSION_COOKIE_NAME"] = "__Host-bw_ui_session"
     app.config["SESSION_COOKIE_PATH"] = "/"
-    app.config["SESSION_COOKIE_SECURE"] = True  # Required for __Host- prefix
-    app.config["SESSION_COOKIE_HTTPONLY"] = True  # Recommended for security
+    app.config["SESSION_COOKIE_SECURE"] = True
+    app.config["SESSION_COOKIE_HTTPONLY"] = True
     app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+
+    app.config["REMEMBER_COOKIE_NAME"] = "__Host-bw_ui_remember_token"
+    app.config["REMEMBER_COOKIE_PATH"] = "/"
+    app.config["REMEMBER_COOKIE_SECURE"] = True
+    app.config["REMEMBER_COOKIE_HTTPONLY"] = True
+    app.config["REMEMBER_COOKIE_SAMESITE"] = "Lax"
 
     app.config["WTF_CSRF_SSL_STRICT"] = False
     app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 86400
     app.config["SCRIPT_NONCE"] = ""
+
+    app.config["EXECUTOR_MAX_WORKERS"] = 4
 
     principal = Principal()
     principal.init_app(app)
@@ -304,6 +312,9 @@ def before_request():
             elif session["user_agent"] != request.headers.get("User-Agent"):
                 LOGGER.warning(f"User {current_user.get_id()} tried to access his session with a different User-Agent.")
                 passed = False
+            elif session["session_id"] in DATA.get("REVOKED_SESSIONS", []):
+                LOGGER.warning(f"User {current_user.get_id()} tried to access a revoked session.")
+                passed = False
 
             if not passed:
                 return logout_page()
@@ -349,7 +360,7 @@ def set_security_headers(response):
     # * Referrer-Policy header to prevent leaking of sensitive data
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
 
-    if current_user.is_authenticated and "session_id" in session:
+    if not request.path.startswith(("/css", "/img", "/js", "/fonts", "/libs")) and current_user.is_authenticated and "session_id" in session:
         executor.submit(mark_user_access, session["session_id"])
 
     return response

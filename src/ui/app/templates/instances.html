@@ -1,0 +1,74 @@
+{% extends "dashboard.html" %}
+{% block content %}
+    <!-- Content -->
+    <div class="card table-responsive text-nowrap p-4 mh-100">
+        <table id="instances" class="table w-100">
+            <thead>
+                <tr>
+                    <th>Hostname</th>
+                    <th>Name</th>
+                    <th>Method</th>
+                    <th>Health</th>
+                    <th>Type</th>
+                    <th>Creation date</th>
+                    <th>Last seen</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for instance in instances %}
+                    <tr>
+                        <td>{{ instance.hostname }}</td>
+                        <td>{{ instance.name }}</td>
+                        <td id="method-{{ instance.hostname }}">{{ instance.method }}</td>
+                        <td>
+                            {% if instance.status == "up" %}
+                                <span id="status-{{ instance.hostname }}"
+                                      class="badge rounded-pill bg-label-success">Up</span>
+                            {% elif instance.status == "down" %}
+                                <span id="status-{{ instance.hostname }}"
+                                      class="badge rounded-pill bg-label-danger">Down</span>
+                            {% else %}
+                                <span id="status-{{ instance.hostname }}"
+                                      class="badge rounded-pill bg-label-warning">Loading</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ instance.type }}</td>
+                        <td>{{ instance.creation_date.astimezone().strftime("%Y-%m-%d at %H:%M:%S %Z") }}</td>
+                        <td>{{ instance.last_seen.astimezone().strftime("%Y-%m-%d at %H:%M:%S %Z") }}</td>
+                        <td>
+                            <form id="instance-form" action="{{ url_for('instances') }}/{{ instance.hostname }}" method="POST">
+                                <input type="hidden"
+                                       name="csrf_token"
+                                       value="{{ csrf_token() }}" />
+                                {% if instance.status != "up" %}
+                                    {% set disabled = "disabled" %}
+                                {% else %}
+                                    {% set disabled = "" %}
+                                {% endif %}
+                                {% if instance.method == "ui" %}
+                                    {% set can_delete = "" %}
+                                {% else %}
+                                    {% set can_delete = "disabled" %}
+                                {% endif %}
+                                <button type="submit"
+                                        data-action="ping"
+                                        class="btn btn-sm btn-outline-primary {{ disabled }}">Ping</button>
+                                <button type="submit"
+                                        data-action="reload"
+                                        class="btn btn-sm btn-outline-warning {{ disabled }}">Reload</button>
+                                <button type="submit"
+                                        data-action="stop"
+                                        class="btn btn-sm btn-outline-dark {{ disabled }}">Stop</button>
+                                <button type="submit"
+                                        data-action="delete"
+                                        class="btn btn-sm btn-outline-danger {{ can_delete }}">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <!-- / Content -->
+{% endblock %}
