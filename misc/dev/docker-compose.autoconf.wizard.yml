@@ -98,6 +98,8 @@ services:
     build:
       context: ../..
       dockerfile: ./src/ui/Dockerfile
+    ports:
+      - 7000:7000
     volumes:
       - bw-logs:/var/log/bunkerweb
       - ../../src/ui/app:/usr/share/bunkerweb/ui/app:ro
@@ -105,6 +107,7 @@ services:
       - ../../src/ui/main.py:/usr/share/bunkerweb/ui/main.py:ro
     environment:
       <<: *env
+      TOTP_SECRETS: "secret"
       DEBUG: "1"
     restart: "unless-stopped"
     networks:

@@ -55,14 +55,10 @@ services:
       USE_BAD_BEHAVIOR: "no"
       USE_LIMIT_REQ: "no"
       USE_LIMIT_CONN: "no"
-      www.example.com_USE_UI: "yes"
+      www.example.com_USE_TEMPLATE: "ui"
       www.example.com_USE_REVERSE_PROXY: "yes"
       www.example.com_REVERSE_PROXY_URL: "/admin"
       www.example.com_REVERSE_PROXY_HOST: "http://bw-ui:7000"
-      www.example.com_INTERCEPTED_ERROR_CODES: "400 404 405 413 429 500 501 502 503 504"
-      www.example.com_MAX_CLIENT_SIZE: "50m"
-      www.example.com_ALLOWED_METHODS: "GET|POST|PUT|DELETE"
-      www.example.com_GENERATE_SELF_SIGNED_SSL: "yes"
       app1.example.com_USE_REVERSE_PROXY: "yes"
       app1.example.com_REVERSE_PROXY_URL: "/"
       app1.example.com_REVERSE_PROXY_HOST: "http://app1:8080"
@@ -84,6 +80,8 @@ services:
     build:
       context: ../..
       dockerfile: ./src/ui/Dockerfile
+    ports:
+      - 7000:7000
     volumes:
       - bw-logs:/var/log/bunkerweb
       - ../../src/ui/app:/usr/share/bunkerweb/ui/app:ro
@@ -93,6 +91,7 @@ services:
       <<: *env
       ADMIN_USERNAME: "admin"
       ADMIN_PASSWORD: "P@ssw0rd"
+      TOTP_SECRETS: "secret"
       DEBUG: "1"
     restart: "unless-stopped"
     networks:
