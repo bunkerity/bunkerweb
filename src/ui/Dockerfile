@@ -63,7 +63,9 @@ RUN echo "Docker" > INTEGRATION && \
   for dir in $(echo "pro/plugins configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/default-server-stream configs/modsec configs/modsec-crs") ; do mkdir "/data/${dir}" ; done && \
   chown -R root:ui INTEGRATION /data /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb && \
   chmod -R 770 /data /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb && \
-  chmod 750 gen/*.py ui/*.sh helpers/*.sh deps/python/bin/* && \
+  chmod 750 gen/*.py ui/*.sh helpers/*.sh && \
+  find . -path deps -prune -o -type f -exec chmod 0740 {} \; && \
+  find . -path deps -prune -o -type d -exec chmod 0750 {} \; && \
   find ui -name "*.py" -type f -exec chmod 750 {} \; && \
   chmod 660 INTEGRATION && \
   ln -s /proc/1/fd/1 /var/log/bunkerweb/ui-access.log && \

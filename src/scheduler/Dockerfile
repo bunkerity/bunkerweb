@@ -69,7 +69,9 @@ RUN cp helpers/bwcli /usr/bin/ && \
   chmod -R 770 /data /etc/nginx /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb && \
   find core/*/jobs/* -type f -exec chmod 750 {} \; && \
   find core/*/bwcli/* -type f -exec chmod 750 {} \; && \
-  chmod 750 cli/main.py gen/*.py scheduler/main.py scheduler/entrypoint.sh helpers/*.sh deps/python/bin/* /usr/bin/bwcli && \
+  find . -path deps -prune -o -type f -exec chmod 0740 {} \; && \
+  find . -path deps -prune -o -type d -exec chmod 0750 {} \; && \
+  chmod 750 cli/main.py gen/*.py scheduler/main.py scheduler/entrypoint.sh helpers/*.sh /usr/bin/bwcli && \
   chmod 660 INTEGRATION
 
 
