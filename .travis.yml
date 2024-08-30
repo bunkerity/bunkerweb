@@ -1,5 +1,9 @@
 sudo: required
-dist: trusty
+dist: focal
+
+branches:
+  only:
+    - "master"
 
 os: linux
 
@@ -27,14 +31,13 @@ env:
     - LD_LIBRARY_PATH=$LUAJIT_LIB:$LD_LIBRARY_PATH
     - TEST_NGINX_SLEEP=0.006
   matrix:
-    - NGINX_VERSION=1.19.9 OPENSSL_VER=1.1.0l
-    - NGINX_VERSION=1.19.9 OPENSSL_VER=1.1.1k
+    - NGINX_VERSION=1.27.0 OPENSSL_VER=1.1.1w
 
 install:
   - if [ ! -d download-cache ]; then mkdir download-cache; fi
   - if [ ! -f download-cache/openssl-$OPENSSL_VER.tar.gz ]; then wget -O download-cache/openssl-$OPENSSL_VER.tar.gz https://www.openssl.org/source/openssl-$OPENSSL_VER.tar.gz; fi
-  - sudo apt-get install -qq -y cpanminus axel
-  - sudo cpanm --notest Test::Nginx > build.log 2>&1 || (cat build.log && exit 1)
+  - sudo apt-get install -qq -y axel
+  - cpanm --sudo --notest Test::Nginx > build.log 2>&1 || (cat build.log && exit 1)
   - wget http://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz
   - git clone https://github.com/openresty/openresty.git ../openresty
   - git clone https://github.com/openresty/nginx-devel-utils.git
