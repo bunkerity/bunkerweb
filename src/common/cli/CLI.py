@@ -20,7 +20,6 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 
 from API import API  # type: ignore
 from ApiCaller import ApiCaller  # type: ignore
-from common_utils import get_integration  # type: ignore
 from logger import setup_logger  # type: ignore
 
 
@@ -76,7 +75,6 @@ class CLI(ApiCaller):
         if tz:
             self.__variables["TZ"] = tz
 
-        self.__integration = get_integration()
         self.__use_redis = self.__get_variable("USE_REDIS", "no") == "yes"
         self.__redis = None
         if self.__use_redis:
@@ -184,15 +182,6 @@ class CLI(ApiCaller):
                 self.__logger.error("USE_REDIS is set to yes but REDIS_HOST or REDIS_SENTINEL_HOSTS is not set, disabling redis")
                 self.__use_redis = False
 
-        if Path(sep, "usr", "sbin", "nginx").exists() and self.__integration != "Linux":
-            return super().__init__(
-                [
-                    API(
-                        f"http://127.0.0.1:{self.__get_variable('API_HTTP_PORT', '5000')}",
-                        host=self.__get_variable("API_SERVER_NAME", "bwapi"),
-                    )
-                ]
-            )
         super().__init__()
         for db_instance in self.__db.get_instances():
             self.apis.append(API(f"http://{db_instance['hostname']}:{db_instance['port']}", db_instance["server_name"]))

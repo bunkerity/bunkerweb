@@ -18,7 +18,7 @@ from schedule import (
     every as schedule_every,
     jobs as schedule_jobs,
 )
-from subprocess import DEVNULL, PIPE, STDOUT, run
+from subprocess import DEVNULL, STDOUT, run
 from sys import path as sys_path
 from threading import Lock, Semaphore, Thread
 from traceback import format_exc
@@ -37,7 +37,6 @@ class JobScheduler(ApiCaller):
         self,
         env: Optional[Dict[str, Any]] = None,
         logger: Optional[Logger] = None,
-        integration: str = "Linux",
         *,
         db: Optional[Database] = None,
         lock: Optional[Lock] = None,
@@ -45,7 +44,6 @@ class JobScheduler(ApiCaller):
     ):
         super().__init__(apis or [])
         self.__logger = logger or setup_logger("Scheduler", getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")))
-        self.__integration = integration
         self.db = db or Database(self.__logger)
         self.__env = env or {}
         self.__env.update(environ)
@@ -63,9 +61,6 @@ class JobScheduler(ApiCaller):
     @env.setter
     def env(self, env: Dict[str, Any]):
         self.__env = env
-
-    def set_integration(self, integration: str):
-        self.__integration = integration
 
     def update_jobs(self):
         self.__jobs = self.__get_jobs()
@@ -138,24 +133,12 @@ class JobScheduler(ApiCaller):
         raise ValueError(f"can't convert string {every} to schedule")
 
     def __reload(self) -> bool:
-        reload = True
-        if self.__integration not in ("Autoconf", "Swarm", "Kubernetes", "Docker"):
-            self.__logger.info("Reloading nginx ...")
-            proc = run([join(sep, "usr", "sbin", "nginx"), "-s", "reload"], stdin=DEVNULL, stderr=PIPE, env=self.__env, check=False)
-            reload = proc.returncode == 0
-            if reload:
-                self.__logger.info("Successfully reloaded nginx")
-                return True
-            self.__logger.error(
-                f"Error while reloading nginx - returncode: {proc.returncode} - error: {proc.stderr.decode() if proc.stderr else 'Missing stderr'}"
-            )
-        else:
-            self.__logger.info("Reloading nginx ...")
-            reload = self.send_to_apis("POST", "/reload")[0]
-            if reload:
-                self.__logger.info("Successfully reloaded nginx")
-                return True
-            self.__logger.error("Error while reloading nginx")
+        self.__logger.info("Reloading nginx ...")
+        reload = self.send_to_apis("POST", "/reload")[0]
+        if reload:
+            self.__logger.info("Successfully reloaded nginx")
+            return True
+        self.__logger.error("Error while reloading nginx")
         return reload
 
     def __job_wrapper(self, path: str, plugin: str, name: str, file: str) -> int:

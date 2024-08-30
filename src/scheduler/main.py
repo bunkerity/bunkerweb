@@ -12,7 +12,7 @@ from pathlib import Path
 from shutil import copy, rmtree, copytree
 from signal import SIGINT, SIGTERM, signal, SIGHUP
 from stat import S_IEXEC
-from subprocess import run as subprocess_run, DEVNULL, STDOUT, PIPE
+from subprocess import run as subprocess_run, DEVNULL, STDOUT
 from sys import path as sys_path
 from tarfile import TarFile, open as tar_open
 from threading import Event, Thread
@@ -27,7 +27,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 from dotenv import dotenv_values
 from schedule import every as schedule_every, run_pending
 
-from common_utils import bytes_hash, dict_to_frozenset, get_integration  # type: ignore
+from common_utils import bytes_hash, dict_to_frozenset  # type: ignore
 from logger import setup_logger  # type: ignore
 from Database import Database  # type: ignore
 from JobScheduler import JobScheduler
@@ -140,8 +140,8 @@ def handle_reload(signum, frame):
                 LOGGER.error("Config saver failed, configuration will not work as expected...")
         else:
             LOGGER.warning("Ignored reload operation because scheduler is not running ...")
-    except:
-        LOGGER.error(f"Exception while reloading scheduler : {format_exc()}")
+    except BaseException as e:
+        LOGGER.error(f"Exception while reloading scheduler : {e}")
 
 
 signal(SIGHUP, handle_reload)
@@ -517,12 +517,11 @@ if __name__ == "__main__":
         parser.add_argument("--variables", type=str, help="path to the file containing environment variables")
         args = parser.parse_args()
 
-        INTEGRATION = get_integration()
         tmp_variables_path = Path(args.variables or join(sep, "var", "tmp", "bunkerweb", "variables.env"))
         nginx_variables_path = CONFIG_PATH.joinpath("variables.env")
         dotenv_env = dotenv_values(str(tmp_variables_path))
 
-        SCHEDULER = JobScheduler(environ, LOGGER, INTEGRATION, db=Database(LOGGER, sqlalchemy_string=dotenv_env.get("DATABASE_URI", getenv("DATABASE_URI", None))))  # type: ignore
+        SCHEDULER = JobScheduler(environ, LOGGER, db=Database(LOGGER, sqlalchemy_string=dotenv_env.get("DATABASE_URI", getenv("DATABASE_URI", None))))  # type: ignore
 
         JOB = Job(LOGGER, SCHEDULER.db)
 
@@ -723,7 +722,8 @@ if __name__ == "__main__":
                         join(sep, "usr", "share", "bunkerweb", "gen", "save_config.py"),
                         "--settings",
                         join(sep, "usr", "share", "bunkerweb", "settings.json"),
-                    ],
+                    ]
+                    + (["--variables", str(tmp_variables_path)] if args.variables else []),
                     stdin=DEVNULL,
                     stderr=STDOUT,
                     check=False,
@@ -795,41 +795,38 @@ if __name__ == "__main__":
 
                     if SCHEDULER.apis:
                         # send nginx configs
-                        thread = Thread(target=send_nginx_configs)
-                        thread.start()
-                        threads.append(thread)
-                    elif INTEGRATION != "Linux":
-                        LOGGER.warning("No BunkerWeb instance found, skipping nginx configs sending ...")
+                        threads.append(Thread(target=send_nginx_configs))
+                        threads[-1].start()
 
             try:
                 success = True
                 reachable = True
                 if SCHEDULER.apis:
                     # send cache
-                    thread = Thread(target=send_nginx_cache)
-                    thread.start()
-                    threads.append(thread)
+                    threads.append(Thread(target=send_nginx_cache))
+                    threads[-1].start()
 
                     for thread in threads:
                         thread.join()
 
                     success, responses = SCHEDULER.send_to_apis("POST", "/reload", response=True)
                     if not success:
-                        LOGGER.debug(f"Error while reloading bunkerweb: {responses}")
-                        reachable = bool(responses)
-                elif INTEGRATION == "Linux":
-                    # Reload nginx
-                    LOGGER.info("Reloading nginx ...")
-                    proc = subprocess_run(
-                        [join(sep, "usr", "sbin", "nginx"), "-s", "reload"],
-                        stdin=DEVNULL,
-                        stderr=STDOUT,
-                        env=env.copy(),
-                        check=False,
-                        stdout=PIPE,
-                    )
-                    success = proc.returncode == 0
+                        LOGGER.debug(f"Error while reloading all bunkerweb instances: {responses}")
+
+                    reachable = False
+                    for db_instance in SCHEDULER.db.get_instances():
+                        status = responses.get(db_instance["hostname"], {"status": "down"}).get("status", "down")
+                        if status == "success":
+                            reachable = True
+                        ret = SCHEDULER.db.update_instance(db_instance["hostname"], "up" if status == "success" else "down")
+                        if ret:
+                            LOGGER.error(f"Couldn't update instance {db_instance['hostname']} status to down in the database: {ret}")
+                        if db_instance["hostname"] in SCHEDULER.apis:
+                            SCHEDULER.apis.remove(db_instance["hostname"])
                 else:
+                    for thread in threads:
+                        thread.join()
+
                     LOGGER.warning("No BunkerWeb instance found, skipping bunkerweb reload ...")
             except BaseException as e:
                 LOGGER.error(f"Exception while reloading after running jobs once scheduling : {e}")

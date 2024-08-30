@@ -65,9 +65,6 @@ if __name__ == "__main__":
         if args.init:
             LOGGER.info(f"Detected {integration} integration")
 
-        if integration == "Linux" and not args.variables:
-            args.variables = join(sep, "etc", "bunkerweb", "variables.env")
-
         external_plugins = args.plugins
         pro_plugins = args.pro_plugins
 

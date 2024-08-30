@@ -6,9 +6,7 @@ from os import R_OK, W_OK, X_OK, access, getenv, sep
 from os.path import join
 from pathlib import Path
 from shutil import rmtree
-from subprocess import DEVNULL, STDOUT, run
 from sys import exit as sys_exit, path as sys_path
-from time import sleep
 from traceback import format_exc
 from typing import Any, Dict
 
@@ -16,7 +14,6 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
-from common_utils import get_integration  # type: ignore
 from logger import setup_logger  # type: ignore
 from Configurator import Configurator
 from Templator import Templator
@@ -66,8 +63,6 @@ if __name__ == "__main__":
         logger.info(f"Pro plugins : {pro_plugins_path}")
         logger.info(f"Output : {output_path}")
         logger.info(f"Target : {target_path}")
-
-        integration = get_integration()
 
         db = None
         if DB_PATH.is_dir():
@@ -133,32 +128,6 @@ if __name__ == "__main__":
         logger.info("Rendering templates ...")
         templator = Templator(str(templates_path), str(core_path), str(plugins_path), str(pro_plugins_path), str(output_path), str(target_path), config)
         templator.render()
-
-        if integration not in ("Autoconf", "Swarm", "Kubernetes", "Docker") and not args.no_linux_reload:
-            retries = 0
-            while not Path(sep, "var", "run", "bunkerweb", "nginx.pid").exists():
-                if retries == 5:
-                    logger.error(
-                        "BunkerWeb's nginx didn't start in time.",
-                    )
-                    sys_exit(1)
-
-                logger.warning(
-                    "Waiting for BunkerWeb's nginx to start, retrying in 5 seconds ...",
-                )
-                retries += 1
-                sleep(5)
-
-            proc = run(
-                [join(sep, "usr", "sbin", "nginx"), "-s", "reload"],
-                stdin=DEVNULL,
-                stderr=STDOUT,
-            )
-            if proc.returncode != 0:
-                status = 1
-                logger.error("Error while reloading nginx")
-            else:
-                logger.info("Successfully reloaded nginx")
 
     except SystemExit as e:
         raise e
