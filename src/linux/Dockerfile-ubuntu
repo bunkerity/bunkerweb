@@ -39,10 +39,6 @@ RUN export MAKEFLAGS="-j$(nproc)" && \
     pip install --no-cache-dir --require-hashes --break-system-packages --ignore-installed -r /tmp/requirements-deps.txt && \
     pip install --no-cache-dir --require-hashes --break-system-packages --target deps/python $(for file in $(ls /tmp/req/requirements*.txt) ; do echo "-r ${file}" ; done | xargs)
 
-# Install node and npm to build vite frontend
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
-    apt-get install -y --no-install-recommends nodejs
-
 # Copy files
 # can't exclude deps from . so we are copying everything by hand
 COPY src/bw/loading loading
@@ -59,21 +55,7 @@ COPY src/common/settings.json settings.json
 COPY src/common/utils utils
 COPY src/scheduler scheduler
 COPY src/VERSION VERSION
-
-COPY src/ui/client ui/client
-
-# This will build the frontend and add files to the UI folder
-WORKDIR /usr/share/bunkerweb/ui/client
-RUN DOCKERFILE=yes python3 build.py
-
-# We can delete the client folder after building the frontend
-RUN rm -rf /usr/share/bunkerweb/ui/client
-
-WORKDIR /usr/share/bunkerweb
-
-COPY src/ui/pages ui/pages
-COPY src/ui/src ui/src
-COPY src/ui/*.py ui/
+COPY src/ui ui
 
 FROM ubuntu:24.04@sha256:562456a05a0dbd62a671c1854868862a4687bf979a96d48ae8e766642cd911e8
 
