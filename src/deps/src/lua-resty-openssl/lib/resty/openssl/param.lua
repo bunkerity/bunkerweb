@@ -20,17 +20,23 @@ local OSSL_PARAM_OCTET_PTR = 7
 
 local alter_type_key = {}
 local buf_param_key = {}
+local buf_anchor_key = {}
 
 local function construct(buf_t, length, types_map, types_size)
   if not length then
     length = nkeys(buf_t)
   end
 
+
   local params = ffi_new("OSSL_PARAM[?]", length + 1)
 
   local i = 0
-  local buf_param
+  local buf_param, buf_anchored
   for key, value in pairs(buf_t) do
+    if key == buf_anchor_key then
+      goto continue
+    end
+
     local typ = types_map[key]
     if not typ then
       return nil, "param:construct: unknown key \"" .. key .. "\""
@@ -69,27 +75,37 @@ local function construct(buf_t, length, types_map, types_size)
                       ffi_new("unsigned int[1]")
       param = C.OSSL_PARAM_construct_uint(key, buf)
     elseif typ == OSSL_PARAM_UTF8_STRING then
-      buf = value and ffi_cast("char *", value) or buf
+      buf = value ~= nil and ffi_cast("char *", value) or buf
       param = C.OSSL_PARAM_construct_utf8_string(key, buf, value and #value or size)
     elseif typ == OSSL_PARAM_OCTET_STRING then
-      buf = value and ffi_cast("char *", value) or buf
+      buf = value ~= nil and ffi_cast("char *", value) or buf
       param = C.OSSL_PARAM_construct_octet_string(key, ffi_cast("void*", buf),
                                                   value and #value or size)
-    elseif typ == OSSL_PARAM_UTF8_PTR then
+    elseif typ == OSSL_PARAM_UTF8_PTR then -- out only
       buf = ffi_new("char*[1]")
       param = C.OSSL_PARAM_construct_utf8_ptr(key, buf, 0)
-    elseif typ == OSSL_PARAM_OCTET_PTR then
+    elseif typ == OSSL_PARAM_OCTET_PTR then -- out only
       buf = ffi_new("char*[1]")
       param = C.OSSL_PARAM_construct_octet_ptr(key, ffi_cast("void**", buf), 0)
     else
       error("type " .. typ .. " is not yet implemented")
     end
-    if not value then -- out
+
+    if value == nil then -- out
       buf_t[key] = buf
+    else -- in
+      -- save value as OSSL_PARAM_construct_* doesn't copy the value
+      buf_anchored = buf_anchored or {}
+      buf_anchored[key] = buf
     end
+
     params[i] = param
     i = i + 1
+
+::continue::
   end
+
+  buf_t[buf_anchor_key] = buf_anchored
 
   buf_t[buf_param_key] = buf_param
   params[length] = C.OSSL_PARAM_construct_end()
@@ -112,7 +128,8 @@ local function parse(buf_t, length, types_map, types_size)
       if C.OSSL_PARAM_get_BN(param, bn_t) ~= 1 then
         return nil, format_error("param:parse: OSSL_PARAM_get_BN")
       end
-      buf_t[key] = bn_lib.dup(bn_t[0])
+      buf_t[key] = assert(bn_lib.dup(bn_t[0]))
+      C.BN_free(bn_t[0])
     elseif typ == OSSL_PARAM_INTEGER or
         typ == OSSL_PARAM_UNSIGNED_INTEGER then
       buf_t[key] = tonumber(buf[0])
@@ -228,7 +245,7 @@ local function get_params_func(typ, field)
   local cf_set = C[typ .. "_set_params"]
   local set = function(self, params)
     if not param_maps_set[self[field]] then
-      local ok, err = self:settable_params()
+      local ok, err = self:settable_params(true) -- only query raw schema to save memory
       if not ok then
         return false, typ_lower .. ":set_params: " .. err
       end
@@ -249,8 +266,8 @@ local function get_params_func(typ, field)
   local cf_gettable = C[typ .. "_gettable_params"]
   local gettable = function(self, raw)
     local k = self[field]
-    if raw and param_maps_set[k] then
-      return param_maps_set[k]
+    if raw and param_maps_get[k] then
+      return param_maps_get[k]
     end
 
     local param = cf_gettable(self.ctx)
@@ -261,7 +278,7 @@ local function get_params_func(typ, field)
     end
     local schema, schema_reabale = {}, raw and nil or {}
     parse_params_schema(param, schema, schema_reabale)
-    param_maps_set[k] = schema
+    param_maps_get[k] = schema
 
     return raw and schema or schema_reabale
   end
@@ -270,12 +287,12 @@ local function get_params_func(typ, field)
   local get_buffer, get_size_map = {}, {}
   local get = function(self, key, want_size, want_type)
     if not param_maps_get[self[field]] then
-      local ok, err = self:gettable_params()
+      local ok, err = self:gettable_params(true) -- only query raw schema to save memory
       if not ok then
         return false, typ_lower .. ":set_params: " .. err
       end
     end
-    local schema = param_maps_set[self[field]]
+    local schema = param_maps_get[self[field]]
     if schema == nil or not schema[key] then -- nil or null
       return nil, typ_lower .. ":get_param: unknown key \"" .. key .. "\""
     end

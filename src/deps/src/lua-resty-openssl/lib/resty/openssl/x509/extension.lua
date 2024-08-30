@@ -204,6 +204,7 @@ end
 
 local NID_subject_alt_name = C.OBJ_sn2nid("subjectAltName")
 assert(NID_subject_alt_name ~= 0)
+local sk_GENERAL_NAME_free = stack_lib.gc_of("GENERAL_NAME")
 
 function _M.to_data(extension, nid)
   if not _M.istype(extension) then
@@ -221,8 +222,8 @@ function _M.to_data(extension, nid)
     -- Note: here we only free the stack itself not elements
     -- since there seems no way to increase ref count for a GENERAL_NAME
     -- we left the elements referenced by the new-dup'ed stack
-    ffi_gc(void_ptr, stack_lib.gc_of("GENERAL_NAME"))
     local got = ffi_cast("GENERAL_NAMES*", void_ptr)
+    ffi_gc(got, sk_GENERAL_NAME_free)
     local lib = require("resty.openssl.x509.altname")
     -- the internal ptr is returned, ie we need to copy it
     return lib.dup(got)

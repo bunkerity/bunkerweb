@@ -136,7 +136,7 @@ jobs:
         T=$OPENSSL_PREFIX
         mkdir -p $T
         if [ "X$OPENSSL_HASH" != "X" ]; then wget https://github.com/openssl/openssl/archive/$OPENSSL_HASH.tar.gz -qO - | tar zxf ; pushd openssl-$OPENSSL_HASH/; fi
-        if [ "X$OPENSSL_HASH" = "X" ] ; then wget https://www.openssl.org/source/openssl-${{ matrix.openssl }}.tar.gz -qO - | tar zxf -; pushd openssl-${{ matrix.openssl }}/; fi
+        if [ "X$OPENSSL_HASH" = "X" ] ; then (wget https://github.com/openssl/openssl/releases/download/openssl-${{ matrix.openssl }}/openssl-${{ matrix.openssl }}.tar.gz -qO - || wget https://openssl.org/source/old/1.1.1/openssl-${{ matrix.openssl}}.tar.gz -qO -) | tar zxf -; pushd openssl-${{ matrix.openssl }}/; fi
         if [ ! -e $T/include ]; then ./config shared -d --prefix=$T -DPURIFY > build.log 2>&1 || (cat build.log && exit 1); fi
         if [ ! -e $T/include ]; then make -j$JOBS > build.log 2>&1 || (cat build.log && exit 1); fi
         if [ ! -e $T/include ]; then make PATH=$PATH install_sw > build.log 2>&1 || (cat build.log && exit 1); fi
@@ -148,7 +148,7 @@ jobs:
       run: |
         T=${OPENSSL_PREFIX}.fips
         mkdir -p $T
-        wget https://www.openssl.org/source/openssl-${{ matrix.openssl_fips }}.tar.gz -qO - | tar zxf -; pushd openssl-${{ matrix.openssl_fips }}/
+        wget https://github.com/openssl/openssl/releases/download/openssl-${{ matrix.openssl_fips }}/openssl-${{ matrix.openssl_fips }}.tar.gz -qO - | tar zxf -; pushd openssl-${{ matrix.openssl_fips }}
         if [ -e $OPENSSL_PREFIX/lib64/ossl-modules/fips.so ]; then exit 0; fi 
         ./config shared -d --prefix=$T -DPURIFY enable-fips > build.log 2>&1 || (cat build.log && exit 1)
         make -j$JOBS > build.log 2>&1 || (cat build.log && exit 1)
@@ -205,22 +205,46 @@ jobs:
         export CI_SKIP_KONG_SSL_FUNCS=1
         TEST_NGINX_TIMEOUT=10 prove -j$JOBS t/openssl/ssl/ 2>&1
 
+    - name: Get changed files
+      id: changed-files
+      uses: tj-actions/changed-files@v44
+
     - name: Run Valgrind
       if: contains(matrix.extras, 'valgrind')
+      env:
+        ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
       run: |
+        files_to_test=""
+        # if on master branches
+        if [ "${{ github.ref }}" == "refs/heads/master" ]; then
+          files_to_test="t"
+        else
+          for file in ${ALL_CHANGED_FILES}; do
+            mod=$(echo "$file" | grep lib/resty | sed 's|^lib/||' | sed 's|/|.|g' | sed 's|\.lua$||')
+            files_to_test="$files_to_test $(grep -l "${mod}\b" t/**/*.t 2>/dev/null | tr '\n' ' ' | sed 's/ $//')"
+          done
+          files_to_test=$(echo "$files_to_test" | tr ' ' '\n' | sort -u | tr '\n' ' ' | sed 's/ $//')
+        fi
+
+        echo "Files to run for valgrind: $files_to_test"
+        if [ -z "$files_to_test" ]; then return; fi
+
         export LD_LIBRARY_PATH=$LUAJIT_LIB:$LD_LIBRARY_PATH
-        export TEST_NGINX_VALGRIND='--num-callers=100 -q --tool=memcheck --leak-check=full --show-possibly-lost=no --gen-suppressions=all --suppressions=valgrind.suppress --track-origins=yes' TEST_NGINX_TIMEOUT=60 TEST_NGINX_SLEEP=1
+        export TEST_NGINX_USE_VALGRIND=1 TEST_NGINX_VALGRIND='--num-callers=100 -q --tool=memcheck --leak-check=full --show-possibly-lost=no --gen-suppressions=all --suppressions=valgrind.suppress --track-origins=yes' TEST_NGINX_TIMEOUT=60 TEST_NGINX_SLEEP=1
+        export TEST_NGINX_INIT_BY_LUA="debug.sethook(function () collectgarbage() end, 'l') jit.off()"
         export PATH=$BASE_PATH/work/nginx/sbin:$PATH
-        stdbuf -o 0 -e 0 prove -j$JOBS -r t/ 2>&1 | grep -v "Connection refused" | grep -v "Retry connecting after" | tee output.log
+        stdbuf -o 0 -e 0 prove -j$JOBS -r $files_to_test 2>&1 | grep -v "Connection refused" | grep -v "Retry connecting after" | tee output.log
         if grep -q 'insert_a_suppression_name_here' output.log; then echo "Valgrind found problems"; exit 1; fi
 
-        echo "Nginx SSL plain FFI"
-        export CI_SKIP_NGINX_C=1
-        stdbuf -o 0 -e 0 prove -j$JOBS t/openssl/ssl/ 2>&1 | grep -v "Connection refused" | grep -v "Retry connecting after" | tee output.log
-        if grep -q 'insert_a_suppression_name_here' output.log; then echo "Valgrind found problems"; exit 1; fi
-        export CI_SKIP_KONG_SSL_FUNCS=1
-        stdbuf -o 0 -e 0 prove -j$JOBS t/openssl/ssl/ 2>&1 | grep -v "Connection refused" | grep -v "Retry connecting after" | tee output.log
-        if grep -q 'insert_a_suppression_name_here' output.log; then echo "Valgrind found problems"; exit 1; fi
+        if echo "$files_to_test" | grep -q "\bt/openssl/ssl\b"; then
+          echo "Nginx SSL plain FFI"
+          export CI_SKIP_NGINX_C=1
+          stdbuf -o 0 -e 0 prove -j$JOBS t/openssl/ssl/ 2>&1 | grep -v "Connection refused" | grep -v "Retry connecting after" | tee output.log
+          if grep -q 'insert_a_suppression_name_here' output.log; then echo "Valgrind found problems"; exit 1; fi
+          export CI_SKIP_KONG_SSL_FUNCS=1
+          stdbuf -o 0 -e 0 prove -j$JOBS t/openssl/ssl/ 2>&1 | grep -v "Connection refused" | grep -v "Retry connecting after" | tee output.log
+          if grep -q 'insert_a_suppression_name_here' output.log; then echo "Valgrind found problems"; exit 1; fi
+        fi
 
     - name: Run FIPS Test
       run: |

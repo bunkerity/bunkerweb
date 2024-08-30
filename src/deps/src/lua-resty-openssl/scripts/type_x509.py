@@ -124,8 +124,8 @@ Tp+h/rnQjL05vAwjx8+RppBa2EWrAxO+wSN6ucTInUf2luC5dmtQNmb3DQ==
   -- since there seems no way to increase ref count for a GENERAL_NAME
   -- we left the elements referenced by the new-dup'ed stack
   local got_ref = got
-  ffi_gc(got_ref, stack_lib.gc_of("GENERAL_NAME"))
-  got = ffi_cast("GENERAL_NAMES*", got_ref)''',
+  got = ffi_cast("GENERAL_NAMES*", got_ref)
+  ffi_gc(got, stack_lib.gc_of("GENERAL_NAME"))''',
 },
 
 {
@@ -139,8 +139,8 @@ Tp+h/rnQjL05vAwjx8+RppBa2EWrAxO+wSN6ucTInUf2luC5dmtQNmb3DQ==
   -- since there seems no way to increase ref count for a GENERAL_NAME
   -- we left the elements referenced by the new-dup'ed stack
   local got_ref = got
-  ffi_gc(got_ref, stack_lib.gc_of("GENERAL_NAME"))
-  got = ffi_cast("GENERAL_NAMES*", got_ref)''',
+  got = ffi_cast("GENERAL_NAMES*", got_ref)
+  ffi_gc(got, stack_lib.gc_of("GENERAL_NAME"))''',
 },
 
 {
@@ -161,8 +161,8 @@ Tp+h/rnQjL05vAwjx8+RppBa2EWrAxO+wSN6ucTInUf2luC5dmtQNmb3DQ==
   -- since there seems no way to increase ref count for a ACCESS_DESCRIPTION
   -- we left the elements referenced by the new-dup'ed stack
   local got_ref = got
-  ffi_gc(got_ref, stack_lib.gc_of("ACCESS_DESCRIPTION"))
-  got = ffi_cast("AUTHORITY_INFO_ACCESS*", got_ref)''',
+  got = ffi_cast("AUTHORITY_INFO_ACCESS*", got_ref)
+  ffi_gc(got, stack_lib.gc_of("ACCESS_DESCRIPTION"))''',
 },
 
 {
@@ -175,8 +175,8 @@ Tp+h/rnQjL05vAwjx8+RppBa2EWrAxO+wSN6ucTInUf2luC5dmtQNmb3DQ==
   -- since there seems no way to increase ref count for a DIST_POINT
   -- we left the elements referenced by the new-dup'ed stack
   local got_ref = got
-  ffi_gc(got_ref, stack_lib.gc_of("DIST_POINT"))
-  got = ffi_cast("OPENSSL_STACK*", got_ref)''',
+  got = ffi_cast("OPENSSL_STACK*", got_ref)
+  ffi_gc(got, stack_lib.gc_of("DIST_POINT"))''',
 },
 ]
 }

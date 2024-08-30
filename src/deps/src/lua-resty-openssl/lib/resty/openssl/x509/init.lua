@@ -688,8 +688,8 @@ function _M:get_subject_alt_name()
   -- since there seems no way to increase ref count for a GENERAL_NAME
   -- we left the elements referenced by the new-dup'ed stack
   local got_ref = got
-  ffi_gc(got_ref, stack_lib.gc_of("GENERAL_NAME"))
   got = ffi_cast("GENERAL_NAMES*", got_ref)
+  ffi_gc(got, stack_lib.gc_of("GENERAL_NAME"))
   local lib = require("resty.openssl.x509.altname")
   -- the internal ptr is returned, ie we need to copy it
   return lib.dup(got)
@@ -742,8 +742,8 @@ function _M:get_issuer_alt_name()
   -- since there seems no way to increase ref count for a GENERAL_NAME
   -- we left the elements referenced by the new-dup'ed stack
   local got_ref = got
-  ffi_gc(got_ref, stack_lib.gc_of("GENERAL_NAME"))
   got = ffi_cast("GENERAL_NAMES*", got_ref)
+  ffi_gc(got, stack_lib.gc_of("GENERAL_NAME"))
   local lib = require("resty.openssl.x509.altname")
   -- the internal ptr is returned, ie we need to copy it
   return lib.dup(got)
@@ -887,8 +887,8 @@ function _M:get_info_access()
   -- since there seems no way to increase ref count for a ACCESS_DESCRIPTION
   -- we left the elements referenced by the new-dup'ed stack
   local got_ref = got
-  ffi_gc(got_ref, stack_lib.gc_of("ACCESS_DESCRIPTION"))
   got = ffi_cast("AUTHORITY_INFO_ACCESS*", got_ref)
+  ffi_gc(got, stack_lib.gc_of("ACCESS_DESCRIPTION"))
   local lib = require("resty.openssl.x509.extension.info_access")
   -- the internal ptr is returned, ie we need to copy it
   return lib.dup(got)
@@ -941,8 +941,8 @@ function _M:get_crl_distribution_points()
   -- since there seems no way to increase ref count for a DIST_POINT
   -- we left the elements referenced by the new-dup'ed stack
   local got_ref = got
-  ffi_gc(got_ref, stack_lib.gc_of("DIST_POINT"))
   got = ffi_cast("OPENSSL_STACK*", got_ref)
+  ffi_gc(got, stack_lib.gc_of("DIST_POINT"))
   local lib = require("resty.openssl.x509.extension.dist_points")
   -- the internal ptr is returned, ie we need to copy it
   return lib.dup(got)
