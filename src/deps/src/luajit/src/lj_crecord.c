@@ -1498,7 +1498,8 @@ static TRef crec_arith_meta(jit_State *J, TRef *sp, CType **s, CTState *cts,
 
 void LJ_FASTCALL recff_cdata_arith(jit_State *J, RecordFFData *rd)
 {
-  CTState *cts = ctype_ctsG(J2G(J));
+  CTState *cts = ctype_cts(J->L);
+  MMS mm = (MMS)rd->data;
   TRef sp[2];
   CType *s[2];
   MSize i;
@@ -1548,6 +1549,8 @@ void LJ_FASTCALL recff_cdata_arith(jit_State *J, RecordFFData *rd)
 	}
       }
     } else if (tref_isnil(tr)) {
+      if (!(mm == MM_len || mm == MM_eq || mm == MM_lt || mm == MM_le))
+	lj_trace_err(J, LJ_TRERR_BADTYPE);
       tr = lj_ir_kptr(J, NULL);
       ct = ctype_get(cts, CTID_P_VOID);
     } else if (tref_isinteger(tr)) {
@@ -1566,12 +1569,12 @@ void LJ_FASTCALL recff_cdata_arith(jit_State *J, RecordFFData *rd)
 	  ct = ctype_child(cts, cct);
 	  tr = lj_ir_kint(J, (int32_t)ofs);
 	} else {  /* Interpreter will throw or return false. */
-	  ct = ctype_get(cts, CTID_P_VOID);
+	  lj_trace_err(J, LJ_TRERR_BADTYPE);
 	}
       } else if (ctype_isptr(ct->info)) {
 	tr = emitir(IRT(IR_ADD, IRT_PTR), tr, lj_ir_kintp(J, sizeof(GCstr)));
       } else {
-	ct = ctype_get(cts, CTID_P_VOID);
+	lj_trace_err(J, LJ_TRERR_BADTYPE);
       }
     } else if (!tref_isnum(tr)) {
       tr = 0;
@@ -1583,7 +1586,6 @@ void LJ_FASTCALL recff_cdata_arith(jit_State *J, RecordFFData *rd)
   }
   {
     TRef tr;
-    MMS mm = (MMS)rd->data;
     if ((mm == MM_len || mm == MM_concat ||
 	 (!(tr = crec_arith_int64(J, sp, s, mm)) &&
 	  !(tr = crec_arith_ptr(J, sp, s, mm)))) &&

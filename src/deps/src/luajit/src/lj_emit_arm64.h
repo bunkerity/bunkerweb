@@ -66,6 +66,17 @@ static uint32_t emit_isfpk64(uint64_t n)
   return ~0u;
 }
 
+static uint32_t emit_isfpmovi(uint64_t n)
+{
+  /* Is every byte either 0x00 or 0xff? */
+  if ((n & U64x(01010101,01010101)) * 0xff != n) return 0;
+  /* Form 8-bit value by taking one bit from each byte. */
+  n &= U64x(80402010,08040201);
+  n = (n * U64x(01010101,01010101)) >> 56;
+  /* Split into the format expected by movi. */
+  return ((n & 0xe0) << 6) | 0x700 | (n & 0x1f);
+}
+
 /* -- Emit basic instructions --------------------------------------------- */
 
 static void emit_dnma(ASMState *as, A64Ins ai, Reg rd, Reg rn, Reg rm, Reg ra)
@@ -299,6 +310,9 @@ static void emit_loadk64(ASMState *as, Reg r, IRIns *ir)
     uint32_t fpk = emit_isfpk64(*k);
     if (fpk != ~0u) {
       emit_d(as, A64I_FMOV_DI | A64F_FP8(fpk), (r & 31));
+      return;
+    } else if ((fpk = emit_isfpmovi(*k))) {
+      emit_d(as, A64I_MOVI_DI | (fpk << 5), (r & 31));
       return;
     }
   }
