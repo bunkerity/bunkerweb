@@ -1,0 +1,32 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##! Prevent command aliasing
+
+##! starting tokens prefix
+##!> assemble
+  \b
+  ##!=>
+  ##!> cmdline unix
+    alias
+  ##!<
+  ##!=>
+
+  ##! match white space between command and arguments
+  \b\s+
+  ##!=>
+
+  ##! match flags
+  (?:[+\-][a-z]+\+?\s+)?
+  ##!=>
+
+  ##! match the alias name
+  ##! The '.' and '-' character match payloads like "alias ls-al='ls -al'" and "alias ..='cd ..'"
+  [.'"\w!%\-,@]+
+  ##!=>
+
+  ##! match equals something
+  =\S
+  ##!=>
+
+##!<

@@ -13,6 +13,9 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.2
+        with:
+          # required for version detection using `git describe`
+          fetch-depth: 50
 
       - name: Lint Yaml
         uses: ibiqlik/action-yamllint@2576378a8e339169678f9939646ee3ee325e845c # v3.1.1
@@ -35,6 +38,12 @@ jobs:
           pip install --upgrade setuptools
           pip install secrules-parsing==${{ env.SECRULES_PARSING_VERSION }}
           secrules-parser -c --output-type github -f rules/*.conf
+
+      - name: Fetch upstream tags for version detection in next step
+        run: |
+          git remote add upstream https://github.com/coreruleset/coreruleset
+          git fetch --tags upstream
+
 
       - name: "Check CRS formatting"
         run: |

@@ -1,8 +1,0 @@
-Welcome to the OWASP Core Rule Set (CRS) documentation.
-The OWASP CRS documentation is generated as a Sphinx project and is stored in a separate Github repository. While the documentation is available as part of the CRS project it is provided in the form of a git-submodule. Using a git-submodule allow us to update the documentation without making changes to the main rule repository.
-
-You can download the documentation using git:
-    $ git submodule init
-    $ git submodule update
-	
-Alternatively, the latest version of the documentation is available at https://www.modsecurity.org/CRS/Documentation/

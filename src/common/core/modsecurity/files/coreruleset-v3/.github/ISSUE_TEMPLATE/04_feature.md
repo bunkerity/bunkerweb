@@ -2,10 +2,16 @@
 name: '🚀 Feature request'
 about: Suggest an idea for this project
 title: ''
-labels: 'Feature Request'
+labels: ':+1: Feature Request'
 assignees: ''
 ---
+<!-- 
+For help and support please go here:
+- https://security.stackexchange.com/questions/tagged/owasp-crs
 
+Ask general usage questions and participate in discussions on the CRS:
+- https://groups.google.com/a/owasp.org/g/modsecurity-core-rule-set-project
+-->
 ### Motivation
 
 <!-- A clear and concise description of what the motivation for the -->

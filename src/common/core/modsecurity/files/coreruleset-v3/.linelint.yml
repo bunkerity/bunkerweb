@@ -10,3 +10,4 @@ rules:
     # will be ignored only by this rule
     ignore:
       - .pytest_cache/*
+      - .changes-pending.md

@@ -21,7 +21,7 @@ parser.add_argument("--suffix", type=str, default="",
 args = parser.parse_args()
 
 # Return the longest prefix of all list elements. Shamelessly copied from:
-# https://stackoverflow.com/questions/6718196/determine-prefix-from-a-set-of-similar-strings
+# https://stackoverflow.com/questions/6718196/determine-the-common-prefix-of-multiple-strings
 def commonprefix(m):
     "Given a list of pathnames, returns the longest common leading component"
     if not m: return ''

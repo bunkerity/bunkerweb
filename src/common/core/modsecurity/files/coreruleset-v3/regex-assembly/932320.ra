@@ -1,0 +1,18 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##! POP3 Commands - PL2
+
+##!+ is
+##!^ \r\n.*?\b
+
+##! POP3 Commands - with args
+LIST(?: \d+)?
+USER .+?
+PASS .+?
+RETR \d+?
+DELE \d+?
+UIDL(?: \d+)?
+APOP [\w]+ [a-f0-9]{32}
+TOP \d+(?: \d+)?
+AUTH [a-z0-9-_]{1,20} (?:=|(?:[\w+/]{4})*(?:[\w+/]{2}==|[\w+/]{3}=))

@@ -1,4 +1,3 @@
----
 name: Regression Tests
 
 on:
@@ -11,7 +10,13 @@ on:
     paths:
       - 'rules/**'
       - 'tests/**'
+      - 'util/**'
       - '.github/**'
+  merge_group:
+
+# Pin tool versions to prevent problems
+env:
+  GO_FTW_VERSION: '1.0.3'
 
 jobs:
   regression:
@@ -21,33 +26,39 @@ jobs:
         modsec_version: [modsec2-apache]
     steps:
       - name: "Checkout repo"
-        uses: actions/checkout@v3
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.2
 
       - name: "Install dependencies"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GO_FTW_VERSION: '0.4.6'
         run: |
-          gh release download -R coreruleset/go-ftw v${GO_FTW_VERSION} -p "ftw_${GO_FTW_VERSION}_linux_amd64.tar.gz" -O - | tar -xzvf - ftw
+          gh release download -R coreruleset/go-ftw "v${{ env.GO_FTW_VERSION }}" \
+            -p "ftw_${{ env.GO_FTW_VERSION }}_linux_amd64.tar.gz" -O - | tar -xzvf - ftw
 
       - name: "Run tests for ${{ matrix.modsec_version }}"
         run: |
-          mkdir -p tests/logs/${{ matrix.modsec_version }}/{nginx,apache2}
-          docker-compose -f ./tests/docker-compose.yml up -d "${{ matrix.modsec_version }}"
-          docker-compose -f ./tests/docker-compose.yml logs
-          [ $(docker inspect ${{ matrix.modsec_version }} --format='{{.State.Running}}') = 'true' ]
-          ./ftw check -d tests/regression/tests
-          ./ftw run -d tests/regression/tests --show-failures-only
-        env:
-          FTW_LOGFILE: './tests/logs/modsec2-apache/error.log'
+          mkdir -p "tests/logs/${{ matrix.modsec_version }}/{nginx,apache2}"
+          docker compose -f ./tests/docker-compose.yml up -d "${{ matrix.modsec_version }}"
+          docker compose -f ./tests/docker-compose.yml logs
+          if ! [ "$(docker inspect ${{ matrix.modsec_version }} --format='{{.State.Running}}')" = "true" ]; then
+            echo "Web server failed to start. Aborting."
+            exit 1
+          fi
 
-      - name: "Change permissions if failed"
+          ./ftw check -d tests/regression/tests
+          ./ftw run \
+            -d tests/regression/tests \
+            --log-file "tests/logs/${{ matrix.modsec_version }}/error.log" \
+            --overrides tests/regression/httpd-overrides.yaml \
+            --show-failures-only
+
+      - name: "Change permissions of artifacts for upload"
         if: failure()
         run: |
-            # we want to get the audit log, so change permissions (file is only for root on docker)
-            sudo chmod 644 tests/logs/${{ matrix.modsec_version }}/modsec_audit.log
+          # Files created from the container will belong to root
+          sudo chmod -R a+r tests/logs
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3 # v4.3.1
         if: failure()
         with:
           name: waf-logs
@@ -55,5 +66,5 @@ jobs:
 
       - name: Clean docker-compose
         run: |
-          docker-compose -f ./tests/docker-compose.yml stop "${{ matrix.modsec_version }}"
-          docker-compose -f ./tests/docker-compose.yml down
+          docker compose -f ./tests/docker-compose.yml stop "${{ matrix.modsec_version }}"
+          docker compose -f ./tests/docker-compose.yml down

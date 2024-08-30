@@ -1,0 +1,18 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##!+ i
+
+PostgreSQL query failed:
+pg_query\(\) \[:
+pg_exec\(\) \[:
+PostgreSQL.{1,20}ERROR
+##! Example match: Warning: pg_fetch_array(): 3 is not a valid PostgreSQL result resource
+Warning.{1,20}\bpg_.*
+valid PostgreSQL result
+Npgsql\.
+PG::[a-z]*Error
+Supplied argument is not a valid PostgreSQL .*? resource
+Unable to connect to PostgreSQL server
+invalid input syntax for integer
+org\.postgresql\.util\.PSQLException:

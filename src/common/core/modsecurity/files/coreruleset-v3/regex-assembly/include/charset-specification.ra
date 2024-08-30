@@ -1,0 +1,21 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##! The expression generated from this file matches a full HTTP
+##! `Accept` header by following the specification as far as
+##! necessary, while restricting the `charset` parameter
+##! to a list of explicitly allowed values.
+##! Where possible, the expression matches tokens "loosely",
+##! to reduce complexity and the risk of false positives.
+
+##! As this specification is used by several rules, we now
+##! store it as an include file.
+
+##! Specifications:
+##! https://httpwg.org/specs/rfc7231.html#request.conneg
+##! https://httpwg.org/specs/rfc7230.html
+
+##!^ ^
+##!$ $
+
+##!> include charset-specification-no-anchors

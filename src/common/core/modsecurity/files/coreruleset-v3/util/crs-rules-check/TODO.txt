@@ -1,0 +1,5 @@
+
+* Add more checks
+  * check 'mandatory' actions, eg. `phase`
+  * check existing of necessary `tag`, eg. `OWASP_CRS/$$VER$$`
+  * check existing of `ver` action

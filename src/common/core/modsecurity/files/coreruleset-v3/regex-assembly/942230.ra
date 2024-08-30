@@ -1,0 +1,9 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##!+ i
+
+[\s()]case\s+when.*?then
+\)\s*?like\s*?\(
+select.*?having\s*?[^\s]+\s*?[^\w\s]
+if\s?\(\w+\s*?[=<>~]

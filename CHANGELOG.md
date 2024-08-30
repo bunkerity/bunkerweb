@@ -25,6 +25,8 @@
 - [MISC] Review security headers in the `headers` plugin to improve security
 - [MISC] Updated context of `realip`'s `USE_PROXY_PROTOCOL` setting to `global` as it was always applied globally even if set only on a service
 - [DEPS] Updated NGINX version to v1.26.2
+- [DEPS] Updated coreruleset-v4 version to v4.6.0
+- [DEPS] Updated coreruleset-v3 version to v3.3.6
 
 ## v1.5.9 - 2024/07/22
 

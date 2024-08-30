@@ -1,9 +1,9 @@
 # ------------------------------------------------------------------------
-# OWASP ModSecurity Core Rule Set ver.3.3.5
+# OWASP CRS ver.4.6.0
 # Copyright (c) 2006-2020 Trustwave and contributors. All rights reserved.
-# Copyright (c) 2021-2023 Core Rule Set project. All rights reserved.
+# Copyright (c) 2021-2024 CRS project. All rights reserved.
 #
-# The OWASP ModSecurity Core Rule Set is distributed under
+# The OWASP CRS is distributed under
 # Apache Software License (ASL) version 2
 # Please see the enclosed LICENSE file for full details.
 # ------------------------------------------------------------------------
@@ -12,15 +12,15 @@
 #
 # -- [[ Introduction ]] --------------------------------------------------------
 #
-# The OWASP ModSecurity Core Rule Set (CRS) is a set of generic attack
+# The OWASP CRS is a set of generic attack
 # detection rules that provide a base level of protection for any web
 # application. They are written for the open source, cross-platform
 # ModSecurity Web Application Firewall.
 #
 # See also:
 # https://coreruleset.org/
-# https://github.com/SpiderLabs/owasp-modsecurity-crs
-# https://www.owasp.org/index.php/Category:OWASP_ModSecurity_Core_Rule_Set_Project
+# https://github.com/coreruleset/coreruleset
+# https://owasp.org/www-project-modsecurity-core-rule-set/
 #
 
 
@@ -175,12 +175,14 @@ SecDefaultAction "phase:2,log,auditlog,pass"
 # Uncomment this rule to change the default:
 #
 #SecAction \
-#  "id:900000,\
-#   phase:1,\
-#   nolog,\
-#   pass,\
-#   t:none,\
-#   setvar:tx.paranoia_level=1"
+#    "id:900000,\
+#    phase:1,\
+#    pass,\
+#    t:none,\
+#    nolog,\
+#    tag:'OWASP_CRS',\
+#    ver:'OWASP_CRS/4.6.0',\
+#    setvar:tx.blocking_paranoia_level=1"
 
 
 # It is possible to execute rules from a higher paranoia level but not include
@@ -189,24 +191,26 @@ SecDefaultAction "phase:2,log,auditlog,pass"
 # the new rules would lead to false positives that raise your score above the
 # threshold.
 # This optional feature is enabled by uncommenting the following rule and
-# setting the tx.executing_paranoia_level.
-# Technically, rules up to the level defined in tx.executing_paranoia_level
-# will be executed, but only the rules up to tx.paranoia_level affect the
+# setting the tx.detection_paranoia_level.
+# Technically, rules up to the level defined in tx.detection_paranoia_level
+# will be executed, but only the rules up to tx.blocking_paranoia_level affect the
 # anomaly scores.
-# By default, tx.executing_paranoia_level is set to tx.paranoia_level.
-# tx.executing_paranoia_level must not be lower than tx.paranoia_level.
+# By default, tx.detection_paranoia_level is set to tx.blocking_paranoia_level.
+# tx.detection_paranoia_level must not be lower than tx.blocking_paranoia_level.
 #
-# Please notice that setting tx.executing_paranoia_level to a higher paranoia
+# Please notice that setting tx.detection_paranoia_level to a higher paranoia
 # level results in a performance impact that is equally high as setting
-# tx.paranoia_level to said level.
+# tx.blocking_paranoia_level to said level.
 #
 #SecAction \
-#  "id:900001,\
-#   phase:1,\
-#   nolog,\
-#   pass,\
-#   t:none,\
-#   setvar:tx.executing_paranoia_level=1"
+#    "id:900001,\
+#    phase:1,\
+#    pass,\
+#    t:none,\
+#    nolog,\
+#    tag:'OWASP_CRS',\
+#    ver:'OWASP_CRS/4.6.0',\
+#    setvar:tx.detection_paranoia_level=1"
 
 
 #
@@ -225,16 +229,18 @@ SecDefaultAction "phase:2,log,auditlog,pass"
 # Uncomment this rule to change the default:
 #
 #SecAction \
-#  "id:900010,\
-#   phase:1,\
-#   nolog,\
-#   pass,\
-#   t:none,\
-#   setvar:tx.enforce_bodyproc_urlencoded=1"
+#    "id:900010,\
+#    phase:1,\
+#    pass,\
+#    t:none,\
+#    nolog,\
+#    tag:'OWASP_CRS',\
+#    ver:'OWASP_CRS/4.6.0',\
+#    setvar:tx.enforce_bodyproc_urlencoded=1"
 
 
 #
-# -- [[ Anomaly Mode Severity Levels ]] ----------------------------------------
+# -- [[ Anomaly Scoring Mode Severity Levels ]] --------------------------------
 #
 # Each rule in the CRS has an associated severity level.
 # These are the default scoring points for each severity level.
@@ -258,19 +264,21 @@ SecDefaultAction "phase:2,log,auditlog,pass"
 # that all configuration variables are set before the CRS rules are processed.)
 #
 #SecAction \
-# "id:900100,\
-#  phase:1,\
-#  nolog,\
-#  pass,\
-#  t:none,\
-#  setvar:tx.critical_anomaly_score=5,\
-#  setvar:tx.error_anomaly_score=4,\
-#  setvar:tx.warning_anomaly_score=3,\
-#  setvar:tx.notice_anomaly_score=2"
+#    "id:900100,\
+#    phase:1,\
+#    pass,\
+#    t:none,\
+#    nolog,\
+#    tag:'OWASP_CRS',\
+#    ver:'OWASP_CRS/4.6.0',\
+#    setvar:tx.critical_anomaly_score=5,\
+#    setvar:tx.error_anomaly_score=4,\
+#    setvar:tx.warning_anomaly_score=3,\
+#    setvar:tx.notice_anomaly_score=2"
 
 
 #
-# -- [[ Anomaly Mode Blocking Threshold Levels ]] ------------------------------
+# -- [[ Anomaly Scoring Mode Blocking Threshold Levels ]] ----------------------
 #
 # Here, you can specify at which cumulative anomaly score an inbound request,
 # or outbound response, gets blocked.
@@ -310,57 +318,129 @@ SecDefaultAction "phase:2,log,auditlog,pass"
 # Uncomment this rule to change the defaults:
 #
 #SecAction \
-# "id:900110,\
-#  phase:1,\
-#  nolog,\
-#  pass,\
-#  t:none,\
-#  setvar:tx.inbound_anomaly_score_threshold=5,\
-#  setvar:tx.outbound_anomaly_score_threshold=4"
+#    "id:900110,\
+#    phase:1,\
+#    pass,\
+#    t:none,\
+#    nolog,\
+#    tag:'OWASP_CRS',\
+#    ver:'OWASP_CRS/4.6.0',\
+#    setvar:tx.inbound_anomaly_score_threshold=5,\
+#    setvar:tx.outbound_anomaly_score_threshold=4"
+
 
 #
-# -- [[ Application Specific Rule Exclusions ]] ----------------------------------------
+# -- [[ Application Specific Rule Exclusions ]] --------------------------------
 #
-# Some well-known applications may undertake actions that appear to be
-# malicious. This includes actions such as allowing HTML or Javascript within
-# parameters. In such cases the CRS aims to prevent false positives by allowing
-# administrators to enable prebuilt, application specific exclusions on an
-# application by application basis.
-# These application specific exclusions are distinct from the rules that would
-# be placed in the REQUEST-900-EXCLUSION-RULES-BEFORE-CRS configuration file as
-# they are prebuilt for specific applications. The 'REQUEST-900' file is
-# designed for users to add their own custom exclusions. Note, using these
-# application specific exclusions may loosen restrictions of the CRS,
-# especially if used with an application they weren't designed for. As a result
-# they should be applied with care.
-# To use this functionality you must specify a supported application. To do so
-# uncomment rule 900130. In addition to uncommenting the rule you will need to
-# specify which application(s) you'd like to enable exclusions for. Only a
-# (very) limited set of applications are currently supported, please use the
-# filenames prefixed with 'REQUEST-903' to guide you in your selection.
-# Such filenames use the following convention:
-# REQUEST-903.9XXX-{APPNAME}-EXCLUSIONS-RULES.conf
+# CRS 3.x contained exclusion packages to tweak the CRS for use with common
+# web applications, lowering the number of false positives.
 #
-# It is recommended if you run multiple web applications on your site to limit
-# the effects of the exclusion to only the path where the excluded webapp
-# resides using a rule similar to the following example:
-# SecRule REQUEST_URI "@beginsWith /wordpress/" setvar:tx.crs_exclusions_wordpress=1
+# In CRS 4, these are no longer part of the CRS itself, but they are available
+# as "CRS plugins". Some plugins improve support for web applications, and others
+# may bring new functionality. Plugins are not installed by default, but can be
+# downloaded from the plugin registry:
+# https://github.com/coreruleset/plugin-registry
+#
+# For detailed information about using and installing plugins, please see:
+# https://coreruleset.org/docs/concepts/plugins/
+
 
 #
-# Modify and uncomment this rule to select which application:
+# -- [[ Anomaly Score Reporting Level ]] ---------------------------------------
+#
+# When a request is blocked due to the anomaly score meeting or exceeding the
+# anomaly threshold then the blocking rule will also report the anomaly score.
+# This applies to the separate inbound and outbound anomaly scores.
+#
+# In phase 5, there are additional rules that can perform additional reporting
+# of anomaly scores with a verbosity that depends on the reporting level defined
+# below.
+#
+# By setting the reporting level you control whether you want additional
+# reporting beyond the blocking rule or not and, if yes, which requests should
+# be covered. The higher the reporting level, the more verbose the reporting is.
+#
+# There are 6 reporting levels:
+#
+# 0 - Reporting disabled
+# 1 - Reporting for requests with a blocking anomaly score >= a threshold
+# 2 - Reporting for requests with a detection anomaly score >= a threshold
+# 3 - Reporting for requests with a blocking anomaly score greater than 0
+# 4 - Reporting for requests with a detection anomaly score greater than 0
+# 5 - Reporting for all requests
+#
+# Note: Reporting levels 1 and 2 make it possible to differentiate between
+# requests that are blocked and requests that are *not* blocked but would have
+# been blocked if the blocking PL was equal to detection PL. This may be useful
+# for certain FP tuning methodologies, for example moving to a higher PL.
+#
+# A value of 5 can be useful on platforms where you are interested in logging
+# non-scoring requests, yet it is not possible to report this information in
+# the request/access log. This applies to Nginx, for example.
 #
 #SecAction \
-# "id:900130,\
-#  phase:1,\
-#  nolog,\
-#  pass,\
-#  t:none,\
-#  setvar:tx.crs_exclusions_cpanel=1,\
-#  setvar:tx.crs_exclusions_drupal=1,\
-#  setvar:tx.crs_exclusions_dokuwiki=1,\
-#  setvar:tx.crs_exclusions_nextcloud=1,\
-#  setvar:tx.crs_exclusions_wordpress=1,\
-#  setvar:tx.crs_exclusions_xenforo=1"
+#    "id:900115,\
+#    phase:1,\
+#    pass,\
+#    t:none,\
+#    nolog,\
+#    tag:'OWASP_CRS',\
+#    ver:'OWASP_CRS/4.6.0',\
+#    setvar:tx.reporting_level=4"
+
+
+#
+# -- [[ Early Anomaly Scoring Mode Blocking ]] ------------------------------
+#
+# The anomaly scores for the request and the responses are generally summed up
+# and evaluated at the end of phase:2 and at the end of phase:4 respectively.
+# However, it is possible to enable an early evaluation of these anomaly scores
+# at the end of phase:1 and at the end of phase:3.
+#
+# If a request (or a response) hits the anomaly threshold in this early
+# evaluation, then blocking happens immediately (if blocking is enabled) and
+# the phase 2 (and phase 4 respectively) will no longer be executed.
+#
+# Enable the rule 900120 that sets the variable tx.early_blocking to 1 in order
+# to enable early blocking. The variable tx.early_blocking is set to 0 by
+# default. Early blocking is thus disabled by default.
+#
+# Please note that early blocking will hide potential alerts from you. This
+# means that a payload that would appear in an alert in phase 2 (or phase 4)
+# does not get evaluated if the request is being blocked early. So when you
+# disabled early blocking again at some point in the future, then new alerts
+# from phase 2 might pop up.
+#SecAction \
+#    "id:900120,\
+#    phase:1,\
+#    pass,\
+#    t:none,\
+#    nolog,\
+#    tag:'OWASP_CRS',\
+#    ver:'OWASP_CRS/4.6.0',\
+#    setvar:tx.early_blocking=1"
+
+
+#
+# -- [[ Initialize Default Collections ]] -----------------------------------
+#
+# CRS provides a centralized option to initialize and populate collections
+# meant to be used by plugins (E.g.DoS protection plugin).
+# By default, Global and IP collections (see rule 901320),
+# being not used by core rules, are not initialized.
+#
+# Uncomment this rule to change the default:
+#
+#SecAction \
+#    "id:900130,\
+#    phase:1,\
+#    pass,\
+#    t:none,\
+#    nolog,\
+#    tag:'OWASP_CRS',\
+#    ver:'OWASP_CRS/4.6.0',\
+#    setvar:tx.enable_default_collections=1"
+
 
 #
 # -- [[ HTTP Policy Settings ]] ------------------------------------------------
@@ -371,7 +451,6 @@ SecDefaultAction "phase:2,log,auditlog,pass"
 #
 # These variables are used in the following rule files:
 # - REQUEST-911-METHOD-ENFORCEMENT.conf
-# - REQUEST-912-DOS-PROTECTION.conf
 # - REQUEST-920-PROTOCOL-ENFORCEMENT.conf
 
 # HTTP methods that a client is allowed to use.
@@ -381,12 +460,14 @@ SecDefaultAction "phase:2,log,auditlog,pass"
 #          MERGE MKACTIVITY MKCOL MOVE PROPFIND PROPPATCH PUT UNLOCK
 # Uncomment this rule to change the default.
 #SecAction \
-# "id:900200,\
-#  phase:1,\
-#  nolog,\
-#  pass,\
-#  t:none,\
-#  setvar:'tx.allowed_methods=GET HEAD POST OPTIONS'"
+#    "id:900200,\
+#    phase:1,\
+#    pass,\
+#    t:none,\
+#    nolog,\
+#    tag:'OWASP_CRS',\
+#    ver:'OWASP_CRS/4.6.0',\
+#    setvar:'tx.allowed_methods=GET HEAD POST OPTIONS'"
 
 # Content-Types that a client is allowed to send in a request.
 # Default: |application/x-www-form-urlencoded| |multipart/form-data| |multipart/related|
@@ -407,105 +488,155 @@ SecDefaultAction "phase:2,log,auditlog,pass"
 #
 # To prevent blocking request with not allowed content-type by default, you can create an exclusion
 # rule that removes rule 920420. For example:
-# SecRule REQUEST_HEADERS:Content-Type "@rx ^text/plain" \
-#  "id:1234,\
-#  phase:1,\
-#  nolog,\
-#  pass,\
-#  t:none,\
-#  ctl:ruleRemoveById=920420,\
-#  chain"
-#  SecRule REQUEST_URI "@rx ^/foo/bar" "t:none"
+#SecRule REQUEST_HEADERS:Content-Type "@rx ^text/plain" \
+#    "id:1234,\
+#    phase:1,\
+#    pass,\
+#    t:none,\
+#    nolog,\
+#    tag:'OWASP_CRS',\
+#    ctl:ruleRemoveById=920420,\
+#    ver:'OWASP_CRS/4.6.0',\
+#    chain"
+#    SecRule REQUEST_URI "@rx ^/foo/bar" \
+#        "t:none"
 #
 # Uncomment this rule to change the default.
 #
 #SecAction \
-# "id:900220,\
-#  phase:1,\
-#  nolog,\
-#  pass,\
-#  t:none,\
-#  setvar:'tx.allowed_request_content_type=|application/x-www-form-urlencoded| |multipart/form-data| |multipart/related| |text/xml| |application/xml| |application/soap+xml| |application/json| |application/cloudevents+json| |application/cloudevents-batch+json|'"
+#    "id:900220,\
+#    phase:1,\
+#    pass,\
+#    t:none,\
+#    nolog,\
+#    tag:'OWASP_CRS',\
+#    ver:'OWASP_CRS/4.6.0',\
+#    setvar:'tx.allowed_request_content_type=|application/x-www-form-urlencoded| |multipart/form-data| |multipart/related| |text/xml| |application/xml| |application/soap+xml| |application/json| |application/cloudevents+json| |application/cloudevents-batch+json|'"
 
 # Allowed HTTP versions.
-# Default: HTTP/1.0 HTTP/1.1 HTTP/2 HTTP/2.0
-# Example for legacy clients: HTTP/0.9 HTTP/1.0 HTTP/1.1 HTTP/2 HTTP/2.0
+# Default: HTTP/1.0 HTTP/1.1 HTTP/2 HTTP/2.0 HTTP/3 HTTP/3.0
+# Example for legacy clients: HTTP/0.9 HTTP/1.0 HTTP/1.1 HTTP/2 HTTP/2.0 HTTP/3 HTTP/3.0
 # Note that some web server versions use 'HTTP/2', some 'HTTP/2.0', so
 # we include both version strings by default.
 # Uncomment this rule to change the default.
 #SecAction \
-# "id:900230,\
-#  phase:1,\
-#  nolog,\
-#  pass,\
-#  t:none,\
-#  setvar:'tx.allowed_http_versions=HTTP/1.0 HTTP/1.1 HTTP/2 HTTP/2.0'"
+#    "id:900230,\
+#    phase:1,\
+#    pass,\
+#    t:none,\
+#    nolog,\
+#    tag:'OWASP_CRS',\
+#    ver:'OWASP_CRS/4.6.0',\
+#    setvar:'tx.allowed_http_versions=HTTP/1.0 HTTP/1.1 HTTP/2 HTTP/2.0 HTTP/3 HTTP/3.0'"
 
 # Forbidden file extensions.
 # Guards against unintended exposure of development/configuration files.
-# Default: .asa/ .asax/ .ascx/ .axd/ .backup/ .bak/ .bat/ .cdx/ .cer/ .cfg/ .cmd/ .com/ .config/ .conf/ .cs/ .csproj/ .csr/ .dat/ .db/ .dbf/ .dll/ .dos/ .htr/ .htw/ .ida/ .idc/ .idq/ .inc/ .ini/ .key/ .licx/ .lnk/ .log/ .mdb/ .old/ .pass/ .pdb/ .pol/ .printer/ .pwd/ .rdb/ .resources/ .resx/ .sql/ .swp/ .sys/ .vb/ .vbs/ .vbproj/ .vsdisco/ .webinfo/ .xsd/ .xsx/
+# Default: .asa/ .asax/ .ascx/ .backup/ .bak/ .bat/ .cdx/ .cer/ .cfg/ .cmd/ .com/ .config/ .conf/ .cs/ .csproj/ .csr/ .dat/ .db/ .dbf/ .dll/ .dos/ .htr/ .htw/ .ida/ .idc/ .idq/ .inc/ .ini/ .key/ .licx/ .lnk/ .log/ .mdb/ .old/ .pass/ .pdb/ .pem/ .pol/ .printer/ .pwd/ .rdb/ .resources/ .resx/ .sql/ .swp/ .sys/ .vb/ .vbs/ .vbproj/ .vsdisco/ .webinfo/ .xsd/ .xsx/
 # Example: .bak/ .config/ .conf/ .db/ .ini/ .log/ .old/ .pass/ .pdb/ .rdb/ .sql/
+# Note that .axd was removed due to false positives (see PR 1925).
+#
+# To additionally guard against configuration/install archive files from being
+# accidentally exposed, common archive file extensions can be added to the
+# restricted extensions list. An example list of common archive file extensions
+# is presented below:
+# .7z/ .br/ .bz/ .bz2/ .cab/ .cpio/ .gz/ .img/ .iso/ .jar/ .rar/ .tar/ .tbz2/ .tgz/ .txz/ .xz/ .zip/ .zst/
+# (Source: https://en.wikipedia.org/wiki/List_of_archive_formats)
+#
 # Uncomment this rule to change the default.
 #SecAction \
-# "id:900240,\
-#  phase:1,\
-#  nolog,\
-#  pass,\
-#  t:none,\
-#  setvar:'tx.restricted_extensions=.asa/ .asax/ .ascx/ .axd/ .backup/ .bak/ .bat/ .cdx/ .cer/ .cfg/ .cmd/ .com/ .config/ .conf/ .cs/ .csproj/ .csr/ .dat/ .db/ .dbf/ .dll/ .dos/ .htr/ .htw/ .ida/ .idc/ .idq/ .inc/ .ini/ .key/ .licx/ .lnk/ .log/ .mdb/ .old/ .pass/ .pdb/ .pol/ .printer/ .pwd/ .rdb/ .resources/ .resx/ .sql/ .swp/ .sys/ .vb/ .vbs/ .vbproj/ .vsdisco/ .webinfo/ .xsd/ .xsx/'"
+#    "id:900240,\
+#    phase:1,\
+#    pass,\
+#    t:none,\
+#    nolog,\
+#    tag:'OWASP_CRS',\
+#    ver:'OWASP_CRS/4.6.0',\
+#    setvar:'tx.restricted_extensions=.asa/ .asax/ .ascx/ .backup/ .bak/ .bat/ .cdx/ .cer/ .cfg/ .cmd/ .com/ .config/ .conf/ .cs/ .csproj/ .csr/ .dat/ .db/ .dbf/ .dll/ .dos/ .htr/ .htw/ .ida/ .idc/ .idq/ .inc/ .ini/ .key/ .licx/ .lnk/ .log/ .mdb/ .old/ .pass/ .pdb/ .pem/ .pol/ .printer/ .pwd/ .rdb/ .resources/ .resx/ .sql/ .swp/ .sys/ .vb/ .vbs/ .vbproj/ .vsdisco/ .webinfo/ .xsd/ .xsx/'"
 
-# Forbidden request headers.
-# Header names should be lowercase, enclosed by /slashes/ as delimiters.
-# Default: /accept-charset/ /content-encoding/ /proxy/ /lock-token/ /content-range/ /if/
+# Restricted request headers.
+# The HTTP request headers that CRS restricts are split into two categories:
+# basic (always forbidden) and extended (may be forbidden). All header names
+# should be lowercase and enclosed by /slashes/ as delimiters.
 #
-# Note: Accept-Charset is a deprecated header that should not be used by clients and
-# ignored by servers. It can be used for a response WAF bypass, by asking for a charset
-# that the WAF cannot decode.
-# Reference: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Accept-Charset
+# [ Basic ]
+# Includes deprecated headers and headers with known security risks. Always
+# forbidden.
+# Default: /content-encoding/ /proxy/ /lock-token/ /content-range/ /if/ /x-http-method-override/ /x-http-method/ /x-method-override/
 #
-# Note: Content-Encoding is used to list any encodings that have been applied to the
-# original payload. It is only used for compression, which isn't supported by CRS by
-# default since it blocks newlines and null bytes inside the request body. Most
-# compression algorithms require at least null bytes per RFC. Blocking it shouldn't
-# break anything and increases security since ModSecurity is incapable of properly
-# scanning compressed request bodies.
+# /content-encoding/
+#   Used to list any encodings that have been applied to the original payload.
+#   Only used for compression, which isn't supported by CRS by default since CRS
+#   blocks newlines and null bytes inside the request body. Most compression
+#   algorithms require at least null bytes per RFC. Blocking Content-Encoding
+#   shouldn't break anything and increases security since WAF engines, including
+#   ModSecurity, are typically incapable of properly scanning compressed request
+#   bodies.
 #
-# Note: Blocking Proxy header prevents 'httpoxy' vulnerability: https://httpoxy.org
+# /proxy/
+#   Blocking this prevents the 'httpoxy' vulnerability: https://httpoxy.org
+#
+# /lock-token/
+#
+# /content-range/
+#
+# /if/
+#
+# /x-http-method-override/
+# /x-http-method/
+# /x-method-override/
+#   Blocking these headers prevents method override attacks, as described here:
+#   https://www.sidechannel.blog/en/http-method-override-what-it-is-and-how-a-pentester-can-use-it
 #
 # Uncomment this rule to change the default.
 #SecAction \
-# "id:900250,\
-#  phase:1,\
-#  nolog,\
-#  pass,\
-#  t:none,\
-#  setvar:'tx.restricted_headers=/accept-charset/ /content-encoding/ /proxy/ /lock-token/ /content-range/ /if/'"
-
-# File extensions considered static files.
-# Extensions include the dot, lowercase, enclosed by /slashes/ as delimiters.
-# Used in DoS protection rule. See section "Anti-Automation / DoS Protection".
-# Default: /.jpg/ /.jpeg/ /.png/ /.gif/ /.js/ /.css/ /.ico/ /.svg/ /.webp/
+#    "id:900250,\
+#    phase:1,\
+#    pass,\
+#    t:none,\
+#    nolog,\
+#    tag:'OWASP_CRS',\
+#    ver:'OWASP_CRS/4.6.0',\
+#    setvar:'tx.restricted_headers_basic=/content-encoding/ /proxy/ /lock-token/ /content-range/ /if/ /x-http-method-override/ /x-http-method/ /x-method-override/'"
+#
+# [ Extended ]
+# Includes deprecated headers that are still in use (so false positives are
+# possible) and headers with possible security risks. Forbidden at a higher
+# paranoia level.
+# Default: /accept-charset/
+#
+# /accept-charset/
+#   Deprecated header that should not be used by clients and should be ignored
+#   by servers. Can be used for a response WAF bypass by asking for a charset
+#   that the WAF cannot decode. Considered to be a good indicator of suspicious
+#   behavior but produces too many false positives to be forbidden by default.
+#   References:
+#   https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Accept-Charset
+#   https://github.com/coreruleset/coreruleset/issues/3140
+#
 # Uncomment this rule to change the default.
 #SecAction \
-# "id:900260,\
-#  phase:1,\
-#  nolog,\
-#  pass,\
-#  t:none,\
-#  setvar:'tx.static_extensions=/.jpg/ /.jpeg/ /.png/ /.gif/ /.js/ /.css/ /.ico/ /.svg/ /.webp/'"
+#    "id:900255,\
+#    phase:1,\
+#    pass,\
+#    t:none,\
+#    nolog,\
+#    tag:'OWASP_CRS',\
+#    ver:'OWASP_CRS/4.6.0',\
+#    setvar:'tx.restricted_headers_extended=/accept-charset/'"
 
 # Content-Types charsets that a client is allowed to send in a request.
-# Default: utf-8|iso-8859-1|iso-8859-15|windows-1252
+# The content-types are enclosed by |pipes| as delimiters to guarantee exact matches.
+# Default: |utf-8| |iso-8859-1| |iso-8859-15| |windows-1252|
 # Uncomment this rule to change the default.
-# Use "|" to separate multiple charsets like in the rule defining
-# tx.allowed_request_content_type.
 #SecAction \
-# "id:900280,\
-#  phase:1,\
-#  nolog,\
-#  pass,\
-#  t:none,\
-#  setvar:'tx.allowed_request_content_type_charset=utf-8|iso-8859-1|iso-8859-15|windows-1252'"
+#    "id:900280,\
+#    phase:1,\
+#    pass,\
+#    t:none,\
+#    nolog,\
+#    tag:'OWASP_CRS',\
+#    ver:'OWASP_CRS/4.6.0',\
+#    setvar:'tx.allowed_request_content_type_charset=|utf-8| |iso-8859-1| |iso-8859-15| |windows-1252|'"
 
 #
 # -- [[ HTTP Argument/Upload Limits ]] -----------------------------------------
@@ -520,80 +651,94 @@ SecDefaultAction "phase:2,log,auditlog,pass"
 # Block request if number of arguments is too high
 # Default: unlimited
 # Example: 255
+# Note that a hard limit by the engine may also apply here (SecArgumentsLimit).
+# This would override this soft limit.
 # Uncomment this rule to set a limit.
 #SecAction \
-# "id:900300,\
-#  phase:1,\
-#  nolog,\
-#  pass,\
-#  t:none,\
-#  setvar:tx.max_num_args=255"
+#    "id:900300,\
+#    phase:1,\
+#    pass,\
+#    t:none,\
+#    nolog,\
+#    tag:'OWASP_CRS',\
+#    ver:'OWASP_CRS/4.6.0',\
+#    setvar:tx.max_num_args=255"
 
 # Block request if the length of any argument name is too high
 # Default: unlimited
 # Example: 100
 # Uncomment this rule to set a limit.
 #SecAction \
-# "id:900310,\
-#  phase:1,\
-#  nolog,\
-#  pass,\
-#  t:none,\
-#  setvar:tx.arg_name_length=100"
+#    "id:900310,\
+#    phase:1,\
+#    pass,\
+#    t:none,\
+#    nolog,\
+#    tag:'OWASP_CRS',\
+#    ver:'OWASP_CRS/4.6.0',\
+#    setvar:tx.arg_name_length=100"
 
 # Block request if the length of any argument value is too high
 # Default: unlimited
 # Example: 400
 # Uncomment this rule to set a limit.
 #SecAction \
-# "id:900320,\
-#  phase:1,\
-#  nolog,\
-#  pass,\
-#  t:none,\
-#  setvar:tx.arg_length=400"
+#    "id:900320,\
+#    phase:1,\
+#    pass,\
+#    t:none,\
+#    nolog,\
+#    tag:'OWASP_CRS',\
+#    ver:'OWASP_CRS/4.6.0',\
+#    setvar:tx.arg_length=400"
 
 # Block request if the total length of all combined arguments is too high
 # Default: unlimited
 # Example: 64000
 # Uncomment this rule to set a limit.
 #SecAction \
-# "id:900330,\
-#  phase:1,\
-#  nolog,\
-#  pass,\
-#  t:none,\
-#  setvar:tx.total_arg_length=64000"
+#    "id:900330,\
+#    phase:1,\
+#    pass,\
+#    t:none,\
+#    nolog,\
+#    tag:'OWASP_CRS',\
+#    ver:'OWASP_CRS/4.6.0',\
+#    setvar:tx.total_arg_length=64000"
 
 # Block request if the file size of any individual uploaded file is too high
 # Default: unlimited
 # Example: 1048576
 # Uncomment this rule to set a limit.
 #SecAction \
-# "id:900340,\
-#  phase:1,\
-#  nolog,\
-#  pass,\
-#  t:none,\
-#  setvar:tx.max_file_size=1048576"
+#    "id:900340,\
+#    phase:1,\
+#    pass,\
+#    t:none,\
+#    nolog,\
+#    tag:'OWASP_CRS',\
+#    ver:'OWASP_CRS/4.6.0',\
+#    setvar:tx.max_file_size=1048576"
 
 # Block request if the total size of all combined uploaded files is too high
 # Default: unlimited
 # Example: 1048576
 # Uncomment this rule to set a limit.
 #SecAction \
-# "id:900350,\
-#  phase:1,\
-#  nolog,\
-#  pass,\
-#  t:none,\
-#  setvar:tx.combined_file_sizes=1048576"
+#    "id:900350,\
+#    phase:1,\
+#    pass,\
+#    t:none,\
+#    nolog,\
+#    tag:'OWASP_CRS',\
+#    ver:'OWASP_CRS/4.6.0',\
+#    setvar:tx.combined_file_sizes=1048576"
 
 
 #
 # -- [[ Easing In / Sampling Percentage ]] -------------------------------------
 #
-# Adding the Core Rule Set to an existing productive site can lead to false
+# Adding the CRS to an existing productive site can lead to false
 # positives, unexpected performance issues and other undesired side effects.
 #
 # It can be beneficial to test the water first by enabling the CRS for a
@@ -612,7 +757,7 @@ SecDefaultAction "phase:2,log,auditlog,pass"
 # following directive somewhere after the inclusion of the CRS
 # (E.g., RESPONSE-999-EXCLUSION-RULES-AFTER-CRS.conf).
 #
-# SecRuleUpdateActionById 901150 "nolog"
+#SecRuleUpdateActionById 901450 "nolog"
 #
 # ATTENTION: If this TX.sampling_percentage is below 100, then some of the
 # requests will bypass the Core Rules completely and you lose the ability to
@@ -620,147 +765,15 @@ SecDefaultAction "phase:2,log,auditlog,pass"
 #
 # Uncomment this rule to enable this feature:
 #
-#SecAction "id:900400,\
-#  phase:1,\
-#  pass,\
-#  nolog,\
-#  setvar:tx.sampling_percentage=100"
-
-
-#
-# -- [[ Project Honey Pot HTTP Blacklist ]] ------------------------------------
-#
-# Optionally, you can check the client IP address against the Project Honey Pot
-# HTTPBL (dnsbl.httpbl.org). In order to use this, you need to register to get a
-# free API key. Set it here with SecHttpBlKey.
-#
-# Project Honeypot returns multiple different malicious IP types.
-# You may specify which you want to block by enabling or disabling them below.
-#
-# Ref: https://www.projecthoneypot.org/httpbl.php
-# Ref: https://github.com/SpiderLabs/ModSecurity/wiki/Reference-Manual#wiki-SecHttpBlKey
-#
-# Uncomment these rules to use this feature:
-#
-#SecHttpBlKey XXXXXXXXXXXXXXXXX
-#SecAction "id:900500,\
-#  phase:1,\
-#  nolog,\
-#  pass,\
-#  t:none,\
-#  setvar:tx.block_search_ip=1,\
-#  setvar:tx.block_suspicious_ip=1,\
-#  setvar:tx.block_harvester_ip=1,\
-#  setvar:tx.block_spammer_ip=1"
-
-
-#
-# -- [[ GeoIP Database ]] ------------------------------------------------------
-#
-# There are some rulesets that inspect geolocation data of the client IP address
-# (geoLookup). The CRS uses geoLookup to implement optional country blocking.
-#
-# To use geolocation, we make use of the MaxMind GeoIP database.
-# This database is not included with the CRS and must be downloaded.
-#
-# There are two formats for the GeoIP database. ModSecurity v2 uses GeoLite (.dat files),
-# and ModSecurity v3 uses GeoLite2 (.mmdb files).
-#
-# If you use ModSecurity 3, MaxMind provides a binary for updating GeoLite2 files,
-# see https://github.com/maxmind/geoipupdate.
-#
-# Download the package for your OS, and read https://dev.maxmind.com/geoip/geoipupdate/
-# for configuration options.
-#
-# Warning: GeoLite (not GeoLite2) databases are considered legacy, and not being updated anymore.
-# See https://support.maxmind.com/geolite-legacy-discontinuation-notice/ for more info.
-#
-# Therefore, if you use ModSecurity v2, you need to regenerate updated .dat files
-# from CSV files first.
-#
-# You can achieve this using https://github.com/sherpya/geolite2legacy
-# Pick the zip files from maxmind site:
-# https://geolite.maxmind.com/download/geoip/database/GeoLite2-Country-CSV.zip
-#
-# Follow the guidelines for installing the tool and run:
-# ./geolite2legacy.py -i GeoLite2-Country-CSV.zip \
-#                     -f geoname2fips.csv -o /usr/share/GeoliteCountry.dat
-#
-# Update the database regularly, see Step 3 of the configuration link above.
-#
-# By default, when you execute `sudo geoipupdate` on Linux, files from the free database
-# will be downloaded to `/usr/share/GeoIP` (both v1 and v2).
-#
-# Then choose from:
-#   - `GeoLite2-Country.mmdb` (if you are using ModSecurity v3)
-#   - `GeoLiteCountry.dat`    (if you are using ModSecurity v2)
-#
-# Ref: http://blog.spiderlabs.com/2010/10/detecting-malice-with-modsecurity-geolocation-data.html
-# Ref: http://blog.spiderlabs.com/2010/11/detecting-malice-with-modsecurity-ip-forensics.html
-#
-# Uncomment only one of the next rules here to use this feature.
-# Choose the one depending on the ModSecurity version you are using, and change the path accordingly:
-#
-# For ModSecurity v3:
-#SecGeoLookupDB /usr/share/GeoIP/GeoLite2-Country.mmdb
-# For ModSecurity v2 (points to the converted one):
-#SecGeoLookupDB /usr/share/GeoIP/GeoLiteCountry.dat
-
-#
-# -=[ Block Countries ]=-
-#
-# Rules in the IP Reputation file can check the client against a list of high
-# risk country codes. These countries have to be defined in the variable
-# tx.high_risk_country_codes via their ISO 3166 two-letter country code:
-# https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2#Officially_assigned_code_elements
-#
-# If you are sure that you are not getting any legitimate requests from a given
-# country, then you can disable all access from that country via this variable.
-# The rule performing the test has the rule id 910100.
-#
-# This rule requires SecGeoLookupDB to be enabled and the GeoIP database to be
-# downloaded (see the section "GeoIP Database" above.)
-#
-# By default, the list is empty. A list used by some sites was the following:
-# setvar:'tx.high_risk_country_codes=UA ID YU LT EG RO BG TR RU PK MY CN'"
-#
-# Uncomment this rule to use this feature:
-#
 #SecAction \
-# "id:900600,\
-#  phase:1,\
-#  nolog,\
-#  pass,\
-#  t:none,\
-#  setvar:'tx.high_risk_country_codes='"
+#    "id:900400,\
+#    phase:1,\
+#    pass,\
+#    nolog,\
+#    tag:'OWASP_CRS',\
+#    ver:'OWASP_CRS/4.6.0',\
+#    setvar:tx.sampling_percentage=100"
 
-
-#
-# -- [[ Anti-Automation / DoS Protection ]] ------------------------------------
-#
-# Optional DoS protection against clients making requests too quickly.
-#
-# When a client is making more than 100 requests (excluding static files) within
-# 60 seconds, this is considered a 'burst'. After two bursts, the client is
-# blocked for 600 seconds.
-#
-# Requests to static files are not counted towards DoS; they are listed in the
-# 'tx.static_extensions' setting, which you can change in this file (see
-# section "HTTP Policy Settings").
-#
-# For a detailed description, see rule file REQUEST-912-DOS-PROTECTION.conf.
-#
-# Uncomment this rule to use this feature:
-#
-#SecAction \
-# "id:900700,\
-#  phase:1,\
-#  nolog,\
-#  pass,\
-#  t:none,\
-#  setvar:'tx.dos_burst_time_slice=60',\
-#  setvar:'tx.dos_counter_threshold=100',\
-#  setvar:'tx.dos_block_timeout=600'"
 
 
 #
@@ -773,80 +786,14 @@ SecDefaultAction "phase:2,log,auditlog,pass"
 # Uncomment this rule to use this feature:
 #
 #SecAction \
-# "id:900950,\
-#  phase:1,\
-#  nolog,\
-#  pass,\
-#  t:none,\
-#  setvar:tx.crs_validate_utf8_encoding=1"
-
-
-#
-# -- [[ Blocking Based on IP Reputation ]] ------------------------------------
-#
-# Blocking based on reputation is permanent in the CRS. Unlike other rules,
-# which look at the individual request, the blocking of IPs is based on
-# a persistent record in the IP collection, which remains active for a
-# certain amount of time.
-#
-# There are two ways an individual client can become flagged for blocking:
-# - External information (RBL, GeoIP, etc.)
-# - Internal information (Core Rules)
-#
-# The record in the IP collection carries a flag, which tags requests from
-# individual clients with a flag named IP.reput_block_flag.
-# But the flag alone is not enough to have a client blocked. There is also
-# a global switch named tx.do_reput_block. This is off by default. If you set
-# it to 1 (=On), requests from clients with the IP.reput_block_flag will
-# be blocked for a certain duration.
-#
-# Variables
-# ip.reput_block_flag      Blocking flag for the IP collection record
-# ip.reput_block_reason    Reason (= rule message) that caused to blocking flag
-# tx.do_reput_block        Switch deciding if we really block based on flag
-# tx.reput_block_duration  Setting to define the duration of a block
-#
-# It may be important to know, that all the other core rules are skipped for
-# requests, when it is clear that they carry the blocking flag in question.
-#
-# Uncomment this rule to use this feature:
-#
-#SecAction \
-# "id:900960,\
-#  phase:1,\
-#  nolog,\
-#  pass,\
-#  t:none,\
-#  setvar:tx.do_reput_block=1"
-#
-# Uncomment this rule to change the blocking time:
-# Default: 300 (5 minutes)
-#
-#SecAction \
-# "id:900970,\
-#  phase:1,\
-#  nolog,\
-#  pass,\
-#  t:none,\
-#  setvar:tx.reput_block_duration=300"
-
-
-#
-# -- [[ Collection timeout ]] --------------------------------------------------
-#
-# Set the SecCollectionTimeout directive from the ModSecurity default (1 hour)
-# to a lower setting which is appropriate to most sites.
-# This increases performance by cleaning out stale collection (block) entries.
-#
-# This value should be greater than or equal to:
-# tx.reput_block_duration (see section "Blocking Based on IP Reputation") and
-# tx.dos_block_timeout (see section "Anti-Automation / DoS Protection").
-#
-# Ref: https://github.com/SpiderLabs/ModSecurity/wiki/Reference-Manual#wiki-SecCollectionTimeout
-
-# Please keep this directive uncommented.
-# Default: 600 (10 minutes)
-SecCollectionTimeout 600
+#    "id:900950,\
+#    phase:1,\
+#    pass,\
+#    t:none,\
+#    nolog,\
+#    tag:'OWASP_CRS',\
+#    ver:'OWASP_CRS/4.6.0',\
+#    setvar:tx.crs_validate_utf8_encoding=1"
 
 
 #
@@ -866,4 +813,6 @@ SecAction \
     pass,\
     t:none,\
     nolog,\
-    setvar:tx.crs_setup_version=335"
+    tag:'OWASP_CRS',\
+    ver:'OWASP_CRS/4.6.0',\
+    setvar:tx.crs_setup_version=460"

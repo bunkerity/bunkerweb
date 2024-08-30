@@ -1,0 +1,32 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##!+ i
+
+##! Helpers
+##!> define alter alter\s*?\w+.*?
+
+##!> define set \s+set\s+\w+
+
+##!> define ticks [\"'`]
+
+##!> define waitfor \s*?waitfor\s+
+
+##! Main assembly
+##!> assemble
+  {{alter}}
+  ##!=>
+  char
+  character
+  ##!=>
+  {{set}}
+##!<
+
+##!> assemble
+  {{ticks}}
+  ##!=>
+  ;*?{{waitfor}}time\s+[\"'`]
+  ;*?{{waitfor}}delay\s+[\"'`]
+  ;.*?:\s*?goto
+  ##!=>
+##!<

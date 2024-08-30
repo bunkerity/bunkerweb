@@ -3,26 +3,34 @@
 ## Project Co-Leads:
 
 - [Christian Folini](https://github.com/dune73)
-- [Walter Hop](https://github.com/lifeforms)
 - [Felipe Zipitría](https://github.com/fzipi)
 
 ## Developers:
 
-- [Paul Beckett](https://github.com/53cur3M3)
 - [Franziska Bühler](https://github.com/franbuehler)
-- [Christoph Hansen](https://github.com/emphazer)
+- [Esad Cetiner](https://github.com/esadcetiner)
 - [Ervin Hegedus](https://github.com/airween)
 - [Andrew Howe](https://github.com/RedXanadu)
+- [Karel Knibbe](https://github.com/karelorigin)
 - [Max Leske](https://github.com/theseion)
+- [Matteo Pace](https://github.com/M4tteoP)
+- [Jitendra Patro](https://github.com/Xhoenix)
+- [Jozef Sudolský](https://github.com/azurit)
+
+## Former and Inactive Developers:
+
+- [Paul Beckett](https://github.com/53cur3M3)
+- [Christoph Hansen](https://github.com/emphazer)
+- [Walter Hop](https://github.com/lifeforms) †
+- [Manuel Leos Rivas](https://github.com/spartantri)
 - [Andrea Menin](https://github.com/theMiddleBlue)
 - [Chaim Sanders](https://github.com/csanders-git)
 - [Federico G. Schwindt](https://github.com/fgsch)
-- [Manuel Leos Rivas](https://github.com/spartantri)
 - [Simon Studer](https://github.com/studersi)
-- [Jozef Sudolský](https://github.com/azurit)
 
 ## Contributors:
 
+- [luelueking](https://github.com/luelueking)
 - [agusmu](https://github.com/agusmu)
 - [Amir Hosein Aliakbarian](https://github.com/AmirHoseinAliakbarian)
 - [Zack Allen](https://github.com/zmallen)
@@ -50,7 +58,6 @@
 - [Pásztor Gábor](https://github.com/gpasztor87)
 - [Jan Gora](https://github.com/terjanq)
 - [Aaron Haaf](https://github.com/Everspace)
-- [Karel Knibbe](https://github.com/karelorigin)
 - [Michael Haas](https://github.com/MichaelHaas)
 - [henkworks](https://github.com/henkworks)
 - [Tim Herren](https://github.com/nerrehmit)
@@ -111,3 +118,34 @@
 - Josh Zlatin
 - [Zou Guangxian](https://github.com/zouguangxian)
 - [4ft35t](https://github.com/4ft35t)
+- [Andy Clapson](https://github.com/Homesteady)
+- [Anuraag Agrawal](https://github.com/anuraaga)
+- [Christian Aistleitner](https://github.com/somechris)
+- [Dennis Brown](https://github.com/MutableLoss)
+- [Dexter Chang](https://github.com/dextermallo)
+- [Esa Jokinen](https://github.com/oh2fih)
+- [Finn Westendorf](https://github.com/wfinn)
+- [Gwendal Le Coguic](https://github.com/gwen001)
+- [Jean-François Viguier](https://github.com/jf-viguier)
+- [Juan Pablo Tosso](https://github.com/jptosso)
+- [Karel](https://github.com/karelorigin)
+- [Khiem Doan](https://github.com/khiemdoan)
+- [Mark Zeman](https://github.com/KramNamez)
+- [Priyam Patel](https://github.com/priyam001)
+- [Robert DeBoer](https://github.com/robertdeboer)
+- [Somdev Sangwan](https://github.com/s0md3v)
+- [Stephen Sigwart](https://github.com/ssigwart)
+- [Zerorigin](https://github.com/Zerorigin)
+- [Syin Wu](https://github.com/bxlxx)
+- [henkdswiss](https://github.com/henkworks)
+- [ignatiev](https://github.com/ignatiev)
+- [oct0pus7](https://github.com/oct0pus7)
+- [Timo](https://github.com/ntimo)
+- [rekter0](https://github.com/rekter0)
+- [ThanhPT](https://github.com/thanhpt1708)
+- [Vandan Rohatgi](https://github.com/vandanrohatgi)
+- [NiceYouKnow](https://github.com/NiceYouKnow)
+- [floyd](https://github.com/floyd)
+- [superlgn](https://github.com/superlgn)
+- [TimDiam0nd](https://github.com/TimDiam0nd)
+- [brentclark](https://github.com/brentclark)
