@@ -305,7 +305,7 @@ LJLIB_CF(ffi_meta___tostring)
       p = *(void **)p;
     } else if (ctype_isenum(ct->info)) {
       msg = "cdata<%s>: %d";
-      p = (void *)(uintptr_t)*(uint32_t **)p;
+      p = (void *)(uintptr_t)*(uint32_t *)p;
     } else {
       if (ctype_isptr(ct->info)) {
 	p = cdata_getptr(p, ct->size);

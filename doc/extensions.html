@@ -265,7 +265,7 @@ and let the GC do its work.
 LuaJIT uses a Tausworthe PRNG with period 2^223 to implement
 <tt>math.random()</tt> and <tt>math.randomseed()</tt>. The quality of
 the PRNG results is much superior compared to the standard Lua
-implementation, which uses the platform-specific ANSI rand().
+implementation, which uses the platform-specific ANSI <tt>rand()</tt>.
 </p>
 <p>
 The PRNG generates the same sequences from the same seeds on all
@@ -274,6 +274,10 @@ platforms and makes use of all bits in the seed argument.
 for every call. The result is uniformly distributed between 0.0 and 1.0.
 It's correctly scaled up and rounded for <tt>math.random(n&nbsp;[,m])</tt> to
 preserve uniformity.
+</p>
+<p>
+Call <tt>math.randomseed()</tt> without any arguments to seed it from
+system entropy.
 </p>
 <p>
 Important: Neither this nor any other PRNG based on the simplistic
