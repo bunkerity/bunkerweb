@@ -13,7 +13,7 @@ local setmetatable = setmetatable
 local type = type
 
 
-local _M = { _VERSION = '0.14' }
+local _M = { _VERSION = '0.16' }
 
 local mt = { __index = _M }
 
@@ -224,7 +224,7 @@ function _M.new(self, key, salt, _cipher, _hash, hash_rounds, iv_len, enable_pad
 end
 
 
-function _M.encrypt(self, s)
+function _M.encrypt(self, s, aad)
     local typ = type(self)
     if typ ~= "table" then
         error("bad argument #1 self: table expected, got " .. typ, 2)
@@ -239,6 +239,12 @@ function _M.encrypt(self, s)
 
     if C.EVP_EncryptInit_ex(ctx, nil, nil, self._key, self._iv) == 0 then
         return nil, "EVP_EncryptInit_ex failed"
+    end
+
+    if self._cipher == "gcm" and aad ~= nil then
+        if C.EVP_EncryptUpdate(ctx, nil, tmp_len, aad, #aad) == 0 then
+            return nil, "C.EVP_EncryptUpdate failed"
+        end
     end
 
     if C.EVP_EncryptUpdate(ctx, buf, out_len, s, s_len) == 0 then
@@ -267,7 +273,7 @@ function _M.encrypt(self, s)
 end
 
 
-function _M.decrypt(self, s, tag)
+function _M.decrypt(self, s, tag, aad)
     local typ = type(self)
     if typ ~= "table" then
         error("bad argument #1 self: table expected, got " .. typ, 2)
@@ -282,6 +288,12 @@ function _M.decrypt(self, s, tag)
 
     if C.EVP_DecryptInit_ex(ctx, nil, nil, self._key, self._iv) == 0 then
       return nil, "EVP_DecryptInit_ex failed"
+    end
+
+    if self._cipher == "gcm" and aad ~= nil then
+        if C.EVP_DecryptUpdate(ctx, nil, tmp_len, aad, #aad) == 0 then
+            return nil, "C.EVP_DecryptUpdate failed"
+        end
     end
 
     if C.EVP_DecryptUpdate(ctx, buf, out_len, s, s_len) == 0 then
