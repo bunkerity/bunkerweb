@@ -1,7 +1,15 @@
 # vim:set ft= ts=4 sw=4 et fdm=marker:
 
+our $SkipReason;
+
+BEGIN {
+    if ($ENV{TEST_NGINX_CHECK_LEAK}) {
+        $SkipReason = "unavailable for the hup tests";
+    }
+}
+
 use lib '.';
-use t::TestCore::Stream;
+use t::TestCore::Stream $SkipReason ? (skip_all => $SkipReason) : ();
 
 repeat_each(2);
 

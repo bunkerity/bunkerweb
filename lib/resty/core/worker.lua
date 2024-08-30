@@ -90,6 +90,7 @@ if is_not_windows then
         ngx_lua_ffi_worker_pids = C.ngx_stream_lua_ffi_worker_pids
     end
 
+    local tonumber = tonumber
     local ngx_phase = ngx.get_phase
 
     function ngx.worker.pids()
