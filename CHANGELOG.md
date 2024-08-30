@@ -1,5 +1,22 @@
 # Changelog
 
+## v1.5.10 - ????/??/??
+
+- [BUGFIX] Add HTTP3 specific modsec rule in web UI to avoid false positives
+- [DEPS] Updated NGINX version to v1.26.2
+- [DEPS] Updated LuaJIT version to v2.1-20240815
+- [DEPS] Updated libmaxminddb version to v1.11.0
+- [DEPS] Updated lua-cjson to latest commit for the version v2.1.0.14
+- [DEPS] Updated lua-nginx-module version to v0.10.27
+- [DEPS] Updated lua-resty-core version to v0.1.29
+- [DEPS] Updated lua-resty-lrucache version to v0.14
+- [DEPS] Updated lua-resty-openssl version to v1.5.1
+- [DEPS] Updated lua-resty-signal version to v0.04
+- [DEPS] Updated lua-resty-string version to v0.16
+- [DEPS] Updated stream-lua-nginx-module version to v0.0.15
+- [DEPS] Updated coreruleset-v4 version to v4.6.0
+- [DEPS] Updated coreruleset-v3 version to v3.3.6
+
 ## v1.5.9 - 2024/07/22
 
 - [BUGFIX] Fix compatibility issues with mysql 8.4+ version and the `backup` plugin by adding the `mariadb-connector-c` dependency to the scheduler Dockerfile (on alpine)

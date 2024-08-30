@@ -1,7 +1,7 @@
 FROM redhat/ubi8:8.10@sha256:44d75007b39e0e1bbf1bcfd0721245add54c54c3f83903f8926fb4bef6827aa2 AS builder
 
 ENV OS=rhel
-ENV NGINX_VERSION=1.26.1
+ENV NGINX_VERSION=1.26.2
 
 # Copy rocky repo
 COPY src/linux/rocky-8.repo /etc/yum.repos.d/rocky.repo
@@ -17,7 +17,7 @@ RUN rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-Rocky-8
 RUN dnf install -y wget make yum-utils && \
   dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm && \
   dnf install -y --setopt=install_weak_deps=False readline-devel python39 python39-devel python39-setuptools brotli brotli-devel gperftools-devel perl libxslt-devel libxml2 yajl yajl-devel libxslt bash gd gd-devel gcc-c++ curl znc-modtcl gawk libtool pcre-devel automake autoconf gcc make openssl-devel git zlib-devel libxml2-devel pkgconf libcurl-devel geoip-devel && \
-  dnf install -y https://nginx.org/packages/rhel/8/$(uname -m)/RPMS/nginx-${NGINX_VERSION}-2.el8.ngx.$(uname -m).rpm
+  dnf install -y https://nginx.org/packages/rhel/8/$(uname -m)/RPMS/nginx-${NGINX_VERSION}-1.el8.ngx.$(uname -m).rpm
 
 WORKDIR /tmp/bunkerweb/deps
 

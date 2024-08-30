@@ -1,5 +1,5 @@
-fastapi==0.111.1
-redis==5.0.7
+fastapi==0.112.2
+redis==5.0.8
 requests==2.32.3
 selenium<4.17.0
-uvicorn[standard]==0.30.1
+uvicorn[standard]==0.30.6
