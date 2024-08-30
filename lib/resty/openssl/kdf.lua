@@ -124,7 +124,7 @@ local options_schema = {
   scrypt_p      = { TYPE_NUMBER, nil, NID_id_scrypt },
 }
 
-local outlen = ctypes.ptr_of_uint64()
+local outlen = ctypes.ptr_of_size_t()
 
 function _M.derive(options)
   local typ = options.type
@@ -337,7 +337,7 @@ function _M:derive(outlen, options, options_count)
   end
 
   if self.buf_size and outlen then
-    return nil, string.format("kdf:derive: this KDF has fixed output size %d, ".. 
+    return nil, string.format("kdf:derive: this KDF has fixed output size %d, "..
                               "it can't be set manually", self.buf_size)
   end
 

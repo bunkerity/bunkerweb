@@ -137,6 +137,7 @@ true
             local p = myassert(pro.load("default"))
             local a = assert(p:get_params("name", "version", "buildinfo", "status"))
             ngx.say(encode_sorted_json(a))
+            myassert(p:unload())
         }
     }
 --- request
