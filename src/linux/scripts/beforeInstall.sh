@@ -23,7 +23,7 @@ if [ -f /etc/os-release ]; then
     if [[ "$OS" == "Ubuntu" || "$OS" == "Debian" ]]; then
         # Get the version of the package
         VERSION=$(dpkg-query -W -f='${Version}' bunkerweb)
-        if dpkg --compare-versions "$VERSION" lt "1.5.9" && [ -f /var/tmp/variables.env ] && [ -f /var/tmp/ui.env ]; then
+        if dpkg --compare-versions "$VERSION" lt "1.5.10" && [ -f /var/tmp/variables.env ] && [ -f /var/tmp/ui.env ]; then
             echo "ℹ️ Copy /var/tmp/variables.env to /etc/bunkerweb/variables.env"
             do_and_check_cmd cp -f /var/tmp/variables.env /etc/bunkerweb/variables.env
             echo "ℹ️ Copy /var/tmp/ui.env to /etc/bunkerweb/ui.env"
@@ -32,7 +32,7 @@ if [ -f /etc/os-release ]; then
     elif [[ "$OS" == "Red Hat Enterprise Linux" || "$OS" == "Fedora" ]]; then
         # Get the version of the package
         VERSION=$(rpm -q --queryformat '%{VERSION}' bunkerweb)
-        if [ "$(printf '%s\n' "$VERSION" "$(echo '1.5.9' | tr -d ' ')" | sort -V | head -n 1)" = "$VERSION" ] && [ -f /var/tmp/variables.env ] && [ -f /var/tmp/ui.env ]; then
+        if [ "$(printf '%s\n' "$VERSION" "$(echo '1.5.10' | tr -d ' ')" | sort -V | head -n 1)" = "$VERSION" ] && [ -f /var/tmp/variables.env ] && [ -f /var/tmp/ui.env ]; then
             echo "ℹ️ Copy /var/tmp/variables.env to /etc/bunkerweb/variables.env"
             do_and_check_cmd cp -f /var/tmp/variables.env /etc/bunkerweb/variables.env
             echo "ℹ️ Copy /var/tmp/ui.env to /etc/bunkerweb/ui.env"

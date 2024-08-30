@@ -47,7 +47,7 @@ body:
       label: BunkerWeb version
       description: What version of BunkerWeb are you running?
       placeholder: Version
-      value: 1.5.9
+      value: 1.5.10
     validations:
       required: true
   - type: dropdown

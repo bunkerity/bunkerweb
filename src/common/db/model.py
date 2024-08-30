@@ -253,4 +253,4 @@ class Metadata(Base):
     last_instances_change = Column(DateTime, nullable=True)
     failover = Column(Boolean, default=None, nullable=True)
     integration = Column(INTEGRATIONS_ENUM, default="Unknown", nullable=False)
-    version = Column(String(32), default="1.5.9", nullable=False)
+    version = Column(String(32), default="1.5.10", nullable=False)

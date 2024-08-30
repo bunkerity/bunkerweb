@@ -66,7 +66,7 @@ RUN apk add --no-cache "busybox>=1.36.1-r17" "busybox-binsh>=1.36.1-r17" "ssl_cl
 RUN apk add --no-cache "libcrypto3>=3.1.6-r0" "libssl3>=3.1.6-r0" # CVE-2024-4741 CVE-2024-5535
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
-LABEL version="1.5.9"
+LABEL version="1.5.10"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="ui"
 
