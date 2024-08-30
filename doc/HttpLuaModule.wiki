@@ -2288,6 +2288,26 @@ When a relative path like <code>foo/bar.lua</code> is given, they will be turned
 
 This directive was first introduced in the <code>v0.10.0</code> release.
 
+== balancer_keepalive ==
+
+'''syntax:''' ''balancer_keepalive <total-connections>''
+
+'''context:''' ''upstream''
+
+'''phase:''' ''loading-config''
+
+The <code>total-connections</code> parameter sets the maximum number of idle
+keepalive connections to upstream servers that are preserved in the cache of
+each worker process. When this number is exceeded, the least recently used
+connections are closed.
+
+It should be particularly noted that the keepalive directive does not limit the
+total number of connections to upstream servers that an nginx worker process
+can open. The connections parameter should be set to a number small enough to
+let upstream servers process new incoming connections as well.
+
+This directive was first introduced in the <code>v0.10.21</code> release.
+
 == lua_need_request_body ==
 
 '''syntax:''' ''lua_need_request_body <on|off>''
@@ -4637,13 +4657,15 @@ See also [[#ngx.req.get_body_data|ngx.req.get_body_data]].
 
 '''syntax:''' ''ngx.req.set_body_data(data)''
 
-'''context:''' ''rewrite_by_lua*, access_by_lua*, content_by_lua*''
+'''context:''' ''rewrite_by_lua*, access_by_lua*, content_by_lua*, balancer_by_lua*''
 
 Set the current request's request body using the in-memory data specified by the <code>data</code> argument.
 
 If the request body has not been read yet, call [[#ngx.req.read_body|ngx.req.read_body]] first (or turn on [[#lua_need_request_body|lua_need_request_body]] to force this module to read the request body. This is not recommended however). Additionally, the request body must not have been previously discarded by [[#ngx.req.discard_body|ngx.req.discard_body]].
 
 Whether the previous request body has been read into memory or buffered into a disk file, it will be freed or the disk file will be cleaned up immediately, respectively.
+
+Note that this function is also work for balancer phase but it needs to call [https://github.com/openresty/lua-resty-core/blob/master/lib/ngx/balancer.md#recreate_request balancer.recreate_request] to make the change take effect after set the request body data or headers.
 
 This function was first introduced in the <code>v0.3.1rc18</code> release.
 
@@ -4653,7 +4675,7 @@ See also [[#ngx.req.set_body_file|ngx.req.set_body_file]].
 
 '''syntax:''' ''ngx.req.set_body_file(file_name, auto_clean?)''
 
-'''context:''' ''rewrite_by_lua*, access_by_lua*, content_by_lua*''
+'''context:''' ''rewrite_by_lua*, access_by_lua*, content_by_lua*, balancer_by_lua*''
 
 Set the current request's request body using the in-file data specified by the <code>file_name</code> argument.
 
@@ -4664,6 +4686,8 @@ If the optional <code>auto_clean</code> argument is given a <code>true</code> va
 Please ensure that the file specified by the <code>file_name</code> argument exists and is readable by an Nginx worker process by setting its permission properly to avoid Lua exception errors.
 
 Whether the previous request body has been read into memory or buffered into a disk file, it will be freed or the disk file will be cleaned up immediately, respectively.
+
+Note that this function is also work for balancer phase but it needs to call [https://github.com/openresty/lua-resty-core/blob/master/lib/ngx/balancer.md#recreate_request balancer.recreate_request] to make the change take effect after set the request body data or headers.
 
 This function was first introduced in the <code>v0.3.1rc18</code> release.
 
@@ -4741,8 +4765,7 @@ Returns a read-only cosocket object that wraps the downstream connection. Only [
 
 In case of error, <code>nil</code> will be returned as well as a string describing the error.
 
-Due to the streaming nature of HTTP2 and HTTP3, this API cannot be used when the downstream connection is HTTP2 and HTTP3.
-
+'''Note:''' This method will block while waiting for client request body to be fully received. Block time depends on the [http://nginx.org/en/docs/http/ngx_http_core_module.html#client_body_timeout client_body_timeout] directive and maximum body size specified by the [http://nginx.org/en/docs/http/ngx_http_core_module.html#client_max_body_size client_max_body_size] directive. If read timeout occurs or client body size exceeds the defined limit, this function will not return and <code>408 Request Time-out</code> or <code>413 Request Entity Too Large</code> response will be returned to the client instead.
 The socket object returned by this method is usually used to read the current request's body in a streaming fashion. Do not turn on the [[#lua_need_request_body|lua_need_request_body]] directive, and do not mix this call with [[#ngx.req.read_body|ngx.req.read_body]] and [[#ngx.req.discard_body|ngx.req.discard_body]].
 
 If any request body data has been pre-read into the Nginx core request header buffer, the resulting cosocket object will take care of this to avoid potential data loss resulting from such pre-reading.
