@@ -7,6 +7,7 @@ base.allows_subsystem('http')
 
 local ffi = require "ffi"
 local C = ffi.C
+local ffi_new = ffi.new
 local ffi_str = ffi.string
 local get_request = base.get_request
 local error = error
@@ -30,7 +31,7 @@ int ngx_http_lua_ffi_ssl_create_ocsp_request(const char *chain_data,
 
 int ngx_http_lua_ffi_ssl_validate_ocsp_response(const unsigned char *resp,
     size_t resp_len, const char *chain_data, size_t chain_len,
-    unsigned char *errbuf, size_t *errbuf_size);
+    unsigned char *errbuf, size_t *errbuf_size, long *valid);
 
 int ngx_http_lua_ffi_ssl_set_ocsp_status_resp(ngx_http_request_t *r,
     const unsigned char *resp, size_t resp_len, char **err);
@@ -98,8 +99,9 @@ function _M.create_ocsp_request(certs, maxlen)
 end
 
 
-function _M.validate_ocsp_response(resp, chain, max_errmsg_len)
+local next_update_p = ffi_new("long[1]")
 
+function _M.validate_ocsp_response(resp, chain, max_errmsg_len)
     local errbuf_size = max_errmsg_len
     if not errbuf_size then
         errbuf_size = get_string_buf_size()
@@ -109,11 +111,19 @@ function _M.validate_ocsp_response(resp, chain, max_errmsg_len)
     local sizep = get_size_ptr()
     sizep[0] = errbuf_size
 
-    local rc = C.ngx_http_lua_ffi_ssl_validate_ocsp_response(
-                        resp, #resp, chain, #chain, errbuf, sizep)
+    next_update_p[0] = 0
+
+    local rc = C.ngx_http_lua_ffi_ssl_validate_ocsp_response(resp, #resp,
+                                                             chain, #chain,
+                                                             errbuf, sizep,
+                                                             next_update_p)
 
     if rc == FFI_OK then
-        return true
+        local next_update = tonumber(next_update_p[0])
+        if next_update == 0 then
+            next_update = nil
+        end
+        return true, next_update
     end
 
     -- rc == FFI_ERROR
