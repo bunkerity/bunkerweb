@@ -1533,11 +1533,11 @@ set keepalive: 1 nil
 --- grep_error_log eval: qr/stream lua ssl (?:set|save|free) session: [0-9A-F]+/
 --- grep_error_log_out eval
 qr/^stream lua ssl save session: ([0-9A-F]+)
-stream lua ssl save session: \1
-stream lua ssl save session: \1
-stream lua ssl free session: \1
-stream lua ssl free session: \1
-stream lua ssl free session: \1
+stream lua ssl save session: ([0-9A-F]+)
+stream lua ssl save session: ([0-9A-F]+)
+stream lua ssl free session: ([0-9A-F]+)
+stream lua ssl free session: ([0-9A-F]+)
+stream lua ssl free session: ([0-9A-F]+)
 $/
 
 --- error_log
