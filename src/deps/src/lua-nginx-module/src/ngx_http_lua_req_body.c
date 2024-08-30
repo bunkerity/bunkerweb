@@ -85,23 +85,6 @@ ngx_http_lua_ngx_req_read_body(lua_State *L)
         return luaL_error(L, "request object not found");
     }
 
-/* http2 read body may break http2 stream process */
-#if (NGX_HTTP_V2)
-    if (r->main->stream && r->headers_in.content_length_n < 0) {
-        return luaL_error(L, "http2 requests are not supported"
-                          " without content-length header");
-    }
-#endif
-
-#if (NGX_HTTP_V3)
-    if (r->http_version == NGX_HTTP_VERSION_30
-        && r->headers_in.content_length_n < 0)
-    {
-        return luaL_error(L, "http3 requests are not supported"
-                          " without content-length header");
-    }
-#endif
-
     r->request_body_in_single_buf = 1;
     r->request_body_in_persistent_file = 1;
     r->request_body_in_clean_file = 1;
@@ -348,23 +331,6 @@ ngx_http_lua_ngx_req_get_body_file(lua_State *L)
     if (r == NULL) {
         return luaL_error(L, "request object not found");
     }
-
-/* http2 read body may break http2 stream process */
-#if (NGX_HTTP_V2)
-    if (r->main->stream && r->headers_in.content_length_n < 0) {
-        return luaL_error(L, "http2 requests are not supported"
-                          " without content-length header");
-    }
-#endif
-
-#if (NGX_HTTP_V3)
-    if (r->http_version == NGX_HTTP_VERSION_30
-        && r->headers_in.content_length_n < 0)
-    {
-        return luaL_error(L, "http3 requests are not supported"
-                          " without content-length header");
-    }
-#endif
 
     ngx_http_lua_check_fake_request(L, r);
 
