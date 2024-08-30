@@ -199,7 +199,7 @@ class Instances(Base):
     __tablename__ = "bw_instances"
 
     hostname = Column(String(256), primary_key=True)
-    name = Column(String(256), nullable=False, default="static instance")
+    name = Column(String(256), nullable=False, default="manual instance")
     port = Column(Integer, nullable=False)
     server_name = Column(String(256), nullable=False)
     type = Column(INSTANCE_TYPE_ENUM, nullable=False, default="static")

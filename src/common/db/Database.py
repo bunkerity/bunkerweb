@@ -3131,7 +3131,7 @@ class Database:
             session.add(
                 Instances(
                     hostname=hostname,
-                    name=name or "static instance",
+                    name=name or "manual instance",
                     port=port,
                     server_name=server_name,
                     method=method,
@@ -3198,7 +3198,7 @@ class Database:
                 to_put.append(
                     Instances(
                         hostname=instance["hostname"],
-                        name=instance.get("name", "static instance"),
+                        name=instance.get("name", "manual instance"),
                         port=instance["env"].get("API_HTTP_PORT", 5000),
                         server_name=instance["env"].get("API_SERVER_NAME", "bwapi"),
                         type=instance.get("type", "static"),
