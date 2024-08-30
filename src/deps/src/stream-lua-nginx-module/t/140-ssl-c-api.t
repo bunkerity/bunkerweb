@@ -10,7 +10,7 @@ my $openssl_version = eval { `$NginxBinary -V 2>&1` };
 if ($openssl_version =~ m/built with OpenSSL (0|1\.0\.(?:0|1[^\d]|2[a-d]).*)/) {
     plan(skip_all => "too old OpenSSL, need 1.0.2e, was $1");
 } else {
-    plan tests => repeat_each() * (blocks() * 5 + 1);
+    plan tests => repeat_each() * (blocks() * 5 - 1);
 }
 
 $ENV{TEST_NGINX_HTML_DIR} ||= html_dir();
@@ -67,7 +67,7 @@ ffi.cdef[[
 
     void ngx_stream_lua_ffi_free_priv_key(void *cdata);
 
-    int ngx_stream_lua_ffi_ssl_verify_client(void *r, void *cdata, int depth, char **err);
+    int ngx_stream_lua_ffi_ssl_verify_client(void *r, void *cdata, void *cdata, int depth, char **err);
 
     int ngx_stream_lua_ffi_ssl_client_random(ngx_stream_lua_request_t *r,
         unsigned char *out, size_t *outlen, char **err);
@@ -722,7 +722,7 @@ lua ssl server name: "test.com"
                 return
             end
 
-            local rc = ffi.C.ngx_stream_lua_ffi_ssl_verify_client(r, cert, -1, errmsg)
+            local rc = ffi.C.ngx_stream_lua_ffi_ssl_verify_client(r, cert, nil, -1, errmsg)
             if rc ~= 0 then
                 ngx.log(ngx.ERR, "failed to set cdata cert: ",
                         ffi.string(errmsg[0]))
@@ -778,7 +778,7 @@ client certificate subject: emailAddress=agentzh@gmail.com,CN=test.com
                 return
             end
 
-            local rc = ffi.C.ngx_stream_lua_ffi_ssl_verify_client(r, nil, -1, errmsg)
+            local rc = ffi.C.ngx_stream_lua_ffi_ssl_verify_client(r, nil, nil, -1, errmsg)
             if rc ~= 0 then
                 ngx.log(ngx.ERR, "failed to set cdata cert: ",
                         ffi.string(errmsg[0]))
@@ -843,7 +843,7 @@ client certificate subject: emailAddress=agentzh@gmail.com,CN=test.com
                 return
             end
 
-            local rc = ffi.C.ngx_stream_lua_ffi_ssl_verify_client(r, cert, 1, errmsg)
+            local rc = ffi.C.ngx_stream_lua_ffi_ssl_verify_client(r, cert, nil, 1, errmsg)
             if rc ~= 0 then
                 ngx.log(ngx.ERR, "failed to set cdata cert: ",
                         ffi.string(errmsg[0]))
@@ -1232,6 +1232,144 @@ close: 1 nil
 
 --- error_log
 lua ssl server name: "test.com"
+
+--- no_error_log
+[error]
+[alert]
+
+
+
+=== TEST 12: verify client, but server don't trust root ca
+--- stream_config
+    server {
+        listen unix:$TEST_NGINX_HTML_DIR/nginx.sock ssl;
+
+        ssl_certificate ../../cert/mtls_server.crt;
+        ssl_certificate_key ../../cert/mtls_server.key;
+
+        ssl_certificate_by_lua_block {
+            collectgarbage()
+
+            local ffi = require "ffi"
+            require "defines"
+
+            local errmsg = ffi.new("char *[1]")
+
+            local r = require "resty.core.base" .get_request()
+            if not r then
+                ngx.log(ngx.ERR, "no request found")
+                return
+            end
+
+            local f = assert(io.open("t/cert/mtls_server.crt", "rb"))
+            local cert_data = f:read("*all")
+            f:close()
+
+            local client_certs = ffi.C.ngx_stream_lua_ffi_parse_pem_cert(cert_data, #cert_data, errmsg)
+            if not client_certs then
+                ngx.log(ngx.ERR, "failed to parse PEM client certs: ",
+                        ffi.string(errmsg[0]))
+                return
+            end
+
+            local rc = ffi.C.ngx_stream_lua_ffi_ssl_verify_client(r, client_certs, nil, 1, errmsg)
+            if rc ~= 0 then
+                ngx.log(ngx.ERR, "failed to set cdata cert: ",
+                        ffi.string(errmsg[0]))
+                return
+            end
+
+            ffi.C.ngx_stream_lua_ffi_free_cert(client_certs)
+        }
+
+        content_by_lua_block {
+            ngx.say(ngx.var.ssl_client_verify)
+        }
+    }
+--- stream_server_config
+    proxy_pass                  unix:$TEST_NGINX_HTML_DIR/nginx.sock;
+    proxy_ssl                   on;
+    proxy_ssl_certificate       ../../cert/mtls_client.crt;
+    proxy_ssl_certificate_key   ../../cert/mtls_client.key;
+    proxy_ssl_session_reuse     off;
+
+--- stream_response
+FAILED:unable to verify the first certificate
+
+--- no_error_log
+[error]
+[alert]
+
+
+
+=== TEST 13: verify client and server trust root ca
+--- stream_config
+    server {
+        listen unix:$TEST_NGINX_HTML_DIR/nginx.sock ssl;
+
+        ssl_certificate ../../cert/mtls_server.crt;
+        ssl_certificate_key ../../cert/mtls_server.key;
+
+        ssl_certificate_by_lua_block {
+            collectgarbage()
+
+            local ffi = require "ffi"
+            require "defines"
+
+            local errmsg = ffi.new("char *[1]")
+
+            local r = require "resty.core.base" .get_request()
+            if not r then
+                ngx.log(ngx.ERR, "no request found")
+                return
+            end
+
+            local f = assert(io.open("t/cert/mtls_server.crt", "rb"))
+            local cert_data = f:read("*all")
+            f:close()
+
+            local client_certs = ffi.C.ngx_stream_lua_ffi_parse_pem_cert(cert_data, #cert_data, errmsg)
+            if not client_certs then
+                ngx.log(ngx.ERR, "failed to parse PEM client certs: ",
+                        ffi.string(errmsg[0]))
+                return
+            end
+
+            local f = assert(io.open("t/cert/mtls_ca.crt", "rb"))
+            local cert_data = f:read("*all")
+            f:close()
+
+            local trusted_certs = ffi.C.ngx_stream_lua_ffi_parse_pem_cert(cert_data, #cert_data, errmsg)
+            if not trusted_certs then
+                ngx.log(ngx.ERR, "failed to parse PEM trusted certs: ",
+                        ffi.string(errmsg[0]))
+                return
+            end
+
+            local rc = ffi.C.ngx_stream_lua_ffi_ssl_verify_client(r, client_certs, trusted_certs, 1, errmsg)
+            if rc ~= 0 then
+                ngx.log(ngx.ERR, "failed to set cdata cert: ",
+                        ffi.string(errmsg[0]))
+                return
+            end
+
+            ffi.C.ngx_stream_lua_ffi_free_cert(client_certs)
+            ffi.C.ngx_stream_lua_ffi_free_cert(trusted_certs)
+        }
+
+        content_by_lua_block {
+            ngx.say(ngx.var.ssl_client_verify)
+        }
+    }
+--- stream_server_config
+    proxy_pass                  unix:$TEST_NGINX_HTML_DIR/nginx.sock;
+    proxy_ssl                   on;
+    proxy_ssl_certificate       ../../cert/mtls_client.crt;
+    proxy_ssl_certificate_key   ../../cert/mtls_client.key;
+    proxy_ssl_session_reuse     off;
+
+--- stream_response
+SUCCESS
 
 --- no_error_log
 [error]
