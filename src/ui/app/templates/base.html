@@ -31,12 +31,19 @@
         <link rel="stylesheet"
               href="libs/perfect-scrollbar/perfect-scrollbar.css"
               nonce="{{ style_nonce }}" />
-        <link rel="stylesheet"
-              href="libs/apexcharts/apexcharts.css"
-              nonce="{{ style_nonce }}" />
-        <link rel="stylesheet"
-              href="libs/datatables/datatables.min.css"
-              nonce="{{ style_nonce }}" />
+        {% if current_endpoint == "home" %}
+            <link rel="stylesheet"
+                  href="libs/apexcharts/apexcharts.css"
+                  nonce="{{ style_nonce }}" />
+        {% endif %}
+        {% if current_endpoint == "instances" %}
+            <link rel="stylesheet"
+                  href="libs/datatables/datatables.min.css"
+                  nonce="{{ style_nonce }}" />
+            <link rel="stylesheet"
+                  href="css/pages/instances.css"
+                  nonce="{{ style_nonce }}" />
+        {% endif %}
         <!-- Page CSS -->
         <!-- Page -->
         {% if current_endpoint == "login" or current_endpoint == "totp" %}
@@ -68,19 +75,21 @@
                 nonce="{{ script_nonce }}"></script>
         <script src="libs/perfect-scrollbar/perfect-scrollbar.min.js"
                 nonce="{{ script_nonce }}"></script>
-        <script src="libs/hammer/hammer.min.js" nonce="{{ script_nonce }}"></script>
-        <script src="libs/masonry/masonry.pkgd.min.js" nonce="{{ script_nonce }}"></script>
         <script src="libs/purify/purify.min.js" nonce="{{ script_nonce }}"></script>
-        <script src="libs/datatables/datatables.min.js" nonce="{{ script_nonce }}"></script>
+        {% if current_endpoint == "instances" %}
+            <script src="libs/datatables/datatables.min.js" nonce="{{ script_nonce }}"></script>
+        {% endif %}
         <!-- Core JS -->
         <script src="js/menu.js" nonce="{{ script_nonce }}"></script>
-        <script src="libs/apexcharts/apexcharts.min.js" nonce="{{ script_nonce }}"></script>
+        {% if current_endpoint == "home" %}
+            <script src="libs/apexcharts/apexcharts.min.js" nonce="{{ script_nonce }}"></script>
+            <script src="js/dashboards-analytics.js" nonce="{{ script_nonce }}"></script>
+        {% endif %}
         <!-- Main JS -->
         <script src="js/main.js" nonce="{{ script_nonce }}"></script>
         {% if current_endpoint != "login" and current_endpoint != "totp" %}
             <script async defer src="js/sidebar.js" nonce="{{ script_nonce }}"></script>
         {% endif %}
-        <script src="js/dashboards-analytics.js" nonce="{{ script_nonce }}"></script>
         <!-- Page JS -->
         {% if current_endpoint == "profile" %}
             <script src="js/pages/profile.js" nonce="{{ script_nonce }}"></script>

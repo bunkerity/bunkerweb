@@ -1,7 +1,7 @@
 {% extends "dashboard.html" %}
 {% block content %}
     <!-- Content -->
-    <div class="card table-responsive text-nowrap p-4 mh-100">
+    <div class="card table-responsive text-nowrap p-4 h-70">
         <table id="instances" class="table w-100">
             <thead>
                 <tr>
@@ -34,13 +34,13 @@
                             {% endif %}
                         </td>
                         <td>{{ instance.type }}</td>
-                        <td>{{ instance.creation_date.astimezone().strftime("%Y-%m-%d at %H:%M:%S %Z") }}</td>
-                        <td>{{ instance.last_seen.astimezone().strftime("%Y-%m-%d at %H:%M:%S %Z") }}</td>
+                        <td>{{ instance.creation_date.astimezone().strftime("%Y-%m-%d %H:%M:%S %Z") }}</td>
+                        <td>{{ instance.last_seen.astimezone().strftime("%Y-%m-%d %H:%M:%S %Z") }}</td>
                         <td>
-                            <form id="instance-form" action="{{ url_for('instances') }}/{{ instance.hostname }}" method="POST">
-                                <input type="hidden"
-                                       name="csrf_token"
-                                       value="{{ csrf_token() }}" />
+                            <form id="instance-form"
+                                  action="{{ url_for("instances") }}/{{ instance.hostname }}"
+                                  method="POST">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                                 {% if instance.status != "up" %}
                                     {% set disabled = "disabled" %}
                                 {% else %}
@@ -51,24 +51,93 @@
                                 {% else %}
                                     {% set can_delete = "disabled" %}
                                 {% endif %}
-                                <button type="submit"
-                                        data-action="ping"
-                                        class="btn btn-sm btn-outline-primary {{ disabled }}">Ping</button>
-                                <button type="submit"
-                                        data-action="reload"
-                                        class="btn btn-sm btn-outline-warning {{ disabled }}">Reload</button>
-                                <button type="submit"
-                                        data-action="stop"
-                                        class="btn btn-sm btn-outline-dark {{ disabled }}">Stop</button>
-                                <button type="submit"
-                                        data-action="delete"
-                                        class="btn btn-sm btn-outline-danger {{ can_delete }}">Delete</button>
+                                <div class="btn-group" role="group" aria-label="Action group">
+                                    <button type="button"
+                                            data-action="ping"
+                                            data-bs-toggle="tooltip"
+                                            data-bs-placement="top"
+                                            data-bs-original-title="Ping"
+                                            class="btn btn-sm btn-outline-primary {{ disabled }}">
+                                        <i class="tf-icons bx bx-xs bx-bell"></i>
+                                    </button>
+                                    <button type="button"
+                                            data-action="stop"
+                                            data-bs-toggle="tooltip"
+                                            data-bs-placement="top"
+                                            data-bs-original-title="Stop"
+                                            class="btn btn-sm btn-outline-primary {{ disabled }}">
+                                        <i class="tf-icons bx bx-xs bx-stop"></i>
+                                    </button>
+                                    <button type="button"
+                                            data-action="reload"
+                                            data-bs-toggle="tooltip"
+                                            data-bs-placement="top"
+                                            data-bs-original-title="Reload"
+                                            class="btn btn-sm btn-outline-primary {{ disabled }}">
+                                        <i class="tf-icons bx bx-xs bx-refresh"></i>
+                                    </button>
+                                    <button type="button"
+                                            data-action="delete"
+                                            data-bs-toggle="tooltip"
+                                            data-bs-placement="top"
+                                            data-bs-original-title="Delete"
+                                            class="btn btn-sm btn-outline-danger {{ can_delete }}">
+                                        <i class="tf-icons bx bx-xs bx-trash"></i>
+                                    </button>
+                                </div>
                             </form>
                         </td>
                     </tr>
                 {% endfor %}
             </tbody>
         </table>
+    </div>
+    <div class="modal fade"
+         id="modal-create-instance"
+         data-bs-backdrop="static"
+         tabindex="-1"
+         aria-hidden="true"
+         role="dialog">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Create new instance</h5>
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                </div>
+                <form action="{{ url_for("instances") }}/new" method="POST">
+                    <div class="modal-body">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                        <div class="mb-3">
+                            <label for="hostname" class="form-label">Hostname</label>
+                            <input type="text"
+                                   class="form-control"
+                                   id="hostname"
+                                   name="hostname"
+                                   placeholder="http://bunkerweb"
+                                   maxlength="256"
+                                   required />
+                        </div>
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Name</label>
+                            <input type="text"
+                                   class="form-control"
+                                   id="name"
+                                   name="name"
+                                   placeholder="My Bunker"
+                                   maxlength="256"
+                                   required />
+                        </div>
+                    </div>
+                    <div class="modal-footer justify-content-center">
+                        <button type="submit" class="btn btn-outline-primary me-2">Create Instance</button>
+                        <button type="reset" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
     <!-- / Content -->
 {% endblock %}

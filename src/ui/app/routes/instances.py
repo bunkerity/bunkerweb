@@ -18,17 +18,17 @@ def instances_page():
     return render_template("instances.html", instances=BW_INSTANCES_UTILS.get_instances())
 
 
-@instances.route("/instances/new", methods=["PUT"])
+@instances.route("/instances/new", methods=["POST"])
 @login_required
 def instances_new():
     verify_data_in_form(
-        data={"instance_hostname": None},
+        data={"hostname": None},
         err_message="Missing instance hostname parameter on /instances/new.",
         redirect_url="instances",
         next=True,
     )
     verify_data_in_form(
-        data={"instance_name": None},
+        data={"name": None},
         err_message="Missing instance name parameter on /instances/new.",
         redirect_url="instances",
         next=True,
@@ -37,10 +37,10 @@ def instances_new():
     db_config = BW_CONFIG.get_config(global_only=True, methods=False, filtered_settings=("API_HTTP_PORT", "API_SERVER_NAME"))
 
     instance = {
-        "hostname": request.form["instance_hostname"].replace("http://", "").replace("https://", ""),
-        "name": request.form["instance_name"],
-        "port": db_config["API_HTTP_PORT"],
-        "server_name": db_config["API_SERVER_NAME"],
+        "hostname": request.form["hostname"].replace("http://", "").replace("https://", "").split(":")[0],
+        "name": request.form["name"],
+        "port": db_config.get("API_HTTP_PORT", "5000"),
+        "server_name": db_config.get("API_SERVER_NAME", "bwapi"),
         "method": "ui",
     }
 
@@ -87,9 +87,8 @@ def instances_action(instance_hostname: str, action: Literal["ping", "reload", "
             "loading",
             next=url_for("instances.instances_page"),
             message=(
-                f"{action.title()}ing"
-                if action not in ("delete", "stop")
-                else ("Deleting" if action == "delete" else "Stopping") + f" instance {instance_hostname}"
+                (f"{action.title()}ing" if action not in ("delete", "stop") else ("Deleting" if action == "delete" else "Stopping"))
+                + f" instance {instance_hostname}"
             ),
         )
     )

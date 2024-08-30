@@ -131,14 +131,15 @@ def inject_variables():
     if not changes_ongoing and DATA.get("PRO_LOADING"):
         DATA["PRO_LOADING"] = False
 
-    if not changes_ongoing and metadata["failover"]:
-        flash(
-            "The last changes could not be applied because it creates a configuration error on NGINX, please check the logs for more information. The configured fell back to the last working one.",
-            "error",
-        )
-    elif not changes_ongoing and not metadata["failover"] and DATA.get("CONFIG_CHANGED", False):
-        flash("The last changes have been applied successfully.", "success")
-        DATA["CONFIG_CHANGED"] = False
+    if not request.path.startswith("/loading"):
+        if not changes_ongoing and metadata["failover"]:
+            flash(
+                "The last changes could not be applied because it creates a configuration error on NGINX, please check the logs for more information. The configured fell back to the last working one.",
+                "error",
+            )
+        elif not changes_ongoing and not metadata["failover"] and DATA.get("CONFIG_CHANGED", False):
+            flash("The last changes have been applied successfully.", "success")
+            DATA["CONFIG_CHANGED"] = False
 
     services = BW_CONFIG.get_config(global_only=True, methods=False, filtered_settings=("SERVER_NAME"))["SERVER_NAME"].split(" ")
 
