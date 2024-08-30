@@ -1,3 +1,11 @@
+## 1.11.0 - 2024-08-21
+
+* When building with CMake, the man pages will now be generated and
+  installed. Requested by Thomas Klausner. GitHub #351.
+* Removed unnecessary `$<INSTALL_INTERFACE:generated>` directory from
+  `target_include_directories` in the CMake build configuration. This is
+  a private build directory. Pull request by Ankur Verma. GitHub #354.
+
 ## 1.10.0 - 2024-06-10
 
 * When building with CMake, it is now possible to disable the building
@@ -6,7 +14,7 @@
   option. Pull request by Seena Fallah. GitHub #342.
 * CMake now makes greater use of GNUInstallDirs. Pull request by Maximilian
   Downey Twiss. GitHub #346.
-* The reader can now lookup records on a database with a search tree
+* The reader can now look up records on a database with a search tree
   that is greater than 4 gigabytes without sometimes returning erroneous
   results due to an integer overflow.
 

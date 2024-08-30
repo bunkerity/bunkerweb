@@ -18,6 +18,7 @@
 /config.*
 /configure
 /depcomp
+/generated
 /include/maxminddb_config.h
 /install-sh
 /libmaxminddb-*
