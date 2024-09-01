@@ -46,7 +46,6 @@ class ApiCaller:
         with ThreadPoolExecutor() as executor:
             future_to_api = {executor.submit(send_request, api, deepcopy(files) if files else None): api for api in self.apis}
             for future in as_completed(future_to_api):
-                api = future_to_api[future]
                 try:
                     api, sent, err, status, resp = future.result()
                     if not sent:

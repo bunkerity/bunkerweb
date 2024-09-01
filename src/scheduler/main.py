@@ -811,13 +811,13 @@ if __name__ == "__main__":
 
                     success, responses = SCHEDULER.send_to_apis("POST", "/reload", response=True)
                     if not success:
+                        reachable = False
                         LOGGER.debug(f"Error while reloading all bunkerweb instances: {responses}")
 
-                    reachable = False
                     for db_instance in SCHEDULER.db.get_instances():
                         status = responses.get(db_instance["hostname"], {"status": "down"}).get("status", "down")
                         if status == "success":
-                            reachable = True
+                            success = True
                         ret = SCHEDULER.db.update_instance(db_instance["hostname"], "up" if status == "success" else "down")
                         if ret:
                             LOGGER.error(f"Couldn't update instance {db_instance['hostname']} status to down in the database: {ret}")

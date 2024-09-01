@@ -69,72 +69,72 @@ class Instance:
         try:
             result = self.apiCaller.send_to_apis("POST", "/reload")[0]
         except BaseException as e:
-            return f"Can't reload {self.hostname}: {e}"
+            return f"Can't reload instance {self.hostname}: {e}"
 
         if result:
             return f"Instance {self.hostname} has been reloaded."
-        return f"Can't reload {self.hostname}"
+        return f"Can't reload instance {self.hostname}"
 
     def start(self) -> str:
         raise NotImplementedError("Method not implemented yet")
         try:
             result = self.apiCaller.send_to_apis("POST", "/start")[0]
         except BaseException as e:
-            return f"Can't start {self.hostname}: {e}"
+            return f"Can't start instance {self.hostname}: {e}"
 
         if result:
             return f"Instance {self.hostname} has been started."
-        return f"Can't start {self.hostname}"
+        return f"Can't start instance {self.hostname}"
 
     def stop(self) -> str:
         try:
             result = self.apiCaller.send_to_apis("POST", "/stop")[0]
         except BaseException as e:
-            return f"Can't stop {self.hostname}: {e}"
+            return f"Can't stop instance {self.hostname}: {e}"
 
         if result:
             return f"Instance {self.hostname} has been stopped."
-        return f"Can't stop {self.hostname}"
+        return f"Can't stop instance {self.hostname}"
 
     def restart(self) -> str:
         try:
             result = self.apiCaller.send_to_apis("POST", "/restart")[0]
         except BaseException as e:
-            return f"Can't restart {self.hostname}: {e}"
+            return f"Can't restart instance {self.hostname}: {e}"
 
         if result:
             return f"Instance {self.hostname} has been restarted."
-        return f"Can't restart {self.hostname}"
+        return f"Can't restart instance {self.hostname}"
 
     def ban(self, ip: str, exp: float, reason: str) -> str:
         try:
             result = self.apiCaller.send_to_apis("POST", "/ban", data={"ip": ip, "exp": exp, "reason": reason})[0]
         except BaseException as e:
-            return f"Can't ban {ip} on {self.hostname}: {e}"
+            return f"Can't ban {ip} on instance {self.hostname}: {e}"
 
         if result:
-            return f"IP {ip} has been banned on {self.hostname} for {exp} seconds{f' with reason: {reason}' if reason else ''}."
-        return f"Can't ban {ip} on {self.hostname}"
+            return f"IP {ip} has been banned on instance {self.hostname} for {exp} seconds{f' with reason: {reason}' if reason else ''}."
+        return f"Can't ban {ip} on instance {self.hostname}"
 
     def unban(self, ip: str) -> str:
         try:
             result = self.apiCaller.send_to_apis("POST", "/unban", data={"ip": ip})[0]
         except BaseException as e:
-            return f"Can't unban {ip} on {self.hostname}: {e}"
+            return f"Can't unban {ip} on instance {self.hostname}: {e}"
 
         if result:
-            return f"IP {ip} has been unbanned on {self.hostname}."
-        return f"Can't unban {ip} on {self.hostname}"
+            return f"IP {ip} has been unbanned on instance {self.hostname}."
+        return f"Can't unban {ip} on instance {self.hostname}"
 
     def bans(self) -> Tuple[str, dict[str, Any]]:
         try:
             result = self.apiCaller.send_to_apis("GET", "/bans", response=True)
         except BaseException as e:
-            return f"Can't get bans from {self.hostname}: {e}", result[1]
+            return f"Can't get bans from instance {self.hostname}: {e}", result[1]
 
         if result[0]:
             return "", result[1]
-        return f"Can't get bans from {self.hostname}", result[1]
+        return f"Can't get bans from instance {self.hostname}", result[1]
 
     def reports(self) -> Tuple[bool, dict[str, Any]]:
         return self.apiCaller.send_to_apis("GET", "/metrics/requests", response=True)
@@ -145,16 +145,16 @@ class Instance:
     def metrics_redis(self) -> Tuple[bool, dict[str, Any]]:
         return self.apiCaller.send_to_apis("GET", "/redis/stats", response=True)
 
-    def ping(self, plugin_id: Optional[str] = None) -> Tuple[bool, dict[str, Any]]:
+    def ping(self, plugin_id: Optional[str] = None) -> Tuple[Union[bool, str], dict[str, Any]]:
         if not plugin_id:
             try:
-                result = self.apiCaller.send_to_apis("GET", "/ping")[0]
+                result = self.apiCaller.send_to_apis("GET", "/ping")
             except BaseException as e:
-                return f"Can't ping {self.hostname}: {e}", {}
+                return f"Can't ping instance {self.hostname}: {e}", {}
 
-            if result:
-                return f"Instance {self.hostname} is up", {}
-            return f"Can't ping {self.hostname}", {}
+            if result[0]:
+                return f"Instance {self.hostname} is up", result[1]
+            return f"Can't ping instance {self.hostname}", result[1]
         return self.apiCaller.send_to_apis("POST", f"/{plugin_id}/ping", response=True)
 
     def data(self, plugin_endpoint) -> Tuple[bool, dict[str, Any]]:

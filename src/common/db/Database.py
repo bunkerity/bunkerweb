@@ -3154,6 +3154,34 @@ class Database:
 
         return ""
 
+    def delete_instances(self, hostnames: List[str], changed: Optional[bool] = True) -> str:
+        """Delete instances."""
+        with self._db_session() as session:
+            if self.readonly:
+                return "The database is read-only, the changes will not be saved"
+
+            db_instances = session.query(Instances).filter(Instances.hostname.in_(hostnames)).all()
+
+            if not db_instances:
+                return "No instances found to delete."
+
+            for db_instance in db_instances:
+                session.delete(db_instance)
+
+            if changed:
+                with suppress(ProgrammingError, OperationalError):
+                    metadata = session.query(Metadata).get(1)
+                    if metadata is not None:
+                        metadata.instances_changed = True
+                        metadata.last_instances_change = datetime.now().astimezone()
+
+            try:
+                session.commit()
+            except BaseException as e:
+                return f"An error occurred while deleting the instances {', '.join(hostnames)}.\n{e}"
+
+        return ""
+
     def delete_instance(self, hostname: str, changed: Optional[bool] = True) -> str:
         """Delete instance."""
         with self._db_session() as session:
@@ -3236,7 +3264,8 @@ class Database:
                 return f"Instance {hostname} does not exist, will not be updated."
 
             db_instance.status = status
-            db_instance.last_seen = datetime.now().astimezone()
+            if status != "down":
+                db_instance.last_seen = datetime.now().astimezone()
 
             try:
                 session.commit()

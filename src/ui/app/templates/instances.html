@@ -1,7 +1,27 @@
 {% extends "dashboard.html" %}
 {% block content %}
     <!-- Content -->
-    <div class="card table-responsive text-nowrap p-4 h-70">
+    <div class="modal fade"
+         id="loadingModal"
+         data-bs-backdrop="static"
+         tabindex="-1"
+         aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-transparent border-0 shadow-none">
+                <div class="modal-body text-center">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-3 text-white">Pinging instances, please wait...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card table-responsive text-nowrap p-4 min-vh-70">
+        <input type="hidden"
+               id="csrf_token"
+               name="csrf_token"
+               value="{{ csrf_token() }}" />
         <table id="instances" class="table w-100">
             <thead>
                 <tr>
@@ -12,7 +32,6 @@
                     <th>Type</th>
                     <th>Creation date</th>
                     <th>Last seen</th>
-                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -36,61 +55,27 @@
                         <td>{{ instance.type }}</td>
                         <td>{{ instance.creation_date.astimezone().strftime("%Y-%m-%d %H:%M:%S %Z") }}</td>
                         <td>{{ instance.last_seen.astimezone().strftime("%Y-%m-%d %H:%M:%S %Z") }}</td>
-                        <td>
-                            <form id="instance-form"
-                                  action="{{ url_for("instances") }}/{{ instance.hostname }}"
-                                  method="POST">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-                                {% if instance.status != "up" %}
-                                    {% set disabled = "disabled" %}
-                                {% else %}
-                                    {% set disabled = "" %}
-                                {% endif %}
-                                {% if instance.method == "ui" %}
-                                    {% set can_delete = "" %}
-                                {% else %}
-                                    {% set can_delete = "disabled" %}
-                                {% endif %}
-                                <div class="btn-group" role="group" aria-label="Action group">
-                                    <button type="button"
-                                            data-action="ping"
-                                            data-bs-toggle="tooltip"
-                                            data-bs-placement="top"
-                                            data-bs-original-title="Ping"
-                                            class="btn btn-sm btn-outline-primary {{ disabled }}">
-                                        <i class="tf-icons bx bx-xs bx-bell"></i>
-                                    </button>
-                                    <button type="button"
-                                            data-action="stop"
-                                            data-bs-toggle="tooltip"
-                                            data-bs-placement="top"
-                                            data-bs-original-title="Stop"
-                                            class="btn btn-sm btn-outline-primary {{ disabled }}">
-                                        <i class="tf-icons bx bx-xs bx-stop"></i>
-                                    </button>
-                                    <button type="button"
-                                            data-action="reload"
-                                            data-bs-toggle="tooltip"
-                                            data-bs-placement="top"
-                                            data-bs-original-title="Reload"
-                                            class="btn btn-sm btn-outline-primary {{ disabled }}">
-                                        <i class="tf-icons bx bx-xs bx-refresh"></i>
-                                    </button>
-                                    <button type="button"
-                                            data-action="delete"
-                                            data-bs-toggle="tooltip"
-                                            data-bs-placement="top"
-                                            data-bs-original-title="Delete"
-                                            class="btn btn-sm btn-outline-danger {{ can_delete }}">
-                                        <i class="tf-icons bx bx-xs bx-trash"></i>
-                                    </button>
-                                </div>
-                            </form>
-                        </td>
                     </tr>
                 {% endfor %}
             </tbody>
         </table>
+    </div>
+    <div id="feedback-toast"
+         class="bs-toast toast fade"
+         role="alert"
+         aria-live="assertive"
+         aria-atomic="true"
+         data-bs-autohide="true">
+        <div class="toast-header">
+            <i class="d-block w-px-20 h-auto rounded me-2 tf-icons bx bx-bell"></i>
+            <span class="fw-medium me-auto">BunkerWeb Forever</span>
+            <small class="text-body-secondary">just now</small>
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="toast"
+                    aria-label="Close"></button>
+        </div>
+        <div class="toast-body">If you read this, ck-t means that you're curious 👀</div>
     </div>
     <div class="modal fade"
          id="modal-create-instance"
@@ -130,10 +115,46 @@
                                    maxlength="256"
                                    required />
                         </div>
+                        <div class="alert alert-primary text-center" role="alert">You don't need to provide the port or the server_name as the values of both <code>API_HTTP_PORT</code> and <code>API_SERVER_NAME</code> will be used for the instance configuration.</div>
                     </div>
                     <div class="modal-footer justify-content-center">
                         <button type="submit" class="btn btn-outline-primary me-2">Create Instance</button>
-                        <button type="reset" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="reset"
+                                class="btn btn-outline-secondary"
+                                data-bs-dismiss="modal">Close</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade"
+         id="modal-delete-instances"
+         data-bs-backdrop="static"
+         tabindex="-1"
+         aria-hidden="true"
+         role="dialog">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Delete instances</h5>
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                </div>
+                <form action="{{ url_for("instances") }}/delete" method="POST">
+                    <div class="modal-body">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                        <input type="hidden" id="selected-instances-input" name="instances" value="" />
+                        <div class="alert alert-danger text-center" role="alert">Are you sure you want to delete the selected instances?</div>
+                        <ul id="selected-instances" class="list-group mb-3">
+                        </ul>
+                    </div>
+                    <div class="modal-footer justify-content-center">
+                        <button type="submit" class="btn btn-outline-danger me-2">Delete instances</button>
+                        <button type="reset"
+                                class="btn btn-outline-secondary"
+                                data-bs-dismiss="modal">Close</button>
                     </div>
                 </form>
             </div>

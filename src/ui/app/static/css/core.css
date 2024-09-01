@@ -22580,29 +22580,18 @@ body {
   }
 }
 
-@keyframes backgroundColorPhase {
-  0% {
-    background-color: var(--bs-primary); /* Start with primary color */
-  }
-  50% {
-    background-color: var(--bs-bw-green); /* Transition to secondary color */
-  }
-  100% {
-    background-color: var(--bs-primary); /* Back to primary color */
-  }
-}
-
 .buy-now .btn-buy-now {
   position: fixed;
   bottom: 3rem;
   right: 1.625rem;
   z-index: 1080;
-  background-color: var(--bs-primary); /* Initial background color */
   box-shadow: 0 1px 20px 1px var(--bs-primary); /* Initial shadow */
-  border-color: var(--bs-primary); /* Initial border color */
+  background-color: var(--bs-primary); /* Initial background color */
   color: #fff;
   animation: colorPhase 3s infinite; /* Apply the color phasing animation */
-  transition: box-shadow 0.3s ease-in-out; /* Smooth transition for box-shadow */
+  transition:
+    background-color 0.3s ease-in-out,
+    box-shadow 0.3s ease-in-out; /* Smooth transitions */
 }
 
 .buy-now .btn-buy-now:hover {
@@ -22613,26 +22602,6 @@ body {
   border-color: var(
     --bs-bw-green
   ) !important; /* Keep the primary color on hover */
-  animation: none; /* Pause the color phase animation on hover */
-  animation: backgroundColorPhase 3s infinite; /* Apply the color phasing animation */
-}
-
-.buy-now .btn-buy-now {
-  position: fixed;
-  bottom: 3rem;
-  right: 1.625rem;
-  z-index: 1080;
-  box-shadow: 0 1px 20px 1px var(--bs-primary); /* Initial shadow */
-  background-color: var(--bs-primary); /* Initial background color */
-  color: #fff;
-  transition:
-    background-color 0.3s ease-in-out,
-    box-shadow 0.3s ease-in-out; /* Smooth transitions */
-}
-
-.buy-now .btn-buy-now:hover {
-  box-shadow: none; /* Remove shadow on hover */
-  animation: colorPhase 3s infinite; /* Start the color phase animation on hover */
 }
 
 .ui-square,

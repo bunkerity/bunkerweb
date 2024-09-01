@@ -1,15 +1,23 @@
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from threading import Thread
 from time import time
 from typing import Literal
-from flask import Blueprint, redirect, render_template, request, url_for
+from flask import Blueprint, flash, jsonify, redirect, render_template, request, url_for
 from flask_login import login_required
 
 from app.dependencies import BW_CONFIG, BW_INSTANCES_UTILS, DATA, DB
 
-from app.routes.utils import handle_error, manage_bunkerweb, verify_data_in_form
+from app.models.instance import Instance
+from app.routes.utils import handle_error, verify_data_in_form
 
 
 instances = Blueprint("instances", __name__)
+
+ACTIONS = {
+    "reload": {"present": "Reloading", "past": "Reloaded"},
+    "stop": {"present": "Stopping", "past": "Stopped"},
+    "delete": {"present": "Deleting", "past": "Deleted"},
+}
 
 
 @instances.route("/instances", methods=["GET"])
@@ -55,40 +63,94 @@ def instances_new():
     return redirect(url_for("loading", next=url_for("instances.instances_page"), message=f"Creating new instance {instance['hostname']}"))
 
 
-@instances.route("/instances/<string:instance_hostname>/<string:action>", methods=["POST"])
+@instances.route("/instances/<string:action>", methods=["POST"])
 @login_required
-def instances_action(instance_hostname: str, action: Literal["ping", "reload", "stop", "delete"]):  # TODO: see if we can support start and restart
-    if action == "delete":
-        delete_instance = None
-        for instance in BW_INSTANCES_UTILS.get_instances():
-            if instance.hostname == instance_hostname:
-                delete_instance = instance
-                break
+def instances_action(action: Literal["ping", "reload", "stop", "delete"]):  # TODO: see if we can support start and restart
+    verify_data_in_form(
+        data={"instances": None},
+        err_message=f"Missing instances parameter on /instances/{action}.",
+        redirect_url="instances",
+        next=True,
+    )
+    instances = request.form["instances"].split(",")
+    if not instances:
+        return handle_error("No instances selected.", "instances", True)
 
-        if not delete_instance:
-            return handle_error(f"Instance {instance_hostname} not found.", "instances", True)
-        if delete_instance.method != "ui":
-            return handle_error(f"Instance {instance_hostname} is not a UI instance.", "instances", True)
+    if action == "ping":
+        succeed = []
+        failed = []
 
-        ret = DB.delete_instance(instance_hostname)
+        def ping_instance(instance):
+            ret = Instance.from_hostname(instance, DB)
+            if not ret:
+                return {"hostname": instance, "message": f"The instance {instance} does not exist."}
+            ret = ret.ping()
+            if ret[0].startswith("Can't"):
+                return {"hostname": instance, "message": ret[0]}
+            return instance
+
+        with ThreadPoolExecutor() as executor:
+            future_to_instance = {executor.submit(ping_instance, instance): instance for instance in instances}
+            for future in as_completed(future_to_instance):
+                instance = future.result()
+                if isinstance(instance, dict):
+                    failed.append(instance)
+                    continue
+                succeed.append(instance)
+
+        return jsonify({"succeed": succeed, "failed": failed}), 200
+    elif action == "delete":
+        delete_instances = set()
+        non_ui_instances = set()
+        for instance in DB.get_instances():
+            if instance["hostname"] in instances:
+                if instance["method"] != "ui":
+                    non_ui_instances.add(instance["hostname"])
+                    continue
+                delete_instances.add(instance["hostname"])
+
+        for non_ui_instance in non_ui_instances:
+            flash(f"Instance {non_ui_instance} is not a UI instance and will not be deleted.", "error")
+
+        if not delete_instances:
+            return handle_error("All selected instances could not be found or are not UI instances.", "instances", True)
+
+        ret = DB.delete_instances(delete_instances)
         if ret:
-            return handle_error(f"Couldn't delete the instance in the database: {ret}", "instances", True)
+            return handle_error(f"Couldn't delete the instances in the database: {ret}", "instances", True)
+        flash(f"Instances {', '.join(delete_instances)} deleted successfully.", "success")
     else:
-        DATA["RELOADING"] = True
-        DATA["LAST_RELOAD"] = time()
-        Thread(
-            target=manage_bunkerweb,
-            args=("instances", instance_hostname),
-            kwargs={"operation": action, "threaded": True},
-        ).start()
+
+        def execute_action(instance):
+            ret = Instance.from_hostname(instance, DB)
+            if not ret:
+                DATA["TO_FLASH"].append({"content": f"The instance {instance} does not exist.", "type": "error"})
+                return
+
+            method = getattr(ret, action, None)
+            if method is None or not callable(method):
+                DATA["TO_FLASH"].append({"content": f"The instance {instance} does not have a {action} method.", "type": "error"})
+                return
+
+            ret = method()
+            if ret.startswith("Can't"):
+                DATA["TO_FLASH"].append({"content": ret, "type": "error"})
+                return
+            DATA["TO_FLASH"].append({"content": f"Instance {instance} {ACTIONS[action]['past']} successfully.", "type": "success"})
+
+        def execute_actions(instances):
+            DATA["RELOADING"] = True
+            DATA["LAST_RELOAD"] = time()
+            with ThreadPoolExecutor() as executor:
+                executor.map(execute_action, instances)
+            DATA["RELOADING"] = False
+
+        Thread(target=execute_actions, args=(instances,)).start()
 
     return redirect(
         url_for(
             "loading",
             next=url_for("instances.instances_page"),
-            message=(
-                (f"{action.title()}ing" if action not in ("delete", "stop") else ("Deleting" if action == "delete" else "Stopping"))
-                + f" instance {instance_hostname}"
-            ),
+            message=(f"{ACTIONS[action]['present']} instances {', '.join(instances)}"),
         )
     )
