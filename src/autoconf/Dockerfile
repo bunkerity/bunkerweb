@@ -63,8 +63,6 @@ RUN cp helpers/bwcli /usr/bin/ && \
   chmod -R 770 /data && \
   chown -R root:autoconf INTEGRATION /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /usr/bin/bwcli && \
   chmod -R 770 /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb && \
-  find . -path deps -prune -o -type f -exec chmod 0740 {} \; && \
-  find . -path deps -prune -o -type d -exec chmod 0750 {} \; && \
   chmod 750 cli/main.py helpers/*.sh /usr/bin/bwcli autoconf/main.py && \
   chmod 660 INTEGRATION
 
