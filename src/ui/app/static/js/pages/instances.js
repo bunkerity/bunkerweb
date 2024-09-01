@@ -1,13 +1,116 @@
 $(document).ready(function () {
-  const getSelectedInstances = (action) => {
+  var toastNum = 0;
+  var actionLock = false;
+  const instanceNumber = parseInt($("#instances_number").val());
+
+  const layout = {
+    topStart: {},
+    bottomEnd: {
+      buttons: [
+        {
+          extend: "ping_instances",
+        },
+        {
+          extend: "exec_form",
+          text: '<span class="tf-icons bx bx-refresh bx-18px me-2"></span>Reload',
+          className: "btn btn-sm btn-outline-primary",
+        },
+        {
+          extend: "exec_form",
+          text: '<span class="tf-icons bx bx-stop bx-18px me-2"></span>Stop',
+          className: "btn btn-sm btn-outline-primary",
+        },
+        {
+          extend: "delete_instances",
+        },
+      ],
+    },
+  };
+
+  if (instanceNumber > 10) {
+    layout.topStart.pageLength = {
+      menu: [10, 25, 50, 100, { label: "All", value: -1 }],
+    };
+    layout.bottomEnd.paging = true;
+  }
+
+  layout.topStart.buttons = [
+    {
+      extend: "colvis",
+      columns: "th:not(:first-child)",
+      text: '<span class="tf-icons bx bx-columns bx-18px me-2"></span>Columns',
+      className: "btn btn-sm btn-outline-primary",
+      columnText: function (dt, idx, title) {
+        return idx + 1 + ". " + title;
+      },
+    },
+    {
+      extend: "colvisRestore",
+      text: '<span class="tf-icons bx bx-reset bx-18px me-2"></span>Reset<span class="d-none d-md-inline"> columns</span>',
+      className: "btn btn-sm btn-outline-primary",
+    },
+    {
+      extend: "collection",
+      text: '<span class="tf-icons bx bx-export bx-18px me-2"></span>Export',
+      className: "btn btn-sm btn-outline-primary",
+      buttons: [
+        {
+          extend: "copy",
+          text: '<span class="tf-icons bx bx-copy bx-18px me-2"></span>Copy current page',
+          exportOptions: {
+            modifier: {
+              page: "current",
+            },
+          },
+        },
+        {
+          extend: "csv",
+          text: '<span class="tf-icons bx bx-table bx-18px me-2"></span>CSV',
+          bom: true,
+          filename: "bw_instances",
+          exportOptions: {
+            modifier: {
+              search: "none",
+            },
+          },
+        },
+        {
+          extend: "excel",
+          text: '<span class="tf-icons bx bx-table bx-18px me-2"></span>Excel',
+          filename: "bw_instances",
+          exportOptions: {
+            modifier: {
+              search: "none",
+            },
+          },
+        },
+      ],
+    },
+    {
+      extend: "create_instance",
+    },
+  ];
+
+  $(document).on("hidden.bs.toast", ".toast", function (event) {
+    if (event.target.id.startsWith("feedback-toast")) {
+      setTimeout(() => {
+        $(this).remove();
+      }, 100);
+    }
+  });
+
+  $("#modal-delete-instances").on("hidden.bs.modal", function () {
+    $("#selected-instances").empty();
+    $("#selected-instances-input").val("");
+  });
+
+  const getSelectedInstances = () => {
     const instances = [];
     $("tr.selected").each(function () {
       instances.push($(this).find("td:first").text());
     });
     return instances;
   };
-  var toastNum = 0;
-  var actionLock = false;
 
   $.fn.dataTable.ext.buttons.create_instance = {
     text: '<span class="tf-icons bx bx-plus-circle bx-18px me-2"></span>Create<span class="d-none d-md-inline"> new instance</span>',
@@ -31,7 +134,7 @@ $(document).ready(function () {
       }
       actionLock = true;
 
-      const instances = getSelectedInstances("ping");
+      const instances = getSelectedInstances();
       if (instances.length === 0) {
         actionLock = false;
         return;
@@ -98,7 +201,7 @@ $(document).ready(function () {
       }
       actionLock = true;
 
-      const instances = getSelectedInstances("ping");
+      const instances = getSelectedInstances();
       if (instances.length === 0) {
         actionLock = false;
         return;
@@ -151,7 +254,7 @@ $(document).ready(function () {
       }
       actionLock = true;
 
-      const instances = getSelectedInstances("ping");
+      const instances = getSelectedInstances();
       if (instances.length === 0) {
         actionLock = false;
         return;
@@ -200,90 +303,7 @@ $(document).ready(function () {
     select: {
       style: "multi+shift",
     },
-    layout: {
-      topStart: {
-        pageLength: {
-          menu: [10, 25, 50, 100, { label: "All", value: -1 }],
-        },
-        buttons: [
-          {
-            extend: "colvis",
-            columns: "th:not(:first-child)",
-            text: '<span class="tf-icons bx bx-columns bx-18px me-2"></span>Columns',
-            className: "btn btn-sm btn-outline-primary",
-            columnText: function (dt, idx, title) {
-              return idx + 1 + ". " + title;
-            },
-          },
-          {
-            extend: "colvisRestore",
-            text: '<span class="tf-icons bx bx-reset bx-18px me-2"></span>Reset<span class="d-none d-md-inline"> columns</span>',
-            className: "btn btn-sm btn-outline-primary",
-          },
-          {
-            extend: "collection",
-            text: '<span class="tf-icons bx bx-export bx-18px me-2"></span>Export',
-            className: "btn btn-sm btn-outline-primary",
-            buttons: [
-              {
-                extend: "copy",
-                text: '<span class="tf-icons bx bx-copy bx-18px me-2"></span>Copy current page',
-                exportOptions: {
-                  modifier: {
-                    page: "current",
-                  },
-                },
-              },
-              {
-                extend: "csv",
-                text: '<span class="tf-icons bx bx-table bx-18px me-2"></span>CSV',
-                bom: true,
-                filename: "bw_instances",
-                exportOptions: {
-                  modifier: {
-                    search: "none",
-                  },
-                },
-              },
-              {
-                extend: "excel",
-                text: '<span class="tf-icons bx bx-table bx-18px me-2"></span>Excel',
-                filename: "bw_instances",
-                exportOptions: {
-                  modifier: {
-                    search: "none",
-                  },
-                },
-              },
-            ],
-          },
-          {
-            extend: "create_instance",
-          },
-        ],
-      },
-      bottomEnd: {
-        buttons: [
-          {
-            extend: "ping_instances",
-          },
-          {
-            extend: "exec_form",
-            text: '<span class="tf-icons bx bx-refresh bx-18px me-2"></span>Reload',
-            className: "btn btn-sm btn-outline-primary",
-          },
-          {
-            extend: "exec_form",
-            text: '<span class="tf-icons bx bx-stop bx-18px me-2"></span>Stop',
-            className: "btn btn-sm btn-outline-primary",
-          },
-          {
-            extend: "delete_instances",
-          },
-        ],
-        paging: true,
-      },
-    },
+    layout: layout,
   });
 
   instances_table.on("mouseenter", "td", function () {
@@ -298,18 +318,5 @@ $(document).ready(function () {
       .column(colIdx)
       .nodes()
       .each((el) => el.classList.add("highlight"));
-  });
-
-  $(document).on("hidden.bs.toast", ".toast", function (event) {
-    if (event.target.id.startsWith("feedback-toast")) {
-      setTimeout(() => {
-        $(this).remove();
-      }, 100);
-    }
-  });
-
-  $("#modal-delete-instances").on("hidden.bs.modal", function () {
-    $("#selected-instances").empty();
-    $("#selected-instances-input").val("");
   });
 });
