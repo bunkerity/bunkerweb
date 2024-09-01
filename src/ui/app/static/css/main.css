@@ -266,3 +266,7 @@
 td.highlight {
   background-color: rgba(var(--bs-primary-rgb), 0.1) !important;
 }
+
+.text-bw-green {
+  color: #2eac68 !important;
+}

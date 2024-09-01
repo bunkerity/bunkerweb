@@ -1,7 +1,3 @@
 :root {
   --dt-row-selected: 29, 123, 167;
 }
-
-#loadingModal .modal-content {
-  background-color: rgba(0, 0, 0, 0.75);
-}

@@ -10,7 +10,7 @@ $(document).ready(function () {
   var actionLock = false;
 
   $.fn.dataTable.ext.buttons.create_instance = {
-    text: "Create new instance",
+    text: '<span class="tf-icons bx bx-plus-circle bx-18px me-2"></span>Create<span class="d-none d-md-inline"> new instance</span>',
     className: "btn btn-sm btn-outline-primary",
     action: function (e, dt, node, config) {
       const modal = new bootstrap.Modal($("#modal-create-instance"));
@@ -23,7 +23,7 @@ $(document).ready(function () {
   };
 
   $.fn.dataTable.ext.buttons.ping_instances = {
-    text: '<span class="tf-icons bx bx-bell bx-18px me-md-2"></span><span class="d-none d-md-inline">Ping</span>',
+    text: '<span class="tf-icons bx bx-bell bx-18px me-2"></span>Ping',
     className: "btn btn-sm btn-outline-primary",
     action: function (e, dt, node, config) {
       if (actionLock) {
@@ -143,7 +143,7 @@ $(document).ready(function () {
   };
 
   $.fn.dataTable.ext.buttons.delete_instances = {
-    text: '<span class="tf-icons bx bx-trash bx-18px me-md-2"></span><span class="d-none d-md-inline">Delete</span>',
+    text: '<span class="tf-icons bx bx-trash bx-18px me-2"></span>Delete',
     className: "btn btn-sm btn-outline-danger",
     action: function (e, dt, node, config) {
       if (actionLock) {
@@ -209,7 +209,7 @@ $(document).ready(function () {
           {
             extend: "colvis",
             columns: "th:not(:first-child)",
-            text: "Columns",
+            text: '<span class="tf-icons bx bx-columns bx-18px me-2"></span>Columns',
             className: "btn btn-sm btn-outline-primary",
             columnText: function (dt, idx, title) {
               return idx + 1 + ". " + title;
@@ -217,17 +217,17 @@ $(document).ready(function () {
           },
           {
             extend: "colvisRestore",
-            text: "Reset",
+            text: '<span class="tf-icons bx bx-reset bx-18px me-2"></span>Reset<span class="d-none d-md-inline"> columns</span>',
             className: "btn btn-sm btn-outline-primary",
           },
           {
             extend: "collection",
-            text: "Export",
+            text: '<span class="tf-icons bx bx-export bx-18px me-2"></span>Export',
             className: "btn btn-sm btn-outline-primary",
             buttons: [
               {
                 extend: "copy",
-                text: "Copy current page",
+                text: '<span class="tf-icons bx bx-copy bx-18px me-2"></span>Copy current page',
                 exportOptions: {
                   modifier: {
                     page: "current",
@@ -236,6 +236,7 @@ $(document).ready(function () {
               },
               {
                 extend: "csv",
+                text: '<span class="tf-icons bx bx-table bx-18px me-2"></span>CSV',
                 bom: true,
                 filename: "bw_instances",
                 exportOptions: {
@@ -246,6 +247,7 @@ $(document).ready(function () {
               },
               {
                 extend: "excel",
+                text: '<span class="tf-icons bx bx-table bx-18px me-2"></span>Excel',
                 filename: "bw_instances",
                 exportOptions: {
                   modifier: {
@@ -267,12 +269,12 @@ $(document).ready(function () {
           },
           {
             extend: "exec_form",
-            text: '<span class="tf-icons bx bx-refresh bx-18px me-md-2"></span><span class="d-none d-md-inline">Reload</span>',
+            text: '<span class="tf-icons bx bx-refresh bx-18px me-2"></span>Reload',
             className: "btn btn-sm btn-outline-primary",
           },
           {
             extend: "exec_form",
-            text: '<span class="tf-icons bx bx-stop bx-18px me-md-2"></span><span class="d-none d-md-inline">Stop</span>',
+            text: '<span class="tf-icons bx bx-stop bx-18px me-2"></span>Stop',
             className: "btn btn-sm btn-outline-primary",
           },
           {
