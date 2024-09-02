@@ -82,10 +82,15 @@ $(document).ready(function () {
   function handleTabChange(targetClass) {
     const target = targetClass.substring(1).replace("navs-pills-", "");
     const isProfileTab = target === "profile";
+    const isSessionsTab = target === "sessions";
 
-    if (isProfileTab) {
+    if (!isSessionsTab) {
       $("#navs-pills-sessions-pagination").removeClass("show active");
+      setTimeout(() => {
+        $("#navs-pills-sessions-pagination").parent().addClass("d-none");
+      }, 200);
     } else {
+      $("#navs-pills-sessions-pagination").parent().removeClass("d-none");
       setTimeout(() => {
         $("#navs-pills-sessions-pagination").addClass("show active");
       }, 200);
@@ -320,4 +325,28 @@ $(document).ready(function () {
       "<p>Error loading data. Please try again.</p>",
     );
   }
+
+  function initializeAccountImageHandling() {
+    const accountUserImage = $("#uploadedAvatar");
+    const fileInput = $(".account-file-input");
+    const resetFileInput = $(".account-image-reset");
+
+    if (accountUserImage.length === 0) return;
+
+    const originalImageSrc = accountUserImage.attr("src");
+
+    fileInput.on("change", function () {
+      const file = this.files[0];
+      if (file) {
+        accountUserImage.attr("src", URL.createObjectURL(file));
+      }
+    });
+
+    resetFileInput.on("click", function () {
+      fileInput.val("");
+      accountUserImage.attr("src", originalImageSrc);
+    });
+  }
+
+  initializeAccountImageHandling();
 });

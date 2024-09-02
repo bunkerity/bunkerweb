@@ -6,7 +6,7 @@
     <div class="d-flex row">
         <div class="col-md-4">
             <ul class="nav nav-pills flex-column flex-md-row mb-6">
-                <li class="nav-item me-0 me-sm-3" role="presentation">
+                <li class="nav-item me-0 me-sm-2" role="presentation">
                     <button type="button"
                             class="nav-link d-flex align-items-center active"
                             role="tab"
@@ -15,8 +15,18 @@
                             aria-controls="navs-pills-profile"
                             aria-selected="true">
                         <i class="tf-icons bx bx-user bx-sm"></i>
-                        &nbsp;
-                        <span class="d-none d-sm-inline">Profile</span>
+                        <span class="d-none d-sm-inline">&nbsp;Profile</span>
+                    </button>
+                </li>
+                <li class="nav-item me-0 me-sm-2" role="presentation">
+                    <button type="button"
+                            class="nav-link d-flex align-items-center"
+                            role="tab"
+                            data-bs-toggle="tab"
+                            data-bs-target="#navs-pills-security"
+                            aria-controls="navs-pills-security">
+                        <i class="tf-icons bx bx-check-shield bx-sm"></i>
+                        <span class="d-none d-sm-inline">&nbsp;Security</span>
                     </button>
                 </li>
                 <li class="nav-item" role="presentation">
@@ -27,14 +37,13 @@
                             data-bs-target="#navs-pills-sessions"
                             aria-controls="navs-pills-sessions">
                         <i class="tf-icons bx bx-link-alt bx-sm"></i>
-                        &nbsp;
-                        <span class="d-none d-sm-inline">Sessions</span>
+                        <span class="d-none d-sm-inline">&nbsp;Sessions</span>
                     </button>
                 </li>
             </ul>
         </div>
         {% if total_pages > 1 %}
-            <div class="col-md-8">
+            <div class="col-md-8 d-none">
                 <div class="tab-pane fade"
                      id="navs-pills-sessions-pagination"
                      role="tabpanel">
@@ -66,15 +75,44 @@
             </div>
         {% endif %}
     </div>
-    <div class="tab-content position-relative">
+    <div class="tab-content p-0 position-relative">
         <div class="tab-pane fade show active"
              id="navs-pills-profile"
              role="tabpanel">
             <div class="d-flex row">
                 <div class="col-md-6">
                     <!-- Profile -->
-                    <div class="card mb-4">
+                    <div class="card">
                         <h5 class="card-header">Edit Profile</h5>
+                        <div class="card-body pb-2">
+                            <div class="d-flex align-items-start align-items-sm-center gap-6 pb-4 border-bottom">
+                                <img src="img/avatar_profil_BW.png"
+                                     alt="Admin Avatar"
+                                     class="d-block w-px-100 h-px-100 rounded"
+                                     id="uploadedAvatar">
+                                <div class="button-wrapper"
+                                     data-bs-toggle="tooltip"
+                                     data-bs-placement="top"
+                                     data-bs-html="true"
+                                     title="<i class='bx bx-rocket bx-xs'></i><span>Coming soon</span>">
+                                    <label for="upload" class="btn btn-primary me-3 mb-4 disabled" tabindex="0">
+                                        <i class="bx bx-upload me-0 me-sm-1"></i>
+                                        <span class="d-none d-sm-block">Upload new photo</span>
+                                        <input type="file"
+                                               id="upload"
+                                               class="account-file-input"
+                                               hidden=""
+                                               accept="image/png, image/jpeg, image/gif">
+                                    </label>
+                                    <button type="button"
+                                            class="btn btn-outline-secondary account-image-reset mb-4 disabled">
+                                        <i class="bx bx-reset me-0 me-sm-1"></i>
+                                        <span class="d-none d-sm-block">Reset</span>
+                                    </button>
+                                    <div>Allowed JPG, GIF or PNG. Max size of 800K</div>
+                                </div>
+                            </div>
+                        </div>
                         <div class="card-body pb-4">
                             <form method="POST" action="{{ profile_url }}/edit">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
@@ -122,6 +160,128 @@
                         </div>
                     </div>
                     <!-- /Profile -->
+                </div>
+                <div class="col-md-6">
+                    <!-- Theme -->
+                    <div class="card">
+                        <h5 class="card-header">Change Theme</h5>
+                        <div class="card-body pb-4">
+                            <!-- <form method="POST" action="{{ profile_url }}/edit"> -->
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                            <div class="row g-3">
+                                <div class="col-md-12 form-floating">
+                                    <select class="form-select"
+                                            id="theme"
+                                            name="theme"
+                                            disabled
+                                            data-bs-toggle="tooltip"
+                                            data-bs-placement="top"
+                                            data-bs-html="true"
+                                            title="<i class='bx bx-rocket bx-xs'></i><span>Coming soon</span>">
+                                        <option value="light"
+                                                {% if current_user.theme == "light" %}selected{% endif %}>
+                                            Light
+                                        </option>
+                                        <option value="dark" {% if current_user.theme == "dark" %}selected{% endif %}>Dark</option>
+                                    </select>
+                                    <label for="theme">Theme</label>
+                                </div>
+                            </div>
+                            <div class="mt-4 justify-content-center d-flex">
+                                <button type="submit" class="btn btn-primary me-2">Save Changes</button>
+                                <button type="reset" class="btn btn-outline-secondary">Cancel</button>
+                            </div>
+                            <!-- </form> -->
+                        </div>
+                    </div>
+                    <!-- /Theme -->
+                </div>
+            </div>
+        </div>
+        <div class="tab-pane fade" id="navs-pills-security" role="tabpanel">
+            <div class="d-flex row">
+                <div class="col-md-6">
+                    <!-- Password -->
+                    <div class="card mb-4">
+                        <h5 class="card-header">Change Password</h5>
+                        <div class="card-body pb-4">
+                            <form method="POST" action="{{ profile_url }}/edit" autocomplete="off">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                                <div class="row g-3">
+                                    <div class="col-md-12 form-password-toggle">
+                                        <label for="new_password" class="form-label">New Password</label>
+                                        <div class="input-group input-group-merge">
+                                            <input class="form-control"
+                                                   type="password"
+                                                   id="new_password"
+                                                   name="new_password"
+                                                   placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
+                                                   aria-label="New Password"
+                                                   autocomplete="off"
+                                                   required
+                                                   pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[ !&quot;#$%&'()*+,./:;<=>?@[\\\]^_`{|}~-]).{8,}$" />
+                                            <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
+                                        </div>
+                                        <div class="mt-3">
+                                            <ul class="list-unstyled" id="password-requirements">
+                                                <li id="length-check">
+                                                    <i class="bx bx-x text-danger"></i> Your password must
+                                                    have at least 8 characters.
+                                                </li>
+                                                <li id="uppercase-check">
+                                                    <i class="bx bx-x text-danger"></i> Your password must
+                                                    have at least 1 uppercase letter.
+                                                </li>
+                                                <li id="number-check">
+                                                    <i class="bx bx-x text-danger"></i> Your password must
+                                                    have at least 1 number.
+                                                </li>
+                                                <li id="special-check">
+                                                    <i class="bx bx-x text-danger"></i> Your password must
+                                                    have at least 1 special character.
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12 form-password-toggle">
+                                        <label for="new_password_confirm" class="form-label">Confirm Password</label>
+                                        <div class="input-group input-group-merge">
+                                            <input class="form-control"
+                                                   type="password"
+                                                   id="new_password_confirm"
+                                                   name="new_password_confirm"
+                                                   placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
+                                                   aria-label="Confirm Password"
+                                                   autocomplete="off"
+                                                   required
+                                                   pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[ !&quot;#$%&'()*+,./:;<=>?@[\\\]^_`{|}~-]).{8,}$" />
+                                            <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12 form-password-toggle">
+                                        <label class="form-label" for="password">Current password</label>
+                                        <div class="input-group input-group-merge">
+                                            <input type="password"
+                                                   id="password"
+                                                   class="form-control"
+                                                   name="password"
+                                                   placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
+                                                   aria-describedby="Current password"
+                                                   required />
+                                            <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mt-4 justify-content-center d-flex">
+                                    <button type="submit" class="btn btn-primary me-2">Save Changes</button>
+                                    <button type="reset" class="btn btn-outline-secondary">Cancel</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <!-- /Password -->
+                </div>
+                <div class="col-md-6">
                     <!-- Two-Factor Authentication (2FA) -->
                     <div class="card mb-4">
                         <h5 class="card-header text-center">Two-Factor Authentication (2FA)</h5>
@@ -234,87 +394,6 @@
                         </div>
                     </div>
                     <!-- /Two-Factor Authentication (2FA) -->
-                </div>
-                <div class="col-md-6">
-                    <!-- Password -->
-                    <div class="card mb-4">
-                        <h5 class="card-header">Change Password</h5>
-                        <div class="card-body pb-4">
-                            <form method="POST" action="{{ profile_url }}/edit" autocomplete="off">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-                                <div class="row g-3">
-                                    <div class="col-md-12 form-password-toggle">
-                                        <label for="new_password" class="form-label">New Password</label>
-                                        <div class="input-group input-group-merge">
-                                            <input class="form-control"
-                                                   type="password"
-                                                   id="new_password"
-                                                   name="new_password"
-                                                   placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
-                                                   aria-label="New Password"
-                                                   autocomplete="off"
-                                                   required
-                                                   pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[ !&quot;#$%&'()*+,./:;<=>?@[\\\]^_`{|}~-]).{8,}$" />
-                                            <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
-                                        </div>
-                                        <div class="mt-3">
-                                            <ul class="list-unstyled" id="password-requirements">
-                                                <li id="length-check">
-                                                    <i class="bx bx-x text-danger"></i> Your password must
-                                                    have at least 8 characters.
-                                                </li>
-                                                <li id="uppercase-check">
-                                                    <i class="bx bx-x text-danger"></i> Your password must
-                                                    have at least 1 uppercase letter.
-                                                </li>
-                                                <li id="number-check">
-                                                    <i class="bx bx-x text-danger"></i> Your password must
-                                                    have at least 1 number.
-                                                </li>
-                                                <li id="special-check">
-                                                    <i class="bx bx-x text-danger"></i> Your password must
-                                                    have at least 1 special character.
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-12 form-password-toggle">
-                                        <label for="new_password_confirm" class="form-label">Confirm Password</label>
-                                        <div class="input-group input-group-merge">
-                                            <input class="form-control"
-                                                   type="password"
-                                                   id="new_password_confirm"
-                                                   name="new_password_confirm"
-                                                   placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
-                                                   aria-label="Confirm Password"
-                                                   autocomplete="off"
-                                                   required
-                                                   pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[ !&quot;#$%&'()*+,./:;<=>?@[\\\]^_`{|}~-]).{8,}$" />
-                                            <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-12 form-password-toggle">
-                                        <label class="form-label" for="password">Current password</label>
-                                        <div class="input-group input-group-merge">
-                                            <input type="password"
-                                                   id="password"
-                                                   class="form-control"
-                                                   name="password"
-                                                   placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
-                                                   aria-describedby="Current password"
-                                                   required />
-                                            <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="mt-4 justify-content-center d-flex">
-                                    <button type="submit" class="btn btn-primary me-2">Save Changes</button>
-                                    <button type="reset" class="btn btn-outline-secondary">Cancel</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                    <!-- /Password -->
                     {% if is_totp %}
                         <!-- Refresh Recovery Codes -->
                         <div class="card mb-4">
@@ -386,7 +465,7 @@
                 </div>
                 <div class="col-md-8">
                     <div id="sessions-page-content"
-                         class="tab-content position-relative pt-0 ps-3 pe-3">
+                         class="tab-content position-relative p-0 ps-md-2 pe-md-2">
                         {% for session in last_sessions %}
                             {% if session["current"] %}
                                 {% set card_classes = "border-primary border-1 position-relative" %}
@@ -417,19 +496,19 @@
                                             <strong>
                                                 <i class="bx bx-window-alt {{ items_classes }}"></i>
                                             Browser:</strong>
-                                            &nbsp; {{ session["browser"]|safe }}
+                                            &nbsp;{{ session["browser"]|safe }}
                                         </div>
                                         <div class="list-group-item d-flex align-items-center">
                                             <strong>
                                                 <i class="bx bx-layer {{ items_classes }}"></i>
                                             Operating System:</strong>
-                                            &nbsp; {{ session["os"]|safe }}
+                                            &nbsp;{{ session["os"]|safe }}
                                         </div>
                                         <div class="list-group-item d-flex align-items-center">
                                             <strong>
                                                 <i class="bx bx-devices {{ items_classes }}"></i>
                                             Device:</strong>
-                                            &nbsp; {{ session["device"]|safe }}
+                                            &nbsp;{{ session["device"]|safe }}
                                         </div>
                                         <div class="d-flex list-group-item form-password-toggle align-items-center">
                                             <strong>
@@ -453,13 +532,13 @@
                                             <strong>
                                                 <i class="bx bx-time {{ items_classes }}"></i>
                                             Creation date:</strong>
-                                            &nbsp; {{ session["creation_date"] }}
+                                            &nbsp;{{ session["creation_date"] }}
                                         </div>
                                         <div class="list-group-item d-flex align-items-center">
                                             <strong>
                                                 <i class="bx bx-time {{ items_classes }}"></i>
                                             Last Activity:</strong>
-                                            &nbsp; {{ session["last_activity"] }}
+                                            &nbsp;{{ session["last_activity"] }}
                                         </div>
                                     </div>
                                 </div>
@@ -493,7 +572,7 @@
                         </div>
                         <div class="alert alert-primary text-center" role="alert">
                             <strong>Important:</strong> Please save these recovery codes in a
-                            secure location. You can use them to access your account if you lose
+                            secure location (like a bunker). You can use them to access your account if you lose
                             your authentication device.
                         </div>
                         <div class="row g-3">

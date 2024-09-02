@@ -131,7 +131,7 @@ let menu, animate;
  * Custom
  */
 
-document.addEventListener("DOMContentLoaded", function onContentLoaded() {
+$(document).ready(function () {
   // Generic Copy to Clipboard with Tooltip
   $(".copy-to-clipboard").on("click", function () {
     const input = $(this).closest(".input-group").find("input")[0];
@@ -152,5 +152,49 @@ document.addEventListener("DOMContentLoaded", function onContentLoaded() {
       .catch((err) => {
         console.error("Failed to copy text: ", err);
       });
+  });
+
+  $("#select-plugin").on("click", function () {
+    $("#plugin-search").focus();
+  });
+
+  $("#plugin-search").on("input", function () {
+    const inputValue = $(this).val().toLowerCase();
+    const dropdownItems = $("#plugins-dropdown-menu li.nav-item");
+
+    dropdownItems.each(function () {
+      const item = $(this);
+      const text = item.text().toLowerCase();
+      console.log(item);
+      const pluginId = item
+        .find("button")
+        .data("bs-target")
+        .replace("#navs-plugins-", "");
+
+      if (text.includes(inputValue) || pluginId.includes(inputValue)) {
+        item.show();
+      } else {
+        item.hide();
+      }
+    });
+
+    // Show "No Item" message if no items match
+    if (dropdownItems.filter(":visible").length === 0) {
+      if ($(".no-items").length === 0) {
+        $("#plugins-dropdown-menu").append(
+          '<li class="no-items dropdown-item text-muted">No Item</li>',
+        );
+      }
+    } else {
+      $(".no-items").remove();
+    }
+  });
+
+  $(document).on("click", function (event) {
+    if (!$(event.target).closest(".card").length) {
+      $("#plugins-dropdown-menu").removeClass("show");
+      $("#plugin-search").val("");
+      $("#plugin-search").trigger("input");
+    }
   });
 });

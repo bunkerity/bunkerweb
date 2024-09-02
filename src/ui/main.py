@@ -338,7 +338,7 @@ def set_security_headers(response):
         + " default-src 'self' https://www.bunkerweb.io https://assets.bunkerity.com https://bunkerity.us1.list-manage.com https://api.github.com;"
         + f" script-src 'self' 'nonce-{app.config['SCRIPT_NONCE']}';"
         + " style-src 'self' 'unsafe-inline';"
-        + " img-src 'self' data: https://assets.bunkerity.com;"
+        + " img-src 'self' data: blob: https://assets.bunkerity.com;"
         + " font-src 'self' data:;"
         + " base-uri 'self';"
         + " block-all-mixed-content;"

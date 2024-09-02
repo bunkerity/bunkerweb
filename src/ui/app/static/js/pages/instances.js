@@ -143,6 +143,9 @@ $(document).ready(function () {
       setTimeout(() => {
         if (actionLock) {
           $("#loadingModal").modal("show");
+          setTimeout(() => {
+            $("#loadingModal").modal("hide");
+          }, 5300);
         }
       }, 500);
 

@@ -35,8 +35,7 @@
             <link rel="stylesheet"
                   href="libs/apexcharts/apexcharts.css"
                   nonce="{{ style_nonce }}" />
-        {% endif %}
-        {% if current_endpoint == "instances" %}
+        {% elif current_endpoint == "instances" %}
             <link rel="stylesheet"
                   href="libs/datatables/datatables.min.css"
                   nonce="{{ style_nonce }}" />

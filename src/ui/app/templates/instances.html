@@ -18,9 +18,7 @@
         </div>
     </div>
     <div class="card table-responsive text-nowrap p-4 min-vh-70">
-        <input type="hidden"
-               id="instances_number"
-               value="{{ instances|length }}" />
+        <input type="hidden" id="instances_number" value="{{ instances|length }}" />
         <input type="hidden"
                id="csrf_token"
                name="csrf_token"
@@ -28,13 +26,27 @@
         <table id="instances" class="table w-100">
             <thead>
                 <tr>
-                    <th data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The hostname of the Instance">Hostname</th>
-                    <th data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The user defined or auto-generated Instance's name">Name</th>
-                    <th data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The creation method of the Instance">Method</th>
-                    <th data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The Instance's health status">Health</th>
-                    <th data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The Instance's type">Type</th>
-                    <th data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The date and time when the Instance was created">Created</th>
-                    <th data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The date and time when the Instance was last seen">Last Seen</th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="top"
+                        data-bs-original-title="The hostname of the Instance">Hostname</th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="top"
+                        data-bs-original-title="The user defined or auto-generated Instance's name">Name</th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="top"
+                        data-bs-original-title="The creation method of the Instance">Method</th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="top"
+                        data-bs-original-title="The Instance's health status">Health</th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="top"
+                        data-bs-original-title="The Instance's type">Type</th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="top"
+                        data-bs-original-title="The date and time when the Instance was created">Created</th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="top"
+                        data-bs-original-title="The date and time when the Instance was last seen">Last Seen</th>
                 </tr>
             </thead>
             <tbody>
@@ -57,11 +69,11 @@
                         </td>
                         <td>
                             {% if instance.type == "container" %}
-                            <i class="bx bx-18px bxl-docker"></i>&nbsp;Container
+                                <i class="bx bx-18px bxl-docker"></i>&nbsp;Container
                             {% elif instance.type == "pod" %}
                                 <i class="bx bx-18px bxl-kubernetes"></i>&nbsp;Pod
                             {% else %}
-                            <i class="bx bx-18px bx-microchip"></i>&nbsp;Static
+                                <i class="bx bx-18px bx-microchip"></i>&nbsp;Static
                             {% endif %}
                         </td>
                         <td>{{ instance.creation_date.astimezone().strftime("%Y-%m-%d %H:%M:%S %Z") }}</td>
@@ -126,7 +138,9 @@
                                    maxlength="256"
                                    required />
                         </div>
-                        <div class="alert alert-primary text-center" role="alert">You don't need to provide the port or the server_name as the values of both <code>API_HTTP_PORT</code> and <code>API_SERVER_NAME</code> will be used for the instance configuration.</div>
+                        <div class="alert alert-primary text-center" role="alert">
+                            You don't need to provide the port or the server_name as the values of both <code>API_HTTP_PORT</code> and <code>API_SERVER_NAME</code> will be used for the instance configuration.
+                        </div>
                     </div>
                     <div class="modal-footer justify-content-center">
                         <button type="submit" class="btn btn-outline-primary me-2">Create Instance</button>

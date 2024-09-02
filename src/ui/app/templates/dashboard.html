@@ -13,27 +13,70 @@
                         <!-- prettier-ignore -->
                         <div class="d-flex justify-content-between align-items-center mb-5">
                             {% include "breadcrumb.html" %}
+                            {% if "services" in request.path %}
+                                <ul class="nav nav-pills flex-column flex-md-row" role="tablist">
+                                    <li class="nav-item me-0 me-sm-3" role="presentation">
+                                        <button type="button"
+                                                class="rounded-pill nav-link d-flex align-items-center active"
+                                                role="tab"
+                                                data-bs-toggle="tab"
+                                                data-bs-target="#navs-pills-easy"
+                                                aria-controls="navs-pills-easy"
+                                                aria-selected="true">
+                                            <i class="bx bx-customize bx-sm"></i>
+                                            &nbsp;
+                                            <span class="d-none d-sm-inline">Easy</span>
+                                        </button>
+                                    </li>
+                                    <li class="nav-item me-0 me-sm-3" role="presentation">
+                                        <button type="button"
+                                                class="rounded-pill nav-link d-flex align-items-center"
+                                                role="tab"
+                                                data-bs-toggle="tab"
+                                                data-bs-target="#navs-pills-advanced"
+                                                aria-controls="navs-pills-advanced">
+                                            <i class="bx bx-shield-quarter bx-sm"></i>
+                                            &nbsp;
+                                            <span class="d-none d-sm-inline">Advanced</span>
+                                        </button>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                        <button type="button"
+                                                class="rounded-pill nav-link d-flex align-items-center"
+                                                role="tab"
+                                                data-bs-toggle="tab"
+                                                data-bs-target="#navs-pills-raw"
+                                                aria-controls="navs-pills-raw">
+                                            <i class="bx bx-notepad bx-sm"></i>
+                                            &nbsp;
+                                            <span class="d-none d-sm-inline">Raw</span>
+                                        </button>
+                                    </li>
+                                </ul>
+                            {% endif %}
                             <ul class="d-flex mb-0 list-unstyled">
                                 <li class="me-3">
                                     <a role="button"
-                                       class="btn btn-sm btn-outline-dark d-flex align-items-center"
+                                       class="btn btn-sm btn-outline-dark d-flex align-items-center h-100"
                                        aria-pressed="true"
                                        href="https://panel.bunkerweb.io/order/support/?utm_campaign=self&utm_source=ui"
                                        target="_blank"
                                        rel="noopener">
-                                        <span class="tf-icons bx bx-help-circle bx-18px me-2"></span>
-                                        Need Help?
+                                        <span class="bx bx-help-circle bx-18px me-0 me-md-2"></span>
+                                        <span class="d-none d-md-inline">Need help?</span>
                                     </a>
                                 </li>
                                 <li>
-                                    <a id="news-button"
-                                       role="button"
-                                       class="btn btn-sm btn-dark text-uppercase d-flex align-items-center position-relative"
-                                       aria-pressed="true"
-                                       href="javascript:void(0)"
-                                       data-bs-toggle="offcanvas"
-                                       data-bs-target="#side-offcanvas"
-                                       aria-controls="side-offcanvas">News</a>
+                                    <button id="news-button"
+                                            type="button"
+                                            class="btn btn-sm btn-dark text-uppercase d-flex align-items-center"
+                                            aria-pressed="true"
+                                            data-bs-toggle="offcanvas"
+                                            data-bs-target="#side-offcanvas"
+                                            aria-controls="side-offcanvas">
+                                        <span class="bx bx-news bx-18px me-0 me-md-2"></span>
+                                        <span class="d-none d-md-inline">News</span>
+                                    </button>
                                 </li>
                             </ul>
                         </div>
@@ -50,7 +93,7 @@
                                href="https://panel.bunkerweb.io/order/bunkerweb-pro/?utm_campaign=self&utm_source=ui"
                                target="_blank"
                                rel="noopener">
-                                <span class="tf-icons me-2 d-flex h-100 justify-content-center align-items-center">
+                                <span class="me-1 me-md-2 d-flex h-100 justify-content-center align-items-center">
                                     <div class="pro-icon"></div>
                                 </span>
                             Upgrade to Pro</a>

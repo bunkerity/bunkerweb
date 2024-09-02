@@ -483,12 +483,15 @@ class UIDatabase(Database):
         """Get ui user sessions."""
         with self._db_session() as session:
             if current_session_id:
-                return (
+                current_session_query = session.query(UserSessions).filter_by(user_name=username, id=current_session_id)
+                other_sessions_query = (
                     session.query(UserSessions)
                     .filter_by(user_name=username)
-                    .order_by(UserSessions.id == current_session_id, UserSessions.creation_date.desc())
-                    .all()
+                    .filter(UserSessions.id != current_session_id)
+                    .order_by(UserSessions.creation_date.desc())
                 )
+                combined_query = current_session_query.union_all(other_sessions_query)
+                return combined_query.all()
             else:
                 return session.query(UserSessions).filter_by(user_name=username).order_by(UserSessions.creation_date.desc()).all()
 

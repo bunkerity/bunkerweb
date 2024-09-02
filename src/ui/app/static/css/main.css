@@ -190,23 +190,7 @@
 }
 
 .bg-bw-green {
-  background-color: #2eac68;
-}
-
-@media (max-width: 768px) {
-  .btn-responsive {
-    padding: 4px 9px;
-    font-size: 80%;
-    line-height: 1;
-  }
-}
-
-@media (min-width: 769px) and (max-width: 992px) {
-  .btn-responsive {
-    padding: 8px 18px;
-    font-size: 90%;
-    line-height: 1.2;
-  }
+  background-color: var(--bs-bw-green);
 }
 
 .pro-icon {
@@ -241,6 +225,27 @@
   animation: fadeIn 1.5s infinite alternate;
 }
 
+@media (max-width: 768px) {
+  .btn-responsive {
+    padding: 4px 9px;
+    font-size: 80%;
+    line-height: 1;
+  }
+
+  .pro-icon {
+    width: 9px;
+    height: 7.75px;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 992px) {
+  .btn-responsive {
+    padding: 8px 18px;
+    font-size: 90%;
+    line-height: 1.2;
+  }
+}
+
 @keyframes fadeOut {
   0% {
     opacity: 1;
@@ -263,10 +268,55 @@
   min-height: 70vh !important;
 }
 
+.max-vh-60 {
+  max-height: 60vh !important;
+}
+
 td.highlight {
   background-color: rgba(var(--bs-primary-rgb), 0.1) !important;
 }
 
 .text-bw-green {
-  color: #2eac68 !important;
+  color: var(--bs-bw-green) !important;
+}
+
+.btn-outline-bw-green {
+  color: var(--bs-bw-green);
+  border-color: var(--bs-bw-green);
+}
+
+.btn-outline-bw-green:hover {
+  color: #fff;
+  background-color: var(--bs-primary);
+}
+
+.col.form-floating > .form-control-sm,
+.col-auto.form-floating > .form-select.form-select-sm {
+  height: calc(1.9em + 0.9rem + 1px);
+  min-height: calc(1.9em + 0.9rem + 1px);
+  font-size: 0.85rem;
+  line-height: 1;
+}
+
+.form-floating > .form-control:focus ~ label {
+  transform: scale(0.8) translateY(-0.7rem) translateX(0.15rem);
+}
+
+.col.form-floating > label,
+.col-auto.form-floating > label {
+  padding: 0.8rem 0.9375rem;
+  font-size: 0.8rem;
+}
+
+.form-floating > .form-select:focus {
+  padding-top: 1.2rem;
+}
+
+.col-auto.form-floating > .form-select.form-select-sm,
+.col-auto.form-floating > .form-select.form-select-sm:focus {
+  padding-top: calc(-2px + 1.2rem);
+}
+
+.form-floating > .form-control.form-control-sm:focus {
+  padding-top: 1.1rem !important;
 }

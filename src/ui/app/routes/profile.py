@@ -142,7 +142,7 @@ def totp_refresh():
     session["decrypted_recovery_codes"] = totp_recovery_codes
 
     flash("The recovery codes have been successfully refreshed. The old ones are no longer valid.")
-    return redirect(url_for("profile.profile_page"))
+    return redirect(url_for("profile.profile_page") + "#security")
 
 
 @profile.route("/profile/totp-disable", methods=["POST"])
@@ -173,7 +173,7 @@ def totp_disable():
     session["totp_validated"] = False
 
     flash("The two-factor authentication has been successfully disabled.")
-    return redirect(url_for("profile.profile_page"))
+    return redirect(url_for("profile.profile_page") + "#security")
 
 
 @profile.route("/profile/totp-enable", methods=["POST"])
@@ -214,7 +214,7 @@ def totp_enable():
     session["decrypted_recovery_codes"] = totp_recovery_codes
 
     flash("The two-factor authentication has been successfully enabled.")
-    return redirect(url_for("profile.profile_page"))
+    return redirect(url_for("profile.profile_page") + "#security")
 
 
 @profile.route("/profile/edit", methods=["POST"])

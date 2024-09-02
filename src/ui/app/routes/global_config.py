@@ -79,8 +79,6 @@ def global_config_page():
             )
         )
 
-    # global_config = BW_CONFIG.get_config(global_only=True, methods=True)
-    # plugins = BW_CONFIG.get_plugins()
-    # builder = global_config_builder({}, plugins, global_config)
-    # return render_template("global-config.html", data_server_builder=b64encode(dumps(builder).encode("utf-8")).decode("ascii"))
-    return render_template("global-config.html")  # TODO
+    global_config = BW_CONFIG.get_config(global_only=True, methods=True)
+    plugins = BW_CONFIG.get_plugins()
+    return render_template("plugins_settings.html", config=global_config, plugins=plugins)
