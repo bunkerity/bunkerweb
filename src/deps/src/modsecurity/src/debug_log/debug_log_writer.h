@@ -13,15 +13,7 @@
  *
  */
 
-#include <stdio.h>
-#include <sys/ipc.h>
-#include <sys/shm.h>
-#include <sys/types.h>
-
-#include <iostream>
-#include <map>
 #include <string>
-#include <cstring>
 
 
 #ifndef SRC_DEBUG_LOG_DEBUG_LOG_WRITER_H_
@@ -45,18 +37,16 @@ class DebugLogWriter {
     static int open(const std::string& m_fileName, std::string *error);
 
  private:
-    DebugLogWriter() : m_first(NULL) { }
-    ~DebugLogWriter() { }
+    DebugLogWriter() = default;
+    ~DebugLogWriter() = default;
 
     // C++ 03
     // ========
     // Dont forget to declare these two. You want to make sure they
     // are unacceptable otherwise you may accidentally get copies of
     // your singleton appearing.
-    DebugLogWriter(DebugLogWriter const&);
-    void operator=(DebugLogWriter const&);
-
-    struct debug_log_file_handler *m_first;
+    DebugLogWriter(DebugLogWriter const&) = delete;
+    void operator=(DebugLogWriter const&) = delete;
 };
 
 

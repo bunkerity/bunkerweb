@@ -52,7 +52,7 @@ namespace operators {
 class Operator;
 }
 
-using TransformationResult = std::pair<std::shared_ptr<std::string>,
+using TransformationResult = std::pair<std::string,
     std::shared_ptr<std::string>>;
 using TransformationResults = std::list<TransformationResult>;
 

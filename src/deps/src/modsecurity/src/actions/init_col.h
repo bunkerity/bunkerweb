@@ -35,7 +35,7 @@ class InitCol : public Action {
     explicit InitCol(const std::string &action) : Action(action) { }
 
     InitCol(const std::string &action, std::unique_ptr<RunTimeString> z)
-        : Action(action, RunTimeOnlyIfMatchKind),
+        : Action(action),
             m_string(std::move(z)) { }
 
     bool evaluate(RuleWithActions *rule, Transaction *transaction) override;

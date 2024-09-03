@@ -13,30 +13,17 @@
  *
  */
 
-#include "src/actions/transformations/cmd_line.h"
-
-#include <iostream>
-#include <string>
-#include <algorithm>
-#include <functional>
-#include <cctype>
-#include <locale>
-
-#include "modsecurity/transaction.h"
-#include "src/actions/transformations/transformation.h"
+#include "cmd_line.h"
 
 
-namespace modsecurity {
-namespace actions {
-namespace transformations {
+namespace modsecurity::actions::transformations {
 
 
-std::string CmdLine::evaluate(const std::string &value,
-    Transaction *transaction) {
-    std::string ret;
-    int space = 0;
+bool CmdLine::transform(std::string &value, const Transaction *trans) const {
+    char *d = value.data();
+    bool space = false;
 
-    for (auto& a : value) {
+    for (const auto& a : value) {
         switch (a) {
             /* remove some characters */
             case '"':
@@ -52,9 +39,9 @@ std::string CmdLine::evaluate(const std::string &value,
             case '\t':
             case '\r':
             case '\n':
-                if (space == 0) {
-                    ret.append(" ");
-                    space++;
+                if (space == false) {
+                    *d++ = ' ';
+                    space = true;
                 }
                 break;
 
@@ -62,26 +49,27 @@ std::string CmdLine::evaluate(const std::string &value,
             case '/':
             case '(':
                 if (space) {
-                    ret.pop_back();
+                    d--;
                 }
-                space = 0;
-                ret.append(&a, 1);
+                space = false;
+                *d++ = a;
                 break;
 
             /* copy normal characters */
             default :
                 char b = std::tolower(a);
-                ret.append(&b, 1);
-                space = 0;
+                *d++ = b;
+                space = false;
                 break;
         }
     }
 
-    return ret;
+    const auto new_len = d - value.c_str();
+    const auto changed = new_len != value.length();
+    value.resize(new_len);
+    return changed;
 }
 
 
-}  // namespace transformations
-}  // namespace actions
-}  // namespace modsecurity
+}  // namespace modsecurity::actions::transformations
 

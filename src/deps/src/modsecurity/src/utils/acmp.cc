@@ -33,135 +33,8 @@
  *       that should be mitigated. This ACMP parser should be re-written to
  *       consume less memory.
  */
+
 extern "C" {
-
-char *parse_pm_content(const char *op_parm, unsigned short int op_len, const char **error_msg)  {
-    char *parm = NULL;
-    char *content;
-    unsigned short int offset = 0;
-//    char converted = 0;
-    int i, x;
-    unsigned char bin = 0, esc = 0, bin_offset = 0;
-    unsigned char c = 0;
-    unsigned char bin_parm[3] = { 0 };
-    char *processed = NULL;
-
-    content = strdup(op_parm);
-
-    if (content == NULL) {
-        *error_msg = std::string("Error allocating memory for pattern matching content.").c_str();
-        return NULL;
-    }
-
-    while (offset < op_len && (content[offset] == ' ' || content[offset] == '\t')) {
-        offset++;
-    };
-
-    op_len = strlen(content);
-
-    if (content[offset] == '\"' && content[op_len-1] == '\"') {
-        parm = strdup(content + offset + 1);
-        if (parm  == NULL) {
-            *error_msg = std::string("Error allocating memory for pattern matching content.").c_str();
-            free(content);
-            content = NULL;
-            return NULL;
-        }
-        parm[op_len - offset - 2] = '\0';
-    } else {
-        parm = strdup(content + offset);
-        if (parm == NULL) {
-            free(content);
-            content = NULL;
-            *error_msg = std::string("Error allocating memory for pattern matching content.").c_str();
-            return NULL;
-        }
-    }
-
-    free(content);
-    content = NULL;
-
-    op_len = strlen(parm);
-
-    if (op_len == 0)   {
-        *error_msg = "Content length is 0.";
-        free(parm);
-        return NULL;
-    }
-
-    for (i = 0, x = 0; i < op_len; i++) {
-        if (parm[i] == '|') {
-            if (bin) {
-                bin = 0;
-            } else {
-                bin = 1;
-            }
-        } else if(!esc && parm[i] == '\\') {
-            esc = 1;
-        } else {
-            if (bin) {
-                if (parm[i] == 0 || parm[i] == 1 || parm[i] == 2 ||
-                    parm[i] == 3 || parm[i] == 4 || parm[i] == 5 ||
-                    parm[i] == 6 || parm[i] == 7 || parm[i] == 8 ||
-                    parm[i] == 9 ||
-                    parm[i] == 'A' || parm[i] == 'a' ||
-                    parm[i] == 'B' || parm[i] == 'b' ||
-                    parm[i] == 'C' || parm[i] == 'c' ||
-                    parm[i] == 'D' || parm[i] == 'd' ||
-                    parm[i] == 'E' || parm[i] == 'e' ||
-                    parm[i] == 'F' || parm[i] == 'f')
-                {
-                    bin_parm[bin_offset] = (char)parm[i];
-                    bin_offset++;
-                    if (bin_offset == 2) {
-                        c = strtol((char *)bin_parm, (char **) NULL, 16) & 0xFF;
-                        bin_offset = 0;
-                        parm[x] = c;
-                        x++;
-                        //converted = 1;
-                    }
-                } else if (parm[i] == ' ') {
-                }
-            } else if (esc) {
-                if (parm[i] == ':' ||
-                        parm[i] == ';' ||
-                        parm[i] == '\\' ||
-                        parm[i] == '\"')
-                {
-                    parm[x] = parm[i];
-                    x++;
-                } else {
-                    *error_msg = std::string("Unsupported escape sequence.").c_str();
-                    free(parm);
-                    return NULL;
-                }
-                esc = 0;
-                //converted = 1;
-            } else {
-                parm[x] = parm[i];
-                x++;
-            }
-        }
-    }
-
-#if 0
-    if (converted) {
-        op_len = x;
-    }
-#endif
-
-    //processed = memcpy(processed, parm, op_len);
-    processed = strdup(parm);
-    free(parm);
-    parm = NULL;
-
-    if (processed == NULL) {
-        *error_msg = std::string("Error allocating memory for pattern matching content.").c_str();
-        return NULL;
-    }
-
-    return processed;
-}
 
 /*
  *******************************************************************************
@@ -190,10 +63,9 @@ static size_t acmp_strlen(ACMP *parser, const char *str) {
  *       len - length of input string
  */
 static void acmp_strtoucs(ACMP *parser, const char *str, long *ucs_chars, int len) {
-    int i;
     const char *c = str;
 
-    for (i = 0; i < len; i++) {
+    for (int i = 0;i < len;i++) {
         *(ucs_chars++) = *(c++);
     }
 }

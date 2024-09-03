@@ -15,7 +15,11 @@
 
 #include <string.h>
 #include <sys/stat.h>
+#ifndef WIN32
 #include <unistd.h>
+#else
+#include <io.h>
+#endif
 
 #include <ctime>
 #include <iostream>
@@ -32,9 +36,8 @@ void print_help(const char *name) {
 
 
 int main(int argc, char **argv) {
-    modsecurity::RulesSet *rules;
+    auto rules = std::make_unique<modsecurity::RulesSet>();
     char **args = argv;
-    rules = new modsecurity::RulesSet();
     int ret = 0;
 
     args++;
@@ -46,41 +49,26 @@ int main(int argc, char **argv) {
 
     while (*args != NULL) {
         struct stat buffer;
-        std::string argFull("");
-        const char *arg = *args;
+        std::string arg = *args;
         std::string err;
         int r;
 
-        if (argFull.empty() == false) {
-            if (arg[strlen(arg)-1] == '\"') {
-                argFull.append(arg, strlen(arg)-1);
-                goto next;
-            } else {
-                argFull.append(arg);
-                goto next;
-            }
-        }
+        // strip arg from leading and trailing '"' chars
+        arg.erase(arg.find_last_not_of('\"')+1);
+        arg.erase(0, arg.find_first_not_of('\"'));
 
-        if (arg[0] == '\"' && argFull.empty() == true) {
-            if (arg[strlen(arg)-1] == '\"') {
-                argFull.append(arg+1, strlen(arg) - 2);
-            } else {
-                argFull.append(arg+1);
-                goto next;
-            }
-        }
-
-        if (argFull.empty() == false) {
-            arg = strdup(argFull.c_str());
-            argFull.clear();
+        if (arg.empty() == true) {
+            args++;
+            continue;
         }
 
         std::cout << " : " << arg << "  --  ";
-        if (stat(arg, &buffer) == 0) {
-            r = rules->loadFromUri(arg);
+        if (stat(arg.c_str(), &buffer) == 0) {
+            r = rules->loadFromUri(arg.c_str());
         } else {
-            r = rules->load(arg);
+            r = rules->load(arg.c_str());
         }
+
         if (r < 0) {
             err.assign(rules->m_parserError.str());
             rules->m_parserError.str("");
@@ -91,11 +79,9 @@ int main(int argc, char **argv) {
         if (err.empty() == false) {
             std::cerr << "    " << err << std::endl;
         }
-next:
+
         args++;
     }
-
-    delete rules;
 
     if (ret < 0) {
         std::cout << "Test failed." << std::endl;

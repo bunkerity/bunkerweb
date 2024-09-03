@@ -13,65 +13,62 @@
  *
  */
 
-#include "src/actions/transformations/transformation.h"
+#include "transformation.h"
 
 #include <cstring>
-
 #include <iostream>
 #include <string>
 
 #include "modsecurity/transaction.h"
 #include "modsecurity/actions/action.h"
-#include "src/actions/transformations/base64_decode_ext.h"
-#include "src/actions/transformations/base64_decode.h"
-#include "src/actions/transformations/base64_encode.h"
-#include "src/actions/transformations/cmd_line.h"
-#include "src/actions/transformations/compress_whitespace.h"
-#include "src/actions/transformations/css_decode.h"
-#include "src/actions/transformations/escape_seq_decode.h"
-#include "src/actions/transformations/hex_decode.h"
-#include "src/actions/transformations/hex_encode.h"
-#include "src/actions/transformations/html_entity_decode.h"
-#include "src/actions/transformations/js_decode.h"
-#include "src/actions/transformations/length.h"
-#include "src/actions/transformations/lower_case.h"
-#include "src/actions/transformations/md5.h"
-#include "src/actions/transformations/none.h"
-#include "src/actions/transformations/normalise_path.h"
-#include "src/actions/transformations/normalise_path_win.h"
-#include "src/actions/transformations/parity_even_7bit.h"
-#include "src/actions/transformations/parity_odd_7bit.h"
-#include "src/actions/transformations/parity_zero_7bit.h"
-#include "src/actions/transformations/remove_comments_char.h"
-#include "src/actions/transformations/remove_comments.h"
-#include "src/actions/transformations/remove_nulls.h"
-#include "src/actions/transformations/remove_whitespace.h"
-#include "src/actions/transformations/replace_comments.h"
-#include "src/actions/transformations/replace_nulls.h"
-#include "src/actions/transformations/sha1.h"
-#include "src/actions/transformations/sql_hex_decode.h"
-#include "src/actions/transformations/trim.h"
-#include "src/actions/transformations/trim_left.h"
-#include "src/actions/transformations/trim_right.h"
-#include "src/actions/transformations/upper_case.h"
-#include "src/actions/transformations/url_decode.h"
-#include "src/actions/transformations/url_decode_uni.h"
-#include "src/actions/transformations/url_encode.h"
-#include "src/actions/transformations/utf8_to_unicode.h"
+
+#include "base64_decode_ext.h"
+#include "base64_decode.h"
+#include "base64_encode.h"
+#include "cmd_line.h"
+#include "compress_whitespace.h"
+#include "css_decode.h"
+#include "escape_seq_decode.h"
+#include "hex_decode.h"
+#include "hex_encode.h"
+#include "html_entity_decode.h"
+#include "js_decode.h"
+#include "length.h"
+#include "lower_case.h"
+#include "md5.h"
+#include "none.h"
+#include "normalise_path.h"
+#include "normalise_path_win.h"
+#include "parity_even_7bit.h"
+#include "parity_odd_7bit.h"
+#include "parity_zero_7bit.h"
+#include "remove_comments_char.h"
+#include "remove_comments.h"
+#include "remove_nulls.h"
+#include "remove_whitespace.h"
+#include "replace_comments.h"
+#include "replace_nulls.h"
+#include "sha1.h"
+#include "sql_hex_decode.h"
+#include "trim.h"
+#include "trim_left.h"
+#include "trim_right.h"
+#include "upper_case.h"
+#include "url_decode.h"
+#include "url_decode_uni.h"
+#include "url_encode.h"
+#include "utf8_to_unicode.h"
 
 
 #define IF_MATCH(b) \
     if (a.compare(2, std::strlen(#b), #b) == 0)
 
 
-namespace modsecurity {
-namespace actions {
-namespace transformations {
+namespace modsecurity::actions::transformations {
 
 
-std::string Transformation::evaluate(const std::string &value,
-    Transaction *transaction) {
-    return value;
+bool Transformation::transform(std::string &value, const Transaction *trans) const {
+    return false;
 }
 
 Transformation* Transformation::instantiate(std::string a) {
@@ -119,6 +116,5 @@ Transformation* Transformation::instantiate(std::string a) {
     return new Transformation(a);
 }
 
-}  // namespace transformations
-}  // namespace actions
-}  // namespace modsecurity
+
+}  // namespace modsecurity::actions::transformations

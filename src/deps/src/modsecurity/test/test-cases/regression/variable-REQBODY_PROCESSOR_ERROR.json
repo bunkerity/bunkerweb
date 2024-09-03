@@ -2,6 +2,7 @@
   {  
     "enabled":1,
     "version_min":300000,
+    "resource":"libxml2",
     "title":"Testing Variables :: REQBODY_PROCESSOR_ERROR_MSG (1/2)",
     "client":{  
       "ip":"200.249.12.31",

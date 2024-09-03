@@ -13,7 +13,7 @@ then
     AMOUNT=$(./regression_tests countall ../$FILE)
     RET=$?
     if [ $RET -ne 0 ]; then
-        echo ":test-result: SKIP: json is not enabled. (regression/$RET) ../$FILE:$i"
+        echo ":test-result: SKIP: json is not enabled. (regression/$RET) ../$FILE"
         exit 0
     fi
 
@@ -30,10 +30,10 @@ else
       RET=$?
       if [ $RET -eq 127 ]
       then
-          echo ":test-result: SKIP: json is not enabled. (unit/$RET) ../$FILE:$i"
+          echo ":test-result: SKIP: json is not enabled. (unit/$RET) ../$FILE"
       elif [ $RET -ne 0 ]
       then
-          echo ":test-result: FAIL possible segfault: (unit/$RET) ../$FILE:$i"
+          echo ":test-result: FAIL possible segfault: (unit/$RET) ../$FILE"
       fi
 fi
 

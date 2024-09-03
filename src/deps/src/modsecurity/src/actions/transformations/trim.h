@@ -13,38 +13,24 @@
  *
  */
 
-#include <string>
-
-#include "modsecurity/actions/action.h"
-#include "src/actions/transformations/transformation.h"
-
 #ifndef SRC_ACTIONS_TRANSFORMATIONS_TRIM_H_
 #define SRC_ACTIONS_TRANSFORMATIONS_TRIM_H_
 
-#ifdef __cplusplus
-namespace modsecurity {
-class Transaction;
+#include "transformation.h"
 
-namespace actions {
-namespace transformations {
+namespace modsecurity::actions::transformations {
 
 class Trim : public Transformation {
  public:
+    using Transformation::Transformation;
 
-    explicit Trim(const std::string &action) ;
+    bool transform(std::string &value, const Transaction *trans) const override;
 
-    std::string evaluate(const std::string &exp,
-        Transaction *transaction) override;
-
-    std::string *ltrim(std::string *s);
-    std::string *rtrim(std::string *s);
-    std::string *trim(std::string *s);
+    static bool ltrim(std::string &s);
+    static bool rtrim(std::string &s);
+    static bool trim(std::string &s);
 };
 
-}  // namespace transformations
-}  // namespace actions
-}  // namespace modsecurity
-
-#endif
+}  // namespace modsecurity::actions::transformations
 
 #endif  // SRC_ACTIONS_TRANSFORMATIONS_TRIM_H_

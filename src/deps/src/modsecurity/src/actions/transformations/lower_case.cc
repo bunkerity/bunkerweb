@@ -13,36 +13,19 @@
  *
  */
 
-#include "src/actions/transformations/lower_case.h"
 
-#include <algorithm>
-#include <string>
+#include "lower_case.h"
 
-#include "modsecurity/transaction.h"
-#include "src/actions/transformations/transformation.h"
-#include "modsecurity/actions/action.h"
-
-namespace modsecurity {
-namespace actions {
-namespace transformations {
+#include <cctype>
 
 
-LowerCase::LowerCase(const std::string &a)
-    : Transformation(a) {
+namespace modsecurity::actions::transformations {
+
+
+bool LowerCase::transform(std::string &value, const Transaction *trans) const {
+    return convert(value, [](auto c) {
+                    return std::tolower(c); });
 }
 
-std::string LowerCase::evaluate(const std::string &val,
-    Transaction *transaction) {
-    std::locale loc;
-    std::string value(val);
 
-    for (std::string::size_type i=0; i < value.length(); ++i) {
-        value[i] = std::tolower(value[i], loc);
-    }
-
-    return value;
-}
-
-}  // namespace transformations
-}  // namespace actions
-}  // namespace modsecurity
+}  // namespace modsecurity::actions::transformations

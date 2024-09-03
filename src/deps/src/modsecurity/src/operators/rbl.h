@@ -17,10 +17,14 @@
 #define SRC_OPERATORS_RBL_H_
 
 #include <sys/types.h>
+#ifndef WIN32
 #include <sys/socket.h>
 #include <netdb.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#else
+#include <WinSock2.h>
+#endif
 
 #include <string>
 #include <memory>
@@ -66,14 +70,15 @@ class Rbl : public Operator {
         m_demandsPassword(false),
         m_provider(RblProvider::UnknownProvider),
         Operator("Rbl", std::move(param)) {
-            m_service = m_string->evaluate();
-            if (m_service.find("httpbl.org") != std::string::npos) {
-                m_demandsPassword = true;
-                m_provider = RblProvider::httpbl;
+        m_service = m_string->evaluate(); // cppcheck-suppress useInitializationList
+        if (m_service.find("httpbl.org") != std::string::npos)
+        {
+            m_demandsPassword = true;
+            m_provider = RblProvider::httpbl;
             } else if (m_service.find("uribl.com") != std::string::npos) {
-                m_provider = RblProvider::httpbl;
+                m_provider = RblProvider::uribl;
             } else if (m_service.find("spamhaus.org") != std::string::npos) {
-                m_provider = RblProvider::httpbl;
+                m_provider = RblProvider::spamhaus;
             }
         }
     bool evaluate(Transaction *transaction, RuleWithActions *rule,

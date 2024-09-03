@@ -311,6 +311,21 @@ extern "C" int msc_rules_add(RulesSet *rules, const char *plain_rules,
 }
 
 
+/**
+ * @name    msc_rules_error_cleanup
+ * @brief   Deallocates an error message buffer returned by a msc_rules_xxx function.
+ *
+ * This is a helper function to free the error message buffer allocated
+ * by a msc_rules_xxx function.
+ *
+ * @param error Error message pointer.
+ *
+ */
+extern "C" void msc_rules_error_cleanup(const char *error) {
+    free((void*) error);
+}
+
+
 extern "C" int msc_rules_cleanup(RulesSet *rules) {
     delete rules;
     return true;

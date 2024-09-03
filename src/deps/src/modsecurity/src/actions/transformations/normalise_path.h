@@ -13,37 +13,22 @@
  *
  */
 
-#include <string>
-
-#include "modsecurity/actions/action.h"
-#include "src/actions/transformations/transformation.h"
-
 #ifndef SRC_ACTIONS_TRANSFORMATIONS_NORMALISE_PATH_H_
 #define SRC_ACTIONS_TRANSFORMATIONS_NORMALISE_PATH_H_
 
-#ifdef __cplusplus
-namespace modsecurity {
-class Transaction;
+#include "transformation.h"
 
-namespace actions {
-namespace transformations {
+namespace modsecurity::actions::transformations {
 
 class NormalisePath : public Transformation {
  public:
+    using Transformation::Transformation;
 
-    explicit NormalisePath(const std::string &action);
+    bool transform(std::string &value, const Transaction *trans) const override;
 
-    std::string evaluate(const std::string &exp,
-        Transaction *transaction) override;
-
-    static int normalize_path_inplace(unsigned char *input, int input_len,
-        int win, int *changed);
+    static bool normalize_path_inplace(std::string &val, const bool win);
 };
 
-}  // namespace transformations
-}  // namespace actions
-}  // namespace modsecurity
-
-#endif
+}  // namespace modsecurity::actions::transformations
 
 #endif  // SRC_ACTIONS_TRANSFORMATIONS_NORMALISE_PATH_H_

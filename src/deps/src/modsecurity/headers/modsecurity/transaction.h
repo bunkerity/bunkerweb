@@ -14,6 +14,7 @@
  */
 
 #ifdef __cplusplus
+#include <cassert>
 #include <ctime>
 #include <fstream>
 #include <iomanip>
@@ -307,11 +308,8 @@ class TransactionSecMarkerManagement {
     }
 
     std::shared_ptr<std::string> getCurrentMarker() const {
-        if (m_marker) {
-            return m_marker;
-        } else {
-            throw;
-        }
+        assert((m_marker != nullptr) && "You might have forgotten to call and evaluate isInsideAMarker() before calling getCurrentMarker().");
+        return m_marker;
     }
 
     void removeMarker() {
@@ -393,6 +391,8 @@ class Transaction : public TransactionAnchoredVariables, public TransactionSecMa
     int processLogging();
     int updateStatusCode(int status);
 
+    int setRequestHostName(const std::string& hostname);
+
     bool intervention(ModSecurityIntervention *it);
 
     bool addArgument(const std::string& orig, const std::string& key,
@@ -405,7 +405,7 @@ class Transaction : public TransactionAnchoredVariables, public TransactionSecMa
     size_t getRequestBodyLength();
 
 #ifndef NO_LOGS
-    void debug(int, const std::string&) const;
+    void debug(int, const std::string &) const; // cppcheck-suppress functionStatic
 #endif
     void serverLog(std::shared_ptr<RuleMessage> rm);
 
@@ -442,6 +442,11 @@ class Transaction : public TransactionAnchoredVariables, public TransactionSecMa
      * Holds the server IP Address
      */
     std::shared_ptr<std::string> m_serverIpAddress;
+
+    /**
+     * Holds the request's hostname
+     */
+    std::shared_ptr<std::string> m_requestHostName;
 
     /**
      * Holds the raw URI that was requested.
@@ -719,10 +724,16 @@ void msc_transaction_cleanup(Transaction *transaction);
 int msc_intervention(Transaction *transaction, ModSecurityIntervention *it);
 
 /** @ingroup ModSecurity_C_API */
+void msc_intervention_cleanup(ModSecurityIntervention *it);
+
+/** @ingroup ModSecurity_C_API */
 int msc_process_logging(Transaction *transaction);
 
 /** @ingroup ModSecurity_C_API */
 int msc_update_status_code(Transaction *transaction, int status);
+
+/** @ingroup ModSecurity_C_API */
+int msc_set_request_hostname(Transaction *transaction, const unsigned char *hostname);
 
 #ifdef __cplusplus
 }

@@ -29,8 +29,8 @@ namespace modsecurity {
 namespace utils {
 
 
-int urldecode_nonstrict_inplace(unsigned char *input,
-    uint64_t input_len, int *invalid_count, int *changed);
+bool urldecode_nonstrict_inplace(std::string &val,
+    int &invalid_count);
 std::string uri_decode(const std::string & sSrc);
 
 

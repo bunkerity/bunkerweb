@@ -74,7 +74,7 @@ bool VerifyCPF::verify(const char *cpfnumber, int len) {
     c = cpf_len;
 
     for (i = 0; i < 9; i++) {
-        sum += (cpf[i] * --c);
+        sum += (cpf[i] * --c); // cppcheck-suppress uninitvar
     }
 
     factor = (sum % cpf_len);

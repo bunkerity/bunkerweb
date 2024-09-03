@@ -28,7 +28,6 @@ modsec_rules_check_LDFLAGS = \
 	$(YAJL_LDFLAGS)
 
 modsec_rules_check_CPPFLAGS = \
-	-std=c++11 \
 	-I$(top_builddir)/headers \
 	$(GLOBAL_CPPFLAGS) \
 	$(PCRE_CFLAGS) \

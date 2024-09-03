@@ -13,40 +13,20 @@
  *
  */
 
-#include <string>
-#include <unordered_map>
-
-#include "modsecurity/actions/action.h"
-#include "src/actions/transformations/transformation.h"
-#include "src/utils/string.h"
-
 #ifndef SRC_ACTIONS_TRANSFORMATIONS_HTML_ENTITY_DECODE_H_
 #define SRC_ACTIONS_TRANSFORMATIONS_HTML_ENTITY_DECODE_H_
 
-#ifdef __cplusplus
-namespace modsecurity {
-class Transaction;
+#include "transformation.h"
 
-namespace actions {
-namespace transformations {
-
+namespace modsecurity::actions::transformations {
 
 class HtmlEntityDecode : public Transformation {
  public:
-    explicit HtmlEntityDecode(const std::string &action) 
-        : Transformation(action) { }
+    using Transformation::Transformation;
 
-    std::string evaluate(const std::string &exp,
-        Transaction *transaction) override;
-
-    static int inplace(unsigned char *input, uint64_t input_len);
+    bool transform(std::string &value, const Transaction *trans) const override;
 };
 
-
-}  // namespace transformations
-}  // namespace actions
-}  // namespace modsecurity
-
-#endif
+}  // namespace modsecurity::actions::transformations
 
 #endif  // SRC_ACTIONS_TRANSFORMATIONS_HTML_ENTITY_DECODE_H_
