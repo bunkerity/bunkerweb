@@ -15,15 +15,15 @@
     },
     {
       "id": "modsecurity",
-      "name": "ModSecurity v3.0.12",
-      "url": "https://github.com/SpiderLabs/ModSecurity.git",
-      "commit": "5f44383236b94ef8066529861d0b4d603f9b3bcb",
+      "name": "ModSecurity v3.0.13",
+      "url": "https://github.com/owasp-modsecurity/ModSecurity.git",
+      "commit": "580fe192df1694934f93e3e008058996ea479e35",
       "post_install": "patch --forward src/deps/src/modsecurity/configure.ac src/deps/misc/modsecurity.patch && rm -rf src/deps/src/modsecurity/others/libinjection"
     },
     {
       "id": "modsecurity-nginx",
       "name": "ModSecurity-nginx v1.0.3",
-      "url": "https://github.com/SpiderLabs/ModSecurity-nginx.git",
+      "url": "https://github.com/owasp-modsecurity/ModSecurity-nginx.git",
       "commit": "d59e4ad121df702751940fd66bcc0b3ecb51a079",
       "post_install": "patch --forward src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_log.c src/deps/misc/modsecurity-nginx.patch && patch --forward src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_common.h src/deps/misc/ngx_http_modsecurity_common.h.patch && patch --forward src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_module.c src/deps/misc/ngx_http_modsecurity_module.c.patch && patch --forward src/deps/src/modsecurity-nginx/config src/deps/misc/modsecurity-nginx-config.patch"
     },

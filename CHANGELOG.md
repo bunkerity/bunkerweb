@@ -16,6 +16,7 @@
 - [DEPS] Updated stream-lua-nginx-module version to v0.0.15
 - [DEPS] Updated coreruleset-v4 version to v4.6.0
 - [DEPS] Updated coreruleset-v3 version to v3.3.6
+- [DEPS] Updated ModSecurity version to v3.0.13
 
 ## v1.5.9 - 2024/07/22
 
