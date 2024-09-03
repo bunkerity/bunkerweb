@@ -15,18 +15,6 @@
 
 #include "src/debug_log/debug_log_writer.h"
 
-#include <errno.h>
-#include <fcntl.h>
-#include <pthread.h>
-#include <stdio.h>
-#include <sys/ipc.h>
-#include <sys/shm.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <unistd.h>
-
-#include <fstream>
-
 #include "src/utils/shared_files.h"
 
 namespace modsecurity {

@@ -23,6 +23,10 @@
 #include "src/operators/operator.h"
 #include "src/utils/system.h"
 
+#ifdef WIN32
+#include "src/compat/msvc.h"
+#endif
+
 namespace modsecurity {
 namespace operators {
 

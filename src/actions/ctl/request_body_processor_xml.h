@@ -29,7 +29,7 @@ namespace ctl {
 class RequestBodyProcessorXML : public Action {
  public:
     explicit RequestBodyProcessorXML(const std::string &action) 
-        : Action(action, RunTimeOnlyIfMatchKind) { }
+        : Action(action) { }
 
     bool evaluate(RuleWithActions *rule, Transaction *transaction) override;
 };

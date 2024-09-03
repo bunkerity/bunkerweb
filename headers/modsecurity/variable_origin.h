@@ -15,6 +15,7 @@
 
 #ifdef __cplusplus
 #include <string>
+#include <memory>
 #endif
 
 #ifndef HEADERS_MODSECURITY_VARIABLE_ORIGIN_H_
@@ -36,14 +37,17 @@ class VariableOrigin {
     VariableOrigin()
         : m_length(0),
         m_offset(0) { }
+    VariableOrigin(size_t length, size_t offset)
+        : m_length(length),
+        m_offset(offset) { } 
 
-    std::string toText() {
-        std::string offset = std::to_string(m_offset);
-        std::string len = std::to_string(m_length);
+    std::string toText() const {
+        const auto offset = std::to_string(m_offset);
+        const auto len = std::to_string(m_length);
         return "v" + offset + "," + len;
     }
 
-    int m_length;
+    size_t m_length;
     size_t m_offset;
 };
 

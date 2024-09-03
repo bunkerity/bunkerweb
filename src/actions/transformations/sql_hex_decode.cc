@@ -13,101 +13,62 @@
  *
  */
 
-#include "src/actions/transformations/sql_hex_decode.h"
+#include "sql_hex_decode.h"
 
-#include <iostream>
-#include <string>
-#include <algorithm>
-#include <functional>
-#include <cctype>
-#include <locale>
 #include <cstring>
 
-#include "modsecurity/transaction.h"
-#include "src/actions/transformations/transformation.h"
 #include "src/utils/string.h"
 
+using namespace modsecurity::utils::string;
 
-namespace modsecurity {
-namespace actions {
-namespace transformations {
+namespace modsecurity::actions::transformations {
 
-#ifndef VALID_HEX
-#define VALID_HEX(X) (((X >= '0') && (X <= '9')) \
-    || ((X >= 'a') && (X <= 'f')) \
-    || ((X >= 'A') && (X <= 'F')))
-#endif
-#ifndef ISODIGIT
-#define ISODIGIT(X) ((X >= '0') && (X <= '7'))
-#endif
 
-std::string SqlHexDecode::evaluate(const std::string &value,
-    Transaction *transaction) {
-    std::string ret;
-    unsigned char *input;
-    int size = 0;
-
-    input = reinterpret_cast<unsigned char *>
-        (malloc(sizeof(char) * value.length()+1));
-
-    if (input == NULL) {
-        return "";
-    }
-
-    memcpy(input, value.c_str(), value.length()+1);
-
-    size = inplace(input, value.length());
-
-    ret.assign(reinterpret_cast<char *>(input), size);
-    free(input);
-
-    return ret;
+static inline int mytolower(int ch) {
+    if (ch >= 'A' && ch <= 'Z')
+        return ('a' + ch - 'A');
+    else
+        return ch;
 }
 
-
-int SqlHexDecode::inplace(unsigned char *data, int len) {
-    unsigned char *d, *begin = data;
-    int count = 0;
-
-    if ((data == NULL) || (len == 0)) {
-        return 0;
+static inline bool inplace(std::string &value) {
+    if (value.empty()) {
+        return false;
     }
 
-    for (d = data; (++count < len) && *data; *d++ = *data++) {
-        if (*data != '0') {
-            continue;
-        }
-        ++data;
-        ++count;
-        if (mytolower(*data) != 'x') {
-            data--;
-            count--;
-            continue;
-        }
+    auto d = reinterpret_cast<unsigned char*>(value.data());
+    const unsigned char *data = d;
+    const auto end = data + value.size();
 
-        data++;
-        ++count;
+    bool changed = false;
 
-        // Do we need to keep "0x" if no hexa after?
-        if (!VALID_HEX(data[0]) || !VALID_HEX(data[1])) {
-            data -= 2;
-            count -= 2;
-            continue;
+    while (data < end) {
+        if (data + 3 < end
+            && *data == '0'
+            && mytolower(*(data + 1)) == 'x'
+            && VALID_HEX(*(data + 2)) && VALID_HEX(*(data + 3))) {
+            data += 2;  // skip '0x'
+            do {
+                *d++ = utils::string::x2c(data);
+                data += 2;
+            } while ((data + 1 < end) && VALID_HEX(*data) && VALID_HEX(*(data + 1)));
+            changed = true;
         }
-
-        while (VALID_HEX(data[0]) && VALID_HEX(data[1])) {
-            *d++ = utils::string::x2c(data);
-            data += 2;
-            count += 2;
+        else {
+            *d++ = *data++;
         }
     }
 
     *d = '\0';
-    return strlen(reinterpret_cast<char *>(begin));
+
+    value.resize(d - reinterpret_cast<const unsigned char*>(value.c_str()));
+    return changed;
 }
 
 
+bool SqlHexDecode::transform(std::string &value, const Transaction *trans) const {
+    return inplace(value);
+}
 
-}  // namespace transformations
-}  // namespace actions
-}  // namespace modsecurity
+
+}  // namespace modsecurity::actions::transformations

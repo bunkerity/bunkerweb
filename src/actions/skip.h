@@ -30,7 +30,7 @@ namespace actions {
 class Skip : public Action {
  public:
     explicit Skip(const std::string &action) 
-        : Action(action, RunTimeOnlyIfMatchKind),
+        : Action(action),
         m_skip_next(0) { }
 
     bool init(std::string *error) override;

@@ -30,7 +30,7 @@ namespace ctl {
 class RequestBodyAccess : public Action {
  public:
     explicit RequestBodyAccess(const std::string &action) 
-        : Action(action, RunTimeOnlyIfMatchKind),
+        : Action(action),
         m_request_body_access(false) { }
 
     bool init(std::string *error) override;

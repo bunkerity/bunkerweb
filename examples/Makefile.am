@@ -4,6 +4,7 @@ ACLOCAL_AMFLAGS = -I build
 
 SUBDIRS = \
 	multiprocess_c \
+	multithread \
 	reading_logs_with_offset \
 	reading_logs_via_rule_message \
 	simple_example_using_c \

@@ -13,49 +13,27 @@
  *
  */
 
-#include "src/actions/transformations/remove_whitespace.h"
+#include "remove_whitespace.h"
 
-#include <string>
+#include "remove_nulls.h"
 
-#include "modsecurity/transaction.h"
-#include "src/actions/transformations/transformation.h"
+namespace modsecurity::actions::transformations {
 
 
-namespace modsecurity {
-namespace actions {
-namespace transformations {
-
-RemoveWhitespace::RemoveWhitespace(const std::string &action) 
-    : Transformation(action) {
-    this->action_kind = 1;
-}
-
-std::string RemoveWhitespace::evaluate(const std::string &val,
-    Transaction *transaction) {
-    std::string transformed_value;
-    transformed_value.reserve(val.size());
-
-    size_t i = 0;
+bool RemoveWhitespace::transform(std::string &value, const Transaction *trans) const {
     const char nonBreakingSpaces = 0xa0;
     const char nonBreakingSpaces2 = 0xc2;
 
-    // loop through all the chars
-    while (i < val.size()) {
+    auto pred = [](const auto c) {
         // remove whitespaces and non breaking spaces (NBSP)
-        if (std::isspace(static_cast<unsigned char>(val[i]))
-            || (val[i] == nonBreakingSpaces)
-            || val[i] == nonBreakingSpaces2) {
-            // don't copy; continue on to next char in original val
-        } else {
-            transformed_value += val.at(i);
-        }
-        i++;
-    }
+        return std::isspace(static_cast<unsigned char>(c))
+            || c == nonBreakingSpaces
+            || c == nonBreakingSpaces2;
+    };
 
-    return transformed_value;
+    return RemoveNulls::remove_if(value, pred);
 }
 
-}  // namespace transformations
-}  // namespace actions
-}  // namespace modsecurity
+
+}  // namespace modsecurity::actions::transformations
 

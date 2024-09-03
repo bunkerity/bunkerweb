@@ -30,7 +30,7 @@ namespace actions {
 class Accuracy : public Action {
  public:
     explicit Accuracy(const std::string &action) 
-        : Action(action, ConfigurationKind),
+        : Action(action, Kind::ConfigurationKind),
         m_accuracy(0) { }
 
     bool evaluate(RuleWithActions *rule, Transaction *transaction) override;

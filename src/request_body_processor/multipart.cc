@@ -21,7 +21,12 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#ifndef WIN32
 #include <unistd.h>
+#else
+#include <io.h>
+#include "src/compat/msvc.h"
+#endif
 #include <list>
 #include <iostream>
 #include <string>
@@ -60,28 +65,34 @@ MultipartPartTmpFile::~MultipartPartTmpFile() {
 }
 
 void MultipartPartTmpFile::Open() {
-    struct tm timeinfo;
-    char tstr[300];
-    time_t tt = time(NULL);
+    time_t tt = time(nullptr);
 
+    struct tm timeinfo;
     localtime_r(&tt, &timeinfo);
 
-    memset(tstr, '\0', 300);
-    strftime(tstr, 299, "/%Y%m%d-%H%M%S", &timeinfo);
+    char tstr[std::size("/yyyymmdd-hhmmss")];
+    strftime(tstr, std::size(tstr), "/%Y%m%d-%H%M%S", &timeinfo);
 
     std::string path = m_transaction->m_rules->m_uploadDirectory.m_value;
     path = path + tstr + "-" + *m_transaction->m_id.get();
     path += "-file-XXXXXX";
 
-    char* tmp = strdup(path.c_str());
-    m_tmp_file_fd = mkstemp(tmp);
-    m_tmp_file_name.assign(tmp);
-    free(tmp);
+#ifndef WIN32
+    m_tmp_file_fd = mkstemp(path.data());
+#else
+    _mktemp_s(path.data(), path.length()+1);
+    m_tmp_file_fd = _open(path.c_str(), _O_CREAT | _O_EXCL | _O_RDWR);
+#endif
+    m_tmp_file_name = path;
     ms_dbg_a(m_transaction, 4, "MultipartPartTmpFile: Create filename= " + m_tmp_file_name);
 
     int mode = m_transaction->m_rules->m_uploadFileMode.m_value;
     if ((m_tmp_file_fd != -1) && (mode != 0)) {
+#ifndef WIN32
         if (fchmod(m_tmp_file_fd, mode) == -1) {
+#else
+        if (_chmod(m_tmp_file_name.c_str(), mode) == -1) {
+#endif
             m_tmp_file_fd = -1;
         }
     }
@@ -231,7 +242,7 @@ int Multipart::boundary_characters_valid(const char *boundary) {
 
 
 void Multipart::validate_quotes(const char *data, char quote)  {
-    int i, len;
+    int len;
 
     if (data == NULL)
         return;
@@ -244,7 +255,7 @@ void Multipart::validate_quotes(const char *data, char quote)  {
 
     len = strlen(data);
 
-    for (i = 0; i < len; i++)   {
+    for (int i = 0;i < len;i++)   {
         if (data[i] == '\'') {
             ms_dbg_a(m_transaction, 9,
                 "Multipart: Invalid quoting detected: " \
@@ -844,7 +855,7 @@ int Multipart::process_part_header(std::string *error, int offset) {
             }
 
             new_value = std::string(data);
-            utils::string::chomp(&new_value);
+            utils::string::chomp(new_value);
 
             /* update the header value in the table */
             header_value = m_mpp->m_headers.at(
@@ -905,6 +916,18 @@ int Multipart::process_part_header(std::string *error, int offset) {
                  return false;
             }
 
+            /* check if multipart header contains any invalid characters */
+            for (const auto& ch : header_name) {
+                if (ch < 33 || ch > 126) {
+                    ms_dbg_a(m_transaction, 1,
+                        "Multipart: Invalid part header " \
+                        "(contains invalid character).");
+                    error->assign("Multipart: Invalid part header "\
+                        "(contains invalid character).");
+                    return false;
+                }
+            }
+
             /* extract the value value */
             data++;
             i++;
@@ -913,7 +936,7 @@ int Multipart::process_part_header(std::string *error, int offset) {
                 i++;
             }
             header_value = std::string(data);
-            utils::string::chomp(&header_value);
+            utils::string::chomp(header_value);
 
             /* error if the name already exists */
             if (m_mpp->m_headers.count(header_name) > 0) {
@@ -1258,22 +1281,10 @@ int Multipart::multipart_complete(std::string *error) {
 
 
 int Multipart::count_boundary_params(const std::string& str_header_value) {
-    std::string lower = utils::string::tolower(str_header_value);
-    const char *header_value = lower.c_str();
-    char *duplicate = NULL;
-    char *s = NULL;
     int count = 0;
 
-    if (header_value == NULL) {
-        return -1;
-    }
-
-    duplicate = strdup(header_value);
-    if (duplicate == NULL) {
-        return -1;
-    }
-
-    s = duplicate;
+    const auto lower = utils::string::tolower(str_header_value);
+    const char *s = lower.c_str();
     while ((s = strstr(s, "boundary")) != NULL) {
         s += 8;
 
@@ -1282,7 +1293,6 @@ int Multipart::count_boundary_params(const std::string& str_header_value) {
         }
     }
 
-    free(duplicate);
     return count;
 }
 

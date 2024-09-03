@@ -134,6 +134,9 @@ RegressionTest *RegressionTest::from_yajl_node(const yajl_val &node) {
                 if (strcmp(key2, "port") == 0) {
                     u->serverPort = YAJL_GET_INTEGER(val2);
                 }
+                if (strcmp(key2, "hostname") == 0) {
+                    u->hostname = YAJL_GET_STRING(val2);
+                }
             }
         }
         if (strcmp(key, "request") == 0) {

@@ -36,7 +36,7 @@ class ExpireVar : public Action {
     explicit ExpireVar(const std::string &action) : Action(action) { }
 
     explicit ExpireVar(std::unique_ptr<RunTimeString> z)
-        : Action("expirevar", RunTimeOnlyIfMatchKind),
+        : Action("expirevar"),
             m_string(std::move(z)) { }
 
     bool evaluate(RuleWithActions *rule, Transaction *transaction) override;

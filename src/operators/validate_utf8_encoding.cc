@@ -19,6 +19,14 @@
 
 #include "src/operators/operator.h"
 
+
+constexpr int UNICODE_ERROR_CHARACTERS_MISSING   = -1;
+constexpr int UNICODE_ERROR_INVALID_ENCODING     = -2;
+constexpr int UNICODE_ERROR_OVERLONG_CHARACTER   = -3;
+constexpr int UNICODE_ERROR_RESTRICTED_CHARACTER = -4;
+constexpr int UNICODE_ERROR_DECODING_ERROR       = -5;
+
+
 namespace modsecurity {
 namespace operators {
 
@@ -132,7 +140,6 @@ bool ValidateUtf8Encoding::evaluate(Transaction *transaction, RuleWithActions *r
                         std::to_string(i) + "\"]");
                 }
                 return true;
-                break;
             case UNICODE_ERROR_INVALID_ENCODING :
                 if (transaction) {
                     ms_dbg_a(transaction, 8, "Invalid UTF-8 encoding: "
@@ -142,7 +149,6 @@ bool ValidateUtf8Encoding::evaluate(Transaction *transaction, RuleWithActions *r
                     logOffset(ruleMessage, i, str.size());
                 }
                 return true;
-                break;
             case UNICODE_ERROR_OVERLONG_CHARACTER :
                 if (transaction) {
                     ms_dbg_a(transaction, 8, "Invalid UTF-8 encoding: "
@@ -152,7 +158,6 @@ bool ValidateUtf8Encoding::evaluate(Transaction *transaction, RuleWithActions *r
                     logOffset(ruleMessage, i, str.size());
                 }
                 return true;
-                break;
             case UNICODE_ERROR_RESTRICTED_CHARACTER :
                 if (transaction) {
                     ms_dbg_a(transaction, 8, "Invalid UTF-8 encoding: "
@@ -162,7 +167,6 @@ bool ValidateUtf8Encoding::evaluate(Transaction *transaction, RuleWithActions *r
                     logOffset(ruleMessage, i, str.size());
                 }
                 return true;
-                break;
             case UNICODE_ERROR_DECODING_ERROR :
                 if (transaction) {
                     ms_dbg_a(transaction, 8, "Error validating UTF-8 decoding "
@@ -171,7 +175,6 @@ bool ValidateUtf8Encoding::evaluate(Transaction *transaction, RuleWithActions *r
                     logOffset(ruleMessage, i, str.size());
                 }
                 return true;
-                break;
         }
 
         if (rc <= 0) {

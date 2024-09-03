@@ -30,7 +30,7 @@ namespace ctl {
 class RuleRemoveTargetByTag : public Action {
  public:
     explicit RuleRemoveTargetByTag(const std::string &action) 
-        : Action(action, RunTimeOnlyIfMatchKind) { }
+        : Action(action) { }
 
     bool init(std::string *error) override;
     bool evaluate(RuleWithActions *rule, Transaction *transaction) override;

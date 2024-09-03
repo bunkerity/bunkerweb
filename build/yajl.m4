@@ -78,6 +78,29 @@ else
 #    fi
 fi
 
+# FIX: if the include directory in CFLAGS ends with "include/yajl",
+# remove the suffix "/yajl". the library header files are included
+# using the prefix (for example, #include <yajl/yajl_tree.h>), and
+# this is even the case for the library itself (for example,
+# yajl_tree.h includes yajl/yajl_common.h).
+
+new_cflags=""
+
+for flag in $YAJL_CFLAGS; do
+    case "$flag" in
+        -I*/include/yajl)
+            new_flag="${flag%/yajl}"
+            new_cflags="$new_cflags $new_flag"
+            ;;
+        *)
+            new_cflags="$new_cflags $flag"
+            ;;
+    esac
+done
+
+YAJL_CFLAGS="$new_cflags"
+
+
 if test -z "${YAJL_LDADD}"; then
     if test -z "${YAJL_MANDATORY}"; then
         if test -z "${YAJL_DISABLED}"; then

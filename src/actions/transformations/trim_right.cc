@@ -13,35 +13,16 @@
  *
  */
 
-#include "src/actions/transformations/trim_right.h"
-
-#include <iostream>
-#include <string>
-#include <algorithm>
-#include <functional>
-#include <cctype>
-#include <locale>
-
-#include "modsecurity/transaction.h"
-#include "src/actions/transformations/transformation.h"
-#include "modsecurity/actions/action.h"
-
-namespace modsecurity {
-namespace actions {
-namespace transformations {
+#include "trim_right.h"
+#include "trim.h"
 
 
-TrimRight::TrimRight(const std::string &action) 
-    : Trim(action) {
-    this->action_kind = 1;
+namespace modsecurity::actions::transformations {
+
+
+bool TrimRight::transform(std::string &value, const Transaction *trans) const {
+    return Trim::rtrim(value);
 }
 
-std::string TrimRight::evaluate(const std::string &val,
-    Transaction *transaction) {
-    std::string value(val);
-    return *this->rtrim(&value);
-}
 
-}  // namespace transformations
-}  // namespace actions
-}  // namespace modsecurity
+}  // namespace modsecurity::actions::transformations

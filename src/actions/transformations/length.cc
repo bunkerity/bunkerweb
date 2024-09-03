@@ -13,34 +13,16 @@
  *
  */
 
-#include "src/actions/transformations/length.h"
-
-#include <iostream>
-#include <string>
-#include <algorithm>
-#include <functional>
-#include <cctype>
-#include <locale>
-
-#include "modsecurity/transaction.h"
-#include "src/actions/transformations/transformation.h"
+#include "length.h"
 
 
-namespace modsecurity {
-namespace actions {
-namespace transformations {
+namespace modsecurity::actions::transformations {
 
-Length::Length(const std::string &action) 
-    : Transformation(action) {
-    this->action_kind = 1;
+
+bool Length::transform(std::string &value, const Transaction *trans) const {
+    value = std::to_string(value.size());
+    return true;
 }
 
-std::string Length::evaluate(const std::string &value,
-    Transaction *transaction) {
 
-    return std::to_string(value.size());
-}
-
-}  // namespace transformations
-}  // namespace actions
-}  // namespace modsecurity
+}  // namespace modsecurity::actions::transformations

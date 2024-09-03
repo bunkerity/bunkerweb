@@ -45,12 +45,6 @@ namespace modsecurity {
 namespace actions {
 
 
-std::string Action::evaluate(const std::string &value,
-    Transaction *transaction) {
-    return value;
-}
-
-
 bool Action::evaluate(RuleWithActions *rule, Transaction *transaction) {
     return true;
 }

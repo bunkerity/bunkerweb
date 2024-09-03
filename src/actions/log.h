@@ -31,7 +31,7 @@ namespace actions {
 class Log : public Action {
  public:
     explicit Log(const std::string &action) 
-        : Action(action, RunTimeOnlyIfMatchKind) { }
+        : Action(action) { }
 
     bool evaluate(RuleWithActions *rule, Transaction *transaction,
         std::shared_ptr<RuleMessage> rm) override;

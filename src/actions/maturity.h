@@ -30,7 +30,7 @@ namespace actions {
 class Maturity : public Action {
  public:
     explicit Maturity(const std::string &action) 
-        : Action(action, ConfigurationKind),
+        : Action(action, Kind::ConfigurationKind),
         m_maturity(0) { }
 
     bool evaluate(RuleWithActions *rule, Transaction *transaction) override;

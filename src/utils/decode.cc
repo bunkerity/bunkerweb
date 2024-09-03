@@ -17,68 +17,60 @@
 #include "modsecurity/modsecurity.h"
 #include "src/utils/string.h"
 
+using namespace modsecurity::utils::string;
 
-namespace modsecurity {
-namespace utils {
+namespace modsecurity::utils {
 
 
-int urldecode_nonstrict_inplace(unsigned char *input,
-    uint64_t input_len, int *invalid_count, int *changed) {
-    unsigned char *d = (unsigned char *)input;
-    uint64_t i, count;
+bool urldecode_nonstrict_inplace(std::string &val,
+    int &invalid_count) {
+    unsigned char *d = (unsigned char *)val.data();
+    unsigned char *s = d;
+    const unsigned char *e = s + val.size();
 
-    *changed = 0;
+    invalid_count = 0;
+    bool changed = false;
 
-    if (input == NULL) {
-        return -1;
-    }
-
-    i = count = 0;
-    while (i < input_len) {
-        if (input[i] == '%') {
+    while (s != e) {
+        if (*s == '%') {
             /* Character is a percent sign. */
 
             /* Are there enough bytes available? */
-            if (i + 2 < input_len) {
-                char c1 = input[i + 1];
-                char c2 = input[i + 2];
+            if (s + 2 < e) {
+                const auto c1 = *(s + 1);
+                const auto c2 = *(s + 2);
                 if (VALID_HEX(c1) && VALID_HEX(c2)) {
-                    uint64_t uni = string::x2c(&input[i + 1]);
+                    const auto uni = string::x2c(s + 1);
 
-                    *d++ = (wchar_t)uni;
-                    count++;
-                    i += 3;
-                    *changed = 1;
+                    *d++ = uni;
+                    s += 3;
+                    changed = true;
                 } else {
                     /* Not a valid encoding, skip this % */
-                    *d++ = input[i++];
-                    count++;
-                    (*invalid_count)++;
+                    *d++ = *s++;
+                    invalid_count++;
                 }
             } else {
                 /* Not enough bytes available, copy the raw bytes. */
-                *d++ = input[i++];
-                count++;
-                (*invalid_count)++;
+                *d++ = *s++;
+                invalid_count++;
             }
         } else {
             /* Character is not a percent sign. */
-            if (input[i] == '+') {
+            if (*s == '+') {
                 *d++ = ' ';
-                *changed = 1;
+                changed = true;
             } else {
-                *d++ = input[i];
+                *d++ = *s;
             }
-            count++;
-            i++;
+            s++;
         }
     }
 
-#if 0
-    *d = '\0';
-#endif
+    if (changed)
+        val.resize((char*) d - val.c_str());
 
-    return count;
+    return changed;
 }
 
 
@@ -99,8 +91,8 @@ std::string uri_decode(const std::string & sSrc) {
     while (pSrc < SRC_LAST_DEC) {
         if (*pSrc == '%') {
             char dec1, dec2;
-            if (-1 != (dec1 = string::HEX2DEC[*(pSrc + 1)])
-                && -1 != (dec2 = string::HEX2DEC[*(pSrc + 2)])) {
+            if ((char)-1 != (dec1 = string::HEX2DEC[*(pSrc + 1)])
+                && (char)-1 != (dec2 = string::HEX2DEC[*(pSrc + 2)])) {
                 *pEnd++ = (dec1 << 4) + dec2;
                 pSrc += 3;
                 continue;
@@ -120,5 +112,4 @@ std::string uri_decode(const std::string & sSrc) {
 }
 
 
-}  // namespace utils
-}  // namespace modsecurity
+}  // namespace modsecurity::utils

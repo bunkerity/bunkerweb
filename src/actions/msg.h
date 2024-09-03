@@ -34,10 +34,10 @@ namespace actions {
 class Msg : public Action {
  public:
     explicit Msg(const std::string &action) 
-        : Action(action, RunTimeOnlyIfMatchKind) { }
+        : Action(action) { }
 
     explicit Msg(std::unique_ptr<RunTimeString> z)
-        : Action("msg", RunTimeOnlyIfMatchKind),
+        : Action("msg"),
             m_string(std::move(z)) { }
 
     bool evaluate(RuleWithActions *rule, Transaction *transaction,

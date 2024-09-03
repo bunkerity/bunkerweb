@@ -333,9 +333,9 @@ class RulesSetProperties {
         case FalseConfigBoolean:
             return "False";
         case PropertyNotSetConfigBoolean:
+        default:
             return "Not set";
         }
-        return NULL;
     }
 
 

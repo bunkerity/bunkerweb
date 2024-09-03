@@ -4900,13 +4900,14 @@ static std::stack<int> YY_PREVIOUS_STATE;
 // The location of the current token.
 #line 4902 "seclang-scanner.cc"
 #define YY_NO_INPUT 1
+#define YY_NO_UNISTD_H 1
 
 #line 494 "seclang-scanner.ll"
   // Code run each time a pattern is matched.
   # define YY_USER_ACTION  driver.loc.back()->columns (yyleng);
 
-#line 4909 "seclang-scanner.cc"
 #line 4910 "seclang-scanner.cc"
+#line 4911 "seclang-scanner.cc"
 
 #define INITIAL 0
 #define EXPECTING_ACTION_PREDICATE_VARIABLE 1
@@ -5228,7 +5229,7 @@ YY_DECL
   // Code run each time yylex is called.
   driver.loc.back()->step();
 
-#line 5232 "seclang-scanner.cc"
+#line 5233 "seclang-scanner.cc"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -8334,7 +8335,7 @@ YY_RULE_SETUP
 #line 1340 "seclang-scanner.ll"
 ECHO;
 	YY_BREAK
-#line 8338 "seclang-scanner.cc"
+#line 8339 "seclang-scanner.cc"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -8956,7 +8957,7 @@ static void yy_load_buffer_state  (void)
 
 /* %if-c-only */
 
-        b->yy_is_interactive = file ? (isatty( fileno(file) ) > 0) : 0;
+        b->yy_is_interactive = 0;
     
 /* %endif */
 /* %if-c++-only */

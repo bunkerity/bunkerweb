@@ -54,7 +54,7 @@ enum AllowType : int {
 class Allow : public Action {
  public:
     explicit Allow(const std::string &action) 
-        : Action(action, RunTimeOnlyIfMatchKind),
+        : Action(action),
         m_allowType(NoneAllowType) { }
 
 

@@ -23,6 +23,7 @@
 #endif
 
 #include <cstddef>
+#include <string>
 
 
 extern "C" {
@@ -188,8 +189,6 @@ int acmp_process_quick(ACMPT *acmpt, const char **match, const char *data, size_
  * Prepares parser for searching
  */
 int acmp_prepare(ACMP *parser);
-
-char *parse_pm_content(const char *op_parm, unsigned short int op_len, const char **error_msg);
 
 }
 

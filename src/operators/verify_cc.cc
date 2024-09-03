@@ -59,7 +59,6 @@ int VerifyCC::luhnVerify(const char *ccnumber, int len) {
     int sum[2] = { 0, 0 };
     int odd = 0;
     int digits = 0;
-    int i;
 
     /* Weighted lookup table which is just a precalculated (i = index):
      *   i*2 + (( (i*2) > 9 ) ? -9 : 0)
@@ -71,7 +70,7 @@ int VerifyCC::luhnVerify(const char *ccnumber, int len) {
     /* Add up only digits (weighted digits via lookup table)
      * for both odd and even CC numbers to avoid 2 passes.
      */
-    for (i = 0; i < len; i++) {
+    for (int i = 0;i < len;i++) {
         if (ccnumber[i] >= (0 + 48) && ccnumber[i] <= (9 + 48)) {
             sum[0] += (!odd ? wtable[ccnumber[i] - '0'] : (ccnumber[i] - '0'));
             sum[1] += (odd ? wtable[ccnumber[i] - '0'] : (ccnumber[i] - '0'));

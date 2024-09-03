@@ -15,16 +15,10 @@
 
 #include "src/actions/rev.h"
 
-#include <iostream>
-#include <string>
-
-#include "modsecurity/actions/action.h"
-#include "modsecurity/transaction.h"
-#include "modsecurity/rule.h"
+#include "modsecurity/rule_with_actions.h"
 
 
-namespace modsecurity {
-namespace actions {
+namespace modsecurity::actions {
 
 
 bool Rev::init(std::string *error) {
@@ -39,5 +33,4 @@ bool Rev::evaluate(RuleWithActions *rule, Transaction *transaction) {
 }
 
 
-}  // namespace actions
-}  // namespace modsecurity
+}  // namespace modsecurity::actions

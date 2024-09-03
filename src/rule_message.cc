@@ -42,8 +42,8 @@ std::string RuleMessage::_details(const RuleMessage *rm) {
         msg.append(" [tag \"" + utils::string::toHexIfNeeded(a, true) + "\"]");
     }
 
-    msg.append(" [hostname \"" + *rm->m_serverIpAddress.get() \
-        + "\"]");
+    msg.append(" [hostname \"" + *rm->m_requestHostName.get() + "\"]");
+
     msg.append(" [uri \"" + utils::string::limitTo(200, *rm->m_uriNoQueryStringDecoded.get()) + "\"]");
     msg.append(" [unique_id \"" + *rm->m_id + "\"]");
     msg.append(" [ref \"" + utils::string::limitTo(200, rm->m_reference) + "\"]");

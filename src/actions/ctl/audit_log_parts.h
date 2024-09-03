@@ -29,7 +29,7 @@ namespace ctl {
 class AuditLogParts : public Action {
  public:
     explicit AuditLogParts(const std::string &action) 
-        : Action(action, RunTimeOnlyIfMatchKind),
+        : Action(action),
         mPartsAction(0),
         mParts("") { }
 

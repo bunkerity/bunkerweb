@@ -13,35 +13,18 @@
  *
  */
 
-#include "src/actions/transformations/sha1.h"
+#include "sha1.h"
 
-#include <iostream>
-#include <string>
-#include <algorithm>
-#include <functional>
-#include <cctype>
-#include <locale>
-
-#include "modsecurity/transaction.h"
-#include "src/actions/transformations/transformation.h"
 #include "src/utils/sha1.h"
 
 
-namespace modsecurity {
-namespace actions {
-namespace transformations {
+namespace modsecurity::actions::transformations {
 
-Sha1::Sha1(const std::string &action) 
-    : Transformation(action) {
-    this->action_kind = 1;
+
+bool Sha1::transform(std::string &value, const Transaction *trans) const {
+    value = Utils::Sha1::digest(value);
+    return true;
 }
 
-std::string Sha1::evaluate(const std::string &value,
-    Transaction *transaction) {
 
-    return Utils::Sha1::digest(value);
-}
-
-}  // namespace transformations
-}  // namespace actions
-}  // namespace modsecurity
+}  // namespace modsecurity::actions::transformations

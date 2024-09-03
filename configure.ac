@@ -52,8 +52,8 @@ AC_PROG_MAKE_SET
 PKG_PROG_PKG_CONFIG
 
 
-# Check if the compiler is c++11 compatible.
-# AX_CXX_COMPILE_STDCXX_11(,mandatory)
+# Set C++ standard version and check if compiler supports it.
+AX_CXX_COMPILE_STDCXX(17, noext, mandatory)
 
 # Check for libinjection
 if ! test -f "${srcdir}/others/libinjection/src/libinjection_html5.c"; then
@@ -75,6 +75,28 @@ AC_MSG_ERROR([\
 fi
 # Libinjection version
 AC_DEFUN([LIBINJECTION_VERSION], m4_esyscmd_s(cd "others/libinjection" && git describe && cd ../..))
+AC_SUBST([LIBINJECTION_VERSION])
+
+# Check for Mbed TLS
+if ! test -f "${srcdir}/others/mbedtls/library/base64.c"; then
+AC_MSG_ERROR([\
+
+
+  Mbed TLS was not found within ModSecurity source directory.
+
+  Mbed TLS code is available as part of ModSecurity source code in a format
+  of a git-submodule. git-submodule allow us to specify the correct version of
+  Mbed TLS and still uses the Mbed TLS repository to download it.
+
+  You can download Mbed TLS using git:
+
+     $ git submodule init
+     $ git submodule update
+
+   ])
+fi
+# Mbed TLS version
+AC_DEFUN([MBEDTLS_VERSION], m4_esyscmd_s(cd "others/mbedtls" && git describe && cd ../..))
 
 # SecLang test version
 AC_DEFUN([SECLANG_TEST_VERSION], m4_esyscmd_s(cd "test/test-cases/secrules-language-tests" && git log -1 --format="%h" --abbrev-commit && cd ../../..))
@@ -137,14 +159,13 @@ AM_CONDITIONAL([PCRE2_CFLAGS], [test "PCRE2_CFLAGS" != ""])
 
 
 # Checks for header files.
-AC_HEADER_STDC
 AC_CHECK_HEADERS([string])
 AC_CHECK_HEADERS([iostream])
 AC_CHECK_HEADERS([sys/utsname.h])
 
 
-# ??
-LT_INIT([dlopen])
+# Initialize libtool
+LT_INIT
 
 # Identify platform
 AC_CANONICAL_HOST
@@ -227,6 +248,17 @@ AC_SUBST([MSC_VERSION])
 MSC_GIT_VERSION=msc_version_git
 AC_SUBST([MSC_GIT_VERSION])
 
+AC_ARG_ENABLE(assertions,
+    [AS_HELP_STRING([--enable-assertions],[Turn on assertions feature: undefine NDEBUG])],
+
+    [case "${enableval}" in
+        yes) assertions=true ;;
+        no)  assertions=false ;;
+        *) AC_MSG_ERROR(bad value ${enableval} for --enable-assertions) ;;
+        esac],
+
+        [assertions=false]
+        )
 
 AC_ARG_ENABLE(debug-logs,
     [AS_HELP_STRING([--disable-debug-logs],[Turn off the SecDebugLog feature])],
@@ -284,27 +316,10 @@ AC_ARG_ENABLE(parser-generation,
     [buildParser=false]
     )
 
-# Mutex
-AC_ARG_ENABLE(mutex-on-pm,
-    [AS_HELP_STRING([--enable-mutex-on-pm],[Treats pm operations as a critical section])],
-
-    [case "${enableval}" in
-        yes) mutexPm=true ;;
-        no)  mutexPm=false ;;
-        *) AC_MSG_ERROR(bad value ${enableval} for --enable-mutex-on-pm) ;;
-    esac],
-
-    [mutexPm=false]
-    )
-if test "$mutexPm" == "true"; then
-    MODSEC_MUTEX_ON_PM="-DMUTEX_ON_PM=1"
-    AC_SUBST(MODSEC_MUTEX_ON_PM)
-fi
-
 
 if test $buildParser = true; then
     AC_PROG_YACC
-    AC_PROG_LEX
+    AC_PROG_LEX(noyywrap)
     AC_PATH_PROG([FLEX], [flex])
     test "x$FLEX" = "x" && AC_MSG_ERROR([flex is needed to build ModSecurity])
 
@@ -356,6 +371,14 @@ if test "$aflFuzzer" == "true"; then
     GLOBAL_CPPFLAGS="$GLOBAL_CPPFLAGS $FUZZ_CPPCFLAGS"
     $buildExamples = false
 fi
+
+case $assertions in
+    false) ASSERTIONS_CPPCFLAGS="-DNDEBUG" ;;
+    true) ASSERTIONS_CPPCFLAGS="-UNDEBUG" ;;
+    *) AC_MSG_ERROR(bad value ${assertions} for assertions) ;;
+esac
+GLOBAL_CPPFLAGS="$GLOBAL_CPPFLAGS $ASSERTIONS_CPPCFLAGS"
+
 AC_SUBST(GLOBAL_LDADD)
 AC_SUBST(GLOBAL_CPPFLAGS)
 
@@ -383,6 +406,7 @@ AM_COND_IF([EXAMPLES],
             examples/Makefile \
             examples/simple_example_using_c/Makefile \
             examples/multiprocess_c/Makefile \
+            examples/multithread/Makefile \
             examples/reading_logs_with_offset/Makefile \
             examples/reading_logs_via_rule_message/Makefile \
             examples/using_bodies_in_chunks/Makefile \
@@ -426,6 +450,8 @@ echo " "
 echo " Mandatory dependencies"
 AS_ECHO_N("   + libInjection                                  ....")
 echo LIBINJECTION_VERSION
+AS_ECHO_N("   + Mbed TLS                                      ....")
+echo MBEDTLS_VERSION
 AS_ECHO_N("   + SecLang tests                                 ....")
 echo SECLANG_TEST_VERSION
 
@@ -589,6 +615,11 @@ if test $buildTestUtilities = true; then
     fi
 else
     echo "   + Test Utilities                                ....disabled"
+fi
+if test $assertions = true; then
+    echo "   + Assertions                                    ....enabled"
+else
+    echo "   + Assertions                                    ....disabled"
 fi
 if test $debugLogs = true; then
     echo "   + SecDebugLog                                   ....enabled"

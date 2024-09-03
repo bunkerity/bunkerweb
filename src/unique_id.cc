@@ -17,7 +17,8 @@
 #include "src/config.h"
 
 #ifdef WIN32
-#include <winsock2.h>
+#include "src/compat/msvc.h"
+#include <WinSock2.h>
 #include <iphlpapi.h>
 #endif
 
@@ -48,7 +49,11 @@
 #endif
 
 #include <stdio.h>
+#ifndef WIN32
 #include <unistd.h>
+#else
+#include <io.h>
+#endif
 #include <string.h>
 
 #include "src/utils/sha1.h"
@@ -207,7 +212,7 @@ std::string UniqueId::ethernetMacAddress() {
     pAdapter = pAdapterInfo;
     while (pAdapter && !mac[0] && !mac[1] && !mac[2]) {
         if (pAdapter->AddressLength > 4) {
-            apr_snprintf(mac, MAC_ADDRESS_SIZE, "%02x:%02x:%02x:%02x:%02x:%02x",
+            snprintf(mac, MAC_ADDRESS_SIZE, "%02x:%02x:%02x:%02x:%02x:%02x",
                 (unsigned char)pAdapter->Address[0],
                 (unsigned char)pAdapter->Address[1],
                 (unsigned char)pAdapter->Address[2],
