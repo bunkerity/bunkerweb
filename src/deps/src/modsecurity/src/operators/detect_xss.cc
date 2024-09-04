@@ -18,7 +18,7 @@
 #include <string>
 
 #include "src/operators/operator.h"
-#include "others/libinjection/src/libinjection.h"
+#include "libinjection/src/libinjection.h"
 
 
 namespace modsecurity {

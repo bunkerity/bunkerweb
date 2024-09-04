@@ -31,7 +31,7 @@ namespace ctl {
 class RuleEngine : public Action {
  public:
     explicit RuleEngine(const std::string &action) 
-        : Action(action, RunTimeOnlyIfMatchKind),
+        : Action(action),
         m_ruleEngine(RulesSetProperties::PropertyNotSetRuleEngine) { }
 
     bool init(std::string *error) override;

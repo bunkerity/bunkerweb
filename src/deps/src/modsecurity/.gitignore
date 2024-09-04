@@ -11,13 +11,18 @@ build/ltoptions.m4
 build/ltsugar.m4
 build/ltversion.m4
 build/lt~obsolete.m4
+build/win32/build
+build/win32/CMakeUserPresets.json
 compile
 config.guess
 config.log
 config.status
 config.sub
+config.h.in~
 configure
+configure~
 depcomp
+modsecurity.pc
 .deps
 .libs
 .dirstamp
@@ -45,6 +50,7 @@ ltmain.sh
 examples/simple_example_using_c/test
 /tools/rules-check/modsec-rules-check
 examples/multiprocess_c/multi
+examples/multithread/multithread
 examples/reading_logs_via_rule_message/simple_request
 examples/reading_logs_with_offset/read
 examples/using_bodies_in_chunks/simple_request

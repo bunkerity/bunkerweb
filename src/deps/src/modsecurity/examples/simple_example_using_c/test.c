@@ -68,6 +68,8 @@ int main (int argc, char **argv)
     msc_process_response_body(transaction);
     msc_process_logging(transaction);
 end:
+    if(error != NULL)
+        msc_rules_error_cleanup(error);
     msc_rules_cleanup(rules);
     msc_cleanup(modsec);
 

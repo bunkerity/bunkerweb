@@ -57,7 +57,13 @@ As a dynamic library, don’t forget that libmodsecurity must be installed to a 
 
 ### Unix (Linux, MacOS, FreeBSD, …)
 
-On unix the project uses autotools to help the compilation process.
+On unix the project uses autotools to help the compilation process. Please note that if you are working with `git`, don't forget to initialize and update the submodules. Here's a quick how-to:
+```shell
+$ git clone --recursive https://github.com/owasp-modsecurity/ModSecurity ModSecurity
+$ cd ModSecurity
+```
+
+You can then start the build process:
 
 ```shell
 $ ./build.sh
@@ -71,12 +77,11 @@ Details on distribution specific builds can be found in our Wiki:
 
 ### Windows
 
-Windows build is not ready yet.
-
+Windows build information can be found [here](build/win32/README.md).
 
 ## Dependencies
 
-This library is written in C++ using the C++11 standards. It also uses Flex
+This library is written in C++ using the C++17 standards. It also uses Flex
 and Yacc to produce the “Sec Rules Language” parser. Other, mandatory dependencies include YAJL, as ModSecurity uses JSON for producing logs and its testing framework, libpcre (not yet mandatory) for processing regular expressions in SecRules, and libXML2 (not yet mandatory) which is used for parsing XML requests.
 
 All others dependencies are related to operators specified within SecRules or configuration directives and may not be required for compilation. A short list of such dependencies is as follows:
@@ -231,11 +236,90 @@ CFLAGS to disable the compilation optimization parameters:
 ```shell
 $ export CFLAGS="-g -O0"
 $ ./build.sh
-$ ./configure
+$ ./configure --enable-assertions=yes
 $ make
 $ sudo make install
 ```
+"Assertions allow us to document assumptions and to spot violations early in the
+development process. What is more, assertions allow us to spot violations with a
+minimum of effort." https://dl.acm.org/doi/pdf/10.1145/240964.240969
 
+It is recommended to use assertions where applicable, and to enable them with
+'--enable-assertions=yes' during the testing and debugging workflow.
+
+### Benchmarking
+
+The source tree includes a Benchmark tool that can help measure library performance. The tool is located in the `test/benchmark/` directory. The build process also creates the binary here, so you will have the tool after the compilation is finished.
+
+To run, just type:
+
+```shell
+cd test/benchmark
+$ ./benchmark
+Doing 1000000 transactions...
+
+```
+
+You can also pass a lower value:
+
+```shell
+$ ./benchmark 1000
+Doing 1000 transactions...
+```
+
+To measure the time:
+```shell
+$ time ./benchmark 1000
+Doing 1000 transactions...
+
+real	0m0.351s
+user	0m0.337s
+sys	0m0.022s
+```
+
+This is very fast because the benchmark uses the minimal `modsecurity.conf.default` configuration, which doesn't include too many rules:
+
+```shell
+$ cat basic_rules.conf
+
+Include "../../modsecurity.conf-recommended"
+
+```
+
+To measure with real rules, run one of the download scripts in the same directory:
+
+```shell
+$ ./download-owasp-v3-rules.sh
+Cloning into 'owasp-v3'...
+remote: Enumerating objects: 33007, done.
+remote: Counting objects: 100% (2581/2581), done.
+remote: Compressing objects: 100% (907/907), done.
+remote: Total 33007 (delta 2151), reused 2004 (delta 1638), pack-reused 30426
+Receiving objects: 100% (33007/33007), 9.02 MiB | 16.21 MiB/s, done.
+Resolving deltas: 100% (25927/25927), done.
+Switched to a new branch 'tag3.0.2'
+/path/to/ModSecurity/test/benchmark
+Done.
+
+$ cat basic_rules.conf
+
+Include "../../modsecurity.conf-recommended"
+
+Include "owasp-v3/crs-setup.conf.example"
+Include "owasp-v3/rules/*.conf"
+```
+
+Now the command will give much higher value.
+
+#### How the benchmark works
+
+The tool is a straightforward wrapper application that utilizes the library. It creates a ModSecurity instance and a RuleSet instance, then runs a loop based on the specified number. Within this loop, it creates a Transaction object to emulate real HTTP transactions.
+
+Each transaction is an HTTP/1.1 GET request with some GET parameters. Common headers are added, followed by the response headers and an XML body. Between phases, the tool checks whether an intervention has occurred. All transactions are created with the same data.
+
+Note that the tool does not call the last phase (logging).
+
+Please remember to reset `basic_rules.conf` if you want to try with a different ruleset.
 
 ## Reporting Issues
 
@@ -262,8 +346,9 @@ new issue, please check if there is one already opened on the same topic.
 
 ## Bindings
 
-The libModSecurity design allows the integration with bindings. There is an effort to avoid breaking API [binary] compatibility to make an easy integration with possible bindings. Currently, there are two notable projects maintained by the community:
+The libModSecurity design allows the integration with bindings. There is an effort to avoid breaking API [binary] compatibility to make an easy integration with possible bindings. Currently, there are a few notable projects maintained by the community:
    * Python - https://github.com/actions-security/pymodsecurity
+   * Rust - https://github.com/rkrishn7/rust-modsecurity
    * Varnish - https://github.com/xdecock/vmod-modsecurity
 
 ## Packaging

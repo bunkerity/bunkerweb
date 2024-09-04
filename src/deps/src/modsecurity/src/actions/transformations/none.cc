@@ -13,30 +13,15 @@
  *
  */
 
-#include "src/actions/transformations/none.h"
-
-#include <iostream>
-#include <string>
-#include <algorithm>
-#include <functional>
-#include <cctype>
-#include <locale>
-
-#include "modsecurity/transaction.h"
-#include "src/actions/transformations/transformation.h"
+#include "none.h"
 
 
-namespace modsecurity {
-namespace actions {
-namespace transformations {
+namespace modsecurity::actions::transformations {
 
 
-std::string None::evaluate(const std::string &value,
-    Transaction *transaction) {
-    return value;
+bool None::transform(std::string &value, const Transaction *trans) const {
+    return false;
 }
 
 
-}  // namespace transformations
-}  // namespace actions
-}  // namespace modsecurity
+}  // namespace modsecurity::actions::transformations

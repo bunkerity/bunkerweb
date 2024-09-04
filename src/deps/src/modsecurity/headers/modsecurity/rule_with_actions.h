@@ -119,16 +119,7 @@ class RuleWithActions : public Rule {
 
 
     void executeTransformations(
-        Transaction *trasn, const std::string &value, TransformationResults &ret);
-
-    inline void executeTransformation(
-        actions::transformations::Transformation *a,
-        std::shared_ptr<std::string> *value,
-        Transaction *trans,
-        TransformationResults *ret,
-        std::string *path,
-        int *nth) const;
-
+        const Transaction *trasn, const std::string &value, TransformationResults &ret);
 
     void performLogging(Transaction *trans,
         std::shared_ptr<RuleMessage> ruleMessage,
@@ -166,6 +157,14 @@ class RuleWithActions : public Rule {
     RuleWithActions *m_chainedRuleParent;
 
  private:
+    inline void executeTransformation(
+        const actions::transformations::Transformation &a,
+        std::string &value,
+        const Transaction *trans,
+        TransformationResults &ret,
+        std::string &path,
+        int &nth) const;
+
     /* actions */
     actions::Action *m_disruptiveAction;
     actions::LogData *m_logData;

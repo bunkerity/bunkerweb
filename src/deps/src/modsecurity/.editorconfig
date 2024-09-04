@@ -1,0 +1,26 @@
+# top-most EditorConfig file
+root = true
+
+# Unix-style newlines with a newline ending every file
+[*]
+end_of_line = lf
+indent_style = space
+# Scripts without suffixes in the project root tend to indent by two spaces
+indent_size = 2
+
+# Most of the project files indent by four spaces
+[*/**]
+indent_size = 4
+
+# Test files indent by two spaces
+[test/**]
+indent_size = 2
+
+# The config parser file indents by both two and four spaces,
+# so we choose to indent by two spaces as a common denominator.
+[*.yy]
+indent_size = 2
+
+[{Makefile,Makefile.am}]
+indent_style = tab
+

@@ -50,7 +50,7 @@ class RuleWithOperator : public RuleWithActions {
     bool evaluate(Transaction *transaction,
         std::shared_ptr<RuleMessage> rm) override;
 
-    void getVariablesExceptions(Transaction *t,
+    void getVariablesExceptions(Transaction &t,
         variables::Variables *exclusion, variables::Variables *addition);
     inline void getFinalVars(variables::Variables *vars,
         variables::Variables *eclusion, Transaction *trans);

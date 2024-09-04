@@ -46,7 +46,7 @@
     "version_min":300000,
     "title":"Include remote rules - failed download (Abort)",
     "expected":{
-      "parser_error": "Failed to download: HTTP response code said error"
+      "parser_error": "Failed to download"
     },
     "rules":[
       "SecRuleEngine On",

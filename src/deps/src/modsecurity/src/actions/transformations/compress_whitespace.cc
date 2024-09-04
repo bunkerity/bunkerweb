@@ -13,54 +13,36 @@
  *
  */
 
-#include "src/actions/transformations/compress_whitespace.h"
-
-#include <iostream>
-#include <string>
-#include <algorithm>
-#include <functional>
-#include <cctype>
-#include <locale>
-
-#include "modsecurity/transaction.h"
-#include "src/actions/transformations/transformation.h"
+#include "compress_whitespace.h"
 
 
-namespace modsecurity {
-namespace actions {
-namespace transformations {
+namespace modsecurity::actions::transformations {
 
-CompressWhitespace::CompressWhitespace(const std::string &action) 
-    : Transformation(action) {
-    this->action_kind = 1;
-}
 
-std::string CompressWhitespace::evaluate(const std::string &value,
-    Transaction *transaction) {
+bool CompressWhitespace::transform(std::string &value, const Transaction *trans) const {
+    bool inWhiteSpace = false;
 
-    std::string a;
-    int inWhiteSpace = 0;
-    int i = 0;
+    auto d = value.data();
 
-    while (i < value.size()) {
-        if (isspace(value[i])) {
+    for(const auto c : value) {
+        if (isspace(c)) {
             if (inWhiteSpace) {
-                i++;
                 continue;
             } else {
-                inWhiteSpace = 1;
-                a.append(" ", 1);
+                inWhiteSpace = true;
+                *d++ = ' ';
             }
         } else {
-            inWhiteSpace = 0;
-            a.append(&value.at(i), 1);
+            inWhiteSpace = false;
+            *d++ = c;
         }
-        i++;
     }
 
-    return a;
+    const auto new_len = d - value.c_str();
+    const auto changed = new_len != value.length();
+    value.resize(new_len);
+    return changed;
 }
 
-}  // namespace transformations
-}  // namespace actions
-}  // namespace modsecurity
+
+}  // namespace modsecurity::actions::transformations

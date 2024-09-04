@@ -30,20 +30,6 @@
 namespace modsecurity_test {
 
 
-std::string string_to_hex(const std::string& input) {
-    static const char* const lut = "0123456789ABCDEF";
-    size_t len = input.length();
-
-    std::string output;
-    output.reserve(2 * len);
-    for (size_t i = 0; i < len; ++i) {
-        const unsigned char c = input[i];
-        output.push_back(lut[c >> 4]);
-        output.push_back(lut[c & 15]);
-    }
-    return output;
-}
-
 void replaceAll(std::string *s, const std::string &search,
     const char replace) {
     for (size_t pos = 0; ; pos += 0) {
@@ -102,15 +88,15 @@ std::string UnitTest::print() {
     i << "  \"param\": \"" << this->param << "\"" << std::endl;
     i << "  \"output\": \"" << this->output << "\"" << std::endl;
     i << "}" << std::endl;
-    if (this->ret != this->obtained) {
+    if (this->ret != this->result.ret) {
         i << "Expecting: \"" << this->ret << "\" - returned: \"";
-        i << this->obtained << "\"" << std::endl;
+        i << this->result.ret << "\"" << std::endl;
     }
-    if (this->output != this->obtainedOutput) {
+    if (this->output != this->result.output) {
         i << "Expecting: \"";
         i << modsecurity::utils::string::toHexIfNeeded(this->output);
         i << "\" - returned: \"";
-        i << modsecurity::utils::string::toHexIfNeeded(this->obtainedOutput);
+        i << modsecurity::utils::string::toHexIfNeeded(this->result.output);
         i << "\"";
         i << std::endl;
     }

@@ -15,7 +15,11 @@
 
 #include <string.h>
 
+#ifndef WIN32
 #include <unistd.h>
+#else
+#include <io.h>
+#endif
 
 #include <ctime>
 #include <iostream>
@@ -60,13 +64,11 @@ bool contains(const std::string &s, const std::string &pattern) {
 
 void clearAuditLog(const std::string &filename) {
     if (!filename.empty()) {
-        std::ifstream file;
-        file.open(filename.c_str(), std::ifstream::out | std::ifstream::trunc);
+        std::ofstream file{filename.c_str(), std::ofstream::out | std::ofstream::trunc};
         if (!file.is_open() || file.fail()) {
             std::cout << std::endl << "Failed to clear previous contents of audit log: " \
                 << filename << std::endl;
         }
-        file.close();
     }
 }
 std::string getAuditLogContent(const std::string &filename) {
@@ -307,6 +309,10 @@ void perform_unit_test(ModSecurityTest<RegressionTest> *test,
         modsec_transaction->processConnection(t->clientIp.c_str(),
             t->clientPort, t->serverIp.c_str(), t->serverPort);
 
+        if (t->hostname != "") {
+            modsec_transaction->setRequestHostName(t->hostname);
+        }
+
         actions(&r, modsec_transaction, &serverLog);
 #if 0
         if (r.status != 200) {
@@ -474,9 +480,14 @@ int main(int argc, char **argv) {
     ModSecurityTest<RegressionTest> test;
 
     std::string ver(MODSECURITY_VERSION);
-    std::string envvar("MODSECURITY=ModSecurity " + ver + " regression tests");
+    std::string envvar("ModSecurity " + ver + " regression tests");
 
-    putenv(strdup(envvar.c_str()));
+#ifndef WIN32
+    setenv("MODSECURITY", envvar.c_str(), 1);
+#else
+    _putenv_s("MODSECURITY", envvar.c_str());
+#endif
+
 #ifndef NO_LOGS
     int test_number = 0;
 #endif
@@ -484,15 +495,12 @@ int main(int argc, char **argv) {
 #if defined(WITH_GEOIP) or defined(WITH_MAXMIND)
     resources.push_back("geoip-or-maxmind");
 #endif
-
 #if defined(WITH_MAXMIND)
     resources.push_back("maxmind");
 #endif
-
 #if defined(WITH_GEOIP)
     resources.push_back("geoip");
 #endif
-
 #ifdef WITH_CURL
     resources.push_back("curl");
 #endif
@@ -502,10 +510,14 @@ int main(int argc, char **argv) {
 #ifdef WITH_LUA
     resources.push_back("lua");
 #endif
+#ifdef WITH_LIBXML2
+    resources.push_back("libxml2");
+#endif
 
 #ifdef NO_LOGS
     std::cout << "Test utility cannot work without logging support." \
         << std::endl;
+    return 0;
 #else
     test.cmd_options(argc, argv);
     if (!test.m_automake_output && !test.m_count_all) {
@@ -605,6 +617,6 @@ int main(int argc, char **argv) {
         delete vec;
     }
 
+    return failed;
 #endif
-    return 0;
 }

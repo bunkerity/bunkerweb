@@ -18,12 +18,14 @@
 #include "src/collection/backend/collection_data.h"
 
 #include <sys/types.h>
+#ifndef WIN32
 #include <unistd.h>
+#else
+#include <io.h>
+#endif
 
 #include <string>
 #include <memory>
-
-#include <pthread.h>
 
 #include "modsecurity/variable_value.h"
 #include "src/utils/regex.h"
@@ -659,7 +661,7 @@ MDB_dbi* MDBEnvProvider::GetDBI() {
     return &m_dbi;
 }
 
-bool MDBEnvProvider::isValid() {
+bool MDBEnvProvider::isValid() const {
     return valid;
 }
 

@@ -27,12 +27,10 @@
 
 #ifdef WITH_LMDB
 #include <lmdb.h>
-#include <semaphore.h>
 #endif  // WITH_LMDB
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <fcntl.h>
-#include <pthread.h>
 
 #include "modsecurity/variable_value.h"
 #include "modsecurity/collection/collection.h"
@@ -83,7 +81,7 @@ class MDBEnvProvider {
     }
     MDB_env* GetEnv();
     MDB_dbi* GetDBI();
-    bool isValid();
+    bool isValid() const;
 
     ~MDBEnvProvider();
  private:

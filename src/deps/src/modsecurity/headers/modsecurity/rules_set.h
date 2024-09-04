@@ -99,6 +99,7 @@ int msc_rules_add_remote(RulesSet *rules, const char *key, const char *uri,
     const char **error);
 int msc_rules_add_file(RulesSet *rules, const char *file, const char **error);
 int msc_rules_add(RulesSet *rules, const char *plain_rules, const char **error);
+void msc_rules_error_cleanup(const char *error);
 int msc_rules_cleanup(RulesSet *rules);
 
 #ifdef __cplusplus

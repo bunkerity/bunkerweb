@@ -13,26 +13,63 @@
  *
  */
 
-
 #ifndef SRC_UTILS_SHA1_H_
 #define SRC_UTILS_SHA1_H_
 
-#include <algorithm>
-#include <iostream>
 #include <string>
+#include <cassert>
 
-namespace modsecurity {
-namespace Utils {
+#include "src/utils/string.h"
+#include "mbedtls/sha1.h"
 
-class Sha1 {
+namespace modsecurity::Utils {
+
+
+using DigestOp = int (*)(const unsigned char *, size_t, unsigned char []);
+
+
+template<DigestOp digestOp, int DigestSize>
+class DigestImpl {
  public:
-    Sha1() { }
 
-    static std::string hexdigest(const std::string& input);
-    static std::string digest(const std::string& input);
+    static std::string digest(const std::string& input) {
+        return digestHelper(input, [](const auto digest) { 
+            return std::string(digest);
+        });
+    }
+
+    static void digestReplace(std::string& value) {
+        digestHelper(value, [&value](const auto digest) mutable { 
+            value = digest;
+        });
+    }
+
+    static std::string hexdigest(const std::string &input) {
+        return digestHelper(input, [](const auto digest) { 
+            return utils::string::string_to_hex(digest);
+        });
+    }
+
+private:
+
+    template<typename ConvertOp>
+    static auto digestHelper(const std::string &input,
+        ConvertOp convertOp) -> auto {
+        char digest[DigestSize];
+
+        auto ret = digestOp(reinterpret_cast<const unsigned char *>(input.c_str()),
+                 input.size(), reinterpret_cast<unsigned char *>(digest));
+        assert(ret == 0);
+
+        return convertOp(std::string_view(digest, DigestSize));
+    }
 };
 
-}  // namespace Utils
-}  // namespace modsecurity
+
+class Sha1 : public DigestImpl<&mbedtls_sha1, 20> {
+};
+
+
+}  // namespace modsecurity::Utils
 
 #endif  // SRC_UTILS_SHA1_H_

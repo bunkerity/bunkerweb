@@ -15,7 +15,6 @@ multi_LDFLAGS = \
 	-L$(top_builddir)/src/.libs/ \
 	$(GEOIP_LDFLAGS) \
 	-lmodsecurity \
-	-lpthread \
 	-lm \
 	-lstdc++ \
 	$(LUA_LDFLAGS) \

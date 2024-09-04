@@ -51,18 +51,12 @@ bool SetVar::evaluate(RuleWithActions *rule, Transaction *t) {
     std::string m_variableNameExpanded;
 
     auto *v = m_variable.get();
-    variables::Tx_DynamicElement *tx = dynamic_cast<
-        variables::Tx_DynamicElement *> (v);
-    variables::Session_DynamicElement *session = dynamic_cast<
-        variables::Session_DynamicElement *> (v);
-    variables::Ip_DynamicElement *ip = dynamic_cast<
-        variables::Ip_DynamicElement *> (v);
-    variables::Resource_DynamicElement *resource = dynamic_cast<
-        variables::Resource_DynamicElement *> (v);
-    variables::Global_DynamicElement *global = dynamic_cast<
-        variables::Global_DynamicElement *> (v);
-    variables::User_DynamicElement *user = dynamic_cast<
-        variables::User_DynamicElement *> (v);
+    auto tx = dynamic_cast<variables::Tx_DynamicElement *> (v);
+    auto session = dynamic_cast<variables::Session_DynamicElement *> (v);
+    auto ip = dynamic_cast<variables::Ip_DynamicElement *> (v);
+    auto resource = dynamic_cast<variables::Resource_DynamicElement *> (v);
+    auto global = dynamic_cast<variables::Global_DynamicElement *> (v);
+    auto user = dynamic_cast<variables::User_DynamicElement *> (v);
     if (tx) {
         m_variableNameExpanded = tx->m_string->evaluate(t, rule);
     } else if (session) {

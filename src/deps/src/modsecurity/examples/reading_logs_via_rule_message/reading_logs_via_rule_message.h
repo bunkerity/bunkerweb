@@ -13,13 +13,19 @@
  *
  */
 
-#include <unistd.h>
+#ifndef EXAMPLES_READING_LOGS_VIA_RULE_MESSAGE_READING_LOGS_VIA_RULE_MESSAGE_H_
+#define EXAMPLES_READING_LOGS_VIA_RULE_MESSAGE_READING_LOGS_VIA_RULE_MESSAGE_H_
 
 #include <string>
 #include <memory>
+#include <thread>
+#include <array>
+#include <chrono>
+
+#include "modsecurity/rule_message.h"
 
 
-#define NUM_THREADS 100
+constexpr auto NUM_THREADS = 100;
 
 
 char request_header[] =  "" \
@@ -61,35 +67,21 @@ char response_body[] = "" \
 
 char ip[] = "200.249.12.31";
 
-#include "modsecurity/rule_message.h"
 
-#ifndef EXAMPLES_READING_LOGS_VIA_RULE_MESSAGE_READING_LOGS_VIA_RULE_MESSAGE_H_
-#define EXAMPLES_READING_LOGS_VIA_RULE_MESSAGE_READING_LOGS_VIA_RULE_MESSAGE_H_
+static void process_request(modsecurity::ModSecurity *modsec, modsecurity::RulesSet *rules) {
+    for (auto z = 0; z < 10000; z++) {
+        auto modsecTransaction = std::make_unique<modsecurity::Transaction>(modsec, rules, nullptr);
 
-
-struct data_ms {
-    modsecurity::ModSecurity *modsec;
-    modsecurity::RulesSet *rules;
-};
-
-
-static void *process_request(void *data) {
-    struct data_ms *a = (struct data_ms *)data;
-    modsecurity::ModSecurity *modsec = a->modsec;
-    modsecurity::RulesSet *rules = a->rules;
-    int z = 0;
-
-    for (z = 0; z < 10000; z++) {
-        modsecurity::Transaction *modsecTransaction = \
-            new modsecurity::Transaction(modsec, rules, NULL);
         modsecTransaction->processConnection(ip, 12345, "127.0.0.1", 80);
         modsecTransaction->processURI(request_uri, "GET", "1.1");
 
-        usleep(10);
+        std::this_thread::sleep_for(std::chrono::microseconds(10));
+
         modsecTransaction->addRequestHeader("Host",
             "net.tutsplus.com");
         modsecTransaction->processRequestHeaders();
         modsecTransaction->processRequestBody();
+
         modsecTransaction->addResponseHeader("HTTP/1.1",
             "200 OK");
         modsecTransaction->processResponseHeaders(200, "HTTP 1.2");
@@ -97,15 +89,10 @@ static void *process_request(void *data) {
             (const unsigned char*)response_body,
             strlen((const char*)response_body));
         modsecTransaction->processResponseBody();
+
         modsecTransaction->processLogging();
-
-        delete modsecTransaction;
     }
-
-    pthread_exit(NULL);
-    return NULL;
 }
-
 
 class ReadingLogsViaRuleMessage {
  public:
@@ -125,47 +112,36 @@ class ReadingLogsViaRuleMessage {
             m_rules(rules)
         { }
 
-    int process() {
-        pthread_t threads[NUM_THREADS];
-        int i;
-        struct data_ms dms;
-        void *status;
-
-        modsecurity::ModSecurity *modsec;
-        modsecurity::RulesSet *rules;
-
-        modsec = new modsecurity::ModSecurity();
+    int process() const {
+        auto modsec = std::make_unique<modsecurity::ModSecurity>();
         modsec->setConnectorInformation("ModSecurity-test v0.0.1-alpha" \
             " (ModSecurity test)");
         modsec->setServerLogCb(logCb, modsecurity::RuleMessageLogProperty
             | modsecurity::IncludeFullHighlightLogProperty);
 
-        rules = new modsecurity::RulesSet();
+        auto rules = std::make_unique<modsecurity::RulesSet>();
         if (rules->loadFromUri(m_rules.c_str()) < 0) {
             std::cout << "Problems loading the rules..." << std::endl;
             std::cout << rules->m_parserError.str() << std::endl;
             return -1;
         }
 
-        dms.modsec = modsec;
-        dms.rules = rules;
+        std::array<std::thread, NUM_THREADS> threads;
 
-        for (i = 0; i < NUM_THREADS; i++) {
-            pthread_create(&threads[i], NULL, process_request,
-		reinterpret_cast<void *>(&dms));
-            //  process_request((void *)&dms);
+        for (auto i = 0; i != threads.size(); ++i) {
+            threads[i] = std::thread(
+                [&modsec, &rules]() {
+                    process_request(modsec.get(), rules.get());
+                });
         }
 
-        usleep(10000);
+        std::this_thread::sleep_for(std::chrono::microseconds(10000));
 
-        for (i=0; i < NUM_THREADS; i++) {
-            pthread_join(threads[i], &status);
+        for (auto i = 0; i != threads.size(); ++i) {
+            threads[i].join();
             std::cout << "Main: completed thread id :" << i << std::endl;
         }
 
-        delete rules;
-        delete modsec;
-        pthread_exit(NULL);
         return 0;
     }
 

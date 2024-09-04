@@ -13,67 +13,35 @@
  *
  */
 
-#include "src/actions/transformations/hex_decode.h"
+#include "hex_decode.h"
 
-#include <iostream>
-#include <string>
-#include <algorithm>
-#include <functional>
-#include <cctype>
-#include <locale>
-#include <cstring>
-
-#include "modsecurity/transaction.h"
-#include "src/actions/transformations/transformation.h"
 #include "src/utils/string.h"
 
-namespace modsecurity {
-namespace actions {
-namespace transformations {
+
+namespace modsecurity::actions::transformations {
 
 
-std::string HexDecode::evaluate(const std::string &value,
-    Transaction *transaction) {
-    std::string ret;
-    unsigned char *input;
-    int size = 0;
+static inline int inplace(std::string &value) {
+    if (value.empty()) return false;
 
-    input = reinterpret_cast<unsigned char *>
-        (malloc(sizeof(char) * value.length()+1));
+    const auto len = value.length();
+    auto d = reinterpret_cast<unsigned char *>(value.data());
+    const auto data = d;
 
-    if (input == NULL) {
-        return "";
-    }
-
-    memcpy(input, value.c_str(), value.length()+1);
-
-    size = inplace(input, value.length());
-
-    ret.assign(reinterpret_cast<char *>(input), size);
-    free(input);
-
-    return ret;
-}
-
-
-int HexDecode::inplace(unsigned char *data, int len) {
-    unsigned char *d = data;
-    int i, count = 0;
-
-    if ((data == NULL) || (len == 0)) {
-        return 0;
-    }
-
-    for (i = 0; i <= len - 2; i += 2) {
+    for (int i = 0; i <= len - 2; i += 2) {
         *d++ = utils::string::x2c(&data[i]);
-        count++;
     }
+
     *d = '\0';
 
-    return count;
+    value.resize(d - data);
+    return true;
 }
 
 
-}  // namespace transformations
-}  // namespace actions
-}  // namespace modsecurity
+bool HexDecode::transform(std::string &value, const Transaction *trans) const {
+    return inplace(value);
+}
+
+
+}  // namespace modsecurity::actions::transformations

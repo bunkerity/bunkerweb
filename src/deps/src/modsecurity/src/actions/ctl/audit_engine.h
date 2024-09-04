@@ -34,7 +34,7 @@ namespace ctl {
 class AuditEngine : public Action {
  public:
     explicit AuditEngine(const std::string &action)
-        : Action(action, RunTimeOnlyIfMatchKind),
+        : Action(action),
         m_auditEngine(audit_log::AuditLog::AuditLogStatus::NotSetLogStatus) { }
 
     bool init(std::string *error) override;

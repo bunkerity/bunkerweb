@@ -1,3 +1,110 @@
+v3.0.13 - 2024-Sep-03
+---------------------
+
+  - Adjust reference to modsecurity::utils::string::VALID_HEX
+    [PR #3243 - @eduar-hte]
+  - Lua::run: Move logging of str parameter to higher log level.
+    [PR #3240 - @frozenice]
+  - Remove unnecessary heap allocated copies in Transformation actions
+    [PR #3231 - @eduar-hte]
+  - Removed multiple heap-allocated copies in Pm::init & parse_pm_content
+    [PR #3233 - @eduar-hte]
+  - Unit tests results should not be displayed in 'automake output' mode
+    [PR #3232 - @eduar-hte]
+  - Replace usage of std::ctime, which is not safe in
+    multithread contexts
+    [PR #3228 - @eduar-hte]
+  - Removed unnecessary lock to call acmp_process_quick in Pm::evaluate
+    [PR #3227 - @eduar-hte]
+  - feat: Check if the MP header contains invalid character
+    [PR #3225 - @airween]
+  - Prevent concurrent access to data in InMemoryPerProcess'
+    resolveXXX methods
+    [PR #3216 - @eduar-hte]
+  - Remove several string copies and unnecessary heap allocations
+    [PR #3222 - @eduar-hte]
+  - Creating a std::string with a null pointer
+    is undefined behaviour
+    [PR #3220 - @eduar-hte]
+  - Simplifiy configuration to build using std C++17
+    [PR #3219 - @eduar-hte]
+  - Remove unnecessary dynamic casts
+    [PR #3218 - @eduar-hte]
+  - fix: Sonarcloud reported memleak fixes
+    [PR #3114 - @airween]
+  - V3/sonarcloud replace this declaration by a structured
+    binding declaration
+    [PR #3217 - @gberkes]
+  - Do not assume ModSecurityIntervention argument to
+    transaction::intervention has been initialized/cleaned
+    [PR #3212 - @eduar-hte]
+  - Refactor: used the init-statement to declare "pos" inside the
+    if statement
+    [PR #3214 - @gberkes]
+  - Refactor: moved 3 #include directives to the top of the file.
+    [PR #3213 - @gberkes]
+  - Fix SecRemoteRules regression test not to depend on a
+    specific error message
+    [PR #3211 - @eduar-hte]
+  - Fixed shared files deadlock in a multi-threaded Windows application
+    [PR #3210 - @eduar-hte]
+  - Add cleanup methods to complete C based ABI
+    [PR #3209 - @eduar-hte]
+  - Build on macOS with Apple silicon (arm64)
+    [PR #3208 - @eduar-hte]
+  - remove 'this throw' call in transaction
+    [PR #3207 - @gberkes]
+  - New API function: set hostname for log
+    [PR #3203 - @airween]
+  - Fixing typo in Dockerfile
+    [PR #3189 - @bitbehz]
+  - Simplify checkout of submodules in GitHub workflows (with support for git describe)
+    [PR #3185 - @eduar-hte]
+  - Update README.md: use submodule and use benchmark tool
+    [PR #3182 - @airween]
+  - Improve performance of VariableOrigin instances
+    [PR #3164 - @eduar-hte]
+  - Update libinjection & Mbed TLS
+    [PR #3161 - @eduar-hte]
+  - chore: add PR template (v3)
+    [PR #3160 - @fzipi]
+  - Update to seclang-scanner changes introduced by Windows support
+    [PR #3146 - @eduar-hte]
+  - GitHub build & quality assurance workflow updates
+    [PR #3144 - @eduar-hte]
+  - Add link to Rust bindings in README
+    [PR #3141 - @rkrishn7]
+  - Remove cppcheck suppressions with line numbers in test/cppcheck_suppressions.txt
+    [PR #3134 - @eduar-hte]
+  - Add support to build libModSecurity v3 on Windows
+    [PR #3132 - @eduar-hte]
+  - fix: update submodule url
+    [PR #3128 - @fzipi]
+  - fix(rbl): typo in rbl check selector
+    [PR #3127 - @fzipi]
+  - fix: Changed 'equal_range()' + loop by 'find()' in resolveFirst() methods
+    [PR #3117 - @airween]
+  - Deleted redundant code in 'ModSecurity::serverLog(...)'.
+    [PR #3116 - @gberkes]
+  - doc: Update CHANGES
+    [PR #3101 - @airween]
+  - Reduce the scope of variables in a for loop
+    [PR #3098 - @devzero2000]
+  - Clean up 'return' never will be executed.
+    [PR #3096 - @gberkes]
+  - fix: Replace obsolete macros
+    [PR #3095 - @airween]
+  - fix: Change 'SecEngineStatus' to Off by default
+    [PR #3092 - @airween]
+  - chore: update bug-report-for-version-3-x.md
+    [PR #3086 - @fzipi]
+  - test: Logical, syntax and cosmetic fixes on test cases
+    [PR #3080 - @MirkoDziadzka, @airween]
+  - Bump the C++ version from C++11 to C++17
+    [PR #3079 - @MirkoDziadzka]
+  - fix: makes uri decode platform independent
+    [PR #3016 - @M4tteoP]
+
 v3.0.12 - 2024-Jan-30
 ---------------------
 

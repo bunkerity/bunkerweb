@@ -19,6 +19,9 @@
 #include <string.h>
 #ifdef __OpenBSD__
 #include <glob.h>
+#elif defined(WIN32)
+#include "Poco/Glob.h"
+#include <algorithm>
 #else
 #include <wordexp.h>
 #endif
@@ -31,6 +34,7 @@
 #include <vector>
 
 #if defined _MSC_VER
+#include "src/compat/msvc.h"
 #include <direct.h>
 #elif defined __GNUC__
 #include <sys/types.h>
@@ -39,6 +43,36 @@
 
 #include "src/utils/system.h"
 #include "src/config.h"
+
+#ifdef WIN32
+
+// Public domain code from mingw-w64's winpthreads
+// https://sourceforge.net/p/mingw-w64/code/HEAD/tree/trunk/mingw-w64-libraries/winpthreads/src/clock.c
+// 
+
+#define CLOCK_PROCESS_CPUTIME_ID    2
+#define POW10_7                 10000000
+
+// NOTE: includes only CLOCK_PROCESS_CPUTIME_ID implementation, ignores clock_id argument
+static int clock_gettime(int clock_id, struct timespec *tp)
+{
+    unsigned __int64 t;
+    LARGE_INTEGER pf, pc;
+    union {
+        unsigned __int64 u64;
+        FILETIME ft;
+    }  ct, et, kt, ut;
+
+    if(0 == GetProcessTimes(GetCurrentProcess(), &ct.ft, &et.ft, &kt.ft, &ut.ft))
+        return -1;
+    t = kt.u64 + ut.u64;
+    tp->tv_sec = t / POW10_7;
+    tp->tv_nsec = ((int) (t % POW10_7)) * 100;
+
+    return 0;
+}
+
+#endif
 
 namespace modsecurity {
 namespace utils {
@@ -64,19 +98,15 @@ double cpu_seconds(void) {
 
 std::string find_resource(const std::string& resource,
     const std::string& config, std::string *err) {
-    std::ifstream *iss;
 
     err->assign("Looking at: ");
     // Trying absolute or relative to the current dir.
-    iss = new std::ifstream(resource, std::ios::in);
-    if (iss->is_open()) {
-        iss->close();
-        delete iss;
+    auto iss = std::ifstream(resource, std::ios::in);
+    if (iss.is_open()) {
         return resource;
     } else {
         err->append("'" + resource + "', ");
     }
-    delete iss;
 
     // What about `*' ?
     if (utils::expandEnv(resource, 0).size() > 0) {
@@ -87,15 +117,12 @@ std::string find_resource(const std::string& resource,
 
     // Trying the same path of the configuration file.
     std::string f = get_path(config) + "/" + resource;
-    iss = new std::ifstream(f, std::ios::in);
-    if (iss->is_open()) {
-        iss->close();
-        delete iss;
+    iss = std::ifstream(f, std::ios::in);
+    if (iss.is_open()) {
         return f;
     } else {
         err->append("'" + f + "', ");
     }
-    delete iss;
 
     // What about `*' ?
     if (utils::expandEnv(f, 0).size() > 0) {
@@ -122,8 +149,16 @@ std::string get_path(const std::string& file) {
 
 std::list<std::string> expandEnv(const std::string& var, int flags) {
     std::list<std::string> vars;
-
-#ifdef __OpenBSD__
+#ifdef WIN32
+    // NOTE: align scopes with if & if in other versions
+    {
+        {
+            std::set<std::string> files;
+            Poco::Glob::glob(var, files);
+            for(auto file : files) {
+                std::replace(file.begin(), file.end(), '\\', '/');  // preserve unix-like paths
+                const char* exp[] = { file.c_str() };
+#elif defined(__OpenBSD__)
     glob_t p;
     if (glob(var.c_str(), flags, NULL, &p) == false) {
         if (p.gl_pathc) {
@@ -135,15 +170,13 @@ std::list<std::string> expandEnv(const std::string& var, int flags) {
         if (p.we_wordc) {
             for (char** exp = p.we_wordv; *exp; ++exp) {
 #endif
-                std::ifstream *iss = new std::ifstream(exp[0], std::ios::in);
-                if (iss->is_open()) {
-                    iss->close();
+                auto iss = std::ifstream(exp[0], std::ios::in);
+                if (iss.is_open())
                     vars.push_back(exp[0]);
-                }
-                delete iss;
             }
         }
-#ifdef __OpenBSD__
+#ifdef WIN32
+#elif defined(__OpenBSD__)
         globfree(&p);
 #else
         wordfree(&p);
@@ -153,7 +186,13 @@ std::list<std::string> expandEnv(const std::string& var, int flags) {
 }
 
 bool createDir(const std::string& dir, int mode, std::string *error) {
+#ifndef WIN32
     int ret = mkdir(dir.data(), mode);
+#else
+    if (dir == ".")
+        return true;
+    int ret = _mkdir(dir.c_str());
+#endif
     if (ret != 0 && errno != EEXIST) {
         error->assign("Not able to create directory: " + dir + ": " \
             + strerror(errno) + ".");

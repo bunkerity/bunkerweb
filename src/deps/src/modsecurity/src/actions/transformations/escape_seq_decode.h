@@ -13,35 +13,20 @@
  *
  */
 
-#include <string>
-
-#include "modsecurity/actions/action.h"
-#include "src/actions/transformations/transformation.h"
-
 #ifndef SRC_ACTIONS_TRANSFORMATIONS_ESCAPE_SEQ_DECODE_H_
 #define SRC_ACTIONS_TRANSFORMATIONS_ESCAPE_SEQ_DECODE_H_
 
-#ifdef __cplusplus
-namespace modsecurity {
-class Transaction;
+#include "transformation.h"
 
-namespace actions {
-namespace transformations {
+namespace modsecurity::actions::transformations {
 
 class EscapeSeqDecode : public Transformation {
  public:
+    using Transformation::Transformation;
 
-    explicit EscapeSeqDecode(const std::string &action) ;
-
-    std::string evaluate(const std::string &exp,
-        Transaction *transaction) override;
-    int ansi_c_sequences_decode_inplace(unsigned char *input, int input_len);
+    bool transform(std::string &value, const Transaction *trans) const override;
 };
 
-}  // namespace transformations
-}  // namespace actions
-}  // namespace modsecurity
-
-#endif
+}  // namespace modsecurity::actions::transformations
 
 #endif  // SRC_ACTIONS_TRANSFORMATIONS_ESCAPE_SEQ_DECODE_H_

@@ -25,6 +25,12 @@
 
 namespace modsecurity_test {
 
+class UnitTestResult {
+ public:
+    int ret;
+    std::string output;
+};
+
 class UnitTest {
  public:
     static UnitTest *from_yajl_node(const yajl_val &);
@@ -39,9 +45,8 @@ class UnitTest {
     std::string filename;
     std::string output;
     int ret;
-    int obtained;
     int skipped;
-    std::string obtainedOutput;
+    UnitTestResult result;
 };
 
 }  // namespace modsecurity_test

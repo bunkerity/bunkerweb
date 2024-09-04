@@ -47,23 +47,11 @@ class AnchoredVariable {
     AnchoredVariable(const AnchoredVariable &a) = delete;
     AnchoredVariable &operator= (const AnchoredVariable &a) = delete;
 
-    /*
-        : m_transaction(a.m_transaction),
-        m_offset(a.m_offset),
-        m_name(a.m_name),
-        m_value(a.m_value),
-        m_var(a.m_var) { }
-    */
-
-    ~AnchoredVariable();
+    ~AnchoredVariable() = default;
 
     void unset();
     void set(const std::string &a, size_t offset);
     void set(const std::string &a, size_t offset, size_t offsetLen);
-    void append(const std::string &a, size_t offset,
-        bool spaceSeparator = false);
-    void append(const std::string &a, size_t offset,
-        bool spaceSeparator, int size);
 
     void evaluate(std::vector<const VariableValue *> *l);
     std::string *  evaluate();
@@ -75,7 +63,7 @@ class AnchoredVariable {
     std::string m_value;
 
  private:
-    VariableValue *m_var;
+    VariableValue m_var;
 };
 
 }  // namespace modsecurity

@@ -29,7 +29,7 @@ namespace ctl {
 class RequestBodyProcessorURLENCODED : public Action {
  public:
     explicit RequestBodyProcessorURLENCODED(const std::string &action) 
-        : Action(action, RunTimeOnlyIfMatchKind) { }
+        : Action(action) { }
 
     bool evaluate(RuleWithActions *rule, Transaction *transaction) override;
 };

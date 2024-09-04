@@ -38,6 +38,7 @@
     {
     "enabled":1,
     "version_min":300000,
+    "resource":"libxml2",
     "title":"Testing XML request body parser (validate ok)",
     "expected":{
       "debug_log": "Target value: \"39.95\" \\(Variable: XML:\/bookstore\/book\/price\\[text\\(\\)\\]\\)"

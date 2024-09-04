@@ -15,236 +15,131 @@
 
 #include "src/utils/shared_files.h"
 
-#include <errno.h>
 #include <fcntl.h>
-#include <pthread.h>
-#include <stdio.h>
-#include <sys/ipc.h>
-#include <sys/shm.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <string.h>
+#ifdef WIN32
+#include <algorithm>
+#endif
 
-#include <utility>
-#include <fstream>
-#include <string>
 
 namespace modsecurity {
 namespace utils {
 
 
-std::pair<msc_file_handler *, FILE *> SharedFiles::find_handler(
-    const std::string &fileName) {
-    for (const auto &i : m_handlers) {
-        if (i.first == fileName) {
-            return i.second;
-        }
-    }
-    return std::pair<modsecurity::utils::msc_file_handler *,
-        FILE *>(NULL, NULL);
-}
-
-
-std::pair<msc_file_handler *, FILE *> SharedFiles::add_new_handler(
+SharedFiles::handlers_map::iterator SharedFiles::add_new_handler(
     const std::string &fileName, std::string *error) {
-    int shm_id;
-    int ret;
-    key_t mem_key_structure;
-    msc_file_handler_t *new_debug_log = NULL;
-    struct shmid_ds shared_mem_info;
-    FILE *fp;
-    bool toBeCreated = true;
-
-    fp = fopen(fileName.c_str(), "a");
+    FILE *fp = fopen(fileName.c_str(), "a");
     if (fp == 0) {
         error->assign("Failed to open file: " + fileName);
-        goto err_fh;
+        return m_handlers.end();
     }
 
-    mem_key_structure = ftok(fileName.c_str(), 1);
-    if (mem_key_structure < 0) {
-        error->assign("Failed to select key for the shared memory (1): ");
-        error->append(strerror(errno));
-        goto err_mem_key;
-    }
+#ifdef WIN32
+    // replace invalid characters for a Win32 named object
+    auto tmp = fileName;
+    std::replace(tmp.begin(), tmp.end(), '\\', '_');
+    std::replace(tmp.begin(), tmp.end(), '/', '_');
 
-    shm_id = shmget(mem_key_structure, sizeof (msc_file_handler_t) \
-        + fileName.size() + 1, IPC_CREAT | IPC_EXCL | 0666);
-    if (shm_id < 0) {
-        shm_id = shmget(mem_key_structure, sizeof (msc_file_handler_t)
-            + fileName.size() + 1, IPC_CREAT | 0666);
-        toBeCreated = false;
-        if (shm_id < 0) {
-            error->assign("Failed to allocate shared memory (1): ");
-            error->append(strerror(errno));
-            goto err_shmget1;
-        }
-    }
+    // use named mutex for multi-process locking support
+    const auto mutexName = "Global\\ModSecurity_" + tmp;
 
-    ret = shmctl(shm_id, IPC_STAT, &shared_mem_info);
-    if (ret < 0) {
-        error->assign("Failed to get information on shared memory (1): ");
-        error->append(strerror(errno));
-        goto err_shmctl1;
+    HANDLE hMutex = CreateMutex(NULL, FALSE, mutexName.c_str());
+    if (hMutex == NULL) {
+        error->assign("Failed to create mutex for shared file: " + fileName);
+        fclose(fp);
+        return m_handlers.end();
     }
+#endif
 
-    new_debug_log = reinterpret_cast<msc_file_handler_t *>(
-            shmat(shm_id, NULL, 0));
-    if ((reinterpret_cast<char *>(new_debug_log)[0]) == -1) {
-        error->assign("Failed to attach shared memory (1): ");
-        error->append(strerror(errno));
-        goto err_shmat1;
-    }
-
-    if (toBeCreated == false && shared_mem_info.shm_nattch == 0) {
-        toBeCreated = true;
-    }
-
-    if (toBeCreated) {
-        memset(new_debug_log, '\0', sizeof(msc_file_handler_t));
-        new_debug_log->shm_id_structure = shm_id;
-        memcpy(new_debug_log->file_name, fileName.c_str(), fileName.size());
-        new_debug_log->file_name[fileName.size()] = '\0';
-    }
-    m_handlers.push_back(std::make_pair(fileName,
-        std::make_pair(new_debug_log, fp)));
-
-    return std::make_pair(new_debug_log, fp);
-err_shmat1:
-    shmdt(new_debug_log);
-err_shmctl1:
-err_shmget1:
-err_mem_key:
-    fclose(fp);
-err_fh:
-    return std::pair<modsecurity::utils::msc_file_handler *,
-        FILE *>(NULL, NULL);
+    auto handler = handler_info {
+        fp,
+#ifdef WIN32
+        hMutex,
+#endif
+        0
+    };
+    // cppcheck-suppress resourceLeak ; false positive, fp is closed in SharedFiles::close
+    return m_handlers.insert({ fileName, handler }).first;
 }
 
 
 bool SharedFiles::open(const std::string& fileName, std::string *error) {
-    std::pair<msc_file_handler *, FILE *> a;
-    bool ret = true;
-
-    #if MODSEC_USE_GENERAL_LOCK
-    pthread_mutex_lock(m_generalLock);
-#endif
-
-    a = find_handler(fileName);
-    if (a.first == NULL) {
-        a = add_new_handler(fileName, error);
-        if (error->size() > 0) {
-            ret = false;
-            goto out;
-        }
+    auto it = m_handlers.find(fileName);
+    if (it == m_handlers.end()) {
+        it = add_new_handler(fileName, error);
+        if (error->size() > 0)
+            return false;
     }
-    if (a.first == NULL) {
+
+    if (it == m_handlers.end()) {
         error->assign("Not able to open: " + fileName);
-        ret = false;
-        goto out;
+        return false;
     }
 
-out:
-#if MODSEC_USE_GENERAL_LOCK
-    pthread_mutex_unlock(m_generalLock);
-#endif
+    it->second.cnt++;
 
-    return ret;
+    return true;
 }
 
 
 void SharedFiles::close(const std::string& fileName) {
-    std::pair<msc_file_handler *, FILE *> a;
-    /* int ret; */
-    /* int shm_id; */
-    /* struct shmid_ds shared_mem_info; */
-    /* int j = 0; */
+    if (fileName.empty())
+        return;
 
-#if MODSEC_USE_GENERAL_LOCK
-    pthread_mutex_lock(m_generalLock);
+    auto it = m_handlers.find(fileName);
+    if (it == m_handlers.end())
+        return;
+
+    it->second.cnt--;
+    if (it->second.cnt == 0)
+    {
+        fclose(it->second.fp);
+#ifdef WIN32
+        CloseHandle(it->second.hMutex);
 #endif
 
-    if (fileName.empty()) {
-        goto out;
+        m_handlers.erase(it);
     }
-
-    a = find_handler(fileName);
-    if (a.first == NULL || a.second == NULL) {
-        goto out;
-    }
-
-    /* fclose(a.second); */
-    a.second = 0;
-
-    /*
-     * Delete the file structure will be welcomed, but we cannot delay
-     * while the process is being killed.
-     *
-    for (std::pair<std::string,
-        std::pair<msc_file_handler *, FILE *>> i : m_handlers) {
-        if (i.first == fileName) {
-            j++;
-        }
-    }
-
-    m_handlers.erase(m_handlers.begin()+j);
-    */
-
-    /* hmdt(a.second); */
-    shmctl(a.first->shm_id_structure, IPC_RMID, NULL);
-
-    /*
-     *
-     * We could check to see how many process attached to the shared memory
-     * we have, prior to the deletion of the shared memory.
-     *
-    ret = shmctl(a.first->shm_id_structure, IPC_STAT, &shared_mem_info);
-    if (ret < 0) {
-        goto out;
-    }
-    ret = shared_mem_info.shm_nattch;
-    shm_id = a.first->shm_id_structure;
-    */
-
-out:
-#if MODSEC_USE_GENERAL_LOCK
-    pthread_mutex_unlock(m_generalLock);
-#endif
-    return;
 }
 
 
 bool SharedFiles::write(const std::string& fileName,
     const std::string &msg, std::string *error) {
-    std::pair<msc_file_handler *, FILE *> a;
-    std::string lmsg = msg;
-    size_t wrote;
-    struct flock lock{};
     bool ret = true;
 
-    a = find_handler(fileName);
-    if (a.first == NULL) {
+    auto it = m_handlers.find(fileName);
+    if (it == m_handlers.end()) {
         error->assign("file is not open: " + fileName);
         return false;
     }
 
     //Exclusively lock whole file
+#ifndef WIN32
+    struct flock lock {};
     lock.l_start = lock.l_len = lock.l_whence = 0;
     lock.l_type = F_WRLCK;
-    fcntl(fileno(a.second), F_SETLKW, &lock);
+    fcntl(fileno(it->second.fp), F_SETLKW, &lock);
+#else
+    DWORD dwWaitResult = WaitForSingleObject(it->second.hMutex, INFINITE);
+    if (dwWaitResult != WAIT_OBJECT_0) {
+        error->assign("couldn't lock shared file: " + fileName);
+        return false;
+    }
+#endif
 
-    wrote = fwrite(lmsg.c_str(), 1, lmsg.size(), a.second);
+    auto wrote = fwrite(msg.c_str(), 1, msg.size(), it->second.fp);
     if (wrote < msg.size()) {
         error->assign("failed to write: " + fileName);
         ret = false;
     }
-    fflush(a.second);
+    fflush(it->second.fp);
 
     //Remove exclusive lock
+#ifndef WIN32
     lock.l_type = F_UNLCK;
-    fcntl(fileno(a.second), F_SETLKW, &lock);
+    fcntl(fileno(it->second.fp), F_SETLKW, &lock);
+#else
+    ::ReleaseMutex(it->second.hMutex);
+#endif
 
     return ret;
 }

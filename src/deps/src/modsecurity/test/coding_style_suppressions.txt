@@ -13,7 +13,6 @@
 ./src/utils/acmp.cc
 ./src/utils/acmp.h
 ./src/utils/mbedtls/
-./src/utils/md5.cc
 ./src/utils/md5.h
 ./src/utils/msc_tree.cc
 ./src/utils/msc_tree.h
