@@ -1419,9 +1419,9 @@ class Database:
                                     (
                                         original_key not in config
                                         and original_key not in db_config
-                                        and (
-                                            (service_templates[server_name] and value == template_setting.default)
-                                            or (not service_templates[server_name] and value == setting.default)
+                                        or (
+                                            (template_setting is not None and value == template_setting.default)
+                                            or (template_setting is None and value == setting.default)
                                         )
                                     )
                                     or (original_key in config and value == config[original_key])
@@ -1446,9 +1446,9 @@ class Database:
                                     (
                                         original_key not in config
                                         and original_key not in db_config
-                                        and (
-                                            (service_templates[server_name] and value == template_setting.default)
-                                            or (not service_templates[server_name] and value == setting.default)
+                                        or (
+                                            (template_setting is not None and value == template_setting.default)
+                                            or (template_setting is None and value == setting.default)
                                         )
                                     )
                                     or (original_key in config and value == config[original_key])
@@ -1479,7 +1479,9 @@ class Database:
                                 )
 
                             if not global_value:
-                                if (template_setting and value == template_setting.default) or (not template_setting and value == setting.default):
+                                if (template_setting is not None and value == template_setting.default) or (
+                                    template_setting is None and value == setting.default
+                                ):
                                     continue
 
                                 self.logger.debug(f"Adding global setting {key}")
@@ -1491,7 +1493,9 @@ class Database:
                                 changed_plugins.add(setting.plugin_id)
                                 query = session.query(Global_values).filter(Global_values.setting_id == key, Global_values.suffix == suffix)
 
-                                if (template_setting and value == template_setting.default) or (not template_setting and value == setting.default):
+                                if (template_setting is not None and value == template_setting.default) or (
+                                    template_setting is None and value == setting.default
+                                ):
                                     self.logger.debug(f"Removing global setting {key}")
                                     query.delete()
                                     continue
@@ -1547,7 +1551,7 @@ class Database:
                             )
 
                         if not global_value:
-                            if (template_setting and value == template_setting.default) or (not template_setting and value == setting.default):
+                            if (template_setting is not None and value == template_setting.default) or (template_setting is None and value == setting.default):
                                 continue
 
                             self.logger.debug(f"Adding global setting {key}")
@@ -1559,7 +1563,7 @@ class Database:
                             changed_plugins.add(setting.plugin_id)
                             query = session.query(Global_values).filter(Global_values.setting_id == key, Global_values.suffix == suffix)
 
-                            if (template_setting and value == template_setting.default) or (not template_setting and value == setting.default):
+                            if (template_setting is not None and value == template_setting.default) or (template_setting is None and value == setting.default):
                                 self.logger.debug(f"Removing global setting {key}")
                                 query.delete()
                                 continue
@@ -1689,6 +1693,7 @@ class Database:
         with_drafts: bool = False,
         filtered_settings: Optional[Union[List[str], Set[str], Tuple[str]]] = None,
         *,
+        service: Optional[str] = None,
         original_config: Optional[Dict[str, Any]] = None,
         original_multisite: Optional[Set[str]] = None,
     ) -> Dict[str, Any]:
@@ -1739,16 +1744,18 @@ class Database:
 
             if not global_only and is_multisite:
                 servers = ""
-                for service in services:
+                for db_service in services:
+                    if service and db_service.id != service:
+                        continue
                     for key in multisite:
-                        config[f"{service.id}_{key}"] = config[key]
-                    config[f"{service.id}_IS_DRAFT"] = {
-                        "value": "yes" if service.is_draft else "no",
+                        config[f"{db_service.id}_{key}"] = config[key]
+                    config[f"{db_service.id}_IS_DRAFT"] = {
+                        "value": "yes" if db_service.is_draft else "no",
                         "global": False,
                         "method": "default",
                         "template": None,
                     }
-                    servers += f"{service.id} "
+                    servers += f"{db_service.id} "
                 servers = servers.strip()
 
                 # Define the join operation
@@ -1779,6 +1786,8 @@ class Database:
                 results = session.execute(stmt).fetchall()
 
                 for result in results:
+                    if service and result.service_id != service:
+                        continue
                     value = result.value
 
                     if result.setting_id == "SERVER_NAME" and not search(r"^" + escape(result.service_id) + r"( |$)", value):
@@ -1793,7 +1802,7 @@ class Database:
                         "template": None,
                     }
             else:
-                servers = " ".join(service.id for service in services)
+                servers = " ".join(db_service.id for db_service in services)
 
             config["SERVER_NAME"] = {
                 "value": servers,
@@ -1801,6 +1810,13 @@ class Database:
                 "method": "scheduler",
                 "template": None,
             }
+
+            if service:
+                for key in config.copy().keys():
+                    if (original_config is None or key not in ("SERVER_NAME", "MULTISITE", "USE_TEMPLATE")) and not key.startswith(f"{service}_"):
+                        del config[key]
+                    if original_config is None:
+                        config[key.replace(f"{service}_", "")] = config.pop(key)
 
             if not methods:
                 for key, value in config.copy().items():
@@ -1814,6 +1830,8 @@ class Database:
         methods: bool = False,
         with_drafts: bool = False,
         filtered_settings: Optional[Union[List[str], Set[str], Tuple[str]]] = None,
+        *,
+        service: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Get the config from the database"""
         filtered_settings = set(filtered_settings or [])
@@ -1849,6 +1867,7 @@ class Database:
             methods=True,
             with_drafts=with_drafts,
             filtered_settings=filtered_settings,
+            service=service,
             original_config=config,
             original_multisite=multisite,
         )
@@ -1901,6 +1920,13 @@ class Database:
                                 "method": "default",
                                 "template": service_template_used,
                             }
+
+        if service:
+            for key in config.copy().keys():
+                if not key.startswith(f"{service}_"):
+                    del config[key]
+                    continue
+                config[key.replace(f"{service}_", "")] = config.pop(key)
 
         if not methods:
             for key, value in config.copy().items():
