@@ -47,11 +47,12 @@ class AnchoredSetVariableTranslationProxy {
                 VariableValue *newVariableValue = new VariableValue(name, &l->at(i)->getKey(), &l->at(i)->getKey());
                 const VariableValue *oldVariableValue = l->at(i);
                 l->at(i) = newVariableValue;
+                newVariableValue->reserveOrigin(oldVariableValue->getOrigin().size());
                 for (const auto &oldOrigin : oldVariableValue->getOrigin()) {
-                    std::unique_ptr<VariableOrigin> newOrigin(new VariableOrigin);
-                    newOrigin->m_length = oldVariableValue->getKey().size();
-                    newOrigin->m_offset = oldOrigin->m_offset - oldVariableValue->getKey().size() - 1;
-                    newVariableValue->addOrigin(std::move(newOrigin));
+                    newVariableValue->addOrigin(
+                        oldVariableValue->getKey().size(),
+                        oldOrigin.m_offset - oldVariableValue->getKey().size() - 1
+                    );
                 }
                 delete oldVariableValue;
             }

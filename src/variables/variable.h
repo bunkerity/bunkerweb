@@ -707,9 +707,8 @@ class VariableModificatorCount : public Variable {
         }
         reslIn.clear();
 
-        std::string *res = new std::string(std::to_string(count));
-        val = new VariableValue(m_fullName.get(), res);
-        delete res;
+        auto res = std::to_string(count);
+        val = new VariableValue(m_fullName.get(), &res);
 
         l->push_back(val);
         return;

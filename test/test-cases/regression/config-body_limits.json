@@ -578,6 +578,7 @@
   {
     "enabled":1,
     "version_min":300000,
+    "resource":"libxml2",
     "title":"SecRequestBodyNoFilesLimit - xml, limit exceeded",
     "client":{
       "ip":"200.249.12.31",
@@ -626,6 +627,7 @@
   {
     "enabled":1,
     "version_min":300000,
+    "resource":"libxml2",
     "title":"SecRequestBodyNoFilesLimit - xml, limit not exceeded",
     "client":{
       "ip":"200.249.12.31",

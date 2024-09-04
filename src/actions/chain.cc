@@ -15,14 +15,9 @@
 
 #include "src/actions/chain.h"
 
-#include <iostream>
-#include <string>
+#include "modsecurity/rule_with_actions.h"
 
-#include "modsecurity/transaction.h"
-#include "modsecurity/rule.h"
-
-namespace modsecurity {
-namespace actions {
+namespace modsecurity::actions {
 
 
 bool Chain::evaluate(RuleWithActions *rule, Transaction *transaction) {
@@ -31,5 +26,4 @@ bool Chain::evaluate(RuleWithActions *rule, Transaction *transaction) {
 }
 
 
-}  // namespace actions
-}  // namespace modsecurity
+}  // namespace modsecurity::actions

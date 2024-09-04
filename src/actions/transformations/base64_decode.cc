@@ -13,33 +13,19 @@
  *
  */
 
-#include "src/actions/transformations/base64_decode.h"
+#include "base64_decode.h"
 
-#include <iostream>
-#include <string>
-#include <algorithm>
-#include <functional>
-#include <cctype>
-#include <locale>
-
-#include "modsecurity/transaction.h"
-#include "src/actions/transformations/transformation.h"
 #include "src/utils/base64.h"
 
 
-namespace modsecurity {
-namespace actions {
-namespace transformations {
+namespace modsecurity::actions::transformations {
 
 
-std::string Base64Decode::evaluate(const std::string &value,
-    Transaction *transaction) {
-    std::string ret = Utils::Base64::decode(value);
-
-    return ret;
+bool Base64Decode::transform(std::string &value, const Transaction *trans) const {
+    if (value.empty()) return false;
+    value = Utils::Base64::decode(value);
+    return true;
 }
 
 
-}  // namespace transformations
-}  // namespace actions
-}  // namespace modsecurity
+}  // namespace modsecurity::actions::transformations

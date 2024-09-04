@@ -15,19 +15,80 @@
 
 #include "src/operators/pm.h"
 
-#include <string.h>
-
-#include <string>
 #include <algorithm>
 #include <iterator>
 #include <sstream>
-#include <vector>
-#include <list>
-#include <memory>
 
-#include "src/operators/operator.h"
 #include "src/utils/acmp.h"
 #include "src/utils/string.h"
+
+using namespace modsecurity::utils::string;
+
+static inline std::string parse_pm_content(const std::string &op_parm) {
+    auto offset = op_parm.find_first_not_of(" \t");
+    if (offset == std::string::npos) {
+        return op_parm;
+    }
+
+    auto size = op_parm.size() - offset;
+    if (size >= 2 &&
+        op_parm.at(offset) == '\"' && op_parm.back() == '\"') {
+        offset++;
+        size -= 2;
+    }
+
+    if (size == 0) {
+        return op_parm;
+    }
+
+    std::string parsed_parm(op_parm.c_str() + offset, size);
+
+    unsigned char bin_offset = 0;
+    unsigned char bin_parm[3] = { 0 };
+    bool bin = false, esc = false;
+
+    char *d = parsed_parm.data();
+    for(const char *s = d, *e = d + size; s != e; ++s) {
+        if (*s == '|') {
+            bin = !bin;
+        } else if(!esc && *s == '\\') {
+            esc = true;
+        } else {
+            if (bin) {
+                if (VALID_HEX(*s)) {
+                    bin_parm[bin_offset] = (char)*s;
+                    bin_offset++;
+                    if (bin_offset == 2) {
+                        unsigned char c = strtol((char *)bin_parm, (char **) nullptr, 16) & 0xFF;
+                        bin_offset = 0;
+                        *d++ = c;
+                    }
+                } else {
+                    // Invalid hex character
+                    return op_parm;
+                }
+            } else if (esc) {
+                if (*s == ':' ||
+                        *s == ';' ||
+                        *s == '\\' ||
+                        *s == '\"')
+                {
+                    *d++ = *s;
+                } else {
+                    // Unsupported escape sequence
+                    return op_parm;
+                }
+                esc = false;
+            } else {
+                *d++ = *s;
+            }
+        }
+    }
+
+    parsed_parm.resize(d - parsed_parm.c_str());
+    return parsed_parm;
+}
+
 
 namespace modsecurity {
 namespace operators {
@@ -39,9 +100,6 @@ Pm::~Pm() {
 
     free(m_p);
     m_p = NULL;
-#ifdef MODSEC_MUTEX_ON_PM
-    pthread_mutex_destroy(&m_lock);
-#endif
 }
 
 
@@ -88,13 +146,7 @@ bool Pm::evaluate(Transaction *transaction, RuleWithActions *rule,
     pt.parser = m_p;
     pt.ptr = NULL;
     const char *match = NULL;
-#ifdef MODSEC_MUTEX_ON_PM
-    pthread_mutex_lock(&m_lock);
-#endif
     rc = acmp_process_quick(&pt, &match, input.c_str(), input.length());
-#ifdef MODSEC_MUTEX_ON_PM
-    pthread_mutex_unlock(&m_lock);
-#endif
 
     if (rc >= 0 && transaction) {
         std::string match_(match?match:"");
@@ -114,38 +166,18 @@ bool Pm::evaluate(Transaction *transaction, RuleWithActions *rule,
 
 
 bool Pm::init(const std::string &file, std::string *error) {
-    std::vector<std::string> vec;
-    std::istringstream *iss;
-    const char *err = NULL;
+    const auto op_parm = parse_pm_content(m_param);
 
-#ifdef MODSEC_MUTEX_ON_PM
-    pthread_mutex_init(&m_lock, NULL);
-#endif
-    char *content = parse_pm_content(m_param.c_str(), m_param.length(), &err);
-    if (content == NULL) {
-        iss = new std::istringstream(m_param);
-    } else {
-        iss = new std::istringstream(content);
-    }
-
-    std::copy(std::istream_iterator<std::string>(*iss),
+    std::istringstream iss{op_parm};
+    std::for_each(std::istream_iterator<std::string>(iss),
         std::istream_iterator<std::string>(),
-        back_inserter(vec));
-
-    for (auto &a : vec) {
-        acmp_add_pattern(m_p, a.c_str(), NULL, NULL, a.length());
-    }
+        [this](const auto &a) {
+            acmp_add_pattern(m_p, a.c_str(), NULL, NULL, a.length());
+        });
 
     while (m_p->is_failtree_done == 0) {
         acmp_prepare(m_p);
     }
-
-    if (content) {
-        free(content);
-        content = NULL;
-    }
-
-    delete iss;
 
     return true;
 }

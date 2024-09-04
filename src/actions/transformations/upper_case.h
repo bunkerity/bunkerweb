@@ -13,35 +13,20 @@
  *
  */
 
-#include <string>
-#include <unordered_map>
-
-#include "modsecurity/actions/action.h"
-#include "src/actions/transformations/transformation.h"
-
 #ifndef SRC_ACTIONS_TRANSFORMATIONS_UPPER_CASE_H_
 #define SRC_ACTIONS_TRANSFORMATIONS_UPPER_CASE_H_
 
-#ifdef __cplusplus
+#include "transformation.h"
 
-namespace modsecurity {
-class Transaction;
-namespace actions {
-namespace transformations {
-
+namespace modsecurity::actions::transformations {
 
 class UpperCase : public Transformation {
  public:
-    explicit UpperCase(const std::string &action) ;
+    using Transformation::Transformation;
 
-    std::string evaluate(const std::string &exp,
-        Transaction *transaction) override;
+    bool transform(std::string &value, const Transaction *trans) const override;
 };
 
-}  // namespace transformations
-}  // namespace actions
-}  // namespace modsecurity
-
-#endif
+}  // namespace modsecurity::actions::transformations
 
 #endif  // SRC_ACTIONS_TRANSFORMATIONS_UPPER_CASE_H_

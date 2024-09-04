@@ -31,7 +31,7 @@ namespace actions {
 class SkipAfter : public Action {
  public:
     explicit SkipAfter(const std::string &action) 
-        : Action(action, RunTimeOnlyIfMatchKind),
+        : Action(action),
         m_skipName(std::make_shared<std::string>(m_parser_payload)) { }
 
     bool evaluate(RuleWithActions *rule, Transaction *transaction) override;

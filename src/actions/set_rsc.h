@@ -36,7 +36,7 @@ class SetRSC : public Action {
         : Action(_action) { }
 
     explicit SetRSC(std::unique_ptr<RunTimeString> z)
-        : Action("setsrc", RunTimeOnlyIfMatchKind),
+        : Action("setsrc"),
             m_string(std::move(z)) { }
 
     bool evaluate(RuleWithActions *rule, Transaction *transaction) override;

@@ -30,21 +30,24 @@
 
 #include "modsecurity/transaction.h"
 
+#ifdef WIN32
+#include "src/compat/msvc.h"
+#endif
+
 namespace modsecurity {
 namespace variables {
 
 void TimeDay::evaluate(Transaction *transaction,
     RuleWithActions *rule,
     std::vector<const VariableValue *> *l) {
-    char tstr[200];
-    struct tm timeinfo;
     time_t timer;
-
     time(&timer);
-    memset(tstr, '\0', 200);
 
+    struct tm timeinfo;
     localtime_r(&timer, &timeinfo);
-    strftime(tstr, 200, "%d", &timeinfo);
+
+    char tstr[std::size("dd")];
+    strftime(tstr, std::size(tstr), "%d", &timeinfo);
 
     transaction->m_variableTimeDay.assign(tstr);
 

@@ -21,19 +21,16 @@ simple_request_LDFLAGS = \
 	-L$(top_builddir)/src/.libs/ \
 	$(GEOIP_LDFLAGS) \
 	-lmodsecurity \
-	-lpthread \
 	-lm \
 	-lstdc++ \
 	$(MAXMIND_LDFLAGS) \
 	$(LMDB_LDFLAGS) \
-	-lpthread \
 	$(LUA_LDFLAGS) \
 	$(SSDEEP_LDFLAGS) \
 	$(YAJL_LDFLAGS)
 
 simple_request_CPPFLAGS = \
 	$(GLOBAL_CFLAGS) \
-	-std=c++11 \
 	-I$(top_builddir)/headers \
 	-I$(top_builddir) \
 	-g \

@@ -25,9 +25,15 @@
 #include <utility>
 #include <map>
 
+#ifdef WIN32
+#include "src/compat/msvc.h"
+#endif
+
 #include "modsecurity/transaction.h"
 
+#ifndef WIN32
 extern char **environ;
+#endif
 
 namespace modsecurity {
 namespace variables {
@@ -47,12 +53,20 @@ void Env::evaluate(Transaction *transaction,
         transaction->m_variableEnvs.insert(a);
     }
 
+    const auto hasName = m_name.length() > 0;
     for (auto& x : transaction->m_variableEnvs) {
-        if (x.first != m_name && m_name.length() > 0) {
+#ifndef WIN32
+        if (hasName && x.first != m_name) {
+#else
+        if (hasName && strcasecmp(x.first.c_str(), m_name.c_str()) != 0) {
+#endif
             continue;
         }
-        if (!m_keyExclusion.toOmit(x.first)) {
-            l->push_back(new VariableValue(&m_collectionName, &x.first,
+        // (Windows) we need to keep the case from the rule in case that from
+        // the environment differs.
+        const auto &key = hasName ? m_name : x.first;
+        if (!m_keyExclusion.toOmit(key)) {
+            l->push_back(new VariableValue(&m_collectionName, &key,
                 &x.second));
         }
     }

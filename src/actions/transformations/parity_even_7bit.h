@@ -13,33 +13,42 @@
  *
  */
 
-#include <string>
-
-#include "modsecurity/actions/action.h"
-#include "src/actions/transformations/transformation.h"
-
 #ifndef SRC_ACTIONS_TRANSFORMATIONS_PARITY_EVEN_7BIT_H_
 #define SRC_ACTIONS_TRANSFORMATIONS_PARITY_EVEN_7BIT_H_
 
-#ifdef __cplusplus
-namespace modsecurity {
-class Transaction;
+#include "transformation.h"
 
-namespace actions {
-namespace transformations {
+namespace modsecurity::actions::transformations {
 
 class ParityEven7bit : public Transformation {
  public:
-    explicit ParityEven7bit(const std::string &action)  : Transformation(action) { }
+    using Transformation::Transformation;
 
-    std::string evaluate(const std::string &exp, Transaction *transaction) override;
-    static bool inplace(unsigned char *input, uint64_t input_len);
+    bool transform(std::string &value, const Transaction *trans) const override;
+
+    template<bool even>
+    static bool inplace(std::string &value) {
+        if (value.empty()) return false;
+
+        for(auto &c : value) {
+            auto &uc = reinterpret_cast<unsigned char&>(c);
+            unsigned int x = uc;
+
+            uc ^= uc >> 4;
+            uc &= 0xf;
+
+            const bool condition = (0x6996 >> uc) & 1;
+            if (even ? condition : !condition) {
+                uc = x | 0x80;
+            } else {
+                uc = x & 0x7f;
+            }
+        }
+
+        return true;
+    }
 };
 
-}  // namespace transformations
-}  // namespace actions
-}  // namespace modsecurity
-
-#endif
+}  // namespace modsecurity::actions::transformations
 
 #endif  // SRC_ACTIONS_TRANSFORMATIONS_PARITY_EVEN_7BIT_H_

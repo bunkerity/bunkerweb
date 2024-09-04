@@ -192,29 +192,30 @@ AC_DEFUN([CHECK_FOR_LUA_AT], [
            LUA_DISPLAY="${lua_lib_file}, ${lua_inc_path}"
 
         # Double checking version from lua.h...
-        AC_TRY_COMPILE([ #include <lua.h>> ],
-                         [ #if (LUA_VERSION_NUM < 502)
-                           return 0;
-                           #else
-                           #error Lua 5.1 not detected
-                           #endif ],
-                             [ LUA_VERSION=501 ], [ lua_5_1=0 ]
-                      )
-
-        AC_TRY_COMPILE([ #include <lua.h> ],
+        AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[ #include <lua.h> ],
                          [ #if (LUA_VERSION_NUM == 502)
                            return 0;
                            #else
                            #error Lua 5.2 not detected
-                           #endif ],
+                           #endif ]])],
                              [ LUA_VERSION=502 ], [ lua_5_2=0 ]
                       )
-        AC_TRY_COMPILE([ #include <lua.h> ],
+
+        AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[ #include <lua.h> ],
+                     [ #if (LUA_VERSION_NUM == 502)
+                           return 0;
+                           #else
+                           #error Lua 5.2 not detected
+                           #endif ]])],
+                             [ LUA_VERSION=502 ], [ lua_5_2=0 ]
+                      )
+
+        AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[ #include <lua.h> ],
                          [ #if (LUA_VERSION_NUM == 504)
                            return 0;
                            #else
                            #error Lua 5.4 not detected
-                           #endif ],
+                           #endif ]])],
                              [ LUA_VERSION=504 ], [ lua_5_4=0 ]
                       )
 

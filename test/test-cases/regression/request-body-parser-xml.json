@@ -2,6 +2,7 @@
   {
     "enabled":1,
     "version_min":300000,
+    "resource":"libxml2",
     "title":"Testing XML request body parser (validate ok)",
     "expected":{
       "debug_log": "XML: Successfully validated payload against Schema:"
@@ -51,6 +52,7 @@
   {
     "enabled":1,
     "version_min":300000,
+    "resource":"libxml2",
     "title":"Testing XML request body parser (validate attribute value failed)",
     "expected":{
       "debug_log": "'badval' is not a valid value of the local atomic type",
@@ -101,6 +103,7 @@
   {
     "enabled":1,
     "version_min":300000,
+    "resource":"libxml2",
     "title":"Testing XML request body parser (validate failed)",
     "expected":{
       "debug_log": "This element is not expected. Expected is one of",
@@ -151,6 +154,7 @@
   {
     "enabled":1,
     "version_min":300000,
+    "resource":"libxml2",
     "title":"Testing XML request body parser (bad XML)",
     "expected":{
       "debug_log": "XML Error: Element '{http://schemas.xmlsoap.org/soap/envelope/}xBody'",
@@ -201,6 +205,7 @@
   {
     "enabled":1,
     "version_min":300000,
+    "resource":"libxml2",
     "title":"Testing XML request body parser (bad schema)",
     "expected":{
       "debug_log": "XML: Failed to load Schema: test-cases/data/SoapEnvelope-bad.xsd. XML Error: Failed to parse the XML resource 'test-cases/data/SoapEnvelope-bad.xsd",

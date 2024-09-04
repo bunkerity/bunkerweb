@@ -13,66 +13,36 @@
  *
  */
 
-#include "src/actions/transformations/html_entity_decode.h"
+#include "html_entity_decode.h"
 
-#include <string.h>
+#include <cstring>
 
-#include <iostream>
-#include <string>
-#include <algorithm>
-#include <functional>
-#include <cctype>
-#include <locale>
+#include "src/utils/string.h"
 
-#include "modsecurity/transaction.h"
-#include "src/actions/transformations/transformation.h"
+#ifdef WIN32
+#include "src/compat/msvc.h"
+#endif
 
+using namespace modsecurity::utils::string;
 
-namespace modsecurity {
-namespace actions {
-namespace transformations {
+namespace modsecurity::actions::transformations {
 
 
-std::string HtmlEntityDecode::evaluate(const std::string &value,
-    Transaction *transaction) {
-    std::string ret;
-    unsigned char *input;
+static inline bool inplace(std::string &value) {
+    const auto input_len = value.length();
+    auto d = reinterpret_cast<unsigned char*>(value.data());
+    const unsigned char *input = d;
+    const unsigned char *end = input + input_len;
 
-    input = reinterpret_cast<unsigned char *>
-        (malloc(sizeof(char) * value.length()+1));
-
-    if (input == NULL) {
-        return "";
-    }
-
-    memcpy(input, value.c_str(), value.length()+1);
-
-    size_t i = inplace(input, value.length());
-
-    ret.assign(reinterpret_cast<char *>(input), i);
-    free(input);
-
-    return ret;
-}
-
-
-int HtmlEntityDecode::inplace(unsigned char *input, uint64_t input_len) {
-    unsigned char *d = input;
-    int i, count;
-
-    if ((input == NULL) || (input_len == 0)) {
-        return 0;
-    }
-
-    i = count = 0;
-    while ((i < input_len) && (count < input_len)) {
-        int z, copy = 1;
+    std::string::size_type i = 0;
+    while (i < input_len) {
+        std::string::size_type copy = 1;
 
         /* Require an ampersand and at least one character to
          * start looking into the entity.
          */
         if ((input[i] == '&') && (i + 1 < input_len)) {
-            int k, j = i + 1;
+            auto j = i + 1;
 
             if (input[j] == '#') {
                 /* Numerical entity. */
@@ -92,19 +62,18 @@ int HtmlEntityDecode::inplace(unsigned char *input, uint64_t input_len) {
                     }
                     j++; /* j is the position of the first digit now. */
 
-                    k = j;
-                    while ((j < input_len) && (isxdigit(input[j]))) {
+                    constexpr int MAX_HEX_DIGITS = 2;   // supports only bytes (max value 0xff)
+                    auto k = j;
+                    while ((j - k < MAX_HEX_DIGITS) && (j < input_len) && (isxdigit(input[j]))) {
                         j++;
                     }
                     if (j > k) { /* Do we have at least one digit? */
                         /* Decode the entity. */
-                        char *x;
-                        x = reinterpret_cast<char *>(calloc(sizeof(char),
-                            ((j - k) + 1)));
+                        char x[MAX_HEX_DIGITS + 1];
                         memcpy(x, (const char *)&input[k], j - k);
-                        *d++ = (unsigned char)strtol(x, NULL, 16);
-                        free(x);
-                        count++;
+                        x[j - k] = '\0';
+
+                        *d++ = (unsigned char)strtol(x, nullptr, 16);
 
                         /* Skip over the semicolon if it's there. */
                         if ((j < input_len) && (input[j] == ';')) {
@@ -118,19 +87,18 @@ int HtmlEntityDecode::inplace(unsigned char *input, uint64_t input_len) {
                     }
                 } else {
                     /* Decimal entity. */
-                    k = j;
-                    while ((j < input_len) && (isdigit(input[j]))) {
+                    constexpr int MAX_DEC_DIGITS = 3;   // supports only bytes (max value 255)
+                    auto k = j;
+                    while ((j - k < MAX_DEC_DIGITS) && (j < input_len) && (isdigit(input[j]))) {
                         j++;
                     }
                     if (j > k) { /* Do we have at least one digit? */
                         /* Decode the entity. */
-                        char *x;
-                        x = reinterpret_cast<char *>(calloc(sizeof(char),
-                            ((j - k) + 1)));
+                        char x[MAX_DEC_DIGITS + 1];
                         memcpy(x, (const char *)&input[k], j - k);
-                        *d++ = (unsigned char)strtol(x, NULL, 10);
-                        free(x);
-                        count++;
+                        x[j - k] = '\0';
+
+                        *d++ = (unsigned char)strtol(x, nullptr, 10);
 
                         /* Skip over the semicolon if it's there. */
                         if ((j < input_len) && (input[j] == ';')) {
@@ -145,38 +113,31 @@ int HtmlEntityDecode::inplace(unsigned char *input, uint64_t input_len) {
                 }
             } else {
                 /* Text entity. */
-                k = j;
+                auto k = j;
                 while ((j < input_len) && (isalnum(input[j]))) {
                     j++;
                 }
                 if (j > k) { /* Do we have at least one digit? */
-                    char *x;
-                    x = reinterpret_cast<char *>(calloc(sizeof(char),
-                        ((j - k) + 1)));
-                    memcpy(x, (const char *)&input[k], j - k);
+                    const auto x = reinterpret_cast<const char*>(&input[k]);
 
                     /* Decode the entity. */
                     /* ENH What about others? */
-                    if (strcasecmp(x, "quot") == 0) {
+                    if (strncasecmp(x, "quot", 4) == 0) {
                         *d++ = '"';
-                    } else if (strcasecmp(x, "amp") == 0) {
+                    } else if (strncasecmp(x, "amp", 3) == 0) {
                         *d++ = '&';
-                    } else if (strcasecmp(x, "lt") == 0) {
+                    } else if (strncasecmp(x, "lt", 2) == 0) {
                         *d++ = '<';
-                    } else if (strcasecmp(x, "gt") == 0) {
+                    } else if (strncasecmp(x, "gt", 2) == 0) {
                         *d++ = '>';
-                    } else if (strcasecmp(x, "nbsp") == 0) {
+                    } else if (strncasecmp(x, "nbsp", 4) == 0) {
                         *d++ = NBSP;
                     } else {
                         /* We do no want to convert this entity,
                          * copy the raw data over. */
                         copy = j - k + 1;
-                        free(x);
                         goto HTML_ENT_OUT;
                     }
-                    free(x);
-
-                    count++;
 
                     /* Skip over the semicolon if it's there. */
                     if ((j < input_len) && (input[j] == ';')) {
@@ -192,17 +153,21 @@ int HtmlEntityDecode::inplace(unsigned char *input, uint64_t input_len) {
 
 HTML_ENT_OUT:
 
-        for (z = 0; ((z < copy) && (count < input_len)); z++) {
+        for (auto z = 0; z < copy; z++) {
             *d++ = input[i++];
-            count++;
         }
     }
 
     *d = '\0';
 
-    return count;
+    value.resize(d - input);
+    return d != end;
 }
 
-}  // namespace transformations
-}  // namespace actions
-}  // namespace modsecurity
+
+bool HtmlEntityDecode::transform(std::string &value, const Transaction *trans) const {
+    return inplace(value);
+}
+
+
+}  // namespace modsecurity::actions::transformations

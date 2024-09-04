@@ -15,14 +15,10 @@
 
 #include "src/actions/rule_id.h"
 
-#include <iostream>
-#include <string>
+#include "modsecurity/rule_with_actions.h"
 
-#include "modsecurity/transaction.h"
-#include "modsecurity/rule.h"
 
-namespace modsecurity {
-namespace actions {
+namespace modsecurity::actions {
 
 
 bool RuleId::init(std::string *error) {
@@ -54,5 +50,4 @@ bool RuleId::evaluate(RuleWithActions *rule, Transaction *transaction) {
 }
 
 
-}  // namespace actions
-}  // namespace modsecurity
+}  // namespace modsecurity::actions

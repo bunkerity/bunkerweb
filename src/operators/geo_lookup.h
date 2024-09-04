@@ -32,6 +32,7 @@ class GeoLookup : public Operator {
     bool evaluate(Transaction *transaction, const std::string &exp) override;
 
  protected:
+    // cppcheck-suppress functionStatic
     bool debug(Transaction *transaction, int x, const std::string &a) {
         ms_dbg_a(transaction, x, a);
         return true;

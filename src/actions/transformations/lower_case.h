@@ -13,34 +13,35 @@
  *
  */
 
-#include <string>
-#include <unordered_map>
-
-#include "modsecurity/actions/action.h"
-#include "src/actions/transformations/transformation.h"
-
 #ifndef SRC_ACTIONS_TRANSFORMATIONS_LOWER_CASE_H_
 #define SRC_ACTIONS_TRANSFORMATIONS_LOWER_CASE_H_
 
-#ifdef __cplusplus
+#include "transformation.h"
 
-namespace modsecurity {
-class Transaction;
-namespace actions {
-namespace transformations {
+#include <algorithm>
 
+namespace modsecurity::actions::transformations {
 
 class LowerCase : public Transformation {
  public:
-    explicit LowerCase(const std::string &action);
-    std::string evaluate(const std::string &exp,
-        Transaction *transaction) override;
+    using Transformation::Transformation;
+
+    bool transform(std::string &value, const Transaction *trans) const override;
+
+    template<typename Operation>
+    static bool convert(std::string &val, Operation op) {
+        bool changed = false;
+
+        std::transform(val.begin(), val.end(), val.data(),
+                       [&](auto c) { 
+                            const auto nc = op(c);
+                            if(nc != c) changed = true; 
+                            return nc; });
+
+        return changed;
+    }
 };
 
-}  // namespace transformations
-}  // namespace actions
-}  // namespace modsecurity
-
-#endif
+}  // namespace modsecurity::actions::transformations
 
 #endif  // SRC_ACTIONS_TRANSFORMATIONS_LOWER_CASE_H_

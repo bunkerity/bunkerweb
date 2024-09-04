@@ -13,29 +13,20 @@
  *
  */
 
-#include <string>
-
-#include "modsecurity/actions/action.h"
-#include "src/actions/transformations/transformation.h"
-
 #ifndef SRC_UTILS_MD5_H_
 #define SRC_UTILS_MD5_H_
 
-#include <cstring>
-#include <iostream>
+#include "src/utils/sha1.h"
+#include "mbedtls/md5.h"
+#include <string>
 
-namespace modsecurity {
-namespace Utils {
+namespace modsecurity::Utils {
 
-class Md5 {
- public:
-    Md5() { }
 
-    static std::string hexdigest(const std::string& input);
-    static std::string digest(const std::string& input);
+class Md5 : public DigestImpl<&mbedtls_md5, 16> {
 };
 
-}  // namespace Utils
-}  // namespace modsecurity
+
+}  // namespace modsecurity::Utils
 
 #endif  // SRC_UTILS_MD5_H_

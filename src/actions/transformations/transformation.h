@@ -13,37 +13,23 @@
  *
  */
 
-#include <string>
-
-#include "modsecurity/actions/action.h"
-
 #ifndef SRC_ACTIONS_TRANSFORMATIONS_TRANSFORMATION_H_
 #define SRC_ACTIONS_TRANSFORMATIONS_TRANSFORMATION_H_
 
+#include "modsecurity/actions/action.h"
 
-namespace modsecurity {
-class Transaction;
-
-namespace actions {
-namespace transformations {
+namespace modsecurity::actions::transformations {
 
 class Transformation : public Action {
  public:
     explicit Transformation(const std::string& _action)
-        : Action(_action, RunTimeBeforeMatchAttemptKind) { }
-
-    explicit Transformation(const std::string& _action, int kind)
-        : Action(_action, kind) { }
-
-    std::string evaluate(const std::string &exp,
-        Transaction *transaction) override;
+        : Action(_action, Kind::RunTimeBeforeMatchAttemptKind) { }
 
     static Transformation* instantiate(std::string a);
+
+    virtual bool transform(std::string &value, const Transaction *trans) const;
 };
 
-}  // namespace transformations
-}  // namespace actions
-}  // namespace modsecurity
-
+}  // namespace modsecurity::actions::transformations
 
 #endif  // SRC_ACTIONS_TRANSFORMATIONS_TRANSFORMATION_H_

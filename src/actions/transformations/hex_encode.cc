@@ -13,41 +13,25 @@
  *
  */
 
-#include "src/actions/transformations/hex_encode.h"
+#include "hex_encode.h"
 
-#include <iostream>
-#include <string>
-#include <algorithm>
-#include <functional>
-#include <cctype>
-#include <locale>
-#include <iterator>
-
-#include "modsecurity/transaction.h"
-#include "src/actions/transformations/transformation.h"
+#include "modsecurity/rule_with_actions.h"
 
 
-namespace modsecurity {
-namespace actions {
-namespace transformations {
+namespace modsecurity::actions::transformations {
 
-HexEncode::HexEncode(const std::string &action) 
-    : Transformation(action) {
-    this->action_kind = 1;
-}
 
-std::string HexEncode::evaluate(const std::string &value,
-    Transaction *transaction) {
+bool HexEncode::transform(std::string &value, const Transaction *trans) const {
+    if (value.empty()) return false;
 
     std::stringstream result;
-    for (std::size_t i=0; i < value.length(); i++) {
-        unsigned int ii = (unsigned char)(value[i]);
+    for (const auto c : value) {
+        unsigned int ii = (unsigned char)c;
         result << std::setw(2) << std::setfill('0') << std::hex << ii;
     }
 
-    return result.str();
+    value = result.str();
+    return true;
 }
 
-}  // namespace transformations
-}  // namespace actions
-}  // namespace modsecurity
+}  // namespace modsecurity::actions::transformations

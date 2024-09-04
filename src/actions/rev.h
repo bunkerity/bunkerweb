@@ -29,7 +29,7 @@ namespace actions {
 
 class Rev : public Action {
  public:
-    explicit Rev(const std::string &action) : Action(action, ConfigurationKind) { }
+    explicit Rev(const std::string &action) : Action(action, Kind::ConfigurationKind) { }
 
     bool evaluate(RuleWithActions *rule, Transaction *transaction) override;
     bool init(std::string *error) override;

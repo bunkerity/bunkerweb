@@ -36,15 +36,15 @@ bool RulesExceptions::loadUpdateActionById(double id,
     std::string *error) {
 
     for (auto &a : *actions) {
-        if (a->action_kind == actions::Action::ConfigurationKind) {
+        if (a->action_kind == actions::Action::Kind::ConfigurationKind) {
             std::cout << "General failure, action: " << a->m_name;
             std::cout << " has not expected to be used with UpdateActionByID.";
             std::cout << std::endl;
         } else if (a->action_kind
-            == actions::Action::RunTimeBeforeMatchAttemptKind) {
+            == actions::Action::Kind::RunTimeBeforeMatchAttemptKind) {
             m_action_pre_update_target_by_id.emplace(std::pair<double,
                 std::unique_ptr<actions::Action>>(id , std::move(a)));
-        } else if (a->action_kind == actions::Action::RunTimeOnlyIfMatchKind) {
+        } else if (a->action_kind == actions::Action::Kind::RunTimeOnlyIfMatchKind) {
             m_action_pos_update_target_by_id.emplace(std::pair<double,
                 std::unique_ptr<actions::Action>>(id , std::move(a)));
         } else {

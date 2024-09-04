@@ -31,7 +31,7 @@ namespace actions {
 class NoLog : public Action {
  public:
     explicit NoLog(const std::string &action) 
-        : Action(action, RunTimeOnlyIfMatchKind) { }
+        : Action(action) { }
 
     bool evaluate(RuleWithActions *rule, Transaction *transaction,
         std::shared_ptr<RuleMessage> rm) override;

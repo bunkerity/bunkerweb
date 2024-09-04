@@ -87,7 +87,7 @@ int main(int argc, char **argv) {
                 continue;
             }
 
-            if (dynamic_cast<modsecurity::RuleUnconditional *>(z.get()) != nullptr) {
+            if (dynamic_cast<modsecurity::RuleUnconditional *>(z.get())) {
                 std::string op = "Unconditional";
                 if (operators.count(op) > 0) {
                     operators[op] = 1 + operators[op];
@@ -96,9 +96,7 @@ int main(int argc, char **argv) {
                 }
             }
 
-            if (dynamic_cast<modsecurity::RuleWithOperator *>(z.get()) != nullptr) {
-                auto *rwo = dynamic_cast<modsecurity::RuleWithOperator *>(z.get());
-
+            if (auto rwo = dynamic_cast<modsecurity::RuleWithOperator *>(z.get())) {
                 std::string op = rwo->getOperatorName();
                 if (operators.count(op) > 0) {
                     operators[op] = 1 + operators[op];

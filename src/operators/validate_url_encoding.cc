@@ -74,7 +74,7 @@ bool ValidateUrlEncoding::evaluate(Transaction *transaction, RuleWithActions *ru
     bool res = false;
 
     if (input.empty() == true) {
-        return res;
+        return res; // cppcheck-suppress knownConditionTrueFalse
     }
 
     int rc = validate_url_encoding(input.c_str(), input.size(), &offset);

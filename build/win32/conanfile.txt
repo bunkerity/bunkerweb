@@ -1,0 +1,14 @@
+[requires]
+yajl/2.1.0
+pcre2/10.42
+libxml2/2.12.6
+lua/5.4.6
+libcurl/8.6.0
+lmdb/0.9.31
+libmaxminddb/1.9.1
+dirent/1.24
+poco/1.13.3
+
+[generators]
+CMakeDeps
+CMakeToolchain

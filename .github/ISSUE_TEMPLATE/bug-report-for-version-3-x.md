@@ -3,7 +3,7 @@ name: Bug report for version 3.x
 about: Create a report to help us improve. If you don't know a specific detail or
   piece of information leave it blank, if necessary we will help you to figure out.
 title: ''
-labels: ''
+labels: '3.x'
 assignees: ''
 
 ---

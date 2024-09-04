@@ -219,7 +219,6 @@ OPERATORS = \
 	operators/no_match.cc \
 	operators/operator.cc \
 	operators/pm.cc \
-	operators/pm_f.cc \
 	operators/pm_from_file.cc \
 	operators/rbl.cc \
 	operators/rsub.cc \
@@ -248,12 +247,9 @@ UTILS = \
 	utils/geo_lookup.cc \
 	utils/https_client.cc \
 	utils/ip_tree.cc \
-	utils/md5.cc \
 	utils/msc_tree.cc \
 	utils/random.cc \
 	utils/regex.cc \
-	utils/sha1.cc \
-	utils/string.cc \
 	utils/system.cc \
 	utils/shared_files.cc
 
@@ -311,10 +307,10 @@ libmodsecurity_la_CFLAGS =
 
 
 libmodsecurity_la_CPPFLAGS = \
-	-std=c++11 \
 	-I.. \
 	-g \
 	-I../others \
+	-I../others/mbedtls/include \
 	-fPIC \
 	-O3 \
 	-I../headers \
@@ -322,7 +318,6 @@ libmodsecurity_la_CPPFLAGS = \
 	$(GEOIP_CFLAGS) \
 	$(GLOBAL_CPPFLAGS) \
 	$(MODSEC_NO_LOGS) \
-	$(MODSEC_MUTEX_ON_PM) \
 	$(YAJL_CFLAGS) \
 	$(LMDB_CFLAGS) \
 	$(PCRE_CFLAGS) \

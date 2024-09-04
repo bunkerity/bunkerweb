@@ -13,20 +13,12 @@
  *
  */
 
-#include <string>
-
-#include "modsecurity/actions/action.h"
-#include "src/actions/transformations/transformation.h"
-
 #ifndef SRC_ACTIONS_TRANSFORMATIONS_NONE_H_
 #define SRC_ACTIONS_TRANSFORMATIONS_NONE_H_
 
-#ifdef __cplusplus
-namespace modsecurity {
-class Transaction;
+#include "transformation.h"
 
-namespace actions {
-namespace transformations {
+namespace modsecurity::actions::transformations {
 
 class None : public Transformation {
  public:
@@ -34,14 +26,9 @@ class None : public Transformation {
         : Transformation(action)
         { m_isNone = true; }
 
-    std::string evaluate(const std::string &exp,
-        Transaction *transaction) override;
+    bool transform(std::string &value, const Transaction *trans) const override;
 };
 
-}  // namespace transformations
-}  // namespace actions
-}  // namespace modsecurity
-
-#endif
+}  // namespace modsecurity::actions::transformations
 
 #endif  // SRC_ACTIONS_TRANSFORMATIONS_NONE_H_

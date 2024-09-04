@@ -13,42 +13,13 @@
  *
  */
 
-#include "src/actions/transformations/css_decode.h"
+#include "css_decode.h"
 
-#include <string.h>
-
-#include <iostream>
-#include <string>
-#include <algorithm>
-#include <functional>
-#include <cctype>
-#include <locale>
-
-#include "modsecurity/transaction.h"
-#include "src/actions/transformations/transformation.h"
 #include "src/utils/string.h"
 
+using namespace modsecurity::utils::string;
 
-namespace modsecurity {
-namespace actions {
-namespace transformations {
-
-
-std::string CssDecode::evaluate(const std::string &value,
-    Transaction *transaction) {
-
-    char *tmp = reinterpret_cast<char *>(
-        malloc(sizeof(char) * value.size() + 1));
-    memcpy(tmp, value.c_str(), value.size() + 1);
-    tmp[value.size()] = '\0';
-
-    CssDecode::css_decode_inplace(reinterpret_cast<unsigned char *>(tmp),
-        value.size());
-
-    std::string ret(tmp, 0, value.size());
-    free(tmp);
-    return ret;
-}
+namespace modsecurity::actions::transformations {
 
 
 /**
@@ -58,15 +29,13 @@ std::string CssDecode::evaluate(const std::string &value,
  *     http://www.w3.org/TR/REC-CSS2/syndata.html#q4
  *     http://www.unicode.org/roadmaps/
  */
-int CssDecode::css_decode_inplace(unsigned char *input, int64_t input_len) {
-    unsigned char *d = (unsigned char *)input;
-    int64_t i, j, count;
+static inline bool css_decode_inplace(std::string &val) {
+    const auto input_len = val.length();
+    auto input = reinterpret_cast<unsigned char *>(val.data());
+    auto d = input;
+    bool changed = false;
 
-    if (input == NULL) {
-        return -1;
-    }
-
-    i = count = 0;
+    std::string::size_type i = 0;
     while (i < input_len) {
         /* Is the character a backslash? */
         if (input[i] == '\\') {
@@ -75,7 +44,7 @@ int CssDecode::css_decode_inplace(unsigned char *input, int64_t input_len) {
                 i++; /* We are not going to need the backslash. */
 
                 /* Check for 1-6 hex characters following the backslash */
-                j = 0;
+                std::string::size_type j = 0;
                 while ((j < 6)
                         && (i + j < input_len)
                         && (VALID_HEX(input[i + j]))) {
@@ -157,40 +126,45 @@ int CssDecode::css_decode_inplace(unsigned char *input, int64_t input_len) {
                     }
 
                     /* Move over. */
-                    count++;
                     i += j;
+
+                    changed = true;
                 } else if (input[i] == '\n') {
                 /* No hexadecimal digits after backslash */
                     /* A newline character following backslash is ignored. */
                     i++;
+                    changed = true;
                 } else {
                 /* The character after backslash is not a hexadecimal digit,
                  * nor a newline. */
                     /* Use one character after backslash as is. */
                     *d++ = input[i++];
-                    count++;
                 }
             } else {
             /* No characters after backslash. */
                 /* Do not include backslash in output
                  *(continuation to nothing) */
                 i++;
+                changed = true;
             }
         } else {
         /* Character is not a backslash. */
             /* Copy one normal character to output. */
             *d++ = input[i++];
-            count++;
         }
     }
 
     /* Terminate output string. */
     *d = '\0';
 
-    return count;
+    val.resize(d - input);
+    return changed;
 }
 
 
-}  // namespace transformations
-}  // namespace actions
-}  // namespace modsecurity
+bool CssDecode::transform(std::string &value, const Transaction *trans) const {
+    return css_decode_inplace(value);
+}
+
+
+}  // namespace modsecurity::actions::transformations

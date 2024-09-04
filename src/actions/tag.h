@@ -33,7 +33,7 @@ namespace actions {
 class Tag : public Action {
  public:
     explicit Tag(std::unique_ptr<RunTimeString> z)
-        : Action("tag", RunTimeOnlyIfMatchKind),
+        : Action("tag"),
         m_string(std::move(z)) { }
 
     std::string getName(Transaction *transaction);

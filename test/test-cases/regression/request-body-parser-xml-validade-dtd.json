@@ -2,6 +2,7 @@
   {
     "enabled":1,
     "version_min":300000,
+    "resource":"libxml2",
     "title":"Testing XML request body parser - validateDTD (validate ok)",
     "expected":{
       "debug_log": "XML: Successfully validated payload against DTD: test-cases/data/SoapEnvelope.dtd"
@@ -47,6 +48,7 @@
   {
     "enabled":1,
     "version_min":300000,
+    "resource":"libxml2",
     "title":"Testing XML request body parser - validateDTD (validation failed)",
     "expected":{
       "debug_log": "XML Error: No declaration for element xBody",
@@ -93,6 +95,7 @@
   {
     "enabled":1,
     "version_min":300000,
+    "resource":"libxml2",
     "title":"Testing XML request body parser - validateDTD (bad XML)",
     "expected":{
       "debug_log": "XML: DTD validation failed because content is not well formed",
@@ -139,6 +142,7 @@
   {
     "enabled":1,
     "version_min":300000,
+    "resource":"libxml2",
     "title":"Testing XML request body parser - validateDTD (bad DTD)",
     "expected":{
       "debug_log": "Failed to load DTD: test-cases/data/SoapEnvelope-bad.dtd",

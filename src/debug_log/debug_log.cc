@@ -15,10 +15,6 @@
 
 #include "modsecurity/debug_log.h"
 
-#include <stddef.h>
-
-#include <fstream>
-
 #include "src/debug_log/debug_log_writer.h"
 #include "src/debug_log_writer_agent.h"
 

@@ -13,7 +13,11 @@
  *
  */
 
+#ifndef WIN32
 #include <unistd.h>
+#else
+#include <io.h>
+#endif
 #include <stdio.h>
 #include <string.h>
 

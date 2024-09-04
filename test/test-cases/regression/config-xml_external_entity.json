@@ -2,6 +2,7 @@
   {
     "enabled":1,
     "version_min":300000,
+    "resource":"libxml2",
     "title":"Testing SecXMLExternalEntity/XXE 1",
     "expected":{
       "debug_log": "Target value: \" jo smith\""
@@ -47,6 +48,7 @@
   {
     "enabled":1,
     "version_min":300000,
+    "resource":"libxml2",
     "title":"Testing SecXMLExternalEntity/XXE 2",
     "expected":{
       "debug_log": "XML: Failed to load DTD: test-cases/data/SoapEnvelope.dtd",
@@ -94,6 +96,7 @@
   {
     "enabled":1,
     "version_min":300000,
+    "resource":"libxml2",
     "title":"Testing SecXMLExternalEntity/XXE 3",
     "expected":{
       "debug_log": "XML Error: No declaration for element bookstore",

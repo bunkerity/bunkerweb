@@ -23,6 +23,7 @@
 #include <vector>
 #include <algorithm>
 #include <memory>
+#include <shared_mutex>
 #endif
 
 
@@ -70,13 +71,11 @@ struct MyHash{
 };
 
 class InMemoryPerProcess :
-    public std::unordered_multimap<std::string, CollectionData,
-        /*std::hash<std::string>*/MyHash, MyEqual>,
     public Collection {
  public:
     explicit InMemoryPerProcess(const std::string &name);
     ~InMemoryPerProcess();
-    void store(std::string key, std::string value);
+    void store(const std::string &key, const std::string &value);
 
     bool storeOrUpdateFirst(const std::string &key,
         const std::string &value) override;
@@ -102,21 +101,23 @@ class InMemoryPerProcess :
         variables::KeyExclusions &ke) override;
 
     /* store */
-    virtual void store(std::string key, std::string compartment,
+    virtual void store(const std::string &key, std::string &compartment,
         std::string value) {
-        std::string nkey = compartment + "::" + key;
+        const auto nkey = compartment + "::" + key;
         store(nkey, value);
     }
 
 
-    virtual void store(std::string key, std::string compartment,
+    virtual void store(const std::string &key, const std::string &compartment,
         std::string compartment2, std::string value) {
-        std::string nkey = compartment + "::" + compartment2 + "::" + key;
+        const auto nkey = compartment + "::" + compartment2 + "::" + key;
         store(nkey, value);
     }
 
  private:
-    pthread_mutex_t m_lock;
+    std::unordered_multimap<std::string, CollectionData,
+        /*std::hash<std::string>*/MyHash, MyEqual> m_map;
+    std::shared_mutex m_mutex;
 };
 
 }  // namespace backend

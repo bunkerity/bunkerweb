@@ -13,54 +13,34 @@
  *
  */
 
-#include "src/actions/transformations/replace_comments.h"
-
-#include <iostream>
-#include <string>
-#include <algorithm>
-#include <functional>
-#include <cctype>
-#include <locale>
-#include <cstring>
-
-#include "modsecurity/transaction.h"
-#include "src/actions/transformations/transformation.h"
+#include "replace_comments.h"
 
 
-namespace modsecurity {
-namespace actions {
-namespace transformations {
+namespace modsecurity::actions::transformations {
 
-ReplaceComments::ReplaceComments(const std::string &action) 
-    : Transformation(action) {
-    this->action_kind = 1;
-}
 
-std::string ReplaceComments::evaluate(const std::string &value,
-    Transaction *transaction) {
-    uint64_t i, j, incomment;
+static inline bool inplace(std::string &value) {
+    auto input = reinterpret_cast<unsigned char*>(value.data());
+    const auto input_len = value.length();
+    bool changed = false, incomment = false;
+    std::string::size_type i = 0, j = 0;
 
-    char *input = reinterpret_cast<char *>(
-        malloc(sizeof(char) * value.size() + 1));
-    memcpy(input, value.c_str(), value.size() + 1);
-    input[value.size()] = '\0';
-
-    i = j = incomment = 0;
-    while (i < value.size()) {
-        if (incomment == 0) {
-            if ((input[i] == '/') && (i + 1 < value.size())
+    while (i < input_len) {
+        if (!incomment) {
+            if ((input[i] == '/') && (i + 1 < input_len)
                 && (input[i + 1] == '*')) {
-                incomment = 1;
+                incomment = true;
                 i += 2;
+                changed = true;
             } else {
                 input[j] = input[i];
                 i++;
                 j++;
             }
         } else {
-            if ((input[i] == '*') && (i + 1 < value.size())
+            if ((input[i] == '*') && (i + 1 < input_len)
                 && (input[i + 1] == '/')) {
-                incomment = 0;
+                incomment = false;
                 i += 2;
                 input[j] = ' ';
                 j++;
@@ -74,15 +54,14 @@ std::string ReplaceComments::evaluate(const std::string &value,
         input[j++] = ' ';
     }
 
-
-    std::string resp;
-    resp.append(reinterpret_cast<char *>(input), j);
-
-    free(input);
-
-    return resp;
+    value.resize(j);
+    return changed;
 }
 
-}  // namespace transformations
-}  // namespace actions
-}  // namespace modsecurity
+
+bool ReplaceComments::transform(std::string &value, const Transaction *trans) const {
+    return inplace(value);
+}
+
+
+}  // namespace modsecurity::actions::transformations

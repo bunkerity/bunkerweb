@@ -2,6 +2,7 @@
   {
     "enabled":1,
     "version_min":300000,
+    "resource":"libxml2",
     "title":"Testing CtlRequestBodyProcessor=XML (1)",
     "expected":{
       "debug_log": "Registered XML namespace href \"http://schemas.xmlsoap.org/soap/envelope/\" prefix \"soap\""
@@ -71,6 +72,7 @@
   {
     "enabled":1,
     "version_min":300000,
+    "resource":"libxml2",
     "title":"Testing CtlRequestBodyProcessor=XML (2)",
     "expected":{
       "debug_log": "Rule returned 0"
@@ -139,6 +141,7 @@
    {
     "enabled":1,
     "version_min":300000,
+    "resource":"libxml2",
     "title":"Testing CtlRequestBodyProcessor=XML (3)",
     "expected":{
       "debug_log": "XML: Failed parsing document."

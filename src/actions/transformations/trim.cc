@@ -13,67 +13,51 @@
  *
  */
 
-#include "src/actions/transformations/trim.h"
+#include "trim.h"
 
-#include <iostream>
-#include <string>
 #include <algorithm>
-#include <functional>
-#include <cctype>
-#include <locale>
-
-#include "modsecurity/transaction.h"
-#include "src/actions/transformations/transformation.h"
-#include "modsecurity/actions/action.h"
-
-namespace modsecurity {
-namespace actions {
-namespace transformations {
 
 
-std::string *Trim::ltrim(std::string *s) {
-    s->erase(
-        s->begin(),
-        std::find_if(s->begin(), s->end(), [](unsigned char c) {
+namespace modsecurity::actions::transformations {
+
+
+bool Trim::ltrim(std::string &s) {
+    auto it = std::find_if(s.begin(), s.end(), [](unsigned char c) {
             return !std::isspace(c);
-        })
-    );
+        });
 
-    return s;
+    const bool changed = it != s.begin();
+
+    s.erase(s.begin(), it);
+
+    return changed;
 }
 
 
-std::string *Trim::rtrim(std::string *s) {
-    s->erase(
-        std::find_if(s->rbegin(), s->rend(), [](unsigned char c) {
+bool Trim::rtrim(std::string &s) {
+    auto it = std::find_if(s.rbegin(), s.rend(), [](unsigned char c) {
             return !std::isspace(c);
-        }).base(),
-        s->end()
-    );
+        }).base();
 
-    return s;
+    const bool changed = it != s.end();
+
+    s.erase(it, s.end());
+
+    return changed;
 }
 
 
-std::string *Trim::trim(std::string *s) {
-    return ltrim(rtrim(s));
+bool Trim::trim(std::string &s) {
+    bool changed = false;
+    changed |= rtrim(s);
+    changed |= ltrim(s);
+    return changed;
 }
 
 
-Trim::Trim(const std::string &action) 
-    : Transformation(action) {
-    this->action_kind = 1;
+bool Trim::transform(std::string &value, const Transaction *trans) const {
+    return trim(value);
 }
 
 
-std::string
-Trim::evaluate(const std::string &val,
-    Transaction *transaction) {
-    std::string value(val);
-    return *this->trim(&value);
-}
-
-
-}  // namespace transformations
-}  // namespace actions
-}  // namespace modsecurity
+}  // namespace modsecurity::actions::transformations

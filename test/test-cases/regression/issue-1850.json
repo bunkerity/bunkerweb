@@ -44,7 +44,7 @@
     "rules": [
       "SecRuleEngine On",
       "SecDefaultAction \"phase:1,status:404,deny\"",
-      "SecRule REQUEST_URI \"@contains /\" \"id:2000001,phase:1,log,redirect:'http://1.1.1.1/failed.html',t:none,msg:\"Unauthorized administrator request'\""
+      "SecRule REQUEST_URI \"@contains /\" \"id:2000001,phase:1,log,redirect:'http://1.1.1.1/failed.html',t:none,msg:'Unauthorized administrator request'\""
     ]
   }
 ]
