@@ -42,7 +42,7 @@ from app.routes.totp import totp
 
 from app.dependencies import BW_CONFIG, DATA, DB
 from app.models.models import AnonymousUser
-from app.utils import TMP_DIR, LOGGER, check_settings, get_latest_stable_release, handle_stop, stop
+from app.utils import TMP_DIR, LOGGER, get_blacklisted_settings, get_filtered_settings, get_latest_stable_release, get_multiples, handle_stop, stop
 
 signal(SIGINT, handle_stop)
 signal(SIGTERM, handle_stop)
@@ -97,15 +97,18 @@ with app.app_context():
 
     def custom_url_for(endpoint, **values):
         try:
-            if endpoint not in ("index", "loading", "check", "check_reloading") and "_page" not in endpoint:
+            if endpoint not in ("static", "index", "loading", "check", "check_reloading") and "_page" not in endpoint:
                 return url_for(f"{endpoint}.{endpoint}_page", **values)
             return url_for(endpoint, **values)
-        except BuildError:
+        except BuildError as e:
+            LOGGER.debug(f"Couldn't build the URL for {endpoint}: {e}")
             return "#"
 
     # Declare functions for jinja2
     app.jinja_env.globals.update(
-        check_settings=check_settings,
+        get_multiples=get_multiples,
+        get_filtered_settings=get_filtered_settings,
+        get_blacklisted_settings=get_blacklisted_settings,
         url_for=custom_url_for,
     )
 

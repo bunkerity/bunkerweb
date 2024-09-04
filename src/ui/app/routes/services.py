@@ -1,7 +1,7 @@
-from flask import Blueprint, redirect, render_template, request, url_for
+from flask import Blueprint, Response, redirect, render_template, request, url_for
 from flask_login import login_required
 
-from app.dependencies import DB
+from app.dependencies import BW_CONFIG, DB
 
 from app.routes.utils import get_service_data, handle_error, update_service
 
@@ -21,39 +21,18 @@ def services_page():
 
         return redirect(url_for("loading", next=url_for("services.services_page"), message=message))
 
-    # Display services
-    services = []
-    tmp_config = DB.get_config(methods=True, with_drafts=True).copy()
-    service_names = tmp_config["SERVER_NAME"]["value"].split(" ")
+    return render_template("services.html")  # TODO
 
-    table_settings = (
-        "USE_REVERSE_PROXY",
-        "IS_DRAFT",
-        "SERVE_FILES",
-        "REMOTE_PHP",
-        "AUTO_LETS_ENCRYPT",
-        "USE_CUSTOM_SSL",
-        "USE_MODSECURITY",
-        "USE_BAD_BEHAVIOR",
-        "USE_LIMIT_REQ",
-        "USE_DNSBL",
-        "SERVER_NAME",
-    )
 
-    for service in service_names:
-        service_settings = {}
-
-        # For each needed setting, get the service value if one, else the global (value), else default value
-        for setting in table_settings:
-            value = tmp_config.get(f"{service}_{setting}", tmp_config.get(setting, {"value": None}))["value"]
-            method = tmp_config.get(f"{service}_{setting}", tmp_config.get(setting, {"method": None}))["method"]
-            is_global = tmp_config.get(f"{service}_{setting}", tmp_config.get(setting, {"global": None}))["global"]
-            service_settings[setting] = {"value": value, "method": method, "global": is_global}
-
-        services.append(service_settings)
-
-    services.sort(key=lambda x: x["SERVER_NAME"]["value"])
-
-    # builder = services_builder(services)
-    # return render_template("services.html", data_server_builder=b64encode(dumps(builder).encode("utf-8")).decode("ascii"))
-    return render_template("services.html")
+@services.route("/services/<string:service>", methods=["GET", "POST"])
+@login_required
+def services_service_page(service: str):
+    services = BW_CONFIG.get_config(global_only=True, methods=False, filtered_settings=("SERVER_NAME"))["SERVER_NAME"].split(" ")
+    if service not in services:
+        return Response("Service not found", status=404)
+    mode = request.args.get("mode", "easy")
+    keywords = request.args.get("keywords", "")
+    search_type = request.args.get("type", "all")
+    db_config = DB.get_config(methods=True, with_drafts=True, service=service)
+    plugins = BW_CONFIG.get_plugins()
+    return render_template("service_settings.html", config=db_config, plugins=plugins, mode=mode, keywords=keywords, type=search_type)

@@ -6,7 +6,9 @@
                 <div class="container-xxl d-flex justify-content-center align-items-center min-vh-100">
                     <div class="layout-main-wrapper">
                         <div class="layout-main-placeholder">
-                            <img src="img/logo-menu-2.png" class="img-fluid pulsating" alt="Logo" />
+                            <img src="{{ url_for('static', filename='img/logo-menu-2.png') }}"
+                                 class="img-fluid pulsating"
+                                 alt="Logo" />
                         </div>
                         {% if message %}
                             <div class="layout-main-info">

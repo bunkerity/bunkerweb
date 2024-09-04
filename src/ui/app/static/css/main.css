@@ -193,7 +193,7 @@
   background-color: var(--bs-bw-green);
 }
 
-.pro-icon {
+/* .pro-icon {
   position: relative;
   width: 18px;
   height: 15.5px;
@@ -223,7 +223,7 @@
   background-image: url("../img/diamond-blue.svg");
   opacity: 0;
   animation: fadeIn 1.5s infinite alternate;
-}
+} */
 
 @media (max-width: 768px) {
   .btn-responsive {
@@ -232,10 +232,10 @@
     line-height: 1;
   }
 
-  .pro-icon {
+  /* .pro-icon {
     width: 9px;
     height: 7.75px;
-  }
+  } */
 }
 
 @media (min-width: 769px) and (max-width: 992px) {
@@ -287,7 +287,7 @@ td.highlight {
 
 .btn-outline-bw-green:hover {
   color: #fff;
-  background-color: var(--bs-primary);
+  background-color: var(--bs-bw-green);
 }
 
 .col.form-floating > .form-control-sm,
@@ -319,4 +319,82 @@ td.highlight {
 
 .form-floating > .form-control.form-control-sm:focus {
   padding-top: 1.1rem !important;
+}
+
+.shine {
+  background-image: linear-gradient(
+    120deg,
+    rgba(46, 172, 104, 0) 0%,
+    rgba(46, 172, 104, 0.8) 50%,
+    rgba(46, 172, 104, 0) 100%
+  );
+  background-size: 40%;
+  background-position: -100% center;
+  background-repeat: no-repeat;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  animation: shine 8s linear infinite;
+  animation-fill-mode: forwards;
+}
+
+.shine-sm {
+  animation: shineSm 5s linear infinite;
+}
+
+@keyframes shine {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+@keyframes shineSm {
+  0% {
+    background-position: -200% center;
+  }
+  60% {
+    background-position: 200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+.text-primary.shine {
+  color: rgba(var(--bs-primary-rgb), 0.1) !important;
+  background-color: var(--bs-primary) !important;
+}
+
+.form-floating > :disabled ~ label::after,
+.form-floating > .form-control:disabled ~ label::after {
+  background-color: transparent;
+}
+
+.chevron-icon {
+  padding-bottom: 0.125rem !important;
+}
+
+.chevron-rotate {
+  transform: rotate(90deg);
+  transition: transform 0.3s ease;
+}
+
+.chevron-rotate-back {
+  transform: rotate(0deg);
+  transition: transform 0.3s ease;
+}
+
+.multiple-container:not(:first-child) {
+  border-top: 1px solid var(--bs-primary);
+}
+
+a.badge:hover {
+  color: #fff;
+}
+
+.setting-checkbox-label {
+  font-size: calc(var(--bs-body-font-size) * 0.85);
 }

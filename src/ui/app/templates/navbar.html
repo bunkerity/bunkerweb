@@ -9,24 +9,45 @@
     <div class="navbar-collapse collapse navbar-nav-right d-flex align-items-center"
          id="navbar-collapse">
         <!-- Buttons -->
+        {% if current_endpoint == 'instances' %}
+            {% set documentation_endpoint = "/integrations" %}
+        {% elif current_endpoint == 'global-config' or 'services' in request.path %}
+            {% set documentation_endpoint = "/settings" %}
+        {% elif current_endpoint == 'configs' %}
+            {% set documentation_endpoint = "/concepts" %}
+            {% set documentation_fragment = "#custom-configurations" %}
+        {% elif 'plugins' in request.path %}
+            {% set documentation_endpoint = "/plugins" %}
+        {% elif current_endpoint == 'cache' %}
+            {% set documentation_endpoint = "/concepts" %}
+            {% set documentation_fragment = "#database" %}
+        {% elif current_endpoint == 'reports' or current_endpoint == 'bans' %}
+            {% set documentation_fragment = "#security-features" %}
+        {% elif current_endpoint == 'jobs' %}
+            {% set documentation_endpoint = "/concepts" %}
+            {% set documentation_fragment = "#scheduler" %}
+        {% elif current_endpoint == 'logs' %}
+            {% set documentation_endpoint = "/web-ui" %}
+            {% set documentation_fragment = "#accessing-logs" %}
+        {% endif %}
         <div class="navbar-nav align-items-center">
             <div class="nav-item d-flex align-items-center">
                 <a role="button"
                    class="btn btn-outline-secondary p-1 p-md-2"
                    aria-pressed="true"
-                   href="https://docs.bunkerweb.io/latest/?utm_campaign=self&utm_source=ui"
+                   href="https://docs.bunkerweb.io/latest{{ documentation_endpoint }}/?utm_campaign=self&utm_source=ui{{ documentation_fragment }}"
                    target="_blank"
                    rel="noopener">
-                    <span class="tf-icons bx bx-file bx-18px me-md-2"></span>
+                    <span class="tf-icons bx bx-file me-md-2"></span>
                     <span class="d-none d-md-inline">Documentation</span>
                 </a>
                 <a role="button"
                    class="btn btn-outline-github p-1 p-md-2 ms-1 ms-md-2"
                    aria-pressed="true"
-                   href="https://github.com/bunkerity/bunkerweb"
+                   href="https://github.com/bunkerity/bunkerweb/?utm_campaign=self&utm_source=ui"
                    target="_blank"
                    rel="noopener">
-                    <i class="tf-icons bx bxl-github bx-18px me-md-2"></i>
+                    <i class="tf-icons bx bxl-github me-md-2"></i>
                     <span class="d-none d-md-inline">Github</span>
                 </a>
                 <a role="button"
@@ -35,7 +56,7 @@
                    href="https://discord.bunkerity.com/?utm_campaign=self&utm_source=ui"
                    target="_blank"
                    rel="noopener">
-                    <i class="tf-icons bx bxl-discord bx-18px me-md-2"></i>
+                    <i class="tf-icons bx bxl-discord me-md-2"></i>
                     <span class="d-none d-md-inline">Discord</span>
                 </a>
             </div>
@@ -59,7 +80,8 @@
                    aria-pressed="true"
                    href="https://github.com/bunkerity/bunkerweb/releases/latest"
                    target="_blank"
-                   rel="noopener">
+                   rel="noopener"
+                   {% if bw_version != latest_version %} data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="New version available" {% endif %}>
                     Version {{ bw_version }}
                     {% if bw_version != latest_version %}
                         <span class="badge-dot position-absolute top-0 start-100 translate-middle bg-danger border border-light rounded-circle">
@@ -75,50 +97,39 @@
                    href="javascript:void(0);"
                    data-bs-toggle="dropdown">
                     <div class="avatar avatar-online">
-                        <img src="img/avatar_profil_BW.png"
+                        <img src="{{ avatar_url }}"
                              alt="User Avatar"
                              class="w-px-40 h-auto rounded-circle" />
                     </div>
                 </a>
-                {% with profile_url = url_for('profile') %}
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li>
-                            <a class="dropdown-item" href="{{ profile_url }}">
-                                <div class="d-flex align-items-center">
-                                    <div class="flex-shrink-0 me-2 me-md-3">
-                                        <div class="avatar avatar-online">
-                                            <img src="img/avatar_profil_BW.png"
-                                                 alt="Admin Avatar"
-                                                 class="w-px-40 h-auto rounded-circle" />
-                                        </div>
-                                    </div>
-                                    <div class="flex-grow-1">
-                                        <h6 class="mb-0 text-truncate">{{ current_user.get_id() |title }}</h6>
-                                        <small class="text-muted text-truncate">{{ current_user.list_roles[0] }}</small>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li>
+                        <a class="dropdown-item" href="{{ url_for('profile') }}">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-shrink-0 me-2 me-md-3">
+                                    <div class="avatar avatar-online">
+                                        <img src="{{ avatar_url }}"
+                                             alt="Admin Avatar"
+                                             class="w-px-40 h-auto rounded-circle" />
                                     </div>
                                 </div>
-                            </a>
-                        </li>
-                        <li>
-                            <div class="dropdown-divider my-1"></div>
-                        </li>
-                        <li>
-                            <a class="dropdown-item d-flex align-items-center"
-                               href="{{ profile_url }}">
-                                <i class="bx bx-user bx-md me-2"></i><span>My Profile</span>
-                            </a>
-                        </li>
-                        <li>
-                            <div class="dropdown-divider my-1"></div>
-                        </li>
-                        <li>
-                            <a class="dropdown-item d-flex align-items-center"
-                               href="{{ url_for('logout') }}">
-                                <i class="bx bx-power-off bx-md me-2"></i><span>Log Out</span>
-                            </a>
-                        </li>
-                    </ul>
-                {% endwith %}
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-0 text-truncate">{{ current_user.get_id() |title }}</h6>
+                                    <small class="text-muted text-truncate">{{ current_user.list_roles[0] }}</small>
+                                </div>
+                            </div>
+                        </a>
+                    </li>
+                    <li>
+                        <div class="dropdown-divider my-1"></div>
+                    </li>
+                    <li>
+                        <a class="dropdown-item d-flex align-items-center"
+                           href="{{ url_for('logout') }}">
+                            <i class="bx bx-power-off bx-md me-2"></i><span>Log Out</span>
+                        </a>
+                    </li>
+                </ul>
             </li>
             <!--/ User -->
         </ul>

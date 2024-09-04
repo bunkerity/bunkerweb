@@ -154,47 +154,15 @@ $(document).ready(function () {
       });
   });
 
-  $("#select-plugin").on("click", function () {
-    $("#plugin-search").focus();
+  $("#pluginsCollapse").on("shown.bs.collapse", () => {
+    $(".chevron-icon")
+      .addClass("chevron-rotate")
+      .removeClass("chevron-rotate-back");
   });
 
-  $("#plugin-search").on("input", function () {
-    const inputValue = $(this).val().toLowerCase();
-    const dropdownItems = $("#plugins-dropdown-menu li.nav-item");
-
-    dropdownItems.each(function () {
-      const item = $(this);
-      const text = item.text().toLowerCase();
-      console.log(item);
-      const pluginId = item
-        .find("button")
-        .data("bs-target")
-        .replace("#navs-plugins-", "");
-
-      if (text.includes(inputValue) || pluginId.includes(inputValue)) {
-        item.show();
-      } else {
-        item.hide();
-      }
-    });
-
-    // Show "No Item" message if no items match
-    if (dropdownItems.filter(":visible").length === 0) {
-      if ($(".no-items").length === 0) {
-        $("#plugins-dropdown-menu").append(
-          '<li class="no-items dropdown-item text-muted">No Item</li>',
-        );
-      }
-    } else {
-      $(".no-items").remove();
-    }
-  });
-
-  $(document).on("click", function (event) {
-    if (!$(event.target).closest(".card").length) {
-      $("#plugins-dropdown-menu").removeClass("show");
-      $("#plugin-search").val("");
-      $("#plugin-search").trigger("input");
-    }
+  $("#pluginsCollapse").on("hidden.bs.collapse", () => {
+    $(".chevron-icon")
+      .removeClass("chevron-rotate")
+      .addClass("chevron-rotate-back");
   });
 });

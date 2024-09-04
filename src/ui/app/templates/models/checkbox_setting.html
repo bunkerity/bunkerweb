@@ -1,0 +1,13 @@
+<div class="form-check form-switch mt-1">
+    <input id="{{ setting_id_prefix }}setting-{{ plugin['id'] }}-{{ setting_data['id'] }}"
+           name="{{ setting }}"
+           class="form-check-input"
+           type="checkbox"
+           role="switch"
+           aria-labelledby="label-{{ plugin['id'] }}-{{ setting_data['id'] }}"
+           data-default="{{ setting_data['default'] }}"
+           {% if setting_value == "yes" %}checked{% endif %}
+           {% if disabled %}disabled{% endif %}>
+    <label class="form-check setting-checkbox-label d-flex align-items-center ps-0"
+           for="{{ setting_id_prefix }}setting-{{ plugin['id'] }}-{{ setting_data['id'] }}">{{ setting }}</label>
+</div>

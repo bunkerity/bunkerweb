@@ -13,16 +13,18 @@
                         <!-- prettier-ignore -->
                         <div class="d-flex justify-content-between align-items-center mb-5">
                             {% include "breadcrumb.html" %}
-                            {% if "services" in request.path %}
-                                <ul class="nav nav-pills flex-column flex-md-row" role="tablist">
+                            {% if current_endpoint != "services" and "services" in request.path %}
+                                <ul id="service-modes-menu"
+                                    class="nav nav-pills flex-column flex-md-row"
+                                    role="tablist">
                                     <li class="nav-item me-0 me-sm-3" role="presentation">
                                         <button type="button"
-                                                class="rounded-pill nav-link d-flex align-items-center active"
+                                                class="rounded-pill nav-link d-flex align-items-center{% if mode == 'easy' %} active{% endif %}"
                                                 role="tab"
                                                 data-bs-toggle="tab"
-                                                data-bs-target="#navs-pills-easy"
-                                                aria-controls="navs-pills-easy"
-                                                aria-selected="true">
+                                                data-bs-target="#navs-modes-easy"
+                                                aria-controls="navs-modes-easy"
+                                                {% if mode == 'easy' %}aria-selected="true"{% endif %}>
                                             <i class="bx bx-customize bx-sm"></i>
                                             &nbsp;
                                             <span class="d-none d-sm-inline">Easy</span>
@@ -30,11 +32,12 @@
                                     </li>
                                     <li class="nav-item me-0 me-sm-3" role="presentation">
                                         <button type="button"
-                                                class="rounded-pill nav-link d-flex align-items-center"
+                                                class="rounded-pill nav-link d-flex align-items-center{% if mode == 'advanced' %} active{% endif %}"
                                                 role="tab"
                                                 data-bs-toggle="tab"
-                                                data-bs-target="#navs-pills-advanced"
-                                                aria-controls="navs-pills-advanced">
+                                                data-bs-target="#navs-modes-advanced"
+                                                aria-controls="navs-modes-advanced"
+                                                {% if mode == 'advanced' %}aria-selected="true"{% endif %}>
                                             <i class="bx bx-shield-quarter bx-sm"></i>
                                             &nbsp;
                                             <span class="d-none d-sm-inline">Advanced</span>
@@ -42,11 +45,12 @@
                                     </li>
                                     <li class="nav-item" role="presentation">
                                         <button type="button"
-                                                class="rounded-pill nav-link d-flex align-items-center"
+                                                class="rounded-pill nav-link d-flex align-items-center{% if mode == 'raw' %} active{% endif %}"
                                                 role="tab"
                                                 data-bs-toggle="tab"
-                                                data-bs-target="#navs-pills-raw"
-                                                aria-controls="navs-pills-raw">
+                                                data-bs-target="#navs-modes-raw"
+                                                aria-controls="navs-modes-raw"
+                                                {% if mode == 'raw' %}aria-selected="true"{% endif %}>
                                             <i class="bx bx-notepad bx-sm"></i>
                                             &nbsp;
                                             <span class="d-none d-sm-inline">Raw</span>
@@ -62,7 +66,7 @@
                                        href="https://panel.bunkerweb.io/order/support/?utm_campaign=self&utm_source=ui"
                                        target="_blank"
                                        rel="noopener">
-                                        <span class="bx bx-help-circle bx-18px me-0 me-md-2"></span>
+                                        <span class="bx bx-help-circle me-0 me-md-2"></span>
                                         <span class="d-none d-md-inline">Need help?</span>
                                     </a>
                                 </li>
@@ -74,7 +78,7 @@
                                             data-bs-toggle="offcanvas"
                                             data-bs-target="#side-offcanvas"
                                             aria-controls="side-offcanvas">
-                                        <span class="bx bx-news bx-18px me-0 me-md-2"></span>
+                                        <span class="bx bx-news me-0 me-md-2"></span>
                                         <span class="d-none d-md-inline">News</span>
                                     </button>
                                 </li>
@@ -94,7 +98,10 @@
                                target="_blank"
                                rel="noopener">
                                 <span class="me-1 me-md-2 d-flex h-100 justify-content-center align-items-center">
-                                    <div class="pro-icon"></div>
+                                    <img src="{{ pro_diamond_url }}"
+                                         alt="Pro plugin"
+                                         width="18px"
+                                         height="15.5px">
                                 </span>
                             Upgrade to Pro</a>
                         </div>

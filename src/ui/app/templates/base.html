@@ -1,4 +1,6 @@
-{% set current_endpoint = url_for(request.endpoint).split("/")[-1] %}
+{% set current_endpoint = request.path.split("/")[-1] %}
+{% set pro_diamond_url = url_for('static', filename='img/diamond.svg') %}
+{% set avatar_url = url_for('static', filename='img/avatar_profil_BW.png') %}
 <!DOCTYPE html>
 <html lang="en"
       class="light-style layout-navbar-fixed layout-menu-fixed"
@@ -12,54 +14,64 @@
         <meta name="author" content="Bunkerity" />
         <title>BunkerWeb UI</title>
         <!-- Favicon -->
-        <link rel="icon" type="image/x-icon" href="img/favicon.ico" />
+        <link rel="icon"
+              type="image/x-icon"
+              href="{{ url_for('static', filename='img/favicon.ico') }}" />
         <!-- Fonts -->
         <link rel="stylesheet"
-              href="fonts/Public_sans.css"
+              href="{{ url_for('static', filename='fonts/Public_sans.css') }}"
               nonce="{{ style_nonce }}" />
         <!-- Icons -->
         <link rel="stylesheet"
-              href="fonts/boxicons.min.css"
+              href="{{ url_for('static', filename='fonts/boxicons.min.css') }}"
               nonce="{{ style_nonce }}" />
         <!-- Core CSS -->
-        <link rel="stylesheet" href="css/core.css" nonce="{{ style_nonce }}" />
         <link rel="stylesheet"
-              href="css/theme-default.css"
+              href="{{ url_for('static', filename='css/core.css') }}"
               nonce="{{ style_nonce }}" />
-        <link rel="stylesheet" href="css/main.css" nonce="{{ style_nonce }}" />
+        <link rel="stylesheet"
+              href="{{ url_for('static', filename='css/theme-default.css') }}"
+              nonce="{{ style_nonce }}" />
+        <link rel="stylesheet"
+              href="{{ url_for('static', filename='css/main.css') }}"
+              nonce="{{ style_nonce }}" />
         <!-- Vendors CSS -->
         <link rel="stylesheet"
-              href="libs/perfect-scrollbar/perfect-scrollbar.css"
+              href="{{ url_for('static', filename='libs/perfect-scrollbar/perfect-scrollbar.css') }}"
               nonce="{{ style_nonce }}" />
         {% if current_endpoint == "home" %}
             <link rel="stylesheet"
-                  href="libs/apexcharts/apexcharts.css"
+                  href="{{ url_for('static', filename='libs/apexcharts/apexcharts.css') }}"
                   nonce="{{ style_nonce }}" />
         {% elif current_endpoint == "instances" %}
             <link rel="stylesheet"
-                  href="libs/datatables/datatables.min.css"
+                  href="{{ url_for('static', filename='libs/datatables/datatables.min.css') }}"
                   nonce="{{ style_nonce }}" />
             <link rel="stylesheet"
-                  href="css/pages/instances.css"
+                  href="{{ url_for('static', filename='css/pages/instances.css') }}"
                   nonce="{{ style_nonce }}" />
         {% endif %}
         <!-- Page CSS -->
         <!-- Page -->
         {% if current_endpoint == "login" or current_endpoint == "totp" %}
-            <link rel="stylesheet" href="css/pages/login.css" nonce="{{ style_nonce }}" />
+            <link rel="stylesheet"
+                  href="{{ url_for('static', filename='css/pages/login.css') }}"
+                  nonce="{{ style_nonce }}" />
         {% elif current_endpoint == "loading" %}
             <link rel="stylesheet"
-                  href="css/pages/loading.css"
+                  href="{{ url_for('static', filename='css/pages/loading.css') }}"
                   nonce="{{ style_nonce }}" />
         {% elif current_endpoint == "profile" %}
             <link rel="stylesheet"
-                  href="css/pages/profile.css"
+                  href="{{ url_for('static', filename='css/pages/profile.css') }}"
                   nonce="{{ style_nonce }}" />
         {% endif %}
         <!-- Helpers  -->
-        <script src="js/helpers.js" nonce="{{ script_nonce }}"></script>
+        <script src="{{ url_for('static', filename='js/helpers.js') }}"
+                nonce="{{ script_nonce }}"></script>
         <!-- Config  -->
-        <script src="js/config.js" nonce="{{ script_nonce }}"></script>
+        <script src="{{ url_for('static', filename='js/config.js') }}"
+                nonce="{{ script_nonce }}"></script>
     </head>
     <body>
         <!-- prettier-ignore -->
@@ -68,33 +80,52 @@
         {% endif %}
         {% block page %}{% endblock %}
         <!-- Vendors JS -->
-        <script src="libs/jquery/jquery.min.js" nonce="{{ script_nonce }}"></script>
-        <script src="libs/popper/popper.min.js" nonce="{{ script_nonce }}"></script>
-        <script src="libs/bootstrap/bootstrap.bundle.min.js"
+        <script src="{{ url_for('static', filename='libs/jquery/jquery.min.js') }}"
                 nonce="{{ script_nonce }}"></script>
-        <script src="libs/perfect-scrollbar/perfect-scrollbar.min.js"
+        <script src="{{ url_for('static', filename='libs/popper/popper.min.js') }}"
                 nonce="{{ script_nonce }}"></script>
-        <script src="libs/purify/purify.min.js" nonce="{{ script_nonce }}"></script>
+        <script src="{{ url_for('static', filename='libs/bootstrap/bootstrap.bundle.min.js') }}"
+                nonce="{{ script_nonce }}"></script>
+        <script src="{{ url_for('static', filename='libs/perfect-scrollbar/perfect-scrollbar.min.js') }}"
+                nonce="{{ script_nonce }}"></script>
+        <script src="{{ url_for('static', filename='libs/purify/purify.min.js') }}"
+                nonce="{{ script_nonce }}"></script>
         {% if current_endpoint == "instances" %}
-            <script src="libs/datatables/datatables.min.js" nonce="{{ script_nonce }}"></script>
+            <script src="{{ url_for('static', filename='libs/datatables/datatables.min.js') }}"
+                    nonce="{{ script_nonce }}"></script>
         {% endif %}
         <!-- Core JS -->
-        <script src="js/menu.js" nonce="{{ script_nonce }}"></script>
+        <script src="{{ url_for('static', filename='js/menu.js') }}"
+                nonce="{{ script_nonce }}"></script>
         {% if current_endpoint == "home" %}
-            <script src="libs/apexcharts/apexcharts.min.js" nonce="{{ script_nonce }}"></script>
-            <script src="js/dashboards-analytics.js" nonce="{{ script_nonce }}"></script>
+            <script src="{{ url_for('static', filename='libs/apexcharts/apexcharts.min.js') }}"
+                    nonce="{{ script_nonce }}"></script>
+            <script src="{{ url_for('static', filename='js/dashboards-analytics.js') }}"
+                    nonce="{{ script_nonce }}"></script>
         {% endif %}
         <!-- Main JS -->
-        <script src="js/main.js" nonce="{{ script_nonce }}"></script>
+        <script src="{{ url_for('static', filename='js/main.js') }}"
+                nonce="{{ script_nonce }}"></script>
         {% if current_endpoint != "login" and current_endpoint != "totp" %}
-            <script async defer src="js/sidebar.js" nonce="{{ script_nonce }}"></script>
+            <script async
+                    defer
+                    src="{{ url_for('static', filename='js/sidebar.js') }}"
+                    nonce="{{ script_nonce }}"></script>
+        {% endif %}
+        {% if current_endpoint == "global-config" or (current_endpoint != "services" and "services" in request.path) %}
+            <script async
+                    defer
+                    src="{{ url_for('static', filename='js/plugins-settings.js') }}"
+                    nonce="{{ script_nonce }}"></script>
         {% endif %}
         <!-- Page JS -->
         {% if current_endpoint == "profile" %}
-            <script src="js/pages/profile.js" nonce="{{ script_nonce }}"></script>
+            <script src="{{ url_for('static', filename='js/pages/profile.js') }}"
+                    nonce="{{ script_nonce }}"></script>
         {% elif current_endpoint == "instances" %}
-            <script src="js/pages/instances.js" nonce="{{ script_nonce }}"></script>
+            <script src="{{ url_for('static', filename='js/pages/instances.js') }}"
+                    nonce="{{ script_nonce }}"></script>
         {% endif %}
-        <script async defer src="js/buttons.js"></script>
+        <script async defer src="{{ url_for('static', filename='js/buttons.js') }}"></script>
     </body>
 </html>

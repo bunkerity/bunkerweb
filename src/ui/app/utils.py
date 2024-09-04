@@ -4,11 +4,11 @@ from os import _exit, getenv
 from os.path import join, sep
 from pathlib import Path
 from subprocess import PIPE, Popen, call
-from typing import List, Optional
+from typing import Dict, List, Optional, Set
 
 from bcrypt import checkpw, gensalt, hashpw
 from magic import Magic
-from regex import compile as re_compile
+from regex import compile as re_compile, match
 from requests import get
 
 from logger import setup_logger  # type: ignore
@@ -43,8 +43,31 @@ def handle_stop(signum, frame):
     stop(0, False)
 
 
-def check_settings(settings: dict, check: str) -> bool:
-    return any(setting["context"] == check for setting in settings.values())
+def get_multiples(settings: dict) -> Dict[str, dict]:
+    multiples = {}
+    for setting, data in settings.items():
+        multiple = data.get("multiple")
+        if multiple:
+            if multiple not in multiples:
+                multiples[multiple] = {}
+            multiples[multiple].update({setting: data | {"setting_no_suffix": setting.rsplit("_", 1)[0] if match(r".+_\d+$", setting) else setting}})
+    return multiples
+
+
+def get_filtered_settings(settings: dict, global_config: bool = False) -> Dict[str, dict]:
+    multisites = {}
+    for setting, data in settings.items():
+        if not global_config and data["context"] == "global":
+            continue
+        multisites[setting] = data
+    return multisites
+
+
+def get_blacklisted_settings(global_config: bool = False) -> Set[str]:
+    blacklisted_settings = {"IS_LOADING", "AUTOCONF_MODE", "SWARM_MODE", "KUBERNETES_MODE", "IS_DRAFT", "BUNKERWEB_INSTANCES"}
+    if global_config:
+        blacklisted_settings.update({"SERVER_NAME", "USE_TEMPLATE"})
+    return blacklisted_settings
 
 
 def gen_password_hash(password: str) -> bytes:

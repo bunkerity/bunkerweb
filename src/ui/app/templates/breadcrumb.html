@@ -1,17 +1,21 @@
 <nav class="d-flex align-items-center" aria-label="breadcrumb">
     <ol class="breadcrumb mb-0">
         <!-- prettier-ignore -->
-        {% with breadcrumbs = url_for(request.endpoint).split("/") %}
-            {% with last_crumb = breadcrumbs[-1] %}
-                {% for breadcrumb in breadcrumbs[1:] %}
-                    {% if breadcrumb == last_crumb %}
-                        <li class="breadcrumb-item active" aria-current="page">{% else %}</li>
-                        <li class="breadcrumb-item">
-                        {% endif %}
-                        <a href="{{ url_for(breadcrumb) }}">{{ breadcrumb }}</a>
-                    </li>
-                {% endfor %}
-            {% endwith %}
+        {% set breadcrumbs_url = url_for(request.endpoint) %}
+        {% if current_endpoint != "services" and "services" in request.path %}
+            {% set breadcrumbs_url = url_for("services") + "/" + current_endpoint %}
+        {% endif %}
+        {% with breadcrumbs = breadcrumbs_url.split("/") %}
+            {% for breadcrumb in breadcrumbs[1:] %}
+                {% set breadcrumb_url = url_for(breadcrumb.replace('_', '-')) %}
+                {% if breadcrumb == current_endpoint %}
+                    {% set breadcrumb_url = breadcrumbs_url %}
+                {% endif %}
+                <li class="breadcrumb-item{% if breadcrumb == current_endpoint %} active{% endif %}"
+                    {% if breadcrumb == current_endpoint %}aria-current="page"{% endif %}>
+                    <a href="{{ breadcrumb_url }}">{{ breadcrumb }}</a>
+                </li>
+            {% endfor %}
         {% endwith %}
     </ol>
 </nav>

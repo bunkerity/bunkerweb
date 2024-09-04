@@ -79,6 +79,8 @@ def global_config_page():
             )
         )
 
-    global_config = BW_CONFIG.get_config(global_only=True, methods=True)
+    keywords = request.args.get("keywords", "")
+    search_type = request.args.get("type", "all")
+    global_config = DB.get_config(global_only=True, methods=True)
     plugins = BW_CONFIG.get_plugins()
-    return render_template("plugins_settings.html", config=global_config, plugins=plugins)
+    return render_template("global_config.html", config=global_config, plugins=plugins, keywords=keywords, type=search_type)

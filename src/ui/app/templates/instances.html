@@ -26,32 +26,40 @@
         <table id="instances" class="table w-100">
             <thead>
                 <tr>
+                    <th>
+                        <input id="select-all-rows"
+                               aria-label="Select all rows"
+                               class="dt-select-checkbox mb-1"
+                               type="checkbox">
+                        Select All
+                    </th>
                     <th data-bs-toggle="tooltip"
-                        data-bs-placement="top"
+                        data-bs-placement="bottom"
                         data-bs-original-title="The hostname of the Instance">Hostname</th>
                     <th data-bs-toggle="tooltip"
-                        data-bs-placement="top"
+                        data-bs-placement="bottom"
                         data-bs-original-title="The user defined or auto-generated Instance's name">Name</th>
                     <th data-bs-toggle="tooltip"
-                        data-bs-placement="top"
+                        data-bs-placement="bottom"
                         data-bs-original-title="The creation method of the Instance">Method</th>
                     <th data-bs-toggle="tooltip"
-                        data-bs-placement="top"
+                        data-bs-placement="bottom"
                         data-bs-original-title="The Instance's health status">Health</th>
                     <th data-bs-toggle="tooltip"
-                        data-bs-placement="top"
+                        data-bs-placement="bottom"
                         data-bs-original-title="The Instance's type">Type</th>
                     <th data-bs-toggle="tooltip"
-                        data-bs-placement="top"
+                        data-bs-placement="bottom"
                         data-bs-original-title="The date and time when the Instance was created">Created</th>
                     <th data-bs-toggle="tooltip"
-                        data-bs-placement="top"
+                        data-bs-placement="bottom"
                         data-bs-original-title="The date and time when the Instance was last seen">Last Seen</th>
                 </tr>
             </thead>
             <tbody>
                 {% for instance in instances %}
                     <tr>
+                        <td></td>
                         <td>{{ instance.hostname }}</td>
                         <td>{{ instance.name }}</td>
                         <td id="method-{{ instance.hostname }}">{{ instance.method }}</td>
@@ -69,11 +77,11 @@
                         </td>
                         <td>
                             {% if instance.type == "container" %}
-                                <i class="bx bx-18px bxl-docker"></i>&nbsp;Container
+                                <i class="bx bxl-docker"></i>&nbsp;Container
                             {% elif instance.type == "pod" %}
-                                <i class="bx bx-18px bxl-kubernetes"></i>&nbsp;Pod
+                                <i class="bx bxl-kubernetes"></i>&nbsp;Pod
                             {% else %}
-                                <i class="bx bx-18px bx-microchip"></i>&nbsp;Static
+                                <i class="bx bx-microchip"></i>&nbsp;Static
                             {% endif %}
                         </td>
                         <td>{{ instance.creation_date.astimezone().strftime("%Y-%m-%d %H:%M:%S %Z") }}</td>
@@ -98,7 +106,7 @@
                     data-bs-dismiss="toast"
                     aria-label="Close"></button>
         </div>
-        <div class="toast-body">If you read this, ck-t means that you're curious 👀</div>
+        <div class="toast-body">If you read this, it means that you're curious 👀</div>
     </div>
     <div class="modal fade"
          id="modal-create-instance"

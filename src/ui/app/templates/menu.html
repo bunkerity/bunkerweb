@@ -1,11 +1,13 @@
 <!-- Menu -->
 <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
-    <div class="app-brand main">
+    <div class="app-brand main mb-2">
         <a href="https://www.bunkerweb.io/?utm_campaign=self&utm_source=ui"
            target="_blank"
            class="app-brand-link">
             <span class="app-brand-logo main w-100">
-                <img class="img-fluid" src="img/logo-menu.png" alt="BunkerWeb logo">
+                <img class="img-fluid"
+                     src="{{ url_for('static', filename='img/logo-menu.png') }}"
+                     alt="BunkerWeb logo">
             </span>
         </a>
         <a href="javascript:void(0);"
@@ -13,7 +15,7 @@
             <i class="bx bx-chevron-left bx-sm d-flex align-items-center justify-content-center"></i>
         </a>
     </div>
-    <div class="menu-inner-shadow"></div>
+    <div class="border border-primary border-0 border-top"></div>
     {% with menu_items = {
         "home": {"url": url_for('home'), "icon": "bx-home-smile"},
         "instances": {"url": url_for('instances'), "icon": "bx-server"},
@@ -29,7 +31,7 @@
         } %}
         <ul class="menu-inner py-1">
             {% for endpoint, item in menu_items.items() %}
-                <li class="menu-item {% if current_endpoint == endpoint %}active{% endif %} {% if item.get('sub') and item.get('open', True) %}open{% endif %}">
+                <li class="menu-item {% if endpoint in request.path %}active{% endif %} {% if item.get('sub') and item.get('open', True) %}open{% endif %}">
                     <a href="{{ item['url'] }}"
                        class="menu-link {% if item.get('sub') %}menu-toggle{% endif %}">
                         <i class="menu-icon tf-icons bx {{ item['icon'] }}"></i>
@@ -59,31 +61,51 @@
                 </li>
             {% endfor %}
             <!-- Plugins Pages -->
-            <li class="menu-header small text-uppercase">
+            <li class="menu-header text-uppercase align-items-center">
                 <span class="menu-header-text">Plugins Pages</span>
+                <button class="btn btn-link menu-header-text p-0"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#pluginsCollapse"
+                        aria-expanded="true"
+                        aria-controls="pluginsCollapse">
+                    <i class="bx bx-chevron-right chevron-icon chevron-rotate"></i>
+                </button>
             </li>
-            {% for plugin in plugins %}
-                {% with not_pro_pro_plugin = not is_pro_version and plugin['type'] == "pro" %}
-                    {% if not_pro_pro_plugin or plugin['page'] %}
-                        <li class="menu-item {% if current_endpoint == plugin['id'] %}active{% endif %}">
-                            <a href="{% if not_pro_pro_plugin %}https://panel.bunkerweb.io/?utm_campaign=self&utm_source=ui#pro{% else %}{{ url_for("plugins") }}/{{ plugin['id'] }}{% endif %}"
-                               class="menu-link">
-                                <i class="menu-icon tf-icons bx bx-puzzle"></i>
-                                <div class="text-truncate" data-i18n="{{ plugin['name'] }}">{{ plugin['name'] }}</div>
-                                {% if plugin['type'] != "pro" %}
-                                    <div class="badge rounded-pill bg-label-{% if plugin['type'] == 'core' %}secondary{% else %}primary{% endif %} text-uppercase fs-tiny ms-auto">
-                                        {{ plugin['type'].title() }}
-                                    </div>
-                                {% else %}
-                                    <div class="badge badge-center rounded-pill text-uppercase fs-tiny ms-auto">
-                                        <img src="img/diamond.svg" alt="Pro plugin" width="18px" height="15.5px">
-                                    </div>
-                                {% endif %}
-                            </a>
-                        </li>
-                    {% endif %}
-                {% endwith %}
-            {% endfor %}
+            <div class="collapse show" id="pluginsCollapse">
+                {% for plugin in plugins %}
+                    {% with not_pro_pro_plugin = not is_pro_version and plugin['type'] == "pro" %}
+                        {% if not_pro_pro_plugin or plugin['page'] %}
+                            <li class="menu-item {% if current_endpoint == plugin['id'] %}active{% endif %}">
+                                <a href="{% if not_pro_pro_plugin %}https://panel.bunkerweb.io/?utm_campaign=self&utm_source=ui#pro{% else %}{{ url_for("plugins") }}/{{ plugin['id'] }}{% endif %}"
+                                   class="menu-link"
+                                   {% if not_pro_pro_plugin %}target="_blank" rel="noopener"{% endif %}>
+                                    <i class="menu-icon tf-icons bx bx-puzzle"></i>
+                                    <div class="text-truncate{% if plugin['type'] == 'pro' %} text-primary shine shine-sm{% endif %}"
+                                         data-i18n="{{ plugin['name'] }}">{{ plugin['name'] }}</div>
+                                    {% if plugin['type'] != "pro" %}
+                                        <div class="badge rounded-pill bg-label-{% if plugin['type'] == 'core' %}secondary{% else %}primary{% endif %} text-uppercase fs-tiny ms-auto">
+                                            {{ plugin['type'].title() }}
+                                        </div>
+                                    {% else %}
+                                        <div class="badge badge-center rounded-pill text-uppercase fs-tiny ms-auto"
+                                             data-bs-toggle="tooltip"
+                                             data-bs-placement="top"
+                                             data-bs-html="true"
+                                             title="<i class='bx bx-diamond bx-xs'></i><span>Pro feature</span>">
+                                            <img src="{{ pro_diamond_url }}"
+                                                 alt="Pro plugin"
+                                                 width="18px"
+                                                 height="15.5px">
+                                        </div>
+                                    {% endif %}
+                                </a>
+                            </li>
+                        {% endif %}
+                    {% endwith %}
+                {% endfor %}
+            </div>
+            <!-- / Plugins Pages -->
             <!-- Misc -->
             <li class="menu-header small text-uppercase">
                 <span class="menu-header-text">Misc</span>

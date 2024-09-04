@@ -152,7 +152,9 @@ $(document).ready(function () {
 
     setTimeout(() => {
       fadeInPlaceholders();
-      loadSessionData(page);
+      setTimeout(() => {
+        loadSessionData(page);
+      }, 200);
     }, 50);
   });
 

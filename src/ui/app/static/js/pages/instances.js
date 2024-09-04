@@ -5,26 +5,7 @@ $(document).ready(function () {
 
   const layout = {
     topStart: {},
-    bottomEnd: {
-      buttons: [
-        {
-          extend: "ping_instances",
-        },
-        {
-          extend: "exec_form",
-          text: '<span class="tf-icons bx bx-refresh bx-18px me-2"></span>Reload',
-          className: "btn btn-sm btn-outline-primary",
-        },
-        {
-          extend: "exec_form",
-          text: '<span class="tf-icons bx bx-stop bx-18px me-2"></span>Stop',
-          className: "btn btn-sm btn-outline-primary",
-        },
-        {
-          extend: "delete_instances",
-        },
-      ],
-    },
+    bottomEnd: {},
   };
 
   if (instanceNumber > 10) {
@@ -37,7 +18,7 @@ $(document).ready(function () {
   layout.topStart.buttons = [
     {
       extend: "colvis",
-      columns: "th:not(:first-child)",
+      columns: "th:not(:first-child):not(:nth-child(2))",
       text: '<span class="tf-icons bx bx-columns bx-18px me-2"></span>Columns',
       className: "btn btn-sm btn-outline-primary",
       columnText: function (dt, idx, title) {
@@ -87,6 +68,28 @@ $(document).ready(function () {
       ],
     },
     {
+      extend: "collection",
+      text: '<span class="tf-icons bx bx-play bx-18px me-2"></span>Actions',
+      className: "btn btn-sm btn-outline-primary",
+      buttons: [
+        {
+          extend: "ping_instances",
+        },
+        {
+          extend: "exec_form",
+          text: '<span class="tf-icons bx bx-refresh bx-18px me-2"></span>Reload',
+        },
+        {
+          extend: "exec_form",
+          text: '<span class="tf-icons bx bx-stop bx-18px me-2"></span>Stop',
+        },
+        {
+          extend: "delete_instances",
+          className: "text-danger",
+        },
+      ],
+    },
+    {
       extend: "create_instance",
     },
   ];
@@ -107,14 +110,14 @@ $(document).ready(function () {
   const getSelectedInstances = () => {
     const instances = [];
     $("tr.selected").each(function () {
-      instances.push($(this).find("td:first").text());
+      instances.push($(this).find("td:eq(1)").text());
     });
     return instances;
   };
 
   $.fn.dataTable.ext.buttons.create_instance = {
     text: '<span class="tf-icons bx bx-plus-circle bx-18px me-2"></span>Create<span class="d-none d-md-inline"> new instance</span>',
-    className: "btn btn-sm btn-outline-primary",
+    className: "btn btn-sm btn-outline-bw-green",
     action: function (e, dt, node, config) {
       const modal = new bootstrap.Modal($("#modal-create-instance"));
       modal.show();
@@ -127,7 +130,6 @@ $(document).ready(function () {
 
   $.fn.dataTable.ext.buttons.ping_instances = {
     text: '<span class="tf-icons bx bx-bell bx-18px me-2"></span>Ping',
-    className: "btn btn-sm btn-outline-primary",
     action: function (e, dt, node, config) {
       if (actionLock) {
         return;
@@ -142,6 +144,7 @@ $(document).ready(function () {
 
       setTimeout(() => {
         if (actionLock) {
+          $(".dt-button-background").click();
           $("#loadingModal").modal("show");
           setTimeout(() => {
             $("#loadingModal").modal("hide");
@@ -250,7 +253,6 @@ $(document).ready(function () {
 
   $.fn.dataTable.ext.buttons.delete_instances = {
     text: '<span class="tf-icons bx bx-trash bx-18px me-2"></span>Delete',
-    className: "btn btn-sm btn-outline-danger",
     action: function (e, dt, node, config) {
       if (actionLock) {
         return;
@@ -293,24 +295,48 @@ $(document).ready(function () {
   const instances_table = new DataTable("#instances", {
     columnDefs: [
       {
+        orderable: false,
+        render: DataTable.render.select(),
+        targets: 0,
+      },
+      {
         targets: "_all", // Target all columns
         createdCell: function (td, cellData, rowData, row, col) {
           $(td).addClass("text-center"); // Apply 'text-center' class to <td>
         },
       },
     ],
-    order: [[6, "desc"]],
+    order: [[7, "desc"]],
     autoFill: false,
     colReorder: true,
     responsive: true,
     select: {
       style: "multi+shift",
+      selector: "td:first-child",
+      headerCheckbox: false,
     },
     layout: layout,
+    language: {
+      info: "Showing _START_ to _END_ of _TOTAL_ instances",
+      infoEmpty: "No instances available",
+      infoFiltered: "(filtered from _MAX_ total instances)",
+      lengthMenu: "Display _MENU_ instances",
+      zeroRecords: "No matching instances found",
+      select: {
+        rows: {
+          _: "Selected %d instances",
+          0: "No instances selected",
+          1: "Selected 1 instance",
+        },
+      },
+    },
+    initComplete: function (settings, json) {
+      $("#instances_wrapper .btn-secondary").removeClass("btn-secondary");
+    },
   });
 
   instances_table.on("mouseenter", "td", function () {
-    const colIdx = instances_table.cell(this).index().column;
+    const rowIdx = instances_table.cell(this).index().row;
 
     instances_table
       .cells()
@@ -318,8 +344,31 @@ $(document).ready(function () {
       .each((el) => el.classList.remove("highlight"));
 
     instances_table
-      .column(colIdx)
+      .cells()
       .nodes()
-      .each((el) => el.classList.add("highlight"));
+      .each(function (el) {
+        if (instances_table.cell(el).index().row === rowIdx)
+          el.classList.add("highlight");
+      });
+  });
+
+  instances_table.on("mouseleave", "td", function () {
+    instances_table
+      .cells()
+      .nodes()
+      .each((el) => el.classList.remove("highlight"));
+  });
+
+  // Event listener for the select-all checkbox
+  $("#select-all-rows").on("change", function () {
+    const isChecked = $(this).prop("checked");
+
+    if (isChecked) {
+      // Select all rows on the current page
+      instances_table.rows({ page: "current" }).select();
+    } else {
+      // Deselect all rows on the current page
+      instances_table.rows({ page: "current" }).deselect();
+    }
   });
 });

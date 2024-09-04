@@ -1,0 +1,16 @@
+{% extends "dashboard.html" %}
+{% block content %}
+    <!-- Content -->
+    <div class="tab-content p-0 position-relative">
+        <div class="tab-pane fade{% if mode == 'easy' %} show active{% endif %}"
+             id="navs-modes-easy"
+             role="tabpanel">TODO: Add Easy mode</div>
+        <div class="tab-pane fade{% if mode == 'advanced' %} show active{% endif %}"
+             id="navs-modes-advanced"
+             role="tabpanel">{% include "models/plugins_settings.html" %}</div>
+        <div class="tab-pane fade{% if mode == 'raw' %} show active{% endif %}"
+             id="navs-modes-raw"
+             role="tabpanel">TODO: Add Raw mode</div>
+    </div>
+    <!-- / Content -->
+{% endblock %}
