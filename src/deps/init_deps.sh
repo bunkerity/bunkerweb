@@ -56,10 +56,6 @@ do
     do_and_check_cmd git subtree pull --prefix "src/deps/src/$id" "$url" "$commit" --squash
 	fi
 
-  if [ -f "src/deps/src/$id/.gitmodules" ] ; then
-    do_and_check_cmd git submodule init -- "src/deps/src/$id"
-  fi
-
   if [ -d "src/deps/src/$id/.git" ] ; then
     do_and_check_cmd rm -rf "src/deps/src/$id/.git"
   fi

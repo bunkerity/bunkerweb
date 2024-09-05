@@ -45,6 +45,7 @@ echo "ℹ️ Compiling and installing ModSecurity"
 # temp fix : Debian run it twice
 # TODO : patch it in clone.sh
 do_and_check_cmd mv /tmp/bunkerweb/deps/src/libinjection /tmp/bunkerweb/deps/src/modsecurity/others/libinjection
+do_and_check_cmd mv /tmp/bunkerweb/deps/src/mbedtls /tmp/bunkerweb/deps/src/modsecurity/others/mbedtls
 export CHANGE_DIR="/tmp/bunkerweb/deps/src/modsecurity"
 do_and_check_cmd chmod +x "build.sh"
 do_and_check_cmd ./build.sh
