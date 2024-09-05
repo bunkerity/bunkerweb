@@ -1,0 +1,243 @@
+OID get Any Policy certificate policy
+oid_get_certificate_policies:"551D2000":"Any Policy"
+
+OID get certificate policy invalid oid
+oid_get_certificate_policies:"5533445566":""
+
+OID get certificate policy wrong oid - id-ce-authorityKeyIdentifier
+oid_get_certificate_policies:"551D23":""
+
+OID get Ext Key Usage - id-kp-serverAuth
+oid_get_extended_key_usage:"2B06010505070301":"TLS Web Server Authentication"
+
+OID get Ext Key Usage - id-kp-clientAuth
+oid_get_extended_key_usage:"2B06010505070302":"TLS Web Client Authentication"
+
+OID get Ext Key Usage - id-kp-codeSigning
+oid_get_extended_key_usage:"2B06010505070303":"Code Signing"
+
+OID get Ext Key Usage - id-kp-emailProtection
+oid_get_extended_key_usage:"2B06010505070304":"E-mail Protection"
+
+OID get Ext Key Usage - id-kp-timeStamping
+oid_get_extended_key_usage:"2B06010505070308":"Time Stamping"
+
+OID get Ext Key Usage - id-kp-OCSPSigning
+oid_get_extended_key_usage:"2B06010505070309":"OCSP Signing"
+
+OID get Ext Key Usage - id-kp-wisun-fan-device
+oid_get_extended_key_usage:"2B0601040182E42501":"Wi-SUN Alliance Field Area Network (FAN)"
+
+OID get Ext Key Usage invalid oid
+oid_get_extended_key_usage:"5533445566":""
+
+OID get Ext Key Usage wrong oid - id-ce-authorityKeyIdentifier
+oid_get_extended_key_usage:"551D23":""
+
+OID get x509 extension - id-ce-basicConstraints
+oid_get_x509_extension:"551D13":MBEDTLS_OID_X509_EXT_BASIC_CONSTRAINTS
+
+OID get x509 extension - id-ce-keyUsage
+oid_get_x509_extension:"551D0F":MBEDTLS_OID_X509_EXT_KEY_USAGE
+
+OID get x509 extension - id-ce-extKeyUsage
+oid_get_x509_extension:"551D25":MBEDTLS_OID_X509_EXT_EXTENDED_KEY_USAGE
+
+OID get x509 extension - id-ce-subjectAltName
+oid_get_x509_extension:"551D11":MBEDTLS_OID_X509_EXT_SUBJECT_ALT_NAME
+
+OID get x509 extension - id-netscape-certtype
+oid_get_x509_extension:"6086480186F8420101":MBEDTLS_OID_X509_EXT_NS_CERT_TYPE
+
+OID get x509 extension - id-ce-certificatePolicies
+oid_get_x509_extension:"551D20":MBEDTLS_OID_X509_EXT_CERTIFICATE_POLICIES
+
+OID get x509 extension - invalid oid
+oid_get_x509_extension:"5533445566":0
+
+OID get x509 extension - wrong oid - id-ce
+oid_get_x509_extension:"551D":0
+
+OID hash id - id-md5
+depends_on:MBEDTLS_MD_CAN_MD5
+oid_get_md_alg_id:"2A864886f70d0205":MBEDTLS_MD_MD5
+
+OID hash id - id-sha1
+depends_on:MBEDTLS_MD_CAN_SHA1
+oid_get_md_alg_id:"2b0e03021a":MBEDTLS_MD_SHA1
+
+OID hash id - id-sha224
+depends_on:MBEDTLS_MD_CAN_SHA224
+oid_get_md_alg_id:"608648016503040204":MBEDTLS_MD_SHA224
+
+OID hash id - id-sha256
+depends_on:MBEDTLS_MD_CAN_SHA256
+oid_get_md_alg_id:"608648016503040201":MBEDTLS_MD_SHA256
+
+OID hash id - id-sha384
+depends_on:MBEDTLS_MD_CAN_SHA384
+oid_get_md_alg_id:"608648016503040202":MBEDTLS_MD_SHA384
+
+OID hash id - id-sha512
+depends_on:MBEDTLS_MD_CAN_SHA512
+oid_get_md_alg_id:"608648016503040203":MBEDTLS_MD_SHA512
+
+OID hash id - id-sha3-224
+depends_on:MBEDTLS_MD_CAN_SHA3_224
+oid_get_md_alg_id:"608648016503040207":MBEDTLS_MD_SHA3_224
+
+OID hash id - id-sha3-256
+depends_on:MBEDTLS_MD_CAN_SHA3_256
+oid_get_md_alg_id:"608648016503040208":MBEDTLS_MD_SHA3_256
+
+OID hash id - id-sha3-384
+depends_on:MBEDTLS_MD_CAN_SHA3_384
+oid_get_md_alg_id:"608648016503040209":MBEDTLS_MD_SHA3_384
+
+OID hash id - id-sha3-512
+depends_on:MBEDTLS_MD_CAN_SHA3_512
+oid_get_md_alg_id:"60864801650304020a":MBEDTLS_MD_SHA3_512
+
+OID hash id - id-ripemd160
+depends_on:MBEDTLS_MD_CAN_RIPEMD160
+oid_get_md_alg_id:"2b24030201":MBEDTLS_MD_RIPEMD160
+
+OID hash id - invalid oid
+oid_get_md_alg_id:"2B864886f70d0204":-1
+
+OID get numeric string - hardware module name
+oid_get_numeric_string:"2B06010505070804":0:"1.3.6.1.5.5.7.8.4"
+
+OID get numeric string - multi-byte subidentifier
+oid_get_numeric_string:"29903C":0:"1.1.2108"
+
+OID get numeric string - second component greater than 39
+oid_get_numeric_string:"81010000863A00":0:"2.49.0.0.826.0"
+
+OID get numeric string - multi-byte first subidentifier
+oid_get_numeric_string:"8837":0:"2.999"
+
+OID get numeric string - second subidentifier not terminated
+oid_get_numeric_string:"0081":MBEDTLS_ERR_ASN1_OUT_OF_DATA:""
+
+OID get numeric string - empty oid buffer
+oid_get_numeric_string:"":MBEDTLS_ERR_ASN1_OUT_OF_DATA:""
+
+OID get numeric string - no final / all bytes have top bit set
+oid_get_numeric_string:"818181":MBEDTLS_ERR_ASN1_OUT_OF_DATA:""
+
+OID get numeric string - 0.39
+oid_get_numeric_string:"27":0:"0.39"
+
+OID get numeric string - 1.0
+oid_get_numeric_string:"28":0:"1.0"
+
+OID get numeric string - 1.39
+oid_get_numeric_string:"4f":0:"1.39"
+
+OID get numeric string - 2.0
+oid_get_numeric_string:"50":0:"2.0"
+
+OID get numeric string - 1 byte first subidentifier beyond 2.39
+oid_get_numeric_string:"7f":0:"2.47"
+
+# Encodes the number 0x0400000000 as a subidentifier which overflows 32-bits
+OID get numeric string - 32-bit overflow
+oid_get_numeric_string:"C080808000":MBEDTLS_ERR_ASN1_INVALID_DATA:""
+
+OID get numeric string - 32-bit overflow, second subidentifier
+oid_get_numeric_string:"2BC080808000":MBEDTLS_ERR_ASN1_INVALID_DATA:""
+
+OID get numeric string - overlong encoding
+oid_get_numeric_string:"8001":MBEDTLS_ERR_ASN1_INVALID_DATA:""
+
+OID get numeric string - overlong encoding, second subidentifier
+oid_get_numeric_string:"2B8001":MBEDTLS_ERR_ASN1_INVALID_DATA:""
+
+OID from numeric string - hardware module name
+oid_from_numeric_string:"1.3.6.1.5.5.7.8.4":0:"2B06010505070804"
+
+OID from numeric string - multi-byte subidentifier
+oid_from_numeric_string:"1.1.2108":0:"29903C"
+
+OID from numeric string - second component greater than 39
+oid_from_numeric_string:"2.49.0.0.826.0":0:"81010000863A00"
+
+OID from numeric string - multi-byte first subidentifier
+oid_from_numeric_string:"2.999":0:"8837"
+
+OID from numeric string - empty string input
+oid_from_numeric_string:"":MBEDTLS_ERR_ASN1_INVALID_DATA:""
+
+OID from numeric string - first component not a number
+oid_from_numeric_string:"abc.1.2":MBEDTLS_ERR_ASN1_INVALID_DATA:""
+
+OID from numeric string - second component not a number
+oid_from_numeric_string:"1.abc.2":MBEDTLS_ERR_ASN1_INVALID_DATA:""
+
+OID from numeric string - first component too large
+oid_from_numeric_string:"3.1":MBEDTLS_ERR_ASN1_INVALID_DATA:""
+
+OID from numeric string - first component < 2, second > 39
+oid_from_numeric_string:"1.40":MBEDTLS_ERR_ASN1_INVALID_DATA:""
+
+OID from numeric string - third component not a number
+oid_from_numeric_string:"1.2.abc":MBEDTLS_ERR_ASN1_INVALID_DATA:""
+
+OID from numeric string - non-'.' separator between first and second
+oid_from_numeric_string:"1/2.3.4":MBEDTLS_ERR_ASN1_INVALID_DATA:""
+
+OID from numeric string - non-'.' separator between second and third
+oid_from_numeric_string:"1.2/3.4":MBEDTLS_ERR_ASN1_INVALID_DATA:""
+
+OID from numeric string - non-'.' separator between third and fourth
+oid_from_numeric_string:"1.2.3/4":MBEDTLS_ERR_ASN1_INVALID_DATA:""
+
+OID from numeric string - OID greater than max length (129 components)
+oid_from_numeric_string:"1.2.3.4.5.6.7.8.1.2.3.4.5.6.7.8.1.2.3.4.5.6.7.8.1.2.3.4.5.6.7.8.1.2.3.4.5.6.7.8.1.2.3.4.5.6.7.8.1.2.3.4.5.6.7.8.1.2.3.4.5.6.7.8.1.2.3.4.5.6.7.8.1.2.3.4.5.6.7.8.1.2.3.4.5.6.7.8.1.2.3.4.5.6.7.8.1.2.3.4.5.6.7.8.1.2.3.4.5.6.7.8.1.2.3.4.5.6.7.8.1.2.3.4.5.6.7.8.1":MBEDTLS_ERR_ASN1_INVALID_DATA:""
+
+OID from numeric string - OID with maximum subidentifier
+oid_from_numeric_string:"2.4294967215":0:"8FFFFFFF7F"
+
+OID from numeric string - OID with overflowing subidentifier
+oid_from_numeric_string:"2.4294967216":MBEDTLS_ERR_ASN1_INVALID_DATA:""
+
+mbedtls_oid_get_md_hmac - RIPEMD160
+depends_on:MBEDTLS_MD_CAN_RIPEMD160
+mbedtls_oid_get_md_hmac:"2B06010505080104":MBEDTLS_MD_RIPEMD160
+
+mbedtls_oid_get_md_hmac - SHA1
+depends_on:MBEDTLS_MD_CAN_SHA1
+mbedtls_oid_get_md_hmac:"2A864886F70D0207":MBEDTLS_MD_SHA1
+
+mbedtls_oid_get_md_hmac - SHA224
+depends_on:MBEDTLS_MD_CAN_SHA224
+mbedtls_oid_get_md_hmac:"2A864886F70D0208":MBEDTLS_MD_SHA224
+
+mbedtls_oid_get_md_hmac - SHA256
+depends_on:MBEDTLS_MD_CAN_SHA256
+mbedtls_oid_get_md_hmac:"2A864886F70D0209":MBEDTLS_MD_SHA256
+
+mbedtls_oid_get_md_hmac - SHA384
+depends_on:MBEDTLS_MD_CAN_SHA384
+mbedtls_oid_get_md_hmac:"2A864886F70D020A":MBEDTLS_MD_SHA384
+
+mbedtls_oid_get_md_hmac - SHA512
+depends_on:MBEDTLS_MD_CAN_SHA512
+mbedtls_oid_get_md_hmac:"2A864886F70D020B":MBEDTLS_MD_SHA512
+
+mbedtls_oid_get_md_hmac - SHA3_224
+depends_on:MBEDTLS_MD_CAN_SHA3_224
+mbedtls_oid_get_md_hmac:"60864801650304020D":MBEDTLS_MD_SHA3_224
+
+mbedtls_oid_get_md_hmac - SHA3_256
+depends_on:MBEDTLS_MD_CAN_SHA3_256
+mbedtls_oid_get_md_hmac:"60864801650304020E":MBEDTLS_MD_SHA3_256
+
+mbedtls_oid_get_md_hmac - SHA3_384
+depends_on:MBEDTLS_MD_CAN_SHA3_384
+mbedtls_oid_get_md_hmac:"60864801650304020F":MBEDTLS_MD_SHA3_384
+
+mbedtls_oid_get_md_hmac - SHA3_512
+depends_on:MBEDTLS_MD_CAN_SHA3_512
+mbedtls_oid_get_md_hmac:"608648016503040210":MBEDTLS_MD_SHA3_512
