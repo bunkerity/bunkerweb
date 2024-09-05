@@ -46,8 +46,7 @@ RUN apk add --no-cache bash unzip libgcc libstdc++ libpq openssl libmagic mariad
   adduser -h /var/cache/nginx -g scheduler -s /bin/sh -G scheduler -D -H -u 101 scheduler
 
 # Fix CVEs
-RUN apk add --no-cache "busybox>=1.36.1-r17" "busybox-binsh>=1.36.1-r17" "ssl_client>=1.36.1-r17" # CVE-2023-42363 CVE-2023-42364 CVE-2023-42365 CVE-2023-42366
-RUN apk add --no-cache "libcrypto3>=3.1.6-r0" "libssl3>=3.1.6-r0" "openssl>=3.1.6-r0" # CVE-2024-4741 CVE-2024-5535
+RUN apk add --no-cache "libcrypto3>=3.3.2-r0" "libssl3>=3.3.2-r0" "openssl>=3.3.2-r0" # CVE-2024-6119
 
 # Cleanup
 RUN rm -rf /var/cache/apk/*
