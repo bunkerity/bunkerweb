@@ -1,0 +1,484 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{46CF2D25-6A36-4189-B59C-E4815388E554}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>mbedTLS</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v141</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v141</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v141</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v141</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <IntDir>$(Configuration)\$(TargetName)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <IntDir>$(Configuration)\$(TargetName)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <IntDir>$(Configuration)\$(TargetName)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <IntDir>$(Configuration)\$(TargetName)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>_USRDLL;MBEDTLS_EXPORTS;KRML_VERIFIED_UINT128;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>
+../../library;../../include;../../3rdparty/everest/include/;../../3rdparty/everest/include/everest;../../3rdparty/everest/include/everest/vs2013;../../3rdparty/everest/include/everest/kremlib;../../tests/include      </AdditionalIncludeDirectories>
+      <CompileAs>CompileAsC</CompileAs>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>bcrypt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>_USRDLL;MBEDTLS_EXPORTS;KRML_VERIFIED_UINT128;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>
+../../library;../../include;../../3rdparty/everest/include/;../../3rdparty/everest/include/everest;../../3rdparty/everest/include/everest/vs2013;../../3rdparty/everest/include/everest/kremlib;../../tests/include      </AdditionalIncludeDirectories>
+      <CompileAs>CompileAsC</CompileAs>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>bcrypt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>NDEBUG;_USRDLL;MBEDTLS_EXPORTS;KRML_VERIFIED_UINT128;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>
+../../library;../../include;../../3rdparty/everest/include/;../../3rdparty/everest/include/everest;../../3rdparty/everest/include/everest/vs2013;../../3rdparty/everest/include/everest/kremlib;../../tests/include      </AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>bcrypt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN64;NDEBUG;_WINDOWS;_USRDLL;MBEDTLS_EXPORTS;KRML_VERIFIED_UINT128;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>
+../../library;../../include;../../3rdparty/everest/include/;../../3rdparty/everest/include/everest;../../3rdparty/everest/include/everest/vs2013;../../3rdparty/everest/include/everest/kremlib;../../tests/include      </AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\include\mbedtls\aes.h" />
+    <ClInclude Include="..\..\include\mbedtls\aria.h" />
+    <ClInclude Include="..\..\include\mbedtls\asn1.h" />
+    <ClInclude Include="..\..\include\mbedtls\asn1write.h" />
+    <ClInclude Include="..\..\include\mbedtls\base64.h" />
+    <ClInclude Include="..\..\include\mbedtls\bignum.h" />
+    <ClInclude Include="..\..\include\mbedtls\block_cipher.h" />
+    <ClInclude Include="..\..\include\mbedtls\build_info.h" />
+    <ClInclude Include="..\..\include\mbedtls\camellia.h" />
+    <ClInclude Include="..\..\include\mbedtls\ccm.h" />
+    <ClInclude Include="..\..\include\mbedtls\chacha20.h" />
+    <ClInclude Include="..\..\include\mbedtls\chachapoly.h" />
+    <ClInclude Include="..\..\include\mbedtls\check_config.h" />
+    <ClInclude Include="..\..\include\mbedtls\cipher.h" />
+    <ClInclude Include="..\..\include\mbedtls\cmac.h" />
+    <ClInclude Include="..\..\include\mbedtls\compat-2.x.h" />
+    <ClInclude Include="..\..\include\mbedtls\config_adjust_legacy_crypto.h" />
+    <ClInclude Include="..\..\include\mbedtls\config_adjust_legacy_from_psa.h" />
+    <ClInclude Include="..\..\include\mbedtls\config_adjust_psa_from_legacy.h" />
+    <ClInclude Include="..\..\include\mbedtls\config_adjust_psa_superset_legacy.h" />
+    <ClInclude Include="..\..\include\mbedtls\config_adjust_ssl.h" />
+    <ClInclude Include="..\..\include\mbedtls\config_adjust_x509.h" />
+    <ClInclude Include="..\..\include\mbedtls\config_psa.h" />
+    <ClInclude Include="..\..\include\mbedtls\constant_time.h" />
+    <ClInclude Include="..\..\include\mbedtls\ctr_drbg.h" />
+    <ClInclude Include="..\..\include\mbedtls\debug.h" />
+    <ClInclude Include="..\..\include\mbedtls\des.h" />
+    <ClInclude Include="..\..\include\mbedtls\dhm.h" />
+    <ClInclude Include="..\..\include\mbedtls\ecdh.h" />
+    <ClInclude Include="..\..\include\mbedtls\ecdsa.h" />
+    <ClInclude Include="..\..\include\mbedtls\ecjpake.h" />
+    <ClInclude Include="..\..\include\mbedtls\ecp.h" />
+    <ClInclude Include="..\..\include\mbedtls\entropy.h" />
+    <ClInclude Include="..\..\include\mbedtls\error.h" />
+    <ClInclude Include="..\..\include\mbedtls\gcm.h" />
+    <ClInclude Include="..\..\include\mbedtls\hkdf.h" />
+    <ClInclude Include="..\..\include\mbedtls\hmac_drbg.h" />
+    <ClInclude Include="..\..\include\mbedtls\lms.h" />
+    <ClInclude Include="..\..\include\mbedtls\mbedtls_config.h" />
+    <ClInclude Include="..\..\include\mbedtls\md.h" />
+    <ClInclude Include="..\..\include\mbedtls\md5.h" />
+    <ClInclude Include="..\..\include\mbedtls\memory_buffer_alloc.h" />
+    <ClInclude Include="..\..\include\mbedtls\net_sockets.h" />
+    <ClInclude Include="..\..\include\mbedtls\nist_kw.h" />
+    <ClInclude Include="..\..\include\mbedtls\oid.h" />
+    <ClInclude Include="..\..\include\mbedtls\pem.h" />
+    <ClInclude Include="..\..\include\mbedtls\pk.h" />
+    <ClInclude Include="..\..\include\mbedtls\pkcs12.h" />
+    <ClInclude Include="..\..\include\mbedtls\pkcs5.h" />
+    <ClInclude Include="..\..\include\mbedtls\pkcs7.h" />
+    <ClInclude Include="..\..\include\mbedtls\platform.h" />
+    <ClInclude Include="..\..\include\mbedtls\platform_time.h" />
+    <ClInclude Include="..\..\include\mbedtls\platform_util.h" />
+    <ClInclude Include="..\..\include\mbedtls\poly1305.h" />
+    <ClInclude Include="..\..\include\mbedtls\private_access.h" />
+    <ClInclude Include="..\..\include\mbedtls\psa_util.h" />
+    <ClInclude Include="..\..\include\mbedtls\ripemd160.h" />
+    <ClInclude Include="..\..\include\mbedtls\rsa.h" />
+    <ClInclude Include="..\..\include\mbedtls\sha1.h" />
+    <ClInclude Include="..\..\include\mbedtls\sha256.h" />
+    <ClInclude Include="..\..\include\mbedtls\sha3.h" />
+    <ClInclude Include="..\..\include\mbedtls\sha512.h" />
+    <ClInclude Include="..\..\include\mbedtls\ssl.h" />
+    <ClInclude Include="..\..\include\mbedtls\ssl_cache.h" />
+    <ClInclude Include="..\..\include\mbedtls\ssl_ciphersuites.h" />
+    <ClInclude Include="..\..\include\mbedtls\ssl_cookie.h" />
+    <ClInclude Include="..\..\include\mbedtls\ssl_ticket.h" />
+    <ClInclude Include="..\..\include\mbedtls\threading.h" />
+    <ClInclude Include="..\..\include\mbedtls\timing.h" />
+    <ClInclude Include="..\..\include\mbedtls\version.h" />
+    <ClInclude Include="..\..\include\mbedtls\x509.h" />
+    <ClInclude Include="..\..\include\mbedtls\x509_crl.h" />
+    <ClInclude Include="..\..\include\mbedtls\x509_crt.h" />
+    <ClInclude Include="..\..\include\mbedtls\x509_csr.h" />
+    <ClInclude Include="..\..\include\psa\build_info.h" />
+    <ClInclude Include="..\..\include\psa\crypto.h" />
+    <ClInclude Include="..\..\include\psa\crypto_adjust_auto_enabled.h" />
+    <ClInclude Include="..\..\include\psa\crypto_adjust_config_dependencies.h" />
+    <ClInclude Include="..\..\include\psa\crypto_adjust_config_key_pair_types.h" />
+    <ClInclude Include="..\..\include\psa\crypto_adjust_config_synonyms.h" />
+    <ClInclude Include="..\..\include\psa\crypto_builtin_composites.h" />
+    <ClInclude Include="..\..\include\psa\crypto_builtin_key_derivation.h" />
+    <ClInclude Include="..\..\include\psa\crypto_builtin_primitives.h" />
+    <ClInclude Include="..\..\include\psa\crypto_compat.h" />
+    <ClInclude Include="..\..\include\psa\crypto_config.h" />
+    <ClInclude Include="..\..\include\psa\crypto_driver_common.h" />
+    <ClInclude Include="..\..\include\psa\crypto_driver_contexts_composites.h" />
+    <ClInclude Include="..\..\include\psa\crypto_driver_contexts_key_derivation.h" />
+    <ClInclude Include="..\..\include\psa\crypto_driver_contexts_primitives.h" />
+    <ClInclude Include="..\..\include\psa\crypto_extra.h" />
+    <ClInclude Include="..\..\include\psa\crypto_legacy.h" />
+    <ClInclude Include="..\..\include\psa\crypto_platform.h" />
+    <ClInclude Include="..\..\include\psa\crypto_se_driver.h" />
+    <ClInclude Include="..\..\include\psa\crypto_sizes.h" />
+    <ClInclude Include="..\..\include\psa\crypto_struct.h" />
+    <ClInclude Include="..\..\include\psa\crypto_types.h" />
+    <ClInclude Include="..\..\include\psa\crypto_values.h" />
+    <ClInclude Include="..\..\tests\include\test\arguments.h" />
+    <ClInclude Include="..\..\tests\include\test\asn1_helpers.h" />
+    <ClInclude Include="..\..\tests\include\test\bignum_helpers.h" />
+    <ClInclude Include="..\..\tests\include\test\certs.h" />
+    <ClInclude Include="..\..\tests\include\test\constant_flow.h" />
+    <ClInclude Include="..\..\tests\include\test\fake_external_rng_for_test.h" />
+    <ClInclude Include="..\..\tests\include\test\helpers.h" />
+    <ClInclude Include="..\..\tests\include\test\macros.h" />
+    <ClInclude Include="..\..\tests\include\test\memory.h" />
+    <ClInclude Include="..\..\tests\include\test\psa_crypto_helpers.h" />
+    <ClInclude Include="..\..\tests\include\test\psa_exercise_key.h" />
+    <ClInclude Include="..\..\tests\include\test\psa_helpers.h" />
+    <ClInclude Include="..\..\tests\include\test\psa_memory_poisoning_wrappers.h" />
+    <ClInclude Include="..\..\tests\include\test\psa_test_wrappers.h" />
+    <ClInclude Include="..\..\tests\include\test\random.h" />
+    <ClInclude Include="..\..\tests\include\test\ssl_helpers.h" />
+    <ClInclude Include="..\..\tests\include\test\threading_helpers.h" />
+    <ClInclude Include="..\..\tests\include\test\drivers\aead.h" />
+    <ClInclude Include="..\..\tests\include\test\drivers\asymmetric_encryption.h" />
+    <ClInclude Include="..\..\tests\include\test\drivers\cipher.h" />
+    <ClInclude Include="..\..\tests\include\test\drivers\config_test_driver.h" />
+    <ClInclude Include="..\..\tests\include\test\drivers\crypto_config_test_driver_extension.h" />
+    <ClInclude Include="..\..\tests\include\test\drivers\hash.h" />
+    <ClInclude Include="..\..\tests\include\test\drivers\key_agreement.h" />
+    <ClInclude Include="..\..\tests\include\test\drivers\key_management.h" />
+    <ClInclude Include="..\..\tests\include\test\drivers\mac.h" />
+    <ClInclude Include="..\..\tests\include\test\drivers\pake.h" />
+    <ClInclude Include="..\..\tests\include\test\drivers\signature.h" />
+    <ClInclude Include="..\..\tests\include\test\drivers\test_driver.h" />
+    <ClInclude Include="..\..\library\aesce.h" />
+    <ClInclude Include="..\..\library\aesni.h" />
+    <ClInclude Include="..\..\library\alignment.h" />
+    <ClInclude Include="..\..\library\base64_internal.h" />
+    <ClInclude Include="..\..\library\bignum_core.h" />
+    <ClInclude Include="..\..\library\bignum_internal.h" />
+    <ClInclude Include="..\..\library\bignum_mod.h" />
+    <ClInclude Include="..\..\library\bignum_mod_raw.h" />
+    <ClInclude Include="..\..\library\bignum_mod_raw_invasive.h" />
+    <ClInclude Include="..\..\library\block_cipher_internal.h" />
+    <ClInclude Include="..\..\library\bn_mul.h" />
+    <ClInclude Include="..\..\library\check_crypto_config.h" />
+    <ClInclude Include="..\..\library\cipher_wrap.h" />
+    <ClInclude Include="..\..\library\common.h" />
+    <ClInclude Include="..\..\library\constant_time_impl.h" />
+    <ClInclude Include="..\..\library\constant_time_internal.h" />
+    <ClInclude Include="..\..\library\ctr.h" />
+    <ClInclude Include="..\..\library\debug_internal.h" />
+    <ClInclude Include="..\..\library\ecp_internal_alt.h" />
+    <ClInclude Include="..\..\library\ecp_invasive.h" />
+    <ClInclude Include="..\..\library\entropy_poll.h" />
+    <ClInclude Include="..\..\library\lmots.h" />
+    <ClInclude Include="..\..\library\md_psa.h" />
+    <ClInclude Include="..\..\library\md_wrap.h" />
+    <ClInclude Include="..\..\library\mps_common.h" />
+    <ClInclude Include="..\..\library\mps_error.h" />
+    <ClInclude Include="..\..\library\mps_reader.h" />
+    <ClInclude Include="..\..\library\mps_trace.h" />
+    <ClInclude Include="..\..\library\padlock.h" />
+    <ClInclude Include="..\..\library\pk_internal.h" />
+    <ClInclude Include="..\..\library\pk_wrap.h" />
+    <ClInclude Include="..\..\library\pkwrite.h" />
+    <ClInclude Include="..\..\library\psa_crypto_aead.h" />
+    <ClInclude Include="..\..\library\psa_crypto_cipher.h" />
+    <ClInclude Include="..\..\library\psa_crypto_core.h" />
+    <ClInclude Include="..\..\library\psa_crypto_core_common.h" />
+    <ClInclude Include="..\..\library\psa_crypto_driver_wrappers.h" />
+    <ClInclude Include="..\..\library\psa_crypto_driver_wrappers_no_static.h" />
+    <ClInclude Include="..\..\library\psa_crypto_ecp.h" />
+    <ClInclude Include="..\..\library\psa_crypto_ffdh.h" />
+    <ClInclude Include="..\..\library\psa_crypto_hash.h" />
+    <ClInclude Include="..\..\library\psa_crypto_invasive.h" />
+    <ClInclude Include="..\..\library\psa_crypto_its.h" />
+    <ClInclude Include="..\..\library\psa_crypto_mac.h" />
+    <ClInclude Include="..\..\library\psa_crypto_pake.h" />
+    <ClInclude Include="..\..\library\psa_crypto_random_impl.h" />
+    <ClInclude Include="..\..\library\psa_crypto_rsa.h" />
+    <ClInclude Include="..\..\library\psa_crypto_se.h" />
+    <ClInclude Include="..\..\library\psa_crypto_slot_management.h" />
+    <ClInclude Include="..\..\library\psa_crypto_storage.h" />
+    <ClInclude Include="..\..\library\psa_util_internal.h" />
+    <ClInclude Include="..\..\library\rsa_alt_helpers.h" />
+    <ClInclude Include="..\..\library\rsa_internal.h" />
+    <ClInclude Include="..\..\library\ssl_ciphersuites_internal.h" />
+    <ClInclude Include="..\..\library\ssl_client.h" />
+    <ClInclude Include="..\..\library\ssl_debug_helpers.h" />
+    <ClInclude Include="..\..\library\ssl_misc.h" />
+    <ClInclude Include="..\..\library\ssl_tls13_invasive.h" />
+    <ClInclude Include="..\..\library\ssl_tls13_keys.h" />
+    <ClInclude Include="..\..\library\x509_internal.h" />
+    <ClInclude Include="..\..\3rdparty\everest\include\everest\everest.h" />
+    <ClInclude Include="..\..\3rdparty\everest\include\everest\Hacl_Curve25519.h" />
+    <ClInclude Include="..\..\3rdparty\everest\include\everest\kremlib.h" />
+    <ClInclude Include="..\..\3rdparty\everest\include\everest\x25519.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\library\aes.c" />
+    <ClCompile Include="..\..\library\aesce.c" />
+    <ClCompile Include="..\..\library\aesni.c" />
+    <ClCompile Include="..\..\library\aria.c" />
+    <ClCompile Include="..\..\library\asn1parse.c" />
+    <ClCompile Include="..\..\library\asn1write.c" />
+    <ClCompile Include="..\..\library\base64.c" />
+    <ClCompile Include="..\..\library\bignum.c" />
+    <ClCompile Include="..\..\library\bignum_core.c" />
+    <ClCompile Include="..\..\library\bignum_mod.c" />
+    <ClCompile Include="..\..\library\bignum_mod_raw.c" />
+    <ClCompile Include="..\..\library\block_cipher.c" />
+    <ClCompile Include="..\..\library\camellia.c" />
+    <ClCompile Include="..\..\library\ccm.c" />
+    <ClCompile Include="..\..\library\chacha20.c" />
+    <ClCompile Include="..\..\library\chachapoly.c" />
+    <ClCompile Include="..\..\library\cipher.c" />
+    <ClCompile Include="..\..\library\cipher_wrap.c" />
+    <ClCompile Include="..\..\library\cmac.c" />
+    <ClCompile Include="..\..\library\constant_time.c" />
+    <ClCompile Include="..\..\library\ctr_drbg.c" />
+    <ClCompile Include="..\..\library\debug.c" />
+    <ClCompile Include="..\..\library\des.c" />
+    <ClCompile Include="..\..\library\dhm.c" />
+    <ClCompile Include="..\..\library\ecdh.c" />
+    <ClCompile Include="..\..\library\ecdsa.c" />
+    <ClCompile Include="..\..\library\ecjpake.c" />
+    <ClCompile Include="..\..\library\ecp.c" />
+    <ClCompile Include="..\..\library\ecp_curves.c" />
+    <ClCompile Include="..\..\library\ecp_curves_new.c" />
+    <ClCompile Include="..\..\library\entropy.c" />
+    <ClCompile Include="..\..\library\entropy_poll.c" />
+    <ClCompile Include="..\..\library\error.c" />
+    <ClCompile Include="..\..\library\gcm.c" />
+    <ClCompile Include="..\..\library\hkdf.c" />
+    <ClCompile Include="..\..\library\hmac_drbg.c" />
+    <ClCompile Include="..\..\library\lmots.c" />
+    <ClCompile Include="..\..\library\lms.c" />
+    <ClCompile Include="..\..\library\md.c" />
+    <ClCompile Include="..\..\library\md5.c" />
+    <ClCompile Include="..\..\library\memory_buffer_alloc.c" />
+    <ClCompile Include="..\..\library\mps_reader.c" />
+    <ClCompile Include="..\..\library\mps_trace.c" />
+    <ClCompile Include="..\..\library\net_sockets.c" />
+    <ClCompile Include="..\..\library\nist_kw.c" />
+    <ClCompile Include="..\..\library\oid.c" />
+    <ClCompile Include="..\..\library\padlock.c" />
+    <ClCompile Include="..\..\library\pem.c" />
+    <ClCompile Include="..\..\library\pk.c" />
+    <ClCompile Include="..\..\library\pk_ecc.c" />
+    <ClCompile Include="..\..\library\pk_wrap.c" />
+    <ClCompile Include="..\..\library\pkcs12.c" />
+    <ClCompile Include="..\..\library\pkcs5.c" />
+    <ClCompile Include="..\..\library\pkcs7.c" />
+    <ClCompile Include="..\..\library\pkparse.c" />
+    <ClCompile Include="..\..\library\pkwrite.c" />
+    <ClCompile Include="..\..\library\platform.c" />
+    <ClCompile Include="..\..\library\platform_util.c" />
+    <ClCompile Include="..\..\library\poly1305.c" />
+    <ClCompile Include="..\..\library\psa_crypto.c" />
+    <ClCompile Include="..\..\library\psa_crypto_aead.c" />
+    <ClCompile Include="..\..\library\psa_crypto_cipher.c" />
+    <ClCompile Include="..\..\library\psa_crypto_client.c" />
+    <ClCompile Include="..\..\library\psa_crypto_driver_wrappers_no_static.c" />
+    <ClCompile Include="..\..\library\psa_crypto_ecp.c" />
+    <ClCompile Include="..\..\library\psa_crypto_ffdh.c" />
+    <ClCompile Include="..\..\library\psa_crypto_hash.c" />
+    <ClCompile Include="..\..\library\psa_crypto_mac.c" />
+    <ClCompile Include="..\..\library\psa_crypto_pake.c" />
+    <ClCompile Include="..\..\library\psa_crypto_rsa.c" />
+    <ClCompile Include="..\..\library\psa_crypto_se.c" />
+    <ClCompile Include="..\..\library\psa_crypto_slot_management.c" />
+    <ClCompile Include="..\..\library\psa_crypto_storage.c" />
+    <ClCompile Include="..\..\library\psa_its_file.c" />
+    <ClCompile Include="..\..\library\psa_util.c" />
+    <ClCompile Include="..\..\library\ripemd160.c" />
+    <ClCompile Include="..\..\library\rsa.c" />
+    <ClCompile Include="..\..\library\rsa_alt_helpers.c" />
+    <ClCompile Include="..\..\library\sha1.c" />
+    <ClCompile Include="..\..\library\sha256.c" />
+    <ClCompile Include="..\..\library\sha3.c" />
+    <ClCompile Include="..\..\library\sha512.c" />
+    <ClCompile Include="..\..\library\ssl_cache.c" />
+    <ClCompile Include="..\..\library\ssl_ciphersuites.c" />
+    <ClCompile Include="..\..\library\ssl_client.c" />
+    <ClCompile Include="..\..\library\ssl_cookie.c" />
+    <ClCompile Include="..\..\library\ssl_debug_helpers_generated.c" />
+    <ClCompile Include="..\..\library\ssl_msg.c" />
+    <ClCompile Include="..\..\library\ssl_ticket.c" />
+    <ClCompile Include="..\..\library\ssl_tls.c" />
+    <ClCompile Include="..\..\library\ssl_tls12_client.c" />
+    <ClCompile Include="..\..\library\ssl_tls12_server.c" />
+    <ClCompile Include="..\..\library\ssl_tls13_client.c" />
+    <ClCompile Include="..\..\library\ssl_tls13_generic.c" />
+    <ClCompile Include="..\..\library\ssl_tls13_keys.c" />
+    <ClCompile Include="..\..\library\ssl_tls13_server.c" />
+    <ClCompile Include="..\..\library\threading.c" />
+    <ClCompile Include="..\..\library\timing.c" />
+    <ClCompile Include="..\..\library\version.c" />
+    <ClCompile Include="..\..\library\version_features.c" />
+    <ClCompile Include="..\..\library\x509.c" />
+    <ClCompile Include="..\..\library\x509_create.c" />
+    <ClCompile Include="..\..\library\x509_crl.c" />
+    <ClCompile Include="..\..\library\x509_crt.c" />
+    <ClCompile Include="..\..\library\x509_csr.c" />
+    <ClCompile Include="..\..\library\x509write.c" />
+    <ClCompile Include="..\..\library\x509write_crt.c" />
+    <ClCompile Include="..\..\library\x509write_csr.c" />
+    <ClCompile Include="..\..\tests\src\asn1_helpers.c" />
+    <ClCompile Include="..\..\tests\src\bignum_helpers.c" />
+    <ClCompile Include="..\..\tests\src\certs.c" />
+    <ClCompile Include="..\..\tests\src\fake_external_rng_for_test.c" />
+    <ClCompile Include="..\..\tests\src\helpers.c" />
+    <ClCompile Include="..\..\tests\src\psa_crypto_helpers.c" />
+    <ClCompile Include="..\..\tests\src\psa_crypto_stubs.c" />
+    <ClCompile Include="..\..\tests\src\psa_exercise_key.c" />
+    <ClCompile Include="..\..\tests\src\psa_memory_poisoning_wrappers.c" />
+    <ClCompile Include="..\..\tests\src\psa_test_wrappers.c" />
+    <ClCompile Include="..\..\tests\src\random.c" />
+    <ClCompile Include="..\..\tests\src\test_memory.c" />
+    <ClCompile Include="..\..\tests\src\threading_helpers.c" />
+    <ClCompile Include="..\..\tests\src\drivers\hash.c" />
+    <ClCompile Include="..\..\tests\src\drivers\platform_builtin_keys.c" />
+    <ClCompile Include="..\..\tests\src\drivers\test_driver_aead.c" />
+    <ClCompile Include="..\..\tests\src\drivers\test_driver_asymmetric_encryption.c" />
+    <ClCompile Include="..\..\tests\src\drivers\test_driver_cipher.c" />
+    <ClCompile Include="..\..\tests\src\drivers\test_driver_key_agreement.c" />
+    <ClCompile Include="..\..\tests\src\drivers\test_driver_key_management.c" />
+    <ClCompile Include="..\..\tests\src\drivers\test_driver_mac.c" />
+    <ClCompile Include="..\..\tests\src\drivers\test_driver_pake.c" />
+    <ClCompile Include="..\..\tests\src\drivers\test_driver_signature.c" />
+    <ClCompile Include="..\..\3rdparty\everest\library\everest.c" />
+    <ClCompile Include="..\..\3rdparty\everest\library\Hacl_Curve25519_joined.c" />
+    <ClCompile Include="..\..\3rdparty\everest\library\x25519.c" />
+    <ClCompile Include="..\..\3rdparty\everest\library\kremlib\FStar_UInt128_extracted.c" />
+    <ClCompile Include="..\..\3rdparty\everest\library\kremlib\FStar_UInt64_FStar_UInt32_FStar_UInt16_FStar_UInt8.c" />
+    <ClCompile Include="..\..\3rdparty\everest\library\legacy\Hacl_Curve25519.c" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

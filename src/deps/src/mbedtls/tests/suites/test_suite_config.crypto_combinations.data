@@ -1,0 +1,9 @@
+# Interesting combinations of low-level crypto options
+
+Config: ECC: Weierstrass curves only
+depends_on:MBEDTLS_ECP_SHORT_WEIERSTRASS_ENABLED:!MBEDTLS_ECP_MONTGOMERY_ENABLED
+pass:
+
+Config: ECC: Montgomery curves only
+depends_on:!MBEDTLS_ECP_SHORT_WEIERSTRASS_ENABLED:MBEDTLS_ECP_MONTGOMERY_ENABLED
+pass:
