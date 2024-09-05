@@ -24,6 +24,7 @@ do_and_check_cmd make INSTALL_TOP=/usr/share/bunkerweb/deps install
 # Compiling and installing libmaxminddb
 echo "ℹ️ Compiling and installing libmaxminddb"
 # TODO : temp fix run it twice...
+chmod +x /tmp/bunkerweb/deps/src/libmaxminddb/bootstrap
 cd /tmp/bunkerweb/deps/src/libmaxminddb && ./bootstrap > /dev/null 2>&1
 export CHANGE_DIR="/tmp/bunkerweb/deps/src/libmaxminddb"
 do_and_check_cmd ./bootstrap
@@ -34,6 +35,7 @@ do_and_check_cmd make install
 # Compiling and installing zlib
 echo "ℹ️ Compiling and installing zlib"
 export CHANGE_DIR="/tmp/bunkerweb/deps/src/zlib"
+do_and_check_cmd chmod +x "configure"
 do_and_check_cmd ./configure --prefix=/usr/share/bunkerweb/deps --libdir=/usr/share/bunkerweb/deps/lib/lua
 do_and_check_cmd make -j "$NTASK"
 do_and_check_cmd make install
@@ -43,7 +45,9 @@ echo "ℹ️ Compiling and installing ModSecurity"
 # temp fix : Debian run it twice
 # TODO : patch it in clone.sh
 do_and_check_cmd mv /tmp/bunkerweb/deps/src/libinjection /tmp/bunkerweb/deps/src/modsecurity/others/libinjection
+do_and_check_cmd mv /tmp/bunkerweb/deps/src/mbedtls /tmp/bunkerweb/deps/src/modsecurity/others/mbedtls
 export CHANGE_DIR="/tmp/bunkerweb/deps/src/modsecurity"
+do_and_check_cmd chmod +x "build.sh"
 do_and_check_cmd ./build.sh
 do_and_check_cmd sh build.sh
 do_and_check_cmd ./configure --disable-dependency-tracking --disable-static --disable-examples --disable-doxygen-doc --disable-doxygen-html --disable-valgrind-memcheck --disable-valgrind-helgrind --prefix=/usr/share/bunkerweb/deps --with-maxmind=/usr/share/bunkerweb/deps
@@ -209,6 +213,7 @@ do_and_check_cmd mv auto/configure ./
 echo '#!/bin/bash' > "/tmp/bunkerweb/deps/src/nginx/configure-fix.sh"
 echo "./configure $CONFARGS --add-dynamic-module=/tmp/bunkerweb/deps/src/headers-more-nginx-module --add-dynamic-module=/tmp/bunkerweb/deps/src/nginx_cookie_flag_module --add-dynamic-module=/tmp/bunkerweb/deps/src/lua-nginx-module --add-dynamic-module=/tmp/bunkerweb/deps/src/ngx_brotli --add-dynamic-module=/tmp/bunkerweb/deps/src/ngx_devel_kit --add-dynamic-module=/tmp/bunkerweb/deps/src/stream-lua-nginx-module" --add-dynamic-module=/tmp/bunkerweb/deps/src/modsecurity-nginx >> "/tmp/bunkerweb/deps/src/nginx/configure-fix.sh"
 
+do_and_check_cmd chmod +x "configure"
 do_and_check_cmd chmod +x "configure-fix.sh"
 export LUAJIT_LIB="/usr/share/bunkerweb/deps/lib -Wl,-rpath,/usr/share/bunkerweb/deps/lib"
 export LUAJIT_INC="/usr/share/bunkerweb/deps/include/luajit-2.1"

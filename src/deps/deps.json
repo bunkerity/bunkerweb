@@ -8,50 +8,6 @@
   ],
   "git_repository": [
     {
-      "id": "luajit",
-      "name": "LuaJIT v2.1-20240815",
-      "url": "https://github.com/openresty/luajit2.git",
-      "commit": "33d6b04681d2f079a6d013988a426a841c52e29e"
-    },
-    {
-      "id": "modsecurity",
-      "name": "ModSecurity v3.0.13",
-      "url": "https://github.com/owasp-modsecurity/ModSecurity.git",
-      "commit": "580fe192df1694934f93e3e008058996ea479e35",
-      "post_install": "patch --forward src/deps/src/modsecurity/configure.ac src/deps/misc/modsecurity.patch && rm -rf src/deps/src/modsecurity/others/libinjection"
-    },
-    {
-      "id": "modsecurity-nginx",
-      "name": "ModSecurity-nginx v1.0.3",
-      "url": "https://github.com/owasp-modsecurity/ModSecurity-nginx.git",
-      "commit": "d59e4ad121df702751940fd66bcc0b3ecb51a079",
-      "post_install": "patch --forward src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_log.c src/deps/misc/modsecurity-nginx.patch && patch --forward src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_common.h src/deps/misc/ngx_http_modsecurity_common.h.patch && patch --forward src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_module.c src/deps/misc/ngx_http_modsecurity_module.c.patch && patch --forward src/deps/src/modsecurity-nginx/config src/deps/misc/modsecurity-nginx-config.patch"
-    },
-    {
-      "id": "nginx",
-      "name": "Nginx v1.26.2",
-      "url": "https://github.com/nginx/nginx.git",
-      "commit": "37fe98355461d2f03d73e6a8e82ac4e4cd85d711"
-    },
-    {
-      "id": "ngx_brotli",
-      "name": "Nginx Brotli v1.0.9",
-      "url": "https://github.com/google/ngx_brotli.git",
-      "commit": "6e975bcb015f62e1f303054897783355e2a877dc"
-    },
-    {
-      "id": "nginx_cookie_flag_module",
-      "name": "Nginx cookie flag module v1.1.0",
-      "url": "https://github.com/AirisX/nginx_cookie_flag_module.git",
-      "commit": "4e48acf132952bbed43b28a8e6af0584dacb7b4c"
-    },
-    {
-      "id": "ngx_devel_kit",
-      "name": "Nginx devel kit v0.3.3",
-      "url": "https://github.com/vision5/ngx_devel_kit.git",
-      "commit": "91e30eb05085e7f9762f130cbb883a0e753cf74d"
-    },
-    {
       "id": "headers-more-nginx-module",
       "name": "headers-more-nginx-module v0.34",
       "url": "https://github.com/openresty/headers-more-nginx-module.git",
@@ -169,6 +125,12 @@
       "commit": "d7c25f1b339d79196ff67f061c547a73a920b580"
     },
     {
+      "id": "lua-resty-redis-connector",
+      "name": "lua-resty-redis-connector v0.11.0",
+      "url": "https://github.com/ledgetech/lua-resty-redis-connector.git",
+      "commit": "02a29f93253d1f6ad392c5ac2b643c57e62b5979"
+    },
+    {
       "id": "lua-resty-session",
       "name": "lua-resty-session v4.0.5",
       "url": "https://github.com/bungle/lua-resty-session.git",
@@ -199,6 +161,12 @@
       "commit": "03704aee42f7135e7782688d8a9af63a16015edc"
     },
     {
+      "id": "luajit",
+      "name": "LuaJIT v2.1-20240815",
+      "url": "https://github.com/openresty/luajit2.git",
+      "commit": "33d6b04681d2f079a6d013988a426a841c52e29e"
+    },
+    {
       "id": "luajit-geoip",
       "name": "luajit-geoip v2.1.0",
       "url": "https://github.com/leafo/luajit-geoip.git",
@@ -224,6 +192,51 @@
       "commit": "95b7efa9da506ef968c1347edf3fc56370f0deed"
     },
     {
+      "id": "mbedtls",
+      "name": "Mbed TLS v3.6.1",
+      "url": "https://github.com/Mbed-TLS/mbedtls.git",
+      "commit": "71c569d44bf3a8bd53d874c81ee8ac644dd6e9e3",
+      "post_install": "rm -rf src/deps/src/mbedtls/tests src/deps/src/mbedtls/programs"
+    },
+    {
+      "id": "modsecurity",
+      "name": "ModSecurity v3.0.13",
+      "url": "https://github.com/owasp-modsecurity/ModSecurity.git",
+      "commit": "580fe192df1694934f93e3e008058996ea479e35",
+      "post_install": "patch --forward src/deps/src/modsecurity/configure.ac src/deps/misc/modsecurity.patch && rm -rf src/deps/src/modsecurity/others/libinjection src/deps/src/modsecurity/others/mbedtls"
+    },
+    {
+      "id": "modsecurity-nginx",
+      "name": "ModSecurity-nginx v1.0.3",
+      "url": "https://github.com/owasp-modsecurity/ModSecurity-nginx.git",
+      "commit": "d59e4ad121df702751940fd66bcc0b3ecb51a079",
+      "post_install": "patch --forward src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_log.c src/deps/misc/modsecurity-nginx.patch && patch --forward src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_common.h src/deps/misc/ngx_http_modsecurity_common.h.patch && patch --forward src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_module.c src/deps/misc/ngx_http_modsecurity_module.c.patch && patch --forward src/deps/src/modsecurity-nginx/config src/deps/misc/modsecurity-nginx-config.patch"
+    },
+    {
+      "id": "nginx",
+      "name": "Nginx v1.26.2",
+      "url": "https://github.com/nginx/nginx.git",
+      "commit": "37fe98355461d2f03d73e6a8e82ac4e4cd85d711"
+    },
+    {
+      "id": "nginx_cookie_flag_module",
+      "name": "Nginx cookie flag module v1.1.0",
+      "url": "https://github.com/AirisX/nginx_cookie_flag_module.git",
+      "commit": "4e48acf132952bbed43b28a8e6af0584dacb7b4c"
+    },
+    {
+      "id": "ngx_brotli",
+      "name": "Nginx Brotli v1.0.9",
+      "url": "https://github.com/google/ngx_brotli.git",
+      "commit": "6e975bcb015f62e1f303054897783355e2a877dc"
+    },
+    {
+      "id": "ngx_devel_kit",
+      "name": "Nginx devel kit v0.3.3",
+      "url": "https://github.com/vision5/ngx_devel_kit.git",
+      "commit": "91e30eb05085e7f9762f130cbb883a0e753cf74d"
+    },
+    {
       "id": "stream-lua-nginx-module",
       "name": "stream-lua-nginx-module v0.0.15",
       "url": "https://github.com/openresty/stream-lua-nginx-module.git",
@@ -234,12 +247,6 @@
       "name": "zlib v1.3.1",
       "url": "https://github.com/madler/zlib.git",
       "commit": "51b7f2abdade71cd9bb0e7a373ef2610ec6f9daf"
-    },
-    {
-      "id": "lua-resty-redis-connector",
-      "name": "lua-resty-redis-connector v0.11.0",
-      "url": "https://github.com/ledgetech/lua-resty-redis-connector.git",
-      "commit": "02a29f93253d1f6ad392c5ac2b643c57e62b5979"
     }
   ]
 }
