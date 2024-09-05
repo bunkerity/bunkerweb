@@ -1,0 +1,135 @@
+# These tests behave differently depending on the presence of
+# drivers and/or built-in, so they're isolated here for the benefit of
+# analyze_outcomes.py (driver vs reference comparison).
+
+PSA dispatch MD5 legacy only
+depends_on:MBEDTLS_MD5_C:!MBEDTLS_MD_MD5_VIA_PSA
+md_psa_dynamic_dispatch:MBEDTLS_MD_MD5:0:MBEDTLS_MD_ENGINE_LEGACY
+
+PSA dispatch MD5 driver only
+depends_on:!MBEDTLS_MD5_C:MBEDTLS_MD_MD5_VIA_PSA
+md_psa_dynamic_dispatch:MBEDTLS_MD_MD5:MBEDTLS_ERR_MD_BAD_INPUT_DATA:MBEDTLS_MD_ENGINE_PSA
+
+PSA dispatch MD5 legacy+driver
+depends_on:MBEDTLS_MD5_C:MBEDTLS_MD_MD5_VIA_PSA
+md_psa_dynamic_dispatch:MBEDTLS_MD_MD5:0:MBEDTLS_MD_ENGINE_PSA
+
+PSA dispatch RIPEMD160 legacy only
+depends_on:MBEDTLS_RIPEMD160_C:!MBEDTLS_MD_RIPEMD160_VIA_PSA
+md_psa_dynamic_dispatch:MBEDTLS_MD_RIPEMD160:0:MBEDTLS_MD_ENGINE_LEGACY
+
+PSA dispatch RIPEMD160 driver only
+depends_on:!MBEDTLS_RIPEMD160_C:MBEDTLS_MD_RIPEMD160_VIA_PSA
+md_psa_dynamic_dispatch:MBEDTLS_MD_RIPEMD160:MBEDTLS_ERR_MD_BAD_INPUT_DATA:MBEDTLS_MD_ENGINE_PSA
+
+PSA dispatch RIPEMD160 legacy+driver
+depends_on:MBEDTLS_RIPEMD160_C:MBEDTLS_MD_RIPEMD160_VIA_PSA
+md_psa_dynamic_dispatch:MBEDTLS_MD_RIPEMD160:0:MBEDTLS_MD_ENGINE_PSA
+
+PSA dispatch SHA1 legacy only
+depends_on:MBEDTLS_SHA1_C:!MBEDTLS_MD_SHA1_VIA_PSA
+md_psa_dynamic_dispatch:MBEDTLS_MD_SHA1:0:MBEDTLS_MD_ENGINE_LEGACY
+
+PSA dispatch SHA1 driver only
+depends_on:!MBEDTLS_SHA1_C:MBEDTLS_MD_SHA1_VIA_PSA
+md_psa_dynamic_dispatch:MBEDTLS_MD_SHA1:MBEDTLS_ERR_MD_BAD_INPUT_DATA:MBEDTLS_MD_ENGINE_PSA
+
+PSA dispatch SHA1 legacy+driver
+depends_on:MBEDTLS_SHA1_C:MBEDTLS_MD_SHA1_VIA_PSA
+md_psa_dynamic_dispatch:MBEDTLS_MD_SHA1:0:MBEDTLS_MD_ENGINE_PSA
+
+PSA dispatch SHA224 legacy only
+depends_on:MBEDTLS_SHA224_C:!MBEDTLS_MD_SHA224_VIA_PSA
+md_psa_dynamic_dispatch:MBEDTLS_MD_SHA224:0:MBEDTLS_MD_ENGINE_LEGACY
+
+PSA dispatch SHA224 driver only
+depends_on:!MBEDTLS_SHA224_C:MBEDTLS_MD_SHA224_VIA_PSA
+md_psa_dynamic_dispatch:MBEDTLS_MD_SHA224:MBEDTLS_ERR_MD_BAD_INPUT_DATA:MBEDTLS_MD_ENGINE_PSA
+
+PSA dispatch SHA224 legacy+driver
+depends_on:MBEDTLS_SHA224_C:MBEDTLS_MD_SHA224_VIA_PSA
+md_psa_dynamic_dispatch:MBEDTLS_MD_SHA224:0:MBEDTLS_MD_ENGINE_PSA
+
+PSA dispatch SHA256 legacy only
+depends_on:MBEDTLS_SHA256_C:!MBEDTLS_MD_SHA256_VIA_PSA
+md_psa_dynamic_dispatch:MBEDTLS_MD_SHA256:0:MBEDTLS_MD_ENGINE_LEGACY
+
+PSA dispatch SHA256 driver only
+depends_on:!MBEDTLS_SHA256_C:MBEDTLS_MD_SHA256_VIA_PSA
+md_psa_dynamic_dispatch:MBEDTLS_MD_SHA256:MBEDTLS_ERR_MD_BAD_INPUT_DATA:MBEDTLS_MD_ENGINE_PSA
+
+PSA dispatch SHA256 legacy+driver
+depends_on:MBEDTLS_SHA256_C:MBEDTLS_MD_SHA256_VIA_PSA
+md_psa_dynamic_dispatch:MBEDTLS_MD_SHA256:0:MBEDTLS_MD_ENGINE_PSA
+
+PSA dispatch SHA384 legacy only
+depends_on:MBEDTLS_SHA384_C:!MBEDTLS_MD_SHA384_VIA_PSA
+md_psa_dynamic_dispatch:MBEDTLS_MD_SHA384:0:MBEDTLS_MD_ENGINE_LEGACY
+
+PSA dispatch SHA384 driver only
+depends_on:!MBEDTLS_SHA384_C:MBEDTLS_MD_SHA384_VIA_PSA
+md_psa_dynamic_dispatch:MBEDTLS_MD_SHA384:MBEDTLS_ERR_MD_BAD_INPUT_DATA:MBEDTLS_MD_ENGINE_PSA
+
+PSA dispatch SHA384 legacy+driver
+depends_on:MBEDTLS_SHA384_C:MBEDTLS_MD_SHA384_VIA_PSA
+md_psa_dynamic_dispatch:MBEDTLS_MD_SHA384:0:MBEDTLS_MD_ENGINE_PSA
+
+PSA dispatch SHA512 legacy only
+depends_on:MBEDTLS_SHA512_C:!MBEDTLS_MD_SHA512_VIA_PSA
+md_psa_dynamic_dispatch:MBEDTLS_MD_SHA512:0:MBEDTLS_MD_ENGINE_LEGACY
+
+PSA dispatch SHA512 driver only
+depends_on:!MBEDTLS_SHA512_C:MBEDTLS_MD_SHA512_VIA_PSA
+md_psa_dynamic_dispatch:MBEDTLS_MD_SHA512:MBEDTLS_ERR_MD_BAD_INPUT_DATA:MBEDTLS_MD_ENGINE_PSA
+
+PSA dispatch SHA512 legacy+driver
+depends_on:MBEDTLS_SHA512_C:MBEDTLS_MD_SHA512_VIA_PSA
+md_psa_dynamic_dispatch:MBEDTLS_MD_SHA512:0:MBEDTLS_MD_ENGINE_PSA
+
+PSA dispatch SHA3-224 legacy only
+depends_on:MBEDTLS_SHA3_C:!MBEDTLS_MD_SHA3_224_VIA_PSA
+md_psa_dynamic_dispatch:MBEDTLS_MD_SHA3_224:0:MBEDTLS_MD_ENGINE_LEGACY
+
+PSA dispatch SHA3-224 driver only
+depends_on:!MBEDTLS_SHA3_C:MBEDTLS_MD_SHA3_224_VIA_PSA
+md_psa_dynamic_dispatch:MBEDTLS_MD_SHA3_224:MBEDTLS_ERR_MD_BAD_INPUT_DATA:MBEDTLS_MD_ENGINE_PSA
+
+PSA dispatch SHA3-224 legacy+driver
+depends_on:MBEDTLS_SHA3_C:MBEDTLS_MD_SHA3_224_VIA_PSA
+md_psa_dynamic_dispatch:MBEDTLS_MD_SHA3_224:0:MBEDTLS_MD_ENGINE_PSA
+
+PSA dispatch SHA3-256 legacy only
+depends_on:MBEDTLS_SHA3_C:!MBEDTLS_MD_SHA3_256_VIA_PSA
+md_psa_dynamic_dispatch:MBEDTLS_MD_SHA3_256:0:MBEDTLS_MD_ENGINE_LEGACY
+
+PSA dispatch SHA3-256 driver only
+depends_on:!MBEDTLS_SHA3_C:MBEDTLS_MD_SHA3_256_VIA_PSA
+md_psa_dynamic_dispatch:MBEDTLS_MD_SHA3_256:MBEDTLS_ERR_MD_BAD_INPUT_DATA:MBEDTLS_MD_ENGINE_PSA
+
+PSA dispatch SHA3-256 legacy+driver
+depends_on:MBEDTLS_SHA3_C:MBEDTLS_MD_SHA3_256_VIA_PSA
+md_psa_dynamic_dispatch:MBEDTLS_MD_SHA3_256:0:MBEDTLS_MD_ENGINE_PSA
+
+PSA dispatch SHA3-384 legacy only
+depends_on:MBEDTLS_SHA3_C:!MBEDTLS_MD_SHA3_384_VIA_PSA
+md_psa_dynamic_dispatch:MBEDTLS_MD_SHA3_384:0:MBEDTLS_MD_ENGINE_LEGACY
+
+PSA dispatch SHA3-384 driver only
+depends_on:!MBEDTLS_SHA3_C:MBEDTLS_MD_SHA3_384_VIA_PSA
+md_psa_dynamic_dispatch:MBEDTLS_MD_SHA3_384:MBEDTLS_ERR_MD_BAD_INPUT_DATA:MBEDTLS_MD_ENGINE_PSA
+
+PSA dispatch SHA3-384 legacy+driver
+depends_on:MBEDTLS_SHA3_C:MBEDTLS_MD_SHA3_384_VIA_PSA
+md_psa_dynamic_dispatch:MBEDTLS_MD_SHA3_384:0:MBEDTLS_MD_ENGINE_PSA
+
+PSA dispatch SHA3-512 legacy only
+depends_on:MBEDTLS_SHA3_C:!MBEDTLS_MD_SHA3_512_VIA_PSA
+md_psa_dynamic_dispatch:MBEDTLS_MD_SHA3_512:0:MBEDTLS_MD_ENGINE_LEGACY
+
+PSA dispatch SHA3-512 driver only
+depends_on:!MBEDTLS_SHA3_C:MBEDTLS_MD_SHA3_512_VIA_PSA
+md_psa_dynamic_dispatch:MBEDTLS_MD_SHA3_512:MBEDTLS_ERR_MD_BAD_INPUT_DATA:MBEDTLS_MD_ENGINE_PSA
+
+PSA dispatch SHA3-512 legacy+driver
+depends_on:MBEDTLS_SHA3_C:MBEDTLS_MD_SHA3_512_VIA_PSA
+md_psa_dynamic_dispatch:MBEDTLS_MD_SHA3_512:0:MBEDTLS_MD_ENGINE_PSA

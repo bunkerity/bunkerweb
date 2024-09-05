@@ -1,0 +1,155 @@
+Public key write check RSA
+depends_on:MBEDTLS_RSA_C:MBEDTLS_PEM_PARSE_C:MBEDTLS_PEM_WRITE_C
+pk_write_pubkey_check:"../framework/data_files/server1.pubkey":TEST_PEM
+
+Public key write check RSA (DER)
+depends_on:MBEDTLS_RSA_C
+pk_write_pubkey_check:"../framework/data_files/server1.pubkey.der":TEST_DER
+
+Public key write check RSA 4096
+depends_on:MBEDTLS_RSA_C:MBEDTLS_PEM_PARSE_C:MBEDTLS_PEM_WRITE_C
+pk_write_pubkey_check:"../framework/data_files/rsa4096_pub.pem":TEST_PEM
+
+Public key write check RSA 4096 (DER)
+depends_on:MBEDTLS_RSA_C
+pk_write_pubkey_check:"../framework/data_files/rsa4096_pub.der":TEST_DER
+
+Public key write check EC 192 bits
+depends_on:MBEDTLS_PK_HAVE_ECC_KEYS:MBEDTLS_PEM_PARSE_C:MBEDTLS_PEM_WRITE_C:MBEDTLS_ECP_HAVE_SECP192R1
+pk_write_pubkey_check:"../framework/data_files/ec_pub.pem":TEST_PEM
+
+Public key write check EC 192 bits (DER)
+depends_on:MBEDTLS_PK_HAVE_ECC_KEYS:MBEDTLS_ECP_HAVE_SECP192R1
+pk_write_pubkey_check:"../framework/data_files/ec_pub.der":TEST_DER
+
+Public key write check EC 521 bits
+depends_on:MBEDTLS_PK_HAVE_ECC_KEYS:MBEDTLS_PEM_PARSE_C:MBEDTLS_PEM_WRITE_C:MBEDTLS_ECP_HAVE_SECP521R1
+pk_write_pubkey_check:"../framework/data_files/ec_521_pub.pem":TEST_PEM
+
+Public key write check EC 521 bits (DER)
+depends_on:MBEDTLS_PK_HAVE_ECC_KEYS:MBEDTLS_ECP_HAVE_SECP521R1
+pk_write_pubkey_check:"../framework/data_files/ec_521_pub.der":TEST_DER
+
+Public key write check EC Brainpool 512 bits
+depends_on:MBEDTLS_PK_HAVE_ECC_KEYS:MBEDTLS_PEM_PARSE_C:MBEDTLS_PEM_WRITE_C:MBEDTLS_ECP_HAVE_BP512R1
+pk_write_pubkey_check:"../framework/data_files/ec_bp512_pub.pem":TEST_PEM
+
+Public key write check EC Brainpool 512 bits (DER)
+depends_on:MBEDTLS_PK_HAVE_ECC_KEYS:MBEDTLS_ECP_HAVE_BP512R1
+pk_write_pubkey_check:"../framework/data_files/ec_bp512_pub.der":TEST_DER
+
+Public key write check EC X25519
+depends_on:MBEDTLS_PK_HAVE_ECC_KEYS:MBEDTLS_PEM_PARSE_C:MBEDTLS_PEM_WRITE_C:MBEDTLS_ECP_HAVE_CURVE25519
+pk_write_pubkey_check:"../framework/data_files/ec_x25519_pub.pem":TEST_PEM
+
+Public key write check EC X25519 (DER)
+depends_on:MBEDTLS_PK_HAVE_ECC_KEYS:MBEDTLS_ECP_HAVE_CURVE25519
+pk_write_pubkey_check:"../framework/data_files/ec_x25519_pub.der":TEST_DER
+
+Public key write check EC X448
+depends_on:MBEDTLS_PK_HAVE_ECC_KEYS:MBEDTLS_PEM_PARSE_C:MBEDTLS_PEM_WRITE_C:MBEDTLS_ECP_HAVE_CURVE448
+pk_write_pubkey_check:"../framework/data_files/ec_x448_pub.pem":TEST_PEM
+
+Public key write check EC X448 (DER)
+depends_on:MBEDTLS_PK_HAVE_ECC_KEYS:MBEDTLS_ECP_HAVE_CURVE448
+pk_write_pubkey_check:"../framework/data_files/ec_x448_pub.der":TEST_DER
+
+Private key write check RSA
+depends_on:MBEDTLS_RSA_C:MBEDTLS_PEM_PARSE_C:MBEDTLS_PEM_WRITE_C
+pk_write_key_check:"../framework/data_files/server1.key":TEST_PEM
+
+Private key write check RSA (DER)
+depends_on:MBEDTLS_RSA_C
+pk_write_key_check:"../framework/data_files/server1.key.der":TEST_DER
+
+Private key write check RSA 4096
+depends_on:MBEDTLS_RSA_C:MBEDTLS_PEM_PARSE_C:MBEDTLS_PEM_WRITE_C
+pk_write_key_check:"../framework/data_files/rsa4096_prv.pem":TEST_PEM
+
+Private key write check RSA 4096 (DER)
+depends_on:MBEDTLS_RSA_C
+pk_write_key_check:"../framework/data_files/rsa4096_prv.der":TEST_DER
+
+Private key write check EC 192 bits
+depends_on:MBEDTLS_PK_HAVE_ECC_KEYS:MBEDTLS_PEM_PARSE_C:MBEDTLS_PEM_WRITE_C:MBEDTLS_ECP_HAVE_SECP192R1
+pk_write_key_check:"../framework/data_files/ec_prv.sec1.pem":TEST_PEM
+
+Private key write check EC 192 bits (DER)
+depends_on:MBEDTLS_PK_HAVE_ECC_KEYS:MBEDTLS_ECP_HAVE_SECP192R1
+pk_write_key_check:"../framework/data_files/ec_prv.sec1.der":TEST_DER
+
+Private key write check EC 256 bits (top bit set)
+depends_on:MBEDTLS_PK_HAVE_ECC_KEYS:MBEDTLS_PEM_PARSE_C:MBEDTLS_PEM_WRITE_C:MBEDTLS_ECP_HAVE_SECP256R1
+pk_write_key_check:"../framework/data_files/ec_256_long_prv.pem":TEST_PEM
+
+Private key write check EC 256 bits (top bit set) (DER)
+depends_on:MBEDTLS_PK_HAVE_ECC_KEYS:MBEDTLS_ECP_HAVE_SECP256R1
+pk_write_key_check:"../framework/data_files/ec_256_long_prv.der":TEST_DER
+
+Private key write check EC 521 bits
+depends_on:MBEDTLS_PK_HAVE_ECC_KEYS:MBEDTLS_PEM_PARSE_C:MBEDTLS_PEM_WRITE_C:MBEDTLS_ECP_HAVE_SECP521R1
+pk_write_key_check:"../framework/data_files/ec_521_prv.pem":TEST_PEM
+
+Private key write check EC 521 bits (DER)
+depends_on:MBEDTLS_PK_HAVE_ECC_KEYS:MBEDTLS_ECP_HAVE_SECP521R1
+pk_write_key_check:"../framework/data_files/ec_521_prv.der":TEST_DER
+
+Private key write check EC 521 bits (top byte is 0)
+depends_on:MBEDTLS_PK_HAVE_ECC_KEYS:MBEDTLS_PEM_PARSE_C:MBEDTLS_PEM_WRITE_C:MBEDTLS_ECP_HAVE_SECP521R1
+pk_write_key_check:"../framework/data_files/ec_521_short_prv.pem":TEST_PEM
+
+Private key write check EC 521 bits (top byte is 0) (DER)
+depends_on:MBEDTLS_PK_HAVE_ECC_KEYS:MBEDTLS_ECP_HAVE_SECP521R1
+pk_write_key_check:"../framework/data_files/ec_521_short_prv.der":TEST_DER
+
+Private key write check EC Brainpool 512 bits
+depends_on:MBEDTLS_PK_HAVE_ECC_KEYS:MBEDTLS_PEM_PARSE_C:MBEDTLS_PEM_WRITE_C:MBEDTLS_ECP_HAVE_BP512R1
+pk_write_key_check:"../framework/data_files/ec_bp512_prv.pem":TEST_PEM
+
+Private key write check EC Brainpool 512 bits (DER)
+depends_on:MBEDTLS_PK_HAVE_ECC_KEYS:MBEDTLS_ECP_HAVE_BP512R1
+pk_write_key_check:"../framework/data_files/ec_bp512_prv.der":TEST_DER
+
+Private key write check EC X25519
+depends_on:MBEDTLS_PK_HAVE_ECC_KEYS:MBEDTLS_PEM_PARSE_C:MBEDTLS_PEM_WRITE_C:MBEDTLS_ECP_HAVE_CURVE25519
+pk_write_key_check:"../framework/data_files/ec_x25519_prv.pem":TEST_PEM
+
+Private key write check EC X25519 (DER)
+depends_on:MBEDTLS_PK_HAVE_ECC_KEYS:MBEDTLS_ECP_HAVE_CURVE25519
+pk_write_key_check:"../framework/data_files/ec_x25519_prv.der":TEST_DER
+
+Private key write check EC X448
+depends_on:MBEDTLS_PK_HAVE_ECC_KEYS:MBEDTLS_PEM_PARSE_C:MBEDTLS_PEM_WRITE_C:MBEDTLS_ECP_HAVE_CURVE448
+pk_write_key_check:"../framework/data_files/ec_x448_prv.pem":TEST_PEM
+
+Private key write check EC X448 (DER)
+depends_on:MBEDTLS_PK_HAVE_ECC_KEYS:MBEDTLS_ECP_HAVE_CURVE448
+pk_write_key_check:"../framework/data_files/ec_x448_prv.der":TEST_DER
+
+Derive public key RSA
+depends_on:MBEDTLS_RSA_C
+pk_write_public_from_private:"../framework/data_files/server1.key.der":"../framework/data_files/server1.pubkey.der"
+
+Derive public key RSA 4096
+depends_on:MBEDTLS_RSA_C
+pk_write_public_from_private:"../framework/data_files/rsa4096_prv.der":"../framework/data_files/rsa4096_pub.der"
+
+Derive public key EC 192 bits
+depends_on:MBEDTLS_PK_HAVE_ECC_KEYS:MBEDTLS_ECP_HAVE_SECP192R1
+pk_write_public_from_private:"../framework/data_files/ec_prv.sec1.der":"../framework/data_files/ec_pub.der"
+
+Derive public key EC 521 bits
+depends_on:MBEDTLS_PK_HAVE_ECC_KEYS:MBEDTLS_ECP_HAVE_SECP521R1
+pk_write_public_from_private:"../framework/data_files/ec_521_prv.der":"../framework/data_files/ec_521_pub.der"
+
+Derive public key EC Brainpool 512 bits
+depends_on:MBEDTLS_PK_HAVE_ECC_KEYS:MBEDTLS_ECP_HAVE_BP512R1
+pk_write_public_from_private:"../framework/data_files/ec_bp512_prv.der":"../framework/data_files/ec_bp512_pub.der"
+
+Derive public key EC X25519
+depends_on:MBEDTLS_PK_HAVE_ECC_KEYS:MBEDTLS_ECP_HAVE_CURVE25519
+pk_write_public_from_private:"../framework/data_files/ec_x25519_prv.der":"../framework/data_files/ec_x25519_pub.der"
+
+Derive public key EC X448
+depends_on:MBEDTLS_PK_HAVE_ECC_KEYS:MBEDTLS_ECP_HAVE_CURVE448
+pk_write_public_from_private:"../framework/data_files/ec_x448_prv.der":"../framework/data_files/ec_x448_pub.der"
