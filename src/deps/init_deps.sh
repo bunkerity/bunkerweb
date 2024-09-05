@@ -57,7 +57,7 @@ do
 	fi
 
   if [ -f "src/deps/src/$id/.gitmodules" ] ; then
-    do_and_check_cmd git submodule init --recursive -- "src/deps/src/$id"
+    do_and_check_cmd git submodule init -- "src/deps/src/$id"
   fi
 
   if [ -d "src/deps/src/$id/.git" ] ; then
