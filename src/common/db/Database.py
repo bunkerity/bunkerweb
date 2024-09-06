@@ -1416,16 +1416,9 @@ class Database:
 
                             if not service_setting:
                                 if key != "SERVER_NAME" and (
-                                    (
-                                        original_key not in config
-                                        and original_key not in db_config
-                                        or (
-                                            (template_setting is not None and value == template_setting.default)
-                                            or (template_setting is None and value == setting.default)
-                                        )
-                                    )
-                                    or (original_key in config and value == config[original_key])
+                                    (original_key in config and value == config[original_key])
                                     or (original_key in db_config and value == db_config[original_key])
+                                    or value == (template_setting.default if template_setting else setting.default)
                                 ):
                                     continue
 
@@ -1443,16 +1436,9 @@ class Database:
                                 )
 
                                 if key != "SERVER_NAME" and (
-                                    (
-                                        original_key not in config
-                                        and original_key not in db_config
-                                        or (
-                                            (template_setting is not None and value == template_setting.default)
-                                            or (template_setting is None and value == setting.default)
-                                        )
-                                    )
-                                    or (original_key in config and value == config[original_key])
+                                    (original_key in config and value == config[original_key])
                                     or (original_key in db_config and value == db_config[original_key])
+                                    or value == (template_setting.default if template_setting else setting.default)
                                 ):
                                     self.logger.debug(f"Removing setting {key} for service {server_name}")
                                     query.delete()
@@ -1479,9 +1465,7 @@ class Database:
                                 )
 
                             if not global_value:
-                                if (template_setting is not None and value == template_setting.default) or (
-                                    template_setting is None and value == setting.default
-                                ):
+                                if value == (template_setting.default if template_setting is not None else setting.default):
                                     continue
 
                                 self.logger.debug(f"Adding global setting {key}")
@@ -1493,9 +1477,7 @@ class Database:
                                 changed_plugins.add(setting.plugin_id)
                                 query = session.query(Global_values).filter(Global_values.setting_id == key, Global_values.suffix == suffix)
 
-                                if (template_setting is not None and value == template_setting.default) or (
-                                    template_setting is None and value == setting.default
-                                ):
+                                if value == (template_setting.default if template_setting is not None else setting.default):
                                     self.logger.debug(f"Removing global setting {key}")
                                     query.delete()
                                     continue
@@ -1551,7 +1533,7 @@ class Database:
                             )
 
                         if not global_value:
-                            if (template_setting is not None and value == template_setting.default) or (template_setting is None and value == setting.default):
+                            if value == (template_setting.default if template_setting is not None else setting.default):
                                 continue
 
                             self.logger.debug(f"Adding global setting {key}")
@@ -1563,7 +1545,7 @@ class Database:
                             changed_plugins.add(setting.plugin_id)
                             query = session.query(Global_values).filter(Global_values.setting_id == key, Global_values.suffix == suffix)
 
-                            if (template_setting is not None and value == template_setting.default) or (template_setting is None and value == setting.default):
+                            if value == (template_setting.default if template_setting is not None else setting.default):
                                 self.logger.debug(f"Removing global setting {key}")
                                 query.delete()
                                 continue
@@ -1712,7 +1694,15 @@ class Database:
 
             # Define the select statement
             stmt = (
-                db_select(Settings.id.label("setting_id"), Settings.context, Settings.multiple, Global_values.value, Global_values.suffix, Global_values.method)
+                db_select(
+                    Settings.id.label("setting_id"),
+                    Settings.context,
+                    Settings.default,
+                    Settings.multiple,
+                    Global_values.value,
+                    Global_values.suffix,
+                    Global_values.method,
+                )
                 .select_from(j)
                 .order_by(Settings.order)
             )
@@ -1729,6 +1719,7 @@ class Database:
                     "value": global_value.value,
                     "global": True,
                     "method": global_value.method,
+                    "default": global_value.default,
                     "template": None,
                 }
 
@@ -1753,6 +1744,7 @@ class Database:
                         "value": "yes" if db_service.is_draft else "no",
                         "global": False,
                         "method": "default",
+                        "default": config.get("IS_DRAFT", {"value": "no"})["value"],
                         "template": None,
                     }
                     servers += f"{db_service.id} "
@@ -1767,6 +1759,7 @@ class Database:
                     db_select(
                         Services.id.label("service_id"),
                         Settings.id.label("setting_id"),
+                        Settings.default,
                         Settings.multiple,
                         Services_settings.value,
                         Services_settings.suffix,
@@ -1799,6 +1792,7 @@ class Database:
                         "value": value,
                         "global": False,
                         "method": result.method,
+                        "default": config.get(result.setting_id, {"value": result.default})["value"],
                         "template": None,
                     }
             else:
@@ -1808,6 +1802,7 @@ class Database:
                 "value": servers,
                 "global": True,
                 "method": "scheduler",
+                "default": "",
                 "template": None,
             }
 
@@ -1849,6 +1844,7 @@ class Database:
                     Settings.id,
                     Settings.context,
                     Settings.default,
+                    Settings.default,
                     Settings.multiple,
                 )
                 .order_by(Settings.order)
@@ -1858,7 +1854,7 @@ class Database:
                 query = query.filter(Settings.id.in_(filtered_settings))
 
             for setting in query:
-                config[setting.id] = {"value": setting.default or "", "global": True, "method": "default", "template": None}
+                config[setting.id] = {"value": setting.default or "", "global": True, "method": "default", "default": setting.default, "template": None}
                 if setting.context == "multisite":
                     multisite.add(setting.id)
 
@@ -1893,6 +1889,7 @@ class Database:
                         "value": template_setting.default,
                         "global": True,
                         "method": "default",
+                        "default": template_setting.default,
                         "template": template_used,
                     }
 
@@ -1918,6 +1915,7 @@ class Database:
                                 "value": setting.default,
                                 "global": False,
                                 "method": "default",
+                                "default": setting.default,
                                 "template": service_template_used,
                             }
 
@@ -2007,7 +2005,15 @@ class Database:
                     tmp_config.pop(key)
                 elif key not in service_settings:
                     tmp_config[key] = (
-                        {"value": value["value"], "global": value["global"], "method": value["method"], "template": value["template"]} if methods else value
+                        {
+                            "value": value["value"],
+                            "global": value["global"],
+                            "method": value["method"],
+                            "default": value["default"],
+                            "template": value["template"],
+                        }
+                        if methods
+                        else value
                     )
 
             services.append(tmp_config)
@@ -3249,6 +3255,19 @@ class Database:
                     continue
 
                 current_time = datetime.now().astimezone()
+
+                db_instance = session.query(Instances).filter_by(hostname=instance["hostname"]).first()
+                if db_instance is not None:
+                    db_instance.name = instance.get("name", "manual instance")
+                    db_instance.port = instance["env"].get("API_HTTP_PORT", 5000)
+                    db_instance.server_name = instance["env"].get("API_SERVER_NAME", "bwapi")
+                    db_instance.type = instance.get("type", "static")
+                    db_instance.status = instance.get("status", "up" if instance.get("health", True) else "down")
+                    db_instance.method = instance.get("method", method)
+                    db_instance.last_seen = instance.get("last_seen", current_time)
+                    to_put.append(db_instance)
+                    continue
+
                 to_put.append(
                     Instances(
                         hostname=instance["hostname"],
@@ -3257,9 +3276,9 @@ class Database:
                         server_name=instance["env"].get("API_SERVER_NAME", "bwapi"),
                         type=instance.get("type", "static"),
                         status="up" if instance.get("health", True) else "down",
-                        method=method,
-                        creation_date=current_time,
-                        last_seen=current_time,
+                        method=instance.get("method", method),
+                        creation_date=instance.get("creation_date", current_time),
+                        last_seen=instance.get("last_seen", current_time),
                     )
                 )
 
