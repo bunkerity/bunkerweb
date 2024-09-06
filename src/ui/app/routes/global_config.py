@@ -1,4 +1,5 @@
 from contextlib import suppress
+from re import match
 from threading import Thread
 from time import time
 from typing import Dict
@@ -30,15 +31,19 @@ def global_config_page():
             wait_applying()
 
             # Edit check fields and remove already existing ones
-            config = DB.get_config(methods=True, with_drafts=True)
+            config = DB.get_config(methods=True, with_drafts=True, filtered_settings=list(variables.keys()))
             services = config["SERVER_NAME"]["value"].split(" ")
+            ignored_multiples = set()
+
             for variable, value in variables.copy().items():
                 setting = config.get(variable, {"value": None, "global": True})
                 if setting["global"] and value == setting["value"]:
+                    if match(r"^.+_\d+$", variable):
+                        ignored_multiples.add(variable)
                     del variables[variable]
                     continue
 
-            variables = BW_CONFIG.check_variables(variables, config, global_config=True, threaded=threaded)
+            variables = BW_CONFIG.check_variables(variables, config, global_config=True, ignored_multiples=ignored_multiples, threaded=threaded)
 
             if not variables:
                 content = "The global configuration was not edited because no values were changed."

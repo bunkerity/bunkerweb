@@ -1,3 +1,4 @@
+from re import match
 from threading import Thread
 from time import time
 from typing import Dict
@@ -50,19 +51,22 @@ def services_service_page(service: str):
 
             # Edit check fields and remove already existing ones
             if service_exists:
-                config = DB.get_config(methods=True, with_drafts=True, service=service)
+                config = DB.get_config(methods=True, with_drafts=True, filtered_settings=list(variables.keys()), service=service)
             else:
-                config = DB.get_config(methods=True, with_drafts=True)
+                config = DB.get_config(methods=True, with_drafts=True, filtered_settings=list(variables.keys()))
             was_draft = config.get(f"{service}_IS_DRAFT", {"value": "no"})["value"] == "yes"
 
             old_server_name = variables.pop("OLD_SERVER_NAME", "")
+            ignored_multiples = set()
 
             # Edit check fields and remove already existing ones
             for variable, value in variables.copy().items():
                 if variable != "SERVER_NAME" and value == config.get(f"{service}_{variable}", {"value": None})["value"]:
+                    if match(r"^.+_\d+$", variable):
+                        ignored_multiples.add(variable)
                     del variables[variable]
 
-            variables = BW_CONFIG.check_variables(variables, config, threaded=threaded)
+            variables = BW_CONFIG.check_variables(variables, config, ignored_multiples=ignored_multiples, threaded=threaded)
 
             if was_draft == is_draft and not variables:
                 content = f"The service {service} was not edited because no values were changed."

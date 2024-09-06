@@ -107,7 +107,7 @@ $(document).ready(() => {
     },
   );
 
-  $(".plugin-setting").on("input", function () {
+  $(document).on("input", ".plugin-setting", function () {
     const isValid = $(this).data("pattern")
       ? new RegExp($(this).data("pattern")).test($(this).val())
       : true;
@@ -116,7 +116,7 @@ $(document).ready(() => {
       .toggleClass("is-invalid", !isValid);
   });
 
-  $(".plugin-setting").on("focusout", function () {
+  $(document).on("focusout", ".plugin-setting", function () {
     $(this).removeClass("is-valid");
   });
 
@@ -152,7 +152,16 @@ $(document).ready(() => {
 
   $(".add-multiple").on("click", function () {
     const multipleId = $(this).attr("id").replace("add-", "");
-    const suffix = $(`#${multipleId}`).find(".multiple-container").length;
+    const suffix =
+      parseInt(
+        $(`#${multipleId}`)
+          .find(".multiple-container")
+          .last()
+          .find(".multiple-collapse")
+          .attr("id")
+          .replace(`${multipleId}-`, ""),
+        10,
+      ) + 1;
     const cloneId = `${multipleId}-${suffix}`;
 
     // Clone the first .multiple-container and reset input values

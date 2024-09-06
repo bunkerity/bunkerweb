@@ -107,7 +107,9 @@ class Config:
         """
         return self.__db.get_services_settings(methods=methods, with_drafts=with_drafts)
 
-    def check_variables(self, variables: dict, config: dict, *, global_config: bool = False, threaded: bool = False) -> dict:
+    def check_variables(
+        self, variables: dict, config: dict, *, global_config: bool = False, ignored_multiples: Optional[Set[str]] = None, threaded: bool = False
+    ) -> dict:
         """Testify that the variables passed are valid
 
         Parameters
@@ -178,8 +180,9 @@ class Config:
                     flash(message, "error")
                 variables.pop(k)
 
+        ignored_multiples = ignored_multiples or set()
         for k in config:
-            if k in plugins_settings:
+            if k in plugins_settings or k in ignored_multiples:
                 continue
             setting = k[0 : k.rfind("_")]  # noqa: E203
 
