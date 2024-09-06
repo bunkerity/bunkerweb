@@ -2,6 +2,7 @@ x-env: &env
   DATABASE_URI: "mariadb+pymysql://bunkerweb:secret@bw-db:3306/db"
   DOCKER_HOST: "tcp://bw-docker:2375"
   AUTOCONF_MODE: "yes"
+  LOG_LEVEL: "info"
   CUSTOM_LOG_LEVEL: "debug"
 
 services:
