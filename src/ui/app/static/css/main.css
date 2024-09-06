@@ -290,6 +290,23 @@ td.highlight {
   background-color: var(--bs-bw-green);
 }
 
+.btn-text-bw-green,
+.btn-text-bw-green:hover {
+  color: var(--bs-bw-green) !important;
+}
+
+.btn-text-secondary,
+.btn-text-secondary:hover {
+  color: var(--bs-secondary) !important;
+}
+
+.btn-text-danger,
+.btn-text-danger.disabled,
+.btn-text-danger:hover {
+  color: var(--bs-danger) !important;
+  border: none;
+}
+
 .col.form-floating > .form-control-sm,
 .col-auto.form-floating > .form-select.form-select-sm {
   height: calc(1.9em + 0.9rem + 1px);
@@ -397,4 +414,18 @@ a.badge:hover {
 
 .setting-checkbox-label {
   font-size: calc(var(--bs-body-font-size) * 0.85);
+}
+
+.sticky-card {
+  position: sticky;
+  background-color: rgba(255, 255, 255, 0.88) !important;
+  backdrop-filter: saturate(200%) blur(6px);
+  top: 85px;
+  z-index: 1000;
+}
+
+#floating-modes-menu {
+  bottom: 2.1rem !important;
+  left: 1.5rem !important;
+  z-index: 1080;
 }

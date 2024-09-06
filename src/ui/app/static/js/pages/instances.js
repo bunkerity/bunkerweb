@@ -154,7 +154,7 @@ $(document).ready(function () {
 
       // Create a FormData object
       const formData = new FormData();
-      formData.append("csrf_token", $("#csrf_token").val()); // Add the CSRF token
+      formData.append("csrf_token", $("#csrf_token").val()); // Add the CSRF token // TODO: find a way to ignore CSRF token
       formData.append("instances", instances.join(",")); // Add the instances
 
       // Send the form data using $.ajax
@@ -224,21 +224,21 @@ $(document).ready(function () {
       }
 
       // Create a form element using jQuery and set its attributes
-      const $form = $("<form>", {
+      const form = $("<form>", {
         method: "POST",
         action: `${window.location.pathname}/${action}`,
         class: "visually-hidden",
       });
 
       // Add CSRF token and instances as hidden inputs
-      $form.append(
+      form.append(
         $("<input>", {
           type: "hidden",
           name: "csrf_token",
           value: $("#csrf_token").val(),
         }),
       );
-      $form.append(
+      form.append(
         $("<input>", {
           type: "hidden",
           name: "instances",
@@ -247,7 +247,7 @@ $(document).ready(function () {
       );
 
       // Append the form to the body and submit it
-      $form.appendTo("body").submit();
+      form.appendTo("body").submit();
     },
   };
 

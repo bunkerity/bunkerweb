@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import login_required
 
-from app.dependencies import BW_CONFIG, DATA, DB
+from app.dependencies import BW_CONFIG, DATA, DB  # TODO: remember about DATA.load_from_file()
 from app.utils import LOGGER, PLUGIN_NAME_RX, path_to_dict
 
 from app.routes.utils import handle_error, verify_data_in_form

@@ -15,8 +15,8 @@
                 <div class="toast-header">
                     <i class="d-block w-px-20 h-auto rounded me-2 tf-icons bx bx-bell"></i>
                     <span class="fw-medium me-auto">
-                        {% if category == 'error' %}
-                            Error
+                        {% if category != 'message' %}
+                            {{ category|capitalize }}
                         {% else %}
                             Success
                         {% endif %}

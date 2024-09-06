@@ -72,61 +72,59 @@
                     <i class="bx bx-chevron-right chevron-icon chevron-rotate"></i>
                 </button>
             </li>
-            <div class="collapse show" id="pluginsCollapse">
+            <div class="collapse w-100 show" id="pluginsCollapse">
                 {% for plugin in plugins %}
                     {% with not_pro_pro_plugin = not is_pro_version and plugin['type'] == "pro" %}
                         {% if not_pro_pro_plugin or plugin['page'] %}
-                            <li class="menu-item {% if current_endpoint == plugin['id'] %}active{% endif %}">
-                                <a href="{% if not_pro_pro_plugin %}https://panel.bunkerweb.io/?utm_campaign=self&utm_source=ui#pro{% else %}{{ url_for("plugins") }}/{{ plugin['id'] }}{% endif %}"
-                                   class="menu-link"
-                                   {% if not_pro_pro_plugin %}target="_blank" rel="noopener"{% endif %}>
-                                    <i class="menu-icon tf-icons bx bx-puzzle"></i>
-                                    <div class="text-truncate{% if plugin['type'] == 'pro' %} text-primary shine shine-sm{% endif %}"
-                                         data-i18n="{{ plugin['name'] }}">{{ plugin['name'] }}</div>
-                                    {% if plugin['type'] != "pro" %}
-                                        <div class="badge rounded-pill bg-label-{% if plugin['type'] == 'core' %}secondary{% else %}primary{% endif %} text-uppercase fs-tiny ms-auto">
-                                            {{ plugin['type'].title() }}
-                                        </div>
-                                    {% else %}
-                                        <div class="badge badge-center rounded-pill text-uppercase fs-tiny ms-auto"
-                                             data-bs-toggle="tooltip"
-                                             data-bs-placement="top"
-                                             data-bs-html="true"
-                                             title="<i class='bx bx-diamond bx-xs'></i><span>Pro feature</span>">
-                                            <img src="{{ pro_diamond_url }}"
-                                                 alt="Pro plugin"
-                                                 width="18px"
-                                                 height="15.5px">
-                                        </div>
-                                    {% endif %}
-                                </a>
-                            </li>
-                        {% endif %}
-                    {% endwith %}
-                {% endfor %}
-            </div>
-            <!-- / Plugins Pages -->
-            <!-- Misc -->
-            <li class="menu-header small text-uppercase">
-                <span class="menu-header-text">Misc</span>
-            </li>
-            <li class="menu-item">
-                <a href="https://panel.bunkerweb.io/order/support/?utm_campaign=self&utm_source=ui"
-                   target="_blank"
-                   class="menu-link">
-                    <i class="menu-icon tf-icons bx bx-support"></i>
-                    <div class="text-truncate" data-i18n="Support">Support</div>
-                </a>
-            </li>
-            <li class="menu-item">
-                <a href="https://docs.bunkerweb.io/latest/?utm_campaign=self&utm_source=ui"
-                   target="_blank"
-                   class="menu-link">
-                    <i class="menu-icon tf-icons bx bx-file"></i>
-                    <div class="text-truncate" data-i18n="Documentation">Documentation</div>
-                </a>
-            </li>
-        </ul>
-    {% endwith %}
+                            <li class="menu-item{% if current_endpoint == plugin['id'] %} active{% endif %}"{% if not_pro_pro_plugin %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" title="<i class='bx bx-diamond bx-xs'></i><span>Pro feature</span>"
+                            {% endif %}
+                            >
+                            <a href="{% if not_pro_pro_plugin %}https://panel.bunkerweb.io/?utm_campaign=self&utm_source=ui#pro{% else %}{{ url_for("plugins") }}/{{ plugin['id'] }}{% endif %}"
+                               class="menu-link"
+                               {% if not_pro_pro_plugin %}target="_blank" rel="noopener"{% endif %}>
+                                <i class="menu-icon tf-icons bx bx-puzzle"></i>
+                                <div class="text-truncate{% if plugin['type'] == 'pro' %} text-primary shine shine-sm{% endif %} pe-2"
+                                     data-i18n="{{ plugin['name'] }}">{{ plugin['name'] }}</div>
+                                {% if plugin['type'] != "pro" %}
+                                    <div class="badge rounded-pill bg-label-{% if plugin['type'] == 'core' %}secondary{% else %}primary{% endif %} text-uppercase fs-tiny ms-auto">
+                                        {{ plugin['type'].title() }}
+                                    </div>
+                                {% else %}
+                                    <div class="badge badge-center rounded-pill text-uppercase fs-tiny ms-auto">
+                                        <img src="{{ pro_diamond_url }}"
+                                             alt="Pro plugin"
+                                             width="18px"
+                                             height="15.5px">
+                                    </div>
+                                {% endif %}
+                            </a>
+                        </li>
+                    {% endif %}
+                {% endwith %}
+            {% endfor %}
+        </div>
+        <!-- / Plugins Pages -->
+        <!-- Misc -->
+        <li class="menu-header small text-uppercase">
+            <span class="menu-header-text">Misc</span>
+        </li>
+        <li class="menu-item">
+            <a href="https://panel.bunkerweb.io/order/support/?utm_campaign=self&utm_source=ui"
+               target="_blank"
+               class="menu-link">
+                <i class="menu-icon tf-icons bx bx-support"></i>
+                <div class="text-truncate" data-i18n="Support">Support</div>
+            </a>
+        </li>
+        <li class="menu-item">
+            <a href="https://docs.bunkerweb.io/latest/?utm_campaign=self&utm_source=ui"
+               target="_blank"
+               class="menu-link">
+                <i class="menu-icon tf-icons bx bx-file"></i>
+                <div class="text-truncate" data-i18n="Documentation">Documentation</div>
+            </a>
+        </li>
+    </ul>
+{% endwith %}
 </aside>
 <!-- / Menu -->

@@ -21,7 +21,7 @@ from werkzeug.utils import secure_filename
 
 from common_utils import bytes_hash  # type: ignore
 
-from app.dependencies import BW_CONFIG, BW_INSTANCES_UTILS, DATA, DB
+from app.dependencies import BW_CONFIG, BW_INSTANCES_UTILS, DATA, DB  # TODO: remember about DATA.load_from_file()
 from app.utils import LOGGER, PLUGIN_NAME_RX, TMP_DIR
 
 from app.routes.utils import PLUGIN_ID_RX, PLUGIN_KEYS, error_message, handle_error, verify_data_in_form, wait_applying

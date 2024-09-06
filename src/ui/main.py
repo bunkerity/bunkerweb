@@ -29,7 +29,6 @@ from app.routes.global_config import global_config
 from app.routes.home import home
 from app.routes.instances import instances
 from app.routes.jobs import jobs
-from app.routes.modes import modes
 from app.routes.login import login
 from app.routes.logout import logout, logout_page
 from app.routes.logs import logs
@@ -406,8 +405,8 @@ def check_reloading():
             DATA["RELOADING"] = False
 
         for f in DATA.get("TO_FLASH", []):
-            if f["type"] == "error":
-                flash(f["content"], "error")
+            if f["type"] != "success":
+                flash(f["content"], f["type"])
             else:
                 flash(f["content"])
 
@@ -419,6 +418,6 @@ def check_reloading():
     return jsonify({"reloading": DATA.get("RELOADING", False)})
 
 
-BLUEPRINTS = (bans, cache, configs, global_config, home, instances, jobs, modes, login, logout, logs, plugins, profile, reports, services, setup, totp)
+BLUEPRINTS = (bans, cache, configs, global_config, home, instances, jobs, login, logout, logs, plugins, profile, reports, services, setup, totp)
 for blueprint in BLUEPRINTS:
     app.register_blueprint(blueprint)

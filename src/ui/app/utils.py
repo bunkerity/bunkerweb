@@ -43,15 +43,36 @@ def handle_stop(signum, frame):
     stop(0, False)
 
 
-def get_multiples(settings: dict) -> Dict[str, dict]:
-    multiples = {}
+def get_multiples(settings: dict, config: dict) -> Dict[str, Dict[str, Dict[str, dict]]]:
+    plugin_multiples = {}
     for setting, data in settings.items():
         multiple = data.get("multiple")
         if multiple:
-            if multiple not in multiples:
-                multiples[multiple] = {}
-            multiples[multiple].update({setting: data | {"setting_no_suffix": setting.rsplit("_", 1)[0] if match(r".+_\d+$", setting) else setting}})
-    return multiples
+            data = data | {"setting_no_suffix": setting}
+
+            if multiple not in plugin_multiples:
+                plugin_multiples[multiple] = {}
+            if "0" not in plugin_multiples[multiple]:
+                plugin_multiples[multiple]["0"] = {}
+
+            plugin_multiples[multiple]["0"].update({setting: data})
+
+            for config_setting in config:
+                setting_match = match(setting + r"_(?P<suffix>\d+)$", config_setting)
+                if setting_match:
+                    suffix = setting_match.group("suffix")
+                    if suffix == "0":
+                        continue
+
+                    if suffix not in plugin_multiples[multiple]:
+                        plugin_multiples[multiple][suffix] = {}
+                    plugin_multiples[multiple][suffix].update({config_setting: data})
+
+    # Sort the multiples and their settings
+    for multiple, multiples in plugin_multiples.items():
+        plugin_multiples[multiple] = dict(sorted(multiples.items()))
+
+    return plugin_multiples
 
 
 def get_filtered_settings(settings: dict, global_config: bool = False) -> Dict[str, dict]:

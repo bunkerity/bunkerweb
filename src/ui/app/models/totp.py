@@ -95,10 +95,12 @@ class Totp:
 
     def get_last_counter(self, user: Users) -> Optional[int]:
         """Fetch stored last_counter from cache."""
+        DATA.load_from_file()
         return DATA.get("totp_last_counter", {}).get(user.get_id())
 
     def set_last_counter(self, user: Users, tmatch: TotpMatch) -> None:
         """Cache last_counter."""
+        DATA.load_from_file()
         if "totp_last_counter" not in DATA:
             DATA["totp_last_counter"] = {}
         DATA["totp_last_counter"][user.get_id()] = tmatch.counter

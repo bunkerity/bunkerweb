@@ -9,11 +9,14 @@ from pathlib import Path
 from re import error as RegexError, search as re_search
 from typing import List, Literal, Optional, Set, Tuple, Union
 
+from app.utils import get_blacklisted_settings
+
 
 class Config:
-    def __init__(self, db) -> None:
+    def __init__(self, db, data) -> None:
         self.__settings = json_loads(Path(sep, "usr", "share", "bunkerweb", "settings.json").read_text(encoding="utf-8"))
         self.__db = db
+        self.__data = data
 
     def __gen_conf(
         self, global_conf: dict, services_conf: list[dict], *, check_changes: bool = True, changed_service: Optional[str] = None
@@ -104,7 +107,7 @@ class Config:
         """
         return self.__db.get_services_settings(methods=methods, with_drafts=with_drafts)
 
-    def check_variables(self, variables: dict, config: dict) -> dict:
+    def check_variables(self, variables: dict, config: dict, *, global_config: bool = False, threaded: bool = False) -> dict:
         """Testify that the variables passed are valid
 
         Parameters
@@ -117,32 +120,41 @@ class Config:
         int
             Return the error code
         """
+        self.__data.load_from_file()
         plugins_settings = self.get_plugins_settings()
         for k, v in variables.copy().items():
             check = False
-
-            if k.endswith("SCHEMA"):
-                variables.pop(k)
-                continue
 
             if k in plugins_settings:
                 setting = k
             else:
                 setting = k[0 : k.rfind("_")]  # noqa: E203
                 if setting not in plugins_settings or "multiple" not in plugins_settings[setting]:
-                    flash(f"Variable {k} is not valid.", "error")
+                    content = f"Variable {k} is not valid."
+                    if threaded:
+                        self.__data["TO_FLASH"].append({"content": content, "type": "error"})
+                    else:
+                        flash(content, "error")
                     variables.pop(k)
                     continue
 
-            if setting in ("AUTOCONF_MODE", "SWARM_MODE", "KUBERNETES_MODE", "IS_LOADING", "IS_DRAFT"):
-                flash(f"Variable {k} is not editable, ignoring it", "error")
+            if setting in get_blacklisted_settings(global_config):
+                message = f"Variable {k} is not editable, ignoring it"
+                if threaded:
+                    self.__data["TO_FLASH"].append({"content": message, "type": "error"})
+                else:
+                    flash(message, "error")
                 variables.pop(k)
                 continue
             elif setting not in config and plugins_settings[setting]["default"] == v:
                 variables.pop(k)
                 continue
             elif config[setting]["method"] not in ("default", "ui"):
-                flash(f"Variable {k} is not editable as is it managed by the {config[setting]['method']}, ignoring it", "error")
+                message = f"Variable {k} is not editable as is it managed by the {config[setting]['method']}, ignoring it"
+                if threaded:
+                    self.__data["TO_FLASH"].append({"content": message, "type": "error"})
+                else:
+                    flash(message, "error")
                 variables.pop(k)
                 continue
 
@@ -150,13 +162,32 @@ class Config:
                 if re_search(plugins_settings[setting]["regex"], v):
                     check = True
             except RegexError as e:
-                flash(f"Invalid regex for setting {setting} : {plugins_settings[setting]['regex']}, ignoring regex check:{e}", "error")
+                message = f"Invalid regex for setting {setting} : {plugins_settings[setting]['regex']}, ignoring regex check:{e}"
+                if threaded:
+                    self.__data["TO_FLASH"].append({"content": message, "type": "error"})
+                else:
+                    flash(message, "error")
                 variables.pop(k)
                 continue
 
             if not check:
-                flash(f"Variable {k} is not valid.", "error")
+                message = f"Variable {k} is not valid."
+                if threaded:
+                    self.__data["TO_FLASH"].append({"content": message, "type": "error"})
+                else:
+                    flash(message, "error")
                 variables.pop(k)
+
+        for k in config:
+            if k in plugins_settings:
+                continue
+            setting = k[0 : k.rfind("_")]  # noqa: E203
+
+            if setting not in plugins_settings or "multiple" not in plugins_settings[setting]:
+                continue
+
+            if k not in variables:
+                variables[k] = plugins_settings[setting]["default"]
 
         return variables
 

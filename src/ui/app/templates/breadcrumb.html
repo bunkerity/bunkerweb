@@ -1,12 +1,8 @@
 <nav class="d-flex align-items-center" aria-label="breadcrumb">
     <ol class="breadcrumb mb-0">
         <!-- prettier-ignore -->
-        {% set breadcrumbs_url = url_for(request.endpoint) %}
-        {% if current_endpoint != "services" and "services" in request.path %}
-            {% set breadcrumbs_url = url_for("services") + "/" + current_endpoint %}
-        {% endif %}
-        {% with breadcrumbs = breadcrumbs_url.split("/") %}
-            {% for breadcrumb in breadcrumbs[1:] %}
+        {% with breadcrumbs = request.path.split("/") %}
+            {% for breadcrumb in breadcrumbs %}
                 {% set breadcrumb_url = url_for(breadcrumb.replace('_', '-')) %}
                 {% if breadcrumb == current_endpoint %}
                     {% set breadcrumb_url = breadcrumbs_url %}

@@ -1,14 +1,17 @@
 <div class="form-floating mt-1">
-    <select id="{{ setting_id_prefix }}setting-{{ plugin['id'] }}-{{ setting_data['id'] }}"
+    <select id="{{ setting_id_prefix }}setting-{{ plugin['id'] }}-{{ setting_data['id'] }}{{ setting_id_suffix }}"
             name="{{ setting }}"
             class="form-select"
-            aria-labelledby="label-{{ plugin['id'] }}-{{ setting_data['id'] }}"
-            data-default="{{ setting_data['default'] }}"
+            aria-labelledby="label-{{ plugin['id'] }}-{{ setting_data['id'] }}{{ setting_id_suffix }}"
+            data-original="{{ setting_value }}"
+            data-default="{{ setting_default }}"
             {% if disabled %}disabled{% endif %}>
         {% for option in setting_data["select"] %}
             <option value="{{ option }}"
                     {% if setting_value == option %}selected{% endif %}>{{ option }}</option>
         {% endfor %}
     </select>
-    <label for="{{ setting_id_prefix }}setting-{{ plugin['id'] }}-{{ setting_data['id'] }}">{{ setting }}</label>
+    <label for="{{ setting_id_prefix }}setting-{{ plugin['id'] }}-{{ setting_data['id'] }}{{ setting_id_suffix }}">
+        {{ setting }}
+    </label>
 </div>

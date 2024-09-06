@@ -3,8 +3,7 @@ from copy import deepcopy
 from datetime import datetime
 from functools import wraps
 from io import BytesIO
-from threading import Thread
-from time import sleep, time
+from time import sleep
 from typing import Any, Dict, Optional, Tuple, Union
 
 from flask import Response, flash, redirect, request, session, url_for
@@ -49,6 +48,7 @@ def wait_applying():
 def manage_bunkerweb(method: str, *args, operation: str = "reloads", is_draft: bool = False, was_draft: bool = False, threaded: bool = False) -> int:
     # Do the operation
     error = 0
+    DATA.load_from_file()
 
     if "TO_FLASH" not in DATA:
         DATA["TO_FLASH"] = []
@@ -309,66 +309,6 @@ def get_service_data(page_name: str):
 
     variables = BW_CONFIG.check_variables(variables, config)
     return config, variables, format_configs, server_name, old_server_name, operation, is_draft, was_draft, is_draft_unchanged, mode
-
-
-def update_service(config, variables, format_configs, server_name, old_server_name, operation, is_draft, was_draft, is_draft_unchanged):
-    if request.form["operation"] == "edit":
-        if is_draft_unchanged and len(variables) == 1 and "SERVER_NAME" in variables and server_name == old_server_name:
-            return handle_error("The service was not edited because no values were changed.", "services", True)
-
-    if request.form["operation"] == "new" and not variables:
-        return handle_error("The service was not created because all values had the default value.", "services", True)
-
-    # Delete
-    if request.form["operation"] == "delete":
-
-        is_service = BW_CONFIG.check_variables({"SERVER_NAME": request.form["SERVER_NAME"]}, config)
-
-        if not is_service:
-            error_message(f"Error while deleting the service {request.form['SERVER_NAME']}")
-
-        if config.get(f"{request.form['SERVER_NAME'].split(' ')[0]}_SERVER_NAME", {"method": "scheduler"})["method"] != "ui":
-            return handle_error("The service cannot be deleted because it has not been created with the UI.", "services", True)
-
-    db_metadata = DB.get_metadata()
-
-    def update_services(threaded: bool = False):
-        wait_applying()
-
-        manage_bunkerweb(
-            "services",
-            variables,
-            old_server_name,
-            variables.get("SERVER_NAME", ""),
-            operation=operation,
-            is_draft=is_draft,
-            was_draft=was_draft,
-            threaded=threaded,
-        )
-
-        if any(
-            v
-            for k, v in db_metadata.items()
-            if k in ("custom_configs_changed", "external_plugins_changed", "pro_plugins_changed", "plugins_config_changed", "instances_changed")
-        ):
-            DATA["RELOADING"] = True
-            DATA["LAST_RELOAD"] = time()
-            Thread(target=update_services, args=(True,)).start()
-        else:
-            update_services()
-
-        DATA["CONFIG_CHANGED"] = True
-
-    message = ""
-
-    if request.form["operation"] == "new":
-        message = f"Creating {'draft ' if is_draft else ''}service {variables.get('SERVER_NAME', '').split(' ')[0]}"
-    elif request.form["operation"] == "edit":
-        message = f"Saving configuration for {'draft ' if is_draft else ''}service {old_server_name.split(' ')[0]}"
-    elif request.form["operation"] == "delete":
-        message = f"Deleting {'draft ' if was_draft and is_draft else ''}service {request.form.get('SERVER_NAME', '').split(' ')[0]}"
-
-    return message
 
 
 def cors_required(f):

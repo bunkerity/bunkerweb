@@ -75,6 +75,7 @@ def instances_action(action: Literal["ping", "reload", "stop", "delete"]):  # TO
     instances = request.form["instances"].split(",")
     if not instances:
         return handle_error("No instances selected.", "instances", True)
+    DATA.load_from_file()
 
     if action == "ping":
         succeed = []

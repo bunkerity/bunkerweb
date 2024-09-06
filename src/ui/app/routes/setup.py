@@ -6,7 +6,7 @@ from time import time
 
 from flask import Blueprint, Response, flash, redirect, render_template, request, url_for
 
-from app.dependencies import BW_CONFIG, DATA, DB
+from app.dependencies import BW_CONFIG, DATA, DB  # TODO: remember about DATA.load_from_file()
 from app.utils import USER_PASSWORD_RX, gen_password_hash
 
 from app.routes.utils import REVERSE_PROXY_PATH, handle_error, manage_bunkerweb
