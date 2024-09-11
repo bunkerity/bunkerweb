@@ -430,7 +430,7 @@ a.badge:hover {
   z-index: 1080;
 }
 
-.multiple-highlight {
+.setting-highlight {
   background-color: rgba(var(--bs-bw-green-rgb), 0.5);
   transition:
     background-color 2s ease,
@@ -438,7 +438,7 @@ a.badge:hover {
   opacity: 1;
 }
 
-.multiple-highlight-fade {
+.setting-highlight-fade {
   background-color: transparent;
   opacity: 1; /* You can set this to 0 if you want it to fade out */
 }

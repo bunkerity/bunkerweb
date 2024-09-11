@@ -96,8 +96,6 @@ def services_service_page(service: str):
         arguments = {}
         if mode != "easy":
             arguments["mode"] = mode
-        if request.args.get("keywords"):
-            arguments["keywords"] = request.args["keywords"]
         if request.args.get("type", "all") != "all":
             arguments["type"] = request.args["type"]
 
@@ -119,14 +117,12 @@ def services_service_page(service: str):
         return render_template("service_settings.html", config=db_config)
 
     mode = request.args.get("mode", "easy")
-    keywords = request.args.get("keywords", "")
     search_type = request.args.get("type", "all")
     db_config = DB.get_config(methods=True, with_drafts=True, service=service)
     return render_template(
         "service_settings.html",
         config=db_config,
         mode=mode,
-        keywords=keywords,
         type=search_type,
     )
 

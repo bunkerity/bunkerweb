@@ -2,10 +2,10 @@ $(document).ready(() => {
   let currentPlugin = "general";
   let currentMode = "easy";
   let currentType = "all";
-  let currentKeywords = "";
 
   const $pluginSearch = $("#plugin-search");
   const $pluginTypeSelect = $("#plugin-type-select");
+  const $pluginKeywordSearch = $("#plugin-keyword-search");
   const $pluginDropdownMenu = $("#plugins-dropdown-menu");
   const pluginDropdownItems = $("#plugins-dropdown-menu li.nav-item");
 
@@ -65,6 +65,45 @@ $(document).ready(() => {
 
       // Also update the URL parameters (if any exist) while preserving the hash
       updateUrlParams(params);
+    }
+  };
+
+  const highlightSettings = (matchedSettings, fadeTimeout = 600) => {
+    matchedSettings.each(function () {
+      const $setting = $(this);
+      $setting.removeClass("setting-highlight setting-highlight-fade");
+
+      // Check if the setting is inside a collapsed multiple setting group
+      const $collapseContainer = $setting.closest(".multiple-collapse");
+
+      if ($collapseContainer.length && !$collapseContainer.hasClass("show")) {
+        // Expand the multiple setting group if it's collapsed
+        const toggleButton = $(
+          `[data-bs-target="#${$collapseContainer.attr("id")}"]`,
+        );
+        toggleButton.trigger("click");
+      }
+
+      // Apply the highlight class
+      $setting.addClass("setting-highlight");
+
+      // Remove the highlight after a delay
+      setTimeout(() => {
+        $setting.addClass("setting-highlight-fade");
+      }, fadeTimeout); // Keep highlight for 600 milliseconds
+
+      // Fully remove the highlight after the transition
+      setTimeout(() => {
+        $setting.removeClass("setting-highlight setting-highlight-fade");
+      }, fadeTimeout * 2); // Adjust to match the fade transition time
+    });
+
+    // Scroll to the first matched setting smoothly
+    if (matchedSettings.length > 0) {
+      matchedSettings[0].scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
     }
   };
 
@@ -144,7 +183,7 @@ $(document).ready(() => {
     $(this).removeClass("is-valid");
   });
 
-  $("#plugin-type-select").on("change", function () {
+  $pluginTypeSelect.on("change", function () {
     currentType = $(this).val();
     const params =
       currentType === "all" ? { type: null } : { type: currentType };
@@ -165,6 +204,69 @@ $(document).ready(() => {
         .tab("show");
     }
   });
+
+  const findMatchingSettings = (keyword) => {
+    let matchedPlugin = null;
+    let matchedSettings = $();
+
+    $("div[id^='navs-plugins-']").each(function () {
+      const $plugin = $(this);
+      const pluginId = $plugin.attr("id").replace("navs-plugins-", "");
+      const pluginType = $plugin.data("type"); // Get the type of the plugin (core, external, pro)
+
+      // If the currentType filter is not "all" and the plugin's type doesn't match the currentType, skip this plugin
+      if (currentType !== "all" && pluginType !== currentType) {
+        return; // Skip this plugin
+      }
+
+      // Find settings that match the keyword based on label text or input/select name
+      const matchingSettings = $plugin.find(".form-label").filter(function () {
+        const $label = $(this);
+        const settingName = $label.attr("for") || "";
+        const labelText = $label.text().toLowerCase();
+
+        // Find the associated input/select element using the "for" attribute
+        const $inputElement = $("#" + settingName);
+        const inputName = $inputElement.attr("name") || "";
+
+        // Match either the label text or the input/select name
+        return (
+          labelText.includes(keyword) ||
+          inputName.toLowerCase().includes(keyword)
+        );
+      });
+
+      if (matchingSettings.length > 0) {
+        matchedPlugin = pluginId;
+        matchedSettings = matchingSettings.closest(".col-12");
+        return false; // Stop searching after finding a plugin with matching settings
+      }
+    });
+
+    return { matchedPlugin, matchedSettings };
+  };
+
+  $pluginKeywordSearch.on(
+    "input",
+    debounce((e) => {
+      const keyword = e.target.value.toLowerCase().trim();
+      if (!keyword) return;
+
+      const { matchedPlugin, matchedSettings } = findMatchingSettings(keyword);
+
+      if (matchedPlugin) {
+        // Automatically switch to the plugin tab
+        $(`button[data-bs-target="#navs-plugins-${matchedPlugin}"]`).tab(
+          "show",
+        );
+
+        // Highlight all matched settings
+        if (matchedSettings.length > 0) {
+          highlightSettings(matchedSettings, 1000);
+        }
+      }
+    }, 100),
+  );
 
   $(document).on("click", ".show-multiple", function () {
     const toggleText = $(this).text().trim() === "SHOW" ? "HIDE" : "SHOW";
@@ -321,23 +423,7 @@ $(document).ready(() => {
 
     if (showMultiple.text().trim() === "SHOW") showMultiple.trigger("click");
 
-    // Scroll to the newly added element smoothly
-    multipleClone
-      .focus()[0]
-      .scrollIntoView({ behavior: "smooth", block: "start" });
-
-    // Add the highlight class to the newly added clone with initial opacity
-    multipleClone.addClass("multiple-highlight");
-
-    // Use setTimeout to gradually fade out the highlight effect after the element is added
-    setTimeout(() => {
-      multipleClone.addClass("multiple-highlight-fade");
-    }, 500); // Delay slightly increased to ensure the class is applied
-
-    // Remove both classes after the transition completes
-    setTimeout(() => {
-      multipleClone.removeClass("multiple-highlight multiple-highlight-fade");
-    }, 5000); // Adjusted to 5 seconds for a slower effect
+    highlightSettings(multipleClone);
   });
 
   $(document).on("click", ".remove-multiple", function () {
@@ -500,7 +586,7 @@ $(document).ready(() => {
   });
 
   if (!hasExternalPlugins && !hasProPlugins) {
-    $("#plugin-type-select").parent().remove();
+    $pluginTypeSelect.parent().remove();
   } else if (!hasExternalPlugins) {
     $("#plugin-type-select option[value='external']").remove();
   } else if (!hasProPlugins) {
@@ -515,5 +601,5 @@ $(document).ready(() => {
     if (targetTab.length) targetTab.tab("show");
   }
 
-  $("#plugin-type-select").trigger("change");
+  $pluginTypeSelect.trigger("change");
 });
