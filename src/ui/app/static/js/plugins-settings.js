@@ -3,102 +3,126 @@ $(document).ready(() => {
   let currentMode = "easy";
   let currentType = "all";
   let currentKeywords = "";
+
+  const $pluginSearch = $("#plugin-search");
+  const $pluginTypeSelect = $("#plugin-type-select");
+  const $pluginDropdownMenu = $("#plugins-dropdown-menu");
   const pluginDropdownItems = $("#plugins-dropdown-menu li.nav-item");
 
   const updateUrlParams = (params, removeHash = false) => {
-    // Create a new URL based on the current location (this keeps both the search params and the hash)
     const newUrl = new URL(window.location.href);
-
-    // Merge existing search parameters with new parameters
     const searchParams = new URLSearchParams(newUrl.search);
 
-    // Add or update the parameters with the new values passed in the `params` object
-    Object.keys(params).forEach((key) => {
-      searchParams.set(key, params[key]);
+    Object.entries(params).forEach(([key, value]) => {
+      if (value === null || value === undefined) {
+        searchParams.delete(key);
+      } else {
+        searchParams.set(key, value);
+      }
     });
 
-    // Update the search params of the URL
     newUrl.search = searchParams.toString();
-
-    // Optionally remove the hash from the URL
     if (removeHash) {
       newUrl.hash = "";
     }
 
-    // Push the updated URL (this keeps or removes the hash and updates the search params)
     history.pushState(params, document.title, newUrl.toString());
   };
 
-  $("#select-plugin").on("click", () => $("#plugin-search").focus());
+  const handleModeChange = (targetClass) => {
+    currentMode = targetClass.substring(1).replace("navs-modes-", "");
 
-  // Debounce for search input to avoid triggering the search on every keystroke
-  let debounceTimer;
-  $("#plugin-search").on("input", (e) => {
-    clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(() => {
+    // Prepare params for the URL update
+    const params = {};
+    if (currentType !== "all") params.type = currentType;
+
+    // If "easy" is selected, remove the "mode" parameter
+    if (currentMode === "easy") {
+      params.mode = null; // Set mode to null to remove it from the URL
+      updateUrlParams(params); // Call the function without the hash (keep it intact)
+    } else {
+      // If another mode is selected, update the "mode" parameter
+      params.mode = currentMode;
+      updateUrlParams(params); // Keep the mode in the URL
+    }
+  };
+
+  const handleTabChange = (targetClass) => {
+    currentPlugin = targetClass.substring(1).replace("navs-plugins-", "");
+
+    // Prepare the params for URL (parameters to be updated in the URL)
+    const params = {};
+    if (currentType !== "all") params.type = currentType;
+    if (currentMode !== "easy") params.mode = currentMode;
+
+    // If "general" is selected and a hash exists, remove the hash but keep the parameters
+    if (currentPlugin === "general" && window.location.hash) {
+      // Call updateUrlParams with `removeHash = true` to remove the hash fragment
+      updateUrlParams(params, true);
+    } else {
+      // Update the URL hash to the current plugin (e.g., #plugin-name)
+      window.location.hash = currentPlugin;
+
+      // Also update the URL parameters (if any exist) while preserving the hash
+      updateUrlParams(params);
+    }
+  };
+
+  const debounce = (func, delay) => {
+    let debounceTimer;
+    return (...args) => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => func.apply(this, args), delay);
+    };
+  };
+
+  $("#select-plugin").on("click", () => $pluginSearch.focus());
+
+  $("#plugin-search").on(
+    "input",
+    debounce((e) => {
       const inputValue = e.target.value.toLowerCase();
+      let visibleItems = 0;
 
       pluginDropdownItems.each(function () {
         const item = $(this);
-        if (currentType !== "all" && item.data("type") !== currentType) return;
+        const matches =
+          (currentType === "all" || item.data("type") === currentType) &&
+          (item.text().toLowerCase().includes(inputValue) ||
+            item.find("button").data("bs-target").includes(inputValue));
 
-        const text = item.text().toLowerCase();
-        const pluginId = item
-          .find("button")
-          .data("bs-target")
-          .replace("#navs-plugins-", "");
+        item.toggle(matches);
 
-        text.includes(inputValue) || pluginId.includes(inputValue)
-          ? item.show()
-          : item.hide();
+        if (matches) {
+          visibleItems++; // Increment when an item is shown
+        }
       });
 
-      // Show "No Item" message if no items match
-      const noVisibleItems =
-        pluginDropdownItems.filter(":visible").length === 0;
-      if (noVisibleItems && $(".no-items").length === 0) {
-        $("#plugins-dropdown-menu").append(
-          '<li class="no-items dropdown-item text-muted">No Item</li>',
-        );
+      if (visibleItems === 0) {
+        if ($pluginDropdownMenu.find(".no-items").length === 0) {
+          $pluginDropdownMenu.append(
+            '<li class="no-items dropdown-item text-muted">No Item</li>',
+          );
+        }
       } else {
-        $(".no-items").remove();
+        $pluginDropdownMenu.find(".no-items").remove();
       }
-    }, 300); // 300ms delay for debounce
-  });
+    }, 50),
+  );
 
+  // Clear search and "No Item" message when the dropdown is closed
   $("#select-plugin").on("hidden.bs.dropdown", () => {
     $("#plugin-search").val("").trigger("input");
     $(".no-items").remove();
   });
 
-  const handleModeChange = (targetClass) => {
-    currentMode = targetClass.substring(1).replace("navs-modes-", "");
-    if (currentMode === "easy") {
-      updateUrlParams(currentType !== "all" ? { type: currentType } : {});
-    } else {
-      updateUrlParams({ mode: currentMode });
-    }
-  };
-
+  // Attach event listener to handle mode changes when tabs are switched
   $('#service-modes-menu button[data-bs-toggle="tab"]').on(
     "shown.bs.tab",
     (e) => {
       handleModeChange($(e.target).data("bs-target"));
     },
   );
-
-  const handleTabChange = (targetClass) => {
-    currentPlugin = targetClass.substring(1).replace("navs-plugins-", "");
-    if (currentPlugin === "general" && window.location.hash) {
-      const params = {};
-      if (currentType !== "all") params.type = currentType;
-      if (currentMode !== "easy") params.mode = currentMode;
-      // Call updateUrlParams with `removeHash = true` to remove the hash
-      updateUrlParams(params, true);
-    } else {
-      window.location.hash = currentPlugin;
-    }
-  };
 
   $('#plugins-dropdown-menu button[data-bs-toggle="tab"]').on(
     "shown.bs.tab",
@@ -122,14 +146,15 @@ $(document).ready(() => {
 
   $("#plugin-type-select").on("change", function () {
     currentType = $(this).val();
-    const params = currentType === "all" ? {} : { type: currentType };
+    const params =
+      currentType === "all" ? { type: null } : { type: currentType };
 
     updateUrlParams(params);
 
     pluginDropdownItems.each(function () {
-      $(this).toggle(
-        currentType === "all" || $(this).data("type") === currentType,
-      );
+      const typeMatches =
+        currentType === "all" || $(this).data("type") === currentType;
+      $(this).toggle(typeMatches);
     });
 
     const currentPane = $('div[id^="navs-plugins-"].active').first();
@@ -152,16 +177,32 @@ $(document).ready(() => {
 
   $(".add-multiple").on("click", function () {
     const multipleId = $(this).attr("id").replace("add-", "");
-    const suffix =
-      parseInt(
-        $(`#${multipleId}`)
-          .find(".multiple-container")
-          .last()
-          .find(".multiple-collapse")
-          .attr("id")
-          .replace(`${multipleId}-`, ""),
-        10,
-      ) + 1;
+
+    // Get all existing suffixes
+    const existingContainers = $(`#${multipleId}`).find(".multiple-container");
+    const existingSuffixes = existingContainers
+      .map(function () {
+        return parseInt(
+          $(this)
+            .find(".multiple-collapse")
+            .attr("id")
+            .replace(`${multipleId}-`, ""),
+          10,
+        );
+      })
+      .get()
+      .sort((a, b) => a - b); // Sort the suffixes in ascending order
+
+    // Find the first missing suffix
+    let suffix = 0;
+    for (let i = 0; i < existingSuffixes.length; i++) {
+      if (existingSuffixes[i] !== i) {
+        suffix = i;
+        break;
+      }
+      suffix = existingSuffixes.length; // If no gaps, use the next number
+    }
+
     const cloneId = `${multipleId}-${suffix}`;
 
     // Clone the first .multiple-container and reset input values
@@ -170,82 +211,133 @@ $(document).ready(() => {
       .first()
       .clone();
 
-    // Update the IDs and names of the cloned inputs/selects
-    multipleClone.find("input, select").each(function () {
-      const type = $(this).attr("type");
-      const defaultVal = $(this).data("default");
+    // Helper function to reset inputs/selects
+    const resetInputField = (element, suffix) => {
+      const elementType = element.attr("type");
+      const defaultVal = element.data("default") || "";
 
-      // Enable the inputs/selects and update values
-      $(this).attr("disabled", false);
-      const newId = $(this).attr("id").replace("-0", `-${suffix}`);
-      const newName = `${$(this).attr("name")}_${suffix}`;
-      $(this).attr("id", newId).attr("name", newName);
+      // Safeguard checks for missing attributes
+      const originalId = element.attr("id") || "";
+      const originalLabelledBy = element.attr("aria-labelledby") || "";
 
-      // Update the label for the input/select
-      const settingLabel = $(this).next("label");
-      settingLabel.attr("for", newId).text(`${settingLabel.text()}_${suffix}`);
+      // Update IDs and attributes
+      const newId = originalId.replace("-0", `-${suffix}`);
+      const newLabelledBy = originalLabelledBy.replace("-0", `-${suffix}`);
+      const newName = `${element.attr("name") || ""}_${suffix}`;
 
-      // Update value to an empty string or default value
-      if ($(this).is("select")) {
-        $(this).val(defaultVal);
-        $(this)
-          .find("option")
-          .each(function () {
-            $(this).prop("selected", false);
-          });
-      } else if (type === "checkbox") {
-        $(this).prop("checked", false);
+      element
+        .attr("id", newId)
+        .attr("aria-labelledby", newLabelledBy)
+        .attr("name", newName)
+        .attr("data-original", defaultVal)
+        .prop("disabled", false);
+
+      // Cache label and description elements to avoid multiple traversals
+      const settingLabel = element.next("label");
+      const labelText = (settingLabel.text() || "").trim();
+      const descriptionLabel = settingLabel
+        .closest(".col-12")
+        .find("label")
+        .first();
+
+      // Update label attributes safely
+      const originalLabelId = descriptionLabel.attr("id") || "";
+      const newLabelId = originalLabelId.replace("-0", `-${suffix}`);
+      const originalLabelFor = descriptionLabel.attr("for") || "";
+      const newLabelFor = originalLabelFor.replace("-0", `-${suffix}`);
+
+      descriptionLabel.attr("id", newLabelId).attr("for", newLabelFor);
+      settingLabel.attr("for", newId).text(`${labelText}_${suffix}`);
+
+      // Reset the value
+      if (element.is("select")) {
+        element.val(defaultVal);
+        element.find("option").each(function () {
+          $(this).prop("selected", $(this).val() === defaultVal);
+        });
+      } else if (elementType === "checkbox") {
+        element.prop("checked", defaultVal === "yes");
       } else {
-        $(this).val("");
+        element.val(defaultVal);
       }
+    };
+
+    // Reset input/select fields inside the clone
+    multipleClone.find("input, select").each(function () {
+      resetInputField($(this), suffix);
     });
 
     // Update the collapse section's ID and remove tooltips
+    multipleClone.find(".multiple-collapse").attr("id", `${cloneId}`);
     multipleClone
-      .find(".multiple-collapse")
-      .attr("id", `${cloneId}`)
       .find('[data-bs-toggle="tooltip"]:not(.badge)')
-      .each(function () {
-        $(this)
-          .removeAttr("data-bs-toggle")
-          .removeAttr("data-bs-placement")
-          .removeAttr("data-bs-original-title");
-      });
+      .removeAttr("data-bs-toggle data-bs-placement data-bs-original-title");
 
-    // Add the #suffix to h6
+    // Update the title with the new suffix
     const multipleTitle = multipleClone.find("h6");
-    multipleTitle.text(`${multipleTitle.text()} #${suffix}`);
+    const titleText = multipleTitle.text().replace(/#\d+$/, ""); // Remove existing suffix if present
+    multipleTitle.text(`${titleText} #${suffix}`);
 
-    // Append the "REMOVE" button
+    // Remove "add-multiple" button and append the "REMOVE" button
     multipleClone.find(".add-multiple").remove();
-    multipleClone.find(".show-multiple").before(
-      `<div>
-  <button id="remove-${cloneId}"
-          type="button"
-          class="btn btn-xs btn-text-danger rounded-pill remove-multiple p-0 pe-2">
-      <i class="bx bx-trash bx-sm"></i>&nbsp;REMOVE
-  </button>
-</div>`,
-    );
+    multipleClone.find(".show-multiple").before(`
+      <div>
+        <button id="remove-${cloneId}" type="button" class="btn btn-xs btn-text-danger rounded-pill remove-multiple p-0 pe-2">
+          <i class="bx bx-trash bx-sm"></i>&nbsp;REMOVE
+        </button>
+      </div>
+    `);
 
-    // Append the cloned element to the container
-    $(`#${multipleId}`).append(multipleClone);
+    // Insert the new element in the correct order based on suffix
+    let inserted = false;
+    existingContainers.each(function () {
+      const containerSuffix = parseInt(
+        $(this)
+          .find(".multiple-collapse")
+          .attr("id")
+          .replace(`${multipleId}-`, ""),
+        10,
+      );
+      if (containerSuffix > suffix) {
+        $(this).before(multipleClone); // Insert before the first container with a higher suffix
+        inserted = true;
+        return false; // Break the loop
+      }
+    });
+
+    if (!inserted) {
+      // If no higher suffix was found, append to the end
+      $(`#${multipleId}`).append(multipleClone);
+    }
 
     // Reinitialize Bootstrap tooltips for the newly added clone
     multipleClone.find('[data-bs-toggle="tooltip"]').tooltip();
 
-    // Update the data-bs-target and aria-controls attributes of the show-multiple button
+    // Update show-multiple button's target and aria-controls attributes
     const showMultiple = multipleClone.find(".show-multiple");
     showMultiple
       .attr("data-bs-target", `#${cloneId}`)
       .attr("aria-controls", cloneId);
+
     if (showMultiple.text().trim() === "SHOW") showMultiple.trigger("click");
 
-    // Scroll to the newly added element
-    multipleClone.focus()[0].scrollIntoView({
-      behavior: "smooth",
-      block: "start",
-    });
+    // Scroll to the newly added element smoothly
+    multipleClone
+      .focus()[0]
+      .scrollIntoView({ behavior: "smooth", block: "start" });
+
+    // Add the highlight class to the newly added clone with initial opacity
+    multipleClone.addClass("multiple-highlight");
+
+    // Use setTimeout to gradually fade out the highlight effect after the element is added
+    setTimeout(() => {
+      multipleClone.addClass("multiple-highlight-fade");
+    }, 500); // Delay slightly increased to ensure the class is applied
+
+    // Remove both classes after the transition completes
+    setTimeout(() => {
+      multipleClone.removeClass("multiple-highlight multiple-highlight-fade");
+    }, 5000); // Adjusted to 5 seconds for a slower effect
   });
 
   $(document).on("click", ".remove-multiple", function () {
@@ -284,52 +376,6 @@ $(document).ready(() => {
       setTimeout(() => {
         $(this).remove(); // Remove the element after collapse
       }, 60);
-    });
-
-    // Update all next elements' IDs and names
-    elementToRemove.nextAll().each(function () {
-      const nextId = $(this).find(".multiple-collapse").attr("id");
-      const nextSuffix = parseInt(
-        nextId.substring(nextId.lastIndexOf("-") + 1),
-        10,
-      );
-      const newSuffix = nextSuffix - 1;
-      const newId = nextId.replace(`-${nextSuffix}`, `-${newSuffix}`);
-
-      // Update the ID of the next element
-      $(this).find(".multiple-collapse").attr("id", newId);
-
-      const multipleTitle = $(this).find("h6");
-      multipleTitle.text(function () {
-        return $(this).text().replace(` #${nextSuffix}`, ` #${newSuffix}`);
-      });
-
-      // Update the input/select name and corresponding label
-      $(this)
-        .find("input, select")
-        .each(function () {
-          const newName = $(this)
-            .attr("name")
-            .replace(`_${nextSuffix}`, `_${newSuffix}`);
-          $(this).attr("name", newName);
-
-          // Find the associated label and update its 'for' attribute and text
-          const settingLabel = $(`label[for="${$(this).attr("id")}"]`);
-          if (settingLabel.length) {
-            settingLabel.attr("for", newId).text(function () {
-              return $(this).text().replace(`_${nextSuffix}`, `_${newSuffix}`);
-            });
-          }
-        });
-
-      // Update the data-bs-target and aria-controls of the show-multiple button
-      const showMultiple = $(this).find(".show-multiple");
-      showMultiple
-        .attr("data-bs-target", `#${newId}`)
-        .attr("aria-controls", newId);
-
-      const removeMultiple = $(this).find(".remove-multiple");
-      removeMultiple.attr("id", `remove-${newId}`);
     });
   });
 

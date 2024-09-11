@@ -3,7 +3,7 @@
            name="{{ setting }}"
            type="{{ setting_data['type'] }}"
            class="form-control plugin-setting"
-           aria-labelledby="label-{{ plugin['id'] }}-{{ setting_data['id'] }}{{ setting_id_suffix }}"
+           aria-labelledby="{{ setting_id_prefix }}label-{{ plugin['id'] }}-{{ setting_data['id'] }}{{ setting_id_suffix }}"
            pattern="{{ setting_data['regex'] }}"
            value="{{ setting_value }}"
            data-original="{{ setting_value }}"

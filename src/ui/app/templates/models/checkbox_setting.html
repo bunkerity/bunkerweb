@@ -4,7 +4,7 @@
            class="form-check-input"
            type="checkbox"
            role="switch"
-           aria-labelledby="label-{{ plugin['id'] }}-{{ setting_data['id'] }}{{ setting_id_suffix }}"
+           aria-labelledby="{{ setting_id_prefix }}label-{{ plugin['id'] }}-{{ setting_data['id'] }}{{ setting_id_suffix }}"
            data-original="{{ setting_value }}"
            data-default="{{ setting_default }}"
            {% if setting_value == "yes" %}checked{% endif %}

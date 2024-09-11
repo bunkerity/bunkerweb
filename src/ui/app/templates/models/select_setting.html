@@ -2,7 +2,7 @@
     <select id="{{ setting_id_prefix }}setting-{{ plugin['id'] }}-{{ setting_data['id'] }}{{ setting_id_suffix }}"
             name="{{ setting }}"
             class="form-select"
-            aria-labelledby="label-{{ plugin['id'] }}-{{ setting_data['id'] }}{{ setting_id_suffix }}"
+            aria-labelledby="{{ setting_id_prefix }}label-{{ plugin['id'] }}-{{ setting_data['id'] }}{{ setting_id_suffix }}"
             data-original="{{ setting_value }}"
             data-default="{{ setting_default }}"
             {% if disabled %}disabled{% endif %}>
