@@ -640,9 +640,6 @@ def setup():
 
             if request.form.get("auto_lets_encrypt", "no") == "yes":
                 config["AUTO_LETS_ENCRYPT"] = "yes"
-            else:
-                config["GENERATE_SELF_SIGNED_SSL"] = "yes"
-                config["SELF_SIGNED_SSL_SUBJ"] = f"/CN={request.form['server_name']}/"
 
             if not config.get("MULTISITE", "no") == "yes":
                 app.config["CONFIG"].edit_global_conf({"MULTISITE": "yes"}, check_changes=False)
