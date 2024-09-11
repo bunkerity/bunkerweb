@@ -210,6 +210,7 @@ class Configurator:
                     "SERVER_SOFTWARE",
                     "NAMESPACE",
                     "TZ",
+                    "DYNPKG_RELEASE",
                 )
             ):
                 self.__logger.warning(f"Ignoring variable {variable} : {err} - {value = !r}")
