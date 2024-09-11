@@ -202,6 +202,7 @@ class Configurator:
                     "DOCKER_HOST",
                     "SLAVE_MODE",
                     "MASTER_MODE",
+                    "DYNPKG_RELEASE",
                 )
             ):
                 self.__logger.warning(f"Ignoring variable {variable} : {err}")
