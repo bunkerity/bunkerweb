@@ -109,6 +109,8 @@ class Services(Base):
     id = Column(String(64), primary_key=True)
     method = Column(METHODS_ENUM, nullable=False)
     is_draft = Column(Boolean, default=False, nullable=False)
+    creation_date = Column(DateTime(timezone=True), nullable=False)
+    last_update = Column(DateTime(timezone=True), nullable=False)
 
     settings = relationship("Services_settings", back_populates="service", cascade="all")
     custom_configs = relationship("Custom_configs", back_populates="service", cascade="all")

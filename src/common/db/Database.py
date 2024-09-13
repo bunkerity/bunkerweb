@@ -1349,13 +1349,14 @@ class Database:
 
                 for draft in drafts:
                     if draft not in db_drafts:
+                        current_time = datetime.now().astimezone()
                         if draft not in db_ids:
                             self.logger.debug(f"Adding draft {draft}")
-                            to_put.append(Services(id=draft, method=method, is_draft=True))
+                            to_put.append(Services(id=draft, method=method, is_draft=True, creation_date=current_time, last_update=current_time))
                             db_ids[draft] = {"method": method, "is_draft": True}
                         elif method == db_ids[draft]["method"]:
                             self.logger.debug(f"Updating draft {draft}")
-                            session.query(Services).filter(Services.id == draft).update({Services.is_draft: True})
+                            session.query(Services).filter(Services.id == draft).update({Services.is_draft: True, Services.last_update: current_time})
                             changed_services = True
 
                 template = config.get("USE_TEMPLATE", "")
@@ -1385,7 +1386,12 @@ class Database:
 
                             if server_name not in db_ids:
                                 self.logger.debug(f"Adding service {server_name}")
-                                to_put.append(Services(id=server_name, method=method, is_draft=server_name in drafts))
+                                current_time = datetime.now().astimezone()
+                                to_put.append(
+                                    Services(
+                                        id=server_name, method=method, is_draft=server_name in drafts, creation_date=current_time, last_update=current_time
+                                    )
+                                )
                                 db_ids[server_name] = {"method": method, "is_draft": server_name in drafts}
                                 if server_name not in drafts:
                                     changed_services = True
@@ -1425,6 +1431,7 @@ class Database:
                                 self.logger.debug(f"Adding setting {key} for service {server_name}")
                                 changed_plugins.add(setting.plugin_id)
                                 to_put.append(Services_settings(service_id=server_name, setting_id=key, value=value, suffix=suffix, method=method))
+                                session.query(Services).filter(Services.id == server_name).update({Services.last_update: datetime.now().astimezone()})
                             elif (
                                 method == service_setting.method or (service_setting.method not in ("scheduler", "autoconf") and method == "autoconf")
                             ) and service_setting.value != value:
@@ -1446,6 +1453,7 @@ class Database:
 
                                 self.logger.debug(f"Updating setting {key} for service {server_name}")
                                 query.update({Services_settings.value: value, Services_settings.method: method})
+                                session.query(Services).filter(Services.id == server_name).update({Services.last_update: datetime.now().astimezone()})
                         elif setting and original_key not in global_values:
                             global_values.append(original_key)
                             global_value = (
@@ -1502,7 +1510,10 @@ class Database:
 
                         if not session.query(Services).with_entities(Services.id).filter_by(id=first_server).first():
                             self.logger.debug(f"Adding service {first_server}")
-                            to_put.append(Services(id=first_server, method=method))
+                            current_time = datetime.now().astimezone()
+                            to_put.append(
+                                Services(id=first_server, method=method, is_draft=first_server in drafts, creation_date=current_time, last_update=current_time)
+                            )
                             changed_services = True
 
                     for key, value in config.items():
@@ -2019,6 +2030,23 @@ class Database:
             services.append(tmp_config)
 
         return services
+
+    def get_services(self, *, with_drafts: bool = False) -> List[Dict[str, Any]]:
+        """Get the services from the database"""
+        with self._db_session() as session:
+            return [
+                {
+                    "id": service.id,
+                    "method": service.method,
+                    "is_draft": service.is_draft,
+                    "creation_date": service.creation_date,
+                    "last_update": service.last_update,
+                }
+                for service in session.query(Services).with_entities(
+                    Services.id, Services.method, Services.is_draft, Services.creation_date, Services.last_update
+                )
+                if with_drafts or not service.is_draft
+            ]
 
     def add_job_run(self, job_name: str, success: bool, start_date: datetime, end_date: Optional[datetime] = None) -> str:
         """Add a job run."""

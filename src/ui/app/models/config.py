@@ -18,7 +18,7 @@ class Config:
         self.__db = db
         self.__data = data
 
-    def __gen_conf(
+    def gen_conf(
         self, global_conf: dict, services_conf: list[dict], *, check_changes: bool = True, changed_service: Optional[str] = None
     ) -> Union[str, Set[str]]:
         """Generates the nginx configuration file from the given configuration
@@ -108,7 +108,14 @@ class Config:
         return self.__db.get_services_settings(methods=methods, with_drafts=with_drafts)
 
     def check_variables(
-        self, variables: dict, config: dict, *, global_config: bool = False, ignored_multiples: Optional[Set[str]] = None, threaded: bool = False
+        self,
+        variables: dict,
+        config: dict,
+        *,
+        global_config: bool = False,
+        ignored_multiples: Optional[Set[str]] = None,
+        new: bool = False,
+        threaded: bool = False,
     ) -> dict:
         """Testify that the variables passed are valid
 
@@ -124,6 +131,8 @@ class Config:
         """
         self.__data.load_from_file()
         plugins_settings = self.get_plugins_settings()
+        blacklisted_settings = get_blacklisted_settings(global_config)
+
         for k, v in variables.copy().items():
             check = False
 
@@ -140,7 +149,7 @@ class Config:
                     variables.pop(k)
                     continue
 
-            if setting in get_blacklisted_settings(global_config):
+            if setting in blacklisted_settings:
                 message = f"Variable {k} is not editable, ignoring it"
                 if threaded:
                     self.__data["TO_FLASH"].append({"content": message, "type": "error"})
@@ -151,7 +160,7 @@ class Config:
             elif setting not in config and plugins_settings[setting]["default"] == v:
                 variables.pop(k)
                 continue
-            elif config[setting]["method"] not in ("default", "ui"):
+            elif not new and setting != "IS_DRAFT" and config[setting]["method"] not in ("default", "ui"):
                 message = f"Variable {k} is not editable as is it managed by the {config[setting]['method']}, ignoring it"
                 if threaded:
                     self.__data["TO_FLASH"].append({"content": message, "type": "error"})
@@ -219,7 +228,7 @@ class Config:
                 return f"Service {service['SERVER_NAME'].split(' ')[0]} already exists.", 1
 
         services.append(variables | {"IS_DRAFT": "yes" if is_draft else "no"})
-        ret = self.__gen_conf(self.get_config(methods=False), services, check_changes=not is_draft)
+        ret = self.gen_conf(self.get_config(methods=False), services, check_changes=not is_draft)
         if isinstance(ret, str):
             return ret, 1
         return f"Configuration for {variables['SERVER_NAME'].split(' ')[0]} has been generated.", 0
@@ -259,7 +268,7 @@ class Config:
                 if k.startswith(old_server_name_splitted[0]):
                     config.pop(k)
 
-        ret = self.__gen_conf(config, services, check_changes=check_changes, changed_service=server_name_splitted[0])
+        ret = self.gen_conf(config, services, check_changes=check_changes, changed_service=server_name_splitted[0])
         if isinstance(ret, str):
             return ret, 1
         return f"Configuration for {old_server_name_splitted[0]} has been edited.", 0
@@ -277,7 +286,7 @@ class Config:
         str
             the confirmation message
         """
-        ret = self.__gen_conf(self.get_config(methods=False) | variables, self.get_services(methods=False), check_changes=check_changes)
+        ret = self.gen_conf(self.get_config(methods=False) | variables, self.get_services(methods=False), check_changes=check_changes)
         if isinstance(ret, str):
             return ret, 1
         return "The global configuration has been edited.", 0
@@ -327,7 +336,7 @@ class Config:
                     if k in service:
                         service.pop(k)
 
-        ret = self.__gen_conf(new_env, new_services, check_changes=check_changes)
+        ret = self.gen_conf(new_env, new_services, check_changes=check_changes)
         if isinstance(ret, str):
             return ret, 1
         return f"Configuration for {service_name} has been deleted.", 0

@@ -147,6 +147,10 @@
 * Custom
 ******************************************************************************/
 
+:root {
+  --dt-row-selected: 29, 123, 167;
+}
+
 .badge-dot {
   padding: 0.35rem;
   font-size: 0.6rem;
@@ -280,11 +284,18 @@ td.highlight {
   color: var(--bs-bw-green) !important;
 }
 
+.btn-bw-green {
+  color: #fff;
+  background-color: var(--bs-bw-green);
+  border-color: var(--bs-bw-green);
+}
+
 .btn-outline-bw-green {
   color: var(--bs-bw-green);
   border-color: var(--bs-bw-green);
 }
 
+.btn-bw-green:hover,
 .btn-outline-bw-green:hover {
   color: #fff;
   background-color: var(--bs-bw-green);

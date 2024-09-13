@@ -1,0 +1,154 @@
+{% extends "dashboard.html" %}
+{% block content %}
+    <!-- Content -->
+    <div class="card table-responsive text-nowrap p-4 min-vh-70">
+        <input type="hidden" id="services_number" value="{{ services|length }}" />
+        <input type="hidden"
+               id="csrf_token"
+               name="csrf_token"
+               value="{{ csrf_token() }}" />
+        <table id="services" class="table w-100">
+            <thead>
+                <tr>
+                    <th>
+                        <input id="select-all-rows"
+                               aria-label="Select all rows"
+                               class="dt-select-checkbox mb-1"
+                               type="checkbox">
+                        Select All
+                    </th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="The name of the service">Service name</th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="The creation method of the Service">Method</th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="The type of the Service">Type</th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="The date and time when the Service was created">Created</th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="The date and time when the Service was last updated">Last Update</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for service in services %}
+                    <tr>
+                        <td></td>
+                        <td>
+                            <a href="{{ url_for("services") }}/{{ service['id'] }}"
+                               data-bs-toggle="tooltip"
+                               data-bs-placement="bottom"
+                               data-bs-original-title="Edit service {{ service['id'] }}"><i class="bx bx-edit bx-xs"></i>&nbsp;{{ service["id"] }}</a>
+                        </td>
+                        <td id="method-{{ service['id'].replace('.', '-') }}">{{ service["method"] }}</td>
+                        <td>
+                            {% if service['is_draft'] %}
+                                <span id="type-{{ service['id'].replace('.', '-') }}"
+                                      data-value="draft"
+                                      class="badge rounded-pill bg-label-secondary">Draft</span>
+                            {% else %}
+                                <span id="type-{{ service['id'].replace('.', '-') }}"
+                                      data-value="online"
+                                      class="badge rounded-pill bg-label-primary">Online</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ service['creation_date'].astimezone().strftime("%Y-%m-%d %H:%M:%S %Z") }}</td>
+                        <td>{{ service['last_update'].astimezone().strftime("%Y-%m-%d %H:%M:%S %Z") }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div id="feedback-toast"
+         class="bs-toast toast fade"
+         role="alert"
+         aria-live="assertive"
+         aria-atomic="true"
+         data-bs-autohide="true">
+        <div class="toast-header">
+            <i class="d-block w-px-20 h-auto rounded me-2 tf-icons bx bx-bell"></i>
+            <span class="fw-medium me-auto">BunkerWeb Forever</span>
+            <small class="text-body-secondary">just now</small>
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="toast"
+                    aria-label="Close"></button>
+        </div>
+        <div class="toast-body">If you read this, it means that you're curious 👀</div>
+    </div>
+    <div class="modal fade"
+         id="modal-convert-services"
+         data-bs-backdrop="static"
+         tabindex="-1"
+         aria-hidden="true"
+         role="dialog">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Convert services to Draft</h5>
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                </div>
+                <form action="{{ url_for("services") }}/convert" method="POST">
+                    <div class="modal-body">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                        <input type="hidden" id="convertion-type" name="convert_to" value="draft" />
+                        <input type="hidden"
+                               id="selected-services-input-convert"
+                               name="services"
+                               value="" />
+                        <div class="alert alert-danger text-center" role="alert">Are you sure you want to convert the selected services?</div>
+                        <ul id="selected-services-convert" class="list-group mb-3">
+                        </ul>
+                    </div>
+                    <div class="modal-footer justify-content-center">
+                        <button type="submit" class="btn btn-outline-secondary me-2">Convert services</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade"
+         id="modal-delete-services"
+         data-bs-backdrop="static"
+         tabindex="-1"
+         aria-hidden="true"
+         role="dialog">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Delete services</h5>
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                </div>
+                <form action="{{ url_for("services") }}/delete" method="POST">
+                    <div class="modal-body">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                        <input type="hidden"
+                               id="selected-services-input-delete"
+                               name="services"
+                               value="" />
+                        <div class="alert alert-danger text-center" role="alert">Are you sure you want to delete the selected services?</div>
+                        <ul id="selected-services-delete" class="list-group mb-3">
+                        </ul>
+                    </div>
+                    <div class="modal-footer justify-content-center">
+                        <button type="submit" class="btn btn-outline-danger me-2">Delete services</button>
+                        <button type="reset"
+                                class="btn btn-outline-secondary"
+                                data-bs-dismiss="modal">Close</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- / Content -->
+{% endblock %}

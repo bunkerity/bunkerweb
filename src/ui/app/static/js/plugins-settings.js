@@ -1,8 +1,10 @@
 $(document).ready(() => {
+  var toastNum = 0;
   let currentPlugin = "general";
-  let currentMode = "easy";
-  let currentType = "all";
+  let currentMode = $("#selected-mode").val();
+  let currentType = $("#selected-type").val();
 
+  const $serviceMethodInput = $("#service-method");
   const $pluginSearch = $("#plugin-search");
   const $pluginTypeSelect = $("#plugin-type-select");
   const $pluginKeywordSearch = $("#plugin-keyword-search");
@@ -105,6 +107,124 @@ $(document).ready(() => {
         block: "center",
       });
     }
+  };
+
+  const getFormFromSettings = () => {
+    const form = $("<form>", {
+      method: "POST",
+      action: window.location.href,
+      class: "visually-hidden",
+    });
+
+    // Helper function to append hidden inputs
+    const appendHiddenInput = (form, name, value) => {
+      form.append(
+        $("<input>", {
+          type: "hidden",
+          name: name,
+          value: $("<div>").text(value).html(), // Sanitize the value
+        }),
+      );
+    };
+
+    // Handle missing CSRF token gracefully
+    const csrfToken = $("#csrf_token").val() || "";
+    appendHiddenInput(form, "csrf_token", csrfToken);
+
+    // TODO: support easy mode
+    if (currentMode === undefined || currentMode === "advanced") {
+      $("div[id^='navs-plugins-']")
+        .find("input, select")
+        .each(function () {
+          const $this = $(this);
+          const settingName = $this.attr("name");
+          const settingType = $this.attr("type");
+          const originalValue = $this.data("original");
+          let settingValue = $this.val();
+
+          if ($this.is("select")) {
+            settingValue = $this.val();
+          } else if (settingType === "checkbox") {
+            settingValue = $this.is(":checked") ? "yes" : "no";
+          }
+
+          if (settingValue == originalValue) return;
+
+          appendHiddenInput(form, settingName, settingValue);
+        });
+
+      const $draftInput = $("#is-draft");
+      if ($draftInput.length) {
+        appendHiddenInput(form, "IS_DRAFT", $draftInput.val());
+      }
+    } else if (currentMode === "raw") {
+      // Helper function to parse configuration strings into an object
+      const parseConfig = (selector) => {
+        const rawConfig = $(selector).val();
+        if (!rawConfig) return {};
+        return rawConfig
+          .trim()
+          .split("\n")
+          .reduce((acc, line) => {
+            const [key, value] = line.split("=");
+            if (key && value !== undefined) {
+              acc[key.trim()] = value.trim();
+            }
+            return acc;
+          }, {});
+      };
+
+      // Parse original and default configurations
+      const configOriginals = parseConfig("#raw-config-originals");
+      const configDefaults = parseConfig("#raw-config-defaults");
+
+      // Sets to keep track of processed keys
+      const formKeys = new Set();
+      const skippedKeys = new Set();
+
+      // Process the current configuration
+      const $rawConfig = $("#raw-config");
+      if ($rawConfig.length) {
+        const configLines = $rawConfig
+          .val()
+          .split("\n")
+          .map((line) => line.trim())
+          .filter((line) => line && !line.startsWith("#"));
+
+        configLines.forEach((line) => {
+          const [key, value] = line.split("=").map((str) => str.trim());
+          if (!key || value === undefined) {
+            console.warn(`Skipping malformed line: ${line}`);
+            return;
+          }
+
+          // Skip unchanged values except for 'IS_DRAFT'
+          if (key !== "IS_DRAFT" && configOriginals[key] === value) {
+            skippedKeys.add(key);
+            return;
+          }
+
+          appendHiddenInput(form, key, value);
+          formKeys.add(key);
+        });
+      }
+
+      // Append default values if they are not already in the form and not skipped
+      Object.entries(configDefaults).forEach(([key, value]) => {
+        if (!formKeys.has(key) && !skippedKeys.has(key)) {
+          appendHiddenInput(form, key, value);
+          formKeys.add(key);
+        }
+      });
+
+      // Append 'OLD_SERVER_NAME' if it exists
+      const $oldServerName = $("#old-server-name");
+      if ($oldServerName.length) {
+        appendHiddenInput(form, "OLD_SERVER_NAME", $oldServerName.val());
+      }
+    }
+
+    return form;
   };
 
   const debounce = (func, delay) => {
@@ -465,55 +585,57 @@ $(document).ready(() => {
     });
   });
 
-  $("#save-settings").on("click", function () {
-    const form = $("<form>", {
-      method: "POST",
-      action: window.location.href,
-      class: "visually-hidden",
-    });
+  $(".save-settings").on("click", function () {
+    const form = getFormFromSettings();
+    // TODO: support easy mode
+    let minSettings = 4;
+    if (!form.find("input[name='IS_DRAFT']").length) minSettings = 2;
 
-    form.append(
-      $("<input>", {
-        type: "hidden",
-        name: "csrf_token",
-        value: $("#csrf_token").val(),
-      }),
-    );
-    $("div[id^='navs-plugins-']")
-      .find("input, select")
-      .each(function () {
-        const settingName = $(this).attr("name");
-        const settingType = $(this).attr("type");
-        const originalValue = $(this).data("original");
-        var settingValue = $(this).val();
+    const draftInput = $("#is-draft");
+    const wasDraft = draftInput.data("original") === "yes";
+    let isDraft = draftInput.val() === "yes";
+    if (currentMode === "raw")
+      isDraft = form.find("input[name='IS_DRAFT']").val() === "yes";
 
-        if ($(this).is("select")) {
-          settingValue = $(this).find("option:selected").val();
-        } else if (settingType === "checkbox") {
-          settingValue = $(this).prop("checked") ? "yes" : "no";
-        }
-
-        if (
-          $(this).attr("id") &&
-          !$(this).attr("id").startsWith("multiple-") &&
-          settingValue == originalValue
-        )
-          return;
-
-        form.append(
-          $("<input>", {
-            type: "hidden",
-            name: settingName,
-            value: settingValue,
-          }),
-        );
-      });
-
-    if (form.children().length < 2) {
+    if (form.children().length < minSettings && isDraft === wasDraft) {
       alert("No changes detected.");
       return;
     }
+    $(window).off("beforeunload");
     form.appendTo("body").submit();
+  });
+
+  $("#toggle-draft").on("click", function () {
+    const draftInput = $("#is-draft");
+    const isDraft = draftInput.val() === "yes";
+
+    draftInput.val(isDraft ? "no" : "yes");
+    $(this).html(
+      `<i class="bx bx-sm bx-${
+        isDraft ? "globe" : "file-blank"
+      } bx-sm"></i>&nbsp;${isDraft ? "Online" : "Draft"}`,
+    );
+  });
+
+  $(".copy-settings").on("click", function () {
+    const config = $("#raw-config").val();
+
+    // Use the Clipboard API
+    navigator.clipboard
+      .writeText(config)
+      .then(() => {
+        // Show tooltip
+        const button = $(this);
+        button.attr("data-bs-original-title", "Copied!").tooltip("show");
+
+        // Hide tooltip after 2 seconds
+        setTimeout(() => {
+          button.tooltip("hide").attr("data-bs-original-title", "");
+        }, 2000);
+      })
+      .catch((err) => {
+        console.error("Failed to copy text: ", err);
+      });
   });
 
   $('div[id^="multiple-"]')
@@ -602,4 +724,65 @@ $(document).ready(() => {
   }
 
   $pluginTypeSelect.trigger("change");
+
+  if (currentMode === "advanced") {
+    const serverNameSetting = $("#setting-general-server-name");
+    if (!serverNameSetting.val()) {
+      if (currentType !== "all") {
+        currentType = "all";
+        $pluginTypeSelect.val("all");
+      } else
+        $(`button[data-bs-target="#navs-plugins-${currentPlugin}"]`).tab(
+          "show",
+        );
+
+      if (currentPlugin !== "general") {
+        $(`button[data-bs-target="#navs-plugins-general"]`).tab("show");
+      }
+
+      updateUrlParams({ type: null });
+
+      highlightSettings(serverNameSetting.closest(".col-12"));
+      serverNameSetting.focus();
+    }
+  }
+
+  if ($serviceMethodInput.length) {
+    if ($serviceMethodInput.val() === "autoconf") {
+      const feedbackToast = $("#feedback-toast").clone(); // Clone the feedback toast
+      feedbackToast.attr("id", `feedback-toast-${toastNum++}`); // Corrected to set the ID for the failed toast
+      feedbackToast.removeClass("bg-primary text-white");
+      feedbackToast.addClass("bg-primary text-white");
+      feedbackToast.find("span").text("The service method is autoconf.");
+      feedbackToast
+        .find("div.toast-body")
+        .html(
+          "<p>As the service method is set to autoconf, the configuration is locked. <div class='fw-bolder'>Any changes made will not be saved.</div><div class='fst-italic'>This is to prevent conflicts with the autoconf and the web UI.</div></p>",
+        );
+      feedbackToast.attr("data-bs-autohide", "false");
+      feedbackToast.appendTo("#feedback-toast-container"); // Ensure the toast is appended to the container
+      feedbackToast.toast("show");
+    }
+  }
+
+  $(window).on("beforeunload", function (e) {
+    const form = getFormFromSettings();
+    // TODO: support easy mode
+    let minSettings = 4;
+    if (!form.find("input[name='IS_DRAFT']").length) minSettings = 2;
+
+    const draftInput = $("#is-draft");
+    const wasDraft = draftInput.data("original") === "yes";
+    let isDraft = draftInput.val() === "yes";
+    if (currentMode === "raw")
+      isDraft = form.find("input[name='IS_DRAFT']").val() === "yes";
+
+    if (form.children().length < minSettings && isDraft === wasDraft) return;
+
+    // Cross-browser compatibility (for older browsers)
+    var message =
+      "Are you sure you want to leave? Changes you made may not be saved.";
+    e.returnValue = message; // Standard for most browsers
+    return message; // Required for some browsers
+  });
 });

@@ -258,6 +258,7 @@ $(document).ready(function () {
         return;
       }
       actionLock = true;
+      $(".dt-button-background").click();
 
       const instances = getSelectedInstances();
       if (instances.length === 0) {

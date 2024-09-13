@@ -6,7 +6,7 @@
            aria-labelledby="{{ setting_id_prefix }}label-{{ plugin['id'] }}-{{ setting_data['id'] }}{{ setting_id_suffix }}"
            pattern="{{ setting_data['regex'] }}"
            value="{{ setting_value }}"
-           data-original="{{ setting_value }}"
+           data-original="{% if current_endpoint != 'new' %}{{ setting_value }}{% else %}{{ setting_default }}{% endif %}"
            data-default="{{ setting_default }}"
            {% if disabled %}disabled{% endif %}>
     <label for="{{ setting_id_prefix }}setting-{{ plugin['id'] }}-{{ setting_data['id'] }}{{ setting_id_suffix }}">

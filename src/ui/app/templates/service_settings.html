@@ -1,6 +1,19 @@
 {% extends "dashboard.html" %}
 {% block content %}
     <!-- Content -->
+    {% set blacklisted_settings = get_blacklisted_settings() %}
+    {% set service_method = "ui" %}
+    {% if current_endpoint != "global-config" %}
+        {% set service_method = config.get("SERVER_NAME", {"method": "ui"})["method"] %}
+        <input type="hidden"
+               id="selected-mode"
+               name="selected_mode"
+               value="{{ mode }}">
+    {% endif %}
+    <input type="hidden"
+           id="service-method"
+           name="service_method"
+           value="{{ service_method }}">
     <div class="tab-content p-0 position-relative">
         <div class="tab-pane fade{% if mode == 'easy' %} show active{% endif %}"
              id="navs-modes-easy"
@@ -8,9 +21,26 @@
         <div class="tab-pane fade{% if mode == 'advanced' %} show active{% endif %}"
              id="navs-modes-advanced"
              role="tabpanel">{% include "models/plugins_settings.html" %}</div>
-        <div class="tab-pane fade{% if mode == 'raw' %} show active{% endif %}"
+        <div class="tab-pane position-relative fade{% if mode == 'raw' %} show active{% endif %}"
              id="navs-modes-raw"
-             role="tabpanel">TODO: Add Raw mode</div>
+             role="tabpanel">{% include "models/plugins_settings_raw.html" %}</div>
+    </div>
+    <div id="feedback-toast"
+         class="bs-toast toast fade"
+         role="alert"
+         aria-live="assertive"
+         aria-atomic="true"
+         data-bs-autohide="true">
+        <div class="toast-header">
+            <i class="d-block w-px-20 h-auto rounded me-2 tf-icons bx bx-bell"></i>
+            <span class="fw-medium me-auto">BunkerWeb Forever</span>
+            <small class="text-body-secondary">just now</small>
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="toast"
+                    aria-label="Close"></button>
+        </div>
+        <div class="toast-body">If you read this, it means that you're curious 👀</div>
     </div>
     <!-- / Content -->
 {% endblock %}

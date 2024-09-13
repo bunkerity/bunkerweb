@@ -1,6 +1,8 @@
 {% extends "dashboard.html" %}
 {% block content %}
     <!-- Content -->
+    {% set blacklisted_settings = get_blacklisted_settings(true) %}
+    {% set service_method = "ui" %}
     {% include "models/plugins_settings.html" %}
     <!-- / Content -->
 {% endblock %}

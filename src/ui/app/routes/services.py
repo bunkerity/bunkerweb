@@ -2,37 +2,98 @@ from re import match
 from threading import Thread
 from time import time
 from typing import Dict
-from flask import Blueprint, flash, redirect, render_template, request, url_for
+from flask import Blueprint, Response, redirect, render_template, request, url_for
 from flask_login import login_required
 
 from app.dependencies import BW_CONFIG, DATA, DB
 
-from app.routes.utils import handle_error, manage_bunkerweb, wait_applying
+from app.routes.utils import handle_error, manage_bunkerweb, verify_data_in_form, wait_applying
 
 services = Blueprint("services", __name__)
 
 
-@services.route("/services", methods=["GET", "POST"])
+@services.route("/services", methods=["GET"])
 @login_required
 def services_page():
-    if request.method == "POST":  # TODO: Handle creation and deletion of services
-        if DB.readonly:
-            return handle_error("Database is in read-only mode", "services")
+    return render_template("services.html", services=DB.get_services(with_drafts=True))
 
-        # config, variables, format_configs, server_name, old_server_name, operation, is_draft, was_draft, is_draft_unchanged, mode = get_service_data("services")
 
-        # message = update_service(config, variables, format_configs, server_name, old_server_name, operation, is_draft, was_draft, is_draft_unchanged)
+@services.route("/services/delete", methods=["POST"])
+@login_required
+def services_delete():
+    verify_data_in_form(
+        data={"services": None},
+        err_message="Missing services parameter on /services/delete.",
+        redirect_url="services",
+        next=True,
+    )
+    services = request.form["services"].split(",")
+    if not services:
+        return handle_error("No services selected.", "services", True)
+    DATA.load_from_file()
 
-        # return redirect(url_for("loading", next=url_for("services.services_page"), message=message))
+    def delete_services(services):
+        wait_applying()
 
-    return render_template("services.html")  # TODO
+        db_config = BW_CONFIG.get_config(methods=False)
+        db_services = DB.get_services(with_drafts=True)
+        all_drafts = True
+        services_to_delete = set()
+        non_ui_services = set()
+
+        for db_service in db_services:
+            if db_service["id"] in services:
+                if db_service["method"] != "ui":
+                    non_ui_services.add(db_service["id"])
+                    continue
+                if not db_service["is_draft"]:
+                    all_drafts = False
+                services_to_delete.add(db_service["id"])
+
+        for non_ui_service in non_ui_services:
+            DATA["TO_FLASH"].append({"content": f"Service {non_ui_service} is not a UI service and will not be deleted.", "type": "error"})
+
+        if not services_to_delete:
+            DATA["TO_FLASH"].append({"content": "All selected services could not be found or are not UI services.", "type": "error"})
+            DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
+            return
+
+        db_config["SERVER_NAME"] = " ".join([service["id"] for service in db_services if service["id"] not in services_to_delete])
+        new_env = db_config.copy()
+
+        for setting in db_config:
+            for service in services_to_delete:
+                if setting.startswith(f"{service}_"):
+                    del new_env[setting]
+
+        ret = BW_CONFIG.gen_conf(new_env, [], check_changes=not all_drafts)
+        if isinstance(ret, str):
+            DATA["TO_FLASH"].append({"content": ret, "type": "error"})
+            DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
+            return
+        DATA["TO_FLASH"].append({"content": f"Deleted services {', '.join(services_to_delete)}", "type": "success"})
+        DATA["RELOADING"] = False
+
+    DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})
+    Thread(target=delete_services, args=(services,)).start()
+
+    return redirect(
+        url_for(
+            "loading",
+            next=url_for("services.services_page"),
+            message=f"Deleting services {', '.join(services)}",
+        )
+    )
 
 
 @services.route("/services/<string:service>", methods=["GET", "POST"])
 @login_required
 def services_service_page(service: str):
-    services = BW_CONFIG.get_config(global_only=True, methods=False, filtered_settings=("SERVER_NAME"))["SERVER_NAME"].split(" ")
+    services = BW_CONFIG.get_config(global_only=True, methods=False, with_drafts=True, filtered_settings=("SERVER_NAME"))["SERVER_NAME"].split(" ")
     service_exists = service in services
+
+    if service != "new" and not service_exists:
+        return Response("Service not found", status=404)
 
     if request.method == "POST":
         if DB.readonly:
@@ -44,54 +105,61 @@ def services_service_page(service: str):
         del variables["csrf_token"]
 
         mode = request.args.get("mode", "easy")
-        is_draft = variables.get("IS_DRAFT", "no") == "yes"
+        is_draft = variables.pop("IS_DRAFT", "no") == "yes"
 
-        def update_service(variables: Dict[str, str], is_draft: bool, threaded: bool = False):  # TODO: handle easy and raw modes
+        def update_service(service: str, variables: Dict[str, str], is_draft: bool, mode: str):  # TODO: handle easy and raw modes
             wait_applying()
 
             # Edit check fields and remove already existing ones
-            if service_exists:
+            if service != "new":
                 config = DB.get_config(methods=True, with_drafts=True, filtered_settings=list(variables.keys()), service=service)
             else:
-                config = DB.get_config(methods=True, with_drafts=True, filtered_settings=list(variables.keys()))
-            was_draft = config.get(f"{service}_IS_DRAFT", {"value": "no"})["value"] == "yes"
+                config = DB.get_config(global_only=True, methods=True, filtered_settings=list(variables.keys()))
+            was_draft = config.get("IS_DRAFT", {"value": "no"})["value"] == "yes"
 
             old_server_name = variables.pop("OLD_SERVER_NAME", "")
             ignored_multiples = set()
 
             # Edit check fields and remove already existing ones
             for variable, value in variables.copy().items():
-                if variable != "SERVER_NAME" and value == config.get(f"{service}_{variable}", {"value": None})["value"]:
+                if (mode == "raw" or variable != "SERVER_NAME") and value == config.get(variable, {"value": None})["value"]:
                     if match(r"^.+_\d+$", variable):
                         ignored_multiples.add(variable)
                     del variables[variable]
 
-            variables = BW_CONFIG.check_variables(variables, config, ignored_multiples=ignored_multiples, threaded=threaded)
+            variables = BW_CONFIG.check_variables(variables, config, ignored_multiples=ignored_multiples, new=service == "new", threaded=True)
 
             if was_draft == is_draft and not variables:
                 content = f"The service {service} was not edited because no values were changed."
-                if threaded:
-                    DATA["TO_FLASH"].append({"content": content, "type": "warning"})
-                else:
-                    flash(content, "warning")
+                DATA["TO_FLASH"].append({"content": content, "type": "warning"})
                 DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
                 return
 
             if "SERVER_NAME" not in variables:
+                if service == "new":
+                    DATA["TO_FLASH"].append({"content": "The service was not created because the server name was not provided.", "type": "error"})
+                    DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
+                    return
                 variables["SERVER_NAME"] = old_server_name
+
+            if service == "new":
+                old_server_name = variables["SERVER_NAME"]
 
             manage_bunkerweb(
                 "services",
                 variables,
                 old_server_name,
-                operation="edit" if service_exists else "new",
+                operation="edit" if service != "new" else "new",
                 is_draft=is_draft,
                 was_draft=was_draft,
-                threaded=threaded,
+                threaded=True,
             )
 
         DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})
-        Thread(target=update_service, args=(variables, is_draft, True)).start()
+        Thread(target=update_service, args=(service, variables, is_draft, mode)).start()
+
+        if service == "new":
+            service = variables["SERVER_NAME"].split(" ")[0]
 
         arguments = {}
         if mode != "easy":
@@ -107,17 +175,32 @@ def services_service_page(service: str):
                     service=service,
                 )
                 + f"?{'&'.join([f'{k}={v}' for k, v in arguments.items()])}",
-                message=f"Saving configuration for {'draft ' if is_draft else ''}service {service}",
+                message=f"{'Saving' if service != 'new' else 'Creating'} configuration for {'draft ' if is_draft else ''}service {service}",
             )
         )
 
-    services = BW_CONFIG.get_config(global_only=True, methods=False, filtered_settings=("SERVER_NAME"))["SERVER_NAME"].split(" ")
-    if not service_exists:
-        db_config = DB.get_config(global_only=True, methods=True)
-        return render_template("service_settings.html", config=db_config)
-
     mode = request.args.get("mode", "easy")
     search_type = request.args.get("type", "all")
+    if service == "new":
+        clone = request.args.get("clone", "")
+        if clone:
+            db_config = DB.get_config(methods=True, with_drafts=True, service=clone)
+            db_config["SERVER_NAME"]["value"] = ""
+            return render_template(
+                "service_settings.html",
+                config=db_config,
+                mode=mode,
+                type=search_type,
+            )
+
+        db_config = DB.get_config(global_only=True, methods=True)
+        return render_template(
+            "service_settings.html",
+            config=db_config,
+            mode=mode,
+            type=search_type,
+        )
+
     db_config = DB.get_config(methods=True, with_drafts=True, service=service)
     return render_template(
         "service_settings.html",

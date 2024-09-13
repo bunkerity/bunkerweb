@@ -1,0 +1,61 @@
+<input type="hidden"
+       id="csrf_token"
+       name="csrf_token"
+       value="{{ csrf_token() }}">
+<div class="position-absolute top-0 end-0 m-3"
+     style="z-index: 1000">
+    <div class="d-flex flex-wrap justify-content-center align-items-center">
+        <div class="card p-1 me-2">
+        <button type="button"
+                    class="btn btn-sm btn-outline-secondary copy-settings">
+                <i class="bx bx-copy-alt bx-xs"></i>
+                <span class="d-none d-md-inline">&nbsp;Copy</span>
+            </button>
+        </div>
+        <div class="card p-1"{% if service_method == "autoconf" %} data-bs-toggle="tooltip" data-bs-placement="top" title="The service was created using the autoconf method, therefore the configuration is locked"{% endif %}>
+            <!-- Save button container -->
+            <button type="button"
+                    class="btn btn-sm btn-outline-bw-green save-settings {% if service_method == "autoconf" %}disabled{% endif %}">
+                <i class="bx bx-save bx-xs"></i>
+                <span class="d-none d-md-inline">&nbsp;Save</span>
+            </button>
+        </div>
+    </div>
+</div>
+<div class="card bg-primary p-1 d-flex flex-column"
+     {% if service_method == "autoconf" %}data-bs-toggle="tooltip" data-bs-placement="top" title="Disabled by {{ service_method }}"{% endif %}>
+    {% set config_lines = ["IS_DRAFT=" + config.get('IS_DRAFT', {}).get('value', 'no')] %}
+    {% set default_settings = ["IS_DRAFT=no"] %}
+    {% for plugin in plugins %}
+        {% set filtered_settings = get_filtered_settings(plugin["settings"], current_endpoint == "global-config") %}
+        {% if filtered_settings %}
+            {% for setting, setting_data in filtered_settings.items() if setting not in blacklisted_settings %}
+                {% set setting_config = config.get(setting, {}) %}
+                {% set setting_default = setting_data.get("default", "") %}
+                {% set setting_value = setting_config.get("value", setting_default) %}
+                {% if setting_value != setting_default %}
+                    {% if config_lines.append(setting + "=" + setting_value) %}{% endif %}
+                    {% if default_settings.append(setting + "=" + setting_default) %}{% endif %}
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+    {% endfor %}
+    <!-- Join the configuration lines with newlines -->
+    {% set raw_config = config_lines | join('\r\n') %}
+    <input type="hidden"
+           id="raw-config-originals"
+           name="raw-config"
+           value="{{ raw_config }}">
+    <input type="hidden"
+           id="raw-config-defaults"
+           name="raw-config"
+           value="{{ default_settings | join('\r\n') }}">
+    <div class="form-floating">
+        <textarea class="form-control w-100 h-100 text-white"
+                  rows="35"
+                  id="raw-config"
+                  aria-label="Raw configuration"
+                  {% if service_method == "autoconf" %}disabled{% endif %}>{{ raw_config|safe }}</textarea>
+        <label for="raw-config" class="text-white">Raw configuration</label>
+    </div>
+</div>
