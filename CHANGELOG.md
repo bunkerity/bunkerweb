@@ -2,7 +2,10 @@
 
 ## v1.5.10 - ????/??/??
 
+- [UI] Fix setup wizard bug related to certificate
+- [UI] Fix bug when adding more than 3 reverse proxies URLs
 - [BUGFIX] Add HTTP3 specific modsec rule in web UI to avoid false positives
+- [BUGFIX] Fix missing scheduler logs in Linux integration
 - [DEPS] Updated NGINX version to v1.26.2
 - [DEPS] Updated LuaJIT version to v2.1-20240815
 - [DEPS] Updated libmaxminddb version to v1.11.0
