@@ -1919,7 +1919,7 @@ class Database:
 
                         for setting in query:
                             key = f"{service_id}_{setting.setting_id}" + (f"_{setting.suffix}" if setting.suffix > 0 else "")
-                            if key in config and config[key]["method"] != "default":
+                            if key in config and config[key]["method"] != "default" and not config[key]["global"]:
                                 continue
 
                             config[key] = {
