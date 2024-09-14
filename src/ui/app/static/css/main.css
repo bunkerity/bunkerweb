@@ -453,3 +453,11 @@ a.badge:hover {
   background-color: transparent;
   opacity: 1; /* You can set this to 0 if you want it to fade out */
 }
+
+.template-steps-container {
+  --bs-breadcrumb-divider: url("../img/bxs-chevron-right.svg");
+}
+
+.template-steps-container .breadcrumb-item + .breadcrumb-item::before {
+  padding: 0 1rem 0 1rem;
+}

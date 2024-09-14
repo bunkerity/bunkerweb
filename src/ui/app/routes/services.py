@@ -1,7 +1,7 @@
 from re import match
 from threading import Thread
 from time import time
-from typing import Dict
+from typing import Dict, List
 from flask import Blueprint, Response, redirect, render_template, request, url_for
 from flask_login import login_required
 
@@ -18,6 +18,86 @@ def services_page():
     return render_template("services.html", services=DB.get_services(with_drafts=True))
 
 
+@services.route("/services/convert", methods=["POST"])
+@login_required
+def services_convert():
+    verify_data_in_form(
+        data={"services": None},
+        err_message="Missing services parameter on /services/convert.",
+        redirect_url="services",
+        next=True,
+    )
+    verify_data_in_form(
+        data={"convert_to": None},
+        err_message="Missing convert_to parameter on /services/convert.",
+        redirect_url="services",
+        next=True,
+    )
+
+    services = request.form["services"].split(",")
+    if not services:
+        return handle_error("No services selected.", "services", True)
+
+    convert_to = request.form["convert_to"]
+    if convert_to not in ("online", "draft"):
+        return handle_error("Invalid convert_to parameter.", "services", True)
+    DATA.load_from_file()
+
+    def convert_services(services: List[str], convert_to: str):
+        wait_applying()
+
+        db_services = DB.get_services(with_drafts=True)
+        services_to_convert = set()
+        non_ui_services = set()
+        non_convertible_services = set()
+
+        for db_service in db_services:
+            if db_service["id"] in services:
+                if db_service["method"] != "ui":
+                    non_ui_services.add(db_service["id"])
+                    continue
+                if db_service["is_draft"] == (convert_to == "draft"):
+                    non_convertible_services.add(db_service["id"])
+                    continue
+                services_to_convert.add(db_service["id"])
+
+        for non_ui_service in non_ui_services:
+            DATA["TO_FLASH"].append({"content": f"Service {non_ui_service} is not a UI service and will not be converted.", "type": "error"})
+
+        for non_convertible_service in non_convertible_services:
+            DATA["TO_FLASH"].append(
+                {"content": f"Service {non_convertible_service} is already a {convert_to} service and will not be converted.", "type": "error"}
+            )
+
+        if not services_to_convert:
+            DATA["TO_FLASH"].append({"content": "All selected services could not be found, are not UI services or are already converted.", "type": "error"})
+            DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
+            return
+
+        db_config = DB.get_config(with_drafts=True)
+        for service in services_to_convert:
+            db_config[f"{service}_IS_DRAFT"] = "yes" if convert_to == "draft" else "no"
+
+        ret = DB.save_config(db_config, "ui", changed=True)
+        if isinstance(ret, str):
+            DATA["TO_FLASH"].append({"content": ret, "type": "error"})
+            DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
+            return
+        DATA["TO_FLASH"].append({"content": f"Converted services: {', '.join(services_to_convert)}", "type": "success"})
+        DATA["RELOADING"] = False
+
+    DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})
+    Thread(target=convert_services, args=(services, convert_to)).start()
+
+    return redirect(
+        url_for(
+            "loading",
+            next=url_for("services.services_page"),
+            message=f"Converting service{'s' if len(services) > 1 else ''} {', '.join(services)} to {convert_to}",
+        )
+    )
+
+
 @services.route("/services/delete", methods=["POST"])
 @login_required
 def services_delete():
@@ -32,10 +112,10 @@ def services_delete():
         return handle_error("No services selected.", "services", True)
     DATA.load_from_file()
 
-    def delete_services(services):
+    def delete_services(services: List[str]):
         wait_applying()
 
-        db_config = BW_CONFIG.get_config(methods=False)
+        db_config = BW_CONFIG.get_config(methods=False, with_drafts=True)
         db_services = DB.get_services(with_drafts=True)
         all_drafts = True
         services_to_delete = set()
@@ -71,7 +151,7 @@ def services_delete():
             DATA["TO_FLASH"].append({"content": ret, "type": "error"})
             DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
             return
-        DATA["TO_FLASH"].append({"content": f"Deleted services {', '.join(services_to_delete)}", "type": "success"})
+        DATA["TO_FLASH"].append({"content": f"Deleted services: {', '.join(services_to_delete)}", "type": "success"})
         DATA["RELOADING"] = False
 
     DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})
@@ -81,7 +161,7 @@ def services_delete():
         url_for(
             "loading",
             next=url_for("services.services_page"),
-            message=f"Deleting services {', '.join(services)}",
+            message=f"Deleting service{'s' if len(services) > 1 else ''} {', '.join(services)}",
         )
     )
 
@@ -107,7 +187,7 @@ def services_service_page(service: str):
         mode = request.args.get("mode", "easy")
         is_draft = variables.pop("IS_DRAFT", "no") == "yes"
 
-        def update_service(service: str, variables: Dict[str, str], is_draft: bool, mode: str):  # TODO: handle easy and raw modes
+        def update_service(service: str, variables: Dict[str, str], is_draft: bool, mode: str):  # TODO: handle easy mode
             wait_applying()
 
             # Edit check fields and remove already existing ones
@@ -121,15 +201,16 @@ def services_service_page(service: str):
             ignored_multiples = set()
 
             # Edit check fields and remove already existing ones
-            for variable, value in variables.copy().items():
-                if (mode == "raw" or variable != "SERVER_NAME") and value == config.get(variable, {"value": None})["value"]:
-                    if match(r"^.+_\d+$", variable):
-                        ignored_multiples.add(variable)
-                    del variables[variable]
+            if mode != "easy":
+                for variable, value in variables.copy().items():
+                    if (mode == "raw" or variable != "SERVER_NAME") and value == config.get(variable, {"value": None})["value"]:
+                        if match(r"^.+_\d+$", variable):
+                            ignored_multiples.add(variable)
+                        del variables[variable]
 
             variables = BW_CONFIG.check_variables(variables, config, ignored_multiples=ignored_multiples, new=service == "new", threaded=True)
 
-            if was_draft == is_draft and not variables:
+            if service != "new" and was_draft == is_draft and not variables:
                 content = f"The service {service} was not edited because no values were changed."
                 DATA["TO_FLASH"].append({"content": content, "type": "warning"})
                 DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
@@ -181,6 +262,8 @@ def services_service_page(service: str):
 
     mode = request.args.get("mode", "easy")
     search_type = request.args.get("type", "all")
+    template = request.args.get("template", "high")
+    db_templates = DB.get_templates()
     if service == "new":
         clone = request.args.get("clone", "")
         if clone:
@@ -189,24 +272,30 @@ def services_service_page(service: str):
             return render_template(
                 "service_settings.html",
                 config=db_config,
+                templates=db_templates,
                 mode=mode,
                 type=search_type,
+                current_template=template,
             )
 
         db_config = DB.get_config(global_only=True, methods=True)
         return render_template(
             "service_settings.html",
             config=db_config,
+            templates=db_templates,
             mode=mode,
             type=search_type,
+            current_template=template,
         )
 
     db_config = DB.get_config(methods=True, with_drafts=True, service=service)
     return render_template(
         "service_settings.html",
         config=db_config,
+        templates=db_templates,
         mode=mode,
         type=search_type,
+        current_template=template,
     )
 
 

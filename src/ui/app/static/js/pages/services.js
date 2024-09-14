@@ -293,7 +293,6 @@ $(document).ready(function () {
     ],
     order: [[5, "desc"]],
     autoFill: false,
-    colReorder: true,
     responsive: true,
     select: {
       style: "multi+shift",

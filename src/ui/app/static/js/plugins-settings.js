@@ -1,6 +1,8 @@
 $(document).ready(() => {
   var toastNum = 0;
   let currentPlugin = "general";
+  let usedTemplate = $("#used-template").val();
+  let currentTemplate = $("#selected-template").val();
   let currentMode = $("#selected-mode").val();
   let currentType = $("#selected-type").val();
 
@@ -9,7 +11,10 @@ $(document).ready(() => {
   const $pluginTypeSelect = $("#plugin-type-select");
   const $pluginKeywordSearch = $("#plugin-keyword-search");
   const $pluginDropdownMenu = $("#plugins-dropdown-menu");
-  const pluginDropdownItems = $("#plugins-dropdown-menu li.nav-item");
+  const $pluginDropdownItems = $("#plugins-dropdown-menu li.nav-item");
+  const $templateSearch = $("#template-search");
+  const $templateDropdownMenu = $("#templates-dropdown-menu");
+  const $templateDropdownItems = $("#templates-dropdown-menu li.nav-item");
 
   const updateUrlParams = (params, removeHash = false) => {
     const newUrl = new URL(window.location.href);
@@ -36,37 +41,64 @@ $(document).ready(() => {
 
     // Prepare params for the URL update
     const params = {};
-    if (currentType !== "all") params.type = currentType;
+    params.mode = currentMode;
+    if (currentMode === "advanced" && currentType !== "all")
+      params.type = currentType;
+    if (currentMode === "easy" && currentTemplate !== "high")
+      params.template = currentTemplate;
 
     // If "easy" is selected, remove the "mode" parameter
     if (currentMode === "easy") {
       params.mode = null; // Set mode to null to remove it from the URL
-      updateUrlParams(params); // Call the function without the hash (keep it intact)
+      params.type = null; // Remove the type parameter
+      updateUrlParams(params, true); // Call the function without the hash (keep it intact)
     } else {
       // If another mode is selected, update the "mode" parameter
-      params.mode = currentMode;
-      updateUrlParams(params); // Keep the mode in the URL
+      params.template = null; // Remove the template parameter
+      if (currentMode === "advanced" && currentPlugin !== "general") {
+        // Update the URL hash to the current plugin (e.g., #plugin-name)
+        window.location.hash = currentPlugin;
+      } else if (currentMode === "raw") {
+        params.type = null; // Remove the type parameter
+      }
+      updateUrlParams(params, currentMode === "raw"); // Keep the mode in the URL
     }
   };
 
   const handleTabChange = (targetClass) => {
-    currentPlugin = targetClass.substring(1).replace("navs-plugins-", "");
-
     // Prepare the params for URL (parameters to be updated in the URL)
     const params = {};
-    if (currentType !== "all") params.type = currentType;
     if (currentMode !== "easy") params.mode = currentMode;
+    if (currentType !== "all") params.type = currentType;
 
-    // If "general" is selected and a hash exists, remove the hash but keep the parameters
-    if (currentPlugin === "general" && window.location.hash) {
-      // Call updateUrlParams with `removeHash = true` to remove the hash fragment
-      updateUrlParams(params, true);
-    } else {
-      // Update the URL hash to the current plugin (e.g., #plugin-name)
-      window.location.hash = currentPlugin;
+    if (targetClass.includes("navs-plugins-")) {
+      currentPlugin = targetClass.substring(1).replace("navs-plugins-", "");
+      params.template = null; // Remove the template parameter
 
-      // Also update the URL parameters (if any exist) while preserving the hash
-      updateUrlParams(params);
+      // If "general" is selected and a hash exists, remove the hash but keep the parameters
+      if (currentPlugin === "general" && window.location.hash) {
+        // Call updateUrlParams with `removeHash = true` to remove the hash fragment
+        updateUrlParams(params, true);
+      } else {
+        // Update the URL hash to the current plugin (e.g., #plugin-name)
+        window.location.hash = currentPlugin;
+
+        // Also update the URL parameters (if any exist) while preserving the hash
+        updateUrlParams(params);
+      }
+    } else if (targetClass.includes("navs-templates-")) {
+      currentTemplate = targetClass.substring(1).replace("navs-templates-", "");
+      params.type = null; // Remove the type parameter
+
+      // If "high" is selected, remove the "template" parameter
+      if (currentTemplate === "high") {
+        params.template = null; // Set template to null to remove it from the URL
+        updateUrlParams(params); // Call the function without the hash (keep it intact)
+      } else {
+        // If another template is selected, update the "template" parameter
+        params.template = currentTemplate;
+        updateUrlParams(params); // Keep the template in the URL
+      }
     }
   };
 
@@ -109,7 +141,70 @@ $(document).ready(() => {
     }
   };
 
-  const getFormFromSettings = () => {
+  // Function to validate inputs and display error messages
+  const validateCurrentStepInputs = (currentStepContainer) => {
+    let isStepValid = true;
+
+    currentStepContainer.find(".plugin-setting").each(function () {
+      const $input = $(this);
+      const value = $input.val().trim();
+      const isRequired = $input.prop("required");
+      const pattern = $input.attr("pattern");
+      const fieldName =
+        $input.data("field-name") || $input.attr("name") || "This field";
+
+      let errorMessage = "";
+      let isValid = true;
+
+      // Custom error messages
+      const requiredMessage =
+        $input.data("required-message") || `${fieldName} is required.`;
+      const patternMessage =
+        $input.data("pattern-message") || `Please enter a valid ${fieldName}.`;
+
+      // Check if the field is required and not empty
+      if (isRequired && value === "") {
+        errorMessage = requiredMessage;
+        isValid = false;
+      }
+
+      // Validate based on pattern if the input is not empty
+      if (isValid && pattern && value !== "") {
+        const regex = new RegExp(pattern);
+        if (!regex.test(value)) {
+          errorMessage = patternMessage;
+          isValid = false;
+        }
+      }
+
+      // Toggle valid/invalid classes
+      $input.toggleClass("is-invalid", !isValid);
+
+      // Manage the invalid-feedback element
+      let $feedback = $input.next(".invalid-feedback");
+      if (!$feedback.length) {
+        $feedback = $('<div class="invalid-feedback"></div>').insertAfter(
+          $input,
+        );
+      }
+
+      if (!isValid) {
+        $feedback.text(errorMessage);
+        isStepValid = false;
+      } else {
+        $feedback.text("");
+      }
+    });
+
+    if (!isStepValid) {
+      // Focus the first invalid input
+      currentStepContainer.find(".is-invalid").first().focus();
+    }
+
+    return isStepValid;
+  };
+
+  const getFormFromSettings = (elem) => {
     const form = $("<form>", {
       method: "POST",
       action: window.location.href,
@@ -127,31 +222,48 @@ $(document).ready(() => {
       );
     };
 
+    const addChildrenToForm = (form, elem, isEasy = false) => {
+      elem.find("input, select").each(function () {
+        const $this = $(this);
+        const settingName = $this.attr("name");
+        const settingType = $this.attr("type");
+        const originalValue = $this.data("original");
+        let settingValue = $this.val();
+
+        if ($this.is("select")) {
+          settingValue = $this.val();
+        } else if (settingType === "checkbox") {
+          settingValue = $this.is(":checked") ? "yes" : "no";
+        }
+
+        if (!isEasy && settingValue == originalValue) return;
+
+        appendHiddenInput(form, settingName, settingValue);
+      });
+    };
+
     // Handle missing CSRF token gracefully
     const csrfToken = $("#csrf_token").val() || "";
     appendHiddenInput(form, "csrf_token", csrfToken);
 
-    // TODO: support easy mode
-    if (currentMode === undefined || currentMode === "advanced") {
-      $("div[id^='navs-plugins-']")
-        .find("input, select")
-        .each(function () {
-          const $this = $(this);
-          const settingName = $this.attr("name");
-          const settingType = $this.attr("type");
-          const originalValue = $this.data("original");
-          let settingValue = $this.val();
+    if (currentMode === "easy") {
+      const template = elem.data("template");
+      appendHiddenInput(form, "USE_TEMPLATE", template);
+      addChildrenToForm(form, $(`#navs-templates-${template}`), true);
 
-          if ($this.is("select")) {
-            settingValue = $this.val();
-          } else if (settingType === "checkbox") {
-            settingValue = $this.is(":checked") ? "yes" : "no";
-          }
+      // Append 'IS_DRAFT' if it exists
+      const $draftInput = $("#is-draft");
+      if ($draftInput.length) {
+        appendHiddenInput(form, "IS_DRAFT", $draftInput.val());
+      }
 
-          if (settingValue == originalValue) return;
-
-          appendHiddenInput(form, settingName, settingValue);
-        });
+      // Append 'OLD_SERVER_NAME' if it exists
+      const $oldServerName = $("#old-server-name");
+      if ($oldServerName.length) {
+        appendHiddenInput(form, "OLD_SERVER_NAME", $oldServerName.val());
+      }
+    } else if (currentMode === undefined || currentMode === "advanced") {
+      addChildrenToForm(form, $("div[id^='navs-plugins-']"));
 
       const $draftInput = $("#is-draft");
       if ($draftInput.length) {
@@ -243,7 +355,7 @@ $(document).ready(() => {
       const inputValue = e.target.value.toLowerCase();
       let visibleItems = 0;
 
-      pluginDropdownItems.each(function () {
+      $pluginDropdownItems.each(function () {
         const item = $(this);
         const matches =
           (currentType === "all" || item.data("type") === currentType) &&
@@ -258,21 +370,54 @@ $(document).ready(() => {
       });
 
       if (visibleItems === 0) {
-        if ($pluginDropdownMenu.find(".no-items").length === 0) {
+        if ($pluginDropdownMenu.find(".no-plugin-items").length === 0) {
           $pluginDropdownMenu.append(
-            '<li class="no-items dropdown-item text-muted">No Item</li>',
+            '<li class="no-plugin-items dropdown-item text-muted">No Item</li>',
           );
         }
       } else {
-        $pluginDropdownMenu.find(".no-items").remove();
+        $pluginDropdownMenu.find(".no-plugin-items").remove();
       }
     }, 50),
   );
 
-  // Clear search and "No Item" message when the dropdown is closed
-  $("#select-plugin").on("hidden.bs.dropdown", () => {
+  $("#select-template").on("click", () => $templateSearch.focus());
+
+  $("#template-search").on(
+    "input",
+    debounce((e) => {
+      const inputValue = e.target.value.toLowerCase();
+      let visibleItems = 0;
+
+      $templateDropdownItems.each(function () {
+        const item = $(this);
+        const matches = item.text().toLowerCase().includes(inputValue);
+
+        item.toggle(matches);
+
+        if (matches) {
+          visibleItems++; // Increment when an item is shown
+        }
+      });
+
+      if (visibleItems === 0) {
+        if ($templateDropdownMenu.find(".no-template-items").length === 0) {
+          $templateDropdownMenu.append(
+            '<li class="no-template-items dropdown-item text-muted">No Item</li>',
+          );
+        }
+      } else {
+        $templateDropdownMenu.find(".no-template-items").remove();
+      }
+    }, 50),
+  );
+
+  $(document).on("hidden.bs.dropdown", "#select-plugin", function () {
     $("#plugin-search").val("").trigger("input");
-    $(".no-items").remove();
+  });
+
+  $(document).on("hidden.bs.dropdown", "#select-template", function () {
+    $("#template-search").val("").trigger("input");
   });
 
   // Attach event listener to handle mode changes when tabs are switched
@@ -290,13 +435,22 @@ $(document).ready(() => {
     },
   );
 
+  $('#templates-dropdown-menu button[data-bs-toggle="tab"]').on(
+    "shown.bs.tab",
+    (e) => {
+      handleTabChange($(e.target).data("bs-target"));
+    },
+  );
+
   $(document).on("input", ".plugin-setting", function () {
-    const isValid = $(this).data("pattern")
-      ? new RegExp($(this).data("pattern")).test($(this).val())
-      : true;
-    $(this)
-      .toggleClass("is-valid", isValid)
-      .toggleClass("is-invalid", !isValid);
+    debounce(() => {
+      const isValid = $(this).attr("pattern")
+        ? new RegExp($(this).attr("pattern")).test($(this).val())
+        : true;
+      $(this)
+        .toggleClass("is-valid", isValid)
+        .toggleClass("is-invalid", !isValid);
+    }, 100)();
   });
 
   $(document).on("focusout", ".plugin-setting", function () {
@@ -310,7 +464,7 @@ $(document).ready(() => {
 
     updateUrlParams(params);
 
-    pluginDropdownItems.each(function () {
+    $pluginDropdownItems.each(function () {
       const typeMatches =
         currentType === "all" || $(this).data("type") === currentType;
       $(this).toggle(typeMatches);
@@ -325,54 +479,44 @@ $(document).ready(() => {
     }
   });
 
-  const findMatchingSettings = (keyword) => {
-    let matchedPlugin = null;
-    let matchedSettings = $();
-
-    $("div[id^='navs-plugins-']").each(function () {
-      const $plugin = $(this);
-      const pluginId = $plugin.attr("id").replace("navs-plugins-", "");
-      const pluginType = $plugin.data("type"); // Get the type of the plugin (core, external, pro)
-
-      // If the currentType filter is not "all" and the plugin's type doesn't match the currentType, skip this plugin
-      if (currentType !== "all" && pluginType !== currentType) {
-        return; // Skip this plugin
-      }
-
-      // Find settings that match the keyword based on label text or input/select name
-      const matchingSettings = $plugin.find(".form-label").filter(function () {
-        const $label = $(this);
-        const settingName = $label.attr("for") || "";
-        const labelText = $label.text().toLowerCase();
-
-        // Find the associated input/select element using the "for" attribute
-        const $inputElement = $("#" + settingName);
-        const inputName = $inputElement.attr("name") || "";
-
-        // Match either the label text or the input/select name
-        return (
-          labelText.includes(keyword) ||
-          inputName.toLowerCase().includes(keyword)
-        );
-      });
-
-      if (matchingSettings.length > 0) {
-        matchedPlugin = pluginId;
-        matchedSettings = matchingSettings.closest(".col-12");
-        return false; // Stop searching after finding a plugin with matching settings
-      }
-    });
-
-    return { matchedPlugin, matchedSettings };
-  };
-
   $pluginKeywordSearch.on(
     "input",
     debounce((e) => {
       const keyword = e.target.value.toLowerCase().trim();
       if (!keyword) return;
 
-      const { matchedPlugin, matchedSettings } = findMatchingSettings(keyword);
+      let matchedPlugin = null;
+      let matchedSettings = $();
+
+      $("div[id^='navs-plugins-']").each(function () {
+        const $plugin = $(this);
+        const pluginId = $plugin.attr("id").replace("navs-plugins-", "");
+        const pluginType = $plugin.data("type"); // Get the type of the plugin (core, external, pro)
+
+        // If the currentType filter is not "all" and the plugin's type doesn't match the currentType, skip this plugin
+        if (currentType !== "all" && pluginType !== currentType) {
+          return; // Skip this plugin
+        }
+
+        // Find settings that match the keyword based on label text or input/select name
+        const matchingSettings = $plugin
+          .find("input, select")
+          .filter(function () {
+            const $input = $(this);
+            const settingName = ($input.attr("name") || "").toLowerCase();
+            const label = $input.next("label");
+            const labelText = (label.text() || "").toLowerCase();
+
+            // Match either the label text or the input/select name
+            return labelText.includes(keyword) || settingName.includes(keyword);
+          });
+
+        if (matchingSettings.length > 0) {
+          matchedPlugin = pluginId;
+          matchedSettings = matchingSettings.closest(".col-12");
+          return false; // Stop searching after finding a plugin with matching settings
+        }
+      });
 
       if (matchedPlugin) {
         // Automatically switch to the plugin tab
@@ -586,31 +730,39 @@ $(document).ready(() => {
   });
 
   $(".save-settings").on("click", function () {
-    const form = getFormFromSettings();
-    // TODO: support easy mode
-    let minSettings = 4;
-    if (!form.find("input[name='IS_DRAFT']").length) minSettings = 2;
+    const form = getFormFromSettings($(this));
+    if (currentMode === "easy") {
+      const currentStep = parseInt($(this).data("current-step"));
+      const template = $(this).data("template");
+      const currentStepId = `navs-steps-${template}-${currentStep}`;
+      const currentStepContainer = $(`#${currentStepId}`);
+      const isStepValid = validateCurrentStepInputs(currentStepContainer);
+      if (!isStepValid) return;
+    } else {
+      let minSettings = 4;
+      if (!form.find("input[name='IS_DRAFT']").length) minSettings = 2;
 
-    const draftInput = $("#is-draft");
-    const wasDraft = draftInput.data("original") === "yes";
-    let isDraft = draftInput.val() === "yes";
-    if (currentMode === "raw")
-      isDraft = form.find("input[name='IS_DRAFT']").val() === "yes";
+      const draftInput = $("#is-draft");
+      const wasDraft = draftInput.data("original") === "yes";
+      let isDraft = draftInput.val() === "yes";
+      if (currentMode === "raw")
+        isDraft = form.find("input[name='IS_DRAFT']").val() === "yes";
 
-    if (form.children().length < minSettings && isDraft === wasDraft) {
-      alert("No changes detected.");
-      return;
+      if (form.children().length < minSettings && isDraft === wasDraft) {
+        alert("No changes detected.");
+        return;
+      }
     }
     $(window).off("beforeunload");
     form.appendTo("body").submit();
   });
 
-  $("#toggle-draft").on("click", function () {
+  $(".toggle-draft").on("click", function () {
     const draftInput = $("#is-draft");
     const isDraft = draftInput.val() === "yes";
 
     draftInput.val(isDraft ? "no" : "yes");
-    $(this).html(
+    $(".toggle-draft").html(
       `<i class="bx bx-sm bx-${
         isDraft ? "globe" : "file-blank"
       } bx-sm"></i>&nbsp;${isDraft ? "Online" : "Draft"}`,
@@ -636,6 +788,54 @@ $(document).ready(() => {
       .catch((err) => {
         console.error("Failed to copy text: ", err);
       });
+  });
+
+  $(document).on("click", ".next-step, .previous-step", function () {
+    const template = $(this).data("template");
+    let currentStep = parseInt($(this).data("current-step"));
+    const isNext = $(this).hasClass("next-step");
+
+    // Determine the new step
+    const newStep = isNext ? currentStep + 1 : currentStep - 1;
+    const currentStepId = `navs-steps-${template}-${currentStep}`;
+    const newStepId = `navs-steps-${template}-${newStep}`;
+
+    const currentStepContainer = $(`#${currentStepId}`);
+    const newTabTrigger = $(`button[data-bs-target="#${newStepId}"]`);
+    const currentTabTrigger = $(`button[data-bs-target="#${currentStepId}"]`);
+
+    if (newTabTrigger.length) {
+      if (isNext) {
+        const isStepValid = validateCurrentStepInputs(currentStepContainer);
+
+        if (!isStepValid) {
+          // Prevent proceeding to the next step
+          return;
+        }
+      }
+
+      currentTabTrigger
+        .parent()
+        .find("div.text-primary")
+        .removeClass("text-primary")
+        .addClass("text-muted");
+      currentTabTrigger.addClass("disabled");
+
+      // Activate the new tab
+      const newTab = new bootstrap.Tab(newTabTrigger[0]);
+      newTab.show();
+      newTabTrigger
+        .parent()
+        .find("div.text-muted")
+        .removeClass("text-muted")
+        .addClass("text-primary");
+      newTabTrigger.removeClass("disabled");
+      newTabTrigger[0].scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+        inline: "center",
+      });
+    }
   });
 
   $('div[id^="multiple-"]')
@@ -696,9 +896,24 @@ $(document).ready(() => {
       }
     });
 
+  if (
+    (usedTemplate === "" || usedTemplate === "ui") &&
+    currentMode === "easy"
+  ) {
+    $(`button[data-bs-target="#navs-modes-advanced"]`).tab("show");
+  } else if (usedTemplate !== "high" && currentMode === "easy") {
+    $(`button[data-bs-target="#navs-templates-${usedTemplate}"]`).tab("show");
+  }
+
+  if (currentMode === "easy" && currentTemplate !== "high") {
+    $(`button[data-bs-target="#navs-templates-${currentTemplate}"]`).tab(
+      "show",
+    );
+  }
+
   var hasExternalPlugins = false;
   var hasProPlugins = false;
-  pluginDropdownItems.each(function () {
+  $pluginDropdownItems.each(function () {
     const type = $(this).data("type");
     if (type === "external") {
       hasExternalPlugins = true;
@@ -723,11 +938,13 @@ $(document).ready(() => {
     if (targetTab.length) targetTab.tab("show");
   }
 
-  $pluginTypeSelect.trigger("change");
+  if (currentType !== "all") {
+    $pluginTypeSelect.trigger("change");
+  }
 
   if (currentMode === "advanced") {
     const serverNameSetting = $("#setting-general-server-name");
-    if (!serverNameSetting.val()) {
+    if (serverNameSetting.val() === "") {
       if (currentType !== "all") {
         currentType = "all";
         $pluginTypeSelect.val("all");
@@ -766,18 +983,19 @@ $(document).ready(() => {
   }
 
   $(window).on("beforeunload", function (e) {
-    const form = getFormFromSettings();
-    // TODO: support easy mode
-    let minSettings = 4;
-    if (!form.find("input[name='IS_DRAFT']").length) minSettings = 2;
+    const form = getFormFromSettings($(this));
+    if (currentMode !== "easy") {
+      let minSettings = 4;
+      if (!form.find("input[name='IS_DRAFT']").length) minSettings = 2;
 
-    const draftInput = $("#is-draft");
-    const wasDraft = draftInput.data("original") === "yes";
-    let isDraft = draftInput.val() === "yes";
-    if (currentMode === "raw")
-      isDraft = form.find("input[name='IS_DRAFT']").val() === "yes";
+      const draftInput = $("#is-draft");
+      const wasDraft = draftInput.data("original") === "yes";
+      let isDraft = draftInput.val() === "yes";
+      if (currentMode === "raw")
+        isDraft = form.find("input[name='IS_DRAFT']").val() === "yes";
 
-    if (form.children().length < minSettings && isDraft === wasDraft) return;
+      if (form.children().length < minSettings && isDraft === wasDraft) return;
+    }
 
     // Cross-browser compatibility (for older browsers)
     var message =

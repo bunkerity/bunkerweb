@@ -58,23 +58,18 @@ class Config:
 
     def get_plugins_settings(self) -> dict:
         return {
-            **{k: v for x in self.get_plugins() for k, v in x["settings"].items()},
+            **{k: v for x in self.get_plugins().values() for k, v in x["settings"].items()},
             **self.__settings,
         }
 
-    def get_plugins(self, *, _type: Literal["all", "external", "ui", "pro"] = "all", with_data: bool = False) -> List[dict]:
-        plugins = self.__db.get_plugins(_type=_type, with_data=with_data)
-        plugins.sort(key=itemgetter("name"))
+    def get_plugins(self, *, _type: Literal["all", "external", "ui", "pro"] = "all", with_data: bool = False) -> dict:
+        db_plugins = self.__db.get_plugins(_type=_type, with_data=with_data)
+        db_plugins.sort(key=itemgetter("name"))
 
-        general_plugin = None
-        for plugin in plugins.copy():
-            if plugin["id"] == "general":
-                general_plugin = plugin
-                plugins.remove(plugin)
-                break
+        plugins = {"general": {}}
 
-        if general_plugin:
-            plugins.insert(0, general_plugin)
+        for plugin in db_plugins.copy():
+            plugins[plugin.pop("id")] = plugin
 
         return plugins
 

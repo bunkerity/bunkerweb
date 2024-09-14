@@ -302,7 +302,7 @@ def plugins_page():
         def update_plugins(threaded: bool = False):
             wait_applying()
 
-            plugins = BW_CONFIG.get_plugins(_type="ui", with_data=True)
+            plugins = BW_CONFIG.get_plugins(_type="ui", with_data=True)  # TODO: remember that this returns a dict now
             for plugin in deepcopy(plugins):
                 if plugin["id"] in new_plugins_ids:
                     flash(f"Plugin {plugin['id']} already exists", "error")

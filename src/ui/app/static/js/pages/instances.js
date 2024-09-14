@@ -309,7 +309,6 @@ $(document).ready(function () {
     ],
     order: [[7, "desc"]],
     autoFill: false,
-    colReorder: true,
     responsive: true,
     select: {
       style: "multi+shift",

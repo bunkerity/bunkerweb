@@ -3,21 +3,45 @@
     <!-- Content -->
     {% set blacklisted_settings = get_blacklisted_settings() %}
     {% set service_method = "ui" %}
-    {% if current_endpoint != "global-config" %}
-        {% set service_method = config.get("SERVER_NAME", {"method": "ui"})["method"] %}
-        <input type="hidden"
-               id="selected-mode"
-               name="selected_mode"
-               value="{{ mode }}">
-    {% endif %}
+    {% set plugin_types = {
+        "core": {
+            "icon": "<i class=\"bx bx-cube\"></i>",
+            "title-class": " border-dark"
+        },
+        "external": {
+            "icon": "<i class=\"bx bx-plug\"></i>",
+            "title-class": " border-secondary",
+            "text-class": " text-secondary fw-bold"
+        },
+        "pro": {
+            "title-class": " border-primary",
+            "text-class": " text-primary fw-bold shine"
+        }
+    } %}
+    {% set service_method = config.get("SERVER_NAME", {"method": "ui"})["method"] %}
+    <input type="hidden"
+           id="selected-mode"
+           name="selected_mode"
+           value="{{ mode }}">
+    <input type="hidden" id="used-template" name="used_template" value="{% if current_endpoint == "new" %}high{% else %}{{ config.get('USE_TEMPLATE', {'value': ''})['value'] }}{% endif %}">
+    <input type="hidden"
+           id="selected-template"
+           name="selected_template"
+           value="{{ current_template }}">
     <input type="hidden"
            id="service-method"
            name="service_method"
            value="{{ service_method }}">
+    <input type="hidden"
+           id="is-draft"
+           name="IS_DRAFT"
+           value="{{ is_draft }}"
+           data-original="{% if current_endpoint != 'new' %}{{ is_draft }}{% else %}no{% endif %}"
+           data-default="no">
     <div class="tab-content p-0 position-relative">
         <div class="tab-pane fade{% if mode == 'easy' %} show active{% endif %}"
              id="navs-modes-easy"
-             role="tabpanel">TODO: Add Easy mode</div>
+             role="tabpanel">{% include "models/plugins_settings_easy.html" %}</div>
         <div class="tab-pane fade{% if mode == 'advanced' %} show active{% endif %}"
              id="navs-modes-advanced"
              role="tabpanel">{% include "models/plugins_settings.html" %}</div>

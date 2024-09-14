@@ -108,6 +108,7 @@ with app.app_context():
         get_multiples=get_multiples,
         get_filtered_settings=get_filtered_settings,
         get_blacklisted_settings=get_blacklisted_settings,
+        get_plugins_settings=BW_CONFIG.get_plugins_settings,
         url_for=custom_url_for,
     )
 
@@ -121,6 +122,9 @@ with app.app_context():
 
 @app.context_processor
 def inject_variables():
+    if request.path.startswith(("/setup", "/loading", "/login", "/totp")):
+        return dict(script_nonce=app.config["SCRIPT_NONCE"])
+
     DATA.load_from_file()
     metadata = DB.get_metadata()
 
