@@ -6,7 +6,7 @@ from datetime import datetime
 from io import BytesIO
 from itertools import chain
 from json import load as json_load
-from logging import FileHandler
+from logging import FileHandler, Formatter
 from os import _exit, environ, getenv, getpid, sep
 from os.path import join
 from pathlib import Path
@@ -81,7 +81,7 @@ logger = setup_logger("Scheduler", getenv("LOG_LEVEL", "INFO"))
 
 if environ.get("LOG_TO_FILE", "no") == "yes":
     file_handler = FileHandler("/var/log/bunkerweb/scheduler.log")
-    file_handler.setFormatter("%(asctime)s [%(name)s] [%(process)d] [%(levelname)s] - %(message)s")
+    file_handler.setFormatter(Formatter("%(asctime)s [%(name)s] [%(process)d] [%(levelname)s] - %(message)s"))
     logger.addHandler(file_handler)
 
 SLAVE_MODE = environ.get("SLAVE_MODE", "no") == "yes"
