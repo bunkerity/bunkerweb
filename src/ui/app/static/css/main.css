@@ -461,3 +461,151 @@ a.badge:hover {
 .template-steps-container .breadcrumb-item + .breadcrumb-item::before {
   padding: 0 1rem 0 1rem;
 }
+
+.h-vh-40 {
+  height: 40vh;
+}
+
+/* Base styles for the ModSecurity mode */
+.ace-modsecurity .ace_editor {
+  font-family: monospace;
+  font-size: 12px;
+}
+
+/* Comments */
+.ace-modsecurity .ace_comment {
+  color: #6a9955; /* Green color for comments */
+  font-style: italic;
+}
+
+/* Strings */
+.ace-modsecurity .ace_string {
+  color: #ce9178; /* Orange color for strings */
+}
+
+/* Keywords */
+.ace-modsecurity .ace_keyword {
+  color: #569cd6; /* Blue color for keywords */
+  font-weight: bold;
+}
+
+/* Constants (numbers, IP addresses) */
+.ace-modsecurity .ace_constant {
+  color: #b5cea8; /* Light green color for constants */
+}
+
+/* Variables */
+.ace-modsecurity .ace_variable {
+  color: #9cdcfe; /* Light blue color for variables */
+}
+
+/* Operators */
+.ace-modsecurity .ace_keyword.ace_operator {
+  color: #c586c0; /* Purple color for operators */
+}
+
+/* Functions (actions) */
+.ace-modsecurity .ace_support.ace_function {
+  color: #dcdcaa; /* Yellow color for functions */
+  font-weight: bold;
+}
+
+/* Invalid or illegal syntax */
+.ace-modsecurity .ace_invalid {
+  color: #ffffff;
+  background-color: #e51400; /* Red background for errors */
+}
+
+/* Text */
+.ace-modsecurity .ace_text {
+  color: #d4d4d4; /* Default text color */
+}
+
+/* Specific token styles based on the highlight rules */
+
+/* ModSecurity directives */
+.ace-modsecurity .ace_keyword\.headers\.modsecurity\.directive,
+.ace-modsecurity .ace_keyword\.headers\.modsecurity\.directive\.marker {
+  color: #569cd6;
+  font-weight: bold;
+}
+
+/* ModSecurity variables */
+.ace-modsecurity .ace_variable\.parameter\.modsecurity,
+.ace-modsecurity .ace_keyword\.macro\.modsecurity {
+  color: #9cdcfe;
+}
+
+/* ModSecurity actions */
+.ace-modsecurity .ace_keyword\.operator\.modsecurity\.action,
+.ace-modsecurity .ace_keyword\.operator\.modsecurity\.action\.ctl,
+.ace-modsecurity .ace_keyword\.operator\.modsecurity\.action\.phase,
+.ace-modsecurity .ace_keyword\.operator\.modsecurity\.action\.severity {
+  color: #c586c0;
+  font-weight: bold;
+}
+
+/* ModSecurity action parameters */
+.ace-modsecurity .ace_string\.modsecurity\.action_parameter,
+.ace-modsecurity .ace_constant\.numeric\.modsecurity\.action\.phase_name,
+.ace-modsecurity .ace_constant\.numeric\.modsecurity\.action\.severity_name,
+.ace-modsecurity .ace_constant\.numeric\.modsecurity\.action\.ctl\.parameter,
+.ace-modsecurity .ace_constant\.numeric\.modsecurity\.action\.transform_name {
+  color: #ce9178;
+}
+
+/* Disruptive actions */
+.ace-modsecurity
+  .ace_entity\.name\.function\.modsecurity\.action\.disruptive_pass {
+  color: #d16969; /* Light red color for disruptive actions */
+  font-weight: bold;
+}
+
+/* Regular expressions and strings */
+.ace-modsecurity .ace_string\.regexp\.modsecurity,
+.ace-modsecurity .ace_string\.unquoted\.modsecurity,
+.ace-modsecurity .ace_string\.quoted\.modsecurity {
+  color: #ce9178;
+}
+
+/* Operators */
+.ace-modsecurity .ace_keyword\.control\.modsecurity {
+  color: #c586c0;
+}
+
+/* IP addresses */
+.ace-modsecurity .ace_constant\.other\.modsecurity\.ip {
+  color: #b5cea8;
+}
+
+/* Numbers */
+.ace-modsecurity .ace_constant\.numeric\.modsecurity {
+  color: #b5cea8;
+}
+
+/* Invalid syntax */
+.ace-modsecurity .ace_invalid\.illegal\.modsecurity {
+  color: #ffffff;
+  background-color: #e51400;
+  font-weight: bold;
+}
+
+/* Punctuation */
+.ace-modsecurity .ace_punctuation\.definition\.tag\.apacheconf,
+.ace-modsecurity .ace_punctuation\.colon\.modsecurity,
+.ace-modsecurity .ace_punctuation\.equals\.modsecurity {
+  color: #d4d4d4;
+}
+
+/* Apache configuration tags */
+.ace-modsecurity .ace_entity\.tag\.apacheconf {
+  color: #569cd6;
+  font-weight: bold;
+}
+
+/* Comments in Apache configuration */
+.ace-modsecurity .ace_punctuation\.definition\.comment\.apacheconf,
+.ace-modsecurity .ace_comment\.line\.hash\.ini {
+  color: #6a9955;
+  font-style: italic;
+}

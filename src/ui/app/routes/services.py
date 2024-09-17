@@ -2,12 +2,12 @@ from re import match
 from threading import Thread
 from time import time
 from typing import Dict, List
-from flask import Blueprint, Response, redirect, render_template, request, url_for
+from flask import Blueprint, redirect, render_template, request, url_for
 from flask_login import login_required
 
 from app.dependencies import BW_CONFIG, DATA, DB
 
-from app.routes.utils import handle_error, manage_bunkerweb, verify_data_in_form, wait_applying
+from app.routes.utils import CUSTOM_CONF_RX, handle_error, verify_data_in_form, wait_applying
 
 services = Blueprint("services", __name__)
 
@@ -173,7 +173,7 @@ def services_service_page(service: str):
     service_exists = service in services
 
     if service != "new" and not service_exists:
-        return Response("Service not found", status=404)
+        return redirect(url_for("services.services_page"))
 
     if request.method == "POST":
         if DB.readonly:
@@ -187,32 +187,94 @@ def services_service_page(service: str):
         mode = request.args.get("mode", "easy")
         is_draft = variables.pop("IS_DRAFT", "no") == "yes"
 
-        def update_service(service: str, variables: Dict[str, str], is_draft: bool, mode: str):  # TODO: handle easy mode
+        def update_service(service: str, variables: Dict[str, str], is_draft: bool, mode: str):
             wait_applying()
 
             # Edit check fields and remove already existing ones
             if service != "new":
-                config = DB.get_config(methods=True, with_drafts=True, filtered_settings=list(variables.keys()), service=service)
+                db_config = DB.get_config(methods=True, with_drafts=True, service=service)
             else:
-                config = DB.get_config(global_only=True, methods=True, filtered_settings=list(variables.keys()))
-            was_draft = config.get("IS_DRAFT", {"value": "no"})["value"] == "yes"
+                db_config = DB.get_config(global_only=True, methods=True, filtered_settings=list(variables.keys()))
+
+            was_draft = db_config.get("IS_DRAFT", {"value": "no"})["value"] == "yes"
 
             old_server_name = variables.pop("OLD_SERVER_NAME", "")
             ignored_multiples = set()
+            db_custom_configs = {}
+            new_configs = set()
+            configs_changed = False
 
-            # Edit check fields and remove already existing ones
-            if mode != "easy":
+            if mode == "easy":
+                db_templates = DB.get_templates()
+                db_custom_configs = DB.get_custom_configs(as_dict=True)
+
                 for variable, value in variables.copy().items():
-                    if (mode == "raw" or variable != "SERVER_NAME") and value == config.get(variable, {"value": None})["value"]:
+                    conf_match = CUSTOM_CONF_RX.match(variable)
+                    if conf_match:
+                        del variables[variable]
+                        key = f"{conf_match['type'].lower()}_{conf_match['name']}"
+                        if value == db_templates.get(f"{key}.conf"):
+                            if db_custom_configs.pop(f"{service}_{key}", None):
+                                configs_changed = True
+                            continue
+                        value = value.replace("\r\n", "\n").strip().encode("utf-8")
+
+                        new_configs.add(key)
+                        db_custom_config = db_custom_configs.get(f"{service}_{key}", {"data": None, "method": "ui"})
+
+                        if db_custom_config["method"] != "ui" and db_custom_config["template"] != variables.get("USE_TEMPLATE", ""):
+                            DATA["TO_FLASH"].append(
+                                {"content": f"The template Custom config {key} cannot be edited because it has not been created with the UI.", "type": "error"}
+                            )
+                            continue
+                        elif value == db_custom_config["data"].strip():
+                            continue
+
+                        configs_changed = True
+                        db_custom_configs[f"{service}_{key}"] = {
+                            "service_id": variables.get("SERVER_NAME", old_server_name).split(" ")[0],
+                            "type": conf_match["type"].lower(),
+                            "name": conf_match["name"],
+                            "data": value,
+                            "method": "ui",
+                        }
+
+                for db_custom_config, data in db_custom_configs.copy().items():
+                    if data["method"] == "default" and data["template"]:
+                        del db_custom_configs[db_custom_config]
+                        continue
+
+                    if db_custom_config.startswith(f"{service}_") and db_custom_config.replace(f"{service}_", "", 1) not in new_configs:
+                        configs_changed = True
+                        del db_custom_configs[db_custom_config]
+                        continue
+                    db_custom_configs[db_custom_config] = {
+                        "service_id": data["service_id"],
+                        "type": data["type"],
+                        "name": data["name"],
+                        "data": data["data"],
+                        "method": data["method"],
+                    }
+                    if "checksum" in data:
+                        db_custom_configs[db_custom_config]["checksum"] = data["checksum"]
+
+            if mode != "easy" or service != "new":
+                # Remove already existing fields
+                for variable, value in variables.copy().items():
+                    if (mode != "advanced" or variable != "SERVER_NAME") and value == db_config.get(variable, {"value": None})["value"]:
                         if match(r"^.+_\d+$", variable):
                             ignored_multiples.add(variable)
                         del variables[variable]
 
-            variables = BW_CONFIG.check_variables(variables, config, ignored_multiples=ignored_multiples, new=service == "new", threaded=True)
+            variables = BW_CONFIG.check_variables(variables, db_config, ignored_multiples=ignored_multiples, new=service == "new", threaded=True)
 
-            if service != "new" and was_draft == is_draft and not variables:
-                content = f"The service {service} was not edited because no values were changed."
-                DATA["TO_FLASH"].append({"content": content, "type": "warning"})
+            if service != "new" and was_draft == is_draft and not variables and not configs_changed:
+                DATA["TO_FLASH"].append(
+                    {
+                        "content": f"The service {service} was not edited because no values{' or custom configs' if mode == 'easy' else ''} were changed.",
+                        "type": "warning",
+                    }
+                )
                 DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
                 return
 
@@ -223,23 +285,40 @@ def services_service_page(service: str):
                     return
                 variables["SERVER_NAME"] = old_server_name
 
+            operation = None
+            error = None
+
+            if new_configs or configs_changed:
+                error = DB.save_custom_configs(db_custom_configs.values(), "ui", changed=service != "new" and (was_draft != is_draft or not is_draft))
+                if error:
+                    DATA["TO_FLASH"].append({"content": f"An error occurred while saving the custom configs: {error}", "type": "error"})
+
             if service == "new":
                 old_server_name = variables["SERVER_NAME"]
+                operation, error = BW_CONFIG.new_service(variables, is_draft=is_draft)
+            else:
+                operation, error = BW_CONFIG.edit_service(old_server_name, variables, check_changes=(was_draft != is_draft or not is_draft), is_draft=is_draft)
 
-            manage_bunkerweb(
-                "services",
-                variables,
-                old_server_name,
-                operation="edit" if service != "new" else "new",
-                is_draft=is_draft,
-                was_draft=was_draft,
-                threaded=True,
-            )
+            if operation.endswith("already exists."):
+                DATA["TO_FLASH"].append({"content": operation, "type": "warning"})
+                operation = None
+            elif not error:
+                operation = f"Configuration successfully {'created' if service == 'new' else 'saved'} for service {variables['SERVER_NAME'].split(' ')[0]}, the Scheduler will be in charge of applying the changes."
+
+            if operation:
+                if operation.startswith(("Can't", "The database is read-only")):
+                    DATA["TO_FLASH"].append({"content": operation, "type": "error"})
+                else:
+                    DATA["TO_FLASH"].append({"content": operation, "type": "success"})
+
+            DATA["RELOADING"] = False
 
         DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})
         Thread(target=update_service, args=(service, variables, is_draft, mode)).start()
 
         if service == "new":
+            if "SERVER_NAME" not in variables:
+                return redirect(url_for("loading", next=url_for("services.services_page")))
             service = variables["SERVER_NAME"].split(" ")[0]
 
         arguments = {}
@@ -264,35 +343,24 @@ def services_service_page(service: str):
     search_type = request.args.get("type", "all")
     template = request.args.get("template", "high")
     db_templates = DB.get_templates()
+    db_custom_configs = DB.get_custom_configs(as_dict=True)
+    clone = None
     if service == "new":
         clone = request.args.get("clone", "")
         if clone:
             db_config = DB.get_config(methods=True, with_drafts=True, service=clone)
             db_config["SERVER_NAME"]["value"] = ""
-            return render_template(
-                "service_settings.html",
-                config=db_config,
-                templates=db_templates,
-                mode=mode,
-                type=search_type,
-                current_template=template,
-            )
+        else:
+            db_config = DB.get_config(global_only=True, methods=True)
+    else:
+        db_config = DB.get_config(methods=True, with_drafts=True, service=service)
 
-        db_config = DB.get_config(global_only=True, methods=True)
-        return render_template(
-            "service_settings.html",
-            config=db_config,
-            templates=db_templates,
-            mode=mode,
-            type=search_type,
-            current_template=template,
-        )
-
-    db_config = DB.get_config(methods=True, with_drafts=True, service=service)
     return render_template(
         "service_settings.html",
         config=db_config,
         templates=db_templates,
+        configs=db_custom_configs,
+        clone=clone,
         mode=mode,
         type=search_type,
         current_template=template,

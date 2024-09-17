@@ -20,6 +20,9 @@ LOG_RX = re_compile(r"^(?P<date>\d+/\d+/\d+\s\d+:\d+:\d+)\s\[(?P<level>[a-z]+)\]
 REVERSE_PROXY_PATH = re_compile(r"^(?P<host>https?://.{1,255}(:((6553[0-5])|(655[0-2]\d)|(65[0-4]\d{2})|(6[0-4]\d{3})|([1-5]\d{4})|([0-5]{0,5})|(\d{1,4})))?)$")
 PLUGIN_KEYS = ["id", "name", "description", "version", "stream", "settings"]
 PLUGIN_ID_RX = re_compile(r"^[\w_-]{1,64}$")
+CUSTOM_CONF_RX = re_compile(
+    r"^CUSTOM_CONF_(?P<type>HTTP|SERVER_STREAM|STREAM|DEFAULT_SERVER_HTTP|SERVER_HTTP|MODSEC_CRS|MODSEC|CRS_PLUGINS_BEFORE|CRS_PLUGINS_AFTER)_(?P<name>.+)$"
+)
 
 
 def wait_applying():
@@ -49,9 +52,6 @@ def manage_bunkerweb(method: str, *args, operation: str = "reloads", is_draft: b
     # Do the operation
     error = 0
     DATA.load_from_file()
-
-    if "TO_FLASH" not in DATA:
-        DATA["TO_FLASH"] = []
 
     if method == "services":
         if operation == "new":

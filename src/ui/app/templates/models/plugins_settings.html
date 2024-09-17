@@ -66,7 +66,6 @@
         <div class="d-flex justify-content-center">
             {% if current_endpoint != "global-config" %}
                 <div {% if current_endpoint != 'new' and service_method != 'ui' %}data-bs-toggle="tooltip" data-bs-placement="top" title="The draft mode can only be toggled on UI created services"{% endif %}>
-                    {% set is_draft = config.get('IS_DRAFT', {}).get('value', 'no') %}
                     <button type="button"
                             class="btn btn-sm btn-outline-secondary toggle-draft me-3 {% if current_endpoint != 'new' and service_method != 'ui' %}disabled{% endif %}">
                         <i class="bx bx-sm bx-{% if is_draft == 'yes' %}file-blank{% else %}globe{% endif %}"></i>

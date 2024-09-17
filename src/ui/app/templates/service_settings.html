@@ -19,11 +19,14 @@
         }
     } %}
     {% set service_method = config.get("SERVER_NAME", {"method": "ui"})["method"] %}
+    {% set is_draft = config.get("IS_DRAFT", {"value": "no"})["value"] %}
     <input type="hidden"
            id="selected-mode"
            name="selected_mode"
            value="{{ mode }}">
-    <input type="hidden" id="used-template" name="used_template" value="{% if current_endpoint == "new" %}high{% else %}{{ config.get('USE_TEMPLATE', {'value': ''})['value'] }}{% endif %}">
+    <input type="hidden" id="used-template" name="used_template" value="{% if current_endpoint == "new" and not clone %}high{% else %}{{ config.get('USE_TEMPLATE', {'value': ''})['value'] }}
+    {% endif %}
+    ">
     <input type="hidden"
            id="selected-template"
            name="selected_template"
@@ -36,7 +39,7 @@
            id="is-draft"
            name="IS_DRAFT"
            value="{{ is_draft }}"
-           data-original="{% if current_endpoint != 'new' %}{{ is_draft }}{% else %}no{% endif %}"
+           data-original="{% if current_endpoint != 'new' or clone %}{{ is_draft }}{% else %}no{% endif %}"
            data-default="no">
     <div class="tab-content p-0 position-relative">
         <div class="tab-pane fade{% if mode == 'easy' %} show active{% endif %}"

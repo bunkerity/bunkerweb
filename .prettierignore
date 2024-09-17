@@ -13,4 +13,5 @@ README.md
 SECURITY.md
 src/ui/app/templates/*
 src/common/core/*/ui/*
+src/ui/app/static/libs/*
 examples/

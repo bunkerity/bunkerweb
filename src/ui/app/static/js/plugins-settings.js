@@ -1,7 +1,8 @@
 $(document).ready(() => {
   var toastNum = 0;
   let currentPlugin = "general";
-  let usedTemplate = $("#used-template").val();
+  let currentStep = 1;
+  let usedTemplate = $("#used-template").val().trim();
   let currentTemplate = $("#selected-template").val();
   let currentMode = $("#selected-mode").val();
   let currentType = $("#selected-type").val();
@@ -225,8 +226,11 @@ $(document).ready(() => {
     const addChildrenToForm = (form, elem, isEasy = false) => {
       elem.find("input, select").each(function () {
         const $this = $(this);
-        const settingName = $this.attr("name");
         const settingType = $this.attr("type");
+
+        if (settingType === "hidden") return;
+
+        const settingName = $this.attr("name");
         const originalValue = $this.data("original");
         let settingValue = $this.val();
 
@@ -236,7 +240,12 @@ $(document).ready(() => {
           settingValue = $this.is(":checked") ? "yes" : "no";
         }
 
-        if (!isEasy && settingValue == originalValue) return;
+        if (
+          !isEasy &&
+          settingName !== "SERVER_NAME" &&
+          settingValue == originalValue
+        )
+          return;
 
         appendHiddenInput(form, settingName, settingValue);
       });
@@ -247,9 +256,18 @@ $(document).ready(() => {
     appendHiddenInput(form, "csrf_token", csrfToken);
 
     if (currentMode === "easy") {
-      const template = elem.data("template");
-      appendHiddenInput(form, "USE_TEMPLATE", template);
-      addChildrenToForm(form, $(`#navs-templates-${template}`), true);
+      appendHiddenInput(form, "USE_TEMPLATE", currentTemplate);
+
+      const templateContainer = $(`#navs-templates-${currentTemplate}`);
+      addChildrenToForm(form, templateContainer, true);
+
+      templateContainer.find(".ace-editor").each(function () {
+        const editor = ace.edit(this);
+        const editorValue = editor.getValue().trim();
+        const editorDefault = $(`#${this.id}-default`).val().trim();
+        if (editorValue !== editorDefault)
+          appendHiddenInput(form, $(this).data("name"), editorValue);
+      });
 
       // Append 'IS_DRAFT' if it exists
       const $draftInput = $("#is-draft");
@@ -502,9 +520,13 @@ $(document).ready(() => {
         const matchingSettings = $plugin
           .find("input, select")
           .filter(function () {
-            const $input = $(this);
-            const settingName = ($input.attr("name") || "").toLowerCase();
-            const label = $input.next("label");
+            const $this = $(this);
+            const settingType = $this.attr("type");
+
+            if (settingType === "hidden") return false;
+
+            const settingName = ($this.attr("name") || "").toLowerCase();
+            const label = $this.next("label");
             const labelText = (label.text() || "").toLowerCase();
 
             // Match either the label text or the input/select name
@@ -732,9 +754,7 @@ $(document).ready(() => {
   $(".save-settings").on("click", function () {
     const form = getFormFromSettings($(this));
     if (currentMode === "easy") {
-      const currentStep = parseInt($(this).data("current-step"));
-      const template = $(this).data("template");
-      const currentStepId = `navs-steps-${template}-${currentStep}`;
+      const currentStepId = `navs-steps-${currentTemplate}-${currentStep}`;
       const currentStepContainer = $(`#${currentStepId}`);
       const isStepValid = validateCurrentStepInputs(currentStepContainer);
       if (!isStepValid) return;
@@ -791,18 +811,15 @@ $(document).ready(() => {
   });
 
   $(document).on("click", ".next-step, .previous-step", function () {
-    const template = $(this).data("template");
-    let currentStep = parseInt($(this).data("current-step"));
     const isNext = $(this).hasClass("next-step");
 
     // Determine the new step
     const newStep = isNext ? currentStep + 1 : currentStep - 1;
-    const currentStepId = `navs-steps-${template}-${currentStep}`;
-    const newStepId = `navs-steps-${template}-${newStep}`;
+    const currentStepId = `navs-steps-${currentTemplate}-${currentStep}`;
+    const newStepId = `navs-steps-${currentTemplate}-${newStep}`;
 
     const currentStepContainer = $(`#${currentStepId}`);
     const newTabTrigger = $(`button[data-bs-target="#${newStepId}"]`);
-    const currentTabTrigger = $(`button[data-bs-target="#${currentStepId}"]`);
 
     if (newTabTrigger.length) {
       if (isNext) {
@@ -812,14 +829,18 @@ $(document).ready(() => {
           // Prevent proceeding to the next step
           return;
         }
-      }
+        currentStep++;
+      } else currentStep--;
 
-      currentTabTrigger
-        .parent()
-        .find("div.text-primary")
-        .removeClass("text-primary")
-        .addClass("text-muted");
-      currentTabTrigger.addClass("disabled");
+      $(`#navs-templates-${currentTemplate}`)
+        .find(".template-steps-container .breadcrumb-item")
+        .each(function () {
+          $(this)
+            .find("div.text-primary")
+            .removeClass("text-primary")
+            .addClass("text-muted");
+          $(this).find("button").addClass("disabled");
+        });
 
       // Activate the new tab
       const newTab = new bootstrap.Tab(newTabTrigger[0]);
@@ -835,6 +856,52 @@ $(document).ready(() => {
         block: "nearest",
         inline: "center",
       });
+    }
+  });
+
+  $("#reset-template-config").on("click", function () {
+    const reset_modal = $("#modal-reset-template-config");
+    reset_modal.modal("show");
+  });
+
+  $("#confirm-reset-template-config").on("click", function () {
+    const templateContainer = $(`#navs-templates-${currentTemplate}`);
+    templateContainer.find("input, select").each(function () {
+      const type = $(this).attr("type");
+      const templateValue = $(`#${this.id}-template`).val();
+      if ($(this).prop("disabled") || type === "hidden") {
+        return;
+      }
+
+      // Check for select element
+      if ($(this).is("select")) {
+        $(this)
+          .find("option")
+          .each(function () {
+            $(this).prop("selected", $(this).val() == templateValue);
+          });
+      } else if (type === "checkbox") {
+        $(this).prop("checked", templateValue === "yes");
+      } else {
+        $(this).val(templateValue);
+      }
+    });
+
+    templateContainer.find(".ace-editor").each(function () {
+      const editor = ace.edit(this);
+      const editorValue = $(`#${this.id}-default`).val().trim();
+      editor.setValue(editorValue);
+      editor.session.setValue(editorValue);
+      editor.gotoLine(0);
+    });
+
+    if (currentStep > 1) {
+      setTimeout(() => {
+        currentStep = 2;
+        $(`#navs-steps-${currentTemplate}-2`)
+          .find(".previous-step")
+          .trigger("click");
+      }, 100);
     }
   });
 
@@ -981,6 +1048,32 @@ $(document).ready(() => {
       feedbackToast.toast("show");
     }
   }
+
+  $(".ace-editor").each(function () {
+    const initialContent = $(this).text().trim();
+    const editor = ace.edit(this);
+    editor.setTheme("ace/theme/cloud9_day"); // cloud9_night when dark mode is supported
+
+    const language = $(this).data("language"); // TODO: Support ModSecurity
+    if (language === "NGINX") {
+      editor.session.setMode("ace/mode/nginx");
+    } else {
+      editor.session.setMode("ace/mode/text"); // Default mode if language is unrecognized
+    }
+
+    // Set the editor's initial content
+    editor.setValue(initialContent, -1); // The second parameter moves the cursor to the start
+
+    editor.setOptions({
+      fontSize: "14px",
+      showPrintMargin: false,
+      tabSize: 2,
+      useSoftTabs: true,
+      wrap: true,
+    });
+
+    editor.renderer.setScrollMargin(10, 10);
+  });
 
   $(window).on("beforeunload", function (e) {
     const form = getFormFromSettings($(this));

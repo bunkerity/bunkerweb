@@ -93,6 +93,10 @@
             <script src="{{ url_for('static', filename='libs/datatables/datatables.min.js') }}"
                     nonce="{{ script_nonce }}"></script>
         {% endif %}
+        {% if current_endpoint != "services" and "services" in request.path %}
+            <script src="{{ url_for('static', filename='libs/ace/src-min/ace.js') }}"
+                    nonce="{{ script_nonce }}"></script>
+        {% endif %}
         <!-- Core JS -->
         <script src="{{ url_for('static', filename='js/menu.js') }}"
                 nonce="{{ script_nonce }}"></script>

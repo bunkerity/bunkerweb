@@ -32,6 +32,9 @@
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
                         data-bs-original-title="The date and time when the Service was last updated">Last Update</th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="The actions that can be performed on the Service">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -58,6 +61,41 @@
                         </td>
                         <td>{{ service['creation_date'].astimezone().strftime("%Y-%m-%d %H:%M:%S %Z") }}</td>
                         <td>{{ service['last_update'].astimezone().strftime("%Y-%m-%d %H:%M:%S %Z") }}</td>
+                        <td>
+                            <div class="d-flex justify-content-center">
+                                <a role="button"
+                                        class="btn btn-primary btn-sm me-1"
+                                        href="{{ url_for("services") }}/{{ service['id'] }}"
+                                        data-bs-toggle="tooltip"
+                                        data-bs-placement="bottom"
+                                        data-bs-original-title="Edit service {{ service['id'] }}">
+                                    <i class="bx bx-edit bx-xs"></i>
+                                </a>
+                                <a role="button"
+                                        class="btn btn-outline-secondary btn-sm me-1"
+                                        href="{{ url_for("services") }}/new?clone={{ service['id'] }}"
+                                        data-bs-toggle="tooltip"
+                                        data-bs-placement="bottom"
+                                        data-bs-original-title="Clone service {{ service['id'] }}">
+                                    <i class="bx bx-copy-alt bx-xs"></i>
+                                </a>
+                                <button type="button"
+                                        class="btn btn-outline-secondary btn-sm me-1"
+                                        data-bs-toggle="tooltip"
+                                        data-bs-placement="bottom"
+                                        data-bs-original-title="Convert service {{ service['id'] }} to {{ 'online' if service['is_draft'] else 'draft' }}">
+                                    <i class="bx bx-transfer bx-xs"></i>
+                                </button>
+                                <div data-bs-toggle="tooltip"
+                                     data-bs-placement="bottom"
+                                     data-bs-original-title="{% if service['method'] != 'ui' %}Disabled by {{ service['method'] }}{% else %}Delete service {{ service['id'] }}{% endif %}">
+                                    <button type="button"
+                                            class="btn btn-outline-danger btn-sm me-1{% if service['method'] != 'ui' %} disabled{% endif %}">
+                                        <i class="bx bx-trash bx-xs"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </td>
                     </tr>
                 {% endfor %}
             </tbody>
