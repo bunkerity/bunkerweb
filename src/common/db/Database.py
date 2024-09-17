@@ -1643,7 +1643,7 @@ class Database:
 
                 custom_config["type"] = custom_config["type"].replace("-", "_").lower()  # type: ignore
                 custom_config["data"] = custom_config["data"].encode("utf-8") if isinstance(custom_config["data"], str) else custom_config["data"]
-                custom_config["checksum"] = bytes_hash(custom_config["data"], algorithm="sha256")  # type: ignore
+                custom_config["checksum"] = custom_config.get("checksum", bytes_hash(custom_config["data"], algorithm="sha256"))  # type: ignore
 
                 service_id = custom_config.get("service_id", None) or None
                 filters = {
@@ -1943,9 +1943,9 @@ class Database:
 
         return config
 
-    def get_custom_configs(self) -> List[Dict[str, Any]]:
+    def get_custom_configs(self, *, with_drafts: bool = False, as_dict: bool = False) -> Union[List[Dict[str, Any]], Dict[str, Any]]:
         """Get the custom configs from the database"""
-        db_config = self.get_non_default_settings(filtered_settings={"USE_TEMPLATE"})
+        db_config = self.get_non_default_settings(with_drafts=with_drafts, filtered_settings={"USE_TEMPLATE"})
 
         with self._db_session() as session:
             custom_configs = [
@@ -1969,6 +1969,13 @@ class Database:
             ]
 
             if not db_config:
+                if as_dict:
+                    dict_custom_configs = {}
+                    for custom_config in custom_configs:
+                        dict_custom_configs[
+                            (f"{custom_config['service_id']}_" if custom_config["service_id"] else "") + f"{custom_config['type']}_{custom_config['name']}"
+                        ] = custom_config
+                    return dict_custom_configs
                 return custom_configs
 
             for service in session.query(Services).with_entities(Services.id).all():
@@ -1996,6 +2003,13 @@ class Database:
                                     }
                                 )
 
+            if as_dict:
+                dict_custom_configs = {}
+                for custom_config in custom_configs:
+                    dict_custom_configs[
+                        (f"{custom_config['service_id']}_" if custom_config["service_id"] else "") + f"{custom_config['type']}_{custom_config['name']}"
+                    ] = custom_config
+                return dict_custom_configs
             return custom_configs
 
     def get_services_settings(self, methods: bool = False, with_drafts: bool = False) -> List[Dict[str, Any]]:
