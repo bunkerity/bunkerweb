@@ -310,7 +310,7 @@ You will find more information in the [Linux section](https://docs.bunkerweb.io/
 	<img alt="Azure banner" src="https://github.com/bunkerity/bunkerweb/raw/v1.5.10/docs/assets/img/integration-azure.webp" />
 </p>
 
-BunkerWeb is referenced in the [Azure Marketplace](https://azuremarketplace.microsoft.com/fr-fr/marketplace/apps/bunkerity.bunkerweb?tab=Overview) and a ARM template is available in the [misc folder](https://github.com/bunkerity/bunkerweb/raw/v1.5.10/misc/integrations/azure-arm-template.json).
+BunkerWeb is referenced in the [Azure Marketplace](https://azuremarketplace.microsoft.com/fr-fr/marketplace/apps/bunkerity.bunkerweb?tab=Overview) and an ARM template is available in the [misc folder](https://github.com/bunkerity/bunkerweb/raw/v1.5.9/misc/integrations/azure-arm-template.json).
 
 You will find more information in the [Microsoft Azure section](https://docs.bunkerweb.io/1.5.10/integrations/?utm_campaign=self&utm_source=github#microsoft-azure) of the documentation.
 
