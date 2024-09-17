@@ -615,13 +615,16 @@ if __name__ == "__main__":
 
                 saving = True
                 in_db = False
+                from_template = False
                 for db_conf in db_configs:
                     if db_conf["service_id"] == service_id and db_conf["name"] == file.stem:
                         in_db = True
+                        if db_conf["template"]:
+                            from_template = True
 
-                if not in_db and content.startswith("# CREATED BY ENV"):
+                if from_template or (not in_db and content.startswith("# CREATED BY ENV")):
                     saving = False
-                    changes = True
+                    changes = not from_template
 
                 if saving:
                     custom_configs.append({"value": content, "exploded": (service_id, config_type, file.stem)})
