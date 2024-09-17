@@ -170,12 +170,12 @@ greenlet==3.1.0 \
     --hash=sha256:fad7a051e07f64e297e6e8399b4d6a3bdcad3d7297409e9a06ef8cbccff4f501 \
     --hash=sha256:ffb08f2a1e59d38c7b8b9ac8083c9c8b9875f0955b1e9b9b9a965607a51f8e54
     # via sqlalchemy
-psycopg==3.2.1 \
-    --hash=sha256:dc8da6dc8729dacacda3cc2f17d2c9397a70a66cf0d2b69c91065d60d5f00cb7 \
-    --hash=sha256:ece385fb413a37db332f97c49208b36cf030ff02b199d7635ed2fbd378724175
+psycopg==3.2.2 \
+    --hash=sha256:8bad2e497ce22d556dac1464738cb948f8d6bab450d965cf1d8a8effd52412e0 \
+    --hash=sha256:babf565d459d8f72fb65da5e211dd0b58a52c51e4e1fa9cadecff42d6b7619b2
     # via -r requirements.armv7.in
-psycopg-c==3.2.1 \
-    --hash=sha256:2d09943cc8a855c42c1e23b4298957b7ce8f27bf3683258c52fd139f601f7cda
+psycopg-c==3.2.2 \
+    --hash=sha256:de8cac75bc6640ef0f54ad9187b81e07c430206a83c566b73d4cca41ecccb7c8
     # via psycopg
 psycopg-pool==3.2.2 \
     --hash=sha256:273081d0fbfaced4f35e69200c89cb8fbddfe277c38cc86c235b90a2ec2c8153 \
