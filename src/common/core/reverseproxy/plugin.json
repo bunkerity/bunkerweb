@@ -48,7 +48,7 @@
       "id": "reverse-proxy-ssl-sni-name",
       "label": "SSL SNI name",
       "regex": "^.*$",
-      "type": "check"
+      "type": "text"
     },
     "REVERSE_PROXY_HOST": {
       "context": "multisite",

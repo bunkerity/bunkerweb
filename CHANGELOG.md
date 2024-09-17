@@ -4,6 +4,7 @@
 
 - [UI] Fix setup wizard bug related to certificate
 - [UI] Fix bug when adding more than 3 reverse proxies URLs
+- [UI] Fix wrong type for REVERSE_PROXY_SSL_SNI_NAME setting
 - [BUGFIX] Add HTTP3 specific modsec rule in web UI to avoid false positives
 - [BUGFIX] Fix missing scheduler logs in Linux integration
 - [BUGFIX] Add missing REPORT HTTP method to ALLOWED_METHODS setting
