@@ -4,6 +4,8 @@ from logging import (
     ERROR,
     INFO,
     WARNING,
+    FileHandler,
+    Formatter,
     Logger,
     _nameToLevel,
     addLevelName,
@@ -57,5 +59,10 @@ def setup_logger(title: str, level: Optional[Union[str, int]] = None) -> Logger:
         logger.setLevel(_nameToLevel.get(level.upper(), default_level))
     else:
         logger.setLevel(level)
+
+    if getenv("SCHEDULER_LOG_TO_FILE", "no") == "yes":
+        file_handler = FileHandler("/var/log/bunkerweb/scheduler.log")
+        file_handler.setFormatter(Formatter("%(asctime)s [%(name)s] [%(process)d] [%(levelname)s] - %(message)s"))
+        logger.addHandler(file_handler)
 
     return logger
