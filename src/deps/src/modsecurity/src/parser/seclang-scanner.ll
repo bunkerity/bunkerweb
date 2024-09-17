@@ -73,7 +73,7 @@ static std::stack<int> YY_PREVIOUS_STATE;
 
 // The location of the current token.
 %}
-%option noyywrap nounput batch debug noinput
+%option noyywrap nounput batch debug noinput nounistd never-interactive
 
 
 

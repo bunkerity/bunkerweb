@@ -19,6 +19,10 @@
 #include "src/utils/string.h"
 #include "src/variables/variable.h"
 
+#ifdef WIN32
+#include "src/compat/msvc.h"
+#endif
+
 namespace modsecurity {
 
 
@@ -98,8 +102,8 @@ void ConfigUnicodeMap::loadConfig(std::string f, double configCodePage,
 
             if (mapping != NULL) {
                 ucode = strtok_r(mapping, ":", &hmap);
-                sscanf(ucode, "%x", &code);
-                sscanf(hmap, "%x", &Map);
+                sscanf(ucode, "%x", &code); // cppcheck-suppress invalidScanfArgType_int
+                sscanf(hmap, "%x", &Map);   // cppcheck-suppress invalidScanfArgType_int
                 if (code >= 0 && code <= 65535)    {
                     driver->m_unicodeMapTable.m_unicodeMapTable->change(code, Map);
                 }

@@ -1,5 +1,9 @@
 sudo: required
-dist: xenial
+dist: focal
+
+branches:
+  only:
+    - "master"
 
 os: linux
 
@@ -7,7 +11,6 @@ language: c
 
 compiler:
   - gcc
-  - clang
 
 env:
   global:
@@ -18,7 +21,7 @@ env:
     - LUAJIT_INC=$LUAJIT_PREFIX/include/luajit-2.1
     - LD_LIBRARY_PATH=$LUAJIT_LIB:$LD_LIBRARY_PATH
   matrix:
-    - NGINX_VERSION=1.19.3
+    - NGINX_VERSION=1.27.0
 
 install:
   - sudo apt-get install -qq -y cpanminus axel
@@ -40,7 +43,7 @@ script:
   - cd ..
   - export PATH=$PWD/work/nginx/sbin:$PWD/nginx-devel-utils:$PATH
   - export NGX_BUILD_CC=$CC
-  - ngx-build $NGINX_VERSION --with-http_realip_module --add-module=../ndk-nginx-module --add-module=../lua-nginx-module --with-debug > build.log 2>&1 || (cat build.log && exit 1)
+  - ngx-build $NGINX_VERSION --without-pcre2 --with-http_realip_module --add-module=../ndk-nginx-module --add-module=../lua-nginx-module --with-debug > build.log 2>&1 || (cat build.log && exit 1)
   - nginx -V
   - ldd `which nginx`|grep -E 'luajit|ssl|pcre'
-  - prove -r t
+  - prove -I. -r t

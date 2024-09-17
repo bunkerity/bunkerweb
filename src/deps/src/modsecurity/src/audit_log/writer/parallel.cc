@@ -21,7 +21,12 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#ifndef WIN32
 #include <unistd.h>
+#else
+#include <io.h>
+#include "src/compat/msvc.h"
+#endif
 #include <stdlib.h>
 
 #include <fstream>
@@ -46,28 +51,27 @@ Parallel::~Parallel() {
 
 inline std::string Parallel::logFilePath(time_t *t,
     int part) {
-    struct tm timeinfo;
-    char tstr[300];
-    std::string name("");
+    std::string name;
 
+    struct tm timeinfo;
     localtime_r(t, &timeinfo);
 
     if (part & YearMonthDayDirectory) {
-        memset(tstr, '\0', 300);
-        strftime(tstr, 299, "/%Y%m%d", &timeinfo);
-        name = tstr;
+        char tstr[std::size("/yyyymmdd")];
+        strftime(tstr, std::size(tstr), "/%Y%m%d", &timeinfo);
+        name.append(tstr);
     }
 
     if (part & YearMonthDayAndTimeDirectory) {
-        memset(tstr, '\0', 300);
-        strftime(tstr, 299, "/%Y%m%d-%H%M", &timeinfo);
-        name = name + tstr;
+        char tstr[std::size("/yyyymmdd-hhmm")];
+        strftime(tstr, std::size(tstr), "/%Y%m%d-%H%M", &timeinfo);
+        name.append(tstr);
     }
 
     if (part & YearMonthDayAndTimeFileName) {
-        memset(tstr, '\0', 300);
-        strftime(tstr, 299, "/%Y%m%d-%H%M%S", &timeinfo);
-        name = name + tstr;
+        char tstr[std::size("/yyyymmdd-hhmmss")];
+        strftime(tstr, std::size(tstr), "/%Y%m%d-%H%M%S", &timeinfo);
+        name.append(tstr);
     }
 
     return name;
@@ -118,7 +122,7 @@ bool Parallel::write(Transaction *transaction, int parts, std::string *error) {
         log = transaction->toOldAuditLogFormat(parts, "-" + boundary + "--");
     }
 
-    std::string logPath = m_audit->m_storage_dir;
+    const auto &logPath = m_audit->m_storage_dir;
     fileName = logPath + fileName + "-" + *transaction->m_id.get();
 
     if (logPath.empty()) {

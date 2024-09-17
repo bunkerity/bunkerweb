@@ -3294,5 +3294,56 @@
         "SecRequestBodyAccess On",
         "SecRule ARGS:namea \"@streq 111\" \"phase:2,deny,id:500096\""
     ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"multipart parser (invalid part header - contains invalid character)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data; boundary=a",
+        "Expect":"100-continue"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body":[
+        "--a\r",
+        "\u000eContent-Disposition\u000e: form-data; name=\"file\"; filename=\"1.jsp\"\r",
+        "Content-Disposition: form-data; name=\"post\";\r",
+        "\r",
+        "<%out.print(123)%>\r",
+        "--a--\r"
+      ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "http_code":403,
+      "debug_log":"Multipart: Invalid part header \\(contains invalid character\\)"
+    },
+    "rules":[
+        "SecruleEngine On",
+        "SecRule REQBODY_PROCESSOR_ERROR \"@eq 1\" \"phase:2,deny,status:403,id:500077\""
+    ]
   }
 ]

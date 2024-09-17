@@ -67,6 +67,7 @@ class RuleMessage {
         m_ruleLine(rule->getLineNumber()),
         m_saveMessage(true),
         m_serverIpAddress(trans->m_serverIpAddress),
+        m_requestHostName(trans->m_requestHostName),
         m_severity(0),
         m_uriNoQueryStringDecoded(trans->m_uri_no_query_string_decoded),
         m_ver(rule->m_ver),
@@ -92,6 +93,7 @@ class RuleMessage {
         m_ruleLine(rule->m_ruleLine),
         m_saveMessage(rule->m_saveMessage),
         m_serverIpAddress(rule->m_serverIpAddress),
+        m_requestHostName(rule->m_requestHostName),
         m_severity(rule->m_severity),
         m_uriNoQueryStringDecoded(rule->m_uriNoQueryStringDecoded),
         m_ver(rule->m_ver),
@@ -117,6 +119,7 @@ class RuleMessage {
         m_ruleLine(ruleMessage.m_ruleLine),
         m_saveMessage(ruleMessage.m_saveMessage),
         m_serverIpAddress(ruleMessage.m_serverIpAddress),
+        m_requestHostName(ruleMessage.m_requestHostName),
         m_severity(ruleMessage.m_severity),
         m_uriNoQueryStringDecoded(ruleMessage.m_uriNoQueryStringDecoded),
         m_ver(ruleMessage.m_ver),
@@ -142,6 +145,7 @@ class RuleMessage {
         m_ruleLine = ruleMessage.m_ruleLine;
         m_saveMessage = ruleMessage.m_saveMessage;
         m_serverIpAddress = ruleMessage.m_serverIpAddress;
+        m_requestHostName = ruleMessage.m_requestHostName;
         m_severity = ruleMessage.m_severity;
         m_uriNoQueryStringDecoded = ruleMessage.m_uriNoQueryStringDecoded;
         m_ver = ruleMessage.m_ver;
@@ -201,6 +205,7 @@ class RuleMessage {
     int m_ruleLine;
     bool m_saveMessage;
     std::shared_ptr<std::string> m_serverIpAddress;
+    std::shared_ptr<std::string> m_requestHostName;
     int m_severity;
     std::shared_ptr<std::string> m_uriNoQueryStringDecoded;
     std::string m_ver;

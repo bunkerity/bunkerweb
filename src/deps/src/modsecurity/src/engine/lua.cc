@@ -185,7 +185,7 @@ int Lua::run(Transaction *t, const std::string &str) {
 
     lua_getglobal(L, "main");
 
-    ms_dbg_a(t, 1, str);
+    ms_dbg_a(t, 9, str);
 
     /* Put the parameter on the stack. */
     if (!str.empty() ) {
@@ -267,7 +267,7 @@ int Lua::getvar(lua_State *L) {
     t = reinterpret_cast<Transaction *>(z);
 
     std::string var = variables::Variable::stringMatchResolve(t, varname);
-    var = applyTransformations(L, t, 2, var);
+    applyTransformations(L, t, 2, var);
 
     if (var.size() == 0) {
         lua_pushnil(L);
@@ -407,12 +407,10 @@ int Lua::setvar(lua_State *L) {
 }
 
 
-std::string Lua::applyTransformations(lua_State *L, Transaction *t,
-    int idx, std::string var) {
-    std::string newVar = var;
-
+void Lua::applyTransformations(lua_State *L, const Transaction *t,
+    int idx, std::string &var) {
     if (lua_isuserdata(L, idx) || lua_isnoneornil(L, idx)) {
-        return var;
+        return;
     }
 
     if (lua_istable(L, idx)) {
@@ -429,16 +427,15 @@ std::string Lua::applyTransformations(lua_State *L, Transaction *t,
 
             /* A "none" means start over */
             if (strcmp("none", name) == 0) {
-                newVar = var;
                 continue;
             }
 
-            actions::transformations::Transformation *tfn = \
+            auto tfn = \
                 actions::transformations::Transformation::instantiate(
                     "t:" + std::string(name));
             // FIXME: transformation is not yet returning null.
             if (tfn) {
-                newVar = tfn->evaluate(newVar, t);
+                tfn->transform(var, t);
             } else {
                 ms_dbg_a(t, 1,
                     "SecRuleScript: Invalid transformation function: " \
@@ -447,32 +444,31 @@ std::string Lua::applyTransformations(lua_State *L, Transaction *t,
             delete tfn;
         }
 
-        return newVar;
+        return;
     }
 
     if (lua_isstring(L, idx)) {
         const char *name(NULL);
         name = reinterpret_cast<const char *>(luaL_checkstring(L, idx));
 
-        actions::transformations::Transformation *tfn = \
+        auto tfn = \
             actions::transformations::Transformation::instantiate(
                 "t:" + std::string(name));
 
         // FIXME: transformation is not yet returning null.
         if (tfn) {
-            newVar = tfn->evaluate(newVar, t);
+            tfn->transform(var, t);
             delete tfn;
         } else {
             ms_dbg_a(t, 1, "SecRuleScript: Invalid transformation function: " \
                 + std::string(name));
         }
-        return newVar;
+        return;
     }
     ms_dbg_a(t, 8, "SecRuleScript: Transformation parameter must be a " \
         "transformation name or array of transformation names, but found " \
         "" + std::string(lua_typename(L, idx)) + " (type " \
         + std::to_string(lua_type(L, idx)) + ")");
-    return newVar;
 }
 #endif
 

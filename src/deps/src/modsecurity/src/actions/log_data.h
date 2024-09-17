@@ -33,10 +33,10 @@ namespace actions {
 class LogData : public Action {
  public:
     explicit LogData(const std::string &action) 
-        : Action(action, RunTimeOnlyIfMatchKind) { }
+        : Action(action) { }
 
     explicit LogData(std::unique_ptr<RunTimeString> z)
-        : Action("logdata", RunTimeOnlyIfMatchKind),
+        : Action("logdata"),
             m_string(std::move(z)) { }
 
     bool evaluate(RuleWithActions *rule, Transaction *transaction,

@@ -35,8 +35,5 @@ int main(int argc, char **argv) {
         response_headers, response_body, ip, rules);
     rlvrm.process();
 
-
-
-    pthread_exit(NULL);
     return 0;
 }

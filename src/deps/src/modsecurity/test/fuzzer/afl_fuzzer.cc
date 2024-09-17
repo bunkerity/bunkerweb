@@ -114,7 +114,11 @@ using namespace modsecurity;
 
 #include <stdio.h>
 #include <stdlib.h>
+#ifndef WIN32
 #include <unistd.h>
+#else
+#include <io.h>
+#endif
 #include <signal.h>
 #include <string.h>
 

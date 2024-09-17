@@ -22,13 +22,6 @@
 #include "src/operators/operator.h"
 
 
-#define UNICODE_ERROR_CHARACTERS_MISSING    -1
-#define UNICODE_ERROR_INVALID_ENCODING      -2
-#define UNICODE_ERROR_OVERLONG_CHARACTER    -3
-#define UNICODE_ERROR_RESTRICTED_CHARACTER  -4
-#define UNICODE_ERROR_DECODING_ERROR        -5
-
-
 namespace modsecurity {
 namespace operators {
 

@@ -29,7 +29,7 @@ namespace actions {
 
 class Ver : public Action {
  public:
-    explicit Ver(const std::string &action) : Action(action, ConfigurationKind) { }
+    explicit Ver(const std::string &action) : Action(action, Kind::ConfigurationKind) { }
 
     bool evaluate(RuleWithActions *rule, Transaction *transaction) override;
 

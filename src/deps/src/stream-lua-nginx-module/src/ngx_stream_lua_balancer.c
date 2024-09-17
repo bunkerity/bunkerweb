@@ -752,4 +752,74 @@ ngx_stream_lua_ffi_balancer_get_last_failure(ngx_stream_lua_request_t *r,
 }
 
 
+int
+ngx_stream_lua_ffi_balancer_bind_to_local_addr(ngx_stream_lua_request_t *r,
+    const u_char *addr, size_t addr_len, u_char *errbuf, size_t *errbuf_size)
+{
+    u_char                         *p;
+    ngx_int_t                       rc;
+    ngx_str_t                       addr_str;
+    ngx_addr_t                     *addr_val;
+    ngx_stream_lua_ctx_t           *ctx;
+    ngx_stream_upstream_t          *u;
+
+    if (r == NULL) {
+        p = ngx_snprintf(errbuf, *errbuf_size, "no request found");
+        *errbuf_size = p - errbuf;
+        return NGX_ERROR;
+    }
+
+    u = r->session->upstream;
+    if (u == NULL) {
+        p = ngx_snprintf(errbuf, *errbuf_size, "no upstream found");
+        *errbuf_size = p - errbuf;
+        return NGX_ERROR;
+    }
+
+    ctx = ngx_stream_lua_get_module_ctx(r, ngx_stream_lua_module);
+    if (ctx == NULL) {
+        p = ngx_snprintf(errbuf, *errbuf_size, "no ctx found");
+        *errbuf_size = p - errbuf;
+        return NGX_ERROR;
+    }
+
+    if ((ctx->context & NGX_STREAM_LUA_CONTEXT_BALANCER) == 0) {
+        p = ngx_snprintf(errbuf, *errbuf_size,
+                         "API disabled in the current context");
+        *errbuf_size = p - errbuf;
+        return NGX_ERROR;
+    }
+
+    addr_val = ngx_pcalloc(r->pool, sizeof(ngx_addr_t));
+    if (addr_val == NULL) {
+        p = ngx_snprintf(errbuf, *errbuf_size, "no memory");
+        *errbuf_size = p - errbuf;
+        return NGX_ERROR;
+    }
+
+    addr_str.len  = addr_len;
+    addr_str.data = ngx_palloc(r->pool, addr_len);
+    if (addr_str.data == NULL) {
+        p = ngx_snprintf(errbuf, *errbuf_size, "no memory");
+        *errbuf_size = p - errbuf;
+        return NGX_ERROR;
+    }
+
+    ngx_memcpy(addr_str.data, addr, addr_len);
+
+    rc = ngx_parse_addr_port(r->pool, addr_val, addr_str.data, addr_str.len);
+    if (rc != NGX_OK) {
+        p = ngx_snprintf(errbuf, *errbuf_size, "parse addr port failed");
+        *errbuf_size = p - errbuf;
+        return NGX_ERROR;
+    }
+
+    addr_val->name = addr_str;
+
+    u->peer.local = addr_val;
+
+    return NGX_OK;
+}
+
+
 /* vi:set ft=c ts=4 sw=4 et fdm=marker: */

@@ -10,14 +10,19 @@ version=$1
 force=$2
 home=~
 
+if [ -z "$version" ]; then
+    echo "Usage: $0 <nginx-version> [force]"
+    exit 1
+fi
+
 add_http3_module=--with-http_v3_module
-answer=`$root/util/ver-ge "$NGINX_VERSION" 1.25.1`
+answer=`$root/util/ver-ge "$version" 1.25.1`
 if [ "$OPENSSL_VER" = "1.1.0l" ] || [ "$answer" = "N" ]; then
     add_http3_module=""
 fi
 
 disable_pcre2=--without-pcre2
-answer=`$root/util/ver-ge "$NGINX_VERSION" 1.25.1`
+answer=`$root/util/ver-ge "$version" 1.25.1`
 if [ "$answer" = "N" ] || [ "$USE_PCRE2" = "Y" ]; then
     disable_pcre2=""
 fi

@@ -32,7 +32,6 @@ benchmark_LDFLAGS = \
 	$(LUA_LDFLAGS)
 
 benchmark_CPPFLAGS = \
-	-std=c++11 \
 	-I$(top_builddir)/headers \
 	$(GLOBAL_CPPFLAGS) \
 	$(PCRE_CFLAGS) \

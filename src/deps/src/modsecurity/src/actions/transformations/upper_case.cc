@@ -13,36 +13,21 @@
  *
  */
 
-#include "src/actions/transformations/upper_case.h"
 
-#include <algorithm>
-#include <string>
+#include "upper_case.h"
 
-#include "modsecurity/transaction.h"
-#include "src/actions/transformations/transformation.h"
-#include "modsecurity/actions/action.h"
+#include <cctype>
 
-namespace modsecurity {
-namespace actions {
-namespace transformations {
+#include "lower_case.h"
 
 
-UpperCase::UpperCase(const std::string &a)
-    : Transformation(a) {
+namespace modsecurity::actions::transformations {
+
+
+bool UpperCase::transform(std::string &value, const Transaction *trans) const {
+    return LowerCase::convert(value, [](auto c)
+                              { return std::toupper(c); });
 }
 
-std::string UpperCase::evaluate(const std::string &val,
-    Transaction *transaction) {
-    std::string value(val);
-    std::locale loc;
 
-    for (std::string::size_type i=0; i < value.length(); ++i) {
-        value[i] = std::toupper(value[i], loc);
-    }
-
-    return value;
-}
-
-}  // namespace transformations
-}  // namespace actions
-}  // namespace modsecurity
+}  // namespace modsecurity::actions::transformations

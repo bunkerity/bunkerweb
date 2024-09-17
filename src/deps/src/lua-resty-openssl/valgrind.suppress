@@ -1,109 +1,8 @@
 {
    <insert_a_suppression_name_here>
-   Memcheck:Cond
-   fun:str_fastcmp
-   fun:lj_str_new
-   fun:lua_pushlstring
-   fun:emptybuffer
-   fun:luaL_pushresult
-   fun:luaL_gsub
-   fun:ngx_http_lua_set_path.isra.7.constprop.21
-   fun:ngx_http_lua_new_state
-   fun:ngx_http_lua_init_vm
-   fun:ngx_http_lua_init
-   fun:ngx_http_block
-   fun:ngx_conf_handler
-   fun:ngx_conf_parse
-   fun:ngx_init_cycle
-   fun:main
-}
-{
-   <insert_a_suppression_name_here>
-   Memcheck:Param
-   write(buf)
-   fun:__write_nocancel
-   fun:ngx_log_error_core
-   fun:ngx_resolver_read_response
-}
-{
-   <insert_a_suppression_name_here>
-   Memcheck:Cond
-   fun:ngx_sprintf_num
-   fun:ngx_vslprintf
-   fun:ngx_log_error_core
-   fun:ngx_resolver_read_response
-   fun:ngx_epoll_process_events
-   fun:ngx_process_events_and_timers
-   fun:ngx_single_process_cycle
-   fun:main
-}
-{
-   <insert_a_suppression_name_here>
-   Memcheck:Addr1
-   fun:ngx_vslprintf
-   fun:ngx_snprintf
-   fun:ngx_sock_ntop
-   fun:ngx_event_accept
-}
-{
-   <insert_a_suppression_name_here>
-   Memcheck:Param
-   write(buf)
-   fun:__write_nocancel
-   fun:ngx_log_error_core
-   fun:ngx_resolver_read_response
-   fun:ngx_event_process_posted
-   fun:ngx_process_events_and_timers
-   fun:ngx_single_process_cycle
-   fun:main
-}
-{
-   <insert_a_suppression_name_here>
-   Memcheck:Cond
-   fun:ngx_sprintf_num
-   fun:ngx_vslprintf
-   fun:ngx_log_error_core
-   fun:ngx_resolver_read_response
-   fun:ngx_event_process_posted
-   fun:ngx_process_events_and_timers
-   fun:ngx_single_process_cycle
-   fun:main
-}
-{
-   <insert_a_suppression_name_here>
    Memcheck:Leak
    fun:malloc
    fun:ngx_alloc
-   obj:*
-}
-{
-   <insert_a_suppression_name_here>
-   exp-sgcheck:SorG
-   fun:ngx_http_lua_ndk_set_var_get
-}
-{
-   <insert_a_suppression_name_here>
-   exp-sgcheck:SorG
-   fun:ngx_http_variables_init_vars
-   fun:ngx_http_block
-}
-{
-   <insert_a_suppression_name_here>
-   exp-sgcheck:SorG
-   fun:ngx_conf_parse
-}
-{
-   <insert_a_suppression_name_here>
-   exp-sgcheck:SorG
-   fun:ngx_vslprintf
-   fun:ngx_log_error_core
-}
-{
-   <insert_a_suppression_name_here>
-   Memcheck:Leak
-   fun:malloc
-   fun:ngx_alloc
-   fun:ngx_calloc
    fun:ngx_event_process_init
 }
 {
@@ -111,258 +10,7 @@
    Memcheck:Param
    epoll_ctl(event)
    fun:epoll_ctl
-}
-{
-   <insert_a_suppression_name_here>
-   Memcheck:Leak
-   fun:malloc
-   fun:ngx_alloc
-   fun:ngx_event_process_init
-}
-{
-   <insert_a_suppression_name_here>
-   Memcheck:Cond
-   fun:ngx_conf_flush_files
-   fun:ngx_single_process_cycle
-}
-{
-   <insert_a_suppression_name_here>
-   Memcheck:Cond
-   fun:memcpy
-   fun:ngx_vslprintf
-   fun:ngx_log_error_core
-   fun:ngx_http_charset_header_filter
-}
-{
-   <insert_a_suppression_name_here>
-   Memcheck:Param
-   socketcall.setsockopt(optval)
-   fun:setsockopt
-   fun:drizzle_state_connect
-}
-{
-   <insert_a_suppression_name_here>
-   Memcheck:Leak
-   fun:malloc
-   fun:ngx_alloc
-   fun:ngx_pool_cleanup_add
-}
-{
-   <insert_a_suppression_name_here>
-   Memcheck:Cond
-   fun:ngx_conf_flush_files
-   fun:ngx_single_process_cycle
-   fun:main
-}
-{
-   <insert_a_suppression_name_here>
-   Memcheck:Leak
-   fun:malloc
-   fun:ngx_alloc
-   fun:ngx_palloc_large
-   fun:ngx_palloc
-   fun:ngx_array_push
-   fun:ngx_http_get_variable_index
-   fun:ngx_http_memc_add_variable
-   fun:ngx_http_memc_init
-   fun:ngx_http_block
-   fun:ngx_conf_parse
-   fun:ngx_init_cycle
-   fun:main
-}
-{
-   <insert_a_suppression_name_here>
-   Memcheck:Leak
-   fun:malloc
-   fun:ngx_alloc
-   fun:ngx_event_process_init
-   fun:ngx_single_process_cycle
-   fun:main
-}
-{
-   <insert_a_suppression_name_here>
-   Memcheck:Leak
-   fun:malloc
-   fun:ngx_alloc
-   fun:ngx_crc32_table_init
-   fun:main
-}
-{
-   <insert_a_suppression_name_here>
-   Memcheck:Leak
-   fun:malloc
-   fun:ngx_alloc
-   fun:ngx_event_process_init
-   fun:ngx_worker_process_init
-   fun:ngx_worker_process_cycle
-   fun:ngx_spawn_process
-   fun:ngx_start_worker_processes
-   fun:ngx_master_process_cycle
-   fun:main
-}
-{
-   <insert_a_suppression_name_here>
-   Memcheck:Leak
-   fun:malloc
-   fun:ngx_alloc
-   fun:ngx_palloc_large
-   fun:ngx_palloc
-   fun:ngx_pcalloc
-   fun:ngx_hash_init
-   fun:ngx_http_variables_init_vars
-   fun:ngx_http_block
-   fun:ngx_conf_parse
-   fun:ngx_init_cycle
-   fun:main
-}
-{
-   <insert_a_suppression_name_here>
-   Memcheck:Leak
-   fun:malloc
-   fun:ngx_alloc
-   fun:ngx_palloc_large
-   fun:ngx_palloc
-   fun:ngx_pcalloc
-   fun:ngx_http_upstream_drizzle_create_srv_conf
-   fun:ngx_http_upstream
-   fun:ngx_conf_parse
-   fun:ngx_http_block
-   fun:ngx_conf_parse
-   fun:ngx_init_cycle
-   fun:main
-}
-{
-   <insert_a_suppression_name_here>
-   Memcheck:Leak
-   fun:malloc
-   fun:ngx_alloc
-   fun:ngx_palloc_large
-   fun:ngx_palloc
-   fun:ngx_pcalloc
-   fun:ngx_hash_keys_array_init
-   fun:ngx_http_variables_add_core_vars
-   fun:ngx_http_core_preconfiguration
-   fun:ngx_http_block
-   fun:ngx_conf_parse
-   fun:ngx_init_cycle
-   fun:main
-}
-{
-   <insert_a_suppression_name_here>
-   Memcheck:Leak
-   fun:malloc
-   fun:ngx_alloc
-   fun:ngx_palloc_large
-   fun:ngx_palloc
-   fun:ngx_array_push
-   fun:ngx_hash_add_key
-   fun:ngx_http_add_variable
-   fun:ngx_http_echo_add_variables
-   fun:ngx_http_echo_handler_init
-   fun:ngx_http_block
-   fun:ngx_conf_parse
-   fun:ngx_init_cycle
-}
-{
-   <insert_a_suppression_name_here>
-   Memcheck:Leak
-   fun:malloc
-   fun:ngx_alloc
-   fun:ngx_palloc_large
-   fun:ngx_palloc
-   fun:ngx_pcalloc
-   fun:ngx_http_upstream_drizzle_create_srv_conf
-   fun:ngx_http_core_server
-   fun:ngx_conf_parse
-   fun:ngx_http_block
-   fun:ngx_conf_parse
-   fun:ngx_init_cycle
-   fun:main
-}
-{
-   <insert_a_suppression_name_here>
-   Memcheck:Leak
-   fun:malloc
-   fun:ngx_alloc
-   fun:ngx_palloc_large
-   fun:ngx_palloc
-   fun:ngx_pcalloc
-   fun:ngx_http_upstream_drizzle_create_srv_conf
-   fun:ngx_http_block
-   fun:ngx_conf_parse
-   fun:ngx_init_cycle
-   fun:main
-}
-{
-   <insert_a_suppression_name_here>
-   Memcheck:Leak
-   fun:malloc
-   fun:ngx_alloc
-   fun:ngx_palloc_large
-   fun:ngx_palloc
-   fun:ngx_array_push
-   fun:ngx_hash_add_key
-   fun:ngx_http_variables_add_core_vars
-   fun:ngx_http_core_preconfiguration
-   fun:ngx_http_block
-   fun:ngx_conf_parse
-   fun:ngx_init_cycle
-   fun:main
-}
-{
-   <insert_a_suppression_name_here>
-   Memcheck:Leak
-   fun:malloc
-   fun:ngx_alloc
-   fun:ngx_palloc_large
-   fun:ngx_palloc
-   fun:ngx_pcalloc
-   fun:ngx_init_cycle
-   fun:main
-}
-{
-   <insert_a_suppression_name_here>
-   Memcheck:Leak
-   fun:malloc
-   fun:ngx_alloc
-   fun:ngx_palloc_large
-   fun:ngx_palloc
-   fun:ngx_hash_init
-   fun:ngx_http_upstream_init_main_conf
-   fun:ngx_http_block
-   fun:ngx_conf_parse
-   fun:ngx_init_cycle
-   fun:main
-}
-{
-   <insert_a_suppression_name_here>
-   Memcheck:Leak
-   fun:malloc
-   fun:ngx_alloc
-   fun:ngx_palloc_large
-   fun:ngx_palloc
-   fun:ngx_pcalloc
-   fun:ngx_http_drizzle_keepalive_init
-   fun:ngx_http_upstream_drizzle_init
-   fun:ngx_http_upstream_init_main_conf
-   fun:ngx_http_block
-   fun:ngx_conf_parse
-   fun:ngx_init_cycle
-   fun:main
-}
-{
-   <insert_a_suppression_name_here>
-   Memcheck:Leak
-   fun:malloc
-   fun:ngx_alloc
-   fun:ngx_palloc_large
-   fun:ngx_palloc
-   fun:ngx_hash_init
-   fun:ngx_http_variables_init_vars
-   fun:ngx_http_block
-   fun:ngx_conf_parse
-   fun:ngx_init_cycle
-   fun:main
+   fun:ngx_epoll_add_event
 }
 {
    <insert_a_suppression_name_here>
@@ -379,6 +27,49 @@
 }
 {
    <insert_a_suppression_name_here>
+   Memcheck:Param
+   epoll_ctl(event)
+   fun:epoll_ctl
+   fun:ngx_epoll_init
+   fun:ngx_event_process_init
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Param
+   epoll_ctl(event)
+   fun:epoll_ctl
+   fun:ngx_epoll_notify_init
+   fun:ngx_epoll_init
+   fun:ngx_event_process_init
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Param
+   epoll_ctl(event)
+   fun:epoll_ctl
+   fun:ngx_epoll_add_connection
+   fun:ngx_event_connect_peer
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Param
+   epoll_ctl(event)
+   fun:epoll_ctl
+   fun:ngx_epoll_test_rdhup
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Param
+   epoll_pwait(sigmask)
+   fun:epoll_pwait
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   obj:*
+}
+{
+   <insert_a_suppression_name_here>
    Memcheck:Leak
    match-leak-kinds: definite
    fun:malloc
@@ -394,77 +85,193 @@
    fun:ngx_alloc
    fun:ngx_set_environment
    fun:ngx_worker_process_init
-   fun:ngx_worker_process_cycle
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Param
+   sendmsg(msg.msg_iov[0])
+   fun:__sendmsg_nocancel
+   fun:ngx_write_channel
+   fun:ngx_pass_open_channel
+   fun:ngx_start_worker_processes
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Param
+   sendmsg(msg.msg_iov[0])
+   fun:__sendmsg_nocancel
+   fun:ngx_write_channel
+   fun:ngx_pass_open_channel
+   fun:ngx_start_cache_manager_processes
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Param
+   sendmsg(msg.msg_iov[0])
+   fun:__sendmsg_nocancel
+   fun:ngx_write_channel
+   fun:ngx_pass_open_channel
+   fun:ngx_start_privileged_agent_processes
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:CRYPTO_zalloc
+   fun:SSL_SESSION_new
+   fun:ssl_get_new_session
+   fun:tls_construct_client_hello
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:ssl_session_dup
+   fun:tls_process_new_session_ticket
 }
 {
     <insert_a_suppression_name_here>
     Memcheck:Leak
     match-leak-kinds: definite
     fun:malloc
-    fun:ngx_alloc
-    fun:ngx_event_process_init
-    fun:ngx_worker_process_init
+    fun:CRYPTO_malloc
+    fun:ssl_session_dup
+    fun:tls_process_new_session_ticket
+    fun:ossl_statem_client_process_message
+    fun:read_state_machine
+    fun:state_machine
+    fun:ossl_statem_connect
+    fun:ssl3_read_bytes
+    fun:ssl3_read_internal
+    fun:ssl3_read
+    fun:ssl_read_internal
+    fun:SSL_read
+    fun:ngx_ssl_recv
+    fun:ngx_http_upstream_process_header
+    fun:ngx_http_upstream_handler
+    fun:ngx_epoll_process_events
+    fun:ngx_process_events_and_timers
+    fun:ngx_single_process_cycle
+    fun:main
 }
-
-
+{
+    <insert_a_suppression_name_here>
+    Memcheck:Leak
+    match-leak-kinds: definite
+    fun:malloc
+    fun:CRYPTO_malloc
+    fun:CRYPTO_zalloc
+    fun:SSL_SESSION_new
+    fun:ssl_get_new_session
+    fun:tls_construct_client_hello
+    fun:write_state_machine
+    fun:state_machine
+    fun:ossl_statem_connect
+    fun:SSL_do_handshake
+    fun:ngx_ssl_handshake
+    fun:ngx_http_upstream_ssl_init_connection
+    fun:ngx_http_upstream_send_request_handler
+    fun:ngx_http_upstream_handler
+    fun:ngx_epoll_process_events
+    fun:ngx_process_events_and_timers
+    fun:ngx_single_process_cycle
+    fun:main
+}
 {
    <insert_a_suppression_name_here>
-   Memcheck:Addr1
-   fun:ngx_http_lua_ngx_echo
-   fun:ngx_http_lua_ngx_say
-   fun:lj_BC_FUNCC
-   fun:lua_resume
-   fun:ngx_http_lua_run_thread
-   fun:ngx_http_lua_content_by_chunk
-   fun:ngx_http_lua_content_handler_inline
-   fun:ngx_http_lua_content_handler
-   fun:ngx_http_core_content_phase
-   fun:ngx_http_core_run_phases
-   fun:ngx_http_handler
-   fun:ngx_http_process_request
-   fun:ngx_http_process_request_headers
-   fun:ngx_http_process_request_line
-   fun:ngx_http_wait_request_handler
-   fun:ngx_epoll_process_events
-   fun:ngx_process_events_and_timers
-   fun:ngx_single_process_cycle
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:CRYPTO_malloc
+   fun:CRYPTO_zalloc
+   fun:evp_md_new
+   fun:evp_md_from_algorithm
+   fun:construct_evp_method
+   fun:ossl_method_construct_this
+   fun:algorithm_do_map
+   fun:algorithm_do_this
+   fun:ossl_provider_doall_activated
+   fun:ossl_algorithm_do_all
+   fun:ossl_method_construct
+   fun:inner_evp_generic_fetch
+   fun:evp_generic_fetch
+   fun:EVP_MD_fetch
+   fun:ssl_evp_md_fetch
+   fun:ssl_load_ciphers
+   fun:SSL_CTX_new_ex
+   fun:SSL_CTX_new
+   fun:ngx_ssl_create
+   fun:ngx_http_lua_set_ssl
+   fun:ngx_http_lua_merge_loc_conf
+   fun:ngx_http_merge_servers
+   fun:ngx_http_block
+   fun:ngx_conf_handler
+   fun:ngx_conf_parse
+   fun:ngx_init_cycle
    fun:main
 }
 {
    <insert_a_suppression_name_here>
-   Memcheck:Param
-   writev(vector[...])
-   fun:writev
-   fun:ngx_writev
-   fun:ngx_linux_sendfile_chain
-   fun:ngx_http_write_filter
-   fun:ngx_http_chunked_body_filter
-   fun:ngx_http_gzip_body_filter
-   fun:ngx_http_postpone_filter
-   fun:ngx_http_ssi_body_filter
-   fun:ngx_http_charset_body_filter
-   fun:ngx_http_trailers_filter
-   fun:ngx_http_lua_capture_body_filter
-   fun:ngx_output_chain
-   fun:ngx_http_copy_filter
-   fun:ngx_http_range_body_filter
-   fun:ngx_http_output_filter
-   fun:ngx_http_send_special
-   fun:ngx_http_lua_send_special
-   fun:ngx_http_lua_send_chain_link
-   fun:ngx_http_lua_run_thread
-   fun:ngx_http_lua_content_by_chunk
-   fun:ngx_http_lua_content_handler_inline
-   fun:ngx_http_lua_content_handler
-   fun:ngx_http_core_content_phase
-   fun:ngx_http_core_run_phases
-   fun:ngx_http_handler
-   fun:ngx_http_process_request
-   fun:ngx_http_process_request_headers
-   fun:ngx_http_process_request_line
-   fun:ngx_http_wait_request_handler
-   fun:ngx_epoll_process_events
-   fun:ngx_process_events_and_timers
-   fun:ngx_single_process_cycle
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:CRYPTO_malloc
+   fun:CRYPTO_zalloc
+   fun:evp_cipher_new
+   fun:evp_cipher_from_algorithm
+   fun:construct_evp_method
+   fun:ossl_method_construct_this
+   fun:algorithm_do_map
+   fun:algorithm_do_this
+   fun:ossl_provider_doall_activated
+   fun:ossl_algorithm_do_all
+   fun:ossl_method_construct
+   fun:inner_evp_generic_fetch
+   fun:evp_generic_fetch
+   fun:EVP_CIPHER_fetch
+   fun:ssl_evp_cipher_fetch
+   fun:ssl_load_ciphers
+   fun:SSL_CTX_new_ex
+   fun:SSL_CTX_new
+   fun:ngx_ssl_create
+   fun:ngx_http_lua_set_ssl
+   fun:ngx_http_lua_merge_loc_conf
+   fun:ngx_http_merge_servers
+   fun:ngx_http_block
+   fun:ngx_conf_handler
+   fun:ngx_conf_parse
+   fun:ngx_init_cycle
    fun:main
 }
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:CRYPTO_malloc
+   fun:CRYPTO_zalloc
+   fun:provider_new
+   fun:provider_activate_fallbacks
+   fun:ossl_provider_doall_activated
+   fun:ossl_algorithm_do_all
+   fun:ossl_method_construct
+   fun:inner_evp_generic_fetch
+   fun:evp_generic_fetch
+   fun:EVP_CIPHER_fetch
+   fun:ssl_evp_cipher_fetch
+   fun:ssl_load_ciphers
+   fun:SSL_CTX_new_ex
+   fun:SSL_CTX_new
+   fun:ngx_ssl_create
+   fun:ngx_http_lua_set_ssl
+   fun:ngx_http_lua_merge_loc_conf
+   fun:ngx_http_merge_servers
+   fun:ngx_http_block
+   fun:ngx_conf_handler
+   fun:ngx_conf_parse
+   fun:ngx_init_cycle
+   fun:main
+}
+

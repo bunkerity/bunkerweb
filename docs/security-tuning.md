@@ -255,8 +255,8 @@ ModSecurity is integrated and enabled by default alongside the OWASP Core Rule S
 
 You can choose between the following versions of the OWASP Core Rule Set :
 
-- **3** : The version [v3.3.5](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.5) of the OWASP Core Rule Set (***default***)
-- **4** : The version [v4.5.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.5.0) of the OWASP Core Rule Set
+- **3** : The version [v3.3.6](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.6) of the OWASP Core Rule Set (***default***)
+- **4** : The version [v4.6.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.6.0) of the OWASP Core Rule Set
 - **nightly** : The latest [nightly](https://github.com/coreruleset/coreruleset/releases/tag/nightly) build of the OWASP Core Rule Set which is updated every day
 
 !!! example "OWASP Core Rule Set's nightly build"
@@ -605,7 +605,7 @@ You can quickly protect sensitive resources like the admin area for example, by 
 
 ### Auth request
 
-You can deploy complex authentication (e.g. SSO), by using the auth request settings (see [here](https://docs.nginx.com/nginx/admin-guide/security-controls/configuring-subrequest-authentication/) for more information on the feature). Please note that you will find [Authelia](https://www.authelia.com/) and [Authentik](https://goauthentik.io/) examples in the [repository](https://github.com/bunkerity/bunkerweb/tree/v1.5.9/examples).
+You can deploy complex authentication (e.g. SSO), by using the auth request settings (see [here](https://docs.nginx.com/nginx/admin-guide/security-controls/configuring-subrequest-authentication/) for more information on the feature). Please note that you will find [Authelia](https://www.authelia.com/) and [Authentik](https://goauthentik.io/) examples in the [repository](https://github.com/bunkerity/bunkerweb/tree/v1.5.10/examples).
 
 **Auth request settings are related to reverse proxy rules.**
 

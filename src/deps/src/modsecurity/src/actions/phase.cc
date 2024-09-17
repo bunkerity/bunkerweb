@@ -15,20 +15,15 @@
 
 #include "src/actions/phase.h"
 
-#include <iostream>
-#include <string>
-
-#include "modsecurity/transaction.h"
-#include "modsecurity/rule.h"
-#include "modsecurity/modsecurity.h"
+#include "modsecurity/rule_with_actions.h"
 #include "src/utils/string.h"
 
 
-namespace modsecurity {
-namespace actions {
+namespace modsecurity::actions {
+
 
 bool Phase::init(std::string *error) {
-    std::string a = utils::string::tolower(m_parser_payload);
+    const auto a = utils::string::tolower(m_parser_payload);
     m_phase = -1;
 
     try {
@@ -77,5 +72,5 @@ bool Phase::evaluate(RuleWithActions *rule, Transaction *transaction) {
     return true;
 }
 
-}  // namespace actions
-}  // namespace modsecurity
+
+}  // namespace modsecurity::actions

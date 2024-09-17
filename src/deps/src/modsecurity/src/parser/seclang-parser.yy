@@ -1086,8 +1086,9 @@ expression:
         std::vector<actions::Action *> *a = new std::vector<actions::Action *>();
         std::vector<actions::transformations::Transformation *> *t = new std::vector<actions::transformations::Transformation *>();
         for (auto &i : *$4.get()) {
-            if (dynamic_cast<actions::transformations::Transformation *>(i.get())) {
-              t->push_back(dynamic_cast<actions::transformations::Transformation *>(i.release()));
+            if (auto pt = dynamic_cast<actions::transformations::Transformation *>(i.get())) {
+              t->push_back(pt);
+              i.release();
             } else {
               a->push_back(i.release());
             }
@@ -1135,8 +1136,9 @@ expression:
         std::vector<actions::Action *> *a = new std::vector<actions::Action *>();
         std::vector<actions::transformations::Transformation *> *t = new std::vector<actions::transformations::Transformation *>();
         for (auto &i : *$2.get()) {
-            if (dynamic_cast<actions::transformations::Transformation *>(i.get())) {
-              t->push_back(dynamic_cast<actions::transformations::Transformation *>(i.release()));
+            if (auto pt = dynamic_cast<actions::transformations::Transformation *>(i.get())) {
+              t->push_back(pt);
+              i.release();
             } else {
               a->push_back(i.release());
             }
@@ -1155,8 +1157,9 @@ expression:
         std::vector<actions::Action *> *a = new std::vector<actions::Action *>();
         std::vector<actions::transformations::Transformation *> *t = new std::vector<actions::transformations::Transformation *>();
         for (auto &i : *$2.get()) {
-            if (dynamic_cast<actions::transformations::Transformation *>(i.get())) {
-              t->push_back(dynamic_cast<actions::transformations::Transformation *>(i.release()));
+            if (auto pt = dynamic_cast<actions::transformations::Transformation *>(i.get())) {
+              t->push_back(pt);
+              i.release();
             } else {
               a->push_back(i.release());
             }
@@ -1196,8 +1199,8 @@ expression:
                 definedPhase = phase->m_phase;
                 secRuleDefinedPhase = phase->m_secRulesPhase;
                 delete phase;
-            } else if (a->action_kind == actions::Action::RunTimeOnlyIfMatchKind ||
-                a->action_kind == actions::Action::RunTimeBeforeMatchAttemptKind) {
+            } else if (a->action_kind == actions::Action::Kind::RunTimeOnlyIfMatchKind ||
+                a->action_kind == actions::Action::Kind::RunTimeBeforeMatchAttemptKind) {
                                 actions::transformations::None *none = dynamic_cast<actions::transformations::None *>(a);
                 if (none != NULL) {
                     driver.error(@0, "The transformation none is not suitable to be part of the SecDefaultActions");

@@ -13,32 +13,17 @@
  *
  */
 
-#include "src/actions/transformations/md5.h"
+#include "md5.h"
 
-#include <iostream>
-#include <string>
-#include <algorithm>
-#include <functional>
-#include <cctype>
-#include <locale>
-
-#include "modsecurity/transaction.h"
-#include "src/actions/transformations/transformation.h"
 #include "src/utils/md5.h"
 
-namespace modsecurity {
-namespace actions {
-namespace transformations {
+namespace modsecurity::actions::transformations {
 
 
-std::string Md5::evaluate(const std::string &value,
-    Transaction *transaction) {
-    std::string ret = Utils::Md5::digest(value);
-
-    return ret;
+bool Md5::transform(std::string &value, const Transaction *trans) const {
+    value = Utils::Md5::digest(value);
+    return true;
 }
 
 
-}  // namespace transformations
-}  // namespace actions
-}  // namespace modsecurity
+}  // namespace modsecurity::actions::transformations

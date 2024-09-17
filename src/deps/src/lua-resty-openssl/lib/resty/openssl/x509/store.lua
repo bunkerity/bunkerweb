@@ -140,7 +140,7 @@ function _M:set_purpose(purpose)
     return nil, "x509.store:set_purpose: expect a string at #1"
   end
 
-  local pchar = ffi.new("char[?]", #purpose, purpose)
+  local pchar = ffi.new("char[?]", #purpose + 1, purpose)
   local idx = C.X509_PURPOSE_get_by_sname(pchar)
   idx = tonumber(idx)
 
@@ -217,7 +217,10 @@ function _M:verify(x509, chain, return_chain, properties, verify_method, flags)
       return true, nil
     end
     local ret_chain_ctx = C.X509_STORE_CTX_get0_chain(ctx)
-    return chain_lib.dup(ret_chain_ctx)
+    -- returns the internal pointer, dup it and avoid tail call return
+    -- to avoid ctx being GC'ed early
+    local res, err = chain_lib.dup(ret_chain_ctx)
+    return res, err
   elseif code == 0 then -- unverified
     local vfy_code = C.X509_STORE_CTX_get_error(ctx)
 
@@ -250,7 +253,12 @@ function _M:check_revocation(verified_chain, properties)
     return nil, format_error("x509.store:check_revocation: X509_STORE_CTX_init")
   end
 
-  C.X509_STORE_CTX_set0_verified_chain(ctx, verified_chain.ctx)
+  local verified_dup = C.X509_chain_up_ref(verified_chain.ctx)
+  if verified_dup == nil then
+    return nil, "x509.store:check_revocation: X509_chain_up_ref() failed"
+  end
+
+  C.X509_STORE_CTX_set0_verified_chain(ctx, verified_dup)
 
   -- enables CRL checking for the certificate chain leaf certificate.
   -- An error occurs if a suitable CRL cannot be found.

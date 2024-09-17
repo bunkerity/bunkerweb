@@ -13,35 +13,20 @@
  *
  */
 
-#include <string>
-
-#include "modsecurity/rules_set_properties.h"
-#include "modsecurity/actions/action.h"
-#include "src/actions/transformations/transformation.h"
-
 #ifndef SRC_ACTIONS_TRANSFORMATIONS_URL_DECODE_UNI_H_
 #define SRC_ACTIONS_TRANSFORMATIONS_URL_DECODE_UNI_H_
 
+#include "transformation.h"
 
-#ifdef __cplusplus
-namespace modsecurity {
-class Transaction;
-namespace actions {
-namespace transformations {
+namespace modsecurity::actions::transformations {
 
 class UrlDecodeUni : public Transformation {
  public:
-    explicit UrlDecodeUni(const std::string &action)  : Transformation(action) { }
+    using Transformation::Transformation;
 
-    std::string evaluate(const std::string &exp, Transaction *transaction) override;
-    static int inplace(unsigned char *input, uint64_t input_len,
-        Transaction *transaction);
+    bool transform(std::string &value, const Transaction *trans) const override;
 };
 
-}  // namespace transformations
-}  // namespace actions
-}  // namespace modsecurity
-
-#endif
+}  // namespace modsecurity::actions::transformations
 
 #endif  // SRC_ACTIONS_TRANSFORMATIONS_URL_DECODE_UNI_H_

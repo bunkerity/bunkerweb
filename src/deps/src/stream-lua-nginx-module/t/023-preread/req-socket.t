@@ -391,6 +391,7 @@ finalize stream session: 200
 --- no_error_log
 [warn]
 [error]
+--- skip_nginx: 5: >= 1.25.5
 
 
 
@@ -509,6 +510,7 @@ received: hello world
 attempt to peek on a consumed socket
 --- no_error_log
 [warn]
+--- skip_nginx: 4: >= 1.25.5
 
 
 
@@ -568,3 +570,4 @@ $ssl_preread_server_name = my.sni.server.name while prereading client data
 [warn]
 assertion failed!
 lua entry thread aborted
+--- skip_nginx: 8: >= 1.25.5

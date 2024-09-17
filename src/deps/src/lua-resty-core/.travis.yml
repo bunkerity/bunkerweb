@@ -49,8 +49,8 @@ env:
     - TEST_NGINX_RANDOMIZE=1
     - LUACHECK_VER=0.21.1
   matrix:
-    - NGINX_VERSION=1.25.1 OPENSSL_VER=1.1.1w OPENSSL_PATCH_VER=1.1.1f USE_PCRE2=Y
-    - NGINX_VERSION=1.21.4 OPENSSL_VER=1.1.1w OPENSSL_PATCH_VER=1.1.1f
+    - NGINX_VERSION=1.27.0 OPENSSL_VER=1.1.1w OPENSSL_PATCH_VER=1.1.1f USE_PCRE2=Y
+    - NGINX_VERSION=1.25.3 OPENSSL_VER=1.1.1w OPENSSL_PATCH_VER=1.1.1f
 
 services:
   - memcache
@@ -107,7 +107,7 @@ script:
   - if [ "$OPENSSL_VER" = "1.1.0l" ] || [ "$answer" = "N" ]; then add_http3_module=""; fi
   - if [ "$answer" = "N" ] || [ "$USE_PCRE2" = "Y" ]; then disable_pcre2=""; fi
   - if [ "$USE_PCRE2" = "Y" ]; then PCRE_INC=$PCRE2_INC; PCRE_LIB=$PCRE2_LIB; fi
-  - ngx-build $NGINX_VERSION --with-ipv6 $disable_pcre2 $add_http3_module --with-http_realip_module --with-http_ssl_module --with-pcre-jit --with-cc-opt="-I$OPENSSL_INC -I$PCRE_INC" --with-ld-opt="-L$OPENSSL_LIB -Wl,-rpath,$OPENSSL_LIB -L$PCRE_LIB -Wl,-rpath,$PCRE_LIB" --add-module=../ndk-nginx-module --add-module=../echo-nginx-module --add-module=../set-misc-nginx-module --add-module=../headers-more-nginx-module --add-module=../lua-nginx-module --with-debug --with-stream_ssl_module --with-stream --with-ipv6 --add-module=../stream-lua-nginx-module > build.log 2>&1 || (cat build.log && exit 1)
+  - ngx-build $NGINX_VERSION $disable_pcre2 $add_http3_module --with-http_v2_module --with-http_realip_module --with-http_ssl_module --with-pcre-jit --with-cc-opt="-I$OPENSSL_INC -I$PCRE_INC" --with-ld-opt="-L$OPENSSL_LIB -Wl,-rpath,$OPENSSL_LIB -L$PCRE_LIB -Wl,-rpath,$PCRE_LIB" --add-module=../ndk-nginx-module --add-module=../echo-nginx-module --add-module=../set-misc-nginx-module --add-module=../headers-more-nginx-module --add-module=../lua-nginx-module --with-debug --with-stream_ssl_module --with-stream --with-ipv6 --add-module=../stream-lua-nginx-module > build.log 2>&1 || (cat build.log && exit 1)
   - nginx -V
   - ldd `which nginx`|grep -E 'luajit|ssl|pcre'
   - prove -I. -Itest-nginx/lib -j$JOBS -r t

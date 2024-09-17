@@ -20,10 +20,14 @@
 #include <curl/curl.h>
 #endif
 
+#ifndef WIN32
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#else
+#include <WinSock2.h>
+#endif
 #include <string>
 
 #include <fstream>
@@ -93,6 +97,11 @@ bool HttpsClient::download(const std::string &uri) {
     /* those are the default options, but lets make sure */
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1);
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 1);
+
+#ifdef WIN32
+    /* use the operating system's native CA store for certificate verification.*/
+    curl_easy_setopt(curl, CURLOPT_SSL_OPTIONS, (long)CURLSSLOPT_NATIVE_CA);
+#endif
 
     /* send all data to this function  */
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &HttpsClient::handle);

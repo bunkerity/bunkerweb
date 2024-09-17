@@ -42,7 +42,7 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
       - name: Install ruby
-        uses: ruby/setup-ruby@50ba3386b050ad5b97a41fcb81240cbee1d1821f # v1.188.0
+        uses: ruby/setup-ruby@a6b46b8a08edb18935835849f2a17072d5cc8c73 # v1.192.0
         with:
           ruby-version: "3.0"
       - name: Install packagecloud
@@ -78,9 +78,9 @@ jobs:
         env:
           PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
       # Update name
-      # - name: Rename package
-      #   if: inputs.BW_VERSION == 'testing'
-      #   run: sudo apt install -y rename && rename 's/[0-9]\.[0-9]\.[0-9]/testing/' /tmp/${{ inputs.LINUX }}/*.${{ inputs.PACKAGE }}
+      - name: Rename package
+        if: inputs.BW_VERSION == '1.5'
+        run: sudo apt install -y rename && rename 's/dev/1.5-dev/' /tmp/${{ inputs.LINUX }}/*.${{ inputs.PACKAGE }}
       # Push package
       - name: Push package to packagecloud
         if: inputs.LINUX != 'el9' && inputs.LINUX != 'ubuntu-jammy'

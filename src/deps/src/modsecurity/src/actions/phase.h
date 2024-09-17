@@ -32,7 +32,7 @@ namespace actions {
 
 class Phase : public Action {
  public:
-    explicit Phase(const std::string &action) : Action(action, ConfigurationKind),
+    explicit Phase(const std::string &action) : Action(action, Kind::ConfigurationKind),
         m_phase(0),
         m_secRulesPhase(0) { }
 

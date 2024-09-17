@@ -13,48 +13,17 @@
  *
  */
 
-#include "src/actions/transformations/normalise_path_win.h"
+#include "normalise_path_win.h"
 
-#include <string.h>
-
-#include <iostream>
-#include <string>
-#include <algorithm>
-#include <functional>
-#include <cctype>
-#include <locale>
-
-#include "modsecurity/transaction.h"
-#include "src/actions/transformations/transformation.h"
-#include "src/actions/transformations/normalise_path.h"
+#include "normalise_path.h"
 
 
-namespace modsecurity {
-namespace actions {
-namespace transformations {
+namespace modsecurity::actions::transformations {
 
 
-std::string NormalisePathWin::evaluate(const std::string &value,
-    Transaction *transaction) {
-    int changed;
-
-    char *tmp = reinterpret_cast<char *>(
-        malloc(sizeof(char) * value.size() + 1));
-    memcpy(tmp, value.c_str(), value.size() + 1);
-    tmp[value.size()] = '\0';
-
-    int i = NormalisePath::normalize_path_inplace(
-        reinterpret_cast<unsigned char *>(tmp),
-        value.size(), 1, &changed);
-
-    std::string ret("");
-    ret.assign(tmp, i);
-    free(tmp);
-
-    return ret;
+bool NormalisePathWin::transform(std::string &value, const Transaction *trans) const {
+    return NormalisePath::normalize_path_inplace(value, true);
 }
 
 
-}  // namespace transformations
-}  // namespace actions
-}  // namespace modsecurity
+}  // namespace modsecurity::actions::transformations

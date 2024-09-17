@@ -13,34 +13,34 @@
  *
  */
 
-#include <string>
-
-#include "modsecurity/actions/action.h"
-#include "src/actions/transformations/transformation.h"
-
 #ifndef SRC_ACTIONS_TRANSFORMATIONS_REMOVE_NULLS_H_
 #define SRC_ACTIONS_TRANSFORMATIONS_REMOVE_NULLS_H_
 
-#ifdef __cplusplus
-namespace modsecurity {
-class Transaction;
+#include "transformation.h"
 
-namespace actions {
-namespace transformations {
+#include <algorithm>
+
+namespace modsecurity::actions::transformations {
 
 class RemoveNulls : public Transformation {
  public:
-    explicit RemoveNulls(const std::string &action) 
-        : Transformation(action) { }
+    using Transformation::Transformation;
 
-    std::string evaluate(const std::string &exp,
-        Transaction *transaction) override;
+    bool transform(std::string &value, const Transaction *trans) const override;
+
+    template<typename Pred>
+    static bool remove_if(std::string &val, Pred pred) {
+        const auto old_size = val.size();
+
+        val.erase(
+            std::remove_if(
+                val.begin(), val.end(), pred),
+            val.end());
+
+        return val.size() != old_size;
+    }
 };
 
-}  // namespace transformations
-}  // namespace actions
-}  // namespace modsecurity
-
-#endif
+}  // namespace modsecurity::actions::transformations
 
 #endif  // SRC_ACTIONS_TRANSFORMATIONS_REMOVE_NULLS_H_

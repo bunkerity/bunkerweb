@@ -2,6 +2,7 @@
   {
     "enabled":1,
     "version_min":300000,
+    "resource":"libxml2",
     "title":"Testing XPath expression with equals sign",
     "expected":{
       "http_code": 403

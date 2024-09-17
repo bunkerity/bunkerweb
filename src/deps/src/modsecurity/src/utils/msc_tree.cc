@@ -15,9 +15,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifndef WIN32
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#else
+#include "src/compat/msvc.h"
+#include <WinSock2.h>
+#include <WS2tcpip.h>
+#endif
 
 #include "src/utils/msc_tree.h"
 

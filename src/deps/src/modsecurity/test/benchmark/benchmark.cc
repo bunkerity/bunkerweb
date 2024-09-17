@@ -73,7 +73,7 @@ int main(int argc, char *argv[]) {
     modsecurity::ModSecurity *modsec;
     modsecurity::RulesSet *rules;
     modsecurity::ModSecurityIntervention it;
-    modsecurity::intervention::reset(&it);
+    modsecurity::intervention::clean(&it);
     modsec = new modsecurity::ModSecurity();
     modsec->setConnectorInformation("ModSecurity-benchmark v0.0.1-alpha" \
             " (ModSecurity benchmark utility)");
@@ -167,6 +167,8 @@ int main(int argc, char *argv[]) {
 next_request:
         modsecTransaction->processLogging();
         delete modsecTransaction;
+        modsecurity::intervention::free(&it);
+        modsecurity::intervention::clean(&it);
     }
 
     delete rules;

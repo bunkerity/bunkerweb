@@ -13,33 +13,20 @@
  *
  */
 
-#include <string>
-
-#include "modsecurity/actions/action.h"
-#include "src/actions/transformations/transformation.h"
-
 #ifndef SRC_ACTIONS_TRANSFORMATIONS_PARITY_ZERO_7BIT_H_
 #define SRC_ACTIONS_TRANSFORMATIONS_PARITY_ZERO_7BIT_H_
 
-#ifdef __cplusplus
-namespace modsecurity {
-class Transaction;
+#include "transformation.h"
 
-namespace actions {
-namespace transformations {
+namespace modsecurity::actions::transformations {
 
 class ParityZero7bit : public Transformation {
  public:
-    explicit ParityZero7bit(const std::string &action)  : Transformation(action) { }
+    using Transformation::Transformation;
 
-    std::string evaluate(const std::string &exp, Transaction *transaction) override;
-    static bool inplace(unsigned char *input, uint64_t input_len);
+    bool transform(std::string &value, const Transaction *trans) const override;
 };
 
-}  // namespace transformations
-}  // namespace actions
-}  // namespace modsecurity
-
-#endif
+}  // namespace modsecurity::actions::transformations
 
 #endif  // SRC_ACTIONS_TRANSFORMATIONS_PARITY_ZERO_7BIT_H_

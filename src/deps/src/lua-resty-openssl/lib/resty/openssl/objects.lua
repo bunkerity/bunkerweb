@@ -57,7 +57,7 @@ local function txtnid2nid(txt_nid)
 end
 
 local function find_sigid_algs(nid)
-  local out = ffi.new("int[0]")
+  local out = ffi.new("int[1]")
   if C.OBJ_find_sigid_algs(nid, out, nil) == 0 then
     return 0, "objects.find_sigid_algs: invalid sigid " .. nid
   end

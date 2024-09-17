@@ -3,7 +3,7 @@
     "enabled": 1,
     "version_min": 300000,
     "version_max": 0,
-    "title": "pm operator test 1/4",
+    "title": "pm operator test 1/6",
     "client": {
       "ip": "200.249.12.31",
       "port": 2313
@@ -77,7 +77,7 @@
     "enabled": 1,
     "version_min": 300000,
     "version_max": 0,
-    "title": "pm operater test 3/4",
+    "title": "pm operater test 3/6",
     "client": {
       "ip": "200.249.12.31",
       "port": 2313
@@ -114,7 +114,7 @@
     "enabled": 1,
     "version_min": 300000,
     "version_max": 0,
-    "title": "pm operater test 4/4",
+    "title": "pm operater test 4/6",
     "client": {
       "ip": "200.249.12.31",
       "port": 2313
@@ -145,6 +145,80 @@
     "rules": [
       "SecRuleEngine On",
       "SecRule ARGS \"@pm a ` b\" \"phase:1,id:999,deny,status:500\""
+    ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "version_max": 0,
+    "title": "pm operater test 5/6",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 2313
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "request": {
+      "headers": {
+        "Host": "net.tutsplus.com"
+      },
+      "uri": "\/test.pl?param1=123",
+      "method": "GET",
+      "http_version": 1.1,
+      "body": ""
+    },
+    "response": {
+      "headers": {
+        "Content-Type": "text\/xml; charset=utf-8\n\r",
+        "Content-Length": "length\n\r"
+      }
+    },
+    "expected": {
+      "debug_log": "Rule returned 1",
+      "http_code": 403
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRule ARGS \"@pm 1 2 3\" \"phase:1,id:999,deny\""
+    ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "version_max": 0,
+    "title": "pm operater test 6/6",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 2313
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "request": {
+      "headers": {
+        "Host": "net.tutsplus.com"
+      },
+      "uri": "\/test.pl?param1=abc",
+      "method": "GET",
+      "http_version": 1.1,
+      "body": ""
+    },
+    "response": {
+      "headers": {
+        "Content-Type": "text\/xml; charset=utf-8\n\r",
+        "Content-Length": "length\n\r"
+      }
+    },
+    "expected": {
+      "debug_log": "Rule returned 0",
+      "http_code": 200
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRule ARGS \"@pm 1 2 3\" \"phase:1,id:999,deny\""
     ]
   }
 ]

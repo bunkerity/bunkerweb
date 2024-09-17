@@ -13,61 +13,26 @@
  *
  */
 
-#include "src/actions/transformations/parity_zero_7bit.h"
-
-#include <iostream>
-#include <string>
-#include <algorithm>
-#include <functional>
-#include <cctype>
-#include <locale>
-#include <cstring>
-
-#include "modsecurity/transaction.h"
-#include "src/actions/transformations/transformation.h"
+#include "parity_zero_7bit.h"
 
 
-namespace modsecurity {
-namespace actions {
-namespace transformations {
+namespace modsecurity::actions::transformations {
 
 
-std::string ParityZero7bit::evaluate(const std::string &value,
-    Transaction *transaction) {
-    std::string ret;
-    unsigned char *input;
+static inline bool inplace(std::string &value) {
+    if (value.empty()) return false;
 
-    input = reinterpret_cast<unsigned char *>
-        (malloc(sizeof(char) * value.length()+1));
-
-    if (input == NULL) {
-        return "";
-    }
-
-    memcpy(input, value.c_str(), value.length()+1);
-
-    inplace(input, value.length());
-
-    ret.assign(reinterpret_cast<char *>(input), value.length());
-    free(input);
-
-    return ret;
-}
-
-
-bool ParityZero7bit::inplace(unsigned char *input, uint64_t input_len) {
-    uint64_t i;
-
-    i = 0;
-    while (i < input_len) {
-        input[i] &= 0x7f;
-        i++;
+    for(auto &c : value) {
+        ((unsigned char&)c) &= 0x7f;
     }
 
     return true;
 }
 
 
-}  // namespace transformations
-}  // namespace actions
-}  // namespace modsecurity
+bool ParityZero7bit::transform(std::string &value, const Transaction *trans) const {
+    return inplace(value);
+}
+
+
+}  // namespace modsecurity::actions::transformations

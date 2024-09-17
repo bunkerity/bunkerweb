@@ -23,33 +23,30 @@
 
 #include "mbedtls/base64.h"
 
+template<typename Operation>
+inline std::string base64Helper(const char *data, const unsigned int len, Operation op) {
+    size_t out_len = 0;
+
+    op(nullptr, 0, &out_len,
+        reinterpret_cast<const unsigned char *>(data), len);
+
+    std::string ret(out_len, {});
+    if(out_len > 0) {
+        op(reinterpret_cast<unsigned char *>(ret.data()), ret.size(), &out_len,
+            reinterpret_cast<const unsigned char *>(data), len);
+
+        ret.resize(out_len);
+    }
+
+    return ret;
+}
+
 namespace modsecurity {
 namespace Utils {
 
 
 std::string Base64::encode(const std::string& data) {
-    size_t encoded_len = 0;
-    unsigned char *d;
-    std::string ret;
-
-    mbedtls_base64_encode(NULL, 0, &encoded_len,
-        reinterpret_cast<const unsigned char*>(data.c_str()), data.size());
-
-    d = reinterpret_cast<unsigned char*>(malloc(sizeof(char) * encoded_len));
-    if (d == NULL) {
-        return data;
-    }
-
-    memset(d, '\0', encoded_len);
-
-    mbedtls_base64_encode(d, encoded_len, &encoded_len,
-        (unsigned char*) data.c_str(), data.size());
-
-    ret.assign(reinterpret_cast<const char*>(d), encoded_len);
-    free(d);
-
-
-    return ret;
+    return base64Helper(data.c_str(), data.size(), mbedtls_base64_encode);
 }
 
 
@@ -63,53 +60,12 @@ std::string Base64::decode(const std::string& data, bool forgiven) {
 
 
 std::string Base64::decode(const std::string& data) {
-    size_t decoded_len = 0;
-    unsigned char *d;
-    std::string ret;
-    size_t len = strlen(data.c_str());
-
-    mbedtls_base64_decode(NULL, 0, &decoded_len,
-        reinterpret_cast<const unsigned char*>(data.c_str()), len);
-
-    d = reinterpret_cast<unsigned char*>(malloc(sizeof(char) * decoded_len));
-    if (d == NULL) {
-        return data;
-    }
-
-    memset(d, '\0', decoded_len);
-
-    mbedtls_base64_decode(d, decoded_len, &decoded_len,
-       reinterpret_cast<const unsigned char*>(data.c_str()), len);
-
-    ret.assign(reinterpret_cast<const char*>(d), decoded_len);
-    free(d);
-
-    return ret;
+    return base64Helper(data.c_str(), strlen(data.c_str()), mbedtls_base64_decode);
 }
 
 
 std::string Base64::decode_forgiven(const std::string& data) {
-    size_t decoded_len = 0;
-    unsigned char *d;
-    std::string ret;
-
-    decode_forgiven_engine(NULL, 0, &decoded_len,
-        reinterpret_cast<const unsigned char*>(data.c_str()), data.size());
-
-    d = reinterpret_cast<unsigned char*>(malloc(sizeof(char) * decoded_len));
-    if (d == NULL) {
-        return data;
-    }
-
-    memset(d, '\0', decoded_len);
-
-    decode_forgiven_engine(d, decoded_len, &decoded_len,
-       reinterpret_cast<const unsigned char*>(data.c_str()), data.size());
-
-    ret.assign(reinterpret_cast<const char*>(d), decoded_len);
-    free(d);
-
-    return ret;
+    return base64Helper(data.c_str(), data.size(), decode_forgiven_engine);
 }
 
 
@@ -214,7 +170,6 @@ void Base64::decode_forgiven_engine(unsigned char *plain_text,
         *aiming_size = j;
     }
 }
-
 
 }  // namespace Utils
 }  // namespace modsecurity

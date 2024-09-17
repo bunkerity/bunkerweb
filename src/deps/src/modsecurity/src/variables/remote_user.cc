@@ -39,50 +39,40 @@ namespace variables {
 void RemoteUser::evaluate(Transaction *transaction,
     RuleWithActions *rule,
     std::vector<const VariableValue *> *l) {
-    size_t pos;
-    std::string base64;
-    VariableValue *var;
-    std::string header;
+    std::vector<const VariableValue *> l2;
 
-    std::vector<const VariableValue *> *l2 = \
-	new std::vector<const VariableValue *>();
-    transaction->m_variableRequestHeaders.resolve("authorization", l2);
+    transaction->m_variableRequestHeaders.resolve("authorization", &l2);
 
-    if (l2->size() < 1) {
-        goto clear;
+    if (!l2.empty()) {
+        const auto *v = l2[0];
+
+        const auto &header = v->getValue();
+
+        std::string base64;
+
+        if (header.compare(0, 6, "Basic ") == 0) {
+            base64 = std::string(header, 6, header.length());
+        }
+
+        base64 = Utils::Base64::decode(base64);
+
+        if (const auto pos{base64.find(":")}; pos != std::string::npos) {
+            transaction->m_variableRemoteUser.assign(std::string(base64, 0, pos));
+
+            auto var = std::make_unique<VariableValue>(&v->getKeyWithCollection(),
+                &transaction->m_variableRemoteUser);
+
+            var->reserveOrigin(v->getOrigin().size());
+            for (const auto &i : v->getOrigin()) {
+                var->addOrigin(i);
+            }
+            l->push_back(var.release());
+        }
+
+        for (auto &a : l2) {
+            delete a;
+        }
     }
-
-    header = std::string(l2->at(0)->getValue());
-
-    if (header.compare(0, 6, "Basic ") == 0) {
-        base64 = std::string(header, 6, header.length());
-    }
-
-    base64 = Utils::Base64::decode(base64);
-
-    pos = base64.find(":");
-    if (pos == std::string::npos) {
-        goto clear;
-    }
-    transaction->m_variableRemoteUser.assign(std::string(base64, 0, pos));
-
-    var = new VariableValue(&l2->at(0)->getKeyWithCollection(),
-        &transaction->m_variableRemoteUser);
-
-    for (const auto &i : l2->at(0)->getOrigin()) {
-        std::unique_ptr<VariableOrigin> origin(new VariableOrigin());
-        origin->m_offset = i->m_offset;
-        origin->m_length = i->m_length;
-        var->addOrigin(std::move(origin));
-    }
-    l->push_back(var);
-
-clear:
-    for (auto &a : *l2) {
-        delete a;
-    }
-    l2->clear();
-    delete l2;
 }
 
 

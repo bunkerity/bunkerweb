@@ -33,8 +33,8 @@ namespace data {
 
 class Status : public Action {
  public:
-    explicit Status(const std::string &action) : Action(action, 2),
-    m_status(0) { }
+    explicit Status(const std::string &action)
+        : Action(action), m_status(0) { }
 
     bool init(std::string *error) override;
     bool evaluate(RuleWithActions *rule, Transaction *transaction,

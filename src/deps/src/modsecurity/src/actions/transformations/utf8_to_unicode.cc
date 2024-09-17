@@ -13,83 +13,40 @@
  *
  */
 
-#include "src/actions/transformations/utf8_to_unicode.h"
+#include "utf8_to_unicode.h"
 
-#include <iostream>
-#include <string>
-#include <algorithm>
-#include <functional>
-#include <cctype>
-#include <locale>
 #include <cstring>
 
-#include "modsecurity/transaction.h"
-#include "src/actions/transformations/transformation.h"
 #include "src/utils/string.h"
 
 
-namespace modsecurity {
-namespace actions {
-namespace transformations {
+constexpr int UNICODE_ERROR_CHARACTERS_MISSING   = -1;
+constexpr int UNICODE_ERROR_INVALID_ENCODING     = -2;
 
 
-std::string Utf8ToUnicode::evaluate(const std::string &value,
-    Transaction *transaction) {
-    std::string ret;
-    unsigned char *input;
-    int changed = 0;
-    char *out;
-
-    input = reinterpret_cast<unsigned char *>
-        (malloc(sizeof(char) * value.length()+1));
-
-    if (input == NULL) {
-        return "";
-    }
-
-    memcpy(input, value.c_str(), value.length()+1);
-
-    out = inplace(input, value.size() + 1, &changed);
-    free(input);
-    if (out != NULL) {
-        ret.assign(reinterpret_cast<char *>(out),
-            strlen(reinterpret_cast<char *>(out)));
-        free(out);
-    }
-
-    return ret;
-}
+namespace modsecurity::actions::transformations {
 
 
-char *Utf8ToUnicode::inplace(unsigned char *input,
-    uint64_t input_len, int *changed) {
-    unsigned int count = 0;
-    char *data;
-    char *data_orig;
-    unsigned int i, len, j;
-    unsigned int bytes_left = input_len;
+static inline bool encode(std::string &value) {
+    auto input = reinterpret_cast<unsigned char*>(value.data());
+    const auto input_len = value.length();
+
+    bool changed = false;
+    std::string::size_type count = 0;
+    auto bytes_left = input_len;
     unsigned char unicode[8];
-    *changed = 0;
 
     /* RFC3629 states that UTF-8 are encoded using sequences of 1 to 4 octets. */
     /* Max size per character should fit in 4 bytes */
-    len = input_len * 4 + 1;
-    data = reinterpret_cast<char *>(malloc(sizeof(char) * len));
-    if (data == NULL) {
-        return NULL;
-    }
-    data_orig = data;
+    const auto len = input_len * 4 + 1;
+    std::string ret(len, {});
+    auto data = ret.data();
 
-    if (input == NULL) {
-        free(data);
-        return NULL;
-    }
-
-    for (i = 0; i < bytes_left;)  {
+    for (std::string::size_type i = 0; i < bytes_left;)  {
         int unicode_len = 0;
         unsigned int d = 0;
         unsigned char c;
-        unsigned char *utf = (unsigned char *)&input[i];
+        auto utf = &input[i];
 
         c = *utf;
 
@@ -117,7 +74,7 @@ char *Utf8ToUnicode::inplace(unsigned char *input,
                 unicode_len = UNICODE_ERROR_INVALID_ENCODING;
             } else {
                 unicode_len = 2;
-                count+=6;
+                count += 6;
                 if (count <= len) {
                     int length = 0;
                     /* compute character number */
@@ -147,11 +104,11 @@ char *Utf8ToUnicode::inplace(unsigned char *input,
                             break;
                     }
 
-                    for (j = 0; j < length; j++) {
+                    for (std::string::size_type j = 0; j < length; j++) {
                         *data++ = unicode[j];
                     }
 
-                    *changed = 1;
+                    changed = true;
                 }
             }
         } else if ((c & 0xF0) == 0xE0) {
@@ -199,11 +156,11 @@ char *Utf8ToUnicode::inplace(unsigned char *input,
                             break;
                     }
 
-                    for (j = 0; j < length; j++) {
+                    for (std::string::size_type j = 0; j < length; j++) {
                         *data++ = unicode[j];
                     }
 
-                    *changed = 1;
+                    changed = true;
                 }
             }
         } else if ((c & 0xF8) == 0xF0) {
@@ -261,11 +218,11 @@ char *Utf8ToUnicode::inplace(unsigned char *input,
                             break;
                     }
 
-                    for (j = 0; j < length; j++) {
+                    for (std::string::size_type j = 0; j < length; j++) {
                         *data++ = unicode[j];
                     }
 
-                    *changed = 1;
+                    changed = true;
                 }
             }
         } else {
@@ -309,10 +266,15 @@ char *Utf8ToUnicode::inplace(unsigned char *input,
 
     *data ='\0';
 
-    return data_orig;
+    ret.resize(data - ret.c_str());
+    std::swap(value, ret);
+    return changed;
 }
 
 
-}  // namespace transformations
-}  // namespace actions
-}  // namespace modsecurity
+bool Utf8ToUnicode::transform(std::string &value, const Transaction *trans) const {
+    return encode(value);
+}
+
+
+}  // namespace modsecurity::actions::transformations

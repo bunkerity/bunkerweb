@@ -13,41 +13,66 @@
  *
  */
 
-#ifdef __cplusplus
-
-#include <string>
-#include <iostream>
-#include <memory>
-
-#endif
-
-#include "modsecurity/intervention.h"
-#include "modsecurity/rule.h"
-#include "modsecurity/rule_with_actions.h"
-
 #ifndef HEADERS_MODSECURITY_ACTIONS_ACTION_H_
 #define HEADERS_MODSECURITY_ACTIONS_ACTION_H_
 
 #ifdef __cplusplus
 
+#include <string>
+#include <memory>
+
 namespace modsecurity {
 class Transaction;
 class RuleWithOperator;
+class RuleWithActions;
+class RuleMessage;
 
 namespace actions {
 
 
 class Action {
  public:
+    /**
+     *
+     * Define the action kind regarding to the execution time.
+     * 
+     * 
+     */
+    enum class Kind {
+    /**
+     *
+     * Action that are executed while loading the configuration. For instance
+     * the rule ID or the rule phase.
+     *
+     */
+     ConfigurationKind,
+    /**
+     *
+     * Those are actions that demands to be executed before call the operator.
+     * For instance the tranformations.
+     *
+     *
+     */
+     RunTimeBeforeMatchAttemptKind,
+    /**
+     *
+     * Actions that are executed after the execution of the operator, only if
+     * the operator returned Match (or True). For instance the disruptive
+     * actions.
+     *
+     */
+     RunTimeOnlyIfMatchKind,
+    };
+
     explicit Action(const std::string& _action)
         : m_isNone(false),
         temporaryAction(false),
-        action_kind(2),
+        action_kind(Kind::RunTimeOnlyIfMatchKind),
         m_name(nullptr),
         m_parser_payload("") {
             set_name_and_payload(_action);
         }
-    explicit Action(const std::string& _action, int kind)
+    explicit Action(const std::string& _action, Kind kind)
         : m_isNone(false),
         temporaryAction(false),
         action_kind(kind),
@@ -74,8 +99,6 @@ class Action {
 
     virtual ~Action() { }
 
-    virtual std::string evaluate(const std::string &exp,
-        Transaction *transaction);
     virtual bool evaluate(RuleWithActions *rule, Transaction *transaction);
     virtual bool evaluate(RuleWithActions *rule, Transaction *transaction,
         std::shared_ptr<RuleMessage> ruleMessage) {
@@ -87,9 +110,9 @@ class Action {
 
     void set_name_and_payload(const std::string& data) {
         size_t pos = data.find(":");
-        std::string t = "t:";
+        const char t[] = "t:";
 
-        if (data.compare(0, t.length(), t) == 0) {
+        if (data.compare(0, std::size(t) - 1, t) == 0) {
             pos = data.find(":", 2);
         }
 
@@ -109,41 +132,9 @@ class Action {
 
     bool m_isNone;
     bool temporaryAction;
-    int action_kind;
+    Kind action_kind;
     std::shared_ptr<std::string> m_name;
     std::string m_parser_payload;
-
-    /**
-     *
-     * Define the action kind regarding to the execution time.
-     * 
-     * 
-     */
-    enum Kind {
-    /**
-     *
-     * Action that are executed while loading the configuration. For instance
-     * the rule ID or the rule phase.
-     *
-     */
-     ConfigurationKind,
-    /**
-     *
-     * Those are actions that demands to be executed before call the operator.
-     * For instance the tranformations.
-     *
-     *
-     */
-     RunTimeBeforeMatchAttemptKind,
-    /**
-     *
-     * Actions that are executed after the execution of the operator, only if
-     * the operator returned Match (or True). For instance the disruptive
-     * actions.
-     *
-     */
-     RunTimeOnlyIfMatchKind,
-    };
  };
 
 

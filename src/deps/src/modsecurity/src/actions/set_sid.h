@@ -36,7 +36,7 @@ class SetSID : public Action {
         : Action(_action) { }
 
     explicit SetSID(std::unique_ptr<RunTimeString> z)
-        : Action("setsid", RunTimeOnlyIfMatchKind),
+        : Action("setsid"),
             m_string(std::move(z)) { }
 
     bool evaluate(RuleWithActions *rule, Transaction *transaction) override;

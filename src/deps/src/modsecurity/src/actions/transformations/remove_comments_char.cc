@@ -13,62 +13,51 @@
  *
  */
 
-#include "src/actions/transformations/remove_comments_char.h"
-
-#include <string>
-
-#include "modsecurity/transaction.h"
-#include "src/actions/transformations/transformation.h"
+#include "remove_comments_char.h"
 
 
-namespace modsecurity {
-namespace actions {
-namespace transformations {
+namespace modsecurity::actions::transformations {
 
-RemoveCommentsChar::RemoveCommentsChar(const std::string &action) 
-    : Transformation(action) {
-    this->action_kind = 1;
-}
 
-std::string RemoveCommentsChar::evaluate(const std::string &val,
-    Transaction *transaction) {
-    size_t i = 0;
-    std::string transformed_value;
-    transformed_value.reserve(val.size());
+bool RemoveCommentsChar::transform(std::string &value, const Transaction *trans) const {
+    char *d = value.data();
+    const char *s = d;
+    const char *e = s + value.size();
 
-    while (i < val.size()) {
-        if (val.at(i) == '/'
-            && (i+1 < val.size()) && val.at(i+1) == '*') {
-            i += 2;
-        } else if (val.at(i) == '*'
-            && (i+1 < val.size()) && val.at(i+1) == '/') {
-            i += 2;
-        } else if (val.at(i) == '<'
-            && (i+1 < val.size())
-            && val.at(i+1) == '!'
-            && (i+2 < val.size())
-            && val.at(i+2) == '-'
-            && (i+3 < val.size())
-            && val.at(i+3) == '-') {
-            i += 4;
-        } else if (val.at(i) == '-'
-            && (i+1 < val.size()) && val.at(i+1) == '-'
-            && (i+2 < val.size()) && val.at(i+2) == '>') {
-            i += 3;
-        } else if (val.at(i) == '-'
-            && (i+1 < val.size()) && val.at(i+1) == '-') {
-            i += 2;
-        } else if (val.at(i) == '#') {
-            i += 1;
+    while (s < e) {
+        if (*s == '/'
+            && (s+1 < e) && *(s+1) == '*') {
+            s += 2;
+        } else if (*s == '*'
+            && (s+1 < e) && *(s+1) == '/') {
+            s += 2;
+        } else if (*s == '<'
+            && (s+1 < e)
+            && *(s+1) == '!'
+            && (s+2 < e)
+            && *(s+2) == '-'
+            && (s+3 < e)
+            && *(s+3) == '-') {
+            s += 4;
+        } else if (*s == '-'
+            && (s+1 < e) && *(s+1) == '-'
+            && (s+2 < e) && *(s+2) == '>') {
+            s += 3;
+        } else if (*s == '-'
+            && (s+1 < e) && *(s+1) == '-') {
+            s += 2;
+        } else if (*s == '#') {
+            s += 1;
         } else {
-            transformed_value += val.at(i);
-            i++;
+            *d++ = *s++;
         }
     }
-    return transformed_value;
+
+    const auto changed = d != s;
+    const auto new_len = d - value.c_str();
+    value.resize(new_len);
+    return changed;
 }
 
-}  // namespace transformations
-}  // namespace actions
-}  // namespace modsecurity
+}  // namespace modsecurity::actions::transformations
 

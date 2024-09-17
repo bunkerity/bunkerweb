@@ -18,8 +18,10 @@
 
 
 #include <stdio.h>
+#ifndef WIN32
 #include <sys/ipc.h>
 #include <sys/shm.h>
+#endif
 #include <sys/types.h>
 
 #include <iostream>

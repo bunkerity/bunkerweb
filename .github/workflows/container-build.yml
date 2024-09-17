@@ -48,7 +48,10 @@ jobs:
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
       - name: Replace VERSION
         if: inputs.RELEASE == 'testing' || inputs.RELEASE == 'dev'
-        run: ./misc/update-version.sh ${{ inputs.RELEASE }}
+        run: chmod +x ./misc/update-version.sh && ./misc/update-version.sh ${{ inputs.RELEASE }}
+      - name: Replace VERSION 1.5
+        if: inputs.RELEASE == '1.5'
+        run: chmod +x ./misc/update-version.sh && ./misc/update-version.sh dev
       - name: Setup SSH for ARM node
         if: inputs.CACHE_SUFFIX == 'arm'
         run: |
@@ -63,10 +66,10 @@ jobs:
           SSH_IP: ${{ secrets.ARM_SSH_IP }}
           SSH_CONFIG: ${{ secrets.ARM_SSH_CONFIG }}
       - name: Setup Buildx
-        uses: docker/setup-buildx-action@aa33708b10e362ff993539393ff100fa93ed6a27 # v3.5.0
+        uses: docker/setup-buildx-action@988b5a0280414f521da01fcc63a27aeeb4b104db # v3.6.1
         if: inputs.CACHE_SUFFIX != 'arm'
       - name: Setup Buildx (ARM)
-        uses: docker/setup-buildx-action@aa33708b10e362ff993539393ff100fa93ed6a27 # v3.5.0
+        uses: docker/setup-buildx-action@988b5a0280414f521da01fcc63a27aeeb4b104db # v3.6.1
         if: inputs.CACHE_SUFFIX == 'arm'
         with:
           endpoint: ssh://root@arm
