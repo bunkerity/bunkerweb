@@ -74,7 +74,7 @@ def instances_action(action: Literal["ping", "reload", "stop", "delete"]):  # TO
     )
     instances = request.form["instances"].split(",")
     if not instances:
-        return handle_error("No instances selected.", "instances", True)
+        return handle_error(f"No instance{'s' if len(instances) > 1 else ''} selected.", "instances", True)
     DATA.load_from_file()
 
     if action == "ping":
@@ -114,12 +114,16 @@ def instances_action(action: Literal["ping", "reload", "stop", "delete"]):  # TO
             flash(f"Instance {non_ui_instance} is not a UI instance and will not be deleted.", "error")
 
         if not delete_instances:
-            return handle_error("All selected instances could not be found or are not UI instances.", "instances", True)
+            return handle_error(
+                f"{'All selected instances' if len(delete_instances) > 1 else 'Selected instance'} could not be found or {'are not UI instances' if len(delete_instances) > 1 else 'is not an UI instance'}.",
+                "instances",
+                True,
+            )
 
         ret = DB.delete_instances(delete_instances)
         if ret:
-            return handle_error(f"Couldn't delete the instances in the database: {ret}", "instances", True)
-        flash(f"Instances {', '.join(delete_instances)} deleted successfully.", "success")
+            return handle_error(f"Couldn't delete the instance{'s' if len(delete_instances) > 1 else ''} in the database: {ret}", "instances", True)
+        flash(f"Instance{'s' if len(delete_instances) > 1 else ''} {', '.join(delete_instances)} deleted successfully.", "success")
     else:
 
         def execute_action(instance):
@@ -152,6 +156,6 @@ def instances_action(action: Literal["ping", "reload", "stop", "delete"]):  # TO
         url_for(
             "loading",
             next=url_for("instances.instances_page"),
-            message=(f"{ACTIONS[action]['present']} instances {', '.join(instances)}"),
+            message=(f"{ACTIONS[action]['present']} instance{'s' if len(instances) > 1 else ''} {', '.join(instances)}"),
         )
     )

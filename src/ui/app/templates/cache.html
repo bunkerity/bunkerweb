@@ -1,0 +1,90 @@
+{% extends "dashboard.html" %}
+{% block content %}
+    <!-- Content -->
+    <div class="card table-responsive text-nowrap p-4 min-vh-70">
+        <input type="hidden" id="cache_number" value="{{ caches|length }}" />
+        <input type="hidden"
+               id="csrf_token"
+               name="csrf_token"
+               value="{{ csrf_token() }}" />
+        <table id="cache" class="table w-100">
+            <thead>
+                <tr>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="The user defined Cache's file name">File name</th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="The Cache's job name">Job name</th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="The Cache's job's Plugin">Plugin</th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="The Service associated with the Cache">Service</th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="The date and time when the Cache was last updated">Last Update</th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="The Cache's checksum">Checksum</th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="The actions that can be performed on the Instance">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cache in caches %}
+                    {% set service_id = cache['service_id'] if cache['service_id'] else 'global' %}
+                    <tr>
+                        <td>
+                            <a href="{{ url_for("cache") }}/{{ service_id }}/{{ cache['plugin_id'] }}/{{ cache['job_name'] }}/{{ cache['file_name'].replace('/', '_') }}"
+                               data-bs-toggle="tooltip"
+                               data-bs-placement="bottom"
+                               data-bs-original-title="View {{ cache['file_name'] }}"><i class="bx bx-show bx-xs"></i>&nbsp;{{ cache['file_name'] }}</a>
+                        </td>
+                        <td>{{ cache['job_name'] }}</td>
+                        <td>{{ cache['plugin_id'] }}</td>
+                        <td id="service-{{ cache['job_name'] }}-{{ service_id.replace('.', '_') }}-{{ cache['file_name'].replace('.', '_') }}">
+                            {% if cache["service_id"] %}
+                                <a href="{{ url_for("services") }}/{{ cache['service_id'] }}"
+                                   data-bs-toggle="tooltip"
+                                   data-bs-placement="bottom"
+                                   data-bs-original-title="Edit service {{ cache['service_id'] }}"><i class="bx bx-edit bx-xs"></i>&nbsp;{{ cache["service_id"] }}</a>
+                            {% else %}
+                                <span class="badge rounded-pill bg-label-secondary">global</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {{ cache["last_update"] if cache["last_update"] == "Never" else cache["last_update"].astimezone().strftime("%Y-%m-%d %H:%M:%S %Z") }}
+                        </td>
+                        <td>{{ cache["checksum"] }}</td>
+                        <td>
+                            <div class="d-flex justify-content-center">
+                                <a role="button"
+                                   class="btn btn-primary btn-sm me-1"
+                                   href="{{ url_for("cache") }}/{{ service_id }}/{{ cache['plugin_id'] }}/{{ cache['job_name'] }}/{{ cache['file_name'].replace('/', '_') }}"
+                                   data-bs-toggle="tooltip"
+                                   data-bs-placement="bottom"
+                                   data-bs-original-title="View {{ cache['file_name'] }}">
+                                    <i class="bx bx-show bx-xs"></i>
+                                </a>
+                                <a role="button"
+                                   class="btn btn-outline-secondary btn-sm me-1"
+                                   href="{{ url_for("cache") }}/{{ service_id }}/{{ cache['plugin_id'] }}/{{ cache['job_name'] }}/{{ cache['file_name'].replace('/', '_') }}?download=true"
+                                   data-bs-toggle="tooltip"
+                                   data-bs-placement="bottom"
+                                   data-bs-original-title="Download {{ cache['file_name'] }}"
+                                   target="_blank"
+                                   rel="noopener noreferrer">
+                                    <i class="bx bx-download bx-xs"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <!-- / Content -->
+{% endblock %}

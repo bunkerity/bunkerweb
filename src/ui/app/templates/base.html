@@ -25,7 +25,7 @@
         <link rel="stylesheet"
               href="{{ url_for('static', filename='fonts/boxicons.min.css') }}"
               nonce="{{ style_nonce }}" />
-        {% if current_endpoint in ("instances", "services") %}
+        {% if current_endpoint in ("instances", "services", "configs", "cache") %}
             <!-- Datatables -->
             <link rel="stylesheet"
                   href="{{ url_for('static', filename='libs/datatables/datatables.min.css') }}"
@@ -89,11 +89,11 @@
                 nonce="{{ script_nonce }}"></script>
         <script src="{{ url_for('static', filename='libs/purify/purify.min.js') }}"
                 nonce="{{ script_nonce }}"></script>
-        {% if current_endpoint in ("instances", "services") %}
+        {% if current_endpoint in ("instances", "services", "configs", "cache") %}
             <script src="{{ url_for('static', filename='libs/datatables/datatables.min.js') }}"
                     nonce="{{ script_nonce }}"></script>
         {% endif %}
-        {% if current_endpoint != "services" and "services" in request.path %}
+        {% if current_endpoint not in ("services", "configs", "cache") and ("services" in request.path or "configs" in request.path or "cache" in request.path) %}
             <script src="{{ url_for('static', filename='libs/ace/src-min/ace.js') }}"
                     nonce="{{ script_nonce }}"></script>
         {% endif %}
@@ -130,6 +130,18 @@
                     nonce="{{ script_nonce }}"></script>
         {% elif current_endpoint == "services" %}
             <script src="{{ url_for('static', filename='js/pages/services.js') }}"
+                    nonce="{{ script_nonce }}"></script>
+        {% elif current_endpoint == "configs" %}
+            <script src="{{ url_for('static', filename='js/pages/configs.js') }}"
+                    nonce="{{ script_nonce }}"></script>
+        {% elif current_endpoint != "configs" and "configs" in request.path %}
+            <script src="{{ url_for('static', filename='js/pages/config_edit.js') }}"
+                    nonce="{{ script_nonce }}"></script>
+        {% elif current_endpoint == "cache" %}
+            <script src="{{ url_for('static', filename='js/pages/cache.js') }}"
+                    nonce="{{ script_nonce }}"></script>
+        {% elif current_endpoint != "cache" and "cache" in request.path %}
+            <script src="{{ url_for('static', filename='js/pages/cache_view.js') }}"
                     nonce="{{ script_nonce }}"></script>
         {% endif %}
         <script async defer src="{{ url_for('static', filename='js/buttons.js') }}"></script>

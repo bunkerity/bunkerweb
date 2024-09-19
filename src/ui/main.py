@@ -229,8 +229,8 @@ def handle_csrf_error(_):
     logout_user()
     flash("Wrong CSRF token !", "error")
     if not current_user:
-        return render_template("setup.html"), 403
-    return render_template("login.html"), 403
+        return redirect(url_for("setup.setup_page")), 403
+    return redirect(url_for("login.login_page")), 403
 
 
 def update_latest_stable_release():

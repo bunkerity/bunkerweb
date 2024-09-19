@@ -1943,30 +1943,28 @@ class Database:
 
         return config
 
-    def get_custom_configs(self, *, with_drafts: bool = False, as_dict: bool = False) -> Union[List[Dict[str, Any]], Dict[str, Any]]:
+    def get_custom_configs(self, *, with_drafts: bool = False, with_data: bool = True, as_dict: bool = False) -> Union[List[Dict[str, Any]], Dict[str, Any]]:
         """Get the custom configs from the database"""
         db_config = self.get_non_default_settings(with_drafts=with_drafts, filtered_settings={"USE_TEMPLATE"})
 
         with self._db_session() as session:
-            custom_configs = [
-                {
+            entities = [Custom_configs.service_id, Custom_configs.type, Custom_configs.name, Custom_configs.checksum, Custom_configs.method]
+            if with_data:
+                entities.append(Custom_configs.data)
+
+            custom_configs = []
+            for custom_config in session.query(Custom_configs).with_entities(*entities):
+                data = {
                     "service_id": custom_config.service_id,
                     "type": custom_config.type,
                     "name": custom_config.name,
-                    "data": custom_config.data,
+                    "checksum": custom_config.checksum,
                     "method": custom_config.method,
                     "template": None,
                 }
-                for custom_config in (
-                    session.query(Custom_configs).with_entities(
-                        Custom_configs.service_id,
-                        Custom_configs.type,
-                        Custom_configs.name,
-                        Custom_configs.data,
-                        Custom_configs.method,
-                    )
-                )
-            ]
+                if with_data:
+                    data["data"] = custom_config.data
+                custom_configs.append(data)
 
             if not db_config:
                 if as_dict:
@@ -1978,30 +1976,31 @@ class Database:
                     return dict_custom_configs
                 return custom_configs
 
+            template_entities = [Template_custom_configs.type, Template_custom_configs.name, Template_custom_configs.checksum]
+            if with_data:
+                template_entities.append(Template_custom_configs.data)
+
             for service in session.query(Services).with_entities(Services.id).all():
                 for key, value in db_config.items():
                     if key.startswith(f"{service.id}_"):
-                        for template_config in (
-                            session.query(Template_custom_configs)
-                            .with_entities(Template_custom_configs.type, Template_custom_configs.name, Template_custom_configs.data)
-                            .filter_by(template_id=value)
-                        ):
+                        for template_config in session.query(Template_custom_configs).with_entities(*template_entities).filter_by(template_id=value):
                             if not any(
                                 custom_config["service_id"] == service.id
                                 and custom_config["type"] == template_config.type
                                 and custom_config["name"] == template_config.name
                                 for custom_config in custom_configs
                             ):
-                                custom_configs.append(
-                                    {
-                                        "service_id": service.id,
-                                        "type": template_config.type,
-                                        "name": template_config.name,
-                                        "data": template_config.data,
-                                        "method": "default",
-                                        "template": value,
-                                    }
-                                )
+                                custom_config = {
+                                    "service_id": service.id,
+                                    "type": template_config.type,
+                                    "name": template_config.name,
+                                    "checksum": template_config.checksum,
+                                    "method": "default",
+                                    "template": value,
+                                }
+                                if with_data:
+                                    custom_config["data"] = template_config.data
+                                custom_configs.append(custom_config)
 
             if as_dict:
                 dict_custom_configs = {}
@@ -2011,6 +2010,102 @@ class Database:
                     ] = custom_config
                 return dict_custom_configs
             return custom_configs
+
+    def get_custom_config(self, config_type: str, name: str, *, service_id: Optional[str] = None, with_data: bool = True) -> Dict[str, Any]:
+        """Get a custom config from the database"""
+        with self._db_session() as session:
+            entities = [Custom_configs.service_id, Custom_configs.type, Custom_configs.name, Custom_configs.checksum, Custom_configs.method]
+            if with_data:
+                entities.append(Custom_configs.data)
+
+            db_config = session.query(Custom_configs).with_entities(*entities).filter_by(service_id=service_id, type=config_type, name=name).first()
+
+        if not db_config:
+            if service_id:
+                service_config = self.get_non_default_settings(with_drafts=True, filtered_settings={"USE_TEMPLATE"})
+                if service_config.get(f"{service_id}_USE_TEMPLATE"):
+                    with self._db_session() as session:
+                        template_config = (
+                            session.query(Template_custom_configs)
+                            .filter_by(template_id=service_config.get(f"{service_id}_USE_TEMPLATE"), type=config_type, name=name)
+                            .first()
+                        )
+                        if template_config:
+                            custom_config = {
+                                "service_id": service_id,
+                                "type": config_type,
+                                "name": name,
+                                "checksum": template_config.checksum,
+                                "method": "default",
+                                "template": service_config.get(f"{service_id}_USE_TEMPLATE"),
+                            }
+                            if with_data:
+                                custom_config["data"] = template_config.data
+                            return custom_config
+            return {}
+
+        custom_config = {
+            "service_id": service_id,
+            "type": config_type,
+            "name": name,
+            "checksum": db_config.checksum,
+            "method": db_config.method,
+            "template": None,
+        }
+        if with_data:
+            custom_config["data"] = db_config.data
+
+        return custom_config
+
+    def upsert_custom_config(self, config_type: str, name: str, config: Dict[str, Any], *, service_id: Optional[str] = None) -> str:
+        """Update or insert a custom config in the database"""
+        with self._db_session() as session:
+            if self.readonly:
+                return "The database is read-only, the changes will not be saved"
+
+            filters = {
+                "type": config_type,
+                "name": name,
+            }
+            if service_id:
+                filters["service_id"] = service_id
+
+            custom_config = session.query(Custom_configs).filter_by(**filters).first()
+
+            data = config["data"].encode("utf-8") if isinstance(config["data"], str) else config["data"]
+            checksum = config.get("checksum", bytes_hash(data, algorithm="sha256"))
+
+            if not custom_config:
+                session.add(
+                    Custom_configs(
+                        service_id=config.get("service_id"),
+                        type=config["type"],
+                        name=config["name"],
+                        data=data,
+                        checksum=checksum,
+                        method=config["method"],
+                    )
+                )
+            else:
+                custom_config.service_id = config.get("service_id")
+                custom_config.data = data
+                custom_config.checksum = checksum
+                for key in ("type", "name", "method"):
+                    if key in config:
+                        setattr(custom_config, key, config[key])
+
+            with suppress(ProgrammingError, OperationalError):
+                metadata = session.query(Metadata).get(1)
+                if metadata is not None:
+                    metadata.custom_configs_changed = True
+                    metadata.last_custom_configs_change = datetime.now().astimezone()
+
+            try:
+                session.commit()
+            except BaseException as e:
+                return str(e)
+
+        return ""
 
     def get_services_settings(self, methods: bool = False, with_drafts: bool = False) -> List[Dict[str, Any]]:
         """Get the services' configs from the database"""
@@ -3145,11 +3240,14 @@ class Database:
             ret_data["data"] = data.data
         return ret_data
 
-    def get_jobs_cache_files(self, *, job_name: str = "", plugin_id: str = "") -> List[Dict[str, Any]]:
+    def get_jobs_cache_files(self, *, with_data: bool = True, job_name: str = "", plugin_id: str = "") -> List[Dict[str, Any]]:
         """Get jobs cache files."""
         with self._db_session() as session:
             filters = {}
-            query = session.query(Jobs_cache).with_entities(Jobs_cache.job_name, Jobs_cache.service_id, Jobs_cache.file_name, Jobs_cache.data)
+            entities = [Jobs_cache.job_name, Jobs_cache.service_id, Jobs_cache.file_name, Jobs_cache.last_update, Jobs_cache.checksum]
+            if with_data:
+                entities.append(Jobs_cache.data)
+            query = session.query(Jobs_cache).with_entities(*entities)
 
             if job_name:
                 query = query.filter_by(job_name=job_name)
@@ -3185,9 +3283,13 @@ class Database:
                         "job_name": cache.job_name,
                         "service_id": cache.service_id,
                         "file_name": cache.file_name,
-                        "data": cache.data,
+                        "last_update": cache.last_update if cache.last_update is not None else "Never",
+                        "checksum": cache.checksum,
                     }
                 )
+                if with_data:
+                    cache_files[-1]["data"] = cache.data
+
             return cache_files
 
     def add_instance(self, hostname: str, port: int, server_name: str, method: str, changed: Optional[bool] = True, *, name: Optional[str] = None) -> str:

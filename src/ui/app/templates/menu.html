@@ -31,7 +31,7 @@
         } %}
         <ul class="menu-inner py-1">
             {% for endpoint, item in menu_items.items() %}
-                <li class="menu-item {% if endpoint in request.path %}active{% endif %} {% if item.get('sub') and item.get('open', True) %}open{% endif %}">
+                <li class="menu-item {% if endpoint in request.path.split('/')[1] %}active{% endif %} {% if item.get('sub') and item.get('open', True) %}open{% endif %}">
                     <a href="{{ item['url'] }}"
                        class="menu-link {% if item.get('sub') %}menu-toggle{% endif %}">
                         <i class="menu-icon tf-icons bx {{ item['icon'] }}"></i>

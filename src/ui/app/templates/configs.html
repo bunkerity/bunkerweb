@@ -1,0 +1,151 @@
+{% extends "dashboard.html" %}
+{% block content %}
+    <!-- Content -->
+    <div class="card table-responsive text-nowrap p-4 min-vh-70">
+        <input type="hidden" id="configs_number" value="{{ configs|length }}" />
+        <input type="hidden"
+               id="csrf_token"
+               name="csrf_token"
+               value="{{ csrf_token() }}" />
+        <table id="configs" class="table w-100">
+            <thead>
+                <tr>
+                    <th>
+                        <input id="select-all-rows"
+                               aria-label="Select all rows"
+                               class="dt-select-checkbox mb-1"
+                               type="checkbox">
+                        Select All
+                    </th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="The user defined Custom config's name">Name</th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="The Custom config's type">Type</th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="The creation method of the Custom config">Method</th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="The Service associated with the Custom configuration">Service</th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="Indication if the custom config is from a template or not">
+                        Template
+                    </th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="The Custom config's checksum">Checksum</th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="The actions that can be performed on the Instance">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for config in configs %}
+                    {% set service_id = config['service_id'] if config['service_id'] else 'global' %}
+                    <tr>
+                        <td></td>
+                        <td>
+                            <a href="{{ url_for("configs") }}/{{ service_id }}/{{ config['type'] }}/{{ config['name'] }}"
+                               data-bs-toggle="tooltip"
+                               data-bs-placement="bottom"
+                               data-bs-original-title="Edit custom config {{ config['name'] }}"><i class="bx bx-edit bx-xs"></i>&nbsp;{{ config["name"] }}</a>
+                        </td>
+                        <td id="type-{{ config['type'] }}-{{ service_id.replace('.', '_') }}-{{ config['name'] }}">
+                            <i class="bx bx-{% if config['type'].startswith('crs') %}shield-alt{% elif config['type'] == 'modsec_crs' %}shield-quarter{% elif config['type'] == 'modsec' %}shield-alt-2{% elif 'stream' in config['type'] %}network-chart{% else %}window-alt{% endif %}"></i>
+                            {{ config["type"]|upper }}
+                        </td>
+                        <td>{{ config["method"] }}</td>
+                        <td id="service-{{ config['type'] }}-{{ service_id.replace('.', '_') }}-{{ config['name'] }}">
+                            {% if config["service_id"] %}
+                                <a href="{{ url_for("services") }}/{{ config['service_id'] }}"
+                                   data-bs-toggle="tooltip"
+                                   data-bs-placement="bottom"
+                                   data-bs-original-title="Edit service {{ config['service_id'] }}"><i class="bx bx-edit bx-xs"></i>&nbsp;{{ config["service_id"] }}</a>
+                            {% else %}
+                                <span class="badge rounded-pill bg-label-secondary">global</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if config["template"] %}
+                                <span class="badge rounded-pill bg-label-primary">{{ config["template"] }}</span>
+                            {% else %}
+                                <span class="badge rounded-pill bg-label-secondary">no template</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ config["checksum"] }}</td>
+                        <td>
+                            <div class="d-flex justify-content-center">
+                                <a role="button"
+                                   class="btn btn-primary btn-sm me-1"
+                                   href="{{ url_for("configs") }}/{{ service_id }}/{{ config['type'] }}/{{ config['name'] }}"
+                                   data-bs-toggle="tooltip"
+                                   data-bs-placement="bottom"
+                                   data-bs-original-title="Edit custom config {{ config['name'] }}">
+                                    <i class="bx bx-edit bx-xs"></i>
+                                </a>
+                                <a role="button"
+                                   class="btn btn-outline-secondary btn-sm me-1"
+                                   href="{{ url_for("configs") }}/new?clone={{ service_id }}/{{ config['type'] }}/{{ config['name'] }}"
+                                   data-bs-toggle="tooltip"
+                                   data-bs-placement="bottom"
+                                   data-bs-original-title="Clone custom config {{ config['name'] }}">
+                                    <i class="bx bx-copy-alt bx-xs"></i>
+                                </a>
+                                <div data-bs-toggle="tooltip"
+                                     data-bs-placement="bottom"
+                                     data-bs-original-title="{% if config['method'] != 'ui' %}Disabled by {% if config['template'] %}template: {{ config['template'] }}{% else %}{{ config['method'] }}{% endif %}{% else %}Delete custom config {{ config['name'] }}{% endif %}">
+                                    <button type="button"
+                                            data-config-name="{{ config['name'] }}"
+                                            data-config-type="{{ config['type'] }}"
+                                            data-config-service="{{ config['service_id'] or 'global' }}"
+                                            class="btn btn-outline-danger btn-sm me-1 delete-config{% if config['method'] != 'ui' %} disabled{% endif %}">
+                                        <i class="bx bx-trash bx-xs"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="modal modal-lg fade"
+         id="modal-delete-configs"
+         data-bs-backdrop="static"
+         tabindex="-1"
+         aria-hidden="true"
+         role="dialog">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirm deletion</h5>
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                </div>
+                <form action="{{ url_for("configs") }}/delete" method="POST">
+                    <div class="modal-body">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                        <input type="hidden"
+                               id="selected-configs-input-delete"
+                               name="configs"
+                               value="" />
+                        <div class="alert alert-danger text-center" role="alert">Are you sure you want to delete the selected configs?</div>
+                        <div id="selected-configs-delete" class="mb-3"></div>
+                    </div>
+                    <div class="modal-footer justify-content-center">
+                        <button type="submit" class="btn btn-outline-danger me-2">Delete</button>
+                        <button type="reset"
+                                class="btn btn-outline-secondary"
+                                data-bs-dismiss="modal">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- / Content -->
+{% endblock %}

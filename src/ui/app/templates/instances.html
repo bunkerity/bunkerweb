@@ -54,6 +54,9 @@
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
                         data-bs-original-title="The date and time when the Instance was last seen">Last Seen</th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="The actions that can be performed on the Instance">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -86,6 +89,45 @@
                         </td>
                         <td>{{ instance.creation_date.astimezone().strftime("%Y-%m-%d %H:%M:%S %Z") }}</td>
                         <td>{{ instance.last_seen.astimezone().strftime("%Y-%m-%d %H:%M:%S %Z") }}</td>
+                        <td>
+                            <div class="d-flex justify-content-center">
+                                <button type="button"
+                                        class="btn btn-primary btn-sm me-1 ping-instance"
+                                        data-instance="{{ instance['hostname'] }}"
+                                        data-bs-toggle="tooltip"
+                                        data-bs-placement="bottom"
+                                        data-bs-original-title="Ping Instance {{ instance['hostname'] }}">
+                                    <i class="bx bx-bell bx-xs"></i>
+                                </button>
+                                <div data-bs-toggle="tooltip"
+                                     data-bs-placement="bottom"
+                                     data-bs-original-title="{% if instance.status != 'up' %}Instance {{ instance['hostname'] }} is not up{% else %}Reload instance {{ instance['hostname'] }}{% endif %}">
+                                    <button type="button"
+                                            class="btn btn-outline-secondary btn-sm me-1 reload-instance{% if instance.status != 'up' %} disabled{% endif %}"
+                                            data-instance="{{ instance['hostname'] }}">
+                                        <i class="bx bx-refresh bx-xs"></i>
+                                    </button>
+                                </div>
+                                <div data-bs-toggle="tooltip"
+                                     data-bs-placement="bottom"
+                                     data-bs-original-title="{% if instance.status != 'up' %}Instance {{ instance['hostname'] }} is not up{% else %}Stop instance {{ instance['hostname'] }}{% endif %}">
+                                    <button type="button"
+                                            class="btn btn-outline-secondary btn-sm me-1 stop-instance{% if instance.status != 'up' %} disabled{% endif %}"
+                                            data-instance="{{ instance['hostname'] }}">
+                                        <i class="bx bx-stop bx-xs"></i>
+                                    </button>
+                                </div>
+                                <div data-bs-toggle="tooltip"
+                                     data-bs-placement="bottom"
+                                     data-bs-original-title="{% if instance['method'] != 'ui' %}Disabled by {{ instance['method'] }}{% else %}Delete instance {{ instance['hostname'] }}{% endif %}">
+                                    <button type="button"
+                                            data-instance="{{ instance['hostname'] }}"
+                                            class="btn btn-outline-danger btn-sm me-1 delete-instance{% if instance['method'] != 'ui' %} disabled{% endif %}">
+                                        <i class="bx bx-trash bx-xs"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </td>
                     </tr>
                 {% endfor %}
             </tbody>
@@ -180,8 +222,7 @@
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                         <input type="hidden" id="selected-instances-input" name="instances" value="" />
                         <div class="alert alert-danger text-center" role="alert">Are you sure you want to delete the selected instances?</div>
-                        <ul id="selected-instances" class="list-group mb-3">
-                        </ul>
+                        <div id="selected-instances" class="mb-3"></div>
                     </div>
                     <div class="modal-footer justify-content-center">
                         <button type="submit" class="btn btn-outline-danger me-2">Delete instances</button>

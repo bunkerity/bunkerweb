@@ -3,6 +3,92 @@ $(document).ready(function () {
   var actionLock = false;
   const instanceNumber = parseInt($("#instances_number").val());
 
+  const pingInstances = (instances) => {
+    setTimeout(() => {
+      if (actionLock) {
+        $(".dt-button-background").click();
+        $("#loadingModal").modal("show");
+        setTimeout(() => {
+          $("#loadingModal").modal("hide");
+        }, 5300);
+      }
+    }, 500);
+
+    // Create a FormData object
+    const formData = new FormData();
+    formData.append("csrf_token", $("#csrf_token").val()); // Add the CSRF token // TODO: find a way to ignore CSRF token
+    formData.append("instances", instances.join(",")); // Add the instances
+
+    // Send the form data using $.ajax
+    $.ajax({
+      url: `${window.location.pathname}/ping`,
+      type: "POST",
+      data: formData,
+      processData: false,
+      contentType: false,
+      success: function (data) {
+        data.failed.forEach((instance) => {
+          var feedbackToastFailed = $("#feedback-toast").clone(); // Clone the feedback toast
+          feedbackToastFailed.attr("id", `feedback-toast-${toastNum++}`); // Corrected to set the ID for the failed toast
+          feedbackToastFailed.removeClass("bg-primary text-white");
+          feedbackToastFailed.addClass("bg-danger text-white");
+          feedbackToastFailed.find("span").text("Ping failed");
+          feedbackToastFailed.find("div.toast-body").text(instance.message);
+          feedbackToastFailed.appendTo("#feedback-toast-container"); // Ensure the toast is appended to the container
+          feedbackToastFailed.toast("show");
+        });
+
+        if (data.succeed.length > 0) {
+          var feedbackToastSucceed = $("#feedback-toast").clone(); // Clone the feedback toast
+          feedbackToastSucceed.attr("id", `feedback-toast-${toastNum++}`);
+          feedbackToastSucceed.addClass("bg-primary text-white");
+          feedbackToastSucceed.find("span").text("Ping successful");
+          feedbackToastSucceed
+            .find("div.toast-body")
+            .text(`Instances: ${data.succeed.join(", ")}`);
+          feedbackToastSucceed.appendTo("#feedback-toast-container");
+          feedbackToastSucceed.toast("show");
+        }
+      },
+      error: function (xhr, status, error) {
+        console.error("AJAX request failed:", status, error);
+        alert("An error occurred while pinging the instances.");
+      },
+      complete: function () {
+        actionLock = false;
+        $("#loadingModal").modal("hide");
+      },
+    });
+  };
+
+  const execForm = (instances, action) => {
+    // Create a form element using jQuery and set its attributes
+    const form = $("<form>", {
+      method: "POST",
+      action: `${window.location.pathname}/${action}`,
+      class: "visually-hidden",
+    });
+
+    // Add CSRF token and instances as hidden inputs
+    form.append(
+      $("<input>", {
+        type: "hidden",
+        name: "csrf_token",
+        value: $("#csrf_token").val(),
+      }),
+    );
+    form.append(
+      $("<input>", {
+        type: "hidden",
+        name: "instances",
+        value: instances.join(","),
+      }),
+    );
+
+    // Append the form to the body and submit it
+    form.appendTo("body").submit();
+  };
+
   const layout = {
     topStart: {},
     bottomEnd: {},
@@ -142,61 +228,7 @@ $(document).ready(function () {
         return;
       }
 
-      setTimeout(() => {
-        if (actionLock) {
-          $(".dt-button-background").click();
-          $("#loadingModal").modal("show");
-          setTimeout(() => {
-            $("#loadingModal").modal("hide");
-          }, 5300);
-        }
-      }, 500);
-
-      // Create a FormData object
-      const formData = new FormData();
-      formData.append("csrf_token", $("#csrf_token").val()); // Add the CSRF token // TODO: find a way to ignore CSRF token
-      formData.append("instances", instances.join(",")); // Add the instances
-
-      // Send the form data using $.ajax
-      $.ajax({
-        url: `${window.location.pathname}/ping`,
-        type: "POST",
-        data: formData,
-        processData: false,
-        contentType: false,
-        success: function (data) {
-          data.failed.forEach((instance) => {
-            var feedbackToastFailed = $("#feedback-toast").clone(); // Clone the feedback toast
-            feedbackToastFailed.attr("id", `feedback-toast-${toastNum++}`); // Corrected to set the ID for the failed toast
-            feedbackToastFailed.removeClass("bg-primary text-white");
-            feedbackToastFailed.addClass("bg-danger text-white");
-            feedbackToastFailed.find("span").text("Ping failed");
-            feedbackToastFailed.find("div.toast-body").text(instance.message);
-            feedbackToastFailed.appendTo("#feedback-toast-container"); // Ensure the toast is appended to the container
-            feedbackToastFailed.toast("show");
-          });
-
-          if (data.succeed.length > 0) {
-            var feedbackToastSucceed = $("#feedback-toast").clone(); // Clone the feedback toast
-            feedbackToastSucceed.attr("id", `feedback-toast-${toastNum++}`);
-            feedbackToastSucceed.addClass("bg-primary text-white");
-            feedbackToastSucceed.find("span").text("Ping successful");
-            feedbackToastSucceed
-              .find("div.toast-body")
-              .text(`Instances: ${data.succeed.join(", ")}`);
-            feedbackToastSucceed.appendTo("#feedback-toast-container");
-            feedbackToastSucceed.toast("show");
-          }
-        },
-        error: function (xhr, status, error) {
-          console.error("AJAX request failed:", status, error);
-          alert("An error occurred while pinging the instances.");
-        },
-        complete: function () {
-          actionLock = false;
-          $("#loadingModal").modal("hide");
-        },
-      });
+      pingInstances(instances);
     },
   };
 
@@ -223,31 +255,7 @@ $(document).ready(function () {
         return;
       }
 
-      // Create a form element using jQuery and set its attributes
-      const form = $("<form>", {
-        method: "POST",
-        action: `${window.location.pathname}/${action}`,
-        class: "visually-hidden",
-      });
-
-      // Add CSRF token and instances as hidden inputs
-      form.append(
-        $("<input>", {
-          type: "hidden",
-          name: "csrf_token",
-          value: $("#csrf_token").val(),
-        }),
-      );
-      form.append(
-        $("<input>", {
-          type: "hidden",
-          name: "instances",
-          value: instances.join(","),
-        }),
-      );
-
-      // Append the form to the body and submit it
-      form.appendTo("body").submit();
+      execForm(instances, action);
     },
   };
 
@@ -268,22 +276,45 @@ $(document).ready(function () {
 
       $("#selected-instances-input").val(instances.join(","));
 
+      const list = $(
+        `<ul class="list-group list-group-horizontal d-flex w-100">
+        <li class="list-group-item align-items-center bg-secondary text-white" style="flex: 1 0;">
+          <div class="ms-2 me-auto">
+            <div class="fw-bold">Hostname</div>
+          </div>
+        </li>
+        <li class="list-group-item align-items-center bg-secondary text-white" style="flex: 1 0;">
+          <div class="fw-bold">Health</div>
+        </li>
+        </ul>`,
+      );
+      $("#selected-instances").append(list);
+
       const delete_modal = $("#modal-delete-instances");
       instances.forEach((instance) => {
+        const list = $(
+          `<ul class="list-group list-group-horizontal d-flex w-100"></ul>`,
+        );
+
         // Create the list item using template literals
         const listItem =
-          $(`<li class="list-group-item d-flex justify-content-between align-items-center">
+          $(`<li class="list-group-item align-items-center text-center" style="flex: 1 0;">
   <div class="ms-2 me-auto">
     <div class="fw-bold">${instance}</div>
   </div>
 </li>`);
+        list.append(listItem);
 
         // Clone the status element and append it to the list item
         const statusClone = $("#status-" + instance).clone();
-        listItem.append(statusClone);
+        const statusListItem = $(
+          `<li class="list-group-item d-flex align-items-center justify-content-center" style="flex: 1 0;"></li>`,
+        );
+        statusListItem.append(statusClone.removeClass("highlight"));
+        list.append(statusListItem);
 
         // Append the list item to the list
-        $("#selected-instances").append(listItem);
+        $("#selected-instances").append(list);
       });
 
       const modal = new bootstrap.Modal(delete_modal);
@@ -299,6 +330,14 @@ $(document).ready(function () {
         orderable: false,
         render: DataTable.render.select(),
         targets: 0,
+      },
+      {
+        orderable: false,
+        targets: -1,
+      },
+      {
+        visible: false,
+        targets: [2, 3],
       },
       {
         targets: "_all", // Target all columns
@@ -370,5 +409,21 @@ $(document).ready(function () {
       // Deselect all rows on the current page
       instances_table.rows({ page: "current" }).deselect();
     }
+  });
+
+  $(".ping-instance").on("click", function () {
+    if (actionLock) {
+      return;
+    }
+    actionLock = true;
+
+    const instance = $(this).data("instance");
+    pingInstances([instance]);
+  });
+
+  $(".reload-instance, .stop-instance").on("click", function () {
+    const instance = $(this).data("instance");
+    const action = $(this).hasClass("reload-instance") ? "reload" : "stop";
+    execForm([instance], action);
   });
 });

@@ -151,7 +151,7 @@ def services_delete():
             DATA["TO_FLASH"].append({"content": ret, "type": "error"})
             DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
             return
-        DATA["TO_FLASH"].append({"content": f"Deleted services: {', '.join(services_to_delete)}", "type": "success"})
+        DATA["TO_FLASH"].append({"content": f"Deleted service{'s' if len(services_to_delete) > 1 else ''}: {', '.join(services_to_delete)}", "type": "success"})
         DATA["RELOADING"] = False
 
     DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})
@@ -206,7 +206,7 @@ def services_service_page(service: str):
 
             if mode == "easy":
                 db_templates = DB.get_templates()
-                db_custom_configs = DB.get_custom_configs(as_dict=True)
+                db_custom_configs = DB.get_custom_configs(with_drafts=True, as_dict=True)
 
                 for variable, value in variables.copy().items():
                     conf_match = CUSTOM_CONF_RX.match(variable)
@@ -343,7 +343,7 @@ def services_service_page(service: str):
     search_type = request.args.get("type", "all")
     template = request.args.get("template", "high")
     db_templates = DB.get_templates()
-    db_custom_configs = DB.get_custom_configs(as_dict=True)
+    db_custom_configs = DB.get_custom_configs(with_drafts=True, as_dict=True)
     clone = None
     if service == "new":
         clone = request.args.get("clone", "")

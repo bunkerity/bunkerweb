@@ -2,7 +2,13 @@ $(document).ready(() => {
   var toastNum = 0;
   let currentPlugin = "general";
   let currentStep = 1;
-  let usedTemplate = $("#used-template").val().trim();
+
+  const $templateInput = $("#used-template");
+  let usedTemplate = "advanced";
+  if ($templateInput.length) {
+    usedTemplate = $templateInput.val().trim();
+  }
+
   let currentTemplate = $("#selected-template").val();
   let currentMode = $("#selected-mode").val();
   let currentType = $("#selected-type").val();
@@ -367,7 +373,7 @@ $(document).ready(() => {
 
   $("#select-plugin").on("click", () => $pluginSearch.focus());
 
-  $("#plugin-search").on(
+  $pluginSearch.on(
     "input",
     debounce((e) => {
       const inputValue = e.target.value.toLowerCase();
@@ -575,7 +581,6 @@ $(document).ready(() => {
             .find(".multiple-collapse")
             .attr("id")
             .replace(`${multipleId}-`, ""),
-          10,
         );
       })
       .get()
@@ -668,7 +673,8 @@ $(document).ready(() => {
 
     // Remove "add-multiple" button and append the "REMOVE" button
     multipleClone.find(".add-multiple").remove();
-    multipleClone.find(".show-multiple").before(`
+    const multipleShow = multipleClone.find(".show-multiple");
+    multipleShow.before(`
       <div>
         <button id="remove-${cloneId}" type="button" class="btn btn-xs btn-text-danger rounded-pill remove-multiple p-0 pe-2">
           <i class="bx bx-trash bx-sm"></i>&nbsp;REMOVE
@@ -684,7 +690,6 @@ $(document).ready(() => {
           .find(".multiple-collapse")
           .attr("id")
           .replace(`${multipleId}-`, ""),
-        10,
       );
       if (containerSuffix > suffix) {
         $(this).before(multipleClone); // Insert before the first container with a higher suffix
@@ -692,6 +697,9 @@ $(document).ready(() => {
         return false; // Break the loop
       }
     });
+
+    multipleShow.html(`<i class="bx bx-hide bx-sm"></i>&nbsp;SHOW`);
+    multipleClone.find(".multiple-collapse").collapse("hide");
 
     if (!inserted) {
       // If no higher suffix was found, append to the end
@@ -707,9 +715,10 @@ $(document).ready(() => {
       .attr("data-bs-target", `#${cloneId}`)
       .attr("aria-controls", cloneId);
 
-    if (showMultiple.text().trim() === "SHOW") showMultiple.trigger("click");
-
-    highlightSettings(multipleClone);
+    setTimeout(() => {
+      showMultiple.trigger("click");
+      highlightSettings(multipleClone);
+    }, 50);
   });
 
   $(document).on("click", ".remove-multiple", function () {
@@ -758,17 +767,11 @@ $(document).ready(() => {
       const currentStepContainer = $(`#${currentStepId}`);
       const isStepValid = validateCurrentStepInputs(currentStepContainer);
       if (!isStepValid) return;
-    } else {
-      let minSettings = 4;
-      if (!form.find("input[name='IS_DRAFT']").length) minSettings = 2;
-
-      const draftInput = $("#is-draft");
+    } else if (currentMode === "raw") {
       const wasDraft = draftInput.data("original") === "yes";
-      let isDraft = draftInput.val() === "yes";
-      if (currentMode === "raw")
-        isDraft = form.find("input[name='IS_DRAFT']").val() === "yes";
+      isDraft = form.find("input[name='IS_DRAFT']").val() === "yes";
 
-      if (form.children().length < minSettings && isDraft === wasDraft) {
+      if (form.children().length < 2 && isDraft === wasDraft) {
         alert("No changes detected.");
         return;
       }

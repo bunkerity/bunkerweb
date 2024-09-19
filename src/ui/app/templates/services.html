@@ -22,10 +22,10 @@
                         data-bs-original-title="The name of the service">Service name</th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
-                        data-bs-original-title="The creation method of the Service">Method</th>
+                        data-bs-original-title="The type of the Service">Type</th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
-                        data-bs-original-title="The type of the Service">Type</th>
+                        data-bs-original-title="The creation method of the Service">Method</th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
                         data-bs-original-title="The date and time when the Service was created">Created</th>
@@ -47,7 +47,6 @@
                                data-bs-placement="bottom"
                                data-bs-original-title="Edit service {{ service['id'] }}"><i class="bx bx-edit bx-xs"></i>&nbsp;{{ service["id"] }}</a>
                         </td>
-                        <td id="method-{{ service['id'].replace('.', '-') }}">{{ service["method"] }}</td>
                         <td>
                             {% if service['is_draft'] %}
                                 <span id="type-{{ service['id'].replace('.', '-') }}"
@@ -59,28 +58,41 @@
                                       class="badge rounded-pill bg-label-primary">Online</span>
                             {% endif %}
                         </td>
+                        <td id="method-{{ service['id'].replace('.', '-') }}">{{ service["method"] }}</td>
                         <td>{{ service['creation_date'].astimezone().strftime("%Y-%m-%d %H:%M:%S %Z") }}</td>
                         <td>{{ service['last_update'].astimezone().strftime("%Y-%m-%d %H:%M:%S %Z") }}</td>
                         <td>
                             <div class="d-flex justify-content-center">
                                 <a role="button"
-                                        class="btn btn-primary btn-sm me-1"
-                                        href="{{ url_for("services") }}/{{ service['id'] }}"
-                                        data-bs-toggle="tooltip"
-                                        data-bs-placement="bottom"
-                                        data-bs-original-title="Edit service {{ service['id'] }}">
+                                   class="btn btn-outline-primary btn-sm me-1"
+                                   href="https://{{ service['id'] }}"
+                                   data-bs-toggle="tooltip"
+                                   data-bs-placement="bottom"
+                                   data-bs-original-title="Access service {{ service['id'] }}"
+                                   target="_blank"
+                                   rel="noopener noreferrer">
+                                    <i class="bx bx-link-external bx-xs"></i>
+                                </a>
+                                <a role="button"
+                                   class="btn btn-primary btn-sm me-1"
+                                   href="{{ url_for("services") }}/{{ service['id'] }}"
+                                   data-bs-toggle="tooltip"
+                                   data-bs-placement="bottom"
+                                   data-bs-original-title="Edit service {{ service['id'] }}">
                                     <i class="bx bx-edit bx-xs"></i>
                                 </a>
                                 <a role="button"
-                                        class="btn btn-outline-secondary btn-sm me-1"
-                                        href="{{ url_for("services") }}/new?clone={{ service['id'] }}"
-                                        data-bs-toggle="tooltip"
-                                        data-bs-placement="bottom"
-                                        data-bs-original-title="Clone service {{ service['id'] }}">
+                                   class="btn btn-outline-secondary btn-sm me-1"
+                                   href="{{ url_for("services") }}/new?clone={{ service['id'] }}"
+                                   data-bs-toggle="tooltip"
+                                   data-bs-placement="bottom"
+                                   data-bs-original-title="Clone service {{ service['id'] }}">
                                     <i class="bx bx-copy-alt bx-xs"></i>
                                 </a>
                                 <button type="button"
-                                        class="btn btn-outline-secondary btn-sm me-1"
+                                        class="btn btn-outline-secondary btn-sm me-1 convert-service"
+                                        data-service-id="{{ service['id'] }}"
+                                        data-value="{{ 'online' if service['is_draft'] else 'draft' }}"
                                         data-bs-toggle="tooltip"
                                         data-bs-placement="bottom"
                                         data-bs-original-title="Convert service {{ service['id'] }} to {{ 'online' if service['is_draft'] else 'draft' }}">
@@ -90,7 +102,8 @@
                                      data-bs-placement="bottom"
                                      data-bs-original-title="{% if service['method'] != 'ui' %}Disabled by {{ service['method'] }}{% else %}Delete service {{ service['id'] }}{% endif %}">
                                     <button type="button"
-                                            class="btn btn-outline-danger btn-sm me-1{% if service['method'] != 'ui' %} disabled{% endif %}">
+                                            data-service-id="{{ service['id'] }}"
+                                            class="btn btn-outline-danger btn-sm me-1 delete-service{% if service['method'] != 'ui' %} disabled{% endif %}">
                                         <i class="bx bx-trash bx-xs"></i>
                                     </button>
                                 </div>
@@ -127,7 +140,7 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Convert services to Draft</h5>
+                    <h5 class="modal-title">Confirm Conversion</h5>
                     <button type="button"
                             class="btn-close"
                             data-bs-dismiss="modal"
@@ -142,11 +155,13 @@
                                name="services"
                                value="" />
                         <div class="alert alert-danger text-center" role="alert">Are you sure you want to convert the selected services?</div>
-                        <ul id="selected-services-convert" class="list-group mb-3">
-                        </ul>
+                        <div id="selected-services-convert" class="mb-3"></div>
                     </div>
                     <div class="modal-footer justify-content-center">
-                        <button type="submit" class="btn btn-outline-secondary me-2">Convert services</button>
+                        <button type="submit" class="btn btn-outline-success me-2">Convert services</button>
+                        <button type="reset"
+                                class="btn btn-outline-secondary"
+                                data-bs-dismiss="modal">Cancel</button>
                     </div>
                 </form>
             </div>
@@ -161,7 +176,7 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Delete services</h5>
+                    <h5 class="modal-title">Confirm deletion</h5>
                     <button type="button"
                             class="btn-close"
                             data-bs-dismiss="modal"
@@ -175,14 +190,13 @@
                                name="services"
                                value="" />
                         <div class="alert alert-danger text-center" role="alert">Are you sure you want to delete the selected services?</div>
-                        <ul id="selected-services-delete" class="list-group mb-3">
-                        </ul>
+                        <div id="selected-services-delete" class="mb-3"></div>
                     </div>
                     <div class="modal-footer justify-content-center">
-                        <button type="submit" class="btn btn-outline-danger me-2">Delete services</button>
+                        <button type="submit" class="btn btn-outline-danger me-2">Delete</button>
                         <button type="reset"
                                 class="btn btn-outline-secondary"
-                                data-bs-dismiss="modal">Close</button>
+                                data-bs-dismiss="modal">Cancel</button>
                     </div>
                 </form>
             </div>

@@ -224,8 +224,7 @@
                         {% for multiple, multiples in plugin_multiples.items() %}
                             {% set multiple_settings = settings|length > 1 %}
                             <div id="multiple-{{ plugin }}-{{ multiple }}"
-                                 class="col-12{% if multiple_plugin_multiples %} col-md-6{% endif %}">
-                                <!-- TODO: Handle if multiple_plugin_multiples|length > 2 and not multiple_settings -> col-lg-4 via JS -->
+                                 class="col-12{% if multiple_plugin_multiples %} col-md-6{% endif %}{% if plugin_multiples|length > 2 and not multiple_settings %} col-lg-4{% endif %}">
                                 {% for setting_suffix, settings in multiples.items() %}
                                     <div class="row multiple-container pt-2 pb-2">
                                         {% set setting_id_suffix = "-" + setting_suffix %}

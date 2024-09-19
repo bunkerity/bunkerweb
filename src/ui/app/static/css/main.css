@@ -609,3 +609,18 @@ a.badge:hover {
   color: #6a9955;
   font-style: italic;
 }
+
+table.table.dataTable > tbody > tr.selected a {
+  color: #fff;
+}
+
+table.table.dataTable > tbody > tr.selected .btn-outline-secondary {
+  color: #fff !important;
+  border-color: #fff !important;
+}
+
+table.table.dataTable > tbody > tr.selected .btn-outline-secondary:hover {
+  color: black !important;
+  background-color: #fff !important;
+  border-color: #fff !important;
+}

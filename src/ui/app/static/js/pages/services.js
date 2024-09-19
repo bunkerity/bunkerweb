@@ -3,6 +3,86 @@ $(document).ready(function () {
   var actionLock = false;
   const serviceNumber = parseInt($("#services_number").val());
 
+  const setupModal = (services, modal) => {
+    const list = $(
+      `<ul class="list-group list-group-horizontal d-flex w-100">
+      <li class="list-group-item align-items-center bg-secondary text-white" style="flex: 1 0;">
+        <div class="ms-2 me-auto">
+          <div class="fw-bold">Service name</div>
+        </div>
+      </li>
+      <li class="list-group-item align-items-center bg-secondary text-white" style="flex: 1 0;">
+        <div class="fw-bold">Type</div>
+      </li>
+      </ul>`,
+    );
+    modal.append(list);
+
+    services.forEach((service) => {
+      const list = $(
+        `<ul class="list-group list-group-horizontal d-flex w-100"></ul>`,
+      );
+
+      // Create the list item using template literals
+      const listItem =
+        $(`<li class="list-group-item align-items-center text-center" style="flex: 1 0;">
+          <div class="ms-2 me-auto">
+          <div class="fw-bold">${service}</div>
+          </div>
+          </li>`);
+      list.append(listItem);
+
+      // Clone the type element and append it to the list item
+      const typeClone = $("#type-" + service.replace(/\./g, "-")).clone();
+      const typeListItem = $(
+        `<li class="list-group-item d-flex align-items-center justify-content-center" style="flex: 1 0;"></li>`,
+      );
+      typeListItem.append(typeClone.removeClass("highlight"));
+      list.append(typeListItem);
+
+      // Append the list item to the list
+      modal.append(list);
+    });
+  };
+
+  const setupConversionModal = (services, convertionType = "draft") => {
+    $("#selected-services-input-convert").val(services.join(","));
+
+    setupModal(services, $("#selected-services-convert"));
+
+    const convert_modal = $("#modal-convert-services");
+    convert_modal
+      .find(".alert")
+      .text(
+        `Are you sure you want to convert the selected service${"s".repeat(
+          services.length > 1,
+        )} to ${convertionType}?`,
+      );
+    convert_modal
+      .find("button[type=submit]")
+      .text(`Convert to ${convertionType}`);
+    $("#convertion-type").val(convertionType);
+    const modal = new bootstrap.Modal(convert_modal);
+    modal.show();
+  };
+
+  const setupDeletionModal = (services) => {
+    $("#selected-services-input-delete").val(services.join(","));
+
+    setupModal(services, $("#selected-services-delete"));
+
+    const convert_modal = $("#modal-delete-services");
+    const modal = new bootstrap.Modal(convert_modal);
+    convert_modal
+      .find(".alert")
+      .text(
+        `Are you sure you want to delete the selected service${"s".repeat(
+          services.length > 1,
+        )}?`,
+      );
+    modal.show();
+  };
+
   const layout = {
     topStart: {},
     bottomEnd: {},
@@ -18,7 +98,7 @@ $(document).ready(function () {
   layout.topStart.buttons = [
     {
       extend: "colvis",
-      columns: "th:not(:first-child):not(:nth-child(2))",
+      columns: "th:not(:first-child):not(:nth-child(2)):not(:last-child)",
       text: '<span class="tf-icons bx bx-columns bx-18px me-2"></span>Columns',
       className: "btn btn-sm btn-outline-primary",
       columnText: function (dt, idx, title) {
@@ -73,9 +153,6 @@ $(document).ready(function () {
       className: "btn btn-sm btn-outline-primary",
       buttons: [
         {
-          extend: "clone_service",
-        },
-        {
           extend: "convert_services",
           text: '<span class="tf-icons bx bx-globe bx-18px me-2"></span>Convert to<span class="d-none d-md-inline"> online</span>',
         },
@@ -128,36 +205,6 @@ $(document).ready(function () {
     },
   };
 
-  $.fn.dataTable.ext.buttons.clone_service = {
-    text: '<span class="tf-icons bx bx-copy-alt bx-18px me-2"></span>Clone<span class="d-none d-md-inline"> service</span>',
-    action: function (e, dt, node, config) {
-      if (actionLock) {
-        return;
-      }
-      actionLock = true;
-      const services = getSelectedservices();
-      if (services.length === 0) {
-        actionLock = false;
-        return;
-      } else if (services.length > 1) {
-        const feedbackToast = $("#feedback-toast").clone(); // Clone the feedback toast
-        feedbackToast.attr("id", `feedback-toast-${toastNum++}`); // Corrected to set the ID for the failed toast
-        feedbackToast.removeClass("bg-primary text-white");
-        feedbackToast.addClass("bg-primary text-white");
-        feedbackToast.find("span").text("Clone failed");
-        feedbackToast
-          .find("div.toast-body")
-          .text("Only one service can be cloned at a time.");
-        feedbackToast.appendTo("#feedback-toast-container"); // Ensure the toast is appended to the container
-        feedbackToast.toast("show");
-        actionLock = false;
-        return;
-      }
-
-      window.location.href = `${window.location.href}/new?clone=${services[0]}`;
-    },
-  };
-
   $.fn.dataTable.ext.buttons.convert_services = {
     action: function (e, dt, node, config) {
       if (actionLock) {
@@ -192,44 +239,7 @@ $(document).ready(function () {
         return;
       }
 
-      $("#selected-services-input-convert").val(services.join(","));
-
-      services.forEach((service) => {
-        // Create the list item using template literals
-        const listItem =
-          $(`<li class="list-group-item d-flex justify-content-between align-items-center">
-          <div class="ms-2 me-auto">
-          <div class="fw-bold">${service}</div>
-          </div>
-          </li>`);
-
-        // Clone the type element and append it to the list item
-        const typeClone = $("#type-" + service.replace(/\./g, "-")).clone();
-        listItem.append(typeClone);
-
-        // Append the list item to the list
-        $("#selected-services-convert").append(listItem);
-      });
-
-      const convert_modal = $("#modal-convert-services");
-      convert_modal
-        .find(".modal-title")
-        .text(
-          `Convert services to ${
-            convertionType.charAt(0).toUpperCase() + convertionType.slice(1)
-          }`,
-        );
-      convert_modal
-        .find(".alert")
-        .text(
-          `Are you sure you want to convert the selected services to ${convertionType}?`,
-        );
-      convert_modal
-        .find("button[type=submit]")
-        .text(`Convert to ${convertionType}`);
-      $("#convertion-type").val(convertionType);
-      const modal = new bootstrap.Modal(convert_modal);
-      modal.show();
+      setupConversionModal(filteredServices, convertionType);
 
       actionLock = false;
     },
@@ -250,28 +260,7 @@ $(document).ready(function () {
         return;
       }
 
-      $("#selected-services-input-delete").val(services.join(","));
-
-      const delete_modal = $("#modal-delete-services");
-      services.forEach((service) => {
-        // Create the list item using template literals
-        const listItem =
-          $(`<li class="list-group-item d-flex justify-content-between align-items-center">
-  <div class="ms-2 me-auto">
-    <div class="fw-bold">${service}</div>
-  </div>
-</li>`);
-
-        // Clone the type element and append it to the list item
-        const typeClone = $("#type-" + service.replace(/\./g, "-")).clone();
-        listItem.append(typeClone);
-
-        // Append the list item to the list
-        $("#selected-services-delete").append(listItem);
-      });
-
-      const modal = new bootstrap.Modal(delete_modal);
-      modal.show();
+      setupDeletionModal(services);
 
       actionLock = false;
     },
@@ -283,6 +272,10 @@ $(document).ready(function () {
         orderable: false,
         render: DataTable.render.select(),
         targets: 0,
+      },
+      {
+        orderable: false,
+        targets: -1,
       },
       {
         targets: "_all", // Target all columns
@@ -354,5 +347,16 @@ $(document).ready(function () {
       // Deselect all rows on the current page
       services_table.rows({ page: "current" }).deselect();
     }
+  });
+
+  $(".convert-service").on("click", function () {
+    const service = $(this).data("service-id");
+    const convertionType = $(this).data("value");
+    setupConversionModal([service], convertionType);
+  });
+
+  $(".delete-service").on("click", function () {
+    const service = $(this).data("service-id");
+    setupDeletionModal([service]);
   });
 });
