@@ -278,12 +278,12 @@ $(document).ready(function () {
 
       const list = $(
         `<ul class="list-group list-group-horizontal d-flex w-100">
-        <li class="list-group-item align-items-center bg-secondary text-white" style="flex: 1 0;">
+        <li class="list-group-item align-items-center text-center bg-secondary text-white" style="flex: 1 0;">
           <div class="ms-2 me-auto">
             <div class="fw-bold">Hostname</div>
           </div>
         </li>
-        <li class="list-group-item align-items-center bg-secondary text-white" style="flex: 1 0;">
+        <li class="list-group-item align-items-center text-center bg-secondary text-white" style="flex: 1 0;">
           <div class="fw-bold">Health</div>
         </li>
         </ul>`,
@@ -298,7 +298,7 @@ $(document).ready(function () {
 
         // Create the list item using template literals
         const listItem =
-          $(`<li class="list-group-item align-items-center text-center" style="flex: 1 0;">
+          $(`<li class="list-group-item align-items-center" style="flex: 1 0;">
   <div class="ms-2 me-auto">
     <div class="fw-bold">${instance}</div>
   </div>
@@ -324,6 +324,26 @@ $(document).ready(function () {
     },
   };
 
+  $(".instance-creation-date, .instance-last-seen-date").each(function () {
+    const isoDateStr = $(this).text().trim();
+
+    // Parse the ISO format date string
+    const date = new Date(isoDateStr);
+
+    // Check if the date is valid
+    if (!isNaN(date)) {
+      // Convert to local date and time string
+      const localDateStr = date.toLocaleString();
+
+      // Update the text content with the local date string
+      $(this).text(localDateStr);
+    } else {
+      // Handle invalid date
+      console.error(`Invalid date string: ${isoDateStr}`);
+      $(this).text("Invalid date");
+    }
+  });
+
   const instances_table = new DataTable("#instances", {
     columnDefs: [
       {
@@ -342,7 +362,7 @@ $(document).ready(function () {
       {
         targets: "_all", // Target all columns
         createdCell: function (td, cellData, rowData, row, col) {
-          $(td).addClass("text-center"); // Apply 'text-center' class to <td>
+          $(td).addClass("align-items-center"); // Apply 'text-center' class to <td>
         },
       },
     ],
@@ -371,10 +391,12 @@ $(document).ready(function () {
     },
     initComplete: function (settings, json) {
       $("#instances_wrapper .btn-secondary").removeClass("btn-secondary");
+      $("#instances_wrapper th").addClass("text-center");
     },
   });
 
   instances_table.on("mouseenter", "td", function () {
+    if (instances_table.cell(this).index() === undefined) return;
     const rowIdx = instances_table.cell(this).index().row;
 
     instances_table

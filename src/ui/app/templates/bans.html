@@ -1,0 +1,185 @@
+{% extends "dashboard.html" %}
+{% block content %}
+    <!-- Content -->
+    <div class="card table-responsive text-nowrap p-4 min-vh-70">
+        <input type="hidden" id="bans_number" value="{{ bans|length }}" />
+        <input type="hidden"
+               id="csrf_token"
+               name="csrf_token"
+               value="{{ csrf_token() }}" />
+        <table id="bans" class="table position-relative w-100">
+            <thead>
+                <tr>
+                    <th>
+                        <input id="select-all-rows"
+                               aria-label="Select all rows"
+                               class="dt-select-checkbox mb-1"
+                               type="checkbox">
+                        Select All
+                    </th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="The date and time when the Ban was created">Date</th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="The banned IP address">IP address</th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="The reason why the Report was created">Reason</th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="The end date of the Ban">End date</th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="The time left until the Ban expires">Time left</th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="The actions that can be performed on the Ban">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ban in bans %}
+                    <tr>
+                        <td></td>
+                        <td class="ban-start-date">{{ ban["start_date"] }}</td>
+                        <td>{{ ban["ip"] }}</td>
+                        <td>{{ ban["reason"] }}</td>
+                        <td class="ban-end-date">{{ ban["end_date"] }}</td>
+                        <td>{{ ban["remain"] }}</td>
+                        <td>
+                            <div class="d-flex justify-content-center">
+                                <div data-bs-toggle="tooltip"
+                                     data-bs-placement="bottom"
+                                     data-bs-original-title="Unban {{ ban['ip'] }}">
+                                    <button type="button"
+                                            data-ip="{{ ban['ip'] }}"
+                                            data-time-left="{{ ban['remain'] }}"
+                                            class="btn btn-outline-danger btn-sm me-1 unban-ip">
+                                        <i class="bx bxs-buoy bx-xs"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+            <span class="position-absolute bottom-0 start-50 translate-middle badge rounded-pill bg-secondary">
+                TZ: <script nonce="{{ script_nonce }}">document.write(Intl.DateTimeFormat().resolvedOptions().timeZone);</script>
+            </span>
+        </table>
+    </div>
+    <div class="modal modal-xl fade"
+         id="modal-ban-ips"
+         data-bs-backdrop="static"
+         tabindex="-1"
+         aria-hidden="true"
+         role="dialog">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Ban(s)</h5>
+                    <button id="add-ban"
+                            type="button"
+                            class="btn btn-text-bw-green rounded-pill p-0 ms-4 me-2">
+                        <i class="bx bx-plus-circle"></i>&nbsp;INSERT
+                    </button>
+                    <button id="clear-bans"
+                            type="button"
+                            class="btn btn-text-danger rounded-pill p-0 ms-4">
+                        <i class="bx bx-trash"></i>&nbsp;CLEAR
+                    </button>
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                </div>
+                <form id="bans-form" action="{{ url_for("bans") }}/ban" method="POST">
+                    <div class="modal-body justify-content-center">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                        <ul id="bans-container" class="list-group rounded-top w-100">
+                            <li id="bans-header" class="list-group-item bg-secondary text-white">
+                                <div class="row">
+                                    <div class="col-3 text-center fw-bold">IP Address</div>
+                                    <div class="col-5 border-start text-center fw-bold">End Date</div>
+                                    <div class="col-3 border-start text-center fw-bold">Reason</div>
+                                    <div class="col-1 border-start text-center fw-bold">Delete</div>
+                                </div>
+                            </li>
+                            <li id="ban-1" class="list-group-item rounded-0">
+                                <div class="row align-items-center d-flex">
+                                    <div class="col-3">
+                                        <input type="text"
+                                               name="ip"
+                                               class="form-control"
+                                               placeholder="127.0.0.1"
+                                               required />
+                                    </div>
+                                    <div class="col-5 border-start">
+                                        <input type="flapickr-datetime"
+                                               name="datetime"
+                                               class="form-control"
+                                               required />
+                                    </div>
+                                    <div class="col-3 border-start">
+                                        <input type="text" name="reason" class="form-control" value="ui" required />
+                                    </div>
+                                    <div class="col-1 border-start align-items-center d-flex"
+                                         data-bs-toggle="tooltip"
+                                         data-bs-placement="right"
+                                         data-bs-original-title="Can't delete the original Ban">
+                                        <button type="button"
+                                                class="btn btn-outline-danger btn-sm me-1 delete-ban disabled">
+                                            <i class="bx bx-trash bx-xs"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="modal-footer justify-content-center">
+                        <button type="submit" class="btn btn-outline-danger me-2">Ban</button>
+                        <button type="reset"
+                                class="btn btn-outline-secondary"
+                                data-bs-dismiss="modal">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="modal modal-lg fade"
+         id="modal-unban-ips"
+         data-bs-backdrop="static"
+         tabindex="-1"
+         aria-hidden="true"
+         role="dialog">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirm Unban</h5>
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                </div>
+                <form action="{{ url_for("bans") }}/unban" method="POST">
+                    <div class="modal-body">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                        <input type="hidden" id="selected-ips-input-unban" name="ips" value="" />
+                        <div class="alert alert-danger text-center" role="alert">
+                            Are you sure you want to unban the selected IP addresses?
+                        </div>
+                        <ul id="selected-ips-unban" class="list-group w-100 mb-3">
+                        </ul>
+                    </div>
+                    <div class="modal-footer justify-content-center">
+                        <button type="submit" class="btn btn-outline-danger me-2">Unban</button>
+                        <button type="reset"
+                                class="btn btn-outline-secondary"
+                                data-bs-dismiss="modal">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- / Content -->
+{% endblock %}

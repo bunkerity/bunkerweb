@@ -23,7 +23,7 @@
                id="csrf_token"
                name="csrf_token"
                value="{{ csrf_token() }}" />
-        <table id="instances" class="table w-100">
+        <table id="instances" class="table position-relative w-100">
             <thead>
                 <tr>
                     <th>
@@ -87,8 +87,8 @@
                                 <i class="bx bx-microchip"></i>&nbsp;Static
                             {% endif %}
                         </td>
-                        <td>{{ instance.creation_date.astimezone().strftime("%Y-%m-%d %H:%M:%S %Z") }}</td>
-                        <td>{{ instance.last_seen.astimezone().strftime("%Y-%m-%d %H:%M:%S %Z") }}</td>
+                        <td class="instance-creation-date">{{ instance.creation_date.astimezone().isoformat() }}</td>
+                        <td class="instance-last-seen-date">{{ instance.last_seen.astimezone().isoformat() }}</td>
                         <td>
                             <div class="d-flex justify-content-center">
                                 <button type="button"
@@ -131,6 +131,9 @@
                     </tr>
                 {% endfor %}
             </tbody>
+            <span class="position-absolute bottom-0 start-50 translate-middle badge rounded-pill bg-secondary">
+                TZ: <script nonce="{{ script_nonce }}">document.write(Intl.DateTimeFormat().resolvedOptions().timeZone);</script>
+            </span>
         </table>
     </div>
     <div id="feedback-toast"

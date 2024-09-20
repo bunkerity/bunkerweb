@@ -6,12 +6,12 @@ $(document).ready(function () {
   const setupModal = (services, modal) => {
     const list = $(
       `<ul class="list-group list-group-horizontal d-flex w-100">
-      <li class="list-group-item align-items-center bg-secondary text-white" style="flex: 1 0;">
+      <li class="list-group-item align-items-center text-center bg-secondary text-white" style="flex: 1 0;">
         <div class="ms-2 me-auto">
           <div class="fw-bold">Service name</div>
         </div>
       </li>
-      <li class="list-group-item align-items-center bg-secondary text-white" style="flex: 1 0;">
+      <li class="list-group-item align-items-center text-center bg-secondary text-white" style="flex: 1 0;">
         <div class="fw-bold">Type</div>
       </li>
       </ul>`,
@@ -25,7 +25,7 @@ $(document).ready(function () {
 
       // Create the list item using template literals
       const listItem =
-        $(`<li class="list-group-item align-items-center text-center" style="flex: 1 0;">
+        $(`<li class="list-group-item align-items-center" style="flex: 1 0;">
           <div class="ms-2 me-auto">
           <div class="fw-bold">${service}</div>
           </div>
@@ -266,6 +266,26 @@ $(document).ready(function () {
     },
   };
 
+  $(".service-creation-date, .service-last-update-date").each(function () {
+    const isoDateStr = $(this).text().trim();
+
+    // Parse the ISO format date string
+    const date = new Date(isoDateStr);
+
+    // Check if the date is valid
+    if (!isNaN(date)) {
+      // Convert to local date and time string
+      const localDateStr = date.toLocaleString();
+
+      // Update the text content with the local date string
+      $(this).text(localDateStr);
+    } else {
+      // Handle invalid date
+      console.error(`Invalid date string: ${isoDateStr}`);
+      $(this).text("Invalid date");
+    }
+  });
+
   const services_table = new DataTable("#services", {
     columnDefs: [
       {
@@ -280,7 +300,7 @@ $(document).ready(function () {
       {
         targets: "_all", // Target all columns
         createdCell: function (td, cellData, rowData, row, col) {
-          $(td).addClass("text-center align-items-center"); // Apply 'text-center' class to <td>
+          $(td).addClass("align-items-center"); // Apply 'text-center' class to <td>
         },
       },
     ],
@@ -309,10 +329,12 @@ $(document).ready(function () {
     },
     initComplete: function (settings, json) {
       $("#services_wrapper .btn-secondary").removeClass("btn-secondary");
+      $("#services_wrapper th").addClass("text-center");
     },
   });
 
   services_table.on("mouseenter", "td", function () {
+    if (services_table.cell(this).index() === undefined) return;
     const rowIdx = services_table.cell(this).index().row;
 
     services_table

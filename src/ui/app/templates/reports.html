@@ -1,0 +1,59 @@
+{% extends "dashboard.html" %}
+{% block content %}
+    <!-- Content -->
+    <div class="card table-responsive text-nowrap p-4 min-vh-70">
+        <input type="hidden" id="reports_number" value="{{ reports|length }}" />
+        <table id="reports" class="table position-relative w-100">
+            <thead>
+                <tr>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="The date and time when the Report was created">Date</th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="The reported IP address">IP Address</th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="The country of the reported IP address">Country</th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="The method used by the attacker">Method</th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="The URL that was targeted by the attacker">URL</th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="The HTTP status code returned by BunkerWeb">Status Code</th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="The User-Agent of the attacker">User-Agent</th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="The reason why the Report was created">Reason</th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="Additional data about the Report">Data</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for report in reports %}
+                    <tr>
+                        <td class="report-date">{{ report["date"] }}</td>
+                        <td>{{ report["ip"] }}</td>
+                        <td>{{ report["country"] }}</td>
+                        <td>{{ report["method"] }}</td>
+                        <td>{{ report["url"] }}</td>
+                        <td>{{ report["status"] }}</td>
+                        <td>{{ report["user_agent"] }}</td>
+                        <td>{{ report["reason"] }}</td>
+                        <td>{{ report["data"] }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+            <span class="position-absolute bottom-0 start-50 translate-middle badge rounded-pill bg-secondary">
+                TZ: <script nonce="{{ script_nonce }}">document.write(Intl.DateTimeFormat().resolvedOptions().timeZone);</script>
+            </span>
+        </table>
+    </div>
+    <!-- / Content -->
+{% endblock %}

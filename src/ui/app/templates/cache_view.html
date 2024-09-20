@@ -2,11 +2,11 @@
 {% block content %}
     <!-- Content -->
     <div class="card position-relative p-4 min-vh-70">
-        <div class="position-absolute top-0 end-0 m-2" style="z-index: 1000">
-            <div class="card p-1 me-2">
+        <div class="position-absolute bottom-0 end-0 m-4" style="z-index: 1000">
+            <div class="card p-1">
                 <a role="button"
                    class="btn btn-sm btn-outline-secondary "
-                   href="{{ url_for("cache") }}/{{ '/'.join(request.path.split('/')[2:]) }}?download=true"
+                   href="{{ url_for("cache") }}/{{ '/'.join(request.path.split('/')[2:] ) }}?download=true"
                    data-bs-toggle="tooltip"
                    data-bs-placement="bottom"
                    data-bs-original-title="Download file"

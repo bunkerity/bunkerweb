@@ -6,15 +6,15 @@ $(document).ready(function () {
     const delete_modal = $("#modal-delete-configs");
     const list = $(
       `<ul class="list-group list-group-horizontal d-flex w-100">
-      <li class="list-group-item align-items-center bg-secondary text-white" style="flex: 1 1 0;">
+      <li class="list-group-item align-items-center text-center bg-secondary text-white" style="flex: 1 1 0;">
         <div class="ms-2 me-auto">
           <div class="fw-bold">Name</div>
         </div>
       </li>
-      <li class="list-group-item align-items-center bg-secondary text-white" style="flex: 1 1 0;">
+      <li class="list-group-item align-items-center text-center bg-secondary text-white" style="flex: 1 1 0;">
         <div class="fw-bold">Type</div>
       </li>
-      <li class="list-group-item align-items-center bg-secondary text-white" style="flex: 1 1 0;">
+      <li class="list-group-item align-items-center text-center bg-secondary text-white" style="flex: 1 1 0;">
         <div class="fw-bold">Service</div>
       </li>
       </ul>`,
@@ -28,7 +28,7 @@ $(document).ready(function () {
 
       // Create the list item using template literals
       const listItem =
-        $(`<li class="list-group-item align-items-center text-center" style="flex: 1 1 0;">
+        $(`<li class="list-group-item align-items-center" style="flex: 1 1 0;">
   <div class="ms-2 me-auto">
     <div class="fw-bold">${config.name}</div>
   </div>
@@ -235,11 +235,11 @@ $(document).ready(function () {
       {
         targets: "_all", // Target all columns
         createdCell: function (td, cellData, rowData, row, col) {
-          $(td).addClass("text-center align-items-center"); // Apply 'text-center' class to <td>
+          $(td).addClass("align-items-center"); // Apply 'text-center' class to <td>
         },
       },
     ],
-    order: [[1, "desc"]],
+    order: [[1, "asc"]],
     autoFill: false,
     responsive: true,
     select: {
@@ -264,10 +264,12 @@ $(document).ready(function () {
     },
     initComplete: function (settings, json) {
       $("#configs_wrapper .btn-secondary").removeClass("btn-secondary");
+      $("#configs_wrapper th").addClass("text-center");
     },
   });
 
   configs_table.on("mouseenter", "td", function () {
+    if (configs_table.cell(this).index() === undefined) return;
     const rowIdx = configs_table.cell(this).index().row;
 
     configs_table

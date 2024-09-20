@@ -147,7 +147,7 @@ def inject_variables():
             flash("The last changes have been applied successfully.", "success")
             DATA["CONFIG_CHANGED"] = False
 
-    services = BW_CONFIG.get_config(global_only=True, methods=False, filtered_settings=("SERVER_NAME"))["SERVER_NAME"].split(" ")
+    services = BW_CONFIG.get_config(global_only=True, with_drafts=True, methods=False, filtered_settings=("SERVER_NAME"))["SERVER_NAME"].split(" ")
 
     # check that is value is in tuple
     return dict(

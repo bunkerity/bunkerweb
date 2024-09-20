@@ -6,8 +6,9 @@ from typing import Dict, Literal, Optional
 
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import login_required
+from werkzeug.utils import secure_filename
 
-from app.dependencies import BW_CONFIG, DATA, DB  # TODO: remember about DATA.load_from_file()
+from app.dependencies import BW_CONFIG, DATA, DB
 
 from app.routes.utils import handle_error, verify_data_in_form, wait_applying
 
@@ -61,18 +62,24 @@ def configs_delete():
         wait_applying()
 
         db_configs = DB.get_custom_configs(with_drafts=True)
+        new_db_configs = []
         configs_to_delete = set()
         non_ui_configs = set()
 
-        for i, db_config in enumerate(db_configs):
+        for db_config in db_configs:
+            key = f"{(db_config['service_id'] + '/') if db_config['service_id'] else ''}{db_config['type']}/{db_config['name']}"
+            keep = True
             for config in configs:
                 if db_config["name"] == config["name"] and db_config["service_id"] == config["service"] and db_config["type"] == config["type"]:
-                    key = f"{(config['service'] + '/') if config['service'] else ''}{config['type']}/{config['name']}"
                     if db_config["method"] != "ui":
                         non_ui_configs.add(key)
                         continue
                     configs_to_delete.add(key)
-                    del db_configs[i]
+                    keep = False
+                    break
+            if db_config.pop("template", None) or not keep:
+                continue
+            new_db_configs.append(db_config)
 
         for non_ui_config in non_ui_configs:
             DATA["TO_FLASH"].append(
@@ -87,7 +94,7 @@ def configs_delete():
             DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
             return
 
-        error = DB.save_custom_configs(db_configs, "ui")
+        error = DB.save_custom_configs(new_db_configs, "ui")
         if error:
             DATA["TO_FLASH"].append({"content": f"An error occurred while saving the custom configs: {error}", "type": "error"})
             DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
@@ -118,7 +125,7 @@ def configs_new():
             next=True,
         )
         service = request.form["service"]
-        services = BW_CONFIG.get_config(global_only=True, methods=False, filtered_settings=("SERVER_NAME"))["SERVER_NAME"].split(" ")
+        services = BW_CONFIG.get_config(global_only=True, with_drafts=True, methods=False, filtered_settings=("SERVER_NAME"))["SERVER_NAME"].split(" ")
         if service != "no service" and service not in services:
             return handle_error(f"Service {service} does not exist.", "configs/new", True)
 
@@ -162,32 +169,6 @@ def configs_new():
             wait_applying()
             config_type = config_type.lower()
 
-            db_configs = DB.get_custom_configs(with_drafts=True)
-            for i, db_config in enumerate(db_configs.copy()):
-                if db_config["method"] == "default" and db_config["template"]:
-                    del db_configs[i]
-                    continue
-
-                if db_config["type"] == config_type and db_config["name"] == config_name and db_config["service_id"] == service:
-                    DATA["TO_FLASH"].append(
-                        {
-                            "content": f"Config {config_type}/{config_name}{' for service ' + service if service else ''} already exists",
-                            "type": "error",
-                        }
-                    )
-                    DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
-                    return
-
-                db_configs[i] = {
-                    "service_id": db_config["service_id"],
-                    "type": db_config["type"],
-                    "name": db_config["name"],
-                    "data": db_config["data"],
-                    "method": db_config["method"],
-                }
-                if "checksum" in db_config:
-                    db_configs[i]["checksum"] = db_config["checksum"]
-
             new_config = {
                 "type": config_type,
                 "name": config_name,
@@ -196,10 +177,18 @@ def configs_new():
             }
             if service != "no service":
                 new_config["service_id"] = service
-            db_configs.append(new_config)
 
-            error = DB.save_custom_configs(db_configs, "ui")
+            error = DB.upsert_custom_config(config_type, config_name, new_config, service_id=new_config.get("service_id"), new=True)
             if error:
+                if error == "The custom config already exists":
+                    DATA["TO_FLASH"].append(
+                        {
+                            "content": f"Config {config_type}/{config_name}{' for service ' + service if service else ''} already exists",
+                            "type": "error",
+                        }
+                    )
+                    DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
+                    return
                 DATA["TO_FLASH"].append({"content": f"An error occurred while saving the custom configs: {error}", "type": "error"})
                 return
             DATA["TO_FLASH"].append(
@@ -242,6 +231,7 @@ def configs_new():
 def configs_edit(service: str, config_type: str, name: str):
     if service == "global":
         service = None
+    name = secure_filename(name)
 
     db_config = DB.get_custom_config(config_type, name, service_id=service, with_data=True)
     if not db_config:
@@ -260,7 +250,7 @@ def configs_edit(service: str, config_type: str, name: str):
             next=True,
         )
         new_service = request.form["service"]
-        services = BW_CONFIG.get_config(global_only=True, methods=False, filtered_settings=("SERVER_NAME"))["SERVER_NAME"].split(" ")
+        services = BW_CONFIG.get_config(global_only=True, with_drafts=True, methods=False, filtered_settings=("SERVER_NAME"))["SERVER_NAME"].split(" ")
         if new_service != "no service" and new_service not in services:
             return handle_error(f"Service {new_service} does not exist.", "configs/new", True)
 
@@ -284,7 +274,7 @@ def configs_edit(service: str, config_type: str, name: str):
             redirect_url="configs/new",
             next=True,
         )
-        new_name = request.form["name"]
+        new_name = secure_filename(request.form["name"])
         if not match(r"^[\w_-]{1,64}$", new_name):
             return handle_error("Invalid name parameter on /configs/new.", "configs/new", True)
 

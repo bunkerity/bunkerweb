@@ -204,7 +204,6 @@ class InstancesUtils:
         def get_instance_bans(instance: Instance) -> List[dict[str, Any]]:
             resp, instance_bans = instance.bans()
             if resp:
-                self.__db.logger.warning(resp)
                 return []
             return instance_bans[instance.hostname].get("data", [])
 
@@ -226,8 +225,7 @@ class InstancesUtils:
 
         def get_instance_reports(instance: Instance) -> Tuple[bool, dict[str, Any]]:
             resp, instance_reports = instance.reports()
-            if resp:
-                self.__db.logger.warning(resp)
+            if not resp:
                 return []
             return (instance_reports[instance.hostname].get("msg") or {"requests": []}).get("requests", [])
 

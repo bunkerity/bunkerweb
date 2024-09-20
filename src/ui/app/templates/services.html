@@ -7,7 +7,7 @@
                id="csrf_token"
                name="csrf_token"
                value="{{ csrf_token() }}" />
-        <table id="services" class="table w-100">
+        <table id="services" class="table position-relative w-100">
             <thead>
                 <tr>
                     <th>
@@ -59,8 +59,8 @@
                             {% endif %}
                         </td>
                         <td id="method-{{ service['id'].replace('.', '-') }}">{{ service["method"] }}</td>
-                        <td>{{ service['creation_date'].astimezone().strftime("%Y-%m-%d %H:%M:%S %Z") }}</td>
-                        <td>{{ service['last_update'].astimezone().strftime("%Y-%m-%d %H:%M:%S %Z") }}</td>
+                        <td class="service-creation-date">{{ service['creation_date'].astimezone().isoformat() }}</td>
+                        <td class="service-last-update-date">{{ service['last_update'].astimezone().isoformat() }}</td>
                         <td>
                             <div class="d-flex justify-content-center">
                                 <a role="button"
@@ -112,6 +112,9 @@
                     </tr>
                 {% endfor %}
             </tbody>
+            <span class="position-absolute bottom-0 start-50 translate-middle badge rounded-pill bg-secondary">
+                TZ: <script nonce="{{ script_nonce }}">document.write(Intl.DateTimeFormat().resolvedOptions().timeZone);</script>
+            </span>
         </table>
     </div>
     <div id="feedback-toast"

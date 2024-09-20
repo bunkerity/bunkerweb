@@ -1,12 +1,12 @@
 $(document).ready(function () {
-  const cacheNumber = parseInt($("#cache_number").val());
+  const jobNumber = parseInt($("#job_number").val());
 
   const layout = {
     topStart: {},
     bottomEnd: {},
   };
 
-  if (cacheNumber > 10) {
+  if (jobNumber > 10) {
     layout.topStart.pageLength = {
       menu: [10, 25, 50, 100, { label: "All", value: -1 }],
     };
@@ -16,7 +16,7 @@ $(document).ready(function () {
   layout.topStart.buttons = [
     {
       extend: "colvis",
-      columns: "th:not(:first-child):not(:last-child)",
+      columns: "th:not(:first-child)",
       text: '<span class="tf-icons bx bx-columns bx-18px me-2"></span>Columns',
       className: "btn btn-sm btn-outline-primary",
       columnText: function (dt, idx, title) {
@@ -46,7 +46,7 @@ $(document).ready(function () {
           extend: "csv",
           text: '<span class="tf-icons bx bx-table bx-18px me-2"></span>CSV',
           bom: true,
-          filename: "bw_cache",
+          filename: "bw_jobs",
           exportOptions: {
             modifier: {
               search: "none",
@@ -56,7 +56,7 @@ $(document).ready(function () {
         {
           extend: "excel",
           text: '<span class="tf-icons bx bx-table bx-18px me-2"></span>Excel',
-          filename: "bw_cache",
+          filename: "bw_jobs",
           exportOptions: {
             modifier: {
               search: "none",
@@ -67,7 +67,7 @@ $(document).ready(function () {
     },
   ];
 
-  $(".cache-last-update-date").each(function () {
+  $(".history-start-date, .history-end-date").each(function () {
     const isoDateStr = $(this).text().trim();
 
     // Parse the ISO format date string
@@ -80,18 +80,18 @@ $(document).ready(function () {
 
       // Update the text content with the local date string
       $(this).text(localDateStr);
+    } else {
+      // Handle invalid date
+      console.error(`Invalid date string: ${isoDateStr}`);
+      $(this).text("Invalid date");
     }
   });
 
-  const cache_table = new DataTable("#cache", {
+  const jobs_table = new DataTable("#jobs", {
     columnDefs: [
       {
         orderable: false,
         targets: -1,
-      },
-      {
-        visible: false,
-        targets: 5,
       },
       {
         targets: "_all", // Target all columns
@@ -100,45 +100,59 @@ $(document).ready(function () {
         },
       },
     ],
-    order: [[2, "asc"]],
+    order: [[1, "asc"]],
     autoFill: false,
     responsive: true,
     layout: layout,
     language: {
-      info: "Showing _START_ to _END_ of _TOTAL_ cache files",
-      infoEmpty: "No cache files available",
-      infoFiltered: "(filtered from _MAX_ total cache files)",
-      lengthMenu: "Display _MENU_ cache files",
-      zeroRecords: "No matching cache files found",
+      info: "Showing _START_ to _END_ of _TOTAL_ jobs",
+      infoEmpty: "No jobs available",
+      infoFiltered: "(filtered from _MAX_ total jobs)",
+      lengthMenu: "Display _MENU_ jobs",
+      zeroRecords: "No matching jobs found",
     },
     initComplete: function (settings, json) {
-      $("#cache_wrapper .btn-secondary").removeClass("btn-secondary");
-      $("#cache_wrapper th").addClass("text-center");
+      $("#jobs_wrapper .btn-secondary").removeClass("btn-secondary");
+      $("#jobs_wrapper th").addClass("text-center");
     },
   });
 
-  cache_table.on("mouseenter", "td", function () {
-    if (cache_table.cell(this).index() === undefined) return;
-    const rowIdx = cache_table.cell(this).index().row;
+  jobs_table.on("mouseenter", "td", function () {
+    if (jobs_table.cell(this).index() === undefined) return;
+    const rowIdx = jobs_table.cell(this).index().row;
 
-    cache_table
+    jobs_table
       .cells()
       .nodes()
       .each((el) => el.classList.remove("highlight"));
 
-    cache_table
+    jobs_table
       .cells()
       .nodes()
       .each(function (el) {
-        if (cache_table.cell(el).index().row === rowIdx)
+        if (jobs_table.cell(el).index().row === rowIdx)
           el.classList.add("highlight");
       });
   });
 
-  cache_table.on("mouseleave", "td", function () {
-    cache_table
+  jobs_table.on("mouseleave", "td", function () {
+    jobs_table
       .cells()
       .nodes()
       .each((el) => el.classList.remove("highlight"));
+  });
+
+  $(".show-history").on("click", function () {
+    const historyModal = $("#modal-job-history");
+    const job = $(this).data("job");
+    const plugin = $(this).data("plugin");
+
+    historyModal.find(".modal-title").text(`Job ${job} History`);
+    const history = $(`#job-${job}-${plugin}-history`).clone();
+    history.removeClass("visually-hidden");
+    historyModal.find(".modal-body").html(history);
+
+    const modal = new bootstrap.Modal(historyModal);
+    modal.show();
   });
 });

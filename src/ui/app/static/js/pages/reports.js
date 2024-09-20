@@ -1,12 +1,12 @@
 $(document).ready(function () {
-  const cacheNumber = parseInt($("#cache_number").val());
+  const reportsNumber = parseInt($("#reports_number").val());
 
   const layout = {
     topStart: {},
     bottomEnd: {},
   };
 
-  if (cacheNumber > 10) {
+  if (reportsNumber > 10) {
     layout.topStart.pageLength = {
       menu: [10, 25, 50, 100, { label: "All", value: -1 }],
     };
@@ -46,7 +46,7 @@ $(document).ready(function () {
           extend: "csv",
           text: '<span class="tf-icons bx bx-table bx-18px me-2"></span>CSV',
           bom: true,
-          filename: "bw_cache",
+          filename: "bw_report",
           exportOptions: {
             modifier: {
               search: "none",
@@ -56,7 +56,7 @@ $(document).ready(function () {
         {
           extend: "excel",
           text: '<span class="tf-icons bx bx-table bx-18px me-2"></span>Excel',
-          filename: "bw_cache",
+          filename: "bw_report",
           exportOptions: {
             modifier: {
               search: "none",
@@ -67,7 +67,7 @@ $(document).ready(function () {
     },
   ];
 
-  $(".cache-last-update-date").each(function () {
+  $(".report-date").each(function () {
     const isoDateStr = $(this).text().trim();
 
     // Parse the ISO format date string
@@ -83,7 +83,7 @@ $(document).ready(function () {
     }
   });
 
-  const cache_table = new DataTable("#cache", {
+  const reports_table = new DataTable("#reports", {
     columnDefs: [
       {
         orderable: false,
@@ -91,7 +91,7 @@ $(document).ready(function () {
       },
       {
         visible: false,
-        targets: 5,
+        targets: [6, -1],
       },
       {
         targets: "_all", // Target all columns
@@ -100,43 +100,50 @@ $(document).ready(function () {
         },
       },
     ],
-    order: [[2, "asc"]],
+    order: [[0, "desc"]],
     autoFill: false,
     responsive: true,
     layout: layout,
     language: {
-      info: "Showing _START_ to _END_ of _TOTAL_ cache files",
-      infoEmpty: "No cache files available",
-      infoFiltered: "(filtered from _MAX_ total cache files)",
-      lengthMenu: "Display _MENU_ cache files",
-      zeroRecords: "No matching cache files found",
+      info: "Showing _START_ to _END_ of _TOTAL_ reports",
+      infoEmpty: "No reports available",
+      infoFiltered: "(filtered from _MAX_ total reports)",
+      lengthMenu: "Display _MENU_ reports",
+      zeroRecords: "No matching reports found",
+      select: {
+        rows: {
+          _: "Selected %d reports",
+          0: "No reports selected",
+          1: "Selected 1 report",
+        },
+      },
     },
     initComplete: function (settings, json) {
-      $("#cache_wrapper .btn-secondary").removeClass("btn-secondary");
-      $("#cache_wrapper th").addClass("text-center");
+      $("#reports_wrapper .btn-secondary").removeClass("btn-secondary");
+      $("#reports_wrapper th").addClass("text-center");
     },
   });
 
-  cache_table.on("mouseenter", "td", function () {
-    if (cache_table.cell(this).index() === undefined) return;
-    const rowIdx = cache_table.cell(this).index().row;
+  reports_table.on("mouseenter", "td", function () {
+    if (reports_table.cell(this).index() === undefined) return;
+    const rowIdx = reports_table.cell(this).index().row;
 
-    cache_table
+    reports_table
       .cells()
       .nodes()
       .each((el) => el.classList.remove("highlight"));
 
-    cache_table
+    reports_table
       .cells()
       .nodes()
       .each(function (el) {
-        if (cache_table.cell(el).index().row === rowIdx)
+        if (reports_table.cell(el).index().row === rowIdx)
           el.classList.add("highlight");
       });
   });
 
-  cache_table.on("mouseleave", "td", function () {
-    cache_table
+  reports_table.on("mouseleave", "td", function () {
+    reports_table
       .cells()
       .nodes()
       .each((el) => el.classList.remove("highlight"));

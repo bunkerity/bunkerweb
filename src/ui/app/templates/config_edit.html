@@ -134,7 +134,7 @@
          {% if not config_template and config_method and config_method != "ui" %}data-bs-toggle="tooltip" data-bs-placement="top" title="Disabled by {{ config_method }}"{% endif %}>
         <div id="config-value"
              data-language="{% if type and type.startswith(('CRS', 'MODSEC')) %}ModSecurity{% else %}NGINX{% endif %}"
-             data-method="{{ config_method }}"
+             data-method="{{ config_method or 'ui' }}"
              data-template="{{ config_template }}"
              class="ace-editor border rounded position-absolute top-0 start-0 end-0 bottom-0">{{ config_value }}</div>
     </div>

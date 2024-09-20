@@ -3,6 +3,7 @@ from io import BytesIO
 from flask import Blueprint, Response, flash, redirect, render_template, request, send_file, url_for
 from flask_login import login_required
 from magic import Magic
+from werkzeug.utils import secure_filename
 
 from app.dependencies import DB
 
@@ -21,7 +22,11 @@ def cache_page():
 @cache.route("/cache/<string:service>/<string:plugin_id>/<string:job_name>/<string:file_name>", methods=["GET"])
 @login_required
 def cache_view(service: str, plugin_id: str, job_name: str, file_name: str):
-    file_name = file_name.replace("_", "/")
+    if file_name.startswith("folder:"):
+        file_name = file_name.replace("_", "/")
+    else:
+        file_name = secure_filename(file_name)
+
     cache_file = DB.get_job_cache_file(
         job_name,
         file_name,

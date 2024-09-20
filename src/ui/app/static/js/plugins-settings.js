@@ -682,6 +682,9 @@ $(document).ready(() => {
       </div>
     `);
 
+    multipleShow.html(`<i class="bx bx-hide bx-sm"></i>&nbsp;SHOW`);
+    multipleClone.find(".multiple-collapse").collapse("hide");
+
     // Insert the new element in the correct order based on suffix
     let inserted = false;
     existingContainers.each(function () {
@@ -697,9 +700,6 @@ $(document).ready(() => {
         return false; // Break the loop
       }
     });
-
-    multipleShow.html(`<i class="bx bx-hide bx-sm"></i>&nbsp;SHOW`);
-    multipleClone.find(".multiple-collapse").collapse("hide");
 
     if (!inserted) {
       // If no higher suffix was found, append to the end
@@ -718,7 +718,7 @@ $(document).ready(() => {
     setTimeout(() => {
       showMultiple.trigger("click");
       highlightSettings(multipleClone);
-    }, 50);
+    }, 30);
   });
 
   $(document).on("click", ".remove-multiple", function () {

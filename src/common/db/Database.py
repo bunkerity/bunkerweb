@@ -2057,7 +2057,7 @@ class Database:
 
         return custom_config
 
-    def upsert_custom_config(self, config_type: str, name: str, config: Dict[str, Any], *, service_id: Optional[str] = None) -> str:
+    def upsert_custom_config(self, config_type: str, name: str, config: Dict[str, Any], *, service_id: Optional[str] = None, new: bool = False) -> str:
         """Update or insert a custom config in the database"""
         with self._db_session() as session:
             if self.readonly:
@@ -2087,6 +2087,8 @@ class Database:
                     )
                 )
             else:
+                if new:
+                    return "The custom config already exists"
                 custom_config.service_id = config.get("service_id")
                 custom_config.data = data
                 custom_config.checksum = checksum
@@ -3181,8 +3183,8 @@ class Database:
                     "reload": job.reload,
                     "history": [
                         {
-                            "start_date": job_run.start_date.strftime("%Y/%m/%d, %H:%M:%S %Z"),
-                            "end_date": job_run.end_date.strftime("%Y/%m/%d, %H:%M:%S %Z"),
+                            "start_date": job_run.start_date.isoformat(),
+                            "end_date": job_run.end_date.isoformat(),
                             "success": job_run.success,
                         }
                         for job_run in session.query(Jobs_runs)

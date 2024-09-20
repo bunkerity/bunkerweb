@@ -25,10 +25,19 @@
         <link rel="stylesheet"
               href="{{ url_for('static', filename='fonts/boxicons.min.css') }}"
               nonce="{{ style_nonce }}" />
-        {% if current_endpoint in ("instances", "services", "configs", "cache") %}
+        {% if current_endpoint in ("instances", "services", "configs", "cache", "reports", "bans", "jobs") %}
             <!-- Datatables -->
             <link rel="stylesheet"
                   href="{{ url_for('static', filename='libs/datatables/datatables.min.css') }}"
+                  nonce="{{ style_nonce }}" />
+        {% endif %}
+        {% if current_endpoint in ("bans") %}
+            <!-- Flatpickr -->
+            <link rel="stylesheet"
+                  href="{{ url_for('static', filename='libs/flatpickr/flatpickr.min.css') }}"
+                  nonce="{{ style_nonce }}" />
+            <link rel="stylesheet"
+                  href="{{ url_for('static', filename='libs/flatpickr/themes/airbnb.css') }}"
                   nonce="{{ style_nonce }}" />
         {% endif %}
         <!-- Core CSS -->
@@ -89,11 +98,17 @@
                 nonce="{{ script_nonce }}"></script>
         <script src="{{ url_for('static', filename='libs/purify/purify.min.js') }}"
                 nonce="{{ script_nonce }}"></script>
-        {% if current_endpoint in ("instances", "services", "configs", "cache") %}
+        {% if current_endpoint in ("instances", "services", "configs", "cache", "reports", "bans", "jobs") %}
             <script src="{{ url_for('static', filename='libs/datatables/datatables.min.js') }}"
                     nonce="{{ script_nonce }}"></script>
         {% endif %}
-        {% if current_endpoint not in ("services", "configs", "cache") and ("services" in request.path or "configs" in request.path or "cache" in request.path) %}
+        {% if current_endpoint in ("bans") %}
+            <script src="{{ url_for('static', filename='libs/flatpickr/flatpickr.min.js') }}"
+                    nonce="{{ script_nonce }}"></script>
+            <script src="{{ url_for('static', filename='libs/flatpickr/plugins/minMaxTimePlugin.js') }}"
+                    nonce="{{ script_nonce }}"></script>
+        {% endif %}
+        {% if current_endpoint not in ("services", "configs", "cache") and ("services" in request.path or "configs" in request.path or "cache" in request.path or current_endpoint == "logs") %}
             <script src="{{ url_for('static', filename='libs/ace/src-min/ace.js') }}"
                     nonce="{{ script_nonce }}"></script>
         {% endif %}
@@ -143,6 +158,18 @@
         {% elif current_endpoint != "cache" and "cache" in request.path %}
             <script src="{{ url_for('static', filename='js/pages/cache_view.js') }}"
                     nonce="{{ script_nonce }}"></script>
+        {% elif current_endpoint == "reports" %}
+            <script src="{{ url_for('static', filename='js/pages/reports.js') }}"
+                    nonce="{{ script_nonce }}"></script>
+        {% elif current_endpoint == "bans" %}
+        <script src="{{ url_for('static', filename='js/pages/bans.js') }}"
+        nonce="{{ script_nonce }}"></script>
+        {% elif current_endpoint == "jobs" %}
+        <script src="{{ url_for('static', filename='js/pages/jobs.js') }}"
+        nonce="{{ script_nonce }}"></script>
+        {% elif current_endpoint == "logs" %}
+        <script src="{{ url_for('static', filename='js/pages/logs.js') }}"
+        nonce="{{ script_nonce }}"></script>
         {% endif %}
         <script async defer src="{{ url_for('static', filename='js/buttons.js') }}"></script>
     </body>
