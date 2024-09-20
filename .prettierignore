@@ -14,4 +14,5 @@ SECURITY.md
 src/ui/app/templates/*
 src/common/core/*/ui/*
 src/ui/app/static/libs/*
+src/ui/app/static/css/core.css
 examples/
