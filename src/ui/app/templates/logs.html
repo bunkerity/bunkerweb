@@ -29,29 +29,29 @@
                     </ul>
                 </div>
                 {% if page_num > 1 %}
-                <div class="dropdown btn-group">
-                    <button type="button"
-                            class="btn btn-outline-primary dropdown-toggle ms-2"
-                            data-bs-toggle="dropdown"
-                            aria-haspopup="true"
-                            aria-expanded="false">
-                        <i class="bx bx-file-find"></i>
-                        <span class="d-none d-md-inline">&nbsp;Select Page</span>
-                    </button>
-                    <ul id="pages-dropdown-menu"
-                        class="dropdown-menu nav-pills max-vh-60 overflow-auto pt-0"
-                        role="tablist">
-                        {% for page in range(page_num, 0, -1) %}
-                            <li class="nav-item">
-                                <a role="button"
-                                   href="{% if loop.index == 1 %}{{ url_for('logs', file=current_file) }}{% else %}{{ url_for('logs', file=current_file, page=page) }}{% endif %}"
-                                   class="dropdown-item{% if current_page == page %} active{% endif %}">
-                                    Page {{ page }}
-                                </a>
-                            </li>
-                        {% endfor %}
-                    </ul>
-                </div>
+                    <div class="dropdown btn-group">
+                        <button type="button"
+                                class="btn btn-outline-primary dropdown-toggle ms-2"
+                                data-bs-toggle="dropdown"
+                                aria-haspopup="true"
+                                aria-expanded="false">
+                            <i class="bx bx-file-find"></i>
+                            <span class="d-none d-md-inline">&nbsp;Select Page</span>
+                        </button>
+                        <ul id="pages-dropdown-menu"
+                            class="dropdown-menu nav-pills max-vh-60 overflow-auto pt-0"
+                            role="tablist">
+                            {% for page in range(page_num, 0, -1) %}
+                                <li class="nav-item">
+                                    <a role="button"
+                                       href="{% if loop.index == 1 %}{{ url_for('logs', file=current_file) }}{% else %}{{ url_for('logs', file=current_file, page=page) }}{% endif %}"
+                                       class="dropdown-item{% if current_page == page %} active{% endif %}">
+                                        Page {{ page }}
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
                 {% endif %}
             </div>
             <div {% if not request.is_secure %}data-bs-toggle="tooltip" data-bs-placement="top" title="The copy feature is only available over HTTPS"{% endif %}>

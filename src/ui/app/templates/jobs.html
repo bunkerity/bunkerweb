@@ -71,7 +71,8 @@
                                                     style="flex: 1 1 0">{{ history['start_date'] }}</li>
                                                 <li class="list-group-item align-items-center history-end-date rounded-0{% if loop.index == job_data['history']|length %} rounded-bottom{% endif %}"
                                                     style="flex: 1 1 0">{{ history['end_date'] }}</li>
-                                                <li class="list-group-item align-items-center text-center rounded-0{% if loop.index == job_data['history']|length %} rounded-bottom{% endif %}" style="flex: 1 1 0">
+                                                <li class="list-group-item align-items-center text-center rounded-0{% if loop.index == job_data['history']|length %} rounded-bottom{% endif %}"
+                                                    style="flex: 1 1 0">
                                                     <i class="bx bx-{% if history['success'] %}check-circle text-success{% else %}x-circle text-danger{% endif %}"></i>
                                                 </li>
                                             </ul>

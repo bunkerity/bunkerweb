@@ -4,8 +4,10 @@
        value="{{ csrf_token() }}">
 <div class="position-absolute top-0 end-0 m-3" style="z-index: 1000">
     <div class="d-flex flex-wrap justify-content-center align-items-center">
-        <div class="card p-1 me-2" {% if not request.is_secure %}data-bs-toggle="tooltip" data-bs-placement="top" title="The copy feature is only available over HTTPS"{% endif %}>
-            <button type="button" class="btn btn-sm btn-outline-secondary copy-settings{% if not request.is_secure %} disabled{% endif %}">
+        <div class="card p-1 me-2"
+             {% if not request.is_secure %}data-bs-toggle="tooltip" data-bs-placement="top" title="The copy feature is only available over HTTPS"{% endif %}>
+            <button type="button"
+                    class="btn btn-sm btn-outline-secondary copy-settings{% if not request.is_secure %} disabled{% endif %}">
                 <i class="bx bx-copy-alt bx-xs"></i>
                 <span class="d-none d-md-inline">&nbsp;Copy</span>
             </button>

@@ -45,6 +45,9 @@
               href="{{ url_for('static', filename='css/core.css') }}"
               nonce="{{ style_nonce }}" />
         <link rel="stylesheet"
+              href="{{ url_for('static', filename='css/overrides.css') }}"
+              nonce="{{ style_nonce }}" />
+        <link rel="stylesheet"
               href="{{ url_for('static', filename='css/theme-default.css') }}"
               nonce="{{ style_nonce }}" />
         <link rel="stylesheet"
@@ -162,14 +165,14 @@
             <script src="{{ url_for('static', filename='js/pages/reports.js') }}"
                     nonce="{{ script_nonce }}"></script>
         {% elif current_endpoint == "bans" %}
-        <script src="{{ url_for('static', filename='js/pages/bans.js') }}"
-        nonce="{{ script_nonce }}"></script>
+            <script src="{{ url_for('static', filename='js/pages/bans.js') }}"
+                    nonce="{{ script_nonce }}"></script>
         {% elif current_endpoint == "jobs" %}
-        <script src="{{ url_for('static', filename='js/pages/jobs.js') }}"
-        nonce="{{ script_nonce }}"></script>
+            <script src="{{ url_for('static', filename='js/pages/jobs.js') }}"
+                    nonce="{{ script_nonce }}"></script>
         {% elif current_endpoint == "logs" %}
-        <script src="{{ url_for('static', filename='js/pages/logs.js') }}"
-        nonce="{{ script_nonce }}"></script>
+            <script src="{{ url_for('static', filename='js/pages/logs.js') }}"
+                    nonce="{{ script_nonce }}"></script>
         {% endif %}
         <script async defer src="{{ url_for('static', filename='js/buttons.js') }}"></script>
     </body>
