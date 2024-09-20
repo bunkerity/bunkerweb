@@ -114,6 +114,9 @@ docker==7.1.0 \
     --hash=sha256:ad8c70e6e3f8926cb8a92619b832b4ea5299e2831c14284663184e200546fa6c \
     --hash=sha256:c96b93b7f0a746f9e77d325bcfb87422a3d8bd4f03136ae8a85b37f1898d5fc0
     # via -r requirements.in
+durationpy==0.7 \
+    --hash=sha256:8447c43df4f1a0b434e70c15a38d77f5c9bd17284bfc1ff1d430f233d5083732
+    # via kubernetes
 google-auth==2.34.0 \
     --hash=sha256:72fd4733b80b6d777dcde515628a9eb4a577339437012874ea286bca7261ee65 \
     --hash=sha256:8eb87396435c19b20d32abd2f984e31c191a15284af72eb922f10e5bde9c04cc
@@ -126,9 +129,9 @@ jinja2==3.1.4 \
     --hash=sha256:4a3aee7acbbe7303aede8e9648d13b8bf88a429282aa6122a993f0ac800cb369 \
     --hash=sha256:bc5dd2abb727a5319567b7a813e6a2e7318c39f4f487cfe6c89c6f9c7d25197d
     # via -r requirements.in
-kubernetes==30.1.0 \
-    --hash=sha256:41e4c77af9f28e7a6c314e3bd06a8c6229ddd787cad684e0ab9f69b498e98ebc \
-    --hash=sha256:e212e8b7579031dd2e512168b617373bc1e03888d41ac4e04039240a292d478d
+kubernetes==31.0.0 \
+    --hash=sha256:28945de906c8c259c1ebe62703b56a03b714049372196f854105afe4e6d014c0 \
+    --hash=sha256:bf141e2d380c8520eada8b351f4e319ffee9636328c137aa432bc486ca1200e1
     # via -r requirements.in
 markupsafe==2.1.5 \
     --hash=sha256:00e046b6dd71aa03a41079792f8473dc494d564611a8f89bbbd7cb93295ebdcf \
