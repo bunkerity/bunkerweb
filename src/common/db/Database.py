@@ -3094,7 +3094,7 @@ class Database:
 
             db_plugins = session.query(Plugins).with_entities(*entities)
             if _type == "external":
-                db_plugins = db_plugins.filter(Plugins.method.in_(["external", "ui"]))
+                db_plugins = db_plugins.filter(Plugins.type.in_(["external", "ui"]))
             elif _type != "all":
                 db_plugins = db_plugins.filter_by(type=_type)
 
