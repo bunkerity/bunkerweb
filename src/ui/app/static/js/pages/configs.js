@@ -84,8 +84,19 @@ $(document).ready(function () {
   };
 
   if (configNumber > 10) {
+    const menu = [10];
+    if (configNumber > 25) {
+      menu.push(25);
+    }
+    if (configNumber > 50) {
+      menu.push(50);
+    }
+    if (configNumber > 100) {
+      menu.push(100);
+    }
+    menu.push({ label: "All", value: -1 });
     layout.topStart.pageLength = {
-      menu: [10, 25, 50, 100, { label: "All", value: -1 }],
+      menu: menu,
     };
     layout.bottomEnd.paging = true;
   }
@@ -312,7 +323,6 @@ $(document).ready(function () {
       type: $(this).data("config-type"),
       service: $(this).data("config-service"),
     };
-    console.log(config);
     setupDeletionModal([config]);
   });
 });

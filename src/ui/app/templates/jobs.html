@@ -3,9 +3,20 @@
     <!-- Content -->
     <div class="card table-responsive text-nowrap p-4 min-vh-70">
         <input type="hidden" id="job_number" value="{{ jobs|length }}" />
-        <table id="jobs" class="table position-relative w-100">
+        <input type="hidden"
+               id="csrf_token"
+               name="csrf_token"
+               value="{{ csrf_token() }}" />
+        <table id="jobs" class="table w-100">
             <thead>
                 <tr>
+                    <th>
+                        <input id="select-all-rows"
+                               aria-label="Select all rows"
+                               class="dt-select-checkbox mb-1"
+                               type="checkbox">
+                        Select All
+                    </th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
                         data-bs-original-title="The Job's name">Name</th>
@@ -23,12 +34,13 @@
                         data-bs-original-title="Does the last Job's execution was successful?">Last run</th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
-                        data-bs-original-title="The Job's information">Information</th>
+                        data-bs-original-title="The actions that can be performed on the Job">Actions</th>
                 </tr>
             </thead>
             <tbody>
                 {% for job, job_data in jobs.items() %}
                     <tr>
+                        <td></td>
                         <td>{{ job }}</td>
                         <td>{{ job_data["plugin_id"] }}</td>
                         <td>
@@ -46,6 +58,16 @@
                         </td>
                         <td>
                             <div class="d-flex justify-content-center">
+                                <div data-bs-toggle="tooltip"
+                                     data-bs-placement="bottom"
+                                     data-bs-original-title="Run the Job">
+                                    <button type="button"
+                                            data-job="{{ job }}"
+                                            data-plugin="{{ job_data['plugin_id'] }}"
+                                            class="btn btn-primary btn-sm me-1 run-job">
+                                        <i class="bx bx-play bx-xs"></i>&nbsp;Run
+                                    </button>
+                                </div>
                                 {% if job_data['history'] %}
                                     <div id="job-{{ job }}-{{ job_data['plugin_id'] }}-history"
                                          class="visually-hidden mb-3">
@@ -118,9 +140,6 @@
                     </tr>
                 {% endfor %}
             </tbody>
-            <span class="position-absolute bottom-0 start-50 translate-middle badge rounded-pill bg-secondary">
-                TZ: <script nonce="{{ script_nonce }}">document.write(Intl.DateTimeFormat().resolvedOptions().timeZone);</script>
-            </span>
         </table>
     </div>
     <div class="modal modal-lg fade"
@@ -130,15 +149,18 @@
          aria-hidden="true"
          role="dialog">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
+            <div class="modal-content position-relative">
                 <div class="modal-header">
-                    <h5 class="modal-title">Job History</h5>
+                    <h5 class="modal-title">Last 10 Job's executions</h5>
                     <button type="button"
                             class="btn-close"
                             data-bs-dismiss="modal"
                             aria-label="Close"></button>
                 </div>
-                <div class="modal-body"></div>
+                <div class="modal-body mb-2"></div>
+                <span class="position-absolute bottom-0 start-50 translate-middle badge rounded-pill bg-secondary">
+                    TZ: <script nonce="{{ script_nonce }}">document.write(Intl.DateTimeFormat().resolvedOptions().timeZone);</script>
+                </span>
             </div>
         </div>
     </div>

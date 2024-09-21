@@ -95,8 +95,19 @@ $(document).ready(function () {
   };
 
   if (instanceNumber > 10) {
+    const menu = [10];
+    if (instanceNumber > 25) {
+      menu.push(25);
+    }
+    if (instanceNumber > 50) {
+      menu.push(50);
+    }
+    if (instanceNumber > 100) {
+      menu.push(100);
+    }
+    menu.push({ label: "All", value: -1 });
     layout.topStart.pageLength = {
-      menu: [10, 25, 50, 100, { label: "All", value: -1 }],
+      menu: menu,
     };
     layout.bottomEnd.paging = true;
   }

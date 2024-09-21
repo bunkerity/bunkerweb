@@ -1,7 +1,10 @@
-from flask import Blueprint, render_template
+from json import JSONDecodeError, loads
+from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import login_required
 
 from app.dependencies import DB
+
+from app.routes.utils import handle_error, verify_data_in_form
 
 jobs = Blueprint("jobs", __name__)
 
@@ -10,3 +13,34 @@ jobs = Blueprint("jobs", __name__)
 @login_required
 def jobs_page():
     return render_template("jobs.html", jobs=DB.get_jobs())
+
+
+@jobs.route("/jobs/run", methods=["POST"])
+@login_required
+def jobs_run():
+    verify_data_in_form(
+        data={"jobs": None},
+        err_message="Missing jobs parameter on /jobs/run.",
+        redirect_url="jobs",
+        next=True,
+    )
+    jobs = request.form["jobs"]
+    if not jobs:
+        return handle_error("No jobs selected.", "jobs", True)
+    try:
+        jobs = loads(jobs)
+    except JSONDecodeError:
+        return handle_error("Invalid jobs parameter on /jobs/run.", "jobs", True)
+
+    ret = DB.checked_changes(["config"], [job.get("plugin") for job in jobs if job.get("plugin")], True)
+    if ret:
+        return handle_error(ret, "jobs", True)
+
+    flash(f"Job{'s' if len(jobs) > 1 else ''}'s plugins will be run in the background by the scheduler.", "success")
+    return redirect(
+        url_for(
+            "loading",
+            next=url_for("jobs.jobs_page"),
+            message=f"Run selected job{'s' if len(jobs) > 1 else ''}'s plugins: {', '.join([job.get('plugin') + '/' + job.get('name') for job in jobs])}",
+        )
+    )

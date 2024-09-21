@@ -174,12 +174,6 @@ $(document).ready(function () {
       return;
     }
 
-    console.log("Saving configuration...");
-    console.log("Service:", selectedService);
-    console.log("Type:", selectedType);
-    console.log("Name:", configName);
-    console.log("Value:", value);
-
     const form = $("<form>", {
       method: "POST",
       action: window.location.href,

@@ -151,8 +151,19 @@ $(document).ready(function () {
   };
 
   if (banNumber > 10) {
+    const menu = [10];
+    if (banNumber > 25) {
+      menu.push(25);
+    }
+    if (banNumber > 50) {
+      menu.push(50);
+    }
+    if (banNumber > 100) {
+      menu.push(100);
+    }
+    menu.push({ label: "All", value: -1 });
     layout.topStart.pageLength = {
-      menu: [10, 25, 50, 100, { label: "All", value: -1 }],
+      menu: menu,
     };
     layout.bottomEnd.paging = true;
   }
@@ -534,14 +545,13 @@ $(document).ready(function () {
         });
       });
 
-    console.log(bans);
     const form = $("<form>", {
       method: "POST",
       action: `${window.location.pathname}/ban`,
       class: "visually-hidden",
     });
 
-    // Add CSRF token and instances as hidden inputs
+    // Add CSRF token and bans as hidden inputs
     form.append(
       $("<input>", {
         type: "hidden",

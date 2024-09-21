@@ -89,8 +89,19 @@ $(document).ready(function () {
   };
 
   if (serviceNumber > 10) {
+    const menu = [10];
+    if (serviceNumber > 25) {
+      menu.push(25);
+    }
+    if (serviceNumber > 50) {
+      menu.push(50);
+    }
+    if (serviceNumber > 100) {
+      menu.push(100);
+    }
+    menu.push({ label: "All", value: -1 });
     layout.topStart.pageLength = {
-      menu: [10, 25, 50, 100, { label: "All", value: -1 }],
+      menu: menu,
     };
     layout.bottomEnd.paging = true;
   }
