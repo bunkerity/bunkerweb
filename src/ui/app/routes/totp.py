@@ -1,9 +1,9 @@
-from flask import Blueprint, flash, redirect, render_template, request, session, url_for
+from flask import Blueprint, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_required
 
 from app.dependencies import DB
 from app.models.totp import totp as TOTP
-from app.routes.utils import handle_error, verify_data_in_form
+from app.routes.utils import flash, handle_error, verify_data_in_form
 
 totp = Blueprint("totp", __name__)
 

@@ -18,4 +18,7 @@ $(document).ready(function () {
   });
 
   editor.renderer.setScrollMargin(10, 10);
+
+  editorElement.removeClass("visually-hidden");
+  $("#cache-waiting").addClass("visually-hidden");
 });

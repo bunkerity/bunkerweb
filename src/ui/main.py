@@ -13,7 +13,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
-from flask import Flask, Response, flash, jsonify, make_response, redirect, render_template, request, session, url_for
+from flask import Flask, Response, flash as flask_flash, jsonify, make_response, redirect, render_template, request, session, url_for
 from flask_executor import Executor
 from flask_login import current_user, LoginManager, login_required, logout_user
 from flask_principal import ActionNeed, identity_loaded, Permission, Principal, RoleNeed, TypeNeed, UserNeed
@@ -41,7 +41,7 @@ from app.routes.totp import totp
 
 from app.dependencies import BW_CONFIG, DATA, DB
 from app.models.models import AnonymousUser
-from app.utils import TMP_DIR, LOGGER, get_blacklisted_settings, get_filtered_settings, get_latest_stable_release, get_multiples, handle_stop, stop
+from app.utils import TMP_DIR, LOGGER, flash, get_blacklisted_settings, get_filtered_settings, get_latest_stable_release, get_multiples, handle_stop, stop
 
 signal(SIGINT, handle_stop)
 signal(SIGTERM, handle_stop)
@@ -147,23 +147,14 @@ def inject_variables():
             flash("The last changes have been applied successfully.", "success")
             DATA["CONFIG_CHANGED"] = False
 
-    services = BW_CONFIG.get_config(global_only=True, with_drafts=True, methods=False, filtered_settings=("SERVER_NAME"))["SERVER_NAME"].split(" ")
-
-    # check that is value is in tuple
     return dict(
         script_nonce=app.config["SCRIPT_NONCE"],
         bw_version=metadata["version"],
         latest_version=DATA.get("LATEST_VERSION", "unknown"),
         is_pro_version=metadata["is_pro"],
-        services=services,
-        pro_status=metadata["pro_status"],
-        pro_services=metadata["pro_services"],
-        pro_expire=metadata["pro_expire"].strftime("%Y-%m-%d") if metadata["pro_expire"] else "Unknown",
-        pro_overlapped=metadata["pro_overlapped"],
         plugins=BW_CONFIG.get_plugins(),
-        pro_loading=DATA.get("PRO_LOADING", False),
+        flash_messages=session.get("flash_messages", []),
         is_readonly=DATA.get("READONLY_MODE", False),
-        username=current_user.get_id() if current_user.is_authenticated else "",
     )
 
 
@@ -187,7 +178,7 @@ def load_user(username):
             and session.get("totp_validated", False)
             and not ui_user.list_recovery_codes
         ):
-            flash(
+            flask_flash(
                 f"""The two-factor authentication is enabled but no recovery codes are available, please refresh them:
 <div class="mt-2 pt-2 border-top border-white">
     <a role='button' class='btn btn-sm btn-dark d-flex align-items-center' aria-pressed='true' href='{url_for('profile.profile_page')}'>here</a>
@@ -227,7 +218,7 @@ def handle_csrf_error(_):
     LOGGER.error(f"CSRF token is missing or invalid for {request.path} by {current_user.get_id()}")
     session.clear()
     logout_user()
-    flash("Wrong CSRF token !", "error")
+    flask_flash("Wrong CSRF token !", "error")
     if not current_user:
         return redirect(url_for("setup.setup_page")), 403
     return redirect(url_for("login.login_page")), 403
@@ -303,7 +294,7 @@ def before_request():
         DB.readonly = DATA.get("READONLY_MODE", False)
 
         if DB.readonly:
-            flash("Database connection is in read-only mode : no modification possible.", "error")
+            flask_flash("Database connection is in read-only mode : no modification possible.", "error")
 
         if current_user.is_authenticated:
             passed = True
@@ -405,17 +396,11 @@ def check_reloading():
     if not DATA.get("RELOADING", False) or DATA.get("LAST_RELOAD", 0) + 60 < time():
         if DATA.get("RELOADING", False):
             LOGGER.warning("Reloading took too long, forcing the state to be reloaded")
-            flash("Forced the status to be reloaded", "error")
+            flask_flash("Forced the status to be reloaded", "error")
             DATA["RELOADING"] = False
 
         for f in DATA.get("TO_FLASH", []):
-            if f["type"] != "success":
-                flash(f["content"], f["type"])
-            else:
-                flash(f["content"])
-
-            if "flash_messages" in session:
-                session["flash_messages"].append((f["content"], f["type"], datetime.now().astimezone().strftime("%Y-%m-%d %H:%M:%S %Z")))
+            flash(f["content"], f["type"], save=f.get("save", True))
 
         DATA["TO_FLASH"] = []
 

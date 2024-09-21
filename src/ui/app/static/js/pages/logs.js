@@ -19,6 +19,9 @@ $(document).ready(function () {
 
   editor.renderer.setScrollMargin(10, 10);
 
+  editorElement.removeClass("visually-hidden");
+  $("#logs-waiting").addClass("visually-hidden");
+
   $("#copy-logs").click(function () {
     $this = $(this);
     editor.selectAll();

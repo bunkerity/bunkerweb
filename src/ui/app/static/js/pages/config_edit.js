@@ -35,6 +35,9 @@ $(document).ready(function () {
 
   editor.renderer.setScrollMargin(10, 10);
 
+  editorElement.removeClass("visually-hidden");
+  $("#config-waiting").addClass("visually-hidden");
+
   const $serviceSearch = $("#service-search");
   const $serviceDropdownMenu = $("#services-dropdown-menu");
   const $serviceDropdownItems = $("#services-dropdown-menu li.nav-item");

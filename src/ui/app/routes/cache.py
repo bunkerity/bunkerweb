@@ -1,6 +1,6 @@
 from io import BytesIO
 
-from flask import Blueprint, Response, flash, redirect, render_template, request, send_file, url_for
+from flask import Blueprint, Response, flash as flask_flash, redirect, render_template, request, send_file, url_for
 from flask_login import login_required
 from magic import Magic
 from werkzeug.utils import secure_filename
@@ -41,7 +41,7 @@ def cache_view(service: str, plugin_id: str, job_name: str, file_name: str):
         return send_file(BytesIO(cache_file), as_attachment=True, download_name=file_name)
 
     if not cache_file:
-        flash(f"Cache file {file_name} from job {job_name}, plugin {plugin_id}{', service ' + service if service != 'global' else ''} not found", "error")
+        flask_flash(f"Cache file {file_name} from job {job_name}, plugin {plugin_id}{', service ' + service if service != 'global' else ''} not found", "error")
         return redirect(url_for("cache.cache_page"))
 
     file_type = Magic(mime=True).from_buffer(cache_file)

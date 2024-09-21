@@ -1,0 +1,80 @@
+<div class="offcanvas offcanvas-end"
+     tabindex="-1"
+     id="side-offcanvas-news"
+     data-bs-keyboard="false"
+     data-bs-backdrop="false">
+    <div class="offcanvas-header">
+        <div class="social-buttons">
+            <a href="https://discord.bunkerity.com/?utm_campaign=self&utm_source=ui"
+               class="btn btn-sm btn-link"
+               target="_blank"
+               rel="noopener">
+                <i class='bx bxl-discord-alt bx-sm'></i>
+            </a>
+            <a href="https://www.linkedin.com/company/bunkerity/"
+               class="btn btn-sm btn-link"
+               target="_blank"
+               rel="noopener">
+                <i class='bx bxl-linkedin bx-sm'></i>
+            </a>
+            <a href="https://www.reddit.com/r/BunkerWeb/"
+               class="btn btn-sm btn-link"
+               target="_blank"
+               rel="noopener">
+                <i class='bx bxl-reddit bx-sm'></i>
+            </a>
+            <a href="https://www.instagram.com/bunkerweb/"
+               class="btn btn-sm btn-link"
+               target="_blank"
+               rel="noopener">
+                <i class='bx bxl-instagram bx-sm'></i>
+            </a>
+            <a href="https://x.com/bunkerity/"
+               class="btn btn-sm btn-link"
+               target="_blank"
+               rel="noopener">
+                <i class='bx bxl-twitter bx-sm'></i>
+            </a>
+        </div>
+        <button type="button"
+                class="btn-close text-reset"
+                data-bs-dismiss="offcanvas"
+                aria-label="Close"></button>
+    </div>
+    <div id="data-news-container"
+         class="offcanvas-body position-relative ps-3 pe-3">
+        <p class="text-center relative w-full p-2 text-primary rounded-lg fw-bold">Impossible to connect to blog news.</p>
+    </div>
+    <!-- Newsletter Signup Section -->
+    <div class="newsletter-signup position-sticky bottom-0 start-0 w-100 p-4 bg-white border-top">
+        <h5 class="mb-3 text-dark">Join the Newsletter</h5>
+        <form action="https://bunkerity.us1.list-manage.com/subscribe/post?u=ec5b1577cf427972b9bd491a6&amp;id=37076d9d67"
+              method="POST"
+              id="subscribe-newsletter">
+            <div class="mb-3">
+                <input type="email"
+                       id="newsletter-email"
+                       name="EMAIL"
+                       class="form-control"
+                       placeholder="John.doe@example.com"
+                       required />
+            </div>
+            <div class="form-check mb-3">
+                <input type="checkbox"
+                       class="form-check-input"
+                       id="newsletter-check"
+                       name="newsletter-check"
+                       required />
+                <label class="form-check-label" for="privacyPolicyCheck">
+                    I've read and agree to the
+                    <a class="fst-italic"
+                       href="https://www.bunkerity.com/en/privacy-policy?utm_campaign=self&utm_source=ui"
+                       target="_blank"
+                       rel="noopener">privacy policy</a>
+                </label>
+            </div>
+            <button type="submit" class="btn btn-primary w-100 text-uppercase">Subscribe</button>
+        </form>
+    </div>
+    <!-- End Newsletter Signup Section -->
+</div>

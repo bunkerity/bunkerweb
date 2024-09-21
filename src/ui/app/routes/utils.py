@@ -6,7 +6,7 @@ from io import BytesIO
 from time import sleep
 from typing import Any, Dict, Optional, Tuple, Union
 
-from flask import Response, flash, redirect, request, session, url_for
+from flask import Response, redirect, request, url_for
 from qrcode.main import QRCode
 from redis import Redis, Sentinel
 from regex import compile as re_compile
@@ -14,7 +14,7 @@ from regex import compile as re_compile
 from app.models.instance import Instance
 
 from app.dependencies import BW_CONFIG, DATA, DB
-from app.utils import LOGGER
+from app.utils import LOGGER, flash
 
 
 LOG_RX = re_compile(r"^(?P<date>\d+/\d+/\d+\s\d+:\d+:\d+)\s\[(?P<level>[a-z]+)\]\s\d+#\d+:\s(?P<message>[^\n]+)$")
@@ -108,13 +108,7 @@ def manage_bunkerweb(method: str, *args, operation: str = "reloads", is_draft: b
 
     if not threaded:
         for f in DATA.get("TO_FLASH", []):
-            if f["type"] == "error":
-                flash(f["content"], "error")
-            else:
-                flash(f["content"])
-
-            if "flash_messages" in session:
-                session["flash_messages"].append((f["content"], f["type"], datetime.now().astimezone().strftime("%Y-%m-%d %H:%M:%S %Z")))
+            flash(f["content"], f["type"], save=f.get("save", True))
 
         DATA["TO_FLASH"] = []
 

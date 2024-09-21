@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from datetime import datetime
 from os import _exit, getenv
 from os.path import join, sep
 from pathlib import Path
@@ -7,6 +8,7 @@ from subprocess import PIPE, Popen, call
 from typing import Dict, List, Optional, Set
 
 from bcrypt import checkpw, gensalt, hashpw
+from flask import flash as flask_flash, session
 from magic import Magic
 from regex import compile as re_compile, match
 from requests import get
@@ -267,3 +269,13 @@ def get_latest_stable_release():
         if not release["prerelease"]:
             return release
     return None
+
+
+def flash(message: str, category: str = "success", *, save: bool = True) -> None:
+    if category != "success":
+        flask_flash(message, category)
+    else:
+        flask_flash(message)
+
+    if save and "flash_messages" in session:
+        session["flash_messages"].append((message, category, datetime.now().astimezone().isoformat()))

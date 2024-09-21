@@ -1,12 +1,12 @@
 from typing import Dict, Generator, Tuple, Union
-from flask import Blueprint, Response, flash, jsonify, redirect, render_template, request, stream_with_context, url_for, session
+from flask import Blueprint, Response, jsonify, redirect, render_template, request, stream_with_context, url_for, session
 from flask_login import current_user, login_required, logout_user
 from user_agents import parse
 
 from app.models.totp import totp as TOTP
 
 from app.dependencies import DATA, DB
-from app.utils import USER_PASSWORD_RX, gen_password_hash
+from app.utils import USER_PASSWORD_RX, flash, gen_password_hash
 
 from app.routes.utils import cors_required, handle_error, verify_data_in_form
 

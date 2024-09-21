@@ -1,36 +1,36 @@
 <div class="offcanvas offcanvas-end"
      tabindex="-1"
-     id="side-offcanvas"
+     id="side-offcanvas-notifications"
      data-bs-keyboard="false"
      data-bs-backdrop="false">
     <div class="offcanvas-header">
         <div class="social-buttons">
             <a href="https://discord.bunkerity.com/?utm_campaign=self&utm_source=ui"
-               class="btn btn-link"
+               class="btn btn-sm btn-link"
                target="_blank"
                rel="noopener">
                 <i class='bx bxl-discord-alt bx-sm'></i>
             </a>
             <a href="https://www.linkedin.com/company/bunkerity/"
-               class="btn btn-link"
+               class="btn btn-sm btn-link"
                target="_blank"
                rel="noopener">
                 <i class='bx bxl-linkedin bx-sm'></i>
             </a>
             <a href="https://www.reddit.com/r/BunkerWeb/"
-               class="btn btn-link"
+               class="btn btn-sm btn-link"
                target="_blank"
                rel="noopener">
                 <i class='bx bxl-reddit bx-sm'></i>
             </a>
             <a href="https://www.instagram.com/bunkerweb/"
-               class="btn btn-link"
+               class="btn btn-sm btn-link"
                target="_blank"
                rel="noopener">
                 <i class='bx bxl-instagram bx-sm'></i>
             </a>
             <a href="https://x.com/bunkerity/"
-               class="btn btn-link"
+               class="btn btn-sm btn-link"
                target="_blank"
                rel="noopener">
                 <i class='bx bxl-twitter bx-sm'></i>
@@ -41,9 +41,37 @@
                 data-bs-dismiss="offcanvas"
                 aria-label="Close"></button>
     </div>
-    <div data-news-container
-         class="offcanvas-body position-relative ps-3 pe-3">
-        <p class="text-center relative w-full p-2 text-primary rounded-lg fw-bold">Impossible to connect to blog news.</p>
+    <div id="data-notifications-container"
+         class="offcanvas-body row justify-content-center ps-3 pe-3{% if flash_messages %} pt-0{% endif %}">
+        {% if flash_messages %}
+            <div id="feedback-toast-container"
+                 class="toast-container position-relative g-3 pt-6">
+                {% for message in flash_messages|reverse %}
+                    {% set content = message[0] %}
+                    {% set category = message[1] %}
+                    {% set datetime = message[2] %}
+                    <div class="col-12 bs-toast toast show {% if category == 'error' %}bg-danger{% elif category == 'warning' %}bg-warning{% else %}bg-primary text-white{% endif %}">
+                        <div class="toast-header">
+                            <i class="d-block w-px-20 h-auto rounded me-2 tf-icons bx bx-bell"></i>
+                            <span class="fw-medium me-auto">
+                                {% if category != 'message' %}
+                                    {{ category|capitalize }}
+                                {% else %}
+                                    Success
+                                {% endif %}
+                            </span>
+                            <small class="text-body-secondary toast-datetime">{{ datetime }}</small>
+                        </div>
+                        <div class="toast-body">{{ content|safe }}</div>
+                    </div>
+                {% endfor %}
+                <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-secondary">
+                    TZ: <script nonce="{{ script_nonce }}">document.write(Intl.DateTimeFormat().resolvedOptions().timeZone);</script>
+                </span>
+            </div>
+        {% else %}
+            <p class="g-3 text-center relative w-full p-2 text-primary rounded-lg fw-bold">No notifications to show</p>
+        {% endif %}
     </div>
     <!-- Newsletter Signup Section -->
     <div class="newsletter-signup position-sticky bottom-0 start-0 w-100 p-4 bg-white border-top">

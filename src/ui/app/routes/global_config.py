@@ -4,10 +4,11 @@ from threading import Thread
 from time import time
 from typing import Dict
 
-from flask import Blueprint, flash, redirect, render_template, request, url_for
+from flask import Blueprint, flash as flask_flash, redirect, render_template, request, url_for
 from flask_login import login_required
 
 from app.dependencies import BW_CONFIG, DATA, DB
+from app.utils import flash
 
 from app.routes.utils import handle_error, manage_bunkerweb, wait_applying
 
@@ -66,9 +67,9 @@ def global_config_page():
             with suppress(BaseException):
                 if config["PRO_LICENSE_KEY"]["value"] != variables["PRO_LICENSE_KEY"]:
                     if threaded:
-                        DATA["TO_FLASH"].append({"content": "Checking license key to upgrade.", "type": "success"})
+                        DATA["TO_FLASH"].append({"content": "Checking license key to upgrade.", "type": "success", "save": False})
                     else:
-                        flash("Checking license key to upgrade.", "success")
+                        flask_flash("Checking license key to upgrade.", "success")
 
             manage_bunkerweb("global_config", variables, threaded=threaded)
 

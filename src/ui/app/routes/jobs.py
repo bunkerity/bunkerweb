@@ -1,8 +1,9 @@
 from json import JSONDecodeError, loads
-from flask import Blueprint, flash, redirect, render_template, request, url_for
+from flask import Blueprint, redirect, render_template, request, url_for
 from flask_login import login_required
 
 from app.dependencies import DB
+from app.utils import flash
 
 from app.routes.utils import handle_error, verify_data_in_form
 

@@ -3,10 +3,11 @@ from json import JSONDecodeError, dumps, loads
 from math import floor
 from time import time
 
-from flask import Blueprint, flash, redirect, render_template, request, url_for
+from flask import Blueprint, flash as flask_flash, redirect, render_template, request, url_for
 from flask_login import login_required
 
 from app.dependencies import BW_INSTANCES_UTILS
+from app.utils import flash
 
 from app.routes.utils import get_redis_client, get_remain, handle_error, verify_data_in_form
 
@@ -33,11 +34,11 @@ def bans_page():
             try:
                 unban = loads(unban.replace('"', '"').replace("'", '"'))
             except BaseException:
-                flash(f"Invalid unban: {unban}, skipping it ...", "error")
+                flask_flash(f"Invalid unban: {unban}, skipping it ...", "error")
                 continue
 
             if "ip" not in unban:
-                flash(f"Invalid unban: {unban}, skipping it ...", "error")
+                flask_flash(f"Invalid unban: {unban}, skipping it ...", "error")
                 continue
 
             if redis_client:
@@ -57,7 +58,7 @@ def bans_page():
 
         for ban in data:
             if not isinstance(ban, dict) or "ip" not in ban:
-                flash(f"Invalid ban: {ban}, skipping it ...", "error")
+                flask_flash(f"Invalid ban: {ban}, skipping it ...", "error")
                 continue
 
             reason = ban.get("reason", "ui")
@@ -134,14 +135,14 @@ def bans_ban():
     redis_client = get_redis_client()
     for ban in bans:
         if not isinstance(ban, dict) or "ip" not in ban:
-            flash(f"Invalid ban: {ban}, skipping it ...", "error")
+            flask_flash(f"Invalid ban: {ban}, skipping it ...", "error")
             continue
 
         reason = ban.get("reason", "ui")
         try:
             ban_end = datetime.fromisoformat(ban["end_date"])
         except ValueError:
-            flash(f"Invalid ban: {ban}, skipping it ...", "error")
+            flask_flash(f"Invalid ban: {ban}, skipping it ...", "error")
             continue
         current_time = datetime.now().astimezone()
         ban_end = (ban_end - current_time).total_seconds()
@@ -181,7 +182,7 @@ def bans_unban():
     redis_client = get_redis_client()
     for unban in unbans:
         if "ip" not in unban:
-            flash(f"Invalid unban: {unban}, skipping it ...", "error")
+            flask_flash(f"Invalid unban: {unban}, skipping it ...", "error")
             continue
 
         if redis_client:

@@ -4,11 +4,12 @@ from threading import Thread
 from time import time
 from typing import Dict, Literal, Optional
 
-from flask import Blueprint, flash, redirect, render_template, request, url_for
+from flask import Blueprint, redirect, render_template, request, url_for
 from flask_login import login_required
 from werkzeug.utils import secure_filename
 
 from app.dependencies import BW_CONFIG, DATA, DB
+from app.utils import flash
 
 from app.routes.utils import handle_error, verify_data_in_form, wait_applying
 

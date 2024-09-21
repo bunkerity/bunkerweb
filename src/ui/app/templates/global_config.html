@@ -3,21 +3,6 @@
     <!-- Content -->
     {% set blacklisted_settings = get_blacklisted_settings(true) %}
     {% set service_method = "ui" %}
-    {% set plugin_types = {
-        "core": {
-            "icon": "<i class=\"bx bx-cube\"></i>",
-            "title-class": " border-dark"
-        },
-        "external": {
-            "icon": "<i class=\"bx bx-plug\"></i>",
-            "title-class": " border-secondary",
-            "text-class": " text-secondary fw-bold"
-        },
-        "pro": {
-            "title-class": " border-primary",
-            "text-class": " text-primary fw-bold shine"
-        }
-    } %}
     {% include "models/plugins_settings.html" %}
     <!-- / Content -->
 {% endblock %}

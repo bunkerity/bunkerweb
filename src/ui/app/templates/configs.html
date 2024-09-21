@@ -43,8 +43,26 @@
                 </tr>
             </thead>
             <tbody>
+                {% set config_types = {
+                    "crs": "shield-alt",
+                    "modsec_crs": "shield-quarter",
+                    "modsec": "shield-alt-2",
+                    "stream": "network-chart",
+                    "custom": "window-alt"
+                } %}
                 {% for config in configs %}
                     {% set service_id = config['service_id'] if config['service_id'] else 'global' %}
+                    {% if config['type'].startswith('crs') %}
+                        {% set config_icon = "shield-alt" %}
+                    {% elif config['type'] == 'modsec_crs' %}
+                        {% set config_icon = "shield-quarter" %}
+                    {% elif config['type'] == 'modsec' %}
+                        {% set config_icon = "shield-alt-2" %}
+                    {% elif 'stream' in config['type'] %}
+                        {% set config_icon = "network-chart" %}
+                    {% else %}
+                        {% set config_icon = "window-alt" %}
+                    {% endif %}
                     <tr>
                         <td></td>
                         <td>
@@ -54,7 +72,7 @@
                                data-bs-original-title="Edit custom config {{ config['name'] }}"><i class="bx bx-edit bx-xs"></i>&nbsp;{{ config["name"] }}</a>
                         </td>
                         <td id="type-{{ config['type'] }}-{{ service_id.replace('.', '_') }}-{{ config['name'] }}">
-                            <i class="bx bx-{% if config['type'].startswith('crs') %}shield-alt{% elif config['type'] == 'modsec_crs' %}shield-quarter{% elif config['type'] == 'modsec' %}shield-alt-2{% elif 'stream' in config['type'] %}network-chart{% else %}window-alt{% endif %}"></i>
+                            <i class="bx bx-{{ config_icon }}"></i>
                             {{ config["type"]|upper }}
                         </td>
                         <td>{{ config["method"] }}</td>

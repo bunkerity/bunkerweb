@@ -48,7 +48,7 @@ class News {
   >`),
       );
       document.querySelector("#news-button").insertAdjacentHTML(
-        "beforeend",
+        "afterend",
         DOMPurify.sanitize(`<span
     class="badge-dot-text position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
   >
@@ -58,12 +58,12 @@ class News {
       );
     }
 
-    const newsContainer = document.querySelector("[data-news-container]");
+    const newsContainer = document.getElementById("data-news-container");
     const lastItem = lastNews[0];
     //remove default message
     newsContainer.textContent = "";
     document
-      .querySelector("[data-news-container]")
+      .getElementById("data-news-container")
       .insertAdjacentHTML(
         "afterbegin",
         `<div data-news-row class="row g-6 justify-content-center">`,
@@ -99,7 +99,7 @@ class News {
       });
     });
     document
-      .querySelector("[data-news-container]")
+      .getElementById("data-news-container")
       .insertAdjacentHTML("beforeend", "</div>");
   }
 

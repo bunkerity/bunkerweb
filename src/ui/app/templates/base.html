@@ -1,6 +1,21 @@
 {% set current_endpoint = request.path.split("/")[-1] %}
 {% set pro_diamond_url = url_for('static', filename='img/diamond.svg') %}
 {% set avatar_url = url_for('static', filename='img/avatar_profil_BW.png') %}
+{% set plugin_types = {
+    "core": {
+        "icon": "<i class=\"bx bx-shield bx-xs\"></i>",
+        "title-class": " border-dark"
+    },
+    "external": {
+        "icon": "<i class=\"bx bx-plug bx-xs\"></i>",
+        "title-class": " border-secondary",
+        "text-class": " text-secondary fw-bold"
+    },
+    "pro": {
+        "title-class": " border-primary",
+        "text-class": " text-primary fw-bold shine"
+    }
+} %}
 <!DOCTYPE html>
 <html lang="en"
       class="light-style layout-navbar-fixed layout-menu-fixed"
@@ -25,7 +40,7 @@
         <link rel="stylesheet"
               href="{{ url_for('static', filename='fonts/boxicons.min.css') }}"
               nonce="{{ style_nonce }}" />
-        {% if current_endpoint in ("instances", "services", "configs", "cache", "reports", "bans", "jobs") %}
+        {% if current_endpoint in ("instances", "services", "configs", "plugins", "cache", "reports", "bans", "jobs") or "plugins" in request.path %}
             <!-- Datatables -->
             <link rel="stylesheet"
                   href="{{ url_for('static', filename='libs/datatables/datatables.min.css') }}"
@@ -101,7 +116,7 @@
                 nonce="{{ script_nonce }}"></script>
         <script src="{{ url_for('static', filename='libs/purify/purify.min.js') }}"
                 nonce="{{ script_nonce }}"></script>
-        {% if current_endpoint in ("instances", "services", "configs", "cache", "reports", "bans", "jobs") %}
+        {% if current_endpoint in ("instances", "services", "configs", "plugins", "cache", "reports", "bans", "jobs") or "plugins" in request.path %}
             <script src="{{ url_for('static', filename='libs/datatables/datatables.min.js') }}"
                     nonce="{{ script_nonce }}"></script>
         {% endif %}
@@ -154,6 +169,9 @@
                     nonce="{{ script_nonce }}"></script>
         {% elif current_endpoint != "configs" and "configs" in request.path %}
             <script src="{{ url_for('static', filename='js/pages/config_edit.js') }}"
+                    nonce="{{ script_nonce }}"></script>
+        {% elif current_endpoint == "plugins" %}
+            <script src="{{ url_for('static', filename='js/pages/plugins.js') }}"
                     nonce="{{ script_nonce }}"></script>
         {% elif current_endpoint == "cache" %}
             <script src="{{ url_for('static', filename='js/pages/cache.js') }}"

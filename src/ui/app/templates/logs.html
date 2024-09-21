@@ -5,7 +5,7 @@
         <div class="d-flex flex-wrap justify-content-around align-items-center">
             <div class="d-flex justify-content-center">
                 <div class="dropdown btn-group"
-                     {% if not files %}data-bs-toggle="tooltip" data-bs-placement="top" title="No log files available"{% endif %}>
+                     {% if not files %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="No log files available"{% endif %}>
                     <button type="button"
                             class="btn btn-outline-primary dropdown-toggle{% if not files %} disabled{% endif %}"
                             data-bs-toggle="dropdown"
@@ -54,7 +54,7 @@
                     </div>
                 {% endif %}
             </div>
-            <div {% if not request.is_secure %}data-bs-toggle="tooltip" data-bs-placement="top" title="The copy feature is only available over HTTPS"{% endif %}>
+            <div {% if not request.is_secure %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The copy feature is only available over HTTPS"{% endif %}>
                 <button id="copy-logs"
                         type="button"
                         class="btn btn-outline-secondary {% if not request.is_secure %}disabled{% endif %}">
@@ -65,8 +65,9 @@
         </div>
     </div>
     <div class="card p-4 min-vh-70">
+        <p id="logs-waiting" class="text-center relative w-full p-2 text-primary rounded-lg fw-bold">Loading logs...</p>
         <div id="raw-logs"
-             class="ace-editor border rounded position-absolute top-0 start-0 end-0 bottom-0">{{ logs }}</div>
+             class="visually-hidden ace-editor border rounded position-absolute top-0 start-0 end-0 bottom-0">{{ logs }}</div>
     </div>
     <!-- / Content -->
 {% endblock %}

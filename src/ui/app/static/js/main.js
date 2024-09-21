@@ -165,4 +165,24 @@ $(document).ready(function () {
       .removeClass("chevron-rotate")
       .addClass("chevron-rotate-back");
   });
+
+  $(".toast-datetime").each(function () {
+    const isoDateStr = $(this).text().trim();
+
+    // Parse the ISO format date string
+    const date = new Date(isoDateStr);
+
+    // Check if the date is valid
+    if (!isNaN(date)) {
+      // Convert to local date and time string
+      const localDateStr = date.toLocaleString();
+
+      // Update the text content with the local date string
+      $(this).text(localDateStr);
+    } else {
+      // Handle invalid date
+      console.error(`Invalid date string: ${isoDateStr}`);
+      $(this).text("Invalid date");
+    }
+  });
 });

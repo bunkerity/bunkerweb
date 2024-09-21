@@ -129,14 +129,32 @@
                                         <span class="d-none d-md-inline">Need help?</span>
                                     </a>
                                 </li>
-                                <li>
+                                <li class="me-3 position-relative">
+                                    <button id="notifications-button"
+                                            type="button"
+                                            class="btn btn-sm btn-primary text-uppercase d-flex align-items-center"
+                                            aria-pressed="true"
+                                            data-bs-toggle="offcanvas"
+                                            data-bs-target="#side-offcanvas-notifications"
+                                            aria-controls="side-offcanvas-notifications">
+                                        <span class="bx bx-bell me-0 me-md-2"></span>
+                                        <span class="d-none d-md-inline">Notifications</span>
+                                    </button>
+                                    {% if flash_messages %}
+                                    <span class="badge-dot-text position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                        {{ flash_messages|length }}
+                                        <span class="visually-hidden">unread notifications</span>
+                                    </span>
+                                    {% endif %}
+                                </li>
+                                <li class="position-relative">
                                     <button id="news-button"
                                             type="button"
                                             class="btn btn-sm btn-dark text-uppercase d-flex align-items-center"
                                             aria-pressed="true"
                                             data-bs-toggle="offcanvas"
-                                            data-bs-target="#side-offcanvas"
-                                            aria-controls="side-offcanvas">
+                                            data-bs-target="#side-offcanvas-news"
+                                            aria-controls="side-offcanvas-news">
                                         <span class="bx bx-news me-0 me-md-2"></span>
                                         <span class="d-none d-md-inline">News</span>
                                     </button>
@@ -147,7 +165,8 @@
                     </div>
                     <!-- prettier-ignore -->
                     {% include "footer.html" %}
-                    {% include "sidebar.html" %}
+                    {% include "sidebar-notifications.html" %}
+                    {% include "sidebar-news.html" %}
                     {% if not is_pro_version %}
                         <div class="buy-now">
                             <a class="btn btn-responsive btn-buy-now"

@@ -2,10 +2,11 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from threading import Thread
 from time import time
 from typing import Literal
-from flask import Blueprint, flash, jsonify, redirect, render_template, request, url_for
+from flask import Blueprint, jsonify, redirect, render_template, request, url_for
 from flask_login import login_required
 
 from app.dependencies import BW_CONFIG, BW_INSTANCES_UTILS, DATA, DB
+from app.utils import flash
 
 from app.models.instance import Instance
 from app.routes.utils import handle_error, verify_data_in_form
