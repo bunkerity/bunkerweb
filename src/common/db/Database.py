@@ -129,7 +129,7 @@ class Database:
                 match.group("database"), f"{match.group('database')}+psycopg"
             )  # ? This is strongly recommended as psycopg is the new way to connect to postgresql
 
-        self.database_uri = sqlalchemy_string
+        self.database_uri = "" if sqlalchemy_string == sqlalchemy_string_readonly else sqlalchemy_string
         self.database_uri_readonly = sqlalchemy_string_readonly
         error = False
 
