@@ -53,7 +53,7 @@ So, whether you choose to use the ready-to-use prebuilt images or embark on the 
 ```shell
 git clone https://github.com/bunkerity/bunkerweb.git && \
 cd bunkerweb && \
-docker build -t my-bunkerweb -f src/bunkerweb/Dockerfile .
+docker build -t my-bunkerweb -f src/bw/Dockerfile .
 ```
 
 Docker integration key concepts are :
