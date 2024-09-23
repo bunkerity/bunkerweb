@@ -2,6 +2,7 @@ $(document).ready(function () {
   var toastNum = 0;
   var actionLock = false;
   const serviceNumber = parseInt($("#services_number").val());
+  const isReadOnly = $("#is-read-only").val().trim() === "True";
 
   const setupModal = (services, modal) => {
     const list = $(
@@ -210,14 +211,24 @@ $(document).ready(function () {
 
   $.fn.dataTable.ext.buttons.create_service = {
     text: '<span class="tf-icons bx bx-plus-circle bx-18px me-2"></span>Create<span class="d-none d-md-inline"> new service</span>',
-    className: "btn btn-sm btn-outline-bw-green",
+    className: `btn btn-sm btn-outline-bw-green${
+      isReadOnly ? " disabled" : ""
+    }`,
     action: function (e, dt, node, config) {
+      if (isReadOnly) {
+        alert("This action is not allowed in read-only mode.");
+        return;
+      }
       window.location.href = `${window.location.href}/new`;
     },
   };
 
   $.fn.dataTable.ext.buttons.convert_services = {
     action: function (e, dt, node, config) {
+      if (isReadOnly) {
+        alert("This action is not allowed in read-only mode.");
+        return;
+      }
       if (actionLock) {
         return;
       }
@@ -259,6 +270,10 @@ $(document).ready(function () {
   $.fn.dataTable.ext.buttons.delete_services = {
     text: '<span class="tf-icons bx bx-trash bx-18px me-2"></span>Delete',
     action: function (e, dt, node, config) {
+      if (isReadOnly) {
+        alert("This action is not allowed in read-only mode.");
+        return;
+      }
       if (actionLock) {
         return;
       }
@@ -341,6 +356,14 @@ $(document).ready(function () {
     initComplete: function (settings, json) {
       $("#services_wrapper .btn-secondary").removeClass("btn-secondary");
       $("#services_wrapper th").addClass("text-center");
+      if (isReadOnly)
+        $("#services_wrapper .dt-buttons")
+          .attr(
+            "data-bs-original-title",
+            "The database is in readonly, therefore you cannot create new services.",
+          )
+          .attr("data-bs-placement", "right")
+          .tooltip();
     },
   });
 
@@ -383,12 +406,20 @@ $(document).ready(function () {
   });
 
   $(".convert-service").on("click", function () {
+    if (isReadOnly) {
+      alert("This action is not allowed in read-only mode.");
+      return;
+    }
     const service = $(this).data("service-id");
     const convertionType = $(this).data("value");
     setupConversionModal([service], convertionType);
   });
 
   $(".delete-service").on("click", function () {
+    if (isReadOnly) {
+      alert("This action is not allowed in read-only mode.");
+      return;
+    }
     const service = $(this).data("service-id");
     setupDeletionModal([service]);
   });

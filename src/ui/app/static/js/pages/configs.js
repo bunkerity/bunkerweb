@@ -1,6 +1,7 @@
 $(document).ready(function () {
   var actionLock = false;
   const configNumber = parseInt($("#configs_number").val());
+  const isReadOnly = $("#is-read-only").val().trim() === "True";
 
   const setupDeletionModal = (configs) => {
     const delete_modal = $("#modal-delete-configs");
@@ -201,8 +202,14 @@ $(document).ready(function () {
 
   $.fn.dataTable.ext.buttons.create_config = {
     text: '<span class="tf-icons bx bx-plus-circle bx-18px me-2"></span>Create<span class="d-none d-md-inline"> new custom config</span>',
-    className: "btn btn-sm btn-outline-bw-green",
+    className: `btn btn-sm btn-outline-bw-green${
+      isReadOnly ? " disabled" : ""
+    }`,
     action: function (e, dt, node, config) {
+      if (isReadOnly) {
+        alert("This action is not allowed in read-only mode.");
+        return;
+      }
       window.location.href = `${window.location.href}/new`;
     },
   };
@@ -210,6 +217,10 @@ $(document).ready(function () {
   $.fn.dataTable.ext.buttons.delete_configs = {
     text: '<span class="tf-icons bx bx-trash bx-18px me-2"></span>Delete',
     action: function (e, dt, node, config) {
+      if (isReadOnly) {
+        alert("This action is not allowed in read-only mode.");
+        return;
+      }
       if (actionLock) {
         return;
       }
@@ -276,6 +287,13 @@ $(document).ready(function () {
     initComplete: function (settings, json) {
       $("#configs_wrapper .btn-secondary").removeClass("btn-secondary");
       $("#configs_wrapper th").addClass("text-center");
+      $("#configs_wrapper .dt-buttons")
+        .attr(
+          "data-bs-original-title",
+          "The database is in readonly, therefore you cannot create new custom configurations.",
+        )
+        .attr("data-bs-placement", "right")
+        .tooltip();
     },
   });
 
@@ -318,6 +336,10 @@ $(document).ready(function () {
   });
 
   $(".delete-config").on("click", function () {
+    if (isReadOnly) {
+      alert("This action is not allowed in read-only mode.");
+      return;
+    }
     const config = {
       name: $(this).data("config-name"),
       type: $(this).data("config-type"),

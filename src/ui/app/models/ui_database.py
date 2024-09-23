@@ -479,9 +479,10 @@ class UIDatabase(Database):
 
         return ""
 
-    def get_ui_user_sessions(self, username: str, current_session_id: Optional[str] = None) -> List[UserSessions]:
+    def get_ui_user_sessions(self, username: str, current_session_id: Optional[str] = None) -> List[dict]:
         """Get ui user sessions."""
         with self._db_session() as session:
+            sessions = []
             if current_session_id:
                 current_session_query = session.query(UserSessions).filter_by(user_name=username, id=current_session_id)
                 other_sessions_query = (
@@ -490,10 +491,22 @@ class UIDatabase(Database):
                     .filter(UserSessions.id != current_session_id)
                     .order_by(UserSessions.creation_date.desc())
                 )
-                combined_query = current_session_query.union_all(other_sessions_query)
-                return combined_query.all()
+                query = current_session_query.union_all(other_sessions_query)
             else:
-                return session.query(UserSessions).filter_by(user_name=username).order_by(UserSessions.creation_date.desc()).all()
+                query = session.query(UserSessions).filter_by(user_name=username).order_by(UserSessions.creation_date.desc())
+
+            for session_data in query:
+                sessions.append(
+                    {
+                        "id": session_data.id,
+                        "ip": session_data.ip,
+                        "user_agent": session_data.user_agent,
+                        "creation_date": session_data.creation_date,
+                        "last_activity": session_data.last_activity,
+                    }
+                )
+
+            return sessions
 
     def delete_ui_user_old_sessions(self, username: str) -> str:
         """Delete ui user old sessions."""

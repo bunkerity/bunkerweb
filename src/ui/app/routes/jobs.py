@@ -19,6 +19,9 @@ def jobs_page():
 @jobs.route("/jobs/run", methods=["POST"])
 @login_required
 def jobs_run():
+    if DB.readonly:
+        return handle_error("Database is in read-only mode", "jobs")
+
     verify_data_in_form(
         data={"jobs": None},
         err_message="Missing jobs parameter on /jobs/run.",

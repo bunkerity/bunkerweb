@@ -44,6 +44,9 @@ def configs_page():
 @configs.route("/configs/delete", methods=["POST"])
 @login_required
 def configs_delete():
+    if DB.readonly:
+        return handle_error("Database is in read-only mode", "configs")
+
     verify_data_in_form(
         data={"configs": None},
         err_message="Missing configs parameter on /configs/delete.",
@@ -119,6 +122,9 @@ def configs_delete():
 @login_required
 def configs_new():
     if request.method == "POST":
+        if DB.readonly:
+            return handle_error("Database is in read-only mode", "configs")
+
         verify_data_in_form(
             data={"service": None},
             err_message="Missing service parameter on /configs/new.",
@@ -239,6 +245,9 @@ def configs_edit(service: str, config_type: str, name: str):
         return handle_error(f"Config {config_type}/{name}{' for service ' + service if service else ''} does not exist.", "configs", True)
 
     if request.method == "POST":
+        if DB.readonly:
+            return handle_error("Database is in read-only mode", "configs")
+
         if not db_config["template"] and db_config["method"] != "ui":
             return handle_error(
                 f"Config {config_type}/{name}{' for service ' + service if service else ''} is not a UI custom config and cannot be edited.", "configs", True

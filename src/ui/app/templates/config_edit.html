@@ -16,7 +16,7 @@
     <div class="card p-1 mb-4 sticky-card">
         <div class="d-flex flex-wrap justify-content-around align-items-center">
             <div class="d-flex">
-                {% if not config_template and config_method and config_method != "ui" %}
+                {% if not config_template and config_method and config_method != "ui" or is_readonly %}
                     <button type="button" class="btn btn-sm btn-secondary ms-2 disabled">
                         <i class="bx bx-xs bx-cube"></i>
                         &nbsp;Service: {{ config_service or "no service" }}
@@ -115,15 +115,21 @@
                            value="{{ name }}"
                            pattern="^[a-zA-Z0-9_\-]{1,64}$"
                            required
-                           {% if not config_template and config_method and config_method != "ui" %}disabled{% endif %}>
+                           {% if not config_template and config_method and config_method != "ui" or is_readonly %}disabled{% endif %}>
                     <label for="config-name">Configuration Name</label>
                     <span class="input-group-text border-0 border-primary border-bottom mt-2 pb-0 shadow-none"
                           id="config-name-suffix">.conf</span>
                 </div>
             </div>
-            <div {% if not config_template and config_method and config_method != "ui" %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The custom config was created using the {{ config_method }} method, therefore it is locked"{% endif %}>
+            <div {% if not config_template and config_method and config_method != "ui" or is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{% if is_readonly %}The database is in readonly{% else %}The custom config was created using the {{ config_method }} method{% endif %}
+                 therefore
+                 it
+                 is
+                 locked
+                 "
+                 {% endif %}>
                 <button type="button"
-                        class="btn btn-sm btn-outline-bw-green save-config{% if not config_template and config_method and config_method != "ui" %} disabled{% endif %}">
+                        class="btn btn-sm btn-outline-bw-green save-config{% if not config_template and config_method and config_method != "ui" or is_readonly %} disabled{% endif %}">
                     <i class="bx bx-save bx-sm"></i>
                     <span class="d-none d-md-inline">&nbsp;Save</span>
                 </button>
@@ -131,13 +137,18 @@
         </div>
     </div>
     <div class="card position-relative p-4 min-vh-70"
-         {% if not config_template and config_method and config_method != "ui" %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Disabled by {{ config_method }}"{% endif %}>
-         <p id="config-waiting" class="text-center relative w-full p-2 text-primary rounded-lg fw-bold">Loading custom configuration...</p>
+         {% if not config_template and config_method and config_method != "ui" or is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Disabled by {% if is_readonly %}readonly{% else %}{{ config_method }}{% endif %}
+         "
+         {% endif %}>
+        <p id="config-waiting"
+           class="text-center relative w-full p-2 text-primary rounded-lg fw-bold">Loading custom configuration...</p>
         <div id="config-value"
              data-language="{% if type and type.startswith(('CRS', 'MODSEC')) %}ModSecurity{% else %}NGINX{% endif %}"
              data-method="{{ config_method or 'ui' }}"
              data-template="{{ config_template }}"
-             class="visually-hidden ace-editor border rounded position-absolute top-0 start-0 end-0 bottom-0">{{ config_value }}</div>
+             class="visually-hidden ace-editor border rounded position-absolute top-0 start-0 end-0 bottom-0">
+            {{ config_value }}
+        </div>
     </div>
     <!-- / Content -->
 {% endblock %}

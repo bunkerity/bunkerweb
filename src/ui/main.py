@@ -122,7 +122,7 @@ with app.app_context():
 
 @app.context_processor
 def inject_variables():
-    if request.path.startswith(("/setup", "/loading", "/login", "/totp")):
+    if request.path.startswith(("/check_reloading", "/setup", "/loading", "/login", "/totp")):
         return dict(script_nonce=app.config["SCRIPT_NONCE"])
 
     DATA.load_from_file()
@@ -256,7 +256,7 @@ def check_database_state():
                 "LAST_DATABASE_RETRY": DB.last_connection_retry.isoformat() if DB.last_connection_retry else datetime.now().astimezone().isoformat(),
             }
         )
-    elif not DATA.get("READONLY_MODE", False) and request.method == "POST" and not ("/totp" in request.path or "/login" in request.path):
+    elif DB.database_uri and not DATA.get("READONLY_MODE", False) and request.method == "POST" and not ("/totp" in request.path or "/login" in request.path):
         try:
             DB.test_write()
             DATA["READONLY_MODE"] = False
@@ -293,8 +293,8 @@ def before_request():
 
         DB.readonly = DATA.get("READONLY_MODE", False)
 
-        if DB.readonly:
-            flask_flash("Database connection is in read-only mode : no modification possible.", "error")
+        if not request.path.startswith(("/check_reloading", "/loading", "/login", "/totp")) and DB.readonly:
+            flask_flash("Database connection is in read-only mode : no modifications possible.", "error")
 
         if current_user.is_authenticated:
             passed = True
@@ -310,7 +310,7 @@ def before_request():
             elif session["user_agent"] != request.headers.get("User-Agent"):
                 LOGGER.warning(f"User {current_user.get_id()} tried to access his session with a different User-Agent.")
                 passed = False
-            elif session["session_id"] in DATA.get("REVOKED_SESSIONS", []):
+            elif "session_id" in session and session["session_id"] in DATA.get("REVOKED_SESSIONS", []):
                 LOGGER.warning(f"User {current_user.get_id()} tried to access a revoked session.")
                 passed = False
 
@@ -319,6 +319,9 @@ def before_request():
 
 
 def mark_user_access(session_id):
+    if DB.readonly:
+        return
+
     ret = DB.mark_ui_user_access(session_id, datetime.now().astimezone())
     if ret:
         LOGGER.error(f"Couldn't mark the user access: {ret}")

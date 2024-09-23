@@ -65,7 +65,7 @@
         </div>
         <div class="d-flex justify-content-center">
             {% if current_endpoint != "global-config" %}
-                <div {% if current_endpoint != 'new' and service_method != 'ui' %}data-bs-toggle="tooltip" data-bs-placement="top" title="The draft mode can only be toggled on UI created services"{% endif %}>
+                <div {% if current_endpoint != 'new' and service_method != 'ui' %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The draft mode can only be toggled on UI created services"{% endif %}>
                     <button type="button"
                             class="btn btn-sm btn-outline-secondary toggle-draft me-3 {% if current_endpoint != 'new' and service_method != 'ui' %}disabled{% endif %}">
                         <i class="bx bx-sm bx-{% if is_draft == 'yes' %}file-blank{% else %}globe{% endif %}"></i>
@@ -79,9 +79,16 @@
                     </button>
                 </div>
             {% endif %}
-            <div {% if service_method == "autoconf" %}data-bs-toggle="tooltip" data-bs-placement="top" title="The service was created using the autoconf method, therefore the configuration is locked"{% endif %}>
+            <div {% if service_method == "autoconf" or is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{% if is_readonly %}The database is in readonly{% else %}The service was created using the autoconf method{% endif %}
+                 therefore
+                 the
+                 configuration
+                 is
+                 locked
+                 "
+                 {% endif %}>
                 <button type="button"
-                        class="btn btn-sm btn-outline-bw-green save-settings {% if service_method == "autoconf" %}disabled{% endif %}">
+                        class="btn btn-sm btn-outline-bw-green save-settings {% if service_method == "autoconf" or is_readonly %}disabled{% endif %}">
                     <i class="bx bx-save bx-sm"></i>
                     <span class="d-none d-md-inline">&nbsp;Save</span>
                 </button>
@@ -115,7 +122,7 @@
                            rel="noopener"
                            data-bs-toggle="tooltip"
                            data-bs-placement="top"
-                           title="{% if plugin_data['stream'] != 'no' %}Supports{% else %}Doesn't support{% endif %} STREAM mode{% if plugin_data['stream'] == 'partial' %} partially{% endif %}">
+                           data-bs-original-title="{% if plugin_data['stream'] != 'no' %}Supports{% else %}Doesn't support{% endif %} STREAM mode{% if plugin_data['stream'] == 'partial' %} partially{% endif %}">
                             <i class="bx bx-{% if plugin_data['stream'] == 'yes' %}badge-check{% elif plugin_data['stream'] == 'partial' %}message-square-detail{% else %}no-entry{% endif %}"></i>&nbsp;STREAM
                         </a>
                         <a href="{% if plugin_data['type'] == 'core' %}https://docs.bunkerweb.io/latest/settings/?utm_campaign=self&utm_source=ui#{% if plugin == 'general' %}global-settings{% else %}{{ plugin }}{% endif %}{% else %}https://docs.bunkerweb.io/latest/plugins/?utm_campaign=self&utm_source=ui{% endif %}"
@@ -151,8 +158,12 @@
                             {% set setting_method = "autoconf" %}
                             {% set disabled = true %}
                         {% endif %}
+                        {% if is_readonly %}
+                            {% set disabled = true %}
+                            {% set setting_method = "readonly" %}
+                        {% endif %}
                         <div class="col-12 col-sm-6 col-lg-4 pb-3"
-                             {% if disabled %}data-bs-toggle="tooltip" data-bs-placement="top" title="Disabled by {{ setting_method }}"{% endif %}>
+                             {% if disabled %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Disabled by {{ setting_method }}"{% endif %}>
                             <div class="d-flex justify-content-between align-items-center">
                                 <label id="label-setting-{{ plugin }}-{{ setting_data['id'] }}"
                                        for="setting-{{ plugin }}-{{ setting_data['id'] }}"
@@ -164,7 +175,7 @@
                                            class="badge badge-center rounded-pill bg-secondary d-flex align-items-center justify-content-center p-1 me-1"
                                            data-bs-toggle="tooltip"
                                            data-bs-placement="top"
-                                           title="Multisite setting"
+                                           data-bs-original-title="Multisite setting"
                                            target="_blank"
                                            rel="noopener">
                                             <span class="bx bx-server bx-xs"></span>
@@ -174,7 +185,7 @@
                                         <span class="badge badge-center rounded-pill bg-secondary d-flex align-items-center justify-content-center p-1 me-1"
                                               data-bs-toggle="tooltip"
                                               data-bs-placement="top"
-                                              title="From template: {{ setting_template }}">
+                                              data-bs-original-title="From template: {{ setting_template }}">
                                             <span class="bx bx-spreadsheet bx-xs"></span>
                                         </span>
                                     {% endif %}
@@ -182,14 +193,14 @@
                                         <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
                                               data-bs-toggle="tooltip"
                                               data-bs-placement="top"
-                                              title="From global configuration">
+                                              data-bs-original-title="From global configuration">
                                             <span class="bx bx-globe bx-xs"></span>
                                         </span>
                                     {% endif %}
                                     <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
                                           data-bs-toggle="tooltip"
                                           data-bs-placement="top"
-                                          title="{{ setting_data['help'] }}">
+                                          data-bs-original-title="{{ setting_data['help'] }}">
                                         <span class="bx bx-question-mark bx-xs"></span>
                                     </span>
                                 </div>
@@ -235,19 +246,27 @@
                                             </h6>
                                             <div class="d-flex align-items-center">
                                                 {% if setting_suffix == "0" %}
-                                                    <button id="add-multiple-{{ plugin }}-{{ multiple }}"
-                                                            type="button"
-                                                            class="btn btn-xs btn-text-bw-green rounded-pill add-multiple p-0 pe-2">
-                                                        <i class="bx bx-plus-circle bx-sm"></i>&nbsp;ADD
-                                                    </button>
-                                                {% else %}
-                                                    <div>
-                                                        <button id="remove-multiple-{{ plugin }}-{{ multiple }}-{{ setting_suffix }}"
+                                                    <div class="me-1"
+                                                         {% if service_method == "autoconf" or is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{% if is_readonly %}The database is in readonly{% else %}The service was created using the autoconf method{% endif %}
+                                                         therefore
+                                                         multiple
+                                                         settings
+                                                         are
+                                                         locked
+                                                         "
+                                                         {% endif %}>
+                                                        <button id="add-multiple-{{ plugin }}-{{ multiple }}"
                                                                 type="button"
-                                                                class="btn btn-xs btn-text-danger rounded-pill remove-multiple p-0 pe-2">
-                                                            <i class="bx bx-trash bx-sm"></i>&nbsp;REMOVE
+                                                                class="btn btn-xs btn-text-bw-green rounded-pill add-multiple p-0 pe-2{% if service_method == "autoconf" or is_readonly %} disabled{% endif %}">
+                                                            <i class="bx bx-plus-circle bx-sm"></i>&nbsp;ADD
                                                         </button>
                                                     </div>
+                                                {% else %}
+                                                    <button id="remove-multiple-{{ plugin }}-{{ multiple }}-{{ setting_suffix }}"
+                                                            type="button"
+                                                            class="btn btn-xs btn-text-danger rounded-pill remove-multiple p-0 pe-2">
+                                                        <i class="bx bx-trash bx-sm"></i>&nbsp;REMOVE
+                                                    </button>
                                                 {% endif %}
                                                 <button id="show-multiple-{{ plugin }}-{{ multiple }}-{{ setting_suffix }}"
                                                         type="button"
@@ -277,8 +296,12 @@
                                                         {% set setting_method = "autoconf" %}
                                                         {% set disabled = true %}
                                                     {% endif %}
+                                                    {% if is_readonly %}
+                                                        {% set disabled = true %}
+                                                        {% set setting_method = "readonly" %}
+                                                    {% endif %}
                                                     <div class="col-12{% if multiple_settings %} col-md-6{% endif %}{% if settings|length > 2 and not multiple_multiples %} col-lg-4{% endif %} pb-2"
-                                                         {% if disabled %}data-bs-toggle="tooltip" data-bs-placement="top" title="Disabled by {{ setting_method }}"{% endif %}>
+                                                         {% if disabled %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Disabled by {{ setting_method }}"{% endif %}>
                                                         <div class="d-flex justify-content-between align-items-center">
                                                             <label id="label-multiple-setting-{{ plugin }}-{{ setting_data['id'] }}-{{ setting_suffix }}"
                                                                    for="multiple-setting-{{ plugin }}-{{ setting_data['id'] }}-{{ setting_suffix }}"
@@ -292,7 +315,7 @@
                                                                        class="badge badge-center rounded-pill bg-secondary d-flex align-items-center justify-content-center p-1 me-1"
                                                                        data-bs-toggle="tooltip"
                                                                        data-bs-placement="top"
-                                                                       title="Multisite setting"
+                                                                       data-bs-original-title="Multisite setting"
                                                                        target="_blank"
                                                                        rel="noopener">
                                                                         <span class="bx bx-server bx-xs"></span>
@@ -302,7 +325,7 @@
                                                                     <span class="badge badge-center rounded-pill bg-secondary d-flex align-items-center justify-content-center p-1 me-1"
                                                                           data-bs-toggle="tooltip"
                                                                           data-bs-placement="top"
-                                                                          title="From template: {{ setting_template }}">
+                                                                          data-bs-original-title="From template: {{ setting_template }}">
                                                                         <span class="bx bx-spreadsheet bx-xs"></span>
                                                                     </span>
                                                                 {% endif %}
@@ -310,14 +333,14 @@
                                                                     <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
                                                                           data-bs-toggle="tooltip"
                                                                           data-bs-placement="top"
-                                                                          title="From global configuration">
+                                                                          data-bs-original-title="From global configuration">
                                                                         <span class="bx bx-globe bx-xs"></span>
                                                                     </span>
                                                                 {% endif %}
                                                                 <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
                                                                       data-bs-toggle="tooltip"
                                                                       data-bs-placement="top"
-                                                                      title="{{ setting_data['help'] }}">
+                                                                      data-bs-original-title="{{ setting_data['help'] }}">
                                                                     <span class="bx bx-question-mark bx-xs"></span>
                                                                 </span>
                                                             </div>

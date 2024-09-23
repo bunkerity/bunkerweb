@@ -5,7 +5,7 @@
 <div class="position-absolute top-0 end-0 m-3" style="z-index: 1000">
     <div class="d-flex flex-wrap justify-content-center align-items-center">
         <div class="card p-1 me-2"
-             {% if not request.is_secure %}data-bs-toggle="tooltip" data-bs-placement="top" title="The copy feature is only available over HTTPS"{% endif %}>
+             {% if not request.is_secure %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The copy feature is only available over HTTPS"{% endif %}>
             <button type="button"
                     class="btn btn-sm btn-outline-secondary copy-settings{% if not request.is_secure %} disabled{% endif %}">
                 <i class="bx bx-copy-alt bx-xs"></i>
@@ -13,10 +13,17 @@
             </button>
         </div>
         <div class="card p-1"
-             {% if service_method == "autoconf" %} data-bs-toggle="tooltip" data-bs-placement="top" title="The service was created using the autoconf method, therefore the configuration is locked"{% endif %}>
+             {% if service_method == "autoconf" or is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{% if is_readonly %}The database is in readonly{% else %}The service was created using the autoconf method{% endif %}
+             therefore
+             the
+             configuration
+             is
+             locked
+             "
+             {% endif %}>
             <!-- Save button container -->
             <button type="button"
-                    class="btn btn-sm btn-outline-bw-green save-settings {% if service_method == "autoconf" %}disabled{% endif %}">
+                    class="btn btn-sm btn-outline-bw-green save-settings {% if service_method == "autoconf" or is_readonly %}disabled{% endif %}">
                 <i class="bx bx-save bx-xs"></i>
                 <span class="d-none d-md-inline">&nbsp;Save</span>
             </button>
@@ -24,7 +31,9 @@
     </div>
 </div>
 <div class="card bg-primary p-1 d-flex flex-column"
-     {% if service_method == "autoconf" %}data-bs-toggle="tooltip" data-bs-placement="top" title="Disabled by {{ service_method }}"{% endif %}>
+     {% if service_method == "autoconf" or is_readonly %}data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Disabled by {% if is_readonly %}readonly{% else %}{{ service_method }}{% endif %}
+     "
+     {% endif %}>
     {% set config_lines = ["IS_DRAFT=" + config.get('IS_DRAFT', {}).get('value', 'no')] %}
     {% set default_settings = ["IS_DRAFT=no"] %}
     {% for plugin_data in plugins.values() %}
@@ -56,7 +65,7 @@
                   rows="35"
                   id="raw-config"
                   aria-label="Raw configuration"
-                  {% if service_method == "autoconf" %}disabled{% endif %}>{{ raw_config|safe }}</textarea>
+                  {% if service_method == "autoconf" or is_readonly %}readonly{% endif %}>{{ raw_config|safe }}</textarea>
         <label for="raw-config" class="text-white">Raw configuration</label>
     </div>
 </div>

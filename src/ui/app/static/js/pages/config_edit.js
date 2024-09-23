@@ -1,4 +1,5 @@
 $(document).ready(function () {
+  const isReadOnly = $("#is-read-only").val().trim() === "True";
   let selectedService = $("#selected-service").val().trim();
   const originalService = selectedService;
   let selectedType = $("#selected-type").val().trim();
@@ -8,6 +9,9 @@ $(document).ready(function () {
   const initialContent = editorElement.text().trim();
   const editor = ace.edit(editorElement[0]);
   editor.setTheme("ace/theme/cloud9_day"); // cloud9_night when dark mode is supported
+
+  if (isReadOnly && window.location.pathname.endsWith("/new"))
+    window.location.href = window.location.href.split("/new")[0];
 
   const language = editorElement.data("language"); // TODO: Support ModSecurity
   if (language === "NGINX") {
@@ -138,6 +142,10 @@ $(document).ready(function () {
   });
 
   $(".save-config").on("click", function () {
+    if (isReadOnly) {
+      alert("This action is not allowed in read-only mode.");
+      return;
+    }
     const value = editor.getValue().trim();
     if (
       value &&
@@ -226,6 +234,8 @@ $(document).ready(function () {
   changeTypesVisibility();
 
   $(window).on("beforeunload", function (e) {
+    if (isReadOnly) return;
+
     const value = editor.getValue().trim();
     if (
       value &&

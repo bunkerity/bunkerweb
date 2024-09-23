@@ -100,6 +100,7 @@
                 nonce="{{ script_nonce }}"></script>
     </head>
     <body>
+        <input type="hidden" id="is-read-only" value="{{ is_readonly }}" />
         <!-- prettier-ignore -->
         {% if current_endpoint != "loading" %}
             {% include "flash.html" %}

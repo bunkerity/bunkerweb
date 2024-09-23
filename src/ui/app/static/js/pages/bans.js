@@ -2,6 +2,7 @@ $(document).ready(function () {
   var actionLock = false;
   let addBanNumber = 1;
   const banNumber = parseInt($("#bans_number").val());
+  const isReadOnly = $("#is-read-only").val().trim() === "True";
 
   // Utility functions
   function addDays(date, days) {
@@ -253,8 +254,14 @@ $(document).ready(function () {
 
   $.fn.dataTable.ext.buttons.add_ban = {
     text: '<span class="tf-icons bx bx-plus-circle bx-18px me-2"></span>Add<span class="d-none d-md-inline"> ban(s)</span>',
-    className: "btn btn-sm btn-outline-bw-green",
+    className: `btn btn-sm btn-outline-bw-green${
+      isReadOnly ? " disabled" : ""
+    }`,
     action: function (e, dt, node, config) {
+      if (isReadOnly) {
+        alert("This action is not allowed in read-only mode.");
+        return;
+      }
       const ban_modal = $("#modal-ban-ips");
       const modal = new bootstrap.Modal(ban_modal);
       modal.show();
@@ -264,6 +271,10 @@ $(document).ready(function () {
   $.fn.dataTable.ext.buttons.unban_ips = {
     text: '<span class="tf-icons bx bxs-buoy bx-18px me-2"></span>Unban',
     action: function (e, dt, node, config) {
+      if (isReadOnly) {
+        alert("This action is not allowed in read-only mode.");
+        return;
+      }
       if (actionLock) {
         return;
       }
@@ -346,6 +357,14 @@ $(document).ready(function () {
     initComplete: function (settings, json) {
       $("#bans_wrapper .btn-secondary").removeClass("btn-secondary");
       $("#bans_wrapper th").addClass("text-center");
+      if (isReadOnly)
+        $("#bans_wrapper .dt-buttons")
+          .attr(
+            "data-bs-original-title",
+            "The database is in readonly, therefore you cannot add bans.",
+          )
+          .attr("data-bs-placement", "right")
+          .tooltip();
     },
   });
 
@@ -388,6 +407,10 @@ $(document).ready(function () {
   });
 
   $(".unban-ip").on("click", function () {
+    if (isReadOnly) {
+      alert("This action is not allowed in read-only mode.");
+      return;
+    }
     $this = $(this);
     setupUnbanModal([
       { ip: $this.data("ip"), time_remaining: $this.data("time-left") },
@@ -440,6 +463,10 @@ $(document).ready(function () {
   });
 
   $(document).on("click", ".delete-ban", function () {
+    if (isReadOnly) {
+      alert("This action is not allowed in read-only mode.");
+      return;
+    }
     const banContainer = $(this).closest("li");
     if (banContainer.attr("id") === "ban-1") return;
     banContainer.remove();

@@ -91,7 +91,7 @@ def on_starting(server):
                     x += 1
             TOTP_SECRETS = tmp_secrets.copy()
             del tmp_secrets
-            invalid_totp_secrets = True
+            invalid_totp_secrets = x == 1
 
     if not TOTP_SECRETS:
         LOGGER.warning("The TOTP_SECRETS environment variable is missing, generating a random one ...")
@@ -114,14 +114,18 @@ def on_starting(server):
     ret, err = DB.init_ui_tables(BW_VERSION)
 
     if not ret and err:
-        LOGGER.error(f"Exception while checking database tables : {err}")
-        exit(1)
+        if err.startswith("The database is read-only"):
+            LOGGER.warning(err)
+        else:
+            LOGGER.error(f"Exception while checking database tables : {err}")
+            exit(1)
     elif not ret:
         LOGGER.info("Database ui tables didn't change, skipping update ...")
     else:
         LOGGER.info("Database ui tables successfully updated")
 
     if not DB.get_ui_roles(as_dict=True):
+
         ret = DB.create_ui_role("admin", "Admins can create new users, edit and read the data.", ["manage", "write", "read"])
         if ret:
             LOGGER.error(f"Couldn't create the admin role in the database: {ret}")
@@ -210,7 +214,15 @@ def on_starting(server):
         latest_version = latest_release["tag_name"].removeprefix("v")
 
     TMP_DIR.joinpath("ui_data.json").write_text(
-        dumps({"LATEST_VERSION": latest_version, "LATEST_VERSION_LAST_CHECK": datetime.now().astimezone().isoformat(), "TO_FLASH": []}), encoding="utf-8"
+        dumps(
+            {
+                "LATEST_VERSION": latest_version,
+                "LATEST_VERSION_LAST_CHECK": datetime.now().astimezone().isoformat(),
+                "TO_FLASH": [],
+                "READONLY_MODE": DB.readonly,
+            }
+        ),
+        encoding="utf-8",
     )
 
     LOGGER.info("UI is ready")

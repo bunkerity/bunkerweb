@@ -21,6 +21,9 @@ def services_page():
 @services.route("/services/convert", methods=["POST"])
 @login_required
 def services_convert():
+    if DB.readonly:
+        return handle_error("Database is in read-only mode", "services")
+
     verify_data_in_form(
         data={"services": None},
         err_message="Missing services parameter on /services/convert.",
@@ -101,6 +104,9 @@ def services_convert():
 @services.route("/services/delete", methods=["POST"])
 @login_required
 def services_delete():
+    if DB.readonly:
+        return handle_error("Database is in read-only mode", "services")
+
     verify_data_in_form(
         data={"services": None},
         err_message="Missing services parameter on /services/delete.",
@@ -178,6 +184,7 @@ def services_service_page(service: str):
     if request.method == "POST":
         if DB.readonly:
             return handle_error("Database is in read-only mode", "services")
+
         DATA.load_from_file()
 
         # Check variables

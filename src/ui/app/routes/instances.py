@@ -30,6 +30,8 @@ def instances_page():
 @instances.route("/instances/new", methods=["POST"])
 @login_required
 def instances_new():
+    if DB.readonly:
+        return handle_error("Database is in read-only mode", "instances")
     verify_data_in_form(
         data={"hostname": None},
         err_message="Missing instance hostname parameter on /instances/new.",
@@ -102,6 +104,9 @@ def instances_action(action: Literal["ping", "reload", "stop", "delete"]):  # TO
 
         return jsonify({"succeed": succeed, "failed": failed}), 200
     elif action == "delete":
+        if DB.readonly:
+            return handle_error("Database is in read-only mode", "instances")
+
         delete_instances = set()
         non_ui_instances = set()
         for instance in DB.get_instances():

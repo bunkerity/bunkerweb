@@ -44,7 +44,7 @@
                         <td>{{ job }}</td>
                         <td>{{ job_data["plugin_id"] }}</td>
                         <td>
-                            <i class="bx {% if job_data['every'] == 'once' %}bx-check-square{% elif job_data['every'] == 'day' %}bx-calendar-event{% elif job_data['every'] == 'week' %}bx-calendar-week{% else %}bxs-hourglass{% endif %}"></i>&nbsp;{{ job_data["every"] }}
+                            <i class="bx {% if job_data['every'] == 'once' %}bx-revision{% elif job_data['every'] == 'day' %}bx-calendar-event{% elif job_data['every'] == 'week' %}bx-calendar-week{% else %}bxs-hourglass{% endif %}"></i>&nbsp;{{ job_data["every"] }}
                         </td>
                         <td class="text-center">
                             <i class="bx bx-sm bx-{% if job_data['reload'] %}check-circle text-success{% else %}x-circle text-danger{% endif %}"></i>
@@ -60,11 +60,11 @@
                             <div class="d-flex justify-content-center">
                                 <div data-bs-toggle="tooltip"
                                      data-bs-placement="bottom"
-                                     data-bs-original-title="Run the Job">
+                                     data-bs-original-title="{% if is_readonly %}Disabled by readonly{% else %}Run the Job{% endif %}">
                                     <button type="button"
                                             data-job="{{ job }}"
                                             data-plugin="{{ job_data['plugin_id'] }}"
-                                            class="btn btn-primary btn-sm me-1 run-job">
+                                            class="btn btn-primary btn-sm me-1 run-job{% if is_readonly %} disabled{% endif %}">
                                         <i class="bx bx-play bx-xs"></i>&nbsp;Run
                                     </button>
                                 </div>

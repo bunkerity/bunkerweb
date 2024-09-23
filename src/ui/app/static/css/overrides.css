@@ -362,11 +362,14 @@ td.highlight {
 }
 
 .btn-text-bw-green,
+.btn-text-bw-green.disabled,
 .btn-text-bw-green:hover {
   color: var(--bs-bw-green) !important;
+  border: none;
 }
 
 .btn-text-secondary,
+.btn-text-secondary.disabled,
 .btn-text-secondary:hover {
   color: var(--bs-secondary) !important;
 }

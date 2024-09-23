@@ -117,7 +117,8 @@
                             <form method="POST" action="{{ profile_url }}/edit">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                                 <div class="row g-3">
-                                    <div class="col-md-6">
+                                    <div class="col-md-6"
+                                         {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Disabled by readonly"{% endif %}>
                                         <label for="username" class="form-label">Username</label>
                                         <input class="form-control"
                                                type="text"
@@ -126,9 +127,11 @@
                                                value="{{ current_user.get_id() }}"
                                                placeholder="john.doe@example.com"
                                                aria-label="Username"
-                                               required />
+                                               required
+                                               {% if is_readonly %}disabled{% endif %} />
                                     </div>
-                                    <div class="col-md-6">
+                                    <div class="col-md-6"
+                                         {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Disabled by readonly"{% endif %}>
                                         <label for="email" class="form-label">E-mail</label>
                                         <input class="form-control"
                                                type="email"
@@ -136,24 +139,32 @@
                                                name="email"
                                                value="{{ current_user.email or '' }}"
                                                placeholder="john.doe@example.com"
-                                               aria-label="E-mail" />
+                                               aria-label="E-mail"
+                                               {% if is_readonly %}disabled{% endif %} />
                                     </div>
                                     <div class="col-md-12 form-password-toggle">
                                         <label class="form-label" for="password">Current password</label>
-                                        <div class="input-group input-group-merge">
+                                        <div class="input-group input-group-merge"
+                                             {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Disabled by readonly"{% endif %}>
                                             <input type="password"
                                                    id="password"
                                                    class="form-control"
                                                    name="password"
                                                    placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
                                                    aria-describedby="Current password"
-                                                   required />
+                                                   required
+                                                   {% if is_readonly %}disabled{% endif %} />
                                             <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="mt-4 justify-content-center d-flex">
-                                    <button type="submit" class="btn btn-primary me-2">Save Changes</button>
+                                    <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The database is in readonly, therefore the configuration is locked"{% endif %}>
+                                        <button type="submit"
+                                                class="btn btn-primary me-2{% if is_readonly %} disabled{% endif %}">
+                                            Save Changes
+                                        </button>
+                                    </div>
                                     <button type="reset" class="btn btn-outline-secondary">Cancel</button>
                                 </div>
                             </form>
@@ -165,19 +176,16 @@
                     <!-- Theme -->
                     <div class="card">
                         <h5 class="card-header">Change Theme</h5>
-                        <div class="card-body pb-4">
+                        <div class="card-body pb-4"
+                             data-bs-toggle="tooltip"
+                             data-bs-placement="top"
+                             data-bs-html="true"
+                             data-bs-original-title="<i class='bx bx-rocket bx-xs'></i><span>Coming soon</span>">
                             <!-- <form method="POST" action="{{ profile_url }}/edit"> -->
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                             <div class="row g-3">
                                 <div class="col-md-12 form-floating">
-                                    <select class="form-select"
-                                            id="theme"
-                                            name="theme"
-                                            disabled
-                                            data-bs-toggle="tooltip"
-                                            data-bs-placement="top"
-                                            data-bs-html="true"
-                                            data-bs-original-title="<i class='bx bx-rocket bx-xs'></i><span>Coming soon</span>">
+                                    <select class="form-select" id="theme" name="theme" disabled>
                                         <option value="light"
                                                 {% if current_user.theme == "light" %}selected{% endif %}>
                                             Light
@@ -188,7 +196,7 @@
                                 </div>
                             </div>
                             <div class="mt-4 justify-content-center d-flex">
-                                <button type="submit" class="btn btn-primary me-2">Save Changes</button>
+                                <button type="submit" class="btn btn-primary me-2 disabled">Save Changes</button>
                                 <button type="reset" class="btn btn-outline-secondary">Cancel</button>
                             </div>
                             <!-- </form> -->
@@ -210,16 +218,11 @@
                                 <div class="row g-3">
                                     <div class="col-md-12 form-password-toggle">
                                         <label for="new_password" class="form-label">New Password</label>
-                                        <div class="input-group input-group-merge">
-                                            <input class="form-control"
-                                                   type="password"
-                                                   id="new_password"
-                                                   name="new_password"
-                                                   placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
-                                                   aria-label="New Password"
-                                                   autocomplete="off"
-                                                   required
-                                                   pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[ !&quot;#$%&'()*+,./:;<=>?@[\\\]^_`{|}~-]).{8,}$" />
+                                        <div class="input-group input-group-merge"
+                                             {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Disabled by readonly"{% endif %}>
+                                            <input class="form-control" type="password" id="new_password" name="new_password" placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;" aria-label="New Password" autocomplete="off" required pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[ !&quot;#$%&'()*+,./:;<=>?@[\\\]^_`{|}~-]).{8,}$"
+                                            {% if is_readonly %}disabled{% endif %}
+                                            />
                                             <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
                                         </div>
                                         <div class="mt-3">
@@ -245,35 +248,37 @@
                                     </div>
                                     <div class="col-md-12 form-password-toggle">
                                         <label for="new_password_confirm" class="form-label">Confirm Password</label>
-                                        <div class="input-group input-group-merge">
-                                            <input class="form-control"
-                                                   type="password"
-                                                   id="new_password_confirm"
-                                                   name="new_password_confirm"
-                                                   placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
-                                                   aria-label="Confirm Password"
-                                                   autocomplete="off"
-                                                   required
-                                                   pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[ !&quot;#$%&'()*+,./:;<=>?@[\\\]^_`{|}~-]).{8,}$" />
+                                        <div class="input-group input-group-merge"
+                                             {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Disabled by readonly"{% endif %}>
+                                            <input class="form-control" type="password" id="new_password_confirm" name="new_password_confirm" placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;" aria-label="Confirm Password" autocomplete="off" required pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[ !&quot;#$%&'()*+,./:;<=>?@[\\\]^_`{|}~-]).{8,}$"
+                                            {% if is_readonly %}disabled{% endif %}
+                                            />
                                             <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
                                         </div>
                                     </div>
                                     <div class="col-md-12 form-password-toggle">
                                         <label class="form-label" for="password">Current password</label>
-                                        <div class="input-group input-group-merge">
+                                        <div class="input-group input-group-merge"
+                                             {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Disabled by readonly"{% endif %}>
                                             <input type="password"
                                                    id="password"
                                                    class="form-control"
                                                    name="password"
                                                    placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
                                                    aria-describedby="Current password"
-                                                   required />
+                                                   required
+                                                   {% if is_readonly %}disabled{% endif %} />
                                             <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="mt-4 justify-content-center d-flex">
-                                    <button type="submit" class="btn btn-primary me-2">Save Changes</button>
+                                    <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The database is in readonly, therefore the configuration is locked"{% endif %}>
+                                        <button type="submit"
+                                                class="btn btn-primary me-2{% if is_readonly %} disabled{% endif %}">
+                                            Save Changes
+                                        </button>
+                                    </div>
                                     <button type="reset" class="btn btn-outline-secondary">Cancel</button>
                                 </div>
                             </form>
@@ -320,7 +325,8 @@
                                                 </span>
                                             </div>
                                         </div>
-                                        <div class="col-md-12">
+                                        <div class="col-md-12"
+                                             {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Disabled by readonly"{% endif %}>
                                             <label for="2fa_code" class="form-label text-start d-block">2FA Code</label>
                                             <div class="input-group">
                                                 <input class="form-control"
@@ -329,25 +335,33 @@
                                                        name="totp_token"
                                                        placeholder="Enter code"
                                                        aria-label="2FA Code"
-                                                       required />
+                                                       required
+                                                       {% if is_readonly %}disabled{% endif %} />
                                             </div>
                                         </div>
                                         <div class="col-md-12 form-password-toggle">
                                             <label class="form-label" for="password">Current password</label>
-                                            <div class="input-group input-group-merge">
+                                            <div class="input-group input-group-merge"
+                                                 {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Disabled by readonly"{% endif %}>
                                                 <input type="password"
                                                        id="password"
                                                        class="form-control"
                                                        name="password"
                                                        placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
                                                        aria-describedby="Current password"
-                                                       required />
+                                                       required
+                                                       {% if is_readonly %}disabled{% endif %} />
                                                 <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="mt-4 justify-content-center d-flex">
-                                        <button type="submit" class="btn btn-primary">Enable TOTP</button>
+                                        <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The database is in readonly, therefore the configuration is locked"{% endif %}>
+                                            <button type="submit"
+                                                    class="btn btn-primary{% if is_readonly %} disabled{% endif %}">
+                                                Enable TOTP
+                                            </button>
+                                        </div>
                                     </div>
                                 </form>
                                 <!-- /Enable 2FA -->
@@ -361,32 +375,41 @@
                                         </div>
                                         <div class="col-md-12">
                                             <label for="totp_token" class="form-label text-start d-block">2FA Code or Recovery Code</label>
-                                            <div class="input-group">
+                                            <div class="input-group"
+                                                 {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Disabled by readonly"{% endif %}>
                                                 <input class="form-control"
                                                        type="text"
                                                        id="totp_token"
                                                        name="totp_token"
                                                        placeholder="Enter code"
                                                        aria-label="2FA Code or Recovery Code"
-                                                       required />
+                                                       required
+                                                       {% if is_readonly %}disabled{% endif %} />
                                             </div>
                                         </div>
                                         <div class="col-md-12 form-password-toggle">
                                             <label class="form-label" for="password">Current password</label>
-                                            <div class="input-group input-group-merge">
+                                            <div class="input-group input-group-merge"
+                                                 {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Disabled by readonly"{% endif %}>
                                                 <input type="password"
                                                        id="password"
                                                        class="form-control"
                                                        name="password"
                                                        placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
                                                        aria-describedby="Current password"
-                                                       required />
+                                                       required
+                                                       {% if is_readonly %}disabled{% endif %} />
                                                 <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="mt-4 justify-content-center d-flex">
-                                        <button type="submit" class="btn btn-primary">Disable TOTP</button>
+                                        <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The database is in readonly, therefore the configuration is locked"{% endif %}>
+                                            <button type="submit"
+                                                    class="btn btn-primary{% if is_readonly %} disabled{% endif %}">
+                                                Disable TOTP
+                                            </button>
+                                        </div>
                                     </div>
                                 </form>
                                 <!-- /Disable 2FA -->
@@ -408,7 +431,8 @@
                                       autocomplete="off">
                                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                                     <div class="row g-3">
-                                        <div class="col-md-12 form-password-toggle">
+                                        <div class="col-md-12 form-password-toggle"
+                                             {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Disabled by readonly"{% endif %}>
                                             <label class="form-label" for="password">Current password</label>
                                             <div class="input-group input-group-merge">
                                                 <input type="password"
@@ -417,13 +441,19 @@
                                                        name="password"
                                                        placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
                                                        aria-describedby="Current password"
-                                                       required />
+                                                       required
+                                                       {% if is_readonly %}disabled{% endif %} />
                                                 <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="mt-4 justify-content-center d-flex">
-                                        <button type="submit" class="btn btn-primary">Refresh Recovery Codes</button>
+                                        <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The database is in readonly, therefore the configuration is locked"{% endif %}>
+                                            <button type="submit"
+                                                    class="btn btn-primary{% if is_readonly %} disabled{% endif %}">
+                                                Refresh Recovery Codes
+                                            </button>
+                                        </div>
                                     </div>
                                 </form>
                             </div>
@@ -444,20 +474,27 @@
                                 <div class="row g-3">
                                     <div class="col-md-12 form-password-toggle">
                                         <label class="form-label" for="password">Current password</label>
-                                        <div class="input-group input-group-merge">
+                                        <div class="input-group input-group-merge"
+                                             {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Disabled by readonly"{% endif %}>
                                             <input type="password"
                                                    id="password"
                                                    class="form-control"
                                                    name="password"
                                                    placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
                                                    aria-describedby="Current password"
-                                                   required />
+                                                   required
+                                                   {% if is_readonly %}disabled{% endif %} />
                                             <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="mt-4 d-flex justify-content-center">
-                                    <button type="submit" class="btn btn-danger">Wipe other sessions</button>
+                                    <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The database is in readonly, therefore the configuration is locked"{% endif %}>
+                                        <button type="submit"
+                                                class="btn btn-danger{% if is_readonly %} disabled{% endif %}">
+                                            Wipe other sessions
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>

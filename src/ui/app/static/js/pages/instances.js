@@ -2,6 +2,7 @@ $(document).ready(function () {
   var toastNum = 0;
   var actionLock = false;
   const instanceNumber = parseInt($("#instances_number").val());
+  const isReadOnly = $("#is-read-only").val().trim() === "True";
 
   const pingInstances = (instances) => {
     setTimeout(() => {
@@ -59,6 +60,54 @@ $(document).ready(function () {
         $("#loadingModal").modal("hide");
       },
     });
+  };
+
+  const setupDeletionModal = (instances) => {
+    $("#selected-instances-input").val(instances.join(","));
+
+    const list = $(
+      `<ul class="list-group list-group-horizontal d-flex w-100">
+        <li class="list-group-item align-items-center text-center bg-secondary text-white" style="flex: 1 0;">
+          <div class="ms-2 me-auto">
+            <div class="fw-bold">Hostname</div>
+          </div>
+        </li>
+        <li class="list-group-item align-items-center text-center bg-secondary text-white" style="flex: 1 0;">
+          <div class="fw-bold">Health</div>
+        </li>
+        </ul>`,
+    );
+    $("#selected-instances").append(list);
+
+    const delete_modal = $("#modal-delete-instances");
+    instances.forEach((instance) => {
+      const list = $(
+        `<ul class="list-group list-group-horizontal d-flex w-100"></ul>`,
+      );
+
+      // Create the list item using template literals
+      const listItem =
+        $(`<li class="list-group-item align-items-center" style="flex: 1 0;">
+  <div class="ms-2 me-auto">
+    <div class="fw-bold">${instance}</div>
+  </div>
+</li>`);
+      list.append(listItem);
+
+      // Clone the status element and append it to the list item
+      const statusClone = $("#status-" + instance).clone();
+      const statusListItem = $(
+        `<li class="list-group-item d-flex align-items-center justify-content-center" style="flex: 1 0;"></li>`,
+      );
+      statusListItem.append(statusClone.removeClass("highlight"));
+      list.append(statusListItem);
+
+      // Append the list item to the list
+      $("#selected-instances").append(list);
+    });
+
+    const modal = new bootstrap.Modal(delete_modal);
+    modal.show();
   };
 
   const execForm = (instances, action) => {
@@ -214,8 +263,14 @@ $(document).ready(function () {
 
   $.fn.dataTable.ext.buttons.create_instance = {
     text: '<span class="tf-icons bx bx-plus-circle bx-18px me-2"></span>Create<span class="d-none d-md-inline"> new instance</span>',
-    className: "btn btn-sm btn-outline-bw-green",
+    className: `btn btn-sm btn-outline-bw-green${
+      isReadOnly ? " disabled" : ""
+    }`,
     action: function (e, dt, node, config) {
+      if (isReadOnly) {
+        alert("This action is not allowed in read-only mode.");
+        return;
+      }
       const modal = new bootstrap.Modal($("#modal-create-instance"));
       modal.show();
 
@@ -273,6 +328,10 @@ $(document).ready(function () {
   $.fn.dataTable.ext.buttons.delete_instances = {
     text: '<span class="tf-icons bx bx-trash bx-18px me-2"></span>Delete',
     action: function (e, dt, node, config) {
+      if (isReadOnly) {
+        alert("This action is not allowed in read-only mode.");
+        return;
+      }
       if (actionLock) {
         return;
       }
@@ -285,51 +344,7 @@ $(document).ready(function () {
         return;
       }
 
-      $("#selected-instances-input").val(instances.join(","));
-
-      const list = $(
-        `<ul class="list-group list-group-horizontal d-flex w-100">
-        <li class="list-group-item align-items-center text-center bg-secondary text-white" style="flex: 1 0;">
-          <div class="ms-2 me-auto">
-            <div class="fw-bold">Hostname</div>
-          </div>
-        </li>
-        <li class="list-group-item align-items-center text-center bg-secondary text-white" style="flex: 1 0;">
-          <div class="fw-bold">Health</div>
-        </li>
-        </ul>`,
-      );
-      $("#selected-instances").append(list);
-
-      const delete_modal = $("#modal-delete-instances");
-      instances.forEach((instance) => {
-        const list = $(
-          `<ul class="list-group list-group-horizontal d-flex w-100"></ul>`,
-        );
-
-        // Create the list item using template literals
-        const listItem =
-          $(`<li class="list-group-item align-items-center" style="flex: 1 0;">
-  <div class="ms-2 me-auto">
-    <div class="fw-bold">${instance}</div>
-  </div>
-</li>`);
-        list.append(listItem);
-
-        // Clone the status element and append it to the list item
-        const statusClone = $("#status-" + instance).clone();
-        const statusListItem = $(
-          `<li class="list-group-item d-flex align-items-center justify-content-center" style="flex: 1 0;"></li>`,
-        );
-        statusListItem.append(statusClone.removeClass("highlight"));
-        list.append(statusListItem);
-
-        // Append the list item to the list
-        $("#selected-instances").append(list);
-      });
-
-      const modal = new bootstrap.Modal(delete_modal);
-      modal.show();
+      setupDeletionModal(instances);
 
       actionLock = false;
     },
@@ -403,6 +418,14 @@ $(document).ready(function () {
     initComplete: function (settings, json) {
       $("#instances_wrapper .btn-secondary").removeClass("btn-secondary");
       $("#instances_wrapper th").addClass("text-center");
+      if (isReadOnly)
+        $("#instances_wrapper .dt-buttons")
+          .attr(
+            "data-bs-original-title",
+            "The database is in readonly, therefore you cannot create new instances.",
+          )
+          .attr("data-bs-placement", "right")
+          .tooltip();
     },
   });
 
@@ -458,5 +481,14 @@ $(document).ready(function () {
     const instance = $(this).data("instance");
     const action = $(this).hasClass("reload-instance") ? "reload" : "stop";
     execForm([instance], action);
+  });
+
+  $(".delete-instance").on("click", function () {
+    if (isReadOnly) {
+      alert("This action is not allowed in read-only mode.");
+      return;
+    }
+    const instance = $(this).data("instance");
+    setupDeletionModal([instance]);
   });
 });

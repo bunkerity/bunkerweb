@@ -2,6 +2,10 @@ $(document).ready(() => {
   var toastNum = 0;
   let currentPlugin = "general";
   let currentStep = 1;
+  const isReadOnly = $("#is-read-only").val().trim() === "True";
+
+  if (isReadOnly && window.location.pathname.endsWith("/new"))
+    window.location.href = window.location.href.split("/new")[0];
 
   const $templateInput = $("#used-template");
   let usedTemplate = "advanced";
@@ -761,6 +765,11 @@ $(document).ready(() => {
   });
 
   $(".save-settings").on("click", function () {
+    if (isReadOnly) {
+      alert("This action is not allowed in read-only mode.");
+      return;
+    }
+
     const form = getFormFromSettings($(this));
     if (currentMode === "easy") {
       const currentStepId = `navs-steps-${currentTemplate}-${currentStep}`;
@@ -1064,6 +1073,11 @@ $(document).ready(() => {
       editor.session.setMode("ace/mode/text"); // Default mode if language is unrecognized
     }
 
+    const method = $(this).data("method");
+    if (method !== "ui") {
+      editor.setReadOnly(true);
+    }
+
     // Set the editor's initial content
     editor.setValue(initialContent, -1); // The second parameter moves the cursor to the start
 
@@ -1079,6 +1093,8 @@ $(document).ready(() => {
   });
 
   $(window).on("beforeunload", function (e) {
+    if (isReadOnly) return;
+
     const form = getFormFromSettings($(this));
     if (currentMode !== "easy") {
       let minSettings = 4;

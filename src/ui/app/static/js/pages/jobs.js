@@ -1,6 +1,7 @@
 $(document).ready(function () {
   let actionLock = false;
   const jobNumber = parseInt($("#job_number").val());
+  const isReadOnly = $("#is-read-only").val().trim() === "True";
 
   const layout = {
     topStart: {},
@@ -130,6 +131,10 @@ $(document).ready(function () {
   $.fn.dataTable.ext.buttons.run_jobs = {
     text: '<span class="tf-icons bx bx-play bx-18px me-2"></span>Run selected jobs',
     action: function (e, dt, node, config) {
+      if (isReadOnly) {
+        alert("This action is not allowed in read-only mode.");
+        return;
+      }
       if (actionLock) {
         return;
       }
@@ -275,6 +280,10 @@ $(document).ready(function () {
   });
 
   $(".run-job").on("click", function () {
+    if (isReadOnly) {
+      alert("This action is not allowed in read-only mode.");
+      return;
+    }
     const job = {
       name: $(this).data("job"),
       plugin: $(this).data("plugin"),

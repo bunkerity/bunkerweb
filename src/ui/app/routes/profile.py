@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Dict, Generator, Tuple, Union
 from flask import Blueprint, Response, jsonify, redirect, render_template, request, stream_with_context, url_for, session
 from flask_login import current_user, login_required, logout_user
@@ -35,6 +36,8 @@ DEVICES = {
 def get_last_sessions(page: int, per_page: int) -> Tuple[Generator[Dict[str, Union[str, bool]], None, None], int]:
     db_sessions = DB.get_ui_user_sessions(current_user.username, session.get("session_id"))
     total_sessions = len(db_sessions)
+    if "session_id" not in session:
+        total_sessions += 1
 
     if total_sessions <= per_page:
         per_page = total_sessions
@@ -42,17 +45,26 @@ def get_last_sessions(page: int, per_page: int) -> Tuple[Generator[Dict[str, Uni
     elif total_sessions <= (page - 1) * per_page:
         page = total_sessions // per_page
 
-    def session_generator():
-        for db_session in db_sessions[(page - 1) * per_page : page * per_page]:  # noqa: E203
-            ua_data = parse(db_session.user_agent)
+    def session_generator(page: int, per_page: int):
+        additional_sessions = []
+        if page == 1 and "session_id" not in session and per_page > 1:
+            per_page -= 1
+            additional_sessions.append(session)
+
+        for db_session in additional_sessions + db_sessions[(page - 1) * per_page : page * per_page]:  # noqa: E203
+            ua_data = parse(db_session["user_agent"])
             last_session = {
-                "current": db_session.id == session.get("session_id"),
+                "current": db_session["id"] == session.get("session_id") if "session_id" in session else "id" not in db_session,
                 "browser": ua_data.get_browser(),
                 "os": ua_data.get_os(),
                 "device": ua_data.get_device(),
-                "ip": db_session.ip,
-                "creation_date": db_session.creation_date.astimezone().strftime("%Y-%m-%d %H:%M:%S %Z"),
-                "last_activity": db_session.last_activity.astimezone().strftime("%Y-%m-%d %H:%M:%S %Z"),
+                "ip": db_session["ip"],
+                "creation_date": db_session["creation_date"].astimezone().strftime("%Y-%m-%d %H:%M:%S %Z"),
+                "last_activity": (
+                    db_session["last_activity"].astimezone().strftime("%Y-%m-%d %H:%M:%S %Z")
+                    if "id" in db_session
+                    else datetime.now().astimezone().strftime("%Y-%m-%d %H:%M:%S %Z")
+                ),
             }
 
             for browser, icon in BROWSERS.items():
@@ -69,7 +81,7 @@ def get_last_sessions(page: int, per_page: int) -> Tuple[Generator[Dict[str, Uni
 
             yield last_session
 
-    return session_generator(), total_sessions
+    return session_generator(page, per_page), total_sessions
 
 
 @profile.route("/profile", methods=["GET"])
@@ -295,7 +307,9 @@ def wipe_old_sessions():
     if not current_user.check_password(request.form["password"]):
         return handle_error("The current password is incorrect.", "profile")
 
-    DATA["REVOKED_SESSIONS"] = [db_session.id for db_session in DB.get_ui_user_sessions(current_user.username) if db_session.id != session.get("session_id")]
+    DATA["REVOKED_SESSIONS"] = [
+        db_session["id"] for db_session in DB.get_ui_user_sessions(current_user.username) if db_session["id"] != session.get("session_id")
+    ]
 
     ret = DB.delete_ui_user_old_sessions(current_user.username)
     if ret:
