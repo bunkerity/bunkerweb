@@ -5,8 +5,56 @@
   or the CRS Google Group at
 * https://groups.google.com/a/owasp.org/g/modsecurity-core-rule-set-project
 
-## Nightly builds
-New changelog entries are written to `.changes-pending.md`. They will be moved to the main changelog before a release.
+## Version 4.7.0 - 2024-09-23
+
+### 🆕 New features and detections 🎉
+* feat: added sendgrid.env into restricted files by @azurit in https://github.com/coreruleset/coreruleset/pull/3823
+### 🧰 Other Changes
+* fix: Changed regex (920470) to match multiple whitespaces after `Content-Type` parameters to avoid false-positives by @lostmann-owl-it in https://github.com/coreruleset/coreruleset/pull/3818
+* fix: fp with user-agent containing ; pg (932239 PL2) by @franbuehler in https://github.com/coreruleset/coreruleset/pull/3727
+* fix: update xss detection with onwebkitplaybacktargetavailabilitychanged event by @fzipi in https://github.com/coreruleset/coreruleset/pull/3822
+* feat: refactoring (944110 PL1) by @azurit in https://github.com/coreruleset/coreruleset/pull/3715
+
+## New Contributors
+* @lostmann-owl-it made their first contribution in https://github.com/coreruleset/coreruleset/pull/3818
+
+**Full Changelog**: https://github.com/coreruleset/coreruleset/compare/v4.6.0...v4.7.0
+
+## Version 4.6.0 - 2024-08-27
+
+### ⭐ Important changes
+* fix: prevent using backslash in file names by @fzipi in https://github.com/coreruleset/coreruleset/pull/3799
+* feat: add new rule to catch invalid character in multipart headers by @airween, @theseion, @fzipi in https://github.com/coreruleset/coreruleset/pull/3796
+
+Big thanks tu @luelueking for reporting us these two ☝️ .
+
+### 🧰 Other Changes
+* feat: rule to detect bash tilde expansion by @Xhoenix in https://github.com/coreruleset/coreruleset/pull/3765
+* fix: Update 932270's `ver` by @airween in https://github.com/coreruleset/coreruleset/pull/3786
+* perf: remove unnecessary chain rule and capture (921180 PL3) by @EsadCetiner in https://github.com/coreruleset/coreruleset/pull/3787
+* fix: add pem to restricted file extensions by @EsadCetiner in https://github.com/coreruleset/coreruleset/pull/3789
+* fix(942160): check REQUEST_FILENAME by @mat1010 in https://github.com/coreruleset/coreruleset/pull/3782
+
+## New Contributors
+* @mat1010 made their first contribution in https://github.com/coreruleset/coreruleset/pull/3782
+
+**Full Changelog**: https://github.com/coreruleset/coreruleset/compare/v4.5.0...v4.6.0
+
+## Version 4.5.0 - 2024-07-23
+
+### 🆕 New features and detections 🎉
+* feat: added arithmetic expansion payload by @Xhoenix in https://github.com/coreruleset/coreruleset/pull/3756
+### 🧰 Other Changes
+* fix(security): alias false negative by @Xhoenix in https://github.com/coreruleset/coreruleset/pull/3740
+* feat: add test overrides for nginx by @theseion in https://github.com/coreruleset/coreruleset/pull/3369
+* fix: use proper capture for log output of 932300 by @theseion in https://github.com/coreruleset/coreruleset/pull/3763
+* chore: use lowercase character class for 932320 by @theseion in https://github.com/coreruleset/coreruleset/pull/3772
+* fix: remove nonnecessary variable (932260 PL1) by @dune73 in https://github.com/coreruleset/coreruleset/pull/3773
+
+## New Contributors
+* @aryehb made their first contribution in https://github.com/coreruleset/coreruleset/pull/3755
+
+**Full Changelog**: https://github.com/coreruleset/coreruleset/compare/v4.4.0...v4.5.0
 
 ## Version 4.4.0 - 2024-06-23
 

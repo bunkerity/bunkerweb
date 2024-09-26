@@ -43,13 +43,44 @@ jobs:
         run: |
           git remote add upstream https://github.com/coreruleset/coreruleset
           git fetch --tags upstream
-
+          git fetch upstream main
+          echo ${{ github.base_ref }}
+          if [ -n "${{ github.base_ref }}" ]; then
+            git fetch upstream "${{ github.base_ref }}"
+          fi
 
       - name: "Check CRS formatting"
         run: |
           pip install --upgrade setuptools
           pip install -r ./util/crs-rules-check/requirements.txt
-          ./util/crs-rules-check/rules-check.py --output=github -r crs-setup.conf.example -r rules/*.conf -t util/APPROVED_TAGS
+          # Use the target branch to look up the latest tag, e.g., `v3.3/master`, fall back
+          # to main branch.
+          # The version is either a tag, if the current commit is tagged, or a string of the form
+          # v<major>.<minor>.<patch>-<nr of commits>-g<hash>.
+          # In the former case we simply use that as the version, in the latter we construct
+          # v<major>.<minor + 1>.<patch>-dev.
+          if [ -z "${{ github.base_ref }}" ]; then
+            # e.g., force push
+            version="$(git describe --tags --match "v*.*.*")"
+          else
+            version="$(git describe --tags --match "v*.*.*" "upstream/${{ github.base_ref }}")"
+          fi
+          version="$(cut -dv -f2 <<<"${version}")"
+          echo "Detected version ${version}"
+          if $(grep -q -- "-g" <<<"${version}"); then
+            prefix="$(cut -d. -f1 <<<"${version}")"
+            minor="$(cut -d. -f2 <<<"${version}")"
+            suffix="$(cut -d. -f3 <<<"${version}")"
+            version="${prefix}.$((minor + 1)).${suffix}"
+            version="${version/-*-g*/}-dev"
+          fi
+          #echo "Required version for check: ${version}"
+          #./util/crs-rules-check/rules-check.py \
+          #  --output=github \
+          #  -r crs-setup.conf.example \
+          #  -r rules/*.conf \
+          #  -t util/APPROVED_TAGS \
+          #  "-v ${version}"
 
       - name: "Find rules without test"
         run: |

@@ -365,6 +365,7 @@
   onwebkitanimationend
   onwebkitanimationiteration
   onwebkitanimationstart
+  onwebkitplaybacktargetavailabilitychanged
   onwebkittransitionend
   onwheel
   onzoom

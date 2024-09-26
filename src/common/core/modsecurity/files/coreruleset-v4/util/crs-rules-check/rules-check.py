@@ -786,16 +786,16 @@ def remove_comments(data):
 
 def errmsg(msg):
     if oformat == "github":
-        print("::error %s" % (msg))
+        print("::error::%s" % (msg))
     else:
         print(msg)
 
 def errmsgf(msg):
     if oformat == "github":
         if 'message' in msg and msg['message'].strip() != "":
-            print("::error%sfile={file},line={line},endLine={endLine},title={title}: {message}".format(**msg) % (msg['indent']*" "))
+            print("::error%sfile={file},line={line},endLine={endLine},title={title}:: {message}".format(**msg) % (msg['indent']*" "))
         else:
-            print("::error%sfile={file},line={line},endLine={endLine},title={title}".format(**msg) % (msg['indent']*" "))
+            print("::error%sfile={file},line={line},endLine={endLine},title={title}::".format(**msg) % (msg['indent']*" "))
     else:
         if 'message' in msg and msg['message'].strip() != "":
             print("%sfile={file}, line={line}, endLine={endLine}, title={title}: {message}".format(**msg) % (msg['indent']*" "))
@@ -804,7 +804,7 @@ def errmsgf(msg):
 
 def msg(msg):
     if oformat == "github":
-        print("::debug %s" % (msg))
+        print("::debug::%s" % (msg))
     else:
         print(msg)
 
@@ -850,7 +850,7 @@ if __name__ == "__main__":
         # if no --version/-v was given, get version from git describe --tags output
         crsversion = generate_version_string()
     else:
-        crsversion = args.version
+        crsversion = args.version.strip()
     # if no "OWASP_CRS/" prefix, append it
     if not crsversion.startswith("OWASP_CRS/"):
         crsversion = "OWASP_CRS/" + crsversion
@@ -1100,17 +1100,17 @@ if __name__ == "__main__":
                 errmsgf(a)
                 retval = 1
         ### check for ver action
-        # c.check_ver_action(crsversion)
-        # if len(c.noveract) == 0:
-        #     msg(" No rule without correct ver action.")
-        # else:
-        #     errmsg(" There are one or more rules without ver action.")
-        #     for a in c.noveract:
-        #         a['indent'] = 2
-        #         a['file']   = f
-        #         a['title']  = "ver is missing / incorrect"
-        #         errmsgf(a)
-        #         retval = 1
+        c.check_ver_action(crsversion)
+        if len(c.noveract) == 0:
+            msg(" No rule without correct ver action.")
+        else:
+            errmsg(" There are one or more rules without ver action.")
+            for a in c.noveract:
+                a['indent'] = 2
+                a['file']   = f
+                a['title']  = "ver is missing / incorrect"
+                errmsgf(a)
+                retval = 1
 
     msg("End of checking parsed rules")
     msg("Cumulated report about unused TX variables")

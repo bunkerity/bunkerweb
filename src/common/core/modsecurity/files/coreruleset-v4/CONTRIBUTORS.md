@@ -80,6 +80,7 @@
 - [na1ex](https://github.com/na1ex)
 - [Jose Nazario](https://github.com/paralax)
 - [Scott O'Neil](https://github.com/cPanelScott)
+- [Lucas Ostmann](https://github.com/lostmann-owl-it)
 - [NiceYouKnow](https://github.com/NiceYouKnow)
 - [nobletrout](https://github.com/nobletrout)
 - [Fernando Outeda](https://github.com/fog94)
