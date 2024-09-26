@@ -114,8 +114,11 @@ try:
         "pro_status": "invalid",
         "pro_overlapped": False,
         "pro_services": 0,
+        "non_draft_services": 0,
     }
-    metadata = {}
+    metadata = {
+        "non_draft_services": int(data["service_number"]),
+    }
     error = False
 
     temp_dir = TMP_DIR.joinpath(str(uuid4()))
@@ -159,6 +162,7 @@ try:
     if (
         pro_license_key == db_metadata.get("pro_license", "")
         and metadata.get("is_pro", False) == db_metadata["is_pro"]
+        and (not metadata.get("pro_overlapped", False) or metadata.get("non_draft_services", 0) == db_metadata.get("non_draft_services", 0))
         and db_metadata["last_pro_check"]
         and current_date.replace(hour=0, minute=0, second=0, microsecond=0) == db_metadata["last_pro_check"].replace(hour=0, minute=0, second=0, microsecond=0)
     ):

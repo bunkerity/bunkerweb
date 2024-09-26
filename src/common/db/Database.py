@@ -389,6 +389,7 @@ class Database:
             "pro_expire": None,
             "pro_status": "invalid",
             "pro_services": 0,
+            "non_draft_services": 0,
             "pro_overlapped": False,
             "last_pro_check": None,
             "failover": False,
@@ -2870,7 +2871,7 @@ class Database:
 
                 if page:
                     path_ui = plugin_path.joinpath("ui")
-                    if not path_ui.is_dir():
+                    if path_ui.is_dir():
                         with BytesIO() as plugin_page_content:
                             with tar_open(fileobj=plugin_page_content, mode="w:gz", compresslevel=9) as tar:
                                 tar.add(path_ui, arcname=path_ui.name, recursive=True)
@@ -3042,7 +3043,7 @@ class Database:
 
         return ""
 
-    def delete_plugin(self, plugin_id: str, method: str) -> str:
+    def delete_plugin(self, plugin_id: str, method: str, *, changes: bool = True) -> str:
         """Delete a plugin from the database."""
         with self._db_session() as session:
             plugin = session.query(Plugins).filter_by(id=plugin_id, method=method).first()
@@ -3050,33 +3051,37 @@ class Database:
                 return f"Plugin with id {plugin_id} and method {method} not found"
 
             session.query(Plugins).filter_by(id=plugin_id, method=method).delete()
-            session.query(Settings).filter_by(plugin_id=plugin_id).delete()
-            session.query(Selects).filter(Selects.setting_id.in_(session.query(Settings).filter_by(plugin_id=plugin_id).with_entities(Settings.id))).delete()
-            session.query(Jobs).filter_by(plugin_id=plugin_id).delete()
-            session.query(Jobs_cache).filter_by(plugin_id=plugin_id).delete()
-            session.query(Jobs_runs).filter_by(plugin_id=plugin_id).delete()
+            for db_setting in session.query(Settings).filter_by(plugin_id=plugin_id).all():
+                session.query(Selects).filter_by(setting_id=db_setting.id).delete()
+                session.query(Services_settings).filter_by(setting_id=db_setting.id).delete()
+                session.query(Global_values).filter_by(setting_id=db_setting.id).delete()
+                session.query(Template_settings).filter_by(setting_id=db_setting.id).delete()
+                session.query(Settings).filter_by(id=db_setting.id).delete()
+
+            for db_job in session.query(Jobs).filter_by(plugin_id=plugin_id).all():
+                session.query(Jobs_cache).filter_by(job_name=db_job.name).delete()
+                session.query(Jobs_runs).filter_by(job_name=db_job.name).delete()
+                session.query(Jobs).filter_by(name=db_job.name).delete()
+
             session.query(Plugin_pages).filter_by(plugin_id=plugin_id).delete()
             session.query(Bw_cli_commands).filter_by(plugin_id=plugin_id).delete()
-            session.query(Templates).filter_by(plugin_id=plugin_id).delete()
-            session.query(Template_steps).filter(
-                Template_steps.template_id.in_(session.query(Templates).filter_by(plugin_id=plugin_id).with_entities(Templates.id))
-            ).delete()
-            session.query(Template_settings).filter(
-                Template_settings.template_id.in_(session.query(Templates).filter_by(plugin_id=plugin_id).with_entities(Templates.id))
-            ).delete()
-            session.query(Template_custom_configs).filter(
-                Template_custom_configs.template_id.in_(session.query(Templates).filter_by(plugin_id=plugin_id).with_entities(Templates.id))
-            ).delete()
 
-            with suppress(ProgrammingError, OperationalError):
-                metadata = session.query(Metadata).get(1)
-                if metadata is not None:
-                    if method in ("external", "ui"):
-                        metadata.external_plugins_changed = True
-                        metadata.last_external_plugins_change = datetime.now().astimezone()
-                    elif method == "pro":
-                        metadata.pro_plugins_changed = True
-                        metadata.last_pro_plugins_change = datetime.now().astimezone()
+            for db_template in session.query(Templates).filter_by(plugin_id=plugin_id).all():
+                session.query(Template_steps).filter_by(template_id=db_template.id).delete()
+                session.query(Template_settings).filter_by(template_id=db_template.id).delete()
+                session.query(Template_custom_configs).filter_by(template_id=db_template.id).delete()
+                session.query(Templates).filter_by(id=db_template.id).delete()
+
+            if changes:
+                with suppress(ProgrammingError, OperationalError):
+                    metadata = session.query(Metadata).get(1)
+                    if metadata is not None:
+                        if method in ("external", "ui"):
+                            metadata.external_plugins_changed = True
+                            metadata.last_external_plugins_change = datetime.now().astimezone()
+                        elif method == "pro":
+                            metadata.pro_plugins_changed = True
+                            metadata.last_pro_plugins_change = datetime.now().astimezone()
 
             try:
                 session.commit()
