@@ -229,7 +229,13 @@ def configs_new():
         db_custom_config = DB.get_custom_config(config_type, config_name, service_id=config_service if config_service != "global" else None, with_data=True)
         clone = db_custom_config.get("data", b"").decode("utf-8")
     return render_template(
-        "config_edit.html", config_types=CONFIG_TYPES, config_value=clone, config_service=config_service, type=config_type.upper(), name=config_name
+        "config_edit.html",
+        config_types=CONFIG_TYPES,
+        config_value=clone,
+        config_service=config_service,
+        type=config_type.upper(),
+        name=config_name,
+        services=BW_CONFIG.get_config(global_only=True, methods=False, with_drafts=True, filtered_settings=("SERVER_NAME"))["SERVER_NAME"].split(" "),
     )
 
 
@@ -335,4 +341,5 @@ def configs_edit(service: str, config_type: str, name: str):
         name=db_config["name"],
         config_method=db_config["method"],
         config_template=db_config.get("template"),
+        services=BW_CONFIG.get_config(global_only=True, methods=False, with_drafts=True, filtered_settings=("SERVER_NAME"))["SERVER_NAME"].split(" "),
     )
