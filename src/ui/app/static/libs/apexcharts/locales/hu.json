@@ -38,7 +38,15 @@
       "szombat",
       "vasárnap"
     ],
-    "shortDays": ["H", "K", "Sze", "Cs", "P", "Szo", "V"],
+    "shortDays": [
+      "H",
+      "K",
+      "Sze",
+      "Cs",
+      "P",
+      "Szo",
+      "V"
+    ],
     "toolbar": {
       "exportToSVG": "Exportálás SVG-be",
       "exportToPNG": "Exportálás PNG-be",

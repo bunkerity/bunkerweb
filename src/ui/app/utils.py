@@ -279,3 +279,11 @@ def flash(message: str, category: str = "success", *, save: bool = True) -> None
 
     if save and "flash_messages" in session:
         session["flash_messages"].append((message, category, datetime.now().astimezone().isoformat()))
+
+
+def human_readable_number(value):
+    if value >= 1_000_000:
+        return f"{value/1_000_000:.1f}M"
+    elif value >= 1_000:
+        return f"{value/1_000:.1f}k"
+    return str(value)

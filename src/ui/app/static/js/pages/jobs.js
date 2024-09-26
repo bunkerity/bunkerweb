@@ -191,7 +191,7 @@ $(document).ready(function () {
         },
       },
     ],
-    order: [[1, "asc"]],
+    order: [[2, "asc"]],
     autoFill: false,
     responsive: true,
     select: {
@@ -219,6 +219,9 @@ $(document).ready(function () {
       $("#jobs_wrapper th").addClass("text-center");
     },
   });
+
+  $("#jobs").removeClass("d-none");
+  $("#jobs-waiting").addClass("visually-hidden");
 
   jobs_table.on("mouseenter", "td", function () {
     if (jobs_table.cell(this).index() === undefined) return;
@@ -258,7 +261,7 @@ $(document).ready(function () {
     }
   });
 
-  $(".show-history").on("click", function () {
+  $(document).on("click", ".show-history", function () {
     const historyModal = $("#modal-job-history");
     const job = $(this).data("job");
     const plugin = $(this).data("plugin");
@@ -279,7 +282,7 @@ $(document).ready(function () {
     modal.show();
   });
 
-  $(".run-job").on("click", function () {
+  $(document).on("click", ".run-job", function () {
     if (isReadOnly) {
       alert("This action is not allowed in read-only mode.");
       return;

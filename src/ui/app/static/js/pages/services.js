@@ -1,109 +1,108 @@
-$(document).ready(function () {
-  var toastNum = 0;
-  var actionLock = false;
-  const serviceNumber = parseInt($("#services_number").val());
+$(function () {
+  let toastNum = 0;
+  let actionLock = false;
+  const serviceNumber = parseInt($("#services_number").val(), 10) || 0;
   const isReadOnly = $("#is-read-only").val().trim() === "True";
 
   const setupModal = (services, modal) => {
-    const list = $(
-      `<ul class="list-group list-group-horizontal d-flex w-100">
-      <li class="list-group-item align-items-center text-center bg-secondary text-white" style="flex: 1 0;">
-        <div class="ms-2 me-auto">
-          <div class="fw-bold">Service name</div>
-        </div>
-      </li>
-      <li class="list-group-item align-items-center text-center bg-secondary text-white" style="flex: 1 0;">
-        <div class="fw-bold">Type</div>
-      </li>
-      </ul>`,
-    );
-    modal.append(list);
+    const headerList = $(`
+      <ul class="list-group list-group-horizontal d-flex w-100">
+        <li class="list-group-item align-items-center text-center bg-secondary text-white" style="flex: 1 0;">
+          <div class="ms-2 me-auto">
+            <div class="fw-bold">Service name</div>
+          </div>
+        </li>
+        <li class="list-group-item align-items-center text-center bg-secondary text-white" style="flex: 1 0;">
+          <div class="fw-bold">Type</div>
+        </li>
+      </ul>
+    `);
+    modal.append(headerList);
 
     services.forEach((service) => {
-      const list = $(
-        `<ul class="list-group list-group-horizontal d-flex w-100"></ul>`,
+      const sanitizedService = service.replace(/\./g, "-");
+      const serviceList = $(
+        '<ul class="list-group list-group-horizontal d-flex w-100"></ul>',
       );
 
-      // Create the list item using template literals
-      const listItem =
-        $(`<li class="list-group-item align-items-center" style="flex: 1 0;">
+      const listItem = $(`
+        <li class="list-group-item align-items-center" style="flex: 1 0;">
           <div class="ms-2 me-auto">
-          <div class="fw-bold">${service}</div>
+            <div class="fw-bold">${service}</div>
           </div>
-          </li>`);
-      list.append(listItem);
+        </li>
+      `);
+      serviceList.append(listItem);
 
-      // Clone the type element and append it to the list item
-      const typeClone = $("#type-" + service.replace(/\./g, "-")).clone();
-      const typeListItem = $(
-        `<li class="list-group-item d-flex align-items-center justify-content-center" style="flex: 1 0;"></li>`,
-      );
-      typeListItem.append(typeClone.removeClass("highlight"));
-      list.append(typeListItem);
+      const typeClone = $(`#type-${sanitizedService}`)
+        .clone()
+        .removeClass("highlight");
+      const typeListItem = $(`
+        <li class="list-group-item d-flex align-items-center justify-content-center" style="flex: 1 0;"></li>
+      `);
+      typeListItem.append(typeClone);
+      serviceList.append(typeListItem);
 
-      // Append the list item to the list
-      modal.append(list);
+      modal.append(serviceList);
     });
   };
 
-  const setupConversionModal = (services, convertionType = "draft") => {
+  const setupConversionModal = (services, conversionType = "draft") => {
     $("#selected-services-input-convert").val(services.join(","));
-
     setupModal(services, $("#selected-services-convert"));
 
-    const convert_modal = $("#modal-convert-services");
-    convert_modal
+    const convertModal = $("#modal-convert-services");
+    convertModal
       .find(".alert")
       .text(
-        `Are you sure you want to convert the selected service${"s".repeat(
-          services.length > 1,
-        )} to ${convertionType}?`,
+        `Are you sure you want to convert the selected service${
+          services.length > 1 ? "s" : ""
+        } to ${conversionType}?`,
       );
-    convert_modal
+    convertModal
       .find("button[type=submit]")
-      .text(`Convert to ${convertionType}`);
-    $("#convertion-type").val(convertionType);
-    const modal = new bootstrap.Modal(convert_modal);
-    modal.show();
+      .text(`Convert to ${conversionType}`);
+    $("#convertion-type").val(conversionType);
+
+    const modalInstance = new bootstrap.Modal(convertModal);
+    modalInstance.show();
   };
 
   const setupDeletionModal = (services) => {
     $("#selected-services-input-delete").val(services.join(","));
-
     setupModal(services, $("#selected-services-delete"));
 
-    const convert_modal = $("#modal-delete-services");
-    const modal = new bootstrap.Modal(convert_modal);
-    convert_modal
+    const deleteModal = $("#modal-delete-services");
+    deleteModal
       .find(".alert")
       .text(
-        `Are you sure you want to delete the selected service${"s".repeat(
-          services.length > 1,
-        )}?`,
+        `Are you sure you want to delete the selected service${
+          services.length > 1 ? "s" : ""
+        }?`,
       );
-    modal.show();
+    const modalInstance = new bootstrap.Modal(deleteModal);
+    modalInstance.show();
   };
 
   const layout = {
     topStart: {},
     bottomEnd: {},
+    bottom1: {
+      searchPanes: {
+        viewTotal: true,
+        cascadePanes: true,
+        columns: [2, 3, 4, 5],
+      },
+    },
   };
 
   if (serviceNumber > 10) {
     const menu = [10];
-    if (serviceNumber > 25) {
-      menu.push(25);
-    }
-    if (serviceNumber > 50) {
-      menu.push(50);
-    }
-    if (serviceNumber > 100) {
-      menu.push(100);
-    }
+    [25, 50, 100].forEach((num) => {
+      if (serviceNumber > num) menu.push(num);
+    });
     menu.push({ label: "All", value: -1 });
-    layout.topStart.pageLength = {
-      menu: menu,
-    };
+    layout.topStart.pageLength = { menu };
     layout.bottomEnd.paging = true;
   }
 
@@ -113,9 +112,7 @@ $(document).ready(function () {
       columns: "th:not(:first-child):not(:nth-child(2)):not(:last-child)",
       text: '<span class="tf-icons bx bx-columns bx-18px me-2"></span>Columns',
       className: "btn btn-sm btn-outline-primary",
-      columnText: function (dt, idx, title) {
-        return idx + 1 + ". " + title;
-      },
+      columnText: (dt, idx, title) => `${idx + 1}. ${title}`,
     },
     {
       extend: "colvisRestore",
@@ -130,32 +127,20 @@ $(document).ready(function () {
         {
           extend: "copy",
           text: '<span class="tf-icons bx bx-copy bx-18px me-2"></span>Copy current page',
-          exportOptions: {
-            modifier: {
-              page: "current",
-            },
-          },
+          exportOptions: { modifier: { page: "current" } },
         },
         {
           extend: "csv",
           text: '<span class="tf-icons bx bx-table bx-18px me-2"></span>CSV',
           bom: true,
           filename: "bw_services",
-          exportOptions: {
-            modifier: {
-              search: "none",
-            },
-          },
+          exportOptions: { modifier: { search: "none" } },
         },
         {
           extend: "excel",
           text: '<span class="tf-icons bx bx-table bx-18px me-2"></span>Excel',
           filename: "bw_services",
-          exportOptions: {
-            modifier: {
-              search: "none",
-            },
-          },
+          exportOptions: { modifier: { search: "none" } },
         },
       ],
     },
@@ -191,30 +176,33 @@ $(document).ready(function () {
     }
   });
 
-  $("#modal-delete-services").on("hidden.bs.modal", function () {
-    $("#selected-services-delete").empty();
-    $("#selected-services-input-delete").val("");
-  });
+  $("#modal-delete-services, #modal-convert-services").on(
+    "hidden.bs.modal",
+    function () {
+      $(this)
+        .find("#selected-services-convert, #selected-services-delete")
+        .empty();
+      $(this)
+        .find(
+          "#selected-services-input-convert, #selected-services-input-delete",
+        )
+        .val("");
+    },
+  );
 
-  $("#modal-convert-services").on("hidden.bs.modal", function () {
-    $("#selected-services-convert").empty();
-    $("#selected-services-input-convert").val("");
-  });
-
-  const getSelectedservices = () => {
-    const services = [];
-    $("tr.selected").each(function () {
-      services.push($(this).find("td:eq(1)").find("a").text().trim());
-    });
-    return services;
-  };
+  const getSelectedServices = () =>
+    $("tr.selected")
+      .map(function () {
+        return $(this).find("td:eq(1) a").text().trim();
+      })
+      .get();
 
   $.fn.dataTable.ext.buttons.create_service = {
     text: '<span class="tf-icons bx bx-plus-circle bx-18px me-2"></span>Create<span class="d-none d-md-inline"> new service</span>',
     className: `btn btn-sm btn-outline-bw-green${
       isReadOnly ? " disabled" : ""
     }`,
-    action: function (e, dt, node, config) {
+    action: function () {
       if (isReadOnly) {
         alert("This action is not allowed in read-only mode.");
         return;
@@ -224,110 +212,162 @@ $(document).ready(function () {
   };
 
   $.fn.dataTable.ext.buttons.convert_services = {
-    action: function (e, dt, node, config) {
+    action: function (e, dt, node) {
       if (isReadOnly) {
         alert("This action is not allowed in read-only mode.");
         return;
       }
-      if (actionLock) {
-        return;
-      }
+      if (actionLock) return;
       actionLock = true;
       $(".dt-button-background").click();
-      const convertionType = $(node).text().trim().split(" ")[2];
 
-      const services = getSelectedservices();
+      const conversionType = $(node).text().trim().split(" ")[2];
+      const services = getSelectedServices();
       if (services.length === 0) {
         actionLock = false;
         return;
       }
 
-      const filteredServices = services.filter(function (service) {
-        const serviceType = $(`#type-${service.replace(/\./g, "-")}`);
-        return serviceType.data("value") !== convertionType;
+      const filteredServices = services.filter((service) => {
+        const serviceType = $(`#type-${service.replace(/\./g, "-")}`).data(
+          "value",
+        );
+        return serviceType !== conversionType;
       });
+
       if (filteredServices.length === 0) {
-        const feedbackToast = $("#feedback-toast").clone(); // Clone the feedback toast
-        feedbackToast.attr("id", `feedback-toast-${toastNum++}`); // Corrected to set the ID for the failed toast
-        feedbackToast.removeClass("bg-primary text-white");
-        feedbackToast.addClass("bg-primary text-white");
+        const feedbackToast = $("#feedback-toast")
+          .clone()
+          .attr("id", `feedback-toast-${toastNum++}`)
+          .addClass("bg-primary text-white")
+          .removeClass("d-none");
         feedbackToast.find("span").text("Conversion failed");
         feedbackToast
           .find("div.toast-body")
           .text("The selected services are already in the desired state.");
-        feedbackToast.appendTo("#feedback-toast-container"); // Ensure the toast is appended to the container
-        feedbackToast.toast("show");
+        feedbackToast.appendTo("#feedback-toast-container").toast("show");
         actionLock = false;
         return;
       }
 
-      setupConversionModal(filteredServices, convertionType);
-
+      setupConversionModal(filteredServices, conversionType);
       actionLock = false;
     },
   };
 
   $.fn.dataTable.ext.buttons.delete_services = {
     text: '<span class="tf-icons bx bx-trash bx-18px me-2"></span>Delete',
-    action: function (e, dt, node, config) {
+    action: function () {
       if (isReadOnly) {
         alert("This action is not allowed in read-only mode.");
         return;
       }
-      if (actionLock) {
-        return;
-      }
+      if (actionLock) return;
       actionLock = true;
       $(".dt-button-background").click();
 
-      const services = getSelectedservices();
+      const services = getSelectedServices();
       if (services.length === 0) {
         actionLock = false;
         return;
       }
 
       setupDeletionModal(services);
-
       actionLock = false;
     },
   };
 
   $(".service-creation-date, .service-last-update-date").each(function () {
-    const isoDateStr = $(this).text().trim();
-
-    // Parse the ISO format date string
+    const $this = $(this);
+    const isoDateStr = $this.text().trim();
     const date = new Date(isoDateStr);
-
-    // Check if the date is valid
     if (!isNaN(date)) {
-      // Convert to local date and time string
-      const localDateStr = date.toLocaleString();
-
-      // Update the text content with the local date string
-      $(this).text(localDateStr);
+      $this.text(date.toLocaleString());
     } else {
-      // Handle invalid date
       console.error(`Invalid date string: ${isoDateStr}`);
-      $(this).text("Invalid date");
+      $this.text("Invalid date");
     }
   });
 
   const services_table = new DataTable("#services", {
     columnDefs: [
+      { orderable: false, render: DataTable.render.select(), targets: 0 },
+      { orderable: false, targets: -1 },
       {
-        orderable: false,
-        render: DataTable.render.select(),
-        targets: 0,
-      },
-      {
-        orderable: false,
-        targets: -1,
-      },
-      {
-        targets: "_all", // Target all columns
-        createdCell: function (td, cellData, rowData, row, col) {
-          $(td).addClass("align-items-center"); // Apply 'text-center' class to <td>
+        searchPanes: {
+          show: true,
+          options: [
+            {
+              label: "Online",
+              value: (rowData) => rowData[2].includes("Online"),
+            },
+            {
+              label: "Draft",
+              value: (rowData) => rowData[2].includes("Draft"),
+            },
+          ],
+          combiner: "or",
+          orderable: false,
         },
+        targets: 2,
+      },
+      {
+        searchPanes: {
+          show: true,
+          combiner: "or",
+          orderable: false,
+        },
+        targets: 3,
+      },
+      {
+        searchPanes: {
+          show: true,
+          options: [
+            {
+              label: "Last 24 hours",
+              value: (rowData) => new Date() - new Date(rowData[4]) < 86400000,
+            },
+            {
+              label: "Last 7 days",
+              value: (rowData) => new Date() - new Date(rowData[4]) < 604800000,
+            },
+            {
+              label: "Last 30 days",
+              value: (rowData) =>
+                new Date() - new Date(rowData[4]) < 2592000000,
+            },
+          ],
+          combiner: "or",
+          orderable: false,
+        },
+        targets: 4,
+      },
+      {
+        searchPanes: {
+          show: true,
+          options: [
+            {
+              label: "Last 24 hours",
+              value: (rowData) => new Date() - new Date(rowData[5]) < 86400000,
+            },
+            {
+              label: "Last 7 days",
+              value: (rowData) => new Date() - new Date(rowData[5]) < 604800000,
+            },
+            {
+              label: "Last 30 days",
+              value: (rowData) =>
+                new Date() - new Date(rowData[5]) < 2592000000,
+            },
+          ],
+          combiner: "or",
+          orderable: false,
+        },
+        targets: 5,
+      },
+      {
+        targets: "_all",
+        createdCell: (td) => $(td).addClass("align-items-center"),
       },
     ],
     order: [[5, "desc"]],
@@ -352,70 +392,73 @@ $(document).ready(function () {
           1: "Selected 1 service",
         },
       },
+      searchPanes: {
+        collapse: {
+          0: '<span class="tf-icons bx bx-search bx-18px me-2"></span>Filters',
+          _: '<span class="tf-icons bx bx-search bx-18px me-2"></span>Filters (%d)',
+        },
+      },
     },
-    initComplete: function (settings, json) {
-      $("#services_wrapper .btn-secondary").removeClass("btn-secondary");
-      $("#services_wrapper th").addClass("text-center");
-      if (isReadOnly)
-        $("#services_wrapper .dt-buttons")
+    initComplete: function () {
+      const $wrapper = $("#services_wrapper");
+      $wrapper.find(".btn-secondary").removeClass("btn-secondary");
+      $wrapper.find("th").addClass("text-center");
+      if (isReadOnly) {
+        $wrapper
+          .find(".dt-buttons")
           .attr(
             "data-bs-original-title",
-            "The database is in readonly, therefore you cannot create new services.",
+            "The database is in read-only mode; you cannot create new services.",
           )
           .attr("data-bs-placement", "right")
           .tooltip();
+      }
     },
   });
 
+  $("#services").removeClass("d-none");
+  $("#services-waiting").addClass("visually-hidden");
+
+  let lastRowIdx = null;
+
   services_table.on("mouseenter", "td", function () {
-    if (services_table.cell(this).index() === undefined) return;
-    const rowIdx = services_table.cell(this).index().row;
+    const cellIdx = services_table.cell(this).index();
+    if (!cellIdx) return;
+    const rowIdx = cellIdx.row;
 
-    services_table
-      .cells()
-      .nodes()
-      .each((el) => el.classList.remove("highlight"));
+    if (lastRowIdx !== null && lastRowIdx !== rowIdx) {
+      services_table.row(lastRowIdx).nodes().to$().removeClass("highlight");
+    }
 
-    services_table
-      .cells()
-      .nodes()
-      .each(function (el) {
-        if (services_table.cell(el).index().row === rowIdx)
-          el.classList.add("highlight");
-      });
+    services_table.row(rowIdx).nodes().to$().addClass("highlight");
+    lastRowIdx = rowIdx;
   });
 
   services_table.on("mouseleave", "td", function () {
-    services_table
-      .cells()
-      .nodes()
-      .each((el) => el.classList.remove("highlight"));
+    if (lastRowIdx !== null) {
+      services_table.row(lastRowIdx).nodes().to$().removeClass("highlight");
+      lastRowIdx = null;
+    }
   });
 
   // Event listener for the select-all checkbox
   $("#select-all-rows").on("change", function () {
     const isChecked = $(this).prop("checked");
-
-    if (isChecked) {
-      // Select all rows on the current page
-      services_table.rows({ page: "current" }).select();
-    } else {
-      // Deselect all rows on the current page
-      services_table.rows({ page: "current" }).deselect();
-    }
+    const rows = services_table.rows({ page: "current" });
+    isChecked ? rows.select() : rows.deselect();
   });
 
-  $(".convert-service").on("click", function () {
+  $(document).on("click", ".convert-service", function () {
     if (isReadOnly) {
       alert("This action is not allowed in read-only mode.");
       return;
     }
     const service = $(this).data("service-id");
-    const convertionType = $(this).data("value");
-    setupConversionModal([service], convertionType);
+    const conversionType = $(this).data("value");
+    setupConversionModal([service], conversionType);
   });
 
-  $(".delete-service").on("click", function () {
+  $(document).on("click", ".delete-service", function () {
     if (isReadOnly) {
       alert("This action is not allowed in read-only mode.");
       return;

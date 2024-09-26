@@ -1,8 +1,11 @@
+from collections import defaultdict
+from datetime import datetime, timedelta
+from operator import itemgetter
 from flask import Blueprint, render_template
 from flask_login import login_required
 
 
-from app.dependencies import BW_CONFIG, BW_INSTANCES_UTILS  # , DB
+from app.dependencies import BW_INSTANCES_UTILS, DB
 
 home = Blueprint("home", __name__)
 
@@ -10,71 +13,43 @@ home = Blueprint("home", __name__)
 @home.route("/home")
 @login_required
 def home_page():
-    """
-    It returns the home page
-    :return: The home.html template is being rendered with the following variables:
-        check_version: a boolean indicating whether the local version is the same as the remote version
-        remote_version: the remote version
-        version: the local version
-        instances_number: the number of instances
-        services_number: the number of services
-        posts: a list of posts
-    """
-    # try:
-    #     r = get("https://github.com/bunkerity/bunkerweb/releases/latest", allow_redirects=True, timeout=5)
-    #     r.raise_for_status()
-    # except BaseException:
-    #     r = None
-    # remote_version = None
+    blocked_requests = BW_INSTANCES_UTILS.get_metrics("requests").get("requests", [])
+    request_countries = {}
+    request_ips = {}
+    current_date = datetime.now().astimezone()
+    time_buckets = {(current_date - timedelta(hours=i)).replace(minute=0, second=0, microsecond=0): 0 for i in range(24)}
 
-    # if r and r.status_code == 200:
-    #     remote_version = basename(r.url).strip().replace("v", "")
+    for request in blocked_requests:
+        timestamp = datetime.fromtimestamp(request["date"]).astimezone()
+        bucket = timestamp.replace(minute=0, second=0, microsecond=0)
+        if bucket < current_date - timedelta(hours=24):
+            continue
 
-    config = BW_CONFIG.get_config(with_drafts=True, filtered_settings=("SERVER_NAME",))
-    instances = BW_INSTANCES_UTILS.get_instances()
+        if request["country"] not in request_countries:
+            request_countries[request["country"]] = {"request": 0, "blocked": 0}
+        if request["ip"] not in request_ips:
+            request_ips[request["ip"]] = {"request": 0, "blocked": 0}
 
-    instance_health_count = 0
+        request_countries[request["country"]]["request"] = request_countries[request["country"]]["request"] + 1
+        request_ips[request["ip"]]["request"] += 1
+        if request["status"] in (403, 429, 444):
+            request_countries[request["country"]]["blocked"] = request_countries[request["country"]]["blocked"] + 1
+            request_ips[request["ip"]]["blocked"] += 1
 
-    for instance in instances:
-        if instance.status == "up":
-            instance_health_count += 1
+            if bucket <= current_date:
+                time_buckets[bucket] += 1
 
-    services = 0
-    services_scheduler_count = 0
-    services_ui_count = 0
-    services_autoconf_count = 0
+    errors = BW_INSTANCES_UTILS.get_metrics("errors")
+    request_errors = defaultdict(int)
+    for error, count in errors.items():
+        request_errors[int(error.replace("counter_", ""))] = count
 
-    for service in config["SERVER_NAME"]["value"].split(" "):
-        service_method = config.get(f"{service}_SERVER_NAME", {"method": "scheduler"})["method"]
-
-        if service_method == "scheduler":
-            services_scheduler_count += 1
-        elif service_method == "ui":
-            services_ui_count += 1
-        elif service_method == "autoconf":
-            services_autoconf_count += 1
-        services += 1
-
-    # metadata = DB.get_metadata()
-
-    # data = {
-    #     "check_version": not remote_version or get_version() == remote_version,
-    #     "remote_version": remote_version,
-    #     "version": metadata["version"],
-    #     "instances_number": len(instances),
-    #     "services_number": services,
-    #     "instance_health_count": instance_health_count,
-    #     "services_scheduler_count": services_scheduler_count,
-    #     "services_ui_count": services_ui_count,
-    #     "services_autoconf_count": services_autoconf_count,
-    #     "is_pro_version": metadata["is_pro"],
-    #     "pro_status": metadata["pro_status"],
-    #     "pro_services": metadata["pro_services"],
-    #     "pro_overlapped": metadata["pro_overlapped"],
-    #     "plugins_number": len(BW_CONFIG.get_plugins()),
-    #     "plugins_errors": DB.get_plugins_errors(),
-    # }
-
-    # builder = home_builder(data)
-    # return render_template("home.html", data_server_builder=b64encode(dumps(builder).encode("utf-8")).decode("ascii"))
-    return render_template("home.html")  # TODO
+    return render_template(
+        "home.html",
+        instances=BW_INSTANCES_UTILS.get_instances(),
+        services=DB.get_services(with_drafts=True),
+        request_errors=dict(sorted(request_errors.items(), key=itemgetter(0))),
+        request_countries=dict(sorted(request_countries.items(), key=lambda item: (-item[1]["blocked"], item[0]))),
+        request_ips=dict(sorted(request_ips.items(), key=lambda item: (-item[1]["blocked"], item[0]))),
+        time_buckets={key.isoformat(): value for key, value in time_buckets.items()},
+    )

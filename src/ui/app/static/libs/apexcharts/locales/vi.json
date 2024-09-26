@@ -38,7 +38,15 @@
       "Thứ sáu",
       "Thứ bảy"
     ],
-    "shortDays": ["CN", "T2", "T3", "T4", "T5", "T6", "T7"],
+    "shortDays": [
+      "CN",
+      "T2",
+      "T3",
+      "T4",
+      "T5",
+      "T6",
+      "T7"
+    ],
     "toolbar": {
       "exportToSVG": "Tải xuống SVG",
       "exportToPNG": "Tải xuống PNG",

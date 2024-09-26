@@ -17,13 +17,15 @@
             </div>
         </div>
     </div>
-    <div class="card table-responsive text-nowrap p-4 min-vh-70">
+    <div class="card table-responsive text-nowrap p-4 pb-8 min-vh-70">
         <input type="hidden" id="instances_number" value="{{ instances|length }}" />
         <input type="hidden"
                id="csrf_token"
                name="csrf_token"
                value="{{ csrf_token() }}" />
-        <table id="instances" class="table position-relative w-100">
+        <p id="instances-waiting"
+           class="text-center relative w-full p-2 text-primary rounded-lg fw-bold">Loading instances...</p>
+        <table id="instances" class="table position-relative w-100 d-none">
             <thead>
                 <tr>
                     <th>

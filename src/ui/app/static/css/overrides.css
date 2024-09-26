@@ -675,6 +675,7 @@ a.badge:hover {
 
 table.table.dataTable > tbody > tr.selected a {
   color: #fff;
+  border-color: #fff;
 }
 
 table.table.dataTable > tbody > tr.selected .btn-outline-secondary {
@@ -686,4 +687,58 @@ table.table.dataTable > tbody > tr.selected .btn-outline-secondary:hover {
   color: black !important;
   background-color: #fff !important;
   border-color: #fff !important;
+}
+
+table.table.dataTable > tbody > tr.selected .text-secondary {
+  color: #fff !important;
+}
+
+.border-dashed {
+  border-style: dashed !important;
+}
+
+.text-white-80 {
+  --bs-text-opacity: 1;
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+a.text-white-80:hover {
+  color: rgba(255, 255, 255, 1) !important;
+  text-decoration: underline;
+}
+
+[role="button"].card:hover {
+  color: var(--bs-secondary) !important;
+}
+
+[role="button"].card.text-color-hover-danger:hover {
+  color: var(--bs-danger) !important;
+}
+
+.mt-0_5 {
+  margin-top: 0.125rem !important;
+}
+
+a.text-decoration-underline.link-underline-primary:hover {
+  text-decoration-color: var(--bs-bw-green) !important;
+}
+
+.slide-out {
+  transition: transform 0.7s ease-in-out !important;
+  transform: translateX(-100%) !important;
+}
+
+#banner-text {
+  transition: none;
+  transform: translateX(100%); /* Start off-screen to the right */
+}
+
+#banner-text.slide-in {
+  transition: transform 0.7s ease-in-out;
+  transform: translateX(0);
+}
+
+.light-href:hover {
+  color: var(--bs-primary) !important;
+  text-decoration: underline;
 }

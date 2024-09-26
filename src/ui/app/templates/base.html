@@ -11,6 +11,11 @@
         "title-class": " border-secondary",
         "text-class": " text-secondary fw-bold"
     },
+    "ui": {
+        "icon": "<i class=\"bx bx-cloud-upload bx-xs\"></i>",
+        "title-class": " border-secondary",
+        "text-class": " text-secondary"
+    },
     "pro": {
         "title-class": " border-primary",
         "text-class": " text-primary fw-bold shine"
@@ -76,6 +81,9 @@
             <link rel="stylesheet"
                   href="{{ url_for('static', filename='libs/apexcharts/apexcharts.css') }}"
                   nonce="{{ style_nonce }}" />
+            <link rel="stylesheet"
+                  href="{{ url_for('static', filename='libs/leaflet/leaflet.css') }}"
+                  nonce="{{ style_nonce }}" />
         {% endif %}
         <!-- Page CSS -->
         <!-- Page -->
@@ -88,9 +96,13 @@
                   href="{{ url_for('static', filename='css/pages/loading.css') }}"
                   nonce="{{ style_nonce }}" />
         {% elif current_endpoint == "profile" %}
-            <link rel="stylesheet"
-                  href="{{ url_for('static', filename='css/pages/profile.css') }}"
-                  nonce="{{ style_nonce }}" />
+        <link rel="stylesheet"
+        href="{{ url_for('static', filename='css/pages/profile.css') }}"
+        nonce="{{ style_nonce }}" />
+        {% elif current_endpoint == "home" %}
+        <link rel="stylesheet"
+        href="{{ url_for('static', filename='css/pages/home.css') }}"
+        nonce="{{ style_nonce }}" />
         {% endif %}
         <!-- Helpers  -->
         <script src="{{ url_for('static', filename='js/helpers.js') }}"
@@ -120,6 +132,8 @@
         {% if current_endpoint in ("instances", "services", "configs", "plugins", "cache", "reports", "bans", "jobs") or "plugins" in request.path %}
             <script src="{{ url_for('static', filename='libs/datatables/datatables.min.js') }}"
                     nonce="{{ script_nonce }}"></script>
+            <script src="{{ url_for('static', filename='libs/datatables/plugins/ip-address.js') }}"
+                    nonce="{{ script_nonce }}"></script>
         {% endif %}
         {% if current_endpoint in ("bans") %}
             <script src="{{ url_for('static', filename='libs/flatpickr/flatpickr.min.js') }}"
@@ -137,7 +151,7 @@
         {% if current_endpoint == "home" %}
             <script src="{{ url_for('static', filename='libs/apexcharts/apexcharts.min.js') }}"
                     nonce="{{ script_nonce }}"></script>
-            <script src="{{ url_for('static', filename='js/dashboards-analytics.js') }}"
+            <script src="{{ url_for('static', filename='libs/leaflet/leaflet.min.js') }}"
                     nonce="{{ script_nonce }}"></script>
         {% endif %}
         <!-- Main JS -->
@@ -146,7 +160,7 @@
         {% if current_endpoint != "login" and current_endpoint != "totp" %}
             <script async
                     defer
-                    src="{{ url_for('static', filename='js/sidebar.js') }}"
+                    src="{{ url_for('static', filename='js/utils.js') }}"
                     nonce="{{ script_nonce }}"></script>
         {% endif %}
         {% if current_endpoint == "global-config" or (current_endpoint != "services" and "services" in request.path) %}
@@ -156,7 +170,10 @@
                     nonce="{{ script_nonce }}"></script>
         {% endif %}
         <!-- Page JS -->
-        {% if current_endpoint == "profile" %}
+        {% if current_endpoint == "home" %}
+        <script async defer src="{{ url_for('static', filename='js/pages/home.js') }}"
+                nonce="{{ script_nonce }}"></script>
+        {% elif current_endpoint == "profile" %}
             <script src="{{ url_for('static', filename='js/pages/profile.js') }}"
                     nonce="{{ script_nonce }}"></script>
         {% elif current_endpoint == "instances" %}

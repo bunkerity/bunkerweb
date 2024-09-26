@@ -1,9 +1,11 @@
 {% extends "dashboard.html" %}
 {% block content %}
     <!-- Content -->
-    <div class="card table-responsive text-nowrap p-4 min-vh-70">
+    <div class="card table-responsive text-nowrap p-4 pb-8 min-vh-70">
         <input type="hidden" id="reports_number" value="{{ reports|length }}" />
-        <table id="reports" class="table position-relative w-100">
+        <p id="reports-waiting"
+           class="text-center relative w-full p-2 text-primary rounded-lg fw-bold">Loading reports...</p>
+        <table id="reports" class="table position-relative w-100 d-none">
             <thead>
                 <tr>
                     <th data-bs-toggle="tooltip"
@@ -36,11 +38,16 @@
                 </tr>
             </thead>
             <tbody>
+                {% set ns = namespace(countries=[]) %}
+                {% set base_url = url_for('static', filename='img/flags') %}
                 {% for report in reports %}
+                    {% if report["country"] not in ns.countries %}
+                        {% set ns.countries = ns.countries + [report["country"]] %}
+                    {% endif %}
                     <tr>
                         <td class="report-date">{{ report["date"] }}</td>
                         <td>{{ report["ip"] }}</td>
-                        <td>{{ report["country"] }}</td>
+                        <td><div class="d-flex align-items-center"><img src="{{ base_url }}/{% if report['country'] == "local" %}zz{% else %}{{ report['country']|lower }}{% endif %}.svg" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{% if report['country'] == "local" %}N/A{% else %}{{ report["country"] }}{% endif %}" height="17" />&nbsp;－&nbsp;{% if report['country'] == "local" %}N/A{% else %}{{ report["country"] }}{% endif %}</div></td>
                         <td>{{ report["method"] }}</td>
                         <td>{{ report["url"] }}</td>
                         <td>{{ report["status"] }}</td>
@@ -50,6 +57,7 @@
                     </tr>
                 {% endfor %}
             </tbody>
+            <input type="hidden" id="countries" value="{{ ns.countries|join(',') }}" />
             <span class="position-absolute bottom-0 start-50 translate-middle badge rounded-pill bg-secondary">
                 TZ: <script nonce="{{ script_nonce }}">document.write(Intl.DateTimeFormat().resolvedOptions().timeZone);</script>
             </span>

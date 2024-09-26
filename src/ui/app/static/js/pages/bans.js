@@ -368,6 +368,9 @@ $(document).ready(function () {
     },
   });
 
+  $("#bans").removeClass("d-none");
+  $("#bans-waiting").addClass("visually-hidden");
+
   bans_table.on("mouseenter", "td", function () {
     if (bans_table.cell(this).index() === undefined) return;
     const rowIdx = bans_table.cell(this).index().row;
@@ -406,7 +409,7 @@ $(document).ready(function () {
     }
   });
 
-  $(".unban-ip").on("click", function () {
+  $(document).on("click", ".unban-ip", function () {
     if (isReadOnly) {
       alert("This action is not allowed in read-only mode.");
       return;

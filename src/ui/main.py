@@ -41,7 +41,18 @@ from app.routes.totp import totp
 
 from app.dependencies import BW_CONFIG, DATA, DB
 from app.models.models import AnonymousUser
-from app.utils import TMP_DIR, LOGGER, flash, get_blacklisted_settings, get_filtered_settings, get_latest_stable_release, get_multiples, handle_stop, stop
+from app.utils import (
+    TMP_DIR,
+    LOGGER,
+    flash,
+    get_blacklisted_settings,
+    get_filtered_settings,
+    get_latest_stable_release,
+    get_multiples,
+    handle_stop,
+    human_readable_number,
+    stop,
+)
 
 signal(SIGINT, handle_stop)
 signal(SIGTERM, handle_stop)
@@ -76,6 +87,7 @@ with app.app_context():
 
     app.config["WTF_CSRF_SSL_STRICT"] = False
     app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 86400
+    app.config["MAX_CONTENT_LENGTH"] = 50 * 1024 * 1024  # 50 MB
     app.config["SCRIPT_NONCE"] = ""
 
     app.config["EXECUTOR_MAX_WORKERS"] = 4
@@ -95,13 +107,14 @@ with app.app_context():
     login_manager.anonymous_user = AnonymousUser
 
     def custom_url_for(endpoint, **values):
-        try:
-            if endpoint not in ("static", "index", "loading", "check", "check_reloading") and "_page" not in endpoint:
-                return url_for(f"{endpoint}.{endpoint}_page", **values)
-            return url_for(endpoint, **values)
-        except BuildError as e:
-            LOGGER.debug(f"Couldn't build the URL for {endpoint}: {e}")
-            return "#"
+        if endpoint:
+            try:
+                if endpoint not in ("static", "index", "loading", "check", "check_reloading") and "_page" not in endpoint:
+                    return url_for(f"{endpoint}.{endpoint}_page", **values)
+                return url_for(endpoint, **values)
+            except BuildError as e:
+                LOGGER.debug(f"Couldn't build the URL for {endpoint}: {e}")
+        return "#"
 
     # Declare functions for jinja2
     app.jinja_env.globals.update(
@@ -109,6 +122,7 @@ with app.app_context():
         get_filtered_settings=get_filtered_settings,
         get_blacklisted_settings=get_blacklisted_settings,
         get_plugins_settings=BW_CONFIG.get_plugins_settings,
+        human_readable_number=human_readable_number,
         url_for=custom_url_for,
     )
 
@@ -152,6 +166,10 @@ def inject_variables():
         bw_version=metadata["version"],
         latest_version=DATA.get("LATEST_VERSION", "unknown"),
         is_pro_version=metadata["is_pro"],
+        pro_status=metadata["pro_status"],
+        pro_services=metadata["pro_services"],
+        pro_expire=metadata["pro_expire"].strftime("%d-%m-%Y") if metadata["pro_expire"] else "Unknown",
+        pro_overlapped=metadata["pro_overlapped"],
         plugins=BW_CONFIG.get_plugins(),
         flash_messages=session.get("flash_messages", []),
         is_readonly=DATA.get("READONLY_MODE", False),
@@ -256,7 +274,12 @@ def check_database_state():
                 "LAST_DATABASE_RETRY": DB.last_connection_retry.isoformat() if DB.last_connection_retry else datetime.now().astimezone().isoformat(),
             }
         )
-    elif DB.database_uri and not DATA.get("READONLY_MODE", False) and request.method == "POST" and not ("/totp" in request.path or "/login" in request.path):
+    elif (
+        DB.database_uri
+        and not DATA.get("READONLY_MODE", False)
+        and request.method == "POST"
+        and not ("/totp" in request.path or "/login" in request.path or request.path.startswith("/plugins/upload"))
+    ):
         try:
             DB.test_write()
             DATA["READONLY_MODE"] = False
@@ -284,7 +307,7 @@ def before_request():
 
     app.config["SCRIPT_NONCE"] = token_urlsafe(32)
 
-    if not request.path.startswith(("/css", "/img", "/js", "/fonts", "/libs")):
+    if not request.path.startswith(("/css/", "/img/", "/js/", "/json/", "/fonts/", "/libs/")):
         if datetime.now().astimezone() - datetime.fromisoformat(DATA.get("LATEST_VERSION_LAST_CHECK", "1970-01-01T00:00:00")).astimezone() > timedelta(hours=1):
             DATA["LATEST_VERSION_LAST_CHECK"] = datetime.now().astimezone().isoformat()
             executor.submit(update_latest_stable_release)
@@ -338,11 +361,15 @@ def set_security_headers(response):
         + " default-src 'self' https://www.bunkerweb.io https://assets.bunkerity.com https://bunkerity.us1.list-manage.com https://api.github.com;"
         + f" script-src 'self' 'nonce-{app.config['SCRIPT_NONCE']}';"
         + " style-src 'self' 'unsafe-inline';"
-        + " img-src 'self' data: blob: https://assets.bunkerity.com;"
+        + " img-src 'self' data: blob: https://assets.bunkerity.com https://*.tile.openstreetmap.org;"
         + " font-src 'self' data:;"
         + " base-uri 'self';"
         + " block-all-mixed-content;"
-        + (" connect-src *;" if request.path.startswith(("/check", "/setup")) else "")
+        + (
+            " connect-src *;"
+            if request.path.startswith(("/check", "/setup"))
+            else " connect-src 'self' https://api.github.com/repos/bunkerity/bunkerweb https://www.bunkerweb.io/api/posts/0/2;"
+        )
     )
 
     if request.headers.get("X-Forwarded-Proto") == "https":
@@ -361,7 +388,7 @@ def set_security_headers(response):
     # * Referrer-Policy header to prevent leaking of sensitive data
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
 
-    if not request.path.startswith(("/css", "/img", "/js", "/fonts", "/libs")) and current_user.is_authenticated and "session_id" in session:
+    if not request.path.startswith(("/css/", "/img/", "/js/", "/json/", "/fonts/", "/libs/")) and current_user.is_authenticated and "session_id" in session:
         executor.submit(mark_user_access, session["session_id"])
 
     return response

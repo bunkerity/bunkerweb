@@ -141,6 +141,13 @@ $(document).ready(function () {
   const layout = {
     topStart: {},
     bottomEnd: {},
+    bottom1: {
+      searchPanes: {
+        viewTotal: true,
+        cascadePanes: true,
+        columns: [3, 4, 5, 6, 7],
+      },
+    },
   };
 
   if (instanceNumber > 10) {
@@ -386,6 +393,138 @@ $(document).ready(function () {
         targets: [2, 3],
       },
       {
+        searchPanes: {
+          show: true,
+          combiner: "or",
+          orderable: false,
+        },
+        targets: 3,
+      },
+      {
+        searchPanes: {
+          show: true,
+          options: [
+            {
+              label: "Up",
+              value: function (rowData, rowIdx) {
+                return rowData[4].includes("Up");
+              },
+            },
+            {
+              label: "Down",
+              value: function (rowData, rowIdx) {
+                return rowData[4].includes("Down");
+              },
+            },
+            {
+              label: "Loading",
+              value: function (rowData, rowIdx) {
+                return rowData[4].includes("Loading");
+              },
+            },
+          ],
+          combiner: "or",
+          orderable: false,
+        },
+        targets: 4,
+      },
+      {
+        searchPanes: {
+          show: true,
+          options: [
+            {
+              label: "Static",
+              value: function (rowData, rowIdx) {
+                return rowData[5].includes("Static");
+              },
+            },
+            {
+              label: "Container",
+              value: function (rowData, rowIdx) {
+                return rowData[5].includes("Container");
+              },
+            },
+            {
+              label: "Pod",
+              value: function (rowData, rowIdx) {
+                return rowData[5].includes("Pod");
+              },
+            },
+          ],
+          combiner: "or",
+          orderable: false,
+        },
+        targets: 5,
+      },
+      {
+        searchPanes: {
+          show: true,
+          options: [
+            {
+              label: "Last 24 hours",
+              value: function (rowData, rowIdx) {
+                const date = new Date(rowData[6]);
+                const now = new Date();
+                return now - date < 24 * 60 * 60 * 1000;
+              },
+            },
+            {
+              label: "Last 7 days",
+              value: function (rowData, rowIdx) {
+                const date = new Date(rowData[6]);
+                const now = new Date();
+                return now - date < 7 * 24 * 60 * 60 * 1000;
+              },
+            },
+            {
+              label: "Last 30 days",
+              value: function (rowData, rowIdx) {
+                const date = new Date(rowData[6]);
+                const now = new Date();
+                return now - date < 30 * 24 * 60 * 60 * 1000;
+              },
+            },
+          ],
+          combiner: "or",
+          orderable: false,
+        },
+        targets: 6,
+      },
+      {
+        searchPanes: {
+          show: true,
+          options: [
+            {
+              label: "Last 24 hours",
+              value: function (rowData, rowIdx) {
+                const date = new Date(rowData[7]);
+                const now = new Date();
+                return now - date < 24 * 60 * 60 * 1000;
+              },
+            },
+            {
+              label: "Last 7 days",
+              value: function (rowData, rowIdx) {
+                const date = new Date(rowData[7]);
+                const now = new Date();
+                return now - date < 7 * 24 * 60 * 60 * 1000;
+              },
+            },
+            {
+              label: "Last 30 days",
+              value: function (rowData, rowIdx) {
+                const date = new Date(rowData[7]);
+                const now = new Date();
+                return now - date < 30 * 24 * 60 * 60 * 1000;
+              },
+            },
+          ],
+          combiner: "or",
+          orderable: false,
+        },
+        targets: 7,
+      },
+      {
         targets: "_all", // Target all columns
         createdCell: function (td, cellData, rowData, row, col) {
           $(td).addClass("align-items-center"); // Apply 'text-center' class to <td>
@@ -429,6 +568,9 @@ $(document).ready(function () {
     },
   });
 
+  $("#instances").removeClass("d-none");
+  $("#instances-waiting").addClass("visually-hidden");
+
   instances_table.on("mouseenter", "td", function () {
     if (instances_table.cell(this).index() === undefined) return;
     const rowIdx = instances_table.cell(this).index().row;
@@ -467,7 +609,7 @@ $(document).ready(function () {
     }
   });
 
-  $(".ping-instance").on("click", function () {
+  $(document).on("click", ".ping-instance", function () {
     if (actionLock) {
       return;
     }
@@ -477,13 +619,13 @@ $(document).ready(function () {
     pingInstances([instance]);
   });
 
-  $(".reload-instance, .stop-instance").on("click", function () {
+  $(document).on("click", ".reload-instance, .stop-instance", function () {
     const instance = $(this).data("instance");
     const action = $(this).hasClass("reload-instance") ? "reload" : "stop";
     execForm([instance], action);
   });
 
-  $(".delete-instance").on("click", function () {
+  $(document).on("click", ".delete-instance", function () {
     if (isReadOnly) {
       alert("This action is not allowed in read-only mode.");
       return;

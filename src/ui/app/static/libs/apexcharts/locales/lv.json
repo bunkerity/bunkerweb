@@ -38,7 +38,15 @@
       "piektdiena",
       "sestdiena"
     ],
-    "shortDays": ["Sv", "P", "O", "T", "C", "P", "S"],
+    "shortDays": [
+      "Sv",
+      "P",
+      "O",
+      "T",
+      "C",
+      "P",
+      "S"
+    ],
     "toolbar": {
       "exportToSVG": "Lejuplādēt SVG",
       "exportToPNG": "Lejuplādēt PNG",

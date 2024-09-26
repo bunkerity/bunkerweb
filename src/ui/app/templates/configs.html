@@ -7,7 +7,9 @@
                id="csrf_token"
                name="csrf_token"
                value="{{ csrf_token() }}" />
-        <table id="configs" class="table w-100">
+        <p id="configs-waiting"
+           class="text-center relative w-full p-2 text-primary rounded-lg fw-bold">Loading custom configurations...</p>
+        <table id="configs" class="table w-100 d-none">
             <thead>
                 <tr>
                     <th>
@@ -101,8 +103,8 @@
                                    href="{{ url_for("configs") }}/{{ service_id }}/{{ config['type'] }}/{{ config['name'] }}"
                                    data-bs-toggle="tooltip"
                                    data-bs-placement="bottom"
-                                   data-bs-original-title="{% if is_readonly %}View{% else %}Edit{% endif %} custom config {{ config['name'] }}">
-                                    <i class="bx bx-{% if is_readonly %}show{% else %}edit{% endif %} bx-xs"></i>
+                                   data-bs-original-title="{% if config['method'] != 'ui' or is_readonly %}View{% else %}Edit{% endif %} custom config {{ config['name'] }}">
+                                    <i class="bx bx-{% if config['method'] != 'ui' or is_readonly %}show{% else %}edit{% endif %} bx-xs"></i>
                                 </a>
                                 <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Disabled by readonly"{% endif %}>
                                     <a role="button"

@@ -7,7 +7,9 @@
                id="csrf_token"
                name="csrf_token"
                value="{{ csrf_token() }}" />
-        <table id="jobs" class="table w-100">
+        <p id="jobs-waiting"
+           class="text-center relative w-full p-2 text-primary rounded-lg fw-bold">Loading jobs...</p>
+        <table id="jobs" class="table w-100 d-none">
             <thead>
                 <tr>
                     <th>
@@ -28,7 +30,7 @@
                         data-bs-original-title="The Job's interval">Interval</th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
-                        data-bs-original-title="Does the Job needs a reload?">Reload</th>
+                        data-bs-original-title="Does the Job reloads BunkerWeb?">Reload</th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
                         data-bs-original-title="Does the last Job's execution was successful?">Last run</th>

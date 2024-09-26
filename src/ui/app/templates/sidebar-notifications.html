@@ -50,8 +50,8 @@
                     {% set content = message[0] %}
                     {% set category = message[1] %}
                     {% set datetime = message[2] %}
-                    <div class="col-12 bs-toast toast show {% if category == 'error' %}bg-danger{% elif category == 'warning' %}bg-warning{% else %}bg-primary text-white{% endif %}">
-                        <div class="toast-header">
+                    <div class="col-12 bs-toast toast show border{% if category == 'error' %} border-danger{% elif category == 'warning' %} border-warning{% else %} border-primary{% endif %}">
+                        <div class="toast-header{% if category == 'error' %} text-danger{% elif category == 'warning' %} text-warning{% else %} text-primary{% endif %}">
                             <i class="d-block w-px-20 h-auto rounded me-2 tf-icons bx bx-bell"></i>
                             <span class="fw-medium me-auto">
                                 {% if category != 'message' %}

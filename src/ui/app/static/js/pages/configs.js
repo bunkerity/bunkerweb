@@ -44,7 +44,7 @@ $(document).ready(function () {
       // Clone the type element and append it to the list item
       const typeClone = $(`#type-${id}`).clone();
       const typeListItem = $(
-        `<li class="list-group-item d-flex align-items-center justify-content-center" style="flex: 1 1 0;"></li>`,
+        `<li class="list-group-item d-flex align-items-center" style="flex: 1 1 0;"></li>`,
       );
       typeListItem.append(typeClone.removeClass("highlight"));
       list.append(typeListItem);
@@ -52,7 +52,7 @@ $(document).ready(function () {
       // Clone the service element and append it to the list item
       const serviceClone = $(`#service-${id}`).clone();
       const serviceListItem = $(
-        `<li class="list-group-item d-flex align-items-center justify-content-center" style="flex: 1 1 0;"></li>`,
+        `<li class="list-group-item d-flex align-items-center" style="flex: 1 1 0;"></li>`,
       );
       serviceListItem.append(serviceClone.removeClass("highlight"));
       list.append(serviceListItem);
@@ -82,6 +82,13 @@ $(document).ready(function () {
   const layout = {
     topStart: {},
     bottomEnd: {},
+    bottom1: {
+      searchPanes: {
+        viewTotal: true,
+        cascadePanes: true,
+        columns: [2, 3, 4, 5],
+      },
+    },
   };
 
   if (configNumber > 10) {
@@ -255,6 +262,77 @@ $(document).ready(function () {
         targets: 6,
       },
       {
+        searchPanes: {
+          show: true,
+          options: [
+            {
+              label: "HTTP",
+              value: function (rowData, rowIdx) {
+                return / HTTP$/.test(rowData[2].trim());
+              },
+            },
+            {
+              label: "SERVER_HTTP",
+              value: function (rowData, rowIdx) {
+                return / SERVER_HTTP$/.test(rowData[2].trim());
+              },
+            },
+            {
+              label: "DEFAULT_SERVER_HTTP",
+              value: function (rowData, rowIdx) {
+                return / DEFAULT_SERVER_HTTP$/.test(rowData[2].trim());
+              },
+            },
+            {
+              label: "MODSEC_CRS",
+              value: function (rowData, rowIdx) {
+                return / MODSEC_CRS$/.test(rowData[2].trim());
+              },
+            },
+            {
+              label: "MODSEC",
+              value: function (rowData, rowIdx) {
+                return / MODSEC$/.test(rowData[2].trim());
+              },
+            },
+            {
+              label: "STREAM",
+              value: function (rowData, rowIdx) {
+                return / STREAM$/.test(rowData[2].trim());
+              },
+            },
+            {
+              label: "SERVER_STREAM",
+              value: function (rowData, rowIdx) {
+                return / SERVER_STREAM$/.test(rowData[2].trim());
+              },
+            },
+            {
+              label: "CRS_PLUGINS_BEFORE",
+              value: function (rowData, rowIdx) {
+                return rowData[2].includes("BEFORE");
+              },
+            },
+            {
+              label: "CRS_PLUGINS_AFTER",
+              value: function (rowData, rowIdx) {
+                return rowData[2].includes("AFTER");
+              },
+            },
+          ],
+          combiner: "or",
+        },
+        targets: 2,
+      },
+      {
+        searchPanes: {
+          show: true,
+          combiner: "or",
+          orderable: false,
+        },
+        targets: [3, 4, 5],
+      },
+      {
         targets: "_all", // Target all columns
         createdCell: function (td, cellData, rowData, row, col) {
           $(td).addClass("align-items-center"); // Apply 'text-center' class to <td>
@@ -287,15 +365,19 @@ $(document).ready(function () {
     initComplete: function (settings, json) {
       $("#configs_wrapper .btn-secondary").removeClass("btn-secondary");
       $("#configs_wrapper th").addClass("text-center");
-      $("#configs_wrapper .dt-buttons")
-        .attr(
-          "data-bs-original-title",
-          "The database is in readonly, therefore you cannot create new custom configurations.",
-        )
-        .attr("data-bs-placement", "right")
-        .tooltip();
+      if (isReadOnly)
+        $("#configs_wrapper .dt-buttons")
+          .attr(
+            "data-bs-original-title",
+            "The database is in readonly, therefore you cannot create new custom configurations.",
+          )
+          .attr("data-bs-placement", "right")
+          .tooltip();
     },
   });
+
+  $("#configs").removeClass("d-none");
+  $("#configs-waiting").addClass("visually-hidden");
 
   configs_table.on("mouseenter", "td", function () {
     if (configs_table.cell(this).index() === undefined) return;
@@ -335,7 +417,7 @@ $(document).ready(function () {
     }
   });
 
-  $(".delete-config").on("click", function () {
+  $(document).on("click", ".delete-config", function () {
     if (isReadOnly) {
       alert("This action is not allowed in read-only mode.");
       return;

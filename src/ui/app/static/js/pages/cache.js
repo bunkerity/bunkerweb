@@ -4,6 +4,13 @@ $(document).ready(function () {
   const layout = {
     topStart: {},
     bottomEnd: {},
+    bottom1: {
+      searchPanes: {
+        viewTotal: true,
+        cascadePanes: true,
+        columns: [2, 3, 4],
+      },
+    },
   };
 
   if (cacheNumber > 10) {
@@ -105,6 +112,47 @@ $(document).ready(function () {
         targets: 5,
       },
       {
+        searchPanes: {
+          show: true,
+          combiner: "or",
+        },
+        targets: [2, 3],
+      },
+      {
+        searchPanes: {
+          show: true,
+          options: [
+            {
+              label: "Last 24 hours",
+              value: function (rowData, rowIdx) {
+                const date = new Date(rowData[4]);
+                const now = new Date();
+                return now - date < 24 * 60 * 60 * 1000;
+              },
+            },
+            {
+              label: "Last 7 days",
+              value: function (rowData, rowIdx) {
+                const date = new Date(rowData[4]);
+                const now = new Date();
+                return now - date < 7 * 24 * 60 * 60 * 1000;
+              },
+            },
+            {
+              label: "Last 30 days",
+              value: function (rowData, rowIdx) {
+                const date = new Date(rowData[4]);
+                const now = new Date();
+                return now - date < 30 * 24 * 60 * 60 * 1000;
+              },
+            },
+          ],
+          combiner: "or",
+          orderable: false,
+        },
+        targets: 4,
+      },
+      {
         targets: "_all", // Target all columns
         createdCell: function (td, cellData, rowData, row, col) {
           $(td).addClass("align-items-center"); // Apply 'text-center' class to <td>
@@ -127,6 +175,9 @@ $(document).ready(function () {
       $("#cache_wrapper th").addClass("text-center");
     },
   });
+
+  $("#cache").removeClass("d-none");
+  $("#cache-waiting").addClass("visually-hidden");
 
   cache_table.on("mouseenter", "td", function () {
     if (cache_table.cell(this).index() === undefined) return;
