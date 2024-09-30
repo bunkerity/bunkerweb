@@ -238,6 +238,7 @@ class Metadata(Base):
     pro_expire = Column(DateTime, nullable=True)
     pro_status = Column(PRO_STATUS_ENUM, default="invalid", nullable=False)
     pro_services = Column(Integer, default=0, nullable=False)
+    non_draft_services = Column(Integer, default=0, nullable=False)
     pro_overlapped = Column(Boolean, default=False, nullable=False)
     last_pro_check = Column(DateTime, nullable=True)
     first_config_saved = Column(Boolean, nullable=False)
