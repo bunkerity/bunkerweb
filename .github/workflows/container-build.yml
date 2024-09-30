@@ -95,7 +95,7 @@ jobs:
       # Build cached image
       - name: Build image
         if: inputs.CACHE == true
-        uses: docker/build-push-action@5176d81f87c23d6fc96624dfdbcd9f3830bbe445 # v6.5.0
+        uses: docker/build-push-action@32945a339266b759abcbdc89316275140b0fc960 # v6.8.0
         with:
           context: .
           file: ${{ inputs.DOCKERFILE }}
@@ -108,7 +108,7 @@ jobs:
       # Build non-cached image
       - name: Build image
         if: inputs.CACHE != true
-        uses: docker/build-push-action@5176d81f87c23d6fc96624dfdbcd9f3830bbe445 # v6.5.0
+        uses: docker/build-push-action@32945a339266b759abcbdc89316275140b0fc960 # v6.8.0
         with:
           context: .
           file: ${{ inputs.DOCKERFILE }}
