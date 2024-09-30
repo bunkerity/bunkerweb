@@ -419,26 +419,29 @@ $(function () {
   $("#services").removeClass("d-none");
   $("#services-waiting").addClass("visually-hidden");
 
-  let lastRowIdx = null;
-
   services_table.on("mouseenter", "td", function () {
-    const cellIdx = services_table.cell(this).index();
-    if (!cellIdx) return;
-    const rowIdx = cellIdx.row;
+    if (services_table.cell(this).index() === undefined) return;
+    const rowIdx = services_table.cell(this).index().row;
 
-    if (lastRowIdx !== null && lastRowIdx !== rowIdx) {
-      services_table.row(lastRowIdx).nodes().to$().removeClass("highlight");
-    }
+    services_table
+      .cells()
+      .nodes()
+      .each((el) => el.classList.remove("highlight"));
 
-    services_table.row(rowIdx).nodes().to$().addClass("highlight");
-    lastRowIdx = rowIdx;
+    services_table
+      .cells()
+      .nodes()
+      .each(function (el) {
+        if (services_table.cell(el).index().row === rowIdx)
+          el.classList.add("highlight");
+      });
   });
 
   services_table.on("mouseleave", "td", function () {
-    if (lastRowIdx !== null) {
-      services_table.row(lastRowIdx).nodes().to$().removeClass("highlight");
-      lastRowIdx = null;
-    }
+    services_table
+      .cells()
+      .nodes()
+      .each((el) => el.classList.remove("highlight"));
   });
 
   // Event listener for the select-all checkbox

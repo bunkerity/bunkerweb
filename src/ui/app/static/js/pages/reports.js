@@ -421,26 +421,29 @@ $(function () {
   $("#reports").removeClass("d-none");
   $("#reports-waiting").addClass("visually-hidden");
 
-  let lastRowIdx = null;
-
   reports_table.on("mouseenter", "td", function () {
-    const cellIdx = reports_table.cell(this).index();
-    if (!cellIdx) return;
-    const rowIdx = cellIdx.row;
+    if (reports_table.cell(this).index() === undefined) return;
+    const rowIdx = reports_table.cell(this).index().row;
 
-    if (lastRowIdx !== null && lastRowIdx !== rowIdx) {
-      reports_table.row(lastRowIdx).nodes().to$().removeClass("highlight");
-    }
+    reports_table
+      .cells()
+      .nodes()
+      .each((el) => el.classList.remove("highlight"));
 
-    reports_table.row(rowIdx).nodes().to$().addClass("highlight");
-    lastRowIdx = rowIdx;
+    reports_table
+      .cells()
+      .nodes()
+      .each(function (el) {
+        if (reports_table.cell(el).index().row === rowIdx)
+          el.classList.add("highlight");
+      });
   });
 
   reports_table.on("mouseleave", "td", function () {
-    if (lastRowIdx !== null) {
-      reports_table.row(lastRowIdx).nodes().to$().removeClass("highlight");
-      lastRowIdx = null;
-    }
+    reports_table
+      .cells()
+      .nodes()
+      .each((el) => el.classList.remove("highlight"));
   });
 
   reports_table.on("draw.dt", updateCountryTooltips);

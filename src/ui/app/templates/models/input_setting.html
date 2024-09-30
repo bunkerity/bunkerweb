@@ -9,9 +9,10 @@
            data-original="{% if current_endpoint != 'new' %}{{ setting_value }}{% else %}{{ setting_default }}{% endif %}"
            data-default="{{ setting_default }}"
            {% if disabled %}disabled{% endif %}
-           {% if required %}required{% endif %}>
+           {% if required %}required{% endif %}
+           {% if input_readonly %}readonly{% endif %}>
     <label for="{{ setting_id_prefix }}{{ setting_data['id'] }}{{ setting_id_suffix }}">{{ setting }}</label>
     {% if setting_data['type'] == 'password' %}
-        <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
+        <span class="input-group-text cursor-pointer rounded-end"><i class="bx bx-hide"></i></span>
     {% endif %}
 </div>

@@ -11,10 +11,13 @@
                                  alt="Logo" />
                         </div>
                         {% if message %}
-                            <div class="layout-main-info">
+                            <div class="layout-main-info mb-1">
                                 <h3>{{ message }}</h3>
                             </div>
                         {% endif %}
+                        <div id="auto-redirect" class="layout-main-info">
+                            <h3>Auto Redirecting in 60 seconds...</h3>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -23,24 +26,57 @@
     <!-- / Content -->
     <script nonce="{{ script_nonce }}">
   const reloading = setInterval(check_reloading, 2000);
+  {% if target_endpoint %}
+  var target_endpoint = "{{ target_endpoint }}";
+  {% else %}
+  var target_endpoint = null;
+  {% endif %}
   check_reloading();
+
+  // Set the full timeout for redirection after 60 seconds
+  const fullTimeout = setTimeout(() => {
+    window.location.replace(
+      target_endpoint ? target_endpoint : ("{{ next }}" + (window.location.hash ? window.location.hash : ""))
+    );
+  }, 60000); // 60 seconds
+
+  // Initialize timeRemaining
+  let timeRemaining = 60;
+
+  // Start the countdown interval
+  const countdownInterval = setInterval(() => {
+    timeRemaining--;
+
+    // Update the countdown display
+    const countdownElement = document.getElementById("auto-redirect");
+    if (countdownElement) {
+      countdownElement.innerHTML = `<h3>Auto Redirecting in ${timeRemaining} seconds...</h3>`;
+    }
+
+    // If time runs out, clear the interval
+    if (timeRemaining <= 0) {
+      clearInterval(countdownInterval);
+    }
+  }, 1000);
 
   async function check_reloading() {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 2000);
     const response = await fetch(
-      `${location.href.replace("/loading", "/check_reloading")}`,
+      target_endpoint ? target_endpoint : `${location.href.replace("/loading", "/check_reloading")}`,
       { signal: controller.signal },
     );
 
     if (response.status === 200) {
-      res = await response.json();
-      if (res.reloading === false) {
-        clearInterval(reloading);
-        window.location.replace(
-          "{{ next }}" + (window.location.hash ? window.location.hash : ""),
-        );
-      }
+      try {
+        const res = await response.json();
+        if (res.message === "ok" || res.reloading === false) {
+          clearInterval(reloading);
+          clearInterval(countdownInterval);
+          clearTimeout(fullTimeout);
+          window.location.replace("{{ next }}" + (window.location.hash ? window.location.hash : ""));
+        }
+      } catch (error) {}
     }
   }
     </script>

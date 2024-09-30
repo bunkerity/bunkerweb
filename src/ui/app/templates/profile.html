@@ -4,7 +4,7 @@
     {% set total_pages = (total_sessions // 3) + (1 if total_sessions % 3 > 0 else 0) %}
     <!-- Content -->
     <div class="d-flex row">
-        <div class="col-md-4">
+        <div>
             <ul class="nav nav-pills flex-column flex-md-row mb-6">
                 <li class="nav-item me-0 me-sm-2" role="presentation">
                     <button type="button"
@@ -122,7 +122,6 @@
                                         <label for="username" class="form-label">Username</label>
                                         <input class="form-control"
                                                type="text"
-                                               id="username"
                                                name="username"
                                                value="{{ current_user.get_id() }}"
                                                placeholder="john.doe@example.com"
@@ -135,7 +134,6 @@
                                         <label for="email" class="form-label">E-mail</label>
                                         <input class="form-control"
                                                type="email"
-                                               id="email"
                                                name="email"
                                                value="{{ current_user.email or '' }}"
                                                placeholder="john.doe@example.com"
@@ -147,7 +145,6 @@
                                         <div class="input-group input-group-merge"
                                              {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Disabled by readonly"{% endif %}>
                                             <input type="password"
-                                                   id="password"
                                                    class="form-control"
                                                    name="password"
                                                    placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
@@ -220,9 +217,16 @@
                                         <label for="new_password" class="form-label">New Password</label>
                                         <div class="input-group input-group-merge"
                                              {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Disabled by readonly"{% endif %}>
-                                            <input class="form-control" type="password" id="new_password" name="new_password" placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;" aria-label="New Password" autocomplete="off" required pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[ !&quot;#$%&'()*+,./:;<=>?@[\\\]^_`{|}~-]).{8,}$"
-                                            {% if is_readonly %}disabled{% endif %}
-                                            />
+                                            <input class="form-control"
+                                                   type="password"
+                                                   id="new_password"
+                                                   name="new_password"
+                                                   placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
+                                                   aria-label="New Password"
+                                                   autocomplete="off"
+                                                   required
+                                                   pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[ -~]).{8,}$"
+                                                   {% if is_readonly %}disabled{% endif %} />
                                             <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
                                         </div>
                                         <div class="mt-3">
@@ -261,7 +265,6 @@
                                         <div class="input-group input-group-merge"
                                              {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Disabled by readonly"{% endif %}>
                                             <input type="password"
-                                                   id="password"
                                                    class="form-control"
                                                    name="password"
                                                    placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
@@ -309,7 +312,6 @@
                                             <label for="secret_token" class="form-label text-start d-block">Secret Token</label>
                                             <div class="input-group input-group-merge">
                                                 <input type="password"
-                                                       id="secret_token"
                                                        name="secret_token"
                                                        class="form-control"
                                                        placeholder="Secret Token"
@@ -317,7 +319,7 @@
                                                        readonly />
                                                 {% if request.is_secure %}
                                                     <span class="input-group-text cursor-pointer copy-to-clipboard">
-                                                        <i class="bx bx-copy-alt copy-to-clipboard"></i>
+                                                        <i class="bx bx-copy-alt"></i>
                                                     </span>
                                                 {% endif %}
                                                 <span class="input-group-text cursor-pointer">
@@ -331,7 +333,6 @@
                                             <div class="input-group">
                                                 <input class="form-control"
                                                        type="text"
-                                                       id="totp_token"
                                                        name="totp_token"
                                                        placeholder="Enter code"
                                                        aria-label="2FA Code"
@@ -344,7 +345,6 @@
                                             <div class="input-group input-group-merge"
                                                  {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Disabled by readonly"{% endif %}>
                                                 <input type="password"
-                                                       id="password"
                                                        class="form-control"
                                                        name="password"
                                                        placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
@@ -379,7 +379,6 @@
                                                  {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Disabled by readonly"{% endif %}>
                                                 <input class="form-control"
                                                        type="text"
-                                                       id="totp_token"
                                                        name="totp_token"
                                                        placeholder="Enter code"
                                                        aria-label="2FA Code or Recovery Code"
@@ -392,7 +391,6 @@
                                             <div class="input-group input-group-merge"
                                                  {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Disabled by readonly"{% endif %}>
                                                 <input type="password"
-                                                       id="password"
                                                        class="form-control"
                                                        name="password"
                                                        placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
@@ -436,7 +434,6 @@
                                             <label class="form-label" for="password">Current password</label>
                                             <div class="input-group input-group-merge">
                                                 <input type="password"
-                                                       id="password"
                                                        class="form-control"
                                                        name="password"
                                                        placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
@@ -477,7 +474,6 @@
                                         <div class="input-group input-group-merge"
                                              {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Disabled by readonly"{% endif %}>
                                             <input type="password"
-                                                   id="password"
                                                    class="form-control"
                                                    name="password"
                                                    placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
@@ -554,8 +550,7 @@
                                             </strong>
                                             &nbsp;
                                             <div class="input-group input-group-sm input-group-merge w-auto">
-                                                <input id="ip"
-                                                       class="form-control"
+                                                <input class="form-control"
                                                        type="password"
                                                        autocomplete="off"
                                                        value="{{ session['ip'] }}"

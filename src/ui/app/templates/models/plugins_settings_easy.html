@@ -87,7 +87,7 @@
             </div>
             <div class="card-body">
                 {% if template_data["steps"] %}
-                    <nav class="p-3 template-steps-container align-items-center mw-100 border rounded-top{{ plugin_types[template_plugin['type']].get('title-class', '') }}"
+                    <nav class="p-3 template-steps-container align-items-center mw-100{{ plugin_types[template_plugin['type']].get('title-class', '') }}"
                          aria-label="breadcrumb">
                         <ol class="breadcrumb nav nav-scroller mb-0 flex-nowrap overflow-hidden{% if loop.index == 1 %} active{% endif %}"
                             role="tablist">
@@ -109,7 +109,7 @@
                             {% endfor %}
                         </ol>
                     </nav>
-                    <div class="tab-content p-3 align-items-center mw-100 border border-top-0 rounded-bottom{{ plugin_types[template_plugin['type']].get('title-class', '') }}">
+                    <div class="tab-content p-3 align-items-center mw-100{{ plugin_types[template_plugin['type']].get('title-class', '') }}">
                         {% for step in template_data["steps"] %}
                             <div id="navs-steps-{{ template }}-{{ loop.index }}"
                                  class="ps-2 pe-2 tab-pane fade{% if loop.index == 1 %} show active{% endif %}"

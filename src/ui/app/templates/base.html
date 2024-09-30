@@ -87,7 +87,7 @@
         {% endif %}
         <!-- Page CSS -->
         <!-- Page -->
-        {% if current_endpoint == "login" or current_endpoint == "totp" %}
+        {% if current_endpoint in ("setup", "login", "totp") %}
             <link rel="stylesheet"
                   href="{{ url_for('static', filename='css/pages/login.css') }}"
                   nonce="{{ style_nonce }}" />
@@ -96,13 +96,13 @@
                   href="{{ url_for('static', filename='css/pages/loading.css') }}"
                   nonce="{{ style_nonce }}" />
         {% elif current_endpoint == "profile" %}
-        <link rel="stylesheet"
-        href="{{ url_for('static', filename='css/pages/profile.css') }}"
-        nonce="{{ style_nonce }}" />
+            <link rel="stylesheet"
+                  href="{{ url_for('static', filename='css/pages/profile.css') }}"
+                  nonce="{{ style_nonce }}" />
         {% elif current_endpoint == "home" %}
-        <link rel="stylesheet"
-        href="{{ url_for('static', filename='css/pages/home.css') }}"
-        nonce="{{ style_nonce }}" />
+            <link rel="stylesheet"
+                  href="{{ url_for('static', filename='css/pages/home.css') }}"
+                  nonce="{{ style_nonce }}" />
         {% endif %}
         <!-- Helpers  -->
         <script src="{{ url_for('static', filename='js/helpers.js') }}"
@@ -157,7 +157,7 @@
         <!-- Main JS -->
         <script src="{{ url_for('static', filename='js/main.js') }}"
                 nonce="{{ script_nonce }}"></script>
-        {% if current_endpoint != "login" and current_endpoint != "totp" %}
+        {% if current_endpoint not in ("setup", "login", "totp") %}
             <script async
                     defer
                     src="{{ url_for('static', filename='js/utils.js') }}"
@@ -170,9 +170,14 @@
                     nonce="{{ script_nonce }}"></script>
         {% endif %}
         <!-- Page JS -->
-        {% if current_endpoint == "home" %}
-        <script async defer src="{{ url_for('static', filename='js/pages/home.js') }}"
-                nonce="{{ script_nonce }}"></script>
+        {% if current_endpoint == "setup" %}
+            <script src="{{ url_for('static', filename='js/pages/setup.js') }}"
+                    nonce="{{ script_nonce }}"></script>
+        {% elif current_endpoint == "home" %}
+            <script async
+                    defer
+                    src="{{ url_for('static', filename='js/pages/home.js') }}"
+                    nonce="{{ script_nonce }}"></script>
         {% elif current_endpoint == "profile" %}
             <script src="{{ url_for('static', filename='js/pages/profile.js') }}"
                     nonce="{{ script_nonce }}"></script>

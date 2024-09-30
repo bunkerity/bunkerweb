@@ -47,7 +47,21 @@
                     <tr>
                         <td class="report-date">{{ report["date"] }}</td>
                         <td>{{ report["ip"] }}</td>
-                        <td><div class="d-flex align-items-center"><img src="{{ base_url }}/{% if report['country'] == "local" %}zz{% else %}{{ report['country']|lower }}{% endif %}.svg" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{% if report['country'] == "local" %}N/A{% else %}{{ report["country"] }}{% endif %}" height="17" />&nbsp;－&nbsp;{% if report['country'] == "local" %}N/A{% else %}{{ report["country"] }}{% endif %}</div></td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <img src="{{ base_url }}/{% if report['country'] == "local" %}zz{% else %}{{ report['country']|lower }}{% endif %}.svg"
+                                     data-bs-toggle="tooltip"
+                                     data-bs-placement="top"
+                                     data-bs-original-title="{% if report['country'] == "local" %}N/A{% else %}{{ report["country"] }}{% endif %}"
+                                     height="17" />
+                                &nbsp;－&nbsp;
+                                {% if report['country'] == "local" %}
+                                    N/A
+                                {% else %}
+                                    {{ report["country"] }}
+                                {% endif %}
+                            </div>
+                        </td>
                         <td>{{ report["method"] }}</td>
                         <td>{{ report["url"] }}</td>
                         <td>{{ report["status"] }}</td>

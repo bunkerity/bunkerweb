@@ -115,14 +115,14 @@
         <div class="col-sm-6 mt-2 mb-2">
             <div class="card p-4 position-relative shadow-sm rounded-3">
                 <div class="card-header p-2">
-                <div class="card-title mb-0 d-flex justify-content-between">
-                    <h5>News :</h5>
-                    <a class="text-decoration-underline link-underline-primary"
-                       href="https://www.bunkerweb.io/blog?utm_campaign=self&amp;utm_source=ui"
-                       target="_blank"
-                       rel="noopener">See more</a>
+                    <div class="card-title mb-0 d-flex justify-content-between">
+                        <h5>News :</h5>
+                        <a class="text-decoration-underline link-underline-primary"
+                           href="https://www.bunkerweb.io/blog?utm_campaign=self&amp;utm_source=ui"
+                           target="_blank"
+                           rel="noopener">See more</a>
+                    </div>
                 </div>
-            </div>
                 <div class="bg-bw-green position-relative w-100 p-2 text-white rounded fw-bold overflow-hidden">
                     <div class="d-flex justify-content-between align-items-center">
                         <div class="flex-grow-1 overflow-hidden me-2">
@@ -144,15 +144,12 @@
             </div>
         </div>
         <div class="col-sm-3 mb-2">
-            <div
-               class="card p-4 position-relative shadow-sm rounded-3 bg-secondary text-white h-100">
+            <div class="card p-4 position-relative shadow-sm rounded-3 bg-secondary text-white h-100">
                 <i class='bx bx-broadcast bx-sm position-absolute top-0 end-0 m-3 text-white'></i>
                 <p class="ps-4 fs-4 mb-2">
                     Total Requests
                     <br />
-                    <span class="fs-3 fw-bold">
-                        {{ human_readable_number(request_errors.values() |sum) }}
-                    </span>
+                    <span class="fs-3 fw-bold">{{ human_readable_number(request_errors.values() |sum) }}</span>
                 </p>
             </div>
         </div>
@@ -163,15 +160,12 @@
             {% endif %}
         {% endfor %}
         <div class="col-sm-3 mb-2">
-            <div
-               class="card p-4 position-relative shadow-sm rounded-3 h-100">
+            <div class="card p-4 position-relative shadow-sm rounded-3 h-100">
                 <i class='bx bx-globe bx-sm position-absolute top-0 end-0 m-3 text-secondary'></i>
                 <p class="ps-4 fs-4 mb-2">
                     Unique Ips
                     <br />
-                    <span class="fs-3 fw-bold">
-                        {{ human_readable_number(request_ips|length) }}
-                    </span>
+                    <span class="fs-3 fw-bold">{{ human_readable_number(request_ips|length) }}</span>
                 </p>
             </div>
         </div>
@@ -185,26 +179,23 @@
                     <br />
                     <span class="fs-3 fw-bold">
                         {% set ns = namespace(blocked_requests=0) %}
-                    {% for status, count in request_errors.items() %}
-                        {% if status in (403, 429, 444) %}
-                            {% set ns.blocked_requests = ns.blocked_requests + count %}
-                        {% endif %}
-                    {% endfor %}
+                        {% for status, count in request_errors.items() %}
+                            {% if status in (403, 429, 444) %}
+                                {% set ns.blocked_requests = ns.blocked_requests + count %}
+                            {% endif %}
+                        {% endfor %}
                         {{ human_readable_number(ns.blocked_requests) }}
                     </span>
                 </p>
             </a>
         </div>
         <div class="col-sm-3 mb-2">
-            <div
-               class="card p-4 position-relative shadow-sm rounded-3 h-100">
+            <div class="card p-4 position-relative shadow-sm rounded-3 h-100">
                 <i class='bx bx-globe bx-sm position-absolute top-0 end-0 m-3 text-danger'></i>
                 <p class="ps-4 fs-4 mb-2">
                     Blocked Unique Ips
                     <br />
-                    <span class="fs-3 fw-bold">
-                        {{ human_readable_number(ips_ns.blocked_ips) }}
-                    </span>
+                    <span class="fs-3 fw-bold">{{ human_readable_number(ips_ns.blocked_ips) }}</span>
                 </p>
             </div>
         </div>

@@ -205,7 +205,11 @@ def on_starting(server):
             LOGGER.error(f"Couldn't create the admin user in the database: {ret}")
             exit(1)
 
-    latest_release = get_latest_stable_release()
+    latest_release = None
+    try:
+        latest_release = get_latest_stable_release()
+    except BaseException as e:
+        LOGGER.error(f"Exception while fetching latest release information: {e}")
 
     if not latest_release:
         LOGGER.error("Failed to fetch latest release information")

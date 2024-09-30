@@ -96,7 +96,7 @@
         </div>
     </div>
 </div>
-<div class="card tab-content m-1 p-2 position-relative">
+<div class="card tab-content p-2 position-relative">
     {% for plugin, plugin_data in plugins.items() %}
         {% set filtered_settings = get_filtered_settings(plugin_data["settings"], current_endpoint == "global-config") %}
         {% if filtered_settings %}

@@ -165,7 +165,7 @@ class InstancesUtils:
     def __init__(self, db):
         self.__db = db
 
-    def get_instances(self) -> list[Instance]:
+    def get_instances(self, status: Optional[Literal["loading", "up", "down"]] = None) -> List[Instance]:
         return [
             Instance(
                 instance["hostname"],
@@ -185,6 +185,7 @@ class InstancesUtils:
                 ),
             )
             for instance in self.__db.get_instances()
+            if not status or instance["status"] == status
         ]
 
     def reload_instances(self, *, instances: Optional[List[Instance]] = None) -> Union[list[str], str]:
@@ -193,10 +194,10 @@ class InstancesUtils:
         ] or "Successfully reloaded instances"
 
     def ban(self, ip: str, exp: float, reason: str, *, instances: Optional[List[Instance]] = None) -> Union[list[str], str]:
-        return [instance.name for instance in instances or self.get_instances() if instance.ban(ip, exp, reason).startswith("Can't ban")] or ""
+        return [instance.name for instance in instances or self.get_instances(status="up") if instance.ban(ip, exp, reason).startswith("Can't ban")] or ""
 
     def unban(self, ip: str, *, instances: Optional[List[Instance]] = None) -> Union[list[str], str]:
-        return [instance.name for instance in instances or self.get_instances() if instance.unban(ip).startswith("Can't unban")] or ""
+        return [instance.name for instance in instances or self.get_instances(status="up") if instance.unban(ip).startswith("Can't unban")] or ""
 
     def get_bans(self, hostname: Optional[str] = None, *, instances: Optional[List[Instance]] = None) -> List[dict[str, Any]]:
         """Get unique bans from all instances or a specific instance and sort them by expiration date"""
@@ -214,7 +215,7 @@ class InstancesUtils:
                 return []
             bans = get_instance_bans(instance)
         else:
-            for instance in instances or self.get_instances():
+            for instance in instances or self.get_instances(status="up"):
                 bans.extend(get_instance_bans(instance))
 
         unique_bans = {}
@@ -236,7 +237,7 @@ class InstancesUtils:
                 return []
             reports = get_instance_reports(instance)
         else:
-            for instance in instances or self.get_instances():
+            for instance in instances or self.get_instances(status="up"):
                 reports.extend(get_instance_reports(instance))
 
         return sorted(reports, key=itemgetter("date"), reverse=True)
@@ -311,14 +312,14 @@ class InstancesUtils:
                 return {}
             return update_metrics_from_instance(instance, metrics.copy())
 
-        for instance in instances or self.get_instances():
+        for instance in instances or self.get_instances(status="up"):
             metrics = update_metrics_from_instance(instance, metrics.copy())
         return metrics
 
     def get_ping(self, plugin_id: str, *, instances: Optional[List[Instance]] = None):
         """Get ping from all instances and return the first success"""
         ping = {"status": "error"}
-        for instance in instances or self.get_instances():
+        for instance in instances or self.get_instances(status="up"):
             try:
                 resp, ping_data = instance.ping(plugin_id)
             except:
@@ -336,7 +337,7 @@ class InstancesUtils:
     def get_data(self, plugin_endpoint: str, *, instances: Optional[List[Instance]] = None):
         """Get data from all instances and return the first success"""
         data = []
-        for instance in instances or self.get_instances():
+        for instance in instances or self.get_instances(status="up"):
             try:
                 resp, instance_data = instance.data(plugin_endpoint)
             except:

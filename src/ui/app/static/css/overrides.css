@@ -344,6 +344,11 @@ td.highlight {
   color: var(--bs-bw-green) !important;
 }
 
+.btn-primary.active {
+  background-color: var(--bs-primary) !important;
+  border-color: var(--bs-primary) !important;
+}
+
 .btn-bw-green {
   color: #fff;
   background-color: var(--bs-bw-green);
@@ -741,4 +746,16 @@ a.text-decoration-underline.link-underline-primary:hover {
 .light-href:hover {
   color: var(--bs-primary) !important;
   text-decoration: underline;
+}
+
+.authentication-wrapper.authentication-basic .authentication-inner.w-100 {
+  max-width: 90% !important;
+}
+
+.form-floating > .form-control:focus,
+.form-floating > .form-control:not(:placeholder-shown),
+.form-floating > .form-control-plaintext:focus,
+.form-floating > .form-control-plaintext:not(:placeholder-shown) {
+  padding-top: 1.625rem !important;
+  padding-bottom: 0.625rem !important;
 }

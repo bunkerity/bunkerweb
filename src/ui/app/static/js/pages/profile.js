@@ -20,7 +20,7 @@ $(document).ready(function () {
       isValid,
     );
     isValid = validateCondition(
-      /[ !"#$%&'()*+,\-./:;<=>?@[\\\]^_`{|}~]/.test(password),
+      /[ -~]/.test(password),
       "#special-check i",
       isValid,
     );
@@ -83,17 +83,32 @@ $(document).ready(function () {
     const target = targetClass.substring(1).replace("navs-pills-", "");
     const isProfileTab = target === "profile";
     const isSessionsTab = target === "sessions";
+    const sessionsPagination = $("#navs-pills-sessions-pagination");
 
-    if (!isSessionsTab) {
-      $("#navs-pills-sessions-pagination").removeClass("show active");
-      setTimeout(() => {
-        $("#navs-pills-sessions-pagination").parent().addClass("d-none");
-      }, 200);
-    } else {
-      $("#navs-pills-sessions-pagination").parent().removeClass("d-none");
-      setTimeout(() => {
-        $("#navs-pills-sessions-pagination").addClass("show active");
-      }, 200);
+    if (sessionsPagination.length) {
+      if (!isSessionsTab) {
+        sessionsPagination.removeClass("show active");
+        setTimeout(() => {
+          sessionsPagination.parent().addClass("d-none");
+          $(".nav-pills .tf-icons")
+            .parent()
+            .find("span")
+            .removeClass("d-xxxl-inline")
+            .addClass("d-sm-inline");
+          $(".nav-pills .tf-icons").closest("div").removeClass("col-md-4");
+        }, 200);
+      } else {
+        sessionsPagination.parent().removeClass("d-none");
+        setTimeout(() => {
+          sessionsPagination.addClass("show active");
+          $(".nav-pills .tf-icons")
+            .parent()
+            .find("span")
+            .removeClass("d-sm-inline")
+            .addClass("d-xxxl-inline");
+          $(".nav-pills .tf-icons").closest("div").addClass("col-md-4");
+        }, 200);
+      }
     }
 
     if (isProfileTab && window.location.hash) {
