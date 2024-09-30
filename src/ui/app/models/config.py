@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from concurrent.futures import ThreadPoolExecutor
 from copy import deepcopy
 from operator import itemgetter
 from os import sep
@@ -37,10 +38,11 @@ class Config:
 
         servers = []
         plugins_settings = self.get_plugins_settings()
-        for service in services_conf:
+
+        def process_service(service):
             server_name = service["SERVER_NAME"].split(" ")[0]
             if not server_name:
-                continue
+                return None
 
             for k, v in service.items():
                 if server_name != changed_service and f"{server_name}_{k}" in conf:
@@ -49,7 +51,12 @@ class Config:
                 if plugins_settings[k.rsplit("_", 1)[0] if re_search(r"_\d+$", k) else k]["context"] == "multisite":
                     conf[f"{server_name}_{k}"] = v
 
-            servers.append(server_name)
+            return server_name
+
+        with ThreadPoolExecutor() as executor:
+            results = executor.map(process_service, services_conf)
+
+        servers.extend(filter(None, results))
 
         conf["SERVER_NAME"] = " ".join(servers)
         conf["DATABASE_URI"] = self.__db.database_uri
