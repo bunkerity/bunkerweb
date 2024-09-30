@@ -181,9 +181,8 @@ configargparse==1.7 \
     --hash=sha256:d249da6591465c6c26df64a9f73d2536e743be2f244eb3ebe61114af2f94f86b \
     --hash=sha256:e7067471884de5478c58a511e529f0f9bd1c66bfef1dea90935438d6c23306d1
     # via certbot
-configobj==5.0.8 \
-    --hash=sha256:6f704434a07dc4f4dc7c9a745172c1cad449feb548febd9f7fe362629c627a97 \
-    --hash=sha256:a7a8c6ab7daade85c3f329931a807c8aee750a2494363934f8ea84d8a54c87ea
+configobj==5.0.9 \
+    --hash=sha256:03c881bbf23aa07bccf1b837005975993c4ab4427ba57f959afdd9d1a2386848
     # via certbot
 cryptography==43.0.1 \
     --hash=sha256:014f58110f53237ace6a408b5beb6c427b64e084eb451ef25a28308270086494 \
@@ -223,13 +222,13 @@ distro==1.9.0 \
     --hash=sha256:2fa77c6fd8940f116ee1d6b94a2f90b13b5ea8d019b98bc8bafdcabcdd9bdbed \
     --hash=sha256:7bffd925d65168f85027d8da9af6bddab658135b840670a223589bc0c8ef02b2
     # via certbot
-idna==3.8 \
-    --hash=sha256:050b4e5baadcd44d760cedbd2b8e639f2ff89bbc7a5730fcc662954303377aac \
-    --hash=sha256:d838c2c0ed6fced7693d5e8ab8e734d5f8fda53a039c0164afb0b82e771e3603
+idna==3.10 \
+    --hash=sha256:12f65c9b470abda6dc35cf8e63cc574b1c52b11df2c86030af0ac09b01b13ea9 \
+    --hash=sha256:946d195a0d259cbba61165e88e65941f16e9b36ea6ddb97f00452bae8b1287d3
     # via requests
-importlib-metadata==8.4.0 \
-    --hash=sha256:66f342cc6ac9818fc6ff340576acd24d65ba0b3efabb2b4ac08b598965a4a2f1 \
-    --hash=sha256:9a547d3bc3608b025f93d403fdd1aae741c24fbb8314df4b155675742ce303c5
+importlib-metadata==8.5.0 \
+    --hash=sha256:45e54197d28b7a7f1559e60b95e7c567032b602131fbd588f1497f47880aa68b \
+    --hash=sha256:71522656f0abace1d072b9e5481a48f07c138e00f079c38c8f883823f9c26bd7
     # via certbot
 josepy==1.14.0 \
     --hash=sha256:308b3bf9ce825ad4d4bba76372cf19b5dc1c2ce96a9d298f9642975e64bd13dd \
@@ -351,21 +350,17 @@ schedule==1.2.2 \
     # via importlib-metadata
 
 # The following packages are considered to be unsafe in a requirements file:
-setuptools==74.1.2 \
-    --hash=sha256:5f4c08aa4d3ebcb57a50c33b1b07e94315d7fc7230f7115e47fc99776c8ce308 \
-    --hash=sha256:95b40ed940a1c67eb70fc099094bd6e99c6ee7c23aa2306f4d2697ba7916f9c6
+setuptools==75.1.0 \
+    --hash=sha256:35ab7fd3bcd95e6b7fd704e4a1539513edad446c097797f2985e0e4b960772f2 \
+    --hash=sha256:d59a21b17a275fb872a9c3dae73963160ae079f1049ed956880cd7c09b120538
     # via -r requirements.in
-six==1.16.0 \
-    --hash=sha256:1e61c37477a1626458e36f7b1d82aa5c9b094fa4802892072e49de9c60c4c926 \
-    --hash=sha256:8abb2f1d86890a2dfb989f9a77cfcfd3e47c2a354b01111771326f8aa26e0254
-    # via configobj
-urllib3==2.2.2 \
-    --hash=sha256:a448b2f64d686155468037e1ace9f2d2199776e17f0a46610480d311f73e3472 \
-    --hash=sha256:dd505485549a7a552833da5e6063639d0d177c04f23bc3864e41e5dc5f612168
+urllib3==2.2.3 \
+    --hash=sha256:ca899ca043dcb1bafa3e262d73aa25c465bfb49e0bd9dd5d59f1d0acba2f8fac \
+    --hash=sha256:e7d814a81dad81e6caf2ec9fdedb284ecc9c73076b62654547cc64ccdcae26e9
     # via requests
-zipp==3.20.1 \
-    --hash=sha256:9960cd8967c8f85a56f920d5d507274e74f9ff813a0ab8889a5b5be2daf44064 \
-    --hash=sha256:c22b14cc4763c5a5b04134207736c107db42e9d3ef2d9779d465f5f1bcba572b
+zipp==3.20.2 \
+    --hash=sha256:a817ac80d6cf4b23bf7f2828b7cabf326f15a001bea8b1f9b49631780ba28350 \
+    --hash=sha256:bc9eb26f4506fda01b81bcde0ca78103b6e62f991b381fec825435c836edbc29
     # via
     #   acme
     #   certbot
