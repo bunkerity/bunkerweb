@@ -153,7 +153,7 @@ def inject_variables():
 
     if not request.path.startswith("/loading"):
         if not changes_ongoing and metadata["failover"]:
-            flash(
+            flask_flash(
                 "The last changes could not be applied because it creates a configuration error on NGINX, please check the logs for more information. The configured fell back to the last working one.",
                 "error",
             )
