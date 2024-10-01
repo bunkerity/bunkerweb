@@ -1,0 +1,2141 @@
+{
+    "title": "Bunkerweb helm chart Schema",
+    "type": "object",
+    "default": {},
+    "properties": {
+        "registry": {
+            "title": "The registry Schema",
+            "type": "object",
+            "default": {},
+            "properties": {
+                "imagePullSecretName": {
+                    "title": "The imagePullSecretName Schema",
+                    "type": "string",
+                    "default": "",
+                    "examples": [
+                        "regcred"
+                    ]
+                },
+                "imageCredentials": {
+                    "title": "The imageCredentials Schema",
+                    "type": "object",
+                    "default": {},
+                    "properties": {
+                        "enabled": {
+                            "title": "The enabled Schema",
+                            "type": "boolean",
+                            "default": false,
+                            "examples": [
+                                false
+                            ]
+                        },
+                        "registry": {
+                            "title": "The registry Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                ""
+                            ]
+                        },
+                        "username": {
+                            "title": "The username Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                ""
+                            ]
+                        },
+                        "password": {
+                            "title": "The password Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                ""
+                            ]
+                        }
+                    },
+                    "examples": [{
+                        "enabled": false,
+                        "registry": "",
+                        "username": "",
+                        "password": ""
+                    }]
+                }
+            },
+            "examples": [{
+                "imagePullSecretName": "regcred",
+                "imageCredentials": {
+                    "enabled": false,
+                    "registry": "",
+                    "username": "",
+                    "password": ""
+                }
+            }]
+        },
+        "bunkerweb": {
+            "title": "The bunkerweb Schema",
+            "type": "object",
+            "default": {},
+            "properties": {
+                "podSecurityContext": {
+                    "title": "The podSecurityContext Schema",
+                    "type": "object",
+                    "default": {},
+                    "properties": {},
+                    "examples": [{}]
+                },
+                "containerSecurityContext": {
+                    "title": "The containerSecurityContext Schema",
+                    "type": "object",
+                    "default": {},
+                    "properties": {
+                        "allowPrivilegeEscalation": {
+                            "title": "The allowPrivilegeEscalation Schema",
+                            "type": "boolean",
+                            "default": false,
+                            "examples": [
+                                false
+                            ]
+                        },
+                        "capabilities": {
+                            "title": "The capabilities Schema",
+                            "type": "object",
+                            "default": {},
+                            "properties": {
+                                "drop": {
+                                    "title": "The drop Schema",
+                                    "type": "array",
+                                    "default": [],
+                                    "items": {
+                                        "title": "A Schema",
+                                        "type": "string",
+                                        "default": "",
+                                        "examples": [
+                                            "ALL"
+                                        ]
+                                    },
+                                    "examples": [
+                                        [
+                                            "ALL"]
+                                    ]
+                                }
+                            },
+                            "examples": [{
+                                "drop": [
+                                    "ALL"
+                                ]
+                            }]
+                        },
+                        "runAsGroup": {
+                            "title": "The runAsGroup Schema",
+                            "type": "integer",
+                            "default": 0,
+                            "examples": [
+                                101
+                            ]
+                        },
+                        "runAsUser": {
+                            "title": "The runAsUser Schema",
+                            "type": "integer",
+                            "default": 0,
+                            "examples": [
+                                101
+                            ]
+                        }
+                    },
+                    "examples": [{
+                        "allowPrivilegeEscalation": false,
+                        "capabilities": {
+                            "drop": [
+                                "ALL"
+                            ]
+                        },
+                        "runAsGroup": 101,
+                        "runAsUser": 101
+                    }]
+                },
+                "env": {
+                    "title": "The env Schema",
+                    "type": "object",
+                    "default": {},
+                    "properties": {
+                        "API_WHITELIST_IP": {
+                            "title": "The API_WHITELIST_IP Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "127.0.0.0/8 10.0.0.0/8"
+                            ]
+                        },
+                        "DNS_RESOLVERS": {
+                            "title": "The DNS_RESOLVERS Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "coredns.kube-system.svc.cluster.local"
+                            ]
+                        },
+                        "KUBERNETES_MODE": {
+                            "title": "The KUBERNETES_MODE Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "yes"
+                            ]
+                        },
+                        "MULTISITE": {
+                            "title": "The MULTISITE Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "yes"
+                            ]
+                        },
+                        "REDIS_HOST": {
+                            "title": "The REDIS_HOST Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "bunkerweb-redis.default.svc.cluster.local"
+                            ]
+                        },
+                        "SERVER_NAME": {
+                            "title": "The SERVER_NAME Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                ""
+                            ]
+                        },
+                        "USE_API": {
+                            "title": "The USE_API Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "yes"
+                            ]
+                        },
+                        "USE_REDIS": {
+                            "title": "The USE_REDIS Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "yes"
+                            ]
+                        }
+                    },
+                    "examples": [{
+                        "API_WHITELIST_IP": "127.0.0.0/8 10.0.0.0/8",
+                        "DNS_RESOLVERS": "coredns.kube-system.svc.cluster.local",
+                        "KUBERNETES_MODE": "yes",
+                        "MULTISITE": "yes",
+                        "REDIS_HOST": "bunkerweb-redis.default.svc.cluster.local",
+                        "SERVER_NAME": "",
+                        "USE_API": "yes",
+                        "USE_REDIS": "yes"
+                    }]
+                },
+                "envFrom": {
+                    "title": "The envFrom Schema",
+                    "type": "object",
+                    "default": {},
+                    "properties": {},
+                    "examples": [{}]
+                },
+                "image": {
+                    "title": "The image Schema",
+                    "type": "object",
+                    "default": {},
+                    "properties": {
+                        "repository": {
+                            "title": "The repository Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "bunkerity/bunkerweb"
+                            ]
+                        },
+                        "tag": {
+                            "title": "The tag Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "1.5.7"
+                            ]
+                        },
+                        "imagePullPolicy": {
+                            "title": "The imagePullPolicy Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "Always"
+                            ]
+                        }
+                    },
+                    "examples": [{
+                        "repository": "bunkerity/bunkerweb",
+                        "tag": "1.5.7",
+                        "imagePullPolicy": "Always"
+                    }]
+                },
+                "resources": {
+                    "title": "The resources Schema",
+                    "type": "object",
+                    "default": {},
+                    "properties": {},
+                    "examples": [{}]
+                },
+                "nodeSelector": {
+                    "title": "The nodeSelector Schema",
+                    "type": "object",
+                    "default": {},
+                    "properties": {},
+                    "examples": [{}]
+                },
+                "service": {
+                    "title": "The service Schema",
+                    "type": "object",
+                    "default": {},
+                    "properties": {
+                        "annotations": {
+                            "title": "The annotations Schema",
+                            "type": "object",
+                            "default": {},
+                            "properties": {},
+                            "examples": [{}]
+                        },
+                        "type": {
+                            "title": "The type Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "LoadBalancer"
+                            ]
+                        },
+                        "clusterIP": {
+                            "title": "The clusterIP Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "None"
+                            ]
+                        },
+                        "loadBalancerSourceRanges": {
+                            "title": "The loadBalancerSourceRanges Schema",
+                            "type": "array",
+                            "default": [],
+                            "items": {},
+                            "examples": [
+                                []
+                            ]
+                        },
+                        "loadBalancerIP": {
+                            "title": "The loadBalancerIP Schema",
+                            "type": "array",
+                            "default": [],
+                            "items": {},
+                            "examples": [
+                                []
+                            ]
+                        },
+                        "externalTrafficPolicy": {
+                            "title": "The externalTrafficPolicy Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "Local"
+                            ]
+                        },
+                        "loadBalancerClass": {
+                            "title": "The loadBalancerClass Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                ""
+                            ]
+                        },
+                        "ports": {
+                            "title": "The ports Schema",
+                            "type": "array",
+                            "default": [],
+                            "items": {
+                                "title": "A Schema",
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "title": "The name Schema",
+                                        "type": "string",
+                                        "examples": [
+                                            "http",
+                                            "https"
+                                        ]
+                                    },
+                                    "port": {
+                                        "title": "The port Schema",
+                                        "type": "integer",
+                                        "examples": [
+                                            80,
+                                            443
+                                        ]
+                                    },
+                                    "protocol": {
+                                        "title": "The protocol Schema",
+                                        "type": "string",
+                                        "examples": [
+                                            "TCP"
+                                        ]
+                                    },
+                                    "targetPort": {
+                                        "title": "The targetPort Schema",
+                                        "type": "string",
+                                        "examples": [
+                                            "http",
+                                            "https"
+                                        ]
+                                    }
+                                },
+                                "examples": [{
+                                    "name": "http",
+                                    "port": 80,
+                                    "protocol": "TCP",
+                                    "targetPort": "http"
+                                },
+                                {
+                                    "name": "https",
+                                    "port": 443,
+                                    "protocol": "TCP",
+                                    "targetPort": "https"
+                                }]
+                            },
+                            "examples": [
+                                [{
+                                    "name": "http",
+                                    "port": 80,
+                                    "protocol": "TCP",
+                                    "targetPort": "http"
+                                },
+                                {
+                                    "name": "https",
+                                    "port": 443,
+                                    "protocol": "TCP",
+                                    "targetPort": "https"
+                                }]
+                            ]
+                        }
+                    },
+                    "examples": [{
+                        "annotations": {},
+                        "type": "LoadBalancer",
+                        "clusterIP": "None",
+                        "loadBalancerSourceRanges": [],
+                        "loadBalancerIP": [],
+                        "externalTrafficPolicy": "Local",
+                        "loadBalancerClass": "",
+                        "ports": [{
+                            "name": "http",
+                            "port": 80,
+                            "protocol": "TCP",
+                            "targetPort": "http"
+                        },
+                        {
+                            "name": "https",
+                            "port": 443,
+                            "protocol": "TCP",
+                            "targetPort": "https"
+                        }]
+                    }]
+                }
+            },
+            "examples": [{
+                "podSecurityContext": {},
+                "containerSecurityContext": {
+                    "allowPrivilegeEscalation": false,
+                    "capabilities": {
+                        "drop": [
+                            "ALL"
+                        ]
+                    },
+                    "runAsGroup": 101,
+                    "runAsUser": 101
+                },
+                "env": {
+                    "API_WHITELIST_IP": "127.0.0.0/8 10.0.0.0/8",
+                    "DNS_RESOLVERS": "coredns.kube-system.svc.cluster.local",
+                    "KUBERNETES_MODE": "yes",
+                    "MULTISITE": "yes",
+                    "REDIS_HOST": "bunkerweb-redis.default.svc.cluster.local",
+                    "SERVER_NAME": "",
+                    "USE_API": "yes",
+                    "USE_REDIS": "yes"
+                },
+                "envFrom": {},
+                "image": {
+                    "repository": "bunkerity/bunkerweb",
+                    "tag": "1.5.7",
+                    "imagePullPolicy": "Always"
+                },
+                "resources": {},
+                "nodeSelector": {},
+                "service": {
+                    "annotations": {},
+                    "type": "LoadBalancer",
+                    "clusterIP": "None",
+                    "loadBalancerSourceRanges": [],
+                    "loadBalancerIP": [],
+                    "externalTrafficPolicy": "Local",
+                    "loadBalancerClass": "",
+                    "ports": [{
+                        "name": "http",
+                        "port": 80,
+                        "protocol": "TCP",
+                        "targetPort": "http"
+                    },
+                    {
+                        "name": "https",
+                        "port": 443,
+                        "protocol": "TCP",
+                        "targetPort": "https"
+                    }]
+                }
+            }]
+        },
+        "controller": {
+            "title": "The controller Schema",
+            "type": "object",
+            "default": {},
+            "properties": {
+                "podSecurityContext": {
+                    "title": "The podSecurityContext Schema",
+                    "type": "object",
+                    "default": {},
+                    "properties": {},
+                    "examples": [{}]
+                },
+                "containerSecurityContext": {
+                    "title": "The containerSecurityContext Schema",
+                    "type": "object",
+                    "default": {},
+                    "properties": {},
+                    "examples": [{}]
+                },
+                "nodeSelector": {
+                    "title": "The nodeSelector Schema",
+                    "type": "object",
+                    "default": {},
+                    "properties": {},
+                    "examples": [{}]
+                },
+                "env": {
+                    "title": "The env Schema",
+                    "type": "object",
+                    "default": {},
+                    "properties": {
+                        "DATABASE_URI": {
+                            "title": "The DATABASE_URI Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "mariadb+pymysql://bunkerweb:changeme@bunkerweb-db:3306/db"
+                            ]
+                        },
+                        "KUBERNETES_MODE": {
+                            "title": "The KUBERNETES_MODE Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "yes"
+                            ]
+                        }
+                    },
+                    "examples": [{
+                        "DATABASE_URI": "mariadb+pymysql://bunkerweb:changeme@bunkerweb-db:3306/db",
+                        "KUBERNETES_MODE": "yes"
+                    }]
+                },
+                "envFrom": {
+                    "title": "The envFrom Schema",
+                    "type": "object",
+                    "default": {},
+                    "properties": {},
+                    "examples": [{}]
+                },
+                "image": {
+                    "title": "The image Schema",
+                    "type": "object",
+                    "default": {},
+                    "properties": {
+                        "repository": {
+                            "title": "The repository Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "bunkerity/bunkerweb-autoconf"
+                            ]
+                        },
+                        "tag": {
+                            "title": "The tag Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "1.5.7"
+                            ]
+                        },
+                        "imagePullPolicy": {
+                            "title": "The imagePullPolicy Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "Always"
+                            ]
+                        }
+                    },
+                    "examples": [{
+                        "repository": "bunkerity/bunkerweb-autoconf",
+                        "tag": "1.5.7",
+                        "imagePullPolicy": "Always"
+                    }]
+                },
+                "replicas": {
+                    "title": "The replicas Schema",
+                    "type": "integer",
+                    "default": 0,
+                    "examples": [
+                        1
+                    ]
+                },
+                "resources": {
+                    "title": "The resources Schema",
+                    "type": "object",
+                    "default": {},
+                    "properties": {},
+                    "examples": [{}]
+                },
+                "initContainers": {
+                    "title": "The initContainers Schema",
+                    "type": "object",
+                    "default": {},
+                    "properties": {},
+                    "examples": [{}]
+                },
+                "volumeMounts": {
+                    "title": "The volumeMounts Schema",
+                    "type": "object",
+                    "default": {},
+                    "properties": {},
+                    "examples": [{}]
+                },
+                "volumes": {
+                    "title": "The volumes Schema",
+                    "type": "object",
+                    "default": {},
+                    "properties": {},
+                    "examples": [{}]
+                }
+            },
+            "examples": [{
+                "podSecurityContext": {},
+                "containerSecurityContext": {},
+                "nodeSelector": {},
+                "env": {
+                    "DATABASE_URI": "mariadb+pymysql://bunkerweb:changeme@bunkerweb-db:3306/db",
+                    "KUBERNETES_MODE": "yes"
+                },
+                "envFrom": {},
+                "image": {
+                    "repository": "bunkerity/bunkerweb-autoconf",
+                    "tag": "1.5.7",
+                    "imagePullPolicy": "Always"
+                },
+                "replicas": 1,
+                "resources": {},
+                "initContainers": {},
+                "volumeMounts": {},
+                "volumes": {}
+            }]
+        },
+        "clamav": {
+            "title": "The clamav Schema",
+            "type": "object",
+            "default": {},
+            "properties": {
+                "enabled": {
+                    "title": "The enabled Schema",
+                    "type": "boolean",
+                    "default": false,
+                    "examples": [
+                        false
+                    ]
+                },
+                "podSecurityContext": {
+                    "title": "The podSecurityContext Schema",
+                    "type": "object",
+                    "default": {},
+                    "properties": {},
+                    "examples": [{}]
+                },
+                "containerSecurityContext": {
+                    "title": "The containerSecurityContext Schema",
+                    "type": "object",
+                    "default": {},
+                    "properties": {},
+                    "examples": [{}]
+                },
+                "nodeSelector": {
+                    "title": "The nodeSelector Schema",
+                    "type": "object",
+                    "default": {},
+                    "properties": {},
+                    "examples": [{}]
+                },
+                "env": {
+                    "title": "The env Schema",
+                    "type": "object",
+                    "default": {},
+                    "properties": {},
+                    "examples": [{}]
+                },
+                "envFrom": {
+                    "title": "The envFrom Schema",
+                    "type": "object",
+                    "default": {},
+                    "properties": {},
+                    "examples": [{}]
+                },
+                "image": {
+                    "title": "The image Schema",
+                    "type": "object",
+                    "default": {},
+                    "properties": {
+                        "repository": {
+                            "title": "The repository Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "clamav/clamav"
+                            ]
+                        },
+                        "tag": {
+                            "title": "The tag Schema",
+                            "type": "number",
+                            "default": 0.0,
+                            "examples": [
+                                1.2
+                            ]
+                        },
+                        "imagePullPolicy": {
+                            "title": "The imagePullPolicy Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "Always"
+                            ]
+                        }
+                    },
+                    "examples": [{
+                        "repository": "clamav/clamav",
+                        "tag": 1.2,
+                        "imagePullPolicy": "Always"
+                    }]
+                },
+                "replicas": {
+                    "title": "The replicas Schema",
+                    "type": "integer",
+                    "default": 0,
+                    "examples": [
+                        1
+                    ]
+                },
+                "resources": {
+                    "title": "The resources Schema",
+                    "type": "object",
+                    "default": {},
+                    "properties": {},
+                    "examples": [{}]
+                },
+                "initContainers": {
+                    "title": "The initContainers Schema",
+                    "type": "object",
+                    "default": {},
+                    "properties": {},
+                    "examples": [{}]
+                },
+                "volumeMounts": {
+                    "title": "The volumeMounts Schema",
+                    "type": "object",
+                    "default": {},
+                    "properties": {},
+                    "examples": [{}]
+                },
+                "volumes": {
+                    "title": "The volumes Schema",
+                    "type": "object",
+                    "default": {},
+                    "properties": {},
+                    "examples": [{}]
+                },
+                "service": {
+                    "title": "The service Schema",
+                    "type": "object",
+                    "default": {},
+                    "properties": {
+                        "annotations": {
+                            "title": "The annotations Schema",
+                            "type": "object",
+                            "default": {},
+                            "properties": {},
+                            "examples": [{}]
+                        },
+                        "ports": {
+                            "title": "The ports Schema",
+                            "type": "array",
+                            "default": [],
+                            "items": {
+                                "title": "A Schema",
+                                "type": "object",
+                                "default": {},
+                                "properties": {
+                                    "name": {
+                                        "title": "The name Schema",
+                                        "type": "string",
+                                        "default": "",
+                                        "examples": [
+                                            "tcp"
+                                        ]
+                                    },
+                                    "protocol": {
+                                        "title": "The protocol Schema",
+                                        "type": "string",
+                                        "default": "",
+                                        "examples": [
+                                            "TCP"
+                                        ]
+                                    },
+                                    "port": {
+                                        "title": "The port Schema",
+                                        "type": "integer",
+                                        "default": 0,
+                                        "examples": [
+                                            3310
+                                        ]
+                                    },
+                                    "targetPort": {
+                                        "title": "The targetPort Schema",
+                                        "type": "integer",
+                                        "default": 0,
+                                        "examples": [
+                                            3310
+                                        ]
+                                    }
+                                },
+                                "examples": [{
+                                    "name": "tcp",
+                                    "protocol": "TCP",
+                                    "port": 3310,
+                                    "targetPort": 3310
+                                }]
+                            },
+                            "examples": [
+                                [{
+                                    "name": "tcp",
+                                    "protocol": "TCP",
+                                    "port": 3310,
+                                    "targetPort": 3310
+                                }]
+                            ]
+                        }
+                    },
+                    "examples": [{
+                        "annotations": {},
+                        "ports": [{
+                            "name": "tcp",
+                            "protocol": "TCP",
+                            "port": 3310,
+                            "targetPort": 3310
+                        }]
+                    }]
+                }
+            },
+            "examples": [{
+                "enabled": false,
+                "podSecurityContext": {},
+                "containerSecurityContext": {},
+                "nodeSelector": {},
+                "env": {},
+                "envFrom": {},
+                "image": {
+                    "repository": "clamav/clamav",
+                    "tag": 1.2,
+                    "imagePullPolicy": "Always"
+                },
+                "replicas": 1,
+                "resources": {},
+                "initContainers": {},
+                "volumeMounts": {},
+                "volumes": {},
+                "service": {
+                    "annotations": {},
+                    "ports": [{
+                        "name": "tcp",
+                        "protocol": "TCP",
+                        "port": 3310,
+                        "targetPort": 3310
+                    }]
+                }
+            }]
+        },
+        "ui": {
+            "title": "The ui Schema",
+            "type": "object",
+            "default": {},
+            "properties": {
+                "enabled": {
+                    "title": "The enabled Schema",
+                    "type": "boolean",
+                    "default": false,
+                    "examples": [
+                        true
+                    ]
+                },
+                "podSecurityContext": {
+                    "title": "The podSecurityContext Schema",
+                    "type": "object",
+                    "default": {},
+                    "properties": {},
+                    "examples": [{}]
+                },
+                "containerSecurityContext": {
+                    "title": "The containerSecurityContext Schema",
+                    "type": "object",
+                    "default": {},
+                    "properties": {},
+                    "examples": [{}]
+                },
+                "nodeSelector": {
+                    "title": "The nodeSelector Schema",
+                    "type": "object",
+                    "default": {},
+                    "properties": {},
+                    "examples": [{}]
+                },
+                "env": {
+                    "title": "The env Schema",
+                    "type": "object",
+                    "default": {},
+                    "properties": {
+                        "DATABASE_URI": {
+                            "title": "The DATABASE_URI Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "mariadb+pymysql://bunkerweb:changeme@bunkerweb-db:3306/db"
+                            ]
+                        },
+                        "KUBERNETES_MODE": {
+                            "title": "The KUBERNETES_MODE Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "yes"
+                            ]
+                        },
+                        "ADMIN_USERNAME": {
+                            "title": "The ADMIN_USERNAME Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "bunkerAdmin"
+                            ]
+                        },
+                        "ADMIN_PASSWORD": {
+                            "title": "The ADMIN_PASSWORD Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "ChangeIT"
+                            ]
+                        },
+                        "ABSOLUTE_URI": {
+                            "title": "The ABSOLUTE_URI Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "https://bunkerweb-build.service.ovh/"
+                            ]
+                        }
+                    },
+                    "examples": [{
+                        "DATABASE_URI": "mariadb+pymysql://bunkerweb:changeme@bunkerweb-db:3306/db",
+                        "KUBERNETES_MODE": "yes",
+                        "ADMIN_USERNAME": "bunkerAdmin",
+                        "ADMIN_PASSWORD": "ChangeIT",
+                        "ABSOLUTE_URI": "https://bunkerweb-build.service.ovh/"
+                    }]
+                },
+                "envFrom": {
+                    "title": "The envFrom Schema",
+                    "type": "object",
+                    "default": {},
+                    "properties": {},
+                    "examples": [{}]
+                },
+                "image": {
+                    "title": "The image Schema",
+                    "type": "object",
+                    "default": {},
+                    "properties": {
+                        "repository": {
+                            "title": "The repository Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "bunkerity/bunkerweb-ui"
+                            ]
+                        },
+                        "tag": {
+                            "title": "The tag Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "1.5.7"
+                            ]
+                        },
+                        "imagePullPolicy": {
+                            "title": "The imagePullPolicy Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "Always"
+                            ]
+                        }
+                    },
+                    "examples": [{
+                        "repository": "bunkerity/bunkerweb-ui",
+                        "tag": "1.5.7",
+                        "imagePullPolicy": "Always"
+                    }]
+                },
+                "replicas": {
+                    "title": "The replicas Schema",
+                    "type": "integer",
+                    "default": 0,
+                    "examples": [
+                        1
+                    ]
+                },
+                "resources": {
+                    "title": "The resources Schema",
+                    "type": "object",
+                    "default": {},
+                    "properties": {},
+                    "examples": [{}]
+                },
+                "service": {
+                    "title": "The service Schema",
+                    "type": "object",
+                    "default": {},
+                    "properties": {
+                        "annotations": {
+                            "title": "The annotations Schema",
+                            "type": "object",
+                            "default": {},
+                            "properties": {},
+                            "examples": [{}]
+                        },
+                        "ports": {
+                            "title": "The ports Schema",
+                            "type": "array",
+                            "default": [],
+                            "items": {
+                                "title": "A Schema",
+                                "type": "object",
+                                "default": {},
+                                "properties": {
+                                    "name": {
+                                        "title": "The name Schema",
+                                        "type": "string",
+                                        "default": "",
+                                        "examples": [
+                                            "http"
+                                        ]
+                                    },
+                                    "protocol": {
+                                        "title": "The protocol Schema",
+                                        "type": "string",
+                                        "default": "",
+                                        "examples": [
+                                            "TCP"
+                                        ]
+                                    },
+                                    "port": {
+                                        "title": "The port Schema",
+                                        "type": "integer",
+                                        "default": 0,
+                                        "examples": [
+                                            7000
+                                        ]
+                                    },
+                                    "targetPort": {
+                                        "title": "The targetPort Schema",
+                                        "type": "integer",
+                                        "default": 0,
+                                        "examples": [
+                                            7000
+                                        ]
+                                    }
+                                },
+                                "examples": [{
+                                    "name": "http",
+                                    "protocol": "TCP",
+                                    "port": 7000,
+                                    "targetPort": 7000
+                                }]
+                            },
+                            "examples": [
+                                [{
+                                    "name": "http",
+                                    "protocol": "TCP",
+                                    "port": 7000,
+                                    "targetPort": 7000
+                                }]
+                            ]
+                        },
+                        "type": {
+                            "title": "The type Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "ClusterIP"
+                            ]
+                        }
+                    },
+                    "examples": [{
+                        "annotations": {},
+                        "ports": [{
+                            "name": "http",
+                            "protocol": "TCP",
+                            "port": 7000,
+                            "targetPort": 7000
+                        }],
+                        "type": "ClusterIP"
+                    }]
+                },
+                "ingress": {
+                    "title": "The ingress Schema",
+                    "type": "object",
+                    "default": {},
+                    "properties": {
+                        "enabled": {
+                            "title": "The enabled Schema",
+                            "type": "boolean",
+                            "default": false,
+                            "examples": [
+                                true
+                            ]
+                        },
+                        "annotations": {
+                            "title": "The annotations Schema",
+                            "type": "object",
+                            "default": {},
+                            "properties": {},
+                            "examples": [{}]
+                        },
+                        "path": {
+                            "title": "The path Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "/"
+                            ]
+                        },
+                        "host": {
+                            "title": "The host Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "bunkerweb.tld.local"
+                            ]
+                        },
+                        "ingressClassName": {
+                            "title": "The ingressClassName Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                ""
+                            ]
+                        },
+                        "secretName": {
+                            "title": "The secretName Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "mysecret"
+                            ]
+                        },
+                        "enabledTls": {
+                            "title": "The enabledTls Schema",
+                            "type": "boolean",
+                            "default": false,
+                            "examples": [
+                                true
+                            ]
+                        }
+                    },
+                    "examples": [{
+                        "enabled": true,
+                        "annotations": {},
+                        "path": "/",
+                        "host": "bunkerweb.tld.local",
+                        "ingressClassName": "",
+                        "secretName": "mysecret",
+                        "enabledTls": true
+                    }]
+                }
+            },
+            "examples": [{
+                "enabled": true,
+                "podSecurityContext": {},
+                "containerSecurityContext": {},
+                "nodeSelector": {},
+                "env": {
+                    "DATABASE_URI": "mariadb+pymysql://bunkerweb:changeme@bunkerweb-db:3306/db",
+                    "KUBERNETES_MODE": "yes",
+                    "ADMIN_USERNAME": "bunkerAdmin",
+                    "ADMIN_PASSWORD": "ChangeIT",
+                    "ABSOLUTE_URI": "https://bunkerweb-build.service.ovh/"
+                },
+                "envFrom": {},
+                "image": {
+                    "repository": "bunkerity/bunkerweb-ui",
+                    "tag": "1.5.7",
+                    "imagePullPolicy": "Always"
+                },
+                "replicas": 1,
+                "resources": {},
+                "service": {
+                    "annotations": {},
+                    "ports": [{
+                        "name": "http",
+                        "protocol": "TCP",
+                        "port": 7000,
+                        "targetPort": 7000
+                    }],
+                    "type": "ClusterIP"
+                },
+                "ingress": {
+                    "enabled": true,
+                    "annotations": {},
+                    "path": "/",
+                    "host": "bunkerweb.tld.local",
+                    "ingressClassName": "",
+                    "secretName": "mysecret",
+                    "enabledTls": true
+                }
+            }]
+        },
+        "db": {
+            "title": "The db Schema",
+            "type": "object",
+            "default": {},
+            "properties": {
+                "enabled": {
+                    "title": "The enabled Schema",
+                    "type": "boolean",
+                    "default": false,
+                    "examples": [
+                        true
+                    ]
+                },
+                "podSecurityContext": {
+                    "title": "The podSecurityContext Schema",
+                    "type": "object",
+                    "default": {},
+                    "properties": {},
+                    "examples": [{}]
+                },
+                "containerSecurityContext": {
+                    "title": "The containerSecurityContext Schema",
+                    "type": "object",
+                    "default": {},
+                    "properties": {},
+                    "examples": [{}]
+                },
+                "nodeSelector": {
+                    "title": "The nodeSelector Schema",
+                    "type": "object",
+                    "default": {},
+                    "properties": {},
+                    "examples": [{}]
+                },
+                "env": {
+                    "title": "The env Schema",
+                    "type": "object",
+                    "default": {},
+                    "properties": {
+                        "MYSQL_DATABASE": {
+                            "title": "The MYSQL_DATABASE Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "db"
+                            ]
+                        },
+                        "MYSQL_PASSWORD": {
+                            "title": "The MYSQL_PASSWORD Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "changeme"
+                            ]
+                        },
+                        "MYSQL_RANDOM_ROOT_PASSWORD": {
+                            "title": "The MYSQL_RANDOM_ROOT_PASSWORD Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "yes"
+                            ]
+                        },
+                        "MYSQL_USER": {
+                            "title": "The MYSQL_USER Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "bunkerweb"
+                            ]
+                        }
+                    },
+                    "examples": [{
+                        "MYSQL_DATABASE": "db",
+                        "MYSQL_PASSWORD": "changeme",
+                        "MYSQL_RANDOM_ROOT_PASSWORD": "yes",
+                        "MYSQL_USER": "bunkerweb"
+                    }]
+                },
+                "envFrom": {
+                    "title": "The envFrom Schema",
+                    "type": "object",
+                    "default": {},
+                    "properties": {},
+                    "examples": [{}]
+                },
+                "image": {
+                    "title": "The image Schema",
+                    "type": "object",
+                    "default": {},
+                    "properties": {
+                        "repository": {
+                            "title": "The repository Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "mariadb"
+                            ]
+                        },
+                        "tag": {
+                            "title": "The tag Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "10.10"
+                            ]
+                        },
+                        "imagePullPolicy": {
+                            "title": "The imagePullPolicy Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "Always"
+                            ]
+                        }
+                    },
+                    "examples": [{
+                        "repository": "mariadb",
+                        "tag": "10.10",
+                        "imagePullPolicy": "Always"
+                    }]
+                },
+                "replicas": {
+                    "title": "The replicas Schema",
+                    "type": "integer",
+                    "default": 0,
+                    "examples": [
+                        1
+                    ]
+                },
+                "resources": {
+                    "title": "The resources Schema",
+                    "type": "object",
+                    "default": {},
+                    "properties": {},
+                    "examples": [{}]
+                },
+                "service": {
+                    "title": "The service Schema",
+                    "type": "object",
+                    "default": {},
+                    "properties": {
+                        "ports": {
+                            "title": "The ports Schema",
+                            "type": "array",
+                            "default": [],
+                            "items": {
+                                "title": "A Schema",
+                                "type": "object",
+                                "default": {},
+                                "properties": {
+                                    "name": {
+                                        "title": "The name Schema",
+                                        "type": "string",
+                                        "default": "",
+                                        "examples": [
+                                            "sql"
+                                        ]
+                                    },
+                                    "port": {
+                                        "title": "The port Schema",
+                                        "type": "integer",
+                                        "default": 0,
+                                        "examples": [
+                                            3306
+                                        ]
+                                    },
+                                    "protocol": {
+                                        "title": "The protocol Schema",
+                                        "type": "string",
+                                        "default": "",
+                                        "examples": [
+                                            "TCP"
+                                        ]
+                                    },
+                                    "targetPort": {
+                                        "title": "The targetPort Schema",
+                                        "type": "integer",
+                                        "default": 0,
+                                        "examples": [
+                                            3306
+                                        ]
+                                    }
+                                },
+                                "examples": [{
+                                    "name": "sql",
+                                    "port": 3306,
+                                    "protocol": "TCP",
+                                    "targetPort": 3306
+                                }]
+                            },
+                            "examples": [
+                                [{
+                                    "name": "sql",
+                                    "port": 3306,
+                                    "protocol": "TCP",
+                                    "targetPort": 3306
+                                }]
+                            ]
+                        },
+                        "type": {
+                            "title": "The type Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "ClusterIP"
+                            ]
+                        }
+                    },
+                    "examples": [{
+                        "ports": [{
+                            "name": "sql",
+                            "port": 3306,
+                            "protocol": "TCP",
+                            "targetPort": 3306
+                        }],
+                        "type": "ClusterIP"
+                    }]
+                },
+                "persistence": {
+                    "title": "The persistence Schema",
+                    "type": "object",
+                    "default": {},
+                    "properties": {
+                        "enabled": {
+                            "title": "The enabled Schema",
+                            "type": "boolean",
+                            "default": false,
+                            "examples": [
+                                true
+                            ]
+                        },
+                        "storageRequest": {
+                            "title": "The storageRequest Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "5Gi"
+                            ]
+                        },
+                        "storageClassName": {
+                            "title": "The storageClassName Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                ""
+                            ]
+                        }
+                    },
+                    "examples": [{
+                        "enabled": true,
+                        "storageRequest": "5Gi",
+                        "storageClassName": ""
+                    }]
+                }
+            },
+            "examples": [{
+                "enabled": true,
+                "podSecurityContext": {},
+                "containerSecurityContext": {},
+                "nodeSelector": {},
+                "env": {
+                    "MYSQL_DATABASE": "db",
+                    "MYSQL_PASSWORD": "changeme",
+                    "MYSQL_RANDOM_ROOT_PASSWORD": "yes",
+                    "MYSQL_USER": "bunkerweb"
+                },
+                "envFrom": {},
+                "image": {
+                    "repository": "mariadb",
+                    "tag": "10.10",
+                    "imagePullPolicy": "Always"
+                },
+                "replicas": 1,
+                "resources": {},
+                "service": {
+                    "ports": [{
+                        "name": "sql",
+                        "port": 3306,
+                        "protocol": "TCP",
+                        "targetPort": 3306
+                    }],
+                    "type": "ClusterIP"
+                },
+                "persistence": {
+                    "enabled": true,
+                    "storageRequest": "5Gi",
+                    "storageClassName": ""
+                }
+            }]
+        },
+        "redis": {
+            "title": "The redis Schema",
+            "type": "object",
+            "default": {},
+            "properties": {
+                "enabled": {
+                    "title": "The enabled Schema",
+                    "type": "boolean",
+                    "default": false,
+                    "examples": [
+                        true
+                    ]
+                },
+                "podSecurityContext": {
+                    "title": "The podSecurityContext Schema",
+                    "type": "object",
+                    "default": {},
+                    "properties": {},
+                    "examples": [{}]
+                },
+                "containerSecurityContext": {
+                    "title": "The containerSecurityContext Schema",
+                    "type": "object",
+                    "default": {},
+                    "properties": {},
+                    "examples": [{}]
+                },
+                "nodeSelector": {
+                    "title": "The nodeSelector Schema",
+                    "type": "object",
+                    "default": {},
+                    "properties": {},
+                    "examples": [{}]
+                },
+                "envFrom": {
+                    "title": "The envFrom Schema",
+                    "type": "object",
+                    "default": {},
+                    "properties": {},
+                    "examples": [{}]
+                },
+                "image": {
+                    "title": "The image Schema",
+                    "type": "object",
+                    "default": {},
+                    "properties": {
+                        "repository": {
+                            "title": "The repository Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "redis"
+                            ]
+                        },
+                        "tag": {
+                            "title": "The tag Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "7-alpine"
+                            ]
+                        },
+                        "imagePullPolicy": {
+                            "title": "The imagePullPolicy Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "Always"
+                            ]
+                        }
+                    },
+                    "examples": [{
+                        "repository": "redis",
+                        "tag": "7-alpine",
+                        "imagePullPolicy": "Always"
+                    }]
+                },
+                "replicas": {
+                    "title": "The replicas Schema",
+                    "type": "integer",
+                    "default": 0,
+                    "examples": [
+                        1
+                    ]
+                },
+                "resources": {
+                    "title": "The resources Schema",
+                    "type": "object",
+                    "default": {},
+                    "properties": {},
+                    "examples": [{}]
+                },
+                "service": {
+                    "title": "The service Schema",
+                    "type": "object",
+                    "default": {},
+                    "properties": {
+                        "ports": {
+                            "title": "The ports Schema",
+                            "type": "array",
+                            "default": [],
+                            "items": {
+                                "title": "A Schema",
+                                "type": "object",
+                                "default": {},
+                                "properties": {
+                                    "name": {
+                                        "title": "The name Schema",
+                                        "type": "string",
+                                        "default": "",
+                                        "examples": [
+                                            "redis"
+                                        ]
+                                    },
+                                    "port": {
+                                        "title": "The port Schema",
+                                        "type": "integer",
+                                        "default": 0,
+                                        "examples": [
+                                            6379
+                                        ]
+                                    },
+                                    "protocol": {
+                                        "title": "The protocol Schema",
+                                        "type": "string",
+                                        "default": "",
+                                        "examples": [
+                                            "TCP"
+                                        ]
+                                    },
+                                    "targetPort": {
+                                        "title": "The targetPort Schema",
+                                        "type": "integer",
+                                        "default": 0,
+                                        "examples": [
+                                            6379
+                                        ]
+                                    }
+                                },
+                                "examples": [{
+                                    "name": "redis",
+                                    "port": 6379,
+                                    "protocol": "TCP",
+                                    "targetPort": 6379
+                                }]
+                            },
+                            "examples": [
+                                [{
+                                    "name": "redis",
+                                    "port": 6379,
+                                    "protocol": "TCP",
+                                    "targetPort": 6379
+                                }]
+                            ]
+                        },
+                        "type": {
+                            "title": "The type Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "ClusterIP"
+                            ]
+                        }
+                    },
+                    "examples": [{
+                        "ports": [{
+                            "name": "redis",
+                            "port": 6379,
+                            "protocol": "TCP",
+                            "targetPort": 6379
+                        }],
+                        "type": "ClusterIP"
+                    }]
+                }
+            },
+            "examples": [{
+                "enabled": true,
+                "podSecurityContext": {},
+                "containerSecurityContext": {},
+                "nodeSelector": {},
+                "envFrom": {},
+                "image": {
+                    "repository": "redis",
+                    "tag": "7-alpine",
+                    "imagePullPolicy": "Always"
+                },
+                "replicas": 1,
+                "resources": {},
+                "service": {
+                    "ports": [{
+                        "name": "redis",
+                        "port": 6379,
+                        "protocol": "TCP",
+                        "targetPort": 6379
+                    }],
+                    "type": "ClusterIP"
+                }
+            }]
+        },
+        "scheduler": {
+            "title": "The scheduler Schema",
+            "type": "object",
+            "default": {},
+            "properties": {
+                "podSecurityContext": {
+                    "title": "The podSecurityContext Schema",
+                    "type": "object",
+                    "default": {},
+                    "properties": {},
+                    "examples": [{}]
+                },
+                "containerSecurityContext": {
+                    "title": "The containerSecurityContext Schema",
+                    "type": "object",
+                    "default": {},
+                    "properties": {},
+                    "examples": [{}]
+                },
+                "nodeSelector": {
+                    "title": "The nodeSelector Schema",
+                    "type": "object",
+                    "default": {},
+                    "properties": {},
+                    "examples": [{}]
+                },
+                "env": {
+                    "title": "The env Schema",
+                    "type": "object",
+                    "default": {},
+                    "properties": {
+                        "DATABASE_URI": {
+                            "title": "The DATABASE_URI Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "mariadb+pymysql://bunkerweb:changeme@bunkerweb-db:3306/db"
+                            ]
+                        },
+                        "KUBERNETES_MODE": {
+                            "title": "The KUBERNETES_MODE Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "yes"
+                            ]
+                        }
+                    },
+                    "examples": [{
+                        "DATABASE_URI": "mariadb+pymysql://bunkerweb:changeme@bunkerweb-db:3306/db",
+                        "KUBERNETES_MODE": "yes"
+                    }]
+                },
+                "envFrom": {
+                    "title": "The envFrom Schema",
+                    "type": "object",
+                    "default": {},
+                    "properties": {},
+                    "examples": [{}]
+                },
+                "image": {
+                    "title": "The image Schema",
+                    "type": "object",
+                    "default": {},
+                    "properties": {
+                        "repository": {
+                            "title": "The repository Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "bunkerity/bunkerweb-scheduler"
+                            ]
+                        },
+                        "tag": {
+                            "title": "The tag Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "1.5.7"
+                            ]
+                        },
+                        "imagePullPolicy": {
+                            "title": "The imagePullPolicy Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "Always"
+                            ]
+                        }
+                    },
+                    "examples": [{
+                        "repository": "bunkerity/bunkerweb-scheduler",
+                        "tag": "1.5.7",
+                        "imagePullPolicy": "Always"
+                    }]
+                },
+                "replicas": {
+                    "title": "The replicas Schema",
+                    "type": "integer",
+                    "default": 0,
+                    "examples": [
+                        1
+                    ]
+                },
+                "resources": {
+                    "title": "The resources Schema",
+                    "type": "object",
+                    "default": {},
+                    "properties": {},
+                    "examples": [{}]
+                },
+                "volumeMounts": {
+                    "title": "The volumeMounts Schema",
+                    "type": "object",
+                    "default": {},
+                    "properties": {},
+                    "examples": [{}]
+                },
+                "volumes": {
+                    "title": "The volumes Schema",
+                    "type": "object",
+                    "default": {},
+                    "properties": {},
+                    "examples": [{}]
+                }
+            },
+            "examples": [{
+                "podSecurityContext": {},
+                "containerSecurityContext": {},
+                "nodeSelector": {},
+                "env": {
+                    "DATABASE_URI": "mariadb+pymysql://bunkerweb:changeme@bunkerweb-db:3306/db",
+                    "KUBERNETES_MODE": "yes"
+                },
+                "envFrom": {},
+                "image": {
+                    "repository": "bunkerity/bunkerweb-scheduler",
+                    "tag": "1.5.7",
+                    "imagePullPolicy": "Always"
+                },
+                "replicas": 1,
+                "resources": {},
+                "volumeMounts": {},
+                "volumes": {}
+            }]
+        },
+        "kubernetesClusterDomain": {
+            "title": "The kubernetesClusterDomain Schema",
+            "type": "string",
+            "default": "",
+            "examples": [
+                "cluster.local"
+            ]
+        },
+        "saBunkerweb": {
+            "title": "The saBunkerweb Schema",
+            "type": "object",
+            "default": {},
+            "properties": {
+                "serviceAccount": {
+                    "title": "The serviceAccount Schema",
+                    "type": "object",
+                    "default": {},
+                    "properties": {
+                        "annotations": {
+                            "title": "The annotations Schema",
+                            "type": "object",
+                            "default": {},
+                            "properties": {},
+                            "examples": [{}]
+                        }
+                    },
+                    "examples": [{
+                        "annotations": {}
+                    }]
+                }
+            },
+            "examples": [{
+                "serviceAccount": {
+                    "annotations": {}
+                }
+            }]
+        }
+    },
+    "examples": [{
+        "registry": {
+            "imagePullSecretName": "regcred",
+            "imageCredentials": {
+                "enabled": false,
+                "registry": "",
+                "username": "",
+                "password": ""
+            }
+        },
+        "bunkerweb": {
+            "podSecurityContext": {},
+            "containerSecurityContext": {
+                "allowPrivilegeEscalation": false,
+                "capabilities": {
+                    "drop": [
+                        "ALL"
+                    ]
+                },
+                "runAsGroup": 101,
+                "runAsUser": 101
+            },
+            "env": {
+                "API_WHITELIST_IP": "127.0.0.0/8 10.0.0.0/8",
+                "DNS_RESOLVERS": "coredns.kube-system.svc.cluster.local",
+                "KUBERNETES_MODE": "yes",
+                "MULTISITE": "yes",
+                "REDIS_HOST": "bunkerweb-redis.default.svc.cluster.local",
+                "SERVER_NAME": "",
+                "USE_API": "yes",
+                "USE_REDIS": "yes"
+            },
+            "envFrom": {},
+            "image": {
+                "repository": "bunkerity/bunkerweb",
+                "tag": "1.5.7",
+                "imagePullPolicy": "Always"
+            },
+            "resources": {},
+            "nodeSelector": {},
+            "service": {
+                "annotations": {},
+                "type": "LoadBalancer",
+                "clusterIP": "None",
+                "loadBalancerSourceRanges": [],
+                "loadBalancerIP": [],
+                "externalTrafficPolicy": "Local",
+                "loadBalancerClass": "",
+                "ports": [{
+                    "name": "http",
+                    "port": 80,
+                    "protocol": "TCP",
+                    "targetPort": "http"
+                },
+                {
+                    "name": "https",
+                    "port": 443,
+                    "protocol": "TCP",
+                    "targetPort": "https"
+                }]
+            }
+        },
+        "controller": {
+            "podSecurityContext": {},
+            "containerSecurityContext": {},
+            "nodeSelector": {},
+            "env": {
+                "DATABASE_URI": "mariadb+pymysql://bunkerweb:changeme@bunkerweb-db:3306/db",
+                "KUBERNETES_MODE": "yes"
+            },
+            "envFrom": {},
+            "image": {
+                "repository": "bunkerity/bunkerweb-autoconf",
+                "tag": "1.5.7",
+                "imagePullPolicy": "Always"
+            },
+            "replicas": 1,
+            "resources": {},
+            "initContainers": {},
+            "volumeMounts": {},
+            "volumes": {}
+        },
+        "clamav": {
+            "enabled": false,
+            "podSecurityContext": {},
+            "containerSecurityContext": {},
+            "nodeSelector": {},
+            "env": {},
+            "envFrom": {},
+            "image": {
+                "repository": "clamav/clamav",
+                "tag": 1.2,
+                "imagePullPolicy": "Always"
+            },
+            "replicas": 1,
+            "resources": {},
+            "initContainers": {},
+            "volumeMounts": {},
+            "volumes": {},
+            "service": {
+                "annotations": {},
+                "ports": [{
+                    "name": "tcp",
+                    "protocol": "TCP",
+                    "port": 3310,
+                    "targetPort": 3310
+                }]
+            }
+        },
+        "ui": {
+            "enabled": true,
+            "podSecurityContext": {},
+            "containerSecurityContext": {},
+            "nodeSelector": {},
+            "env": {
+                "DATABASE_URI": "mariadb+pymysql://bunkerweb:changeme@bunkerweb-db:3306/db",
+                "KUBERNETES_MODE": "yes",
+                "ADMIN_USERNAME": "bunkerAdmin",
+                "ADMIN_PASSWORD": "ChangeIT",
+                "ABSOLUTE_URI": "https://bunkerweb-build.service.ovh/"
+            },
+            "envFrom": {},
+            "image": {
+                "repository": "bunkerity/bunkerweb-ui",
+                "tag": "1.5.7",
+                "imagePullPolicy": "Always"
+            },
+            "replicas": 1,
+            "resources": {},
+            "service": {
+                "annotations": {},
+                "ports": [{
+                    "name": "http",
+                    "protocol": "TCP",
+                    "port": 7000,
+                    "targetPort": 7000
+                }],
+                "type": "ClusterIP"
+            },
+            "ingress": {
+                "enabled": true,
+                "annotations": {},
+                "path": "/",
+                "host": "bunkerweb.tld.local",
+                "ingressClassName": "",
+                "secretName": "mysecret",
+                "enabledTls": true
+            }
+        },
+        "db": {
+            "enabled": true,
+            "podSecurityContext": {},
+            "containerSecurityContext": {},
+            "nodeSelector": {},
+            "env": {
+                "MYSQL_DATABASE": "db",
+                "MYSQL_PASSWORD": "changeme",
+                "MYSQL_RANDOM_ROOT_PASSWORD": "yes",
+                "MYSQL_USER": "bunkerweb"
+            },
+            "envFrom": {},
+            "image": {
+                "repository": "mariadb",
+                "tag": "10.10",
+                "imagePullPolicy": "Always"
+            },
+            "replicas": 1,
+            "resources": {},
+            "service": {
+                "ports": [{
+                    "name": "sql",
+                    "port": 3306,
+                    "protocol": "TCP",
+                    "targetPort": 3306
+                }],
+                "type": "ClusterIP"
+            },
+            "persistence": {
+                "enabled": true,
+                "storageRequest": "5Gi",
+                "storageClassName": ""
+            }
+        },
+        "redis": {
+            "enabled": true,
+            "podSecurityContext": {},
+            "containerSecurityContext": {},
+            "nodeSelector": {},
+            "envFrom": {},
+            "image": {
+                "repository": "redis",
+                "tag": "7-alpine",
+                "imagePullPolicy": "Always"
+            },
+            "replicas": 1,
+            "resources": {},
+            "service": {
+                "ports": [{
+                    "name": "redis",
+                    "port": 6379,
+                    "protocol": "TCP",
+                    "targetPort": 6379
+                }],
+                "type": "ClusterIP"
+            }
+        },
+        "scheduler": {
+            "podSecurityContext": {},
+            "containerSecurityContext": {},
+            "nodeSelector": {},
+            "env": {
+                "DATABASE_URI": "mariadb+pymysql://bunkerweb:changeme@bunkerweb-db:3306/db",
+                "KUBERNETES_MODE": "yes"
+            },
+            "envFrom": {},
+            "image": {
+                "repository": "bunkerity/bunkerweb-scheduler",
+                "tag": "1.5.7",
+                "imagePullPolicy": "Always"
+            },
+            "replicas": 1,
+            "resources": {},
+            "volumeMounts": {},
+            "volumes": {}
+        },
+        "kubernetesClusterDomain": "cluster.local",
+        "saBunkerweb": {
+            "serviceAccount": {
+                "annotations": {}
+            }
+        }
+    }]
+}

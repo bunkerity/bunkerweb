@@ -1,0 +1,29 @@
+{{- if and .Values.ui.enabled .Values.ui.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: bunkerweb-ui
+  {{- with .Values.ui.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  ingressClassName: {{ .Values.ui.ingress.ingressClassName }}
+  rules:
+    - host: {{ .Values.ui.ingress.host }}
+      http:
+        paths:
+          - path: {{ .Values.ui.ingress.path }}
+            pathType: Prefix
+            backend:
+              service:
+                name: bunkerweb-ui
+                port:
+                  number: 7000
+{{- if  .Values.ui.ingress.enabledTls }}
+  tls:
+  - hosts:
+    - {{ .Values.ui.ingress.host }}
+    secretName: {{ .Values.ui.ingress.secretName }}
+{{- end }}
+{{- end }}
