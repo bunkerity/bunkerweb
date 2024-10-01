@@ -117,6 +117,15 @@
     "regex": "^(?! )(( *[^ ]+)(?!.*\\2))*$",
     "type": "text"
   },
+  "WORKERLOCK_MEMORY_SIZE": {
+    "context": "global",
+    "default": "48k",
+    "help": "Size of lua_shared_dict for initialization workers",
+    "id": "workerlock-memory-size",
+    "label": "Initialization Workerlock memory size",
+    "regex": "^\\d+[kKmMgG]?$",
+    "type": "text"
+  },
   "DATASTORE_MEMORY_SIZE": {
     "context": "global",
     "default": "64m",

@@ -66,7 +66,7 @@ jobs:
         if: inputs.RELEASE == '1.5'
         run: |
           container_id=$(docker create "ghcr.io/bunkerity/ubuntu-tests:${{ inputs.RELEASE }}")
-          docker cp "$container_id:/opt/bunkerweb_dev-1_amd64.deb" "/tmp/bunkerweb.deb"
+          docker cp "$container_id:/opt/bunkerweb_1.5-dev-1_amd64.deb" "/tmp/bunkerweb.deb"
           docker rm "$container_id"
       - name: Install NGINX
         run: |
@@ -76,7 +76,7 @@ jobs:
           curl https://nginx.org/keys/nginx_signing.key | gpg --dearmor | sudo tee /usr/share/keyrings/nginx-archive-keyring.gpg >/dev/null
           echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] http://nginx.org/packages/ubuntu `lsb_release -cs` nginx" | sudo tee /etc/apt/sources.list.d/nginx.list
           sudo apt update
-          sudo -E apt install -y nginx=1.26.1-2~noble
+          sudo -E apt install -y nginx=1.26.2-1~noble
       - name: Fix version without a starting number
         if: inputs.RELEASE == 'testing' || inputs.RELEASE == 'dev' || inputs.RELEASE == 'ui' || inputs.RELEASE == '1.5'
         run: echo "force-bad-version" | sudo tee -a /etc/dpkg/dpkg.cfg

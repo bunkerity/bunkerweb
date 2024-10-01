@@ -59,15 +59,7 @@ services:
       DATASOURCES_DEFAULT_USERNAME: "user"
       DATASOURCES_DEFAULT_PASSWORD: "db-user-pwd" # replace with a stronger password (must match MYSQL_PASSWORD)
       DATASOURCES_DEFAULT_DATABASE: "passbolt"
-    command:
-      [
-        "/usr/bin/wait-for.sh",
-        "-t",
-        "0",
-        "mydb:3306",
-        "--",
-        "/docker-entrypoint.sh"
-      ]
+    command: [ "/usr/bin/wait-for.sh", "-t", "0", "mydb:3306", "--", "/docker-entrypoint.sh" ]
     networks:
       - passbolt-net
       - bw-services

@@ -220,6 +220,7 @@ function start() {
 
     # Execute scheduler
     log "SYSTEMCTL" "ℹ️ " "Executing scheduler ..."
+    export SCHEDULER_LOG_TO_FILE=yes
     sudo -E -u nginx -g nginx /bin/bash -c "PYTHONPATH=/usr/share/bunkerweb/deps/python/ /usr/share/bunkerweb/scheduler/main.py --variables /etc/bunkerweb/variables.env"
     # shellcheck disable=SC2181
     if [ $? -ne 0 ] ; then

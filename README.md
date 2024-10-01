@@ -302,7 +302,7 @@ List of supported Linux distros :
 - RHEL 8.9
 - RHEL 9.4
 
-You will find more information in the [Linux section](https://docs.bunkerweb.io/1.5.9/integrations/?utm_campaign=self&utm_source=github#linux) of the documentation.
+You will find more information in the [Linux section](https://docs.bunkerweb.io/1.5.10/integrations/?utm_campaign=self&utm_source=github#linux) of the documentation.
 
 ## Microsoft Azure
 
