@@ -71,7 +71,7 @@
                     </tr>
                 {% endfor %}
             </tbody>
-            <input type="hidden" id="countries" value="{{ ns.countries|join(',') }}" />
+            <input type="hidden" id="countries" value="{{ ns.countries|join(",") }}" />
             <span class="position-absolute bottom-0 start-50 translate-middle badge rounded-pill bg-secondary">
                 TZ: <script nonce="{{ script_nonce }}">document.write(Intl.DateTimeFormat().resolvedOptions().timeZone);</script>
             </span>
