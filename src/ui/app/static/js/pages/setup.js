@@ -33,22 +33,22 @@ $(document).ready(() => {
     isValid = validateCondition(
       password.length >= 8,
       "#length-check i",
-      isValid,
+      isValid
     );
     isValid = validateCondition(
       /[A-Z]/.test(password),
       "#uppercase-check i",
-      isValid,
+      isValid
     );
     isValid = validateCondition(
       /\d/.test(password),
       "#number-check i",
-      isValid,
+      isValid
     );
     isValid = validateCondition(
       /[ -~]/.test(password),
       "#special-check i",
-      isValid,
+      isValid
     ); // Check for special characters
 
     return isValid;
@@ -121,10 +121,12 @@ $(document).ready(() => {
       const text = (await response.text()).trim().toLowerCase();
       if (response.status === 200 && text === "ok") {
         return true;
+      } else if (text === "error") {
+        return "Server name check failed";
       }
       return false;
     } catch (error) {
-      return false;
+      return error.message;
     }
   };
 
@@ -146,30 +148,50 @@ $(document).ready(() => {
     const primaryURL = `https://${serverName}/setup/check`;
     const fallbackURL = `${window.location.origin}/setup/check?server_name=${serverName}`;
 
-    let isSuccess = await fetchCheck(primaryURL);
+    let result = await fetchCheck(primaryURL);
 
-    if (!isSuccess) {
-      isSuccess = await fetchCheck(fallbackURL);
+    if (!result || typeof result === "string") {
+      result = await fetchCheck(fallbackURL);
     }
 
     $overviewUniqueServerName
       .find("i")
       .toggleClass("bx-question-mark text-warning", false);
 
+    const $input = $("#SERVER_NAME");
+    const isValid = result && typeof result !== "string";
+
+    // Toggle valid/invalid classes
+    $input.toggleClass("is-invalid", !isValid);
+
+    // Manage the invalid-feedback element
+    let $feedback = $input.siblings(".invalid-feedback");
+    if (!$feedback.length) {
+      const $textSpan = $input.parent().find("span.input-group-text");
+      $feedback = $('<div class="invalid-feedback"></div>').insertAfter(
+        $textSpan.length ? $textSpan : $input
+      );
+    }
+
     const feedbackToast = $("#feedback-toast").clone(); // Clone the feedback toast
     feedbackToast.attr("id", `feedback-toast-${toastNum++}`); // Corrected to set the ID for the toast
-    if (!isSuccess) {
+    if (!isValid) {
+      $feedback.text("Server name is not unique.");
       feedbackToast.removeClass("bg-primary");
       feedbackToast.addClass("bg-danger");
       feedbackToast.find("span").text("Server name is not unique.");
       feedbackToast
         .find("div.toast-body")
         .text("Please choose a different server name.");
-      $overviewUniqueServerName
-        .find("i")
-        .toggleClass("bx-check text-success", false)
-        .toggleClass("bx-x text-danger", true);
+      if (typeof result !== "string")
+        $overviewUniqueServerName
+          .find("i")
+          .toggleClass("bx-check text-success", false)
+          .toggleClass("bx-x text-danger", true);
     } else {
+      $feedback.text("");
+      feedbackToast.removeClass("bg-danger");
+      feedbackToast.addClass("bg-primary");
       feedbackToast.find("span").text("Server name is unique.");
       feedbackToast
         .find("div.toast-body")
@@ -179,8 +201,11 @@ $(document).ready(() => {
         .toggleClass("bx-check text-success", true)
         .toggleClass("bx-x text-danger", false);
     }
+
     feedbackToast.appendTo("#feedback-toast-container"); // Ensure the toast is appended to the container
     feedbackToast.toast("show");
+
+    return result;
   };
 
   /**
@@ -231,7 +256,7 @@ $(document).ready(() => {
       if (!$feedback.length) {
         const $textSpan = $input.parent().find("span.input-group-text");
         $feedback = $('<div class="invalid-feedback"></div>').insertAfter(
-          $textSpan.length ? $textSpan : $input,
+          $textSpan.length ? $textSpan : $input
         );
       }
 
@@ -324,14 +349,34 @@ $(document).ready(() => {
    */
   const populateOverview = () => {
     if (!uiUser) {
-      $("#overview_username").val($("#username").val());
-      $("#overview_password").val($("#password").val());
+      const $overviewEmail = $("#overview_email");
+      const $overviewUsername = $("#overview_username");
+      const $overviewPassword = $("#overview_password");
+      const adminEmail = $("#email").val();
+
+      if (adminEmail) {
+        $overviewEmail.val(adminEmail);
+        $overviewEmail.closest(".col-12").removeClass("d-none");
+        $overviewUsername.closest(".col-12").addClass("col-md-4");
+        $overviewPassword
+          .closest(".col-12")
+          .addClass("col-md-4")
+          .removeClass("col-sm-6");
+      } else {
+        $overviewEmail.closest(".col-12").addClass("d-none");
+        $overviewUsername.closest(".col-12").removeClass("col-md-4");
+        $overviewPassword
+          .closest(".col-12")
+          .removeClass("col-md-4")
+          .addClass("col-sm-6");
+      }
+      $overviewUsername.val($("#username").val());
+      $overviewPassword.val($("#password").val());
     }
     if (!uiReverseProxy) {
       $("#overview_service_url").val(
-        `https://${getServerName()}${$("#REVERSE_PROXY_URL").val()}`,
+        `https://${getServerName()}${$("#REVERSE_PROXY_URL").val()}`
       );
-      $("#overview_email_lets_encrypt").val($("#EMAIL_LETS_ENCRYPT").val());
     }
   };
 
@@ -339,11 +384,11 @@ $(document).ready(() => {
    * Handles navigation to the next or previous step.
    * @param {boolean} isNext - True if navigating forward, false if backward.
    */
-  const handleStepNavigation = (isNext) => {
+  const handleStepNavigation = async (isNext, force = false) => {
     const newStep = isNext ? currentStep + 1 : currentStep - 1;
     const $currentStepContainer = $(`#navs-steps-${currentStep}`);
 
-    if (isNext) {
+    if (!force && isNext) {
       let isStepValid = validateCurrentStepInputs($currentStepContainer);
 
       // Additional validation for step 1 (password confirmation)
@@ -359,7 +404,7 @@ $(document).ready(() => {
               .parent()
               .find("span.input-group-text");
             $feedback = $(
-              '<div class="invalid-feedback">Passwords do not match.</div>',
+              '<div class="invalid-feedback">Passwords do not match.</div>'
             ).insertAfter($textSpan.length ? $textSpan : $confirmPasswordInput);
           } else {
             $feedback.text("Passwords do not match.");
@@ -368,6 +413,29 @@ $(document).ready(() => {
         } else {
           $confirmPasswordInput.removeClass("is-invalid");
           $confirmPasswordInput.siblings(".invalid-feedback").text("");
+        }
+      } else if (!uiReverseProxy && currentStep === 2) {
+        const result = await checkDNS();
+        const modal = $("#modal-confirm-dns");
+        const $checkUrl = $("#check-url");
+        const serverName = getServerName();
+        $checkUrl.attr("href", `https://${serverName}/setup/check`);
+        isStepValid = false;
+
+        if (typeof result === "string") {
+          $("#dns-check-title").text("Error");
+          $("#dns-check-result").html(
+            `Are you sure you want to proceed to the next step?<br/>Error: ${result}`
+          );
+          modal.modal("show");
+        } else if (!result) {
+          $("#dns-check-title").text("Server name is not unique");
+          $("#dns-check-result").html(
+            `Are you sure you want to proceed to the next step?<br/>Server name "${serverName}" is not unique.`
+          );
+          modal.modal("show");
+        } else {
+          isStepValid = true;
         }
       }
 
@@ -389,7 +457,7 @@ $(document).ready(() => {
     debounce(function () {
       const isValid = validatePassword();
       updateValidationState(this, isValid);
-    }, 100),
+    }, 100)
   );
 
   // Real-time validation for other plugin settings
@@ -404,7 +472,7 @@ $(document).ready(() => {
       $this
         .toggleClass("is-valid", isValid)
         .toggleClass("is-invalid", !isValid);
-    }, 100),
+    }, 100)
   );
 
   // Remove validation state on focus out
@@ -442,11 +510,11 @@ $(document).ready(() => {
       formData.append("ui_url", ui_url);
       formData.append(
         "auto_lets_encrypt",
-        $("#AUTO_LETS_ENCRYPT").prop("checked") ? "yes" : "no",
+        $("#AUTO_LETS_ENCRYPT").prop("checked") ? "yes" : "no"
       );
       formData.append(
         "lets_encrypt_staging",
-        $("#LETS_ENCRYPT_STAGING").prop("checked") ? "yes" : "no",
+        $("#LETS_ENCRYPT_STAGING").prop("checked") ? "yes" : "no"
       );
       formData.append("email_lets_encrypt", $("#EMAIL_LETS_ENCRYPT").val());
     }
@@ -501,17 +569,8 @@ $(document).ready(() => {
     e.preventDefault();
 
     const isNext = $(this).hasClass("next-step");
-    handleStepNavigation(isNext);
-  });
-
-  // DNS Check Button Click
-  $("#check-dns").on("click", function (e) {
-    e.preventDefault();
-    if (uiReverseProxy) return;
-
-    if (currentStep !== CHECK_STEP) return;
-
-    checkDNS();
+    const confirmDNS = this.id === "confirm-dns";
+    handleStepNavigation(isNext, confirmDNS);
   });
 
   $2faInput.on("input", function () {

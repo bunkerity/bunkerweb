@@ -423,7 +423,7 @@
                                     {% if not ui_user %}
                                         <h6 class="mt-2 mb-1 fw-bold">Admin User</h6>
                                         {% set input_readonly = true %}
-                                        <div class="col-12 col-sm-6 pb-3">
+                                        <div class="col-12 col-sm-6 col-md-4 pb-3">
                                             <div class="d-flex justify-content-between align-items-center">
                                                 <label id="label-overview_username"
                                                        for="overview_username"
@@ -435,7 +435,17 @@
                                             {% set setting_data = {"type": "text", "id": "overview_username", "regex": "^.{1,256}$"} %}
                                             {% include "models/input_setting.html" %}
                                         </div>
-                                        <div class="col-12 col-sm-6 pb-3">
+                                        <div class="col-12 col-sm-6 col-md-4 pb-3">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <label id="label-overview_email"
+                                                       for="overview_email"
+                                                       class="form-label fw-semibold text-truncate">Admin Email</label>
+                                            </div>
+                                            {% set setting = "email" %}
+                                            {% set setting_data = {"type": "email", "id": "overview_email", "regex": "^.*$"} %}
+                                            {% include "models/input_setting.html" %}
+                                        </div>
+                                        <div class="col-12 col-md-4 pb-3">
                                             <div class="d-flex justify-content-between align-items-center">
                                                 <label id="label-overview_password"
                                                        for="overview_password"
@@ -449,52 +459,21 @@
                                         </div>
                                     {% endif %}
                                     {% if not ui_reverse_proxy %}
-                                        <h6 class="mt-2 mb-1 fw-bold">UI specific Settings</h6>
-                                        <div class="col-12 col-sm-6 pb-3">
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <label id="label-overview_service_url"
-                                                       for="overview_service_url"
-                                                       class="form-label fw-semibold text-truncate">
-                                                    BunkerWeb UI final URL
-                                                </label>
+                                        <div class="row justify-content-center">
+                                            <div class="col-6 pb-3">
+                                                <h6 class="mt-2 mb-1 fw-bold">BunkerWeb UI final URL</h6>
+                                                {% set setting = "SERVER_NAME + REVERSE_PROXY_HOST" %}
+                                                {% set setting_data = {"type": "text", "id": "overview_service_url", "regex": "^.+$"} %}
+                                                {% include "models/input_setting.html" %}
                                             </div>
-                                            {% set setting = "SERVER_NAME + REVERSE_PROXY_HOST" %}
-                                            {% set setting_data = {"type": "text", "id": "overview_service_url", "regex": "^.+$"} %}
-                                            {% include "models/input_setting.html" %}
                                         </div>
-                                        <div class="col-sm-6 pb-3">
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <label id="label-overview_email_lets_encrypt"
-                                                       for="overview_email_lets_encrypt"
-                                                       class="form-label fw-semibold text-truncate">
-                                                    Email for Let's Encrypt
-                                                </label>
-                                                <div class="d-flex align-items-center">
-                                                    <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
-                                                          data-bs-toggle="tooltip"
-                                                          data-bs-placement="top"
-                                                          data-bs-original-title="The email address that will be used for Let's Encrypt">
-                                                        <span class="bx bx-question-mark bx-xs"></span>
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            {% set setting = "EMAIL_LETS_ENCRYPT" %}
-                                            {% set setting_data = {"type": "text", "id": "overview_email_lets_encrypt", "regex": "^.*$"} %}
-                                            {% include "models/input_setting.html" %}
-                                        </div>
-                                        <div class="text-center pt-2 mb-6">
-                                                <h6 class="mb-1 fw-bold">Check server name DNS</h6>
-                                                <button id="check-dns" class="btn btn-primary">Check DNS</button>
-                                                <p class="mt-1 mb-0">
-                                                    In case of issues, you can also click <a id="check_url"
-    class="fw-semibold"
-    href="https://www.example.com/setup/check"
-    target="_blank"
-    data-bs-toggle="tooltip"
-    data-bs-placement="top"
-    data-bs-original-title='If the shown text is "ok", that means that the server name is available'>here</a> to perform a manual check.
-                                                </p>
-                                        </div>
+                                        <!-- <div class="text-center pt-2 mb-6">
+                                            <h6 class="mb-1 fw-bold">Check server name DNS</h6>
+                                            <button id="check-dns" class="btn btn-primary">Check DNS</button>
+                                            <p class="mt-1 mb-0">
+                                                In case of issues, you can also click <a id="check_url" class="fw-semibold" href="https://www.example.com/setup/check" target="_blank" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title='If the shown text is "ok", that means that the server name is available'>here</a> to perform a manual check.
+                                            </p>
+                                        </div> -->
                                     {% endif %}
                                     <div class="row p-0">
                                         <div class="col-md-{% if not ui_user %}4{% else %}6{% endif %}">
@@ -593,12 +572,12 @@
         </div>
     </div>
     <div id="feedback-toast"
-         class="bs-toast toast fade bg-primary text-white"
+         class="bs-toast toast fade"
          role="alert"
          aria-live="assertive"
          aria-atomic="true"
          data-bs-autohide="true"
-         data-bs-delay="8000">
+         data-bs-delay="10000">
         <div class="toast-header">
             <i class="d-block w-px-20 h-auto rounded me-2 tf-icons bx bx-bell"></i>
             <span class="fw-medium me-auto">BunkerWeb Forever</span>
@@ -610,6 +589,48 @@
         </div>
         <div class="toast-body">If you read this, it means that you're curious 👀</div>
     </div>
+    {% if not ui_reverse_proxy %}
+        <div class="modal fade"
+             id="modal-confirm-dns"
+             data-bs-backdrop="static"
+             tabindex="-1"
+             aria-hidden="true"
+             role="dialog">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 id="dns-check-title" class="modal-title">Server name is not unique</h5>
+                        <button type="button"
+                                class="btn-close"
+                                data-bs-dismiss="modal"
+                                aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="dns-check-result"
+                             class="alert alert-danger text-center"
+                             role="alert">Are you sure you want to proceed to the next step?</div>
+                        <p class="mt-1 mb-0 text-center">
+                            In case of issues, you can also click <a id="check-url"
+    class="fw-semibold"
+    href="https://www.example.com/setup/check"
+    target="_blank"
+    data-bs-toggle="tooltip"
+    data-bs-placement="top"
+    data-bs-original-title='If the shown text is "ok", that means that the server name is available'>here</a> to perform a manual check.
+                        </p>
+                    </div>
+                    <div class="modal-footer justify-content-center">
+                        <button id="confirm-dns"
+                                class="btn btn-outline-danger next-step me-2"
+                                data-bs-dismiss="modal">Proceed</button>
+                        <button type="reset"
+                                class="btn btn-outline-secondary"
+                                data-bs-dismiss="modal">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
     <div class="modal fade"
          id="loadingModal"
          data-bs-backdrop="static"
