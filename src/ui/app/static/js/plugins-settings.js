@@ -124,7 +124,7 @@ $(document).ready(() => {
       if ($collapseContainer.length && !$collapseContainer.hasClass("show")) {
         // Expand the multiple setting group if it's collapsed
         const toggleButton = $(
-          `[data-bs-target="#${$collapseContainer.attr("id")}"]`,
+          `[data-bs-target="#${$collapseContainer.attr("id")}"]`
         );
         toggleButton.trigger("click");
       }
@@ -195,7 +195,7 @@ $(document).ready(() => {
       let $feedback = $input.next(".invalid-feedback");
       if (!$feedback.length) {
         $feedback = $('<div class="invalid-feedback"></div>').insertAfter(
-          $input,
+          $input
         );
       }
 
@@ -229,7 +229,7 @@ $(document).ready(() => {
           type: "hidden",
           name: name,
           value: $("<div>").text(value).html(), // Sanitize the value
-        }),
+        })
       );
     };
 
@@ -400,13 +400,13 @@ $(document).ready(() => {
       if (visibleItems === 0) {
         if ($pluginDropdownMenu.find(".no-plugin-items").length === 0) {
           $pluginDropdownMenu.append(
-            '<li class="no-plugin-items dropdown-item text-muted">No Item</li>',
+            '<li class="no-plugin-items dropdown-item text-muted">No Item</li>'
           );
         }
       } else {
         $pluginDropdownMenu.find(".no-plugin-items").remove();
       }
-    }, 50),
+    }, 50)
   );
 
   $("#select-template").on("click", () => $templateSearch.focus());
@@ -431,13 +431,13 @@ $(document).ready(() => {
       if (visibleItems === 0) {
         if ($templateDropdownMenu.find(".no-template-items").length === 0) {
           $templateDropdownMenu.append(
-            '<li class="no-template-items dropdown-item text-muted">No Item</li>',
+            '<li class="no-template-items dropdown-item text-muted">No Item</li>'
           );
         }
       } else {
         $templateDropdownMenu.find(".no-template-items").remove();
       }
-    }, 50),
+    }, 50)
   );
 
   $(document).on("hidden.bs.dropdown", "#select-plugin", function () {
@@ -453,21 +453,21 @@ $(document).ready(() => {
     "shown.bs.tab",
     (e) => {
       handleModeChange($(e.target).data("bs-target"));
-    },
+    }
   );
 
   $('#plugins-dropdown-menu button[data-bs-toggle="tab"]').on(
     "shown.bs.tab",
     (e) => {
       handleTabChange($(e.target).data("bs-target"));
-    },
+    }
   );
 
   $('#templates-dropdown-menu button[data-bs-toggle="tab"]').on(
     "shown.bs.tab",
     (e) => {
       handleTabChange($(e.target).data("bs-target"));
-    },
+    }
   );
 
   $(document).on("input", ".plugin-setting", function () {
@@ -553,7 +553,7 @@ $(document).ready(() => {
       if (matchedPlugin) {
         // Automatically switch to the plugin tab
         $(`button[data-bs-target="#navs-plugins-${matchedPlugin}"]`).tab(
-          "show",
+          "show"
         );
 
         // Highlight all matched settings
@@ -561,7 +561,7 @@ $(document).ready(() => {
           highlightSettings(matchedSettings, 1000);
         }
       }
-    }, 100),
+    }, 100)
   );
 
   $(document).on("click", ".show-multiple", function () {
@@ -569,7 +569,7 @@ $(document).ready(() => {
     $(this).html(
       `<i class="bx bx-${
         toggleText === "SHOW" ? "hide" : "show-alt"
-      } bx-sm"></i>&nbsp;${toggleText}`,
+      } bx-sm"></i>&nbsp;${toggleText}`
     );
   });
 
@@ -584,7 +584,7 @@ $(document).ready(() => {
           $(this)
             .find(".multiple-collapse")
             .attr("id")
-            .replace(`${multipleId}-`, ""),
+            .replace(`${multipleId}-`, "")
         );
       })
       .get()
@@ -696,7 +696,7 @@ $(document).ready(() => {
         $(this)
           .find(".multiple-collapse")
           .attr("id")
-          .replace(`${multipleId}-`, ""),
+          .replace(`${multipleId}-`, "")
       );
       if (containerSuffix > suffix) {
         $(this).before(multipleClone); // Insert before the first container with a higher suffix
@@ -797,7 +797,7 @@ $(document).ready(() => {
     $(".toggle-draft").html(
       `<i class="bx bx-sm bx-${
         isDraft ? "globe" : "file-blank"
-      } bx-sm"></i>&nbsp;${isDraft ? "Online" : "Draft"}`,
+      } bx-sm"></i>&nbsp;${isDraft ? "Online" : "Draft"}`
     );
   });
 
@@ -961,7 +961,7 @@ $(document).ready(() => {
           .parent()
           .attr(
             "title",
-            "Cannot remove because one or more settings are disabled",
+            "Cannot remove because one or more settings are disabled"
           );
 
         new bootstrap.Tooltip(
@@ -970,7 +970,7 @@ $(document).ready(() => {
             .get(0),
           {
             placement: "top",
-          },
+          }
         );
       }
     });
@@ -986,7 +986,7 @@ $(document).ready(() => {
 
   if (currentMode === "easy" && currentTemplate !== "high") {
     $(`button[data-bs-target="#navs-templates-${currentTemplate}"]`).tab(
-      "show",
+      "show"
     );
   }
 
@@ -1012,7 +1012,7 @@ $(document).ready(() => {
   const hash = window.location.hash;
   if (hash) {
     const targetTab = $(
-      `button[data-bs-target="#navs-plugins-${hash.substring(1)}"]`,
+      `button[data-bs-target="#navs-plugins-${hash.substring(1)}"]`
     );
     if (targetTab.length) targetTab.tab("show");
   }
@@ -1029,7 +1029,7 @@ $(document).ready(() => {
         $pluginTypeSelect.val("all");
       } else
         $(`button[data-bs-target="#navs-plugins-${currentPlugin}"]`).tab(
-          "show",
+          "show"
         );
 
       if (currentPlugin !== "general") {
@@ -1053,7 +1053,7 @@ $(document).ready(() => {
       feedbackToast
         .find("div.toast-body")
         .html(
-          "<p>As the service method is set to autoconf, the configuration is locked. <div class='fw-bolder'>Any changes made will not be saved.</div><div class='fst-italic'>This is to prevent conflicts with the autoconf and the web UI.</div></p>",
+          "<p>As the service method is set to autoconf, the configuration is locked. <div class='fw-bolder'>Any changes made will not be saved.</div><div class='fst-italic'>This is to prevent conflicts with the autoconf and the web UI.</div></p>"
         );
       feedbackToast.attr("data-bs-autohide", "false");
       feedbackToast.appendTo("#feedback-toast-container"); // Ensure the toast is appended to the container
@@ -1066,12 +1066,13 @@ $(document).ready(() => {
     const editor = ace.edit(this);
     editor.setTheme("ace/theme/cloud9_day"); // cloud9_night when dark mode is supported
 
-    const language = $(this).data("language"); // TODO: Support ModSecurity
-    if (language === "NGINX") {
-      editor.session.setMode("ace/mode/nginx");
-    } else {
-      editor.session.setMode("ace/mode/text"); // Default mode if language is unrecognized
-    }
+    editor.session.setMode("ace/mode/nginx");
+    // const language = $(this).data("language"); // TODO: Support ModSecurity
+    // if (language === "NGINX") {
+    //   editor.session.setMode("ace/mode/nginx");
+    // } else {
+    //   editor.session.setMode("ace/mode/text"); // Default mode if language is unrecognized
+    // }
 
     const method = $(this).data("method");
     if (method !== "ui") {
