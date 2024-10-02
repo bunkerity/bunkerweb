@@ -1,4 +1,4 @@
-FROM python:3.12.6-alpine@sha256:7130f75b1bb16c7c5d802782131b4024fe3d7a87ce7d936e8948c2d2e0180bc4 AS builder
+FROM python:3.12.7-alpine@sha256:e75de178bc15e72f3f16bf75a6b484e33d39a456f03fc771a2b3abb9146b75f8 AS builder
 
 # Export var for specific actions on linux/arm/v7
 ARG TARGETPLATFORM
@@ -31,7 +31,7 @@ COPY src/common/helpers helpers
 COPY src/common/settings.json settings.json
 COPY src/common/utils utils
 
-FROM python:3.12.6-alpine@sha256:7130f75b1bb16c7c5d802782131b4024fe3d7a87ce7d936e8948c2d2e0180bc4
+FROM python:3.12.7-alpine@sha256:e75de178bc15e72f3f16bf75a6b484e33d39a456f03fc771a2b3abb9146b75f8
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
