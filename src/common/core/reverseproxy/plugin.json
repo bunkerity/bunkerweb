@@ -186,7 +186,7 @@
       "help": "Additional configuration to include in the location block, separated with spaces.",
       "id": "reverse-proxy-includes",
       "label": "Reverse proxy includes",
-      "regex": "^(?! )( ?(\\w+)(?!.*\\b\\2\\b))*$",
+      "regex": "^(?! )( ?([^ ])(?!.*\\b\\2\\b))*$",
       "type": "text",
       "multiple": "reverse-proxy"
     },
