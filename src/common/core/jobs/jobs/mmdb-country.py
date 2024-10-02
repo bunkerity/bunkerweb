@@ -82,27 +82,25 @@ try:
                 for chunk in resp.iter_content(chunk_size=4 * 1024):
                     if chunk:
                         file_content.write(chunk)
-        except RequestException as e:
-            LOGGER.error(f"Error while downloading mmdb file from {mmdb_url}: {e}")
-            sys_exit(2)
-
-        try:
+                        
             assert file_content
-        except AssertionError:
-            LOGGER.error(f"Error while downloading mmdb file from {mmdb_url}")
-            sys_exit(2)
+            
+            # Decompress it
+            LOGGER.info("Decompressing mmdb file ...")
+            file_content.seek(0)
+            tmp_path.write_bytes(decompress(file_content.getvalue()))
 
-        # Decompress it
-        LOGGER.info("Decompressing mmdb file ...")
-        file_content.seek(0)
-        tmp_path.write_bytes(decompress(file_content.getvalue()))
-
-        if job_cache:
-            # Check if file has changed
-            new_hash = file_hash(tmp_path)
-            if new_hash == job_cache["checksum"]:
-                LOGGER.info("New file is identical to cache file, reload is not needed")
-                sys_exit(0)
+            if job_cache:
+                # Check if file has changed
+                new_hash = file_hash(tmp_path)
+                if new_hash == job_cache["checksum"]:
+                    LOGGER.info("New file is identical to cache file, reload is not needed")
+                    sys_exit(0)
+        except BaseException as e:
+            LOGGER.error(f"Error while downloading mmdb file from {mmdb_url}: {e}")
+            if not tmp_path.is_file():
+                sys_exit(2)
+            LOGGER.warning("Falling back to project cached mmdb file.")
 
     # Try to load it
     LOGGER.info("Checking if mmdb file is valid ...")
