@@ -467,20 +467,14 @@
                                                 {% include "models/input_setting.html" %}
                                             </div>
                                         </div>
-                                        <!-- <div class="text-center pt-2 mb-6">
-                                            <h6 class="mb-1 fw-bold">Check server name DNS</h6>
-                                            <button id="check-dns" class="btn btn-primary">Check DNS</button>
-                                            <p class="mt-1 mb-0">
-                                                In case of issues, you can also click <a id="check_url" class="fw-semibold" href="https://www.example.com/setup/check" target="_blank" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title='If the shown text is "ok", that means that the server name is available'>here</a> to perform a manual check.
-                                            </p>
-                                        </div> -->
                                     {% endif %}
                                     <div class="row p-0">
                                         <div class="col-md-{% if not ui_user %}4{% else %}6{% endif %}">
                                             <h5 class="mb-3 text-dark">Join the Newsletter</h5>
                                             <form action="https://bunkerity.us1.list-manage.com/subscribe/post?u=ec5b1577cf427972b9bd491a6&amp;id=37076d9d67"
                                                   method="POST"
-                                                  target="_blank">
+                                                  target="_blank"
+                                                  rel="noopener">
                                                 <div class="mb-3">
                                                     <input type="email"
                                                            name="EMAIL"
@@ -614,6 +608,7 @@
     class="fw-semibold"
     href="https://www.example.com/setup/check"
     target="_blank"
+    rel="noreferrer"
     data-bs-toggle="tooltip"
     data-bs-placement="top"
     data-bs-original-title='If the shown text is "ok", that means that the server name is available'>here</a> to perform a manual check.

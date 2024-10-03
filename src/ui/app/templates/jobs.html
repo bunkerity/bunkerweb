@@ -130,7 +130,7 @@
                                                    class="dropdown-item"
                                                    href="{{ url_for("cache") }}/{{ service_id }}/{{ job_data['plugin_id'] }}/{{ job }}/{{ cache['file_name'].replace('/', '_') if cache['file_name'].startswith('folder:') else cache['file_name'] }}?download=true"
                                                    target="_blank"
-                                                   rel="noopener noreferrer">
+                                                   rel="noreferrer">
                                                     <i class="tf-icons bx bx-download bx-xs me-1"></i>{{ cache["file_name"] }}
                                                 </a>
                                             </li>

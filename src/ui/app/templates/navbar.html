@@ -46,7 +46,7 @@
                    aria-pressed="true"
                    href="https://github.com/bunkerity/bunkerweb/?utm_campaign=self&utm_source=ui"
                    target="_blank"
-                   rel="noopener">
+                   rel="noreferrer">
                     <i class="tf-icons bx bxl-github me-md-2"></i>
                     <span class="d-none d-md-inline">Github</span>
                 </a>
@@ -80,7 +80,7 @@
                    aria-pressed="true"
                    href="https://github.com/bunkerity/bunkerweb/releases/latest"
                    target="_blank"
-                   rel="noopener"
+                   rel="noreferrer"
                    {% if bw_version != latest_version %} data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="New version available" {% endif %}>
                     Version {{ bw_version }}
                     {% if bw_version != latest_version %}
@@ -104,7 +104,7 @@
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end">
                     <li>
-                        <a class="dropdown-item" href="{{ url_for("profile") }}">
+                        <a class="dropdown-item" href="{{ url_for('profile') }}">
                             <div class="d-flex align-items-center">
                                 <div class="flex-shrink-0 me-2 me-md-3">
                                     <div class="avatar avatar-online">
@@ -125,7 +125,7 @@
                     </li>
                     <li>
                         <a class="dropdown-item d-flex align-items-center"
-                           href="{{ url_for("logout") }}">
+                           href="{{ url_for('logout') }}">
                             <i class="bx bx-power-off bx-md me-2"></i><span>Log Out</span>
                         </a>
                     </li>

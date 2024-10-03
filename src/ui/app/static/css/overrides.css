@@ -179,9 +179,7 @@ button.list-group-item-secondary.active {
   background-color: var(--bs-bw-green); /* Initial background color */
   color: #fff;
   animation: colorPhase 3s infinite; /* Apply the color phasing animation */
-  transition:
-    background-color 0.3s ease-in-out,
-    box-shadow 0.3s ease-in-out; /* Smooth transitions */
+  transition: background-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out; /* Smooth transitions */
 }
 
 .buy-now .btn-buy-now:hover {
@@ -511,9 +509,7 @@ a.badge:hover {
 
 .setting-highlight {
   background-color: rgba(var(--bs-bw-green-rgb), 0.5);
-  transition:
-    background-color 2s ease,
-    opacity 2s ease;
+  transition: background-color 2s ease, opacity 2s ease;
   opacity: 1;
 }
 
@@ -758,4 +754,13 @@ a.text-decoration-underline.link-underline-primary:hover {
 .form-floating > .form-control-plaintext:not(:placeholder-shown) {
   padding-top: 1.625rem !important;
   padding-bottom: 0.625rem !important;
+}
+
+.footer-container .footer-link:hover {
+  font-style: italic;
+  text-decoration: underline;
+}
+
+.w-70 {
+  width: 70% !important;
 }

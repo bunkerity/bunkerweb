@@ -3,6 +3,7 @@
     <div class="app-brand main mb-2">
         <a href="https://www.bunkerweb.io/?utm_campaign=self&utm_source=ui"
            target="_blank"
+           rel="noopener"
            class="app-brand-link">
             <span class="app-brand-logo main w-100">
                 <img class="img-fluid"
@@ -109,19 +110,26 @@
             <span class="menu-header-text">Misc</span>
         </li>
         <li class="menu-item">
-            <a href="https://panel.bunkerweb.io/order/support/?utm_campaign=self&utm_source=ui"
-               target="_blank"
-               class="menu-link">
-                <i class="menu-icon tf-icons bx bx-support"></i>
-                <div class="text-truncate" data-i18n="Support">Support</div>
+            <a href="{{ url_for('about') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-info-circle"></i>
+                <div class="text-truncate" data-i18n="About">About</div>
             </a>
         </li>
         <li class="menu-item">
-            <a href="https://docs.bunkerweb.io/latest/?utm_campaign=self&utm_source=ui"
+            <a href="{{ url_for('pro') }}" class="menu-link">
+                <img    class="menu-icon tf-icons" 
+                    src="{{ pro_diamond_url }}"
+                     alt="Pro plugin">
+                <div class="text-truncate" data-i18n="Pro">Pro</div>
+            </a>
+        </li>
+        <li class="menu-item">
+            <a href="https://panel.bunkerweb.io/order/support/?utm_campaign=self&utm_source=ui"
                target="_blank"
+               rel="noopener"
                class="menu-link">
-                <i class="menu-icon tf-icons bx bx-file"></i>
-                <div class="text-truncate" data-i18n="Documentation">Documentation</div>
+                <i class="menu-icon tf-icons bx bx-support"></i>
+                <div class="text-truncate" data-i18n="Support">Support</div>
             </a>
         </li>
     </ul>

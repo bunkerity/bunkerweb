@@ -22,6 +22,7 @@ from werkzeug.routing.exceptions import BuildError
 
 from app.models.reverse_proxied import ReverseProxied
 
+from app.routes.about import about
 from app.routes.bans import bans
 from app.routes.cache import cache
 from app.routes.configs import configs
@@ -33,6 +34,7 @@ from app.routes.login import login
 from app.routes.logout import logout, logout_page
 from app.routes.logs import logs
 from app.routes.plugins import plugins
+from app.routes.pro import pro
 from app.routes.profile import profile
 from app.routes.reports import reports
 from app.routes.services import services
@@ -437,6 +439,6 @@ def check_reloading():
     return jsonify({"reloading": DATA.get("RELOADING", False)})
 
 
-BLUEPRINTS = (bans, cache, configs, global_config, home, instances, jobs, login, logout, logs, plugins, profile, reports, services, setup, totp)
+BLUEPRINTS = (about, services, profile, jobs, reports, totp, home, logout, instances, plugins, global_config, pro, cache, logs, login, configs, bans, setup)
 for blueprint in BLUEPRINTS:
     app.register_blueprint(blueprint)
