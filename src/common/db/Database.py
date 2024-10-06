@@ -1396,18 +1396,17 @@ class Database:
                         Services_settings.service_id, Services_settings.setting_id, Services_settings.suffix, Services_settings.value, Services_settings.method
                     ).all()
                     existing_service_settings_dict = {
-                        (s.service_id, s.setting_id, s.suffix): {"value": s.value, "method": s.method} for s in existing_service_settings
+                        (s.service_id, s.setting_id, s.suffix or 0): {"value": s.value, "method": s.method} for s in existing_service_settings
                     }
 
                     # Collect template settings
-                    template_settings = {}
-                    if template:
-                        template_settings_data = (
-                            session.query(Template_settings.setting_id, Template_settings.suffix, Template_settings.default)
-                            .filter_by(template_id=template)
-                            .all()
-                        )
-                        template_settings = {(t.setting_id, t.suffix): t.default for t in template_settings_data}
+                    templates = {}
+                    for template in session.query(Template_settings).with_entities(
+                        Template_settings.template_id, Template_settings.setting_id, Template_settings.suffix, Template_settings.default
+                    ):
+                        if template.template_id not in templates:
+                            templates[template.template_id] = {}
+                        templates[template.template_id][(template.setting_id, template.suffix or 0)] = template.default
 
                     def process_service(server_name: str, service_config: Dict[str, str], db_ids: Dict[str, dict]):
                         local_to_put = []
@@ -1446,14 +1445,20 @@ class Database:
 
                             template_setting_default = None
                             if service_template:
-                                template_setting_default = template_settings.get((key, suffix))
+                                template_setting_default = templates.get(service_template, {}).get((key, suffix))
 
                             # Determine if we need to add, update, or delete
                             if not service_setting:
                                 if key != "SERVER_NAME" and (
-                                    (original_key in config and value == config[original_key])
-                                    or (original_key in db_config and value == db_config[original_key])
-                                    or value == (template_setting_default if template_setting_default is not None else setting["default"])
+                                    (template_setting_default is not None and value == template_setting_default)
+                                    or (
+                                        template_setting_default is None
+                                        and (
+                                            (original_key in config and value == config[original_key])
+                                            or (original_key in db_config and value == db_config[original_key])
+                                            or value == setting["default"]
+                                        )
+                                    )
                                 ):
                                     continue
 
@@ -1470,9 +1475,15 @@ class Database:
                                 local_changed_plugins.add(setting["plugin_id"])
 
                                 if key != "SERVER_NAME" and (
-                                    (original_key in config and value == config[original_key])
-                                    or (original_key in db_config and value == db_config[original_key])
-                                    or value == (template_setting_default if template_setting_default is not None else setting["default"])
+                                    (template_setting_default is not None and value == template_setting_default)
+                                    or (
+                                        template_setting_default is None
+                                        and (
+                                            (original_key in config and value == config[original_key])
+                                            or (original_key in db_config and value == db_config[original_key])
+                                            or value == setting["default"]
+                                        )
+                                    )
                                 ):
                                     self.logger.debug(f"Removing setting {key} for service {server_name}")
                                     local_to_delete.append(
@@ -1516,10 +1527,14 @@ class Database:
 
                             template_setting_default = None
                             if template:
-                                template_setting_default = template_settings.get((key, suffix))
+                                template_setting_default = templates.get(template, {}).get((key, suffix))
 
                             if not global_value:
-                                if value == (template_setting_default if template_setting_default is not None else setting["default"]):
+                                if (
+                                    template_setting_default is not None
+                                    and value == template_setting_default
+                                    or (template_setting_default is None and value == setting["default"])
+                                ):
                                     continue
 
                                 self.logger.debug(f"Adding global setting {key}")
@@ -1530,7 +1545,11 @@ class Database:
                             ) and global_value.value != value:
                                 local_changed_plugins.add(setting["plugin_id"])
 
-                                if value == (template_setting_default if template_setting_default is not None else setting["default"]):
+                                if (
+                                    template_setting_default is not None
+                                    and value == template_setting_default
+                                    or (template_setting_default is None and value == setting["default"])
+                                ):
                                     self.logger.debug(f"Removing global setting {key}")
                                     local_to_delete.append({"model": Global_values, "filter": {"setting_id": key, "suffix": suffix}})
                                     continue
