@@ -4,7 +4,7 @@
         <a href="https://www.bunkerweb.io/?utm_campaign=self&utm_source=ui"
            target="_blank"
            rel="noopener"
-           class="app-brand-link">
+           class="app-brand-link p-5">
             <span class="app-brand-logo main w-100">
                 <img class="img-fluid"
                      src="{{ url_for('static', filename='img/logo-menu.png') }}"
@@ -16,7 +16,6 @@
             <i class="bx bx-chevron-left bx-sm d-flex align-items-center justify-content-center"></i>
         </a>
     </div>
-    <div class="border border-primary border-0 border-top"></div>
     {% with menu_items = {
         "home": {"url": url_for('home'), "icon": "bx-home-smile"},
         "instances": {"url": url_for('instances'), "icon": "bx-server"},
@@ -117,8 +116,8 @@
         </li>
         <li class="menu-item">
             <a href="{{ url_for('pro') }}" class="menu-link">
-                <img    class="menu-icon tf-icons" 
-                    src="{{ pro_diamond_url }}"
+                <img class="menu-icon tf-icons"
+                     src="{{ pro_diamond_url }}"
                      alt="Pro plugin">
                 <div class="text-truncate" data-i18n="Pro">Pro</div>
             </a>

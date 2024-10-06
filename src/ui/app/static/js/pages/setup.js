@@ -154,10 +154,6 @@ $(document).ready(() => {
       result = await fetchCheck(fallbackURL);
     }
 
-    $overviewUniqueServerName
-      .find("i")
-      .toggleClass("bx-question-mark text-warning", false);
-
     const $input = $("#SERVER_NAME");
     const isValid = result && typeof result !== "string";
 
@@ -186,7 +182,10 @@ $(document).ready(() => {
       if (typeof result !== "string")
         $overviewUniqueServerName
           .find("i")
-          .toggleClass("bx-check text-success", false)
+          .toggleClass(
+            "bx-question-mark text-warning bx-check text-success",
+            false
+          )
           .toggleClass("bx-x text-danger", true);
     } else {
       $feedback.text("");
@@ -199,7 +198,7 @@ $(document).ready(() => {
       $overviewUniqueServerName
         .find("i")
         .toggleClass("bx-check text-success", true)
-        .toggleClass("bx-x text-danger", false);
+        .toggleClass("bx-question-mark text-warning bx-x text-danger", false);
     }
 
     feedbackToast.appendTo("#feedback-toast-container"); // Ensure the toast is appended to the container
@@ -585,12 +584,14 @@ $(document).ready(() => {
       .find("i")
       .toggleClass("bx-x text-danger bx-check text-success", false)
       .toggleClass("bx-question-mark text-warning", value === "");
+    $overview2faEnabled.tooltip("enable");
     if (value) {
       if (isValid) {
         $overview2faEnabled
           .find("i")
           .toggleClass("bx-x text-danger", false)
           .toggleClass("bx-check text-success", true);
+        $overview2faEnabled.tooltip("disable");
       } else {
         $overview2faEnabled
           .find("i")

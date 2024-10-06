@@ -206,7 +206,13 @@ button.list-group-item-secondary.active {
 ******************************************************************************/
 
 :root {
-  --dt-row-selected: 29, 123, 167;
+  --dt-row-selected: 230, 234, 237;
+  --font-don-jose: "Don Jose", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
+  --font-courier-prime: "Courier Prime", -apple-system, BlinkMacSystemFont,
+    "Segoe UI", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+    "Helvetica Neue", sans-serif;
 }
 
 .badge-dot {
@@ -343,6 +349,11 @@ td.highlight {
 }
 
 .btn-primary.active {
+  background-color: var(--bs-primary) !important;
+  border-color: var(--bs-primary) !important;
+}
+
+.btn-primary:hover {
   background-color: var(--bs-primary) !important;
   border-color: var(--bs-primary) !important;
 }
@@ -674,24 +685,8 @@ a.badge:hover {
   font-style: italic;
 }
 
-table.table.dataTable > tbody > tr.selected a {
-  color: #fff;
-  border-color: #fff;
-}
-
-table.table.dataTable > tbody > tr.selected .btn-outline-secondary {
-  color: #fff !important;
-  border-color: #fff !important;
-}
-
-table.table.dataTable > tbody > tr.selected .btn-outline-secondary:hover {
-  color: black !important;
-  background-color: #fff !important;
-  border-color: #fff !important;
-}
-
-table.table.dataTable > tbody > tr.selected .text-secondary {
-  color: #fff !important;
+table.table.dataTable > tbody > tr.selected > * {
+  color: initial !important;
 }
 
 .border-dashed {
@@ -718,10 +713,6 @@ a.text-white-80:hover {
 
 .mt-0_5 {
   margin-top: 0.125rem !important;
-}
-
-a.text-decoration-underline.link-underline-primary:hover {
-  text-decoration-color: var(--bs-bw-green) !important;
 }
 
 .slide-out {
@@ -763,4 +754,12 @@ a.text-decoration-underline.link-underline-primary:hover {
 
 .w-70 {
   width: 70% !important;
+}
+
+.don-jose {
+  font-family: var(--font-don-jose);
+}
+
+.courier-prime {
+  font-family: var(--font-courier-prime);
 }

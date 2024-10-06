@@ -63,7 +63,7 @@
                             <div data-bs-toggle="tooltip"
                                  data-bs-placement="top"
                                  data-bs-original-title="{% if plugin_data['stream'] != 'no' %}Supports{% else %}Doesn't support{% endif %} STREAM mode{% if plugin_data['stream'] == 'partial' %} partially{% endif %}">
-                                <i class="bx bx-sm bx-{% if plugin_data['stream'] == 'yes' %}check-circle text-success{% elif plugin_data['stream'] == 'partial' %}minus-circle text-warning{% else %}x-circle text-danger{% endif %}"></i>
+                                <i class="bx bx-sm bx-{% if plugin_data['stream'] == 'yes' %}check text-success{% elif plugin_data['stream'] == 'partial' %}minus text-warning{% else %}x text-danger{% endif %}"></i>
                             </td>
                         </div>
                         <td id="type-{{ plugin }}">

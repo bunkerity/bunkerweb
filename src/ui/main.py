@@ -411,7 +411,9 @@ def index():
 @app.route("/loading")
 @login_required
 def loading():
-    return render_template("loading.html", message=request.values.get("message", "Loading"), next=request.values.get("next", None) or url_for("home.home_page"))
+    return render_template(
+        "loading.html", message=request.values.get("message", "Loading..."), next=request.values.get("next", None) or url_for("home.home_page")
+    )
 
 
 @app.route("/check", methods=["GET"])

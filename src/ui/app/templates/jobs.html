@@ -49,11 +49,11 @@
                             <i class="bx {% if job_data['every'] == 'once' %}bx-revision{% elif job_data['every'] == 'day' %}bx-calendar-event{% elif job_data['every'] == 'week' %}bx-calendar-week{% else %}bxs-hourglass{% endif %}"></i>&nbsp;{{ job_data["every"] }}
                         </td>
                         <td class="text-center">
-                            <i class="bx bx-sm bx-{% if job_data['reload'] %}check-circle text-success{% else %}x-circle text-danger{% endif %}"></i>
+                            <i class="bx bx-sm bx-{% if job_data['reload'] %}check text-success{% else %}x text-danger{% endif %}"></i>
                         </td>
                         <td class="text-center">
                             {% if job_data['history'] %}
-                                <i class="bx bx-sm bx-{% if job_data['history'][0]['success'] %}check-circle text-success{% else %}x-circle text-danger{% endif %}"></i>
+                                <i class="bx bx-sm bx-{% if job_data['history'][0]['success'] %}check text-success{% else %}x text-danger{% endif %}"></i>
                             {% else %}
                                 No history
                             {% endif %}
@@ -97,7 +97,7 @@
                                                     style="flex: 1 1 0">{{ history['end_date'] }}</li>
                                                 <li class="list-group-item align-items-center text-center rounded-0{% if loop.index == job_data['history']|length %} rounded-bottom{% endif %}"
                                                     style="flex: 1 1 0">
-                                                    <i class="bx bx-{% if history['success'] %}check-circle text-success{% else %}x-circle text-danger{% endif %}"></i>
+                                                    <i class="bx bx-{% if history['success'] %}check text-success{% else %}x text-danger{% endif %}"></i>
                                                 </li>
                                             </ul>
                                         {% endfor %}

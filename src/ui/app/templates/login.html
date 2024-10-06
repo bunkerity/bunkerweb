@@ -13,7 +13,7 @@
                                target="_blank"
                                rel="noopener"
                                class="app-brand-link gap-2">
-                                <span class="app-brand-logo login w-75">
+                                <span class="app-brand-logo login w-50">
                                     <img class="img-fluid"
                                          src="{{ url_for('static', filename='img/logo-menu.png') }}"
                                          alt="BunkerWeb logo">
@@ -21,7 +21,6 @@
                             </a>
                         </div>
                         <!-- /Logo -->
-                        <p class="mb-6">Please sign-in to your account</p>
                         <form class="mb-6" method="POST">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                             <input type="hidden"
@@ -67,7 +66,7 @@
                                 </div>
                             </div>
                             <div class="mb-6">
-                                <button class="btn btn-primary d-grid w-100" type="submit">Login</button>
+                                <button class="btn btn-primary d-grid w-100 don-jose" type="submit">Login</button>
                             </div>
                         </form>
                     </div>

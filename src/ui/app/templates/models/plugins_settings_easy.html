@@ -76,13 +76,13 @@
              aria-labelledby="navs-templates-{{ template }}-tab">
             <div class="card-header d-flex align-items-center mw-100">
                 <div class="pt-1">
-                    <h5 class="card-title d-inline border p-2{{ plugin_types[template_plugin['type']].get('text-class', '') }}{{ plugin_types[template_plugin['type']].get('title-class', '') }}">
+                    <h5 class="card-title d-inline border p-2 don-jose{{ plugin_types[template_plugin['type']].get('text-class', '') }}{{ plugin_types[template_plugin['type']].get('title-class', '') }}">
                         {{ template|capitalize }}&nbsp;－&nbsp;{{ plugin_types[template_plugin["type"]].get('icon', '<img src="' + pro_diamond_url + '"
      alt="Pro plugin"
      width="18px"
      height="15.5px">') |safe }}
                     </h5>
-                    <p class="card-subtitle text-muted text-truncate mt-2">{{ template_data["name"] }}</p>
+                    <p class="card-subtitle text-muted text-truncate mt-3">{{ template_data["name"] }}</p>
                 </div>
             </div>
             <div class="card-body">

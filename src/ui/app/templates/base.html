@@ -41,6 +41,12 @@
         <link rel="stylesheet"
               href="{{ url_for('static', filename='fonts/Public_sans.css') }}"
               nonce="{{ style_nonce }}" />
+        <link rel="stylesheet"
+              href="{{ url_for('static', filename='fonts/DonJose.css') }}"
+              nonce="{{ style_nonce }}" />
+        <link rel="stylesheet"
+              href="{{ url_for('static', filename='fonts/Courier_Prime.css') }}"
+              nonce="{{ style_nonce }}" />
         <!-- Icons -->
         <link rel="stylesheet"
               href="{{ url_for('static', filename='fonts/boxicons.min.css') }}"
@@ -135,6 +141,12 @@
             <script src="{{ url_for('static', filename='libs/datatables/plugins/ip-address.js') }}"
                     nonce="{{ script_nonce }}"></script>
         {% endif %}
+        {% if current_endpoint == "home" %}
+            <script src="{{ url_for('static', filename='libs/apexcharts/apexcharts.min.js') }}"
+                    nonce="{{ script_nonce }}"></script>
+            <script src="{{ url_for('static', filename='libs/leaflet/leaflet.min.js') }}"
+                    nonce="{{ script_nonce }}"></script>
+        {% endif %}
         {% if current_endpoint in ("bans") %}
             <script src="{{ url_for('static', filename='libs/flatpickr/flatpickr.min.js') }}"
                     nonce="{{ script_nonce }}"></script>
@@ -145,15 +157,13 @@
             <script src="{{ url_for('static', filename='libs/ace/src-min/ace.js') }}"
                     nonce="{{ script_nonce }}"></script>
         {% endif %}
+        {% if current_endpoint in ("loading", "instances") %}
+            <script src="{{ url_for('static', filename='libs/lottie-player/lottie-player.min.js') }}"
+                    nonce="{{ script_nonce }}"></script>
+        {% endif %}
         <!-- Core JS -->
         <script src="{{ url_for('static', filename='js/menu.js') }}"
                 nonce="{{ script_nonce }}"></script>
-        {% if current_endpoint == "home" %}
-            <script src="{{ url_for('static', filename='libs/apexcharts/apexcharts.min.js') }}"
-                    nonce="{{ script_nonce }}"></script>
-            <script src="{{ url_for('static', filename='libs/leaflet/leaflet.min.js') }}"
-                    nonce="{{ script_nonce }}"></script>
-        {% endif %}
         <!-- Main JS -->
         <script src="{{ url_for('static', filename='js/main.js') }}"
                 nonce="{{ script_nonce }}"></script>
@@ -172,6 +182,9 @@
         <!-- Page JS -->
         {% if current_endpoint == "setup" %}
             <script src="{{ url_for('static', filename='js/pages/setup.js') }}"
+                    nonce="{{ script_nonce }}"></script>
+        {% elif current_endpoint == "loading" %}
+            <script src="{{ url_for('static', filename='js/pages/loading.js') }}"
                     nonce="{{ script_nonce }}"></script>
         {% elif current_endpoint == "home" %}
             <script async

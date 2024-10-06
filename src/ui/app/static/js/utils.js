@@ -35,20 +35,20 @@ class News {
     ) {
       sessionStorage.setItem(
         "lastRefetch",
-        Math.round(Date.now() / 1000) + 3600,
+        Math.round(Date.now() / 1000) + 3600
       );
       sessionStorage.setItem("lastNews", JSON.stringify(lastNews));
 
       const newsNumber = lastNews.length;
       $("#news-pill").append(
         DOMPurify.sanitize(
-          `<span class="badge rounded-pill badge-center-sm bg-danger ms-1_5">${newsNumber}</span>`,
-        ),
+          `<span class="badge rounded-pill badge-center-sm bg-danger ms-1_5">${newsNumber}</span>`
+        )
       );
       $("#news-button").after(
         DOMPurify.sanitize(
-          `<span class="badge-dot-text position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">${newsNumber}<span class="visually-hidden">unread news</span></span>`,
-        ),
+          `<span class="badge-dot-text position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">${newsNumber}<span class="visually-hidden">unread news</span></span>`
+        )
       );
     }
 
@@ -84,7 +84,7 @@ class News {
         news.tags,
         news.date,
         isLast,
-        false, // isHome is false
+        false // isHome is false
       );
       newsRow.append(cardElement);
 
@@ -98,7 +98,7 @@ class News {
           news.tags,
           news.date,
           isLast,
-          true, // isHome is true
+          true // isHome is true
         );
         homeNewsRow.append(homeCardElement);
       }
@@ -131,13 +131,13 @@ class News {
           class: "card-img card-img-left",
           src: img,
           alt: "News image",
-        }),
+        })
       );
       imgCol.append(imgLink);
 
       const contentCol = $("<div>", { class: "col-md-7" }).appendTo(row);
       const cardBody = $("<div>", { class: "card-body p-3" }).appendTo(
-        contentCol,
+        contentCol
       );
 
       const cardTitle = $("<h6>", { class: "card-title lh-sm mb-2" }).append(
@@ -146,7 +146,7 @@ class News {
           target: "_blank",
           rel: "noopener",
           text: title,
-        }),
+        })
       );
 
       const cardText = $("<small>", { class: "card-text lh-1", text: excerpt });
@@ -157,7 +157,7 @@ class News {
       });
       $("<p>", { class: "card-text mb-0" })
         .append(
-          $("<small>", { class: "text-muted", text: `Posted on: ${date}` }),
+          $("<small>", { class: "text-muted", text: `Posted on: ${date}` })
         )
         .appendTo(cardFooter);
 
@@ -175,7 +175,7 @@ class News {
             $("<span>", {
               class: "tf-icons bx bx-xs bx-purchase-tag me-1",
             }),
-            tag.name,
+            tag.name
           )
           .appendTo(tagsContainer);
       });
@@ -195,7 +195,7 @@ class News {
           class: "card-img-top",
           src: img,
           alt: "News image",
-        }),
+        })
       );
 
       const cardBody = $("<div>", { class: "card-body" });
@@ -205,7 +205,7 @@ class News {
           target: "_blank",
           rel: "noopener",
           text: title,
-        }),
+        })
       );
       const cardText = $("<p>", { class: "card-text", text: excerpt });
 
@@ -223,13 +223,13 @@ class News {
             $("<span>", {
               class: "tf-icons bx bx-xs bx-purchase-tag bx-18px me-2",
             }),
-            tag.name,
+            tag.name
           )
           .appendTo(tagsContainer);
       });
 
       const dateText = $("<p>", { class: "card-text" }).append(
-        $("<small>", { class: "text-muted", text: `Posted on: ${date}` }),
+        $("<small>", { class: "text-muted", text: `Posted on: ${date}` })
       );
 
       cardBody.append(cardTitle, cardText, tagsContainer, dateText);
@@ -250,4 +250,98 @@ class News {
 $(document).ready(() => {
   const news = new News();
   news.init();
+
+  // Define news items array
+  let newsItems = [
+    `Get the most of BunkerWeb by upgrading to the PRO version. More info and free trial <a class="light-href text-white-80" target="_blank" rel="noopener" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#pro">here</a>.`,
+    `Need premium support or tailored consulting around BunkerWeb? Check out our <a class="light-href text-white-80" target="_blank" rel="noopener" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services">professional services</a>.`,
+    `Be part of the Bunker community by joining the <a class="light-href text-white-80" target="_blank" rel="noopener" href="https://discord.bunkerweb.io/?utm_campaign=self&utm_source=banner">Discord chat</a> and following us on <a class="light-href text-white-80" target="_blank" rel="noopener" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.`,
+  ];
+
+  let currentIndex = 0;
+  const intervalTime = 7000;
+  let interval;
+
+  function loadData() {
+    const nowStamp = Math.round(Date.now() / 1000);
+    const bannerRefetch = sessionStorage.getItem("bannerRefetch");
+    let bannerNews = sessionStorage.getItem("bannerNews");
+
+    // Check if cached data is expired
+    if (bannerRefetch && nowStamp > bannerRefetch) {
+      sessionStorage.removeItem("bannerRefetch");
+      sessionStorage.removeItem("bannerNews");
+      bannerNews = null;
+    }
+
+    if (bannerNews) {
+      // Use cached data
+      const data = JSON.parse(bannerNews);
+      newsItems = data.map((item) => item.content);
+    } else {
+      console.log("TODO: Fetch data from API when endpoint is available");
+      // TODO: Fetch data from API when endpoint is available
+      /*
+      $.getJSON("https://www.bunkerweb.io/api/bw-ui-news-16")
+        .done(function (res) {
+          const data = res.data[0].data;
+          sessionStorage.setItem("bannerNews", JSON.stringify(data));
+          sessionStorage.setItem("bannerRefetch", nowStamp + 3600); // Refetch after one hour
+          newsItems = data.map((item) => item.content);
+        })
+        .fail(function (e) {
+          console.error("Failed to fetch banner news:", e);
+        });
+      */
+    }
+    newsItems.sort(() => Math.random() - 0.5);
+    startInterval();
+  }
+
+  // Function to update the banner text with animation
+  function updateBannerText(nextIndex) {
+    const $bannerText = $("#banner-text");
+
+    // Remove any existing slide-in class to reset
+    $bannerText.removeClass("slide-in").addClass("slide-out");
+
+    setTimeout(() => {
+      $bannerText.removeClass("slide-out");
+
+      // Update the text content
+      $bannerText.html(newsItems[nextIndex]);
+
+      // Trigger reflow to ensure the browser applies the changes
+      $bannerText[0].offsetHeight;
+
+      // Add the slide-in class to start the animation
+      $bannerText.addClass("slide-in");
+    }, 700);
+  }
+
+  // Function to start the automatic news rotation
+  function startInterval() {
+    if (newsItems.length > 0) {
+      interval = setInterval(() => {
+        currentIndex = (currentIndex + 1) % newsItems.length;
+        updateBannerText(currentIndex);
+      }, intervalTime);
+    }
+  }
+
+  // Reset interval when user interacts
+  function resetInterval() {
+    clearInterval(interval);
+    startInterval();
+  }
+
+  // Click event handler for the "next-news" icon
+  $("#next-news").on("click", function () {
+    currentIndex = (currentIndex + 1) % newsItems.length;
+    updateBannerText(currentIndex);
+    resetInterval();
+  });
+
+  loadData();
+  $("#next-news").trigger("click");
 });

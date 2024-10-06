@@ -16,24 +16,14 @@
                 <div class="card px-sm-6 px-0">
                     <div class="card-header d-flex justify-content-between align-items-center mw-100">
                         <div class="pt-1">
-                            <h4 class="card-title d-inline border fw-bold p-2">Setup Wizard</h4>
-                            <p class="card-subtitle text-muted text-truncate mt-2">Follow the steps to complete the setup wizard</p>
+                            <h4 class="card-title d-inline border fw-bold p-2 don-jose">Setup Wizard</h4>
+                            <p class="card-subtitle text-muted text-truncate mt-3">Follow the steps to complete the setup wizard</p>
                         </div>
-                        <!-- Logo -->
                         <div class="app-brand justify-content-center">
-                            <a href="https://www.bunkerweb.io/?utm_campaign=self&utm_source=ui"
-                               target="_blank"
-                               rel="noopener"
-                               class="app-brand-link gap-2">
-                                <span class="app-brand-logo login">
-                                    <img class="img-fluid"
-                                         src="{{ url_for('static', filename='img/icon.svg') }}"
-                                         alt="BunkerWeb logo"
-                                         width="50" />
-                                </span>
-                            </a>
+                            <span class="app-brand-logo login">
+                                <i class="bx bx-lg bxs-magic-wand bx-tada"></i>
+                            </span>
                         </div>
-                        <!-- /Logo -->
                     </div>
                     <div class="card-body p-2">
                         <div class="d-flex justify-content-center">
@@ -459,152 +449,115 @@
                                         </div>
                                     {% endif %}
                                     {% if not ui_reverse_proxy %}
-                                        <div class="row justify-content-center">
-                                            <div class="col-6 pb-3">
-                                                <h6 class="mt-2 mb-1 fw-bold">BunkerWeb UI final URL</h6>
-                                                {% set setting = "SERVER_NAME + REVERSE_PROXY_HOST" %}
-                                                {% set setting_data = {"type": "text", "id": "overview_service_url", "regex": "^.+$"} %}
-                                                {% include "models/input_setting.html" %}
-                                            </div>
+                                        <div class="col-6 pb-3">
+                                            <h6 class="mt-2 mb-2 fw-bold">BunkerWeb UI final URL</h6>
+                                            {% set setting = "SERVER_NAME + REVERSE_PROXY_HOST" %}
+                                            {% set setting_data = {"type": "text", "id": "overview_service_url", "regex": "^.+$"} %}
+                                            {% include "models/input_setting.html" %}
                                         </div>
                                     {% endif %}
-                                    <div class="row p-0">
-                                        <div class="col-md-{% if not ui_user %}4{% else %}6{% endif %}">
-                                            <h5 class="mb-3 text-dark">Join the Newsletter</h5>
-                                            <form action="https://bunkerity.us1.list-manage.com/subscribe/post?u=ec5b1577cf427972b9bd491a6&amp;id=37076d9d67"
-                                                  method="POST"
-                                                  target="_blank"
-                                                  rel="noopener">
-                                                <div class="mb-3">
-                                                    <input type="email"
-                                                           name="EMAIL"
-                                                           class="form-control"
-                                                           placeholder="John.doe@example.com"
-                                                           required />
+                                    {% if not ui_user %}
+                                        <div class="col-6">
+                                            {% set input_readonly = false %}
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <h6 class="mt-2 mb-1 fw-bold">2FA Setup</h6>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
+                                                          data-bs-toggle="tooltip"
+                                                          data-bs-placement="top"
+                                                          data-bs-original-title="The 6-digit code generated by your 2FA app">
+                                                        <span class="bx bx-question-mark bx-xs"></span>
+                                                    </span>
                                                 </div>
-                                                <div class="form-check mb-3">
-                                                    <input type="checkbox"
-                                                           class="form-check-input"
-                                                           name="newsletter-check"
-                                                           required />
-                                                    <label class="form-check-label" for="privacyPolicyCheck">
-                                                        I've read and agree to the
-                                                        <a class="fst-italic"
-                                                           href="https://www.bunkerity.com/en/privacy-policy?utm_campaign=self&utm_source=ui"
-                                                           target="_blank"
-                                                           rel="noopener">privacy policy</a>
-                                                    </label>
-                                                </div>
-                                                <button type="submit" class="btn btn-primary w-100 text-uppercase">Subscribe</button>
-                                            </form>
-                                        </div>
-                                        <div class="col-md-{% if not ui_user %}4{% else %}6{% endif %} d-flex align-items-center justify-content-center">
-                                            <div class="p-5 fs-5 fw-semibold border border-primary">
-                                                <ul class="list-unstyled mb-0" id="password-requirements">
-                                                    {% if not ui_user %}
-                                                        <li>
-                                                            <i class="bx bx-check text-success"></i> Secure password
-                                                        </li>
-                                                        <li id="overview-2fa-enabled" class="mt-1">
-                                                            <i class="bx bx-question-mark text-warning"></i> 2FA enabled
-                                                        </li>
-                                                    {% endif %}
-                                                    {% if not ui_reverse_proxy %}
-                                                        <li id="overview-unique-server-name" class="mt-1">
-                                                            <i class="bx bx-question-mark text-warning"></i> Unique Server Name
-                                                        </li>
-                                                    {% endif %}
-                                                </ul>
                                             </div>
+                                            {% set setting = "2FA Code" %}
+                                            {% set setting_data = {"type": "number", "id": "2fa_code", "regex": "^[0-9]{6}$"} %}
+                                            {% include "models/input_setting.html" %}
                                         </div>
+                                    {% endif %}
+                                    <div class="d-flex justify-content-around text-center mt-4">
                                         {% if not ui_user %}
-                                            <div class="col-md-4">
-                                                <h5 class="mb-3 text-dark">2FA Setup</h5>
-                                                {% set input_readonly = false %}
-                                                <div class="d-flex justify-content-between align-items-center">
-                                                    <label id="label-2fa_code"
-                                                           for="2fa_code"
-                                                           class="form-label fw-semibold text-truncate">
-                                                        2FA Code
-                                                    </label>
-                                                    <div class="d-flex align-items-center">
-                                                        <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
-                                                              data-bs-toggle="tooltip"
-                                                              data-bs-placement="top"
-                                                              data-bs-original-title="The 6-digit code generated by your 2FA app">
-                                                            <span class="bx bx-question-mark bx-xs"></span>
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                                {% set setting = "2FA Code" %}
-                                                {% set setting_data = {"type": "number", "id": "2fa_code", "regex": "^[0-9]{6}$"} %}
-                                                {% include "models/input_setting.html" %}
+                                            <div>
+                                                <i class="bx bx-check text-success"></i> Secure password
+                                            </div>
+                                            <div id="overview-2fa-enabled"
+                                                 class="ms-4"
+                                                 data-bs-toggle="tooltip"
+                                                 data-bs-placement="top"
+                                                 data-bs-original-title='Please enter a valid 2FA code in the 2FA setup input'>
+                                                <i class="bx bx-question-mark text-warning"></i> 2FA enabled
+                                            </div>
+                                        {% endif %}
+                                        {% if not ui_reverse_proxy %}
+                                            <div id="overview-unique-server-name" class="ms-4">
+                                                <i class="bx bx-question-mark text-warning"></i> Unique Server Name
                                             </div>
                                         {% endif %}
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="d-flex justify-content-between mt-2">
-                            <button class="btn btn-primary btn-prev previous-step disabled">
-                                <i class="bx bx-chevron-left bx-sm ms-sm-n2"></i>
-                                <span class="align-middle d-sm-inline-block d-none">Previous</span>
-                            </button>
-                            <button type="button" class="btn btn-outline-bw-green save-settings d-none">
-                                <i class="bx bx-save bx-sm ms-sm-n2"></i>
-                                <span class="align-middle d-sm-inline-block d-none ms-sm-1">Setup</span>
-                            </button>
-                            <button class="btn btn-primary btn-next next-step">
-                                <span class="align-middle d-sm-inline-block d-none me-sm-1">Next</span>
-                                <i class="bx bx-chevron-right bx-sm me-sm-n2"></i>
-                            </button>
-                        </div>
                     </div>
-                    <!-- /Setup -->
+                    <div class="d-flex justify-content-between mt-2">
+                        <button class="btn btn-primary btn-prev previous-step disabled">
+                            <i class="bx bx-chevron-left bx-sm ms-sm-n2"></i>
+                            <span class="align-middle d-sm-inline-block d-none">Previous</span>
+                        </button>
+                        <button type="button" class="btn btn-outline-bw-green save-settings d-none">
+                            <i class="bx bx-save bx-sm ms-sm-n2"></i>
+                            <span class="align-middle d-sm-inline-block d-none ms-sm-1">Setup</span>
+                        </button>
+                        <button class="btn btn-primary btn-next next-step">
+                            <span class="align-middle d-sm-inline-block d-none me-sm-1">Next</span>
+                            <i class="bx bx-chevron-right bx-sm me-sm-n2"></i>
+                        </button>
+                    </div>
                 </div>
+                <!-- /Setup -->
             </div>
         </div>
     </div>
-    <div id="feedback-toast"
-         class="bs-toast toast fade"
-         role="alert"
-         aria-live="assertive"
-         aria-atomic="true"
-         data-bs-autohide="true"
-         data-bs-delay="10000">
-        <div class="toast-header">
-            <i class="d-block w-px-20 h-auto rounded me-2 tf-icons bx bx-bell"></i>
-            <span class="fw-medium me-auto">BunkerWeb Forever</span>
-            <small class="text-body-secondary">just now</small>
-            <button type="button"
-                    class="btn-close"
-                    data-bs-dismiss="toast"
-                    aria-label="Close"></button>
-        </div>
-        <div class="toast-body">If you read this, it means that you're curious 👀</div>
+</div>
+<div id="feedback-toast"
+     class="bs-toast toast fade"
+     role="alert"
+     aria-live="assertive"
+     aria-atomic="true"
+     data-bs-autohide="true"
+     data-bs-delay="10000">
+    <div class="toast-header">
+        <i class="d-block w-px-20 h-auto rounded me-2 tf-icons bx bx-bell"></i>
+        <span class="fw-medium me-auto">BunkerWeb Forever</span>
+        <small class="text-body-secondary">just now</small>
+        <button type="button"
+                class="btn-close"
+                data-bs-dismiss="toast"
+                aria-label="Close"></button>
     </div>
-    {% if not ui_reverse_proxy %}
-        <div class="modal fade"
-             id="modal-confirm-dns"
-             data-bs-backdrop="static"
-             tabindex="-1"
-             aria-hidden="true"
-             role="dialog">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 id="dns-check-title" class="modal-title">Server name is not unique</h5>
-                        <button type="button"
-                                class="btn-close"
-                                data-bs-dismiss="modal"
-                                aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div id="dns-check-result"
-                             class="alert alert-danger text-center"
-                             role="alert">Are you sure you want to proceed to the next step?</div>
-                        <p class="mt-1 mb-0 text-center">
-                            In case of issues, you can also click <a id="check-url"
+    <div class="toast-body">If you read this, it means that you're curious 👀</div>
+</div>
+{% if not ui_reverse_proxy %}
+    <div class="modal fade"
+         id="modal-confirm-dns"
+         data-bs-backdrop="static"
+         tabindex="-1"
+         aria-hidden="true"
+         role="dialog">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 id="dns-check-title" class="modal-title">Server name is not unique</h5>
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="dns-check-result"
+                         class="alert alert-danger text-center"
+                         role="alert">Are you sure you want to proceed to the next step?</div>
+                    <p class="mt-1 mb-0 text-center">
+                        In case of issues, you can also click <a id="check-url"
     class="fw-semibold"
     href="https://www.example.com/setup/check"
     target="_blank"
@@ -612,35 +565,78 @@
     data-bs-toggle="tooltip"
     data-bs-placement="top"
     data-bs-original-title='If the shown text is "ok", that means that the server name is available'>here</a> to perform a manual check.
-                        </p>
-                    </div>
-                    <div class="modal-footer justify-content-center">
-                        <button id="confirm-dns"
-                                class="btn btn-outline-danger next-step me-2"
-                                data-bs-dismiss="modal">Proceed</button>
-                        <button type="reset"
-                                class="btn btn-outline-secondary"
-                                data-bs-dismiss="modal">Cancel</button>
-                    </div>
+                    </p>
                 </div>
-            </div>
-        </div>
-    {% endif %}
-    <div class="modal fade"
-         id="loadingModal"
-         data-bs-backdrop="static"
-         tabindex="-1"
-         aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content bg-transparent border-0 shadow-none">
-                <div class="modal-body text-center">
-                    <div class="spinner-border text-bw-green" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                    <p class="mt-3 text-white">Setting up your BunkerWeb, please wait...</p>
+                <div class="modal-footer justify-content-center">
+                    <button id="confirm-dns"
+                            class="btn btn-outline-danger next-step me-2"
+                            data-bs-dismiss="modal">Proceed</button>
+                    <button type="reset"
+                            class="btn btn-outline-secondary"
+                            data-bs-dismiss="modal">Cancel</button>
                 </div>
             </div>
         </div>
     </div>
-    <!-- / Content -->
+{% endif %}
+<div class="modal fade"
+     id="loadingModal"
+     data-bs-backdrop="static"
+     tabindex="-1"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-transparent border-0 shadow-none">
+            <div class="modal-body text-center">
+                <div class="spinner-border text-bw-green" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-3 text-white">Setting up your BunkerWeb, please wait...</p>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="position-fixed bottom-0 start-0 m-3" id="floating-modes-menu">
+    <button class="btn btn-sm btn-primary d-flex align-items-center justify-content-center rounded-pill me-1"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#newsletter-floating"
+            aria-controls="newsletter-floating"
+            aria-expanded="true"
+            aria-label="Toggle navigation">
+        <i class="bx bx-xs bx-menu me-1"></i>News from the Bunker
+    </button>
+    <!-- Collapsible floating menu -->
+    <div class="collapse show mt-2" id="newsletter-floating">
+        <div class="card card-body bg-white border-0 shadow-sm">
+            <h5 class="mb-3 text-dark">Join the Newsletter</h5>
+            <form action="https://bunkerity.us1.list-manage.com/subscribe/post?u=ec5b1577cf427972b9bd491a6&amp;id=37076d9d67"
+                  method="POST"
+                  target="_blank"
+                  rel="noopener">
+                <div class="mb-3">
+                    <input type="email"
+                           name="EMAIL"
+                           class="form-control"
+                           placeholder="John.doe@example.com"
+                           required />
+                </div>
+                <div class="form-check mb-3">
+                    <input type="checkbox"
+                           class="form-check-input"
+                           name="newsletter-check"
+                           required />
+                    <label class="form-check-label" for="privacyPolicyCheck">
+                        I've read and agree to the
+                        <a class="fst-italic"
+                           href="https://www.bunkerity.com/en/privacy-policy?utm_campaign=self&utm_source=ui"
+                           target="_blank"
+                           rel="noopener">privacy policy</a>
+                    </label>
+                </div>
+                <button type="submit" class="btn btn-primary w-100 text-uppercase don-jose">Subscribe</button>
+            </form>
+        </div>
+    </div>
+</div>
+<!-- / Content -->
 {% endblock %}

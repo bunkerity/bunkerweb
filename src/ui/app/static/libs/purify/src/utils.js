@@ -7,7 +7,7 @@ const {
 } = Object;
 
 let { freeze, seal, create } = Object; // eslint-disable-line import/no-mutable-exports
-let { apply, construct } = typeof Reflect !== "undefined" && Reflect;
+let { apply, construct } = typeof Reflect !== 'undefined' && Reflect;
 
 if (!freeze) {
   freeze = function (x) {
@@ -91,7 +91,7 @@ function addToSet(set, array, transformCaseFunc = stringToLowerCase) {
   let l = array.length;
   while (l--) {
     let element = array[l];
-    if (typeof element === "string") {
+    if (typeof element === 'string') {
       const lcElement = transformCaseFunc(element);
       if (lcElement !== element) {
         // Config presets (e.g. tags.js, attrs.js) are immutable.
@@ -144,7 +144,7 @@ function clone(object) {
         newObject[property] = cleanArray(value);
       } else if (
         value &&
-        typeof value === "object" &&
+        typeof value === 'object' &&
         value.constructor === Object
       ) {
         newObject[property] = clone(value);
@@ -173,7 +173,7 @@ function lookupGetter(object, prop) {
         return unapply(desc.get);
       }
 
-      if (typeof desc.value === "function") {
+      if (typeof desc.value === 'function') {
         return unapply(desc.value);
       }
     }

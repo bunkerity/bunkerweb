@@ -18,13 +18,13 @@ $(document).ready(function () {
       <li class="list-group-item align-items-center text-center bg-secondary text-white" style="flex: 1 1 0;">
         <div class="fw-bold">Service</div>
       </li>
-      </ul>`,
+      </ul>`
     );
     $("#selected-configs-delete").append(list);
 
     configs.forEach((config) => {
       const list = $(
-        `<ul class="list-group list-group-horizontal d-flex w-100"></ul>`,
+        `<ul class="list-group list-group-horizontal d-flex w-100"></ul>`
       );
 
       // Create the list item using template literals
@@ -38,13 +38,13 @@ $(document).ready(function () {
 
       const id = `${config.type.toLowerCase()}-${config.service.replaceAll(
         ".",
-        "_",
+        "_"
       )}-${config.name}`;
 
       // Clone the type element and append it to the list item
       const typeClone = $(`#type-${id}`).clone();
       const typeListItem = $(
-        `<li class="list-group-item d-flex align-items-center" style="flex: 1 1 0;"></li>`,
+        `<li class="list-group-item d-flex align-items-center" style="flex: 1 1 0;"></li>`
       );
       typeListItem.append(typeClone.removeClass("highlight"));
       list.append(typeListItem);
@@ -52,7 +52,7 @@ $(document).ready(function () {
       // Clone the service element and append it to the list item
       const serviceClone = $(`#service-${id}`).clone();
       const serviceListItem = $(
-        `<li class="list-group-item d-flex align-items-center" style="flex: 1 1 0;"></li>`,
+        `<li class="list-group-item d-flex align-items-center" style="flex: 1 1 0;"></li>`
       );
       serviceListItem.append(serviceClone.removeClass("highlight"));
       list.append(serviceListItem);
@@ -66,8 +66,8 @@ $(document).ready(function () {
       .find(".alert")
       .text(
         `Are you sure you want to delete the selected custom configuration${"s".repeat(
-          configs.length > 1,
-        )}?`,
+          configs.length > 1
+        )}?`
       );
     modal.show();
 
@@ -110,6 +110,9 @@ $(document).ready(function () {
   }
 
   layout.topStart.buttons = [
+    {
+      extend: "create_config",
+    },
     {
       extend: "colvis",
       columns: "th:not(:first-child):not(:nth-child(2)):not(:last-child)",
@@ -172,9 +175,6 @@ $(document).ready(function () {
         },
       ],
     },
-    {
-      extend: "create_config",
-    },
   ];
 
   $(document).on("hidden.bs.toast", ".toast", function (event) {
@@ -208,7 +208,7 @@ $(document).ready(function () {
   };
 
   $.fn.dataTable.ext.buttons.create_config = {
-    text: '<span class="tf-icons bx bx-plus-circle bx-18px me-2"></span>Create<span class="d-none d-md-inline"> new custom config</span>',
+    text: '<span class="tf-icons bx bx-plus"></span>&nbsp;Create<span class="d-none d-md-inline"> new custom config</span>',
     className: `btn btn-sm btn-outline-bw-green${
       isReadOnly ? " disabled" : ""
     }`,
@@ -369,7 +369,7 @@ $(document).ready(function () {
         $("#configs_wrapper .dt-buttons")
           .attr(
             "data-bs-original-title",
-            "The database is in readonly, therefore you cannot create new custom configurations.",
+            "The database is in readonly, therefore you cannot create new custom configurations."
           )
           .attr("data-bs-placement", "right")
           .tooltip();

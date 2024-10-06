@@ -33,7 +33,7 @@
         <div class="navbar-nav align-items-center">
             <div class="nav-item d-flex align-items-center">
                 <a role="button"
-                   class="btn btn-outline-secondary p-1 p-md-2"
+                   class="btn btn-text-secondary p-1 p-md-2"
                    aria-pressed="true"
                    href="https://docs.bunkerweb.io/latest{{ documentation_endpoint }}/?utm_campaign=self&utm_source=ui{{ documentation_fragment }}"
                    target="_blank"
@@ -81,13 +81,13 @@
                    href="https://github.com/bunkerity/bunkerweb/releases/latest"
                    target="_blank"
                    rel="noreferrer"
-                   {% if bw_version != latest_version %} data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="New version available" {% endif %}>
+                   data-bs-toggle="tooltip"
+                   data-bs-placement="bottom"
+                   data-bs-original-title="{% if bw_version != latest_version %}New version available{% else %}Latest version installed{% endif %}">
                     Version {{ bw_version }}
-                    {% if bw_version != latest_version %}
-                        <span class="badge-dot position-absolute top-0 start-100 translate-middle bg-danger border border-light rounded-circle">
-                            <span class="visually-hidden">New version</span>
-                        </span>
-                    {% endif %}
+                    <span class="badge-dot position-absolute top-0 start-100 translate-middle bg-{% if bw_version != latest_version %}danger{% else %}success{% endif %} border border-light rounded-circle">
+                        <span class="visually-hidden">New version</span>
+                    </span>
                 </a>
             </li>
             <!--/ Version -->

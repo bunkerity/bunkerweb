@@ -107,17 +107,17 @@
                  data-type="{{ plugin_data['type'] }}">
                 <div class="card-header d-flex justify-content-between align-items-center mw-100">
                     <div class="pt-1 flex-grow-1 me-2" style="min-width: 0;">
-                        <h5 class="card-title d-inline border p-2{{ plugin_types[plugin_data['type']].get('text-class', '') }}{{ plugin_types[plugin_data['type']].get('title-class', '') }}">
+                        <h5 class="card-title d-inline border p-2 don-jose{{ plugin_types[plugin_data['type']].get('text-class', '') }}{{ plugin_types[plugin_data['type']].get('title-class', '') }}">
                             {{ plugin_data["name"] }}&nbsp;－&nbsp;v{{ plugin_data["version"] }}&nbsp;－&nbsp;{{ plugin_types[plugin_data["type"]].get('icon', '<img src="' + pro_diamond_url + '"
      alt="Pro plugin"
      width="18px"
      height="15.5px">') |safe }}
                         </h5>
-                        <p class="card-subtitle text-muted text-truncate mt-2">{{ plugin_data["description"] }}</p>
+                        <p class="card-subtitle text-muted text-truncate mt-3">{{ plugin_data["description"] }}</p>
                     </div>
                     <div class="d-flex flex-grow-0 flex-shrink-0 justify-content-end align-items-center">
                         <a href="https://docs.bunkerweb.io/latest/quickstart-guide/#protect-udptcp-applications"
-                           class="btn btn-sm btn-{% if plugin_data['stream'] == 'yes' %}bw-green{% elif plugin_data['stream'] == 'partial' %}warning{% else %}danger{% endif %} rounded-pill"
+                           class="btn btn-sm btn-outline-{% if plugin_data['stream'] == 'yes' %}bw-green{% elif plugin_data['stream'] == 'partial' %}warning{% else %}danger{% endif %} rounded-pill"
                            target="_blank"
                            rel="noopener"
                            data-bs-toggle="tooltip"

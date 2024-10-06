@@ -21,8 +21,7 @@ setup = Blueprint("setup", __name__)
 def setup_page():
     if current_user.is_authenticated:
         return redirect(url_for("home.home_page"))
-    db_config = BW_CONFIG.get_config(
-        methods=False,
+    db_config = DB.get_config(
         filtered_settings=("SERVER_NAME", "MULTISITE", "USE_UI", "UI_HOST", "AUTO_LETS_ENCRYPT", "USE_LETS_ENCRYPT_STAGING", "EMAIL_LETS_ENCRYPT"),
     )
 
