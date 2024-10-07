@@ -149,6 +149,13 @@ $(document).ready(function () {
   const layout = {
     topStart: {},
     bottomEnd: {},
+    bottom1: {
+      searchPanes: {
+        viewTotal: true,
+        cascadePanes: true,
+        columns: [1, 4],
+      },
+    },
   };
 
   if (banNumber > 10) {
@@ -320,9 +327,94 @@ $(document).ready(function () {
         render: DataTable.render.select(),
         targets: 0,
       },
+      { type: "ip-address", targets: 1 },
       {
         orderable: false,
         targets: -1,
+      },
+      {
+        searchPanes: {
+          show: true,
+          options: [
+            {
+              label: "Last 24 hours",
+              value: function (rowData, rowIdx) {
+                const date = new Date(rowData[1]);
+                const now = new Date();
+                return now - date < 24 * 60 * 60 * 1000;
+              },
+            },
+            {
+              label: "Last 7 days",
+              value: function (rowData, rowIdx) {
+                const date = new Date(rowData[1]);
+                const now = new Date();
+                return now - date < 7 * 24 * 60 * 60 * 1000;
+              },
+            },
+            {
+              label: "Last 30 days",
+              value: function (rowData, rowIdx) {
+                const date = new Date(rowData[1]);
+                const now = new Date();
+                return now - date < 30 * 24 * 60 * 60 * 1000;
+              },
+            },
+            {
+              label: "More than 30 days",
+              value: function (rowData, rowIdx) {
+                const date = new Date(rowData[1]);
+                const now = new Date();
+                return now - date >= 30 * 24 * 60 * 60 * 1000;
+              },
+            },
+          ],
+          combiner: "or",
+          orderable: false,
+        },
+        targets: 1,
+      },
+      {
+        searchPanes: {
+          show: true,
+          options: [
+            {
+              label: "Next 24 hours",
+              value: function (rowData, rowIdx) {
+                const date = new Date(rowData[4]);
+                const now = new Date();
+                return date - now < 24 * 60 * 60 * 1000;
+              },
+            },
+            {
+              label: "Next 7 days",
+              value: function (rowData, rowIdx) {
+                const date = new Date(rowData[4]);
+                const now = new Date();
+                return date - now < 7 * 24 * 60 * 60 * 1000;
+              },
+            },
+            {
+              label: "Next 30 days",
+              value: function (rowData, rowIdx) {
+                const date = new Date(rowData[4]);
+                const now = new Date();
+                return date - now < 30 * 24 * 60 * 60 * 1000;
+              },
+            },
+            {
+              label: "More than 30 days",
+              value: function (rowData, rowIdx) {
+                const date = new Date(rowData[4]);
+                const now = new Date();
+                return date - now >= 30 * 24 * 60 * 60 * 1000;
+              },
+            },
+          ],
+          combiner: "or",
+          orderable: false,
+        },
+        targets: 4,
       },
       {
         targets: "_all", // Target all columns

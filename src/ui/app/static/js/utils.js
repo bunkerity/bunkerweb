@@ -149,15 +149,21 @@ class News {
         })
       );
 
-      const cardText = $("<small>", { class: "card-text lh-1", text: excerpt });
+      const cardText = $("<small>", {
+        class: "card-text lh-1 courier-prime",
+        text: excerpt,
+      });
 
       const cardFooter = $("<div>", {
         class:
-          "card-footer p-0 mt-2 d-flex justify-content-between align-items-center",
+          "card-footer p-0 mt-3 d-flex justify-content-between align-items-center",
       });
       $("<p>", { class: "card-text mb-0" })
         .append(
-          $("<small>", { class: "text-muted", text: `Posted on: ${date}` })
+          $("<small>", {
+            class: "text-muted courier-prime",
+            text: `Posted on: ${date}`,
+          })
         )
         .appendTo(cardFooter);
 
@@ -207,7 +213,10 @@ class News {
           text: title,
         })
       );
-      const cardText = $("<p>", { class: "card-text", text: excerpt });
+      const cardText = $("<p>", {
+        class: "card-text courier-prime",
+        text: excerpt,
+      });
 
       const tagsContainer = $("<p>", { class: "d-flex flex-wrap" });
       tags.forEach((tag) => {
@@ -229,7 +238,10 @@ class News {
       });
 
       const dateText = $("<p>", { class: "card-text" }).append(
-        $("<small>", { class: "text-muted", text: `Posted on: ${date}` })
+        $("<small>", {
+          class: "text-muted courier-prime",
+          text: `Posted on: ${date}`,
+        })
       );
 
       cardBody.append(cardTitle, cardText, tagsContainer, dateText);
@@ -261,6 +273,7 @@ $(document).ready(() => {
   let currentIndex = 0;
   const intervalTime = 7000;
   let interval;
+  const $bannerText = $("#banner-text");
 
   function loadData() {
     const nowStamp = Math.round(Date.now() / 1000);
@@ -300,8 +313,6 @@ $(document).ready(() => {
 
   // Function to update the banner text with animation
   function updateBannerText(nextIndex) {
-    const $bannerText = $("#banner-text");
-
     // Remove any existing slide-in class to reset
     $bannerText.removeClass("slide-in").addClass("slide-out");
 
@@ -342,6 +353,8 @@ $(document).ready(() => {
     resetInterval();
   });
 
-  loadData();
-  $("#next-news").trigger("click");
+  if ($bannerText.length) {
+    loadData();
+    $("#next-news").trigger("click");
+  }
 });

@@ -1,7 +1,48 @@
 $(document).ready(function () {
   var actionLock = false;
   const configNumber = parseInt($("#configs_number").val());
+  const services = $("#services").val().trim().split(" ");
+  const templates = $("#templates").val().trim().split(" ");
+  const configServiceSelection = $("#configs_service_selection").val().trim();
+  const configTypeSelection = $("#configs_type_selection")
+    .val()
+    .trim()
+    .toUpperCase();
   const isReadOnly = $("#is-read-only").val().trim() === "True";
+
+  const servicesSearchPanesOptions = [
+    {
+      label: "global",
+      value: function (rowData) {
+        return $(rowData[4]).text().trim() === "global";
+      },
+    },
+  ];
+  const templatesSearchPanesOptions = [
+    {
+      label: "no template",
+      value: function (rowData) {
+        return $(rowData[5]).text().trim() === "no template";
+      },
+    },
+  ];
+
+  services.forEach((service) => {
+    servicesSearchPanesOptions.push({
+      label: service,
+      value: function (rowData) {
+        return $(rowData[4]).text().trim() === service;
+      },
+    });
+  });
+  templates.forEach((template) => {
+    templatesSearchPanesOptions.push({
+      label: template,
+      value: function (rowData) {
+        return $(rowData[5]).text().trim() === template;
+      },
+    });
+  });
 
   const setupDeletionModal = (configs) => {
     const delete_modal = $("#modal-delete-configs");
@@ -328,9 +369,25 @@ $(document).ready(function () {
         searchPanes: {
           show: true,
           combiner: "or",
+          options: servicesSearchPanesOptions,
+        },
+        targets: 4,
+      },
+      {
+        searchPanes: {
+          show: true,
+          combiner: "or",
           orderable: false,
         },
-        targets: [3, 4, 5],
+        targets: 3,
+      },
+      {
+        searchPanes: {
+          show: true,
+          combiner: "or",
+          options: templatesSearchPanesOptions,
+        },
+        targets: 5,
       },
       {
         targets: "_all", // Target all columns
@@ -375,6 +432,14 @@ $(document).ready(function () {
           .tooltip();
     },
   });
+
+  $(`#DataTables_Table_0 span[title='${configTypeSelection}']`).trigger(
+    "click"
+  );
+
+  $(`#DataTables_Table_2 span[title='${configServiceSelection}']`).trigger(
+    "click"
+  );
 
   $("#configs").removeClass("d-none");
   $("#configs-waiting").addClass("visually-hidden");

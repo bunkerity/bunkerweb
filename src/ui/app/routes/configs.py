@@ -38,7 +38,16 @@ CONFIG_TYPES = {
 @configs.route("/configs", methods=["GET"])
 @login_required
 def configs_page():
-    return render_template("configs.html", configs=DB.get_custom_configs(with_drafts=True, with_data=False))
+    service = request.args.get("service", "")
+    config_type = request.args.get("type", "")
+    return render_template(
+        "configs.html",
+        configs=DB.get_custom_configs(with_drafts=True, with_data=False),
+        services=BW_CONFIG.get_config(global_only=True, methods=False, with_drafts=True, filtered_settings=("SERVER_NAME"))["SERVER_NAME"],
+        db_templates=" ".join([template for template in DB.get_templates() if template != "ui"]),
+        config_service=service,
+        config_type=config_type,
+    )
 
 
 @configs.route("/configs/delete", methods=["POST"])
@@ -239,7 +248,7 @@ def configs_new():
     )
 
 
-@configs.route("/configs/<string:service>/<string:config_type>/<string:name>", methods=["GET", "POST"])  # TODO: finish saving
+@configs.route("/configs/<string:service>/<string:config_type>/<string:name>", methods=["GET", "POST"])
 @login_required
 def configs_edit(service: str, config_type: str, name: str):
     if service == "global":

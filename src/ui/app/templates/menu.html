@@ -79,7 +79,7 @@
                             <li class="menu-item{% if current_endpoint == plugin %} active{% endif %}"{% if not_pro_pro_plugin %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" data-bs-original-title="<i class='bx bx-diamond bx-xs'></i><span>Pro feature</span>"
                             {% endif %}
                             >
-                            <a href="{% if not_pro_pro_plugin %}https://panel.bunkerweb.io/?utm_campaign=self&utm_source=ui#pro{% else %}{{ url_for("plugins") }}/{{ plugin }}{% endif %}"
+                            <a href="{% if not_pro_pro_plugin %}{{ url_for("pro") }}{% else %}{{ url_for("plugins") }}/{{ plugin }}{% endif %}"
                                class="menu-link"
                                {% if not_pro_pro_plugin %}target="_blank" rel="noopener"{% endif %}>
                                 <i class="menu-icon tf-icons bx bx-puzzle"></i>

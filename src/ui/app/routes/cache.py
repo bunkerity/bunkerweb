@@ -5,7 +5,7 @@ from flask_login import login_required
 from magic import Magic
 from werkzeug.utils import secure_filename
 
-from app.dependencies import DB
+from app.dependencies import BW_CONFIG, DB
 
 
 cache = Blueprint("cache", __name__)
@@ -16,7 +16,17 @@ SHOWN_FILE_TYPES = ("text/plain", "text/html", "text/css", "text/javascript", "a
 @cache.route("/cache", methods=["GET"])
 @login_required
 def cache_page():
-    return render_template("cache.html", caches=DB.get_jobs_cache_files(with_data=False))
+    service = request.args.get("service", "")
+    cache_plugin = request.args.get("plugin", "")
+    cache_job_name = request.args.get("job_name", "")
+    return render_template(
+        "cache.html",
+        caches=DB.get_jobs_cache_files(with_data=False),
+        services=BW_CONFIG.get_config(global_only=True, methods=False, with_drafts=True, filtered_settings=("SERVER_NAME"))["SERVER_NAME"],
+        cache_service=service,
+        cache_plugin=cache_plugin,
+        cache_job_name=cache_job_name,
+    )
 
 
 @cache.route("/cache/<string:service>/<string:plugin_id>/<string:job_name>/<string:file_name>", methods=["GET"])

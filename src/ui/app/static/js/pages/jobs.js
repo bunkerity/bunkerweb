@@ -6,6 +6,13 @@ $(document).ready(function () {
   const layout = {
     topStart: {},
     bottomEnd: {},
+    bottom1: {
+      searchPanes: {
+        viewTotal: true,
+        cascadePanes: true,
+        columns: [2, 3, 4, 5],
+      },
+    },
   };
 
   if (jobNumber > 10) {
@@ -114,14 +121,14 @@ $(document).ready(function () {
         type: "hidden",
         name: "csrf_token",
         value: $("#csrf_token").val(),
-      }),
+      })
     );
     form.append(
       $("<input>", {
         type: "hidden",
         name: "jobs",
         value: JSON.stringify(jobs),
-      }),
+      })
     );
 
     // Append the form to the body and submit it
@@ -183,6 +190,95 @@ $(document).ready(function () {
       {
         orderable: false,
         targets: -1,
+      },
+      {
+        searchPanes: {
+          show: true,
+          combiner: "or",
+        },
+        targets: [2],
+      },
+      {
+        searchPanes: {
+          show: true,
+          header: "Interval",
+          options: [
+            {
+              label: "Every day",
+              value: function (rowData, rowIdx) {
+                return rowData[3].includes("day");
+              },
+            },
+            {
+              label: "Every hour",
+              value: function (rowData, rowIdx) {
+                return rowData[3].includes("hour");
+              },
+            },
+            {
+              label: "Every week",
+              value: function (rowData, rowIdx) {
+                return rowData[3].includes("week");
+              },
+            },
+            {
+              label: "Once",
+              value: function (rowData, rowIdx) {
+                return rowData[3].includes("once");
+              },
+            },
+          ],
+          combiner: "or",
+          orderable: false,
+        },
+        targets: 3,
+      },
+      {
+        searchPanes: {
+          show: true,
+          header: "Reload",
+          options: [
+            {
+              label: '<i class="bx bx-sm bx-x text-danger"></i>&nbsp;No',
+              value: function (rowData, rowIdx) {
+                return rowData[4].includes("bx-x");
+              },
+            },
+            {
+              label: '<i class="bx bx-sm bx-check text-success"></i>&nbsp;Yes',
+              value: function (rowData, rowIdx) {
+                return rowData[4].includes("bx-check");
+              },
+            },
+          ],
+          combiner: "or",
+          orderable: false,
+        },
+        targets: 4,
+      },
+      {
+        searchPanes: {
+          show: true,
+          header: "Last run state",
+          options: [
+            {
+              label: '<i class="bx bx-sm bx-x text-danger"></i>&nbsp;Failed',
+              value: function (rowData, rowIdx) {
+                return rowData[5].includes("bx-x");
+              },
+            },
+            {
+              label:
+                '<i class="bx bx-sm bx-check text-success"></i>&nbsp;Success',
+              value: function (rowData, rowIdx) {
+                return rowData[5].includes("bx-check");
+              },
+            },
+          ],
+          combiner: "or",
+          orderable: false,
+        },
+        targets: 5,
       },
       {
         targets: "_all", // Target all columns
@@ -273,7 +369,7 @@ $(document).ready(function () {
       .html(
         `Last${historyCount > 1 ? " " + historyCount : ""} execution${
           historyCount > 1 ? "s" : ""
-        } of Job <span class="fw-bold fst-italic">${job}</span> from plugin <span class="fw-bold fst-italic">${plugin}</span>`,
+        } of Job <span class="fw-bold fst-italic">${job}</span> from plugin <span class="fw-bold fst-italic">${plugin}</span>`
       );
     history.removeClass("visually-hidden");
     historyModal.find(".modal-body").html(history);

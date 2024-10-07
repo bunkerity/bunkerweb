@@ -398,7 +398,7 @@ $(document).ready(function () {
           combiner: "or",
           orderable: false,
         },
-        targets: 3,
+        targets: [3],
       },
       {
         searchPanes: {

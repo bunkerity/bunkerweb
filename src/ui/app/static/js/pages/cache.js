@@ -1,5 +1,27 @@
 $(document).ready(function () {
   const cacheNumber = parseInt($("#cache_number").val());
+  const services = $("#services").val().trim().split(" ");
+  const cacheServiceSelection = $("#cache_service_selection").val().trim();
+  const cachePluginSelection = $("#cache_plugin_selection").val().trim();
+  const cacheJobNameSelection = $("#cache_job_name_selection").val().trim();
+
+  const servicesSearchPanesOptions = [
+    {
+      label: "global",
+      value: function (rowData) {
+        return $(rowData[3]).text().trim() === "global";
+      },
+    },
+  ];
+
+  services.forEach((service) => {
+    servicesSearchPanesOptions.push({
+      label: service,
+      value: function (rowData) {
+        return $(rowData[3]).text().trim() === service;
+      },
+    });
+  });
 
   const layout = {
     topStart: {},
@@ -8,7 +30,7 @@ $(document).ready(function () {
       searchPanes: {
         viewTotal: true,
         cascadePanes: true,
-        columns: [2, 3, 4],
+        columns: [1, 2, 3, 4],
       },
     },
   };
@@ -116,7 +138,15 @@ $(document).ready(function () {
           show: true,
           combiner: "or",
         },
-        targets: [2, 3],
+        targets: [1, 2],
+      },
+      {
+        searchPanes: {
+          show: true,
+          combiner: "or",
+          options: servicesSearchPanesOptions,
+        },
+        targets: 3,
       },
       {
         searchPanes: {
@@ -175,6 +205,18 @@ $(document).ready(function () {
       $("#cache_wrapper th").addClass("text-center");
     },
   });
+
+  $(`#DataTables_Table_0 span[title='${cacheJobNameSelection}']`).trigger(
+    "click"
+  );
+
+  $(`#DataTables_Table_1 span[title='${cachePluginSelection}']`).trigger(
+    "click"
+  );
+
+  $(`#DataTables_Table_2 span[title='${cacheServiceSelection}']`).trigger(
+    "click"
+  );
 
   $("#cache").removeClass("d-none");
   $("#cache-waiting").addClass("visually-hidden");
