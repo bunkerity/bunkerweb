@@ -1,28 +1,40 @@
+from importlib.machinery import SourceFileLoader
 from io import BytesIO
 from json import JSONDecodeError, loads as json_loads
 from os import listdir
 from os.path import basename, dirname, isabs
 from pathlib import Path
 from shutil import move, rmtree
+from sys import path as sys_path
 from tarfile import CompressionError, HeaderError, ReadError, TarError, open as tar_open
 from threading import Thread
 from time import time
-from typing import List
+from typing import List, Optional, Union
+from uuid import uuid4
 from zipfile import BadZipFile, ZipFile
 
-from flask import Blueprint, flash, redirect, render_template, request, url_for
+from flask import Blueprint, Response, current_app, flash, jsonify, redirect, render_template, request, url_for
 from flask_login import login_required
 from werkzeug.utils import secure_filename
 
 from common_utils import bytes_hash  # type: ignore
 
-from app.dependencies import BW_CONFIG, DATA, DB
+from app.dependencies import BW_CONFIG, BW_INSTANCES_UTILS, DATA, DB
 from app.utils import LOGGER, PLUGIN_NAME_RX, TMP_DIR
 
-from app.routes.utils import PLUGIN_KEYS, handle_error, verify_data_in_form, wait_applying
+from app.routes.utils import PLUGIN_KEYS, error_message, handle_error, verify_data_in_form, wait_applying
 
 
 plugins = Blueprint("plugins", __name__)
+
+ALWAYS_USED_PLUGINS = ("errors", "headers", "misc", "php", "pro", "sessions")
+PLUGINS_SPECIFICS = {
+    "country": {"BLACKLIST_COUNTRY": "", "WHITELIST_COUNTRY": ""},
+    "customcert": {"USE_CUSTOM_SSL": "no"},
+    "letsencrypt": {"AUTO_LETS_ENCRYPT": "no"},
+    "limit": {"USE_LIMIT_REQ": "no", "USE_LIMIT_CONN": "no"},
+    "selfsigned": {"GENERATE_SELF_SIGNED_SSL": "no"},
+}
 
 
 @plugins.route("/plugins", methods=["GET"])
@@ -75,86 +87,86 @@ def delete_plugin():
     return redirect(url_for("loading", next=url_for("plugins.plugins_page"), message=f"Deleting plugins: {', '.join(plugins)}"))
 
 
-# def run_action(plugin: str, function_name: str = "", *, tmp_dir: Optional[Path] = None) -> Union[dict, Response]:
-#     message = ""
-#     if not tmp_dir:
-#         page = DB.get_plugin_page(plugin)
+def run_action(plugin: str, function_name: str = "", *, tmp_dir: Optional[Path] = None) -> Union[dict, Response]:
+    message = ""
+    if not tmp_dir:
+        page = DB.get_plugin_page(plugin)
 
-#         if not page:
-#             return {"status": "ko", "code": 404, "message": "The plugin does not have a page"}
+        if not page:
+            return {"status": "ko", "code": 404, "message": "The plugin does not have a page"}
 
-#         try:
-#             # Try to import the plugin's custom page
-#             tmp_dir = TMP_DIR.joinpath("ui", "action", str(uuid4()))
-#             tmp_dir.mkdir(parents=True, exist_ok=True)
+        try:
+            # Try to import the plugin's custom page
+            tmp_dir = TMP_DIR.joinpath("ui", "action", str(uuid4()))
+            tmp_dir.mkdir(parents=True, exist_ok=True)
 
-#             with tar_open(fileobj=BytesIO(page), mode="r:gz") as tar:
-#                 tar.extractall(tmp_dir)
+            with tar_open(fileobj=BytesIO(page), mode="r:gz") as tar:
+                tar.extractall(tmp_dir)
 
-#             tmp_dir = tmp_dir.joinpath("ui")
-#         except BaseException as e:
-#             LOGGER.error(f"An error occurred while extracting the plugin: {e}")
-#             return {"status": "ko", "code": 500, "message": "An error occurred while extracting the plugin, see logs for more details"}
+            tmp_dir = tmp_dir.joinpath("ui")
+        except BaseException as e:
+            LOGGER.error(f"An error occurred while extracting the plugin: {e}")
+            return {"status": "ko", "code": 500, "message": "An error occurred while extracting the plugin, see logs for more details"}
 
-#     try:
-#         action_file = tmp_dir.joinpath("actions.py")
-#         if not action_file.is_file():
-#             return {"status": "ko", "code": 404, "message": "The plugin does not have an action file"}
+    try:
+        action_file = tmp_dir.joinpath("actions.py")
+        if not action_file.is_file():
+            return {"status": "ko", "code": 404, "message": "The plugin does not have an action file"}
 
-#         sys_path.append(tmp_dir.as_posix())
-#         loader = SourceFileLoader("actions", action_file.as_posix())
-#         actions = loader.load_module()
-#     except BaseException as e:
-#         sys_path.pop()
-#         if function_name != "pre_render":
-#             rmtree(tmp_dir, ignore_errors=True)
+        sys_path.append(tmp_dir.as_posix())
+        loader = SourceFileLoader("actions", action_file.as_posix())
+        actions = loader.load_module()
+    except BaseException as e:
+        sys_path.pop()
+        if function_name != "pre_render":
+            rmtree(tmp_dir, ignore_errors=True)
 
-#         LOGGER.error(f"An error occurred while importing the plugin: {e}")
-#         return {"status": "ko", "code": 500, "message": "An error occurred while importing the plugin, see logs for more details"}
+        LOGGER.error(f"An error occurred while importing the plugin: {e}")
+        return {"status": "ko", "code": 500, "message": "An error occurred while importing the plugin, see logs for more details"}
 
-#     exception = None
-#     res = None
-#     message = None
+    exception = None
+    res = None
+    message = None
 
-#     try:
-#         # Try to get the custom plugin custom function and call it
-#         method = getattr(actions, function_name or plugin)
-#         queries = request.args.to_dict()
-#         try:
-#             data = request.json or {}
-#         except BaseException:
-#             data = {}
+    try:
+        # Try to get the custom plugin custom function and call it
+        method = getattr(actions, function_name or plugin)
+        queries = request.args.to_dict()
+        try:
+            data = request.json or {}
+        except BaseException:
+            data = {}
 
-#         res = method(app=current_app, db=DB, instances_utils=BW_INSTANCES_UTILS, args=queries, data=data)
-#     except AttributeError as e:
-#         if function_name == "pre_render":
-#             sys_path.pop()
-#             return {"status": "ok", "code": 200, "message": "The plugin does not have a pre_render method"}
+        res = method(app=current_app, db=DB, bw_instances_utils=BW_INSTANCES_UTILS, args=queries, data=data)
+    except AttributeError as e:
+        if function_name == "pre_render":
+            sys_path.pop()
+            return {"status": "ok", "code": 200, "message": "The plugin does not have a pre_render method"}
 
-#         message = "The plugin does not have a method"
-#         exception = e
-#     except BaseException as e:
-#         message = "An error occurred while executing the plugin"
-#         exception = e
-#     finally:
-#         sys_path.pop()
+        message = "The plugin does not have a method"
+        exception = e
+    except BaseException as e:
+        message = "An error occurred while executing the plugin"
+        exception = e
+    finally:
+        sys_path.pop()
 
-#         if function_name != "pre_render":
-#             rmtree(tmp_dir, ignore_errors=True)
+        if function_name != "pre_render":
+            rmtree(tmp_dir, ignore_errors=True)
 
-#         if message:
-#             LOGGER.error(message + (f": {exception}" if exception else ""))
-#         if message or not isinstance(res, dict) and not res:
-#             return {
-#                 "status": "ko",
-#                 "code": 500,
-#                 "message": message + ", see logs for more details" if message else "The plugin did not return a valid response",
-#             }
+        if message:
+            LOGGER.error(message + (f": {exception}" if exception else ""))
+        if message or not isinstance(res, dict) and not res:
+            return {
+                "status": "ko",
+                "code": 500,
+                "message": message + ", see logs for more details" if message else "The plugin did not return a valid response",
+            }
 
-#     if isinstance(res, Response):
-#         return res
+    if isinstance(res, Response):
+        return res
 
-#     return {"status": "ok", "code": 200, "data": res}
+    return {"status": "ok", "code": 200, "data": res}
 
 
 @plugins.route("/plugins/refresh", methods=["POST"])
@@ -457,10 +469,106 @@ def upload_plugin():
     return {"status": "ok"}, 201
 
 
-@plugins.route("/plugins/<string:plugin>", methods=["GET"])
+@plugins.route("/plugins/<string:plugin>", methods=["GET", "POST"])
 @login_required
 def custom_plugin_page(plugin: str):
-    return render_template("plugin_page.html")
+    rmtree(TMP_DIR.joinpath("ui", "page"), ignore_errors=True)
+
+    if not PLUGIN_NAME_RX.match(plugin):
+        return handle_error("Invalid plugin id, (must be between 1 and 64 characters, only letters, numbers, underscores and hyphens)", "plugins")
+
+    if request.method == "POST":
+
+        action_result = run_action(plugin)
+
+        if isinstance(action_result, Response):
+            LOGGER.info(f"Plugin {plugin} action executed successfully")
+            return action_result
+
+        # case error
+        if action_result["status"] == "ko":
+            return error_message(action_result["message"]), action_result["code"]
+
+        LOGGER.info(f"Plugin {plugin} action executed successfully")
+
+        if request.content_type == "application/x-www-form-urlencoded":
+            return redirect(f"{url_for('plugins.plugins_page')}/{plugin}", code=303)
+        return jsonify({"message": "ok", "data": action_result["data"]}), 200
+
+    plugin_data = {}
+    for db_plugin, db_plugin_data in BW_CONFIG.get_plugins().items():
+        if db_plugin == plugin:
+            plugin_data = db_plugin_data | {"id": db_plugin}
+            break
+
+    if not plugin_data:
+        return error_message("Plugin not found"), 404
+
+    plugin_id = plugin.upper()
+    plugin_name_formatted = plugin_data["name"].replace(" ", "_").upper()
+    db_config = DB.get_config()
+
+    def plugin_used(prefix: str = "") -> bool:
+        if plugin_id in PLUGINS_SPECIFICS:
+            for key, value in PLUGINS_SPECIFICS[plugin_id].items():
+                if db_config.get(f"{prefix}{key}", value) != value:
+                    return True
+        elif db_config.get(f"{prefix}USE_{plugin_id}", db_config.get(f"{prefix}USE_{plugin_name_formatted}", "no")) != "no":
+            return True
+        return False
+
+    is_metrics_on = db_config.get("USE_METRICS", "yes") != "no"
+    is_used = plugin in ALWAYS_USED_PLUGINS or plugin_used()
+
+    if not is_metrics_on and not is_used:
+        # Check if at least one service is using metrics and/or the plugin
+        for service in db_config.get("SERVER_NAME", "").split(" "):
+            if not is_metrics_on and db_config.get(f"{service}_USE_METRICS", "yes") != "no":
+                is_metrics_on = True
+            elif not is_used and plugin_used(f"{service}_"):
+                is_used = True
+            if is_metrics_on and is_used:
+                break
+
+    plugin_page = ""
+    # TODO: uncomment this when the plugin pages are ready
+    # if is_used and is_metrics_on:
+    #     page = DB.get_plugin_page(plugin)
+    #     if not page:
+    #         return error_message("The plugin does not have a page"), 404
+
+    #     tmp_page_dir = TMP_DIR.joinpath("ui", "page", str(uuid4()))
+    #     tmp_page_dir.mkdir(parents=True, exist_ok=True)
+
+    #     with tar_open(fileobj=BytesIO(page), mode="r:gz") as tar_file:
+    #         tar_file.extractall(tmp_page_dir)
+
+    #     tmp_page_dir = tmp_page_dir.joinpath("ui")
+
+    #     LOGGER.debug(f"Plugin {plugin} page extracted successfully")
+
+    #     pre_render = run_action(plugin, "pre_render", tmp_dir=tmp_page_dir)
+    #     try:
+    #         plugin_page = (
+    #             # deepcode ignore Ssti: We trust the plugin template
+    #             Environment(
+    #                 loader=FileSystemLoader((tmp_page_dir.as_posix() + "/", join(sep, "usr", "share", "bunkerweb", "ui", "templates") + "/")),
+    #                 autoescape=select_autoescape(["html"]),
+    #             )
+    #             .from_string(tmp_page_dir.joinpath("template.html").read_text(encoding="utf-8"))
+    #             .render(pre_render=pre_render, **current_app.jinja_env.globals)
+    #         )
+    #     except BaseException as e:
+    #         LOGGER.exception(f"An error occurred while rendering the plugin page")
+    #         plugin_page = f'<div class="mt-2 mb-2 alert alert-danger text-center" role="alert">An error occurred while rendering the plugin page: {e}<br/>See logs for more details</div>'
+
+    return render_template(
+        "plugin_page.html",
+        plugin_page=plugin_page,
+        plugin=plugin_data,
+        is_used=is_used,
+        is_metrics=is_metrics_on,
+    )
 
 
 # @plugins.route("/plugins/<plugin>", methods=["GET", "POST"])
