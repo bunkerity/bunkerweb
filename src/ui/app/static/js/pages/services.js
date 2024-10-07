@@ -298,11 +298,11 @@ $(function () {
           show: true,
           options: [
             {
-              label: "Online",
+              label: '<i class="bx bx-xs bx-globe"></i>&nbsp;Online',
               value: (rowData) => rowData[2].includes("Online"),
             },
             {
-              label: "Draft",
+              label: '<i class="bx bx-xs bx-file-blank"></i>&nbsp;Draft',
               value: (rowData) => rowData[2].includes("Draft"),
             },
           ],

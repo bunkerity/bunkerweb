@@ -239,13 +239,13 @@ $(document).ready(function () {
           header: "Reload",
           options: [
             {
-              label: '<i class="bx bx-sm bx-x text-danger"></i>&nbsp;No',
+              label: '<i class="bx bx-xs bx-x text-danger"></i>&nbsp;No',
               value: function (rowData, rowIdx) {
                 return rowData[4].includes("bx-x");
               },
             },
             {
-              label: '<i class="bx bx-sm bx-check text-success"></i>&nbsp;Yes',
+              label: '<i class="bx bx-xs bx-check text-success"></i>&nbsp;Yes',
               value: function (rowData, rowIdx) {
                 return rowData[4].includes("bx-check");
               },
@@ -262,14 +262,14 @@ $(document).ready(function () {
           header: "Last run state",
           options: [
             {
-              label: '<i class="bx bx-sm bx-x text-danger"></i>&nbsp;Failed',
+              label: '<i class="bx bx-xs bx-x text-danger"></i>&nbsp;Failed',
               value: function (rowData, rowIdx) {
                 return rowData[5].includes("bx-x");
               },
             },
             {
               label:
-                '<i class="bx bx-sm bx-check text-success"></i>&nbsp;Success',
+                '<i class="bx bx-xs bx-check text-success"></i>&nbsp;Success',
               value: function (rowData, rowIdx) {
                 return rowData[5].includes("bx-check");
               },

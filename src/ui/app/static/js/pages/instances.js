@@ -405,19 +405,22 @@ $(document).ready(function () {
           show: true,
           options: [
             {
-              label: "Up",
+              label:
+                '<i class="bx bx-xs bx-up-arrow-alt text-success"></i>&nbsp;Up',
               value: function (rowData, rowIdx) {
                 return rowData[4].includes("Up");
               },
             },
             {
-              label: "Down",
+              label:
+                '<i class="bx bx-xs bx-down-arrow-alt text-danger"></i>&nbsp;Down',
               value: function (rowData, rowIdx) {
                 return rowData[4].includes("Down");
               },
             },
             {
-              label: "Loading",
+              label:
+                '<i class="bx bx-xs bxs-hourglass text-warning"></i>&nbsp;Loading',
               value: function (rowData, rowIdx) {
                 return rowData[4].includes("Loading");
               },
@@ -433,19 +436,19 @@ $(document).ready(function () {
           show: true,
           options: [
             {
-              label: "Static",
+              label: '<i class="bx bx-xs bx-microchip"></i>&nbsp;Static',
               value: function (rowData, rowIdx) {
                 return rowData[5].includes("Static");
               },
             },
             {
-              label: "Container",
+              label: '<i class="bx bx-xs bxl-docker"></i>&nbsp;Container',
               value: function (rowData, rowIdx) {
                 return rowData[5].includes("Container");
               },
             },
             {
-              label: "Pod",
+              label: '<i class="bx bx-xs bxl-kubernetes"></i>&nbsp;Pod',
               value: function (rowData, rowIdx) {
                 return rowData[5].includes("Pod");
               },

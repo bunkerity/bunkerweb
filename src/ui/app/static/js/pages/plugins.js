@@ -337,19 +337,20 @@ $(document).ready(function () {
           header: "Stream Support",
           options: [
             {
-              label: "No",
+              label: '<i class="bx bx-xs bx-x text-danger"></i>&nbsp;No',
               value: function (rowData, rowIdx) {
                 return rowData[5].includes("bx-x");
               },
             },
             {
-              label: "Yes",
+              label: '<i class="bx bx-xs bx-check text-success"></i>&nbsp;Yes',
               value: function (rowData, rowIdx) {
                 return rowData[5].includes("bx-check");
               },
             },
             {
-              label: "Partial",
+              label:
+                '<i class="bx bx-xs bx-minus text-warning"></i>&nbsp;Partial',
               value: function (rowData, rowIdx) {
                 return rowData[5].includes("bx-minus");
               },
@@ -365,25 +366,26 @@ $(document).ready(function () {
           show: true,
           options: [
             {
-              label: "PRO",
+              label:
+                '<img src="/admin/img/diamond.svg" alt="Pro plugin" width="16px" height="12.9125px" class="mb-1">&nbsp;PRO',
               value: function (rowData, rowIdx) {
                 return rowData[6].includes("PRO");
               },
             },
             {
-              label: "External",
+              label: '<i class="bx bx-plug bx-xs"></i>&nbsp;External',
               value: function (rowData, rowIdx) {
                 return rowData[6].includes("EXTERNAL");
               },
             },
             {
-              label: "UI",
+              label: '<i class="bx bx-cloud-upload bx-xs"></i>&nbsp;UI',
               value: function (rowData, rowIdx) {
                 return rowData[6].includes("UI");
               },
             },
             {
-              label: "Core",
+              label: '<i class="bx bx-shield bx-xs"></i>&nbsp;Core',
               value: function (rowData, rowIdx) {
                 return rowData[6].includes("CORE");
               },

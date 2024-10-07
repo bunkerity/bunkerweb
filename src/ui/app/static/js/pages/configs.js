@@ -307,55 +307,60 @@ $(document).ready(function () {
           show: true,
           options: [
             {
-              label: "HTTP",
+              label: '<i class="bx bx-xs bx-window-alt"></i>&nbsp;HTTP',
               value: function (rowData, rowIdx) {
                 return / HTTP$/.test(rowData[2].trim());
               },
             },
             {
-              label: "SERVER_HTTP",
+              label: '<i class="bx bx-xs bx-window-alt"></i>&nbsp;SERVER_HTTP',
               value: function (rowData, rowIdx) {
                 return / SERVER_HTTP$/.test(rowData[2].trim());
               },
             },
             {
-              label: "DEFAULT_SERVER_HTTP",
+              label:
+                '<i class="bx bx-xs bx-window-alt"></i>&nbsp;DEFAULT_SERVER_HTTP',
               value: function (rowData, rowIdx) {
                 return / DEFAULT_SERVER_HTTP$/.test(rowData[2].trim());
               },
             },
             {
-              label: "MODSEC_CRS",
+              label:
+                '<i class="bx bx-xs bx-shield-quarter"></i>&nbsp;MODSEC_CRS',
               value: function (rowData, rowIdx) {
                 return / MODSEC_CRS$/.test(rowData[2].trim());
               },
             },
             {
-              label: "MODSEC",
+              label: '<i class="bx bx-xs bx-shield-alt-2"></i>&nbsp;MODSEC',
               value: function (rowData, rowIdx) {
                 return / MODSEC$/.test(rowData[2].trim());
               },
             },
             {
-              label: "STREAM",
+              label: '<i class="bx bx-xs bx-network-chart"></i>&nbsp;STREAM',
               value: function (rowData, rowIdx) {
                 return / STREAM$/.test(rowData[2].trim());
               },
             },
             {
-              label: "SERVER_STREAM",
+              label:
+                '<i class="bx bx-xs bx-network-chart"></i>&nbsp;SERVER_STREAM',
               value: function (rowData, rowIdx) {
                 return / SERVER_STREAM$/.test(rowData[2].trim());
               },
             },
             {
-              label: "CRS_PLUGINS_BEFORE",
+              label:
+                '<i class="bx bx-xs bx-shield-alt"></i>&nbsp;CRS_PLUGINS_BEFORE',
               value: function (rowData, rowIdx) {
                 return rowData[2].includes("BEFORE");
               },
             },
             {
-              label: "CRS_PLUGINS_AFTER",
+              label:
+                '<i class="bx bx-xs bx-shield-alt"></i>&nbsp;CRS_PLUGINS_AFTER',
               value: function (rowData, rowIdx) {
                 return rowData[2].includes("AFTER");
               },
