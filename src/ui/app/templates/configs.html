@@ -79,7 +79,7 @@
                             <a href="{{ url_for("configs") }}/{{ service_id }}/{{ config['type'] }}/{{ config['name'] }}"
                                data-bs-toggle="tooltip"
                                data-bs-placement="bottom"
-                               data-bs-original-title="{% if config['method'] != 'ui' or is_readonly %}View{% else %}Edit{% endif %} custom config {{ config['name'] }}"><i class="bx bx-{% if config['method'] != 'ui' or is_readonly %}show{% else %}edit{% endif %} bx-xs"></i>&nbsp;{{ config["name"] }}</a>
+                               data-bs-original-title="{% if config['method'] != 'ui' and not config['template'] or is_readonly %}View{% else %}Edit{% endif %} custom config {{ config['name'] }}"><i class="bx bx-{% if config['method'] != 'ui' and not config['template'] or is_readonly %}show{% else %}edit{% endif %} bx-xs"></i>&nbsp;{{ config["name"] }}</a>
                         </td>
                         <td id="type-{{ config['type'] }}-{{ service_id.replace('.', '_') }}-{{ config['name'] }}">
                             <i class="bx bx-{{ config_icon }}"></i>
@@ -111,8 +111,8 @@
                                    href="{{ url_for("configs") }}/{{ service_id }}/{{ config['type'] }}/{{ config['name'] }}"
                                    data-bs-toggle="tooltip"
                                    data-bs-placement="bottom"
-                                   data-bs-original-title="{% if config['method'] != 'ui' or is_readonly %}View{% else %}Edit{% endif %} custom config {{ config['name'] }}">
-                                    <i class="bx bx-{% if config['method'] != 'ui' or is_readonly %}show{% else %}edit{% endif %} bx-xs"></i>
+                                   data-bs-original-title="{% if config['method'] != 'ui' and not config['template'] or is_readonly %}View{% else %}Edit{% endif %} custom config {{ config['name'] }}">
+                                    <i class="bx bx-{% if config['method'] != 'ui' and not config['template'] or is_readonly %}show{% else %}edit{% endif %} bx-xs"></i>
                                 </a>
                                 <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Disabled by readonly"{% endif %}>
                                     <a role="button"
