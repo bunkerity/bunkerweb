@@ -193,7 +193,7 @@ $(function () {
           getColor(from + 1) +
           '"></i> ' +
           from +
-          (to ? "&ndash;" + to : "+")
+          (to ? "&ndash;" + to : "+"),
       );
     }
 
@@ -210,7 +210,7 @@ $(function () {
   // Ensure each value is properly converted to a number
   const totalRequests = Object.values(requestsData).reduce(
     (acc, curr) => acc + parseInt(curr, 10), // Parse as integer
-    0 // Initial value for the accumulator
+    0, // Initial value for the accumulator
   );
 
   const blockedRequests = Object.keys(requestsData).reduce((acc, key) => {
@@ -305,7 +305,7 @@ $(function () {
 
   const requestsChart = new ApexCharts(
     document.querySelector("#requests-stats"),
-    requestsOptions
+    requestsOptions,
   );
   requestsChart.render();
 
@@ -396,7 +396,7 @@ $(function () {
 
     const ipsChart = new ApexCharts(
       document.querySelector("#requests-ips"),
-      ipsOptions
+      ipsOptions,
     );
     ipsChart.render();
   }
@@ -406,10 +406,10 @@ $(function () {
   const blockingData = JSON.parse($("#requests-blocking-data").text());
 
   const dataValues = Object.values(blockingData).map((value) =>
-    parseInt(value, 10)
+    parseInt(value, 10),
   );
   const categories = Object.keys(blockingData).map((key) =>
-    new Date(key).toLocaleTimeString()
+    new Date(key).toLocaleTimeString(),
   );
 
   const minValue = Math.min(...dataValues);
@@ -498,7 +498,7 @@ $(function () {
 
   const blockingChart = new ApexCharts(
     document.querySelector("#requests-blocking"),
-    blockingOptions
+    blockingOptions,
   );
   blockingChart.render();
 });

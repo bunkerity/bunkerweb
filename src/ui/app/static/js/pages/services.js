@@ -22,7 +22,7 @@ $(function () {
     services.forEach((service) => {
       const sanitizedService = service.replace(/\./g, "-");
       const serviceList = $(
-        '<ul class="list-group list-group-horizontal d-flex w-100"></ul>'
+        '<ul class="list-group list-group-horizontal d-flex w-100"></ul>',
       );
 
       const listItem = $(`
@@ -57,7 +57,7 @@ $(function () {
       .text(
         `Are you sure you want to convert the selected service${
           services.length > 1 ? "s" : ""
-        } to ${conversionType}?`
+        } to ${conversionType}?`,
       );
     convertModal
       .find("button[type=submit]")
@@ -78,7 +78,7 @@ $(function () {
       .text(
         `Are you sure you want to delete the selected service${
           services.length > 1 ? "s" : ""
-        }?`
+        }?`,
       );
     const modalInstance = new bootstrap.Modal(deleteModal);
     modalInstance.show();
@@ -184,10 +184,10 @@ $(function () {
         .empty();
       $(this)
         .find(
-          "#selected-services-input-convert, #selected-services-input-delete"
+          "#selected-services-input-convert, #selected-services-input-delete",
         )
         .val("");
-    }
+    },
   );
 
   const getSelectedServices = () =>
@@ -230,7 +230,7 @@ $(function () {
 
       const filteredServices = services.filter((service) => {
         const serviceType = $(`#type-${service.replace(/\./g, "-")}`).data(
-          "value"
+          "value",
         );
         return serviceType !== conversionType;
       });
@@ -408,7 +408,7 @@ $(function () {
           .find(".dt-buttons")
           .attr(
             "data-bs-original-title",
-            "The database is in read-only mode; you cannot create new services."
+            "The database is in read-only mode; you cannot create new services.",
           )
           .attr("data-bs-placement", "right")
           .tooltip();

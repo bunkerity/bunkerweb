@@ -75,14 +75,14 @@ $(document).ready(function () {
         <li class="list-group-item align-items-center text-center bg-secondary text-white" style="flex: 1 0;">
           <div class="fw-bold">Health</div>
         </li>
-        </ul>`
+        </ul>`,
     );
     $("#selected-instances").append(list);
 
     const delete_modal = $("#modal-delete-instances");
     instances.forEach((instance) => {
       const list = $(
-        `<ul class="list-group list-group-horizontal d-flex w-100"></ul>`
+        `<ul class="list-group list-group-horizontal d-flex w-100"></ul>`,
       );
 
       // Create the list item using template literals
@@ -97,7 +97,7 @@ $(document).ready(function () {
       // Clone the status element and append it to the list item
       const statusClone = $("#status-" + instance).clone();
       const statusListItem = $(
-        `<li class="list-group-item d-flex align-items-center justify-content-center" style="flex: 1 0;"></li>`
+        `<li class="list-group-item d-flex align-items-center justify-content-center" style="flex: 1 0;"></li>`,
       );
       statusListItem.append(statusClone.removeClass("highlight"));
       list.append(statusListItem);
@@ -124,14 +124,14 @@ $(document).ready(function () {
         type: "hidden",
         name: "csrf_token",
         value: $("#csrf_token").val(),
-      })
+      }),
     );
     form.append(
       $("<input>", {
         type: "hidden",
         name: "instances",
         value: instances.join(","),
-      })
+      }),
     );
 
     // Append the form to the body and submit it
@@ -564,7 +564,7 @@ $(document).ready(function () {
         $("#instances_wrapper .dt-buttons")
           .attr(
             "data-bs-original-title",
-            "The database is in readonly, therefore you cannot create new instances."
+            "The database is in readonly, therefore you cannot create new instances.",
           )
           .attr("data-bs-placement", "right")
           .tooltip();

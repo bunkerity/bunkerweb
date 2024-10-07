@@ -59,7 +59,8 @@ $(document).ready(function () {
     $typeDropdownItems.each(function () {
       const item = $(this);
       item.toggle(
-        selectedService === "no service" || item.data("context") === "multisite"
+        selectedService === "no service" ||
+          item.data("context") === "multisite",
       );
     });
   };
@@ -86,13 +87,13 @@ $(document).ready(function () {
       if (visibleItems === 0) {
         if ($serviceDropdownMenu.find(".no-service-items").length === 0) {
           $serviceDropdownMenu.append(
-            '<li class="no-service-items dropdown-item text-muted">No Item</li>'
+            '<li class="no-service-items dropdown-item text-muted">No Item</li>',
           );
         }
       } else {
         $serviceDropdownMenu.find(".no-service-items").remove();
       }
-    }, 50)
+    }, 50),
   );
 
   $(document).on("hidden.bs.dropdown", "#select-service", function () {
@@ -107,7 +108,7 @@ $(document).ready(function () {
       $(`#config-type-${selectedType}`).data("context") !== "multisite"
     ) {
       const firstMultisiteType = $(
-        `#types-dropdown-menu li.nav-item[data-context="multisite"]`
+        `#types-dropdown-menu li.nav-item[data-context="multisite"]`,
       ).first();
       $("#select-type")
         .parent()
@@ -115,7 +116,7 @@ $(document).ready(function () {
           "data-bs-original-title",
           `Switched to ${firstMultisiteType
             .text()
-            .trim()} as ${selectedType} is not a valid multisite type.`
+            .trim()} as ${selectedType} is not a valid multisite type.`,
         )
         .tooltip("show");
 
@@ -167,13 +168,14 @@ $(document).ready(function () {
     if (!configName) {
       errorMessage = "A custom configuration name is required.";
       isValid = false;
-    } else if (pattern && !new RegExp(pattern).test(configName)) isValid = false;
+    } else if (pattern && !new RegExp(pattern).test(configName))
+      isValid = false;
 
     if (!isValid) {
       $configInput
         .attr(
           "data-bs-original-title",
-          errorMessage || "Please enter a valid configuration name."
+          errorMessage || "Please enter a valid configuration name.",
         )
         .tooltip("show");
 
@@ -195,35 +197,35 @@ $(document).ready(function () {
         type: "hidden",
         name: "service",
         value: $("<div>").text(selectedService).html(),
-      })
+      }),
     );
     form.append(
       $("<input>", {
         type: "hidden",
         name: "type",
         value: $("<div>").text(selectedType).html(),
-      })
+      }),
     );
     form.append(
       $("<input>", {
         type: "hidden",
         name: "name",
         value: $("<div>").text(configName).html(),
-      })
+      }),
     );
     form.append(
       $("<input>", {
         type: "hidden",
         name: "value",
         value: $("<div>").text(value).html(),
-      })
+      }),
     );
     form.append(
       $("<input>", {
         type: "hidden",
         name: "csrf_token",
         value: $("<div>").text($("#csrf_token").val()).html(), // Sanitize the value
-      })
+      }),
     );
 
     $(window).off("beforeunload");

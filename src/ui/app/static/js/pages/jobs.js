@@ -121,14 +121,14 @@ $(document).ready(function () {
         type: "hidden",
         name: "csrf_token",
         value: $("#csrf_token").val(),
-      })
+      }),
     );
     form.append(
       $("<input>", {
         type: "hidden",
         name: "jobs",
         value: JSON.stringify(jobs),
-      })
+      }),
     );
 
     // Append the form to the body and submit it
@@ -369,7 +369,7 @@ $(document).ready(function () {
       .html(
         `Last${historyCount > 1 ? " " + historyCount : ""} execution${
           historyCount > 1 ? "s" : ""
-        } of Job <span class="fw-bold fst-italic">${job}</span> from plugin <span class="fw-bold fst-italic">${plugin}</span>`
+        } of Job <span class="fw-bold fst-italic">${job}</span> from plugin <span class="fw-bold fst-italic">${plugin}</span>`,
       );
     history.removeClass("visually-hidden");
     historyModal.find(".modal-body").html(history);

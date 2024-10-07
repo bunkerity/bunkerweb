@@ -6,7 +6,6 @@ from datetime import datetime
 from io import BytesIO
 from itertools import chain
 from json import load as json_load
-from logging import FileHandler, Formatter
 from os import _exit, environ, getenv, getpid, sep
 from os.path import join
 from pathlib import Path

@@ -147,10 +147,12 @@ try:
                 LOGGER.warning(f"Domains for {first_server} are not the same as in the certificate, asking new certificate...")
                 domains_to_ask[first_server] = True
                 continue
-            elif ("TEST_CERT" in current_domains.groupdict()['expiry_date'] and getenv(f"{first_server}_")):
+            elif "TEST_CERT" in current_domains.groupdict()["expiry_date"] and getenv(f"{first_server}_"):
                 LOGGER.warning(f"Certificate environment (staging/production) changed for {first_server}, asking new certificate...")
             use_letsencrypt_staging = getenv(f"{first_server}_USE_LETS_ENCRYPT_STAGING", getenv("USE_LETS_ENCRYPT_STAGING", "no")) == "yes"
-            if ("TEST_CERT" in current_domains.groupdict()['expiry_date'] and not use_letsencrypt_staging) or ("TEST_CERT" not in current_domains.groupdict()['expiry_date'] and use_letsencrypt_staging):
+            if ("TEST_CERT" in current_domains.groupdict()["expiry_date"] and not use_letsencrypt_staging) or (
+                "TEST_CERT" not in current_domains.groupdict()["expiry_date"] and use_letsencrypt_staging
+            ):
                 LOGGER.warning(f"Certificate environment (staging/production) changed for {first_server}, asking new certificate...")
                 domains_to_ask[first_server] = True
             LOGGER.info(f"Certificates already exists for domain(s) {domains}")

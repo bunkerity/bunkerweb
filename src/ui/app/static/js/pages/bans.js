@@ -95,14 +95,14 @@ $(document).ready(function () {
       <li class="list-group-item align-items-center text-center bg-secondary text-white" style="flex: 1 0;">
         <div class="fw-bold">Time left</div>
       </li>
-      </ul>`
+      </ul>`,
     );
     $("#selected-ips-unban").append(list);
 
     bans.forEach((ban) => {
       // Create the list item using template literals
       const list = $(
-        `<ul class="list-group list-group-horizontal d-flex w-100"></ul>`
+        `<ul class="list-group list-group-horizontal d-flex w-100"></ul>`,
       );
 
       const listItem =
@@ -130,8 +130,8 @@ $(document).ready(function () {
       .find(".alert")
       .text(
         `Are you sure you want to unban the selected IP address${"es".repeat(
-          bans.length > 1
-        )}?`
+          bans.length > 1,
+        )}?`,
       );
     modal.show();
 
@@ -453,7 +453,7 @@ $(document).ready(function () {
         $("#bans_wrapper .dt-buttons")
           .attr(
             "data-bs-original-title",
-            "The database is in readonly, therefore you cannot add bans."
+            "The database is in readonly, therefore you cannot add bans.",
           )
           .attr("data-bs-placement", "right")
           .tooltip();
@@ -576,7 +576,7 @@ $(document).ready(function () {
   });
 
   const ipRegex = new RegExp(
-    /^(?:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(?:\.(?!$)|$)){4}$|^((?:[A-Fa-f0-9]{1,4}:){7}[A-Fa-f0-9]{1,4}|(?:[A-Fa-f0-9]{1,4}:){1,7}:|:(?::[A-Fa-f0-9]{1,4}){1,7}|::)$/i
+    /^(?:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(?:\.(?!$)|$)){4}$|^((?:[A-Fa-f0-9]{1,4}:){7}[A-Fa-f0-9]{1,4}|(?:[A-Fa-f0-9]{1,4}:){1,7}:|:(?::[A-Fa-f0-9]{1,4}){1,7}|::)$/i,
   );
 
   const validateBan = (ban, ipSet) => {
@@ -679,14 +679,14 @@ $(document).ready(function () {
         type: "hidden",
         name: "csrf_token",
         value: $("#csrf_token").val(),
-      })
+      }),
     );
     form.append(
       $("<input>", {
         type: "hidden",
         name: "bans",
         value: JSON.stringify(bans),
-      })
+      }),
     );
 
     // Append the form to the body and submit it

@@ -207,15 +207,15 @@ $(document).ready(function () {
   });
 
   $(`#DataTables_Table_0 span[title='${cacheJobNameSelection}']`).trigger(
-    "click"
+    "click",
   );
 
   $(`#DataTables_Table_1 span[title='${cachePluginSelection}']`).trigger(
-    "click"
+    "click",
   );
 
   $(`#DataTables_Table_2 span[title='${cacheServiceSelection}']`).trigger(
-    "click"
+    "click",
   );
 
   $("#cache").removeClass("d-none");

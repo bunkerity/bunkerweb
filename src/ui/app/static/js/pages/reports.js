@@ -283,7 +283,7 @@ $(function () {
       if (country) {
         $(`[data-bs-original-title="${countryCode}"]`).attr(
           "data-bs-original-title",
-          country
+          country,
         );
       }
     });

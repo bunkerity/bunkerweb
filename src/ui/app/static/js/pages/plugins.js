@@ -21,13 +21,13 @@ $(document).ready(function () {
       <li class="list-group-item align-items-center text-center bg-secondary text-white" style="flex: 1 1 0;">
         <div class="fw-bold">Type</div>
       </li>
-      </ul>`
+      </ul>`,
     );
     $("#selected-plugins-delete").append(list);
 
     plugins.forEach((plugin) => {
       const list = $(
-        `<ul class="list-group list-group-horizontal d-flex w-100"></ul>`
+        `<ul class="list-group list-group-horizontal d-flex w-100"></ul>`,
       );
 
       // Create the list item using template literals
@@ -42,7 +42,7 @@ $(document).ready(function () {
       // Clone the version element and append it to the list item
       const versionClone = $(`#version-${plugin}`).clone();
       const versionListItem = $(
-        `<li class="list-group-item d-flex align-items-center" style="flex: 1 1 0;"></li>`
+        `<li class="list-group-item d-flex align-items-center" style="flex: 1 1 0;"></li>`,
       );
       versionListItem.append(versionClone.removeClass("highlight"));
       list.append(versionListItem);
@@ -50,7 +50,7 @@ $(document).ready(function () {
       // Clone the type element and append it to the list item
       const typeClone = $(`#type-${plugin}`).clone();
       const typeListItem = $(
-        `<li class="list-group-item d-flex align-items-center" style="flex: 1 1 0;"></li>`
+        `<li class="list-group-item d-flex align-items-center" style="flex: 1 1 0;"></li>`,
       );
       typeListItem.append(typeClone.removeClass("highlight"));
       list.append(typeListItem);
@@ -64,8 +64,8 @@ $(document).ready(function () {
       .find(".alert")
       .text(
         `Are you sure you want to delete the selected plugin${"s".repeat(
-          plugins.length > 1
-        )}?`
+          plugins.length > 1,
+        )}?`,
       );
     modal.show();
 
@@ -113,7 +113,7 @@ $(document).ready(function () {
 
     // Create a progress bar element
     const progressBar = $(
-      '<div class="progress-bar" role="progressbar" style="width: 0%;"></div>'
+      '<div class="progress-bar" role="progressbar" style="width: 0%;"></div>',
     );
     const progress = $('<div class="progress mt-2"></div>').append(progressBar);
     fileList.append(progress);
@@ -447,7 +447,7 @@ $(document).ready(function () {
         $("#plugins_wrapper .dt-buttons")
           .attr(
             "data-bs-original-title",
-            "The database is in readonly, therefore you cannot create add plugins."
+            "The database is in readonly, therefore you cannot create add plugins.",
           )
           .attr("data-bs-placement", "right")
           .tooltip();

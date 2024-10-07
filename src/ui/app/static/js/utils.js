@@ -35,20 +35,20 @@ class News {
     ) {
       sessionStorage.setItem(
         "lastRefetch",
-        Math.round(Date.now() / 1000) + 3600
+        Math.round(Date.now() / 1000) + 3600,
       );
       sessionStorage.setItem("lastNews", JSON.stringify(lastNews));
 
       const newsNumber = lastNews.length;
       $("#news-pill").append(
         DOMPurify.sanitize(
-          `<span class="badge rounded-pill badge-center-sm bg-danger ms-1_5">${newsNumber}</span>`
-        )
+          `<span class="badge rounded-pill badge-center-sm bg-danger ms-1_5">${newsNumber}</span>`,
+        ),
       );
       $("#news-button").after(
         DOMPurify.sanitize(
-          `<span class="badge-dot-text position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">${newsNumber}<span class="visually-hidden">unread news</span></span>`
-        )
+          `<span class="badge-dot-text position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">${newsNumber}<span class="visually-hidden">unread news</span></span>`,
+        ),
       );
     }
 
@@ -84,7 +84,7 @@ class News {
         news.tags,
         news.date,
         isLast,
-        false // isHome is false
+        false, // isHome is false
       );
       newsRow.append(cardElement);
 
@@ -98,7 +98,7 @@ class News {
           news.tags,
           news.date,
           isLast,
-          true // isHome is true
+          true, // isHome is true
         );
         homeNewsRow.append(homeCardElement);
       }
@@ -131,13 +131,13 @@ class News {
           class: "card-img card-img-left",
           src: img,
           alt: "News image",
-        })
+        }),
       );
       imgCol.append(imgLink);
 
       const contentCol = $("<div>", { class: "col-md-7" }).appendTo(row);
       const cardBody = $("<div>", { class: "card-body p-3" }).appendTo(
-        contentCol
+        contentCol,
       );
 
       const cardTitle = $("<h6>", { class: "card-title lh-sm mb-2" }).append(
@@ -146,7 +146,7 @@ class News {
           target: "_blank",
           rel: "noopener",
           text: title,
-        })
+        }),
       );
 
       const cardText = $("<small>", {
@@ -163,7 +163,7 @@ class News {
           $("<small>", {
             class: "text-muted courier-prime",
             text: `Posted on: ${date}`,
-          })
+          }),
         )
         .appendTo(cardFooter);
 
@@ -181,7 +181,7 @@ class News {
             $("<span>", {
               class: "tf-icons bx bx-xs bx-purchase-tag me-1",
             }),
-            tag.name
+            tag.name,
           )
           .appendTo(tagsContainer);
       });
@@ -201,7 +201,7 @@ class News {
           class: "card-img-top",
           src: img,
           alt: "News image",
-        })
+        }),
       );
 
       const cardBody = $("<div>", { class: "card-body" });
@@ -211,7 +211,7 @@ class News {
           target: "_blank",
           rel: "noopener",
           text: title,
-        })
+        }),
       );
       const cardText = $("<p>", {
         class: "card-text courier-prime",
@@ -232,7 +232,7 @@ class News {
             $("<span>", {
               class: "tf-icons bx bx-xs bx-purchase-tag bx-18px me-2",
             }),
-            tag.name
+            tag.name,
           )
           .appendTo(tagsContainer);
       });
@@ -241,7 +241,7 @@ class News {
         $("<small>", {
           class: "text-muted courier-prime",
           text: `Posted on: ${date}`,
-        })
+        }),
       );
 
       cardBody.append(cardTitle, cardText, tagsContainer, dateText);

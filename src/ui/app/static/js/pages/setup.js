@@ -33,22 +33,22 @@ $(document).ready(() => {
     isValid = validateCondition(
       password.length >= 8,
       "#length-check i",
-      isValid
+      isValid,
     );
     isValid = validateCondition(
       /[A-Z]/.test(password),
       "#uppercase-check i",
-      isValid
+      isValid,
     );
     isValid = validateCondition(
       /\d/.test(password),
       "#number-check i",
-      isValid
+      isValid,
     );
     isValid = validateCondition(
       /[ -~]/.test(password),
       "#special-check i",
-      isValid
+      isValid,
     ); // Check for special characters
 
     return isValid;
@@ -165,7 +165,7 @@ $(document).ready(() => {
     if (!$feedback.length) {
       const $textSpan = $input.parent().find("span.input-group-text");
       $feedback = $('<div class="invalid-feedback"></div>').insertAfter(
-        $textSpan.length ? $textSpan : $input
+        $textSpan.length ? $textSpan : $input,
       );
     }
 
@@ -184,7 +184,7 @@ $(document).ready(() => {
           .find("i")
           .toggleClass(
             "bx-question-mark text-warning bx-check text-success",
-            false
+            false,
           )
           .toggleClass("bx-x text-danger", true);
     } else {
@@ -255,7 +255,7 @@ $(document).ready(() => {
       if (!$feedback.length) {
         const $textSpan = $input.parent().find("span.input-group-text");
         $feedback = $('<div class="invalid-feedback"></div>').insertAfter(
-          $textSpan.length ? $textSpan : $input
+          $textSpan.length ? $textSpan : $input,
         );
       }
 
@@ -374,7 +374,7 @@ $(document).ready(() => {
     }
     if (!uiReverseProxy) {
       $("#overview_service_url").val(
-        `https://${getServerName()}${$("#REVERSE_PROXY_URL").val()}`
+        `https://${getServerName()}${$("#REVERSE_PROXY_URL").val()}`,
       );
     }
   };
@@ -403,7 +403,7 @@ $(document).ready(() => {
               .parent()
               .find("span.input-group-text");
             $feedback = $(
-              '<div class="invalid-feedback">Passwords do not match.</div>'
+              '<div class="invalid-feedback">Passwords do not match.</div>',
             ).insertAfter($textSpan.length ? $textSpan : $confirmPasswordInput);
           } else {
             $feedback.text("Passwords do not match.");
@@ -424,13 +424,13 @@ $(document).ready(() => {
         if (typeof result === "string") {
           $("#dns-check-title").text("Error");
           $("#dns-check-result").html(
-            `Are you sure you want to proceed to the next step?<br/>Error: ${result}`
+            `Are you sure you want to proceed to the next step?<br/>Error: ${result}`,
           );
           modal.modal("show");
         } else if (!result) {
           $("#dns-check-title").text("Server name is not unique");
           $("#dns-check-result").html(
-            `Are you sure you want to proceed to the next step?<br/>Server name "${serverName}" is not unique.`
+            `Are you sure you want to proceed to the next step?<br/>Server name "${serverName}" is not unique.`,
           );
           modal.modal("show");
         } else {
@@ -456,7 +456,7 @@ $(document).ready(() => {
     debounce(function () {
       const isValid = validatePassword();
       updateValidationState(this, isValid);
-    }, 100)
+    }, 100),
   );
 
   // Real-time validation for other plugin settings
@@ -471,7 +471,7 @@ $(document).ready(() => {
       $this
         .toggleClass("is-valid", isValid)
         .toggleClass("is-invalid", !isValid);
-    }, 100)
+    }, 100),
   );
 
   // Remove validation state on focus out
@@ -509,11 +509,11 @@ $(document).ready(() => {
       formData.append("ui_url", ui_url);
       formData.append(
         "auto_lets_encrypt",
-        $("#AUTO_LETS_ENCRYPT").prop("checked") ? "yes" : "no"
+        $("#AUTO_LETS_ENCRYPT").prop("checked") ? "yes" : "no",
       );
       formData.append(
         "lets_encrypt_staging",
-        $("#LETS_ENCRYPT_STAGING").prop("checked") ? "yes" : "no"
+        $("#LETS_ENCRYPT_STAGING").prop("checked") ? "yes" : "no",
       );
       formData.append("email_lets_encrypt", $("#EMAIL_LETS_ENCRYPT").val());
     }

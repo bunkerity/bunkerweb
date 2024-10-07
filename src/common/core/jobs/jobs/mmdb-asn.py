@@ -82,9 +82,9 @@ try:
                 for chunk in resp.iter_content(chunk_size=4 * 1024):
                     if chunk:
                         file_content.write(chunk)
-                        
+
             assert file_content
-            
+
             # Decompress it
             LOGGER.info("Decompressing mmdb file ...")
             file_content.seek(0)

@@ -1,13 +1,12 @@
 from datetime import datetime
 from threading import Thread
 from time import time
-from typing import Dict
 from flask import Blueprint, redirect, render_template, request, url_for
 from flask_login import login_required
 
 from app.dependencies import BW_CONFIG, DATA, DB
 from app.routes.utils import get_remain, handle_error, manage_bunkerweb, verify_data_in_form, wait_applying
-from app.utils import LOGGER, flash
+from app.utils import flash
 
 
 pro = Blueprint("pro", __name__)
