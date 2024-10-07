@@ -2,7 +2,7 @@
      class="toast-container position-fixed bottom-0 end-0 mb-3 me-3">
     <!-- prettier-ignore -->
     {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if pro_overlapped %}
+        {% if pro_overlapped and current_endpoint != "pro" %}
             {% if messages.append(('error', 'You have more services than allowed by your pro license. Upgrade your license or move some services to draft mode to unlock your pro license.')) %}
             {% endif %}
         {% endif %}

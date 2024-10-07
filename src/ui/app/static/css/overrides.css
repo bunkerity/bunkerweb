@@ -747,7 +747,8 @@ a.text-white-80:hover {
   padding-bottom: 0.625rem !important;
 }
 
-.footer-container .footer-link:hover {
+.footer-container .footer-link:hover,
+a.courier-prime:hover {
   font-style: italic;
   text-decoration: underline;
 }

@@ -3,9 +3,16 @@
     <!-- Content -->
     <div class="row g-4">
         <div class="col-sm-3 mb-2">
-            <div class="card p-4 position-relative shadow-sm rounded-3 h-100{% if not is_pro_version %} bg-bw-green text-white{% endif %}">
-                <i class='bx bxs-rocket bx-sm position-absolute top-0 end-0 m-3'></i>
-                <p class="ps-4 fs-4 mb-2{% if is_pro_version %} text-primary shine{% else %} text-white{% endif %}">
+            <div class="card p-4 position-relative shadow-sm rounded-3 h-100 text-white {% if is_pro_version %}bg-primary{% else %}bg-bw-green{% endif %}">
+                {% if is_pro_version %}
+                    <img class='position-absolute top-0 end-0 m-3'
+                         src="{{ pro_diamond_url }}"
+                         alt="Pro plugin"
+                         width="24px">
+                {% else %}
+                    <i class='bx bxs-rocket bx-sm position-absolute top-0 end-0 m-3'></i>
+                {% endif %}
+                <p class="ps-4 fs-4 mb-2 text-white">
                     Plan
                     <br />
                     <span class="fs-3 fw-bold don-jose">
@@ -16,8 +23,13 @@
                         {% endif %}
                     </span>
                 </p>
-                <a class="ps-4 text-underline{% if not is_pro_version %} text-white-80{% endif %}"
-                   href="{{ url_for('pro') }}">Upgrade?</a>
+                <a class="ps-4 text-underline text-white-80" href="{{ url_for('pro') }}">
+                    {% if is_pro_version %}
+                        More info
+                    {% else %}
+                        Upgrade?
+                    {% endif %}
+                </a>
             </div>
         </div>
         <div class="col-sm-3 mb-2">

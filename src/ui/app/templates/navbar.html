@@ -29,6 +29,8 @@
         {% elif current_endpoint == 'logs' %}
             {% set documentation_endpoint = "/web-ui" %}
             {% set documentation_fragment = "#accessing-logs" %}
+        {% elif current_endpoint == 'pro' %}
+            {% set documentation_endpoint = "/professional-services" %}
         {% endif %}
         <div class="navbar-nav align-items-center">
             <div class="nav-item d-flex align-items-center">

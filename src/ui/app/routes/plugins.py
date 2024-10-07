@@ -457,6 +457,12 @@ def upload_plugin():
     return {"status": "ok"}, 201
 
 
+@plugins.route("/plugins/<string:plugin>", methods=["GET"])
+@login_required
+def custom_plugin_page(plugin: str):
+    return render_template("plugin_page.html")
+
+
 # @plugins.route("/plugins/<plugin>", methods=["GET", "POST"])
 # @login_required
 # def custom_plugin(plugin: str):

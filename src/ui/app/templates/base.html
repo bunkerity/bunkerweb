@@ -57,7 +57,7 @@
                   href="{{ url_for('static', filename='libs/datatables/datatables.min.css') }}"
                   nonce="{{ style_nonce }}" />
         {% endif %}
-        {% if current_endpoint == "bans" or current_endpoint != "plugins" and "plugins" in request.path %}
+        {% if current_endpoint in ("bans", "pro") or current_endpoint != "plugins" and "plugins" in request.path %}
             <!-- Flatpickr -->
             <link rel="stylesheet"
                   href="{{ url_for('static', filename='libs/flatpickr/flatpickr.min.css') }}"
@@ -147,7 +147,7 @@
             <script src="{{ url_for('static', filename='libs/leaflet/leaflet.min.js') }}"
                     nonce="{{ script_nonce }}"></script>
         {% endif %}
-        {% if current_endpoint == "bans" or current_endpoint != "plugins" and "plugins" in request.path %}
+        {% if current_endpoint in ("bans", "pro") or current_endpoint != "plugins" and "plugins" in request.path %}
             <script src="{{ url_for('static', filename='libs/flatpickr/flatpickr.min.js') }}"
                     nonce="{{ script_nonce }}"></script>
             <script src="{{ url_for('static', filename='libs/flatpickr/plugins/minMaxTimePlugin.js') }}"
@@ -226,6 +226,9 @@
                     nonce="{{ script_nonce }}"></script>
         {% elif current_endpoint == "logs" %}
             <script src="{{ url_for('static', filename='js/pages/logs.js') }}"
+                    nonce="{{ script_nonce }}"></script>
+        {% elif current_endpoint == "pro" %}
+            <script src="{{ url_for('static', filename='js/pages/pro.js') }}"
                     nonce="{{ script_nonce }}"></script>
         {% endif %}
         <script async defer src="{{ url_for('static', filename='js/buttons.js') }}"></script>

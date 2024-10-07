@@ -3,13 +3,11 @@
     <!-- Content -->
     <div class="card table-responsive text-nowrap p-4 min-vh-70">
         <input type="hidden" id="configs_number" value="{{ configs|length }}" />
+        <input type="hidden" id="services" value="{{ services }}" />
+        <input type="hidden" id="templates" value="{{ db_templates }}" />
         <input type="hidden"
-           id="services"
-           value="{{ services }}" />
-           <input type="hidden"
-           id="templates"
-           value="{{ db_templates }}" />
-        <input type="hidden" id="configs_service_selection" value="{{ config_service }}" />
+               id="configs_service_selection"
+               value="{{ config_service }}" />
         <input type="hidden" id="configs_type_selection" value="{{ config_type }}" />
         <input type="hidden"
                id="csrf_token"

@@ -71,7 +71,7 @@
                             {% endif %}
                             >
                             {% if plugin_data["type"] == "pro" %}
-                                <a href="{{ url_for("pro") }}" target="_blank" rel="noopener" {% else %}
+                                <a href="{{ url_for('pro') }}" target="_blank" rel="noopener" {% else %}
                                     <div {% endif %}
                                          class="{{ plugin_types[plugin_data['type']].get('text-class', '') }}">
                                         {{ plugin_types[plugin_data["type"]].get('icon', '<img src="' + pro_diamond_url + '"

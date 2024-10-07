@@ -41,7 +41,7 @@ $(document).ready(function () {
   }
 
   // Select the Flatpickr input elements
-  const flatpickrDatetime = $("[type='flapickr-datetime']");
+  const flatpickrDatetime = $("[type='flatpickr-datetime']");
 
   // Get the current date and times
   const currentDatetime = new Date();

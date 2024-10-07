@@ -3,12 +3,14 @@
     <!-- Content -->
     <div class="card table-responsive text-nowrap p-4 pb-8 min-vh-70">
         <input type="hidden" id="cache_number" value="{{ caches|length }}" />
+        <input type="hidden" id="services" value="{{ services }}" />
         <input type="hidden"
-           id="services"
-           value="{{ services }}" />
-        <input type="hidden" id="cache_service_selection" value="{{ cache_service }}" />
+               id="cache_service_selection"
+               value="{{ cache_service }}" />
         <input type="hidden" id="cache_plugin_selection" value="{{ cache_plugin }}" />
-        <input type="hidden" id="cache_job_name_selection" value="{{ cache_job_name }}" />
+        <input type="hidden"
+               id="cache_job_name_selection"
+               value="{{ cache_job_name }}" />
         <input type="hidden"
                id="csrf_token"
                name="csrf_token"
