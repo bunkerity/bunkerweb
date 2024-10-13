@@ -1,0 +1,48 @@
+{{- if .Values.redis.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bunkerweb-redis
+  labels:
+  {{- include "bunkerweb.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.redis.replicas }}
+  selector:
+    matchLabels:
+      app: bunkerweb-redis
+    {{- include "bunkerweb.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        app: bunkerweb-redis
+      {{- include "bunkerweb.selectorLabels" . | nindent 8 }}
+    spec:
+    {{- if .Values.registry.imageCredentials }}
+      imagePullSecrets:
+        - name: regcred
+    {{- else }}
+      imagePullSecrets:
+        - name: {{ .Values.registry.imagePullSecretName }}
+    {{- end }}
+      securityContext:
+        {{- toYaml .Values.redis.podSecurityContext | nindent 8 }}
+      containers:
+      - name: bunkerweb-redis
+        env:
+        - name: KUBERNETES_CLUSTER_DOMAIN
+          value: {{ quote .Values.kubernetesClusterDomain }}
+        {{- with .Values.redis.envFrom }}
+        envFrom:
+          {{- toYaml . | nindent 12 }}
+        {{- end }}
+        image: {{ .Values.redis.image.repository }}:{{ .Values.redis.image.tag | default .Chart.AppVersion }}
+        imagePullPolicy: {{ .Values.redis.image.imagePullPolicy }}
+        resources:
+          {{- toYaml .Values.redis.resources | nindent 12 }}
+        securityContext: 
+          {{- toYaml .Values.redis.containerSecurityContext | nindent 12 }}
+      {{- with .Values.redis.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}
