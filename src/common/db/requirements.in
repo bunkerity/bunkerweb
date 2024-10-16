@@ -1,5 +1,5 @@
 cryptography==43.0.1
 psycopg[binary,pool]==3.2.2
 PyMySQL==1.1.1
-sqlalchemy==2.0.35
+sqlalchemy==2.0.36
 zipp>=3.19.1
