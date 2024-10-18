@@ -241,11 +241,9 @@ class Instances:
                     env_variables = {env.name: env.value or "" for env in pod.spec.containers[0].env}
 
                     status = "up"
-                    if pod.status.conditions is not None:
-                        for condition in pod.status.conditions:
-                            if condition.type == "Ready" and condition.status == "True":
-                                status = "down"
-                                break
+                    if pod.status.phase != "Running":
+                        status = "down"
+                        break
 
                     instances.append(
                         Instance(

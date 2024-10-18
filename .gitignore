@@ -9,3 +9,5 @@ node_modules
 .mypy_cache
 .cache/
 /package*.json
+src/autoconf/IngressController.py
+.gitignore
