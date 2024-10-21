@@ -1,4 +1,4 @@
 mike==2.1.3
-mkdocs-material[imaging]==9.5.39
+mkdocs-material[imaging]==9.5.42
 mkdocs-print-site-plugin==2.6.0
 pytablewriter==1.2.0
