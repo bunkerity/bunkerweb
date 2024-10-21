@@ -51,6 +51,7 @@
                     <tr>
                         <td>
                             <a href="{{ url_for("cache") }}/{{ service_id }}/{{ cache['plugin_id'] }}/{{ cache['job_name'] }}/{{ cache['file_name'].replace('/', '_') if cache['file_name'].startswith('folder:') else cache['file_name'] }}"
+                               class="d-flex align-items-center"
                                data-bs-toggle="tooltip"
                                data-bs-placement="bottom"
                                data-bs-original-title="View {{ cache['file_name'] }}"><i class="bx bx-show bx-xs"></i>&nbsp;{{ cache['file_name'] }}</a>
@@ -60,6 +61,7 @@
                         <td id="service-{{ cache['job_name'] }}-{{ service_id.replace('.', '_') }}-{{ cache['file_name'].replace('.', '_') }}">
                             {% if cache["service_id"] %}
                                 <a href="{{ url_for("services") }}/{{ cache['service_id'] }}"
+                                   class="d-flex align-items-center"
                                    data-bs-toggle="tooltip"
                                    data-bs-placement="bottom"
                                    data-bs-original-title="Edit service {{ cache['service_id'] }}"><i class="bx bx-edit bx-xs"></i>&nbsp;{{ cache["service_id"] }}</a>

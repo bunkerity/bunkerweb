@@ -46,7 +46,9 @@
                         <td>{{ job }}</td>
                         <td>{{ job_data["plugin_id"] }}</td>
                         <td>
-                            <i class="bx {% if job_data['every'] == 'once' %}bx-revision{% elif job_data['every'] == 'day' %}bx-calendar-event{% elif job_data['every'] == 'week' %}bx-calendar-week{% else %}bxs-hourglass{% endif %}"></i>&nbsp;{{ job_data["every"] }}
+                            <div class="d-flex align-items-center">
+                                <i class="bx {% if job_data['every'] == 'once' %}bx-revision{% elif job_data['every'] == 'day' %}bx-calendar-event{% elif job_data['every'] == 'week' %}bx-calendar-week{% else %}bxs-hourglass{% endif %}"></i>&nbsp;{{ job_data["every"] }}
+                            </div>
                         </td>
                         <td class="text-center">
                             <i class="bx bx-sm bx-{% if job_data['reload'] %}check text-success{% else %}x text-danger{% endif %}"></i>
@@ -121,7 +123,7 @@
                                         <i class="bx bx-data"></i>
                                         <span class="d-none d-md-inline">&nbsp;Cache</span>
                                     </button>
-                                    <ul class="dropdown-menu nav-pills max-vh-60 overflow-auto pt-0"
+                                    <ul class="dropdown-menu nav-pills max-vh-60 overflow-auto pt-0 pb-0"
                                         role="tablist">
                                         {% for cache in job_data['cache'] %}
                                             {% set service_id = cache['service_id'] if cache['service_id'] else 'global' %}

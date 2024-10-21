@@ -24,15 +24,28 @@ $(document).ready(function () {
   });
 
   const layout = {
-    topStart: {},
-    bottomEnd: {},
-    bottom1: {
+    top1: {
       searchPanes: {
         viewTotal: true,
         cascadePanes: true,
+        collapse: false,
         columns: [1, 2, 3, 4],
       },
     },
+    topStart: {},
+    topEnd: {
+      buttons: [
+        {
+          extend: "toggle_filters",
+          className: "btn btn-sm btn-outline-primary toggle-filters",
+        },
+      ],
+      search: true,
+    },
+    bottomStart: {
+      info: true,
+    },
+    bottomEnd: {},
   };
 
   if (cacheNumber > 10) {
@@ -47,8 +60,11 @@ $(document).ready(function () {
       menu.push(100);
     }
     menu.push({ label: "All", value: -1 });
-    layout.topStart.pageLength = {
-      menu: menu,
+    layout.bottomStart = {
+      pageLength: {
+        menu: menu,
+      },
+      info: true,
     };
     layout.bottomEnd.paging = true;
   }
@@ -106,6 +122,15 @@ $(document).ready(function () {
       ],
     },
   ];
+
+  $.fn.dataTable.ext.buttons.toggle_filters = {
+    text: '<span class="tf-icons bx bx-filter bx-18px me-2"></span><span id="show-filters">Show</span><span id="hide-filters" class="d-none">Hide</span><span class="d-none d-md-inline"> filters</span>',
+    action: function (e, dt, node, config) {
+      cache_table.searchPanes.container().slideToggle(); // Smoothly hide or show the container
+      $("#show-filters").toggleClass("d-none"); // Toggle the visibility of the 'Show' span
+      $("#hide-filters").toggleClass("d-none"); // Toggle the visibility of the 'Hide' span
+    },
+  };
 
   $(".cache-last-update-date").each(function () {
     const isoDateStr = $(this).text().trim();
@@ -182,12 +207,6 @@ $(document).ready(function () {
         },
         targets: 4,
       },
-      {
-        targets: "_all", // Target all columns
-        createdCell: function (td, cellData, rowData, row, col) {
-          $(td).addClass("align-items-center"); // Apply 'text-center' class to <td>
-        },
-      },
     ],
     order: [[2, "asc"]],
     autoFill: false,
@@ -202,7 +221,6 @@ $(document).ready(function () {
     },
     initComplete: function (settings, json) {
       $("#cache_wrapper .btn-secondary").removeClass("btn-secondary");
-      $("#cache_wrapper th").addClass("text-center");
     },
   });
 
@@ -217,6 +235,9 @@ $(document).ready(function () {
   $(`#DataTables_Table_2 span[title='${cacheServiceSelection}']`).trigger(
     "click",
   );
+
+  if (!cacheJobNameSelection && !cachePluginSelection && !cacheServiceSelection)
+    cache_table.searchPanes.container().hide();
 
   $("#cache").removeClass("d-none");
   $("#cache-waiting").addClass("visually-hidden");

@@ -260,9 +260,6 @@ class News {
 
 // Initialize the News class
 $(document).ready(() => {
-  const news = new News();
-  news.init();
-
   // Define news items array
   let newsItems = [
     `Get the most of BunkerWeb by upgrading to the PRO version. More info and free trial <a class="light-href text-white-80" target="_blank" rel="noopener" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#pro">here</a>.`,
@@ -274,6 +271,32 @@ $(document).ready(() => {
   const intervalTime = 7000;
   let interval;
   const $bannerText = $("#banner-text");
+  // Create a hidden element to measure the max height
+  const $measuringElement = $("<div>")
+    .css({
+      position: "absolute",
+      visibility: "hidden",
+      height: "auto",
+      width: $bannerText.width(),
+      whiteSpace: "nowrap",
+    })
+    .appendTo("body");
+
+  // Calculate the minimum height required for the banner text
+  let minHeight = 0;
+  newsItems.forEach((item) => {
+    $measuringElement.html(item);
+    minHeight = Math.max(minHeight, $measuringElement.outerHeight());
+  });
+
+  // Set the minimum height to avoid layout shifts
+  $bannerText.css("min-height", minHeight);
+
+  // Remove the measuring element from the DOM
+  $measuringElement.remove();
+
+  const news = new News();
+  news.init();
 
   function loadData() {
     const nowStamp = Math.round(Date.now() / 1000);

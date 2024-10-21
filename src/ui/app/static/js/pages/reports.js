@@ -291,15 +291,28 @@ $(function () {
   };
 
   const layout = {
-    topStart: {},
-    bottomEnd: {},
-    bottom1: {
+    top1: {
       searchPanes: {
         viewTotal: true,
         cascadePanes: true,
+        collapse: false,
         columns: [1, 2, 3, 4, 5, 7],
       },
     },
+    topStart: {},
+    topEnd: {
+      buttons: [
+        {
+          extend: "toggle_filters",
+          className: "btn btn-sm btn-outline-primary toggle-filters",
+        },
+      ],
+      search: true,
+    },
+    bottomStart: {
+      info: true,
+    },
+    bottomEnd: {},
   };
 
   if (reportsNumber > 10) {
@@ -308,7 +321,12 @@ $(function () {
     if (reportsNumber > 50) menu.push(50);
     if (reportsNumber > 100) menu.push(100);
     menu.push({ label: "All", value: -1 });
-    layout.topStart.pageLength = { menu };
+    layout.bottomStart = {
+      pageLength: {
+        menu: menu,
+      },
+      info: true,
+    };
     layout.bottomEnd.paging = true;
   }
 
@@ -360,6 +378,15 @@ $(function () {
     },
   ];
 
+  $.fn.dataTable.ext.buttons.toggle_filters = {
+    text: '<span class="tf-icons bx bx-filter bx-18px me-2"></span><span id="show-filters">Show</span><span id="hide-filters" class="d-none">Hide</span><span class="d-none d-md-inline"> filters</span>',
+    action: function (e, dt, node, config) {
+      reports_table.searchPanes.container().slideToggle(); // Smoothly hide or show the container
+      $("#show-filters").toggleClass("d-none"); // Toggle the visibility of the 'Show' span
+      $("#hide-filters").toggleClass("d-none"); // Toggle the visibility of the 'Hide' span
+    },
+  };
+
   $(".report-date").each(function () {
     const $this = $(this);
     const isoDateStr = $this.text().trim();
@@ -386,12 +413,6 @@ $(function () {
         searchPanes: { show: true },
         targets: [1, 2, 3, 4, 5, 7],
       },
-      {
-        targets: "_all",
-        createdCell: function (td) {
-          $(td).addClass("align-items-center");
-        },
-      },
     ],
     order: [[0, "desc"]],
     autoFill: false,
@@ -414,10 +435,11 @@ $(function () {
     initComplete: function () {
       const $wrapper = $("#reports_wrapper");
       $wrapper.find(".btn-secondary").removeClass("btn-secondary");
-      $wrapper.find("th").addClass("text-center");
       updateCountryTooltips();
     },
   });
+
+  reports_table.searchPanes.container().hide();
 
   $("#reports").removeClass("d-none");
   $("#reports-waiting").addClass("visually-hidden");

@@ -86,13 +86,13 @@ $(document).ready(function () {
 
   const setupUnbanModal = (bans) => {
     const list = $(
-      `<ul class="list-group list-group-horizontal d-flex w-100">
-      <li class="list-group-item align-items-center text-center bg-secondary text-white" style="flex: 1 0;">
+      `<ul class="list-group list-group-horizontal w-100">
+      <li class="list-group-item bg-secondary text-white" style="flex: 1 0;">
         <div class="ms-2 me-auto">
           <div class="fw-bold">IP Address</div>
         </div>
       </li>
-      <li class="list-group-item align-items-center text-center bg-secondary text-white" style="flex: 1 0;">
+      <li class="list-group-item bg-secondary text-white" style="flex: 1 0;">
         <div class="fw-bold">Time left</div>
       </li>
       </ul>`,
@@ -102,19 +102,17 @@ $(document).ready(function () {
     bans.forEach((ban) => {
       // Create the list item using template literals
       const list = $(
-        `<ul class="list-group list-group-horizontal d-flex w-100"></ul>`,
+        `<ul class="list-group list-group-horizontal w-100"></ul>`,
       );
 
-      const listItem =
-        $(`<li class="list-group-item align-items-center" style="flex: 1 0;">
+      const listItem = $(`<li class="list-group-item" style="flex: 1 0;">
         <div class="ms-2 me-auto">
           <div class="fw-bold">${ban.ip}</div>
         </div>
       </li>`);
       list.append(listItem);
 
-      const timeLeft =
-        $(`<li class="list-group-item align-items-center" style="flex: 1 0;">
+      const timeLeft = $(`<li class="list-group-item" style="flex: 1 0;">
         <div class="ms-2 me-auto">
           ${ban.time_remaining}
         </div>
@@ -147,15 +145,28 @@ $(document).ready(function () {
   };
 
   const layout = {
-    topStart: {},
-    bottomEnd: {},
-    bottom1: {
+    top1: {
       searchPanes: {
         viewTotal: true,
         cascadePanes: true,
+        collapse: false,
         columns: [1, 4],
       },
     },
+    topStart: {},
+    topEnd: {
+      buttons: [
+        {
+          extend: "toggle_filters",
+          className: "btn btn-sm btn-outline-primary toggle-filters",
+        },
+      ],
+      search: true,
+    },
+    bottomStart: {
+      info: true,
+    },
+    bottomEnd: {},
   };
 
   if (banNumber > 10) {
@@ -170,8 +181,11 @@ $(document).ready(function () {
       menu.push(100);
     }
     menu.push({ label: "All", value: -1 });
-    layout.topStart.pageLength = {
-      menu: menu,
+    layout.bottomStart = {
+      pageLength: {
+        menu: menu,
+      },
+      info: true,
     };
     layout.bottomEnd.paging = true;
   }
@@ -234,7 +248,7 @@ $(document).ready(function () {
     {
       extend: "collection",
       text: '<span class="tf-icons bx bx-play bx-18px me-2"></span>Actions',
-      className: "btn btn-sm btn-outline-primary",
+      className: "btn btn-sm btn-outline-primary action-button disabled",
       buttons: [
         {
           extend: "unban_ips",
@@ -272,6 +286,15 @@ $(document).ready(function () {
       const ban_modal = $("#modal-ban-ips");
       const modal = new bootstrap.Modal(ban_modal);
       modal.show();
+    },
+  };
+
+  $.fn.dataTable.ext.buttons.toggle_filters = {
+    text: '<span class="tf-icons bx bx-filter bx-18px me-2"></span><span id="show-filters">Show</span><span id="hide-filters" class="d-none">Hide</span><span class="d-none d-md-inline"> filters</span>',
+    action: function (e, dt, node, config) {
+      bans_table.searchPanes.container().slideToggle(); // Smoothly hide or show the container
+      $("#show-filters").toggleClass("d-none"); // Toggle the visibility of the 'Show' span
+      $("#hide-filters").toggleClass("d-none"); // Toggle the visibility of the 'Hide' span
     },
   };
 
@@ -416,12 +439,6 @@ $(document).ready(function () {
         },
         targets: 4,
       },
-      {
-        targets: "_all", // Target all columns
-        createdCell: function (td, cellData, rowData, row, col) {
-          $(td).addClass("align-items-center"); // Apply 'text-center' class to <td>
-        },
-      },
     ],
     order: [[4, "asc"]],
     autoFill: false,
@@ -448,7 +465,6 @@ $(document).ready(function () {
     },
     initComplete: function (settings, json) {
       $("#bans_wrapper .btn-secondary").removeClass("btn-secondary");
-      $("#bans_wrapper th").addClass("text-center");
       if (isReadOnly)
         $("#bans_wrapper .dt-buttons")
           .attr(
@@ -459,6 +475,8 @@ $(document).ready(function () {
           .tooltip();
     },
   });
+
+  bans_table.searchPanes.container().hide();
 
   $("#bans").removeClass("d-none");
   $("#bans-waiting").addClass("visually-hidden");
@@ -486,6 +504,19 @@ $(document).ready(function () {
       .cells()
       .nodes()
       .each((el) => el.classList.remove("highlight"));
+  });
+
+  bans_table.on("select", function (e, dt, type, indexes) {
+    // Enable the actions button
+    $(".action-button").removeClass("disabled");
+  });
+
+  bans_table.on("deselect", function (e, dt, type, indexes) {
+    // If no rows are selected, disable the actions button
+    if (bans_table.rows({ selected: true }).count() === 0) {
+      $(".action-button").addClass("disabled");
+      $("#select-all-rows").prop("checked", false);
+    }
   });
 
   // Event listener for the select-all checkbox

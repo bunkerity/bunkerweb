@@ -1,6 +1,7 @@
 from os import getenv
-from secrets import choice
-from string import ascii_letters, digits
+
+# from secrets import choice
+# from string import ascii_letters, digits
 from threading import Thread
 from time import time
 
@@ -43,7 +44,9 @@ def setup_page():
         if not ui_reverse_proxy:
             required_keys.extend(["server_name", "ui_host", "ui_url", "auto_lets_encrypt", "lets_encrypt_staging", "email_lets_encrypt"])
         if not admin_user:
-            required_keys.extend(["admin_username", "admin_email", "admin_password", "admin_password_check", "2fa_code"])
+            required_keys.extend(
+                ["admin_username", "admin_email", "admin_password", "admin_password_check"]
+            )  # TODO: add "2fa_code" back when TOTP is implemented in setup wizard
 
         if not any(key in request.form for key in required_keys):
             return handle_error(f"Missing either one of the following parameters: {', '.join(required_keys)}.", "setup")
@@ -64,12 +67,12 @@ def setup_page():
             totp_secret = None
             totp_recovery_codes = None
 
-            if request.form["2fa_code"]:
-                totp_secret = session.pop("tmp_totp_secret", "")
-                if not TOTP.verify_totp(request.form["2fa_code"], totp_secret=totp_secret, user=current_user):
-                    return handle_error("The totp token is invalid.", "setup")
+            # if request.form["2fa_code"]: # TODO: uncomment when TOTP is implemented in setup wizard
+            #     totp_secret = session.pop("tmp_totp_secret", "")
+            #     if not TOTP.verify_totp(request.form["2fa_code"], totp_secret=totp_secret, user=current_user):
+            #         return handle_error("The totp token is invalid.", "setup")
 
-                totp_recovery_codes = TOTP.generate_recovery_codes()
+            #     totp_recovery_codes = TOTP.generate_recovery_codes()
 
             ret = DB.create_ui_user(
                 request.form["admin_username"],
@@ -148,7 +151,6 @@ def setup_page():
         auto_lets_encrypt=db_config.get("AUTO_LETS_ENCRYPT", getenv("AUTO_LETS_ENCRYPT", "no")),
         lets_encrypt_staging=db_config.get("USE_LETS_ENCRYPT_STAGING", getenv("USE_LETS_ENCRYPT_STAGING", "no")),
         email_lets_encrypt=db_config.get("EMAIL_LETS_ENCRYPT", getenv("EMAIL_LETS_ENCRYPT", "")),
-        random_url=f"/{''.join(choice(ascii_letters + digits) for _ in range(10))}",
         totp_qr_image=totp_qr_image,
         totp_secret=TOTP.get_totp_pretty_key(session.get("tmp_totp_secret", "")),
     )

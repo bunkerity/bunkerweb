@@ -81,13 +81,15 @@
                             {% endif %}
                         </td>
                         <td>
-                            {% if instance.type == "container" %}
-                                <i class="bx bxl-docker"></i>&nbsp;Container
-                            {% elif instance.type == "pod" %}
-                                <i class="bx bxl-kubernetes"></i>&nbsp;Pod
-                            {% else %}
-                                <i class="bx bx-microchip"></i>&nbsp;Static
-                            {% endif %}
+                            <div class="d-flex align-items-center">
+                                {% if instance.type == "container" %}
+                                    <i class="bx bxl-docker"></i>&nbsp;Container
+                                {% elif instance.type == "pod" %}
+                                    <i class="bx bxl-kubernetes"></i>&nbsp;Pod
+                                {% else %}
+                                    <i class="bx bx-microchip"></i>&nbsp;Static
+                                {% endif %}
+                            </div>
                         </td>
                         <td class="instance-creation-date">{{ instance.creation_date.astimezone().isoformat() }}</td>
                         <td class="instance-last-seen-date">{{ instance.last_seen.astimezone().isoformat() }}</td>

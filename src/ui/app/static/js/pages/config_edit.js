@@ -59,8 +59,7 @@ $(document).ready(function () {
     $typeDropdownItems.each(function () {
       const item = $(this);
       item.toggle(
-        selectedService === "no service" ||
-          item.data("context") === "multisite",
+        selectedService === "global" || item.data("context") === "multisite",
       );
     });
   };
@@ -104,7 +103,7 @@ $(document).ready(function () {
     selectedService = $(this).text().trim();
     changeTypesVisibility();
     if (
-      selectedService !== "no service" &&
+      selectedService !== "global" &&
       $(`#config-type-${selectedType}`).data("context") !== "multisite"
     ) {
       const firstMultisiteType = $(

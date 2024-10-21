@@ -66,13 +66,13 @@ $(document).ready(function () {
     $("#selected-instances-input").val(instances.join(","));
 
     const list = $(
-      `<ul class="list-group list-group-horizontal d-flex w-100">
-        <li class="list-group-item align-items-center text-center bg-secondary text-white" style="flex: 1 0;">
+      `<ul class="list-group list-group-horizontal w-100">
+        <li class="list-group-item bg-secondary text-white" style="flex: 1 0;">
           <div class="ms-2 me-auto">
             <div class="fw-bold">Hostname</div>
           </div>
         </li>
-        <li class="list-group-item align-items-center text-center bg-secondary text-white" style="flex: 1 0;">
+        <li class="list-group-item bg-secondary text-white" style="flex: 1 0;">
           <div class="fw-bold">Health</div>
         </li>
         </ul>`,
@@ -82,12 +82,11 @@ $(document).ready(function () {
     const delete_modal = $("#modal-delete-instances");
     instances.forEach((instance) => {
       const list = $(
-        `<ul class="list-group list-group-horizontal d-flex w-100"></ul>`,
+        `<ul class="list-group list-group-horizontal w-100"></ul>`,
       );
 
       // Create the list item using template literals
-      const listItem =
-        $(`<li class="list-group-item align-items-center" style="flex: 1 0;">
+      const listItem = $(`<li class="list-group-item" style="flex: 1 0;">
   <div class="ms-2 me-auto">
     <div class="fw-bold">${instance}</div>
   </div>
@@ -97,7 +96,7 @@ $(document).ready(function () {
       // Clone the status element and append it to the list item
       const statusClone = $("#status-" + instance).clone();
       const statusListItem = $(
-        `<li class="list-group-item d-flex align-items-center justify-content-center" style="flex: 1 0;"></li>`,
+        `<li class="list-group-item" style="flex: 1 0;"></li>`,
       );
       statusListItem.append(statusClone.removeClass("highlight"));
       list.append(statusListItem);
@@ -139,15 +138,28 @@ $(document).ready(function () {
   };
 
   const layout = {
-    topStart: {},
-    bottomEnd: {},
-    bottom1: {
+    top1: {
       searchPanes: {
         viewTotal: true,
         cascadePanes: true,
+        collapse: false,
         columns: [3, 4, 5, 6, 7],
       },
     },
+    topStart: {},
+    topEnd: {
+      buttons: [
+        {
+          extend: "toggle_filters",
+          className: "btn btn-sm btn-outline-primary toggle-filters",
+        },
+      ],
+      search: true,
+    },
+    bottomStart: {
+      info: true,
+    },
+    bottomEnd: {},
   };
 
   if (instanceNumber > 10) {
@@ -162,8 +174,11 @@ $(document).ready(function () {
       menu.push(100);
     }
     menu.push({ label: "All", value: -1 });
-    layout.topStart.pageLength = {
-      menu: menu,
+    layout.bottomStart = {
+      pageLength: {
+        menu: menu,
+      },
+      info: true,
     };
     layout.bottomEnd.paging = true;
   }
@@ -226,7 +241,7 @@ $(document).ready(function () {
     {
       extend: "collection",
       text: '<span class="tf-icons bx bx-play bx-18px me-2"></span>Actions',
-      className: "btn btn-sm btn-outline-primary",
+      className: "btn btn-sm btn-outline-primary action-button disabled",
       buttons: [
         {
           extend: "ping_instances",
@@ -284,6 +299,15 @@ $(document).ready(function () {
       $("#modal-create-instance").on("shown.bs.modal", function () {
         $(this).find("#hostname").focus();
       });
+    },
+  };
+
+  $.fn.dataTable.ext.buttons.toggle_filters = {
+    text: '<span class="tf-icons bx bx-filter bx-18px me-2"></span><span id="show-filters">Show</span><span id="hide-filters" class="d-none">Hide</span><span class="d-none d-md-inline"> filters</span>',
+    action: function (e, dt, node, config) {
+      instances_table.searchPanes.container().slideToggle(); // Smoothly hide or show the container
+      $("#show-filters").toggleClass("d-none"); // Toggle the visibility of the 'Show' span
+      $("#hide-filters").toggleClass("d-none"); // Toggle the visibility of the 'Hide' span
     },
   };
 
@@ -527,12 +551,6 @@ $(document).ready(function () {
         },
         targets: 7,
       },
-      {
-        targets: "_all", // Target all columns
-        createdCell: function (td, cellData, rowData, row, col) {
-          $(td).addClass("align-items-center"); // Apply 'text-center' class to <td>
-        },
-      },
     ],
     order: [[7, "desc"]],
     autoFill: false,
@@ -559,7 +577,6 @@ $(document).ready(function () {
     },
     initComplete: function (settings, json) {
       $("#instances_wrapper .btn-secondary").removeClass("btn-secondary");
-      $("#instances_wrapper th").addClass("text-center");
       if (isReadOnly)
         $("#instances_wrapper .dt-buttons")
           .attr(
@@ -570,6 +587,8 @@ $(document).ready(function () {
           .tooltip();
     },
   });
+
+  instances_table.searchPanes.container().hide();
 
   $("#instances").removeClass("d-none");
   $("#instances-waiting").addClass("visually-hidden");
@@ -597,6 +616,19 @@ $(document).ready(function () {
       .cells()
       .nodes()
       .each((el) => el.classList.remove("highlight"));
+  });
+
+  instances_table.on("select", function (e, dt, type, indexes) {
+    // Enable the actions button
+    $(".action-button").removeClass("disabled");
+  });
+
+  instances_table.on("deselect", function (e, dt, type, indexes) {
+    // If no rows are selected, disable the actions button
+    if (instances_table.rows({ selected: true }).count() === 0) {
+      $(".action-button").addClass("disabled");
+      $("#select-all-rows").prop("checked", false);
+    }
   });
 
   // Event listener for the select-all checkbox

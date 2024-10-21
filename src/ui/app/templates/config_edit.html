@@ -4,7 +4,7 @@
     <input type="hidden"
            id="selected-service"
            name="selected_service"
-           value="{{ config_service if config_service and config_service != "global" else "no service" }}">
+           value="{{ config_service if config_service and config_service != "global" else "global" }}">
     <input type="hidden"
            id="selected-type"
            name="selected_type"
@@ -19,7 +19,7 @@
                 {% if not config_template and config_method and config_method != "ui" or is_readonly %}
                     <button type="button" class="btn btn-sm btn-secondary ms-2 disabled">
                         <i class="bx bx-xs bx-cube"></i>
-                        &nbsp;Service: {{ config_service or "no service" }}
+                        &nbsp;Service: {{ config_service or "global" }}
                     </button>
                     <button type="button" class="btn btn-sm btn-secondary ms-2 disabled">
                         <i class="bx bx-xs bx-window"></i>
@@ -52,7 +52,7 @@
                                         class="dropdown-item{% if not config_service or config_service == 'global' %} active{% endif %}"
                                         role="tab"
                                         data-bs-toggle="tab"
-                                        {% if not config_service %}aria-selected="true"{% endif %}>no service</button>
+                                        {% if not config_service %}aria-selected="true"{% endif %}>global</button>
                             </li>
                             {% for service in services %}
                                 <li class="nav-item">

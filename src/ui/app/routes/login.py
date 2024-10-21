@@ -1,10 +1,10 @@
 from datetime import datetime
 
-from flask import Blueprint, flash, redirect, render_template, request, session, url_for
+from flask import Blueprint, flash as flask_flash, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_user
 
 from app.dependencies import DB
-from app.utils import LOGGER
+from app.utils import LOGGER, flash
 
 login = Blueprint("login", __name__)
 
@@ -38,15 +38,21 @@ def login_page():
                 session["session_id"] = ret
 
             if not login_user(ui_user, remember=request.form.get("remember-me") == "on"):
-                flash("Couldn't log you in, please try again", "error")
+                flask_flash("Couldn't log you in, please try again", "error")
                 return (render_template("login.html", error="Couldn't log you in, please try again"),)
 
             LOGGER.info(f"User {ui_user.username} logged in successfully" + (" with remember me" if request.form.get("remember-me") == "on" else ""))
 
+            if not ui_user.totp_secret:
+                flash(
+                    f'Please enable two-factor authentication to secure your account <a href="{url_for("profile.profile_page", _anchor="security")}">here</a>',
+                    "error",
+                )
+
             # redirect him to the page he originally wanted or to the home page
             return redirect(url_for("loading", next=request.form.get("next") or url_for("home.home_page")))
         else:
-            flash("Invalid username or password", "error")
+            flask_flash("Invalid username or password", "error")
             fail = True
 
     kwargs = {

@@ -9,16 +9,16 @@ $(document).ready(function () {
   const setupDeletionModal = (plugins) => {
     const delete_modal = $("#modal-delete-plugins");
     const list = $(
-      `<ul class="list-group list-group-horizontal d-flex w-100">
-      <li class="list-group-item align-items-center text-center bg-secondary text-white" style="flex: 1 1 0;">
+      `<ul class="list-group list-group-horizontal w-100">
+      <li class="list-group-item bg-secondary text-white" style="flex: 1 1 0;">
         <div class="ms-2 me-auto">
           <div class="fw-bold">Name</div>
         </div>
       </li>
-      <li class="list-group-item align-items-center text-center bg-secondary text-white" style="flex: 1 1 0;">
+      <li class="list-group-item bg-secondary text-white" style="flex: 1 1 0;">
         <div class="fw-bold">Version</div>
       </li>
-      <li class="list-group-item align-items-center text-center bg-secondary text-white" style="flex: 1 1 0;">
+      <li class="list-group-item bg-secondary text-white" style="flex: 1 1 0;">
         <div class="fw-bold">Type</div>
       </li>
       </ul>`,
@@ -27,12 +27,11 @@ $(document).ready(function () {
 
     plugins.forEach((plugin) => {
       const list = $(
-        `<ul class="list-group list-group-horizontal d-flex w-100"></ul>`,
+        `<ul class="list-group list-group-horizontal w-100"></ul>`,
       );
 
       // Create the list item using template literals
-      const listItem =
-        $(`<li class="list-group-item align-items-center" style="flex: 1 1 0;">
+      const listItem = $(`<li class="list-group-item" style="flex: 1 1 0;">
   <div class="ms-2 me-auto">
     ${$(`#name-${plugin}`).html()}
   </div>
@@ -42,7 +41,7 @@ $(document).ready(function () {
       // Clone the version element and append it to the list item
       const versionClone = $(`#version-${plugin}`).clone();
       const versionListItem = $(
-        `<li class="list-group-item d-flex align-items-center" style="flex: 1 1 0;"></li>`,
+        `<li class="list-group-item" style="flex: 1 1 0;"></li>`,
       );
       versionListItem.append(versionClone.removeClass("highlight"));
       list.append(versionListItem);
@@ -50,7 +49,7 @@ $(document).ready(function () {
       // Clone the type element and append it to the list item
       const typeClone = $(`#type-${plugin}`).clone();
       const typeListItem = $(
-        `<li class="list-group-item d-flex align-items-center" style="flex: 1 1 0;"></li>`,
+        `<li class="list-group-item" style="flex: 1 1 0;"></li>`,
       );
       typeListItem.append(typeClone.removeClass("highlight"));
       list.append(typeListItem);
@@ -152,15 +151,28 @@ $(document).ready(function () {
   };
 
   const layout = {
-    topStart: {},
-    bottomEnd: {},
-    bottom1: {
+    top1: {
       searchPanes: {
         viewTotal: true,
         cascadePanes: true,
+        collapse: false,
         columns: [5, 6, 7],
       },
     },
+    topStart: {},
+    topEnd: {
+      buttons: [
+        {
+          extend: "toggle_filters",
+          className: "btn btn-sm btn-outline-primary toggle-filters",
+        },
+      ],
+      search: true,
+    },
+    bottomStart: {
+      info: true,
+    },
+    bottomEnd: {},
   };
 
   if (pluginNumber > 10) {
@@ -175,8 +187,11 @@ $(document).ready(function () {
       menu.push(100);
     }
     menu.push({ label: "All", value: -1 });
-    layout.topStart.pageLength = {
-      menu: menu,
+    layout.bottomStart = {
+      pageLength: {
+        menu: menu,
+      },
+      info: true,
     };
     layout.bottomEnd.paging = true;
   }
@@ -239,7 +254,7 @@ $(document).ready(function () {
     {
       extend: "collection",
       text: '<span class="tf-icons bx bx-play bx-18px me-2"></span>Actions',
-      className: "btn btn-sm btn-outline-primary",
+      className: "btn btn-sm btn-outline-primary action-button disabled",
       buttons: [
         {
           extend: "delete_plugins",
@@ -263,6 +278,15 @@ $(document).ready(function () {
       }
     });
     return plugins;
+  };
+
+  $.fn.dataTable.ext.buttons.toggle_filters = {
+    text: '<span class="tf-icons bx bx-filter bx-18px me-2"></span><span id="show-filters">Show</span><span id="hide-filters" class="d-none">Hide</span><span class="d-none d-md-inline"> filters</span>',
+    action: function (e, dt, node, config) {
+      plugins_table.searchPanes.container().slideToggle(); // Smoothly hide or show the container
+      $("#show-filters").toggleClass("d-none"); // Toggle the visibility of the 'Show' span
+      $("#hide-filters").toggleClass("d-none"); // Toggle the visibility of the 'Hide' span
+    },
   };
 
   $.fn.dataTable.ext.buttons.add_plugin = {
@@ -395,12 +419,6 @@ $(document).ready(function () {
         },
         targets: 7,
       },
-      {
-        targets: "_all", // Target all columns
-        createdCell: function (td, cellData, rowData, row, col) {
-          $(td).addClass("align-items-center"); // Apply 'text-center' class to <td>
-        },
-      },
     ],
     order: [[2, "asc"]],
     autoFill: false,
@@ -424,16 +442,9 @@ $(document).ready(function () {
           1: "Selected 1 plugin",
         },
       },
-      // searchPanes: {
-      //   collapse: {
-      //     0: '<span class="tf-icons bx bx-search bx-18px me-2"></span>Filters',
-      //     _: '<span class="tf-icons bx bx-search bx-18px me-2"></span>Filters (%d)',
-      //   },
-      // },
     },
     initComplete: function (settings, json) {
       $("#plugins_wrapper .btn-secondary").removeClass("btn-secondary");
-      $("#plugins_wrapper th").addClass("text-center");
       if (isReadOnly)
         $("#plugins_wrapper .dt-buttons")
           .attr(
@@ -444,6 +455,8 @@ $(document).ready(function () {
           .tooltip();
     },
   });
+
+  plugins_table.searchPanes.container().hide();
 
   $("#plugins").removeClass("d-none");
   $("#plugins-waiting").addClass("visually-hidden");
@@ -471,6 +484,19 @@ $(document).ready(function () {
       .cells()
       .nodes()
       .each((el) => el.classList.remove("highlight"));
+  });
+
+  plugins_table.on("select", function (e, dt, type, indexes) {
+    // Enable the actions button
+    $(".action-button").removeClass("disabled");
+  });
+
+  plugins_table.on("deselect", function (e, dt, type, indexes) {
+    // If no rows are selected, disable the actions button
+    if (plugins_table.rows({ selected: true }).count() === 0) {
+      $(".action-button").addClass("disabled");
+      $("#select-all-rows").prop("checked", false);
+    }
   });
 
   // Event listener for the select-all checkbox

@@ -15,6 +15,7 @@
                     {% set breadcrumbs_ns.working_url = breadcrumb_url %}
                 {% endif %}
                 {% if current_endpoint != "configs" and "configs" in request.path %}
+                    {% set breadcrumb_url = url_for("configs") %}
                     {% if loop.index == 3 %}
                         {% set breadcrumb_prefix = "?service=" + breadcrumb %}
                     {% elif loop.index == 4 %}
@@ -22,6 +23,7 @@
                     {% endif %}
                 {% endif %}
                 {% if current_endpoint != "cache" and "cache" in request.path %}
+                    {% set breadcrumb_url = url_for("cache") %}
                     {% if loop.index == 3 %}
                         {% set breadcrumb_prefix = "?service=" + breadcrumb %}
                     {% elif loop.index == 4 %}

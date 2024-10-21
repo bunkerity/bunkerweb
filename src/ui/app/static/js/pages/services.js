@@ -6,13 +6,13 @@ $(function () {
 
   const setupModal = (services, modal) => {
     const headerList = $(`
-      <ul class="list-group list-group-horizontal d-flex w-100">
-        <li class="list-group-item align-items-center text-center bg-secondary text-white" style="flex: 1 0;">
+      <ul class="list-group list-group-horizontal w-100">
+        <li class="list-group-item bg-secondary text-white" style="flex: 1 0;">
           <div class="ms-2 me-auto">
             <div class="fw-bold">Service name</div>
           </div>
         </li>
-        <li class="list-group-item align-items-center text-center bg-secondary text-white" style="flex: 1 0;">
+        <li class="list-group-item bg-secondary text-white" style="flex: 1 0;">
           <div class="fw-bold">Type</div>
         </li>
       </ul>
@@ -22,11 +22,11 @@ $(function () {
     services.forEach((service) => {
       const sanitizedService = service.replace(/\./g, "-");
       const serviceList = $(
-        '<ul class="list-group list-group-horizontal d-flex w-100"></ul>',
+        '<ul class="list-group list-group-horizontal w-100"></ul>',
       );
 
       const listItem = $(`
-        <li class="list-group-item align-items-center" style="flex: 1 0;">
+        <li class="list-group-item" style="flex: 1 0;">
           <div class="ms-2 me-auto">
             <div class="fw-bold">${service}</div>
           </div>
@@ -38,7 +38,7 @@ $(function () {
         .clone()
         .removeClass("highlight");
       const typeListItem = $(`
-        <li class="list-group-item d-flex align-items-center justify-content-center" style="flex: 1 0;"></li>
+        <li class="list-group-item" style="flex: 1 0;"></li>
       `);
       typeListItem.append(typeClone);
       serviceList.append(typeListItem);
@@ -85,15 +85,28 @@ $(function () {
   };
 
   const layout = {
-    topStart: {},
-    bottomEnd: {},
-    bottom1: {
+    top1: {
       searchPanes: {
         viewTotal: true,
         cascadePanes: true,
+        collapse: false,
         columns: [2, 3, 4, 5],
       },
     },
+    topStart: {},
+    topEnd: {
+      buttons: [
+        {
+          extend: "toggle_filters",
+          className: "btn btn-sm btn-outline-primary toggle-filters",
+        },
+      ],
+      search: true,
+    },
+    bottomStart: {
+      info: true,
+    },
+    bottomEnd: {},
   };
 
   if (serviceNumber > 10) {
@@ -102,7 +115,12 @@ $(function () {
       if (serviceNumber > num) menu.push(num);
     });
     menu.push({ label: "All", value: -1 });
-    layout.topStart.pageLength = { menu };
+    layout.bottomStart = {
+      pageLength: {
+        menu: menu,
+      },
+      info: true,
+    };
     layout.bottomEnd.paging = true;
   }
 
@@ -158,7 +176,7 @@ $(function () {
     {
       extend: "collection",
       text: '<span class="tf-icons bx bx-play bx-18px me-2"></span>Actions',
-      className: "btn btn-sm btn-outline-primary",
+      className: "btn btn-sm btn-outline-primary action-button disabled",
       buttons: [
         {
           extend: "convert_services",
@@ -204,6 +222,15 @@ $(function () {
         return $(this).find("td:eq(1) a").text().trim();
       })
       .get();
+
+  $.fn.dataTable.ext.buttons.toggle_filters = {
+    text: '<span class="tf-icons bx bx-filter bx-18px me-2"></span><span id="show-filters">Show</span><span id="hide-filters" class="d-none">Hide</span><span class="d-none d-md-inline"> filters</span>',
+    action: function (e, dt, node, config) {
+      services_table.searchPanes.container().slideToggle(); // Smoothly hide or show the container
+      $("#show-filters").toggleClass("d-none"); // Toggle the visibility of the 'Show' span
+      $("#hide-filters").toggleClass("d-none"); // Toggle the visibility of the 'Hide' span
+    },
+  };
 
   $.fn.dataTable.ext.buttons.create_service = {
     text: '<span class="tf-icons bx bx-plus"></span>&nbsp;Create<span class="d-none d-md-inline"> new service</span>',
@@ -373,10 +400,6 @@ $(function () {
         },
         targets: 5,
       },
-      {
-        targets: "_all",
-        createdCell: (td) => $(td).addClass("align-items-center"),
-      },
     ],
     order: [[5, "desc"]],
     autoFill: false,
@@ -410,7 +433,6 @@ $(function () {
     initComplete: function () {
       const $wrapper = $("#services_wrapper");
       $wrapper.find(".btn-secondary").removeClass("btn-secondary");
-      $wrapper.find("th").addClass("text-center");
       if (isReadOnly) {
         $wrapper
           .find(".dt-buttons")
@@ -423,6 +445,8 @@ $(function () {
       }
     },
   });
+
+  services_table.searchPanes.container().hide();
 
   $("#services").removeClass("d-none");
   $("#services-waiting").addClass("visually-hidden");
@@ -450,6 +474,19 @@ $(function () {
       .cells()
       .nodes()
       .each((el) => el.classList.remove("highlight"));
+  });
+
+  services_table.on("select", function (e, dt, type, indexes) {
+    // Enable the actions button
+    $(".action-button").removeClass("disabled");
+  });
+
+  services_table.on("deselect", function (e, dt, type, indexes) {
+    // If no rows are selected, disable the actions button
+    if (services_table.rows({ selected: true }).count() === 0) {
+      $(".action-button").addClass("disabled");
+      $("#select-all-rows").prop("checked", false);
+    }
   });
 
   // Event listener for the select-all checkbox

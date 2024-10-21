@@ -4,15 +4,28 @@ $(document).ready(function () {
   const isReadOnly = $("#is-read-only").val().trim() === "True";
 
   const layout = {
-    topStart: {},
-    bottomEnd: {},
-    bottom1: {
+    top1: {
       searchPanes: {
         viewTotal: true,
         cascadePanes: true,
+        collapse: false,
         columns: [2, 3, 4, 5],
       },
     },
+    topStart: {},
+    topEnd: {
+      buttons: [
+        {
+          extend: "toggle_filters",
+          className: "btn btn-sm btn-outline-primary toggle-filters",
+        },
+      ],
+      search: true,
+    },
+    bottomStart: {
+      info: true,
+    },
+    bottomEnd: {},
   };
 
   if (jobNumber > 10) {
@@ -27,13 +40,20 @@ $(document).ready(function () {
       menu.push(100);
     }
     menu.push({ label: "All", value: -1 });
-    layout.topStart.pageLength = {
-      menu: menu,
+    layout.bottomStart = {
+      pageLength: {
+        menu: menu,
+      },
+      info: true,
     };
     layout.bottomEnd.paging = true;
   }
 
   layout.topStart.buttons = [
+    {
+      extend: "toggle_filters",
+      className: "btn btn-sm btn-outline-primary toggle-filters",
+    },
     {
       extend: "colvis",
       columns: "th:not(:first-child)",
@@ -88,7 +108,7 @@ $(document).ready(function () {
     {
       extend: "collection",
       text: '<span class="tf-icons bx bx-play bx-18px me-2"></span>Actions',
-      className: "btn btn-sm btn-outline-primary",
+      className: "btn btn-sm btn-outline-primary action-button disabled",
       buttons: [
         {
           extend: "run_jobs",
@@ -133,6 +153,15 @@ $(document).ready(function () {
 
     // Append the form to the body and submit it
     form.appendTo("body").submit();
+  };
+
+  $.fn.dataTable.ext.buttons.toggle_filters = {
+    text: '<span class="tf-icons bx bx-filter bx-18px me-2"></span><span id="show-filters">Show</span><span id="hide-filters" class="d-none">Hide</span><span class="d-none d-md-inline"> filters</span>',
+    action: function (e, dt, node, config) {
+      jobs_table.searchPanes.container().slideToggle(); // Smoothly hide or show the container
+      $("#show-filters").toggleClass("d-none"); // Toggle the visibility of the 'Show' span
+      $("#hide-filters").toggleClass("d-none"); // Toggle the visibility of the 'Hide' span
+    },
   };
 
   $.fn.dataTable.ext.buttons.run_jobs = {
@@ -280,12 +309,6 @@ $(document).ready(function () {
         },
         targets: 5,
       },
-      {
-        targets: "_all", // Target all columns
-        createdCell: function (td, cellData, rowData, row, col) {
-          $(td).addClass("align-items-center"); // Apply 'text-center' class to <td>
-        },
-      },
     ],
     order: [[2, "asc"]],
     autoFill: false,
@@ -312,9 +335,10 @@ $(document).ready(function () {
     },
     initComplete: function (settings, json) {
       $("#jobs_wrapper .btn-secondary").removeClass("btn-secondary");
-      $("#jobs_wrapper th").addClass("text-center");
     },
   });
+
+  jobs_table.searchPanes.container().hide();
 
   $("#jobs").removeClass("d-none");
   $("#jobs-waiting").addClass("visually-hidden");
@@ -342,6 +366,19 @@ $(document).ready(function () {
       .cells()
       .nodes()
       .each((el) => el.classList.remove("highlight"));
+  });
+
+  jobs_table.on("select", function (e, dt, type, indexes) {
+    // Enable the actions button
+    $(".action-button").removeClass("disabled");
+  });
+
+  jobs_table.on("deselect", function (e, dt, type, indexes) {
+    // If no rows are selected, disable the actions button
+    if (jobs_table.rows({ selected: true }).count() === 0) {
+      $(".action-button").addClass("disabled");
+      $("#select-all-rows").prop("checked", false);
+    }
   });
 
   // Event listener for the select-all checkbox

@@ -137,38 +137,38 @@ def configs_new():
         verify_data_in_form(
             data={"service": None},
             err_message="Missing service parameter on /configs/new.",
-            redirect_url="configs/new",
+            redirect_url="configs.configs_new",
             next=True,
         )
         service = request.form["service"]
         services = BW_CONFIG.get_config(global_only=True, with_drafts=True, methods=False, filtered_settings=("SERVER_NAME"))["SERVER_NAME"].split(" ")
-        if service != "no service" and service not in services:
-            return handle_error(f"Service {service} does not exist.", "configs/new", True)
+        if service != "global" and service not in services:
+            return handle_error(f"Service {service} does not exist.", "configs.configs_new", True)
 
         verify_data_in_form(
             data={"type": None},
             err_message="Missing type parameter on /configs/new.",
-            redirect_url="configs/new",
+            redirect_url="configs.configs_new",
             next=True,
         )
         config_type = request.form["type"]
         if config_type not in CONFIG_TYPES:
-            return handle_error("Invalid type parameter on /configs/new.", "configs/new", True)
+            return handle_error("Invalid type parameter on /configs/new.", "configs.configs_new", True)
 
         verify_data_in_form(
             data={"name": None},
             err_message="Missing name parameter on /configs/new.",
-            redirect_url="configs/new",
+            redirect_url="configs.configs_new",
             next=True,
         )
         config_name = request.form["name"]
         if not match(r"^[\w_-]{1,64}$", config_name):
-            return handle_error("Invalid name parameter on /configs/new.", "configs/new", True)
+            return handle_error("Invalid name parameter on /configs/new.", "configs.configs_new", True)
 
         verify_data_in_form(
             data={"value": None},
             err_message="Missing value parameter on /configs/new.",
-            redirect_url="configs/new",
+            redirect_url="configs.configs_new",
             next=True,
         )
         config_value = request.form["value"].replace("\r\n", "\n").strip()
@@ -191,7 +191,7 @@ def configs_new():
                 "data": config_value,
                 "method": "ui",
             }
-            if service != "no service":
+            if service != "global":
                 new_config["service_id"] = service
 
             error = DB.upsert_custom_config(config_type, config_name, new_config, service_id=new_config.get("service_id"), new=True)
@@ -216,15 +216,13 @@ def configs_new():
             DATA["RELOADING"] = False
 
         DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})
-        Thread(target=create_config, args=(service if service != "no service" else None, config_type, config_name, config_value)).start()
+        Thread(target=create_config, args=(service if service != "global" else None, config_type, config_name, config_value)).start()
 
         return redirect(
             url_for(
                 "loading",
-                next=url_for(
-                    "configs.configs_edit", service="global" if service == "no service" else service, config_type=config_type.lower(), name=config_name
-                ),
-                message=f"Creating custom configuration {config_type}/{config_name}{' for service' + service if service != 'no service' else ''}",
+                next=url_for("configs.configs_edit", service="global" if service == "global" else service, config_type=config_type.lower(), name=config_name),
+                message=f"Creating custom configuration {config_type}/{config_name}{' for service' + service if service != 'global' else ''}",
             )
         )
 
@@ -271,42 +269,42 @@ def configs_edit(service: str, config_type: str, name: str):
         verify_data_in_form(
             data={"service": None},
             err_message="Missing service parameter on /configs/new.",
-            redirect_url="configs/new",
+            redirect_url="configs.configs_new",
             next=True,
         )
         new_service = request.form["service"]
         services = BW_CONFIG.get_config(global_only=True, with_drafts=True, methods=False, filtered_settings=("SERVER_NAME"))["SERVER_NAME"].split(" ")
-        if new_service != "no service" and new_service not in services:
-            return handle_error(f"Service {new_service} does not exist.", "configs/new", True)
+        if new_service != "global" and new_service not in services:
+            return handle_error(f"Service {new_service} does not exist.", "configs.configs_new", True)
 
-        if new_service == "no service":
+        if new_service == "global":
             new_service = None
 
         verify_data_in_form(
             data={"type": None},
             err_message="Missing type parameter on /configs/new.",
-            redirect_url="configs/new",
+            redirect_url="configs.configs_new",
             next=True,
         )
         new_type = request.form["type"]
         if new_type not in CONFIG_TYPES:
-            return handle_error("Invalid type parameter on /configs/new.", "configs/new", True)
+            return handle_error("Invalid type parameter on /configs/new.", "configs.configs_new", True)
         new_type = new_type.lower()
 
         verify_data_in_form(
             data={"name": None},
             err_message="Missing name parameter on /configs/new.",
-            redirect_url="configs/new",
+            redirect_url="configs.configs_new",
             next=True,
         )
         new_name = secure_filename(request.form["name"])
         if not match(r"^[\w_-]{1,64}$", new_name):
-            return handle_error("Invalid name parameter on /configs/new.", "configs/new", True)
+            return handle_error("Invalid name parameter on /configs/new.", "configs.configs_new", True)
 
         verify_data_in_form(
             data={"value": None},
             err_message="Missing value parameter on /configs/new.",
-            redirect_url="configs/new",
+            redirect_url="configs.configs_new",
             next=True,
         )
         config_value = request.form["value"].replace("\r\n", "\n").strip()

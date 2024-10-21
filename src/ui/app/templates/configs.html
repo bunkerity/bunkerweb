@@ -75,18 +75,22 @@
                         <td></td>
                         <td>
                             <a href="{{ url_for("configs") }}/{{ service_id }}/{{ config['type'] }}/{{ config['name'] }}"
+                               class="d-flex align-items-center"
                                data-bs-toggle="tooltip"
                                data-bs-placement="bottom"
                                data-bs-original-title="{% if config['method'] != 'ui' and not config['template'] or is_readonly %}View{% else %}Edit{% endif %} custom config {{ config['name'] }}"><i class="bx bx-{% if config['method'] != 'ui' and not config['template'] or is_readonly %}show{% else %}edit{% endif %} bx-xs"></i>&nbsp;{{ config["name"] }}</a>
                         </td>
                         <td id="type-{{ config['type'] }}-{{ service_id.replace('.', '_') }}-{{ config['name'] }}">
-                            <i class="bx bx-{{ config_icon }}"></i>
-                            {{ config["type"]|upper }}
+                            <div class="d-flex align-items-center">
+                                <i class="bx bx-{{ config_icon }} me-1"></i>
+                                {{ config["type"]|upper }}
+                            </div>
                         </td>
                         <td>{{ config["method"] }}</td>
                         <td id="service-{{ config['type'] }}-{{ service_id.replace('.', '_') }}-{{ config['name'] }}">
                             {% if config["service_id"] %}
                                 <a href="{{ url_for("services") }}/{{ config['service_id'] }}"
+                                   class="d-flex align-items-center"
                                    data-bs-toggle="tooltip"
                                    data-bs-placement="bottom"
                                    data-bs-original-title="Edit service {{ config['service_id'] }}"><i class="bx bx-edit bx-xs"></i>&nbsp;{{ config["service_id"] }}</a>

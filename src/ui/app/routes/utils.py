@@ -158,10 +158,11 @@ def handle_error(err_message: str = "", redirect_url: str = "", next: bool = Fal
     if not redirect_url:
         return False
 
+    redirect_url = f"{redirect_url}.{redirect_url}_page" if "." not in redirect_url else redirect_url
     if next:
-        return redirect(url_for("loading", next=url_for(f"{redirect_url}.{redirect_url}_page")))
+        return redirect(url_for("loading", next=url_for(redirect_url)))
 
-    return redirect(url_for(f"{redirect_url}.{redirect_url}_page"))
+    return redirect(url_for(redirect_url))
 
 
 def error_message(msg: str):

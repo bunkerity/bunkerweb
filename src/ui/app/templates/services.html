@@ -45,6 +45,7 @@
                         <td></td>
                         <td>
                             <a href="{{ url_for("services") }}/{{ service['id'] }}"
+                               class="d-flex align-items-center"
                                data-bs-toggle="tooltip"
                                data-bs-placement="bottom"
                                data-bs-original-title="{% if service['method'] == 'autoconf' or is_readonly %}View{% else %}Edit{% endif %} service {{ service['id'] }}"><i class="bx bx-{% if service['method'] == 'autoconf' or is_readonly %}show{% else %}edit{% endif %} bx-xs"></i>&nbsp;{{ service["id"] }}</a>

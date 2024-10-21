@@ -9,10 +9,10 @@ $(document).ready(() => {
   // Cache jQuery selectors for performance
   const $window = $(window);
   const $passwordInput = $("#password");
-  const $2faInput = $("#2fa_code");
+  // const $2faInput = $("#2fa_code");
   const $confirmPasswordInput = $("#confirm_password");
   const $serverNameInput = $("#SERVER_NAME");
-  const $overview2faEnabled = $("#overview-2fa-enabled");
+  // const $overview2faEnabled = $("#overview-2fa-enabled");
   const $overviewUniqueServerName = $("#overview-unique-server-name");
   const $saveSettingsButton = $(".save-settings");
   const $previousStepButton = $(".previous-step");
@@ -355,19 +355,9 @@ $(document).ready(() => {
 
       if (adminEmail) {
         $overviewEmail.val(adminEmail);
-        $overviewEmail.closest(".col-12").removeClass("d-none");
-        $overviewUsername.closest(".col-12").addClass("col-md-4");
-        $overviewPassword
-          .closest(".col-12")
-          .addClass("col-md-4")
-          .removeClass("col-sm-6");
+        $overviewEmail.parent().removeClass("d-none");
       } else {
-        $overviewEmail.closest(".col-12").addClass("d-none");
-        $overviewUsername.closest(".col-12").removeClass("col-md-4");
-        $overviewPassword
-          .closest(".col-12")
-          .removeClass("col-md-4")
-          .addClass("col-sm-6");
+        $overviewEmail.parent().addClass("d-none");
       }
       $overviewUsername.val($("#username").val());
       $overviewPassword.val($("#password").val());
@@ -500,7 +490,7 @@ $(document).ready(() => {
       formData.append("admin_email", $("#email").val());
       formData.append("admin_password", $("#password").val());
       formData.append("admin_password_check", $("#confirm_password").val());
-      formData.append("2fa_code", $("#2fa_code").val());
+      // formData.append("2fa_code", $("#2fa_code").val());
     }
 
     if (!uiReverseProxy) {
@@ -526,7 +516,7 @@ $(document).ready(() => {
       if (!ui_url.startsWith("/")) {
         api = `${api}/`;
       }
-      api = `${api}${ui_url}/check`;
+      api = `${api}${ui_url}${ui_url !== "/" ? "/" : ""}check`;
       var redirect = `https://${server_name}/setup/loading?target_endpoint=${api}`;
     } else {
       var redirect = window.location.href.replace("setup", "login");
@@ -572,34 +562,40 @@ $(document).ready(() => {
     handleStepNavigation(isNext, confirmDNS);
   });
 
-  $2faInput.on("input", function () {
-    if (uiUser) return;
-
-    const $this = $(this);
-    const value = $this.val();
-    const isValid = /^[0-9]{6}$/.test(value);
-    updateValidationState(this, isValid);
-
-    $overview2faEnabled
-      .find("i")
-      .toggleClass("bx-x text-danger bx-check text-success", false)
-      .toggleClass("bx-question-mark text-warning", value === "");
-    $overview2faEnabled.tooltip("enable");
-    if (value) {
-      if (isValid) {
-        $overview2faEnabled
-          .find("i")
-          .toggleClass("bx-x text-danger", false)
-          .toggleClass("bx-check text-success", true);
-        $overview2faEnabled.tooltip("disable");
-      } else {
-        $overview2faEnabled
-          .find("i")
-          .toggleClass("bx-check text-success", false)
-          .toggleClass("bx-x text-danger", true);
-      }
+  $(document).on("keydown", ".plugin-setting", function (e) {
+    if (e.key === "Enter" || e.keyCode === 13) {
+      $("#next-step").trigger("click");
     }
   });
+
+  // $2faInput.on("input", function () {
+  //   if (uiUser) return;
+
+  //   const $this = $(this);
+  //   const value = $this.val();
+  //   const isValid = /^[0-9]{6}$/.test(value);
+  //   updateValidationState(this, isValid);
+
+  //   $overview2faEnabled
+  //     .find("i")
+  //     .toggleClass("bx-x text-danger bx-check text-success", false)
+  //     .toggleClass("bx-question-mark text-warning", value === "");
+  //   $overview2faEnabled.tooltip("enable");
+  //   if (value) {
+  //     if (isValid) {
+  //       $overview2faEnabled
+  //         .find("i")
+  //         .toggleClass("bx-x text-danger", false)
+  //         .toggleClass("bx-check text-success", true);
+  //       $overview2faEnabled.tooltip("disable");
+  //     } else {
+  //       $overview2faEnabled
+  //         .find("i")
+  //         .toggleClass("bx-check text-success", false)
+  //         .toggleClass("bx-x text-danger", true);
+  //     }
+  //   }
+  // });
 
   // Before Unload Event to Warn Users About Unsaved Changes
   $window.on("beforeunload", function (e) {

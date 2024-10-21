@@ -58,7 +58,7 @@
                         </td>
                         <td>{{ plugin_data["description"] }}</td>
                         <td id="version-{{ plugin }}">
-                            <div class="{{ plugin_types[plugin_data['type']].get('text-class', '') }}">{{ plugin_data["version"] }}</div>
+                            <div class="{{ plugin_types[plugin_data['type']].get('text-class', '') }}">v{{ plugin_data["version"] }}</div>
                         </td>
                         <td class="text-center">
                             <div data-bs-toggle="tooltip"
@@ -68,13 +68,13 @@
                             </td>
                         </div>
                         <td id="type-{{ plugin }}">
-                            <div {% if not is_pro_version and plugin_data['type'] == "pro" %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" data-bs-original-title="<i class='bx bx-diamond bx-xs'></i><span>Pro feature</span>"
+                            <div class="d-flex align-items-center" {% if not is_pro_version and plugin_data['type'] == "pro" %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" data-bs-original-title="<i class='bx bx-diamond bx-xs'></i><span>Pro feature</span>"
                             {% endif %}
                             >
                             {% if plugin_data["type"] == "pro" %}
                                 <a href="{{ url_for('pro') }}" target="_blank" rel="noopener" {% else %}
                                     <div {% endif %}
-                                         class="{{ plugin_types[plugin_data['type']].get('text-class', '') }}">
+                                         class="d-flex align-items-center{{ plugin_types[plugin_data['type']].get('text-class', '') }}">
                                         {{ plugin_types[plugin_data["type"]].get('icon', '<img src="' + pro_diamond_url + '"
                                              alt="Pro plugin"
                                              width="16px"

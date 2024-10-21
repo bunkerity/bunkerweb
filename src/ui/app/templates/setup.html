@@ -10,6 +10,36 @@
            name="csrf_token"
            value="{{ csrf_token() }}" />
     <div class="container-xxl">
+        <div class="position-fixed top-0 end-0 m-5">
+            <!-- prettier-ignore -->
+            <div class="d-flex justify-content-end align-items-center mb-5">
+                <ul class="d-flex mb-0 list-unstyled">
+                    <li class="me-3">
+                        <a role="button"
+                           class="btn btn-sm btn-outline-dark d-flex align-items-center h-100"
+                           aria-pressed="true"
+                           href="https://panel.bunkerweb.io/order/support/?utm_campaign=self&utm_source=ui"
+                           target="_blank"
+                           rel="noopener">
+                            <span class="bx bx-help-circle me-0 me-md-2"></span>
+                            <span class="d-none d-md-inline">Need help?</span>
+                        </a>
+                    </li>
+                    <li class="position-relative">
+                        <button id="news-button"
+                                type="button"
+                                class="btn btn-sm btn-dark text-uppercase d-flex align-items-center"
+                                aria-pressed="true"
+                                data-bs-toggle="offcanvas"
+                                data-bs-target="#side-offcanvas-news"
+                                aria-controls="side-offcanvas-news">
+                            <span class="bx bx-news me-0 me-md-2"></span>
+                            <span class="d-none d-md-inline">News</span>
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
         <div class="authentication-wrapper authentication-basic container-p-y">
             <div class="authentication-inner w-100">
                 <!-- Setup -->
@@ -96,11 +126,13 @@
                                                     </span>
                                                 </div>
                                             </div>
-                                            {% set setting = "username" %}
-                                            {% set setting_value = username %}
-                                            {% set setting_data = {"type": "text", "id": "username", "regex": "^.{1,256}$"} %}
-                                            {% set required = true %}
-                                            {% include "models/input_setting.html" %}
+                                            <input id="username"
+                                                   name="username"
+                                                   type="text"
+                                                   class="form-control plugin-setting mt-1"
+                                                   aria-labelledby="label-username"
+                                                   pattern="^.{1,256}$"
+                                                   required />
                                         </div>
                                         <div class="col-12 col-sm-6 pb-3">
                                             <div class="d-flex justify-content-between align-items-center">
@@ -116,15 +148,17 @@
                                                     </span>
                                                 </div>
                                             </div>
-                                            {% set setting = "email" %}
-                                            {% set setting_data = {"type": "email", "id": "email", "regex": "^.{1,256}$"} %}
-                                            {% set required = false %}
-                                            {% include "models/input_setting.html" %}
+                                            <input id="email"
+                                                   name="email"
+                                                   type="email"
+                                                   placeholder="John.doe@example.com"
+                                                   class="form-control plugin-setting mt-1"
+                                                   aria-labelledby="label-email" />
                                         </div>
                                         <div class="col-12 col-sm-6 pb-3">
                                             <div class="d-flex justify-content-between align-items-center">
-                                                <label id="label-username"
-                                                       for="username"
+                                                <label id="label-password"
+                                                       for="password"
                                                        class="form-label fw-semibold text-truncate">
                                                     Admin Password
                                                 </label>
@@ -137,11 +171,20 @@
                                                     </span>
                                                 </div>
                                             </div>
-                                            {% set setting = "password" %}
-                                            {% set setting_value = password %}
-                                            {% set setting_data = {"type": "password", "id": "password", "regex": "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[ -~]).{8,}$"} %}
-                                            {% set required = true %}
-                                            {% include "models/input_setting.html" %}
+                                            <div class="form-password-toggle">
+                                                <div class="input-group input-group-merge mt-1">
+                                                    <input class="form-control plugin-setting"
+                                                           type="password"
+                                                           id="password"
+                                                           name="password"
+                                                           placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
+                                                           aria-labelledby="label-password"
+                                                           autocomplete="off"
+                                                           required
+                                                           pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[ -~]).{8,}$" />
+                                                    <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
+                                                </div>
+                                            </div>
                                             <div class="mt-3">
                                                 <ul class="list-unstyled" id="password-requirements">
                                                     <li id="length-check">
@@ -165,8 +208,8 @@
                                         </div>
                                         <div class="col-12 col-sm-6 pb-3">
                                             <div class="d-flex justify-content-between align-items-center">
-                                                <label id="label-username"
-                                                       for="username"
+                                                <label id="label-confirm_password"
+                                                       for="confirm_password"
                                                        class="form-label fw-semibold text-truncate">
                                                     Confirm Password
                                                 </label>
@@ -179,34 +222,34 @@
                                                     </span>
                                                 </div>
                                             </div>
-                                            {% set setting = "confirm_password" %}
-                                            {% set setting_data = {"type": "password", "id": "confirm_password", "regex": "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[ -~]).{8,}$"} %}
-                                            {% set required = true %}
-                                            {% include "models/input_setting.html" %}
+                                            <div class="form-password-toggle">
+                                                <div class="input-group input-group-merge mt-1">
+                                                    <input class="form-control plugin-setting"
+                                                           type="password"
+                                                           id="confirm_password"
+                                                           name="confirm_password"
+                                                           placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
+                                                           aria-labelledby="label-confirm_password"
+                                                           autocomplete="off"
+                                                           required
+                                                           pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[ -~]).{8,}$" />
+                                                    <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div class="pt-1 pb-4">
+                                        <!-- <div class="pt-1 pb-4">
                                             <h5 class="mb-1 fw-bold">Enable 2FA</h5>
                                             <p class="card-subtitle text-muted">Enable Two-Factor Authentication (Strongly Recommended)</p>
                                         </div>
                                         <div class="col-12 pb-3 d-flex justify-content-center">
                                             <div class="g-3 w-75">
                                                 <div class="d-flex justify-content-center">
-                                                    <img class="img-fluid"
-                                                         src="{{ totp_qr_image }}"
-                                                         alt="2FA QR Code"
-                                                         height="200"
-                                                         width="200" />
+                                                    <img class="img-fluid" src="{{ totp_qr_image }}" alt="2FA QR Code" height="200" width="200" />
                                                 </div>
                                                 <div class="form-password-toggle">
                                                     <label for="secret_token" class="form-label text-start d-block">Secret Token</label>
                                                     <div class="input-group input-group-merge">
-                                                        <input type="password"
-                                                               id="secret_token"
-                                                               name="secret_token"
-                                                               class="form-control"
-                                                               placeholder="Secret Token"
-                                                               value="{{ totp_secret }}"
-                                                               readonly />
+                                                        <input type="password" id="secret_token" name="secret_token" class="form-control" placeholder="Secret Token" value="{{ totp_secret }}" readonly />
                                                         {% if request.is_secure %}
                                                             <span class="input-group-text cursor-pointer copy-to-clipboard">
                                                                 <i class="bx bx-copy-alt"></i>
@@ -219,7 +262,7 @@
                                                     <small class="form-text text-muted">Save it in a safe place, you will need the generated code to setup your 2FA in the last step.</small>
                                                 </div>
                                             </div>
-                                        </div>
+                                        </div> -->
                                     </div>
                                 {% else %}
                                     <p class="text-center relative w-full p-2 text-primary rounded-lg fw-bold">
@@ -240,8 +283,8 @@
                                     <div class="row pb-0">
                                         <div class="col-12 pb-6">
                                             <div class="d-flex justify-content-between align-items-center">
-                                                <label id="label-username"
-                                                       for="username"
+                                                <label id="label-SERVER_NAME"
+                                                       for="SERVER_NAME"
                                                        class="form-label fw-semibold text-truncate">Server name</label>
                                                 <div class="d-flex align-items-center">
                                                     <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
@@ -252,16 +295,20 @@
                                                     </span>
                                                 </div>
                                             </div>
-                                            {% set setting = "SERVER_NAME" %}
-                                            {% set setting_value = "www.example.com" %}
-                                            {% set setting_data = {"type": "text", "id": "SERVER_NAME", "regex": "^.+$"} %}
-                                            {% set required = true %}
-                                            {% include "models/input_setting.html" %}
+                                            <input id="SERVER_NAME"
+                                                   name="SERVER_NAME"
+                                                   type="text"
+                                                   placeholder="www.example.com"
+                                                   value="www.example.com"
+                                                   class="form-control plugin-setting mt-1"
+                                                   aria-labelledby="label-SERVER_NAME"
+                                                   pattern="^.+$"
+                                                   required />
                                         </div>
                                         <div class="col-12 col-sm-6 pb-6">
                                             <div class="d-flex justify-content-between align-items-center">
-                                                <label id="label-username"
-                                                       for="username"
+                                                <label id="label-REVERSE_PROXY_HOST"
+                                                       for="REVERSE_PROXY_HOST"
                                                        class="form-label fw-semibold text-truncate">UI Host</label>
                                                 <div class="d-flex align-items-center">
                                                     {% if ui_host %}
@@ -280,11 +327,14 @@
                                                     </span>
                                                 </div>
                                             </div>
-                                            {% set setting = "REVERSE_PROXY_HOST" %}
-                                            {% set setting_value = ui_host %}
-                                            {% set setting_data = {"type": "text", "id": "REVERSE_PROXY_HOST", "regex": "^.+$"} %}
-                                            {% set required = true %}
-                                            {% include "models/input_setting.html" %}
+                                            <input id="REVERSE_PROXY_HOST"
+                                                   name="REVERSE_PROXY_HOST"
+                                                   type="text"
+                                                   value="{{ ui_host }}"
+                                                   class="form-control plugin-setting mt-1"
+                                                   aria-labelledby="label-REVERSE_PROXY_HOST"
+                                                   pattern="^.+$"
+                                                   required />
                                         </div>
                                         <div class="col-12 col-sm-6 pb-6">
                                             <div class="d-flex justify-content-between align-items-center">
@@ -292,6 +342,12 @@
                                                        for="username"
                                                        class="form-label fw-semibold text-truncate">UI URL</label>
                                                 <div class="d-flex align-items-center">
+                                                    <span class="badge badge-center rounded-pill bg-warning text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                                                          data-bs-toggle="tooltip"
+                                                          data-bs-placement="top"
+                                                          data-bs-original-title="We recommend using a random URL">
+                                                        <span class="bx bx-shield bx-xs"></span>
+                                                    </span>
                                                     <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
                                                           data-bs-toggle="tooltip"
                                                           data-bs-placement="top"
@@ -300,16 +356,18 @@
                                                     </span>
                                                 </div>
                                             </div>
-                                            {% set setting = "REVERSE_PROXY_URL" %}
-                                            {% set setting_value = random_url %}
-                                            {% set setting_data = {"type": "text", "id": "REVERSE_PROXY_URL", "regex": "^.+$"} %}
-                                            {% set required = false %}
-                                            {% include "models/input_setting.html" %}
+                                            <input id="REVERSE_PROXY_URL"
+                                                   name="REVERSE_PROXY_URL"
+                                                   type="text"
+                                                   value="/"
+                                                   class="form-control plugin-setting mt-1"
+                                                   aria-labelledby="label-REVERSE_PROXY_URL"
+                                                   pattern="^.*$" />
                                         </div>
                                         <div class="col-6 col-sm-3 pb-3">
                                             <div class="d-flex justify-content-between align-items-center">
-                                                <label id="label-username"
-                                                       for="username"
+                                                <label id="label-AUTO_LETS_ENCRYPT"
+                                                       for="AUTO_LETS_ENCRYPT"
                                                        class="form-label fw-semibold text-truncate">
                                                     Auto Let's Encrypt
                                                 </label>
@@ -330,15 +388,20 @@
                                                     </span>
                                                 </div>
                                             </div>
-                                            {% set setting = "AUTO_LETS_ENCRYPT" %}
-                                            {% set setting_value = auto_lets_encrypt %}
-                                            {% set setting_data = {"id": "AUTO_LETS_ENCRYPT"} %}
-                                            {% include "models/checkbox_setting.html" %}
+                                            <div class="form-check form-switch mt-1">
+                                                <input id="AUTO_LETS_ENCRYPT"
+                                                       name="AUTO_LETS_ENCRYPT"
+                                                       class="form-check-input"
+                                                       type="checkbox"
+                                                       role="switch"
+                                                       aria-labelledby="label-AUTO_LETS_ENCRYPT"
+                                                       {% if auto_lets_encrypt == "yes" %}checked{% endif %} />
+                                            </div>
                                         </div>
                                         <div class="col-6 col-sm-3 pb-3">
                                             <div class="d-flex justify-content-between align-items-center">
-                                                <label id="label-username"
-                                                       for="username"
+                                                <label id="label-USE_LETS_ENCRYPT_STAGING"
+                                                       for="USE_LETS_ENCRYPT_STAGING"
                                                        class="form-label fw-semibold text-truncate">
                                                     Use Let's Encrypt Staging
                                                 </label>
@@ -359,15 +422,20 @@
                                                     </span>
                                                 </div>
                                             </div>
-                                            {% set setting = "USE_LETS_ENCRYPT_STAGING" %}
-                                            {% set setting_value = lets_encrypt_staging %}
-                                            {% set setting_data = {"id": "USE_LETS_ENCRYPT_STAGING"} %}
-                                            {% include "models/checkbox_setting.html" %}
+                                            <div class="form-check form-switch mt-1">
+                                                <input id="USE_LETS_ENCRYPT_STAGING"
+                                                       name="USE_LETS_ENCRYPT_STAGING"
+                                                       class="form-check-input"
+                                                       type="checkbox"
+                                                       role="switch"
+                                                       aria-labelledby="label-USE_LETS_ENCRYPT_STAGING"
+                                                       {% if lets_encrypt_staging == "yes" %}checked{% endif %} />
+                                            </div>
                                         </div>
                                         <div class="col-sm-6 pb-3">
                                             <div class="d-flex justify-content-between align-items-center">
-                                                <label id="label-username"
-                                                       for="username"
+                                                <label id="label-EMAIL_LETS_ENCRYPT"
+                                                       for="EMAIL_LETS_ENCRYPT"
                                                        class="form-label fw-semibold text-truncate">
                                                     Email for Let's Encrypt
                                                 </label>
@@ -388,10 +456,13 @@
                                                     </span>
                                                 </div>
                                             </div>
-                                            {% set setting = "EMAIL_LETS_ENCRYPT" %}
-                                            {% set setting_value = email_lets_encrypt %}
-                                            {% set setting_data = {"type": "text", "id": "EMAIL_LETS_ENCRYPT", "regex": "^.*$"} %}
-                                            {% include "models/input_setting.html" %}
+                                            <input id="EMAIL_LETS_ENCRYPT"
+                                                   name="EMAIL_LETS_ENCRYPT"
+                                                   type="text"
+                                                   placeholder="John.doe@example.com"
+                                                   class="form-control plugin-setting mt-1"
+                                                   aria-labelledby="label-EMAIL_LETS_ENCRYPT"
+                                                   pattern="^.*$" />
                                         </div>
                                     </div>
                                 {% else %}
@@ -409,63 +480,82 @@
                                     <h5 class="mb-1 fw-bold">Overview</h5>
                                     <p class="card-subtitle text-muted">Review your settings</p>
                                 </div>
-                                <div class="row pb-0 mb-4">
-                                    {% if not ui_user %}
-                                        <h6 class="mt-2 mb-1 fw-bold">Admin User</h6>
+                                <div class="d-flex justify-content-center pb-0 mb-4">
+                                    <div class="col-12 col-md-8">
+                                        {% set input_required = false %}
                                         {% set input_readonly = true %}
-                                        <div class="col-12 col-sm-6 col-md-4 pb-3">
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <label id="label-overview_username"
-                                                       for="overview_username"
-                                                       class="form-label fw-semibold text-truncate">
-                                                    Admin Username
-                                                </label>
+                                        {% if not ui_user %}
+                                            <div class="pb-3">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <label id="label-overview_username"
+                                                           for="overview_username"
+                                                           class="form-label fw-semibold text-truncate">
+                                                        Admin Username
+                                                    </label>
+                                                </div>
+                                                <input id="overview_username"
+                                                       name="overview_username"
+                                                       type="text"
+                                                       class="form-control plugin-setting mt-1"
+                                                       aria-labelledby="label-overview_username"
+                                                       pattern="^.{1,256}$"
+                                                       readonly />
                                             </div>
-                                            {% set setting = "username" %}
-                                            {% set setting_data = {"type": "text", "id": "overview_username", "regex": "^.{1,256}$"} %}
-                                            {% include "models/input_setting.html" %}
-                                        </div>
-                                        <div class="col-12 col-sm-6 col-md-4 pb-3">
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <label id="label-overview_email"
-                                                       for="overview_email"
-                                                       class="form-label fw-semibold text-truncate">Admin Email</label>
+                                            <div class="pb-3">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <label id="label-overview_email"
+                                                           for="overview_email"
+                                                           class="form-label fw-semibold text-truncate">
+                                                        Admin Email
+                                                    </label>
+                                                </div>
+                                                <input id="overview_email"
+                                                       name="overview_email"
+                                                       type="text"
+                                                       class="form-control plugin-setting mt-1"
+                                                       aria-labelledby="label-overview_email"
+                                                       pattern="^.*$"
+                                                       readonly />
                                             </div>
-                                            {% set setting = "email" %}
-                                            {% set setting_data = {"type": "email", "id": "overview_email", "regex": "^.*$"} %}
-                                            {% include "models/input_setting.html" %}
-                                        </div>
-                                        <div class="col-12 col-md-4 pb-3">
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <label id="label-overview_password"
-                                                       for="overview_password"
-                                                       class="form-label fw-semibold text-truncate">
-                                                    Admin Password
-                                                </label>
+                                            <div class="pb-3">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <label id="label-overview_password"
+                                                           for="overview_password"
+                                                           class="form-label fw-semibold text-truncate">
+                                                        Admin Password
+                                                    </label>
+                                                </div>
+                                                <div class="form-password-toggle">
+                                                    <div class="input-group input-group-merge mt-1">
+                                                        <input class="form-control plugin-setting"
+                                                               type="password"
+                                                               id="overview_password"
+                                                               name="overview_password"
+                                                               aria-labelledby="label-overview_password"
+                                                               autocomplete="off"
+                                                               readonly
+                                                               pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[ -~]).{8,}$" />
+                                                        <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
+                                                    </div>
+                                                </div>
                                             </div>
-                                            {% set setting = "password" %}
-                                            {% set setting_data = {"type": "password", "id": "overview_password", "regex": "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[ -~]).{8,}$"} %}
-                                            {% include "models/input_setting.html" %}
-                                        </div>
-                                    {% endif %}
-                                    {% if not ui_reverse_proxy %}
-                                        <div class="col-6 pb-3">
-                                            <h6 class="mt-2 mb-2 fw-bold">BunkerWeb UI final URL</h6>
-                                            {% set setting = "SERVER_NAME + REVERSE_PROXY_HOST" %}
-                                            {% set setting_data = {"type": "text", "id": "overview_service_url", "regex": "^.+$"} %}
-                                            {% include "models/input_setting.html" %}
-                                        </div>
-                                    {% endif %}
+                                        {% endif %}
+                                        {% if not ui_reverse_proxy %}
+                                            <div class="pb-3">
+                                                <h6 class="mt-2 mb-2 fw-bold">BunkerWeb UI final URL</h6>
+                                                {% set setting = "SERVER_NAME + REVERSE_PROXY_HOST" %}
+                                                {% set setting_data = {"type": "text", "id": "overview_service_url", "regex": "^.+$"} %}
+                                                {% include "models/input_setting.html" %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
                                     {% if not ui_user %}
-                                        <div class="col-6">
+                                        <!-- <div class="col-6">
                                             {% set input_readonly = false %}
                                             <div class="d-flex justify-content-between align-items-center">
                                                 <h6 class="mt-2 mb-1 fw-bold">2FA Setup</h6>
                                                 <div class="d-flex align-items-center">
-                                                    <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
-                                                          data-bs-toggle="tooltip"
-                                                          data-bs-placement="top"
-                                                          data-bs-original-title="The 6-digit code generated by your 2FA app">
+                                                    <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The 6-digit code generated by your 2FA app">
                                                         <span class="bx bx-question-mark bx-xs"></span>
                                                     </span>
                                                 </div>
@@ -473,33 +563,30 @@
                                             {% set setting = "2FA Code" %}
                                             {% set setting_data = {"type": "number", "id": "2fa_code", "regex": "^[0-9]{6}$"} %}
                                             {% include "models/input_setting.html" %}
+                                        </div> -->
+                                    {% endif %}
+                                </div>
+                                <div class="d-flex justify-content-center text-center mt-4">
+                                    {% if not ui_user %}
+                                        <div>
+                                            <i class="bx bx-check text-success"></i> Secure password
+                                        </div>
+                                        <!-- <div id="overview-2fa-enabled" class="ms-4" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title='Please enter a valid 2FA code in the 2FA setup input'>
+                                            <i class="bx bx-question-mark text-warning"></i> 2FA enabled
+                                        </div> -->
+                                    {% endif %}
+                                    {% if not ui_reverse_proxy %}
+                                        <div id="overview-unique-server-name" class="ms-4">
+                                            <i class="bx bx-question-mark text-warning"></i> Unique Server Name
                                         </div>
                                     {% endif %}
-                                    <div class="d-flex justify-content-center text-center mt-4">
-                                        {% if not ui_user %}
-                                            <div>
-                                                <i class="bx bx-check text-success"></i> Secure password
-                                            </div>
-                                            <div id="overview-2fa-enabled"
-                                                 class="ms-4"
-                                                 data-bs-toggle="tooltip"
-                                                 data-bs-placement="top"
-                                                 data-bs-original-title='Please enter a valid 2FA code in the 2FA setup input'>
-                                                <i class="bx bx-question-mark text-warning"></i> 2FA enabled
-                                            </div>
-                                        {% endif %}
-                                        {% if not ui_reverse_proxy %}
-                                            <div id="overview-unique-server-name" class="ms-4">
-                                                <i class="bx bx-question-mark text-warning"></i> Unique Server Name
-                                            </div>
-                                        {% endif %}
-                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div class="d-flex justify-content-between mt-2">
-                        <button class="btn btn-primary btn-prev previous-step disabled">
+                        <button id="previous-step"
+                                class="btn btn-primary btn-prev previous-step disabled">
                             <i class="bx bx-chevron-left bx-sm ms-sm-n2"></i>
                             <span class="align-middle d-sm-inline-block d-none">Previous</span>
                         </button>
@@ -507,7 +594,7 @@
                             <i class="bx bx-save bx-sm ms-sm-n2"></i>
                             <span class="align-middle d-sm-inline-block d-none ms-sm-1">Setup</span>
                         </button>
-                        <button class="btn btn-primary btn-next next-step">
+                        <button id="next-step" class="btn btn-primary btn-next next-step">
                             <span class="align-middle d-sm-inline-block d-none me-sm-1">Next</span>
                             <i class="bx bx-chevron-right bx-sm me-sm-n2"></i>
                         </button>
@@ -516,6 +603,8 @@
                 <!-- /Setup -->
             </div>
         </div>
+        <!-- prettier-ignore -->
+        {% include "sidebar-news.html" %}
     </div>
 </div>
 <div id="feedback-toast"
@@ -557,14 +646,14 @@
                          class="alert alert-danger text-center"
                          role="alert">Are you sure you want to proceed to the next step?</div>
                     <p class="mt-1 mb-0 text-center">
-                        In case of issues, you can also click <a id="check-url"
+                        In case of issues, you can manually accept the unsafe cert <a id="check-url"
     class="fw-semibold"
     href="https://www.example.com/setup/check"
     target="_blank"
     rel="noreferrer"
     data-bs-toggle="tooltip"
     data-bs-placement="top"
-    data-bs-original-title='If the shown text is "ok", that means that the server name is available'>here</a> to perform a manual check.
+    data-bs-original-title='If the shown text is "ok", that means that the server name is available'>here</a>.
                     </p>
                 </div>
                 <div class="modal-footer justify-content-center">
@@ -592,49 +681,6 @@
                 </div>
                 <p class="mt-3 text-white">Setting up your BunkerWeb, please wait...</p>
             </div>
-        </div>
-    </div>
-</div>
-<div class="position-fixed bottom-0 start-0 m-3" id="floating-modes-menu">
-    <button class="btn btn-sm btn-primary d-flex align-items-center justify-content-center rounded-pill me-1"
-            type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#newsletter-floating"
-            aria-controls="newsletter-floating"
-            aria-expanded="true"
-            aria-label="Toggle navigation">
-        <i class="bx bx-xs bx-menu me-1"></i>News from the Bunker
-    </button>
-    <!-- Collapsible floating menu -->
-    <div class="collapse show mt-2" id="newsletter-floating">
-        <div class="card card-body bg-white border-0 shadow-sm">
-            <h5 class="mb-3 text-dark">Join the Newsletter</h5>
-            <form action="https://bunkerity.us1.list-manage.com/subscribe/post?u=ec5b1577cf427972b9bd491a6&id=37076d9d67"
-                  method="POST"
-                  target="_blank"
-                  rel="noopener">
-                <div class="mb-3">
-                    <input type="email"
-                           name="EMAIL"
-                           class="form-control"
-                           placeholder="John.doe@example.com"
-                           required />
-                </div>
-                <div class="form-check mb-3">
-                    <input type="checkbox"
-                           class="form-check-input"
-                           name="newsletter-check"
-                           required />
-                    <label class="form-check-label" for="privacyPolicyCheck">
-                        I've read and agree to the
-                        <a class="fst-italic"
-                           href="https://www.bunkerity.com/en/privacy-policy?utm_campaign=self&utm_source=ui"
-                           target="_blank"
-                           rel="noopener">privacy policy</a>
-                    </label>
-                </div>
-                <button type="submit" class="btn btn-primary w-100 text-uppercase don-jose">Subscribe</button>
-            </form>
         </div>
     </div>
 </div>

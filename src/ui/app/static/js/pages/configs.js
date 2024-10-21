@@ -47,16 +47,16 @@ $(document).ready(function () {
   const setupDeletionModal = (configs) => {
     const delete_modal = $("#modal-delete-configs");
     const list = $(
-      `<ul class="list-group list-group-horizontal d-flex w-100">
-      <li class="list-group-item align-items-center text-center bg-secondary text-white" style="flex: 1 1 0;">
+      `<ul class="list-group list-group-horizontal w-100">
+      <li class="list-group-item bg-secondary text-white" style="flex: 1 1 0;">
         <div class="ms-2 me-auto">
           <div class="fw-bold">Name</div>
         </div>
       </li>
-      <li class="list-group-item align-items-center text-center bg-secondary text-white" style="flex: 1 1 0;">
+      <li class="list-group-item bg-secondary text-white" style="flex: 1 1 0;">
         <div class="fw-bold">Type</div>
       </li>
-      <li class="list-group-item align-items-center text-center bg-secondary text-white" style="flex: 1 1 0;">
+      <li class="list-group-item bg-secondary text-white" style="flex: 1 1 0;">
         <div class="fw-bold">Service</div>
       </li>
       </ul>`,
@@ -65,12 +65,11 @@ $(document).ready(function () {
 
     configs.forEach((config) => {
       const list = $(
-        `<ul class="list-group list-group-horizontal d-flex w-100"></ul>`,
+        `<ul class="list-group list-group-horizontal w-100"></ul>`,
       );
 
       // Create the list item using template literals
-      const listItem =
-        $(`<li class="list-group-item align-items-center" style="flex: 1 1 0;">
+      const listItem = $(`<li class="list-group-item" style="flex: 1 1 0;">
   <div class="ms-2 me-auto">
     <div class="fw-bold">${config.name}</div>
   </div>
@@ -85,7 +84,7 @@ $(document).ready(function () {
       // Clone the type element and append it to the list item
       const typeClone = $(`#type-${id}`).clone();
       const typeListItem = $(
-        `<li class="list-group-item d-flex align-items-center" style="flex: 1 1 0;"></li>`,
+        `<li class="list-group-item" style="flex: 1 1 0;"></li>`,
       );
       typeListItem.append(typeClone.removeClass("highlight"));
       list.append(typeListItem);
@@ -93,7 +92,7 @@ $(document).ready(function () {
       // Clone the service element and append it to the list item
       const serviceClone = $(`#service-${id}`).clone();
       const serviceListItem = $(
-        `<li class="list-group-item d-flex align-items-center" style="flex: 1 1 0;"></li>`,
+        `<li class="list-group-item" style="flex: 1 1 0;"></li>`,
       );
       serviceListItem.append(serviceClone.removeClass("highlight"));
       list.append(serviceListItem);
@@ -121,15 +120,28 @@ $(document).ready(function () {
   };
 
   const layout = {
-    topStart: {},
-    bottomEnd: {},
-    bottom1: {
+    top1: {
       searchPanes: {
         viewTotal: true,
         cascadePanes: true,
+        collapse: false,
         columns: [2, 3, 4, 5],
       },
     },
+    topStart: {},
+    topEnd: {
+      buttons: [
+        {
+          extend: "toggle_filters",
+          className: "btn btn-sm btn-outline-primary toggle-filters",
+        },
+      ],
+      search: true,
+    },
+    bottomStart: {
+      info: true,
+    },
+    bottomEnd: {},
   };
 
   if (configNumber > 10) {
@@ -144,8 +156,11 @@ $(document).ready(function () {
       menu.push(100);
     }
     menu.push({ label: "All", value: -1 });
-    layout.topStart.pageLength = {
-      menu: menu,
+    layout.bottomStart = {
+      pageLength: {
+        menu: menu,
+      },
+      info: true,
     };
     layout.bottomEnd.paging = true;
   }
@@ -208,7 +223,7 @@ $(document).ready(function () {
     {
       extend: "collection",
       text: '<span class="tf-icons bx bx-play bx-18px me-2"></span>Actions',
-      className: "btn btn-sm btn-outline-primary",
+      className: "btn btn-sm btn-outline-primary action-button disabled",
       buttons: [
         {
           extend: "delete_configs",
@@ -246,6 +261,15 @@ $(document).ready(function () {
       configs.push({ name: name, type: type, service: service });
     });
     return configs;
+  };
+
+  $.fn.dataTable.ext.buttons.toggle_filters = {
+    text: '<span class="tf-icons bx bx-filter bx-18px me-2"></span><span id="show-filters">Show</span><span id="hide-filters" class="d-none">Hide</span><span class="d-none d-md-inline"> filters</span>',
+    action: function (e, dt, node, config) {
+      configs_table.searchPanes.container().slideToggle(); // Smoothly hide or show the container
+      $("#show-filters").toggleClass("d-none"); // Toggle the visibility of the 'Show' span
+      $("#hide-filters").toggleClass("d-none"); // Toggle the visibility of the 'Hide' span
+    },
   };
 
   $.fn.dataTable.ext.buttons.create_config = {
@@ -307,62 +331,58 @@ $(document).ready(function () {
           show: true,
           options: [
             {
-              label: '<i class="bx bx-xs bx-window-alt"></i>&nbsp;HTTP',
+              label: '<i class="bx bx-xs bx-window-alt"></i>HTTP',
               value: function (rowData, rowIdx) {
-                return / HTTP$/.test(rowData[2].trim());
+                $(rowData[2]).text().trim() === "HTTP";
               },
             },
             {
-              label: '<i class="bx bx-xs bx-window-alt"></i>&nbsp;SERVER_HTTP',
+              label: '<i class="bx bx-xs bx-window-alt"></i>SERVER_HTTP',
               value: function (rowData, rowIdx) {
-                return / SERVER_HTTP$/.test(rowData[2].trim());
-              },
-            },
-            {
-              label:
-                '<i class="bx bx-xs bx-window-alt"></i>&nbsp;DEFAULT_SERVER_HTTP',
-              value: function (rowData, rowIdx) {
-                return / DEFAULT_SERVER_HTTP$/.test(rowData[2].trim());
+                return $(rowData[2]).text().trim() === "SERVER_HTTP";
               },
             },
             {
               label:
-                '<i class="bx bx-xs bx-shield-quarter"></i>&nbsp;MODSEC_CRS',
+                '<i class="bx bx-xs bx-window-alt"></i>DEFAULT_SERVER_HTTP',
               value: function (rowData, rowIdx) {
-                return / MODSEC_CRS$/.test(rowData[2].trim());
+                return $(rowData[2]).text().trim() === "DEFAULT_SERVER_HTTP";
               },
             },
             {
-              label: '<i class="bx bx-xs bx-shield-alt-2"></i>&nbsp;MODSEC',
+              label: '<i class="bx bx-xs bx-shield-quarter"></i>MODSEC_CRS',
               value: function (rowData, rowIdx) {
-                return / MODSEC$/.test(rowData[2].trim());
+                return $(rowData[2]).text().trim() === "MODSEC_CRS";
               },
             },
             {
-              label: '<i class="bx bx-xs bx-network-chart"></i>&nbsp;STREAM',
+              label: '<i class="bx bx-xs bx-shield-alt-2"></i>MODSEC',
               value: function (rowData, rowIdx) {
-                return / STREAM$/.test(rowData[2].trim());
+                return $(rowData[2]).text().trim() === "MODSEC";
               },
             },
             {
-              label:
-                '<i class="bx bx-xs bx-network-chart"></i>&nbsp;SERVER_STREAM',
+              label: '<i class="bx bx-xs bx-network-chart"></i>STREAM',
               value: function (rowData, rowIdx) {
-                return / SERVER_STREAM$/.test(rowData[2].trim());
+                return $(rowData[2]).text().trim() === "STREAM";
               },
             },
             {
-              label:
-                '<i class="bx bx-xs bx-shield-alt"></i>&nbsp;CRS_PLUGINS_BEFORE',
+              label: '<i class="bx bx-xs bx-network-chart"></i>SERVER_STREAM',
               value: function (rowData, rowIdx) {
-                return rowData[2].includes("BEFORE");
+                return $(rowData[2]).text().trim() === "SERVER_STREAM";
               },
             },
             {
-              label:
-                '<i class="bx bx-xs bx-shield-alt"></i>&nbsp;CRS_PLUGINS_AFTER',
+              label: '<i class="bx bx-xs bx-shield-alt"></i>CRS_PLUGINS_BEFORE',
               value: function (rowData, rowIdx) {
-                return rowData[2].includes("AFTER");
+                return $(rowData[2]).text().trim() === "CRS_PLUGINS_BEFORE";
+              },
+            },
+            {
+              label: '<i class="bx bx-xs bx-shield-alt"></i>CRS_PLUGINS_AFTER',
+              value: function (rowData, rowIdx) {
+                return $(rowData[2]).text().trim() === "CRS_PLUGINS_AFTER";
               },
             },
           ],
@@ -394,12 +414,6 @@ $(document).ready(function () {
         },
         targets: 5,
       },
-      {
-        targets: "_all", // Target all columns
-        createdCell: function (td, cellData, rowData, row, col) {
-          $(td).addClass("align-items-center"); // Apply 'text-center' class to <td>
-        },
-      },
     ],
     order: [[1, "asc"]],
     autoFill: false,
@@ -426,7 +440,6 @@ $(document).ready(function () {
     },
     initComplete: function (settings, json) {
       $("#configs_wrapper .btn-secondary").removeClass("btn-secondary");
-      $("#configs_wrapper th").addClass("text-center");
       if (isReadOnly)
         $("#configs_wrapper .dt-buttons")
           .attr(
@@ -445,6 +458,9 @@ $(document).ready(function () {
   $(`#DataTables_Table_2 span[title='${configServiceSelection}']`).trigger(
     "click",
   );
+
+  if (!configTypeSelection && !configServiceSelection)
+    configs_table.searchPanes.container().hide();
 
   $("#configs").removeClass("d-none");
   $("#configs-waiting").addClass("visually-hidden");
@@ -472,6 +488,19 @@ $(document).ready(function () {
       .cells()
       .nodes()
       .each((el) => el.classList.remove("highlight"));
+  });
+
+  configs_table.on("select", function (e, dt, type, indexes) {
+    // Enable the actions button
+    $(".action-button").removeClass("disabled");
+  });
+
+  configs_table.on("deselect", function (e, dt, type, indexes) {
+    // If no rows are selected, disable the actions button
+    if (configs_table.rows({ selected: true }).count() === 0) {
+      $(".action-button").addClass("disabled");
+      $("#select-all-rows").prop("checked", false);
+    }
   });
 
   // Event listener for the select-all checkbox
