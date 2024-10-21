@@ -1,5 +1,5 @@
 certbot==2.11.0
-cryptography==43.0.1
+cryptography==43.0.3
 maxminddb==2.6.2
 python-magic==0.4.27
 requests==2.32.3
