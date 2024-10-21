@@ -1,5 +1,16 @@
 Mbed TLS ChangeLog (Sorted per branch, date)
 
+= Mbed TLS 3.6.2 branch released 2024-10-14
+
+Security
+   * Fix a buffer underrun in mbedtls_pk_write_key_der() when
+     called on an opaque key, MBEDTLS_USE_PSA_CRYPTO is enabled,
+     and the output buffer is smaller than the actual output.
+     Fix a related buffer underrun in mbedtls_pk_write_key_pem()
+     when called on an opaque RSA key, MBEDTLS_USE_PSA_CRYPTO is enabled
+     and MBEDTLS_MPI_MAX_SIZE is smaller than needed for a 4096-bit RSA key.
+     CVE-2024-49195
+
 = Mbed TLS 3.6.1 branch released 2024-08-30
 
 API changes
