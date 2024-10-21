@@ -86,191 +86,200 @@
                 </div>
             </div>
             <div class="card-body">
-                {% if template_data["steps"] %}
-                    <nav class="p-3 template-steps-container align-items-center mw-100{{ plugin_types[template_plugin['type']].get('title-class', '') }}"
-                         aria-label="breadcrumb">
-                        <ol class="breadcrumb nav nav-scroller mb-0 flex-nowrap overflow-hidden{% if loop.index == 1 %} active{% endif %}"
-                            role="tablist">
+                {% if template_method == "ui" or not selected_template or template == selected_template %}
+                    {% if template_data["steps"] %}
+                        <nav class="p-3 template-steps-container align-items-center mw-100{{ plugin_types[template_plugin['type']].get('title-class', '') }}"
+                             aria-label="breadcrumb">
+                            <ol class="breadcrumb nav nav-scroller mb-0 flex-nowrap overflow-hidden{% if loop.index == 1 %} active{% endif %}"
+                                role="tablist">
+                                {% for step in template_data["steps"] %}
+                                    <li class="breadcrumb-item nav-link d-flex align-items-center pe-0">
+                                        <button class="btn btn-primary pt-3 pb-3 me-3{% if loop.index == 1 %} active{% else %} disabled{% endif %}"
+                                                role="tab"
+                                                data-bs-toggle="tab"
+                                                data-bs-target="#navs-steps-{{ template }}-{{ loop.index }}"
+                                                aria-controls="navs-steps-{{ template }}-{{ loop.index }}"
+                                                {% if loop.index == 1 %}aria-selected="true"{% endif %}>
+                                            {{ loop.index }}
+                                        </button>
+                                        <div class="text-nowrap">
+                                            <div class="fw-bold{% if loop.index == 1 %} text-primary{% else %} text-muted{% endif %}">{{ step["title"] }}</div>
+                                            <small class="text-muted">{{ step["subtitle"] }}</small>
+                                        </div>
+                                    </li>
+                                {% endfor %}
+                            </ol>
+                        </nav>
+                        <div class="tab-content p-3 align-items-center mw-100{{ plugin_types[template_plugin['type']].get('title-class', '') }}">
                             {% for step in template_data["steps"] %}
-                                <li class="breadcrumb-item nav-link d-flex align-items-center pe-0">
-                                    <button class="btn btn-primary pt-3 pb-3 me-3{% if loop.index == 1 %} active{% else %} disabled{% endif %}"
-                                            role="tab"
-                                            data-bs-toggle="tab"
-                                            data-bs-target="#navs-steps-{{ template }}-{{ loop.index }}"
-                                            aria-controls="navs-steps-{{ template }}-{{ loop.index }}"
-                                            {% if loop.index == 1 %}aria-selected="true"{% endif %}>
-                                        {{ loop.index }}
-                                    </button>
-                                    <div class="text-nowrap">
-                                        <div class="fw-bold{% if loop.index == 1 %} text-primary{% else %} text-muted{% endif %}">{{ step["title"] }}</div>
-                                        <small class="text-muted">{{ step["subtitle"] }}</small>
+                                <div id="navs-steps-{{ template }}-{{ loop.index }}"
+                                     class="ps-2 pe-2 tab-pane fade{% if loop.index == 1 %} show active{% endif %}"
+                                     role="tabpanel"
+                                     data-step="{{ loop.index }}"
+                                     aria-labelledby="navs-steps-{{ template }}-{{ loop.index }}-tab">
+                                    <div class="pt-1 pb-4">
+                                        <h5 class="mb-1 fw-bold{{ plugin_types[template_plugin['type']].get('text-class', '') }}">{{ step["title"] }}</h5>
+                                        <p class="card-subtitle text-muted">{{ step["subtitle"] }}</p>
                                     </div>
-                                </li>
-                            {% endfor %}
-                        </ol>
-                    </nav>
-                    <div class="tab-content p-3 align-items-center mw-100{{ plugin_types[template_plugin['type']].get('title-class', '') }}">
-                        {% for step in template_data["steps"] %}
-                            <div id="navs-steps-{{ template }}-{{ loop.index }}"
-                                 class="ps-2 pe-2 tab-pane fade{% if loop.index == 1 %} show active{% endif %}"
-                                 role="tabpanel"
-                                 data-step="{{ loop.index }}"
-                                 aria-labelledby="navs-steps-{{ template }}-{{ loop.index }}-tab">
-                                <div class="pt-1 pb-4">
-                                    <h5 class="mb-1 fw-bold{{ plugin_types[template_plugin['type']].get('text-class', '') }}">{{ step["title"] }}</h5>
-                                    <p class="card-subtitle text-muted">{{ step["subtitle"] }}</p>
-                                </div>
-                                <div class="row pb-0">
-                                    {% for setting in step["settings"] %}
-                                        {% set setting_id_prefix = template + "-setting-" + template_data['plugin_id'] +"-" %}
-                                        {% set setting_config = config.get(setting, {}) %}
-                                        {% set setting_data = plugins_settings.get(setting, {}) %}
-                                        {% set setting_default = setting_data.get("default", "") %}
-                                        {% set setting_value = setting_config.get("value", setting_default) %}
-                                        {% set setting_method = setting_config.get("method", "default") %}
-                                        {% set setting_template = setting_config.get("template", "") %}
-                                        {% set disabled = setting_method not in ('ui', 'default') and (current_endpoint == "global-config" or not setting_config.get("global")) %}
-                                        {% set required = setting == "SERVER_NAME" %}
-                                        {% if current_endpoint == "new" %}
-                                            {% set disabled = false %}
-                                            {% if not clone %}
-                                                {% set setting_value = template_data["settings"].get(setting, setting_default) %}
+                                    <div class="row pb-0">
+                                        {% for setting in step["settings"] %}
+                                            {% set setting_id_prefix = template + "-setting-" + template_data['plugin_id'] +"-" %}
+                                            {% set setting_config = config.get(setting, {}) %}
+                                            {% set setting_data = plugins_settings.get(setting, {}) %}
+                                            {% set setting_default = setting_data.get("default", "") %}
+                                            {% set setting_value = setting_config.get("value", setting_default) %}
+                                            {% set setting_method = setting_config.get("method", "default") %}
+                                            {% set setting_template = setting_config.get("template", "") %}
+                                            {% set disabled = setting_method not in ('ui', 'default') and (current_endpoint == "global-config" or not setting_config.get("global")) %}
+                                            {% set required = setting == "SERVER_NAME" %}
+                                            {% if current_endpoint == "new" %}
+                                                {% set disabled = false %}
+                                                {% if not clone %}
+                                                    {% set setting_value = template_data["settings"].get(setting, setting_default) %}
+                                                {% endif %}
                                             {% endif %}
-                                        {% endif %}
-                                        {% if service_method == "autoconf" %}
-                                            {% set setting_method = "autoconf" %}
-                                            {% set disabled = true %}
-                                        {% endif %}
-                                        {% if is_readonly %}
-                                            {% set disabled = true %}
-                                            {% set setting_method = "readonly" %}
-                                        {% endif %}
-                                        <div class="col-12 col-sm-6 col-lg-4 pb-3"
-                                             {% if disabled %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Disabled by {{ setting_method }}"{% endif %}>
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <label id="label-{{ template }}-setting-{{ template_data['plugin_id'] }}-{{ setting_data['id'] }}"
-                                                       for="{{ template }}-setting-{{ template_data['plugin_id'] }}-{{ setting_data['id'] }}"
-                                                       class="form-label fw-semibold text-truncate">
-                                                    {{ setting_data["label"] }}
-                                                </label>
-                                                <div class="d-flex align-items-center">
-                                                    {% if current_endpoint == "global-config" and setting_data["context"] == "multisite" %}
-                                                        <a role="badge"
-                                                           href='https://docs.bunkerweb.io/latest/concepts/?utm_campaign=self&utm_source=ui#multisite-mode'
-                                                           class="badge badge-center rounded-pill bg-secondary d-flex align-items-center justify-content-center p-1 me-1"
-                                                           data-bs-toggle="tooltip"
-                                                           data-bs-placement="top"
-                                                           data-bs-original-title="Multisite setting"
-                                                           target="_blank"
-                                                           rel="noopener">
-                                                            <span class="bx bx-server bx-xs"></span>
-                                                        </a>
-                                                    {% endif %}
-                                                    {% if current_endpoint not in ("new", "global-config") and setting_config.get("global") and setting_value != setting_default %}
-                                                        <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                                            {% if service_method == "autoconf" %}
+                                                {% set setting_method = "autoconf" %}
+                                                {% set disabled = true %}
+                                            {% endif %}
+                                            {% if is_readonly %}
+                                                {% set disabled = true %}
+                                                {% set setting_method = "readonly" %}
+                                            {% endif %}
+                                            <div class="col-12 col-sm-6 col-lg-4 pb-3"
+                                                 {% if disabled %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Disabled by {{ setting_method }}"{% endif %}>
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <label id="label-{{ template }}-setting-{{ template_data['plugin_id'] }}-{{ setting_data['id'] }}"
+                                                           for="{{ template }}-setting-{{ template_data['plugin_id'] }}-{{ setting_data['id'] }}"
+                                                           class="form-label fw-semibold text-truncate">
+                                                        {{ setting_data["label"] }}
+                                                    </label>
+                                                    <div class="d-flex align-items-center">
+                                                        {% if current_endpoint == "global-config" and setting_data["context"] == "multisite" %}
+                                                            <a role="badge"
+                                                               href='https://docs.bunkerweb.io/latest/concepts/?utm_campaign=self&utm_source=ui#multisite-mode'
+                                                               class="badge badge-center rounded-pill bg-secondary d-flex align-items-center justify-content-center p-1 me-1"
+                                                               data-bs-toggle="tooltip"
+                                                               data-bs-placement="top"
+                                                               data-bs-original-title="Multisite setting"
+                                                               target="_blank"
+                                                               rel="noopener">
+                                                                <span class="bx bx-server bx-xs"></span>
+                                                            </a>
+                                                        {% endif %}
+                                                        {% if current_endpoint not in ("new", "global-config") and setting_config.get("global") and setting_value != setting_default %}
+                                                            <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                                                                  data-bs-toggle="tooltip"
+                                                                  data-bs-placement="top"
+                                                                  data-bs-original-title="From global configuration">
+                                                                <span class="bx bx-globe bx-xs"></span>
+                                                            </span>
+                                                        {% endif %}
+                                                        <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
                                                               data-bs-toggle="tooltip"
                                                               data-bs-placement="top"
-                                                              data-bs-original-title="From global configuration">
-                                                            <span class="bx bx-globe bx-xs"></span>
+                                                              data-bs-original-title="{{ setting_data['help'] }}">
+                                                            <span class="bx bx-question-mark bx-xs"></span>
                                                         </span>
-                                                    {% endif %}
-                                                    <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
-                                                          data-bs-toggle="tooltip"
-                                                          data-bs-placement="top"
-                                                          data-bs-original-title="{{ setting_data['help'] }}">
-                                                        <span class="bx bx-question-mark bx-xs"></span>
-                                                    </span>
+                                                    </div>
+                                                </div>
+                                                <input id="{{ setting_id_prefix }}{{ setting_data['id'] }}{{ setting_id_suffix }}-template"
+                                                       type="hidden"
+                                                       value="{{ template_data['settings'].get(setting, setting_default) }}">
+                                                {% if setting_data["type"] == "select" %}
+                                                    {% include "models/select_setting.html" %}
+                                                {% elif setting_data["type"] == "check" %}
+                                                    {% include "models/checkbox_setting.html" %}
+                                                {% else %}
+                                                    {% include "models/input_setting.html" %}
+                                                {% endif %}
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                    {% set step_configs = step.get("configs") %}
+                                    {% if step_configs %}
+                                        <div class="pt-1 pb-4">
+                                            <h5 class="mb-1 fw-bold{{ plugin_types[template_plugin['type']].get('text-class', '') }}">
+                                                Custom configuration
+                                                {% if step_configs|length > 1 %}s{% endif %}
+                                            </h5>
+                                        </div>
+                                        {% for step_config in step_configs %}
+                                            {% set step_config_id = template + "-config-" + template_data['plugin_id'] + "-" + step_config.replace("/", "-").replace(".conf", "") %}
+                                            {% set step_config_value = configs.get(current_endpoint + "_" + step_config.replace(".conf", "").replace("/", "_")) %}
+                                            {% set step_config_method = "ui" %}
+                                            {% if step_config_value is none %}
+                                                {% set step_config_value = template_data["configs"].get(step_config, "") %}
+                                            {% else %}
+                                                {% set step_config_value = step_config_value["data"].decode("utf-8") %}
+                                                {% set step_config_method = step_config_value["method"] %}
+                                            {% endif %}
+                                            <div class="mb-3 pb-6 position-relative h-vh-40"
+                                                 {% if service_method == "autoconf" or is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{% if is_readonly %}The database is in readonly{% else %}The service was created using the autoconf method{% endif %}
+                                                 therefore
+                                                 the
+                                                 configuration
+                                                 is
+                                                 locked
+                                                 "
+                                                 {% endif %}>
+                                                <label for="{{ step_config_id }}" class="form-label fw-semibold fs-6">{{ step_config }}</label>
+                                                <textarea id="{{ step_config_id }}-default" class="visually-hidden">{{ template_data["configs"].get(step_config, "") }}</textarea>
+                                                <div id="{{ step_config_id }}" aria-labelledby="label-{{ step_config_id }}" data-language="{% if step_config.startswith(('crs', 'modsec')) %}ModSecurity{% else %}NGINX{% endif %}" data-name="CUSTOM_CONF_{{ step_config.split("/")[0] |upper }}_{{ step_config.split("/")[1] .replace(".conf", "") }}" data-method="{% if is_readonly %}readonly{% else %}{{ step_config_method }}{% endif %}" class="ace-editor border rounded position-absolute top-0 start-0 end-0 bottom-0 mt-6">
+                                                    {{ step_config_value }}
                                                 </div>
                                             </div>
-                                            <input id="{{ setting_id_prefix }}{{ setting_data['id'] }}{{ setting_id_suffix }}-template"
-                                                   type="hidden"
-                                                   value="{{ template_data['settings'].get(setting, setting_default) }}">
-                                            {% if setting_data["type"] == "select" %}
-                                                {% include "models/select_setting.html" %}
-                                            {% elif setting_data["type"] == "check" %}
-                                                {% include "models/checkbox_setting.html" %}
-                                            {% else %}
-                                                {% include "models/input_setting.html" %}
-                                            {% endif %}
-                                        </div>
-                                    {% endfor %}
-                                </div>
-                                {% set step_configs = step.get("configs") %}
-                                {% if step_configs %}
-                                    <div class="pt-1 pb-4">
-                                        <h5 class="mb-1 fw-bold{{ plugin_types[template_plugin['type']].get('text-class', '') }}">
-                                            Custom configuration
-                                            {% if step_configs|length > 1 %}s{% endif %}
-                                        </h5>
-                                    </div>
-                                    {% for step_config in step_configs %}
-                                        {% set step_config_id = template + "-config-" + template_data['plugin_id'] + "-" + step_config.replace("/", "-").replace(".conf", "") %}
-                                        {% set step_config_value = configs.get(current_endpoint + "_" + step_config.replace(".conf", "").replace("/", "_")) %}
-                                        {% set step_config_method = "ui" %}
-                                        {% if step_config_value is none %}
-                                            {% set step_config_value = template_data["configs"].get(step_config, "") %}
-                                        {% else %}
-                                            {% set step_config_value = step_config_value["data"].decode("utf-8") %}
-                                            {% set step_config_method = step_config_value["method"] %}
-                                        {% endif %}
-                                        <div class="mb-3 pb-6 position-relative h-vh-40"
-                                             {% if service_method == "autoconf" or is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{% if is_readonly %}The database is in readonly{% else %}The service was created using the autoconf method{% endif %}
-                                             therefore
-                                             the
-                                             configuration
-                                             is
-                                             locked
-                                             "
-                                             {% endif %}>
-                                            <label for="{{ step_config_id }}" class="form-label fw-semibold fs-6">{{ step_config }}</label>
-                                            <textarea id="{{ step_config_id }}-default" class="visually-hidden">{{ template_data["configs"].get(step_config, "") }}</textarea>
-                                            <div id="{{ step_config_id }}" aria-labelledby="label-{{ step_config_id }}" data-language="{% if step_config.startswith(('crs', 'modsec')) %}ModSecurity{% else %}NGINX{% endif %}" data-name="CUSTOM_CONF_{{ step_config.split("/")[0] |upper }}_{{ step_config.split("/")[1] .replace(".conf", "") }}" data-method="{% if is_readonly %}readonly{% else %}{{ step_config_method }}{% endif %}" class="ace-editor border rounded position-absolute top-0 start-0 end-0 bottom-0 mt-6">
-                                                {{ step_config_value }}
-                                            </div>
-                                        </div>
-                                    {% endfor %}
-                                {% endif %}
-                                <div class="d-flex justify-content-between">
-                                    {% if loop.index > 1 %}
-                                        <button class="btn btn-primary btn-prev previous-step"
-                                                data-template="{{ template }}">
-                                            <i class="bx bx-chevron-left bx-sm ms-sm-n2"></i>
-                                            <span class="align-middle d-sm-inline-block d-none">Previous</span>
-                                        </button>
-                                    {% else %}
-                                        <div></div>
+                                        {% endfor %}
                                     {% endif %}
-                                    {% if loop.index == template_data["steps"]|length %}
-                                        <div {% if service_method == "autoconf" or is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{% if is_readonly %}The database is in readonly{% else %}The service was created using the autoconf method{% endif %}
-                                             therefore
-                                             the
-                                             configuration
-                                             is
-                                             locked
-                                             "
-                                             {% endif %}>
-                                            <button type="button"
-                                                    class="btn btn-outline-bw-green save-settings{% if service_method == "autoconf" or is_readonly %} disabled{% endif %}"
+                                    <div class="d-flex justify-content-between">
+                                        {% if loop.index > 1 %}
+                                            <button class="btn btn-primary btn-prev previous-step"
                                                     data-template="{{ template }}">
-                                                <i class="bx bx-save bx-sm ms-sm-n2"></i>
-                                                <span class="align-middle d-sm-inline-block d-none ms-sm-1">Save</span>
+                                                <i class="bx bx-chevron-left bx-sm ms-sm-n2"></i>
+                                                <span class="align-middle d-sm-inline-block d-none">Previous</span>
                                             </button>
-                                        </div>
-                                    {% else %}
-                                        <button class="btn btn-primary btn-next next-step"
-                                                data-template="{{ template }}">
-                                            <span class="align-middle d-sm-inline-block d-none me-sm-1">Next</span>
-                                            <i class="bx bx-chevron-right bx-sm me-sm-n2"></i>
-                                        </button>
-                                    {% endif %}
+                                        {% else %}
+                                            <div></div>
+                                        {% endif %}
+                                        {% if loop.index == template_data["steps"]|length %}
+                                            <div {% if service_method == "autoconf" or is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{% if is_readonly %}The database is in readonly{% else %}The service was created using the autoconf method{% endif %}
+                                                 therefore
+                                                 the
+                                                 configuration
+                                                 is
+                                                 locked
+                                                 "
+                                                 {% endif %}>
+                                                <button type="button"
+                                                        class="btn btn-outline-bw-green save-settings{% if service_method == "autoconf" or is_readonly %} disabled{% endif %}"
+                                                        data-template="{{ template }}">
+                                                    <i class="bx bx-save bx-sm ms-sm-n2"></i>
+                                                    <span class="align-middle d-sm-inline-block d-none ms-sm-1">Save</span>
+                                                </button>
+                                            </div>
+                                        {% else %}
+                                            <button class="btn btn-primary btn-next next-step"
+                                                    data-template="{{ template }}">
+                                                <span class="align-middle d-sm-inline-block d-none me-sm-1">Next</span>
+                                                <i class="bx bx-chevron-right bx-sm me-sm-n2"></i>
+                                            </button>
+                                        {% endif %}
+                                    </div>
                                 </div>
-                            </div>
-                        {% endfor %}
-                    </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center">
+                            <h5 class="text-dark fw-bold mt-5">No steps available</h5>
+                            <p class="text-muted">This template does not have any steps to configure</p>
+                        </div>
+                    {% endif %}
                 {% else %}
                     <div class="text-center">
-                        <h5 class="text-dark fw-bold mt-5">No steps available</h5>
-                        <p class="text-muted">This template does not have any steps to configure</p>
+                        <h5 class="text-dark fw-bold mt-5">
+                            This service currently uses template "{{ selected_template }}" which is of method "{{ template_method }}"
+                        </h5>
+                        <p class="text-muted">Therefore no changes outside of the current template are allowed, please make changes to the current template or via the advanced/raw mode</p>
                     </div>
                 {% endif %}
             </div>

@@ -199,16 +199,6 @@ $(document).ready(function () {
       text: '<span class="tf-icons bx bx-reset bx-18px me-2"></span>Reset<span class="d-none d-md-inline"> columns</span>',
       className: "btn btn-sm btn-outline-primary",
     },
-    // {
-    //   extend: "searchPanes",
-    //   text: '<span class="tf-icons bx bx-search bx-18px me-2"></span>Filters',
-    //   className: "btn btn-sm btn-outline-primary",
-    //   config: {
-    //     viewTotal: true,
-    //     cascadePanes: true,
-    //     columns: [5, 6],
-    //   },
-    // },
     {
       extend: "collection",
       text: '<span class="tf-icons bx bx-export bx-18px me-2"></span>Export',
@@ -216,11 +206,9 @@ $(document).ready(function () {
       buttons: [
         {
           extend: "copy",
-          text: '<span class="tf-icons bx bx-copy bx-18px me-2"></span>Copy current page',
+          text: '<span class="tf-icons bx bx-copy bx-18px me-2"></span>Copy visible',
           exportOptions: {
-            modifier: {
-              page: "current",
-            },
+            columns: ":visible:not(:first-child):not(:last-child)",
           },
         },
         {
@@ -232,6 +220,7 @@ $(document).ready(function () {
             modifier: {
               search: "none",
             },
+            columns: ":not(:first-child):not(:last-child)",
           },
         },
         {
@@ -242,6 +231,7 @@ $(document).ready(function () {
             modifier: {
               search: "none",
             },
+            columns: ":not(:first-child):not(:last-child)",
           },
         },
       ],
@@ -366,8 +356,9 @@ $(document).ready(function () {
           show: true,
           options: [
             {
-              label:
-                '<img src="/admin/img/diamond.svg" alt="Pro plugin" width="16px" height="12.9125px" class="mb-1">&nbsp;PRO',
+              label: `<img src="${$("#pro_diamond_url")
+                .val()
+                .trim()}" alt="Pro plugin" width="16px" height="12.9125px" class="mb-1">&nbsp;PRO`,
               value: function (rowData, rowIdx) {
                 return rowData[6].includes("PRO");
               },

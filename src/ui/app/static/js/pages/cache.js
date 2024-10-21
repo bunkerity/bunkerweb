@@ -75,11 +75,9 @@ $(document).ready(function () {
       buttons: [
         {
           extend: "copy",
-          text: '<span class="tf-icons bx bx-copy bx-18px me-2"></span>Copy current page',
+          text: '<span class="tf-icons bx bx-copy bx-18px me-2"></span>Copy visible',
           exportOptions: {
-            modifier: {
-              page: "current",
-            },
+            columns: ":visible:not(:first-child):not(:last-child)",
           },
         },
         {
@@ -91,6 +89,7 @@ $(document).ready(function () {
             modifier: {
               search: "none",
             },
+            columns: ":not(:last-child)",
           },
         },
         {
@@ -101,6 +100,7 @@ $(document).ready(function () {
             modifier: {
               search: "none",
             },
+            columns: ":not(:last-child)",
           },
         },
       ],

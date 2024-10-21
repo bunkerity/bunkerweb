@@ -14,6 +14,7 @@ $(document).ready(() => {
   }
 
   let currentTemplate = $("#selected-template").val();
+  let currentTemplateMethod = $("#selected-template-method").val();
   let currentMode = $("#selected-mode").val();
   let currentType = $("#selected-type").val();
 
@@ -284,12 +285,6 @@ $(document).ready(() => {
       if ($draftInput.length) {
         appendHiddenInput(form, "IS_DRAFT", $draftInput.val());
       }
-
-      // Append 'OLD_SERVER_NAME' if it exists
-      const $oldServerName = $("#old-server-name");
-      if ($oldServerName.length) {
-        appendHiddenInput(form, "OLD_SERVER_NAME", $oldServerName.val());
-      }
     } else if (currentMode === undefined || currentMode === "advanced") {
       addChildrenToForm(form, $("div[id^='navs-plugins-']"));
 
@@ -356,12 +351,12 @@ $(document).ready(() => {
           formKeys.add(key);
         }
       });
+    }
 
-      // Append 'OLD_SERVER_NAME' if it exists
-      const $oldServerName = $("#old-server-name");
-      if ($oldServerName.length) {
-        appendHiddenInput(form, "OLD_SERVER_NAME", $oldServerName.val());
-      }
+    // Append 'OLD_SERVER_NAME' if it exists
+    const $oldServerName = $("#old-server-name");
+    if ($oldServerName.length) {
+      appendHiddenInput(form, "OLD_SERVER_NAME", $oldServerName.val());
     }
 
     return form;
@@ -777,6 +772,7 @@ $(document).ready(() => {
       const isStepValid = validateCurrentStepInputs(currentStepContainer);
       if (!isStepValid) return;
     } else if (currentMode === "raw") {
+      const draftInput = $("#is-draft");
       const wasDraft = draftInput.data("original") === "yes";
       isDraft = form.find("input[name='IS_DRAFT']").val() === "yes";
 

@@ -312,20 +312,25 @@ def configs_edit(service: str, config_type: str, name: str):
         config_value = request.form["value"].replace("\r\n", "\n").strip()
         DATA.load_from_file()
 
-        if config_value == db_config["data"].decode("utf-8").strip():
+        if (
+            db_config["type"] == new_type
+            and db_config["name"] == new_name
+            and db_config["service_id"] == new_service
+            and db_config["data"].decode("utf-8") == config_value
+        ):
             return handle_error("No values were changed.", "configs", True)
 
         error = DB.upsert_custom_config(
             config_type,
             name,
             {
-                "service_id": service,
+                "service_id": new_service,
                 "type": new_type,
                 "name": new_name,
                 "data": config_value,
                 "method": "ui",
             },
-            service_id=new_service,
+            service_id=service,
         )
         if error:
             flash(f"An error occurred while saving the custom configs: {error}", "error")
@@ -335,7 +340,7 @@ def configs_edit(service: str, config_type: str, name: str):
         return redirect(
             url_for(
                 "configs.configs_edit",
-                service=new_service,
+                service=new_service or "global",
                 config_type=new_type,
                 name=new_name,
             )

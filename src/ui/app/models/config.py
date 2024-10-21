@@ -20,7 +20,7 @@ class Config:
         self.__data = data
 
     def gen_conf(
-        self, global_conf: dict, services_conf: list[dict], *, check_changes: bool = True, changed_service: Optional[str] = None
+        self, global_conf: dict, services_conf: list[dict], *, check_changes: bool = True, changed_service: Optional[str] = None, override_method: str = "ui"
     ) -> Union[str, Set[str]]:
         """Generates the nginx configuration file from the given configuration
 
@@ -61,7 +61,7 @@ class Config:
         conf["SERVER_NAME"] = " ".join(servers)
         conf["DATABASE_URI"] = self.__db.database_uri
 
-        return self.__db.save_config(conf, "ui", changed=check_changes)
+        return self.__db.save_config(conf, override_method, changed=check_changes)
 
     def get_plugins_settings(self) -> dict:
         return {
@@ -205,7 +205,7 @@ class Config:
 
         return variables
 
-    def new_service(self, variables: dict, is_draft: bool = False) -> Tuple[str, int]:
+    def new_service(self, variables: dict, is_draft: bool = False, override_method: str = "ui") -> Tuple[str, int]:
         """Creates a new service from the given variables
 
         Parameters
@@ -230,12 +230,14 @@ class Config:
                 return f"Service {service['SERVER_NAME'].split(' ')[0]} already exists.", 1
 
         services.append(variables | {"IS_DRAFT": "yes" if is_draft else "no"})
-        ret = self.gen_conf(self.get_config(methods=False), services, check_changes=not is_draft)
+        ret = self.gen_conf(self.get_config(methods=False), services, check_changes=not is_draft, override_method=override_method)
         if isinstance(ret, str):
             return ret, 1
         return f"Configuration for {variables['SERVER_NAME'].split(' ')[0]} has been generated.", 0
 
-    def edit_service(self, old_server_name: str, variables: dict, *, check_changes: bool = True, is_draft: bool = False) -> Tuple[str, int]:
+    def edit_service(
+        self, old_server_name: str, variables: dict, *, check_changes: bool = True, is_draft: bool = False, override_method: str = "ui"
+    ) -> Tuple[str, int]:
         """Edits a service
 
         Parameters
@@ -270,12 +272,12 @@ class Config:
                 if k.startswith(old_server_name_splitted[0]):
                     config.pop(k)
 
-        ret = self.gen_conf(config, services, check_changes=check_changes, changed_service=server_name_splitted[0])
+        ret = self.gen_conf(config, services, check_changes=check_changes, changed_service=server_name_splitted[0], override_method=override_method)
         if isinstance(ret, str):
             return ret, 1
         return f"Configuration for {old_server_name_splitted[0]} has been edited.", 0
 
-    def edit_global_conf(self, variables: dict, *, check_changes: bool = True) -> Tuple[str, int]:
+    def edit_global_conf(self, variables: dict, *, check_changes: bool = True, override_method: str = "ui") -> Tuple[str, int]:
         """Edits the global conf
 
         Parameters
@@ -288,12 +290,14 @@ class Config:
         str
             the confirmation message
         """
-        ret = self.gen_conf(self.get_config(methods=False) | variables, self.get_services(methods=False), check_changes=check_changes)
+        ret = self.gen_conf(
+            self.get_config(methods=False) | variables, self.get_services(methods=False), check_changes=check_changes, override_method=override_method
+        )
         if isinstance(ret, str):
             return ret, 1
         return "The global configuration has been edited.", 0
 
-    def delete_service(self, service_name: str, *, check_changes: bool = True) -> Tuple[str, int]:
+    def delete_service(self, service_name: str, *, check_changes: bool = True, override_method: str = "ui") -> Tuple[str, int]:
         """Deletes a service
 
         Parameters
@@ -338,7 +342,7 @@ class Config:
                     if k in service:
                         service.pop(k)
 
-        ret = self.gen_conf(new_env, new_services, check_changes=check_changes)
+        ret = self.gen_conf(new_env, new_services, check_changes=check_changes, override_method=override_method)
         if isinstance(ret, str):
             return ret, 1
         return f"Configuration for {service_name} has been deleted.", 0

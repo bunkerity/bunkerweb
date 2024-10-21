@@ -130,7 +130,7 @@ def setup_page():
                 target=manage_bunkerweb,
                 name="Reloading instances",
                 args=("services", config, request.form["server_name"], request.form["server_name"]),
-                kwargs={"operation": "new", "threaded": True},
+                kwargs={"operation": "new", "threaded": True, "override_method": "wizard"},
             ).start()
 
         return Response(status=200)

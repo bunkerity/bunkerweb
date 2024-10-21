@@ -268,7 +268,7 @@ def services_service_page(service: str):
             if mode != "easy" or service != "new":
                 # Remove already existing fields
                 for variable, value in variables.copy().items():
-                    if (mode != "advanced" or variable != "SERVER_NAME") and value == db_config.get(variable, {"value": None})["value"]:
+                    if (mode == "advanced" or variable != "SERVER_NAME") and value == db_config.get(variable, {"value": None})["value"]:
                         if match(r"^.+_\d+$", variable):
                             ignored_multiples.add(variable)
                         del variables[variable]

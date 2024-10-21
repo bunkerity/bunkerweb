@@ -2,9 +2,10 @@
 {% block content %}
     <!-- Content -->
     {% set blacklisted_settings = get_blacklisted_settings() %}
-    {% set service_method = "ui" %}
     {% set service_method = config.get("SERVER_NAME", {"method": "ui"})["method"] %}
     {% set is_draft = config.get("IS_DRAFT", {"value": "no"})["value"] %}
+    {% set template_method = config.get("USE_TEMPLATE", {"method": "ui"})["method"] %}
+    {% set selected_template = config.get("USE_TEMPLATE", {"value": ""})["value"] %}
     <input type="hidden"
            id="selected-mode"
            name="selected_mode"
@@ -16,6 +17,10 @@
            id="selected-template"
            name="selected_template"
            value="{{ current_template }}">
+    <input type="hidden"
+           id="selected-template-method"
+           name="selected_template_method"
+           value="{{ template_method }}">
     <input type="hidden"
            id="service-method"
            name="service_method"

@@ -129,21 +129,29 @@ $(function () {
       buttons: [
         {
           extend: "copy",
-          text: '<span class="tf-icons bx bx-copy bx-18px me-2"></span>Copy current page',
-          exportOptions: { modifier: { page: "current" } },
+          text: '<span class="tf-icons bx bx-copy bx-18px me-2"></span>Copy visible',
+          exportOptions: {
+            columns: ":visible:not(:first-child):not(:last-child)",
+          },
         },
         {
           extend: "csv",
           text: '<span class="tf-icons bx bx-table bx-18px me-2"></span>CSV',
           bom: true,
           filename: "bw_services",
-          exportOptions: { modifier: { search: "none" } },
+          exportOptions: {
+            modifier: { search: "none" },
+            columns: ":not(:first-child):not(:last-child)",
+          },
         },
         {
           extend: "excel",
           text: '<span class="tf-icons bx bx-table bx-18px me-2"></span>Excel',
           filename: "bw_services",
-          exportOptions: { modifier: { search: "none" } },
+          exportOptions: {
+            modifier: { search: "none" },
+            columns: ":not(:first-child):not(:last-child)",
+          },
         },
       ],
     },

@@ -49,20 +49,24 @@ def wait_applying():
 
 
 # TODO: Find a more elegant way to handle this
-def manage_bunkerweb(method: str, *args, operation: str = "reloads", is_draft: bool = False, was_draft: bool = False, threaded: bool = False) -> int:
+def manage_bunkerweb(
+    method: str, *args, operation: str = "reloads", is_draft: bool = False, was_draft: bool = False, threaded: bool = False, override_method: str = "ui"
+) -> int:
     # Do the operation
     error = 0
     DATA.load_from_file()
 
     if method == "services":
         if operation == "new":
-            operation, error = BW_CONFIG.new_service(args[0], is_draft=is_draft)
+            operation, error = BW_CONFIG.new_service(args[0], is_draft=is_draft, override_method=override_method)
         elif operation == "edit":
-            operation, error = BW_CONFIG.edit_service(args[1], args[0], check_changes=(was_draft != is_draft or not is_draft), is_draft=is_draft)
+            operation, error = BW_CONFIG.edit_service(
+                args[1], args[0], check_changes=(was_draft != is_draft or not is_draft), is_draft=is_draft, override_method=override_method
+            )
         elif operation == "delete":
-            operation, error = BW_CONFIG.delete_service(args[2], check_changes=(was_draft != is_draft or not is_draft))
+            operation, error = BW_CONFIG.delete_service(args[2], check_changes=(was_draft != is_draft or not is_draft), override_method=override_method)
     elif method == "global_config":
-        operation, error = BW_CONFIG.edit_global_conf(args[0], check_changes=True)
+        operation, error = BW_CONFIG.edit_global_conf(args[0], check_changes=True, override_method=override_method)
 
     if operation == "reload":
         instance = Instance.from_hostname(args[0], DB)

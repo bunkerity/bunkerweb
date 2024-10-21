@@ -129,12 +129,13 @@ $(document).ready(function () {
       }, 2000);
 
       firstMultisiteType.find("button").tab("show");
+      selectedType = firstMultisiteType.text().trim();
     }
   });
 
   $typeDropdownItems.on("click", function () {
     editor.session.setMode("ace/mode/nginx");
-    // selectedType = $(this).text().trim();
+    selectedType = $(this).text().trim();
     // if (selectedType.startsWith("CRS") || selectedType.startsWith("MODSEC")) {
     //   editor.session.setMode("ace/mode/text"); // TODO: Support ModSecurity
     // } else {
