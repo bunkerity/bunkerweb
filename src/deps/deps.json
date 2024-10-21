@@ -58,9 +58,9 @@
     },
     {
       "id": "lua-resty-core",
-      "name": "lua-resty-core v0.1.29",
+      "name": "lua-resty-core v0.1.30",
       "url": "https://github.com/openresty/lua-resty-core.git",
-      "commit": "fa3cd7aec1d5da30b44cb093ae6076ac6778b1e8"
+      "commit": "2da3d7719a05b2981f3808ca874517b558f29fa9"
     },
     {
       "id": "lua-resty-dns",
@@ -95,9 +95,9 @@
     },
     {
       "id": "lua-resty-lrucache",
-      "name": "lua-resty-lrucache v0.14",
+      "name": "lua-resty-lrucache v0.15",
       "url": "https://github.com/openresty/lua-resty-lrucache.git",
-      "commit": "1293147608c9dfb0ee163e39a4c8997476e8f741"
+      "commit": "3ff6300e68b73ba20e909c7d16bd839aef2e5a4b"
     },
     {
       "id": "lua-resty-mlcache",
@@ -193,9 +193,9 @@
     },
     {
       "id": "mbedtls",
-      "name": "Mbed TLS v3.6.1",
+      "name": "Mbed TLS v3.6.2",
       "url": "https://github.com/Mbed-TLS/mbedtls.git",
-      "commit": "71c569d44bf3a8bd53d874c81ee8ac644dd6e9e3",
+      "commit": "107ea89daaefb9867ea9121002fbbdf926780e98",
       "post_install": "rm -rf src/deps/src/mbedtls/tests src/deps/src/mbedtls/programs"
     },
     {

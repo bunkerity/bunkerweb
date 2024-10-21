@@ -24,6 +24,9 @@
 - [MISC] Review security headers in the `headers` plugin to improve security
 - [MISC] Updated context of `realip`'s `USE_PROXY_PROTOCOL` setting to `global` as it was always applied globally even if set only on a service
 - [DEPS] Updated coreruleset-v4 version to v4.7.0
+- [DEPS] Updated lua-resty-core version to v0.1.30
+- [DEPS] Updated lua-resty-lrucache version to v0.15
+- [DEPS] Updated Mbed TLS version to v3.6.2
 
 ## v1.5.10 - 2024/08/17
 
