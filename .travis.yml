@@ -23,7 +23,7 @@ env:
     - TEST_NGINX_SLEEP=0.006
     - TEST_NGINX_RANDOMIZE=1
   matrix:
-    - NGINX_VERSION=1.27.0
+    - NGINX_VERSION=1.27.1
 
 install:
   - export NGX_BUILD_CC=$CC
