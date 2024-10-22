@@ -274,10 +274,6 @@ packaging==24.1 \
     --hash=sha256:026ed72c8ed3fcce5bf8950572258698927fd1dbda10a5e981cdf0ac37f4f002 \
     --hash=sha256:5b8f2217dbdbd2f7f384c41c628544e6d52f2d0f53c6d0c3ea61aa5d1d7ff124
     # via gunicorn
-passlib==1.7.4 \
-    --hash=sha256:aa6bca462b8d8bda89c70b382f0c298a20b5560af6cbfa2dce410c0a2fb669f1 \
-    --hash=sha256:defd50f72b65c5402ab2c573830a6978e5f202ad0d984793c8dde2c4152ebe04
-    # via -r requirements.in
 python-dateutil==2.9.0.post0 \
     --hash=sha256:37dd54208da7e1cd875388217d5e00ebd4179249f90fb72437e91a35459a0ad3 \
     --hash=sha256:a8b2bc7bffae282281c8140a97d3aa9c14da0b136dfe83f850eea9a5f7470427
@@ -415,9 +411,9 @@ werkzeug==3.0.4 \
     #   -r requirements.in
     #   flask
     #   flask-login
-wtforms==3.2.0 \
-    --hash=sha256:1f377b4c3fdf48e05e36a373bd4402b1dc3b3aab0791418d5e9ad808bee34134 \
-    --hash=sha256:8433188faea36077db4513ade7ba0bb671175d2a72de16c198e92760b9298a66
+wtforms==3.2.1 \
+    --hash=sha256:583bad77ba1dd7286463f21e11aa3043ca4869d03575921d1a1698d0715e0fd4 \
+    --hash=sha256:df3e6b70f3192e92623128123ec8dca3067df9cfadd43d59681e210cfb8d4682
     # via flask-wtf
 zipp==3.20.2 \
     --hash=sha256:a817ac80d6cf4b23bf7f2828b7cabf326f15a001bea8b1f9b49631780ba28350 \
