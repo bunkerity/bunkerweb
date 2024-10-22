@@ -431,6 +431,7 @@ $(function () {
     chart: {
       type: "bar",
       width: "100%",
+      height: 400,
     },
     title: {
       text: "Blocked Requests per Hour",

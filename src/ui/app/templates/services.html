@@ -66,16 +66,18 @@
                         <td class="service-last-update-date">{{ service['last_update'].astimezone().isoformat() }}</td>
                         <td>
                             <div class="d-flex justify-content-center">
-                                <a role="button"
-                                   class="btn btn-outline-primary btn-sm me-1"
-                                   href="https://{{ service['id'] }}"
-                                   data-bs-toggle="tooltip"
-                                   data-bs-placement="bottom"
-                                   data-bs-original-title="Access service {{ service['id'] }}"
-                                   target="_blank"
-                                   rel="noreferrer">
-                                    <i class="bx bx-link-external bx-xs"></i>
-                                </a>
+                                <div {% if service['is_draft'] %}data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Disabled by draft mode"{% endif %}>
+                                    <a role="button"
+                                       class="btn btn-outline-primary btn-sm me-1{% if service['is_draft'] %} disabled{% endif %}"
+                                       href="https://{{ service['id'] }}"
+                                       data-bs-toggle="tooltip"
+                                       data-bs-placement="bottom"
+                                       data-bs-original-title="Access service {{ service['id'] }}"
+                                       target="_blank"
+                                       rel="noreferrer">
+                                        <i class="bx bx-link-external bx-xs"></i>
+                                    </a>
+                                </div>
                                 <a role="button"
                                    class="btn btn-primary btn-sm me-1"
                                    href="{{ url_for("services") }}/{{ service['id'] }}"

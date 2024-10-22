@@ -370,7 +370,7 @@ def set_security_headers(response):
         + (
             " connect-src *;"
             if request.path.startswith(("/check", "/setup"))
-            else " connect-src 'self' https://api.github.com/repos/bunkerity/bunkerweb https://www.bunkerweb.io/api/posts/0/2;"
+            else " connect-src 'self' https://api.github.com/repos/bunkerity/bunkerweb https://www.bunkerweb.io/api/posts/0/3;"
         )
     )
 

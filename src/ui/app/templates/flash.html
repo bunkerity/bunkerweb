@@ -8,12 +8,12 @@
         {% endif %}
         <!-- flash message-->
         {% for category, message in messages %}
-            <div class="bs-toast toast fade show {% if category == 'error' %}bg-danger{% elif category == 'warning' %}bg-warning{% else %}bg-primary text-white{% endif %}"
+            <div class="bs-toast toast fade show bg-white border{% if category == 'error' %} border-danger{% elif category == 'warning' %} border-warning{% else %} border-primary{% endif %}"
                  role="alert"
                  aria-live="assertive"
                  aria-atomic="true">
-                <div class="toast-header">
-                    <i class="d-block w-px-20 h-auto rounded me-2 tf-icons bx bx-bell"></i>
+                <div class="toast-header d-flex align-items-center{% if category == 'error' %} text-danger{% elif category == 'warning' %} text-warning{% else %} text-primary{% endif %}">
+                    <i class="d-block h-auto rounded tf-icons bx bx-xs bx-bell bx-tada me-2"></i>
                     <span class="fw-medium me-auto">
                         {% if category != 'message' %}
                             {{ category|capitalize }}

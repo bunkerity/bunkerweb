@@ -14,7 +14,6 @@ $(document).ready(() => {
   }
 
   let currentTemplate = $("#selected-template").val();
-  let currentTemplateMethod = $("#selected-template-method").val();
   let currentMode = $("#selected-mode").val();
   let currentType = $("#selected-type").val();
 
@@ -159,7 +158,7 @@ $(document).ready(() => {
 
     currentStepContainer.find(".plugin-setting").each(function () {
       const $input = $(this);
-      const value = $input.val().trim();
+      const value = $input.val();
       const isRequired = $input.prop("required");
       const pattern = $input.attr("pattern");
       const fieldName =

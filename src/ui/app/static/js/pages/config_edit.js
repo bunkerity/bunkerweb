@@ -111,6 +111,7 @@ $(document).ready(function () {
       ).first();
       $("#select-type")
         .parent()
+        .attr("data-bs-custom-class", "warning-tooltip")
         .attr(
           "data-bs-original-title",
           `Switched to ${firstMultisiteType

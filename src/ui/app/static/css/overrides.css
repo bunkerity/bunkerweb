@@ -768,3 +768,8 @@ a.courier-prime:hover {
 .courier-prime {
   font-family: var(--font-courier-prime);
 }
+
+.warning-tooltip {
+  --bs-tooltip-bg: var(--bs-warning);
+  --bs-tooltip-color: var(--bs-white);
+}

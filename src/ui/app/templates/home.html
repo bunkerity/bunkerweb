@@ -2,7 +2,7 @@
 {% block content %}
     <!-- Content -->
     <div class="row g-4">
-        <div class="col-sm-3 mb-2">
+        <div class="col-md-3 mb-2">
             <div class="card p-4 position-relative shadow-sm rounded-3 h-100 text-white {% if is_pro_version %}bg-primary{% else %}bg-bw-green{% endif %}">
                 {% if is_pro_version %}
                     <img class='position-absolute top-0 end-0 m-3'
@@ -32,7 +32,7 @@
                 </a>
             </div>
         </div>
-        <div class="col-sm-3 mb-2">
+        <div class="col-md-3 mb-2">
             <a role="button"
                href="{{ url_for('instances') }}"
                class="card p-4 position-relative shadow-sm rounded-3 h-100">
@@ -59,7 +59,7 @@
                 </small>
             </a>
         </div>
-        <div class="col-sm-3 mb-2">
+        <div class="col-md-3 mb-2">
             <a role="button"
                href="{{ url_for('services') }}"
                class="card p-4 position-relative shadow-sm rounded-3 h-100">
@@ -84,7 +84,7 @@
                 </small>
             </a>
         </div>
-        <div class="col-sm-3 mb-2">
+        <div class="col-md-3 mb-2">
             <a role="button"
                href="{{ url_for('plugins') }}"
                class="card p-4 position-relative shadow-sm rounded-3 h-100">
@@ -111,21 +111,63 @@
                 </small>
             </a>
         </div>
-        <div class="col-sm-7 mt-2 mb-2">
-            <div class="card p-4 position-relative shadow-sm rounded-3 h-100">
-                <div class="card-header p-2">
-                    <div class="card-title mb-0">
-                        <h5 class="me-2 don-jose mb-0">Blocked Requests countries</h5>
+        <div class="col-md-7 row g-4 m-0 p-0">
+            <div class="col-12 col-lg-6 mt-2 mb-2">
+                <div class="card p-4 position-relative shadow-sm rounded-3 h-100">
+                    <div class="card-header p-2">
+                        <div class="card-title mb-0">
+                            <h5 class="mb-1 me-2 don-jose">Request status</h5>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-center align-items-center">
+                            <div id="requests-data" class="visually-hidden">{{ request_errors|tojson }}</div>
+                            <div id="requests-stats"></div>
+                        </div>
                     </div>
                 </div>
-                <div class="card-body p-0">
-                    <div id="requests-map-data" class="visually-hidden">{{ request_countries|tojson }}</div>
-                    <div id="requests-map" class="rounded h-100"></div>
+            </div>
+            <div class="col-12 col-lg-6 mt-2 mb-2">
+                <div class="card p-4 position-relative shadow-sm rounded-3 h-100">
+                    <div class="card-header p-2">
+                        <div class="card-title mb-0">
+                            <h5 class="mb-1 me-2 don-jose">Top 10 - Blocked ips</h5>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        {% if request_ips %}
+                            {% set limited_request_ips = request_ips.items() | list %}
+                            {% set top_ips = limited_request_ips[:10] %}
+                            <div class="d-flex justify-content-center align-items-center mb-6">
+                                <div id="requests-ips-data" class="visually-hidden">{{ request_ips|tojson }}</div>
+                                <div id="requests-ips"></div>
+                            </div>
+                        {% else %}
+                            <div class="d-flex align-items-center justify-content-center h-100">
+                                <div class="text-center mt-2">
+                                    <p class="g-3 p-2 text-primary rounded-lg fw-bold">No data to show</p>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 mt-2 mb-2">
+                <div class="card p-4 position-relative shadow-sm rounded-3 h-100">
+                    <div class="card-header p-2">
+                        <div class="card-title mb-0">
+                            <h5 class="me-2 don-jose mb-0">Blocked Requests countries</h5>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div id="requests-map-data" class="visually-hidden">{{ request_countries|tojson }}</div>
+                        <div id="requests-map" class="rounded h-100"></div>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="col-sm-5 mt-2 mb-2">
-            <div class="card p-4 position-relative shadow-sm rounded-3">
+        <div class="col-md-5 mt-2 mb-2">
+            <div class="card p-4 position-relative shadow-sm rounded-3 h-100">
                 <div class="card-header p-2">
                     <div class="card-title mb-0 d-flex justify-content-between">
                         <h5 class="don-jose mb-0">News</h5>
@@ -155,7 +197,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-sm-6 mb-2">
+        <div class="col-md-6 mb-2">
             <div class="card p-4 position-relative shadow-sm rounded-3 bg-secondary text-white h-100">
                 <i class='bx bx-broadcast bx-sm position-absolute top-0 end-0 m-3 text-white'></i>
                 <p class="ps-4 fs-4 mb-2">
@@ -165,7 +207,7 @@
                 </p>
             </div>
         </div>
-        <div class="col-sm-3 mb-2">
+        <div class="col-md-3 mb-2">
             <a role="button"
                class="card p-4 position-relative shadow-sm rounded-3 h-100 text-color-hover-danger"
                href="{{ url_for('loading', next=url_for('reports') ) }}">
@@ -185,7 +227,7 @@
                 </p>
             </a>
         </div>
-        <div class="col-sm-3 mb-2">
+        <div class="col-md-3 mb-2">
             <div class="card p-4 position-relative shadow-sm rounded-3 h-100">
                 <i class='bx bx-globe bx-sm position-absolute top-0 end-0 m-3 text-danger'></i>
                 <p class="ps-4 fs-4 mb-2">
@@ -201,47 +243,7 @@
                 </p>
             </div>
         </div>
-        <div class="col-sm-3 mt-2 mb-2">
-            <div class="card p-4 position-relative shadow-sm rounded-3">
-                <div class="card-header p-2">
-                    <div class="card-title mb-0">
-                        <h5 class="mb-1 me-2 don-jose">Request status</h5>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <div class="d-flex justify-content-center align-items-center mb-6">
-                        <div id="requests-data" class="visually-hidden">{{ request_errors|tojson }}</div>
-                        <div id="requests-stats"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-sm-3 mt-2 mb-2">
-            <div class="card p-4 position-relative shadow-sm rounded-3">
-                <div class="card-header p-2">
-                    <div class="card-title mb-0">
-                        <h5 class="mb-1 me-2 don-jose">Blocked Request ips</h5>
-                    </div>
-                </div>
-                <div class="card-body">
-                    {% if request_ips %}
-                        {% set limited_request_ips = request_ips.items() | list %}
-                        {% set top_ips = limited_request_ips[:10] %}
-                        <div class="d-flex justify-content-center align-items-center mb-6">
-                            <div id="requests-ips-data" class="visually-hidden">{{ request_ips|tojson }}</div>
-                            <div id="requests-ips"></div>
-                        </div>
-                    {% else %}
-                        <div class="d-flex align-items-center justify-content-center">
-                            <div class="text-center mt-2">
-                                <p class="g-3 p-2 text-primary rounded-lg fw-bold">No data to show</p>
-                            </div>
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-        <div class="col-sm-6 mt-2 mb-2">
+        <div class="col-12 mt-2 mb-2">
             <div class="card p-4 position-relative shadow-sm rounded-3">
                 <div class="card-header p-2">
                     <div class="card-title mb-0">

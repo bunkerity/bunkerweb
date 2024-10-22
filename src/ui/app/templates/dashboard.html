@@ -141,7 +141,8 @@
                                         <span class="d-none d-md-inline">Notifications</span>
                                     </button>
                                     {% if flash_messages %}
-                                        <span class="badge-dot-text position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                        <span id="unread-notifications"
+                                              class="badge-dot-text position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none">
                                             {{ flash_messages|length }}
                                             <span class="visually-hidden">unread notifications</span>
                                         </span>
@@ -174,7 +175,7 @@
                                aria-pressed="true"
                                href="{{ url_for('pro') }}">
                                 <span class="me-1 me-md-2 d-flex h-100 justify-content-center align-items-center">
-                                    <img src="{{ pro_diamond_url }}"
+                                    <img src="{{ url_for('static', filename='img/diamond-white.svg') }}"
                                          alt="Pro plugin"
                                          width="18px"
                                          height="15.5px">

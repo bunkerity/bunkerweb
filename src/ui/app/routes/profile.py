@@ -13,25 +13,6 @@ from app.routes.utils import cors_required, handle_error, verify_data_in_form
 
 profile = Blueprint("profile", __name__)
 
-BROWSERS = {
-    "Chrome": "bxl-chrome",
-    "Firefox": "bxl-firefox",
-    "Safari": "bx-compass",
-    "Edge": "bxl-edge",
-    "Opera": "bxl-opera",
-    "Internet Explorer": "bxl-internet-explorer",
-}
-
-OS = {
-    "Windows": "bxl-windows",
-    "Mac": "bxl-apple",
-    "Linux": "bxl-tux",
-}
-
-DEVICES = {
-    "PC": "bx-desktop",
-}
-
 
 def get_last_sessions(page: int, per_page: int) -> Tuple[Generator[Dict[str, Union[str, bool]], None, None], int]:
     db_sessions = DB.get_ui_user_sessions(current_user.username, session.get("session_id"))
@@ -53,7 +34,7 @@ def get_last_sessions(page: int, per_page: int) -> Tuple[Generator[Dict[str, Uni
 
         for db_session in additional_sessions + db_sessions[(page - 1) * per_page : page * per_page]:  # noqa: E203
             ua_data = parse(db_session["user_agent"])
-            last_session = {
+            yield {
                 "current": db_session["id"] == session.get("session_id") if "session_id" in session else "id" not in db_session,
                 "browser": ua_data.get_browser(),
                 "os": ua_data.get_os(),
@@ -66,20 +47,6 @@ def get_last_sessions(page: int, per_page: int) -> Tuple[Generator[Dict[str, Uni
                     else datetime.now().astimezone().strftime("%Y-%m-%d %H:%M:%S %Z")
                 ),
             }
-
-            for browser, icon in BROWSERS.items():
-                if browser in last_session["browser"]:
-                    last_session["browser"] = f"<i class='bx {icon} text-primary'></i>&nbsp;{last_session['browser']}"
-                    break
-
-            for os, icon in OS.items():
-                if os in last_session["os"]:
-                    last_session["os"] = f"<i class='bx {icon} text-primary'></i>&nbsp;{last_session['os']}"
-                    break
-
-            last_session["device"] = f"<i class='bx {DEVICES.get(last_session['device'], 'bx-mobile')} text-primary'></i>&nbsp;{last_session['device']}"
-
-            yield last_session
 
     return session_generator(page, per_page), total_sessions
 

@@ -17,7 +17,7 @@ class News {
     if (lastNews) {
       this.render(JSON.parse(lastNews));
     } else {
-      $.getJSON("https://www.bunkerweb.io/api/posts/0/2")
+      $.getJSON("https://www.bunkerweb.io/api/posts/0/3")
         .done((res) => {
           const reverseData = res.data.reverse();
           this.render(reverseData);
@@ -271,29 +271,40 @@ $(document).ready(() => {
   const intervalTime = 7000;
   let interval;
   const $bannerText = $("#banner-text");
-  // Create a hidden element to measure the max height
-  const $measuringElement = $("<div>")
-    .css({
-      position: "absolute",
-      visibility: "hidden",
-      height: "auto",
-      width: $bannerText.width(),
-      whiteSpace: "nowrap",
-    })
-    .appendTo("body");
 
-  // Calculate the minimum height required for the banner text
-  let minHeight = 0;
-  newsItems.forEach((item) => {
-    $measuringElement.html(item);
-    minHeight = Math.max(minHeight, $measuringElement.outerHeight());
+  function calculateMinHeight() {
+    // Create a hidden element to measure the max height
+    const $measuringElement = $("<div>")
+      .css({
+        position: "absolute",
+        visibility: "hidden",
+        height: "auto",
+        width: $bannerText.width(), // Set width to match the current width of the banner text container
+        whiteSpace: "normal", // Change to normal for wrapping if needed
+      })
+      .appendTo("body");
+
+    // Calculate the minimum height required for the banner text
+    let minHeight = 0;
+    newsItems.forEach((item) => {
+      $measuringElement.html(item);
+      minHeight = Math.max(minHeight, $measuringElement.outerHeight());
+    });
+
+    // Set the minimum height to avoid layout shifts
+    $bannerText.css("min-height", minHeight);
+
+    // Remove the measuring element from the DOM
+    $measuringElement.remove();
+  }
+
+  // Calculate the min-height on page load
+  calculateMinHeight();
+
+  // Recalculate the min-height on window resize
+  $(window).on("resize", function () {
+    calculateMinHeight();
   });
-
-  // Set the minimum height to avoid layout shifts
-  $bannerText.css("min-height", minHeight);
-
-  // Remove the measuring element from the DOM
-  $measuringElement.remove();
 
   const news = new News();
   news.init();
@@ -380,4 +391,35 @@ $(document).ready(() => {
     loadData();
     $("#next-news").trigger("click");
   }
+
+  var notificationsRead =
+    parseInt(sessionStorage.getItem("notificationsRead")) || 0;
+
+  function updateNotificationsBadge() {
+    const $notificationsBadge = $("#unread-notifications");
+    let unreadNotifications = parseInt($notificationsBadge.text());
+
+    unreadNotifications = isNaN(unreadNotifications) ? 0 : unreadNotifications;
+
+    if ($notificationsBadge.length) {
+      const updatedUnread = unreadNotifications - notificationsRead;
+      if (updatedUnread > 0) {
+        $notificationsBadge.text(updatedUnread);
+        $notificationsBadge.removeClass("d-none");
+      } else {
+        $notificationsBadge.addClass("d-none");
+      }
+    }
+  }
+
+  updateNotificationsBadge();
+
+  $("#notifications-button").on("click", function () {
+    const readNotifications = $(
+      "#notifications-toast-container .bs-toast",
+    ).length;
+    notificationsRead = readNotifications;
+    sessionStorage.setItem("notificationsRead", notificationsRead);
+    updateNotificationsBadge();
+  });
 });

@@ -46,7 +46,7 @@ def login_page():
             if not ui_user.totp_secret:
                 flash(
                     f'Please enable two-factor authentication to secure your account <a href="{url_for("profile.profile_page", _anchor="security")}">here</a>',
-                    "error",
+                    "warning",
                 )
 
             # redirect him to the page he originally wanted or to the home page
