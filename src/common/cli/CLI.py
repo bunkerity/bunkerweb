@@ -216,7 +216,7 @@ class CLI(ApiCaller):
                 self.__logger.error(f"Failed to ban {ip} in redis: {e}")
 
         try:
-            if self.send_to_apis("POST", "/ban", data={"ip": ip, "exp": exp, "reason": reason}):
+            if self.send_to_apis("POST", "/ban", data={"ip": ip, "exp": exp, "reason": reason, "service": "bwcli"}):
                 return True, f"IP {ip} has been banned for {format_remaining_time(exp)} with reason {reason}"
         except BaseException as e:
             return False, f"Failed to ban {ip}: {e}"
