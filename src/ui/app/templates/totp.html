@@ -1,55 +1,59 @@
 {% extends "base.html" %}
 {% block page %}
     <!-- Content -->
-    <div class="container-xxl">
-        <div class="authentication-wrapper authentication-basic container-p-y">
-            <div class="authentication-inner">
-                <!-- Register -->
-                <div class="card px-sm-6 px-0">
-                    <a href="{{ url_for('login') }}">
-                        <i class="bx bx-arrow-back me-1"></i>
-                        <span>back to login</span></a>
-                    <div class="card-body">
-                        <!-- Logo -->
-                        <div class="app-brand justify-content-center">
-                            <a href="https://www.bunkerweb.io/?utm_campaign=self&utm_source=ui"
-                               target="_blank"
-                               rel="noopener"
-                               class="app-brand-link gap-2">
-                                <span class="app-brand-logo login w-75">
-                                    <img class="img-fluid"
-                                         src="{{ url_for('static', filename='img/logo-menu.png') }}"
-                                         alt="BunkerWeb logo">
-                                </span>
-                            </a>
-                        </div>
-                        <!-- /Logo -->
-                        <p class="mb-6">Please enter your TOTP code</p>
-                        <form id="formAuthentication" class="mb-6" method="POST">
-                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-                            <input type="hidden"
-                                   name="next"
-                                   value="{{ request.values.get('next', '') }}" />
-                            <div class="mb-6 form-password-toggle">
-                                <label class="form-label" for="totp_token">2FA Code</label>
-                                <div class="input-group input-group-merge">
-                                    <input type="password"
-                                           id="totp_token"
-                                           class="form-control"
-                                           name="totp_token"
-                                           placeholder="2FA Code"
-                                           aria-describedby="2FA Code"
-                                           required />
-                                    <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
+    <div class="bg-light-subtle">
+        <div class="login-background">
+            <div class="container-xxl">
+                <div class="authentication-wrapper authentication-basic container-p-y">
+                    <div class="authentication-inner">
+                        <!-- Register -->
+                        <div class="card px-sm-6 px-0">
+                            <a href="{{ url_for('login') }}">
+                                <i class="bx bx-arrow-back me-1"></i>
+                                <span>back to login</span></a>
+                            <div class="card-body">
+                                <!-- Logo -->
+                                <div class="app-brand justify-content-center">
+                                    <a href="https://www.bunkerweb.io/?utm_campaign=self&utm_source=ui"
+                                       target="_blank"
+                                       rel="noopener"
+                                       class="app-brand-link gap-2">
+                                        <span class="app-brand-logo login w-75">
+                                            <img class="img-fluid"
+                                                 src="{{ url_for('static', filename='img/logo-menu.png') }}"
+                                                 alt="BunkerWeb logo">
+                                        </span>
+                                    </a>
                                 </div>
+                                <!-- /Logo -->
+                                <p class="mb-6">Please enter your TOTP code</p>
+                                <form id="formAuthentication" class="mb-6" method="POST">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                                    <input type="hidden"
+                                           name="next"
+                                           value="{{ request.values.get('next', '') }}" />
+                                    <div class="mb-6 form-password-toggle">
+                                        <label class="form-label" for="totp_token">2FA Code</label>
+                                        <div class="input-group input-group-merge">
+                                            <input type="password"
+                                                   id="totp_token"
+                                                   class="form-control"
+                                                   name="totp_token"
+                                                   placeholder="2FA Code"
+                                                   aria-describedby="2FA Code"
+                                                   required />
+                                            <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
+                                        </div>
+                                    </div>
+                                    <div class="mb-6">
+                                        <button class="btn btn-primary d-grid w-100" type="submit">Submit</button>
+                                    </div>
+                                </form>
                             </div>
-                            <div class="mb-6">
-                                <button class="btn btn-primary d-grid w-100" type="submit">Submit</button>
-                            </div>
-                        </form>
+                        </div>
+                        <!-- /Register -->
                     </div>
                 </div>
-                <!-- /Register -->
             </div>
         </div>
     </div>

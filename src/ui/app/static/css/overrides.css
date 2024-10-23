@@ -773,3 +773,12 @@ a.courier-prime:hover {
   --bs-tooltip-bg: var(--bs-warning);
   --bs-tooltip-color: var(--bs-white);
 }
+
+.login-background {
+  background-image: url("../img/login-background.svg");
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  width: 100vw;
+  height: 100vh;
+}
