@@ -1,1 +1,14 @@
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 809 500"><path fill="#006a4e" d="M0 0h809v500H0z"/><path fill="#ffce00" d="M0 100h809v100H0zm0 200h809v100H0z"/><path fill="#d21034" d="M0 0h300v300H0z"/><g transform="translate(150 150)" fill="#fff"><g id="b"><path id="a" d="M0-95V0h50" transform="rotate(18 0 -95)"/><use xlink:href="#a" transform="scale(-1 1)"/></g><use xlink:href="#b" transform="rotate(72)"/><use xlink:href="#b" transform="rotate(144)"/><use xlink:href="#b" transform="rotate(216)"/><use xlink:href="#b" transform="rotate(288)"/></g></svg>
+<svg xmlns="http://www.w3.org/2000/svg" id="flag-icons-tg" viewBox="0 0 640 480">
+  <defs>
+    <clipPath id="tg-a">
+      <path fill-opacity=".7" d="M0 0h682.7v512H0z"/>
+    </clipPath>
+  </defs>
+  <g fill-rule="evenodd" clip-path="url(#tg-a)" transform="scale(.9375)">
+    <path fill="#ffe300" d="M0 0h767.6v512H0z"/>
+    <path fill="#118600" d="M0 208.1h767.6V311H0zM0 .2h767.6v102.9H0z"/>
+    <path fill="#d80000" d="M0 .3h306.5v310.6H0z"/>
+    <path fill="#fff" d="M134.4 128.4c0-.8 18.9-53 18.9-53l17 52.2s57.4 1.7 57.4.8-45.3 34.3-45.3 34.3 21.4 60 20.5 58.2c-.8-1.7-49.6-36-49.6-36s-49.7 34.3-48.8 34.3c.8 0 18.8-56.5 18.8-56.5l-44.5-33.4z"/>
+    <path fill="#118600" d="M0 409.2h767.6V512H0z"/>
+  </g>
+</svg>

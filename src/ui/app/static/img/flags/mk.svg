@@ -1,1 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-140 -70 280 140" fill="#f8e92e"><path fill="#d82126" d="M-140-70h280V70h-280z"/><path d="M-140 14v-28l280 28v-28zm126-84h28L0-15zM14 70h-28L0 15zM-140-70h42L12.86 7.72zm0 140h42L12.86-7.72zM140-70H98L-12.86 7.72zm0 140H98L-12.86-7.72z"/><circle r="25" fill="#d82126"/><circle r="20"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" id="flag-icons-mk" viewBox="0 0 640 480">
+  <path fill="#d20000" d="M0 0h640v480H0z"/>
+  <path fill="#ffe600" d="M0 0h96l224 231.4L544 0h96L0 480h96l224-231.4L544 480h96zm640 192v96L0 192v96zM280 0l40 205.7L360 0zm0 480 40-205.7L360 480z"/>
+  <circle cx="320" cy="240" r="77.1" fill="#ffe600" stroke="#d20000" stroke-width="17.1"/>
+</svg>

@@ -1,1 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3000 2000"><path fill="#d01c1f" d="M0 0h3000v2000H0z"/><path fill="#00a95c" d="M0 400h3000v1200H0z"/><path fill="gold" d="M1299 744h153l48-144 48 144h153l-126 92 51 146-126-90-126 90 51-146zm-549-74a760.093 628 0 001500 0 750 730 0 01-1500 0z"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" id="flag-icons-mr" viewBox="0 0 640 480">
+  <path fill="#cd2a3e" d="M0 0h640v480H0z"/>
+  <path fill="#006233" d="M0 72h640v336H0z"/>
+  <path fill="#ffc400" d="M470 154.6a150 150 0 0 1-300 0 154.9 154.9 0 0 0-5 39.2 155 155 0 1 0 310 0 154.4 154.4 0 0 0-5-39.2" class="mr-st1"/>
+  <path fill="#ffc400" d="m320 93.8-13.5 41.5H263l35.3 25.6-13.5 41.4 35.3-25.6 35.3 25.6-13.5-41.4 35.3-25.6h-43.6z"/>
+</svg>

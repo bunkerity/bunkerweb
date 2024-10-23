@@ -3,6 +3,7 @@ $(function () {
   const dataCountries = ($("#countries").val() || "")
     .split(",")
     .filter((code) => code && code !== "local");
+  const baseFlagsUrl = $("#base_flags_url").val().trim();
 
   const countriesDataNames = {
     AD: "Andorra",
@@ -19,7 +20,7 @@ $(function () {
     AT: "Austria",
     AU: "Australia",
     AW: "Aruba",
-    AX: "\u00c5land Islands",
+    AX: "Åland Islands",
     AZ: "Azerbaijan",
     BA: "Bosnia and Herzegovina",
     BB: "Barbados",
@@ -48,7 +49,7 @@ $(function () {
     CF: "Central African Republic",
     CG: "Republic of the Congo",
     CH: "Switzerland",
-    CI: "C\u00f4te d'Ivoire",
+    CI: "Côte d'Ivoire",
     CK: "Cook Islands",
     CL: "Chile",
     CM: "Cameroon",
@@ -57,7 +58,7 @@ $(function () {
     CR: "Costa Rica",
     CU: "Cuba",
     CV: "Cape Verde",
-    CW: "Cura\u00e7ao",
+    CW: "Curaçao",
     CX: "Christmas Island",
     CY: "Cyprus",
     CZ: "Czech Republic",
@@ -258,38 +259,42 @@ $(function () {
     ZW: "Zimbabwe",
   };
 
+  // Filter countriesDataNames to include only necessary countries
+  const filteredCountriesDataNames = dataCountries.reduce((obj, code) => {
+    if (countriesDataNames[code]) {
+      obj[code] = countriesDataNames[code];
+    }
+    return obj;
+  }, {});
+
+  // Assuming baseFlagsUrl, dataCountries, and countriesDataNames are defined
   const countriesSearchPanesOptions = [
     {
-      label: "N/A",
-      value: function (rowData) {
-        return $(rowData[2]).text().trim() === "N/A";
-      },
+      label: `<img src="${baseFlagsUrl}/zz.svg" class="border border-1 p-0 me-1" height="17" />&nbsp;－&nbsp;N/A`,
+      value: (rowData) => rowData[2].includes("N/A"),
     },
+    ...Object.entries(filteredCountriesDataNames).map(([code, name]) => ({
+      label: `<img src="${baseFlagsUrl}/${code.toLowerCase()}.svg" class="border border-1 p-0 me-1" height="17" />&nbsp;－&nbsp;${name}`,
+      value: (rowData) =>
+        rowData[2].includes(`data-bs-original-title="${code}"`),
+    })),
   ];
 
-  dataCountries.forEach((countryCode) => {
-    const regex = new RegExp(`\\b${countryCode}$`, "i");
-    countriesSearchPanesOptions.push({
-      label: countryCode,
-      value: function (rowData) {
-        return $(rowData[2]).text().trim().match(regex);
-      },
-    });
-  });
-
-  const updateCountryTooltips = function () {
-    dataCountries.forEach((countryCode) => {
-      const country = countriesDataNames[countryCode];
-      if (country) {
-        $(`[data-bs-original-title="${countryCode}"]`).attr(
-          "data-bs-original-title",
-          country,
-        );
+  // Batch update tooltips
+  const updateCountryTooltips = () => {
+    $("[data-bs-original-title]").each(function () {
+      const $elem = $(this);
+      const countryCode = $elem.attr("data-bs-original-title");
+      const countryName = countriesDataNames[countryCode];
+      if (countryName) {
+        $elem.attr("data-bs-original-title", countryName);
       }
     });
+    // Initialize tooltips once
     $('[data-bs-toggle="tooltip"]').tooltip();
   };
 
+  // Configure DataTable layout
   const layout = {
     top1: {
       searchPanes: {
@@ -303,6 +308,10 @@ $(function () {
     topEnd: {
       buttons: [
         {
+          extend: "auto_refresh",
+          className: "btn btn-sm btn-outline-primary d-flex align-items-center",
+        },
+        {
           extend: "toggle_filters",
           className: "btn btn-sm btn-outline-primary toggle-filters",
         },
@@ -315,6 +324,7 @@ $(function () {
     bottomEnd: {},
   };
 
+  // Adjust page length options based on reports number
   if (reportsNumber > 10) {
     const menu = [10];
     if (reportsNumber > 25) menu.push(25);
@@ -330,15 +340,14 @@ $(function () {
     layout.bottomEnd.paging = true;
   }
 
+  // Define DataTable buttons
   layout.topStart.buttons = [
     {
       extend: "colvis",
       columns: "th:not(:first-child):not(:last-child)",
       text: '<span class="tf-icons bx bx-columns bx-18px me-2"></span>Columns',
       className: "btn btn-sm btn-outline-primary",
-      columnText: function (dt, idx, title) {
-        return `${idx + 1}. ${title}`;
-      },
+      columnText: (dt, idx, title) => `${idx + 1}. ${title}`,
     },
     {
       extend: "colvisRestore",
@@ -378,29 +387,69 @@ $(function () {
     },
   ];
 
+  // Custom button for toggling filters
   $.fn.dataTable.ext.buttons.toggle_filters = {
     text: '<span class="tf-icons bx bx-filter bx-18px me-2"></span><span id="show-filters">Show</span><span id="hide-filters" class="d-none">Hide</span><span class="d-none d-md-inline"> filters</span>',
-    action: function (e, dt, node, config) {
-      reports_table.searchPanes.container().slideToggle(); // Smoothly hide or show the container
-      $("#show-filters").toggleClass("d-none"); // Toggle the visibility of the 'Show' span
-      $("#hide-filters").toggleClass("d-none"); // Toggle the visibility of the 'Hide' span
+    action: (e, dt, node, config) => {
+      reports_table.searchPanes.container().slideToggle();
+      $("#show-filters, #hide-filters").toggleClass("d-none");
     },
   };
 
-  $(".report-date").each(function () {
-    const $this = $(this);
-    const isoDateStr = $this.text().trim();
-    const date = new Date(isoDateStr);
-    if (!isNaN(date)) {
-      $this.text(date.toLocaleString());
-    }
-  });
+  // Custom button for auto-refresh
+  let autoRefresh = false;
+  const sessionAutoRefresh = sessionStorage.getItem("reportsAutoRefresh");
 
+  function toggleAutoRefresh() {
+    autoRefresh = !autoRefresh;
+    sessionStorage.setItem("reportsAutoRefresh", autoRefresh);
+    if (autoRefresh) {
+      $(".bx-loader")
+        .addClass("bx-spin")
+        .closest(".btn")
+        .removeClass("btn-outline-primary")
+        .addClass("btn-primary");
+      const interval = setInterval(() => {
+        if (!autoRefresh) {
+          clearInterval(interval);
+        } else {
+          window.location.reload();
+        }
+      }, 10000); // 10 seconds
+    } else {
+      $(".bx-loader")
+        .removeClass("bx-spin")
+        .closest(".btn")
+        .removeClass("btn-primary")
+        .addClass("btn-outline-primary");
+    }
+  }
+
+  $.fn.dataTable.ext.buttons.auto_refresh = {
+    text: '<span class="bx bx-loader bx-18px lh-1"></span>&nbsp;&nbsp;Auto refresh',
+    action: (e, dt, node, config) => {
+      toggleAutoRefresh();
+    },
+  };
+
+  // Initialize DataTable
   const reports_table = new DataTable("#reports", {
     columnDefs: [
       { orderable: false, targets: -1 },
       { visible: false, targets: [6, -1] },
       { type: "ip-address", targets: 1 },
+      {
+        targets: 0,
+        render: function (data, type, row) {
+          if (type === "display" || type === "filter") {
+            const date = new Date(data);
+            if (!isNaN(date.getTime())) {
+              return date.toLocaleString();
+            }
+          }
+          return data;
+        },
+      },
       {
         searchPanes: {
           show: true,
@@ -432,42 +481,25 @@ $(function () {
         },
       },
     },
-    initComplete: function () {
-      const $wrapper = $("#reports_wrapper");
-      $wrapper.find(".btn-secondary").removeClass("btn-secondary");
+    initComplete: () => {
+      $("#reports_wrapper").find(".btn-secondary").removeClass("btn-secondary");
       updateCountryTooltips();
     },
   });
 
+  $(".dt-type-numeric").removeClass("dt-type-numeric");
+
+  if (sessionAutoRefresh === "true") {
+    toggleAutoRefresh();
+  }
+
+  // Initially hide search panes
   reports_table.searchPanes.container().hide();
 
+  // Show the reports table and hide the loading indicator
   $("#reports").removeClass("d-none");
   $("#reports-waiting").addClass("visually-hidden");
 
-  reports_table.on("mouseenter", "td", function () {
-    if (reports_table.cell(this).index() === undefined) return;
-    const rowIdx = reports_table.cell(this).index().row;
-
-    reports_table
-      .cells()
-      .nodes()
-      .each((el) => el.classList.remove("highlight"));
-
-    reports_table
-      .cells()
-      .nodes()
-      .each(function (el) {
-        if (reports_table.cell(el).index().row === rowIdx)
-          el.classList.add("highlight");
-      });
-  });
-
-  reports_table.on("mouseleave", "td", function () {
-    reports_table
-      .cells()
-      .nodes()
-      .each((el) => el.classList.remove("highlight"));
-  });
-
+  // Update tooltips after table draw
   reports_table.on("draw.dt", updateCountryTooltips);
 });

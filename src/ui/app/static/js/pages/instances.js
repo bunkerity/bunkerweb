@@ -381,26 +381,6 @@ $(document).ready(function () {
     },
   };
 
-  $(".instance-creation-date, .instance-last-seen-date").each(function () {
-    const isoDateStr = $(this).text().trim();
-
-    // Parse the ISO format date string
-    const date = new Date(isoDateStr);
-
-    // Check if the date is valid
-    if (!isNaN(date)) {
-      // Convert to local date and time string
-      const localDateStr = date.toLocaleString();
-
-      // Update the text content with the local date string
-      $(this).text(localDateStr);
-    } else {
-      // Handle invalid date
-      console.error(`Invalid date string: ${isoDateStr}`);
-      $(this).text("Invalid date");
-    }
-  });
-
   const instances_table = new DataTable("#instances", {
     columnDefs: [
       {
@@ -415,6 +395,18 @@ $(document).ready(function () {
       {
         visible: false,
         targets: [2, 3],
+      },
+      {
+        targets: [6, 7],
+        render: function (data, type, row) {
+          if (type === "display" || type === "filter") {
+            const date = new Date(data);
+            if (!isNaN(date.getTime())) {
+              return date.toLocaleString();
+            }
+          }
+          return data;
+        },
       },
       {
         searchPanes: {

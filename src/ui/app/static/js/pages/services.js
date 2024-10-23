@@ -312,22 +312,22 @@ $(function () {
     },
   };
 
-  $(".service-creation-date, .service-last-update-date").each(function () {
-    const $this = $(this);
-    const isoDateStr = $this.text().trim();
-    const date = new Date(isoDateStr);
-    if (!isNaN(date)) {
-      $this.text(date.toLocaleString());
-    } else {
-      console.error(`Invalid date string: ${isoDateStr}`);
-      $this.text("Invalid date");
-    }
-  });
-
   const services_table = new DataTable("#services", {
     columnDefs: [
       { orderable: false, render: DataTable.render.select(), targets: 0 },
       { orderable: false, targets: -1 },
+      {
+        targets: [4, 5],
+        render: function (data, type, row) {
+          if (type === "display" || type === "filter") {
+            const date = new Date(data);
+            if (!isNaN(date.getTime())) {
+              return date.toLocaleString();
+            }
+          }
+          return data;
+        },
+      },
       {
         searchPanes: {
           show: true,

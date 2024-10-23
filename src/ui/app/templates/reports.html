@@ -2,7 +2,9 @@
 {% block content %}
     <!-- Content -->
     <div class="card table-responsive text-nowrap p-4 pb-8 min-vh-70">
+        {% set base_flags_url = url_for('static', filename='img/flags') %}
         <input type="hidden" id="reports_number" value="{{ reports|length }}" />
+        <input type="hidden" id="base_flags_url" value="{{ base_flags_url }}" />
         <p id="reports-waiting"
            class="text-center relative w-full p-2 text-primary rounded-lg fw-bold">Loading reports...</p>
         <table id="reports" class="table position-relative w-100 d-none">
@@ -39,7 +41,6 @@
             </thead>
             <tbody>
                 {% set ns = namespace(countries=[]) %}
-                {% set base_url = url_for('static', filename='img/flags') %}
                 {% for report in reports %}
                     {% if report["country"] not in ns.countries %}
                         {% set ns.countries = ns.countries + [report["country"]] %}
@@ -49,7 +50,8 @@
                         <td>{{ report["ip"] }}</td>
                         <td>
                             <div class="d-flex align-items-center">
-                                <img src="{{ base_url }}/{% if report['country'] == "local" %}zz{% else %}{{ report['country']|lower }}{% endif %}.svg"
+                                <img src="{{ base_flags_url }}/{% if report['country'] == "local" %}zz{% else %}{{ report['country']|lower }}{% endif %}.svg"
+                                    class="border border-1 p-0 me-1"
                                      data-bs-toggle="tooltip"
                                      data-bs-placement="top"
                                      data-bs-original-title="{% if report['country'] == "local" %}N/A{% else %}{{ report["country"] }}{% endif %}"

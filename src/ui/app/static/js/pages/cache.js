@@ -132,22 +132,6 @@ $(document).ready(function () {
     },
   };
 
-  $(".cache-last-update-date").each(function () {
-    const isoDateStr = $(this).text().trim();
-
-    // Parse the ISO format date string
-    const date = new Date(isoDateStr);
-
-    // Check if the date is valid
-    if (!isNaN(date)) {
-      // Convert to local date and time string
-      const localDateStr = date.toLocaleString();
-
-      // Update the text content with the local date string
-      $(this).text(localDateStr);
-    }
-  });
-
   const cache_table = new DataTable("#cache", {
     columnDefs: [
       {
@@ -157,6 +141,18 @@ $(document).ready(function () {
       {
         visible: false,
         targets: 5,
+      },
+      {
+        targets: 4,
+        render: function (data, type, row) {
+          if (type === "display" || type === "filter") {
+            const date = new Date(data);
+            if (!isNaN(date.getTime())) {
+              return date.toLocaleString();
+            }
+          }
+          return data;
+        },
       },
       {
         searchPanes: {

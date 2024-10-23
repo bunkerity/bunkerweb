@@ -1,16 +1,15 @@
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 72 36">
-<rect fill="#024FA2" width="72" height="36"/>
-<rect fill="#fff" y="6" width="72" height="24"/>
-<rect fill="#ED1C27" y="7" width="72" height="22"/>
-<circle fill="#fff" cx="24" cy="18" r="8"/>
-<g id="star" transform="translate(24,18) scale(7.75)" fill="#ED1C27">
-<g id="cone">
-<polygon id="triangle" points="0,0 0,1 .5,1" transform="translate(0,-1) rotate(18)"/>
-<use xlink:href="#triangle" transform="scale(-1,1)" id="use12"/>
-</g>
-<use xlink:href="#cone" transform="rotate(72)" id="use14"/>
-<use xlink:href="#cone" transform="rotate(-72)" id="use16"/>
-<use xlink:href="#cone" transform="rotate(144)" id="use18"/>
-<use xlink:href="#cone" transform="rotate(-144)" id="use20"/>
-</g>
+<svg xmlns="http://www.w3.org/2000/svg" id="flag-icons-kp" viewBox="0 0 640 480">
+  <defs>
+    <clipPath id="kp-a">
+      <path fill-opacity=".7" d="M5 .1h682.6V512H5.1z"/>
+    </clipPath>
+  </defs>
+  <g fill-rule="evenodd" clip-path="url(#kp-a)" transform="translate(-4.8 -.1)scale(.93768)">
+    <path fill="#fff" stroke="#000" d="M776 511.5H-76V.5h852z"/>
+    <path fill="#3e5698" d="M776 419H-76v92.5h852z"/>
+    <path fill="#c60000" d="M776 397.6H-76V114.4h852z"/>
+    <path fill="#3e5698" d="M776 .6H-76V93h852z"/>
+    <path fill="#fff" d="M328.5 256c0 63.5-53 115-118.6 115S91.3 319.5 91.3 256s53-114.8 118.6-114.8c65.5 0 118.6 51.4 118.6 114.9z"/>
+    <path fill="#c40000" d="m175.8 270.6-57-40.7 71-.2 22.7-66.4 21.1 66.1 71-.4-57.9 41.2 21.3 66.1-57-40.7-58 41.3z"/>
+  </g>
 </svg>
