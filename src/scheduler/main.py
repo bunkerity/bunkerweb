@@ -829,7 +829,7 @@ if __name__ == "__main__":
                     for thread in threads:
                         thread.join()
 
-                    success, responses = SCHEDULER.send_to_apis("POST", "/reload", response=True)
+                    success, responses = SCHEDULER.send_to_apis("POST", "/reload", timeout=max(5, 2 * len(env["SERVER_NAME"].split(" "))), response=True)
                     if not success:
                         reachable = False
                         LOGGER.debug(f"Error while reloading all bunkerweb instances: {responses}")
@@ -893,7 +893,7 @@ if __name__ == "__main__":
                             for thread in tmp_threads:
                                 thread.join()
 
-                        if not SCHEDULER.send_to_apis("POST", "/reload")[0]:
+                        if not SCHEDULER.send_to_apis("POST", "/reload", timeout=max(5, 2 * len(env["SERVER_NAME"].split(" "))))[0]:
                             LOGGER.error("Error while reloading bunkerweb with failover configuration, skipping ...")
                 elif not reachable:
                     LOGGER.warning("No BunkerWeb instance is reachable, skipping failover ...")

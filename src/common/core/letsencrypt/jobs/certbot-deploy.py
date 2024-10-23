@@ -35,6 +35,7 @@ try:
     db = Database(LOGGER, sqlalchemy_string=getenv("DATABASE_URI", None))
 
     instances = db.get_instances()
+    services = db.get_non_default_settings(global_only=True, methods=False, with_drafts=True, filtered_settings=("SERVER_NAME"))["SERVER_NAME"].split(" ")
 
     for instance in instances:
         endpoint = f"http://{instance['hostname']}:{instance['port']}"
@@ -52,7 +53,7 @@ try:
             LOGGER.info(
                 f"Successfully sent API request to {api.endpoint}/lets-encrypt/certificates",
             )
-            sent, err, status, resp = api.request("POST", "/reload")
+            sent, err, status, resp = api.request("POST", "/reload", timeout=max(5, 2 * len(services)))
             if not sent:
                 status = 1
                 LOGGER.error(f"Can't send API request to {api.endpoint}/reload : {err}")

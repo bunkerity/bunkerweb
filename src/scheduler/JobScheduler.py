@@ -128,7 +128,7 @@ class JobScheduler(ApiCaller):
 
     def __reload(self) -> bool:
         self.__logger.info("Reloading nginx...")
-        reload_success = self.send_to_apis("POST", "/reload")[0]
+        reload_success = self.send_to_apis("POST", "/reload", timeout=max(5, 2 * len(self.__env["SERVER_NAME"].split(" "))))[0]
         if reload_success:
             self.__logger.info("Successfully reloaded nginx")
             return True

@@ -29,10 +29,11 @@ class ApiCaller:
         url: str,
         files: Optional[Dict[str, BytesIO]] = None,
         data: Optional[Dict[str, Any]] = None,
+        timeout=(5, 10),
         response: bool = False,
     ) -> Tuple[bool, Optional[Dict[str, Any]]]:
         def send_request(api, files):
-            sent, err, status, resp = api.request(method, url, files=files, data=data)
+            sent, err, status, resp = api.request(method, url, files=files, data=data, timeout=timeout)
             return api, sent, err, status, resp
 
         ret = True
@@ -67,10 +68,10 @@ class ApiCaller:
 
         return ret, responses
 
-    def send_files(self, path: str, url: str) -> bool:
+    def send_files(self, path: str, url: str, timeout=(5, 10)) -> bool:
         with BytesIO() as tgz:
             with tar_open(mode="w:gz", fileobj=tgz, dereference=True, compresslevel=3) as tf:
                 tf.add(path, arcname=".")
             tgz.seek(0, 0)
             files = {"archive.tar.gz": tgz}
-            return self.send_to_apis("POST", url, files=files)[0]
+            return self.send_to_apis("POST", url, files=files, timeout=timeout)[0]
