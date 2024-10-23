@@ -147,6 +147,12 @@ Depending on the integration approach, the execution environment of the schedule
 
 By employing the scheduler, BunkerWeb streamlines the automation and coordination of essential tasks, enabling efficient and reliable operation of the entire system.
 
+### Instances healthcheck
+
+Since the 1.6.0-beta, the Scheduler possess a built-in healthcheck system, that will check the health of the instances. If an instance becomes unhealthy, the scheduler will stop sending the configuration to it. If the instance becomes healthy again, the scheduler will start sending the configuration to it again.
+
+The healthcheck interval is set by the `HEALTHCHECK_INTERVAL` environment variable with a default value of `30` which means that the scheduler will check the health of the instances every 30 seconds.
+
 ## Templates
 
 BunkerWeb leverages the power of templates to simplify the configuration process and enhance flexibility. Templates provide a structured and standardized approach to defining settings and custom configurations, ensuring consistency and ease of use.

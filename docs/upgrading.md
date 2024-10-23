@@ -396,6 +396,8 @@ Unlike the 1.5.X releases, the Scheduler service **no longer uses the *docker so
 
     **The instances will be automatically fetched by the controller**. You can also add custom instances to the list that may not be picked up by the controller.
 
+Since the 1.6.0-beta, the Scheduler also have a new [built-in healthcheck system](concepts.md#instances-healthcheck), that will check the health of the instances. If an instance becomes unhealthy, the scheduler will stop sending the configuration to it. If the instance becomes healthy again, the scheduler will start sending the configuration to it again.
+
 ### BunkerWeb container
 
 Another important change is that the **settings** that were previously declared on the BunkerWeb container **are now declared on the scheduler**. This means that you'll have to move your settings from the BunkerWeb container to the Scheduler container.
