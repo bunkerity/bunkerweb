@@ -86,7 +86,7 @@ def services_convert():
             DATA["TO_FLASH"].append({"content": ret, "type": "error"})
             DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
             return
-        DATA["TO_FLASH"].append({"content": f"Converted services: {', '.join(services_to_convert)}", "type": "success"})
+        DATA["TO_FLASH"].append({"content": f"Converted to \"{convert_to.title()}\" services: {', '.join(services_to_convert)}", "type": "success"})
         DATA["RELOADING"] = False
 
     DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})
