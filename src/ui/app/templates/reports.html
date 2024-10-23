@@ -36,6 +36,9 @@
                         data-bs-original-title="The reason why the Report was created">Reason</th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
+                        data-bs-original-title="The Server name that created the report">Server name</th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
                         data-bs-original-title="Additional data about the Report">Data</th>
                 </tr>
             </thead>
@@ -69,6 +72,7 @@
                         <td>{{ report["status"] }}</td>
                         <td>{{ report["user_agent"] }}</td>
                         <td>{{ report["reason"] }}</td>
+                        <td>{{ report["server_name"] }}</td>
                         <td>{{ report["data"] }}</td>
                     </tr>
                 {% endfor %}

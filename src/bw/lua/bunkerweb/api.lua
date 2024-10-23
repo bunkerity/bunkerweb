@@ -225,6 +225,7 @@ api.global.POST["^/ban$"] = function(self)
 		ip = "",
 		exp = 86400,
 		reason = "manual",
+		service = "unknown",
 	}
 	ban.ip = ip["ip"]
 	if ip["exp"] then
@@ -233,10 +234,14 @@ api.global.POST["^/ban$"] = function(self)
 	if ip["reason"] then
 		ban.reason = ip["reason"]
 	end
+	if ip["service"] then
+		ban.service = ip["service"]
+	end
 	datastore:set(
 		"bans_ip_" .. ban["ip"],
 		encode({
 			reason = ban["reason"],
+			service = ban["service"],
 			date = os.time(),
 		}),
 		ban["exp"]
@@ -267,12 +272,15 @@ api.global.GET["^/bans$"] = function(self)
 			local ban_data
 			ok, ban_data = pcall(decode, result)
 			if not ok then
-				ban_data = { reason = result, date = -1 }
+				ban_data = { reason = result, service = "unknown", date = -1 }
 			end
-			table.insert(
-				data,
-				{ ip = k:sub(9, #k), reason = ban_data["reason"], date = ban_data["date"], exp = math.floor(ttl) }
-			)
+			table.insert(data, {
+				ip = k:sub(9, #k),
+				reason = ban_data["reason"],
+				service = ban_data["service"],
+				date = ban_data["date"],
+				exp = math.floor(ttl),
+			})
 		end
 	end
 	return self:response(HTTP_OK, "success", data)

@@ -301,7 +301,7 @@ $(function () {
         viewTotal: true,
         cascadePanes: true,
         collapse: false,
-        columns: [1, 2, 3, 4, 5, 7],
+        columns: [1, 2, 3, 4, 5, 7, 8],
       },
     },
     topStart: {},
@@ -460,7 +460,7 @@ $(function () {
       },
       {
         searchPanes: { show: true },
-        targets: [1, 2, 3, 4, 5, 7],
+        targets: [1, 2, 3, 4, 5, 7, 8],
       },
     ],
     order: [[0, "desc"]],

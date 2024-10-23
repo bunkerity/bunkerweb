@@ -150,7 +150,7 @@ $(document).ready(function () {
         viewTotal: true,
         cascadePanes: true,
         collapse: false,
-        columns: [1, 4],
+        columns: [1, 4, 5],
       },
     },
     topStart: {},
@@ -336,7 +336,7 @@ $(document).ready(function () {
         targets: -1,
       },
       {
-        targets: [1, 4],
+        targets: [1, 5],
         render: function (data, type, row) {
           if (type === "display" || type === "filter") {
             const date = new Date(data);
@@ -396,7 +396,7 @@ $(document).ready(function () {
             {
               label: "Next 24 hours",
               value: function (rowData, rowIdx) {
-                const date = new Date(rowData[4]);
+                const date = new Date(rowData[5]);
                 const now = new Date();
                 return date - now < 24 * 60 * 60 * 1000;
               },
@@ -404,7 +404,7 @@ $(document).ready(function () {
             {
               label: "Next 7 days",
               value: function (rowData, rowIdx) {
-                const date = new Date(rowData[4]);
+                const date = new Date(rowData[5]);
                 const now = new Date();
                 return date - now < 7 * 24 * 60 * 60 * 1000;
               },
@@ -412,7 +412,7 @@ $(document).ready(function () {
             {
               label: "Next 30 days",
               value: function (rowData, rowIdx) {
-                const date = new Date(rowData[4]);
+                const date = new Date(rowData[5]);
                 const now = new Date();
                 return date - now < 30 * 24 * 60 * 60 * 1000;
               },
@@ -420,7 +420,7 @@ $(document).ready(function () {
             {
               label: "More than 30 days",
               value: function (rowData, rowIdx) {
-                const date = new Date(rowData[4]);
+                const date = new Date(rowData[5]);
                 const now = new Date();
                 return date - now >= 30 * 24 * 60 * 60 * 1000;
               },
@@ -429,10 +429,14 @@ $(document).ready(function () {
           combiner: "or",
           orderable: false,
         },
+        targets: 5,
+      },
+      {
+        searchPanes: { show: true },
         targets: 4,
       },
     ],
-    order: [[4, "asc"]],
+    order: [[5, "asc"]],
     autoFill: false,
     responsive: true,
     select: {

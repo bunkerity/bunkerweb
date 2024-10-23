@@ -106,9 +106,9 @@ class Instance:
             return f"Instance {self.hostname} has been restarted."
         return f"Can't restart instance {self.hostname}"
 
-    def ban(self, ip: str, exp: float, reason: str) -> str:
+    def ban(self, ip: str, exp: float, reason: str, service: str) -> str:
         try:
-            result = self.apiCaller.send_to_apis("POST", "/ban", data={"ip": ip, "exp": exp, "reason": reason})[0]
+            result = self.apiCaller.send_to_apis("POST", "/ban", data={"ip": ip, "exp": exp, "reason": reason, "service": service})[0]
         except BaseException as e:
             return f"Can't ban {ip} on instance {self.hostname}: {e}"
 
@@ -193,8 +193,10 @@ class InstancesUtils:
             instance.name for instance in instances or self.get_instances() if instance.status == "down" or instance.reload().startswith("Can't reload")
         ] or "Successfully reloaded instances"
 
-    def ban(self, ip: str, exp: float, reason: str, *, instances: Optional[List[Instance]] = None) -> Union[list[str], str]:
-        return [instance.name for instance in instances or self.get_instances(status="up") if instance.ban(ip, exp, reason).startswith("Can't ban")] or ""
+    def ban(self, ip: str, exp: float, reason: str, service: str, *, instances: Optional[List[Instance]] = None) -> Union[list[str], str]:
+        return [
+            instance.name for instance in instances or self.get_instances(status="up") if instance.ban(ip, exp, reason, service).startswith("Can't ban")
+        ] or ""
 
     def unban(self, ip: str, *, instances: Optional[List[Instance]] = None) -> Union[list[str], str]:
         return [instance.name for instance in instances or self.get_instances(status="up") if instance.unban(ip).startswith("Can't unban")] or ""

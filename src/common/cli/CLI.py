@@ -208,7 +208,7 @@ class CLI(ApiCaller):
     def ban(self, ip: str, exp: float, reason: str) -> Tuple[bool, str]:
         if self.__redis:
             try:
-                ok = self.__redis.set(f"bans_ip_{ip}", dumps({"reason": reason, "date": time()}))
+                ok = self.__redis.set(f"bans_ip_{ip}", dumps({"reason": reason, "date": time(), "service": "bwcli"}))
                 if not ok:
                     self.__logger.error(f"Failed to ban {ip} in redis")
                 self.__redis.expire(f"bans_ip_{ip}", int(exp))
@@ -260,7 +260,12 @@ class CLI(ApiCaller):
                     banned_date = f"the {datetime.fromtimestamp(ban['date']).strftime('%Y-%m-%d at %H:%M:%S %Z')} "
                 if ban["exp"] != -1:
                     remaining = f"for {format_remaining_time(ban['exp'])} remaining"
-                cli_str += f"- {ban['ip']} ; banned {banned_date}{remaining} with reason \"{ban.get('reason', 'no reason given')}\"\n"
+                cli_str += f"- {ban['ip']} ; banned {banned_date}{remaining} with reason \"{ban.get('reason', 'no reason given')}\""
+
+                if ban.get("service", "unknown") != "unknown":
+                    cli_str += f" by {ban['service'] if ban['service'] != '_' else 'default server'}"
+
+                cli_str += "\n"
             cli_str += "\n"
 
         return True, cli_str

@@ -85,12 +85,12 @@ def bans_ban():
         ban_end = (ban_end - current_time).total_seconds()
 
         if redis_client:
-            ok = redis_client.set(f"bans_ip_{ban['ip']}", dumps({"reason": reason, "date": time()}))
+            ok = redis_client.set(f"bans_ip_{ban['ip']}", dumps({"reason": reason, "date": time(), "service": "web UI"}))
             if not ok:
                 flash(f"Couldn't ban {ban['ip']} on redis", "error")
             redis_client.expire(f"bans_ip_{ban['ip']}", int(ban_end))
 
-        resp = BW_INSTANCES_UTILS.ban(ban["ip"], ban_end, reason)
+        resp = BW_INSTANCES_UTILS.ban(ban["ip"], ban_end, reason, "web UI")
         if resp:
             flash(f"Couldn't ban {ban['ip']} on the following instances: {', '.join(resp)}", "error")
         else:

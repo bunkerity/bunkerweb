@@ -714,10 +714,11 @@ utils.is_banned = function(ip)
 	return false, "not banned"
 end
 
-utils.add_ban = function(ip, reason, ttl)
+utils.add_ban = function(ip, reason, ttl, service)
 	-- Set on local datastore
 	local ban_data = encode({
 		reason = reason,
+		service = service or "unknown",
 		date = os.time(),
 	})
 	local ok, err = datastore:set("bans_ip_" .. ip, ban_data, ttl)

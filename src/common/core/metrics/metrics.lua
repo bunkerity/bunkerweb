@@ -72,6 +72,7 @@ function metrics:log(bypass_checks)
 			status = ngx.status,
 			user_agent = self.ctx.bw.http_user_agent or "",
 			reason = reason,
+			server_name = self.ctx.bw.server_name,
 			data = data,
 		}
 		-- Get current requests
