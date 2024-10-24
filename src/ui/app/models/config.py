@@ -162,7 +162,12 @@ class Config:
             elif setting not in config and plugins_settings[setting]["default"] == v:
                 variables.pop(k)
                 continue
-            elif not new and setting != "IS_DRAFT" and setting in config and config[setting]["method"] not in ("default", "ui"):
+            elif (
+                not new
+                and setting != "IS_DRAFT"
+                and setting in config
+                and ((global_config or not config[setting]["global"]) and config[setting]["method"] not in ("default", "ui"))
+            ):
                 message = f"Variable {k} is not editable as is it managed by the {config[setting]['method']}, ignoring it"
                 if threaded:
                     self.__data["TO_FLASH"].append({"content": message, "type": "error"})
