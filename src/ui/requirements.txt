@@ -67,9 +67,9 @@ flask-login==0.6.3 \
 flask-principal==0.4.0 \
     --hash=sha256:f5d6134b5caebfdbb86f32d56d18ee44b080876a27269560a96ea35f75c99453
     # via -r requirements.in
-flask-wtf==1.2.1 \
-    --hash=sha256:8bb269eb9bb46b87e7c8233d7e7debdf1f8b74bf90cc1789988c29b37a97b695 \
-    --hash=sha256:fa6793f2fb7e812e0fe9743b282118e581fb1b6c45d414b8af05e659bd653287
+flask-wtf==1.2.2 \
+    --hash=sha256:79d2ee1e436cf570bccb7d916533fa18757a2f18c290accffab1b9a0b684666b \
+    --hash=sha256:e93160c5c5b6b571cf99300b6e01b72f9a101027cab1579901f8b10c5daf0b70
     # via -r requirements.in
 gevent==24.10.3 \
     --hash=sha256:051b22e2758accfddb0457728bfc9abf8c3f2ce6bca43f1ff6e07b5ed9e49bf4 \
@@ -381,12 +381,6 @@ regex==2024.9.11 \
     --hash=sha256:f8404bf61298bb6f8224bb9176c1424548ee1181130818fcd2cbffddc768bed8 \
     --hash=sha256:f9268774428ec173654985ce55fc6caf4c6d11ade0f6f914d48ef4719eb05ebb \
     --hash=sha256:faa3c142464efec496967359ca99696c896c591c56c53506bac1ad465f66e919
-    # via gevent
-
-# The following packages are considered to be unsafe in a requirements file:
-setuptools==75.2.0 \
-    --hash=sha256:753bb6ebf1f465a1912e19ed1d41f403a79173a9acf66a42e7e6aec45c3c16ec \
-    --hash=sha256:a7fcb66f68b4d9e8e66b42f9876150a3371558f98fa32222ffaa5bced76406f8
     # via -r requirements.in
 six==1.16.0 \
     --hash=sha256:1e61c37477a1626458e36f7b1d82aa5c9b094fa4802892072e49de9c60c4c926 \
@@ -461,6 +455,12 @@ zope-interface==7.1.0 \
     --hash=sha256:ec59fe53db7d32abb96c6d4efeed84aab4a7c38c62d7a901a9b20c09dd936e7a \
     --hash=sha256:f245d039f72e6f802902375755846f5de1ee1e14c3e8736c078565599bcab621 \
     --hash=sha256:ff115ef91c0eeac69cd92daeba36a9d8e14daee445b504eeea2b1c0b55821984
+    # via gevent
+
+# The following packages are considered to be unsafe in a requirements file:
+setuptools==75.2.0 \
+    --hash=sha256:753bb6ebf1f465a1912e19ed1d41f403a79173a9acf66a42e7e6aec45c3c16ec \
+    --hash=sha256:a7fcb66f68b4d9e8e66b42f9876150a3371558f98fa32222ffaa5bced76406f8
     # via
     #   zope-event
     #   zope-interface
