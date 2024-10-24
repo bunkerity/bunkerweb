@@ -230,6 +230,9 @@
         {% elif current_endpoint == "pro" %}
             <script src="{{ url_for('static', filename='js/pages/pro.js') }}"
                     nonce="{{ script_nonce }}"></script>
+        {% elif current_endpoint != "plugins" and "plugins" in request.path %}
+            <script src="{{ url_for('static', filename='js/pages/plugin_page.js') }}"
+                    nonce="{{ script_nonce }}"></script>
         {% endif %}
         <script async defer src="{{ url_for('static', filename='js/buttons.js') }}"></script>
     </body>

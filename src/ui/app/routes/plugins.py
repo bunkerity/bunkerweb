@@ -2,7 +2,7 @@ from importlib.machinery import SourceFileLoader
 from io import BytesIO
 from json import JSONDecodeError, loads as json_loads
 from os import listdir
-from os.path import basename, dirname, isabs
+from os.path import basename, dirname, isabs, join, sep
 from pathlib import Path
 from shutil import move, rmtree
 from sys import path as sys_path
@@ -15,6 +15,7 @@ from zipfile import BadZipFile, ZipFile
 
 from flask import Blueprint, Response, current_app, flash, jsonify, redirect, render_template, request, url_for
 from flask_login import login_required
+from jinja2 import Environment, FileSystemLoader, select_autoescape
 from werkzeug.utils import secure_filename
 
 from common_utils import bytes_hash  # type: ignore
@@ -520,7 +521,7 @@ def custom_plugin_page(plugin: str):
     is_metrics_on = db_config.get("USE_METRICS", "yes") != "no"
     is_used = plugin in ALWAYS_USED_PLUGINS or plugin_used()
 
-    if not is_metrics_on and not is_used:
+    if is_metrics_on and not is_used:
         # Check if at least one service is using metrics and/or the plugin
         for service in db_config.get("SERVER_NAME", "").split(" "):
             if not is_metrics_on and db_config.get(f"{service}_USE_METRICS", "yes") != "no":
@@ -530,37 +531,38 @@ def custom_plugin_page(plugin: str):
             if is_metrics_on and is_used:
                 break
 
+    pre_render = {}
     plugin_page = ""
-    # TODO: uncomment this when the plugin pages are ready
-    # if is_used and is_metrics_on:
-    #     page = DB.get_plugin_page(plugin)
-    #     if not page:
-    #         return error_message("The plugin does not have a page"), 404
+    if is_used and is_metrics_on:
+        page = DB.get_plugin_page(plugin)
+        if not page:
+            return error_message("The plugin does not have a page"), 404
 
-    #     tmp_page_dir = TMP_DIR.joinpath("ui", "page", str(uuid4()))
-    #     tmp_page_dir.mkdir(parents=True, exist_ok=True)
+        tmp_page_dir = TMP_DIR.joinpath("ui", "page", str(uuid4()))
+        tmp_page_dir.mkdir(parents=True, exist_ok=True)
 
-    #     with tar_open(fileobj=BytesIO(page), mode="r:gz") as tar_file:
-    #         tar_file.extractall(tmp_page_dir)
+        with tar_open(fileobj=BytesIO(page), mode="r:gz") as tar_file:
+            tar_file.extractall(tmp_page_dir)
 
-    #     tmp_page_dir = tmp_page_dir.joinpath("ui")
+        tmp_page_dir = tmp_page_dir.joinpath("ui")
 
-    #     LOGGER.debug(f"Plugin {plugin} page extracted successfully")
+        LOGGER.debug(f"Plugin {plugin} page extracted successfully")
 
-    #     pre_render = run_action(plugin, "pre_render", tmp_dir=tmp_page_dir)
-    #     try:
-    #         plugin_page = (
-    #             # deepcode ignore Ssti: We trust the plugin template
-    #             Environment(
-    #                 loader=FileSystemLoader((tmp_page_dir.as_posix() + "/", join(sep, "usr", "share", "bunkerweb", "ui", "templates") + "/")),
-    #                 autoescape=select_autoescape(["html"]),
-    #             )
-    #             .from_string(tmp_page_dir.joinpath("template.html").read_text(encoding="utf-8"))
-    #             .render(pre_render=pre_render, **current_app.jinja_env.globals)
-    #         )
-    #     except BaseException as e:
-    #         LOGGER.exception(f"An error occurred while rendering the plugin page")
-    #         plugin_page = f'<div class="mt-2 mb-2 alert alert-danger text-center" role="alert">An error occurred while rendering the plugin page: {e}<br/>See logs for more details</div>'
+        pre_render = run_action(plugin, "pre_render", tmp_dir=tmp_page_dir)
+        if tmp_page_dir.joinpath("template.html").is_file():
+            try:
+                plugin_page = (
+                    # deepcode ignore Ssti: We trust the plugin template
+                    Environment(
+                        loader=FileSystemLoader((tmp_page_dir.as_posix() + "/", join(sep, "usr", "share", "bunkerweb", "ui", "templates") + "/")),
+                        autoescape=select_autoescape(["html"]),
+                    )
+                    .from_string(tmp_page_dir.joinpath("template.html").read_text(encoding="utf-8"))
+                    .render(pre_render=pre_render, **current_app.jinja_env.globals)
+                )
+            except BaseException as e:
+                LOGGER.exception("An error occurred while rendering the plugin page")
+                plugin_page = f'<div class="mt-2 mb-2 alert alert-danger text-center" role="alert">An error occurred while rendering the plugin page: {e}<br/>See logs for more details</div>'
 
     return render_template(
         "plugin_page.html",
@@ -568,6 +570,7 @@ def custom_plugin_page(plugin: str):
         plugin=plugin_data,
         is_used=is_used,
         is_metrics=is_metrics_on,
+        pre_render=pre_render,
     )
 
 

@@ -1,24 +1,26 @@
+from logging import getLogger
 from traceback import format_exc
 
 
 def pre_render(**kwargs):
+    logger = getLogger("UI")
+    ret = {
+        "counter_failed_challenges": {
+            "value": 0,
+            "title": "Challenges",
+            "subtitle": "Failed",
+            "subtitle_color": "danger",
+            "svg_color": "danger",
+        },
+    }
     try:
-        data = kwargs["bw_instances_utils"].get_metrics("antibot")
-        return {
-            "counter_failed_challenges": {
-                "value": data.get("counter_failed_challenges", 0),
-                "title": "Challenge",
-                "subtitle": "Failed",
-                "subtitle_color": "error",
-                "svg_color": "red",
-            }
-        }
-    except BaseException:
-        print(format_exc(), flush=True)
-        return {
-            "counter_failed_challenges": {"value": "unknown", "title": "Challenge", "subtitle": "Failed", "subtitle_color": "error", "svg_color": "red"},
-            "error": format_exc(),
-        }
+        ret["counter_failed_challenges"]["value"] = kwargs["bw_instances_utils"].get_metrics("antibot").get("counter_failed_challenges", 0)
+    except BaseException as e:
+        logger.debug(format_exc())
+        logger.error(f"Failed to get antibot metrics: {e}")
+        ret["error"] = str(e)
+
+    return ret
 
 
 def antibot(**kwargs):

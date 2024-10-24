@@ -1,7 +1,7 @@
 {% extends "dashboard.html" %}
 {% block content %}
     <!-- Content -->
-    <div class="card text-nowrap p-4 min-vh-70">
+    <div class="card p-1 mb-4 sticky-card text-nowrap">
         <div class="card-header d-flex justify-content-between align-items-center mw-100">
             <div class="pt-1 flex-grow-1 me-2" style="min-width: 0;">
                 <h5 class="card-title d-inline don-jose{{ plugin_types[plugin['type']].get('text-class', '') }}{{ plugin_types[plugin['type']].get('title-class', '') }}">
@@ -21,29 +21,164 @@
                 </a>
             </div>
         </div>
-        <div class="card-body">
-            <div class="d-flex align-items-center justify-content-center h-100">
-                <div class="text-center text-primary">
-                    {% if not is_used %}
-                        <p id="config-waiting"
-                           class="text-center relative w-full p-2 text-primary rounded-lg fw-bold">
-                            Plugin is deactivated, therefore no information is available.
-                        </p>
-                    {% elif not is_metrics %}
-                        <p id="config-waiting"
-                           class="text-center relative w-full p-2 text-primary rounded-lg fw-bold">
-                            Metrics plugin isn't activated, therefore no information is available.
-                        </p>
-                    {% else %}
-                        <!-- TODO: remove this when plugin pages are available -->
-                        <p class="text-center relative w-full p-2 text-primary rounded-lg fw-bold">
-                            Plugin pages are not yet available during the beta phase.
-                        </p>
-                        {{ plugin_page|safe }}
-                    {% endif %}
-                </div>
+    </div>
+    {% if not is_used %}
+        <div class="d-flex align-items-center justify-content-center">
+            <div class="text-center text-primary">
+                <p class="text-center relative w-full p-2 text-primary rounded-lg fw-bold">
+                    Plugin is deactivated, therefore no information is available.
+                </p>
             </div>
         </div>
-    </div>
+    {% elif not is_metrics %}
+        <div class="d-flex align-items-center justify-content-center">
+            <div class="text-center text-primary">
+                <p class="text-center relative w-full p-2 text-primary rounded-lg fw-bold">
+                    Metrics plugin isn't activated, therefore no information is available.
+                </p>
+            </div>
+        </div>
+    {% elif pre_render.get("status", False) and pre_render.get("status", False) == "ko" or "error" in pre_render.get("data", {}) or pre_render.get("data") is not mapping %}
+        <div class="d-flex align-items-center justify-content-center">
+            <div class="text-center text-primary">
+                <p class="text-center relative w-full p-2 text-primary rounded-lg fw-bold">
+                    (Pre rendering error) {{ pre_render.get('data', {'error': 'No log to show'}).get("error", "No log to show") }}
+                </p>
+            </div>
+        </div>
+    {% else %}
+        {% if plugin_page %}
+            {{ plugin_page|safe }}
+        {% elif pre_render.get("status", "ko") == "ok" and pre_render.get("data") is mapping and "error" not in pre_render.get("data", {}) %}
+            <div class="row g-4">
+                {% for key, value in pre_render.get("data", {}).items() %}
+                    {% if key.startswith("ping_") %}
+                        {% set up = value.get("value") in ('up', 'yes', 'success', 'true') %}
+                        <div class="{{ value.get('col-size', 'col-12 col-md-4') }}">
+                            <div class="card p-4 position-relative shadow-md rounded-3 {{ value.get('card-classes', '') }}">
+                                <i class='bx bx-{% if up %}up{% else %}down{% endif %}-arrow-circle bx-sm position-absolute top-0 end-0 m-3 text-{% if up %}success{% else %}danger{% endif %}'></i>
+                                <div class="card-header p-1">
+                                    <div class="card-title mb-0">
+                                        <h5 class="mb-1 me-2 don-jose">{{ value.get('title', 'STATUS') }}</h5>
+                                    </div>
+                                </div>
+                                <div class="card-body position-relative pb-0">
+                                    <div class="d-flex align-items-center justify-content-center h-100">
+                                        <div class="text-center mt-2">
+                                            <p class="g-3 p-2 text-{% if up %}success{% else %}danger{% endif %} rounded-lg fw-bold">
+                                                {{ 'Active' if up else 'Inactive' }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% elif key.startswith(("info_", "date_", "count_", "counter_")) %}
+                        <div class="{{ value.get('col-size', 'col-12 col-md-4') }}">
+                            <div class="card p-4 position-relative shadow-md rounded-3 {{ value.get('card-classes', '') }}">
+                                {% set svg_color = value.get("svg_color") %}
+                                <i class='bx bx-{% if key.startswith("info_") %}info-circle{% elif key.startswith("date_") %}calendar{% else %}slider-alt{% endif %} bx-sm position-absolute top-0 end-0 m-3{% if svg_color %} text-{{ svg_color }}{% endif %}'></i>
+                                <div class="card-header p-1">
+                                    <div class="card-title mb-0">
+                                        <h5 class="mb-1 me-2 don-jose">{{ value.get("title") }}</h5>
+                                    </div>
+                                </div>
+                                <div class="card-body position-relative">
+                                    {% if key.startswith("info_") %}
+                                        <div class="d-flex align-items-center justify-content-center h-100">
+                                            <div class="text-center mt-2">
+                                                <p class="card-text mb-1">{{ value.get("value") }}</p>
+                                                {% set description = value.get("description") %}
+                                                {% if description %}<p class="card-text text-muted mb-0">{{ value.get("description") }}</p>{% endif %}
+                                            </div>
+                                        </div>
+                                    {% elif key.startswith("date_") %}
+                                        <div class="d-flex align-items-center justify-content-center h-100">
+                                            <div class="text-center mt-2">
+                                                <p class="g-3 p-2 text-primary rounded-lg fw-bold date-field">{{ value.get("value") }}</p>
+                                            </div>
+                                        </div>
+                                    {% else %}
+                                        <p class="card-text mb-0">{{ human_readable_number(value.get("value") ) }}</p>
+                                    {% endif %}
+                                    {% set subtitle = value.get("subtitle") %}
+                                    {% if subtitle %}
+                                        <small class="position-absolute bottom-0 end-0 text-{{ value.get('subtitle_color', 'muted') }}">{{ subtitle }}</small>
+                                    {% endif %}
+                                </div>
+                                {% if key.startswith("date_") %}
+                                    <span class="position-absolute bottom-0 start-50 translate-middle badge rounded-pill bg-secondary">
+                                        TZ: <script nonce="{{ script_nonce }}">document.write(Intl.DateTimeFormat().resolvedOptions().timeZone);</script>
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% elif key.startswith(("top_", "list_")) %}
+                        <div class="{{ value.get('col-size', 'col-12 col-md-8') }}">
+                            <div class="card p-4 position-relative shadow-md rounded-3 h-100 {{ value.get('card-classes', '') }}">
+                                {% set svg_color = value.get("svg_color") %}
+                                <i class='bx bx-list-{% if key.startswith("top_") %}ol{% else %}ul{% endif %} bx-sm position-absolute top-0 end-0 m-3{% if svg_color %} text-{{ svg_color }}{% endif %}'></i>
+                                <div class="card-header p-1">
+                                    <div class="card-title mb-0">
+                                        <h5 class="mb-1 me-2 don-jose">{{ key.replace('_', ' ') }}</h5>
+                                    </div>
+                                </div>
+                                <div class="card-body p-0">
+                                    {% if value.get("data") %}
+                                        {% if key.startswith("top_") %}
+                                            {% set top_order = value.get("order", {"column": "0", "dir": "desc"}) %}
+                                            <div id="table-{{ key.replace('_', '-') }}-order" class="visually-hidden">{{ top_order|tojson }}</div>
+                                        {% endif %}
+                                        <div id="table-{{ key.replace('_', '-') }}-types" class="visually-hidden">{{ value.get('types', {}) |tojson }}</div>
+                                        <div class="card table-responsive text-nowrap">
+                                            <table id="table-{{ key.replace('_', '-') }}" class="table w-100 d-none">
+                                                {% set ns_list = namespace(size=0) %}
+                                                <thead>
+                                                    <tr>
+                                                        {% for val_key in value['data'] %}
+                                                            <th>{{ val_key|trim }}</th>
+                                                            {% set ns_list.size = value['data'][val_key]|length if value['data'][val_key]|length > ns_list.size else ns_list.size %}
+                                                        {% endfor %}
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for n in range(ns_list.size) %}
+                                                        <tr>
+                                                            {% for val_key, items in value['data'].items() %}
+                                                                <td>
+                                                                    {{ items[n]|trim if n < items|length else '' }}
+                                                                </td>
+                                                            {% endfor %}
+                                                        </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <input type="hidden"
+                                               id="table-{{ key.replace('_', '-') }}-length"
+                                               value="{{ ns_list.size }}">
+                                    {% else %}
+                                        <div class="d-flex align-items-center justify-content-center h-100">
+                                            <div class="text-center mt-2">
+                                                <p class="g-3 p-2 text-primary rounded-lg fw-bold">No data to show</p>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="d-flex align-items-center justify-content-center">
+                <div class="text-center text-primary">
+                    <p class="text-center relative w-full p-2 text-primary rounded-lg fw-bold">
+                        Plugin page not yet available during the beta phase.
+                    </p>
+                </div>
+            </div>
+        {% endif %}
+    {% endif %}
     <!--/ Content -->
 {% endblock %}

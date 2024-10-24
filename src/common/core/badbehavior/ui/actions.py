@@ -1,18 +1,40 @@
+from logging import getLogger
 from operator import itemgetter
 from traceback import format_exc
 
 
 def pre_render(**kwargs):
+    logger = getLogger("UI")
+    ret = {
+        "top_bad_behavior": {
+            "data": {},
+            "order": {
+                "column": 1,
+                "dir": "desc",
+            },
+            "svg_color": "primary",
+        },
+    }
     try:
-        # Here we will have a list { 'counter_403': X, 'counter_401': Y ... }
-        data = kwargs["bw_instances_utils"].get_metrics("badbehavior")
-        # Format to fit [{code: 403, count: X}, {code: 401, count: Y} ...]
-        format_data = [{"code": int(key.split("_")[1]), "count": int(value)} for key, value in data.items()]
+        format_data = [
+            {
+                "code": int(key.split("_")[1]),
+                "count": int(value),
+            }
+            for key, value in kwargs["bw_instances_utils"].get_metrics("badbehavior").items()
+        ]
         format_data.sort(key=itemgetter("count"), reverse=True)
-        return {"top_bad_behavior": format_data}
-    except BaseException:
-        print(format_exc(), flush=True)
-        return {"top_bad_behavior": "unknown", "error": format_exc()}
+        data = {"code": [], "count": []}
+        for item in format_data:
+            data["code"].append(item["code"])
+            data["count"].append(item["count"])
+        ret["top_bad_behavior"]["data"] = data
+    except BaseException as e:
+        logger.debug(format_exc())
+        logger.error(f"Failed to get badbehavior metrics: {e}")
+        ret["error"] = str(e)
+
+    return ret
 
 
 def badbehavior(**kwargs):

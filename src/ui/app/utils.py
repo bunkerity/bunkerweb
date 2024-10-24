@@ -5,7 +5,7 @@ from os import _exit, getenv
 from os.path import join, sep
 from pathlib import Path
 from subprocess import PIPE, Popen, call
-from typing import Dict, List, Optional, Set
+from typing import Dict, List, Optional, Set, Union
 
 from bcrypt import checkpw, gensalt, hashpw
 from flask import flash as flask_flash, session
@@ -281,7 +281,8 @@ def flash(message: str, category: str = "success", *, save: bool = True) -> None
         session["flash_messages"].append((message, category, datetime.now().astimezone().isoformat()))
 
 
-def human_readable_number(value):
+def human_readable_number(value: Union[str, int]) -> str:
+    value = int(value)
     if value >= 1_000_000:
         return f"{value/1_000_000:.1f}M"
     elif value >= 1_000:

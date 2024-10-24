@@ -782,3 +782,67 @@ a.courier-prime:hover {
   width: 100vw;
   height: 100vh;
 }
+
+.text-orange {
+  color: #ff7f50;
+}
+
+.text-amber {
+  color: #ffbf00;
+}
+
+.text-emerald {
+  color: #50c878;
+}
+
+.text-pink {
+  color: #ff69b4;
+}
+
+.text-purple {
+  color: #800080;
+}
+
+.text-sky {
+  color: #87ceeb;
+}
+
+.text-turquoise {
+  color: #40e0d0;
+}
+
+.text-violet {
+  color: #ee82ee;
+}
+
+.text-rose {
+  color: #ff007f;
+}
+
+.text-olive {
+  color: #808000;
+}
+
+.text-lime {
+  color: #00ff00;
+}
+
+.text-gold {
+  color: #ffd700;
+}
+
+.text-cyan {
+  color: #00ffff;
+}
+
+.text-aqua {
+  color: #00ffff;
+}
+
+.text-indigo {
+  color: #4b0082;
+}
+
+.text-maroon {
+  color: #800000;
+}
