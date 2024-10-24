@@ -213,7 +213,7 @@ class JobScheduler(ApiCaller):
         self.__job_reload = False
 
         # Use ThreadPoolExecutor to run jobs
-        futures = [self.__executor.submit(self.__run_job_with_semaphore, job.run) for job in pending_jobs]
+        futures = [self.__executor.submit(self.__run_jobs_with_semaphore, [job.run]) for job in pending_jobs]
 
         # Wait for all jobs to complete
         for future in futures:
@@ -255,9 +255,9 @@ class JobScheduler(ApiCaller):
 
         plugins = plugins or []
 
-        # Create a list of all jobs to run
-        jobs_to_run = []
+        futures = []
         for plugin, jobs in self.__jobs.items():
+            jobs_to_run = []
             if plugins and plugin not in plugins:
                 continue
             for job in jobs:
@@ -270,9 +270,7 @@ class JobScheduler(ApiCaller):
                         job["file"],
                     )
                 )
-
-        # Use ThreadPoolExecutor to run jobs
-        futures = [self.__executor.submit(self.__run_job_with_semaphore, job_func) for job_func in jobs_to_run]
+            futures.append(self.__executor.submit(self.__run_jobs_with_semaphore, jobs_to_run))
 
         # Wait for all jobs to complete
         for future in futures:
@@ -314,9 +312,10 @@ class JobScheduler(ApiCaller):
             self.__lock.release()
         return self.__job_success
 
-    def __run_job_with_semaphore(self, job_func):
+    def __run_jobs_with_semaphore(self, jobs):
         with self.__semaphore:
-            job_func()
+            for job in jobs:
+                job()
 
     def clear(self):
         schedule.clear()
