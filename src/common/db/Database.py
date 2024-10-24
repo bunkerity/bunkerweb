@@ -1450,14 +1450,12 @@ class Database:
                             # Determine if we need to add, update, or delete
                             if not service_setting:
                                 if key != "SERVER_NAME" and (
-                                    (template_setting_default is not None and value == template_setting_default)
-                                    or (
-                                        template_setting_default is None
-                                        and (
-                                            (original_key in config and value == config[original_key])
-                                            or (original_key in db_config and value == db_config[original_key])
-                                            or value == setting["default"]
-                                        )
+                                    value == template_setting_default
+                                    if template_setting_default is not None
+                                    else (
+                                        value == setting["default"]
+                                        if original_key not in config and original_key not in db_config
+                                        else value in (config.get(original_key), db_config.get(original_key))
                                     )
                                 ):
                                     continue
@@ -1475,14 +1473,12 @@ class Database:
                                 local_changed_plugins.add(setting["plugin_id"])
 
                                 if key != "SERVER_NAME" and (
-                                    (template_setting_default is not None and value == template_setting_default)
-                                    or (
-                                        template_setting_default is None
-                                        and (
-                                            (original_key in config and value == config[original_key])
-                                            or (original_key in db_config and value == db_config[original_key])
-                                            or value == setting["default"]
-                                        )
+                                    value == template_setting_default
+                                    if template_setting_default is not None
+                                    else (
+                                        value == setting["default"]
+                                        if original_key not in config and original_key not in db_config
+                                        else value in (config.get(original_key), db_config.get(original_key))
                                     )
                                 ):
                                     self.logger.debug(f"Removing setting {key} for service {server_name}")
