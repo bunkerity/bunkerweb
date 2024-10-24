@@ -68,10 +68,13 @@ class ApiCaller:
 
         return ret, responses
 
-    def send_files(self, path: str, url: str, timeout=(5, 10)) -> bool:
+    def send_files(self, path: str, url: str, timeout=(5, 10), response: bool = False) -> Union[bool, Tuple[bool, Optional[Dict[str, Any]]]]:
         with BytesIO() as tgz:
             with tar_open(mode="w:gz", fileobj=tgz, dereference=True, compresslevel=3) as tf:
                 tf.add(path, arcname=".")
             tgz.seek(0, 0)
             files = {"archive.tar.gz": tgz}
-            return self.send_to_apis("POST", url, files=files, timeout=timeout)[0]
+            ret = self.send_to_apis("POST", url, files=files, timeout=timeout, response=response)
+            if response:
+                return ret[0], ret[1]
+            return ret[0]

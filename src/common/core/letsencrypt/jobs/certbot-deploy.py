@@ -37,6 +37,14 @@ try:
     instances = db.get_instances()
     services = db.get_non_default_settings(global_only=True, methods=False, with_drafts=True, filtered_settings=("SERVER_NAME"))["SERVER_NAME"].split(" ")
 
+    reload_min_timeout = getenv("RELOAD_MIN_TIMEOUT", "5")
+
+    if not reload_min_timeout.isdigit():
+        LOGGER.error("RELOAD_MIN_TIMEOUT must be an integer, defaulting to 5")
+        reload_min_timeout = 5
+
+    reload_min_timeout = int(reload_min_timeout)
+
     for instance in instances:
         endpoint = f"http://{instance['hostname']}:{instance['port']}"
         host = instance["server_name"]
@@ -53,7 +61,7 @@ try:
             LOGGER.info(
                 f"Successfully sent API request to {api.endpoint}/lets-encrypt/certificates",
             )
-            sent, err, status, resp = api.request("POST", "/reload", timeout=max(5, 2 * len(services)))
+            sent, err, status, resp = api.request("POST", "/reload", timeout=max(reload_min_timeout, 2 * len(services)))
             if not sent:
                 status = 1
                 LOGGER.error(f"Can't send API request to {api.endpoint}/reload : {err}")
