@@ -401,7 +401,7 @@ $(function () {
         targets: 5,
       },
     ],
-    order: [[5, "desc"]],
+    order: [[1, "desc"]],
     autoFill: false,
     responsive: true,
     select: {
