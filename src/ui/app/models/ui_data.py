@@ -17,8 +17,10 @@ class UIData(dict):
     def load_from_file(self):
         if self.file_path.is_file():
             with self.__lock:
-                for key, value in loads(self.file_path.read_text()).items():
-                    super().__setitem__(key, value)
+                data = self.file_path.read_text()
+                if data:
+                    for key, value in loads(data).items():
+                        super().__setitem__(key, value)
 
     def __setitem__(self, key, value):
         super().__setitem__(key, value)
