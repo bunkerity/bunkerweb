@@ -1,24 +1,26 @@
+from logging import getLogger
 from traceback import format_exc
 
 
 def pre_render(**kwargs):
+    logger = getLogger("UI")
+    ret = {
+        "counter_failed_dnsbl": {
+            "value": 0,
+            "title": "DNSBL",
+            "subtitle": "Request blocked",
+            "subtitle_color": "danger",
+            "svg_color": "danger",
+        },
+    }
     try:
-        data = kwargs["bw_instances_utils"].get_metrics("dnsbl")
-        return {
-            "counter_failed_dnsbl": {
-                "value": data.get("counter_failed_dnsbl", 0),
-                "title": "DNSBL",
-                "subtitle": "request blocked",
-                "subtitle_color": "error",
-                "svg_color": "red",
-            }
-        }
-    except BaseException:
-        print(format_exc(), flush=True)
-        return {
-            "counter_failed_dnsbl": {"value": "unknown", "title": "DNSBL", "subtitle": "request blocked", "subtitle_color": "error", "svg_color": "red"},
-            "error": format_exc(),
-        }
+        ret["counter_failed_dnsbl"]["value"] = kwargs["bw_instances_utils"].get_metrics("dnsbl").get("counter_failed_dnsbl", 0)
+    except BaseException as e:
+        logger.debug(format_exc())
+        logger.error(f"Failed to get dnsbl metrics: {e}")
+        ret["error"] = str(e)
+
+    return ret
 
 
 def dnsbl(**kwargs):

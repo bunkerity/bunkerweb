@@ -30,11 +30,11 @@ plugins = Blueprint("plugins", __name__)
 
 ALWAYS_USED_PLUGINS = ("errors", "headers", "misc", "php", "pro", "sessions")
 PLUGINS_SPECIFICS = {
-    "country": {"BLACKLIST_COUNTRY": "", "WHITELIST_COUNTRY": ""},
-    "customcert": {"USE_CUSTOM_SSL": "no"},
-    "letsencrypt": {"AUTO_LETS_ENCRYPT": "no"},
-    "limit": {"USE_LIMIT_REQ": "no", "USE_LIMIT_CONN": "no"},
-    "selfsigned": {"GENERATE_SELF_SIGNED_SSL": "no"},
+    "COUNTRY": {"BLACKLIST_COUNTRY": "", "WHITELIST_COUNTRY": ""},
+    "CUSTOMCERT": {"USE_CUSTOM_SSL": "no"},
+    "LETSENCRYPT": {"AUTO_LETS_ENCRYPT": "no"},
+    "LIMIT": {"USE_LIMIT_REQ": "no", "USE_LIMIT_CONN": "no"},
+    "SELFSIGNED": {"GENERATE_SELF_SIGNED_SSL": "no"},
 }
 
 
