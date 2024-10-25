@@ -693,6 +693,18 @@ table.table.dataTable > tbody > tr.selected > * {
   color: initial !important;
 }
 
+table.table.dataTable > tbody > tr.selected a.btn-outline-secondary {
+  color: var(--bs-secondary) !important;
+}
+
+table.table.dataTable > tbody > tr.selected a.btn-outline-primary {
+  color: var(--bs-primary) !important;
+}
+
+table.table.dataTable > tbody > tr.selected a.btn-primary {
+  color: #fff !important;
+}
+
 .border-dashed {
   border-style: dashed !important;
 }
