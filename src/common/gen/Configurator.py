@@ -152,7 +152,7 @@ class Configurator:
                 variables[split[0]] = split[1]
         return variables
 
-    def get_config(self, db=None) -> Dict[str, str]:
+    def get_config(self, db=None, *, first_run: bool = False) -> Dict[str, str]:
         config = {}
         template = self.__variables.get("USE_TEMPLATE", "")
 
@@ -186,31 +186,34 @@ class Configurator:
             ret, err = self.__check_var(variable)
             if ret:
                 config[variable] = value
-            elif variable == "KUBERNETES_MODE" or (
-                "CUSTOM_CONF" not in variable
-                and not variable.startswith(("_", "PYTHON", "KUBERNETES_", "SVC_", "LB_"))
-                and variable
-                not in (
-                    "DOCKER_HOST",
-                    "SLAVE_MODE",
-                    "MASTER_MODE",
-                    "CUSTOM_LOG_LEVEL",
-                    "HEALTHCHECK_INTERVAL",
-                    "GPG_KEY",
-                    "HOME",
-                    "HOSTNAME",
-                    "LANG",
-                    "PATH",
-                    "NGINX_VERSION",
-                    "NJS_VERSION",
-                    "PATH",
-                    "PKG_RELEASE",
-                    "PWD",
-                    "SHLVL",
-                    "SERVER_SOFTWARE",
-                    "NAMESPACE",
-                    "TZ",
-                    "DYNPKG_RELEASE",
+            elif (not first_run or not self.__variables.get("EXTERNAL_PLUGIN_URLS")) and (
+                variable == "KUBERNETES_MODE"
+                or (
+                    "CUSTOM_CONF" not in variable
+                    and not variable.startswith(("_", "PYTHON", "KUBERNETES_", "SVC_", "LB_"))
+                    and variable
+                    not in (
+                        "DOCKER_HOST",
+                        "SLAVE_MODE",
+                        "MASTER_MODE",
+                        "CUSTOM_LOG_LEVEL",
+                        "HEALTHCHECK_INTERVAL",
+                        "GPG_KEY",
+                        "HOME",
+                        "HOSTNAME",
+                        "LANG",
+                        "PATH",
+                        "NGINX_VERSION",
+                        "NJS_VERSION",
+                        "PATH",
+                        "PKG_RELEASE",
+                        "PWD",
+                        "SHLVL",
+                        "SERVER_SOFTWARE",
+                        "NAMESPACE",
+                        "TZ",
+                        "DYNPKG_RELEASE",
+                    )
                 )
             ):
                 self.__logger.warning(f"Ignoring variable {variable} : {err} - {value = !r}")

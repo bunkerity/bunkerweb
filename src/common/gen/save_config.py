@@ -46,6 +46,7 @@ if __name__ == "__main__":
         parser.add_argument("--init", action="store_true", help="Only initialize the database")
         parser.add_argument("--method", default="scheduler", type=str, help="The method that is used to save the config")
         parser.add_argument("--no-check-changes", action="store_true", help="Set the changes to checked in the database")
+        parser.add_argument("--first-run", action="store_true", help="Set the first run flag")
         args = parser.parse_args()
 
         settings_path = Path(args.settings)
@@ -164,7 +165,7 @@ if __name__ == "__main__":
         if args.init:
             sys_exit(0)
 
-        settings = config.get_config(db)
+        settings = config.get_config(db, first_run=args.first_run)
 
         # Parse BunkerWeb instances from environment
         apis = []

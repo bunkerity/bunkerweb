@@ -579,6 +579,7 @@ if __name__ == "__main__":
                     join(sep, "usr", "share", "bunkerweb", "gen", "save_config.py"),
                     "--settings",
                     join(sep, "usr", "share", "bunkerweb", "settings.json"),
+                    "--first-run",
                 ]
                 + (["--variables", str(tmp_variables_path)] if args.variables else []),
                 stdin=DEVNULL,
