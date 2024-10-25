@@ -4,11 +4,11 @@ Flask==3.0.3
 Flask-executor==1.0.0
 Flask-Login==0.6.3
 Flask-Principal==0.4.0
-Flask-WTF==1.2.1
+Flask-WTF==1.2.2
 gunicorn[gevent]==23.0.0
 python-magic==0.4.27
 python_dateutil==2.9.0.post0
 qrcode==8.0
 regex==2024.9.11
 user_agents==2.2.0
-werkzeug==3.0.4
+werkzeug==3.0.5
