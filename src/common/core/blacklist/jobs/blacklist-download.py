@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
 
 from contextlib import suppress
+from datetime import datetime, timedelta
 from ipaddress import ip_address, ip_network
+from json import dumps, loads
 from os import getenv, sep
 from os.path import join, normpath
+from pathlib import Path
 from re import compile as re_compile
+from shutil import rmtree
 from sys import exit as sys_exit, path as sys_path
 from traceback import format_exc
 from typing import Tuple
@@ -53,18 +57,45 @@ def check_line(kind: str, line: bytes) -> Tuple[bool, bytes]:
 LOGGER = setup_logger("BLACKLIST", getenv("LOG_LEVEL", "INFO"))
 status = 0
 
+KINDS = ("IP", "RDNS", "ASN", "USER_AGENT", "URI", "IGNORE_IP", "IGNORE_RDNS", "IGNORE_ASN", "IGNORE_USER_AGENT", "IGNORE_URI")
+
 try:
     # Check if at least a server has Blacklist activated
     blacklist_activated = False
+
+    services = getenv("SERVER_NAME", "").strip()
+
+    if not services:
+        LOGGER.warning("No services found, exiting...")
+        sys_exit(0)
+
+    services = services.split(" ")
+    services_blacklist_urls = {}
+
     # Multisite case
     if getenv("MULTISITE", "no") == "yes":
-        for first_server in getenv("SERVER_NAME", "").split(" "):
+        for first_server in services:
             if getenv(f"{first_server}_USE_BLACKLIST", getenv("USE_BLACKLIST", "yes")) == "yes":
                 blacklist_activated = True
-                break
+
+                # Get URLs
+                services_blacklist_urls[first_server] = {}
+                for kind in KINDS:
+                    services_blacklist_urls[first_server][kind] = set()
+                    for url in getenv(f"{first_server}_BLACKLIST_{kind}_URLS", getenv(f"BLACKLIST_{kind}_URLS", "")).strip().split(" "):
+                        if url:
+                            services_blacklist_urls[first_server][kind].add(url)
     # Singlesite case
     elif getenv("USE_BLACKLIST", "yes") == "yes":
         blacklist_activated = True
+
+        # Get URLs
+        services_blacklist_urls[services[0]] = {}
+        for kind in KINDS:
+            services_blacklist_urls[services[0]][kind] = set()
+            for url in getenv(f"BLACKLIST_{kind}_URLS", "").strip().split(" "):
+                if url:
+                    services_blacklist_urls[services[0]][kind].add(url)
 
     if not blacklist_activated:
         LOGGER.info("Blacklist is not activated, skipping downloads...")
@@ -72,111 +103,116 @@ try:
 
     JOB = Job(LOGGER)
 
-    # Get URLs
-    urls = {
-        "IP": [],
-        "RDNS": [],
-        "ASN": [],
-        "USER_AGENT": [],
-        "URI": [],
-        "IGNORE_IP": [],
-        "IGNORE_RDNS": [],
-        "IGNORE_ASN": [],
-        "IGNORE_USER_AGENT": [],
-        "IGNORE_URI": [],
-    }
-    for kind in urls:
-        for url in getenv(f"BLACKLIST_{kind}_URLS", "").split(" "):
-            if url and url not in urls[kind]:
-                urls[kind].append(url)
-
-    # Don't go further if the cache is fresh
-    kinds_fresh = {
-        "IP": True,
-        "RDNS": True,
-        "ASN": True,
-        "USER_AGENT": True,
-        "URI": True,
-        "IGNORE_IP": True,
-        "IGNORE_RDNS": True,
-        "IGNORE_ASN": True,
-        "IGNORE_USER_AGENT": True,
-        "IGNORE_URI": True,
-    }
-    for kind in kinds_fresh:
-        if not JOB.is_cached_file(f"{kind}.list", "hour"):
-            if urls[kind]:
-                kinds_fresh[kind] = False
-                LOGGER.info(f"Blacklist for {kind} is not cached, processing downloads..")
-            continue
-
-        LOGGER.info(f"Blacklist for {kind} is already in cache, skipping downloads...")
-
-        if not urls[kind]:
-            LOGGER.warning(f"Blacklist for {kind} is cached but no URL is configured, removing from cache...")
-            deleted, err = JOB.del_cache(f"{kind}.list")
+    if not any(url for urls in services_blacklist_urls.values() for url in urls.values()):
+        LOGGER.warning("No blacklist URL is configured, nothing to do...")
+        if Path(JOB.job_path.joinpath("urls.json")).exists():
+            LOGGER.warning("Blacklist URLs are cached but no URL is configured, removing from cache...")
+            deleted, err = JOB.del_cache("urls.json")
             if not deleted:
-                LOGGER.warning(f"Couldn't delete {kind}.list from cache : {err}")
-
-    if all(kinds_fresh.values()):
-        if not any(urls.values()):
-            LOGGER.info("No blacklist URL is configured, nothing to do...")
+                LOGGER.warning(f"Couldn't delete blacklist URLs from cache : {err}")
         sys_exit(0)
 
+    cached_urls = loads(JOB.get_cache("urls.json") or "{}")
+
+    tmp_downloads = Path(sep, "var", "tmp", "bunkerweb", "blacklist")
+    tmp_downloads.mkdir(parents=True, exist_ok=True)
+    downloaded_urls = {}
+    failed_urls = set()
+    current_timestamp = datetime.now().astimezone().timestamp()
+
     # Loop on kinds
-    for kind, urls_list in urls.items():
-        if kinds_fresh[kind]:
-            continue
+    for service, kinds in services_blacklist_urls.items():
+        for kind, urls_list in kinds.items():
+            if not urls_list:
+                if Path(JOB.job_path.joinpath(service, f"{kind}.list")).exists():
+                    LOGGER.warning(f"{service} blacklist for {kind} is cached but no URL is configured, removing from cache...")
+                    deleted, err = JOB.del_cache(f"{kind}.list", service_id=service)
+                    if not deleted:
+                        LOGGER.warning(f"Couldn't delete {service} {kind}.list from cache : {err}")
+                continue
 
-        # Write combined data of the kind in memory and check if it has changed
-        for url in urls_list:
-            try:
-                LOGGER.info(f"Downloading blacklist data from {url} ...")
-                if url.startswith("file://"):
-                    with open(normpath(url[7:]), "rb") as f:
-                        iterable = f.readlines()
-                else:
-                    resp = get(url, stream=True, timeout=10)
-
-                    if resp.status_code != 200:
-                        LOGGER.warning(f"Got status code {resp.status_code}, skipping...")
+            # Write combined data of the kind in memory and check if it has changed
+            content = b""
+            for url in urls_list:
+                try:
+                    cached_url = cached_urls.get(url, {"time": 0, "tmp_path": ""})
+                    # Check if the URL's last download timestamp is younger than 1 hour
+                    if current_timestamp - cached_url["time"] < timedelta(hours=1).total_seconds():
+                        downloaded_urls[url] = {
+                            "time": cached_url["time"],
+                            "tmp_path": tmp_downloads.joinpath(f"{bytes_hash(url, algorithm='sha1')}.list").as_posix(),
+                        }
+                        LOGGER.info(f"URL {url} has been downloaded less than 1 hour ago, skipping it...")
+                        failed_urls.add(url)
+                        status = 1 if status == 1 else 0
                         continue
 
-                    iterable = resp.iter_lines()
-
-                i = 0
-                content = b""
-                for line in iterable:
-                    line = line.strip()
-
-                    if not line or line.startswith((b"#", b";")):
+                    # Check if the URL has already been downloaded
+                    if url in failed_urls:
                         continue
-                    elif kind != "USER_AGENT":
-                        line = line.split(b" ")[0]
-
-                    ok, data = check_line(kind, line)
-                    if ok:
-                        content += data + b"\n"
-                        i += 1
-
-                LOGGER.info(f"Downloaded {i} bad {kind}")
-                # Check if file has changed
-                new_hash = bytes_hash(content)
-                old_hash = JOB.cache_hash(f"{kind}.list")
-                if new_hash == old_hash:
-                    LOGGER.info(f"New file {kind}.list is identical to cache file, reload is not needed")
-                else:
-                    LOGGER.info(f"New file {kind}.list is different than cache file, reload is needed")
-                    # Put file in cache
-                    cached, err = JOB.cache_file(f"{kind}.list", content, checksum=new_hash)
-                    if not cached:
-                        LOGGER.error(f"Error while caching blacklist : {err}")
-                        status = 2
+                    elif url in downloaded_urls:
+                        LOGGER.info(f"URL {url} has already been downloaded, skipping it...")
+                        content += Path(downloaded_urls[url]["tmp_path"]).read_bytes()
                     else:
-                        status = 1
-            except:
+                        LOGGER.info(f"Downloading blacklist data from {url} ...")
+                        if url.startswith("file://"):
+                            with open(normpath(url[7:]), "rb") as f:
+                                iterable = f.readlines()
+                        else:
+                            resp = get(url, stream=True, timeout=10)
+
+                            if resp.status_code != 200:
+                                LOGGER.warning(f"Got status code {resp.status_code}, skipping...")
+                                continue
+
+                            iterable = resp.iter_lines()
+
+                        i = 0
+                        for line in iterable:
+                            line = line.strip()
+
+                            if not line or line.startswith((b"#", b";")):
+                                continue
+                            elif kind != "USER_AGENT":
+                                line = line.split(b" ")[0]
+
+                            ok, data = check_line(kind, line)
+                            if ok:
+                                content += data + b"\n"
+                                i += 1
+
+                        LOGGER.info(f"Downloaded {i} bad {kind}")
+                        downloaded_urls[url] = {
+                            "time": current_timestamp,
+                            "tmp_path": tmp_downloads.joinpath(f"{bytes_hash(url, algorithm='sha1')}.list").as_posix(),
+                        }
+                except BaseException as e:
+                    status = 2
+                    LOGGER.error(f"Exception while getting {service} blacklist from {url} :\n{e}")
+                    failed_urls.add(url)
+
+            # Check if file has changed
+            new_hash = bytes_hash(content)
+            old_hash = JOB.cache_hash(f"{kind}.list", service_id=service)
+            if new_hash == old_hash:
+                LOGGER.info(f"New {service} file {kind}.list is identical to cache file, reload is not needed")
+                continue
+
+            LOGGER.info(f"New {service} file {kind}.list is different than cache file, reload is needed")
+            # Put file in cache
+            cached, err = JOB.cache_file(f"{kind}.list", content, service_id=service, checksum=new_hash)
+            if not cached:
+                LOGGER.error(f"Error while caching blacklist : {err}")
                 status = 2
-                LOGGER.error(f"Exception while getting blacklist from {url} :\n{format_exc()}")
+                continue
+
+            status = 1
+
+    cached, err = JOB.cache_file("urls.json", dumps(downloaded_urls, indent=2).encode("utf-8"))
+    if not cached:
+        LOGGER.error(f"Error while caching blacklist URLs : {err}")
+
+    rmtree(tmp_downloads, ignore_errors=True)
 except SystemExit as e:
     status = e.code
 except:

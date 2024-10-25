@@ -69,7 +69,7 @@
       "type": "text"
     },
     "WHITELIST_IP_URLS": {
-      "context": "global",
+      "context": "multisite",
       "default": "",
       "help": "List of URLs, separated with spaces, containing good IP/network to whitelist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.",
       "id": "whitelist-ip-urls",
@@ -78,7 +78,7 @@
       "type": "text"
     },
     "WHITELIST_RDNS_URLS": {
-      "context": "global",
+      "context": "multisite",
       "default": "",
       "help": "List of URLs, separated with spaces, containing reverse DNS suffixes to whitelist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.",
       "id": "whitelist-rdns-urls",
@@ -87,7 +87,7 @@
       "type": "text"
     },
     "WHITELIST_ASN_URLS": {
-      "context": "global",
+      "context": "multisite",
       "default": "",
       "help": "List of URLs, separated with spaces, containing ASN to whitelist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.",
       "id": "whitelist-asn-urls",
@@ -96,7 +96,7 @@
       "type": "text"
     },
     "WHITELIST_USER_AGENT_URLS": {
-      "context": "global",
+      "context": "multisite",
       "default": "",
       "help": "List of URLs, separated with spaces, containing good User-Agent to whitelist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.",
       "id": "whitelist-user-agent-urls",
@@ -105,7 +105,7 @@
       "type": "text"
     },
     "WHITELIST_URI_URLS": {
-      "context": "global",
+      "context": "multisite",
       "default": "",
       "help": "List of URLs, separated with spaces, containing bad URI to whitelist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.",
       "id": "whitelist-uri-urls",

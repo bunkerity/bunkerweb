@@ -114,7 +114,7 @@
       "type": "text"
     },
     "BLACKLIST_IP_URLS": {
-      "context": "global",
+      "context": "multisite",
       "default": "https://www.dan.me.uk/torlist/?exit",
       "help": "List of URLs, separated with spaces, containing bad IP/network to block. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.",
       "id": "blacklist-ip-urls",
@@ -123,7 +123,7 @@
       "type": "text"
     },
     "BLACKLIST_RDNS_URLS": {
-      "context": "global",
+      "context": "multisite",
       "default": "",
       "help": "List of URLs, separated with spaces, containing reverse DNS suffixes to block. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.",
       "id": "blacklist-rdns-urls",
@@ -132,7 +132,7 @@
       "type": "text"
     },
     "BLACKLIST_ASN_URLS": {
-      "context": "global",
+      "context": "multisite",
       "default": "",
       "help": "List of URLs, separated with spaces, containing ASN to block. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.",
       "id": "blacklist-asn-urls",
@@ -141,7 +141,7 @@
       "type": "text"
     },
     "BLACKLIST_USER_AGENT_URLS": {
-      "context": "global",
+      "context": "multisite",
       "default": "https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list",
       "help": "List of URLs, separated with spaces, containing bad User-Agent to block. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.",
       "id": "blacklist-user-agent-urls",
@@ -150,7 +150,7 @@
       "type": "text"
     },
     "BLACKLIST_URI_URLS": {
-      "context": "global",
+      "context": "multisite",
       "default": "",
       "help": "List of URLs, separated with spaces, containing bad URI to block. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.",
       "id": "blacklist-uri-urls",
@@ -159,7 +159,7 @@
       "type": "text"
     },
     "BLACKLIST_IGNORE_IP_URLS": {
-      "context": "global",
+      "context": "multisite",
       "default": "",
       "help": "List of URLs, separated with spaces, containing IP/network to ignore in the blacklist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.",
       "id": "blacklist-ignore-ip-urls",
@@ -168,7 +168,7 @@
       "type": "text"
     },
     "BLACKLIST_IGNORE_RDNS_URLS": {
-      "context": "global",
+      "context": "multisite",
       "default": "",
       "help": "List of URLs, separated with spaces, containing reverse DNS suffixes to ignore in the blacklist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.",
       "id": "blacklist-ignore-rdns-urls",
@@ -177,7 +177,7 @@
       "type": "text"
     },
     "BLACKLIST_IGNORE_ASN_URLS": {
-      "context": "global",
+      "context": "multisite",
       "default": "",
       "help": "List of URLs, separated with spaces, containing ASN to ignore in the blacklist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.",
       "id": "blacklist-ignore-asn-urls",
@@ -186,7 +186,7 @@
       "type": "text"
     },
     "BLACKLIST_IGNORE_USER_AGENT_URLS": {
-      "context": "global",
+      "context": "multisite",
       "default": "",
       "help": "List of URLs, separated with spaces, containing User-Agent to ignore in the blacklist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.",
       "id": "blacklist-ignore-user-agent-urls",
@@ -195,7 +195,7 @@
       "type": "text"
     },
     "BLACKLIST_IGNORE_URI_URLS": {
-      "context": "global",
+      "context": "multisite",
       "default": "",
       "help": "List of URLs, separated with spaces, containing URI to ignore in the blacklist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.",
       "id": "blacklist-ignore-uri-urls",

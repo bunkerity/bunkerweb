@@ -13,6 +13,7 @@ local get_deny_status = utils.get_deny_status
 local get_rdns = utils.get_rdns
 local get_asn = utils.get_asn
 local regex_match = utils.regex_match
+local get_variable = utils.get_variable
 local ipmatcher_new = ipmatcher.new
 local tostring = tostring
 local open = io.open
@@ -22,12 +23,12 @@ function blacklist:initialize(ctx)
 	plugin.initialize(self, "blacklist", ctx)
 	-- Decode lists
 	if get_phase() ~= "init" and self:is_needed() then
-		local lists, err = self.datastore:get("plugin_blacklist_lists", true)
-		if not lists then
+		local datastore_lists, err = self.datastore:get("plugin_blacklist_lists_" .. self.ctx.bw.server_name, true)
+		if not datastore_lists then
 			self.logger:log(ERR, err)
 			self.lists = {}
 		else
-			self.lists = lists
+			self.lists = datastore_lists
 		end
 		local kinds = {
 			["IP"] = {},
@@ -42,10 +43,10 @@ function blacklist:initialize(ctx)
 			["IGNORE_URI"] = {},
 		}
 		for kind, _ in pairs(kinds) do
+			if not self.lists[kind] then
+				self.lists[kind] = {}
+			end
 			for data in self.variables["BLACKLIST_" .. kind]:gmatch("%S+") do
-				if not self.lists[kind] then
-					self.lists[kind] = {}
-				end
 				table.insert(self.lists[kind], data)
 			end
 		end
@@ -70,7 +71,7 @@ function blacklist:is_needed()
 end
 
 function blacklist:init()
-	-- Check if init needed
+	-- Check if init is needed
 	if not self:is_needed() then
 		return self:ret(true, "init not needed")
 	end
@@ -88,21 +89,46 @@ function blacklist:init()
 		["IGNORE_USER_AGENT"] = {},
 		["IGNORE_URI"] = {},
 	}
-	local i = 0
-	for kind, _ in pairs(blacklists) do
-		local f, _ = open("/var/cache/bunkerweb/blacklist/" .. kind .. ".list", "r")
-		if f then
-			for line in f:lines() do
-				table.insert(blacklists[kind], line)
-				i = i + 1
-			end
-			f:close()
-		end
+
+	local server_name, err = get_variable("SERVER_NAME", false)
+	if not server_name then
+		return self:ret(false, "can't get SERVER_NAME variable : " .. err)
 	end
-	-- Load them into datastore
-	local ok, err = self.datastore:set("plugin_blacklist_lists", blacklists, nil, true)
-	if not ok then
-		return self:ret(false, "can't store blacklist list into datastore : " .. err)
+
+	-- Iterate over each kind and server
+	local i = 0
+	for key in server_name:gmatch("%S+") do
+		for kind, _ in pairs(blacklists) do
+			local file_path = "/var/cache/bunkerweb/blacklist/" .. key .. "/" .. kind .. ".list"
+			local f = open(file_path, "r")
+			if f then
+				for line in f:lines() do
+					table.insert(blacklists[kind], line)
+					i = i + 1
+				end
+				f:close()
+			end
+		end
+
+		-- Load service specific ones into datastore
+		local ok
+		ok, err = self.datastore:set("plugin_blacklist_lists_" .. key, blacklists, nil, true)
+		if not ok then
+			return self:ret(false, "can't store blacklist list into datastore : " .. err)
+		end
+
+		blacklists = {
+			["IP"] = {},
+			["RDNS"] = {},
+			["ASN"] = {},
+			["USER_AGENT"] = {},
+			["URI"] = {},
+			["IGNORE_IP"] = {},
+			["IGNORE_RDNS"] = {},
+			["IGNORE_ASN"] = {},
+			["IGNORE_USER_AGENT"] = {},
+			["IGNORE_URI"] = {},
+		}
 	end
 	return self:ret(true, "successfully loaded " .. tostring(i) .. " IP/network/rDNS/ASN/User-Agent/URI")
 end
