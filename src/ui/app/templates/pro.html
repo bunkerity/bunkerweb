@@ -5,7 +5,7 @@
     {% set is_expired = pro_status == "expired" %}
     {% set is_suspended = pro_status == "suspended" %}
     <div class="row g-3">
-        <div class="col-12 col-md-6 col-xl-4">
+        <div class="col-12 col-xl-4">
             <div class="card p-4 position-relative h-100">
                 <img class='position-absolute top-0 end-0 m-3'
                      src="{{ pro_diamond_url if is_pro_version else url_for('static', filename='img/diamond-blue.svg') }}"
@@ -13,7 +13,7 @@
                      width="24px">
                 <div class="card-header p-2">
                     <div class="card-title">
-                        <h5 class="me-2 text-primary shine don-jose mb-0">Pro status</h5>
+                        <h5 class="me-2 text-primary shine don-jose mb-0">Status</h5>
                     </div>
                 </div>
                 <div class="card-body position-relative">
@@ -44,9 +44,18 @@
                                     Delete or draft some services to reach the number of {{ pro_services }} services.
                                 </div>
                             {% endif %}
-                            <a href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=ui#pro"
-                               class="fs-6 mt-2 p-2 courier-prime fst-italic text-primary shine">
-                                <i class="bx bx-link-external"></i>
+                            <a href="{% if is_pro_version %}https://panel.bunkerweb.io/clientarea.php?action=services&utm_campaign=self&utm_source=ui{% else %}https://panel.bunkerweb.io/order/bunkerweb-pro?utm_campaign=self&utm_source=ui{% endif %}"
+                               role="button"
+                               aria-pressed="true"
+                               class="btn btn-pro-now courier-prime"
+                               target="_blank"
+                               rel="noopener">
+                                <span class="me-1 me-md-2 d-flex h-100 justify-content-center align-items-center">
+                                    <img src="{{ url_for('static', filename='img/diamond-white.svg') }}"
+                                         alt="Pro plugin"
+                                         width="18px"
+                                         height="15.5px">
+                                </span>
                                 {% if is_pro_version %}
                                     All features available
                                 {% else %}
@@ -72,11 +81,13 @@
         <div class="col-12 col-xl-4">
             <div class="card p-4 position-relative h-100">
                 <i class='bx bx-calendar bx-sm position-absolute top-0 end-0 m-3 {% if is_expired %}text-warning{% else %}text-primary{% endif %}'></i>
-                <div class="card-header p-2">
-                    <div class="card-title">
-                        <h5 class="me-2 text-primary shine don-jose mb-0">Pro expiration date</h5>
+                {% if is_pro_version %}
+                    <div class="card-header p-2">
+                        <div class="card-title">
+                            <h5 class="me-2 text-primary shine don-jose mb-0">Pro expiration date</h5>
+                        </div>
                     </div>
-                </div>
+                {% endif %}
                 <div class="card-body position-relative">
                     <div class="d-flex align-items-center justify-content-center h-100 pb-2">
                         <input id="expiration-date" type="hidden" value="{{ pro_expire }}" />
@@ -86,18 +97,20 @@
                                class="visually-hidden"
                                value="{{ pro_expire }}" />
                     </div>
-                    <small class="position-absolute bottom-0 end-0 text-primary">
-                        {% if pro_expires_in != "Unknown" %}
-                            Expires in: {{ pro_expires_in }}
-                        {% else %}
-                            Unknown expiration date
-                        {% endif %}
-                    </small>
+                    {% if is_pro_version %}
+                        <small class="position-absolute bottom-0 end-0 text-primary">
+                            {% if pro_expires_in != "Unknown" %}
+                                Expires in: {{ pro_expires_in }}
+                            {% else %}
+                                Unknown expiration date
+                            {% endif %}
+                        </small>
+                    {% endif %}
                 </div>
             </div>
         </div>
         <div class="col-12 row g-3 m-0 p-0">
-            <div class="col-12 col-md-6 col-xl-4">
+            <div class="col-12 col-xl-8">
                 <div class="card p-4 position-relative">
                     <i class='bx bx-key bx-sm position-absolute top-0 end-0 m-3 {% if is_expired %}text-warning{% else %}text-primary{% endif %}'></i>
                     <div class="card-header p-2">
@@ -139,15 +152,16 @@
                                 {% set setting_method = "readonly" %}
                             {% endif %}
                             {% include "models/input_setting.html" %}
-                            <button type="submit"
-                                    class="btn btn-primary w-100 text-uppercase don-jose mt-3">
-                                {% if is_pro_version %}
-                                    Update
-                                {% else %}
-                                    Activate
-                                {% endif %}
-                                key
-                            </button>
+                            <div class="d-flex justify-content-center align-items-center">
+                                <button type="submit" class="btn btn-primary text-uppercase don-jose mt-3">
+                                    {% if is_pro_version %}
+                                        Update
+                                    {% else %}
+                                        Activate
+                                    {% endif %}
+                                    key
+                                </button>
+                            </div>
                         </form>
                     </div>
                 </div>

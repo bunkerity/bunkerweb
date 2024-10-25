@@ -340,6 +340,15 @@ $(document).ready(function () {
 
   jobs_table.searchPanes.container().hide();
 
+  $(".action-button")
+    .parent()
+    .attr(
+      "data-bs-original-title",
+      "Please select one or more rows to perform an action.",
+    )
+    .attr("data-bs-placement", "top")
+    .tooltip();
+
   $("#jobs").removeClass("d-none");
   $("#jobs-waiting").addClass("visually-hidden");
 
@@ -370,13 +379,21 @@ $(document).ready(function () {
 
   jobs_table.on("select", function (e, dt, type, indexes) {
     // Enable the actions button
-    $(".action-button").removeClass("disabled");
+    $(".action-button").removeClass("disabled").parent().tooltip("dispose");
   });
 
   jobs_table.on("deselect", function (e, dt, type, indexes) {
     // If no rows are selected, disable the actions button
     if (jobs_table.rows({ selected: true }).count() === 0) {
-      $(".action-button").addClass("disabled");
+      $(".action-button")
+        .addClass("disabled")
+        .parent()
+        .attr(
+          "data-bs-original-title",
+          "Please select one or more rows to perform an action.",
+        )
+        .attr("data-bs-placement", "top")
+        .tooltip();
       $("#select-all-rows").prop("checked", false);
     }
   });

@@ -124,7 +124,15 @@ $(document).ready(function () {
   ];
 
   $.fn.dataTable.ext.buttons.toggle_filters = {
-    text: '<span class="tf-icons bx bx-filter bx-18px me-2"></span><span id="show-filters">Show</span><span id="hide-filters" class="d-none">Hide</span><span class="d-none d-md-inline"> filters</span>',
+    text: `<span class="tf-icons bx bx-filter bx-18px me-2"></span><span id="show-filters"${
+      cacheJobNameSelection || cachePluginSelection || cacheServiceSelection
+        ? ' class="d-none"'
+        : ""
+    }>Show</span><span id="hide-filters"${
+      !cacheJobNameSelection && !cachePluginSelection && !cacheServiceSelection
+        ? ' class="d-none"'
+        : ""
+    }>Hide</span><span class="d-none d-md-inline"> filters</span>`,
     action: function (e, dt, node, config) {
       cache_table.searchPanes.container().slideToggle(); // Smoothly hide or show the container
       $("#show-filters").toggleClass("d-none"); // Toggle the visibility of the 'Show' span

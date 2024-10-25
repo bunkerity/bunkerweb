@@ -190,6 +190,17 @@ button.list-group-item-secondary.active {
   ) !important; /* Keep the primary color on hover */
 }
 
+.btn-pro-now {
+  background-color: var(--bs-bw-green); /* Initial background color */
+  color: #fff;
+}
+
+.btn-pro-now:hover {
+  background-color: var(
+    --bs-bw-green
+  ) !important; /* Keep the primary color on hover */
+}
+
 .avatar.avatar-offline:after {
   background-color: var(--bs-secondary);
 }
@@ -857,4 +868,27 @@ a.courier-prime:hover {
 
 .text-maroon {
   color: #800000;
+}
+
+.blur-overlay {
+  position: relative;
+}
+
+.blur-overlay .card-body,
+.blur-overlay .card-header {
+  filter: blur(3px);
+  pointer-events: none;
+}
+
+.blur-overlay .blur-message {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--bs-bw-green);
+  color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: bold;
 }

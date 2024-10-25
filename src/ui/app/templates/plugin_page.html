@@ -38,7 +38,7 @@
                 </p>
             </div>
         </div>
-    {% elif pre_render.get("status", False) and pre_render.get("status", False) == "ko" or "error" in pre_render.get("data", {}) or pre_render.get("data") is not mapping %}
+    {% elif "Plugin page uses old template" not in plugin_page and pre_render.get("status", False) and pre_render.get("status", False) == "ko" or "error" in pre_render.get("data", {}) or pre_render.get("data") is not mapping %}
         <div class="d-flex align-items-center justify-content-center">
             <div class="text-center text-primary">
                 <p class="text-center relative w-full p-2 text-primary rounded-lg fw-bold">

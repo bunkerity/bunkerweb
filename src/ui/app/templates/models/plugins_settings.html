@@ -139,6 +139,13 @@
                         {% endif %}
                     </div>
                 </div>
+                <div {% if plugin_data["type"] == "pro" and not is_pro_version %}class="blur-overlay"{% endif %}>
+                {% if plugin_data["type"] == "pro" and not is_pro_version %}
+                    <div class="blur-message">
+                        <i class='bx bx-diamond bx-xs'></i>
+                        <a href="{{ url_for('pro') }}" class="text-white-80">Upgrade to Pro to access this feature</a>
+                    </div>
+                {% endif %}
                 <div class="card-body row g-2 gx-6 pb-0">
                     {% for setting, setting_data in filtered_settings.items() if not setting_data.get('multiple', false) and setting not in blacklisted_settings and (not service_endpoint or setting_data['context'] == "multisite") %}
                         {% set setting_id_prefix = "setting-" + plugin + "-" %}
@@ -158,12 +165,16 @@
                             {% set setting_method = "autoconf" %}
                             {% set disabled = true %}
                         {% endif %}
+                        {% if plugin_data["type"] == "pro" and not is_pro_version %}
+                            {% set disabled = true %}
+                            {% set setting_method = "<i class='bx bx-diamond bx-xs'></i><span>Pro feature</span>" %}
+                        {% endif %}
                         {% if is_readonly %}
                             {% set disabled = true %}
                             {% set setting_method = "readonly" %}
                         {% endif %}
                         <div class="col-12 col-sm-6 col-lg-4 pb-3"
-                             {% if disabled %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Disabled by {{ setting_method }}"{% endif %}>
+                             {% if disabled %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" data-bs-original-title="Disabled by {{ setting_method }}"{% endif %}>
                             <div class="d-flex justify-content-between align-items-center">
                                 <label id="label-setting-{{ plugin }}-{{ setting_data['id'] }}"
                                        for="setting-{{ plugin }}-{{ setting_data['id'] }}"
@@ -294,12 +305,16 @@
                                                         {% set setting_method = "autoconf" %}
                                                         {% set disabled = true %}
                                                     {% endif %}
+                                                    {% if plugin_data["type"] == "pro" and not is_pro_version %}
+                                                        {% set disabled = true %}
+                                                        {% set setting_method = "<i class='bx bx-diamond bx-xs'></i><span>Pro feature</span>" %}
+                                                    {% endif %}
                                                     {% if is_readonly %}
                                                         {% set disabled = true %}
                                                         {% set setting_method = "readonly" %}
                                                     {% endif %}
                                                     <div class="col-12{% if settings|length > 1 %} col-md-6{% endif %}{% if settings|length > 2 and not multiple_multiples %} col-lg-4{% endif %} pb-2"
-                                                         {% if disabled %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Disabled by {{ setting_method }}"{% endif %}>
+                                                         {% if disabled %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" data-bs-original-title="Disabled by {{ setting_method }}"{% endif %}>
                                                         <div class="d-flex justify-content-between align-items-center">
                                                             <label id="label-multiple-setting-{{ plugin }}-{{ setting_data['id'] }}-{{ setting_suffix }}"
                                                                    for="multiple-setting-{{ plugin }}-{{ setting_data['id'] }}-{{ setting_suffix }}"
@@ -360,6 +375,7 @@
                         {% endfor %}
                     </div>
                 {% endif %}
+            </div>
             </div>
         {% endif %}
     {% endfor %}

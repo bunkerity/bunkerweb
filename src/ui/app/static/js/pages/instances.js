@@ -582,6 +582,15 @@ $(document).ready(function () {
 
   instances_table.searchPanes.container().hide();
 
+  $(".action-button")
+    .parent()
+    .attr(
+      "data-bs-original-title",
+      "Please select one or more rows to perform an action.",
+    )
+    .attr("data-bs-placement", "top")
+    .tooltip();
+
   $("#instances").removeClass("d-none");
   $("#instances-waiting").addClass("visually-hidden");
 
@@ -612,13 +621,21 @@ $(document).ready(function () {
 
   instances_table.on("select", function (e, dt, type, indexes) {
     // Enable the actions button
-    $(".action-button").removeClass("disabled");
+    $(".action-button").removeClass("disabled").parent().tooltip("dispose");
   });
 
   instances_table.on("deselect", function (e, dt, type, indexes) {
     // If no rows are selected, disable the actions button
     if (instances_table.rows({ selected: true }).count() === 0) {
-      $(".action-button").addClass("disabled");
+      $(".action-button")
+        .addClass("disabled")
+        .parent()
+        .attr(
+          "data-bs-original-title",
+          "Please select one or more rows to perform an action.",
+        )
+        .attr("data-bs-placement", "top")
+        .tooltip();
       $("#select-all-rows").prop("checked", false);
     }
   });

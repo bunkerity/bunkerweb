@@ -92,8 +92,7 @@
                                 {% endif %}
                                 >
                                 <a href="{% if not_pro_pro_plugin %}{{ url_for('pro') }}{% else %}{{ url_for("plugins") }}/{{ plugin }}{% endif %}"
-                                   class="menu-link"
-                                   {% if not_pro_pro_plugin %}target="_blank" rel="noopener"{% endif %}>
+                                   class="menu-link">
                                     {{ menu_plugin_types.get(plugin_data["type"], {}).get('icon', '<img src="' + pro_diamond_url + '"
      alt="Pro plugin"
      width="20px"
@@ -117,13 +116,13 @@
         <li class="menu-header small text-uppercase">
             <span class="menu-header-text">Misc</span>
         </li>
-        <li class="menu-item">
+        <li class="menu-item{% if current_endpoint == 'about' %} active{% endif %}">
             <a href="{{ url_for('about') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-info-circle"></i>
                 <div class="text-truncate" data-i18n="About">About</div>
             </a>
         </li>
-        <li class="menu-item">
+        <li class="menu-item{% if current_endpoint == 'pro' %} active{% endif %}">
             <a href="{{ url_for('pro') }}" class="menu-link">
                 <img class="menu-icon tf-icons"
                      src="{{ pro_diamond_url }}"

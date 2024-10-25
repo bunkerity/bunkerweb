@@ -264,7 +264,11 @@ $(document).ready(function () {
   };
 
   $.fn.dataTable.ext.buttons.toggle_filters = {
-    text: '<span class="tf-icons bx bx-filter bx-18px me-2"></span><span id="show-filters">Show</span><span id="hide-filters" class="d-none">Hide</span><span class="d-none d-md-inline"> filters</span>',
+    text: `<span class="tf-icons bx bx-filter bx-18px me-2"></span><span id="show-filters"${
+      configTypeSelection || configServiceSelection ? ' class="d-none"' : ""
+    }>Show</span><span id="hide-filters"${
+      !configTypeSelection && !configServiceSelection ? ' class="d-none"' : ""
+    }>Hide</span><span class="d-none d-md-inline"> filters</span>`,
     action: function (e, dt, node, config) {
       configs_table.searchPanes.container().slideToggle(); // Smoothly hide or show the container
       $("#show-filters").toggleClass("d-none"); // Toggle the visibility of the 'Show' span
@@ -462,6 +466,15 @@ $(document).ready(function () {
   if (!configTypeSelection && !configServiceSelection)
     configs_table.searchPanes.container().hide();
 
+  $(".action-button")
+    .parent()
+    .attr(
+      "data-bs-original-title",
+      "Please select one or more rows to perform an action.",
+    )
+    .attr("data-bs-placement", "top")
+    .tooltip();
+
   $("#configs").removeClass("d-none");
   $("#configs-waiting").addClass("visually-hidden");
 
@@ -492,13 +505,21 @@ $(document).ready(function () {
 
   configs_table.on("select", function (e, dt, type, indexes) {
     // Enable the actions button
-    $(".action-button").removeClass("disabled");
+    $(".action-button").removeClass("disabled").parent().tooltip("dispose");
   });
 
   configs_table.on("deselect", function (e, dt, type, indexes) {
     // If no rows are selected, disable the actions button
     if (configs_table.rows({ selected: true }).count() === 0) {
-      $(".action-button").addClass("disabled");
+      $(".action-button")
+        .addClass("disabled")
+        .parent()
+        .attr(
+          "data-bs-original-title",
+          "Please select one or more rows to perform an action.",
+        )
+        .attr("data-bs-placement", "top")
+        .tooltip();
       $("#select-all-rows").prop("checked", false);
     }
   });
