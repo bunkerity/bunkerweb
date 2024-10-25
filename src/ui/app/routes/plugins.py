@@ -550,19 +550,29 @@ def custom_plugin_page(plugin: str):
 
         pre_render = run_action(plugin, "pre_render", tmp_dir=tmp_page_dir)
         if tmp_page_dir.joinpath("template.html").is_file():
-            try:
-                plugin_page = (
-                    # deepcode ignore Ssti: We trust the plugin template
-                    Environment(
-                        loader=FileSystemLoader((tmp_page_dir.as_posix() + "/", join(sep, "usr", "share", "bunkerweb", "ui", "templates") + "/")),
-                        autoescape=select_autoescape(["html"]),
+            page_content = tmp_page_dir.joinpath("template.html").read_text(encoding="utf-8")
+            if page_content.startswith('{% extends "base.html" %}'):
+                page_content = """<div class="d-flex align-items-center justify-content-center">
+    <div class="text-center text-primary">
+        <p class="text-center relative w-full p-2 text-primary rounded-lg fw-bold">
+            Plugin page uses old template, therefore it will not be displayed correctly. Please update it to the new format.
+        </p>
+    </div>
+</div>"""
+            else:
+                try:
+                    plugin_page = (
+                        # deepcode ignore Ssti: We trust the plugin template
+                        Environment(
+                            loader=FileSystemLoader((tmp_page_dir.as_posix() + "/", join(sep, "usr", "share", "bunkerweb", "ui", "templates") + "/")),
+                            autoescape=select_autoescape(["html"]),
+                        )
+                        .from_string(page_content)
+                        .render(pre_render=pre_render, **current_app.jinja_env.globals)
                     )
-                    .from_string(tmp_page_dir.joinpath("template.html").read_text(encoding="utf-8"))
-                    .render(pre_render=pre_render, **current_app.jinja_env.globals)
-                )
-            except BaseException as e:
-                LOGGER.exception("An error occurred while rendering the plugin page")
-                plugin_page = f'<div class="mt-2 mb-2 alert alert-danger text-center" role="alert">An error occurred while rendering the plugin page: {e}<br/>See logs for more details</div>'
+                except BaseException as e:
+                    LOGGER.exception("An error occurred while rendering the plugin page")
+                    plugin_page = f'<div class="mt-2 mb-2 alert alert-danger text-center" role="alert">An error occurred while rendering the plugin page: {e}<br/>See logs for more details</div>'
 
     return render_template(
         "plugin_page.html",
