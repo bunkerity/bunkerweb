@@ -118,8 +118,6 @@ jobs:
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
       ARM_SSH_KEY: ${{ secrets.ARM_SSH_KEY }}
       ARM_SSH_IP: ${{ needs.create-arm.outputs.ip }}
       ARM_SSH_CONFIG: ${{ secrets.ARM_SSH_CONFIG }}
