@@ -76,6 +76,47 @@ $(document).ready(() => {
     }
   };
 
+  const resetTemplateConfig = () => {
+    const templateContainer = $(`#navs-templates-${currentTemplate}`);
+    templateContainer.find("input, select").each(function () {
+      const type = $(this).attr("type");
+      const templateValue = $(`#${this.id}-template`).val();
+      if ($(this).prop("disabled") || type === "hidden") {
+        return;
+      }
+
+      // Check for select element
+      if ($(this).is("select")) {
+        $(this)
+          .find("option")
+          .each(function () {
+            $(this).prop("selected", $(this).val() == templateValue);
+          });
+      } else if (type === "checkbox") {
+        $(this).prop("checked", templateValue === "yes");
+      } else {
+        $(this).val(templateValue);
+      }
+    });
+
+    templateContainer.find(".ace-editor").each(function () {
+      const editor = ace.edit(this);
+      const editorValue = $(`#${this.id}-default`).val().trim();
+      editor.setValue(editorValue);
+      editor.session.setValue(editorValue);
+      editor.gotoLine(0);
+    });
+
+    if (currentStep > 1) {
+      setTimeout(() => {
+        currentStep = 2;
+        $(`#navs-steps-${currentTemplate}-2`)
+          .find(".previous-step")
+          .trigger("click");
+      }, 100);
+    }
+  };
+
   const handleTabChange = (targetClass) => {
     // Prepare the params for URL (parameters to be updated in the URL)
     const params = {};
@@ -98,18 +139,24 @@ $(document).ready(() => {
         updateUrlParams(params);
       }
     } else if (targetClass.includes("navs-templates-")) {
-      currentTemplate = targetClass.substring(1).replace("navs-templates-", "");
-      params.type = null; // Remove the type parameter
+      resetTemplateConfig();
+      setTimeout(() => {
+        currentTemplate = targetClass
+          .substring(1)
+          .replace("navs-templates-", "");
 
-      // If "high" is selected, remove the "template" parameter
-      if (currentTemplate === "high") {
-        params.template = null; // Set template to null to remove it from the URL
-        updateUrlParams(params); // Call the function without the hash (keep it intact)
-      } else {
-        // If another template is selected, update the "template" parameter
-        params.template = currentTemplate;
-        updateUrlParams(params); // Keep the template in the URL
-      }
+        params.type = null; // Remove the type parameter
+
+        // If "high" is selected, remove the "template" parameter
+        if (currentTemplate === "high") {
+          params.template = null; // Set template to null to remove it from the URL
+          updateUrlParams(params); // Call the function without the hash (keep it intact)
+        } else {
+          // If another template is selected, update the "template" parameter
+          params.template = currentTemplate;
+          updateUrlParams(params); // Keep the template in the URL
+        }
+      }, 200);
     }
   };
 
@@ -872,44 +919,7 @@ $(document).ready(() => {
   });
 
   $("#confirm-reset-template-config").on("click", function () {
-    const templateContainer = $(`#navs-templates-${currentTemplate}`);
-    templateContainer.find("input, select").each(function () {
-      const type = $(this).attr("type");
-      const templateValue = $(`#${this.id}-template`).val();
-      if ($(this).prop("disabled") || type === "hidden") {
-        return;
-      }
-
-      // Check for select element
-      if ($(this).is("select")) {
-        $(this)
-          .find("option")
-          .each(function () {
-            $(this).prop("selected", $(this).val() == templateValue);
-          });
-      } else if (type === "checkbox") {
-        $(this).prop("checked", templateValue === "yes");
-      } else {
-        $(this).val(templateValue);
-      }
-    });
-
-    templateContainer.find(".ace-editor").each(function () {
-      const editor = ace.edit(this);
-      const editorValue = $(`#${this.id}-default`).val().trim();
-      editor.setValue(editorValue);
-      editor.session.setValue(editorValue);
-      editor.gotoLine(0);
-    });
-
-    if (currentStep > 1) {
-      setTimeout(() => {
-        currentStep = 2;
-        $(`#navs-steps-${currentTemplate}-2`)
-          .find(".previous-step")
-          .trigger("click");
-      }, 100);
-    }
+    resetTemplateConfig();
   });
 
   $('div[id^="multiple-"]')
