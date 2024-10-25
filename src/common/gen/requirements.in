@@ -2,5 +2,5 @@ jinja2==3.1.4
 passlib==1.7.4
 python-dotenv==1.0.1
 pytz==2024.2
-redis==5.1.1
+redis==5.2.0
 requests==2.32.3
