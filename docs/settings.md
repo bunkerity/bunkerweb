@@ -42,6 +42,10 @@ STREAM support :warning:
 |`AUTOCONF_MODE`               |`no`                                                                                                                    |global   |no      |Enable Autoconf Docker integration.                                                         |
 |`SWARM_MODE`                  |`no`                                                                                                                    |global   |no      |Enable Docker Swarm integration.                                                            |
 |`KUBERNETES_MODE`             |`no`                                                                                                                    |global   |no      |Enable Kubernetes integration.                                                              |
+
+|`API_TIMEOUT`                 |`10`                                                                                                                   |global   |no      |Manually set the timeout for BunkerWeb API requests.                               |                                                      |
+|`API_READ_TIMEOUT`            |`30`                                                                                                                   |global   |no      |Manually set the read timeout for BunkerWeb API requests.                                |
+
 |`SERVER_TYPE`                 |`http`                                                                                                                  |multisite|no      |Server type : http or stream.                                                               |
 |`LISTEN_STREAM`               |`yes`                                                                                                                   |multisite|no      |Enable listening for non-ssl (passthrough).                                                 |
 |`LISTEN_STREAM_PORT`          |`1337`                                                                                                                  |multisite|no      |Listening port for non-ssl (passthrough).                                                   |
@@ -51,7 +55,7 @@ STREAM support :warning:
 |`IS_DRAFT`                    |`no`                                                                                                                    |multisite|no      |Internal use : set to yes when the service is in draft mode.                                |
 |`TIMERS_LOG_LEVEL`            |`debug`                                                                                                                 |global   |no      |Log level for timers.                                                                       |
 |`OVERRIDE_INSTANCES`          |                                                                                                                        |global   |no      |List of BunkerWeb instances separated with spaces (format : fqdn-or-ip:5000 fqdn-or-ip:5000)|
-
+|`DISABLE_CONFIGURATION_TESTING`                     |`no`                                                                                                                   |global   |no      |Disable sanity checks for all other environment variables.                                                      |
 
 ## Antibot
 
