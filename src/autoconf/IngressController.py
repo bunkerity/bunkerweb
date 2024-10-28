@@ -17,6 +17,7 @@ class IngressController(Controller):
         self.__internal_lock = Lock()
         super().__init__("kubernetes")
         config.load_incluster_config()
+        config.verify_ssl = getenv("KUBERNETES_VERIFY_SSL", "yes") == "yes"
         self.__corev1 = client.CoreV1Api()
         self.__networkingv1 = client.NetworkingV1Api()
         self.__use_fqdn = getenv("USE_KUBERNETES_FQDN", "yes").lower() == "yes"

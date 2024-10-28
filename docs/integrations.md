@@ -746,6 +746,9 @@ Given the presence of multiple BunkerWeb instances, it is necessary to establish
 
 Please ensure that the autoconf services have access to the Kubernetes API. It is recommended to utilize [RBAC authorization](https://kubernetes.io/docs/reference/access-authn-authz/rbac/) for this purpose.
 
+!!! warn "Custom CA for Kubernetes API"
+    At the moment, using a custom CA for the Kubernetes API is not supported by the autoconf. The only workaround available is to disable certificate verification by setting the `KUBERNETES_SSL_VERIFY` environment variable of the autoconf to `no` (default is `yes`).
+
 Additionally, **it is crucial to set the `KUBERNETES_MODE` environment variable to `yes` when utilizing the Kubernetes integration**. This variable is mandatory for proper functionality.
 
 To assist you, here is a YAML boilerplate that can serve as a foundation for your configuration:
