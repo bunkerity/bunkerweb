@@ -210,7 +210,7 @@ class Config:
 
         return variables
 
-    def new_service(self, variables: dict, is_draft: bool = False, override_method: str = "ui") -> Tuple[str, int]:
+    def new_service(self, variables: dict, is_draft: bool = False, override_method: str = "ui", check_changes: bool = True) -> Tuple[str, int]:
         """Creates a new service from the given variables
 
         Parameters
@@ -235,7 +235,9 @@ class Config:
                 return f"Service {service['SERVER_NAME'].split(' ')[0]} already exists.", 1
 
         services.append(variables | {"IS_DRAFT": "yes" if is_draft else "no"})
-        ret = self.gen_conf(self.get_config(methods=False), services, check_changes=not is_draft, override_method=override_method)
+        ret = self.gen_conf(
+            self.get_config(methods=False), services, check_changes=False if not check_changes else not is_draft, override_method=override_method
+        )
         if isinstance(ret, str):
             return ret, 1
         return f"Configuration for {variables['SERVER_NAME'].split(' ')[0]} has been generated.", 0

@@ -404,6 +404,43 @@ $(document).ready(() => {
           $confirmPasswordInput.siblings(".invalid-feedback").text("");
         }
       } else if (!uiReverseProxy && currentStep === 2) {
+        const $customSslCert = $("#CUSTOM_SSL_CERT");
+        const $customSslKey = $("#CUSTOM_SSL_KEY");
+        if (
+          $("#USE_CUSTOM_SSL").prop("checked") &&
+          (!$customSslCert.val() || !$customSslKey.val())
+        ) {
+          if (!$customSslCert.val()) {
+            $customSslCert.addClass("is-invalid");
+            let $feedback = $customSslCert.siblings(".invalid-feedback");
+            if (!$feedback.length) {
+              const $textSpan = $customSslCert
+                .parent()
+                .find("span.input-group-text");
+              $feedback = $(
+                '<div class="invalid-feedback">This field is required when using custom SSL.</div>',
+              ).insertAfter($textSpan.length ? $textSpan : $customSslCert);
+            } else {
+              $feedback.text("This field is required when using custom SSL.");
+            }
+          }
+          if (!$customSslKey.val()) {
+            $customSslKey.addClass("is-invalid");
+            let $feedback = $customSslKey.siblings(".invalid-feedback");
+            if (!$feedback.length) {
+              const $textSpan = $customSslKey
+                .parent()
+                .find("span.input-group-text");
+              $feedback = $(
+                '<div class="invalid-feedback">This field is required when using custom SSL.</div>',
+              ).insertAfter($textSpan.length ? $textSpan : $customSslKey);
+            } else {
+              $feedback.text("This field is required when using custom SSL.");
+            }
+          }
+          return;
+        }
+
         const result = await checkDNS();
         const modal = $("#modal-confirm-dns");
         const $checkUrl = $("#check-url");
@@ -506,6 +543,12 @@ $(document).ready(() => {
         $("#LETS_ENCRYPT_STAGING").prop("checked") ? "yes" : "no",
       );
       formData.append("email_lets_encrypt", $("#EMAIL_LETS_ENCRYPT").val());
+      formData.append(
+        "use_custom_ssl",
+        $("#USE_CUSTOM_SSL").prop("checked") ? "yes" : "no",
+      );
+      formData.append("custom_ssl_cert", $("#CUSTOM_SSL_CERT").val());
+      formData.append("custom_ssl_key", $("#CUSTOM_SSL_KEY").val());
     }
 
     // Remove beforeunload event to prevent prompt on form submission

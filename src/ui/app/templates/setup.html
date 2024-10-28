@@ -112,7 +112,7 @@
                                         </div>
                                         {% if not ui_user %}
                                             <div class="row pb-0">
-                                                <div class="col-12 col-sm-6 pb-3">
+                                                <div class="col-12 col-md-6 pb-3">
                                                     <div class="d-flex justify-content-between align-items-center">
                                                         <label id="label-username"
                                                                for="username"
@@ -136,7 +136,7 @@
                                                            pattern="^.{1,256}$"
                                                            required />
                                                 </div>
-                                                <div class="col-12 col-sm-6 pb-3">
+                                                <div class="col-12 col-md-6 pb-3">
                                                     <div class="d-flex justify-content-between align-items-center">
                                                         <label id="label-username"
                                                                for="username"
@@ -159,7 +159,7 @@
                                                            class="form-control plugin-setting mt-1"
                                                            aria-labelledby="label-email" />
                                                 </div>
-                                                <div class="col-12 col-sm-6 pb-3">
+                                                <div class="col-12 col-md-6 pb-3">
                                                     <div class="d-flex justify-content-between align-items-center">
                                                         <label id="label-password"
                                                                for="password"
@@ -210,7 +210,7 @@
                                                         </ul>
                                                     </div>
                                                 </div>
-                                                <div class="col-12 col-sm-6 pb-3">
+                                                <div class="col-12 col-md-6 pb-3">
                                                     <div class="d-flex justify-content-between align-items-center">
                                                         <label id="label-confirm_password"
                                                                for="confirm_password"
@@ -311,7 +311,8 @@
                                                            pattern="^.+$"
                                                            required />
                                                 </div>
-                                                <div class="col-12 col-sm-6 pb-6">
+                                                <h6 class="mt-2 mb-2 fw-bold">Reverse Proxy</h6>
+                                                <div class="col-12 col-md-6 pb-6">
                                                     <div class="d-flex justify-content-between align-items-center">
                                                         <label id="label-REVERSE_PROXY_HOST"
                                                                for="REVERSE_PROXY_HOST"
@@ -344,7 +345,7 @@
                                                            pattern="^.+$"
                                                            required />
                                                 </div>
-                                                <div class="col-12 col-sm-6 pb-6">
+                                                <div class="col-12 col-md-6 pb-6">
                                                     <div class="d-flex justify-content-between align-items-center">
                                                         <label id="label-username"
                                                                for="username"
@@ -374,7 +375,8 @@
                                                            aria-labelledby="label-REVERSE_PROXY_URL"
                                                            pattern="^.*$" />
                                                 </div>
-                                                <div class="col-6 col-sm-3 pb-3">
+                                                <h6 class="mt-2 mb-2 fw-bold">Let's Encrypt</h6>
+                                                <div class="col-6 col-md-3 pb-3">
                                                     <div class="d-flex justify-content-between align-items-center">
                                                         <label id="label-AUTO_LETS_ENCRYPT"
                                                                for="AUTO_LETS_ENCRYPT"
@@ -408,7 +410,7 @@
                                                                {% if auto_lets_encrypt == "yes" %}checked{% endif %} />
                                                     </div>
                                                 </div>
-                                                <div class="col-6 col-sm-3 pb-3">
+                                                <div class="col-6 col-md-3 pb-3">
                                                     <div class="d-flex justify-content-between align-items-center">
                                                         <label id="label-USE_LETS_ENCRYPT_STAGING"
                                                                for="USE_LETS_ENCRYPT_STAGING"
@@ -442,7 +444,7 @@
                                                                {% if lets_encrypt_staging == "yes" %}checked{% endif %} />
                                                     </div>
                                                 </div>
-                                                <div class="col-sm-6 pb-3">
+                                                <div class="col-md-6 pb-3">
                                                     <div class="d-flex justify-content-between align-items-center">
                                                         <label id="label-EMAIL_LETS_ENCRYPT"
                                                                for="EMAIL_LETS_ENCRYPT"
@@ -472,6 +474,107 @@
                                                            placeholder="John.doe@example.com"
                                                            class="form-control plugin-setting mt-1"
                                                            aria-labelledby="label-EMAIL_LETS_ENCRYPT"
+                                                           pattern="^.*$" />
+                                                </div>
+                                                <h6 class="mt-2 mb-2 fw-bold">Custom certificate</h6>
+                                                <div class="col-12 col-md-2 pb-3">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <label id="label-USE_CUSTOM_SSL"
+                                                               for="USE_CUSTOM_SSL"
+                                                               class="form-label fw-semibold text-truncate">
+                                                            Use Custom SSL
+                                                        </label>
+                                                        {% if use_custom_ssl == "yes" %}
+                                                            <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                                                                  data-bs-toggle="tooltip"
+                                                                  data-bs-placement="top"
+                                                                  data-bs-original-title="From global configuration">
+                                                                <span class="bx bx-globe bx-xs"></span>
+                                                            </span>
+                                                        {% endif %}
+                                                        <div class="d-flex align-items-center">
+                                                            <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
+                                                                  data-bs-toggle="tooltip"
+                                                                  data-bs-placement="top"
+                                                                  data-bs-original-title="Whether to use a custom SSL certificate">
+                                                                <span class="bx bx-question-mark bx-xs"></span>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-check form-switch mt-1">
+                                                        <input id="USE_CUSTOM_SSL"
+                                                               name="USE_CUSTOM_SSL"
+                                                               class="form-check-input"
+                                                               type="checkbox"
+                                                               role="switch"
+                                                               aria-labelledby="label-USE_CUSTOM_SSL"
+                                                               {% if use_custom_ssl == "yes" %}checked{% endif %} />
+                                                    </div>
+                                                </div>
+                                                <div class="col-6 col-md-5 pb-3">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <label id="label-CUSTOM_SSL_CERT"
+                                                               for="CUSTOM_SSL_CERT"
+                                                               class="form-label fw-semibold text-truncate">
+                                                            Custom SSL Certificate
+                                                        </label>
+                                                        <div class="d-flex align-items-center">
+                                                            {% if custom_ssl_cert %}
+                                                                <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                                                                      data-bs-toggle="tooltip"
+                                                                      data-bs-placement="top"
+                                                                      data-bs-original-title="From global configuration">
+                                                                    <span class="bx bx-globe bx-xs"></span>
+                                                                </span>
+                                                            {% endif %}
+                                                            <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
+                                                                  data-bs-toggle="tooltip"
+                                                                  data-bs-placement="top"
+                                                                  data-bs-original-title="The custom SSL certificate path">
+                                                                <span class="bx bx-question-mark bx-xs"></span>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <input id="CUSTOM_SSL_CERT"
+                                                           name="CUSTOM_SSL_CERT"
+                                                           type="text"
+                                                           placeholder="/tmp/cert.pem"
+                                                           value="{{ custom_ssl_cert }}"
+                                                           class="form-control plugin-setting mt-1"
+                                                           aria-labelledby="label-CUSTOM_SSL_CERT"
+                                                           pattern="^.*$" />
+                                                </div>
+                                                <div class="col-6 col-md-5 pb-3">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <label id="label-CUSTOM_SSL_KEY"
+                                                               for="CUSTOM_SSL_KEY"
+                                                               class="form-label fw-semibold text-truncate">
+                                                            Custom SSL Key
+                                                        </label>
+                                                        <div class="d-flex align-items-center">
+                                                            {% if custom_ssl_key %}
+                                                                <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                                                                      data-bs-toggle="tooltip"
+                                                                      data-bs-placement="top"
+                                                                      data-bs-original-title="From global configuration">
+                                                                    <span class="bx bx-globe bx-xs"></span>
+                                                                </span>
+                                                            {% endif %}
+                                                            <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
+                                                                  data-bs-toggle="tooltip"
+                                                                  data-bs-placement="top"
+                                                                  data-bs-original-title="The custom SSL key path">
+                                                                <span class="bx bx-question-mark bx-xs"></span>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <input id="CUSTOM_SSL_KEY"
+                                                           name="CUSTOM_SSL_KEY"
+                                                           type="text"
+                                                        placeholder="/tmp/key.pem"
+                                                              value="{{ custom_ssl_key }}"
+                                                           class="form-control plugin-setting mt-1"
+                                                           aria-labelledby="label-CUSTOM_SSL_KEY"
                                                            pattern="^.*$" />
                                                 </div>
                                             </div>

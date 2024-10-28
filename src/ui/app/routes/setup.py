@@ -5,10 +5,10 @@ from os import getenv
 from threading import Thread
 from time import time
 
-from flask import Blueprint, Response, flash, redirect, render_template, request, session, url_for
+from flask import Blueprint, Response, flash, redirect, render_template, request, url_for
 from flask_login import current_user
 
-from app.models.totp import totp as TOTP
+# from app.models.totp import totp as TOTP
 
 from app.dependencies import BW_CONFIG, DATA, DB
 from app.utils import USER_PASSWORD_RX, gen_password_hash
@@ -23,7 +23,18 @@ def setup_page():
     if current_user.is_authenticated:
         return redirect(url_for("home.home_page"))
     db_config = DB.get_config(
-        filtered_settings=("SERVER_NAME", "MULTISITE", "USE_UI", "UI_HOST", "AUTO_LETS_ENCRYPT", "USE_LETS_ENCRYPT_STAGING", "EMAIL_LETS_ENCRYPT"),
+        filtered_settings=(
+            "SERVER_NAME",
+            "MULTISITE",
+            "USE_UI",
+            "UI_HOST",
+            "AUTO_LETS_ENCRYPT",
+            "USE_LETS_ENCRYPT_STAGING",
+            "EMAIL_LETS_ENCRYPT",
+            "USE_CUSTOM_SSL",
+            "CUSTOM_SSL_CERT",
+            "CUSTOM_SSL_KEY",
+        ),
     )
 
     admin_user = DB.get_ui_user()
@@ -42,7 +53,19 @@ def setup_page():
 
         required_keys = []
         if not ui_reverse_proxy:
-            required_keys.extend(["server_name", "ui_host", "ui_url", "auto_lets_encrypt", "lets_encrypt_staging", "email_lets_encrypt"])
+            required_keys.extend(
+                [
+                    "server_name",
+                    "ui_host",
+                    "ui_url",
+                    "auto_lets_encrypt",
+                    "lets_encrypt_staging",
+                    "email_lets_encrypt",
+                    "use_custom_ssl",
+                    "custom_ssl_cert",
+                    "custom_ssl_key",
+                ]
+            )
         if not admin_user:
             required_keys.extend(
                 ["admin_username", "admin_email", "admin_password", "admin_password_check"]
@@ -104,9 +127,12 @@ def setup_page():
             DATA["RELOADING"] = True
             DATA["LAST_RELOAD"] = time()
 
-            config = {
+            base_config = {
                 "SERVER_NAME": request.form["server_name"],
                 "USE_TEMPLATE": "ui",
+            }
+
+            config = {
                 "USE_REVERSE_PROXY": "yes",
                 "REVERSE_PROXY_HOST": request.form["ui_host"],
                 "REVERSE_PROXY_URL": request.form["ui_url"] or "/",
@@ -116,6 +142,22 @@ def setup_page():
 
             if request.form.get("auto_lets_encrypt", "no") == "yes":
                 config["AUTO_LETS_ENCRYPT"] = "yes"
+            elif request.form.get("use_custom_ssl", "no") == "yes":
+                if not all(
+                    [
+                        bool(request.form.get("custom_ssl_cert", "")),
+                        bool(request.form.get("custom_ssl_key", "")),
+                    ]
+                ):
+                    return handle_error("When using a custom SSL certificate, you must set both the certificate and the key.", "setup")
+
+                config.update(
+                    {
+                        "USE_CUSTOM_SSL": "yes",
+                        "CUSTOM_SSL_CERT": request.form.get("custom_ssl_cert", ""),
+                        "CUSTOM_SSL_KEY": request.form.get("custom_ssl_key", ""),
+                    }
+                )
             else:
                 config.update(
                     {
@@ -128,18 +170,22 @@ def setup_page():
             if not config.get("MULTISITE", "no") == "yes":
                 BW_CONFIG.edit_global_conf({"MULTISITE": "yes"}, check_changes=False)
 
+            operation, error = BW_CONFIG.new_service(base_config, override_method="wizard", check_changes=False)
+            if error:
+                return handle_error(f"Couldn't create the new service: {operation}", "setup", False, "error")
+
             # deepcode ignore MissingAPI: We don't need to check to wait for the thread to finish
             Thread(
                 target=manage_bunkerweb,
                 name="Reloading instances",
-                args=("services", config, request.form["server_name"], request.form["server_name"]),
-                kwargs={"operation": "new", "threaded": True, "override_method": "wizard"},
+                args=("services", config | base_config, request.form["server_name"], request.form["server_name"]),
+                kwargs={"operation": "edit", "threaded": True},
             ).start()
 
         return Response(status=200)
 
-    session["tmp_totp_secret"] = TOTP.generate_totp_secret()
-    totp_qr_image = TOTP.generate_qrcode(current_user.get_id(), session["tmp_totp_secret"])
+    # session["tmp_totp_secret"] = TOTP.generate_totp_secret() # TODO: uncomment when TOTP is implemented in setup wizard
+    # totp_qr_image = TOTP.generate_qrcode(current_user.get_id(), session["tmp_totp_secret"])
 
     return render_template(
         "setup.html",
@@ -151,8 +197,11 @@ def setup_page():
         auto_lets_encrypt=db_config.get("AUTO_LETS_ENCRYPT", getenv("AUTO_LETS_ENCRYPT", "no")),
         lets_encrypt_staging=db_config.get("USE_LETS_ENCRYPT_STAGING", getenv("USE_LETS_ENCRYPT_STAGING", "no")),
         email_lets_encrypt=db_config.get("EMAIL_LETS_ENCRYPT", getenv("EMAIL_LETS_ENCRYPT", "")),
-        totp_qr_image=totp_qr_image,
-        totp_secret=TOTP.get_totp_pretty_key(session.get("tmp_totp_secret", "")),
+        use_custom_ssl=db_config.get("USE_CUSTOM_SSL", getenv("USE_CUSTOM_SSL", "no")),
+        custom_ssl_cert=db_config.get("CUSTOM_SSL_CERT", getenv("CUSTOM_SSL_CERT", "")),
+        custom_ssl_key=db_config.get("CUSTOM_SSL_KEY", getenv("CUSTOM_SSL_KEY", "")),
+        # totp_qr_image=totp_qr_image,
+        # totp_secret=TOTP.get_totp_pretty_key(session.get("tmp_totp_secret", "")),
     )
 
 
