@@ -1052,8 +1052,6 @@ $(document).ready(() => {
     if ($serviceMethodInput.val() === "autoconf") {
       const feedbackToast = $("#feedback-toast").clone(); // Clone the feedback toast
       feedbackToast.attr("id", `feedback-toast-${toastNum++}`); // Corrected to set the ID for the failed toast
-      feedbackToast.removeClass("bg-primary text-white");
-      feedbackToast.addClass("bg-primary text-white");
       feedbackToast.find("span").text("The service method is autoconf.");
       feedbackToast
         .find("div.toast-body")

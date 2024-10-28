@@ -274,7 +274,6 @@ $(function () {
         const feedbackToast = $("#feedback-toast")
           .clone()
           .attr("id", `feedback-toast-${toastNum++}`)
-          .addClass("bg-primary text-white")
           .removeClass("d-none");
         feedbackToast.find("span").text("Conversion failed");
         feedbackToast

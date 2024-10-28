@@ -31,8 +31,8 @@ $(document).ready(function () {
         data.failed.forEach((instance) => {
           var feedbackToastFailed = $("#feedback-toast").clone(); // Clone the feedback toast
           feedbackToastFailed.attr("id", `feedback-toast-${toastNum++}`); // Corrected to set the ID for the failed toast
-          feedbackToastFailed.removeClass("bg-primary text-white");
-          feedbackToastFailed.addClass("bg-danger text-white");
+          feedbackToastFailed.addClass("border-danger");
+          feedbackToastFailed.find(".toast-header").addClass("text-danger");
           feedbackToastFailed.find("span").text("Ping failed");
           feedbackToastFailed.find("div.toast-body").text(instance.message);
           feedbackToastFailed.appendTo("#feedback-toast-container"); // Ensure the toast is appended to the container
@@ -42,7 +42,8 @@ $(document).ready(function () {
         if (data.succeed.length > 0) {
           var feedbackToastSucceed = $("#feedback-toast").clone(); // Clone the feedback toast
           feedbackToastSucceed.attr("id", `feedback-toast-${toastNum++}`);
-          feedbackToastSucceed.addClass("bg-primary text-white");
+          feedbackToastSucceed.addClass("border-primary");
+          feedbackToastSucceed.find(".toast-header").addClass("text-primary");
           feedbackToastSucceed.find("span").text("Ping successful");
           feedbackToastSucceed
             .find("div.toast-body")

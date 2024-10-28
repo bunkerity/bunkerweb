@@ -173,8 +173,8 @@ $(document).ready(() => {
     feedbackToast.attr("id", `feedback-toast-${toastNum++}`); // Corrected to set the ID for the toast
     if (!isValid) {
       $feedback.text("Server name is not unique.");
-      feedbackToast.removeClass("bg-primary");
-      feedbackToast.addClass("bg-danger");
+      feedbackToast.addClass("border-danger");
+      feedbackToast.find(".toast-header").addClass("text-danger");
       feedbackToast.find("span").text("Server name is not unique.");
       feedbackToast
         .find("div.toast-body")
@@ -189,8 +189,8 @@ $(document).ready(() => {
           .toggleClass("bx-x text-danger", true);
     } else {
       $feedback.text("");
-      feedbackToast.removeClass("bg-danger");
-      feedbackToast.addClass("bg-primary");
+      feedbackToast.addClass("border-primary");
+      feedbackToast.find(".toast-header").addClass("text-primary");
       feedbackToast.find("span").text("Server name is unique.");
       feedbackToast
         .find("div.toast-body")
@@ -581,8 +581,8 @@ $(document).ready(() => {
         setTimeout(() => {
           const feedbackToast = $("#feedback-toast").clone(); // Clone the feedback toast
           feedbackToast.attr("id", `feedback-toast-${toastNum++}`); // Corrected to set the ID for the failed toast
-          feedbackToast.removeClass("bg-primary");
-          feedbackToast.addClass("bg-danger");
+          feedbackToast.addClass("border-danger");
+          feedbackToast.find(".toast-header").addClass("text-danger");
           feedbackToast.find("span").text("Error");
           feedbackToast
             .find("div.toast-body")
