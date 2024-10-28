@@ -29,6 +29,13 @@ roleRef:
   name: cr-bunkerweb
   apiGroup: rbac.authorization.k8s.io
 ---
+apiVersion: networking.k8s.io/v1
+kind: IngressClass
+metadata:
+  name: bunkerweb
+spec:
+  controller: bunkerweb.io/ingress-controller
+---
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:

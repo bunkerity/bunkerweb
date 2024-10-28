@@ -6,6 +6,7 @@ from time import sleep
 from traceback import format_exc
 from typing import List
 from kubernetes import client, config, watch
+from kubernetes.client import Configuration
 from kubernetes.client.exceptions import ApiException
 from threading import Thread, Lock
 
@@ -17,10 +18,14 @@ class IngressController(Controller):
         self.__internal_lock = Lock()
         super().__init__("kubernetes")
         config.load_incluster_config()
-        config.verify_ssl = getenv("KUBERNETES_VERIFY_SSL", "yes") == "yes"
+        Configuration._default.verify_ssl = getenv("KUBERNETES_VERIFY_SSL", "yes") == "yes"
+        ssl_ca_cert = getenv("KUBERNETES_SSL_CA_CERT", "")
+        if ssl_ca_cert:
+            Configuration._default.ssl_ca_cert = ssl_ca_cert
         self.__corev1 = client.CoreV1Api()
         self.__networkingv1 = client.NetworkingV1Api()
         self.__use_fqdn = getenv("USE_KUBERNETES_FQDN", "yes").lower() == "yes"
+        self.__ingress_class = getenv("KUBERNETES_INGRESS_CLASS", "")
         self._logger.info(f"Using Pod {'FQDN' if self.__use_fqdn else 'IP'} as hostname")
 
     def _get_controller_instances(self) -> list:
@@ -219,6 +224,10 @@ class IngressController(Controller):
         if obj.kind == "Pod":
             return annotations and "bunkerweb.io/INSTANCE" in annotations
         if obj.kind == "Ingress":
+            if self.__ingress_class:
+                ingress_class_name = getattr(obj.spec, "ingressClassName", None)
+                if not ingress_class_name or ingress_class_name != self.__ingress_class:
+                    return False
             return True
         if obj.kind == "ConfigMap":
             return annotations and "bunkerweb.io/CONFIG_TYPE" in annotations

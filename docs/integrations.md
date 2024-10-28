@@ -747,7 +747,7 @@ Given the presence of multiple BunkerWeb instances, it is necessary to establish
 Please ensure that the autoconf services have access to the Kubernetes API. It is recommended to utilize [RBAC authorization](https://kubernetes.io/docs/reference/access-authn-authz/rbac/) for this purpose.
 
 !!! warn "Custom CA for Kubernetes API"
-    At the moment, using a custom CA for the Kubernetes API is not supported by the autoconf. The only workaround available is to disable certificate verification by setting the `KUBERNETES_SSL_VERIFY` environment variable of the autoconf to `no` (default is `yes`).
+    If you use a custom CA for your Kubernetes API, you can mount a bundle file containing your intermediate(s) and root certificates on the ingress controller and set the `KUBERNETES_SSL_CA_FILE` environment value to the path of the bundle inside the container. Alternatively, even if it's not recommended, you can disable certificate verification by setting the `KUBERNETES_SSL_VERIFY` environment variable of the ingress controller to `no` (default is `yes`).
 
 Additionally, **it is crucial to set the `KUBERNETES_MODE` environment variable to `yes` when utilizing the Kubernetes integration**. This variable is mandatory for proper functionality.
 
@@ -785,6 +785,13 @@ roleRef:
   kind: ClusterRole
   name: cr-bunkerweb
   apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: networking.k8s.io/v1
+kind: IngressClass
+metadata:
+  name: bunkerweb
+spec:
+  controller: bunkerweb.io/ingress-controller
 ---
 apiVersion: apps/v1
 kind: DaemonSet
@@ -1056,7 +1063,7 @@ spec:
 
 ### Namespaces
 
-Starting from version `1.6.0-beta`, BunkerWeb's Autoconf stacks now support namespaces. This feature enables you to manage multiple clusters of BunkerWeb instances and services on the same Kubernetes cluster. To take advantage of namespaces, simply set the `namespace` metadata field on your BunkerWeb instances and services. Here's an example:
+Starting from version `1.6.0-beta`, BunkerWeb's autoconf stacks now support namespaces. This feature enables you to manage multiple clusters of BunkerWeb instances and services on the same Kubernetes cluster. To take advantage of namespaces, simply set the `namespace` metadata field on your BunkerWeb instances and services. Here's an example:
 
 ```yaml
 apiVersion: apps/v1
@@ -1109,6 +1116,44 @@ metadata:
     There can only be **one database** and **one Scheduler** per namespace. If you try to create multiple databases or Schedulers in the same namespace, the configurations will end up conflicting with each other.
 
     The Scheduler doesn't need the `NAMESPACE` annotation to work properly. It will only need the `DATABASE_URI` setting properly configured so that it can access the same database as the autoconf service.
+
+### Ingress class
+
+When installed using the official methods in the documentation, BunkerWeb comes with the following `IngressClass` definition :
+
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: IngressClass
+metadata:
+  name: bunkerweb
+spec:
+  controller: bunkerweb.io/ingress-controller
+```
+
+In order to restrict the `Ingress` resources monitored by the ingress controller, you can set the `KUBERNETES_INGRESS_CLASS` environment variable with the value `bunkerweb`. Then, you can leverage the `ingressClassName` directive in your `Ingress` definitions :
+
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: my-ingress
+  annotations:
+    bunkerweb.io/MY_SETTING: "value"
+    bunkerweb.io/www.example.com_MY_SETTING: "value"
+spec:
+  ingressClassName: bunkerweb
+  rules:
+    - host: www.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: svc-my-app
+                port:
+                  number: 8000
+```
 
 ### Minikube specificities
 
