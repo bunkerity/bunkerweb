@@ -1222,6 +1222,9 @@ class Database:
                     # ? As the external column has been replaced by the type column, we need to update the data if the column exists
                     if table_name == "bw_plugins" and external_column is not None:
                         row["type"] = "external" if external_column else "core"
+                    elif table_name in ("bw_services", "bw_instances") and "creation_date" not in row:
+                        row["creation_date"] = datetime.now().astimezone()
+                        row["last_update" if table_name == "bw_services" else "last_seen"] = datetime.now().astimezone()
 
                     with self._db_session() as session:
                         try:
