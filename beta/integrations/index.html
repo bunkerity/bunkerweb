@@ -826,6 +826,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#ingress-class" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ingress class
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#minikube-specificities" class="md-nav__link">
     <span class="md-ellipsis">
       Minikube specificities
@@ -1701,6 +1710,10 @@ MY_SETTING_2=value2
 <p>Clustered database backends setup are out-of-the-scope of this documentation.</p>
 </div>
 <p>Please ensure that the autoconf services have access to the Kubernetes API. It is recommended to utilize <a href="https://kubernetes.io/docs/reference/access-authn-authz/rbac/">RBAC authorization</a> for this purpose.</p>
+<div class="admonition warn">
+<p class="admonition-title">Custom CA for Kubernetes API</p>
+<p>If you use a custom CA for your Kubernetes API, you can mount a bundle file containing your intermediate(s) and root certificates on the ingress controller and set the <code>KUBERNETES_SSL_CA_FILE</code> environment value to the path of the bundle inside the container. Alternatively, even if it's not recommended, you can disable certificate verification by setting the <code>KUBERNETES_SSL_VERIFY</code> environment variable of the ingress controller to <code>no</code> (default is <code>yes</code>).</p>
+</div>
 <p>Additionally, <strong>it is crucial to set the <code>KUBERNETES_MODE</code> environment variable to <code>yes</code> when utilizing the Kubernetes integration</strong>. This variable is mandatory for proper functionality.</p>
 <p>To assist you, here is a YAML boilerplate that can serve as a foundation for your configuration:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rbac.authorization.k8s.io/v1</span>
@@ -1734,6 +1747,13 @@ MY_SETTING_2=value2
 <span class="w">  </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ClusterRole</span>
 <span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cr-bunkerweb</span>
 <span class="w">  </span><span class="nt">apiGroup</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rbac.authorization.k8s.io</span>
+<span class="nn">---</span>
+<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.k8s.io/v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">IngressClass</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">controller</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb.io/ingress-controller</span>
 <span class="nn">---</span>
 <span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DaemonSet</span>
@@ -1998,7 +2018,7 @@ MY_SETTING_2=value2
 <span class="nn">...</span>
 </code></pre></div>
 <h3 id="namespaces_1">Namespaces</h3>
-<p>Starting from version <code>1.6.0-beta</code>, BunkerWeb's Autoconf stacks now support namespaces. This feature enables you to manage multiple clusters of BunkerWeb instances and services on the same Kubernetes cluster. To take advantage of namespaces, simply set the <code>namespace</code> metadata field on your BunkerWeb instances and services. Here's an example:</p>
+<p>Starting from version <code>1.6.0-beta</code>, BunkerWeb's autoconf stacks now support namespaces. This feature enables you to manage multiple clusters of BunkerWeb instances and services on the same Kubernetes cluster. To take advantage of namespaces, simply set the <code>namespace</code> metadata field on your BunkerWeb instances and services. Here's an example:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DaemonSet</span>
 <span class="nt">metadata</span><span class="p">:</span>
@@ -2045,6 +2065,37 @@ MY_SETTING_2=value2
 <p>There can only be <strong>one database</strong> and <strong>one Scheduler</strong> per namespace. If you try to create multiple databases or Schedulers in the same namespace, the configurations will end up conflicting with each other.</p>
 <p>The Scheduler doesn't need the <code>NAMESPACE</code> annotation to work properly. It will only need the <code>DATABASE_URI</code> setting properly configured so that it can access the same database as the autoconf service.</p>
 </div>
+<h3 id="ingress-class">Ingress class</h3>
+<p>When installed using the official methods in the documentation, BunkerWeb comes with the following <code>IngressClass</code> definition :</p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.k8s.io/v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">IngressClass</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">controller</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb.io/ingress-controller</span>
+</code></pre></div>
+<p>In order to restrict the <code>Ingress</code> resources monitored by the ingress controller, you can set the <code>KUBERNETES_INGRESS_CLASS</code> environment variable with the value <code>bunkerweb</code>. Then, you can leverage the <code>ingressClassName</code> directive in your <code>Ingress</code> definitions :</p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.k8s.io/v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ingress</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-ingress</span>
+<span class="w">  </span><span class="nt">annotations</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">bunkerweb.io/MY_SETTING</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;value&quot;</span>
+<span class="w">    </span><span class="nt">bunkerweb.io/www.example.com_MY_SETTING</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;value&quot;</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">ingressClassName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span>
+<span class="w">  </span><span class="nt">rules</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">www.example.com</span>
+<span class="w">      </span><span class="nt">http</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">paths</span><span class="p">:</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/</span>
+<span class="w">            </span><span class="nt">pathType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Prefix</span>
+<span class="w">            </span><span class="nt">backend</span><span class="p">:</span>
+<span class="w">              </span><span class="nt">service</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">svc-my-app</span>
+<span class="w">                </span><span class="nt">port</span><span class="p">:</span>
+<span class="w">                  </span><span class="nt">number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8000</span>
+</code></pre></div>
 <h3 id="minikube-specificities">Minikube specificities</h3>
 <p>We are aware of issues with Minikube and internal hostname resolution. To work around this, there is a specific setting that you can use in the <code>bunkerweb-controller</code> deployment :</p>
 <div class="highlight"><pre><span></span><code><span class="nn">...</span>
