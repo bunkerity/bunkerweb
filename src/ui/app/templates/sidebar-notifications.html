@@ -34,6 +34,7 @@
                target="_blank"
                rel="noreferrer">
                 <img src="{{ url_for('static', filename='img/brands/Twitter-X-Logo.svg') }}"
+                    class="x-logo"
                      alt="X logo"
                      width="20px"
                      height="20px">
@@ -53,7 +54,7 @@
                     {% set content = message[0] %}
                     {% set category = message[1] %}
                     {% set datetime = message[2] %}
-                    <div class="col-12 bs-toast toast show bw-white border{% if category == 'error' %} border-danger{% elif category == 'warning' %} border-warning{% else %} border-primary{% endif %}">
+                    <div class="col-12 bs-toast toast show bg-{% if theme == 'light' %}white{% else %}dark{% endif %} border{% if category == 'error' %} border-danger{% elif category == 'warning' %} border-warning{% else %} border-primary{% endif %}">
                         <div class="toast-header d-flex align-items-center{% if category == 'error' %} text-danger{% elif category == 'warning' %} text-warning{% else %} text-primary{% endif %}">
                             <i class="d-block h-auto rounded tf-icons bx bx-xs bx-bell me-2"></i>
                             <span class="fw-medium me-auto">
@@ -77,8 +78,8 @@
         {% endif %}
     </div>
     <!-- Newsletter Signup Section -->
-    <div class="newsletter-signup position-sticky bottom-0 start-0 w-100 p-4 bg-light-subtle border-top">
-        <h5 class="mb-3 text-dark">Join the Newsletter</h5>
+    <div class="newsletter-signup position-sticky bottom-0 start-0 w-100 p-4 bg-{% if theme == 'light' %}light{% else %}dark{% endif %}-subtle border-top">
+        <h5 class="mb-3 text-{% if theme == 'light' %}dark{% else %}primary{% endif %}">Join the Newsletter</h5>
         <form action="https://bunkerity.us1.list-manage.com/subscribe/post?u=ec5b1577cf427972b9bd491a6&id=37076d9d67"
               method="POST">
             <div class="mb-3">

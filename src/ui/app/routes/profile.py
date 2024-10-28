@@ -202,20 +202,21 @@ def edit_profile():
     if DB.readonly:
         return handle_error("Database is in read-only mode", "profile")
 
-    verify_data_in_form(data={"password": None}, err_message="Missing current password parameter on /profile/edit.", redirect_url="profile")
-
-    if not current_user.check_password(request.form["password"]):
-        return handle_error("The current password is incorrect.", "profile")
-
     user_data = {
         "username": current_user.get_id(),
         "password": current_user.password.encode("utf-8"),
         "email": current_user.email,
         "totp_secret": current_user.totp_secret,
         "method": current_user.method,
+        "theme": current_user.theme,
     }
 
     if "username" in request.form:
+        verify_data_in_form(data={"password": None}, err_message="Missing current password parameter on /profile/edit.", redirect_url="profile")
+
+        if not current_user.check_password(request.form["password"]):
+            return handle_error("The current password is incorrect.", "profile")
+
         verify_data_in_form(data={"email": None}, err_message="Missing email parameter on /profile/edit.", redirect_url="profile")
 
         if request.form["email"] and request.form["email"] != current_user.email:
@@ -231,6 +232,11 @@ def edit_profile():
         if request.form["email"] == (current_user.email or "") and request.form["username"] == current_user.get_id():
             return handle_error("The username and email are the same as the current ones.", "profile")
     elif "new_password" in request.form:
+        verify_data_in_form(data={"password": None}, err_message="Missing current password parameter on /profile/edit.", redirect_url="profile")
+
+        if not current_user.check_password(request.form["password"]):
+            return handle_error("The current password is incorrect.", "profile")
+
         verify_data_in_form(
             data={"new_password_confirm": None},
             err_message="Missing new password confirm parameter on /profile/edit.",
@@ -248,6 +254,11 @@ def edit_profile():
             return handle_error("The new password is the same as the current one.", "profile")
 
         user_data["password"] = gen_password_hash(request.form["new_password"])
+    elif "theme" in request.form:
+        if request.form["theme"] not in ("dark", "light"):
+            return handle_error("The theme is invalid.", "profile")
+
+        user_data["theme"] = request.form["theme"]
     else:
         return handle_error("No fields were updated.", "profile")
 

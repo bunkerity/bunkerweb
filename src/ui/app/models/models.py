@@ -9,9 +9,11 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 from bcrypt import checkpw
 from flask_login import AnonymousUserMixin, UserMixin
 from sqlalchemy.orm import declarative_base, relationship
-from sqlalchemy import TEXT, Boolean, DateTime, Column, Identity, Integer, String, ForeignKey, UnicodeText
+from sqlalchemy import TEXT, Boolean, DateTime, Column, Enum, Identity, Integer, String, ForeignKey, UnicodeText
 
 from model import METHODS_ENUM  # type: ignore
+
+THEMES_ENUM = Enum("light", "dark", name="themes_enum")
 
 Base = declarative_base()
 
@@ -44,6 +46,7 @@ class Users(Base, UserMixin):
     password = Column(String(60), nullable=False)
     method = Column(METHODS_ENUM, nullable=False, default="manual")
     admin = Column(Boolean, nullable=False, default=False)
+    theme = Column(THEMES_ENUM, nullable=False, default="light")
 
     # 2FA
     totp_secret = Column(String(256), nullable=True)

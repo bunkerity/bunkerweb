@@ -78,7 +78,7 @@
             <!-- Version -->
             <li class="nav-item lh-1 me-2 me-md-4">
                 <a role="button"
-                   class="btn btn-sm btn-outline-dark px-2 px-md-3 position-relative"
+                   class="btn btn-sm btn-outline-{% if theme == 'light' %}dark{% else %}light{% endif %} px-2 px-md-3 position-relative"
                    aria-pressed="true"
                    href="https://github.com/bunkerity/bunkerweb/releases/latest"
                    target="_blank"

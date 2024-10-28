@@ -892,3 +892,292 @@ a.courier-prime:hover {
   text-align: center;
   font-weight: bold;
 }
+
+.layout-page::before {
+  display: none;
+}
+
+/*
+* Dark mode overrides
+******************************************************************************/
+
+.dark-style body {
+  color: #fff;
+  background-color: #0d2f45;
+  color-scheme: dark;
+}
+
+.dark-style,
+[data-bs-theme="dark"] {
+  --bs-primary: #fff;
+  --bs-secondary: #9caeb7;
+  --bs-primary-rgb: 255, 255, 255;
+  --bs-secondary-rgb: 156, 174, 183;
+  --bs-primary-text-emphasis: #fff;
+  --bs-secondary-text-emphasis: #b3cad4;
+  --bs-link-color: #fff;
+  --bs-link-color-rgb: 255, 255, 255;
+  --bs-breadcrumb-divider-color: #fff;
+  --bs-body-color-rgb: 255, 255, 255;
+  --dt-row-selected: 31, 31, 31;
+  --bs-breadcrumb-item-active-color: #fff;
+}
+
+.dark-style .list-group {
+  --bs-list-group-color: #fff;
+}
+
+.dark-style .btn {
+  --bs-btn-color: #fff;
+}
+
+.dark-style .btn:hover {
+  --bs-btn-hover-color: #fff;
+}
+
+.dark-style .card {
+  --bs-card-title-color: #fff;
+}
+
+.dark-style .dropdown-menu {
+  --bs-dropdown-bg: #0c283a;
+}
+
+.dark-style .offcanvas,
+.dark-style .offcanvas-xxl,
+.dark-style .offcanvas-xl,
+.dark-style .offcanvas-lg,
+.dark-style .offcanvas-md,
+.dark-style .offcanvas-sm {
+  --bs-offcanvas-bg: #0d2f45;
+}
+
+.dark-style .nav-link,
+.dark-style .breadcrumb-item.active,
+.dark-style .card .card-header,
+.dark-style .card .card-body,
+.dark-style .form-label,
+.dark-style .form-control,
+.dark-style .form-select,
+.dark-style .input-group-text {
+  color: #fff !important;
+}
+
+.dark-style .breadcrumb-item,
+.dark-style .breadcrumb-item a {
+  color: #9caeb7;
+}
+
+.dark-style .breadcrumb-item:hover,
+.dark-style .breadcrumb-item:focus,
+.dark-style .breadcrumb-item a:hover,
+.dark-style .breadcrumb-item a:focus {
+  color: #fff;
+}
+
+.dark-style .nav-pills .nav-link.active,
+.nav-pills .nav-link.active:hover,
+.nav-pills .nav-link.active:focus {
+  background-color: #0a4b69;
+}
+
+.dark-style .btn-primary {
+  background-color: var(--bs-primary);
+  border-color: var(--bs-primary);
+  color: #07354a;
+}
+
+.dark-style .breadcrumb-item + .breadcrumb-item::before {
+  color: #9caeb7;
+}
+
+.dark-style .btn-primary:hover {
+  color: #07354a !important;
+}
+
+.dark-style .btn-light {
+  background-color: #0a4b69;
+  border-color: #0a4b69;
+  box-shadow: none;
+  color: #fff;
+}
+
+.dark-style .card {
+  background-color: #0c283a;
+  border-color: #0c283a;
+  color: #fff;
+}
+
+.dark-style .modal {
+  --bs-modal-color: #fff;
+  --bs-modal-bg: #0c283a;
+}
+
+.dark-style .input-group:focus-within .form-control,
+.dark-style .input-group:focus-within .input-group-text {
+  border-color: #fff !important;
+}
+
+.dark-style .text-body {
+  color: #fff !important;
+}
+
+.dark-style .bg-footer-theme .footer-link {
+  color: #cdd7db;
+}
+
+.dark-style h6,
+.h6,
+h5,
+.h5,
+h4,
+.h4,
+h3,
+.h3,
+h2,
+.h2,
+h1,
+.h1 {
+  color: #fff;
+}
+
+.dark-style .img-fluid.qr-code,
+.dark-style .x-logo {
+  filter: brightness(0) invert(1);
+}
+
+.dark-style .text-primary {
+  color: var(--bs-primary) !important;
+}
+
+.dark-style .text-primary.shine {
+  color: rgba(var(--bs-primary-rgb), 0.1) !important;
+  background-color: var(--bs-primary) !important;
+}
+
+.dark-style .text-muted {
+  color: #9caeb7 !important;
+}
+.dark-style .sticky-card {
+  background-color: rgba(12, 40, 58, 0.95) !important;
+}
+
+.dark-style .layout-navbar,
+.dark-style .layout-menu {
+  background-color: #0c283a !important;
+  color: #fff !important;
+}
+
+.dark-style .bg-menu-theme .menu-link,
+.dark-style .bg-menu-theme .menu-horizontal-prev,
+.dark-style .bg-menu-theme .menu-horizontal-next {
+  color: #fff;
+}
+
+.dark-style .bg-menu-theme .menu-inner > .menu-item.active > .menu-link {
+  color: #07354a !important;
+  background-color: #fff !important;
+}
+
+.dark-style .bg-menu-theme .menu-inner > .menu-item.active:before {
+  background-color: #fff !important;
+}
+
+.dark-style .btn-outline-primary {
+  color: var(--bs-primary);
+  border-color: var(--bs-primary);
+}
+
+html:not([dir="rtl"]).dark-style .border-primary,
+html[dir="rtl"].dark-style .border-primary {
+  border-color: var(--bs-primary) !important;
+}
+
+.dark-style .form-floating > .form-control:focus ~ label,
+.dark-style
+  .form-floating
+  > .form-control:focus:not(:placeholder-shown)
+  ~ label,
+.dark-style .form-floating > .form-select:focus ~ label,
+.dark-style
+  .form-floating
+  > .form-select:focus:not(:placeholder-shown)
+  ~ label {
+  color: #fff;
+}
+
+.dark-style .form-select {
+  --bs-form-select-bg-img: url('data:image/svg+xml,%3csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 22" fill="none"%3e%3cpath d="M10.9999 12.0743L15.5374 7.53676L16.8336 8.83292L10.9999 14.6666L5.16626 8.83292L6.46243 7.53676L10.9999 12.0743Z" fill="%23ffffff" fill-opacity="0.9"/%3e%3c/svg%3e');
+  background-color: #0c283a;
+}
+
+.dark-style .dropdown-item {
+  color: #fff;
+}
+
+.dark-style .dropdown-item:not(.disabled).active,
+.dark-style .dropdown-item:not(.disabled):active {
+  color: #fff !important;
+  background-color: #0a4b69;
+}
+
+.dark-style .bg-secondary {
+  color: #07354a;
+}
+
+.dark-style .table th {
+  color: #fff;
+}
+
+.dark-style .table > :not(caption) > * > * {
+  color: #fff;
+}
+
+.dark-style .form-control:focus,
+.dark-style .form-select:focus {
+  border-color: #fff !important;
+}
+
+.dark-style .btn-outline-primary.disabled,
+.dark-style .btn-outline-primary:disabled {
+  color: var(--bs-primary) !important;
+  border-color: var(--bs-primary) !important;
+}
+
+.dark-style td.highlight {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.dark-style .form-check-label {
+  color: #fff;
+}
+
+.dark-style a {
+  color: #cdd7db;
+}
+
+.dark-style a:hover {
+  color: #fff;
+}
+
+.dark-style .bg-label-secondary {
+  color: #000 !important;
+}
+
+.dark-style .bg-bw-green {
+  background-color: var(--bs-bw-green);
+}
+
+.dark-style .apexcharts-text {
+  fill: #fff;
+}
+.dark-style .apexcharts-tooltip,
+.dark-style .apexcharts-tooltip-title {
+  background-color: #333;
+  color: #fff;
+  border: 1px solid #555;
+}
+.dark-style .apexcharts-legend-text {
+  color: #fff;
+  border: 1px solid #555;
+}

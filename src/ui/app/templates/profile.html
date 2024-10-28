@@ -79,10 +79,11 @@
         <div class="tab-pane fade show active"
              id="navs-pills-profile"
              role="tabpanel">
-            <div class="d-flex row">
+            <div class="d-flex row g-4">
                 <div class="col-md-6">
                     <!-- Profile -->
-                    <div class="card">
+                    <div class="card position-relative">
+                        <i class='bx bx-user bx-sm position-absolute top-0 end-0 m-3'></i>
                         <h5 class="card-header">Edit Profile</h5>
                         <div class="card-body pb-2">
                             <div class="d-flex align-items-start align-items-sm-center gap-6 pb-4 border-bottom">
@@ -171,32 +172,29 @@
                 </div>
                 <div class="col-md-6">
                     <!-- Theme -->
-                    <div class="card">
+                    <div class="card position-relative">
+                        <i class='bx bx-{% if theme == 'light' %}sun{% else %}moon{% endif %} bx-sm position-absolute top-0 end-0 m-3'></i>
                         <h5 class="card-header">Change Theme</h5>
-                        <div class="card-body pb-4"
-                             data-bs-toggle="tooltip"
-                             data-bs-placement="top"
-                             data-bs-html="true"
-                             data-bs-original-title="<i class='bx bx-rocket bx-xs'></i><span>Coming soon</span>">
-                            <!-- <form method="POST" action="{{ profile_url }}/edit"> -->
-                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-                            <div class="row g-3">
-                                <div class="col-md-12 form-floating">
-                                    <select class="form-select" id="theme" name="theme" disabled>
-                                        <option value="light"
-                                                {% if current_user.theme == "light" %}selected{% endif %}>
-                                            Light
-                                        </option>
-                                        <option value="dark" {% if current_user.theme == "dark" %}selected{% endif %}>Dark</option>
-                                    </select>
-                                    <label for="theme">Theme</label>
+                        <div class="card-body pb-4">
+                            <form method="POST" action="{{ profile_url }}/edit">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                                <div class="row g-3">
+                                    <div class="col-md-12 form-floating">
+                                        <select class="form-select" id="theme" name="theme">
+                                            <option value="light"
+                                                    {% if theme == "light" %}selected{% endif %}>
+                                                Light
+                                            </option>
+                                            <option value="dark" {% if theme == "dark" %}selected{% endif %}>Dark</option>
+                                        </select>
+                                        <label for="theme">Theme</label>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="mt-4 justify-content-center d-flex">
-                                <button type="submit" class="btn btn-primary me-2 disabled">Save Changes</button>
-                                <button type="reset" class="btn btn-outline-secondary">Cancel</button>
-                            </div>
-                            <!-- </form> -->
+                                <div class="mt-4 justify-content-center d-flex">
+                                    <button type="submit" class="btn btn-primary me-2">Save Changes</button>
+                                    <button type="reset" class="btn btn-outline-secondary">Cancel</button>
+                                </div>
+                            </form>
                         </div>
                     </div>
                     <!-- /Theme -->
@@ -204,10 +202,11 @@
             </div>
         </div>
         <div class="tab-pane fade" id="navs-pills-security" role="tabpanel">
-            <div class="d-flex row">
+            <div class="d-flex row g-4">
                 <div class="col-md-6">
                     <!-- Password -->
-                    <div class="card mb-4">
+                    <div class="card mb-4 position-relative">
+                        <i class='bx bx-check-shield bx-sm position-absolute top-0 end-0 m-3'></i>
                         <h5 class="card-header">Change Password</h5>
                         <div class="card-body pb-4">
                             <form method="POST" action="{{ profile_url }}/edit" autocomplete="off">
@@ -291,7 +290,8 @@
                 </div>
                 <div class="col-md-6">
                     <!-- Two-Factor Authentication (2FA) -->
-                    <div class="card mb-4">
+                    <div class="card mb-4 position-relative">
+                        <i class='bx bx-qr bx-sm position-absolute top-0 end-0 m-3'></i>
                         <h5 class="card-header text-center">Two-Factor Authentication (2FA)</h5>
                         <div class="card-body">
                             {% if not is_totp %}
@@ -302,7 +302,7 @@
                                         <!-- QR Code Section -->
                                         <div class="col-md-12 text-center">
                                             <h5 class="mb-0">Enable 2FA</h5>
-                                            <img class="img-fluid"
+                                            <img class="img-fluid qr-code"
                                                  src="{{ totp_qr_image }}"
                                                  alt="2FA QR Code"
                                                  height="200"
@@ -417,7 +417,8 @@
                     <!-- /Two-Factor Authentication (2FA) -->
                     {% if is_totp %}
                         <!-- Refresh Recovery Codes -->
-                        <div class="card mb-4">
+                        <div class="card mb-4 position-relative">
+                            <i class='bx bx-data bx-sm position-absolute top-0 end-0 m-3'></i>
                             <h5 class="card-header">Refresh Recovery Codes</h5>
                             <div class="card-body">
                                 <div class="alert alert-danger text-center" role="alert">
@@ -461,11 +462,12 @@
             </div>
         </div>
         <div class="tab-pane fade" id="navs-pills-sessions" role="tabpanel">
-            <div class="d-flex row justify-content-center">
+            <div class="d-flex row g-2 justify-content-center">
                 <div class="col-md-4">
                     <form method="POST" action="{{ profile_url }}/wipe-other-sessions">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-                        <div class="card mb-4">
+                        <div class="card mb-4 position-relative">
+                            <i class='bx bx-history bx-sm position-absolute top-0 end-0 m-3'></i>
                             <h5 class="card-header">Sessions</h5>
                             <div class="card-body">
                                 <div class="row g-3">

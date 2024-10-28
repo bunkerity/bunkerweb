@@ -1,6 +1,13 @@
 $(function () {
-  const headingColor = config.colors.headingColor;
-  const legendColor = config.colors.bodyColor;
+  var headingColor = config.colors.headingColor;
+  var legendColor = config.colors.bodyColor;
+
+  const theme = $("#theme").val();
+
+  if (theme === "dark") {
+    headingColor = config.colors.white;
+    legendColor = config.colors.white;
+  }
 
   // Requests countries map
 
@@ -432,10 +439,16 @@ $(function () {
       type: "bar",
       width: "100%",
       height: 400,
+      toolbar: {
+        show: false,
+      },
     },
     title: {
       text: "Blocked Requests per Hour",
       align: "center",
+      style: {
+        color: headingColor,
+      },
     },
     series: [
       {
@@ -446,7 +459,7 @@ $(function () {
     colors: colorValues,
     plotOptions: {
       bar: {
-        distributed: true, // This line enables individual bar colors
+        distributed: true,
       },
     },
     xaxis: {
@@ -454,14 +467,23 @@ $(function () {
       labels: {
         rotate: -45,
         hideOverlappingLabels: true,
+        style: {
+          colors: headingColor,
+        },
       },
       title: {
         text: "Time",
+        style: {
+          color: headingColor,
+        },
       },
     },
     yaxis: {
       title: {
         text: "Number of Blocked Requests",
+        style: {
+          color: headingColor,
+        },
       },
     },
     legend: {
@@ -491,6 +513,9 @@ $(function () {
           },
           legend: {
             position: "bottom",
+            labels: {
+              color: legendColor,
+            },
           },
         },
       },

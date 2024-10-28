@@ -23,7 +23,7 @@
 } %}
 <!DOCTYPE html>
 <html lang="en"
-      class="light-style layout-navbar-fixed layout-menu-fixed"
+      class="{{ theme }}-style layout-navbar-fixed layout-menu-fixed"
       data-theme="theme-default">
     <head>
         <meta charset="utf-8" />
@@ -65,6 +65,11 @@
             <link rel="stylesheet"
                   href="{{ url_for('static', filename='libs/flatpickr/themes/airbnb.css') }}"
                   nonce="{{ style_nonce }}" />
+            {% if theme == 'dark' %}
+            <link rel="stylesheet"
+                  href="{{ url_for('static', filename='libs/flatpickr/themes/airbnb.dark.css') }}"
+                  nonce="{{ style_nonce }}" />
+            {% endif %}
         {% endif %}
         <!-- Core CSS -->
         <link rel="stylesheet"
@@ -119,6 +124,7 @@
     </head>
     <body>
         <input type="hidden" id="is-read-only" value="{{ is_readonly }}" />
+        <input type="hidden" id="theme" value="{{ theme }}" />
         <!-- prettier-ignore -->
         {% if current_endpoint != "loading" %}
             {% include "flash.html" %}

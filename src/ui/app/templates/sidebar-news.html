@@ -34,6 +34,7 @@
                target="_blank"
                rel="noreferrer">
                 <img src="{{ url_for('static', filename='img/brands/Twitter-X-Logo.svg') }}"
+                class="x-logo"
                      alt="X logo"
                      width="20px"
                      height="20px">
@@ -56,8 +57,8 @@
         </div>
     </div>
     <!-- Newsletter Signup Section -->
-    <div class="newsletter-signup position-sticky bottom-0 start-0 w-100 p-4 bg-light-subtle border-top">
-        <h5 class="mb-3 text-dark">Join the Newsletter</h5>
+    <div class="newsletter-signup position-sticky bottom-0 start-0 w-100 p-4 bg-{% if theme == 'light' %}light{% else %}dark{% endif %}-subtle border-top">
+        <h5 class="mb-3 text-{% if theme == 'light' %}dark{% else %}primary{% endif %}">Join the Newsletter</h5>
         <form action="https://bunkerity.us1.list-manage.com/subscribe/post?u=ec5b1577cf427972b9bd491a6&id=37076d9d67"
               method="POST">
             <div class="mb-3">

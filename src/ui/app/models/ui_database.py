@@ -4,7 +4,7 @@ from os import sep
 from os.path import join
 from sys import path as sys_path
 from time import sleep
-from typing import List, Optional, Tuple, Union
+from typing import List, Literal, Optional, Tuple, Union
 
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("api",), ("db",))]:
@@ -163,6 +163,7 @@ class UIDatabase(Database):
                 "email": ui_user.email,
                 "password": ui_user.password.encode("utf-8"),
                 "method": ui_user.method,
+                "theme": ui_user.theme,
                 "totp_secret": ui_user.totp_secret,
                 "creation_date": ui_user.creation_date,
                 "update_date": ui_user.update_date,
@@ -179,6 +180,7 @@ class UIDatabase(Database):
         roles: List[str],
         email: Optional[str] = None,
         *,
+        theme: Union[Literal["light"], Literal["dark"]] = "light",
         totp_secret: Optional[str] = None,
         totp_recovery_codes: Optional[List[str]] = None,
         method: str = "manual",
@@ -209,6 +211,7 @@ class UIDatabase(Database):
                     password=password.decode("utf-8"),
                     method=method,
                     admin=admin,
+                    theme=theme,
                     totp_secret=totp_secret,
                     creation_date=current_time,
                     update_date=current_time,
@@ -231,6 +234,7 @@ class UIDatabase(Database):
         password: bytes,
         totp_secret: Optional[str],
         *,
+        theme: Union[Literal["light"], Literal["dark"]] = "light",
         old_username: Optional[str] = None,
         email: Optional[str] = None,
         totp_recovery_codes: Optional[List[str]] = None,
@@ -263,6 +267,7 @@ class UIDatabase(Database):
             user.password = password.decode("utf-8")
             user.totp_secret = totp_secret
             user.method = method
+            user.theme = theme
             user.update_date = datetime.now().astimezone()
 
             try:

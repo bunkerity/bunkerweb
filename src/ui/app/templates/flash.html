@@ -8,7 +8,7 @@
         {% endif %}
         <!-- flash message-->
         {% for category, message in messages %}
-            <div class="bs-toast toast fade show bg-white border{% if category == 'error' %} border-danger{% elif category == 'warning' %} border-warning{% else %} border-primary{% endif %}"
+            <div class="bs-toast toast fade show bg-{% if theme == 'light' %}white{% else %}dark{% endif %} border{% if category == 'error' %} border-danger{% elif category == 'warning' %} border-warning{% else %} border-primary{% endif %}"
                  role="alert"
                  aria-live="assertive"
                  aria-atomic="true">
