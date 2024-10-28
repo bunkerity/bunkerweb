@@ -42,6 +42,7 @@ def update_cache_file(db: Database, backup_dir: Path) -> str:
     """Update the cache file in the database."""
     backup_data = loads(db.get_job_cache_file("backup-data", "backup.json") or "{}")
     backup_data["files"] = sorted([file.name for file in backup_dir.glob("backup-*.zip")])
+    backup_data["date"] = datetime.now().astimezone().isoformat()
     content = dumps(backup_data, indent=2).encode()
     checksum = bytes_hash(content)
     err = db.upsert_job_cache(None, "backup.json", content, job_name="backup-data", checksum=checksum)

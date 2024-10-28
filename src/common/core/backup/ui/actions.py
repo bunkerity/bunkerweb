@@ -1,4 +1,3 @@
-from datetime import datetime
 from json import loads
 from logging import getLogger
 from traceback import format_exc
@@ -29,13 +28,8 @@ def pre_render(**kwargs):
                 ret["list_backup_files"]["data"]["file name"] = []
             ret["list_backup_files"]["data"]["file name"].append(backup_file)
 
-        if ret["list_backup_files"]["data"]:
-            ret["date_last_backup"]["value"] = datetime.strptime(
-                "-".join(ret["list_backup_files"]["data"]["file name"][len(ret["list_backup_files"]["data"]["file name"]) - 1].split("-")[2:]).replace(
-                    ".zip", ""
-                ),
-                "%Y-%m-%d_%H-%M-%S",
-            ).isoformat()
+        if data.get("date"):
+            ret["date_last_backup"]["value"] = data["date"]
     except BaseException as e:
         logger.debug(format_exc())
         logger.error(f"Failed to get backup metrics: {e}")
