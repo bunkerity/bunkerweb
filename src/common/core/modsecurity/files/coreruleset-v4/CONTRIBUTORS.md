@@ -30,6 +30,8 @@
 
 ## Contributors:
 
+- [evidencebp](https://github.com/evidencebp)
+- [mtaket](https://github.com/mtaket)
 - [luelueking](https://github.com/luelueking)
 - [agusmu](https://github.com/agusmu)
 - [Amir Hosein Aliakbarian](https://github.com/AmirHoseinAliakbarian)

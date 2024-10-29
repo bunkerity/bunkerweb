@@ -2,11 +2,19 @@ name: Regression Tests
 
 on:
   push:
+    branches:
+      - main
+      - v3.3/dev
+      - v3.3/master
     paths:
       - 'rules/**'
       - 'tests/**'
       - '.github/**'
   pull_request:
+    branches:
+      - main
+      - v3.3/dev
+      - v3.3/master
     paths:
       - 'rules/**'
       - 'tests/**'
@@ -23,7 +31,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        modsec_version: [modsec2-apache]
+        modsec_version: [modsec2-apache, modsec3-nginx]
     steps:
       - name: "Checkout repo"
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.2
@@ -49,7 +57,7 @@ jobs:
           ./ftw run \
             -d tests/regression/tests \
             --log-file "tests/logs/${{ matrix.modsec_version }}/error.log" \
-            --overrides tests/regression/httpd-overrides.yaml \
+            --overrides tests/regression/${{ matrix.modsec_version == 'modsec2-apache' && 'httpd' || 'nginx' }}-overrides.yaml \
             --show-failures-only
 
       - name: "Change permissions of artifacts for upload"
@@ -61,7 +69,7 @@ jobs:
       - uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3 # v4.3.1
         if: failure()
         with:
-          name: waf-logs
+          name: waf-logs-${{ matrix.modsec_version }}
           path: tests/logs/${{ matrix.modsec_version }}
 
       - name: Clean docker-compose

@@ -1,5 +1,5 @@
 # Java Classes for use with Java RCEs
-# 
+#
 # Used With Rule 944130 in Apache Struts and Oracle Weblogic RCEs Detection:
 #
 # CVE-2017-5638  (2017.01.29) https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2017-5638

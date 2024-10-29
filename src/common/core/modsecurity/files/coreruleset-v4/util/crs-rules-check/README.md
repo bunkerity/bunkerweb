@@ -55,6 +55,11 @@ Second, the script loops over each of the parsed structures. Each iteration cons
 * **Check rule has a `ver` action with correct version** - Every rule must have `ver` action with correct value
     * script accepts `-v` or `--version` argument if you want to pass it manually
     * if no `-v` was given, the script tries to extract the version from result of `git describe --tags`
+* **Check if the rule uses any `TX:N` target in a chained rule then there must be a `capture` action** - Consider the rule is a chained rule and not the first rule uses the `TX:1` target
+    * this means we want to check the previously rule's result
+    * which is produced by `capture`
+    * if there is no previously `capture`, then it means the next `TX:1` will uses a previously produced captured value
+
 
 Finally, the script prints a report of all unused TX variables. Usually, unused TX variables occur when a rule creates a TX variable (e.g., `setvar:tx.foo=1`) but the value of the variable is never used anywhere else. This will only be revealed after the script has checked all rules.
 
@@ -546,6 +551,75 @@ examples/test12.conf
  There are one or more rules without ver action.
   file=examples/test12.conf, line=8, endLine=8, title=ver is missing / incorrect: rule does not have 'ver' action; rule id: 1
   file=examples/test12.conf, line=18, endLine=18, title=ver is missing / incorrect: rule's 'ver' action has incorrect value; rule id: 2, version: 'OWASP_CRS/1.0.0-dev', expected: 'OWASP_CRS/4.6.0-dev'
+End of checking parsed rules
+Cumulated report about unused TX variables
+ No unused TX variable
+```
+
+### Test 13 - Check if a chained rule uses `TX:1` target then it has a previously `capture` action
+
+
+```
+# no need 'capture' action because the TX:1, but there is no chain action
+SecRule ARGS "@rx TX:1" \
+    "id:1,\
+    phase:2,\
+    deny,\
+    t:none,\
+    nolog,\
+    tag:OWASP_CRS,\
+    ver:'OWASP_CRS/4.7.0-dev'"
+
+# normal use
+SecRule ARGS "@rx attack" \
+    "id:2,\
+    phase:2,\
+    deny,\
+    capture,\
+    t:none,\
+    nolog,\
+    tag:OWASP_CRS,\
+    ver:'OWASP_CRS/4.7.0-dev',\
+    chain"
+    SecRule TX:1 "@eq attack"
+
+# invalid use
+SecRule ARGS "@rx attack" \
+    "id:3,\
+    phase:2,\
+    deny,\
+    t:none,\
+    nolog,\
+    tag:OWASP_CRS,\
+    ver:'OWASP_CRS/4.7.0-dev',\
+    chain"
+    SecRule TX:0 "@eq attack"
+```
+
+Rule 1 is a "regular" rule, it can use `TX:1` without any restriction.
+Rule 2 is the valid form.
+Rule 3 is a chained rule and it uses `TX:0` in second rule, but first rule does not have `capture`.
+
+```
+$ ./rules-check.py -r examples/test13.conf -t ../APPROVED_TAGS -v "4.7.0-dev"
+Config file: examples/test13.conf
+ Parsing ok.
+Checking parsed rules...
+examples/test13.conf
+ Ignore case check ok.
+ Action order check ok.
+ Indentation check ok.
+ no 'ctl:auditLogParts' action found.
+ no duplicate id's
+ paranoia-level tags are correct.
+ PL anomaly_scores are correct.
+ All TX variables are set.
+ No new tags added.
+ No t:lowercase and (?i) flag used.
+ No rule without OWASP_CRS tag.
+ No rule without correct ver action.
+ There are one or more rules using TX.N without capture action.
+  file=examples/test13.conf, line=34, endLine=34, title=capture is missing: rule uses TX.N without capture; rule id: 3'
 End of checking parsed rules
 Cumulated report about unused TX variables
  No unused TX variable

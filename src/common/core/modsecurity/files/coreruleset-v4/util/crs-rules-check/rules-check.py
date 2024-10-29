@@ -83,6 +83,7 @@ class Check(object):
         self.ignorecase     = []    # list of combinations of t:lowercase and (?i)
         self.nocrstags      = []    # list of rules without tag:OWASP_CRS
         self.noveract       = []    # list of rules without ver action or incorrect ver
+        self.nocaptact      = []    # list of rules which uses TX.N without previous 'capture'
 
         self.re_tx_var      = re.compile(r"%\{\}")
 
@@ -431,7 +432,7 @@ class Check(object):
                                 if has_disruptive == True:
                                     self.globtxvars[v['variable_part'].lower()]['used'] = True
                                 if len(self.undef_txvars) > 0 and self.undef_txvars[-1]['var'] == v['variable_part'].lower():
-                                    del(self.undef_txvars[-1])
+                                    del self.undef_txvars[-1]
                 if chained == False:
                     check_exists   = None
                     has_disruptive = False
@@ -723,6 +724,66 @@ class Check(object):
                                 'endLine': a['lineno'],
                                 'message': f"rule's 'ver' action has incorrect value; rule id: {ruleid}, version: '{ruleversion}', expected: '{crsversion}'"
                             })
+
+    def check_capture_action(self):
+        """
+        check that every chained rule has a `capture` action if it uses TX.N variable
+        """
+        chained            = False
+        ruleid             = 0
+        chainlevel         = 0
+        capture_level      = None
+        re_number          = re.compile(r"^\d$")
+        has_capture        = False
+        use_captured_var   = False
+        captured_var_chain_level = 0
+        for d in self.data:
+            # only the SecRule object is relevant
+            if d['type'].lower() == "secrule":
+                for v in d['variables']:
+                    if v['variable'].lower() == 'tx' and re_number.match(v['variable_part']):
+                        if use_captured_var == False: # only the first occurrence required
+                            use_captured_var   = True
+                            captured_var_chain_level = chainlevel
+                if "actions" in d:
+                    aidx       = 0        # stores the index of current action
+                    if chained == False:
+                        ruleid     = 0
+                        chainlevel = 0
+                    else:
+                        chained    = False
+                    while aidx < len(d['actions']):
+                        # read the action into 'a'
+                        a = d['actions'][aidx]
+                        if a['act_name'] == "id":
+                            ruleid = int(a['act_arg'])
+                        if a['act_name'] == "chain":
+                            chained = True
+                            chainlevel += 1
+                        if a['act_name'] == "capture" :
+                            capture_level = chainlevel
+                            has_capture   = True
+                        aidx += 1
+                    if ruleid > 0 and chained == False: # end of chained rule
+                        if use_captured_var == True:
+                            # we allow if target with TX:N is in the first rule
+                            # of a chained rule without 'capture'
+                            if captured_var_chain_level > 0:
+                                if has_capture == False or captured_var_chain_level < capture_level:
+                                    self.nocaptact.append({
+                                        'ruleid' : ruleid,
+                                        'line'   : a['lineno'],
+                                        'endLine': a['lineno'],
+                                        'message': f"rule uses TX.N without capture; rule id: {ruleid}'"
+                                    })
+                        # clear variables
+                        chained = False
+                        chainlevel = 0
+                        has_capture = False
+                        capture_level = 0
+                        captured_var_chain_level = 0
+                        use_captured_var = False
+                        ruleid = 0
 
 def remove_comments(data):
     """
@@ -1109,6 +1170,18 @@ if __name__ == "__main__":
                 a['indent'] = 2
                 a['file']   = f
                 a['title']  = "ver is missing / incorrect"
+                errmsgf(a)
+                retval = 1
+
+        c.check_capture_action()
+        if len(c.nocaptact) == 0:
+            msg(" No rule uses TX.N without capture action.")
+        else:
+            errmsg(" There are one or more rules using TX.N without capture action.")
+            for a in c.nocaptact:
+                a['indent'] = 2
+                a['file']   = f
+                a['title']  = "capture is missing"
                 errmsgf(a)
                 retval = 1
 

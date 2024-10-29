@@ -21,4 +21,3 @@ indent_size = 4
 [tests/regression/tests/**/*.yaml]
 indent_style = space
 indent_size = 2
-
