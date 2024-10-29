@@ -12,6 +12,324 @@
       - Before proceeding with the database upgrade, ensure to perform a complete backup of the current state of the database.
       - Use appropriate tools to backup the entire database, including data, schemas, and configurations.
 
+    === "Docker"
+
+        ```bash
+        docker exec -it -e BACKUP_DIRECTORY=/path/to/backup/directory <scheduler_container> bwcli plugin backup save
+        ```
+
+        ```bash
+        docker cp <scheduler_container>:/path/to/backup/directory /path/to/backup/directory
+        ```
+
+    === "Linux"
+
+        !!! warning "Information for Red Hat Enterprise Linux (RHEL) 8.9 users"
+            If you are using **RHEL 8.9** and plan on using an **external database**, you will need to install the `mysql-community-client` package to ensure the `mysqldump` command is available. You can install the package by executing the following commands:
+
+            === "MySQL/MariaDB"
+
+                1. **Install the MySQL repository configuration package**
+
+                    ```bash
+                    sudo dnf install https://dev.mysql.com/get/mysql80-community-release-el8-9.noarch.rpm
+                    ```
+
+                2. **Enable the MySQL repository**
+
+                    ```bash
+                    sudo dnf config-manager --enable mysql80-community
+                    ```
+
+                3. **Install the MySQL client**
+
+                    ```bash
+                    sudo dnf install mysql-community-client
+                    ```
+
+            === "PostgreSQL"
+
+                4. **Install the PostgreSQL repository configuration package**
+
+                    ```bash
+                    dnf install "https://download.postgresql.org/pub/repos/yum/reporpms/EL-8-$(uname -m)/pgdg-redhat-repo-latest.noarch.rpm"
+                    ```
+
+                5. **Install the PostgreSQL client**
+
+                    ```bash
+                    dnf install postgresql<version>
+                    ```
+
+        ```bash
+        BACKUP_DIRECTORY=/path/to/backup/directory bwcli plugin backup save
+        ```
+
+2. **Upgrade BunkerWeb**:
+      - Upgrade BunkerWeb to the latest version.
+
+        === "Docker"
+
+            1. **Update the Docker Compose file**: Update the Docker Compose file to use the new version of the BunkerWeb image.
+                ```yaml
+                services:
+                    bunkerweb:
+                        image: bunkerity/bunkerweb:1.6.0-beta
+                        ...
+                    bw-scheduler:
+                        image: bunkerity/bunkerweb-scheduler:1.6.0-beta
+                        ...
+                    bw-autoconf:
+                        image: bunkerity/bunkerweb-autoconf:1.6.0-beta
+                        ...
+                    bw-ui:
+                        image: bunkerity/bunkerweb-ui:1.6.0-beta
+                        ...
+                ```
+
+            2. **Restart the containers**: Restart the containers to apply the changes.
+                ```bash
+                docker compose down
+                docker compose up -d
+                ```
+
+        === "Linux"
+
+            3. **Stop the services**:
+                ```bash
+                systemctl stop bunkerweb
+                systemctl stop bunkerweb-ui
+                ```
+
+            4. **Update BunkerWeb**:
+
+                === "Debian/Ubuntu"
+
+                    First, if you have previously hold the BunkerWeb package, unhold it :
+
+                    You can print a list of packages on hold with `apt-mark showhold`
+
+                    ```shell
+                    sudo apt-mark unhold bunkerweb
+                    ```
+
+                    Them, you can update BunkerWeb package :
+
+                    ```shell
+                    sudo apt install -y bunkerweb=1.6.0-beta
+                    ```
+
+                    To prevent upgrading BunkerWeb package when executing `apt upgrade`, you can use the following command :
+
+                    ```shell
+                    sudo apt-mark hold bunkerweb
+                    ```
+
+                    More details in the [integration Linux page](integrations.md#__tabbed_1_1).
+
+                === "Fedora/RedHat"
+
+                    First, if you have previously hold the BunkerWeb package, unhold it :
+
+                    You can print a list of packages on hold with `dnf versionlock list`
+
+                    ```shell
+                    sudo dnf versionlock delete package bunkerweb
+                    ```
+
+                    Them, you can update BunkerWeb package :
+
+                    ```shell
+                    sudo dnf install -y bunkerweb-1.6.0-beta
+                    ```
+
+                    To prevent upgrading BunkerWeb package when executing `dnf upgrade`, you can use the following command :
+
+                    ```shell
+                    sudo dnf versionlock add bunkerweb
+                    ```
+
+                    More details in the [integration Linux page](integrations.md#__tabbed_1_3).
+
+3. **Check the logs**: Check the logs of the scheduler service to ensure that the migration was successful.
+
+    === "Docker"
+
+        ```bash
+        docker compose logs <scheduler_container>
+        ```
+
+    === "Linux"
+
+        ```bash
+        journalctl -u bunkerweb --no-pager
+        ```
+
+4. **Verify the database**: Verify that the database upgrade was successful by checking the data and configurations in the new database container.
+
+### Rollback
+
+!!! failure "In case of issues"
+
+    If you encounter any issues during the upgrade, you can rollback to the previous version of the database by restoring the backup taken in [step 1](#__tabbed_1_1).
+
+    Get support and more information :
+
+    - [Order professional support](https://panel.bunkerweb.io/?utm_source=doc&utm_campaign=self)
+    - [Create an issue on GitHub](https://github.com/bunkerity/bunkerweb/issues)
+    - [Join the BunkerWeb Discord server](https://discord.bunkerity.com)
+
+=== "Docker"
+
+    1. **Restore the backup**.
+
+        === "SQLite"
+
+            1. **Stop the Stack.**
+
+                ```bash
+                docker compose down
+                ```
+
+            2. **Remove the existing database file.**
+
+                ```bash
+                docker exec -u 0 -i <scheduler_container> rm -f /var/lib/bunkerweb/db.sqlite3
+                ```
+
+            3. **Restore the backup.**
+
+                ```bash
+                docker exec -i <scheduler_container> sqlite3 /var/lib/bunkerweb/db.sqlite3 < /path/to/backup/directory/backup.sql
+                ```
+
+            4. **Fix permissions.**
+
+                ```bash
+                docker exec -u 0 -i <scheduler_container> chown root:nginx /var/lib/bunkerweb/db.sqlite3
+                docker exec -u 0 -i <scheduler_container> chmod 770 /var/lib/bunkerweb/db.sqlite3
+                ```
+
+        === "MySQL/MariaDB"
+
+            5. **Stop the Stack.**
+
+                ```bash
+                docker compose down
+                ```
+
+            6. **Restore the backup.**
+
+                ```bash
+                docker exec -e MYSQL_PWD=<your_password> -i <database_container> mysql -u <username> <database_name> < /path/to/backup/directory/backup.sql
+                ```
+
+        === "PostgreSQL"
+
+            7. **Stop the Stack.**
+
+                ```bash
+                docker compose down
+                ```
+
+            8. **Remove the existing database.**
+
+                ```bash
+                docker exec -i <database_container> dropdb -U <username> --force <database_name>
+                ```
+
+            9. **Recreate the database.**
+
+                ```bash
+                docker exec -i <database_container> createdb -U <username> <database_name>
+                ```
+
+            10. **Restore the backup.**
+
+                ```bash
+                docker exec -i <database_container> psql -U <username> -d <database_name> < /path/to/backup/directory/backup.sql
+                ```
+
+    2. **Downgrade BunkerWeb**.
+
+        ```yaml
+        services:
+            bunkerweb:
+                image: bunkerity/bunkerweb:<old_version>
+                ...
+            bw-scheduler:
+                image: bunkerity/bunkerweb-scheduler:<old_version>
+                ...
+            bw-autoconf:
+                image: bunkerity/bunkerweb-autoconf:<old_version>
+                ...
+            bw-ui:
+                image: bunkerity/bunkerweb-ui:<old_version>
+                ...
+        ```
+
+    3. **Start the containers**.
+
+        ```bash
+        docker compose up -d
+        ```
+
+=== "Linux"
+
+    4. **Stop the services**.
+
+        ```bash
+        systemctl stop bunkerweb bunkerweb-ui
+        ```
+
+    5. **Restore the backup**.
+
+        === "SQLite"
+
+            ```bash
+            sudo rm -f /var/lib/bunkerweb/db.sqlite3
+            sudo sqlite3 /var/lib/bunkerweb/db.sqlite3 < /path/to/backup/directory/backup.sql
+            sudo chown root:nginx /var/lib/bunkerweb/db.sqlite3
+            sudo chmod 770 /var/lib/bunkerweb/db.sqlite3
+            ```
+
+        === "MySQL/MariaDB"
+
+            ```bash
+            mysql -u <username> -p <database_name> < /path/to/backup/directory/backup.sql
+            ```
+
+        === "PostgreSQL"
+
+            1. **Remove the existing database.**
+
+                ```bash
+                dropdb -U <username> --force <database_name>
+                ```
+
+            2. **Recreate the database.**
+
+                ```bash
+                createdb -U <username> <database_name>
+                ```
+
+            3. **Restore the backup.**
+
+                ```bash
+                psql -U <username> -d <database_name> < /path/to/backup/directory/backup.sql
+                ```
+
+    6. **Downgrade BunkerWeb**.
+        - Downgrade BunkerWeb to the previous version by following the same steps as when upgrading BunkerWeb in the [integration Linux page](integrations.md#linux)
+
+## Upgrade from 1.5.X
+
+### Procedure
+
+1. **Backup the database**:
+      - Before proceeding with the database upgrade, ensure to perform a complete backup of the current state of the database.
+      - Use appropriate tools to backup the entire database, including data, schemas, and configurations.
+
     === "1\.5\.7 and later"
 
         === "Docker"
@@ -91,18 +409,32 @@
                 sqlite3 /var/lib/bunkerweb/db.sqlite3 ".dump" > /path/to/backup/directory/backup.sql
                 ```
 
-        === "MySQL/MariaDB"
+        === "MariaDB"
 
             === "Docker"
 
                 ```bash
-                docker exec -it <database_container> mysqldump -u <username> -p <database_name> > /path/to/backup/directory/backup.sql
+                docker exec -it -e MYSQL_PWD=<database_password> <database_container> mariadb-dump -u <username> <database_name> > /path/to/backup/directory/backup.sql
                 ```
 
             === "Linux"
 
                 ```bash
-                mysqldump -u <username> -p <database_name> > /path/to/backup/directory/backup.sql
+                MYSQL_PWD=<database_password> mariadb-dump -u <username> <database_name> > /path/to/backup/directory/backup.sql
+                ```
+
+        === "MySQL"
+
+            === "Docker"
+
+                ```bash
+                docker exec -it -e MYSQL_PWD=<database_password> <database_container> mysqldump -u <username> <database_name> > /path/to/backup/directory/backup.sql
+                ```
+
+            === "Linux"
+
+                ```bash
+                MYSQL_PWD=<database_password> mysqldump -u <username> <database_name> > /path/to/backup/directory/backup.sql
                 ```
 
         === "PostgreSQL"
@@ -110,13 +442,13 @@
             === "Docker"
 
                 ```bash
-                docker exec -it <database_container> pg_dump -U <username> -d <database_name> > /path/to/backup/directory/backup.sql
+                docker exec -it -e PGPASSWORD=<database_password> <database_container> pg_dump -U <username> -d <database_name> > /path/to/backup/directory/backup.sql
                 ```
 
             === "Linux"
 
                 ```bash
-                pg_dump -U <username> -d <database_name> > /path/to/backup/directory/backup.sql
+                PGPASSWORD=<database_password> pg_dump -U <username> -d <database_name> > /path/to/backup/directory/backup.sql
                 ```
 
 2. **Upgrade BunkerWeb**:
@@ -254,7 +586,7 @@
             3. **Restore the backup.**
 
                 ```bash
-                docker exec -i -T <scheduler_container> sqlite3 /var/lib/bunkerweb/db.sqlite3 < /path/to/backup/directory/backup.sql
+                docker exec -i <scheduler_container> sqlite3 /var/lib/bunkerweb/db.sqlite3 < /path/to/backup/directory/backup.sql
                 ```
 
             4. **Fix permissions.**
@@ -275,7 +607,7 @@
             6. **Restore the backup.**
 
                 ```bash
-                docker exec -e MYSQL_PWD=<your_password> -i -T <database_container> mysql -u <username> <database_name> < /path/to/backup/directory/backup.sql
+                docker exec -e MYSQL_PWD=<your_password> -i <database_container> mysql -u <username> <database_name> < /path/to/backup/directory/backup.sql
                 ```
 
         === "PostgreSQL"
@@ -301,7 +633,7 @@
             10. **Restore the backup.**
 
                 ```bash
-                docker exec -i -T <database_container> psql -U <username> -d <database_name> < /path/to/backup/directory/backup.sql
+                docker exec -i <database_container> psql -U <username> -d <database_name> < /path/to/backup/directory/backup.sql
                 ```
 
     2. **Downgrade BunkerWeb**.
@@ -375,8 +707,6 @@
 
     6. **Downgrade BunkerWeb**.
         - Downgrade BunkerWeb to the previous version by following the same steps as when upgrading BunkerWeb in the [integration Linux page](integrations.md#linux)
-
-## Upgrade from 1.5.X
 
 ### Scheduler
 
