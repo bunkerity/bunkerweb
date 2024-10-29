@@ -49,8 +49,8 @@ class Plugins(Base):
     stream = Column(STREAM_TYPES_ENUM, default="no", nullable=False)
     type = Column(PLUGIN_TYPES_ENUM, default="core", nullable=False)
     method = Column(METHODS_ENUM, default="manual", nullable=False)
-    data = Column(LargeBinary(length=(2**32) - 1), nullable=True)
-    checksum = Column(String(128), nullable=True)
+    data = Column(LargeBinary(length=(2**32) - 1), default=None, nullable=True)
+    checksum = Column(String(128), default=None, nullable=True)
     config_changed = Column(Boolean, default=False, nullable=True)
     last_config_change = Column(DateTime(timezone=True), nullable=True)
 
@@ -304,7 +304,6 @@ class Metadata(Base):
     failover = Column(Boolean, default=None, nullable=True)
     integration = Column(INTEGRATIONS_ENUM, default="Unknown", nullable=False)
     version = Column(String(32), default="1.6.0-beta", nullable=False)
-    ui_version = Column(String(32), default="1.6.0-beta", nullable=False)
 
 
 ## UI Models

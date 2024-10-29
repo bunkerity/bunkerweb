@@ -409,7 +409,6 @@ class Database:
             "last_instances_change": None,
             "integration": "unknown",
             "version": "1.6.0-beta",
-            "ui_version": "1.6.0-beta",
             "database_version": "Unknown",  # ? Extracted from the database
             "default": True,  # ? Extra field to know if the returned data is the default one
         }
@@ -521,7 +520,6 @@ class Database:
 
         inspector = inspect(self.sql_engine)
         db_version = None
-        db_ui_version = bunkerweb_version
         has_all_tables = True
         old_data = {}
 
@@ -529,15 +527,11 @@ class Database:
         if inspector and len(inspector.get_table_names()):
             metadata = self.get_metadata()
             db_version = metadata["version"]
-            db_ui_version = metadata["ui_version"]
             if metadata["default"]:
                 db_version = "error"
 
             # ? Check if the version is different from the database one
             if db_version != bunkerweb_version:
-                if db_ui_version != bunkerweb_version:
-                    db_ui_version = db_version
-
                 self.logger.warning(f"Database version ({db_version}) is different from Bunkerweb version ({bunkerweb_version}), migrating ...")
                 current_time = datetime.now().astimezone()
                 error = True
@@ -1223,9 +1217,11 @@ class Database:
                     # ? As the external column has been replaced by the type column, we need to update the data if the column exists
                     if table_name == "bw_plugins" and external_column is not None:
                         row["type"] = "external" if external_column else "core"
-                    elif table_name in ("bw_services", "bw_instances") and "creation_date" not in row:
+                    elif table_name in ("bw_services", "bw_instances", "bw_ui_users") and "creation_date" not in row:
                         row["creation_date"] = datetime.now().astimezone()
-                        row["last_update" if table_name == "bw_services" else "last_seen"] = datetime.now().astimezone()
+                        row["last_update" if table_name == "bw_services" else "last_seen" if table_name == "bw_instances" else "update_date"] = (
+                            datetime.now().astimezone()
+                        )
                     elif table_name == "bw_ui_users" and two_factor_enabled is not None:
                         if two_factor_enabled:
                             self.logger.warning(
@@ -1236,7 +1232,7 @@ class Database:
                     with self._db_session() as session:
                         try:
                             if table_name == "bw_metadata":
-                                session.add(Metadata(**(row | {"ui_version": db_ui_version})))
+                                session.add(Metadata(**row))
                                 session.commit()
                                 continue
 

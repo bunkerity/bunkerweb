@@ -184,7 +184,7 @@ def on_starting(server):
                 exit(1)
 
         ret = DB.create_ui_user(user_name, gen_password_hash(env_admin_password), ["admin"], admin=True)
-        if ret:
+        if ret and "already exists" not in ret:
             LOGGER.error(f"Couldn't create the admin user in the database: {ret}")
             exit(1)
 
