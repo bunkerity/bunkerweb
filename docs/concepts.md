@@ -101,6 +101,11 @@ By leveraging custom configurations, you unlock a world of possibilities to tail
 
 ## Database
 
+!!! warning "PostgreSQL 17"
+    As of now, **PostgreSQL 17** is not supported in the **Docker integration**. If you want to use PostgreSQL 17, you will have to use the Linux integration.
+
+    This is due to the fact that the `postgresql-client` package only has the 14, 15 and 16 versions available in the alpine repositories.
+
 BunkerWeb securely stores its current configuration in a backend database, which contains essential data for smooth operation. The following information is stored in the database:
 
 - **Settings for all services**: The database holds the defined settings for all the services provided by BunkerWeb. This ensures that your configurations and preferences are preserved and readily accessible.
