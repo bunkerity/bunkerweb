@@ -9,7 +9,7 @@ from passlib.pwd import genword
 from qrcode import make
 from qrcode.image.svg import SvgImage
 
-from app.models.models import Users
+from app.models.models import UiUsers
 from app.dependencies import DATA
 from app.utils import LIB_DIR, LOGGER, stop
 
@@ -56,7 +56,7 @@ class Totp:
     def generate_recovery_codes(self) -> List[str]:
         return ["-".join([pwd[i : i + 4] for i in range(0, len(pwd), 4)]) for pwd in genword(length=16, charset="hex", returns=6)]  # noqa: E203
 
-    def verify_recovery_code(self, code: str, user: Users) -> Optional[str]:
+    def verify_recovery_code(self, code: str, user: UiUsers) -> Optional[str]:
         """Check if recovery code is valid for user."""
         if not user.list_recovery_codes:
             return
@@ -65,7 +65,7 @@ class Totp:
             if checkpw(code.encode("utf-8"), encrypted_code.encode("utf-8")):
                 return user.list_recovery_codes.pop(i)
 
-    def verify_totp(self, token: str, *, totp_secret: Optional[str] = None, user: Optional[Users] = None) -> bool:
+    def verify_totp(self, token: str, *, totp_secret: Optional[str] = None, user: Optional[UiUsers] = None) -> bool:
         """Verifies token for specific user."""
         if not totp_secret and not user:
             raise ValueError("Either totp_secret or user must be provided")
@@ -93,12 +93,12 @@ class Totp:
 
         return f"data:image/svg+xml;base64,{image_as_str}"
 
-    def get_last_counter(self, user: Users) -> Optional[int]:
+    def get_last_counter(self, user: UiUsers) -> Optional[int]:
         """Fetch stored last_counter from cache."""
         DATA.load_from_file()
         return DATA.get("totp_last_counter", {}).get(user.get_id())
 
-    def set_last_counter(self, user: Users, tmatch: TotpMatch) -> None:
+    def set_last_counter(self, user: UiUsers, tmatch: TotpMatch) -> None:
         """Cache last_counter."""
         DATA.load_from_file()
         if "totp_last_counter" not in DATA:

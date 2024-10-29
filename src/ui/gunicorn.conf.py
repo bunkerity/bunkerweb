@@ -18,7 +18,6 @@ patch_all()
 
 from passlib import totp
 
-from common_utils import get_version  # type: ignore
 from logger import setup_logger  # type: ignore
 
 from app.models.ui_database import UIDatabase
@@ -109,23 +108,7 @@ def on_starting(server):
             continue
         sleep(5)
 
-    BW_VERSION = get_version()
-
-    ret, err = DB.init_ui_tables(BW_VERSION)
-
-    if not ret and err:
-        if err.startswith("The database is read-only"):
-            LOGGER.warning(err)
-        else:
-            LOGGER.error(f"Exception while checking database tables : {err}")
-            exit(1)
-    elif not ret:
-        LOGGER.info("Database ui tables didn't change, skipping update ...")
-    else:
-        LOGGER.info("Database ui tables successfully updated")
-
     if not DB.get_ui_roles(as_dict=True):
-
         ret = DB.create_ui_role("admin", "Admins can create new users, edit and read the data.", ["manage", "write", "read"])
         if ret:
             LOGGER.error(f"Couldn't create the admin role in the database: {ret}")

@@ -3,8 +3,7 @@ from logging import Logger
 from os import sep
 from os.path import join
 from sys import path as sys_path
-from time import sleep
-from typing import List, Literal, Optional, Tuple, Union
+from typing import List, Literal, Optional, Union
 
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("api",), ("db",))]:
@@ -12,144 +11,26 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
         sys_path.append(deps_path)
 
 from bcrypt import gensalt, hashpw
-from sqlalchemy import MetaData, inspect, text
 from sqlalchemy.orm import joinedload
-from sqlalchemy.exc import IntegrityError
 
 from Database import Database  # type: ignore
-from model import Metadata  # type: ignore
+from model import Permissions, Roles, RolesPermissions, RolesUsers, UserRecoveryCodes, UserSessions  # type: ignore
 
-from app.models.models import Base, Permissions, Roles, RolesPermissions, RolesUsers, Users, UserRecoveryCodes, UserSessions
+from app.models.models import UiUsers
 
 
 class UIDatabase(Database):
     def __init__(self, logger: Logger, sqlalchemy_string: Optional[str] = None, *, pool: Optional[bool] = None, log: bool = True, **kwargs) -> None:
         super().__init__(logger, sqlalchemy_string, ui=True, pool=pool, log=log, **kwargs)
 
-    def init_ui_tables(self, bunkerweb_version: str) -> Tuple[bool, str]:
-        """Initialize the database ui tables and return the result"""
-
-        if self.readonly:
-            return False, "The database is read-only, the changes will not be saved"
-
-        assert self.sql_engine is not None, "The database engine is not initialized"
-
-        inspector = inspect(self.sql_engine)
-        db_version = None
-        has_all_tables = True
-        old_data = {}
-
-        if inspector and len(inspector.get_table_names()):
-            metadata = self.get_metadata()
-            db_version = metadata["ui_version"]
-            if metadata["default"]:
-                db_version = "error"
-
-            if db_version != bunkerweb_version:
-                self.logger.warning(f"UI tables version ({db_version}) is different from BunkerWeb version ({bunkerweb_version}), migrating them ...")
-                current_time = datetime.now().astimezone()
-                error = True
-                while error:
-                    try:
-                        metadata = MetaData()
-                        metadata.reflect(self.sql_engine)
-                        error = False
-                    except BaseException as e:
-                        if (datetime.now().astimezone() - current_time).total_seconds() > 10:
-                            raise e
-                        sleep(1)
-
-                assert isinstance(metadata, MetaData)
-
-                for table_name in Base.metadata.tables.keys():
-                    if not inspector.has_table(table_name):
-                        self.logger.warning(f'UI table "{table_name}" is missing, creating it')
-                        has_all_tables = False
-                        continue
-
-                    with self._db_session() as session:
-                        old_data[table_name] = session.query(metadata.tables[table_name]).all()
-
-                # Rename the old tables
-                db_version_id = db_version.replace(".", "_")
-                with self._db_session() as session:
-                    for table_name in metadata.tables.keys():
-                        if table_name in Base.metadata.tables:
-                            if inspector.has_table(f"{table_name}_{db_version_id}"):
-                                self.logger.warning(f'UI table "{table_name}" already exists, dropping it to make room for the new one')
-                                session.execute(text(f"DROP TABLE {table_name}_{db_version_id}"))
-                            session.execute(text(f"ALTER TABLE {table_name} RENAME TO {table_name}_{db_version_id}"))
-                            session.commit()
-
-                Base.metadata.drop_all(self.sql_engine)
-            else:
-                for table_name in Base.metadata.tables.keys():
-                    if not inspector.has_table(table_name):
-                        self.logger.warning(f'UI table "{table_name}" is missing, creating it')
-                        has_all_tables = False
-                        continue
-
-        if has_all_tables and db_version and db_version == bunkerweb_version:
-            return False, ""
-
-        self.logger.info("Creating UI tables ...")
-
-        try:
-            Base.metadata.create_all(self.sql_engine, checkfirst=True)
-        except BaseException as e:
-            return False, str(e)
-
-        if db_version and db_version != bunkerweb_version:
-            for table_name, data in old_data.items():
-                if not data:
-                    continue
-
-                self.logger.warning(f'Restoring data for ui table "{table_name}"')
-                self.logger.debug(f"Data: {data}")
-                for row in data:
-                    two_factor_enabled = getattr(row, "is_two_factor_enabled", None)
-                    row = {column: getattr(row, column) for column in Base.metadata.tables[table_name].columns.keys() if hasattr(row, column)}
-
-                    if table_name == "bw_ui_users" and two_factor_enabled is not None:
-                        if two_factor_enabled:
-                            self.logger.warning(
-                                "Detected old user model, as we implemented advanced security in the new model (custom salt for passwords, totp, etc.), you will have to re set the two factor authentication for the admin user."
-                            )
-                        row["admin"] = True
-
-                    with self._db_session() as session:
-                        try:
-                            # Check if the row already exists in the table
-                            existing_row = session.query(Base.metadata.tables[table_name]).filter_by(**row).first()
-                            if not existing_row:
-                                session.execute(Base.metadata.tables[table_name].insert().values(row))
-                                session.commit()
-                        except IntegrityError as e:
-                            session.rollback()
-                            if "Duplicate entry" not in str(e):
-                                self.logger.error(f"Error when trying to restore data for table {table_name}: {e}")
-                                continue
-                            self.logger.debug(e)
-
-        with self._db_session() as session:
-            try:
-                metadata = session.query(Metadata).get(1)
-                if metadata:
-                    metadata.ui_version = bunkerweb_version
-                    session.commit()
-            except BaseException as e:
-                self.logger.error(f"Error when trying to update ui_version field in metadata: {e}")
-
-        return True, ""
-
-    def get_ui_user(self, *, username: Optional[str] = None, as_dict: bool = False) -> Optional[Union[Users, dict]]:
+    def get_ui_user(self, *, username: Optional[str] = None, as_dict: bool = False) -> Optional[Union[UiUsers, dict]]:
         """Get ui user. If username is None, return the first admin user."""
         with self._db_session() as session:
             if username:
-                query = session.query(Users).filter_by(username=username)
+                query = session.query(UiUsers).filter_by(username=username)
             else:
-                query = session.query(Users).filter_by(admin=True)
-            query = query.options(joinedload(Users.roles), joinedload(Users.recovery_codes))
+                query = session.query(UiUsers).filter_by(admin=True)
+            query = query.options(joinedload(UiUsers.roles), joinedload(UiUsers.recovery_codes))
 
             ui_user = query.first()
 
@@ -191,10 +72,10 @@ class UIDatabase(Database):
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
 
-            if admin and session.query(Users).with_entities(Users.username).filter_by(admin=True).first():
+            if admin and session.query(UiUsers).with_entities(UiUsers.username).filter_by(admin=True).first():
                 return "An admin user already exists"
 
-            user = session.query(Users).with_entities(Users.username).filter_by(username=username).first()
+            user = session.query(UiUsers).with_entities(UiUsers.username).filter_by(username=username).first()
             if user:
                 return f"User {username} already exists"
 
@@ -205,7 +86,7 @@ class UIDatabase(Database):
 
             current_time = datetime.now().astimezone()
             session.add(
-                Users(
+                UiUsers(
                     username=username,
                     email=email,
                     password=password.decode("utf-8"),
@@ -247,12 +128,12 @@ class UIDatabase(Database):
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
 
-            user = session.query(Users).filter_by(username=old_username).first()
+            user = session.query(UiUsers).filter_by(username=old_username).first()
             if not user:
                 return f"User {old_username} doesn't exist"
 
             if username != old_username:
-                if session.query(Users).with_entities(Users.username).filter_by(username=username).first():
+                if session.query(UiUsers).with_entities(UiUsers.username).filter_by(username=username).first():
                     return f"User {username} already exists"
 
                 user.username = username
@@ -289,7 +170,7 @@ class UIDatabase(Database):
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
 
-            user = session.query(Users).filter_by(username=username).first()
+            user = session.query(UiUsers).filter_by(username=username).first()
             if not user:
                 return f"User {username} doesn't exist"
 
@@ -310,7 +191,7 @@ class UIDatabase(Database):
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
 
-            user = session.query(Users).filter_by(username=username).first()
+            user = session.query(UiUsers).filter_by(username=username).first()
             if not user:
                 return f"User {username} doesn't exist"
 
@@ -405,7 +286,7 @@ class UIDatabase(Database):
             if not codes:
                 return "No recovery codes provided"
 
-            user = session.query(Users).filter_by(username=username).first()
+            user = session.query(UiUsers).filter_by(username=username).first()
             if not user:
                 return f"User {username} doesn't exist"
 
@@ -467,7 +348,7 @@ class UIDatabase(Database):
     def use_ui_user_recovery_code(self, username: str, hashed_code: str) -> str:
         """Use ui user recovery code."""
         with self._db_session() as session:
-            user = session.query(Users).filter_by(username=username).first()
+            user = session.query(UiUsers).filter_by(username=username).first()
             if not user:
                 return f"User {username} doesn't exist"
 
@@ -519,7 +400,7 @@ class UIDatabase(Database):
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
 
-            user = session.query(Users).filter_by(username=username).first()
+            user = session.query(UiUsers).filter_by(username=username).first()
             if not user:
                 return f"User {username} doesn't exist"
 

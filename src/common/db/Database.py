@@ -1216,6 +1216,7 @@ class Database:
                 self.logger.warning(f'Restoring data for table "{table_name}"')
                 self.logger.debug(f"Data: {data}")
                 for row in data:
+                    two_factor_enabled = getattr(row, "is_two_factor_enabled", None)
                     external_column = getattr(row, "external", None)
                     row = {column: getattr(row, column) for column in Base.metadata.tables[table_name].columns.keys() if hasattr(row, column)}
 
@@ -1225,6 +1226,12 @@ class Database:
                     elif table_name in ("bw_services", "bw_instances") and "creation_date" not in row:
                         row["creation_date"] = datetime.now().astimezone()
                         row["last_update" if table_name == "bw_services" else "last_seen"] = datetime.now().astimezone()
+                    elif table_name == "bw_ui_users" and two_factor_enabled is not None:
+                        if two_factor_enabled:
+                            self.logger.warning(
+                                "Detected old user model, as we implemented advanced security in the new model (custom salt for passwords, totp, etc.), you will have to re set the two factor authentication for the admin user."
+                            )
+                        row["admin"] = True
 
                     with self._db_session() as session:
                         try:
