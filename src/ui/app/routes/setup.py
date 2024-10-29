@@ -129,6 +129,7 @@ def setup_page():
 
             base_config = {
                 "SERVER_NAME": request.form["server_name"],
+                "USE_UI": "yes",
                 "USE_TEMPLATE": "ui",
             }
 
@@ -170,7 +171,7 @@ def setup_page():
             if not config.get("MULTISITE", "no") == "yes":
                 BW_CONFIG.edit_global_conf({"MULTISITE": "yes"}, check_changes=False)
 
-            operation, error = BW_CONFIG.new_service(base_config, override_method="wizard", check_changes=False)
+            operation, error = BW_CONFIG.new_service(base_config, override_method="wizard")
             if error:
                 return handle_error(f"Couldn't create the new service: {operation}", "setup", False, "error")
 
