@@ -3,6 +3,7 @@ $(document).ready(() => {
   let currentPlugin = "general";
   let currentStep = 1;
   const isReadOnly = $("#is-read-only").val().trim() === "True";
+  var isInit = true;
 
   if (isReadOnly && window.location.pathname.endsWith("/new"))
     window.location.href = window.location.href.split("/new")[0];
@@ -139,7 +140,7 @@ $(document).ready(() => {
         updateUrlParams(params);
       }
     } else if (targetClass.includes("navs-templates-")) {
-      resetTemplateConfig();
+      if (!isInit) resetTemplateConfig();
       setTimeout(() => {
         currentTemplate = targetClass
           .substring(1)
@@ -1064,10 +1065,11 @@ $(document).ready(() => {
     }
   }
 
+  var editors = [];
+
   $(".ace-editor").each(function () {
     const initialContent = $(this).text().trim();
     const editor = ace.edit(this);
-    editor.setTheme("ace/theme/cloud9_day"); // cloud9_night when dark mode is supported
 
     editor.session.setMode("ace/mode/nginx");
     // const language = $(this).data("language"); // TODO: Support ModSecurity
@@ -1094,6 +1096,28 @@ $(document).ready(() => {
     });
 
     editor.renderer.setScrollMargin(10, 10);
+    editors.push(editor);
+  });
+
+  var theme = $("#theme").val();
+
+  function setEditorTheme() {
+    editors.forEach((editor) => {
+      if (theme === "dark") {
+        editor.setTheme("ace/theme/cloud9_night");
+      } else {
+        editor.setTheme("ace/theme/cloud9_day");
+      }
+    });
+  }
+
+  setEditorTheme();
+
+  $("#dark-mode-toggle").on("change", function () {
+    setTimeout(() => {
+      theme = $("#theme").val();
+      setEditorTheme();
+    }, 30);
   });
 
   $(window).on("beforeunload", function (e) {
@@ -1119,4 +1143,6 @@ $(document).ready(() => {
     e.returnValue = message; // Standard for most browsers
     return message; // Required for some browsers
   });
+
+  isInit = false;
 });

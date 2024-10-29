@@ -910,11 +910,8 @@ a.courier-prime:hover {
 .dark-style,
 [data-bs-theme="dark"] {
   --bs-primary: #fff;
-  --bs-secondary: #9caeb7;
   --bs-primary-rgb: 255, 255, 255;
-  --bs-secondary-rgb: 156, 174, 183;
   --bs-primary-text-emphasis: #fff;
-  --bs-secondary-text-emphasis: #b3cad4;
   --bs-link-color: #fff;
   --bs-link-color-rgb: 255, 255, 255;
   --bs-breadcrumb-divider-color: #fff;
@@ -976,8 +973,8 @@ a.courier-prime:hover {
 }
 
 .dark-style .nav-pills .nav-link.active,
-.nav-pills .nav-link.active:hover,
-.nav-pills .nav-link.active:focus {
+.dark-style .nav-pills .nav-link.active:hover,
+.dark-style .nav-pills .nav-link.active:focus {
   background-color: #0a4b69;
 }
 
@@ -996,10 +993,10 @@ a.courier-prime:hover {
 }
 
 .dark-style .btn-light {
-  background-color: #0a4b69;
-  border-color: #0a4b69;
+  background-color: #fff;
+  border-color: #fff;
   box-shadow: none;
-  color: #fff;
+  color: #000;
 }
 
 .dark-style .card {
@@ -1027,17 +1024,17 @@ a.courier-prime:hover {
 }
 
 .dark-style h6,
-.h6,
-h5,
-.h5,
-h4,
-.h4,
-h3,
-.h3,
-h2,
-.h2,
-h1,
-.h1 {
+.dark-style .h6,
+.dark-style h5,
+.dark-style .h5,
+.dark-style h4,
+.dark-style .h4,
+.dark-style h3,
+.dark-style .h3,
+.dark-style h2,
+.dark-style .h2,
+.dark-style h1,
+.dark-style .h1 {
   color: #fff;
 }
 
@@ -1058,6 +1055,7 @@ h1,
 .dark-style .text-muted {
   color: #9caeb7 !important;
 }
+
 .dark-style .sticky-card {
   background-color: rgba(12, 40, 58, 0.95) !important;
 }
@@ -1180,4 +1178,23 @@ html[dir="rtl"].dark-style .border-primary {
 .dark-style .apexcharts-legend-text {
   color: #fff;
   border: 1px solid #555;
+}
+
+.dark-style .btn-check:checked + .btn-primary,
+.dark-style .btn-check:active + .btn-primary,
+.dark-style .btn-primary:active,
+.dark-style .btn-primary.active,
+.dark-style .btn-primary.show.dropdown-toggle,
+.dark-style .show > .btn-primary.dropdown-toggle {
+  color: #07354a !important;
+}
+
+.dark-style .leaflet-container {
+  background: #000;
+}
+
+.dark-style .leaflet-layer,
+.dark-style .leaflet-control-zoom-in,
+.dark-style .leaflet-control-zoom-out {
+  filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
 }

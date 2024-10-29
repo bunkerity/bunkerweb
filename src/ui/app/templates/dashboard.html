@@ -29,7 +29,7 @@
                                     <!-- Collapsible floating menu -->
                                     <div class="collapse mt-2" id="service-modes-floating">
                                         <ul id="service-modes-menu"
-                                            class="nav nav-pills flex-column bg-{% if theme == 'light' %}white{% else %}dark{% endif %} p-2 rounded shadow-sm"
+                                            class="nav nav-pills flex-column bg-{% if current_user.theme == 'light' %}white{% else %}dark{% endif %} p-2 rounded shadow-sm"
                                             role="tablist">
                                             <li class="nav-item mb-1" role="presentation">
                                                 <button type="button"
@@ -120,7 +120,7 @@
                             <ul class="d-flex mb-0 list-unstyled">
                                 <li class="me-3">
                                     <a role="button"
-                                       class="btn btn-sm btn-outline-{% if theme == 'light' %}dark{% else %}light{% endif %} d-flex align-items-center h-100"
+                                       class="btn btn-sm btn-outline-{% if current_user.theme == 'light' %}dark{% else %}light{% endif %} d-flex align-items-center h-100"
                                        aria-pressed="true"
                                        href="https://panel.bunkerweb.io/order/support/?utm_campaign=self&utm_source=ui"
                                        target="_blank"
@@ -151,7 +151,7 @@
                                 <li class="position-relative">
                                     <button id="news-button"
                                             type="button"
-                                            class="btn btn-sm btn-{% if theme == 'light' %}dark{% else %}light{% endif %} text-uppercase d-flex align-items-center"
+                                            class="btn btn-sm btn-{% if current_user.theme == 'light' %}dark{% else %}light{% endif %} text-uppercase d-flex align-items-center"
                                             aria-pressed="true"
                                             data-bs-toggle="offcanvas"
                                             data-bs-target="#side-offcanvas-news"

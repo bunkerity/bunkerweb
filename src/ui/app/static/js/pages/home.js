@@ -2,7 +2,7 @@ $(function () {
   var headingColor = config.colors.headingColor;
   var legendColor = config.colors.bodyColor;
 
-  const theme = $("#theme").val();
+  var theme = $("#theme").val();
 
   if (theme === "dark") {
     headingColor = config.colors.white;
@@ -232,94 +232,105 @@ $(function () {
     100
   ).toFixed(2);
 
-  const requestsOptions = {
-    chart: {
-      type: "donut",
-    },
-    labels: Object.keys(requestsData),
-    series: Object.values(requestsData).map((value) => parseInt(value, 10)),
-    responsive: [
-      {
-        breakpoint: 480,
-        options: {
-          chart: {
-            width: 200,
-          },
-          legend: {
-            position: "bottom",
-          },
-        },
-      },
-    ],
-    legend: {
-      show: false,
-    },
-    dataLabels: {
-      enabled: false,
-      formatter: function (val, opt) {
-        return ((parseInt(val) / totalRequests) * 100).toFixed(2) + "%";
-      },
-    },
-    grid: {
-      padding: {
-        top: 0,
-        bottom: 0,
-        right: 15,
-      },
-    },
-    states: {
-      hover: {
-        filter: { type: "none" },
-      },
-      active: {
-        filter: { type: "none" },
-      },
-    },
-    plotOptions: {
-      pie: {
-        donut: {
-          size: "75%",
-          labels: {
-            show: true,
-            value: {
-              fontSize: "18px",
-              fontFamily: "Public Sans",
-              fontWeight: 500,
-              color: headingColor,
-              offsetY: -17,
-              formatter: function (val) {
-                return ((parseInt(val) / totalRequests) * 100).toFixed(2) + "%";
-              },
-            },
-            name: {
-              offsetY: 17,
-              fontFamily: "Public Sans",
-            },
-            total: {
-              show: true,
-              fontSize: "13px",
-              color: legendColor,
-              label: "Blocked",
-              formatter: function (w) {
-                return blockedRequestsPercent + "%";
-              },
-            },
-          },
-        },
-      },
-    },
-  };
+  var requestsChart;
 
-  const requestsChart = new ApexCharts(
-    document.querySelector("#requests-stats"),
-    requestsOptions,
-  );
-  requestsChart.render();
+  function renderStatsChart() {
+    const requestsOptions = {
+      chart: {
+        type: "donut",
+      },
+      labels: Object.keys(requestsData),
+      series: Object.values(requestsData).map((value) => parseInt(value, 10)),
+      responsive: [
+        {
+          breakpoint: 480,
+          options: {
+            chart: {
+              width: 200,
+            },
+            legend: {
+              position: "bottom",
+            },
+          },
+        },
+      ],
+      legend: {
+        show: false,
+      },
+      dataLabels: {
+        enabled: false,
+        formatter: function (val, opt) {
+          return ((parseInt(val) / totalRequests) * 100).toFixed(2) + "%";
+        },
+      },
+      grid: {
+        padding: {
+          top: 0,
+          bottom: 0,
+          right: 15,
+        },
+      },
+      states: {
+        hover: {
+          filter: { type: "none" },
+        },
+        active: {
+          filter: { type: "none" },
+        },
+      },
+      plotOptions: {
+        pie: {
+          donut: {
+            size: "75%",
+            labels: {
+              show: true,
+              value: {
+                fontSize: "18px",
+                fontFamily: "Public Sans",
+                fontWeight: 500,
+                color: headingColor,
+                offsetY: -17,
+                formatter: function (val) {
+                  return (
+                    ((parseInt(val) / totalRequests) * 100).toFixed(2) + "%"
+                  );
+                },
+              },
+              name: {
+                offsetY: 17,
+                fontFamily: "Public Sans",
+              },
+              total: {
+                show: true,
+                fontSize: "13px",
+                color: legendColor,
+                label: "Blocked",
+                formatter: function (w) {
+                  return blockedRequestsPercent + "%";
+                },
+              },
+            },
+          },
+        },
+      },
+    };
+
+    requestsChart = new ApexCharts(
+      document.querySelector("#requests-stats"),
+      requestsOptions,
+    );
+    requestsChart.render();
+  }
+
+  renderStatsChart();
 
   // Requests IPs chart
 
   const $ipsData = $("#requests-ips-data");
-  if ($ipsData.length) {
+
+  var ipsChart;
+
+  function renderIpsChart() {
     const requestsIpsData = JSON.parse($("#requests-ips-data").text());
 
     const topIpsData = Object.entries(requestsIpsData)
@@ -401,11 +412,15 @@ $(function () {
       },
     };
 
-    const ipsChart = new ApexCharts(
+    ipsChart = new ApexCharts(
       document.querySelector("#requests-ips"),
       ipsOptions,
     );
     ipsChart.render();
+  }
+
+  if ($ipsData.length) {
+    renderIpsChart();
   }
 
   // Requests Blocking status
@@ -434,97 +449,124 @@ $(function () {
     return getColorFromRatio(ratio);
   });
 
-  const blockingOptions = {
-    chart: {
-      type: "bar",
-      width: "100%",
-      height: 400,
-      toolbar: {
+  var blockingChart;
+
+  function renderBlockingStatus() {
+    const blockingOptions = {
+      chart: {
+        type: "bar",
+        width: "100%",
+        height: 400,
+        toolbar: {
+          show: false,
+        },
+      },
+      title: {
+        text: "Blocked Requests per Hour",
+        align: "center",
+        style: {
+          color: headingColor,
+        },
+      },
+      series: [
+        {
+          name: "Blocked Requests",
+          data: dataValues,
+        },
+      ],
+      colors: colorValues,
+      plotOptions: {
+        bar: {
+          distributed: true,
+        },
+      },
+      xaxis: {
+        categories: categories,
+        labels: {
+          rotate: -45,
+          hideOverlappingLabels: true,
+          style: {
+            colors: headingColor,
+          },
+        },
+        title: {
+          text: "Time",
+          style: {
+            color: headingColor,
+          },
+        },
+      },
+      yaxis: {
+        title: {
+          text: "Number of Blocked Requests",
+          style: {
+            color: headingColor,
+          },
+        },
+      },
+      legend: {
         show: false,
       },
-    },
-    title: {
-      text: "Blocked Requests per Hour",
-      align: "center",
-      style: {
-        color: headingColor,
-      },
-    },
-    series: [
-      {
-        name: "Blocked Requests",
-        data: dataValues,
-      },
-    ],
-    colors: colorValues,
-    plotOptions: {
-      bar: {
-        distributed: true,
-      },
-    },
-    xaxis: {
-      categories: categories,
-      labels: {
-        rotate: -45,
-        hideOverlappingLabels: true,
-        style: {
-          colors: headingColor,
+      grid: {
+        padding: {
+          top: 0,
+          bottom: 0,
+          right: 15,
         },
       },
-      title: {
-        text: "Time",
-        style: {
-          color: headingColor,
+      states: {
+        hover: {
+          filter: { type: "none" },
+        },
+        active: {
+          filter: { type: "none" },
         },
       },
-    },
-    yaxis: {
-      title: {
-        text: "Number of Blocked Requests",
-        style: {
-          color: headingColor,
-        },
-      },
-    },
-    legend: {
-      show: false,
-    },
-    grid: {
-      padding: {
-        top: 0,
-        bottom: 0,
-        right: 15,
-      },
-    },
-    states: {
-      hover: {
-        filter: { type: "none" },
-      },
-      active: {
-        filter: { type: "none" },
-      },
-    },
-    responsive: [
-      {
-        breakpoint: 480,
-        options: {
-          chart: {
-            width: "100%",
-          },
-          legend: {
-            position: "bottom",
-            labels: {
-              color: legendColor,
+      responsive: [
+        {
+          breakpoint: 480,
+          options: {
+            chart: {
+              width: "100%",
+            },
+            legend: {
+              position: "bottom",
+              labels: {
+                color: legendColor,
+              },
             },
           },
         },
-      },
-    ],
-  };
+      ],
+    };
 
-  const blockingChart = new ApexCharts(
-    document.querySelector("#requests-blocking"),
-    blockingOptions,
-  );
-  blockingChart.render();
+    blockingChart = new ApexCharts(
+      document.querySelector("#requests-blocking"),
+      blockingOptions,
+    );
+    blockingChart.render();
+  }
+
+  renderBlockingStatus();
+
+  $("#dark-mode-toggle").on("change", function () {
+    setTimeout(() => {
+      theme = $("#theme").val();
+      headingColor = config.colors.headingColor;
+      legendColor = config.colors.bodyColor;
+      if (theme === "dark") {
+        headingColor = config.colors.white;
+        legendColor = config.colors.white;
+      }
+
+      requestsChart.destroy();
+      renderStatsChart();
+      if ($ipsData.length) {
+        ipsChart.destroy();
+        renderIpsChart();
+      }
+      blockingChart.destroy();
+      renderBlockingStatus();
+    }, 30);
+  });
 });

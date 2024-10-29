@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block page %}
-    <div class="bg-light-subtle">
+    <div class="bg-{% if current_user.theme == 'light' %}light{% else %}dark{% endif %}-subtle">
         <div class="login-background">
             <div class="container-xxl">
                 <div class="authentication-wrapper authentication-basic container-p-y">

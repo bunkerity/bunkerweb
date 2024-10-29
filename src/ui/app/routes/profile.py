@@ -264,7 +264,7 @@ def edit_profile():
 
     ret = DB.update_ui_user(**user_data, old_username=current_user.get_id())
     if ret:
-        return handle_error(f"Couldn't update the admin user in the database: {ret}", "profile")
+        return handle_error(f"Couldn't update the {current_user.get_id()} user in the database: {ret}", "profile")
 
     if "new_password" in request.form:
         session.clear()

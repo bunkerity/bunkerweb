@@ -422,4 +422,55 @@ $(document).ready(() => {
     sessionStorage.setItem("notificationsRead", notificationsRead);
     updateNotificationsBadge();
   });
+
+  $("#dark-mode-toggle").on("change", function () {
+    const darkMode = $(this).prop("checked");
+    if (darkMode) {
+      $("html").removeClass("light-style").addClass("dark-style");
+      $(".btn-outline-dark")
+        .addClass("btn-outline-light")
+        .removeClass("btn-outline-dark");
+      $(".btn-dark").addClass("btn-light").removeClass("btn-dark");
+      $(".bg-white").addClass("bg-dark").removeClass("bg-white");
+      $(".bg-light-subtle")
+        .addClass("bg-dark-subtle")
+        .removeClass("bg-light-subtle");
+    } else {
+      $("html").removeClass("dark-style").addClass("light-style");
+      $(".btn-outline-light")
+        .addClass("btn-outline-dark")
+        .removeClass("btn-outline-light");
+      $(".btn-light").addClass("btn-dark").removeClass("btn-light");
+      $(".bg-dark").addClass("bg-white").removeClass("bg-dark");
+      $(".bg-dark-subtle")
+        .addClass("bg-light-subtle")
+        .removeClass("bg-dark-subtle");
+    }
+
+    $("#theme").val(darkMode ? "dark" : "light");
+
+    const rootUrl = $(this)
+      .data("root-url")
+      .replace(/\/profile$/, "/set_theme");
+    const csrfToken = $("#csrf_token").val();
+    const theme = darkMode ? "dark" : "light";
+
+    const data = new FormData();
+    data.append("theme", theme);
+    data.append("csrf_token", csrfToken);
+
+    fetch(rootUrl, {
+      method: "POST",
+      body: data,
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        // Handle success, redirect, etc.
+      })
+      .catch((error) => {
+        console.error("There was a problem with the fetch operation:", error);
+      });
+  });
 });

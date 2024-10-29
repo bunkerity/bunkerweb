@@ -9,6 +9,7 @@ from signal import SIGINT, signal, SIGTERM
 from sys import path as sys_path
 from time import time
 
+
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("api",), ("db",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
@@ -175,7 +176,6 @@ def inject_variables():
         plugins=BW_CONFIG.get_plugins(),
         flash_messages=session.get("flash_messages", []),
         is_readonly=DATA.get("READONLY_MODE", False),
-        theme=current_user.theme if current_user.is_authenticated else "light",
     )
 
 
@@ -440,6 +440,28 @@ def check_reloading():
         DATA["TO_FLASH"] = []
 
     return jsonify({"reloading": DATA.get("RELOADING", False)})
+
+
+@app.route("/set_theme", methods=["POST"])
+@login_required
+def set_theme():
+    if DB.readonly or request.form["theme"] not in ("dark", "light"):
+        return
+
+    user_data = {
+        "username": current_user.get_id(),
+        "password": current_user.password.encode("utf-8"),
+        "email": current_user.email,
+        "totp_secret": current_user.totp_secret,
+        "method": current_user.method,
+        "theme": request.form["theme"],
+    }
+
+    ret = DB.update_ui_user(**user_data, old_username=current_user.get_id())
+    if ret:
+        LOGGER.error(f"Couldn't update the user {current_user.get_id()}: {ret}")
+
+    return Response(status=200, response=dumps({"message": "ok"}), content_type="application/json")
 
 
 BLUEPRINTS = (about, services, profile, jobs, reports, totp, home, logout, instances, plugins, global_config, pro, cache, logs, login, configs, bans, setup)

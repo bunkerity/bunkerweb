@@ -65,6 +65,30 @@
         </div>
         <!-- /Buttons -->
         <ul class="navbar-nav flex-row align-items-center ms-auto">
+            <!-- Dark mode toggle -->
+            <li class="nav-item lh-1 me-4">
+                <div class="d-flex mt-1">
+                    <input type="hidden"
+                           id="csrf_token"
+                           name="csrf_token"
+                           value="{{ csrf_token() }}" />
+                    <label class="setting-checkbox-label d-flex align-items-center ps-0"
+                           for="dark-mode-toggle">Light</label>
+                    <div class="form-switch ms-2 mb-1" {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The database is in readonly mode, therefore the theme cannot be changed"{% endif %}>
+                        <input id="dark-mode-toggle"
+                               name="dark-mode-toggle"
+                               class="form-check-input"
+                               type="checkbox"
+                               role="switch"
+                               data-root-url="{{ url_for('profile') }}"
+                               {% if current_user.theme == "dark" %}checked{% endif %}
+                               {% if is_readonly %}disabled{% endif %} />
+                    </div>
+                    <label class="setting-checkbox-label d-flex align-items-center ps-0"
+                           for="dark-mode-toggle">Dark</label>
+                </div>
+            </li>
+            <!--/ Dark mode toggle -->
             <!-- Stars -->
             <li class="d-none d-md-inline nav-item lh-1 me-4">
                 <a class="github-button"
@@ -78,7 +102,7 @@
             <!-- Version -->
             <li class="nav-item lh-1 me-2 me-md-4">
                 <a role="button"
-                   class="btn btn-sm btn-outline-{% if theme == 'light' %}dark{% else %}light{% endif %} px-2 px-md-3 position-relative"
+                   class="btn btn-sm btn-outline-{% if current_user.theme == 'light' %}dark{% else %}light{% endif %} px-2 px-md-3 position-relative"
                    aria-pressed="true"
                    href="https://github.com/bunkerity/bunkerweb/releases/latest"
                    target="_blank"
