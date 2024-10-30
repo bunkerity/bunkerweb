@@ -4,19 +4,19 @@ from datetime import datetime
 from json import dumps, loads
 from operator import itemgetter
 from time import time
-from dotenv import dotenv_values
 from os import environ, getenv, sep
 from os.path import join
 from pathlib import Path
-from redis import StrictRedis, Sentinel
 from subprocess import DEVNULL, STDOUT, run
 from sys import path as sys_path
 from typing import Any, Optional, Tuple
 
-
-for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("utils",), ("db",))]:
+for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("api",), ("db",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
+
+from dotenv import dotenv_values
+from redis import StrictRedis, Sentinel
 
 from API import API  # type: ignore
 from ApiCaller import ApiCaller  # type: ignore
