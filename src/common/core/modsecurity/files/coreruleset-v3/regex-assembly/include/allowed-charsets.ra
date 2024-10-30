@@ -1,9 +1,0 @@
-##! Please refer to the documentation at
-##! https://coreruleset.org/docs/development/regex_assembly/.
-
-##! This list is in sync with the default value of tx.allowed_request_content_type_charset.
-
-iso-8859-1
-iso-8859-15
-utf-8
-windows-1252

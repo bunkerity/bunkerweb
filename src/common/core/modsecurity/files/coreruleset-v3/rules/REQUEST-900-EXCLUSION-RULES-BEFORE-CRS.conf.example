@@ -1,9 +1,9 @@
 # ------------------------------------------------------------------------
-# OWASP CRS ver.4.6.0
+# OWASP ModSecurity Core Rule Set ver.3.3.7
 # Copyright (c) 2006-2020 Trustwave and contributors. All rights reserved.
-# Copyright (c) 2021-2024 CRS project. All rights reserved.
+# Copyright (c) 2021-2024 Core Rule Set project. All rights reserved.
 #
-# The OWASP CRS is distributed under
+# The OWASP ModSecurity Core Rule Set is distributed under
 # Apache Software License (ASL) version 2
 # Please see the enclosed LICENSE file for full details.
 # ------------------------------------------------------------------------
@@ -82,9 +82,9 @@
 # This ruleset allows you to control how ModSecurity will handle traffic
 # originating from Authorized Vulnerability Scanning (AVS) sources.  See
 # related blog post -
-# https://www.trustwave.com/en-us/resources/blogs/spiderlabs-blog/updated-advanced-topic-of-the-week-handling-authorized-scanning-traffic/
+# http://blog.spiderlabs.com/2010/12/advanced-topic-of-the-week-handling-authorized-scanning-traffic.html
 #
-# Allow List ASV network block (no blocking or logging of AVS traffic) Update
+# White-list ASV network block (no blocking or logging of AVS traffic) Update
 # IP network block as appropriate for your AVS traffic
 #
 # ModSec Rule Exclusion: Disable Rule Engine for known ASV IP
@@ -130,7 +130,7 @@
 # Example Exclusion Rule: Removing a specific ARGS parameter from inspection
 #                         for all CRS rules
 #
-# This rule illustrates that we can use tagging very effectively to allow list a
+# This rule illustrates that we can use tagging very effectively to whitelist a
 # common false positive across an entire ModSecurity instance. This can be done
 # because every rule in OWASP_CRS is tagged with OWASP_CRS. This will NOT
 # affect custom rules.
@@ -150,10 +150,6 @@
 # This rule illustrates that we can remove a rule range via a ctl action.
 # This uses the fact, that rules are grouped by topic in rule files covering
 # a certain id range.
-# IMPORTANT: ModSecurity v3, aka libModSecurity, does not currently support the
-# use of rule ranges in a ruleRemoveById ctl action (this feature has been
-# planned for v3.1). Consider using ruleRemoveByTag as a workaround, if
-# appropriate.
 #
 # ModSecurity Rule Exclusion: Disable all SQLi and XSS rules
 # SecRule REQUEST_FILENAME "@beginsWith /admin" \
@@ -164,37 +160,7 @@
 #     ctl:ruleRemoveById=941000-942999"
 #
 #
-# The application-specific rule exclusion plugins
-# (see: https://github.com/coreruleset/plugin-registry)
-# provide additional examples which can be useful then tuning a service.
-
-
-#
-# Example Rule: Allow monitoring tools and scripts
-#
-# Uncomment this rule to allow all requests from trusted IPs and User-Agent.
-# This can be useful for monitoring tools like Monit, Nagios, or other agents.
-# For example, if you're using AWS Load Balancer, you may need to trust all
-# requests from "10.0.0.0/8" subnet that come with the user-agent
-# "ELB-HealthChecker/2.0". By doing this, all requests that match these
-# conditions will not be matched against the following rules:
-#
-# - id: 911100 (allowed methods)
-# - id: 913100 (scan detection)
-# - id: 920280 (missing/empty host header)
-# - id: 920350 (IP address in host header)
-# - tag: attack-disclosure (all RESPONSE-*-DATA-LEAKAGES rules)
-#
-# SecRule REMOTE_ADDR "@ipMatch 10.0.0.0/8" \
-#    "id:1005,\
-#    phase:1,\
-#    pass,\
-#    nolog,\
-#    chain"
-#    SecRule REQUEST_METHOD "@pm GET HEAD" "chain"
-#       SecRule REQUEST_HEADERS:User-Agent "@pm ELB-HealthChecker" \
-#           "ctl:ruleRemoveById=911100,\
-#           ctl:ruleRemoveById=913100,\
-#           ctl:ruleRemoveById=920280,\
-#           ctl:ruleRemoveById=920350,\
-#           ctl:ruleRemoveByTag=attack-disclosure"
+# The application specific rule exclusion files
+# REQUEST-903.9001-DRUPAL-EXCLUSION-RULES.conf
+# REQUEST-903.9002-WORDPRESS-EXCLUSION-RULES.conf
+# bring additional examples which can be useful then tuning a service.

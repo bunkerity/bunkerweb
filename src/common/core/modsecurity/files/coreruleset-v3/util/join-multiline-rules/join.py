@@ -20,16 +20,16 @@
 #
 # Example:
 #
-#   SecRule &TX:BLOCKING_PARANOIA_LEVEL "@eq 0" \
+#   SecRule &TX:paranoia_level "@eq 0" \
 #      "id:901120,\
 #      phase:1,\
 #      pass,\
 #      nolog,\
-#      setvar:tx.blocking_paranoia_level=1"
+#      setvar:tx.paranoia_level=1"
 #
 # will be outputted as:
 #
-#   SecRule &TX:BLOCKING_PARANOIA_LEVEL "@eq 0" "id:901120,phase:1,pass,nolog,setvar:tx.blocking_paranoia_level=1"
+#   SecRule &TX:paranoia_level "@eq 0" "id:901120,phase:1,pass,nolog,setvar:tx.paranoia_level=1"
 #
 
 import fileinput, sys

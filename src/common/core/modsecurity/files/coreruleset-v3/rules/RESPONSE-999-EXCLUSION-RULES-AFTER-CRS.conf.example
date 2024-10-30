@@ -1,9 +1,9 @@
 # ------------------------------------------------------------------------
-# OWASP CRS ver.4.6.0
+# OWASP ModSecurity Core Rule Set ver.3.3.7
 # Copyright (c) 2006-2020 Trustwave and contributors. All rights reserved.
-# Copyright (c) 2021-2024 CRS project. All rights reserved.
+# Copyright (c) 2021-2024 Core Rule Set project. All rights reserved.
 #
-# The OWASP CRS is distributed under
+# The OWASP ModSecurity Core Rule Set is distributed under
 # Apache Software License (ASL) version 2
 # Please see the enclosed LICENSE file for full details.
 # ------------------------------------------------------------------------
