@@ -23,7 +23,6 @@ RUN export MAKEFLAGS="-j$(nproc)" && \
 
 # Copy files
 # can't exclude specific files/dir from . so we are copying everything by hand
-COPY src/autoconf autoconf
 COPY src/common/api api
 COPY src/common/cli cli
 COPY src/common/core core
@@ -31,6 +30,8 @@ COPY src/common/db db
 COPY src/common/helpers helpers
 COPY src/common/settings.json settings.json
 COPY src/common/utils utils
+COPY src/autoconf autoconf
+COPY src/VERSION VERSION
 
 FROM python:3.13.0-alpine@sha256:c38ead8bcf521573dad837d7ecfdebbc87792202e89953ba8b2b83a9c5a520b6
 
@@ -56,14 +57,12 @@ RUN cp helpers/bwcli /usr/bin/ && \
   mkdir -p /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb /var/www && \
   mkdir -p /data/cache && ln -s /data/cache /var/cache/bunkerweb && \
   mkdir -p /data/lib && ln -s /data/lib /var/lib/bunkerweb && \
-  mkdir -p /data/www && ln -s /data/www /var/www/html && \
-  for dir in $(echo "configs plugins") ; do mkdir -p "/data/${dir}" && ln -s "/data/${dir}" "/etc/bunkerweb/${dir}" ; done && \
-  for dir in $(echo "configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/default-server-stream configs/modsec configs/modsec-crs configs/crs-plugins-before configs/crs-plugins-after") ; do mkdir "/data/${dir}" ; done && \
-  chown -R root:autoconf /data && \
-  chmod -R 770 /data && \
-  chown -R root:autoconf INTEGRATION /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /usr/bin/bwcli && \
-  chmod -R 770 /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb && \
-  chmod 750 cli/main.py helpers/*.sh /usr/bin/bwcli autoconf/main.py && \
+  for dir in $(echo "pro configs plugins") ; do mkdir -p "/data/${dir}" && ln -s "/data/${dir}" "/etc/bunkerweb/${dir}" ; done && \
+  for dir in $(echo "pro/plugins configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/default-server-stream configs/modsec configs/modsec-crs configs/crs-plugins-before configs/crs-plugins-after") ; do mkdir "/data/${dir}" ; done && \
+  chown -R root:autoconf INTEGRATION /data /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb /usr/bin/bwcli && \
+  chmod -R 770 /data /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb && \
+  find core/*/bwcli/* -type f -exec chmod 750 {} \; && \
+  chmod 750 cli/main.py autoconf/main.py helpers/*.sh deps/python/bin/* /usr/bin/bwcli && \
   chmod 660 INTEGRATION
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
