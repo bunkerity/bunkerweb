@@ -3,12 +3,10 @@
 from contextlib import suppress
 from datetime import datetime, timedelta
 from ipaddress import ip_address, ip_network
-from json import dumps, loads
 from os import getenv, sep
 from os.path import join, normpath
 from pathlib import Path
 from re import compile as re_compile
-from shutil import rmtree
 from sys import exit as sys_exit, path as sys_path
 from traceback import format_exc
 from typing import Tuple
@@ -112,19 +110,13 @@ try:
                 LOGGER.warning(f"Couldn't delete whitelist URLs from cache : {err}")
         sys_exit(0)
 
-    cached_urls = loads(JOB.get_cache("urls.json") or "{}")
-
-    tmp_downloads = Path(sep, "var", "tmp", "bunkerweb", "blacklist")
-    tmp_downloads.mkdir(parents=True, exist_ok=True)
-    downloaded_urls = {}
     failed_urls = set()
-    current_timestamp = datetime.now().astimezone().timestamp()
 
     # Loop on kinds
     for service, kinds in services_whitelist_urls.items():
         for kind, urls_list in kinds.items():
             if not urls_list:
-                if Path(JOB.job_path.joinpath(service, f"{kind}.list")).exists():
+                if JOB.job_path.joinpath(service, f"{kind}.list").exists():
                     LOGGER.warning(f"{service} whitelist for {kind} is cached but no URL is configured, removing from cache...")
                     deleted, err = JOB.del_cache(f"{kind}.list", service_id=service)
                     if not deleted:
@@ -134,25 +126,16 @@ try:
             # Write combined data of the kind in memory and check if it has changed
             content = b""
             for url in urls_list:
+                url_file = f"{bytes_hash(url, algorithm='sha1')}.list"
+                cached_url = JOB.get_cache(url_file, with_info=True, with_data=True)
                 try:
-                    cached_url = cached_urls.get(url, {"time": 0, "tmp_path": ""})
-                    # Check if the URL's last download timestamp is younger than 1 hour
-                    if current_timestamp - cached_url["time"] < timedelta(hours=1).total_seconds():
-                        downloaded_urls[url] = {
-                            "time": cached_url["time"],
-                            "tmp_path": tmp_downloads.joinpath(f"{bytes_hash(url, algorithm='sha1')}.list").as_posix(),
-                        }
-                        LOGGER.info(f"URL {url} has been downloaded less than 1 hour ago, skipping it...")
-                        failed_urls.add(url)
-                        status = 1 if status == 1 else 0
-                        continue
-
                     # Check if the URL has already been downloaded
                     if url in failed_urls:
                         continue
-                    elif url in downloaded_urls:
-                        LOGGER.info(f"URL {url} has already been downloaded, skipping it...")
-                        content += Path(downloaded_urls[url]["tmp_path"]).read_bytes()
+                    elif isinstance(cached_url, dict) and cached_url["last_update"] < (datetime.now().astimezone() - timedelta(hours=1)).timestamp():
+                        LOGGER.info(f"URL {url} has already been downloaded less than 1 hour ago, skipping download...")
+                        # Remove first line (URL) and add to content
+                        content += b"\n".join(cached_url["data"].split(b"\n")[1:]) + b"\n"
                     else:
                         LOGGER.info(f"Downloading whitelist data from {url} ...")
                         if url.startswith("file://"):
@@ -182,14 +165,16 @@ try:
                                 i += 1
 
                         LOGGER.info(f"Downloaded {i} bad {kind}")
-                        downloaded_urls[url] = {
-                            "time": current_timestamp,
-                            "tmp_path": tmp_downloads.joinpath(f"{bytes_hash(url, algorithm='sha1')}.list").as_posix(),
-                        }
+
+                        cached, err = JOB.cache_file(url_file, b"# Downloaded from " + url.encode("utf-8") + b"\n" + content)
+                        if not cached:
+                            LOGGER.error(f"Error while caching url content : {err}")
                 except BaseException as e:
                     status = 2
                     LOGGER.error(f"Exception while getting {service} whitelist from {url} :\n{e}")
                     failed_urls.add(url)
+
+            LOGGER.debug(f"Content for {service} {kind} : {content}")
 
             # Check if file has changed
             new_hash = bytes_hash(content)
@@ -207,12 +192,6 @@ try:
                 continue
 
             status = 1
-
-    cached, err = JOB.cache_file("urls.json", dumps(downloaded_urls, indent=2).encode("utf-8"))
-    if not cached:
-        LOGGER.error(f"Error while caching whitelist URLs : {err}")
-
-    rmtree(tmp_downloads, ignore_errors=True)
 except SystemExit as e:
     status = e.code
 except:
