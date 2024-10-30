@@ -178,24 +178,19 @@ def send_file_to_bunkerweb(file_path: Path, endpoint: str):
                     break
 
         status = responses.get(db_instance["hostname"], {"status": "down"}).get("status", "down")
-        if status == "success":
-            success = True
-        elif index != -1:
-            fails.append(db_instance["hostname"])
 
         ret = SCHEDULER.db.update_instance(db_instance["hostname"], "up" if status == "success" else "down")
         if ret:
             LOGGER.error(f"Couldn't update instance {db_instance['hostname']} status to down in the database: {ret}")
 
-        if status == "success":
-            if index == -1:
-                with SCHEDULER_LOCK:
+        with SCHEDULER_LOCK:
+            if status == "success":
+                success = True
+                if index == -1:
                     LOGGER.debug(f"Adding {db_instance['hostname']}:{db_instance['port']} to the list of reachable instances")
                     SCHEDULER.apis.append(API(f"http://{db_instance['hostname']}:{db_instance['port']}", db_instance["server_name"]))
-            continue
-
-        with SCHEDULER_LOCK:
-            if api.endpoint == f"http://{db_instance['hostname']}:{db_instance['port']}/":
+            elif index != -1:
+                fails.append(f"{db_instance['hostname']}:{db_instance['port']}")
                 LOGGER.debug(f"Removing {db_instance['hostname']}:{db_instance['port']} from the list of reachable instances")
                 del SCHEDULER.apis[index]
 
