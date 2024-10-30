@@ -183,8 +183,11 @@ class CLI(ApiCaller):
                 self.__use_redis = False
 
         super().__init__()
-        for db_instance in self.__db.get_instances():
-            self.apis.append(API(f"http://{db_instance['hostname']}:{db_instance['port']}", db_instance["server_name"]))
+        if self.__db:
+            for db_instance in self.__db.get_instances():
+                self.apis.append(API(f"http://{db_instance['hostname']}:{db_instance['port']}", db_instance["server_name"]))
+        else:
+            self.apis.append(API(f"http://127.0.0.1:{self.__get_variable('API_HTTP_PORT', '5000')}", self.__get_variable("API_SERVER_NAME", "bwapi")))
 
     def __get_variable(self, variable: str, default: Optional[Any] = None) -> Optional[str]:
         return getenv(variable, self.__variables.get(variable, default))
