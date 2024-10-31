@@ -7,7 +7,6 @@ from os import getenv, sep
 from os.path import join, normpath
 from pathlib import Path
 from sys import exit as sys_exit, path as sys_path
-from traceback import format_exc
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("db",))]:
     if deps_path not in sys_path:
@@ -87,6 +86,7 @@ try:
                 LOGGER.warning(f"Couldn't delete realip URLs from cache : {err}")
         sys_exit(0)
 
+    urls = set()
     failed_urls = set()
 
     for service, urls in services_realip_urls.items():
@@ -102,6 +102,7 @@ try:
         content = b""
         for url in urls:
             url_file = f"{bytes_hash(url, algorithm='sha1')}.list"
+            urls.add(url_file)
             cached_url = JOB.get_cache(url_file, with_info=True, with_data=True)
             try:
                 # Check if the URL has already been downloaded
@@ -165,10 +166,19 @@ try:
             continue
 
         status = 1
+
+    # Remove old files
+    for url_file in JOB.job_path.glob("*.list"):
+        LOGGER.debug(f"Checking if {url_file} is still in use ...")
+        if url_file.name not in urls:
+            LOGGER.warning(f"Removing no longer used url file {url_file} ...")
+            deleted, err = JOB.del_cache(url_file)
+            if not deleted:
+                LOGGER.warning(f"Couldn't delete url file {url_file} from cache : {err}")
 except SystemExit as e:
     status = e.code
-except:
+except BaseException as e:
     status = 2
-    LOGGER.error(f"Exception while running realip-download.py :\n{format_exc()}")
+    LOGGER.error(f"Exception while running realip-download.py :\n{e}")
 
 sys_exit(status)
