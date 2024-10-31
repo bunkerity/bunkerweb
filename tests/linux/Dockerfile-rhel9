@@ -1,6 +1,6 @@
 FROM redhat/ubi9-init:9.4-14.1729775103@sha256:13616a49d9de2875040ff8926a3dd984c7dd97edad5abb0ceef2bb9b667c0109
 
-ENV NGINX_VERSION 1.26.2
+ENV NGINX_VERSION=1.26.2
 
 # Copy rocky repo
 COPY src/linux/rocky-9.repo /etc/yum.repos.d/rocky.repo
@@ -14,7 +14,7 @@ RUN rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-Rocky-9
 
 COPY src/linux/nginx.repo /etc/yum.repos.d/nginx.repo
 
-RUN rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm && \
+RUN dnf install https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm -y && \
     dnf install php-fpm yum-utils -y && \
     dnf install nginx-${NGINX_VERSION} -y
 
