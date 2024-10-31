@@ -65,7 +65,7 @@ else
 fi
 
 # Create wizard config
-if [ "$UI_WIZARD" != "" ] ; then
+if [ "$UI_WIZARD" != "no" ] ; then
     echo -ne 'DNS_RESOLVERS=9.9.9.9 8.8.8.8 8.8.4.4\nHTTP_PORT=80\nHTTPS_PORT=443\nAPI_LISTEN_IP=127.0.0.1\nMULTISITE=yes\nUI_HOST=http://127.0.0.1:7000\nSERVER_NAME=\n' > /etc/bunkerweb/variables.env
     do_and_check_cmd chown nginx:nginx /etc/bunkerweb/variables.env
     do_and_check_cmd chmod 660 /etc/bunkerweb/variables.env

@@ -356,10 +356,10 @@ Please ensure that you have **NGINX 1.26.2 installed before installing BunkerWeb
         echo "force-bad-version" | sudo tee -a /etc/dpkg/dpkg.cfg
         ```
 
-    Optional step : if you want to automatically enable the [setup wizard](web-ui.md#setup-wizard) when BunkerWeb is installed, export the following variable :
+    Optional step : if you don't want to use the automatically enabled [setup wizard](web-ui.md#setup-wizard) when BunkerWeb is installed, export the following variable :
 
     ```shell
-    export UI_WIZARD=1
+    export UI_WIZARD=no
     ```
 
     And finally install BunkerWeb 1.6.0-beta :
@@ -403,10 +403,10 @@ Please ensure that you have **NGINX 1.26.2 installed before installing BunkerWeb
         echo "force-bad-version" | sudo tee -a /etc/dpkg/dpkg.cfg
         ```
 
-    Optional step : if you want to automatically enable the [setup wizard](web-ui.md#setup-wizard) when BunkerWeb is installed, export the following variable :
+    Optional step : if you don't want to use the automatically enabled [setup wizard](web-ui.md#setup-wizard) when BunkerWeb is installed, export the following variable :
 
     ```shell
-    export UI_WIZARD=1
+    export UI_WIZARD=no
     ```
 
     And finally install BunkerWeb 1.6.0-beta :
@@ -438,10 +438,10 @@ Please ensure that you have **NGINX 1.26.2 installed before installing BunkerWeb
     sudo dnf install -y nginx-1.26.2
     ```
 
-    Optional step : if you want to automatically enable the [setup wizard](web-ui.md#setup-wizard) when BunkerWeb is installed, export the following variable :
+    Optional step : if you don't want to use the automatically enabled [setup wizard](web-ui.md#setup-wizard) when BunkerWeb is installed, export the following variable :
 
     ```shell
-    export UI_WIZARD=1
+    export UI_WIZARD=no
     ```
 
     And finally install BunkerWeb 1.6.0-beta :
@@ -489,10 +489,10 @@ Please ensure that you have **NGINX 1.26.2 installed before installing BunkerWeb
     sudo dnf install nginx-1.26.2
     ```
 
-    Optional step : if you want to automatically enable the [setup wizard](web-ui.md#setup-wizard) when BunkerWeb is installed, export the following variable :
+    Optional step : if you don't want to use the automatically enabled [setup wizard](web-ui.md#setup-wizard) when BunkerWeb is installed, export the following variable :
 
     ```shell
-    export UI_WIZARD=1
+    export UI_WIZARD=no
     ```
 
     And finally install BunkerWeb 1.6.0-beta :

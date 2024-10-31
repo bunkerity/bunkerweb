@@ -756,7 +756,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
 
 === "Linux"
 
-    If you want to use the setup wizard, you will need to run the following command `export UI_WIZARD=1` before installing BunkerWeb as described in [integrations section](integrations.md#linux) of the documentation (this is an optional step).
+    If you don't want to use the setup wizard, you will need to run the following command `export UI_WIZARD=no` before installing BunkerWeb as described in [integrations section](integrations.md#linux) of the documentation (this is an optional step).
 
     !!! tip "Accessing the setup wizard"
 
