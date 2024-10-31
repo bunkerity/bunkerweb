@@ -74,6 +74,11 @@ if [ "$UI_WIZARD" != "no" ] ; then
     do_and_check_cmd chmod 660 /etc/bunkerweb/ui.env
     do_and_check_cmd systemctl enable bunkerweb-ui
     do_and_check_cmd systemctl start bunkerweb-ui
+    echo "🧙 The setup wizard has been activated automatically."
+    echo "Please complete the initial configuration at: https://your-ip-address-or-fqdn/setup"
+    echo ""
+    echo "Note: Make sure that your firewall settings allow access to this URL."
+    echo ""
 fi
 
 # Create /var/www/html if needed
@@ -96,4 +101,11 @@ echo "Enabling and starting bunkerweb service..."
 do_and_check_cmd systemctl enable bunkerweb
 do_and_check_cmd systemctl start bunkerweb
 
-echo "Postinstall successful !"
+echo "BunkerWeb has been successfully installed\! 🎉"
+echo ""
+echo "For more information on BunkerWeb, visit:"
+echo "  * Official website: https://www.bunkerweb.io"
+echo "  * Documentation: https://docs.bunkerweb.io"
+echo "  * Community Support: https://discord.bunkerity.com"
+echo "  * Commercial Support: https://panel.bunkerweb.io/order/support"
+echo "Thank you for using BunkerWeb\!"
