@@ -8,7 +8,6 @@ from re import MULTILINE, search
 from shutil import rmtree
 from sys import exit as sys_exit, path as sys_path
 from tarfile import open as tar_open
-from traceback import format_exc
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("db",))]:
     if deps_path not in sys_path:
@@ -119,8 +118,8 @@ try:
         status = 1
 except SystemExit as e:
     status = e.code
-except:
+except BaseException as e:
     status = 2
-    LOGGER.error(f"Exception while running coreruleset-nightly.py :\n{format_exc()}")
+    LOGGER.error(f"Exception while running coreruleset-nightly.py :\n{e}")
 
 sys_exit(status)

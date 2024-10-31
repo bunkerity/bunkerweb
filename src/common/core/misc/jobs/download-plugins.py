@@ -11,7 +11,6 @@ from uuid import uuid4
 from json import JSONDecodeError, load as json_load, loads
 from shutil import copytree, rmtree
 from tarfile import open as tar_open
-from traceback import format_exc
 from zipfile import ZipFile
 
 for deps_path in [
@@ -117,8 +116,8 @@ try:
                 for chunk in resp.iter_content(chunk_size=8192):
                     if chunk:
                         content += chunk
-        except:
-            LOGGER.error(f"Exception while downloading plugin(s) from {plugin_url} :\n{format_exc()}")
+        except BaseException as e:
+            LOGGER.error(f"Exception while downloading plugin(s) from {plugin_url} :\n{e}")
             status = 2
             continue
 
@@ -146,8 +145,8 @@ try:
             else:
                 LOGGER.error(f"Unknown file type for {plugin_url}, either zip or tar are supported, skipping...")
                 continue
-        except:
-            LOGGER.error(f"Exception while decompressing plugin(s) from {plugin_url} :\n{format_exc()}")
+        except BaseException as e:
+            LOGGER.error(f"Exception while decompressing plugin(s) from {plugin_url} :\n{e}")
             status = 2
             continue
 
@@ -159,8 +158,8 @@ try:
                         plugin_nbr += 1
                 except FileExistsError:
                     LOGGER.warning(f"Skipping installation of plugin {plugin_path.parent.name} (already installed)")
-        except:
-            LOGGER.error(f"Exception while installing plugin(s) from {plugin_url} :\n{format_exc()}")
+        except BaseException as e:
+            LOGGER.error(f"Exception while installing plugin(s) from {plugin_url} :\n{e}")
             status = 2
 
     if not plugin_nbr:
@@ -211,9 +210,9 @@ try:
 
 except SystemExit as e:
     status = e.code
-except:
+except BaseException as e:
     status = 2
-    LOGGER.error(f"Exception while running download-plugins.py :\n{format_exc()}")
+    LOGGER.error(f"Exception while running download-plugins.py :\n{e}")
 
 rmtree(TMP_DIR, ignore_errors=True)
 

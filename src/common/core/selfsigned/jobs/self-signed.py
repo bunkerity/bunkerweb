@@ -6,7 +6,6 @@ from os.path import join
 from pathlib import Path
 from subprocess import DEVNULL, run
 from sys import exit as sys_exit, path as sys_path
-from traceback import format_exc
 from typing import Tuple
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("db",))]:
@@ -149,8 +148,8 @@ try:
         JOB.del_cache("key.pem", service_id=first_server)
 except SystemExit as e:
     status = e.code
-except:
+except BaseException as e:
     status = 2
-    LOGGER.error(f"Exception while running self-signed.py :\n{format_exc()}")
+    LOGGER.error(f"Exception while running self-signed.py :\n{e}")
 
 sys_exit(status)

@@ -4,7 +4,6 @@ from os import getenv, sep
 from os.path import join
 from pathlib import Path
 from sys import exit as sys_exit, path as sys_path
-from traceback import format_exc
 from base64 import b64decode
 from typing import Tuple, Union
 
@@ -143,8 +142,8 @@ try:
         JOB.del_cache("key.pem", service_id=first_server)
 except SystemExit as e:
     status = e.code
-except:
+except BaseException as e:
     status = 2
-    LOGGER.error(f"Exception while running custom-cert.py :\n{format_exc()}")
+    LOGGER.error(f"Exception while running custom-cert.py :\n{e}")
 
 sys_exit(status)

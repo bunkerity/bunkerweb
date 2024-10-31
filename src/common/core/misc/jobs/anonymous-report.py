@@ -5,7 +5,6 @@ from os import getenv, sep
 from os.path import join
 from re import compile as re_compile
 from sys import exit as sys_exit, path as sys_path, version
-from traceback import format_exc
 from typing import Any, Dict
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("db",))]:
@@ -116,8 +115,8 @@ try:
         status = 2
 except SystemExit as e:
     status = e.code
-except:
+except BaseException as e:
     status = 2
-    LOGGER.error(f"Exception while running anonymous-report.py :\n{format_exc()}")
+    LOGGER.error(f"Exception while running anonymous-report.py :\n{e}")
 
 sys_exit(status)

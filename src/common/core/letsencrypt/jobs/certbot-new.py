@@ -7,7 +7,6 @@ from pathlib import Path
 from shutil import rmtree
 from subprocess import DEVNULL, STDOUT, Popen, run, PIPE
 from sys import exit as sys_exit, path as sys_path
-from traceback import format_exc
 from re import MULTILINE, search
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("db",))]:
@@ -196,8 +195,8 @@ try:
             LOGGER.info("Successfully saved Let's Encrypt data to db cache")
 except SystemExit as e:
     status = e.code
-except:
+except BaseException as e:
     status = 3
-    LOGGER.error(f"Exception while running certbot-new.py :\n{format_exc()}")
+    LOGGER.error(f"Exception while running certbot-new.py :\n{e}")
 
 sys_exit(status)

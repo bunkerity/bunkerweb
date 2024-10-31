@@ -6,7 +6,6 @@ from os import getenv, sep
 from os.path import join
 from pathlib import Path
 from sys import exit as sys_exit, path as sys_path
-from traceback import format_exc
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("db",), ("core", "backup"))]:
     if deps_path not in sys_path:
@@ -87,8 +86,8 @@ try:
     update_cache_file(JOB.db, backup_dir)
 except SystemExit as e:
     status = e.code
-except:
+except BaseException as e:
     status = 2
-    LOGGER.error(f"Exception while running backup-data.py :\n{format_exc()}")
+    LOGGER.error(f"Exception while running backup-data.py :\n{e}")
 
 sys_exit(status)

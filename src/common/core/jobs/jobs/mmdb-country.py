@@ -7,7 +7,6 @@ from os import getenv, sep
 from os.path import join
 from pathlib import Path
 from sys import exit as sys_exit, path as sys_path
-from traceback import format_exc
 from typing import Optional
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("db",))]:
@@ -101,6 +100,7 @@ try:
             if not tmp_path.is_file():
                 sys_exit(2)
             LOGGER.warning("Falling back to project cached mmdb file.")
+            dl_mmdb = False
 
     # Try to load it
     LOGGER.info("Checking if mmdb file is valid ...")
@@ -122,8 +122,8 @@ try:
     status = 1
 except SystemExit as e:
     status = e.code
-except:
+except BaseException as e:
     status = 2
-    LOGGER.error(f"Exception while running mmdb-country.py :\n{format_exc()}")
+    LOGGER.error(f"Exception while running mmdb-country.py :\n{e}")
 
 sys_exit(status)

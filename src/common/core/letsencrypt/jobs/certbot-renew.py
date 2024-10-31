@@ -5,7 +5,6 @@ from os.path import join
 from pathlib import Path
 from subprocess import DEVNULL, PIPE, Popen
 from sys import exit as sys_exit, path as sys_path
-from traceback import format_exc
 
 for deps_path in [
     join(sep, "usr", "share", "bunkerweb", *paths)
@@ -83,8 +82,8 @@ try:
             LOGGER.info("Successfully saved Let's Encrypt data to db cache")
 except SystemExit as e:
     status = e.code
-except:
+except BaseException as e:
     status = 2
-    LOGGER.error(f"Exception while running certbot-renew.py :\n{format_exc()}")
+    LOGGER.error(f"Exception while running certbot-renew.py :\n{e}")
 
 sys_exit(status)

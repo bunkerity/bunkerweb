@@ -11,7 +11,6 @@ from uuid import uuid4
 from json import dumps
 from shutil import copy, copytree, move, rmtree
 from tarfile import open as tar_open
-from traceback import format_exc
 from zipfile import ZipFile
 
 for deps_path in [
@@ -230,9 +229,9 @@ try:
         status = 1
 except SystemExit as e:
     status = e.code
-except:
+except BaseException as e:
     status = 2
-    LOGGER.error(f"Exception while running download-crs-plugins.py :\n{format_exc()}")
+    LOGGER.error(f"Exception while running download-crs-plugins.py :\n{e}")
 
 rmtree(TMP_DIR, ignore_errors=True)
 rmtree(NEW_PLUGINS_DIR, ignore_errors=True)

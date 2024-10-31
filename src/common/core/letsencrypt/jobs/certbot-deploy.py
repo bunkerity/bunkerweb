@@ -5,7 +5,6 @@ from os import getenv, sep
 from os.path import join
 from sys import exit as sys_exit, path as sys_path
 from tarfile import open as tar_open
-from traceback import format_exc
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("api",), ("db",))]:
     if deps_path not in sys_path:
@@ -70,8 +69,8 @@ try:
                 LOGGER.error(f"Error while sending API request to {api.endpoint}/reload : status = {resp['status']}, msg = {resp['msg']}")
             else:
                 LOGGER.info(f"Successfully sent API request to {api.endpoint}/reload")
-except:
+except BaseException as e:
     status = 1
-    LOGGER.error(f"Exception while running certbot-deploy.py :\n{format_exc()}")
+    LOGGER.error(f"Exception while running certbot-deploy.py :\n{e}")
 
 sys_exit(status)

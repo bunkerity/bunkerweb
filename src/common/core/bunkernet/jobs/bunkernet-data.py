@@ -4,7 +4,6 @@ from os import getenv, sep
 from os.path import join
 from pathlib import Path
 from sys import exit as sys_exit, path as sys_path
-from traceback import format_exc
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("db",))]:
     if deps_path not in sys_path:
@@ -114,8 +113,8 @@ try:
     exit_status = 1
 except SystemExit as e:
     exit_status = e.code
-except:
+except BaseException as e:
     exit_status = 2
-    LOGGER.error(f"Exception while running bunkernet-data.py :\n{format_exc()}")
+    LOGGER.error(f"Exception while running bunkernet-data.py :\n{e}")
 
 sys_exit(exit_status)

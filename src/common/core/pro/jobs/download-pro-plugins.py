@@ -12,7 +12,6 @@ from uuid import uuid4
 from json import JSONDecodeError, load as json_load, loads
 from shutil import copytree, rmtree
 from tarfile import open as tar_open
-from traceback import format_exc
 from zipfile import ZipFile
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("api",), ("db",))]:
@@ -319,9 +318,9 @@ try:
     LOGGER.info("🚀 Pro plugins downloaded and installed successfully!")
 except SystemExit as e:
     status = e.code
-except:
+except BaseException as e:
     status = 2
-    LOGGER.error(f"Exception while running download-pro-plugins.py :\n{format_exc()}")
+    LOGGER.error(f"Exception while running download-pro-plugins.py :\n{e}")
 
 for plugin_tmp in TMP_DIR.glob("*"):
     rmtree(plugin_tmp, ignore_errors=True)
