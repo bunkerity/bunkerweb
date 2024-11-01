@@ -213,11 +213,6 @@ if __name__ == "__main__":
         if err:
             LOGGER.warning(f"Couldn't clear manual instances from database : {err}, instances may be incorrect")
 
-        if any(settings.get(setting, "no") == "yes" for setting in ("AUTOCONF_MODE", "SWARM_MODE", "KUBERNETES_MODE")):
-            err = db.update_instances([], method="autoconf", changed=False)
-            if err:
-                LOGGER.warning(f"Couldn't clear autoconf instances from database : {err}, instances may be incorrect")
-
         changes.append("instances")
 
         for api in apis:
