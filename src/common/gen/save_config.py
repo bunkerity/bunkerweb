@@ -23,7 +23,7 @@ CUSTOM_CONF_RX = re_compile(
 )
 BUNKERWEB_STATIC_INSTANCES_RX = re_compile(r"(http://)?(?P<hostname>(?<![:])\b[^:\s]+\b)(:(?P<port>\d+))?")
 
-LOGGER = setup_logger("Generator", getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")))
+LOGGER = setup_logger("Generator.save_config", getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")))
 
 
 if __name__ == "__main__":
@@ -213,6 +213,11 @@ if __name__ == "__main__":
         err = db.update_instances([], method="manual", changed=False)
         if err:
             LOGGER.warning(f"Couldn't clear manual instances from database : {err}, instances may be incorrect")
+
+        if any(settings.get(setting, "no") == "yes" for setting in ("AUTOCONF_MODE", "SWARM_MODE", "KUBERNETES_MODE")):
+            err = db.update_instances([], method="autoconf", changed=False)
+            if err:
+                LOGGER.warning(f"Couldn't clear autoconf instances from database : {err}, instances may be incorrect")
 
         changes.append("instances")
 
