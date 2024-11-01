@@ -5,7 +5,6 @@ from datetime import datetime, timedelta
 from ipaddress import ip_address, ip_network
 from os import getenv, sep
 from os.path import join, normpath
-from pathlib import Path
 from re import compile as re_compile
 from sys import exit as sys_exit, path as sys_path
 from typing import Tuple
@@ -102,11 +101,16 @@ try:
 
     if not any(url for urls in services_whitelist_urls.values() for url in urls.values()):
         LOGGER.warning("No whitelist URL is configured, nothing to do...")
-        if Path(JOB.job_path.joinpath("urls.json")).exists():
-            LOGGER.warning("Whitelist URLs are cached but no URL is configured, removing from cache...")
-            deleted, err = JOB.del_cache("urls.json")
+        for file in JOB.job_path.rglob("*.list"):
+            if file.parent == JOB.job_path:
+                LOGGER.warning(f"Removing no longer used url file {file} ...")
+                deleted, err = JOB.del_cache(file)
+            else:
+                LOGGER.warning(f"Removing no longer used service file {file} ...")
+                deleted, err = JOB.del_cache(file, service_id=file.parent.name)
+
             if not deleted:
-                LOGGER.warning(f"Couldn't delete whitelist URLs from cache : {err}")
+                LOGGER.warning(f"Couldn't delete file {file} from cache : {err}")
         sys_exit(0)
 
     urls = set()
@@ -116,7 +120,7 @@ try:
     for service, kinds in services_whitelist_urls.items():
         for kind, urls_list in kinds.items():
             if not urls_list:
-                if JOB.job_path.joinpath(service, f"{kind}.list").exists():
+                if JOB.job_path.joinpath(service, f"{kind}.list").is_file():
                     LOGGER.warning(f"{service} whitelist for {kind} is cached but no URL is configured, removing from cache...")
                     deleted, err = JOB.del_cache(f"{kind}.list", service_id=service)
                     if not deleted:
