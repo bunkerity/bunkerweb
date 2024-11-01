@@ -101,11 +101,11 @@ echo "Enabling and starting bunkerweb service..."
 do_and_check_cmd systemctl enable bunkerweb
 do_and_check_cmd systemctl start bunkerweb
 
-echo "BunkerWeb has been successfully installed\! 🎉"
+echo "BunkerWeb has been successfully installed! 🎉"
 echo ""
 echo "For more information on BunkerWeb, visit:"
 echo "  * Official website: https://www.bunkerweb.io"
 echo "  * Documentation: https://docs.bunkerweb.io"
 echo "  * Community Support: https://discord.bunkerity.com"
 echo "  * Commercial Support: https://panel.bunkerweb.io/order/support"
-echo "Thank you for using BunkerWeb\!"
+echo "Thank you for using BunkerWe!"
