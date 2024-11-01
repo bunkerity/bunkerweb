@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from os import environ
 from typing import Literal, Optional, Union
 from requests import request
 
@@ -25,7 +26,8 @@ class API:
         url: str,
         data: Optional[Union[dict, bytes]] = None,
         files=None,
-        timeout=(10, 30),
+        timeout=(int(environ.get('API_TIMEOUT', 10)), 
+                 int(environ.get('API_READ_TIMEOUT', 30))),
     ) -> tuple[bool, str, Optional[int], Optional[dict]]:
         try:
             kwargs = {}
