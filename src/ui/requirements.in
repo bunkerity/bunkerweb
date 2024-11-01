@@ -8,7 +8,7 @@ importlib-metadata==8.5.0
 pyotp==2.9.0
 python-magic==0.4.27
 python_dateutil==2.9.0.post0
-qrcode==8.0
+qrcode==7.4.2
 regex==2024.9.11
 werkzeug==3.0.4
 zipp>=3.19.1
