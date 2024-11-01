@@ -200,7 +200,7 @@ do
 
     echo "🌍 Starting the FR country"
     if [ "$integration" == "docker" ] ; then
-        docker compose -f docker-compose.test.yml up tests-FR --abort-on-container-exit --exit-code-from tests-FR
+        docker compose -f docker-compose.test.yml up tests-fr --abort-on-container-exit --exit-code-from tests-fr
     else
         export COUNTRY="FR"
         python3 main.py
