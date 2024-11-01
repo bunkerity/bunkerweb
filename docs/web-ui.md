@@ -673,7 +673,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
                 - name: KUBERNETES_MODE
                   value: "YES"
                 - name: DATABASE_URI
-                  value: "mariadb+pymysql://bunkerweb:testor@svc-bunkerweb-db:3306/db"
+                  value: "mariadb+pymysql://bunkerweb:changeme@svc-bunkerweb-db:3306/db"
     ---
     apiVersion: v1
     kind: Service
@@ -736,7 +736,6 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
       resources:
         requests:
           storage: 5Gi
-      volumeName: pv-bunkerweb
     ```
 
 === "Linux"
@@ -1546,7 +1545,7 @@ After a successful login/password combination, you will be prompted to enter you
                 - name: KUBERNETES_MODE
                   value: "YES"
                 - name: DATABASE_URI
-                  value: "mariadb+pymysql://bunkerweb:testor@svc-bunkerweb-db:3306/db"
+                  value: "mariadb+pymysql://bunkerweb:changeme@svc-bunkerweb-db:3306/db"
     ---
     apiVersion: v1
     kind: Service
@@ -1609,7 +1608,6 @@ After a successful login/password combination, you will be prompted to enter you
       resources:
         requests:
           storage: 5Gi
-      volumeName: pv-bunkerweb
     ---
     apiVersion: networking.k8s.io/v1
     kind: Ingress

@@ -240,11 +240,11 @@ class Instances:
                 if pod.metadata.annotations is not None and "bunkerweb.io/INSTANCE" in pod.metadata.annotations:
                     env_variables = {env.name: env.value or "" for env in pod.spec.containers[0].env}
 
-                    status = "up"
+                    status = "down"
                     if pod.status.conditions is not None:
                         for condition in pod.status.conditions:
                             if condition.type == "Ready" and condition.status == "True":
-                                status = "down"
+                                status = "up"
                                 break
 
                     instances.append(
