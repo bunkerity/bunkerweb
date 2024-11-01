@@ -291,14 +291,11 @@ def generate_external_plugins(original_path: Union[Path, str] = EXTERNAL_PLUGINS
 
             try:
                 if plugin["data"]:
-                    tmp_path = TMP_PATH.joinpath(f"{plugin['id']}_{plugin['name']}.tar.gz")
-                    tmp_path.write_bytes(plugin["data"])
-                    with tar_open(str(tmp_path), "r:gz") as tar:
+                    with tar_open(fileobj=BytesIO(plugin["data"]), mode="r:gz") as tar:
                         try:
                             tar.extractall(original_path, filter="fully_trusted")
                         except TypeError:
                             tar.extractall(original_path)
-                    tmp_path.unlink(missing_ok=True)
 
                     for job_file in chain(original_path.joinpath(plugin["id"], "jobs").glob("*"), original_path.joinpath(plugin["id"], "bwcli").glob("*")):
                         job_file.chmod(job_file.stat().st_mode | S_IEXEC)
@@ -424,7 +421,7 @@ def run_in_slave_mode():  # TODO: Refactor this feature
             "--output",
             CONFIG_PATH.as_posix(),
             "--variables",
-            str(SCHEDULER_TMP_ENV_PATH),
+            SCHEDULER_TMP_ENV_PATH.as_posix(),
         ],
         stdin=DEVNULL,
         stderr=STDOUT,
@@ -550,7 +547,7 @@ if __name__ == "__main__":
 
         tmp_variables_path = Path(args.variables or join(sep, "var", "tmp", "bunkerweb", "variables.env"))
         nginx_variables_path = CONFIG_PATH.joinpath("variables.env")
-        dotenv_env = dotenv_values(str(tmp_variables_path))
+        dotenv_env = dotenv_values(tmp_variables_path.as_posix())
 
         SCHEDULER = JobScheduler(environ, LOGGER, db=Database(LOGGER, sqlalchemy_string=dotenv_env.get("DATABASE_URI", getenv("DATABASE_URI", None))))  # type: ignore
 
@@ -576,7 +573,7 @@ if __name__ == "__main__":
                     join(sep, "usr", "share", "bunkerweb", "settings.json"),
                     "--first-run",
                 ]
-                + (["--variables", str(tmp_variables_path)] if args.variables else []),
+                + (["--variables", tmp_variables_path.as_posix()] if args.variables else []),
                 stdin=DEVNULL,
                 stderr=STDOUT,
                 check=False,
@@ -757,7 +754,7 @@ if __name__ == "__main__":
                         "--settings",
                         join(sep, "usr", "share", "bunkerweb", "settings.json"),
                     ]
-                    + (["--variables", str(tmp_variables_path)] if args.variables else []),
+                    + (["--variables", tmp_variables_path.as_posix()] if args.variables else []),
                     stdin=DEVNULL,
                     stderr=STDOUT,
                     check=False,
@@ -820,7 +817,7 @@ if __name__ == "__main__":
                         "--output",
                         CONFIG_PATH.as_posix(),
                         "--variables",
-                        str(SCHEDULER_TMP_ENV_PATH),
+                        SCHEDULER_TMP_ENV_PATH.as_posix(),
                     ]
                     + (["--no-linux-reload"] if MASTER_MODE else []),
                     stdin=DEVNULL,
@@ -831,7 +828,7 @@ if __name__ == "__main__":
                 if proc.returncode != 0:
                     LOGGER.error("Config generator failed, configuration will not work as expected...")
                 else:
-                    copy(str(nginx_variables_path), join(sep, "var", "tmp", "bunkerweb", "variables.env"))
+                    copy(nginx_variables_path.as_posix(), join(sep, "var", "tmp", "bunkerweb", "variables.env"))
 
                     if SCHEDULER.apis:
                         # send nginx configs

@@ -12,6 +12,8 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
+from dotenv import dotenv_values
+
 from common_utils import get_integration, get_version  # type: ignore
 from logger import setup_logger  # type: ignore
 from Database import Database  # type: ignore
@@ -27,14 +29,6 @@ LOGGER = setup_logger("Generator.save_config", getenv("CUSTOM_LOG_LEVEL", getenv
 
 
 if __name__ == "__main__":
-    wait_retry_interval = getenv("WAIT_RETRY_INTERVAL", "5")
-
-    if not wait_retry_interval.isdigit():
-        LOGGER.error("Invalid WAIT_RETRY_INTERVAL value, must be an integer")
-        sys_exit(1)
-
-    wait_retry_interval = int(wait_retry_interval)
-
     try:
         # Parse arguments
         parser = ArgumentParser(description="BunkerWeb config saver")
@@ -69,9 +63,15 @@ if __name__ == "__main__":
         external_plugins = args.plugins
         pro_plugins = args.pro_plugins
 
+        dotenv_env = {}
+        if args.variables:
+            variables_path = Path(args.variables)
+            LOGGER.info(f"Variables : {variables_path}")
+            dotenv_env = dotenv_values(variables_path.as_posix())
+
         # Check existences and permissions
         LOGGER.info("Checking arguments ...")
-        files = [settings_path] + ([Path(args.variables)] if args.variables else [])
+        files = [settings_path] + ([variables_path] if args.variables else [])
         paths_rx = [core_path, plugins_path, pro_plugins_path]
         for file in files:
             if not file.is_file():
@@ -88,16 +88,15 @@ if __name__ == "__main__":
                 LOGGER.error(f"Missing RX rights on directory : {path}")
                 sys_exit(1)
 
-        tmp_config = {}
-
-        if args.variables:
-            variables_path = Path(args.variables)
-            LOGGER.info(f"Variables : {variables_path}")
-
         # Compute the config
         LOGGER.info("Computing config ...")
         config = Configurator(
-            str(settings_path), str(core_path), external_plugins, pro_plugins, str(variables_path) if args.variables else environ.copy(), LOGGER
+            settings_path.as_posix(),
+            core_path.as_posix(),
+            external_plugins,
+            pro_plugins,
+            variables_path.as_posix() if args.variables else environ.copy(),
+            LOGGER,
         )
 
         custom_confs = []
@@ -119,7 +118,7 @@ if __name__ == "__main__":
                 )
                 continue
 
-        db = Database(LOGGER)
+        db = Database(LOGGER, sqlalchemy_string=dotenv_env.get("DATABASE_URI", getenv("DATABASE_URI", None)))
 
         bunkerweb_version = get_version()
         db_metadata = db.get_metadata()
