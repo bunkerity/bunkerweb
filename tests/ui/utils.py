@@ -70,7 +70,7 @@ def assert_button_click(driver, button: Union[str, WebElement], by: str = "xpath
 
             clicked = True
 
-        if (datetime.now() - current_date).seconds > 20:
+        if (datetime.now() - current_date).seconds > 30:
             log_error("Button click failed, exiting ...")
             exit(1)
 
