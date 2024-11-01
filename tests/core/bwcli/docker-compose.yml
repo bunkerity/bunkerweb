@@ -2,7 +2,7 @@ version: "3.5"
 
 services:
   bw:
-    image: bunkerity/bunkerweb:1.5.10
+    image: bunkerity/bunkerweb:1.5.11
     pull_policy: never
     depends_on:
       - bw-redis
@@ -29,7 +29,7 @@ services:
       - bw-universe
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.5.10
+    image: bunkerity/bunkerweb-scheduler:1.5.11
     pull_policy: never
     depends_on:
       - bw

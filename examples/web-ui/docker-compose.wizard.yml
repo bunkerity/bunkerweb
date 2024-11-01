@@ -2,7 +2,7 @@ version: "3.5"
 
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.5.10
+    image: bunkerity/bunkerweb:1.5.11
     ports:
       - 80:8080
       - 443:8443
@@ -23,7 +23,7 @@ services:
       - bw-services
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.5.10
+    image: bunkerity/bunkerweb-scheduler:1.5.11
     depends_on:
       - bunkerweb
       - bw-docker
@@ -45,7 +45,7 @@ services:
       - bw-docker
 
   bw-ui:
-    image: bunkerity/bunkerweb-ui:1.5.10
+    image: bunkerity/bunkerweb-ui:1.5.11
     depends_on:
       - bw-docker
     environment:

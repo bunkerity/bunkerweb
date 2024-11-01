@@ -65,7 +65,7 @@ RUN apk add --no-cache bash unzip libmagic mariadb-connector-c mariadb-client po
 RUN apk add --no-cache "libcrypto3>=3.3.2-r1" "libssl3>=3.3.2-r1" "openssl>=3.3.2-r1" # CVE-2024-6119
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
-LABEL version="1.5.10"
+LABEL version="1.5.11"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="ui"
 
