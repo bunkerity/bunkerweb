@@ -33,7 +33,7 @@ services:
       bw-us-network:
         ipv4_address: 8.0.0.2
       bw-gb-network:
-        ipv4_address: 2.0.0.2
+        ipv4_address: 213.186.33.4
 
   bw-scheduler:
     image: bunkerity/bunkerweb-scheduler:1.5.11
@@ -75,6 +75,6 @@ networks:
     ipam:
       driver: default
       config:
-        - subnet: 2.0.0.0/8
+        - subnet: 213.0.0.0/8
   bw-docker:
     name: bw-docker

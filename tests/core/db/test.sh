@@ -464,7 +464,7 @@ do
             fi
         fi
     elif [ "$test" = "upgrade" ] ; then
-        older_version="$(curl -i https://github.com/bunkerity/bunkerweb/tags | grep -Po 'v[0-9]+\.[0-9]+\.[0-9]+' | uniq | sed -n 1p | cut -c 2-)"
+        older_version="$(curl -i https://github.com/bunkerity/bunkerweb/tags | grep -v "1\.6\.0" | grep -Po 'v[0-9]+\.[0-9]+\.[0-9]+' | uniq | sed -n 1p | cut -c 2-)"
         echo "💾 Running tests when upgrading from $older_version (older) to latest version ..."
         find . -type f -name 'docker-compose.*' -exec sed -i 's@DATABASE_URI: ".*"$@DATABASE_URI: "sqlite:////var/lib/bunkerweb/db.sqlite3"@' {} \;
         sed -i 's@bunkerity/bunkerweb:.*$@bunkerity/bunkerweb:'"$older_version"'@' docker-compose.yml
