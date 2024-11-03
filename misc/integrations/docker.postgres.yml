@@ -36,6 +36,7 @@ services:
       POSTGRES_USER: "bunkerweb"
       POSTGRES_PASSWORD: "changeme" # Remember to set a stronger password for the database
       POSTGRES_DB: "db"
+      PGDATA: "/var/lib/postgresql/data/pgdata"
     volumes:
       - bw-db:/var/lib/postgresql/data
     networks:
