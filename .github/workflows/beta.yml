@@ -147,7 +147,8 @@ jobs:
     needs: [create-arm, wait-builds]
     strategy:
       matrix:
-        image: [bunkerweb, bunkerweb-scheduler, bunkerweb-autoconf, bunkerweb-ui]
+        image:
+          [bunkerweb, bunkerweb-scheduler, bunkerweb-autoconf, bunkerweb-ui]
         include:
           - release: beta
           - image: bunkerweb
@@ -198,7 +199,7 @@ jobs:
           - linux: fedora
             separator: "-"
             suffix: "1."
-            version: 40
+            version: 41
             package: rpm
           - linux: el
             separator: "-"

@@ -202,7 +202,7 @@ CONFARGS="${CONFARGS/-Os -fomit-frame-pointer -g/-Os}"
 CONFARGS="$(echo -n "$CONFARGS" | sed "s/--with-ld-opt=-Wl/--with-ld-opt='-lpcre -Wl'/")"
 CONFARGS="$(echo -n "$CONFARGS" | sed "s/--with-ld-opt='-Wl/--with-ld-opt='-lpcre -Wl/")"
 if [ "$OS" = "fedora" ] ; then
-	CONFARGS="$(echo -n "$CONFARGS" | sed "s/--with-ld-opt='.*'/--with-ld-opt=-lpcre/" | sed "s/--with-cc-opt='.*'//")"
+	CONFARGS="$(echo -n "$CONFARGS" | sed "s/--with-ld-opt='.*'/--with-ld-opt=-lpcre/" | sed "s/--with-cc-opt='.*'//" | sed "s/--without-engine//")"
 fi
 
 # Set CFALGS

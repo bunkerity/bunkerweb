@@ -298,7 +298,7 @@ List of supported Linux distros :
 - Debian 12 "Bookworm"
 - Ubuntu 22.04 "Noble"
 - Ubuntu 24.04 "Jammy"
-- Fedora 40
+- Fedora 41
 - RHEL 8.9
 - RHEL 9.4
 
