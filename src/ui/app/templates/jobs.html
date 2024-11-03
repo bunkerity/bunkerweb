@@ -33,6 +33,9 @@
                         data-bs-original-title="Does the Job reloads BunkerWeb?">Reload</th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
+                        data-bs-original-title="Does the Job run asynchronously?">Async</th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
                         data-bs-original-title="Does the last Job's execution was successful?">Last run</th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
@@ -52,6 +55,9 @@
                         </td>
                         <td class="text-center">
                             <i class="bx bx-sm bx-{% if job_data['reload'] %}check text-success{% else %}x text-danger{% endif %}"></i>
+                        </td>
+                        <td class="text-center">
+                            <i class="bx bx-sm bx-{% if job_data['async'] %}check text-success{% else %}x text-danger{% endif %}"></i>
                         </td>
                         <td class="text-center">
                             {% if job_data['history'] %}

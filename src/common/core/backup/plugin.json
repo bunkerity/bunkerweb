@@ -48,7 +48,8 @@
       "name": "backup-data",
       "file": "backup-data.py",
       "every": "day",
-      "reload": false
+      "reload": false,
+      "async": true
     }
   ],
   "bwcli": {

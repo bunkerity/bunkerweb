@@ -38,7 +38,8 @@
       "name": "self-signed",
       "file": "self-signed.py",
       "every": "day",
-      "reload": true
+      "reload": true,
+      "async": true
     }
   ]
 }

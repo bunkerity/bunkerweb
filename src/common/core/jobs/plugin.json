@@ -10,25 +10,29 @@
       "name": "mmdb-country",
       "file": "mmdb-country.py",
       "every": "day",
-      "reload": true
+      "reload": true,
+      "async": true
     },
     {
       "name": "mmdb-asn",
       "file": "mmdb-asn.py",
       "every": "day",
-      "reload": true
+      "reload": true,
+      "async": true
     },
     {
       "name": "update-check",
       "file": "update-check.py",
       "every": "day",
-      "reload": false
+      "reload": false,
+      "async": true
     },
     {
       "name": "failover-backup",
       "file": "failover-backup.py",
       "every": "once",
-      "reload": false
+      "reload": false,
+      "async": true
     }
   ]
 }

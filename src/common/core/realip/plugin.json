@@ -65,7 +65,8 @@
       "name": "realip-download",
       "file": "realip-download.py",
       "every": "hour",
-      "reload": true
+      "reload": true,
+      "async": true
     }
   ]
 }

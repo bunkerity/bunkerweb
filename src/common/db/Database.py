@@ -720,6 +720,7 @@ class Database:
                     for job in jobs:
                         job["file_name"] = job.pop("file")
                         job["reload"] = job.get("reload", False)
+                        job["run_async"] = job.pop("async", False)
 
                         # ? Check if the job already exists and if it has changed
                         if plugin["id"] in found_plugins:
@@ -2578,7 +2579,7 @@ class Database:
                     for job in jobs:
                         db_job = (
                             session.query(Jobs)
-                            .with_entities(Jobs.file_name, Jobs.every, Jobs.reload)
+                            .with_entities(Jobs.file_name, Jobs.every, Jobs.reload, Jobs.run_async)
                             .filter_by(name=job["name"], plugin_id=plugin["id"])
                             .first()
                         )
@@ -2587,6 +2588,7 @@ class Database:
                             changes = True
                             job["file_name"] = job.pop("file")
                             job["reload"] = job.get("reload", False)
+                            job["run_async"] = job.pop("async", False)
                             to_put.append(Jobs(plugin_id=plugin["id"], **job))
                         else:
                             updates = {}
@@ -2597,8 +2599,11 @@ class Database:
                             if job["every"] != db_job.every:
                                 updates[Jobs.every] = job["every"]
 
-                            if job.get("reload", None) != db_job.reload:
+                            if job.get("reload", False) != db_job.reload:
                                 updates[Jobs.reload] = job.get("reload", False)
+
+                            if job.get("async", False) != db_job.run_async:
+                                updates[Jobs.run_async] = job.get("async", False)
 
                             if updates:
                                 changes = True
@@ -2959,9 +2964,7 @@ class Database:
                     plugin_settings.add(setting)
 
                 for job in jobs:
-                    db_job = (
-                        session.query(Jobs).with_entities(Jobs.file_name, Jobs.every, Jobs.reload).filter_by(name=job["name"], plugin_id=plugin["id"]).first()
-                    )
+                    db_job = session.query(Jobs).filter_by(name=job["name"], plugin_id=plugin["id"]).first()
 
                     if db_job is not None:
                         self.logger.warning(f"A job with the name {job['name']} already exists in the database, therefore it will not be added.")
@@ -2969,6 +2972,7 @@ class Database:
 
                     job["file_name"] = job.pop("file")
                     job["reload"] = job.get("reload", False)
+                    job["run_async"] = job.pop("async", False)
                     to_put.append(Jobs(plugin_id=plugin["id"], **job))
 
                 plugin_path = Path(sep, "var", "tmp", "bunkerweb", "ui", plugin["id"])
@@ -3299,6 +3303,7 @@ class Database:
                     "plugin_id": job.plugin_id,
                     "every": job.every,
                     "reload": job.reload,
+                    "async": job.run_async,
                     "history": [
                         {
                             "start_date": job_run.start_date.isoformat(),
@@ -3323,7 +3328,7 @@ class Database:
                         .filter_by(job_name=job.name)
                     ],
                 }
-                for job in session.query(Jobs).with_entities(Jobs.name, Jobs.plugin_id, Jobs.every, Jobs.reload)
+                for job in session.query(Jobs).with_entities(Jobs.name, Jobs.plugin_id, Jobs.every, Jobs.reload, Jobs.run_async)
             }
 
     def get_job_cache_file(

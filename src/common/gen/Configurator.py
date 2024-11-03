@@ -357,7 +357,9 @@ class Configurator:
                 )
             elif job["every"] not in ("once", "minute", "hour", "day", "week"):
                 return (False, f"Invalid every for job {job['name']} in plugin {plugin['id']} (Must be once, minute, hour, day or week)")
-            elif job["reload"] is not True and job["reload"] is not False:
+            elif job.get("reload", False) is not True and job.get("reload", False) is not False:
                 return (False, f"Invalid reload for job {job['name']} in plugin {plugin['id']} (Must be true or false)")
+            elif job.get("async", False) is not True and job.get("async", False) is not False:
+                return (False, f"Invalid async for job {job['name']} in plugin {plugin['id']} (Must be true or false)")
 
         return True, "ok"

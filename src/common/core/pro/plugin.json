@@ -20,7 +20,8 @@
       "name": "download-pro-plugins",
       "file": "download-pro-plugins.py",
       "every": "day",
-      "reload": true
+      "reload": true,
+      "async": true
     }
   ]
 }

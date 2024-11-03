@@ -16,7 +16,7 @@ import schedule
 from schedule import Job
 from subprocess import DEVNULL, STDOUT, run
 from sys import path as sys_path
-from threading import Lock, Semaphore
+from threading import Lock
 
 # Add dependencies to sys.path
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("utils",), ("db",))]:
@@ -46,7 +46,6 @@ class JobScheduler(ApiCaller):
         self.__thread_lock = Lock()
         self.__job_success = True
         self.__job_reload = False
-        self.__semaphore = Semaphore(cpu_count() or 1)
         self.__executor = ThreadPoolExecutor(max_workers=cpu_count() or 1)
         self.__compiled_regexes = self.__compile_regexes()
         self.update_jobs()
@@ -104,9 +103,10 @@ class JobScheduler(ApiCaller):
             name_valid = self.__compiled_regexes["name"].match(job["name"])
             file_valid = self.__compiled_regexes["file"].match(job["file"])
             every_valid = job["every"] in ("once", "minute", "hour", "day", "week")
-            reload_valid = isinstance(job["reload"], bool)
+            reload_valid = isinstance(job.get("reload", False), bool)
+            async_valid = isinstance(job.get("async", False), bool)
 
-            if not (name_valid and file_valid and every_valid and reload_valid):
+            if not all((name_valid, file_valid, every_valid, reload_valid, async_valid)):
                 self.__logger.warning(f"Invalid job definition in plugin {plugin_name}. Job: {job}")
                 continue
 
@@ -213,7 +213,7 @@ class JobScheduler(ApiCaller):
         self.__job_reload = False
 
         # Use ThreadPoolExecutor to run jobs
-        futures = [self.__executor.submit(self.__run_jobs_with_semaphore, [job.run]) for job in pending_jobs]
+        futures = [self.__executor.submit(job.run) for job in pending_jobs]
 
         # Wait for all jobs to complete
         for future in futures:
@@ -261,6 +261,10 @@ class JobScheduler(ApiCaller):
             if plugins and plugin not in plugins:
                 continue
             for job in jobs:
+                if job.get("async", False):
+                    futures.append(self.__executor.submit(self.__job_wrapper, job["path"], plugin, job["name"], job["file"]))
+                    continue
+
                 jobs_to_run.append(
                     partial(
                         self.__job_wrapper,
@@ -270,7 +274,9 @@ class JobScheduler(ApiCaller):
                         job["file"],
                     )
                 )
-            futures.append(self.__executor.submit(self.__run_jobs_with_semaphore, jobs_to_run))
+
+            if jobs_to_run:
+                futures.append(self.__executor.submit(self.__run_jobs, jobs_to_run))
 
         # Wait for all jobs to complete
         for future in futures:
@@ -312,10 +318,9 @@ class JobScheduler(ApiCaller):
             self.__lock.release()
         return self.__job_success
 
-    def __run_jobs_with_semaphore(self, jobs):
-        with self.__semaphore:
-            for job in jobs:
-                job()
+    def __run_jobs(self, jobs):
+        for job in jobs:
+            job()
 
     def clear(self):
         schedule.clear()

@@ -201,19 +201,22 @@
       "name": "default-server-cert",
       "file": "default-server-cert.py",
       "every": "once",
-      "reload": false
+      "reload": false,
+      "async": true
     },
     {
       "name": "anonymous-report",
       "file": "anonymous-report.py",
       "every": "day",
-      "reload": false
+      "reload": false,
+      "async": true
     },
     {
       "name": "download-plugins",
       "file": "download-plugins.py",
       "every": "once",
-      "reload": false
+      "reload": false,
+      "async": true
     }
   ]
 }

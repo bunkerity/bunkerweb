@@ -138,6 +138,7 @@ class Jobs(Base):
     file_name = Column(String(256), nullable=False)
     every = Column(SCHEDULES_ENUM, nullable=False)
     reload = Column(Boolean, default=False, nullable=False)
+    run_async = Column(Boolean, default=False, nullable=False)
 
     plugin = relationship("Plugins", back_populates="jobs")
     cache = relationship("Jobs_cache", back_populates="job", cascade="all")

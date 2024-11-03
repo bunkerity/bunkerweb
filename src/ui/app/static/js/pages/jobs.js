@@ -9,7 +9,7 @@ $(document).ready(function () {
         viewTotal: true,
         cascadePanes: true,
         collapse: false,
-        columns: [2, 3, 4, 5],
+        columns: [2, 3, 4, 5, 6],
       },
     },
     topStart: {},
@@ -288,17 +288,16 @@ $(document).ready(function () {
       {
         searchPanes: {
           show: true,
-          header: "Last run state",
+          header: "Async",
           options: [
             {
-              label: '<i class="bx bx-xs bx-x text-danger"></i>&nbsp;Failed',
+              label: '<i class="bx bx-xs bx-x text-danger"></i>&nbsp;No',
               value: function (rowData, rowIdx) {
                 return rowData[5].includes("bx-x");
               },
             },
             {
-              label:
-                '<i class="bx bx-xs bx-check text-success"></i>&nbsp;Success',
+              label: '<i class="bx bx-xs bx-check text-success"></i>&nbsp;Yes',
               value: function (rowData, rowIdx) {
                 return rowData[5].includes("bx-check");
               },
@@ -308,6 +307,30 @@ $(document).ready(function () {
           orderable: false,
         },
         targets: 5,
+      },
+      {
+        searchPanes: {
+          show: true,
+          header: "Last run state",
+          options: [
+            {
+              label: '<i class="bx bx-xs bx-x text-danger"></i>&nbsp;Failed',
+              value: function (rowData, rowIdx) {
+                return rowData[6].includes("bx-x");
+              },
+            },
+            {
+              label:
+                '<i class="bx bx-xs bx-check text-success"></i>&nbsp;Success',
+              value: function (rowData, rowIdx) {
+                return rowData[6].includes("bx-check");
+              },
+            },
+          ],
+          combiner: "or",
+          orderable: false,
+        },
+        targets: 6,
       },
     ],
     order: [[2, "asc"]],

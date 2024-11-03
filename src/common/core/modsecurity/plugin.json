@@ -86,13 +86,15 @@
       "name": "coreruleset-nightly",
       "file": "coreruleset-nightly.py",
       "every": "day",
-      "reload": true
+      "reload": true,
+      "async": true
     },
     {
       "name": "download-crs-plugins",
       "file": "download-crs-plugins.py",
       "every": "day",
-      "reload": true
+      "reload": true,
+      "async": true
     }
   ]
 }

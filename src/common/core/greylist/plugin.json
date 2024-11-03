@@ -119,7 +119,8 @@
       "name": "greylist-download",
       "file": "greylist-download.py",
       "every": "hour",
-      "reload": true
+      "reload": true,
+      "async": true
     }
   ]
 }

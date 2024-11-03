@@ -56,7 +56,8 @@
       "name": "custom-cert",
       "file": "custom-cert.py",
       "every": "day",
-      "reload": true
+      "reload": true,
+      "async": true
     }
   ]
 }

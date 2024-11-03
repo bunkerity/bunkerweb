@@ -48,7 +48,8 @@
       "name": "cleanup-excess-jobs-runs",
       "file": "cleanup-excess-jobs-runs.py",
       "every": "day",
-      "reload": false
+      "reload": false,
+      "async": true
     }
   ]
 }

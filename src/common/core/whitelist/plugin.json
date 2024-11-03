@@ -119,7 +119,8 @@
       "name": "whitelist-download",
       "file": "whitelist-download.py",
       "every": "hour",
-      "reload": true
+      "reload": true,
+      "async": true
     }
   ]
 }
