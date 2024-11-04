@@ -42,9 +42,7 @@ try:
 
     log_info("Trying to create a new config ...")
 
-    sleep(1)
     assert_button_click(DRIVER, "//div[@data-configs-element='server-http' and @data-_type='folder']")
-    sleep(1)
     assert_button_click(DRIVER, "//button[@data-configs-add-file='']")
 
     configs_modal_path_input = safe_get_element(DRIVER, By.XPATH, "//div[@data-configs-modal-path='']/input")
@@ -109,7 +107,6 @@ location /hello {
     log_info("Check path with conf only filter ...")
 
     assert_button_click(DRIVER, "//button[@data-configs-setting-select='withconf']")
-    sleep(1)
     assert_button_click(DRIVER, "//button[@data-configs-setting-select-dropdown-btn='withconf' and @value='true']")
 
     is_server_http_folder_hidden = DRIVER.execute_script(
@@ -128,17 +125,12 @@ location /hello {
 
     # Reset
     assert_button_click(DRIVER, "//button[@data-configs-setting-select='withconf']")
-    sleep(1)
     assert_button_click(DRIVER, "//button[@data-configs-setting-select-dropdown-btn='withconf' and @value='false']")
 
     log_info("Check path with conf only filter done, check show global conf only ...")
 
-    sleep(1)
     assert_button_click(DRIVER, "//button[@data-configs-setting-select='globalconf']")
-    sleep(1)
     assert_button_click(DRIVER, "//button[@data-configs-setting-select-dropdown-btn='globalconf' and @value='true']")
-
-    sleep(1)
     assert_button_click(DRIVER, "//div[@data-configs-element='http' and @data-_type='folder']")
 
     is_app1_example_com_folder_hidden = DRIVER.execute_script(
@@ -150,7 +142,6 @@ location /hello {
         exit(1)
 
     assert_button_click(DRIVER, "//button[@data-configs-setting-select='globalconf']")
-    sleep(1)
     assert_button_click(DRIVER, "//button[@data-configs-setting-select-dropdown-btn='globalconf' and @value='false']")
 
     log_info("Check show global conf only  done...")
@@ -158,20 +149,14 @@ location /hello {
     log_info("Filters working, trying breadcrumb ...")
 
     assert_button_click(DRIVER, "//div[@data-configs-element='http' and @data-_type='folder']")
-    sleep(1)
     assert_button_click(DRIVER, "//li[@data-configs-breadcrumb-item]")
-    sleep(1)
     assert_button_click(DRIVER, "//div[@data-configs-element='http' and @data-_type='folder']")
-    sleep(1)
     assert_button_click(DRIVER, "//li[@data-configs-breadcrumb-item and @data-level='0']/button")
 
     log_info("Breadcrumb working, trying to delete the config ...")
 
-    sleep(1)
     assert_button_click(DRIVER, "//div[@data-configs-element='server-http' and @data-_type='folder']")
-    sleep(1)
     assert_button_click(DRIVER, "//div[@data-configs-action-button='hello.conf']")
-    sleep(1)
     assert_button_click(DRIVER, "//div[@data-configs-action-dropdown='hello.conf']/button[@value='delete' and @data-configs-action-dropdown-btn='hello.conf']")
 
     access_page(DRIVER, "//button[@data-configs-modal-submit='']", "configs", False)
@@ -181,6 +166,8 @@ location /hello {
 
     assert_alert_message(DRIVER, "Deleted")
 
+    DRIVER.refresh()
+
     sleep(5)
 
     resp = get("http://www.example.com/hello", verify=False)
@@ -189,13 +176,12 @@ location /hello {
         log_error("The config hasn't been deleted correctly, exiting ...")
         exit(1)
 
+    DRIVER.refresh()
+
     log_info("The config has been deleted, trying the same for a specific service ...")
 
-    sleep(1)
     assert_button_click(DRIVER, "//div[@data-configs-element='server-http' and @data-_type='folder']")
-    sleep(1)
     assert_button_click(DRIVER, "//div[@data-path='/etc/bunkerweb/configs/server-http/app1.example.com' and @data-_type='folder']")
-    sleep(1)
     assert_button_click(DRIVER, "//button[@data-configs-add-file='']")
 
     configs_modal_path_input = safe_get_element(DRIVER, By.XPATH, "//div[@data-configs-modal-path='']/input")
@@ -214,7 +200,6 @@ location /hello {
 }"""
     )
 
-    sleep(1)
     access_page(DRIVER, "//button[@data-configs-modal-submit='']", "configs", False)
 
     if TEST_TYPE == "linux":
@@ -252,8 +237,6 @@ location /hello {
     access_page(DRIVER, "/html/body/aside[1]/div[2]/ul[1]/li[4]/a", "services")
 
     assert_button_click(DRIVER, "//button[@data-services-action='delete' and @data-services-name='app1.example.com']")
-
-    sleep(1)
     access_page(DRIVER, "//form[@data-services-modal-form-delete='']//button[@type='submit']", "services", False)
 
     if TEST_TYPE == "linux":
@@ -263,7 +246,6 @@ location /hello {
 
     access_page(DRIVER, "/html/body/aside[1]/div[2]/ul[1]/li[5]/a", "configs")
 
-    sleep(1)
     assert_button_click(DRIVER, "//div[@data-configs-element='server-http' and @data-_type='folder']")
 
     with suppress(TimeoutException):
