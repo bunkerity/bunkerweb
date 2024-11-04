@@ -1368,7 +1368,7 @@ chmod -R 770 bw-data</code></p>
 <li>Debian 12 "Bookworm"</li>
 <li>Ubuntu 22.04 "Jammy"</li>
 <li>Ubuntu 24.04 "Noble"</li>
-<li>Fedora 40</li>
+<li>Fedora 41</li>
 <li>Red Hat Enterprise Linux (RHEL) 8.9</li>
 <li>Red Hat Enterprise Linux (RHEL) 9.4</li>
 </ul>
@@ -1394,8 +1394,8 @@ sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> <
 <div class="highlight"><pre><span></span><code><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;force-bad-version&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>-a<span class="w"> </span>/etc/dpkg/dpkg.cfg
 </code></pre></div>
 </div>
-<p>Optional step : if you want to automatically enable the <a href="../web-ui/#setup-wizard">setup wizard</a> when BunkerWeb is installed, export the following variable :</p>
-<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">UI_WIZARD</span><span class="o">=</span><span class="m">1</span>
+<p>Optional step : if you don't want to use the automatically enabled <a href="../web-ui/#setup-wizard">setup wizard</a> when BunkerWeb is installed, export the following variable :</p>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">UI_WIZARD</span><span class="o">=</span>no
 </code></pre></div>
 <p>And finally install BunkerWeb 1.6.0-beta :</p>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-s<span class="w"> </span>https://repo.bunkerweb.io/install/script.deb.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
@@ -1425,8 +1425,8 @@ sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> <
 <div class="highlight"><pre><span></span><code><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;force-bad-version&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>-a<span class="w"> </span>/etc/dpkg/dpkg.cfg
 </code></pre></div>
 </div>
-<p>Optional step : if you want to automatically enable the <a href="../web-ui/#setup-wizard">setup wizard</a> when BunkerWeb is installed, export the following variable :</p>
-<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">UI_WIZARD</span><span class="o">=</span><span class="m">1</span>
+<p>Optional step : if you don't want to use the automatically enabled <a href="../web-ui/#setup-wizard">setup wizard</a> when BunkerWeb is installed, export the following variable :</p>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">UI_WIZARD</span><span class="o">=</span>no
 </code></pre></div>
 <p>And finally install BunkerWeb 1.6.0-beta :</p>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-s<span class="w"> </span>https://repo.bunkerweb.io/install/script.deb.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
@@ -1447,8 +1447,8 @@ sudo<span class="w"> </span>-E<span class="w"> </span>apt<span class="w"> </span
 <p>Fedora already provides NGINX 1.26.2 that we support :</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>nginx-1.26.2
 </code></pre></div>
-<p>Optional step : if you want to automatically enable the <a href="../web-ui/#setup-wizard">setup wizard</a> when BunkerWeb is installed, export the following variable :</p>
-<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">UI_WIZARD</span><span class="o">=</span><span class="m">1</span>
+<p>Optional step : if you don't want to use the automatically enabled <a href="../web-ui/#setup-wizard">setup wizard</a> when BunkerWeb is installed, export the following variable :</p>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">UI_WIZARD</span><span class="o">=</span>no
 </code></pre></div>
 <p>And finally install BunkerWeb 1.6.0-beta :</p>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-s<span class="w"> </span>https://repo.bunkerweb.io/install/script.rpm.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="se">\</span>
@@ -1483,8 +1483,8 @@ module_hotfixes=true
 <p>You should now be able to install NGINX 1.26.2 :</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>nginx-1.26.2
 </code></pre></div>
-<p>Optional step : if you want to automatically enable the <a href="../web-ui/#setup-wizard">setup wizard</a> when BunkerWeb is installed, export the following variable :</p>
-<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">UI_WIZARD</span><span class="o">=</span><span class="m">1</span>
+<p>Optional step : if you don't want to use the automatically enabled <a href="../web-ui/#setup-wizard">setup wizard</a> when BunkerWeb is installed, export the following variable :</p>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">UI_WIZARD</span><span class="o">=</span>no
 </code></pre></div>
 <p>And finally install BunkerWeb 1.6.0-beta :</p>
 <div class="highlight"><pre><span></span><code><span class="w">  </span>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>epel-release<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>

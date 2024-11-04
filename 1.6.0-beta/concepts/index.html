@@ -1070,6 +1070,11 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <p>You will find concrete examples of custom configurations in the <a href="../quickstart-guide/">quickstart guide</a> of the documentation and the <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.0-beta/examples">examples</a> directory of the repository.</p>
 </div>
 <h2 id="database">Database</h2>
+<div class="admonition warning">
+<p class="admonition-title">PostgreSQL 17</p>
+<p>As of now, <strong>PostgreSQL 17</strong> is not supported in the <strong>Docker integration</strong>. If you want to use PostgreSQL 17, you will have to use the Linux integration.</p>
+<p>This is due to the fact that the <code>postgresql-client</code> package only has the 14, 15 and 16 versions available in the alpine repositories.</p>
+</div>
 <p>BunkerWeb securely stores its current configuration in a backend database, which contains essential data for smooth operation. The following information is stored in the database:</p>
 <ul>
 <li>
