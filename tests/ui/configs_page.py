@@ -191,6 +191,7 @@ location /hello {
 
     log_info("The config has been deleted, trying the same for a specific service ...")
 
+    sleep(1)
     assert_button_click(DRIVER, "//div[@data-configs-element='server-http' and @data-_type='folder']")
     sleep(1)
     assert_button_click(DRIVER, "//div[@data-path='/etc/bunkerweb/configs/server-http/app1.example.com' and @data-_type='folder']")
@@ -213,6 +214,7 @@ location /hello {
 }"""
     )
 
+    sleep(1)
     access_page(DRIVER, "//button[@data-configs-modal-submit='']", "configs", False)
 
     if TEST_TYPE == "linux":
