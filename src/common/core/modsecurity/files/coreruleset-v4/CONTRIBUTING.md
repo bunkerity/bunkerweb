@@ -268,7 +268,7 @@ Optimizing regular expressions is hard. Often, a change intended to improve the 
 mailto|mms|mumble|maven
 ```
 
-An optimized version (produced by the [crs-toolchain]({{< ref "crs_toolchain" >}})) could look like this:
+An optimized version (produced by the [crs-toolchain](https://github.com/coreruleset/crs-toolchain)) could look like this:
 
 ```python
 m(?:a(?:ilto|ven)|umble|ms)
@@ -276,7 +276,7 @@ m(?:a(?:ilto|ven)|umble|ms)
 
 The above expression is an optimization because it reduces the number of backtracking steps when a branch fails. The regular expressions in the CRS are often comprised of lists of tens or even hundreds of words. Reading such an expression in an optimized form is difficult: even the _simple_ optimized example above is difficult to read.
 
-In general, contributors should not try to optimize contributed regular expressions and should instead strive for clarity. New regular expressions will usually be required to be submitted as a `.ra` file for the [crs-toolchain]({{< ref "crs_toolchain" >}}) to process. In such a file, the regular expression is decomposed into individual parts, making manual optimizations much harder or even impossible (and unnecessary with the `crs-toolchain`). The `crs-toolchain` performs some common optimizations automatically, such as the one shown above.
+In general, contributors should not try to optimize contributed regular expressions and should instead strive for clarity. New regular expressions will usually be required to be submitted as a `.ra` file for the [crs-toolchain](https://github.com/coreruleset/crs-toolchain) to process. In such a file, the regular expression is decomposed into individual parts, making manual optimizations much harder or even impossible (and unnecessary with the `crs-toolchain`). The `crs-toolchain` performs some common optimizations automatically, such as the one shown above.
 
 Whether optimizations make sense in a contribution is assessed for each case individually.
 
@@ -363,7 +363,7 @@ Rule tests also provide an excellent way to test WAF engines and implementations
 
 The rule tests are located under `tests/regression/tests`. Each CRS rule *file* has a corresponding *directory* and each individual *rule* has a corresponding *YAML file* containing all the tests for that rule. For example, the tests for rule 911100 *(Method is not allowed by policy)* are in the file `REQUEST-911-METHOD-ENFORCEMENT/911100.yaml`.
 
-Full documentation of the required formatting and available options of the YAML tests can be found at https://github.com/coreruleset/ftw/blob/main/docs/YAMLFormat.md.
+Full documentation of the required formatting and available options of the YAML tests can be found in the SPECs at https://github.com/coreruleset/ftw-tests-schema/tree/main/spec. Be aware that the spec is evolving and the latest versions will be supported by the latests versions of the test engine.
 
 Documentation on how to run the CRS test suite can be found in the [online documentation](https://coreruleset.org/docs/development/testing/).
 
@@ -442,19 +442,23 @@ The older method of using `raw_request` is deprecated as it's difficult to maint
 
 ### Using The Correct HTTP Endpoint
 
-The CRS project uses [kennthreitz/httpbin](https://hub.docker.com/r/kennethreitz/httpbin) as the backend server for tests. This backend provides one dedicated endpoint for each HTTP method. Tests should target these endpoints to:
+The CRS project uses [albedo](https://github.com/coreruleset/albedo) as the backend server for tests. Albedo is a simple HTTP server used as a reverse-proxy backend in testing web application firewalls (WAFs).
 
 - improve test throughput (prevent HTML from being returned by the backend)
 - add automatic HTTP method verification (the backend will respond with status code `405` (method not allowed) to requests whose method does not match the endpoint)
+
+These are the supported endpoints by albedo: https://github.com/coreruleset/albedo/?tab=readme-ov-file#endpoints
 
 Test URIs should be structured as follows, where `<method>` must be replaced by the name of the HTTP method the test uses:
 
 ```yaml
 #...
           method: <method>
-          uri: /<method>/some/arbitrary/url
+          uri: /<your url>
 #...
 ```
+
+If you are writing a test for a response rule, take a look at the `/reflect` endpoint on how to use it.
 
 ## Further Guidance on Rule Writing
 
@@ -467,4 +471,4 @@ Former versions of CRS dynamically included the HTTP response body in the audit 
 * Remove trailing spaces from files (if they're not needed). This will make linters happy.
 * EOF should have an EOL.
 
-The `pre-commit` framework can be used to check for and fix these issues automatically. First, go to the [pre-commit](https://pre-commit.com/) website and download the framework. Then, after installing, use the command `pre-commit install` so that the tools are installed and run each time a commit is made. CRS provides a config file that will keep the repository clean.
+The `pre-commit` framework can be used to check for and fix these issues automatically. First, go to the [pre-commit](https://pre-commit.com/) website and download the framework. Then, after installing, use the command `pre-commit install` so that the tools are installed and run each time a commit is made. CRS provides a config file that will keep the repository clean. We are also running `pre-commit` in our pipeline, so it will catch common errors.

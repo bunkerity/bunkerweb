@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------
-# OWASP ModSecurity Core Rule Set ver.3.3.5
+# OWASP ModSecurity Core Rule Set ver.3.3.7
 # Copyright (c) 2006-2020 Trustwave and contributors. All rights reserved.
-# Copyright (c) 2021-2023 Core Rule Set project. All rights reserved.
+# Copyright (c) 2021-2024 Core Rule Set project. All rights reserved.
 #
 # The OWASP ModSecurity Core Rule Set is distributed under
 # Apache Software License (ASL) version 2
@@ -389,9 +389,8 @@ SecDefaultAction "phase:2,log,auditlog,pass"
 #  setvar:'tx.allowed_methods=GET HEAD POST OPTIONS'"
 
 # Content-Types that a client is allowed to send in a request.
-# Default: |application/x-www-form-urlencoded| |multipart/form-data| |multipart/related|
-# |text/xml| |application/xml| |application/soap+xml| |application/json|
-# |application/cloudevents+json| |application/cloudevents-batch+json|
+# Default: |application/x-www-form-urlencoded| |multipart/form-data| |text/xml|
+# |application/xml| |application/soap+xml| |application/json|
 #
 # Please note, that the rule where CRS uses this variable (920420) evaluates it with operator
 # `@within`, which is case sensitive, but uses t:lowercase. You must add your whole custom
@@ -404,6 +403,15 @@ SecDefaultAction "phase:2,log,auditlog,pass"
 # could lead to a WAF bypass. For example, a malicious JSON payload submitted with a "text/plain"
 # content type may still be interpreted as JSON by a backend application but would not trigger the
 # JSON body parser at the WAF, leading to a bypass.
+#
+# When additional JSON content types are legitimately used in a deployment,
+# e.g. application/cloudevents+json, it is extremely important to ensure that a
+# rule exists to enable the engine's JSON body processor for these additional
+# JSON content types. Failure to do so can lead to a request body bypass. The
+# default JSON rule in modsecurity.conf-recommended (200001) will only activate
+# the JSON body processor for the specific content type application/json. The
+# optional modsecurity.conf-recommended rule 200006 can be used to enable the
+# JSON body processor for a wide variety of JSON content types.
 #
 # To prevent blocking request with not allowed content-type by default, you can create an exclusion
 # rule that removes rule 920420. For example:
@@ -425,7 +433,7 @@ SecDefaultAction "phase:2,log,auditlog,pass"
 #  nolog,\
 #  pass,\
 #  t:none,\
-#  setvar:'tx.allowed_request_content_type=|application/x-www-form-urlencoded| |multipart/form-data| |multipart/related| |text/xml| |application/xml| |application/soap+xml| |application/json| |application/cloudevents+json| |application/cloudevents-batch+json|'"
+#  setvar:'tx.allowed_request_content_type=|application/x-www-form-urlencoded| |multipart/form-data| |text/xml| |application/xml| |application/soap+xml| |application/json|'"
 
 # Allowed HTTP versions.
 # Default: HTTP/1.0 HTTP/1.1 HTTP/2 HTTP/2.0
@@ -866,4 +874,4 @@ SecAction \
     pass,\
     t:none,\
     nolog,\
-    setvar:tx.crs_setup_version=335"
+    setvar:tx.crs_setup_version=337"

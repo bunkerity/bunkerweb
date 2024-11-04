@@ -1,6 +1,17 @@
 name: Lint
 
-on: [push, pull_request, merge_group]
+on:
+  push:
+    branches:
+      - main
+      - v3.3/dev
+      - v3.3/master
+  pull_request:
+    branches:
+      - main
+      - v3.3/dev
+      - v3.3/master
+  merge_group:
 
 # Pin versions to not disrupt test pipelines
 env:
@@ -13,6 +24,9 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.2
+        with:
+          # required for version detection using `git describe`
+          fetch-depth: 50
 
       - name: Lint Yaml
         uses: ibiqlik/action-yamllint@2576378a8e339169678f9939646ee3ee325e845c # v3.1.1
@@ -21,30 +35,71 @@ jobs:
           file_or_dir: tests/regression/tests
           config_file: .yamllint.yml
 
-      - name: Linelint
-        uses: fernandrone/linelint@7907a5dca0c28ea7dd05c6d8d8cacded713aca11 # v0.0.6
-        id: linelint
-
       - name: Set up Python 3
         uses: actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c # v5.0.0
         with:
-          python-version: 3.7
+          python-version: 3.x
+
+      - uses: pre-commit/action@2c7b3805fd2a0fd8c1884dcaebf91fc102a13ecd # v3.0.1
 
       - name: "Check CRS syntax"
         run: |
-          pip install --upgrade setuptools
+          pip install -U setuptools
           pip install secrules-parsing==${{ env.SECRULES_PARSING_VERSION }}
           secrules-parser -c --output-type github -f rules/*.conf
 
+      - name: Fetch upstream tags for version detection in next step
+        run: |
+          git remote add upstream https://github.com/coreruleset/coreruleset
+          git fetch --tags upstream
+          git fetch upstream main
+          echo ${{ github.base_ref }}
+          if [ -n "${{ github.base_ref }}" ]; then
+            git fetch upstream "${{ github.base_ref }}"
+          fi
+
       - name: "Check CRS formatting"
         run: |
-          pip install --upgrade setuptools
+          pip install -U setuptools
           pip install -r ./util/crs-rules-check/requirements.txt
-          ./util/crs-rules-check/rules-check.py --output=github -r crs-setup.conf.example -r rules/*.conf -t util/APPROVED_TAGS
+          # Use the target branch to look up the latest tag, e.g., `v3.3/master`, fall back
+          # to main branch.
+          # The version is either a tag, if the current commit is tagged, or a string of the form
+          # v<major>.<minor>.<patch>-<nr of commits>-g<hash>.
+          # In the former case we simply use that as the version, in the latter we construct
+          # v<major>.<minor + 1>.<patch>-dev.
+          if [ -z "${{ github.base_ref }}" ]; then
+            # e.g., force push
+            version="$(git describe --tags --match "v*.*.*")"
+          else
+            version="$(git describe --tags --match "v*.*.*" "upstream/${{ github.base_ref }}")"
+          fi
+          version="$(cut -dv -f2 <<<"${version}")"
+          echo "Detected version ${version}"
+          if grep -q -- "-g" <<<"${version}"; then
+            prefix="$(cut -d. -f1 <<<"${version}")"
+            minor="$(cut -d. -f2 <<<"${version}")"
+            suffix="$(cut -d. -f3 <<<"${version}")"
+            version="${prefix}.$((minor + 1)).${suffix}"
+            release_ref="${{ github.head_ref }}"
+            if [[ "${release_ref}" =~ ^release/v ]]
+            then
+              version="${release_ref/release\/v/}"
+            else
+              version="${version/-*-g*/}-dev"
+            fi
+          fi
+          echo "Required version for check: ${version}"
+          ./util/crs-rules-check/rules-check.py \
+            --output=github \
+            -r crs-setup.conf.example \
+            -r rules/*.conf \
+            -t util/APPROVED_TAGS \
+            "-v ${version}"
 
       - name: "Find rules without test"
         run: |
-          pip install --upgrade setuptools
+          pip install -U setuptools
           pip install -r ./util/find-rules-without-test/requirements.txt
           ./util/find-rules-without-test/find-rules-without-test.py --output=github .
 

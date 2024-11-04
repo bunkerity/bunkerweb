@@ -11,7 +11,7 @@ rules/RESPONSE-999-EXCLUSION-RULES-AFTER-CRS.conf
 util/geo-location/GeoIP.dat
 
 # PHP functions frequency list generated and updated by running
-# util/php-dictionary-gen.sh 
+# util/php-dictionary-gen.sh
 util/php-dictionary-gen/frequencylist.txt
 
 # Unit test caches

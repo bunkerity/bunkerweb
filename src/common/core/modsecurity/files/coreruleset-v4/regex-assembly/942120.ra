@@ -1,17 +1,19 @@
 ##! Please refer to the documentation at
 ##! https://coreruleset.org/docs/development/regex_assembly/.
 
+##! Operators == and -> are sourced from https://sqlite.org/lang_expr.html
 ##!+ i
 
+\=\=
 \!\=
 \&\&
 \|\|
+->
 >>
 <<
 >=
 <=
 <>
-<=>
 \bxor\b
 \bregexp\b
 regexp\s+binary
@@ -31,7 +33,7 @@ like\s+null
 \bnotnull\b
 like\s+[\w]+\s+escape\b
 \bilike\b
-[<>=!]{1,2}\s*all\b
+[<>=!]\s*all\b
 \blikelihood\s*\(
 \bunlikely\s*\(
 \blikely\s*\(

@@ -10,6 +10,8 @@
 - [LINUX] Increase default worker dict size to avoid crash on RPI
 - [MISC] Add WORKERLOCK_MEMORY_SIZE setting for worker dict size
 - [MISC] Add API_TIMEOUT and API_READ_TIMEOUT settings to control API timeouts
+- [DEPS] Updated coreruleset-v4 version to v4.8.0
+- [DEPS] Updated coreruleset-v3 version to v3.3.7
 
 ## v1.5.10 - 2024/09/17
 

@@ -7,10 +7,6 @@
 
 ##!+ i
 
-##! add capture group
-##!^ (
-##!$ )
-
 ##! This regex starts with a list of all the schemes that can be used to make a request
 ##!> assemble
   ##!> include url-schemes
