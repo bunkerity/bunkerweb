@@ -381,12 +381,6 @@ regex==2024.9.11 \
     --hash=sha256:f8404bf61298bb6f8224bb9176c1424548ee1181130818fcd2cbffddc768bed8 \
     --hash=sha256:f9268774428ec173654985ce55fc6caf4c6d11ade0f6f914d48ef4719eb05ebb \
     --hash=sha256:faa3c142464efec496967359ca99696c896c591c56c53506bac1ad465f66e919
-    # via gevent
-
-# The following packages are considered to be unsafe in a requirements file:
-setuptools==75.2.0 \
-    --hash=sha256:753bb6ebf1f465a1912e19ed1d41f403a79173a9acf66a42e7e6aec45c3c16ec \
-    --hash=sha256:a7fcb66f68b4d9e8e66b42f9876150a3371558f98fa32222ffaa5bced76406f8
     # via -r requirements.in
 six==1.16.0 \
     --hash=sha256:1e61c37477a1626458e36f7b1d82aa5c9b094fa4802892072e49de9c60c4c926 \
@@ -404,9 +398,9 @@ user-agents==2.2.0 \
     --hash=sha256:a98c4dc72ecbc64812c4534108806fb0a0b3a11ec3fd1eafe807cee5b0a942e7 \
     --hash=sha256:d36d25178db65308d1458c5fa4ab39c9b2619377010130329f3955e7626ead26
     # via -r requirements.in
-werkzeug==3.0.5 \
-    --hash=sha256:033bc3783777078517f32ae3ba9e86e9bc38bdbf139b1a5a3af9679a64ed1293 \
-    --hash=sha256:6e589e0b303561b8b1a61d363ee05b1d7de6ca12f27a3a25269ae6ee93e363fd
+werkzeug==3.1.1 \
+    --hash=sha256:8cd39dfbdfc1e051965f156163e2974e52c210f130810e9ad36858f0fd3edad4 \
+    --hash=sha256:a71124d1ef06008baafa3d266c02f56e1836a5984afd6dd6c9230669d60d9fb5
     # via
     #   -r requirements.in
     #   flask
@@ -461,6 +455,12 @@ zope-interface==7.1.1 \
     --hash=sha256:ed1df8cc01dd1e3970666a7370b8bfc7457371c58ba88c57bd5bca17ab198053 \
     --hash=sha256:f1d52d052355e0c5c89e0630dd2ff7c0b823fd5f56286a663e92444761b35e25 \
     --hash=sha256:f85b290e5b8b11814efb0d004d8ce6c9a483c35c462e8d9bf84abb93e79fa770
+    # via gevent
+
+# The following packages are considered to be unsafe in a requirements file:
+setuptools==75.2.0 \
+    --hash=sha256:753bb6ebf1f465a1912e19ed1d41f403a79173a9acf66a42e7e6aec45c3c16ec \
+    --hash=sha256:a7fcb66f68b4d9e8e66b42f9876150a3371558f98fa32222ffaa5bced76406f8
     # via
     #   zope-event
     #   zope-interface
