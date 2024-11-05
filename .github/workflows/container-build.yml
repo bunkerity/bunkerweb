@@ -130,6 +130,8 @@ jobs:
           ignore-unfixed: false
           severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
           trivyignores: .trivyignore
+        env:
+          TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db
       # Push image
       - name: Push image
         if: inputs.PUSH == true
