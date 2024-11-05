@@ -382,6 +382,17 @@ class Database:
 
         return ""
 
+    def get_version(self) -> str:
+        """Get the database version"""
+        with self._db_session() as session:
+            try:
+                metadata = session.query(Metadata).with_entities(Metadata.version).filter_by(id=1).first()
+                if metadata:
+                    return metadata.version
+                return "1.6.0-beta"
+            except BaseException as e:
+                return f"Error: {e}"
+
     def get_metadata(self) -> Dict[str, Any]:
         """Get the metadata from the database"""
         data = {
@@ -557,17 +568,6 @@ class Database:
 
                     with self._db_session() as session:
                         old_data[table_name] = session.query(metadata.tables[table_name]).all()
-
-                # ? Rename the old tables to keep the data in case of rollback
-                db_version_id = db_version.replace(".", "_")
-                for table_name in metadata.tables.keys():
-                    if table_name in Base.metadata.tables:
-                        with self._db_session() as session:
-                            if inspector.has_table(f"{table_name}_{db_version_id}"):
-                                self.logger.warning(f'Table "{table_name}" already exists, dropping it to make room for the new one')
-                                session.execute(text(f"DROP TABLE {table_name}_{db_version_id}"))
-                            session.execute(text(f"ALTER TABLE {table_name} RENAME TO {table_name}_{db_version_id}"))
-                            session.commit()
 
                 Base.metadata.drop_all(self.sql_engine)
 
