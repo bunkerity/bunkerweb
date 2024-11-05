@@ -739,10 +739,19 @@ if __name__ == "__main__":
 
         LOGGER.info("Running plugins download jobs ...")
 
-        if not SCHEDULER.run_single("download-plugins"):
-            LOGGER.warning("download-plugins job failed at first start, plugins settings set by the user may not be up to date ...")
-        if not SCHEDULER.run_single("download-pro-plugins"):
-            LOGGER.warning("download-pro-plugins job failed at first start, pro plugins settings set by the user may not be up to date ...")
+        threads.clear()
+        threads.extend(
+            [
+                Thread(target=SCHEDULER.run_single, args=("download-plugins",)),
+                Thread(target=SCHEDULER.run_single, args=("download-pro-plugins",)),
+            ]
+        )
+
+        for thread in threads:
+            thread.start()
+
+        for thread in threads:
+            thread.join()
 
         db_metadata = SCHEDULER.db.get_metadata()
         if db_metadata["pro_plugins_changed"] or db_metadata["external_plugins_changed"]:
