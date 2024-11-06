@@ -1223,12 +1223,13 @@ class Database:
                         row["last_update" if table_name == "bw_services" else "last_seen" if table_name == "bw_instances" else "update_date"] = (
                             datetime.now().astimezone()
                         )
-                    elif table_name == "bw_ui_users" and two_factor_enabled is not None:
-                        if two_factor_enabled:
-                            self.logger.warning(
-                                "Detected old user model, as we implemented advanced security in the new model (custom salt for passwords, totp, etc.), you will have to re set the two factor authentication for the admin user."
-                            )
-                        row["admin"] = True
+
+                        if table_name == "bw_ui_users" and two_factor_enabled is not None:
+                            if two_factor_enabled:
+                                self.logger.warning(
+                                    "Detected old user model, as we implemented advanced security in the new model (custom salt for passwords, totp, etc.), you will have to re set the two factor authentication for the admin user."
+                                )
+                            row["admin"] = True
 
                     with self._db_session() as session:
                         try:
