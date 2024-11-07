@@ -1,4 +1,5 @@
 {% set current_endpoint = request.path.split("/")[-1] %}
+{% set theme = theme or "light" %}
 {% set pro_diamond_url = url_for('static', filename='img/diamond.svg') %}
 {% set avatar_url = url_for('static', filename='img/avatar_profil_BW.png') %}
 {% set plugin_types = {
