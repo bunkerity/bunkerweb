@@ -58,7 +58,8 @@ class Config:
 
         servers.extend(filter(None, results))
 
-        conf["SERVER_NAME"] = " ".join(servers)
+        if servers:
+            conf["SERVER_NAME"] = " ".join(servers)
         conf["DATABASE_URI"] = self.__db.database_uri
 
         return self.__db.save_config(conf, override_method, changed=check_changes)
