@@ -1120,6 +1120,13 @@ $(document).ready(() => {
     }, 30);
   });
 
+  $(".plugin-setting").on("keydown", function (e) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      $(".save-settings").trigger("click");
+    }
+  });
+
   $(window).on("beforeunload", function (e) {
     if (isReadOnly) return;
 
@@ -1134,7 +1141,7 @@ $(document).ready(() => {
       if (currentMode === "raw")
         isDraft = form.find("input[name='IS_DRAFT']").val() === "yes";
 
-      if (form.children().length < minSettings && isDraft === wasDraft) return;
+      if (form.children().length <= minSettings && isDraft === wasDraft) return;
     }
 
     // Cross-browser compatibility (for older browsers)
