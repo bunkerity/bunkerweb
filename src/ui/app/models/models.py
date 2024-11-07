@@ -18,6 +18,7 @@ class AnonymousUser(AnonymousUserMixin):
     password = ""
     method = "manual"
     admin = False
+    theme = "light"
     totp_secret = None
     creation_date = datetime.now().astimezone()
     update_date = datetime.now().astimezone()
