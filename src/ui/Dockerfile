@@ -62,7 +62,7 @@ RUN apk add --no-cache bash unzip libmagic mariadb-connector-c mariadb-client po
   ln -s /proc/1/fd/2 /var/log/bunkerweb/ui.log
 
 # Fix CVEs
-RUN apk add --no-cache "libcrypto3>=3.3.2-r1" "libssl3>=3.3.2-r1" "openssl>=3.3.2-r1" # CVE-2024-6119
+RUN apk add --no-cache "libcrypto3>=3.3.2-r1" "libssl3>=3.3.2-r1" # CVE-2024-9143
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
 LABEL version="1.5.11"

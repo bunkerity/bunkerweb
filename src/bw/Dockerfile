@@ -68,8 +68,6 @@ RUN apk add --no-cache openssl pcre bash python3 yajl geoip libxml2 libgd curl &
 	ln -s /proc/1/fd/1 /var/log/bunkerweb/access.log
 
 # Fix CVEs
-RUN apk add --no-cache "curl>=8.9.1-r0" "libcurl>=8.9.1-r0" "pyc>=3.12.3-r2" "python3>=3.12.3-r2" "python3-pyc>=3.12.3-r2" "python3-pycache-pyc0>=3.12.3-r2" # CVE-2024-7264 CVE-2024-8088
-RUN apk add --no-cache "libcrypto3>=3.3.2-r1" "libssl3>=3.3.2-r1" "openssl>=3.3.2-r1" # CVE-2024-6119
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
 LABEL version="1.5.11"

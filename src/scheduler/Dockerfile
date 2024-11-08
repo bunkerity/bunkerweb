@@ -70,7 +70,6 @@ COPY --chown=root:scheduler --chmod=770 src/bw/misc/asn.mmdb /var/tmp/bunkerweb/
 COPY --chown=root:scheduler --chmod=770 src/bw/misc/country.mmdb /var/tmp/bunkerweb/country.mmdb
 
 # Fix CVEs
-RUN apk add --no-cache "libcrypto3>=3.3.2-r1" "libssl3>=3.3.2-r1" "openssl>=3.3.2-r1" # CVE-2024-6119
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
 LABEL version="1.5.11"
