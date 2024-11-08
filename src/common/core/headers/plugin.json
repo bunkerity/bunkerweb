@@ -39,7 +39,7 @@
       "help": "Value for the Strict-Transport-Security header.",
       "id": "strict-transport-security",
       "label": "Strict-Transport-Security",
-      "regex": "^max-age=\\d+(; includeSubDomains(; preload)?)?$",
+      "regex": "^(max-age=\\d+(; includeSubDomains(; preload)?)?)?$",
       "type": "text"
     },
     "COOKIE_FLAGS": {
@@ -48,7 +48,7 @@
       "help": "Cookie flags automatically added to all cookies (value accepted for nginx_cookie_flag_module).",
       "id": "cookie-flags",
       "label": "Cookie flags",
-      "regex": "^(\\*|[^;]+)( (HttpOnly|(SameSite)(?!.*\\4)(=(Lax|Strict))?)(?!.*\\3))*$",
+      "regex": "^((\\*|[^;]+)( (HttpOnly|(SameSite)(?!.*\\4)(=(Lax|Strict))?)(?!.*\\3))+)?$",
       "type": "text",
       "multiple": "cookie-flags"
     },
@@ -123,7 +123,7 @@
       "help": "Value for the X-XSS-Protection header.",
       "id": "x-xss-protection",
       "label": "X-XSS-Protection",
-      "regex": "^0|1(; (mode=block|report=https?:\\/\\/[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*))?$",
+      "regex": "^(0|1(; (mode=block|report=https?:\\/\\/[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*))?)?$",
       "type": "text"
     },
     "X_DNS_PREFETCH_CONTROL": {
