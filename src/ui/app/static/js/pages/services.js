@@ -187,6 +187,10 @@ $(function () {
           text: '<span class="tf-icons bx bx-file-blank bx-18px me-2"></span>Convert to<span class="d-none d-md-inline"> draft</span>',
         },
         {
+          extend: "export_services",
+          text: '<span class="tf-icons bx bx-export bx-18px me-2"></span>Export',
+        },
+        {
           extend: "delete_services",
           className: "text-danger",
         },
@@ -285,6 +289,25 @@ $(function () {
       }
 
       setupConversionModal(filteredServices, conversionType);
+      actionLock = false;
+    },
+  };
+
+  $.fn.dataTable.ext.buttons.export_services = {
+    action: function () {
+      if (actionLock) return;
+      actionLock = true;
+      $(".dt-button-background").click();
+
+      const services = getSelectedServices();
+      if (services.length === 0) {
+        actionLock = false;
+        return;
+      }
+
+      const baseUrl = window.location.href;
+      const exportUrl = `${baseUrl}/export?services=${services.join(",")}`;
+      window.open(exportUrl, "_blank");
       actionLock = false;
     },
   };
@@ -486,7 +509,13 @@ $(function () {
 
   services_table.on("select", function (e, dt, type, indexes) {
     // Enable the actions button
-    $(".action-button").removeClass("disabled").parent().tooltip("dispose");
+    $(".action-button")
+      .removeClass("disabled")
+      .parent()
+      .attr("data-bs-toggle", null)
+      .attr("data-bs-original-title", null)
+      .attr("data-bs-placement", null)
+      .tooltip("dispose");
   });
 
   services_table.on("deselect", function (e, dt, type, indexes) {
@@ -495,6 +524,7 @@ $(function () {
       $(".action-button")
         .addClass("disabled")
         .parent()
+        .attr("data-bs-toggle", "tooltip")
         .attr(
           "data-bs-original-title",
           "Please select one or more rows to perform an action.",

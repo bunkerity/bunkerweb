@@ -65,7 +65,7 @@
                         <td class="service-creation-date">{{ service['creation_date'].astimezone().isoformat() }}</td>
                         <td class="service-last-update-date">{{ service['last_update'].astimezone().isoformat() }}</td>
                         <td>
-                            <div class="d-flex justify-content-center">
+                            <div class="d-flex justify-content-evenly">
                                 <div {% if service['is_draft'] %}data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Disabled by draft mode"{% endif %}>
                                     <a role="button"
                                        class="btn btn-outline-primary btn-sm me-1{% if service['is_draft'] %} disabled{% endif %}"
@@ -107,6 +107,16 @@
                                         <i class="bx bx-transfer bx-xs"></i>
                                     </button>
                                 </div>
+                                <a role="button"
+                                   class="btn btn-outline-secondary btn-sm me-1 export-service"
+                                   href="{{ url_for("services") }}/export?services={{ service['id'] }}"
+                                   data-bs-toggle="tooltip"
+                                   data-bs-placement="bottom"
+                                   data-bs-original-title="Export service {{ service['id'] }} configuration"
+                                   target="_blank"
+                                   rel="noreferrer">
+                                    <i class="bx bx-export bx-xs"></i>
+                                </a>
                                 <div data-bs-toggle="tooltip"
                                      data-bs-placement="bottom"
                                      data-bs-original-title="{% if service['method'] != 'ui' or is_readonly %}Disabled by {% if is_readonly %}readonly{% else %}{{ service['method'] }}{% endif %}{% else %}Delete service {{ service['id'] }}{% endif %}">

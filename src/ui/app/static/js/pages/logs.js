@@ -2,7 +2,17 @@ $(document).ready(function () {
   const editorElement = $("#raw-logs");
   const initialContent = editorElement.text().trim();
   const editor = ace.edit(editorElement[0]);
-  editor.setTheme("ace/theme/cloud9_day"); // cloud9_night when dark mode is supported
+  var theme = $("#theme").val();
+
+  function setEditorTheme() {
+    if (theme === "dark") {
+      editor.setTheme("ace/theme/cloud9_night");
+    } else {
+      editor.setTheme("ace/theme/cloud9_day");
+    }
+  }
+
+  setEditorTheme();
   editor.session.setMode("ace/mode/text");
   editor.setReadOnly(true);
 
@@ -42,5 +52,12 @@ $(document).ready(function () {
     setTimeout(() => {
       $this.tooltip("hide").attr("data-bs-original-title", "");
     }, 2000);
+  });
+
+  $("#dark-mode-toggle").on("change", function () {
+    setTimeout(() => {
+      theme = $("#theme").val();
+      setEditorTheme();
+    }, 30);
   });
 });

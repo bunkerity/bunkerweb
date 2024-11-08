@@ -622,7 +622,13 @@ $(document).ready(function () {
 
   instances_table.on("select", function (e, dt, type, indexes) {
     // Enable the actions button
-    $(".action-button").removeClass("disabled").parent().tooltip("dispose");
+    $(".action-button")
+      .removeClass("disabled")
+      .parent()
+      .attr("data-bs-toggle", null)
+      .attr("data-bs-original-title", null)
+      .attr("data-bs-placement", null)
+      .tooltip("dispose");
   });
 
   instances_table.on("deselect", function (e, dt, type, indexes) {
@@ -631,6 +637,7 @@ $(document).ready(function () {
       $(".action-button")
         .addClass("disabled")
         .parent()
+        .attr("data-bs-toggle", "tooltip")
         .attr(
           "data-bs-original-title",
           "Please select one or more rows to perform an action.",
