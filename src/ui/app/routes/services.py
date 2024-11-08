@@ -1,8 +1,11 @@
+from concurrent.futures import ThreadPoolExecutor
+from io import BytesIO
+from itertools import chain
 from re import match
 from threading import Thread
 from time import time
 from typing import Dict, List
-from flask import Blueprint, redirect, render_template, request, url_for
+from flask import Blueprint, redirect, render_template, request, send_file, url_for
 from flask_login import login_required
 
 from app.dependencies import BW_CONFIG, DATA, DB
@@ -266,6 +269,12 @@ def services_service_page(service: str):
                         db_custom_configs[db_custom_config]["checksum"] = data["checksum"]
 
             if mode != "easy" or service != "new":
+                if mode == "raw":
+                    server_name = variables.get("SERVER_NAME", old_server_name).split(" ")[0]
+                    for variable, value in variables.copy().items():
+                        if variable.startswith(f"{server_name}_"):
+                            variables[variable.replace(f"{server_name}_", "", 1)] = value
+
                 # Remove already existing fields
                 for variable, value in variables.copy().items():
                     if (mode == "advanced" or variable != "SERVER_NAME") and value == db_config.get(variable, {"value": None})["value"]:
@@ -372,3 +381,36 @@ def services_service_page(service: str):
         type=search_type,
         current_template=template,
     )
+
+
+@services.route("/services/export", methods=["GET"])
+@login_required
+def services_service_export():
+    services = request.args.get("services", "").split(",")
+    if not services:
+        return handle_error("No services selected.", "services", True)
+
+    db_config = BW_CONFIG.get_config(methods=False, with_drafts=True)
+
+    def export_service(service: str) -> List[str]:
+        if service not in db_config["SERVER_NAME"].split(" "):
+            return [f"# Configuration for {service} not found\n\n"]
+
+        lines = [f"# Configuration for {service}\n"]
+        for setting in db_config:
+            if setting.startswith(f"{service}_"):
+                lines.append(f"{setting}={db_config[setting]}\n")
+        lines.append("\n")
+        return lines
+
+    with ThreadPoolExecutor() as executor:
+        futures = executor.map(export_service, services)
+        env_lines = list(chain.from_iterable(futures))
+
+    if not env_lines:
+        return handle_error("No services to export.", "services", True)
+
+    env_output = BytesIO("".join(env_lines).encode("utf-8"))
+    env_output.seek(0)
+
+    return send_file(env_output, mimetype="text/plain", as_attachment=True, download_name="services_export.env")
