@@ -34,8 +34,8 @@
      {% if service_method == "autoconf" or is_readonly %}data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Disabled by {% if is_readonly %}readonly{% else %}{{ service_method }}{% endif %}
      "
      {% endif %}>
-    {% set config_lines = ["IS_DRAFT=" + config.get('IS_DRAFT', {}).get('value', 'no')] %}
-    {% set default_settings = ["IS_DRAFT=no"] %}
+    {% set config_lines = ["IS_DRAFT=" + config.get('IS_DRAFT', {}).get('value', 'no')] if current_endpoint != "global-config" else [] %}
+    {% set default_settings = ["IS_DRAFT=no"] if current_endpoint != "global-config" else [] %}
     {% for plugin_data in plugins.values() %}
         {% set filtered_settings = get_filtered_settings(plugin_data["settings"], current_endpoint == "global-config") %}
         {% if filtered_settings %}

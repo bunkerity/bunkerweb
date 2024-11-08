@@ -13,37 +13,38 @@
                         <!-- prettier-ignore -->
                         <div class="d-flex justify-content-between align-items-center mb-5">
                             {% include "breadcrumb.html" %}
-                            {% if current_endpoint != "services" and "services" in request.path %}
+                            {% if current_endpoint == "global-config" or current_endpoint != "services" and "services" in request.path %}
                                 <!-- Floating button to toggle the menu -->
                                 <div class="position-fixed bottom-0 start-0 m-3 d-lg-none"
                                      id="floating-modes-menu">
                                     <button class="btn btn-sm btn-primary d-flex align-items-center justify-content-center rounded-pill me-1"
                                             type="button"
                                             data-bs-toggle="collapse"
-                                            data-bs-target="#service-modes-floating"
-                                            aria-controls="service-modes-floating"
+                                            data-bs-target="#mode-selection-floating"
+                                            aria-controls="mode-selection-floating"
                                             aria-expanded="false"
                                             aria-label="Toggle navigation">
-                                        <i class="bx bx-xs bx-menu"></i> Service Modes
+                                        <i class="bx bx-xs bx-menu"></i> Mode selection
                                     </button>
                                     <!-- Collapsible floating menu -->
-                                    <div class="collapse mt-2" id="service-modes-floating">
-                                        <ul id="service-modes-menu"
-                                            class="nav nav-pills flex-column bg-{% if current_user.theme == 'light' %}white{% else %}dark{% endif %} p-2 rounded shadow-sm"
+                                    <div class="collapse mt-2" id="mode-selection-floating">
+                                        <ul class="nav nav-pills flex-column bg-{% if current_user.theme == 'light' %}white{% else %}dark{% endif %} p-2 rounded shadow-sm mode-selection-menu"
                                             role="tablist">
-                                            <li class="nav-item mb-1" role="presentation">
-                                                <button type="button"
-                                                        class="btn btn-sm rounded-pill nav-link d-flex align-items-center{% if mode == 'easy' %} active{% endif %}"
-                                                        role="tab"
-                                                        data-bs-toggle="tab"
-                                                        data-bs-target="#navs-modes-easy"
-                                                        aria-controls="navs-modes-easy"
-                                                        {% if mode == 'easy' %}aria-selected="true"{% endif %}>
-                                                    <i class="bx bx-customize bx-sm"></i>
-                                                    &nbsp;
-                                                    <span class="don-jose">Easy</span>
-                                                </button>
-                                            </li>
+                                            {% if current_endpoint != "global-config" %}
+                                                <li class="nav-item mb-1" role="presentation">
+                                                    <button type="button"
+                                                            class="btn btn-sm rounded-pill nav-link d-flex align-items-center{% if mode == 'easy' %} active{% endif %}"
+                                                            role="tab"
+                                                            data-bs-toggle="tab"
+                                                            data-bs-target="#navs-modes-easy"
+                                                            aria-controls="navs-modes-easy"
+                                                            {% if mode == 'easy' %}aria-selected="true"{% endif %}>
+                                                        <i class="bx bx-customize bx-sm"></i>
+                                                        &nbsp;
+                                                        <span class="don-jose">Easy</span>
+                                                    </button>
+                                                </li>
+                                            {% endif %}
                                             <li class="nav-item mb-1" role="presentation">
                                                 <button type="button"
                                                         class="btn btn-sm rounded-pill nav-link d-flex align-items-center{% if mode == 'advanced' %} active{% endif %}"
@@ -73,22 +74,23 @@
                                         </ul>
                                     </div>
                                 </div>
-                                <ul id="service-modes-menu"
-                                    class="nav nav-pills flex-column flex-md-row d-none d-lg-flex"
+                                <ul class="nav nav-pills flex-column flex-md-row d-none d-lg-flex mode-selection-menu"
                                     role="tablist">
-                                    <li class="nav-item me-0 me-sm-3" role="presentation">
-                                        <button type="button"
-                                                class="btn btn-sm rounded-pill nav-link d-flex align-items-center{% if mode == 'easy' %} active{% endif %}"
-                                                role="tab"
-                                                data-bs-toggle="tab"
-                                                data-bs-target="#navs-modes-easy"
-                                                aria-controls="navs-modes-easy"
-                                                {% if mode == 'easy' %}aria-selected="true"{% endif %}>
-                                            <i class="bx bx-customize bx-xs"></i>
-                                            &nbsp;
-                                            <span class="d-none d-sm-inline don-jose">Easy</span>
-                                        </button>
-                                    </li>
+                                    {% if current_endpoint != "global-config" %}
+                                        <li class="nav-item me-0 me-sm-3" role="presentation">
+                                            <button type="button"
+                                                    class="btn btn-sm rounded-pill nav-link d-flex align-items-center{% if mode == 'easy' %} active{% endif %}"
+                                                    role="tab"
+                                                    data-bs-toggle="tab"
+                                                    data-bs-target="#navs-modes-easy"
+                                                    aria-controls="navs-modes-easy"
+                                                    {% if mode == 'easy' %}aria-selected="true"{% endif %}>
+                                                <i class="bx bx-customize bx-xs"></i>
+                                                &nbsp;
+                                                <span class="d-none d-sm-inline don-jose">Easy</span>
+                                            </button>
+                                        </li>
+                                    {% endif %}
                                     <li class="nav-item me-0 me-sm-3" role="presentation">
                                         <button type="button"
                                                 class="btn btn-sm rounded-pill nav-link d-flex align-items-center{% if mode == 'advanced' %} active{% endif %}"

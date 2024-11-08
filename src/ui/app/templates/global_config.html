@@ -1,8 +1,19 @@
 {% extends "dashboard.html" %}
 {% block content %}
     <!-- Content -->
+    <input type="hidden"
+           id="selected-mode"
+           name="selected_mode"
+           value="{{ mode }}">
     {% set blacklisted_settings = get_blacklisted_settings(true) %}
     {% set service_method = "ui" %}
-    {% include "models/plugins_settings.html" %}
+    <div class="tab-content p-0 position-relative">
+        <div class="tab-pane fade{% if mode == 'advanced' %} show active{% endif %}"
+             id="navs-modes-advanced"
+             role="tabpanel">{% include "models/plugins_settings.html" %}</div>
+        <div class="tab-pane position-relative fade{% if mode == 'raw' %} show active{% endif %}"
+             id="navs-modes-raw"
+             role="tabpanel">{% include "models/plugins_settings_raw.html" %}</div>
+    </div>
     <!-- / Content -->
 {% endblock %}

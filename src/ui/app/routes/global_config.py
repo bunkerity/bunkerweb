@@ -77,6 +77,8 @@ def global_config_page():
         Thread(target=update_global_config, args=(variables, True)).start()
 
         arguments = {}
+        if request.args.get("mode", "advanced") != "advanced":
+            arguments["mode"] = request.args["mode"]
         if request.args.get("type", "all") != "all":
             arguments["type"] = request.args["type"]
 
@@ -88,6 +90,7 @@ def global_config_page():
             )
         )
 
+    mode = request.args.get("mode", "advanced")
     search_type = request.args.get("type", "all")
     global_config = DB.get_config(global_only=True, methods=True)
-    return render_template("global_config.html", config=global_config, type=search_type)
+    return render_template("global_config.html", config=global_config, mode=mode, type=search_type)

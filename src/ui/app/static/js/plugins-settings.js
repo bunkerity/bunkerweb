@@ -65,6 +65,10 @@ $(document).ready(() => {
       params.type = null; // Remove the type parameter
       updateUrlParams(params, true); // Call the function without the hash (keep it intact)
     } else {
+      if (currentMode === "advanced" && !$("#navs-modes-easy").length) {
+        params.mode = null; // Remove the mode parameter
+      }
+
       // If another mode is selected, update the "mode" parameter
       params.template = null; // Remove the template parameter
       if (currentMode === "advanced" && currentPlugin !== "general") {
@@ -121,7 +125,8 @@ $(document).ready(() => {
   const handleTabChange = (targetClass) => {
     // Prepare the params for URL (parameters to be updated in the URL)
     const params = {};
-    if (currentMode !== "easy") params.mode = currentMode;
+    if (currentMode !== ($("#navs-modes-easy").length ? "easy" : "advanced"))
+      params.mode = currentMode;
     if (currentType !== "all") params.type = currentType;
 
     if (targetClass.includes("navs-plugins-")) {
@@ -491,7 +496,7 @@ $(document).ready(() => {
   });
 
   // Attach event listener to handle mode changes when tabs are switched
-  $('#service-modes-menu button[data-bs-toggle="tab"]').on(
+  $('.mode-selection-menu button[data-bs-toggle="tab"]').on(
     "shown.bs.tab",
     (e) => {
       handleModeChange($(e.target).data("bs-target"));
