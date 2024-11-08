@@ -94,7 +94,7 @@
                         <td class="instance-creation-date">{{ instance.creation_date.astimezone().isoformat() }}</td>
                         <td class="instance-last-seen-date">{{ instance.last_seen.astimezone().isoformat() }}</td>
                         <td>
-                            <div class="d-flex justify-content-center">
+                            <div class="d-flex justify-content-evenly">
                                 <button type="button"
                                         class="btn btn-primary btn-sm me-1 ping-instance"
                                         data-instance="{{ instance['hostname'] }}"

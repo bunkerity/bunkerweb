@@ -74,7 +74,7 @@
                         </td>
                         <td>{{ cache["checksum"] }}</td>
                         <td>
-                            <div class="d-flex justify-content-center">
+                            <div class="d-flex justify-content-evenly">
                                 <a role="button"
                                    class="btn btn-primary btn-sm me-1"
                                    href="{{ url_for("cache") }}/{{ service_id }}/{{ cache['plugin_id'] }}/{{ cache['job_name'] }}/{{ cache['file_name'].replace('/', '_') if cache['file_name'].startswith('folder:') else cache['file_name'] }}"
