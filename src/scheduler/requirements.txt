@@ -4,13 +4,13 @@
 #
 #    pip-compile --allow-unsafe --generate-hashes --strip-extras requirements.in
 #
-acme==2.11.0 \
-    --hash=sha256:23213ac3074a78862b219e0a30e141fd53238a8bdcf0668bd4dea59b28873fb8 \
-    --hash=sha256:f4950015cf52ff0de12f37fc28034c7710aca63f64f1696253d2f6cb9f22645e
+acme==3.0.0 \
+    --hash=sha256:2bb48ad117b4190600e9fb5c372e3b658cd320bc445d5dba493be20db490d9e4 \
+    --hash=sha256:e8ebff13b8ae85d2a700466a01c01ce68da72cec8e82031fd94b9aeb4966c0f1
     # via certbot
-certbot==2.11.0 \
-    --hash=sha256:257ae1cb0a534373ca50dd807c9ae96f27660e41379c45afb9b50cab0e6a7a97 \
-    --hash=sha256:dc4e0a48bcb09448d60362170ca1047cc9a81966da0dd35135f2561f0ea7d5b1
+certbot==3.0.0 \
+    --hash=sha256:18b01f12b6278d19bad416fb9435a7e192b37a5081528473031193502f920c97 \
+    --hash=sha256:480014af69ac507c1ff4b892d23159a98d8d2ff3f70aedc3e6e56cf170878f5b
     # via -r requirements.in
 certifi==2024.8.30 \
     --hash=sha256:922820b53db7a7257ffbda3f597266d435245903d80737e34f8a45ff3e3230d8 \
