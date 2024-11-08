@@ -41,6 +41,20 @@ def login_page():
                 flask_flash("Couldn't log you in, please try again", "error")
                 return (render_template("login.html", error="Couldn't log you in, please try again"),)
 
+            ret = DB.update_ui_user(
+                **{
+                    "username": current_user.get_id(),
+                    "password": current_user.password.encode("utf-8"),
+                    "email": current_user.email,
+                    "totp_secret": current_user.totp_secret,
+                    "method": current_user.method,
+                    "theme": request.form["theme"],
+                },
+                old_username=current_user.get_id(),
+            )
+            if ret:
+                LOGGER.error(f"Couldn't update the user {current_user.get_id()}: {ret}")
+
             LOGGER.info(f"User {ui_user.username} logged in successfully" + (" with remember me" if request.form.get("remember-me") == "on" else ""))
 
             if not ui_user.totp_secret:

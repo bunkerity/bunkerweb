@@ -519,6 +519,9 @@ $(document).ready(() => {
     // Append the CSRF token
     formData.append("csrf_token", $csrfTokenInput.val() || "");
 
+    // Append the Theme
+    formData.append("theme", $("[name='theme']").val());
+
     const server_name = getServerName();
     const ui_url = $("#REVERSE_PROXY_URL").val();
 

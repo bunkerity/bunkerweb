@@ -74,7 +74,8 @@
                            value="{{ csrf_token() }}" />
                     <label class="setting-checkbox-label d-flex align-items-center ps-0"
                            for="dark-mode-toggle">Light</label>
-                    <div class="form-switch ms-2 mb-1" {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The database is in readonly mode, therefore the theme cannot be changed"{% endif %}>
+                    <div class="form-switch ms-2 mb-1"
+                         {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The database is in readonly mode, therefore the theme cannot be changed"{% endif %}>
                         <input id="dark-mode-toggle"
                                name="dark-mode-toggle"
                                class="form-check-input"

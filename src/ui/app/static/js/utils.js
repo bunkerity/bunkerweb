@@ -424,6 +424,9 @@ $(document).ready(() => {
   });
 
   $("#dark-mode-toggle").on("change", function () {
+    // If endpoint is "setup", ignore the theme change
+    if (window.location.pathname.includes("/setup")) return;
+
     const darkMode = $(this).prop("checked");
     if (darkMode) {
       $("html").removeClass("light-style").addClass("dark-style");

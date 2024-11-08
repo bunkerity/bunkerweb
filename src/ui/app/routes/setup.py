@@ -51,7 +51,7 @@ def setup_page():
         if DB.readonly:
             return handle_error("Database is in read-only mode", "setup")
 
-        required_keys = []
+        required_keys = ["theme"]
         if not ui_reverse_proxy:
             required_keys.extend(
                 [
@@ -102,6 +102,7 @@ def setup_page():
                 gen_password_hash(request.form["admin_password"]),
                 ["admin"],
                 request.form["admin_email"] or None,
+                theme=request.form["theme"],
                 totp_secret=totp_secret,
                 totp_recovery_codes=totp_recovery_codes,
                 method="ui",

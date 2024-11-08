@@ -1,6 +1,25 @@
 {% extends "base.html" %}
 {% block page %}
     <!-- Content -->
+    <!-- Dark Mode Toggle - Enhanced Floating Button -->
+    <div class="theme-toggle position-fixed top-0 end-0 p-6"
+         style="z-index: 1030">
+        <div class="toggle-container d-flex align-items-center bg-white p-3 rounded-pill shadow-lg">
+            <label class="setting-checkbox-label pe-2 mb-0 fw-bold text-secondary"
+                   for="dark-mode-toggle">Light</label>
+            <div class="form-switch">
+                <input id="dark-mode-toggle"
+                       name="dark-mode-toggle"
+                       class="form-check-input"
+                       type="checkbox"
+                       role="switch"
+                       {% if current_user.theme == "dark" %}checked{% endif %} />
+            </div>
+            <label class="setting-checkbox-label mb-0 fw-bold text-secondary"
+                   for="dark-mode-toggle">Dark</label>
+        </div>
+    </div>
+    <!-- /Dark Mode Toggle -->
     <div class="bg-light-subtle">
         <div class="login-background">
             <div class="container-xxl">
@@ -23,11 +42,12 @@
                                     </a>
                                 </div>
                                 <!-- /Logo -->
-                                <form class="mb-6" method="POST">
+                                <form method="POST">
                                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                                     <input type="hidden"
                                            name="next"
                                            value="{{ request.values.get('next', '') }}" />
+                                    <input type="hidden" name="theme" value="light" />
                                     <div class="mb-6">
                                         <label for="username" class="form-label">Username</label>
                                         <input type="text"

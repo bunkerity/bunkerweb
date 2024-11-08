@@ -978,12 +978,6 @@ a.courier-prime:hover {
   background-color: #0a4b69;
 }
 
-.dark-style .btn-primary {
-  background-color: var(--bs-primary);
-  border-color: var(--bs-primary);
-  color: #07354a;
-}
-
 .dark-style .breadcrumb-item + .breadcrumb-item::before {
   color: #9caeb7;
 }
@@ -1197,4 +1191,27 @@ html[dir="rtl"].dark-style .border-primary {
 .dark-style .leaflet-control-zoom-in,
 .dark-style .leaflet-control-zoom-out {
   filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
+}
+
+.dark-style .was-validated .input-group .form-control:invalid:focus,
+.input-group .form-control.is-invalid:focus {
+  border-color: var(--bs-form-invalid-color) !important;
+}
+
+.dark-style
+  .was-validated
+  .input-group
+  .form-control:invalid:focus
+  ~ .input-group-text,
+.dark-style .input-group .form-control.is-invalid:focus ~ .input-group-text {
+  border-color: var(--bs-form-invalid-color) !important;
+}
+
+.dark-style .was-validated .input-group .form-control:valid:focus,
+.dark-style .input-group .form-control.is-valid:focus {
+  border-color: var(--bs-form-valid-color) !important;
+}
+
+.dark-style table.table.dataTable > tbody > tr.selected a {
+  color: initial !important;
 }

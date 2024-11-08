@@ -11,10 +11,25 @@
                    id="csrf_token"
                    name="csrf_token"
                    value="{{ csrf_token() }}" />
+            <input type="hidden" name="theme" value="light" />
             <div class="container-xxl">
                 <div class="position-fixed top-0 end-0 m-5">
                     <!-- prettier-ignore -->
                     <div class="d-flex justify-content-end align-items-center mb-5">
+                        <div class="toggle-container d-flex align-items-center bg-white p-2 rounded-pill shadow-lg me-3">
+                            <label class="setting-checkbox-label pe-2 mb-0 fw-bold text-secondary"
+                                   for="dark-mode-toggle">Light</label>
+                            <div class="form-switch">
+                                <input id="dark-mode-toggle"
+                                       name="dark-mode-toggle"
+                                       class="form-check-input"
+                                       type="checkbox"
+                                       role="switch"
+                                       {% if current_user.theme == "dark" %}checked{% endif %} />
+                            </div>
+                            <label class="setting-checkbox-label mb-0 fw-bold text-secondary"
+                                   for="dark-mode-toggle">Dark</label>
+                        </div>
                         <ul class="d-flex mb-0 list-unstyled">
                             <li class="me-3">
                                 <a role="button"
@@ -571,8 +586,8 @@
                                                     <input id="CUSTOM_SSL_KEY"
                                                            name="CUSTOM_SSL_KEY"
                                                            type="text"
-                                                        placeholder="/tmp/key.pem"
-                                                              value="{{ custom_ssl_key }}"
+                                                           placeholder="/tmp/key.pem"
+                                                           value="{{ custom_ssl_key }}"
                                                            class="form-control plugin-setting mt-1"
                                                            aria-labelledby="label-CUSTOM_SSL_KEY"
                                                            pattern="^.*$" />
@@ -721,7 +736,7 @@
             </div>
         </div>
         <div id="feedback-toast"
-             class="bs-toast toast fade bg-white border"
+             class="bs-toast toast fade bg-{% if current_user.theme == 'light' %}white{% else %}dark{% endif %} border"
              role="alert"
              aria-live="assertive"
              aria-atomic="true"
