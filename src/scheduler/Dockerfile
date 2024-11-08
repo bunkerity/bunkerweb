@@ -46,8 +46,6 @@ RUN apk add --no-cache bash unzip libgcc libstdc++ libpq openssl libmagic mariad
   adduser -h /var/cache/nginx -g scheduler -s /bin/sh -G scheduler -D -H -u 101 scheduler
 
 # Fix CVEs
-RUN apk add --no-cache "libcrypto3>=3.3.2-r1" "libssl3>=3.3.2-r1" "openssl>=3.3.2-r1" # CVE-2024-6119
-RUN apk add --no-cache "libpq>=16.4-r0" "postgresql16-client" # CVE-2024-7348
 
 # Cleanup
 RUN rm -rf /var/cache/apk/*
