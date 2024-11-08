@@ -5,8 +5,88 @@
   or the CRS Google Group at
 * https://groups.google.com/a/owasp.org/g/modsecurity-core-rule-set-project
 
-## Nightly builds
-New changelog entries are written to `.changes-pending.md`. They will be moved to the main changelog before a release.
+## Version 4.8.0 - 2024-10-28
+
+## What's Changed
+### ⭐ Important changes
+* fix: 9EA-241022 v4 by @RedXanadu in https://github.com/coreruleset/coreruleset/pull/3905
+### 🆕 New features and detections 🎉
+* chore: set up nginx tests by @theseion in https://github.com/coreruleset/coreruleset/pull/3856
+### 🧰 Other Changes
+* fix: remove unnecessary capture groups by @TimDiam0nd in https://github.com/coreruleset/coreruleset/pull/3849
+* fix(942120): update operators by @Xhoenix in https://github.com/coreruleset/coreruleset/pull/3841
+* fix(933120): do not match on base64 encoded strings by @fzipi in https://github.com/coreruleset/coreruleset/pull/3863
+* fix(refactor): 942130 and 942131 regex-assembly by @Xhoenix in https://github.com/coreruleset/coreruleset/pull/3862
+* fix(942520):  SQL operators can be one or more characters by @Xhoenix in https://github.com/coreruleset/coreruleset/pull/3845
+* chore: remove verify id-range by @fzipi in https://github.com/coreruleset/coreruleset/pull/3885
+* chore: remove find-max-datalen-in-tests by @fzipi in https://github.com/coreruleset/coreruleset/pull/3891
+* chore: remove honeypot sensor by @fzipi in https://github.com/coreruleset/coreruleset/pull/3883
+* chore: remove browser tools by @fzipi in https://github.com/coreruleset/coreruleset/pull/3887
+* chore: remove send-payload-pls by @fzipi in https://github.com/coreruleset/coreruleset/pull/3879
+* chore: remove geo-location by @fzipi in https://github.com/coreruleset/coreruleset/pull/3875
+* chore: remove crs2 renumbering by @fzipi in https://github.com/coreruleset/coreruleset/pull/3873
+* chore: remove change-version script by @fzipi in https://github.com/coreruleset/coreruleset/pull/3869
+* chore: remove join multiline rules by @fzipi in https://github.com/coreruleset/coreruleset/pull/3877
+* chore: remove av-scanning by @fzipi in https://github.com/coreruleset/coreruleset/pull/3871
+* chore: remove util virtual patching by @fzipi in https://github.com/coreruleset/coreruleset/pull/3889
+* chore: remove fp-finder by @fzipi in https://github.com/coreruleset/coreruleset/pull/3893
+
+## New Contributors
+* @evidencebp made their first contribution in https://github.com/coreruleset/coreruleset/pull/3837
+* @mtaket made their first contribution in https://github.com/coreruleset/coreruleset/pull/3855
+
+**Full Changelog**: https://github.com/coreruleset/coreruleset/compare/v4.7.0...v4.8.0
+
+## Version 4.7.0 - 2024-09-23
+
+### 🆕 New features and detections 🎉
+* feat: added sendgrid.env into restricted files by @azurit in https://github.com/coreruleset/coreruleset/pull/3823
+### 🧰 Other Changes
+* fix: Changed regex (920470) to match multiple whitespaces after `Content-Type` parameters to avoid false-positives by @lostmann-owl-it in https://github.com/coreruleset/coreruleset/pull/3818
+* fix: fp with user-agent containing ; pg (932239 PL2) by @franbuehler in https://github.com/coreruleset/coreruleset/pull/3727
+* fix: update xss detection with onwebkitplaybacktargetavailabilitychanged event by @fzipi in https://github.com/coreruleset/coreruleset/pull/3822
+* feat: refactoring (944110 PL1) by @azurit in https://github.com/coreruleset/coreruleset/pull/3715
+
+## New Contributors
+* @lostmann-owl-it made their first contribution in https://github.com/coreruleset/coreruleset/pull/3818
+
+**Full Changelog**: https://github.com/coreruleset/coreruleset/compare/v4.6.0...v4.7.0
+
+## Version 4.6.0 - 2024-08-27
+
+### ⭐ Important changes
+* fix: prevent using backslash in file names by @fzipi in https://github.com/coreruleset/coreruleset/pull/3799
+* feat: add new rule to catch invalid character in multipart headers by @airween, @theseion, @fzipi in https://github.com/coreruleset/coreruleset/pull/3796
+
+Big thanks tu @luelueking for reporting us these two ☝️ .
+
+### 🧰 Other Changes
+* feat: rule to detect bash tilde expansion by @Xhoenix in https://github.com/coreruleset/coreruleset/pull/3765
+* fix: Update 932270's `ver` by @airween in https://github.com/coreruleset/coreruleset/pull/3786
+* perf: remove unnecessary chain rule and capture (921180 PL3) by @EsadCetiner in https://github.com/coreruleset/coreruleset/pull/3787
+* fix: add pem to restricted file extensions by @EsadCetiner in https://github.com/coreruleset/coreruleset/pull/3789
+* fix(942160): check REQUEST_FILENAME by @mat1010 in https://github.com/coreruleset/coreruleset/pull/3782
+
+## New Contributors
+* @mat1010 made their first contribution in https://github.com/coreruleset/coreruleset/pull/3782
+
+**Full Changelog**: https://github.com/coreruleset/coreruleset/compare/v4.5.0...v4.6.0
+
+## Version 4.5.0 - 2024-07-23
+
+### 🆕 New features and detections 🎉
+* feat: added arithmetic expansion payload by @Xhoenix in https://github.com/coreruleset/coreruleset/pull/3756
+### 🧰 Other Changes
+* fix(security): alias false negative by @Xhoenix in https://github.com/coreruleset/coreruleset/pull/3740
+* feat: add test overrides for nginx by @theseion in https://github.com/coreruleset/coreruleset/pull/3369
+* fix: use proper capture for log output of 932300 by @theseion in https://github.com/coreruleset/coreruleset/pull/3763
+* chore: use lowercase character class for 932320 by @theseion in https://github.com/coreruleset/coreruleset/pull/3772
+* fix: remove nonnecessary variable (932260 PL1) by @dune73 in https://github.com/coreruleset/coreruleset/pull/3773
+
+## New Contributors
+* @aryehb made their first contribution in https://github.com/coreruleset/coreruleset/pull/3755
+
+**Full Changelog**: https://github.com/coreruleset/coreruleset/compare/v4.4.0...v4.5.0
 
 ## Version 4.4.0 - 2024-06-23
 
@@ -578,6 +658,18 @@ Functionality that has been moved to plugins for this release:
  * fix: wordPress: fix FPs and improve performance (now a plugin) (Walter Hop) [#1997, #2311]
  * fix: wordPress: fix FPs in Site Health page (now a plugin) (Robert de Boer, Fregf, Walter Hop) [#1895, #1920]
  * fix: xenForo: fix FPs (now a plugin) (Walter Hop, ThanhPT) [#1844, #1865, #1894, #1998, #2421]
+
+## Version 3.3.7 - 2024-10-28
+
+### ⭐ Important changes
+* fix: 9EA-241022 v3 by @RedXanadu in https://github.com/coreruleset/coreruleset/pull/3906
+
+## Version 3.3.6 - 2024-08-27
+
+Important changes:
+
+* Backport fix for 3MU-240701-1 - catch invalid character in multipart headers via new rule 922130 (Ervin Hegedus, Felipe Zipitría)
+* Backport fix for 3MU-240701-2 - prevent using backslash in file names from v4 - updated rule 920120 - pl1, 920121 - pl2 (Felipe Zipitria)
 
 ## Version 3.3.5 - 2023-07-18
 

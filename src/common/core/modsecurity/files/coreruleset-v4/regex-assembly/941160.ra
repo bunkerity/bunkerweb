@@ -1,11 +1,31 @@
 ##! Please refer to the documentation at
 ##! https://coreruleset.org/docs/development/regex_assembly/.
 
+##! The regular expressions in this file were copied from version 1 or 2 of the NoScript
+##! browser extension. The source code is available here: https://noscript.net/getit.
+##! The extension, among other things, looks for "dangerous" tags and doesn't care whether
+##! they are valid or actually carry a dangerous payload. Therefore, rule 941160 is rather
+##! aggressive in its detection, triggering on strings like `<img>`.
+
 ##!+ i
 
 ##!> assemble
-  <[^\w<>]*(?:[^<>\"'\s]*:)?[^\w<>]*\W*?
-  ##!=< js-prop-prefix
+  ##! HTML tag opening bracket
+  <
+  ##!=>
+  ##! Quotes, punctuation, brackets, etc.
+  [^\w<>]*
+  ##!=>
+  ##! More or less `\w`, followed by `:`, which would match `xml:base`, together with the
+  ##! list defined later.
+  (?:[^<>\"'\s]*:)?
+  ##!=>
+  ##! Quotes, punctuation, brackets, etc.
+  [^\w<>]*
+  ##!=>
+  ##! Quotes, punctuation, brackets, etc., angle brackets allowed
+  \W*?
+  ##!=< html-tag-prefix
 ##!<
 
 ##!> assemble
@@ -30,7 +50,7 @@
   b\W*?i\W*?n\W*?d\W*?i\W*?n\W*?g\W*?s[^>\w]
   s\W*?e\W*?t[^>\w]
   a\W*?n\W*?i\W*?m\W*?a\W*?t\W*?e[^>\w]
-  ##!=< js-payloads
+  ##!=< dangerous-html-tags
 ##!<
 
 
@@ -345,6 +365,7 @@
   onwebkitanimationend
   onwebkitanimationiteration
   onwebkitanimationstart
+  onwebkitplaybacktargetavailabilitychanged
   onwebkittransitionend
   onwheel
   onzoom
@@ -360,8 +381,8 @@
 ##!<
 
 ##!> assemble
-  ##!=> js-prop-prefix
-  ##!=> js-payloads
+  ##!=> html-tag-prefix
+  ##!=> dangerous-html-tags
 ##!<
 
 ##!> assemble

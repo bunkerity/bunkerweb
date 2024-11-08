@@ -48,7 +48,7 @@ spec:
       containers:
         # using bunkerweb as name is mandatory
         - name: bunkerweb
-          image: bunkerity/bunkerweb:1.5.10
+          image: bunkerity/bunkerweb:1.5.11
           imagePullPolicy: Always
           securityContext:
             runAsUser: 101
@@ -118,7 +118,7 @@ spec:
       serviceAccountName: sa-bunkerweb
       containers:
         - name: bunkerweb-controller
-          image: bunkerity/bunkerweb-autoconf:1.5.10
+          image: bunkerity/bunkerweb-autoconf:1.5.11
           imagePullPolicy: Always
           env:
             - name: KUBERNETES_MODE
@@ -145,7 +145,7 @@ spec:
       serviceAccountName: sa-bunkerweb
       containers:
         - name: bunkerweb-scheduler
-          image: bunkerity/bunkerweb-scheduler:1.5.10
+          image: bunkerity/bunkerweb-scheduler:1.5.11
           imagePullPolicy: Always
           env:
             - name: KUBERNETES_MODE
@@ -230,7 +230,7 @@ spec:
       serviceAccountName: sa-bunkerweb
       containers:
         - name: bunkerweb-ui
-          image: bunkerity/bunkerweb-ui:1.5.10
+          image: bunkerity/bunkerweb-ui:1.5.11
           imagePullPolicy: Always
           env:
             - name: ADMIN_USERNAME
@@ -240,7 +240,7 @@ spec:
             - name: KUBERNETES_MODE
               value: "YES"
             - name: "DATABASE_URI"
-              value: "mariadb+pymysql://bunkerweb:testor@svc-bunkerweb-db:3306/db"
+              value: "mariadb+pymysql://bunkerweb:changeme@svc-bunkerweb-db:3306/db"
 ---
 apiVersion: v1
 kind: Service
@@ -303,7 +303,6 @@ spec:
   resources:
     requests:
       storage: 5Gi
-  volumeName: pv-bunkerweb
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress

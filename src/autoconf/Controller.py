@@ -75,9 +75,6 @@ class Controller(Config):
                 self._loaded = True
 
     def get_services(self):
-        while not self._get_controller_services():
-            sleep(1)
-
         services = []
         for controller_service in self._get_controller_services():
             services.extend(self._to_services(controller_service))

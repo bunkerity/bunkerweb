@@ -20,7 +20,7 @@
       "help": "List of HTTP error code intercepted by BunkerWeb",
       "id": "intercepted-error-codes",
       "label": "Intercepted error codes",
-      "regex": "^( *([1-5]\\d{2})(?!.*\\2) *)+$",
+      "regex": "^( *([1-5]\\d{2})(?!.*\\2) *)*$",
       "type": "text"
     }
   }

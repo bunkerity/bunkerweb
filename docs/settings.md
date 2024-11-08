@@ -29,6 +29,7 @@ STREAM support :warning:
 |`LOG_FORMAT`                  |`$host $remote_addr - $remote_user [$time_local] "$request" $status $body_bytes_sent "$http_referer" "$http_user_agent"`|global   |no      |The format to use for access logs.                                                          |
 |`LOG_LEVEL`                   |`notice`                                                                                                                |global   |no      |The level to use for error logs.                                                            |
 |`DNS_RESOLVERS`               |`127.0.0.11`                                                                                                            |global   |no      |DNS addresses of resolvers to use.                                                          |
+|`WORKERLOCK_MEMORY_SIZE`      |`48k`                                                                                                                   |global   |no      |Size of lua_shared_dict for initialization workers                                          |
 |`DATASTORE_MEMORY_SIZE`       |`64m`                                                                                                                   |global   |no      |Size of the internal datastore.                                                             |
 |`CACHESTORE_MEMORY_SIZE`      |`64m`                                                                                                                   |global   |no      |Size of the internal cachestore.                                                            |
 |`CACHESTORE_IPC_MEMORY_SIZE`  |`16m`                                                                                                                   |global   |no      |Size of the internal cachestore (ipc).                                                      |
@@ -42,6 +43,10 @@ STREAM support :warning:
 |`AUTOCONF_MODE`               |`no`                                                                                                                    |global   |no      |Enable Autoconf Docker integration.                                                         |
 |`SWARM_MODE`                  |`no`                                                                                                                    |global   |no      |Enable Docker Swarm integration.                                                            |
 |`KUBERNETES_MODE`             |`no`                                                                                                                    |global   |no      |Enable Kubernetes integration.                                                              |
+
+|`API_TIMEOUT`                 |`10`                                                                                                                   |global   |no      |Manually set the timeout for BunkerWeb API requests.                               |                                                      |
+|`API_READ_TIMEOUT`            |`30`                                                                                                                   |global   |no      |Manually set the read timeout for BunkerWeb API requests.                                |
+
 |`SERVER_TYPE`                 |`http`                                                                                                                  |multisite|no      |Server type : http or stream.                                                               |
 |`LISTEN_STREAM`               |`yes`                                                                                                                   |multisite|no      |Enable listening for non-ssl (passthrough).                                                 |
 |`LISTEN_STREAM_PORT`          |`1337`                                                                                                                  |multisite|no      |Listening port for non-ssl (passthrough).                                                   |
@@ -51,7 +56,7 @@ STREAM support :warning:
 |`IS_DRAFT`                    |`no`                                                                                                                    |multisite|no      |Internal use : set to yes when the service is in draft mode.                                |
 |`TIMERS_LOG_LEVEL`            |`debug`                                                                                                                 |global   |no      |Log level for timers.                                                                       |
 |`OVERRIDE_INSTANCES`          |                                                                                                                        |global   |no      |List of BunkerWeb instances separated with spaces (format : fqdn-or-ip:5000 fqdn-or-ip:5000)|
-
+|`DISABLE_CONFIGURATION_TESTING`                     |`no`                                                                                                                   |global   |no      |Disable sanity checks for all other environment variables.                                                      |
 
 ## Antibot
 
@@ -693,4 +698,3 @@ Allow access based on internal and external IP/network/rDNS/ASN whitelists.
 |`WHITELIST_ASN_URLS`       |                                                                                                                                                                            |global   |no      |List of URLs, separated with spaces, containing ASN to whitelist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.                 |
 |`WHITELIST_USER_AGENT_URLS`|                                                                                                                                                                            |global   |no      |List of URLs, separated with spaces, containing good User-Agent to whitelist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.     |
 |`WHITELIST_URI_URLS`       |                                                                                                                                                                            |global   |no      |List of URLs, separated with spaces, containing bad URI to whitelist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.             |
-

@@ -131,7 +131,6 @@ location /hello {
 
     assert_button_click(DRIVER, "//button[@data-configs-setting-select='globalconf']")
     assert_button_click(DRIVER, "//button[@data-configs-setting-select-dropdown-btn='globalconf' and @value='true']")
-
     assert_button_click(DRIVER, "//div[@data-configs-element='http' and @data-_type='folder']")
 
     is_app1_example_com_folder_hidden = DRIVER.execute_script(
@@ -167,6 +166,8 @@ location /hello {
 
     assert_alert_message(DRIVER, "Deleted")
 
+    DRIVER.refresh()
+
     sleep(5)
 
     resp = get("http://www.example.com/hello", verify=False)
@@ -174,6 +175,8 @@ location /hello {
     if resp.status_code != 404:
         log_error("The config hasn't been deleted correctly, exiting ...")
         exit(1)
+
+    DRIVER.refresh()
 
     log_info("The config has been deleted, trying the same for a specific service ...")
 
@@ -234,7 +237,6 @@ location /hello {
     access_page(DRIVER, "/html/body/aside[1]/div[2]/ul[1]/li[4]/a", "services")
 
     assert_button_click(DRIVER, "//button[@data-services-action='delete' and @data-services-name='app1.example.com']")
-
     access_page(DRIVER, "//form[@data-services-modal-form-delete='']//button[@type='submit']", "services", False)
 
     if TEST_TYPE == "linux":

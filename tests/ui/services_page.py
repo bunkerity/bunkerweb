@@ -404,6 +404,8 @@ try:
 
     log_info("Service app2.example.com is present, trying it ...")
 
+    DRIVER.refresh()
+
     wait_for_service("app2.example.com")
 
     try:
@@ -414,7 +416,11 @@ try:
 
     log_info("The service is working, trying to set it as draft ...")
 
+    sleep(2)
+
     assert_button_click(DRIVER, "//div[@data-services-service='app2.example.com']//button[@data-services-action='edit']")
+
+    sleep(2)
 
     assert_button_click(DRIVER, "//button[@data-toggle-draft-btn='']")
 

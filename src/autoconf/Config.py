@@ -41,22 +41,24 @@ class Config:
             self._settings.update(plugin["settings"])
 
     def __get_full_env(self) -> dict:
-        env_instances = {"SERVER_NAME": ""}
+        config = {"SERVER_NAME": "", "MULTISITE": "yes"}
+
         for instance in self.__instances:
             for variable, value in instance["env"].items():
-                env_instances[variable] = value
+                if not self._db.is_setting(variable):
+                    self.__logger.warning(f"Variable {variable}: {value} is not a valid setting, ignoring it")
+                    continue
+                config[variable] = value
 
-        config = {"SERVER_NAME": "", "MULTISITE": "yes"}
         for service in self.__services:
             server_name = service["SERVER_NAME"].split(" ")[0]
             if not server_name:
                 continue
-            for variable, value in chain(env_instances.items(), service.items()):
+            for variable, value in service.items():
                 if variable.startswith("CUSTOM_CONF") or not variable.isupper():
                     continue
                 if not self._db.is_setting(variable, multisite=True):
-                    if variable in service:
-                        self.__logger.warning(f"Variable {variable}: {value} is not a valid multisite setting, ignoring it")
+                    self.__logger.warning(f"Variable {variable}: {value} is not a valid multisite setting, ignoring it")
                     continue
                 config[f"{server_name}_{variable}"] = value
             config["SERVER_NAME"] += f" {server_name}"

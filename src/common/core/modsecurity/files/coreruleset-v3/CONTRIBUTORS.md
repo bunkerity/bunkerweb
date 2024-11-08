@@ -1,28 +1,32 @@
 # Contributors
 
-## Project Co-Leads:
+## Project Co-Leads
 
 - [Christian Folini](https://github.com/dune73)
-- [Walter Hop](https://github.com/lifeforms)
 - [Felipe Zipitría](https://github.com/fzipi)
 
-## Developers:
+## Developers
 
-- [Paul Beckett](https://github.com/53cur3M3)
 - [Franziska Bühler](https://github.com/franbuehler)
-- [Christoph Hansen](https://github.com/emphazer)
 - [Ervin Hegedus](https://github.com/airween)
 - [Andrew Howe](https://github.com/RedXanadu)
 - [Max Leske](https://github.com/theseion)
+- [Jozef Sudolský](https://github.com/azurit)
+
+## Past Developers
+
+- [Walter Hop](https://github.com/lifeforms)
+- [Paul Beckett](https://github.com/53cur3M3)
+- [Christoph Hansen](https://github.com/emphazer)
 - [Andrea Menin](https://github.com/theMiddleBlue)
 - [Chaim Sanders](https://github.com/csanders-git)
 - [Federico G. Schwindt](https://github.com/fgsch)
 - [Manuel Leos Rivas](https://github.com/spartantri)
 - [Simon Studer](https://github.com/studersi)
-- [Jozef Sudolský](https://github.com/azurit)
 
-## Contributors:
+## Contributors
 
+- [luelueking](https://github.com/luelueking)
 - [agusmu](https://github.com/agusmu)
 - [Amir Hosein Aliakbarian](https://github.com/AmirHoseinAliakbarian)
 - [Zack Allen](https://github.com/zmallen)

@@ -7,6 +7,7 @@ import msc_pyparser
 import difflib
 import argparse
 import re
+import subprocess
 
 oformat = "native"
 
@@ -80,8 +81,11 @@ class Check(object):
         self.ids            = {}    # list of rule id's
         self.newtags        = []    # list of new, unlisted tags
         self.ignorecase     = []    # list of combinations of t:lowercase and (?i)
+        self.nocrstags      = []    # list of rules without tag:OWASP_CRS
+        self.noveract       = []    # list of rules without ver action or incorrect ver
+        self.nocaptact      = []    # list of rules which uses TX.N without previous 'capture'
 
-        self.re_tx_var      = re.compile("%\{\}")
+        self.re_tx_var      = re.compile(r"%\{\}")
 
     def store_error(self, msg):
         # store the error msg in the list
@@ -278,7 +282,7 @@ class Check(object):
                             # OR
                             # key exists but the existing struct's phase is higher
                             if (txv[0] not in self.globtxvars or self.globtxvars[txv[0]]['phase'] > phase) and \
-                               not re.search("%\{[^%]+\}", txv[0]):
+                               not re.search(r"%\{[^%]+\}", txv[0]):
                                 self.globtxvars[txv[0]] = {
                                     'phase'  : phase,
                                     'used'   : False,
@@ -288,8 +292,6 @@ class Check(object):
                                     'line'   : a['lineno'],
                                     'endLine': a['lineno']
                                 }
-                            else:
-                                pass
                     aidx += 1
 
     def check_tx_variable(self, fname):
@@ -343,13 +345,13 @@ class Check(object):
                     #  act_atg_val <- 5
                     #
                     if "act_arg" in a and a['act_arg'] is not None:
-                        val_act = re.findall("%\{(tx.[^%]*)\}", a['act_arg'], re.I)
+                        val_act = re.findall(r"%\{(tx.[^%]*)\}", a['act_arg'], re.I)
                     if "act_arg_val" in a and a['act_arg_val'] is not None:
-                        val_act_arg = re.findall("%\{(tx.[^%]*)\}", a['act_arg_val'], re.I)
+                        val_act_arg = re.findall(r"%\{(tx.[^%]*)\}", a['act_arg_val'], re.I)
                     for v in val_act + val_act_arg:
                         v = v.lower().replace("tx.", "")
                         # check whether the variable is a captured var, eg TX.1 - we do not care that case
-                        if not re.match("^\d$", v, re.I):
+                        if not re.match(r"^\d$", v, re.I):
                             # v holds the tx.ANY variable, but not the captured ones
                             # we should collect these variables
                             if (v not in self.globtxvars or phase < self.globtxvars[v]['phase']):
@@ -368,14 +370,14 @@ class Check(object):
                     aidx += 1
 
                 if "operator_argument" in d:
-                    oparg = re.findall("%\{(tx.[^%]*)\}", d['operator_argument'], re.I)
+                    oparg = re.findall(r"%\{(tx.[^%]*)\}", d['operator_argument'], re.I)
                     if oparg:
                         for o in oparg:
                             o = o.lower()
-                            o = re.sub("tx\.", "", o, re.I)
+                            o = re.sub(r"tx\.", "", o, re.I)
                             if (o not in self.globtxvars or phase < self.globtxvars[o]['phase']) and \
-                              not re.match("^\d$", o) and \
-                              not re.match("\/.*\/", o) and \
+                              not re.match(r"^\d$", o) and \
+                              not re.match(r"/.*/", o) and \
                               check_exists is None:
                                 self.undef_txvars.append({
                                     'var'    : o,
@@ -385,8 +387,8 @@ class Check(object):
                                     'message': "TX variable '%s' not set / later set (OPARG) in rule %d" % (o, ruleid)
                                 })
                             elif o in self.globtxvars and phase >= self.globtxvars[o]['phase'] and \
-                                not re.match("^\d$", o) and \
-                                not re.match("\/.*\/", o):
+                                not re.match(r"^\d$", o) and \
+                                not re.match(r"/.*/", o):
                                     self.globtxvars[o]['used'] = True
                 if "variables" in d:
                     for v in d['variables']:
@@ -402,8 +404,8 @@ class Check(object):
                                 # * rule's phase lower than declaration's phase
                                 rvar = v['variable_part'].lower()
                                 if (rvar not in self.globtxvars or (ruleid != self.globtxvars[rvar]['ruleid'] and phase < self.globtxvars[rvar]['phase'])) and \
-                                  not re.match("^\d$", rvar) and \
-                                  not re.match("\/.*\/", rvar):
+                                  not re.match(r"^\d$", rvar) and \
+                                  not re.match(r"/.*/", rvar):
                                     self.undef_txvars.append({
                                         'var'    : rvar,
                                         'ruleid' : ruleid,
@@ -412,8 +414,8 @@ class Check(object):
                                         'message': "TX variable '%s' not set / later set (VAR)" % (v['variable_part'])
                                     })
                                 elif rvar in self.globtxvars and phase >= self.globtxvars[rvar]['phase'] and \
-                                    not re.match("^\d$", rvar) and \
-                                    not re.match("\/.*\/", rvar):
+                                    not re.match(r"^\d$", rvar) and \
+                                    not re.match(r"/.*/", rvar):
                                         self.globtxvars[rvar]['used'] = True
                             else:
                                 check_exists = True
@@ -430,7 +432,7 @@ class Check(object):
                                 if has_disruptive == True:
                                     self.globtxvars[v['variable_part'].lower()]['used'] = True
                                 if len(self.undef_txvars) > 0 and self.undef_txvars[-1]['var'] == v['variable_part'].lower():
-                                    del(self.undef_txvars[-1])
+                                    del self.undef_txvars[-1]
                 if chained == False:
                     check_exists   = None
                     has_disruptive = False
@@ -469,7 +471,7 @@ class Check(object):
                 for v in d['variables']:
                     if v['variable'].lower() == "tx" and \
                        v['variable_part'].lower() == "detection_paranoia_level" and \
-                       d['operator'] == "@lt" and re.match("^\d$", d['operator_argument']):
+                       d['operator'] == "@lt" and re.match(r"^\d$", d['operator_argument']):
                             curr_pl = int(d['operator_argument'])
 
             if "actions" in d:
@@ -494,9 +496,9 @@ class Check(object):
                             txv = a['act_arg'][3:].split("=")
                             txv[0] = txv[0].lower()                     # variable name
                             if len(txv) > 1:
-                                txv[1] = txv[1].lower().strip("+\{\}")  # variable value
+                                txv[1] = txv[1].lower().strip(r"+\{\}")  # variable value
                             else:
-                                txv.append(a['act_arg_val'].strip("+\{\}"))
+                                txv.append(a['act_arg_val'].strip(r"+\{\}"))
                             _txvars[txv[0]] = txv[1]
                             _txvlines[txv[0]] = a['lineno']
                     if a['act_name'] == "nolog":
@@ -535,8 +537,8 @@ class Check(object):
 
                 for t in _txvars:
                     subst_val = re.search("%{tx.[a-z]+_anomaly_score}", _txvars[t], re.I)
-                    val = re.sub("[\+\%\{\}]", "", _txvars[t]).lower()
-                    scorepl = re.search("anomaly_score_pl\d$", t)   # check if last char is a numeric, eg ...anomaly_score_pl1
+                    val = re.sub(r"[+%{}]", "", _txvars[t]).lower()
+                    scorepl = re.search(r"anomaly_score_pl\d$", t)   # check if last char is a numeric, eg ...anomaly_score_pl1
                     if scorepl:
                         if curr_pl > 0 and int(t[-1]) != curr_pl:
                             self.plscores.append({
@@ -603,7 +605,7 @@ class Check(object):
                     aidx += 1
 
     def check_lowercase_ignorecase(self):
-        ruleid = 0 
+        ruleid = 0
         for d in self.data:
             if d['type'].lower() == "secrule":
                 if d['operator'] == "@rx":
@@ -613,7 +615,7 @@ class Check(object):
                             aidx = 0        # stores the index of current action
                             while aidx < len(d['actions']):
                                 # read the action into 'a'
-                                a = d['actions'][aidx]               
+                                a = d['actions'][aidx]
                                 if a['act_name'] == "id":
                                     ruleid = int(a['act_arg'])
                                 if a['act_name'] == 't':
@@ -626,6 +628,162 @@ class Check(object):
                                             'message': "rule uses (?i) in combination with t:lowercase: '%s'; rule id: %d" % (a['act_arg'], ruleid)
                             })
                                 aidx += 1
+
+    def check_crs_tag(self):
+        """
+        check that every rule has a `tag:'OWASP_CRS'` action
+        """
+        chained    = False
+        ruleid     = 0
+        chainlevel = 0
+        has_crs    = False
+        for d in self.data:
+            if "actions" in d:
+                aidx       = 0        # stores the index of current action
+                chainlevel = 0
+
+                if chained == False:
+                    ruleid     = 0
+                    has_crs    = False
+                    chainlevel = 0
+                else:
+                    chained    = False
+                while aidx < len(d['actions']):
+                    # read the action into 'a'
+                    a = d['actions'][aidx]
+                    if a['act_name'] == "id":
+                        ruleid = int(a['act_arg'])
+                    if a['act_name'] == "chain":
+                        chained = True
+                        chainlevel += 1
+                    if a['act_name'] == "tag":
+                        if chainlevel == 0:
+                            if a['act_arg'] == 'OWASP_CRS':
+                                has_crs = True
+                    aidx += 1
+                if ruleid > 0 and has_crs == False:
+                    self.nocrstags.append({
+                        'ruleid' : ruleid,
+                        'line'   : a['lineno'],
+                        'endLine': a['lineno'],
+                        'message': f"rule does not have tag with value 'OWASP_CRS'; rule id: {ruleid}"
+                    })
+
+    def check_ver_action(self, version):
+        """
+        check that every rule has a `ver` action
+        """
+        chained    = False
+        ruleid     = 0
+        chainlevel = 0
+        has_ver    = False
+        ver_is_ok  = False
+        crsversion = version
+        ruleversion = ""
+        for d in self.data:
+            if "actions" in d:
+                aidx       = 0        # stores the index of current action
+                chainlevel = 0
+
+                if chained == False:
+                    ruleid     = 0
+                    has_ver    = False
+                    ver_is_ok  = False
+                    chainlevel = 0
+                else:
+                    chained    = False
+                while aidx < len(d['actions']):
+                    # read the action into 'a'
+                    a = d['actions'][aidx]
+                    if a['act_name'] == "id":
+                        ruleid = int(a['act_arg'])
+                    if a['act_name'] == "chain":
+                        chained = True
+                        chainlevel += 1
+                    if a['act_name'] == "ver":
+                        if chainlevel == 0:
+                            has_ver = True
+                            if a['act_arg'] == version:
+                                ver_is_ok = True
+                            else:
+                                ruleversion = a['act_arg']
+                    aidx += 1
+                if ruleid > 0 and chainlevel == 0:
+                    if has_ver == False:
+                        self.noveract.append({
+                            'ruleid' : ruleid,
+                            'line'   : a['lineno'],
+                            'endLine': a['lineno'],
+                            'message': f"rule does not have 'ver' action; rule id: {ruleid}"
+                        })
+                    else:
+                        if ver_is_ok == False:
+                            self.noveract.append({
+                                'ruleid' : ruleid,
+                                'line'   : a['lineno'],
+                                'endLine': a['lineno'],
+                                'message': f"rule's 'ver' action has incorrect value; rule id: {ruleid}, version: '{ruleversion}', expected: '{crsversion}'"
+                            })
+
+    def check_capture_action(self):
+        """
+        check that every chained rule has a `capture` action if it uses TX.N variable
+        """
+        chained            = False
+        ruleid             = 0
+        chainlevel         = 0
+        capture_level      = None
+        re_number          = re.compile(r"^\d$")
+        has_capture        = False
+        use_captured_var   = False
+        captured_var_chain_level = 0
+        for d in self.data:
+            # only the SecRule object is relevant
+            if d['type'].lower() == "secrule":
+                for v in d['variables']:
+                    if v['variable'].lower() == 'tx' and re_number.match(v['variable_part']):
+                        if use_captured_var == False: # only the first occurrence required
+                            use_captured_var   = True
+                            captured_var_chain_level = chainlevel
+                if "actions" in d:
+                    aidx       = 0        # stores the index of current action
+                    if chained == False:
+                        ruleid     = 0
+                        chainlevel = 0
+                    else:
+                        chained    = False
+                    while aidx < len(d['actions']):
+                        # read the action into 'a'
+                        a = d['actions'][aidx]
+                        if a['act_name'] == "id":
+                            ruleid = int(a['act_arg'])
+                        if a['act_name'] == "chain":
+                            chained = True
+                            chainlevel += 1
+                        if a['act_name'] == "capture" :
+                            capture_level = chainlevel
+                            has_capture   = True
+                        aidx += 1
+                    if ruleid > 0 and chained == False: # end of chained rule
+                        if use_captured_var == True:
+                            # we allow if target with TX:N is in the first rule
+                            # of a chained rule without 'capture'
+                            if captured_var_chain_level > 0:
+                                if has_capture == False or captured_var_chain_level < capture_level:
+                                    self.nocaptact.append({
+                                        'ruleid' : ruleid,
+                                        'line'   : a['lineno'],
+                                        'endLine': a['lineno'],
+                                        'message': f"rule uses TX.N without capture; rule id: {ruleid}'"
+                                    })
+                        # clear variables
+                        chained = False
+                        chainlevel = 0
+                        has_capture = False
+                        capture_level = 0
+                        captured_var_chain_level = 0
+                        use_captured_var = False
+                        ruleid = 0
 
 def remove_comments(data):
     """
@@ -689,16 +847,16 @@ def remove_comments(data):
 
 def errmsg(msg):
     if oformat == "github":
-        print("::error %s" % (msg))
+        print("::error::%s" % (msg))
     else:
         print(msg)
 
 def errmsgf(msg):
     if oformat == "github":
         if 'message' in msg and msg['message'].strip() != "":
-            print("::error%sfile={file},line={line},endLine={endLine},title={title}: {message}".format(**msg) % (msg['indent']*" "))
+            print("::error%sfile={file},line={line},endLine={endLine},title={title}:: {message}".format(**msg) % (msg['indent']*" "))
         else:
-            print("::error%sfile={file},line={line},endLine={endLine},title={title}".format(**msg) % (msg['indent']*" "))
+            print("::error%sfile={file},line={line},endLine={endLine},title={title}::".format(**msg) % (msg['indent']*" "))
     else:
         if 'message' in msg and msg['message'].strip() != "":
             print("%sfile={file}, line={line}, endLine={endLine}, title={title}: {message}".format(**msg) % (msg['indent']*" "))
@@ -707,9 +865,27 @@ def errmsgf(msg):
 
 def msg(msg):
     if oformat == "github":
-        print("::debug %s" % (msg))
+        print("::debug::%s" % (msg))
     else:
         print(msg)
+
+def generate_version_string():
+    """
+    generate version string from git tag
+    program calls "git describe --tags" and converts it to version
+    eg:
+      v4.5.0-6-g872a90ab -> "4.6.0-dev"
+      v4.5.0-0-abcd01234 -> "4.5.0"
+    """
+    result = subprocess.run(["git", "describe", "--tags", "--match", "v*.*.*"], capture_output=True, text=True)
+    version = re.sub("^v", "", result.stdout.strip())
+    print(f"Latest tag found: {version}")
+    ver, commits = version.split("-")[0:2]
+    if int(commits) > 0:
+        version = ver.split(".")
+        version[1] = str((int(version[1]) + 1))
+        ver = f"""{".".join(version)}-dev"""
+    return ver
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="CRS Rules Check tool")
@@ -718,6 +894,7 @@ if __name__ == "__main__":
                             nargs='*', help='Directory path to CRS rules', required=True,
                             action="append")
     parser.add_argument("-t", "--tags-list", dest="tagslist", help="Path to file with permitted tags", required=True)
+    parser.add_argument("-v", "--version", dest="version", help="Version string", required=False)
     args = parser.parse_args()
 
     crspath = []
@@ -729,6 +906,15 @@ if __name__ == "__main__":
             print("--output can be one of the 'native' or 'github'. Default value is 'native'")
             sys.exit(1)
     oformat = args.output
+
+    if args.version is None:
+        # if no --version/-v was given, get version from git describe --tags output
+        crsversion = generate_version_string()
+    else:
+        crsversion = args.version.strip()
+    # if no "OWASP_CRS/" prefix, append it
+    if not crsversion.startswith("OWASP_CRS/"):
+        crsversion = "OWASP_CRS/" + crsversion
 
     tags = []
     try:
@@ -791,6 +977,7 @@ if __name__ == "__main__":
             continue
 
     msg("Checking parsed rules...")
+    crsver = ""
     for f in parsed_structs.keys():
 
         msg(f)
@@ -856,7 +1043,7 @@ if __name__ == "__main__":
             retval = 1
         for d in diff:
             d = d.strip("\n")
-            r = re.match("^@@ -(\d+),(\d+) \+\d+,\d+ @@$", d)
+            r = re.match(r"^@@ -(\d+),(\d+) \+\d+,\d+ @@$", d)
             if r:
                 line1, line2 = [int(i) for i in r.groups()]
                 e = {
@@ -949,7 +1136,7 @@ if __name__ == "__main__":
                 a['title']  = "new unlisted tag"
                 errmsgf(a)
                 retval = 1
-        ### check for t:lowercase in combination with (?i) in regex       
+        ### check for t:lowercase in combination with (?i) in regex
         c.check_lowercase_ignorecase()
         if len(c.ignorecase) == 0:
             msg(" No t:lowercase and (?i) flag used.")
@@ -959,6 +1146,42 @@ if __name__ == "__main__":
                 a['indent'] = 2
                 a['file']   = f
                 a['title']  = "t:lowercase and (?i)"
+                errmsgf(a)
+                retval = 1
+        ### check for tag:'OWASP_CRS'
+        c.check_crs_tag()
+        if len(c.nocrstags) == 0:
+            msg(" No rule without OWASP_CRS tag.")
+        else:
+            errmsg(" There are one or more rules without OWASP_CRS tag.")
+            for a in c.nocrstags:
+                a['indent'] = 2
+                a['file']   = f
+                a['title']  = "tag:OWASP_CRS is missing"
+                errmsgf(a)
+                retval = 1
+        ### check for ver action
+        c.check_ver_action(crsversion)
+        if len(c.noveract) == 0:
+            msg(" No rule without correct ver action.")
+        else:
+            errmsg(" There are one or more rules without ver action.")
+            for a in c.noveract:
+                a['indent'] = 2
+                a['file']   = f
+                a['title']  = "ver is missing / incorrect"
+                errmsgf(a)
+                retval = 1
+
+        c.check_capture_action()
+        if len(c.nocaptact) == 0:
+            msg(" No rule uses TX.N without capture action.")
+        else:
+            errmsg(" There are one or more rules using TX.N without capture action.")
+            for a in c.nocaptact:
+                a['indent'] = 2
+                a['file']   = f
+                a['title']  = "capture is missing"
                 errmsgf(a)
                 retval = 1
 
@@ -981,4 +1204,3 @@ if __name__ == "__main__":
         msg(" No unused TX variable")
 
     sys.exit(retval)
-

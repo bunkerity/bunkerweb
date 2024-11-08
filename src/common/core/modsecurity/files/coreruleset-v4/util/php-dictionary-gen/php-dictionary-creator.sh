@@ -368,7 +368,7 @@ if [ "$DO_RULE_933161" == "1" ]; then
 	# Being 933161 a stricter sibling of 933160, 933160 entries are also added to 933161.
 	# We read the 933160 file skipping comments and empty lines. Entries are added to 933161 (if not already present).
 	grep -v '^#' "$RA_FILE_PATH$R933160_FILENAME" | awk NF | while read -r R933160_ENTRY; do
-		
+
 		if [ $(grep -c -E "^$R933160_ENTRY$" "$TMP_ENGLISH_WORDS") -eq 0 ]; then
 			# we have to add this function to 933161
 			echo "Function \"$R933160_ENTRY\" from $R933160_FILENAME added to the stricter sibling $R933161_FILENAME"
@@ -376,7 +376,7 @@ if [ "$DO_RULE_933161" == "1" ]; then
 		else
 			echo "Function \"$R933160_ENTRY\" from $R933160_FILENAME already present in the stricter sibling $R933161_FILENAME"
 		fi
-	
+
 	done
 
 	sort -o "$TMP_ENGLISH_WORDS" "$TMP_ENGLISH_WORDS"
@@ -473,7 +473,7 @@ if [ "$DO_RULE_933150" == "1" ]; then
 		else
 			echo "High-risk function \"$HIGH_RISK_FUNC\" already present in $R933150_FILENAME"
 		fi
-	
+
 	done
 	sort -o "$TMP_PHP_FUNCTIONS_FREQUENT" "$TMP_PHP_FUNCTIONS_FREQUENT"
 	echo "File $R933150_FILENAME updated."

@@ -238,6 +238,7 @@ class Metadata(Base):
     pro_expire = Column(DateTime, nullable=True)
     pro_status = Column(PRO_STATUS_ENUM, default="invalid", nullable=False)
     pro_services = Column(Integer, default=0, nullable=False)
+    non_draft_services = Column(Integer, default=0, nullable=False)
     pro_overlapped = Column(Boolean, default=False, nullable=False)
     last_pro_check = Column(DateTime, nullable=True)
     first_config_saved = Column(Boolean, nullable=False)
@@ -253,4 +254,4 @@ class Metadata(Base):
     last_instances_change = Column(DateTime, nullable=True)
     failover = Column(Boolean, default=None, nullable=True)
     integration = Column(INTEGRATIONS_ENUM, default="Unknown", nullable=False)
-    version = Column(String(32), default="1.5.10", nullable=False)
+    version = Column(String(32), default="1.5.11", nullable=False)

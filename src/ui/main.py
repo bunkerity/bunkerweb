@@ -1025,13 +1025,14 @@ def services():
             del variables["OLD_SERVER_NAME"]
 
             # Edit check fields and remove already existing ones
-            for variable, value in variables.copy().items():
-                if (
-                    variable in variables
-                    and variable != "SERVER_NAME"
-                    and value == config.get(f"{server_name}_{variable}" if request.form["operation"] == "edit" else variable, {"value": None})["value"]
-                ):
-                    del variables[variable]
+            if was_draft == is_draft or not was_draft:
+                for variable, value in variables.copy().items():
+                    if (
+                        variable in variables
+                        and variable != "SERVER_NAME"
+                        and value == config.get(f"{server_name}_{variable}" if request.form["operation"] == "edit" else variable, {"value": None})["value"]
+                    ):
+                        del variables[variable]
 
             variables = app.config["CONFIG"].check_variables(variables, config)
 
@@ -1064,6 +1065,8 @@ def services():
 
         old_server_name = request.form.get("OLD_SERVER_NAME", "")
         operation = request.form["operation"]
+
+        app.logger.warning(variables)
 
         def update_services(threaded: bool = False):
             wait_applying()

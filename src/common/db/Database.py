@@ -343,7 +343,9 @@ class Database:
 
         return ""
 
-    def set_pro_metadata(self, data: Dict[Literal["is_pro", "pro_license", "pro_expire", "pro_status", "pro_overlapped", "pro_services"], Any] = {}) -> str:
+    def set_pro_metadata(
+        self, data: Dict[Literal["is_pro", "pro_license", "pro_expire", "pro_status", "pro_overlapped", "pro_services", "non_draft_services"], Any] = {}
+    ) -> str:
         """Set the pro metadata values"""
         with self.__db_session() as session:
             if self.readonly:
@@ -461,13 +463,14 @@ class Database:
     def get_metadata(self) -> Dict[str, Any]:
         """Get the metadata from the database"""
         data = {
-            "version": "1.5.10",
+            "version": "1.5.11",
             "integration": "unknown",
             "database_version": "Unknown",
             "is_pro": "no",
             "pro_license": "",
             "pro_expire": None,
             "pro_services": 0,
+            "non_draft_services": 0,
             "pro_overlapped": False,
             "pro_status": "invalid",
             "last_pro_check": None,
@@ -489,6 +492,7 @@ class Database:
                         Metadata.pro_license,
                         Metadata.pro_expire,
                         Metadata.pro_services,
+                        Metadata.non_draft_services,
                         Metadata.pro_overlapped,
                         Metadata.pro_status,
                         Metadata.last_pro_check,
@@ -506,6 +510,7 @@ class Database:
                             "pro_license": metadata.pro_license,
                             "pro_expire": metadata.pro_expire,
                             "pro_services": metadata.pro_services,
+                            "non_draft_services": metadata.non_draft_services,
                             "pro_overlapped": metadata.pro_overlapped,
                             "pro_status": metadata.pro_status,
                             "last_pro_check": metadata.last_pro_check,

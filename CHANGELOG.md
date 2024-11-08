@@ -1,6 +1,19 @@
 # Changelog
 
-## v1.5.10 - ????/??/??
+## v1.5.11 - ????/??/??
+
+- [BUGFIX] Fix INTERCEPTED_ERROR_CODES to allow empty value
+- [UI] Fix missing settings when a service is published online
+- [UI] Fix instances always down in instances page
+- [AUTOCONF] Fix BW env vars not retrieved
+- [AUTOCONF] Fix deadlock on k8s events when there is no ingress
+- [LINUX] Increase default worker dict size to avoid crash on RPI
+- [MISC] Add WORKERLOCK_MEMORY_SIZE setting for worker dict size
+- [MISC] Add API_TIMEOUT and API_READ_TIMEOUT settings to control API timeouts
+- [DEPS] Updated coreruleset-v4 version to v4.8.0
+- [DEPS] Updated coreruleset-v3 version to v3.3.7
+
+## v1.5.10 - 2024/09/17
 
 - [UI] Fix setup wizard bug related to certificate
 - [UI] Fix bug when adding more than 3 reverse proxies URLs

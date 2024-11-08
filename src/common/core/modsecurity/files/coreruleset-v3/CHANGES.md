@@ -6,6 +6,19 @@
   or the CRS Google Group at
 * <https://groups.google.com/a/owasp.org/forum/#!forum/modsecurity-core-rule-set-project>
 
+## Version 3.3.7 - 2024-10-28
+
+### ⭐ Important changes
+
+* fix: 9EA-241022 v3 by @RedXanadu in https://github.com/coreruleset/coreruleset/pull/3906
+
+## Version 3.3.6 - 2024-08-27
+
+Important changes:
+
+* Backport fix for 3MU-240701-1 - catch invalid character in multipart headers via new rule 922130 (Ervin Hegedus, Felipe Zipitría)
+* Backport fix for 3MU-240701-2 - prevent using backslash in file names from v4 - updated rule 920120 - pl1, 920121 - pl2 (Felipe Zipitria)
+
 ## Version 3.3.5 - 2023-07-18
 
 Important changes:
