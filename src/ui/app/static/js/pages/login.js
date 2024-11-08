@@ -1,11 +1,16 @@
 $(document).ready(() => {
-  // If no saved preference, use the system's preferred color scheme
-  const systemPrefersDark = window.matchMedia(
-    "(prefers-color-scheme: dark)",
-  ).matches;
-  savedTheme = systemPrefersDark ? "dark" : "light";
+  // Check if there's a saved theme preference in localStorage
+  let savedTheme = localStorage.getItem("theme");
 
-  // Apply the preferred theme
+  if (!savedTheme) {
+    // If no saved preference, use the system's preferred color scheme
+    const systemPrefersDark = window.matchMedia(
+      "(prefers-color-scheme: dark)",
+    ).matches;
+    savedTheme = systemPrefersDark ? "dark" : "light";
+  }
+
+  // Apply the saved or system-preferred theme
   applyTheme(savedTheme);
 
   // Toggle theme on change
