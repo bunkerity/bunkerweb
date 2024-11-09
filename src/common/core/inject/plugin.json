@@ -18,7 +18,7 @@
       "context": "multisite",
       "default": "",
       "help": "The HTML code to inject before the </head> tag.",
-      "id": "inject-body",
+      "id": "inject-head",
       "label": "head HTML code",
       "regex": "^.*$",
       "type": "text"
