@@ -43,6 +43,11 @@ if [ -f /etc/os-release ]; then
         echo "ℹ️ Copy /var/tmp/db.sqlite3 to /var/lib/bunkerweb/db.sqlite3"
         do_and_check_cmd cp -f /var/tmp/db.sqlite3 /var/lib/bunkerweb/db.sqlite3
     fi
+    if [ -d /etc/nginx ]; then
+        output_path="/etc/nginx_backup_$(date +%s)"
+        echo "ℹ️ Copy /etc/nginx to $output_path"
+        do_and_check_cmd cp -R /etc/nginx $output_path
+    fi
 else
     echo "❌ Error: /etc/os-release not found"
     exit 1
