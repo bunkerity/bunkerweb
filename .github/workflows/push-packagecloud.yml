@@ -84,6 +84,12 @@ jobs:
         continue-on-error: true
         env:
           PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
+      - name: Remove 1.5 file
+        if: inputs.BW_VERSION == '1.5-dev'
+        run: package_cloud yank bunkerity/${{ inputs.REPO }}/${{ inputs.LINUX }}/${{ inputs.VERSION }} bunkerweb${{ inputs.SEPARATOR }}1.5${{ inputs.SEPARATOR }}${{ inputs.SUFFIX }}${{ inputs.PACKAGE_ARCH }}.${{ inputs.PACKAGE }}
+        continue-on-error: true
+        env:
+          PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
       # Push package
       - name: Push package to packagecloud
         if: inputs.LINUX != 'el9' && inputs.LINUX != 'ubuntu-jammy'
