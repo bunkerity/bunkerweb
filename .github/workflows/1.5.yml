@@ -190,7 +190,7 @@ jobs:
         linux: [ubuntu, debian, fedora, el, el9, ubuntu-jammy]
         arch: [amd64]
         include:
-          - release: 1.5
+          - release: 1.5-dev
             repo: bunkerweb
           - linux: ubuntu
             package_arch: amd64
