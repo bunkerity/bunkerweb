@@ -49,9 +49,9 @@ jobs:
       - name: Replace VERSION
         if: inputs.RELEASE == 'testing' || inputs.RELEASE == 'dev'
         run: chmod +x ./misc/update-version.sh && ./misc/update-version.sh ${{ inputs.RELEASE }}
-      - name: Replace VERSION 1.5
-        if: inputs.RELEASE == '1.5'
-        run: chmod +x ./misc/update-version.sh && ./misc/update-version.sh dev
+      - name: Replace VERSION 1.5-dev
+        if: inputs.RELEASE == '1.5-dev'
+        run: chmod +x ./misc/update-version.sh && ./misc/update-version.sh 1.5-dev
       - name: Setup SSH for ARM node
         if: inputs.CACHE_SUFFIX == 'arm'
         run: |
