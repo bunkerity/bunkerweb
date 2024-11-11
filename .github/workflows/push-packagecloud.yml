@@ -77,10 +77,13 @@ jobs:
         continue-on-error: true
         env:
           PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
-      # Update name
-      - name: Rename package
-        if: inputs.BW_VERSION == '1.5'
-        run: sudo apt install -y rename && rename 's/dev/1.5-dev/' /tmp/${{ inputs.LINUX }}/*.${{ inputs.PACKAGE }}
+      # Specific removes for 1.5
+      - name: Remove 1.5_dev file
+        if: inputs.BW_VERSION == '1.5-dev'
+        run: package_cloud yank bunkerity/${{ inputs.REPO }}/${{ inputs.LINUX }}/${{ inputs.VERSION }} bunkerweb${{ inputs.SEPARATOR }}1.5_dev${{ inputs.SEPARATOR }}${{ inputs.SUFFIX }}${{ inputs.PACKAGE_ARCH }}.${{ inputs.PACKAGE }}
+        continue-on-error: true
+        env:
+          PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
       # Push package
       - name: Push package to packagecloud
         if: inputs.LINUX != 'el9' && inputs.LINUX != 'ubuntu-jammy'
