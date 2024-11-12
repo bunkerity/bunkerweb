@@ -17,7 +17,7 @@ repos:
       - id: check-case-conflict
 
   - repo: https://github.com/psf/black
-    rev: b965c2a5026f8ba399283ba3e01898b012853c79 # frozen: 24.8.0
+    rev: 1b2427a2b785cc4aac97c19bb4b9a0de063f9547 # frozen: 24.10.0
     hooks:
       - id: black
         name: Black Python Formatter
@@ -67,7 +67,7 @@ repos:
         types: [text]
 
   - repo: https://github.com/gitleaks/gitleaks
-    rev: ce2702a4889da86abb07e0fb0482e9a6e12a9f24 # frozen: v8.20.0
+    rev: a9e1950fe247fbb08817393121691474c55a6cfa # frozen: v8.21.2
     hooks:
       - id: gitleaks
 
