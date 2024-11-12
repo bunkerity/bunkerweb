@@ -438,6 +438,7 @@ $(document).ready(() => {
       $(".bg-light-subtle")
         .addClass("bg-dark-subtle")
         .removeClass("bg-light-subtle");
+      $("html").attr("data-bs-theme", "dark");
     } else {
       $("html").removeClass("dark-style").addClass("light-style");
       $(".btn-outline-light")
@@ -448,6 +449,7 @@ $(document).ready(() => {
       $(".bg-dark-subtle")
         .addClass("bg-light-subtle")
         .removeClass("bg-dark-subtle");
+      $("html").attr("data-bs-theme", null);
     }
 
     $("#theme").val(darkMode ? "dark" : "light");
@@ -457,6 +459,7 @@ $(document).ready(() => {
       .replace(/\/profile$/, "/set_theme");
     const csrfToken = $("#csrf_token").val();
     const theme = darkMode ? "dark" : "light";
+    localStorage.setItem("theme", theme); // Save user preference
 
     const data = new FormData();
     data.append("theme", theme);

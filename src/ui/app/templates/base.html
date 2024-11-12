@@ -25,7 +25,8 @@
 <!DOCTYPE html>
 <html lang="en"
       class="{{ current_user.theme }}-style layout-navbar-fixed layout-menu-fixed"
-      data-theme="theme-default">
+      data-theme="theme-default"
+      {% if current_user.theme == 'dark' %}data-bs-theme="dark"{% endif %}>
     <head>
         <meta charset="utf-8" />
         <meta name="viewport"

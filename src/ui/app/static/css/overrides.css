@@ -1215,3 +1215,13 @@ html[dir="rtl"].dark-style .border-primary {
 .dark-style table.table.dataTable > tbody > tr.selected a {
   color: initial !important;
 }
+
+.dark-style div.dts div.dt-scroll-body table,
+.dark-style div.dts div.dataTables_scrollBody table {
+  background-color: #0c283a;
+}
+
+.dark-style .form-floating > :disabled ~ label,
+.dark-style .form-floating > .form-control:disabled ~ label {
+  color: #9caeb7;
+}

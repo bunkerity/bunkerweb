@@ -423,7 +423,7 @@ $(function () {
         targets: 5,
       },
     ],
-    order: [[1, "desc"]],
+    order: [[1, "asc"]],
     autoFill: false,
     responsive: true,
     select: {
