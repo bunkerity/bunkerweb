@@ -1,4 +1,4 @@
-FROM debian:bookworm-slim@sha256:36e591f228bb9b99348f584e83f16e012c33ba5cad44ef5981a1d7c0a93eca22 AS builder
+FROM debian:bookworm-slim@sha256:ca3372ce30b03a591ec573ea975ad8b0ecaf0eb17a354416741f8001bbcae33d AS builder
 
 ENV OS=debian
 ENV NGINX_VERSION=1.26.2
@@ -58,7 +58,7 @@ COPY src/scheduler scheduler
 COPY src/ui ui
 COPY src/VERSION VERSION
 
-FROM debian:bookworm-slim@sha256:36e591f228bb9b99348f584e83f16e012c33ba5cad44ef5981a1d7c0a93eca22
+FROM debian:bookworm-slim@sha256:ca3372ce30b03a591ec573ea975ad8b0ecaf0eb17a354416741f8001bbcae33d
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
