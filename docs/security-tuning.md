@@ -158,41 +158,17 @@ BunkerWeb comes with automatic Let's Encrypt certificate generation and renewal.
 
 Here is the list of related settings :
 
-|          Setting           |         Default          | Description                                                                                                                                                        |
-| :------------------------: | :----------------------: | :----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-|    `AUTO_LETS_ENCRYPT`     |           `no`           | When set to `yes`, HTTPS / SSL/TLS will be enabled with automatic certificate generation and renewal from Let's Encrypt.                                           |
-|    `EMAIL_LETS_ENCRYPT`    | `contact@{FIRST_SERVER}` | Email to use when generating certificates. Let's Encrypt will send notifications to that email like certificate expiration.                                        |
-| `USE_LETS_ENCRYPT_STAGING` |           `no`           | When set to `yes`, the staging server of Let's Encrypt will be used instead of the production one. Useful when doing tests to avoid being "blocked" due to limits. |
-
-Full Let's Encrypt automation is fully working with stream mode as long as you open the `80/tcp` port from the outside. Please note that you will need to use the `LISTEN_STREAM_PORT_SSL` setting in order to choose your listening SSL/TLS port.
-
-### Let's Encrypt DNS <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
-
-STREAM support :white_check_mark:
-
-The Let's Encrypt DNS plugin facilitates the automatic creation, renewal, and configuration of Let's Encrypt certificates using DNS challenges.
-
-This plugin offers seamless integration with various DNS providers for streamlined certificate management.
-
-**List of features**
-
-- Automatic creation and renewal of Let's Encrypt certificates
-- Integration with DNS providers for DNS challenges
-- Generate wildcard certificates
-- Configuration options for customization and flexibility
-
-**Settings of the Let's Encrypt DNS plugin**
-
-| Setting                            | Default   | Context   | Multiple | Description                                                                             |
-| ---------------------------------- | --------- | --------- | -------- | --------------------------------------------------------------------------------------- |
-| `AUTO_LETS_ENCRYPT_DNS`            | `no`      | multisite | no       | Set to `yes` to enable automatic certificate creation and renewal using DNS challenges. |
-| `LETS_ENCRYPT_DNS_EMAIL`           |           | multisite | no       | Email address for Let's Encrypt notifications.                                          |
-| `USE_LETS_ENCRYPT_DNS_STAGING`     | `no`      | multisite | no       | Set to `yes` to use Let's Encrypt staging server.                                       |
-| `LETS_ENCRYPT_DNS_PROVIDER`        |           | multisite | no       | DNS provider for Let's Encrypt DNS challenges.                                          |
-| `USE_LETS_ENCRYPT_DNS_WILDCARD`    | `yes`     | multisite | no       | Set to `yes` to automatically generate wildcard domains in certificates.                |
-| `LETS_ENCRYPT_DNS_PROPAGATION`     | `default` | multisite | no       | Time in seconds to wait for DNS propagation.                                            |
-| `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` |           | multisite | yes      | Credential item for Let's Encrypt DNS provider that contains required credentials.      |
-| `LETS_ENCRYPT_DNS_CLEAR_OLD_CERTS` | `no`      | global    | no       | Clear old certificates when renewing.                                                   |
+|              Setting               |         Default          | Description                                                                                                                                                                   |
+| :--------------------------------: | :----------------------: | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|        `AUTO_LETS_ENCRYPT`         |           `no`           | When set to `yes`, HTTPS / SSL/TLS will be enabled with automatic certificate generation and renewal from Let's Encrypt.                                                      |
+|        `EMAIL_LETS_ENCRYPT`        | `contact@{FIRST_SERVER}` | Email to use when generating certificates. Let's Encrypt will send notifications to that email like certificate expiration.                                                   |
+|      `LETS_ENCRYPT_CHALLENGE`      |          `http`          | The challenge type to use for Let's Encrypt (http or dns).                                                                                                                    |
+|    `LETS_ENCRYPT_DNS_PROVIDER`     |                          | The DNS provider to use for DNS challenges.                                                                                                                                   |
+|   `LETS_ENCRYPT_DNS_PROPAGATION`   |        `default`         | The time to wait for DNS propagation in seconds for DNS challenges.                                                                                                           |
+| `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` |                          | Configuration item that will be added to the credentials.ini file for the DNS provider (e.g. 'cloudflare_api_token 123456') for DNS challenges.                               |
+|    `USE_LETS_ENCRYPT_WILDCARD`     |           `no`           | Create wildcard certificates for all domains. This allows a single certificate to secure multiple subdomains.                                                                 |
+|     `USE_LETS_ENCRYPT_STAGING`     |           `no`           | Use the staging environment for Let’s Encrypt certificate generation. Useful when you are testing your deployments to avoid being rate limited in the production environment. |
+|   `LETS_ENCRYPT_CLEAR_OLD_CERTS`   |           `no`           | Clear old certificates when renewing.                                                                                                                                         |
 
 !!! info "Information and behavior"
     - The `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` setting is a multiple setting and can be used to set multiple items for the DNS provider. The items will be saved as a cache file and Certbot will read the credentials from it.
@@ -201,16 +177,24 @@ This plugin offers seamless integration with various DNS providers for streamlin
 
 **Available DNS Providers**
 
-| Provider       | Description                  | Mandatory Settings                                                                                    | Link(s)                                                                               |
-| -------------- | ---------------------------- | ----------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| `cloudflare`   | Cloudflare DNS provider      | `dns_cloudflare_api_token`                                                                            | [Documentation](https://certbot-dns-cloudflare.readthedocs.io/en/stable/)             |
-| `digitalocean` | DigitalOcean DNS provider    | `dns_digitalocean_token`                                                                              | [Documentation](https://certbot-dns-digitalocean.readthedocs.io/en/stable/)           |
-| `google`       | Google Cloud DNS provider    | `project_id`, `private_key_id`, `private_key`, `client_email`, `client_email`, `client_x509_cert_url` | [Documentation](https://certbot-dns-google.readthedocs.io/en/stable/)                 |
-| `linode`       | Linode DNS provider          | `dns_linode_key`                                                                                      | [Documentation](https://certbot-dns-linode.readthedocs.io/en/stable/)                 |
-| `ovh`          | OVH DNS provider             | `dns_ovh_application_key`, `dns_ovh_application_secret`, `dns_ovh_consumer_key`                       | [Documentation](https://certbot-dns-ovh.readthedocs.io/en/stable/)                    |
-| `rfc2136`      | RFC 2136 DNS provider        | `dns_rfc2136_server`, `dns_rfc2136_name`, `dns_rfc2136_secret`                                        | [Documentation](https://certbot-dns-rfc2136.readthedocs.io/en/stable/)                |
-| `route53`      | Amazon Route 53 DNS provider | `aws_access_key_id`, `aws_secret_access_key`                                                          | [Documentation](https://certbot-dns-route53.readthedocs.io/en/stable/)                |
-| `scaleway`     | Scaleway DNS provider        | `dns_scaleway_application_token`                                                                      | [Documentation](https://github.com/vanonox/certbot-dns-scaleway/blob/main/README.rst) |
+| Provider       | Description     | Mandatory Settings                                                                                 | Link(s)                                                                               |
+| -------------- | --------------- | -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `cloudflare`   | Cloudflare      | `dns_cloudflare_api_token`                                                                         | [Documentation](https://certbot-dns-cloudflare.readthedocs.io/en/stable/)             |
+| `digitalocean` | DigitalOcean    | `dns_digitalocean_token`                                                                           | [Documentation](https://certbot-dns-digitalocean.readthedocs.io/en/stable/)           |
+| `dnsimple`     | DNSimple        | `dns_dnsimple_token`                                                                               | [Documentation](https://certbot-dns-dnsimple.readthedocs.io/en/stable/)               |
+| `dnsmadeeasy`  | DNS Made Easy   | `dns_dnsmadeeasy_api_key`, `dns_dnsmadeeasy_secret_key`                                            | [Documentation](https://certbot-dns-dnsmadeeasy.readthedocs.io/en/stable/)            |
+| `gehirn`       | Gehirn DNS      | `dns_gehirn_api_token`, `dns_gehirn_api_secret`                                                    | [Documentation](https://certbot-dns-gehirn.readthedocs.io/en/stable/)                 |
+| `google`       | Google Cloud    | `project_id`, `private_key_id`, `private_key`, `client_email`, `client_id`, `client_x509_cert_url` | [Documentation](https://certbot-dns-google.readthedocs.io/en/stable/)                 |
+| `linode`       | Linode          | `dns_linode_key`                                                                                   | [Documentation](https://certbot-dns-linode.readthedocs.io/en/stable/)                 |
+| `luadns`       | LuaDNS          | `dns_luadns_email`, `dns_luadns_token`                                                             | [Documentation](https://certbot-dns-luadns.readthedocs.io/en/stable/)                 |
+| `nsone`        | NS1             | `dns_nsone_api_key`                                                                                | [Documentation](https://certbot-dns-nsone.readthedocs.io/en/stable/)                  |
+| `ovh`          | OVH             | `dns_ovh_application_key`, `dns_ovh_application_secret`, `dns_ovh_consumer_key`                    | [Documentation](https://certbot-dns-ovh.readthedocs.io/en/stable/)                    |
+| `rfc2136`      | RFC 2136        | `dns_rfc2136_server`, `dns_rfc2136_name`, `dns_rfc2136_secret`                                     | [Documentation](https://certbot-dns-rfc2136.readthedocs.io/en/stable/)                |
+| `route53`      | Amazon Route 53 | `aws_access_key_id`, `aws_secret_access_key`                                                       | [Documentation](https://certbot-dns-route53.readthedocs.io/en/stable/)                |
+| `sakuracloud`  | Sakura Cloud    | `dns_sakuracloud_api_token`, `dns_sakuracloud_api_secret`                                          | [Documentation](https://certbot-dns-sakuracloud.readthedocs.io/en/stable/)            |
+| `scaleway`     | Scaleway        | `dns_scaleway_application_token`                                                                   | [Documentation](https://github.com/vanonox/certbot-dns-scaleway/blob/main/README.rst) |
+
+Full Let's Encrypt automation is fully working with stream mode as long as you open the `80/tcp` port from the outside. Please note that you will need to use the `LISTEN_STREAM_PORT_SSL` setting in order to choose your listening SSL/TLS port.
 
 ### Custom certificate
 
