@@ -23,6 +23,70 @@
       "regex": "^([^@ \\t\\r\\n]+@[^@ \\t\\r\\n]+\\.[^@ \\t\\r\\n]+)?$",
       "type": "text"
     },
+    "LETS_ENCRYPT_CHALLENGE": {
+      "context": "multisite",
+      "default": "http",
+      "help": "The challenge type to use for Let's Encrypt (http or dns).",
+      "id": "lets-encrypt-challenge",
+      "label": "Challenge Type",
+      "regex": "^(http|dns)$",
+      "type": "select",
+      "select": ["http", "dns"]
+    },
+    "LETS_ENCRYPT_DNS_PROVIDER": {
+      "context": "multisite",
+      "default": "",
+      "help": "The DNS provider to use for DNS challenges.",
+      "id": "auto-lets-encrypt-dns-provider",
+      "label": "DNS Provider",
+      "regex": "^(cloudflare|digitalocean|dnsimple|dnsmadeeasy|gehirn|google|linode|luadns|nsone|ovh|rfc2136|route53|sakuracloud|scaleway)?$",
+      "type": "select",
+      "select": [
+        "",
+        "cloudflare",
+        "digitalocean",
+        "dnsimple",
+        "dnsmadeeasy",
+        "gehirn",
+        "google",
+        "linode",
+        "luadns",
+        "nsone",
+        "ovh",
+        "rfc2136",
+        "route53",
+        "sakuracloud",
+        "scaleway"
+      ]
+    },
+    "LETS_ENCRYPT_DNS_PROPAGATION": {
+      "context": "multisite",
+      "default": "default",
+      "help": "The time to wait for DNS propagation in seconds for DNS challenges.",
+      "id": "lets-encrypt-dns-propagation",
+      "label": "DNS Propagation",
+      "regex": "^(default|\\d+)$",
+      "type": "text"
+    },
+    "LETS_ENCRYPT_DNS_CREDENTIAL_ITEM": {
+      "context": "multisite",
+      "default": "",
+      "help": "Configuration item that will be added to the credentials.ini file for the DNS provider (e.g. 'cloudflare_api_token 123456') for DNS challenges.",
+      "id": "lets-encrypt-dns-credential-item",
+      "label": "Credential Item",
+      "regex": "^(\\w+ .+)?$",
+      "type": "password",
+      "multiple": "lets-encrypt-dns-credential-item"
+    },
+    "USE_LETS_ENCRYPT_WILDCARD": {
+      "context": "multisite",
+      "default": "no",
+      "help": "Create wildcard certificates for all domains. This allows a single certificate to secure multiple subdomains.",
+      "id": "use-lets-encrypt-wildcard",
+      "label": "Wildcard Certificates",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
     "USE_LETS_ENCRYPT_STAGING": {
       "context": "multisite",
       "default": "no",

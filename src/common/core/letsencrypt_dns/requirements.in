@@ -1,9 +1,0 @@
-certbot-dns-cloudflare==2.11.0
-certbot-dns-digitalocean==2.11.0
-certbot-dns-google==2.11.0
-certbot-dns-linode==2.11.0
-certbot-dns-ovh==2.11.0
-certbot-dns-rfc2136==2.11.0
-certbot-dns-route53==2.11.0
-certbot-dns-scaleway==0.0.7
-pydantic==2.9.2

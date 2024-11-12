@@ -12,6 +12,7 @@
 - [FEATURE] Optimized the way the scheduler sends the configuration to the instances to make it faster and more reliable using a ThreadPoolExecutor
 - [FEATURE] Add the possibility to set a custom timezone for every service via the `TZ` environment variable (will apply to the logs and all date fields stored in the database). If not set, it will use the local timezone of the server.
 - [FEATURE] Add the possibility to run plugins job in async mode to avoid running them in order in the scheduler by setting the `async` key to `true` in the plugin job configuration (default is `false`)
+- [FEATURE] Add Let's Encrypt DNS challenges support !
 - [SCHEDULER] Refactor the scheduler to use the `BUNKERWEB_INSTANCES` (previously known as `OVERRIDE_INSTANCES`) environment variable instead of an integration specific system
 - [AUTOCONF] Add new `NAMESPACES` environment variable to allow setting the namespaces to watch for the autoconf feature which makes it possible to use multiple autoconf instances in the same cluster while keeping the configuration separated
 - [AUTOCONF] Add new `USE_KUBERNETES_FQDN` environment variable to allow using the full qualified domain name of the services in Kubernetes instead of the ip address for the hostname of instances (default is yes)
@@ -25,10 +26,22 @@
 - [DOCS] Updated docs for all new features and changes
 - [MISC] Review security headers in the `headers` plugin to improve security
 - [MISC] Updated context of `realip`'s `USE_PROXY_PROTOCOL` setting to `global` as it was always applied globally even if set only on a service
-- [DEPS] Updated coreruleset-v4 version to v4.7.0
 - [DEPS] Updated lua-resty-core version to v0.1.30
 - [DEPS] Updated lua-resty-lrucache version to v0.15
 - [DEPS] Updated Mbed TLS version to v3.6.2
+
+## v1.5.11 - 2024/11/08
+
+- [BUGFIX] Fix INTERCEPTED_ERROR_CODES to allow empty value
+- [UI] Fix missing settings when a service is published online
+- [UI] Fix instances always down in instances page
+- [AUTOCONF] Fix BW env vars not retrieved
+- [AUTOCONF] Fix deadlock on k8s events when there is no ingress
+- [LINUX] Increase default worker dict size to avoid crash on RPI
+- [MISC] Add WORKERLOCK_MEMORY_SIZE setting for worker dict size
+- [MISC] Add API_TIMEOUT and API_READ_TIMEOUT settings to control API timeouts
+- [DEPS] Updated coreruleset-v4 version to v4.8.0
+- [DEPS] Updated coreruleset-v3 version to v3.3.7
 
 ## v1.5.10 - 2024/08/17
 
