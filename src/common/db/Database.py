@@ -18,6 +18,7 @@ from threading import Lock
 from typing import Any, Dict, List, Literal, Optional, Set, Tuple, Union
 from time import sleep
 from uuid import uuid4
+from warnings import filterwarnings
 
 from model import (
     Base,
@@ -56,6 +57,7 @@ from sqlalchemy.exc import (
     IntegrityError,
     OperationalError,
     ProgrammingError,
+    SAWarning,
     SQLAlchemyError,
 )
 from sqlalchemy.orm import scoped_session, sessionmaker
@@ -73,6 +75,9 @@ def set_sqlite_pragma(dbapi_connection, _):
         cursor = dbapi_connection.cursor()
         cursor.execute("PRAGMA journal_mode=WAL")
         cursor.close()
+
+
+filterwarnings("ignore", category=SAWarning, message="DELETE statement on table .* expected to delete")
 
 
 class Database:
