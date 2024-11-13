@@ -349,9 +349,7 @@ uint64_t lj_carith_check64(lua_State *L, int narg, CTypeID *id)
   if (LJ_LIKELY(tvisint(o))) {
     return (uint32_t)intV(o);
   } else {
-    int32_t i = lj_num2bit(numV(o));
-    if (LJ_DUALNUM) setintV(o, i);
-    return (uint32_t)i;
+    return (uint32_t)lj_num2bit(numV(o));
   }
 }
 

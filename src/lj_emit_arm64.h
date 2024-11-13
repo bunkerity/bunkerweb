@@ -109,6 +109,11 @@ static void emit_d(ASMState *as, A64Ins ai, Reg rd)
   *--as->mcp = ai | A64F_D(rd);
 }
 
+static void emit_dl(ASMState *as, A64Ins ai, Reg rd, uint32_t l)
+{
+  *--as->mcp = ai | A64F_D(rd) | A64F_S19(l >> 2);
+}
+
 static void emit_n(ASMState *as, A64Ins ai, Reg rn)
 {
   *--as->mcp = ai | A64F_N(rn);
@@ -226,7 +231,7 @@ static int emit_kadrp(ASMState *as, Reg rd, uint64_t k)
       emit_dn(as, (A64I_ADDx^A64I_K12)|A64F_U12(k - kpage), rd, rd);
     ai = A64I_ADRP;
   }
-  emit_d(as, ai|(((uint32_t)ofs&3)<<29)|A64F_S19(ofs>>2), rd);
+  emit_dl(as, ai|(((uint32_t)ofs&3)<<29), rd, ofs);
   return 1;
 }
 
@@ -291,7 +296,7 @@ static void emit_lsptr(ASMState *as, A64Ins ai, Reg r, void *p)
     /* GL + offset, might subsequently fuse to LDP/STP. */
   } else if (ai == A64I_LDRx && checkmcpofs(as, p)) {
     /* IP + offset is cheaper than allock, but address must be in range. */
-    emit_d(as, A64I_LDRLx | A64F_S19(mcpofs(as, p)>>2), r);
+    emit_dl(as, A64I_LDRLx, r, mcpofs(as, p));
     return;
   } else {  /* Split up into base reg + offset. */
     int64_t i64 = i64ptr(p);
@@ -320,15 +325,15 @@ static void emit_loadk64(ASMState *as, Reg r, IRIns *ir)
   if (emit_checkofs(A64I_LDRx, ofs)) {
     emit_lso(as, r >= RID_MAX_GPR ? A64I_LDRd : A64I_LDRx,
 	     (r & 31), RID_GL, ofs);
+  } else if (checkmcpofs(as, k)) {
+    emit_dl(as, r >= RID_MAX_GPR ? A64I_LDRLd : A64I_LDRLx,
+	    (r & 31), mcpofs(as, k));
   } else {
     if (r >= RID_MAX_GPR) {
       emit_dn(as, A64I_FMOV_D_R, (r & 31), RID_TMP);
       r = RID_TMP;
     }
-    if (checkmcpofs(as, k))
-      emit_d(as, A64I_LDRLx | A64F_S19(mcpofs(as, k)>>2), r);
-    else
-      emit_loadu64(as, r, *k);
+    emit_loadu64(as, r, *k);
   }
 }
 

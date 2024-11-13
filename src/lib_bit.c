@@ -98,7 +98,7 @@ LJLIB_ASM(bit_lshift)		LJLIB_REC(bit_shift IR_BSHL)
     x = lj_carith_shift64(x, sh, curr_func(L)->c.ffid - (int)FF_bit_lshift);
     return bit_result64(L, id, x);
   }
-  if (id2) setintV(L->base+1, sh);
+  setintV(L->base+1, sh);
   return FFH_RETRY;
 #else
   lj_lib_checknumber(L, 1);

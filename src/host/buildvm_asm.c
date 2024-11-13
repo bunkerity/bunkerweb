@@ -399,6 +399,10 @@ void emit_asm(BuildCtx *ctx)
     fprintf(ctx->fp, "\t.ident \"%s\"\n", ctx->dasm_ident);
     break;
   case BUILD_machasm:
+#if defined(__apple_build_version__) && __apple_build_version__ >= 15000000 && __apple_build_version__ < 15000300
+    /* Workaround for XCode 15.0 - 15.2. */
+    fprintf(ctx->fp, "\t.subsections_via_symbols\n");
+#endif
     fprintf(ctx->fp,
       "\t.cstring\n"
       "\t.ascii \"%s\\0\"\n", ctx->dasm_ident);
