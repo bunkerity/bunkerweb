@@ -165,7 +165,7 @@ try:
         servers = servers.split(" ")
 
     if not servers:
-        LOGGER.error("There are no server names, skipping generation...")
+        LOGGER.warning("There are no server names, skipping generation...")
         sys_exit(0)
 
     use_letsencrypt = False
