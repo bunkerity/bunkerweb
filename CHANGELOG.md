@@ -28,6 +28,7 @@
 - [MISC] Updated context of `realip`'s `USE_PROXY_PROTOCOL` setting to `global` as it was always applied globally even if set only on a service
 - [DEPS] Updated lua-resty-core version to v0.1.30
 - [DEPS] Updated lua-resty-lrucache version to v0.15
+- [DEPS] Updated LuaJIT version to v2.1-20241113
 - [DEPS] Updated Mbed TLS version to v3.6.2
 
 ## v1.5.11 - 2024/11/08
