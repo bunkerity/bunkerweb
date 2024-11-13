@@ -404,6 +404,57 @@ $(document).ready(() => {
           $confirmPasswordInput.siblings(".invalid-feedback").text("");
         }
       } else if (!uiReverseProxy && currentStep === 2) {
+        const autoLetsEncrypt = $("#AUTO_LETS_ENCRYPT").prop("checked");
+        const letsEncryptChallenge = $("#LETS_ENCRYPT_CHALLENGE")
+          .find(":selected")
+          .val();
+        if (autoLetsEncrypt && letsEncryptChallenge === "dns") {
+          const $letsEncryptProvider = $("#LETS_ENCRYPT_DNS_PROVIDER");
+          if (!$letsEncryptProvider.find(":selected").val()) {
+            $letsEncryptProvider.addClass("is-invalid");
+            let $feedback = $letsEncryptProvider.siblings(".invalid-feedback");
+            if (!$feedback.length) {
+              const $textSpan = $letsEncryptProvider
+                .parent()
+                .find("span.input-group-text");
+              $feedback = $(
+                '<div class="invalid-feedback">This field is required when using DNS challenge.</div>',
+              ).insertAfter(
+                $textSpan.length ? $textSpan : $letsEncryptProvider,
+              );
+            } else {
+              $feedback.text(
+                "This field is required when using DNS challenge.",
+              );
+            }
+            return;
+          }
+
+          const $letsEncryptCredentialItems = $(
+            "#LETS_ENCRYPT_DNS_CREDENTIAL_ITEMS",
+          );
+          if (!$letsEncryptCredentialItems.val()) {
+            $letsEncryptCredentialItems.addClass("is-invalid");
+            let $feedback =
+              $letsEncryptCredentialItems.siblings(".invalid-feedback");
+            if (!$feedback.length) {
+              const $textSpan = $letsEncryptCredentialItems
+                .parent()
+                .find("span.input-group-text");
+              $feedback = $(
+                '<div class="invalid-feedback">This field is required when using DNS challenge.</div>',
+              ).insertAfter(
+                $textSpan.length ? $textSpan : $letsEncryptCredentialItems,
+              );
+            } else {
+              $feedback.text(
+                "This field is required when using DNS challenge.",
+              );
+            }
+            return;
+          }
+        }
+
         const $customSslCert = $("#CUSTOM_SSL_CERT");
         const $customSslKey = $("#CUSTOM_SSL_KEY");
         if (
@@ -545,7 +596,31 @@ $(document).ready(() => {
         "lets_encrypt_staging",
         $("#LETS_ENCRYPT_STAGING").prop("checked") ? "yes" : "no",
       );
+      formData.append(
+        "lets_encrypt_wildcard",
+        $("#USE_LETS_ENCRYPT_WILDCARD").prop("checked") ? "yes" : "no",
+      );
       formData.append("email_lets_encrypt", $("#EMAIL_LETS_ENCRYPT").val());
+      formData.append(
+        "lets_encrypt_challenge",
+        $("#LETS_ENCRYPT_CHALLENGE").find(":selected").val(),
+      );
+      formData.append(
+        "lets_encrypt_dns_provider",
+        $("#LETS_ENCRYPT_DNS_PROVIDER").find(":selected").val(),
+      );
+      formData.append(
+        "lets_encrypt_dns_propagation",
+        $("#LETS_ENCRYPT_DNS_PROPAGATION").val(),
+      );
+      formData.append(
+        "lets_encrypt_dns_credential_items",
+        $("#LETS_ENCRYPT_DNS_CREDENTIAL_ITEMS")
+          .val()
+          .split("\n")
+          .map((item) => item.trim())
+          .filter((item) => item !== ""),
+      );
       formData.append(
         "use_custom_ssl",
         $("#USE_CUSTOM_SSL").prop("checked") ? "yes" : "no",
@@ -610,6 +685,7 @@ $(document).ready(() => {
 
   $(document).on("keydown", ".plugin-setting", function (e) {
     if (e.key === "Enter" || e.keyCode === 13) {
+      if ($("#LETS_ENCRYPT_DNS_CREDENTIAL_ITEMS").is(":focus")) return;
       $("#next-step").trigger("click");
     }
   });

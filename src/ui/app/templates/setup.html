@@ -13,7 +13,7 @@
                    value="{{ csrf_token() }}" />
             <input type="hidden" name="theme" value="light" />
             <div class="container-xxl">
-                <div class="position-fixed top-0 end-0 m-5">
+                <div class="position-fixed top-0 end-0 m-5" style="z-index: 1050;">
                     <!-- prettier-ignore -->
                     <div class="d-flex justify-content-end align-items-center mb-5">
                         <div class="toggle-container d-flex align-items-center bg-white p-2 rounded-pill shadow-lg me-3">
@@ -391,7 +391,7 @@
                                                            pattern="^.*$" />
                                                 </div>
                                                 <h6 class="mt-2 mb-2 fw-bold">Let's Encrypt</h6>
-                                                <div class="col-6 col-md-3 pb-3">
+                                                <div class="col-4 pb-3">
                                                     <div class="d-flex justify-content-between align-items-center">
                                                         <label id="label-AUTO_LETS_ENCRYPT"
                                                                for="AUTO_LETS_ENCRYPT"
@@ -425,7 +425,7 @@
                                                                {% if auto_lets_encrypt == "yes" %}checked{% endif %} />
                                                     </div>
                                                 </div>
-                                                <div class="col-6 col-md-3 pb-3">
+                                                <div class="col-4 pb-3">
                                                     <div class="d-flex justify-content-between align-items-center">
                                                         <label id="label-USE_LETS_ENCRYPT_STAGING"
                                                                for="USE_LETS_ENCRYPT_STAGING"
@@ -459,6 +459,40 @@
                                                                {% if lets_encrypt_staging == "yes" %}checked{% endif %} />
                                                     </div>
                                                 </div>
+                                                <div class="col-4 pb-3">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <label id="label-USE_LETS_ENCRYPT_WILDCARD"
+                                                               for="USE_LETS_ENCRYPT_WILDCARD"
+                                                               class="form-label fw-semibold text-truncate">
+                                                            Wildcard Certificates
+                                                        </label>
+                                                        <div class="d-flex align-items-center">
+                                                            {% if lets_encrypt_wildcard == "yes" %}
+                                                                <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                                                                      data-bs-toggle="tooltip"
+                                                                      data-bs-placement="top"
+                                                                      data-bs-original-title="From global configuration">
+                                                                    <span class="bx bx-globe bx-xs"></span>
+                                                                </span>
+                                                            {% endif %}
+                                                            <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
+                                                                  data-bs-toggle="tooltip"
+                                                                  data-bs-placement="top"
+                                                                  data-bs-original-title="Create wildcard certificates for all domains. This allows a single certificate to secure multiple subdomains.">
+                                                                <span class="bx bx-question-mark bx-xs"></span>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-check form-switch mt-1">
+                                                        <input id="USE_LETS_ENCRYPT_WILDCARD"
+                                                               name="USE_LETS_ENCRYPT_WILDCARD"
+                                                               class="form-check-input"
+                                                               type="checkbox"
+                                                               role="switch"
+                                                               aria-labelledby="label-USE_LETS_ENCRYPT_WILDCARD"
+                                                               {% if lets_encrypt_wildcard == "yes" %}checked{% endif %} />
+                                                    </div>
+                                                </div>
                                                 <div class="col-md-6 pb-3">
                                                     <div class="d-flex justify-content-between align-items-center">
                                                         <label id="label-EMAIL_LETS_ENCRYPT"
@@ -490,6 +524,185 @@
                                                            class="form-control plugin-setting mt-1"
                                                            aria-labelledby="label-EMAIL_LETS_ENCRYPT"
                                                            pattern="^.*$" />
+                                                </div>
+                                                <div class="col-md-6 pb-3">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <label id="label-LETS_ENCRYPT_CHALLENGE"
+                                                               for="LETS_ENCRYPT_CHALLENGE"
+                                                               class="form-label fw-semibold text-truncate">
+                                                            Challenge Type
+                                                        </label>
+                                                        <div class="d-flex align-items-center">
+                                                            {% if lets_encrypt_challenge == "dns" %}
+                                                                <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                                                                      data-bs-toggle="tooltip"
+                                                                      data-bs-placement="top"
+                                                                      data-bs-original-title="From global configuration">
+                                                                    <span class="bx bx-globe bx-xs"></span>
+                                                                </span>
+                                                            {% endif %}
+                                                            <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
+                                                                  data-bs-toggle="tooltip"
+                                                                  data-bs-placement="top"
+                                                                  data-bs-original-title="The challenge type to use for Let's Encrypt (http or dns).">
+                                                                <span class="bx bx-question-mark bx-xs"></span>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <select id="LETS_ENCRYPT_CHALLENGE"
+                                                            name="LETS_ENCRYPT_CHALLENGE"
+                                                            class="form-select mt-1"
+                                                            aria-labelledby="label-LETS_ENCRYPT_CHALLENGE">
+                                                        <option value="dns"
+                                                                {% if lets_encrypt_challenge == "dns" %}selected{% endif %}>
+                                                            dns
+                                                        </option>
+                                                        <option value="http"
+                                                                {% if lets_encrypt_challenge == "http" %}selected{% endif %}>
+                                                            http
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-6 pb-3">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <label id="label-LETS_ENCRYPT_DNS_PROVIDER"
+                                                               for="LETS_ENCRYPT_DNS_PROVIDER"
+                                                               class="form-label fw-semibold text-truncate">
+                                                            DNS Provider
+                                                        </label>
+                                                        <div class="d-flex align-items-center">
+                                                            {% if lets_encrypt_dns_provider %}
+                                                                <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                                                                      data-bs-toggle="tooltip"
+                                                                      data-bs-placement="top"
+                                                                      data-bs-original-title="From global configuration">
+                                                                    <span class="bx bx-globe bx-xs"></span>
+                                                                </span>
+                                                            {% endif %}
+                                                            <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
+                                                                  data-bs-toggle="tooltip"
+                                                                  data-bs-placement="top"
+                                                                  data-bs-original-title="The DNS provider to use for DNS challenges.">
+                                                                <span class="bx bx-question-mark bx-xs"></span>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <select id="LETS_ENCRYPT_DNS_PROVIDER"
+                                                            name="LETS_ENCRYPT_DNS_PROVIDER"
+                                                            class="form-select mt-1"
+                                                            aria-labelledby="label-LETS_ENCRYPT_DNS_PROVIDER">
+                                                        <option value="" {% if not lets_encrypt_dns_provider %}selected{% endif %}></option>
+                                                        <option value="cloudflare"
+                                                                {% if lets_encrypt_dns_provider == "cloudflare" %}selected{% endif %}>
+                                                            cloudflare
+                                                        </option>
+                                                        <option value="digitalocean"
+                                                                {% if lets_encrypt_dns_provider == "digitalocean" %}selected{% endif %}>
+                                                            digitalocean
+                                                        </option>
+                                                        <option value="dnsimple"
+                                                                {% if lets_encrypt_dns_provider == "dnsimple" %}selected{% endif %}>
+                                                            dnsimple
+                                                        </option>
+                                                        <option value="dnsmadeeasy"
+                                                                {% if lets_encrypt_dns_provider == "dnsmadeeasy" %}selected{% endif %}>
+                                                            dnsmadeeasy
+                                                        </option>
+                                                        <option value="gehirn"
+                                                                {% if lets_encrypt_dns_provider == "gehirn" %}selected{% endif %}>
+                                                            gehirn
+                                                        </option>
+                                                        <option value="google"
+                                                                {% if lets_encrypt_dns_provider == "google" %}selected{% endif %}>
+                                                            google
+                                                        </option>
+                                                        <option value="linode"
+                                                                {% if lets_encrypt_dns_provider == "linode" %}selected{% endif %}>
+                                                            linode
+                                                        </option>
+                                                        <option value="luadns"
+                                                                {% if lets_encrypt_dns_provider == "luadns" %}selected{% endif %}>
+                                                            luadns
+                                                        </option>
+                                                        <option value="nsone"
+                                                                {% if lets_encrypt_dns_provider == "nsone" %}selected{% endif %}>
+                                                            nsone
+                                                        </option>
+                                                        <option value="ovh"
+                                                                {% if lets_encrypt_dns_provider == "ovh" %}selected{% endif %}>
+                                                            ovh
+                                                        </option>
+                                                        <option value="rfc2136"
+                                                                {% if lets_encrypt_dns_provider == "rfc2136" %}selected{% endif %}>
+                                                            rfc2136
+                                                        </option>
+                                                        <option value="route53"
+                                                                {% if lets_encrypt_dns_provider == "route53" %}selected{% endif %}>
+                                                            route53
+                                                        </option>
+                                                        <option value="sakuracloud"
+                                                                {% if lets_encrypt_dns_provider == "sakuracloud" %}selected{% endif %}>
+                                                            sakuracloud
+                                                        </option>
+                                                        <option value="scaleway"
+                                                                {% if lets_encrypt_dns_provider == "scaleway" %}selected{% endif %}>
+                                                            scaleway
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-6 pb-3">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <label id="label-LETS_ENCRYPT_DNS_PROPAGATION"
+                                                               for="LETS_ENCRYPT_DNS_PROPAGATION"
+                                                               class="form-label fw-semibold text-truncate">
+                                                            DNS Propagation
+                                                        </label>
+                                                        <div class="d-flex align-items-center">
+                                                            {% if lets_encrypt_dns_propagation != "default" %}
+                                                                <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                                                                      data-bs-toggle="tooltip"
+                                                                      data-bs-placement="top"
+                                                                      data-bs-original-title="From global configuration">
+                                                                    <span class="bx bx-globe bx-xs"></span>
+                                                                </span>
+                                                            {% endif %}
+                                                            <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
+                                                                  data-bs-toggle="tooltip"
+                                                                  data-bs-placement="top"
+                                                                  data-bs-original-title="The time to wait for DNS propagation in seconds for DNS challenges.">
+                                                                <span class="bx bx-question-mark bx-xs"></span>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <input id="LETS_ENCRYPT_DNS_PROPAGATION"
+                                                           name="LETS_ENCRYPT_DNS_PROPAGATION"
+                                                           type="text"
+                                                           value="{{ lets_encrypt_dns_propagation }}"
+                                                           class="form-control plugin-setting mt-1"
+                                                           aria-labelledby="label-LETS_ENCRYPT_DNS_PROPAGATION"
+                                                           pattern="^(default|\d+)$" />
+                                                </div>
+                                                <div class="col-12 pb-3">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <label id="label-LETS_ENCRYPT_DNS_CREDENTIAL_ITEMS"
+                                                               for="LETS_ENCRYPT_DNS_CREDENTIAL_ITEMS"
+                                                               class="form-label fw-semibold text-truncate">
+                                                            Lets encrypt dns credential items
+                                                        </label>
+                                                        <div class="d-flex align-items-center">
+                                                            <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
+                                                                  data-bs-toggle="tooltip"
+                                                                  data-bs-placement="top"
+                                                                  data-bs-original-title="Configuration item that will be added to the credentials.ini file for the DNS provider (e.g. 'cloudflare_api_token 123456') for DNS challenges.">
+                                                                <span class="bx bx-question-mark bx-xs"></span>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <textarea id="LETS_ENCRYPT_DNS_CREDENTIAL_ITEMS"
+                                                              name="LETS_ENCRYPT_DNS_CREDENTIAL_ITEMS"
+                                                              class="form-control plugin-setting mt-1"
+                                                              aria-labelledby="label-LETS_ENCRYPT_DNS_CREDENTIAL_ITEMS"
+                                                              pattern="^.*$"></textarea>
                                                 </div>
                                                 <h6 class="mt-2 mb-2 fw-bold">Custom certificate</h6>
                                                 <div class="col-12 col-md-2 pb-3">

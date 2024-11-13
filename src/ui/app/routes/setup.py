@@ -31,6 +31,10 @@ def setup_page():
             "AUTO_LETS_ENCRYPT",
             "USE_LETS_ENCRYPT_STAGING",
             "EMAIL_LETS_ENCRYPT",
+            "LETS_ENCRYPT_CHALLENGE",
+            "LETS_ENCRYPT_DNS_PROVIDER",
+            "LETS_ENCRYPT_DNS_PROPAGATION",
+            "USE_LETS_ENCRYPT_WILDCARD",
             "USE_CUSTOM_SSL",
             "CUSTOM_SSL_CERT",
             "CUSTOM_SSL_KEY",
@@ -60,7 +64,12 @@ def setup_page():
                     "ui_url",
                     "auto_lets_encrypt",
                     "lets_encrypt_staging",
+                    "lets_encrypt_wildcard",
                     "email_lets_encrypt",
+                    "lets_encrypt_challenge",
+                    "lets_encrypt_dns_provider",
+                    "lets_encrypt_dns_propagation",
+                    "lets_encrypt_dns_credential_items",
                     "use_custom_ssl",
                     "custom_ssl_cert",
                     "custom_ssl_key",
@@ -138,12 +147,25 @@ def setup_page():
                 "USE_REVERSE_PROXY": "yes",
                 "REVERSE_PROXY_HOST": request.form["ui_host"],
                 "REVERSE_PROXY_URL": request.form["ui_url"] or "/",
-                "USE_LETS_ENCRYPT_STAGING": request.form["lets_encrypt_staging"],
-                "EMAIL_LETS_ENCRYPT": request.form["email_lets_encrypt"],
             }
 
             if request.form.get("auto_lets_encrypt", "no") == "yes":
-                config["AUTO_LETS_ENCRYPT"] = "yes"
+                config.update(
+                    {
+                        "AUTO_LETS_ENCRYPT": "yes",
+                        "USE_LETS_ENCRYPT_STAGING": request.form["lets_encrypt_staging"],
+                        "USE_LETS_ENCRYPT_WILDCARD": request.form["lets_encrypt_wildcard"],
+                        "EMAIL_LETS_ENCRYPT": request.form["email_lets_encrypt"],
+                        "LETS_ENCRYPT_CHALLENGE": request.form["lets_encrypt_challenge"],
+                        "LETS_ENCRYPT_DNS_PROVIDER": request.form["lets_encrypt_dns_provider"],
+                        "LETS_ENCRYPT_DNS_PROPAGATION": request.form["lets_encrypt_dns_propagation"],
+                    }
+                )
+
+                lets_encrypt_dns_credential_items = request.form.getlist("lets_encrypt_dns_credential_items")
+                for x in range(len(lets_encrypt_dns_credential_items)):
+                    if lets_encrypt_dns_credential_items[x]:
+                        config["LETS_ENCRYPT_DNS_CREDENTIAL_ITEM" + (f"_{x}" if x else "")] = lets_encrypt_dns_credential_items[x]
             elif request.form.get("use_custom_ssl", "no") == "yes":
                 if not all(
                     [
@@ -198,7 +220,11 @@ def setup_page():
         ui_host=db_config.get("UI_HOST", getenv("UI_HOST", "")),
         auto_lets_encrypt=db_config.get("AUTO_LETS_ENCRYPT", getenv("AUTO_LETS_ENCRYPT", "no")),
         lets_encrypt_staging=db_config.get("USE_LETS_ENCRYPT_STAGING", getenv("USE_LETS_ENCRYPT_STAGING", "no")),
+        lets_encrypt_wildcard=db_config.get("USE_LETS_ENCRYPT_WILDCARD", getenv("USE_LETS_ENCRYPT_WILDCARD", "no")),
         email_lets_encrypt=db_config.get("EMAIL_LETS_ENCRYPT", getenv("EMAIL_LETS_ENCRYPT", "")),
+        lets_encrypt_challenge=db_config.get("LETS_ENCRYPT_CHALLENGE", getenv("LETS_ENCRYPT_CHALLENGE", "http")),
+        lets_encrypt_dns_provider=db_config.get("LETS_ENCRYPT_DNS_PROVIDER", getenv("LETS_ENCRYPT_DNS_PROVIDER", "")),
+        lets_encrypt_dns_propagation=db_config.get("LETS_ENCRYPT_DNS_PROPAGATION", getenv("LETS_ENCRYPT_DNS_PROPAGATION", "default")),
         use_custom_ssl=db_config.get("USE_CUSTOM_SSL", getenv("USE_CUSTOM_SSL", "no")),
         custom_ssl_cert=db_config.get("CUSTOM_SSL_CERT", getenv("CUSTOM_SSL_CERT", "")),
         custom_ssl_key=db_config.get("CUSTOM_SSL_KEY", getenv("CUSTOM_SSL_KEY", "")),
