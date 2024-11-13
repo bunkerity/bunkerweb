@@ -439,6 +439,7 @@ $(document).ready(() => {
         .addClass("bg-dark-subtle")
         .removeClass("bg-light-subtle");
       $("html").attr("data-bs-theme", "dark");
+      $(".dark-mode-toggle-icon").removeClass("bx-sun").addClass("bx-moon");
     } else {
       $("html").removeClass("dark-style").addClass("light-style");
       $(".btn-outline-light")
@@ -450,6 +451,7 @@ $(document).ready(() => {
         .addClass("bg-light-subtle")
         .removeClass("bg-dark-subtle");
       $("html").attr("data-bs-theme", null);
+      $(".dark-mode-toggle-icon").removeClass("bx-moon").addClass("bx-sun");
     }
 
     $("#theme").val(darkMode ? "dark" : "light");

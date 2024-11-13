@@ -28,7 +28,7 @@
                                     </button>
                                     <!-- Collapsible floating menu -->
                                     <div class="collapse mt-2" id="mode-selection-floating">
-                                        <ul class="nav nav-pills flex-column bg-{% if current_user.theme == 'light' %}white{% else %}dark{% endif %} p-2 rounded shadow-sm mode-selection-menu"
+                                        <ul class="nav nav-pills flex-column bg-{% if theme == 'light' %}white{% else %}dark{% endif %} p-2 rounded shadow-sm mode-selection-menu"
                                             role="tablist">
                                             {% if current_endpoint != "global-config" %}
                                                 <li class="nav-item mb-1" role="presentation">
@@ -122,7 +122,7 @@
                             <ul class="d-flex mb-0 list-unstyled">
                                 <li class="me-3">
                                     <a role="button"
-                                       class="btn btn-sm btn-outline-{% if current_user.theme == 'light' %}dark{% else %}light{% endif %} d-flex align-items-center h-100"
+                                       class="btn btn-sm btn-outline-{% if theme == 'light' %}dark{% else %}light{% endif %} d-flex align-items-center h-100"
                                        aria-pressed="true"
                                        href="https://panel.bunkerweb.io/order/support/?utm_campaign=self&utm_source=ui"
                                        target="_blank"
@@ -153,7 +153,7 @@
                                 <li class="position-relative">
                                     <button id="news-button"
                                             type="button"
-                                            class="btn btn-sm btn-{% if current_user.theme == 'light' %}dark{% else %}light{% endif %} text-uppercase d-flex align-items-center"
+                                            class="btn btn-sm btn-{% if theme == 'light' %}dark{% else %}light{% endif %} text-uppercase d-flex align-items-center"
                                             aria-pressed="true"
                                             data-bs-toggle="offcanvas"
                                             data-bs-target="#side-offcanvas-news"
@@ -170,23 +170,6 @@
                     {% include "footer.html" %}
                     {% include "sidebar-notifications.html" %}
                     {% include "sidebar-news.html" %}
-                    {% if not is_pro_version %}
-                        <div class="buy-now courier-prime">
-                            <a class="btn btn-responsive btn-buy-now"
-                               role="button"
-                               aria-pressed="true"
-                               href="https://panel.bunkerweb.io/order/bunkerweb-pro?utm_campaign=self&utm_source=ui"
-                               target="_blank"
-                               rel="noopener">
-                                <span class="me-1 me-md-2 d-flex h-100 justify-content-center align-items-center">
-                                    <img src="{{ url_for('static', filename='img/diamond-white.svg') }}"
-                                         alt="Pro plugin"
-                                         width="18px"
-                                         height="15.5px">
-                                </span>
-                            Upgrade to PRO</a>
-                        </div>
-                    {% endif %}
                     <div class="content-backdrop fade"></div>
                 </div>
                 <!-- Content wrapper -->

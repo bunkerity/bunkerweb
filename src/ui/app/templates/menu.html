@@ -30,6 +30,34 @@
         "logs": {"url": url_for('logs'), "icon": "bx-file-find"},
         } %}
         <ul class="menu-inner py-1">
+            <!-- Dark mode toggle -->
+            <li class="menu-item mt-1 mb-1">
+                <div class="menu-link">
+                    <input type="hidden"
+                           id="csrf_token"
+                           name="csrf_token"
+                           value="{{ csrf_token() }}" />
+                    <i class="menu-icon tf-icons dark-mode-toggle-icon bx bx-{% if theme == "light" %}sun{% else %}moon{% endif %}"></i>
+                    <div class="d-flex align-items-center justify-content-center w-100 h-100">
+                        <label class="setting-checkbox-label me-2 mb-0"
+                               for="dark-mode-toggle">Light</label>
+                        <div class="form-check form-switch mb-0"
+                             {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The database is in readonly mode, therefore the theme cannot be changed"{% endif %}>
+                            <input id="dark-mode-toggle"
+                                   name="dark-mode-toggle"
+                                   class="form-check-input"
+                                   type="checkbox"
+                                   role="switch"
+                                   data-root-url="{{ url_for('profile') }}"
+                                   {% if theme == "dark" %}checked{% endif %}
+                                   {% if is_readonly %}disabled{% endif %} />
+                        </div>
+                        <label class="setting-checkbox-label mb-0"
+                               for="dark-mode-toggle">Dark</label>
+                    </div>
+                </div>
+            </li>
+            <!--/ Dark mode toggle -->
             {% for endpoint, item in menu_items.items() %}
                 <li class="menu-item{% if endpoint == current_endpoint or endpoint != 'plugins' and endpoint in request.path.split('/')[1] %} active{% endif %}{% if item.get('sub') and item.get('open', True) %} open{% endif %}">
                     <a href="{{ item['url'] }}"

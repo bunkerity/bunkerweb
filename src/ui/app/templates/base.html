@@ -24,9 +24,9 @@
 } %}
 <!DOCTYPE html>
 <html lang="en"
-      class="{{ current_user.theme }}-style layout-navbar-fixed layout-menu-fixed"
+      class="{{ theme }}-style layout-navbar-fixed layout-menu-fixed"
       data-theme="theme-default"
-      {% if current_user.theme == 'dark' %}data-bs-theme="dark"{% endif %}>
+      {% if theme == 'dark' %}data-bs-theme="dark"{% endif %}>
     <head>
         <meta charset="utf-8" />
         <meta name="viewport"
@@ -67,7 +67,7 @@
             <link rel="stylesheet"
                   href="{{ url_for('static', filename='libs/flatpickr/themes/airbnb.css') }}"
                   nonce="{{ style_nonce }}" />
-            {% if current_user.theme == 'dark' %}
+            {% if theme == 'dark' %}
                 <link rel="stylesheet"
                       href="{{ url_for('static', filename='libs/flatpickr/themes/airbnb.dark.css') }}"
                       nonce="{{ style_nonce }}" />
@@ -126,7 +126,7 @@
     </head>
     <body>
         <input type="hidden" id="is-read-only" value="{{ is_readonly }}" />
-        <input type="hidden" id="theme" value="{{ current_user.theme }}" />
+        <input type="hidden" id="theme" value="{{ theme }}" />
         <!-- prettier-ignore -->
         {% if current_endpoint != "loading" %}
             {% include "flash.html" %}

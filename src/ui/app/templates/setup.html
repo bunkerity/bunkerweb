@@ -25,7 +25,7 @@
                                        class="form-check-input"
                                        type="checkbox"
                                        role="switch"
-                                       {% if current_user.theme == "dark" %}checked{% endif %} />
+                                       {% if theme == "dark" %}checked{% endif %} />
                             </div>
                             <label class="setting-checkbox-label mb-0 fw-bold text-secondary"
                                    for="dark-mode-toggle">Dark</label>
@@ -949,7 +949,7 @@
             </div>
         </div>
         <div id="feedback-toast"
-             class="bs-toast toast fade bg-{% if current_user.theme == 'light' %}white{% else %}dark{% endif %} border"
+             class="bs-toast toast fade bg-{% if theme == 'light' %}white{% else %}dark{% endif %} border"
              role="alert"
              aria-live="assertive"
              aria-atomic="true"

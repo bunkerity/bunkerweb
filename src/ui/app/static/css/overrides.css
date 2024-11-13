@@ -171,10 +171,7 @@ button.list-group-item-secondary.active {
 }
 
 .buy-now .btn-buy-now {
-  position: fixed;
-  bottom: 3rem;
-  right: 1.625rem;
-  z-index: 1080;
+  position: unset;
   box-shadow: 0 1px 20px 1px var(--bs-primary); /* Initial shadow */
   background-color: var(--bs-bw-green); /* Initial background color */
   color: #fff;
@@ -306,10 +303,16 @@ button.list-group-item-secondary.active {
   animation: fadeIn 1.5s infinite alternate;
 } */
 
+.btn-responsive {
+  padding: 6px 14px;
+  font-size: 90%;
+  line-height: 1.2;
+}
+
 @media (max-width: 768px) {
   .btn-responsive {
-    padding: 4px 9px;
-    font-size: 80%;
+    padding: 2px 6px;
+    font-size: 70%;
     line-height: 1;
   }
 
@@ -321,9 +324,9 @@ button.list-group-item-secondary.active {
 
 @media (min-width: 769px) and (max-width: 992px) {
   .btn-responsive {
-    padding: 8px 18px;
-    font-size: 90%;
-    line-height: 1.2;
+    padding: 4px 9px;
+    font-size: 80%;
+    line-height: 1.1;
   }
 }
 

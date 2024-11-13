@@ -32,7 +32,7 @@
         {% elif current_endpoint == 'pro' %}
             {% set documentation_endpoint = "/professional-services" %}
         {% endif %}
-        <div class="navbar-nav align-items-center">
+        <div class="d-none d-md-inline navbar-nav align-items-center">
             <div class="nav-item d-flex align-items-center">
                 <a role="button"
                    class="btn btn-text-secondary p-1 p-md-2"
@@ -41,7 +41,7 @@
                    target="_blank"
                    rel="noopener">
                     <span class="tf-icons bx bx-file me-md-2"></span>
-                    <span class="d-none d-md-inline">Documentation</span>
+                    <span class="d-none d-lg-inline">Documentation</span>
                 </a>
                 <a role="button"
                    class="btn btn-outline-github p-1 p-md-2 ms-1 ms-md-2"
@@ -50,7 +50,7 @@
                    target="_blank"
                    rel="noreferrer">
                     <i class="tf-icons bx bxl-github me-md-2"></i>
-                    <span class="d-none d-md-inline">Github</span>
+                    <span class="d-none d-lg-inline">Github</span>
                 </a>
                 <a role="button"
                    class="btn btn-outline-discord p-1 p-md-2 ms-1 ms-md-2"
@@ -59,37 +59,31 @@
                    target="_blank"
                    rel="noopener">
                     <i class="tf-icons bx bxl-discord me-md-2"></i>
-                    <span class="d-none d-md-inline">Discord</span>
+                    <span class="d-none d-lg-inline">Discord</span>
                 </a>
             </div>
         </div>
         <!-- /Buttons -->
         <ul class="navbar-nav flex-row align-items-center ms-auto">
-            <!-- Dark mode toggle -->
+            {% if not is_pro_version %}
             <li class="nav-item lh-1 me-4">
-                <div class="d-flex mt-1">
-                    <input type="hidden"
-                           id="csrf_token"
-                           name="csrf_token"
-                           value="{{ csrf_token() }}" />
-                    <label class="setting-checkbox-label d-flex align-items-center ps-0"
-                           for="dark-mode-toggle">Light</label>
-                    <div class="form-switch ms-2 mb-1"
-                         {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The database is in readonly mode, therefore the theme cannot be changed"{% endif %}>
-                        <input id="dark-mode-toggle"
-                               name="dark-mode-toggle"
-                               class="form-check-input"
-                               type="checkbox"
-                               role="switch"
-                               data-root-url="{{ url_for('profile') }}"
-                               {% if current_user.theme == "dark" %}checked{% endif %}
-                               {% if is_readonly %}disabled{% endif %} />
-                    </div>
-                    <label class="setting-checkbox-label d-flex align-items-center ps-0"
-                           for="dark-mode-toggle">Dark</label>
+                <div class="buy-now courier-prime">
+                    <a class="btn btn-responsive btn-buy-now"
+                        role="button"
+                        aria-pressed="true"
+                        href="https://panel.bunkerweb.io/order/bunkerweb-pro?utm_campaign=self&utm_source=ui"
+                        target="_blank"
+                        rel="noopener">
+                        <span class="me-1 me-md-2 d-flex h-100 justify-content-center align-items-center">
+                            <img src="{{ url_for('static', filename='img/diamond-white.svg') }}"
+                                    alt="Pro plugin"
+                                    width="18px"
+                                    height="15.5px">
+                        </span>
+                    Upgrade to PRO</a>
                 </div>
             </li>
-            <!--/ Dark mode toggle -->
+            {% endif %}
             <!-- Stars -->
             <li class="d-none d-md-inline nav-item lh-1 me-4">
                 <a class="github-button"

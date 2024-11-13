@@ -173,7 +173,7 @@
                 <div class="col-md-6">
                     <!-- Theme -->
                     <div class="card position-relative">
-                        <i class='bx bx-{% if current_user.theme == 'light' %}sun{% else %}moon{% endif %} bx-sm position-absolute top-0 end-0 m-3'></i>
+                        <i class='bx bx-{% if theme == 'light' %}sun{% else %}moon{% endif %} bx-sm position-absolute top-0 end-0 m-3'></i>
                         <h5 class="card-header">Change Theme</h5>
                         <div class="card-body pb-4">
                             <form method="POST" action="{{ profile_url }}/edit">
@@ -182,10 +182,10 @@
                                     <div class="col-md-12 form-floating">
                                         <select class="form-select" id="theme" name="theme">
                                             <option value="light"
-                                                    {% if current_user.theme == "light" %}selected{% endif %}>
+                                                    {% if theme == "light" %}selected{% endif %}>
                                                 Light
                                             </option>
-                                            <option value="dark" {% if current_user.theme == "dark" %}selected{% endif %}>Dark</option>
+                                            <option value="dark" {% if theme == "dark" %}selected{% endif %}>Dark</option>
                                         </select>
                                         <label for="theme">Theme</label>
                                     </div>

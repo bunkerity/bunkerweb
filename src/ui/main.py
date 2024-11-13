@@ -176,6 +176,7 @@ def inject_variables():
         plugins=BW_CONFIG.get_plugins(),
         flash_messages=session.get("flash_messages", []),
         is_readonly=DATA.get("READONLY_MODE", False),
+        theme=current_user.theme if current_user.is_authenticated else "dark",
     )
 
 
