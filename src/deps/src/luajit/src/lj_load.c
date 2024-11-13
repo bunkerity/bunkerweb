@@ -101,29 +101,30 @@ LUALIB_API int luaL_loadfilex(lua_State *L, const char *filename,
   FileReaderCtx ctx;
   int status;
   const char *chunkname;
+  int err = 0;
   if (filename) {
+    chunkname = lua_pushfstring(L, "@%s", filename);
     ctx.fp = fopen(filename, "rb");
     if (ctx.fp == NULL) {
+      L->top--;
       lua_pushfstring(L, "cannot open %s: %s", filename, strerror(errno));
       return LUA_ERRFILE;
     }
-    chunkname = lua_pushfstring(L, "@%s", filename);
   } else {
     ctx.fp = stdin;
     chunkname = "=stdin";
   }
   status = lua_loadx(L, reader_file, &ctx, chunkname, mode);
-  if (ferror(ctx.fp)) {
-    L->top -= filename ? 2 : 1;
-    lua_pushfstring(L, "cannot read %s: %s", chunkname+1, strerror(errno));
-    if (filename)
-      fclose(ctx.fp);
-    return LUA_ERRFILE;
-  }
+  if (ferror(ctx.fp)) err = errno;
   if (filename) {
+    fclose(ctx.fp);
     L->top--;
     copyTV(L, L->top-1, L->top);
-    fclose(ctx.fp);
+  }
+  if (err) {
+    L->top--;
+    lua_pushfstring(L, "cannot read %s: %s", chunkname+1, strerror(err));
+    return LUA_ERRFILE;
   }
   return status;
 }

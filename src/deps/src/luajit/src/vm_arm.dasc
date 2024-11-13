@@ -1823,9 +1823,19 @@ static void build_subroutines(BuildCtx *ctx)
   |
   |//-- Bit library --------------------------------------------------------
   |
-  |// FP number to bit conversion for soft-float. Clobbers r0-r3.
   |->vm_tobit_fb:
   |  bhi ->fff_fallback
+  |.if FPU
+  |// FP number to bit conversion for hard-float. Clobbers r0, d0-d1.
+  |  vldr d1, >9
+  |  vmov d0, CARG1, CARG2
+  |  vadd.f64 d0, d0, d1
+  |  vmov CARG1, s0
+  |  bx lr
+  |9:
+  |  .long 0, 0x43380000		// (double)(2^52 + 2^51).
+  |.else
+  |// FP number to bit conversion for soft-float. Clobbers r0-r3.
   |->vm_tobit:
   |  lsl RB, CARG2, #1
   |  adds RB, RB, #0x00200000
@@ -1850,6 +1860,7 @@ static void build_subroutines(BuildCtx *ctx)
   |  orr CARG1, CARG4, CARG1, lsl RB
   |   rsblt CARG1, CARG1, #0
   |  bx lr
+  |.endif
   |
   |.macro .ffunc_bit, name
   |  .ffunc_1 bit_..name

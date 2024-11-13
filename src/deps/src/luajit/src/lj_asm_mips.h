@@ -456,7 +456,7 @@ static void asm_retf(ASMState *as, IRIns *ir)
   emit_addptr(as, base, -8*delta);
   asm_guard(as, MIPSI_BNE, RID_TMP,
 	    ra_allock(as, igcptr(pc), rset_exclude(RSET_GPR, base)));
-  emit_tsi(as, MIPSI_AL, RID_TMP, base, -8);
+  emit_tsi(as, MIPSI_AL, RID_TMP, base, (LJ_BE || LJ_FR2) ? -8 : -4);
 }
 
 /* -- Buffer operations --------------------------------------------------- */
