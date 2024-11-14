@@ -34,7 +34,7 @@ try:
     db = Database(LOGGER, sqlalchemy_string=getenv("DATABASE_URI", None))
 
     instances = db.get_instances()
-    services = db.get_non_default_settings(global_only=True, methods=False, with_drafts=True, filtered_settings=("SERVER_NAME"))["SERVER_NAME"].split(" ")
+    services = db.get_non_default_settings(global_only=True, methods=False, with_drafts=True, filtered_settings=("SERVER_NAME",))["SERVER_NAME"].split(" ")
 
     reload_min_timeout = getenv("RELOAD_MIN_TIMEOUT", "5")
 

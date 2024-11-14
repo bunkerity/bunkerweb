@@ -2066,7 +2066,7 @@ class Database:
 
     def get_custom_configs(self, *, with_drafts: bool = False, with_data: bool = True, as_dict: bool = False) -> Union[List[Dict[str, Any]], Dict[str, Any]]:
         """Get the custom configs from the database"""
-        db_config = self.get_non_default_settings(with_drafts=with_drafts, filtered_settings={"USE_TEMPLATE"})
+        db_config = self.get_non_default_settings(with_drafts=with_drafts, filtered_settings=("USE_TEMPLATE",))
 
         with self._db_session() as session:
             entities = [Custom_configs.service_id, Custom_configs.type, Custom_configs.name, Custom_configs.checksum, Custom_configs.method]
@@ -2143,7 +2143,7 @@ class Database:
 
         if not db_config:
             if service_id:
-                service_config = self.get_non_default_settings(with_drafts=True, filtered_settings={"USE_TEMPLATE"})
+                service_config = self.get_non_default_settings(with_drafts=True, filtered_settings=("USE_TEMPLATE",))
                 if service_config.get(f"{service_id}_USE_TEMPLATE"):
                     with self._db_session() as session:
                         template_config = (
