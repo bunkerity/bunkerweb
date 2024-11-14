@@ -198,6 +198,7 @@ class Configurator:
                         "MASTER_MODE",
                         "CUSTOM_LOG_LEVEL",
                         "HEALTHCHECK_INTERVAL",
+                        "DATABASE_RETRY_TIMEOUT",
                         "GPG_KEY",
                         "HOME",
                         "HOSTNAME",
