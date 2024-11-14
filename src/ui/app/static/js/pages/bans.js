@@ -73,7 +73,7 @@ $(document).ready(function () {
     enableTime: true,
     dateFormat: "Y-m-d\\TH:i:S", // ISO format
     altInput: true,
-    altFormat: "F j, Y h:i", // User-friendly display format
+    altFormat: "F j, Y h:i K", // User-friendly display format
     time_24hr: true,
     defaultDate: defaultDatetime,
     minDate: minDatetime,
@@ -198,7 +198,7 @@ $(document).ready(function () {
       extend: "colvis",
       columns: "th:not(:first-child):not(:nth-child(2)):not(:last-child)",
       text: '<span class="tf-icons bx bx-columns bx-18px me-2"></span>Columns',
-      className: "btn btn-sm btn-outline-primary",
+      className: "btn btn-sm btn-outline-primary rounded-start",
       columnText: function (dt, idx, title) {
         return idx + 1 + ". " + title;
       },
@@ -275,7 +275,7 @@ $(document).ready(function () {
 
   $.fn.dataTable.ext.buttons.add_ban = {
     text: '<span class="tf-icons bx bx-plus"></span>&nbsp;Add<span class="d-none d-md-inline"> ban(s)</span>',
-    className: `btn btn-sm btn-outline-bw-green${
+    className: `btn btn-sm rounded me-4 btn-bw-green${
       isReadOnly ? " disabled" : ""
     }`,
     action: function (e, dt, node, config) {

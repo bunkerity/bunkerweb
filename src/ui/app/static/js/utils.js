@@ -440,6 +440,8 @@ $(document).ready(() => {
         .removeClass("bg-light-subtle");
       $("html").attr("data-bs-theme", "dark");
       $(".dark-mode-toggle-icon").removeClass("bx-sun").addClass("bx-moon");
+      $("[alt='BunkerWeb logo']").attr("src", $("#bw-logo-white").val());
+      $("[alt='User Avatar']").attr("src", $("#avatar-url-white").val());
     } else {
       $("html").removeClass("dark-style").addClass("light-style");
       $(".btn-outline-light")
@@ -452,6 +454,8 @@ $(document).ready(() => {
         .removeClass("bg-dark-subtle");
       $("html").attr("data-bs-theme", null);
       $(".dark-mode-toggle-icon").removeClass("bx-moon").addClass("bx-sun");
+      $("[alt='BunkerWeb logo']").attr("src", $("#bw-logo").val());
+      $("[alt='User Avatar']").attr("src", $("#avatar-url").val());
     }
 
     $("#theme").val(darkMode ? "dark" : "light");

@@ -900,6 +900,10 @@ a.courier-prime:hover {
   display: none;
 }
 
+table.table.dataTable > tbody > tr.selected > * {
+  box-shadow: inset 0 0 0 9999px rgb(var(--bs-primary-rgb), 0.1) !important;
+}
+
 /*
 * Dark mode overrides
 ******************************************************************************/
@@ -1117,7 +1121,7 @@ html[dir="rtl"].dark-style .border-primary {
 }
 
 .dark-style .bg-secondary {
-  color: #07354a;
+  color: #fff;
 }
 
 .dark-style .table th {
@@ -1137,10 +1141,6 @@ html[dir="rtl"].dark-style .border-primary {
 .dark-style .btn-outline-primary:disabled {
   color: var(--bs-primary) !important;
   border-color: var(--bs-primary) !important;
-}
-
-.dark-style td.highlight {
-  background-color: rgba(255, 255, 255, 0.1) !important;
 }
 
 .dark-style .form-check-label {
@@ -1215,10 +1215,6 @@ html[dir="rtl"].dark-style .border-primary {
   border-color: var(--bs-form-valid-color) !important;
 }
 
-.dark-style table.table.dataTable > tbody > tr.selected a {
-  color: initial !important;
-}
-
 .dark-style div.dts div.dt-scroll-body table,
 .dark-style div.dts div.dataTables_scrollBody table {
   background-color: #0c283a;
@@ -1227,4 +1223,91 @@ html[dir="rtl"].dark-style .border-primary {
 .dark-style .form-floating > :disabled ~ label,
 .dark-style .form-floating > .form-control:disabled ~ label {
   color: #9caeb7;
+}
+
+.dark-style .form-switch .form-check-input {
+  background-color: #484d50;
+}
+
+.dark-style .form-check-input:checked {
+  background-color: #186285;
+}
+
+@keyframes darkColorPhase {
+  0% {
+    box-shadow: 0 1px 20px 1px var(--bs-secondary); /* Primary shadow */
+  }
+  50% {
+    box-shadow: 0 1px 20px 1px var(--bs-bw-green); /* Secondary shadow */
+  }
+  100% {
+    box-shadow: 0 1px 20px 1px var(--bs-secondary); /* Primary shadow */
+  }
+}
+
+.dark-style .buy-now .btn-buy-now {
+  animation: darkColorPhase 3s infinite; /* Apply the color phasing animation */
+}
+
+html:not(.layout-menu-collapsed).dark-style
+  .bg-menu-theme
+  .menu-inner
+  .menu-item.open
+  > .menu-link,
+.layout-menu-hover.layout-menu-collapsed.dark-style
+  .bg-menu-theme
+  .menu-inner
+  .menu-item.open
+  > .menu-link,
+html:not(.layout-menu-collapsed).dark-style
+  .bg-menu-theme
+  .menu-inner
+  .menu-item
+  .menu-link:not(.active):hover,
+.layout-menu-hover.layout-menu-collapsed.dark-style
+  .bg-menu-theme
+  .menu-inner
+  .menu-item
+  .menu-link:not(.active):hover {
+  background-color: #0b394e;
+}
+
+.dark-style table.table.dataTable > tbody > tr.selected > * {
+  color: #fff !important;
+}
+
+.dark-style table.table.dataTable > tbody > tr.selected a {
+  color: #fff !important;
+}
+
+.dark-style .pagination {
+  --bs-pagination-color: #fff;
+  --bs-pagination-bg: rgba(34, 48, 62, 0.06);
+  --bs-pagination-border-color: #ced1d5;
+  --bs-pagination-hover-color: #fff;
+  --bs-pagination-hover-bg: rgba(145, 155, 165, 0.06);
+  --bs-pagination-hover-border-color: #ced1d5;
+  --bs-pagination-hover-color: #fff;
+  --bs-pagination-hover-bg: rgba(145, 155, 165, 0.06);
+  --bs-pagination-active-color: #fff;
+  --bs-pagination-active-bg: #696cff;
+  --bs-pagination-active-border-color: #696cff;
+  --bs-pagination-disabled-color: #384551;
+  --bs-pagination-disabled-bg: rgba(34, 48, 62, 0.06);
+  --bs-pagination-disabled-border-color: #ced1d5;
+}
+
+.dark-style thead,
+.dark-style tbody,
+.dark-style tfoot,
+.dark-style tr,
+.dark-style td,
+.dark-style th {
+  border-color: #384551;
+}
+
+.dark-style .btn-primary {
+  background-color: #fff;
+  border-color: #fff;
+  color: #000;
 }

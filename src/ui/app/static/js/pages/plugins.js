@@ -204,7 +204,7 @@ $(document).ready(function () {
       extend: "colvis",
       columns: "th:not(:first-child):not(:nth-child(2)):not(:last-child)",
       text: '<span class="tf-icons bx bx-columns bx-18px me-2"></span>Columns',
-      className: "btn btn-sm btn-outline-primary",
+      className: "btn btn-sm btn-outline-primary rounded-start",
       columnText: function (dt, idx, title) {
         return idx + 1 + ". " + title;
       },
@@ -291,7 +291,7 @@ $(document).ready(function () {
 
   $.fn.dataTable.ext.buttons.add_plugin = {
     text: '<span class="tf-icons bx bx-plus"></span>&nbsp;Add<span class="d-none d-md-inline"> plugin(s)</span>',
-    className: `btn btn-sm btn-outline-bw-green${
+    className: `btn btn-sm rounded me-4 btn-bw-green${
       isReadOnly ? " disabled" : ""
     }`,
     action: function (e, dt, node, config) {
@@ -534,6 +534,15 @@ $(document).ready(function () {
       // Deselect all rows on the current page
       plugins_table.rows({ page: "current" }).deselect();
     }
+  });
+
+  $(document).on("click", ".delete-plugin", function () {
+    if (isReadOnly) {
+      alert("This action is not allowed in read-only mode.");
+      return;
+    }
+    $this = $(this);
+    setupDeletionModal([$this.data("plugin-id")]);
   });
 
   // Open file dialog on click

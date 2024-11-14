@@ -132,7 +132,7 @@ $(function () {
       extend: "colvis",
       columns: "th:not(:first-child):not(:nth-child(2)):not(:last-child)",
       text: '<span class="tf-icons bx bx-columns bx-18px me-2"></span>Columns',
-      className: "btn btn-sm btn-outline-primary",
+      className: "btn btn-sm btn-outline-primary rounded-start",
       columnText: (dt, idx, title) => `${idx + 1}. ${title}`,
     },
     {
@@ -238,7 +238,7 @@ $(function () {
 
   $.fn.dataTable.ext.buttons.create_service = {
     text: '<span class="tf-icons bx bx-plus"></span>&nbsp;Create<span class="d-none d-md-inline"> new service</span>',
-    className: `btn btn-sm btn-outline-bw-green${
+    className: `btn btn-sm rounded me-4 btn-bw-green${
       isReadOnly ? " disabled" : ""
     }`,
     action: function () {

@@ -36,6 +36,9 @@ def pro_page():
         online_services=online_services,
         draft_services=draft_services,
         pro_expires_in=pro_expires_in,
+        pro_license_key=BW_CONFIG.get_config(global_only=True, methods=False, with_drafts=True, filtered_settings=("PRO_LICENSE_KEY",)).get(
+            "PRO_LICENSE_KEY", ""
+        ),
     )
 
 
@@ -55,7 +58,7 @@ def pro_key():
     if not license_key:
         return handle_error("Invalid license key", "pro")
 
-    global_config = DB.get_config(global_only=True, methods=True, filtered_settings=("PRO_LICENSE_KEY"))
+    global_config = DB.get_config(global_only=True, methods=True, filtered_settings=("PRO_LICENSE_KEY",))
     variables = BW_CONFIG.check_variables({"PRO_LICENSE_KEY": license_key}, global_config, global_config=True)
 
     if not variables:

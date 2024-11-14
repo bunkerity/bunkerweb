@@ -146,6 +146,7 @@
                             </div>
                             {% set setting = "PRO_LICENSE_KEY" %}
                             {% set setting_data = {"type": "password", "id": "license_key", "regex": "^.+$"} %}
+                            {% set setting_value = pro_license_key %}
                             {% set required = true %}
                             {% if is_readonly %}
                                 {% set disabled = true %}

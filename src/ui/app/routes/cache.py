@@ -22,7 +22,7 @@ def cache_page():
     return render_template(
         "cache.html",
         caches=DB.get_jobs_cache_files(with_data=False),
-        services=BW_CONFIG.get_config(global_only=True, methods=False, with_drafts=True, filtered_settings=("SERVER_NAME"))["SERVER_NAME"],
+        services=BW_CONFIG.get_config(global_only=True, methods=False, with_drafts=True, filtered_settings=("SERVER_NAME",))["SERVER_NAME"],
         cache_service=service,
         cache_plugin=cache_plugin,
         cache_job_name=cache_job_name,

@@ -313,6 +313,9 @@ $(function () {
           },
         },
       },
+      tooltip: {
+        theme: theme,
+      },
     };
 
     requestsChart = new ApexCharts(
@@ -410,6 +413,9 @@ $(function () {
           },
         },
       },
+      tooltip: {
+        theme: theme,
+      },
     };
 
     ipsChart = new ApexCharts(
@@ -479,6 +485,9 @@ $(function () {
         bar: {
           distributed: true,
         },
+      },
+      tooltip: {
+        theme: theme,
       },
       xaxis: {
         categories: categories,

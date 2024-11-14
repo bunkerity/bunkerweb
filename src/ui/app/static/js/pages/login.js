@@ -31,6 +31,8 @@ $(document).ready(() => {
         .removeClass("bg-light-subtle");
       $("#dark-mode-toggle").prop("checked", true);
       $("html").attr("data-bs-theme", "dark");
+      $("[alt='BunkerWeb logo']").attr("src", $("#bw-logo-white").val());
+      $("[alt='User Avatar']").attr("src", $("#avatar-url-white").val());
     } else {
       $("html").removeClass("dark-style").addClass("light-style");
       $(".bs-toast.bg-dark").addClass("bg-white").removeClass("bg-dark");
@@ -39,6 +41,8 @@ $(document).ready(() => {
         .removeClass("bg-dark-subtle");
       $("#dark-mode-toggle").prop("checked", false);
       $("html").attr("data-bs-theme", null);
+      $("[alt='BunkerWeb logo']").attr("src", $("#bw-logo").val());
+      $("[alt='User Avatar']").attr("src", $("#avatar-url").val());
     }
 
     // Update input values

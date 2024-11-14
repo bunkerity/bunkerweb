@@ -36,7 +36,7 @@
                                        class="app-brand-link gap-2">
                                         <span class="app-brand-logo login w-50">
                                             <img class="img-fluid"
-                                                 src="{{ url_for('static', filename='img/logo-menu.png') }}"
+                                                 src="{% if theme == 'light' %}{{ url_for('static', filename='img/logo-menu.png') }}{% else %}{{ url_for('static', filename='img/logo-menu-white.png') }}{% endif %}"
                                                  alt="BunkerWeb logo">
                                         </span>
                                     </a>
