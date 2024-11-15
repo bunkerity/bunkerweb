@@ -254,28 +254,31 @@ class UIDatabase(Database):
 
         return ""
 
-    def get_ui_roles(self, *, as_dict: bool = False) -> List[Union[Roles, dict]]:
+    def get_ui_roles(self, *, as_dict: bool = False) -> Union[str, List[Union[Roles, dict]]]:
         """Get ui roles."""
         with self._db_session() as session:
-            roles = session.query(Roles).with_entities(Roles.name, Roles.description, Roles.update_datetime).all()
-            if not as_dict:
-                return roles
+            try:
+                roles = session.query(Roles).with_entities(Roles.name, Roles.description, Roles.update_datetime).all()
+                if not as_dict:
+                    return roles
 
-            roles_data = []
-            for role in roles:
-                role_data = {
-                    "name": role.name,
-                    "description": role.description,
-                    "update_datetime": role.update_datetime,
-                    "permissions": [],
-                }
+                roles_data = []
+                for role in roles:
+                    role_data = {
+                        "name": role.name,
+                        "description": role.description,
+                        "update_datetime": role.update_datetime,
+                        "permissions": [],
+                    }
 
-                for permission in session.query(RolesPermissions).with_entities(RolesPermissions.permission_name).filter_by(role_name=role.name):
-                    role_data["permissions"].append(permission.permission_name)
+                    for permission in session.query(RolesPermissions).with_entities(RolesPermissions.permission_name).filter_by(role_name=role.name):
+                        role_data["permissions"].append(permission.permission_name)
 
-                roles_data.append(role_data)
+                    roles_data.append(role_data)
 
-            return roles_data
+                return roles_data
+            except BaseException as e:
+                return str(e)
 
     def refresh_ui_user_recovery_codes(self, username: str, codes: List[str]) -> str:
         """Refresh ui user recovery codes."""

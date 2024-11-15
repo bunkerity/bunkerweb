@@ -101,14 +101,15 @@ def on_starting(server):
     ready = False
     while not ready:
         db_metadata = DB.get_metadata()
-        if isinstance(db_metadata, str) or not db_metadata["is_initialized"]:
+        ui_roles = DB.get_ui_roles(as_dict=True)
+        if isinstance(db_metadata, str) or not db_metadata["is_initialized"] or (isinstance(ui_roles, str) and "doesn't exist" in ui_roles):
             LOGGER.warning("Database is not initialized, retrying in 5s ...")
         else:
             ready = True
             continue
         sleep(5)
 
-    if not DB.get_ui_roles(as_dict=True):
+    if not ui_roles:
         ret = DB.create_ui_role("admin", "Admins can create new users, edit and read the data.", ["manage", "write", "read"])
         if ret:
             LOGGER.error(f"Couldn't create the admin role in the database: {ret}")
