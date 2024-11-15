@@ -1543,6 +1543,13 @@
 <td>no</td>
 <td>Config template to use that will override the default values of specific settings.</td>
 </tr>
+<tr>
+<td><code>SECURITY_MODE</code></td>
+<td><code>block</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Defines the response to threats: "detect" to monitor and log, or "block" to prevent access and log incidents.</td>
+</tr>
 </tbody>
 </table>
 <h2 id="antibot">Antibot</h2>
@@ -2399,7 +2406,7 @@
 </tr>
 <tr>
 <td><code>DNSBL_LIST</code></td>
-<td><code>bl.blocklist.de problems.dnsbl.sorbs.net sbl.spamhaus.org xbl.spamhaus.org</code></td>
+<td><code>bl.blocklist.de sbl.spamhaus.org xbl.spamhaus.org</code></td>
 <td>global</td>
 <td>no</td>
 <td>List of DNSBL servers.</td>
@@ -2792,7 +2799,7 @@
 <td><code>no</code></td>
 <td>multisite</td>
 <td>no</td>
-<td>Create wildcard certificates for all domains. This allows a single certificate to secure multiple subdomains.</td>
+<td>Create wildcard certificates for all domains. This allows a single certificate to secure multiple subdomains. (Only available with DNS challenges)</td>
 </tr>
 <tr>
 <td><code>USE_LETS_ENCRYPT_STAGING</code></td>

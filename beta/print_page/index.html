@@ -4391,7 +4391,7 @@ app3.example.com_LOCAL_PHP_PATH=/var/www/html/app3.example.com
 <tr>
 <td style="text-align: center;"><code>USE_LETS_ENCRYPT_WILDCARD</code></td>
 <td style="text-align: center;"><code>no</code></td>
-<td style="text-align: left;">Create wildcard certificates for all domains. This allows a single certificate to secure multiple subdomains.</td>
+<td style="text-align: left;">Create wildcard certificates for all domains. This allows a single certificate to secure multiple subdomains. (Only available with DNS challenges)</td>
 </tr>
 <tr>
 <td style="text-align: center;"><code>USE_LETS_ENCRYPT_STAGING</code></td>
@@ -4415,6 +4415,10 @@ app3.example.com_LOCAL_PHP_PATH=/var/www/html/app3.example.com
 <p>If no <code>LETS_ENCRYPT_DNS_PROPAGATION</code> setting is set, the provider's default propagation time will be used.</p>
 </li>
 </ul>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Wildcard certificates</p>
+<p>Wildcard certificates are only available with DNS challenges. If you want to use them, you will need to set the <code>USE_LETS_ENCRYPT_WILDCARD</code> setting to <code>yes</code>.</p>
 </div>
 <p><strong>Available DNS Providers</strong></p>
 <table>
@@ -6770,6 +6774,13 @@ Consider adding this feature if you want to detect possible open proxies or conn
 <td>no</td>
 <td>Config template to use that will override the default values of specific settings.</td>
 </tr>
+<tr>
+<td><code>SECURITY_MODE</code></td>
+<td><code>block</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Defines the response to threats: "detect" to monitor and log, or "block" to prevent access and log incidents.</td>
+</tr>
 </tbody>
 </table>
 <h2 id="settings-antibot">Antibot</h2>
@@ -7626,7 +7637,7 @@ Consider adding this feature if you want to detect possible open proxies or conn
 </tr>
 <tr>
 <td><code>DNSBL_LIST</code></td>
-<td><code>bl.blocklist.de problems.dnsbl.sorbs.net sbl.spamhaus.org xbl.spamhaus.org</code></td>
+<td><code>bl.blocklist.de sbl.spamhaus.org xbl.spamhaus.org</code></td>
 <td>global</td>
 <td>no</td>
 <td>List of DNSBL servers.</td>
@@ -8031,7 +8042,7 @@ Consider adding this feature if you want to detect possible open proxies or conn
 <td><code>no</code></td>
 <td>multisite</td>
 <td>no</td>
-<td>Create wildcard certificates for all domains. This allows a single certificate to secure multiple subdomains.</td>
+<td>Create wildcard certificates for all domains. This allows a single certificate to secure multiple subdomains. (Only available with DNS challenges)</td>
 </tr>
 <tr>
 <td><code>USE_LETS_ENCRYPT_STAGING</code></td>
