@@ -289,8 +289,9 @@ end
 utils.get_reason = function(ctx)
 	-- ngx.ctx
 	if ctx and ctx.bw and ctx.bw.reason then
-		return ctx.bw.reason, ctx.bw.reason_data or {}
+		return ctx.bw.reason, ctx.bw.reason_data or {}, ctx.bw.security_mode
 	end
+	local security_mode = utils.get_security_mode(ctx)
 	-- ngx.var
 	local var_reason = var.reason
 	if var_reason and var_reason ~= "" then
@@ -302,11 +303,11 @@ utils.get_reason = function(ctx)
 				reason_data = data
 			end
 		end
-		return var_reason, reason_data
+		return var_reason, reason_data, security_mode
 	end
 	-- os.getenv
 	if os.getenv("REASON") == "modsecurity" then
-		return "modsecurity", {}
+		return "modsecurity", {}, security_mode
 	end
 	-- datastore ban
 	local ip
@@ -321,7 +322,7 @@ utils.get_reason = function(ctx)
 		if ok then
 			banned = ban_data["reason"]
 		end
-		return banned, {}
+		return banned, {}, security_mode
 	end
 	-- unknown
 	if ngx.status == utils.get_deny_status() then
@@ -330,10 +331,11 @@ utils.get_reason = function(ctx)
 	return nil
 end
 
-utils.set_reason = function(reason, reason_data, ctx)
+utils.set_reason = function(reason, reason_data, ctx, security_mode)
 	if ctx and ctx.bw then
 		ctx.bw.reason = reason or "unknown"
 		ctx.bw.reason_data = reason_data or {}
+		ctx.bw.security_mode = security_mode
 	end
 	if var.reason then
 		var.reason = reason
@@ -570,6 +572,14 @@ utils.get_deny_status = function()
 		return tonumber(variables["global"]["DENY_HTTP_STATUS"])
 	end
 	return 444
+end
+
+utils.get_security_mode = function(ctx)
+	local security_mode, err = utils.get_variable("SECURITY_MODE", true, ctx)
+	if not security_mode then
+		return "block"
+	end
+	return security_mode
 end
 
 utils.get_session = function(ctx)

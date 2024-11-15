@@ -2,7 +2,11 @@
 {% set json = import("json") %}
 {% set service_id = SERVER_NAME.split(" ")[0] %}
 # process rules with disruptive actions
+{% if SECURITY_MODE == "block" %}
 SecRuleEngine {{ MODSECURITY_SEC_RULE_ENGINE }}
+{% else %}
+SecRuleEngine DetectionOnly
+{% endif %}
 
 # allow body checks
 SecRequestBodyAccess On

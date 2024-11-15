@@ -52,7 +52,7 @@ function metrics:log(bypass_checks)
 		return self:ret(true, "metrics are disabled")
 	end
 	-- Store blocked requests
-	local reason, data = get_reason(self.ctx)
+	local reason, data, security_mode = get_reason(self.ctx)
 	if reason then
 		local country = "local"
 		local err
@@ -74,6 +74,7 @@ function metrics:log(bypass_checks)
 			reason = reason,
 			server_name = self.ctx.bw.server_name,
 			data = data,
+			security_mode = security_mode
 		}
 		-- Get current requests
 		local requests = lru:get("requests")

@@ -343,5 +343,14 @@
     "label": "Use template",
     "regex": "^.*$",
     "type": "text"
+  },
+  "SECURITY_MODE": {
+    "context": "multisite",
+    "default": "block",
+    "help": "Defines the response to threats: \"detect\" to monitor and log, or \"block\" to prevent access and log incidents.",
+    "id": "security-mode",
+    "label": "Security mode",
+    "regex": "^(detect|block)$",
+    "type": "check"
   }
 }

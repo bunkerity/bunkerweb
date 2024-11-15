@@ -40,6 +40,9 @@
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
                         data-bs-original-title="Additional data about the Report">Data</th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="Security mode">Security mode</th>
                 </tr>
             </thead>
             <tbody>
@@ -74,6 +77,7 @@
                         <td>{{ report["reason"] }}</td>
                         <td>{{ report["server_name"] }}</td>
                         <td>{{ report["data"] }}</td>
+                        <td>{{ report["security_mode"] }}</td>
                     </tr>
                 {% endfor %}
             </tbody>
