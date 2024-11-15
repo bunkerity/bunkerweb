@@ -18,4 +18,8 @@ def reports_page():
         if date < current_date - timedelta(days=7):
             break
         reports[i]["date"] = date.isoformat()
-    return render_template("reports.html", reports=list(filter(lambda x: 400 <= x["status"] < 500, reports)))  # TODO: check why we need to filter this
+
+    # Filter reports based on status code OR security_mode="detect"
+    return render_template(
+        "reports.html", reports=[report for report in reports if (400 <= report.get("status", 0) < 500) or (report.get("security_mode") == "detect")]
+    )

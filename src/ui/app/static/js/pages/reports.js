@@ -301,7 +301,7 @@ $(function () {
         viewTotal: true,
         cascadePanes: true,
         collapse: false,
-        columns: [1, 2, 3, 4, 5, 7, 8],
+        columns: [1, 2, 3, 4, 5, 7, 8, 10],
       },
     },
     topStart: {},
@@ -436,7 +436,7 @@ $(function () {
   const reports_table = new DataTable("#reports", {
     columnDefs: [
       { orderable: false, targets: -1 },
-      { visible: false, targets: [6, 9] },
+      { visible: false, targets: [3, 4, 5, 6, 9] },
       { type: "ip-address", targets: 1 },
       {
         targets: 0,
@@ -460,7 +460,7 @@ $(function () {
       },
       {
         searchPanes: { show: true },
-        targets: [1, 2, 3, 4, 5, 7, 8],
+        targets: [1, 2, 3, 4, 5, 7, 8, 10],
       },
     ],
     order: [[0, "desc"]],
@@ -502,4 +502,19 @@ $(function () {
 
   // Update tooltips after table draw
   reports_table.on("draw.dt", updateCountryTooltips);
+
+  const hashValue = location.hash;
+  if (hashValue) {
+    $("#dt-length-0").val(hashValue.replace("#", ""));
+    $("#dt-length-0").trigger("change");
+  }
+
+  $("#dt-length-0").on("change", function () {
+    const value = $(this).val();
+    history.replaceState(
+      null,
+      "",
+      value === "10" ? location.pathname : `#${value}`,
+    );
+  });
 });
