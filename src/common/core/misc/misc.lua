@@ -8,6 +8,7 @@ local ngx = ngx
 local HTTP_NOT_ALLOWED = ngx.HTTP_NOT_ALLOWED
 local HTTP_BAD_REQUEST = ngx.HTTP_BAD_REQUEST
 local HTTP_MOVED_PERMANENTLY = ngx.HTTP_MOVED_PERMANENTLY
+local get_security_mode = utils.get_security_mode
 local regex_match = utils.regex_match
 
 function misc:initialize(ctx)
@@ -43,7 +44,11 @@ function misc:access()
 		end
 	end
 	self:set_metric("counters", "failed_method", 1)
-	return self:ret(true, "method " .. method .. " is not allowed", HTTP_NOT_ALLOWED)
+	local security_mode = get_security_mode(self.ctx)
+	if security_mode == "block" then
+		return self:ret(true, "method " .. method .. " is not allowed", HTTP_NOT_ALLOWED)
+	end
+	return self:ret(true, "detected method " .. method .. " not allowed")
 end
 
 function misc:header()

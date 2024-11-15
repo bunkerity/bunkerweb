@@ -436,7 +436,7 @@ $(function () {
   const reports_table = new DataTable("#reports", {
     columnDefs: [
       { orderable: false, targets: -1 },
-      { visible: false, targets: [6, -1] },
+      { visible: false, targets: [6, 9] },
       { type: "ip-address", targets: 1 },
       {
         targets: 0,

@@ -13,6 +13,7 @@ local has_variable = utils.has_variable
 local get_multiple_variables = utils.get_multiple_variables
 local is_whitelisted = utils.is_whitelisted
 local regex_match = utils.regex_match
+local security_mode = utils.get_security_mode
 local time = os.time
 local date = os.date
 local encode = cjson.encode
@@ -159,21 +160,40 @@ function limit:access()
 	-- Limit reached
 	if limited then
 		self:set_metric("counters", "limited_uri_" .. self.ctx.bw.uri, 1)
-		return self:ret(
-			true,
-			"client IP "
-				.. self.ctx.bw.remote_addr
-				.. " is limited for URL "
-				.. self.ctx.bw.uri
-				.. " (current rate = "
-				.. current_rate
-				.. "r/"
-				.. rate_time
-				.. " and max rate = "
-				.. rate
-				.. ")",
-			HTTP_TOO_MANY_REQUESTS
-		)
+		local security_mode = get_security_mode(self.ctx)
+		if security_mode == "block" then
+			return self:ret(
+				true,
+				"client IP "
+					.. self.ctx.bw.remote_addr
+					.. " is limited for URL "
+					.. self.ctx.bw.uri
+					.. " (current rate = "
+					.. current_rate
+					.. "r/"
+					.. rate_time
+					.. " and max rate = "
+					.. rate
+					.. ")",
+				HTTP_TOO_MANY_REQUESTS
+			)
+		else
+			return self:ret(
+				true,
+				"detected client IP "
+					.. self.ctx.bw.remote_addr
+					.. " limit for URL "
+					.. self.ctx.bw.uri
+					.. " (current rate = "
+					.. current_rate
+					.. "r/"
+					.. rate_time
+					.. " and max rate = "
+					.. rate
+					.. ")",
+				HTTP_TOO_MANY_REQUESTS
+			)
+		end
 	end
 	-- Limit not reached
 	return self:ret(

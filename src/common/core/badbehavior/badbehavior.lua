@@ -12,6 +12,7 @@ local timer_at = ngx.timer.at
 local add_ban = utils.add_ban
 local is_whitelisted = utils.is_whitelisted
 local is_banned = utils.is_banned
+local get_security_mode = utils.get_security_mode
 local tostring = tostring
 
 function badbehavior:initialize(ctx)
@@ -36,6 +37,8 @@ function badbehavior:log()
 	if is_banned(self.ctx.bw.remote_addr) then
 		return self:ret(true, "already banned")
 	end
+	-- Get security mode
+	local security_mode = get_security_mode(self.ctx)
 	-- Call increase function later and with cosocket enabled
 	local ok, err = timer_at(
 		0,
@@ -45,7 +48,8 @@ function badbehavior:log()
 		tonumber(self.variables["BAD_BEHAVIOR_BAN_TIME"]),
 		tonumber(self.variables["BAD_BEHAVIOR_THRESHOLD"]),
 		self.use_redis,
-		self.ctx.bw.server_name
+		self.ctx.bw.server_name,
+		security_mode
 	)
 	if not ok then
 		return self:ret(false, "can't create increase timer : " .. err)
@@ -63,7 +67,7 @@ function badbehavior:log_stream()
 end
 
 -- luacheck: ignore 212
-function badbehavior.increase(premature, ip, count_time, ban_time, threshold, use_redis, server_name)
+function badbehavior.increase(premature, ip, count_time, ban_time, threshold, use_redis, server_name, security_mode)
 	-- Instantiate objects
 	local logger = require "bunkerweb.logger":new("badbehavior")
 	local datastore = require "bunkerweb.datastore":new()
@@ -103,23 +107,38 @@ function badbehavior.increase(premature, ip, count_time, ban_time, threshold, us
 	end
 	-- Store local ban
 	if counter > threshold then
-		ok, err = add_ban(ip, "bad behavior", ban_time, server_name)
-		if not ok then
-			logger:log(ERR, "(increase) can't save ban : " .. err)
-			return
+		if security_mode == "block" then
+			ok, err = add_ban(ip, "bad behavior", ban_time, server_name)
+			if not ok then
+				logger:log(ERR, "(increase) can't save ban : " .. err)
+				return
+			end
+			logger:log(
+				WARN,
+				"IP "
+					.. ip
+					.. " is banned for "
+					.. ban_time
+					.. "s ("
+					.. tostring(counter)
+					.. "/"
+					.. tostring(threshold)
+					.. ")"
+			)
+		else
+			logger:log(
+				WARN,
+				"detected IP "
+					.. ip
+					.. " ban for "
+					.. ban_time
+					.. "s ("
+					.. tostring(counter)
+					.. "/"
+					.. tostring(threshold)
+					.. ")"
+			)
 		end
-		logger:log(
-			WARN,
-			"IP "
-				.. ip
-				.. " is banned for "
-				.. ban_time
-				.. "s ("
-				.. tostring(counter)
-				.. "/"
-				.. tostring(threshold)
-				.. ")"
-		)
 	end
 	logger:log(
 		NOTICE,

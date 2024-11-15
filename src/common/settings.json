@@ -351,6 +351,10 @@
     "id": "security-mode",
     "label": "Security mode",
     "regex": "^(detect|block)$",
-    "type": "check"
+    "type": "select",
+    "select": [
+      "detect",
+      "block"
+    ]
   }
 }
