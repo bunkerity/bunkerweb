@@ -1,4 +1,4 @@
-certbot==3.0.0
+certbot==3.0.1
 certbot-dns-cloudflare==3.0.0
 certbot-dns-digitalocean==3.0.0
 certbot-dns-dnsimple==3.0.0
