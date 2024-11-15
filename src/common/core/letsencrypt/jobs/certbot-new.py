@@ -264,7 +264,9 @@ try:
     else:
         certificate_blocks = stdout.split("Certificate Name: ")[1:]
         for first_server, domains in domains_server_names.items():
-            if getenv(f"{first_server}_USE_LETS_ENCRYPT_WILDCARD", getenv("USE_LETS_ENCRYPT_WILDCARD", "no")) == "yes":
+            letsencrypt_challenge = getenv(f"{first_server}_LETS_ENCRYPT_CHALLENGE", getenv("LETS_ENCRYPT_CHALLENGE", "http"))
+
+            if letsencrypt_challenge == "dns" and getenv(f"{first_server}_USE_LETS_ENCRYPT_WILDCARD", getenv("USE_LETS_ENCRYPT_WILDCARD", "no")) == "yes":
                 wildcards = WildcardGenerator.get_wildcards_from_domains((first_server,))
                 first_server = wildcards[0].lstrip("*.")
                 domains = set(wildcards)
@@ -308,7 +310,6 @@ try:
                 LOGGER.warning(f"Certificate environment (staging/production) changed for {first_server}, asking new certificate...")
                 continue
 
-            letsencrypt_challenge = getenv(f"{first_server}_LETS_ENCRYPT_CHALLENGE", getenv("LETS_ENCRYPT_CHALLENGE", "http"))
             letsencrypt_provider = getenv(f"{first_server}_LETS_ENCRYPT_DNS_PROVIDER", getenv("LETS_ENCRYPT_DNS_PROVIDER", ""))
             current_provider = search(rf"DNS-01 challenge: {letsencrypt_provider}", certificate_block, MULTILINE)
             if letsencrypt_challenge == "dns":
@@ -335,6 +336,10 @@ try:
             "propagation": getenv(f"{first_server}_LETS_ENCRYPT_DNS_PROPAGATION", getenv("LETS_ENCRYPT_DNS_PROPAGATION", "default")),
             "credential_items": {},
         }
+
+        if data["challenge"] == "http" and data["use_wildcard"]:
+            LOGGER.warning(f"Wildcard is not supported with HTTP challenge, disabling wildcard for service {first_server}...")
+            data["use_wildcard"] = False
 
         if (not data["use_wildcard"] and not domains_to_ask.get(first_server)) or (
             data["use_wildcard"] and not domains_to_ask.get(WILDCARD_GENERATOR.get_wildcards_from_domains((first_server,))[0].lstrip("*."))
