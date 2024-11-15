@@ -166,7 +166,7 @@ Here is the list of related settings :
 |    `LETS_ENCRYPT_DNS_PROVIDER`     |                          | The DNS provider to use for DNS challenges.                                                                                                                                   |
 |   `LETS_ENCRYPT_DNS_PROPAGATION`   |        `default`         | The time to wait for DNS propagation in seconds for DNS challenges.                                                                                                           |
 | `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` |                          | Configuration item that will be added to the credentials.ini file for the DNS provider (e.g. 'cloudflare_api_token 123456') for DNS challenges.                               |
-|    `USE_LETS_ENCRYPT_WILDCARD`     |           `no`           | Create wildcard certificates for all domains. This allows a single certificate to secure multiple subdomains.                                                                 |
+|    `USE_LETS_ENCRYPT_WILDCARD`     |           `no`           | Create wildcard certificates for all domains. This allows a single certificate to secure multiple subdomains. (Only available with DNS challenges)                            |
 |     `USE_LETS_ENCRYPT_STAGING`     |           `no`           | Use the staging environment for Let’s Encrypt certificate generation. Useful when you are testing your deployments to avoid being rate limited in the production environment. |
 |   `LETS_ENCRYPT_CLEAR_OLD_CERTS`   |           `no`           | Clear old certificates when renewing.                                                                                                                                         |
 
@@ -174,6 +174,9 @@ Here is the list of related settings :
     - The `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` setting is a multiple setting and can be used to set multiple items for the DNS provider. The items will be saved as a cache file and Certbot will read the credentials from it.
 
     - If no `LETS_ENCRYPT_DNS_PROPAGATION` setting is set, the provider's default propagation time will be used.
+
+!!! warning "Wildcard certificates"
+    Wildcard certificates are only available with DNS challenges. If you want to use them, you will need to set the `USE_LETS_ENCRYPT_WILDCARD` setting to `yes`.
 
 **Available DNS Providers**
 

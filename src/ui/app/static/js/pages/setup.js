@@ -719,6 +719,92 @@ $(document).ready(() => {
   //   }
   // });
 
+  $("#LETS_ENCRYPT_CHALLENGE").on("change", function () {
+    const challenge = $(this).find(":selected").val();
+    const $wildcardCheckbox = $("#USE_LETS_ENCRYPT_WILDCARD");
+    const $dnsProvider = $("#LETS_ENCRYPT_DNS_PROVIDER");
+    const $dnsPropagation = $("#LETS_ENCRYPT_DNS_PROPAGATION");
+    const $dnsCredentialItems = $("#LETS_ENCRYPT_DNS_CREDENTIAL_ITEMS");
+
+    if (challenge === "http") {
+      $wildcardCheckbox.prop("checked", false).prop("disabled", true);
+      $wildcardCheckbox
+        .closest(".col-4")
+        .attr("data-bs-toggle", "tooltip")
+        .attr("data-bs-placement", "top")
+        .attr(
+          "data-bs-original-title",
+          "Wildcard certificates are only supported with DNS challenges.",
+        )
+        .tooltip();
+
+      $dnsProvider.prop("disabled", true);
+      $dnsProvider
+        .parent()
+        .attr("data-bs-toggle", "tooltip")
+        .attr("data-bs-placement", "top")
+        .attr(
+          "data-bs-original-title",
+          "DNS provider is only supported with DNS challenges.",
+        )
+        .tooltip();
+
+      $dnsPropagation.prop("disabled", true);
+      $dnsPropagation
+        .parent()
+        .attr("data-bs-toggle", "tooltip")
+        .attr("data-bs-placement", "top")
+        .attr(
+          "data-bs-original-title",
+          "DNS propagation is only supported with DNS challenges.",
+        )
+        .tooltip();
+
+      $dnsCredentialItems.prop("disabled", true);
+      $dnsCredentialItems
+        .parent()
+        .attr("data-bs-toggle", "tooltip")
+        .attr("data-bs-placement", "top")
+        .attr(
+          "data-bs-original-title",
+          "Credentials are only supported with DNS challenges",
+        )
+        .tooltip();
+    } else {
+      $wildcardCheckbox.prop("disabled", false);
+      $wildcardCheckbox
+        .closest(".col-4")
+        .attr("data-bs-toggle", null)
+        .attr("data-bs-placement", null)
+        .attr("data-bs-original-title", null)
+        .tooltip("dispose");
+
+      $dnsProvider.prop("disabled", false);
+      $dnsProvider
+        .parent()
+        .attr("data-bs-toggle", null)
+        .attr("data-bs-placement", null)
+        .attr("data-bs-original-title", null)
+        .tooltip("dispose");
+
+      $dnsPropagation.prop("disabled", false);
+      $dnsPropagation
+        .parent()
+        .attr("data-bs-toggle", null)
+        .attr("data-bs-placement", null)
+        .attr("data-bs-original-title", null)
+        .tooltip("dispose");
+
+      $dnsCredentialItems.prop("disabled", false);
+      $dnsCredentialItems
+        .parent()
+        .attr("data-bs-toggle", null)
+        .attr("data-bs-placement", null)
+        .attr("data-bs-original-title", null)
+        .tooltip("dispose");
+    }
+  });
+
   // Before Unload Event to Warn Users About Unsaved Changes
   $window.on("beforeunload", function (e) {
     const message =

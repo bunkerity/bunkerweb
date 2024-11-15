@@ -459,7 +459,7 @@
                                                                {% if lets_encrypt_staging == "yes" %}checked{% endif %} />
                                                     </div>
                                                 </div>
-                                                <div class="col-4 pb-3">
+                                                <div class="col-4 pb-3"{% if lets_encrypt_challenge == 'http' %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Wildcard certificates are only supported with DNS challenges."{% endif %}>
                                                     <div class="d-flex justify-content-between align-items-center">
                                                         <label id="label-USE_LETS_ENCRYPT_WILDCARD"
                                                                for="USE_LETS_ENCRYPT_WILDCARD"
@@ -490,7 +490,8 @@
                                                                type="checkbox"
                                                                role="switch"
                                                                aria-labelledby="label-USE_LETS_ENCRYPT_WILDCARD"
-                                                               {% if lets_encrypt_wildcard == "yes" %}checked{% endif %} />
+                                                               {% if lets_encrypt_wildcard == "yes" %}checked{% endif %}
+                                                               {% if lets_encrypt_challenge == 'http' %}disabled{% endif %}/>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6 pb-3">
@@ -563,7 +564,7 @@
                                                         </option>
                                                     </select>
                                                 </div>
-                                                <div class="col-md-6 pb-3">
+                                                <div class="col-md-6 pb-3"{% if lets_encrypt_challenge == 'http' %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="DNS provider is only supported with DNS challenges."{% endif %}>
                                                     <div class="d-flex justify-content-between align-items-center">
                                                         <label id="label-LETS_ENCRYPT_DNS_PROVIDER"
                                                                for="LETS_ENCRYPT_DNS_PROVIDER"
@@ -590,7 +591,8 @@
                                                     <select id="LETS_ENCRYPT_DNS_PROVIDER"
                                                             name="LETS_ENCRYPT_DNS_PROVIDER"
                                                             class="form-select mt-1"
-                                                            aria-labelledby="label-LETS_ENCRYPT_DNS_PROVIDER">
+                                                            aria-labelledby="label-LETS_ENCRYPT_DNS_PROVIDER"
+                                                            {% if lets_encrypt_challenge == 'http' %}disabled{% endif %}>
                                                         <option value="" {% if not lets_encrypt_dns_provider %}selected{% endif %}></option>
                                                         <option value="cloudflare"
                                                                 {% if lets_encrypt_dns_provider == "cloudflare" %}selected{% endif %}>
@@ -650,7 +652,7 @@
                                                         </option>
                                                     </select>
                                                 </div>
-                                                <div class="col-md-6 pb-3">
+                                                <div class="col-md-6 pb-3"{% if lets_encrypt_challenge == 'http' %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="DNS propagation is only supported with DNS challenges."{% endif %}>
                                                     <div class="d-flex justify-content-between align-items-center">
                                                         <label id="label-LETS_ENCRYPT_DNS_PROPAGATION"
                                                                for="LETS_ENCRYPT_DNS_PROPAGATION"
@@ -680,9 +682,10 @@
                                                            value="{{ lets_encrypt_dns_propagation }}"
                                                            class="form-control plugin-setting mt-1"
                                                            aria-labelledby="label-LETS_ENCRYPT_DNS_PROPAGATION"
-                                                           pattern="^(default|\d+)$" />
+                                                           pattern="^(default|\d+)$"
+                                                           {% if lets_encrypt_challenge == 'http' %}disabled{% endif %} />
                                                 </div>
-                                                <div class="col-12 pb-3">
+                                                <div class="col-12 pb-3"{% if lets_encrypt_challenge == 'http' %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Credentials are only supported with DNS challenges."{% endif %}>
                                                     <div class="d-flex justify-content-between align-items-center">
                                                         <label id="label-LETS_ENCRYPT_DNS_CREDENTIAL_ITEMS"
                                                                for="LETS_ENCRYPT_DNS_CREDENTIAL_ITEMS"
@@ -702,7 +705,8 @@
                                                               name="LETS_ENCRYPT_DNS_CREDENTIAL_ITEMS"
                                                               class="form-control plugin-setting mt-1"
                                                               aria-labelledby="label-LETS_ENCRYPT_DNS_CREDENTIAL_ITEMS"
-                                                              pattern="^.*$"></textarea>
+                                                              pattern="^.*$"
+                                                              {% if lets_encrypt_challenge == 'http' %}disabled{% endif %}></textarea>
                                                 </div>
                                                 <h6 class="mt-2 mb-2 fw-bold">Custom certificate</h6>
                                                 <div class="col-12 col-md-2 pb-3">

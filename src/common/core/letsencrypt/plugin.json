@@ -81,7 +81,7 @@
     "USE_LETS_ENCRYPT_WILDCARD": {
       "context": "multisite",
       "default": "no",
-      "help": "Create wildcard certificates for all domains. This allows a single certificate to secure multiple subdomains.",
+      "help": "Create wildcard certificates for all domains. This allows a single certificate to secure multiple subdomains. (Only available with DNS challenges)",
       "id": "use-lets-encrypt-wildcard",
       "label": "Wildcard Certificates",
       "regex": "^(yes|no)$",
