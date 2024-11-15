@@ -625,6 +625,10 @@ class Database:
                             del old_data["bw_plugins"][i]
                             break
 
+                    if plugin["id"] == "letsencrypt_dns":
+                        self.logger.warning(f"Plugin {plugin['id']} is no longer supported in 1.6.X versions, skipping it")
+                        continue
+
                     if old_data and plugin["id"] not in found_plugins:
                         self.logger.warning(f'{plugin.get("type", "core").title()} Plugin "{plugin["id"]}" does not exist, creating it')
 
@@ -1219,6 +1223,12 @@ class Database:
                     two_factor_enabled = getattr(row, "is_two_factor_enabled", None)
                     external_column = getattr(row, "external", None)
                     row = {column: getattr(row, column) for column in Base.metadata.tables[table_name].columns.keys() if hasattr(row, column)}
+
+                    # ? As the letsencrypt_dns plugin is no longer supported, we need to remove the data
+                    if (table_name == "bw_plugins" and row["id"] == "letsencrypt_dns") or (
+                        table_name in ("bw_settings", "bw_jobs", "bw_plugin_pages", "bw_cli_commands") and row["plugin_id"] == "letsencrypt_dns"
+                    ):
+                        continue
 
                     # ? As the external column has been replaced by the type column, we need to update the data if the column exists
                     if table_name == "bw_plugins" and external_column is not None:

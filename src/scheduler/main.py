@@ -578,6 +578,8 @@ if __name__ == "__main__":
                 stop(1)
             LOGGER.info("Backup completed successfully, if you want to restore the backup, you can find it in /var/lib/bunkerweb/upgrade_backups")
 
+            rmtree(join(sep, "etc", "bunkerweb", "pro", "plugins", "letsencrypt_dns"), ignore_errors=True)
+
         if SCHEDULER.db.readonly:
             LOGGER.warning("The database is read-only, no need to save the changes in the configuration as they will not be saved")
         else:
