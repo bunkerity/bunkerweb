@@ -2114,6 +2114,7 @@ chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span
 <ul>
 <li><code>REMOTE_PHP</code> : Hostname of the remote PHP-FPM instance.</li>
 <li><code>REMOTE_PHP_PATH</code> : Root folder containing files in the remote PHP-FPM instance.</li>
+<li><code>REMOTE_PHP_PORT</code> : Port of the remote PHP-FPM instance. (default: 9000)</li>
 <li><code>LOCAL_PHP</code> : Path to the local socket file of PHP-FPM instance.</li>
 <li><code>LOCAL_PHP_PATH</code> : Root folder containing files in the local PHP-FPM instance.</li>
 </ul>
@@ -2124,7 +2125,7 @@ chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span
 <ul>
 <li>Mount your PHP files into the <code>/var/www/html</code> folder of BunkerWeb</li>
 <li>Set up a PHP-FPM container for your application and mount the folder containing PHP files</li>
-<li>Use the specific settings <code>REMOTE_PHP</code> and <code>REMOTE_PHP_PATH</code> as environment variables when starting BunkerWeb</li>
+<li>Use the specific settings <code>REMOTE_PHP</code>, <code>REMOTE_PHP_PATH</code> and <code>REMOTE_PHP_PORT</code> as environment variables when starting BunkerWeb</li>
 </ul>
 <p>If you enable the <a href="../concepts/#multisite-mode">multisite mode</a>, you will need to create separate directories for each of your applications. Each subdirectory should be named using the first value of <code>SERVER_NAME</code>. Here is a dummy example :</p>
 <div class="highlight"><pre><span></span><code>www
@@ -2224,7 +2225,7 @@ find<span class="w"> </span>./www<span class="w"> </span>-type<span class="w"> <
 <ul>
 <li>Mount your PHP files into the <code>/var/www/html</code> folder of BunkerWeb</li>
 <li>Set up a PHP-FPM containers for your applications and mount the folder containing PHP apps</li>
-<li>Use the specific settings <code>REMOTE_PHP</code> and <code>REMOTE_PHP_PATH</code> as labels for your PHP-FPM container</li>
+<li>Use the specific settings <code>REMOTE_PHP</code>, <code>REMOTE_PHP_PATH</code> and <code>REMOTE_PHP_PORT</code> as labels for your PHP-FPM container</li>
 </ul>
 <p>Since the Docker autoconf implies using the <a href="../concepts/#multisite-mode">multisite mode</a>, you will need to create separate directories for each of your applications. Each subdirectory should be named using the first value of <code>SERVER_NAME</code>. Here is a dummy example :</p>
 <div class="highlight"><pre><span></span><code>www
@@ -2390,7 +2391,7 @@ find<span class="w"> </span>./www<span class="w"> </span>-type<span class="w"> <
 <ul>
 <li>Mount your PHP files into the <code>/var/www/html</code> folder of BunkerWeb</li>
 <li>Set up a PHP-FPM containers for your applications and mount the folder containing PHP apps</li>
-<li>Use the specific settings <code>REMOTE_PHP</code> and <code>REMOTE_PHP_PATH</code> as labels for your PHP-FPM container</li>
+<li>Use the specific settings <code>REMOTE_PHP</code>, <code>REMOTE_PHP_PATH</code> and <code>REMOTE_PHP_PORT</code> as labels for your PHP-FPM container</li>
 </ul>
 <p>Since the Swarm integration implies using the <a href="../concepts/#multisite-mode">multisite mode</a>, you will need to create separate directories for each of your applications. Each subdirectory should be named using the first value of <code>SERVER_NAME</code>. Here is a dummy example :</p>
 <div class="highlight"><pre><span></span><code>www
