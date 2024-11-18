@@ -17,9 +17,12 @@
                value="{{ csrf_token() }}" />
         <p id="cache-waiting"
            class="text-center relative w-full p-2 text-primary rounded-lg fw-bold">Loading cache files...</p>
-        <table id="cache" class="table position-relative w-100 d-none">
+        <table id="cache" class="table responsive nowrap position-relative w-100 d-none">
             <thead>
                 <tr>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="Show the Cache files' details"></th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
                         data-bs-original-title="The Cache file's name">File name</th>
@@ -49,6 +52,7 @@
                 {% for cache in caches %}
                     {% set service_id = cache['service_id'] if cache['service_id'] else 'global' %}
                     <tr>
+                        <td></td>
                         <td>
                             <a href="{{ url_for("cache") }}/{{ service_id }}/{{ cache['plugin_id'] }}/{{ cache['job_name'] }}/{{ cache['file_name'].replace('/', '_') if cache['file_name'].startswith('folder:') else cache['file_name'] }}"
                                class="d-flex align-items-center"

@@ -429,7 +429,10 @@ $(document).ready(() => {
 
     const darkMode = $(this).prop("checked");
     if (darkMode) {
-      $("html").removeClass("light-style").addClass("dark-style");
+      $("html")
+        .removeClass("light-style")
+        .addClass("dark-style dark")
+        .attr("data-bs-theme", "dark");
       $(".btn-outline-dark")
         .addClass("btn-outline-light")
         .removeClass("btn-outline-dark");
@@ -438,12 +441,14 @@ $(document).ready(() => {
       $(".bg-light-subtle")
         .addClass("bg-dark-subtle")
         .removeClass("bg-light-subtle");
-      $("html").attr("data-bs-theme", "dark");
       $(".dark-mode-toggle-icon").removeClass("bx-sun").addClass("bx-moon");
       $("[alt='BunkerWeb logo']").attr("src", $("#bw-logo-white").val());
       $("[alt='User Avatar']").attr("src", $("#avatar-url-white").val());
     } else {
-      $("html").removeClass("dark-style").addClass("light-style");
+      $("html")
+        .removeClass("dark-style dark")
+        .addClass("light-style")
+        .attr("data-bs-theme", null);
       $(".btn-outline-light")
         .addClass("btn-outline-dark")
         .removeClass("btn-outline-light");
@@ -452,7 +457,6 @@ $(document).ready(() => {
       $(".bg-dark-subtle")
         .addClass("bg-light-subtle")
         .removeClass("bg-dark-subtle");
-      $("html").attr("data-bs-theme", null);
       $(".dark-mode-toggle-icon").removeClass("bx-moon").addClass("bx-sun");
       $("[alt='BunkerWeb logo']").attr("src", $("#bw-logo").val());
       $("[alt='User Avatar']").attr("src", $("#avatar-url").val());

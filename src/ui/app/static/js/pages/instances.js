@@ -144,7 +144,7 @@ $(document).ready(function () {
         viewTotal: true,
         cascadePanes: true,
         collapse: false,
-        columns: [3, 4, 5, 6, 7],
+        columns: [4, 5, 6, 7, 8],
       },
     },
     topStart: {},
@@ -190,8 +190,8 @@ $(document).ready(function () {
     },
     {
       extend: "colvis",
-      columns: "th:not(:first-child):not(:nth-child(2))",
-      text: '<span class="tf-icons bx bx-columns bx-18px me-2"></span>Columns',
+      columns: "th:not(:nth-child(-n+3))",
+      text: '<span class="tf-icons bx bx-columns bx-18px me-md-2"></span><span class="d-none d-md-inline">Columns</span>',
       className: "btn btn-sm btn-outline-primary rounded-start",
       columnText: function (dt, idx, title) {
         return idx + 1 + ". " + title;
@@ -199,19 +199,19 @@ $(document).ready(function () {
     },
     {
       extend: "colvisRestore",
-      text: '<span class="tf-icons bx bx-reset bx-18px me-2"></span>Reset<span class="d-none d-md-inline"> columns</span>',
-      className: "btn btn-sm btn-outline-primary",
+      text: '<span class="tf-icons bx bx-reset bx-18px me-2"></span>Reset columns',
+      className: "btn btn-sm btn-outline-primary d-none d-md-inline",
     },
     {
       extend: "collection",
-      text: '<span class="tf-icons bx bx-export bx-18px me-2"></span>Export',
+      text: '<span class="tf-icons bx bx-export bx-18px me-md-2"></span><span class="d-none d-md-inline">Export</span>',
       className: "btn btn-sm btn-outline-primary",
       buttons: [
         {
           extend: "copy",
           text: '<span class="tf-icons bx bx-copy bx-18px me-2"></span>Copy visible',
           exportOptions: {
-            columns: ":visible:not(:first-child):not(:last-child)",
+            columns: ":visible:not(:nth-child(-n+2)):not(:last-child)",
           },
         },
         {
@@ -223,7 +223,7 @@ $(document).ready(function () {
             modifier: {
               search: "none",
             },
-            columns: ":not(:first-child):not(:last-child)",
+            columns: ":not(:nth-child(-n+2)):not(:last-child)",
           },
         },
         {
@@ -234,14 +234,14 @@ $(document).ready(function () {
             modifier: {
               search: "none",
             },
-            columns: ":not(:first-child):not(:last-child)",
+            columns: ":not(:nth-child(-n+2)):not(:last-child)",
           },
         },
       ],
     },
     {
       extend: "collection",
-      text: '<span class="tf-icons bx bx-play bx-18px me-2"></span>Actions',
+      text: '<span class="tf-icons bx bx-play bx-18px me-md-2"></span><span class="d-none d-md-inline">Actions</span>',
       className: "btn btn-sm btn-outline-primary action-button disabled",
       buttons: [
         {
@@ -279,13 +279,13 @@ $(document).ready(function () {
   const getSelectedInstances = () => {
     const instances = [];
     $("tr.selected").each(function () {
-      instances.push($(this).find("td:eq(1)").text());
+      instances.push($(this).find("td:eq(2)").text());
     });
     return instances;
   };
 
   $.fn.dataTable.ext.buttons.create_instance = {
-    text: '<span class="tf-icons bx bx-plus"></span>&nbsp;Create<span class="d-none d-md-inline"> new instance</span>',
+    text: '<span class="tf-icons bx bx-plus"></span><span class="d-none d-md-inline">&nbsp;Create new instance</span>',
     className: `btn btn-sm rounded me-4 btn-bw-green${
       isReadOnly ? " disabled" : ""
     }`,
@@ -386,8 +386,13 @@ $(document).ready(function () {
     columnDefs: [
       {
         orderable: false,
-        render: DataTable.render.select(),
+        className: "dtr-control",
         targets: 0,
+      },
+      {
+        orderable: false,
+        render: DataTable.render.select(),
+        targets: 1,
       },
       {
         orderable: false,
@@ -395,10 +400,10 @@ $(document).ready(function () {
       },
       {
         visible: false,
-        targets: [2, 3],
+        targets: [3, 4],
       },
       {
-        targets: [6, 7],
+        targets: [7, 8],
         render: function (data, type, row) {
           if (type === "display" || type === "filter") {
             const date = new Date(data);
@@ -415,7 +420,7 @@ $(document).ready(function () {
           combiner: "or",
           orderable: false,
         },
-        targets: [3],
+        targets: [4],
       },
       {
         searchPanes: {
@@ -425,49 +430,21 @@ $(document).ready(function () {
               label:
                 '<i class="bx bx-xs bx-up-arrow-alt text-success"></i>&nbsp;Up',
               value: function (rowData, rowIdx) {
-                return rowData[4].includes("Up");
+                return rowData[5].includes("Up");
               },
             },
             {
               label:
                 '<i class="bx bx-xs bx-down-arrow-alt text-danger"></i>&nbsp;Down',
               value: function (rowData, rowIdx) {
-                return rowData[4].includes("Down");
+                return rowData[5].includes("Down");
               },
             },
             {
               label:
                 '<i class="bx bx-xs bxs-hourglass text-warning"></i>&nbsp;Loading',
               value: function (rowData, rowIdx) {
-                return rowData[4].includes("Loading");
-              },
-            },
-          ],
-          combiner: "or",
-          orderable: false,
-        },
-        targets: 4,
-      },
-      {
-        searchPanes: {
-          show: true,
-          options: [
-            {
-              label: '<i class="bx bx-xs bx-microchip"></i>&nbsp;Static',
-              value: function (rowData, rowIdx) {
-                return rowData[5].includes("Static");
-              },
-            },
-            {
-              label: '<i class="bx bx-xs bxl-docker"></i>&nbsp;Container',
-              value: function (rowData, rowIdx) {
-                return rowData[5].includes("Container");
-              },
-            },
-            {
-              label: '<i class="bx bx-xs bxl-kubernetes"></i>&nbsp;Pod',
-              value: function (rowData, rowIdx) {
-                return rowData[5].includes("Pod");
+                return rowData[5].includes("Loading");
               },
             },
           ],
@@ -481,27 +458,21 @@ $(document).ready(function () {
           show: true,
           options: [
             {
-              label: "Last 24 hours",
+              label: '<i class="bx bx-xs bx-microchip"></i>&nbsp;Static',
               value: function (rowData, rowIdx) {
-                const date = new Date(rowData[6]);
-                const now = new Date();
-                return now - date < 24 * 60 * 60 * 1000;
+                return rowData[6].includes("Static");
               },
             },
             {
-              label: "Last 7 days",
+              label: '<i class="bx bx-xs bxl-docker"></i>&nbsp;Container',
               value: function (rowData, rowIdx) {
-                const date = new Date(rowData[6]);
-                const now = new Date();
-                return now - date < 7 * 24 * 60 * 60 * 1000;
+                return rowData[6].includes("Container");
               },
             },
             {
-              label: "Last 30 days",
+              label: '<i class="bx bx-xs bxl-kubernetes"></i>&nbsp;Pod',
               value: function (rowData, rowIdx) {
-                const date = new Date(rowData[6]);
-                const now = new Date();
-                return now - date < 30 * 24 * 60 * 60 * 1000;
+                return rowData[6].includes("Pod");
               },
             },
           ],
@@ -544,14 +515,48 @@ $(document).ready(function () {
         },
         targets: 7,
       },
+      {
+        searchPanes: {
+          show: true,
+          options: [
+            {
+              label: "Last 24 hours",
+              value: function (rowData, rowIdx) {
+                const date = new Date(rowData[8]);
+                const now = new Date();
+                return now - date < 24 * 60 * 60 * 1000;
+              },
+            },
+            {
+              label: "Last 7 days",
+              value: function (rowData, rowIdx) {
+                const date = new Date(rowData[8]);
+                const now = new Date();
+                return now - date < 7 * 24 * 60 * 60 * 1000;
+              },
+            },
+            {
+              label: "Last 30 days",
+              value: function (rowData, rowIdx) {
+                const date = new Date(rowData[8]);
+                const now = new Date();
+                return now - date < 30 * 24 * 60 * 60 * 1000;
+              },
+            },
+          ],
+          combiner: "or",
+          orderable: false,
+        },
+        targets: 8,
+      },
     ],
-    order: [[7, "desc"]],
+    order: [[8, "desc"]],
     autoFill: false,
     responsive: true,
     select: {
       style: "multi+shift",
-      selector: "td:first-child",
-      headerCheckbox: false,
+      selector: "td:nth-child(2)",
+      headerCheckbox: true,
     },
     layout: layout,
     language: {
@@ -594,6 +599,8 @@ $(document).ready(function () {
 
   $("#instances").removeClass("d-none");
   $("#instances-waiting").addClass("visually-hidden");
+
+  instances_table.responsive.recalc();
 
   instances_table.on("mouseenter", "td", function () {
     if (instances_table.cell(this).index() === undefined) return;
@@ -644,20 +651,6 @@ $(document).ready(function () {
         )
         .attr("data-bs-placement", "top")
         .tooltip();
-      $("#select-all-rows").prop("checked", false);
-    }
-  });
-
-  // Event listener for the select-all checkbox
-  $("#select-all-rows").on("change", function () {
-    const isChecked = $(this).prop("checked");
-
-    if (isChecked) {
-      // Select all rows on the current page
-      instances_table.rows({ page: "current" }).select();
-    } else {
-      // Deselect all rows on the current page
-      instances_table.rows({ page: "current" }).deselect();
     }
   });
 

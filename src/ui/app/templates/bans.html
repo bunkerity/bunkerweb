@@ -9,16 +9,16 @@
                value="{{ csrf_token() }}" />
         <p id="bans-waiting"
            class="text-center relative w-full p-2 text-primary rounded-lg fw-bold">Loading bans...</p>
-        <table id="bans" class="table position-relative w-100 d-none">
+        <table id="bans"
+               class="table responsive nowrap position-relative w-100 d-none">
             <thead>
                 <tr>
-                    <th>
-                        <input id="select-all-rows"
-                               aria-label="Select all rows"
-                               class="dt-select-checkbox mb-1"
-                               type="checkbox">
-                        Select All
-                    </th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="Show the Bans' details"></th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="Select all Bans"></th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
                         data-bs-original-title="The date and time when the Ban was created">Date</th>
@@ -45,6 +45,7 @@
             <tbody>
                 {% for ban in bans %}
                     <tr>
+                        <td></td>
                         <td></td>
                         <td class="ban-start-date">{{ ban["start_date"] }}</td>
                         <td>{{ ban["ip"] }}</td>
@@ -81,7 +82,7 @@
              tabindex="-1"
              aria-hidden="true"
              role="dialog">
-            <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title">Add Ban(s)</h5>
@@ -106,36 +107,36 @@
                             <ul id="bans-container" class="list-group rounded-top w-100">
                                 <li id="bans-header" class="list-group-item bg-secondary text-white">
                                     <div class="row">
-                                        <div class="col-3 text-center fw-bold">IP Address</div>
-                                        <div class="col-5 border-start text-center fw-bold">End Date</div>
-                                        <div class="col-3 border-start text-center fw-bold">Reason</div>
-                                        <div class="col-1 border-start text-center fw-bold">Delete</div>
+                                        <div class="col-12 col-md-3 text-center fw-bold">IP Address</div>
+                                        <div class="col-12 col-md-5 border-start text-center fw-bold">End Date</div>
+                                        <div class="col-12 col-md-3 border-start text-center fw-bold">Reason</div>
+                                        <div class="col-12 col-md-1 border-start text-center fw-bold">Delete</div>
                                     </div>
                                 </li>
                                 <li id="ban-1" class="list-group-item rounded-0">
-                                    <div class="row align-items-center d-flex">
-                                        <div class="col-3">
+                                    <div class="row align-items-center">
+                                        <div class="col-12 col-md-3 mb-2 mb-md-0">
                                             <input type="text"
                                                    name="ip"
                                                    class="form-control"
                                                    placeholder="127.0.0.1"
                                                    required />
                                         </div>
-                                        <div class="col-5 border-start">
+                                        <div class="col-12 col-md-5 mb-2 mb-md-0 border-start">
                                             <input type="flatpickr-datetime"
                                                    name="datetime"
                                                    class="form-control"
                                                    required />
                                         </div>
-                                        <div class="col-3 border-start">
+                                        <div class="col-12 col-md-3 mb-2 mb-md-0 border-start">
                                             <input type="text" name="reason" class="form-control" value="ui" required />
                                         </div>
-                                        <div class="col-1 border-start align-items-center d-flex"
-                                             data-bs-toggle="tooltip"
-                                             data-bs-placement="right"
-                                             data-bs-original-title="Can't delete the original Ban">
+                                        <div class="col-12 col-md-1 border-start text-center">
                                             <button type="button"
-                                                    class="btn btn-outline-danger btn-sm me-1 delete-ban disabled">
+                                                    class="btn btn-outline-danger btn-sm disabled"
+                                                    data-bs-toggle="tooltip"
+                                                    data-bs-placement="right"
+                                                    title="Can't delete the original Ban">
                                                 <i class="bx bx-trash bx-xs"></i>
                                             </button>
                                         </div>
@@ -143,8 +144,8 @@
                                 </li>
                             </ul>
                         </div>
-                        <div class="modal-footer justify-content-center">
-                            <button type="submit" class="btn btn-danger me-2">Ban</button>
+                        <div class="modal-footer justify-content-center flex-wrap gap-2">
+                            <button type="submit" class="btn btn-danger">Ban</button>
                             <button type="reset"
                                     class="btn btn-outline-secondary"
                                     data-bs-dismiss="modal">Cancel</button>

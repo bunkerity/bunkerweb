@@ -14,7 +14,7 @@ $(document).ready(function () {
     {
       label: "global",
       value: function (rowData) {
-        return $(rowData[4]).text().trim() === "global";
+        return $(rowData[5]).text().trim() === "global";
       },
     },
   ];
@@ -22,7 +22,7 @@ $(document).ready(function () {
     {
       label: "no template",
       value: function (rowData) {
-        return $(rowData[5]).text().trim() === "no template";
+        return $(rowData[6]).text().trim() === "no template";
       },
     },
   ];
@@ -31,7 +31,7 @@ $(document).ready(function () {
     servicesSearchPanesOptions.push({
       label: service,
       value: function (rowData) {
-        return $(rowData[4]).text().trim() === service;
+        return $(rowData[5]).text().trim() === service;
       },
     });
   });
@@ -39,7 +39,7 @@ $(document).ready(function () {
     templatesSearchPanesOptions.push({
       label: template,
       value: function (rowData) {
-        return $(rowData[5]).text().trim() === template;
+        return $(rowData[6]).text().trim() === template;
       },
     });
   });
@@ -125,7 +125,7 @@ $(document).ready(function () {
         viewTotal: true,
         cascadePanes: true,
         collapse: false,
-        columns: [2, 3, 4, 5],
+        columns: [3, 4, 5, 6],
       },
     },
     topStart: {},
@@ -171,8 +171,8 @@ $(document).ready(function () {
     },
     {
       extend: "colvis",
-      columns: "th:not(:first-child):not(:nth-child(2)):not(:last-child)",
-      text: '<span class="tf-icons bx bx-columns bx-18px me-2"></span>Columns',
+      columns: "th:not(:nth-child(-n+3))",
+      text: '<span class="tf-icons bx bx-columns bx-18px me-md-2"></span><span class="d-none d-md-inline">Columns</span>',
       className: "btn btn-sm btn-outline-primary rounded-start",
       columnText: function (dt, idx, title) {
         return idx + 1 + ". " + title;
@@ -180,19 +180,19 @@ $(document).ready(function () {
     },
     {
       extend: "colvisRestore",
-      text: '<span class="tf-icons bx bx-reset bx-18px me-2"></span>Reset<span class="d-none d-md-inline"> columns</span>',
-      className: "btn btn-sm btn-outline-primary",
+      text: '<span class="tf-icons bx bx-reset bx-18px me-2"></span>Reset columns',
+      className: "btn btn-sm btn-outline-primary d-none d-md-inline",
     },
     {
       extend: "collection",
-      text: '<span class="tf-icons bx bx-export bx-18px me-2"></span>Export',
+      text: '<span class="tf-icons bx bx-export bx-18px me-md-2"></span><span class="d-none d-md-inline">Export</span>',
       className: "btn btn-sm btn-outline-primary",
       buttons: [
         {
           extend: "copy",
           text: '<span class="tf-icons bx bx-copy bx-18px me-2"></span>Copy visible',
           exportOptions: {
-            columns: ":visible:not(:first-child):not(:last-child)",
+            columns: ":visible:not(:nth-child(-n+2)):not(:last-child)",
           },
         },
         {
@@ -204,7 +204,7 @@ $(document).ready(function () {
             modifier: {
               search: "none",
             },
-            columns: ":not(:first-child):not(:last-child)",
+            columns: ":not(:nth-child(-n+2)):not(:last-child)",
           },
         },
         {
@@ -215,14 +215,14 @@ $(document).ready(function () {
             modifier: {
               search: "none",
             },
-            columns: ":not(:first-child):not(:last-child)",
+            columns: ":not(:nth-child(-n+2)):not(:last-child)",
           },
         },
       ],
     },
     {
       extend: "collection",
-      text: '<span class="tf-icons bx bx-play bx-18px me-2"></span>Actions',
+      text: '<span class="tf-icons bx bx-play bx-18px me-md-2"></span><span class="d-none d-md-inline">Actions</span>',
       className: "btn btn-sm btn-outline-primary action-button disabled",
       buttons: [
         {
@@ -250,9 +250,9 @@ $(document).ready(function () {
     const configs = [];
     $("tr.selected").each(function () {
       const $this = $(this);
-      const name = $this.find("td:eq(1)").find("a").text().trim();
-      const type = $this.find("td:eq(2)").text().trim();
-      let service = $this.find("td:eq(4)");
+      const name = $this.find("td:eq(2)").find("a").text().trim();
+      const type = $this.find("td:eq(3)").text().trim();
+      let service = $this.find("td:eq(5)");
       if (service.find("a").length > 0) {
         service = service.find("a").text().trim();
       } else {
@@ -277,7 +277,7 @@ $(document).ready(function () {
   };
 
   $.fn.dataTable.ext.buttons.create_config = {
-    text: '<span class="tf-icons bx bx-plus"></span>&nbsp;Create<span class="d-none d-md-inline"> new custom config</span>',
+    text: '<span class="tf-icons bx bx-plus"></span><span class="d-none d-md-inline">&nbsp;Create new custom config</span>',
     className: `btn btn-sm rounded me-4 btn-bw-green${
       isReadOnly ? " disabled" : ""
     }`,
@@ -319,8 +319,13 @@ $(document).ready(function () {
     columnDefs: [
       {
         orderable: false,
-        render: DataTable.render.select(),
+        className: "dtr-control",
         targets: 0,
+      },
+      {
+        orderable: false,
+        render: DataTable.render.select(),
+        targets: 1,
       },
       {
         orderable: false,
@@ -328,7 +333,7 @@ $(document).ready(function () {
       },
       {
         visible: false,
-        targets: 6,
+        targets: 7,
       },
       {
         searchPanes: {
@@ -337,76 +342,60 @@ $(document).ready(function () {
             {
               label: '<i class="bx bx-xs bx-window-alt"></i>HTTP',
               value: function (rowData, rowIdx) {
-                $(rowData[2]).text().trim() === "HTTP";
+                $(rowData[3]).text().trim() === "HTTP";
               },
             },
             {
               label: '<i class="bx bx-xs bx-window-alt"></i>SERVER_HTTP',
               value: function (rowData, rowIdx) {
-                return $(rowData[2]).text().trim() === "SERVER_HTTP";
+                return $(rowData[3]).text().trim() === "SERVER_HTTP";
               },
             },
             {
               label:
                 '<i class="bx bx-xs bx-window-alt"></i>DEFAULT_SERVER_HTTP',
               value: function (rowData, rowIdx) {
-                return $(rowData[2]).text().trim() === "DEFAULT_SERVER_HTTP";
+                return $(rowData[3]).text().trim() === "DEFAULT_SERVER_HTTP";
               },
             },
             {
               label: '<i class="bx bx-xs bx-shield-quarter"></i>MODSEC_CRS',
               value: function (rowData, rowIdx) {
-                return $(rowData[2]).text().trim() === "MODSEC_CRS";
+                return $(rowData[3]).text().trim() === "MODSEC_CRS";
               },
             },
             {
               label: '<i class="bx bx-xs bx-shield-alt-2"></i>MODSEC',
               value: function (rowData, rowIdx) {
-                return $(rowData[2]).text().trim() === "MODSEC";
+                return $(rowData[3]).text().trim() === "MODSEC";
               },
             },
             {
               label: '<i class="bx bx-xs bx-network-chart"></i>STREAM',
               value: function (rowData, rowIdx) {
-                return $(rowData[2]).text().trim() === "STREAM";
+                return $(rowData[3]).text().trim() === "STREAM";
               },
             },
             {
               label: '<i class="bx bx-xs bx-network-chart"></i>SERVER_STREAM',
               value: function (rowData, rowIdx) {
-                return $(rowData[2]).text().trim() === "SERVER_STREAM";
+                return $(rowData[3]).text().trim() === "SERVER_STREAM";
               },
             },
             {
               label: '<i class="bx bx-xs bx-shield-alt"></i>CRS_PLUGINS_BEFORE',
               value: function (rowData, rowIdx) {
-                return $(rowData[2]).text().trim() === "CRS_PLUGINS_BEFORE";
+                return $(rowData[3]).text().trim() === "CRS_PLUGINS_BEFORE";
               },
             },
             {
               label: '<i class="bx bx-xs bx-shield-alt"></i>CRS_PLUGINS_AFTER',
               value: function (rowData, rowIdx) {
-                return $(rowData[2]).text().trim() === "CRS_PLUGINS_AFTER";
+                return $(rowData[3]).text().trim() === "CRS_PLUGINS_AFTER";
               },
             },
           ],
           combiner: "or",
-        },
-        targets: 2,
-      },
-      {
-        searchPanes: {
-          show: true,
-          combiner: "or",
-          options: servicesSearchPanesOptions,
-        },
-        targets: 4,
-      },
-      {
-        searchPanes: {
-          show: true,
-          combiner: "or",
-          orderable: false,
         },
         targets: 3,
       },
@@ -414,18 +403,34 @@ $(document).ready(function () {
         searchPanes: {
           show: true,
           combiner: "or",
-          options: templatesSearchPanesOptions,
+          orderable: false,
+        },
+        targets: 4,
+      },
+      {
+        searchPanes: {
+          show: true,
+          combiner: "or",
+          options: servicesSearchPanesOptions,
         },
         targets: 5,
       },
+      {
+        searchPanes: {
+          show: true,
+          combiner: "or",
+          options: templatesSearchPanesOptions,
+        },
+        targets: 6,
+      },
     ],
-    order: [[1, "asc"]],
+    order: [[2, "asc"]],
     autoFill: false,
     responsive: true,
     select: {
       style: "multi+shift",
-      selector: "td:first-child",
-      headerCheckbox: false,
+      selector: "td:nth-child(2)",
+      headerCheckbox: true,
     },
     layout: layout,
     language: {
@@ -478,6 +483,8 @@ $(document).ready(function () {
   $("#configs").removeClass("d-none");
   $("#configs-waiting").addClass("visually-hidden");
 
+  configs_table.responsive.recalc();
+
   configs_table.on("mouseenter", "td", function () {
     if (configs_table.cell(this).index() === undefined) return;
     const rowIdx = configs_table.cell(this).index().row;
@@ -527,20 +534,6 @@ $(document).ready(function () {
         )
         .attr("data-bs-placement", "top")
         .tooltip();
-      $("#select-all-rows").prop("checked", false);
-    }
-  });
-
-  // Event listener for the select-all checkbox
-  $("#select-all-rows").on("change", function () {
-    const isChecked = $(this).prop("checked");
-
-    if (isChecked) {
-      // Select all rows on the current page
-      configs_table.rows({ page: "current" }).select();
-    } else {
-      // Deselect all rows on the current page
-      configs_table.rows({ page: "current" }).deselect();
     }
   });
 

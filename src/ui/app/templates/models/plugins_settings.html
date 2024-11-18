@@ -63,7 +63,7 @@
                 <label for="plugin-type-select">Type</label>
             </div>
         </div>
-        <div class="d-flex justify-content-center">
+        <div class="justify-content-center d-none d-sm-flex">
             {% if current_endpoint != "global-config" %}
                 <div {% if current_endpoint != 'new' and service_method != 'ui' %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The draft mode can only be toggled on UI created services"{% endif %}>
                     <button type="button"
@@ -96,6 +96,37 @@
         </div>
     </div>
 </div>
+<div class="d-flex justify-content-center position-fixed m-3 d-sm-none"
+     id="floating-settings-button">
+    {% if current_endpoint != "global-config" %}
+        <div {% if current_endpoint != 'new' and service_method != 'ui' %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The draft mode can only be toggled on UI created services"{% endif %}>
+            <button type="button"
+                    class="btn btn-sm btn-outline-secondary toggle-draft p-1_5 me-1 {% if current_endpoint != 'new' and service_method != 'ui' %}disabled{% endif %}">
+                <i class="bx bx-xs bx-{% if is_draft == 'yes' %}file-blank{% else %}globe{% endif %}"></i>
+                &nbsp;
+                {% if is_draft == 'yes' %}
+                    Draft
+                {% else %}
+                    Online
+                {% endif %}
+            </button>
+        </div>
+    {% endif %}
+    <div {% if service_method == "autoconf" or is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{% if is_readonly %}The database is in readonly{% else %}The service was created using the autoconf method{% endif %}
+         therefore
+         the
+         configuration
+         is
+         locked
+         "
+         {% endif %}>
+        <button type="button"
+                class="btn btn-sm btn-bw-green save-settings p-1_5 {% if service_method == "autoconf" or is_readonly %}disabled{% endif %}">
+            <i class="bx bx-save bx-xs"></i>
+            &nbsp;Save
+        </button>
+    </div>
+</div>
 <div class="card tab-content p-2 position-relative">
     {% for plugin, plugin_data in plugins.items() %}
         {% set filtered_settings = get_filtered_settings(plugin_data["settings"], current_endpoint == "global-config") %}
@@ -123,18 +154,18 @@
                            data-bs-toggle="tooltip"
                            data-bs-placement="top"
                            data-bs-original-title="{% if plugin_data['stream'] != 'no' %}Supports{% else %}Doesn't support{% endif %} STREAM mode{% if plugin_data['stream'] == 'partial' %} partially{% endif %}">
-                            <i class="bx bx-{% if plugin_data['stream'] == 'yes' %}badge-check{% elif plugin_data['stream'] == 'partial' %}message-square-detail{% else %}no-entry{% endif %}"></i>&nbsp;STREAM
+                            <i class="bx bx-{% if plugin_data['stream'] == 'yes' %}badge-check{% elif plugin_data['stream'] == 'partial' %}message-square-detail{% else %}no-entry{% endif %}"></i><span class="d-none d-md-inline">&nbsp;STREAM</span>
                         </a>
                         <a href="{% if plugin_data['type'] == 'core' %}https://docs.bunkerweb.io/latest/settings/?utm_campaign=self&utm_source=ui#{% if plugin == 'general' %}global-settings{% else %}{{ plugin }}{% endif %}{% else %}https://docs.bunkerweb.io/latest/plugins/?utm_campaign=self&utm_source=ui{% endif %}"
                            class="btn btn-sm btn-primary rounded-pill ms-2"
                            target="_blank"
                            rel="noopener">
-                            <i class="bx bx-link"></i>&nbsp;More info
+                            <i class="bx bx-link"></i><span class="d-none d-md-inline">&nbsp;More info</span>
                         </a>
                         {% if plugin_data["page"] %}
                             <a href="{{ url_for("plugins") }}/{{ plugin }}"
                                class="btn btn-sm btn-primary rounded-pill ms-2">
-                                <i class="bx bxs-file-html"></i>&nbsp;Plugin page
+                                <i class="bx bxs-file-html"></i><span class="d-none d-md-inline">&nbsp;Plugin page</span>
                             </a>
                         {% endif %}
                     </div>

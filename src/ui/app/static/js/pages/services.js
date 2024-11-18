@@ -90,7 +90,7 @@ $(function () {
         viewTotal: true,
         cascadePanes: true,
         collapse: false,
-        columns: [2, 3, 4, 5],
+        columns: [3, 4, 5, 6],
       },
     },
     topStart: {},
@@ -130,26 +130,26 @@ $(function () {
     },
     {
       extend: "colvis",
-      columns: "th:not(:first-child):not(:nth-child(2)):not(:last-child)",
-      text: '<span class="tf-icons bx bx-columns bx-18px me-2"></span>Columns',
+      columns: "th:not(:nth-child(-n+3))",
+      text: '<span class="tf-icons bx bx-columns bx-18px me-md-2"></span><span class="d-none d-md-inline">Columns</span>',
       className: "btn btn-sm btn-outline-primary rounded-start",
       columnText: (dt, idx, title) => `${idx + 1}. ${title}`,
     },
     {
       extend: "colvisRestore",
-      text: '<span class="tf-icons bx bx-reset bx-18px me-2"></span>Reset<span class="d-none d-md-inline"> columns</span>',
-      className: "btn btn-sm btn-outline-primary",
+      text: '<span class="tf-icons bx bx-reset bx-18px me-2"></span>Reset columns',
+      className: "btn btn-sm btn-outline-primary d-none d-md-inline",
     },
     {
       extend: "collection",
-      text: '<span class="tf-icons bx bx-export bx-18px me-2"></span>Export',
+      text: '<span class="tf-icons bx bx-export bx-18px me-md-2"></span><span class="d-none d-md-inline">Export</span>',
       className: "btn btn-sm btn-outline-primary",
       buttons: [
         {
           extend: "copy",
           text: '<span class="tf-icons bx bx-copy bx-18px me-2"></span>Copy visible',
           exportOptions: {
-            columns: ":visible:not(:first-child):not(:last-child)",
+            columns: ":visible:not(:nth-child(-n+2)):not(:last-child)",
           },
         },
         {
@@ -159,7 +159,7 @@ $(function () {
           filename: "bw_services",
           exportOptions: {
             modifier: { search: "none" },
-            columns: ":not(:first-child):not(:last-child)",
+            columns: ":not(:nth-child(-n+2)):not(:last-child)",
           },
         },
         {
@@ -168,14 +168,14 @@ $(function () {
           filename: "bw_services",
           exportOptions: {
             modifier: { search: "none" },
-            columns: ":not(:first-child):not(:last-child)",
+            columns: ":not(:nth-child(-n+2)):not(:last-child)",
           },
         },
       ],
     },
     {
       extend: "collection",
-      text: '<span class="tf-icons bx bx-play bx-18px me-2"></span>Actions',
+      text: '<span class="tf-icons bx bx-play bx-18px me-md-2"></span><span class="d-none d-md-inline">Actions</span>',
       className: "btn btn-sm btn-outline-primary action-button disabled",
       buttons: [
         {
@@ -223,7 +223,7 @@ $(function () {
   const getSelectedServices = () =>
     $("tr.selected")
       .map(function () {
-        return $(this).find("td:eq(1) a").text().trim();
+        return $(this).find("td:eq(2) a").text().trim();
       })
       .get();
 
@@ -237,7 +237,7 @@ $(function () {
   };
 
   $.fn.dataTable.ext.buttons.create_service = {
-    text: '<span class="tf-icons bx bx-plus"></span>&nbsp;Create<span class="d-none d-md-inline"> new service</span>',
+    text: '<span class="tf-icons bx bx-plus"></span><span class="d-none d-md-inline">&nbsp;Create new service</span>',
     className: `btn btn-sm rounded me-4 btn-bw-green${
       isReadOnly ? " disabled" : ""
     }`,
@@ -336,10 +336,19 @@ $(function () {
 
   const services_table = new DataTable("#services", {
     columnDefs: [
-      { orderable: false, render: DataTable.render.select(), targets: 0 },
+      {
+        orderable: false,
+        className: "dtr-control",
+        targets: 0,
+      },
+      {
+        orderable: false,
+        render: DataTable.render.select(),
+        targets: 1,
+      },
       { orderable: false, targets: -1 },
       {
-        targets: [4, 5],
+        targets: [5, 6],
         render: function (data, type, row) {
           if (type === "display" || type === "filter") {
             const date = new Date(data);
@@ -356,21 +365,13 @@ $(function () {
           options: [
             {
               label: '<i class="bx bx-xs bx-globe"></i>&nbsp;Online',
-              value: (rowData) => rowData[2].includes("Online"),
+              value: (rowData) => rowData[3].includes("Online"),
             },
             {
               label: '<i class="bx bx-xs bx-file-blank"></i>&nbsp;Draft',
-              value: (rowData) => rowData[2].includes("Draft"),
+              value: (rowData) => rowData[3].includes("Draft"),
             },
           ],
-          combiner: "or",
-          orderable: false,
-        },
-        targets: 2,
-      },
-      {
-        searchPanes: {
-          show: true,
           combiner: "or",
           orderable: false,
         },
@@ -379,21 +380,6 @@ $(function () {
       {
         searchPanes: {
           show: true,
-          options: [
-            {
-              label: "Last 24 hours",
-              value: (rowData) => new Date() - new Date(rowData[4]) < 86400000,
-            },
-            {
-              label: "Last 7 days",
-              value: (rowData) => new Date() - new Date(rowData[4]) < 604800000,
-            },
-            {
-              label: "Last 30 days",
-              value: (rowData) =>
-                new Date() - new Date(rowData[4]) < 2592000000,
-            },
-          ],
           combiner: "or",
           orderable: false,
         },
@@ -422,14 +408,37 @@ $(function () {
         },
         targets: 5,
       },
+      {
+        searchPanes: {
+          show: true,
+          options: [
+            {
+              label: "Last 24 hours",
+              value: (rowData) => new Date() - new Date(rowData[6]) < 86400000,
+            },
+            {
+              label: "Last 7 days",
+              value: (rowData) => new Date() - new Date(rowData[6]) < 604800000,
+            },
+            {
+              label: "Last 30 days",
+              value: (rowData) =>
+                new Date() - new Date(rowData[6]) < 2592000000,
+            },
+          ],
+          combiner: "or",
+          orderable: false,
+        },
+        targets: 6,
+      },
     ],
-    order: [[1, "asc"]],
+    order: [[2, "asc"]],
     autoFill: false,
     responsive: true,
     select: {
       style: "multi+shift",
-      selector: "td:first-child",
-      headerCheckbox: false,
+      selector: "td:nth-child(2)",
+      headerCheckbox: true,
     },
     layout: layout,
     language: {
@@ -482,6 +491,8 @@ $(function () {
   $("#services").removeClass("d-none");
   $("#services-waiting").addClass("visually-hidden");
 
+  services_table.responsive.recalc();
+
   services_table.on("mouseenter", "td", function () {
     if (services_table.cell(this).index() === undefined) return;
     const rowIdx = services_table.cell(this).index().row;
@@ -531,25 +542,7 @@ $(function () {
         )
         .attr("data-bs-placement", "top")
         .tooltip();
-      $("#select-all-rows").prop("checked", false);
     }
-  });
-
-  // Event listener for the select-all checkbox
-  $("#select-all-rows").on("change", function () {
-    const isChecked = $(this).prop("checked");
-    const rows = services_table.rows({ page: "current" });
-    isChecked ? rows.select() : rows.deselect();
-  });
-
-  $(document).on("click", ".convert-service", function () {
-    if (isReadOnly) {
-      alert("This action is not allowed in read-only mode.");
-      return;
-    }
-    const service = $(this).data("service-id");
-    const conversionType = $(this).data("value");
-    setupConversionModal([service], conversionType);
   });
 
   $(document).on("click", ".delete-service", function () {

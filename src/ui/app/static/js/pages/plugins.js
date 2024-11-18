@@ -156,7 +156,7 @@ $(document).ready(function () {
         viewTotal: true,
         cascadePanes: true,
         collapse: false,
-        columns: [5, 6, 7],
+        columns: [6, 7, 8],
       },
     },
     topStart: {},
@@ -202,8 +202,8 @@ $(document).ready(function () {
     },
     {
       extend: "colvis",
-      columns: "th:not(:first-child):not(:nth-child(2)):not(:last-child)",
-      text: '<span class="tf-icons bx bx-columns bx-18px me-2"></span>Columns',
+      columns: "th:not(:nth-child(-n+3))",
+      text: '<span class="tf-icons bx bx-columns bx-18px me-md-2"></span><span class="d-none d-md-inline">Columns</span>',
       className: "btn btn-sm btn-outline-primary rounded-start",
       columnText: function (dt, idx, title) {
         return idx + 1 + ". " + title;
@@ -211,19 +211,19 @@ $(document).ready(function () {
     },
     {
       extend: "colvisRestore",
-      text: '<span class="tf-icons bx bx-reset bx-18px me-2"></span>Reset<span class="d-none d-md-inline"> columns</span>',
-      className: "btn btn-sm btn-outline-primary",
+      text: '<span class="tf-icons bx bx-reset bx-18px me-2"></span>Reset columns',
+      className: "btn btn-sm btn-outline-primary d-none d-md-inline",
     },
     {
       extend: "collection",
-      text: '<span class="tf-icons bx bx-export bx-18px me-2"></span>Export',
+      text: '<span class="tf-icons bx bx-export bx-18px me-md-2"></span><span class="d-none d-md-inline">Export</span>',
       className: "btn btn-sm btn-outline-primary",
       buttons: [
         {
           extend: "copy",
           text: '<span class="tf-icons bx bx-copy bx-18px me-2"></span>Copy visible',
           exportOptions: {
-            columns: ":visible:not(:first-child):not(:last-child)",
+            columns: ":visible:not(:nth-child(-n+2)):not(:last-child)",
           },
         },
         {
@@ -235,7 +235,7 @@ $(document).ready(function () {
             modifier: {
               search: "none",
             },
-            columns: ":not(:first-child):not(:last-child)",
+            columns: ":not(:nth-child(-n+2)):not(:last-child)",
           },
         },
         {
@@ -246,14 +246,14 @@ $(document).ready(function () {
             modifier: {
               search: "none",
             },
-            columns: ":not(:first-child):not(:last-child)",
+            columns: ":not(:nth-child(-n+2)):not(:last-child)",
           },
         },
       ],
     },
     {
       extend: "collection",
-      text: '<span class="tf-icons bx bx-play bx-18px me-2"></span>Actions',
+      text: '<span class="tf-icons bx bx-play bx-18px me-md-2"></span><span class="d-none d-md-inline">Actions</span>',
       className: "btn btn-sm btn-outline-primary action-button disabled",
       buttons: [
         {
@@ -272,7 +272,7 @@ $(document).ready(function () {
   const getSelectedPlugins = () => {
     const plugins = [];
     $("tr.selected").each(function () {
-      const plugin = $(this).find("td:eq(1)").data("id");
+      const plugin = $(this).find("td:eq(2)").data("id");
       if (plugin) {
         plugins.push(plugin);
       }
@@ -290,7 +290,7 @@ $(document).ready(function () {
   };
 
   $.fn.dataTable.ext.buttons.add_plugin = {
-    text: '<span class="tf-icons bx bx-plus"></span>&nbsp;Add<span class="d-none d-md-inline"> plugin(s)</span>',
+    text: '<span class="tf-icons bx bx-plus"></span><span class="d-none d-md-inline">&nbsp;Add plugin(s)</span>',
     className: `btn btn-sm rounded me-4 btn-bw-green${
       isReadOnly ? " disabled" : ""
     }`,
@@ -334,8 +334,13 @@ $(document).ready(function () {
     columnDefs: [
       {
         orderable: false,
-        render: DataTable.render.select(),
+        className: "dtr-control",
         targets: 0,
+      },
+      {
+        orderable: false,
+        render: DataTable.render.select(),
+        targets: 1,
       },
       {
         orderable: false,
@@ -343,7 +348,7 @@ $(document).ready(function () {
       },
       {
         visible: false,
-        targets: [1, 3],
+        targets: [2, 4],
       },
       {
         searchPanes: {
@@ -353,56 +358,20 @@ $(document).ready(function () {
             {
               label: '<i class="bx bx-xs bx-x text-danger"></i>&nbsp;No',
               value: function (rowData, rowIdx) {
-                return rowData[5].includes("bx-x");
+                return rowData[6].includes("bx-x");
               },
             },
             {
               label: '<i class="bx bx-xs bx-check text-success"></i>&nbsp;Yes',
               value: function (rowData, rowIdx) {
-                return rowData[5].includes("bx-check");
+                return rowData[6].includes("bx-check");
               },
             },
             {
               label:
                 '<i class="bx bx-xs bx-minus text-warning"></i>&nbsp;Partial',
               value: function (rowData, rowIdx) {
-                return rowData[5].includes("bx-minus");
-              },
-            },
-          ],
-          combiner: "or",
-          orderable: false,
-        },
-        targets: 5,
-      },
-      {
-        searchPanes: {
-          show: true,
-          options: [
-            {
-              label: `<img src="${$("#pro_diamond_url")
-                .val()
-                .trim()}" alt="Pro plugin" width="16px" height="12.9125px" class="mb-1">&nbsp;PRO`,
-              value: function (rowData, rowIdx) {
-                return rowData[6].includes("PRO");
-              },
-            },
-            {
-              label: '<i class="bx bx-plug bx-xs"></i>&nbsp;External',
-              value: function (rowData, rowIdx) {
-                return rowData[6].includes("EXTERNAL");
-              },
-            },
-            {
-              label: '<i class="bx bx-cloud-upload bx-xs"></i>&nbsp;UI',
-              value: function (rowData, rowIdx) {
-                return rowData[6].includes("UI");
-              },
-            },
-            {
-              label: '<i class="bx bx-shield bx-xs"></i>&nbsp;Core',
-              value: function (rowData, rowIdx) {
-                return rowData[6].includes("CORE");
+                return rowData[6].includes("bx-minus");
               },
             },
           ],
@@ -414,19 +383,55 @@ $(document).ready(function () {
       {
         searchPanes: {
           show: true,
+          options: [
+            {
+              label: `<img src="${$("#pro_diamond_url")
+                .val()
+                .trim()}" alt="Pro plugin" width="16px" height="12.9125px" class="mb-1">&nbsp;PRO`,
+              value: function (rowData, rowIdx) {
+                return rowData[7].includes("PRO");
+              },
+            },
+            {
+              label: '<i class="bx bx-plug bx-xs"></i>&nbsp;External',
+              value: function (rowData, rowIdx) {
+                return rowData[7].includes("EXTERNAL");
+              },
+            },
+            {
+              label: '<i class="bx bx-cloud-upload bx-xs"></i>&nbsp;UI',
+              value: function (rowData, rowIdx) {
+                return rowData[7].includes("UI");
+              },
+            },
+            {
+              label: '<i class="bx bx-shield bx-xs"></i>&nbsp;Core',
+              value: function (rowData, rowIdx) {
+                return rowData[7].includes("CORE");
+              },
+            },
+          ],
           combiner: "or",
           orderable: false,
         },
         targets: 7,
       },
+      {
+        searchPanes: {
+          show: true,
+          combiner: "or",
+          orderable: false,
+        },
+        targets: 8,
+      },
     ],
-    order: [[2, "asc"]],
+    order: [[3, "asc"]],
     autoFill: false,
     responsive: true,
     select: {
       style: "multi+shift",
-      selector: "td:first-child",
-      headerCheckbox: false,
+      selector: "td:nth-child(2)",
+      headerCheckbox: true,
     },
     layout: layout,
     language: {
@@ -469,6 +474,8 @@ $(document).ready(function () {
 
   $("#plugins").removeClass("d-none");
   $("#plugins-waiting").addClass("visually-hidden");
+
+  plugins_table.responsive.recalc();
 
   plugins_table.on("mouseenter", "td", function () {
     if (plugins_table.cell(this).index() === undefined) return;
@@ -519,20 +526,6 @@ $(document).ready(function () {
         )
         .attr("data-bs-placement", "top")
         .tooltip();
-      $("#select-all-rows").prop("checked", false);
-    }
-  });
-
-  // Event listener for the select-all checkbox
-  $("#select-all-rows").on("change", function () {
-    const isChecked = $(this).prop("checked");
-
-    if (isChecked) {
-      // Select all rows on the current page
-      plugins_table.rows({ page: "current" }).select();
-    } else {
-      // Deselect all rows on the current page
-      plugins_table.rows({ page: "current" }).deselect();
     }
   });
 

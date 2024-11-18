@@ -9,7 +9,7 @@ $(document).ready(function () {
     {
       label: "global",
       value: function (rowData) {
-        return $(rowData[3]).text().trim() === "global";
+        return $(rowData[4]).text().trim() === "global";
       },
     },
   ];
@@ -18,7 +18,7 @@ $(document).ready(function () {
     servicesSearchPanesOptions.push({
       label: service,
       value: function (rowData) {
-        return $(rowData[3]).text().trim() === service;
+        return $(rowData[4]).text().trim() === service;
       },
     });
   });
@@ -29,7 +29,7 @@ $(document).ready(function () {
         viewTotal: true,
         cascadePanes: true,
         collapse: false,
-        columns: [1, 2, 3, 4],
+        columns: [2, 3, 4, 5],
       },
     },
     topStart: {},
@@ -72,7 +72,7 @@ $(document).ready(function () {
   layout.topStart.buttons = [
     {
       extend: "colvis",
-      columns: "th:not(:first-child):not(:last-child)",
+      columns: "th:not(:nth-child(-n+3))",
       text: '<span class="tf-icons bx bx-columns bx-18px me-2"></span>Columns',
       className: "btn btn-sm btn-outline-primary",
       columnText: function (dt, idx, title) {
@@ -81,12 +81,12 @@ $(document).ready(function () {
     },
     {
       extend: "colvisRestore",
-      text: '<span class="tf-icons bx bx-reset bx-18px me-2"></span>Reset<span class="d-none d-md-inline"> columns</span>',
+      text: '<span class="tf-icons bx bx-reset bx-18px me-md-2"></span><span class="d-none d-md-inline">Reset columns</span>',
       className: "btn btn-sm btn-outline-primary",
     },
     {
       extend: "collection",
-      text: '<span class="tf-icons bx bx-export bx-18px me-2"></span>Export',
+      text: '<span class="tf-icons bx bx-export bx-18px me-md-2"></span><span class="d-none d-md-inline">Export</span>',
       className: "btn btn-sm btn-outline-primary",
       buttons: [
         {
@@ -105,7 +105,7 @@ $(document).ready(function () {
             modifier: {
               search: "none",
             },
-            columns: ":not(:last-child)",
+            columns: ":not(:first-child):not(:last-child)",
           },
         },
         {
@@ -116,7 +116,7 @@ $(document).ready(function () {
             modifier: {
               search: "none",
             },
-            columns: ":not(:last-child)",
+            columns: ":not(:first-child):not(:last-child)",
           },
         },
       ],
@@ -144,14 +144,19 @@ $(document).ready(function () {
     columnDefs: [
       {
         orderable: false,
+        className: "dtr-control",
+        targets: 0,
+      },
+      {
+        orderable: false,
         targets: -1,
       },
       {
         visible: false,
-        targets: 5,
+        targets: 6,
       },
       {
-        targets: 4,
+        targets: 5,
         render: function (data, type, row) {
           if (type === "display" || type === "filter") {
             const date = new Date(data);
@@ -167,7 +172,7 @@ $(document).ready(function () {
           show: true,
           combiner: "or",
         },
-        targets: [1, 2],
+        targets: [2, 3],
       },
       {
         searchPanes: {
@@ -175,7 +180,7 @@ $(document).ready(function () {
           combiner: "or",
           options: servicesSearchPanesOptions,
         },
-        targets: 3,
+        targets: 4,
       },
       {
         searchPanes: {
@@ -184,7 +189,7 @@ $(document).ready(function () {
             {
               label: "Last 24 hours",
               value: function (rowData, rowIdx) {
-                const date = new Date(rowData[4]);
+                const date = new Date(rowData[5]);
                 const now = new Date();
                 return now - date < 24 * 60 * 60 * 1000;
               },
@@ -192,7 +197,7 @@ $(document).ready(function () {
             {
               label: "Last 7 days",
               value: function (rowData, rowIdx) {
-                const date = new Date(rowData[4]);
+                const date = new Date(rowData[5]);
                 const now = new Date();
                 return now - date < 7 * 24 * 60 * 60 * 1000;
               },
@@ -200,7 +205,7 @@ $(document).ready(function () {
             {
               label: "Last 30 days",
               value: function (rowData, rowIdx) {
-                const date = new Date(rowData[4]);
+                const date = new Date(rowData[5]);
                 const now = new Date();
                 return now - date < 30 * 24 * 60 * 60 * 1000;
               },
@@ -209,10 +214,10 @@ $(document).ready(function () {
           combiner: "or",
           orderable: false,
         },
-        targets: 4,
+        targets: 5,
       },
     ],
-    order: [[2, "asc"]],
+    order: [[3, "asc"]],
     autoFill: false,
     responsive: true,
     layout: layout,
@@ -245,6 +250,8 @@ $(document).ready(function () {
 
   $("#cache").removeClass("d-none");
   $("#cache-waiting").addClass("visually-hidden");
+
+  cache_table.responsive.recalc();
 
   cache_table.on("mouseenter", "td", function () {
     if (cache_table.cell(this).index() === undefined) return;

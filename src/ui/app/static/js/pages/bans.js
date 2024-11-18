@@ -150,7 +150,7 @@ $(document).ready(function () {
         viewTotal: true,
         cascadePanes: true,
         collapse: false,
-        columns: [1, 4, 5],
+        columns: [2, 5, 6],
       },
     },
     topStart: {},
@@ -196,8 +196,8 @@ $(document).ready(function () {
     },
     {
       extend: "colvis",
-      columns: "th:not(:first-child):not(:nth-child(2)):not(:last-child)",
-      text: '<span class="tf-icons bx bx-columns bx-18px me-2"></span>Columns',
+      columns: "th:not(:nth-child(-n+3))",
+      text: '<span class="tf-icons bx bx-columns bx-18px me-md-2"></span><span class="d-none d-md-inline">Columns</span>',
       className: "btn btn-sm btn-outline-primary rounded-start",
       columnText: function (dt, idx, title) {
         return idx + 1 + ". " + title;
@@ -205,19 +205,19 @@ $(document).ready(function () {
     },
     {
       extend: "colvisRestore",
-      text: '<span class="tf-icons bx bx-reset bx-18px me-2"></span>Reset<span class="d-none d-md-inline"> columns</span>',
-      className: "btn btn-sm btn-outline-primary",
+      text: '<span class="tf-icons bx bx-reset bx-18px me-2"></span>Reset columns',
+      className: "btn btn-sm btn-outline-primary d-none d-md-inline",
     },
     {
       extend: "collection",
-      text: '<span class="tf-icons bx bx-export bx-18px me-2"></span>Export',
+      text: '<span class="tf-icons bx bx-export bx-18px me-md-2"></span><span class="d-none d-md-inline">Export</span>',
       className: "btn btn-sm btn-outline-primary",
       buttons: [
         {
           extend: "copy",
           text: '<span class="tf-icons bx bx-copy bx-18px me-2"></span>Copy visible',
           exportOptions: {
-            columns: ":visible:not(:first-child):not(:last-child)",
+            columns: ":visible:not(:nth-child(-n+2)):not(:last-child)",
           },
         },
         {
@@ -229,7 +229,7 @@ $(document).ready(function () {
             modifier: {
               search: "none",
             },
-            columns: ":not(:first-child):not(:last-child)",
+            columns: ":not(:nth-child(-n+2)):not(:last-child)",
           },
         },
         {
@@ -240,14 +240,14 @@ $(document).ready(function () {
             modifier: {
               search: "none",
             },
-            columns: ":not(:first-child):not(:last-child)",
+            columns: ":not(:nth-child(-n+2)):not(:last-child)",
           },
         },
       ],
     },
     {
       extend: "collection",
-      text: '<span class="tf-icons bx bx-play bx-18px me-2"></span>Actions',
+      text: '<span class="tf-icons bx bx-play bx-18px me-md-2"></span><span class="d-none d-md-inline">Actions</span>',
       className: "btn btn-sm btn-outline-primary action-button disabled",
       buttons: [
         {
@@ -266,15 +266,15 @@ $(document).ready(function () {
   const getSelectedBans = () => {
     const bans = [];
     $("tr.selected").each(function () {
-      const ip = $(this).find("td:eq(2)").text().trim();
-      const time_remaining = $(this).find("td:eq(5)").text().trim();
+      const ip = $(this).find("td:eq(3)").text().trim();
+      const time_remaining = $(this).find("td:eq(6)").text().trim();
       bans.push({ ip: ip, time_remaining: time_remaining });
     });
     return bans;
   };
 
   $.fn.dataTable.ext.buttons.add_ban = {
-    text: '<span class="tf-icons bx bx-plus"></span>&nbsp;Add<span class="d-none d-md-inline"> ban(s)</span>',
+    text: '<span class="tf-icons bx bx-plus"></span><span class="d-none d-md-inline">&nbsp;Add ban(s)</span>',
     className: `btn btn-sm rounded me-4 btn-bw-green${
       isReadOnly ? " disabled" : ""
     }`,
@@ -327,16 +327,21 @@ $(document).ready(function () {
     columnDefs: [
       {
         orderable: false,
-        render: DataTable.render.select(),
+        className: "dtr-control",
         targets: 0,
       },
-      { type: "ip-address", targets: 1 },
+      {
+        orderable: false,
+        render: DataTable.render.select(),
+        targets: 1,
+      },
+      { type: "ip-address", targets: 2 },
       {
         orderable: false,
         targets: -1,
       },
       {
-        targets: [1, 5],
+        targets: [2, 6],
         render: function (data, type, row) {
           if (type === "display" || type === "filter") {
             const date = new Date(data);
@@ -354,7 +359,7 @@ $(document).ready(function () {
             {
               label: "Last 24 hours",
               value: function (rowData, rowIdx) {
-                const date = new Date(rowData[1]);
+                const date = new Date(rowData[2]);
                 const now = new Date();
                 return now - date < 24 * 60 * 60 * 1000;
               },
@@ -362,7 +367,7 @@ $(document).ready(function () {
             {
               label: "Last 7 days",
               value: function (rowData, rowIdx) {
-                const date = new Date(rowData[1]);
+                const date = new Date(rowData[2]);
                 const now = new Date();
                 return now - date < 7 * 24 * 60 * 60 * 1000;
               },
@@ -370,7 +375,7 @@ $(document).ready(function () {
             {
               label: "Last 30 days",
               value: function (rowData, rowIdx) {
-                const date = new Date(rowData[1]);
+                const date = new Date(rowData[2]);
                 const now = new Date();
                 return now - date < 30 * 24 * 60 * 60 * 1000;
               },
@@ -378,7 +383,7 @@ $(document).ready(function () {
             {
               label: "More than 30 days",
               value: function (rowData, rowIdx) {
-                const date = new Date(rowData[1]);
+                const date = new Date(rowData[2]);
                 const now = new Date();
                 return now - date >= 30 * 24 * 60 * 60 * 1000;
               },
@@ -387,7 +392,7 @@ $(document).ready(function () {
           combiner: "or",
           orderable: false,
         },
-        targets: 1,
+        targets: 2,
       },
       {
         searchPanes: {
@@ -396,7 +401,7 @@ $(document).ready(function () {
             {
               label: "Next 24 hours",
               value: function (rowData, rowIdx) {
-                const date = new Date(rowData[5]);
+                const date = new Date(rowData[6]);
                 const now = new Date();
                 return date - now < 24 * 60 * 60 * 1000;
               },
@@ -404,7 +409,7 @@ $(document).ready(function () {
             {
               label: "Next 7 days",
               value: function (rowData, rowIdx) {
-                const date = new Date(rowData[5]);
+                const date = new Date(rowData[6]);
                 const now = new Date();
                 return date - now < 7 * 24 * 60 * 60 * 1000;
               },
@@ -412,7 +417,7 @@ $(document).ready(function () {
             {
               label: "Next 30 days",
               value: function (rowData, rowIdx) {
-                const date = new Date(rowData[5]);
+                const date = new Date(rowData[6]);
                 const now = new Date();
                 return date - now < 30 * 24 * 60 * 60 * 1000;
               },
@@ -420,7 +425,7 @@ $(document).ready(function () {
             {
               label: "More than 30 days",
               value: function (rowData, rowIdx) {
-                const date = new Date(rowData[5]);
+                const date = new Date(rowData[6]);
                 const now = new Date();
                 return date - now >= 30 * 24 * 60 * 60 * 1000;
               },
@@ -429,20 +434,20 @@ $(document).ready(function () {
           combiner: "or",
           orderable: false,
         },
-        targets: 5,
+        targets: 6,
       },
       {
         searchPanes: { show: true },
-        targets: 4,
+        targets: 5,
       },
     ],
-    order: [[5, "asc"]],
+    order: [[6, "asc"]],
     autoFill: false,
     responsive: true,
     select: {
       style: "multi+shift",
-      selector: "td:first-child",
-      headerCheckbox: false,
+      selector: "td:nth-child(2)",
+      headerCheckbox: true,
     },
     layout: layout,
     language: {
@@ -485,6 +490,8 @@ $(document).ready(function () {
 
   $("#bans").removeClass("d-none");
   $("#bans-waiting").addClass("visually-hidden");
+
+  bans_table.responsive.recalc();
 
   bans_table.on("mouseenter", "td", function () {
     if (bans_table.cell(this).index() === undefined) return;
@@ -535,20 +542,6 @@ $(document).ready(function () {
         )
         .attr("data-bs-placement", "top")
         .tooltip();
-      $("#select-all-rows").prop("checked", false);
-    }
-  });
-
-  // Event listener for the select-all checkbox
-  $("#select-all-rows").on("change", function () {
-    const isChecked = $(this).prop("checked");
-
-    if (isChecked) {
-      // Select all rows on the current page
-      bans_table.rows({ page: "current" }).select();
-    } else {
-      // Deselect all rows on the current page
-      bans_table.rows({ page: "current" }).deselect();
     }
   });
 

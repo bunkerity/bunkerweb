@@ -25,16 +25,16 @@
                value="{{ csrf_token() }}" />
         <p id="instances-waiting"
            class="text-center relative w-full p-2 text-primary rounded-lg fw-bold">Loading instances...</p>
-        <table id="instances" class="table position-relative w-100 d-none">
+        <table id="instances"
+               class="table responsive nowrap position-relative w-100 d-none">
             <thead>
                 <tr>
-                    <th>
-                        <input id="select-all-rows"
-                               aria-label="Select all rows"
-                               class="dt-select-checkbox mb-1"
-                               type="checkbox">
-                        Select All
-                    </th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="Show the instances' details"></th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="Select all instances"></th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
                         data-bs-original-title="The hostname of the Instance">Hostname</th>
@@ -64,6 +64,7 @@
             <tbody>
                 {% for instance in instances %}
                     <tr>
+                        <td></td>
                         <td></td>
                         <td>{{ instance.hostname }}</td>
                         <td>{{ instance.name }}</td>

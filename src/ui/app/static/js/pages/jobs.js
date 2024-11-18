@@ -9,7 +9,7 @@ $(document).ready(function () {
         viewTotal: true,
         cascadePanes: true,
         collapse: false,
-        columns: [2, 3, 4, 5, 6],
+        columns: [3, 4, 5, 6, 7],
       },
     },
     topStart: {},
@@ -51,12 +51,8 @@ $(document).ready(function () {
 
   layout.topStart.buttons = [
     {
-      extend: "toggle_filters",
-      className: "btn btn-sm btn-outline-primary toggle-filters",
-    },
-    {
       extend: "colvis",
-      columns: "th:not(:first-child)",
+      columns: "th:not(:nth-child(-n+3))",
       text: '<span class="tf-icons bx bx-columns bx-18px me-2"></span>Columns',
       className: "btn btn-sm btn-outline-primary",
       columnText: function (dt, idx, title) {
@@ -65,19 +61,19 @@ $(document).ready(function () {
     },
     {
       extend: "colvisRestore",
-      text: '<span class="tf-icons bx bx-reset bx-18px me-2"></span>Reset<span class="d-none d-md-inline"> columns</span>',
+      text: '<span class="tf-icons bx bx-reset bx-18px me-md-2"></span><span class="d-none d-md-inline">Reset columns</span>',
       className: "btn btn-sm btn-outline-primary",
     },
     {
       extend: "collection",
-      text: '<span class="tf-icons bx bx-export bx-18px me-2"></span>Export',
+      text: '<span class="tf-icons bx bx-export bx-18px me-md-2"></span><span class="d-none d-md-inline">Export</span>',
       className: "btn btn-sm btn-outline-primary",
       buttons: [
         {
           extend: "copy",
           text: '<span class="tf-icons bx bx-copy bx-18px me-2"></span>Copy visible',
           exportOptions: {
-            columns: ":visible:not(:first-child):not(:last-child)",
+            columns: ":visible:not(:nth-child(-n+2)):not(:last-child)",
           },
         },
         {
@@ -89,7 +85,7 @@ $(document).ready(function () {
             modifier: {
               search: "none",
             },
-            columns: ":not(:first-child):not(:last-child)",
+            columns: ":not(:nth-child(-n+2)):not(:last-child)",
           },
         },
         {
@@ -100,14 +96,14 @@ $(document).ready(function () {
             modifier: {
               search: "none",
             },
-            columns: ":not(:first-child):not(:last-child)",
+            columns: ":not(:nth-child(-n+2)):not(:last-child)",
           },
         },
       ],
     },
     {
       extend: "collection",
-      text: '<span class="tf-icons bx bx-play bx-18px me-2"></span>Actions',
+      text: '<span class="tf-icons bx bx-play bx-18px me-md-2"></span><span class="d-none d-md-inline">Actions</span>',
       className: "btn btn-sm btn-outline-primary action-button disabled",
       buttons: [
         {
@@ -213,8 +209,13 @@ $(document).ready(function () {
     columnDefs: [
       {
         orderable: false,
-        render: DataTable.render.select(),
+        className: "dtr-control",
         targets: 0,
+      },
+      {
+        orderable: false,
+        render: DataTable.render.select(),
+        targets: 1,
       },
       {
         orderable: false,
@@ -225,7 +226,7 @@ $(document).ready(function () {
           show: true,
           combiner: "or",
         },
-        targets: [2],
+        targets: 3,
       },
       {
         searchPanes: {
@@ -235,48 +236,25 @@ $(document).ready(function () {
             {
               label: "Every day",
               value: function (rowData, rowIdx) {
-                return rowData[3].includes("day");
+                return rowData[4].includes("day");
               },
             },
             {
               label: "Every hour",
               value: function (rowData, rowIdx) {
-                return rowData[3].includes("hour");
+                return rowData[4].includes("hour");
               },
             },
             {
               label: "Every week",
               value: function (rowData, rowIdx) {
-                return rowData[3].includes("week");
+                return rowData[4].includes("week");
               },
             },
             {
               label: "Once",
               value: function (rowData, rowIdx) {
-                return rowData[3].includes("once");
-              },
-            },
-          ],
-          combiner: "or",
-          orderable: false,
-        },
-        targets: 3,
-      },
-      {
-        searchPanes: {
-          show: true,
-          header: "Reload",
-          options: [
-            {
-              label: '<i class="bx bx-xs bx-x text-danger"></i>&nbsp;No',
-              value: function (rowData, rowIdx) {
-                return rowData[4].includes("bx-x");
-              },
-            },
-            {
-              label: '<i class="bx bx-xs bx-check text-success"></i>&nbsp;Yes',
-              value: function (rowData, rowIdx) {
-                return rowData[4].includes("bx-check");
+                return rowData[4].includes("once");
               },
             },
           ],
@@ -288,7 +266,7 @@ $(document).ready(function () {
       {
         searchPanes: {
           show: true,
-          header: "Async",
+          header: "Reload",
           options: [
             {
               label: '<i class="bx bx-xs bx-x text-danger"></i>&nbsp;No',
@@ -311,17 +289,16 @@ $(document).ready(function () {
       {
         searchPanes: {
           show: true,
-          header: "Last run state",
+          header: "Async",
           options: [
             {
-              label: '<i class="bx bx-xs bx-x text-danger"></i>&nbsp;Failed',
+              label: '<i class="bx bx-xs bx-x text-danger"></i>&nbsp;No',
               value: function (rowData, rowIdx) {
                 return rowData[6].includes("bx-x");
               },
             },
             {
-              label:
-                '<i class="bx bx-xs bx-check text-success"></i>&nbsp;Success',
+              label: '<i class="bx bx-xs bx-check text-success"></i>&nbsp;Yes',
               value: function (rowData, rowIdx) {
                 return rowData[6].includes("bx-check");
               },
@@ -332,14 +309,38 @@ $(document).ready(function () {
         },
         targets: 6,
       },
+      {
+        searchPanes: {
+          show: true,
+          header: "Last run state",
+          options: [
+            {
+              label: '<i class="bx bx-xs bx-x text-danger"></i>&nbsp;Failed',
+              value: function (rowData, rowIdx) {
+                return rowData[7].includes("bx-x");
+              },
+            },
+            {
+              label:
+                '<i class="bx bx-xs bx-check text-success"></i>&nbsp;Success',
+              value: function (rowData, rowIdx) {
+                return rowData[7].includes("bx-check");
+              },
+            },
+          ],
+          combiner: "or",
+          orderable: false,
+        },
+        targets: 7,
+      },
     ],
-    order: [[2, "asc"]],
+    order: [[3, "asc"]],
     autoFill: false,
     responsive: true,
     select: {
       style: "multi+shift",
-      selector: "td:first-child",
-      headerCheckbox: false,
+      selector: "td:nth-child(2)",
+      headerCheckbox: true,
     },
     layout: layout,
     language: {
@@ -374,6 +375,8 @@ $(document).ready(function () {
 
   $("#jobs").removeClass("d-none");
   $("#jobs-waiting").addClass("visually-hidden");
+
+  jobs_table.responsive.recalc();
 
   jobs_table.on("mouseenter", "td", function () {
     if (jobs_table.cell(this).index() === undefined) return;
@@ -424,20 +427,6 @@ $(document).ready(function () {
         )
         .attr("data-bs-placement", "top")
         .tooltip();
-      $("#select-all-rows").prop("checked", false);
-    }
-  });
-
-  // Event listener for the select-all checkbox
-  $("#select-all-rows").on("change", function () {
-    const isChecked = $(this).prop("checked");
-
-    if (isChecked) {
-      // Select all rows on the current page
-      jobs_table.rows({ page: "current" }).select();
-    } else {
-      // Deselect all rows on the current page
-      jobs_table.rows({ page: "current" }).deselect();
     }
   });
 

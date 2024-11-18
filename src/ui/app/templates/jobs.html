@@ -9,16 +9,15 @@
                value="{{ csrf_token() }}" />
         <p id="jobs-waiting"
            class="text-center relative w-full p-2 text-primary rounded-lg fw-bold">Loading jobs...</p>
-        <table id="jobs" class="table w-100 d-none">
+        <table id="jobs" class="table responsive nowrap w-100 d-none">
             <thead>
                 <tr>
-                    <th>
-                        <input id="select-all-rows"
-                               aria-label="Select all rows"
-                               class="dt-select-checkbox mb-1"
-                               type="checkbox">
-                        Select All
-                    </th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="Show the Jobs' details"></th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="Select all Jobs"></th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
                         data-bs-original-title="The Job's name">Name</th>
@@ -45,6 +44,7 @@
             <tbody>
                 {% for job, job_data in jobs.items() %}
                     <tr>
+                        <td></td>
                         <td></td>
                         <td>{{ job }}</td>
                         <td>{{ job_data["plugin_id"] }}</td>

@@ -10,16 +10,15 @@
                value="{{ csrf_token() }}" />
         <p id="plugins-waiting"
            class="text-center relative w-full p-2 text-primary rounded-lg fw-bold">Loading plugins...</p>
-        <table id="plugins" class="table w-100 d-none">
+        <table id="plugins" class="table responsive nowrap w-100 d-none">
             <thead>
                 <tr>
-                    <th>
-                        <input id="select-all-rows"
-                               aria-label="Select all rows"
-                               class="dt-select-checkbox mb-1"
-                               type="checkbox">
-                        Select All
-                    </th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="Show the Plugins' details"></th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="Select all Plugins"></th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
                         data-bs-original-title="The Plugin's ID">ID</th>
@@ -49,6 +48,7 @@
             <tbody>
                 {% for plugin, plugin_data in plugins.items() %}
                     <tr>
+                        <td></td>
                         <td></td>
                         <td>
                             <div class="{{ plugin_types[plugin_data['type']].get('text-class', '') }}">{{ plugin }}</div>

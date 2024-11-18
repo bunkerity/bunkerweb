@@ -715,6 +715,14 @@ table.table.dataTable > tbody > tr.selected a.btn-outline-primary {
   color: var(--bs-primary) !important;
 }
 
+table.table.dataTable > tbody > tr.selected a.btn-outline-secondary:hover {
+  color: #fff !important;
+}
+
+table.table.dataTable > tbody > tr.selected a.btn-outline-primary:hover {
+  color: #fff !important;
+}
+
 table.table.dataTable > tbody > tr.selected a.btn-primary {
   color: #fff !important;
 }
@@ -902,6 +910,29 @@ a.courier-prime:hover {
 
 table.table.dataTable > tbody > tr.selected > * {
   box-shadow: inset 0 0 0 9999px rgb(var(--bs-primary-rgb), 0.1) !important;
+}
+
+@media (min-width: 992px) {
+  .w-lg-70 {
+    width: 70% !important;
+  }
+}
+
+/* Align and style the modal content */
+.modal-dialog {
+  max-width: 600px; /* Restrict modal width */
+}
+
+@media (max-width: 768px) {
+  .modal-dialog {
+    max-width: 90%; /* Adjust modal width on smaller screens */
+  }
+}
+
+#floating-settings-button {
+  bottom: 2.1rem !important;
+  right: 1.5rem !important;
+  z-index: 1080;
 }
 
 /*
@@ -1270,6 +1301,11 @@ html:not(.layout-menu-collapsed).dark-style
   .menu-item
   .menu-link:not(.active):hover {
   background-color: #0b394e;
+}
+
+html.dark-style div.dts div.dt-scroll-body table,
+html.dark-style div.dts div.dataTables_scrollBody table {
+  background-color: #0c283a;
 }
 
 .dark-style table.table.dataTable > tbody > tr.selected > * {

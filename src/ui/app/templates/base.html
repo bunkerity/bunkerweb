@@ -24,7 +24,7 @@
 } %}
 <!DOCTYPE html>
 <html lang="en"
-      class="{{ theme }}-style layout-navbar-fixed layout-menu-fixed"
+      class="{{ theme }}-style layout-navbar-fixed layout-menu-fixed{% if theme == 'dark' %} dark{% endif %}"
       data-theme="theme-default"
       {% if theme == 'dark' %}data-bs-theme="dark"{% endif %}>
     <head>

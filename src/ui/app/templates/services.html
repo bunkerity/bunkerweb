@@ -9,16 +9,15 @@
                value="{{ csrf_token() }}" />
         <p id="services-waiting"
            class="text-center relative w-full p-2 text-primary rounded-lg fw-bold">Loading services...</p>
-        <table id="services" class="table position-relative w-100 d-none">
+        <table id="services" class="table responsive nowrap position-relative w-100 d-none">
             <thead>
                 <tr>
-                    <th>
-                        <input id="select-all-rows"
-                               aria-label="Select all rows"
-                               class="dt-select-checkbox mb-1"
-                               type="checkbox">
-                        Select All
-                    </th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="Show the services' details"></th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="Select all services"></th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
                         data-bs-original-title="The name of the service">Service name</th>
@@ -42,6 +41,7 @@
             <tbody>
                 {% for service in services %}
                     <tr>
+                        <td></td>
                         <td></td>
                         <td>
                             <a href="{{ url_for("services") }}/{{ service['id'] }}"
