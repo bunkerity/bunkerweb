@@ -23,6 +23,15 @@
       "regex": "^(/[\\w. \\-]+)*/?$",
       "type": "text"
     },
+    "REMOTE_PHP_PORT": {
+      "context": "multisite",
+      "default": "9000",
+      "help": "Port of the remote PHP-FPM instance.",
+      "id": "remote-php-port",
+      "label": "Remote PHP port",
+      "regex": "^((6553[0-5])|(655[0-2][0-9])|(65[0-4][0-9]{2})|(6[0-4][0-9]{3})|([1-5][0-9]{4})|([0-5]{0,5})|([0-9]{1,4}))$",
+      "type": "text"
+    },
     "LOCAL_PHP": {
       "context": "multisite",
       "default": "",

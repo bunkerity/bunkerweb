@@ -1310,6 +1310,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 
 - `REMOTE_PHP` : Hostname of the remote PHP-FPM instance.
 - `REMOTE_PHP_PATH` : Root folder containing files in the remote PHP-FPM instance.
+- `REMOTE_PHP_PORT` : Port of the remote PHP-FPM instance. (default: 9000)
 - `LOCAL_PHP` : Path to the local socket file of PHP-FPM instance.
 - `LOCAL_PHP_PATH` : Root folder containing files in the local PHP-FPM instance.
 
@@ -1319,7 +1320,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 
     - Mount your PHP files into the `/var/www/html` folder of BunkerWeb
     - Set up a PHP-FPM container for your application and mount the folder containing PHP files
-    - Use the specific settings `REMOTE_PHP` and `REMOTE_PHP_PATH` as environment variables when starting BunkerWeb
+    - Use the specific settings `REMOTE_PHP`, `REMOTE_PHP_PATH` and `REMOTE_PHP_PORT` as environment variables when starting BunkerWeb
 
     If you enable the [multisite mode](concepts.md#multisite-mode), you will need to create separate directories for each of your applications. Each subdirectory should be named using the first value of `SERVER_NAME`. Here is a dummy example :
 
@@ -1427,7 +1428,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 
     - Mount your PHP files into the `/var/www/html` folder of BunkerWeb
     - Set up a PHP-FPM containers for your applications and mount the folder containing PHP apps
-    - Use the specific settings `REMOTE_PHP` and `REMOTE_PHP_PATH` as labels for your PHP-FPM container
+    - Use the specific settings `REMOTE_PHP`, `REMOTE_PHP_PATH` and `REMOTE_PHP_PORT` as labels for your PHP-FPM container
 
     Since the Docker autoconf implies using the [multisite mode](concepts.md#multisite-mode), you will need to create separate directories for each of your applications. Each subdirectory should be named using the first value of `SERVER_NAME`. Here is a dummy example :
 
@@ -1603,7 +1604,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 
     - Mount your PHP files into the `/var/www/html` folder of BunkerWeb
     - Set up a PHP-FPM containers for your applications and mount the folder containing PHP apps
-    - Use the specific settings `REMOTE_PHP` and `REMOTE_PHP_PATH` as labels for your PHP-FPM container
+    - Use the specific settings `REMOTE_PHP`, `REMOTE_PHP_PATH` and `REMOTE_PHP_PORT` as labels for your PHP-FPM container
 
     Since the Swarm integration implies using the [multisite mode](concepts.md#multisite-mode), you will need to create separate directories for each of your applications. Each subdirectory should be named using the first value of `SERVER_NAME`. Here is a dummy example :
 

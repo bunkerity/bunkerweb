@@ -1,8 +1,8 @@
-{% if REMOTE_PHP != "" +%}
+{% if REMOTE_PHP != "" %}
 fastcgi_param  SCRIPT_FILENAME    {{ REMOTE_PHP_PATH }}/$fastcgi_script_name;
-{% elif LOCAL_PHP != "" +%}
+{% elif LOCAL_PHP != "" %}
 fastcgi_param  SCRIPT_FILENAME    {{ LOCAL_PHP_PATH }}/$fastcgi_script_name;
-{% else +%}
+{% else %}
 fastcgi_param  SCRIPT_FILENAME    $fastcgi_script_name;
 {% endif %}
 fastcgi_param  QUERY_STRING       $query_string;
@@ -13,13 +13,14 @@ fastcgi_param  CONTENT_LENGTH     $content_length;
 fastcgi_param  SCRIPT_NAME        $fastcgi_script_name;
 fastcgi_param  REQUEST_URI        $request_uri;
 fastcgi_param  DOCUMENT_URI       $document_uri;
-{% if REMOTE_PHP != "" +%}
+{% if REMOTE_PHP != "" %}
 fastcgi_param  DOCUMENT_ROOT      {{ REMOTE_PHP_PATH }};
-{% elif LOCAL_PHP != "" +%}
+{% elif LOCAL_PHP != "" %}
 fastcgi_param  DOCUMENT_ROOT      {{ LOCAL_PHP_PATH }};
-{% else +%}
+{% else %}
 fastcgi_param  DOCUMENT_ROOT      $document_root;
 {% endif %}
+
 fastcgi_param  SERVER_PROTOCOL    $server_protocol;
 fastcgi_param  REQUEST_SCHEME     $scheme;
 fastcgi_param  HTTPS              $https if_not_empty;

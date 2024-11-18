@@ -478,6 +478,7 @@ Manage local or remote PHP-FPM.
 | ----------------- | ------- | --------- | -------- | ------------------------------------------------------------ |
 | `REMOTE_PHP`      |         | multisite | no       | Hostname of the remote PHP-FPM instance.                     |
 | `REMOTE_PHP_PATH` |         | multisite | no       | Root folder containing files in the remote PHP-FPM instance. |
+| `REMOTE_PHP_PORT` | `9000`  | multisite | no       | Port of the remote PHP-FPM instance.                         |
 | `LOCAL_PHP`       |         | multisite | no       | Path to the PHP-FPM socket file.                             |
 | `LOCAL_PHP_PATH`  |         | multisite | no       | Root folder containing files in the local PHP-FPM instance.  |
 
