@@ -47,6 +47,7 @@ RUN apk add --no-cache bash unzip libmagic mariadb-connector-c mariadb-client po
 
 # Fix CVEs
 RUN apk add --no-cache "libcrypto3>=3.3.2-r1" "libssl3>=3.3.2-r1" # CVE-2024-9143
+RUN apk add --no-cache "libpq>=16.5-r0" "postgresql16-client>=16.5-r0" # CVE-2024-10976 CVE-2024-10977 CVE-2024-10978 CVE-2024-10979
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 /usr/share/bunkerweb /usr/share/bunkerweb
