@@ -96,6 +96,7 @@ class Templator:
             loader=FileSystemLoader(searchpath=searchpath),
             lstrip_blocks=True,
             trim_blocks=True,
+            keep_trailing_newline=True,
         )
 
     def _find_templates(self, contexts: List[str]) -> List[str]:
