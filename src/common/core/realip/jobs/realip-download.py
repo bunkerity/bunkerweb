@@ -93,8 +93,8 @@ try:
     urls = set()
     failed_urls = set()
 
-    for service, urls in services_realip_urls.items():
-        if not urls:
+    for service, urls_list in services_realip_urls.items():
+        if not urls_list:
             if JOB.job_path.joinpath(service, "combined.list").is_file():
                 LOGGER.warning(f"{service} realip combined.list is cached but no URL is configured, removing from cache...")
                 deleted, err = JOB.del_cache("combined.list", service_id=service)
@@ -104,7 +104,7 @@ try:
 
         # Write combined data of the kind in memory and check if it has changed
         content = b""
-        for url in urls:
+        for url in urls_list:
             url_file = f"{bytes_hash(url, algorithm='sha1')}.list"
             urls.add(url_file)
             cached_url = JOB.get_cache(url_file, with_info=True, with_data=True)
