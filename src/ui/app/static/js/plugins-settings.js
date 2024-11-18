@@ -1138,7 +1138,7 @@ $(document).ready(() => {
     const form = getFormFromSettings($(this));
     if (currentMode !== "easy") {
       let minSettings = 4;
-      if (!form.find("input[name='IS_DRAFT']").length) minSettings = 2;
+      if (!form.find("input[name='IS_DRAFT']").length) minSettings = 1;
 
       const draftInput = $("#is-draft");
       const wasDraft = draftInput.data("original") === "yes";
