@@ -30,7 +30,7 @@ repos:
         name: Prettier Code Formatter
 
   - repo: https://github.com/JohnnyMorganz/StyLua
-    rev: 84c370104d6a8d1eef00c80a3ebd42f7033aaaad # frozen: v0.20.0
+    rev: f4b9d628b48d1a8b21fdc38967831640de1ba09f # frozen: v2.0.1
     hooks:
       - id: stylua-github
         exclude: ^src/(bw/lua/middleclass.lua|common/core/antibot/captcha.lua)$
