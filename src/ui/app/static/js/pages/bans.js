@@ -196,7 +196,7 @@ $(document).ready(function () {
     },
     {
       extend: "colvis",
-      columns: "th:not(:nth-child(-n+3))",
+      columns: "th:not(:nth-child(-n+3)):not(:last-child)",
       text: '<span class="tf-icons bx bx-columns bx-18px me-md-2"></span><span class="d-none d-md-inline">Columns</span>',
       className: "btn btn-sm btn-outline-primary rounded-start",
       columnText: function (dt, idx, title) {
@@ -491,6 +491,24 @@ $(document).ready(function () {
   $("#bans").removeClass("d-none");
   $("#bans-waiting").addClass("visually-hidden");
 
+  const defaultColsVisibility = {
+    3: true,
+    4: true,
+    5: true,
+    6: true,
+    7: true,
+  };
+
+  var columnVisibility = localStorage.getItem("bw-bans-columns");
+  if (columnVisibility === null) {
+    columnVisibility = JSON.parse(JSON.stringify(defaultColsVisibility));
+  } else {
+    columnVisibility = JSON.parse(columnVisibility);
+    Object.entries(columnVisibility).forEach(([key, value]) => {
+      bans_table.column(key).visible(value);
+    });
+  }
+
   bans_table.responsive.recalc();
 
   bans_table.on("mouseenter", "td", function () {
@@ -542,6 +560,21 @@ $(document).ready(function () {
         )
         .attr("data-bs-placement", "top")
         .tooltip();
+    }
+  });
+
+  bans_table.on("column-visibility.dt", function (e, settings, column, state) {
+    if (column < 3 || column === 8) return;
+    columnVisibility[column] = state;
+    // Check if columVisibility is equal to defaultColsVisibility
+    const isDefault =
+      JSON.stringify(columnVisibility) ===
+      JSON.stringify(defaultColsVisibility);
+    // If it is, remove the key from localStorage
+    if (isDefault) {
+      localStorage.removeItem("bw-bans-columns");
+    } else {
+      localStorage.setItem("bw-bans-columns", JSON.stringify(columnVisibility));
     }
   });
 

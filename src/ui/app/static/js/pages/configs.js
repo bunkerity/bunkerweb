@@ -171,7 +171,7 @@ $(document).ready(function () {
     },
     {
       extend: "colvis",
-      columns: "th:not(:nth-child(-n+3))",
+      columns: "th:not(:nth-child(-n+3)):not(:last-child)",
       text: '<span class="tf-icons bx bx-columns bx-18px me-md-2"></span><span class="d-none d-md-inline">Columns</span>',
       className: "btn btn-sm btn-outline-primary rounded-start",
       columnText: function (dt, idx, title) {
@@ -483,6 +483,24 @@ $(document).ready(function () {
   $("#configs").removeClass("d-none");
   $("#configs-waiting").addClass("visually-hidden");
 
+  const defaultColsVisibility = {
+    3: true,
+    4: true,
+    5: true,
+    6: true,
+    7: false,
+  };
+
+  var columnVisibility = localStorage.getItem("bw-configs-columns");
+  if (columnVisibility === null) {
+    columnVisibility = JSON.parse(JSON.stringify(defaultColsVisibility));
+  } else {
+    columnVisibility = JSON.parse(columnVisibility);
+    Object.entries(columnVisibility).forEach(([key, value]) => {
+      configs_table.column(key).visible(value);
+    });
+  }
+
   configs_table.responsive.recalc();
 
   configs_table.on("mouseenter", "td", function () {
@@ -536,6 +554,27 @@ $(document).ready(function () {
         .tooltip();
     }
   });
+
+  configs_table.on(
+    "column-visibility.dt",
+    function (e, settings, column, state) {
+      if (column === 0 || column === 1 || column === 8) return;
+      columnVisibility[column] = state;
+      // Check if columVisibility is equal to defaultColsVisibility
+      const isDefault =
+        JSON.stringify(columnVisibility) ===
+        JSON.stringify(defaultColsVisibility);
+      // If it is, remove the key from localStorage
+      if (isDefault) {
+        localStorage.removeItem("bw-configs-columns");
+      } else {
+        localStorage.setItem(
+          "bw-configs-columns",
+          JSON.stringify(columnVisibility),
+        );
+      }
+    },
+  );
 
   $(document).on("click", ".delete-config", function () {
     if (isReadOnly) {

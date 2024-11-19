@@ -501,10 +501,53 @@ $(function () {
   $("#reports").removeClass("d-none");
   $("#reports-waiting").addClass("visually-hidden");
 
+  const defaultColsVisibility = {
+    3: true,
+    4: false,
+    5: false,
+    6: false,
+    7: false,
+    8: true,
+    9: true,
+    10: false,
+    11: true,
+  };
+
+  var columnVisibility = localStorage.getItem("bw-reports-columns");
+  if (columnVisibility === null) {
+    columnVisibility = JSON.parse(JSON.stringify(defaultColsVisibility));
+  } else {
+    columnVisibility = JSON.parse(columnVisibility);
+    Object.entries(columnVisibility).forEach(([key, value]) => {
+      reports_table.column(key).visible(value);
+    });
+  }
+
   reports_table.responsive.recalc();
 
   // Update tooltips after table draw
   reports_table.on("draw.dt", updateCountryTooltips);
+
+  reports_table.on(
+    "column-visibility.dt",
+    function (e, settings, column, state) {
+      if (column < 3) return;
+      columnVisibility[column] = state;
+      // Check if columVisibility is equal to defaultColsVisibility
+      const isDefault =
+        JSON.stringify(columnVisibility) ===
+        JSON.stringify(defaultColsVisibility);
+      // If it is, remove the key from localStorage
+      if (isDefault) {
+        localStorage.removeItem("bw-reports-columns");
+      } else {
+        localStorage.setItem(
+          "bw-reports-columns",
+          JSON.stringify(columnVisibility),
+        );
+      }
+    },
+  );
 
   const hashValue = location.hash;
   if (hashValue) {

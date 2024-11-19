@@ -130,7 +130,7 @@ $(function () {
     },
     {
       extend: "colvis",
-      columns: "th:not(:nth-child(-n+3))",
+      columns: "th:not(:nth-child(-n+3)):not(:last-child)",
       text: '<span class="tf-icons bx bx-columns bx-18px me-md-2"></span><span class="d-none d-md-inline">Columns</span>',
       className: "btn btn-sm btn-outline-primary rounded-start",
       columnText: (dt, idx, title) => `${idx + 1}. ${title}`,
@@ -491,6 +491,23 @@ $(function () {
   $("#services").removeClass("d-none");
   $("#services-waiting").addClass("visually-hidden");
 
+  const defaultColsVisibility = {
+    3: true,
+    4: true,
+    5: true,
+    6: true,
+  };
+
+  var columnVisibility = localStorage.getItem("bw-services-columns");
+  if (columnVisibility === null) {
+    columnVisibility = JSON.parse(JSON.stringify(defaultColsVisibility));
+  } else {
+    columnVisibility = JSON.parse(columnVisibility);
+    Object.entries(columnVisibility).forEach(([key, value]) => {
+      services_table.column(key).visible(value);
+    });
+  }
+
   services_table.responsive.recalc();
 
   services_table.on("mouseenter", "td", function () {
@@ -544,6 +561,27 @@ $(function () {
         .tooltip();
     }
   });
+
+  services_table.on(
+    "column-visibility.dt",
+    function (e, settings, column, state) {
+      if (column === 0 || column === 1 || column === 7) return;
+      columnVisibility[column] = state;
+      // Check if columVisibility is equal to defaultColsVisibility
+      const isDefault =
+        JSON.stringify(columnVisibility) ===
+        JSON.stringify(defaultColsVisibility);
+      // If it is, remove the key from localStorage
+      if (isDefault) {
+        localStorage.removeItem("bw-services-columns");
+      } else {
+        localStorage.setItem(
+          "bw-services-columns",
+          JSON.stringify(columnVisibility),
+        );
+      }
+    },
+  );
 
   $(document).on("click", ".delete-service", function () {
     if (isReadOnly) {

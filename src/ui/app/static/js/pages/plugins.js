@@ -202,7 +202,7 @@ $(document).ready(function () {
     },
     {
       extend: "colvis",
-      columns: "th:not(:nth-child(-n+3))",
+      columns: "th:not(:nth-child(-n+3)):not(:last-child)",
       text: '<span class="tf-icons bx bx-columns bx-18px me-md-2"></span><span class="d-none d-md-inline">Columns</span>',
       className: "btn btn-sm btn-outline-primary rounded-start",
       columnText: function (dt, idx, title) {
@@ -475,6 +475,25 @@ $(document).ready(function () {
   $("#plugins").removeClass("d-none");
   $("#plugins-waiting").addClass("visually-hidden");
 
+  const defaultColsVisibility = {
+    2: false,
+    4: false,
+    5: true,
+    6: true,
+    7: true,
+    8: true,
+  };
+
+  var columnVisibility = localStorage.getItem("bw-plugins-columns");
+  if (columnVisibility === null) {
+    columnVisibility = JSON.parse(JSON.stringify(defaultColsVisibility));
+  } else {
+    columnVisibility = JSON.parse(columnVisibility);
+    Object.entries(columnVisibility).forEach(([key, value]) => {
+      plugins_table.column(key).visible(value);
+    });
+  }
+
   plugins_table.responsive.recalc();
 
   plugins_table.on("mouseenter", "td", function () {
@@ -528,6 +547,27 @@ $(document).ready(function () {
         .tooltip();
     }
   });
+
+  plugins_table.on(
+    "column-visibility.dt",
+    function (e, settings, column, state) {
+      if (column === 0 || column === 1 || column === 9) return;
+      columnVisibility[column] = state;
+      // Check if columVisibility is equal to defaultColsVisibility
+      const isDefault =
+        JSON.stringify(columnVisibility) ===
+        JSON.stringify(defaultColsVisibility);
+      // If it is, remove the key from localStorage
+      if (isDefault) {
+        localStorage.removeItem("bw-plugins-columns");
+      } else {
+        localStorage.setItem(
+          "bw-plugins-columns",
+          JSON.stringify(columnVisibility),
+        );
+      }
+    },
+  );
 
   $(document).on("click", ".delete-plugin", function () {
     if (isReadOnly) {
