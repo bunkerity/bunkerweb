@@ -186,7 +186,12 @@ class Configurator:
             ret, err = self.__check_var(variable)
             if ret:
                 config[variable] = value
-            elif (not first_run or not self.__variables.get("EXTERNAL_PLUGIN_URLS")) and (
+            elif (
+                not first_run
+                or variable in self.get_settings()
+                or variable in self.get_plugins_settings("core")
+                or not self.__variables.get("EXTERNAL_PLUGIN_URLS")
+            ) and (
                 variable == "KUBERNETES_MODE"
                 or (
                     "CUSTOM_CONF" not in variable
