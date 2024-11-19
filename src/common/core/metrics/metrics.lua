@@ -74,7 +74,7 @@ function metrics:log(bypass_checks)
 			reason = reason,
 			server_name = self.ctx.bw.server_name,
 			data = data,
-			security_mode = security_mode
+			security_mode = security_mode,
 		}
 		-- Get current requests
 		local requests = lru:get("requests")

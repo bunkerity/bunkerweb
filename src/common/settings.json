@@ -352,9 +352,6 @@
     "label": "Security mode",
     "regex": "^(detect|block)$",
     "type": "select",
-    "select": [
-      "detect",
-      "block"
-    ]
+    "select": ["detect", "block"]
   }
 }
