@@ -288,10 +288,10 @@ end
 
 utils.get_reason = function(ctx)
 	-- ngx.ctx
-	if ctx and ctx.bw and ctx.bw.reason then
-		return ctx.bw.reason, ctx.bw.reason_data or {}, ctx.bw.security_mode
-	end
 	local security_mode = utils.get_security_mode(ctx)
+	if ctx and ctx.bw and ctx.bw.reason then
+		return ctx.bw.reason, ctx.bw.reason_data or {}, security_mode
+	end
 	-- ngx.var
 	local var_reason = var.reason
 	if var_reason and var_reason ~= "" then
@@ -575,7 +575,7 @@ utils.get_deny_status = function()
 end
 
 utils.get_security_mode = function(ctx)
-	local security_mode, err = utils.get_variable("SECURITY_MODE", true, ctx)
+	local security_mode, _ = utils.get_variable("SECURITY_MODE", true, ctx)
 	if not security_mode then
 		return "block"
 	end
