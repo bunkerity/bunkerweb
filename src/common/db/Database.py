@@ -1776,14 +1776,12 @@ class Database:
                 custom_config["data"] = custom_config["data"].encode("utf-8") if isinstance(custom_config["data"], str) else custom_config["data"]
                 custom_config["checksum"] = custom_config.get("checksum", bytes_hash(custom_config["data"], algorithm="sha256"))  # type: ignore
 
-                service_id = custom_config.get("service_id", None) or None
+                service_id = custom_config.get("service_id") or None
                 filters = {
                     "type": custom_config["type"],
                     "name": custom_config["name"],
+                    "service_id": service_id,
                 }
-
-                if service_id:
-                    filters["service_id"] = service_id
 
                 custom_conf = session.query(Custom_configs).with_entities(Custom_configs.checksum, Custom_configs.method).filter_by(**filters).first()
 
@@ -2197,9 +2195,8 @@ class Database:
             filters = {
                 "type": config_type,
                 "name": name,
+                "service_id": service_id or None,
             }
-            if service_id:
-                filters["service_id"] = service_id
 
             custom_config = session.query(Custom_configs).filter_by(**filters).first()
 
@@ -2322,11 +2319,9 @@ class Database:
 
     def delete_job_cache(self, file_name: str, *, job_name: Optional[str] = None, service_id: Optional[str] = None) -> str:
         job_name = job_name or argv[0].replace(".py", "")
-        filters = {"file_name": file_name}
+        filters = {"file_name": file_name, "service_id": service_id or None}
         if job_name:
             filters["job_name"] = job_name
-        if service_id:
-            filters["service_id"] = service_id
 
         with self._db_session() as session:
             if self.readonly:
@@ -3357,9 +3352,7 @@ class Database:
         if with_data:
             entities.append(Jobs_cache.data)
 
-        filters = {"job_name": job_name, "file_name": file_name}
-        if service_id:
-            filters["service_id"] = service_id
+        filters = {"job_name": job_name, "file_name": file_name, "service_id": service_id or None}
 
         with self._db_session() as session:
             if plugin_id:
