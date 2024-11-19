@@ -55,7 +55,7 @@ try:
             if getenv(f"{first_server}_USE_REAL_IP", getenv("USE_REAL_IP", "no")) == "yes":
                 realip_activated = True
 
-                # Get URLs
+                # Get service URLs
                 services_realip_urls[first_server] = set()
                 for url in getenv(f"{first_server}_REAL_IP_FROM_URLS", getenv("REAL_IP_FROM_URLS", "")).strip().split(" "):
                     if url:
@@ -64,11 +64,11 @@ try:
     elif getenv("USE_REAL_IP", "no") == "yes":
         realip_activated = True
 
-        # Get URLs
-        services_realip_urls[services[0]] = set()
-        for url in getenv("REAL_IP_FROM_URLS", "").strip().split(" "):
-            if url:
-                services_realip_urls[services[0]].add(url)
+    # Get global URLs
+    services_realip_urls["global"] = set()
+    for url in getenv("REAL_IP_FROM_URLS", "").strip().split(" "):
+        if url:
+            services_realip_urls["global"].add(url)
 
     if not realip_activated:
         LOGGER.info("RealIP is not activated, skipping download...")
@@ -95,9 +95,9 @@ try:
 
     for service, urls_list in services_realip_urls.items():
         if not urls_list:
-            if JOB.job_path.joinpath(service, "combined.list").is_file():
+            if JOB.job_path.joinpath("" if service == "global" else service, "combined.list").is_file():
                 LOGGER.warning(f"{service} realip combined.list is cached but no URL is configured, removing from cache...")
-                deleted, err = JOB.del_cache("combined.list", service_id=service)
+                deleted, err = JOB.del_cache("combined.list", service_id="" if service == "global" else service)
                 if not deleted:
                     LOGGER.warning(f"Couldn't delete {service} combined.list from cache : {err}")
             continue
@@ -112,7 +112,7 @@ try:
                 # Check if the URL has already been downloaded
                 if url in failed_urls:
                     continue
-                elif isinstance(cached_url, dict) and cached_url["last_update"] < (datetime.now().astimezone() - timedelta(hours=1)).timestamp():
+                elif isinstance(cached_url, dict) and cached_url["last_update"] > (datetime.now().astimezone() - timedelta(hours=1)).timestamp():
                     LOGGER.info(f"URL {url} has already been downloaded less than 1 hour ago, skipping download...")
                     # Remove first line (URL) and add to content
                     content += b"\n".join(cached_url["data"].split(b"\n")[1:]) + b"\n"
@@ -152,27 +152,35 @@ try:
                 LOGGER.error(f"Exception while getting {service} realip from {url} :\n{e}")
                 failed_urls.add(url)
 
-        LOGGER.debug(f"Content for {service} : {content}")
+        if not content:
+            LOGGER.warning(f"No data for {service}, skipping...")
+            continue
 
         # Check if file has changed
         new_hash = bytes_hash(content)
-        old_hash = JOB.cache_hash("combined.list", service_id=service)
+        old_hash = JOB.cache_hash("combined.list", service_id="" if service == "global" else service)
         if new_hash == old_hash:
             LOGGER.info(f"New {service} file combined.list is identical to cache file, reload is not needed")
             continue
+        elif old_hash:
+            LOGGER.info(f"New {service} file combined.list is different than cache file, reload is needed")
+        else:
+            LOGGER.info(f"New {service} file combined.list is not in cache, reload is needed")
 
-        LOGGER.info(f"New {service} file combined.list is different than cache file, reload is needed")
         # Put file in cache
-        cached, err = JOB.cache_file("combined.list", content, service_id=service, checksum=new_hash)
+        cached, err = JOB.cache_file("combined.list", content, service_id="" if service == "global" else service, checksum=new_hash)
         if not cached:
             LOGGER.error(f"Error while caching realip : {err}")
             status = 2
             continue
 
-        status = 1
+        status = 1 if status != 2 else 2
 
     # Remove old files
     for url_file in JOB.job_path.glob("*.list"):
+        if url_file.name == "combined.list":
+            continue
+
         LOGGER.debug(f"Checking if {url_file} is still in use ...")
         if url_file.name not in urls:
             LOGGER.warning(f"Removing no longer used url file {url_file} ...")
