@@ -74,7 +74,7 @@ try:
             if getenv(f"{first_server}_USE_BLACKLIST", getenv("USE_BLACKLIST", "yes")) == "yes":
                 blacklist_activated = True
 
-                # Get URLs
+                # Get services URLs
                 services_blacklist_urls[first_server] = {}
                 for kind in KINDS:
                     services_blacklist_urls[first_server][kind] = set()
@@ -85,7 +85,7 @@ try:
     elif getenv("USE_BLACKLIST", "yes") == "yes":
         blacklist_activated = True
 
-        # Get URLs
+        # Get global URLs
         services_blacklist_urls[services[0]] = {}
         for kind in KINDS:
             services_blacklist_urls[services[0]][kind] = set()
@@ -137,7 +137,7 @@ try:
                     # Check if the URL has already been downloaded
                     if url in failed_urls:
                         continue
-                    elif isinstance(cached_url, dict) and cached_url["last_update"] < (datetime.now().astimezone() - timedelta(hours=1)).timestamp():
+                    elif isinstance(cached_url, dict) and cached_url["last_update"] > (datetime.now().astimezone() - timedelta(hours=1)).timestamp():
                         LOGGER.info(f"URL {url} has already been downloaded less than 1 hour ago, skipping download...")
                         # Remove first line (URL) and add to content
                         content += b"\n".join(cached_url["data"].split(b"\n")[1:]) + b"\n"
@@ -179,7 +179,9 @@ try:
                     LOGGER.error(f"Exception while getting {service} blacklist from {url} :\n{e}")
                     failed_urls.add(url)
 
-            LOGGER.debug(f"Content for {service} {kind} : {content}")
+            if not content:
+                LOGGER.warning(f"No data for {service} {kind}, skipping...")
+                continue
 
             # Check if file has changed
             new_hash = bytes_hash(content)
@@ -187,8 +189,11 @@ try:
             if new_hash == old_hash:
                 LOGGER.info(f"New {service} file {kind}.list is identical to cache file, reload is not needed")
                 continue
+            elif old_hash:
+                LOGGER.info(f"New {service} file {kind}.list is different than cache file, reload is needed")
+            else:
+                LOGGER.info(f"New {service} file {kind}.list is not in cache, reload is needed")
 
-            LOGGER.info(f"New {service} file {kind}.list is different than cache file, reload is needed")
             # Put file in cache
             cached, err = JOB.cache_file(f"{kind}.list", content, service_id=service, checksum=new_hash)
             if not cached:
@@ -196,7 +201,7 @@ try:
                 status = 2
                 continue
 
-            status = 1
+            status = 1 if status != 2 else 2
 
     # Remove old files
     for url_file in JOB.job_path.glob("*.list"):

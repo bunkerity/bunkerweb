@@ -7,6 +7,7 @@ local blacklist = class("blacklist", plugin)
 
 local ngx = ngx
 local ERR = ngx.ERR
+local INFO = ngx.INFO
 local get_phase = ngx.get_phase
 local has_variable = utils.has_variable
 local get_deny_status = utils.get_deny_status
@@ -47,7 +48,9 @@ function blacklist:initialize(ctx)
 				self.lists[kind] = {}
 			end
 			for data in self.variables["BLACKLIST_" .. kind]:gmatch("%S+") do
-				table.insert(self.lists[kind], data)
+				if data ~= "" then
+					table.insert(self.lists[kind], data)
+				end
 			end
 		end
 	end
@@ -103,8 +106,10 @@ function blacklist:init()
 			local f = open(file_path, "r")
 			if f then
 				for line in f:lines() do
-					table.insert(blacklists[kind], line)
-					i = i + 1
+					if line ~= "" then
+						table.insert(blacklists[kind], line)
+						i = i + 1
+					end
 				end
 				f:close()
 			end
@@ -114,9 +119,15 @@ function blacklist:init()
 		local ok
 		ok, err = self.datastore:set("plugin_blacklist_lists_" .. key, blacklists, nil, true)
 		if not ok then
-			return self:ret(false, "can't store blacklist list into datastore : " .. err)
+			return self:ret(false, "can't store blacklist " .. key .. " list into datastore : " .. err)
 		end
 
+		self.logger:log(
+			INFO,
+			"successfully loaded " .. tostring(i) .. " IP/network/rDNS/ASN/User-Agent/URI for the service: " .. key
+		)
+
+		i = 0
 		blacklists = {
 			["IP"] = {},
 			["RDNS"] = {},
@@ -130,7 +141,7 @@ function blacklist:init()
 			["IGNORE_URI"] = {},
 		}
 	end
-	return self:ret(true, "successfully loaded " .. tostring(i) .. " IP/network/rDNS/ASN/User-Agent/URI")
+	return self:ret(true, "successfully loaded all IP/network/rDNS/ASN/User-Agent/URI")
 end
 
 function blacklist:access()

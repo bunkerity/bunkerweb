@@ -7,6 +7,7 @@ local greylist = class("greylist", plugin)
 
 local ngx = ngx
 local ERR = ngx.ERR
+local INFO = ngx.INFO
 local get_phase = ngx.get_phase
 local has_variable = utils.has_variable
 local get_deny_status = utils.get_deny_status
@@ -42,7 +43,9 @@ function greylist:initialize(ctx)
 				self.lists[kind] = {}
 			end
 			for data in self.variables["GREYLIST_" .. kind]:gmatch("%S+") do
-				table.insert(self.lists[kind], data)
+				if data ~= "" then
+					table.insert(self.lists[kind], data)
+				end
 			end
 		end
 	end
@@ -93,8 +96,10 @@ function greylist:init()
 			local f = open(file_path, "r")
 			if f then
 				for line in f:lines() do
-					table.insert(greylists[kind], line)
-					i = i + 1
+					if line ~= "" then
+						table.insert(greylists[kind], line)
+						i = i + 1
+					end
 				end
 				f:close()
 			end
@@ -104,9 +109,15 @@ function greylist:init()
 		local ok
 		ok, err = self.datastore:set("plugin_greylist_lists_" .. key, greylists, nil, true)
 		if not ok then
-			return self:ret(false, "can't store greylist list into datastore : " .. err)
+			return self:ret(false, "can't store greylist " .. key .. " list into datastore : " .. err)
 		end
 
+		self.logger:log(
+			INFO,
+			"successfully loaded " .. tostring(i) .. " IP/network/rDNS/ASN/User-Agent/URI for the service: " .. key
+		)
+
+		i = 0
 		greylists = {
 			["IP"] = {},
 			["RDNS"] = {},
@@ -115,7 +126,7 @@ function greylist:init()
 			["URI"] = {},
 		}
 	end
-	return self:ret(true, "successfully loaded " .. tostring(i) .. " IP/network/rDNS/ASN/User-Agent/URI")
+	return self:ret(true, "successfully loaded all IP/network/rDNS/ASN/User-Agent/URI")
 end
 
 function greylist:access()

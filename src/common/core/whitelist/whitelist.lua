@@ -8,6 +8,7 @@ local whitelist = class("whitelist", plugin)
 
 local ngx = ngx
 local ERR = ngx.ERR
+local INFO = ngx.INFO
 local OK = ngx.OK
 local WARN = ngx.WARN
 local get_phase = ngx.get_phase
@@ -46,7 +47,9 @@ function whitelist:initialize(ctx)
 				self.lists[kind] = {}
 			end
 			for data in self.variables["WHITELIST_" .. kind]:gmatch("%S+") do
-				table.insert(self.lists[kind], data)
+				if data ~= "" then
+					table.insert(self.lists[kind], data)
+				end
 			end
 		end
 	end
@@ -97,8 +100,10 @@ function whitelist:init()
 			local f = open(file_path, "r")
 			if f then
 				for line in f:lines() do
-					table.insert(whitelists[kind], line)
-					i = i + 1
+					if line ~= "" then
+						table.insert(whitelists[kind], line)
+						i = i + 1
+					end
 				end
 				f:close()
 			end
@@ -108,9 +113,15 @@ function whitelist:init()
 		local ok
 		ok, err = self.datastore:set("plugin_whitelist_lists_" .. key, whitelists, nil, true)
 		if not ok then
-			return self:ret(false, "can't store whitelist list into datastore : " .. err)
+			return self:ret(false, "can't store whitelist " .. key .. " list into datastore : " .. err)
 		end
 
+		self.logger:log(
+			INFO,
+			"successfully loaded " .. tostring(i) .. " IP/network/rDNS/ASN/User-Agent/URI for the service: " .. key
+		)
+
+		i = 0
 		whitelists = {
 			["IP"] = {},
 			["RDNS"] = {},
@@ -119,7 +130,7 @@ function whitelist:init()
 			["URI"] = {},
 		}
 	end
-	return self:ret(true, "successfully loaded " .. tostring(i) .. " IP/network/rDNS/ASN/User-Agent/URI")
+	return self:ret(true, "successfully loaded all IP/network/rDNS/ASN/User-Agent/URI")
 end
 
 function whitelist:set()
