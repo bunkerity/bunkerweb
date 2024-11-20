@@ -20,7 +20,6 @@ services:
       - bunkerweb
     volumes:
       - bw-data:/data
-      - certs:/certs
     environment:
       BUNKERWEB_INSTANCES: "bunkerweb"
       SERVER_NAME: "app1.example.com app2.example.com app3.example.com" # replace with your domains
