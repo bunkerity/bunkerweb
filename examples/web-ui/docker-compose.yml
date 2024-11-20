@@ -6,8 +6,9 @@ services:
     image: bunkerity/bunkerweb:1.6.0-beta
     container_name: bunkerweb
     ports:
-      - "80:8080"
-      - "443:8443"
+      - "80:8080/tcp"
+      - "443:8443/tcp"
+      - "443:8443/udp" # for QUIC
     environment:
       API_WHITELIST_IP: "127.0.0.0/24 10.20.30.0/24"
     restart: "unless-stopped"
@@ -32,12 +33,10 @@ services:
       AUTO_LETS_ENCRYPT: "yes"
       USE_CLIENT_CACHE: "yes"
       USE_GZIP: "yes"
-      www.example.com_USE_UI: "yes"
+      www.example.com_USE_TEMPLATE: "ui" # Template specific to the web-ui
       www.example.com_USE_REVERSE_PROXY: "yes"
       www.example.com_REVERSE_PROXY_URL: "/changeme"
       www.example.com_REVERSE_PROXY_HOST: "http://bw-ui:7000"
-      www.example.com_INTERCEPTED_ERROR_CODES: "400 404 405 413 429 500 501 502 503 504"
-      www.example.com_MAX_CLIENT_SIZE: "50m"
     restart: "unless-stopped"
     networks:
       - bw-universe

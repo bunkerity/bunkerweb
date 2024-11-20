@@ -41,7 +41,7 @@ services:
   myproxy:
     image: haproxy:3.0-alpine
     ports:
-      - "80:8080"
+      - "80:8080/tcp"
     volumes:
       - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
     networks:
