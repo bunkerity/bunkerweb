@@ -3,8 +3,9 @@ services:
     image: bunkerity/bunkerweb:1.6.0-beta
     container_name: bunkerweb
     ports:
-      - "80:8080"
-      - "443:8443"
+      - "80:8080/tcp"
+      - "443:8443/tcp"
+      - "443:8443/udp" # for QUIC
     environment:
       API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
     restart: "unless-stopped"
@@ -30,9 +31,21 @@ services:
       USE_CLIENT_CACHE: "yes"
       USE_GZIP: "yes"
       USE_REVERSE_PROXY: "yes"
-      USE_CUSTOM_SSL: "yes"
-      CUSTOM_SSL_CERT: "/certs/live/example.com/fullchain.pem"
-      CUSTOM_SSL_KEY: "/certs/live/example.com/privkey.pem"
+
+      # Let's Encrypt configuration
+      AUTO_LETS_ENCRYPT: "yes"
+      EMAIL_LETS_ENCRYPT: "changeme@example.com" # replace with your email to receive notifications about certificate expiration
+      LETS_ENCRYPT_CHALLENGE: "dns"
+      LETS_ENCRYPT_DNS_PROVIDER: "google"
+      LETS_ENCRYPT_DNS_PROPAGATION: "default" # change this to a number of seconds if you have a slow DNS provider (It's recommended to use the default value)
+      LETS_ENCRYPT_DNS_CREDENTIAL_ITEM: "project_id <your-google-project-id>" # replace with your Google project ID
+      LETS_ENCRYPT_DNS_CREDENTIAL_ITEM_1: "private_key_id <your-google-private-key-id>" # replace with your Google private key ID
+      LETS_ENCRYPT_DNS_CREDENTIAL_ITEM_2: "private_key <your-google-private-key>" # replace with your Google private key
+      LETS_ENCRYPT_DNS_CREDENTIAL_ITEM_3: "client_email <your-google-client-email>" # replace with your Google client email
+      LETS_ENCRYPT_DNS_CREDENTIAL_ITEM_4: "client_id <your-google-client-id>" # replace with your Google client ID
+      LETS_ENCRYPT_DNS_CREDENTIAL_ITEM_5: "client_x509_cert_url <your-google-client-x509-cert-url>" # replace with your Google client x509 cert URL
+
+      # Reverse proxy configuration
       app1.example.com_REVERSE_PROXY_URL: "/"
       app1.example.com_REVERSE_PROXY_HOST: "http://app1:8080"
       app2.example.com_REVERSE_PROXY_URL: "/"
@@ -42,17 +55,6 @@ services:
     restart: "unless-stopped"
     networks:
       - bw-universe
-
-  mycertbot:
-    image: certbot/dns-digitalocean:v2.11.0
-    environment:
-      DOMAINS: "*.example.com,example.com"
-      EMAIL: "contact@example.com"
-    volumes:
-      - certs:/etc/letsencrypt
-      - ./digitalocean.ini:/opt/digitalocean.ini
-      - ./entrypoint.sh:/opt/entrypoint.sh
-    entrypoint: /bin/sh /opt/entrypoint.sh
 
   app1:
     image: nginxdemos/nginx-hello
@@ -71,7 +73,6 @@ services:
 
 volumes:
   bw-data:
-  certs:
 
 
 networks:
