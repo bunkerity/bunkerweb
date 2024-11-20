@@ -18,8 +18,8 @@ services:
       - bunkerweb.REVERSE_PROXY_HOST=http://mydrupal
       - bunkerweb.LIMIT_REQ_URL_1=/core/install.php
       - bunkerweb.LIMIT_REQ_RATE_1=5r/s
-      - |
-        CUSTOM_CONF_MODSEC_CRS_drupal=SecAction "id:900130,phase:1,nolog,pass,t:none,setvar:tx.crs_exclusions_drupal=1"
+      # This is a CRS plugin specific to Drupal
+      - bunkerweb.MODSECURITY_CRS_PLUGIN_URLS=https://github.com/coreruleset/drupal-rule-exclusions-plugin/archive/refs/tags/v1.0.0.tar.gz
 
   mydb:
     image: mariadb:11

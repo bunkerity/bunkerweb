@@ -22,5 +22,3 @@ chown -R $user:nginx /var/www/html
 find /var/www/html -type f -exec chmod 0640 {} \;
 find /var/www/html -type d -exec chmod 0750 {} \;
 cd "$current_dir" || exit 1
-cp -r ./bw-data/configs/* /etc/bunkerweb/configs
-chown -R nginx:nginx /etc/bunkerweb/configs
