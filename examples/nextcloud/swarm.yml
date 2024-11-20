@@ -34,6 +34,8 @@ services:
         - bunkerweb.LIMIT_REQ_RATE_2=8r/s
         - bunkerweb.LIMIT_REQ_URL_3=/core/preview
         - bunkerweb.LIMIT_REQ_RATE_3=5r/s
+        # This is a CRS plugin specific to Nextcloud
+        - bunkerweb.MODSECURITY_CRS_PLUGIN_URLS=https://github.com/coreruleset/nextcloud-rule-exclusions-plugin/archive/refs/tags/v1.2.0.tar.gz
 
   mydb:
     image: mariadb:11

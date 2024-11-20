@@ -19,4 +19,3 @@ cp -r /tmp/nextcloud/* /var/www/html
 chown -R $user:nginx /var/www/html
 find /var/www/html -type f -exec chmod 0640 {} \;
 find /var/www/html -type d -exec chmod 0750 {} \;
-cp -r bw-data/configs/* /etc/bunkerweb/configs

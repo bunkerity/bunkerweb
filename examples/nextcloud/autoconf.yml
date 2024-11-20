@@ -32,27 +32,8 @@ services:
       - bunkerweb.LIMIT_REQ_RATE_2=8r/s
       - bunkerweb.LIMIT_REQ_URL_3=/core/preview
       - bunkerweb.LIMIT_REQ_RATE_3=5r/s
-      - |
-        bunkerweb.CUSTOM_CONF_MODSEC_CRS_nextcloud=
-        SecAction \
-         "id:900130,\
-          phase:1,\
-          nolog,\
-          pass,\
-          t:none,\
-          setvar:tx.crs_exclusions_nextcloud=1"
-
-        # WebDAV
-        SecAction \
-         "id:900200,\
-          phase:1,\
-          nolog,\
-          pass,\
-          t:none,\
-          setvar:'tx.allowed_methods=GET POST HEAD COPY DELETE LOCK MKCOL MOVE PROPFIND PROPPATCH PUT UNLOCK OPTIONS'"
-      - |
-        bunkerweb.CUSTOM_CONF_MODSEC_nextcloud=
-        SecRule REQUEST_FILENAME "@rx ^/remote.php/dav/files/" "id:2000,ctl:ruleRemoveByTag=attack-protocol,ctl:ruleRemoveByTag=attack-generic,nolog"
+      # This is a CRS plugin specific to Nextcloud
+      - bunkerweb.MODSECURITY_CRS_PLUGIN_URLS=https://github.com/coreruleset/nextcloud-rule-exclusions-plugin/archive/refs/tags/v1.2.0.tar.gz
 
   mydb:
     image: mariadb:11
