@@ -3,8 +3,9 @@ services:
     image: bunkerity/bunkerweb:1.6.0-beta
     container_name: bunkerweb
     ports:
-      - "80:8080"
-      - "443:8443"
+      - "80:8080/tcp"
+      - "443:8443/tcp"
+      - "443:8443/udp" # for QUIC
     environment:
       API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
     restart: "unless-stopped"
@@ -31,22 +32,7 @@ services:
       USE_REVERSE_PROXY: "yes"
       REVERSE_PROXY_URL: "/"
       REVERSE_PROXY_HOST: "http://mywp"
-      CUSTOM_CONF_MODSEC_CRS_wordpress: |
-        SecAction \
-         "id:900130,\
-          phase:1,\
-          nolog,\
-          pass,\
-          t:none,\
-          setvar:tx.crs_exclusions_wordpress=1"
-
-        SecAction \
-         "id:900220,\
-          phase:1,\
-          nolog,\
-          pass,\
-          t:none,\
-          setvar:'tx.allowed_request_content_type=|application/x-www-form-urlencoded| |multipart/form-data| |multipart/related| |text/xml| |application/xml| |application/soap+xml| |application/x-amf| |application/json| |application/cloudevents+json| |application/cloudevents-batch+json| |application/octet-stream| |application/csp-report| |application/xss-auditor-report| |text/plain| |application/x-git-upload-pack-request| |application/x-git-receive-pack-request|'"
+      MODSECURITY_CRS_PLUGIN_URLS: "https://github.com/coreruleset/wordpress-rule-exclusions-plugin/archive/refs/tags/v1.0.1.tar.gz" # This is a CRS plugin specific to WordPress
     restart: "unless-stopped"
     networks:
       - bw-universe
