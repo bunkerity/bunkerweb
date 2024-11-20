@@ -307,7 +307,7 @@ class CLI(ApiCaller):
             cmd.extend(args)
 
         self.__logger.debug(f"Executing command {' '.join(cmd)}")
-        proc = run(cmd, stdin=DEVNULL, stderr=STDOUT, check=False, env=self.__variables | environ | ({"LOG_LEVEL": "DEBUG"} if debug else {}))  # type: ignore
+        proc = run(cmd, stdin=DEVNULL, stderr=STDOUT, check=False, env=self.__variables | environ | ({"LOG_LEVEL": "DEBUG"} if debug else {}) | ({"DATABASE_URI": self.__db.database_uri} if self.__db else {}))  # type: ignore
 
         if proc.returncode != 0:
             return False, f"Command {command} failed"

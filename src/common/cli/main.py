@@ -60,6 +60,9 @@ if __name__ == "__main__":
         # Parse args
         args = parser.parse_args()
 
+        if args.debug:
+            logger.setLevel("DEBUG")
+
         # Instantiate CLI
         cli = CLI()
 
