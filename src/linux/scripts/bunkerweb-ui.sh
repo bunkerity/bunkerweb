@@ -11,6 +11,8 @@ fi
 
 # Function to start the UI
 start() {
+    stop
+
     echo "Starting UI"
     # shellcheck disable=SC2046
     export $(cat /etc/bunkerweb/ui.env)
