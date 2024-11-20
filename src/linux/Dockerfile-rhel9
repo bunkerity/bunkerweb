@@ -71,7 +71,7 @@ FROM redhat/ubi9:9.5@sha256:2bae9062eddbbc18e76555972e7026ffe02cef560a0076e6d7f7
 RUN umask 027
 
 # Install fpm
-RUN dnf install -y wget redhat-rpm-config rpm-build yum-utils gcc make && \
+RUN dnf install -y wget redhat-rpm-config rpm-build yum-utils gcc make pigz && \
   wget https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm && \
   rpm -Uvh epel-release*rpm && \
   dnf module -y reset ruby && dnf module -y enable ruby:3.1 && dnf module -y install ruby:3.1/common && \
@@ -89,22 +89,25 @@ COPY --from=builder --chown=0:101 /usr/share/bunkerweb /usr/share/bunkerweb
 
 WORKDIR /usr/share/bunkerweb
 
-# Setup BW
-RUN cp helpers/bwcli /usr/bin/ && \
-  chmod 755 /usr/bin/bwcli && \
-  mkdir -p /etc/bunkerweb/configs /etc/bunkerweb/plugins /var/cache/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb /var/lib/bunkerweb /var/www/html && \
-  echo "Linux" > INTEGRATION && \
-  for dir in $(echo "plugins pro/plugins configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/default-server-stream configs/modsec configs/modsec-crs configs/crs-plugins-before configs/crs-plugins-after") ; do mkdir -p "/etc/bunkerweb/${dir}" ; done && \
-  find . -path deps -prune -o -type f -exec chmod 0740 {} \; && \
-  find . -path deps -prune -o -type d -exec chmod 0750 {} \; && \
-  chmod 755 /var/log/bunkerweb && \
-  touch /var/log/bunkerweb/error.log /var/log/bunkerweb/access.log /var/log/bunkerweb/modsec_audit.log && \
-  chmod 770 /var/cache/bunkerweb/ /var/tmp/bunkerweb/ /var/run/bunkerweb/ && \
-  chmod 750 gen/*.py scheduler/*.py cli/*.py ui/*.sh helpers/*.sh /var/www/ && \
-  find ui -name "*.py" -type f -exec chmod 750 {} \; && \
-  find core/*/jobs/* -type f -exec chmod 750 {} \; && \
-  find core/*/bwcli/* -type f -exec chmod 750 {} \; && \
-  chmod 755 .
+# Setup BunkerWeb
+RUN install -m 755 helpers/bwcli /usr/bin/bwcli && \
+    echo "Linux" > INTEGRATION && \
+    mkdir -p /etc/bunkerweb/configs /etc/bunkerweb/plugins /var/cache/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb /var/lib/bunkerweb /var/www/html && \
+    for dir in $(echo "plugins pro/plugins configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/default-server-stream configs/modsec configs/modsec-crs configs/crs-plugins-before configs/crs-plugins-after") ; do mkdir -p "/etc/bunkerweb/${dir}" ; done && \
+    find . -path ./deps -prune -o -type f -print0 | xargs -0 chmod 0740 && \
+    find . -path ./deps -prune -o -type d -print0 | xargs -0 chmod 0750 && \
+    chmod 755 /var/log/bunkerweb && \
+    touch /var/log/bunkerweb/error.log /var/log/bunkerweb/access.log /var/log/bunkerweb/modsec_audit.log && \
+    chmod 770 /var/cache/bunkerweb/ /var/tmp/bunkerweb/ /var/run/bunkerweb/ && \
+    chmod 750 gen/*.py scheduler/*.py cli/*.py ui/*.sh helpers/*.sh /var/www/ && \
+    find ui -name "*.py" -type f -print0 | xargs -0 chmod 750 && \
+    find core/*/jobs/* -type f -print0 | xargs -0 chmod 750 && \
+    find core/*/bwcli/* -type f -print0 | xargs -0 chmod 750 && \
+    chmod 755 .
+
+# Compress dependencies
+RUN tar -I pigz -cf /var/tmp/bunkerweb/deps.tar.gz deps && \
+    rm -rf deps
 
 COPY --chmod=660 src/bw/misc/asn.mmdb /var/tmp/bunkerweb/asn.mmdb
 COPY --chmod=660 src/bw/misc/country.mmdb /var/tmp/bunkerweb/country.mmdb

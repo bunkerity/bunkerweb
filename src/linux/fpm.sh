@@ -5,4 +5,4 @@ ARCH="$(uname -m)"
 sed -i "s/%VERSION%/${VERSION}/g" .fpm
 sed -i "s/%ARCH%/${ARCH}/g" .fpm
 
-fpm -t "$1" -p "/data/bunkerweb.$1"
+fpm -t "$1" -p "/data/bunkerweb.$1" --verbose --log debug
