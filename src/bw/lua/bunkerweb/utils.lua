@@ -307,7 +307,18 @@ utils.get_reason = function(ctx)
 	end
 	-- os.getenv
 	if os.getenv("REASON") == "modsecurity" then
-		return "modsecurity", {}, security_mode
+		local env_reason_data = os.getenv("REASON_DATA")
+		local reason_data = {}
+		if env_reason_data and env_reason_data ~= "" and env_reason_data ~= "none" then
+			if env_reason_data:sub(1, 1) == " " then
+				env_reason_data = env_reason_data:sub(2)
+			end
+			reason_data["ids"] = {}
+			for rule_id in env_reason_data:gmatch("%S+") do
+				table.insert(reason_data["ids"], rule_id)
+			end
+		end
+		return "modsecurity", reason_data, security_mode
 	end
 	-- datastore ban
 	local ip
