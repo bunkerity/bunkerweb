@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from contextlib import suppress
 from datetime import datetime, timedelta
-from json import dumps
+from json import dumps, loads
 from os import getenv, sep
 from os.path import join
 from secrets import token_urlsafe
@@ -45,6 +45,7 @@ from app.routes.totp import totp
 from app.dependencies import BW_CONFIG, DATA, DB
 from app.models.models import AnonymousUser
 from app.utils import (
+    COLUMNS_PREFERENCES_DEFAULTS,
     TMP_DIR,
     LOGGER,
     flash,
@@ -139,8 +140,9 @@ with app.app_context():
 
 @app.context_processor
 def inject_variables():
+    current_endpoint = request.path.split("/")[-1]
     if request.path.startswith(("/check_reloading", "/setup", "/loading", "/login", "/totp")):
-        return dict(script_nonce=app.config["SCRIPT_NONCE"])
+        return dict(current_endpoint=current_endpoint, script_nonce=app.config["SCRIPT_NONCE"])
 
     DATA.load_from_file()
     metadata = DB.get_metadata()
@@ -164,7 +166,8 @@ def inject_variables():
             flash("The last changes have been applied successfully.", "success")
             DATA["CONFIG_CHANGED"] = False
 
-    return dict(
+    data = dict(
+        current_endpoint=current_endpoint,
         script_nonce=app.config["SCRIPT_NONCE"],
         bw_version=metadata["version"],
         latest_version=DATA.get("LATEST_VERSION", "unknown"),
@@ -177,7 +180,13 @@ def inject_variables():
         flash_messages=session.get("flash_messages", []),
         is_readonly=DATA.get("READONLY_MODE", False),
         theme=current_user.theme if current_user.is_authenticated else "dark",
+        columns_preferences_defaults=COLUMNS_PREFERENCES_DEFAULTS,
     )
+
+    if current_endpoint in COLUMNS_PREFERENCES_DEFAULTS:
+        data["columns_preferences"] = DB.get_ui_user_columns_preferences(current_user.get_id(), current_endpoint)
+
+    return data
 
 
 @login_manager.user_loader
@@ -447,7 +456,7 @@ def check_reloading():
 @login_required
 def set_theme():
     if DB.readonly or request.form["theme"] not in ("dark", "light"):
-        return
+        return Response(status=400, response=dumps({"message": "Bad request"}), content_type="application/json")
 
     user_data = {
         "username": current_user.get_id(),
@@ -461,6 +470,36 @@ def set_theme():
     ret = DB.update_ui_user(**user_data, old_username=current_user.get_id())
     if ret:
         LOGGER.error(f"Couldn't update the user {current_user.get_id()}: {ret}")
+        return Response(status=500, response=dumps({"message": "Internal server error"}), content_type="application/json")
+
+    return Response(status=200, response=dumps({"message": "ok"}), content_type="application/json")
+
+
+@app.route("/set_columns_preferences", methods=["POST"])
+@login_required
+def set_columns_preferences():
+    table_name = request.form.get("table_name")
+    columns_preferences = request.form.get("columns_preferences", "{}")
+
+    try:
+        columns_preferences = loads(columns_preferences)
+    except BaseException:
+        return Response(status=400, response=dumps({"message": "Bad request"}), content_type="application/json")
+
+    LOGGER.debug(f"Setting columns preferences for {table_name}: {columns_preferences}")
+    LOGGER.debug(f"Default columns preferences for {table_name}: {COLUMNS_PREFERENCES_DEFAULTS.get(table_name, {})}")
+
+    if (
+        DB.readonly
+        or table_name not in COLUMNS_PREFERENCES_DEFAULTS
+        or any(column not in COLUMNS_PREFERENCES_DEFAULTS[table_name] for column in columns_preferences)
+    ):
+        return Response(status=400, response=dumps({"message": "Bad request"}), content_type="application/json")
+
+    ret = DB.update_ui_user_columns_preferences(current_user.get_id(), table_name, columns_preferences)
+    if ret:
+        LOGGER.error(f"Couldn't update the user {current_user.get_id()}'s columns preferences: {ret}")
+        return Response(status=500, response=dumps({"message": "Internal server error"}), content_type="application/json")
 
     return Response(status=200, response=dumps({"message": "ok"}), content_type="application/json")
 

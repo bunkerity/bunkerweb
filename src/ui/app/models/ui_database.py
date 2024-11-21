@@ -3,7 +3,7 @@ from logging import Logger
 from os import sep
 from os.path import join
 from sys import path as sys_path
-from typing import List, Literal, Optional, Union
+from typing import Dict, List, Literal, Optional, Union
 
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("api",), ("db",))]:
@@ -14,9 +14,10 @@ from bcrypt import gensalt, hashpw
 from sqlalchemy.orm import joinedload
 
 from Database import Database  # type: ignore
-from model import Permissions, Roles, RolesPermissions, RolesUsers, UserRecoveryCodes, UserSessions  # type: ignore
+from model import Permissions, Roles, RolesPermissions, RolesUsers, UserColumnsPreferences, UserRecoveryCodes, UserSessions  # type: ignore
 
 from app.models.models import UiUsers
+from app.utils import COLUMNS_PREFERENCES_DEFAULTS
 
 
 class UIDatabase(Database):
@@ -30,13 +31,20 @@ class UIDatabase(Database):
                 query = session.query(UiUsers).filter_by(username=username)
             else:
                 query = session.query(UiUsers).filter_by(admin=True)
-            query = query.options(joinedload(UiUsers.roles), joinedload(UiUsers.recovery_codes))
+            query = query.options(joinedload(UiUsers.roles), joinedload(UiUsers.recovery_codes), joinedload(UiUsers.columns_preferences))
 
             ui_user = query.first()
 
             if not ui_user:
                 return None
-            elif not as_dict:
+
+            if not ui_user.columns_preferences and not self.readonly:
+                for table_name, columns in COLUMNS_PREFERENCES_DEFAULTS.items():
+                    session.add(UserColumnsPreferences(user_name=ui_user.username, table_name=table_name, columns=columns))
+                session.commit()
+                session.refresh(ui_user)
+
+            if not as_dict:
                 return ui_user
 
             ui_user_data = {
@@ -102,6 +110,9 @@ class UIDatabase(Database):
             for code in totp_recovery_codes or []:
                 session.add(UserRecoveryCodes(user_name=username, code=hashpw(code.encode("utf-8"), gensalt(rounds=10)).decode("utf-8")))
 
+            for table_name, columns in COLUMNS_PREFERENCES_DEFAULTS.items():
+                session.add(UserColumnsPreferences(user_name=username, table_name=table_name, columns=columns))
+
             try:
                 session.commit()
             except BaseException as e:
@@ -141,6 +152,7 @@ class UIDatabase(Database):
                 session.query(RolesUsers).filter_by(user_name=old_username).update({"user_name": username})
                 session.query(UserRecoveryCodes).filter_by(user_name=old_username).update({"user_name": username})
                 session.query(UserSessions).filter_by(user_name=old_username).update({"user_name": username})
+                session.query(UserColumnsPreferences).filter_by(user_name=old_username).update({"user_name": username})
 
             totp_changed = user.totp_secret != totp_secret
 
@@ -176,6 +188,7 @@ class UIDatabase(Database):
 
             session.query(RolesUsers).filter_by(user_name=username).delete()
             session.query(UserRecoveryCodes).filter_by(user_name=username).delete()
+            session.query(UserColumnsPreferences).filter_by(user_name=username).delete()
             session.delete(user)
 
             try:
@@ -417,3 +430,35 @@ class UIDatabase(Database):
                 return str(e)
 
         return ""
+
+    def update_ui_user_columns_preferences(self, username: str, table_name: str, columns: Dict[str, bool]) -> str:
+        """Update ui user columns preferences."""
+        with self._db_session() as session:
+            if self.readonly:
+                return "The database is read-only, the changes will not be saved"
+
+            user = session.query(UiUsers).filter_by(username=username).first()
+            if not user:
+                return f"User {username} doesn't exist"
+
+            columns_preferences = session.query(UserColumnsPreferences).filter_by(user_name=username, table_name=table_name).first()
+            if not columns_preferences:
+                return f"Table {table_name} doesn't exist"
+
+            columns_preferences.columns = columns
+
+            try:
+                session.commit()
+            except BaseException as e:
+                return str(e)
+
+        return ""
+
+    def get_ui_user_columns_preferences(self, username: str, table_name: str) -> Dict[str, bool]:
+        """Get ui user columns preferences."""
+        with self._db_session() as session:
+            columns_preferences = session.query(UserColumnsPreferences).filter_by(user_name=username, table_name=table_name).first()
+            if not columns_preferences:
+                return COLUMNS_PREFERENCES_DEFAULTS.get(table_name, {})
+
+            return columns_preferences.columns

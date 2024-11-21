@@ -263,19 +263,6 @@ $(document).ready(function () {
     return configs;
   };
 
-  $.fn.dataTable.ext.buttons.toggle_filters = {
-    text: `<span class="tf-icons bx bx-filter bx-18px me-2"></span><span id="show-filters"${
-      configTypeSelection || configServiceSelection ? ' class="d-none"' : ""
-    }>Show</span><span id="hide-filters"${
-      !configTypeSelection && !configServiceSelection ? ' class="d-none"' : ""
-    }>Hide</span><span class="d-none d-md-inline"> filters</span>`,
-    action: function (e, dt, node, config) {
-      configs_table.searchPanes.container().slideToggle(); // Smoothly hide or show the container
-      $("#show-filters").toggleClass("d-none"); // Toggle the visibility of the 'Show' span
-      $("#hide-filters").toggleClass("d-none"); // Toggle the visibility of the 'Hide' span
-    },
-  };
-
   $.fn.dataTable.ext.buttons.create_config = {
     text: '<span class="tf-icons bx bx-plus"></span><span class="d-none d-md-inline">&nbsp;Create new custom config</span>',
     className: `btn btn-sm rounded me-4 btn-bw-green${
@@ -315,148 +302,155 @@ $(document).ready(function () {
     },
   };
 
-  const configs_table = new DataTable("#configs", {
-    columnDefs: [
-      {
-        orderable: false,
-        className: "dtr-control",
-        targets: 0,
-      },
-      {
-        orderable: false,
-        render: DataTable.render.select(),
-        targets: 1,
-      },
-      {
-        orderable: false,
-        targets: -1,
-      },
-      {
-        visible: false,
-        targets: 7,
-      },
-      {
-        searchPanes: {
-          show: true,
-          options: [
-            {
-              label: '<i class="bx bx-xs bx-window-alt"></i>HTTP',
-              value: function (rowData, rowIdx) {
-                $(rowData[3]).text().trim() === "HTTP";
-              },
-            },
-            {
-              label: '<i class="bx bx-xs bx-window-alt"></i>SERVER_HTTP',
-              value: function (rowData, rowIdx) {
-                return $(rowData[3]).text().trim() === "SERVER_HTTP";
-              },
-            },
-            {
-              label:
-                '<i class="bx bx-xs bx-window-alt"></i>DEFAULT_SERVER_HTTP',
-              value: function (rowData, rowIdx) {
-                return $(rowData[3]).text().trim() === "DEFAULT_SERVER_HTTP";
-              },
-            },
-            {
-              label: '<i class="bx bx-xs bx-shield-quarter"></i>MODSEC_CRS',
-              value: function (rowData, rowIdx) {
-                return $(rowData[3]).text().trim() === "MODSEC_CRS";
-              },
-            },
-            {
-              label: '<i class="bx bx-xs bx-shield-alt-2"></i>MODSEC',
-              value: function (rowData, rowIdx) {
-                return $(rowData[3]).text().trim() === "MODSEC";
-              },
-            },
-            {
-              label: '<i class="bx bx-xs bx-network-chart"></i>STREAM',
-              value: function (rowData, rowIdx) {
-                return $(rowData[3]).text().trim() === "STREAM";
-              },
-            },
-            {
-              label: '<i class="bx bx-xs bx-network-chart"></i>SERVER_STREAM',
-              value: function (rowData, rowIdx) {
-                return $(rowData[3]).text().trim() === "SERVER_STREAM";
-              },
-            },
-            {
-              label: '<i class="bx bx-xs bx-shield-alt"></i>CRS_PLUGINS_BEFORE',
-              value: function (rowData, rowIdx) {
-                return $(rowData[3]).text().trim() === "CRS_PLUGINS_BEFORE";
-              },
-            },
-            {
-              label: '<i class="bx bx-xs bx-shield-alt"></i>CRS_PLUGINS_AFTER',
-              value: function (rowData, rowIdx) {
-                return $(rowData[3]).text().trim() === "CRS_PLUGINS_AFTER";
-              },
-            },
-          ],
-          combiner: "or",
-        },
-        targets: 3,
-      },
-      {
-        searchPanes: {
-          show: true,
-          combiner: "or",
+  const configs_table = initializeDataTable({
+    tableSelector: "#configs",
+    tableName: "configs",
+    columnVisibilityCondition: (column) => column > 2 && column < 8,
+    dataTableOptions: {
+      columnDefs: [
+        {
           orderable: false,
+          className: "dtr-control",
+          targets: 0,
         },
-        targets: 4,
-      },
-      {
-        searchPanes: {
-          show: true,
-          combiner: "or",
-          options: servicesSearchPanesOptions,
+        {
+          orderable: false,
+          render: DataTable.render.select(),
+          targets: 1,
         },
-        targets: 5,
-      },
-      {
-        searchPanes: {
-          show: true,
-          combiner: "or",
-          options: templatesSearchPanesOptions,
+        {
+          orderable: false,
+          targets: -1,
         },
-        targets: 6,
-      },
-    ],
-    order: [[2, "asc"]],
-    autoFill: false,
-    responsive: true,
-    select: {
-      style: "multi+shift",
-      selector: "td:nth-child(2)",
-      headerCheckbox: true,
-    },
-    layout: layout,
-    language: {
-      info: "Showing _START_ to _END_ of _TOTAL_ custom configs",
-      infoEmpty: "No custom configs available",
-      infoFiltered: "(filtered from _MAX_ total custom configs)",
-      lengthMenu: "Display _MENU_ custom configs",
-      zeroRecords: "No matching custom configs found",
+        {
+          visible: false,
+          targets: 7,
+        },
+        {
+          searchPanes: {
+            show: true,
+            options: [
+              {
+                label: '<i class="bx bx-xs bx-window-alt"></i>HTTP',
+                value: function (rowData, rowIdx) {
+                  $(rowData[3]).text().trim() === "HTTP";
+                },
+              },
+              {
+                label: '<i class="bx bx-xs bx-window-alt"></i>SERVER_HTTP',
+                value: function (rowData, rowIdx) {
+                  return $(rowData[3]).text().trim() === "SERVER_HTTP";
+                },
+              },
+              {
+                label:
+                  '<i class="bx bx-xs bx-window-alt"></i>DEFAULT_SERVER_HTTP',
+                value: function (rowData, rowIdx) {
+                  return $(rowData[3]).text().trim() === "DEFAULT_SERVER_HTTP";
+                },
+              },
+              {
+                label: '<i class="bx bx-xs bx-shield-quarter"></i>MODSEC_CRS',
+                value: function (rowData, rowIdx) {
+                  return $(rowData[3]).text().trim() === "MODSEC_CRS";
+                },
+              },
+              {
+                label: '<i class="bx bx-xs bx-shield-alt-2"></i>MODSEC',
+                value: function (rowData, rowIdx) {
+                  return $(rowData[3]).text().trim() === "MODSEC";
+                },
+              },
+              {
+                label: '<i class="bx bx-xs bx-network-chart"></i>STREAM',
+                value: function (rowData, rowIdx) {
+                  return $(rowData[3]).text().trim() === "STREAM";
+                },
+              },
+              {
+                label: '<i class="bx bx-xs bx-network-chart"></i>SERVER_STREAM',
+                value: function (rowData, rowIdx) {
+                  return $(rowData[3]).text().trim() === "SERVER_STREAM";
+                },
+              },
+              {
+                label:
+                  '<i class="bx bx-xs bx-shield-alt"></i>CRS_PLUGINS_BEFORE',
+                value: function (rowData, rowIdx) {
+                  return $(rowData[3]).text().trim() === "CRS_PLUGINS_BEFORE";
+                },
+              },
+              {
+                label:
+                  '<i class="bx bx-xs bx-shield-alt"></i>CRS_PLUGINS_AFTER',
+                value: function (rowData, rowIdx) {
+                  return $(rowData[3]).text().trim() === "CRS_PLUGINS_AFTER";
+                },
+              },
+            ],
+            combiner: "or",
+          },
+          targets: 3,
+        },
+        {
+          searchPanes: {
+            show: true,
+            combiner: "or",
+            orderable: false,
+          },
+          targets: 4,
+        },
+        {
+          searchPanes: {
+            show: true,
+            combiner: "or",
+            options: servicesSearchPanesOptions,
+          },
+          targets: 5,
+        },
+        {
+          searchPanes: {
+            show: true,
+            combiner: "or",
+            options: templatesSearchPanesOptions,
+          },
+          targets: 6,
+        },
+      ],
+      order: [[2, "asc"]],
+      autoFill: false,
+      responsive: true,
       select: {
-        rows: {
-          _: "Selected %d custom configs",
-          0: "No custom configs selected",
-          1: "Selected 1 custom config",
+        style: "multi+shift",
+        selector: "td:nth-child(2)",
+        headerCheckbox: true,
+      },
+      layout: layout,
+      language: {
+        info: "Showing _START_ to _END_ of _TOTAL_ custom configs",
+        infoEmpty: "No custom configs available",
+        infoFiltered: "(filtered from _MAX_ total custom configs)",
+        lengthMenu: "Display _MENU_ custom configs",
+        zeroRecords: "No matching custom configs found",
+        select: {
+          rows: {
+            _: "Selected %d custom configs",
+            0: "No custom configs selected",
+            1: "Selected 1 custom config",
+          },
         },
       },
-    },
-    initComplete: function (settings, json) {
-      $("#configs_wrapper .btn-secondary").removeClass("btn-secondary");
-      if (isReadOnly)
-        $("#configs_wrapper .dt-buttons")
-          .attr(
-            "data-bs-original-title",
-            "The database is in readonly, therefore you cannot create new custom configurations.",
-          )
-          .attr("data-bs-placement", "right")
-          .tooltip();
+      initComplete: function (settings, json) {
+        $("#configs_wrapper .btn-secondary").removeClass("btn-secondary");
+        if (isReadOnly)
+          $("#configs_wrapper .dt-buttons")
+            .attr(
+              "data-bs-original-title",
+              "The database is in readonly, therefore you cannot create new custom configurations.",
+            )
+            .attr("data-bs-placement", "right")
+            .tooltip();
+      },
     },
   });
 
@@ -468,113 +462,11 @@ $(document).ready(function () {
     "click",
   );
 
-  if (!configTypeSelection && !configServiceSelection)
-    configs_table.searchPanes.container().hide();
-
-  $(".action-button")
-    .parent()
-    .attr(
-      "data-bs-original-title",
-      "Please select one or more rows to perform an action.",
-    )
-    .attr("data-bs-placement", "top")
-    .tooltip();
-
-  $("#configs").removeClass("d-none");
-  $("#configs-waiting").addClass("visually-hidden");
-
-  const defaultColsVisibility = {
-    3: true,
-    4: true,
-    5: true,
-    6: true,
-    7: false,
-  };
-
-  var columnVisibility = localStorage.getItem("bw-configs-columns");
-  if (columnVisibility === null) {
-    columnVisibility = JSON.parse(JSON.stringify(defaultColsVisibility));
-  } else {
-    columnVisibility = JSON.parse(columnVisibility);
-    Object.entries(columnVisibility).forEach(([key, value]) => {
-      configs_table.column(key).visible(value);
-    });
+  if (configTypeSelection || configServiceSelection) {
+    configs_table.searchPanes.container().show();
+    $("#show-filters").toggleClass("d-none"); // Toggle the visibility of the 'Show' span
+    $("#hide-filters").toggleClass("d-none"); // Toggle the visibility of the 'Hide' span
   }
-
-  configs_table.responsive.recalc();
-
-  configs_table.on("mouseenter", "td", function () {
-    if (configs_table.cell(this).index() === undefined) return;
-    const rowIdx = configs_table.cell(this).index().row;
-
-    configs_table
-      .cells()
-      .nodes()
-      .each((el) => el.classList.remove("highlight"));
-
-    configs_table
-      .cells()
-      .nodes()
-      .each(function (el) {
-        if (configs_table.cell(el).index().row === rowIdx)
-          el.classList.add("highlight");
-      });
-  });
-
-  configs_table.on("mouseleave", "td", function () {
-    configs_table
-      .cells()
-      .nodes()
-      .each((el) => el.classList.remove("highlight"));
-  });
-
-  configs_table.on("select", function (e, dt, type, indexes) {
-    // Enable the actions button
-    $(".action-button")
-      .removeClass("disabled")
-      .parent()
-      .attr("data-bs-toggle", null)
-      .attr("data-bs-original-title", null)
-      .attr("data-bs-placement", null)
-      .tooltip("dispose");
-  });
-
-  configs_table.on("deselect", function (e, dt, type, indexes) {
-    // If no rows are selected, disable the actions button
-    if (configs_table.rows({ selected: true }).count() === 0) {
-      $(".action-button")
-        .addClass("disabled")
-        .parent()
-        .attr("data-bs-toggle", "tooltip")
-        .attr(
-          "data-bs-original-title",
-          "Please select one or more rows to perform an action.",
-        )
-        .attr("data-bs-placement", "top")
-        .tooltip();
-    }
-  });
-
-  configs_table.on(
-    "column-visibility.dt",
-    function (e, settings, column, state) {
-      if (column === 0 || column === 1 || column === 8) return;
-      columnVisibility[column] = state;
-      // Check if columVisibility is equal to defaultColsVisibility
-      const isDefault =
-        JSON.stringify(columnVisibility) ===
-        JSON.stringify(defaultColsVisibility);
-      // If it is, remove the key from localStorage
-      if (isDefault) {
-        localStorage.removeItem("bw-configs-columns");
-      } else {
-        localStorage.setItem(
-          "bw-configs-columns",
-          JSON.stringify(columnVisibility),
-        );
-      }
-    },
-  );
 
   $(document).on("click", ".delete-config", function () {
     if (isReadOnly) {

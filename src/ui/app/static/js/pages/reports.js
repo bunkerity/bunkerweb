@@ -390,15 +390,6 @@ $(function () {
     },
   ];
 
-  // Custom button for toggling filters
-  $.fn.dataTable.ext.buttons.toggle_filters = {
-    text: '<span class="tf-icons bx bx-filter bx-18px me-2"></span><span id="show-filters">Show</span><span id="hide-filters" class="d-none">Hide</span><span class="d-none d-md-inline"> filters</span>',
-    action: (e, dt, node, config) => {
-      reports_table.searchPanes.container().slideToggle();
-      $("#show-filters, #hide-filters").toggleClass("d-none");
-    },
-  };
-
   // Custom button for auto-refresh
   let autoRefresh = false;
   const sessionAutoRefresh = sessionStorage.getItem("reportsAutoRefresh");
@@ -436,118 +427,71 @@ $(function () {
   };
 
   // Initialize DataTable
-  const reports_table = new DataTable("#reports", {
-    columnDefs: [
-      {
-        orderable: false,
-        className: "dtr-control",
-        targets: 0,
-      },
-      { orderable: false, targets: -1 },
-      { visible: false, targets: [4, 5, 6, 7, 10] },
-      { type: "ip-address", targets: 2 },
-      {
-        render: function (data, type, row) {
-          if (type === "display" || type === "filter") {
-            const date = new Date(data);
-            if (!isNaN(date.getTime())) {
-              return date.toLocaleString();
+  const reports_table = initializeDataTable({
+    tableSelector: "#reports",
+    tableName: "reports",
+    columnVisibilityCondition: (column) => column > 2 && column < 12,
+    dataTableOptions: {
+      columnDefs: [
+        {
+          orderable: false,
+          className: "dtr-control",
+          targets: 0,
+        },
+        { orderable: false, targets: -1 },
+        { visible: false, targets: [4, 5, 6, 7, 10] },
+        { type: "ip-address", targets: 2 },
+        {
+          render: function (data, type, row) {
+            if (type === "display" || type === "filter") {
+              const date = new Date(data);
+              if (!isNaN(date.getTime())) {
+                return date.toLocaleString();
+              }
             }
-          }
-          return data;
+            return data;
+          },
+          targets: 1,
         },
-        targets: 1,
-      },
-      {
-        searchPanes: {
-          show: true,
-          combiner: "or",
-          options: countriesSearchPanesOptions,
+        {
+          searchPanes: {
+            show: true,
+            combiner: "or",
+            options: countriesSearchPanesOptions,
+          },
+          targets: 3,
         },
-        targets: 3,
+        {
+          searchPanes: { show: true },
+          targets: [2, 4, 5, 6, 8, 9, 11],
+        },
+      ],
+      order: [[1, "desc"]],
+      autoFill: false,
+      responsive: true,
+      layout: layout,
+      language: {
+        info: "Showing _START_ to _END_ of _TOTAL_ reports",
+        infoEmpty: "No reports available",
+        infoFiltered: "(filtered from _MAX_ total reports)",
+        lengthMenu: "Display _MENU_ reports",
+        zeroRecords: "No matching reports found",
       },
-      {
-        searchPanes: { show: true },
-        targets: [2, 4, 5, 6, 8, 9, 11],
+      initComplete: () => {
+        $("#reports_wrapper")
+          .find(".btn-secondary")
+          .removeClass("btn-secondary");
+        updateCountryTooltips();
       },
-    ],
-    order: [[1, "desc"]],
-    autoFill: false,
-    responsive: true,
-    layout: layout,
-    language: {
-      info: "Showing _START_ to _END_ of _TOTAL_ reports",
-      infoEmpty: "No reports available",
-      infoFiltered: "(filtered from _MAX_ total reports)",
-      lengthMenu: "Display _MENU_ reports",
-      zeroRecords: "No matching reports found",
-    },
-    initComplete: () => {
-      $("#reports_wrapper").find(".btn-secondary").removeClass("btn-secondary");
-      updateCountryTooltips();
     },
   });
-
-  $(".dt-type-numeric").removeClass("dt-type-numeric");
 
   if (sessionAutoRefresh === "true") {
     toggleAutoRefresh();
   }
 
-  // Initially hide search panes
-  reports_table.searchPanes.container().hide();
-
-  // Show the reports table and hide the loading indicator
-  $("#reports").removeClass("d-none");
-  $("#reports-waiting").addClass("visually-hidden");
-
-  const defaultColsVisibility = {
-    3: true,
-    4: false,
-    5: false,
-    6: false,
-    7: false,
-    8: true,
-    9: true,
-    10: false,
-    11: true,
-  };
-
-  var columnVisibility = localStorage.getItem("bw-reports-columns");
-  if (columnVisibility === null) {
-    columnVisibility = JSON.parse(JSON.stringify(defaultColsVisibility));
-  } else {
-    columnVisibility = JSON.parse(columnVisibility);
-    Object.entries(columnVisibility).forEach(([key, value]) => {
-      reports_table.column(key).visible(value);
-    });
-  }
-
-  reports_table.responsive.recalc();
-
   // Update tooltips after table draw
   reports_table.on("draw.dt", updateCountryTooltips);
-
-  reports_table.on(
-    "column-visibility.dt",
-    function (e, settings, column, state) {
-      if (column < 3) return;
-      columnVisibility[column] = state;
-      // Check if columVisibility is equal to defaultColsVisibility
-      const isDefault =
-        JSON.stringify(columnVisibility) ===
-        JSON.stringify(defaultColsVisibility);
-      // If it is, remove the key from localStorage
-      if (isDefault) {
-        localStorage.removeItem("bw-reports-columns");
-      } else {
-        localStorage.setItem(
-          "bw-reports-columns",
-          JSON.stringify(columnVisibility),
-        );
-      }
-    },
-  );
 
   const hashValue = location.hash;
   if (hashValue) {

@@ -423,6 +423,28 @@ $(document).ready(() => {
     updateNotificationsBadge();
   });
 
+  const saveTheme = debounce((rootUrl, theme) => {
+    const csrfToken = $("#csrf_token").val();
+
+    const data = new FormData();
+    data.append("theme", theme);
+    data.append("csrf_token", csrfToken);
+
+    fetch(rootUrl, {
+      method: "POST",
+      body: data,
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        // Handle success, redirect, etc.
+      })
+      .catch((error) => {
+        console.error("There was a problem with the fetch operation:", error);
+      });
+  }, 1000);
+
   $("#dark-mode-toggle").on("change", function () {
     // If endpoint is "setup", ignore the theme change
     if (window.location.pathname.includes("/setup")) return;
@@ -463,30 +485,14 @@ $(document).ready(() => {
     }
 
     $("#theme").val(darkMode ? "dark" : "light");
-
-    const rootUrl = $(this)
-      .data("root-url")
-      .replace(/\/profile$/, "/set_theme");
-    const csrfToken = $("#csrf_token").val();
     const theme = darkMode ? "dark" : "light";
     localStorage.setItem("theme", theme); // Save user preference
 
-    const data = new FormData();
-    data.append("theme", theme);
-    data.append("csrf_token", csrfToken);
-
-    fetch(rootUrl, {
-      method: "POST",
-      body: data,
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        // Handle success, redirect, etc.
-      })
-      .catch((error) => {
-        console.error("There was a problem with the fetch operation:", error);
-      });
+    saveTheme(
+      $(this)
+        .data("root-url")
+        .replace(/\/profile$/, "/set_theme"),
+      theme,
+    );
   });
 });

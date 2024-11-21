@@ -227,15 +227,6 @@ $(function () {
       })
       .get();
 
-  $.fn.dataTable.ext.buttons.toggle_filters = {
-    text: '<span class="tf-icons bx bx-filter bx-18px me-2"></span><span id="show-filters">Show</span><span id="hide-filters" class="d-none">Hide</span><span class="d-none d-md-inline"> filters</span>',
-    action: function (e, dt, node, config) {
-      services_table.searchPanes.container().slideToggle(); // Smoothly hide or show the container
-      $("#show-filters").toggleClass("d-none"); // Toggle the visibility of the 'Show' span
-      $("#hide-filters").toggleClass("d-none"); // Toggle the visibility of the 'Hide' span
-    },
-  };
-
   $.fn.dataTable.ext.buttons.create_service = {
     text: '<span class="tf-icons bx bx-plus"></span><span class="d-none d-md-inline">&nbsp;Create new service</span>',
     className: `btn btn-sm rounded me-4 btn-bw-green${
@@ -334,254 +325,157 @@ $(function () {
     },
   };
 
-  const services_table = new DataTable("#services", {
-    columnDefs: [
-      {
-        orderable: false,
-        className: "dtr-control",
-        targets: 0,
-      },
-      {
-        orderable: false,
-        render: DataTable.render.select(),
-        targets: 1,
-      },
-      { orderable: false, targets: -1 },
-      {
-        targets: [5, 6],
-        render: function (data, type, row) {
-          if (type === "display" || type === "filter") {
-            const date = new Date(data);
-            if (!isNaN(date.getTime())) {
-              return date.toLocaleString();
+  initializeDataTable({
+    tableSelector: "#services",
+    tableName: "services",
+    columnVisibilityCondition: (column) => column > 2 && column < 7,
+    dataTableOptions: {
+      columnDefs: [
+        {
+          orderable: false,
+          className: "dtr-control",
+          targets: 0,
+        },
+        {
+          orderable: false,
+          render: DataTable.render.select(),
+          targets: 1,
+        },
+        { orderable: false, targets: -1 },
+        {
+          targets: [5, 6],
+          render: function (data, type, row) {
+            if (type === "display" || type === "filter") {
+              const date = new Date(data);
+              if (!isNaN(date.getTime())) {
+                return date.toLocaleString();
+              }
             }
-          }
-          return data;
+            return data;
+          },
         },
-      },
-      {
-        searchPanes: {
-          show: true,
-          options: [
-            {
-              label: '<i class="bx bx-xs bx-globe"></i>&nbsp;Online',
-              value: (rowData) => rowData[3].includes("Online"),
-            },
-            {
-              label: '<i class="bx bx-xs bx-file-blank"></i>&nbsp;Draft',
-              value: (rowData) => rowData[3].includes("Draft"),
-            },
-          ],
-          combiner: "or",
-          orderable: false,
+        {
+          searchPanes: {
+            show: true,
+            options: [
+              {
+                label: '<i class="bx bx-xs bx-globe"></i>&nbsp;Online',
+                value: (rowData) => rowData[3].includes("Online"),
+              },
+              {
+                label: '<i class="bx bx-xs bx-file-blank"></i>&nbsp;Draft',
+                value: (rowData) => rowData[3].includes("Draft"),
+              },
+            ],
+            combiner: "or",
+            orderable: false,
+          },
+          targets: 3,
         },
-        targets: 3,
-      },
-      {
-        searchPanes: {
-          show: true,
-          combiner: "or",
-          orderable: false,
+        {
+          searchPanes: {
+            show: true,
+            combiner: "or",
+            orderable: false,
+          },
+          targets: 4,
         },
-        targets: 4,
-      },
-      {
-        searchPanes: {
-          show: true,
-          options: [
-            {
-              label: "Last 24 hours",
-              value: (rowData) => new Date() - new Date(rowData[5]) < 86400000,
-            },
-            {
-              label: "Last 7 days",
-              value: (rowData) => new Date() - new Date(rowData[5]) < 604800000,
-            },
-            {
-              label: "Last 30 days",
-              value: (rowData) =>
-                new Date() - new Date(rowData[5]) < 2592000000,
-            },
-          ],
-          combiner: "or",
-          orderable: false,
+        {
+          searchPanes: {
+            show: true,
+            options: [
+              {
+                label: "Last 24 hours",
+                value: (rowData) =>
+                  new Date() - new Date(rowData[5]) < 86400000,
+              },
+              {
+                label: "Last 7 days",
+                value: (rowData) =>
+                  new Date() - new Date(rowData[5]) < 604800000,
+              },
+              {
+                label: "Last 30 days",
+                value: (rowData) =>
+                  new Date() - new Date(rowData[5]) < 2592000000,
+              },
+            ],
+            combiner: "or",
+            orderable: false,
+          },
+          targets: 5,
         },
-        targets: 5,
-      },
-      {
-        searchPanes: {
-          show: true,
-          options: [
-            {
-              label: "Last 24 hours",
-              value: (rowData) => new Date() - new Date(rowData[6]) < 86400000,
-            },
-            {
-              label: "Last 7 days",
-              value: (rowData) => new Date() - new Date(rowData[6]) < 604800000,
-            },
-            {
-              label: "Last 30 days",
-              value: (rowData) =>
-                new Date() - new Date(rowData[6]) < 2592000000,
-            },
-          ],
-          combiner: "or",
-          orderable: false,
+        {
+          searchPanes: {
+            show: true,
+            options: [
+              {
+                label: "Last 24 hours",
+                value: (rowData) =>
+                  new Date() - new Date(rowData[6]) < 86400000,
+              },
+              {
+                label: "Last 7 days",
+                value: (rowData) =>
+                  new Date() - new Date(rowData[6]) < 604800000,
+              },
+              {
+                label: "Last 30 days",
+                value: (rowData) =>
+                  new Date() - new Date(rowData[6]) < 2592000000,
+              },
+            ],
+            combiner: "or",
+            orderable: false,
+          },
+          targets: 6,
         },
-        targets: 6,
-      },
-    ],
-    order: [[2, "asc"]],
-    autoFill: false,
-    responsive: true,
-    select: {
-      style: "multi+shift",
-      selector: "td:nth-child(2)",
-      headerCheckbox: true,
-    },
-    layout: layout,
-    language: {
-      info: "Showing _START_ to _END_ of _TOTAL_ services",
-      infoEmpty: "No services available",
-      infoFiltered: "(filtered from _MAX_ total services)",
-      lengthMenu: "Display _MENU_ services",
-      zeroRecords: "No matching services found",
+      ],
+      order: [[2, "asc"]],
+      autoFill: false,
+      responsive: true,
       select: {
-        rows: {
-          _: "Selected %d services",
-          0: "No services selected",
-          1: "Selected 1 service",
+        style: "multi+shift",
+        selector: "td:nth-child(2)",
+        headerCheckbox: true,
+      },
+      layout: layout,
+      language: {
+        info: "Showing _START_ to _END_ of _TOTAL_ services",
+        infoEmpty: "No services available",
+        infoFiltered: "(filtered from _MAX_ total services)",
+        lengthMenu: "Display _MENU_ services",
+        zeroRecords: "No matching services found",
+        select: {
+          rows: {
+            _: "Selected %d services",
+            0: "No services selected",
+            1: "Selected 1 service",
+          },
+        },
+        searchPanes: {
+          collapse: {
+            0: '<span class="tf-icons bx bx-search bx-18px me-2"></span>Filters',
+            _: '<span class="tf-icons bx bx-search bx-18px me-2"></span>Filters (%d)',
+          },
         },
       },
-      searchPanes: {
-        collapse: {
-          0: '<span class="tf-icons bx bx-search bx-18px me-2"></span>Filters',
-          _: '<span class="tf-icons bx bx-search bx-18px me-2"></span>Filters (%d)',
-        },
+      initComplete: function () {
+        const $wrapper = $("#services_wrapper");
+        $wrapper.find(".btn-secondary").removeClass("btn-secondary");
+        if (isReadOnly) {
+          $wrapper
+            .find(".dt-buttons")
+            .attr(
+              "data-bs-original-title",
+              "The database is in read-only mode; you cannot create new services.",
+            )
+            .attr("data-bs-placement", "right")
+            .tooltip();
+        }
       },
     },
-    initComplete: function () {
-      const $wrapper = $("#services_wrapper");
-      $wrapper.find(".btn-secondary").removeClass("btn-secondary");
-      if (isReadOnly) {
-        $wrapper
-          .find(".dt-buttons")
-          .attr(
-            "data-bs-original-title",
-            "The database is in read-only mode; you cannot create new services.",
-          )
-          .attr("data-bs-placement", "right")
-          .tooltip();
-      }
-    },
   });
-
-  services_table.searchPanes.container().hide();
-
-  $(".action-button")
-    .parent()
-    .attr(
-      "data-bs-original-title",
-      "Please select one or more rows to perform an action.",
-    )
-    .attr("data-bs-placement", "top")
-    .tooltip();
-
-  $("#services").removeClass("d-none");
-  $("#services-waiting").addClass("visually-hidden");
-
-  const defaultColsVisibility = {
-    3: true,
-    4: true,
-    5: true,
-    6: true,
-  };
-
-  var columnVisibility = localStorage.getItem("bw-services-columns");
-  if (columnVisibility === null) {
-    columnVisibility = JSON.parse(JSON.stringify(defaultColsVisibility));
-  } else {
-    columnVisibility = JSON.parse(columnVisibility);
-    Object.entries(columnVisibility).forEach(([key, value]) => {
-      services_table.column(key).visible(value);
-    });
-  }
-
-  services_table.responsive.recalc();
-
-  services_table.on("mouseenter", "td", function () {
-    if (services_table.cell(this).index() === undefined) return;
-    const rowIdx = services_table.cell(this).index().row;
-
-    services_table
-      .cells()
-      .nodes()
-      .each((el) => el.classList.remove("highlight"));
-
-    services_table
-      .cells()
-      .nodes()
-      .each(function (el) {
-        if (services_table.cell(el).index().row === rowIdx)
-          el.classList.add("highlight");
-      });
-  });
-
-  services_table.on("mouseleave", "td", function () {
-    services_table
-      .cells()
-      .nodes()
-      .each((el) => el.classList.remove("highlight"));
-  });
-
-  services_table.on("select", function (e, dt, type, indexes) {
-    // Enable the actions button
-    $(".action-button")
-      .removeClass("disabled")
-      .parent()
-      .attr("data-bs-toggle", null)
-      .attr("data-bs-original-title", null)
-      .attr("data-bs-placement", null)
-      .tooltip("dispose");
-  });
-
-  services_table.on("deselect", function (e, dt, type, indexes) {
-    // If no rows are selected, disable the actions button
-    if (services_table.rows({ selected: true }).count() === 0) {
-      $(".action-button")
-        .addClass("disabled")
-        .parent()
-        .attr("data-bs-toggle", "tooltip")
-        .attr(
-          "data-bs-original-title",
-          "Please select one or more rows to perform an action.",
-        )
-        .attr("data-bs-placement", "top")
-        .tooltip();
-    }
-  });
-
-  services_table.on(
-    "column-visibility.dt",
-    function (e, settings, column, state) {
-      if (column === 0 || column === 1 || column === 7) return;
-      columnVisibility[column] = state;
-      // Check if columVisibility is equal to defaultColsVisibility
-      const isDefault =
-        JSON.stringify(columnVisibility) ===
-        JSON.stringify(defaultColsVisibility);
-      // If it is, remove the key from localStorage
-      if (isDefault) {
-        localStorage.removeItem("bw-services-columns");
-      } else {
-        localStorage.setItem(
-          "bw-services-columns",
-          JSON.stringify(columnVisibility),
-        );
-      }
-    },
-  );
 
   $(document).on("click", ".delete-service", function () {
     if (isReadOnly) {

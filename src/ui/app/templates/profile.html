@@ -181,10 +181,7 @@
                                 <div class="row g-3">
                                     <div class="col-md-12 form-floating">
                                         <select class="form-select" id="theme" name="theme">
-                                            <option value="light"
-                                                    {% if theme == "light" %}selected{% endif %}>
-                                                Light
-                                            </option>
+                                            <option value="light" {% if theme == "light" %}selected{% endif %}>Light</option>
                                             <option value="dark" {% if theme == "dark" %}selected{% endif %}>Dark</option>
                                         </select>
                                         <label for="theme">Theme</label>

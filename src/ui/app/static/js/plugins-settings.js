@@ -414,14 +414,6 @@ $(document).ready(() => {
     return form;
   };
 
-  const debounce = (func, delay) => {
-    let debounceTimer;
-    return (...args) => {
-      clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(() => func.apply(this, args), delay);
-    };
-  };
-
   $("#select-plugin").on("click", () => $pluginSearch.focus());
 
   $pluginSearch.on(

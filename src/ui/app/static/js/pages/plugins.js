@@ -280,15 +280,6 @@ $(document).ready(function () {
     return plugins;
   };
 
-  $.fn.dataTable.ext.buttons.toggle_filters = {
-    text: '<span class="tf-icons bx bx-filter bx-18px me-2"></span><span id="show-filters">Show</span><span id="hide-filters" class="d-none">Hide</span><span class="d-none d-md-inline"> filters</span>',
-    action: function (e, dt, node, config) {
-      plugins_table.searchPanes.container().slideToggle(); // Smoothly hide or show the container
-      $("#show-filters").toggleClass("d-none"); // Toggle the visibility of the 'Show' span
-      $("#hide-filters").toggleClass("d-none"); // Toggle the visibility of the 'Hide' span
-    },
-  };
-
   $.fn.dataTable.ext.buttons.add_plugin = {
     text: '<span class="tf-icons bx bx-plus"></span><span class="d-none d-md-inline">&nbsp;Add plugin(s)</span>',
     className: `btn btn-sm rounded me-4 btn-bw-green${
@@ -330,244 +321,143 @@ $(document).ready(function () {
     },
   };
 
-  const plugins_table = new DataTable("#plugins", {
-    columnDefs: [
-      {
-        orderable: false,
-        className: "dtr-control",
-        targets: 0,
-      },
-      {
-        orderable: false,
-        render: DataTable.render.select(),
-        targets: 1,
-      },
-      {
-        orderable: false,
-        targets: -1,
-      },
-      {
-        visible: false,
-        targets: [2, 4],
-      },
-      {
-        searchPanes: {
-          show: true,
-          header: "Stream Support",
-          options: [
-            {
-              label: '<i class="bx bx-xs bx-x text-danger"></i>&nbsp;No',
-              value: function (rowData, rowIdx) {
-                return rowData[6].includes("bx-x");
-              },
-            },
-            {
-              label: '<i class="bx bx-xs bx-check text-success"></i>&nbsp;Yes',
-              value: function (rowData, rowIdx) {
-                return rowData[6].includes("bx-check");
-              },
-            },
-            {
-              label:
-                '<i class="bx bx-xs bx-minus text-warning"></i>&nbsp;Partial',
-              value: function (rowData, rowIdx) {
-                return rowData[6].includes("bx-minus");
-              },
-            },
-          ],
-          combiner: "or",
+  initializeDataTable({
+    tableSelector: "#plugins",
+    tableName: "plugins",
+    columnVisibilityCondition: (column) =>
+      column > 1 && column !== 3 && column < 9,
+    dataTableOptions: {
+      columnDefs: [
+        {
           orderable: false,
+          className: "dtr-control",
+          targets: 0,
         },
-        targets: 6,
-      },
-      {
-        searchPanes: {
-          show: true,
-          options: [
-            {
-              label: `<img src="${$("#pro_diamond_url")
-                .val()
-                .trim()}" alt="Pro plugin" width="16px" height="12.9125px" class="mb-1">&nbsp;PRO`,
-              value: function (rowData, rowIdx) {
-                return rowData[7].includes("PRO");
-              },
-            },
-            {
-              label: '<i class="bx bx-plug bx-xs"></i>&nbsp;External',
-              value: function (rowData, rowIdx) {
-                return rowData[7].includes("EXTERNAL");
-              },
-            },
-            {
-              label: '<i class="bx bx-cloud-upload bx-xs"></i>&nbsp;UI',
-              value: function (rowData, rowIdx) {
-                return rowData[7].includes("UI");
-              },
-            },
-            {
-              label: '<i class="bx bx-shield bx-xs"></i>&nbsp;Core',
-              value: function (rowData, rowIdx) {
-                return rowData[7].includes("CORE");
-              },
-            },
-          ],
-          combiner: "or",
+        {
           orderable: false,
+          render: DataTable.render.select(),
+          targets: 1,
         },
-        targets: 7,
-      },
-      {
-        searchPanes: {
-          show: true,
-          combiner: "or",
+        {
           orderable: false,
+          targets: -1,
         },
-        targets: 8,
-      },
-    ],
-    order: [[3, "asc"]],
-    autoFill: false,
-    responsive: true,
-    select: {
-      style: "multi+shift",
-      selector: "td:nth-child(2)",
-      headerCheckbox: true,
-    },
-    layout: layout,
-    language: {
-      info: "Showing _START_ to _END_ of _TOTAL_ plugins",
-      infoEmpty: "No plugins available",
-      infoFiltered: "(filtered from _MAX_ total plugins)",
-      lengthMenu: "Display _MENU_ plugins",
-      zeroRecords: "No matching plugins found",
+        {
+          visible: false,
+          targets: [2, 4],
+        },
+        {
+          searchPanes: {
+            show: true,
+            header: "Stream Support",
+            options: [
+              {
+                label: '<i class="bx bx-xs bx-x text-danger"></i>&nbsp;No',
+                value: function (rowData, rowIdx) {
+                  return rowData[6].includes("bx-x");
+                },
+              },
+              {
+                label:
+                  '<i class="bx bx-xs bx-check text-success"></i>&nbsp;Yes',
+                value: function (rowData, rowIdx) {
+                  return rowData[6].includes("bx-check");
+                },
+              },
+              {
+                label:
+                  '<i class="bx bx-xs bx-minus text-warning"></i>&nbsp;Partial',
+                value: function (rowData, rowIdx) {
+                  return rowData[6].includes("bx-minus");
+                },
+              },
+            ],
+            combiner: "or",
+            orderable: false,
+          },
+          targets: 6,
+        },
+        {
+          searchPanes: {
+            show: true,
+            options: [
+              {
+                label: `<img src="${$("#pro_diamond_url")
+                  .val()
+                  .trim()}" alt="Pro plugin" width="16px" height="12.9125px" class="mb-1">&nbsp;PRO`,
+                value: function (rowData, rowIdx) {
+                  return rowData[7].includes("PRO");
+                },
+              },
+              {
+                label: '<i class="bx bx-plug bx-xs"></i>&nbsp;External',
+                value: function (rowData, rowIdx) {
+                  return rowData[7].includes("EXTERNAL");
+                },
+              },
+              {
+                label: '<i class="bx bx-cloud-upload bx-xs"></i>&nbsp;UI',
+                value: function (rowData, rowIdx) {
+                  return rowData[7].includes("UI");
+                },
+              },
+              {
+                label: '<i class="bx bx-shield bx-xs"></i>&nbsp;Core',
+                value: function (rowData, rowIdx) {
+                  return rowData[7].includes("CORE");
+                },
+              },
+            ],
+            combiner: "or",
+            orderable: false,
+          },
+          targets: 7,
+        },
+        {
+          searchPanes: {
+            show: true,
+            combiner: "or",
+            orderable: false,
+          },
+          targets: 8,
+        },
+      ],
+      order: [[3, "asc"]],
+      autoFill: false,
+      responsive: true,
       select: {
-        rows: {
-          _: "Selected %d plugins",
-          0: "No plugins selected",
-          1: "Selected 1 plugin",
+        style: "multi+shift",
+        selector: "td:nth-child(2)",
+        headerCheckbox: true,
+      },
+      layout: layout,
+      language: {
+        info: "Showing _START_ to _END_ of _TOTAL_ plugins",
+        infoEmpty: "No plugins available",
+        infoFiltered: "(filtered from _MAX_ total plugins)",
+        lengthMenu: "Display _MENU_ plugins",
+        zeroRecords: "No matching plugins found",
+        select: {
+          rows: {
+            _: "Selected %d plugins",
+            0: "No plugins selected",
+            1: "Selected 1 plugin",
+          },
         },
       },
+      initComplete: function (settings, json) {
+        $("#plugins_wrapper .btn-secondary").removeClass("btn-secondary");
+        if (isReadOnly)
+          $("#plugins_wrapper .dt-buttons")
+            .attr(
+              "data-bs-original-title",
+              "The database is in readonly, therefore you cannot create add plugins.",
+            )
+            .attr("data-bs-placement", "right")
+            .tooltip();
+      },
     },
-    initComplete: function (settings, json) {
-      $("#plugins_wrapper .btn-secondary").removeClass("btn-secondary");
-      if (isReadOnly)
-        $("#plugins_wrapper .dt-buttons")
-          .attr(
-            "data-bs-original-title",
-            "The database is in readonly, therefore you cannot create add plugins.",
-          )
-          .attr("data-bs-placement", "right")
-          .tooltip();
-    },
   });
-
-  plugins_table.searchPanes.container().hide();
-
-  $(".action-button")
-    .parent()
-    .attr(
-      "data-bs-original-title",
-      "Please select one or more rows to perform an action.",
-    )
-    .attr("data-bs-placement", "top")
-    .tooltip();
-
-  $("#plugins").removeClass("d-none");
-  $("#plugins-waiting").addClass("visually-hidden");
-
-  const defaultColsVisibility = {
-    2: false,
-    4: false,
-    5: true,
-    6: true,
-    7: true,
-    8: true,
-  };
-
-  var columnVisibility = localStorage.getItem("bw-plugins-columns");
-  if (columnVisibility === null) {
-    columnVisibility = JSON.parse(JSON.stringify(defaultColsVisibility));
-  } else {
-    columnVisibility = JSON.parse(columnVisibility);
-    Object.entries(columnVisibility).forEach(([key, value]) => {
-      plugins_table.column(key).visible(value);
-    });
-  }
-
-  plugins_table.responsive.recalc();
-
-  plugins_table.on("mouseenter", "td", function () {
-    if (plugins_table.cell(this).index() === undefined) return;
-    const rowIdx = plugins_table.cell(this).index().row;
-
-    plugins_table
-      .cells()
-      .nodes()
-      .each((el) => el.classList.remove("highlight"));
-
-    plugins_table
-      .cells()
-      .nodes()
-      .each(function (el) {
-        if (plugins_table.cell(el).index().row === rowIdx)
-          el.classList.add("highlight");
-      });
-  });
-
-  plugins_table.on("mouseleave", "td", function () {
-    plugins_table
-      .cells()
-      .nodes()
-      .each((el) => el.classList.remove("highlight"));
-  });
-
-  plugins_table.on("select", function (e, dt, type, indexes) {
-    // Enable the actions button
-    $(".action-button")
-      .removeClass("disabled")
-      .parent()
-      .attr("data-bs-toggle", null)
-      .attr("data-bs-original-title", null)
-      .attr("data-bs-placement", null)
-      .tooltip("dispose");
-  });
-
-  plugins_table.on("deselect", function (e, dt, type, indexes) {
-    // If no rows are selected, disable the actions button
-    if (plugins_table.rows({ selected: true }).count() === 0) {
-      $(".action-button")
-        .addClass("disabled")
-        .parent()
-        .attr("data-bs-toggle", "tooltip")
-        .attr(
-          "data-bs-original-title",
-          "Please select one or more rows to perform an action.",
-        )
-        .attr("data-bs-placement", "top")
-        .tooltip();
-    }
-  });
-
-  plugins_table.on(
-    "column-visibility.dt",
-    function (e, settings, column, state) {
-      if (column === 0 || column === 1 || column === 9) return;
-      columnVisibility[column] = state;
-      // Check if columVisibility is equal to defaultColsVisibility
-      const isDefault =
-        JSON.stringify(columnVisibility) ===
-        JSON.stringify(defaultColsVisibility);
-      // If it is, remove the key from localStorage
-      if (isDefault) {
-        localStorage.removeItem("bw-plugins-columns");
-      } else {
-        localStorage.setItem(
-          "bw-plugins-columns",
-          JSON.stringify(columnVisibility),
-        );
-      }
-    },
-  );
 
   $(document).on("click", ".delete-plugin", function () {
     if (isReadOnly) {

@@ -9,6 +9,10 @@
                id="configs_service_selection"
                value="{{ config_service }}" />
         <input type="hidden" id="configs_type_selection" value="{{ config_type }}" />
+        <textarea type="hidden"
+                  id="columns_preferences_defaults"
+                  class="visually-hidden">{{ columns_preferences_defaults['configs']|tojson }}</textarea>
+        <textarea type="hidden" id="columns_preferences" class="visually-hidden">{{ columns_preferences|tojson }}</textarea>
         <input type="hidden"
                id="csrf_token"
                name="csrf_token"
