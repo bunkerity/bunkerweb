@@ -501,32 +501,67 @@ $(function () {
   $("#reports").removeClass("d-none");
   $("#reports-waiting").addClass("visually-hidden");
 
-  const defaultColsVisibility = {
-    3: true,
-    4: false,
-    5: false,
-    6: false,
-    7: false,
-    8: true,
-    9: true,
-    10: false,
-    11: true,
-  };
+  const defaultColsVisibility = JSON.parse(
+    $("#columns_preferences_defaults").val().trim(),
+  );
 
   var columnVisibility = localStorage.getItem("bw-reports-columns");
   if (columnVisibility === null) {
-    columnVisibility = JSON.parse(JSON.stringify(defaultColsVisibility));
+    columnVisibility = JSON.parse($("#columns_preferences").val().trim());
   } else {
     columnVisibility = JSON.parse(columnVisibility);
-    Object.entries(columnVisibility).forEach(([key, value]) => {
-      reports_table.column(key).visible(value);
-    });
   }
+
+  Object.entries(columnVisibility).forEach(([key, value]) => {
+    reports_table.column(key).visible(value);
+  });
 
   reports_table.responsive.recalc();
 
   // Update tooltips after table draw
   reports_table.on("draw.dt", updateCountryTooltips);
+
+  const debounce = (func, delay) => {
+    let timer = null;
+
+    return (...args) => {
+      // Clear the timer if the function is called again during the delay
+      if (timer) clearTimeout(timer);
+
+      // Start a new timer to invoke the function after the delay
+      timer = setTimeout(() => {
+        func(...args);
+      }, delay);
+    };
+  };
+
+  const saveColumnsPreferences = debounce(() => {
+    const rootUrl = $("#home-path")
+      .val()
+      .trim()
+      .replace(/\/home$/, "/set_columns_preferences");
+    const csrfToken = $("#csrf_token").val();
+
+    const data = new FormData();
+    data.append("csrf_token", csrfToken);
+    data.append("table_name", "reports");
+    data.append("columns_preferences", JSON.stringify(columnVisibility));
+
+    fetch(rootUrl, {
+      method: "POST",
+      body: data,
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        console.log("Preferences saved successfully!");
+        // Handle success, redirect, etc.
+      })
+      .catch((error) => {
+        console.error("There was a problem with the fetch operation:", error);
+      });
+  }, 1000);
 
   reports_table.on(
     "column-visibility.dt",
@@ -546,6 +581,8 @@ $(function () {
           JSON.stringify(columnVisibility),
         );
       }
+
+      saveColumnsPreferences();
     },
   );
 

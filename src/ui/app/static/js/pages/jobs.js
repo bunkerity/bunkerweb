@@ -376,23 +376,20 @@ $(document).ready(function () {
   $("#jobs").removeClass("d-none");
   $("#jobs-waiting").addClass("visually-hidden");
 
-  const defaultColsVisibility = {
-    3: true,
-    4: true,
-    5: true,
-    6: true,
-    7: true,
-  };
+  const defaultColsVisibility = JSON.parse(
+    $("#columns_preferences_defaults").val().trim(),
+  );
 
-  var columnVisibility = localStorage.getItem("bw-jobs-columns");
+  var columnVisibility = localStorage.getItem("bw-instances-columns");
   if (columnVisibility === null) {
-    columnVisibility = JSON.parse(JSON.stringify(defaultColsVisibility));
+    columnVisibility = JSON.parse($("#columns_preferences").val().trim());
   } else {
     columnVisibility = JSON.parse(columnVisibility);
-    Object.entries(columnVisibility).forEach(([key, value]) => {
-      jobs_table.column(key).visible(value);
-    });
   }
+
+  Object.entries(columnVisibility).forEach(([key, value]) => {
+    instances_table.column(key).visible(value);
+  });
 
   jobs_table.responsive.recalc();
 
@@ -448,6 +445,48 @@ $(document).ready(function () {
     }
   });
 
+  const debounce = (func, delay) => {
+    let timer = null;
+
+    return (...args) => {
+      // Clear the timer if the function is called again during the delay
+      if (timer) clearTimeout(timer);
+
+      // Start a new timer to invoke the function after the delay
+      timer = setTimeout(() => {
+        func(...args);
+      }, delay);
+    };
+  };
+
+  const saveColumnsPreferences = debounce(() => {
+    const rootUrl = $("#home-path")
+      .val()
+      .trim()
+      .replace(/\/home$/, "/set_columns_preferences");
+    const csrfToken = $("#csrf_token").val();
+
+    const data = new FormData();
+    data.append("csrf_token", csrfToken);
+    data.append("table_name", "jobs");
+    data.append("columns_preferences", JSON.stringify(columnVisibility));
+
+    fetch(rootUrl, {
+      method: "POST",
+      body: data,
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        console.log("Preferences saved successfully!");
+        // Handle success, redirect, etc.
+      })
+      .catch((error) => {
+        console.error("There was a problem with the fetch operation:", error);
+      });
+  }, 1000);
+
   jobs_table.on("column-visibility.dt", function (e, settings, column, state) {
     if (column < 3 || column === 8) return;
     columnVisibility[column] = state;
@@ -461,6 +500,8 @@ $(document).ready(function () {
     } else {
       localStorage.setItem("bw-jobs-columns", JSON.stringify(columnVisibility));
     }
+
+    saveColumnsPreferences();
   });
 
   $(document).on("click", ".show-history", function () {

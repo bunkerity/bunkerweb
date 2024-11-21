@@ -1,4 +1,3 @@
-{% set current_endpoint = request.path.split("/")[-1] %}
 {% set theme = theme or "light" %}
 {% set pro_diamond_url = url_for('static', filename='img/diamond.svg') %}
 {% set avatar_url = url_for('static', filename='img/avatar_profil_BW.png' if theme == 'light' else 'img/avatar_profil_BW-white.png') %}
@@ -125,12 +124,21 @@
                 nonce="{{ script_nonce }}"></script>
     </head>
     <body>
+        <input type="hidden" id="home-path" value="{{ url_for('home') }}" />
         <input type="hidden" id="is-read-only" value="{{ is_readonly }}" />
         <input type="hidden" id="theme" value="{{ theme }}" />
-        <input type="hidden" id="bw-logo" value="{{ url_for('static', filename='img/logo-menu.png') }}" />
-        <input type="hidden" id="bw-logo-white" value="{{ url_for('static', filename='img/logo-menu-white.png') }}" />
-        <input type="hidden" id="avatar-url" value="{{ url_for('static', filename='img/avatar_profil_BW.png') }}" />
-        <input type="hidden" id="avatar-url-white" value="{{ url_for('static', filename='img/avatar_profil_BW-white.png') }}" />
+        <input type="hidden"
+               id="bw-logo"
+               value="{{ url_for('static', filename='img/logo-menu.png') }}" />
+        <input type="hidden"
+               id="bw-logo-white"
+               value="{{ url_for('static', filename='img/logo-menu-white.png') }}" />
+        <input type="hidden"
+               id="avatar-url"
+               value="{{ url_for('static', filename='img/avatar_profil_BW.png') }}" />
+        <input type="hidden"
+               id="avatar-url-white"
+               value="{{ url_for('static', filename='img/avatar_profil_BW-white.png') }}" />
         <!-- prettier-ignore -->
         {% if current_endpoint != "loading" %}
             {% include "flash.html" %}

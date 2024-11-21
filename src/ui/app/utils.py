@@ -23,6 +23,63 @@ LOGGER = setup_logger("UI", getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO
 USER_PASSWORD_RX = re_compile(r"^(?=.*?\p{Lowercase_Letter})(?=.*?\p{Uppercase_Letter})(?=.*?\d)(?=.*?[ -~]).{8,}$")
 PLUGIN_NAME_RX = re_compile(r"^[\w.-]{4,64}$")
 
+COLUMNS_PREFERENCES_DEFAULTS = {
+    "bans": {
+        "3": True,
+        "4": True,
+        "5": True,
+        "6": True,
+        "7": True,
+    },
+    "configs": {
+        "3": True,
+        "4": True,
+        "5": True,
+        "6": True,
+        "7": False,
+    },
+    "instances": {
+        "3": False,
+        "4": False,
+        "5": True,
+        "6": True,
+        "7": True,
+        "8": True,
+    },
+    "jobs": {
+        "3": True,
+        "4": True,
+        "5": True,
+        "6": True,
+        "7": True,
+    },
+    "plugins": {
+        "2": False,
+        "4": False,
+        "5": True,
+        "6": True,
+        "7": True,
+        "8": True,
+    },
+    "reports": {
+        "3": True,
+        "4": False,
+        "5": False,
+        "6": False,
+        "7": False,
+        "8": True,
+        "9": True,
+        "10": False,
+        "11": True,
+    },
+    "services": {
+        "3": True,
+        "4": True,
+        "5": True,
+        "6": True,
+    },
+}
+
 
 def stop_gunicorn():
     p = Popen(["pgrep", "-f", "gunicorn"], stdout=PIPE)

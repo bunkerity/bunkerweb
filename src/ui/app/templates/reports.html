@@ -5,6 +5,14 @@
         {% set base_flags_url = url_for('static', filename='img/flags') %}
         <input type="hidden" id="reports_number" value="{{ reports|length }}" />
         <input type="hidden" id="base_flags_url" value="{{ base_flags_url }}" />
+        <textarea type="hidden"
+                  id="columns_preferences_defaults"
+                  class="visually-hidden">{{ columns_preferences_defaults['reports']|tojson }}</textarea>
+        <textarea type="hidden" id="columns_preferences" class="visually-hidden">{{ columns_preferences|tojson }}</textarea>
+        <input type="hidden"
+               id="csrf_token"
+               name="csrf_token"
+               value="{{ csrf_token() }}" />
         <p id="reports-waiting"
            class="text-center relative w-full p-2 text-primary rounded-lg fw-bold">Loading reports...</p>
         <table id="reports"

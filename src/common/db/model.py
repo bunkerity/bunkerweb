@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
-from sqlalchemy import TEXT, Boolean, Column, DateTime, Enum, ForeignKey, Identity, Integer, LargeBinary, String, UnicodeText
+from json import dumps, loads
+from typing import Any, Optional
+from sqlalchemy import TEXT, Boolean, Column, DateTime, Enum, ForeignKey, Identity, Integer, LargeBinary, String, Text, TypeDecorator, UnicodeText
 from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy.schema import UniqueConstraint
 
@@ -310,6 +312,36 @@ class Metadata(Base):
 ## UI Models
 
 THEMES_ENUM = Enum("light", "dark", name="themes_enum")
+TABLES_ENUM = Enum("bans", "configs", "instances", "jobs", "plugins", "reports", "services", name="tables_enum")
+
+
+class JSONText(TypeDecorator):
+    """
+    Custom JSON type to serialize/deserialize dictionaries as strings.
+    Compatible with all databases (MariaDB, MySQL, PostgreSQL, SQLite).
+    Ensures JSON strings are sorted by keys for consistent storage.
+    """
+
+    impl = Text  # Stores JSON as a TEXT field in the database
+
+    def process_bind_param(self, value: Optional[dict], dialect: Any) -> Optional[str]:
+        """
+        Convert a dictionary to a JSON string before saving to the database.
+        Sorts dictionary keys for consistent serialization.
+        """
+        if value is None:
+            return None
+        # Serialize dictionary to a sorted JSON string
+        return dumps(dict(sorted(value.items())))
+
+    def process_result_value(self, value: Optional[str], dialect: Any) -> Optional[dict]:
+        """
+        Convert a JSON string back to a dictionary after retrieving from the database.
+        """
+        if value is None:
+            return None
+        # Deserialize JSON string to dictionary
+        return loads(value)
 
 
 class Users(Base):
@@ -331,6 +363,7 @@ class Users(Base):
     roles = relationship("RolesUsers", back_populates="user", cascade="all")
     recovery_codes = relationship("UserRecoveryCodes", back_populates="user", cascade="all")
     sessions = relationship("UserSessions", back_populates="user", cascade="all")
+    columns_preferences = relationship("UserColumnsPreferences", back_populates="user", cascade="all")
     list_roles: list[str] = []
     list_permissions: list[str] = []
     list_recovery_codes: list[str] = []
@@ -396,3 +429,15 @@ class UserSessions(Base):
     last_activity = Column(DateTime(timezone=True), nullable=False)
 
     user = relationship("Users", back_populates="sessions")
+
+
+class UserColumnsPreferences(Base):
+    __tablename__ = "bw_ui_user_columns_preferences"
+    __table_args__ = (UniqueConstraint("user_name", "table_name"),)
+
+    id = Column(Integer, Identity(start=1, increment=1), primary_key=True)
+    user_name = Column(String(256), ForeignKey("bw_ui_users.username", onupdate="cascade", ondelete="cascade"), nullable=False)
+    table_name = Column(TABLES_ENUM, nullable=False)
+    columns = Column(JSONText, nullable=False)
+
+    user = relationship("Users", back_populates="columns_preferences")

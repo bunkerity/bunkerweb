@@ -137,10 +137,16 @@ $(document).ready(function () {
   };
 
   const debounce = (func, delay) => {
-    let debounceTimer;
+    let timer = null;
+
     return (...args) => {
-      clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(() => func.apply(this, args), delay);
+      // Clear the timer if the function is called again during the delay
+      if (timer) clearTimeout(timer);
+
+      // Start a new timer to invoke the function after the delay
+      timer = setTimeout(() => {
+        func(...args);
+      }, delay);
     };
   };
 
@@ -491,23 +497,20 @@ $(document).ready(function () {
   $("#bans").removeClass("d-none");
   $("#bans-waiting").addClass("visually-hidden");
 
-  const defaultColsVisibility = {
-    3: true,
-    4: true,
-    5: true,
-    6: true,
-    7: true,
-  };
+  const defaultColsVisibility = JSON.parse(
+    $("#columns_preferences_defaults").val().trim(),
+  );
 
   var columnVisibility = localStorage.getItem("bw-bans-columns");
   if (columnVisibility === null) {
-    columnVisibility = JSON.parse(JSON.stringify(defaultColsVisibility));
+    columnVisibility = JSON.parse($("#columns_preferences").val().trim());
   } else {
     columnVisibility = JSON.parse(columnVisibility);
-    Object.entries(columnVisibility).forEach(([key, value]) => {
-      bans_table.column(key).visible(value);
-    });
   }
+
+  Object.entries(columnVisibility).forEach(([key, value]) => {
+    bans_table.column(key).visible(value);
+  });
 
   bans_table.responsive.recalc();
 
@@ -563,6 +566,34 @@ $(document).ready(function () {
     }
   });
 
+  const saveColumnsPreferences = debounce(() => {
+    const rootUrl = $("#home-path")
+      .val()
+      .trim()
+      .replace(/\/home$/, "/set_columns_preferences");
+    const csrfToken = $("#csrf_token").val();
+
+    const data = new FormData();
+    data.append("csrf_token", csrfToken);
+    data.append("table_name", "bans");
+    data.append("columns_preferences", JSON.stringify(columnVisibility));
+
+    fetch(rootUrl, {
+      method: "POST",
+      body: data,
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        console.log("Preferences saved successfully!");
+        // Handle success, redirect, etc.
+      })
+      .catch((error) => {
+        console.error("There was a problem with the fetch operation:", error);
+      });
+  }, 1000);
+
   bans_table.on("column-visibility.dt", function (e, settings, column, state) {
     if (column < 3 || column === 8) return;
     columnVisibility[column] = state;
@@ -576,6 +607,8 @@ $(document).ready(function () {
     } else {
       localStorage.setItem("bw-bans-columns", JSON.stringify(columnVisibility));
     }
+
+    saveColumnsPreferences();
   });
 
   $(document).on("click", ".unban-ip", function () {

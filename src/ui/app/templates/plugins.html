@@ -4,6 +4,10 @@
     <div class="card table-responsive text-nowrap p-4 min-vh-70">
         <input type="hidden" id="plugins_number" value="{{ plugins|length }}" />
         <input type="hidden" id="pro_diamond_url" value="{{ pro_diamond_url }}" />
+        <textarea type="hidden"
+                  id="columns_preferences_defaults"
+                  class="visually-hidden">{{ columns_preferences_defaults['plugins']|tojson }}</textarea>
+        <textarea type="hidden" id="columns_preferences" class="visually-hidden">{{ columns_preferences|tojson }}</textarea>
         <input type="hidden"
                id="csrf_token"
                name="csrf_token"

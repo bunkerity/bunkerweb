@@ -3,13 +3,18 @@
     <!-- Content -->
     <div class="card table-responsive text-nowrap p-4 pb-8 min-vh-70">
         <input type="hidden" id="services_number" value="{{ services|length }}" />
+        <textarea type="hidden"
+                  id="columns_preferences_defaults"
+                  class="visually-hidden">{{ columns_preferences_defaults['services']|tojson }}</textarea>
+        <textarea type="hidden" id="columns_preferences" class="visually-hidden">{{ columns_preferences|tojson }}</textarea>
         <input type="hidden"
                id="csrf_token"
                name="csrf_token"
                value="{{ csrf_token() }}" />
         <p id="services-waiting"
            class="text-center relative w-full p-2 text-primary rounded-lg fw-bold">Loading services...</p>
-        <table id="services" class="table responsive nowrap position-relative w-100 d-none">
+        <table id="services"
+               class="table responsive nowrap position-relative w-100 d-none">
             <thead>
                 <tr>
                     <th data-bs-toggle="tooltip"
