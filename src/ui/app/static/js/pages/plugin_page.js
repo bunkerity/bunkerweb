@@ -70,12 +70,17 @@ $(document).ready(function () {
       });
     }
 
-    new DataTable(this, {
-      columnDefs: columnDefs,
-      autoFill: false,
-      responsive: true,
-      layout: layout,
-      order: [[parseInt(tableOrder.column), tableOrder.dir]],
+    initializeDataTable({
+      tableSelector: this,
+      tableName: this.id,
+      columnVisibilityCondition: (column) => false, // Ignore all columns
+      dataTableOptions: {
+        columnDefs: columnDefs,
+        autoFill: false,
+        responsive: true,
+        layout: layout,
+        order: [[parseInt(tableOrder.column), tableOrder.dir]],
+      },
     });
 
     $(this).removeClass("d-none");

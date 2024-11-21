@@ -263,14 +263,6 @@ $(document).ready(function () {
     },
   ];
 
-  $(document).on("hidden.bs.toast", ".toast", function (event) {
-    if (event.target.id.startsWith("feedback-toast")) {
-      setTimeout(() => {
-        $(this).remove();
-      }, 100);
-    }
-  });
-
   $("#modal-delete-instances").on("hidden.bs.modal", function () {
     $("#selected-instances").empty();
     $("#selected-instances-input").val("");
@@ -300,15 +292,6 @@ $(document).ready(function () {
       $("#modal-create-instance").on("shown.bs.modal", function () {
         $(this).find("#hostname").focus();
       });
-    },
-  };
-
-  $.fn.dataTable.ext.buttons.toggle_filters = {
-    text: '<span class="tf-icons bx bx-filter bx-18px me-2"></span><span id="show-filters">Show</span><span id="hide-filters" class="d-none">Hide</span><span class="d-none d-md-inline"> filters</span>',
-    action: function (e, dt, node, config) {
-      instances_table.searchPanes.container().slideToggle(); // Smoothly hide or show the container
-      $("#show-filters").toggleClass("d-none"); // Toggle the visibility of the 'Show' span
-      $("#hide-filters").toggleClass("d-none"); // Toggle the visibility of the 'Hide' span
     },
   };
 
@@ -382,357 +365,214 @@ $(document).ready(function () {
     },
   };
 
-  const instances_table = new DataTable("#instances", {
-    columnDefs: [
-      {
-        orderable: false,
-        className: "dtr-control",
-        targets: 0,
-      },
-      {
-        orderable: false,
-        render: DataTable.render.select(),
-        targets: 1,
-      },
-      {
-        orderable: false,
-        targets: -1,
-      },
-      {
-        visible: false,
-        targets: [3, 4],
-      },
-      {
-        targets: [7, 8],
-        render: function (data, type, row) {
-          if (type === "display" || type === "filter") {
-            const date = new Date(data);
-            if (!isNaN(date.getTime())) {
-              return date.toLocaleString();
+  initializeDataTable({
+    tableSelector: "#instances",
+    tableName: "instances",
+    columnVisibilityCondition: (column) => column > 2 && column < 9,
+    dataTableOptions: {
+      columnDefs: [
+        {
+          orderable: false,
+          className: "dtr-control",
+          targets: 0,
+        },
+        {
+          orderable: false,
+          render: DataTable.render.select(),
+          targets: 1,
+        },
+        {
+          orderable: false,
+          targets: -1,
+        },
+        {
+          visible: false,
+          targets: [3, 4],
+        },
+        {
+          targets: [7, 8],
+          render: function (data, type, row) {
+            if (type === "display" || type === "filter") {
+              const date = new Date(data);
+              if (!isNaN(date.getTime())) {
+                return date.toLocaleString();
+              }
             }
-          }
-          return data;
+            return data;
+          },
         },
-      },
-      {
-        searchPanes: {
-          show: true,
-          combiner: "or",
-          orderable: false,
+        {
+          searchPanes: {
+            show: true,
+            combiner: "or",
+            orderable: false,
+          },
+          targets: [4],
         },
-        targets: [4],
-      },
-      {
-        searchPanes: {
-          show: true,
-          options: [
-            {
-              label:
-                '<i class="bx bx-xs bx-up-arrow-alt text-success"></i>&nbsp;Up',
-              value: function (rowData, rowIdx) {
-                return rowData[5].includes("Up");
+        {
+          searchPanes: {
+            show: true,
+            options: [
+              {
+                label:
+                  '<i class="bx bx-xs bx-up-arrow-alt text-success"></i>&nbsp;Up',
+                value: function (rowData, rowIdx) {
+                  return rowData[5].includes("Up");
+                },
               },
-            },
-            {
-              label:
-                '<i class="bx bx-xs bx-down-arrow-alt text-danger"></i>&nbsp;Down',
-              value: function (rowData, rowIdx) {
-                return rowData[5].includes("Down");
+              {
+                label:
+                  '<i class="bx bx-xs bx-down-arrow-alt text-danger"></i>&nbsp;Down',
+                value: function (rowData, rowIdx) {
+                  return rowData[5].includes("Down");
+                },
               },
-            },
-            {
-              label:
-                '<i class="bx bx-xs bxs-hourglass text-warning"></i>&nbsp;Loading',
-              value: function (rowData, rowIdx) {
-                return rowData[5].includes("Loading");
+              {
+                label:
+                  '<i class="bx bx-xs bxs-hourglass text-warning"></i>&nbsp;Loading',
+                value: function (rowData, rowIdx) {
+                  return rowData[5].includes("Loading");
+                },
               },
-            },
-          ],
-          combiner: "or",
-          orderable: false,
+            ],
+            combiner: "or",
+            orderable: false,
+          },
+          targets: 5,
         },
-        targets: 5,
-      },
-      {
-        searchPanes: {
-          show: true,
-          options: [
-            {
-              label: '<i class="bx bx-xs bx-microchip"></i>&nbsp;Static',
-              value: function (rowData, rowIdx) {
-                return rowData[6].includes("Static");
+        {
+          searchPanes: {
+            show: true,
+            options: [
+              {
+                label: '<i class="bx bx-xs bx-microchip"></i>&nbsp;Static',
+                value: function (rowData, rowIdx) {
+                  return rowData[6].includes("Static");
+                },
               },
-            },
-            {
-              label: '<i class="bx bx-xs bxl-docker"></i>&nbsp;Container',
-              value: function (rowData, rowIdx) {
-                return rowData[6].includes("Container");
+              {
+                label: '<i class="bx bx-xs bxl-docker"></i>&nbsp;Container',
+                value: function (rowData, rowIdx) {
+                  return rowData[6].includes("Container");
+                },
               },
-            },
-            {
-              label: '<i class="bx bx-xs bxl-kubernetes"></i>&nbsp;Pod',
-              value: function (rowData, rowIdx) {
-                return rowData[6].includes("Pod");
+              {
+                label: '<i class="bx bx-xs bxl-kubernetes"></i>&nbsp;Pod',
+                value: function (rowData, rowIdx) {
+                  return rowData[6].includes("Pod");
+                },
               },
-            },
-          ],
-          combiner: "or",
-          orderable: false,
+            ],
+            combiner: "or",
+            orderable: false,
+          },
+          targets: 6,
         },
-        targets: 6,
-      },
-      {
-        searchPanes: {
-          show: true,
-          options: [
-            {
-              label: "Last 24 hours",
-              value: function (rowData, rowIdx) {
-                const date = new Date(rowData[7]);
-                const now = new Date();
-                return now - date < 24 * 60 * 60 * 1000;
+        {
+          searchPanes: {
+            show: true,
+            options: [
+              {
+                label: "Last 24 hours",
+                value: function (rowData, rowIdx) {
+                  const date = new Date(rowData[7]);
+                  const now = new Date();
+                  return now - date < 24 * 60 * 60 * 1000;
+                },
               },
-            },
-            {
-              label: "Last 7 days",
-              value: function (rowData, rowIdx) {
-                const date = new Date(rowData[7]);
-                const now = new Date();
-                return now - date < 7 * 24 * 60 * 60 * 1000;
+              {
+                label: "Last 7 days",
+                value: function (rowData, rowIdx) {
+                  const date = new Date(rowData[7]);
+                  const now = new Date();
+                  return now - date < 7 * 24 * 60 * 60 * 1000;
+                },
               },
-            },
-            {
-              label: "Last 30 days",
-              value: function (rowData, rowIdx) {
-                const date = new Date(rowData[7]);
-                const now = new Date();
-                return now - date < 30 * 24 * 60 * 60 * 1000;
+              {
+                label: "Last 30 days",
+                value: function (rowData, rowIdx) {
+                  const date = new Date(rowData[7]);
+                  const now = new Date();
+                  return now - date < 30 * 24 * 60 * 60 * 1000;
+                },
               },
-            },
-          ],
-          combiner: "or",
-          orderable: false,
+            ],
+            combiner: "or",
+            orderable: false,
+          },
+          targets: 7,
         },
-        targets: 7,
-      },
-      {
-        searchPanes: {
-          show: true,
-          options: [
-            {
-              label: "Last 24 hours",
-              value: function (rowData, rowIdx) {
-                const date = new Date(rowData[8]);
-                const now = new Date();
-                return now - date < 24 * 60 * 60 * 1000;
+        {
+          searchPanes: {
+            show: true,
+            options: [
+              {
+                label: "Last 24 hours",
+                value: function (rowData, rowIdx) {
+                  const date = new Date(rowData[8]);
+                  const now = new Date();
+                  return now - date < 24 * 60 * 60 * 1000;
+                },
               },
-            },
-            {
-              label: "Last 7 days",
-              value: function (rowData, rowIdx) {
-                const date = new Date(rowData[8]);
-                const now = new Date();
-                return now - date < 7 * 24 * 60 * 60 * 1000;
+              {
+                label: "Last 7 days",
+                value: function (rowData, rowIdx) {
+                  const date = new Date(rowData[8]);
+                  const now = new Date();
+                  return now - date < 7 * 24 * 60 * 60 * 1000;
+                },
               },
-            },
-            {
-              label: "Last 30 days",
-              value: function (rowData, rowIdx) {
-                const date = new Date(rowData[8]);
-                const now = new Date();
-                return now - date < 30 * 24 * 60 * 60 * 1000;
+              {
+                label: "Last 30 days",
+                value: function (rowData, rowIdx) {
+                  const date = new Date(rowData[8]);
+                  const now = new Date();
+                  return now - date < 30 * 24 * 60 * 60 * 1000;
+                },
               },
-            },
-          ],
-          combiner: "or",
-          orderable: false,
+            ],
+            combiner: "or",
+            orderable: false,
+          },
+          targets: 8,
         },
-        targets: 8,
-      },
-    ],
-    order: [[8, "desc"]],
-    autoFill: false,
-    responsive: true,
-    select: {
-      style: "multi+shift",
-      selector: "td:nth-child(2)",
-      headerCheckbox: true,
-    },
-    layout: layout,
-    language: {
-      info: "Showing _START_ to _END_ of _TOTAL_ instances",
-      infoEmpty: "No instances available",
-      infoFiltered: "(filtered from _MAX_ total instances)",
-      lengthMenu: "Display _MENU_ instances",
-      zeroRecords: "No matching instances found",
+      ],
+      order: [[8, "desc"]],
+      autoFill: false,
+      responsive: true,
       select: {
-        rows: {
-          _: "Selected %d instances",
-          0: "No instances selected",
-          1: "Selected 1 instance",
+        style: "multi+shift",
+        selector: "td:nth-child(2)",
+        headerCheckbox: true,
+      },
+      layout: layout,
+      language: {
+        info: "Showing _START_ to _END_ of _TOTAL_ instances",
+        infoEmpty: "No instances available",
+        infoFiltered: "(filtered from _MAX_ total instances)",
+        lengthMenu: "Display _MENU_ instances",
+        zeroRecords: "No matching instances found",
+        select: {
+          rows: {
+            _: "Selected %d instances",
+            0: "No instances selected",
+            1: "Selected 1 instance",
+          },
         },
       },
+      initComplete: function (settings, json) {
+        $("#instances_wrapper .btn-secondary").removeClass("btn-secondary");
+        if (isReadOnly)
+          $("#instances_wrapper .dt-buttons")
+            .attr(
+              "data-bs-original-title",
+              "The database is in readonly, therefore you cannot create new instances.",
+            )
+            .attr("data-bs-placement", "right")
+            .tooltip();
+      },
     },
-    initComplete: function (settings, json) {
-      $("#instances_wrapper .btn-secondary").removeClass("btn-secondary");
-      if (isReadOnly)
-        $("#instances_wrapper .dt-buttons")
-          .attr(
-            "data-bs-original-title",
-            "The database is in readonly, therefore you cannot create new instances.",
-          )
-          .attr("data-bs-placement", "right")
-          .tooltip();
-    },
   });
-
-  instances_table.searchPanes.container().hide();
-
-  $(".action-button")
-    .parent()
-    .attr(
-      "data-bs-original-title",
-      "Please select one or more rows to perform an action.",
-    )
-    .attr("data-bs-placement", "top")
-    .tooltip();
-
-  $("#instances").removeClass("d-none");
-  $("#instances-waiting").addClass("visually-hidden");
-
-  const defaultColsVisibility = JSON.parse(
-    $("#columns_preferences_defaults").val().trim(),
-  );
-
-  var columnVisibility = localStorage.getItem("bw-instances-columns");
-  if (columnVisibility === null) {
-    columnVisibility = JSON.parse($("#columns_preferences").val().trim());
-  } else {
-    columnVisibility = JSON.parse(columnVisibility);
-  }
-
-  Object.entries(columnVisibility).forEach(([key, value]) => {
-    instances_table.column(key).visible(value);
-  });
-
-  instances_table.responsive.recalc();
-
-  instances_table.on("mouseenter", "td", function () {
-    if (instances_table.cell(this).index() === undefined) return;
-    const rowIdx = instances_table.cell(this).index().row;
-
-    instances_table
-      .cells()
-      .nodes()
-      .each((el) => el.classList.remove("highlight"));
-
-    instances_table
-      .cells()
-      .nodes()
-      .each(function (el) {
-        if (instances_table.cell(el).index().row === rowIdx)
-          el.classList.add("highlight");
-      });
-  });
-
-  instances_table.on("mouseleave", "td", function () {
-    instances_table
-      .cells()
-      .nodes()
-      .each((el) => el.classList.remove("highlight"));
-  });
-
-  instances_table.on("select", function (e, dt, type, indexes) {
-    // Enable the actions button
-    $(".action-button")
-      .removeClass("disabled")
-      .parent()
-      .attr("data-bs-toggle", null)
-      .attr("data-bs-original-title", null)
-      .attr("data-bs-placement", null)
-      .tooltip("dispose");
-  });
-
-  instances_table.on("deselect", function (e, dt, type, indexes) {
-    // If no rows are selected, disable the actions button
-    if (instances_table.rows({ selected: true }).count() === 0) {
-      $(".action-button")
-        .addClass("disabled")
-        .parent()
-        .attr("data-bs-toggle", "tooltip")
-        .attr(
-          "data-bs-original-title",
-          "Please select one or more rows to perform an action.",
-        )
-        .attr("data-bs-placement", "top")
-        .tooltip();
-    }
-  });
-
-  const debounce = (func, delay) => {
-    let timer = null;
-
-    return (...args) => {
-      // Clear the timer if the function is called again during the delay
-      if (timer) clearTimeout(timer);
-
-      // Start a new timer to invoke the function after the delay
-      timer = setTimeout(() => {
-        func(...args);
-      }, delay);
-    };
-  };
-
-  const saveColumnsPreferences = debounce(() => {
-    const rootUrl = $("#home-path")
-      .val()
-      .trim()
-      .replace(/\/home$/, "/set_columns_preferences");
-    const csrfToken = $("#csrf_token").val();
-
-    const data = new FormData();
-    data.append("csrf_token", csrfToken);
-    data.append("table_name", "instances");
-    data.append("columns_preferences", JSON.stringify(columnVisibility));
-
-    fetch(rootUrl, {
-      method: "POST",
-      body: data,
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        console.log("Preferences saved successfully!");
-        // Handle success, redirect, etc.
-      })
-      .catch((error) => {
-        console.error("There was a problem with the fetch operation:", error);
-      });
-  }, 1000);
-
-  instances_table.on(
-    "column-visibility.dt",
-    function (e, settings, column, state) {
-      if (column === 0 || column === 1 || column === 9) return;
-      columnVisibility[column] = state;
-      // Check if columVisibility is equal to defaultColsVisibility
-      const isDefault =
-        JSON.stringify(columnVisibility) ===
-        JSON.stringify(defaultColsVisibility);
-      // If it is, remove the key from localStorage
-      if (isDefault) {
-        localStorage.removeItem("bw-instances-columns");
-      } else {
-        localStorage.setItem(
-          "bw-instances-columns",
-          JSON.stringify(columnVisibility),
-        );
-      }
-
-      saveColumnsPreferences();
-    },
-  );
 
   $(document).on("click", ".ping-instance", function () {
     if (actionLock) {

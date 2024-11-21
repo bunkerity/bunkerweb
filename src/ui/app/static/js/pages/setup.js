@@ -87,21 +87,6 @@ $(document).ready(() => {
   };
 
   /**
-   * Debounce function to limit the rate at which a function can fire.
-   * @param {Function} func - The function to debounce.
-   * @param {number} delay - The delay in milliseconds.
-   * @returns {Function} Debounced function.
-   */
-  const debounce = (func, delay) => {
-    let debounceTimer;
-    return function (...args) {
-      const context = this;
-      clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(() => func.apply(context, args), delay);
-    };
-  };
-
-  /**
    * Extracts and encodes the server name from the input.
    * @returns {string} Encoded server name.
    */

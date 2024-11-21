@@ -160,6 +160,8 @@
                     nonce="{{ script_nonce }}"></script>
             <script src="{{ url_for('static', filename='libs/datatables/plugins/ip-address.js') }}"
                     nonce="{{ script_nonce }}"></script>
+            <script src="{{ url_for('static', filename='js/dataTableInit.js') }}"
+                    nonce="{{ script_nonce }}"></script>
         {% endif %}
         {% if current_endpoint == "home" or current_endpoint != "plugins" and "plugins" in request.path %}
             <script src="{{ url_for('static', filename='libs/apexcharts/apexcharts.min.js') }}"
@@ -186,6 +188,8 @@
                 nonce="{{ script_nonce }}"></script>
         <!-- Main JS -->
         <script src="{{ url_for('static', filename='js/main.js') }}"
+                nonce="{{ script_nonce }}"></script>
+        <script src="{{ url_for('static', filename='js/common.js') }}"
                 nonce="{{ script_nonce }}"></script>
         {% if current_endpoint in ("setup", "login", "totp", "loading") %}
             <script src="{{ url_for('static', filename='js/pages/login.js') }}"

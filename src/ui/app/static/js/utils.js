@@ -423,20 +423,6 @@ $(document).ready(() => {
     updateNotificationsBadge();
   });
 
-  const debounce = (func, delay) => {
-    let timer = null;
-
-    return (...args) => {
-      // Clear the timer if the function is called again during the delay
-      if (timer) clearTimeout(timer);
-
-      // Start a new timer to invoke the function after the delay
-      timer = setTimeout(() => {
-        func(...args);
-      }, delay);
-    };
-  };
-
   const saveTheme = debounce((rootUrl, theme) => {
     const csrfToken = $("#csrf_token").val();
 

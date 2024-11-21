@@ -136,20 +136,6 @@ $(document).ready(function () {
     $("#selected-ips-input-unban").val(JSON.stringify(bans));
   };
 
-  const debounce = (func, delay) => {
-    let timer = null;
-
-    return (...args) => {
-      // Clear the timer if the function is called again during the delay
-      if (timer) clearTimeout(timer);
-
-      // Start a new timer to invoke the function after the delay
-      timer = setTimeout(() => {
-        func(...args);
-      }, delay);
-    };
-  };
-
   const layout = {
     top1: {
       searchPanes: {
@@ -295,15 +281,6 @@ $(document).ready(function () {
     },
   };
 
-  $.fn.dataTable.ext.buttons.toggle_filters = {
-    text: '<span class="tf-icons bx bx-filter bx-18px me-2"></span><span id="show-filters">Show</span><span id="hide-filters" class="d-none">Hide</span><span class="d-none d-md-inline"> filters</span>',
-    action: function (e, dt, node, config) {
-      bans_table.searchPanes.container().slideToggle(); // Smoothly hide or show the container
-      $("#show-filters").toggleClass("d-none"); // Toggle the visibility of the 'Show' span
-      $("#hide-filters").toggleClass("d-none"); // Toggle the visibility of the 'Hide' span
-    },
-  };
-
   $.fn.dataTable.ext.buttons.unban_ips = {
     text: '<span class="tf-icons bx bxs-buoy bx-18px me-2"></span>Unban',
     action: function (e, dt, node, config) {
@@ -329,286 +306,163 @@ $(document).ready(function () {
     },
   };
 
-  const bans_table = new DataTable("#bans", {
-    columnDefs: [
-      {
-        orderable: false,
-        className: "dtr-control",
-        targets: 0,
-      },
-      {
-        orderable: false,
-        render: DataTable.render.select(),
-        targets: 1,
-      },
-      { type: "ip-address", targets: 2 },
-      {
-        orderable: false,
-        targets: -1,
-      },
-      {
-        targets: [2, 6],
-        render: function (data, type, row) {
-          if (type === "display" || type === "filter") {
-            const date = new Date(data);
-            if (!isNaN(date.getTime())) {
-              return date.toLocaleString();
+  initializeDataTable({
+    tableSelector: "#bans",
+    tableName: "bans",
+    columnVisibilityCondition: (column) => column > 2 && column < 8,
+    dataTableOptions: {
+      columnDefs: [
+        {
+          orderable: false,
+          className: "dtr-control",
+          targets: 0,
+        },
+        {
+          orderable: false,
+          render: DataTable.render.select(),
+          targets: 1,
+        },
+        { type: "ip-address", targets: 2 },
+        {
+          orderable: false,
+          targets: -1,
+        },
+        {
+          targets: [2, 6],
+          render: function (data, type, row) {
+            if (type === "display" || type === "filter") {
+              const date = new Date(data);
+              if (!isNaN(date.getTime())) {
+                return date.toLocaleString();
+              }
             }
-          }
-          return data;
+            return data;
+          },
         },
-      },
-      {
-        searchPanes: {
-          show: true,
-          options: [
-            {
-              label: "Last 24 hours",
-              value: function (rowData, rowIdx) {
-                const date = new Date(rowData[2]);
-                const now = new Date();
-                return now - date < 24 * 60 * 60 * 1000;
+        {
+          searchPanes: {
+            show: true,
+            options: [
+              {
+                label: "Last 24 hours",
+                value: function (rowData, rowIdx) {
+                  const date = new Date(rowData[2]);
+                  const now = new Date();
+                  return now - date < 24 * 60 * 60 * 1000;
+                },
               },
-            },
-            {
-              label: "Last 7 days",
-              value: function (rowData, rowIdx) {
-                const date = new Date(rowData[2]);
-                const now = new Date();
-                return now - date < 7 * 24 * 60 * 60 * 1000;
+              {
+                label: "Last 7 days",
+                value: function (rowData, rowIdx) {
+                  const date = new Date(rowData[2]);
+                  const now = new Date();
+                  return now - date < 7 * 24 * 60 * 60 * 1000;
+                },
               },
-            },
-            {
-              label: "Last 30 days",
-              value: function (rowData, rowIdx) {
-                const date = new Date(rowData[2]);
-                const now = new Date();
-                return now - date < 30 * 24 * 60 * 60 * 1000;
+              {
+                label: "Last 30 days",
+                value: function (rowData, rowIdx) {
+                  const date = new Date(rowData[2]);
+                  const now = new Date();
+                  return now - date < 30 * 24 * 60 * 60 * 1000;
+                },
               },
-            },
-            {
-              label: "More than 30 days",
-              value: function (rowData, rowIdx) {
-                const date = new Date(rowData[2]);
-                const now = new Date();
-                return now - date >= 30 * 24 * 60 * 60 * 1000;
+              {
+                label: "More than 30 days",
+                value: function (rowData, rowIdx) {
+                  const date = new Date(rowData[2]);
+                  const now = new Date();
+                  return now - date >= 30 * 24 * 60 * 60 * 1000;
+                },
               },
-            },
-          ],
-          combiner: "or",
-          orderable: false,
+            ],
+            combiner: "or",
+            orderable: false,
+          },
+          targets: 2,
         },
-        targets: 2,
-      },
-      {
-        searchPanes: {
-          show: true,
-          options: [
-            {
-              label: "Next 24 hours",
-              value: function (rowData, rowIdx) {
-                const date = new Date(rowData[6]);
-                const now = new Date();
-                return date - now < 24 * 60 * 60 * 1000;
+        {
+          searchPanes: {
+            show: true,
+            options: [
+              {
+                label: "Next 24 hours",
+                value: function (rowData, rowIdx) {
+                  const date = new Date(rowData[6]);
+                  const now = new Date();
+                  return date - now < 24 * 60 * 60 * 1000;
+                },
               },
-            },
-            {
-              label: "Next 7 days",
-              value: function (rowData, rowIdx) {
-                const date = new Date(rowData[6]);
-                const now = new Date();
-                return date - now < 7 * 24 * 60 * 60 * 1000;
+              {
+                label: "Next 7 days",
+                value: function (rowData, rowIdx) {
+                  const date = new Date(rowData[6]);
+                  const now = new Date();
+                  return date - now < 7 * 24 * 60 * 60 * 1000;
+                },
               },
-            },
-            {
-              label: "Next 30 days",
-              value: function (rowData, rowIdx) {
-                const date = new Date(rowData[6]);
-                const now = new Date();
-                return date - now < 30 * 24 * 60 * 60 * 1000;
+              {
+                label: "Next 30 days",
+                value: function (rowData, rowIdx) {
+                  const date = new Date(rowData[6]);
+                  const now = new Date();
+                  return date - now < 30 * 24 * 60 * 60 * 1000;
+                },
               },
-            },
-            {
-              label: "More than 30 days",
-              value: function (rowData, rowIdx) {
-                const date = new Date(rowData[6]);
-                const now = new Date();
-                return date - now >= 30 * 24 * 60 * 60 * 1000;
+              {
+                label: "More than 30 days",
+                value: function (rowData, rowIdx) {
+                  const date = new Date(rowData[6]);
+                  const now = new Date();
+                  return date - now >= 30 * 24 * 60 * 60 * 1000;
+                },
               },
-            },
-          ],
-          combiner: "or",
-          orderable: false,
+            ],
+            combiner: "or",
+            orderable: false,
+          },
+          targets: 6,
         },
-        targets: 6,
-      },
-      {
-        searchPanes: { show: true },
-        targets: 5,
-      },
-    ],
-    order: [[6, "asc"]],
-    autoFill: false,
-    responsive: true,
-    select: {
-      style: "multi+shift",
-      selector: "td:nth-child(2)",
-      headerCheckbox: true,
-    },
-    layout: layout,
-    language: {
-      info: "Showing _START_ to _END_ of _TOTAL_ bans",
-      infoEmpty: "No bans available",
-      infoFiltered: "(filtered from _MAX_ total bans)",
-      lengthMenu: "Display _MENU_ bans",
-      zeroRecords: "No matching bans found",
+        {
+          searchPanes: { show: true },
+          targets: 5,
+        },
+      ],
+      order: [[6, "asc"]],
+      autoFill: false,
+      responsive: true,
       select: {
-        rows: {
-          _: "Selected %d bans",
-          0: "No bans selected",
-          1: "Selected 1 ban",
+        style: "multi+shift",
+        selector: "td:nth-child(2)",
+        headerCheckbox: true,
+      },
+      layout: layout,
+      language: {
+        info: "Showing _START_ to _END_ of _TOTAL_ bans",
+        infoEmpty: "No bans available",
+        infoFiltered: "(filtered from _MAX_ total bans)",
+        lengthMenu: "Display _MENU_ bans",
+        zeroRecords: "No matching bans found",
+        select: {
+          rows: {
+            _: "Selected %d bans",
+            0: "No bans selected",
+            1: "Selected 1 ban",
+          },
         },
       },
+      initComplete: function (settings, json) {
+        $("#bans_wrapper .btn-secondary").removeClass("btn-secondary");
+        if (isReadOnly)
+          $("#bans_wrapper .dt-buttons")
+            .attr(
+              "data-bs-original-title",
+              "The database is in readonly, therefore you cannot add bans.",
+            )
+            .attr("data-bs-placement", "right")
+            .tooltip();
+      },
     },
-    initComplete: function (settings, json) {
-      $("#bans_wrapper .btn-secondary").removeClass("btn-secondary");
-      if (isReadOnly)
-        $("#bans_wrapper .dt-buttons")
-          .attr(
-            "data-bs-original-title",
-            "The database is in readonly, therefore you cannot add bans.",
-          )
-          .attr("data-bs-placement", "right")
-          .tooltip();
-    },
-  });
-
-  bans_table.searchPanes.container().hide();
-
-  $(".action-button")
-    .parent()
-    .attr(
-      "data-bs-original-title",
-      "Please select one or more rows to perform an action.",
-    )
-    .attr("data-bs-placement", "top")
-    .tooltip();
-
-  $("#bans").removeClass("d-none");
-  $("#bans-waiting").addClass("visually-hidden");
-
-  const defaultColsVisibility = JSON.parse(
-    $("#columns_preferences_defaults").val().trim(),
-  );
-
-  var columnVisibility = localStorage.getItem("bw-bans-columns");
-  if (columnVisibility === null) {
-    columnVisibility = JSON.parse($("#columns_preferences").val().trim());
-  } else {
-    columnVisibility = JSON.parse(columnVisibility);
-  }
-
-  Object.entries(columnVisibility).forEach(([key, value]) => {
-    bans_table.column(key).visible(value);
-  });
-
-  bans_table.responsive.recalc();
-
-  bans_table.on("mouseenter", "td", function () {
-    if (bans_table.cell(this).index() === undefined) return;
-    const rowIdx = bans_table.cell(this).index().row;
-
-    bans_table
-      .cells()
-      .nodes()
-      .each((el) => el.classList.remove("highlight"));
-
-    bans_table
-      .cells()
-      .nodes()
-      .each(function (el) {
-        if (bans_table.cell(el).index().row === rowIdx)
-          el.classList.add("highlight");
-      });
-  });
-
-  bans_table.on("mouseleave", "td", function () {
-    bans_table
-      .cells()
-      .nodes()
-      .each((el) => el.classList.remove("highlight"));
-  });
-
-  bans_table.on("select", function (e, dt, type, indexes) {
-    // Enable the actions button
-    $(".action-button")
-      .removeClass("disabled")
-      .parent()
-      .attr("data-bs-toggle", null)
-      .attr("data-bs-original-title", null)
-      .attr("data-bs-placement", null)
-      .tooltip("dispose");
-  });
-
-  bans_table.on("deselect", function (e, dt, type, indexes) {
-    // If no rows are selected, disable the actions button
-    if (bans_table.rows({ selected: true }).count() === 0) {
-      $(".action-button")
-        .addClass("disabled")
-        .parent()
-        .attr("data-bs-toggle", "tooltip")
-        .attr(
-          "data-bs-original-title",
-          "Please select one or more rows to perform an action.",
-        )
-        .attr("data-bs-placement", "top")
-        .tooltip();
-    }
-  });
-
-  const saveColumnsPreferences = debounce(() => {
-    const rootUrl = $("#home-path")
-      .val()
-      .trim()
-      .replace(/\/home$/, "/set_columns_preferences");
-    const csrfToken = $("#csrf_token").val();
-
-    const data = new FormData();
-    data.append("csrf_token", csrfToken);
-    data.append("table_name", "bans");
-    data.append("columns_preferences", JSON.stringify(columnVisibility));
-
-    fetch(rootUrl, {
-      method: "POST",
-      body: data,
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        console.log("Preferences saved successfully!");
-        // Handle success, redirect, etc.
-      })
-      .catch((error) => {
-        console.error("There was a problem with the fetch operation:", error);
-      });
-  }, 1000);
-
-  bans_table.on("column-visibility.dt", function (e, settings, column, state) {
-    if (column < 3 || column === 8) return;
-    columnVisibility[column] = state;
-    // Check if columVisibility is equal to defaultColsVisibility
-    const isDefault =
-      JSON.stringify(columnVisibility) ===
-      JSON.stringify(defaultColsVisibility);
-    // If it is, remove the key from localStorage
-    if (isDefault) {
-      localStorage.removeItem("bw-bans-columns");
-    } else {
-      localStorage.setItem("bw-bans-columns", JSON.stringify(columnVisibility));
-    }
-
-    saveColumnsPreferences();
   });
 
   $(document).on("click", ".unban-ip", function () {

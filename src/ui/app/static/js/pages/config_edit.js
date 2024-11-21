@@ -65,14 +65,6 @@ $(document).ready(function () {
   const $serviceDropdownItems = $("#services-dropdown-menu li.nav-item");
   const $typeDropdownItems = $("#types-dropdown-menu li.nav-item");
 
-  const debounce = (func, delay) => {
-    let debounceTimer;
-    return (...args) => {
-      clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(() => func.apply(this, args), delay);
-    };
-  };
-
   const changeTypesVisibility = () => {
     $typeDropdownItems.each(function () {
       const item = $(this);
