@@ -142,7 +142,7 @@
         </table>
     </div>
     <div id="feedback-toast"
-         class="bs-toast toast fade bg-white border border-warning"
+         class="bs-toast toast fade bg-{% if theme == 'light' %}white{% else %}dark{% endif %} border border-warning"
          role="alert"
          aria-live="assertive"
          aria-atomic="true"

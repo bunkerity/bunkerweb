@@ -4,7 +4,7 @@
     <!-- Dark Mode Toggle - Enhanced Floating Button -->
     <div class="theme-toggle position-fixed top-0 end-0 p-6"
          style="z-index: 1030">
-        <div class="toggle-container d-flex align-items-center bg-white p-3 rounded-pill shadow-lg">
+        <div class="toggle-container d-flex align-items-center bg-{% if theme == 'light' %}white{% else %}dark{% endif %} p-3 rounded-pill shadow-lg">
             <label class="setting-checkbox-label pe-2 mb-0 fw-bold text-secondary"
                    for="dark-mode-toggle">Light</label>
             <div class="form-switch">

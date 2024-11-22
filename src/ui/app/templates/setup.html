@@ -710,7 +710,7 @@
                                                               class="form-control plugin-setting mt-1"
                                                               aria-labelledby="label-LETS_ENCRYPT_DNS_CREDENTIAL_ITEMS"
                                                               pattern="^.*$"
-                                                              {% if lets_encrypt_challenge == 'http' %}disabled{% endif %}></textarea>
+                                                              {% if lets_encrypt_challenge == 'http' %}disabled{% endif %}>{% for item in lets_encrypt_dns_credential_items %}{{ item }}{% if not loop.last %}\n{% endif %}{% endfor %}</textarea>
                                                 </div>
                                                 <h6 class="mt-2 mb-2 fw-bold">Custom certificate</h6>
                                                 <div class="col-12 col-md-2 pb-3">

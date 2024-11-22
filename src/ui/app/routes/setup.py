@@ -1,4 +1,5 @@
-from os import getenv
+from itertools import chain
+from os import environ, getenv
 
 # from secrets import choice
 # from string import ascii_letters, digits
@@ -11,7 +12,7 @@ from flask_login import current_user
 # from app.models.totp import totp as TOTP
 
 from app.dependencies import BW_CONFIG, DATA, DB
-from app.utils import USER_PASSWORD_RX, gen_password_hash
+from app.utils import LOGGER, USER_PASSWORD_RX, gen_password_hash
 
 from app.routes.utils import REVERSE_PROXY_PATH, handle_error, manage_bunkerweb
 
@@ -35,6 +36,7 @@ def setup_page():
             "LETS_ENCRYPT_DNS_PROVIDER",
             "LETS_ENCRYPT_DNS_PROPAGATION",
             "USE_LETS_ENCRYPT_WILDCARD",
+            "LETS_ENCRYPT_DNS_CREDENTIAL_ITEM",
             "USE_CUSTOM_SSL",
             "CUSTOM_SSL_CERT",
             "CUSTOM_SSL_KEY",
@@ -147,52 +149,50 @@ def setup_page():
                 "USE_REVERSE_PROXY": "yes",
                 "REVERSE_PROXY_HOST": request.form["ui_host"],
                 "REVERSE_PROXY_URL": request.form["ui_url"] or "/",
+                "AUTO_LETS_ENCRYPT": "yes" if request.form.get("auto_lets_encrypt", "no") == "yes" else "no",
+                "USE_LETS_ENCRYPT_STAGING": request.form["lets_encrypt_staging"],
+                "USE_LETS_ENCRYPT_WILDCARD": request.form["lets_encrypt_wildcard"],
+                "EMAIL_LETS_ENCRYPT": request.form["email_lets_encrypt"],
+                "LETS_ENCRYPT_CHALLENGE": request.form["lets_encrypt_challenge"],
+                "LETS_ENCRYPT_DNS_PROVIDER": request.form["lets_encrypt_dns_provider"],
+                "LETS_ENCRYPT_DNS_PROPAGATION": request.form["lets_encrypt_dns_propagation"],
             }
 
-            if request.form.get("auto_lets_encrypt", "no") == "yes":
-                config.update(
-                    {
-                        "AUTO_LETS_ENCRYPT": "yes",
-                        "USE_LETS_ENCRYPT_STAGING": request.form["lets_encrypt_staging"],
-                        "USE_LETS_ENCRYPT_WILDCARD": request.form["lets_encrypt_wildcard"],
-                        "EMAIL_LETS_ENCRYPT": request.form["email_lets_encrypt"],
-                        "LETS_ENCRYPT_CHALLENGE": request.form["lets_encrypt_challenge"],
-                        "LETS_ENCRYPT_DNS_PROVIDER": request.form["lets_encrypt_dns_provider"],
-                        "LETS_ENCRYPT_DNS_PROPAGATION": request.form["lets_encrypt_dns_propagation"],
-                    }
-                )
+            lets_encrypt_dns_credential_items = request.form.getlist("lets_encrypt_dns_credential_items")
+            for x in range(len(lets_encrypt_dns_credential_items)):
+                if lets_encrypt_dns_credential_items[x]:
+                    config["LETS_ENCRYPT_DNS_CREDENTIAL_ITEM" + (f"_{x}" if x else "")] = lets_encrypt_dns_credential_items[x]
 
-                lets_encrypt_dns_credential_items = request.form.getlist("lets_encrypt_dns_credential_items")
-                for x in range(len(lets_encrypt_dns_credential_items)):
-                    if lets_encrypt_dns_credential_items[x]:
-                        config["LETS_ENCRYPT_DNS_CREDENTIAL_ITEM" + (f"_{x}" if x else "")] = lets_encrypt_dns_credential_items[x]
-            elif request.form.get("use_custom_ssl", "no") == "yes":
-                if not all(
-                    [
-                        bool(request.form.get("custom_ssl_cert", "")),
-                        bool(request.form.get("custom_ssl_key", "")),
-                    ]
-                ):
-                    return handle_error("When using a custom SSL certificate, you must set both the certificate and the key.", "setup")
+            if request.form.get("auto_lets_encrypt", "no") == "no":
+                if request.form.get("use_custom_ssl", "no") == "yes":
+                    if not all(
+                        [
+                            bool(request.form.get("custom_ssl_cert", "")),
+                            bool(request.form.get("custom_ssl_key", "")),
+                        ]
+                    ):
+                        return handle_error("When using a custom SSL certificate, you must set both the certificate and the key.", "setup")
 
-                config.update(
-                    {
-                        "USE_CUSTOM_SSL": "yes",
-                        "CUSTOM_SSL_CERT": request.form.get("custom_ssl_cert", ""),
-                        "CUSTOM_SSL_KEY": request.form.get("custom_ssl_key", ""),
-                    }
-                )
-            else:
-                config.update(
-                    {
-                        "USE_CUSTOM_SSL": "yes",
-                        "CUSTOM_SSL_CERT": "/var/cache/bunkerweb/misc/default-server-cert.pem",
-                        "CUSTOM_SSL_KEY": "/var/cache/bunkerweb/misc/default-server-cert.key",
-                    }
-                )
+                    config.update(
+                        {
+                            "USE_CUSTOM_SSL": "yes",
+                            "CUSTOM_SSL_CERT": request.form.get("custom_ssl_cert", ""),
+                            "CUSTOM_SSL_KEY": request.form.get("custom_ssl_key", ""),
+                        }
+                    )
+                else:
+                    config.update(
+                        {
+                            "USE_CUSTOM_SSL": "yes",
+                            "CUSTOM_SSL_CERT": "/var/cache/bunkerweb/misc/default-server-cert.pem",
+                            "CUSTOM_SSL_KEY": "/var/cache/bunkerweb/misc/default-server-cert.key",
+                        }
+                    )
 
             if not config.get("MULTISITE", "no") == "yes":
                 BW_CONFIG.edit_global_conf({"MULTISITE": "yes"}, check_changes=False)
+
+            LOGGER.debug(f"Creating new service with base_config: {base_config} and config: {config}")
 
             operation, error = BW_CONFIG.new_service(base_config, override_method="wizard")
             if error:
@@ -211,6 +211,10 @@ def setup_page():
     # session["tmp_totp_secret"] = TOTP.generate_totp_secret() # TODO: uncomment when TOTP is implemented in setup wizard
     # totp_qr_image = TOTP.generate_qrcode(current_user.get_id(), session["tmp_totp_secret"])
 
+    lets_encrypt_dns_credential_items = [
+        value for key, value in chain(db_config.items(), environ.items()) if key.startswith("LETS_ENCRYPT_DNS_CREDENTIAL_ITEM")
+    ]
+
     return render_template(
         "setup.html",
         ui_user=admin_user,
@@ -225,6 +229,7 @@ def setup_page():
         lets_encrypt_challenge=db_config.get("LETS_ENCRYPT_CHALLENGE", getenv("LETS_ENCRYPT_CHALLENGE", "http")),
         lets_encrypt_dns_provider=db_config.get("LETS_ENCRYPT_DNS_PROVIDER", getenv("LETS_ENCRYPT_DNS_PROVIDER", "")),
         lets_encrypt_dns_propagation=db_config.get("LETS_ENCRYPT_DNS_PROPAGATION", getenv("LETS_ENCRYPT_DNS_PROPAGATION", "default")),
+        lets_encrypt_dns_credential_items=lets_encrypt_dns_credential_items,
         use_custom_ssl=db_config.get("USE_CUSTOM_SSL", getenv("USE_CUSTOM_SSL", "no")),
         custom_ssl_cert=db_config.get("CUSTOM_SSL_CERT", getenv("CUSTOM_SSL_CERT", "")),
         custom_ssl_key=db_config.get("CUSTOM_SSL_KEY", getenv("CUSTOM_SSL_KEY", "")),

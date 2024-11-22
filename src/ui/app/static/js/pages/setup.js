@@ -579,7 +579,7 @@ $(document).ready(() => {
       );
       formData.append(
         "lets_encrypt_staging",
-        $("#LETS_ENCRYPT_STAGING").prop("checked") ? "yes" : "no",
+        $("#USE_LETS_ENCRYPT_STAGING").prop("checked") ? "yes" : "no",
       );
       formData.append(
         "lets_encrypt_wildcard",
