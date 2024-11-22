@@ -103,8 +103,6 @@ class Database:
         if not sqlalchemy_string:
             sqlalchemy_string = getenv("DATABASE_URI", "sqlite:////var/lib/bunkerweb/db.sqlite3")
 
-        self.logger.debug(f"SQLAlchemy string: {sqlalchemy_string}")
-
         sqlalchemy_string_readonly = getenv("DATABASE_URI_READONLY", "")
 
         if not sqlalchemy_string:
