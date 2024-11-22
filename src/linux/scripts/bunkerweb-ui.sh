@@ -16,16 +16,7 @@ start() {
     echo "Starting UI"
     # shellcheck disable=SC2046
     export $(cat /etc/bunkerweb/ui.env)
-    python3 -m gunicorn \
-        --chdir /usr/share/bunkerweb/ui \
-        --config /usr/share/bunkerweb/ui/gunicorn.conf.py \
-        --pythonpath /usr/share/bunkerweb/deps/python,/usr/share/bunkerweb/ui \
-        --user nginx \
-        --group nginx \
-        --bind "127.0.0.1:7000" &
-    while ! [ -f "/var/run/bunkerweb/ui.pid" ]; do
-        sleep 1
-    done
+    sudo -E -u nginx -g nginx /bin/bash -c "PYTHONPATH=$PYTHONPATH python3 -m gunicorn --chdir /usr/share/bunkerweb/ui --config /usr/share/bunkerweb/ui/gunicorn.conf.py --pythonpath /usr/share/bunkerweb/deps/python,/usr/share/bunkerweb/ui --bind \"127.0.0.1:7000\""
 }
 
 # Function to stop the UI
