@@ -1,4 +1,4 @@
-bcrypt==4.2.0
+bcrypt==4.2.1
 beautifulsoup4==4.12.3
 Flask==3.1.0
 Flask-executor==1.0.0
