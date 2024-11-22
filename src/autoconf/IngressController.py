@@ -26,6 +26,7 @@ class IngressController(Controller):
         self.__networkingv1 = client.NetworkingV1Api()
         self.__use_fqdn = getenv("USE_KUBERNETES_FQDN", "yes").lower() == "yes"
         self.__ingress_class = getenv("KUBERNETES_INGRESS_CLASS", "")
+        self.__domain_name = getenv("KUBERNETES_DOMAIN_NAME", "cluster.local")
         self._logger.info(f"Using Pod {'FQDN' if self.__use_fqdn else 'IP'} as hostname")
 
     def _get_controller_instances(self) -> list:
@@ -51,7 +52,7 @@ class IngressController(Controller):
     def _to_instances(self, controller_instance) -> List[dict]:
         instance = {
             "name": controller_instance.metadata.name,
-            "hostname": controller_instance.metadata.name if self.__use_fqdn else controller_instance.status.pod_ip,
+            "hostname": f"{controller_instance.status.pod_ip.replace(".", "-")}.pod.{self.__domain_name}" if self.__use_fqdn else controller_instance.status.pod_ip,
             "health": False,
             "type": "pod",
             "env": {},
@@ -110,8 +111,8 @@ class IngressController(Controller):
                 elif not path.backend.service.port:
                     self._logger.warning("Ignoring unsupported ingress rule without backend service port.")
                     continue
-                elif not path.backend.service.port.number:
-                    self._logger.warning("Ignoring unsupported ingress rule without backend service port number.")
+                elif not path.backend.service.port.number and not path.backend.service.port.name :
+                    self._logger.warning("Ignoring unsupported ingress rule without backend service port number or name.")
                     continue
 
                 service_list = self.__corev1.list_namespaced_service(
@@ -123,10 +124,19 @@ class IngressController(Controller):
                 if not service_list:
                     self._logger.warning(f"Ignoring ingress rule with service {path.backend.service.name} : service not found.")
                     continue
+                port = 80
+                if path.backend.service.port.name:
+                    service = service_list[0]
+                    for svc_port in service.spec.ports:
+                        if svc_port.name == path.backend.service.port.name:
+                            port = svc_port.port
+                            break
+                else:
+                    port = path.backend.service.port.number
 
-                reverse_proxy_host = f"http://{path.backend.service.name}.{namespace}.svc.cluster.local"
-                if path.backend.service.port.number != 80:
-                    reverse_proxy_host += f":{path.backend.service.port.number}"
+                reverse_proxy_host = f"http://{path.backend.service.name}.{namespace}.svc.{self.__domain_name}"
+                if port != 80:
+                    reverse_proxy_host += f":{str(port)}"
 
                 service.update(
                     {

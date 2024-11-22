@@ -1189,6 +1189,9 @@ spec:
 ...
 ```
 
+### Custom domain name
+
+If you use a custom domain name for your Kubernetes cluster different than the default `kubernetes.local` one, you can set the value using the `KUBERNETES_DOMAIN_NAME` environment variable on the scheduler container.
 
 ## Swarm
 
