@@ -186,23 +186,24 @@
                             {% set setting_method = setting_config.get("method", "default") %}
                             {% set setting_template = setting_config.get("template", "") %}
                             {% set disabled = setting_method not in ('ui', 'default') and (current_endpoint == "global-config" or not setting_config.get("global")) %}
-                            {% if current_endpoint == "new" %}
+                            {% if service_method == "autoconf" %}
+                                {% set setting_method = "autoconf" %}
+                                {% set disabled = true %}
+                            {% endif %}
+                            {% if current_endpoint == "new" or clone %}
+                                {% set setting_method = "default" %}
                                 {% set disabled = false %}
                                 {% if setting == "SERVER_NAME" %}
                                     {% set setting_value = "" %}
                                 {% endif %}
                             {% endif %}
-                            {% if service_method == "autoconf" %}
-                                {% set setting_method = "autoconf" %}
+                            {% if is_readonly %}
                                 {% set disabled = true %}
+                                {% set setting_method = "readonly" %}
                             {% endif %}
                             {% if plugin_data["type"] == "pro" and not is_pro_version %}
                                 {% set disabled = true %}
                                 {% set setting_method = "<i class='bx bx-diamond bx-xs'></i><span>Pro feature</span>" %}
-                            {% endif %}
-                            {% if is_readonly %}
-                                {% set disabled = true %}
-                                {% set setting_method = "readonly" %}
                             {% endif %}
                             <div class="col-12 col-sm-6 col-lg-4 pb-3"
                                  {% if disabled %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" data-bs-original-title="Disabled by {{ setting_method }}"{% endif %}>
@@ -331,20 +332,21 @@
                                                         {% set setting_method = setting_config.get("method", "default") %}
                                                         {% set setting_template = setting_config.get("template", "") %}
                                                         {% set disabled = setting_method not in ('ui', 'default') and (current_endpoint == "global-config" or not setting_config.get("global")) %}
-                                                        {% if current_endpoint == "new" %}
-                                                            {% set disabled = false %}
-                                                        {% endif %}
                                                         {% if service_method == "autoconf" %}
                                                             {% set setting_method = "autoconf" %}
                                                             {% set disabled = true %}
                                                         {% endif %}
-                                                        {% if plugin_data["type"] == "pro" and not is_pro_version %}
-                                                            {% set disabled = true %}
-                                                            {% set setting_method = "<i class='bx bx-diamond bx-xs'></i><span>Pro feature</span>" %}
+                                                        {% if current_endpoint == "new" or clone %}
+                                                            {% set setting_method = "default" %}
+                                                            {% set disabled = false %}
                                                         {% endif %}
                                                         {% if is_readonly %}
                                                             {% set disabled = true %}
                                                             {% set setting_method = "readonly" %}
+                                                        {% endif %}
+                                                        {% if plugin_data["type"] == "pro" and not is_pro_version %}
+                                                            {% set disabled = true %}
+                                                            {% set setting_method = "<i class='bx bx-diamond bx-xs'></i><span>Pro feature</span>" %}
                                                         {% endif %}
                                                         <div class="col-12{% if settings|length > 1 %} col-md-6{% endif %}{% if settings|length > 2 and not multiple_multiples %} col-lg-4{% endif %} pb-2"
                                                              {% if disabled %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" data-bs-original-title="Disabled by {{ setting_method }}"{% endif %}>

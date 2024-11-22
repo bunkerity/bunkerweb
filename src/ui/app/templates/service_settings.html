@@ -2,7 +2,7 @@
 {% block content %}
     <!-- Content -->
     {% set blacklisted_settings = get_blacklisted_settings() %}
-    {% set service_method = config.get("SERVER_NAME", {"method": "ui"})["method"] %}
+    {% set service_method = config.get("SERVER_NAME", {"method": "ui"})["method"] if current_endpoint != 'new' and not clone else "ui" %}
     {% set is_draft = config.get("IS_DRAFT", {"value": "no"})["value"] %}
     {% set template_method = config.get("USE_TEMPLATE", {"method": "ui"})["method"] %}
     {% set selected_template = config.get("USE_TEMPLATE", {"value": ""})["value"] %}
@@ -29,7 +29,7 @@
            id="is-draft"
            name="IS_DRAFT"
            value="{{ is_draft }}"
-           data-original="{% if current_endpoint != 'new' or clone %}{{ is_draft }}{% else %}no{% endif %}"
+           data-original="{% if current_endpoint != 'new' and not clone %}{{ is_draft }}{% else %}no{% endif %}"
            data-default="no">
     <div class="tab-content p-0 position-relative">
         <div class="tab-pane fade{% if mode == 'easy' %} show active{% endif %}"
@@ -43,7 +43,7 @@
              role="tabpanel">{% include "models/plugins_settings_raw.html" %}</div>
     </div>
     <div id="feedback-toast"
-         class="bs-toast toast fade bg-white border border-warning"
+         class="bs-toast toast fade bg-{% if theme == 'light' %}white{% else %}dark{% endif %} border border-warning"
          role="alert"
          aria-live="assertive"
          aria-atomic="true"
