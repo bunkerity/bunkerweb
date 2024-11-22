@@ -60,9 +60,6 @@ if __name__ == "__main__":
         # Parse args
         args = parser.parse_args()
 
-        if args.debug:
-            logger.setLevel("DEBUG")
-
         # Instantiate CLI
         cli = CLI()
 
@@ -75,6 +72,9 @@ if __name__ == "__main__":
         elif args.command == "bans":
             ret, err = cli.bans()
         else:
+            if args.debug:
+                logger.setLevel("DEBUG")
+
             ret, err = cli.custom(args.plugin_id, args.command, *args.arg, debug=args.debug)
 
         if not ret:
