@@ -6,6 +6,7 @@ from os.path import join
 from pathlib import Path
 from re import MULTILINE, search
 from shutil import rmtree
+from subprocess import CalledProcessError, run
 from sys import exit as sys_exit, path as sys_path
 from tarfile import open as tar_open
 
@@ -22,8 +23,13 @@ LOGGER = setup_logger("MODSECURITY.coreruleset-nightly", getenv("LOG_LEVEL", "IN
 status = 0
 
 CRS_NIGHTLY_PATH = Path(sep, "var", "cache", "bunkerweb", "modsecurity", "crs", "nightly")
+PATCH_SCRIPT = Path(sep, "usr", "share", "bunkerweb", "core", "modsecurity", "misc", "patch.sh")
 
 try:
+    if not PATCH_SCRIPT.is_file():
+        LOGGER.error(f"Patch script not found: {PATCH_SCRIPT}")
+        sys_exit(1)
+
     # * Check if we're using the nightly version of the Core Rule Set (CRS)
     use_nightly_crs = False
 
@@ -107,6 +113,16 @@ try:
     # * Move and rename the example configuration file to "crs-setup-nightly.conf"
     example_conf = CRS_NIGHTLY_PATH.joinpath("crs-nightly", "crs-setup.conf.example")
     example_conf.rename(CRS_NIGHTLY_PATH.joinpath("crs-setup-nightly.conf"))
+
+    # * Patch the rules so we can extract the rule IDs when matching
+    try:
+        LOGGER.info("Patching Core Rule Set (CRS) nightly rules...")
+        result = run([PATCH_SCRIPT.as_posix(), CRS_NIGHTLY_PATH.as_posix()], check=True)
+    except CalledProcessError as e:
+        LOGGER.error(f"Failed to patch Core Rule Set (CRS) nightly rules: {e}")
+        sys_exit(1)
+
+    LOGGER.info("Successfully patched Core Rule Set (CRS) nightly rules.")
 
     cached, err = JOB.cache_dir(CRS_NIGHTLY_PATH)
     if not cached:

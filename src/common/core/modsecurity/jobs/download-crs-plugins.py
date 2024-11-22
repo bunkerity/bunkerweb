@@ -5,6 +5,7 @@ from os import getenv, sep
 from os.path import join
 from pathlib import Path
 from re import MULTILINE, compile as re_compile
+from subprocess import CalledProcessError, run
 from sys import exit as sys_exit, path as sys_path
 from typing import Dict, Set
 from uuid import uuid4
@@ -37,10 +38,15 @@ PLUGIN_VERSION_RX = re_compile(r"^# Plugin version: (?P<version>.+)$", MULTILINE
 CRS_PLUGINS_DIR = Path(sep, "var", "cache", "bunkerweb", "modsecurity", "crs", "plugins")
 NEW_PLUGINS_DIR = Path(sep, "var", "tmp", "bunkerweb", "crs-new-plugins")
 TMP_DIR = Path(sep, "var", "tmp", "bunkerweb", "crs-plugins")
+PATCH_SCRIPT = Path(sep, "usr", "share", "bunkerweb", "core", "modsecurity", "misc", "patch.sh")
 LOGGER = setup_logger("modsecurity.download-crs-plugins", getenv("LOG_LEVEL", "INFO"))
 status = 0
 
 try:
+    if not PATCH_SCRIPT.is_file():
+        LOGGER.error(f"Patch script not found: {PATCH_SCRIPT}")
+        sys_exit(1)
+
     # * Check if we're using the 4 or nightly version of the Core Rule Set (CRS)
     use_right_crs_version = False
     use_modsecurity_crs_plugins = False
@@ -152,6 +158,9 @@ try:
                     LOGGER.error(f"Exception while decompressing plugin(s) from {crs_plugin_url} :\n{e}")
                     continue
 
+            plugin_name = ""
+            plugin_id = ""
+
             # Check if the plugins are valid, if they are already installed and if they need to be updated
             for plugin_config in temp_dir.rglob("**/*-config.conf"):
                 try:
@@ -202,6 +211,16 @@ try:
                     LOGGER.error(f"Exception while checking plugin {plugin_config} :\n{e}")
                     status = 2
                     continue
+
+            # * Patch the rules so we can extract the rule IDs when matching
+            try:
+                LOGGER.info(f"Patching Core Rule Set (CRS) plugin {plugin_name}...")
+                result = run([PATCH_SCRIPT.as_posix(), NEW_PLUGINS_DIR.joinpath(plugin_id).as_posix()], check=True)
+            except CalledProcessError as e:
+                LOGGER.error(f"Failed to patch Core Rule Set (CRS) plugin {plugin_name}: {e}")
+                sys_exit(1)
+
+            LOGGER.info(f"Successfully patched Core Rule Set (CRS) plugin {plugin_name}.")
 
             downloaded_plugins[crs_plugin_url] = installed_plugins.copy()
 
