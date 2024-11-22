@@ -52,7 +52,7 @@ class IngressController(Controller):
     def _to_instances(self, controller_instance) -> List[dict]:
         instance = {
             "name": controller_instance.metadata.name,
-            "hostname": f"{controller_instance.status.pod_ip.replace(".", "-")}.pod.{self.__domain_name}" if self.__use_fqdn else controller_instance.status.pod_ip,
+            "hostname": f"{controller_instance.status.pod_ip.replace(".", "-")}.{controller_instance.metadata.namespace}.pod.{self.__domain_name}" if self.__use_fqdn else controller_instance.status.pod_ip,
             "health": False,
             "type": "pod",
             "env": {},
