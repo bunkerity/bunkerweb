@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+from copy import deepcopy
 from datetime import datetime, timedelta
 from itertools import chain
 from json import dumps
@@ -264,7 +265,11 @@ try:
     else:
         certificate_blocks = stdout.split("Certificate Name: ")[1:]
         for first_server, domains in domains_server_names.items():
+            if getenv(f"{first_server}_AUTO_LETS_ENCRYPT", getenv("AUTO_LETS_ENCRYPT", "no")) != "yes":
+                continue
+
             letsencrypt_challenge = getenv(f"{first_server}_LETS_ENCRYPT_CHALLENGE", getenv("LETS_ENCRYPT_CHALLENGE", "http"))
+            original_first_server = deepcopy(first_server)
 
             if letsencrypt_challenge == "dns" and getenv(f"{first_server}_USE_LETS_ENCRYPT_WILDCARD", getenv("USE_LETS_ENCRYPT_WILDCARD", "no")) == "yes":
                 wildcards = WildcardGenerator.get_wildcards_from_domains((first_server,))
@@ -281,17 +286,17 @@ try:
 
             if not certificate_block:
                 domains_to_ask[first_server] = True
-                LOGGER.warning(f"Certificate block for {first_server} not found, asking new certificate...")
+                LOGGER.warning(f"[{original_first_server}] Certificate block for {first_server} not found, asking new certificate...")
                 continue
 
             try:
                 cert_domains = search(r"Domains: (?P<domains>.*)\n\s*Expiry Date: (?P<expiry_date>.*)\n", certificate_block, MULTILINE)
             except Exception as e:
-                LOGGER.error(f"[{first_server}] Error while parsing certificate block: {e}")
+                LOGGER.error(f"[{original_first_server}] Error while parsing certificate block: {e}")
                 continue
 
             if not cert_domains:
-                LOGGER.error(f"[{first_server}] Failed to parse domains and expiry date from certificate block.")
+                LOGGER.error(f"[{original_first_server}] Failed to parse domains and expiry date from certificate block.")
                 continue
 
             cert_domains_list = cert_domains.group("domains").strip().split()
@@ -299,7 +304,7 @@ try:
 
             if cert_domains_set != domains:
                 domains_to_ask[first_server] = True
-                LOGGER.warning(f"Domains for {first_server} are not the same as in the certificate, asking new certificate...")
+                LOGGER.warning(f"[{original_first_server}] Domains for {first_server} are not the same as in the certificate, asking new certificate...")
                 continue
 
             use_letsencrypt_staging = getenv(f"{first_server}_USE_LETS_ENCRYPT_STAGING", getenv("USE_LETS_ENCRYPT_STAGING", "no")) == "yes"
@@ -307,25 +312,43 @@ try:
 
             if (is_test_cert and not use_letsencrypt_staging) or (not is_test_cert and use_letsencrypt_staging):
                 domains_to_ask[first_server] = True
-                LOGGER.warning(f"Certificate environment (staging/production) changed for {first_server}, asking new certificate...")
+                LOGGER.warning(f"[{original_first_server}] Certificate environment (staging/production) changed for {first_server}, asking new certificate...")
                 continue
 
             letsencrypt_provider = getenv(f"{first_server}_LETS_ENCRYPT_DNS_PROVIDER", getenv("LETS_ENCRYPT_DNS_PROVIDER", ""))
-            current_provider = search(rf"DNS-01 challenge: {letsencrypt_provider}", certificate_block, MULTILINE)
+
+            renewal_file = DATA_PATH.joinpath("renewal", f"{first_server}.conf")
+            if not renewal_file.is_file():
+                LOGGER.error(f"[{original_first_server}] Renewal file for {first_server} not found, asking new certificate...")
+                domains_to_ask[first_server] = True
+                continue
+
+            current_provider = None
+            with renewal_file.open("r") as file:
+                for line in file:
+                    if line.startswith("authenticator"):
+                        key, value = line.strip().split("=", 1)
+                        current_provider = value.strip().replace("dns-", "")
+                        break
+
             if letsencrypt_challenge == "dns":
-                if letsencrypt_provider and (not current_provider or current_provider.group(1) != letsencrypt_provider):
+                if letsencrypt_provider and (not current_provider or current_provider != letsencrypt_provider):
                     domains_to_ask[first_server] = True
-                    LOGGER.warning(f"Provider for {first_server} is not the same as in the certificate, asking new certificate...")
+                    LOGGER.warning(f"[{original_first_server}] Provider for {first_server} is not the same as in the certificate, asking new certificate...")
                     continue
             elif current_provider and letsencrypt_challenge == "http":
                 domains_to_ask[first_server] = True
-                LOGGER.warning(f"{first_server} is no longer using DNS challenge, asking new certificate...")
+                LOGGER.warning(f"[{original_first_server}] {first_server} is no longer using DNS challenge, asking new certificate...")
                 continue
 
             domains_to_ask[first_server] = False
-            LOGGER.info(f"[{first_server}] Certificates already exist for domain(s) {domains}, expiry date: {cert_domains.group('expiry_date')}")
+            LOGGER.info(f"[{original_first_server}] Certificates already exist for domain(s) {domains}, expiry date: {cert_domains.group('expiry_date')}")
 
     for first_server, domains in domains_server_names.items():
+        if getenv(f"{first_server}_AUTO_LETS_ENCRYPT", getenv("AUTO_LETS_ENCRYPT", "no")) != "yes":
+            LOGGER.info(f"Let's Encrypt is not activated for {first_server}, skipping...")
+            continue
+
         # * Getting all the necessary data
         data = {
             "email": getenv(f"{first_server}_EMAIL_LETS_ENCRYPT", getenv("EMAIL_LETS_ENCRYPT", "")) or f"contact@{first_server}",
