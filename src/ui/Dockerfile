@@ -64,7 +64,7 @@ RUN echo "Docker" > INTEGRATION && \
   chown -R root:ui INTEGRATION /data /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb && \
   chmod -R 770 /data /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb && \
   chmod 750 gen/*.py ui/*.sh helpers/*.sh deps/python/bin/* && \
-  find ui -name "*.py" -type f -exec chmod 750 {} \; && \
+  find ui/ -type f -name "*.py" -print0 | xargs -0 chmod 750 && \
   chmod 660 INTEGRATION && \
   ln -s /proc/1/fd/1 /var/log/bunkerweb/ui-access.log && \
   ln -s /proc/1/fd/2 /var/log/bunkerweb/ui.log
