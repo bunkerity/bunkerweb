@@ -69,7 +69,7 @@ COLUMNS_PREFERENCES_DEFAULTS = {
         "7": False,
         "8": True,
         "9": True,
-        "10": False,
+        "10": True,
         "11": True,
     },
     "services": {
