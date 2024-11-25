@@ -24,10 +24,16 @@ class IngressController(Controller):
             Configuration._default.ssl_ca_cert = ssl_ca_cert
         self.__corev1 = client.CoreV1Api()
         self.__networkingv1 = client.NetworkingV1Api()
+
         self.__use_fqdn = getenv("USE_KUBERNETES_FQDN", "yes").lower() == "yes"
-        self.__ingress_class = getenv("KUBERNETES_INGRESS_CLASS", "")
-        self.__domain_name = getenv("KUBERNETES_DOMAIN_NAME", "cluster.local")
         self._logger.info(f"Using Pod {'FQDN' if self.__use_fqdn else 'IP'} as hostname")
+
+        self.__ingress_class = getenv("KUBERNETES_INGRESS_CLASS", "")
+        if self.__ingress_class:
+            self._logger.info(f"Using Ingress class: {self.__ingress_class}")
+
+        self.__domain_name = getenv("KUBERNETES_DOMAIN_NAME", "cluster.local")
+        self._logger.info(f"Using domain name: {self.__domain_name}")
 
     def _get_controller_instances(self) -> list:
         instances = []
@@ -45,14 +51,28 @@ class IngressController(Controller):
         services = []
         ingresses = self.__networkingv1.list_ingress_for_all_namespaces(watch=False).items
         for ingress in ingresses:
-            if ingress.metadata.namespace in self._namespaces if self._namespaces else True:
-                services.append(ingress)
+            # Skip if ingress class doesn't match (when specified)
+            if self.__ingress_class:
+                ingress_class_name = getattr(ingress.spec, "ingress_class_name", None)
+                if ingress_class_name != self.__ingress_class:
+                    continue
+
+            # Skip if the namespace is not in the allowed namespaces (when specified)
+            if self._namespaces and ingress.metadata.namespace not in self._namespaces:
+                continue
+
+            # Add the ingress to services if it passes all checks
+            services.append(ingress)
         return services
 
     def _to_instances(self, controller_instance) -> List[dict]:
         instance = {
             "name": controller_instance.metadata.name,
-            "hostname": f"{controller_instance.status.pod_ip.replace(".", "-")}.{controller_instance.metadata.namespace}.pod.{self.__domain_name}" if self.__use_fqdn else controller_instance.status.pod_ip,
+            "hostname": (
+                f"{controller_instance.status.pod_ip.replace('.','-')}.{controller_instance.metadata.namespace}.pod.{self.__domain_name}"
+                if self.__use_fqdn
+                else controller_instance.status.pod_ip
+            ),
             "health": False,
             "type": "pod",
             "env": {},
@@ -111,7 +131,7 @@ class IngressController(Controller):
                 elif not path.backend.service.port:
                     self._logger.warning("Ignoring unsupported ingress rule without backend service port.")
                     continue
-                elif not path.backend.service.port.number and not path.backend.service.port.name :
+                elif not path.backend.service.port.number and not path.backend.service.port.name:
                     self._logger.warning("Ignoring unsupported ingress rule without backend service port number or name.")
                     continue
 
@@ -136,7 +156,7 @@ class IngressController(Controller):
 
                 reverse_proxy_host = f"http://{path.backend.service.name}.{namespace}.svc.{self.__domain_name}"
                 if port != 80:
-                    reverse_proxy_host += f":{str(port)}"
+                    reverse_proxy_host += f":{port}"
 
                 service.update(
                     {
@@ -222,30 +242,36 @@ class IngressController(Controller):
 
     def __process_event(self, event):
         obj = event["object"]
-        metadata = obj.metadata if obj else None
-
-        if metadata and self._namespaces and metadata.namespace not in self._namespaces:
-            return False
-
-        annotations = metadata.annotations if metadata else None
-        data = getattr(obj, "data", None) if obj else None
         if not obj:
             return False
+
+        if obj.metadata and self._namespaces and obj.metadata.namespace not in self._namespaces:
+            return False
+
+        annotations = obj.metadata.annotations if obj.metadata else None
+        data = getattr(obj, "data", None)
+
+        ret = False
         if obj.kind == "Pod":
-            return annotations and "bunkerweb.io/INSTANCE" in annotations
-        if obj.kind == "Ingress":
+            ret = annotations and "bunkerweb.io/INSTANCE" in annotations
+        elif obj.kind == "Ingress":
             if self.__ingress_class:
-                ingress_class_name = getattr(obj.spec, "ingressClassName", None)
+                ingress_class_name = getattr(obj.spec, "ingress_class_name", None)
                 if not ingress_class_name or ingress_class_name != self.__ingress_class:
-                    return False
-            return True
-        if obj.kind == "ConfigMap":
-            return annotations and "bunkerweb.io/CONFIG_TYPE" in annotations
-        if obj.kind == "Service":
-            return True
-        if obj.kind == "Secret":
-            return data and "tls.crt" in data and "tls.key" in data
-        return False
+                    ret = False
+            else:
+                ret = True
+        elif obj.kind == "ConfigMap":
+            ret = annotations and "bunkerweb.io/CONFIG_TYPE" in annotations
+        elif obj.kind == "Service":
+            ret = True
+        elif obj.kind == "Secret":
+            ret = data and "tls.crt" in data and "tls.key" in data
+
+        if ret:
+            self._logger.debug(f"Processing event {event['type']} for {obj.kind} {obj.metadata.name if obj.metadata else 'unknown'}")
+
+        return ret
 
     def __watch(self, watch_type):
         w = watch.Watch()
