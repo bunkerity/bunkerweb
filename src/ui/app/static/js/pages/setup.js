@@ -636,7 +636,9 @@ $(document).ready(() => {
     })
       .then((res) => {
         if (res.status === 200) {
-          window.location.href = redirect;
+          setTimeout(() => {
+            window.location.href = redirect;
+          }, 1000);
         }
       })
       .catch((err) => {

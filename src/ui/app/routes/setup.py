@@ -1,10 +1,11 @@
+from datetime import datetime, timedelta
 from itertools import chain
 from os import environ, getenv
 
 # from secrets import choice
 # from string import ascii_letters, digits
-from threading import Thread
-from time import time
+from re import escape, match
+from time import sleep, time
 
 from flask import Blueprint, Response, flash, redirect, render_template, request, url_for
 from flask_login import current_user
@@ -14,7 +15,7 @@ from flask_login import current_user
 from app.dependencies import BW_CONFIG, DATA, DB
 from app.utils import LOGGER, USER_PASSWORD_RX, gen_password_hash
 
-from app.routes.utils import REVERSE_PROXY_PATH, handle_error, manage_bunkerweb
+from app.routes.utils import REVERSE_PROXY_PATH, handle_error
 
 setup = Blueprint("setup", __name__)
 
@@ -194,17 +195,17 @@ def setup_page():
 
             LOGGER.debug(f"Creating new service with base_config: {base_config} and config: {config}")
 
-            operation, error = BW_CONFIG.new_service(base_config, override_method="wizard")
+            operation, error = BW_CONFIG.new_service(base_config, override_method="wizard", check_changes=False)
             if error:
                 return handle_error(f"Couldn't create the new service: {operation}", "setup", False, "error")
 
-            # deepcode ignore MissingAPI: We don't need to check to wait for the thread to finish
-            Thread(
-                target=manage_bunkerweb,
-                name="Reloading instances",
-                args=("services", config | base_config, request.form["server_name"], request.form["server_name"]),
-                kwargs={"operation": "edit", "threaded": True},
-            ).start()
+            operation, error = BW_CONFIG.edit_service(request.form["server_name"], config | base_config, check_changes=False)
+            if error:
+                return handle_error(f"Couldn't edit the new service: {operation}", "setup", False, "error")
+
+            err = DB.checked_changes(["config", "custom_configs"], plugins_changes="all", value=True)
+            if err:
+                LOGGER.error(f"Error while applying changes to the database: {err}, you may need to reload the application")
 
         return Response(status=200)
 
@@ -243,13 +244,30 @@ def setup_loading():
     if current_user.is_authenticated:
         return redirect(url_for("home.home_page"))
 
-    if DB.get_ui_user():
-        db_config = BW_CONFIG.get_config(methods=False, filtered_settings=("SERVER_NAME", "USE_UI", "REVERSE_PROXY_URL"))
-        for server_name in db_config["SERVER_NAME"].split(" "):
-            if server_name and db_config.get(f"{server_name}_USE_UI", db_config.get("USE_UI", "no")) == "yes":
+    DATA.load_from_file()
+
+    db_config = DB.get_config(filtered_settings=("SERVER_NAME", "USE_UI", "REVERSE_PROXY_URL"))
+    ui_service = {}
+    ui_admin = DB.get_ui_user()
+    admin_old_enough = ui_admin and ui_admin.creation_date < datetime.now() - timedelta(minutes=5)
+
+    for server_name in db_config["SERVER_NAME"].split(" "):
+        if server_name and db_config.get(f"{server_name}_USE_UI", "no") == "yes":
+            if admin_old_enough:
                 return redirect(url_for("login.login_page"), 301)
+            ui_service = {"server_name": server_name, "url": db_config.get(f"{server_name}_REVERSE_PROXY_URL", "/")}
+            break
+
+    if not ui_service:
+        sleep(1)
+        return redirect(url_for("setup.setup_loading"))
 
     target_endpoint = request.args.get("target_endpoint", "")
+    if target_endpoint and not match(
+        rf"^https://{escape(ui_service['server_name'])}{escape(ui_service['url'])}/check$".replace("//check", "/check"), target_endpoint
+    ):
+        return Response(status=400)
+
     return render_template(
         "loading.html",
         message="Setting up Web UI...",

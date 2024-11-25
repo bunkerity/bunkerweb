@@ -141,7 +141,7 @@ with app.app_context():
 @app.context_processor
 def inject_variables():
     current_endpoint = request.path.split("/")[-1]
-    if request.path.startswith(("/check_reloading", "/setup", "/loading", "/login", "/totp")):
+    if request.path.startswith(("/check", "/setup", "/loading", "/login", "/totp")):
         return dict(current_endpoint=current_endpoint, script_nonce=app.config["SCRIPT_NONCE"])
 
     DATA.load_from_file()
@@ -329,7 +329,7 @@ def before_request():
 
         DB.readonly = DATA.get("READONLY_MODE", False)
 
-        if not request.path.startswith(("/check_reloading", "/loading", "/login", "/totp")) and DB.readonly:
+        if not request.path.startswith(("/check", "/loading", "/login", "/totp")) and DB.readonly:
             flask_flash("Database connection is in read-only mode : no modifications possible.", "error")
 
         if current_user.is_authenticated:
@@ -410,7 +410,7 @@ def set_security_headers(response):
 ### * MISC ROUTES * ###
 
 
-@app.route("/", strict_slashes=False)
+@app.route("/", strict_slashes=False, methods=["GET"])
 def index():
     if DB.get_ui_user():
         if current_user.is_authenticated:  # type: ignore
@@ -419,12 +419,16 @@ def index():
     return redirect(url_for("setup.setup_page"), 301)
 
 
-@app.route("/loading")
+@app.route("/loading", methods=["GET"])
 @login_required
 def loading():
-    return render_template(
-        "loading.html", message=request.values.get("message", "Loading..."), next=request.values.get("next", None) or url_for("home.home_page")
-    )
+    home_url = url_for("home.home_page")
+    next_url = request.values.get("next", None) or home_url
+
+    if not next_url.startswith(home_url.replace("/home", "/", 1).replace("//", "/")):
+        return Response(status=400)
+
+    return render_template("loading.html", message=request.values.get("message", "Loading..."), next=next_url)
 
 
 @app.route("/check", methods=["GET"])
@@ -433,7 +437,7 @@ def check():
     return Response(status=200, headers={"Access-Control-Allow-Origin": "*"}, response=dumps({"message": "ok"}), content_type="application/json")
 
 
-@app.route("/check_reloading")
+@app.route("/check_reloading", methods=["GET"])
 @login_required
 def check_reloading():
     DATA.load_from_file()
