@@ -185,69 +185,69 @@
 
         === "SQLite"
 
-            1. **Stop the Stack.**
-
-                ```bash
-                docker compose down
-                ```
-
-            2. **Remove the existing database file.**
+            1. **Remove the existing database file.**
 
                 ```bash
                 docker exec -u 0 -i <scheduler_container> rm -f /var/lib/bunkerweb/db.sqlite3
                 ```
 
-            3. **Restore the backup.**
+            2. **Restore the backup.**
 
                 ```bash
                 docker exec -i <scheduler_container> sqlite3 /var/lib/bunkerweb/db.sqlite3 < /path/to/backup/directory/backup.sql
                 ```
 
-            4. **Fix permissions.**
+            3. **Fix permissions.**
 
                 ```bash
                 docker exec -u 0 -i <scheduler_container> chown root:nginx /var/lib/bunkerweb/db.sqlite3
                 docker exec -u 0 -i <scheduler_container> chmod 770 /var/lib/bunkerweb/db.sqlite3
                 ```
 
-        === "MySQL/MariaDB"
-
-            5. **Stop the Stack.**
+            4. **Stop the Stack.**
 
                 ```bash
                 docker compose down
                 ```
 
-            6. **Restore the backup.**
+        === "MySQL/MariaDB"
+
+            1. **Restore the backup.**
 
                 ```bash
                 docker exec -e MYSQL_PWD=<your_password> -i <database_container> mysql -u <username> <database_name> < /path/to/backup/directory/backup.sql
                 ```
 
-        === "PostgreSQL"
-
-            7. **Stop the Stack.**
+            2. **Stop the Stack.**
 
                 ```bash
                 docker compose down
                 ```
 
-            8. **Remove the existing database.**
+        === "PostgreSQL"
+
+            1. **Remove the existing database.**
 
                 ```bash
                 docker exec -i <database_container> dropdb -U <username> --force <database_name>
                 ```
 
-            9. **Recreate the database.**
+            2. **Recreate the database.**
 
                 ```bash
                 docker exec -i <database_container> createdb -U <username> <database_name>
                 ```
 
-            10. **Restore the backup.**
+            3. **Restore the backup.**
 
                 ```bash
                 docker exec -i <database_container> psql -U <username> -d <database_name> < /path/to/backup/directory/backup.sql
+                ```
+
+            4. **Stop the Stack.**
+
+                ```bash
+                docker compose down
                 ```
 
     2. **Downgrade BunkerWeb**.
@@ -571,69 +571,69 @@
 
         === "SQLite"
 
-            1. **Stop the Stack.**
-
-                ```bash
-                docker compose down
-                ```
-
-            2. **Remove the existing database file.**
+            1. **Remove the existing database file.**
 
                 ```bash
                 docker exec -u 0 -i <scheduler_container> rm -f /var/lib/bunkerweb/db.sqlite3
                 ```
 
-            3. **Restore the backup.**
+            2. **Restore the backup.**
 
                 ```bash
                 docker exec -i <scheduler_container> sqlite3 /var/lib/bunkerweb/db.sqlite3 < /path/to/backup/directory/backup.sql
                 ```
 
-            4. **Fix permissions.**
+            3. **Fix permissions.**
 
                 ```bash
                 docker exec -u 0 -i <scheduler_container> chown root:nginx /var/lib/bunkerweb/db.sqlite3
                 docker exec -u 0 -i <scheduler_container> chmod 770 /var/lib/bunkerweb/db.sqlite3
                 ```
 
-        === "MySQL/MariaDB"
-
-            5. **Stop the Stack.**
+            ''. **Stop the Stack.**
 
                 ```bash
                 docker compose down
                 ```
 
-            6. **Restore the backup.**
+        === "MySQL/MariaDB"
+
+            1. **Restore the backup.**
 
                 ```bash
                 docker exec -e MYSQL_PWD=<your_password> -i <database_container> mysql -u <username> <database_name> < /path/to/backup/directory/backup.sql
                 ```
 
-        === "PostgreSQL"
-
-            7. **Stop the Stack.**
+            2. **Stop the Stack.**
 
                 ```bash
                 docker compose down
                 ```
 
-            8. **Remove the existing database.**
+        === "PostgreSQL"
+
+            1. **Remove the existing database.**
 
                 ```bash
                 docker exec -i <database_container> dropdb -U <username> --force <database_name>
                 ```
 
-            9. **Recreate the database.**
+            2. **Recreate the database.**
 
                 ```bash
                 docker exec -i <database_container> createdb -U <username> <database_name>
                 ```
 
-            10. **Restore the backup.**
+            3. **Restore the backup.**
 
                 ```bash
                 docker exec -i <database_container> psql -U <username> -d <database_name> < /path/to/backup/directory/backup.sql
+                ```
+
+            4. **Stop the Stack.**
+
+                ```bash
+                docker compose down
                 ```
 
     2. **Downgrade BunkerWeb**.
