@@ -315,8 +315,12 @@ def cors_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         fetch_mode = request.headers.get("Sec-Fetch-Mode")
-        if fetch_mode != "cors":
-            return Response("CORS request required", status=403)
+        x_requested_with = request.headers.get("X-Requested-With")
+
+        # Check for CORS mode or AJAX request
+        if fetch_mode != "cors" and (not x_requested_with or x_requested_with.lower() != "xmlhttprequest"):
+            return Response("CORS or AJAX request required", status=403)
+
         return f(*args, **kwargs)
 
     return decorated_function
