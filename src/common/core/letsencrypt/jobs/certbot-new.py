@@ -332,11 +332,11 @@ try:
                         break
 
             if letsencrypt_challenge == "dns":
-                if letsencrypt_provider and (not current_provider or current_provider != letsencrypt_provider):
+                if letsencrypt_provider and current_provider != letsencrypt_provider:
                     domains_to_ask[first_server] = True
                     LOGGER.warning(f"[{original_first_server}] Provider for {first_server} is not the same as in the certificate, asking new certificate...")
                     continue
-            elif current_provider and letsencrypt_challenge == "http":
+            elif current_provider != "manual" and letsencrypt_challenge == "http":
                 domains_to_ask[first_server] = True
                 LOGGER.warning(f"[{original_first_server}] {first_server} is no longer using DNS challenge, asking new certificate...")
                 continue
