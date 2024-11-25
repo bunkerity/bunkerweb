@@ -62,7 +62,7 @@ function headers:init()
 			if data[srv] == nil then
 				data[srv] = {}
 			end
-			local m = regex_match(value, "([\\w-]+): ([^,]+)")
+			local m = regex_match(value, "([\\w-]+): (.+)")
 			if m then
 				data[srv][m[1]] = m[2]
 			end
