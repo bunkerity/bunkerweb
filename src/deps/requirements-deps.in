@@ -5,4 +5,4 @@ pip-upgrader==1.4.15
 setuptools==75.6.0
 tomli==2.1.0
 urllib3<2.0.0
-wheel==0.45.0
+wheel==0.45.1
