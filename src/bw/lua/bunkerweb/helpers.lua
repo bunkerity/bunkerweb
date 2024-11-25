@@ -188,6 +188,7 @@ helpers.fill_ctx = function(no_ref)
 			data.time_local = var.time_local
 			if data.kind == "http" then
 				data.uri = var.uri
+				data.request_id = var.request_id
 				data.request_uri = var.request_uri
 				data.request_method = var.request_method
 				data.http_user_agent = var.http_user_agent

@@ -64,6 +64,7 @@ function metrics:log(bypass_checks)
 			end
 		end
 		local request = {
+			id = self.ctx.bw.request_id,
 			date = self.ctx.bw.start_time or time(),
 			ip = self.ctx.bw.remote_addr,
 			country = country,
@@ -75,20 +76,20 @@ function metrics:log(bypass_checks)
 			server_name = self.ctx.bw.server_name,
 			data = data,
 			security_mode = security_mode,
+			synced = not self.use_redis,
 		}
-		-- Get current requests
-		local requests = lru:get("requests")
-		if not requests then
-			requests = {}
-		end
-		-- Add current request
+		-- Get requests from LRU
+		local requests = lru:get("requests") or {}
+
+		-- Add to LRU
 		table_insert(requests, request)
-		-- Remove old requests
-		local nb_delete = #requests - tonumber(self.variables["METRICS_MAX_BLOCKED_REQUESTS"])
-		while nb_delete > 0 do
+
+		-- Remove old requests if needed
+		local max_requests = tonumber(self.variables["METRICS_MAX_BLOCKED_REQUESTS"])
+		while #requests > max_requests do
 			table_remove(requests, 1)
-			nb_delete = nb_delete - 1
 		end
+
 		-- Update worker cache
 		lru:set("requests", requests)
 	end
@@ -168,10 +169,43 @@ function metrics:timer()
 		end
 		lru:set("setup", true)
 	end
+
+	local clusterstore_ok = nil
+	if self.use_redis then
+		clusterstore_ok, err = self.clusterstore:connect()
+		if not clusterstore_ok then
+			self.logger:log(ERR, "Can't connect to Redis server: " .. err .. " - requests will be stored in datastore")
+		end
+	end
+
 	-- Loop on all keys
 	for _, key in ipairs(lru:get_keys()) do
 		-- Get LRU data
 		local value = lru:get(key)
+		if key == "requests" and clusterstore_ok then
+			for _, request in ipairs(value) do
+				if not request.synced then
+					-- Add only unsynced requests
+					local ok
+					ok, err = self.clusterstore:call("rpush", "requests", encode(request))
+					if not ok then
+						self.logger:log(ERR, "Can't sync request to Redis: " .. err)
+						break
+					end
+					request.synced = true -- Mark as synced
+				end
+			end
+
+			-- Remove old requests if needed
+			local max_requests = tonumber(self.variables["METRICS_MAX_BLOCKED_REQUESTS_REDIS"])
+			local nb_requests = self.clusterstore:call("llen", "requests")
+			if nb_requests and nb_requests > max_requests then
+				self.clusterstore:call("ltrim", "requests", -max_requests, -1)
+			end
+
+			-- Update LRU cache
+			lru:set("requests", value)
+		end
 		if type(value) == "table" then
 			value = encode(value)
 		end
@@ -184,6 +218,11 @@ function metrics:timer()
 			self.logger:log(ERR, "can't update " .. key .. "_" .. wid .. " : " .. err)
 		end
 	end
+
+	if clusterstore_ok then
+		self.clusterstore:close()
+	end
+
 	-- Done
 	return self:ret(ret, ret_err)
 end
@@ -203,7 +242,7 @@ function metrics:api()
 			-- Get the value
 			local data, err = self.metrics_datastore:get(key)
 			if not data then
-				return self:ret(true, "error while fetching requests : " .. err, HTTP_INTERNAL_SERVER_ERROR)
+				return self:ret(true, "error while fetching metric : " .. err, HTTP_INTERNAL_SERVER_ERROR)
 			end
 			local metric_key = key:gsub("_[0-9]+$", ""):gsub("^" .. filter .. "_", "")
 			if metric_key == "" then

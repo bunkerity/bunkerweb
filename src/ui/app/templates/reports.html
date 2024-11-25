@@ -3,7 +3,6 @@
     <!-- Content -->
     <div class="card table-responsive text-nowrap p-4 pb-8 min-vh-70">
         {% set base_flags_url = url_for('static', filename='img/flags') %}
-        <input type="hidden" id="reports_number" value="{{ reports|length }}" />
         <input type="hidden" id="base_flags_url" value="{{ base_flags_url }}" />
         <textarea type="hidden"
                   id="columns_preferences_defaults"
@@ -58,8 +57,9 @@
                 </tr>
             </thead>
             <tbody>
-                {% set ns = namespace(countries=[]) %}
+                {% set ns = namespace(countries=[], reports_number=0) %}
                 {% for report in reports %}
+                    {% set ns.reports_number = ns.reports_number + 1 %}
                     {% if report["country"] not in ns.countries %}
                         {% set ns.countries = ns.countries + [report["country"].lower()] %}
                     {% endif %}
@@ -91,6 +91,7 @@
                     </tr>
                 {% endfor %}
             </tbody>
+            <input type="hidden" id="reports_number" value="{{ ns.reports_number }}" />
             <input type="hidden" id="countries" value="{{ ns.countries|join(',') }}" />
             <span class="position-absolute bottom-0 start-50 translate-middle badge rounded-pill bg-secondary">
                 TZ: <script nonce="{{ script_nonce }}">document.write(Intl.DateTimeFormat().resolvedOptions().timeZone);</script>
