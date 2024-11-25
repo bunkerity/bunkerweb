@@ -44,9 +44,6 @@ jobs:
         id: getchangelog
         run: |
           content=$(awk -v n=2 '/##/{n--}; n > 0' CHANGELOG.md | grep -v '# Changelog' | grep -v '##' | sed '/^$/d')
-          content="${content//'%'/'%25'}"
-          content="${content//$'\n'/'%0A'}"
-          content="${content//$'\r'/'%0D'}"
           echo "content=$content" >> $GITHUB_OUTPUT
       # Create release
       - name: Create release
