@@ -22,7 +22,7 @@ def bans_page():
     bans = []
     if redis_client:
         for key in redis_client.scan_iter("bans_ip_*"):
-            ip = key.decode("utf-8").replace("bans_ip_", "")
+            ip = key.replace("bans_ip_", "")
             data = redis_client.get(key)
             if not data:
                 continue

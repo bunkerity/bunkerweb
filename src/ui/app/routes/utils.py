@@ -394,7 +394,14 @@ def get_redis_client():
                 socket_keepalive=True,
                 max_connections=redis_keepalive_pool,
             )
-            redis_client = sentinel.slave_for(sentinel_master, db=redis_db, username=username, password=password)
+
+            redis_client = sentinel.slave_for(
+                sentinel_master,
+                db=redis_db,
+                username=username,
+                password=password,
+                decode_responses=True,
+            )
         else:
             redis_client = Redis(
                 host=redis_host,
@@ -407,6 +414,7 @@ def get_redis_client():
                 socket_keepalive=True,
                 max_connections=redis_keepalive_pool,
                 ssl=redis_ssl,
+                decode_responses=True,
             )
 
         try:
