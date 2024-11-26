@@ -89,7 +89,6 @@ def on_starting(server):
         LOGGER.info(f"Permissions set to 600 for {file_path}")
 
     # * Handle Flask secret
-    VALID_FLASK_SECRET_LENGTH = 64
     try:
         flask_secret = None
 
@@ -107,16 +106,13 @@ def on_starting(server):
         if not flask_secret:
             flask_secret_env = getenv("FLASK_SECRET", "").strip()
             if flask_secret_env:
-                if len(flask_secret_env) != VALID_FLASK_SECRET_LENGTH:
-                    LOGGER.warning("Invalid Flask secret length. Ignoring environment variable.")
-                else:
-                    flask_secret = flask_secret_env
-                    LOGGER.info("Flask secret successfully loaded from the environment variable.")
+                flask_secret = flask_secret_env
+                LOGGER.info("Flask secret successfully loaded from the environment variable.")
 
         # * Step 3: Generate new secret if none found
         if not flask_secret:
             LOGGER.warning("No valid Flask secret found. Generating a new random secret...")
-            flask_secret = token_hex(VALID_FLASK_SECRET_LENGTH)
+            flask_secret = token_hex(64)
             LOGGER.info("Generated a new Flask secret.")
 
         # * Step 4: Hash for change detection
