@@ -64,7 +64,7 @@ RUN apk add --no-cache bash && \
 RUN apk add --no-cache "libcrypto3>=3.3.2-r1" "libssl3>=3.3.2-r1" # CVE-2024-9143
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
-LABEL version="1.5.11"
+LABEL version="1.5.12"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="autoconf"
 

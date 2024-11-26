@@ -463,7 +463,7 @@ class Database:
     def get_metadata(self) -> Dict[str, Any]:
         """Get the metadata from the database"""
         data = {
-            "version": "1.5.11",
+            "version": "1.5.12",
             "integration": "unknown",
             "database_version": "Unknown",
             "is_pro": "no",

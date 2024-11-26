@@ -70,7 +70,7 @@ RUN apk add --no-cache openssl pcre bash python3 yajl geoip libxml2 libgd curl &
 # Fix CVEs
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
-LABEL version="1.5.11"
+LABEL version="1.5.12"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="bunkerweb"
 LABEL bunkerweb.INSTANCE="bunkerweb"
