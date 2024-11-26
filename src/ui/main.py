@@ -46,7 +46,7 @@ from app.dependencies import BW_CONFIG, DATA, DB
 from app.models.models import AnonymousUser
 from app.utils import (
     COLUMNS_PREFERENCES_DEFAULTS,
-    TMP_DIR,
+    LIB_DIR,
     LOGGER,
     flash,
     get_blacklisted_settings,
@@ -68,12 +68,10 @@ with app.app_context():
     PROXY_NUMBERS = int(getenv("PROXY_NUMBERS", "1"))
     app.wsgi_app = ReverseProxied(app.wsgi_app, x_for=PROXY_NUMBERS, x_proto=PROXY_NUMBERS, x_host=PROXY_NUMBERS, x_prefix=PROXY_NUMBERS)
 
-    FLASK_SECRET = getenv("FLASK_SECRET")
-    if not FLASK_SECRET:
-        if not TMP_DIR.joinpath(".flask_secret").is_file():
-            LOGGER.error("The FLASK_SECRET environment variable is missing and the .flask_secret file is missing, exiting ...")
-            stop(1)
-        FLASK_SECRET = TMP_DIR.joinpath(".flask_secret").read_text(encoding="utf-8").strip()
+    if not LIB_DIR.joinpath(".flask_secret").is_file():
+        LOGGER.error("The .flask_secret file is missing, exiting ...")
+        stop(1)
+    FLASK_SECRET = LIB_DIR.joinpath(".flask_secret").read_text(encoding="utf-8").strip()
 
     app.config["SECRET_KEY"] = FLASK_SECRET
 

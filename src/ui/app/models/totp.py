@@ -1,7 +1,6 @@
 from base64 import b64encode
 from io import BytesIO
-from json import JSONDecodeError, loads as json_loads
-from os import getenv
+from json import loads as json_loads
 from bcrypt import checkpw
 from typing import List, Optional
 from passlib.totp import TOTP, MalformedTokenError, TokenError, TotpMatch
@@ -14,25 +13,10 @@ from app.dependencies import DATA
 from app.utils import LIB_DIR, LOGGER, stop
 
 
-TOTP_SECRETS = getenv("TOTP_SECRETS", "")
-if TOTP_SECRETS:
-    try:
-        TOTP_SECRETS = json_loads(TOTP_SECRETS)
-    except JSONDecodeError:
-        x = 1
-        tmp_secrets = {}
-        for secret in TOTP_SECRETS.strip().split(" "):
-            if secret:
-                tmp_secrets[x] = secret
-                x += 1
-        TOTP_SECRETS = tmp_secrets.copy()
-        del tmp_secrets
-
-if not TOTP_SECRETS:
-    if not LIB_DIR.joinpath(".totp_secrets.json").is_file():
-        LOGGER.error("The TOTP_SECRETS environment variable is missing and the .totp_secrets.json file is missing, exiting ...")
-        stop(1)
-    TOTP_SECRETS = json_loads(LIB_DIR.joinpath(".totp_secrets.json").read_text(encoding="utf-8"))
+if not LIB_DIR.joinpath(".totp_secrets.json").is_file():
+    LOGGER.error("The .totp_secrets.json file is missing, exiting ...")
+    stop(1)
+TOTP_SECRETS = json_loads(LIB_DIR.joinpath(".totp_secrets.json").read_text(encoding="utf-8"))
 
 
 class Totp:
