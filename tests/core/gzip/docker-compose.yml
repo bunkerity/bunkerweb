@@ -2,7 +2,7 @@ version: "3.5"
 
 services:
   bw:
-    image: bunkerity/bunkerweb:1.5.11
+    image: bunkerity/bunkerweb:1.5.12
     pull_policy: never
     ports:
       - 80:8080
@@ -36,7 +36,7 @@ services:
         ipv4_address: 192.168.0.2
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.5.11
+    image: bunkerity/bunkerweb-scheduler:1.5.12
     pull_policy: never
     depends_on:
       - bw

@@ -547,10 +547,16 @@ def index():
     return redirect(url_for("setup"))
 
 
-@app.route("/loading")
+@app.route("/loading", methods=["GET"])
 @login_required
 def loading():
-    return render_template("loading.html", message=request.values.get("message", "Loading"), next=request.values.get("next", None) or url_for("home"))
+    home_url = url_for("home")
+    next_url = request.values.get("next", None) or home_url
+
+    if not next_url.startswith(home_url.replace("/home", "/", 1).replace("//", "/")):
+        return Response(status=400)
+
+    return render_template("loading.html", message=request.values.get("message", "Loading..."), next=next_url)
 
 
 @app.route("/check", methods=["GET"])

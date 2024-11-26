@@ -1,6 +1,11 @@
 # Changelog
 
-## v1.5.11 - ????/??/??
+## v1.5.12 - ????/??/??
+
+- [SECURITY] Fix CVE-2024-53254
+- [UI] Fix issues in several pages because of a wrong key being used to fetch the data
+
+## v1.5.11 - 2024/11/10
 
 - [BUGFIX] Fix INTERCEPTED_ERROR_CODES to allow empty value
 - [UI] Fix missing settings when a service is published online

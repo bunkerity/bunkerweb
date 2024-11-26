@@ -1,10 +1,10 @@
-FROM python:3.12.7-alpine@sha256:f498302457ec11162f872199b92239c34e1fbcdbc391ff37a4959e820224aa98 AS builder
+FROM python:3.12.7-alpine@sha256:38e179a0f0436c97ecc76bcd378d7293ab3ee79e4b8c440fdc7113670cb6e204 AS builder
 
 # Export var for specific actions on linux/arm/v7
 ARG TARGETPLATFORM
 
 # Install python dependencies
-RUN apk add --no-cache build-base libffi-dev postgresql-dev cargo
+RUN apk add --no-cache build-base libffi-dev postgresql-dev cargo tiff-dev jpeg-dev openjpeg-dev zlib-dev freetype-dev lcms2-dev libwebp-dev tcl-dev tk-dev harfbuzz-dev fribidi-dev libimagequant-dev libxcb-dev libpng-dev
 
 # Copy python requirements
 COPY src/deps/requirements.txt /tmp/requirements-deps.txt
@@ -34,7 +34,7 @@ COPY src/common/templates templates
 COPY src/ui ui
 COPY src/VERSION VERSION
 
-FROM python:3.12.7-alpine@sha256:f498302457ec11162f872199b92239c34e1fbcdbc391ff37a4959e820224aa98
+FROM python:3.12.7-alpine@sha256:38e179a0f0436c97ecc76bcd378d7293ab3ee79e4b8c440fdc7113670cb6e204
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
@@ -65,7 +65,7 @@ RUN apk add --no-cache bash unzip libmagic mariadb-connector-c mariadb-client po
 RUN apk add --no-cache "libcrypto3>=3.3.2-r1" "libssl3>=3.3.2-r1" # CVE-2024-9143
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
-LABEL version="1.5.11"
+LABEL version="1.5.12"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="ui"
 

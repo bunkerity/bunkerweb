@@ -1,4 +1,4 @@
-FROM python:3.12.7-alpine@sha256:f498302457ec11162f872199b92239c34e1fbcdbc391ff37a4959e820224aa98 AS builder
+FROM python:3.12.7-alpine@sha256:38e179a0f0436c97ecc76bcd378d7293ab3ee79e4b8c440fdc7113670cb6e204 AS builder
 
 # Export var for specific actions on linux/arm/v7
 ARG TARGETPLATFORM
@@ -35,7 +35,7 @@ COPY src/common/utils utils
 COPY src/scheduler scheduler
 COPY src/VERSION VERSION
 
-FROM python:3.12.7-alpine@sha256:f498302457ec11162f872199b92239c34e1fbcdbc391ff37a4959e820224aa98
+FROM python:3.12.7-alpine@sha256:38e179a0f0436c97ecc76bcd378d7293ab3ee79e4b8c440fdc7113670cb6e204
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
@@ -72,7 +72,7 @@ COPY --chown=root:scheduler --chmod=770 src/bw/misc/country.mmdb /var/tmp/bunker
 # Fix CVEs
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
-LABEL version="1.5.11"
+LABEL version="1.5.12"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="scheduler"
 
