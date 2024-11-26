@@ -49,6 +49,22 @@ Because the web UI is a web application, the recommended installation procedure 
 
     The web UI will use these variables to authenticate you and handle the 2FA feature.
 
+!!! example "Generating recommended secrets"
+
+    To generate a valid **ADMIN_PASSWORD**, we recommend you to **use a password manager** or a **password generator**.
+
+    You can generate a valid **FLASK_SECRET** using the following command :
+
+    ```shell
+    python3 -c "import secrets; print(secrets.token_hex(64))"
+    ```
+
+    You can generate valid space-separated **TOTP_SECRETS** using the following command (you will need the `passlib` package) :
+
+    ```shell
+    python3 -c "from passlib import totp; print(' '.join(totp.generate_secret() for i in range(1, 6)))"
+    ```
+
 ## Setup wizard
 
 !!! info "Wizard"
@@ -1319,16 +1335,6 @@ When your BunkerWeb instance has upgraded to the PRO version, you will see your 
     - `ADMIN_PASSWORD` : password to access the web UI
 
     The web UI will use these variables to authenticate you.
-
-!!! tip "Generating recommended secrets"
-
-    To generate a valid password, we recommend you to use a password manager or a password generator.
-
-    You can generate a valid totp secrets dictionary using the following command (you will need the `passlib` package) :
-
-    ```shell
-    python3 -c "from passlib import totp; import random; print(' '.join(totp.generate_secret() for _ in range(random.randint(1, 5))))"
-    ```
 
 !!! warning "Lost password/username"
 
