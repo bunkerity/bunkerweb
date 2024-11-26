@@ -37,10 +37,7 @@ WORKDIR /usr/share/bunkerweb
 RUN export MAKEFLAGS="-j$(nproc)" && \
     mkdir -p deps/python && \
     pip install --no-cache-dir --require-hashes --ignore-installed -r /tmp/requirements-deps.txt && \
-    pip install --no-cache-dir --require-hashes --force-reinstall --target deps/python $(for file in $(ls /tmp/req/requirements*.txt) ; do echo "-r ${file}" ; done | xargs) && \
-    if [ ! -f deps/python/zope/__init__.py ]; then \
-        touch deps/python/zope/__init__.py; \
-    fi # Ensure __init__.py exists to avoid import failures
+    pip install --no-cache-dir --require-hashes --force-reinstall --target deps/python $(for file in $(ls /tmp/req/requirements*.txt) ; do echo "-r ${file}" ; done | xargs)
 
 # Copy files
 # can't exclude deps from . so we are copying everything by hand

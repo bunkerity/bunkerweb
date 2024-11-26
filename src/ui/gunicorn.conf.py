@@ -13,10 +13,6 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
-from gevent.monkey import patch_all
-
-patch_all()
-
 from passlib.totp import generate_secret
 
 from logger import setup_logger  # type: ignore
@@ -58,7 +54,7 @@ pythonpath = join(sep, "usr", "share", "bunkerweb", "deps", "python")
 proxy_allow_ips = "*"
 casefold_http_method = True
 workers = MAX_WORKERS
-worker_class = "gevent"
+worker_class = "gthread"
 threads = int(getenv("MAX_THREADS", MAX_WORKERS * 2))
 max_requests_jitter = min(8, MAX_WORKERS)
 graceful_timeout = 30
