@@ -609,7 +609,7 @@
                         <div class="row g-3">
                             {% for code in totp_recovery_codes %}
                                 <div class="col-6">
-                                    <div class="p-3 border rounded bg-light shadow-sm text-center recovery-code">{{ code }}</div>
+                                    <div class="p-3 border rounded bg-{% if theme == 'light' %}light{% else %}dark{% endif %} shadow-sm text-center recovery-code">{{ code }}</div>
                                 </div>
                             {% endfor %}
                         </div>
