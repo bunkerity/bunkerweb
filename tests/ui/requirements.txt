@@ -156,9 +156,9 @@ requests==2.32.3 \
     --hash=sha256:55365417734eb18255590a9ff9eb97e9e1da868d4ccd6402399eaf68af20a760 \
     --hash=sha256:70761cfe03c773ceb22aa2f671b4757976145175cdfca038c02654d061d6dcc6
     # via -r requirements.in
-selenium==4.26.1 \
-    --hash=sha256:1db3f3a0cd5bb07624fa8a3905a6fdde1595a42185a0617077c361dc53d104fb \
-    --hash=sha256:7640f3f08ae7f4e450f895678e8a10a55eb4e4ca18311ed675ecc4684b96b683
+selenium==4.27.0 \
+    --hash=sha256:70ff70cc8d08f19bda0e89d6a521c0f1c3ae648088c34dcf9fa177f1374c3b5f \
+    --hash=sha256:e8850834c482dc93d92060586139cf8ff8be6c6f0e93db640fa65358548f426b
     # via -r requirements.in
 sniffio==1.3.1 \
     --hash=sha256:2f6da418d1f1e0fddd844478f41680e794e6051915791a034ff65e5f100525a2 \
