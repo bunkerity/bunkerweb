@@ -40,6 +40,12 @@ FROM python:3.13-alpine@sha256:fcbcbbecdeae71d3b77445d9144d1914df55110f825ab62b0
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
 
+COPY src/deps/requirements.txt /tmp/requirements-deps.txt
+
+# Install python requirements
+RUN export MAKEFLAGS="-j$(nproc)" && \
+  pip install --no-cache-dir --require-hashes --break-system-packages -r /tmp/requirements-deps.txt
+
 # Install runtime dependencies and add ui user
 RUN apk add --no-cache bash unzip libmagic mariadb-connector-c mariadb-client postgresql-client sqlite tzdata && \
   addgroup -g 101 ui && \
