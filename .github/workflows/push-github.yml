@@ -38,13 +38,15 @@ jobs:
           tag: "${{ inputs.VERSION }}"
           message: "${{ inputs.VERSION }}"
           force_push_tag: true
-      # Extract changelog
+      # Extract and preserve changelog formatting
       - name: Extract changelog
         if: inputs.VERSION != 'testing'
-        id: getchangelog
         run: |
+          # Extract the changelog content
           content=$(awk -v n=2 '/##/{n--}; n > 0' CHANGELOG.md | grep -v '# Changelog' | grep -v '##' | sed '/^$/d')
-          echo "content=$content" >> $GITHUB_OUTPUT
+          echo "DECODED_CHANGELOG<<EOF" >> $GITHUB_ENV
+          echo "$content" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
       # Create release
       - name: Create release
         if: inputs.VERSION != 'testing'
@@ -62,7 +64,7 @@ jobs:
             Linux packages : https://packagecloud.io/app/bunkerity/bunkerweb/search?q=${{ inputs.VERSION }}&filter=all&dist=
 
             Changelog :
-            ${{ steps.getchangelog.outputs.content }}
+            ${{ env.DECODED_CHANGELOG }}
           draft: true
           prerelease: ${{ inputs.PRERELEASE }}
           name: v${{ inputs.VERSION }}
