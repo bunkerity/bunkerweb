@@ -71,7 +71,7 @@ if __name__ == "__main__":
             ret, err = cli.ban(args.ip, args.exp, args.reason)
         elif args.command == "bans":
             ret, err = cli.bans()
-        else:
+        elif args.command == "plugin":
             if args.debug:
                 logger.setLevel("DEBUG")
 

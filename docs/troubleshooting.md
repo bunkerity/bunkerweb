@@ -348,16 +348,19 @@ In case you lost your UI credentials or have 2FA issues, you can connect to the 
 
 **Troubleshooting actions**
 
-!!! info "Table schema"
+!!! info "Tables schema"
     The schema of the `bw_ui_users` table is the following :
 
     ```sql
-    id INTEGER PRIMARY KEY AUTOINCREMENT
-    username VARCHAR(256) NOT NULL UNIQUE
+    username VARCHAR(256) PRIMARY KEY NOT NULL
+    email VARCHAR(256) UNIQUE DEFAULT NULL
     password VARCHAR(60) NOT NULL
-    is_two_factor_enabled BOOLEAN NOT NULL DEFAULT 0
-    secret_token VARCHAR(32) DEFAULT NULL
-    method ("manual" or "ui") NOT NULL DEFAULT 'manual'
+    method ENUM('ui', 'scheduler', 'autoconf', 'manual', 'wizard') NOT NULL
+    admin BOOLEAN NOT NULL DEFAULT 0
+    theme ENUM('light', 'dark') NOT NULL DEFAULT 'light'
+    totp_secret VARCHAR(256) DEFAULT NULL
+    creation_date DATETIME NOT NULL
+    update_date DATETIME NOT NULL
     ```
 
 === "Retrieve username"
@@ -369,11 +372,13 @@ In case you lost your UI credentials or have 2FA issues, you can connect to the 
     ```
 
     You should see something like this :
-    ```text
-    1|<username>|<password_hash>|1|<secret_totp_token>|(manual or ui)
-    ```
 
-=== "Update password"
+    | username | email | password | method | admin | theme | totp_secret | creation_date | update_date |
+    | -------- | ----- | -------- | ------ | ----- | ----- | ----------- | ------------- | ----------- |
+    | ***      | ***   | ***      | manual | 1     | light | ***         | ***           | ***         |
+
+
+=== "Update admin user password"
 
     You first need to hash the new password using the bcrypt algorithm.
 
@@ -386,50 +391,54 @@ In case you lost your UI credentials or have 2FA issues, you can connect to the 
     Generate your hash (replace `mypassword` with your own password) :
 
     ```shell
-    python -c 'from bcrypt import hashpw, gensalt ; print(hashpw("mypassword".encode("utf-8"), gensalt(rounds=13)).decode())'
+    python3 -c 'from bcrypt import hashpw, gensalt ; print(hashpw(b"""mypassword""", gensalt(rounds=10)).decode("utf-8"))'
     ```
 
     You can update your username / password executing this command :
 
     ```sql
-    UPDATE bw_ui_users SET username = <username>, password = <password_hash> WHERE id = 1;
+    UPDATE bw_ui_users SET password = '<password_hash>' WHERE admin = 1;
     ```
 
     If you check again your `bw_ui_users` table following this command :
 
     ```sql
-    SELECT * FROM bw_ui_users;
+    SELECT * FROM bw_ui_users WHERE admin = 1;
     ```
 
     You should see something like this :
 
-    ```text
-    1|<username>|<password_hash>|0||(manual or ui)
-    ```
+    | username | email | password | method | admin | theme | totp_secret | creation_date | update_date |
+    | -------- | ----- | -------- | ------ | ----- | ----- | ----------- | ------------- | ----------- |
+    | ***      | ***   | ***      | manual | 1     | light | ***         | ***           | ***         |
 
     You should now be able to use the new credentials to log into the web UI.
 
-=== "Disable 2FA authentication"
+=== "Disable 2FA authentication for admin user"
 
     You can deactivate 2FA by executing this command :
 
     ```sql
-    UPDATE bw_ui_users SET is_two_factor_enabled = 0, secret_token = NULL WHERE id = 1;
+    UPDATE bw_ui_users SET totp_secret = NULL WHERE admin = 1;
     ```
 
     If you check again your `bw_ui_users` table by following this command :
 
     ```sql
-    SELECT * FROM bw_ui_users;
+    SELECT * FROM bw_ui_users WHERE admin = 1;
     ```
 
     You should see something like this :
 
-    ```text
-    1|<username>|<password_hash>|0||(manual or ui)
-    ```
+    | username | email | password | method | admin | theme | totp_secret | creation_date | update_date |
+    | -------- | ----- | -------- | ------ | ----- | ----- | ----------- | ------------- | ----------- |
+    | ***      | ***   | ***      | manual | 1     | light | NULL        | ***           | ***         |
 
-    You should now be able to log into the web UI only using your username and password.
+    You should now be able to log into the web UI only using your username and password without 2FA.
+
+=== "Refresh 2FA recovery codes"
+
+    The recovery codes can be refreshed in your **profile page** of the web UI under the `Security` tab.
 
 **Upload plugin**
 

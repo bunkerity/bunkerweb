@@ -3,139 +3,150 @@
 # Function to run a command and check its return code
 function do_and_check_cmd() {
     output=$("$@" 2>&1)
-    ret="$?"
-    if [ $ret -ne 0 ] ; then
-        echo "❌ Error from command : $*"
+    ret=$?
+    if [ $ret -ne 0 ]; then
+        echo "❌ Error from command: $*"
         echo "$output"
         exit $ret
     else
         echo "✔️ Success: $*"
         echo "$output"
     fi
-    return 0
 }
 
+# Reload systemd configuration
 function reload_systemd() {
-    do_and_check_cmd systemctl daemon-reload
-    do_and_check_cmd systemctl reset-failed
-}
-
-# remove a systemd service
-function remove_systemd_service {
-    service=$1
-    service_file="/lib/systemd/system/$service.service"
-    echo "checking service $service with $service_file file "
-    if [ -f "$service_file" ]; then
-        echo "ℹ️ Remove $service service"
-        do_and_check_cmd systemctl stop "$service"
-        do_and_check_cmd systemctl disable "$service"
-        do_and_check_cmd rm -f "$service_file"
-        reload_systemd
+    if command -v systemctl >/dev/null 2>&1; then
+        do_and_check_cmd systemctl daemon-reload
+        do_and_check_cmd systemctl reset-failed
     else
-        echo "$service_file not found"
+        echo "ℹ️ Systemd not found, skipping reload."
     fi
 }
 
-function remove {
-    echo "Package is being uninstalled"
+# Detect and remove systemd services related to the package
+function remove_systemd_services() {
+    service_prefix=$1  # Prefix to identify relevant services
+    echo "ℹ️ Searching for services related to '$service_prefix'"
 
-    # Stop nginx
-    if systemctl is-active nginx; then
-        echo "ℹ️ Stop nginx service"
+    # Search for services in common locations
+    for dir in /etc/systemd/system /usr/lib/systemd/system /lib/systemd/system; do
+        if [ -d "$dir" ]; then
+            services=$(find "$dir" -type f -name "${service_prefix}*.service" -exec basename {} \;)
+            for service_file in $services; do
+                service_name="${service_file%.service}"
+                echo "ℹ️ Found service: $service_name"
+                echo "ℹ️ Removing $service_name service"
+
+                if command -v systemctl >/dev/null 2>&1; then
+                    do_and_check_cmd systemctl stop "$service_name" || echo "ℹ️ Service $service_name already stopped."
+                    do_and_check_cmd systemctl disable "$service_name"
+                else
+                    echo "❌ Systemctl not available, skipping service operations."
+                fi
+
+                # Remove the service file
+                do_and_check_cmd rm -f "$dir/$service_file"
+            done
+        fi
+    done
+
+    reload_systemd
+}
+
+# Remove directories or files if they exist
+function remove_path() {
+    path=$1
+    description=$2
+
+    if [ -e "$path" ]; then
+        echo "ℹ️ Removing $description ($path)"
+        do_and_check_cmd rm -rf "$path"
+    else
+        echo "ℹ️ $description ($path) does not exist. Skipping."
+    fi
+}
+
+# Perform actions for package removal
+function remove() {
+    echo "ℹ️ Package is being uninstalled"
+
+    # Stop nginx if it is active
+    if command -v systemctl >/dev/null 2>&1 && systemctl is-active --quiet nginx; then
+        echo "ℹ️ Stopping nginx service"
         do_and_check_cmd systemctl stop nginx
     fi
 
-    remove_systemd_service "bunkerweb"
-    remove_systemd_service "bunkerweb-ui"
+    # Dynamically remove all related systemd services
+    remove_systemd_services "bunkerweb"
 
-    # Remove /usr/share/bunkerweb
-    if test -e "/usr/share/bunkerweb"; then
-        echo "ℹ️ Remove /usr/share/bunkerweb"
-        do_and_check_cmd rm -rf /usr/share/bunkerweb
-    fi
-
-    # Remove /var/tmp/bunkerweb
-    if test -e "/var/tmp/bunkerweb"; then
-        echo "ℹ️ Remove /var/tmp/bunkerweb"
-        do_and_check_cmd rm -rf /var/tmp/bunkerweb
-    fi
-
-    # Remove /var/run/bunkerweb
-    if test -e "/var/run/bunkerweb"; then
-        echo "ℹ️ Remove /var/run/bunkerweb"
-        do_and_check_cmd rm -rf /var/run/bunkerweb
-    fi
-
-    # Remove /var/log/bunkerweb
-    if test -e "/var/log/bunkerweb"; then
-        echo "ℹ️ Remove /var/log/bunkerweb"
-        do_and_check_cmd rm -rf /var/log/bunkerweb
-    fi
-
-    # Remove /var/lib/bunkerweb
-    if test -e "/var/cache/bunkerweb"; then
-        echo "ℹ️ Remove  /var/cache/bunkerweb"
-        do_and_check_cmd rm -rf /var/cache/bunkerweb
-    fi
-
-    # Remove /usr/bin/bwcli
-    if test -f "/usr/bin/bwcli"; then
-        echo "ℹ️ Remove /usr/bin/bwcli"
-        do_and_check_cmd rm -f /usr/bin/bwcli
-    fi
+    # Remove associated paths
+    remove_path "/usr/share/bunkerweb" "application files"
+    remove_path "/var/tmp/bunkerweb" "temporary files"
+    remove_path "/var/run/bunkerweb" "runtime files"
+    remove_path "/var/log/bunkerweb" "log files"
+    remove_path "/var/cache/bunkerweb" "cache files"
+    remove_path "/usr/bin/bwcli" "CLI binary"
 
     echo "ℹ️ BunkerWeb successfully uninstalled"
 }
 
+# Perform actions for package purge
 function purge() {
-    echo "Package is being purged"
+    echo "ℹ️ Package is being purged"
     remove
 
-    # Remove /var/lib/bunkerweb
-    if test -e "/var/lib/bunkerweb"; then
-        echo "ℹ️ Remove /var/lib/bunkerweb"
-        do_and_check_cmd rm -rf /var/lib/bunkerweb
-    fi
-
-    # Remove /var/tmp/bunkerweb/variables.env
-    if test -d "/etc/bunkerweb"; then
-        echo "ℹ️ Remove /etc/bunkerweb"
-        do_and_check_cmd rm -rf /etc/bunkerweb
-    fi
+    # Remove additional paths during purge
+    remove_path "/var/lib/bunkerweb" "data files"
+    remove_path "/etc/bunkerweb" "configuration files"
 
     echo "ℹ️ BunkerWeb successfully purged"
 }
 
-# Check if we are root
-if [ "$(id -u)" -ne 0 ] ; then
-    echo "❌ Run me as root"
+# Check for root privileges
+if [ "$(id -u)" -ne 0 ]; then
+    echo "❌ This script must be run as root"
     exit 1
 fi
 
+# Detect operating system
 if [ -f /etc/redhat-release ]; then
-  OS="redhat"
+    OS="redhat"
+elif command -v lsb_release >/dev/null 2>&1; then
+    OS=$(lsb_release -is | tr '[:upper:]' '[:lower:]')
 else
-  OS=$(lsb_release -is | tr '[:upper:]' '[:lower:]')
+    if [ -f /etc/os-release ]; then
+        OS=$(grep "^ID=" /etc/os-release | cut -d= -f2 | tr -d '"' | tr '[:upper:]' '[:lower:]')
+    else
+        echo "❌ Unable to detect operating system"
+        exit 1
+    fi
 fi
 
-if ! [[ "$OS" =~ (centos|fedora|redhat) ]]; then
-    echo "❌ Unsupported Operating System"
+# Support only Red Hat-based systems
+if ! [[ "$OS" =~ (redhat|centos|fedora) ]]; then
+    echo "❌ Unsupported operating system: $OS"
     exit 1
 fi
 
-# Check if the package is being upgraded or uninstalled
-if [ "$1" = "0" ]; then
-    # Call the remove function
-    remove
-    purge
-elif [ "$1" = "1" ]; then
-    echo "Package is being upgraded"
-    # Copy env and db
-    cp -f /etc/bunkerweb/variables.env /var/tmp/variables.env
-    cp -f /etc/bunkerweb/ui.env /var/tmp/ui.env
-    cp -f /var/lib/bunkerweb/db.sqlite3 /var/tmp/db.sqlite3
-    exit 0
-else
-    echo "Error"
-    exit 1
-fi
+# Handle script arguments
+case "$1" in
+    0)
+        remove
+        purge
+        ;;
+    1)
+        echo "ℹ️ Package is being upgraded"
+        # Backup important files during upgrade
+        remove_path "/var/tmp/variables.env" "temporary environment variables"
+        remove_path "/var/tmp/ui.env" "UI environment variables"
+        remove_path "/var/tmp/db.sqlite3" "database"
+        do_and_check_cmd cp -f /etc/bunkerweb/variables.env /var/tmp/variables.env
+        do_and_check_cmd cp -f /etc/bunkerweb/ui.env /var/tmp/ui.env
+        do_and_check_cmd cp -f /var/lib/bunkerweb/db.sqlite3 /var/tmp/db.sqlite3
+        ;;
+    *)
+        echo "❌ Invalid argument"
+        exit 1
+        ;;
+esac

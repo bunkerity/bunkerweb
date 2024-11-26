@@ -89,7 +89,6 @@ services:
       <<: *env
       ADMIN_USERNAME: "admin"
       ADMIN_PASSWORD: "P@ssw0rd"
-      TOTP_SECRETS: "secret"
       DEBUG: "1"
     restart: "unless-stopped"
     networks:

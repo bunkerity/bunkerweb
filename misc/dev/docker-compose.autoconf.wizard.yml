@@ -108,7 +108,6 @@ services:
       - ../../src/ui/main.py:/usr/share/bunkerweb/ui/main.py:ro
     environment:
       <<: *env
-      TOTP_SECRETS: "secret"
       DEBUG: "1"
     restart: "unless-stopped"
     networks:
