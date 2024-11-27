@@ -144,10 +144,11 @@ class IngressController(Controller):
                 if not service_list:
                     self._logger.warning(f"Ignoring ingress rule with service {path.backend.service.name} : service not found.")
                     continue
+
                 port = 80
                 if path.backend.service.port.name:
-                    service = service_list[0]
-                    for svc_port in service.spec.ports:
+                    k8s_service = service_list[0]
+                    for svc_port in k8s_service.spec.ports:
                         if svc_port.name == path.backend.service.port.name:
                             port = svc_port.port
                             break
@@ -193,6 +194,7 @@ class IngressController(Controller):
                                     watch=False,
                                     field_selector=f"metadata.name={tls.secret_name}",
                                 ).items
+
                                 if not secrets_tls:
                                     self._logger.warning(f"Ignoring tls setting for {host} : secret {tls.secret_name} not found.")
                                     break
@@ -204,6 +206,7 @@ class IngressController(Controller):
                                 elif "tls.crt" not in secret_tls.data or "tls.key" not in secret_tls.data:
                                     self._logger.warning(f"Ignoring tls setting for {host} : secret {tls.secret_name} is missing tls data.")
                                     break
+
                                 service["USE_CUSTOM_SSL"] = "yes"
                                 service["CUSTOM_SSL_CERT_DATA"] = secret_tls.data["tls.crt"]
                                 service["CUSTOM_SSL_KEY_DATA"] = secret_tls.data["tls.key"]
