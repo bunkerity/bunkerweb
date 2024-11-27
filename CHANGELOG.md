@@ -32,6 +32,11 @@
 - [DEPS] Updated LuaJIT version to v2.1-20241113
 - [DEPS] Updated Mbed TLS version to v3.6.2
 
+## v1.5.12 - 2024/11/27
+
+- [SECURITY] Fix CVE-2024-53254
+- [UI] Fix issues in several pages because of a wrong key being used to fetch the data
+
 ## v1.5.11 - 2024/11/08
 
 - [BUGFIX] Fix INTERCEPTED_ERROR_CODES to allow empty value
