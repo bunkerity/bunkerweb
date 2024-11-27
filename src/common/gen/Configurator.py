@@ -186,6 +186,9 @@ class Configurator:
             ret, err = self.__check_var(variable)
             if ret:
                 config[variable] = value
+            elif variable == "SERVER_NAME":
+                self.__logger.critical(f"Invalid SERVER_NAME (check for duplicates or invalid characters) : {err} - {value = !r}")
+                exit(1)
             elif (
                 not first_run
                 or variable in self.get_settings()
