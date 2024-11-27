@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
-from argparse import ArgumentParser
+from argparse import ArgumentError, ArgumentParser
+from contextlib import suppress
 from os import _exit, getenv, sep
 from os.path import join
 from sys import exit as sys_exit, path as sys_path
@@ -71,11 +72,14 @@ if __name__ == "__main__":
             ret, err = cli.ban(args.ip, args.exp, args.reason)
         elif args.command == "bans":
             ret, err = cli.bans()
-        elif args.command == "plugin":
-            if args.debug:
-                logger.setLevel("DEBUG")
+        else:
+            with suppress(ArgumentError):
+                plugin_args = parser_plugin.parse_args()
 
-            ret, err = cli.custom(args.plugin_id, args.command, *args.arg, debug=args.debug)
+                if args.debug:
+                    logger.setLevel("DEBUG")
+
+                ret, err = cli.custom(args.plugin_id, args.command, *args.arg, debug=args.debug)
 
         if not ret:
             logger.error(f"CLI command status : ❌ (fail)\n{err}")
