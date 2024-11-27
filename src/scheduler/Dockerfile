@@ -72,7 +72,7 @@ COPY --chown=root:scheduler --chmod=770 src/bw/misc/country.mmdb /var/tmp/bunker
 # Fix CVEs
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
-LABEL version="1.5.11"
+LABEL version="1.5.12"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="scheduler"
 

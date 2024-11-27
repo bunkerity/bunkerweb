@@ -6,7 +6,7 @@
 
 !!! tip "Going further"
 
-	To demonstrate the use of BunkerWeb, we will deploy a dummy "Hello World" web application as an example. See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.5.11/examples) of the repository to get real-world examples.
+	To demonstrate the use of BunkerWeb, we will deploy a dummy "Hello World" web application as an example. See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.5.12/examples) of the repository to get real-world examples.
 
 ## Protect HTTP applications
 
@@ -37,7 +37,7 @@ You will find more settings about reverse proxy in the [settings section](settin
           - bw-services
 
       bunkerweb:
-        image: bunkerity/bunkerweb:1.5.11
+        image: bunkerity/bunkerweb:1.5.12
         ports:
           - 80:8080
           - 443:8443
@@ -54,7 +54,7 @@ You will find more settings about reverse proxy in the [settings section](settin
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.5.11
+        image: bunkerity/bunkerweb-scheduler:1.5.12
         depends_on:
           - bunkerweb
           - bw-docker
@@ -295,7 +295,7 @@ You will find more settings about reverse proxy in the [settings section](settin
           - bw-services
 
       bunkerweb:
-        image: bunkerity/bunkerweb:1.5.11
+        image: bunkerity/bunkerweb:1.5.12
         ports:
           - 80:8080
           - 443:8443
@@ -315,7 +315,7 @@ You will find more settings about reverse proxy in the [settings section](settin
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.5.11
+        image: bunkerity/bunkerweb-scheduler:1.5.12
         depends_on:
           - bunkerweb
           - bw-docker
@@ -634,7 +634,7 @@ REAL_IP_HEADER=X-Forwarded-For
 
     ```yaml
     mybunker:
-      image: bunkerity/bunkerweb:1.5.11
+      image: bunkerity/bunkerweb:1.5.12
       ...
       environment:
         - USE_REAL_IP=yes
@@ -649,7 +649,7 @@ REAL_IP_HEADER=X-Forwarded-For
 
     ```yaml
     mybunker:
-      image: bunkerity/bunkerweb:1.5.11
+      image: bunkerity/bunkerweb:1.5.12
       ...
       environment:
         - USE_REAL_IP=yes
@@ -664,7 +664,7 @@ REAL_IP_HEADER=X-Forwarded-For
 
     ```yaml
     mybunker:
-      image: bunkerity/bunkerweb:1.5.11
+      image: bunkerity/bunkerweb:1.5.12
       ...
       environment:
         - USE_REAL_IP=yes
@@ -738,7 +738,7 @@ REAL_IP_HEADER=proxy_protocol
 
     ```yaml
     mybunker:
-      image: bunkerity/bunkerweb:1.5.11
+      image: bunkerity/bunkerweb:1.5.12
       ...
       environment:
         - USE_REAL_IP=yes
@@ -754,7 +754,7 @@ REAL_IP_HEADER=proxy_protocol
 
     ```yaml
     mybunker:
-      image: bunkerity/bunkerweb:1.5.11
+      image: bunkerity/bunkerweb:1.5.12
       ...
       environment:
         - USE_REAL_IP=yes
@@ -770,7 +770,7 @@ REAL_IP_HEADER=proxy_protocol
 
     ```yaml
     mybunker:
-      image: bunkerity/bunkerweb:1.5.11
+      image: bunkerity/bunkerweb:1.5.12
       ...
       environment:
         - USE_REAL_IP=yes
@@ -869,7 +869,7 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
           - bw-services
 
       bunkerweb:
-        image: bunkerity/bunkerweb:1.5.11
+        image: bunkerity/bunkerweb:1.5.12
         ports:
           - 80:8080 # Keep it if you want to use Let's Encrypt automation
           - 10000:10000 # app1
@@ -891,7 +891,7 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.5.11
+        image: bunkerity/bunkerweb-scheduler:1.5.12
         depends_on:
           - bunkerweb
           - bw-docker
@@ -940,7 +940,7 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
     services:
 
       bunkerweb:
-        image: bunkerity/bunkerweb:1.5.11
+        image: bunkerity/bunkerweb:1.5.12
         ports:
           - 80:8080 # Keep it if you want to use Let's Encrypt automation
           - 10000:10000 # app1
@@ -998,7 +998,7 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.5.11
+        image: bunkerity/bunkerweb:1.5.12
         ports:
           # Keep it if you want to use Let's Encrypt automation
           - published: 80
@@ -1142,7 +1142,7 @@ Some integrations provide more convenient ways to apply configurations, such as 
     ```yaml
     ...
     mybunker:
-      image: bunkerity/bunkerweb:1.5.11
+      image: bunkerity/bunkerweb:1.5.12
       environment:
         - |
           CUSTOM_CONF_SERVER_HTTP_hello-world=
@@ -1185,7 +1185,7 @@ Some integrations provide more convenient ways to apply configurations, such as 
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.5.11
+      image: bunkerity/bunkerweb-scheduler:1.5.12
       volumes:
         - ./bw-data:/data
       ...
@@ -1255,7 +1255,7 @@ Some integrations provide more convenient ways to apply configurations, such as 
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.5.11
+      image: bunkerity/bunkerweb-scheduler:1.5.12
       volumes:
         - ./bw-data:/data
       ...
@@ -1439,7 +1439,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
           - bw-services
 
       bunkerweb:
-        image: bunkerity/bunkerweb:1.5.11
+        image: bunkerity/bunkerweb:1.5.12
         volumes:
           - ./www:/var/www/html
         ports:
@@ -1462,7 +1462,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.5.11
+        image: bunkerity/bunkerweb-scheduler:1.5.12
         depends_on:
           - bunkerweb
           - bw-docker
@@ -1540,7 +1540,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.5.11
+        image: bunkerity/bunkerweb:1.5.12
         volumes:
           - ./www:/var/www/html
         labels:
@@ -1554,7 +1554,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.5.11
+        image: bunkerity/bunkerweb-scheduler:1.5.12
         depends_on:
           - bunkerweb
           - bw-docker
@@ -1698,7 +1698,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.5.11
+        image: bunkerity/bunkerweb:1.5.12
         volumes:
           - /shared/www:/var/www/html
     ...
@@ -1889,7 +1889,7 @@ By default, BunkerWeb will only listen on IPv4 addresses and won't use IPv6 for 
     services:
 
       bunkerweb:
-        image: bunkerity/bunkerweb:1.5.11
+        image: bunkerity/bunkerweb:1.5.12
         environment:
           - USE_IPv6=yes
 
@@ -1934,7 +1934,7 @@ By default, BunkerWeb will only listen on IPv4 addresses and won't use IPv6 for 
     services:
 
       bunkerweb:
-        image: bunkerity/bunkerweb:1.5.11
+        image: bunkerity/bunkerweb:1.5.12
         environment:
           - USE_IPv6=yes
 

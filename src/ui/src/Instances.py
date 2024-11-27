@@ -15,7 +15,7 @@ class Instance:
     _id: str
     name: str
     hostname: str
-    _type: str
+    instance_type: str
     health: bool
     env: Any
     apiCaller: ApiCaller
@@ -25,7 +25,7 @@ class Instance:
         _id: str,
         name: str,
         hostname: str,
-        _type: str,
+        instance_type: str,
         status: str,
         data: Any = None,
         apiCaller: Optional[ApiCaller] = None,
@@ -33,9 +33,11 @@ class Instance:
         self._id = _id
         self.name = name
         self.hostname = hostname
-        self._type = _type
+        self.instance_type = instance_type
         self.health = status == "up" and (
-            (data.attrs["State"]["Health"]["Status"] == "healthy" if "Health" in data.attrs["State"] else False) if _type == "container" and data else True
+            (data.attrs["State"]["Health"]["Status"] == "healthy" if "Health" in data.attrs["State"] else False)
+            if instance_type == "container" and data
+            else True
         )
         self.env = data
         self.apiCaller = apiCaller or ApiCaller()
@@ -45,7 +47,7 @@ class Instance:
         return self._id
 
     def reload(self) -> bool:
-        if self._type == "local":
+        if self.instance_type == "local":
             return (
                 run(
                     [join(sep, "usr", "sbin", "nginx"), "-s", "reload"],
@@ -59,7 +61,7 @@ class Instance:
         return self.apiCaller.send_to_apis("POST", "/reload")
 
     def start(self) -> bool:
-        if self._type == "local":
+        if self.instance_type == "local":
             return (
                 run(
                     [join(sep, "usr", "sbin", "nginx"), "-e", "/var/log/bunkerweb/error.log"],
@@ -73,7 +75,7 @@ class Instance:
         return self.apiCaller.send_to_apis("POST", "/start")
 
     def stop(self) -> bool:
-        if self._type == "local":
+        if self.instance_type == "local":
             return (
                 run(
                     [join(sep, "usr", "sbin", "nginx"), "-s", "stop"],
@@ -87,7 +89,7 @@ class Instance:
         return self.apiCaller.send_to_apis("POST", "/stop")
 
     def restart(self) -> bool:
-        if self._type == "local":
+        if self.instance_type == "local":
             proc = run(
                 [join(sep, "usr", "sbin", "nginx"), "-s", "stop"],
                 stdin=DEVNULL,
@@ -368,7 +370,9 @@ class Instances:
                 return []
             if not resp:
                 return []
-            return instance_bans[instance.name if instance.name != "local" else "127.0.0.1"].get("data", [])
+            return instance_bans[(instance.name if instance.instance_type != "pod" else instance.hostname) if instance.name != "local" else "127.0.0.1"].get(
+                "data", []
+            )
 
         bans: List[dict[str, Any]] = []
         for instance in self.get_instances():
@@ -378,7 +382,11 @@ class Instances:
                 continue
             if not resp:
                 continue
-            bans.extend(instance_bans[instance.name if instance.name != "local" else "127.0.0.1"].get("data", []))
+            bans.extend(
+                instance_bans[(instance.name if instance.instance_type != "pod" else instance.hostname) if instance.name != "local" else "127.0.0.1"].get(
+                    "data", []
+                )
+            )
 
         bans.sort(key=itemgetter("exp"))
 
@@ -425,7 +433,12 @@ class Instances:
                 return []
             if not resp:
                 return []
-            return (instance_reports[instance.name if instance.name != "local" else "127.0.0.1"].get("msg") or {"requests": []})["requests"]
+            return (
+                instance_reports[(instance.name if instance.instance_type != "pod" else instance.hostname) if instance.name != "local" else "127.0.0.1"].get(
+                    "msg"
+                )
+                or {"requests": []}
+            )["requests"]
 
         reports: List[dict[str, Any]] = []
         for instance in self.get_instances():
@@ -436,7 +449,14 @@ class Instances:
 
             if not resp:
                 continue
-            reports.extend((instance_reports[instance.name if instance.name != "local" else "127.0.0.1"].get("msg") or {"requests": []})["requests"])
+            reports.extend(
+                (
+                    instance_reports[
+                        (instance.name if instance.instance_type != "pod" else instance.hostname) if instance.name != "local" else "127.0.0.1"
+                    ].get("msg")
+                    or {"requests": []}
+                )["requests"]
+            )
 
         reports.sort(key=itemgetter("date"), reverse=True)
 
@@ -446,7 +466,7 @@ class Instances:
         # Get metrics from all instances
         metrics = {}
         for instance in self.get_instances():
-            instance_name = instance.name if instance.name != "local" else "127.0.0.1"
+            instance_name = (instance.name if instance.instance_type != "pod" else instance.hostname) if instance.name != "local" else "127.0.0.1"
 
             try:
                 if plugin_id == "redis":
@@ -505,7 +525,7 @@ class Instances:
         # Need at least one instance to get a success ping to return success
         ping = {"status": "error"}
         for instance in self.get_instances():
-            instance_name = instance.name if instance.name != "local" else "127.0.0.1"
+            instance_name = (instance.name if instance.instance_type != "pod" else instance.hostname) if instance.name != "local" else "127.0.0.1"
 
             try:
                 resp, ping_data = instance.ping(plugin_id)
@@ -527,7 +547,7 @@ class Instances:
         data = []
         for instance in self.get_instances():
 
-            instance_name = instance.name if instance.name != "local" else "127.0.0.1"
+            instance_name = (instance.name if instance.instance_type != "pod" else instance.hostname) if instance.name != "local" else "127.0.0.1"
 
             try:
                 resp, instance_data = instance.data(plugin_endpoint)

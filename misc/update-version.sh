@@ -16,8 +16,17 @@ sed -i "s@${OLD_VERSION}@${NEW_VERSION}@g" misc/integrations/*.yml
 shopt -s globstar
 for example in examples/* ; do
     if [ -d "$example" ] ; then
-        # shellcheck disable=SC2086
-        sed -i "s@${OLD_VERSION}@${NEW_VERSION}@g" ${example}/*.yml
+        if [ "$example" = "examples/community" ] ; then
+            for community in examples/community/* ; do
+                if [ -d "$community" ] ; then
+                    # shellcheck disable=SC2086
+                    sed -i "s@${OLD_VERSION}@${NEW_VERSION}@g" ${community}/*.yml
+                fi
+            done
+        else
+            # shellcheck disable=SC2086
+            sed -i "s@${OLD_VERSION}@${NEW_VERSION}@g" ${example}/*.yml
+        fi
     fi
 done
 shopt -u globstar

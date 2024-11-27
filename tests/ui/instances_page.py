@@ -41,6 +41,9 @@ try:
             retries += 1
             log_warning("Error while reloading, retrying...")
 
+    DRIVER.refresh()
+    DRIVER.refresh()
+
     wait_for_service()
 
     log_info("Trying to stop instance ...")

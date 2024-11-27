@@ -2,7 +2,7 @@ version: "3"
 
 services:
   mybunker:
-    image: bunkerity/bunkerweb:1.5.11
+    image: bunkerity/bunkerweb:1.5.12
     ports:
       - 80:8080
       - 443:8443
@@ -33,7 +33,7 @@ services:
       - bw-services
 
   bbw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.5.11
+    image: bunkerity/bunkerweb-scheduler:1.5.12
     depends_on:
       - mybunker
     environment:
