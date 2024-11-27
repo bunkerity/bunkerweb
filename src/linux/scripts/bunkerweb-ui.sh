@@ -14,9 +14,11 @@ start() {
     stop
 
     echo "Starting UI"
+    export LISTEN_ADDR="127.0.0.1"
+    export FORWARDED_ALLOW_IPS="127.0.0.1"
     # shellcheck disable=SC2046
     export $(cat /etc/bunkerweb/ui.env)
-    sudo -E -u nginx -g nginx /bin/bash -c "PYTHONPATH=$PYTHONPATH python3 -m gunicorn --chdir /usr/share/bunkerweb/ui --config /usr/share/bunkerweb/ui/gunicorn.conf.py --pythonpath /usr/share/bunkerweb/deps/python,/usr/share/bunkerweb/ui --bind \"127.0.0.1:7000\""
+    sudo -E -u nginx -g nginx /bin/bash -c "PYTHONPATH=$PYTHONPATH python3 -m gunicorn --chdir /usr/share/bunkerweb/ui --config /usr/share/bunkerweb/ui/gunicorn.conf.py"
 }
 
 # Function to stop the UI
