@@ -110,7 +110,7 @@ fi
 if [ "$SERVICE_SCHEDULER" != "no" ] ; then
     if [ -f /var/tmp/bunkerweb_upgrade ] && systemctl is-active --quiet bunkerweb-scheduler; then
         # Reload bunkerweb-scheduler service
-        echo "Reloading bunkerweb-scheduler service..."
+        echo "Restarting bunkerweb-scheduler service..."
         do_and_check_cmd systemctl restart bunkerweb-scheduler
     else
         # Auto start BW Scheduler service on boot and start it now
