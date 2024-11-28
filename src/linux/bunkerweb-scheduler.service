@@ -1,0 +1,19 @@
+[Unit]
+Description=BunkerWeb Scheduler service
+Documentation=https://docs.bunkerweb.io
+After=bunkerweb.service
+
+[Service]
+Restart=no
+User=root
+PIDFile=/var/run/bunkerweb/scheduler.pid
+ExecStart=/usr/share/bunkerweb/scripts/bunkerweb-scheduler.sh start
+ExecStop=/usr/share/bunkerweb/scripts/bunkerweb-scheduler.sh stop
+ExecReload=/usr/share/bunkerweb/scripts/bunkerweb-scheduler.sh reload
+Type=simple
+StandardOutput=journal+console
+StandardError=journal+console
+
+[Install]
+WantedBy=multi-user.target
+Alias=bunkerweb-scheduler.service
