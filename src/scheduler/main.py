@@ -11,7 +11,6 @@ from os.path import join
 from pathlib import Path
 from shutil import copy, rmtree, copytree
 from signal import SIGINT, SIGTERM, signal, SIGHUP
-from stat import S_IEXEC
 from subprocess import run as subprocess_run, DEVNULL, STDOUT
 from sys import path as sys_path
 from tarfile import TarFile, open as tar_open
@@ -101,9 +100,6 @@ if not RELOAD_MIN_TIMEOUT.isdigit():
     RELOAD_MIN_TIMEOUT = 5
 
 RELOAD_MIN_TIMEOUT = int(RELOAD_MIN_TIMEOUT)
-
-SLAVE_MODE = getenv("SLAVE_MODE", "no") == "yes"
-MASTER_MODE = getenv("MASTER_MODE", "no") == "yes"
 
 
 def handle_stop(signum, frame):
@@ -234,6 +230,7 @@ def generate_custom_configs(configs: Optional[List[Dict[str, Any]]] = None, *, o
                     )
                     tmp_path.parent.mkdir(parents=True, exist_ok=True)
                     tmp_path.write_bytes(custom_config["data"])
+                    tmp_path.chmod(0o640)
             except OSError as e:
                 LOGGER.debug(format_exc())
                 if custom_config["method"] != "manual":
@@ -298,7 +295,7 @@ def generate_external_plugins(original_path: Union[Path, str] = EXTERNAL_PLUGINS
                             tar.extractall(original_path)
 
                     for job_file in chain(original_path.joinpath(plugin["id"], "jobs").glob("*"), original_path.joinpath(plugin["id"], "bwcli").glob("*")):
-                        job_file.chmod(job_file.stat().st_mode | S_IEXEC)
+                        job_file.chmod(0o750)
             except OSError as e:
                 LOGGER.debug(format_exc())
                 if plugin["method"] != "manual":
@@ -346,6 +343,7 @@ def generate_caches():
                 continue
             cache_path.parent.mkdir(parents=True, exist_ok=True)
             cache_path.write_bytes(job_cache_file["data"])
+            cache_path.chmod(0o640)
             LOGGER.debug(f"Restored cache file {job_cache_file['file_name']}")
         except BaseException as e:
             LOGGER.error(f"Exception while restoring cache file {job_cache_file['file_name']} :\n{e}")
@@ -364,75 +362,13 @@ def generate_caches():
                     rmtree(file.parent, ignore_errors=True)
                     if file.parent == job_path:
                         break
+                continue
             elif file.is_dir() and not list(file.iterdir()):
                 LOGGER.debug(f"Removing empty directory {file}")
                 rmtree(file, ignore_errors=True)
+                continue
 
-
-def run_in_slave_mode():  # TODO: Refactor this feature
-    assert SCHEDULER is not None
-
-    ready = False
-    while not ready:
-        db_metadata = SCHEDULER.db.get_metadata()
-        env = SCHEDULER.db.get_config()
-        if isinstance(db_metadata, str) or not db_metadata["is_initialized"]:
-            LOGGER.warning("Database is not initialized, retrying in 5s ...")
-        elif not db_metadata["first_config_saved"] or not env:
-            LOGGER.warning("Database doesn't have any config saved yet, retrying in 5s ...")
-        else:
-            ready = True
-            continue
-        sleep(5)
-
-    tz = getenv("TZ")
-    if tz:
-        env["TZ"] = tz
-
-    # Instantiate scheduler environment
-    SCHEDULER.env = env | {"LOG_LEVEL": getenv("CUSTOM_LOG_LEVEL", env.get("LOG_LEVEL", "notice")), "RELOAD_MIN_TIMEOUT": str(RELOAD_MIN_TIMEOUT)}
-
-    generate_custom_configs()
-    threads = [
-        Thread(target=generate_external_plugins),
-        Thread(target=generate_external_plugins, args=(PRO_PLUGINS_PATH,)),
-        Thread(target=generate_caches),
-    ]
-
-    for thread in threads:
-        thread.start()
-
-    for thread in threads:
-        thread.join()
-
-    # Gen config
-    content = ""
-    for k, v in env.items():
-        content += f"{k}={v}\n"
-    SCHEDULER_TMP_ENV_PATH.write_text(content)
-    proc = subprocess_run(
-        [
-            "python3",
-            join(sep, "usr", "share", "bunkerweb", "gen", "main.py"),
-            "--settings",
-            join(sep, "usr", "share", "bunkerweb", "settings.json"),
-            "--templates",
-            join(sep, "usr", "share", "bunkerweb", "confs"),
-            "--output",
-            CONFIG_PATH.as_posix(),
-            "--variables",
-            SCHEDULER_TMP_ENV_PATH.as_posix(),
-        ],
-        stdin=DEVNULL,
-        stderr=STDOUT,
-        check=False,
-    )
-    if proc.returncode != 0:
-        LOGGER.error("Config generator failed, configuration will not work as expected...")
-
-    # TODO : check nginx status + check DB status
-    while True:
-        sleep(5)
+            file.chmod(0o750)
 
 
 def healthcheck_job():
@@ -552,10 +488,6 @@ if __name__ == "__main__":
         SCHEDULER = JobScheduler(environ, LOGGER, db=Database(LOGGER, sqlalchemy_string=dotenv_env.get("DATABASE_URI", getenv("DATABASE_URI", None))))  # type: ignore
 
         JOB = Job(LOGGER, SCHEDULER.db)
-
-        if SLAVE_MODE:
-            run_in_slave_mode()
-            stop(1)
 
         APPLYING_CHANGES.set()
 
@@ -846,8 +778,7 @@ if __name__ == "__main__":
                         CONFIG_PATH.as_posix(),
                         "--variables",
                         SCHEDULER_TMP_ENV_PATH.as_posix(),
-                    ]
-                    + (["--no-linux-reload"] if MASTER_MODE else []),
+                    ],
                     stdin=DEVNULL,
                     stderr=STDOUT,
                     check=False,

@@ -223,6 +223,9 @@ class Database:
         if log:
             self.logger.info(f"✅ Database connection established{'' if not self.readonly else ' in read-only mode'}")
 
+        if match.group("database").startswith("sqlite"):
+            db_path.chmod(0o660)
+
     def __del__(self) -> None:
         """Close the database"""
         if self._session_factory:
