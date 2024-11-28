@@ -100,6 +100,10 @@ if [ "$SERVICE_BUNKERWEB" != "no" ] ; then
         do_and_check_cmd systemctl enable bunkerweb
         do_and_check_cmd systemctl start bunkerweb
     fi
+elif systemctl is-active --quiet bunkerweb; then
+    echo "Disabling bunkerweb service..."
+    do_and_check_cmd systemctl stop bunkerweb
+    do_and_check_cmd systemctl disable bunkerweb
 fi
 
 # Create scheduler if necessary
@@ -132,6 +136,18 @@ if [ "$SERVICE_SCHEDULER" != "no" ] ; then
         echo ""
         echo "Note: Make sure that your firewall settings allow access to this URL."
         echo ""
+    fi
+else
+    if systemctl is-active --quiet bunkerweb-scheduler; then
+        echo "Disabling bunkerweb-scheduler service..."
+        do_and_check_cmd systemctl stop bunkerweb-scheduler
+        do_and_check_cmd systemctl disable bunkerweb-scheduler
+    fi
+
+    if systemctl is-active --quiet bunkerweb-ui; then
+        echo "Disabling bunkerweb-ui service..."
+        do_and_check_cmd systemctl stop bunkerweb-ui
+        do_and_check_cmd systemctl disable bunkerweb-ui
     fi
 fi
 
