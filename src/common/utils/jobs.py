@@ -71,8 +71,8 @@ class Job:
                     extract_path = cache_path.parent
                     if job_cache_file["file_name"].startswith("folder:"):
                         extract_path = Path(job_cache_file["file_name"].split("folder:", 1)[1].rsplit(".tgz", 1)[0])
-                    ignored_dirs.add(extract_path.as_posix())
                     if job_cache_file["job_name"] != job_name:
+                        ignored_dirs.add(extract_path.as_posix())
                         continue
                     with LOCK:
                         rmtree(extract_path, ignore_errors=True)
@@ -85,9 +85,10 @@ class Job:
                                         tar.extract(member, path=extract_path)
                                     except Exception as e:
                                         self.logger.error(f"Error extracting {member.name}: {e}")
+                                ignored_dirs.add(extract_path.as_posix())
+                                self.logger.debug(f"Restored cache directory {extract_path}")
                             except Exception as e:
                                 self.logger.error(f"Error extracting tar file: {e}")
-                    self.logger.debug(f"Restored cache directory {extract_path}")
                     continue
                 elif job_cache_file["job_name"] != job_name:
                     continue
