@@ -83,20 +83,23 @@ else
     echo "/var/www/html directory already exists, skipping copy..."
 fi
 
-if [ -f /var/tmp/bunkerweb_upgrade ]; then
-    # Reload bunkerweb service
-    echo "Reloading bunkerweb service..."
-    do_and_check_cmd systemctl reload bunkerweb
-else
-    # Stop and disable nginx on boot
-    echo "Stop and disable nginx on boot..."
-    do_and_check_cmd systemctl stop nginx
-    do_and_check_cmd systemctl disable nginx
+# Create bunkerweb if needed
+if [ "$SERVICE_BUNKERWEB" != "no" ] ; then
+    if [ -f /var/tmp/bunkerweb_upgrade ]; then
+        # Reload bunkerweb service
+        echo "Reloading bunkerweb service..."
+        do_and_check_cmd systemctl reload bunkerweb
+    else
+        # Stop and disable nginx on boot
+        echo "Stop and disable nginx on boot..."
+        do_and_check_cmd systemctl stop nginx
+        do_and_check_cmd systemctl disable nginx
 
-    # Auto start BW service on boot and start it now
-    echo "Enabling and starting bunkerweb service..."
-    do_and_check_cmd systemctl enable bunkerweb
-    do_and_check_cmd systemctl start bunkerweb
+        # Auto start BW service on boot and start it now
+        echo "Enabling and starting bunkerweb service..."
+        do_and_check_cmd systemctl enable bunkerweb
+        do_and_check_cmd systemctl start bunkerweb
+    fi
 fi
 
 # Create scheduler if necessary
