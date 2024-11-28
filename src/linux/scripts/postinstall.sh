@@ -86,9 +86,11 @@ fi
 # Create bunkerweb if needed
 if [ "$SERVICE_BUNKERWEB" != "no" ] ; then
     if [ -f /var/tmp/bunkerweb_upgrade ]; then
-        # Reload bunkerweb service
-        echo "Reloading bunkerweb service..."
-        do_and_check_cmd systemctl reload bunkerweb
+        if systemctl is-active --quiet bunkerweb; then
+            # Reload bunkerweb service
+            echo "Reloading bunkerweb service..."
+            do_and_check_cmd systemctl reload bunkerweb
+        fi
     else
         # Stop and disable nginx on boot
         echo "Stop and disable nginx on boot..."
@@ -108,10 +110,12 @@ fi
 
 # Create scheduler if necessary
 if [ "$SERVICE_SCHEDULER" != "no" ] ; then
-    if [ -f /var/tmp/bunkerweb_upgrade ] && systemctl is-active --quiet bunkerweb-scheduler; then
-        # Reload bunkerweb-scheduler service
-        echo "Restarting bunkerweb-scheduler service..."
-        do_and_check_cmd systemctl restart bunkerweb-scheduler
+    if [ -f /var/tmp/bunkerweb_upgrade ]; then
+        if systemctl is-active --quiet bunkerweb-scheduler; then
+            # Reload bunkerweb-scheduler service
+            echo "Restarting bunkerweb-scheduler service..."
+            do_and_check_cmd systemctl restart bunkerweb-scheduler
+        fi
     else
         # Auto start BW Scheduler service on boot and start it now
         echo "Enabling and starting bunkerweb service..."
