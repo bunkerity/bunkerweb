@@ -39,12 +39,14 @@ LOG_LEVEL = getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "info"))
 LISTEN_ADDR = getenv("LISTEN_ADDR", "0.0.0.0")
 LISTEN_PORT = getenv("LISTEN_PORT", "7000")
 FORWARDED_ALLOW_IPS = getenv("FORWARDED_ALLOW_IPS", "*")
+CAPTURE_OUTPUT = getenv("CAPTURE_OUTPUT", "no").lower() == "yes"
 
 wsgi_app = "main:app"
 proc_name = "bunkerweb-ui"
 accesslog = join(sep, "var", "log", "bunkerweb", "ui-access.log")
 access_log_format = '%({x-forwarded-for}i)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s"'
 errorlog = join(sep, "var", "log", "bunkerweb", "ui.log")
+capture_output = CAPTURE_OUTPUT
 limit_request_line = 0
 limit_request_fields = 32768
 limit_request_field_size = 0
