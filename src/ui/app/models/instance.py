@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from datetime import datetime
 from operator import itemgetter
+from os import getenv
 from typing import Any, List, Literal, Optional, Tuple, Union
 
 from API import API  # type: ignore
@@ -67,7 +68,7 @@ class Instance:
 
     def reload(self) -> str:
         try:
-            result = self.apiCaller.send_to_apis("POST", "/reload")[0]
+            result = self.apiCaller.send_to_apis("POST", f"/reload?test={'no' if getenv('DISABLE_CONFIGURATION_TESTING', 'no').lower() == 'yes' else 'yes'}")[0]
         except BaseException as e:
             return f"Can't reload instance {self.hostname}: {e}"
 

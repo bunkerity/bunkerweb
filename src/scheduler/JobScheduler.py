@@ -134,7 +134,11 @@ class JobScheduler(ApiCaller):
             self.__logger.error("RELOAD_MIN_TIMEOUT must be an integer, defaulting to 5")
             reload_min_timeout = 5
 
-        reload_success = self.send_to_apis("POST", "/reload", timeout=max(int(reload_min_timeout), 2 * len(self.__env["SERVER_NAME"].split(" "))))[0]
+        reload_success = self.send_to_apis(
+            "POST",
+            f"/reload?test={'no' if self.__env.get('DISABLE_CONFIGURATION_TESTING', 'no').lower() == 'yes' else 'yes'}",
+            timeout=max(int(reload_min_timeout), 2 * len(self.__env["SERVER_NAME"].split(" "))),
+        )[0]
         if reload_success:
             self.__logger.info("Successfully reloaded nginx")
             return True

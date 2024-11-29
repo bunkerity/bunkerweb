@@ -101,6 +101,11 @@ if not RELOAD_MIN_TIMEOUT.isdigit():
 
 RELOAD_MIN_TIMEOUT = int(RELOAD_MIN_TIMEOUT)
 
+DISABLE_CONFIGURATION_TESTING = getenv("DISABLE_CONFIGURATION_TESTING", "no").lower() == "yes"
+
+if DISABLE_CONFIGURATION_TESTING:
+    LOGGER.warning("Configuration testing is disabled, changes will be applied without testing (we hope you know what you're doing) ...")
+
 
 def handle_stop(signum, frame):
     current_time = datetime.now().astimezone()
@@ -383,6 +388,8 @@ def healthcheck_job():
 
     HEALTHCHECK_EVENT.set()
 
+    # env = SCHEDULER.db.get_config()  # TODO: uncomment when the healthcheck endpoint is ready @fl0ppy-d1sk
+
     for db_instance in SCHEDULER.db.get_instances():
         bw_instance = API(f"http://{db_instance['hostname']}:{db_instance['port']}", db_instance["server_name"])
         try:
@@ -421,7 +428,7 @@ def healthcheck_job():
             #     api_caller.send_files(PRO_PLUGINS_PATH, "/pro_plugins")
             #     api_caller.send_files(join(sep, "etc", "nginx"), "/confs")
             #     api_caller.send_files(CACHE_PATH, "/cache")
-            #     if not api_caller.send_to_apis("POST", "/reload")[0]:
+            #     if not api_caller.send_to_apis("POST", f"/reload?test={'no' if DISABLE_CONFIGURATION_TESTING else 'yes'}", timeout=max(RELOAD_MIN_TIMEOUT, 2 * len(env["SERVER_NAME"].split(" "))),)[0]:
             #         HEALTHCHECK_LOGGER.error(f"Error while reloading instance {bw_instance.endpoint}")
             #         ret = SCHEDULER.db.update_instance(db_instance["hostname"], "loading")
             #         if ret:
@@ -806,7 +813,10 @@ if __name__ == "__main__":
                         thread.join()
 
                     success, responses = SCHEDULER.send_to_apis(
-                        "POST", "/reload", timeout=max(RELOAD_MIN_TIMEOUT, 2 * len(env["SERVER_NAME"].split(" "))), response=True
+                        "POST",
+                        f"/reload?test={'no' if DISABLE_CONFIGURATION_TESTING else 'yes'}",
+                        timeout=max(RELOAD_MIN_TIMEOUT, 2 * len(env["SERVER_NAME"].split(" "))),
+                        response=True,
                     )
                     if not success:
                         reachable = False
@@ -872,7 +882,11 @@ if __name__ == "__main__":
                             for thread in tmp_threads:
                                 thread.join()
 
-                        if not SCHEDULER.send_to_apis("POST", "/reload", timeout=max(RELOAD_MIN_TIMEOUT, 2 * len(env["SERVER_NAME"].split(" "))))[0]:
+                        if not SCHEDULER.send_to_apis(
+                            "POST",
+                            f"/reload?test={'no' if DISABLE_CONFIGURATION_TESTING else 'yes'}",
+                            timeout=max(RELOAD_MIN_TIMEOUT, 2 * len(env["SERVER_NAME"].split(" "))),
+                        )[0]:
                             LOGGER.error("Error while reloading bunkerweb with failover configuration, skipping ...")
                 elif not reachable:
                     LOGGER.warning("No BunkerWeb instance is reachable, skipping failover ...")

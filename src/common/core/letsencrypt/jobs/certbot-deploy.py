@@ -60,7 +60,11 @@ try:
             LOGGER.info(
                 f"Successfully sent API request to {api.endpoint}/lets-encrypt/certificates",
             )
-            sent, err, status, resp = api.request("POST", "/reload", timeout=max(reload_min_timeout, 2 * len(services)))
+            sent, err, status, resp = api.request(
+                "POST",
+                f"/reload?test={'no' if getenv('DISABLE_CONFIGURATION_TESTING', 'no').lower() == 'yes' else 'yes'}",
+                timeout=max(reload_min_timeout, 2 * len(services)),
+            )
             if not sent:
                 status = 1
                 LOGGER.error(f"Can't send API request to {api.endpoint}/reload : {err}")
