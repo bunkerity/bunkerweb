@@ -86,9 +86,9 @@ fi
 # Create bunkerweb if needed
 if {
     {
-        [ -z "$MASTER_MODE" ] && [ -z "$SLAVE_MODE" ];
+        [ -z "$MANAGER_MODE" ] && [ -z "$WORKER_MODE" ];
     } || {
-        [ "${MASTER_MODE:-yes}" = "no" ] || [ "${SLAVE_MODE:-no}" != "no" ];
+        [ "${MANAGER_MODE:-yes}" = "no" ] || [ "${WORKER_MODE:-no}" != "no" ];
     };
 } && [ "$SERVICE_BUNKERWEB" != "no" ]; then
     if [ -f /var/tmp/bunkerweb_upgrade ]; then
@@ -116,7 +116,7 @@ fi
 
 # Create scheduler if necessary
 if {
-    [ "${MASTER_MODE:-yes}" != "no" ] || [ "${SLAVE_MODE:-no}" = "no" ];
+    [ "${MANAGER_MODE:-yes}" != "no" ] || [ "${WORKER_MODE:-no}" = "no" ];
 } && [ "$SERVICE_SCHEDULER" != "no" ]; then
     if [ -f /var/tmp/bunkerweb_upgrade ]; then
             # Reload the bunkerweb-scheduler service if running
@@ -138,7 +138,7 @@ fi
 
 # Create web UI if necessary
 if {
-    [ "${MASTER_MODE:-yes}" != "no" ] || [ "${SLAVE_MODE:-no}" = "no" ];
+    [ "${MANAGER_MODE:-yes}" != "no" ] || [ "${WORKER_MODE:-no}" = "no" ];
 } && [ "$SERVICE_UI" != "no" ]; then
     if [ -f /var/tmp/bunkerweb_upgrade ]; then
         # Reload the bunkerweb-ui service if running
