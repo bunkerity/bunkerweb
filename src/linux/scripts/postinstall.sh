@@ -84,11 +84,17 @@ else
 fi
 
 # Create bunkerweb if needed
-if [ "$SERVICE_BUNKERWEB" != "no" ] ; then
+if {
+    {
+        [ -z "$MASTER_MODE" ] && [ -z "$SLAVE_MODE" ];
+    } || {
+        [ "${MASTER_MODE:-yes}" = "no" ] || [ "${SLAVE_MODE:-no}" != "no" ];
+    };
+} && [ "$SERVICE_BUNKERWEB" != "no" ]; then
     if [ -f /var/tmp/bunkerweb_upgrade ]; then
         if systemctl is-active --quiet bunkerweb; then
             # Reload bunkerweb service
-            echo "Reloading bunkerweb service..."
+            echo "Reloading the bunkerweb service..."
             do_and_check_cmd systemctl reload bunkerweb
         fi
     else
@@ -98,35 +104,46 @@ if [ "$SERVICE_BUNKERWEB" != "no" ] ; then
         do_and_check_cmd systemctl disable nginx
 
         # Auto start BW service on boot and start it now
-        echo "Enabling and starting bunkerweb service..."
+        echo "Enabling and starting the bunkerweb service..."
         do_and_check_cmd systemctl enable bunkerweb
         do_and_check_cmd systemctl start bunkerweb
     fi
 elif systemctl is-active --quiet bunkerweb; then
-    echo "Disabling bunkerweb service..."
+    echo "Disabling the bunkerweb service..."
     do_and_check_cmd systemctl stop bunkerweb
     do_and_check_cmd systemctl disable bunkerweb
 fi
 
 # Create scheduler if necessary
-if [ "$SERVICE_SCHEDULER" != "no" ] ; then
+if {
+    [ "${MASTER_MODE:-yes}" != "no" ] || [ "${SLAVE_MODE:-no}" = "no" ];
+} && [ "$SERVICE_SCHEDULER" != "no" ]; then
     if [ -f /var/tmp/bunkerweb_upgrade ]; then
+            # Reload the bunkerweb-scheduler service if running
         if systemctl is-active --quiet bunkerweb-scheduler; then
-            # Reload bunkerweb-scheduler service
-            echo "Restarting bunkerweb-scheduler service..."
+            echo "Restarting the bunkerweb-scheduler service..."
             do_and_check_cmd systemctl restart bunkerweb-scheduler
         fi
     else
         # Auto start BW Scheduler service on boot and start it now
-        echo "Enabling and starting bunkerweb service..."
+        echo "Enabling and starting the bunkerweb-scheduler service..."
         do_and_check_cmd systemctl enable bunkerweb-scheduler
         do_and_check_cmd systemctl start bunkerweb-scheduler
     fi
+elif systemctl is-active --quiet bunkerweb-scheduler; then
+    echo "Disabling the bunkerweb-scheduler service..."
+    do_and_check_cmd systemctl stop bunkerweb-scheduler
+    do_and_check_cmd systemctl disable bunkerweb-scheduler
+fi
 
+# Create web UI if necessary
+if {
+    [ "${MASTER_MODE:-yes}" != "no" ] || [ "${SLAVE_MODE:-no}" = "no" ];
+} && [ "$SERVICE_UI" != "no" ]; then
     if [ -f /var/tmp/bunkerweb_upgrade ]; then
-        # Reload bunkerweb-ui service if running
+        # Reload the bunkerweb-ui service if running
         if systemctl is-active --quiet bunkerweb-ui; then
-            echo "Reloading bunkerweb-ui service..."
+            echo "Reloading the bunkerweb-ui service..."
             do_and_check_cmd systemctl restart bunkerweb-ui
         fi
     elif [ "$UI_WIZARD" != "no" ] ; then
@@ -141,18 +158,10 @@ if [ "$SERVICE_SCHEDULER" != "no" ] ; then
         echo "Note: Make sure that your firewall settings allow access to this URL."
         echo ""
     fi
-else
-    if systemctl is-active --quiet bunkerweb-scheduler; then
-        echo "Disabling bunkerweb-scheduler service..."
-        do_and_check_cmd systemctl stop bunkerweb-scheduler
-        do_and_check_cmd systemctl disable bunkerweb-scheduler
-    fi
-
-    if systemctl is-active --quiet bunkerweb-ui; then
-        echo "Disabling bunkerweb-ui service..."
-        do_and_check_cmd systemctl stop bunkerweb-ui
-        do_and_check_cmd systemctl disable bunkerweb-ui
-    fi
+elif systemctl is-active --quiet bunkerweb-ui; then
+    echo "Disabling the bunkerweb-ui service..."
+    do_and_check_cmd systemctl stop bunkerweb-ui
+    do_and_check_cmd systemctl disable bunkerweb-ui
 fi
 
 if [ -f /var/tmp/bunkerweb_upgrade ]; then
