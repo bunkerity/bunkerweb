@@ -20,6 +20,7 @@ class SwarmController(Controller):
         self.__swarm_instances = []
         self.__swarm_services = []
         self.__swarm_configs = []
+        self._logger.warning("Swarm integration is deprecated and will be removed in a future release")
 
     def _get_controller_instances(self) -> List[Service]:
         self.__swarm_instances = []
