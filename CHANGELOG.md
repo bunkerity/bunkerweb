@@ -31,6 +31,7 @@
 - [DEPS] Updated lua-resty-lrucache version to v0.15
 - [DEPS] Updated LuaJIT version to v2.1-20241113
 - [DEPS] Updated Mbed TLS version to v3.6.2
+- [DEPS] Updated coreruleset-v4 version to v4.9.0
 
 ## v1.5.12 - 2024/11/27
 

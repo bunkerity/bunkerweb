@@ -11,8 +11,9 @@ Along those lines, OWASP CRS team may not issue security notifications for unsup
 
 | Version   | Supported          |
 | --------- | ------------------ |
+| 4.9.x     | :white_check_mark: |
 | 4.8.x     | :white_check_mark: |
-| 4.7.x     | :white_check_mark: |
+| 4.7.x     | :x: |
 | 4.6.x     | :x: |
 | 4.5.x     | :x: |
 | 4.4.x     | :x: |
