@@ -1,8 +1,4 @@
-$(function () {
-  const reportsNumber = parseInt($("#reports_number").val(), 10) || 0;
-  const dataCountries = ($("#countries").val() || "")
-    .split(",")
-    .filter((code) => code && code !== "local");
+$(document).ready(function () {
   const baseFlagsUrl = $("#base_flags_url").val().trim();
 
   const countriesDataNames = {
@@ -259,26 +255,6 @@ $(function () {
     zw: "Zimbabwe",
   };
 
-  // Precompute filtered options using jQuery's map for efficiency
-  const countriesSearchPanesOptions = $.map(dataCountries, function (code) {
-    if (countriesDataNames[code]) {
-      return {
-        label: `<img src="${baseFlagsUrl}/${code}.svg" class="border border-1 p-0 me-1" height="17" />&nbsp;－&nbsp;${countriesDataNames[code]}`,
-        value: function (rowData) {
-          return rowData[3].indexOf(`${code}.svg`) !== -1;
-        },
-      };
-    }
-  });
-
-  // Append the "N/A" option first
-  countriesSearchPanesOptions.unshift({
-    label: `<img src="${baseFlagsUrl}/zz.svg" class="border border-1 p-0 me-1" height="17" />&nbsp;－&nbsp;N/A`,
-    value: function (rowData) {
-      return rowData[3].indexOf("N/A") !== -1;
-    },
-  });
-
   // Batch update tooltips
   const updateCountryTooltips = () => {
     $("[data-bs-original-title]").each(function () {
@@ -318,26 +294,12 @@ $(function () {
       search: true,
     },
     bottomStart: {
-      info: true,
-    },
-    bottomEnd: {},
-  };
-
-  // Adjust page length options based on reports number
-  if (reportsNumber > 10) {
-    const menu = [10];
-    if (reportsNumber > 25) menu.push(25);
-    if (reportsNumber > 50) menu.push(50);
-    if (reportsNumber > 100) menu.push(100);
-    menu.push({ label: "All", value: -1 });
-    layout.bottomStart = {
       pageLength: {
-        menu: menu,
+        menu: [10, 25, 50, 100, { label: "All", value: -1 }],
       },
       info: true,
-    };
-    layout.bottomEnd.paging = true;
-  }
+    },
+  };
 
   // Define DataTable buttons
   layout.topStart.buttons = [
@@ -407,7 +369,7 @@ $(function () {
         if (!autoRefresh) {
           clearInterval(interval);
         } else {
-          window.location.reload();
+          reports_table.ajax.reload(null, false);
         }
       }, 10000); // 10 seconds
     } else {
@@ -433,11 +395,6 @@ $(function () {
     columnVisibilityCondition: (column) => column > 2 && column < 12,
     dataTableOptions: {
       columnDefs: [
-        {
-          orderable: false,
-          className: "dtr-control",
-          targets: 0,
-        },
         { orderable: false, targets: -1 },
         { visible: false, targets: [4, 5, 6, 7, 10] },
         { type: "ip-address", targets: 2 },
@@ -457,9 +414,22 @@ $(function () {
           searchPanes: {
             show: true,
             combiner: "or",
-            options: countriesSearchPanesOptions,
+            // options: countriesSearchPanesOptions,
           },
           targets: 3,
+          render: function (data) {
+            const countryCode = data.toLowerCase();
+            const tooltipContent = countriesDataNames[countryCode] || "N/A";
+            return `
+              <span data-bs-toggle="tooltip" data-bs-original-title="${tooltipContent}">
+                <img src="${baseFlagsUrl}/${
+                  countryCode === "local" ? "zz" : countryCode
+                }.svg"
+                     class="border border-1 p-0 me-1"
+                     height="17" />
+                &nbsp;－&nbsp;${countryCode === "local" ? "N/A" : data}
+              </span>`;
+          },
         },
         {
           searchPanes: { show: true },
@@ -477,11 +447,83 @@ $(function () {
         lengthMenu: "Display _MENU_ reports",
         zeroRecords: "No matching reports found",
       },
+      processing: true,
+      serverSide: true,
+      ajax: {
+        url: `${window.location.pathname}/fetch`,
+        type: "POST",
+        data: function (d) {
+          d.csrf_token = $("#csrf_token").val(); // Add CSRF token if needed
+          return d;
+        },
+      },
       initComplete: () => {
-        $("#reports_wrapper")
-          .find(".btn-secondary")
-          .removeClass("btn-secondary");
         updateCountryTooltips();
+      },
+      columns: [
+        {
+          data: null,
+          defaultContent: "",
+          orderable: false,
+          className: "dtr-control",
+        },
+        { data: "date", title: "Date" },
+        { data: "ip", title: "IP Address" },
+        { data: "country", title: "Country" },
+        { data: "method", title: "Method" },
+        { data: "url", title: "URL" },
+        { data: "status", title: "Status Code" },
+        { data: "user_agent", title: "User-Agent" },
+        { data: "reason", title: "Reason" },
+        { data: "server_name", title: "Server name" },
+        { data: "data", title: "Data" },
+        { data: "security_mode", title: "Security mode" },
+      ],
+      headerCallback: function (thead) {
+        const headers = [
+          {
+            title: "Date",
+            tooltip: "The date and time when the Report was created",
+          },
+          { title: "IP Address", tooltip: "The reported IP address" },
+          {
+            title: "Country",
+            tooltip: "The country of the reported IP address",
+          },
+          { title: "Method", tooltip: "The method used by the attacker" },
+          {
+            title: "URL",
+            tooltip: "The URL that was targeted by the attacker",
+          },
+          {
+            title: "Status Code",
+            tooltip: "The HTTP status code returned by BunkerWeb",
+          },
+          { title: "User-Agent", tooltip: "The User-Agent of the attacker" },
+          { title: "Reason", tooltip: "The reason why the Report was created" },
+          {
+            title: "Server name",
+            tooltip: "The Server name that created the report",
+          },
+          { title: "Data", tooltip: "Additional data about the Report" },
+          { title: "Security mode", tooltip: "Security mode" },
+        ];
+
+        // Apply tooltips to column headers
+        $(thead)
+          .find("th")
+          .each(function (index) {
+            const header = headers[index - 1]; // Adjust index to skip expandable column
+            if (header) {
+              $(this)
+                .attr("data-bs-toggle", "tooltip")
+                .attr("data-bs-placement", "bottom")
+                .attr("title", header.tooltip);
+            }
+          });
+
+        // Initialize Bootstrap tooltips
+        $('[data-bs-toggle="tooltip"]').tooltip();
       },
     },
   });
@@ -489,6 +531,8 @@ $(function () {
   if (sessionAutoRefresh === "true") {
     toggleAutoRefresh();
   }
+
+  $("#reports_wrapper").find(".btn-secondary").removeClass("btn-secondary");
 
   // Update tooltips after table draw
   reports_table.on("draw.dt", updateCountryTooltips);
