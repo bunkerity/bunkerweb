@@ -92,19 +92,29 @@ api.global.GET["^/ping$"] = function(self)
 	return self:response(HTTP_OK, "success", "pong")
 end
 
-api.global.POST["^/reload$"] = function(self)
-	-- Check config
-	logger:log(NOTICE, "Checking Nginx configuration")
-	local status = execute("nginx -t")
-	if status ~= 0 then
-		return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", "config check failed")
+api.global.POST["^/reload"] = function(self)
+	-- Get test argument
+	local args = ngx.req.get_uri_args()
+	local test_arg = args.test or "yes"
+
+	if test_arg ~= "no" then
+		-- Check Nginx configuration
+		logger:log(NOTICE, "Checking Nginx configuration")
+		local status = execute("nginx -t")
+		if status ~= 0 then
+			return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", "config check failed")
+		end
+		logger:log(NOTICE, "Nginx configuration is valid")
 	end
-	logger:log(NOTICE, "Nginx configuration is valid, reloading Nginx")
+
+	-- Reload Nginx
+	logger:log(NOTICE, "Reloading Nginx")
 	-- Send HUP signal to master process
 	local ok, err = kill(get_master_pid(), "HUP")
 	if not ok then
 		return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", "err = " .. err)
 	end
+
 	return self:response(HTTP_OK, "success", "reload successful")
 end
 

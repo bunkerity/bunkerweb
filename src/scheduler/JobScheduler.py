@@ -134,7 +134,11 @@ class JobScheduler(ApiCaller):
             self.__logger.error("RELOAD_MIN_TIMEOUT must be an integer, defaulting to 5")
             reload_min_timeout = 5
 
-        reload_success = self.send_to_apis("POST", "/reload", timeout=max(int(reload_min_timeout), 2 * len(self.__env["SERVER_NAME"].split(" "))))[0]
+        reload_success = self.send_to_apis(
+            "POST",
+            f"/reload?test={'no' if self.__env.get('DISABLE_CONFIGURATION_TESTING', 'no').lower() == 'yes' else 'yes'}",
+            timeout=max(int(reload_min_timeout), 2 * len(self.__env["SERVER_NAME"].split(" "))),
+        )[0]
         if reload_success:
             self.__logger.info("Successfully reloaded nginx")
             return True
@@ -243,6 +247,16 @@ class JobScheduler(ApiCaller):
         if pending_jobs:
             self.__logger.info("All scheduled jobs have been executed")
 
+        # Update cache files permissions to be 660
+        for item in Path(sep, "var", "cache", "bunkerweb").rglob("*"):
+            try:
+                if item.is_dir():
+                    item.chmod(0o740)
+                    continue
+                item.chmod(0o640)
+            except Exception as e:
+                self.__logger.error(f"Error while changing permissions for '{item}': {e}")
+
         return success
 
     def run_once(self, plugins: Optional[List[str]] = None) -> bool:
@@ -282,6 +296,16 @@ class JobScheduler(ApiCaller):
         for future in futures:
             future.result()
 
+        # Update cache files permissions to be 660
+        for item in Path(sep, "var", "cache", "bunkerweb").rglob("*"):
+            try:
+                if item.is_dir():
+                    item.chmod(0o740)
+                    continue
+                item.chmod(0o640)
+            except Exception as e:
+                self.__logger.error(f"Error while changing permissions for '{item}': {e}")
+
         return self.__job_success
 
     def run_single(self, job_name: str) -> bool:
@@ -313,6 +337,16 @@ class JobScheduler(ApiCaller):
             job_to_run["name"],
             job_to_run["file"],
         )
+
+        # Update cache files permissions to be 660
+        for item in Path(sep, "var", "cache", "bunkerweb").rglob("*"):
+            try:
+                if item.is_dir():
+                    item.chmod(0o740)
+                    continue
+                item.chmod(0o640)
+            except Exception as e:
+                self.__logger.error(f"Error while changing permissions for '{item}': {e}")
 
         if self.__lock:
             self.__lock.release()

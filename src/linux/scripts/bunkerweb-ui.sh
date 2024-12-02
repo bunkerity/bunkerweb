@@ -5,8 +5,18 @@ export PYTHONPATH=/usr/share/bunkerweb/deps/python:/usr/share/bunkerweb/ui
 
 # Create the ui.env file if it doesn't exist
 if [ ! -f /etc/bunkerweb/ui.env ]; then
-    echo "ADMIN_USERNAME=" > /etc/bunkerweb/ui.env
-    echo "ADMIN_PASSWORD=" >> /etc/bunkerweb/ui.env
+    {
+        echo "# OVERRIDE_ADMIN_CREDS=no"
+        echo "ADMIN_USERNAME="
+        echo "ADMIN_PASSWORD="
+        echo "# FLASK_SECRET=changeme"
+        echo "# TOTP_SECRETS=changeme"
+        echo "LISTEN_ADDR=127.0.0.1"
+        echo "# LISTEN_PORT=7000"
+        echo "FORWARDED_ALLOW_IPS=127.0.0.1"
+    } > /etc/bunkerweb/ui.env
+    chown root:nginx /etc/bunkerweb/ui.env
+    chmod 660 /etc/bunkerweb/ui.env
 fi
 
 # Function to start the UI
@@ -14,9 +24,12 @@ start() {
     stop
 
     echo "Starting UI"
+    export LISTEN_ADDR="127.0.0.1"
+    export FORWARDED_ALLOW_IPS="127.0.0.1"
+    export CAPTURE_OUTPUT="yes"
     # shellcheck disable=SC2046
     export $(cat /etc/bunkerweb/ui.env)
-    sudo -E -u nginx -g nginx /bin/bash -c "PYTHONPATH=$PYTHONPATH python3 -m gunicorn --chdir /usr/share/bunkerweb/ui --config /usr/share/bunkerweb/ui/gunicorn.conf.py --pythonpath /usr/share/bunkerweb/deps/python,/usr/share/bunkerweb/ui --bind \"127.0.0.1:7000\""
+    sudo -E -u nginx -g nginx /bin/bash -c "PYTHONPATH=$PYTHONPATH python3 -m gunicorn --chdir /usr/share/bunkerweb/ui --config /usr/share/bunkerweb/ui/gunicorn.conf.py"
 }
 
 # Function to stop the UI

@@ -16,87 +16,10 @@
            class="text-center relative w-full p-2 text-primary rounded-lg fw-bold">Loading reports...</p>
         <table id="reports"
                class="table responsive nowrap position-relative w-100 d-none">
-            <thead>
-                <tr>
-                    <th data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        data-bs-original-title="Show the Reports' details"></th>
-                    <th data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        data-bs-original-title="The date and time when the Report was created">Date</th>
-                    <th data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        data-bs-original-title="The reported IP address">IP Address</th>
-                    <th data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        data-bs-original-title="The country of the reported IP address">Country</th>
-                    <th data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        data-bs-original-title="The method used by the attacker">Method</th>
-                    <th data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        data-bs-original-title="The URL that was targeted by the attacker">URL</th>
-                    <th data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        data-bs-original-title="The HTTP status code returned by BunkerWeb">Status Code</th>
-                    <th data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        data-bs-original-title="The User-Agent of the attacker">User-Agent</th>
-                    <th data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        data-bs-original-title="The reason why the Report was created">Reason</th>
-                    <th data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        data-bs-original-title="The Server name that created the report">Server name</th>
-                    <th data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        data-bs-original-title="Additional data about the Report">Data</th>
-                    <th data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        data-bs-original-title="Security mode">Security mode</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% set ns = namespace(countries=[], reports_number=0) %}
-                {% for report in reports %}
-                    {% set ns.reports_number = ns.reports_number + 1 %}
-                    {% if report["country"] not in ns.countries %}
-                        {% set ns.countries = ns.countries + [report["country"].lower()] %}
-                    {% endif %}
-                    <tr>
-                        <td></td>
-                        <td class="report-date">{{ report["date"] }}</td>
-                        <td>{{ report["ip"] }}</td>
-                        <td data-bs-toggle="tooltip"
-                            data-bs-placement="top"
-                            data-bs-original-title="{% if report['country'] == "local" %}N/A{% else %}{{ report["country"]|lower }}{% endif %}">
-                            <img src="{{ base_flags_url }}/{% if report['country'] == "local" %}zz{% else %}{{ report['country']|lower }}{% endif %}.svg"
-                                 class="border border-1 p-0 me-1"
-                                 height="17" />
-                            &nbsp;－&nbsp;
-                            {% if report['country'] == "local" %}
-                                N/A
-                            {% else %}
-                                {{ report["country"] }}
-                            {% endif %}
-                        </td>
-                        <td>{{ report["method"] }}</td>
-                        <td>{{ report["url"] }}</td>
-                        <td>{{ report["status"] }}</td>
-                        <td>{{ report["user_agent"] }}</td>
-                        <td>{{ report["reason"] }}</td>
-                        <td>{{ report["server_name"] }}</td>
-                        <td>{{ report["data"] }}</td>
-                        <td>{{ report["security_mode"] }}</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-            <input type="hidden" id="reports_number" value="{{ ns.reports_number }}" />
-            <input type="hidden" id="countries" value="{{ ns.countries|join(',') }}" />
-            <span class="position-absolute bottom-0 start-50 translate-middle badge rounded-pill bg-secondary">
-                TZ: <script nonce="{{ script_nonce }}">document.write(Intl.DateTimeFormat().resolvedOptions().timeZone);</script>
-            </span>
         </table>
+        <span class="position-absolute bottom-0 start-50 translate-middle badge rounded-pill bg-secondary">
+            TZ: <script nonce="{{ script_nonce }}">document.write(Intl.DateTimeFormat().resolvedOptions().timeZone);</script>
+        </span>
     </div>
     <!-- / Content -->
 {% endblock %}

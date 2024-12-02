@@ -2,6 +2,9 @@ from logging import CRITICAL, DEBUG, ERROR, INFO, WARNING, FileHandler, Formatte
 from os import getenv
 from typing import Optional, Union
 
+LOG_FORMAT = "%(asctime)s [%(name)s] [%(process)d] [%(levelname)s] - %(message)s"
+DATE_FORMAT = "[%Y-%m-%d %H:%M:%S %z]"
+
 
 class BWLogger(Logger):
     """Custom logger class inheriting from the standard Logger."""
@@ -16,11 +19,7 @@ setLoggerClass(BWLogger)
 # Set the default logging level based on environment variables
 default_level = _nameToLevel.get(getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")).upper(), INFO)
 
-basicConfig(
-    format="%(asctime)s [%(name)s] [%(process)d] [%(levelname)s] - %(message)s",
-    datefmt="[%Y-%m-%d %H:%M:%S %z]",
-    level=default_level,
-)
+basicConfig(format=LOG_FORMAT, datefmt=DATE_FORMAT, level=default_level)
 
 # Set the default logging level for specific SQLAlchemy components
 database_default_level = _nameToLevel.get(getenv("DATABASE_LOG_LEVEL", "WARNING").upper(), WARNING)
@@ -55,7 +54,7 @@ def setup_logger(title: str, level: Optional[Union[str, int]] = None) -> Logger:
 
     if getenv("SCHEDULER_LOG_TO_FILE", "no") == "yes":
         file_handler = FileHandler("/var/log/bunkerweb/scheduler.log")
-        file_handler.setFormatter(Formatter("%(asctime)s [%(name)s] [%(process)d] [%(levelname)s] - %(message)s"))
+        file_handler.setFormatter(Formatter(fmt=LOG_FORMAT, datefmt=DATE_FORMAT))
         logger.addHandler(file_handler)
 
     return logger

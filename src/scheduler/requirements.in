@@ -13,9 +13,9 @@ certbot-dns-rfc2136==3.0.1
 certbot-dns-route53==3.0.1
 certbot-dns-sakuracloud==3.0.1
 certbot-dns-scaleway==0.0.7
-cryptography==43.0.3
+cryptography==44.0.0
 maxminddb==2.6.2
-pydantic==2.10.1
+pydantic==2.10.2
 python-magic==0.4.27
 requests==2.32.3
 schedule==1.2.2

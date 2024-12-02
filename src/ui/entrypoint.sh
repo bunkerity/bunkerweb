@@ -37,12 +37,7 @@ else
   echo "Docker" > /usr/share/bunkerweb/INTEGRATION
 fi
 
-python3 -m gunicorn --config gunicorn.conf.py --user ui --group ui --bind 0.0.0.0:7000 &
-pid="$!"
-wait "$pid"
-while [ -f /var/run/bunkerweb/ui.pid ] ; do
-		wait "$pid"
-done
+python3 -m gunicorn --config gunicorn.conf.py
 
 if [ -f /var/tmp/bunkerweb/ui.healthy ] ; then
 	rm /var/tmp/bunkerweb/ui.healthy

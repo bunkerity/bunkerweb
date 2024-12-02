@@ -141,9 +141,12 @@ case "$1" in
         # Backup important files during upgrade
         remove_path "/var/tmp/variables.env" "temporary environment variables"
         remove_path "/var/tmp/ui.env" "UI environment variables"
+        remove_path "/var/tmp/scheduler.env" "Scheduler environment variables"
         remove_path "/var/tmp/db.sqlite3" "database"
         do_and_check_cmd cp -f /etc/bunkerweb/variables.env /var/tmp/variables.env
         do_and_check_cmd cp -f /etc/bunkerweb/ui.env /var/tmp/ui.env
+        do_and_check_cmd cp -f /etc/bunkerweb/scheduler.env /var/tmp/scheduler.env
         do_and_check_cmd cp -f /var/lib/bunkerweb/db.sqlite3 /var/tmp/db.sqlite3
+        do_and_check_cmd touch /var/tmp/bunkerweb_upgrade
         ;;
 esac

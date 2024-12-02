@@ -1347,3 +1347,7 @@ html.dark-style div.dts div.dataTables_scrollBody table {
   border-color: #fff;
   color: #000;
 }
+
+.dark-style div.dt-processing > div:last-child > div {
+  background-color: #fff;
+}

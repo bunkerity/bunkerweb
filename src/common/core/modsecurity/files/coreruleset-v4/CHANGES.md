@@ -5,6 +5,24 @@
   or the CRS Google Group at
 * https://groups.google.com/a/owasp.org/g/modsecurity-core-rule-set-project
 
+## Version 4.9.0 - 2024-11-29
+
+## What's Changed
+### ⭐ Important changes
+* feat: add variable to skip response rules by @fzipi in https://github.com/coreruleset/coreruleset/pull/3944
+### 🆕 New features and detections 🎉
+* feat: add fish shell files to restricted-files.data by @OhMyVolk in https://github.com/coreruleset/coreruleset/pull/3915
+* feat: add quantitative testing to Git workflow by @airween in https://github.com/coreruleset/coreruleset/pull/3924
+### 🧰 Other Changes
+* feat: added support for new web shells by @azurit in https://github.com/coreruleset/coreruleset/pull/3898
+* fix(security): remove double URL decode (921151 PL2, 932190 PL3, 942441 PL2, 942442 PL2, 942460 PL3) by @azurit in https://github.com/coreruleset/coreruleset/pull/3741
+* docs: extended rule documentation (900200) by @dune73 in https://github.com/coreruleset/coreruleset/pull/3934
+
+## New Contributors
+* @OhMyVolk made their first contribution in https://github.com/coreruleset/coreruleset/pull/3915
+
+**Full Changelog**: https://github.com/coreruleset/coreruleset/compare/v4.8.0...v4.9.0
+
 ## Version 4.8.0 - 2024-10-28
 
 ## What's Changed
