@@ -1128,18 +1128,16 @@ $(document).ready(() => {
     if (isReadOnly) return;
 
     const form = getFormFromSettings($(this));
-    if (currentMode !== "easy") {
-      let minSettings = 4;
-      if (!form.find("input[name='IS_DRAFT']").length) minSettings = 1;
+    let minSettings = 4;
+    if (!form.find("input[name='IS_DRAFT']").length) minSettings = 1;
 
-      const draftInput = $("#is-draft");
-      const wasDraft = draftInput.data("original") === "yes";
-      let isDraft = draftInput.val() === "yes";
-      if (currentMode === "raw")
-        isDraft = form.find("input[name='IS_DRAFT']").val() === "yes";
+    const draftInput = $("#is-draft");
+    const wasDraft = draftInput.data("original") === "yes";
+    let isDraft = draftInput.val() === "yes";
+    if (currentMode === "raw")
+      isDraft = form.find("input[name='IS_DRAFT']").val() === "yes";
 
-      if (form.children().length <= minSettings && isDraft === wasDraft) return;
-    }
+    if (form.children().length <= minSettings && isDraft === wasDraft) return;
 
     // Cross-browser compatibility (for older browsers)
     var message =
