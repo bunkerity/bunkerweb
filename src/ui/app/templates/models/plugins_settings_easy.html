@@ -38,6 +38,17 @@
             </ul>
         </div>
         <div class="d-flex justify-content-center">
+            <button id="reset-template-config"
+                    type="button"
+                    class="btn btn-sm btn-outline-danger me-3"
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="top"
+                    data-bs-original-title="Reset the current template settings">
+                <i class="bx bx-sm bx-reset"></i>
+                <span class="d-none d-md-inline">&nbsp;
+                    Reset
+                </span>
+            </button>
             {% if current_endpoint != "global-config" %}
                 <div {% if current_endpoint != 'new' and service_method != 'ui' %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The draft mode can only be toggled on UI created services"{% endif %}>
                     <button type="button"
@@ -53,17 +64,20 @@
                     </button>
                 </div>
             {% endif %}
-            <button id="reset-template-config"
-                    type="button"
-                    class="btn btn-sm btn-outline-danger me-3"
-                    data-bs-toggle="tooltip"
-                    data-bs-placement="top"
-                    data-bs-original-title="Reset the current template settings">
-                <i class="bx bx-sm bx-reset"></i>
-                <span class="d-none d-md-inline">&nbsp;
-                    Reset
-                </span>
-            </button>
+            <div {% if service_method == "autoconf" or is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{% if is_readonly %}The database is in readonly{% else %}The service was created using the autoconf method{% endif %}
+                 therefore
+                 the
+                 configuration
+                 is
+                 locked
+                 "
+                 {% endif %}>
+                <button type="button"
+                        class="btn btn-sm btn-bw-green save-settings {% if service_method == "autoconf" or is_readonly %}disabled{% endif %}">
+                    <i class="bx bx-save bx-sm"></i>
+                    <span class="d-none d-md-inline">&nbsp;Save</span>
+                </button>
+            </div>
         </div>
     </div>
 </div>
