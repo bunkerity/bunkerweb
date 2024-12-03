@@ -49,7 +49,7 @@ for deps_path in [os_join(sep, "usr", "share", "bunkerweb", *paths) for paths in
 from common_utils import bytes_hash  # type: ignore
 
 from pymysql import install_as_MySQLdb
-from sqlalchemy import create_engine, event, MetaData as sql_metadata, func, join, select as db_select, text, inspect
+from sqlalchemy import case, create_engine, event, MetaData as sql_metadata, func, join, select as db_select, text, inspect
 from sqlalchemy.engine import Engine
 from sqlalchemy.exc import (
     ArgumentError,
@@ -3659,7 +3659,11 @@ class Database:
     def get_templates(self, plugin: Optional[str] = None) -> Dict[str, dict]:
         """Get templates."""
         with self._db_session() as session:
-            query = session.query(Templates).with_entities(Templates.id, Templates.plugin_id, Templates.name)
+            query = (
+                session.query(Templates)
+                .with_entities(Templates.id, Templates.plugin_id, Templates.name)
+                .order_by(case((Templates.name == "low", 0), else_=1))  # Pass as positional arguments
+            )
 
             if plugin:
                 query = query.filter_by(plugin_id=plugin)

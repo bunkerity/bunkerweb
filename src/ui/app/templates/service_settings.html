@@ -10,7 +10,7 @@
            id="selected-mode"
            name="selected_mode"
            value="{{ mode }}">
-    <input type="hidden" id="used-template" name="used_template" value="{% if current_endpoint == "new" and not clone %}high{% else %}{{ config.get('USE_TEMPLATE', {'value': ''})['value'] }}
+    <input type="hidden" id="used-template" name="used_template" value="{% if current_endpoint == "new" and not clone %}low{% else %}{{ config.get('USE_TEMPLATE', {'value': ''})['value'] }}
     {% endif %}
     ">
     <input type="hidden"

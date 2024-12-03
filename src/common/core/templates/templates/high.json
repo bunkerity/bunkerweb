@@ -48,6 +48,7 @@
     "USE_LIMIT_CONN": "yes",
     "LIMIT_CONN_MAX_HTTP1": "10",
     "LIMIT_CONN_MAX_HTTP2": "100",
+    "LIMIT_CONN_MAX_HTTP3": "100",
     "USE_LIMIT_REQ": "yes",
     "LIMIT_REQ_URL": "/",
     "LIMIT_REQ_RATE": "2r/s",

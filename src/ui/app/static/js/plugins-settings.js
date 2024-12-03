@@ -56,7 +56,7 @@ $(document).ready(() => {
     params.mode = currentMode;
     if (currentMode === "advanced" && currentType !== "all")
       params.type = currentType;
-    if (currentMode === "easy" && currentTemplate !== "high")
+    if (currentMode === "easy" && currentTemplate !== "low")
       params.template = currentTemplate;
 
     // If "easy" is selected, remove the "mode" parameter
@@ -153,8 +153,8 @@ $(document).ready(() => {
 
         params.type = null; // Remove the type parameter
 
-        // If "high" is selected, remove the "template" parameter
-        if (currentTemplate === "high") {
+        // If "low"  is selected, remove the "template" parameter
+        if (currentTemplate === "low") {
           params.template = null; // Set template to null to remove it from the URL
           updateUrlParams(params); // Call the function without the hash (keep it intact)
         } else {
@@ -983,11 +983,11 @@ $(document).ready(() => {
     currentMode === "easy"
   ) {
     $(`button[data-bs-target="#navs-modes-advanced"]`).tab("show");
-  } else if (usedTemplate !== "high" && currentMode === "easy") {
+  } else if (usedTemplate !== "low" && currentMode === "easy") {
     $(`button[data-bs-target="#navs-templates-${usedTemplate}"]`).tab("show");
   }
 
-  if (currentMode === "easy" && currentTemplate !== "high") {
+  if (currentMode === "easy" && currentTemplate !== "low") {
     $(`button[data-bs-target="#navs-templates-${currentTemplate}"]`).tab(
       "show",
     );
@@ -1128,18 +1128,16 @@ $(document).ready(() => {
     if (isReadOnly) return;
 
     const form = getFormFromSettings($(this));
-    if (currentMode !== "easy") {
-      let minSettings = 4;
-      if (!form.find("input[name='IS_DRAFT']").length) minSettings = 1;
+    let minSettings = 4;
+    if (!form.find("input[name='IS_DRAFT']").length) minSettings = 1;
 
-      const draftInput = $("#is-draft");
-      const wasDraft = draftInput.data("original") === "yes";
-      let isDraft = draftInput.val() === "yes";
-      if (currentMode === "raw")
-        isDraft = form.find("input[name='IS_DRAFT']").val() === "yes";
+    const draftInput = $("#is-draft");
+    const wasDraft = draftInput.data("original") === "yes";
+    let isDraft = draftInput.val() === "yes";
+    if (currentMode === "raw")
+      isDraft = form.find("input[name='IS_DRAFT']").val() === "yes";
 
-      if (form.children().length <= minSettings && isDraft === wasDraft) return;
-    }
+    if (form.children().length <= minSettings && isDraft === wasDraft) return;
 
     // Cross-browser compatibility (for older browsers)
     var message =

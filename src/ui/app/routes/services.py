@@ -357,7 +357,7 @@ def services_service_page(service: str):
 
     mode = request.args.get("mode", "easy")
     search_type = request.args.get("type", "all")
-    template = request.args.get("template", "high")
+    template = request.args.get("template", "low")
     db_templates = DB.get_templates()
     db_custom_configs = DB.get_custom_configs(with_drafts=True, as_dict=True)
     clone = None
