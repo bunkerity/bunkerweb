@@ -56,7 +56,7 @@ $(document).ready(() => {
     params.mode = currentMode;
     if (currentMode === "advanced" && currentType !== "all")
       params.type = currentType;
-    if (currentMode === "easy" && currentTemplate !== "high")
+    if (currentMode === "easy" && currentTemplate !== "low")
       params.template = currentTemplate;
 
     // If "easy" is selected, remove the "mode" parameter
@@ -153,8 +153,8 @@ $(document).ready(() => {
 
         params.type = null; // Remove the type parameter
 
-        // If "high" is selected, remove the "template" parameter
-        if (currentTemplate === "high") {
+        // If "low"  is selected, remove the "template" parameter
+        if (currentTemplate === "low") {
           params.template = null; // Set template to null to remove it from the URL
           updateUrlParams(params); // Call the function without the hash (keep it intact)
         } else {
@@ -983,11 +983,11 @@ $(document).ready(() => {
     currentMode === "easy"
   ) {
     $(`button[data-bs-target="#navs-modes-advanced"]`).tab("show");
-  } else if (usedTemplate !== "high" && currentMode === "easy") {
+  } else if (usedTemplate !== "low" && currentMode === "easy") {
     $(`button[data-bs-target="#navs-templates-${usedTemplate}"]`).tab("show");
   }
 
-  if (currentMode === "easy" && currentTemplate !== "high") {
+  if (currentMode === "easy" && currentTemplate !== "low") {
     $(`button[data-bs-target="#navs-templates-${currentTemplate}"]`).tab(
       "show",
     );
