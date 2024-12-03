@@ -2,6 +2,7 @@
   "name": "Advanced security level with focus on robust security measures and comprehensive protection",
   "settings": {
     "SERVER_NAME": "www.example.com",
+    "SECURITY_MODE": "block",
     "USE_REVERSE_PROXY": "yes",
     "REVERSE_PROXY_HOST": "http://upstream-server:8080",
     "REVERSE_PROXY_URL": "/",
@@ -73,6 +74,7 @@
       "subtitle": "Configure your web service facing your clients",
       "settings": [
         "SERVER_NAME",
+        "SECURITY_MODE",
         "AUTO_LETS_ENCRYPT",
         "USE_LETS_ENCRYPT_STAGING",
         "USE_LETS_ENCRYPT_WILDCARD",
