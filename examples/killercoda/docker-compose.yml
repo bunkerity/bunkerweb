@@ -39,6 +39,7 @@ services:
       USE_CLIENT_CACHE: "yes"
       USE_GZIP: "yes"
       UI_HOST: "http://bw-ui:7000"
+      CUSTOM_CONF_HTTP_increase_server_names_hash_bucket_size: "server_names_hash_bucket_size 128;"
     restart: "unless-stopped"
     networks:
       - bw-universe
