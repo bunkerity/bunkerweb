@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from contextlib import suppress
 from datetime import datetime, timedelta
+from ipaddress import ip_address
 from json import dumps, loads
 from os import getenv, sep
 from os.path import join
@@ -338,7 +339,7 @@ def before_request():
                 if not request.path.endswith("/login"):
                     return redirect(url_for("totp.totp_page", next=request.form.get("next")))
                 passed = False
-            elif session["ip"] != request.remote_addr:
+            elif not ip_address(request.remote_addr).is_private and session["ip"] != request.remote_addr:
                 LOGGER.warning(f"User {current_user.get_id()} tried to access his session with a different IP address.")
                 passed = False
             elif session["user_agent"] != request.headers.get("User-Agent"):

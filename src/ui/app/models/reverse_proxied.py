@@ -1,14 +1,9 @@
 #!/usr/bin/env python3
 
-from logging import getLogger
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 
 class ReverseProxied(ProxyFix):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.__logger = getLogger("UI.ReverseProxied")
-
     def __call__(self, environ, start_response):
         """Modify the WSGI environ based on the various ``Forwarded``
         headers before calling the wrapped application. Store the
@@ -63,7 +58,5 @@ class ReverseProxied(ProxyFix):
         environ["PATH_INFO"] = environ["PATH_INFO"][len(environ["SCRIPT_NAME"]) :]  # noqa: E203
         environ["ABSOLUTE_URI"] = f"{environ['wsgi.url_scheme']}://{environ['HTTP_HOST']}{environ['SCRIPT_NAME']}/"
         environ["SESSION_COOKIE_DOMAIN"] = environ["HTTP_HOST"]
-
-        self.__logger.debug(f"Reverse Proxy environ: {environ}")
 
         return self.app(environ, start_response)
