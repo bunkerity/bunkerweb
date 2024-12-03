@@ -248,8 +248,8 @@ def setup_loading():
 
     db_config = DB.get_config(filtered_settings=("SERVER_NAME", "USE_UI", "REVERSE_PROXY_URL"))
     ui_service = {}
-    ui_admin = DB.get_ui_user()
-    admin_old_enough = ui_admin and ui_admin.creation_date < datetime.now().astimezone() - timedelta(minutes=5)
+    ui_admin = DB.get_ui_user(as_dict=True)
+    admin_old_enough = ui_admin and ui_admin["creation_date"] < datetime.now().astimezone() - timedelta(minutes=5)
 
     for server_name in db_config["SERVER_NAME"].split(" "):
         if server_name and db_config.get(f"{server_name}_USE_UI", "no") == "yes":
