@@ -34,6 +34,8 @@ services:
       USE_BLACKLIST: "no"
       USE_WHITELIST: "no"
       SEND_ANONYMOUS_REPORT: "no"
+      USE_REAL_IP: "yes"
+      REAL_IP_FROM: "10.0.0.0/8"
       USE_CLIENT_CACHE: "yes"
       USE_GZIP: "yes"
       UI_HOST: "http://bw-ui:7000"
