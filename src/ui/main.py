@@ -74,6 +74,7 @@ with app.app_context():
         stop(1)
     FLASK_SECRET = LIB_DIR.joinpath(".flask_secret").read_text(encoding="utf-8").strip()
 
+    app.config["CHECK_PRIVATE_IP"] = getenv("CHECK_PRIVATE_IP", "yes").lower() == "yes"
     app.config["SECRET_KEY"] = FLASK_SECRET
 
     app.config["SESSION_COOKIE_NAME"] = "__Host-bw_ui_session"
@@ -339,7 +340,7 @@ def before_request():
                 if not request.path.endswith("/login"):
                     return redirect(url_for("totp.totp_page", next=request.form.get("next")))
                 passed = False
-            elif not ip_address(request.remote_addr).is_private and session["ip"] != request.remote_addr:
+            elif (app.config["CHECK_PRIVATE_IP"] or not ip_address(request.remote_addr).is_private) and session["ip"] != request.remote_addr:
                 LOGGER.warning(f"User {current_user.get_id()} tried to access his session with a different IP address.")
                 passed = False
             elif session["user_agent"] != request.headers.get("User-Agent"):

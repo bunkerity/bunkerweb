@@ -325,6 +325,11 @@ def on_starting(server):
     )
     set_secure_permissions(UI_DATA_FILE)
 
+    LOGGER.info(
+        "UI will disconnect users that have their IP address changed during a session"
+        + (" except for private IP addresses" if getenv("CHECK_PRIVATE_IP", "yes").lower() == "no" else "")
+    )
+
     LOGGER.info("UI is ready")
 
 
