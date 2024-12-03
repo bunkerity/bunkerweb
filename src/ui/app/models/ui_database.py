@@ -54,8 +54,8 @@ class UIDatabase(Database):
                 "method": ui_user.method,
                 "theme": ui_user.theme,
                 "totp_secret": ui_user.totp_secret,
-                "creation_date": ui_user.creation_date,
-                "update_date": ui_user.update_date,
+                "creation_date": ui_user.creation_date.astimezone(),
+                "update_date": ui_user.update_date.astimezone(),
                 "roles": [role.role_name for role in ui_user.roles],
                 "recovery_codes": [recovery_code.code for recovery_code in ui_user.recovery_codes],
             }
