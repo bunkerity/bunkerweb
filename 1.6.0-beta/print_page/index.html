@@ -16,7 +16,7 @@
       
       
       <link rel="icon" href="../assets/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.46">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.47">
     
     
       
@@ -4663,7 +4663,7 @@ app3.example.com_LOCAL_PHP_PATH=/var/www/html/app3.example.com
 <p>You can choose between the following versions of the OWASP Core Rule Set :</p>
 <ul>
 <li><strong>3</strong> : The version <a href="https://github.com/coreruleset/coreruleset/releases/tag/v3.3.7">v3.3.7</a> of the OWASP Core Rule Set</li>
-<li><strong>4</strong> : The version <a href="https://github.com/coreruleset/coreruleset/releases/tag/v4.8.0">v4.8.0</a> of the OWASP Core Rule Set (<strong><em>default</em></strong>)</li>
+<li><strong>4</strong> : The version <a href="https://github.com/coreruleset/coreruleset/releases/tag/v4.9.0">v4.9.0</a> of the OWASP Core Rule Set (<strong><em>default</em></strong>)</li>
 <li><strong>nightly</strong> : The latest <a href="https://github.com/coreruleset/coreruleset/releases/tag/nightly">nightly</a> build of the OWASP Core Rule Set which is updated every day</li>
 </ul>
 <div class="admonition example">
@@ -9530,6 +9530,11 @@ Consider adding this feature if you want to detect possible open proxies or conn
 <li><code>ADMIN_PASSWORD</code> : password to access the web UI.</li>
 <li><code>FLASK_SECRET</code> : a secret key used to encrypt the session cookie (if not set, a random key will be generated).</li>
 <li><code>TOTP_SECRETS</code> : a list of TOTP secrets separated by spaces or a dictionary (e.g. : <code>{"1": "mysecretkey"}</code> or <code>mysecretkey</code> or <code>mysecretkey mysecretkey1</code>). <strong>We strongly recommend you to set this variable if you want to use 2FA, as it will be used to encrypt the TOTP secret keys</strong> (if not set, a random number of secret keys will be generated). Check out the <a href="https://passlib.readthedocs.io/en/stable/narr/totp-tutorial.html#application-secrets">passlib documentation</a> for more information.</li>
+<li><code>LISTEN_ADDR</code> : the address where the web UI will listen (default is <code>0.0.0.0</code> in <strong>Docker images</strong> and <code>127.0.0.1</code> on <strong>Linux installations</strong>).</li>
+<li><code>LISTEN_PORT</code> : the port where the web UI will listen (default is <code>7000</code>).</li>
+<li><code>MAX_WORKERS</code> : the number of workers used by the web UI (default is the number of CPUs).</li>
+<li><code>MAX_THREADS</code> : the number of threads used by the web UI (default is <code>MAX_WORKERS</code> * 2).</li>
+<li><code>FORWARDED_ALLOW_IPS</code> : a list of IP addresses or networks that are allowed to be used in the <code>X-Forwarded-For</code> header (default is <code>*</code> in <strong>Docker images</strong> and <code>127.0.0.1</code> on <strong>Linux installations</strong>).</li>
 </ul>
 <p>The web UI will use these variables to authenticate you and handle the 2FA feature.</p>
 </div>
