@@ -758,10 +758,10 @@ DNSBL or "DNS BlackList" is an external list of malicious IPs that you query usi
 
 Here is the list of settings related to DNSBL :
 
-|   Setting    |                                   Default                                    | Description                                    |
-| :----------: | :--------------------------------------------------------------------------: | :--------------------------------------------- |
-| `USE_DNSBL`  |                                    `yes`                                     | When set to `yes`, will enable DNSBL checking. |
-| `DNSBL_LIST` | `bl.blocklist.de problems.dnsbl.sorbs.net sbl.spamhaus.org xbl.spamhaus.org` | List of DNSBL servers to ask.                  |
+|   Setting    |                       Default                       | Description                                    |
+| :----------: | :-------------------------------------------------: | :--------------------------------------------- |
+| `USE_DNSBL`  |                        `yes`                        | When set to `yes`, will enable DNSBL checking. |
+| `DNSBL_LIST` | `bl.blocklist.de sbl.spamhaus.org xbl.spamhaus.org` | List of DNSBL servers to ask.                  |
 
 ## Limiting
 
