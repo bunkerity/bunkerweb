@@ -38,8 +38,11 @@ services:
       REAL_IP_FROM: "10.0.0.0/8"
       USE_CLIENT_CACHE: "yes"
       USE_GZIP: "yes"
+      COOKIE_FLAGS: ""
+      COOKIE_AUTO_SECURE_FLAG: "no"
+      KEEP_UPSTREAM_HEADERS: "*"
       UI_HOST: "http://bw-ui:7000"
-      CUSTOM_CONF_HTTP_increase_server_names_hash_bucket_size: "server_names_hash_bucket_size 128;"
+      CUSTOM_CONF_HTTP_increase_server_names_hash_bucket_size: "server_names_hash_bucket_size 256;"
     restart: "unless-stopped"
     networks:
       - bw-universe
@@ -53,6 +56,7 @@ services:
     environment:
       <<: *env
       CHECK_PRIVATE_IP: "no"
+      ALWAYS_REMEMBER: "yes"
     restart: "unless-stopped"
     networks:
       - bw-universe
