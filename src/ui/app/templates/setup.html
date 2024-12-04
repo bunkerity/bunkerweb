@@ -815,6 +815,14 @@
                                                 </div>
                                             </div>
                                         {% else %}
+                                            <input id="SERVER_NAME"
+                                                   name="SERVER_NAME"
+                                                   type="hidden"
+                                                   value="{{ ui_reverse_proxy }}" />
+                                            <input id="REVERSE_PROXY_URL"
+                                                   name="REVERSE_PROXY_URL"
+                                                   type="hidden"
+                                                   value="{{ ui_reverse_proxy_url }}" />
                                             <p class="text-center relative w-full p-2 text-primary rounded-lg fw-bold">
                                                 ↪️ A reverse proxy is already configured for the web interface, please proceed to the next step
                                             </p>
@@ -1025,8 +1033,8 @@
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content bg-transparent border-0 shadow-none">
                     <div class="modal-body text-center">
-                        <div class="spinner-border text-bw-green" role="status">
-                            <span class="visually-hidden">Loading...</span>
+                        <div class="d-flex justify-content-center align-items-center w-100">
+                            <lottie-player src="{{ url_for('static', filename='json/periscop.min.json') }}" background="transparent"  speed="1" style="width: 300px; height: 300px;" class="img-fluid" loop autoplay></lottie-player>
                         </div>
                         <p class="mt-3 text-white">Setting up your BunkerWeb, please wait...</p>
                     </div>

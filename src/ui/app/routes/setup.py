@@ -30,6 +30,7 @@ def setup_page():
             "MULTISITE",
             "USE_UI",
             "UI_HOST",
+            "REVERSE_PROXY_URL",
             "AUTO_LETS_ENCRYPT",
             "USE_LETS_ENCRYPT_STAGING",
             "EMAIL_LETS_ENCRYPT",
@@ -46,12 +47,14 @@ def setup_page():
 
     admin_user = DB.get_ui_user()
 
-    ui_reverse_proxy = False
+    ui_reverse_proxy = None
+    ui_reverse_proxy_url = None
     for server_name in db_config["SERVER_NAME"].split(" "):
         if server_name and db_config.get(f"{server_name}_USE_UI", db_config.get("USE_UI", "no")) == "yes":
             if admin_user:
                 return redirect(url_for("login.login_page"), 301)
-            ui_reverse_proxy = True
+            ui_reverse_proxy = server_name
+            ui_reverse_proxy_url = db_config.get(f"{server_name}_REVERSE_PROXY_URL", db_config.get("REVERSE_PROXY_URL", "/"))
             break
 
     if request.method == "POST":
@@ -220,6 +223,7 @@ def setup_page():
         "setup.html",
         ui_user=admin_user,
         ui_reverse_proxy=ui_reverse_proxy,
+        ui_reverse_proxy_url=ui_reverse_proxy_url,
         username=getenv("ADMIN_USERNAME", ""),
         password=getenv("ADMIN_PASSWORD", ""),
         ui_host=db_config.get("UI_HOST", getenv("UI_HOST", "")),

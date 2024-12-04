@@ -319,6 +319,7 @@ $(document).ready(() => {
       if (
         !uiUser &&
         currentStep === 2 &&
+        $("#EMAIL_LETS_ENCRYPT").length &&
         $("#EMAIL_LETS_ENCRYPT").val().trim() === ""
       ) {
         $("#EMAIL_LETS_ENCRYPT").val($("#email").val().trim());
@@ -526,8 +527,8 @@ $(document).ready(() => {
   $(document).on(
     "input",
     ".plugin-setting",
-    debounce(function () {
-      const $this = $(this);
+    debounce(function (event) {
+      const $this = $(event.target);
       const pattern = $this.attr("pattern");
       const value = $this.val();
       const isValid = pattern ? new RegExp(pattern).test(value) : true;

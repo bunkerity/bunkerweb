@@ -179,7 +179,7 @@
             <script src="{{ url_for('static', filename='libs/ace/src-min/ace.js') }}"
                     nonce="{{ script_nonce }}"></script>
         {% endif %}
-        {% if current_endpoint in ("loading", "instances") or current_endpoint != "plugins" and "plugins" in request.path %}
+        {% if current_endpoint in ("setup", "loading", "instances") or current_endpoint != "plugins" and "plugins" in request.path %}
             <script src="{{ url_for('static', filename='libs/lottie-player/lottie-player.min.js') }}"
                     nonce="{{ script_nonce }}"></script>
         {% endif %}
