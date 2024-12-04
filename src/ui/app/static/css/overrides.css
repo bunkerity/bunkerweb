@@ -1316,6 +1316,10 @@ html.dark-style div.dts div.dataTables_scrollBody table {
   color: #fff !important;
 }
 
+.dark-style table.table.dataTable > tbody > tr.selected a.btn-primary {
+  color: #0b354a !important;
+}
+
 .dark-style .pagination {
   --bs-pagination-color: #fff;
   --bs-pagination-bg: rgba(34, 48, 62, 0.06);
