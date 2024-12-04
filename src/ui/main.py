@@ -80,6 +80,7 @@ with app.app_context():
     app.config["SESSION_COOKIE_NAME"] = "__Host-bw_ui_session"
     app.config["SESSION_COOKIE_PATH"] = "/"
     app.config["SESSION_COOKIE_SECURE"] = True
+    app.config["SESSION_COOKIE_PARTITIONED"] = True
     app.config["SESSION_COOKIE_HTTPONLY"] = True
     app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 
