@@ -1,3 +1,4 @@
+from html import escape
 from importlib.machinery import SourceFileLoader
 from io import BytesIO
 from json import JSONDecodeError, loads as json_loads
@@ -102,7 +103,18 @@ def run_action(plugin: str, function_name: str = "", *, tmp_dir: Optional[Path] 
             tmp_dir.mkdir(parents=True, exist_ok=True)
 
             with tar_open(fileobj=BytesIO(page), mode="r:gz") as tar:
-                tar.extractall(tmp_dir)
+                for member in tar.getmembers():
+                    # Prevent absolute paths and paths with '..'
+                    if member.name.startswith("/") or ".." in Path(member.name).parts:
+                        return {"status": "ko", "code": 400, "message": "Invalid file path"}
+
+                    # Construct the target path and ensure it is within tmp_dir
+                    target_path = tmp_dir.joinpath(member.name).resolve()
+                    if not str(target_path).startswith(str(tmp_dir)):
+                        return {"status": "ko", "code": 400, "message": "Invalid file path"}
+
+                    # Extract the file safely
+                    tar.extract(member, tmp_dir)
 
             tmp_dir = tmp_dir.joinpath("ui")
         except BaseException as e:
@@ -479,16 +491,15 @@ def custom_plugin_page(plugin: str):
         return handle_error("Invalid plugin id, (must be between 1 and 64 characters, only letters, numbers, underscores and hyphens)", "plugins")
 
     if request.method == "POST":
-
         action_result = run_action(plugin)
 
         if isinstance(action_result, Response):
-            LOGGER.info(f"Plugin {plugin} action executed successfully")
+            LOGGER.info("Plugin action executed successfully")
             return action_result
 
         # case error
         if action_result["status"] == "ko":
-            return error_message(action_result["message"]), action_result["code"]
+            return error_message(escape(action_result["message"])), action_result["code"]
 
         LOGGER.info(f"Plugin {plugin} action executed successfully")
 
@@ -541,8 +552,19 @@ def custom_plugin_page(plugin: str):
         tmp_page_dir = TMP_DIR.joinpath("ui", "page", str(uuid4()))
         tmp_page_dir.mkdir(parents=True, exist_ok=True)
 
-        with tar_open(fileobj=BytesIO(page), mode="r:gz") as tar_file:
-            tar_file.extractall(tmp_page_dir)
+        with tar_open(fileobj=BytesIO(page), mode="r:gz") as tar:
+            for member in tar.getmembers():
+                # Prevent absolute paths and paths with '..'
+                if member.name.startswith("/") or ".." in Path(member.name).parts:
+                    return {"status": "ko", "code": 400, "message": "Invalid file path"}
+
+                # Construct the target path and ensure it is within tmp_dir
+                target_path = tmp_page_dir.joinpath(member.name).resolve()
+                if not str(target_path).startswith(str(tmp_page_dir)):
+                    return {"status": "ko", "code": 400, "message": "the plugin page has an invalid file path"}
+
+                # Extract the file safely
+                tar.extract(member, tmp_page_dir)
 
         tmp_page_dir = tmp_page_dir.joinpath("ui")
 
@@ -570,15 +592,8 @@ def custom_plugin_page(plugin: str):
                         .from_string(page_content)
                         .render(pre_render=pre_render, **current_app.jinja_env.globals)
                     )
-                except BaseException as e:
+                except BaseException:
                     LOGGER.exception("An error occurred while rendering the plugin page")
-                    plugin_page = f'<div class="mt-2 mb-2 alert alert-danger text-center" role="alert">An error occurred while rendering the plugin page: {e}<br/>See logs for more details</div>'
+                    plugin_page = '<div class="mt-2 mb-2 alert alert-danger text-center" role="alert">An error occurred while rendering the plugin page<br/>See logs for more details</div>'
 
-    return render_template(
-        "plugin_page.html",
-        plugin_page=plugin_page,
-        plugin=plugin_data,
-        is_used=is_used,
-        is_metrics=is_metrics_on,
-        pre_render=pre_render,
-    )
+    return render_template("plugin_page.html", plugin_page=plugin_page, plugin=plugin_data, is_used=is_used, is_metrics=is_metrics_on, pre_render=pre_render)

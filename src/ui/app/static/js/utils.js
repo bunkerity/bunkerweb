@@ -354,7 +354,8 @@ $(document).ready(() => {
       $bannerText.removeClass("slide-out");
 
       // Update the text content
-      $bannerText.html(newsItems[nextIndex]);
+      const sanitizedText = DOMPurify.sanitize(newsItems[nextIndex]);
+      $bannerText.html(sanitizedText);
 
       // Trigger reflow to ensure the browser applies the changes
       $bannerText[0].offsetHeight;

@@ -5,7 +5,7 @@ from os import environ, getenv
 # from secrets import choice
 # from string import ascii_letters, digits
 from re import escape, match
-from time import sleep, time
+from time import sleep
 
 from flask import Blueprint, Response, flash, redirect, render_template, request, url_for
 from flask_login import current_user
@@ -139,9 +139,6 @@ def setup_page():
 
             if not REVERSE_PROXY_PATH.match(request.form["ui_host"]):
                 return handle_error("The hostname is not valid.", "setup")
-
-            DATA["RELOADING"] = True
-            DATA["LAST_RELOAD"] = time()
 
             base_config = {
                 "SERVER_NAME": request.form["server_name"],
