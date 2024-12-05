@@ -281,22 +281,22 @@ class IngressController(Controller):
         return ret
 
     def __watch(self, watch_type):
-        w = watch.Watch()
-        what = None
-        if watch_type == "pod":
-            what = self.__corev1.list_pod_for_all_namespaces
-        elif watch_type == "ingress":
-            what = self.__networkingv1.list_ingress_for_all_namespaces
-        elif watch_type == "configmap":
-            what = self.__corev1.list_config_map_for_all_namespaces
-        elif watch_type == "service":
-            what = self.__corev1.list_service_for_all_namespaces
-        elif watch_type == "secret":
-            what = self.__corev1.list_secret_for_all_namespaces
-        else:
-            raise Exception(f"Unsupported watch_type {watch_type}")
-
         while True:
+            w = watch.Watch()
+            what = None
+            if watch_type == "pod":
+                what = self.__corev1.list_pod_for_all_namespaces
+            elif watch_type == "ingress":
+                what = self.__networkingv1.list_ingress_for_all_namespaces
+            elif watch_type == "configmap":
+                what = self.__corev1.list_config_map_for_all_namespaces
+            elif watch_type == "service":
+                what = self.__corev1.list_service_for_all_namespaces
+            elif watch_type == "secret":
+                what = self.__corev1.list_secret_for_all_namespaces
+            else:
+                raise Exception(f"Unsupported watch_type {watch_type}")
+
             locked = False
             error = False
             applied = False
