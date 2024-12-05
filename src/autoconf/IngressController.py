@@ -18,10 +18,15 @@ class IngressController(Controller):
         self.__internal_lock = Lock()
         super().__init__("kubernetes")
         config.load_incluster_config()
+
         Configuration._default.verify_ssl = getenv("KUBERNETES_VERIFY_SSL", "yes") == "yes"
+        self._logger.info(f"SSL verification is {'enabled' if Configuration._default.verify_ssl else 'disabled'}")
+
         ssl_ca_cert = getenv("KUBERNETES_SSL_CA_CERT", "")
         if ssl_ca_cert:
             Configuration._default.ssl_ca_cert = ssl_ca_cert
+            self._logger.info("Using custom SSL CA certificate")
+
         self.__corev1 = client.CoreV1Api()
         self.__networkingv1 = client.NetworkingV1Api()
 
@@ -71,7 +76,7 @@ class IngressController(Controller):
             "hostname": (
                 f"{controller_instance.status.pod_ip.replace('.','-')}.{controller_instance.metadata.namespace}.pod.{self.__domain_name}"
                 if self.__use_fqdn
-                else controller_instance.status.pod_ip
+                else (controller_instance.status.pod_ip or controller_instance.metadata.name)
             ),
             "health": False,
             "type": "pod",
@@ -108,6 +113,7 @@ class IngressController(Controller):
     def _to_services(self, controller_service) -> List[dict]:
         if not controller_service.spec or not controller_service.spec.rules:
             return []
+
         namespace = controller_service.metadata.namespace
         services = []
         # parse rules
@@ -115,13 +121,14 @@ class IngressController(Controller):
             if not rule.host:
                 self._logger.warning("Ignoring unsupported ingress rule without host.")
                 continue
+
             service = {}
             service["SERVER_NAME"] = rule.host
             if not rule.http:
                 services.append(service)
                 continue
-            location = 1
-            for path in rule.http.paths:
+
+            for location, path in enumerate(rule.http.paths, start=1):
                 if not path.path:
                     self._logger.warning("Ignoring unsupported ingress rule without path.")
                     continue
@@ -166,7 +173,6 @@ class IngressController(Controller):
                         f"REVERSE_PROXY_URL_{location}": path.path,
                     }
                 )
-                location += 1
             services.append(service)
 
         # parse annotations
@@ -178,8 +184,6 @@ class IngressController(Controller):
 
                     variable = annotation.replace("bunkerweb.io/", "", 1)
                     server_name = service["SERVER_NAME"].strip().split(" ")[0]
-                    if not variable.startswith(f"{server_name}_"):
-                        variable = f"{server_name}_{variable}"  # ? Ingress specific global variables are applied to all services
                     service[variable.replace(f"{server_name}_", "", 1)] = value
 
         # parse tls
