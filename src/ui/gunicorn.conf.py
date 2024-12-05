@@ -91,7 +91,6 @@ def on_starting(server):
     def set_secure_permissions(file_path: Path):
         """Set file permissions to 600 (owner read/write only)."""
         file_path.chmod(S_IRUSR | S_IWUSR)
-        LOGGER.info(f"Permissions set to 600 for {file_path}")
 
     # * Handle Flask secret
     try:
@@ -137,8 +136,8 @@ def on_starting(server):
                 file.write(current_env_hash)
             set_secure_permissions(FLASK_SECRET_HASH_FILE)
 
-        LOGGER.info(f"Flask secret securely stored in {FLASK_SECRET_FILE}.")
-        LOGGER.info(f"Flask secret hash stored in {FLASK_SECRET_HASH_FILE} for change detection.")
+        LOGGER.info("Flask secret securely stored.")
+        LOGGER.info("Flask secret hash stored for change detection.")
     except Exception as e:
         LOGGER.critical(f"An error occurred while handling the Flask secret: {e}")
         exit(1)
@@ -201,8 +200,8 @@ def on_starting(server):
                 file.write(current_env_hash)
             set_secure_permissions(TOTP_HASH_FILE)
 
-        LOGGER.info(f"TOTP secrets securely stored in {TOTP_SECRETS_FILE}.")
-        LOGGER.info(f"TOTP environment hash stored in {TOTP_HASH_FILE} for change detection.")
+        LOGGER.info("TOTP secrets securely stored.")
+        LOGGER.info("TOTP environment hash stored for change detection.")
     except Exception as e:
         LOGGER.critical(f"An error occurred while handling TOTP secrets: {e}")
         exit(1)
@@ -254,7 +253,6 @@ def on_starting(server):
             if err:
                 LOGGER.error(f"Couldn't update the admin user in the database: {err}")
 
-        LOGGER.debug(f"Admin user: {ADMIN_USER}")
         if env_admin_username or env_admin_password:
             override_admin_creds = getenv("OVERRIDE_ADMIN_CREDS", "no").lower() == "yes"
             if ADMIN_USER["method"] == "manual" or override_admin_creds:

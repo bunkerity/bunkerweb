@@ -491,9 +491,6 @@ def set_columns_preferences():
     except BaseException:
         return Response(status=400, response=dumps({"message": "Bad request"}), content_type="application/json")
 
-    LOGGER.debug(f"Setting columns preferences for {table_name}: {columns_preferences}")
-    LOGGER.debug(f"Default columns preferences for {table_name}: {COLUMNS_PREFERENCES_DEFAULTS.get(table_name, {})}")
-
     if (
         DB.readonly
         or table_name not in COLUMNS_PREFERENCES_DEFAULTS

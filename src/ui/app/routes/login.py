@@ -20,8 +20,7 @@ def login_page():
 
     fail = False
     if request.method == "POST" and "username" in request.form and "password" in request.form:
-        LOGGER.debug(request.form)
-        LOGGER.warning(f"Login attempt from {request.remote_addr} with username \"{request.form['username']}\"")
+        LOGGER.warning(f"Login attempt from {request.remote_addr}")
 
         ui_user = DB.get_ui_user(username=request.form["username"])
         if ui_user and ui_user.username == request.form["username"] and ui_user.check_password(request.form["password"]):
