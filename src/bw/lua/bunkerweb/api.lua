@@ -92,6 +92,18 @@ api.global.GET["^/ping$"] = function(self)
 	return self:response(HTTP_OK, "success", "pong")
 end
 
+api.global.GET["^/health$"] = function(self)
+	local data, err = get_variable("IS_LOADING", false)
+	if not data then
+		logger:log(ERR, "can't get IS_LOADING variable : " .. err)
+		return self:response(HTTP_OK, "success", "loading")
+	end
+	if data == "yes" then
+		return self:response(HTTP_OK, "success", "loading")
+	end
+	return self:response(HTTP_OK, "success", "ok")
+end
+
 api.global.POST["^/reload"] = function(self)
 	-- Get test argument
 	local args = ngx.req.get_uri_args()

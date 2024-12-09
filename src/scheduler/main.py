@@ -33,7 +33,7 @@ from JobScheduler import JobScheduler
 from jobs import Job  # type: ignore
 from API import API  # type: ignore
 
-# from ApiCaller import ApiCaller  # type: ignore  # TODO: uncomment when the healthcheck endpoint is ready @fl0ppy-d1sk
+from ApiCaller import ApiCaller  # type: ignore
 
 APPLYING_CHANGES = Event()
 RUN = True
@@ -388,13 +388,15 @@ def healthcheck_job():
 
     HEALTHCHECK_EVENT.set()
 
-    # env = SCHEDULER.db.get_config()  # TODO: uncomment when the healthcheck endpoint is ready @fl0ppy-d1sk
+    while APPLYING_CHANGES.is_set():
+        sleep(1)
+
+    env = SCHEDULER.db.get_config()
 
     for db_instance in SCHEDULER.db.get_instances():
         bw_instance = API(f"http://{db_instance['hostname']}:{db_instance['port']}", db_instance["server_name"])
         try:
-            sent, err, status, resp = bw_instance.request("GET", "ping")
-            # sent, err, status, resp = bw_instance.request("GET", "health") # TODO: use health instead when the healthcheck endpoint is ready @fl0ppy-d1sk
+            sent, err, status, resp = bw_instance.request("GET", "health")
 
             success = True
             if not sent:
@@ -420,32 +422,25 @@ def healthcheck_job():
                         break
                 continue
 
-            # if resp["state"] == "loading": # TODO: uncomment when the healthcheck endpoint is ready @fl0ppy-d1sk
-            #     HEALTHCHECK_LOGGER.info(f"Instance {bw_instance.endpoint} is loading, sending config ...")
-            #     api_caller = ApiCaller([bw_instance])
-            #     api_caller.send_files(CUSTOM_CONFIGS_PATH, "/custom_configs")
-            #     api_caller.send_files(EXTERNAL_PLUGINS_PATH, "/plugins")
-            #     api_caller.send_files(PRO_PLUGINS_PATH, "/pro_plugins")
-            #     api_caller.send_files(join(sep, "etc", "nginx"), "/confs")
-            #     api_caller.send_files(CACHE_PATH, "/cache")
-            #     if not api_caller.send_to_apis("POST", f"/reload?test={'no' if DISABLE_CONFIGURATION_TESTING else 'yes'}", timeout=max(RELOAD_MIN_TIMEOUT, 2 * len(env["SERVER_NAME"].split(" "))),)[0]:
-            #         HEALTHCHECK_LOGGER.error(f"Error while reloading instance {bw_instance.endpoint}")
-            #         ret = SCHEDULER.db.update_instance(db_instance["hostname"], "loading")
-            #         if ret:
-            #             HEALTHCHECK_LOGGER.error(f"Couldn't update instance {bw_instance.endpoint} status to loading in the database: {ret}")
-            #         continue
-            #     HEALTHCHECK_LOGGER.info(f"Successfully reloaded instance {bw_instance.endpoint}")
-            # elif resp["state"] == "down":
-            #     HEALTHCHECK_LOGGER.warning(f"Instance {bw_instance.endpoint} is down")
-            #     ret = SCHEDULER.db.update_instance(db_instance["hostname"], "down")
-            #     if ret:
-            #         HEALTHCHECK_LOGGER.error(f"Couldn't update instance {bw_instance.endpoint} status to down in the database: {ret}")
-            #     for i, api in enumerate(SCHEDULER.apis):
-            #         if api.endpoint == bw_instance.endpoint:
-            #             HEALTHCHECK_LOGGER.debug(f"Removing {bw_instance.endpoint} from the list of reachable instances")
-            #             del SCHEDULER.apis[i]
-            #             break
-            #     continue
+            if resp["msg"] == "loading":
+                HEALTHCHECK_LOGGER.info(f"Instance {bw_instance.endpoint} is loading, sending config ...")
+                api_caller = ApiCaller([bw_instance])
+                api_caller.send_files(CUSTOM_CONFIGS_PATH, "/custom_configs")
+                api_caller.send_files(EXTERNAL_PLUGINS_PATH, "/plugins")
+                api_caller.send_files(PRO_PLUGINS_PATH, "/pro_plugins")
+                api_caller.send_files(join(sep, "etc", "nginx"), "/confs")
+                api_caller.send_files(CACHE_PATH, "/cache")
+                if not api_caller.send_to_apis(
+                    "POST",
+                    f"/reload?test={'no' if DISABLE_CONFIGURATION_TESTING else 'yes'}",
+                    timeout=max(RELOAD_MIN_TIMEOUT, 2 * len(env["SERVER_NAME"].split(" "))),
+                )[0]:
+                    HEALTHCHECK_LOGGER.error(f"Error while reloading instance {bw_instance.endpoint}")
+                    ret = SCHEDULER.db.update_instance(db_instance["hostname"], "loading")
+                    if ret:
+                        HEALTHCHECK_LOGGER.error(f"Couldn't update instance {bw_instance.endpoint} status to loading in the database: {ret}")
+                    continue
+                HEALTHCHECK_LOGGER.info(f"Successfully reloaded instance {bw_instance.endpoint}")
 
             ret = SCHEDULER.db.update_instance(db_instance["hostname"], "up")
             if ret:
