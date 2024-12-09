@@ -19,7 +19,7 @@ class IngressController(Controller):
         super().__init__("kubernetes")
         config.load_incluster_config()
 
-        Configuration._default.verify_ssl = getenv("KUBERNETES_VERIFY_SSL", "yes") == "yes"
+        Configuration._default.verify_ssl = getenv("KUBERNETES_VERIFY_SSL", "yes").lower().strip() == "yes"
         self._logger.info(f"SSL verification is {'enabled' if Configuration._default.verify_ssl else 'disabled'}")
 
         ssl_ca_cert = getenv("KUBERNETES_SSL_CA_CERT", "")
@@ -30,7 +30,7 @@ class IngressController(Controller):
         self.__corev1 = client.CoreV1Api()
         self.__networkingv1 = client.NetworkingV1Api()
 
-        self.__use_fqdn = getenv("USE_KUBERNETES_FQDN", "yes").lower() == "yes"
+        self.__use_fqdn = getenv("USE_KUBERNETES_FQDN", "yes").lower().strip() == "yes"
         self._logger.info(f"Using Pod {'FQDN' if self.__use_fqdn else 'IP'} as hostname")
 
         self.__ingress_class = getenv("KUBERNETES_INGRESS_CLASS", "")
@@ -39,6 +39,12 @@ class IngressController(Controller):
 
         self.__domain_name = getenv("KUBERNETES_DOMAIN_NAME", "cluster.local")
         self._logger.info(f"Using domain name: {self.__domain_name}")
+
+        self.__service_protocol = getenv("KUBERNETES_SERVICE_PROTOCOL", "http").lower().strip()
+        if self.__service_protocol not in ("http", "https"):
+            self._logger.warning(f"Unsupported service protocol {self.__service_protocol}")
+            self.__service_protocol = "http"
+        self._logger.info(f"Using service protocol: {self.__service_protocol}")
 
     def _get_controller_instances(self) -> list:
         instances = []
@@ -162,7 +168,7 @@ class IngressController(Controller):
                 else:
                     port = path.backend.service.port.number
 
-                reverse_proxy_host = f"http://{path.backend.service.name}.{namespace}.svc.{self.__domain_name}"
+                reverse_proxy_host = f"{self.__service_protocol}://{path.backend.service.name}.{namespace}.svc.{self.__domain_name}"
                 if port != 80:
                     reverse_proxy_host += f":{port}"
 
