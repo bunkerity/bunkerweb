@@ -300,7 +300,7 @@ def on_starting(server):
                 if env_admin_password and not check_password(env_admin_password, ADMIN_USER["password"]):
                     if not USER_PASSWORD_RX.match(env_admin_password):
                         LOGGER.warning(
-                            "The admin password is not strong enough. It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (#@?!$%^&*-). It will not be updated."
+                            "The admin password is not strong enough. It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character. It will not be updated."
                         )
                     else:
                         ADMIN_USER["password"] = gen_password_hash(env_admin_password)
@@ -326,7 +326,7 @@ def on_starting(server):
                 ERROR_FILE.write_text(message, encoding="utf-8")
                 exit(1)
             elif not USER_PASSWORD_RX.match(env_admin_password):
-                message = "The admin password is not strong enough. It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (#@?!$%^&*-)."
+                message = "The admin password is not strong enough. It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character."
                 LOGGER.error(message)
                 ERROR_FILE.write_text(message, encoding="utf-8")
                 exit(1)

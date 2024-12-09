@@ -221,7 +221,7 @@
                                                    aria-label="New Password"
                                                    autocomplete="off"
                                                    required
-                                                   pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[ -~]).{8,}$"
+                                                   pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z0-9]).{8,}$"
                                                    {% if is_readonly %}disabled{% endif %} />
                                             <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
                                         </div>

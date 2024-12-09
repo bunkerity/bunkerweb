@@ -20,10 +20,10 @@ $(document).ready(function () {
       isValid,
     );
     isValid = validateCondition(
-      /[ -~]/.test(password),
+      /[^a-zA-Z0-9]/.test(password),
       "#special-check i",
       isValid,
-    );
+    ); // Check for special characters
 
     return isValid;
   }
