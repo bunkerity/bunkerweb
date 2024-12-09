@@ -99,6 +99,7 @@ with app.app_context():
     sess.init_app(app)
 
     # CSRF protection
+    app.config["WTF_CSRF_SSL_STRICT"] = False
     csrf = CSRFProtect()
     csrf.init_app(app)
 
@@ -333,7 +334,6 @@ def before_request():
         app.config["SESSION_COOKIE_SECURE"] = False
         app.config["REMEMBER_COOKIE_NAME"] = "bw_ui_remember_token"
         app.config["REMEMBER_COOKIE_SECURE"] = False
-        app.config["WTF_CSRF_SSL_STRICT"] = False
 
     app.config["SCRIPT_NONCE"] = token_urlsafe(32)
 
