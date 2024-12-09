@@ -4,6 +4,7 @@ Flask==3.1.0
 Flask-executor==1.0.0
 Flask-Login==0.6.3
 Flask-Principal==0.4.0
+Flask-Session[cachelib]==0.8.0
 Flask-WTF==1.2.2
 gunicorn[gthread]==23.0.0
 python-magic==0.4.27

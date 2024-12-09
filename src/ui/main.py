@@ -15,10 +15,12 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
+from cachelib import FileSystemCache
 from flask import Flask, Response, flash as flask_flash, jsonify, make_response, redirect, render_template, request, session, url_for
 from flask_executor import Executor
 from flask_login import current_user, LoginManager, login_required, logout_user
 from flask_principal import ActionNeed, identity_loaded, Permission, Principal, RoleNeed, TypeNeed, UserNeed
+from flask_session import Session
 from flask_wtf.csrf import CSRFProtect, CSRFError
 from werkzeug.routing.exceptions import BuildError
 
@@ -77,25 +79,28 @@ with app.app_context():
     app.config["CHECK_PRIVATE_IP"] = getenv("CHECK_PRIVATE_IP", "yes").lower() == "yes"
     app.config["SECRET_KEY"] = FLASK_SECRET
 
-    app.config["SESSION_COOKIE_NAME"] = "__Host-bw_ui_session"
     app.config["SESSION_COOKIE_PATH"] = "/"
-    app.config["SESSION_COOKIE_SECURE"] = True
-    app.config["SESSION_COOKIE_PARTITIONED"] = True
     app.config["SESSION_COOKIE_HTTPONLY"] = True
     app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 
-    app.config["REMEMBER_COOKIE_NAME"] = "__Host-bw_ui_remember_token"
     app.config["REMEMBER_COOKIE_PATH"] = "/"
-    app.config["REMEMBER_COOKIE_SECURE"] = True
     app.config["REMEMBER_COOKIE_HTTPONLY"] = True
     app.config["REMEMBER_COOKIE_SAMESITE"] = "Lax"
 
-    app.config["WTF_CSRF_SSL_STRICT"] = False
     app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 86400
     app.config["MAX_CONTENT_LENGTH"] = 50 * 1024 * 1024  # 50 MB
     app.config["SCRIPT_NONCE"] = ""
 
-    app.config["EXECUTOR_MAX_WORKERS"] = 4
+    # Session management
+    app.config["SESSION_TYPE"] = "cachelib"
+    app.config["SESSION_ID_LENGTH"] = 64
+    app.config["SESSION_CACHELIB"] = FileSystemCache(threshold=500, cache_dir=LIB_DIR.joinpath("ui_sessions_cache"))
+    sess = Session()
+    sess.init_app(app)
+
+    # CSRF protection
+    csrf = CSRFProtect()
+    csrf.init_app(app)
 
     principal = Principal()
     principal.init_app(app)
@@ -131,11 +136,8 @@ with app.app_context():
         url_for=custom_url_for,
     )
 
-    # CSRF protection
-    csrf = CSRFProtect()
-    csrf.init_app(app)
-
     # Executor
+    app.config["EXECUTOR_MAX_WORKERS"] = 4
     executor = Executor(app)
 
 
@@ -319,6 +321,20 @@ def before_request():
         response.headers["Retry-After"] = 30  # Clients should retry after 30 seconds # type: ignore
         return response
 
+    if request.environ.get("HTTP_X_FORWARDED_FOR") is not None:
+        # Requests from the reverse proxy
+        app.config["SESSION_COOKIE_NAME"] = "__Host-bw_ui_session"
+        app.config["SESSION_COOKIE_SECURE"] = True
+        app.config["REMEMBER_COOKIE_NAME"] = "__Host-bw_ui_remember_token"
+        app.config["REMEMBER_COOKIE_SECURE"] = True
+    else:
+        # Requests from other sources
+        app.config["SESSION_COOKIE_NAME"] = "bw_ui_session"
+        app.config["SESSION_COOKIE_SECURE"] = False
+        app.config["REMEMBER_COOKIE_NAME"] = "bw_ui_remember_token"
+        app.config["REMEMBER_COOKIE_SECURE"] = False
+        app.config["WTF_CSRF_SSL_STRICT"] = False
+
     app.config["SCRIPT_NONCE"] = token_urlsafe(32)
 
     if not request.path.startswith(("/css/", "/img/", "/js/", "/json/", "/fonts/", "/libs/")):
@@ -372,8 +388,8 @@ def set_security_headers(response):
     response.headers["Content-Security-Policy"] = (
         "object-src 'none';"
         + " frame-ancestors 'self';"
-        + " default-src 'self' https://www.bunkerweb.io https://assets.bunkerity.com https://bunkerity.us1.list-manage.com https://api.github.com;"
-        + f" script-src 'self' 'nonce-{app.config['SCRIPT_NONCE']}';"
+        + " default-src https: http: 'self' https://www.bunkerweb.io https://assets.bunkerity.com https://bunkerity.us1.list-manage.com https://api.github.com;"
+        + f" script-src https: http: 'self' 'nonce-{app.config['SCRIPT_NONCE']}' 'strict-dynamic' 'unsafe-inline';"
         + " style-src 'self' 'unsafe-inline';"
         + " img-src 'self' data: blob: https://assets.bunkerity.com https://*.tile.openstreetmap.org;"
         + " font-src 'self' data:;"
@@ -382,7 +398,7 @@ def set_security_headers(response):
         + (
             " connect-src *;"
             if request.path.startswith(("/check", "/setup"))
-            else " connect-src 'self' https://api.github.com/repos/bunkerity/bunkerweb https://www.bunkerweb.io/api/posts/0/3;"
+            else " connect-src https: http: 'self' https://api.github.com/repos/bunkerity/bunkerweb https://www.bunkerweb.io/api/posts/0/3;"
         )
     )
 

@@ -81,18 +81,15 @@ COLUMNS_PREFERENCES_DEFAULTS = {
 }
 
 
-def stop_gunicorn():
-    p = Popen(["pgrep", "-f", "gunicorn"], stdout=PIPE)
-    out, _ = p.communicate()
-    pid = out.strip().decode().split("\n")[0]
-    call(["kill", "-SIGTERM", pid])
-
-
-def stop(status, _stop=True):
-    Path(sep, "var", "run", "bunkerweb", "ui.pid").unlink(missing_ok=True)
-    TMP_DIR.joinpath("ui.healthy").unlink(missing_ok=True)
-    if _stop is True:
-        stop_gunicorn()
+def stop(status, _stop: bool = True):
+    if _stop:
+        pid_file = Path(sep, "var", "run", "bunkerweb", "ui.pid")
+        if pid_file.is_file():
+            pid = pid_file.read_bytes()
+        else:
+            p = Popen(["pgrep", "-f", "gunicorn"], stdout=PIPE)
+            pid, _ = p.communicate()
+        call(["kill", "-SIGTERM", pid.strip().decode().split("\n")[0]])
     _exit(status)
 
 

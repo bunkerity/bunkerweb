@@ -99,11 +99,11 @@
         {% endif %}
         <!-- Page CSS -->
         <!-- Page -->
-        {% if current_endpoint in ("setup", "login", "totp", "loading") %}
+        {% if starting or current_endpoint in ("setup", "login", "totp", "loading") %}
             <link rel="stylesheet"
                   href="{{ url_for('static', filename='css/pages/login.css') }}"
                   nonce="{{ style_nonce }}" />
-        {% elif current_endpoint == "loading" %}
+        {% elif current_endpoint in ("loading", "starting") %}
             <link rel="stylesheet"
                   href="{{ url_for('static', filename='css/pages/loading.css') }}"
                   nonce="{{ style_nonce }}" />
@@ -124,7 +124,9 @@
                 nonce="{{ script_nonce }}"></script>
     </head>
     <body>
+        {% if not starting %}
         <input type="hidden" id="home-path" value="{{ url_for('home') }}" />
+        {% endif %}
         <input type="hidden" id="is-read-only" value="{{ is_readonly }}" />
         <input type="hidden" id="theme" value="{{ theme }}" />
         <input type="hidden"
@@ -140,7 +142,7 @@
                id="avatar-url-white"
                value="{{ url_for('static', filename='img/avatar_profil_BW-white.png') }}" />
         <!-- prettier-ignore -->
-        {% if current_endpoint != "loading" %}
+        {% if not starting and  current_endpoint != "loading" %}
             {% include "flash.html" %}
         {% endif %}
         {% block page %}{% endblock %}
@@ -179,7 +181,7 @@
             <script src="{{ url_for('static', filename='libs/ace/src-min/ace.js') }}"
                     nonce="{{ script_nonce }}"></script>
         {% endif %}
-        {% if current_endpoint in ("setup", "loading", "instances") or current_endpoint != "plugins" and "plugins" in request.path %}
+        {% if starting or current_endpoint in ("setup", "loading", "instances") or (current_endpoint != "plugins" and "plugins" in request.path) %}
             <script src="{{ url_for('static', filename='libs/lottie-player/lottie-player.min.js') }}"
                     nonce="{{ script_nonce }}"></script>
         {% endif %}
@@ -191,7 +193,7 @@
                 nonce="{{ script_nonce }}"></script>
         <script src="{{ url_for('static', filename='js/common.js') }}"
                 nonce="{{ script_nonce }}"></script>
-        {% if current_endpoint in ("setup", "login", "totp", "loading") %}
+        {% if starting or current_endpoint in ("setup", "login", "totp", "loading") %}
             <script src="{{ url_for('static', filename='js/pages/login.js') }}"
                     nonce="{{ script_nonce }}"></script>
         {% endif %}
@@ -208,6 +210,10 @@
                     nonce="{{ script_nonce }}"></script>
         {% endif %}
         <!-- Page JS -->
+        {% if starting %}
+            <script src="{{ url_for('static', filename='js/pages/starting.js') }}"
+                    nonce="{{ script_nonce }}"></script>
+        {% endif %}
         {% if current_endpoint == "setup" %}
             <script src="{{ url_for('static', filename='js/pages/setup.js') }}"
                     nonce="{{ script_nonce }}"></script>
@@ -262,6 +268,6 @@
             <script src="{{ url_for('static', filename='js/pages/plugin_page.js') }}"
                     nonce="{{ script_nonce }}"></script>
         {% endif %}
-        <script async defer src="{{ url_for('static', filename='js/buttons.js') }}"></script>
+        <script async defer src="{{ url_for('static', filename='js/buttons.js') }}" nonce="{{ script_nonce }}"></script>
     </body>
 </html>

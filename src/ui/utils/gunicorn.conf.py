@@ -6,8 +6,10 @@ from os.path import join
 from pathlib import Path
 from secrets import token_hex
 from stat import S_IRUSR, S_IWUSR
+from subprocess import call
 from sys import exit, path as sys_path
 from time import sleep
+from traceback import format_exc
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("api",), ("db",))]:
     if deps_path not in sys_path:
@@ -26,8 +28,12 @@ LIB_DIR = Path(sep, "var", "lib", "bunkerweb")
 
 UI_DATA_FILE = TMP_DIR.joinpath("ui_data.json")
 HEALTH_FILE = TMP_DIR.joinpath("ui.healthy")
+ERROR_FILE = TMP_DIR.joinpath("ui.error")
 
+TMP_PID_FILE = RUN_DIR.joinpath("tmp-ui.pid")
 PID_FILE = RUN_DIR.joinpath("ui.pid")
+
+UI_SESSIONS_CACHE = LIB_DIR.joinpath("ui_sessions_cache")
 
 FLASK_SECRET_FILE = LIB_DIR.joinpath(".flask_secret")
 FLASK_SECRET_HASH_FILE = FLASK_SECRET_FILE.with_suffix(".hash")  # File to store hash of Flask secret
@@ -51,6 +57,7 @@ limit_request_line = 0
 limit_request_fields = 32768
 limit_request_field_size = 0
 reuse_port = True
+daemon = False
 chdir = join(sep, "usr", "share", "bunkerweb", "ui")
 umask = 0x027
 pidfile = PID_FILE.as_posix()
@@ -85,6 +92,8 @@ def on_starting(server):
     TMP_DIR.mkdir(parents=True, exist_ok=True)
     RUN_DIR.mkdir(parents=True, exist_ok=True)
     LIB_DIR.mkdir(parents=True, exist_ok=True)
+
+    ERROR_FILE.unlink(missing_ok=True)
 
     LOGGER = setup_logger("UI", getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")))
 
@@ -137,9 +146,12 @@ def on_starting(server):
             set_secure_permissions(FLASK_SECRET_HASH_FILE)
 
         LOGGER.info("Flask secret securely stored.")
-        LOGGER.info("Flask secret hash stored for change detection.")
+        LOGGER.info("Flask secret hash securely stored for change detection.")
     except Exception as e:
-        LOGGER.critical(f"An error occurred while handling the Flask secret: {e}")
+        message = f"An error occurred while handling the Flask secret: {e}"
+        LOGGER.debug(format_exc())
+        LOGGER.critical(message)
+        ERROR_FILE.write_text(message, encoding="utf-8")
         exit(1)
 
     # * Handle TOTP secrets
@@ -201,15 +213,25 @@ def on_starting(server):
             set_secure_permissions(TOTP_HASH_FILE)
 
         LOGGER.info("TOTP secrets securely stored.")
-        LOGGER.info("TOTP environment hash stored for change detection.")
+        LOGGER.info("TOTP environment hash securely stored for change detection.")
     except Exception as e:
-        LOGGER.critical(f"An error occurred while handling TOTP secrets: {e}")
+        message = f"An error occurred while handling TOTP secrets: {e}"
+        LOGGER.debug(format_exc())
+        LOGGER.critical(message)
+        ERROR_FILE.write_text(message, encoding="utf-8")
         exit(1)
 
     DB = UIDatabase(LOGGER)
+    current_time = datetime.now().astimezone()
 
     ready = False
     while not ready:
+        if (datetime.now().astimezone() - current_time).total_seconds() > 60:
+            message = "Timed out while waiting for the database to be initialized."
+            LOGGER.error(message)
+            ERROR_FILE.write_text(message, encoding="utf-8")
+            exit(1)
+
         db_metadata = DB.get_metadata()
         ui_roles = DB.get_ui_roles(as_dict=True)
         if isinstance(db_metadata, str) or not db_metadata["is_initialized"] or (isinstance(ui_roles, str) and "doesn't exist" in ui_roles):
@@ -222,21 +244,35 @@ def on_starting(server):
     if not ui_roles:
         ret = DB.create_ui_role("admin", "Admins can create new users, edit and read the data.", ["manage", "write", "read"])
         if ret:
-            LOGGER.error(f"Couldn't create the admin role in the database: {ret}")
+            message = f"Couldn't create the admin role in the database: {ret}"
+            LOGGER.error(message)
+            ERROR_FILE.write_text(message, encoding="utf-8")
             exit(1)
 
         ret = DB.create_ui_role("writer", "Writers can edit and read the data but can't create new users.", ["write", "read"])
         if ret:
-            LOGGER.error(f"Couldn't create the admin role in the database: {ret}")
+            message = f"Couldn't create the writer role in the database: {ret}"
+            LOGGER.error(message)
+            ERROR_FILE.write_text(message, encoding="utf-8")
             exit(1)
 
         ret = DB.create_ui_role("reader", "Readers can only read the data.", ["read"])
         if ret:
-            LOGGER.error(f"Couldn't create the admin role in the database: {ret}")
+            message = f"Couldn't create the reader role in the database: {ret}"
+            LOGGER.error(message)
+            ERROR_FILE.write_text(message, encoding="utf-8")
             exit(1)
+
+    current_time = datetime.now().astimezone()
 
     ADMIN_USER = "Error"
     while ADMIN_USER == "Error":
+        if (datetime.now().astimezone() - current_time).total_seconds() > 60:
+            message = "Timed out while waiting for the admin user."
+            LOGGER.error(message)
+            ERROR_FILE.write_text(message, encoding="utf-8")
+            exit(1)
+
         try:
             ADMIN_USER = DB.get_ui_user(as_dict=True)
         except BaseException as e:
@@ -277,7 +313,7 @@ def on_starting(server):
                     if err:
                         LOGGER.error(f"Couldn't update the admin user in the database: {err}")
                     else:
-                        LOGGER.info("The admin user was updated successfully")
+                        LOGGER.info("The admin user was updated successfully.")
             else:
                 LOGGER.warning("The admin user wasn't created manually. You can't change it from the environment variables.")
     elif env_admin_username and env_admin_password:
@@ -285,17 +321,21 @@ def on_starting(server):
 
         if not DEBUG:
             if len(user_name) > 256:
-                LOGGER.error("The admin username is too long. It must be less than 256 characters.")
+                message = "The admin username is too long. It must be less than 256 characters."
+                LOGGER.error(message)
+                ERROR_FILE.write_text(message, encoding="utf-8")
                 exit(1)
             elif not USER_PASSWORD_RX.match(env_admin_password):
-                LOGGER.error(
-                    "The admin password is not strong enough. It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (#@?!$%^&*-)."
-                )
+                message = "The admin password is not strong enough. It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (#@?!$%^&*-)."
+                LOGGER.error(message)
+                ERROR_FILE.write_text(message, encoding="utf-8")
                 exit(1)
 
         ret = DB.create_ui_user(user_name, gen_password_hash(env_admin_password), ["admin"], admin=True)
         if ret and "already exists" not in ret:
-            LOGGER.error(f"Couldn't create the admin user in the database: {ret}")
+            message = f"Couldn't create the admin user in the database: {ret}"
+            LOGGER.critical(message)
+            ERROR_FILE.write_text(message, encoding="utf-8")
             exit(1)
 
     latest_release = None
@@ -325,8 +365,23 @@ def on_starting(server):
 
     LOGGER.info(
         "UI will disconnect users that have their IP address changed during a session"
-        + (" except for private IP addresses" if getenv("CHECK_PRIVATE_IP", "yes").lower() == "no" else "")
+        + (" except for private IP addresses." if getenv("CHECK_PRIVATE_IP", "yes").lower() == "no" else ".")
     )
+
+    UI_SESSIONS_CACHE.mkdir(parents=True, exist_ok=True)
+
+    if TMP_PID_FILE.is_file():
+        LOGGER.info("Stopping temporary UI...")
+        call(["kill", "-SIGQUIT", TMP_PID_FILE.read_text().strip()])
+        current_time = datetime.now().astimezone()
+        while TMP_PID_FILE.is_file():
+            if (datetime.now().astimezone() - current_time).total_seconds() > 60:
+                message = "Timed out while waiting for the temporary UI to stop."
+                LOGGER.error(message)
+                ERROR_FILE.write_text(message, encoding="utf-8")
+                exit(1)
+            sleep(1)
+        LOGGER.info("Temporary UI is stopped")
 
     LOGGER.info("UI is ready")
 

@@ -1,7 +1,7 @@
 from datetime import datetime
 from os import getenv
 
-from flask import Blueprint, flash as flask_flash, redirect, render_template, request, session, url_for
+from flask import Blueprint, current_app, flash as flask_flash, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_user
 
 from app.dependencies import DB
@@ -20,10 +20,14 @@ def login_page():
 
     fail = False
     if request.method == "POST" and "username" in request.form and "password" in request.form:
-        LOGGER.warning(f"Login attempt from {request.remote_addr}")
+        LOGGER.warning(f"Login attempt from {request.remote_addr} with username \"{request.form['username']}\"")
 
         ui_user = DB.get_ui_user(username=request.form["username"])
         if ui_user and ui_user.username == request.form["username"] and ui_user.check_password(request.form["password"]):
+            # Regenerate the session to mitigate session fixation
+            session.clear()  # Clear the current session
+            current_app.session_interface.regenerate(session)  # Regenerate the session ID
+
             # log the user in
             session["creation_date"] = datetime.now().astimezone()
             session["ip"] = request.remote_addr

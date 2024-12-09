@@ -10,7 +10,7 @@ from app.dependencies import BW_INSTANCES_UTILS, DB
 home = Blueprint("home", __name__)
 
 
-@home.route("/home")
+@home.route("/home", methods=["GET"])
 @login_required
 def home_page():
     blocked_requests = BW_INSTANCES_UTILS.get_metrics("requests").get("requests", [])

@@ -29,12 +29,21 @@ start() {
     export CAPTURE_OUTPUT="yes"
     # shellcheck disable=SC2046
     export $(cat /etc/bunkerweb/ui.env)
-    sudo -E -u nginx -g nginx /bin/bash -c "PYTHONPATH=$PYTHONPATH python3 -m gunicorn --chdir /usr/share/bunkerweb/ui --config /usr/share/bunkerweb/ui/gunicorn.conf.py"
+    sudo -E -u nginx -g nginx /bin/bash -c "PYTHONPATH=$PYTHONPATH python3 -m gunicorn --chdir /usr/share/bunkerweb/ui --logger-class utils.logger.TmpUiLogger --config utils/tmp-gunicorn.conf.py"
+    sudo -E -u nginx -g nginx /bin/bash -c "PYTHONPATH=$PYTHONPATH python3 -m gunicorn --chdir /usr/share/bunkerweb/ui --logger-class utils.logger.UiLogger --config utils/gunicorn.conf.py"
 }
 
 # Function to stop the UI
 stop() {
     echo "Stopping UI service..."
+
+    if [ -f "/var/run/bunkerweb/tmp-ui.pid" ]; then
+        pid="$(cat /var/run/bunkerweb/tmp-ui.pid)"
+        kill -s TERM "$pid"
+    else
+        echo "Temporary UI service is not running or the pid file doesn't exist."
+    fi
+
     if [ -f "/var/run/bunkerweb/ui.pid" ]; then
         pid="$(cat /var/run/bunkerweb/ui.pid)"
         kill -s TERM "$pid"

@@ -1,4 +1,4 @@
-FROM python:3.13-alpine@sha256:fcbcbbecdeae71d3b77445d9144d1914df55110f825ab62b04a66c7c33c09373 AS builder
+FROM python:3.12-alpine@sha256:bb94273467caf397de28b4e6dd09ca4a2dd1b53fa9b130d5b2c7c82719258356 AS builder
 
 # Export var for specific actions on linux/arm/v7
 ARG TARGETPLATFORM
@@ -35,7 +35,7 @@ COPY src/common/helpers helpers
 COPY src/VERSION VERSION
 COPY src/ui ui
 
-FROM python:3.13-alpine@sha256:fcbcbbecdeae71d3b77445d9144d1914df55110f825ab62b04a66c7c33c09373
+FROM python:3.12-alpine@sha256:bb94273467caf397de28b4e6dd09ca4a2dd1b53fa9b130d5b2c7c82719258356
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
@@ -73,7 +73,9 @@ RUN echo "Docker" > INTEGRATION && \
   find ui/ -type f -name "*.py" -print0 | xargs -0 chmod 750 && \
   chmod 660 INTEGRATION && \
   ln -s /proc/1/fd/1 /var/log/bunkerweb/ui-access.log && \
-  ln -s /proc/1/fd/2 /var/log/bunkerweb/ui.log
+  ln -s /proc/1/fd/2 /var/log/bunkerweb/ui.log && \
+  ln -s /proc/1/fd/1 /var/log/bunkerweb/tmp-ui-access.log && \
+  ln -s /proc/1/fd/2 /var/log/bunkerweb/tmp-ui.log
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
 LABEL version="1.6.0-beta"
