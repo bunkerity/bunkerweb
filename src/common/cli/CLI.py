@@ -257,13 +257,16 @@ class CLI(ApiCaller):
                 cli_str += "No ban found\n"
 
             for ban in bans:
+                banned_country = ban.get("country", "unknown")
                 banned_date = ""
                 remaining = "for eternity"
                 if ban["date"] != -1:
                     banned_date = f"the {datetime.fromtimestamp(ban['date']).strftime('%Y-%m-%d at %H:%M:%S %Z')} "
                 if ban["exp"] != -1:
                     remaining = f"for {format_remaining_time(ban['exp'])} remaining"
-                cli_str += f"- {ban['ip']} ; banned {banned_date}{remaining} with reason \"{ban.get('reason', 'no reason given')}\""
+                cli_str += (
+                    f"- {ban['ip']} from country \"{banned_country}\" ; banned {banned_date}{remaining} with reason \"{ban.get('reason', 'no reason given')}\""
+                )
 
                 if ban.get("service", "unknown") != "unknown":
                     cli_str += f" by {ban['service'] if ban['service'] != '_' else 'default server'}"

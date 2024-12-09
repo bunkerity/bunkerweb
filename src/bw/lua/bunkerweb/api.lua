@@ -15,6 +15,7 @@ local api = class("api")
 local datastore = cdatastore:new()
 local logger = clogger:new("API")
 
+local get_country = utils.get_country
 local get_variable = utils.get_variable
 local is_ip_in_networks = utils.is_ip_in_networks
 -- local run = shell.run
@@ -248,6 +249,7 @@ api.global.POST["^/ban$"] = function(self)
 		exp = 86400,
 		reason = "manual",
 		service = "unknown",
+		country = "local",
 	}
 	ban.ip = ip["ip"]
 	if ip["exp"] then
@@ -259,12 +261,19 @@ api.global.POST["^/ban$"] = function(self)
 	if ip["service"] then
 		ban.service = ip["service"]
 	end
+	local country, err = get_country(ban["ip"])
+	if not country then
+		country = "unknown"
+		logger:log(ERR, "can't get country code " .. err)
+	end
+	ban.country = country
 	datastore:set(
 		"bans_ip_" .. ban["ip"],
 		encode({
 			reason = ban["reason"],
 			service = ban["service"],
 			date = os.time(),
+			country = ban["country"],
 		}),
 		ban["exp"]
 	)
@@ -301,6 +310,7 @@ api.global.GET["^/bans$"] = function(self)
 				reason = ban_data["reason"],
 				service = ban_data["service"],
 				date = ban_data["date"],
+				country = ban_data["country"],
 				exp = math.floor(ttl),
 			})
 		end

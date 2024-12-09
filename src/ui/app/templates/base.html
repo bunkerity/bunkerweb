@@ -124,9 +124,7 @@
                 nonce="{{ script_nonce }}"></script>
     </head>
     <body>
-        {% if not starting %}
-        <input type="hidden" id="home-path" value="{{ url_for('home') }}" />
-        {% endif %}
+        {% if not starting %}<input type="hidden" id="home-path" value="{{ url_for('home') }}" />{% endif %}
         <input type="hidden" id="is-read-only" value="{{ is_readonly }}" />
         <input type="hidden" id="theme" value="{{ theme }}" />
         <input type="hidden"
@@ -268,6 +266,9 @@
             <script src="{{ url_for('static', filename='js/pages/plugin_page.js') }}"
                     nonce="{{ script_nonce }}"></script>
         {% endif %}
-        <script async defer src="{{ url_for('static', filename='js/buttons.js') }}" nonce="{{ script_nonce }}"></script>
+        <script async
+                defer
+                src="{{ url_for('static', filename='js/buttons.js') }}"
+                nonce="{{ script_nonce }}"></script>
     </body>
 </html>
