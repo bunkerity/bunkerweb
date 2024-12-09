@@ -75,9 +75,11 @@ fi
 python3 -m gunicorn --logger-class utils.logger.TmpUiLogger --config utils/tmp-gunicorn.conf.py
 
 # Start the main Gunicorn process with the standard logger configuration.
-python3 -m gunicorn --logger-class utils.logger.UiLogger --config utils/gunicorn.conf.py
+python3 -m gunicorn --logger-class utils.logger.UiLogger --config utils/gunicorn.conf.py &
+pid="$!"
 
-# Capture the exit code of the main Gunicorn process.
+# Wait for the main web UI process to exit and capture its exit code.
+wait "$pid"
 exit_code=$?
 
 # Log the exit status of the main web UI process for debugging purposes.
