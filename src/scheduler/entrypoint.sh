@@ -38,13 +38,13 @@ fi
 log "ENTRYPOINT" "ℹ️ " "Executing scheduler ..."
 /usr/share/bunkerweb/scheduler/main.py &
 pid="$!"
+
 wait "$pid"
-while [ -f /var/run/bunkerweb/scheduler.pid ] ; do
-    wait "$pid"
-done
+exit_code=$?
 
 if [ -f /var/tmp/bunkerweb/scheduler.healthy ] ; then
-	rm /var/tmp/bunkerweb/scheduler.healthy
+	rm -f /var/tmp/bunkerweb/scheduler.healthy
 fi
+
 log "ENTRYPOINT" "ℹ️ " "Scheduler stopped"
-exit 0
+exit $exit_code
