@@ -21,7 +21,6 @@ function headers:initialize(ctx)
 		["PERMISSIONS_POLICY"] = "Permissions-Policy",
 		["X_FRAME_OPTIONS"] = "X-Frame-Options",
 		["X_CONTENT_TYPE_OPTIONS"] = "X-Content-Type-Options",
-		["X_XSS_PROTECTION"] = "X-XSS-Protection",
 		["X_DNS_PREFETCH_CONTROL"] = "X-DNS-Prefetch-Control",
 	}
 	-- Load data from datastore if needed

@@ -90,7 +90,7 @@
     },
     "PERMISSIONS_POLICY": {
       "context": "multisite",
-      "default": "accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), compute-pressure=(), display-capture=(), document-domain=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), identity-credentials-get=(), idle-detection=(), local-fonts=(), magnetometer=(), microphone=(), midi=(), otp-credentials=(), payment=(), picture-in-picture=(), publickey-credentials-create=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), speaker-selection=(), storage-access=(), usb=(), web-share=(), window-management=(), xr-spatial-tracking=(), interest-cohort=()",
+      "default": "accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), compute-pressure=(), display-capture=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), identity-credentials-get=(), idle-detection=(), local-fonts=(), magnetometer=(), microphone=(), midi=(), otp-credentials=(), payment=(), picture-in-picture=(), publickey-credentials-create=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), speaker-selection=(), storage-access=(), usb=(), web-share=(), window-management=(), xr-spatial-tracking=(), interest-cohort=()",
       "help": "Value for the Permissions-Policy header.",
       "id": "permissions-policy",
       "label": "Permissions-Policy",
@@ -116,15 +116,6 @@
       "regex": "^(nosniff)?$",
       "type": "select",
       "select": ["", "nosniff"]
-    },
-    "X_XSS_PROTECTION": {
-      "context": "multisite",
-      "default": "1; mode=block",
-      "help": "Value for the X-XSS-Protection header.",
-      "id": "x-xss-protection",
-      "label": "X-XSS-Protection",
-      "regex": "^(0|1(; (mode=block|report=https?:\\/\\/[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*))?)?$",
-      "type": "text"
     },
     "X_DNS_PREFETCH_CONTROL": {
       "context": "multisite",
