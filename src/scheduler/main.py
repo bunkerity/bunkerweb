@@ -26,7 +26,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 from dotenv import dotenv_values
 from schedule import every as schedule_every, run_pending
 
-from common_utils import bytes_hash, dict_to_frozenset, get_version  # type: ignore
+from common_utils import bytes_hash, dict_to_frozenset  # type: ignore
 from logger import setup_logger  # type: ignore
 from Database import Database  # type: ignore
 from JobScheduler import JobScheduler
@@ -396,7 +396,13 @@ def healthcheck_job():
     for db_instance in SCHEDULER.db.get_instances():
         bw_instance = API(f"http://{db_instance['hostname']}:{db_instance['port']}", db_instance["server_name"])
         try:
-            sent, err, status, resp = bw_instance.request("GET", "health")
+            try:
+                sent, err, status, resp = bw_instance.request("GET", "health")
+            except BaseException as e:
+                err = str(e)
+                sent = False
+                status = 500
+                resp = {"status": "down", "msg": err}
 
             success = True
             if not sent:
@@ -492,27 +498,6 @@ if __name__ == "__main__":
         JOB = Job(LOGGER, SCHEDULER.db)
 
         APPLYING_CHANGES.set()
-
-        db_version = SCHEDULER.db.get_version()
-        if not db_version.startswith("Error") and db_version != get_version():
-            LOGGER.warning("BunkerWeb version changed, creating a backup of the database and proceeding with the upgrade ...")
-            SCHEDULER.env = {
-                "DATABASE_URI": SCHEDULER.db.database_uri,
-                "USE_BACKUP": "yes",
-                "FORCE_BACKUP": "yes",
-                "BACKUP_SCHEDULE": "daily",
-                "BACKUP_ROTATION": "7",
-                "BACKUP_DIRECTORY": "/var/lib/bunkerweb/upgrade_backups",
-                "LOG_LEVEL": getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "notice")),
-                "RELOAD_MIN_TIMEOUT": str(RELOAD_MIN_TIMEOUT),
-            }
-
-            if not SCHEDULER.run_single("backup-data"):
-                LOGGER.error("backup-data job failed, stopping ...")
-                stop(1)
-            LOGGER.info("Backup completed successfully, if you want to restore the backup, you can find it in /var/lib/bunkerweb/upgrade_backups")
-
-            rmtree(join(sep, "etc", "bunkerweb", "pro", "plugins", "letsencrypt_dns"), ignore_errors=True)
 
         if SCHEDULER.db.readonly:
             LOGGER.warning("The database is read-only, no need to save the changes in the configuration as they will not be saved")
@@ -622,6 +607,9 @@ if __name__ == "__main__":
 
                     with file.open("r", encoding="utf-8") as f:
                         plugin_data = json_load(f)
+
+                    if plugin_data["id"] == "letsencrypt_dns":
+                        continue
 
                     checksum = bytes_hash(plugin_content, algorithm="sha256")
                     common_data = plugin_data | {

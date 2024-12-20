@@ -116,19 +116,27 @@ fi
 
 # Create scheduler if necessary
 if {
-    [ "${MANAGER_MODE:-yes}" != "no" ] || [ "${WORKER_MODE:-no}" = "no" ];
+    {
+        [ -z "$MANAGER_MODE" ] && [ -z "$WORKER_MODE" ];
+    } || {
+        [ "${MANAGER_MODE:-yes}" != "no" ] || [ "${WORKER_MODE:-no}" = "no" ];
+    };
 } && [ "$SERVICE_SCHEDULER" != "no" ]; then
-    if [ -f /var/tmp/bunkerweb_upgrade ]; then
-            # Reload the bunkerweb-scheduler service if running
-        if systemctl is-active --quiet bunkerweb-scheduler; then
-            echo "Restarting the bunkerweb-scheduler service..."
-            do_and_check_cmd systemctl restart bunkerweb-scheduler
-        fi
-    else
+    if [[ -f /var/tmp/bunkerweb_enable_scheduler || ! -f /var/tmp/bunkerweb_upgrade ]]; then
         # Auto start BW Scheduler service on boot and start it now
         echo "Enabling and starting the bunkerweb-scheduler service..."
         do_and_check_cmd systemctl enable bunkerweb-scheduler
         do_and_check_cmd systemctl start bunkerweb-scheduler
+
+        if [ -f /var/tmp/bunkerweb_enable_scheduler ]; then
+            rm -f /var/tmp/bunkerweb_enable_scheduler
+        fi
+    else
+        # Reload the bunkerweb-scheduler service if running
+        if systemctl is-active --quiet bunkerweb-scheduler; then
+            echo "Restarting the bunkerweb-scheduler service..."
+            do_and_check_cmd systemctl restart bunkerweb-scheduler
+        fi
     fi
 elif systemctl is-active --quiet bunkerweb-scheduler; then
     echo "Disabling the bunkerweb-scheduler service..."
@@ -138,7 +146,11 @@ fi
 
 # Create web UI if necessary
 if {
-    [ "${MANAGER_MODE:-yes}" != "no" ] || [ "${WORKER_MODE:-no}" = "no" ];
+    {
+        [ -z "$MANAGER_MODE" ] && [ -z "$WORKER_MODE" ];
+    } || {
+        [ "${MANAGER_MODE:-yes}" != "no" ] || [ "${WORKER_MODE:-no}" = "no" ];
+    };
 } && [ "$SERVICE_UI" != "no" ]; then
     if [ -f /var/tmp/bunkerweb_upgrade ]; then
         # Reload the bunkerweb-ui service if running

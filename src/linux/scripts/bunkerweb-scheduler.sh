@@ -5,7 +5,7 @@
 source /usr/share/bunkerweb/helpers/utils.sh
 
 # Set the PYTHONPATH
-export PYTHONPATH=/usr/share/bunkerweb/deps/python
+export PYTHONPATH=/usr/share/bunkerweb/deps/python:/usr/share/bunkerweb/db
 
 # Create the scheduler.env file if it doesn't exist
 if [ ! -f /etc/bunkerweb/scheduler.env ]; then
@@ -47,6 +47,101 @@ function start() {
         fi
     fi
     export SCHEDULER_LOG_TO_FILE
+
+    # Database migration section
+    log "SYSTEMCTL" "ℹ️" "Checking database configuration..."
+    cd /usr/share/bunkerweb/db/alembic || {
+        log "SYSTEMCTL" "❌" "Failed to access database migration directory"
+        exit 1
+    }
+
+    # Extract and validate database type
+    DATABASE_URI=${DATABASE_URI:-sqlite:////var/lib/bunkerweb/db.sqlite3}
+    DATABASE=$(echo "$DATABASE_URI" | awk -F: '{print $1}' | awk -F+ '{print $1}')
+
+    # Validate database type with case-insensitive comparison
+    db_type=$(echo "$DATABASE" | tr '[:upper:]' '[:lower:]')
+    case "$db_type" in
+        sqlite|mysql|mariadb|postgresql)
+            log "SYSTEMCTL" "ℹ️" "Using database type: $DATABASE"
+            ;;
+        *)
+            log "SYSTEMCTL" "❌" "Unsupported database type: $DATABASE"
+            exit 1
+            ;;
+    esac
+
+    # Update configuration files
+    if ! sed -i "s|^sqlalchemy\\.url =.*$|sqlalchemy.url = $DATABASE_URI|" alembic.ini; then
+        log "SYSTEMCTL" "❌" "Failed to update database URL in configuration"
+        exit 1
+    fi
+
+    if ! sed -i "s|^version_locations =.*$|version_locations = ${DATABASE}_versions|" alembic.ini; then
+        log "SYSTEMCTL" "❌" "Failed to update version locations in configuration"
+        exit 1
+    fi
+
+    # Check current version and stamp
+    log "SYSTEMCTL" "ℹ️" "Checking database version..."
+    installed_version=$(cat /usr/share/bunkerweb/VERSION)
+    # Create temporary Python script
+    cat > /tmp/version_check.py << EOL
+import sqlalchemy as sa
+from os import getenv
+
+from Database import Database
+from logger import setup_logger
+
+LOGGER = setup_logger('Scheduler', getenv('CUSTOM_LOG_LEVEL', getenv('LOG_LEVEL', 'INFO')))
+
+engine = Database(LOGGER, '${DATABASE_URI}').sql_engine
+with engine.connect() as conn:
+    try:
+        result = conn.execute(sa.text('SELECT version FROM bw_metadata WHERE id = 1'))
+        print(next(result)[0])
+    except BaseException as e:
+        if 'doesn\\'t exist' not in str(e):
+            print('none')
+        print('${installed_version}')
+EOL
+
+    current_version=$(sudo -E -u nginx -g nginx /bin/bash -c "PYTHONPATH=$PYTHONPATH python3 /tmp/version_check.py")
+    rm -f /tmp/version_check.py
+
+    if [ "$current_version" == "none" ]; then
+        log "SYSTEMCTL" "❌" "Failed to retrieve database version"
+        exit 1
+    fi
+
+    if [ "$current_version" != "$installed_version" ]; then
+        # Find the corresponding Alembic revision by scanning migration files
+        MIGRATION_DIR="/usr/share/bunkerweb/db/alembic/${DATABASE}_versions"
+        NORMALIZED_VERSION=$(echo "$current_version" | tr '.' '_' | tr '-' '_')
+        REVISION=$(find "$MIGRATION_DIR" -maxdepth 1 -type f -name "*_upgrade_to_version_${NORMALIZED_VERSION}.py" -exec basename {} \; | awk -F_ '{print $1}')
+
+        if [ -z "$REVISION" ]; then
+            log "SYSTEMCTL" "❌" "No migration file found for database version: $current_version"
+            exit 1
+        fi
+
+        # Stamp the database with the determined revision
+        if ! sudo -E -u nginx -g nginx /bin/bash -c "PYTHONPATH=$PYTHONPATH python3 -m alembic stamp \"$REVISION\""; then
+            log "SYSTEMCTL" "❌" "Failed to stamp database with revision: $REVISION"
+            exit 1
+        fi
+
+        # Run database migration
+        log "SYSTEMCTL" "ℹ️" "Running database migration..."
+        if ! sudo -E -u nginx -g nginx /bin/bash -c "PYTHONPATH=$PYTHONPATH python3 -m alembic upgrade head"; then
+            log "SYSTEMCTL" "❌" "Database migration failed"
+            exit 1
+        fi
+
+        log "SYSTEMCTL" "✅" "Database migration completed successfully"
+    fi
+
+    cd - > /dev/null || exit 1
 
     # Execute scheduler
     log "SYSTEMCTL" "ℹ️ " "Executing scheduler ..."

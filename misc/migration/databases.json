@@ -1,0 +1,3 @@
+{
+  "postgresql": "postgresql+psycopg://bunkerweb:secret@bw-db:5432/db"
+}

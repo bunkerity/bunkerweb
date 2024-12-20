@@ -41,7 +41,7 @@ FROM python:3.13-alpine@sha256:fcbcbbecdeae71d3b77445d9144d1914df55110f825ab62b0
 RUN umask 027
 
 # Install runtime dependencies and add scheduler user
-RUN apk add --no-cache bash unzip libgcc libstdc++ libpq openssl libmagic mariadb-connector-c mariadb-client postgresql-client sqlite tzdata && \
+RUN apk add --no-cache bash unzip libgcc libstdc++ libpq openssl libmagic mariadb-connector-c mariadb-client postgresql-client sqlite tzdata sed grep && \
   addgroup -g 101 scheduler && \
   adduser -h /var/cache/nginx -g scheduler -s /bin/sh -G scheduler -D -H -u 101 scheduler
 
@@ -69,6 +69,8 @@ RUN cp helpers/bwcli /usr/bin/ && \
   find core/ -type f -name "*.sh" ! -path "core/modsecurity/files/*" -print0 | xargs -0 chmod 750 && \
   find core/ -type f -name "*.py" ! -path "core/modsecurity/files/*" -print0 | xargs -0 chmod 750 && \
   chmod 750 cli/main.py gen/*.py scheduler/main.py scheduler/entrypoint.sh helpers/*.sh deps/python/bin/* /usr/bin/bwcli && \
+  chmod 770 db/alembic/alembic.ini db/alembic/env.py && \
+  chmod u+w db/alembic && \
   chmod 660 INTEGRATION
 
 
@@ -76,7 +78,7 @@ COPY --chown=root:scheduler --chmod=770 src/bw/misc/asn.mmdb /var/tmp/bunkerweb/
 COPY --chown=root:scheduler --chmod=770 src/bw/misc/country.mmdb /var/tmp/bunkerweb/country.mmdb
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
-LABEL version="1.6.0-beta"
+LABEL version="1.6.0-rc1"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="scheduler"
 
@@ -87,5 +89,7 @@ WORKDIR /usr/share/bunkerweb/scheduler
 USER scheduler:scheduler
 
 HEALTHCHECK --interval=10s --timeout=10s --start-period=30s --retries=6 CMD /usr/share/bunkerweb/helpers/healthcheck-scheduler.sh
+
+ENV PYTHONPATH=/usr/share/bunkerweb/deps/python:/usr/share/bunkerweb/db
 
 ENTRYPOINT [ "./entrypoint.sh" ]
