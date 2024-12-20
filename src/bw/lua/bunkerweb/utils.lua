@@ -5,6 +5,7 @@ local mmdb = require "bunkerweb.mmdb"
 
 local cjson = require "cjson"
 local ipmatcher = require "resty.ipmatcher"
+local random = require "resty.random"
 local resolver = require "resty.dns.resolver"
 local session = require "resty.session"
 
@@ -26,8 +27,8 @@ local parse_ipv6 = ipmatcher.parse_ipv6
 local open = io.open
 local encode = cjson.encode
 local decode = cjson.decode
+local bytes = random.bytes
 local char = string.char
-local random = math.random
 local session_start = session.start
 local tonumber = tonumber
 
@@ -554,23 +555,26 @@ end
 
 utils.rand = function(nb, no_numbers)
 	local charset = {}
-	-- lowers, uppers and numbers
 	if not no_numbers then
 		for i = 48, 57 do
 			table.insert(charset, char(i))
-		end
+		end -- Numbers
 	end
 	for i = 65, 90 do
 		table.insert(charset, char(i))
-	end
+	end -- Uppercase
 	for i = 97, 122 do
 		table.insert(charset, char(i))
-	end
-	local result = ""
+	end -- Lowercase
+
+	local result = {}
 	for _ = 1, nb do
-		result = result .. charset[random(1, #charset)]
+		local byte = bytes(1, true):byte() -- Get a secure random byte
+		local index = (byte % #charset) + 1 -- Map byte to charset index
+		table.insert(result, charset[index])
 	end
-	return result
+
+	return table.concat(result)
 end
 
 utils.get_deny_status = function()
