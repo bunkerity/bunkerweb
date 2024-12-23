@@ -178,7 +178,7 @@ def inject_variables():
         is_pro_version=metadata["is_pro"],
         pro_status=metadata["pro_status"],
         pro_services=metadata["pro_services"],
-        pro_expire=metadata["pro_expire"].strftime("%Y/%m/%d") if metadata["pro_expire"] else "Unknown",
+        pro_expire=metadata["pro_expire"].strftime("%Y/%m/%d") if isinstance(metadata["pro_expire"], datetime) else "Unknown",
         pro_overlapped=metadata["pro_overlapped"],
         plugins=BW_CONFIG.get_plugins(),
         flash_messages=session.get("flash_messages", []),
