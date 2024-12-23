@@ -286,9 +286,29 @@ class IngressController(Controller):
 
         return ret
 
+    def __get_stream_with_retries(self, watch_type, what, retries=3):
+        """
+        Retry logic for streaming events with a capped retry limit.
+        """
+        for attempt in range(retries):
+            try:
+                self._logger.info(f"Starting Kubernetes watch for {watch_type}, attempt {attempt + 1}/{retries}")
+                yield from watch.Watch().stream(what)
+            except ApiException as e:
+                if e.status != 410:  # Not a 'Gone' error
+                    self._logger.debug(format_exc())
+                    self._logger.error(f"API exception while watching {watch_type} :\n{e}")
+                else:
+                    self._logger.warning(f"Resource version outdated for {watch_type}, retrying...")
+            except Exception as e:
+                self._logger.debug(format_exc())
+                self._logger.error(f"Unexpected error while watching {watch_type}:\n{e}")
+            self._logger.warning(f"Retrying {watch_type} in 5 seconds...")
+            sleep(5)
+        self._logger.error(f"Failed to watch {watch_type} after {retries} retries.")
+
     def __watch(self, watch_type):
         while True:
-            w = watch.Watch()
             what = None
             if watch_type == "pod":
                 what = self.__corev1.list_pod_for_all_namespaces
@@ -307,7 +327,7 @@ class IngressController(Controller):
             error = False
             applied = False
             try:
-                for event in w.stream(what):
+                for event in self.__get_stream_with_retries(watch_type, what):
                     applied = False
                     self.__internal_lock.acquire()
                     locked = True
@@ -345,8 +365,9 @@ class IngressController(Controller):
                                 self._logger.info("Successfully deployed new configuration 🚀")
 
                                 self._set_autoconf_load_db()
-                        except:
-                            self._logger.error(f"Exception while deploying new configuration :\n{format_exc()}")
+                        except BaseException as e:
+                            self._logger.debug(format_exc())
+                            self._logger.error(f"Exception while deploying new configuration :\n{e}")
                         applied = True
 
                     if locked:
@@ -354,10 +375,12 @@ class IngressController(Controller):
                         locked = False
             except ApiException as e:
                 if e.status != 410:
-                    self._logger.error(f"API exception while reading k8s event (type = {watch_type}) :\n{format_exc()}")
+                    self._logger.debug(format_exc())
+                    self._logger.error(f"API exception while reading k8s event (type = {watch_type}) :\n{e}")
                     error = True
-            except:
-                self._logger.error(f"Unknown exception while reading k8s event (type = {watch_type}) :\n{format_exc()}")
+            except BaseException as e:
+                self._logger.debug(format_exc())
+                self._logger.error(f"Unknown exception while reading k8s event (type = {watch_type}) :\n{e}")
                 error = True
             finally:
                 if locked:
