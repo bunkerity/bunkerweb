@@ -43,6 +43,7 @@ cd /usr/share/bunkerweb/db/alembic || {
 
 # Extract and validate database type
 DATABASE_URI=${DATABASE_URI:-sqlite:////var/lib/bunkerweb/db.sqlite3}
+export DATABASE_URI
 DATABASE=$(echo "$DATABASE_URI" | awk -F: '{print $1}' | awk -F+ '{print $1}')
 
 # Validate database type with case-insensitive comparison
@@ -80,15 +81,16 @@ from logger import setup_logger
 
 LOGGER = setup_logger('Scheduler', getenv('CUSTOM_LOG_LEVEL', getenv('LOG_LEVEL', 'INFO')))
 
-engine = Database(LOGGER, '${DATABASE_URI}').sql_engine
+engine = Database(LOGGER).sql_engine
 with engine.connect() as conn:
 	try:
 		result = conn.execute(sa.text('SELECT version FROM bw_metadata WHERE id = 1'))
 		print(next(result)[0])
 	except BaseException as e:
-		if 'doesn\'t exist' not in str(e):
+		if 'doesn\'t exist' not in str(e) and 'no such table' not in str(e) and 'relation \"bw_metadata\" does not exist' not in str(e):
 			print('none')
-		print('${installed_version}')
+		else:
+			print('${installed_version}')
 ")
 
 if [ "$current_version" == "none" ]; then
