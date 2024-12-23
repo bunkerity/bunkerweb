@@ -352,6 +352,11 @@ def before_request():
         if current_user.is_authenticated:
             passed = True
 
+            if "ip" not in session:
+                session["ip"] = request.remote_addr
+            if "user_agent" not in session:
+                session["user_agent"] = request.headers.get("User-Agent")
+
             # Case not login page, keep on 2FA before any other access
             if not session.get("totp_validated", False) and bool(current_user.totp_secret) and "/totp" not in request.path:
                 if not request.path.endswith("/login"):
