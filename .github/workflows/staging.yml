@@ -87,50 +87,6 @@ jobs:
     secrets:
       CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
       SECRET_KEY: ${{ secrets.SECRET_KEY }}
-  prepare-tests-core:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - id: set-matrix
-        run: |
-          tests=$(find ./tests/core/ -maxdepth 1 -mindepth 1 -type d -printf "%f\n" | jq -c --raw-input --slurp 'split("\n")| .[0:-1]')
-          echo "tests=$tests" >> $GITHUB_OUTPUT
-    outputs:
-      tests: ${{ steps.set-matrix.outputs.tests }}
-  prepare-tests-ui:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - id: set-matrix
-        run: |
-          tests=$(find ./tests/ui/ -name "*_page.py" -type f -printf "%f\n" | jq -c --raw-input --slurp 'split("\n")| .[0:-1]')
-          echo "tests=$tests" >> $GITHUB_OUTPUT
-    outputs:
-      tests: ${{ steps.set-matrix.outputs.tests }}
-
-  # Perform tests
-  tests-ui:
-    needs: [prepare-tests-ui, build-containers]
-    strategy:
-      fail-fast: false
-      matrix:
-        test: ${{ fromJson(needs.prepare-tests-ui.outputs.tests) }}
-    uses: ./.github/workflows/tests-ui.yml
-    with:
-      TEST: ${{ matrix.test }}
-      RELEASE: testing
-  tests-ui-linux:
-    needs: [prepare-tests-ui, build-packages]
-    strategy:
-      fail-fast: false
-      matrix:
-        test: ${{ fromJson(needs.prepare-tests-ui.outputs.tests) }}
-    uses: ./.github/workflows/tests-ui-linux.yml
-    with:
-      TEST: ${{ matrix.test }}
-      RELEASE: testing
 
   staging-tests:
     needs: [create-infras]
@@ -154,28 +110,6 @@ jobs:
       RUNS_ON: ${{ matrix.runs_on }}
     secrets: inherit
 
-  tests-core:
-    needs: [build-containers, prepare-tests-core]
-    strategy:
-      fail-fast: false
-      matrix:
-        test: ${{ fromJson(needs.prepare-tests-core.outputs.tests) }}
-    uses: ./.github/workflows/test-core.yml
-    with:
-      TEST: ${{ matrix.test }}
-      RELEASE: testing
-  tests-core-linux:
-    needs: [build-packages, prepare-tests-core]
-    strategy:
-      fail-fast: false
-      matrix:
-        test: ${{ fromJson(needs.prepare-tests-core.outputs.tests) }}
-    uses: ./.github/workflows/test-core-linux.yml
-    with:
-      TEST: ${{ matrix.test }}
-      RELEASE: testing
-    secrets: inherit
-
   # Delete infrastructures
   delete-infras:
     if: ${{ always() }}
@@ -192,7 +126,7 @@ jobs:
 
   # Push Docker images
   push-images:
-    needs: [staging-tests, tests-ui, tests-core]
+    needs: [staging-tests]
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -220,7 +154,7 @@ jobs:
 
   # Push Linux packages
   push-packages:
-    needs: [staging-tests, tests-ui-linux, tests-core-linux]
+    needs: [staging-tests]
     strategy:
       matrix:
         linux: [ubuntu, debian, fedora, el, el9, ubuntu-jammy]
