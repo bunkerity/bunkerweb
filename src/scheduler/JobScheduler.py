@@ -41,7 +41,7 @@ class JobScheduler(ApiCaller):
         super().__init__(apis or [])
         self.__logger = logger or setup_logger("Scheduler", getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")))
         self.db = db or Database(self.__logger)
-        self.__env = {**environ, **(env or {})}
+        self.__env = environ | env
         self.__lock = lock
         self.__thread_lock = Lock()
         self.__job_success = True
@@ -166,7 +166,8 @@ class JobScheduler(ApiCaller):
         start_date = datetime.now().astimezone()
         try:
             module = self.__load_plugin_module(join(path, "jobs", file), name)
-            ret = module.run(self.__env)
+            job_env = self.__env.copy()
+            ret = module.run(job_env)
         except SystemExit as e:
             ret = e.code
         except Exception as e:
@@ -245,6 +246,8 @@ class JobScheduler(ApiCaller):
         self.__job_success = True
         self.__job_reload = False
 
+        environ.update(environ | self.__env)
+
         # Use ThreadPoolExecutor to run jobs
         futures = [self.__executor.submit(job.run) for job in pending_jobs]
 
@@ -289,6 +292,8 @@ class JobScheduler(ApiCaller):
         self.__job_reload = False
 
         plugins = plugins or []
+
+        environ.update(environ | self.__env)
 
         futures = []
         for plugin, jobs in self.__jobs.items():
@@ -343,6 +348,8 @@ class JobScheduler(ApiCaller):
             if self.__lock:
                 self.__lock.release()
             return False
+
+        environ.update(environ | self.__env)
 
         self.__job_wrapper(
             job_to_run["path"],
