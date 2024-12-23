@@ -612,7 +612,7 @@ class Database:
                 old_template_settings[(ts.template_id, ts.setting_id, ts.suffix, ts.step_id)] = ts
 
             old_template_configs = {}
-            for tc in old_data.get("bw_template_configs", []):
+            for tc in old_data.get("bw_template_custom_configs", []):
                 old_template_configs[(tc.template_id, tc.type, tc.name, tc.step_id)] = tc
 
             # Build desired data from default_plugins
@@ -750,21 +750,24 @@ class Database:
                 for plugin in plugins:
                     if "id" not in plugin:
                         # General plugin
-                        base_plugin = {
-                            "id": "general",
-                            "type": "core",
-                        }
+                        base_plugin = {"id": "general", "type": "core"}
                     else:
-                        base_plugin = {
-                            "id": plugin["id"],
-                            "type": plugin.get("type", "core"),
-                        }
+                        base_plugin = {"id": plugin["id"], "type": plugin.get("type", "core")}
 
                     # Skip unsupported plugin
                     if base_plugin["id"] == "letsencrypt_dns":
                         continue
 
                     # TEMPLATES
+                    plugin_path = (
+                        Path("/", "usr", "share", "bunkerweb", "core", base_plugin["id"])
+                        if base_plugin.get("type", "core") == "core"
+                        else (
+                            Path("/", "etc", "bunkerweb", "plugins", base_plugin["id"])
+                            if base_plugin.get("type", "core") == "external"
+                            else Path("/", "etc", "bunkerweb", "pro", "plugins", base_plugin["id"])
+                        )
+                    )
                     templates_path = plugin_path.joinpath("templates")
                     if templates_path.is_dir():
                         for template_file in templates_path.iterdir():
@@ -807,7 +810,7 @@ class Database:
                                     continue
                                 # Check if setting exists globally
                                 setting_id = setting
-                                suffix = None
+                                suffix = 0
                                 if hasattr(self, "suffix_rx") and self.suffix_rx.search(setting):
                                     setting_id, suffix = setting.rsplit("_", 1)
                                 if setting_id not in saved_settings:

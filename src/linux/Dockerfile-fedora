@@ -6,7 +6,7 @@ ENV NGINX_VERSION=1.26.2
 # Install Nginx, fpm and dependencies
 RUN dnf update -y && \
     dnf install -y curl gnupg2 ca-certificates redhat-lsb-core make gcc && \
-    dnf install -y --setopt=install_weak_deps=False python3 python3-devel python3-pip brotli brotli-devel gperftools-devel perl libxslt-devel libxml2 yajl yajl-devel libxslt bash gd gd-devel gcc-c++ kernel-devel znc-modtcl libmpc-devel gmp-devel gawk mpfr-devel libtool pcre-devel automake autoconf readline-devel gcc make openssl-devel git zlib-devel libxml2-devel pkgconf libcurl-devel geoip-devel lmdb-devel && \
+    dnf install -y --setopt=install_weak_deps=False python3.12 python3.12-devel python3-pip brotli brotli-devel gperftools-devel perl libxslt-devel libxml2 yajl yajl-devel libxslt bash gd gd-devel gcc-c++ kernel-devel znc-modtcl libmpc-devel gmp-devel gawk mpfr-devel libtool pcre-devel automake autoconf readline-devel gcc make openssl-devel git zlib-devel libxml2-devel pkgconf libcurl-devel geoip-devel lmdb-devel && \
     dnf install nginx-${NGINX_VERSION} -y
 
 WORKDIR /tmp/bunkerweb/deps
@@ -32,8 +32,9 @@ WORKDIR /usr/share/bunkerweb
 # Compile and install dependencies
 RUN export MAKEFLAGS="-j$(nproc)" && \
     mkdir -p deps/python && \
-    pip install --no-cache-dir --require-hashes --ignore-installed -r /tmp/requirements-deps.txt && \
-    pip install --no-cache-dir --require-hashes --force-reinstall --target deps/python $(for file in $(ls /tmp/req/requirements*.txt) ; do echo "-r ${file}" ; done | xargs)
+    python3.12 -m ensurepip && \
+    python3.12 -m pip install --no-cache-dir --require-hashes --ignore-installed -r /tmp/requirements-deps.txt && \
+    python3.12 -m pip install --no-cache-dir --require-hashes --force-reinstall --target deps/python $(for file in $(ls /tmp/req/requirements*.txt) ; do echo "-r ${file}" ; done | xargs)
 
 # Copy files
 # can't exclude deps from . so we are copying everything by hand
