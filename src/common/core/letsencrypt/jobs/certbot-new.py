@@ -15,7 +15,7 @@ from subprocess import DEVNULL, PIPE, STDOUT, Popen, run
 from sys import exit as sys_exit, path as sys_path
 from typing import Dict, Literal, Type, Union
 
-for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("db",), ("core", "letsencrypt", "jobs"))]:
+for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("db",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
