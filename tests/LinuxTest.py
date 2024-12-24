@@ -34,6 +34,9 @@ class LinuxTest(Test):
             proc = LinuxTest.docker_exec(distro, "systemctl start bunkerweb")
             if proc.returncode != 0:
                 raise Exception("docker exec systemctl start failed (linux stack)")
+            proc = LinuxTest.docker_exec(distro, "systemctl start bunkerweb-scheduler")
+            if proc.returncode != 0:
+                raise Exception("docker exec systemctl start failed (linux stack)")
             if distro in ("ubuntu", "debian", "ubuntu-jammy"):
                 LinuxTest.docker_exec(
                     distro,
@@ -119,7 +122,7 @@ class LinuxTest(Test):
             )
             if proc.returncode != 0:
                 raise (Exception("docker exec append variables.env failed (test)"))
-            proc = self.docker_exec(self.__distro, "systemctl stop bunkerweb ; systemctl start bunkerweb")
+            proc = self.docker_exec(self.__distro, "systemctl restart bunkerweb-scheduler")
             if proc.returncode != 0:
                 raise Exception("docker exec systemctl restart failed (linux stack)")
         except:
@@ -154,7 +157,7 @@ class LinuxTest(Test):
     def _debug_fail(self):
         self.docker_exec(
             self.__distro,
-            "cat /var/log/bunkerweb/access.log ; cat /var/log/bunkerweb/error.log ; journalctl -u bunkerweb --no-pager",
+            "cat /var/log/bunkerweb/access.log ; cat /var/log/bunkerweb/error.log ; journalctl -u bunkerweb --no-pager ; journalctl -u bunkerweb-scheduler --no-pager",
         )
 
     @staticmethod

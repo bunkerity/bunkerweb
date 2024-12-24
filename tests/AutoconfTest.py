@@ -36,7 +36,7 @@ class AutoconfTest(Test):
             if isdir("/tmp/www"):
                 rmtree("/tmp/www")
             mkdir("/tmp/www")
-            copy("./misc/integrations/autoconf.yml", "/tmp/autoconf/docker-compose.yml")
+            copy("./misc/integrations/autoconf.mariadb.yml", "/tmp/autoconf/docker-compose.yml")
             compose = "/tmp/autoconf/docker-compose.yml"
             Test.replace_in_file(compose, r"bunkerity/bunkerweb:.*$", "local/bunkerweb-tests:latest")
             Test.replace_in_file(
@@ -53,13 +53,13 @@ class AutoconfTest(Test):
             with open(compose, "r") as f:
                 data = safe_load(f.read())
             data["services"]["bunkerweb"]["volumes"] = ["/tmp/www:/var/www/html"]
-            if "AUTO_LETS_ENCRYPT=yes" not in data["services"]["bunkerweb"]["environment"]:
-                data["services"]["bunkerweb"]["environment"].append("AUTO_LETS_ENCRYPT=yes")
-            data["services"]["bunkerweb"]["environment"].append("USE_LETS_ENCRYPT_STAGING=yes")
-            data["services"]["bunkerweb"]["environment"].append("LOG_LEVEL=info")
-            data["services"]["bunkerweb"]["environment"].append("USE_BUNKERNET=no")
-            data["services"]["bunkerweb"]["environment"].append("SEND_ANONYMOUS_REPORT=no")
-            data["services"]["bunkerweb"]["environment"].append("USE_DNSBL=no")
+            if "AUTO_LETS_ENCRYPT=yes" not in data["services"]["bw-scheduler"]["environment"]:
+                data["services"]["bw-scheduler"]["environment"].append("AUTO_LETS_ENCRYPT=yes")
+            data["services"]["bw-scheduler"]["environment"].append("USE_LETS_ENCRYPT_STAGING=yes")
+            data["services"]["bw-scheduler"]["environment"].append("LOG_LEVEL=info")
+            data["services"]["bw-scheduler"]["environment"].append("USE_BUNKERNET=no")
+            data["services"]["bw-scheduler"]["environment"].append("SEND_ANONYMOUS_REPORT=no")
+            data["services"]["bw-scheduler"]["environment"].append("USE_DNSBL=no")
             with open(compose, "w") as f:
                 f.write(dump(data))
             proc = run(
