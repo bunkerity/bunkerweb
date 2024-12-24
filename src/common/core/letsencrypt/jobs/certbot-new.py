@@ -20,7 +20,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
         sys_path.append(deps_path)
 
 from pydantic import ValidationError
-from models import (
+from letsencrypt import (
     CloudflareProvider,
     DigitalOceanProvider,
     DnsimpleProvider,
