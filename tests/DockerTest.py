@@ -1,3 +1,5 @@
+from json import dump
+from yaml import safe_load
 from Test import Test
 from os.path import isdir, isfile
 from os import getenv
@@ -51,12 +53,18 @@ class DockerTest(Test):
             Test.replace_in_file(compose, r"\./bw\-data:/", "/tmp/bw-data:/")
             Test.replace_in_file(compose, r"\- bw_data:/", "- /tmp/bw-data:/")
             Test.replace_in_file(compose, r"\- bw\-data:/", "- /tmp/bw-data:/")
-            Test.replace_in_file(
-                compose,
-                r"AUTO_LETS_ENCRYPT=yes",
-                "AUTO_LETS_ENCRYPT=yes\n      - USE_LETS_ENCRYPT_STAGING=yes\n      - LOG_LEVEL=info\n      - USE_BUNKERNET=no\n      - SEND_ANONYMOUS_REPORT=no\n      - USE_DNSBL=no",
-            )
-            Test.replace_in_file(compose, r"DISABLE_DEFAULT_SERVER=yes", "DISABLE_DEFAULT_SERVER=no")
+            with open(compose, "r") as f:
+                data = safe_load(f.read())
+            data["services"]["bw-scheduler"]["environment"]["CUSTOM_LOG_LEVEL"] = "debug"
+            data["services"]["bw-scheduler"]["environment"]["AUTO_LETS_ENCRYPT"] = "yes"
+            data["services"]["bw-scheduler"]["environment"]["USE_LETS_ENCRYPT_STAGING"] = "yes"
+            data["services"]["bw-scheduler"]["environment"]["LOG_LEVEL"] = "info"
+            data["services"]["bw-scheduler"]["environment"]["USE_BUNKERNET"] = "no"
+            data["services"]["bw-scheduler"]["environment"]["SEND_ANONYMOUS_REPORT"] = "no"
+            data["services"]["bw-scheduler"]["environment"]["USE_DNSBL"] = "no"
+            data["services"]["bw-scheduler"]["environment"]["DISABLE_DEFAULT_SERVER"] = "no"
+            with open(compose, "w") as f:
+                f.write(dump(data))
             for ex_domain, test_domain in self._domains.items():
                 Test.replace_in_files(test, ex_domain, test_domain)
                 Test.rename(test, ex_domain, test_domain)
