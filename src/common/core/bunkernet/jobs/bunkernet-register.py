@@ -4,7 +4,7 @@ from os import getenv, sep
 from os.path import join
 from sys import exit as sys_exit, path as sys_path
 
-for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("db",), ("core", "bunkernet", "jobs"))]:
+for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("db",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
