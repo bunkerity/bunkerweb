@@ -155,9 +155,14 @@ class JobScheduler(ApiCaller):
 
     def __exec_plugin_module(self, path: str, name: str) -> ModuleType:
         """Dynamically import plugin module."""
-        spec = spec_from_file_location(name, path)
-        module = module_from_spec(spec)
-        spec.loader.exec_module(module)
+        module_dir = dirname(path)
+        sys_path.insert(0, module_dir)
+        try:
+            spec = spec_from_file_location(name, path)
+            module = module_from_spec(spec)
+            spec.loader.exec_module(module)
+        finally:
+            sys_path.remove(module_dir)
 
     def __job_wrapper(self, path: str, plugin: str, name: str, file: str) -> int:
         self.__logger.info(f"Executing job '{name}' from plugin '{plugin}'...")
