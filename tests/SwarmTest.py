@@ -29,13 +29,15 @@ class SwarmTest(Test):
             compose = "/tmp/swarm/stack.yml"
             with open(compose, "r") as f:
                 data = safe_load(f.read())
-            if "AUTO_LETS_ENCRYPT=yes" not in data["services"]["bw-scheduler"]["environment"]:
-                data["services"]["bw-scheduler"]["environment"].append("AUTO_LETS_ENCRYPT=yes")
-            data["services"]["bw-scheduler"]["environment"].append("USE_LETS_ENCRYPT_STAGING=yes")
-            data["services"]["bw-scheduler"]["environment"].append("LOG_LEVEL=info")
-            data["services"]["bw-scheduler"]["environment"].append("USE_BUNKERNET=no")
-            data["services"]["bw-scheduler"]["environment"].append("SEND_ANONYMOUS_REPORT=no")
-            data["services"]["bw-scheduler"]["environment"].append("USE_DNSBL=no")
+            if data["services"]["bw-scheduler"]["environment"].get("AUTO_LETS_ENCRYPT", "no") != "yes":
+                data["services"]["bw-scheduler"]["environment"]["AUTO_LETS_ENCRYPT"] = "yes"
+            data["services"]["bw-scheduler"]["environment"]["USE_LETS_ENCRYPT_STAGING"] = "yes"
+            data["services"]["bw-scheduler"]["environment"]["CUSTOM_LOG_LEVEL"] = "debug"
+            data["services"]["bw-autoconf"]["environment"]["CUSTOM_LOG_LEVEL"] = "debug"
+            data["services"]["bw-scheduler"]["environment"]["LOG_LEVEL"] = "info"
+            data["services"]["bw-scheduler"]["environment"]["USE_BUNKERNET"] = "no"
+            data["services"]["bw-scheduler"]["environment"]["SEND_ANONYMOUS_REPORT"] = "no"
+            data["services"]["bw-scheduler"]["environment"]["USE_DNSBL"] = "no"
             del data["services"]["bunkerweb"]["deploy"]["placement"]
             with open(compose, "w") as f:
                 f.write(dump(data))
