@@ -175,7 +175,7 @@ try:
     if not IS_MULTISITE:
         use_letsencrypt = getenv("AUTO_LETS_ENCRYPT", "no") == "yes"
         use_letsencrypt_dns = getenv("LETS_ENCRYPT_CHALLENGE", "http") == "dns"
-        domains_server_names = {servers[0]: servers}
+        domains_server_names = {servers[0]: " ".join(servers).lower()}
     else:
         domains_server_names = {}
 
@@ -276,10 +276,7 @@ try:
                 first_server = wildcards[0].lstrip("*.")
                 domains = set(wildcards)
             else:
-                if isinstance(domains, str):
-                    domains = set(domains.split(" "))
-                else:
-                    domains = set(domains)
+                domains = set(domains.split(" "))
 
             certificate_block = None
             for block in certificate_blocks:
@@ -419,7 +416,7 @@ try:
                 + ("the propagation time will be the provider's default and " if data["challenge"] == "dns" else "")
                 + "the email will be the same as the first domain that created the group..."
             )
-            WILDCARD_GENERATOR.extend(group, domains.split(" ") if isinstance(domains, str) else domains, data["email"], data["staging"])
+            WILDCARD_GENERATOR.extend(group, domains.split(" "), data["email"], data["staging"])
             file_path = (f"{group}.{file_type}",)
 
         # * Generating the credentials file
