@@ -45,11 +45,15 @@ class KubernetesTest(Test):
                     for ele in yaml["spec"]["template"]["spec"]["containers"][0]["env"]:
                         if ele["name"] in replace_env:
                             ele["value"] = replace_env[ele["name"]]
-                if yaml["metadata"]["name"] in [
-                    "bunkerweb",
-                    "bunkerweb-controller",
-                    "bunkerweb-scheduler",
-                ]:
+                if (
+                    yaml["metadata"]["name"]
+                    in [
+                        "bunkerweb",
+                        "bunkerweb-controller",
+                        "bunkerweb-scheduler",
+                    ]
+                    and yaml["kind"] != "IngressClass"
+                ):
                     yaml["spec"]["template"]["spec"]["imagePullSecrets"] = [{"name": "secret-registry"}]
                 yamls.append(yaml)
             with open(deploy, "w") as f:
