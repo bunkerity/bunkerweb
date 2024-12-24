@@ -276,7 +276,10 @@ try:
                 first_server = wildcards[0].lstrip("*.")
                 domains = set(wildcards)
             else:
-                domains = set(domains.split(" "))
+                if isinstance(domains, str):
+                    domains = set(domains.split(" "))
+                else:
+                    domains = set(domains)
 
             certificate_block = None
             for block in certificate_blocks:
@@ -416,7 +419,7 @@ try:
                 + ("the propagation time will be the provider's default and " if data["challenge"] == "dns" else "")
                 + "the email will be the same as the first domain that created the group..."
             )
-            WILDCARD_GENERATOR.extend(group, domains.split(" "), data["email"], data["staging"])
+            WILDCARD_GENERATOR.extend(group, domains.split(" ") if isinstance(domains, str) else domains, data["email"], data["staging"])
             file_path = (f"{group}.{file_type}",)
 
         # * Generating the credentials file
