@@ -1,5 +1,4 @@
-from json import dump
-from yaml import safe_load
+from yaml import safe_load, dump
 from Test import Test
 from os.path import isdir, isfile
 from os import getenv
