@@ -16,6 +16,10 @@ services:
       - /var/tmp/bunkerweb:mode=0770,uid=0,gid=101
       - /var/run/bunkerweb:mode=0770,uid=0,gid=101
       - /var/cache/bunkerweb:mode=0770,uid=0,gid=101
+      - /var/lib/bunkerweb:mode=0770,uid=0,gid=101
+      - /var/www/html:mode=0770,uid=0,gid=101
+      - /etc/bunkerweb:mode=0770,uid=0,gid=101
+      - /etc/bunkerweb/configs:mode=0770,uid=0,gid=101
       - /etc/nginx:mode=0770,uid=0,gid=101
     ports:
       - "80:8080/tcp"

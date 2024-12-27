@@ -26,8 +26,13 @@ EXPIRE_TIME = {
 
 
 class Job:
-    def __init__(self, logger: Optional[Logger] = None, db=None, *, plugin_id: str = "", job_name: str = "", deprecated: bool = False):
-        if not plugin_id:
+    def __init__(self, logger: Optional[Logger] = None, db=None, *, job_name: str = "", deprecated: bool = False):
+        """Initialize Job class."""
+        unique_id = getattr(__name__, "unique_env_id", None)
+        if unique_id:
+            plugin_id = getenv(f"{unique_id}_PLUGIN_ID", "")
+            job_name = job_name or getenv(f"{unique_id}_JOB_NAME", "")
+        else:
             frame = currentframe()
             if not frame:
                 raise ValueError("frame could not be determined.")
