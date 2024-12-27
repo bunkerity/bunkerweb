@@ -153,13 +153,16 @@ class JobScheduler(ApiCaller):
         self.__logger.error("Error while reloading nginx")
         return False
 
-    def __exec_plugin_module(self, path: str, name: str) -> ModuleType:
+    def __exec_plugin_module(self, path: str, name: str, **kwargs) -> ModuleType:
         """Dynamically import plugin module."""
         module_dir = dirname(path)
         sys_path.insert(0, module_dir)
         try:
             spec = spec_from_file_location(name, path)
             module = module_from_spec(spec)
+            # Set any arguments as module attributes before execution
+            for key, value in kwargs.items():
+                setattr(module, key, value)
             spec.loader.exec_module(module)
         finally:
             sys_path.remove(module_dir)
@@ -170,7 +173,7 @@ class JobScheduler(ApiCaller):
         ret = -1
         start_date = datetime.now().astimezone()
         try:
-            self.__exec_plugin_module(join(path, "jobs", file), name)
+            self.__exec_plugin_module(join(path, "jobs", file), name, passed_plugin_id=plugin, passed_job_name=name)
         except SystemExit as e:
             ret = e.code if isinstance(e.code, int) else 1
         except Exception as e:
