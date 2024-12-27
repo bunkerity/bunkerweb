@@ -1,6 +1,6 @@
 services:
   myapp1:
-    image: php:fpm-alpine3.19
+    image: php:fpm
     # ⚠️ UID and GID of BunkerWeb (101:101) and php:fpm (33:33) are not the same ⚠️
     # but both needs access to the files and folders of web-files
     # don't forget to edit the permissions of the files and folders accordingly
@@ -17,7 +17,7 @@ services:
       - bunkerweb.REMOTE_PHP_PATH=/app
 
   myapp2:
-    image: php:fpm-alpine3.19
+    image: php:fpm
     # ⚠️ UID and GID of BunkerWeb (101:101) and php:fpm (33:33) are not the same ⚠️
     # but both needs access to the files and folders of web-files
     # don't forget to edit the permissions of the files and folders accordingly

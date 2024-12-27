@@ -80,12 +80,12 @@ class DockerTest(Test):
                 )
                 if proc.returncode != 0:
                     raise (Exception("cp bw-data failed"))
-            proc = run("docker-compose pull --ignore-pull-failures", shell=True, cwd=test)
+            proc = run("docker compose pull --ignore-pull-failures", shell=True, cwd=test)
             if proc.returncode != 0:
-                raise (Exception("docker-compose pull failed"))
-            proc = run("docker-compose up -d", shell=True, cwd=test)
+                raise (Exception("docker compose pull failed"))
+            proc = run("docker compose up -d", shell=True, cwd=test)
             if proc.returncode != 0:
-                raise (Exception("docker-compose up failed"))
+                raise (Exception("docker compose up failed"))
         except:
             log(
                 "DOCKER",
@@ -99,9 +99,9 @@ class DockerTest(Test):
     def _cleanup_test(self):
         try:
             test = "/tmp/tests/" + self._name
-            proc = run("docker-compose down -v", shell=True, cwd=test)
+            proc = run("docker compose down -v", shell=True, cwd=test)
             if proc.returncode != 0:
-                raise (Exception("docker-compose down failed"))
+                raise (Exception("docker compose down failed"))
             super()._cleanup_test()
         except:
             log(
@@ -114,4 +114,4 @@ class DockerTest(Test):
 
     def _debug_fail(self):
         test = "/tmp/tests/" + self._name
-        run("docker-compose logs", shell=True, cwd=test)
+        run("docker compose logs", shell=True, cwd=test)

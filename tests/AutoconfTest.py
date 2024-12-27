@@ -65,15 +65,15 @@ class AutoconfTest(Test):
             with open(compose, "w") as f:
                 f.write(dump(data))
             proc = run(
-                "docker-compose pull --ignore-pull-failures",
+                "docker compose pull --ignore-pull-failures",
                 cwd="/tmp/autoconf",
                 shell=True,
             )
             if proc.returncode != 0:
-                raise (Exception("docker-compose pull failed (autoconf stack)"))
-            proc = run("docker-compose up -d", cwd="/tmp/autoconf", shell=True)
+                raise (Exception("docker compose pull failed (autoconf stack)"))
+            proc = run("docker compose up -d", cwd="/tmp/autoconf", shell=True)
             if proc.returncode != 0:
-                raise (Exception("docker-compose up failed (autoconf stack)"))
+                raise (Exception("docker compose up failed (autoconf stack)"))
             i = 0
             healthy = False
             while i < 30:
@@ -107,7 +107,7 @@ class AutoconfTest(Test):
         try:
             if not Test.end():
                 return False
-            proc = run("docker-compose down -v", cwd="/tmp/autoconf", shell=True)
+            proc = run("docker compose down -v", cwd="/tmp/autoconf", shell=True)
             if proc.returncode != 0:
                 ret = False
             rmtree("/tmp/autoconf")
@@ -165,15 +165,15 @@ class AutoconfTest(Test):
                 if proc.returncode != 0:
                     raise (Exception("cp bw-data failed"))
             proc = run(
-                "docker-compose -f autoconf.yml pull --ignore-pull-failures",
+                "docker compose -f autoconf.yml pull --ignore-pull-failures",
                 shell=True,
                 cwd=test,
             )
             if proc.returncode != 0:
-                raise (Exception("docker-compose pull failed"))
-            proc = run("docker-compose -f autoconf.yml up -d", shell=True, cwd=test)
+                raise (Exception("docker compose pull failed"))
+            proc = run("docker compose -f autoconf.yml up -d", shell=True, cwd=test)
             if proc.returncode != 0:
-                raise (Exception("docker-compose up failed"))
+                raise (Exception("docker compose up failed"))
         except:
             log(
                 "AUTOCONF",
@@ -187,9 +187,9 @@ class AutoconfTest(Test):
     def _cleanup_test(self):
         try:
             test = f"/tmp/tests/{self._name}"
-            proc = run("docker-compose -f autoconf.yml down -v", shell=True, cwd=test)
+            proc = run("docker compose -f autoconf.yml down -v", shell=True, cwd=test)
             if proc.returncode != 0:
-                raise (Exception("docker-compose down failed"))
+                raise (Exception("docker compose down failed"))
             proc = run(
                 "sudo bash -c 'rm -rf /tmp/www/*'",
                 shell=True,
@@ -208,6 +208,6 @@ class AutoconfTest(Test):
 
     def _debug_fail(self):
         autoconf = "/tmp/autoconf"
-        run("docker-compose logs", shell=True, cwd=autoconf)
+        run("docker compose logs", shell=True, cwd=autoconf)
         test = f"/tmp/tests/{self._name}"
-        run("docker-compose -f autoconf.yml logs", shell=True, cwd=test)
+        run("docker compose -f autoconf.yml logs", shell=True, cwd=test)
