@@ -81,7 +81,10 @@ function letsencrypt:init()
 					)
 				then
 					local data
-					if multisite_vars["USE_LETS_ENCRYPT_WILDCARD"] == "yes" then
+					if
+						multisite_vars["LETS_ENCRYPT_CHALLENGE"] == "dns"
+						and multisite_vars["USE_LETS_ENCRYPT_WILDCARD"] == "yes"
+					then
 						for part in server_name:gmatch("%S+") do
 							wildcard_servers[part] = true
 						end
@@ -108,7 +111,10 @@ function letsencrypt:init()
 							ret_ok = false
 							ret_err = "error reading files"
 						else
-							if multisite_vars["USE_LETS_ENCRYPT_WILDCARD"] == "yes" then
+							if
+								multisite_vars["LETS_ENCRYPT_CHALLENGE"] == "dns"
+								and multisite_vars["USE_LETS_ENCRYPT_WILDCARD"] == "yes"
+							then
 								check, err = self:load_data(data, server_name)
 							else
 								check, err = self:load_data(data, multisite_vars["SERVER_NAME"])
@@ -133,8 +139,13 @@ function letsencrypt:init()
 			if not use_wildcard then
 				return self:ret(false, "can't get USE_LETS_ENCRYPT_WILDCARD variable : " .. err)
 			end
+			local challenge
+			challenge, err = get_variable("LETS_ENCRYPT_CHALLENGE", false)
+			if not challenge then
+				return self:ret(false, "can't get LETS_ENCRYPT_CHALLENGE variable : " .. err)
+			end
 			server_name = server_name:match("%S+")
-			if use_wildcard == "yes" then
+			if challenge == "dns" and use_wildcard == "yes" then
 				for part in server_name:gmatch("%S+") do
 					wildcard_servers[part] = true
 				end
