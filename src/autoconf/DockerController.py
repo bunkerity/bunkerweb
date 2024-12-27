@@ -7,6 +7,7 @@ from re import compile as re_compile
 from traceback import format_exc
 
 from docker.models.containers import Container
+from docker.errors import DockerException
 from Controller import Controller
 
 
@@ -16,33 +17,66 @@ class DockerController(Controller):
         self.__client = DockerClient(base_url=docker_host)
         self.__custom_confs_rx = re_compile(r"^bunkerweb.CUSTOM_CONF_(SERVER_STREAM|SERVER_HTTP|MODSEC_CRS|MODSEC|CRS_PLUGINS_BEFORE|CRS_PLUGINS_AFTER)_(.+)$")
 
-    def _get_controller_instances(self) -> List[Container]:
-        containers: List[Container] = self.__client.containers.list(filters={"label": "bunkerweb.INSTANCE"})
+    def _get_controller_containers(self, label_key: str) -> List[Container]:
+        """
+        Fetch containers based on a specific label and filter them by namespace.
+
+        Args:
+            label_key (str): The key of the label to filter containers by (e.g., "bunkerweb.INSTANCE").
+
+        Returns:
+            List[Container]: A list of containers matching the label and namespace criteria.
+        """
+        try:
+            # Retrieve containers with the specific label
+            containers: List[Container] = self.__client.containers.list(filters={"label": label_key})
+        except DockerException as e:
+            self._logger.error(f"Failed to retrieve containers with label '{label_key}': {e}")
+            return []
+
         if not self._namespaces:
             return containers
-        return [
-            container
-            for container in containers
-            if any(
-                ({label: "" for label in container.labels} if isinstance(container.labels, list) else container.labels).get("bunkerweb.NAMESPACE", "")
-                == namespace
-                for namespace in self._namespaces
-            )
-        ]
+
+        namespace_set = set(self._namespaces)
+        valid_containers = []
+
+        for container in containers:
+            try:
+                # Safely retrieve and validate labels
+                labels = getattr(container, "labels", {})
+                if not isinstance(labels, dict):
+                    if isinstance(labels, list):
+                        labels = {label: "" for label in labels}
+                    else:
+                        self._logger.warning(f"Unexpected label format for container {container.id}: {labels}")
+                        continue
+
+                # Check if the namespace label matches any in the set
+                namespace = labels.get("bunkerweb.NAMESPACE", "")
+                if namespace in namespace_set:
+                    self._logger.debug(f"Container {container.id} matches namespace '{namespace}'.")
+                    valid_containers.append(container)
+                else:
+                    self._logger.debug(f"Container {container.id} does not match any namespace.")
+
+            except AttributeError as e:
+                self._logger.warning(f"Container {container.id} missing expected attributes: {e}")
+            except Exception as e:
+                self._logger.error(f"Unexpected error while processing container {container.id}: {e}")
+
+        return valid_containers
+
+    def _get_controller_instances(self) -> List[Container]:
+        """
+        Fetch containers labeled as 'bunkerweb.INSTANCE'.
+        """
+        return self._get_controller_containers(label_key="bunkerweb.INSTANCE")
 
     def _get_controller_services(self) -> List[Container]:
-        containers: List[Container] = self.__client.containers.list(filters={"label": "bunkerweb.SERVER_NAME"})
-        if not self._namespaces:
-            return containers
-        return [
-            container
-            for container in containers
-            if any(
-                ({label: "" for label in container.labels} if isinstance(container.labels, list) else container.labels).get("bunkerweb.NAMESPACE", "")
-                == namespace
-                for namespace in self._namespaces
-            )
-        ]
+        """
+        Fetch containers labeled as 'bunkerweb.SERVER_NAME'.
+        """
+        return self._get_controller_containers(label_key="bunkerweb.SERVER_NAME")
 
     def _to_instances(self, controller_instance) -> List[dict]:
         instance = {
