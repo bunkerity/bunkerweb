@@ -160,8 +160,8 @@ function letsencrypt:init()
 				end
 			end
 			local check, data = read_files({
-				"/var/cache/bunkerweb/letsencrypt_dns/etc/live/" .. server_name .. "/fullchain.pem",
-				"/var/cache/bunkerweb/letsencrypt_dns/etc/live/" .. server_name .. "/privkey.pem",
+				"/var/cache/bunkerweb/letsencrypt/etc/live/" .. server_name .. "/fullchain.pem",
+				"/var/cache/bunkerweb/letsencrypt/etc/live/" .. server_name .. "/privkey.pem",
 			})
 			if not check then
 				self.logger:log(ERR, "error while reading files : " .. data)
