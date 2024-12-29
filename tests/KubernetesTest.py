@@ -33,18 +33,25 @@ class KubernetesTest(Test):
                 "REAL_IP_FROM": "100.64.0.0/10 192.168.0.0/16 172.16.0.0/12 10.0.0.0/8",
                 "REAL_IP_HEADER": "proxy_protocol",
                 "LOG_LEVEL": "info",
+                "CUSTOM_LOG_LEVEL": "debug",
                 "USE_BUNKERNET": "no",
                 "SEND_ANONYMOUS_REPORT": "no",
                 "USE_DNSBL": "no",
             }
             replace_env = {"API_WHITELIST_IP": "127.0.0.1/8 100.64.0.0/10 192.168.0.0/16 172.16.0.0/12 10.0.0.0/8"}
             for yaml in data:
+                if yaml["metadata"]["name"] == "bunkerweb":
+                    for ele in yaml["spec"]["template"]["spec"]["containers"][0]["env"]:
+                        if ele["name"] in replace_env:
+                            ele["value"] = replace_env[ele["name"]]
                 if yaml["metadata"]["name"] == "bunkerweb-scheduler":
                     for k, v in append_env.items():
                         yaml["spec"]["template"]["spec"]["containers"][0]["env"].append({"name": k, "value": v})
                     for ele in yaml["spec"]["template"]["spec"]["containers"][0]["env"]:
                         if ele["name"] in replace_env:
                             ele["value"] = replace_env[ele["name"]]
+                if yaml["metadata"]["name"] == "bunkerweb-controller":
+                    yaml["spec"]["template"]["spec"]["containers"][0]["env"].append({"name": "CUSTOM_LOG_LEVEL", "value": "debug"})
                 if (
                     yaml["metadata"]["name"]
                     in [
