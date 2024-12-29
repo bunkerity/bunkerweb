@@ -189,6 +189,7 @@ class JobScheduler(ApiCaller):
         start_date = datetime.now().astimezone()
         try:
             self.__exec_plugin_module(join(path, "jobs", file), name, PLUGIN_ID=plugin, JOB_NAME=name)
+            ret = 1
         except SystemExit as e:
             ret = e.code if isinstance(e.code, int) else 1
         except Exception as e:
