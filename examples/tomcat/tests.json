@@ -8,7 +8,7 @@
       "type": "string",
       "url": "https://www.example.com",
       "string": "tomcat",
-      "tls": "www.example.com"
+      "tls": "www.example.com/sample/"
     }
   ]
 }

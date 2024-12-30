@@ -36,7 +36,7 @@ services:
       - bw-universe
 
   mytomcat:
-    image: tomcat:11.0
+    image: tomcat:11
     volumes:
       - ./app:/usr/local/tomcat/webapps/ # folder containing war files
     networks:
