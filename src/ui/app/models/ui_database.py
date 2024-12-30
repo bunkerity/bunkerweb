@@ -62,6 +62,37 @@ class UIDatabase(Database):
 
             return ui_user_data
 
+    def get_ui_users(self, *, as_dict: bool = False) -> Union[str, List[Union[UiUsers, dict]]]:
+        """Get ui users."""
+        with self._db_session() as session:
+            try:
+                users = (
+                    session.query(UiUsers).options(joinedload(UiUsers.roles), joinedload(UiUsers.recovery_codes), joinedload(UiUsers.columns_preferences)).all()
+                )
+                if not as_dict:
+                    return users
+
+                users_data = []
+                for user in users:
+                    user_data = {
+                        "username": user.username,
+                        "email": user.email,
+                        "password": user.password.encode("utf-8"),
+                        "method": user.method,
+                        "theme": user.theme,
+                        "totp_secret": user.totp_secret,
+                        "creation_date": user.creation_date.astimezone(),
+                        "update_date": user.update_date.astimezone(),
+                        "roles": [role.role_name for role in user.roles],
+                        "recovery_codes": [recovery_code.code for recovery_code in user.recovery_codes],
+                    }
+
+                    users_data.append(user_data)
+
+                return users_data
+            except BaseException as e:
+                return str(e)
+
     def create_ui_user(
         self,
         username: str,
@@ -72,6 +103,7 @@ class UIDatabase(Database):
         theme: Union[Literal["light"], Literal["dark"]] = "light",
         totp_secret: Optional[str] = None,
         totp_recovery_codes: Optional[List[str]] = None,
+        creation_date: Optional[datetime] = None,
         method: str = "manual",
         admin: bool = False,
     ) -> str:
@@ -102,7 +134,7 @@ class UIDatabase(Database):
                     admin=admin,
                     theme=theme,
                     totp_secret=totp_secret,
-                    creation_date=current_time,
+                    creation_date=creation_date or current_time,
                     update_date=current_time,
                 )
             )

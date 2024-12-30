@@ -15,11 +15,6 @@ function do_and_check_cmd() {
     return 0
 }
 
-echo "Decompressing BunkerWeb dependencies..."
-rm -rf /usr/share/bunkerweb/deps >/dev/null 2>&1
-do_and_check_cmd tar -xzf /var/tmp/bunkerweb/deps.tar.gz -C /usr/share/bunkerweb
-rm -f /var/tmp/bunkerweb/deps.tar.gz >/dev/null 2>&1
-
 # Give all the permissions to the nginx user
 echo "Setting ownership for all necessary directories to nginx user and group..."
 do_and_check_cmd chown -R nginx:nginx /usr/share/bunkerweb /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb
