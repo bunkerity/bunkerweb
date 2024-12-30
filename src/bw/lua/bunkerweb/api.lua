@@ -113,7 +113,7 @@ api.global.POST["^/reload"] = function(self)
 	if test_arg ~= "no" then
 		-- Check Nginx configuration
 		logger:log(NOTICE, "Checking Nginx configuration")
-		local status = execute("nginx -t")
+		local status = execute("/usr/sbin/nginx -t")
 		if status ~= 0 then
 			return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", "config check failed")
 		end
