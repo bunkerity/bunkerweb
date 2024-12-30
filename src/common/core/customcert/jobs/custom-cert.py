@@ -16,7 +16,7 @@ from jobs import Job  # type: ignore
 from logger import setup_logger  # type: ignore
 
 LOGGER = setup_logger("CUSTOM-CERT", getenv("LOG_LEVEL", "INFO"))
-JOB = Job(LOGGER)
+JOB = Job(LOGGER, __file__)
 
 
 def check_cert(cert_file: Union[Path, bytes], key_file: Union[Path, bytes], first_server: str) -> Tuple[bool, Union[str, BaseException]]:

@@ -495,7 +495,7 @@ if __name__ == "__main__":
 
         SCHEDULER = JobScheduler(environ, LOGGER, db=Database(LOGGER, sqlalchemy_string=dotenv_env.get("DATABASE_URI", getenv("DATABASE_URI", None))))  # type: ignore
 
-        JOB = Job(LOGGER, SCHEDULER.db)
+        JOB = Job(LOGGER, __file__, SCHEDULER.db)
 
         APPLYING_CHANGES.set()
 

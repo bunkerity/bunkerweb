@@ -93,7 +93,7 @@ try:
         LOGGER.warning("No service is using a compatible Core Rule Set (CRS) version with the plugins (4 or nightly), skipping download...")
         sys_exit(0)
 
-    JOB = Job(LOGGER)
+    JOB = Job(LOGGER, __file__)
 
     downloaded_plugins: Dict[str, Set[str]] = {}
     service_plugins: Dict[str, Set[str]] = {service: set() for service in services}

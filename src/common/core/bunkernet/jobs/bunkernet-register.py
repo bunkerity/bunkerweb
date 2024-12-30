@@ -33,7 +33,7 @@ try:
         sys_exit(0)
 
     # Get ID from cache
-    JOB = Job(LOGGER)
+    JOB = Job(LOGGER, __file__)
     bunkernet_id = JOB.get_cache("instance.id")
 
     # Register instance

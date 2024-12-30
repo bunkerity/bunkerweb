@@ -26,12 +26,12 @@ EXPIRE_TIME = {
 
 
 class Job:
-    def __init__(self, logger: Optional[Logger] = None, db=None, *, job_name: str = "", deprecated: bool = False):
+    def __init__(self, logger: Logger, job_path: str, db=None, *, deprecated: bool = False):
         """Initialize Job class."""
-        unique_id = getattr(__name__, "unique_env_id", None)
-        if unique_id:
-            plugin_id = getenv(f"{unique_id}_PLUGIN_ID", "")
-            job_name = job_name or getenv(f"{unique_id}_JOB_NAME", "")
+        if job_path:
+            job_path = Path(job_path)
+            plugin_id = job_path.parent.parent.name
+            job_name = job_path.stem
         else:
             frame = currentframe()
             if not frame:
@@ -41,8 +41,6 @@ class Job:
 
             if not source_path.exists():
                 raise ValueError("source_file could not be determined.")
-            elif not logger and not db:
-                raise ValueError("Either logger or db must be provided.")
 
             plugin_id = source_path.parent.parent.name
             job_name = job_name or source_path.name.replace(".py", "")

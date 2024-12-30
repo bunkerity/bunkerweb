@@ -97,7 +97,7 @@ try:
         LOGGER.info("Greylist is not activated, skipping downloads...")
         sys_exit(0)
 
-    JOB = Job(LOGGER)
+    JOB = Job(LOGGER, __file__)
 
     if not any(url for urls in services_greylist_urls.values() for url in urls.values()):
         LOGGER.warning("No greylist URL is configured, nothing to do...")
