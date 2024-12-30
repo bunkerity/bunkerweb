@@ -71,7 +71,7 @@ FROM redhat/ubi9:9.5@sha256:38791b293262ac2169eca2717e68e626a047d2b89fbd1da544db
 RUN umask 027
 
 # Install fpm
-RUN dnf install -y wget redhat-rpm-config rpm-build yum-utils gcc make pigz && \
+RUN dnf install -y wget redhat-rpm-config rpm-build yum-utils gcc make && \
   wget https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm && \
   rpm -Uvh epel-release*rpm && \
   dnf module -y reset ruby && dnf module -y enable ruby:3.1 && dnf module -y install ruby:3.1/common && \
@@ -103,10 +103,6 @@ RUN install -m 755 helpers/bwcli /usr/bin/bwcli && \
     find core/ -type f -name "*.sh" ! -path "core/modsecurity/files/*" -print0 | xargs -0 chmod 750 && \
     find core/ ui/ -type f -name "*.py" ! -path "core/modsecurity/files/*" -print0 | xargs -0 chmod 750 && \
     chmod 755 .
-
-# Compress dependencies
-RUN tar -I pigz -cf /var/tmp/bunkerweb/deps.tar.gz deps && \
-    rm -rf deps
 
 COPY --chmod=660 src/bw/misc/asn.mmdb /var/tmp/bunkerweb/asn.mmdb
 COPY --chmod=660 src/bw/misc/country.mmdb /var/tmp/bunkerweb/country.mmdb
