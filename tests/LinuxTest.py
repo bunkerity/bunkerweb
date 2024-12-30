@@ -122,6 +122,9 @@ class LinuxTest(Test):
             )
             if proc.returncode != 0:
                 raise (Exception("docker exec append variables.env failed (test)"))
+            proc = self.docker_exec(self.__distro, "systemctl restart bunkerweb")
+            if proc.returncode != 0:
+                raise Exception("docker exec systemctl restart failed (linux stack)")
             proc = self.docker_exec(self.__distro, "systemctl restart bunkerweb-scheduler")
             if proc.returncode != 0:
                 raise Exception("docker exec systemctl restart failed (linux stack)")

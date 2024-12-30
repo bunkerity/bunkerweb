@@ -35,6 +35,22 @@ function start() {
     # Check if the scheduler is already running
     stop
 
+    # Create dummy variables.env
+    if [ ! -f /etc/bunkerweb/variables.env ]; then
+        {
+            echo "# remove IS_LOADING=yes when your config is ready"
+            echo "IS_LOADING=yes"
+            echo "SERVER_NAME="
+            echo "DNS_RESOLVERS=9.9.9.9 149.112.112.112 8.8.8.8 8.8.4.4" # Quad9, Google
+            echo "HTTP_PORT=80"
+            echo "HTTPS_PORT=443"
+            echo "API_LISTEN_IP=127.0.0.1"
+        } > /etc/bunkerweb/variables.env
+        chown root:nginx /etc/bunkerweb/variables.env
+        chmod 660 /etc/bunkerweb/variables.env
+        log "SYSTEMCTL" "ℹ️" "Created dummy variables.env file"
+    fi
+
     CUSTOM_LOG_LEVEL="$(grep "^LOG_LEVEL=" /etc/bunkerweb/scheduler.env | cut -d '=' -f 2)"
     export CUSTOM_LOG_LEVEL
 
