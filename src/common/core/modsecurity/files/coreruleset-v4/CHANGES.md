@@ -5,6 +5,20 @@
   or the CRS Google Group at
 * https://groups.google.com/a/owasp.org/g/modsecurity-core-rule-set-project
 
+## Version 4.11.0 - TBD
+
+## Version 4.10.0 - 2024-12-29
+
+## What's Changed
+### 🆕 New features and detections 🎉
+* feat: block CVE-2023-5003 by @azurit in https://github.com/coreruleset/coreruleset/pull/3955
+* feat: prevent accessing PHP variables by @azurit in https://github.com/coreruleset/coreruleset/pull/3965
+### 🧰 Other Changes
+* fix: FP against `pattern` with `=` following at arbitrary position by @theseion in https://github.com/coreruleset/coreruleset/pull/3963
+
+
+**Full Changelog**: https://github.com/coreruleset/coreruleset/compare/v4.9.0...v4.10.0
+
 ## Version 4.9.0 - 2024-11-29
 
 ## What's Changed

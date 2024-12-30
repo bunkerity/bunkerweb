@@ -3,15 +3,14 @@
 
 ##!+ i
 ##!^ .
-##!$ \b
 
-\bxlink:href
-\bxhtml
-\bxmlns
-!ENTITY\s+(?:\S+|%\s+\S+)\s+SYSTEM
-!ENTITY\s+(?:\S+|%\s+\S+)\s+PUBLIC
-\bdata:text/html
-\bformaction
-@import
-;base64
-\bpattern\b.*?=
+\bxlink:href\b
+\bxhtml\b
+\bxmlns\b
+!ENTITY\s+(?:\S+|%\s+\S+)\s+SYSTEM\b
+!ENTITY\s+(?:\S+|%\s+\S+)\s+PUBLIC\b
+\bdata:text/html\b
+\bformaction\b
+@import\b
+;base64\b
+\bpattern\s*=

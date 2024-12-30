@@ -12,6 +12,7 @@
 - [FEATURE] Add country tracking to bans data
 - [FEATURE] Refactored the way the database migrations are handled to make it more reliable and faster using alembic
 - [DEPRECATION] Remove `X-XSS-Protection` header from the `header` plugin as it is deprecated
+- [DEPS] Updated coreruleset-v4 version to v4.10.0
 
 ## v1.6.0-beta - 2024/12/10
 

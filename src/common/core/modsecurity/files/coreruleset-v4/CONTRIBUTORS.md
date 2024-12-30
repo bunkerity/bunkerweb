@@ -2,13 +2,13 @@
 
 ## Project Co-Leads:
 
-- [Christian Folini](https://github.com/dune73)
 - [Felipe Zipitría](https://github.com/fzipi)
 
 ## Developers:
 
 - [Franziska Bühler](https://github.com/franbuehler)
 - [Esad Cetiner](https://github.com/esadcetiner)
+- [Christian Folini](https://github.com/dune73)
 - [Ervin Hegedus](https://github.com/airween)
 - [Andrew Howe](https://github.com/RedXanadu)
 - [Max Leske](https://github.com/theseion)
