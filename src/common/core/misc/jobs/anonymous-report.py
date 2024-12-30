@@ -26,7 +26,7 @@ try:
         LOGGER.info("Skipping the sending of anonymous report (disabled)")
         sys_exit(status)
 
-    JOB = Job(LOGGER)
+    JOB = Job(LOGGER, __file__)
     if JOB.is_cached_file("last_report.json", "day"):
         LOGGER.info("Skipping the sending of anonymous report (already sent today)")
         sys_exit(0)

@@ -16,7 +16,7 @@ status = 0
 
 try:
     # Restoring the backup failover configuration
-    JOB = Job(LOGGER)
+    JOB = Job(LOGGER, __file__)
 except BaseException as e:
     status = 2
     LOGGER.error(f"Exception while running failover-backup.py :\n{e}")

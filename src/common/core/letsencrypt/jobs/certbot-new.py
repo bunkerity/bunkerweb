@@ -230,7 +230,7 @@ try:
             "scaleway": ScalewayProvider,
         }
 
-    JOB = Job(LOGGER)
+    JOB = Job(LOGGER, __file__)
 
     # ? Restore data from db cache of certbot-renew job
     JOB.restore_cache(job_name="certbot-renew")

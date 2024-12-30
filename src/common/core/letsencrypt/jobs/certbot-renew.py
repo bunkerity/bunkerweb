@@ -42,7 +42,7 @@ try:
         LOGGER.info("Let's Encrypt is not activated, skipping renew...")
         sys_exit(0)
 
-    JOB = Job(LOGGER)
+    JOB = Job(LOGGER, __file__)
 
     process = Popen(
         [

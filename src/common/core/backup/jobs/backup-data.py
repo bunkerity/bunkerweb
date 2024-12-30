@@ -32,7 +32,7 @@ try:
             LOGGER.info("Backup feature is disabled, skipping backup ...")
             sys_exit(0)
 
-        JOB = Job(LOGGER)
+        JOB = Job(LOGGER, __file__)
 
         last_backup = loads(JOB.get_cache("backup.json") or "{}")
         last_backup_date = last_backup.get("date", None)

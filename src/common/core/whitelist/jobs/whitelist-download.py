@@ -97,7 +97,7 @@ try:
         LOGGER.info("Whitelist is not activated, skipping downloads...")
         sys_exit(0)
 
-    JOB = Job(LOGGER)
+    JOB = Job(LOGGER, __file__)
 
     if not any(url for urls in services_whitelist_urls.values() for url in urls.values()):
         LOGGER.warning("No whitelist URL is configured, nothing to do...")
