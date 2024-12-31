@@ -107,6 +107,7 @@ jobs:
         run: |
           export NEEDRESTART_SUSPEND=1
           export DEBIAN_FRONTEND=noninteractive
+          export UI_WIZARD=no
           sudo -E apt install -fy /tmp/bunkerweb.deb
       - name: Run tests
         run: |
