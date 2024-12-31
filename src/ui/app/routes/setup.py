@@ -40,8 +40,11 @@ def setup_page():
             "USE_LETS_ENCRYPT_WILDCARD",
             "LETS_ENCRYPT_DNS_CREDENTIAL_ITEM",
             "USE_CUSTOM_SSL",
+            "CUSTOM_SSL_CERT_PRIORITY",
             "CUSTOM_SSL_CERT",
             "CUSTOM_SSL_KEY",
+            "CUSTOM_SSL_CERT_DATA",
+            "CUSTOM_SSL_KEY_DATA",
         ),
     )
 
@@ -77,8 +80,11 @@ def setup_page():
                     "lets_encrypt_dns_propagation",
                     "lets_encrypt_dns_credential_items",
                     "use_custom_ssl",
+                    "custom_ssl_cert_priority",
                     "custom_ssl_cert",
                     "custom_ssl_key",
+                    "custom_ssl_cert_data",
+                    "custom_ssl_key_data",
                 ]
             )
         if not admin_user:
@@ -171,14 +177,22 @@ def setup_page():
                             bool(request.form.get("custom_ssl_cert", "")),
                             bool(request.form.get("custom_ssl_key", "")),
                         ]
+                    ) or not all(
+                        [
+                            bool(request.form.get("custom_ssl_cert_data", "")),
+                            bool(request.form.get("custom_ssl_key_data", "")),
+                        ]
                     ):
                         return handle_error("When using a custom SSL certificate, you must set both the certificate and the key.", "setup")
 
                     config.update(
                         {
                             "USE_CUSTOM_SSL": "yes",
+                            "CUSTOM_SSL_CERT_PRIORITY": request.form.get("custom_ssl_cert_priority", "file"),
                             "CUSTOM_SSL_CERT": request.form.get("custom_ssl_cert", ""),
                             "CUSTOM_SSL_KEY": request.form.get("custom_ssl_key", ""),
+                            "CUSTOM_SSL_CERT_DATA": request.form.get("custom_ssl_cert_data", ""),
+                            "CUSTOM_SSL_KEY_DATA": request.form.get("custom_ssl_key_data", ""),
                         }
                     )
                 else:
@@ -233,8 +247,11 @@ def setup_page():
         lets_encrypt_dns_propagation=db_config.get("LETS_ENCRYPT_DNS_PROPAGATION", getenv("LETS_ENCRYPT_DNS_PROPAGATION", "default")),
         lets_encrypt_dns_credential_items=lets_encrypt_dns_credential_items,
         use_custom_ssl=db_config.get("USE_CUSTOM_SSL", getenv("USE_CUSTOM_SSL", "no")),
+        custom_ssl_cert_priority=db_config.get("CUSTOM_SSL_CERT_PRIORITY", getenv("CUSTOM_SSL_CERT_PRIORITY", "file")),
         custom_ssl_cert=db_config.get("CUSTOM_SSL_CERT", getenv("CUSTOM_SSL_CERT", "")),
         custom_ssl_key=db_config.get("CUSTOM_SSL_KEY", getenv("CUSTOM_SSL_KEY", "")),
+        custom_ssl_cert_data=db_config.get("CUSTOM_SSL_CERT_DATA", getenv("CUSTOM_SSL_CERT_DATA", "")),
+        custom_ssl_key_data=db_config.get("CUSTOM_SSL_KEY_DATA", getenv("CUSTOM_SSL_KEY_DATA", "")),
         # totp_qr_image=totp_qr_image,
         # totp_secret=TOTP.get_totp_pretty_key(session.get("tmp_totp_secret", "")),
     )

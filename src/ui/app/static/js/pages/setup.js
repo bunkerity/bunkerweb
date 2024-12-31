@@ -611,8 +611,14 @@ $(document).ready(() => {
         "use_custom_ssl",
         $("#USE_CUSTOM_SSL").prop("checked") ? "yes" : "no",
       );
+      formData.append(
+        "custom_ssl_cert_priority",
+        $("#CUSTOM_SSL_CERT_PRIORITY").find(":selected").val(),
+      );
       formData.append("custom_ssl_cert", $("#CUSTOM_SSL_CERT").val());
       formData.append("custom_ssl_key", $("#CUSTOM_SSL_KEY").val());
+      formData.append("custom_ssl_cert_data", $("#CUSTOM_SSL_CERT_DATA").val());
+      formData.append("custom_ssl_key_data", $("#CUSTOM_SSL_KEY_DATA").val());
     }
 
     // Remove beforeunload event to prevent prompt on form submission
@@ -791,6 +797,21 @@ $(document).ready(() => {
         .attr("data-bs-original-title", null)
         .tooltip("dispose");
     }
+  });
+
+  $("#USE_CUSTOM_SSL").on("change", function () {
+    const isChecked = $(this).prop("checked");
+    const $certPriority = $("#CUSTOM_SSL_CERT_PRIORITY");
+    const $cert = $("#CUSTOM_SSL_CERT");
+    const $key = $("#CUSTOM_SSL_KEY");
+    const $certData = $("#CUSTOM_SSL_CERT_DATA");
+    const $keyData = $("#CUSTOM_SSL_KEY_DATA");
+
+    $certPriority.prop("disabled", !isChecked);
+    $cert.prop("disabled", !isChecked);
+    $key.prop("disabled", !isChecked);
+    $certData.prop("disabled", !isChecked);
+    $keyData.prop("disabled", !isChecked);
   });
 
   // Before Unload Event to Warn Users About Unsaved Changes
