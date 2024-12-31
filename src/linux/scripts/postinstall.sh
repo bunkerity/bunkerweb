@@ -83,7 +83,9 @@ if {
     {
         [ -z "$MANAGER_MODE" ] && [ -z "$WORKER_MODE" ];
     } || {
-        [ "${MANAGER_MODE:-yes}" = "no" ] || [ "${WORKER_MODE:-no}" != "no" ];
+        {
+            [ -z "$MANAGER_MODE" ] || [ "${MANAGER_MODE:-yes}" = "no" ]
+        } && [ "${WORKER_MODE:-no}" != "no" ];
     };
 } && [ "$SERVICE_BUNKERWEB" != "no" ]; then
     if [ -f /var/tmp/bunkerweb_upgrade ]; then
@@ -114,7 +116,7 @@ if {
     {
         [ -z "$MANAGER_MODE" ] && [ -z "$WORKER_MODE" ];
     } || {
-        [ "${MANAGER_MODE:-yes}" != "no" ] || [ "${WORKER_MODE:-no}" = "no" ];
+        [ "${MANAGER_MODE:-yes}" != "no" ] && [ "${WORKER_MODE:-no}" = "no" ];
     };
 } && [ "$SERVICE_SCHEDULER" != "no" ]; then
     if [[ -f /var/tmp/bunkerweb_enable_scheduler || ! -f /var/tmp/bunkerweb_upgrade ]]; then
@@ -144,7 +146,7 @@ if {
     {
         [ -z "$MANAGER_MODE" ] && [ -z "$WORKER_MODE" ];
     } || {
-        [ "${MANAGER_MODE:-yes}" != "no" ] || [ "${WORKER_MODE:-no}" = "no" ];
+        [ "${MANAGER_MODE:-yes}" != "no" ] && [ "${WORKER_MODE:-no}" = "no" ];
     };
 } && [ "$SERVICE_UI" != "no" ]; then
     if [ -f /var/tmp/bunkerweb_upgrade ]; then

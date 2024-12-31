@@ -532,6 +532,53 @@ BunkerWeb is managed using systemctl :
 - Reload it to apply new configuration : `systemctl reload bunkerweb`
 - And restart it : `systemctl restart bunkerweb`
 
+### High availability
+
+The scheduler can be detached from the BunkerWeb instance to provide high availability. In this case, the scheduler will be installed on a separate server and will be able to manage multiple BunkerWeb instances.
+
+#### Manager
+
+To install only the scheduler on a server, you can export the following variables before executing the BunkerWeb installation :
+
+```shell
+export MANAGER_MODE=yes
+export UI_WIZARD=no
+```
+
+Alternatively, you can also export the following variables to only enable the scheduler :
+
+```shell
+export SERVICE_SCHEDULER=yes
+export SERVICE_BUNKERWEB=no
+export SERVICE_UI=no
+```
+
+#### Worker
+
+On another server, to install only BunkerWeb, you can export the following variables before executing the BunkerWeb installation :
+
+```shell
+export WORKER_MODE=yes
+```
+
+Alternatively, you can also export the following variables to only enable BunkerWeb :
+
+```shell
+export SERVICE_BUNKERWEB=yes
+export SERVICE_SCHEDULER=no
+export SERVICE_UI=no
+```
+
+#### Web UI
+
+The Web UI can be installed on a separate server to provide a dedicated interface for managing BunkerWeb instances. To install only the Web UI, you can export the following variables before executing the BunkerWeb installation :
+
+```shell
+export SERVICE_BUNKERWEB=no
+export SERVICE_SCHEDULER=no
+export SERVICE_UI=yes
+```
+
 ## Docker autoconf
 
 <figure markdown>
