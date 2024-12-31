@@ -280,10 +280,19 @@
     "regex": "^[0-9]+$",
     "type": "text"
   },
+  "USE_TCP": {
+    "context": "multisite",
+    "default": "yes",
+    "help": "TCP listen (stream).",
+    "id": "use-tcp",
+    "label": "Listen TCP",
+    "regex": "^(yes|no)$",
+    "type": "check"
+  },
   "USE_UDP": {
     "context": "multisite",
     "default": "no",
-    "help": "UDP listen instead of TCP (stream).",
+    "help": "UDP listen (stream).",
     "id": "use-udp",
     "label": "Listen UDP",
     "regex": "^(yes|no)$",
