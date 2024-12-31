@@ -20,7 +20,7 @@
       "help": "URL of the protected resource or sitewide value.",
       "id": "auth-basic-location",
       "label": "Auth basic Location",
-      "regex": "^(sitewide|/[a-zA-Z0-9.\\/\\-]*)$",
+      "regex": "^.*$",
       "type": "text"
     },
     "AUTH_BASIC_USER": {
@@ -30,7 +30,8 @@
       "id": "auth-basic-user",
       "label": "Auth basic Username",
       "regex": "^[\\w\\-]+",
-      "type": "text"
+      "type": "text",
+      "multiple": "auth-basic-credentials"
     },
     "AUTH_BASIC_PASSWORD": {
       "context": "multisite",
@@ -39,7 +40,8 @@
       "id": "auth-basic-password",
       "label": "Password",
       "regex": "^.+",
-      "type": "password"
+      "type": "password",
+      "multiple": "auth-basic-credentials"
     },
     "AUTH_BASIC_TEXT": {
       "context": "multisite",
