@@ -64,6 +64,14 @@ class LinuxTest(Test):
                     )
                     LinuxTest.docker_exec(distro, "systemctl stop php8.1-fpm ; systemctl start php8.1-fpm")
             elif distro in ("centos", "fedora") or distro.startswith("rhel"):
+                if distro == "rhel":
+                    LinuxTest.docker_exec(distro, "dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm")
+                    LinuxTest.docker_exec(distro, "dnf install -y https://rpms.remirepo.net/enterprise/remi-release-8.rpm")
+                    LinuxTest.docker_exec(distro, "dnf module enable php:remi-8.3 -y")
+                elif distro == "rhel9":
+                    LinuxTest.docker_exec(distro, "dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm")
+                    LinuxTest.docker_exec(distro, "dnf install -y https://rpms.remirepo.net/enterprise/remi-release-9.rpm")
+                    LinuxTest.docker_exec(distro, "dnf module enable php:remi-8.3 -y")
                 LinuxTest.docker_exec(distro, "dnf install -y php-fpm unzip")
                 LinuxTest.docker_cp(distro, "./tests/www-rpm.conf", "/etc/php-fpm.d/www.conf")
                 LinuxTest.docker_exec(
