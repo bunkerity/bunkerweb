@@ -32,6 +32,8 @@ function display_help() {
 function start() {
     log "SYSTEMCTL" "ℹ️" "Starting BunkerWeb Scheduler service ..."
 
+    chown -R nginx:nginx /etc/nginx
+
     # Check if the scheduler is already running
     stop
 
