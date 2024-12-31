@@ -85,13 +85,14 @@ try:
 
             LOGGER.info(f"Service {first_server} is using custom SSL certificates, checking ...")
 
+            cert_priority = getenv(f"{first_server}_CUSTOM_SSL_CERT_PRIORITY", getenv("CUSTOM_SSL_CERT_PRIORITY", "file"))
             cert_file = getenv(f"{first_server}_CUSTOM_SSL_CERT", getenv("CUSTOM_SSL_CERT", ""))
             key_file = getenv(f"{first_server}_CUSTOM_SSL_KEY", getenv("CUSTOM_SSL_KEY", ""))
             cert_data = getenv(f"{first_server}_CUSTOM_SSL_CERT_DATA", getenv("CUSTOM_SSL_CERT_DATA", ""))
             key_data = getenv(f"{first_server}_CUSTOM_SSL_KEY_DATA", getenv("CUSTOM_SSL_KEY_DATA", ""))
 
             if (cert_file or cert_data) and (key_file or key_data):
-                if cert_file:
+                if (cert_priority == "file" or not cert_data) and cert_file:
                     cert_file = Path(cert_file)
                 else:
                     try:
@@ -102,7 +103,7 @@ try:
                         status = 2
                         continue
 
-                if key_file:
+                if (cert_priority == "file" or not key_data) and key_file:
                     key_file = Path(key_file)
                 else:
                     try:
