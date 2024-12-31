@@ -4,6 +4,7 @@
 
 - [BUGFIX] Increase string length for service_id and id columns in database models to avoid issues with long service names
 - [BUGFIX] Fix shenanigans with setup wizard when a reverse proxy was already configured
+- [LINUX] Support Fedora 40 back and temporarily put aside Fedora 41 (there are issues when building the images)
 - [UI] Add `CHECK_PRIVATE_IP` configuration to manage session IP address changes for private networks
 - [UI] Implement `ALWAYS_REMEMBER` functionality for session persistence in login
 - [UI] Add temporary UI service to show errors that occurred if any while web UI was starting up
