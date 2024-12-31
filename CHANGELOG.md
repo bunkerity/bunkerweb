@@ -4,6 +4,7 @@
 
 - [BUGFIX] Increase string length for service_id and id columns in database models to avoid issues with long service names
 - [BUGFIX] Fix shenanigans with setup wizard when a reverse proxy was already configured
+- [LINUX] Support Fedora 40 back and temporarily put aside Fedora 41 (there are issues when building the images)
 - [UI] Add `CHECK_PRIVATE_IP` configuration to manage session IP address changes for private networks
 - [UI] Implement `ALWAYS_REMEMBER` functionality for session persistence in login
 - [UI] Add temporary UI service to show errors that occurred if any while web UI was starting up
@@ -12,6 +13,7 @@
 - [FEATURE] Add country tracking to bans data
 - [FEATURE] Refactored the way the database migrations are handled to make it more reliable and faster using alembic
 - [DEPRECATION] Remove `X-XSS-Protection` header from the `header` plugin as it is deprecated
+- [DEPS] Updated coreruleset-v4 version to v4.10.0
 
 ## v1.6.0-beta - 2024/12/10
 

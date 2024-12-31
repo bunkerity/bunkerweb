@@ -1,4 +1,4 @@
-FROM fedora:41@sha256:3ec60eb34fa1a095c0c34dd37cead9fd38afb62612d43892fcf1d3425c32bc1e
+FROM fedora:40@sha256:7cdd2b48396929bb8723ea2fa60e03bee39cc22e2a853cbd891587fab4eb1bc9
 
 ENV container=docker
 ENV NGINX_VERSION=1.26.2
@@ -21,7 +21,7 @@ RUN rm -f /lib/systemd/system/multi-user.target.wants/* \
 # Nginx
 RUN dnf update -y && \
     dnf install -y php-fpm curl gnupg2 ca-certificates redhat-lsb-core python3-pip which && \
-    dnf install --enablerepo=updates-testing nginx-${NGINX_VERSION} -y
+    dnf install nginx-${NGINX_VERSION} -y
 
 COPY ./package-fedora/*.rpm /opt
 

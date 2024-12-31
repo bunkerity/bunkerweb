@@ -1,4 +1,4 @@
-FROM fedora:41@sha256:3ec60eb34fa1a095c0c34dd37cead9fd38afb62612d43892fcf1d3425c32bc1e AS builder
+FROM fedora:40@sha256:7cdd2b48396929bb8723ea2fa60e03bee39cc22e2a853cbd891587fab4eb1bc9 AS builder
 
 ENV OS=fedora
 ENV NGINX_VERSION=1.26.2
@@ -6,7 +6,7 @@ ENV NGINX_VERSION=1.26.2
 # Install Nginx, fpm and dependencies
 RUN dnf update -y && \
     dnf install -y curl gnupg2 ca-certificates redhat-lsb-core make gcc && \
-    dnf install -y --setopt=install_weak_deps=False python3.12 python3.12-devel python3-pip brotli brotli-devel gperftools-devel perl libxslt-devel libxml2 yajl yajl-devel libxslt bash gd gd-devel gcc-c++ kernel-devel znc-modtcl libmpc-devel gmp-devel gawk mpfr-devel libtool pcre-devel automake autoconf readline-devel gcc make openssl-devel git zlib-devel libxml2-devel pkgconf libcurl-devel geoip-devel lmdb-devel && \
+    dnf install -y --setopt=install_weak_deps=False python3 python3-devel python3-pip brotli brotli-devel gperftools-devel perl libxslt-devel libxml2 yajl yajl-devel libxslt bash gd gd-devel gcc-c++ kernel-devel znc-modtcl libmpc-devel gmp-devel gawk mpfr-devel libtool pcre-devel automake autoconf readline-devel gcc make openssl-devel git zlib-devel libxml2-devel pkgconf libcurl-devel geoip-devel lmdb-devel && \
     dnf install nginx-${NGINX_VERSION} -y
 
 WORKDIR /tmp/bunkerweb/deps
@@ -32,9 +32,8 @@ WORKDIR /usr/share/bunkerweb
 # Compile and install dependencies
 RUN export MAKEFLAGS="-j$(nproc)" && \
     mkdir -p deps/python && \
-    python3.12 -m ensurepip && \
-    python3.12 -m pip install --no-cache-dir --require-hashes --ignore-installed -r /tmp/requirements-deps.txt && \
-    python3.12 -m pip install --no-cache-dir --require-hashes --force-reinstall --target deps/python $(for file in $(ls /tmp/req/requirements*.txt) ; do echo "-r ${file}" ; done | xargs)
+    pip install --no-cache-dir --require-hashes --ignore-installed -r /tmp/requirements-deps.txt && \
+    pip install --no-cache-dir --require-hashes --force-reinstall --target deps/python $(for file in $(ls /tmp/req/requirements*.txt) ; do echo "-r ${file}" ; done | xargs)
 
 # Copy files
 # can't exclude deps from . so we are copying everything by hand
@@ -54,7 +53,7 @@ COPY src/scheduler scheduler
 COPY src/VERSION VERSION
 COPY src/ui ui
 
-FROM fedora:41@sha256:3ec60eb34fa1a095c0c34dd37cead9fd38afb62612d43892fcf1d3425c32bc1e
+FROM fedora:40@sha256:7cdd2b48396929bb8723ea2fa60e03bee39cc22e2a853cbd891587fab4eb1bc9
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
@@ -99,9 +98,6 @@ COPY --chmod=740 src/linux/fpm.sh /usr/share/fpm.sh
 COPY src/linux/fpm-fedora /usr/share/.fpm
 COPY --chmod=644 src/linux/*.service /lib/systemd/system/
 COPY --chmod=644 src/linux/bunkerweb.logrotate /etc/logrotate.d/bunkerweb
-
-# TMP patch for fpm
-RUN sed -i -e 's/args = \["rpmbuild", "-bb"\]/args = \["rpmbuild", "-bb", "--buildroot", "#{build_path}\/BUILD"\]/g' /usr/local/share/gems/gems/fpm-*/lib/fpm/package/rpm.rb
 
 # Generate RPM at startup
 VOLUME /data

@@ -298,7 +298,8 @@ List of supported Linux distros :
 - Debian 12 "Bookworm"
 - Ubuntu 22.04 "Noble"
 - Ubuntu 24.04 "Jammy"
-- Fedora 41
+- Fedora 40
+- Fedora 41 (to be released)
 - RHEL 8.9
 - RHEL 9.4
 
@@ -375,7 +376,7 @@ Here is the list of "official" plugins that we maintain (see the [bunkerweb-plug
 |  **Discord**   |   1.6   | Send security notifications to a Discord channel using a Webhook.                                                                |    [bunkerweb-plugins/discord](https://github.com/bunkerity/bunkerweb-plugins/tree/main/discord)    |
 |   **Slack**    |   1.6   | Send security notifications to a Slack channel using a Webhook.                                                                  |      [bunkerweb-plugins/slack](https://github.com/bunkerity/bunkerweb-plugins/tree/main/slack)      |
 | **VirusTotal** |   1.6   | Automatically scans uploaded files with the VirusTotal API and denies the request when a file is detected as malicious.          | [bunkerweb-plugins/virustotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal) |
-|  **WebHook**   |   1.6   | Send security notifications to a custom HTTP endpoint using a Webhook.                                                           |     [bunkerweb-plugins/webhook](https://github.com/bunkerity/bunkerweb-plugins/tree/main/webhook)     |
+|  **WebHook**   |   1.6   | Send security notifications to a custom HTTP endpoint using a Webhook.                                                           |    [bunkerweb-plugins/webhook](https://github.com/bunkerity/bunkerweb-plugins/tree/main/webhook)    |
 
 You will find more information in the [plugins section](https://docs.bunkerweb.io/1.6.0-rc1/plugins/?utm_campaign=self&utm_source=github) of the documentation.
 
