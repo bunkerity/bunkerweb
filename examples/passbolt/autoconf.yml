@@ -38,7 +38,7 @@ services:
         SecRule REQUEST_FILENAME "@rx ^/locales" "id:1000000,ctl:ruleRemoveById=953100,nolog"
 
   mydb:
-    image: mariadb:10.11
+    image: mariadb:11
     volumes:
       - db-data:/var/lib/mysql
     networks:
