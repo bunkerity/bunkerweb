@@ -79,6 +79,15 @@
       "label": "SecAuditLogParts",
       "regex": "^A(([B-K])(?!.*\\2))+Z$",
       "type": "text"
+    },
+    "MODSECURITY_REQ_BODY_NO_FILES_LIMIT": {
+      "context": "multisite",
+      "default": "131072",
+      "help": "SecRequestBodyNoFilesLimit directive of ModSecurity.",
+      "id": "modsecurity-req-body-no-files-limit",
+      "label": "SecRequestBodyNoFilesLimit",
+      "regex": "^[0-9]+$",
+      "type": "text"
     }
   },
   "jobs": [
