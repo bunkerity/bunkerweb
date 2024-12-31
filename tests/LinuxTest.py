@@ -143,7 +143,7 @@ class LinuxTest(Test):
         try:
             proc = self.docker_exec(
                 self.__distro,
-                f"cd /opt/{self._name} ; ./cleanup-linux.sh ; rm -rf /etc/bunkerweb/configs/* ; rm -rf /etc/bunkerweb/plugins/* ; rm -rf /var/www/html/* ; journalctl --rotate --vacuum-time=1s ; truncate -s 0 /var/log/bunkerweb/error.log ; truncate -s 0 /var/log/bunkerweb/access.log ; truncate -s 0 /var/log/bunkerweb/scheduler.log",
+                f"cd /opt/{self._name} ; ./cleanup-linux.sh ; rm -rf /etc/bunkerweb/configs/* ; rm -rf /etc/bunkerweb/plugins/* ; rm -rf /var/www/html/* ; journalctl --rotate --vacuum-time=1s ; truncate -s 0 /var/log/bunkerweb/error.log ; truncate -s 0 /var/log/bunkerweb/access.log ; truncate -s 0 /var/log/bunkerweb/scheduler.log ; truncate -s 0 /var/log/bunkerweb/scheduler.log",
             )
             if proc.returncode != 0:
                 raise Exception("docker exec rm failed (cleanup)")
@@ -160,7 +160,7 @@ class LinuxTest(Test):
     def _debug_fail(self):
         self.docker_exec(
             self.__distro,
-            "cat /var/log/bunkerweb/access.log ; cat /var/log/bunkerweb/error.log ; journalctl -u bunkerweb --no-pager ; journalctl -u bunkerweb-scheduler --no-pager",
+            "cat /var/log/bunkerweb/access.log ; cat /var/log/bunkerweb/error.log ; cat /var/log/bunkerweb/scheduler.log ; journalctl -u bunkerweb --no-pager ; journalctl -u bunkerweb-scheduler --no-pager",
         )
 
     @staticmethod
