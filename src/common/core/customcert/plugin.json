@@ -1,14 +1,14 @@
 {
   "id": "customcert",
-  "name": "Custom HTTPS certificate",
-  "description": "Choose custom certificate for HTTPS.",
+  "name": "Custom SSL certificate",
+  "description": "Choose custom certificate for SSL.",
   "version": "1.0",
   "stream": "yes",
   "settings": {
     "USE_CUSTOM_SSL": {
       "context": "multisite",
       "default": "no",
-      "help": "Use custom HTTPS certificate.",
+      "help": "Use custom SSL certificate.",
       "id": "use-custom-ssl",
       "label": "Use custom certificate",
       "regex": "^(yes|no)$",
