@@ -26,7 +26,8 @@ services:
       API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
       SERVE_FILES: "no"
       DISABLE_DEFAULT_SERVER: "yes"
-      AUTO_LETS_ENCRYPT: "yes"
+      # AUTO_LETS_ENCRYPT: "yes"
+      GENERATE_SELF_SIGNED_SSL: "yes"
       USE_CLIENT_CACHE: "yes"
       USE_GZIP: "yes"
       USE_REVERSE_PROXY: "yes"
@@ -37,28 +38,29 @@ services:
       - bw-universe
 
   myredmine:
-    image: redmine:5-alpine
-    restart: always
+    image: redmine:6-alpine
     volumes:
       - redmine-data:/usr/src/redmine/files
     environment:
-      REDMINE_DB_MYSQL: "mydb"
+      REDMINE_DB_POSTGRES: "mydb"
       REDMINE_DB_DATABASE: "redminedb"
       REDMINE_DB_USERNAME: "user"
       REDMINE_DB_PASSWORD: "db-user-pwd" # set a stronger password in a .env file (must match MYSQL_PASSWORD)
+    restart: "unless-stopped"
     networks:
       - redmine-net
       - bw-services
 
   mydb:
-    image: mysql:8
+    image: postgres:16-alpine
     volumes:
-      - db-data:/var/lib/mysql
+      - db-data:/var/lib/postgresql/data
     environment:
-      MYSQL_ROOT_PASSWORD: "db-root-pwd" # replace with a stronger password
-      MYSQL_DATABASE: "redminedb"
-      MYSQL_USER: "user"
-      MYSQL_PASSWORD: "db-user-pwd" # replace with a stronger password (must match REDMINE_DB_PASSWORD)
+      POSTGRES_USER: "user"
+      POSTGRES_PASSWORD: "db-user-pwd" # replace with a stronger password (must match REDMINE_DB_PASSWORD)
+      POSTGRES_DB: "redminedb"
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+    restart: "unless-stopped"
     networks:
       - redmine-net
 
