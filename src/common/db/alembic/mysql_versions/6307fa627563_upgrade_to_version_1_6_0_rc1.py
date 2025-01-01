@@ -48,8 +48,14 @@ def upgrade() -> None:
     with op.batch_alter_table("bw_services_settings") as batch_op:
         batch_op.create_foreign_key("bw_services_settings_ibfk_1", "bw_services", ["service_id"], ["id"], onupdate="CASCADE", ondelete="CASCADE")
 
-    # Update bw_settings.default from String(4096) to TEXT
-    op.alter_column("bw_settings", "default", existing_type=mysql.VARCHAR(length=4096), type_=sa.TEXT(), existing_nullable=True)
+    # Update bw_instances.status from Enum("loading", "up", "down", name="instance_status_enum") to Enum("loading", "up", "down", "failover", name="instance_status_enum")
+    op.alter_column(
+        "bw_instances",
+        "status",
+        existing_type=mysql.ENUM("loading", "up", "down", name="instance_status_enum"),
+        type_=mysql.ENUM("loading", "up", "down", "failover", name="instance_status_enum"),
+        existing_nullable=False,
+    )
 
     # Drop bw_ui_users.id column
     op.drop_column("bw_ui_users", "id")
@@ -91,7 +97,13 @@ def downgrade() -> None:
     with op.batch_alter_table("bw_services_settings") as batch_op:
         batch_op.create_foreign_key("bw_services_settings_ibfk_1", "bw_services", ["service_id"], ["id"], onupdate="CASCADE", ondelete="CASCADE")
 
-    op.alter_column("bw_settings", "default", existing_type=sa.TEXT(), type_=mysql.VARCHAR(length=4096), existing_nullable=True)
+    op.alter_column(
+        "bw_instances",
+        "status",
+        existing_type=mysql.ENUM("loading", "up", "down", "failover", name="instance_status_enum"),
+        type_=mysql.ENUM("loading", "up", "down", name="instance_status_enum"),
+        existing_nullable=False,
+    )
 
     # Re-add bw_ui_users.id and index on username
     op.add_column("bw_ui_users", sa.Column("id", sa.Integer(), autoincrement=True, nullable=False))
