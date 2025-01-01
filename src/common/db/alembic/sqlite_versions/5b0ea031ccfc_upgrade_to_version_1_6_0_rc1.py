@@ -148,6 +148,34 @@ def upgrade() -> None:
     op.drop_table("bw_jobs_cache")
     op.rename_table("bw_jobs_cache_new", "bw_jobs_cache")
 
+    # --- bw_instances ---
+    # Old schema:
+    # status: sa.Enum("loading", "up", "down", name="instance_status_enum")
+    # New schema:
+    # status: Enum("loading", "up", "down", "failover", name="instance_status_enum")
+    op.create_table(
+        "bw_instances_new",
+        sa.Column("hostname", sa.String(256), primary_key=True),
+        sa.Column("name", sa.String(256), nullable=False, default="manual instance"),
+        sa.Column("port", sa.Integer, nullable=False),
+        sa.Column("server_name", sa.String(256), nullable=False),
+        sa.Column("type", sa.Enum("static", "container", "pod", name="instance_type_enum"), nullable=False, default="static"),
+        sa.Column("status", sa.Enum("loading", "up", "down", "failover", name="instance_status_enum"), nullable=False, default="loading"),
+        sa.Column("method", sa.Enum("ui", "scheduler", "autoconf", "manual", "wizard", name="methods_enum"), nullable=False, default="manual"),
+        sa.Column("creation_date", sa.DateTime(timezone=True), nullable=False),
+        sa.Column("last_seen", sa.DateTime(timezone=True), nullable=False),
+    )
+
+    op.execute(
+        """
+        INSERT INTO bw_instances_new (hostname, name, port, server_name, type, status, method, creation_date, last_seen)
+        SELECT hostname, name, port, server_name, type, status, method, creation_date, last_seen FROM bw_instances
+    """
+    )
+
+    op.drop_table("bw_instances")
+    op.rename_table("bw_instances_new", "bw_instances")
+
     # Re-enable foreign keys
     op.execute("PRAGMA foreign_keys=ON;")
 

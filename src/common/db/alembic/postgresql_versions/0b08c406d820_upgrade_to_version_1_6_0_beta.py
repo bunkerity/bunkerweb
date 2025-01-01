@@ -276,6 +276,9 @@ def upgrade():
         batch_op.alter_column("creation_date", existing_type=sa.DateTime(timezone=True), nullable=False)
         batch_op.alter_column("last_seen", existing_type=sa.DateTime(timezone=True), nullable=False)
 
+    # Update bw_settings.default from String(4096) to TEXT
+    op.alter_column("bw_settings", "default", existing_type=sa.String(4096), type_=sa.Text, existing_nullable=True)
+
     # Update version
     op.execute("UPDATE bw_metadata SET version = '1.6.0-beta' WHERE id = 1")
 
@@ -335,6 +338,9 @@ def downgrade():
 
     op.drop_table("bw_ui_users")
     op.rename_table("bw_ui_users_old", "bw_ui_users")
+
+    # Reverse bw_settings.default from TEXT to String(4096)
+    op.alter_column("bw_settings", "default", existing_type=sa.Text, type_=sa.String(4096), existing_nullable=True)
 
     # 4. Drop new UI and templates tables
     op.drop_table("bw_template_custom_configs")

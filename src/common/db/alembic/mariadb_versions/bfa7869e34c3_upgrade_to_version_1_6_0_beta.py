@@ -228,6 +228,9 @@ def upgrade():
         batch_op.drop_column("obfuscation_file")
         batch_op.drop_column("obfuscation_checksum")
 
+    # Update bw_settings.default from String(4096) to TEXT
+    op.alter_column("bw_settings", "default", existing_type=mysql.VARCHAR(length=4096), type_=sa.TEXT(), existing_nullable=True)
+
     # bw_instances changes
     with op.batch_alter_table("bw_instances") as batch_op:
         batch_op.add_column(sa.Column("name", sa.String(256), nullable=True))
@@ -388,6 +391,9 @@ def downgrade():
     # Note: The original primary key and unique constraints must be re-added as they were initially.
     op.create_primary_key("bw_settings_pkey", "bw_settings", ["id", "name"])
     op.create_unique_constraint("id", "bw_settings", ["id"])
+
+    # Update bw_settings.default from TEXT to String(4096)
+    op.alter_column("bw_settings", "default", existing_type=sa.TEXT(), type_=mysql.VARCHAR(length=4096), existing_nullable=True)
 
     # bw_jobs revert: drop run_async, add success and last_run
     with op.batch_alter_table("bw_jobs") as batch_op:

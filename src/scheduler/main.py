@@ -429,6 +429,10 @@ def healthcheck_job():
                 continue
 
             if resp["msg"] == "loading":
+                if db_instance["status"] == "failover":
+                    HEALTHCHECK_LOGGER.warning(f"Instance {db_instance['hostname']} is in failover mode, skipping sending config ...")
+                    continue
+
                 HEALTHCHECK_LOGGER.info(f"Instance {bw_instance.endpoint} is loading, sending config ...")
                 api_caller = ApiCaller([bw_instance])
                 api_caller.send_files(CUSTOM_CONFIGS_PATH, "/custom_configs")
@@ -809,9 +813,18 @@ if __name__ == "__main__":
                         status = responses.get(db_instance["hostname"], {"status": "down"}).get("status", "down")
                         if status == "success":
                             success = True
-                        ret = SCHEDULER.db.update_instance(db_instance["hostname"], "up" if status == "success" else "down")
+                        ret = SCHEDULER.db.update_instance(
+                            db_instance["hostname"],
+                            (
+                                "up"
+                                if status == "success"
+                                else ("failover" if responses.get(db_instance["hostname"], {}).get("msg") == "config check failed" else "down")
+                            ),
+                        )
                         if ret:
-                            LOGGER.error(f"Couldn't update instance {db_instance['hostname']} status to down in the database: {ret}")
+                            LOGGER.error(
+                                f"Couldn't update instance {db_instance['hostname']} status to {'up' if status == 'success' else 'down'} in the database: {ret}"
+                            )
 
                         if status == "success":
                             found = False

@@ -147,6 +147,16 @@ def upgrade() -> None:
     with op.batch_alter_table("bw_jobs_cache") as batch_op:
         batch_op.create_foreign_key("bw_jobs_cache_service_id_fkey", "bw_services", ["service_id"], ["id"], onupdate="CASCADE", ondelete="CASCADE")
 
+    # Update bw_instances.status from Enum("loading", "up", "down", name="instance_status_enum") to Enum("loading", "up", "down", "failover", name="instance_status_enum")
+    op.execute("ALTER TYPE instance_status_enum ADD VALUE 'failover'")
+    op.alter_column(
+        "bw_instances",
+        "status",
+        existing_type=postgresql.ENUM("loading", "up", "down", name="instance_status_enum", create_type=False),
+        type_=postgresql.ENUM("loading", "up", "down", "failover", name="instance_status_enum", create_type=False),
+        existing_nullable=False,
+    )
+
     # Update the version in bw_metadata
     op.execute("UPDATE bw_metadata SET version = '1.6.0-rc1' WHERE id = 1")
 
@@ -282,6 +292,16 @@ def downgrade() -> None:
 
     with op.batch_alter_table("bw_jobs_cache") as batch_op:
         batch_op.create_foreign_key("bw_jobs_cache_service_id_fkey", "bw_services", ["service_id"], ["id"], onupdate="CASCADE", ondelete="CASCADE")
+
+    # Update bw_instances.status from Enum("loading", "up", "down", "failover", name="instance_status_enum") to Enum("loading", "up", "down", name="instance_status_enum")
+    op.execute("ALTER TYPE instance_status_enum DROP VALUE 'failover'")
+    op.alter_column(
+        "bw_instances",
+        "status",
+        existing_type=postgresql.ENUM("loading", "up", "down", "failover", name="instance_status_enum", create_type=False),
+        type_=postgresql.ENUM("loading", "up", "down", name="instance_status_enum", create_type=False),
+        existing_nullable=False,
+    )
 
     # Revert version
     op.execute("UPDATE bw_metadata SET version = '1.6.0-beta' WHERE id = 1")

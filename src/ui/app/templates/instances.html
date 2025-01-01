@@ -77,12 +77,12 @@
                             {% if instance.status == "up" %}
                                 <span id="status-{{ instance.hostname }}"
                                       class="badge rounded-pill bg-label-primary">Up</span>
-                            {% elif instance.status == "down" %}
-                                <span id="status-{{ instance.hostname }}"
-                                      class="badge rounded-pill bg-label-danger">Down</span>
-                            {% else %}
+                            {% elif instance.status == "loading" %}
                                 <span id="status-{{ instance.hostname }}"
                                       class="badge rounded-pill bg-label-warning">Loading</span>
+                            {% else %}
+                                <span id="status-{{ instance.hostname }}"
+                                      class="badge rounded-pill bg-label-danger">{{ instance.status | title }}</span>
                             {% endif %}
                         </td>
                         <td>
