@@ -15,6 +15,7 @@
 - [FEATURE] Add configurable limit for SecRequestBodyNoFilesLimit in ModSecurity via the `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` setting
 - [FEATURE] Add multi-user support in `Auth basic` plugin
 - [FEATURE] Add support for TCP toggle listening in server-stream configuration (now UDP doesn't replace TCP when activated)
+- [FEATURE] Made `LISTEN_STREAM_PORT` and `LISTEN_STREAM_PORT_SSL` settings multiples to allow listening on multiple ports
 - [DEPRECATION] Remove `X-XSS-Protection` header from the `header` plugin as it is deprecated
 - [DEPS] Updated coreruleset-v4 version to v4.10.0
 

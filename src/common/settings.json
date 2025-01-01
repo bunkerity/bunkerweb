@@ -269,7 +269,8 @@
     "id": "listen-stream-port",
     "label": "Listen stream port",
     "regex": "^[0-9]+$",
-    "type": "text"
+    "type": "text",
+    "multiple": "listen-stream-ports"
   },
   "LISTEN_STREAM_PORT_SSL": {
     "context": "multisite",
@@ -278,7 +279,8 @@
     "id": "listen-stream-port-ssl",
     "label": "Listen stream port ssl",
     "regex": "^[0-9]+$",
-    "type": "text"
+    "type": "text",
+    "multiple": "listen-stream-ports-ssl"
   },
   "USE_TCP": {
     "context": "multisite",
