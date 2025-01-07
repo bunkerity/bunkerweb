@@ -24,7 +24,8 @@
     "id": "http-port",
     "label": "HTTP port",
     "regex": "^\\d+$",
-    "type": "text"
+    "type": "text",
+    "multiple": "listen-http-ports"
   },
   "HTTPS_PORT": {
     "context": "global",
@@ -33,7 +34,8 @@
     "id": "https-port",
     "label": "HTTPS port",
     "regex": "^\\d+$",
-    "type": "text"
+    "type": "text",
+    "multiple": "listen-https-ports"
   },
   "MULTISITE": {
     "context": "global",
