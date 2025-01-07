@@ -173,14 +173,14 @@
                 <div class="col-md-6">
                     <!-- Theme -->
                     <div class="card position-relative">
-                        <i class='bx bx-{% if theme == 'light' %}sun{% else %}moon{% endif %} bx-sm position-absolute top-0 end-0 m-3'></i>
+                        <i class='bx bx-{% if theme == 'light' %}sun{% else %}moon{% endif %} bx-sm position-absolute top-0 end-0 m-3 dark-mode-toggle-icon'></i>
                         <h5 class="card-header">Change Theme</h5>
                         <div class="card-body pb-4">
                             <form method="POST" action="{{ profile_url }}/edit">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                                 <div class="row g-3">
                                     <div class="col-md-12 form-floating">
-                                        <select class="form-select" id="theme" name="theme">
+                                        <select class="form-select" id="theme-toggle" name="theme">
                                             <option value="light" {% if theme == "light" %}selected{% endif %}>Light</option>
                                             <option value="dark" {% if theme == "dark" %}selected{% endif %}>Dark</option>
                                         </select>

@@ -44,6 +44,9 @@ try:
 
     JOB = Job(LOGGER, __file__)
 
+    env = environ.copy()
+    env["PYTHONPATH"] = env.get("PYTHONPATH", "") + (f":{DEPS_PATH}" if DEPS_PATH not in env.get("PYTHONPATH", "") else "")
+
     process = Popen(
         [
             CERTBOT_BIN,
@@ -59,7 +62,7 @@ try:
         stdin=DEVNULL,
         stderr=PIPE,
         universal_newlines=True,
-        env=environ | {"PYTHONPATH": DEPS_PATH},
+        env=env,
     )
     while process.poll() is None:
         if process.stderr:
