@@ -12,7 +12,6 @@ from os import cpu_count, environ, getenv, sep
 from os.path import basename, dirname, join
 from pathlib import Path
 import re
-from types import ModuleType
 from typing import Any, Dict, List, Optional
 import schedule
 from schedule import Job
@@ -153,16 +152,27 @@ class JobScheduler(ApiCaller):
         self.__logger.error("Error while reloading nginx")
         return False
 
-    def __exec_plugin_module(self, path: str, name: str, **kwargs) -> ModuleType:
+    def __exec_plugin_module(self, path: str, name: str) -> None:
         """Dynamically import a plugin module with thread-local environment."""
-        module_dir = dirname(path)
-        sys_path.insert(0, module_dir)
+        # Convert to absolute path using Path
+        abs_path = Path(path).resolve()
+        module_dir = abs_path.parent
+
+        # Validate path exists
+        if not abs_path.exists():
+            raise FileNotFoundError(f"Plugin path not found: {abs_path}")
+
+        # Add to path and load module
+        sys_path.insert(0, module_dir.as_posix())
         try:
-            spec = spec_from_file_location(name, path)
+            spec = spec_from_file_location(name, abs_path.as_posix())
+            if spec is None:
+                raise ImportError(f"Failed to create module spec for {abs_path}")
             module = module_from_spec(spec)
             spec.loader.exec_module(module)
         finally:
-            sys_path.remove(module_dir)
+            if module_dir.as_posix() in sys_path:
+                sys_path.remove(module_dir.as_posix())
 
     def __job_wrapper(self, path: str, plugin: str, name: str, file: str) -> int:
         self.__logger.info(f"Executing job '{name}' from plugin '{plugin}'...")
