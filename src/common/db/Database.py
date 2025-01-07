@@ -801,6 +801,7 @@ class Database:
                                     steps_configs[step_id].append(conf)
 
                             # Template-level settings
+                            order = 0
                             for setting, default in template_data.get("settings", {}).items():
                                 # Check restrictions and existence
                                 if setting in getattr(self, "RESTRICTED_TEMPLATE_SETTINGS", []):
@@ -826,9 +827,17 @@ class Database:
                                         step_for_setting = sid
                                         break
 
-                                desired_template_settings[(template_id, setting_id, suffix, step_for_setting)] = default
+                                if not step_for_setting:
+                                    self.logger.error(
+                                        f'{base_plugin.get("type", "core").title()} Plugin "{base_plugin["id"]}"\'s Template {template_id}`s setting "{setting}" doesn\'t belong to a step, skipping'
+                                    )
+                                    continue
+
+                                desired_template_settings[(template_id, setting_id, suffix, step_for_setting)] = {"default": default, "order": order}
+                                order += 1
 
                             # Template-level configs
+                            order = 0
                             for config in template_data.get("configs", []):
                                 try:
                                     config_type, config_name = config.split("/", 1)
@@ -861,10 +870,18 @@ class Database:
                                         step_for_config = sid
                                         break
 
+                                if not step_for_config:
+                                    self.logger.error(
+                                        f'{base_plugin.get("type", "core").title()} Plugin "{base_plugin["id"]}"\'s Template {template_id}`s config "{config}" doesn\'t belong to a step, skipping'
+                                    )
+                                    continue
+
                                 desired_template_configs[(template_id, config_type, config_name_clean, step_for_config)] = {
                                     "data": content,
                                     "checksum": checksum,
+                                    "order": order,
                                 }
+                                order += 1
 
             # Compute differences for PLUGINS
             old_plugin_ids = set(old_plugins.keys())
@@ -1016,13 +1033,15 @@ class Database:
 
             for tsk in new_ts_keys - old_ts_keys:
                 template_id, setting_id, suffix, step_id = tsk
-                default = desired_template_settings[tsk]
-                to_put.append(Template_settings(template_id=template_id, setting_id=setting_id, suffix=suffix, step_id=step_id, default=default))
+                default = desired_template_settings[tsk]["default"]
+                order = desired_template_settings[tsk]["order"]
+                to_put.append(Template_settings(template_id=template_id, setting_id=setting_id, suffix=suffix, step_id=step_id, default=default, order=order))
 
             for tsk in old_ts_keys & new_ts_keys:
                 old_ts_val = old_template_settings[tsk]
-                new_default = desired_template_settings[tsk]
-                if old_ts_val.default != new_default:
+                new_default = desired_template_settings[tsk]["default"]
+                new_order = desired_template_settings[tsk]["order"]
+                if old_ts_val.default != new_default or old_ts_val.order != new_order:
                     template_id, setting_id, suffix, step_id = tsk
                     filter_data = {"template_id": template_id, "id": setting_id}
                     if step_id is not None:
@@ -1030,7 +1049,9 @@ class Database:
                     if suffix is not None:
                         # Not all queries handle suffix well. If suffix is defined, add to filter:
                         filter_data["suffix"] = suffix
-                    to_update.append({"type": "template_setting", "filter": filter_data, "data": {"default": new_default, "suffix": suffix}})
+                    to_update.append(
+                        {"type": "template_setting", "filter": filter_data, "data": {"default": new_default, "suffix": suffix, "order": new_order}}
+                    )
 
             for tsk in old_ts_keys - new_ts_keys:
                 template_id, setting_id, suffix, step_id = tsk
@@ -1296,8 +1317,10 @@ class Database:
 
                     # Collect template settings
                     templates = {}
-                    for template in session.query(Template_settings).with_entities(
-                        Template_settings.template_id, Template_settings.setting_id, Template_settings.suffix, Template_settings.default
+                    for template in (
+                        session.query(Template_settings)
+                        .with_entities(Template_settings.template_id, Template_settings.setting_id, Template_settings.suffix, Template_settings.default)
+                        .order_by(Template_settings.order)
                     ):
                         if template.template_id not in templates:
                             templates[template.template_id] = {}
@@ -1887,6 +1910,7 @@ class Database:
                     session.query(Template_settings)
                     .with_entities(Template_settings.setting_id, Template_settings.default, Template_settings.suffix)
                     .filter_by(template_id=template_used)
+                    .order_by(Template_settings.order)
                 )
 
                 if filtered_settings:
@@ -1913,6 +1937,7 @@ class Database:
                             session.query(Template_settings)
                             .with_entities(Template_settings.setting_id, Template_settings.default, Template_settings.suffix)
                             .filter_by(template_id=service_template_used)
+                            .order_by(Template_settings.order)
                         )
 
                         if filtered_settings:
@@ -1984,7 +2009,12 @@ class Database:
             for service in session.query(Services).with_entities(Services.id).all():
                 for key, value in db_config.items():
                     if key.startswith(f"{service.id}_"):
-                        for template_config in session.query(Template_custom_configs).with_entities(*template_entities).filter_by(template_id=value):
+                        for template_config in (
+                            session.query(Template_custom_configs)
+                            .with_entities(*template_entities)
+                            .filter_by(template_id=value)
+                            .order_by(Template_custom_configs.order)
+                        ):
                             if not any(
                                 custom_config["service_id"] == service.id
                                 and custom_config["type"] == template_config.type
@@ -2613,10 +2643,8 @@ class Database:
 
                         if missing_ids:
                             changes = True
-                            session.query(Template_settings).filter(Template_settings.step_id.in_(missing_ids)).update({Template_settings.step_id: None})
-                            session.query(Template_custom_configs).filter(Template_custom_configs.step_id.in_(missing_ids)).update(
-                                {Template_custom_configs.step_id: None}
-                            )
+                            session.query(Template_settings).filter(Template_settings.step_id.in_(missing_ids)).delete()
+                            session.query(Template_custom_configs).filter(Template_custom_configs.step_id.in_(missing_ids)).delete()
                             session.query(Template_steps).filter(Template_steps.id.in_(missing_ids)).delete()
 
                         steps_settings = {}
@@ -2639,19 +2667,26 @@ class Database:
                                     changes = True
                                     session.query(Template_steps).filter(Template_steps.id == db_step.id).update(updates)
 
+                            order = 0
                             for setting in step.get("settings", []):
                                 if step_id not in steps_settings:
                                     steps_settings[step_id] = []
-                                steps_settings[step_id].append(setting)
+                                steps_settings[step_id].append(setting | {"order": order})
+                                order += 1
 
+                            order = 0
                             for config in step.get("configs", []):
                                 if step_id not in steps_configs:
                                     steps_configs[step_id] = []
-                                steps_configs[step_id].append(config)
+                                steps_configs[step_id].append(config | {"order": order})
+                                order += 1
 
                         db_template_settings = [
                             f"{setting.setting_id}_{setting.suffix}" if setting.suffix else setting.setting_id
-                            for setting in session.query(Template_settings).with_entities(Template_settings.id).filter_by(template_id=template_id)
+                            for setting in session.query(Template_settings)
+                            .with_entities(Template_settings.id)
+                            .filter_by(template_id=template_id)
+                            .order_by(Template_settings.order)
                         ]
                         missing_ids = [setting for setting in template.get("settings", {}) if setting not in db_template_settings]
 
@@ -2659,6 +2694,7 @@ class Database:
                             changes = True
                             session.query(Template_settings).filter(Template_settings.id.in_(missing_ids)).delete()
 
+                        order = 0
                         for setting, default in template.get("settings", {}).items():
                             setting_id, suffix = setting.rsplit("_", 1) if self.suffix_rx.search(setting) else (setting, None)
 
@@ -2689,44 +2725,54 @@ class Database:
                                     step_id = step
                                     break
 
+                            if not step_id:
+                                self.logger.error(
+                                    f'{plugin.get("type", "core").title()} Plugin "{plugin["id"]}"\'s Template "{template_id}"\'s Setting "{setting}" doesn\'t belong to a step, skipping it'
+                                )
+                                continue
+
                             template_setting = (
                                 session.query(Template_settings)
-                                .with_entities(Template_settings.id)
+                                .with_entities(
+                                    Template_settings.id,
+                                    Template_settings.step_id,
+                                    Template_settings.default,
+                                    Template_settings.order,
+                                )
                                 .filter_by(template_id=template_id, setting_id=setting_id, step_id=step_id, suffix=suffix)
                                 .first()
                             )
 
                             if not template_setting:
                                 changes = True
-                                if step_id:
-                                    to_put.append(
-                                        Template_settings(
-                                            template_id=template_id,
-                                            setting_id=setting_id,
-                                            step_id=step_id,
-                                            suffix=suffix,
-                                            default=default,
-                                        )
-                                    )
-                                    continue
-
                                 to_put.append(
                                     Template_settings(
                                         template_id=template_id,
                                         setting_id=setting_id,
+                                        step_id=step_id,
                                         suffix=suffix,
                                         default=default,
+                                        order=order,
                                     )
                                 )
-                            elif default != template_setting.default:
+                            elif step_id != template_setting.step_id or default != template_setting.default or order != template_setting.order:
                                 changes = True
-                                session.query(Template_settings).filter_by(id=template_setting.id).update({Template_settings.default: default})
+                                session.query(Template_settings).filter_by(id=template_setting.id).update(
+                                    {
+                                        Template_settings.step_id: step_id,
+                                        Template_settings.default: default,
+                                        Template_settings.order: order,
+                                    }
+                                )
+
+                            order += 1
 
                         db_template_configs = [
                             f"{config.type}/{config.name}.conf"
                             for config in session.query(Template_custom_configs)
                             .with_entities(Template_custom_configs.type, Template_custom_configs.name)
                             .filter_by(template_id=template_id)
+                            .order_by(Template_custom_configs.order)
                         ]
                         missing_ids = [config for config in template.get("configs", {}) if config not in db_template_configs]
 
@@ -2734,6 +2780,7 @@ class Database:
                             changes = True
                             session.query(Template_custom_configs).filter(Template_custom_configs.name.in_(missing_ids)).delete()
 
+                        order = 0
                         for config in template.get("configs", []):
                             try:
                                 config_type, config_name = config.split("/", 1)
@@ -2766,42 +2813,49 @@ class Database:
                                     step_id = step
                                     break
 
+                            if not step_id:
+                                self.logger.error(
+                                    f'{plugin.get("type", "core").title()} Plugin "{plugin["id"]}"\'s Template "{template_id}"\'s Custom config "{config}" doesn\'t belong to a step, skipping it'
+                                )
+                                continue
+
                             template_config = (
                                 session.query(Template_custom_configs)
-                                .with_entities(Template_custom_configs.id)
+                                .with_entities(
+                                    Template_custom_configs.id,
+                                    Template_custom_configs.step_id,
+                                    Template_custom_configs.checksum,
+                                    Template_custom_configs.order,
+                                )
                                 .filter_by(template_id=template_id, step_id=step_id, type=config_type, name=config_name)
                                 .first()
                             )
 
                             if not template_config:
                                 changes = True
-                                if step_id:
-                                    to_put.append(
-                                        Template_custom_configs(
-                                            template_id=template_id,
-                                            step_id=step_id,
-                                            type=config_type,
-                                            name=config_name,
-                                            data=content,
-                                            checksum=checksum,
-                                        )
-                                    )
-                                    continue
-
                                 to_put.append(
                                     Template_custom_configs(
                                         template_id=template_id,
+                                        step_id=step_id,
                                         type=config_type,
                                         name=config_name,
                                         data=content,
                                         checksum=checksum,
+                                        order=order,
                                     )
                                 )
-                            elif checksum != template_config.checksum:
+                            elif step_id != template_config.step_id or checksum != template_config.checksum or order != template_config.order:
                                 changes = True
                                 session.query(Template_custom_configs).filter_by(id=template_config.id).update(
-                                    {Template_custom_configs.data: content, Template_custom_configs.checksum: checksum}
+                                    {
+                                        Template_custom_configs.step_id: step_id,
+                                        Template_custom_configs.data: content,
+                                        Template_custom_configs.checksum: checksum,
+                                        Template_custom_configs.order: order,
+                                    }
                                 )
+
+                            order += 1
 
                     for template in db_names:
                         if template not in saved_templates:
@@ -2921,6 +2975,7 @@ class Database:
                                 steps_configs[step_id] = []
                             steps_configs[step_id].append(config)
 
+                    order = 0
                     for setting, default in template_data.get("settings", {}).items():
                         setting_id, suffix = setting.rsplit("_", 1) if self.suffix_rx.search(setting) else (setting, None)
 
@@ -2948,15 +3003,9 @@ class Database:
                                 step_id = step
                                 break
 
-                        if step_id:
-                            to_put.append(
-                                Template_settings(
-                                    template_id=template_id,
-                                    setting_id=setting_id,
-                                    step_id=step_id,
-                                    default=default,
-                                    suffix=suffix,
-                                )
+                        if not step_id:
+                            self.logger.error(
+                                f'{plugin.get("type", "core").title()} Plugin "{plugin["id"]}"\'s Template "{template_id}"\'s Setting "{setting}" doesn\'t belong to a step, skipping it'
                             )
                             continue
 
@@ -2964,11 +3013,15 @@ class Database:
                             Template_settings(
                                 template_id=template_id,
                                 setting_id=setting_id,
+                                step_id=step_id,
                                 default=default,
                                 suffix=suffix,
+                                order=order,
                             )
                         )
+                        order += 1
 
+                    order = 0
                     for config in template_data.get("configs", []):
                         try:
                             config_type, config_name = config.split("/", 1)
@@ -3001,28 +3054,24 @@ class Database:
                                 step_id = step
                                 break
 
-                        if step_id:
-                            to_put.append(
-                                Template_custom_configs(
-                                    template_id=template_id,
-                                    step_id=step_id,
-                                    type=config_type,
-                                    name=config_name,
-                                    data=content,
-                                    checksum=checksum,
-                                )
+                        if not step_id:
+                            self.logger.error(
+                                f'{plugin.get("type", "core").title()} Plugin "{plugin["id"]}"\'s Template "{template_id}"\'s Custom config "{config}" doesn\'t belong to a step, skipping it'
                             )
                             continue
 
                         to_put.append(
                             Template_custom_configs(
                                 template_id=template_id,
+                                step_id=step_id,
                                 type=config_type,
                                 name=config_name,
                                 data=content,
                                 checksum=checksum,
+                                order=order,
                             )
                         )
+                        order += 1
 
             if changes:
                 with suppress(ProgrammingError, OperationalError):
@@ -3546,6 +3595,7 @@ class Database:
                     session.query(Template_settings)
                     .with_entities(Template_settings.setting_id, Template_settings.step_id, Template_settings.default, Template_settings.suffix)
                     .filter_by(template_id=template.id)
+                    .order_by(Template_settings.order)
                 ):
                     key = f"{setting.setting_id}_{setting.suffix}" if setting.suffix else setting.setting_id
                     templates[template.id]["settings"][key] = setting.default
@@ -3560,6 +3610,7 @@ class Database:
                     session.query(Template_custom_configs)
                     .with_entities(Template_custom_configs.step_id, Template_custom_configs.type, Template_custom_configs.name, Template_custom_configs.data)
                     .filter_by(template_id=template.id)
+                    .order_by(Template_custom_configs.order)
                 ):
                     key = f"{config.type}/{config.name}.conf"
                     templates[template.id]["configs"][key] = config.data.decode("utf-8")
@@ -3591,6 +3642,7 @@ class Database:
                 session.query(Template_settings)
                 .with_entities(Template_settings.setting_id, Template_settings.default, Template_settings.suffix)
                 .filter_by(template_id=template_id)
+                .order_by(Template_settings.order)
             ):
                 settings[f"{setting.setting_id}_{setting.suffix}" if setting.suffix else setting.setting_id] = setting.default
             return settings
