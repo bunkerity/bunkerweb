@@ -207,6 +207,8 @@ class Configurator:
                         "CUSTOM_LOG_LEVEL",
                         "HEALTHCHECK_INTERVAL",
                         "DATABASE_RETRY_TIMEOUT",
+                        "RELOAD_MIN_TIMEOUT",
+                        "DISABLE_CONFIGURATION_TESTING",
                         "GPG_KEY",
                         "HOME",
                         "HOSTNAME",
@@ -222,6 +224,7 @@ class Configurator:
                         "NAMESPACE",
                         "TZ",
                         "DYNPKG_RELEASE",
+                        "OLDPWD",
                     )
                 )
             ):
