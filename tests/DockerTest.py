@@ -54,9 +54,9 @@ class DockerTest(Test):
             Test.replace_in_file(compose, r"\- bw\-data:/", "- /tmp/bw-data:/")
             with open(compose, "r") as f:
                 data = safe_load(f.read())
+            if data["services"]["bw-scheduler"]["environment"].get("AUTO_LETS_ENCRYPT", "no") == "yes":
+                data["services"]["bw-scheduler"]["environment"]["USE_LETS_ENCRYPT_STAGING"] = "yes"
             data["services"]["bw-scheduler"]["environment"]["CUSTOM_LOG_LEVEL"] = "debug"
-            data["services"]["bw-scheduler"]["environment"]["AUTO_LETS_ENCRYPT"] = "yes"
-            data["services"]["bw-scheduler"]["environment"]["USE_LETS_ENCRYPT_STAGING"] = "yes"
             data["services"]["bw-scheduler"]["environment"]["LOG_LEVEL"] = "info"
             data["services"]["bw-scheduler"]["environment"]["USE_BUNKERNET"] = "no"
             data["services"]["bw-scheduler"]["environment"]["SEND_ANONYMOUS_REPORT"] = "no"
