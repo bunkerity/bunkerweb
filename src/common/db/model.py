@@ -252,14 +252,18 @@ class Template_steps(Base):
 
 class Template_settings(Base):
     __tablename__ = "bw_template_settings"
-    __table_args__ = (UniqueConstraint("template_id", "setting_id", "step_id", "suffix"),)
+    __table_args__ = (
+        UniqueConstraint("template_id", "setting_id", "step_id", "suffix"),
+        UniqueConstraint("template_id", "setting_id", "order"),
+    )
 
     id = Column(Integer, Identity(start=1, increment=1), primary_key=True)
     template_id = Column(String(256), ForeignKey("bw_templates.id", onupdate="cascade", ondelete="cascade"), nullable=False)
     setting_id = Column(String(256), ForeignKey("bw_settings.id", onupdate="cascade", ondelete="cascade"), nullable=False)
-    step_id = Column(Integer, nullable=True)
+    step_id = Column(Integer, nullable=False)
     default = Column(TEXT, nullable=False)
     suffix = Column(Integer, nullable=True, default=0)
+    order = Column(Integer, default=0, nullable=False)
 
     template = relationship("Templates", back_populates="settings")
     setting = relationship("Settings", back_populates="templates")
@@ -267,15 +271,19 @@ class Template_settings(Base):
 
 class Template_custom_configs(Base):
     __tablename__ = "bw_template_custom_configs"
-    __table_args__ = (UniqueConstraint("template_id", "step_id", "type", "name"),)
+    __table_args__ = (
+        UniqueConstraint("template_id", "step_id", "type", "name"),
+        UniqueConstraint("template_id", "order"),
+    )
 
     id = Column(Integer, Identity(start=1, increment=1), primary_key=True)
     template_id = Column(String(256), ForeignKey("bw_templates.id", onupdate="cascade", ondelete="cascade"), nullable=False)
-    step_id = Column(Integer, nullable=True)
+    step_id = Column(Integer, nullable=False)
     type = Column(CUSTOM_CONFIGS_TYPES_ENUM, nullable=False)
     name = Column(String(256), nullable=False)
     data = Column(LargeBinary(length=(2**32) - 1), nullable=False)
     checksum = Column(String(128), nullable=False)
+    order = Column(Integer, default=0, nullable=False)
 
     template = relationship("Templates", back_populates="custom_configs")
 

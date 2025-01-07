@@ -157,6 +157,26 @@ def upgrade() -> None:
         existing_nullable=False,
     )
 
+    # Add the new order column to bw_template_settings
+    # Step 1: Add column as nullable
+    op.add_column("bw_template_settings", sa.Column("order", sa.Integer(), nullable=True))
+
+    # Step 2: Populate default values
+    op.execute('UPDATE bw_template_settings SET "order" = 0')
+
+    # Step 3: Alter column to NOT NULL
+    op.alter_column("bw_template_settings", "order", nullable=False)
+
+    # Add the new order column to bw_template_custom_configs
+    # Step 1: Add column as nullable
+    op.add_column("bw_template_custom_configs", sa.Column("order", sa.Integer(), nullable=True))
+
+    # Step 2: Populate default values
+    op.execute('UPDATE bw_template_custom_configs SET "order" = 0')
+
+    # Step 3: Alter column to NOT NULL
+    op.alter_column("bw_template_custom_configs", "order", nullable=False)
+
     # Update the version in bw_metadata
     op.execute("UPDATE bw_metadata SET version = '1.6.0-rc1' WHERE id = 1")
 
@@ -302,6 +322,14 @@ def downgrade() -> None:
         type_=postgresql.ENUM("loading", "up", "down", name="instance_status_enum", create_type=False),
         existing_nullable=False,
     )
+
+    # Drop 'order' column from 'bw_template_settings'
+    with op.batch_alter_table("bw_template_settings") as batch_op:
+        batch_op.drop_column("order")
+
+    # Drop 'order' column from 'bw_template_custom_configs'
+    with op.batch_alter_table("bw_template_custom_configs") as batch_op:
+        batch_op.drop_column("order")
 
     # Revert version
     op.execute("UPDATE bw_metadata SET version = '1.6.0-beta' WHERE id = 1")

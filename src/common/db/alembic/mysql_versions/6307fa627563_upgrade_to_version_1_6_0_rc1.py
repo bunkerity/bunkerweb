@@ -60,6 +60,12 @@ def upgrade() -> None:
     # Drop bw_ui_users.id column
     op.drop_column("bw_ui_users", "id")
 
+    # Add the new order column to bw_template_settings
+    op.add_column("bw_template_settings", sa.Column("order", sa.Integer(), nullable=False))
+
+    # Add the new order column to bw_template_custom_configs
+    op.add_column("bw_template_custom_configs", sa.Column("order", sa.Integer(), nullable=False))
+
     # Update version in bw_metadata
     op.execute("UPDATE bw_metadata SET version = '1.6.0-rc1' WHERE id = 1")
 
@@ -107,6 +113,12 @@ def downgrade() -> None:
 
     # Re-add bw_ui_users.id and index on username
     op.add_column("bw_ui_users", sa.Column("id", sa.Integer(), autoincrement=True, nullable=False))
+
+    # Drop the order column from bw_template_settings
+    op.drop_column("bw_template_settings", "order")
+
+    # Drop the order column from bw_template_custom_configs
+    op.drop_column("bw_template_custom_configs", "order")
 
     # Revert version
     op.execute("UPDATE bw_metadata SET version = '1.6.0-beta' WHERE id = 1")

@@ -176,6 +176,22 @@ def upgrade() -> None:
     op.drop_table("bw_instances")
     op.rename_table("bw_instances_new", "bw_instances")
 
+    # Step 1: Add 'order' column as nullable with a default
+    with op.batch_alter_table("bw_template_settings") as batch_op:
+        batch_op.add_column(sa.Column("order", sa.Integer(), nullable=False, server_default="0"))
+    with op.batch_alter_table("bw_template_custom_configs") as batch_op:
+        batch_op.add_column(sa.Column("order", sa.Integer(), nullable=False, server_default="0"))
+
+    # Step 2: Set default value for existing rows
+    op.execute("UPDATE bw_template_settings SET `order` = 0")
+    op.execute("UPDATE bw_template_custom_configs SET `order` = 0")
+
+    # Step 3: Alter 'order' column to NOT NULL
+    with op.batch_alter_table("bw_template_settings") as batch_op:
+        batch_op.alter_column("order", nullable=False)
+    with op.batch_alter_table("bw_template_custom_configs") as batch_op:
+        batch_op.alter_column("order", nullable=False)
+
     # Re-enable foreign keys
     op.execute("PRAGMA foreign_keys=ON;")
 
@@ -297,6 +313,14 @@ def downgrade() -> None:
 
     op.drop_table("bw_jobs_cache")
     op.rename_table("bw_jobs_cache_old", "bw_jobs_cache")
+
+    # Drop 'order' column from 'bw_template_settings'
+    with op.batch_alter_table("bw_template_settings") as batch_op:
+        batch_op.drop_column("order")
+
+    # Drop 'order' column from 'bw_template_custom_configs'
+    with op.batch_alter_table("bw_template_custom_configs") as batch_op:
+        batch_op.drop_column("order")
 
     # Re-enable foreign keys
     op.execute("PRAGMA foreign_keys=ON;")
