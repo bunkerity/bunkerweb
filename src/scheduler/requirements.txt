@@ -35,13 +35,13 @@ beautifulsoup4==4.12.3 \
     --hash=sha256:74e3d1928edc070d21748185c46e3fb33490f22f52a3addee9aee0f4f7781051 \
     --hash=sha256:b80878c9f40111313e55da8ba20bdba06d8fa3969fc68304167741bbf9e082ed
     # via dns-lexicon
-boto3==1.35.90 \
-    --hash=sha256:b0874233057995a8f0c813f5b45a36c09630e74c43d7a7c64db2feef2915d493 \
-    --hash=sha256:dc56caaaab2157a4bfc109c88b50cd032f3ac66c06d17f8ee335b798eaf53e5c
+boto3==1.35.93 \
+    --hash=sha256:2446e819cf4e295833474cdcf2c92bc82718ce537e9ee1f17f7e3d237f60e69b \
+    --hash=sha256:7de2c44c960e486f3c57e5203ea6393c6c4f0914c5f81c789ceb8b5d2ba5d1c5
     # via certbot-dns-route53
-botocore==1.35.90 \
-    --hash=sha256:51dcbe1b32e2ac43dac17091f401a00ce5939f76afe999081802009cce1e92e4 \
-    --hash=sha256:f007f58e8e3c1ad0412a6ddfae40ed92a7bca571c068cb959902bcf107f2ae48
+botocore==1.35.93 \
+    --hash=sha256:47f7161000af6036f806449e3de12acdd3ec11aac7f5578e43e96241413a0f8f \
+    --hash=sha256:b8d245a01e7d64c41edcf75a42be158df57b9518a83a3dbf5c7e4b8c2bc540cc
     # via
     #   boto3
     #   s3transfer
@@ -367,9 +367,9 @@ google-api-core==2.24.0 \
     --hash=sha256:10d82ac0fca69c82a25b3efdeefccf6f28e02ebb97925a8cce8edbfe379929d9 \
     --hash=sha256:e255640547a597a4da010876d333208ddac417d60add22b6851a0c66a831fcaf
     # via google-api-python-client
-google-api-python-client==2.156.0 \
-    --hash=sha256:6352185c505e1f311f11b0b96c1b636dcb0fec82cd04b80ac5a671ac4dcab339 \
-    --hash=sha256:b809c111ded61716a9c1c7936e6899053f13bae3defcdfda904bd2ca68065b9c
+google-api-python-client==2.157.0 \
+    --hash=sha256:0b0231db106324c659bf8b85f390391c00da57a60ebc4271e33def7aac198c75 \
+    --hash=sha256:2ee342d0967ad1cedec43ccd7699671d94bff151e1f06833ea81303f9a6d86fd
     # via certbot-dns-google
 google-auth==2.37.0 \
     --hash=sha256:0054623abf1f9c83492c63d3f47e77f0a544caa3d40b2d98e099a611c2dd5d00 \
@@ -775,9 +775,9 @@ schedule==1.2.2 \
     # via importlib-metadata
 
 # The following packages are considered to be unsafe in a requirements file:
-setuptools==75.6.0 \
-    --hash=sha256:8199222558df7c86216af4f84c30e9b34a61d8ba19366cc914424cdbd28252f6 \
-    --hash=sha256:ce74b49e8f7110f9bf04883b730f4765b774ef3ef28f722cce7c273d253aaf7d
+setuptools==75.7.0 \
+    --hash=sha256:84fb203f278ebcf5cd08f97d3fb96d3fbed4b629d500b29ad60d11e00769b183 \
+    --hash=sha256:886ff7b16cd342f1d1defc16fc98c9ce3fde69e087a4e1983d7ab634e5f41f4f
     # via -r requirements.in
 six==1.17.0 \
     --hash=sha256:4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274 \
