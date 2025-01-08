@@ -3,4 +3,4 @@ passlib==1.7.4
 pytz==2024.2
 redis==5.2.1
 requests==2.32.3
-urllib3<2.0.0
+urllib3<3.0.0
