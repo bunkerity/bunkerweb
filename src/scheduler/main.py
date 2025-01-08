@@ -738,6 +738,7 @@ if __name__ == "__main__":
 
         changed_plugins = []
         old_changes = {}
+        healthcheck_job_run = False
 
         while True:
             threads.clear()
@@ -753,6 +754,7 @@ if __name__ == "__main__":
                     LOGGER.info("All jobs in run_once() were successful")
                     if SCHEDULER.db.readonly:
                         generate_caches()
+                healthcheck_job_run = False
 
             if CONFIG_NEED_GENERATION:
                 content = ""
@@ -933,7 +935,10 @@ if __name__ == "__main__":
                 HEALTHY_PATH.write_text(datetime.now().astimezone().isoformat(), encoding="utf-8")
 
             APPLYING_CHANGES.clear()
-            schedule_every(HEALTHCHECK_INTERVAL).seconds.do(healthcheck_job)
+            if not healthcheck_job_run:
+                LOGGER.debug("Scheduling healthcheck job ...")
+                schedule_every(HEALTHCHECK_INTERVAL).seconds.do(healthcheck_job)
+                healthcheck_job_run = True
 
             # infinite schedule for the jobs
             LOGGER.info("Executing job scheduler ...")
