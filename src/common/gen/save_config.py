@@ -12,8 +12,6 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
-from dotenv import dotenv_values
-
 from common_utils import get_integration, get_version  # type: ignore
 from logger import setup_logger  # type: ignore
 from Database import Database  # type: ignore
@@ -67,7 +65,8 @@ if __name__ == "__main__":
         if args.variables:
             variables_path = Path(args.variables)
             LOGGER.info(f"Variables : {variables_path}")
-            dotenv_env = dotenv_values(variables_path.as_posix())
+            with variables_path.open() as f:
+                dotenv_env = dict(line.strip().split("=", 1) for line in f if line.strip() and not line.startswith("#"))
 
         # Check existences and permissions
         LOGGER.info("Checking arguments ...")

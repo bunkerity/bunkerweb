@@ -145,7 +145,7 @@ class JobScheduler(ApiCaller):
         reload_success = self.send_to_apis(
             "POST",
             f"/reload?test={'no' if self.__env.get('DISABLE_CONFIGURATION_TESTING', 'no').lower() == 'yes' else 'yes'}",
-            timeout=max(int(reload_min_timeout), 2 * len(self.__env["SERVER_NAME"].split(" "))),
+            timeout=max(int(reload_min_timeout), 3 * len(self.__env["SERVER_NAME"].split(" "))),
         )[0]
         if reload_success:
             self.__logger.info("Successfully reloaded nginx")
@@ -262,7 +262,7 @@ class JobScheduler(ApiCaller):
 
         old_env = environ.copy()
         environ.clear()
-        environ.update(old_env | self.__env)
+        environ.update(old_env | self.__env | {"LOG_LEVEL": getenv("CUSTOM_LOG_LEVEL", self.__env.get("LOG_LEVEL", "notice"))}),
 
         # Use ThreadPoolExecutor to run jobs
         futures = [self.__executor.submit(job.run) for job in pending_jobs]
@@ -318,7 +318,7 @@ class JobScheduler(ApiCaller):
 
         old_env = environ.copy()
         environ.clear()
-        environ.update(old_env | self.__env)
+        environ.update(old_env | self.__env | {"LOG_LEVEL": getenv("CUSTOM_LOG_LEVEL", self.__env.get("LOG_LEVEL", "notice"))})
 
         futures = []
         for plugin, jobs in self.__jobs.items():
@@ -383,7 +383,7 @@ class JobScheduler(ApiCaller):
 
         old_env = environ.copy()
         environ.clear()
-        environ.update(old_env | self.__env)
+        environ.update(old_env | self.__env | {"LOG_LEVEL": getenv("CUSTOM_LOG_LEVEL", self.__env.get("LOG_LEVEL", "notice"))})
 
         self.__job_wrapper(
             job_to_run["path"],

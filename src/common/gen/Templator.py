@@ -64,10 +64,10 @@ class Templator:
             raise TypeError("config must be a dictionary")
 
         self._templates = templates
-        self._global_templates = [basename(template) for template in glob(join(self._templates, "*", "*.conf"))]
-        self._core = core
-        self._plugins = plugins
-        self._pro_plugins = pro_plugins
+        self._global_templates = [template.name for template in Path(self._templates).glob("**/*.conf")]
+        self._core = Path(core)
+        self._plugins = Path(plugins)
+        self._pro_plugins = Path(pro_plugins)
         self._output = output
         self._target = target
         self._config = config
@@ -78,7 +78,7 @@ class Templator:
         self._render_global()
         servers = [self._config.get("SERVER_NAME", "").strip()]
         if self._config.get("MULTISITE", "no") == "yes":
-            servers = self._config.get("SERVER_NAME", "").strip().split()
+            servers = self._config.get("SERVER_NAME", "").strip().split(" ")
         for server in servers:
             self._render_server(server)
 
@@ -89,9 +89,7 @@ class Templator:
             Environment: The Jinja2 environment.
         """
         searchpath = [self._templates]
-        for subpath in glob(join(self._core, "*", "confs")) + glob(join(self._plugins, "*", "confs")) + glob(join(self._pro_plugins, "*", "confs")):
-            if Path(subpath).is_dir():
-                searchpath.append(subpath)
+        searchpath.extend(p.as_posix() for p in (*self._core.glob("*/confs"), *self._plugins.glob("*/confs"), *self._pro_plugins.glob("*/confs")) if p.is_dir())
         return Environment(
             loader=FileSystemLoader(searchpath=searchpath),
             lstrip_blocks=True,
@@ -108,13 +106,20 @@ class Templator:
         Returns:
             List[str]: List of template names.
         """
-        context_set = set(contexts)
-        templates = [
-            template
-            for template in self._jinja_env.list_templates()
-            if any(template.startswith(context + "/") or (context == "global" and "/" not in template) for context in context_set)
-        ]
-        return templates
+        templates = set()
+        all_templates = frozenset(self._jinja_env.list_templates())
+
+        # Handle global context specially for better performance
+        if "global" in contexts:
+            templates.update(t for t in all_templates if "/" not in t)
+            contexts.remove("global")
+
+        # Process remaining contexts
+        if contexts:
+            prefix_set = tuple(context + "/" for context in contexts)
+            templates.update(t for t in all_templates if any(t.startswith(prefix) for prefix in prefix_set))
+
+        return list(templates)
 
     def _write_config(self, subpath: Optional[str] = None, config: Optional[Dict[str, Any]] = None) -> None:
         """Write the configuration to a variables.env file.
@@ -127,8 +132,7 @@ class Templator:
         real_path = Path(self._output, subpath or "", "variables.env")
         try:
             real_path.parent.mkdir(parents=True, exist_ok=True)
-            with real_path.open("w") as f:
-                f.write("\n".join(f"{k}={v}" for k, v in real_config.items()))
+            real_path.write_text("".join(f"{k}={v}\n" for k, v in real_config.items()))
         except IOError as e:
             logger.error(f"Error writing configuration to {real_path}: {e}")
 
@@ -141,23 +145,30 @@ class Templator:
         Returns:
             Dict[str, Any]: Configuration dictionary for the server.
         """
-        config = self._config.copy()
+        config = {}
         prefix = f"{server}_"
-        for variable, value in self._config.items():
-            if variable.startswith(prefix):
-                config[variable[len(prefix) :]] = value  # noqa: E203
+        prefix_len = len(prefix)
+
+        # Pre-populate with base config and handle NGINX_PREFIX
+        config.update(self._config)
         config["NGINX_PREFIX"] = join(self._target, server) + "/"
-        server_key = f"{server}_SERVER_NAME"
-        if server_key not in self._config:
+
+        # Efficient single-pass override of server-specific values
+        for key, value in ((k, v) for k, v in self._config.items() if k.startswith(prefix)):
+            config[key[prefix_len:]] = value
+
+        # Set default SERVER_NAME if not explicitly defined
+        if f"{prefix}SERVER_NAME" not in self._config:
             config["SERVER_NAME"] = server
+
         return config
 
     def _render_global(self) -> None:
         """Render global templates."""
         self._write_config()
         templates = self._find_templates(["global", "http", "stream", "default-server-http"])
-        for template in templates:
-            self._render_template(template)
+        with ThreadPoolExecutor(max_workers=min(32, len(templates))) as executor:
+            executor.map(self._render_template, templates)
 
     def _render_server(self, server: str) -> None:
         """Render templates for a specific server.
