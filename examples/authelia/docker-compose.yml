@@ -27,7 +27,8 @@ services:
       API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
       SERVE_FILES: "no"
       DISABLE_DEFAULT_SERVER: "yes"
-      AUTO_LETS_ENCRYPT: "yes"
+      # AUTO_LETS_ENCRYPT: "yes"
+      GENERATE_SELF_SIGNED_SSL: "yes"
       USE_CLIENT_CACHE: "yes"
       USE_GZIP: "yes"
       USE_REVERSE_PROXY: "yes"
@@ -39,6 +40,8 @@ services:
       auth.example.com_REVERSE_PROXY_URL: "/"
       auth.example.com_REVERSE_PROXY_HOST: "http://authelia:9091"
       auth.example.com_REVERSE_PROXY_INTERCEPT_ERRORS: "no"
+      auth.example.com_CUSTOM_CONF_MODSEC_remove-false-positives: |
+        SecRule REQUEST_FILENAME "/" "id:1000000,ctl:ruleRemoveByTag=attack-lfi,nolog"
       # Applications
       app1.example.com_REVERSE_PROXY_URL: "/"
       app1.example.com_REVERSE_PROXY_HOST: "http://app1:8080"
