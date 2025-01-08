@@ -4,20 +4,17 @@ metadata:
   name: ingress
   annotations:
     bunkerweb.io/AUTO_LETS_ENCRYPT: "yes"
+    bunkerweb.io/REVERSE_PROXY_URL_999: "/authelia"
+    bunkerweb.io/REVERSE_PROXY_HOST_999: "http://svc-authelia.default.svc.cluster.local:9091/api/verify"
+    bunkerweb.io/REVERSE_PROXY_HEADERS_999: "X-Original-URL $scheme://$http_host$request_uri;Content-Length ''"
     bunkerweb.io/app1.example.com_REVERSE_PROXY_AUTH_REQUEST: "/authelia"
     bunkerweb.io/app1.example.com_REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL: "https://auth.example.com/?rd=$scheme%3A%2F%2F$host$request_uri"
     bunkerweb.io/app1.example.com_REVERSE_PROXY_AUTH_REQUEST_SET: "$user $upstream_http_remote_user;$groups $upstream_http_remote_groups;$name $upstream_http_remote_name;$email $upstream_http_remote_email"
     bunkerweb.io/app1.example.com_REVERSE_PROXY_HEADERS: "Remote-User $user;Remote-Groups $groups;Remote-Name $name;Remote-Email $email"
-    bunkerweb.io/app1.example.com_REVERSE_PROXY_URL_999: "/authelia"
-    bunkerweb.io/app1.example.com_REVERSE_PROXY_HOST_999: "http://authelia:9091/api/verify"
-    bunkerweb.io/app1.example.com_REVERSE_PROXY_HEADERS_999: "X-Original-URL $scheme://$http_host$request_uri;Content-Length ''"
     bunkerweb.io/app2.example.com_REVERSE_PROXY_AUTH_REQUEST: "/authelia"
     bunkerweb.io/app2.example.com_REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL: "https://auth.example.com/?rd=$scheme%3A%2F%2F$host$request_uri"
     bunkerweb.io/app2.example.com_REVERSE_PROXY_AUTH_REQUEST_SET: "$user $upstream_http_remote_user;$groups $upstream_http_remote_groups;$name $upstream_http_remote_name;$email $upstream_http_remote_email"
     bunkerweb.io/app2.example.com_REVERSE_PROXY_HEADERS: "Remote-User $user;Remote-Groups $groups;Remote-Name $name;Remote-Email $email"
-    bunkerweb.io/app2.example.com_REVERSE_PROXY_URL_999: "/authelia"
-    bunkerweb.io/app2.example.com_REVERSE_PROXY_HOST_999: "http://authelia:9091/api/verify"
-    bunkerweb.io/app2.example.com_REVERSE_PROXY_HEADERS_999: "X-Original-URL $scheme://$http_host$request_uri;Content-Length ''"
     bunkerweb.io/auth.example.com_REVERSE_PROXY_INTERCEPT_ERRORS: "no"
 spec:
   rules:
@@ -239,7 +236,7 @@ spec:
     spec:
       containers:
         - name: authelia
-          image: authelia/authelia
+          image: authelia/authelia:4
           env:
             - name: TZ
               value: "Europe/Paris"
@@ -285,7 +282,7 @@ spec:
     spec:
       containers:
         - name: redis
-          image: redis:alpine
+          image: redis:7-alpine
           env:
             - name: TZ
               value: "Europe/Paris"
@@ -301,3 +298,14 @@ spec:
     - protocol: TCP
       port: 6379
       targetPort: 6379
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cfg-bunkerweb-auth-modsec
+  annotations:
+    bunkerweb.io/CONFIG_TYPE: "modsec"
+    bunkerweb.io/CONFIG_SITE: "auth.example.com"
+data:
+  remove-false-positives: |
+    SecRule REQUEST_FILENAME "/" "id:1000000,ctl:ruleRemoveByTag=attack-lfi,nolog"

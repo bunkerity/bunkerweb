@@ -14,7 +14,6 @@ from pathlib import Path
 import re
 from typing import Any, Dict, List, Optional
 import schedule
-from schedule import Job
 from sys import path as sys_path
 from threading import Lock
 
@@ -122,7 +121,7 @@ class JobScheduler(ApiCaller):
             valid_jobs.append(job)
         return valid_jobs
 
-    def __str_to_schedule(self, every: str) -> Job:
+    def __str_to_schedule(self, every: str) -> schedule.Job:
         schedule_map = {
             "minute": schedule.every().minute,
             "hour": schedule.every().hour,

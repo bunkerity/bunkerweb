@@ -58,6 +58,9 @@ services:
       - bunkerweb.REVERSE_PROXY_URL=/
       - bunkerweb.REVERSE_PROXY_HOST=http://authelia:9091
       - bunkerweb.REVERSE_PROXY_INTERCEPT_ERRORS=no
+      - |
+        bunkerweb.CUSTOM_CONF_MODSEC_remove-false-positives=
+        SecRule REQUEST_FILENAME "/" "id:1000000,ctl:ruleRemoveByTag=attack-lfi,nolog"
 
   redis:
     image: redis:7-alpine
