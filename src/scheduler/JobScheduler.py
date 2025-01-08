@@ -48,6 +48,7 @@ class JobScheduler(ApiCaller):
         self.__job_reload = False
         self.__executor = ThreadPoolExecutor(max_workers=min(32, (cpu_count() or 1) * 4))
         self.__compiled_regexes = self.__compile_regexes()
+        self.__module_paths = set()
         self.update_jobs()
 
     def __compile_regexes(self):
@@ -162,17 +163,16 @@ class JobScheduler(ApiCaller):
         if not abs_path.exists():
             raise FileNotFoundError(f"Plugin path not found: {abs_path}")
 
-        # Add to path and load module
-        sys_path.insert(0, module_dir.as_posix())
-        try:
-            spec = spec_from_file_location(name, abs_path.as_posix())
-            if spec is None:
-                raise ImportError(f"Failed to create module spec for {abs_path}")
-            module = module_from_spec(spec)
-            spec.loader.exec_module(module)
-        finally:
-            if module_dir.as_posix() in sys_path:
-                sys_path.remove(module_dir.as_posix())
+        module_dir_str = module_dir.as_posix()
+        if module_dir_str not in sys_path and module_dir_str not in self.__module_paths:
+            self.__module_paths.add(module_dir.as_posix())
+            sys_path.insert(0, module_dir.as_posix())
+
+        spec = spec_from_file_location(name, abs_path.as_posix())
+        if spec is None:
+            raise ImportError(f"Failed to create module spec for {abs_path}")
+        module = module_from_spec(spec)
+        spec.loader.exec_module(module)
 
     def __job_wrapper(self, path: str, plugin: str, name: str, file: str) -> int:
         self.__logger.info(f"Executing job '{name}' from plugin '{plugin}'...")
@@ -298,6 +298,10 @@ class JobScheduler(ApiCaller):
         environ.clear()
         environ.update(old_env)
 
+        for module_path in self.__module_paths.copy():
+            sys_path.remove(module_path)
+            self.__module_paths.remove(module_path)
+
         self.__update_cache_permissions()
 
         return success
@@ -346,6 +350,10 @@ class JobScheduler(ApiCaller):
         environ.clear()
         environ.update(old_env)
 
+        for module_path in self.__module_paths.copy():
+            sys_path.remove(module_path)
+            self.__module_paths.remove(module_path)
+
         self.__update_cache_permissions()
 
         return self.__job_success
@@ -386,6 +394,10 @@ class JobScheduler(ApiCaller):
 
         environ.clear()
         environ.update(old_env)
+
+        for module_path in self.__module_paths.copy():
+            sys_path.remove(module_path)
+            self.__module_paths.remove(module_path)
 
         self.__update_cache_permissions()
 
