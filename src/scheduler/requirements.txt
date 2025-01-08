@@ -4,9 +4,9 @@
 #
 #    pip-compile --allow-unsafe --generate-hashes --strip-extras requirements.in
 #
-acme==3.0.1 \
-    --hash=sha256:2f4ae207c8a6791a2bc74cd18d60274766f483c2059145b0142cbb43e761331c \
-    --hash=sha256:6b5f88681ead76f8c7de313ac6c7ee1c567fdcc61d48cfad2f5cb3606778529b
+acme==3.1.0 \
+    --hash=sha256:39ae0032834585e5c893d7865a5867af01598b5ebef688edb54e9f11cb89ccd9 \
+    --hash=sha256:d5b6bb7cddbdf276666794b235ef73fbb064cdc4d5b596979a7e9f523eac29b1
     # via
     #   certbot
     #   certbot-dns-cloudflare
@@ -49,9 +49,9 @@ cachetools==5.5.0 \
     --hash=sha256:02134e8439cdc2ffb62023ce1debca2944c3f289d66bb17ead3ab3dede74b292 \
     --hash=sha256:2cc24fb4cbe39633fb7badd9db9ca6295d766d9c2995f245725a46715d050f2a
     # via google-auth
-certbot==3.0.1 \
-    --hash=sha256:32447edd7f9d38d2b30699137c0986516ed01971b60667c72382c7f81ec104dd \
-    --hash=sha256:4d573635840bbcc1124a2176e7188e69f6e3210f9ed94e20839547f07caee2b2
+certbot==3.1.0 \
+    --hash=sha256:0ac0bacc74af1802eeb13f4008f0cb2eaccb0432a07224f5c8554ba6f135c2df \
+    --hash=sha256:1b27c9cfc38930924568b15a06a2fb6744f13ad9dc298c650e69868c456d90cb
     # via
     #   -r requirements.in
     #   certbot-dns-cloudflare
@@ -772,12 +772,6 @@ s3transfer==0.10.4 \
 schedule==1.2.2 \
     --hash=sha256:15fe9c75fe5fd9b9627f3f19cc0ef1420508f9f9a46f45cd0769ef75ede5f0b7 \
     --hash=sha256:5bef4a2a0183abf44046ae0d164cadcac21b1db011bdd8102e4a0c1e91e06a7d
-    # via importlib-metadata
-
-# The following packages are considered to be unsafe in a requirements file:
-setuptools==75.7.0 \
-    --hash=sha256:84fb203f278ebcf5cd08f97d3fb96d3fbed4b629d500b29ad60d11e00769b183 \
-    --hash=sha256:886ff7b16cd342f1d1defc16fc98c9ce3fde69e087a4e1983d7ab634e5f41f4f
     # via -r requirements.in
 six==1.17.0 \
     --hash=sha256:4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274 \
@@ -810,9 +804,13 @@ urllib3==1.26.20 \
 zipp==3.21.0 \
     --hash=sha256:2c9958f6430a2040341a52eb608ed6dd93ef4392e02ffe219417c1b28b5dd1f4 \
     --hash=sha256:ac1bbe05fd2991f160ebce24ffbac5f6d11d83dc90891255885223d42b3cd931
+    # via importlib-metadata
+
+# The following packages are considered to be unsafe in a requirements file:
+setuptools==75.7.0 \
+    --hash=sha256:84fb203f278ebcf5cd08f97d3fb96d3fbed4b629d500b29ad60d11e00769b183 \
+    --hash=sha256:886ff7b16cd342f1d1defc16fc98c9ce3fde69e087a4e1983d7ab634e5f41f4f
     # via
-    #   acme
-    #   certbot
     #   certbot-dns-cloudflare
     #   certbot-dns-digitalocean
     #   certbot-dns-dnsimple
