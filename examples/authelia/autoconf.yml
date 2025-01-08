@@ -78,3 +78,6 @@ networks:
     name: bw-services
   authelia-redis:
     name: authelia-redis
+
+volumes:
+  redis-data:
