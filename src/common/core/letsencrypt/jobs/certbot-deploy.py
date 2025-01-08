@@ -63,7 +63,7 @@ try:
             sent, err, status, resp = api.request(
                 "POST",
                 f"/reload?test={'no' if getenv('DISABLE_CONFIGURATION_TESTING', 'no').lower() == 'yes' else 'yes'}",
-                timeout=max(reload_min_timeout, 2 * len(services)),
+                timeout=max(reload_min_timeout, 3 * len(services)),
             )
             if not sent:
                 status = 1

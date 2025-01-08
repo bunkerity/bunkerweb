@@ -15,7 +15,6 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
-from dotenv import dotenv_values
 from redis import StrictRedis, Sentinel
 
 from API import API  # type: ignore
@@ -59,7 +58,8 @@ class CLI(ApiCaller):
         self.__variables = {}
         self.__db = None
         if variables_path.is_file():
-            self.__variables = dotenv_values(variables_path)
+            with variables_path.open() as f:
+                self.__variables = dict(line.strip().split("=", 1) for line in f if line.strip() and not line.startswith("#"))
 
         if Path(sep, "usr", "share", "bunkerweb", "db").exists():
             from Database import Database  # type: ignore
