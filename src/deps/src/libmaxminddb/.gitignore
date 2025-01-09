@@ -44,3 +44,4 @@ Makefile
 Makefile.in
 Testing/
 install_manifest.txt
+build/

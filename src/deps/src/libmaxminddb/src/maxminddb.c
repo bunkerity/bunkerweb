@@ -744,12 +744,14 @@ static int populate_languages_metadata(MMDB_s *mmdb,
     mmdb->metadata.languages.count = 0;
     mmdb->metadata.languages.names = calloc(array_size, sizeof(char *));
     if (NULL == mmdb->metadata.languages.names) {
+        MMDB_free_entry_data_list(first_member);
         return MMDB_OUT_OF_MEMORY_ERROR;
     }
 
     for (uint32_t i = 0; i < array_size; i++) {
         member = member->next;
         if (MMDB_DATA_TYPE_UTF8_STRING != member->entry_data.type) {
+            MMDB_free_entry_data_list(first_member);
             return MMDB_INVALID_METADATA_ERROR;
         }
 
@@ -757,6 +759,7 @@ static int populate_languages_metadata(MMDB_s *mmdb,
             member->entry_data.utf8_string, member->entry_data.data_size);
 
         if (NULL == mmdb->metadata.languages.names[i]) {
+            MMDB_free_entry_data_list(first_member);
             return MMDB_OUT_OF_MEMORY_ERROR;
         }
         // We assign this as we go so that if we fail a calloc and need to
@@ -1646,6 +1649,10 @@ int MMDB_get_entry_data_list(MMDB_entry_s *start,
 
     int const status =
         get_entry_data_list(start->mmdb, start->offset, list, pool, 0);
+    if (MMDB_SUCCESS != status) {
+        data_pool_destroy(pool);
+        return status;
+    }
 
     *entry_data_list = data_pool_to_list(pool);
     if (!*entry_data_list) {
