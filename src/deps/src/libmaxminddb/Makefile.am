@@ -18,7 +18,7 @@ endif
 
 EXTRA_DIST = doc Changes.md LICENSE NOTICE README.md \
 			 CMakeLists.txt t/CMakeLists.txt bin/CMakeLists.txt \
-			 include/maxminddb_config.h.cmake.in
+			 cmake_uninstall.cmake.in include/maxminddb_config.h.cmake.in
 
 dist-hook:
 	dev-bin/make-man-pages.pl $(distdir)
