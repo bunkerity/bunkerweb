@@ -27,9 +27,6 @@ class AutoconfTest(Test):
         try:
             if not Test.init():
                 return False
-            proc = run("sudo chown -R root:root /tmp/bw-data", shell=True)
-            if proc.returncode != 0:
-                raise (Exception("chown failed (autoconf stack)"))
             if isdir("/tmp/autoconf"):
                 rmtree("/tmp/autoconf")
             mkdir("/tmp/autoconf")
@@ -107,7 +104,7 @@ class AutoconfTest(Test):
         try:
             if not Test.end():
                 return False
-            proc = run("docker compose down -v", cwd="/tmp/autoconf", shell=True)
+            proc = run("docker compose down -v --remove-orphans", cwd="/tmp/autoconf", shell=True)
             if proc.returncode != 0:
                 ret = False
             rmtree("/tmp/autoconf")
@@ -150,6 +147,13 @@ class AutoconfTest(Test):
                 proc = run("sudo ./setup-autoconf.sh", cwd=test, shell=True)
                 if proc.returncode != 0:
                     raise (Exception("setup-autoconf failed"))
+            if isdir("/tmp/bw-data"):
+                proc = run("sudo rm -rf /tmp/bw-data", shell=True)
+                if proc.returncode != 0:
+                    raise (Exception("rm bw-data failed"))
+                proc = run("sudo mkdir /tmp/bw-data", shell=True)
+                if proc.returncode != 0:
+                    raise (Exception("mkdir bw-data failed"))
             if isdir(example_data) and not self._no_copy_container:
                 proc = run(
                     f"sudo bash -c 'cp -rp {example_data}/* /tmp/bw-data'",
@@ -157,6 +161,12 @@ class AutoconfTest(Test):
                 )
                 if proc.returncode != 0:
                     raise (Exception("cp bw-data failed"))
+            proc = run("sudo chown -R root:101 /tmp/bw-data", shell=True)
+            if proc.returncode != 0:
+                raise (Exception("chown failed (docker stack)"))
+            proc = run("sudo chmod -R 770 /tmp/bw-data", shell=True)
+            if proc.returncode != 0:
+                raise (Exception("chmod failed (docker stack)"))
             if isdir(example_www):
                 proc = run(
                     f"sudo bash -c 'cp -rp {example_www}/* /tmp/www'",
@@ -187,7 +197,7 @@ class AutoconfTest(Test):
     def _cleanup_test(self):
         try:
             test = f"/tmp/tests/{self._name}"
-            proc = run("docker compose -f autoconf.yml down -v", shell=True, cwd=test)
+            proc = run("docker compose -f autoconf.yml down -v --remove-orphans", shell=True, cwd=test)
             if proc.returncode != 0:
                 raise (Exception("docker compose down failed"))
             proc = run(
