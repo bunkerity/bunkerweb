@@ -86,7 +86,7 @@ Rolsky (drolsky@maxmind.com).
 
 # COPYRIGHT AND LICENSE
 
-Copyright 2013-2024 MaxMind, Inc.
+Copyright 2013-2025 MaxMind, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

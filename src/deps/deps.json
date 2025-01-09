@@ -27,9 +27,9 @@
     },
     {
       "id": "libmaxminddb",
-      "name": "libmaxminddb v1.11.0",
+      "name": "libmaxminddb v1.12.1",
       "url": "https://github.com/maxmind/libmaxminddb.git",
-      "commit": "24df335085318a26a5f3aafba12fec3cd322e570"
+      "commit": "0ff5a5bfb3bc8f7da1e1d1a7c3398b9d3fcf7493"
     },
     {
       "id": "lua-cjson",

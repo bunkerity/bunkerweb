@@ -52,3 +52,9 @@ foreach(TEST_TARGET_NAME ${TEST_TARGET_NAMES})
 
   add_test( NAME ${TEST_TARGET_NAME} COMMAND ${TEST_TARGET_NAME} WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/t)
 endforeach()
+
+if(BUILD_FUZZING)
+  add_executable(fuzz_mmdb fuzz_mmdb.c)
+  target_include_directories(fuzz_mmdb PRIVATE ../src)
+  target_link_libraries(fuzz_mmdb maxminddb $ENV{LIB_FUZZING_ENGINE})
+endif()

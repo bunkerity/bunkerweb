@@ -1,4 +1,4 @@
-/var/log/bunkerweb/*.log /var/log/bunkerweb/*.log.*
+/var/log/bunkerweb/*.log /var/log/bunkerweb/*.log.* /var/log/bunkerweb/letsencrypt/*.log /var/log/bunkerweb/letsencrypt/*.log.*
 {
     su nginx nginx
     daily
