@@ -5,7 +5,7 @@ if [ "$(id -u)" -ne 0 ] ; then
 	exit 1
 fi
 
-cp -r bw-data/configs/* /etc/bunkerweb/configs
+cp -r configs/* /etc/bunkerweb/configs
 
 curl https://github.com/authelia/authelia/releases/download/v4.36.2/authelia-v4.36.2-linux-amd64.tar.gz -Lo /tmp/authelia.tar.gz
 tar -xzf /tmp/authelia.tar.gz -C /tmp
