@@ -18,6 +18,7 @@
 - [FEATURE] Made `LISTEN_STREAM_PORT` and `LISTEN_STREAM_PORT_SSL` settings multiples to allow listening on multiple ports
 - [DEPRECATION] Remove `X-XSS-Protection` header from the `header` plugin as it is deprecated
 - [DEPS] Updated coreruleset-v4 version to v4.10.0
+- [DEPS] Updated libmaxminddb version to v1.12.1
 
 ## v1.6.0-beta - 2024/12/10
 
