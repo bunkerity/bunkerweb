@@ -25,9 +25,6 @@ class DockerTest(Test):
         try:
             if not Test.init():
                 return False
-            # proc = run("sudo chown -R 101:101 /tmp/bw-data", shell=True)
-            # if proc.returncode != 0 :
-            #     raise(Exception("chown failed (autoconf stack)"))
         except:
             log(
                 "DOCKER",
@@ -73,13 +70,26 @@ class DockerTest(Test):
                 proc = run("sudo ./setup-docker.sh", cwd=test, shell=True)
                 if proc.returncode != 0:
                     raise (Exception("setup-docker failed"))
+            if isdir("/tmp/bw-data"):
+                proc = run("sudo rm -rf /tmp/bw-data", shell=True)
+                if proc.returncode != 0:
+                    raise (Exception("rm bw-data failed"))
+                proc = run("sudo mkdir /tmp/bw-data", shell=True)
+                if proc.returncode != 0:
+                    raise (Exception("mkdir bw-data failed"))
             if isdir(example_data) and not self._no_copy_container:
                 proc = run(
-                    "sudo bash -c 'cp -rp " + example_data + "/* /tmp/bw-data'",
+                    f"sudo bash -c 'cp -rp {example_data}/* /tmp/bw-data'",
                     shell=True,
                 )
                 if proc.returncode != 0:
                     raise (Exception("cp bw-data failed"))
+            proc = run("sudo chown -R root:101 /tmp/bw-data", shell=True)
+            if proc.returncode != 0:
+                raise (Exception("chown failed (docker stack)"))
+            proc = run("sudo chmod -R 770 /tmp/bw-data", shell=True)
+            if proc.returncode != 0:
+                raise (Exception("chmod failed (docker stack)"))
             proc = run("docker compose pull --ignore-pull-failures", shell=True, cwd=test)
             if proc.returncode != 0:
                 raise (Exception("docker compose pull failed"))
@@ -99,7 +109,7 @@ class DockerTest(Test):
     def _cleanup_test(self):
         try:
             test = "/tmp/tests/" + self._name
-            proc = run("docker compose down -v", shell=True, cwd=test)
+            proc = run("docker compose down -v --remove-orphans", shell=True, cwd=test)
             if proc.returncode != 0:
                 raise (Exception("docker compose down failed"))
             super()._cleanup_test()
