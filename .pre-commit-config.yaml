@@ -48,6 +48,7 @@ repos:
       - id: flake8
         name: Flake8 Python Linter
         args: ["--max-line-length=160", "--ignore=E266,E402,E501,E722,W503"]
+        exclude: ^src/common/db/alembic/(mariadb|mysql|postgresql|sqlite)_versions
 
   - repo: https://github.com/dosisod/refurb
     rev: 2e31f0033b6c00bf99912fc6a8b5fd00460c9ba0 # frozen: v2.0.0
@@ -62,7 +63,7 @@ repos:
       - id: codespell
         name: Codespell Spell Checker
         exclude: (^src/(ui/templates|common/core/.+/files|bw/loading)/.+.html|modsecurity-rules.conf.*|src/ui/app/static/(fonts|libs)/.+)$
-        entry: codespell --ignore-regex="(tabEl|Widgits)" --skip CHANGELOG.md,CODE_OF_CONDUCT.md,src/ui/client/build.py,src/ui/app/static/json/countries.geojson,src/ui/app/static/js/pages/reports.js,src/ui/app/static/json/periscop.min.json,src/ui/app/static/json/blockhaus.min.json,src/ui/app/routes/reports.py
+        entry: codespell --ignore-regex="(tabEl|Widgits)" --skip CHANGELOG.md,CODE_OF_CONDUCT.md,src/ui/client/build.py,src/ui/app/static/json/countries.geojson,src/ui/app/static/js/pages/bans.js,src/ui/app/static/json/periscop.min.json,src/ui/app/static/json/blockhaus.min.json,src/ui/app/routes/reports.py
         language: python
         types: [text]
 

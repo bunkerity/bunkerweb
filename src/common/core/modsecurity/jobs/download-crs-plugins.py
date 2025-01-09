@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from io import BytesIO
+from mimetypes import guess_type
 from os import getenv, sep
 from os.path import join
 from pathlib import Path
@@ -11,8 +12,8 @@ from typing import Dict, Set
 from uuid import uuid4
 from json import dumps
 from shutil import copy, copytree, move, rmtree
-from tarfile import open as tar_open
-from zipfile import ZipFile
+from tarfile import TarError, open as tar_open
+from zipfile import BadZipFile, ZipFile
 
 for deps_path in [
     join(sep, "usr", "share", "bunkerweb", *paths)
@@ -92,7 +93,7 @@ try:
         LOGGER.warning("No service is using a compatible Core Rule Set (CRS) version with the plugins (4 or nightly), skipping download...")
         sys_exit(0)
 
-    JOB = Job(LOGGER)
+    JOB = Job(LOGGER, __file__)
 
     downloaded_plugins: Dict[str, Set[str]] = {}
     service_plugins: Dict[str, Set[str]] = {service: set() for service in services}
@@ -113,49 +114,75 @@ try:
 
             with BytesIO() as content:
                 try:
+                    # Download the file
                     resp = get(crs_plugin_url, headers={"User-Agent": "BunkerWeb"}, stream=True, timeout=5)
-
                     if resp.status_code != 200:
                         LOGGER.warning(f"Got status code {resp.status_code}, skipping download of plugin(s) with URL {crs_plugin_url}...")
                         continue
 
-                    # Iterate over the response content in chunks
+                    # Write content to BytesIO
                     for chunk in resp.iter_content(chunk_size=8192):
                         if chunk:
                             content.write(chunk)
 
                     content.seek(0)
-                except BaseException as e:
-                    LOGGER.error(f"Exception while downloading plugin(s) with URL {crs_plugin_url} :\n{e}")
+                except Exception as e:
+                    LOGGER.error(f"Exception while downloading plugin(s) with URL {crs_plugin_url}:\n{e}")
                     continue
 
                 # Extract it to tmp folder
                 temp_dir = TMP_DIR.joinpath(str(uuid4()))
                 try:
                     temp_dir.mkdir(parents=True, exist_ok=True)
+
+                    # Detect file type
                     file_type = Magic(mime=True).from_buffer(content.getvalue())
+                    LOGGER.debug(f"Detected file type: {file_type}")
+
+                    # Fallback to file extension detection
+                    if file_type == "application/octet-stream":
+                        file_type = guess_type(crs_plugin_url)[0] or "application/octet-stream"
+                        LOGGER.debug(f"Guessed file type from URL: {file_type}")
+
                     content.seek(0)
 
-                    if file_type == "application/zip":
-                        with ZipFile(content) as zf:
-                            zf.extractall(path=temp_dir)
-                    elif file_type == "application/gzip":
-                        with tar_open(fileobj=content, mode="r:gz") as tar:
-                            try:
-                                tar.extractall(path=temp_dir, filter="data")
-                            except TypeError:
+                    # Handle ZIP files
+                    if file_type == "application/zip" or crs_plugin_url.endswith(".zip"):
+                        try:
+                            with ZipFile(content) as zf:
+                                zf.extractall(path=temp_dir)
+                            LOGGER.info(f"Successfully extracted ZIP file to {temp_dir}")
+                        except BadZipFile as e:
+                            LOGGER.error(f"Invalid ZIP file: {e}")
+                            continue
+
+                    # Handle TAR files (all compression types)
+                    elif file_type.startswith("application/x-tar") or crs_plugin_url.endswith(
+                        (".tar", ".tar.gz", ".tgz", ".tar.bz2", ".tbz2", ".tar.xz", ".txz")
+                    ):
+                        try:
+                            # Detect the appropriate tar mode
+                            tar_mode = "r"
+                            if crs_plugin_url.endswith(".gz") or file_type == "application/gzip":
+                                tar_mode = "r:gz"
+                            elif crs_plugin_url.endswith(".bz2"):
+                                tar_mode = "r:bz2"
+                            elif crs_plugin_url.endswith(".xz"):
+                                tar_mode = "r:xz"
+
+                            with tar_open(fileobj=content, mode=tar_mode) as tar:
                                 tar.extractall(path=temp_dir)
-                    elif file_type == "application/x-tar":
-                        with tar_open(fileobj=content, mode="r") as tar:
-                            try:
-                                tar.extractall(path=temp_dir, filter="data")
-                            except TypeError:
-                                tar.extractall(path=temp_dir)
+                            LOGGER.info(f"Successfully extracted TAR file to {temp_dir}")
+                        except TarError as e:
+                            LOGGER.error(f"Invalid TAR file: {e}")
+                            continue
+
                     else:
-                        LOGGER.error(f"Unknown file type for {crs_plugin_url}, either zip or tar are supported, skipping...")
+                        LOGGER.error(f"Unknown file type for {crs_plugin_url}, either ZIP or TAR is supported, skipping...")
                         continue
-                except BaseException as e:
-                    LOGGER.error(f"Exception while decompressing plugin(s) from {crs_plugin_url} :\n{e}")
+
+                except Exception as e:
+                    LOGGER.error(f"Exception while decompressing plugin(s) from {crs_plugin_url}:\n{e}")
                     continue
 
             plugin_name = ""

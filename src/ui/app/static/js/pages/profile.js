@@ -20,10 +20,10 @@ $(document).ready(function () {
       isValid,
     );
     isValid = validateCondition(
-      /[ -~]/.test(password),
+      /[^a-zA-Z0-9]/.test(password),
       "#special-check i",
       isValid,
-    );
+    ); // Check for special characters
 
     return isValid;
   }
@@ -270,8 +270,10 @@ $(document).ready(function () {
       const content = generateSessionContent(session, index);
       const placeholder = $(`#session-placeholder-${index}`);
 
+      const sanitizedText = DOMPurify.sanitize(content);
+
       placeholder
-        .html(content)
+        .html(sanitizedText)
         .removeClass("placeholder-transition fade-in")
         .addClass("card-transition")
         .toggleClass(currentCardClasses, session.current)

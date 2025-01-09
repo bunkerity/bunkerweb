@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from concurrent.futures import ThreadPoolExecutor
 from copy import deepcopy
 from functools import cache
 from io import BytesIO
@@ -67,10 +68,7 @@ class Configurator:
 
     @cache
     def get_plugins_settings(self, _type: Literal["core", "external", "pro"]) -> Dict[str, str]:
-        plugins_settings = {}
-        for plugin in self.get_plugins(_type):
-            plugins_settings.update(plugin.get("settings", {}))
-        return plugins_settings
+        return {k: v for plugin in self.get_plugins(_type) for k, v in plugin.get("settings", {}).items()}
 
     @cache
     def __map_servers(self) -> Dict[str, List[str]]:
@@ -78,35 +76,42 @@ class Configurator:
             return {}
 
         servers = {}
-        for server_name in self.__variables["SERVER_NAME"].strip().split(" "):
-            if not server_name:
-                continue
+        server_regex = re_compile(self.__settings["SERVER_NAME"]["regex"])
+        server_names = [s for s in self.__variables["SERVER_NAME"].strip().split(" ") if s]
 
-            if re_search(self.__settings["SERVER_NAME"]["regex"], server_name) is None:
+        for server_name in server_names:
+            if not server_regex.search(server_name):
                 self.__logger.warning(f"Ignoring server name {server_name} because regex is not valid")
                 continue
 
-            names = [server_name]
-            if f"{server_name}_SERVER_NAME" in self.__variables:
-                if re_search(self.__settings["SERVER_NAME"]["regex"], self.__variables[f"{server_name}_SERVER_NAME"]) is None:
-                    self.__logger.warning(f"Ignoring {server_name}_SERVER_NAME because regex is not valid")
+            server_name_var = f"{server_name}_SERVER_NAME"
+            if server_name_var in self.__variables:
+                names_str = self.__variables[server_name_var].strip()
+                if not server_regex.search(names_str):
+                    self.__logger.warning(f"Ignoring {server_name_var} because regex is not valid")
+                    servers[server_name] = [server_name]
                 else:
-                    names = self.__variables[f"{server_name}_SERVER_NAME"].strip().split(" ")
+                    servers[server_name] = [n for n in names_str.split(" ") if n]
+            else:
+                servers[server_name] = [server_name]
 
-            servers[server_name] = names
         return servers
 
     def __load_settings(self, path: Path) -> Dict[str, str]:
         return loads(path.read_text())
 
     def __load_plugins(self, path: Path, _type: Literal["core", "external", "pro"] = "core"):
-        x = 0
-        for file in path.glob("*/plugin.json"):
-            self.__logger.debug(f"Loading {_type} plugin {file}")
-            self.__load_plugin(file, _type)
-            x += 1
 
-        self.__logger.info(f"Computed {x} {_type} plugin{'s' if x > 1 else ''}")
+        plugin_files = list(path.glob("*/plugin.json"))
+
+        with ThreadPoolExecutor() as executor:
+            futures = [executor.submit(self.__load_plugin, file, _type) for file in plugin_files]
+            for file, future in zip(plugin_files, futures):
+                self.__logger.debug(f"Loading {_type} plugin {file}")
+                future.result()
+
+        count = len(plugin_files)
+        self.__logger.info(f"Computed {count} {_type} plugin{'s' if count > 1 else ''}")
 
     def __load_plugin(self, file: Path, _type: Literal["core", "external", "pro"] = "core"):
         try:
@@ -141,16 +146,15 @@ class Configurator:
             self.__logger.error(f"Exception while loading JSON from {file} : {e}")
 
     def __load_variables(self, path: Path) -> Dict[str, str]:
-        variables = {}
-        with path.open("r", encoding="utf-8") as f:
-            lines = f.readlines()
-            for line in lines:
-                line = line.strip()
-                if not line or line.startswith("#") or "=" not in line:
-                    continue
-                split = line.split("=", 1)
-                variables[split[0]] = split[1]
-        return variables
+        try:
+            return dict(
+                line.strip().split("=", 1)
+                for line in path.read_text(encoding="utf-8").splitlines()
+                if line.strip() and not line.strip().startswith("#") and "=" in line
+            )
+        except Exception as e:
+            self.__logger.error(f"Failed to load variables from {path}: {e}")
+            return {}
 
     def get_config(self, db=None, *, first_run: bool = False) -> Dict[str, str]:
         config = {}
@@ -207,6 +211,8 @@ class Configurator:
                         "CUSTOM_LOG_LEVEL",
                         "HEALTHCHECK_INTERVAL",
                         "DATABASE_RETRY_TIMEOUT",
+                        "RELOAD_MIN_TIMEOUT",
+                        "DISABLE_CONFIGURATION_TESTING",
                         "GPG_KEY",
                         "HOME",
                         "HOSTNAME",
@@ -222,6 +228,7 @@ class Configurator:
                         "NAMESPACE",
                         "TZ",
                         "DYNPKG_RELEASE",
+                        "OLDPWD",
                     )
                 )
             ):

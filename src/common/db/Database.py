@@ -49,12 +49,11 @@ for deps_path in [os_join(sep, "usr", "share", "bunkerweb", *paths) for paths in
 from common_utils import bytes_hash  # type: ignore
 
 from pymysql import install_as_MySQLdb
-from sqlalchemy import case, create_engine, event, MetaData as sql_metadata, func, join, select as db_select, text, inspect
+from sqlalchemy import case, create_engine, event, MetaData as sql_metadata, func, join, select as db_select, text
 from sqlalchemy.engine import Engine
 from sqlalchemy.exc import (
     ArgumentError,
     DatabaseError,
-    IntegrityError,
     OperationalError,
     ProgrammingError,
     SAWarning,
@@ -224,7 +223,12 @@ class Database:
             self.logger.info(f"✅ Database connection established{'' if not self.readonly else ' in read-only mode'}")
 
         if match.group("database").startswith("sqlite"):
-            db_path.chmod(0o660)
+            try:
+                current_mode = db_path.stat().st_mode & 0o777
+                if current_mode != 0o660:
+                    db_path.chmod(0o660)
+            except (OSError, IOError) as e:
+                self.logger.warning(f"Could not set file permissions on {db_path}: {e}")
 
     def __del__(self) -> None:
         """Close the database"""
@@ -397,7 +401,7 @@ class Database:
                 metadata = session.query(Metadata).with_entities(Metadata.version).filter_by(id=1).first()
                 if metadata:
                     return metadata.version
-                return "1.6.0-beta"
+                return "1.6.0-rc1"
             except BaseException as e:
                 return f"Error: {e}"
 
@@ -427,7 +431,7 @@ class Database:
             "last_pro_plugins_change": None,
             "last_instances_change": None,
             "integration": "unknown",
-            "version": "1.6.0-beta",
+            "version": "1.6.0-rc1",
             "database_version": "Unknown",  # ? Extracted from the database
             "default": True,  # ? Extra field to know if the returned data is the default one
         }
@@ -529,7 +533,7 @@ class Database:
 
         return ""
 
-    def init_tables(self, default_plugins: List[dict], bunkerweb_version: str) -> Tuple[bool, str]:
+    def init_tables(self, default_plugins: List[dict]) -> Tuple[bool, str]:
         """Initialize the database tables and return the result"""
 
         if self.readonly:
@@ -537,79 +541,121 @@ class Database:
 
         assert self.sql_engine is not None, "The database engine is not initialized"
 
-        inspector = inspect(self.sql_engine)
-        db_version = None
-        has_all_tables = True
-        old_data = {}
-
-        # ? Check if the tables exist
-        if inspector and len(inspector.get_table_names()):
-            metadata = self.get_metadata()
-            db_version = metadata["version"]
-            if metadata["default"]:
-                db_version = "error"
-
-            # ? Check if the version is different from the database one
-            if db_version != bunkerweb_version:
-                self.logger.warning(f"Database version ({db_version}) is different from Bunkerweb version ({bunkerweb_version}), migrating ...")
-                current_time = datetime.now().astimezone()
-                error = True
-                # ? Wait for the metadata to be available
-                while error:
-                    try:
-                        metadata = sql_metadata()
-                        metadata.reflect(self.sql_engine)
-                        error = False
-                    except BaseException as e:
-                        if (datetime.now().astimezone() - current_time).total_seconds() > 10:
-                            raise e
-                        sleep(1)
-
-                assert isinstance(metadata, sql_metadata)
-
-                # ? Check if tables are missing
-                for table_name in Base.metadata.tables.keys():
-                    if not inspector.has_table(table_name):
-                        self.logger.warning(f'Table "{table_name}" is missing, creating it')
-                        has_all_tables = False
-                        continue
-
-                    with self._db_session() as session:
-                        old_data[table_name] = session.query(metadata.tables[table_name]).all()
-
-                Base.metadata.drop_all(self.sql_engine)
-
-        if has_all_tables and db_version and db_version == bunkerweb_version:
-            return False, ""
-
         try:
             Base.metadata.create_all(self.sql_engine, checkfirst=True)
-        except BaseException as e:
+        except Exception as e:
             return False, str(e)
 
-        to_put = []
-        with self._db_session() as session:
-            saved_settings = set()
-            found_plugins = set()
+        # Reflecting the metadata with a timeout
+        current_time = datetime.now().astimezone()
+        timeout_seconds = 10
+        error = True
+        while error:
+            try:
+                meta_cls = sql_metadata()
+                meta_cls.reflect(self.sql_engine)
+                error = False
+            except Exception as e:
+                if (datetime.now().astimezone() - current_time).total_seconds() > timeout_seconds:
+                    raise e
+                sleep(1)
 
+        assert isinstance(meta_cls, sql_metadata)
+
+        # Fetch old data
+        old_data = {}
+        with self._db_session() as session:
+            for table_name in Base.metadata.tables.keys():
+                old_data[table_name] = session.query(meta_cls.tables[table_name]).all()
+
+        # Prepare structures to track changes
+        to_put = []
+        to_update = []
+        to_delete = []
+
+        with self._db_session() as session:
+            # Convert old_data into dicts keyed by IDs or relevant unique keys.
+            # For plugins:
+            old_plugins = {p.id: p for p in old_data.get("bw_plugins", [])}
+
+            # For settings:
+            old_settings = {}
+            for s in old_data.get("bw_settings", []):
+                old_settings[(s.plugin_id, s.id)] = s
+
+            # For selects:
+            old_selects = {}
+            for sel in old_data.get("bw_selects", []):
+                old_selects[(sel.setting_id, sel.value)] = sel
+
+            # For jobs:
+            old_jobs = {}
+            for j in old_data.get("bw_jobs", []):
+                old_jobs[(j.plugin_id, j.name)] = j
+
+            # For plugin pages:
+            old_plugin_pages = {pp.plugin_id: pp for pp in old_data.get("bw_plugin_pages", [])}
+
+            # For CLI commands:
+            old_cli_commands = {}
+            for c in old_data.get("bw_cli_commands", []):
+                old_cli_commands[(c.plugin_id, c.name)] = c
+
+            # For templates:
+            old_templates = {(t.plugin_id, t.id): t for t in old_data.get("bw_templates", [])}
+            old_template_steps = {}
+            for st in old_data.get("bw_template_steps", []):
+                old_template_steps[(st.template_id, st.id)] = st
+
+            old_template_settings = {}
+            for ts in old_data.get("bw_template_settings", []):
+                old_template_settings[(ts.template_id, ts.setting_id, ts.suffix, ts.step_id)] = ts
+
+            old_template_configs = {}
+            for tc in old_data.get("bw_template_custom_configs", []):
+                old_template_configs[(tc.template_id, tc.type, tc.name, tc.step_id)] = tc
+
+            # Build desired data from default_plugins
+            # The following logic is similar to the original code but uses dicts/sets for comparisons.
+
+            # Desired plugins, settings, jobs, pages, etc.
+            desired_plugins = {}
+            desired_settings = {}
+            desired_selects = set()
+            desired_jobs = {}
+            desired_plugin_pages = {}
+            desired_cli_commands = {}
+            desired_templates = {}
+            desired_template_steps = {}
+            desired_template_settings = {}
+            desired_template_configs = {}
+
+            saved_settings = set()
+
+            # Process default plugins
             for plugins in default_plugins:
                 if not isinstance(plugins, list):
                     plugins = [plugins]
 
                 for plugin in plugins:
-                    settings = {}
-                    jobs = []
-                    commands = {}
                     if "id" not in plugin:
-                        settings = plugin
-                        plugin = {
+                        # General plugin
+                        base_plugin = {
                             "id": "general",
                             "name": "General",
                             "description": "The general settings for the server",
                             "version": "0.1",
                             "stream": "partial",
+                            "type": "core",
+                            "method": "manual",
+                            "data": None,
+                            "checksum": None,
                         }
+                        settings = plugin
+                        jobs = []
+                        commands = {}
                     else:
+                        # Extract plugin details
                         settings = plugin.pop("settings", {})
                         jobs = plugin.pop("jobs", [])
                         plugin.pop("page", False)
@@ -617,656 +663,498 @@ class Database:
                         if not isinstance(commands, dict):
                             commands = {}
 
-                    # ? Check if the plugin already exists and if it has changed
-                    for i, db_plugin in enumerate(old_data.get("bw_plugins", [])):
-                        if db_plugin.id == plugin["id"]:
-                            found_plugins.add(plugin["id"])
-                            if any(getattr(db_plugin, key, None) != plugin.get(key) for key in ("name", "description", "version", "stream", "type", "method")):
-                                self.logger.warning(
-                                    f'{plugin.get("type", "core").title()} Plugin "{plugin["id"]}" already exists, updating it with the new values'
-                                )
-                            del old_data["bw_plugins"][i]
-                            break
+                        base_plugin = {
+                            "id": plugin["id"],
+                            "name": plugin["name"],
+                            "description": plugin["description"],
+                            "version": plugin["version"],
+                            "stream": plugin["stream"],
+                            "type": plugin.get("type", "core"),
+                            "method": plugin.get("method", "manual"),
+                            "data": plugin.get("data"),
+                            "checksum": plugin.get("checksum"),
+                        }
 
-                    if plugin["id"] == "letsencrypt_dns":
-                        self.logger.warning(f"Plugin {plugin['id']} is no longer supported in 1.6.X versions, skipping it")
+                    # Skip unsupported plugin
+                    if base_plugin["id"] == "letsencrypt_dns":
+                        self.logger.warning(f'Plugin {base_plugin["id"]} is no longer supported, skipping it')
                         continue
 
-                    if old_data and plugin["id"] not in found_plugins:
-                        self.logger.warning(f'{plugin.get("type", "core").title()} Plugin "{plugin["id"]}" does not exist, creating it')
+                    # Track desired plugin
+                    desired_plugins[base_plugin["id"]] = base_plugin
 
-                    to_put.append(
-                        Plugins(
-                            id=plugin["id"],
-                            name=plugin["name"],
-                            description=plugin["description"],
-                            version=plugin["version"],
-                            stream=plugin["stream"],
-                            type=plugin.get("type", "core"),
-                            method=plugin.get("method"),
-                            data=plugin.get("data"),
-                            checksum=plugin.get("checksum"),
-                        )
-                    )
+                    # Identify if this plugin existed before
+                    plugin_found = base_plugin["id"] in old_plugins
+                    if not plugin_found and old_plugins:
+                        self.logger.warning(f'{base_plugin.get("type", "core").title()} Plugin "{base_plugin["id"]}" does not exist, creating it')
 
-                    ### * SETTINGS
-
-                    # ? Add the settings and selects
+                    # SETTINGS
                     order = 0
-                    for setting, value in settings.items():
-                        value.update({"plugin_id": plugin["id"], "name": value["id"], "id": setting})
+                    plugin_saved_settings = set()
+                    for setting_key, value in settings.items():
+                        # setting_key is e.g. "my_setting"
+                        # value should contain "id", "select", etc.
                         select_values = value.pop("select", [])
+                        # The main setting id:
+                        setting_id = setting_key
+                        # Ensure plugin_id and name in the value
+                        value["plugin_id"] = base_plugin["id"]
+                        value["name"] = value["id"]
+                        value["id"] = setting_id
+                        value["order"] = order
 
-                        # ? Check if the setting already exists and if it has changed
-                        setting_found = False
-                        if plugin["id"] in found_plugins:
-                            for i, old_setting in enumerate(old_data.get("bw_settings", [])):
-                                if old_setting.plugin_id == plugin["id"] and (old_setting.id == setting or old_setting.name == value["name"]):
-                                    setting_found = True
-                                    if any(getattr(old_setting, key, None) != data for key, data in value.items()):
-                                        self.logger.warning(
-                                            f'{plugin.get("type", "core").title()} Plugin "{plugin["id"]}"\'s Setting "{setting}" already exists, updating it with the new values'
-                                        )
-                                    del old_data["bw_settings"][i]
-                                    break
-
-                            if not setting_found:
-                                self.logger.warning(
-                                    f'{plugin.get("type", "core").title()} Plugin "{plugin["id"]}"\'s Setting "{setting}" does not exist, creating it'
-                                )
-
-                        to_put.append(Settings(**value | {"order": order}))
-
-                        for select in select_values:
-                            if plugin["id"] in found_plugins and setting_found:
-                                # ? Check if the select already exists and if it has changed
-                                select_found = False
-                                for i, db_setting_select in enumerate(old_data.get("bw_selects", [])):
-                                    if db_setting_select.setting_id == value["id"] and db_setting_select.value == select:
-                                        select_found = True
-                                        del old_data["bw_selects"][i]
-                                        break
-
-                                if not select_found:
-                                    self.logger.warning(
-                                        f'{plugin.get("type", "core").title()} Plugin "{plugin["id"]}"\'s Setting "{setting}"\'s Select "{select}" does not exist, creating it'
-                                    )
-
-                            to_put.append(Selects(setting_id=value["id"], value=select))
-
-                        # ? Clear out the old selects
-                        for i, old_select in enumerate(old_data.get("bw_selects", [])):
-                            if old_select.setting_id == value["id"]:
-                                self.logger.warning(
-                                    f'{plugin.get("type", "core").title()} Plugin "{plugin["id"]}"\'s Setting "{setting}"\'s Select "{old_select.value}" has been removed, deleting it'
-                                )
-                                del old_data["bw_selects"][i]
-
+                        desired_settings[(base_plugin["id"], setting_id)] = value
+                        desired_selects.update((setting_id, sel_val) for sel_val in select_values)
+                        plugin_saved_settings.add(setting_id)
                         order += 1
-                        saved_settings.add(setting)
 
-                    # ? Clear out the old settings and related data
-                    for i, old_setting in enumerate(old_data.get("bw_settings", [])):
-                        if old_setting.plugin_id == plugin["id"]:
-                            self.logger.warning(
-                                f'{plugin.get("type", "core").title()} Plugin "{plugin["id"]}"\'s Setting "{old_setting.id}" has been removed, deleting it'
-                            )
+                    saved_settings |= plugin_saved_settings
 
-                            for j, old_select in enumerate(old_data.get("bw_selects", [])):
-                                if old_select.setting_id == old_setting.id:
-                                    del old_data["bw_selects"][j]
-
-                            for j, old_global_value in enumerate(old_data.get("bw_global_values", [])):
-                                if old_global_value.setting_id == old_setting.id:
-                                    del old_data["bw_global_values"][j]
-
-                            for j, old_service_setting in enumerate(old_data.get("bw_services_settings", [])):
-                                if old_service_setting.setting_id == old_setting.id:
-                                    del old_data["bw_services_settings"][j]
-
-                            del old_data["bw_settings"][i]
-
-                    ### * JOBS
-
-                    # ? Add the jobs
+                    # JOBS
                     for job in jobs:
                         job["file_name"] = job.pop("file")
                         job["reload"] = job.get("reload", False)
                         job["run_async"] = job.pop("async", False)
+                        desired_jobs[(base_plugin["id"], job["name"])] = job
 
-                        # ? Check if the job already exists and if it has changed
-                        if plugin["id"] in found_plugins:
-                            job_found = False
-                            for i, old_job in enumerate(old_data.get("bw_jobs", [])):
-                                if old_job.plugin_id == plugin["id"] and old_job.name == job["name"]:
-                                    job_found = True
-                                    if any(getattr(old_job, key, None) != data for key, data in job.items()):
-                                        self.logger.warning(
-                                            f'{plugin.get("type", "core").title()} Plugin "{plugin["id"]}"\'s Job "{job["name"]}" already exists, updating it with the new values'
-                                        )
-                                    del old_data["bw_jobs"][i]
-                                    break
+                    # COMMANDS
+                    for command, file_name in commands.items():
+                        desired_cli_commands[(base_plugin["id"], command)] = file_name
 
-                            if not job_found:
-                                self.logger.warning(
-                                    f'{plugin.get("type", "core").title()} Plugin "{plugin["id"]}"\'s Job "{job["name"]}" does not exist, creating it'
-                                )
-
-                        to_put.append(Jobs(plugin_id=plugin["id"], **job))
-
-                    # ? Clear out the old jobs and related data
-                    for i, old_job in enumerate(old_data.get("bw_jobs", [])):
-                        if old_job.plugin_id == plugin["id"]:
-                            self.logger.warning(
-                                f'{plugin.get("type", "core").title()} Plugin "{plugin["id"]}"\'s Job "{old_job.name}" has been removed, deleting it'
-                            )
-
-                            for j, old_cache in enumerate(old_data.get("bw_jobs_cache", [])):
-                                if old_cache.job_id == old_job.id:
-                                    del old_data["bw_jobs_cache"][j]
-
-                            for j, old_run in enumerate(old_data.get("bw_jobs_runs", [])):
-                                if old_run.job_id == old_job.id:
-                                    del old_data["bw_jobs_runs"][j]
-
-                            del old_data["bw_jobs"][i]
-
-                    ### * PAGES
-
+                    # PAGES
                     plugin_path = (
-                        Path(sep, "usr", "share", "bunkerweb", "core", plugin["id"])
-                        if plugin.get("type", "core") == "core"
+                        Path("/", "usr", "share", "bunkerweb", "core", base_plugin["id"])
+                        if base_plugin.get("type", "core") == "core"
                         else (
-                            Path(sep, "etc", "bunkerweb", "plugins", plugin["id"])
-                            if plugin.get("type", "core") == "external"
-                            else Path(sep, "etc", "bunkerweb", "pro", "plugins", plugin["id"])
+                            Path("/", "etc", "bunkerweb", "plugins", base_plugin["id"])
+                            if base_plugin.get("type", "core") == "external"
+                            else Path("/", "etc", "bunkerweb", "pro", "plugins", base_plugin["id"])
                         )
                     )
                     path_ui = plugin_path.joinpath("ui")
-
-                    # ? Add the plugin pages
                     if path_ui.is_dir():
                         with BytesIO() as plugin_page_content:
                             with tar_open(fileobj=plugin_page_content, mode="w:gz", compresslevel=9) as tar:
                                 tar.add(path_ui, arcname=path_ui.name, recursive=True)
                             plugin_page_content.seek(0)
                             checksum = bytes_hash(plugin_page_content, algorithm="sha256")
-
-                            if plugin["id"] in found_plugins:
-                                # ? Check if the page already exists and if it has changed
-                                page_found = False
-                                for i, plugin_page in enumerate(old_data.get("bw_plugin_pages", [])):
-                                    if plugin_page.plugin_id == plugin["id"]:
-                                        page_found = True
-                                        if getattr(plugin_page, "checksum", None) != checksum or getattr(plugin_page, "template_file", None):
-                                            self.logger.warning(
-                                                f'{plugin.get("type", "core").title()} Plugin "{plugin["id"]}"\'s Page already exists, updating it with the new values'
-                                            )
-                                        del old_data["bw_plugin_pages"][i]
-                                        break
-
-                                if not page_found:
-                                    self.logger.warning(f'{plugin.get("type", "core").title()} Plugin "{plugin["id"]}"\'s Page does not exist, creating it')
-
-                            to_put.append(
-                                Plugin_pages(
-                                    plugin_id=plugin["id"],
-                                    data=plugin_page_content.getvalue(),
-                                    checksum=checksum,
-                                )
-                            )
-
-                    # ? Clear out the old pages
-                    for i, old_plugin_page in enumerate(old_data.get("bw_plugin_pages", [])):
-                        if old_plugin_page.plugin_id == plugin["id"]:
-                            self.logger.warning(f'{plugin.get("type", "core").title()} Plugin "{plugin["id"]}"\'s Page has been removed, deleting it')
-                            del old_data["bw_plugin_pages"][i]
-
-                    ### * CLI COMMANDS
-
-                    # ? Add the plugin commands
-                    for command, file_name in commands.items():
-                        if plugin["id"] in found_plugins:
-                            # ? Check if the command already exists and if it has changed
-                            command_found = False
-                            for i, old_command in enumerate(old_data.get("bw_cli_commands", [])):
-                                if old_command.plugin_id == plugin["id"] and old_command.name == command:
-                                    command_found = True
-                                    if old_command.file_name != file_name:
-                                        self.logger.warning(
-                                            f'{plugin.get("type", "core").title()} Plugin "{plugin["id"]}"\'s Command "{command}" already exists, updating it with the new file name'
-                                        )
-                                    del old_data["bw_cli_commands"][i]
-                                    break
-
-                            if not command_found:
-                                self.logger.warning(
-                                    f'{plugin.get("type", "core").title()} Plugin "{plugin["id"]}"\'s Command "{command}" does not exist, creating it'
-                                )
-
-                        to_put.append(Bw_cli_commands(name=command, plugin_id=plugin["id"], file_name=file_name))
-
-                    # ? Clear out the old commands
-                    for i, old_command in enumerate(old_data.get("bw_cli_commands", [])):
-                        if old_command.plugin_id == plugin["id"]:
-                            self.logger.warning(
-                                f'{plugin.get("type", "core").title()} Plugin "{plugin["id"]}"\'s Command "{old_command.name}" has been removed, deleting it'
-                            )
-                            del old_data["bw_cli_commands"][i]
-
-            # ? Add potential external/pro settings to saved_settings
-            for i, old_plugin in enumerate(old_data.get("bw_plugins", [])):
-                if getattr(old_plugin, "external", False) or getattr(old_plugin, "type", "core") != "core":
-                    for j, old_setting in enumerate(old_data.get("bw_settings", [])):
-                        if old_setting.plugin_id == old_plugin.id:
-                            saved_settings.add(old_setting.id)
+                            desired_plugin_pages[base_plugin["id"]] = {
+                                "data": plugin_page_content.getvalue(),
+                                "checksum": checksum,
+                            }
 
             for plugins in default_plugins:
                 if not isinstance(plugins, list):
                     plugins = [plugins]
 
                 for plugin in plugins:
+                    if "id" not in plugin:
+                        # General plugin
+                        base_plugin = {"id": "general", "type": "core"}
+                    else:
+                        base_plugin = {"id": plugin["id"], "type": plugin.get("type", "core")}
 
-                    ### * TEMPLATES
+                    # Skip unsupported plugin
+                    if base_plugin["id"] == "letsencrypt_dns":
+                        continue
 
+                    # TEMPLATES
                     plugin_path = (
-                        Path(sep, "usr", "share", "bunkerweb", "core", plugin.get("id", "general"))
-                        if plugin.get("type", "core") == "core"
+                        Path("/", "usr", "share", "bunkerweb", "core", base_plugin["id"])
+                        if base_plugin.get("type", "core") == "core"
                         else (
-                            Path(sep, "etc", "bunkerweb", "plugins", plugin.get("id", "general"))
-                            if plugin.get("type", "core") == "external"
-                            else Path(sep, "etc", "bunkerweb", "pro", "plugins", plugin.get("id", "general"))
+                            Path("/", "etc", "bunkerweb", "plugins", base_plugin["id"])
+                            if base_plugin.get("type", "core") == "external"
+                            else Path("/", "etc", "bunkerweb", "pro", "plugins", base_plugin["id"])
                         )
                     )
                     templates_path = plugin_path.joinpath("templates")
-
-                    if not templates_path.is_dir():
-                        continue
-
-                    # ? Add the templates
-                    for template_file in templates_path.iterdir():
-                        if template_file.is_dir():
-                            continue
-
-                        try:
-                            template_data = loads(template_file.read_text())
-                        except JSONDecodeError:
-                            self.logger.error(
-                                f"{plugin.get('type', 'core').title()} Plugin \"{plugin['id']}\"'s Template file \"{template_file}\" is not a valid JSON file"
-                            )
-                            continue
-
-                        template_id = template_file.stem
-
-                        if plugin["id"] in found_plugins:
-                            # ? Check if the template already exists and if it has changed
-                            template_found = False
-                            for i, old_template in enumerate(old_data.get("bw_templates", [])):
-                                if old_template.plugin_id == plugin.get("id", "general") and old_template.id == template_id:
-                                    template_found = True
-                                    del old_data["bw_templates"][i]
-                                    break
-
-                            if not template_found:
-                                self.logger.warning(
-                                    f'{plugin.get("type", "core").title()} Plugin "{plugin["id"]}"\'s Template "{template_id}" does not exist, creating it'
-                                )
-
-                        to_put.append(Templates(id=template_id, plugin_id=plugin.get("id", "general"), name=template_data.get("name", template_id)))
-
-                        ### * TEMPLATES STEPS
-
-                        # ? Add template steps
-                        steps_settings = {}
-                        steps_configs = {}
-                        for step_id, step in enumerate(template_data.get("steps", []), start=1):
-                            if plugin["id"] in found_plugins and template_found:
-                                # ? Check if the step already exists and if it has changed
-                                step_found = False
-                                for i, old_step in enumerate(old_data.get("bw_template_steps", [])):
-                                    if old_step.template_id == template_id and old_step.id == step_id:
-                                        step_found = True
-                                        if old_step.title != step["title"] or old_step.subtitle != step["subtitle"]:
-                                            self.logger.warning(
-                                                f'{plugin.get("type", "core").title()} Plugin "{plugin["id"]}"\'s Template "{template_id}"\'s Step "{step["name"]}" already exists, updating it with the new values'
-                                            )
-                                        del old_data["bw_template_steps"][i]
-                                        break
-
-                                if not step_found:
-                                    self.logger.warning(
-                                        f'{plugin.get("type", "core").title()} Plugin "{plugin["id"]}"\'s Template "{template_id}"\'s Step "{step["name"]}" does not exist, creating it'
-                                    )
-
-                            to_put.append(Template_steps(id=step_id, template_id=template_id, title=step["title"], subtitle=step["subtitle"]))
-
-                            # ? Add step settings and configs for later
-                            for setting in step.get("settings", []):
-                                if step_id not in steps_settings:
-                                    steps_settings[step_id] = []
-                                steps_settings[step_id].append(setting)
-
-                            for config in step.get("configs", []):
-                                if step_id not in steps_configs:
-                                    steps_configs[step_id] = []
-                                steps_configs[step_id].append(config)
-
-                        # ? Clear out the old steps and related data
-                        for i, old_step in enumerate(old_data.get("bw_template_steps", [])):
-                            if old_step.template_id == template_id:
-                                self.logger.warning(
-                                    f'{plugin.get("type", "core").title()} Plugin "{plugin["id"]}"\'s Template "{template_id}"\'s Step "{old_step.id}" has been removed, deleting it'
-                                )
-
-                                for j, old_setting in enumerate(old_data.get("bw_template_settings", [])):
-                                    if old_setting.step_id == old_step.id:
-                                        old_data["bw_template_settings"][j]["step_id"] = None
-
-                                for j, old_config in enumerate(old_data.get("bw_template_configs", [])):
-                                    if old_config.step_id == old_step.id:
-                                        old_data["bw_template_configs"][j]["step_id"] = None
-
-                                del old_data["bw_template_steps"][i]
-
-                        ### * TEMPLATES SETTINGS
-
-                        # ? Add template settings
-                        for setting, default in template_data.get("settings", {}).items():
-                            setting_id, suffix = setting.rsplit("_", 1) if self.suffix_rx.search(setting) else (setting, None)
-
-                            # ? Check if the setting is restricted
-                            if setting_id in self.RESTRICTED_TEMPLATE_SETTINGS:
-                                self.logger.error(
-                                    f'{plugin.get("type", "core").title()} Plugin "{plugin["id"]}"\'s Template {template_id} has a restricted setting: {setting}, skipping it'
-                                )
+                    if templates_path.is_dir():
+                        for template_file in templates_path.iterdir():
+                            if template_file.is_dir():
                                 continue
-                            # ? Check if the setting exists
-                            elif setting_id not in saved_settings:
-                                self.logger.error(
-                                    f'{plugin.get("type", "core").title()} Plugin "{plugin["id"]}"\'s Template {template_id} has an invalid setting: {setting}, skipping it'
-                                )
-                                continue
-
-                            if plugin["id"] in found_plugins and template_found:
-                                # ? Check if the template setting already exists and if it has changed
-                                setting_found = False
-                                for i, old_setting in enumerate(old_data.get("bw_template_settings", [])):
-                                    if old_setting.template_id == template_id and old_setting.id == setting_id and old_setting.suffix == suffix:
-                                        setting_found = True
-                                        if old_setting.default != default:
-                                            self.logger.warning(
-                                                f'{plugin.get("type", "core").title()} Plugin "{plugin["id"]}"\'s Template "{template_id}"\'s Setting "{setting}" already exists, updating it with the new default value'
-                                            )
-                                        del old_data["bw_template_settings"][i]
-                                        break
-
-                                if not setting_found:
-                                    self.logger.warning(
-                                        f'{plugin.get("type", "core").title()} Plugin "{plugin["id"]}"\'s Template "{template_id}"\'s Setting "{setting}" does not exist, creating it'
-                                    )
-
-                            # ? Check if the setting is part of a step
-                            step_id = None
-                            for step, settings in steps_settings.items():
-                                if setting in settings:
-                                    step_id = step
-                                    break
-
-                            if step_id:
-                                to_put.append(
-                                    Template_settings(
-                                        template_id=template_id,
-                                        setting_id=setting_id,
-                                        step_id=step_id,
-                                        default=default,
-                                        suffix=suffix,
-                                    )
-                                )
-                                continue
-
-                            to_put.append(
-                                Template_settings(
-                                    template_id=template_id,
-                                    setting_id=setting_id,
-                                    default=default,
-                                    suffix=suffix,
-                                )
-                            )
-
-                        # ? Clear out the old template settings
-                        for i, old_setting in enumerate(old_data.get("bw_template_settings", [])):
-                            if old_setting.template_id == template_id:
-                                self.logger.warning(
-                                    f'{plugin.get("type", "core").title()} Plugin "{plugin["id"]}"\'s Template "{template_id}"\'s Setting "{old_setting.id}" has been removed, deleting it'
-                                )
-                                del old_data["bw_template_settings"][i]
-
-                        ### * TEMPLATES CUSTOM CONFIGS
-
-                        # ? Add template custom configs
-                        for config in template_data.get("configs", []):
                             try:
-                                config_type, config_name = config.split("/", 1)
-                            except ValueError:
+                                template_data = loads(template_file.read_text())
+                            except JSONDecodeError:
                                 self.logger.error(
-                                    f'{plugin.get("type", "core").title()} Plugin "{plugin["id"]}"\'s Template {template_id} has an invalid config: {config}'
+                                    f'{base_plugin.get("type", "core").title()} Plugin "{base_plugin["id"]}"\'s Template file "{template_file}" is not valid JSON'
                                 )
                                 continue
 
-                            # ? Check if the template custom config type is valid
-                            if config_type not in self.MULTISITE_CUSTOM_CONFIG_TYPES:
-                                self.logger.error(
-                                    f'{plugin.get("type", "core").title()} Plugin "{plugin["id"]}"\'s Template {template_id} has an invalid config type: {config_type}'
-                                )
-                                continue
-                            # ? Check if the template custom config exists
-                            elif not templates_path.joinpath(template_id, "configs", config_type, config_name).is_file():
-                                self.logger.error(
-                                    f'{plugin.get("type", "core").title()} Plugin "{plugin["id"]}"\'s Template {template_id} has a missing config: {config}'
-                                )
-                                continue
+                            template_id = template_file.stem
+                            desired_templates[(base_plugin["id"], template_id)] = {"name": template_data.get("name", template_id)}
 
-                            content = templates_path.joinpath(template_id, "configs", config_type, config_name).read_bytes()
-                            checksum = bytes_hash(content, algorithm="sha256")
+                            # Steps
+                            found_steps = set()
+                            steps_settings = {}
+                            steps_configs = {}
+                            for step_id, step in enumerate(template_data.get("steps", []), start=1):
+                                desired_template_steps[(template_id, step_id)] = {"title": step["title"], "subtitle": step["subtitle"]}
+                                found_steps.add(step_id)
+                                for sett in step.get("settings", []):
+                                    if step_id not in steps_settings:
+                                        steps_settings[step_id] = []
+                                    steps_settings[step_id].append(sett)
+                                for conf in step.get("configs", []):
+                                    if step_id not in steps_configs:
+                                        steps_configs[step_id] = []
+                                    steps_configs[step_id].append(conf)
 
-                            config_name = config_name.replace(".conf", "")
+                            # Template-level settings
+                            order = 0
+                            for setting, default in template_data.get("settings", {}).items():
+                                # Check restrictions and existence
+                                if setting in getattr(self, "RESTRICTED_TEMPLATE_SETTINGS", []):
+                                    self.logger.error(
+                                        f'{base_plugin.get("type", "core").title()} Plugin "{base_plugin["id"]}"\'s Template {template_id} has restricted setting "{setting}", skipping'
+                                    )
+                                    continue
+                                # Check if setting exists globally
+                                setting_id = setting
+                                suffix = 0
+                                if hasattr(self, "suffix_rx") and self.suffix_rx.search(setting):
+                                    setting_id, suffix = setting.rsplit("_", 1)
+                                if setting_id not in saved_settings:
+                                    self.logger.error(
+                                        f'{base_plugin.get("type", "core").title()} Plugin "{base_plugin["id"]}"\'s Template {template_id} has invalid setting "{setting}", skipping'
+                                    )
+                                    continue
 
-                            if plugin["id"] in found_plugins and template_found:
-                                # ? Check if the custom config already exists and if it has changed
-                                config_found = False
-                                for i, old_config in enumerate(old_data.get("bw_template_configs", [])):
-                                    if old_config.template_id == template_id and old_config.name == config_name and old_config.type == config_type:
-                                        config_found = True
-                                        if old_config.checksum != checksum:
-                                            self.logger.warning(
-                                                f'{plugin.get("type", "core").title()} Plugin "{plugin["id"]}"\'s Template "{template_id}"\'s Custom config "{config}" already exists, updating it with the new values'
-                                            )
-                                        del old_data["bw_template_configs"][i]
+                                # Check if belongs to a step
+                                step_for_setting = None
+                                for sid, step_set_list in steps_settings.items():
+                                    if setting in step_set_list:
+                                        step_for_setting = sid
                                         break
 
-                                if not config_found:
-                                    self.logger.warning(
-                                        f'{plugin.get("type", "core").title()} Plugin "{plugin["id"]}"\'s Template "{template_id}"\'s Custom config "{config}" does not exist, creating it'
+                                if not step_for_setting:
+                                    self.logger.error(
+                                        f'{base_plugin.get("type", "core").title()} Plugin "{base_plugin["id"]}"\'s Template {template_id}`s setting "{setting}" doesn\'t belong to a step, skipping'
                                     )
+                                    continue
 
-                            # ? Check if the custom config is part of a step
-                            step_id = None
-                            for step, configs in steps_configs.items():
-                                if config in configs:
-                                    step_id = step
-                                    break
+                                desired_template_settings[(template_id, setting_id, suffix, step_for_setting)] = {"default": default, "order": order}
+                                order += 1
 
-                            if step_id:
-                                to_put.append(
-                                    Template_custom_configs(
-                                        template_id=template_id,
-                                        step_id=step_id,
-                                        type=config_type,
-                                        name=config_name,
-                                        data=content,
-                                        checksum=checksum,
+                            # Template-level configs
+                            order = 0
+                            for config in template_data.get("configs", []):
+                                try:
+                                    config_type, config_name = config.split("/", 1)
+                                except ValueError:
+                                    self.logger.error(
+                                        f'{base_plugin.get("type", "core").title()} Plugin "{base_plugin["id"]}"\'s Template {template_id} has invalid config "{config}"'
                                     )
-                                )
-                                continue
+                                    continue
+                                if config_type not in getattr(self, "MULTISITE_CUSTOM_CONFIG_TYPES", []):
+                                    self.logger.error(
+                                        f'{base_plugin.get("type", "core").title()} Plugin "{base_plugin["id"]}"\'s Template {template_id} has invalid config type "{config_type}"'
+                                    )
+                                    continue
 
-                            to_put.append(
-                                Template_custom_configs(
-                                    template_id=template_id,
-                                    type=config_type,
-                                    name=config_name,
-                                    data=content,
-                                    checksum=checksum,
-                                )
-                            )
+                                config_file = templates_path.joinpath(template_id, "configs", config_type, config_name)
+                                if not config_file.is_file():
+                                    self.logger.error(
+                                        f'{base_plugin.get("type", "core").title()} Plugin "{base_plugin["id"]}"\'s Template {template_id} missing config "{config}"'
+                                    )
+                                    continue
 
-                        # ? Clear out the old template custom configs
-                        for i, old_config in enumerate(old_data.get("bw_template_configs", [])):
-                            if old_config.template_id == template_id:
-                                self.logger.warning(
-                                    f'{plugin.get("type", "core").title()} Plugin "{plugin["id"]}"\'s Template "{template_id}"\'s Custom config "{old_config.name}" has been removed, deleting it'
-                                )
-                                del old_data["bw_template_configs"][i]
+                                content = config_file.read_bytes()
+                                checksum = bytes_hash(content, algorithm="sha256")
+                                config_name_clean = config_name.replace(".conf", "")
 
-                    # ? Clear out the old templates and related data
-                    for i, old_template in enumerate(old_data.get("bw_templates", [])):
-                        if old_template.plugin_id == plugin.get("id", "general"):
-                            self.logger.warning(
-                                f'{plugin.get("type", "core").title()} Plugin "{plugin.get("id", "general")}"\'s Template "{old_template.id}" has been removed, deleting it'
-                            )
+                                # Check if belongs to a step
+                                step_for_config = None
+                                for sid, step_conf_list in steps_configs.items():
+                                    if config in step_conf_list:
+                                        step_for_config = sid
+                                        break
 
-                            for j, old_step in enumerate(old_data.get("bw_template_steps", [])):
-                                if old_step.template_id == old_template.id:
-                                    del old_data["bw_template_steps"][j]
+                                if not step_for_config:
+                                    self.logger.error(
+                                        f'{base_plugin.get("type", "core").title()} Plugin "{base_plugin["id"]}"\'s Template {template_id}`s config "{config}" doesn\'t belong to a step, skipping'
+                                    )
+                                    continue
 
-                            for j, old_setting in enumerate(old_data.get("bw_template_settings", [])):
-                                if old_setting.template_id == old_template.id:
-                                    del old_data["bw_template_settings"][j]
+                                desired_template_configs[(template_id, config_type, config_name_clean, step_for_config)] = {
+                                    "data": content,
+                                    "checksum": checksum,
+                                    "order": order,
+                                }
+                                order += 1
 
-                            for j, old_config in enumerate(old_data.get("bw_template_configs", [])):
-                                if old_config.template_id == old_template.id:
-                                    del old_data["bw_template_configs"][j]
+            # Compute differences for PLUGINS
+            old_plugin_ids = set(old_plugins.keys())
+            new_plugin_ids = set(desired_plugins.keys())
 
-                            del old_data["bw_templates"][i]
+            # Plugins to create
+            for pid in new_plugin_ids - old_plugin_ids:
+                p = desired_plugins[pid]
+                to_put.append(Plugins(**p))
 
-            # ? Clear out the old plugins and related data
-            for i, old_plugin in enumerate(old_data.get("bw_plugins", [])):
-                if not getattr(old_plugin, "external", False) and getattr(old_plugin, "type", "core") == "core":
-                    self.logger.warning(f'Core plugin "{old_plugin.id}" has been removed, deleting it')
+            # Plugins to update
+            for pid in old_plugin_ids & new_plugin_ids:
+                old_p = old_plugins[pid]
+                new_p = desired_plugins[pid]
+                attrs_to_check = ("name", "description", "version", "stream", "type", "method", "data", "checksum")
+                if any(getattr(old_p, attr, None) != new_p.get(attr) for attr in attrs_to_check):
+                    to_update.append({"type": "plugin", "filter": {"id": pid}, "data": {k: new_p[k] for k in attrs_to_check if k in new_p}})
 
-                    for j, old_setting in enumerate(old_data.get("bw_settings", [])):
-                        if old_setting.plugin_id == old_plugin.id:
-                            for k, old_select in enumerate(old_data.get("bw_selects", [])):
-                                if old_select.setting_id == old_setting.id:
-                                    del old_data["bw_selects"][k]
+            # Plugins to delete
+            for pid in old_plugin_ids - new_plugin_ids:
+                old_p = old_plugins[pid]
+                self.logger.warning(f'{old_p.type.title()} plugin "{pid}" has been removed, deleting it')
+                to_delete.append({"type": "plugin", "filter": {"id": pid}})
 
-                            for k, old_global_value in enumerate(old_data.get("bw_global_values", [])):
-                                if old_global_value.setting_id == old_setting.id:
-                                    del old_data["bw_global_values"][k]
+            # SETTINGS
+            old_setting_keys = set(old_settings.keys())
+            new_setting_keys = set(desired_settings.keys())
+            for sk in new_setting_keys - old_setting_keys:
+                to_put.append(Settings(**desired_settings[sk]))
 
-                            for k, old_service_setting in enumerate(old_data.get("bw_services_settings", [])):
-                                if old_service_setting.setting_id == old_setting.id:
-                                    del old_data["bw_services_settings"][k]
+            for sk in old_setting_keys & new_setting_keys:
+                old_s = old_settings[sk]
+                new_s = desired_settings[sk]
+                # Check changes excluding order since we always set order
+                changed = any(getattr(old_s, k, None) != new_s.get(k) for k in new_s.keys())
+                if changed:
+                    to_update.append({"type": "setting", "filter": {"plugin_id": sk[0], "id": sk[1]}, "data": new_s})
 
-                            del old_data["bw_settings"][j]
+            # Settings to delete
+            for sk in old_setting_keys - new_setting_keys:
+                to_delete.append({"type": "setting", "filter": {"plugin_id": sk[0], "id": sk[1]}})
 
-                    for j, old_job in enumerate(old_data.get("bw_jobs", [])):
-                        if old_job.plugin_id == old_plugin.id:
-                            for k, old_cache in enumerate(old_data.get("bw_jobs_cache", [])):
-                                if old_cache.job_id == old_job.id:
-                                    del old_data["bw_jobs_cache"][k]
+            # SELECTS
+            old_select_keys = set(old_selects.keys())
+            # desired_selects is a set of (setting_id, value)
+            # We must correlate with known settings. If setting_id belongs to a plugin_id?
+            # Original code just handled removing selects not present. We'll trust that logic:
+            # Insert new selects
+            for sel in desired_selects - old_select_keys:
+                # We only have setting_id, value
+                to_put.append(Selects(setting_id=sel[0], value=sel[1]))
 
-                            for k, old_run in enumerate(old_data.get("bw_jobs_runs", [])):
-                                if old_run.job_id == old_job.id:
-                                    del old_data["bw_jobs_runs"][k]
+            # Delete old selects not needed
+            for sel in old_select_keys - desired_selects:
+                to_delete.append({"type": "select", "filter": {"setting_id": sel[0], "value": sel[1]}})
 
-                            del old_data["bw_jobs"][j]
+            # JOBS
+            old_job_keys = set(old_jobs.keys())
+            new_job_keys = set(desired_jobs.keys())
 
-                    for j, old_page in enumerate(old_data.get("bw_plugin_pages", [])):
-                        if old_page.plugin_id == old_plugin.id:
-                            del old_data["bw_plugin_pages"][j]
+            for jk in new_job_keys - old_job_keys:
+                job = desired_jobs[jk]
+                to_put.append(Jobs(plugin_id=jk[0], **job))
 
-                    for j, old_command in enumerate(old_data.get("bw_cli_commands", [])):
-                        if old_command.plugin_id == old_plugin.id:
-                            del old_data["bw_cli_commands"][j]
+            for jk in old_job_keys & new_job_keys:
+                old_j = old_jobs[jk]
+                new_j = desired_jobs[jk]
+                changed = any(getattr(old_j, k, None) != new_j.get(k) for k in new_j.keys())
+                if changed:
+                    to_update.append({"type": "job", "filter": {"plugin_id": jk[0], "name": jk[1]}, "data": new_j})
 
-                    for j, old_template in enumerate(old_data.get("bw_templates", [])):
-                        if old_template.plugin_id == old_plugin.id:
-                            for k, old_step in enumerate(old_data.get("bw_template_steps", [])):
-                                if old_step.template_id == old_template.id:
-                                    del old_data["bw_template_steps"][k]
+            for jk in old_job_keys - new_job_keys:
+                to_delete.append({"type": "job", "filter": {"plugin_id": jk[0], "name": jk[1]}})
 
-                            for k, old_setting in enumerate(old_data.get("bw_template_settings", [])):
-                                if old_setting.template_id == old_template.id:
-                                    del old_data["bw_template_settings"][k]
+            # PLUGIN PAGES
+            old_page_ids = set(old_plugin_pages.keys())
+            new_page_ids = set(desired_plugin_pages.keys())
 
-                            for k, old_config in enumerate(old_data.get("bw_template_configs", [])):
-                                if old_config.template_id == old_template.id:
-                                    del old_data["bw_template_configs"][k]
+            for pid in new_page_ids - old_page_ids:
+                pp = desired_plugin_pages[pid]
+                to_put.append(Plugin_pages(plugin_id=pid, data=pp["data"], checksum=pp["checksum"]))
 
-                            del old_data["bw_templates"][j]
+            for pid in old_page_ids & new_page_ids:
+                old_pp = old_plugin_pages[pid]
+                new_pp = desired_plugin_pages[pid]
+                if old_pp.checksum != new_pp["checksum"]:
+                    to_update.append({"type": "plugin_page", "filter": {"plugin_id": pid}, "data": {"data": new_pp["data"], "checksum": new_pp["checksum"]}})
 
-                    del old_data["bw_plugins"][i]
+            for pid in old_page_ids - new_page_ids:
+                to_delete.append({"type": "plugin_page", "filter": {"plugin_id": pid}})
 
-            self.logger.debug(f"Remaining data: {old_data}")
+            # CLI COMMANDS
+            old_command_keys = set(old_cli_commands.keys())
+            new_command_keys = set(desired_cli_commands.keys())
 
+            for ck in new_command_keys - old_command_keys:
+                to_put.append(Bw_cli_commands(name=ck[1], plugin_id=ck[0], file_name=desired_cli_commands[ck]))
+
+            for ck in old_command_keys & new_command_keys:
+                old_c = old_cli_commands[ck]
+                new_file = desired_cli_commands[ck]
+                if old_c.file_name != new_file:
+                    to_update.append({"type": "cli_command", "filter": {"plugin_id": ck[0], "name": ck[1]}, "data": {"file_name": new_file}})
+
+            for ck in old_command_keys - new_command_keys:
+                to_delete.append({"type": "cli_command", "filter": {"plugin_id": ck[0], "name": ck[1]}})
+
+            # TEMPLATES
+            old_tmpl_keys = set(old_templates.keys())
+            new_tmpl_keys = set(desired_templates.keys())
+
+            for tk in new_tmpl_keys - old_tmpl_keys:
+                to_put.append(Templates(id=tk[1], plugin_id=tk[0], name=desired_templates[tk]["name"]))
+
+            for tk in old_tmpl_keys & new_tmpl_keys:
+                old_t = old_templates[tk]
+                new_t = desired_templates[tk]
+                if old_t.name != new_t["name"]:
+                    to_update.append({"type": "template", "filter": {"plugin_id": tk[0], "id": tk[1]}, "data": {"name": new_t["name"]}})
+
+            for tk in old_tmpl_keys - new_tmpl_keys:
+                to_delete.append({"type": "template", "filter": {"plugin_id": tk[0], "id": tk[1]}})
+
+            # TEMPLATE STEPS
+            old_step_keys = set(old_template_steps.keys())
+            new_step_keys = set(desired_template_steps.keys())
+
+            for st in new_step_keys - old_step_keys:
+                to_put.append(Template_steps(id=st[1], template_id=st[0], **desired_template_steps[st]))
+
+            for st in old_step_keys & new_step_keys:
+                old_stp = old_template_steps[st]
+                new_stp = desired_template_steps[st]
+                if old_stp.title != new_stp["title"] or old_stp.subtitle != new_stp["subtitle"]:
+                    to_update.append(
+                        {
+                            "type": "template_step",
+                            "filter": {"template_id": st[0], "id": st[1]},
+                            "data": {"title": new_stp["title"], "subtitle": new_stp["subtitle"]},
+                        }
+                    )
+
+            for st in old_step_keys - new_step_keys:
+                to_delete.append({"type": "template_step", "filter": {"template_id": st[0], "id": st[1]}})
+
+            # TEMPLATE SETTINGS
+            old_ts_keys = set(old_template_settings.keys())
+            new_ts_keys = set(desired_template_settings.keys())
+
+            for tsk in new_ts_keys - old_ts_keys:
+                template_id, setting_id, suffix, step_id = tsk
+                default = desired_template_settings[tsk]["default"]
+                order = desired_template_settings[tsk]["order"]
+                to_put.append(Template_settings(template_id=template_id, setting_id=setting_id, suffix=suffix, step_id=step_id, default=default, order=order))
+
+            for tsk in old_ts_keys & new_ts_keys:
+                old_ts_val = old_template_settings[tsk]
+                new_default = desired_template_settings[tsk]["default"]
+                new_order = desired_template_settings[tsk]["order"]
+                if old_ts_val.default != new_default or old_ts_val.order != new_order:
+                    template_id, setting_id, suffix, step_id = tsk
+                    filter_data = {"template_id": template_id, "id": setting_id}
+                    if step_id is not None:
+                        filter_data["step_id"] = step_id
+                    if suffix is not None:
+                        # Not all queries handle suffix well. If suffix is defined, add to filter:
+                        filter_data["suffix"] = suffix
+                    to_update.append(
+                        {"type": "template_setting", "filter": filter_data, "data": {"default": new_default, "suffix": suffix, "order": new_order}}
+                    )
+
+            for tsk in old_ts_keys - new_ts_keys:
+                template_id, setting_id, suffix, step_id = tsk
+                filter_data = {"template_id": template_id, "id": setting_id}
+                if step_id is not None:
+                    filter_data["step_id"] = step_id
+                if suffix is not None:
+                    filter_data["suffix"] = suffix
+                to_delete.append({"type": "template_setting", "filter": filter_data})
+
+            # TEMPLATE CONFIGS
+            old_tc_keys = set(old_template_configs.keys())
+            new_tc_keys = set(desired_template_configs.keys())
+
+            for tck in new_tc_keys - old_tc_keys:
+                template_id, ctype, cname, step_id = tck
+                conf_data = desired_template_configs[tck]
+                to_put.append(
+                    Template_custom_configs(
+                        template_id=template_id, type=ctype, name=cname, data=conf_data["data"], checksum=conf_data["checksum"], step_id=step_id
+                    )
+                )
+
+            for tck in old_tc_keys & new_tc_keys:
+                old_tc_obj = old_template_configs[tck]
+                new_tc_obj = desired_template_configs[tck]
+                if old_tc_obj.checksum != new_tc_obj["checksum"]:
+                    template_id, ctype, cname, step_id = tck
+                    filter_data = {"template_id": template_id, "name": cname, "type": ctype}
+                    if step_id is not None:
+                        filter_data["step_id"] = step_id
+                    to_update.append(
+                        {"type": "template_config", "filter": filter_data, "data": {"data": new_tc_obj["data"], "checksum": new_tc_obj["checksum"]}}
+                    )
+
+            for tck in old_tc_keys - new_tc_keys:
+                template_id, ctype, cname, step_id = tck
+                filter_data = {"template_id": template_id, "name": cname, "type": ctype}
+                if step_id is not None:
+                    filter_data["step_id"] = step_id
+                to_delete.append({"type": "template_config", "filter": filter_data})
+
+            # APPLY CHANGES
             try:
+                # Apply updates
+                for update in to_update:
+                    t = update["type"]
+                    if t == "setting":
+                        session.query(Settings).filter_by(**update["filter"]).update(update["data"])
+                    elif t == "job":
+                        session.query(Jobs).filter_by(**update["filter"]).update(update["data"])
+                    elif t == "plugin_page":
+                        session.query(Plugin_pages).filter_by(**update["filter"]).update(update["data"])
+                    elif t == "cli_command":
+                        session.query(Bw_cli_commands).filter_by(**update["filter"]).update(update["data"])
+                    elif t == "template_step":
+                        session.query(Template_steps).filter_by(**update["filter"]).update(update["data"])
+                    elif t == "template_setting":
+                        session.query(Template_settings).filter_by(**update["filter"]).update(update["data"])
+                    elif t == "template_config":
+                        session.query(Template_custom_configs).filter_by(**update["filter"]).update(update["data"])
+                    elif t == "plugin":
+                        session.query(Plugins).filter_by(**update["filter"]).update(update["data"])
+                    elif t == "template":
+                        session.query(Templates).filter_by(**update["filter"]).update(update["data"])
+
+                # Apply deletes
+                for delete in to_delete:
+                    t = delete["type"]
+                    if t == "setting":
+                        session.query(Settings).filter_by(**delete["filter"]).delete()
+                    elif t == "global_value":
+                        session.query(Global_values).filter_by(**delete["filter"]).delete()
+                    elif t == "service_setting":
+                        session.query(Services_settings).filter_by(**delete["filter"]).delete()
+                    elif t == "job":
+                        session.query(Jobs).filter_by(**delete["filter"]).delete()
+                    elif t == "job_cache":
+                        session.query(Jobs_cache).filter_by(**delete["filter"]).delete()
+                    elif t == "job_run":
+                        session.query(Jobs_runs).filter_by(**delete["filter"]).delete()
+                    elif t == "plugin_page":
+                        session.query(Plugin_pages).filter_by(**delete["filter"]).delete()
+                    elif t == "cli_command":
+                        session.query(Bw_cli_commands).filter_by(**delete["filter"]).delete()
+                    elif t == "template":
+                        session.query(Templates).filter_by(**delete["filter"]).delete()
+                    elif t == "template_step":
+                        session.query(Template_steps).filter_by(**delete["filter"]).delete()
+                    elif t == "template_setting":
+                        session.query(Template_settings).filter_by(**delete["filter"]).delete()
+                    elif t == "template_config":
+                        session.query(Template_custom_configs).filter_by(**delete["filter"]).delete()
+                    elif t == "select":
+                        session.query(Selects).filter_by(**delete["filter"]).delete()
+                    elif t == "plugin":
+                        session.query(Plugins).filter_by(**delete["filter"]).delete()
+
                 session.add_all(to_put)
                 session.commit()
-            except BaseException as e:
+            except SQLAlchemyError as e:
+                session.rollback()
                 return False, str(e)
-
-        if db_version and db_version != bunkerweb_version:
-            for table_name, data in old_data.items():
-                if not data:
-                    continue
-
-                self.logger.warning(f'Restoring data for table "{table_name}"')
-                self.logger.debug(f"Data: {data}")
-                for row in data:
-                    two_factor_enabled = getattr(row, "is_two_factor_enabled", None)
-                    external_column = getattr(row, "external", None)
-                    row = {column: getattr(row, column) for column in Base.metadata.tables[table_name].columns.keys() if hasattr(row, column)}
-
-                    # ? As the letsencrypt_dns plugin is no longer supported, we need to remove the data
-                    if (table_name == "bw_plugins" and row["id"] == "letsencrypt_dns") or (
-                        table_name in ("bw_settings", "bw_jobs", "bw_plugin_pages", "bw_cli_commands") and row["plugin_id"] == "letsencrypt_dns"
-                    ):
-                        continue
-
-                    # ? As the external column has been replaced by the type column, we need to update the data if the column exists
-                    if table_name == "bw_plugins" and external_column is not None:
-                        row["type"] = "external" if external_column else "core"
-                    elif table_name in ("bw_services", "bw_instances", "bw_ui_users") and "creation_date" not in row:
-                        row["creation_date"] = datetime.now().astimezone()
-                        row["last_update" if table_name == "bw_services" else "last_seen" if table_name == "bw_instances" else "update_date"] = (
-                            datetime.now().astimezone()
-                        )
-
-                        if table_name == "bw_ui_users" and two_factor_enabled is not None:
-                            if two_factor_enabled:
-                                self.logger.warning(
-                                    "Detected old user model, as we implemented advanced security in the new model (custom salt for passwords, totp, etc.), you will have to re set the two factor authentication for the admin user."
-                                )
-                            row["admin"] = True
-
-                    with self._db_session() as session:
-                        try:
-                            if table_name == "bw_metadata":
-                                session.add(Metadata(**row))
-                                session.commit()
-                                continue
-
-                            # Check if the row already exists in the table
-                            existing_row = session.query(Base.metadata.tables[table_name]).filter_by(**row).first()
-                            if not existing_row:
-                                session.execute(Base.metadata.tables[table_name].insert().values(row))
-                                session.commit()
-                        except IntegrityError as e:
-                            session.rollback()
-                            if "Duplicate entry" not in str(e):
-                                self.logger.error(f"Error when trying to restore data for table {table_name}: {e}")
-                                continue
-                            self.logger.debug(e)
 
         # ? Check if all templates settings are valid
         with self._db_session() as session:
@@ -1289,6 +1177,8 @@ class Database:
             except BaseException as e:
                 return False, str(e)
 
+        if not to_put and not to_update and not to_delete:
+            return False, ""
         return True, ""
 
     def save_config(self, config: Dict[str, Any], method: str, changed: Optional[bool] = True) -> Union[str, Set[str]]:
@@ -1427,8 +1317,10 @@ class Database:
 
                     # Collect template settings
                     templates = {}
-                    for template in session.query(Template_settings).with_entities(
-                        Template_settings.template_id, Template_settings.setting_id, Template_settings.suffix, Template_settings.default
+                    for template in (
+                        session.query(Template_settings)
+                        .with_entities(Template_settings.template_id, Template_settings.setting_id, Template_settings.suffix, Template_settings.default)
+                        .order_by(Template_settings.order)
                     ):
                         if template.template_id not in templates:
                             templates[template.template_id] = {}
@@ -2018,6 +1910,7 @@ class Database:
                     session.query(Template_settings)
                     .with_entities(Template_settings.setting_id, Template_settings.default, Template_settings.suffix)
                     .filter_by(template_id=template_used)
+                    .order_by(Template_settings.order)
                 )
 
                 if filtered_settings:
@@ -2044,6 +1937,7 @@ class Database:
                             session.query(Template_settings)
                             .with_entities(Template_settings.setting_id, Template_settings.default, Template_settings.suffix)
                             .filter_by(template_id=service_template_used)
+                            .order_by(Template_settings.order)
                         )
 
                         if filtered_settings:
@@ -2115,7 +2009,12 @@ class Database:
             for service in session.query(Services).with_entities(Services.id).all():
                 for key, value in db_config.items():
                     if key.startswith(f"{service.id}_"):
-                        for template_config in session.query(Template_custom_configs).with_entities(*template_entities).filter_by(template_id=value):
+                        for template_config in (
+                            session.query(Template_custom_configs)
+                            .with_entities(*template_entities)
+                            .filter_by(template_id=value)
+                            .order_by(Template_custom_configs.order)
+                        ):
                             if not any(
                                 custom_config["service_id"] == service.id
                                 and custom_config["type"] == template_config.type
@@ -2744,10 +2643,8 @@ class Database:
 
                         if missing_ids:
                             changes = True
-                            session.query(Template_settings).filter(Template_settings.step_id.in_(missing_ids)).update({Template_settings.step_id: None})
-                            session.query(Template_custom_configs).filter(Template_custom_configs.step_id.in_(missing_ids)).update(
-                                {Template_custom_configs.step_id: None}
-                            )
+                            session.query(Template_settings).filter(Template_settings.step_id.in_(missing_ids)).delete()
+                            session.query(Template_custom_configs).filter(Template_custom_configs.step_id.in_(missing_ids)).delete()
                             session.query(Template_steps).filter(Template_steps.id.in_(missing_ids)).delete()
 
                         steps_settings = {}
@@ -2770,19 +2667,26 @@ class Database:
                                     changes = True
                                     session.query(Template_steps).filter(Template_steps.id == db_step.id).update(updates)
 
+                            order = 0
                             for setting in step.get("settings", []):
                                 if step_id not in steps_settings:
                                     steps_settings[step_id] = []
-                                steps_settings[step_id].append(setting)
+                                steps_settings[step_id].append(setting | {"order": order})
+                                order += 1
 
+                            order = 0
                             for config in step.get("configs", []):
                                 if step_id not in steps_configs:
                                     steps_configs[step_id] = []
-                                steps_configs[step_id].append(config)
+                                steps_configs[step_id].append(config | {"order": order})
+                                order += 1
 
                         db_template_settings = [
                             f"{setting.setting_id}_{setting.suffix}" if setting.suffix else setting.setting_id
-                            for setting in session.query(Template_settings).with_entities(Template_settings.id).filter_by(template_id=template_id)
+                            for setting in session.query(Template_settings)
+                            .with_entities(Template_settings.id)
+                            .filter_by(template_id=template_id)
+                            .order_by(Template_settings.order)
                         ]
                         missing_ids = [setting for setting in template.get("settings", {}) if setting not in db_template_settings]
 
@@ -2790,6 +2694,7 @@ class Database:
                             changes = True
                             session.query(Template_settings).filter(Template_settings.id.in_(missing_ids)).delete()
 
+                        order = 0
                         for setting, default in template.get("settings", {}).items():
                             setting_id, suffix = setting.rsplit("_", 1) if self.suffix_rx.search(setting) else (setting, None)
 
@@ -2820,44 +2725,54 @@ class Database:
                                     step_id = step
                                     break
 
+                            if not step_id:
+                                self.logger.error(
+                                    f'{plugin.get("type", "core").title()} Plugin "{plugin["id"]}"\'s Template "{template_id}"\'s Setting "{setting}" doesn\'t belong to a step, skipping it'
+                                )
+                                continue
+
                             template_setting = (
                                 session.query(Template_settings)
-                                .with_entities(Template_settings.id)
+                                .with_entities(
+                                    Template_settings.id,
+                                    Template_settings.step_id,
+                                    Template_settings.default,
+                                    Template_settings.order,
+                                )
                                 .filter_by(template_id=template_id, setting_id=setting_id, step_id=step_id, suffix=suffix)
                                 .first()
                             )
 
                             if not template_setting:
                                 changes = True
-                                if step_id:
-                                    to_put.append(
-                                        Template_settings(
-                                            template_id=template_id,
-                                            setting_id=setting_id,
-                                            step_id=step_id,
-                                            suffix=suffix,
-                                            default=default,
-                                        )
-                                    )
-                                    continue
-
                                 to_put.append(
                                     Template_settings(
                                         template_id=template_id,
                                         setting_id=setting_id,
+                                        step_id=step_id,
                                         suffix=suffix,
                                         default=default,
+                                        order=order,
                                     )
                                 )
-                            elif default != template_setting.default:
+                            elif step_id != template_setting.step_id or default != template_setting.default or order != template_setting.order:
                                 changes = True
-                                session.query(Template_settings).filter_by(id=template_setting.id).update({Template_settings.default: default})
+                                session.query(Template_settings).filter_by(id=template_setting.id).update(
+                                    {
+                                        Template_settings.step_id: step_id,
+                                        Template_settings.default: default,
+                                        Template_settings.order: order,
+                                    }
+                                )
+
+                            order += 1
 
                         db_template_configs = [
                             f"{config.type}/{config.name}.conf"
                             for config in session.query(Template_custom_configs)
                             .with_entities(Template_custom_configs.type, Template_custom_configs.name)
                             .filter_by(template_id=template_id)
+                            .order_by(Template_custom_configs.order)
                         ]
                         missing_ids = [config for config in template.get("configs", {}) if config not in db_template_configs]
 
@@ -2865,6 +2780,7 @@ class Database:
                             changes = True
                             session.query(Template_custom_configs).filter(Template_custom_configs.name.in_(missing_ids)).delete()
 
+                        order = 0
                         for config in template.get("configs", []):
                             try:
                                 config_type, config_name = config.split("/", 1)
@@ -2897,42 +2813,49 @@ class Database:
                                     step_id = step
                                     break
 
+                            if not step_id:
+                                self.logger.error(
+                                    f'{plugin.get("type", "core").title()} Plugin "{plugin["id"]}"\'s Template "{template_id}"\'s Custom config "{config}" doesn\'t belong to a step, skipping it'
+                                )
+                                continue
+
                             template_config = (
                                 session.query(Template_custom_configs)
-                                .with_entities(Template_custom_configs.id)
+                                .with_entities(
+                                    Template_custom_configs.id,
+                                    Template_custom_configs.step_id,
+                                    Template_custom_configs.checksum,
+                                    Template_custom_configs.order,
+                                )
                                 .filter_by(template_id=template_id, step_id=step_id, type=config_type, name=config_name)
                                 .first()
                             )
 
                             if not template_config:
                                 changes = True
-                                if step_id:
-                                    to_put.append(
-                                        Template_custom_configs(
-                                            template_id=template_id,
-                                            step_id=step_id,
-                                            type=config_type,
-                                            name=config_name,
-                                            data=content,
-                                            checksum=checksum,
-                                        )
-                                    )
-                                    continue
-
                                 to_put.append(
                                     Template_custom_configs(
                                         template_id=template_id,
+                                        step_id=step_id,
                                         type=config_type,
                                         name=config_name,
                                         data=content,
                                         checksum=checksum,
+                                        order=order,
                                     )
                                 )
-                            elif checksum != template_config.checksum:
+                            elif step_id != template_config.step_id or checksum != template_config.checksum or order != template_config.order:
                                 changes = True
                                 session.query(Template_custom_configs).filter_by(id=template_config.id).update(
-                                    {Template_custom_configs.data: content, Template_custom_configs.checksum: checksum}
+                                    {
+                                        Template_custom_configs.step_id: step_id,
+                                        Template_custom_configs.data: content,
+                                        Template_custom_configs.checksum: checksum,
+                                        Template_custom_configs.order: order,
+                                    }
                                 )
+
+                            order += 1
 
                     for template in db_names:
                         if template not in saved_templates:
@@ -3052,6 +2975,7 @@ class Database:
                                 steps_configs[step_id] = []
                             steps_configs[step_id].append(config)
 
+                    order = 0
                     for setting, default in template_data.get("settings", {}).items():
                         setting_id, suffix = setting.rsplit("_", 1) if self.suffix_rx.search(setting) else (setting, None)
 
@@ -3079,15 +3003,9 @@ class Database:
                                 step_id = step
                                 break
 
-                        if step_id:
-                            to_put.append(
-                                Template_settings(
-                                    template_id=template_id,
-                                    setting_id=setting_id,
-                                    step_id=step_id,
-                                    default=default,
-                                    suffix=suffix,
-                                )
+                        if not step_id:
+                            self.logger.error(
+                                f'{plugin.get("type", "core").title()} Plugin "{plugin["id"]}"\'s Template "{template_id}"\'s Setting "{setting}" doesn\'t belong to a step, skipping it'
                             )
                             continue
 
@@ -3095,11 +3013,15 @@ class Database:
                             Template_settings(
                                 template_id=template_id,
                                 setting_id=setting_id,
+                                step_id=step_id,
                                 default=default,
                                 suffix=suffix,
+                                order=order,
                             )
                         )
+                        order += 1
 
+                    order = 0
                     for config in template_data.get("configs", []):
                         try:
                             config_type, config_name = config.split("/", 1)
@@ -3132,28 +3054,24 @@ class Database:
                                 step_id = step
                                 break
 
-                        if step_id:
-                            to_put.append(
-                                Template_custom_configs(
-                                    template_id=template_id,
-                                    step_id=step_id,
-                                    type=config_type,
-                                    name=config_name,
-                                    data=content,
-                                    checksum=checksum,
-                                )
+                        if not step_id:
+                            self.logger.error(
+                                f'{plugin.get("type", "core").title()} Plugin "{plugin["id"]}"\'s Template "{template_id}"\'s Custom config "{config}" doesn\'t belong to a step, skipping it'
                             )
                             continue
 
                         to_put.append(
                             Template_custom_configs(
                                 template_id=template_id,
+                                step_id=step_id,
                                 type=config_type,
                                 name=config_name,
                                 data=content,
                                 checksum=checksum,
+                                order=order,
                             )
                         )
+                        order += 1
 
             if changes:
                 with suppress(ProgrammingError, OperationalError):
@@ -3677,6 +3595,7 @@ class Database:
                     session.query(Template_settings)
                     .with_entities(Template_settings.setting_id, Template_settings.step_id, Template_settings.default, Template_settings.suffix)
                     .filter_by(template_id=template.id)
+                    .order_by(Template_settings.order)
                 ):
                     key = f"{setting.setting_id}_{setting.suffix}" if setting.suffix else setting.setting_id
                     templates[template.id]["settings"][key] = setting.default
@@ -3691,6 +3610,7 @@ class Database:
                     session.query(Template_custom_configs)
                     .with_entities(Template_custom_configs.step_id, Template_custom_configs.type, Template_custom_configs.name, Template_custom_configs.data)
                     .filter_by(template_id=template.id)
+                    .order_by(Template_custom_configs.order)
                 ):
                     key = f"{config.type}/{config.name}.conf"
                     templates[template.id]["configs"][key] = config.data.decode("utf-8")
@@ -3722,6 +3642,7 @@ class Database:
                 session.query(Template_settings)
                 .with_entities(Template_settings.setting_id, Template_settings.default, Template_settings.suffix)
                 .filter_by(template_id=template_id)
+                .order_by(Template_settings.order)
             ):
                 settings[f"{setting.setting_id}_{setting.suffix}" if setting.suffix else setting.setting_id] = setting.default
             return settings

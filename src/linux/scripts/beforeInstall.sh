@@ -20,3 +20,11 @@ if [ -d /etc/nginx ]; then
     echo "ℹ️ Copy /etc/nginx to $output_path"
     do_and_check_cmd cp -R /etc/nginx "$output_path"
 fi
+
+# If version is older that 1.5.12 included then create another file
+if [ -f /usr/share/bunkerweb/VERSION ]; then
+    version=$(cat /usr/share/bunkerweb/VERSION)
+    if dpkg --compare-versions "$version" le "1.5.12"; then
+        do_and_check_cmd touch /var/tmp/bunkerweb_enable_scheduler
+    fi
+fi

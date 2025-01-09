@@ -173,14 +173,14 @@
                 <div class="col-md-6">
                     <!-- Theme -->
                     <div class="card position-relative">
-                        <i class='bx bx-{% if theme == 'light' %}sun{% else %}moon{% endif %} bx-sm position-absolute top-0 end-0 m-3'></i>
+                        <i class='bx bx-{% if theme == 'light' %}sun{% else %}moon{% endif %} bx-sm position-absolute top-0 end-0 m-3 dark-mode-toggle-icon'></i>
                         <h5 class="card-header">Change Theme</h5>
                         <div class="card-body pb-4">
                             <form method="POST" action="{{ profile_url }}/edit">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                                 <div class="row g-3">
                                     <div class="col-md-12 form-floating">
-                                        <select class="form-select" id="theme" name="theme">
+                                        <select class="form-select" id="theme-toggle" name="theme">
                                             <option value="light" {% if theme == "light" %}selected{% endif %}>Light</option>
                                             <option value="dark" {% if theme == "dark" %}selected{% endif %}>Dark</option>
                                         </select>
@@ -221,7 +221,7 @@
                                                    aria-label="New Password"
                                                    autocomplete="off"
                                                    required
-                                                   pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[ -~]).{8,}$"
+                                                   pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z0-9]).{8,}$"
                                                    {% if is_readonly %}disabled{% endif %} />
                                             <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
                                         </div>
@@ -609,7 +609,9 @@
                         <div class="row g-3">
                             {% for code in totp_recovery_codes %}
                                 <div class="col-6">
-                                    <div class="p-3 border rounded bg-{% if theme == 'light' %}light{% else %}dark{% endif %} shadow-sm text-center recovery-code">{{ code }}</div>
+                                    <div class="p-3 border rounded bg-{% if theme == 'light' %}light{% else %}dark{% endif %} shadow-sm text-center recovery-code">
+                                        {{ code }}
+                                    </div>
                                 </div>
                             {% endfor %}
                         </div>

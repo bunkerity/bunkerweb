@@ -5,7 +5,7 @@ from os import environ, getenv
 # from secrets import choice
 # from string import ascii_letters, digits
 from re import escape, match
-from time import sleep, time
+from time import sleep
 
 from flask import Blueprint, Response, flash, redirect, render_template, request, url_for
 from flask_login import current_user
@@ -30,6 +30,7 @@ def setup_page():
             "MULTISITE",
             "USE_UI",
             "UI_HOST",
+            "REVERSE_PROXY_URL",
             "AUTO_LETS_ENCRYPT",
             "USE_LETS_ENCRYPT_STAGING",
             "EMAIL_LETS_ENCRYPT",
@@ -39,19 +40,24 @@ def setup_page():
             "USE_LETS_ENCRYPT_WILDCARD",
             "LETS_ENCRYPT_DNS_CREDENTIAL_ITEM",
             "USE_CUSTOM_SSL",
+            "CUSTOM_SSL_CERT_PRIORITY",
             "CUSTOM_SSL_CERT",
             "CUSTOM_SSL_KEY",
+            "CUSTOM_SSL_CERT_DATA",
+            "CUSTOM_SSL_KEY_DATA",
         ),
     )
 
     admin_user = DB.get_ui_user()
 
-    ui_reverse_proxy = False
+    ui_reverse_proxy = None
+    ui_reverse_proxy_url = None
     for server_name in db_config["SERVER_NAME"].split(" "):
         if server_name and db_config.get(f"{server_name}_USE_UI", db_config.get("USE_UI", "no")) == "yes":
             if admin_user:
                 return redirect(url_for("login.login_page"), 301)
-            ui_reverse_proxy = True
+            ui_reverse_proxy = server_name
+            ui_reverse_proxy_url = db_config.get(f"{server_name}_REVERSE_PROXY_URL", db_config.get("REVERSE_PROXY_URL", "/"))
             break
 
     if request.method == "POST":
@@ -74,8 +80,11 @@ def setup_page():
                     "lets_encrypt_dns_propagation",
                     "lets_encrypt_dns_credential_items",
                     "use_custom_ssl",
+                    "custom_ssl_cert_priority",
                     "custom_ssl_cert",
                     "custom_ssl_key",
+                    "custom_ssl_cert_data",
+                    "custom_ssl_key_data",
                 ]
             )
         if not admin_user:
@@ -137,9 +146,6 @@ def setup_page():
             if not REVERSE_PROXY_PATH.match(request.form["ui_host"]):
                 return handle_error("The hostname is not valid.", "setup")
 
-            DATA["RELOADING"] = True
-            DATA["LAST_RELOAD"] = time()
-
             base_config = {
                 "SERVER_NAME": request.form["server_name"],
                 "USE_UI": "yes",
@@ -171,14 +177,22 @@ def setup_page():
                             bool(request.form.get("custom_ssl_cert", "")),
                             bool(request.form.get("custom_ssl_key", "")),
                         ]
+                    ) or not all(
+                        [
+                            bool(request.form.get("custom_ssl_cert_data", "")),
+                            bool(request.form.get("custom_ssl_key_data", "")),
+                        ]
                     ):
                         return handle_error("When using a custom SSL certificate, you must set both the certificate and the key.", "setup")
 
                     config.update(
                         {
                             "USE_CUSTOM_SSL": "yes",
+                            "CUSTOM_SSL_CERT_PRIORITY": request.form.get("custom_ssl_cert_priority", "file"),
                             "CUSTOM_SSL_CERT": request.form.get("custom_ssl_cert", ""),
                             "CUSTOM_SSL_KEY": request.form.get("custom_ssl_key", ""),
+                            "CUSTOM_SSL_CERT_DATA": request.form.get("custom_ssl_cert_data", ""),
+                            "CUSTOM_SSL_KEY_DATA": request.form.get("custom_ssl_key_data", ""),
                         }
                     )
                 else:
@@ -220,6 +234,7 @@ def setup_page():
         "setup.html",
         ui_user=admin_user,
         ui_reverse_proxy=ui_reverse_proxy,
+        ui_reverse_proxy_url=ui_reverse_proxy_url,
         username=getenv("ADMIN_USERNAME", ""),
         password=getenv("ADMIN_PASSWORD", ""),
         ui_host=db_config.get("UI_HOST", getenv("UI_HOST", "")),
@@ -232,8 +247,11 @@ def setup_page():
         lets_encrypt_dns_propagation=db_config.get("LETS_ENCRYPT_DNS_PROPAGATION", getenv("LETS_ENCRYPT_DNS_PROPAGATION", "default")),
         lets_encrypt_dns_credential_items=lets_encrypt_dns_credential_items,
         use_custom_ssl=db_config.get("USE_CUSTOM_SSL", getenv("USE_CUSTOM_SSL", "no")),
+        custom_ssl_cert_priority=db_config.get("CUSTOM_SSL_CERT_PRIORITY", getenv("CUSTOM_SSL_CERT_PRIORITY", "file")),
         custom_ssl_cert=db_config.get("CUSTOM_SSL_CERT", getenv("CUSTOM_SSL_CERT", "")),
         custom_ssl_key=db_config.get("CUSTOM_SSL_KEY", getenv("CUSTOM_SSL_KEY", "")),
+        custom_ssl_cert_data=db_config.get("CUSTOM_SSL_CERT_DATA", getenv("CUSTOM_SSL_CERT_DATA", "")),
+        custom_ssl_key_data=db_config.get("CUSTOM_SSL_KEY_DATA", getenv("CUSTOM_SSL_KEY_DATA", "")),
         # totp_qr_image=totp_qr_image,
         # totp_secret=TOTP.get_totp_pretty_key(session.get("tmp_totp_secret", "")),
     )

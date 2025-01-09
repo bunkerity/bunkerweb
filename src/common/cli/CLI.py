@@ -15,7 +15,6 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
-from dotenv import dotenv_values
 from redis import StrictRedis, Sentinel
 
 from API import API  # type: ignore
@@ -59,7 +58,8 @@ class CLI(ApiCaller):
         self.__variables = {}
         self.__db = None
         if variables_path.is_file():
-            self.__variables = dotenv_values(variables_path)
+            with variables_path.open() as f:
+                self.__variables = dict(line.strip().split("=", 1) for line in f if line.strip() and not line.startswith("#"))
 
         if Path(sep, "usr", "share", "bunkerweb", "db").exists():
             from Database import Database  # type: ignore
@@ -257,13 +257,16 @@ class CLI(ApiCaller):
                 cli_str += "No ban found\n"
 
             for ban in bans:
+                banned_country = ban.get("country", "unknown")
                 banned_date = ""
                 remaining = "for eternity"
                 if ban["date"] != -1:
                     banned_date = f"the {datetime.fromtimestamp(ban['date']).strftime('%Y-%m-%d at %H:%M:%S %Z')} "
                 if ban["exp"] != -1:
                     remaining = f"for {format_remaining_time(ban['exp'])} remaining"
-                cli_str += f"- {ban['ip']} ; banned {banned_date}{remaining} with reason \"{ban.get('reason', 'no reason given')}\""
+                cli_str += (
+                    f"- {ban['ip']} from country \"{banned_country}\" ; banned {banned_date}{remaining} with reason \"{ban.get('reason', 'no reason given')}\""
+                )
 
                 if ban.get("service", "unknown") != "unknown":
                     cli_str += f" by {ban['service'] if ban['service'] != '_' else 'default server'}"

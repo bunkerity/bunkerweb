@@ -252,7 +252,7 @@ ModSecurity is integrated and enabled by default alongside the OWASP Core Rule S
 You can choose between the following versions of the OWASP Core Rule Set :
 
 - **3** : The version [v3.3.7](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.7) of the OWASP Core Rule Set
-- **4** : The version [v4.9.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.9.0) of the OWASP Core Rule Set (***default***)
+- **4** : The version [v4.10.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.10.0) of the OWASP Core Rule Set (***default***)
 - **nightly** : The latest [nightly](https://github.com/coreruleset/coreruleset/releases/tag/nightly) build of the OWASP Core Rule Set which is updated every day
 
 !!! example "OWASP Core Rule Set's nightly build"
@@ -372,7 +372,7 @@ This BunkerWeb plugin acts as a [CrowdSec](https://crowdsec.net/) bouncer. It wi
     ```yaml
     services:
         bunkerweb:
-            image: bunkerity/bunkerweb:1.6.0-beta
+            image: bunkerity/bunkerweb:1.6.0-rc1
             ports:
               - "80:8080"
               - "443:8443"
@@ -389,7 +389,7 @@ This BunkerWeb plugin acts as a [CrowdSec](https://crowdsec.net/) bouncer. It wi
                     syslog-address: "udp://10.10.10.254:514"
 
         bw-scheduler:
-            image: bunkerity/bunkerweb-scheduler:1.6.0-beta
+            image: bunkerity/bunkerweb-scheduler:1.6.0-rc1
             depends_on:
               - bunkerweb
             environment:
@@ -839,7 +839,7 @@ You can quickly protect sensitive resources like the admin area for example, by 
 
 ### Auth request
 
-You can deploy complex authentication (e.g. SSO), by using the auth request settings (see [here](https://docs.nginx.com/nginx/admin-guide/security-controls/configuring-subrequest-authentication/) for more information on the feature). Please note that you will find [Authelia](https://www.authelia.com/) and [Authentik](https://goauthentik.io/) examples in the [repository](https://github.com/bunkerity/bunkerweb/tree/v1.6.0-beta/examples).
+You can deploy complex authentication (e.g. SSO), by using the auth request settings (see [here](https://docs.nginx.com/nginx/admin-guide/security-controls/configuring-subrequest-authentication/) for more information on the feature). Please note that you will find [Authelia](https://www.authelia.com/) and [Authentik](https://goauthentik.io/) examples in the [repository](https://github.com/bunkerity/bunkerweb/tree/v1.6.0-rc1/examples).
 
 **Auth request settings are related to reverse proxy rules.**
 

@@ -1,13 +1,13 @@
 services:
   myredmine:
-    image: redmine:5-alpine
-    restart: always
+    image: redmine:6-alpine
+    restart: "unless-stopped"
     volumes:
       - redmine-data:/usr/src/redmine/files
     networks:
       - bw-services
     environment:
-      - REDMINE_DB_MYSQL=mydb
+      - REDMINE_DB_POSTGRES=mydb
       - REDMINE_DB_DATABASE=redminedb
       - REDMINE_DB_USERNAME=user
       - REDMINE_DB_PASSWORD=db-user-pwd # replace with a stronger password (must match MYSQL_PASSWORD)
@@ -22,16 +22,16 @@ services:
         - bunkerweb.REVERSE_PROXY_HOST=http://myredmine:3000
 
   mydb:
-    image: mysql:8
+    image: postgres:16-alpine
     volumes:
-      - db-data:/var/lib/mysql
+      - db-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: "user"
+      POSTGRES_PASSWORD: "db-user-pwd" # replace with a stronger password (must match REDMINE_DB_PASSWORD)
+      POSTGRES_DB: "redminedb"
+      PGDATA: "/var/lib/postgresql/data/pgdata"
     networks:
       - bw-services
-    environment:
-      - MYSQL_ROOT_PASSWORD=db-root-pwd # replace with a stronger password
-      - MYSQL_DATABASE=redminedb
-      - MYSQL_USER=user
-      - MYSQL_PASSWORD=db-user-pwd # replace with a stronger password (must match REDMINE_DB_PASSWORD)
     deploy:
       placement:
         constraints:

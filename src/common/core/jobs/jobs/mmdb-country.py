@@ -50,7 +50,7 @@ try:
         else:
             LOGGER.warning("Unable to check if the temporary mmdb file is the latest version, downloading it anyway...")
 
-    JOB = Job(LOGGER)
+    JOB = Job(LOGGER, __file__)
 
     if dl_mmdb:
         job_cache = JOB.get_cache("country.mmdb", with_info=True, with_data=True)

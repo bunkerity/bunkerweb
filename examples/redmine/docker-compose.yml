@@ -1,6 +1,6 @@
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.0-beta
+    image: bunkerity/bunkerweb:1.6.0-rc1
     container_name: bunkerweb
     ports:
       - "80:8080/tcp"
@@ -14,7 +14,7 @@ services:
       - bw-services
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.0-beta
+    image: bunkerity/bunkerweb-scheduler:1.6.0-rc1
     container_name: bw-scheduler
     depends_on:
       - bunkerweb
@@ -37,28 +37,29 @@ services:
       - bw-universe
 
   myredmine:
-    image: redmine:5-alpine
-    restart: always
+    image: redmine:6-alpine
     volumes:
       - redmine-data:/usr/src/redmine/files
     environment:
-      REDMINE_DB_MYSQL: "mydb"
+      REDMINE_DB_POSTGRES: "mydb"
       REDMINE_DB_DATABASE: "redminedb"
       REDMINE_DB_USERNAME: "user"
       REDMINE_DB_PASSWORD: "db-user-pwd" # set a stronger password in a .env file (must match MYSQL_PASSWORD)
+    restart: "unless-stopped"
     networks:
       - redmine-net
       - bw-services
 
   mydb:
-    image: mysql:8
+    image: postgres:16-alpine
     volumes:
-      - db-data:/var/lib/mysql
+      - db-data:/var/lib/postgresql/data
     environment:
-      MYSQL_ROOT_PASSWORD: "db-root-pwd" # replace with a stronger password
-      MYSQL_DATABASE: "redminedb"
-      MYSQL_USER: "user"
-      MYSQL_PASSWORD: "db-user-pwd" # replace with a stronger password (must match REDMINE_DB_PASSWORD)
+      POSTGRES_USER: "user"
+      POSTGRES_PASSWORD: "db-user-pwd" # replace with a stronger password (must match REDMINE_DB_PASSWORD)
+      POSTGRES_DB: "redminedb"
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+    restart: "unless-stopped"
     networks:
       - redmine-net
 

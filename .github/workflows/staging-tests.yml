@@ -93,25 +93,25 @@ jobs:
       # Do tests
       - name: Run tests
         if: inputs.TYPE == 'docker'
-        run: export $(echo "$TEST_DOMAINS" | xargs) && ./tests/main.py "${{ inputs.TYPE }}"
+        run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "${{ inputs.TYPE }}"
         env:
           TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_DOCKER }}
           ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
       - name: Run tests
         if: inputs.TYPE == 'autoconf'
-        run: export $(echo "$TEST_DOMAINS" | xargs) && ./tests/main.py "${{ inputs.TYPE }}"
+        run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "${{ inputs.TYPE }}"
         env:
           TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_AUTOCONF }}
           ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
       - name: Run tests
         if: inputs.TYPE == 'swarm'
-        run: export $(echo "$TEST_DOMAINS" | xargs) && ./tests/main.py "${{ inputs.TYPE }}"
+        run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "${{ inputs.TYPE }}"
         env:
           TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_SWARM }}
           ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
       - name: Run tests
         if: inputs.TYPE == 'k8s'
-        run: export $(echo "$TEST_DOMAINS" | xargs) && ./tests/main.py "kubernetes"
+        run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "kubernetes"
         env:
           TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_KUBERNETES }}
           ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
@@ -120,37 +120,37 @@ jobs:
           IMAGE_TAG: "testing"
       - name: Run Linux ubuntu tests
         if: inputs.TYPE == 'linux'
-        run: export $(echo "$TEST_DOMAINS" | xargs) && ./tests/main.py "linux" "ubuntu"
+        run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "linux" "ubuntu"
         env:
           TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
           ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
       - name: Run Linux debian tests
         if: inputs.TYPE == 'linux'
-        run: export $(echo "$TEST_DOMAINS" | xargs) && ./tests/main.py "linux" "debian"
+        run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "linux" "debian"
         env:
           TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
           ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
       - name: Run Linux fedora tests
         if: inputs.TYPE == 'linux'
-        run: export $(echo "$TEST_DOMAINS" | xargs) && ./tests/main.py "linux" "fedora"
+        run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "linux" "fedora"
         env:
           TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
           ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
       - name: Run Linux rhel tests
         if: inputs.TYPE == 'linux'
-        run: export $(echo "$TEST_DOMAINS" | xargs) && ./tests/main.py "linux" "rhel"
+        run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "linux" "rhel"
         env:
           TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
           ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
       - name: Run Linux rhel9 tests
         if: inputs.TYPE == 'linux'
-        run: export $(echo "$TEST_DOMAINS" | xargs) && ./tests/main.py "linux" "rhel9"
+        run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "linux" "rhel9"
         env:
           TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
           ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
       - name: Run Linux ubuntu-jammy tests
         if: inputs.TYPE == 'linux'
-        run: export $(echo "$TEST_DOMAINS" | xargs) && ./tests/main.py "linux" "ubuntu-jammy"
+        run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "linux" "ubuntu-jammy"
         env:
           TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
           ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}

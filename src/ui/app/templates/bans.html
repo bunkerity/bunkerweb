@@ -2,7 +2,9 @@
 {% block content %}
     <!-- Content -->
     <div class="card table-responsive text-nowrap p-4 pb-8 min-vh-70">
+        {% set base_flags_url = url_for('static', filename='img/flags') %}
         <input type="hidden" id="bans_number" value="{{ bans|length }}" />
+        <input type="hidden" id="base_flags_url" value="{{ base_flags_url }}" />
         <textarea type="hidden"
                   id="columns_preferences_defaults"
                   class="visually-hidden">{{ columns_preferences_defaults['bans']|tojson }}</textarea>
@@ -31,6 +33,9 @@
                         data-bs-original-title="The banned IP address">IP address</th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
+                        data-bs-original-title="The banned IP country">Country</th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
                         data-bs-original-title="The reason why the Report was created">Reason</th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
@@ -47,12 +52,32 @@
                 </tr>
             </thead>
             <tbody>
+                {% set ns = namespace(countries=[]) %}
                 {% for ban in bans %}
+                    {% if ban.get("country", "local") and ban.get('country', 'local') not in ns.countries %}
+                        {% set ns.countries = ns.countries + [ban.get('country', 'local')] %}
+                    {% endif %}
                     <tr>
                         <td></td>
                         <td></td>
                         <td class="ban-start-date">{{ ban["start_date"] }}</td>
                         <td>{{ ban["ip"] }}</td>
+                        <td>
+                            <div class="d-flex align-items-center"
+                                 data-bs-toggle="tooltip"
+                                 data-bs-placement="top"
+                                 data-bs-original-title="{% if ban.get('country', 'local') in ("local", "unknown") %}N/A{% else %}{{ ban.get('country', 'local') }}{% endif %}">
+                                <img src="{{ base_flags_url }}/{% if ban.get('country', 'local') in ("local", "unknown") %}zz{% else %}{{ ban.get('country', 'local') |lower }}{% endif %}.svg"
+                                     class="border border-1 p-0 me-1"
+                                     height="17" />
+                                &nbsp;－&nbsp;
+                                {% if ban.get('country', 'local') in ("local", "unknown") %}
+                                    N/A
+                                {% else %}
+                                    {{ ban["country"] }}
+                                {% endif %}
+                            </div>
+                        </td>
                         <td>{{ ban["reason"] }}</td>
                         <td>{{ ban["service"] if ban["service"] != "_" else "default server" }}</td>
                         <td class="ban-end-date">{{ ban["end_date"] }}</td>
@@ -74,6 +99,7 @@
                     </tr>
                 {% endfor %}
             </tbody>
+            <input type="hidden" id="countries" value="{{ ns.countries|join(',') }}" />
             <span class="position-absolute bottom-0 start-50 translate-middle badge rounded-pill bg-secondary">
                 TZ: <script nonce="{{ script_nonce }}">document.write(Intl.DateTimeFormat().resolvedOptions().timeZone);</script>
             </span>

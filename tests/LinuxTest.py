@@ -34,6 +34,9 @@ class LinuxTest(Test):
             proc = LinuxTest.docker_exec(distro, "systemctl start bunkerweb")
             if proc.returncode != 0:
                 raise Exception("docker exec systemctl start failed (linux stack)")
+            proc = LinuxTest.docker_exec(distro, "systemctl start bunkerweb-scheduler")
+            if proc.returncode != 0:
+                raise Exception("docker exec systemctl start failed (linux stack)")
             if distro in ("ubuntu", "debian", "ubuntu-jammy"):
                 LinuxTest.docker_exec(
                     distro,
@@ -61,6 +64,16 @@ class LinuxTest(Test):
                     )
                     LinuxTest.docker_exec(distro, "systemctl stop php8.1-fpm ; systemctl start php8.1-fpm")
             elif distro in ("centos", "fedora") or distro.startswith("rhel"):
+                if distro.startswith("rhel"):
+                    if distro == "rhel":
+                        LinuxTest.docker_exec(distro, "dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm")
+                        LinuxTest.docker_exec(distro, "dnf install -y https://rpms.remirepo.net/enterprise/remi-release-8.rpm")
+                    elif distro == "rhel9":
+                        LinuxTest.docker_exec(distro, "dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm")
+                        LinuxTest.docker_exec(distro, "dnf install -y https://rpms.remirepo.net/enterprise/remi-release-9.rpm")
+                    LinuxTest.docker_exec(distro, "dnf module reset php -y")
+                    LinuxTest.docker_exec(distro, "dnf module enable php:remi-8.3 -y")
+
                 LinuxTest.docker_exec(distro, "dnf install -y php-fpm unzip")
                 LinuxTest.docker_cp(distro, "./tests/www-rpm.conf", "/etc/php-fpm.d/www.conf")
                 LinuxTest.docker_exec(
@@ -119,7 +132,10 @@ class LinuxTest(Test):
             )
             if proc.returncode != 0:
                 raise (Exception("docker exec append variables.env failed (test)"))
-            proc = self.docker_exec(self.__distro, "systemctl stop bunkerweb ; systemctl start bunkerweb")
+            proc = self.docker_exec(self.__distro, "systemctl restart bunkerweb")
+            if proc.returncode != 0:
+                raise Exception("docker exec systemctl restart failed (linux stack)")
+            proc = self.docker_exec(self.__distro, "systemctl restart bunkerweb-scheduler")
             if proc.returncode != 0:
                 raise Exception("docker exec systemctl restart failed (linux stack)")
         except:
@@ -137,7 +153,7 @@ class LinuxTest(Test):
         try:
             proc = self.docker_exec(
                 self.__distro,
-                f"cd /opt/{self._name} ; ./cleanup-linux.sh ; rm -rf /etc/bunkerweb/configs/* ; rm -rf /etc/bunkerweb/plugins/* ; rm -rf /var/www/html/*",
+                f"cd /opt/{self._name} ; ./cleanup-linux.sh ; rm -rf /etc/bunkerweb/configs/* ; rm -rf /etc/bunkerweb/plugins/* ; rm -rf /var/www/html/* ; journalctl --rotate --vacuum-time=1s ; truncate -s 0 /var/log/bunkerweb/error.log ; truncate -s 0 /var/log/bunkerweb/access.log ; truncate -s 0 /var/log/bunkerweb/scheduler.log ; truncate -s 0 /var/log/bunkerweb/scheduler.log",
             )
             if proc.returncode != 0:
                 raise Exception("docker exec rm failed (cleanup)")
@@ -154,7 +170,7 @@ class LinuxTest(Test):
     def _debug_fail(self):
         self.docker_exec(
             self.__distro,
-            "cat /var/log/bunkerweb/access.log ; cat /var/log/bunkerweb/error.log ; journalctl -u bunkerweb --no-pager",
+            "cat /var/log/bunkerweb/access.log ; cat /var/log/bunkerweb/error.log ; cat /var/log/bunkerweb/scheduler.log ; journalctl -u bunkerweb --no-pager ; journalctl -u bunkerweb-scheduler --no-pager",
         )
 
     @staticmethod

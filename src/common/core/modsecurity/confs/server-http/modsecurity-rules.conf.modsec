@@ -34,7 +34,7 @@ SecRequestBodyLimit 13107200
 {% endif %}
 
 # Maximum data size for requests without files
-SecRequestBodyNoFilesLimit 131072
+SecRequestBodyNoFilesLimit {{ MODSECURITY_REQ_BODY_NO_FILES_LIMIT }}
 
 # Reject requests if bigger than max data size
 SecRequestBodyLimitAction Reject

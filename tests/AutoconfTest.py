@@ -27,16 +27,13 @@ class AutoconfTest(Test):
         try:
             if not Test.init():
                 return False
-            proc = run("sudo chown -R root:root /tmp/bw-data", shell=True)
-            if proc.returncode != 0:
-                raise (Exception("chown failed (autoconf stack)"))
             if isdir("/tmp/autoconf"):
                 rmtree("/tmp/autoconf")
             mkdir("/tmp/autoconf")
             if isdir("/tmp/www"):
                 rmtree("/tmp/www")
             mkdir("/tmp/www")
-            copy("./misc/integrations/autoconf.yml", "/tmp/autoconf/docker-compose.yml")
+            copy("./misc/integrations/autoconf.mariadb.yml", "/tmp/autoconf/docker-compose.yml")
             compose = "/tmp/autoconf/docker-compose.yml"
             Test.replace_in_file(compose, r"bunkerity/bunkerweb:.*$", "local/bunkerweb-tests:latest")
             Test.replace_in_file(
@@ -53,25 +50,27 @@ class AutoconfTest(Test):
             with open(compose, "r") as f:
                 data = safe_load(f.read())
             data["services"]["bunkerweb"]["volumes"] = ["/tmp/www:/var/www/html"]
-            if "AUTO_LETS_ENCRYPT=yes" not in data["services"]["bunkerweb"]["environment"]:
-                data["services"]["bunkerweb"]["environment"].append("AUTO_LETS_ENCRYPT=yes")
-            data["services"]["bunkerweb"]["environment"].append("USE_LETS_ENCRYPT_STAGING=yes")
-            data["services"]["bunkerweb"]["environment"].append("LOG_LEVEL=info")
-            data["services"]["bunkerweb"]["environment"].append("USE_BUNKERNET=no")
-            data["services"]["bunkerweb"]["environment"].append("SEND_ANONYMOUS_REPORT=no")
-            data["services"]["bunkerweb"]["environment"].append("USE_DNSBL=no")
+            if data["services"]["bw-scheduler"]["environment"].get("AUTO_LETS_ENCRYPT", "no") != "yes":
+                data["services"]["bw-scheduler"]["environment"]["AUTO_LETS_ENCRYPT"] = "yes"
+            data["services"]["bw-scheduler"]["environment"]["USE_LETS_ENCRYPT_STAGING"] = "yes"
+            data["services"]["bw-scheduler"]["environment"]["CUSTOM_LOG_LEVEL"] = "debug"
+            data["services"]["bw-autoconf"]["environment"]["CUSTOM_LOG_LEVEL"] = "debug"
+            data["services"]["bw-scheduler"]["environment"]["LOG_LEVEL"] = "info"
+            data["services"]["bw-scheduler"]["environment"]["USE_BUNKERNET"] = "no"
+            data["services"]["bw-scheduler"]["environment"]["SEND_ANONYMOUS_REPORT"] = "no"
+            data["services"]["bw-scheduler"]["environment"]["USE_DNSBL"] = "no"
             with open(compose, "w") as f:
                 f.write(dump(data))
             proc = run(
-                "docker-compose pull --ignore-pull-failures",
+                "docker compose pull --ignore-pull-failures",
                 cwd="/tmp/autoconf",
                 shell=True,
             )
             if proc.returncode != 0:
-                raise (Exception("docker-compose pull failed (autoconf stack)"))
-            proc = run("docker-compose up -d", cwd="/tmp/autoconf", shell=True)
+                raise (Exception("docker compose pull failed (autoconf stack)"))
+            proc = run("docker compose up -d", cwd="/tmp/autoconf", shell=True)
             if proc.returncode != 0:
-                raise (Exception("docker-compose up failed (autoconf stack)"))
+                raise (Exception("docker compose up failed (autoconf stack)"))
             i = 0
             healthy = False
             while i < 30:
@@ -105,7 +104,7 @@ class AutoconfTest(Test):
         try:
             if not Test.end():
                 return False
-            proc = run("docker-compose down -v", cwd="/tmp/autoconf", shell=True)
+            proc = run("docker compose down -v --remove-orphans", cwd="/tmp/autoconf", shell=True)
             if proc.returncode != 0:
                 ret = False
             rmtree("/tmp/autoconf")
@@ -148,6 +147,13 @@ class AutoconfTest(Test):
                 proc = run("sudo ./setup-autoconf.sh", cwd=test, shell=True)
                 if proc.returncode != 0:
                     raise (Exception("setup-autoconf failed"))
+            if isdir("/tmp/bw-data"):
+                proc = run("sudo rm -rf /tmp/bw-data", shell=True)
+                if proc.returncode != 0:
+                    raise (Exception("rm bw-data failed"))
+                proc = run("sudo mkdir /tmp/bw-data", shell=True)
+                if proc.returncode != 0:
+                    raise (Exception("mkdir bw-data failed"))
             if isdir(example_data) and not self._no_copy_container:
                 proc = run(
                     f"sudo bash -c 'cp -rp {example_data}/* /tmp/bw-data'",
@@ -155,6 +161,12 @@ class AutoconfTest(Test):
                 )
                 if proc.returncode != 0:
                     raise (Exception("cp bw-data failed"))
+            proc = run("sudo chown -R root:101 /tmp/bw-data", shell=True)
+            if proc.returncode != 0:
+                raise (Exception("chown failed (docker stack)"))
+            proc = run("sudo chmod -R 770 /tmp/bw-data", shell=True)
+            if proc.returncode != 0:
+                raise (Exception("chmod failed (docker stack)"))
             if isdir(example_www):
                 proc = run(
                     f"sudo bash -c 'cp -rp {example_www}/* /tmp/www'",
@@ -163,15 +175,15 @@ class AutoconfTest(Test):
                 if proc.returncode != 0:
                     raise (Exception("cp bw-data failed"))
             proc = run(
-                "docker-compose -f autoconf.yml pull --ignore-pull-failures",
+                "docker compose -f autoconf.yml pull --ignore-pull-failures",
                 shell=True,
                 cwd=test,
             )
             if proc.returncode != 0:
-                raise (Exception("docker-compose pull failed"))
-            proc = run("docker-compose -f autoconf.yml up -d", shell=True, cwd=test)
+                raise (Exception("docker compose pull failed"))
+            proc = run("docker compose -f autoconf.yml up -d", shell=True, cwd=test)
             if proc.returncode != 0:
-                raise (Exception("docker-compose up failed"))
+                raise (Exception("docker compose up failed"))
         except:
             log(
                 "AUTOCONF",
@@ -185,9 +197,9 @@ class AutoconfTest(Test):
     def _cleanup_test(self):
         try:
             test = f"/tmp/tests/{self._name}"
-            proc = run("docker-compose -f autoconf.yml down -v", shell=True, cwd=test)
+            proc = run("docker compose -f autoconf.yml down -v --remove-orphans", shell=True, cwd=test)
             if proc.returncode != 0:
-                raise (Exception("docker-compose down failed"))
+                raise (Exception("docker compose down failed"))
             proc = run(
                 "sudo bash -c 'rm -rf /tmp/www/*'",
                 shell=True,
@@ -206,6 +218,6 @@ class AutoconfTest(Test):
 
     def _debug_fail(self):
         autoconf = "/tmp/autoconf"
-        run("docker-compose logs", shell=True, cwd=autoconf)
+        run("docker compose logs", shell=True, cwd=autoconf)
         test = f"/tmp/tests/{self._name}"
-        run("docker-compose -f autoconf.yml logs", shell=True, cwd=test)
+        run("docker compose -f autoconf.yml logs", shell=True, cwd=test)

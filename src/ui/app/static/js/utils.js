@@ -354,7 +354,8 @@ $(document).ready(() => {
       $bannerText.removeClass("slide-out");
 
       // Update the text content
-      $bannerText.html(newsItems[nextIndex]);
+      const sanitizedText = DOMPurify.sanitize(newsItems[nextIndex]);
+      $bannerText.html(sanitizedText);
 
       // Trigger reflow to ensure the browser applies the changes
       $bannerText[0].offsetHeight;
@@ -449,6 +450,7 @@ $(document).ready(() => {
     // If endpoint is "setup", ignore the theme change
     if (window.location.pathname.includes("/setup")) return;
 
+    $themeSelector = $("#theme-toggle");
     const darkMode = $(this).prop("checked");
     if (darkMode) {
       $("html")
@@ -466,6 +468,7 @@ $(document).ready(() => {
       $(".dark-mode-toggle-icon").removeClass("bx-sun").addClass("bx-moon");
       $("[alt='BunkerWeb logo']").attr("src", $("#bw-logo-white").val());
       $("[alt='User Avatar']").attr("src", $("#avatar-url-white").val());
+      $themeSelector.find("option[value='dark']").prop("selected", true);
     } else {
       $("html")
         .removeClass("dark-style dark")
@@ -482,6 +485,7 @@ $(document).ready(() => {
       $(".dark-mode-toggle-icon").removeClass("bx-moon").addClass("bx-sun");
       $("[alt='BunkerWeb logo']").attr("src", $("#bw-logo").val());
       $("[alt='User Avatar']").attr("src", $("#avatar-url").val());
+      $themeSelector.find("option[value='light']").prop("selected", true);
     }
 
     $("#theme").val(darkMode ? "dark" : "light");

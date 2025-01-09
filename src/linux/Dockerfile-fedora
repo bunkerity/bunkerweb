@@ -1,4 +1,4 @@
-FROM fedora:41@sha256:3ec60eb34fa1a095c0c34dd37cead9fd38afb62612d43892fcf1d3425c32bc1e AS builder
+FROM fedora:40@sha256:7cdd2b48396929bb8723ea2fa60e03bee39cc22e2a853cbd891587fab4eb1bc9 AS builder
 
 ENV OS=fedora
 ENV NGINX_VERSION=1.26.2
@@ -53,14 +53,14 @@ COPY src/scheduler scheduler
 COPY src/VERSION VERSION
 COPY src/ui ui
 
-FROM fedora:41@sha256:3ec60eb34fa1a095c0c34dd37cead9fd38afb62612d43892fcf1d3425c32bc1e
+FROM fedora:40@sha256:7cdd2b48396929bb8723ea2fa60e03bee39cc22e2a853cbd891587fab4eb1bc9
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
 
 # Install fpm
 RUN dnf update -y && \
-    dnf install -y ruby ruby-devel redhat-rpm-config rpm-build gcc make pigz && \
+    dnf install -y ruby ruby-devel redhat-rpm-config rpm-build gcc make && \
     gem install -N fpm
 
 # Cleanup
@@ -89,10 +89,6 @@ RUN install -m 755 helpers/bwcli /usr/bin/bwcli && \
     find core/ ui/ -type f -name "*.py" ! -path "core/modsecurity/files/*" -print0 | xargs -0 chmod 750 && \
     chmod 755 .
 
-# Compress dependencies
-RUN tar -I pigz -cf /var/tmp/bunkerweb/deps.tar.gz deps && \
-    rm -rf deps
-
 COPY --chmod=660 src/bw/misc/asn.mmdb /var/tmp/bunkerweb/asn.mmdb
 COPY --chmod=660 src/bw/misc/country.mmdb /var/tmp/bunkerweb/country.mmdb
 
@@ -102,9 +98,6 @@ COPY --chmod=740 src/linux/fpm.sh /usr/share/fpm.sh
 COPY src/linux/fpm-fedora /usr/share/.fpm
 COPY --chmod=644 src/linux/*.service /lib/systemd/system/
 COPY --chmod=644 src/linux/bunkerweb.logrotate /etc/logrotate.d/bunkerweb
-
-# TMP patch for fpm
-RUN sed -i -e 's/args = \["rpmbuild", "-bb"\]/args = \["rpmbuild", "-bb", "--buildroot", "#{build_path}\/BUILD"\]/g' /usr/local/share/gems/gems/fpm-*/lib/fpm/package/rpm.rb
 
 # Generate RPM at startup
 VOLUME /data

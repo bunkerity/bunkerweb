@@ -74,7 +74,7 @@ try:
         LOGGER.info("RealIP is not activated, skipping download...")
         sys_exit(0)
 
-    JOB = Job(LOGGER)
+    JOB = Job(LOGGER, __file__)
 
     if not any(services_realip_urls.values()):
         LOGGER.warning("No URL configured, nothing to do...")

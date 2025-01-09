@@ -1,3 +1,4 @@
+from yaml import safe_load, dump
 from Test import Test
 from os.path import isdir, isfile
 from os import getenv
@@ -24,9 +25,6 @@ class DockerTest(Test):
         try:
             if not Test.init():
                 return False
-            # proc = run("sudo chown -R 101:101 /tmp/bw-data", shell=True)
-            # if proc.returncode != 0 :
-            #     raise(Exception("chown failed (autoconf stack)"))
         except:
             log(
                 "DOCKER",
@@ -51,12 +49,18 @@ class DockerTest(Test):
             Test.replace_in_file(compose, r"\./bw\-data:/", "/tmp/bw-data:/")
             Test.replace_in_file(compose, r"\- bw_data:/", "- /tmp/bw-data:/")
             Test.replace_in_file(compose, r"\- bw\-data:/", "- /tmp/bw-data:/")
-            Test.replace_in_file(
-                compose,
-                r"AUTO_LETS_ENCRYPT=yes",
-                "AUTO_LETS_ENCRYPT=yes\n      - USE_LETS_ENCRYPT_STAGING=yes\n      - LOG_LEVEL=info\n      - USE_BUNKERNET=no\n      - SEND_ANONYMOUS_REPORT=no\n      - USE_DNSBL=no",
-            )
-            Test.replace_in_file(compose, r"DISABLE_DEFAULT_SERVER=yes", "DISABLE_DEFAULT_SERVER=no")
+            with open(compose, "r") as f:
+                data = safe_load(f.read())
+            if data["services"]["bw-scheduler"]["environment"].get("AUTO_LETS_ENCRYPT", "no") == "yes":
+                data["services"]["bw-scheduler"]["environment"]["USE_LETS_ENCRYPT_STAGING"] = "yes"
+            data["services"]["bw-scheduler"]["environment"]["CUSTOM_LOG_LEVEL"] = "debug"
+            data["services"]["bw-scheduler"]["environment"]["LOG_LEVEL"] = "info"
+            data["services"]["bw-scheduler"]["environment"]["USE_BUNKERNET"] = "no"
+            data["services"]["bw-scheduler"]["environment"]["SEND_ANONYMOUS_REPORT"] = "no"
+            data["services"]["bw-scheduler"]["environment"]["USE_DNSBL"] = "no"
+            data["services"]["bw-scheduler"]["environment"]["DISABLE_DEFAULT_SERVER"] = "no"
+            with open(compose, "w") as f:
+                f.write(dump(data))
             for ex_domain, test_domain in self._domains.items():
                 Test.replace_in_files(test, ex_domain, test_domain)
                 Test.rename(test, ex_domain, test_domain)
@@ -66,19 +70,32 @@ class DockerTest(Test):
                 proc = run("sudo ./setup-docker.sh", cwd=test, shell=True)
                 if proc.returncode != 0:
                     raise (Exception("setup-docker failed"))
+            if isdir("/tmp/bw-data"):
+                proc = run("sudo rm -rf /tmp/bw-data", shell=True)
+                if proc.returncode != 0:
+                    raise (Exception("rm bw-data failed"))
+                proc = run("sudo mkdir /tmp/bw-data", shell=True)
+                if proc.returncode != 0:
+                    raise (Exception("mkdir bw-data failed"))
             if isdir(example_data) and not self._no_copy_container:
                 proc = run(
-                    "sudo bash -c 'cp -rp " + example_data + "/* /tmp/bw-data'",
+                    f"sudo bash -c 'cp -rp {example_data}/* /tmp/bw-data'",
                     shell=True,
                 )
                 if proc.returncode != 0:
                     raise (Exception("cp bw-data failed"))
-            proc = run("docker-compose pull --ignore-pull-failures", shell=True, cwd=test)
+            proc = run("sudo chown -R root:101 /tmp/bw-data", shell=True)
             if proc.returncode != 0:
-                raise (Exception("docker-compose pull failed"))
-            proc = run("docker-compose up -d", shell=True, cwd=test)
+                raise (Exception("chown failed (docker stack)"))
+            proc = run("sudo chmod -R 770 /tmp/bw-data", shell=True)
             if proc.returncode != 0:
-                raise (Exception("docker-compose up failed"))
+                raise (Exception("chmod failed (docker stack)"))
+            proc = run("docker compose pull --ignore-pull-failures", shell=True, cwd=test)
+            if proc.returncode != 0:
+                raise (Exception("docker compose pull failed"))
+            proc = run("docker compose up -d", shell=True, cwd=test)
+            if proc.returncode != 0:
+                raise (Exception("docker compose up failed"))
         except:
             log(
                 "DOCKER",
@@ -92,9 +109,9 @@ class DockerTest(Test):
     def _cleanup_test(self):
         try:
             test = "/tmp/tests/" + self._name
-            proc = run("docker-compose down -v", shell=True, cwd=test)
+            proc = run("docker compose down -v --remove-orphans", shell=True, cwd=test)
             if proc.returncode != 0:
-                raise (Exception("docker-compose down failed"))
+                raise (Exception("docker compose down failed"))
             super()._cleanup_test()
         except:
             log(
@@ -107,4 +124,4 @@ class DockerTest(Test):
 
     def _debug_fail(self):
         test = "/tmp/tests/" + self._name
-        run("docker-compose logs", shell=True, cwd=test)
+        run("docker compose logs", shell=True, cwd=test)

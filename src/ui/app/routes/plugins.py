@@ -1,3 +1,4 @@
+from html import escape
 from importlib.machinery import SourceFileLoader
 from io import BytesIO
 from json import JSONDecodeError, loads as json_loads
@@ -102,7 +103,18 @@ def run_action(plugin: str, function_name: str = "", *, tmp_dir: Optional[Path] 
             tmp_dir.mkdir(parents=True, exist_ok=True)
 
             with tar_open(fileobj=BytesIO(page), mode="r:gz") as tar:
-                tar.extractall(tmp_dir)
+                for member in tar.getmembers():
+                    # Prevent absolute paths and paths with '..'
+                    if member.name.startswith("/") or ".." in Path(member.name).parts:
+                        return {"status": "ko", "code": 400, "message": "Invalid file path"}
+
+                    # Construct the target path and ensure it is within tmp_dir
+                    target_path = tmp_dir.joinpath(member.name).resolve()
+                    if not str(target_path).startswith(str(tmp_dir)):
+                        return {"status": "ko", "code": 400, "message": "Invalid file path"}
+
+                    # Extract the file safely
+                    tar.extract(member, tmp_dir)
 
             tmp_dir = tmp_dir.joinpath("ui")
         except BaseException as e:
@@ -479,16 +491,15 @@ def custom_plugin_page(plugin: str):
         return handle_error("Invalid plugin id, (must be between 1 and 64 characters, only letters, numbers, underscores and hyphens)", "plugins")
 
     if request.method == "POST":
-
         action_result = run_action(plugin)
 
         if isinstance(action_result, Response):
-            LOGGER.info(f"Plugin {plugin} action executed successfully")
+            LOGGER.info("Plugin action executed successfully")
             return action_result
 
         # case error
         if action_result["status"] == "ko":
-            return error_message(action_result["message"]), action_result["code"]
+            return error_message(escape(action_result["message"])), action_result["code"]
 
         LOGGER.info(f"Plugin {plugin} action executed successfully")
 
@@ -541,8 +552,19 @@ def custom_plugin_page(plugin: str):
         tmp_page_dir = TMP_DIR.joinpath("ui", "page", str(uuid4()))
         tmp_page_dir.mkdir(parents=True, exist_ok=True)
 
-        with tar_open(fileobj=BytesIO(page), mode="r:gz") as tar_file:
-            tar_file.extractall(tmp_page_dir)
+        with tar_open(fileobj=BytesIO(page), mode="r:gz") as tar:
+            for member in tar.getmembers():
+                # Prevent absolute paths and paths with '..'
+                if member.name.startswith("/") or ".." in Path(member.name).parts:
+                    return {"status": "ko", "code": 400, "message": "Invalid file path"}
+
+                # Construct the target path and ensure it is within tmp_dir
+                target_path = tmp_page_dir.joinpath(member.name).resolve()
+                if not str(target_path).startswith(str(tmp_page_dir)):
+                    return {"status": "ko", "code": 400, "message": "the plugin page has an invalid file path"}
+
+                # Extract the file safely
+                tar.extract(member, tmp_page_dir)
 
         tmp_page_dir = tmp_page_dir.joinpath("ui")
 
@@ -570,162 +592,8 @@ def custom_plugin_page(plugin: str):
                         .from_string(page_content)
                         .render(pre_render=pre_render, **current_app.jinja_env.globals)
                     )
-                except BaseException as e:
+                except BaseException:
                     LOGGER.exception("An error occurred while rendering the plugin page")
-                    plugin_page = f'<div class="mt-2 mb-2 alert alert-danger text-center" role="alert">An error occurred while rendering the plugin page: {e}<br/>See logs for more details</div>'
+                    plugin_page = '<div class="mt-2 mb-2 alert alert-danger text-center" role="alert">An error occurred while rendering the plugin page<br/>See logs for more details</div>'
 
-    return render_template(
-        "plugin_page.html",
-        plugin_page=plugin_page,
-        plugin=plugin_data,
-        is_used=is_used,
-        is_metrics=is_metrics_on,
-        pre_render=pre_render,
-    )
-
-
-# @plugins.route("/plugins/<plugin>", methods=["GET", "POST"])
-# @login_required
-# def custom_plugin(plugin: str):
-#     if not PLUGIN_ID_RX.match(plugin):
-#         return error_message("Invalid plugin id, (must be between 1 and 64 characters, only letters, numbers, underscores and hyphens)"), 400
-
-#     # Case we ware looking for a plugin template
-#     # We need to check if a page exists, and if it does, we need to check if the plugin is activated and metrics are on
-#     if request.method == "GET":
-
-#         # Check plugin's page
-#         page = DB.get_plugin_page(plugin)
-
-#         if not page:
-#             return error_message("The plugin does not have a page"), 404
-
-#         tmp_page_dir = TMP_DIR.joinpath("ui", "page", str(uuid4()))
-#         tmp_page_dir.mkdir(parents=True, exist_ok=True)
-
-#         with tar_open(fileobj=BytesIO(page), mode="r:gz") as tar_file:
-#             tar_file.extractall(tmp_page_dir)
-
-#         tmp_page_dir = tmp_page_dir.joinpath("ui")
-
-#         LOGGER.debug(f"Plugin {plugin} page extracted successfully")
-
-#         # Case template, prepare data
-#         plugins = BW_CONFIG.get_plugins()
-#         plugin_id = None
-#         curr_plugin = {}
-#         is_used = False
-#         use_key = False
-#         is_metrics_on = False
-#         context = "multisite"
-
-#         for plug in plugins:
-#             if plug["id"] == plugin:
-#                 plugin_id = plug["id"]
-#                 curr_plugin = plug
-#                 break
-
-#         # Case no plugin found
-#         if plugin_id is None:
-#             return error_message("Plugin not found"), 404
-
-#         config = DB.get_config()
-
-#         # Check if we are using metrics
-#         for service in config.get("SERVER_NAME", "").split(" "):
-#             # specific case
-#             if config.get(f"{service}_USE_METRICS", "yes") != "no":
-#                 is_metrics_on = True
-#                 break
-
-#         # Check if the plugin is used
-
-#         # Here we have specific cases for some plugins
-#         # {plugin_id: [[setting_name, setting_false], ...]}
-#         specific_cases = {
-#             "limit": [["USE_LIMIT_REQ", "no"], ["USE_LIMIT_CONN", "no"]],
-#             "misc": [["DISABLE_DEFAULT_SERVER", "no"], ["ALLOWED_METHODS", ""]],
-#             "modsecurity": [["USE_MODSECURITY", "no"]],
-#             "realip": [["USE_REALIP", "no"]],
-#             "reverseproxy": [["USE_REVERSE_PROXY", "no"]],
-#             "selfsigned": [["GENERATE_SELF_SIGNED_SSL", "no"]],
-#             "letsencrypt": [["AUTO_LETS_ENCRYPT", "no"]],
-#             "country": [["BLACKLIST_COUNTRY", ""], ["WHITELIST_COUNTRY", ""]],
-#         }
-
-#         # specific cases
-#         for key, data in curr_plugin["settings"].items():
-#             # specific cases
-#             if plugin_id in specific_cases:
-#                 use_key = "SPECIFIC"
-#                 context = data["context"]
-#                 break
-
-#             # default case (one USE_)
-#             if key.upper().startswith("USE_"):
-#                 use_key = key
-#                 context = data["context"]
-#                 break
-
-#         # Case USE_<NAME>, it means show only if used by one service
-#         if context == "global":
-#             if plugin_id in specific_cases:
-#                 for key in specific_cases[plugin_id]:
-#                     setting_name = key[0]
-#                     setting_false = key[1]
-#                     if config.get(setting_name, setting_false) != setting_false:
-#                         is_used = True
-#                         break
-
-#             if config.get(use_key, "no") != "no":
-#                 is_used = True
-
-#         if context == "multisite":
-#             for service in config.get("SERVER_NAME", "").split(" "):
-#                 # specific case
-#                 if plugin_id in specific_cases:
-#                     for key in specific_cases[plugin_id]:
-#                         setting_name = key[0]
-#                         setting_false = key[1]
-#                         if config.get(f"{service}_{setting_name}", setting_false) != setting_false:
-#                             is_used = True
-#                             break
-
-#                 # general case
-#                 if config.get(f"{service}_{use_key}", "no") != "no":
-#                     is_used = True
-#                     break
-
-#         # Get prerender from action.py
-#         pre_render = run_action(plugin, "pre_render", tmp_dir=tmp_page_dir)
-#         return render_template(
-#             # deepcode ignore Ssti: We trust the plugin template
-#             Environment(
-#                 loader=FileSystemLoader((tmp_page_dir.as_posix() + "/", join(sep, "usr", "share", "bunkerweb", "ui", "templates") + "/")),
-#                 autoescape=select_autoescape(["html"]),
-#             ).from_string(tmp_page_dir.joinpath("template.html").read_text(encoding="utf-8")),
-#             current_endpoint=plugin,
-#             plugin=curr_plugin,
-#             pre_render=pre_render,
-#             is_used=is_used,
-#             is_metrics=is_metrics_on,
-#             **current_app.jinja_env.globals,
-#         )
-
-#     rmtree(TMP_DIR.joinpath("ui", "page"), ignore_errors=True)
-
-#     action_result = run_action(plugin)
-
-#     if isinstance(action_result, Response):
-#         LOGGER.info(f"Plugin {plugin} action executed successfully")
-#         return action_result
-
-#     # case error
-#     if action_result["status"] == "ko":
-#         return error_message(action_result["message"]), action_result["code"]
-
-#     LOGGER.info(f"Plugin {plugin} action executed successfully")
-
-#     if request.content_type == "application/x-www-form-urlencoded":
-#         return redirect(f"{url_for('plugins.plugins_page')}/{plugin}", code=303)
-#     return jsonify({"message": "ok", "data": action_result["data"]}), 200
+    return render_template("plugin_page.html", plugin_page=plugin_page, plugin=plugin_data, is_used=is_used, is_metrics=is_metrics_on, pre_render=pre_render)

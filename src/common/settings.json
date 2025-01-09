@@ -24,7 +24,8 @@
     "id": "http-port",
     "label": "HTTP port",
     "regex": "^\\d+$",
-    "type": "text"
+    "type": "text",
+    "multiple": "listen-http-ports"
   },
   "HTTPS_PORT": {
     "context": "global",
@@ -33,7 +34,8 @@
     "id": "https-port",
     "label": "HTTPS port",
     "regex": "^\\d+$",
-    "type": "text"
+    "type": "text",
+    "multiple": "listen-https-ports"
   },
   "MULTISITE": {
     "context": "global",
@@ -50,7 +52,7 @@
     "help": "List of the virtual hosts served by bunkerweb.",
     "id": "server-name",
     "label": "Server name",
-    "regex": "^(((?!.*\\.\\.)(?![^\\s]{256,})([A-Za-z0-9]([A-Za-z0-9\\-]{0,61}[A-Za-z0-9])?\\.)+[A-Za-z]{2,63})(?!.*\\s\\2(\\s|$)))?(\\s(((?!.*\\.\\.)(?![^\\s]{256,})([A-Za-z0-9]([A-Za-z0-9\\-]{0,61}[A-Za-z0-9])?\\.)+[A-Za-z]{2,63}))(?!.*\\s\\5(\\s|$)))*$",
+    "regex": "^((?!.*\\.\\.)([^\\s]{1,256})(?!.*\\s\\2(\\s|$)))?(\\s(((?!.*\\.\\.))([^\\s]{1,256})(?!.*\\s\\7(\\s|$))))*$",
     "type": "text"
   },
   "WORKER_PROCESSES": {
@@ -269,7 +271,8 @@
     "id": "listen-stream-port",
     "label": "Listen stream port",
     "regex": "^[0-9]+$",
-    "type": "text"
+    "type": "text",
+    "multiple": "listen-stream-ports"
   },
   "LISTEN_STREAM_PORT_SSL": {
     "context": "multisite",
@@ -278,12 +281,22 @@
     "id": "listen-stream-port-ssl",
     "label": "Listen stream port ssl",
     "regex": "^[0-9]+$",
-    "type": "text"
+    "type": "text",
+    "multiple": "listen-stream-ports-ssl"
+  },
+  "USE_TCP": {
+    "context": "multisite",
+    "default": "yes",
+    "help": "TCP listen (stream).",
+    "id": "use-tcp",
+    "label": "Listen TCP",
+    "regex": "^(yes|no)$",
+    "type": "check"
   },
   "USE_UDP": {
     "context": "multisite",
     "default": "no",
-    "help": "UDP listen instead of TCP (stream).",
+    "help": "UDP listen (stream).",
     "id": "use-udp",
     "label": "Listen UDP",
     "regex": "^(yes|no)$",

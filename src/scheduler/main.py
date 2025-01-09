@@ -23,17 +23,16 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
-from dotenv import dotenv_values
 from schedule import every as schedule_every, run_pending
 
-from common_utils import bytes_hash, dict_to_frozenset, get_version  # type: ignore
+from common_utils import bytes_hash, dict_to_frozenset  # type: ignore
 from logger import setup_logger  # type: ignore
 from Database import Database  # type: ignore
 from JobScheduler import JobScheduler
 from jobs import Job  # type: ignore
 from API import API  # type: ignore
 
-# from ApiCaller import ApiCaller  # type: ignore  # TODO: uncomment when the healthcheck endpoint is ready @fl0ppy-d1sk
+from ApiCaller import ApiCaller  # type: ignore
 
 APPLYING_CHANGES = Event()
 RUN = True
@@ -388,13 +387,23 @@ def healthcheck_job():
 
     HEALTHCHECK_EVENT.set()
 
-    # env = SCHEDULER.db.get_config()  # TODO: uncomment when the healthcheck endpoint is ready @fl0ppy-d1sk
+    if APPLYING_CHANGES.is_set():
+        return
+
+    env = SCHEDULER.db.get_config()
 
     for db_instance in SCHEDULER.db.get_instances():
         bw_instance = API(f"http://{db_instance['hostname']}:{db_instance['port']}", db_instance["server_name"])
         try:
-            sent, err, status, resp = bw_instance.request("GET", "ping")
-            # sent, err, status, resp = bw_instance.request("GET", "health") # TODO: use health instead when the healthcheck endpoint is ready @fl0ppy-d1sk
+            try:
+                sent, err, status, resp = bw_instance.request("GET", "health")
+            except BaseException as e:
+                err = str(e)
+                sent = False
+                status = 500
+                resp = {"status": "down", "msg": err}
+
+            HEALTHCHECK_LOGGER.debug(resp)
 
             success = True
             if not sent:
@@ -420,32 +429,29 @@ def healthcheck_job():
                         break
                 continue
 
-            # if resp["state"] == "loading": # TODO: uncomment when the healthcheck endpoint is ready @fl0ppy-d1sk
-            #     HEALTHCHECK_LOGGER.info(f"Instance {bw_instance.endpoint} is loading, sending config ...")
-            #     api_caller = ApiCaller([bw_instance])
-            #     api_caller.send_files(CUSTOM_CONFIGS_PATH, "/custom_configs")
-            #     api_caller.send_files(EXTERNAL_PLUGINS_PATH, "/plugins")
-            #     api_caller.send_files(PRO_PLUGINS_PATH, "/pro_plugins")
-            #     api_caller.send_files(join(sep, "etc", "nginx"), "/confs")
-            #     api_caller.send_files(CACHE_PATH, "/cache")
-            #     if not api_caller.send_to_apis("POST", f"/reload?test={'no' if DISABLE_CONFIGURATION_TESTING else 'yes'}", timeout=max(RELOAD_MIN_TIMEOUT, 2 * len(env["SERVER_NAME"].split(" "))),)[0]:
-            #         HEALTHCHECK_LOGGER.error(f"Error while reloading instance {bw_instance.endpoint}")
-            #         ret = SCHEDULER.db.update_instance(db_instance["hostname"], "loading")
-            #         if ret:
-            #             HEALTHCHECK_LOGGER.error(f"Couldn't update instance {bw_instance.endpoint} status to loading in the database: {ret}")
-            #         continue
-            #     HEALTHCHECK_LOGGER.info(f"Successfully reloaded instance {bw_instance.endpoint}")
-            # elif resp["state"] == "down":
-            #     HEALTHCHECK_LOGGER.warning(f"Instance {bw_instance.endpoint} is down")
-            #     ret = SCHEDULER.db.update_instance(db_instance["hostname"], "down")
-            #     if ret:
-            #         HEALTHCHECK_LOGGER.error(f"Couldn't update instance {bw_instance.endpoint} status to down in the database: {ret}")
-            #     for i, api in enumerate(SCHEDULER.apis):
-            #         if api.endpoint == bw_instance.endpoint:
-            #             HEALTHCHECK_LOGGER.debug(f"Removing {bw_instance.endpoint} from the list of reachable instances")
-            #             del SCHEDULER.apis[i]
-            #             break
-            #     continue
+            if resp["msg"] == "loading":
+                if db_instance["status"] == "failover":
+                    HEALTHCHECK_LOGGER.warning(f"Instance {db_instance['hostname']} is in failover mode, skipping sending config ...")
+                    continue
+
+                HEALTHCHECK_LOGGER.info(f"Instance {bw_instance.endpoint} is loading, sending config ...")
+                api_caller = ApiCaller([bw_instance])
+                api_caller.send_files(CUSTOM_CONFIGS_PATH, "/custom_configs")
+                api_caller.send_files(EXTERNAL_PLUGINS_PATH, "/plugins")
+                api_caller.send_files(PRO_PLUGINS_PATH, "/pro_plugins")
+                api_caller.send_files(join(sep, "etc", "nginx"), "/confs")
+                api_caller.send_files(CACHE_PATH, "/cache")
+                if not api_caller.send_to_apis(
+                    "POST",
+                    f"/reload?test={'no' if DISABLE_CONFIGURATION_TESTING else 'yes'}",
+                    timeout=max(RELOAD_MIN_TIMEOUT, 3 * len(env["SERVER_NAME"].split(" "))),
+                )[0]:
+                    HEALTHCHECK_LOGGER.error(f"Error while reloading instance {bw_instance.endpoint}")
+                    ret = SCHEDULER.db.update_instance(db_instance["hostname"], "loading")
+                    if ret:
+                        HEALTHCHECK_LOGGER.error(f"Couldn't update instance {bw_instance.endpoint} status to loading in the database: {ret}")
+                    continue
+                HEALTHCHECK_LOGGER.info(f"Successfully reloaded instance {bw_instance.endpoint}")
 
             ret = SCHEDULER.db.update_instance(db_instance["hostname"], "up")
             if ret:
@@ -490,34 +496,17 @@ if __name__ == "__main__":
 
         tmp_variables_path = Path(args.variables or join(sep, "var", "tmp", "bunkerweb", "variables.env"))
         nginx_variables_path = CONFIG_PATH.joinpath("variables.env")
-        dotenv_env = dotenv_values(tmp_variables_path.as_posix())
+
+        dotenv_env = {}
+        if tmp_variables_path.is_file():
+            with tmp_variables_path.open() as f:
+                dotenv_env = dict(line.strip().split("=", 1) for line in f if line.strip() and not line.startswith("#"))
 
         SCHEDULER = JobScheduler(environ, LOGGER, db=Database(LOGGER, sqlalchemy_string=dotenv_env.get("DATABASE_URI", getenv("DATABASE_URI", None))))  # type: ignore
 
-        JOB = Job(LOGGER, SCHEDULER.db)
+        JOB = Job(LOGGER, __file__, SCHEDULER.db)
 
         APPLYING_CHANGES.set()
-
-        db_version = SCHEDULER.db.get_version()
-        if not db_version.startswith("Error") and db_version != get_version():
-            LOGGER.warning("BunkerWeb version changed, creating a backup of the database and proceeding with the upgrade ...")
-            SCHEDULER.env = {
-                "DATABASE_URI": SCHEDULER.db.database_uri,
-                "USE_BACKUP": "yes",
-                "FORCE_BACKUP": "yes",
-                "BACKUP_SCHEDULE": "daily",
-                "BACKUP_ROTATION": "7",
-                "BACKUP_DIRECTORY": "/var/lib/bunkerweb/upgrade_backups",
-                "LOG_LEVEL": getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "notice")),
-                "RELOAD_MIN_TIMEOUT": str(RELOAD_MIN_TIMEOUT),
-            }
-
-            if not SCHEDULER.run_single("backup-data"):
-                LOGGER.error("backup-data job failed, stopping ...")
-                stop(1)
-            LOGGER.info("Backup completed successfully, if you want to restore the backup, you can find it in /var/lib/bunkerweb/upgrade_backups")
-
-            rmtree(join(sep, "etc", "bunkerweb", "pro", "plugins", "letsencrypt_dns"), ignore_errors=True)
 
         if SCHEDULER.db.readonly:
             LOGGER.warning("The database is read-only, no need to save the changes in the configuration as they will not be saved")
@@ -556,7 +545,7 @@ if __name__ == "__main__":
             env["TZ"] = tz
 
         # Instantiate scheduler environment
-        SCHEDULER.env = env | {"LOG_LEVEL": getenv("CUSTOM_LOG_LEVEL", env.get("LOG_LEVEL", "notice")), "RELOAD_MIN_TIMEOUT": str(RELOAD_MIN_TIMEOUT)}
+        SCHEDULER.env = env | {"RELOAD_MIN_TIMEOUT": str(RELOAD_MIN_TIMEOUT)}
 
         threads = []
 
@@ -627,6 +616,9 @@ if __name__ == "__main__":
 
                     with file.open("r", encoding="utf-8") as f:
                         plugin_data = json_load(f)
+
+                    if plugin_data["id"] == "letsencrypt_dns":
+                        continue
 
                     checksum = bytes_hash(plugin_content, algorithm="sha256")
                     common_data = plugin_data | {
@@ -746,6 +738,7 @@ if __name__ == "__main__":
 
         changed_plugins = []
         old_changes = {}
+        healthcheck_job_run = False
 
         while True:
             threads.clear()
@@ -753,12 +746,7 @@ if __name__ == "__main__":
             if RUN_JOBS_ONCE:
                 # Only run jobs once
                 if not SCHEDULER.reload(
-                    env
-                    | {
-                        "TZ": getenv("TZ", "UTC"),
-                        "LOG_LEVEL": getenv("CUSTOM_LOG_LEVEL", env.get("LOG_LEVEL", "notice")),
-                        "RELOAD_MIN_TIMEOUT": str(RELOAD_MIN_TIMEOUT),
-                    },
+                    env | {"TZ": getenv("TZ", "UTC"), "RELOAD_MIN_TIMEOUT": str(RELOAD_MIN_TIMEOUT)},
                     changed_plugins=changed_plugins,
                 ):
                     LOGGER.error("At least one job in run_once() failed")
@@ -766,6 +754,7 @@ if __name__ == "__main__":
                     LOGGER.info("All jobs in run_once() were successful")
                     if SCHEDULER.db.readonly:
                         generate_caches()
+                healthcheck_job_run = False
 
             if CONFIG_NEED_GENERATION:
                 content = ""
@@ -815,20 +804,31 @@ if __name__ == "__main__":
                     success, responses = SCHEDULER.send_to_apis(
                         "POST",
                         f"/reload?test={'no' if DISABLE_CONFIGURATION_TESTING else 'yes'}",
-                        timeout=max(RELOAD_MIN_TIMEOUT, 2 * len(env["SERVER_NAME"].split(" "))),
+                        timeout=max(RELOAD_MIN_TIMEOUT, 3 * len(env["SERVER_NAME"].split(" "))),
                         response=True,
                     )
                     if not success:
                         reachable = False
-                        LOGGER.debug(f"Error while reloading all bunkerweb instances: {responses}")
+                        LOGGER.debug("Error while reloading all bunkerweb instances")
+
+                    LOGGER.debug(responses)
 
                     for db_instance in SCHEDULER.db.get_instances():
                         status = responses.get(db_instance["hostname"], {"status": "down"}).get("status", "down")
                         if status == "success":
                             success = True
-                        ret = SCHEDULER.db.update_instance(db_instance["hostname"], "up" if status == "success" else "down")
+                        ret = SCHEDULER.db.update_instance(
+                            db_instance["hostname"],
+                            (
+                                "up"
+                                if status == "success"
+                                else ("failover" if responses.get(db_instance["hostname"], {}).get("msg") == "config check failed" else "down")
+                            ),
+                        )
                         if ret:
-                            LOGGER.error(f"Couldn't update instance {db_instance['hostname']} status to down in the database: {ret}")
+                            LOGGER.error(
+                                f"Couldn't update instance {db_instance['hostname']} status to {'up' if status == 'success' else 'down'} in the database: {ret}"
+                            )
 
                         if status == "success":
                             found = False
@@ -885,7 +885,7 @@ if __name__ == "__main__":
                         if not SCHEDULER.send_to_apis(
                             "POST",
                             f"/reload?test={'no' if DISABLE_CONFIGURATION_TESTING else 'yes'}",
-                            timeout=max(RELOAD_MIN_TIMEOUT, 2 * len(env["SERVER_NAME"].split(" "))),
+                            timeout=max(RELOAD_MIN_TIMEOUT, 3 * len(env["SERVER_NAME"].split(" "))),
                         )[0]:
                             LOGGER.error("Error while reloading bunkerweb with failover configuration, skipping ...")
                 elif not reachable:
@@ -935,7 +935,10 @@ if __name__ == "__main__":
                 HEALTHY_PATH.write_text(datetime.now().astimezone().isoformat(), encoding="utf-8")
 
             APPLYING_CHANGES.clear()
-            schedule_every(HEALTHCHECK_INTERVAL).seconds.do(healthcheck_job)
+            if not healthcheck_job_run:
+                LOGGER.debug("Scheduling healthcheck job ...")
+                schedule_every(HEALTHCHECK_INTERVAL).seconds.do(healthcheck_job)
+                healthcheck_job_run = True
 
             # infinite schedule for the jobs
             LOGGER.info("Executing job scheduler ...")

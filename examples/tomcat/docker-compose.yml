@@ -1,6 +1,6 @@
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.0-beta
+    image: bunkerity/bunkerweb:1.6.0-rc1
     container_name: bunkerweb
     ports:
       - "80:8080/tcp"
@@ -14,7 +14,7 @@ services:
       - bw-services
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.0-beta
+    image: bunkerity/bunkerweb-scheduler:1.6.0-rc1
     container_name: bunkerweb-scheduler
     depends_on:
       - bunkerweb
@@ -36,7 +36,7 @@ services:
       - bw-universe
 
   mytomcat:
-    image: tomcat:11.0
+    image: tomcat:11
     volumes:
       - ./app:/usr/local/tomcat/webapps/ # folder containing war files
     networks:

@@ -1,6 +1,25 @@
 # Changelog
 
-## v1.6.0-beta - ????/??/??
+## v1.6.0-rc1 - ????/??/??
+
+- [BUGFIX] Increase string length for service_id and id columns in database models to avoid issues with long service names
+- [BUGFIX] Fix shenanigans with setup wizard when a reverse proxy was already configured
+- [LINUX] Support Fedora 40 back and temporarily put aside Fedora 41 (there are issues when building the images)
+- [UI] Add `CHECK_PRIVATE_IP` configuration to manage session IP address changes for private networks
+- [UI] Implement `ALWAYS_REMEMBER` functionality for session persistence in login
+- [UI] Add temporary UI service to show errors that occurred if any while web UI was starting up
+- [FEATURE] Update regex for cookie flags validation to allow additional attributes
+- [FEATURE] Add health check endpoint and integrate it into the scheduler for instance status monitoring
+- [FEATURE] Add country tracking to bans data
+- [FEATURE] Refactored the way the database migrations are handled to make it more reliable and faster using alembic
+- [FEATURE] Add configurable limit for SecRequestBodyNoFilesLimit in ModSecurity via the `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` setting
+- [FEATURE] Add multi-user support in `Auth basic` plugin
+- [FEATURE] Add support for TCP toggle listening in server-stream configuration (now UDP doesn't replace TCP when activated)
+- [FEATURE] Made `LISTEN_STREAM_PORT` and `LISTEN_STREAM_PORT_SSL` settings multiples to allow listening on multiple ports
+- [DEPRECATION] Remove `X-XSS-Protection` header from the `header` plugin as it is deprecated
+- [DEPS] Updated coreruleset-v4 version to v4.10.0
+
+## v1.6.0-beta - 2024/12/10
 
 - [FEATURE] Add support for the Coreruleset plugins via the USE_MODSECURITY_CRS_PLUGINS and the MODSECURITY_CRS_PLUGIN_URLS settings (it automatically downloads and installs the plugins like with BunkerWeb's external plugins). plugins can also be added manually via custom configuration files
 - [FEATURE] Add X_DNS_PREFETCH_CONTROL setting to control the DNS prefetching behavior via the X-DNS-Prefetch-Control header (default is off)

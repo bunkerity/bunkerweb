@@ -37,7 +37,7 @@ STREAM_TYPES_ENUM = Enum("no", "yes", "partial", name="stream_types_enum")
 PLUGIN_TYPES_ENUM = Enum("core", "external", "ui", "pro", name="plugin_types_enum")
 PRO_STATUS_ENUM = Enum("active", "invalid", "expired", "suspended", name="pro_status_enum")
 INSTANCE_TYPE_ENUM = Enum("static", "container", "pod", name="instance_type_enum")
-INSTANCE_STATUS_ENUM = Enum("loading", "up", "down", name="instance_status_enum")
+INSTANCE_STATUS_ENUM = Enum("loading", "up", "down", "failover", name="instance_status_enum")
 Base = declarative_base()
 
 
@@ -108,7 +108,7 @@ class Global_values(Base):
 class Services(Base):
     __tablename__ = "bw_services"
 
-    id = Column(String(64), primary_key=True)
+    id = Column(String(256), primary_key=True)
     method = Column(METHODS_ENUM, nullable=False)
     is_draft = Column(Boolean, default=False, nullable=False)
     creation_date = Column(DateTime(timezone=True), nullable=False)
@@ -122,7 +122,7 @@ class Services(Base):
 class Services_settings(Base):
     __tablename__ = "bw_services_settings"
 
-    service_id = Column(String(64), ForeignKey("bw_services.id", onupdate="cascade", ondelete="cascade"), primary_key=True)
+    service_id = Column(String(256), ForeignKey("bw_services.id", onupdate="cascade", ondelete="cascade"), primary_key=True)
     setting_id = Column(String(256), ForeignKey("bw_settings.id", onupdate="cascade", ondelete="cascade"), primary_key=True)
     value = Column(TEXT, nullable=False)
     suffix = Column(Integer, primary_key=True, nullable=True, default=0)
@@ -163,7 +163,7 @@ class Jobs_cache(Base):
 
     id = Column(Integer, Identity(start=1, increment=1), primary_key=True)
     job_name = Column(String(128), ForeignKey("bw_jobs.name", onupdate="cascade", ondelete="cascade"), nullable=False)
-    service_id = Column(String(64), ForeignKey("bw_services.id", onupdate="cascade", ondelete="cascade"), nullable=True)
+    service_id = Column(String(256), ForeignKey("bw_services.id", onupdate="cascade", ondelete="cascade"), nullable=True)
     file_name = Column(String(256), nullable=False)
     data = Column(LargeBinary(length=(2**32) - 1), nullable=True)
     last_update = Column(DateTime(timezone=True), nullable=True)
@@ -190,7 +190,7 @@ class Custom_configs(Base):
     __table_args__ = (UniqueConstraint("service_id", "type", "name"),)
 
     id = Column(Integer, Identity(start=1, increment=1), primary_key=True)
-    service_id = Column(String(64), ForeignKey("bw_services.id", onupdate="cascade", ondelete="cascade"), nullable=True)
+    service_id = Column(String(256), ForeignKey("bw_services.id", onupdate="cascade", ondelete="cascade"), nullable=True)
     type = Column(CUSTOM_CONFIGS_TYPES_ENUM, nullable=False)
     name = Column(String(256), nullable=False)
     data = Column(LargeBinary(length=(2**32) - 1), nullable=False)
@@ -252,14 +252,18 @@ class Template_steps(Base):
 
 class Template_settings(Base):
     __tablename__ = "bw_template_settings"
-    __table_args__ = (UniqueConstraint("template_id", "setting_id", "step_id", "suffix"),)
+    __table_args__ = (
+        UniqueConstraint("template_id", "setting_id", "step_id", "suffix"),
+        UniqueConstraint("template_id", "setting_id", "order"),
+    )
 
     id = Column(Integer, Identity(start=1, increment=1), primary_key=True)
     template_id = Column(String(256), ForeignKey("bw_templates.id", onupdate="cascade", ondelete="cascade"), nullable=False)
     setting_id = Column(String(256), ForeignKey("bw_settings.id", onupdate="cascade", ondelete="cascade"), nullable=False)
-    step_id = Column(Integer, nullable=True)
+    step_id = Column(Integer, nullable=False)
     default = Column(TEXT, nullable=False)
     suffix = Column(Integer, nullable=True, default=0)
+    order = Column(Integer, default=0, nullable=False)
 
     template = relationship("Templates", back_populates="settings")
     setting = relationship("Settings", back_populates="templates")
@@ -267,15 +271,19 @@ class Template_settings(Base):
 
 class Template_custom_configs(Base):
     __tablename__ = "bw_template_custom_configs"
-    __table_args__ = (UniqueConstraint("template_id", "step_id", "type", "name"),)
+    __table_args__ = (
+        UniqueConstraint("template_id", "step_id", "type", "name"),
+        UniqueConstraint("template_id", "order"),
+    )
 
     id = Column(Integer, Identity(start=1, increment=1), primary_key=True)
     template_id = Column(String(256), ForeignKey("bw_templates.id", onupdate="cascade", ondelete="cascade"), nullable=False)
-    step_id = Column(Integer, nullable=True)
+    step_id = Column(Integer, nullable=False)
     type = Column(CUSTOM_CONFIGS_TYPES_ENUM, nullable=False)
     name = Column(String(256), nullable=False)
     data = Column(LargeBinary(length=(2**32) - 1), nullable=False)
     checksum = Column(String(128), nullable=False)
+    order = Column(Integer, default=0, nullable=False)
 
     template = relationship("Templates", back_populates="custom_configs")
 
@@ -306,7 +314,7 @@ class Metadata(Base):
     last_instances_change = Column(DateTime(timezone=True), nullable=True)
     failover = Column(Boolean, default=None, nullable=True)
     integration = Column(INTEGRATIONS_ENUM, default="Unknown", nullable=False)
-    version = Column(String(32), default="1.6.0-beta", nullable=False)
+    version = Column(String(32), default="1.6.0-rc1", nullable=False)
 
 
 ## UI Models

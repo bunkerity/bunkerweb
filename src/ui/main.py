@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from contextlib import suppress
 from datetime import datetime, timedelta
+from ipaddress import ip_address
 from json import dumps, loads
 from os import getenv, sep
 from os.path import join
@@ -14,10 +15,12 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
+from cachelib import FileSystemCache
 from flask import Flask, Response, flash as flask_flash, jsonify, make_response, redirect, render_template, request, session, url_for
 from flask_executor import Executor
 from flask_login import current_user, LoginManager, login_required, logout_user
 from flask_principal import ActionNeed, identity_loaded, Permission, Principal, RoleNeed, TypeNeed, UserNeed
+from flask_session import Session
 from flask_wtf.csrf import CSRFProtect, CSRFError
 from werkzeug.routing.exceptions import BuildError
 
@@ -73,26 +76,32 @@ with app.app_context():
         stop(1)
     FLASK_SECRET = LIB_DIR.joinpath(".flask_secret").read_text(encoding="utf-8").strip()
 
+    app.config["CHECK_PRIVATE_IP"] = getenv("CHECK_PRIVATE_IP", "yes").lower() == "yes"
     app.config["SECRET_KEY"] = FLASK_SECRET
 
-    app.config["SESSION_COOKIE_NAME"] = "__Host-bw_ui_session"
     app.config["SESSION_COOKIE_PATH"] = "/"
-    app.config["SESSION_COOKIE_SECURE"] = True
     app.config["SESSION_COOKIE_HTTPONLY"] = True
     app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 
-    app.config["REMEMBER_COOKIE_NAME"] = "__Host-bw_ui_remember_token"
     app.config["REMEMBER_COOKIE_PATH"] = "/"
-    app.config["REMEMBER_COOKIE_SECURE"] = True
     app.config["REMEMBER_COOKIE_HTTPONLY"] = True
     app.config["REMEMBER_COOKIE_SAMESITE"] = "Lax"
 
-    app.config["WTF_CSRF_SSL_STRICT"] = False
     app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 86400
     app.config["MAX_CONTENT_LENGTH"] = 50 * 1024 * 1024  # 50 MB
     app.config["SCRIPT_NONCE"] = ""
 
-    app.config["EXECUTOR_MAX_WORKERS"] = 4
+    # Session management
+    app.config["SESSION_TYPE"] = "cachelib"
+    app.config["SESSION_ID_LENGTH"] = 64
+    app.config["SESSION_CACHELIB"] = FileSystemCache(threshold=500, cache_dir=LIB_DIR.joinpath("ui_sessions_cache"))
+    sess = Session()
+    sess.init_app(app)
+
+    # CSRF protection
+    app.config["WTF_CSRF_SSL_STRICT"] = False
+    csrf = CSRFProtect()
+    csrf.init_app(app)
 
     principal = Principal()
     principal.init_app(app)
@@ -128,11 +137,8 @@ with app.app_context():
         url_for=custom_url_for,
     )
 
-    # CSRF protection
-    csrf = CSRFProtect()
-    csrf.init_app(app)
-
     # Executor
+    app.config["EXECUTOR_MAX_WORKERS"] = 4
     executor = Executor(app)
 
 
@@ -172,7 +178,7 @@ def inject_variables():
         is_pro_version=metadata["is_pro"],
         pro_status=metadata["pro_status"],
         pro_services=metadata["pro_services"],
-        pro_expire=metadata["pro_expire"].strftime("%Y/%m/%d") if metadata["pro_expire"] else "Unknown",
+        pro_expire=metadata["pro_expire"].strftime("%Y/%m/%d") if isinstance(metadata["pro_expire"], datetime) else "Unknown",
         pro_overlapped=metadata["pro_overlapped"],
         plugins=BW_CONFIG.get_plugins(),
         flash_messages=session.get("flash_messages", []),
@@ -316,6 +322,19 @@ def before_request():
         response.headers["Retry-After"] = 30  # Clients should retry after 30 seconds # type: ignore
         return response
 
+    if request.environ.get("HTTP_X_FORWARDED_FOR") is not None:
+        # Requests from the reverse proxy
+        app.config["SESSION_COOKIE_NAME"] = "__Host-bw_ui_session"
+        app.config["SESSION_COOKIE_SECURE"] = True
+        app.config["REMEMBER_COOKIE_NAME"] = "__Host-bw_ui_remember_token"
+        app.config["REMEMBER_COOKIE_SECURE"] = True
+    else:
+        # Requests from other sources
+        app.config["SESSION_COOKIE_NAME"] = "bw_ui_session"
+        app.config["SESSION_COOKIE_SECURE"] = False
+        app.config["REMEMBER_COOKIE_NAME"] = "bw_ui_remember_token"
+        app.config["REMEMBER_COOKIE_SECURE"] = False
+
     app.config["SCRIPT_NONCE"] = token_urlsafe(32)
 
     if not request.path.startswith(("/css/", "/img/", "/js/", "/json/", "/fonts/", "/libs/")):
@@ -333,12 +352,17 @@ def before_request():
         if current_user.is_authenticated:
             passed = True
 
+            if "ip" not in session:
+                session["ip"] = request.remote_addr
+            if "user_agent" not in session:
+                session["user_agent"] = request.headers.get("User-Agent")
+
             # Case not login page, keep on 2FA before any other access
             if not session.get("totp_validated", False) and bool(current_user.totp_secret) and "/totp" not in request.path:
                 if not request.path.endswith("/login"):
                     return redirect(url_for("totp.totp_page", next=request.form.get("next")))
                 passed = False
-            elif session["ip"] != request.remote_addr:
+            elif (app.config["CHECK_PRIVATE_IP"] or not ip_address(request.remote_addr).is_private) and session["ip"] != request.remote_addr:
                 LOGGER.warning(f"User {current_user.get_id()} tried to access his session with a different IP address.")
                 passed = False
             elif session["user_agent"] != request.headers.get("User-Agent"):
@@ -369,8 +393,8 @@ def set_security_headers(response):
     response.headers["Content-Security-Policy"] = (
         "object-src 'none';"
         + " frame-ancestors 'self';"
-        + " default-src 'self' https://www.bunkerweb.io https://assets.bunkerity.com https://bunkerity.us1.list-manage.com https://api.github.com;"
-        + f" script-src 'self' 'nonce-{app.config['SCRIPT_NONCE']}';"
+        + " default-src https: http: 'self' https://www.bunkerweb.io https://assets.bunkerity.com https://bunkerity.us1.list-manage.com https://api.github.com;"
+        + f" script-src https: http: 'self' 'nonce-{app.config['SCRIPT_NONCE']}' 'strict-dynamic' 'unsafe-inline';"
         + " style-src 'self' 'unsafe-inline';"
         + " img-src 'self' data: blob: https://assets.bunkerity.com https://*.tile.openstreetmap.org;"
         + " font-src 'self' data:;"
@@ -379,7 +403,7 @@ def set_security_headers(response):
         + (
             " connect-src *;"
             if request.path.startswith(("/check", "/setup"))
-            else " connect-src 'self' https://api.github.com/repos/bunkerity/bunkerweb https://www.bunkerweb.io/api/posts/0/3;"
+            else " connect-src https: http: 'self' https://api.github.com/repos/bunkerity/bunkerweb https://www.bunkerweb.io/api/posts/0/3;"
         )
     )
 
@@ -398,6 +422,11 @@ def set_security_headers(response):
 
     # * Referrer-Policy header to prevent leaking of sensitive data
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+
+    # * Permissions-Policy header to prevent unwanted behavior
+    response.headers["Permissions-Policy"] = (
+        "accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), compute-pressure=(), display-capture=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), identity-credentials-get=(), idle-detection=(), local-fonts=(), magnetometer=(), microphone=(), midi=(), otp-credentials=(), payment=(), picture-in-picture=(), publickey-credentials-create=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), speaker-selection=(), storage-access=(), usb=(), web-share=(), window-management=(), xr-spatial-tracking=(), interest-cohort=()"
+    )
 
     if not request.path.startswith(("/css/", "/img/", "/js/", "/json/", "/fonts/", "/libs/")) and current_user.is_authenticated and "session_id" in session:
         executor.submit(mark_user_access, session["session_id"])
@@ -487,9 +516,6 @@ def set_columns_preferences():
         columns_preferences = loads(columns_preferences)
     except BaseException:
         return Response(status=400, response=dumps({"message": "Bad request"}), content_type="application/json")
-
-    LOGGER.debug(f"Setting columns preferences for {table_name}: {columns_preferences}")
-    LOGGER.debug(f"Default columns preferences for {table_name}: {COLUMNS_PREFERENCES_DEFAULTS.get(table_name, {})}")
 
     if (
         DB.readonly

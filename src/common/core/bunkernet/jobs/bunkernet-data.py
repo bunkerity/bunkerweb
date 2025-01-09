@@ -38,7 +38,7 @@ try:
     bunkernet_path = Path(sep, "var", "cache", "bunkerweb", "bunkernet")
     bunkernet_path.mkdir(parents=True, exist_ok=True)
 
-    JOB = Job(LOGGER)
+    JOB = Job(LOGGER, __file__)
 
     # Create empty file in case it doesn't exist
     ip_list_path = bunkernet_path.joinpath("ip.list")

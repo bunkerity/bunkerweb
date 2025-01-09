@@ -20,7 +20,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
         sys_path.append(deps_path)
 
 from pydantic import ValidationError
-from models import (
+from letsencrypt import (
     CloudflareProvider,
     DigitalOceanProvider,
     DnsimpleProvider,
@@ -66,6 +66,7 @@ def certbot_new(
     propagation: str = "default",
     staging: bool = False,
     force: bool = False,
+    cmd_env: Dict[str, str] = None,
 ) -> int:
     if isinstance(credentials_path, str):
         credentials_path = Path(credentials_path)
@@ -89,7 +90,8 @@ def certbot_new(
         "--expand",
     ]
 
-    env = environ | {"PYTHONPATH": DEPS_PATH}
+    if not cmd_env:
+        cmd_env = {}
 
     if challenge_type == "dns":
         # * Adding DNS challenge hooks
@@ -108,7 +110,7 @@ def certbot_new(
             with credentials_path.open("r") as file:
                 for line in file:
                     key, value = line.strip().split("=", 1)
-                    env[key] = value
+                    cmd_env[key] = value
         else:
             command.extend([f"--dns-{provider}-credentials", credentials_path.as_posix()])
 
@@ -138,7 +140,7 @@ def certbot_new(
         command.append("--force-renewal")
 
     current_date = datetime.now()
-    process = Popen(command, stdin=DEVNULL, stderr=PIPE, universal_newlines=True, env=env)
+    process = Popen(command, stdin=DEVNULL, stderr=PIPE, universal_newlines=True, env=cmd_env)
 
     while process.poll() is None:
         if process.stderr:
@@ -175,7 +177,7 @@ try:
     if not IS_MULTISITE:
         use_letsencrypt = getenv("AUTO_LETS_ENCRYPT", "no") == "yes"
         use_letsencrypt_dns = getenv("LETS_ENCRYPT_CHALLENGE", "http") == "dns"
-        domains_server_names = {servers[0]: servers}
+        domains_server_names = {servers[0]: " ".join(servers).lower()}
     else:
         domains_server_names = {}
 
@@ -230,10 +232,13 @@ try:
             "scaleway": ScalewayProvider,
         }
 
-    JOB = Job(LOGGER)
+    JOB = Job(LOGGER, __file__)
 
     # ? Restore data from db cache of certbot-renew job
     JOB.restore_cache(job_name="certbot-renew")
+
+    env = environ.copy()
+    env["PYTHONPATH"] = env.get("PYTHONPATH", "") + (f":{DEPS_PATH}" if DEPS_PATH not in env.get("PYTHONPATH", "") else "")
 
     proc = run(
         [
@@ -250,7 +255,7 @@ try:
         stdout=PIPE,
         stderr=STDOUT,
         text=True,
-        env=environ | {"PYTHONPATH": DEPS_PATH},
+        env=env,
         check=False,
     )
     stdout = proc.stdout
@@ -465,6 +470,7 @@ try:
                 data["propagation"],
                 data["staging"],
                 domains_to_ask[first_server],
+                cmd_env=env.copy(),
             )
             != 0
         ):
@@ -503,6 +509,7 @@ try:
                         provider,
                         credentials_file,
                         staging=staging,
+                        cmd_env=env.copy(),
                     )
                     != 0
                 ):

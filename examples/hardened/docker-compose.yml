@@ -1,6 +1,6 @@
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.0-beta
+    image: bunkerity/bunkerweb:1.6.0-rc1
     container_name: bunkerweb
     # dropping all capabilities
     cap_drop:
@@ -16,6 +16,10 @@ services:
       - /var/tmp/bunkerweb:mode=0770,uid=0,gid=101
       - /var/run/bunkerweb:mode=0770,uid=0,gid=101
       - /var/cache/bunkerweb:mode=0770,uid=0,gid=101
+      - /var/lib/bunkerweb:mode=0770,uid=0,gid=101
+      - /var/www/html:mode=0770,uid=0,gid=101
+      - /etc/bunkerweb:mode=0770,uid=0,gid=101
+      - /etc/bunkerweb/configs:mode=0770,uid=0,gid=101
       - /etc/nginx:mode=0770,uid=0,gid=101
     ports:
       - "80:8080/tcp"
@@ -29,7 +33,7 @@ services:
       - bw-services
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.0-beta
+    image: bunkerity/bunkerweb-scheduler:1.6.0-rc1
     container_name: bw-scheduler
     depends_on:
       - bunkerweb

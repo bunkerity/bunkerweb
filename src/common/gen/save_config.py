@@ -12,8 +12,6 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
-from dotenv import dotenv_values
-
 from common_utils import get_integration, get_version  # type: ignore
 from logger import setup_logger  # type: ignore
 from Database import Database  # type: ignore
@@ -67,7 +65,8 @@ if __name__ == "__main__":
         if args.variables:
             variables_path = Path(args.variables)
             LOGGER.info(f"Variables : {variables_path}")
-            dotenv_env = dotenv_values(variables_path.as_posix())
+            with variables_path.open() as f:
+                dotenv_env = dict(line.strip().split("=", 1) for line in f if line.strip() and not line.startswith("#"))
 
         # Check existences and permissions
         LOGGER.info("Checking arguments ...")
@@ -120,15 +119,12 @@ if __name__ == "__main__":
 
         db = Database(LOGGER, sqlalchemy_string=dotenv_env.get("DATABASE_URI", getenv("DATABASE_URI", None)))
 
-        bunkerweb_version = get_version()
         db_metadata = db.get_metadata()
         db_initialized = not isinstance(db_metadata, str) and db_metadata["is_initialized"]
 
         if not db_initialized:
             LOGGER.info("Database not initialized, initializing ...")
-            ret, err = db.init_tables(
-                [config.get_settings(), config.get_plugins("core"), config.get_plugins("external"), config.get_plugins("pro")], bunkerweb_version
-            )
+            ret, err = db.init_tables([config.get_settings(), config.get_plugins("core"), config.get_plugins("external"), config.get_plugins("pro")])
 
             # Initialize database tables
             if err:
@@ -141,9 +137,7 @@ if __name__ == "__main__":
         else:
             LOGGER.info("Database is already initialized, checking for changes ...")
 
-            ret, err = db.init_tables(
-                [config.get_settings(), config.get_plugins("core"), config.get_plugins("external"), config.get_plugins("pro")], bunkerweb_version
-            )
+            ret, err = db.init_tables([config.get_settings(), config.get_plugins("core"), config.get_plugins("external"), config.get_plugins("pro")])
 
             if not ret and err:
                 LOGGER.error(f"Exception while checking database tables : {err}")
@@ -153,7 +147,7 @@ if __name__ == "__main__":
             else:
                 LOGGER.info("Database tables successfully updated")
 
-        err = db.initialize_db(version=bunkerweb_version, integration=integration)
+        err = db.initialize_db(version=get_version(), integration=integration)
 
         if err:
             LOGGER.error(f"Can't {'initialize' if not db_initialized else 'update'} database metadata : {err}")

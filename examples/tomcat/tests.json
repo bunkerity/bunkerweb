@@ -6,7 +6,7 @@
   "tests": [
     {
       "type": "string",
-      "url": "https://www.example.com",
+      "url": "https://www.example.com/sample/",
       "string": "tomcat",
       "tls": "www.example.com"
     }

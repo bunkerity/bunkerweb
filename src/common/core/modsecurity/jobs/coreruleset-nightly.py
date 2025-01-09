@@ -45,7 +45,7 @@ try:
         LOGGER.info("Core Rule Set (CRS) nightly is not being used, skipping download...")
         sys_exit(0)
 
-    JOB = Job(LOGGER)
+    JOB = Job(LOGGER, __file__)
 
     LOGGER.info("Checking if Core Rule Set (CRS) nightly needs to be downloaded...")
 

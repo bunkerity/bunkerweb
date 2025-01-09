@@ -185,6 +185,8 @@ sendgrid.env
 # Fish shell files
 .fish
 fish_variables
+# CVE-2023-5003
+ldap-authentication-report.csv
 
 # /proc entries (keep in sync with lfi-os-files.data)
 # grep -E "^proc/" lfi-os-files.data

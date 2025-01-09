@@ -20,7 +20,7 @@ LIB_DIR = Path(sep, "var", "lib", "bunkerweb")
 
 LOGGER = setup_logger("UI", getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")))
 
-USER_PASSWORD_RX = re_compile(r"^(?=.*?\p{Lowercase_Letter})(?=.*?\p{Uppercase_Letter})(?=.*?\d)(?=.*?[ -~]).{8,}$")
+USER_PASSWORD_RX = re_compile(r"^(?=.*\p{Ll})(?=.*\p{Lu})(?=.*\d)(?=.*\P{Alnum}).{8,}$")
 PLUGIN_NAME_RX = re_compile(r"^[\w.-]{4,64}$")
 
 COLUMNS_PREFERENCES_DEFAULTS = {
@@ -30,6 +30,7 @@ COLUMNS_PREFERENCES_DEFAULTS = {
         "5": True,
         "6": True,
         "7": True,
+        "8": True,
     },
     "configs": {
         "3": True,
@@ -81,18 +82,15 @@ COLUMNS_PREFERENCES_DEFAULTS = {
 }
 
 
-def stop_gunicorn():
-    p = Popen(["pgrep", "-f", "gunicorn"], stdout=PIPE)
-    out, _ = p.communicate()
-    pid = out.strip().decode().split("\n")[0]
-    call(["kill", "-SIGTERM", pid])
-
-
-def stop(status, _stop=True):
-    Path(sep, "var", "run", "bunkerweb", "ui.pid").unlink(missing_ok=True)
-    TMP_DIR.joinpath("ui.healthy").unlink(missing_ok=True)
-    if _stop is True:
-        stop_gunicorn()
+def stop(status, _stop: bool = True):
+    if _stop:
+        pid_file = Path(sep, "var", "run", "bunkerweb", "ui.pid")
+        if pid_file.is_file():
+            pid = pid_file.read_bytes()
+        else:
+            p = Popen(["pgrep", "-f", "gunicorn"], stdout=PIPE)
+            pid, _ = p.communicate()
+        call(["kill", "-SIGTERM", pid.strip().decode().split("\n")[0]])
     _exit(status)
 
 

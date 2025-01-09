@@ -1,0 +1,15 @@
+services:
+  bw-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: "bunkerweb"
+      POSTGRES_PASSWORD: "secret"
+      POSTGRES_DB: "db"
+    networks:
+      bw-db:
+        aliases:
+          - bw-db
+
+networks:
+  bw-db:
+    name: bw-db

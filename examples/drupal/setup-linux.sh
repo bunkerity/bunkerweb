@@ -13,7 +13,7 @@ else
 	echo "❌ No PHP user found"
 	exit 1
 fi
-curl https://ftp.drupal.org/files/projects/drupal-10.2.6.tar.gz -Lo /tmp/drupal.tar.gz
+curl https://ftp.drupal.org/files/projects/drupal-10.4.0.tar.gz -Lo /tmp/drupal.tar.gz
 tar -xzf /tmp/drupal.tar.gz -C /tmp
 current_dir="$(pwd)"
 cd /tmp/drupal-* || exit 1

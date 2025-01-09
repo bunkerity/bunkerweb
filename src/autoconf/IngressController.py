@@ -18,14 +18,19 @@ class IngressController(Controller):
         self.__internal_lock = Lock()
         super().__init__("kubernetes")
         config.load_incluster_config()
-        Configuration._default.verify_ssl = getenv("KUBERNETES_VERIFY_SSL", "yes") == "yes"
+
+        Configuration._default.verify_ssl = getenv("KUBERNETES_VERIFY_SSL", "yes").lower().strip() == "yes"
+        self._logger.info(f"SSL verification is {'enabled' if Configuration._default.verify_ssl else 'disabled'}")
+
         ssl_ca_cert = getenv("KUBERNETES_SSL_CA_CERT", "")
         if ssl_ca_cert:
             Configuration._default.ssl_ca_cert = ssl_ca_cert
+            self._logger.info("Using custom SSL CA certificate")
+
         self.__corev1 = client.CoreV1Api()
         self.__networkingv1 = client.NetworkingV1Api()
 
-        self.__use_fqdn = getenv("USE_KUBERNETES_FQDN", "yes").lower() == "yes"
+        self.__use_fqdn = getenv("USE_KUBERNETES_FQDN", "yes").lower().strip() == "yes"
         self._logger.info(f"Using Pod {'FQDN' if self.__use_fqdn else 'IP'} as hostname")
 
         self.__ingress_class = getenv("KUBERNETES_INGRESS_CLASS", "")
@@ -34,6 +39,12 @@ class IngressController(Controller):
 
         self.__domain_name = getenv("KUBERNETES_DOMAIN_NAME", "cluster.local")
         self._logger.info(f"Using domain name: {self.__domain_name}")
+
+        self.__service_protocol = getenv("KUBERNETES_SERVICE_PROTOCOL", "http").lower().strip()
+        if self.__service_protocol not in ("http", "https"):
+            self._logger.warning(f"Unsupported service protocol {self.__service_protocol}")
+            self.__service_protocol = "http"
+        self._logger.info(f"Using service protocol: {self.__service_protocol}")
 
     def _get_controller_instances(self) -> list:
         instances = []
@@ -71,7 +82,7 @@ class IngressController(Controller):
             "hostname": (
                 f"{controller_instance.status.pod_ip.replace('.','-')}.{controller_instance.metadata.namespace}.pod.{self.__domain_name}"
                 if self.__use_fqdn
-                else controller_instance.status.pod_ip
+                else (controller_instance.status.pod_ip or controller_instance.metadata.name)
             ),
             "health": False,
             "type": "pod",
@@ -108,6 +119,7 @@ class IngressController(Controller):
     def _to_services(self, controller_service) -> List[dict]:
         if not controller_service.spec or not controller_service.spec.rules:
             return []
+
         namespace = controller_service.metadata.namespace
         services = []
         # parse rules
@@ -115,13 +127,14 @@ class IngressController(Controller):
             if not rule.host:
                 self._logger.warning("Ignoring unsupported ingress rule without host.")
                 continue
+
             service = {}
             service["SERVER_NAME"] = rule.host
             if not rule.http:
                 services.append(service)
                 continue
-            location = 1
-            for path in rule.http.paths:
+
+            for location, path in enumerate(rule.http.paths, start=1):
                 if not path.path:
                     self._logger.warning("Ignoring unsupported ingress rule without path.")
                     continue
@@ -155,7 +168,7 @@ class IngressController(Controller):
                 else:
                     port = path.backend.service.port.number
 
-                reverse_proxy_host = f"http://{path.backend.service.name}.{namespace}.svc.{self.__domain_name}"
+                reverse_proxy_host = f"{self.__service_protocol}://{path.backend.service.name}.{namespace}.svc.{self.__domain_name}"
                 if port != 80:
                     reverse_proxy_host += f":{port}"
 
@@ -166,7 +179,6 @@ class IngressController(Controller):
                         f"REVERSE_PROXY_URL_{location}": path.path,
                     }
                 )
-                location += 1
             services.append(service)
 
         # parse annotations
@@ -178,8 +190,6 @@ class IngressController(Controller):
 
                     variable = annotation.replace("bunkerweb.io/", "", 1)
                     server_name = service["SERVER_NAME"].strip().split(" ")[0]
-                    if not variable.startswith(f"{server_name}_"):
-                        variable = f"{server_name}_{variable}"  # ? Ingress specific global variables are applied to all services
                     service[variable.replace(f"{server_name}_", "", 1)] = value
 
         # parse tls
@@ -276,28 +286,48 @@ class IngressController(Controller):
 
         return ret
 
-    def __watch(self, watch_type):
-        w = watch.Watch()
-        what = None
-        if watch_type == "pod":
-            what = self.__corev1.list_pod_for_all_namespaces
-        elif watch_type == "ingress":
-            what = self.__networkingv1.list_ingress_for_all_namespaces
-        elif watch_type == "configmap":
-            what = self.__corev1.list_config_map_for_all_namespaces
-        elif watch_type == "service":
-            what = self.__corev1.list_service_for_all_namespaces
-        elif watch_type == "secret":
-            what = self.__corev1.list_secret_for_all_namespaces
-        else:
-            raise Exception(f"Unsupported watch_type {watch_type}")
+    def __get_stream_with_retries(self, watch_type, what, retries=3):
+        """
+        Retry logic for streaming events with a capped retry limit.
+        """
+        for attempt in range(retries):
+            try:
+                self._logger.info(f"Starting Kubernetes watch for {watch_type}, attempt {attempt + 1}/{retries}")
+                yield from watch.Watch().stream(what)
+            except ApiException as e:
+                if e.status != 410:  # Not a 'Gone' error
+                    self._logger.debug(format_exc())
+                    self._logger.error(f"API exception while watching {watch_type} :\n{e}")
+                else:
+                    self._logger.warning(f"Resource version outdated for {watch_type}, retrying...")
+            except Exception as e:
+                self._logger.debug(format_exc())
+                self._logger.error(f"Unexpected error while watching {watch_type}:\n{e}")
+            self._logger.warning(f"Retrying {watch_type} in 5 seconds...")
+            sleep(5)
+        self._logger.error(f"Failed to watch {watch_type} after {retries} retries.")
 
+    def __watch(self, watch_type):
         while True:
+            what = None
+            if watch_type == "pod":
+                what = self.__corev1.list_pod_for_all_namespaces
+            elif watch_type == "ingress":
+                what = self.__networkingv1.list_ingress_for_all_namespaces
+            elif watch_type == "configmap":
+                what = self.__corev1.list_config_map_for_all_namespaces
+            elif watch_type == "service":
+                what = self.__corev1.list_service_for_all_namespaces
+            elif watch_type == "secret":
+                what = self.__corev1.list_secret_for_all_namespaces
+            else:
+                raise Exception(f"Unsupported watch_type {watch_type}")
+
             locked = False
             error = False
             applied = False
             try:
-                for event in w.stream(what):
+                for event in self.__get_stream_with_retries(watch_type, what):
                     applied = False
                     self.__internal_lock.acquire()
                     locked = True
@@ -335,8 +365,9 @@ class IngressController(Controller):
                                 self._logger.info("Successfully deployed new configuration 🚀")
 
                                 self._set_autoconf_load_db()
-                        except:
-                            self._logger.error(f"Exception while deploying new configuration :\n{format_exc()}")
+                        except BaseException as e:
+                            self._logger.debug(format_exc())
+                            self._logger.error(f"Exception while deploying new configuration :\n{e}")
                         applied = True
 
                     if locked:
@@ -344,10 +375,12 @@ class IngressController(Controller):
                         locked = False
             except ApiException as e:
                 if e.status != 410:
-                    self._logger.error(f"API exception while reading k8s event (type = {watch_type}) :\n{format_exc()}")
+                    self._logger.debug(format_exc())
+                    self._logger.error(f"API exception while reading k8s event (type = {watch_type}) :\n{e}")
                     error = True
-            except:
-                self._logger.error(f"Unknown exception while reading k8s event (type = {watch_type}) :\n{format_exc()}")
+            except BaseException as e:
+                self._logger.debug(format_exc())
+                self._logger.error(f"Unknown exception while reading k8s event (type = {watch_type}) :\n{e}")
                 error = True
             finally:
                 if locked:

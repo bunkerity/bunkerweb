@@ -104,7 +104,7 @@ services:
     volumes:
       - bw-logs:/var/log/bunkerweb
       - ../../src/ui/app:/usr/share/bunkerweb/ui/app:ro
-      - ../../src/ui/gunicorn.conf.py:/usr/share/bunkerweb/ui/gunicorn.conf.py:ro
+      - ../../src/ui/utils:/usr/share/bunkerweb/ui/utils:ro
       - ../../src/ui/main.py:/usr/share/bunkerweb/ui/main.py:ro
     environment:
       <<: *env

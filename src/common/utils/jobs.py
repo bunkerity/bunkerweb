@@ -2,13 +2,13 @@
 # -*- coding: utf-8 -*-
 
 from datetime import datetime, timedelta
+from inspect import currentframe, getframeinfo
 from io import BytesIO
 from logging import Logger
 from os import getenv
 from os.path import sep
 from pathlib import Path
 from shutil import rmtree
-from sys import argv
 from tarfile import TarFile, open as tar_open
 from threading import Lock
 from traceback import format_exc
@@ -26,20 +26,35 @@ EXPIRE_TIME = {
 
 
 class Job:
-    def __init__(self, logger: Optional[Logger] = None, db=None, *, job_name: str = "", deprecated: bool = False):
-        if not argv:
-            raise ValueError("argv could not be determined.")
+    def __init__(self, logger: Logger, job_path: str, db=None, *, deprecated: bool = False):
+        """Initialize Job class."""
+        if job_path:
+            job_path = Path(job_path)
+            plugin_id = job_path.parent.parent.name
+            job_name = job_path.stem
+        else:
+            frame = currentframe()
+            if not frame:
+                raise ValueError("frame could not be determined.")
 
-        source_file = argv[0]
+            source_path = Path(getframeinfo(frame.f_back).filename)
 
-        if source_file is None:
-            raise ValueError("source_file could not be determined.")
-        elif not logger and not db:
-            raise ValueError("Either logger or db must be provided.")
+            if not source_path.exists():
+                raise ValueError("source_file could not be determined.")
 
-        source_path = Path(source_file)
-        self.job_path = Path(sep, "var", "cache", "bunkerweb", source_path.parent.parent.name)
-        self.job_name = job_name or source_path.name.replace(".py", "")
+            plugin_id = source_path.parent.parent.name
+            job_name = job_name or source_path.name.replace(".py", "")
+
+        if not job_name:
+            raise ValueError("Could not determine job name.")
+
+        # Set job_path and job_name
+        self.job_path = Path(sep, "var", "cache", "bunkerweb", plugin_id)
+        self.job_name = job_name
+
+        # Additional validation for job_path
+        if self.job_path == Path(sep, "var", "cache", "bunkerweb"):
+            raise ValueError("Could not determine job path. Ensure passed_plugin_id is valid.")
 
         self.db = db
         if not self.db:

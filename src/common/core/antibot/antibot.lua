@@ -90,8 +90,16 @@ function antibot:header()
 	for directive, value in pairs(csp_directives) do
 		csp_content = csp_content .. directive .. " " .. value .. "; "
 	end
-	csp_content = csp_content .. "block-all-mixed-content; upgrade-insecure-requests;"
-	ngx.header["Content-Security-Policy"] = csp_content
+
+	local hdr = ngx.header
+
+	hdr["Content-Security-Policy"] = csp_content
+
+	local ssl = (self.ctx.bw and self.ctx.bw.scheme == "https") or ngx.var.scheme == "https"
+	if ssl then
+		hdr["Content-Security-Policy"] = hdr["Content-Security-Policy"] .. " upgrade-insecure-requests;"
+	end
+
 	return self:ret(true, "successfully overridden CSP header")
 end
 

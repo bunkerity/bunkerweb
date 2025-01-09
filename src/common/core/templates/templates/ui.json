@@ -8,5 +8,20 @@
     "MAX_CLIENT_SIZE": "50m",
     "KEEP_UPSTREAM_HEADERS": "Content-Security-Policy Strict-Transport-Security X-Frame-Options X-Content-Type-Options Referrer-Policy",
     "REVERSE_PROXY_KEEPALIVE": "yes"
-  }
+  },
+  "steps": [
+    {
+      "title": "Dummy step",
+      "subtitle": "This is a dummy step to show the basic settings when using the web UI",
+      "settings": [
+        "USE_UI",
+        "USE_CORS",
+        "CORS_ALLOW_ORIGIN",
+        "INTERCEPTED_ERROR_CODES",
+        "MAX_CLIENT_SIZE",
+        "KEEP_UPSTREAM_HEADERS",
+        "REVERSE_PROXY_KEEPALIVE"
+      ]
+    }
+  ]
 }

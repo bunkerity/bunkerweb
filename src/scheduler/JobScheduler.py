@@ -5,6 +5,7 @@ from contextlib import suppress
 from datetime import datetime
 from functools import partial
 from glob import glob
+from importlib.util import module_from_spec, spec_from_file_location
 from json import loads
 from logging import Logger
 from os import cpu_count, environ, getenv, sep
@@ -13,8 +14,6 @@ from pathlib import Path
 import re
 from typing import Any, Dict, List, Optional
 import schedule
-from schedule import Job
-from subprocess import DEVNULL, STDOUT, run
 from sys import path as sys_path
 from threading import Lock
 
@@ -41,13 +40,14 @@ class JobScheduler(ApiCaller):
         super().__init__(apis or [])
         self.__logger = logger or setup_logger("Scheduler", getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")))
         self.db = db or Database(self.__logger)
-        self.__env = {**environ, **(env or {})}
+        self.__env = environ | (env or {})
         self.__lock = lock
         self.__thread_lock = Lock()
         self.__job_success = True
         self.__job_reload = False
-        self.__executor = ThreadPoolExecutor(max_workers=cpu_count() or 1)
+        self.__executor = ThreadPoolExecutor(max_workers=min(32, (cpu_count() or 1) * 4))
         self.__compiled_regexes = self.__compile_regexes()
+        self.__module_paths = set()
         self.update_jobs()
 
     def __compile_regexes(self):
@@ -63,7 +63,7 @@ class JobScheduler(ApiCaller):
 
     @env.setter
     def env(self, env: Dict[str, Any]):
-        self.__env = environ | env
+        self.__env = env
 
     def update_jobs(self):
         self.__jobs = self.__get_jobs()
@@ -76,21 +76,28 @@ class JobScheduler(ApiCaller):
             join(sep, "etc", "bunkerweb", "plugins", "*", "plugin.json"),
             join(sep, "etc", "bunkerweb", "pro", "plugins", "*", "plugin.json"),
         ]
+
         for pattern in plugin_dirs:
             plugin_files.extend(glob(pattern))
 
-        for plugin_file in plugin_files:
+        def load_plugin(plugin_file):
             plugin_name = basename(dirname(plugin_file))
-            jobs[plugin_name] = []
             try:
                 plugin_data = loads(Path(plugin_file).read_text(encoding="utf-8"))
                 plugin_jobs = plugin_data.get("jobs", [])
-                valid_jobs = self.__validate_jobs(plugin_jobs, plugin_name, plugin_file)
-                jobs[plugin_name] = valid_jobs
+                return plugin_name, self.__validate_jobs(plugin_jobs, plugin_name, plugin_file)
             except FileNotFoundError:
                 self.__logger.warning(f"Plugin file not found: {plugin_file}")
             except Exception as e:
                 self.__logger.warning(f"Exception while getting jobs for plugin {plugin_name}: {e}")
+            return plugin_name, []
+
+        # Load/validate plugins in parallel:
+        with ThreadPoolExecutor() as executor:
+            results = list(executor.map(load_plugin, plugin_files))
+
+        for plugin_name, valid_jobs in results:
+            jobs[plugin_name] = valid_jobs
         return jobs
 
     def __validate_jobs(self, plugin_jobs, plugin_name, plugin_file):
@@ -114,7 +121,7 @@ class JobScheduler(ApiCaller):
             valid_jobs.append(job)
         return valid_jobs
 
-    def __str_to_schedule(self, every: str) -> Job:
+    def __str_to_schedule(self, every: str) -> schedule.Job:
         schedule_map = {
             "minute": schedule.every().minute,
             "hour": schedule.every().hour,
@@ -137,7 +144,7 @@ class JobScheduler(ApiCaller):
         reload_success = self.send_to_apis(
             "POST",
             f"/reload?test={'no' if self.__env.get('DISABLE_CONFIGURATION_TESTING', 'no').lower() == 'yes' else 'yes'}",
-            timeout=max(int(reload_min_timeout), 2 * len(self.__env["SERVER_NAME"].split(" "))),
+            timeout=max(int(reload_min_timeout), 3 * len(self.__env["SERVER_NAME"].split(" "))),
         )[0]
         if reload_success:
             self.__logger.info("Successfully reloaded nginx")
@@ -145,20 +152,37 @@ class JobScheduler(ApiCaller):
         self.__logger.error("Error while reloading nginx")
         return False
 
+    def __exec_plugin_module(self, path: str, name: str) -> None:
+        """Dynamically import a plugin module with thread-local environment."""
+        # Convert to absolute path using Path
+        abs_path = Path(path).resolve()
+        module_dir = abs_path.parent
+
+        # Validate path exists
+        if not abs_path.exists():
+            raise FileNotFoundError(f"Plugin path not found: {abs_path}")
+
+        module_dir_str = module_dir.as_posix()
+        if module_dir_str not in sys_path and module_dir_str not in self.__module_paths:
+            self.__module_paths.add(module_dir.as_posix())
+            sys_path.insert(0, module_dir.as_posix())
+
+        spec = spec_from_file_location(name, abs_path.as_posix())
+        if spec is None:
+            raise ImportError(f"Failed to create module spec for {abs_path}")
+        module = module_from_spec(spec)
+        spec.loader.exec_module(module)
+
     def __job_wrapper(self, path: str, plugin: str, name: str, file: str) -> int:
         self.__logger.info(f"Executing job '{name}' from plugin '{plugin}'...")
         success = True
         ret = -1
         start_date = datetime.now().astimezone()
         try:
-            proc = run(
-                join(path, "jobs", file),
-                stdin=DEVNULL,
-                stderr=STDOUT,
-                env=self.__env,
-                check=False,
-            )
-            ret = proc.returncode
+            self.__exec_plugin_module(join(path, "jobs", file), name)
+            ret = 1
+        except SystemExit as e:
+            ret = e.code if isinstance(e.code, int) else 1
         except Exception as e:
             success = False
             self.__logger.error(f"Exception while executing job '{name}' from plugin '{plugin}': {e}")
@@ -190,6 +214,25 @@ class JobScheduler(ApiCaller):
         else:
             self.__logger.warning(f"Failed to add job run for the job '{name}': {err}")
 
+    def __update_cache_permissions(self):
+        """Update permissions for cache files and directories."""
+        self.__logger.info("Updating /var/cache/bunkerweb permissions...")
+        cache_path = Path(sep, "var", "cache", "bunkerweb")
+
+        DIR_MODE = 0o740
+        FILE_MODE = 0o640
+
+        try:
+            # Process directories and files in a single pass
+            for item in cache_path.rglob("*"):
+                current_mode = item.stat().st_mode & 0o777
+                target_mode = DIR_MODE if item.is_dir() else FILE_MODE
+
+                if current_mode != target_mode:
+                    item.chmod(target_mode)
+        except Exception as e:
+            self.__logger.error(f"Error while updating cache permissions: {e}")
+
     def setup(self):
         for plugin, jobs in self.__jobs.items():
             for job in jobs:
@@ -215,6 +258,10 @@ class JobScheduler(ApiCaller):
 
         self.__job_success = True
         self.__job_reload = False
+
+        old_env = environ.copy()
+        environ.clear()
+        environ.update(old_env | self.__env | {"LOG_LEVEL": getenv("CUSTOM_LOG_LEVEL", self.__env.get("LOG_LEVEL", "notice"))}),
 
         # Use ThreadPoolExecutor to run jobs
         futures = [self.__executor.submit(job.run) for job in pending_jobs]
@@ -247,15 +294,14 @@ class JobScheduler(ApiCaller):
         if pending_jobs:
             self.__logger.info("All scheduled jobs have been executed")
 
-        # Update cache files permissions to be 660
-        for item in Path(sep, "var", "cache", "bunkerweb").rglob("*"):
-            try:
-                if item.is_dir():
-                    item.chmod(0o740)
-                    continue
-                item.chmod(0o640)
-            except Exception as e:
-                self.__logger.error(f"Error while changing permissions for '{item}': {e}")
+        environ.clear()
+        environ.update(old_env)
+
+        for module_path in self.__module_paths.copy():
+            sys_path.remove(module_path)
+            self.__module_paths.remove(module_path)
+
+        self.__update_cache_permissions()
 
         return success
 
@@ -268,6 +314,10 @@ class JobScheduler(ApiCaller):
         self.__job_reload = False
 
         plugins = plugins or []
+
+        old_env = environ.copy()
+        environ.clear()
+        environ.update(old_env | self.__env | {"LOG_LEVEL": getenv("CUSTOM_LOG_LEVEL", self.__env.get("LOG_LEVEL", "notice"))})
 
         futures = []
         for plugin, jobs in self.__jobs.items():
@@ -296,15 +346,14 @@ class JobScheduler(ApiCaller):
         for future in futures:
             future.result()
 
-        # Update cache files permissions to be 660
-        for item in Path(sep, "var", "cache", "bunkerweb").rglob("*"):
-            try:
-                if item.is_dir():
-                    item.chmod(0o740)
-                    continue
-                item.chmod(0o640)
-            except Exception as e:
-                self.__logger.error(f"Error while changing permissions for '{item}': {e}")
+        environ.clear()
+        environ.update(old_env)
+
+        for module_path in self.__module_paths.copy():
+            sys_path.remove(module_path)
+            self.__module_paths.remove(module_path)
+
+        self.__update_cache_permissions()
 
         return self.__job_success
 
@@ -331,6 +380,10 @@ class JobScheduler(ApiCaller):
                 self.__lock.release()
             return False
 
+        old_env = environ.copy()
+        environ.clear()
+        environ.update(old_env | self.__env | {"LOG_LEVEL": getenv("CUSTOM_LOG_LEVEL", self.__env.get("LOG_LEVEL", "notice"))})
+
         self.__job_wrapper(
             job_to_run["path"],
             job_plugin,
@@ -338,15 +391,14 @@ class JobScheduler(ApiCaller):
             job_to_run["file"],
         )
 
-        # Update cache files permissions to be 660
-        for item in Path(sep, "var", "cache", "bunkerweb").rglob("*"):
-            try:
-                if item.is_dir():
-                    item.chmod(0o740)
-                    continue
-                item.chmod(0o640)
-            except Exception as e:
-                self.__logger.error(f"Error while changing permissions for '{item}': {e}")
+        environ.clear()
+        environ.update(old_env)
+
+        for module_path in self.__module_paths.copy():
+            sys_path.remove(module_path)
+            self.__module_paths.remove(module_path)
+
+        self.__update_cache_permissions()
 
         if self.__lock:
             self.__lock.release()
@@ -361,7 +413,7 @@ class JobScheduler(ApiCaller):
 
     def reload(self, env: Dict[str, Any], apis: Optional[list] = None, *, changed_plugins: Optional[List[str]] = None) -> bool:
         try:
-            self.__env = environ | env
+            self.__env = env
             super().__init__(apis or self.apis)
             self.clear()
             self.update_jobs()
@@ -402,7 +454,3 @@ class JobScheduler(ApiCaller):
                 self.db.readonly = True
 
         return self.db.readonly
-
-    def shutdown(self):
-        """Shut down the ThreadPoolExecutor."""
-        self.__executor.shutdown(wait=True)

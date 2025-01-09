@@ -18,7 +18,7 @@ LOGGER_OPENSSL = setup_logger("DEFAULT-SERVER-CERT.openssl", getenv("LOG_LEVEL",
 status = 0
 
 try:
-    JOB = Job(LOGGER)
+    JOB = Job(LOGGER, __file__)
 
     cert_path = Path(sep, "var", "cache", "bunkerweb", "misc")
     if not JOB.is_cached_file("default-server-cert.pem", "month") or not JOB.is_cached_file("default-server-cert.key", "month"):
