@@ -273,6 +273,19 @@ jobs:
       VERSION: ${{ needs.wait-builds.outputs.version }}
       PRERELEASE: true
 
+  # Push doc
+  push-doc:
+    needs: [wait-builds, push-gh]
+    permissions:
+      contents: write
+    uses: ./.github/workflows/push-doc.yml
+    with:
+      VERSION: ${{ needs.wait-builds.outputs.version }}
+      ALIAS: rc
+      HIDDEN: true
+    secrets:
+      BUNKERBOT_TOKEN: ${{ secrets.BUNKERBOT_TOKEN }}
+
   # Remove ARM VM
   rm-arm:
     if: ${{ always() }}
