@@ -194,14 +194,21 @@ def upgrade():
 
     # bw_ui_users changes
     with op.batch_alter_table("bw_ui_users") as batch_op:
+        # Drop existing primary key and columns
+        batch_op.drop_column("id")
+        batch_op.drop_column("is_two_factor_enabled")
+        batch_op.drop_column("secret_token")
+
+        # Add new columns
         batch_op.add_column(sa.Column("email", sa.String(256), nullable=True, unique=True))
         batch_op.add_column(sa.Column("admin", sa.Boolean(), nullable=False, server_default="0"))
         batch_op.add_column(sa.Column("theme", sa.Enum("light", "dark", name="themes_enum"), nullable=False, server_default="light"))
         batch_op.add_column(sa.Column("totp_secret", sa.String(256), nullable=True))
         batch_op.add_column(sa.Column("creation_date", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.current_timestamp()))
         batch_op.add_column(sa.Column("update_date", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.current_timestamp()))
-        batch_op.drop_column("is_two_factor_enabled")
-        batch_op.drop_column("secret_token")
+
+        # Make username the primary key
+        batch_op.alter_column("username", existing_type=sa.String(256), nullable=False, primary_key=True)
 
     # Set defaults for existing bw_ui_users rows
     op.execute("UPDATE bw_ui_users SET admin=1, theme='light', creation_date=CURRENT_TIMESTAMP, update_date=CURRENT_TIMESTAMP")
@@ -418,8 +425,11 @@ def downgrade():
         batch_op.drop_column("totp_secret")
         batch_op.drop_column("creation_date")
         batch_op.drop_column("update_date")
+        batch_op.add_column(sa.Column("id", sa.Integer(), sa.Identity(start=1, increment=1), primary_key=True))
         batch_op.add_column(sa.Column("is_two_factor_enabled", sa.Boolean, nullable=False, server_default="0"))
         batch_op.add_column(sa.Column("secret_token", sa.String(32), nullable=True, unique=True, default=None))
+
+        batch_op.alter_column("username", existing_type=sa.String(256), nullable=False, primary_key=False)
 
     # bw_plugin_pages revert: remove data, checksum, add template_file, template_checksum, actions_file, actions_checksum, obfuscation_file, obfuscation_checksum
     with op.batch_alter_table("bw_plugin_pages") as batch_op:

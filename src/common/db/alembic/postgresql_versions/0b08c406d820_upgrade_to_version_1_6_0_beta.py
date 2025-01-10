@@ -203,21 +203,28 @@ def upgrade():
     op.execute("CREATE TYPE themes_enum AS ENUM ('light', 'dark')")
 
     with op.batch_alter_table("bw_ui_users") as batch_op:
+        # Drop existing primary key and columns
+        batch_op.drop_column("id")
+        batch_op.drop_column("is_two_factor_enabled")
+        batch_op.drop_column("secret_token")
+
+        # Add new columns
         batch_op.add_column(sa.Column("email", sa.String(256), nullable=True, unique=True))
         batch_op.add_column(sa.Column("admin", sa.Boolean(), nullable=False, server_default="0"))
         batch_op.add_column(sa.Column("theme", themes_enum, nullable=False, server_default="light"))
         batch_op.add_column(sa.Column("totp_secret", sa.String(256), nullable=True))
-        batch_op.add_column(sa.Column("creation_date", sa.DateTime(timezone=True), nullable=False, server_default=sa.text("CURRENT_TIMESTAMP")))
-        batch_op.add_column(sa.Column("update_date", sa.DateTime(timezone=True), nullable=False, server_default=sa.text("CURRENT_TIMESTAMP")))
-        batch_op.drop_column("is_two_factor_enabled")
-        batch_op.drop_column("secret_token")
+        batch_op.add_column(sa.Column("creation_date", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.current_timestamp()))
+        batch_op.add_column(sa.Column("update_date", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.current_timestamp()))
+
+        # Make username the primary key
+        batch_op.alter_column("username", existing_type=sa.String(256), nullable=False, primary_key=True)
 
     op.execute("UPDATE bw_ui_users SET admin=TRUE, theme='light', creation_date=CURRENT_TIMESTAMP, update_date=CURRENT_TIMESTAMP")
 
     # bw_plugin_pages changes
     with op.batch_alter_table("bw_plugin_pages") as batch_op:
-        batch_op.add_column(sa.Column("data", sa.LargeBinary(length=(2**32) - 1), nullable=False))
-        batch_op.add_column(sa.Column("checksum", sa.String(128), nullable=False))
+        batch_op.add_column(sa.Column("data", sa.LargeBinary(length=(2**32) - 1), nullable=True))
+        batch_op.add_column(sa.Column("checksum", sa.String(128), nullable=True))
 
     op.execute(
         """
@@ -228,6 +235,8 @@ def upgrade():
     )
 
     with op.batch_alter_table("bw_plugin_pages") as batch_op:
+        batch_op.alter_column("data", existing_type=sa.LargeBinary(length=(2**32) - 1), nullable=False)
+        batch_op.alter_column("checksum", existing_type=sa.String(128), nullable=False)
         batch_op.drop_column("template_file")
         batch_op.drop_column("template_checksum")
         batch_op.drop_column("actions_file")
@@ -252,7 +261,7 @@ def upgrade():
     with op.batch_alter_table("bw_instances") as batch_op:
         batch_op.add_column(sa.Column("name", sa.String(256), nullable=True))
         batch_op.add_column(sa.Column("type", new_it_enum, nullable=True))
-        batch_op.add_column(sa.Column("status", new_it_enum, nullable=True))
+        batch_op.add_column(sa.Column("status", new_is_enum, nullable=True))
         batch_op.add_column(sa.Column("method", old_methods_enum_for_instances, nullable=True))
         batch_op.add_column(sa.Column("creation_date", sa.DateTime(timezone=True), nullable=True, server_default=sa.text("CURRENT_TIMESTAMP")))
         batch_op.add_column(sa.Column("last_seen", sa.DateTime(timezone=True), nullable=True, server_default=sa.text("CURRENT_TIMESTAMP")))

@@ -2,4 +2,4 @@ alembic==1.14.0
 cryptography==44.0.0
 psycopg[binary,pool]==3.2.3
 PyMySQL==1.1.1
-sqlalchemy==2.0.36
+sqlalchemy==2.0.37

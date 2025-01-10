@@ -81,7 +81,7 @@ services:
         - "bunkerweb.ALLOWED_METHODS=GET|POST|PUT|DELETE"
 
   bw-db:
-    image: postgres:16-alpine
+    image: postgres:17-alpine
     environment:
       POSTGRES_USER: "bunkerweb"
       POSTGRES_PASSWORD: "changeme" # Remember to set a stronger password for the database
