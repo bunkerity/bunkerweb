@@ -1026,11 +1026,6 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <p>You will find concrete examples of custom configurations in the <a href="#quickstart-guide">quickstart guide</a> of the documentation and the <a href="https://github.com/bunkerity/bunkerweb/tree/vtesting/examples">examples</a> directory of the repository.</p>
 </div>
 <h2 id="concepts-database">Database</h2>
-<div class="admonition warning">
-<p class="admonition-title">PostgreSQL 17</p>
-<p>As of now, <strong>PostgreSQL 17</strong> is not supported in the <strong>Docker integration</strong>. If you want to use PostgreSQL 17, you will have to use the Linux integration.</p>
-<p>This is due to the fact that the <code>postgresql-client</code> package only has the 14, 15 and 16 versions available in the alpine repositories.</p>
-</div>
 <p>BunkerWeb securely stores its current configuration in a backend database, which contains essential data for smooth operation. The following information is stored in the database:</p>
 <ul>
 <li>
@@ -12906,43 +12901,43 @@ sqlite&gt;
 <tbody>
 <tr>
 <td style="text-align: center;"><strong>ClamAV</strong></td>
-<td style="text-align: center;">1.6</td>
+<td style="text-align: center;">1.8</td>
 <td style="text-align: left;">Automatically scans uploaded files with the ClamAV antivirus engine and denies the request when a file is detected as malicious.</td>
 <td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav">bunkerweb-plugins/clamav</a></td>
 </tr>
 <tr>
 <td style="text-align: center;"><strong>Coraza</strong></td>
-<td style="text-align: center;">1.6</td>
+<td style="text-align: center;">1.8</td>
 <td style="text-align: left;">Inspect requests using a the Coraza WAF (alternative of ModSecurity).</td>
 <td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/coraza">bunkerweb-plugins/coraza</a></td>
 </tr>
 <tr>
 <td style="text-align: center;"><strong>CrowdSec</strong></td>
-<td style="text-align: center;">1.6</td>
+<td style="text-align: center;">1.8</td>
 <td style="text-align: left;">CrowdSec bouncer for BunkerWeb.</td>
 <td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/crowdsec">bunkerweb-plugins/crowdsec</a></td>
 </tr>
 <tr>
 <td style="text-align: center;"><strong>Discord</strong></td>
-<td style="text-align: center;">1.6</td>
+<td style="text-align: center;">1.8</td>
 <td style="text-align: left;">Send security notifications to a Discord channel using a Webhook.</td>
 <td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/discord">bunkerweb-plugins/discord</a></td>
 </tr>
 <tr>
 <td style="text-align: center;"><strong>Slack</strong></td>
-<td style="text-align: center;">1.6</td>
+<td style="text-align: center;">1.8</td>
 <td style="text-align: left;">Send security notifications to a Slack channel using a Webhook.</td>
 <td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/slack">bunkerweb-plugins/slack</a></td>
 </tr>
 <tr>
 <td style="text-align: center;"><strong>VirusTotal</strong></td>
-<td style="text-align: center;">1.6</td>
+<td style="text-align: center;">1.8</td>
 <td style="text-align: left;">Automatically scans uploaded files with the VirusTotal API and denies the request when a file is detected as malicious.</td>
 <td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal">bunkerweb-plugins/virustotal</a></td>
 </tr>
 <tr>
 <td style="text-align: center;"><strong>WebHook</strong></td>
-<td style="text-align: center;">1.6</td>
+<td style="text-align: center;">1.8</td>
 <td style="text-align: left;">Send security notifications to a custom HTTP endpoint using a  Webhook.</td>
 <td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/webhook">bunkerweb-plugins/webhook</a></td>
 </tr>
@@ -12951,7 +12946,7 @@ sqlite&gt;
 <h2 id="plugins-how-to-use-a-plugin">How to use a plugin</h2>
 <h3 id="plugins-automatic">Automatic</h3>
 <p>If you want to quickly install external plugins, you can use the <code>EXTERNAL_PLUGIN_URLS</code> setting. It takes a list of URLs, separated with space, pointing to compressed (zip format) archive containing one or more plugin(s).</p>
-<p>You can use the following value if you want to automatically install the official plugins : <code>EXTERNAL_PLUGIN_URLS=https://github.com/bunkerity/bunkerweb-plugins/archive/refs/tags/v1.6.zip</code></p>
+<p>You can use the following value if you want to automatically install the official plugins : <code>EXTERNAL_PLUGIN_URLS=https://github.com/bunkerity/bunkerweb-plugins/archive/refs/tags/v1.8.zip</code></p>
 <h3 id="plugins-manual">Manual</h3>
 <p>The first step is to install the plugin by putting the plugin files inside the corresponding <code>plugins</code> data folder, the procedure depends on your integration :</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:5"><input checked="checked" id="plugins-__tabbed_1_1" name="plugins-__tabbed_1" type="radio" /><input id="plugins-__tabbed_1_2" name="plugins-__tabbed_1" type="radio" /><input id="plugins-__tabbed_1_3" name="plugins-__tabbed_1" type="radio" /><input id="plugins-__tabbed_1_4" name="plugins-__tabbed_1" type="radio" /><input id="plugins-__tabbed_1_5" name="plugins-__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="plugins-__tabbed_1_1">Docker</label><label for="plugins-__tabbed_1_2">Docker autoconf</label><label for="plugins-__tabbed_1_3">Swarm</label><label for="plugins-__tabbed_1_4">Kubernetes</label><label for="plugins-__tabbed_1_5">Linux</label></div>
