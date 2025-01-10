@@ -11,7 +11,7 @@ from logging import Logger
 from os import _exit, getenv, sep
 from os.path import join as os_join
 from pathlib import Path
-from re import compile as re_compile, escape, error as RegexError, search
+from re import Match, compile as re_compile, escape, error as RegexError, search
 from sys import argv, path as sys_path
 from tarfile import open as tar_open
 from threading import Lock
@@ -112,32 +112,50 @@ class Database:
                 if log:
                     self.logger.warning("The database connection is set to read-only, the changes will not be saved")
 
-        match = self.DB_STRING_RX.search(sqlalchemy_string)
-        if not match:
-            self.logger.error(f"Invalid database string provided: {sqlalchemy_string}, exiting...")
-            _exit(1)
+        def validate_and_update_db_string(db_string: str) -> Tuple[str, Optional[Match]]:
+            """Validate and update database connection string."""
+            if not db_string:
+                return db_string, None
 
-        if match.group("database").startswith("sqlite"):
-            db_path = Path(match.group("path"))
-            if ui:
-                while not db_path.is_file():
-                    if log:
-                        self.logger.warning(f"Waiting for the database file to be created: {db_path}")
-                    sleep(1)
-            else:
-                db_path.parent.mkdir(parents=True, exist_ok=True)
-        elif match.group("database").startswith("m") and not match.group("database").endswith("+pymysql"):
-            sqlalchemy_string = sqlalchemy_string.replace(
-                match.group("database"), f"{match.group('database')}+pymysql"
-            )  # ? This is strongly recommended as pymysql is the new way to connect to mariadb and mysql
-        elif match.group("database").startswith("postgresql") and not match.group("database").endswith("+psycopg"):
-            sqlalchemy_string = sqlalchemy_string.replace(
-                match.group("database"), f"{match.group('database')}+psycopg"
-            )  # ? This is strongly recommended as psycopg is the new way to connect to postgresql
+            match = self.DB_STRING_RX.search(db_string)
+            if not match:
+                self.logger.error(f"Invalid database string provided: {db_string}, exiting...")
+                _exit(1)
+
+            db_type = match.group("database")
+            db_path = match.group("path")
+
+            # Handle SQLite database
+            if db_type.startswith("sqlite"):
+                path = Path(db_path)
+                if ui:
+                    while not path.is_file():
+                        if log:
+                            self.logger.warning(f"Waiting for the database file to be created: {path}")
+                        sleep(1)
+                else:
+                    path.parent.mkdir(parents=True, exist_ok=True)
+                return db_string, match
+
+            # Add recommended drivers for MySQL/MariaDB and PostgreSQL
+            if db_type.startswith("m") and not db_type.endswith("+pymysql"):
+                return db_string.replace(db_type, f"{db_type}+pymysql"), match
+            elif db_type.startswith("postgresql") and not db_type.endswith("+psycopg"):
+                return db_string.replace(db_type, f"{db_type}+psycopg"), match
+
+            return db_string, match
+
+        # Validate and update both connection strings
+        sqlalchemy_string, main_match = validate_and_update_db_string(sqlalchemy_string)
+        sqlalchemy_string_readonly, readonly_match = validate_and_update_db_string(sqlalchemy_string_readonly)
 
         self.database_uri = "" if sqlalchemy_string == sqlalchemy_string_readonly else sqlalchemy_string
         self.database_uri_readonly = sqlalchemy_string_readonly
         error = False
+
+        match = main_match
+        if self.database_uri_readonly and not self.database_uri and readonly_match:
+            match = readonly_match
 
         self._engine_kwargs = {
             "future": True,
@@ -223,6 +241,7 @@ class Database:
             self.logger.info(f"✅ Database connection established{'' if not self.readonly else ' in read-only mode'}")
 
         if match.group("database").startswith("sqlite"):
+            db_path = match.group("path")
             try:
                 current_mode = db_path.stat().st_mode & 0o777
                 if current_mode != 0o660:
