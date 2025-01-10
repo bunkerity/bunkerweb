@@ -241,7 +241,7 @@ class Database:
             self.logger.info(f"✅ Database connection established{'' if not self.readonly else ' in read-only mode'}")
 
         if match.group("database").startswith("sqlite"):
-            db_path = match.group("path")
+            db_path = Path(match.group("path"))
             try:
                 current_mode = db_path.stat().st_mode & 0o777
                 if current_mode != 0o660:
