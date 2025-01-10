@@ -69,6 +69,9 @@ def instances_new():
 @instances.route("/instances/<string:action>", methods=["POST"])
 @login_required
 def instances_action(action: Literal["ping", "reload", "stop", "delete"]):  # TODO: see if we can support start and restart
+    if DB.readonly:
+        return handle_error("Database is in read-only mode", "instances")
+
     verify_data_in_form(
         data={"instances": None},
         err_message=f"Missing instances parameter on /instances/{action}.",
