@@ -81,7 +81,7 @@ services:
         - "bunkerweb.ALLOWED_METHODS=GET|POST|PUT|DELETE"
 
   bw-db:
-    image: mysql:8
+    image: mysql:9
     environment:
       MYSQL_RANDOM_ROOT_PASSWORD: "yes"
       MYSQL_DATABASE: "db"
