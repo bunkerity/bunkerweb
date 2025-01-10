@@ -57,8 +57,10 @@ def upgrade() -> None:
         existing_nullable=False,
     )
 
-    # Drop bw_ui_users.id column
-    op.drop_column("bw_ui_users", "id")
+    # Drop bw_ui_users.id column if it exists
+    with op.batch_alter_table("bw_ui_users") as batch_op:
+        if "id" in [c["name"] for c in batch_op.impl.dialect.get_columns(op.get_bind(), "bw_ui_users")]:
+            batch_op.drop_column("id")
 
     # Add the new order column to bw_template_settings
     op.add_column("bw_template_settings", sa.Column("order", sa.Integer(), nullable=False))
@@ -110,9 +112,6 @@ def downgrade() -> None:
         type_=mysql.ENUM("loading", "up", "down", name="instance_status_enum"),
         existing_nullable=False,
     )
-
-    # Re-add bw_ui_users.id and index on username
-    op.add_column("bw_ui_users", sa.Column("id", sa.Integer(), autoincrement=True, nullable=False))
 
     # Drop the order column from bw_template_settings
     op.drop_column("bw_template_settings", "order")

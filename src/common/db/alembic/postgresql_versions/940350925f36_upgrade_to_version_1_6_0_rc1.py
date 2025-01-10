@@ -149,13 +149,19 @@ def upgrade() -> None:
 
     # Update bw_instances.status from Enum("loading", "up", "down", name="instance_status_enum") to Enum("loading", "up", "down", "failover", name="instance_status_enum")
     op.execute("ALTER TYPE instance_status_enum ADD VALUE 'failover'")
-    op.alter_column(
-        "bw_instances",
-        "status",
-        existing_type=postgresql.ENUM("loading", "up", "down", name="instance_status_enum", create_type=False),
-        type_=postgresql.ENUM("loading", "up", "down", "failover", name="instance_status_enum", create_type=False),
-        existing_nullable=False,
-    )
+
+    # Check if bw_instances.status has instance_type_enum type and replace it with instance_status_enum if needed
+    with op.batch_alter_table("bw_instances") as batch_op:
+        # Create temporary column with new enum type
+        batch_op.add_column(
+            sa.Column("status_new", postgresql.ENUM("loading", "up", "down", "failover", name="instance_status_enum", create_type=False), nullable=True)
+        )
+    # Copy data to new column
+    op.execute("UPDATE bw_instances SET status_new = status::text::instance_status_enum")
+    # Drop old column
+    batch_op.drop_column("status")
+    # Rename new column to status
+    batch_op.alter_column("status_new", new_column_name="status", nullable=False)
 
     # Add the new order column to bw_template_settings
     # Step 1: Add column as nullable
@@ -176,6 +182,70 @@ def upgrade() -> None:
 
     # Step 3: Alter column to NOT NULL
     op.alter_column("bw_template_custom_configs", "order", nullable=False)
+
+    # First drop Identity properties
+    op.execute(
+        """
+        ALTER TABLE bw_plugin_pages ALTER COLUMN id DROP IDENTITY IF EXISTS;
+        ALTER TABLE bw_jobs_cache ALTER COLUMN id DROP IDENTITY IF EXISTS;
+        ALTER TABLE bw_jobs_runs ALTER COLUMN id DROP IDENTITY IF EXISTS;
+        ALTER TABLE bw_custom_configs ALTER COLUMN id DROP IDENTITY IF EXISTS;
+        ALTER TABLE bw_cli_commands ALTER COLUMN id DROP IDENTITY IF EXISTS;
+        ALTER TABLE bw_template_settings ALTER COLUMN id DROP IDENTITY IF EXISTS;
+        ALTER TABLE bw_template_custom_configs ALTER COLUMN id DROP IDENTITY IF EXISTS;
+        ALTER TABLE bw_ui_user_recovery_codes ALTER COLUMN id DROP IDENTITY IF EXISTS;
+        ALTER TABLE bw_ui_user_sessions ALTER COLUMN id DROP IDENTITY IF EXISTS;
+        ALTER TABLE bw_ui_user_columns_preferences ALTER COLUMN id DROP IDENTITY IF EXISTS;
+    """
+    )
+
+    # Create sequences
+    op.execute(
+        """
+        CREATE SEQUENCE IF NOT EXISTS bw_plugin_pages_id_seq;
+        CREATE SEQUENCE IF NOT EXISTS bw_jobs_cache_id_seq;
+        CREATE SEQUENCE IF NOT EXISTS bw_jobs_runs_id_seq;
+        CREATE SEQUENCE IF NOT EXISTS bw_custom_configs_id_seq;
+        CREATE SEQUENCE IF NOT EXISTS bw_cli_commands_id_seq;
+        CREATE SEQUENCE IF NOT EXISTS bw_template_settings_id_seq;
+        CREATE SEQUENCE IF NOT EXISTS bw_template_custom_configs_id_seq;
+        CREATE SEQUENCE IF NOT EXISTS bw_ui_user_recovery_codes_id_seq;
+        CREATE SEQUENCE IF NOT EXISTS bw_ui_user_sessions_id_seq;
+        CREATE SEQUENCE IF NOT EXISTS bw_ui_user_columns_preferences_id_seq;
+    """
+    )
+
+    # Set sequence values
+    op.execute(
+        """
+        SELECT setval('bw_plugin_pages_id_seq', (SELECT COALESCE(MAX(id), 0) + 1 FROM bw_plugin_pages));
+        SELECT setval('bw_jobs_cache_id_seq', (SELECT COALESCE(MAX(id), 0) + 1 FROM bw_jobs_cache));
+        SELECT setval('bw_jobs_runs_id_seq', (SELECT COALESCE(MAX(id), 0) + 1 FROM bw_jobs_runs));
+        SELECT setval('bw_custom_configs_id_seq', (SELECT COALESCE(MAX(id), 0) + 1 FROM bw_custom_configs));
+        SELECT setval('bw_cli_commands_id_seq', (SELECT COALESCE(MAX(id), 0) + 1 FROM bw_cli_commands));
+        SELECT setval('bw_template_settings_id_seq', (SELECT COALESCE(MAX(id), 0) + 1 FROM bw_template_settings));
+        SELECT setval('bw_template_custom_configs_id_seq', (SELECT COALESCE(MAX(id), 0) + 1 FROM bw_template_custom_configs));
+        SELECT setval('bw_ui_user_recovery_codes_id_seq', (SELECT COALESCE(MAX(id), 0) + 1 FROM bw_ui_user_recovery_codes));
+        SELECT setval('bw_ui_user_sessions_id_seq', (SELECT COALESCE(MAX(id), 0) + 1 FROM bw_ui_user_sessions));
+        SELECT setval('bw_ui_user_columns_preferences_id_seq', (SELECT COALESCE(MAX(id), 0) + 1 FROM bw_ui_user_columns_preferences));
+    """
+    )
+
+    # Set column defaults
+    op.execute(
+        """
+        ALTER TABLE bw_plugin_pages ALTER COLUMN id SET DEFAULT nextval('bw_plugin_pages_id_seq');
+        ALTER TABLE bw_jobs_cache ALTER COLUMN id SET DEFAULT nextval('bw_jobs_cache_id_seq');
+        ALTER TABLE bw_jobs_runs ALTER COLUMN id SET DEFAULT nextval('bw_jobs_runs_id_seq');
+        ALTER TABLE bw_custom_configs ALTER COLUMN id SET DEFAULT nextval('bw_custom_configs_id_seq');
+        ALTER TABLE bw_cli_commands ALTER COLUMN id SET DEFAULT nextval('bw_cli_commands_id_seq');
+        ALTER TABLE bw_template_settings ALTER COLUMN id SET DEFAULT nextval('bw_template_settings_id_seq');
+        ALTER TABLE bw_template_custom_configs ALTER COLUMN id SET DEFAULT nextval('bw_template_custom_configs_id_seq');
+        ALTER TABLE bw_ui_user_recovery_codes ALTER COLUMN id SET DEFAULT nextval('bw_ui_user_recovery_codes_id_seq');
+        ALTER TABLE bw_ui_user_sessions ALTER COLUMN id SET DEFAULT nextval('bw_ui_user_sessions_id_seq');
+        ALTER TABLE bw_ui_user_columns_preferences ALTER COLUMN id SET DEFAULT nextval('bw_ui_user_columns_preferences_id_seq');
+    """
+    )
 
     # Update the version in bw_metadata
     op.execute("UPDATE bw_metadata SET version = '1.6.0-rc1' WHERE id = 1")
@@ -315,13 +385,6 @@ def downgrade() -> None:
 
     # Update bw_instances.status from Enum("loading", "up", "down", "failover", name="instance_status_enum") to Enum("loading", "up", "down", name="instance_status_enum")
     op.execute("ALTER TYPE instance_status_enum DROP VALUE 'failover'")
-    op.alter_column(
-        "bw_instances",
-        "status",
-        existing_type=postgresql.ENUM("loading", "up", "down", "failover", name="instance_status_enum", create_type=False),
-        type_=postgresql.ENUM("loading", "up", "down", name="instance_status_enum", create_type=False),
-        existing_nullable=False,
-    )
 
     # Drop 'order' column from 'bw_template_settings'
     with op.batch_alter_table("bw_template_settings") as batch_op:

@@ -200,7 +200,7 @@ spec:
     spec:
       containers:
         - name: bunkerweb-db
-          image: mysql:8
+          image: mysql:9
           imagePullPolicy: Always
           env:
             - name: MYSQL_RANDOM_ROOT_PASSWORD

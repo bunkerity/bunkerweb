@@ -157,6 +157,8 @@ try:
             if metadata["is_pro"] and metadata["pro_services"] < int(data["service_number"]):
                 metadata["pro_overlapped"] = True
 
+    db_metadata = db.get_metadata()
+
     # ? If we already checked today, skip the check and if the metadata is the same, skip the check
     if (
         pro_license_key == db_metadata.get("pro_license", "")

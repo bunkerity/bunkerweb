@@ -90,14 +90,11 @@ function start() {
             ;;
     esac
 
-    # Update configuration files
-    if sed -i "s|^sqlalchemy\\.url =.*$|sqlalchemy.url = $DATABASE_URI|" alembic.ini; then
-	    if sed -i "s|^version_locations =.*$|version_locations = ${DATABASE}_versions|" alembic.ini; then
-            # Check current version and stamp
-            log "SYSTEMCTL" "ℹ️" "Checking database version..."
-            installed_version=$(cat /usr/share/bunkerweb/VERSION)
-            # Create temporary Python script
-            cat > /tmp/version_check.py << EOL
+    # Check current version and stamp
+    log "SYSTEMCTL" "ℹ️" "Checking database version..."
+    installed_version=$(cat /usr/share/bunkerweb/VERSION)
+    # Create temporary Python script
+    cat > /tmp/version_check.py << EOL
 import sqlalchemy as sa
 from os import getenv
 
@@ -106,8 +103,8 @@ from logger import setup_logger
 
 LOGGER = setup_logger('Scheduler', getenv('CUSTOM_LOG_LEVEL', getenv('LOG_LEVEL', 'INFO')))
 
-engine = Database(LOGGER).sql_engine
-with engine.connect() as conn:
+db = Database(LOGGER)
+with db.sql_engine.connect() as conn:
     try:
         result = conn.execute(sa.text('SELECT version FROM bw_metadata WHERE id = 1'))
         print(next(result)[0])
@@ -116,16 +113,26 @@ with engine.connect() as conn:
             print('none')
         else:
             print('${installed_version}')
+
+with open('/var/tmp/bunkerweb/database_uri', 'w') as file:
+	file.write(db.database_uri)
 EOL
 
-            current_version=$(sudo -E -u nginx -g nginx /bin/bash -c "PYTHONPATH=$PYTHONPATH python3 /tmp/version_check.py")
-            rm -f /tmp/version_check.py
+    current_version=$(sudo -E -u nginx -g nginx /bin/bash -c "PYTHONPATH=$PYTHONPATH python3 /tmp/version_check.py")
+    rm -f /tmp/version_check.py
 
-            if [ "$current_version" == "none" ]; then
-                log "SYSTEMCTL" "❌" "Failed to retrieve database version"
-                exit 1
-            fi
+    if [ "$current_version" == "none" ]; then
+        log "SYSTEMCTL" "❌" "Failed to retrieve database version"
+        exit 1
+    fi
 
+    DATABASE_URI=$(cat /var/tmp/bunkerweb/database_uri)
+    export DATABASE_URI
+    rm -f /var/tmp/bunkerweb/database_uri
+
+    # Update configuration files
+    if sed -i "s|^sqlalchemy\\.url =.*$|sqlalchemy.url = $DATABASE_URI|" alembic.ini; then
+        if sed -i "s|^version_locations =.*$|version_locations = ${DATABASE}_versions|" alembic.ini; then
             if [ "$current_version" != "$installed_version" ]; then
                 # Find the corresponding Alembic revision by scanning migration files
                 MIGRATION_DIR="/usr/share/bunkerweb/db/alembic/${DATABASE}_versions"

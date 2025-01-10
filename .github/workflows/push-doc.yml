@@ -38,10 +38,14 @@ jobs:
           python-version: "3.10"
       - name: Install doc dependencies
         run: pip install --no-cache-dir --require-hashes -r docs/requirements.txt && sudo apt install -y libcairo2-dev libfreetype6-dev libffi-dev libjpeg-dev libpng-dev libz-dev
-      - name: Hide doc
+      - name: Deploy documentation (hidden)
         if: inputs.HIDDEN == true
-        run: mike props ${{ inputs.VERSION }} --set hidden=true
-      - name: Push doc
+        run: |
+          mike deploy --update-aliases --alias-type=copy ${{ inputs.VERSION }} ${{ inputs.ALIAS }}
+          mike set-hidden ${{ inputs.VERSION }} true
+          mike push
+      - name: Deploy documentation
+        if: inputs.HIDDEN == false
         run: mike deploy --update-aliases --push --alias-type=copy ${{ inputs.VERSION }} ${{ inputs.ALIAS }}
       - name: Set default doc
         if: inputs.ALIAS == 'latest'
