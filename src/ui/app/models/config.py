@@ -116,7 +116,6 @@ class Config:
         config: dict,
         *,
         global_config: bool = False,
-        ignored_multiples: Optional[Set[str]] = None,
         new: bool = False,
         threaded: bool = False,
     ) -> dict:
@@ -197,9 +196,8 @@ class Config:
                     flash(message, "error")
                 variables.pop(k)
 
-        ignored_multiples = ignored_multiples or set()
         for k in config:
-            if k in plugins_settings or k in ignored_multiples:
+            if k in plugins_settings:
                 continue
             setting = k[0 : k.rfind("_")]  # noqa: E203
 

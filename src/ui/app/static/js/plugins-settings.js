@@ -303,10 +303,17 @@ $(document).ready(() => {
           settingValue = $this.is(":checked") ? "yes" : "no";
         }
 
+        // Check if it's a multiple setting with numeric suffix
+        const isMultipleSetting =
+          settingName &&
+          $this.attr("id").startsWith("multiple-") &&
+          /_\d+$/.test(settingName);
+
         if (
           !isEasy &&
           settingName !== "SERVER_NAME" &&
-          settingValue == originalValue
+          settingValue == originalValue &&
+          !isMultipleSetting
         )
           return;
 
@@ -1117,7 +1124,7 @@ $(document).ready(() => {
     }, 30);
   });
 
-  $(".plugin-setting").on("keydown", function (e) {
+  $(document).on("keydown", ".plugin-setting", function () {
     if (e.key === "Enter") {
       e.preventDefault();
       $(".save-settings").trigger("click");

@@ -204,12 +204,11 @@ def services_service_page(service: str):
             if service != "new":
                 db_config = DB.get_config(methods=True, with_drafts=True, service=service)
             else:
-                db_config = DB.get_config(global_only=True, methods=True, filtered_settings=list(variables.keys()))
+                db_config = DB.get_config(global_only=True, methods=True)
 
             was_draft = db_config.get("IS_DRAFT", {"value": "no"})["value"] == "yes"
 
             old_server_name = variables.pop("OLD_SERVER_NAME", "")
-            ignored_multiples = set()
             db_custom_configs = {}
             new_configs = set()
             configs_changed = False
@@ -279,10 +278,10 @@ def services_service_page(service: str):
                 for variable, value in variables.copy().items():
                     if (mode == "advanced" or variable != "SERVER_NAME") and value == db_config.get(variable, {"value": None})["value"]:
                         if match(r"^.+_\d+$", variable):
-                            ignored_multiples.add(variable)
+                            continue
                         del variables[variable]
 
-            variables = BW_CONFIG.check_variables(variables, db_config, ignored_multiples=ignored_multiples, new=service == "new", threaded=True)
+            variables = BW_CONFIG.check_variables(variables, db_config, new=service == "new", threaded=True)
 
             if service != "new" and was_draft == is_draft and not variables and not configs_changed:
                 DATA["TO_FLASH"].append(
