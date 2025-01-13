@@ -1252,6 +1252,12 @@ If you use a custom domain name for your Kubernetes cluster different than the d
   <figcaption>Docker Swarm integration</figcaption>
 </figure>
 
+!!! warning "Deprecated"
+    The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Docker autoconf integration](#docker-autoconf) instead.
+
+!!! tip "PRO support"
+    **If you need Swarm support**, please contact us at [contact@bunkerity.com](mailto:contact@bunkerity.com) or via the [contact form](https://panel.bunkerweb.io/contact.php).
+
 !!! info "Docker autoconf"
     The Swarm integration is similar to the Docker autoconf one (but with services instead of containers). Please read the [Docker autoconf integration section](#docker-autoconf) first if needed.
 

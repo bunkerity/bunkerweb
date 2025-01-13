@@ -6,6 +6,7 @@
 - [UI] Fixed condition when validating the setup wizard form when a custom certificate is used
 - [FEATURE] Add extra validation of certificates in `customcert` plugin
 - [FEATURE] Introduce new `SSL` plugin to manage SSL/TLS settings without tweaking the `misc` plugin
+- [DOCS] Added Swarm deprecated notice in the documentation
 - [DEPS] Updated libmaxminddb version to v1.12.2
 
 ## v1.6.0-rc1 - 2025/01/10

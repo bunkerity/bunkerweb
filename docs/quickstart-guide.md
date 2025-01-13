@@ -103,6 +103,11 @@ You will find more settings about reverse proxy in the [settings section](settin
 
 === "Swarm"
 
+    !!! warning "Deprecated"
+        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Docker autoconf integration](#__tabbed_1_2) instead.
+
+        **More information can be found in the [Swarm integration documentation](integrations.md#swarm).**
+
     We will assume that you already have the [Swarm integration](integrations.md#swarm) stack running on your cluster and connected to a network called `bw-services` so you can connect your existing application and configure BunkerWeb with labels :
 
     ```yaml
@@ -363,6 +368,11 @@ You will find more settings about reverse proxy in the [settings section](settin
 
 === "Swarm"
 
+    !!! warning "Deprecated"
+        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Docker autoconf integration](#__tabbed_2_2) instead.
+
+        **More information can be found in the [Swarm integration documentation](integrations.md#swarm).**
+
     We will assume that you already have the [Swarm integration](integrations.md#swarm) stack running on your cluster and connected to a network called `bw-services` so you can connect your existing application and configure BunkerWeb with labels :
 
     ```yaml
@@ -610,6 +620,11 @@ REAL_IP_HEADER=X-Forwarded-For
 
 === "Swarm"
 
+    !!! warning "Deprecated"
+        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Docker autoconf integration](#__tabbed_3_2) instead.
+
+        **More information can be found in the [Swarm integration documentation](integrations.md#swarm).**
+
     Before running the [Swarm integration](integrations.md#swarm) stack, you will need to add the settings for the Scheduler service :
 
     ```yaml
@@ -715,6 +730,11 @@ REAL_IP_HEADER=proxy_protocol
     ```
 
 === "Swarm"
+
+    !!! warning "Deprecated"
+        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Docker autoconf integration](#__tabbed_4_2) instead.
+
+        **More information can be found in the [Swarm integration documentation](integrations.md#swarm).**
 
     Before running the [Swarm integration](integrations.md#swarm) stack, you will need to add the settings for the Scheduler service :
 
@@ -925,6 +945,11 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
     ```
 
 === "Swarm"
+
+    !!! warning "Deprecated"
+        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Docker autoconf integration](#__tabbed_5_2) instead.
+
+        **More information can be found in the [Swarm integration documentation](integrations.md#swarm).**
 
     Before running the [Swarm integration](integrations.md#swarm) stack on your machine, you will need to edit the ports :
 
@@ -1195,6 +1220,11 @@ Some integrations provide more convenient ways to apply configurations, such as 
     ```
 
 === "Swarm"
+
+    !!! warning "Deprecated"
+        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Docker autoconf integration](#__tabbed_6_2) instead.
+
+        **More information can be found in the [Swarm integration documentation](integrations.md#swarm).**
 
     When using the [Swarm integration](integrations.md#swarm), custom configurations are managed using [Docker Configs](https://docs.docker.com/engine/swarm/configs/).
 
@@ -1593,6 +1623,11 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
     ```
 
 === "Swarm"
+
+    !!! warning "Deprecated"
+        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Docker autoconf integration](#__tabbed_7_2) instead.
+
+        **More information can be found in the [Swarm integration documentation](integrations.md#swarm).**
 
     !!! info "Multisite mode enabled"
         The [Swarm integration](integrations.md#docker-autoconf) integration implies the use of multisite mode : protecting one PHP application is the same as protecting multiple ones.
