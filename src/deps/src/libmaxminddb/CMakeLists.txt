@@ -2,7 +2,7 @@ cmake_minimum_required (VERSION 3.9...3.30)
 
 project(maxminddb
   LANGUAGES C
-  VERSION 1.12.1
+  VERSION 1.12.2
 )
 set(MAXMINDDB_SOVERSION 0.0.7)
 set(CMAKE_C_STANDARD 99)
