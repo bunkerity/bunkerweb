@@ -1,0 +1,36 @@
+{
+  "id": "ssl",
+  "name": "SSL",
+  "description": "Handle SSL/TLS related settings.",
+  "version": "1.0",
+  "stream": "yes",
+  "settings": {
+    "REDIRECT_HTTP_TO_HTTPS": {
+      "context": "multisite",
+      "default": "no",
+      "help": "Redirect all HTTP request to HTTPS.",
+      "id": "redirect-http-to-https",
+      "label": "Redirect HTTP to HTTPS",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
+    "AUTO_REDIRECT_HTTP_TO_HTTPS": {
+      "context": "multisite",
+      "default": "yes",
+      "help": "Try to detect if HTTPS is used and activate HTTP to HTTPS redirection if that's the case.",
+      "id": "auto-redirect-http-to-https",
+      "label": "Auto redirect HTTP to HTTPS",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
+    "SSL_PROTOCOLS": {
+      "context": "multisite",
+      "default": "TLSv1.2 TLSv1.3",
+      "help": "The supported version of TLS. We recommend the default value TLSv1.2 TLSv1.3 for compatibility reasons.",
+      "id": "https-protocols",
+      "label": "HTTPS protocols",
+      "regex": "^(?! )( ?TLSv1\\.[0-3])*$",
+      "type": "text"
+    }
+  }
+}
