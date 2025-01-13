@@ -10,6 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - run: sudo apt install clang-tools libipc-run3-perl
       - run: ./bootstrap
       - run: scan-build ./configure

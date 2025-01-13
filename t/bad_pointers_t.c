@@ -28,6 +28,11 @@ void run_tests(int mode, const char *mode_desc) {
                MMDB_INVALID_DATA_ERROR,
                "MMDB_get_entry_data_list returns MMDB_INVALID_DATA_ERROR for "
                "bad pointer in data section");
+
+        // This is not necessary as on error we should not need to free
+        // anything. However test that it is safe to do so. See change in
+        // 1.12.2.
+        MMDB_free_entry_data_list(entry_data_list);
     }
 
     {

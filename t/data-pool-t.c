@@ -43,7 +43,9 @@ static void test_data_pool_new(void) {
 }
 
 static void test_data_pool_destroy(void) {
-    { data_pool_destroy(NULL); }
+    {
+        data_pool_destroy(NULL);
+    }
 
     {
         MMDB_data_pool_s *const pool = data_pool_new(512);
