@@ -1,8 +1,9 @@
 # Changelog
 
-## v1.6.0 - ????/??/??
+## v1.6.0-rc2 - ????/??/??
 
 - [UI] Fixed condition when validating the setup wizard form when a custom certificate is used
+- [FEATURE] Add extra validation of certificates in `customcert` plugin
 - [DEPS] Updated libmaxminddb version to v1.12.2
 
 ## v1.6.0-rc1 - 2025/01/10
