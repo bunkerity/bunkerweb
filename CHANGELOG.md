@@ -1,6 +1,11 @@
 # Changelog
 
-## v1.6.0-rc1 - ????/??/??
+## v1.6.0 - ????/??/??
+
+- [UI] Fixed condition when validating the setup wizard form when a custom certificate is used
+- [DEPS] Updated libmaxminddb version to v1.12.2
+
+## v1.6.0-rc1 - 2025/01/10
 
 - [BUGFIX] Increase string length for service_id and id columns in database models to avoid issues with long service names
 - [BUGFIX] Fix shenanigans with setup wizard when a reverse proxy was already configured
