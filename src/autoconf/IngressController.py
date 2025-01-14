@@ -122,6 +122,8 @@ class IngressController(Controller):
 
         namespace = controller_service.metadata.namespace
         services = []
+        server_names = set()
+
         # parse rules
         for rule in controller_service.spec.rules:
             if not rule.host:
@@ -130,6 +132,7 @@ class IngressController(Controller):
 
             service = {}
             service["SERVER_NAME"] = rule.host
+            server_names.add(rule.host.strip().split(" ")[0])
             if not rule.http:
                 services.append(service)
                 continue
@@ -184,13 +187,38 @@ class IngressController(Controller):
         # parse annotations
         if controller_service.metadata.annotations:
             for service in services:
+                server_name = service["SERVER_NAME"].strip().split(" ")[0]
+
                 for annotation, value in controller_service.metadata.annotations.items():
                     if not annotation.startswith("bunkerweb.io/"):
                         continue
 
                     variable = annotation.replace("bunkerweb.io/", "", 1)
-                    server_name = service["SERVER_NAME"].strip().split(" ")[0]
-                    service[variable.replace(f"{server_name}_", "", 1)] = value
+                    if variable.startswith(f"{server_name}_") or not all(variable.startswith(f"{server_name}_") for server_name in server_names):
+                        service[variable.replace(f"{server_name}_", "", 1)] = value
+
+                # Handle stream services
+                if service.get("SERVER_TYPE", "http") == "stream":
+                    reverse_proxy_found = False
+                    warned = False
+                    for setting in service.copy():
+                        if setting.startswith("REVERSE_PROXY_HOST_"):
+                            if not reverse_proxy_found:
+                                reverse_proxy_found = True
+                                suffix = setting.replace("REVERSE_PROXY_HOST_", "", 1)
+                                service["REVERSE_PROXY_HOST"] = service.pop(setting).replace(f"{self.__service_protocol}://", "", 1)
+                                service["REVERSE_PROXY_URL"] = service.pop(f"REVERSE_PROXY_URL_{suffix}", "/")
+                                continue
+
+                            if not warned:
+                                warned = True
+                                self._logger.warning(
+                                    f"Service {server_name} is a stream service, we will only use the first reverse proxy config. Ignoring all others..."
+                                )
+
+                            del service[setting]
+                        elif setting.startswith("REVERSE_PROXY_URL_") and setting in service:
+                            del service[setting]
 
         # parse tls
         if controller_service.spec.tls:
