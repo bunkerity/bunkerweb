@@ -3643,13 +3643,14 @@ class Database:
                     session.query(Template_steps)
                     .with_entities(Template_steps.id, Template_steps.title, Template_steps.subtitle)
                     .filter_by(template_id=template.id)
+                    .order_by(Template_steps.id)
                 ):
-                    templates[template.id]["steps"].append({"title": step.title, "subtitle": step.subtitle})
-
+                    step_data = {"title": step.title, "subtitle": step.subtitle}
                     if step.id in steps_settings:
-                        templates[template.id]["steps"][step.id - 1]["settings"] = steps_settings[step.id]
+                        step_data["settings"] = steps_settings[step.id]
                     if step.id in steps_configs:
-                        templates[template.id]["steps"][step.id - 1]["configs"] = steps_configs[step.id]
+                        step_data["configs"] = steps_configs[step.id]
+                    templates[template.id]["steps"].append(step_data)
 
             return templates
 
