@@ -109,15 +109,15 @@ with db.sql_engine.connect() as conn:
         result = conn.execute(sa.text('SELECT version FROM bw_metadata WHERE id = 1'))
         print(next(result)[0])
     except BaseException as e:
-        if 'doesn\'t exist' not in str(e) and 'no such table' not in str(e) and 'relation \"bw_metadata\" does not exist' not in str(e):
+        if "doesn't exist" not in str(e) and "no such table" not in str(e) and 'relation "bw_metadata" does not exist' not in str(e):
             with open('/var/tmp/bunkerweb/database_error', 'w') as file:
-				file.write(str(e))
+                file.write(str(e))
             print('none')
         else:
             print('${installed_version}')
 
 with open('/var/tmp/bunkerweb/database_uri', 'w') as file:
-	file.write(db.database_uri)
+    file.write(db.database_uri)
 EOL
 
     current_version=$(sudo -E -u nginx -g nginx /bin/bash -c "PYTHONPATH=$PYTHONPATH python3 /tmp/version_check.py")
