@@ -303,10 +303,17 @@ $(document).ready(() => {
           settingValue = $this.is(":checked") ? "yes" : "no";
         }
 
+        // Check if it's a multiple setting with numeric suffix
+        const isMultipleSetting =
+          settingName &&
+          $this.attr("id").startsWith("multiple-") &&
+          /_\d+$/.test(settingName);
+
         if (
           !isEasy &&
           settingName !== "SERVER_NAME" &&
-          settingValue == originalValue
+          settingValue == originalValue &&
+          !isMultipleSetting
         )
           return;
 
@@ -353,7 +360,10 @@ $(document).ready(() => {
           .trim()
           .split("\n")
           .reduce((acc, line) => {
-            const [key, value] = line.split("=");
+            const [key, ...valueParts] = line
+              .split("=")
+              .map((str) => str.trim());
+            const value = valueParts.join("=");
             if (key && value !== undefined) {
               acc[key.trim()] = value.trim();
             }
@@ -379,7 +389,8 @@ $(document).ready(() => {
           .filter((line) => line && !line.startsWith("#"));
 
         configLines.forEach((line) => {
-          const [key, value] = line.split("=").map((str) => str.trim());
+          const [key, ...valueParts] = line.split("=").map((str) => str.trim());
+          const value = valueParts.join("=");
           if (!key || value === undefined) {
             console.warn(`Skipping malformed line: ${line}`);
             return;
@@ -1117,7 +1128,7 @@ $(document).ready(() => {
     }, 30);
   });
 
-  $(".plugin-setting").on("keydown", function (e) {
+  $(document).on("keydown", ".plugin-setting", function () {
     if (e.key === "Enter") {
       e.preventDefault();
       $(".save-settings").trigger("click");

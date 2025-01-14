@@ -158,9 +158,13 @@ int main(void) {
 }
 
 static void test_can_multiply(void) {
-    { ok(can_multiply(SIZE_MAX, 1, SIZE_MAX), "1*SIZE_MAX is ok"); }
+    {
+        ok(can_multiply(SIZE_MAX, 1, SIZE_MAX), "1*SIZE_MAX is ok");
+    }
 
-    { ok(!can_multiply(SIZE_MAX, 2, SIZE_MAX), "2*SIZE_MAX is not ok"); }
+    {
+        ok(!can_multiply(SIZE_MAX, 2, SIZE_MAX), "2*SIZE_MAX is not ok");
+    }
 
     {
         ok(can_multiply(SIZE_MAX, 10240, sizeof(MMDB_entry_data_list_s)),

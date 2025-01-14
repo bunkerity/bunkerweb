@@ -102,9 +102,11 @@ def handle_stop(signum, frame):
 
 def get_multiples(settings: dict, config: dict) -> Dict[str, Dict[str, Dict[str, dict]]]:
     plugin_multiples = {}
+
     for setting, data in settings.items():
         multiple = data.get("multiple")
         if multiple:
+            # Add the setting without suffix for reference
             data = data | {"setting_no_suffix": setting}
 
             if multiple not in plugin_multiples:
@@ -112,22 +114,41 @@ def get_multiples(settings: dict, config: dict) -> Dict[str, Dict[str, Dict[str,
             if "0" not in plugin_multiples[multiple]:
                 plugin_multiples[multiple]["0"] = {}
 
+            # Add the base (suffix "0") setting
             plugin_multiples[multiple]["0"].update({setting: data})
 
-            for config_setting in config:
+            # Process config settings with suffixes
+            for config_setting, value in config.items():
                 setting_match = match(setting + r"_(?P<suffix>\d+)$", config_setting)
                 if setting_match:
                     suffix = setting_match.group("suffix")
-                    if suffix == "0":
-                        continue
-
                     if suffix not in plugin_multiples[multiple]:
                         plugin_multiples[multiple][suffix] = {}
-                    plugin_multiples[multiple][suffix].update({config_setting: data})
+                    plugin_multiples[multiple][suffix][config_setting] = {
+                        **data,
+                        "value": value,  # Include the value from the config
+                    }
+
+            # Ensure every suffix group has all settings in the same order as "0"
+            base_settings = plugin_multiples[multiple]["0"]
+            for suffix, settings_dict in plugin_multiples[multiple].items():
+                if suffix == "0":
+                    continue
+                for default_setting, default_data in base_settings.items():
+                    if f"{default_setting}_{suffix}" not in settings_dict:
+                        settings_dict[f"{default_setting}_{suffix}"] = {
+                            **default_data,
+                            "value": default_data.get("value"),  # Default value if not in config
+                        }
+
+                # Preserve the order of settings based on suffix "0"
+                plugin_multiples[multiple][suffix] = {
+                    f"{default_setting}_{suffix}": settings_dict[f"{default_setting}_{suffix}"] for default_setting in base_settings
+                }
 
     # Sort the multiples and their settings
     for multiple, multiples in plugin_multiples.items():
-        plugin_multiples[multiple] = dict(sorted(multiples.items()))
+        plugin_multiples[multiple] = dict(sorted(multiples.items(), key=lambda x: int(x[0])))
 
     return plugin_multiples
 

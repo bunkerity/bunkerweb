@@ -51,6 +51,11 @@ Here is how you can access the logs, depending on your integration :
 
 === "Swarm"
 
+    !!! warning "Deprecated"
+        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Docker autoconf integration](#__tabbed_1_2) instead.
+
+        **More information can be found in the [Swarm integration documentation](integrations.md#swarm).**
+
     !!! tip "List services"
     	To list the services, you can use the following command :
     	```shell
@@ -221,6 +226,11 @@ You can manually unban an IP which can be useful when doing some tests but it ne
     ```
 
 === "Swarm"
+
+    !!! warning "Deprecated"
+        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Docker autoconf integration](#__tabbed_2_2) instead.
+
+        **More information can be found in the [Swarm integration documentation](integrations.md#swarm).**
 
     You can use the `docker exec` command (replace `myautoconf` with the name of your service) :
     ```shell

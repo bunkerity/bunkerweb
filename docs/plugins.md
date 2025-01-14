@@ -134,6 +134,11 @@ The first step is to install the plugin by putting the plugin files inside the c
 
 === "Swarm"
 
+    !!! warning "Deprecated"
+        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Docker autoconf integration](#__tabbed_1_2) instead.
+
+        **More information can be found in the [Swarm integration documentation](integrations.md#swarm).**
+
     When using the [Swarm integration](integrations.md#swarm), plugins must be written to the volume mounted on `/data/plugins` into the scheduler container.
 
     !!! info "Swarm volume"

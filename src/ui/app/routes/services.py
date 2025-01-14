@@ -195,6 +195,16 @@ def services_service_page(service: str):
         del variables["csrf_token"]
 
         mode = request.args.get("mode", "easy")
+
+        if mode == "raw":
+            server_name = variables.get("SERVER_NAME", variables.get("OLD_SERVER_NAME", "")).split(" ")[0]
+            for variable, value in variables.copy().items():
+                if variable.endswith("_SERVER_NAME") and variable != "OLD_SERVER_NAME":
+                    server_name = value.split(" ")[0]
+            for variable in variables.copy():
+                if variable.startswith(f"{server_name}_"):
+                    variables[variable.replace(f"{server_name}_", "", 1)] = variables.pop(variable)
+
         is_draft = variables.pop("IS_DRAFT", "no") == "yes"
 
         def update_service(service: str, variables: Dict[str, str], is_draft: bool, mode: str):
@@ -204,12 +214,11 @@ def services_service_page(service: str):
             if service != "new":
                 db_config = DB.get_config(methods=True, with_drafts=True, service=service)
             else:
-                db_config = DB.get_config(global_only=True, methods=True, filtered_settings=list(variables.keys()))
+                db_config = DB.get_config(global_only=True, methods=True)
 
             was_draft = db_config.get("IS_DRAFT", {"value": "no"})["value"] == "yes"
 
             old_server_name = variables.pop("OLD_SERVER_NAME", "")
-            ignored_multiples = set()
             db_custom_configs = {}
             new_configs = set()
             configs_changed = False
@@ -269,20 +278,14 @@ def services_service_page(service: str):
                         db_custom_configs[db_custom_config]["checksum"] = data["checksum"]
 
             if mode != "easy" or service != "new":
-                if mode == "raw":
-                    server_name = variables.get("SERVER_NAME", old_server_name).split(" ")[0]
-                    for variable, value in variables.copy().items():
-                        if variable.startswith(f"{server_name}_"):
-                            variables[variable.replace(f"{server_name}_", "", 1)] = value
-
                 # Remove already existing fields
                 for variable, value in variables.copy().items():
                     if (mode == "advanced" or variable != "SERVER_NAME") and value == db_config.get(variable, {"value": None})["value"]:
                         if match(r"^.+_\d+$", variable):
-                            ignored_multiples.add(variable)
+                            continue
                         del variables[variable]
 
-            variables = BW_CONFIG.check_variables(variables, db_config, ignored_multiples=ignored_multiples, new=service == "new", threaded=True)
+            variables = BW_CONFIG.check_variables(variables, db_config, new=service == "new", threaded=True)
 
             if service != "new" and was_draft == is_draft and not variables and not configs_changed:
                 DATA["TO_FLASH"].append(

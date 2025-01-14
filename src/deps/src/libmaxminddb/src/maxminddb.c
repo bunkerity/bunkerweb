@@ -1636,6 +1636,8 @@ int MMDB_get_metadata_as_entry_data_list(
 
 int MMDB_get_entry_data_list(MMDB_entry_s *start,
                              MMDB_entry_data_list_s **const entry_data_list) {
+    *entry_data_list = NULL;
+
     MMDB_data_pool_s *const pool = data_pool_new(MMDB_POOL_INIT_SIZE);
     if (!pool) {
         return MMDB_OUT_OF_MEMORY_ERROR;

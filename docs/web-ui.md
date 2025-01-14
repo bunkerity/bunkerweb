@@ -302,6 +302,11 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
 
 === "Swarm"
 
+    !!! warning "Deprecated"
+        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Docker autoconf integration](#__tabbed_1_2) instead.
+
+        **More information can be found in the [Swarm integration documentation](integrations.md#swarm).**
+
     If you want to use the setup wizard, you will need to set the `UI_HOST` setting to the HTTP endpoint of your web UI container. For example, if your web UI container is named `bw-ui` and is listening on the `7000` port, you will need to set the `UI_HOST` setting to `http://bw-ui:7000`.
 
     !!! tip "Accessing the setup wizard"
@@ -1064,6 +1069,11 @@ To keep the logs accessible from the web UI, you will need to use `syslog-ng` to
 
 === "Swarm"
 
+    !!! warning "Deprecated"
+        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Docker autoconf integration](#__tabbed_2_2) instead.
+
+        **More information can be found in the [Swarm integration documentation](integrations.md#swarm).**
+
     To forward the logs correctly to the `/var/log/bunkerweb` directory on the Swarm integration, you will need to stream the logs to a file using `syslog-ng`. Here is an example of how to do this :
 
     ```yaml
@@ -1652,6 +1662,11 @@ After a successful login/password combination, you will be prompted to enter you
     ```
 
 === "Swarm"
+
+    !!! warning "Deprecated"
+        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Docker autoconf integration](#__tabbed_3_2) instead.
+
+        **More information can be found in the [Swarm integration documentation](integrations.md#swarm).**
 
     The web UI can be deployed using a dedicated container which is available on [Docker Hub](https://hub.docker.com/r/bunkerity/bunkerweb-ui) :
 

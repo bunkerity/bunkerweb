@@ -169,7 +169,7 @@ try:
                                 content += data + b"\n"
                                 i += 1
 
-                        LOGGER.info(f"Downloaded {i} bad {kind}")
+                        LOGGER.info(f"Downloaded {i} good {kind}")
 
                         cached, err = JOB.cache_file(url_file, b"# Downloaded from " + url.encode("utf-8") + b"\n" + content)
                         if not cached:
