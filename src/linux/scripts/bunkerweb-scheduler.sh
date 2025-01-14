@@ -110,6 +110,8 @@ with db.sql_engine.connect() as conn:
         print(next(result)[0])
     except BaseException as e:
         if 'doesn\'t exist' not in str(e) and 'no such table' not in str(e) and 'relation \"bw_metadata\" does not exist' not in str(e):
+            with open('/var/tmp/bunkerweb/database_error', 'w') as file:
+				file.write(str(e))
             print('none')
         else:
             print('${installed_version}')
@@ -122,7 +124,8 @@ EOL
     rm -f /tmp/version_check.py
 
     if [ "$current_version" == "none" ]; then
-        log "SYSTEMCTL" "❌" "Failed to retrieve database version"
+        log "SYSTEMCTL" "❌" "Failed to retrieve database version: $(cat /var/tmp/bunkerweb/database_error)"
+        rm -f /var/tmp/bunkerweb/database_error
         exit 1
     fi
 
