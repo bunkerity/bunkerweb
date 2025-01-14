@@ -267,13 +267,13 @@ def services_service_page(service: str):
                     if "checksum" in data:
                         db_custom_configs[db_custom_config]["checksum"] = data["checksum"]
 
-            if mode != "easy" or service != "new":
-                if mode == "raw":
-                    server_name = variables.get("SERVER_NAME", old_server_name).split(" ")[0]
-                    for variable, value in variables.copy().items():
-                        if variable.startswith(f"{server_name}_"):
-                            variables[variable.replace(f"{server_name}_", "", 1)] = value
+            if mode == "raw":
+                server_name = variables.get("SERVER_NAME", old_server_name).split(" ")[0]
+                for variable, value in variables.copy().items():
+                    if variable.startswith(f"{server_name}_"):
+                        variables[variable.replace(f"{server_name}_", "", 1)] = value
 
+            if mode != "easy" or service != "new":
                 # Remove already existing fields
                 for variable, value in variables.copy().items():
                     if (mode == "advanced" or variable != "SERVER_NAME") and value == db_config.get(variable, {"value": None})["value"]:
