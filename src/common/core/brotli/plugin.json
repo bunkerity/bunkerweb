@@ -8,7 +8,7 @@
     "USE_BROTLI": {
       "context": "multisite",
       "default": "no",
-      "help": "Use brotli",
+      "help": "Enable or disable Brotli compression.",
       "id": "use-brotli",
       "label": "Use brotli",
       "regex": "^(yes|no)$",
@@ -26,7 +26,7 @@
     "BROTLI_MIN_LENGTH": {
       "context": "multisite",
       "default": "1000",
-      "help": "Minimum length for brotli compression.",
+      "help": "Minimum response size (in bytes) for Brotli compression to apply.",
       "id": "brotli-min-length",
       "label": "Minimum length",
       "regex": "^\\d+",
@@ -35,7 +35,7 @@
     "BROTLI_COMP_LEVEL": {
       "context": "multisite",
       "default": "6",
-      "help": "The compression level of the brotli algorithm.",
+      "help": "Compression level for Brotli (0 = no compression, 11 = maximum compression).",
       "id": "brotli-comp-level",
       "label": "Compression level",
       "regex": "^([02-9]|1[01]?)$",
