@@ -43,6 +43,13 @@
                 {% set setting_config = config.get(setting, {}) %}
                 {% set setting_default = setting_data.get("default", "") %}
                 {% set setting_value = setting_config.get("value", setting_default) %}
+                {% if current_endpoint == "new" or clone %}
+                    {% set setting_method = "default" %}
+                    {% set disabled = false %}
+                    {% if setting == "SERVER_NAME" %}
+                        {% set setting_value = "" %}
+                    {% endif %}
+                {% endif %}
                 {% if setting_value != setting_default %}
                     {% if config_lines.append(setting + "=" + setting_value) %}{% endif %}
                     {% if default_settings.append(setting + "=" + setting_default) %}{% endif %}
