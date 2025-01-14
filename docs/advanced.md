@@ -5,6 +5,8 @@ BunkerWeb offers many security features that you can configure with [settings](s
 !!! tip "Other settings"
     This section only focuses on advanced usages, see the [settings section](settings.md) of the documentation to see all the available settings.
 
+## Use cases
+
 !!! tip "Testing"
     To perform quick tests when multisite mode is enabled (and if you don't have the proper DNS entries set up for the domains) you can use curl with the HTTP Host header of your choice :
     ```shell
@@ -16,7 +18,7 @@ BunkerWeb offers many security features that you can configure with [settings](s
     curl -H "Host: app1.example.com" --resolve example.com:443:ip-of-server https://example.com
     ```
 
-## Behind load balancer or reverse proxy
+### Behind load balancer or reverse proxy
 
 !!! info "Real IP"
 
@@ -246,7 +248,7 @@ You will find more settings about real IP in the [settings section](settings.md#
         systemctl restart bunkerweb bunkerweb-scheduler
         ```
 
-## Protect UDP/TCP applications
+### Protect UDP/TCP applications
 
 !!! example "Experimental feature"
 
@@ -256,7 +258,7 @@ BunkerWeb offers the capability to function as a **generic UDP/TCP reverse proxy
 
 It's important to note that **not all settings and security features are available when using the stream module**. Additional information on this can be found in the [settings](settings.md) sections of the documentation.
 
-Configuring a basic reverse proxy is quite similar to the HTTP setup, as it involves using the same settings: `USE_REVERSE_PROXY=yes` and `REVERSE_PROXY_HOST=myapp:4242`. Even when BunkerWeb is positioned behind a Load Balancer, the settings remain the same (with **PROXY protocol** being the supported option due to evident reasons).
+Configuring a basic reverse proxy is quite similar to the HTTP setup, as it involves using the same settings: `USE_REVERSE_PROXY=yes` and `REVERSE_PROXY_HOST=myapp:9000`. Even when BunkerWeb is positioned behind a Load Balancer, the settings remain the same (with **PROXY protocol** being the supported option due to evident reasons).
 
 On top of that, the following specific settings are used :
 
@@ -266,6 +268,21 @@ On top of that, the following specific settings are used :
 - `USE_UDP=no` : listen for and forward UDP packets instead of TCP
 
 For complete list of settings regarding `stream` mode, please refer to the [settings](settings.md) section of the documentation.
+
+!!! tip "multiple listening ports"
+
+    Since the `1.6.0-rc1` version, BunkerWeb supports multiple listening ports for the `stream` mode. You can specify them using the `LISTEN_STREAM_PORT` and `LISTEN_STREAM_PORT_SSL` settings.
+
+    Here is an example :
+
+    ```conf
+    ...
+    LISTEN_STREAM_PORT=4242
+    LISTEN_STREAM_PORT_SSL=4343
+    LISTEN_STREAM_PORT_1=4244
+    LISTEN_STREAM_PORT_SSL_1=4344
+    ...
+    ```
 
 === "Docker"
 
@@ -280,7 +297,7 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
       bunkerweb:
         image: bunkerity/bunkerweb:1.6.0-rc1
         ports:
-          - "80:8080" # Keep it if you want to use Let's Encrypt automation
+          - "80:8080" # Keep it if you want to use Let's Encrypt automation when using http challenge type
           - "10000:10000" # app1
           - "20000:20000" # app2
         labels:
@@ -339,22 +356,16 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
 
 === "Docker autoconf"
 
-    Before running the [Docker autoconf integration](integrations.md#docker-autoconf) stack on your machine, you will need to edit the ports and the Scheduler environment variables :
+    Before running the [Docker autoconf integration](integrations.md#docker-autoconf) stack on your machine, you will need to edit the ports :
 
     ```yaml
     services:
       bunkerweb:
         image: bunkerity/bunkerweb:1.6.0-rc1
         ports:
-          - "80:8080" # Keep it if you want to use Let's Encrypt automation
+          - "80:8080" # Keep it if you want to use Let's Encrypt automation when using http challenge type
           - "10000:10000" # app1
           - "20000:20000" # app2
-      ...
-      bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.0-rc1
-        ...
-        environment:
-          SERVER_TYPE: "stream"
     ...
     ```
 
@@ -369,6 +380,7 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
           - bw-services
         labels:
           - "bunkerweb.SERVER_NAME=app1.example.com"
+          - "bunkerweb.SERVER_TYPE=stream"
           - "bunkerweb.USE_REVERSE_PROXY=yes"
           - "bunkerweb.REVERSE_PROXY_HOST=myapp1:9000"
           - "bunkerweb.LISTEN_STREAM_PORT=10000"
@@ -380,6 +392,7 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
           - bw-services
         labels:
           - "bunkerweb.SERVER_NAME=app2.example.com"
+          - "bunkerweb.SERVER_TYPE=stream"
           - "bunkerweb.USE_REVERSE_PROXY=yes"
           - "bunkerweb.REVERSE_PROXY_HOST=myapp2:9000"
           - "bunkerweb.LISTEN_STREAM_PORT=20000"
@@ -397,14 +410,14 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
 
         **More information can be found in the [Swarm integration documentation](integrations.md#swarm).**
 
-    Before running the [Swarm integration](integrations.md#swarm) stack on your machine, you will need to edit the ports and the Scheduler environment variables :
+    Before running the [Swarm integration](integrations.md#swarm) stack on your machine, you will need to edit the ports :
 
     ```yaml
     services:
       bunkerweb:
         image: bunkerity/bunkerweb:1.6.0-rc1
         ports:
-          # Keep it if you want to use Let's Encrypt automation
+          # Keep it if you want to use Let's Encrypt automation when using http challenge type
           - published: 80
             target: 8080
             mode: host
@@ -415,16 +428,10 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
             mode: host
             protocol: tcp
           # app2
-          - published: 10000
-            target: 10000
+          - published: 20000
+            target: 20000
             mode: host
             protocol: tcp
-      ...
-      bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.0-rc1
-        ...
-        environment:
-          SERVER_TYPE: "stream"
     ...
     ```
 
@@ -444,6 +451,7 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
               - "node.role==worker"
           labels:
             - "bunkerweb.SERVER_NAME=app1.example.com"
+            - "bunkerweb.SERVER_TYPE=stream"
             - "bunkerweb.USE_REVERSE_PROXY=yes"
             - "bunkerweb.REVERSE_PROXY_HOST=myapp1:9000"
             - "bunkerweb.LISTEN_STREAM_PORT=10000"
@@ -459,6 +467,7 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
               - "node.role==worker"
           labels:
             - "bunkerweb.SERVER_NAME=app2.example.com"
+            - "bunkerweb.SERVER_TYPE=stream"
             - "bunkerweb.USE_REVERSE_PROXY=yes"
             - "bunkerweb.REVERSE_PROXY_HOST=myapp2:9000"
             - "bunkerweb.LISTEN_STREAM_PORT=20000"
@@ -471,7 +480,144 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
 
 === "Kubernetes"
 
-    Protection TCP/UDP applications using the `stream` feature is not yet supported when using the [Kubernetes integration](integrations.md#kubernetes).
+    !!! example "Experimental feature"
+
+        At the moment, [Ingresses](https://kubernetes.io/docs/concepts/services-networking/ingress/) does not support the `stream` mode. **What we are doing here is a workaround to make it work.**
+
+        Feel free to test it and report us any bug using [issues](https://github.com/bunkerity/bunkerweb/issues) in the GitHub repository.
+
+    Before running the [Kubernetes integration](integrations.md#kubernetes) stack on your machine, you will need to open the ports on your load balancer :
+
+    ```yaml
+    apiVersion: v1
+    kind: Service
+    metadata:
+      name: lb
+    spec:
+      type: LoadBalancer
+      ports:
+        - name: http # Keep it if you want to use Let's Encrypt automation when using http challenge type
+          port: 80
+          targetPort: 8080
+        - name: app1
+          port: 10000
+          targetPort: 10000
+        - name: app2
+          port: 20000
+          targetPort: 20000
+      selector:
+        app: bunkerweb
+    ```
+
+    Once the stack is running, you can create your ingress resources :
+
+    ```yaml
+    apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    metadata:
+      name: ingress
+      namespace: services
+      annotations:
+        bunkerweb.io/SERVER_TYPE: "stream" # Will be applied to all services
+        bunkerweb.io/app1.example.com_LISTEN_STREAM_PORT: "10000"
+        bunkerweb.io/app2.example.com_LISTEN_STREAM_PORT: "20000"
+    spec:
+      rules:
+        - host: app1.example.com
+          http:
+            paths:
+              - path: / # This isn't used in stream mode but is required
+                pathType: Prefix
+                backend:
+                  service:
+                    name: svc-app1
+                    port:
+                      number: 9000
+        - host: app2.example.com
+          http:
+            paths:
+              - path: / # This isn't used in stream mode but is required
+                pathType: Prefix
+                backend:
+                  service:
+                    name: svc-app2
+                    port:
+                      number: 9000
+    ---
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: app1
+      namespace: services
+      labels:
+        app: app1
+    spec:
+      replicas: 1
+      selector:
+        matchLabels:
+          app: app1
+      template:
+        metadata:
+          labels:
+            app: app1
+        spec:
+          containers:
+            - name: app1
+              image: istio/tcp-echo-server:1.3
+              args: ["9000", "app1"]
+              ports:
+                - containerPort: 9000
+    ---
+    apiVersion: v1
+    kind: Service
+    metadata:
+      name: svc-app1
+      namespace: services
+    spec:
+      selector:
+        app: app1
+      ports:
+        - protocol: TCP
+          port: 9000
+          targetPort: 9000
+    ---
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: app2
+      namespace: services
+      labels:
+        app: app2
+    spec:
+      replicas: 1
+      selector:
+        matchLabels:
+          app: app2
+      template:
+        metadata:
+          labels:
+            app: app2
+        spec:
+          containers:
+            - name: app2
+              image: istio/tcp-echo-server:1.3
+              args: ["9000", "app2"]
+              ports:
+                - containerPort: 9000
+    ---
+    apiVersion: v1
+    kind: Service
+    metadata:
+      name: svc-app2
+      namespace: services
+    spec:
+      selector:
+        app: app2
+      ports:
+        - protocol: TCP
+          port: 9000
+          targetPort: 9000
+    ```
 
 === "Linux"
 
@@ -514,7 +660,7 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
     systemctl start bunkerweb bunkerweb-scheduler
     ```
 
-## Custom configurations
+### Custom configurations
 
 To customize and add custom configurations to BunkerWeb, you can take advantage of its NGINX foundation. Custom NGINX configurations can be added in different NGINX contexts, including configurations for the ModSecurity Web Application Firewall (WAF), which is a core component of BunkerWeb. More details about ModSecurity configurations can be found [here](security-tuning.md#modsecurity).
 
@@ -778,7 +924,7 @@ Some integrations provide more convenient ways to apply configurations, such as 
     systemctl start bunkerweb bunkerweb-scheduler
     ```
 
-## PHP
+### PHP
 
 !!! example "Experimental feature"
 	At the moment, PHP support with BunkerWeb is still in beta and we recommend you use a reverse-proxy architecture if you can. By the way, PHP is not supported at all for some integrations like Kubernetes.
@@ -1282,9 +1428,9 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
     systemctl start bunkerweb bunkerweb-scheduler
     ```
 
-## IPv6
+### IPv6
 
-!!! warning "Experimental feature"
+!!! example "Experimental feature"
 
     This feature is not production-ready. Feel free to test it and report us any bug using [issues](https://github.com/bunkerity/bunkerweb/issues) in the GitHub repository.
 
@@ -1366,95 +1512,117 @@ By default, BunkerWeb will only listen on IPv4 addresses and won't use IPv6 for 
     systemctl start bunkerweb bunkerweb-scheduler
     ```
 
+## Security Mode
+
+STREAM support :white_check_mark:
+
+The **Security Mode** setting determines how BunkerWeb handles detected threats. This flexible feature allows you to choose between monitoring or actively blocking suspicious activity, depending on their specific needs.
+
+- **`detect`**: Logs potential threats without blocking access. This mode is useful for identifying and analyzing false positives in a safe, non-disruptive manner.
+- **`block`** (default): Actively blocks detected threats while logging incidents to prevent unauthorized access and protect your application.
+
+!!! tip "Detect mode"
+    Switching to `detect` mode can help you identify and resolve potential false positives without disrupting legitimate clients. Once these issues are addressed, you can confidently switch back to `block` mode for full protection.
+
+
 ## HTTP protocol
 
 ### Deny status code
 
 STREAM support :warning:
 
-The first thing to define is the kind of action to do when a client access is denied. You can control the action with the `DENY_HTTP_STATUS` setting which allows the following values :
+The first step in handling denied client access is defining the appropriate action. This can be configured using the `DENY_HTTP_STATUS` setting, which supports the following values:
 
-- `403` : send a "classical" Forbidden HTTP status code (a web page or custom content will be displayed)
-- `444` : close the connection (no web page or custom content will be displayed)
+- **`403`**: Sends a standard "Forbidden" HTTP status code. A web page or custom content will be displayed to the client.
+- **`444`**: Silently closes the connection without displaying any web page or custom content.
 
-The default value is `403` and we suggest you set it to `444` only if you already fixed a lot of false positive, you are familiar with BunkerWeb and want a higher level of security.
+The default value is `403`. Setting it to `444` is recommended only if you have thoroughly addressed false positives, are experienced with BunkerWeb, and require a higher level of security.
 
-When using stream mode, value is ignored and always set to `444` with effect of closing the connection.
+In **stream mode**, this setting is always enforced as `444`, meaning the connection will be closed, regardless of the configured value.
 
 ### Default server
 
-STREAM support :x:
+STREAM support :warning:
 
-In the HTTP protocol, the Host header is used to determine which server the client wants to send the request to. That header is facultative and may be missing from the request or can be set as an unknown value. This is a common case, a lot of bots are scanning the Internet and are trying to exploit services or simply doing some fingerprinting.
+In the HTTP protocol, the `Host` header specifies the server the client intends to contact. However, this header is optional and may be missing or set to an unknown value. This scenario is common, as many bots scan the internet to exploit services or perform fingerprinting.
 
-You can disable any request containing undefined or unknown Host value by setting `DISABLE_DEFAULT_SERVER` to `yes` (default : `no`). Please note that clients won't even receive a response, the TCP connection will be closed (using the special 444 status code of NGINX).
+To block requests with undefined or unknown `Host` values, you can enable the `DISABLE_DEFAULT_SERVER` setting by setting it to `yes` (default: `no`). When enabled, such requests are silently denied by closing the TCP connection using NGINX's special `444` status code, meaning no response is sent to the client.
 
-If you want to close SSL/TLS connection if [Server Name Indication (SNI)](https://en.wikipedia.org/wiki/Server_Name_Indication) is undefined or unknown, you can set `DISABLE_DEFAULT_SERVER_STRICT_SNI` to `yes` (default : `no`). On the one hand, you can block attackers as soon as possible at SSL/TLS level but, in the other hand, you may have issues if your BunkerWeb instance is behind a reverse proxy configured to send HTTPS requests without SNI.
+For stricter security, you can also close SSL/TLS connections when the [Server Name Indication (SNI)](https://en.wikipedia.org/wiki/Server_Name_Indication) is undefined or unknown by setting `DISABLE_DEFAULT_SERVER_STRICT_SNI` to `yes` (default: `no`). This approach blocks attackers at the SSL/TLS level. However, it may cause issues if your BunkerWeb instance is behind a reverse proxy that forwards HTTPS requests without SNI.
 
 ### Allowed methods
 
 STREAM support :x:
 
-You can control the allowed HTTP methods by listing them (separated with "|") in the `ALLOWED_METHODS` setting (default : `GET|POST|HEAD`). Clients sending a method which is not listed will get a "405 - Method Not Allowed".
+You can define the allowed HTTP methods using the `ALLOWED_METHODS` setting, listing them separated by a `|` (default: `GET|POST|HEAD`). If a client sends a request using a method not listed, they will receive a **405 - Method Not Allowed** response.
 
-!!! note Using POST
+!!! abstract "POST Requests"
 
-    If `POST` is required, then `OPTIONS` should also be specified to allow for the CORS pre-flight request.
+    If you include `POST` in the allowed methods, you should also include `OPTIONS` to accommodate CORS pre-flight requests.
 
 ### Max sizes
 
 STREAM support :x:
 
-You can control the maximum body size with the `MAX_CLIENT_SIZE` setting (default : `10m`). See [here](https://nginx.org/en/docs/syntax.html) for accepted values. You can use the special value `0` to allow a body of infinite size (not recommended).
+The maximum request body size can be controlled using the `MAX_CLIENT_SIZE` setting (default: `10m`). Accepted values follow the syntax described [here](https://nginx.org/en/docs/syntax.html).
+
+To allow a request body of unlimited size, you can use the special value `0` (not recommended for security and performance reasons).
 
 ### Serve files
 
 STREAM support :x:
 
-To disable serving files from the www folder, you can set `SERVE_FILES` to `no` (default : `yes`). The value `no` is recommended if you use BunkerWeb as a reverse proxy.
+To prevent serving files from the `www` folder, set the `SERVE_FILES` option to `no` (default: `yes`). Using `no` is recommended if BunkerWeb is configured as a reverse proxy.
 
 ### Headers
 
 STREAM support :x:
 
-Headers are very important when it comes to HTTP security. While some of them might be too verbose, others' verbosity will need to be increased, especially on the client-side.
+Headers play a crucial role in HTTP security. While some headers may be overly verbose, others might require enhanced verbosity to ensure better security, particularly on the client side.
 
 #### Remove headers
 
 STREAM support :x:
 
-You can automatically remove verbose headers in the HTTP responses by using the `REMOVE_HEADERS` setting (default : `Server X-Powered-By X-AspNet-Version X-AspNetMvc-Version`).
+You can use the `REMOVE_HEADERS` setting to automatically remove specific verbose headers from HTTP responses. By default, it removes the following headers: `Server`, `X-Powered-By`, `X-AspNet-Version`, and `X-AspNetMvc-Version`.
+
+Headers to be removed should be listed and separated by spaces.
 
 #### Keep upstream headers
 
 STREAM support :x:
 
-You can use the `KEEP_UPSTREAM_HEADERS` setting to preserve specific headers from upstream servers, preventing BunkerWeb from overriding them in HTTP responses.
+The `KEEP_UPSTREAM_HEADERS` setting allows you to preserve specific headers from upstream servers, ensuring that BunkerWeb does not override them in HTTP responses.
 
-* By default, this setting includes `Content-Security-Policy`, `Permissions-Policy`, and `X-Frame-Options`.
-* To retain all headers from the upstream server, use the special value `*`.
+- By default, it includes the headers: `Content-Security-Policy`, `Permissions-Policy`, and `X-Frame-Options`.
+- To preserve all headers from the upstream server, use the special value `*`.
 
-Headers to be preserved should be listed and separated by spaces.
+Headers to be preserved must be listed and separated by spaces.
 
 #### Cookies
 
 STREAM support :x:
 
-When it comes to cookies security, we can use the following flags :
+Cookie security is **critical** for protecting user data and ensuring application security. Misconfigured cookies can expose sensitive information, making them a potential target for attacks such as Cross-Site Scripting (XSS) or Cross-Site Request Forgery (CSRF).
 
-- **HttpOnly** : disable any access to the cookie from Javascript using document.cookie
-- **SameSite** : policy when requests come from third-party websites
-- **Secure** : only send cookies on HTTPS request
+To strengthen cookie security, you can use the following flags:
 
-Cookie flags can be overridden with values of your choice by using the `COOKIE_FLAGS` setting (default : `* HttpOnly SameSite=Lax`). See [here](https://github.com/AirisX/nginx_cookie_flag_module) for accepted values.
+- **HttpOnly**: Prevents access to cookies via JavaScript using `document.cookie`, mitigating XSS risks.
+- **SameSite**: Restricts cookie sharing policies for requests originating from third-party websites, reducing CSRF vulnerabilities.
+- **Secure**: Ensures cookies are sent only over secure HTTPS connections, protecting them from being intercepted.
 
-The Secure flag can be automatically added if HTTPS is used by using the `COOKIE_AUTO_SECURE_FLAG` setting (default : `yes`). The value `no` is not recommended unless you know what you're doing.
+You can configure these flags using the `COOKIE_FLAGS` setting (default: `* HttpOnly SameSite=Lax`). Refer to [this guide](https://github.com/AirisX/nginx_cookie_flag_module) for accepted values.
+
+To further enhance security, the `Secure` flag can be applied automatically for HTTPS requests by enabling the `COOKIE_AUTO_SECURE_FLAG` setting (default: `yes`).
+
+!!! danger "Important"
+    Disabling the `COOKIE_AUTO_SECURE_FLAG` setting may expose your cookies to interception over insecure HTTP connections.
 
 #### Security headers
 
 STREAM support :x:
 
-Various security headers are available and most of them can be set using BunkerWeb settings. Here is the list of headers, the corresponding setting and default value :
+**Security headers are a fundamental aspect of web application security**, helping protect against a wide range of vulnerabilities, including XSS, clickjacking, and other attacks. BunkerWeb simplifies the process by allowing you to configure these headers through its settings. Below is a list of key security headers, along with their corresponding settings and default values:
 
 |           Header            | Setting                     |                                                                                                                                                                                                                                                                                                                                                                    Default                                                                                                                                                                                                                                                                                                                                                                     |
 | :-------------------------: | :-------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
@@ -1466,11 +1634,20 @@ Various security headers are available and most of them can be set using BunkerW
 |  `X-Content-Type-Options`   | `X_CONTENT_TYPE_OPTIONS`    |                                                                                                                                                                                                                                                                                                                                                                   `nosniff`                                                                                                                                                                                                                                                                                                                                                                    |
 |  `X-DNS-Prefetch-Control`   | `X_DNS_PREFETCH_CONTROL`    |                                                                                                                                                                                                                                                                                                                                                                     `off`                                                                                                                                                                                                                                                                                                                                                                      |
 
+!!! note "About Security Headers"
+    Security headers are a **first line of defense** against malicious actors. Properly configuring them can drastically reduce the attack surface of your application. Use the BunkerWeb settings to fine-tune these headers and ensure your application adheres to the highest security standards.
+
 #### CORS
 
 STREAM support :x:
 
-[Cross-Origin Resource Sharing (CORS)](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS) allows you to control how your service can be accessed from different origins. To enable CORS, ensure the `OPTIONS` HTTP method is included in the `ALLOWED_METHODS` setting (more details [here](#allowed-methods)). Below is a list of settings related to CORS:
+[Cross-Origin Resource Sharing (CORS)](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS) lets you control which origins can access your service and how they can do so.
+
+To enable CORS:
+1. Include the `OPTIONS` HTTP method in the `ALLOWED_METHODS` setting to support pre-flight requests.
+2. Configure the necessary CORS headers for proper handling of requests.
+
+Here is a list of settings related to CORS:
 
 | Setting                        | Default                                                                              | Context   | Multiple | Description                                                                            |
 | ------------------------------ | ------------------------------------------------------------------------------------ | --------- | -------- | -------------------------------------------------------------------------------------- |
@@ -1486,23 +1663,66 @@ STREAM support :x:
 | `CORS_MAX_AGE`                 | `86400`                                                                              | multisite | no       | Value of the Access-Control-Max-Age header.                                            |
 | `CORS_DENY_REQUEST`            | `yes`                                                                                | multisite | no       | Deny request and don't send it to backend if Origin is not allowed.                    |
 
-Here is some examples of possible values for `CORS_ALLOW_ORIGIN` setting :
+Here are examples of possible values for the `CORS_ALLOW_ORIGIN` setting, along with their behavior:
 
-- `*` will allow all origin
-- `^https://www\.example\.com$` will allow `https://www.example.com`
-- `^https://.+\.example.com$` will allow any origins when domain ends with `.example.com`
-- `^https://(www\.example1\.com|www\.example2\.com)$` will allow both `https://www.example1.com` and `https://www.example2.com`
-- `^https?://www\.example\.com$` will allow both `https://www.example.com` and `http://www.example.com`
+- **`*`**: Allows requests from all origins.
+- **`self`**: Automatically allows requests from the same origin as the server_name configured.
+- **`^https://www\.example\.com$`**: Allows requests only from `https://www.example.com`.
+- **`^https://.+\.example\.com$`**: Allows requests from any subdomain ending with `.example.com`.
+- **`^https://(www\.example1\.com|www\.example2\.com)$`**: Allows requests from either `https://www.example1.com` or `https://www.example2.com`.
+- **`^https?://www\.example\.com$`**: Allows requests from both `https://www.example.com` and `http://www.example.com`.
 
-Here are some links to help you set the correct values for the CORS settings :
+##### Helpful Resources for Configuring CORS Settings:
+- **Cross-Origin-Opener-Policy**: [MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Opener-Policy)
+- **Cross-Origin-Embedder-Policy**: [MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Embedder-Policy)
+- **Cross-Origin-Resource-Policy**: [MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Resource-Policy)
 
-* Cross-Origin-Opener-Policy: [MDN](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Opener-Policy)
-* Cross-Origin-Embedder-Policy: [MDN](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Embedder-Policy)
-* Cross-Origin-Resource-Policy: [MDN](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Resource-Policy)
+These examples and resources will help you configure CORS policies effectively, ensuring secure and controlled access to your service.
+
+### Compression algorithms
+
+STREAM support :x:
+
+Compression algorithms in BunkerWeb, such as Brotli and Gzip, optimize performance by reducing the size of HTTP responses. These algorithms help save bandwidth and improve loading times for end-users.
+
+#### Brotli
+
+The **Brotli** algorithm provides higher compression rates compared to Gzip, making it ideal for modern web applications.
+
+| Setting             | Default                                                                                                                                                                                                                                                                                                                                                                                                                          | Context   | Multiple | Description                                                                  |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | -------- | ---------------------------------------------------------------------------- |
+| `USE_BROTLI`        | `no`                                                                                                                                                                                                                                                                                                                                                                                                                             | multisite | no       | Enable or disable Brotli compression.                                        |
+| `BROTLI_TYPES`      | `application/atom+xml application/javascript application/json application/rss+xml application/vnd.ms-fontobject application/x-font-opentype application/x-font-truetype application/x-font-ttf application/x-javascript application/xhtml+xml application/xml font/eot font/opentype font/otf font/truetype image/svg+xml image/vnd.microsoft.icon image/x-icon image/x-win-bitmap text/css text/javascript text/plain text/xml` | multisite | no       | List of MIME types that will be compressed with brotli.                      |
+| `BROTLI_MIN_LENGTH` | `1000`                                                                                                                                                                                                                                                                                                                                                                                                                           | multisite | no       | Minimum response size (in bytes) for Brotli compression to apply.            |
+| `BROTLI_COMP_LEVEL` | `6`                                                                                                                                                                                                                                                                                                                                                                                                                              | multisite | no       | Compression level for Brotli (0 = no compression, 11 = maximum compression). |
+
+#### Gzip
+
+The **Gzip** algorithm is widely supported and ensures compatibility with older clients.
+
+| Setting           | Default                                                                                                                                                                                                                                                                                                                                                                                                                          | Context   | Multiple | Description                                                                  |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | -------- | ---------------------------------------------------------------------------- |
+| `USE_GZIP`        | `no`                                                                                                                                                                                                                                                                                                                                                                                                                             | multisite | no       | Enable or disable Gzip compression.                                          |
+| `GZIP_TYPES`      | `application/atom+xml application/javascript application/json application/rss+xml application/vnd.ms-fontobject application/x-font-opentype application/x-font-truetype application/x-font-ttf application/x-javascript application/xhtml+xml application/xml font/eot font/opentype font/otf font/truetype image/svg+xml image/vnd.microsoft.icon image/x-icon image/x-win-bitmap text/css text/javascript text/plain text/xml` | multisite | no       | List of MIME types that will be compressed with gzip.                        |
+| `GZIP_MIN_LENGTH` | `1000`                                                                                                                                                                                                                                                                                                                                                                                                                           | multisite | no       | Minimum response size (in bytes) for Gzip compression to apply.              |
+| `GZIP_COMP_LEVEL` | `5`                                                                                                                                                                                                                                                                                                                                                                                                                              | multisite | no       | Compression level for Gzip (1 = least compression, 9 = maximum compression). |
+| `GZIP_PROXIED`    | `no-cache no-store private expired auth`                                                                                                                                                                                                                                                                                                                                                                                         | multisite | no       | Specifies which proxied requests should be compressed.                       |
+
+**Choosing the Right Algorithm**:
+
+- **Brotli**: Provides better compression rates, suitable for modern browsers and applications where reducing payload size is a priority.
+- **Gzip**: Offers broader compatibility and is ideal for environments with older clients.
+
+!!! tip "Optimizing Compression Settings"
+    Properly configuring MIME types and compression levels helps balance performance gains with resource usage.
 
 ## HTTPS / SSL/TLS
 
-Besides the HTTPS / SSL/TLS configuration, the following settings related to HTTPS / SSL/TLS can be set :
+Strong SSL/TLS certificates are **essential** for ensuring secure communication between clients and your server. They protect sensitive data from being intercepted or tampered with and are a fundamental component of a secure HTTPS setup.
+
+Ensuring your SSL/TLS certificates are strong, up-to-date, and properly configured is critical to safeguarding your application and building trust with your users. Combine these settings with a robust HTTPS/SSL/TLS setup for maximum protection.
+
+In addition to configuring HTTPS and SSL/TLS protocols, the following settings can be customized to enhance your security:
 
 |            Setting            |      Default      | Description                                                                                                  |
 | :---------------------------: | :---------------: | :----------------------------------------------------------------------------------------------------------- |
@@ -1515,17 +1735,22 @@ Besides the HTTPS / SSL/TLS configuration, the following settings related to HTT
 |         `LISTEN_HTTP`         |       `yes`       | When set to `no`, BunkerWeb will not listen for HTTP requests. Useful if you want HTTPS only for example.    |
 
 !!! example "About HTTP3"
-    HTTP/3 is the next version of the HTTP protocol. It is based on Google's QUIC protocol which is a transport layer protocol that provides security and reliability features. HTTP/3 is designed to improve the performance of websites and web applications.
+    HTTP/3 is the latest iteration of the Hypertext Transfer Protocol, designed to enhance web performance and security. Unlike its predecessors, HTTP/1.1 and HTTP/2, which rely on the Transmission Control Protocol (TCP), HTTP/3 utilizes QUIC—a transport layer protocol developed by Google that operates over the User Datagram Protocol (UDP). This shift addresses issues like head-of-line blocking in TCP, leading to faster and more reliable connections.
 
-    **Remember that NGINX's support for HTTP/3 is still experimental and may not be suitable for all use cases.**
+    NGINX introduced experimental support for QUIC and HTTP/3 starting from version 1.25.0. However, **this support is still in the experimental stage, and caution is advised when deploying it in production environments**. For more details, refer to [NGINX's official documentation](https://nginx.org/en/docs/quic.html).
+
+    Given the experimental nature of HTTP/3 support in NGINX, it may not be suitable for all use cases. Thorough testing is recommended before enabling it in a production setting.
 
 ### Let's Encrypt
 
 STREAM support :white_check_mark:
 
-BunkerWeb comes with automatic Let's Encrypt certificate generation and renewal. This is the easiest way of getting HTTPS / SSL/TLS working out of the box for public-facing web applications. Please note that you will need to set up proper DNS A record(s) for each of your domains pointing to your public IP(s) where BunkerWeb is accessible.
+BunkerWeb offers automatic Let's Encrypt certificate generation and renewal, making it simple to secure your web applications with HTTPS / SSL/TLS. Let’s Encrypt is a free, automated, and widely trusted Certificate Authority (CA) that provides SSL/TLS certificates to enable encrypted communication.
 
-Here is the list of related settings :
+!!! info "Prerequisites"
+    To use this feature, ensure proper DNS **A records** are set up for each domain, pointing to the public IP(s) where BunkerWeb is accessible.
+
+Below is the list of related settings:
 
 |              Setting               |         Default          | Description                                                                                                                                                                   |
 | :--------------------------------: | :----------------------: | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -1572,7 +1797,9 @@ Full Let's Encrypt automation using the `http` challenge is fully working with s
 
 STREAM support :white_check_mark:
 
-If you want to use your own certificates, here is the list of related settings :
+BunkerWeb also allows you to use your own custom SSL/TLS certificates, providing flexibility for advanced use cases or specific organizational requirements. This feature is ideal for scenarios where you need to use certificates issued by a specific Certificate Authority (CA) or self-signed certificates for internal purposes.
+
+Below is the list of related settings to configure your own certificates:
 
 | Setting                | Default | Context   | Multiple | Description                                                                      |
 | ---------------------- | ------- | --------- | -------- | -------------------------------------------------------------------------------- |
@@ -1582,15 +1809,17 @@ If you want to use your own certificates, here is the list of related settings :
 | `CUSTOM_SSL_CERT_DATA` |         | multisite | no       | Certificate data encoded in base64.                                              |
 | `CUSTOM_SSL_KEY_DATA`  |         | multisite | no       | Key data encoded in base64.                                                      |
 
-When `USE_CUSTOM_SSL` is set to `yes`, BunkerWeb will check every day if the custom certificate specified in `CUSTOM_SSL_CERT` is modified and will reload NGINX if that's the case.
+When you enable custom SSL/TLS by setting `USE_CUSTOM_SSL` to `yes`, BunkerWeb will automatically monitor the custom certificate specified in `CUSTOM_SSL_CERT`. It checks for changes daily and reloads NGINX if any modifications are detected, ensuring the latest certificate is always in use.
 
-When using stream mode, you will need to use the `LISTEN_STREAM_PORT_SSL` setting in order to choose your listening SSL/TLS port.
+For stream mode, you must configure the `LISTEN_STREAM_PORT_SSL` setting to specify the SSL/TLS listening port. This step is essential for proper operation in stream mode.
 
 ### Self-signed
 
 STREAM support :white_check_mark:
 
-If you want to quickly test HTTPS / SSL/TLS for staging/dev environment you can configure BunkerWeb to generate self-signed certificates, here is the list of related settings :
+If you need to quickly test HTTPS / SSL/TLS in a staging or development environment, BunkerWeb can generate self-signed certificates for you. This is a convenient way to enable encryption without requiring an external Certificate Authority (CA).
+
+Below is the list of related settings:
 
 |          Setting           |        Default         | Description                                                                                                                          |
 | :------------------------: | :--------------------: | :----------------------------------------------------------------------------------------------------------------------------------- |
@@ -1598,13 +1827,17 @@ If you want to quickly test HTTPS / SSL/TLS for staging/dev environment you can 
 |  `SELF_SIGNED_SSL_EXPIRY`  |         `365`          | Number of days for the certificate expiration (**-days** value used with **openssl**).                                               |
 |   `SELF_SIGNED_SSL_SUBJ`   | `/CN=www.example.com/` | Certificate subject to use (**-subj** value used with **openssl**).                                                                  |
 
-When using stream mode, you will need to use the `LISTEN_STREAM_PORT_SSL` setting in order to choose your listening SSL/TLS port.
+For stream mode, you must configure the `LISTEN_STREAM_PORT_SSL` setting to specify the SSL/TLS listening port. This step is essential for proper operation in stream mode.
 
 ## ModSecurity
 
 STREAM support :x:
 
-ModSecurity is integrated and enabled by default alongside the OWASP Core Rule Set within BunkerWeb. Here is the list of related settings :
+[ModSecurity](https://modsecurity.org) is a robust web application firewall (WAF) that helps protect your applications from a wide range of attacks, including SQL injection, cross-site scripting (XSS), and other common vulnerabilities. It acts as a shield, inspecting incoming and outgoing HTTP traffic and enforcing security rules to block malicious activity.
+
+In BunkerWeb, ModSecurity is integrated and enabled by default, paired with the **[OWASP Core Rule Set (CRS)](https://coreruleset.org)**. The OWASP CRS is a curated set of rules designed to detect and mitigate common web application vulnerabilities, offering strong baseline protection for your applications.
+
+Below is the list of related settings:
 
 | Setting                               | Default        | Description                                                                                                                                                        |
 | ------------------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -1619,27 +1852,35 @@ ModSecurity is integrated and enabled by default alongside the OWASP Core Rule S
 | `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` | `131072`       | SecRequestBodyNoFilesLimit directive of ModSecurity.                                                                                                               |
 
 !!! warning "ModSecurity and the OWASP Core Rule Set"
-    **We strongly recommend keeping both ModSecurity and the OWASP Core Rule Set enabled**. The only downsides are the false positives that may occur. But they can be fixed with some efforts and the CRS team maintains a list of exclusions for common applications (e.g., WordPress, Nextcloud, Drupal, Cpanel, ...).
+    **We strongly recommend keeping both ModSecurity and the OWASP Core Rule Set (CRS) enabled** to provide robust protection against common web vulnerabilities. While occasional false positives may occur, they can be resolved with some effort by fine-tuning rules or using predefined exclusions.
 
-You can choose between the following versions of the OWASP Core Rule Set :
+    The CRS team actively maintains a list of exclusions for popular applications such as WordPress, Nextcloud, Drupal, and Cpanel, making it easier to integrate without impacting functionality. The security benefits far outweigh the minimal configuration effort required to address false positives.
 
-- **3** : The version [v3.3.7](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.7) of the OWASP Core Rule Set
-- **4** : The version [v4.10.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.10.0) of the OWASP Core Rule Set (***default***)
-- **nightly** : The latest [nightly](https://github.com/coreruleset/coreruleset/releases/tag/nightly) build of the OWASP Core Rule Set which is updated every day
+You can select from the following versions of the OWASP Core Rule Set (CRS) to suit your application's security needs:
 
-!!! example "OWASP Core Rule Set's nightly build"
-    The nightly build of the OWASP Core Rule Set is updated every day and contains the latest rules. It is recommended to use it in a staging environment before using it in production.
+- **`3`**: The stable [v3.3.7](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.7) release of the OWASP CRS.
+- **`4`**: The stable [v4.10.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.10.0) release of the OWASP CRS (**default**).
+- **`nightly`**: The [nightly build](https://github.com/coreruleset/coreruleset/releases/tag/nightly), which is updated daily with the latest rules and improvements.
+
+!!! example "Nightly Build"
+    The **nightly build** contains the most up-to-date rules, offering the latest protections against emerging threats. However, since it is updated daily and may include experimental or untested changes, it is recommended to first use the nightly build in a **staging environment** before deploying it in production.
+
+!!! note "Core Rule Set Plugins"
+    The OWASP Core Rule Set also supports a range of **plugins** designed to extend its functionality and improve compatibility with specific applications or environments. These plugins can help fine-tune the CRS for use with popular platforms such as WordPress, Nextcloud, and Drupal, or even custom setups. For more information and a list of available plugins, refer to the [OWASP CRS plugin registry](https://github.com/coreruleset/plugin-registry).
 
 ### Custom configurations
 
-Tuning ModSecurity and the CRS can be done using [custom configurations](quickstart-guide.md#custom-configurations) :
+Tuning ModSecurity and the OWASP Core Rule Set (CRS) can be achieved through [custom configurations](#custom-configurations). These configurations allow you to customize behavior at specific stages of the security rules processing:
 
-- modsec-crs : before the OWASP Core Rule Set is loaded
-- modsec : after the OWASP Core Rule Set is loaded (also used if CRS is not loaded)
-- crs-plugins-before : before the CRS plugins are loaded
-- crs-plugins-after : after the CRS plugins are loaded
+- **`modsec-crs`**: Applied **before** the OWASP Core Rule Set is loaded.
+- **`modsec`**: Applied **after** the OWASP Core Rule Set is loaded. This is also used if the CRS is not loaded at all.
+- **`crs-plugins-before`**: Applied **before** the CRS plugins are loaded.
+- **`crs-plugins-after`**: Applied **after** the CRS plugins are loaded.
 
-For example, you can add a custom configuration with type `modsec-crs` to add CRS exclusions :
+This structure provides flexibility, allowing you to fine-tune ModSecurity and CRS settings to suit your application's specific needs while maintaining a clear configuration flow.
+
+#### Example 1: Adding CRS Exclusions with `modsec-crs`
+You can use a custom configuration of type `modsec-crs` to add exclusions for specific use cases, such as enabling predefined exclusions for WordPress:
 
 ```conf
 SecAction \
@@ -1651,7 +1892,13 @@ SecAction \
   setvar:tx.crs_exclusions_wordpress=1"
 ```
 
-You can also add a custom configuration with type `modsec` to update loaded CRS rules :
+In this example:
+
+- The action is executed in **Phase 1** (early in the request lifecycle).
+- It enables WordPress-specific CRS exclusions by setting the variable `tx.crs_exclusions_wordpress`.
+
+#### Example 2: Updating CRS Rules with `modsec`
+To fine-tune the loaded CRS rules, you can use a custom configuration of type `modsec`. For example, you can remove specific rules or tags for certain request paths:
 
 ```conf
 SecRule REQUEST_FILENAME "/wp-admin/admin-ajax.php" "id:1,ctl:ruleRemoveByTag=attack-xss,ctl:ruleRemoveByTag=attack-rce"
@@ -1659,22 +1906,37 @@ SecRule REQUEST_FILENAME "/wp-admin/options.php" "id:2,ctl:ruleRemoveByTag=attac
 SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,ctl:ruleRemoveById=930120"
 ```
 
+In this example:
+
+- **Rule 1**: Removes rules tagged as `attack-xss` and `attack-rce` for requests to `/wp-admin/admin-ajax.php`.
+- **Rule 2**: Removes rules tagged as `attack-xss` for requests to `/wp-admin/options.php`.
+- **Rule 3**: Removes a specific rule (ID `930120`) for requests matching `/wp-json/yoast`.
+
+#### Key Points
+- Use `modsec-crs` for configurations that should be applied **before** CRS rules are loaded, such as enabling exclusions or setting variables.
+- Use `modsec` for configurations that modify or extend **loaded CRS rules**, such as removing rules by ID or tag.
+
+This approach provides precise control over the security rules, allowing you to adapt them to your application's specific needs while minimizing false positives.
+
 !!! info "Order of execution"
-    ModSecurity order of execution is as follows :
+    The execution order for ModSecurity in BunkerWeb is as follows, ensuring a clear and logical progression of rule application:
 
-    1. *OWASP* CRS configuration
-    2. Custom plugins configuration (`crs-plugins-before`)
-    3. Custom plugins rules **before CRS rules** (`crs-plugins-before`)
-    4. Downloaded plugins configuration
-    5. Downloaded plugins rules **before CRS rules**
-    6. Custom CRS rules (`modsec-crs`)
-    6. *OWASP* CRS rules
-    7. Custom plugins rules **after CRS rules** (`crs-plugins-after`)
-    8. Downloaded plugins rules **after CRS rules**
-    9. Custom rules (`modsec`)
+    1. **OWASP CRS Configuration**: Base configuration for the OWASP Core Rule Set.
+    2. **Custom Plugins Configuration (`crs-plugins-before`)**: Settings specific to plugins, applied before any CRS rules.
+    3. **Custom Plugin Rules (Before CRS Rules) (`crs-plugins-before`)**: Custom rules for plugins executed prior to CRS rules.
+    4. **Downloaded Plugins Configuration**: Configuration for externally downloaded plugins.
+    5. **Downloaded Plugin Rules (Before CRS Rules)**: Rules for downloaded plugins executed before CRS rules.
+    6. **Custom CRS Rules (`modsec-crs`)**: User-defined rules applied before loading the CRS rules.
+    7. **OWASP CRS Rules**: The core set of security rules provided by OWASP.
+    8. **Custom Plugin Rules (After CRS Rules) (`crs-plugins-after`)**: Custom plugin rules executed after CRS rules.
+    9. **Downloaded Plugin Rules (After CRS Rules)**: Rules for downloaded plugins executed after CRS rules.
+    10. **Custom Rules (`modsec`)**: User-defined rules applied after all CRS and plugin rules.
 
-!!! tip "OWASP Core Rule Set's plugins"
-    The OWASP Core Rule Set plugins can be found [here](https://github.com/coreruleset/plugin-registry)
+    **Key Notes**:
+
+    - **Pre-CRS customizations** (`crs-plugins-before`, `modsec-crs`) allow you to define exceptions or preparatory rules before the core CRS rules are loaded.
+    - **Post-CRS customizations** (`crs-plugins-after`, `modsec`) are ideal for overriding or extending rules after CRS and plugin rules have been applied.
+    - This structure provides maximum flexibility, enabling precise control over rule execution and customization while maintaining a strong security baseline.
 
 <!-- ## CrowdSec
 
@@ -1902,9 +2164,11 @@ This BunkerWeb plugin acts as a [CrowdSec](https://crowdsec.net/) bouncer. It wi
 
 STREAM support :white_check_mark:
 
-When attackers search for and/or exploit vulnerabilities they might generate some "suspicious" HTTP status codes that a "regular" user won’t generate within a period of time. If we detect that kind of behavior we can ban the offending IP address and force the attacker to come up with a new one.
+Attackers often generate "suspicious" HTTP status codes when probing for or exploiting vulnerabilities—codes that a typical user is unlikely to trigger within a given time frame. By detecting this behavior, BunkerWeb can automatically ban the offending IP address, forcing the attacker to switch to a new IP to continue their attempts.
 
-That kind of security measure is implemented and enabled by default in BunkerWeb and is called "Bad behavior". Here is the list of the related settings :
+This security measure, known as **"Bad Behavior,"** is implemented and enabled by default in BunkerWeb, providing an additional layer of protection against malicious activity.
+
+Below is the list of related settings:
 
 |           Setting           |            Default            | Description                                                                  |
 | :-------------------------: | :---------------------------: | :--------------------------------------------------------------------------- |
@@ -1914,9 +2178,13 @@ That kind of security measure is implemented and enabled by default in BunkerWeb
 |  `BAD_BEHAVIOR_COUNT_TIME`  |             `60`              | Period of time during which we count "suspicious" HTTP status codes.         |
 |   `BAD_BEHAVIOR_BAN_TIME`   |            `86400`            | The duration time (in seconds) of a ban when a client reached the threshold. |
 
-In other words, with the default values, if a client generates more than `10` status codes from the list `400 401 403 404 405 429 444` within `60` seconds their IP address will be banned for `86400` seconds.
+By default, BunkerWeb's **"Bad Behavior"** feature works as follows:
 
-When using stream mode, only the `444` status code will count as "bad".
+- If a client generates more than **10** HTTP status codes from the list `400, 401, 403, 404, 405, 429, 444` within a **60-second** period, their IP address will be banned for **86400 seconds** (24 hours).
+
+In **stream mode**, only the `444` status code is considered "bad" and will trigger this behavior.
+
+This configuration helps prevent attackers from repeatedly probing your server for vulnerabilities while minimizing the impact on legitimate users.
 
 ## Antibot
 
@@ -2188,18 +2456,22 @@ The following settings are related to the Limiting requests feature :
 | `LIMIT_REQ_URL`  | `/`     | multisite | yes      | URL (PCRE regex) where the limit request will be applied or special value / for all requests. |
 | `LIMIT_REQ_RATE` | `2r/s`  | multisite | yes      | Rate to apply to the URL (s for second, m for minute, h for hour and d for day).              |
 
-You can configure different rate limits for specific URLs by appending a numeric suffix to the relevant settings. This allows fine-grained control over traffic to various endpoints. For example:
+You can configure specific rate limits for different URLs by appending a numeric suffix to the relevant settings, providing fine-grained control over traffic to various endpoints. For example:
 
-- `LIMIT_REQ_URL_1=^/url1$` and `LIMIT_REQ_RATE_1=5r/d` will apply a limit of 5 requests per day to `/url1`.
-- `LIMIT_REQ_URL_2=^/url2/subdir/.*$` and `LIMIT_REQ_RATE_2=1r/m` will apply a stricter limit of 1 request per minute to any URL under `/url2/subdir/`.
+- **`LIMIT_REQ_URL_1=^/url1$`** and **`LIMIT_REQ_RATE_1=5r/d`**: Limits requests to `/url1` to a maximum of 5 requests per day.
+- **`LIMIT_REQ_URL_2=^/url2/subdir/.*$`** and **`LIMIT_REQ_RATE_2=1r/m`**: Imposes a stricter limit of 1 request per minute for any URL under `/url2/subdir/`.
 
-This flexibility ensures that different endpoints can have tailored rate limits based on their usage patterns or sensitivity.
+This flexibility ensures tailored rate limits for different endpoints based on their usage patterns, sensitivity, or importance.
 
-!!! info "Key considerations"
-    - The `LIMIT_REQ_URL` values are **PCRE regex (Perl Compatible Regular Expressions)**. This means you can use advanced regular expression patterns to match specific URLs or URL structures precisely.
-    - Proper regex usage allows for complex matching scenarios, such as limiting requests to nested paths, parameterized URLs, or specific file types.
+!!! tip "Rate Limiting Best Practices"
+    - **Regex Matching**:
+      The `LIMIT_REQ_URL` values use **PCRE (Perl Compatible Regular Expressions)**, allowing advanced patterns to precisely match specific URLs or structures. This supports complex scenarios such as:
+        - Matching nested paths.
+        - Limiting requests to specific file types (e.g., `^/files/.*\.pdf$`).
+        - Handling parameterized URLs.
 
-By leveraging these settings, you can effectively manage traffic across your application, ensuring fair resource usage while protecting against misuse or abuse.
+    - **Efficient Traffic Management**:
+      Properly applied, these settings help balance resource usage, mitigate abuse, and protect critical endpoints without impacting legitimate users.
 
 ## Country
 
