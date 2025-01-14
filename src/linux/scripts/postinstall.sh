@@ -156,9 +156,10 @@ if {
             do_and_check_cmd systemctl restart bunkerweb-ui
         fi
     elif [ "$UI_WIZARD" != "no" ] ; then
-        touch /etc/bunkerweb/ui.env
-        do_and_check_cmd chown root:nginx /etc/bunkerweb/ui.env
-        do_and_check_cmd chmod 660 /etc/bunkerweb/ui.env
+        echo -ne 'DNS_RESOLVERS=9.9.9.9 149.112.112.112 8.8.8.8 8.8.4.4\nHTTP_PORT=80\nHTTPS_PORT=443\nAPI_LISTEN_IP=127.0.0.1\nMULTISITE=yes\nUI_HOST=http://127.0.0.1:7000\nSERVER_NAME=\n' > /etc/bunkerweb/variables.env
+        : > /etc/bunkerweb/ui.env
+        do_and_check_cmd chown root:nginx /etc/bunkerweb/ui.env /etc/bunkerweb/variables.env
+        do_and_check_cmd chmod 660 /etc/bunkerweb/ui.env /etc/bunkerweb/variables.env
         do_and_check_cmd systemctl enable bunkerweb-ui
         do_and_check_cmd systemctl start bunkerweb-ui
         echo "🧙 The setup wizard has been activated automatically."
