@@ -35,10 +35,10 @@
     },
     "STRICT_TRANSPORT_SECURITY": {
       "context": "multisite",
-      "default": "max-age=31536000; includeSubDomains; preload",
-      "help": "Value for the Strict-Transport-Security header.",
+      "default": "max-age=63072000; includeSubDomains; preload",
+      "help": "Value for the Strict-Transport-Security (HSTS) header.",
       "id": "strict-transport-security",
-      "label": "Strict-Transport-Security",
+      "label": "Strict-Transport-Security (HSTS)",
       "regex": "^(max-age=\\d+(; includeSubDomains(; preload)?)?)?$",
       "type": "text"
     },
