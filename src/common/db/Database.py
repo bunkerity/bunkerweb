@@ -723,7 +723,7 @@ class Database:
                         value["order"] = order
 
                         desired_settings[(base_plugin["id"], setting_id)] = value
-                        desired_selects.update((setting_id, sel_val) for sel_val in select_values)
+                        desired_selects.update((setting_id, sel_val, sel_order) for sel_order, sel_val in enumerate(select_values, start=1))
                         plugin_saved_settings.add(setting_id)
                         order += 1
 
@@ -944,14 +944,20 @@ class Database:
                 to_delete.append({"type": "setting", "filter": {"plugin_id": sk[0], "id": sk[1]}})
 
             # SELECTS
-            old_select_keys = set(old_selects.keys())
-            # desired_selects is a set of (setting_id, value)
+            old_select_keys = set((s.setting_id, s.value, s.order) for s in old_selects.values())
+            # desired_selects is a set of (setting_id, value, order)
             # We must correlate with known settings. If setting_id belongs to a plugin_id?
             # Original code just handled removing selects not present. We'll trust that logic:
             # Insert new selects
             for sel in desired_selects - old_select_keys:
-                # We only have setting_id, value
-                to_put.append(Selects(setting_id=sel[0], value=sel[1]))
+                # We only have setting_id, value and order.
+                to_put.append(Selects(setting_id=sel[0], value=sel[1], order=sel[2]))
+
+            for sel in old_select_keys & desired_selects:
+                # We only have setting_id, value and order.
+                # We don't have a way to update a select, so we'll delete and reinsert
+                to_delete.append({"type": "select", "filter": {"setting_id": sel[0], "value": sel[1]}})
+                to_put.append(Selects(setting_id=sel[0], value=sel[1], order=sel[2]))
 
             # Delete old selects not needed
             for sel in old_select_keys - desired_selects:
@@ -2443,8 +2449,8 @@ class Database:
 
                         if setting not in db_ids or not db_setting:
                             changes = True
-                            for select in value.pop("select", []):
-                                to_put.append(Selects(setting_id=value["id"], value=select))
+                            for sel_order, select in enumerate(value.pop("select", []), start=1):
+                                to_put.append(Selects(setting_id=value["id"], value=select, order=sel_order))
 
                             to_put.append(Settings(**value | {"order": order}))
                         else:
@@ -2481,19 +2487,20 @@ class Database:
                                 changes = True
                                 session.query(Settings).filter(Settings.id == setting).update(updates)
 
-                            db_values = [select.value for select in session.query(Selects).with_entities(Selects.value).filter_by(setting_id=setting)]
-                            select_values = value.get("select", [])
-                            missing_values = [select for select in db_values if select not in select_values]
+                            db_values = [
+                                (select.value, select.order)
+                                for select in session.query(Selects).with_entities(Selects.value, Selects.order).filter_by(setting_id=setting)
+                            ]
+                            select_values = enumerate(value.get("select", []), start=1)
+                            different_values = any(db_value != (value, order) for db_value, (value, order) in zip(db_values, select_values))
 
-                            if missing_values:
+                            if different_values:
                                 changes = True
-                                # Remove selects that are no longer in the list
-                                session.query(Selects).filter(Selects.value.in_(missing_values)).delete()
-
-                            for select in value.get("select", []):
-                                if select not in db_values:
-                                    changes = True
-                                    to_put.append(Selects(setting_id=setting, value=select))
+                                # Remove old selects
+                                session.query(Selects).filter(Selects.setting_id == setting).delete()
+                                # Add new selects with the new values
+                                for sel_order, select in enumerate(value.get("select", []), start=1):
+                                    to_put.append(Selects(setting_id=setting, value=select, order=sel_order))
 
                         order += 1
 
@@ -2912,8 +2919,8 @@ class Database:
 
                     value.update({"plugin_id": plugin["id"], "name": value["id"], "id": setting})
 
-                    for select in value.pop("select", []):
-                        to_put.append(Selects(setting_id=value["id"], value=select))
+                    for sel_order, select in enumerate(value.pop("select", []), start=1):
+                        to_put.append(Selects(setting_id=value["id"], value=select, order=sel_order))
 
                     to_put.append(Settings(**value | {"order": order}))
                     order += 1
@@ -3214,7 +3221,8 @@ class Database:
 
                     if setting.type == "select":
                         data["settings"][setting.id]["select"] = [
-                            select.value for select in session.query(Selects).with_entities(Selects.value).filter_by(setting_id=setting.id)
+                            select.value
+                            for select in session.query(Selects).with_entities(Selects.value).filter_by(setting_id=setting.id).order_by(Selects.order)
                         ]
 
                 for command in session.query(Bw_cli_commands).with_entities(Bw_cli_commands.name, Bw_cli_commands.file_name).filter_by(plugin_id=plugin.id):

@@ -90,6 +90,7 @@ class Selects(Base):
 
     setting_id = Column(String(256), ForeignKey("bw_settings.id", onupdate="cascade", ondelete="cascade"), primary_key=True)
     value = Column(String(256), primary_key=True)
+    order = Column(Integer, default=0, nullable=False)
 
     setting = relationship("Settings", back_populates="selects")
 
