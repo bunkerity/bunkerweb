@@ -52,6 +52,16 @@
     "ANTIBOT_TURNSTILE_SECRET": "",
     "USE_BLACKLIST": "yes",
     "USE_DNSBL": "no",
+    "BLACKLIST_IP": "",
+    "BLACKLIST_RDNS": ".shodan.io .censys.io",
+    "BLACKLIST_ASN": "",
+    "BLACKLIST_USER_AGENT": "",
+    "BLACKLIST_URI": "",
+    "BLACKLIST_IP_URLS": "https://www.dan.me.uk/torlist/?exit",
+    "BLACKLIST_RDNS_URLS": "",
+    "BLACKLIST_ASN_URLS": "",
+    "BLACKLIST_USER_AGENT_URLS": "https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list",
+    "BLACKLIST_URI_URLS": "",
     "USE_LIMIT_CONN": "yes",
     "LIMIT_CONN_MAX_HTTP1": "20",
     "LIMIT_CONN_MAX_HTTP2": "150",
@@ -148,7 +158,20 @@
     {
       "title": "Security - Blacklisting",
       "subtitle": "Configure the settings related to the external blacklists.",
-      "settings": ["USE_BLACKLIST", "USE_DNSBL"]
+      "settings": [
+        "USE_BLACKLIST",
+        "USE_DNSBL",
+        "BLACKLIST_IP",
+        "BLACKLIST_RDNS",
+        "BLACKLIST_ASN",
+        "BLACKLIST_USER_AGENT",
+        "BLACKLIST_URI",
+        "BLACKLIST_IP_URLS",
+        "BLACKLIST_RDNS_URLS",
+        "BLACKLIST_ASN_URLS",
+        "BLACKLIST_USER_AGENT_URLS",
+        "BLACKLIST_URI_URLS"
+      ]
     },
     {
       "title": "Security - Limiting",
