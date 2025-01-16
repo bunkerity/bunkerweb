@@ -1,8 +1,0 @@
---TEST--
-Variables
---INPUT--
-SELECT @a'foo'
---EXPECTED--
-E SELECT
-v @a
-s 'foo'

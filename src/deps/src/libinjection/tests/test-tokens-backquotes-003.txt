@@ -1,8 +1,0 @@
---TEST--
-name using backquotes
---INPUT--
-SELECT foo.`select`;
---EXPECTED--
-E SELECT
-n foo.`select`
-; ;

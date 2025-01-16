@@ -1,8 +1,0 @@
---TEST--
-Strings, basic
---INPUT--
-SELECT "FOO";
---EXPECTED--
-E SELECT
-s "FOO"
-; ;

@@ -1,6 +1,0 @@
---TEST--
-ascii word in double quotes
---INPUT--
-"foo"
---EXPECTED--
-DATA_TEXT,5,"foo"

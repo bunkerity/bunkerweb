@@ -1,8 +1,0 @@
---TEST--
-'.' can start a number after a keyword
---INPUT--
-FOO.1
---EXPECTED--
-n FOO.1
-
-
