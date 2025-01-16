@@ -17,6 +17,7 @@ do
   id="$(echo "$url" | sed 's/.*\/\([^\/]*\)\.tar\.gz/\1/')"
   name="$(echo "$download" | jq -r .name)"
   sha512="$(echo "$download" | jq -r .sha512)"
+  post_install="$(echo "$repo" | jq -r .post_install)"
 
   echo "ℹ️ Downloading ${name} from $url"
 
@@ -34,6 +35,11 @@ do
   else
 		echo "⚠️ Skipping download of $url because target directory is already present"
 	fi
+
+  if [ "$post_install" != "null" ]; then
+    echo "ℹ️ Running post install script for ${name}"
+    bash -c "$post_install"
+  fi
 done
 
 jq -c .git_repository[] src/deps/deps.json | while read -r repo
