@@ -176,21 +176,73 @@ def upgrade() -> None:
     op.drop_table("bw_instances")
     op.rename_table("bw_instances_new", "bw_instances")
 
-    # Step 1: Add 'order' column as nullable with a default
-    with op.batch_alter_table("bw_template_settings") as batch_op:
-        batch_op.add_column(sa.Column("order", sa.Integer(), nullable=False, server_default="0"))
-    with op.batch_alter_table("bw_template_custom_configs") as batch_op:
-        batch_op.add_column(sa.Column("order", sa.Integer(), nullable=False, server_default="0"))
+    # Create new tables with order column and constraints
+    op.create_table(
+        "bw_template_settings_new",
+        sa.Column("id", sa.Integer, sa.Identity(start=1, increment=1), primary_key=True),
+        sa.Column("template_id", sa.String(256), nullable=False),
+        sa.Column("setting_id", sa.String(256), nullable=False),
+        sa.Column("step_id", sa.Integer, nullable=False),
+        sa.Column("default", sa.TEXT, nullable=False),
+        sa.Column("suffix", sa.Integer, nullable=True, default=0),
+        sa.Column("order", sa.Integer, nullable=False, default=0),
+        sa.UniqueConstraint("template_id", "setting_id", "step_id", "suffix"),
+        sa.UniqueConstraint("template_id", "setting_id", "order"),
+        sa.ForeignKeyConstraint(["template_id"], ["bw_templates.id"], onupdate="CASCADE", ondelete="CASCADE"),
+        sa.ForeignKeyConstraint(["setting_id"], ["bw_settings.id"], onupdate="CASCADE", ondelete="CASCADE"),
+    )
 
-    # Step 2: Set default value for existing rows
-    op.execute("UPDATE bw_template_settings SET `order` = 0")
-    op.execute("UPDATE bw_template_custom_configs SET `order` = 0")
+    op.create_table(
+        "bw_template_custom_configs_new",
+        sa.Column("id", sa.Integer, sa.Identity(start=1, increment=1), primary_key=True),
+        sa.Column("template_id", sa.String(256), nullable=False),
+        sa.Column("step_id", sa.Integer, nullable=False),
+        sa.Column(
+            "type",
+            sa.Enum(
+                "http",
+                "stream",
+                "server_http",
+                "server_stream",
+                "default_server_http",
+                "default_server_stream",
+                "modsec",
+                "modsec_crs",
+                "crs_plugins_before",
+                "crs_plugins_after",
+                name="custom_configs_types_enum",
+            ),
+            nullable=False,
+        ),
+        sa.Column("name", sa.String(256), nullable=False),
+        sa.Column("data", sa.LargeBinary(length=(2**32) - 1), nullable=False),
+        sa.Column("checksum", sa.String(128), nullable=False),
+        sa.Column("order", sa.Integer, nullable=False, default=0),
+        sa.UniqueConstraint("template_id", "step_id", "type", "name"),
+        sa.UniqueConstraint("template_id", "order"),
+        sa.ForeignKeyConstraint(["template_id"], ["bw_templates.id"], onupdate="CASCADE", ondelete="CASCADE"),
+    )
 
-    # Step 3: Alter 'order' column to NOT NULL
-    with op.batch_alter_table("bw_template_settings") as batch_op:
-        batch_op.alter_column("order", nullable=False)
-    with op.batch_alter_table("bw_template_custom_configs") as batch_op:
-        batch_op.alter_column("order", nullable=False)
+    # Copy data to new tables with default order=0
+    op.execute(
+        """
+        INSERT INTO bw_template_settings_new (template_id, setting_id, step_id, "default", suffix, "order")
+        SELECT template_id, setting_id, step_id, "default", suffix, 0 FROM bw_template_settings
+    """
+    )
+
+    op.execute(
+        """
+        INSERT INTO bw_template_custom_configs_new (template_id, step_id, type, name, data, checksum, "order")
+        SELECT template_id, step_id, type, name, data, checksum, 0 FROM bw_template_custom_configs
+    """
+    )
+
+    # Drop old tables and rename new ones
+    op.drop_table("bw_template_settings")
+    op.drop_table("bw_template_custom_configs")
+    op.rename_table("bw_template_settings_new", "bw_template_settings")
+    op.rename_table("bw_template_custom_configs_new", "bw_template_custom_configs")
 
     # Re-enable foreign keys
     op.execute("PRAGMA foreign_keys=ON;")

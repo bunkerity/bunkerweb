@@ -75,6 +75,7 @@ jq -r 'to_entries[] | "\(.key) \(.value)"' databases.json | while read -r databa
       # Start the database stack if not SQLite
       if [[ "$database" != "sqlite" ]]; then
         log "🚀 Starting Docker stack for $database"
+        docker compose -f "$database.yml" pull || true
         if ! docker compose -f "$database.yml" up -d; then
           log "❌ Failed to start the Docker stack for $database"
           docker compose down -v --remove-orphans

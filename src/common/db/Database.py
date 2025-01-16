@@ -15,6 +15,7 @@ from re import Match, compile as re_compile, escape, error as RegexError, search
 from sys import argv, path as sys_path
 from tarfile import open as tar_open
 from threading import Lock
+from traceback import format_exc
 from typing import Any, Dict, List, Literal, Optional, Set, Tuple, Union
 from time import sleep
 from uuid import uuid4
@@ -605,7 +606,7 @@ class Database:
             # For selects:
             old_selects = {}
             for sel in old_data.get("bw_selects", []):
-                old_selects[(sel.setting_id, sel.value)] = sel
+                old_selects[(sel.setting_id, sel.value, sel.order)] = sel
 
             # For jobs:
             old_jobs = {}
@@ -628,11 +629,11 @@ class Database:
 
             old_template_settings = {}
             for ts in old_data.get("bw_template_settings", []):
-                old_template_settings[(ts.template_id, ts.setting_id, ts.suffix, ts.step_id)] = ts
+                old_template_settings[(ts.template_id, ts.setting_id, ts.suffix, ts.step_id, ts.order)] = ts.default
 
             old_template_configs = {}
             for tc in old_data.get("bw_template_custom_configs", []):
-                old_template_configs[(tc.template_id, tc.type, tc.name, tc.step_id)] = tc
+                old_template_configs[(tc.template_id, tc.type, tc.name, tc.step_id, ts.order)] = tc
 
             # Build desired data from default_plugins
             # The following logic is similar to the original code but uses dicts/sets for comparisons.
@@ -833,6 +834,7 @@ class Database:
                                 suffix = 0
                                 if hasattr(self, "suffix_rx") and self.suffix_rx.search(setting):
                                     setting_id, suffix = setting.rsplit("_", 1)
+                                    suffix = int(suffix)  # noqa: FURB123
                                 if setting_id not in saved_settings:
                                     self.logger.error(
                                         f'{base_plugin.get("type", "core").title()} Plugin "{base_plugin["id"]}"\'s Template {template_id} has invalid setting "{setting}", skipping'
@@ -840,19 +842,19 @@ class Database:
                                     continue
 
                                 # Check if belongs to a step
-                                step_for_setting = None
+                                step_id = None
                                 for sid, step_set_list in steps_settings.items():
                                     if setting in step_set_list:
-                                        step_for_setting = sid
+                                        step_id = sid
                                         break
 
-                                if not step_for_setting:
+                                if not step_id:
                                     self.logger.error(
                                         f'{base_plugin.get("type", "core").title()} Plugin "{base_plugin["id"]}"\'s Template {template_id}`s setting "{setting}" doesn\'t belong to a step, skipping'
                                     )
                                     continue
 
-                                desired_template_settings[(template_id, setting_id, suffix, step_for_setting)] = {"default": default, "order": order}
+                                desired_template_settings[(template_id, setting_id, suffix, step_id, order)] = default
                                 order += 1
 
                             # Template-level configs
@@ -883,22 +885,21 @@ class Database:
                                 config_name_clean = config_name.replace(".conf", "")
 
                                 # Check if belongs to a step
-                                step_for_config = None
+                                step_id = None
                                 for sid, step_conf_list in steps_configs.items():
                                     if config in step_conf_list:
-                                        step_for_config = sid
+                                        step_id = sid
                                         break
 
-                                if not step_for_config:
+                                if not step_id:
                                     self.logger.error(
                                         f'{base_plugin.get("type", "core").title()} Plugin "{base_plugin["id"]}"\'s Template {template_id}`s config "{config}" doesn\'t belong to a step, skipping'
                                     )
                                     continue
 
-                                desired_template_configs[(template_id, config_type, config_name_clean, step_for_config)] = {
+                                desired_template_configs[(template_id, config_type, config_name_clean, step_id, order)] = {
                                     "data": content,
                                     "checksum": checksum,
-                                    "order": order,
                                 }
                                 order += 1
 
@@ -944,7 +945,7 @@ class Database:
                 to_delete.append({"type": "setting", "filter": {"plugin_id": sk[0], "id": sk[1]}})
 
             # SELECTS
-            old_select_keys = set((s.setting_id, s.value, s.order) for s in old_selects.values())
+            old_select_keys = set(old_selects.keys())
             # desired_selects is a set of (setting_id, value, order)
             # We must correlate with known settings. If setting_id belongs to a plugin_id?
             # Original code just handled removing selects not present. We'll trust that logic:
@@ -1057,32 +1058,39 @@ class Database:
             new_ts_keys = set(desired_template_settings.keys())
 
             for tsk in new_ts_keys - old_ts_keys:
-                template_id, setting_id, suffix, step_id = tsk
-                default = desired_template_settings[tsk]["default"]
-                order = desired_template_settings[tsk]["order"]
-                to_put.append(Template_settings(template_id=template_id, setting_id=setting_id, suffix=suffix, step_id=step_id, default=default, order=order))
+                template_id, setting_id, suffix, step_id, order = tsk
+                default = desired_template_settings[tsk]
+                to_put.append(
+                    Template_settings(
+                        template_id=template_id,
+                        setting_id=setting_id,
+                        suffix=suffix,
+                        step_id=step_id,
+                        default=default,
+                        order=order,
+                    )
+                )
 
             for tsk in old_ts_keys & new_ts_keys:
                 old_ts_val = old_template_settings[tsk]
-                new_default = desired_template_settings[tsk]["default"]
-                new_order = desired_template_settings[tsk]["order"]
-                if old_ts_val.default != new_default or old_ts_val.order != new_order:
-                    template_id, setting_id, suffix, step_id = tsk
-                    filter_data = {"template_id": template_id, "id": setting_id}
-                    if step_id is not None:
-                        filter_data["step_id"] = step_id
+                new_default = desired_template_settings[tsk]
+                if old_ts_val != new_default:
+                    template_id, setting_id, suffix, step_id, order = tsk
+                    filter_data = {"template_id": template_id, "setting_id": setting_id, "step_id": step_id}
                     if suffix is not None:
                         # Not all queries handle suffix well. If suffix is defined, add to filter:
                         filter_data["suffix"] = suffix
                     to_update.append(
-                        {"type": "template_setting", "filter": filter_data, "data": {"default": new_default, "suffix": suffix, "order": new_order}}
+                        {
+                            "type": "template_setting",
+                            "filter": filter_data,
+                            "data": {"default": new_default, "suffix": suffix},
+                        }
                     )
 
             for tsk in old_ts_keys - new_ts_keys:
-                template_id, setting_id, suffix, step_id = tsk
-                filter_data = {"template_id": template_id, "id": setting_id}
-                if step_id is not None:
-                    filter_data["step_id"] = step_id
+                template_id, setting_id, suffix, step_id, order = tsk
+                filter_data = {"template_id": template_id, "setting_id": setting_id, "step_id": step_id}
                 if suffix is not None:
                     filter_data["suffix"] = suffix
                 to_delete.append({"type": "template_setting", "filter": filter_data})
@@ -1092,11 +1100,17 @@ class Database:
             new_tc_keys = set(desired_template_configs.keys())
 
             for tck in new_tc_keys - old_tc_keys:
-                template_id, ctype, cname, step_id = tck
+                template_id, ctype, cname, step_id, order = tck
                 conf_data = desired_template_configs[tck]
                 to_put.append(
                     Template_custom_configs(
-                        template_id=template_id, type=ctype, name=cname, data=conf_data["data"], checksum=conf_data["checksum"], step_id=step_id
+                        template_id=template_id,
+                        type=ctype,
+                        name=cname,
+                        data=conf_data["data"],
+                        checksum=conf_data["checksum"],
+                        step_id=step_id,
+                        order=order,
                     )
                 )
 
@@ -1104,19 +1118,19 @@ class Database:
                 old_tc_obj = old_template_configs[tck]
                 new_tc_obj = desired_template_configs[tck]
                 if old_tc_obj.checksum != new_tc_obj["checksum"]:
-                    template_id, ctype, cname, step_id = tck
-                    filter_data = {"template_id": template_id, "name": cname, "type": ctype}
-                    if step_id is not None:
-                        filter_data["step_id"] = step_id
+                    template_id, ctype, cname, step_id, order = tck
+                    filter_data = {"template_id": template_id, "name": cname, "type": ctype, "step_id": step_id}
                     to_update.append(
-                        {"type": "template_config", "filter": filter_data, "data": {"data": new_tc_obj["data"], "checksum": new_tc_obj["checksum"]}}
+                        {
+                            "type": "template_config",
+                            "filter": filter_data,
+                            "data": {"data": new_tc_obj["data"], "checksum": new_tc_obj["checksum"]},
+                        }
                     )
 
             for tck in old_tc_keys - new_tc_keys:
-                template_id, ctype, cname, step_id = tck
-                filter_data = {"template_id": template_id, "name": cname, "type": ctype}
-                if step_id is not None:
-                    filter_data["step_id"] = step_id
+                template_id, ctype, cname, step_id, order = tck
+                filter_data = {"template_id": template_id, "name": cname, "type": ctype, "step_id": step_id}
                 to_delete.append({"type": "template_config", "filter": filter_data})
 
             # APPLY CHANGES
@@ -1178,6 +1192,7 @@ class Database:
                 session.add_all(to_put)
                 session.commit()
             except SQLAlchemyError as e:
+                self.logger.debug(format_exc())
                 session.rollback()
                 return False, str(e)
 
@@ -2723,6 +2738,8 @@ class Database:
                         order = 0
                         for setting, default in template.get("settings", {}).items():
                             setting_id, suffix = setting.rsplit("_", 1) if self.suffix_rx.search(setting) else (setting, None)
+                            if suffix is not None:
+                                suffix = int(suffix)
 
                             if setting_id in self.RESTRICTED_TEMPLATE_SETTINGS:
                                 self.logger.error(
@@ -3004,6 +3021,8 @@ class Database:
                     order = 0
                     for setting, default in template_data.get("settings", {}).items():
                         setting_id, suffix = setting.rsplit("_", 1) if self.suffix_rx.search(setting) else (setting, None)
+                        if suffix is not None:
+                            suffix = int(suffix)
 
                         if setting_id in self.RESTRICTED_TEMPLATE_SETTINGS:
                             self.logger.error(

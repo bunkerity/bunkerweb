@@ -159,29 +159,55 @@ def upgrade() -> None:
     # Copy data to new column
     op.execute("UPDATE bw_instances SET status_new = status::text::instance_status_enum")
     # Drop old column
-    batch_op.drop_column("status")
+    op.drop_column("bw_instances", "status")
     # Rename new column to status
-    batch_op.alter_column("status_new", new_column_name="status", nullable=False)
+    op.alter_column("bw_instances", "status_new", new_column_name="status", nullable=False)
 
     # Add the new order column to bw_template_settings
     # Step 1: Add column as nullable
     op.add_column("bw_template_settings", sa.Column("order", sa.Integer(), nullable=True))
 
     # Step 2: Populate default values
-    op.execute('UPDATE bw_template_settings SET "order" = 0')
+    op.execute(
+        """
+        UPDATE bw_template_settings
+        SET "order" = subquery.row_number
+        FROM (
+            SELECT id, ROW_NUMBER() OVER (ORDER BY template_id, setting_id) as row_number
+            FROM bw_template_settings
+        ) as subquery
+        WHERE bw_template_settings.id = subquery.id
+    """
+    )
 
     # Step 3: Alter column to NOT NULL
     op.alter_column("bw_template_settings", "order", nullable=False)
+
+    # Step 4: Add unique constraint
+    op.create_unique_constraint(None, "bw_template_settings", ["template_id", "setting_id", "order"])
 
     # Add the new order column to bw_template_custom_configs
     # Step 1: Add column as nullable
     op.add_column("bw_template_custom_configs", sa.Column("order", sa.Integer(), nullable=True))
 
     # Step 2: Populate default values
-    op.execute('UPDATE bw_template_custom_configs SET "order" = 0')
+    op.execute(
+        """
+        UPDATE bw_template_custom_configs
+        SET "order" = subquery.row_number
+        FROM (
+            SELECT id, ROW_NUMBER() OVER (ORDER BY template_id) as row_number
+            FROM bw_template_custom_configs
+        ) as subquery
+        WHERE bw_template_custom_configs.id = subquery.id
+    """
+    )
 
     # Step 3: Alter column to NOT NULL
     op.alter_column("bw_template_custom_configs", "order", nullable=False)
+
+    # Step 4: Add unique constraint
+    op.create_unique_constraint(None, "bw_template_custom_configs", ["template_id", "order"])
 
     # First drop Identity properties
     op.execute(

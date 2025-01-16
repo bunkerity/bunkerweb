@@ -87,6 +87,7 @@ class Settings(Base):
 
 class Selects(Base):
     __tablename__ = "bw_selects"
+    __table_args__ = (UniqueConstraint("setting_id", "order"),)
 
     setting_id = Column(String(256), ForeignKey("bw_settings.id", onupdate="cascade", ondelete="cascade"), primary_key=True)
     value = Column(String(256), primary_key=True)
