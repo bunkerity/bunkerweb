@@ -39,8 +39,7 @@
       "id": "lua-cjson",
       "name": "lua-cjson v2.1.0.14",
       "url": "https://github.com/openresty/lua-cjson.git",
-      "commit": "91ca29db9a4a4fd0eedaebcd5d5f3ba2ace5ae63",
-      "post_install": "rm -r src/deps/src/lua-cjson/tests"
+      "commit": "91ca29db9a4a4fd0eedaebcd5d5f3ba2ace5ae63"
     },
     {
       "id": "lua-ffi-zlib",
@@ -53,8 +52,7 @@
       "id": "lua-gd",
       "name": "lua-gd v2.0.33r3+",
       "url": "https://github.com/ittner/lua-gd.git",
-      "commit": "2ce8e478a8591afd71e607506bc8c64b161bbd30",
-      "post_install": "rm src/deps/src/lua-gd/test_features.lua"
+      "commit": "2ce8e478a8591afd71e607506bc8c64b161bbd30"
     },
     {
       "id": "lua-nginx-module",
