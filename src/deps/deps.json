@@ -284,7 +284,7 @@
       "name": "zstd-nginx-module v0.1.1 (1 commit after just in case)",
       "url": "https://github.com/tokers/zstd-nginx-module.git",
       "commit": "f4ba115e0b0eaecde545e5f37db6aa18917d8f4b",
-      "post_install": "rm -r src/deps/src/zstd-nginx-module/tests"
+      "post_install": "rm -r src/deps/src/zstd-nginx-module/t"
     }
   ]
 }
