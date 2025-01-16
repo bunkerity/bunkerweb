@@ -273,13 +273,6 @@
       "post_install": "rm -r src/deps/src/zlib/doc src/deps/src/zlib/examples"
     },
     {
-      "id": "zstd",
-      "name": "zstd v1.5.6",
-      "url": "https://github.com/facebook/zstd.git",
-      "commit": "794ea1b0afca0f020f4e57b6732332231fb23c70",
-      "post_install": "rm -r src/deps/src/zstd/tests"
-    },
-    {
       "id": "zstd-nginx-module",
       "name": "zstd-nginx-module v0.1.1 (1 commit after just in case)",
       "url": "https://github.com/tokers/zstd-nginx-module.git",

@@ -7,6 +7,7 @@
 - [FEATURE] Add extra validation of certificates in `customcert` plugin
 - [FEATURE] Introduce new `SSL` plugin to manage SSL/TLS settings without tweaking the `misc` plugin
 - [FEATURE] Add `stream` support in `Kubernetes` integration
+- [FEATURE] Add support for Zstandard (Zstd) compression algorithm through the new `zstd` plugin
 - [DOCS] Added Swarm deprecated notice in the documentation
 - [DEPS] Updated libmaxminddb version to v1.12.2
 - [DEPS] Added zstd version v1.5.6

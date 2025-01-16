@@ -1683,7 +1683,7 @@ These examples and resources will help you configure CORS policies effectively, 
 
 STREAM support :x:
 
-Compression algorithms in BunkerWeb, such as Brotli and Gzip, optimize performance by reducing the size of HTTP responses. These algorithms help save bandwidth and improve loading times for end-users.
+BunkerWeb supports three HTTP compression algorithms: **Brotli**, **Gzip**, and **Zstandard**, to optimize performance by reducing the size of HTTP responses. These algorithms help improve load times and reduce bandwidth usage.
 
 #### Brotli
 
@@ -1708,10 +1708,28 @@ The **Gzip** algorithm is widely supported and ensures compatibility with older 
 | `GZIP_COMP_LEVEL` | `5`                                                                                                                                                                                                                                                                                                                                                                                                                              | multisite | no       | Compression level for Gzip (1 = least compression, 9 = maximum compression). |
 | `GZIP_PROXIED`    | `no-cache no-store private expired auth`                                                                                                                                                                                                                                                                                                                                                                                         | multisite | no       | Specifies which proxied requests should be compressed.                       |
 
-**Choosing the Right Algorithm**:
+#### Zstandard
 
-- **Brotli**: Provides better compression rates, suitable for modern browsers and applications where reducing payload size is a priority.
-- **Gzip**: Offers broader compatibility and is ideal for environments with older clients.
+**Zstandard** is a modern compression algorithm designed for high-speed compression and decompression with good compression ratios, making it ideal for both performance-critical and resource-intensive applications.
+
+| Setting           | Default                                                                                                                                                                                                                                                                                                                                                                                                                          | Context   | Multiple | Description                                                                        |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | -------- | ---------------------------------------------------------------------------------- |
+| `USE_ZSTD`        | `no`                                                                                                                                                                                                                                                                                                                                                                                                                             | multisite | no       | Enable or disable Zstandard compression.                                           |
+| `ZSTD_TYPES`      | `application/atom+xml application/javascript application/json application/rss+xml application/vnd.ms-fontobject application/x-font-opentype application/x-font-truetype application/x-font-ttf application/x-javascript application/xhtml+xml application/xml font/eot font/opentype font/otf font/truetype image/svg+xml image/vnd.microsoft.icon image/x-icon image/x-win-bitmap text/css text/javascript text/plain text/xml` | multisite | no       | MIME types to compress with Zstandard.                                             |
+| `ZSTD_MIN_LENGTH` | `1000`                                                                                                                                                                                                                                                                                                                                                                                                                           | multisite | no       | Minimum response size (in bytes) for Zstandard compression to apply.               |
+| `ZSTD_COMP_LEVEL` | `1`                                                                                                                                                                                                                                                                                                                                                                                                                              | multisite | no       | Compression level for Zstandard (1 = least compression, 22 = maximum compression). |
+| `ZSTD_STATIC`     | `off`                                                                                                                                                                                                                                                                                                                                                                                                                            | multisite | no       | Serve pre-compressed Zstandard files.                                              |
+
+!!! warning "Compression Levels 20 and above"
+    Levels **20 and above**, should be used cautiously as they demand significantly more memory.
+    
+    Lower levels prioritize faster processing speeds but achieve lower compression ratios, while higher levels focus on maximum compression efficiency at the expense of speed.
+
+#### Choosing the Right Algorithm
+
+- **Brotli**: Best for achieving maximum compression with modern browsers and clients.
+- **Gzip**: Provides compatibility with older browsers and environments.
+- **Zstandard**: Balances speed and compression, ideal for high-performance use cases.
 
 !!! tip "Optimizing Compression Settings"
     Properly configuring MIME types and compression levels helps balance performance gains with resource usage.

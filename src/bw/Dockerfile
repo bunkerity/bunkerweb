@@ -1,7 +1,7 @@
 FROM nginx:1.26.2-alpine-slim@sha256:1d541dc68a99c4da7923e88b8e184f85034804a1ff59ee838a81d83c319267d8 AS builder
 
 # Install temporary requirements for the dependencies
-RUN apk add --no-cache bash autoconf libtool automake geoip-dev g++ gcc curl-dev libxml2-dev pcre-dev make linux-headers musl-dev gd-dev gnupg brotli-dev openssl-dev patch readline-dev yajl yajl-dev yajl-tools py3-pip
+RUN apk add --no-cache bash autoconf libtool automake geoip-dev g++ gcc curl-dev libxml2-dev pcre-dev make linux-headers musl-dev gd-dev gnupg brotli-dev openssl-dev patch readline-dev yajl yajl-dev yajl-tools py3-pip zstd-dev zstd-static
 
 WORKDIR /tmp/bunkerweb/deps
 
