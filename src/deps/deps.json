@@ -33,8 +33,7 @@
       "id": "libmaxminddb",
       "name": "libmaxminddb v1.12.2",
       "url": "https://github.com/maxmind/libmaxminddb.git",
-      "commit": "cba618d6581b7dbe83478c798d9e58faeaa6b582",
-      "post_install": "rm -r src/deps/src/libmaxminddb/t"
+      "commit": "cba618d6581b7dbe83478c798d9e58faeaa6b582"
     },
     {
       "id": "lua-cjson",
@@ -226,7 +225,7 @@
       "name": "ModSecurity v3.0.13",
       "url": "https://github.com/owasp-modsecurity/ModSecurity.git",
       "commit": "580fe192df1694934f93e3e008058996ea479e35",
-      "post_install": "rm -r src/deps/src/modsecurity/test src/deps/src/modsecurity/doc && rm -rf src/deps/src/modsecurity/others/libinjection src/deps/src/modsecurity/others/mbedtls && patch --forward src/deps/src/modsecurity/configure.ac src/deps/misc/modsecurity.patch || rm src/deps/src/modsecurity/configure.ac.orig src/deps/src/modsecurity/configure.ac.rej"
+      "post_install": "rm -rf src/deps/src/modsecurity/others/libinjection src/deps/src/modsecurity/others/mbedtls && patch --forward src/deps/src/modsecurity/configure.ac src/deps/misc/modsecurity.patch || rm src/deps/src/modsecurity/configure.ac.orig src/deps/src/modsecurity/configure.ac.rej"
     },
     {
       "id": "modsecurity-nginx",
@@ -273,7 +272,7 @@
       "name": "zlib v1.3.1",
       "url": "https://github.com/madler/zlib.git",
       "commit": "51b7f2abdade71cd9bb0e7a373ef2610ec6f9daf",
-      "post_install": "rm -r src/deps/src/zlib/doc src/deps/src/zlib/examples src/deps/src/zlib/test"
+      "post_install": "rm -r src/deps/src/zlib/doc src/deps/src/zlib/examples"
     }
   ]
 }
