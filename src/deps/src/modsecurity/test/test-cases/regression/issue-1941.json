@@ -1,0 +1,159 @@
+[
+  {
+    "enabled": 1,
+    "version_min": 209000,
+    "version_max": -1,
+    "title": "Failed to load locate the unicode map file from: ... 1/n",
+    "url": "https:\/\/github.com\/SpiderLabs\/ModSecurity\/issues\/1941",
+    "expected": {
+      "parser_error": "Failed to locate the unicode map file from: does-not-exist-unicode.mapping"
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecUnicodeMapFile does-not-exist-unicode.mapping 20127"
+    ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 209000,
+    "version_max": -1,
+    "title": "Failed to load locate the unicode map file from: ... 2/n",
+    "url": "https:\/\/github.com\/SpiderLabs\/ModSecurity\/issues\/1941",
+    "expected": {
+     "parser_error": "Failed to locate the unicode map file from: um dois tres does-not-exist-unicode.mapping"
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecUnicodeMapFile um dois tres does-not-exist-unicode.mapping 20127"
+    ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 209000,
+    "version_max": -1,
+    "title": "Failed to load locate the unicode map file from: ... 3/n",
+    "url": "https:\/\/github.com\/SpiderLabs\/ModSecurity\/issues\/1941",
+    "expected": {
+     "parser_error": "Invalid input:  SecUnicodeMapFile does-not-exist-unicode.mapping eita"
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecUnicodeMapFile does-not-exist-unicode.mapping eita"
+    ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "version_max": 0,
+    "title": "Failed to load locate the unicode map file from: ... 4/n",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 2313
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "request": {
+      "headers": {
+        "Host": "net.tutsplus.com",
+        "User-Agent": "Mozilla\/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.5) Gecko\/20091102 Firefox\/3.5.5 (.NET CLR 3.5.30729)",
+        "Accept": "text\/html,application\/xhtml+xml,application\/xml;q=0.9,*\/*;q=0.8",
+        "Accept-Language": "en-us,en;q=0.5",
+        "Accept-Encoding": "gzip,deflate",
+        "Accept-Charset": "ISO-8859-1,utf-8;q=0.7,*;q=0.7",
+        "Keep-Alive": "300",
+        "Connection": "keep-alive",
+        "Cookie": "PHPSESSID=r2t5uvjq435r4q7ib3vtdjq120",
+        "Pragma": "no-cache",
+        "Cache-Control": "no-cache"
+      },
+      "uri": "\/test.pl?param1=   test   &param2=test2&pparam=дор",
+      "method": "GET",
+      "http_version": 1.1,
+      "body": ""
+    },
+    "response": {
+      "headers": {
+        "Content-Type": "text\/xml; charset=utf-8\n\r",
+        "Content-Length": "length\n\r"
+      },
+      "body": [
+        "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n\r",
+        "<soap:Envelope xmlns:xsi=\"http:\/\/www.w3.org\/2001\/XMLSchema-instance\" xmlns:xsd=\"http:\/\/www.w3.org\/2001\/XMLSchema\" xmlns:soap=\"http:\/\/schemas.xmlsoap.org\/soap\/envelope\/\">\n\r",
+        "  <soap:Body>\n\r",
+        "  <EnlightenResponse xmlns=\"http:\/\/clearforest.com\/\">\n\r",
+        "  <EnlightenResult>string<\/EnlightenResult>\n\r",
+        "  <\/EnlightenResponse>\n\r",
+        "  <\/soap:Body>\n\r",
+        "<\/soap:Envelope>\n\r"
+      ]
+    },
+    "expected": {
+      "debug_log": "Target value: \"dop\"",
+      "http_code": 403
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecUnicodeMapFile test-cases/data/unicode.mapping-reduced 1251",
+      "SecRule ARGS \"@contains dop\" \"phase:1,id:999,deny,log,auditlog,t:none,t:utf8toUnicode,t:urlDecodeUni,multiMatch\""
+    ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "version_max": 0,
+    "title": "Failed to load locate the unicode map file from: ... 5/n",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 2313
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "request": {
+      "headers": {
+        "Host": "net.tutsplus.com",
+        "User-Agent": "Mozilla\/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.5) Gecko\/20091102 Firefox\/3.5.5 (.NET CLR 3.5.30729)",
+        "Accept": "text\/html,application\/xhtml+xml,application\/xml;q=0.9,*\/*;q=0.8",
+        "Accept-Language": "en-us,en;q=0.5",
+        "Accept-Encoding": "gzip,deflate",
+        "Accept-Charset": "ISO-8859-1,utf-8;q=0.7,*;q=0.7",
+        "Keep-Alive": "300",
+        "Connection": "keep-alive",
+        "Cookie": "PHPSESSID=r2t5uvjq435r4q7ib3vtdjq120",
+        "Pragma": "no-cache",
+        "Cache-Control": "no-cache"
+      },
+      "uri": "\/test.pl?param1=   test   &param2=test2&pparam=дор",
+      "method": "GET",
+      "http_version": 1.1,
+      "body": ""
+    },
+    "response": {
+      "headers": {
+        "Content-Type": "text\/xml; charset=utf-8\n\r",
+        "Content-Length": "length\n\r"
+      },
+      "body": [
+        "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n\r",
+        "<soap:Envelope xmlns:xsi=\"http:\/\/www.w3.org\/2001\/XMLSchema-instance\" xmlns:xsd=\"http:\/\/www.w3.org\/2001\/XMLSchema\" xmlns:soap=\"http:\/\/schemas.xmlsoap.org\/soap\/envelope\/\">\n\r",
+        "  <soap:Body>\n\r",
+        "  <EnlightenResponse xmlns=\"http:\/\/clearforest.com\/\">\n\r",
+        "  <EnlightenResult>string<\/EnlightenResult>\n\r",
+        "  <\/EnlightenResponse>\n\r",
+        "  <\/soap:Body>\n\r",
+        "<\/soap:Envelope>\n\r"
+      ]
+    },
+    "expected": {
+      "debug_log": "Target value: \"4>@\"",
+      "http_code": 200
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRule ARGS \"@contains dop\" \"phase:1,id:999,deny,log,auditlog,t:none,t:utf8toUnicode,t:urlDecodeUni,multiMatch\""
+    ]
+  }
+]

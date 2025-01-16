@@ -1,0 +1,295 @@
+[  
+  {  
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing Variables :: ARGS_COMBINED_SIZE - GET (1/7)",
+    "client":{  
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{  
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{  
+      "headers":{  
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*"
+      },
+      "uri":"/?key=value&key=other_value",
+      "method":"GET"
+    },
+    "response":{  
+      "headers":{  
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[  
+        "no need."
+      ]
+    },
+    "expected":{  
+      "debug_log":"Target value: \"22."
+    },
+    "rules":[  
+      "SecRuleEngine On",
+      "SecRule ARGS_COMBINED_SIZE \"@gt 10 \" \"id:1,pass\""
+    ]
+  },
+  {  
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing Variables :: ARGS_COMBINED_SIZE - GET (2/7)",
+    "client":{  
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{  
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{  
+      "headers":{  
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*"
+      },
+      "uri":"/?key=value&key=other_value&a=b",
+      "method":"GET"
+    },
+    "response":{  
+      "headers":{  
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[  
+        "no need."
+      ]
+    },
+    "expected":{  
+      "debug_log":"Target value: \"24."
+    },
+    "rules":[  
+      "SecRuleEngine On",
+      "SecRule ARGS_COMBINED_SIZE \"@gt 10 \" \"id:1,pass\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing Variables :: ARGS_COMBINED_SIZE - POST (3/7)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length": "27",
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body": [
+        "param1=value1&param2=value2"
+      ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":"Target value: \"25."
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRule ARGS_COMBINED_SIZE \"@gt 10 \" \"id:1,phase:3,pass\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing Variables :: ARGS_COMBINED_SIZE - POST (4/7)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length": "28",
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body": [
+        "param1=value1&param2=value2&a=b\n"
+      ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":"Target value: \"28."
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRule ARGS_COMBINED_SIZE \"@gt 10 \" \"id:1,phase:3,pass,t:trim\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing Variables :: ARGS_COMBINED_SIZE - POST (5/7)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length": "27",
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body": [
+        "a=%EC%A7%84%20%EB%A7%88%EC%9D%BC%20%EB%A6%AC"
+      ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":"Target value: \"16."
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRule ARGS_COMBINED_SIZE \"@gt 10 \" \"id:1,phase:3,pass,t:trim\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing Variables :: ARGS_COMBINED_SIZE - GET (6/7)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length": "27",
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "uri":"/?z=%EC%A7%84%20%EB%A7%88%EC%9D%BC%20%EB%A6%AC",
+      "method":"GET"
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":"Target value: \"15."
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRule ARGS_COMBINED_SIZE \"@gt 10 \" \"id:1,phase:3,pass,t:trim\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing Variables :: ARGS_COMBINED_SIZE - GET (7/7)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length": "27",
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "uri":"/?z=진 마일 리",
+      "method":"GET"
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":"Target value: \"15."
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRule ARGS_COMBINED_SIZE \"@gt 10 \" \"id:1,phase:3,pass,t:trim\""
+    ]
+  }
+]
+

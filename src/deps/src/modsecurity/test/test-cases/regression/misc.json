@@ -1,0 +1,18 @@
+[
+  {
+    "enabled":1,
+    "version_min":300000,
+    "version_max":0,
+    "title":"Testing action :: SecRule directives should be case insensitive",
+    "expected":{
+      "audit_log":"",
+      "debug_log":"Executing operator \"Contains\" with param \"PHPSESSID\" against REQUEST_HEADERS.",
+      "error_log":""
+    },
+    "rules":[
+      "secruleengine On",
+      "secrule REQUEST_HEADERS \"@contains PHPSESSID\" \"id:1,t:lowercase,t:none,msg:'This is a test, %{REQUEST_HEADERS:Accept}%'\"",
+      "secrule TX \"@contains to_test\" \"id:2,t:lowercase,t:none\""
+    ]
+  }
+]

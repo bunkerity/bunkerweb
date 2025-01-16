@@ -1,0 +1,279 @@
+[
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"m_lineNumber ... mapping ... correct line number in file (1/n)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length": "27",
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Authorization": "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ=="
+      },
+      "uri":"/",
+      "method":"POST",
+      "body": [
+        "param1=test1&param2=value2"
+      ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "error_log":"line \"29\""
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRule WEBAPPID \"@contains test1\" \"id:1,phase:3,pass,t:trim\"",
+      "Include test-cases/data/big-file.conf"
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"m_lineNumber ... mapping ... correct line number in file (2/n)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length": "27",
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Authorization": "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ=="
+      },
+      "uri":"/",
+      "method":"POST",
+      "body": [
+        "param1=test2"
+      ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "error_log":"line \"55\""
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRule WEBAPPID \"@contains test2\" \"id:1,phase:3,pass,t:trim\"",
+      "Include test-cases/data/big-file.conf"
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"m_lineNumber ... mapping ... correct line number in file (3/n)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length": "27",
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Authorization": "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ=="
+      },
+      "uri":"/",
+      "method":"POST",
+      "body": [
+        "param1=test3"
+      ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "error_log":"line \"84\""
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRule WEBAPPID \"@contains test3\" \"id:1,phase:3,pass,t:trim\"",
+      "Include test-cases/data/big-file.conf"
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"m_lineNumber ... mapping ... correct line number in file (4/n)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length": "27",
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Authorization": "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ=="
+      },
+      "uri":"/",
+      "method":"POST",
+      "body": [
+        "param1=test4"
+      ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "error_log":"line \"116\""
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRule WEBAPPID \"@contains test3\" \"id:1,phase:3,pass,t:trim\"",
+      "Include test-cases/data/big-file.conf"
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"m_lineNumber ... mapping ... correct line number in file (5/n)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length": "27",
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Authorization": "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ=="
+      },
+      "uri":"/",
+      "method":"POST",
+      "body": [
+        "param1=test5"
+      ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "error_log":"line \"174\""
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRule WEBAPPID \"@contains test3\" \"id:1,phase:3,pass,t:trim\"",
+      "Include test-cases/data/big-file.conf"
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"m_lineNumber ... mapping ... correct line number in file (6/n)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length": "27",
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Authorization": "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ=="
+      },
+      "uri":"/",
+      "method":"POST",
+      "body": [
+        "param1=test5"
+      ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "error_log":"line \"174\""
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRule WEBAPPID \"@contains test3\" \"id:1,phase:3,pass,t:trim\"",
+      "Include test-cases/data/not-so-big-file.conf"
+    ]
+  }
+]
+

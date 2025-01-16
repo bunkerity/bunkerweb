@@ -1,0 +1,66 @@
+[
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing 'block' action without desruptive action",
+    "expected":{
+      "parser_error": "Line: 1. Column: 16. SecDefaultAction must specify a disruptive action."
+    },
+    "client":{
+      "ip":"200.249.12.31",
+      "port":12300
+    },
+    "request":{
+      "headers":{
+        "Host":"a.b.com",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "User-Agent":"My sweet little browser",
+        "Cookie": "PHPSESSID=rAAAAAAA2t5uvjq435r4q7ib3vtdjq120"
+      },
+      "uri":"/path1",
+      "method":"GET"
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecDefaultAction \"phase:1,log,block,status:404\"",
+      "SecRule REQUEST_URI \"@contains path1\" \"phase:1,block,id:5\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing 'block' action with desruptive action",
+    "expected":{
+      "http_code": 400
+    },
+    "client":{
+      "ip":"200.249.12.31",
+      "port":12300
+    },
+    "request":{
+      "headers":{
+        "Host":"a.b.com",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "User-Agent":"My sweet little browser",
+        "Cookie": "PHPSESSID=rAAAAAAA2t5uvjq435r4q7ib3vtdjq120"
+      },
+      "uri":"/path1",
+      "method":"GET"
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecDefaultAction \"phase:1,log,block,deny,status:400\"",
+      "SecRule REQUEST_URI \"@contains path1\" \"phase:1,block,id:5\""
+    ]
+  }
+]

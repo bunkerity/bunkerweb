@@ -1,0 +1,195 @@
+[
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing ctl:ruleRemoveById - issue 2099",
+    "expected":{
+      "http_code":200
+    },
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*"
+      },
+      "uri":"/remote.php/webdav?bar=foo",
+      "method":"GET",
+      "body": ""
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRequestBodyAccess On",
+        "SecRule REQUEST_FILENAME \"@contains /remote.php/webdav\" \"id:9003100,phase:2,pass,t:none,nolog,ctl:ruleRemoveByTag=attack-injection-php,ctl:ruleRemoveById=941000-942999,ctl:ruleRemoveById=951000-951999,ctl:ruleRemoveById=953100-953130,ctl:ruleRemoveById=920420,ctl:ruleRemoveById=920440\"",
+        "SecRule ARGS \"@contains foo\" \"id:951001,phase:2,t:none,drop\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing ctl:ruleRemoveById against - issue 2099",
+    "expected":{
+      "http_code":403
+    },
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*"
+      },
+      "uri":"/remote.php?bar=foo",
+      "method":"GET",
+      "body": ""
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRequestBodyAccess On",
+        "SecRule REQUEST_FILENAME \"@contains /remote.php/webdav\" \"id:9003100,phase:2,pass,t:none,nolog,ctl:ruleRemoveByTag=attack-injection-php,ctl:ruleRemoveById=941000-942999,ctl:ruleRemoveById=951000-951999,ctl:ruleRemoveById=953100-953130,ctl:ruleRemoveById=920420,ctl:ruleRemoveById=920440\"",
+        "SecRule ARGS \"@contains foo\" \"id:951001,phase:2,t:none,drop\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing ctl:ruleRemoveByTag - issue 2099",
+    "expected":{
+      "http_code":200
+    },
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*"
+      },
+      "uri":"/remote.php/webdav?bar=foo",
+      "method":"GET",
+      "body": ""
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRequestBodyAccess On",
+        "SecRule REQUEST_FILENAME \"@contains /remote.php/webdav\" \"id:1000001,phase:2,pass,t:none,nolog,ctl:ruleRemoveByTag=attack-injection-php,ctl:ruleRemoveById=1100000-2100000,ctl:ruleRemoveById=9990000\"",
+        "SecRule ARGS \"@contains foo\" \"id:4400000,tag:'attack-injection-php',phase:2,t:none,msg:'test rule',drop\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing ctl:ruleRemoveByTag against - issue 2099",
+    "expected":{
+      "http_code":403
+    },
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*"
+      },
+      "uri":"/remote.php?bar=foo",
+      "method":"GET",
+      "body": ""
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRequestBodyAccess On",
+        "SecRule REQUEST_FILENAME \"@contains /remote.php/webdav\" \"id:1000001,phase:2,pass,t:none,nolog,ctl:ruleRemoveByTag=attack-injection-php,ctl:ruleRemoveById=1100000-2100000,ctl:ruleRemoveById=9990000\"",
+        "SecRule ARGS \"@contains foo\" \"id:4400000,tag:'attack-injection-php',phase:2,t:none,msg:'test rule',drop\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing ctl:ruleRemoveTargetByTag - issue 2099",
+    "expected":{
+      "http_code":200
+    },
+    "client":{
+      "ip":"1.2.3.4",
+      "port":123
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*"
+      },
+      "uri":"/test.php?a=a",
+      "method":"GET",
+      "body": ""
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRequestBodyAccess On",
+        "SecRule REQUEST_URI \"@contains /test.php\" \"id:100,phase:1,nolog,pass,ctl:ruleRemoveTargetByTag=attack-injection-php;ARGS:a,ctl:ruleRemoveTargetByTag=attack-rce;ARGS:a\"",
+        "SecRule ARGS \"@contains a\" \"id:4400000,tag:'attack-injection-php',phase:2,t:none,msg:'test rule',drop\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing ctl:ruleRemoveTargetByTag against - issue 2099",
+    "expected":{
+      "http_code":403
+    },
+    "client":{
+      "ip":"1.2.3.4",
+      "port":123
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*"
+      },
+      "uri":"/index.php?a=a",
+      "method":"GET",
+      "body": ""
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRequestBodyAccess On",
+        "SecRule REQUEST_URI \"@contains /test.php\" \"id:100,phase:1,nolog,pass,ctl:ruleRemoveTargetByTag=attack-injection-php;ARGS:a,ctl:ruleRemoveTargetByTag=attack-rce;ARGS:a\"",
+        "SecRule ARGS \"@contains a\" \"id:4400000,tag:'attack-injection-php',phase:2,t:none,msg:'test rule',drop\""
+    ]
+  }  
+]
+

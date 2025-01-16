@@ -1,0 +1,433 @@
+[
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Variable key selection using a regular expression (1/n)",
+    "url": "https:\/\/github.com\/SpiderLabs\/ModSecurity\/issues\/2296",
+    "gihub_issue": 2296,
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "name1": "value1"
+      },
+      "uri":"/?THIS=is+a+simple+test",
+      "method":"GET"
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "http_code":200,
+      "debug_log":"Target value: \"is a simple test\"",
+      "error_log":"Operator `Rx' with parameter `test' against variable `ARGS:THIS'"
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRule ARGS:/^ThIs$/ \"test\" \"id:1\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Variable key selection using a regular expression (2/n)",
+    "url": "https:\/\/github.com\/SpiderLabs\/ModSecurity\/issues\/2296",
+    "gihub_issue": 2296,
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "name1": "value1"
+      },
+      "uri":"/?THIS=is+a+simple+test",
+      "method":"GET"
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "http_code":200,
+      "debug_log":"Rule returned 0",
+      "error_log":""
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRule ARGS:/^ThIz$/ \"test\" \"id:1,deny,status:302\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Variable key selection using a regular expression - msg (3/n)",
+    "url": "https:\/\/github.com\/SpiderLabs\/ModSecurity\/issues\/2296",
+    "gihub_issue": 2296,
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "name1": "value1"
+      },
+      "uri":"/?THIS=is+a+simple+test",
+      "method":"GET"
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "http_code":200,
+      "debug_log":"Target value: \"is a simple test\"",
+      "error_log":"msg \"Testing is a simple test\""
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRule ARGS:/^ThIs$/ \"test\" \"id:1,msg:'Testing %{ARGS:/^ThIs$/}'\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Variable key selection using a regular expression - matched_vars (4/n)",
+    "url": "https:\/\/github.com\/SpiderLabs\/ModSecurity\/issues\/2296",
+    "gihub_issue": 2296,
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "name1": "value1"
+      },
+      "uri":"/?THIS=is+a+simple+test",
+      "method":"GET"
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "http_code":200,
+      "debug_log":"Target value: \"is a simple test\"",
+      "error_log":"msg \"Testing is a simple test\""
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRule ARGS:/^ThIs$/ \"test\" \"id:1,msg:'Testing %{ARGS:/^ThIs$/}',chain\"",
+        "SecRule MATCHED_VARS:/thIs/ \"is a simple test\" \"log\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Variable key selection using a regular expression - rule (5/n)",
+    "url": "https:\/\/github.com\/SpiderLabs\/ModSecurity\/issues\/2296",
+    "gihub_issue": 2296,
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "name1": "value1"
+      },
+      "uri":"/?THIS=is+a+simple+test",
+      "method":"GET"
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "http_code":403,
+      "debug_log":"Target value: .1. .Variable: RULE:id.",
+      "error_log":"Operator `Rx' with parameter `1' against variable `RULE:id' .Value: `1' ."
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRule RULE:/^Id$/ \"1\" \"id:1,msg:'Testing %{RULE.id}% -- ',deny\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Variable key selection using a regular expression - TX (6/n)",
+    "url": "https:\/\/github.com\/SpiderLabs\/ModSecurity\/issues\/2296",
+    "gihub_issue": 2296,
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "name1": "value1"
+      },
+      "uri":"/",
+      "method":"GET"
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "http_code":437,
+      "error_log":"`Within' with parameter `/name1/' against variable `TX:header_name_name1'"
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecAction \"id:1,phase:1,setvar:'TX.restricted_headers=/name1/'\"",
+        "SecRule REQUEST_HEADERS_NAMES \"^.*$\" \"id:2,phase:2,setvar:'tx.header_name_%{tx.0}=/%{tx.0}/',deny,status:437,chain,capture\"",
+        "SecRule TX:/^header_name_/ \"@within %{TX:/esTrictEd_headers/}\" \"setvar:'tx.matched=1'\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Variable key selection using a regular expression - TX (7/n)",
+    "url": "https:\/\/github.com\/SpiderLabs\/ModSecurity\/issues\/2296",
+    "gihub_issue": 2296,
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "name1": "value1"
+      },
+      "uri":"/",
+      "method":"GET"
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "http_code":437,
+      "error_log":"`Within' with parameter `/name1/' against variable `TX:header_name_name1'"
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecAction \"id:1,phase:1,setvar:'TX.restricted_headers=/name1/'\"",
+        "SecRule REQUEST_HEADERS_NAMES \"^.*$\" \"id:2,phase:2,setvar:'tx.header_name_%{tx.0}=/%{tx.0}/',deny,status:437,capture,chain\"",
+        "SecRule TX:/^HEADER_NAME_/ \"@within %{tx.restricted_headers}\" \"setvar:'tx.matched=1',log\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Variable key selection using a regular expression - exclusion (8/n)",
+    "url": "https:\/\/github.com\/SpiderLabs\/ModSecurity\/issues\/2296",
+    "gihub_issue": 2296,
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "name1": "value1"
+      },
+      "uri":"/?THIS=is+a+simple+test",
+      "method":"GET"
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "http_code":200
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRule ARGS \"test\" \"id:1,msg:'Testing %{ARGS:/^ThIs$/}',deny,status:500,chain\"",
+        "SecRule MATCHED_VARS:/thIs/ \"is a simple test\" \"log\"",
+        "SecRuleUpdateTargetById 1 !ARGS:/ThIs/"
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Variable key selection using a regular expression - exclusion/ARGS (9/n)",
+    "url": "https:\/\/github.com\/SpiderLabs\/ModSecurity\/issues\/2296",
+    "gihub_issue": 2296,
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "name1": "value1"
+      },
+      "uri":"/?THIS=is+a+simple+test",
+      "method":"GET"
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "http_code":200
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRule ARGS|!ARGS:/tHiS/ \"test\" \"id:1,msg:'Testing %{ARGS:/^ThIs$/}',deny,status:500,chain\"",
+        "SecRule MATCHED_VARS:/thIs/ \"is a simple test\" \"log\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Variable key selection using a regular expression - exclusion/TX (10/n)",
+    "url": "https:\/\/github.com\/SpiderLabs\/ModSecurity\/issues\/2296",
+    "gihub_issue": 2296,
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "name1": "value1"
+      },
+      "uri":"/?THIS=is+a+simple+test",
+      "method":"GET"
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "http_code":200
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecAction \"phase:1,setvar:'tx.a=10'\"",
+        "SecRule TX|!TX:/a/ \"10\" \"id:10,deny,status:500\""
+    ]
+  }
+]

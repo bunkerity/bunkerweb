@@ -1,0 +1,44 @@
+[  
+  {  
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing Variables :: RESPONSE_CONTENT_LENGTH",
+    "client":{  
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{  
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{  
+      "headers":{  
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*"
+      },
+      "uri":"/?key=value&key=other_value",
+      "method":"GET",
+      "http_version":1.1
+    },
+    "response":{  
+      "headers":{  
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[  
+        "no need."
+      ]
+    },
+    "expected":{  
+      "debug_log":"Target value: \"9\" \\(Variable: RESPONSE_CONTENT_LENGTH\\)"
+    },
+    "rules":[  
+      "SecRuleEngine On",
+      "SecResponseBodyAccess On",
+      "SecRule RESPONSE_CONTENT_LENGTH \"@contains test \" \"id:1,phase:4,pass,t:trim\""
+    ]
+  }
+]
+
