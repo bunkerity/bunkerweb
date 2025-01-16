@@ -9,6 +9,8 @@
 - [FEATURE] Add `stream` support in `Kubernetes` integration
 - [DOCS] Added Swarm deprecated notice in the documentation
 - [DEPS] Updated libmaxminddb version to v1.12.2
+- [DEPS] Added zstd version v1.5.6
+- [DEPS] Added zstd-nginx-module version v0.1.1+
 
 ## v1.6.0-rc1 - 2025/01/10
 
