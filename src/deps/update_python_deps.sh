@@ -43,7 +43,7 @@ echo "Updating python requirements files"
 files=("requirements.in" "../autoconf/requirements.in" "../scheduler/requirements.in" "../ui/requirements.in")
 
 shopt -s globstar
-for file in ../{common,../{docs,misc,tests}}/**/requirements*.in
+for file in ../{common,../{docs,misc}}/**/requirements*.in
 do
     if echo "$file" | grep "ansible"; then
         continue
