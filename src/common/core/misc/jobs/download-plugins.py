@@ -8,6 +8,7 @@ from os.path import join
 from pathlib import Path
 from stat import S_IEXEC
 from sys import exit as sys_exit, path as sys_path
+from time import sleep
 from uuid import uuid4
 from json import JSONDecodeError, load as json_load, loads
 from shutil import copytree, rmtree
@@ -28,6 +29,7 @@ for deps_path in [
 
 from magic import Magic
 from requests import get
+from requests.exceptions import ConnectionError
 
 from common_utils import bytes_hash  # type: ignore
 from Database import Database  # type: ignore
@@ -102,7 +104,18 @@ try:
                 if plugin_urls.startswith("file://"):
                     content = Path(plugin_urls[7:]).read_bytes()
                 else:
-                    resp = get(plugin_url, headers={"User-Agent": "BunkerWeb"}, stream=True, timeout=30)
+                    max_retries = 3
+                    retry_count = 0
+                    while retry_count < max_retries:
+                        try:
+                            resp = get(plugin_url, headers={"User-Agent": "BunkerWeb"}, stream=True, timeout=10)
+                            break
+                        except ConnectionError as e:
+                            retry_count += 1
+                            if retry_count == max_retries:
+                                raise e
+                            LOGGER.warning(f"Connection refused, retrying in 3 seconds... ({retry_count}/{max_retries})")
+                            sleep(3)
 
                     if resp.status_code != 200:
                         LOGGER.warning(f"Got status code {resp.status_code}, skipping...")

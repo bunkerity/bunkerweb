@@ -8,6 +8,8 @@ from os.path import join
 from pathlib import Path
 from stat import S_IEXEC
 from sys import exit as sys_exit, path as sys_path
+from time import sleep
+from traceback import format_exc
 from uuid import uuid4
 from json import JSONDecodeError, load as json_load, loads
 from shutil import copytree, rmtree
@@ -19,6 +21,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
         sys_path.append(deps_path)
 
 from requests import get
+from requests.exceptions import ConnectionError
 
 from Database import Database  # type: ignore
 from logger import setup_logger  # type: ignore
@@ -126,7 +129,7 @@ try:
     if pro_license_key:
         LOGGER.info("BunkerWeb Pro license provided, checking if it's valid...")
         headers["Authorization"] = f"Bearer {pro_license_key}"
-        resp = get(f"{API_ENDPOINT}/pro/status", headers=headers, json=data, timeout=5, allow_redirects=True)
+        resp = get(f"{API_ENDPOINT}/pro/status", headers=headers, json=data, timeout=8, allow_redirects=True)
 
         if resp.status_code == 403:
             LOGGER.error(f"Access denied to {API_ENDPOINT}/pro-status - please check your BunkerWeb Pro access at https://panel.bunkerweb.io/")
@@ -180,7 +183,7 @@ try:
     if metadata["is_pro"]:
         LOGGER.info("🚀 Your BunkerWeb Pro license is valid, checking if there are new or updated Pro plugins...")
 
-        resp = get(f"{API_ENDPOINT}/pro/download", headers=headers, json=data, timeout=5, stream=True, allow_redirects=True)
+        resp = get(f"{API_ENDPOINT}/pro/download", headers=headers, json=data, timeout=8, stream=True, allow_redirects=True)
 
         if resp.status_code == 403:
             LOGGER.error(f"Access denied to {API_ENDPOINT}/pro - please check your BunkerWeb Pro access at https://panel.bunkerweb.io/")
@@ -228,7 +231,18 @@ try:
             message = "No BunkerWeb Pro license key provided"
         LOGGER.warning(f"{message}, only checking if there are new or updated preview versions of Pro plugins...")
 
-        resp = get(f"{PREVIEW_ENDPOINT}/v{data['version']}.zip", timeout=5, stream=True, allow_redirects=True)
+        max_retries = 3
+        retry_count = 0
+        while retry_count < max_retries:
+            try:
+                resp = get(f"{PREVIEW_ENDPOINT}/v{data['version']}.zip", timeout=8, stream=True, allow_redirects=True)
+                break
+            except ConnectionError as e:
+                retry_count += 1
+                if retry_count == max_retries:
+                    raise e
+                LOGGER.warning(f"Connection refused, retrying in 3 seconds... ({retry_count}/{max_retries})")
+                sleep(3)
 
         if resp.status_code == 404:
             LOGGER.error(f"Couldn't find Pro plugins for BunkerWeb version {data['version']} at {PREVIEW_ENDPOINT}/v{data['version']}.zip")
@@ -243,6 +257,7 @@ try:
             sys_exit(status)
         elif resp.status_code != 500:
             resp.raise_for_status()
+            # Add retry logic for connection refused errors
 
     if resp.status_code == 500:
         LOGGER.error("An error occurred with the remote server, please try again later")
@@ -321,6 +336,7 @@ try:
 except SystemExit as e:
     status = e.code
 except BaseException as e:
+    LOGGER.debug(format_exc())
     status = 2
     LOGGER.error(f"Exception while running download-pro-plugins.py :\n{e}")
 
