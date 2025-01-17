@@ -10,6 +10,7 @@
 - [FEATURE] Renamed the `MODSECURITY_CRS_PLUGIN_URLS` setting to `MODSECURITY_CRS_PLUGINS` to make it more consistent as the setting now accepts plugin names directly as well as URLs and automatically downloads them
 [FEATURE] Add `plugin_list` command to `bwcli` for listing available plugins and their commands
 - [DOCS] Added Swarm deprecated notice in the documentation
+- [DEPS] Added Brotli v1.1.0 dependency for ngx_brotli
 - [DEPS] Updated headers-more-nginx-module version to v0.37
 - [DEPS] Updated libinjection to latest commit on main branch
 - [DEPS] Updated libmaxminddb version to v1.12.2

@@ -9,6 +9,13 @@
   ],
   "git_repository": [
     {
+      "id": "brotli",
+      "name": "Brotli v1.1.0",
+      "url": "https://github.com/google/brotli.git",
+      "commit": "ed738e842d2fbdf2d6459e39267a633c4a9b2f5d",
+      "post_install": "rm -r src/deps/src/brotli/tests"
+    },
+    {
       "id": "headers-more-nginx-module",
       "name": "headers-more-nginx-module v0.37",
       "url": "https://github.com/openresty/headers-more-nginx-module.git",
@@ -223,7 +230,7 @@
       "name": "ModSecurity v3.0.13",
       "url": "https://github.com/owasp-modsecurity/ModSecurity.git",
       "commit": "580fe192df1694934f93e3e008058996ea479e35",
-      "post_install": "rm -rf src/deps/src/modsecurity/others/libinjection src/deps/src/modsecurity/others/mbedtls && patch --forward src/deps/src/modsecurity/configure.ac src/deps/misc/modsecurity.patch || rm src/deps/src/modsecurity/configure.ac.orig src/deps/src/modsecurity/configure.ac.rej"
+      "post_install": "rm src/deps/src/modsecurity/.gitmodules && rm -rf src/deps/src/modsecurity/others/libinjection src/deps/src/modsecurity/others/mbedtls && patch --forward src/deps/src/modsecurity/configure.ac src/deps/misc/modsecurity.patch || rm src/deps/src/modsecurity/configure.ac.orig src/deps/src/modsecurity/configure.ac.rej"
     },
     {
       "id": "modsecurity-nginx",
@@ -250,8 +257,7 @@
       "name": "Nginx Brotli v1.0.9+",
       "url": "https://github.com/google/ngx_brotli.git",
       "commit": "a71f9312c2deb28875acc7bacfdd5695a111aa53",
-      "post_install": "rm -r src/deps/src/ngx_brotli/deps/brotli/.git src/deps/src/ngx_brotli/deps/brotli/tests",
-      "submodules": true
+      "post_install": "rm src/deps/src/ngx_brotli/.gitmodules && rm -r src/deps/src/ngx_brotli/deps/brotli"
     },
     {
       "id": "ngx_devel_kit",

@@ -195,6 +195,9 @@ do_and_check_cmd make PREFIX=/usr/share/bunkerweb/deps LUA_LIB_DIR=/usr/share/bu
 export CHANGE_DIR="/tmp/bunkerweb/deps/misc"
 do_and_check_cmd bash -c "mv ngx_http_modsecurity_access.c /tmp/bunkerweb/deps/src/modsecurity-nginx/src/"
 
+# Move brotli to ngx_brotli deps directory
+do_and_check_cmd mv /tmp/bunkerweb/deps/src/brotli /tmp/bunkerweb/deps/src/ngx_brotli/deps/brotli
+
 # Compile dynamic modules
 echo "ℹ️ Compiling and installing dynamic modules"
 CONFARGS="$(nginx -V 2>&1 | sed -n -e 's/^.*arguments: //p')"
