@@ -943,6 +943,22 @@ class Database:
             # Settings to delete
             for sk in old_setting_keys - new_setting_keys:
                 to_delete.append({"type": "setting", "filter": {"plugin_id": sk[0], "id": sk[1]}})
+                if sk[1] == "MODSECURITY_CRS_PLUGIN_URLS":
+                    self.logger.warning("MODSECURITY_CRS_PLUGIN_URLS setting has been renamed to MODSECURITY_CRS_PLUGINS, migrating data")
+                    to_update.extend(
+                        [
+                            {
+                                "type": "global_value",
+                                "filter": {"setting_id": "MODSECURITY_CRS_PLUGIN_URLS"},
+                                "data": {"setting_id": "MODSECURITY_CRS_PLUGINS"},
+                            },
+                            {
+                                "type": "service_setting",
+                                "filter": {"setting_id": "MODSECURITY_CRS_PLUGIN_URLS"},
+                                "data": {"setting_id": "MODSECURITY_CRS_PLUGINS"},
+                            },
+                        ]
+                    )
 
             # SELECTS
             old_select_keys = set(old_selects.keys())
@@ -1135,28 +1151,6 @@ class Database:
 
             # APPLY CHANGES
             try:
-                # Apply updates
-                for update in to_update:
-                    t = update["type"]
-                    if t == "setting":
-                        session.query(Settings).filter_by(**update["filter"]).update(update["data"])
-                    elif t == "job":
-                        session.query(Jobs).filter_by(**update["filter"]).update(update["data"])
-                    elif t == "plugin_page":
-                        session.query(Plugin_pages).filter_by(**update["filter"]).update(update["data"])
-                    elif t == "cli_command":
-                        session.query(Bw_cli_commands).filter_by(**update["filter"]).update(update["data"])
-                    elif t == "template_step":
-                        session.query(Template_steps).filter_by(**update["filter"]).update(update["data"])
-                    elif t == "template_setting":
-                        session.query(Template_settings).filter_by(**update["filter"]).update(update["data"])
-                    elif t == "template_config":
-                        session.query(Template_custom_configs).filter_by(**update["filter"]).update(update["data"])
-                    elif t == "plugin":
-                        session.query(Plugins).filter_by(**update["filter"]).update(update["data"])
-                    elif t == "template":
-                        session.query(Templates).filter_by(**update["filter"]).update(update["data"])
-
                 # Apply deletes
                 for delete in to_delete:
                     t = delete["type"]
@@ -1190,6 +1184,33 @@ class Database:
                         session.query(Plugins).filter_by(**delete["filter"]).delete()
 
                 session.add_all(to_put)
+
+                # Apply updates
+                for update in to_update:
+                    t = update["type"]
+                    if t == "setting":
+                        session.query(Settings).filter_by(**update["filter"]).update(update["data"])
+                    elif t == "job":
+                        session.query(Jobs).filter_by(**update["filter"]).update(update["data"])
+                    elif t == "plugin_page":
+                        session.query(Plugin_pages).filter_by(**update["filter"]).update(update["data"])
+                    elif t == "cli_command":
+                        session.query(Bw_cli_commands).filter_by(**update["filter"]).update(update["data"])
+                    elif t == "template_step":
+                        session.query(Template_steps).filter_by(**update["filter"]).update(update["data"])
+                    elif t == "template_setting":
+                        session.query(Template_settings).filter_by(**update["filter"]).update(update["data"])
+                    elif t == "template_config":
+                        session.query(Template_custom_configs).filter_by(**update["filter"]).update(update["data"])
+                    elif t == "plugin":
+                        session.query(Plugins).filter_by(**update["filter"]).update(update["data"])
+                    elif t == "template":
+                        session.query(Templates).filter_by(**update["filter"]).update(update["data"])
+                    elif t == "global_value":
+                        session.query(Global_values).filter_by(**update["filter"]).update(update["data"])
+                    elif t == "service_setting":
+                        session.query(Services_settings).filter_by(**update["filter"]).update(update["data"])
+
                 session.commit()
             except SQLAlchemyError as e:
                 self.logger.debug(format_exc())

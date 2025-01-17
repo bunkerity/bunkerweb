@@ -81,7 +81,7 @@
     "USE_MODSECURITY": "yes",
     "USE_MODSECURITY_CRS_PLUGINS": "yes",
     "MODSECURITY_CRS_VERSION": "4",
-    "MODSECURITY_CRS_PLUGIN_URLS": ""
+    "MODSECURITY_CRS_PLUGINS": ""
   },
   "configs": ["modsec/anomaly_score.conf"],
   "steps": [
@@ -229,7 +229,7 @@
         "USE_MODSECURITY",
         "USE_MODSECURITY_CRS_PLUGINS",
         "MODSECURITY_CRS_VERSION",
-        "MODSECURITY_CRS_PLUGIN_URLS"
+        "MODSECURITY_CRS_PLUGINS"
       ],
       "configs": ["modsec/anomaly_score.conf"]
     }

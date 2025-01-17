@@ -1839,17 +1839,17 @@ In BunkerWeb, ModSecurity is integrated and enabled by default, paired with the 
 
 Below is the list of related settings:
 
-| Setting                               | Default        | Description                                                                                                                                                        |
-| ------------------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `USE_MODSECURITY`                     | `yes`          | Enable ModSecurity WAF.                                                                                                                                            |
-| `USE_MODSECURITY_CRS`                 | `yes`          | Enable OWASP Core Rule Set.                                                                                                                                        |
-| `USE_MODSECURITY_CRS_PLUGINS`         | `yes`          | Enable OWASP Core Rule Set plugins.                                                                                                                                |
-| `MODSECURITY_CRS_VERSION`             | `4`            | Version of the OWASP Core Rule Set to use with ModSecurity (3, 4 or nightly).                                                                                      |
-| `MODSECURITY_CRS_PLUGIN_URLS`         |                | List of OWASP CRS plugins URLs (direct download to .zip or .tar file) to download and install (URLs are separated with space). (Not compatible with CRS version 3) |
-| `MODSECURITY_SEC_AUDIT_ENGINE`        | `RelevantOnly` | SecAuditEngine directive of ModSecurity.                                                                                                                           |
-| `MODSECURITY_SEC_RULE_ENGINE`         | `On`           | SecRuleEngine directive of ModSecurity.                                                                                                                            |
-| `MODSECURITY_SEC_AUDIT_LOG_PARTS`     | `ABCFHZ`       | SecAuditLogParts directive of ModSecurity.                                                                                                                         |
-| `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` | `131072`       | SecRequestBodyNoFilesLimit directive of ModSecurity.                                                                                                               |
+| Setting                               | Default        | Description                                                                                                                               |
+| ------------------------------------- | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_MODSECURITY`                     | `yes`          | Enable ModSecurity WAF.                                                                                                                   |
+| `USE_MODSECURITY_CRS`                 | `yes`          | Enable OWASP Core Rule Set.                                                                                                               |
+| `USE_MODSECURITY_CRS_PLUGINS`         | `yes`          | Enable OWASP Core Rule Set plugins.                                                                                                       |
+| `MODSECURITY_CRS_VERSION`             | `4`            | Version of the OWASP Core Rule Set to use with ModSecurity (3, 4 or nightly).                                                             |
+| `MODSECURITY_CRS_PLUGINS`             |                | List of OWASP CRS plugins (plugin-name[/tag] or URL) to download and install (separated with spaces). (Not compatible with CRS version 3) |
+| `MODSECURITY_SEC_AUDIT_ENGINE`        | `RelevantOnly` | SecAuditEngine directive of ModSecurity.                                                                                                  |
+| `MODSECURITY_SEC_RULE_ENGINE`         | `On`           | SecRuleEngine directive of ModSecurity.                                                                                                   |
+| `MODSECURITY_SEC_AUDIT_LOG_PARTS`     | `ABCFHZ`       | SecAuditLogParts directive of ModSecurity.                                                                                                |
+| `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` | `131072`       | SecRequestBodyNoFilesLimit directive of ModSecurity.                                                                                      |
 
 !!! warning "ModSecurity and the OWASP Core Rule Set"
     **We strongly recommend keeping both ModSecurity and the OWASP Core Rule Set (CRS) enabled** to provide robust protection against common web vulnerabilities. While occasional false positives may occur, they can be resolved with some effort by fine-tuning rules or using predefined exclusions.
@@ -1864,9 +1864,6 @@ You can select from the following versions of the OWASP Core Rule Set (CRS) to s
 
 !!! example "Nightly Build"
     The **nightly build** contains the most up-to-date rules, offering the latest protections against emerging threats. However, since it is updated daily and may include experimental or untested changes, it is recommended to first use the nightly build in a **staging environment** before deploying it in production.
-
-!!! note "Core Rule Set Plugins"
-    The OWASP Core Rule Set also supports a range of **plugins** designed to extend its functionality and improve compatibility with specific applications or environments. These plugins can help fine-tune the CRS for use with popular platforms such as WordPress, Nextcloud, and Drupal, or even custom setups. For more information and a list of available plugins, refer to the [OWASP CRS plugin registry](https://github.com/coreruleset/plugin-registry).
 
 ### Custom configurations
 
@@ -1937,6 +1934,19 @@ This approach provides precise control over the security rules, allowing you to 
     - **Pre-CRS customizations** (`crs-plugins-before`, `modsec-crs`) allow you to define exceptions or preparatory rules before the core CRS rules are loaded.
     - **Post-CRS customizations** (`crs-plugins-after`, `modsec`) are ideal for overriding or extending rules after CRS and plugin rules have been applied.
     - This structure provides maximum flexibility, enabling precise control over rule execution and customization while maintaining a strong security baseline.
+
+### OWASP CRS Plugins
+
+The OWASP Core Rule Set also supports a range of **plugins** designed to extend its functionality and improve compatibility with specific applications or environments. These plugins can help fine-tune the CRS for use with popular platforms such as WordPress, Nextcloud, and Drupal, or even custom setups. For more information and a list of available plugins, refer to the [OWASP CRS plugin registry](https://github.com/coreruleset/plugin-registry).
+
+!!! tip "Plugin download"
+    The `MODSECURITY_CRS_PLUGINS` setting allows you to download and install plugins to extend the functionality of the OWASP Core Rule Set (CRS). This setting accepts a list of plugin names with optional tags or URLs, making it easy to integrate additional security features tailored to your specific needs.
+
+    Here's a non-exhaustive of accepted values for the `MODSECURITY_CRS_PLUGINS` setting:
+
+    * `fake-bot` <---- *Download the latest release of the plugin.*
+    * `wordpress-rule-exclusions/v1.0.0` <---- *Download the version 1.0.0 of the plugin.*
+    * `https://github.com/coreruleset/dos-protection-plugin-modsecurity/archive/refs/heads/main.zip` <---- *Download the plugin directly from the URL.*
 
 <!-- ## CrowdSec
 

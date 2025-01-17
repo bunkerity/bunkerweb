@@ -7,6 +7,7 @@
 - [FEATURE] Add extra validation of certificates in `customcert` plugin
 - [FEATURE] Introduce new `SSL` plugin to manage SSL/TLS settings without tweaking the `misc` plugin
 - [FEATURE] Add `stream` support in `Kubernetes` integration
+- [FEATURE] Renamed the `MODSECURITY_CRS_PLUGIN_URLS` setting to `MODSECURITY_CRS_PLUGINS` to make it more consistent as the setting now accepts plugin names directly as well as URLs and automatically downloads them
 - [DOCS] Added Swarm deprecated notice in the documentation
 - [DEPS] Updated libmaxminddb version to v1.12.2
 
