@@ -1,0 +1,23 @@
+{% autoescape xhtml_escape %}
+{% extends "base.html" %}
+{% block title %} Recent Queries {% end %}
+{% block body %}
+
+<table class="table">
+{% for log in table %}
+{% if log[2] %}
+<tr>
+{% else %}
+<tr class="warning">
+{% end %}
+<td>{{ log[4] }}</td>
+<td><a href="{{ log[0] }}">{{ log[1] }}</a></td>
+<td>{{ log[3] }}</td>
+<td>{{ log[2] }}</td>
+</tr>
+{% end %}
+</table>
+<hr/>
+<p>Generated on <code>{{ now }}</code></p>
+
+{% end %}

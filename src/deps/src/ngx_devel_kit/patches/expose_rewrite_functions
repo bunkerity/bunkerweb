@@ -1,0 +1,291 @@
+diff -rNp a/src/http/modules/ngx_http_rewrite_module.c b/src/http/modules/ngx_http_rewrite_module.c
+*** a/src/http/modules/ngx_http_rewrite_module.c	2010-06-18 16:15:20.000000000 +0100
+--- b/src/http/modules/ngx_http_rewrite_module.c	2010-10-09 14:47:10.000000000 +0100
+***************
+*** 8,14 ****
+  #include <ngx_core.h>
+  #include <ngx_http.h>
+  
+! 
+  typedef struct {
+      ngx_array_t  *codes;        /* uintptr_t */
+  
+--- 8,14 ----
+  #include <ngx_core.h>
+  #include <ngx_http.h>
+  
+! #if !(NDK_EXPOSE_REWRITE_FUNCTIONS)
+  typedef struct {
+      ngx_array_t  *codes;        /* uintptr_t */
+  
+*************** typedef struct {
+*** 17,23 ****
+      ngx_flag_t    log;
+      ngx_flag_t    uninitialized_variable_warn;
+  } ngx_http_rewrite_loc_conf_t;
+! 
+  
+  static void *ngx_http_rewrite_create_loc_conf(ngx_conf_t *cf);
+  static char *ngx_http_rewrite_merge_loc_conf(ngx_conf_t *cf,
+--- 17,23 ----
+      ngx_flag_t    log;
+      ngx_flag_t    uninitialized_variable_warn;
+  } ngx_http_rewrite_loc_conf_t;
+! #endif
+  
+  static void *ngx_http_rewrite_create_loc_conf(ngx_conf_t *cf);
+  static char *ngx_http_rewrite_merge_loc_conf(ngx_conf_t *cf,
+*************** static char *ngx_http_rewrite_return(ngx
+*** 28,44 ****
+      void *conf);
+  static char *ngx_http_rewrite_break(ngx_conf_t *cf, ngx_command_t *cmd,
+      void *conf);
+  static char *ngx_http_rewrite_if(ngx_conf_t *cf, ngx_command_t *cmd,
+      void *conf);
+  static char * ngx_http_rewrite_if_condition(ngx_conf_t *cf,
+      ngx_http_rewrite_loc_conf_t *lcf);
+  static char *ngx_http_rewrite_variable(ngx_conf_t *cf,
+      ngx_http_rewrite_loc_conf_t *lcf, ngx_str_t *value);
+  static char *ngx_http_rewrite_set(ngx_conf_t *cf, ngx_command_t *cmd,
+      void *conf);
+  static char * ngx_http_rewrite_value(ngx_conf_t *cf,
+      ngx_http_rewrite_loc_conf_t *lcf, ngx_str_t *value);
+! 
+  
+  static ngx_command_t  ngx_http_rewrite_commands[] = {
+  
+--- 28,47 ----
+      void *conf);
+  static char *ngx_http_rewrite_break(ngx_conf_t *cf, ngx_command_t *cmd,
+      void *conf);
++ #if !(NDK_EXPOSE_REWRITE_FUNCTIONS)
+  static char *ngx_http_rewrite_if(ngx_conf_t *cf, ngx_command_t *cmd,
+      void *conf);
+  static char * ngx_http_rewrite_if_condition(ngx_conf_t *cf,
+      ngx_http_rewrite_loc_conf_t *lcf);
+  static char *ngx_http_rewrite_variable(ngx_conf_t *cf,
+      ngx_http_rewrite_loc_conf_t *lcf, ngx_str_t *value);
++ #endif
+  static char *ngx_http_rewrite_set(ngx_conf_t *cf, ngx_command_t *cmd,
+      void *conf);
++ #if !(NDK_EXPOSE_REWRITE_FUNCTIONS)
+  static char * ngx_http_rewrite_value(ngx_conf_t *cf,
+      ngx_http_rewrite_loc_conf_t *lcf, ngx_str_t *value);
+! #endif
+  
+  static ngx_command_t  ngx_http_rewrite_commands[] = {
+  
+*************** ngx_http_rewrite_handler(ngx_http_reques
+*** 178,185 ****
+      return r->err_status;
+  }
+  
+! 
+! static ngx_int_t
+  ngx_http_rewrite_var(ngx_http_request_t *r, ngx_http_variable_value_t *v,
+      uintptr_t data)
+  {
+--- 181,190 ----
+      return r->err_status;
+  }
+  
+! #if !(NDK_EXPOSE_REWRITE_FUNCTIONS)
+! static
+! #endif
+! ngx_int_t
+  ngx_http_rewrite_var(ngx_http_request_t *r, ngx_http_variable_value_t *v,
+      uintptr_t data)
+  {
+*************** ngx_http_rewrite_break(ngx_conf_t *cf, n
+*** 511,517 ****
+  }
+  
+  
+! static char *
+  ngx_http_rewrite_if(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
+  {
+      ngx_http_rewrite_loc_conf_t  *lcf = conf;
+--- 516,525 ----
+  }
+  
+  
+! #if !(NDK_EXPOSE_REWRITE_FUNCTIONS)
+! static
+! #endif
+! char *
+  ngx_http_rewrite_if(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
+  {
+      ngx_http_rewrite_loc_conf_t  *lcf = conf;
+*************** ngx_http_rewrite_if(ngx_conf_t *cf, ngx_
+*** 627,633 ****
+  }
+  
+  
+! static char *
+  ngx_http_rewrite_if_condition(ngx_conf_t *cf, ngx_http_rewrite_loc_conf_t *lcf)
+  {
+      u_char                        *p;
+--- 635,644 ----
+  }
+  
+  
+! #if !(NDK_EXPOSE_REWRITE_FUNCTIONS)
+! static
+! #endif
+! char *
+  ngx_http_rewrite_if_condition(ngx_conf_t *cf, ngx_http_rewrite_loc_conf_t *lcf)
+  {
+      u_char                        *p;
+*************** ngx_http_rewrite_if_condition(ngx_conf_t
+*** 847,853 ****
+  }
+  
+  
+! static char *
+  ngx_http_rewrite_variable(ngx_conf_t *cf, ngx_http_rewrite_loc_conf_t *lcf,
+      ngx_str_t *value)
+  {
+--- 858,867 ----
+  }
+  
+  
+! #if !(NDK_EXPOSE_REWRITE_FUNCTIONS)
+! static
+! #endif
+! char *
+  ngx_http_rewrite_variable(ngx_conf_t *cf, ngx_http_rewrite_loc_conf_t *lcf,
+      ngx_str_t *value)
+  {
+*************** ngx_http_rewrite_set(ngx_conf_t *cf, ngx
+*** 948,954 ****
+  }
+  
+  
+! static char *
+  ngx_http_rewrite_value(ngx_conf_t *cf, ngx_http_rewrite_loc_conf_t *lcf,
+      ngx_str_t *value)
+  {
+--- 962,971 ----
+  }
+  
+  
+! #if !(NDK_EXPOSE_REWRITE_FUNCTIONS)
+! static
+! #endif
+! char *
+  ngx_http_rewrite_value(ngx_conf_t *cf, ngx_http_rewrite_loc_conf_t *lcf,
+      ngx_str_t *value)
+  {
+diff -rNp a/src/http/modules/ngx_http_rewrite_module.h b/src/http/modules/ngx_http_rewrite_module.h
+*** a/src/http/modules/ngx_http_rewrite_module.h	1970-01-01 01:00:00.000000000 +0100
+--- b/src/http/modules/ngx_http_rewrite_module.h	2010-10-09 14:38:04.000000000 +0100
+***************
+*** 0 ****
+--- 1,47 ----
++ 
++ /*
++  * Copyright (C) Marcus Clyne
++  *
++  * Note : this file has been created by the Nginx Development Kit using
++  * some code from ngx_http_rewrite_module.c
++  */
++ 
++ #if (NDK_EXPOSE_REWRITE_FUNCTIONS)
++ 
++ #ifndef _NGX_HTTP_REWRITE_H_INCLUDED_
++ #define _NGX_HTTP_REWRITE_H_INCLUDED_
++ 
++ #include <ngx_config.h>
++ #include <ngx_core.h>
++ #include <ngx_http.h>
++ 
++ 
++ extern  ngx_module_t  ngx_http_rewrite_module;
++ 
++ 
++ typedef struct {
++     ngx_array_t  *codes;        /* uintptr_t */
++ 
++     ngx_uint_t    stack_size;
++ 
++     ngx_flag_t    log;
++     ngx_flag_t    uninitialized_variable_warn;
++ } ngx_http_rewrite_loc_conf_t;
++ 
++ 
++ char *
++ ngx_http_rewrite_if(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
++ char *
++ ngx_http_rewrite_if_condition(ngx_conf_t *cf, ngx_http_rewrite_loc_conf_t *lcf);
++ char *
++ ngx_http_rewrite_variable(ngx_conf_t *cf, ngx_http_rewrite_loc_conf_t *lcf,
++     ngx_str_t *value);
++ char *
++ ngx_http_rewrite_value(ngx_conf_t *cf, ngx_http_rewrite_loc_conf_t *lcf,
++     ngx_str_t *value);
++ ngx_int_t
++ ngx_http_rewrite_var(ngx_http_request_t *r, ngx_http_variable_value_t *v,
++     uintptr_t data);
++ 
++ #endif
++ #endif
+diff -rNp a/src/http/ngx_http.h b/src/http/ngx_http.h
+*** a/src/http/ngx_http.h	2010-06-15 16:13:34.000000000 +0100
+--- b/src/http/ngx_http.h	2010-10-09 14:25:56.000000000 +0100
+*************** typedef u_char *(*ngx_http_log_handler_p
+*** 43,48 ****
+--- 43,52 ----
+  #include <ngx_http_ssl_module.h>
+  #endif
+  
++ #if (NDK_EXPOSE_REWRITE_FUNCTIONS)
++ #include <ngx_http_rewrite_module.h>
++ #endif
++ 
+  
+  struct ngx_http_log_ctx_s {
+      ngx_connection_t    *connection;
+diff -rNp a/src/http/ngx_http_script.c b/src/http/ngx_http_script.c
+*** a/src/http/ngx_http_script.c	2010-09-13 13:44:43.000000000 +0100
+--- b/src/http/ngx_http_script.c	2010-10-09 14:36:10.000000000 +0100
+*************** static size_t ngx_http_script_full_name_
+*** 26,35 ****
+--- 26,43 ----
+  static void ngx_http_script_full_name_code(ngx_http_script_engine_t *e);
+  
+  
++ #if (NDK_EXPOSE_REWRITE_FUNCTIONS)
++ 
++ uintptr_t ngx_http_script_exit_code = (uintptr_t) NULL;
++ 
++ #else
++ 
+  #define ngx_http_script_exit  (u_char *) &ngx_http_script_exit_code
+  
+  static uintptr_t ngx_http_script_exit_code = (uintptr_t) NULL;
+  
++ #endif
++ 
+  
+  void
+  ngx_http_script_flush_complex_value(ngx_http_request_t *r,
+diff -rNp a/src/http/ngx_http_script.h b/src/http/ngx_http_script.h
+*** a/src/http/ngx_http_script.h	2010-09-13 13:44:43.000000000 +0100
+--- b/src/http/ngx_http_script.h	2010-10-09 14:33:40.000000000 +0100
+***************
+*** 12,17 ****
+--- 12,25 ----
+  #include <ngx_core.h>
+  #include <ngx_http.h>
+  
++ #if (NDK_EXPOSE_REWRITE_FUNCTIONS)
++ 
++ #define ngx_http_script_exit  (u_char *) &ngx_http_script_exit_code
++ 
++ extern uintptr_t ngx_http_script_exit_code;
++ 
++ #endif
++ 
+  
+  typedef struct {
+      u_char                     *ip;

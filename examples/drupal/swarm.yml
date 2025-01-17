@@ -1,0 +1,52 @@
+services:
+  mydrupal:
+    image: drupal:10-apache
+    networks:
+      - bw-services
+    volumes:
+      - drupal-modules:/var/www/html/modules
+      - drupal-profiles:/var/www/html/profiles
+      - drupal-themes:/var/www/html/themes
+      - drupal-sites:/var/www/html/sites
+    deploy:
+      placement:
+        constraints:
+          - "node.role==worker"
+      labels:
+        - bunkerweb.SERVER_NAME=www.example.com # replace with your domain
+        - bunkerweb.AUTO_LETS_ENCRYPT=yes
+        - bunkerweb.USE_REVERSE_PROXY=yes
+        - bunkerweb.REVERSE_PROXY_URL=/
+        - bunkerweb.REVERSE_PROXY_HOST=http://mydrupal
+        - bunkerweb.LIMIT_REQ_URL_1=/core/install.php
+        - bunkerweb.LIMIT_REQ_RATE_1=5r/s
+        # This is a CRS plugin specific to Drupal
+        - bunkerweb.MODSECURITY_CRS_PLUGIN_URLS=https://github.com/coreruleset/drupal-rule-exclusions-plugin/archive/refs/tags/v1.0.0.tar.gz
+
+  mydb:
+    image: mariadb:11
+    networks:
+      - bw-services
+    volumes:
+      - db-data:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=db-root-pwd # replace with a stronger password
+      - MYSQL_DATABASE=drupaldb
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=db-user-pwd # replace with a stronger password
+    deploy:
+      placement:
+        constraints:
+          - "node.role==worker"
+
+networks:
+  bw-services:
+    external: true
+    name: bw-services
+
+volumes:
+  drupal-modules:
+  drupal-profiles:
+  drupal-themes:
+  drupal-sites:
+  db-data:

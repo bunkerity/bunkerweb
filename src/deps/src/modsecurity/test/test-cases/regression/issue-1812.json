@@ -1,0 +1,51 @@
+[
+  {
+    "enabled": 1,
+    "version_min": 209000,
+    "version_max": -1,
+    "title": "Converting £ (%C2%A3) from query string",
+    "url": "https:\/\/github.com\/SpiderLabs\/ModSecurity\/issues\/1812",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 2313
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "request": {
+      "headers": {
+        "Host": "net.tutsplus.com",
+        "User-Agent": "",
+        "Accept": "text\/html,application\/xhtml+xml,application\/xml;q=0.9,*\/*;q=0.8",
+        "Accept-Language": "en-us,en;q=0.5",
+        "Accept-Encoding": "gzip,deflate",
+        "Accept-Charset": "ISO-8859-1,utf-8;q=0.7,*;q=0.7",
+        "Keep-Alive": "300",
+        "Connection": "keep-alive",
+        "Cookie": "PHPSESSID=r2t5uvjq435r4q7ib3vtdjq120",
+        "Pragma": "no-cache",
+        "Cache-Control": "no-cache"
+      },
+      "uri": "\/test.pl?foo=£&bar=%C2%A3",
+      "method": "GET",
+      "http_version": 1.1,
+      "body": ""
+    },
+    "response": {
+      "headers": {
+        "Content-Type": "text\/xml; charset=utf-8\n\r",
+        "Content-Length": "length\n\r"
+      }
+    },
+    "expected": {
+      "debug_log": "\/test.pl\\?foo=\\\\xc2\\\\xa3&bar=\\\\xc2\\\\xa3"
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRule ARGS:foo \"^$\" \"id:'900017',phase:1,t:none,deny,nolog,msg:'foo = bar'\"",
+      "SecRule ARGS:bar \"^$\" \"id:'900018',phase:1,t:none,deny,nolog,msg:'foo = bar'\"",
+      "SecRule REQUEST_URI \"@validatebyterange 1-255\" \"id:'900019',phase:1,t:none,deny,nolog,msg:'foo = bar'\""
+    ]
+  }
+]

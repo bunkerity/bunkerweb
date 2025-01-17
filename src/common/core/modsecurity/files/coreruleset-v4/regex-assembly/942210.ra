@@ -1,0 +1,109 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##!+ i
+
+##! Looking for patterns like:
+##!   between[\s(]+\w+[\s)]*?[!=+]+[\s\d]*?[\"'`=()]
+
+##!> assemble
+  &&
+  \|\|
+  and
+  between
+  div
+  like
+  nand
+  not
+  or
+  xor
+  xxor
+  ##!=>
+
+  [\s(]+\w+[\s)]*?[!=+]+[\s\d]*?[\"'`=()]
+##!<
+
+
+##! Looking for patterns like:
+##!   \d\s*?between\s*?\d+\s*?[\-+]
+
+##!> assemble
+  \d\s*?
+  ##!=>
+
+  and
+  between
+  div
+  like
+  or
+  xor
+  ##!=>
+
+  \s*?\d+\s*?[\-+]
+##!<
+
+##! Looking for a variation of the pattern above:
+\d\s+group\s+by.+\(
+
+
+##! Looking for patterns like:
+##!   \/\w+;?\s+between\W
+
+##!> assemble
+  \/\w+;?\s+
+  ##!=>
+
+  and
+  between
+  div
+  having
+  like
+  or
+  select
+  xor
+  ##!=>
+
+  \W
+##!<
+
+
+##! Looking for patterns like:
+##!   ;\s*?drop
+##!   #\s*?alter
+##!   --\s*?drop
+
+##!> assemble
+  ;\s*?
+  #\s*?
+  --\s*?
+  ##!=>
+
+  alter
+  drop
+  ##!=>
+##!<
+
+
+##! Looking for patterns like:
+##!   ;\s*?update\s*?\w{2,}
+##!   #\s*?insert\s*?\w{2,}
+##!   --\s*?update\s*?\w{2,}
+
+##!> assemble
+  ;\s*?
+  #\s*?
+  --\s*?
+  ##!=>
+
+  insert
+  update
+  ##!=>
+
+  \s*?\w{2,}
+  ##!=>
+##!<
+
+
+##! Looking for these unique patterns:
+@.+=\s*?\(\s*?select
+[^\w]SET\s*?@\w+

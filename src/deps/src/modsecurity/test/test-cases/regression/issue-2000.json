@@ -1,0 +1,45 @@
+[
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing audit log part H should output when deny - issue-2000",
+    "expected":{
+      "http_code":200
+    },
+    "client":{
+      "ip":"127.0.0.1",
+      "port":123
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*"
+      },
+      "uri":"index.php?foo=bar&a=xxx",
+      "method":"GET",
+      "body": ""
+    },
+    "expected": {
+      "http_code": 403,
+      "audit_log": "id \"1234"
+    },
+
+    "server":{
+      "ip":"127.0.0.1",
+      "port":80
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecAuditLogParts ABIJDEFHZ",
+      "SecAuditEngine RelevantOnly",
+      "SecAuditLogParts ABCFHZ",
+      "SecAuditLog /tmp/test/modsec_audit.log",
+      "SecAuditLogDirMode 0766",
+      "SecAuditLogFileMode 0666",
+      "SecAuditLogType Serial",
+      "SecAuditLogRelevantStatus \"^(?:5|4(?!04))\"",
+      "SecRule ARGS:foo \"@rx ^bar$\" \"id:1234,phase:1,deny,status:403\""
+    ]
+  }
+]

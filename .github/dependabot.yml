@@ -1,0 +1,215 @@
+version: 2
+
+updates:
+  # GHA
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "daily"
+      time: "09:00"
+      timezone: "Europe/Paris"
+    assignees:
+      - "TheophileDiot"
+    reviewers:
+      - "TheophileDiot"
+    commit-message:
+      prefix: "deps/gha"
+    target-branch: "dev"
+
+  # Linux
+  - package-ecosystem: "docker"
+    directory: "/src/linux"
+    schedule:
+      interval: "daily"
+      time: "09:00"
+      timezone: "Europe/Paris"
+    assignees:
+      - "TheophileDiot"
+    reviewers:
+      - "TheophileDiot"
+    commit-message:
+      prefix: "deps/linux"
+    target-branch: "dev"
+  - package-ecosystem: "docker"
+    directory: "/tests/linux"
+    schedule:
+      interval: "daily"
+      time: "09:00"
+      timezone: "Europe/Paris"
+    assignees:
+      - "TheophileDiot"
+    reviewers:
+      - "TheophileDiot"
+    commit-message:
+      prefix: "deps/tests/linux"
+    target-branch: "dev"
+
+  # BW
+  - package-ecosystem: "docker"
+    directory: "/src/bw"
+    schedule:
+      interval: "daily"
+      time: "09:00"
+      timezone: "Europe/Paris"
+    assignees:
+      - "TheophileDiot"
+    reviewers:
+      - "TheophileDiot"
+    commit-message:
+      prefix: "deps/bw"
+    target-branch: "dev"
+
+  # Scheduler
+  - package-ecosystem: "docker"
+    directory: "/src/scheduler"
+    schedule:
+      interval: "daily"
+      time: "09:00"
+      timezone: "Europe/Paris"
+    assignees:
+      - "TheophileDiot"
+    reviewers:
+      - "TheophileDiot"
+    commit-message:
+      prefix: "deps/scheduler"
+    target-branch: "dev"
+  - package-ecosystem: "pip"
+    directory: "/src/scheduler"
+    schedule:
+      interval: "daily"
+      time: "09:00"
+      timezone: "Europe/Paris"
+    assignees:
+      - "TheophileDiot"
+    reviewers:
+      - "TheophileDiot"
+    commit-message:
+      prefix: "deps/scheduler"
+    target-branch: "dev"
+
+  # Autoconf
+  - package-ecosystem: "docker"
+    directory: "/src/autoconf"
+    schedule:
+      interval: "daily"
+      time: "09:00"
+      timezone: "Europe/Paris"
+    assignees:
+      - "TheophileDiot"
+    reviewers:
+      - "TheophileDiot"
+    commit-message:
+      prefix: "deps/autoconf"
+    target-branch: "dev"
+  - package-ecosystem: "pip"
+    directory: "/src/autoconf"
+    schedule:
+      interval: "daily"
+      time: "09:00"
+      timezone: "Europe/Paris"
+    assignees:
+      - "TheophileDiot"
+    reviewers:
+      - "TheophileDiot"
+    commit-message:
+      prefix: "deps/autoconf"
+    target-branch: "dev"
+
+  # UI
+  - package-ecosystem: "docker"
+    directory: "/src/ui"
+    schedule:
+      interval: "daily"
+      time: "09:00"
+      timezone: "Europe/Paris"
+    assignees:
+      - "TheophileDiot"
+    reviewers:
+      - "TheophileDiot"
+    commit-message:
+      prefix: "deps/ui"
+    target-branch: "dev"
+  - package-ecosystem: "pip"
+    directory: "/src/ui"
+    schedule:
+      interval: "daily"
+      time: "09:00"
+      timezone: "Europe/Paris"
+    assignees:
+      - "TheophileDiot"
+    reviewers:
+      - "TheophileDiot"
+    commit-message:
+      prefix: "deps/ui"
+    target-branch: "dev"
+
+  # Misc
+  - package-ecosystem: "pip"
+    directory: "/src/deps"
+    schedule:
+      interval: "daily"
+      time: "09:00"
+      timezone: "Europe/Paris"
+    assignees:
+      - "TheophileDiot"
+    reviewers:
+      - "TheophileDiot"
+    commit-message:
+      prefix: "deps/deps"
+    target-branch: "dev"
+  - package-ecosystem: "pip"
+    directory: "/src/common/gen"
+    schedule:
+      interval: "daily"
+      time: "09:00"
+      timezone: "Europe/Paris"
+    assignees:
+      - "TheophileDiot"
+    reviewers:
+      - "TheophileDiot"
+    commit-message:
+      prefix: "deps/common/gen"
+    target-branch: "dev"
+  - package-ecosystem: "pip"
+    directory: "/src/common/db"
+    schedule:
+      interval: "daily"
+      time: "09:00"
+      timezone: "Europe/Paris"
+    assignees:
+      - "TheophileDiot"
+    reviewers:
+      - "TheophileDiot"
+    commit-message:
+      prefix: "deps/common/db"
+    target-branch: "dev"
+
+  # Terraform
+  - package-ecosystem: "terraform"
+    directory: "/tests/terraform"
+    schedule:
+      interval: "daily"
+      time: "09:00"
+      timezone: "Europe/Paris"
+    assignees:
+      - "fl0ppy-d1sk"
+    reviewers:
+      - "fl0ppy-d1sk"
+    commit-message:
+      prefix: "deps/terraform"
+    target-branch: "dev"
+
+  # Migration
+  - package-ecosystem: "docker"
+    directory: "/misc/migration"
+    schedule:
+      interval: "daily"
+      time: "09:00"
+      timezone: "Europe/Paris"
+    assignees:
+      - "TheophileDiot"
+    reviewers:
+      - "TheophileDiot"
+    commit-message:
+      prefix: "deps/migration"
+    target-branch: "dev"

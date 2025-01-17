@@ -1,0 +1,2 @@
+SecRule ARGS "@contains config_example" "id:10,pass,t:trim"
+SecRule ARGS 123 "@missingOperator config_example" "id:11,pass,t:trim"

@@ -1,0 +1,14 @@
+{
+  "name": "tomcat",
+  "kinds": ["docker", "autoconf", "swarm"],
+  "timeout": 60,
+  "delay": 60,
+  "tests": [
+    {
+      "type": "string",
+      "url": "https://www.example.com/sample/",
+      "string": "tomcat",
+      "tls": "www.example.com"
+    }
+  ]
+}

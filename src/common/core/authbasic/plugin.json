@@ -1,0 +1,56 @@
+{
+  "id": "authbasic",
+  "name": "Auth basic",
+  "description": "Enforce login before accessing a resource or the whole site using HTTP basic auth method.",
+  "version": "1.0",
+  "stream": "no",
+  "settings": {
+    "USE_AUTH_BASIC": {
+      "context": "multisite",
+      "default": "no",
+      "help": "Use HTTP basic auth",
+      "id": "use-auth-basic",
+      "label": "Use HTTP basic auth",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
+    "AUTH_BASIC_LOCATION": {
+      "context": "multisite",
+      "default": "sitewide",
+      "help": "URL of the protected resource or sitewide value.",
+      "id": "auth-basic-location",
+      "label": "Auth basic Location",
+      "regex": "^.*$",
+      "type": "text"
+    },
+    "AUTH_BASIC_USER": {
+      "context": "multisite",
+      "default": "changeme",
+      "help": "Username",
+      "id": "auth-basic-user",
+      "label": "Auth basic Username",
+      "regex": "^[\\w\\-]+",
+      "type": "text",
+      "multiple": "auth-basic-credentials"
+    },
+    "AUTH_BASIC_PASSWORD": {
+      "context": "multisite",
+      "default": "changeme",
+      "help": "Password",
+      "id": "auth-basic-password",
+      "label": "Password",
+      "regex": "^.+",
+      "type": "password",
+      "multiple": "auth-basic-credentials"
+    },
+    "AUTH_BASIC_TEXT": {
+      "context": "multisite",
+      "default": "Restricted area",
+      "help": "Text to display",
+      "id": "auth-basic-text",
+      "label": "Text",
+      "regex": "^.+",
+      "type": "text"
+    }
+  }
+}

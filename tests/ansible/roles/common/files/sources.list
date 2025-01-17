@@ -1,0 +1,3 @@
+deb http://deb.debian.org/debian bookworm main
+deb http://deb.debian.org/debian-security/ bookworm-security main
+deb http://deb.debian.org/debian bookworm-updates main

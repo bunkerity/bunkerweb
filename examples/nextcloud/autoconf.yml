@@ -1,0 +1,60 @@
+services:
+  mync:
+    image: nextcloud:stable-apache
+    volumes:
+      - nc-files:/var/www/html
+    networks:
+      bw-services:
+        aliases:
+          - mync
+    environment:
+      - MYSQL_HOST=mydb
+      - MYSQL_DATABASE=nc
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=db-user-pwd # replace with a stronger password (must match MYSQL_PASSWORD)
+      - NEXTCLOUD_ADMIN_USER=admin # replace with the admin username
+      - NEXTCLOUD_ADMIN_PASSWORD=changeme # replace with a stronger password
+      - NEXTCLOUD_TRUSTED_DOMAINS=www.example.com # replace with your domain(s)
+      - TRUSTED_PROXIES=192.168.0.0/16 172.16.0.0/12 10.0.0.0/8
+      - APACHE_DISABLE_REWRITE_IP=1
+    labels:
+      - bunkerweb.SERVER_NAME=www.example.com # replace with your domain
+      - bunkerweb.MAX_CLIENT_SIZE=10G
+      - bunkerweb.ALLOWED_METHODS=GET|POST|HEAD|COPY|DELETE|LOCK|MKCOL|MOVE|PROPFIND|PROPPATCH|PUT|UNLOCK|OPTIONS
+      - bunkerweb.X_FRAME_OPTIONS=SAMEORIGIN
+      - bunkerweb.BAD_BEHAVIOR_STATUS_CODES=400 401 403 405 444
+      - bunkerweb.USE_REVERSE_PROXY=yes
+      - bunkerweb.REVERSE_PROXY_URL=/
+      - bunkerweb.REVERSE_PROXY_HOST=http://mync
+      - bunkerweb.LIMIT_REQ_URL_1=/apps
+      - bunkerweb.LIMIT_REQ_RATE_1=5r/s
+      - bunkerweb.LIMIT_REQ_URL_2=/apps/text/session/sync
+      - bunkerweb.LIMIT_REQ_RATE_2=8r/s
+      - bunkerweb.LIMIT_REQ_URL_3=/core/preview
+      - bunkerweb.LIMIT_REQ_RATE_3=5r/s
+      # This is a CRS plugin specific to Nextcloud
+      - bunkerweb.MODSECURITY_CRS_PLUGIN_URLS=https://github.com/coreruleset/nextcloud-rule-exclusions-plugin/archive/refs/tags/v1.2.0.tar.gz
+
+  mydb:
+    image: mariadb:11
+    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
+    volumes:
+      - db-data:/var/lib/mysql
+    networks:
+      bw-services:
+        aliases:
+          - mydb
+    environment:
+      - MYSQL_ROOT_PASSWORD=db-root-pwd # replace with a stronger password
+      - MYSQL_DATABASE=nc
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=db-user-pwd # replace with a stronger password (must match MYSQL_PASSWORD)
+
+volumes:
+  nc-files:
+  db-data:
+
+networks:
+  bw-services:
+    external: true
+    name: bw-services

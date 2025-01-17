@@ -1,0 +1,393 @@
+===Filters, sources and sinks: design, motivation and examples===
+==or Functional programming for the rest of us==
+by DiegoNehab
+
+{{{
+
+}}}
+
+===Abstract===
+Certain operations can be implemented in the form of filters. A filter is a function that processes data received in consecutive function calls, returning partial results chunk by chunk.  Examples of operations that can be implemented as filters include the end-of-line normalization for text, Base64 and Quoted-Printable transfer content encodings, the breaking of text into lines, SMTP byte stuffing, and there are many others.  Filters become even more powerful when we allow them to be chained together to create composite filters. Filters can be seen as middle nodes in a chain of data transformations. Sources an sinks are the corresponding end points of these chains. A source is a function that produces data, chunk by chunk, and a sink is a function that takes data, chunk by chunk. In this technical note, we define an elegant interface for filters, sources, sinks and chaining. We evolve our interface progressively, until we reach a high degree of generality. We discuss difficulties that arise during the implementation of this interface and we provide solutions and examples. 
+
+===Introduction===
+
+Applications sometimes have too much information to process to fit in memory and are thus forced to process data in smaller parts.  Even when there is enough memory, processing all the data atomically may take long enough to frustrate a user that wants to interact with the application.  Furthermore, complex transformations can often be defined as series of simpler operations. Several different complex transformations might share the same simpler operations, so that an uniform interface to combine them is desirable. The following concepts constitute our solution to these problems. 
+
+''Filters'' are functions that accept successive chunks of input, and produce successive chunks of output. Furthermore, the result of concatenating all the output data is the same as the result of applying the filter over the concatenation of the input data. As a consequence, boundaries are irrelevant: filters have to handle input data split arbitrarily by the user. 
+
+A ''chain'' is a function that combines the effect of two (or more) other functions, but whose interface is indistinguishable from the interface of one of its components.  Thus, a chained filter can be used wherever an atomic filter can be used.  However, its effect on data is the combined effect of its component filters. Note that, as a consequence, chains can be chained themselves to create arbitrarily complex operations that can be used just like atomic operations.
+
+Filters can be seen as internal nodes in a network through which data flows, potentially being transformed along its way.  Chains connect these nodes together. To complete the picture, we need ''sources'' and ''sinks'' as initial and final nodes of the network, respectively.  Less abstractly, a source is a function that produces new data every time it is called.  On the other hand, sinks are functions that give a final destination to the data they receive.  Naturally, sources and sinks can be chained with filters.
+
+Finally, filters, chains, sources, and sinks are all passive entities: they need to be repeatedly called in order for something to happen.  ''Pumps'' provide the driving force that pushes data through the network, from a source to a sink.
+
+ Hopefully, these concepts will become clear with examples. In the following sections, we start with simplified interfaces, which we improve several times until we can find no obvious shortcomings. The evolution we present is not contrived: it follows the steps we followed ourselves as we consolidated our understanding of these concepts. 
+
+== A concrete example ==
+
+Some data transformations are easier to implement as filters than others.  Examples of operations that can be implemented as filters include the end-of-line normalization for text, the Base64 and Quoted-Printable transfer content encodings, the breaking of text into lines, SMTP byte stuffing, and many others. Let's use the end-of-line normalization as an example to define our initial filter interface. We later discuss why the implementation might not be trivial.
+
+Assume we are given text in an unknown end-of-line convention (including possibly mixed conventions) out of the commonly found Unix (LF), Mac OS (CR), and DOS (CRLF) conventions. We would like to be able to write code like the following:
+        {{{
+input = source.chain(source.file(io.stdin), normalize("\r\n"))
+output = sink.file(io.stdout)
+pump(input, output)
+}}}
+
+This program should read data from the standard input stream and normalize the end-of-line markers to the canonic CRLF marker defined by the MIME standard, finally sending the results to the standard output stream.  For that, we use a ''file source'' to produce data from standard input, and chain it with a filter that normalizes the data. The pump then repeatedly gets data from the source, and moves it to the ''file sink'' that sends it to standard output.
+
+To make the discussion even more concrete, we start by discussing the implementation of the normalization filter. The {{normalize}} ''factory'' is a function that creates such a filter. Our initial filter interface is as follows: the filter receives a chunk of input data, and returns a chunk of processed data. When there is no more input data, the user notifies the filter by invoking it with a {{nil}} chunk. The filter then returns the final chunk of processed data.
+
+Although the interface is extremely simple, the implementation doesn't seem so obvious. Any filter respecting this interface needs to keep some kind of context between calls. This is because chunks can be broken between the CR and LF characters marking the end of a line.  This need for context storage is what motivates the use of factories: each time the factory is called, it returns a filter with its own context so that we can have several independent filters being used at the same time.  For the normalization filter, we know that the obvious solution (i.e.  concatenating all the input into the context before producing any output) is not good enough, so we will have to find another way.
+
+We will break the implementation in two parts: a low-level filter, and a factory of high-level filters. The low-level filter will be implemented in C and will not carry any context between function calls. The high-level filter factory, implemented in Lua, will create and return a high-level filter that keeps whatever context the low-level filter needs, but isolates the user from its internal details. That way, we take advantage of C's efficiency to perform the dirty work, and take advantage of Lua's simplicity for the bookkeeping.
+
+==The Lua part of the implementation==
+
+Below is the implementation of the factory of high-level end-of-line normalization filters:
+        {{{
+function filter.cycle(low, ctx, extra)
+    return function(chunk)
+        local ret
+        ret, ctx = low(ctx, chunk, extra)
+        return ret
+    end
+end
+
+function normalize(marker)
+    return cycle(eol, 0, marker)
+end
+}}}
+
+The {{normalize}} factory simply calls a more generic factory, the {{cycle}} factory. This factory receives a low-level filter, an initial context and some extra value and returns the corresponding high-level filter. Each time the high level filer is called with a new chunk, it calls the low-level filter passing the previous context, the new chunk and the extra argument. The low-level filter produces the chunk of processed data and a new context. Finally, the high-level filter updates its internal context and returns the processed chunk of data to the user.  It is the low-level filter that does all the work.  Notice that this implementation takes advantage of the Lua 5.0 lexical scoping rules to store the context locally, between function calls.  
+
+Moving to the low-level filter, we notice there is no perfect solution to the end-of-line marker normalization problem itself. The difficulty comes from an inherent ambiguity on the definition of empty lines within mixed input. However, the following solution works well for any consistent input, as well as for non-empty lines in mixed input. It also does a reasonable job with empty lines and serves as a good example of how to implement a low-level filter.
+
+Here is what we do: CR and LF are considered candidates for line break.  We issue ''one'' end-of-line line marker if one of the candidates is seen alone, or followed by a ''different'' candidate.  That is, CR&nbsp;CR and LF&nbsp;LF issue two end of line markers each, but CR&nbsp;LF and LF&nbsp;CR issue only one marker.  This idea takes care of Mac OS, Mac OS X, VMS and Unix, DOS and MIME, as well as probably other more obscure conventions.
+
+==The C part of the implementation==
+
+The low-level filter is divided into two simple functions. The inner function actually does the conversion. It takes each input character in turn, deciding what to output and how to modify the context. The context tells if the last character seen was a candidate and, if so, which candidate it was.
+        {{{
+#define candidate(c) (c == CR || c == LF)
+static int process(int c, int last, const char *marker, luaL_Buffer *buffer) {
+    if (candidate(c)) {
+        if (candidate(last)) {
+            if (c == last) luaL_addstring(buffer, marker);
+            return 0;
+        } else {
+            luaL_addstring(buffer, marker);
+            return c;
+        }
+    } else {
+        luaL_putchar(buffer, c);
+        return 0;
+    }
+}
+}}}
+
+The inner function makes use of Lua's auxiliary library's buffer interface for its efficiency and ease of use. The outer function simply interfaces with Lua.  It receives the context and the input chunk (as well as an optional end-of-line marker), and returns the transformed output and the new context.
+        {{{
+static int eol(lua_State *L) {
+    int ctx = luaL_checkint(L, 1);
+    size_t isize = 0;
+    const char *input = luaL_optlstring(L, 2, NULL, &isize);
+    const char *last = input + isize;
+    const char *marker = luaL_optstring(L, 3, CRLF);
+    luaL_Buffer buffer;
+    luaL_buffinit(L, &amp;buffer);
+    if (!input) {
+       lua_pushnil(L);
+       lua_pushnumber(L, 0);
+       return 2;
+    }
+    while (input &lt; last)
+        ctx = process(*input++, ctx, marker, &amp;buffer);
+    luaL_pushresult(&amp;buffer);
+    lua_pushnumber(L, ctx);
+    return 2;
+}
+}}}
+
+Notice that if the input chunk is {{nil}}, the operation is considered to be finished. In that case, the loop will not execute a single time and the context is reset to the initial state.  This allows the filter to be reused indefinitely. It is a good idea to write filters like this, when possible. 
+
+Besides the end-of-line normalization filter shown above, many other filters can be implemented with the same ideas. Examples include Base64 and Quoted-Printable transfer content encodings, the breaking of text into lines, SMTP byte stuffing etc. The challenging part is to decide what will be the context. For line breaking, for instance, it could be the number of bytes left in the current line.  For Base64 encoding, it could be the bytes that remain in the division of the input into 3-byte atoms. 
+
+===Chaining===
+
+Filters become more powerful when the concept of chaining is introduced. Suppose you have a filter for Quoted-Printable encoding and you want to encode some text. According to the standard, the text has to be normalized into its canonic form prior to encoding.  A nice interface that simplifies this task is a factory that creates a composite filter that passes data through multiple filters, but that can be used wherever a primitive filter is used.
+        {{{
+local function chain2(f1, f2)
+    return function(chunk)
+        local ret = f2(f1(chunk))
+        if chunk then return ret
+        else return ret .. f2() end
+    end
+end
+
+function filter.chain(...)
+    local arg = {...}
+    local f = arg[1]
+    for i = 2, #arg do
+        f = chain2(f, arg[i])
+    end
+    return f
+end
+
+local chain = filter.chain(normalize("\r\n"), encode("quoted-printable"))
+while 1 do
+    local chunk = io.read(2048)
+    io.write(chain(chunk))
+    if not chunk then break end
+end
+}}}
+
+The chaining factory is very simple. All it does is return a function that passes data through all filters and returns the result to the user.  It uses the simpler auxiliary function that knows how to chain two filters together. In the auxiliary function, special care must be taken if the chunk is final. This is because the final chunk notification has to be pushed through both filters in turn. Thanks to the chain factory, it is easy to perform the Quoted-Printable conversion, as the above example shows.
+
+===Sources, sinks, and pumps===
+
+As we noted in the introduction, the filters we introduced so far act as the internal nodes in a network of transformations. Information flows from node to node (or rather from one filter to the next) and is transformed on its way out. Chaining filters together is the way we found to connect nodes in the network. But what about the end nodes?  In the beginning of the network, we need a node that provides the data, a source. In the end of the network, we need a node that takes in the data, a sink.
+
+==Sources==
+
+We start with two simple sources. The first is the {{empty}} source: It simply returns no data, possibly returning an error message. The second is the {{file}} source, which produces the contents of a file in a chunk by chunk fashion, closing the file handle when done.
+        {{{
+function source.empty(err)
+    return function()
+        return nil, err
+    end
+end
+
+function source.file(handle, io_err)
+    if handle then 
+        return function()
+            local chunk = handle:read(2048)
+            if not chunk then handle:close() end
+            return chunk
+        end
+    else return source.empty(io_err or "unable to open file") end
+end
+}}}
+
+A source returns the next chunk of data each time it is called. When there is no more data, it just returns {{nil}}.  If there is an error, the source can inform the caller by returning {{nil}} followed by an error message. Adrian Sietsma noticed that, although not on purpose, the interface for sources is compatible with the idea of iterators in Lua 5.0. That is, a data source can be nicely used in conjunction with {{for}} loops.  Using our file source as an iterator, we can rewrite our first example:
+        {{{
+local process = normalize("\r\n")
+for chunk in source.file(io.stdin) do
+    io.write(process(chunk))
+end
+io.write(process(nil))
+}}}
+
+Notice that the last call to the filter obtains the last chunk of processed data. The loop terminates when the source returns {{nil}} and therefore we need that final call outside of the loop.
+
+==Maintaining state between calls==
+
+It is often the case that a source needs to change its behavior after some event. One simple example would be a file source that wants to make sure it returns {{nil}} regardless of how many times it is called after the end of file, avoiding attempts to read past the end of the file.  Another example would be a source that returns the contents of several files, as if they were concatenated, moving from one file to the next until the end of the last file is reached.
+
+One way to implement this kind of source is to have the factory declare extra state variables that the source can use via lexical scoping. Our file source could set the file handle itself to {{nil}} when it detects the end-of-file.  Then, every time the source is called, it could check if the handle is still valid and act accordingly:
+        {{{
+function source.file(handle, io_err)
+    if handle then 
+        return function()
+            if not handle then return nil end
+            local chunk = handle:read(2048)
+            if not chunk then 
+                handle:close() 
+                handle = nil
+            end
+            return chunk
+        end
+    else return source.empty(io_err or "unable to open file") end
+end
+}}}
+
+Another way to implement this behavior involves a change in the source interface to makes it more flexible. Let's allow a source to return a second value, besides the next chunk of data.  If the returned chunk is {{nil}}, the extra return value tells us what happened. A second {{nil}} means that there is just no more data and the source is empty.  Any other value is considered to be an error message.  On the other hand, if the chunk was ''not'' {{nil}}, the second return value tells us whether the source wants to be replaced. If it is {{nil}}, we should proceed using the same source.  Otherwise it has to be another source, which we have to use from then on, to get the remaining data. 
+
+This extra freedom is good for someone writing a source function, but it is a pain for those that have to use it.  Fortunately, given one of these ''fancy'' sources, we can transform it into a simple source that never needs to be replaced, using the following factory.
+        {{{
+function source.simplify(src)
+    return function()
+        local chunk, err_or_new = src()
+        src = err_or_new or src
+        if not chunk then return nil, err_or_new
+        else return chunk end
+    end
+end
+}}}
+
+The simplification factory allows us to write fancy sources and use them as if they were simple. Therefore, our next functions will only produce simple sources, and functions that take sources will assume they are simple.
+
+Going back to our file source, the extended interface allows for a more elegant implementation. The new source just asks to be replaced by an empty source as soon as there is no more data. There is no repeated checking of the handle. To make things simpler to the user, the factory itself simplifies the the fancy file source before returning it to the user:
+        {{{
+function source.file(handle, io_err)
+    if handle then 
+        return source.simplify(function()
+            local chunk = handle:read(2048)
+            if not chunk then 
+                handle:close()
+                return "", source.empty() 
+            end
+            return chunk
+        end)
+    else return source.empty(io_err or "unable to open file") end
+end
+}}}
+
+We can make these ideas even more powerful if we use a new feature of Lua 5.0: coroutines.  Coroutines suffer from a great lack of advertisement, and I am going to play my part here.  Just like lexical scoping, coroutines taste odd at first, but once you get used with the concept, it can save your day. I have to admit that using coroutines to implement our file source would be overkill, so let's implement a concatenated source factory instead.
+        {{{
+function source.cat(...)
+    local arg = {...}
+    local co = coroutine.create(function()
+        local i = 1
+        while i <= #arg do
+            local chunk, err = arg[i]()
+            if chunk then coroutine.yield(chunk)
+            elseif err then return nil, err 
+            else i = i + 1 end 
+        end
+    end)
+    return function()
+        return shift(coroutine.resume(co))
+    end
+end
+}}}
+
+The factory creates two functions. The first is an auxiliary that does all the work, in the form of a coroutine. It reads a chunk from one of the sources. If the chunk is {{nil}}, it moves to the next source, otherwise it just yields returning the chunk. When it is resumed, it continues from where it stopped and tries to read the next chunk.  The second function is the source itself, and just resumes the execution of the auxiliary coroutine, returning to the user whatever chunks it returns (skipping the first result that tells us if the coroutine terminated). Imagine writing the same function without coroutines and you will notice the simplicity of this implementation. We will use coroutines again when we make the filter interface more powerful. 
+
+==Chaining Sources==
+
+What does it mean to chain a source with a filter?  The most useful interpretation is that the combined source-filter is a new source that produces data and passes it through the filter before returning it. Here is a factory that does it:
+        {{{
+function source.chain(src, f)
+    return source.simplify(function()
+        local chunk, err = src()
+        if not chunk then return f(nil), source.empty(err)
+        else return f(chunk) end
+    end)
+end
+}}}
+
+Our motivating example in the introduction chains a source with a filter. The idea of chaining a source with a filter is useful when one thinks about functions that might get their input data from a source. By chaining a simple source with one or more filters, the same function can be provided with filtered data even though it is unaware of the filtering that is happening behind its back.
+
+==Sinks==
+
+Just as we defined an interface for an initial source of data, we can also define an interface for a final destination of data. We call any function respecting that interface a ''sink''. Below are two simple factories that return sinks. The table factory creates a sink that stores all obtained data into a table. The data can later be efficiently concatenated into a single string with the {{table.concat}} library function. As another example, we introduce the {{null}} sink: A sink that simply discards the data it receives.
+        {{{
+function sink.table(t)
+    t = t or {}
+    local f = function(chunk, err)
+        if chunk then table.insert(t, chunk) end
+        return 1
+    end
+    return f, t
+end
+
+local function null()
+    return 1
+end
+
+function sink.null()
+    return null
+end
+}}}
+
+Sinks receive consecutive chunks of data, until the end of data is notified with a {{nil}} chunk. An error is notified by an extra argument giving an error message after the {{nil}} chunk.  If a sink detects an error itself and wishes not to be called again, it should return {{nil}}, optionally followed by an error message. A return value that is not {{nil}} means the source will accept more data. Finally, just as sources can choose to be replaced, so can sinks, following the same interface. Once again, it is easy to implement a {{sink.simplify}} factory that transforms a fancy sink into a simple sink.
+
+As an example, let's create a source that reads from the standard input, then chain it with a filter that normalizes the end-of-line convention and let's use a sink to place all data into a table, printing the result in the end.
+        {{{
+local load = source.chain(source.file(io.stdin), normalize("\r\n"))
+local store, t = sink.table()
+while 1 do
+    local chunk = load()
+    store(chunk)
+    if not chunk then break end
+end
+print(table.concat(t))
+}}}
+
+Again, just as we created a factory that produces a chained source-filter from a source and a filter, it is easy to create a factory that produces a new sink given a sink and a filter.  The new sink passes all data it receives through the filter before handing it in to the original sink. Here is the implementation: 
+        {{{
+function sink.chain(f, snk)
+    return function(chunk, err)
+        local r, e = snk(f(chunk))
+        if not r then return nil, e end
+        if not chunk then return snk(nil, err) end
+        return 1
+    end
+end
+}}}
+
+==Pumps==
+
+There is a while loop that has been around for too long in our examples.  It's always there because everything that we designed so far is passive.  Sources, sinks, filters: None of them will do anything on their own. The operation of pumping all data a source can provide into a sink is so common that we will provide a couple helper functions to do that for us.
+        {{{
+function pump.step(src, snk)
+    local chunk, src_err = src()
+    local ret, snk_err = snk(chunk, src_err)
+    return chunk and ret and not src_err and not snk_err, src_err or snk_err
+end
+
+function pump.all(src, snk, step)
+    step = step or pump.step
+    while true do
+        local ret, err = step(src, snk)
+        if not ret then return not err, err end
+    end
+end
+}}}
+
+The {{pump.step}} function moves one chunk of data from the source to the sink. The {{pump.all}} function takes an optional {{step}} function and uses it to pump all the data from the source to the sink. We can now use everything we have to write a program that reads a binary file from disk and stores it in another file, after encoding it to the Base64 transfer content encoding:
+        {{{
+local load = source.chain(
+    source.file(io.open("input.bin", "rb")), 
+    encode("base64")
+)
+local store = sink.chain(
+    wrap(76),
+    sink.file(io.open("output.b64", "w")), 
+)
+pump.all(load, store)
+}}}
+
+The way we split the filters here is not intuitive, on purpose.  Alternatively, we could have chained the Base64 encode filter and the line-wrap filter together, and then chain the resulting filter with either the file source or the file sink. It doesn't really matter.
+
+===One last important change===
+
+Turns out we still have a problem. When David Burgess was writing his gzip filter, he noticed that the decompression filter can explode a small input chunk into a huge amount of data. Although we wished we could ignore this problem, we soon agreed we couldn't. The only solution is to allow filters to return partial results, and that is what we chose to do.  After invoking the filter to pass input data, the user now has to loop invoking the filter to find out if it has more output data to return.  Note that these extra calls can't pass more data to the filter. 
+
+More specifically, after passing a chunk of input data to a filter and collecting the first chunk of output data, the user invokes the filter repeatedly, passing the empty string, to get extra output chunks. When the filter itself returns an empty string, the user knows there is no more output data, and can proceed to pass the next input chunk. In the end, after the user passes a {{nil}} notifying the filter that there is no more input data, the filter might still have produced too much output data to return in a single chunk. The user has to loop again, this time passing {{nil}} each time, until the filter itself returns {{nil}} to notify the user it is finally done.
+
+Most filters won't need this extra freedom. Fortunately, the new filter interface is easy to implement. In fact, the end-of-line translation filter we created in the introduction already conforms to it. On the other hand, the chaining function becomes much more complicated. If it wasn't for coroutines, I wouldn't be happy to implement it. Let me know if you can find a simpler implementation that does not use coroutines!
+        {{{
+local function chain2(f1, f2)
+    local co = coroutine.create(function(chunk)
+        while true do
+            local filtered1 = f1(chunk)
+            local filtered2 = f2(filtered1)
+            local done2 = filtered1 and ""
+            while true do
+                if filtered2 == "" or filtered2 == nil then break end
+                coroutine.yield(filtered2)
+                filtered2 = f2(done2)
+            end
+            if filtered1 == "" then chunk = coroutine.yield(filtered1)
+            elseif filtered1 == nil then return nil
+            else chunk = chunk and "" end
+        end
+    end)
+    return function(chunk)
+        local _, res = coroutine.resume(co, chunk)
+        return res
+    end
+end
+}}}
+
+Chaining sources also becomes more complicated, but a similar solution is possible with coroutines. Chaining sinks is just as simple as it has always been. Interestingly, these modifications do not have a measurable negative impact in the the performance of filters that didn't need the added flexibility. They do severely improve the efficiency of filters like the gzip filter, though, and that is why we are keeping them.
+
+===Final considerations===
+
+These ideas were created during the development of {{LuaSocket}}[http://www.tecgraf.puc-rio.br/luasocket] 2.0, and are available as the LTN12 module.  As a result, {{LuaSocket}}[http://www.tecgraf.puc-rio.br/luasocket] implementation was greatly simplified and became much more powerful.  The MIME module is especially integrated to LTN12 and provides many other filters. We felt these concepts deserved to be made public even to those that don't care about {{LuaSocket}}[http://www.tecgraf.puc-rio.br/luasocket], hence the LTN. 
+
+One extra application that deserves mentioning makes use of an identity filter.  Suppose you want to provide some feedback to the user while a file is being downloaded into a sink. Chaining the sink with an identity filter (a filter that simply returns the received data unaltered), you can update a progress counter on the fly. The original sink doesn't have to be modified.  Another interesting idea is that of a T sink: A sink that sends data to two other sinks. In summary, there appears to be enough room for many other interesting ideas.
+
+In this technical note we introduced filters, sources, sinks, and pumps.  These are useful tools for data processing in general. Sources provide a simple abstraction for data acquisition. Sinks provide an abstraction for final data destinations. Filters define an interface for data transformations.  The chaining of filters, sources and sinks provides an elegant way to create arbitrarily complex data transformation from simpler transformations. Pumps just put the machinery to work.  

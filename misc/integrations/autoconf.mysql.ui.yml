@@ -1,0 +1,106 @@
+x-env: &env
+  DATABASE_URI: "mysql+pymysql://bunkerweb:changeme@bw-db:3306/db" # Remember to set a stronger password for the database
+  AUTOCONF_MODE: "yes"
+
+services:
+  bunkerweb:
+    image: bunkerity/bunkerweb:1.6.0-rc2
+    ports:
+      - 80:8080
+      - 443:8443
+    labels:
+      - "bunkerweb.INSTANCE=yes"
+    environment:
+      <<: *env
+      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+    networks:
+      - bw-universe
+      - bw-services
+
+  bw-autoconf:
+    image: bunkerity/bunkerweb-autoconf:1.6.0-rc2
+    depends_on:
+      - bunkerweb
+      - bw-docker
+    environment:
+      <<: *env
+      DOCKER_HOST: "tcp://bw-docker:2375"
+    networks:
+      - bw-universe
+      - bw-docker
+      - bw-db
+
+  bw-scheduler:
+    image: bunkerity/bunkerweb-scheduler:1.6.0-rc2
+    depends_on:
+      - bunkerweb
+    volumes:
+      - bw-data:/data
+    environment:
+      <<: *env
+      BUNKERWEB_INSTANCES: ""
+      SERVER_NAME: ""
+      MULTISITE: "yes"
+      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+    networks:
+      - bw-universe
+      - bw-db
+
+  bw-ui:
+    image: bunkerity/bunkerweb-ui:1.6.0-rc2
+    networks:
+      - bw-universe
+      - bw-db
+    environment:
+      <<: *env
+      ADMIN_USERNAME: "changeme"
+      ADMIN_PASSWORD: "changeme"
+    labels:
+      - "bunkerweb.SERVER_NAME=www.example.com"
+      - "bunkerweb.USE_UI=yes"
+      - "bunkerweb.USE_REVERSE_PROXY=yes"
+      - "bunkerweb.REVERSE_PROXY_URL=/changeme"
+      - "bunkerweb.REVERSE_PROXY_HOST=http://bw-ui:7000"
+      - "bunkerweb.INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504"
+      - "bunkerweb.MAX_CLIENT_SIZE=50m"
+      - "bunkerweb.ALLOWED_METHODS=GET|POST|PUT|DELETE"
+
+  bw-db:
+    image: mysql:9
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+      MYSQL_DATABASE: "db"
+      MYSQL_USER: "bunkerweb"
+      MYSQL_PASSWORD: "changeme" # Remember to set a stronger password for the database
+    volumes:
+      - bw-db:/var/lib/mysql
+    networks:
+      - bw-db
+
+  bw-docker:
+    image: tecnativa/docker-socket-proxy:nightly
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      CONTAINERS: "1"
+      LOG_LEVEL: "warning"
+    networks:
+      - bw-docker
+
+volumes:
+  bw-data:
+  bw-db:
+
+networks:
+  bw-universe:
+    name: bw-universe
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.20.30.0/24
+  bw-services:
+    name: bw-services
+  bw-docker:
+    name: bw-docker
+  bw-db:
+    name: bw-db

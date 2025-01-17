@@ -1,0 +1,57 @@
+version: "3.5"
+
+services:
+  bw:
+    image: bunkerity/bunkerweb:1.6.0-beta
+    pull_policy: never
+    depends_on:
+      - bw-redis
+    labels:
+      - "bunkerweb.INSTANCE=yes"
+    environment:
+      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+    networks:
+      - bw-universe
+
+  bw-scheduler:
+    image: bunkerity/bunkerweb-scheduler:1.6.0-beta
+    pull_policy: never
+    depends_on:
+      - bw
+    labels:
+      - "bunkerweb.SCHEDULER=yes"
+    environment:
+      BUNKERWEB_INSTANCES: "bw"
+      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+      USE_BUNKERNET: "no"
+      USE_BLACKLIST: "no"
+      SEND_ANONYMOUS_REPORT: "no"
+      LOG_LEVEL: "info"
+      USE_REDIS: "yes"
+      REDIS_HOST: "bw-redis"
+      CUSTOM_LOG_LEVEL: "debug"
+
+      CUSTOM_CONF_SERVER_HTTP_ready: |
+        location /ready {
+          default_type 'text/plain';
+          rewrite_by_lua_block {
+            ngx.print('ready')
+            ngx.flush(true)
+            ngx.exit(ngx.HTTP_OK)
+          }
+        }
+    networks:
+      - bw-universe
+
+  bw-redis:
+    image: redis:7-alpine
+    networks:
+      - bw-universe
+
+networks:
+  bw-universe:
+    name: bw-universe
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.20.30.0/24

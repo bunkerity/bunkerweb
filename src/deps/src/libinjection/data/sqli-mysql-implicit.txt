@@ -1,0 +1,132 @@
+# mysql implicit conversions tests
+A' AND 'B
+A 'AND' B
+'AND'
+' AND '
+A' && 'B
+A '&&' B
+'&&'
+' && '
+A' = 'B
+A '=' B
+'='
+' = '
+A' & 'B
+A '&' B
+'&'
+' & '
+A' | 'B
+A '|' B
+'|'
+' | '
+A' ^ 'B
+A '^' B
+'^'
+' ^ '
+A' DIV 'B
+A 'DIV' B
+'DIV'
+' DIV '
+A' / 'B
+A '/' B
+'/'
+' / '
+A' <=> 'B
+A '<=>' B
+'<=>'
+' <=> '
+A' >= 'B
+A '>=' B
+'>='
+' >= '
+A' > 'B
+A '>' B
+'>'
+' > '
+A' << 'B
+A '<<' B
+'<<'
+' << '
+A' <= 'B
+A '<=' B
+'<='
+' <= '
+A' < 'B
+A '<' B
+'<'
+' < '
+A' LIKE 'B
+
+# common false positive
+#A 'LIKE' B
+#'LIKE'
+#' LIKE '
+
+A' - 'B
+A '-' B
+'-'
+' - '
+A' %25 'B
+A '%25' B
+'%25'
+' %25 '
+A' MOD 'B
+A 'MOD' B
+'MOD'
+' MOD '
+A' != 'B
+A '!=' B
+'!='
+' != '
+A' <> 'B
+A '<>' B
+'<>'
+' <> '
+A' NOT LIKE 'B
+A 'NOT LIKE' B
+'NOT LIKE'
+' NOT LIKE '
+A' NOT REGEXP 'B
+A 'NOT REGEXP' B
+'NOT REGEXP'
+' NOT REGEXP '
+A' OR 'B
+A 'OR' B
+'OR'
+' OR '
+A' || 'B
+A '||' B
+'||'
+' || '
+A' %2B 'B
+A '%2B' B
+'%2B'
+' %2B '
+A' REGEXP 'B
+A 'REGEXP' B
+'REGEXP'
+' REGEXP '
+A' >> 'B
+A '>>' B
+'>>'
+' >> '
+A' RLIKE 'B
+A 'RLIKE' B
+'RLIKE'
+' RLIKE '
+A' NOT RLIKE 'B
+A 'NOT RLIKE' B
+'NOT RLIKE'
+' NOT RLIKE '
+A' SOUNDS LIKE 'B
+A 'SOUNDS LIKE' B
+'SOUNDS LIKE'
+' SOUNDS LIKE '
+A' * 'B
+A '*' B
+'*'
+' * '
+A' XOR 'B
+A 'XOR' B
+'XOR'
+' XOR '

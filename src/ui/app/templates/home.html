@@ -1,0 +1,263 @@
+{% extends "dashboard.html" %}
+{% block content %}
+    <!-- Content -->
+    <div class="row g-4">
+        <div class="col-md-3 mb-2">
+            <div class="card p-4 position-relative shadow-sm rounded-3 h-100 text-white {% if is_pro_version %}bg-primary{% else %}bg-bw-green{% endif %}">
+                {% if is_pro_version %}
+                    <img class='position-absolute top-0 end-0 m-3'
+                         src="{{ pro_diamond_url }}"
+                         alt="Pro plugin"
+                         width="24px">
+                {% else %}
+                    <i class='bx bxs-rocket bx-sm position-absolute top-0 end-0 m-3'></i>
+                {% endif %}
+                <p class="ps-4 fs-4 mb-2 text-white">
+                    Plan
+                    <br />
+                    <span class="fs-3 fw-bold don-jose">
+                        {% if is_pro_version %}
+                            PRO
+                        {% else %}
+                            FREE
+                        {% endif %}
+                    </span>
+                </p>
+                <a class="ps-4 text-underline text-white-80" href="{{ url_for('pro') }}">
+                    {% if is_pro_version %}
+                        More info
+                    {% else %}
+                        Upgrade?
+                    {% endif %}
+                </a>
+            </div>
+        </div>
+        <div class="col-md-3 mb-2">
+            <a role="button"
+               href="{{ url_for('instances') }}"
+               class="card p-4 position-relative shadow-sm rounded-3 h-100">
+                <i class='bx bx-server bx-sm position-absolute top-0 end-0 m-3 text-secondary'></i>
+                <p class="ps-4 fs-4 mb-2">
+                    Instances
+                    <br />
+                    <span class="fs-3 don-jose">
+                        {{ '0' if instances|length < 10 else '' }}{{ instances|length }}
+                    </span>
+                </p>
+                <small class="ps-4 text-muted mt-0">
+                    {% set ns = namespace(up_instances=0, down_instances=0, loading_instances=0) %}
+                    {% for instance in instances %}
+                        {% if instance['status'] == 'up' %}
+                            {% set ns.up_instances = ns.up_instances + 1 %}
+                        {% elif instance['status'] == 'down' %}
+                            {% set ns.down_instances = ns.down_instances + 1 %}
+                        {% else %}
+                            {% set ns.loading_instances = ns.loading_instances + 1 %}
+                        {% endif %}
+                    {% endfor %}
+                    {{ ns.up_instances }} up / {{ ns.down_instances }} down / {{ ns.loading_instances }} loading
+                </small>
+            </a>
+        </div>
+        <div class="col-md-3 mb-2">
+            <a role="button"
+               href="{{ url_for('services') }}"
+               class="card p-4 position-relative shadow-sm rounded-3 h-100">
+                <i class='bx bx-cube bx-sm position-absolute top-0 end-0 m-3 text-secondary'></i>
+                <p class="ps-4 fs-4 mb-2">
+                    Services
+                    <br />
+                    <span class="fs-3 don-jose">
+                        {{ '0' if services|length < 10 else '' }}{{ services|length }}
+                    </span>
+                </p>
+                <small class="ps-4 text-muted mt-0">
+                    {% set ns = namespace(online_services=0, draft_services=0) %}
+                    {% for service in services %}
+                        {% if service['is_draft'] %}
+                            {% set ns.draft_services = ns.draft_services + 1 %}
+                        {% else %}
+                            {% set ns.online_services = ns.online_services + 1 %}
+                        {% endif %}
+                    {% endfor %}
+                    {{ ns.online_services }} online / {{ ns.draft_services }} draft
+                </small>
+            </a>
+        </div>
+        <div class="col-md-3 mb-2">
+            <a role="button"
+               href="{{ url_for('plugins') }}"
+               class="card p-4 position-relative shadow-sm rounded-3 h-100">
+                <i class='bx bx-plug bx-sm position-absolute top-0 end-0 m-3 text-secondary'></i>
+                <p class="ps-4 fs-4 mb-2">
+                    Plugins
+                    <br />
+                    <span class="fs-3 don-jose">
+                        {{ '0' if plugins|length < 10 else '' }}{{ plugins|length }}
+                    </span>
+                </p>
+                <small class="ps-4 text-muted mt-0">
+                    {% set ns = namespace(core_plugins=0, external_plugins=0, pro_plugins=0) %}
+                    {% for plugin in plugins.values() %}
+                        {% if plugin['type'] == 'core' %}
+                            {% set ns.core_plugins = ns.core_plugins + 1 %}
+                        {% elif plugin['type'] == 'pro' %}
+                            {% set ns.pro_plugins = ns.pro_plugins + 1 %}
+                        {% else %}
+                            {% set ns.external_plugins = ns.external_plugins + 1 %}
+                        {% endif %}
+                    {% endfor %}
+                    {{ ns.core_plugins }} core / {{ ns.pro_plugins }} PRO / {{ ns.external_plugins }} external
+                </small>
+            </a>
+        </div>
+        <div class="col-md-7 row g-4 m-0 p-0">
+            <div class="col-12 col-lg-6 mt-2 mb-2">
+                <div class="card p-4 position-relative shadow-sm rounded-3 h-100">
+                    <div class="card-header p-2">
+                        <div class="card-title mb-0">
+                            <h5 class="mb-1 me-2 don-jose">Request status</h5>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-center align-items-center">
+                            <div id="requests-data" class="visually-hidden">{{ request_errors|tojson }}</div>
+                            <div id="requests-stats"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-lg-6 mt-2 mb-2">
+                <div class="card p-4 position-relative shadow-sm rounded-3 h-100">
+                    <div class="card-header p-2">
+                        <div class="card-title mb-0">
+                            <h5 class="mb-1 me-2 don-jose">Top 10 - Blocked ips</h5>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        {% if request_ips %}
+                            {% set limited_request_ips = request_ips.items() | list %}
+                            {% set top_ips = limited_request_ips[:10] %}
+                            <div class="d-flex justify-content-center align-items-center mb-6">
+                                <div id="requests-ips-data" class="visually-hidden">{{ request_ips|tojson }}</div>
+                                <div id="requests-ips"></div>
+                            </div>
+                        {% else %}
+                            <div class="d-flex align-items-center justify-content-center h-100">
+                                <div class="text-center mt-2">
+                                    <p class="g-3 p-2 text-primary rounded-lg fw-bold">No data to show</p>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 mt-2 mb-2">
+                <div class="card p-4 position-relative shadow-sm rounded-3 h-100">
+                    <div class="card-header p-2">
+                        <div class="card-title mb-0">
+                            <h5 class="me-2 don-jose mb-0">Blocked Requests countries</h5>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div id="requests-map-data" class="visually-hidden">{{ request_countries|tojson }}</div>
+                        <div id="requests-map" class="rounded h-100"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-5 mt-2 mb-2">
+            <div class="card p-4 position-relative shadow-sm rounded-3 h-100">
+                <div class="card-header p-2">
+                    <div class="card-title mb-0 d-flex justify-content-between">
+                        <h5 class="don-jose mb-0">News</h5>
+                        <a class="text-decoration-underline link-underline-primary"
+                           href="https://www.bunkerweb.io/blog?utm_campaign=self&utm_source=ui"
+                           target="_blank"
+                           rel="noopener">See more</a>
+                    </div>
+                </div>
+                <div class="bg-bw-green position-relative w-100 p-2 text-white rounded fw-bold overflow-hidden">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="flex-grow-1 overflow-hidden me-2">
+                            <div id="banner-container">
+                                <p id="banner-text" class="mb-0 slide-in">
+                                    Get the most of BunkerWeb by upgrading to the PRO version. More info and free trial <a class="light-href text-white-80"
+    target="_blank"
+    rel="noopener"
+    href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#pro">here</a>.
+                                </p>
+                            </div>
+                        </div>
+                        <i id="next-news" role="button" class='bx bx-sm bx-chevron-right'></i>
+                    </div>
+                </div>
+                <div id="data-news-container-home" class="mt-3">
+                    <p class="text-center relative w-full p-2 text-primary rounded-lg fw-bold">Impossible to connect to blog news.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-2">
+            <div class="card p-4 position-relative shadow-sm rounded-3 bg-secondary text-white h-100">
+                <i class='bx bx-broadcast bx-sm position-absolute top-0 end-0 m-3 text-white'></i>
+                <p class="ps-4 fs-4 mb-2">
+                    Total Requests
+                    <br />
+                    <span class="fs-3 don-jose">{{ human_readable_number(request_errors.values() |sum) }}</span>
+                </p>
+            </div>
+        </div>
+        <div class="col-md-3 mb-2">
+            <a role="button"
+               class="card p-4 position-relative shadow-sm rounded-3 h-100 text-color-hover-danger"
+               href="{{ url_for('loading', next=url_for('reports') ) }}">
+                <i class='bx bx-block bx-sm position-absolute top-0 end-0 m-3 text-danger'></i>
+                <p class="ps-4 fs-4 mb-2">
+                    Blocked Requests
+                    <br />
+                    <span class="fs-3 don-jose">
+                        {% set ns = namespace(blocked_requests=0) %}
+                        {% for status, count in request_errors.items() %}
+                            {% if status in (403, 429, 444) %}
+                                {% set ns.blocked_requests = ns.blocked_requests + count %}
+                            {% endif %}
+                        {% endfor %}
+                        {{ human_readable_number(ns.blocked_requests) }}
+                    </span>
+                </p>
+            </a>
+        </div>
+        <div class="col-md-3 mb-2">
+            <div class="card p-4 position-relative shadow-sm rounded-3 h-100">
+                <i class='bx bx-globe bx-sm position-absolute top-0 end-0 m-3 text-danger'></i>
+                <p class="ps-4 fs-4 mb-2">
+                    Blocked Unique Ips
+                    <br />
+                    {% set ips_ns = namespace(ips=0, blocked_ips=0) %}
+                    {% for data in request_ips.values() %}
+                        {% if data["blocked"] > 0 %}
+                            {% set ips_ns.blocked_ips = ips_ns.blocked_ips + 1 %}
+                        {% endif %}
+                    {% endfor %}
+                    <span class="fs-3 don-jose">{{ human_readable_number(ips_ns.blocked_ips) }}</span>
+                </p>
+            </div>
+        </div>
+        <div class="col-12 mt-2 mb-2">
+            <div class="card p-4 position-relative shadow-sm rounded-3">
+                <div class="card-header p-2">
+                    <div class="card-title mb-0">
+                        <h5 class="mb-1 me-2 don-jose">Blocking status</h5>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center w-100">
+                        <div id="requests-blocking-data" class="visually-hidden">{{ time_buckets|tojson }}</div>
+                        <div id="requests-blocking" class="w-100"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- / Content -->
+{% endblock %}

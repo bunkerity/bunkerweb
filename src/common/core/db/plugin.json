@@ -1,0 +1,55 @@
+{
+  "id": "db",
+  "name": "DB",
+  "description": "Integrate easily the Database.",
+  "version": "1.0",
+  "stream": "yes",
+  "settings": {
+    "DATABASE_URI": {
+      "context": "global",
+      "default": "sqlite:////var/lib/bunkerweb/db.sqlite3",
+      "help": "The database URI, following the sqlalchemy format.",
+      "id": "database-uri",
+      "label": "The database URI",
+      "regex": "^((postgresql|mysql|mariadb|sqlite)(\\+[\\w\\-]+)?:.+)?$",
+      "type": "text"
+    },
+    "DATABASE_URI_READONLY": {
+      "context": "global",
+      "default": "",
+      "help": "The database URI for read-only operations, it can also serve as a fallback if the main database is down. Following the sqlalchemy format.",
+      "id": "database-uri-readonly",
+      "label": "The database URI for read-only operations",
+      "regex": "^((postgresql|mysql|mariadb|sqlite)(\\+[\\w\\-]+)?:.+)?$",
+      "type": "text"
+    },
+    "DATABASE_LOG_LEVEL": {
+      "context": "global",
+      "default": "warning",
+      "help": "The level to use for database logs.",
+      "id": "database-log-level",
+      "label": "Database log level",
+      "regex": "^(debug|info|warn|warning|error)$",
+      "type": "select",
+      "select": ["debug", "info", "warn", "warning", "error"]
+    },
+    "DATABASE_MAX_JOBS_RUNS": {
+      "context": "global",
+      "default": "10000",
+      "help": "The maximum number of jobs runs to keep in the database.",
+      "id": "database-max-jobs-runs",
+      "label": "The maximum number of jobs runs",
+      "regex": "^\\d+$",
+      "type": "text"
+    }
+  },
+  "jobs": [
+    {
+      "name": "cleanup-excess-jobs-runs",
+      "file": "cleanup-excess-jobs-runs.py",
+      "every": "day",
+      "reload": false,
+      "async": true
+    }
+  ]
+}

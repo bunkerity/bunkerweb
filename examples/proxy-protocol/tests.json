@@ -1,0 +1,13 @@
+{
+  "name": "proxy-protocol",
+  "kinds": ["docker"],
+  "delay": 30,
+  "timeout": 60,
+  "tests": [
+    {
+      "type": "string",
+      "url": "http://www.example.com",
+      "string": "hello"
+    }
+  ]
+}

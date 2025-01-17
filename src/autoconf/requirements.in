@@ -1,0 +1,4 @@
+docker==7.1.0
+kubernetes==31.0.0
+pytz==2024.2
+urllib3<2.0.0

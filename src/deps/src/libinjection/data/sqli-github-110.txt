@@ -1,0 +1,6 @@
+# https://github.com/client9/libinjection/issues/110
+# lots of great details in this ticket HT: @lifeforms
+
+id having (1 or 1)
+id having (1 or true)
+id having (true or 1)

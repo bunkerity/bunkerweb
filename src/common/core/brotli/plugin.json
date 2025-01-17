@@ -1,0 +1,46 @@
+{
+  "id": "brotli",
+  "name": "Brotli",
+  "description": "Compress HTTP requests with the brotli algorithm.",
+  "version": "1.0",
+  "stream": "no",
+  "settings": {
+    "USE_BROTLI": {
+      "context": "multisite",
+      "default": "no",
+      "help": "Enable or disable Brotli compression.",
+      "id": "use-brotli",
+      "label": "Use brotli",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
+    "BROTLI_TYPES": {
+      "context": "multisite",
+      "default": "application/atom+xml application/javascript application/json application/rss+xml application/vnd.ms-fontobject application/x-font-opentype application/x-font-truetype application/x-font-ttf application/x-javascript application/xhtml+xml application/xml font/eot font/opentype font/otf font/truetype image/svg+xml image/vnd.microsoft.icon image/x-icon image/x-win-bitmap text/css text/javascript text/plain text/xml",
+      "help": "List of MIME types that will be compressed with brotli.",
+      "id": "brotli-types",
+      "label": "MIME types",
+      "regex": "^(?! )( ?([\\-\\w.]+/[\\-\\w.+]+)(?!.*\\2(?!.)))+$",
+      "type": "text"
+    },
+    "BROTLI_MIN_LENGTH": {
+      "context": "multisite",
+      "default": "1000",
+      "help": "Minimum response size (in bytes) for Brotli compression to apply.",
+      "id": "brotli-min-length",
+      "label": "Minimum length",
+      "regex": "^\\d+",
+      "type": "text"
+    },
+    "BROTLI_COMP_LEVEL": {
+      "context": "multisite",
+      "default": "6",
+      "help": "Compression level for Brotli (0 = no compression, 11 = maximum compression).",
+      "id": "brotli-comp-level",
+      "label": "Compression level",
+      "regex": "^([02-9]|1[01]?)$",
+      "type": "select",
+      "select": ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11"]
+    }
+  }
+}

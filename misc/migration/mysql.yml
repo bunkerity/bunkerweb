@@ -1,0 +1,16 @@
+services:
+  bw-db:
+    image: mysql:9
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+      MYSQL_DATABASE: "db"
+      MYSQL_USER: "bunkerweb"
+      MYSQL_PASSWORD: "secret"
+    networks:
+      bw-db:
+        aliases:
+          - bw-db
+
+networks:
+  bw-db:
+    name: bw-db

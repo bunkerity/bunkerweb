@@ -1,0 +1,109 @@
+<div class="offcanvas offcanvas-end"
+     tabindex="-1"
+     id="side-offcanvas-notifications"
+     data-bs-keyboard="false"
+     data-bs-backdrop="false">
+    <div class="offcanvas-header">
+        <div class="social-buttons">
+            <a href="https://discord.bunkerity.com/?utm_campaign=self&utm_source=ui"
+               class="btn btn-sm btn-link"
+               target="_blank"
+               rel="noopener">
+                <i class='bx bxl-discord-alt bx-sm'></i>
+            </a>
+            <a href="https://www.linkedin.com/company/bunkerity/"
+               class="btn btn-sm btn-link"
+               target="_blank"
+               rel="noreferrer">
+                <i class='bx bxl-linkedin bx-sm'></i>
+            </a>
+            <a href="https://www.reddit.com/r/BunkerWeb/"
+               class="btn btn-sm btn-link"
+               target="_blank"
+               rel="noreferrer">
+                <i class='bx bxl-reddit bx-sm'></i>
+            </a>
+            <a href="https://www.instagram.com/bunkerweb/"
+               class="btn btn-sm btn-link"
+               target="_blank"
+               rel="noreferrer">
+                <i class='bx bxl-instagram bx-sm'></i>
+            </a>
+            <a href="https://x.com/bunkerity/"
+               class="btn btn-sm btn-link"
+               target="_blank"
+               rel="noreferrer">
+                <img src="{{ url_for('static', filename='img/brands/Twitter-X-Logo.svg') }}"
+                     class="x-logo"
+                     alt="X logo"
+                     width="20px"
+                     height="20px">
+            </a>
+        </div>
+        <button type="button"
+                class="btn-close text-reset"
+                data-bs-dismiss="offcanvas"
+                aria-label="Close"></button>
+    </div>
+    <div id="data-notifications-container"
+         class="offcanvas-body row justify-content-center ps-3 pe-3{% if flash_messages %} pt-0{% endif %}">
+        {% if flash_messages %}
+            <div id="notifications-toast-container"
+                 class="toast-container position-relative g-3 pt-6">
+                {% for message in flash_messages|reverse %}
+                    {% set content = message[0] %}
+                    {% set category = message[1] %}
+                    {% set datetime = message[2] %}
+                    <div class="col-12 bs-toast toast show bg-{% if theme == 'light' %}white{% else %}dark{% endif %} border{% if category == 'error' %} border-danger{% elif category == 'warning' %} border-warning{% else %} border-primary{% endif %}">
+                        <div class="toast-header d-flex align-items-center{% if category == 'error' %} text-danger{% elif category == 'warning' %} text-warning{% else %} text-primary{% endif %}">
+                            <i class="d-block h-auto rounded tf-icons bx bx-xs bx-bell me-2"></i>
+                            <span class="fw-medium me-auto">
+                                {% if category != 'message' %}
+                                    {{ category|capitalize }}
+                                {% else %}
+                                    Info
+                                {% endif %}
+                            </span>
+                            <small class="text-body-secondary toast-datetime">{{ datetime }}</small>
+                        </div>
+                        <div class="toast-body">{{ content|safe }}</div>
+                    </div>
+                {% endfor %}
+                <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-secondary">
+                    TZ: <script nonce="{{ script_nonce }}">document.write(Intl.DateTimeFormat().resolvedOptions().timeZone);</script>
+                </span>
+            </div>
+        {% else %}
+            <p class="g-3 text-center relative w-full p-2 text-primary rounded-lg fw-bold">No notifications to show</p>
+        {% endif %}
+    </div>
+    <!-- Newsletter Signup Section -->
+    <div class="newsletter-signup position-sticky bottom-0 start-0 w-100 p-4 bg-{% if theme == 'light' %}light{% else %}dark{% endif %}-subtle border-top">
+        <h5 class="mb-3 text-primary">Join the Newsletter</h5>
+        <form action="https://bunkerity.us1.list-manage.com/subscribe/post?u=ec5b1577cf427972b9bd491a6&id=37076d9d67"
+              method="POST">
+            <div class="mb-3">
+                <input type="email"
+                       name="EMAIL"
+                       class="form-control"
+                       placeholder="John.doe@example.com"
+                       required />
+            </div>
+            <div class="form-check mb-3">
+                <input type="checkbox"
+                       class="form-check-input"
+                       name="newsletter-check"
+                       required />
+                <label class="form-check-label" for="privacyPolicyCheck">
+                    I've read and agree to the
+                    <a class="fst-italic"
+                       href="https://www.bunkerity.com/en/privacy-policy?utm_campaign=self&utm_source=ui"
+                       target="_blank"
+                       rel="noopener">privacy policy</a>
+                </label>
+            </div>
+            <button type="submit" class="btn btn-primary w-100 text-uppercase don-jose">Subscribe</button>
+        </form>
+    </div>
+    <!-- End Newsletter Signup Section -->
+</div>

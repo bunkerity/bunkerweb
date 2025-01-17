@@ -1,0 +1,124 @@
+
+set var tools
+=============
+
+OVERVIEW
+--------
+This collection of tools is designed to make it easier to set Nginx variables
+using a common interface.  It works by plugging into and extending the features
+of the internal rewrite module, and operations performed by this module are
+therefore done at the rewrite phase of handling.
+
+
+ADVANTAGES OF USING THIS MODULE
+-------------------------------
+
+- simple interface - you don't have to worry about lots of http script compiling
+- it plugs into the rewrite module, so setting (and getting) vars will happen
+  in the order you expect based on how they appear in the configuration file
+- you do not have to worry about overriding the v->get_handler (useful if
+  a variable of a specific name could be set in multiple different ways)
+
+
+WHEN TO USE THIS AND WHEN TO USE v->get_handler = my_func
+---------------------------------------------------------
+
+- if you want a variable to always be generated using a specific function,
+    and should not be over-ridden by 'set' functions (e.g. $request_uri, 
+    $document_root), then you should use v->get_handler
+
+- if you want to allow a variable to be set using many possible methods,
+    including using the 'set' directive, then this module provides an easy way
+    for you to do so (if you use the v->get_handler method in this case, you may
+    run into problems because the get_handler may over-ride previous uses of the
+    set directive)
+
+
+USAGE
+-----
+
+- decide on the type of function you'll need to write
+
+    type                                use when there are these requirements
+    ----                                -------------------------------------
+    NDK_SET_VAR_BASIC                   0 variable values, no extra data
+    NDK_SET_VAR_DATA                    0 variable values, extra data
+    NDK_SET_VAR_VALUE                   1 variable value, no extra data
+    NDK_SET_VAR_VALUE_DATA              1 variable value, extra data
+    NDK_SET_VAR_MULTI_VALUE             2+ variable values, no extra data
+    NDK_SET_VAR_MULTI_VALUE_DATA        2+ variable values, extra data
+    NDK_SET_VAR_HASH                    the space needed for the result string 
+                                        value is known in advance (usually 
+                                        used in a hash function)
+
+    NOTE : if none of these generic calling types suit your needs, it is
+    easy to extend the list of types in the .c file (and you if you let me know
+    I'll add them to the list
+
+
+- define the filter function with the respective prototype
+
+    type                                prototype
+    ----                                ---------
+    NDK_SET_VAR_BASIC                   ndk_set_var_pt
+    NDK_SET_VAR_DATA                    ndk_set_var_data_pt
+    NDK_SET_VAR_VALUE                   ndk_set_var_value_pt
+    NDK_SET_VAR_DATA_VALUE              ndk_set_var_value_data_pt
+    NDK_SET_VAR_MULTI_VALUE             ndk_set_var_value_pt
+    NDK_SET_VAR_MULTI_VALUE_DATA        ndk_set_var_value_data_pt
+    NDK_SET_VAR_HASH                    ndk_set_var_hash_pt
+
+    (See ngx_tools_module.h for the prototype definitions.)
+
+    Note : For the multi_value functions, the variable value pointer is to the
+    first value (with the others being in an array following it)
+
+
+to use one of the default setup functions
+-----------------------------------------
+
+- define one or multiple ngx_http_var_filter_t's at the global scope, setting :
+
+    type = (one of types above)
+    func = function to call
+    size = (for multi value)        the number of variable values
+           (for hash)               length of buffer to allocate
+    data = (for data functions)     additional data (see note below)
+
+- define a configuration directive (see in the .c file for examples), where the
+    function is 'ngx_http_set_var' and the 'post' is a pointer your filter definition
+
+
+to setup in a customized way
+----------------------------
+
+- define a configuration directive which has your own specific configuration function
+
+- inside your config function, define one or several ngx_http_var_filter_t's like
+    above, and call one of the ngx_http_set_var_..._core functions, passing the 
+    variable name and value pointers as appropriate - see examples section
+
+Note : if you're passing extra data to the function, then you will probably want
+to use this second method and store the data either in the loc conf, or just
+allocate the space for it using one of the ngx_palloc functions.
+
+If the values that will be used for processing are in the same order as in the
+config file and there aren't any additional values that are input, then you can
+just use the (ngx_str_t *) (cf->args->elts) + 1 as your base for the values or 
+possibly not use the _core versions of the functions.
+
+
+That's it!
+
+
+FEEDBACK
+--------
+
+If you have any comments (good/bad), or have found any bugs, please let me know at:
+ngx.eugaia AT gmail DOT com
+
+
+TODO
+----
+- add more documentation/examples
+

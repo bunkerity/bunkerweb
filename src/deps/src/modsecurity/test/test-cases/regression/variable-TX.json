@@ -1,0 +1,222 @@
+[
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing Variables :: TX:0 (1/2)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.11",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"27",
+        "Content-Type":"application/x-www-form-urlencoded"
+      },
+      "uri":"/one/two/three?key1=value1&key2=v%20a%20l%20u%20e%202",
+      "method":"GET"
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "whee test 123"
+      ]
+    },
+    "expected":{
+      "debug_log":"(.*) Target value: \"123\" \\(Variable\\: TX\\:0(.*)"
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecResponseBodyAccess On",
+      "SecRequestBodyAccess On",
+      "SecRule RESPONSE_BODY \"@rx ([0-9]+)\" \"id:1,phase:4,capture,id:105\"",
+      "SecRule TX \"@rx ([A-z]+)\" \"phase:4,id:106\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing Variables :: TX:0 (2/2)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Cookie":"USER_TOKEN=Yes; a=z; t=b"
+      },
+      "uri":"/?key=value&key=other_value",
+      "method":"GET"
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":"Target value: \"USER_TOKEN\" \\(Variable: TX:0(.*)"
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRule REQUEST_HEADERS \"@rx ([A-z]+)\" \"id:1,log,pass,capture,id:14\"",
+      "SecRule TX:0 \"@rx ([A-z]+)\" \"id:15\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing Variables :: capture group match after unused group",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "uri":"/?key=aadd",
+      "method":"GET"
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":"Added regex subexpression TX\\.3: dd[\\s\\S]*Target value: \"dd\" \\(Variable\\: TX\\:3[\\s\\S]*Rule returned 1"
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRule ARGS \"@rx (aa)(bb|cc)?(dd)\" \"id:1,log,pass,capture,id:16\"",
+      "SecRule TX:3 \"@streq dd\" \"id:19,phase:2,log,pass\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing Variables :: empty capture group match followed by nonempty capture group",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "uri":"/?key=aadd",
+      "method":"GET"
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":"Added regex subexpression TX\\.3: dd[\\s\\S]*Target value: \"dd\" \\(Variable\\: TX\\:3[\\s\\S]*Rule returned 1"
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRule ARGS \"@rx (aa)(bb|cc|)(dd)\" \"id:18,phase:1,log,pass,capture\"",
+      "SecRule TX:3 \"@streq dd\" \"id:19,phase:2,log,pass\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing Variables :: repeating capture group -- alternates",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "uri":"/?key=_abc123_",
+      "method":"GET"
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":"Added regex subexpression TX\\.2: abc[\\s\\S]*Added regex subexpression TX\\.3: 123"
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRule ARGS \"@rx _((?:(abc)|(123))+)_\" \"id:18,phase:1,log,pass,capture\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing Variables :: repeating capture group -- same (nested)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "uri":"/?key=a:5a:8a:9",
+      "method":"GET"
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":"Added regex subexpression TX\\.1: 5[\\s\\S]*Added regex subexpression TX\\.2: 8[\\s\\S]*Added regex subexpression TX\\.3: 9"
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRule ARGS \"@rx a:([0-9])(?:a:([0-9])(?:a:([0-9]))*)*\" \"id:18,phase:1,log,pass,capture\""
+    ]
+  }
+]

@@ -1,0 +1,8 @@
+{
+  "id": "templates",
+  "name": "Templates",
+  "description": "Fake core plugin for internal templates.",
+  "version": "1.0",
+  "stream": "yes",
+  "settings": {}
+}

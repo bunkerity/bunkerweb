@@ -1,0 +1,65 @@
+[
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing Variables :: OWASP CRS id:920120",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept-Language":"en-us,en;q=0.5",
+        "Accept":"*/*",
+        "Content-Length":"411",
+        "Content-Type":"multipart/form-data; boundary=---------------------------265001916915724",
+        "Proxy-Connection":"keep-alive",
+        "Keep-Alive":"300"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body": [
+        "-----------------------------265001916915724\r",
+        "Content-Disposition: form-data; name=\"fi;le\"; filename=\"test\"\r",
+        "Content-Type: application/octet-stream\r",
+        "\r",
+        "Rotem & Ayala\r",
+        "\r",
+        "-----------------------------265001916915724\r",
+        "Content-Disposition: form-data; name=\"name\"\r",
+        "\r",
+        "tt2\r",
+        "-----------------------------265001916915724\r",
+        "Content-Disposition: form-data; name=\"B1\"\r",
+        "\r",
+        "Submit\r",
+        "-----------------------------265001916915724--\r"
+      ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "http_code":400
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecDefaultAction \"phase:2,deny,block,status:400,log\"",
+      "SecRule FILES_NAMES|FILES \"@rx (?<!&(?:[aAoOuUyY]uml)|&(?:[aAeEiIoOuU]circ)|&(?:[eEiIoOuUyY]acute)|&(?:[aAeEiIoOuU]grave)|&(?:[cC]cedil)|&(?:[aAnNoO]tilde)|&(?:amp)|&(?:apos));|['\\\"=]\" \"id:920120,phase:2,block,t:none,t:urlDecodeUni,msg:'Attempted multipart/form-data bypass',logdata:'%{MATCHED_VAR}',tag:'application-multi',tag:'language-multi',tag:'platform-multi',tag:'attack-protocol',tag:'OWASP_CRS/PROTOCOL_VIOLATION/INVALID_REQ',tag:'CAPEC-272',ver:'OWASP_CRS/3.1.0',severity:'CRITICAL',setvar:'tx.msg=%{rule.msg}',setvar:'tx.anomaly_score_pl1=+%{tx.critical_anomaly_score}',setvar:'tx.%{rule.id}-OWASP_CRS/PROTOCOL_VIOLATION/INVALID_REQ-%{MATCHED_VAR_NAME}=%{MATCHED_VAR}'\""
+    ]
+  }
+]
+

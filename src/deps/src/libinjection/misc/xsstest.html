@@ -1,0 +1,35 @@
+{% autoescape None %}
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta charset="utf-8">
+<title>XSS TEST</title>
+<meta name="viewport" content="width=device-width" />
+<meta name="format-detection" content="telephone=no">
+<link rel="icon" type="image/gif" href="/static/favicon.gif" />
+<style>
+body { font-family: sans-serif; width: 640px; }
+textarea { width: 100% }
+table { width: 100% }
+td { font-family: monospace; vertical-align: top }
+th { text-align: left }
+.red { background-color: #FFaaaa; overflow: hidden }
+.green { background-color: #aaFFaa }
+</style>
+<script>
+function alert() { document.write("YES"); }
+</script>
+</head>
+<body>
+<h1>XSS Test</h1>
+
+<div><div>{{ args[1] }}</div></div>
+
+<div><div style="background:{{ args[2] }}"></div></div>
+
+<div><div {{ args[3] }}></div></div>
+
+<div><div foo='{{ args[4] }}'></div></div>
+
+</body>
+</html>

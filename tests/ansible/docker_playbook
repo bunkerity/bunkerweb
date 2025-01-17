@@ -1,0 +1,41 @@
+---
+- hosts: all
+  gather_facts: false
+  tasks:
+    - name: Wait 300 seconds for port 22 to become open and contain "OpenSSH"
+      wait_for:
+        port: 22
+        host: '{{ (ansible_ssh_host|default(ansible_host))|default(inventory_hostname) }}'
+        search_regex: OpenSSH
+        delay: 10
+      connection: local
+
+- hosts: all
+  name: Provisioning tasks
+  roles:
+    - common
+    - docker
+
+- hosts: all
+  name: Install GH runner
+  vars:
+    - runner_user: user
+    - access_token: "{{ lookup('env', 'GITHUB_TOKEN') }}"
+    - runner_extra_config_args: "--ephemeral"
+    - runner_name: "bw-docker-{{ ansible_date_time.iso8601_micro | to_uuid }}"
+    - github_account: "{{ lookup('env', 'GITHUB_ACCOUNT') }}"
+    - github_owner: bunkerity
+    - github_repo: bunkerweb
+    - runner_labels:
+        - bw-docker
+  roles:
+    - monolithprojects.github_actions_runner
+
+- hosts: all
+  name: Restart GH runner (dirty hack because sometimes the runner is in inactive state)
+  tasks:
+    - name: Wait 60 seconds just in case
+      ansible.builtin.pause:
+        seconds: 60
+    - name: Restart GH runner
+      shell: chown -R user:user /opt/actions-runner/ && systemctl restart actions.runner.*

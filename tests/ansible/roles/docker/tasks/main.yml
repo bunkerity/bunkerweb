@@ -1,0 +1,41 @@
+---
+- name: Install docker dependencies
+  apt:
+    name:
+      - ca-certificates
+      - gnupg
+    update_cache: yes
+    state: present
+
+- name: Update /etc/apt/sources.list.d/docker.list
+  copy:
+    src: docker.list
+    dest: /etc/apt/sources.list.d/docker.list
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Trust docker key
+  apt_key:
+    url: https://download.docker.com/linux/debian/gpg
+    state: present
+
+- name: Install docker
+  apt:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-buildx-plugin
+      - docker-compose-plugin
+    update_cache: yes
+    state: present
+
+- name: Symlink docker-compose
+  shell: ln -f -s /usr/libexec/docker/cli-plugins/docker-compose /usr/local/bin/docker-compose
+
+- name: Add user to docker group
+  user:
+    name: user
+    groups: docker
+    append: yes

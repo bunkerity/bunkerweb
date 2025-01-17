@@ -1,0 +1,194 @@
+===Using finalized exceptions===
+==or How to get rid of all those if statements==
+by DiegoNehab
+
+{{{
+
+}}}
+
+===Abstract===
+This little LTN describes a simple exception scheme that greatly simplifies error checking in Lua programs. All the needed functionality ships standard with Lua, but is hidden between the {{assert}} and {{pcall}} functions.  To make it more evident, we stick to a convenient standard (you probably already use anyways) for Lua function return values, and define two very simple helper functions (either in C or in Lua itself). 
+
+===Introduction===
+
+Most Lua functions return {{nil}} in case of error, followed by a message describing the error. If you don't use this convention, you probably have good reasons. Hopefully, after reading on, you will realize your reasons are not good enough. 
+
+If you are like me, you hate error checking. Most nice little code snippets that look beautiful when you first write them lose some of their charm when you add all that error checking code.  Yet, error checking is as important as  the rest of the code. How sad.
+
+Even if you stick to a return convention, any complex task involving several function calls makes error checking both boring and error-prone (do you see the ''error'' below?)
+        {{{
+function task(arg1, arg2, ...)
+    local ret1, err = task1(arg1)
+    if not ret1 then 
+        cleanup1()
+        return nil, error 
+    end
+    local ret2, err = task2(arg2)
+    if not ret then 
+        cleanup2()
+        return nil, error 
+    end
+    ...
+end
+}}}
+
+The standard {{assert}} function provides an interesting alternative.  To use it, simply nest every function call to  be error checked with a call to {{assert}}. The {{assert}} function checks the value of its first argument.  If it is {{nil}}, {{assert}} throws the second argument as an error message. Otherwise, {{assert}} lets all arguments through as if had not been there. The idea greatly simplifies error checking: 
+        {{{
+function task(arg1, arg2, ...)
+    local ret1 = assert(task1(arg1))
+    local ret2 = assert(task2(arg2))
+    ...
+end
+}}}
+
+If any task fails, the execution is aborted by {{assert}} and the error message is displayed to the user as the cause of the problem.  If no error happens, the task completes as before. There isn't a single {{if}} statement and this is great. However, there are some problems with the idea.
+
+First, the topmost {{task}} function doesn't respect the protocol followed by the lower-level tasks: It raises an error instead of returning {{nil}} followed by the error messages. Here is where the standard {{pcall}} comes in handy. 
+        {{{
+function xtask(arg1, arg2, ...)
+    local ret1 = assert(task1(arg1))
+    local ret2 = assert(task2(arg2))
+    ...
+end
+
+function task(arg1, arg2, ...)
+    local ok, ret_or_err = pcall(xtask, arg1, arg2, ...)
+    if ok then return ret_or_err
+    else return nil, ret_or_err end
+end
+}}}
+
+Our new {{task}} function is well behaved. {{Pcall}} catches any error raised by the calls to {{assert}} and returns it after the status code. That way, errors don't get propagated to the user of the high level {{task}} function. 
+
+These are the main ideas for our exception scheme, but there are still a few glitches to fix: 
+
+        * Directly using {{pcall}} ruined the simplicity of the code;
+        * What happened to the cleanup function calls? What if we have to, say, close a file?
+        * {{Assert}} messes with the error message before raising the error (it adds line number information).
+
+Fortunately, all these problems are very easy to solve and that's what we do in the following sections. 
+
+== Introducing the {{protect}} factory ==
+
+We used the {{pcall}} function to shield the user from errors that could be raised by the underlying implementation.  Instead of directly using {{pcall}} (and thus duplicating code) every time we prefer a factory that does the same job:
+        {{{
+local function pack(ok, ...)
+    return ok, {...}
+end
+
+function protect(f)
+    return function(...)
+        local ok, ret = pack(pcall(f, ...))
+        if ok then return unpack(ret)
+        else return nil, ret[1] end
+    end
+end
+}}}
+
+The {{protect}} factory receives a function that might raise exceptions and returns a function that respects our return value convention. Now we can rewrite the top-level {{task}} function in a much cleaner way:
+        {{{
+task = protect(function(arg1, arg2, ...)
+    local ret1 = assert(task1(arg1))
+    local ret2 = assert(task2(arg2))
+    ...
+end)
+}}}
+
+The Lua implementation of the {{protect}} factory suffers with the creation of tables to hold multiple arguments and return values.  It is possible (and easy) to implement the same function in C, without any table creation. 
+        {{{
+static int safecall(lua_State *L) {
+    lua_pushvalue(L, lua_upvalueindex(1));
+    lua_insert(L, 1);
+    if (lua_pcall(L, lua_gettop(L) - 1, LUA_MULTRET, 0) != 0) {
+        lua_pushnil(L);
+        lua_insert(L, 1);
+        return 2;
+    } else return lua_gettop(L);
+}
+
+static int protect(lua_State *L) {
+    lua_pushcclosure(L, safecall, 1);
+    return 1;
+}
+}}}
+
+===The {{newtry}} factory===
+
+Let's solve the two remaining issues with a single shot and use a concrete example to illustrate the proposed solution. Suppose you want to write a function to download an HTTP document. You have to connect, send the request and read the reply. Each of these tasks can fail, but if something goes wrong after you connected, you have to close the connection before returning the error message.
+        {{{
+get = protect(function(host, path)
+    local c
+    -- create a try function with a finalizer to close the socket
+    local try = newtry(function() 
+        if c then c:close() end 
+    end)
+    -- connect and send request
+    c = try(connect(host, 80))
+    try(c:send("GET " .. path .. " HTTP/1.0\r\n\r\n"))
+    -- get headers
+    local h = {}
+    while 1 do
+        l = try(c:receive())
+        if l == "" then break end
+        table.insert(h, l)
+    end
+    -- get body
+    local b = try(c:receive("*a"))
+    c:close()
+    return b, h
+end)
+}}}
+
+The {{newtry}} factory returns a function that works just like {{assert}}. The differences are that the {{try}} function doesn't mess with the error message and it calls an optional ''finalizer'' before raising the error. In our example, the finalizer simply closes the socket.
+
+Even with a simple example like this, we see that the finalized exceptions simplified our life. Let's see what we gain in general, not just in this example: 
+
+        * We don't need to declare dummy variables to hold error messages in case any ever shows up; 
+        * We avoid using a variable to hold something that could either be a return value or an error message; 
+        * We didn't have to use several ''if'' statements to check for errors;
+        * If an error happens, we know our finalizer is going to be invoked automatically;
+        * Exceptions get propagated, so we don't repeat these ''if'' statements until the error reaches the user.
+
+Try writing the same function without the tricks we used above and you will see that the code gets ugly. Longer sequences of operations with error checking would get even uglier. So let's implement the {{newtry}} function in Lua:
+        {{{
+function newtry(f)
+    return function(...) 
+        if not arg[1] then 
+            if f then f() end 
+            error(arg[2], 0)  
+        else 
+            return ...
+        end
+    end
+end
+}}}
+
+Again, the implementation suffers from the creation of tables at each function call, so we prefer the C version:
+        {{{
+static int finalize(lua_State *L) {
+    if (!lua_toboolean(L, 1)) {
+        lua_pushvalue(L, lua_upvalueindex(1));
+        lua_pcall(L, 0, 0, 0);
+        lua_settop(L, 2);
+        lua_error(L);
+        return 0;
+    } else return lua_gettop(L);
+}
+
+static int do_nothing(lua_State *L) {
+    (void) L;
+    return 0;
+}
+
+static int newtry(lua_State *L) {
+    lua_settop(L, 1);
+    if (lua_isnil(L, 1)) 
+        lua_pushcfunction(L, do_nothing);
+    lua_pushcclosure(L, finalize, 1);
+    return 1;
+}
+}}}
+
+===Final considerations===
+
+The {{protect}} and {{newtry}} functions saved a ''lot'' of work in the implementation of {{LuaSocket}}[http://www.tecgraf.puc-rio.br/luasocket].  The size of some modules was cut in half by the these ideas.  It's true the scheme is not as generic as the exception mechanism of programming languages like C++ or Java, but the power/simplicity ratio is favorable and I hope it serves you as well as it served {{LuaSocket}}.

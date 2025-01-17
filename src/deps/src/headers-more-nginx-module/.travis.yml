@@ -1,0 +1,55 @@
+sudo: required
+dist: bionic
+
+os: linux
+
+language: c
+
+compiler:
+  - gcc
+
+addons:
+  apt:
+    packages:
+    - axel
+    - cpanminus
+
+env:
+  global:
+    - LUAJIT_PREFIX=/opt/luajit21
+    - LUAJIT_LIB=$LUAJIT_PREFIX/lib
+    - LUAJIT_INC=$LUAJIT_PREFIX/include/luajit-2.1
+    - LD_LIBRARY_PATH=$LUAJIT_LIB:$LD_LIBRARY_PATH
+  matrix:
+    - NGINX_VERSION=1.19.3
+    - NGINX_VERSION=1.19.9
+    - NGINX_VERSION=1.23.0 WITHOUT_PCRE2=1
+
+before_install:
+  - sudo apt-get update -y
+  - sudo apt-get install -y ca-certificates
+  - sudo cpanm -v --notest Test::Nginx > build.log 2>&1 || (cat build.log && exit 1)
+
+install:
+  - git clone https://github.com/openresty/echo-nginx-module.git ../echo-nginx-module
+  - git clone https://github.com/openresty/lua-nginx-module.git ../lua-nginx-module
+  - git clone https://github.com/openresty/lua-resty-core.git ../lua-resty-core
+  - git clone https://github.com/openresty/lua-resty-lrucache.git ../lua-resty-lrucache
+  - git clone https://github.com/openresty/nginx-eval-module.git ../eval-nginx-module
+  - git clone https://github.com/openresty/openresty.git ../openresty
+  - git clone https://github.com/openresty/no-pool-nginx.git ../no-pool-nginx
+  - git clone https://github.com/openresty/nginx-devel-utils.git
+  - git clone -b v2.1-agentzh https://github.com/openresty/luajit2.git luajit2
+
+before_script:
+  - cd luajit2/
+  - make -j$JOBS CCDEBUG=-g Q= PREFIX=$LUAJIT_PREFIX CC=$CC XCFLAGS='-DLUA_USE_APICHECK -DLUA_USE_ASSERT -msse4.2' > build.log 2>&1 || (cat build.log && exit 1)
+  - sudo make install PREFIX=$LUAJIT_PREFIX > build.log 2>&1 || (cat build.log && exit 1)
+  - cd ..
+
+script:
+  - export PATH=$PWD/work/nginx/sbin:$PWD/nginx-devel-utils:$PATH
+  - export NGX_BUILD_CC=$CC
+  - sh util/build.sh $NGINX_VERSION > build.log 2>&1 || (cat build.log && exit 1)
+  - prove -I. -r t
+

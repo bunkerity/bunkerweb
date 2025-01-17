@@ -1,0 +1,39 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##! Operators == and -> are sourced from https://sqlite.org/lang_expr.html
+##!+ i
+
+\=\=
+\!\=
+\&\&
+\|\|
+->
+>>
+<<
+>=
+<=
+<>
+\bxor\b
+\bregexp\b
+regexp\s+binary
+\bisnull\b
+\brlike\b
+rlike\s+binary
+not\s+between\s+0\s+and
+not\s+between\s+(?:(?:'[^']*')|(?:\"[^\"]*\"))\s+and\s+(?:(?:'[^']*')|(?:\"[^\"]*\"))
+is\s+null
+like\s+null
+^in[+\s]*\([\s\d\"]+[^()]*\)
+\Win[+\s]*\([\s\d\"]+[^()]*\)
+<>\s+binary
+\bcollate\W*?(?:U&)?[\"'`]
+\bcollate\W+(?:binary|nocase|rtrim)\b
+\bcollate\W+\w*?_
+\bnotnull\b
+like\s+[\w]+\s+escape\b
+\bilike\b
+[<>=!]\s*all\b
+\blikelihood\s*\(
+\bunlikely\s*\(
+\blikely\s*\(

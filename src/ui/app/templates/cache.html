@@ -1,0 +1,112 @@
+{% extends "dashboard.html" %}
+{% block content %}
+    <!-- Content -->
+    <div class="card table-responsive text-nowrap p-4 pb-8 min-vh-70">
+        <input type="hidden" id="cache_number" value="{{ caches|length }}" />
+        <input type="hidden" id="services" value="{{ services }}" />
+        <input type="hidden"
+               id="cache_service_selection"
+               value="{{ cache_service }}" />
+        <input type="hidden" id="cache_plugin_selection" value="{{ cache_plugin }}" />
+        <input type="hidden"
+               id="cache_job_name_selection"
+               value="{{ cache_job_name }}" />
+        <input type="hidden"
+               id="csrf_token"
+               name="csrf_token"
+               value="{{ csrf_token() }}" />
+        <p id="cache-waiting"
+           class="text-center relative w-full p-2 text-primary rounded-lg fw-bold">Loading cache files...</p>
+        <table id="cache"
+               class="table responsive nowrap position-relative w-100 d-none">
+            <thead>
+                <tr>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="Show the Cache files' details"></th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="The Cache file's name">File name</th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="The Cache file's job name">Job name</th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="The Cache file's job's Plugin">Plugin</th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="The Service associated with the Cache file">Service</th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="The date and time when the Cache file was last updated">
+                        Last Update
+                    </th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="The Cache file's checksum">Checksum</th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="The actions that can be performed on the Cache file">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cache in caches %}
+                    {% set service_id = cache['service_id'] if cache['service_id'] else 'global' %}
+                    <tr>
+                        <td></td>
+                        <td>
+                            <a href="{{ url_for("cache") }}/{{ service_id }}/{{ cache['plugin_id'] }}/{{ cache['job_name'] }}/{{ cache['file_name'].replace('/', '_') if cache['file_name'].startswith('folder:') else cache['file_name'] }}"
+                               class="d-flex align-items-center"
+                               data-bs-toggle="tooltip"
+                               data-bs-placement="bottom"
+                               data-bs-original-title="View {{ cache['file_name'] }}"><i class="bx bx-show bx-xs"></i>&nbsp;{{ cache['file_name'] }}</a>
+                        </td>
+                        <td>{{ cache['job_name'] }}</td>
+                        <td>{{ cache['plugin_id'] }}</td>
+                        <td id="service-{{ cache['job_name'] }}-{{ service_id.replace('.', '_') }}-{{ cache['file_name'].replace('.', '_') }}">
+                            {% if cache["service_id"] %}
+                                <a href="{{ url_for("services") }}/{{ cache['service_id'] }}"
+                                   class="d-flex align-items-center"
+                                   data-bs-toggle="tooltip"
+                                   data-bs-placement="bottom"
+                                   data-bs-original-title="Edit service {{ cache['service_id'] }}"><i class="bx bx-edit bx-xs"></i>&nbsp;{{ cache["service_id"] }}</a>
+                            {% else %}
+                                <span class="badge rounded-pill bg-label-secondary">global</span>
+                            {% endif %}
+                        </td>
+                        <td class="cache-last-update-date">
+                            {{ cache["last_update"] if cache["last_update"] == "Never" else cache["last_update"].astimezone().isoformat() }}
+                        </td>
+                        <td>{{ cache["checksum"] }}</td>
+                        <td>
+                            <div class="d-flex justify-content-evenly">
+                                <a role="button"
+                                   class="btn btn-primary btn-sm me-1"
+                                   href="{{ url_for("cache") }}/{{ service_id }}/{{ cache['plugin_id'] }}/{{ cache['job_name'] }}/{{ cache['file_name'].replace('/', '_') if cache['file_name'].startswith('folder:') else cache['file_name'] }}"
+                                   data-bs-toggle="tooltip"
+                                   data-bs-placement="bottom"
+                                   data-bs-original-title="View {{ cache['file_name'] }}">
+                                    <i class="bx bx-show bx-xs"></i>
+                                </a>
+                                <a role="button"
+                                   class="btn btn-outline-secondary btn-sm"
+                                   href="{{ url_for("cache") }}/{{ service_id }}/{{ cache['plugin_id'] }}/{{ cache['job_name'] }}/{{ cache['file_name'].replace('/', '_') if cache['file_name'].startswith('folder:') else cache['file_name'] }}?download=true"
+                                   data-bs-toggle="tooltip"
+                                   data-bs-placement="bottom"
+                                   data-bs-original-title="Download {{ cache['file_name'] }}"
+                                   target="_blank"
+                                   rel="noreferrer">
+                                    <i class="bx bx-download bx-xs"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+            <span class="position-absolute bottom-0 start-50 translate-middle badge rounded-pill bg-secondary">
+                TZ: <script nonce="{{ script_nonce }}">document.write(Intl.DateTimeFormat().resolvedOptions().timeZone);</script>
+            </span>
+        </table>
+    </div>
+    <!-- / Content -->
+{% endblock %}

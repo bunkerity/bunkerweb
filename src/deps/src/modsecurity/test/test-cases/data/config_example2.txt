@@ -1,0 +1,1 @@
+SecRule ARGS "@contains config_example2" "id:40,pass,t:trim"

@@ -1,0 +1,27 @@
+{
+  "id": "dnsbl",
+  "name": "DNSBL",
+  "description": "Deny access based on external DNSBL servers.",
+  "version": "1.0",
+  "stream": "yes",
+  "settings": {
+    "USE_DNSBL": {
+      "context": "multisite",
+      "default": "yes",
+      "help": "Activate DNSBL feature.",
+      "id": "use-dnsbl",
+      "label": "Activate DNSBL",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
+    "DNSBL_LIST": {
+      "context": "global",
+      "default": "bl.blocklist.de sbl.spamhaus.org xbl.spamhaus.org",
+      "help": "List of DNSBL servers.",
+      "id": "dnsbl-list",
+      "label": "DNSBL list",
+      "regex": "^(?! )( ?((?!\\.)[\\w.]+)(?!.*\\2(?!.)))*$",
+      "type": "text"
+    }
+  }
+}

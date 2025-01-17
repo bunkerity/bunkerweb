@@ -1,0 +1,54 @@
+# Copyright (C) 2015-2019 Google Inc.
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+# OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+# HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+# OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+
+if [ "$ngx_addon_name" = "ngx_brotli" ]; then
+  BROTLI_MODULE_SRC_DIR="$ngx_addon_dir/static"
+else
+  BROTLI_MODULE_SRC_DIR="$ngx_addon_dir"
+fi
+
+ngx_addon_name=ngx_brotli_static
+
+if [ -z "$ngx_module_link" ]; then
+cat << END
+
+$0: error: Brotli module requires recent version of NGINX (1.9.11+).
+
+END
+  exit 1
+fi
+
+ngx_module_type=HTTP
+ngx_module_name=ngx_http_brotli_static_module
+ngx_module_incs=
+ngx_module_deps=
+ngx_module_srcs="$BROTLI_MODULE_SRC_DIR/ngx_http_brotli_static_module.c"
+ngx_module_libs=
+ngx_module_order=
+
+. auto/module
+
+have=NGX_HTTP_GZIP . auto/have
+have=NGX_HTTP_BROTLI_STATIC . auto/have
+have=NGX_HTTP_BROTLI_STATIC_MODULE . auto/have  # deprecated

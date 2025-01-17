@@ -1,0 +1,70 @@
+services:
+  myonion:
+    image: goldy/tor-hidden-service:v0.4.7.12-54c0e54
+    volumes:
+      - ./hidden-services:/var/lib/tor/hidden_service # .onion address and private key will be located in ./hidden_service
+    environment:
+      SERVICE1_TOR_SERVICE_HOSTS: "80:bunkerweb:8080"
+      SERVICE1_TOR_SERVICE_VERSION: "3"
+    networks:
+      - onion-net
+
+  bunkerweb:
+    image: bunkerity/bunkerweb:1.6.0-rc2
+    container_name: bunkerweb
+    environment:
+      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+    restart: "unless-stopped"
+    networks:
+      - onion-net
+      - bw-universe
+      - bw-services
+
+  bw-scheduler:
+    image: bunkerity/bunkerweb-scheduler:1.6.0-rc2
+    container_name: bunkerweb-scheduler
+    depends_on:
+      - bunkerweb
+    volumes:
+      - bw-data:/data
+    environment:
+      BUNKERWEB_INSTANCES: "bunkerweb"
+      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+      # disable common security measures based on IP
+      USE_BAD_BEHAVIOR: "no"
+      USE_DNSBL: "no"
+      USE_WHITELIST: "no"
+      USE_BLACKLIST: "no"
+      USE_GREYLIST: "no"
+      # enable captcha at least
+      USE_ANTIBOT: "captcha"
+      SERVE_FILES: "no"
+      USE_CLIENT_CACHE: "yes"
+      USE_GZIP: "yes"
+      USE_REVERSE_PROXY: "yes"
+      REVERSE_PROXY_URL: "/"
+      REVERSE_PROXY_HOST: "http://myapp:8080"
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+
+  myapp:
+    image: nginxdemos/nginx-hello
+    networks:
+      - bw-services
+
+volumes:
+  bw-data:
+
+
+networks:
+  bw-universe:
+    name: bw-universe
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.20.30.0/24
+  bw-services:
+    name: bw-services
+  onion-net:
+    name: onion-net

@@ -1,0 +1,87 @@
+services:
+  bunkerweb:
+    image: bunkerity/bunkerweb:1.6.0-rc2
+    container_name: bunkerweb
+    ports:
+      - "80:8080/tcp"
+      - "443:8443/tcp"
+      - "443:8443/udp" # for QUIC
+    environment:
+      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+      - bw-services
+
+  bw-scheduler:
+    image: bunkerity/bunkerweb-scheduler:1.6.0-rc2
+    container_name: bw-scheduler
+    depends_on:
+      - bunkerweb
+    volumes:
+      - bw-data:/data
+    environment:
+      BUNKERWEB_INSTANCES: "bunkerweb"
+      MULTISITE: "yes"
+      SERVER_NAME: "app1.example.com app2.example.com" # replace with your domains
+      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+      SERVE_FILES: "no"
+      DISABLE_DEFAULT_SERVER: "yes"
+      AUTO_LETS_ENCRYPT: "yes"
+      USE_CLIENT_CACHE: "yes"
+      USE_GZIP: "yes"
+      USE_REVERSE_PROXY: "yes"
+      app1.example.com_REVERSE_PROXY_URL: "/"
+      app1.example.com_REVERSE_PROXY_HOST: "http://myapp1:8080"
+      app2.example.com_REVERSE_PROXY_URL: "/"
+      app2.example.com_REVERSE_PROXY_HOST: "http://myapp2:8080"
+      # global config applied at server context
+      CUSTOM_CONF_SERVER_HTTP_hello-world: |
+        location /hello {
+        	default_type 'text/plain';
+        	content_by_lua_block {
+        		ngx.say('world')
+        	}
+        }
+      # site configs applied at server context
+      app1.example.com_CUSTOM_CONF_SERVER_HTTP_dummy: |
+        location = /app1 {
+        	default_type 'text/plain';
+        	content_by_lua_block {
+        		ngx.say('hello app1')
+        	}
+        }
+      app2.example.com_CUSTOM_CONF_SERVER_HTTP_dummy: |
+        location = /app2 {
+        	default_type 'text/plain';
+        	content_by_lua_block {
+        		ngx.say('hello app2')
+        	}
+        }
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+
+  myapp1:
+    image: nginxdemos/nginx-hello
+    networks:
+      - bw-services
+
+  myapp2:
+    image: nginxdemos/nginx-hello
+    networks:
+      - bw-services
+
+volumes:
+  bw-data:
+
+
+networks:
+  bw-universe:
+    name: bw-universe
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.20.30.0/24
+  bw-services:
+    name: bw-services

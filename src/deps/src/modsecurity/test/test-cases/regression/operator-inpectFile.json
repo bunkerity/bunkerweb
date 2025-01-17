@@ -1,0 +1,394 @@
+[
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing Operator :: @inspectFile (1/3)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length": "27",
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "uri":"/whee?res=1",
+      "method":"GET",
+      "body": [ ]
+    },
+    "response":{
+      "headers":{},
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":"Rule returned 0."
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRule ARGS:res \"@inspectFile /bin/echo\" \"id:1,phase:2,pass,t:trim\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing Operator :: @inspectFile (2/3)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length": "27",
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "uri":"/whee?res=0",
+      "method":"GET",
+      "body": [ ]
+    },
+    "response":{
+      "headers":{},
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":"Rule returned 1."
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRule ARGS:res \"@inspectFile /bin/echo\" \"id:1,phase:2,pass,t:trim\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing Operator :: @inspectFile (3/3)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length": "27",
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "uri":"/whee?res=whee",
+      "method":"GET",
+      "body": [ ]
+    },
+    "response":{
+      "headers":{},
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":"Rule returned 1."
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRule ARGS:res \"@inspectFile /bin/echo\" \"id:1,phase:2,pass,t:trim\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "resource":"lua",
+    "title":"Testing Operator :: @inspectFile - lua (1/7)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length": "27",
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "uri":"/whee?res=whee",
+      "method":"GET",
+      "body": [ ]
+    },
+    "response":{
+      "headers":{},
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":"Rule returned 1."
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRule ARGS:res \"@inspectFile test-cases/data/match.lua\" \"id:1,phase:2,pass,t:trim\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "resource":"lua",
+    "title":"Testing Operator :: @inspectFile - lua (2/7)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length": "27",
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "uri":"/whee?res=whee",
+      "method":"GET",
+      "body": [ ]
+    },
+    "response":{
+      "headers":{},
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":"echo 123"
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRule ARGS:res \"@inspectFile test-cases/data/match-log.lua\" \"id:1,phase:2,pass,t:trim\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "resource":"lua",
+    "title":"Testing Operator :: @inspectFile - lua (3/7)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length": "27",
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "uri":"/whee?res=whee",
+      "method":"GET",
+      "body": [ ]
+    },
+    "response":{
+      "headers":{},
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":"Target value: \"whee\" "
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRule ARGS:res \"@inspectFile test-cases/data/match-set.lua\" \"id:1,phase:2,pass,t:trim\"",
+      "SecRule TX:test \"whee\" \"id:2,phase:2,pass,t:trim\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "resource":"lua",
+    "title":"Testing Operator :: @inspectFile - lua (4/7)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length": "27",
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "uri":"/whee?res=whee",
+      "method":"GET",
+      "body": [ ]
+    },
+    "response":{
+      "headers":{},
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":"Number is bigger than one."
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRule ARGS \".\" \"id:2,phase:2,setvar:tx.test=2\"",
+      "SecRule ARGS:res \"@inspectFile test-cases/data/match-getvar.lua\" \"id:1,phase:2,pass,t:trim\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "resource":"lua",
+    "title":"Testing Operator :: @inspectFile - lua (5/7)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length": "27",
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "uri":"/whee?res=whee&z=z&d=e",
+      "method":"GET",
+      "body": [ ]
+    },
+    "response":{
+      "headers":{},
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":"Z: \\{ \\[1\\] = \\{ \\[\""
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRule QUERY_STRING \".\" \"id:2,phase:2,setvar:tx.test=2\"",
+      "SecRule ARGS:res \"@inspectFile test-cases/data/match-getvars.lua\" \"id:1,phase:2,pass,t:trim\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "resource":"lua",
+    "title":"Testing Operator :: @inspectFile - lua (6/7)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length": "27",
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "uri":"/whee?res=whee&z=z&d=e",
+      "method":"GET",
+      "body": [ ]
+    },
+    "response":{
+      "headers":{},
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":"Just fine."
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRule QUERY_STRING \".\" \"id:2,phase:2,setvar:tx.test=FELIPE\"",
+      "SecRule QUERY_STRING \"@inspectFile test-cases/data/match-getvar-transformation.lua\" \"id:1,phase:2,pass\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "resource":"lua",
+    "title":"Testing Operator :: @inspectFile - lua (7/7)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length": "27",
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "uri":"/whee?res=whee&z=z&d=e",
+      "method":"GET",
+      "body": [ ]
+    },
+    "response":{
+      "headers":{},
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":"Whee. Working like a charm. That is what we have: FELIPE"
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRule QUERY_STRING \".\" \"id:2,phase:2,setvar:tx.test=FeLiPe\"",
+      "SecRule QUERY_STRING \"@inspectFile test-cases/data/match-getvar-multi-transformations.lua\" \"id:1,phase:2,pass\""
+    ]
+  }
+]

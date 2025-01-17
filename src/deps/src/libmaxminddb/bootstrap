@@ -1,0 +1,21 @@
+#! /bin/sh
+
+# make sure  to use the installed libtool
+if [ -f ltmain.sh ]; then
+    rm ltmain.sh
+fi
+autoreconf -fiv
+
+###################################################
+# the steps below may help with outdated toolsets
+
+# disable dependency trackeing for OS X with multiply arch option's
+# automake -i --gnu --add-missing
+
+
+#aclocal \
+#&& automake -i --gnu --add-missing \
+#&& autoconf
+
+#LIBTOOLIZE=$( which libtoolize glibtoolize | head -1 )
+#$LIBTOOLIZE -f

@@ -1,0 +1,76 @@
+{% extends "dashboard.html" %}
+{% block content %}
+    <!-- Content -->
+    <div class="card p-1 mb-4 sticky-card">
+        <div class="d-flex flex-wrap justify-content-around align-items-center">
+            <div class="d-flex justify-content-center">
+                <div class="dropdown btn-group"
+                     {% if not files %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="No log files available"{% endif %}>
+                    <button type="button"
+                            class="btn btn-outline-primary dropdown-toggle{% if not files %} disabled{% endif %}"
+                            data-bs-toggle="dropdown"
+                            aria-haspopup="true"
+                            aria-expanded="false">
+                        <i class="bx bx-file"></i>
+                        <span class="d-none d-md-inline">&nbsp;Select File</span>
+                    </button>
+                    <ul id="types-dropdown-menu"
+                        class="dropdown-menu nav-pills max-vh-60 overflow-auto pt-0"
+                        role="tablist">
+                        {% for file in files %}
+                            <li class="nav-item">
+                                <a role="button"
+                                   href="{{ url_for('logs', file=file) }}"
+                                   class="dropdown-item{% if current_file and current_file == file %} active{% endif %}">
+                                    {{ file }}
+                                </a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% if page_num > 1 %}
+                    <div class="dropdown btn-group">
+                        <button type="button"
+                                class="btn btn-outline-primary dropdown-toggle ms-2"
+                                data-bs-toggle="dropdown"
+                                aria-haspopup="true"
+                                aria-expanded="false">
+                            <i class="bx bx-file-find"></i>
+                            <span class="d-none d-md-inline">&nbsp;Select Page</span>
+                        </button>
+                        <ul id="pages-dropdown-menu"
+                            class="dropdown-menu nav-pills max-vh-60 overflow-auto pt-0"
+                            role="tablist">
+                            {% for page in range(page_num, 0, -1) %}
+                                <li class="nav-item">
+                                    <a role="button"
+                                       href="{% if loop.index == 1 %}{{ url_for('logs', file=current_file) }}{% else %}{{ url_for('logs', file=current_file, page=page) }}{% endif %}"
+                                       class="dropdown-item{% if current_page == page %} active{% endif %}">
+                                        Page {{ page }}
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+            </div>
+            <div {% if not request.is_secure %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The copy feature is only available over HTTPS"{% endif %}>
+                <button id="copy-logs"
+                        type="button"
+                        class="btn btn-outline-secondary {% if not request.is_secure %}disabled{% endif %}">
+                    <i class="bx bx-copy-alt"></i>
+                    <span class="d-none d-md-inline">&nbsp;Copy</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="card p-4 min-vh-70">
+        <p id="logs-waiting"
+           class="text-center relative w-full p-2 text-primary rounded-lg fw-bold">Loading logs...</p>
+        <div id="raw-logs"
+             class="visually-hidden ace-editor border rounded position-absolute top-0 start-0 end-0 bottom-0">
+            {{ logs }}
+        </div>
+    </div>
+    <!-- / Content -->
+{% endblock %}

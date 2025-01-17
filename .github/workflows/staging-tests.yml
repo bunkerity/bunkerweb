@@ -1,0 +1,156 @@
+name: Perform staging tests (REUSABLE)
+
+on:
+  workflow_call:
+    inputs:
+      TYPE:
+        required: true
+        type: string
+      RUNS_ON:
+        required: true
+        type: string
+    # secrets:
+    #   PRIVATE_REGISTRY:
+    #     required: true
+    #   PRIVATE_REGISTRY_TOKEN:
+    #     required: true
+    #   TEST_DOMAINS:
+    #     required: true
+    #   ROOT_DOMAIN:
+    #     required: true
+
+jobs:
+  tests:
+    runs-on: ${{ fromJSON(inputs.RUNS_ON) }}
+    steps:
+      # Prepare
+      - name: Checkout source code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Login to ghcr
+        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - run: docker pull ghcr.io/bunkerity/bunkerweb-tests:testing && docker tag ghcr.io/bunkerity/bunkerweb-tests:testing local/bunkerweb-tests:latest
+        if: contains(fromJSON('["linux", "k8s"]'), inputs.TYPE) != true
+      - run: docker pull ghcr.io/bunkerity/scheduler-tests:testing && docker tag ghcr.io/bunkerity/scheduler-tests:testing local/scheduler-tests:latest
+        if: contains(fromJSON('["linux", "k8s"]'), inputs.TYPE) != true
+      - run: docker pull ghcr.io/bunkerity/autoconf-tests:testing && docker tag ghcr.io/bunkerity/autoconf-tests:testing local/autoconf-tests:latest
+        if: contains(fromJSON('["autoconf", "swarm"]'), inputs.TYPE)
+      - name: Push images to local repo
+        run: docker tag local/bunkerweb-tests:latest manager:5000/bunkerweb-tests:latest && docker push manager:5000/bunkerweb-tests:latest && docker tag local/scheduler-tests:latest manager:5000/scheduler-tests:latest && docker push manager:5000/scheduler-tests:latest && docker tag local/autoconf-tests:latest manager:5000/autoconf-tests:latest && docker push manager:5000/autoconf-tests:latest
+        if: inputs.TYPE == 'swarm'
+      - name: Install test dependencies
+        run: PIP_BREAK_SYSTEM_PACKAGES=1 pip3 install --no-cache-dir --require-hashes --no-deps -r tests/requirements.txt
+      - uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        with:
+          name: tf-k8s
+          path: /tmp
+        if: inputs.TYPE == 'k8s'
+      - run: |
+          echo "$SECRET_KEY" > /tmp/.secret_key
+          openssl enc -d -in /tmp/terraform.tar.enc -aes-256-cbc -pbkdf2 -iter 100000 -md sha256 -pass file:/tmp/.secret_key -out /tmp/terraform.tar
+          rm -f /tmp/.secret_key
+          tar xf /tmp/terraform.tar -C /
+          mkdir /tmp/reg
+          cp tests/terraform/k8s-reg.tf /tmp/reg
+          cp tests/terraform/providers.tf /tmp/reg
+          cd /tmp/reg
+          export TF_VAR_k8s_reg_user=${REG_USER}
+          export TF_VAR_k8s_reg_token=${REG_TOKEN}
+          terraform init
+          terraform apply -auto-approve
+        env:
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          REG_USER: ${{ github.actor }}
+          REG_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        if: inputs.TYPE == 'k8s'
+      - uses: azure/setup-kubectl@3e0aec4d80787158d308d7b364cb1b702e7feb7f # v4.0.0
+        if: inputs.TYPE == 'k8s'
+        with:
+          version: "v1.29.1"
+      - uses: azure/setup-helm@fe7b79cd5ee1e45176fcad797de68ecaf3ca4814 # v4.2.0
+        if: inputs.TYPE == 'k8s'
+      - name: Pull BW linux ubuntu test image
+        if: inputs.TYPE == 'linux'
+        run: docker pull ghcr.io/bunkerity/ubuntu-tests:testing && docker tag ghcr.io/bunkerity/ubuntu-tests:testing local/ubuntu:latest
+      - name: Pull BW linux debian test image
+        if: inputs.TYPE == 'linux'
+        run: docker pull ghcr.io/bunkerity/debian-tests:testing && docker tag ghcr.io/bunkerity/debian-tests:testing local/debian:latest
+      - name: Pull BW linux fedora test image
+        if: inputs.TYPE == 'linux'
+        run: docker pull ghcr.io/bunkerity/fedora-tests:testing && docker tag ghcr.io/bunkerity/fedora-tests:testing local/fedora:latest
+      - name: Pull BW linux rhel test image
+        if: inputs.TYPE == 'linux'
+        run: docker pull ghcr.io/bunkerity/rhel-tests:testing && docker tag ghcr.io/bunkerity/rhel-tests:testing local/rhel:latest
+      - name: Pull BW linux rhel9 test image
+        if: inputs.TYPE == 'linux'
+        run: docker pull ghcr.io/bunkerity/rhel9-tests:testing && docker tag ghcr.io/bunkerity/rhel9-tests:testing local/rhel9:latest
+      - name: Pull BW linux ubuntu jammy test image
+        if: inputs.TYPE == 'linux'
+        run: docker pull ghcr.io/bunkerity/ubuntu-jammy-tests:testing && docker tag ghcr.io/bunkerity/ubuntu-jammy-tests:testing local/ubuntu-jammy:latest
+      # Do tests
+      - name: Run tests
+        if: inputs.TYPE == 'docker'
+        run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "${{ inputs.TYPE }}"
+        env:
+          TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_DOCKER }}
+          ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
+      - name: Run tests
+        if: inputs.TYPE == 'autoconf'
+        run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "${{ inputs.TYPE }}"
+        env:
+          TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_AUTOCONF }}
+          ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
+      - name: Run tests
+        if: inputs.TYPE == 'swarm'
+        run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "${{ inputs.TYPE }}"
+        env:
+          TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_SWARM }}
+          ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
+      - name: Run tests
+        if: inputs.TYPE == 'k8s'
+        run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "kubernetes"
+        env:
+          TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_KUBERNETES }}
+          ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
+          KUBECONFIG: "/tmp/k8s/kubeconfig"
+          PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
+          IMAGE_TAG: "testing"
+      - name: Run Linux ubuntu tests
+        if: inputs.TYPE == 'linux'
+        run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "linux" "ubuntu"
+        env:
+          TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
+          ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
+      - name: Run Linux debian tests
+        if: inputs.TYPE == 'linux'
+        run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "linux" "debian"
+        env:
+          TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
+          ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
+      - name: Run Linux fedora tests
+        if: inputs.TYPE == 'linux'
+        run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "linux" "fedora"
+        env:
+          TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
+          ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
+      - name: Run Linux rhel tests
+        if: inputs.TYPE == 'linux'
+        run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "linux" "rhel"
+        env:
+          TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
+          ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
+      - name: Run Linux rhel9 tests
+        if: inputs.TYPE == 'linux'
+        run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "linux" "rhel9"
+        env:
+          TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
+          ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
+      - name: Run Linux ubuntu-jammy tests
+        if: inputs.TYPE == 'linux'
+        run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "linux" "ubuntu-jammy"
+        env:
+          TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
+          ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}

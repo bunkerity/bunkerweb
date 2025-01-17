@@ -1,0 +1,6 @@
+ghostUsername: "user"
+ghostPassword: "changeme42"
+ghostHost: "www.example.com"
+mysql:
+  auth:
+    password: "changeme1337"

@@ -1,0 +1,252 @@
+{% extends "dashboard.html" %}
+{% block content %}
+    <!-- Content -->
+    <div class="modal fade"
+         id="loadingModal"
+         data-bs-backdrop="static"
+         tabindex="-1"
+         aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-transparent border-0 shadow-none">
+                <div class="modal-body">
+                    <div class="d-flex justify-content-center align-items-center w-100">
+                        <lottie-player src="{{ url_for('static', filename='json/periscop.min.json') }}" background="transparent"  speed="1" style="width: 300px; height: 300px;" class="img-fluid" loop autoplay></lottie-player>
+                    </div>
+                    <p class="mt-3 text-white text-center">Pinging instances, please wait...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card table-responsive text-nowrap p-4 pb-8 min-vh-70">
+        <input type="hidden" id="instances_number" value="{{ instances|length }}" />
+        <textarea type="hidden"
+                  id="columns_preferences_defaults"
+                  class="visually-hidden">{{ columns_preferences_defaults['instances']|tojson }}</textarea>
+        <textarea type="hidden" id="columns_preferences" class="visually-hidden">{{ columns_preferences|tojson }}</textarea>
+        <input type="hidden"
+               id="csrf_token"
+               name="csrf_token"
+               value="{{ csrf_token() }}" />
+        <p id="instances-waiting"
+           class="text-center relative w-full p-2 text-primary rounded-lg fw-bold">Loading instances...</p>
+        <table id="instances"
+               class="table responsive nowrap position-relative w-100 d-none">
+            <thead>
+                <tr>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="Show the instances' details"></th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="Select all instances"></th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="The hostname of the Instance">Hostname</th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="The user defined or auto-generated Instance's name">Name</th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="The creation method of the Instance">Method</th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="The Instance's health status">Health</th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="The Instance's type">Type</th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="The date and time when the Instance was created">Created</th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="The date and time when the Instance was last seen">Last Seen</th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="The actions that can be performed on the Instance">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for instance in instances %}
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td>{{ instance.hostname }}</td>
+                        <td>{{ instance.name }}</td>
+                        <td id="method-{{ instance.hostname }}">{{ instance.method }}</td>
+                        <td>
+                            {% if instance.status == "up" %}
+                                <span id="status-{{ instance.hostname }}"
+                                      class="badge rounded-pill bg-label-primary">Up</span>
+                            {% elif instance.status == "loading" %}
+                                <span id="status-{{ instance.hostname }}"
+                                      class="badge rounded-pill bg-label-warning">Loading</span>
+                            {% else %}
+                                <span id="status-{{ instance.hostname }}"
+                                      class="badge rounded-pill bg-label-danger">{{ instance.status | title }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                {% if instance.type == "container" %}
+                                    <i class="bx bxl-docker"></i>&nbsp;Container
+                                {% elif instance.type == "pod" %}
+                                    <i class="bx bxl-kubernetes"></i>&nbsp;Pod
+                                {% else %}
+                                    <i class="bx bx-microchip"></i>&nbsp;Static
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td class="instance-creation-date">{{ instance.creation_date.astimezone().isoformat() }}</td>
+                        <td class="instance-last-seen-date">{{ instance.last_seen.astimezone().isoformat() }}</td>
+                        <td>
+                            <div class="d-flex justify-content-evenly">
+                                <button type="button"
+                                        class="btn btn-primary btn-sm me-1 ping-instance"
+                                        data-instance="{{ instance['hostname'] }}"
+                                        data-bs-toggle="tooltip"
+                                        data-bs-placement="bottom"
+                                        data-bs-original-title="Ping Instance {{ instance['hostname'] }}">
+                                    <i class="bx bx-bell bx-xs"></i>
+                                </button>
+                                <div data-bs-toggle="tooltip"
+                                     data-bs-placement="bottom"
+                                     data-bs-original-title="{% if instance.status != 'up' %}Instance {{ instance['hostname'] }} is not up{% else %}Reload instance {{ instance['hostname'] }}{% endif %}">
+                                    <button type="button"
+                                            class="btn btn-outline-secondary btn-sm me-1 reload-instance{% if instance.status != 'up' %} disabled{% endif %}"
+                                            data-instance="{{ instance['hostname'] }}">
+                                        <i class="bx bx-refresh bx-xs"></i>
+                                    </button>
+                                </div>
+                                <div data-bs-toggle="tooltip"
+                                     data-bs-placement="bottom"
+                                     data-bs-original-title="{% if instance.status != 'up' %}Instance {{ instance['hostname'] }} is not up{% else %}Stop instance {{ instance['hostname'] }}{% endif %}">
+                                    <button type="button"
+                                            class="btn btn-outline-secondary btn-sm me-1 stop-instance{% if instance.status != 'up' %} disabled{% endif %}"
+                                            data-instance="{{ instance['hostname'] }}">
+                                        <i class="bx bx-stop bx-xs"></i>
+                                    </button>
+                                </div>
+                                <div data-bs-toggle="tooltip"
+                                     data-bs-placement="bottom"
+                                     data-bs-original-title="{% if instance['method'] != 'ui' or is_readonly %}Disabled by {% if is_readonly %}readonly{% else %}{{ instance['method'] }}{% endif %}{% else %}Delete instance {{ instance['hostname'] }}{% endif %}">
+                                    <button type="button"
+                                            data-instance="{{ instance['hostname'] }}"
+                                            class="btn btn-outline-danger btn-sm me-1 delete-instance{% if instance['method'] != 'ui' or is_readonly %} disabled{% endif %}">
+                                        <i class="bx bx-trash bx-xs"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+            <span class="position-absolute bottom-0 start-50 translate-middle badge rounded-pill bg-secondary">
+                TZ: <script nonce="{{ script_nonce }}">document.write(Intl.DateTimeFormat().resolvedOptions().timeZone);</script>
+            </span>
+        </table>
+    </div>
+    <div id="feedback-toast"
+         class="bs-toast toast fade bg-{% if theme == 'light' %}white{% else %}dark{% endif %} border"
+         role="alert"
+         aria-live="assertive"
+         aria-atomic="true"
+         data-bs-autohide="true">
+        <div class="toast-header d-flex align-items-center">
+            <i class="d-block h-auto rounded tf-icons bx bx-xs bx-bell bx-tada me-2"></i>
+            <span class="fw-medium me-auto">BunkerWeb Forever</span>
+            <small class="text-body-secondary">just now</small>
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="toast"
+                    aria-label="Close"></button>
+        </div>
+        <div class="toast-body">If you read this, it means that you're curious 👀</div>
+    </div>
+    {% if not is_readonly %}
+        <div class="modal fade"
+             id="modal-create-instance"
+             data-bs-backdrop="static"
+             tabindex="-1"
+             aria-hidden="true"
+             role="dialog">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Create new instance</h5>
+                        <button type="button"
+                                class="btn-close"
+                                data-bs-dismiss="modal"
+                                aria-label="Close"></button>
+                    </div>
+                    <form action="{{ url_for("instances") }}/new" method="POST">
+                        <div class="modal-body">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                            <div class="mb-3">
+                                <label for="hostname" class="form-label">Hostname</label>
+                                <input type="text"
+                                       class="form-control"
+                                       id="hostname"
+                                       name="hostname"
+                                       placeholder="http://bunkerweb"
+                                       maxlength="256"
+                                       required />
+                            </div>
+                            <div class="mb-3">
+                                <label for="name" class="form-label">Name</label>
+                                <input type="text"
+                                       class="form-control"
+                                       id="name"
+                                       name="name"
+                                       placeholder="My Bunker"
+                                       maxlength="256"
+                                       required />
+                            </div>
+                            <div class="alert alert-primary text-center" role="alert">
+                                You don't need to provide the port or the server_name as the values of both <code>API_HTTP_PORT</code> and <code>API_SERVER_NAME</code> will be used for the instance configuration.
+                            </div>
+                        </div>
+                        <div class="modal-footer justify-content-center">
+                            <button type="submit" class="btn btn-bw-green me-2">Create Instance</button>
+                            <button type="reset"
+                                    class="btn btn-outline-secondary"
+                                    data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade"
+             id="modal-delete-instances"
+             data-bs-backdrop="static"
+             tabindex="-1"
+             aria-hidden="true"
+             role="dialog">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Delete instances</h5>
+                        <button type="button"
+                                class="btn-close"
+                                data-bs-dismiss="modal"
+                                aria-label="Close"></button>
+                    </div>
+                    <form action="{{ url_for("instances") }}/delete" method="POST">
+                        <div class="modal-body">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                            <input type="hidden" id="selected-instances-input" name="instances" value="" />
+                            <div class="alert alert-danger text-center" role="alert">Are you sure you want to delete the selected instances?</div>
+                            <div id="selected-instances" class="mb-3"></div>
+                        </div>
+                        <div class="modal-footer justify-content-center">
+                            <button type="submit" class="btn btn-outline-danger me-2">Delete instances</button>
+                            <button type="reset"
+                                    class="btn btn-outline-secondary"
+                                    data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    <!-- / Content -->
+{% endblock %}

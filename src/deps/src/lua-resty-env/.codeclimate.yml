@@ -1,0 +1,12 @@
+---
+engines:
+  fixme:
+    enabled: true
+  luacheck:
+    enabled: true
+    channel: beta
+ratings:
+  paths:
+    - "**/*.lua"
+exclude_paths:
+  - .idea

@@ -1,0 +1,23 @@
+version: "3.5"
+
+services:
+  tests:
+    build: .
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      PYTHONUNBUFFERED: "1"
+      USE_BAD_BEHAVIOR: "yes"
+      BAD_BEHAVIOR_STATUS_CODES: "400 401 403 404 405 429 444"
+      BAD_BEHAVIOR_BAN_TIME: "86400"
+      BAD_BEHAVIOR_THRESHOLD: "10"
+      BAD_BEHAVIOR_COUNT_TIME: "60"
+    extra_hosts:
+      - "www.example.com:192.168.0.2"
+    networks:
+      bw-services:
+        ipv4_address: 192.168.0.3
+
+networks:
+  bw-services:
+    external: true

@@ -1,0 +1,38 @@
+services:
+  radarr:
+    image: lscr.io/linuxserver/radarr:5.7.0.8882-ls226
+    networks:
+      bw-services:
+        aliases:
+          - radarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/London
+    volumes:
+      - ./config:/config
+      - ./movies:/movies #optional
+      - ./downloads:/downloads #optional
+    labels:
+      - bunkerweb.SERVER_NAME=www.example.com
+      - bunkerweb.MAX_CLIENT_SIZE=50m
+      # Methods used by the radarr API
+      # more info at https://radarr.video/docs/api/
+      - bunkerweb.ALLOWED_METHODS=GET|POST|HEAD|DELETE|PUT
+      # Proxy requests to radarr
+      # websocket is needed
+      - bunkerweb.USE_REVERSE_PROXY=yes
+      - bunkerweb.REVERSE_PROXY_URL=/
+      - bunkerweb.REVERSE_PROXY_HOST=http://radarr:7878
+      - bunkerweb.REVERSE_PROXY_WS=yes
+      # Increase request rate for API endpoints
+      - bunkerweb.LIMIT_REQ_URL_1=^/api/
+      - bunkerweb.LIMIT_REQ_RATE_1=10r/s
+      - |
+        bunkerweb.CUSTOM_CONF_MODSEC_CRS_radarr=
+        SecAction "id:900220,phase:1,nolog,pass,t:none,setvar:'tx.allowed_request_content_type=|application/x-www-form-urlencoded| |multipart/form-data| |multipart/related| |text/xml| |application/xml| |application/soap+xml| |application/x-amf| |application/json| |application/cloudevents+json| |application/cloudevents-batch+json| |application/octet-stream| |application/csp-report| |application/xss-auditor-report| |text/plain| |application/x-git-upload-pack-request| |application/x-git-receive-pack-request|'"
+
+networks:
+  bw-services:
+    external: true
+    name: bw-services

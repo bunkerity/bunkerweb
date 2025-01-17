@@ -1,0 +1,8 @@
+.git
+.idea/
+.vscode/
+__pycache__/
+
+env/
+src/deps/tmp_venv/
+tests/

@@ -1,0 +1,17 @@
+Changelog
+---------
+
+0.1         feature : set_var functions
+0.1.1       feature : upstream_list directive and functions
+0.2         feature : conf merge functions
+            feature : conf command macros
+            feature : 'action' macros
+0.2.1       bugfix  : ndk_map_uri_to_path_add_suffix
+0.2.2       feature : regex conf functions
+0.2.3       feature : version number
+0.2.4       change  : the auto/build script is now executed automatically on compilation
+0.2.9       feature : ngx_auto_lib included with source
+0.2.11      bugfix  : hash functions did not display properly
+0.2.12      feature : patches for rewrite functions and rewrite phase handler
+0.2.13      change  : revert to old behaviour rewrite functions
+            change  : pre-generated config and macro files now provided

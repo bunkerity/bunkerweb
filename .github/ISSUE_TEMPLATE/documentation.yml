@@ -1,0 +1,29 @@
+name: 📚 Documentation enhancement
+description: Suggest an idea that will improve BunkerWeb documentation or declare a bug in the documentation
+title: "[DOC] "
+labels: ["documentation"]
+body:
+  - type: markdown
+    attributes:
+      value: >
+        #### Before submitting a documentation enhancement request, please make sure the feature hasn't been already addressed by searching through [the existing and past documentation enhancement requests](https://github.com/bunkerity/bunkerweb/issues?q=is%3Aissue+sort%3Acreated-desc+%5BDOC%5D+in%3Atitle).
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Concise description of the error or what is missing.
+    validations:
+      required: true
+  - type: textarea
+    id: proposed-solution
+    attributes:
+      label: Proposed solution (optional)
+      description: How it should be fixed or what should be added ?
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Code of Conduct
+      description: By submitting this documentation enhancement request, you agree to follow our [Code of Conduct](https://github.com/bunkerity/bunkerweb/blob/master/CODE_OF_CONDUCT.md)
+      options:
+        - label: I agree to follow this project's Code of Conduct
+          required: true

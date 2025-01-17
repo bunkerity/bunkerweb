@@ -1,0 +1,27 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##! The HTML entities included in the expression are a best guess selection of frequently
+##! used entities. Including too many would further reduce the performance of the expression
+##! but there may well be additional entities that would make sense to add to the list.
+##! The official list of entities is hosted by the WHATWG:
+##! https://html.spec.whatwg.org/multipage/named-characters.html#named-character-references
+
+##!+ i
+
+##!^ ^
+##!$ *$
+
+&[aeiouclnrszg]acute;
+&[cdelnrstz]caron;
+&[cgklnrst]cedil;
+&[aeioucghjswy]circ;
+&[aeiou]grave;
+&[au]ring;
+&[anoi]tilde;
+&[aeiouy]uml;
+&amp;
+&apos;
+&nbsp;
+&oslash;
+[^'\";=\x5c]

@@ -1,0 +1,34 @@
+name: Test
+
+on: [ push, pull_request ]
+
+jobs:
+
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        luaVersion: [ "5.4", "5.3", "5.2", "5.1", "luajit" ] # , "luajit-openresty" ]
+        debug: ["", "_G.debug = nil"] # also run with debug lib disabled
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup ‘lua’
+        uses: leafo/gh-actions-lua@v9
+        with:
+          luaVersion: ${{ matrix.luaVersion }}
+
+      - name: Setup ‘luarocks’
+        uses: leafo/gh-actions-luarocks@v4
+
+      - name: Setup dependencies
+        run: |
+          luarocks install luasocket
+
+
+      - name: Run regression tests
+        run: make test
+        env:
+          LUA_INIT: ${{ matrix.debug }}

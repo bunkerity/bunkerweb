@@ -1,0 +1,28 @@
+{% extends "dashboard.html" %}
+{% block content %}
+    <!-- Content -->
+    <div class="card position-relative p-4 min-vh-70">
+        <div class="position-absolute bottom-0 end-0 m-4" style="z-index: 1000">
+            <div class="card p-1">
+                <a role="button"
+                   class="btn btn-sm btn-outline-secondary "
+                   href="{{ url_for("cache") }}/{{ '/'.join(request.path.split('/')[2:] ) }}?download=true"
+                   data-bs-toggle="tooltip"
+                   data-bs-placement="bottom"
+                   data-bs-original-title="Download file"
+                   target="_blank"
+                   rel="noreferrer">
+                    <i class="bx bx-download bx-xs"></i>
+                    <span class="d-none d-md-inline">&nbsp;Download</span>
+                </a>
+            </div>
+        </div>
+        <p id="cache-waiting"
+           class="text-center relative w-full p-2 text-primary rounded-lg fw-bold">Loading cache file...</p>
+        <div id="cache-value"
+             class="visually-hidden ace-editor border rounded position-absolute top-0 start-0 end-0 bottom-0 courier-prime">
+            {{ cache_file }}
+        </div>
+    </div>
+    <!-- / Content -->
+{% endblock %}

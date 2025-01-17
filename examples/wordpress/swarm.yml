@@ -1,0 +1,52 @@
+version: "3"
+
+services:
+  mywp:
+    image: wordpress:6-apache
+    volumes:
+      - wp-data:/var/www/html
+    networks:
+      - bw-services
+    environment:
+      - WORDPRESS_DB_HOST=mydb
+      - WORDPRESS_DB_NAME=wp
+      - WORDPRESS_DB_USER=user
+      - WORDPRESS_DB_PASSWORD=db-user-pwd # replace with a stronger password (must match MYSQL_PASSWORD)
+      - WORDPRESS_TABLE_PREFIX=prefix_ # best practice : replace with a random prefix
+    deploy:
+      placement:
+        constraints:
+          - "node.role==worker"
+      labels:
+        - bunkerweb.SERVER_NAME=www.example.com
+        - bunkerweb.MAX_CLIENT_SIZE=50m
+        - bunkerweb.USE_REVERSE_PROXY=yes
+        - bunkerweb.REVERSE_PROXY_URL=/
+        - bunkerweb.REVERSE_PROXY_HOST=http://mywp
+        # This is a CRS plugin specific to WordPress
+        - bunkerweb.MODSECURITY_CRS_PLUGIN_URLS=https://github.com/coreruleset/wordpress-rule-exclusions-plugin/archive/refs/tags/v1.0.1.tar.gz
+
+  mydb:
+    image: mariadb:11
+    volumes:
+      - db-data:/var/lib/mysql
+    networks:
+      - bw-services
+    environment:
+      - MYSQL_ROOT_PASSWORD=db-root-pwd # replace with a stronger password
+      - MYSQL_DATABASE=wp
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=db-user-pwd # replace with a stronger password (must match WORDPRESS_DB_PASSWORD)
+    deploy:
+      placement:
+        constraints:
+          - "node.role==worker"
+
+networks:
+  bw-services:
+    external: true
+    name: bw-services
+
+volumes:
+  wp-data:
+  db-data:

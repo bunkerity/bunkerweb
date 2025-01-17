@@ -1,0 +1,11 @@
+create\s+function\s+.+\s+returns
+;\s*?alter\b\s*?[\[(]?\w{2,}
+;\s*?create\b\s*?[\[(]?\w{2,}
+;\s*?delete\b\s*?[\[(]?\w{2,}
+;\s*?desc\b\s*?[\[(]?\w{2,}
+;\s*?insert\b\s*?[\[(]?\w{2,}
+;\s*?load\b\s*?[\[(]?\w{2,}
+;\s*?rename\b\s*?[\[(]?\w{2,}
+;\s*?select\b\s*?[\[(]?\w{2,}
+;\s*?truncate\b\s*?[\[(]?\w{2,}
+;\s*?update\b\s*?[\[(]?\w{2,}

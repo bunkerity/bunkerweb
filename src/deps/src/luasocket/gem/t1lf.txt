@@ -1,0 +1,5 @@
+this is a test file
+it should have been saved as lf eol
+but t1.lua will convert it to crlf eol
+otherwise it is broken!
+

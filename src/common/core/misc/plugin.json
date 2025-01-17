@@ -1,0 +1,195 @@
+{
+  "id": "misc",
+  "name": "Miscellaneous",
+  "description": "Miscellaneous settings.",
+  "version": "1.0",
+  "stream": "partial",
+  "settings": {
+    "DISABLE_DEFAULT_SERVER": {
+      "context": "global",
+      "default": "no",
+      "help": "Deny HTTP request if the request vhost is unknown.",
+      "id": "disable-default-server",
+      "label": "Disable default server",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
+    "DISABLE_DEFAULT_SERVER_STRICT_SNI": {
+      "context": "global",
+      "default": "no",
+      "help": "Close SSL/TLS connection if the SNI is unknown.",
+      "id": "disable-default-server-strict-sni",
+      "label": "Disable default server strict SNI",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
+    "ALLOWED_METHODS": {
+      "context": "multisite",
+      "default": "GET|POST|HEAD",
+      "help": "Allowed HTTP and WebDAV methods, separated with pipes to be sent by clients.",
+      "id": "allowed-methods",
+      "label": "Allowed methods",
+      "regex": "^(?!\\|)(\\|?([A-Z]{3,})(?!.*(^|\\|)\\2))+$",
+      "type": "text"
+    },
+    "MAX_CLIENT_SIZE": {
+      "context": "multisite",
+      "default": "10m",
+      "help": "Maximum body size (0 for infinite).",
+      "id": "max-client-size",
+      "label": "Maximum body size",
+      "regex": "^\\d+[kKmMgG]?$",
+      "type": "text"
+    },
+    "SERVE_FILES": {
+      "context": "multisite",
+      "default": "yes",
+      "help": "Serve files from the local folder.",
+      "id": "serve-files",
+      "label": "Serve files",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
+    "ROOT_FOLDER": {
+      "context": "multisite",
+      "default": "",
+      "help": "Root folder containing files to serve (/var/www/html/{server_name} if unset).",
+      "id": "root-folder",
+      "label": "Root folder",
+      "regex": "^(/[\\w. \\-]+)*/?$",
+      "type": "text"
+    },
+    "HTTP2": {
+      "context": "multisite",
+      "default": "yes",
+      "help": "Support HTTP2 protocol when HTTPS is enabled.",
+      "id": "http2",
+      "label": "HTTP2",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
+    "HTTP3": {
+      "context": "multisite",
+      "default": "yes",
+      "help": "Support HTTP3 protocol when HTTPS is enabled.",
+      "id": "http3",
+      "label": "HTTP3",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
+    "HTTP3_ALT_SVC_PORT": {
+      "context": "multisite",
+      "default": "443",
+      "help": "HTTP3 alternate service port. This value will be used as part of the Alt-Svc header.",
+      "id": "http3-alt-svc-port",
+      "label": "HTTP3 Alt-Svc port",
+      "regex": "^((6553[0-5])|(655[0-2][0-9])|(65[0-4][0-9]{2})|(6[0-4][0-9]{3})|([1-5][0-9]{4})|([0-5]{0,5})|([0-9]{1,4}))$",
+      "type": "text"
+    },
+    "LISTEN_HTTP": {
+      "context": "multisite",
+      "default": "yes",
+      "help": "Respond to (insecure) HTTP requests.",
+      "id": "http-listen",
+      "label": "HTTP listen",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
+    "USE_OPEN_FILE_CACHE": {
+      "context": "multisite",
+      "default": "no",
+      "help": "Enable open file cache feature",
+      "id": "use-open-file-cache",
+      "label": "Use open file cache",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
+    "OPEN_FILE_CACHE": {
+      "context": "multisite",
+      "default": "max=1000 inactive=20s",
+      "help": "Open file cache directive",
+      "id": "open-file-cache",
+      "label": "Use open file cache",
+      "regex": "^(off|max=\\d+( inactive=\\d+(ms?|[shdwMy]))?)$",
+      "type": "text"
+    },
+    "OPEN_FILE_CACHE_ERRORS": {
+      "context": "multisite",
+      "default": "yes",
+      "help": "Enable open file cache for errors",
+      "id": "open-file-cache-errors",
+      "label": "Open file cache errors",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
+    "OPEN_FILE_CACHE_MIN_USES": {
+      "context": "multisite",
+      "default": "2",
+      "help": "Enable open file cache minimum uses",
+      "id": "open-file-cache-min-uses",
+      "label": "Open file cache min uses",
+      "regex": "^[1-9]\\d*$",
+      "type": "text"
+    },
+    "OPEN_FILE_CACHE_VALID": {
+      "context": "multisite",
+      "default": "30s",
+      "help": "Open file cache valid time",
+      "id": "open-file-cache-valid",
+      "label": "Open file cache valid time",
+      "regex": "^\\d+(ms?|[shdwMy])$",
+      "type": "text"
+    },
+    "EXTERNAL_PLUGIN_URLS": {
+      "context": "global",
+      "default": "",
+      "help": "List of external plugins URLs (direct download to .zip or .tar file) to download and install (URLs are separated with space).",
+      "id": "external-plugin-urls",
+      "label": "External plugin URLs",
+      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
+      "type": "text"
+    },
+    "DENY_HTTP_STATUS": {
+      "context": "global",
+      "default": "403",
+      "help": "HTTP status code to send when the request is denied (403 or 444). When using 444, BunkerWeb will close the connection.",
+      "id": "deny-http-status",
+      "label": "Deny HTTP status",
+      "regex": "^(403|444)$",
+      "type": "select",
+      "select": ["403", "444"]
+    },
+    "SEND_ANONYMOUS_REPORT": {
+      "context": "global",
+      "default": "yes",
+      "help": "Send anonymous report to BunkerWeb maintainers.",
+      "id": "send-anonymous-report",
+      "label": "Send anonymous report",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    }
+  },
+  "jobs": [
+    {
+      "name": "default-server-cert",
+      "file": "default-server-cert.py",
+      "every": "once",
+      "reload": false,
+      "async": true
+    },
+    {
+      "name": "anonymous-report",
+      "file": "anonymous-report.py",
+      "every": "day",
+      "reload": false,
+      "async": true
+    },
+    {
+      "name": "download-plugins",
+      "file": "download-plugins.py",
+      "every": "once",
+      "reload": false,
+      "async": true
+    }
+  ]
+}

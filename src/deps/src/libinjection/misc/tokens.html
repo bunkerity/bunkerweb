@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}libinjection sqli tokens diagnostic{% end %}
+{% block body %}
+<h1>libinjection {{ version }} tokens diagnostics</h1>
+<p>Enter text to be analyzed in form below or directly modify the query string: </p>
+<form method="get">
+<textarea class="form-control" name="id" rows="5">{{ formvalue }}</textarea><br/>
+<input class="btn" type="submit" name="type" value="fingerprints"></input>
+<input class="btn" type="submit" name="type" value="tokens"></input>
+</form>
+{% if len(formvalue) %}
+
+<hr/>
+<ul>
+{% for p in parsed %}
+<li>
+<a href="#{{ p['quote'] }}-{{ p['comment'] }}">
+{{ p['quote']}} quotes / {{ p['comment'] }} comments
+</a>
+</li>
+{% end %}
+</ul>
+
+{% for p in parsed %}
+<a name="{{ p['quote'] }}-{{ p['comment'] }}"></a>
+{% if p['sqli'] %}
+
+<div class='red' style="width:100%; margin:0px">
+{% else %}
+<div style="width:100%; maring:0px; background-color:inherit">
+{% end %}
+<h2>{{ p['quote']}} quotes / {{ p['comment'] }} comments: SQLi {{ p['sqli'] }} </h2>
+
+<p>Fingerprint: {{ p['fingerprint'] }}</p>
+<div style="float:left; margin:0px; padding: 0px; width:50%; background-color:inherit">
+
+<h4>Raw Tokens</h4>
+<table class="table table-condensed">
+<tr><th>type</th><th>value</th></tr>
+{% for i in p['tokens'] %}
+<tr><td>{{ i[0] }}</td><td>{{ i[1] }}</tr>
+{% end %}
+</table>
+</div>
+<div style="float:left; margin: 0px;padding: 0px;width:50%;background-color:inherit">
+<h4>Folded</h4>
+<table class="table table-condensed">
+<tr><th>type</th><th>value</th></tr>
+{% for i in p['folds'] %}
+<tr><td>{{ i[0] }}</td><td>{{ i[1] }}</tr>
+{% end %}
+</table>
+</div>
+
+</div>
+<hr style="clear:both">
+
+{% end %}
+{% end %}
+{% end %}

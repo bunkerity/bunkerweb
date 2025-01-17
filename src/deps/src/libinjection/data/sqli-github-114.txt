@@ -1,0 +1,4 @@
+# https://github.com/client9/libinjection/issues/114
+# ht @sshayb
+
+; if not((select serverproperty('isintegratedsecurityonly')) <> 1) waitfor delay '0:0:2

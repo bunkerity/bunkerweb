@@ -1,0 +1,38 @@
+[
+{
+  "enabled": 1,
+  "version_min": 209000,
+  "version_max": -1,
+  "title": "Macro expansion inside regex does not work",
+  "url": "https:\/\/github.com\/SpiderLabs\/ModSecurity\/issues\/1528",
+  "gihub_issue": 1528,
+  "client": {
+    "ip": "200.249.12.31",
+    "port": 2313
+  },
+  "server": {
+    "ip": "200.249.12.31",
+    "port": 80
+  },
+  "request": {
+    "uri":"/?param=attack",
+    "headers": "",
+    "body": "",
+    "method": "GET",
+    "http_version": 1.1
+  },
+  "response": {
+    "headers": "",
+    "body": ""
+  },
+  "expected": {
+    "debug_log": "Rule returned 1",
+    "error_log": "Matched \"Operator `Rx' with parameter `\\^attack\\$'"
+  },
+  "rules": [
+    "SecRuleEngine On",
+    "SecAction \"id:1, nolog, setvar:tx.bad_value=attack\"",
+    "SecRule ARGS:param \"@rx ^%{tx.bad_value}$\" \"id:2,block\""
+  ]
+}
+]
