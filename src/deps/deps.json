@@ -70,9 +70,9 @@
     },
     {
       "id": "lua-resty-dns",
-      "name": "lua-resty-dns v0.22",
+      "name": "lua-resty-dns v0.23",
       "url": "https://github.com/openresty/lua-resty-dns.git",
-      "commit": "869d2fbb009b6ada93a5a10cb93acd1cc12bd53f",
+      "commit": "273db4f348d4676f554c5319a902e7b836153192",
       "post_install": "rm -r src/deps/src/lua-resty-dns/t"
     },
     {
