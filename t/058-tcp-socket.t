@@ -4,12 +4,13 @@ use Test::Nginx::Socket::Lua::Stream;
 
 repeat_each(2);
 
-plan tests => repeat_each() * 221;
+plan tests => repeat_each() * 224;
 
 our $HtmlDir = html_dir;
 
 $ENV{TEST_NGINX_MEMCACHED_PORT} ||= 11211;
 $ENV{TEST_NGINX_RESOLVER} ||= '8.8.8.8';
+$ENV{TEST_NGINX_HTML_DIR} ||= html_dir();
 
 #log_level 'warn';
 log_level 'debug';
@@ -3545,3 +3546,58 @@ lua tcp socket calling receiveany() method to read at most 7 bytes
 
 --- error_log
 shutdown on a not connected socket: closed
+
+
+
+=== TEST 68: setkeepalive with TLSv1.3
+--- skip_openssl: 3: < 1.1.1
+--- stream_config
+    server {
+        listen unix:$TEST_NGINX_HTML_DIR/nginx.sock ssl;
+        ssl_certificate     ../../cert/test_ecdsa.crt;
+        ssl_certificate_key ../../cert/test_ecdsa.key;
+        ssl_protocols TLSv1.3;
+        content_by_lua_block {
+            local sock = assert(ngx.req.socket(true))
+            local data
+            while true do
+                data = assert(sock:receive())
+                assert(data == "hello")
+            end
+        }
+    }
+--- stream_server_config
+    lua_ssl_protocols TLSv1.3;
+    content_by_lua_block {
+        local sock = ngx.socket.tcp()
+        sock:settimeout(2000)
+        local ok, err = sock:connect("unix:$TEST_NGINX_HTML_DIR/nginx.sock")
+        if not ok then
+            ngx.say("failed to connect: ", err)
+            return
+        end
+        ngx.say("connected: ", ok)
+        local ok, err = sock:sslhandshake(false, nil, false)
+        if not ok then
+            ngx.say("failed to sslhandshake: ", err)
+            return
+        end
+        local ok, err = sock:send("hello\n")
+        if not ok then
+            ngx.say("failed to send: ", err)
+            return
+        end
+        -- sleep a while to make sure the NewSessionTicket message has arrived
+        ngx.sleep(1)
+        local ok, err = sock:setkeepalive()
+        if not ok then
+            ngx.say("failed to setkeepalive: ", err)
+        else
+            ngx.say("setkeepalive: ", ok)
+        end
+    }
+--- stream_response
+connected: 1
+setkeepalive: 1
+--- no_error_log
+[error]

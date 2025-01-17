@@ -30,7 +30,7 @@ __DATA__
         ngx.say("ngx: ", n)
     }
 --- stream_response
-ngx: 53
+ngx: 54
 --- no_error_log
 [error]
 
