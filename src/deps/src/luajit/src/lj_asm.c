@@ -1,6 +1,6 @@
 /*
 ** IR assembler (SSA IR -> machine code).
-** Copyright (C) 2005-2023 Mike Pall. See Copyright Notice in luajit.h
+** Copyright (C) 2005-2025 Mike Pall. See Copyright Notice in luajit.h
 */
 
 #define lj_asm_c
@@ -949,11 +949,11 @@ static int asm_sunk_store(ASMState *as, IRIns *ira, IRIns *irs)
 static void asm_snap_alloc1(ASMState *as, IRRef ref)
 {
   IRIns *ir = IR(ref);
-  if (!irref_isk(ref) && ir->r != RID_SUNK) {
+  if (!irref_isk(ref)) {
     bloomset(as->snapfilt1, ref);
     bloomset(as->snapfilt2, hashrot(ref, ref + HASH_BIAS));
     if (ra_used(ir)) return;
-    if (ir->r == RID_SINK) {
+    if (ir->r == RID_SINK || ir->r == RID_SUNK) {
       ir->r = RID_SUNK;
 #if LJ_HASFFI
       if (ir->o == IR_CNEWI) {  /* Allocate CNEWI value. */
