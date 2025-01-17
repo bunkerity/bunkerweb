@@ -10,9 +10,9 @@
   "git_repository": [
     {
       "id": "headers-more-nginx-module",
-      "name": "headers-more-nginx-module v0.34",
+      "name": "headers-more-nginx-module v0.37",
       "url": "https://github.com/openresty/headers-more-nginx-module.git",
-      "commit": "bea1be3bbf6af28f6aa8cf0c01c07ee1637e2bd0",
+      "commit": "06dc0be56e5ec9f7fd814e881b066b5540a85bec",
       "post_install": "rm -r src/deps/src/headers-more-nginx-module/t"
     },
     {

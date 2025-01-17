@@ -10,6 +10,7 @@
 - [FEATURE] Renamed the `MODSECURITY_CRS_PLUGIN_URLS` setting to `MODSECURITY_CRS_PLUGINS` to make it more consistent as the setting now accepts plugin names directly as well as URLs and automatically downloads them
 [FEATURE] Add `plugin_list` command to `bwcli` for listing available plugins and their commands
 - [DOCS] Added Swarm deprecated notice in the documentation
+- [DEPS] Updated headers-more-nginx-module version to v0.37
 - [DEPS] Updated libmaxminddb version to v1.12.2
 - [DEPS] Updated luajit2 version to v2.1-20250117
 - [DEPS] Updated lua-resty-core version to v0.1.31
