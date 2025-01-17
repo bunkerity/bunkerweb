@@ -1,0 +1,86 @@
+[
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing Config :: Phases by name (1/2)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*"
+      },
+      "uri":"/?key=value&key=other_value",
+      "method":"GET"
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":"Target value: \"other_value\" \\(Variable: MATCHED_VAR\\)"
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRule ARGS:key \"@contains other_value\" \"id:1,phase:request,pass,chain\"",
+      "SecRule MATCHED_VAR \"@contains asdf\" \"\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing Config :: Phases by name (2/2)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*"
+      },
+      "uri":"/?key=value&key=other_value",
+      "method":"GET"
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":"Target value: \"other_value\" \\(Variable: MATCHED_VAR\\)"
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRule ARGS:key \"@contains other_value\" \"chain,pass,phase:response,id:28\"",
+      "SecRule MATCHED_VAR \"@contains Aasdf\" \"\"",
+      "SecResponseBodyAccess On",
+      "SecRule MATCHED_VAR \"@contains other_value\" \"id:29,phase:response,pass\"",
+      "SecRule MATCHED_VAR \"@contains other_value\" \"id:30,phase:response,pass\""
+    ]
+  }
+]
+

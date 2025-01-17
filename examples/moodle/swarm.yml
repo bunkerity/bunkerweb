@@ -1,0 +1,56 @@
+services:
+  mymoodle:
+    image: bitnami/moodle:4
+    networks:
+      - bw-services
+    depends_on:
+      - mydb
+    volumes:
+      - moodle-files:/bitnami/moodle
+      - moodle-data:/bitnami/moodledata
+    environment:
+      - MOODLE_USERNAME=admin # replace with your moodle admin username
+      - MOODLE_PASSWORD=password # replace with your moodle admin password
+      - MOODLE_EMAIL=moodle@example.com # replace with your moodle admin email
+      - MOODLE_SITE_NAME=My Moodle # replace with your moodle site name
+      - MOODLE_DATABASE_HOST=mydb
+      - MOODLE_DATABASE_NAME=moodle
+      - MOODLE_DATABASE_USER=user
+      - MOODLE_DATABASE_PASSWORD=db-user-pwd # replace with a stronger password (must match MARIADB_PASSWORD)
+    deploy:
+      placement:
+        constraints:
+          - "node.role==worker"
+      labels:
+        - bunkerweb.SERVER_NAME=www.example.com
+        - bunkerweb.USE_REVERSE_PROXY=yes
+        - bunkerweb.REVERSE_PROXY_URL=/
+        - bunkerweb.REVERSE_PROXY_HOST=https://mymoodle:8443
+
+  mydb:
+    image: bitnami/mariadb:11.2
+    volumes:
+      - db-data:/bitnami/mariadb
+    networks:
+      - bw-services
+    environment:
+      - MARIADB_ROOT_PASSWORD=db-root-pwd # replace with a stronger password
+      - MARIADB_DATABASE=moodle
+      - MARIADB_USER=user
+      - MARIADB_PASSWORD=db-user-pwd # replace with a stronger password (must match MOODLE_DATABASE_PASSWORD)
+      - MARIADB_CHARACTER_SET=utf8mb4
+      - MARIADB_COLLATE=utf8mb4_unicode_ci
+    deploy:
+      placement:
+        constraints:
+          - "node.role==worker"
+
+networks:
+  bw-services:
+    external: true
+    name: bw-services
+
+volumes:
+  db-data:
+  moodle-files:
+  moodle-data:

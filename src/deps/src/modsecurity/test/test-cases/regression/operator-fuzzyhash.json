@@ -1,0 +1,216 @@
+[
+  {
+    "enabled":1,
+    "version_min":300000,
+    "resource":"ssdeep",
+    "title":"Testing Operator :: @fuzzyHash (1/2)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length": "27",
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body": [
+"",
+"# -- Rule engine initialization ----------------------------------------------",
+"",
+"# Enable ModSecurity, attaching it to every transaction. Use detection",
+"# only to start with, because that minimises the chances of post-installation",
+"# disruption.",
+"#",
+"SecRuleEngine DetectionOnly",
+"",
+"",
+"# -- Request body handling ---------------------------------------------------",
+"",
+"# Allow ModSecurity to access request bodies. If you don't, ModSecurity",
+"# won't be able to see any POST parameters, which opens a large security",
+"# hole for attackers to exploit.",
+"#",
+"SecRequestBodyAccess On",
+"",
+"",
+"# Enable XML request body parser.",
+"# Initiate XML Processor in case of xml content-type",
+"#",
+"SecRule REQUEST_HEADERS:Content-Type \"text/xml\" \\",
+"     \"id:'200000',phase:1,t:none,t:lowercase,pass,nolog,ctl:requestBodyProcessor=XML\"",
+"",
+"# Enable JSON request body parser.",
+"# Initiate JSON Processor in case of JSON content-type; change accordingly",
+"# if your application does not use 'application/json'",
+"#",
+"SecRule REQUEST_HEADERS:Content-Type \"application/json\" \\",
+"     \"id:'200001',phase:1,t:none,t:lowercase,pass,nolog,ctl:requestBodyProcessor=JSON\"",
+"",
+"# Maximum request body size we will accept for buffering. If you support",
+"# file uploads then the value given on the first line has to be as large",
+"# as the largest file you are willing to accept. The second value refers",
+"# to the size of data, with files excluded. You want to keep that value as",
+"# low as practical.",
+"#",
+"SecRequestBodyLimit 13107200",
+"SecRequestBodyNoFilesLimit 131072",
+"",
+"# Store up to 128 KB of request body data in memory. When the multipart",
+"# parser reachers this limit, it will start using your hard disk for",
+"# storage. That is slow, but unavoidable.",
+"#",
+"SecRequestBodyInMemoryLimit 131072",
+"",
+"# What do do if the request body size is above our configured limit.",
+"# Keep in mind that this setting will automatically be set to ProcessPartial",
+"# when SecRuleEngine is set to DetectionOnly mode in order to minimize",
+"# disruptions when initially deploying ModSecurity.",
+"#",
+"SecRequestBodyLimitAction Reject",
+"",
+"# Verify that we've correctly processed the request body.",
+"# As a rule of thumb, when failing to process a request body",
+"# you should reject the request (when deployed in blocking mode)",
+"# or log a high-severity alert (when deployed in detection-only mode).",
+"#",
+"SecRule REQBODY_ERROR \"!\\@eq 0\" ",
+"\"id:'200002', phase:2,t:none,log,deny,status:400,msg:'Failed to parse request body.',logdata:'%{reqbody_error_msg}',severity:2\"",
+"       "
+]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":" Fuzzy hash: matched with score: 54."
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRequestBodyAccess On",
+      "SecRule REQUEST_BODY \"@fuzzyHash test-cases/data/ssdeep.txt 1\" \"id:1,phase:2,pass,t:trim\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "resource":"ssdeep",
+    "title":"Testing Operator :: @fuzzyHash (2/2)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length": "27",
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body": [
+"",
+"# -- Rule engine initialization ----------------------------------------------",
+"",
+"# Enable ModSecurity, attaching it to every transaction. Use detection",
+"# only to start with, because that minimises the chances of post-installation",
+"# disruption.",
+"#",
+"SecRuleEngine DetectionOnly",
+"",
+"",
+"# -- Request body handling ---------------------------------------------------",
+"",
+"# Allow ModSecurity to access request bodies. If you don't, ModSecurity",
+"# won't be able to see any POST parameters, which opens a large security",
+"# hole for attackers to exploit.",
+"#",
+"SecRequestBodyAccess On",
+"",
+"",
+"# Enable XML request body parser.",
+"# Initiate XML Processor in case of xml content-type",
+"#",
+"SecRule REQUEST_HEADERS:Content-Type \"text/xml\" \\",
+"     \"id:'200000',phase:1,t:none,t:lowercase,pass,nolog,ctl:requestBodyProcessor=XML\"",
+"",
+"# Enable JSON request body parser.",
+"# Initiate JSON Processor in case of JSON content-type; change accordingly",
+"# if your application does not use 'application/json'",
+"#",
+"SecRule REQUEST_HEADERS:Content-Type \"application/json\" \\",
+"     \"id:'200001',phase:1,t:none,t:lowercase,pass,nolog,ctl:requestBodyProcessor=JSON\"",
+"",
+"# Maximum request body size we will accept for buffering. If you support",
+"# file uploads then the value given on the first line has to be as large",
+"# as the largest file you are willing to accept. The second value refers",
+"# to the size of data, with files excluded. You want to keep that value as",
+"# low as practical.",
+"#",
+"SecRequestBodyLimit 13107200",
+"SecRequestBodyNoFilesLimit 131072",
+"",
+"# Store up to 128 KB of request body data in memory. When the multipart",
+"# parser reachers this limit, it will start using your hard disk for",
+"# storage. That is slow, but unavoidable.",
+"#",
+"SecRequestBodyInMemoryLimit 131072",
+"",
+"# What do do if the request body size is above our configured limit.",
+"# Keep in mind that this setting will automatically be set to ProcessPartial",
+"# when SecRuleEngine is set to DetectionOnly mode in order to minimize",
+"# disruptions when initially deploying ModSecurity.",
+"#",
+"SecRequestBodyLimitAction Reject",
+"",
+"# Verify that we've correctly processed the request body.",
+"# As a rule of thumb, when failing to process a request body",
+"# you should reject the request (when deployed in blocking mode)",
+"# or log a high-severity alert (when deployed in detection-only mode).",
+"#",
+"SecRule REQBODY_ERROR \"!\\@eq 0\" ",
+"\"id:'200002', phase:2,t:none,log,deny,status:400,msg:'Failed to parse request body.',logdata:'%{reqbody_error_msg}',severity:2\"",
+"       "
+]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":"Rule returned 0."
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRequestBodyAccess On",
+      "SecRule REQUEST_BODY \"@fuzzyHash test-cases/data/ssdeep.txt 100\" \"id:1,phase:2,pass,t:trim\""
+    ]
+  }
+]

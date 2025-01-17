@@ -1,0 +1,20 @@
+version: "3.5"
+
+services:
+  tests:
+    build: .
+    environment:
+      PYTHONUNBUFFERED: "1"
+      USE_AUTH_BASIC: "no"
+      AUTH_BASIC_LOCATION: "sitewide"
+      AUTH_BASIC_USER: "bunkerity"
+      AUTH_BASIC_PASSWORD: "Secr3tP@ssw0rd"
+    extra_hosts:
+      - "www.example.com:192.168.0.2"
+    networks:
+      bw-services:
+        ipv4_address: 192.168.0.3
+
+networks:
+  bw-services:
+    external: true

@@ -1,0 +1,64 @@
+# Java Classes for use with Java RCEs
+#
+# Used With Rule 944130 in Apache Struts and Oracle Weblogic RCEs Detection:
+#
+# CVE-2017-5638  (2017.01.29) https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2017-5638
+# CVE-2017-9791  (2017.06.21) https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2017-9791
+# CVE-2017-9805  (2017.06.21) https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2017-9805
+# CVE-2017-10271 (2017.06.21) https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2017-10271
+# CVE-2018-11776 (2018.06.05) https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-11776
+# CVE-2021-44228 (2021.11.26) https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-44228
+#
+# Additional Resources
+# Apache S2-057 (2019.01.20) https://cwiki.apache.org/confluence/display/WW/S2-057
+
+com.opensymphony.xwork2
+com.sun.org.apache
+freemarker.core
+freemarker.template
+freemarker.ext.rhino
+java.io.BufferedInputStream
+java.io.BufferedReader
+java.io.ByteArrayInputStream
+java.io.ByteArrayOutputStream
+java.io.CharArrayReader
+java.io.DataInputStream
+java.io.File
+java.io.FileOutputStream
+java.io.FilePermission
+java.io.FileWriter
+java.io.FilterInputStream
+java.io.FilterOutputStream
+java.io.FilterReader
+java.io.InputStream
+java.io.InputStreamReader
+java.io.IOException
+java.io.LineNumberReader
+java.io.ObjectOutputStream
+java.io.OutputStream
+java.io.PipedOutputStream
+java.io.PipedReader
+java.io.PrintStream
+java.io.PushbackInputStream
+java.io.Reader
+java.io.StringReader
+java.lang.Class
+java.lang.Integer
+java.lang.Number
+java.lang.Object
+java.lang.Process
+java.lang.ProcessBuilder
+java.lang.reflect
+java.lang.Runtime
+java.lang.String
+java.lang.StringBuilder
+java.lang.System
+java.net.Socket
+javassist
+javax.script.ScriptEngineManager
+org.apache.commons
+org.apache.struts
+org.apache.struts2
+org.omg.CORBA
+java.beans.XMLDecode
+sun.reflect

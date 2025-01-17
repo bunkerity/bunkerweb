@@ -1,0 +1,35 @@
+
+BITMASK             1MORE       bitmask
+BUFS                TAKE1       bufs
+COMPLEX_KEYVAL      TAKE2       http_complex_keyval
+COMPLEX_PATH        TAKE1       http_complex_path
+COMPLEX_VALUE       TAKE1       http_complex_value
+COMPLEX_VALUE_ARRAY 1MORE       http_complex_value_array
+ENCODING            TAKE1       encoding
+ENUM                TAKE1       enum
+FALSE               NOARGS      false
+FULL_PATH           TAKE1       full_path
+KEYVAL              TAKE2       keyval
+KEYVAL1             TAKE2       keyval1
+MSEC                TAKE1       msec
+NULL                NOARGS      null
+NUM                 TAKE1       num
+NUM64               TAKE1       num64
+NUM_FLAG            TAKE1       num_flag
+ONOFF               FLAG        flag
+OFF                 TAKE1       off
+PATH                TAKE1       split_path
+REXEX               TAKE1       regex
+REGEX_CL            TAKE1       regex_caseless
+REGEX_ARRAY         1MORE       regex_array
+REGEX_ARRAY_CL      1MORE       regex_array_caseless
+PTR                 NOARGS      ptr
+SEC                 TAKE1       sec
+SEC_FLAG            TAKE2       sec_flag
+SIZE                TAKE1       size
+STR                 TAKE1       str
+STR_ARRAY           1MORE       str_array_multi
+STR_ARRAY1          TAKE1       str_array
+TRUE                NOARGS      true
+
+ 

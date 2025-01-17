@@ -1,0 +1,20 @@
+[\"'`]\s*?!\s*?[\"'`\w]
+[\"'`];?\s*?having\b\s*?[^\s]
+[\"'`];?\s*?select\b\s*?[^\s]
+[\"'`];?\s*?union\b\s*?[^\s]
+\s*?exec.*?\Wxp_cmdshell
+\s*?execute.*?\Wxp_cmdshell
+\wiif\s*?\(
+connection_id\s*?\([^\)]*?
+current_user\s*?\([^\)]*?
+database\s*?\([^\)]*?
+exec\s+master\.
+execute\s+master\.
+from\W+information_schema\W
+into[\s+]+dumpfile\s*?[\"'`]
+into[\s+]+outfile\s*?[\"'`]
+schema\s*?\([^\)]*?
+select.*?\w?user\(
+union select @
+union[\w(\s]*?select
+user\s*?\([^\)]*?

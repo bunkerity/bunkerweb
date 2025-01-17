@@ -1,0 +1,167 @@
+# This list contains patterns of various web shells, backdoors and similar
+# software written in PHP language. There is no way how to automatically update
+# this list, so it must be done by hand. Here is a recommended way how to add
+# new malicious software:
+# 1.) As patterns are matched against RESPONSE_BODY, you need to run a malicious
+#     software (ideally in an isolated environment) and catch the output.
+# 2.) In the output, search for static pattern unique enough to match only
+#     the software in question and to not do any FPs. The best pick is usually
+#     a part of HTML code with software name.
+# 3.) Include software name and URL (if available) in the comment above
+#     the pattern.
+#
+# Data comes from multiple places of which some doesn't work anymore. Few are
+# listed below:
+# - https://github.com/JohnTroony/php-webshells/tree/master/Collection
+# - https://www.localroot.net/
+# - Google search (keywords like webshells, php backdoor and similar)
+
+# 1n73ction web shell
+<title>=[ 1n73ct10n privat shell ]=</title>
+# Ajax/PHP Command Shell web shell
+>Ajax/PHP Command Shell<
+# AK-74 Security Team Web-shell
+.:: :[ AK-74 Security Team Web-shell ]: ::.
+# ALFA-SHELL web shell (deprecated, https://github.com/solevisible)
+~ ALFA TEaM Shell -
+# Andela Yuwono Priv8 Shell web shell
+<title>--==[[ Andela Yuwono Priv8 Shell ]]==--</title>
+# Ani-Shell web shell (https://ani-shell.sourceforge.net/)
+<title>Ani-Shell | India</title>
+# AnonymousFox PHP web shell
+<input type='submit' value='file' /></form>AnonymousFox
+# Antichat Shell web shell
+- Antichat Shell</title>
+# AYT web shell
+Ayyildiz Tim  | AYT
+# b374k web shell (https://github.com/b374k/b374k)
+<link rel='SHORTCUT ICON' href='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMy1jMDExIDY2LjE0NTY2MSwgMjAxMi8wMi8wNi0xNDo1NjoyNyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNiAoV2luZG93cykiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6MkRFNDY2MDQ4MDgyMTFFM0FDRDdBN0MzOTAxNzZFQUYiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6MkRFNDY2MDU4MDgyMTFFM0FDRDdBN0MzOTAxNzZFQUYiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDoyREU0NjYwMjgwODIxMUUzQUNEN0E3QzM5MDE3NkVBRiIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDoyREU0NjYwMzgwODIxMUUzQUNEN0E3QzM5MDE3NkVBRiIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/Pu6UWJYAAAKySURBVHjafFNdSJNhFH7e/fhDkrm2i03QphsxhYSgMIUgIeiiK6/SCAKTKNlFoEtBRfEvXYhM+0GQMtMUL7qSgqS0QCNKTDS6cJWGi6n577Zv3/e+b+934ZgxPfDBd3jP85xznnOOzufz4SCr7R7knKOg4eaVd9WPBgsZY/3NZcWJ0TGaaKeuZzgz2ueMgFF+p6WnL0OAjzMK+f8k+wg4xXxN91D5ns8ok8CRH5S2GogS8HBKk1xud+uBBIwpm5zyRvW/+sHAJuM8nsrMIElHi0/aHAmFl/OI2WRyOevrK/YwJFoD0ecFkfWthpDNRH1Cct4ZOzRaglX/DsY+TcNqTUd2phEjo1OiWg5KKUhJTbua6XTT7SKvSlLpGWB6DUjuWQeW/m4iJIWho8DvBT+2tgOwpZsxM/tm/sn9Trsar2OMq6rOV3X19wncJUNSEsnKSsWifx0BKYTgdhDxiENBfjZCuxJejX0W4frZiAZNZUVxVKYfmcyuKTI15ZxKw4IA74aCCIiMeqZDptWIuV8+hAkXOlFo9eaLNyrvOfdp4Gp/FjKlpMSbLMlY2dhCaCcEnUJgt5sF4QqkkIKsDAtGXn9QSThlMmFCg8gUmELpkXg99FoNwgEJ2jBBWpoBP/8sC7AMi/EY/EvLUBQJCpOMT921hDG5JkIglPd8/7EIFpShCQMnrAYsrW0gLERUwTNfv2FyaloddWmvu25NxTzvaG6MELRVXK/SgL8fHZ9AjsMCKUzFqBhSjQZAkrC6viqyy+ILdxU775bH3APVblW3j3POzuc4bGIHNPgyM4dAcFdtslT07OWcvhRVJIvVtg0/9nhJrGMqqWzpFb1eFYuiVfdbACcGOlvzYx0cOewaVStyuiY5U3JFVbahhx3eQ48plr3obDtHqSxTRZ6K9f5PgAEAm/hvADIkGOQAAAAASUVORK5CYII='>
+# BloodSecurity Hackers Shell web shell
+<title>BloodSecurity Hackers Shell</title>
+# Bypass Attack Shell web shell
+<font color='red' size='6px' face='Fredericka the Great'> Bypass Attack Shell </font>
+# c0derz shell web shell
+title='.::[c0derz shell]::.'>
+# C99Shell + N3tShell web shell
+<font face=Webdings size=6><b>!</b></font>
+# Con7ext Shell V.2 web shell
+<title>Con7ext Shell V.2</title>
+# Crystal shell web shell
+<font face="Wingdings 3" size="5">y</font><b>Crystal shell v.
+# Unknown (probably private) web shell
+<title>CUPLIS BYPASSS SHELL</title>
+# CWShell web shell
+~ CWShell ~</font></a>
+# dC3 Security Crew web shell
+&dir&pic=o.b height= width=>
+# Defacing Tool Pro web shell
+<b>[ Defacing Tool Pro v
+# Dive Shell web shell
+<title>Dive Shell - Emperor Hacking Team</title>
+# easy simple php web shell
+<script>document.getElementById("cmd").focus();</script>
+# ex0 shell web shell
+color=DeepSkyBlue   size=6>    ## ex0 shell
+# FaTaLSheLL web shell
+<p align="center" class="style4">FaTaLSheLL v
+# G-Security Webshell
+<title>G-Security Webshell</title>
+# Gecko web shell
+<title>Gecko [
+# h4ntu shell web shell
+<title>h4ntu shell [powered by tsoi]</title>
+# IDBTEAM SHELLS file manager
+<H1><center>-=[+] IDBTEAM SHELLS
+# IndoXploit web shell
+<title>IndoXploit</title>
+# KA_uShell web shell
+<KAdot Universal Shell>     |
+## Laudanum PHP Web Shells (http://sourceforge.net/projects/laudanum)
+# Laudanum dns.php
+<title>Laudanum PHP DNS Access</title>
+# Laudanum file.php
+<title>Laudanum PHP File Browser</title>
+# Laudanum host.php
+<title>Laudanum PHP Hostname by IP Lookup</title>
+# Laudanum proxy.php
+<title>Laudanum PHP Proxy</title>
+# Laudanum shell.php
+<title>Laudanum PHP Shell Access</title>
+## Laudanum WordPress Plugin settings.php
+<h2>Laudanum Tools</h2>
+# Lifka Shell web shell
+>LIFKA SHELL</span></big></big></big></a>
+# Loader'z web shell
+<title>Loader'z WEB shell</title>
+# Locus7Shell web shell
+b>--[ x2300 Locus7Shell v.
+# Lolipop web shell
+<title>Lolipop.php - Edited By KingDefacer -
+# MARIJUANA web shell (https://0x5a455553.github.io/MARIJUANA/)
+<link rel="icon" href="//0x5a455553.github.io/MARIJUANA/icon.png" />
+# Matamu Mat web shell
+<title> Matamu Mat </title>
+# MyShell web shell
+<b>MyShell</b> &copy;2001 Digitart Producciones</a>
+# NCC Shell web shell
+<h1>.:NCC:. Shell v
+# PHPShell by Macker web shell
+<font size=3>PHPShell by Macker - Version
+# PHPShell by MAX666 web shell
+PHPShell by MAX666, Private Exploit, For Server Hacking
+# qsd web shell
+<form action="" METHOD="GET" >Execute Shell Command (safe mode is off): <input type="text" name="c"><input type="submit" value="Go"></form>
+# Rootshell web shell
+<p align="center"><font face="Verdana" size="2">Rootshell v
+# rusuh web shell
+<font color=lime>./rusuh</font>
+# Safe0ver web shell
+<font color="navy"><strong>##Safe0ver##</strong></font>
+# Shany's web shell
+<center><h1>Watch Your system Shany was here.</h1></center><center><h1>Linux Shells</h1></center><hr><hr>
+# Simple PHP backdoor web shell
+<!-- Simple PHP backdoor by DK
+# SimShell web shell
+<title>SimShell - Simorgh Security MGZ</title>
+# Sincap web shell
+<title>:: AventGrup ::.. - Sincap
+# Small Shell file manager
+<title>Small Shell - Edited By KingDefacer</title>
+# Small Web Shell
+<title>small web shell by zaco
+# SoldiersofAllah Private Shell web shell
+<title>SoldiersofAllah Private Shell |
+# Sosyete web shell
+<title>Sosyete Safe Mode Bypass Shell -
+# STNC WebShell
+&nbsp;&nbsp;STNC&nbsp;WebShell&nbsp;
+# StresBypass shell web shell
+<font face="Wingdings 3" size="5">y</font><b>StresBypass<span lang="en-us">v
+# SyRiAn Sh3ll web shell
+<title>SyRiAn Sh3ll ~
+# Tiny File Manager
+<title>Tiny File Manager</title>
+# Turk Shell web shell
+<head><title>Wardom | Ne Mutlu T
+# Unknown web shell
+<hr>to browse go to http://?d=[directory here]
+# Ustadcage48 Filemanager
+<font color="red">USTADCAGE_48</font> <font color="dodgerblue">FILE MANAGER</font>
+# WebRoot Hack Tools shell
+<title>WebRoot Hack Tools</title>
+# web shell by BLaSTER
+<div align="center"><span class="style6">By BLaSTER</span><br />
+# WinX Shell web shell
+<head><title>-:[GreenwooD]:- WinX Shell</title>
+# wwwolf web shell
+<sup><a href="#" onclick="cmd.value=''; cmd.focus(); return false;">Clear cmd</a></sup>
+# Yourman.sh Mini Shell web shell
+<title>Yourman.sh Mini Shell</title>
+# Zerion Mini Shell web shell
+</div><center><br />Zerion Mini Shell <font color=
+# Zero Byte Mini Shell V2 web shell
+<title>0byt3m1n1-V2</title>
+# Zerostore web shell
+<title>ZEROSHELL | ZEROSTORE</title>
+# Unknown web shell
+<input type=submit name=find value='find writeable'>

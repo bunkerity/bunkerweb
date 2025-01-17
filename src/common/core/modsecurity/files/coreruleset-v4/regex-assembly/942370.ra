@@ -1,0 +1,51 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##!+ i
+
+##! Helpers
+##!> define quotes [\"'`]
+
+##!> assemble
+  or
+  xor
+  div
+  like
+  between
+  and
+  ##!=< operators
+##!<
+
+##! Main assembly
+##!> assemble
+  {{quotes}}\s*?
+  ##!=>
+  ##!> assemble
+    \*.+
+    ##!=>
+    ##!> assemble
+      ##!> assemble
+        ##!=> operators
+      ##!<
+      id
+      ##!=>
+    ##!<
+    ##!=>
+    \W*?{{quotes}}\d
+    ##!=>
+  ##!<
+  [^\w\s?]+\s*?[^\w\s]+\s*?{{quotes}}
+  [^\w\s]+\s*?[\W\d].*?#
+  [^\w\s]+\s*?[\W\d].*?--
+  ##!> assemble
+    ##!> assemble
+      ##!=> operators
+    ##!<
+    ##!=>
+    \s[^\d]+[\w-]+.*?\d
+  ##!<
+##!<
+
+\^{{quotes}}
+{{quotes}}.*?\*\s*?\d
+[()\*<>%+-][\w-]+[^\w\s]+{{quotes}}[^,]

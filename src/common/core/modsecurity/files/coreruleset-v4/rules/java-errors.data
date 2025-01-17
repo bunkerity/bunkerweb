@@ -1,0 +1,10 @@
+[java.lang.
+class java.lang.
+java.lang.NullPointerException
+java.rmi.ServerException
+at java.lang.
+onclick="toggle('full exception chain stacktrace')"
+at org.apache.catalina
+at org.apache.coyote.
+at org.apache.tomcat.
+at org.apache.jasper.

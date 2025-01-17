@@ -1,0 +1,50 @@
+services:
+  myps:
+    image: prestashop/prestashop:8
+    volumes:
+      - ps-data:/var/www/html
+    networks:
+      bw-services:
+        aliases:
+          - myps
+    environment:
+      - DB_SERVER=mydb
+      - DB_USER=user
+      - DB_PASSWD=db-user-pwd # replace with a stronger password (must match MYSQL_PASSWORD)
+      - DB_PREFIX=prefix_ # replace with a random prefix (good security practice)
+      - DB_NAME=prestashop
+      - PS_ENABLE_SSL=1
+      - ADMIN_MAIL=admin@example.com # change to the prestashop admin email
+      - ADMIN_PASSWD=changeme # change to the prestashop admin password
+      - PS_FOLDER_ADMIN=administration # change to the prestashop admin folder
+    labels:
+      - bunkerweb.SERVER_NAME=www.example.com
+      - bunkerweb.MAX_CLIENT_SIZE=50m
+      - bunkerweb.USE_REVERSE_PROXY=yes
+      - bunkerweb.REVERSE_PROXY_URL=/
+      - bunkerweb.REVERSE_PROXY_HOST=http://myps
+      - bunkerweb.LIMIT_REQ_URL_1=/install/index.php
+      - bunkerweb.LIMIT_REQ_RATE_1=8r/s
+
+  mydb:
+    image: mariadb:11
+    volumes:
+      - db-data:/var/lib/mysql
+    networks:
+      bw-services:
+        aliases:
+          - mydb
+    environment:
+      - MYSQL_ROOT_PASSWORD=db-root-pwd # replace with a stronger password
+      - MYSQL_DATABASE=prestashop
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=db-user-pwd # replace with a stronger password (must match DB_PASSWD)
+
+networks:
+  bw-services:
+    external: true
+    name: bw-services
+
+volumes:
+  ps-data:
+  db-data:

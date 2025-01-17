@@ -1,0 +1,337 @@
+[
+   {
+    "enabled": 1,
+    "version_min":300000,
+    "version_max":0,
+    "title":"Collection :: TX full vs partial match",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":2313
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "User-Agent":"Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.5) Gecko/20091102 Firefox/3.5.5 (.NET CLR 3.5.30729)"
+      },
+      "uri":"/",
+      "method":"GET",
+      "http_version":1.1,
+      "body":""
+    },
+    "response":{
+      "headers":{
+        "Content-Type":"text/xml; charset=utf-8\n"
+      },
+      "body":[
+        "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
+      ]
+    },
+    "expected":{
+	"http_code":200
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRule REMOTE_ADDR \"@unconditionalMatch\" \"id:1,deny,setvar:TX.partial_match=1,chain\"",
+      "SecRule TX.partial \"@gt 0\" \"id:2,t:lowercase,t:none,status:444\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "version_max":0,
+    "title":"Testing collection :: TX (1/4)",
+    "client":{  
+      "ip":"200.249.12.31",
+      "port":2313
+    },
+    "server":{  
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{  
+      "headers":{  
+        "User-Agent":"Mozilla\/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.5) Gecko\/20091102 Firefox\/3.5.5 (.NET CLR 3.5.30729)",
+        "Accept":"text\/html,application\/xhtml+xml,application\/xml;q=0.9,*\/*;q=0.8",
+        "Accept-Language":"en-us,en;q=0.5",
+        "Accept-Encoding":"gzip,deflate",
+        "Accept-Charset":"ISO-8859-1,utf-8;q=0.7,*;q=0.7",
+        "Keep-Alive":"300",
+        "Connection":"keep-alive",
+        "Cookie":"PHPSESSID=rAAAAAAA2t5uvjq435r4q7ib3vtdjq120",
+        "Pragma":"no-cache",
+        "Cache-Control":"no-cache"
+      },
+      "uri":"\/test.pl?param1=   test   &param2=test2",
+      "method":"GET",
+      "http_version":1.1,
+      "body":""
+    },
+    "response":{  
+      "headers":{  
+        "Content-Type":"text\/xml; charset=utf-8\n\r",
+        "Content-Length":"length\n\r"
+      },
+      "body":[  
+        "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n\r",
+        "<soap:Envelope xmlns:xsi=\"http:\/\/www.w3.org\/2001\/XMLSchema-instance\" xmlns:xsd=\"http:\/\/www.w3.org\/2001\/XMLSchema\" xmlns:soap=\"http:\/\/schemas.xmlsoap.org\/soap\/envelope\/\">\n\r",
+        "  <soap:Body>\n\r",
+        "  <EnlightenResponse xmlns=\"http:\/\/clearforest.com\/\">\n\r",
+        "  <EnlightenResult>string<\/EnlightenResult>\n\r",
+        "  <\/EnlightenResponse>\n\r",
+        "  <\/soap:Body>\n\r",
+        "<\/soap:Envelope>\n\r"
+      ]
+    },
+    "expected":{  
+      "audit_log":"",
+      "debug_log":"Target value: \"to_test\" \\(Variable: TX:something\\)",
+      "error_log":""
+    },
+    "rules":[  
+      "SecRuleEngine On",
+      "SecRule REQUEST_HEADERS \"@contains PHPSESSID\" \"id:1,t:lowercase,t:none,setvar:TX.something=to_test\"",
+      "SecRule TX \"@contains to_test\" \"id:2,t:lowercase,t:none\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "version_max":0,
+    "title":"Testing collection :: TX (2/4)",
+    "client":{  
+      "ip":"200.249.12.31",
+      "port":2313
+    },
+    "server":{  
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{  
+      "headers":{  
+        "User-Agent":"Mozilla\/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.5) Gecko\/20091102 Firefox\/3.5.5 (.NET CLR 3.5.30729)",
+        "Accept":"text\/html,application\/xhtml+xml,application\/xml;q=0.9,*\/*;q=0.8",
+        "Accept-Language":"en-us,en;q=0.5",
+        "Accept-Encoding":"gzip,deflate",
+        "Accept-Charset":"ISO-8859-1,utf-8;q=0.7,*;q=0.7",
+        "Keep-Alive":"300",
+        "Connection":"keep-alive",
+        "Cookie":"PHPSESSID=rAAAAAAA2t5uvjq435r4q7ib3vtdjq120",
+        "Pragma":"no-cache",
+        "Cache-Control":"no-cache"
+      },
+      "uri":"\/test.pl?param1=   test   &param2=test2",
+      "method":"GET",
+      "http_version":1.1,
+      "body":""
+    },
+    "response":{  
+      "headers":{  
+        "Content-Type":"text\/xml; charset=utf-8\n\r",
+        "Content-Length":"length\n\r"
+      },
+      "body":[  
+        "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n\r",
+        "<soap:Envelope xmlns:xsi=\"http:\/\/www.w3.org\/2001\/XMLSchema-instance\" xmlns:xsd=\"http:\/\/www.w3.org\/2001\/XMLSchema\" xmlns:soap=\"http:\/\/schemas.xmlsoap.org\/soap\/envelope\/\">\n\r",
+        "  <soap:Body>\n\r",
+        "  <EnlightenResponse xmlns=\"http:\/\/clearforest.com\/\">\n\r",
+        "  <EnlightenResult>string<\/EnlightenResult>\n\r",
+        "  <\/EnlightenResponse>\n\r",
+        "  <\/soap:Body>\n\r",
+        "<\/soap:Envelope>\n\r"
+      ]
+    },
+    "expected":{  
+      "audit_log":"",
+      "debug_log":"Target value: \"1\" \\(Variable: TX:something\\)",
+      "error_log":""
+    },
+    "rules":[  
+      "SecRuleEngine On",
+      "SecRule REQUEST_HEADERS \"@contains PHPSESSID\" \"id:1,t:lowercase,t:none,setvar:TX.something\"",
+      "SecRule TX \"@contains to_test\" \"id:2,t:lowercase,t:none\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "version_max":0,
+    "title":"Testing collection :: TX (3/4)",
+    "client":{  
+      "ip":"200.249.12.31",
+      "port":2313
+    },
+    "server":{  
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{  
+      "headers":{  
+        "User-Agent":"Mozilla\/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.5) Gecko\/20091102 Firefox\/3.5.5 (.NET CLR 3.5.30729)",
+        "Accept":"text\/html,application\/xhtml+xml,application\/xml;q=0.9,*\/*;q=0.8",
+        "Accept-Language":"en-us,en;q=0.5",
+        "Accept-Encoding":"gzip,deflate",
+        "Accept-Charset":"ISO-8859-1,utf-8;q=0.7,*;q=0.7",
+        "Keep-Alive":"300",
+        "Connection":"keep-alive",
+        "Cookie":"PHPSESSID=rAAAAAAA2t5uvjq435r4q7ib3vtdjq120",
+        "Pragma":"no-cache",
+        "Cache-Control":"no-cache"
+      },
+      "uri":"\/test.pl?param1=   test   &param2=test2",
+      "method":"GET",
+      "http_version":1.1,
+      "body":""
+    },
+    "response":{  
+      "headers":{  
+        "Content-Type":"text\/xml; charset=utf-8\n\r",
+        "Content-Length":"length\n\r"
+      },
+      "body":[  
+        "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n\r",
+        "<soap:Envelope xmlns:xsi=\"http:\/\/www.w3.org\/2001\/XMLSchema-instance\" xmlns:xsd=\"http:\/\/www.w3.org\/2001\/XMLSchema\" xmlns:soap=\"http:\/\/schemas.xmlsoap.org\/soap\/envelope\/\">\n\r",
+        "  <soap:Body>\n\r",
+        "  <EnlightenResponse xmlns=\"http:\/\/clearforest.com\/\">\n\r",
+        "  <EnlightenResult>string<\/EnlightenResult>\n\r",
+        "  <\/EnlightenResponse>\n\r",
+        "  <\/soap:Body>\n\r",
+        "<\/soap:Envelope>\n\r"
+      ]
+    },
+    "expected":{  
+      "audit_log":"",
+      "debug_log":"Target value: \"20\" \\(Variable: TX:something\\)",
+      "error_log":""
+    },
+    "rules":[  
+      "SecRuleEngine On",
+      "SecRule REQUEST_HEADERS \"@contains PHPSESSID\" \"id:1,t:lowercase,t:none,setvar:TX.something=+10\"",
+      "SecRule REQUEST_HEADERS \"@contains PHPSESSID\" \"id:2,t:lowercase,t:none,setvar:TX.something=+10\"",
+      "SecRule TX \"@contains to_test\" \"id:3,t:lowercase,t:none\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "version_max":0,
+    "title":"Testing collection :: TX (4/4)",
+    "client":{  
+      "ip":"200.249.12.31",
+      "port":2313
+    },
+    "server":{  
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{  
+      "headers":{  
+        "User-Agent":"Mozilla\/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.5) Gecko\/20091102 Firefox\/3.5.5 (.NET CLR 3.5.30729)",
+        "Accept":"text\/html,application\/xhtml+xml,application\/xml;q=0.9,*\/*;q=0.8",
+        "Accept-Language":"en-us,en;q=0.5",
+        "Accept-Encoding":"gzip,deflate",
+        "Accept-Charset":"ISO-8859-1,utf-8;q=0.7,*;q=0.7",
+        "Keep-Alive":"300",
+        "Connection":"keep-alive",
+        "Cookie":"PHPSESSID=rAAAAAAA2t5uvjq435r4q7ib3vtdjq120",
+        "Pragma":"no-cache",
+        "Cache-Control":"no-cache"
+      },
+      "uri":"\/test.pl?param1=   test   &param2=test2",
+      "method":"GET",
+      "http_version":1.1,
+      "body":""
+    },
+    "response":{  
+      "headers":{  
+        "Content-Type":"text\/xml; charset=utf-8\n\r",
+        "Content-Length":"length\n\r"
+      },
+      "body":[  
+        "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n\r",
+        "<soap:Envelope xmlns:xsi=\"http:\/\/www.w3.org\/2001\/XMLSchema-instance\" xmlns:xsd=\"http:\/\/www.w3.org\/2001\/XMLSchema\" xmlns:soap=\"http:\/\/schemas.xmlsoap.org\/soap\/envelope\/\">\n\r",
+        "  <soap:Body>\n\r",
+        "  <EnlightenResponse xmlns=\"http:\/\/clearforest.com\/\">\n\r",
+        "  <EnlightenResult>string<\/EnlightenResult>\n\r",
+        "  <\/EnlightenResponse>\n\r",
+        "  <\/soap:Body>\n\r",
+        "<\/soap:Envelope>\n\r"
+      ]
+    },
+    "expected":{  
+      "audit_log":"",
+      "debug_log":"Target value: \"15\" \\(Variable: TX:something\\)",
+      "error_log":""
+    },
+    "rules":[  
+      "SecRuleEngine On",
+      "SecRule REQUEST_HEADERS \"@contains PHPSESSID\" \"id:1,t:lowercase,t:none,setvar:TX.something=+10\"",
+      "SecRule REQUEST_HEADERS \"@contains PHPSESSID\" \"id:2,t:lowercase,t:none,setvar:TX.something=+10\"",
+      "SecRule REQUEST_HEADERS \"@contains PHPSESSID\" \"id:3,t:lowercase,t:none,setvar:TX.something=-5\"",
+      "SecRule TX \"@contains to_test\" \"id:4,t:lowercase,t:none\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "version_max":0,
+    "title":"Testing collection :: TX (5/n)",
+    "client":{  
+      "ip":"200.249.12.31",
+      "port":2313
+    },
+    "server":{  
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{  
+      "headers":{  
+        "User-Agent":"Mozilla\/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.5) Gecko\/20091102 Firefox\/3.5.5 (.NET CLR 3.5.30729)",
+        "Accept":"text\/html,application\/xhtml+xml,application\/xml;q=0.9,*\/*;q=0.8",
+        "Accept-Language":"en-us,en;q=0.5",
+        "Accept-Encoding":"gzip,deflate",
+        "Accept-Charset":"ISO-8859-1,utf-8;q=0.7,*;q=0.7",
+        "Keep-Alive":"300",
+        "Connection":"keep-alive",
+        "Cookie":"PHPSESSID=rAAAAAAA2t5uvjq435r4q7ib3vtdjq120 - cookie I",
+        "Cookie2":"PHPSESSID=rAAAAAAA2t5uvjq435r4q7ib3vtdjq120 - cookie II",
+        "Pragma":"no-cache",
+        "Cache-Control":"no-cache"
+      },
+      "uri":"\/test.pl?param1=   test   &param2=test2",
+      "method":"GET",
+      "http_version":1.1,
+      "body":""
+    },
+    "response":{  
+      "headers":{  
+        "Content-Type":"text\/xml; charset=utf-8\n\r",
+        "Content-Length":"length\n\r"
+      },
+      "body":[  
+        "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n\r",
+        "<soap:Envelope xmlns:xsi=\"http:\/\/www.w3.org\/2001\/XMLSchema-instance\" xmlns:xsd=\"http:\/\/www.w3.org\/2001\/XMLSchema\" xmlns:soap=\"http:\/\/schemas.xmlsoap.org\/soap\/envelope\/\">\n\r",
+        "  <soap:Body>\n\r",
+        "  <EnlightenResponse xmlns=\"http:\/\/clearforest.com\/\">\n\r",
+        "  <EnlightenResult>string<\/EnlightenResult>\n\r",
+        "  <\/EnlightenResponse>\n\r",
+        "  <\/soap:Body>\n\r",
+        "<\/soap:Envelope>\n\r"
+      ]
+    },
+    "expected":{  
+      "audit_log":"",
+      "debug_log":"Target value: \"40\" \\(Variable: TX:anomaly_score\\)",
+      "error_log":""
+    },
+    "rules":[  
+      "SecRuleEngine On",
+      "SecRule REQUEST_HEADERS:Cookie \"@contains PHPSESSID\" \"id:1,setvar:tx.critical_anomaly_score=5\"",
+      "SecRule REQUEST_HEADERS:Cookie \"@contains PHPSESSID\" \"id:2,setvar:tx.anomaly_score=10\"",
+      "SecRule REQUEST_HEADERS:Cookie|REQUEST_HEADERS:Cookie2 \"@contains ookie\" \"id:4,t:lowercase,t:removewhitespace,multimatch,setvar:tx.anomaly_score=+%{tx.critical_anomaly_score}\"",
+      "SecRule TX \"@contains to_test\" \"id:100\""
+    ]
+  }
+]

@@ -1,0 +1,13 @@
+prestashopHost: "www.example.com"
+prestashopUsername: "user@example.com"
+prestashopPassword: "changeme42"
+prestashopEmail: "user@example.com"
+prestashopFirstName: "Prestashop"
+prestashopLastName: "User"
+prestashopCountry: "us"
+prestashopLanguage: "en"
+service:
+  type: ClusterIP
+mariadb:
+  auth:
+    password: "changeme1337"

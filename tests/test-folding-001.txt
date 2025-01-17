@@ -1,8 +1,0 @@
---TEST--
-strings are merged
---INPUT--
-SELECT "first" "second";
---EXPECTED--
-E SELECT
-s "first"
-; ;

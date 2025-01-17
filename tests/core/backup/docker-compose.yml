@@ -1,0 +1,67 @@
+version: "3.5"
+
+services:
+  bw:
+    image: bunkerity/bunkerweb:1.6.0-beta
+    pull_policy: never
+    labels:
+      - "bunkerweb.INSTANCE=yes"
+    environment:
+      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+    networks:
+      bw-universe:
+      bw-services:
+        ipv4_address: 192.168.0.2
+
+  bw-scheduler:
+    image: bunkerity/bunkerweb-scheduler:1.6.0-beta
+    pull_policy: never
+    labels:
+      - "bunkerweb.SCHEDULER=yes"
+    depends_on:
+      - bw
+    volumes:
+      - bw-data:/data/lib
+    environment:
+      BUNKERWEB_INSTANCES: "bw"
+      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+      MULTISITE: "no"
+      HTTP_PORT: "80"
+      USE_BUNKERNET: "no"
+      USE_BLACKLIST: "no"
+      SEND_ANONYMOUS_REPORT: "no"
+      USE_REVERSE_PROXY: "yes"
+      REVERSE_PROXY_HOST: "http://app1:8080"
+      CUSTOM_LOG_LEVEL: "debug"
+      LOG_LEVEL: "info"
+
+      # ? Backup settings
+      USE_BACKUP: "yes"
+      BACKUP_DIRECTORY: "/var/lib/bunkerweb/backups"
+      BACKUP_ROTATION: "7"
+
+      # ? DATABASE settings
+      DATABASE_URI: "sqlite:////var/lib/bunkerweb/db.sqlite3"
+    networks:
+      - bw-universe
+      - bw-docker
+
+volumes:
+  bw-data:
+    name: bw-data
+
+networks:
+  bw-universe:
+    name: bw-universe
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.20.30.0/24
+  bw-services:
+    name: bw-services
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.168.0.0/24
+  bw-docker:
+    external: true

@@ -1,0 +1,24 @@
+version: "3.5"
+
+services:
+  ui-tests:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - TEST_FILE=${TEST_FILE}
+    environment:
+      - PYTHONUNBUFFERED=1
+    extra_hosts:
+      - "www.example.com:192.168.0.2"
+      - "app1.example.com:192.168.0.2"
+      - "app2.example.com:192.168.0.2"
+      - "app3.example.com:192.168.0.2"
+    networks:
+      bw-services:
+        ipv4_address: 192.168.0.3
+
+networks:
+  bw-services:
+    external:
+      name: bw-services

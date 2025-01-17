@@ -1,0 +1,111 @@
+name: Push packagecloud (REUSABLE)
+
+on:
+  workflow_call:
+    inputs:
+      SEPARATOR:
+        required: true
+        type: string
+      SUFFIX:
+        required: true
+        type: string
+      REPO:
+        required: true
+        type: string
+      LINUX:
+        required: true
+        type: string
+      VERSION:
+        required: true
+        type: string
+      PACKAGE:
+        required: true
+        type: string
+      BW_VERSION:
+        required: true
+        type: string
+      ARCH:
+        required: true
+        type: string
+      PACKAGE_ARCH:
+        required: true
+        type: string
+    secrets:
+      PACKAGECLOUD_TOKEN:
+        required: true
+
+jobs:
+  push:
+    runs-on: ubuntu-latest
+    steps:
+      # Prepare
+      - name: Check out repository code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Install ruby
+        uses: ruby/setup-ruby@868b3f088412f139260f27f5b148179b9dd6b008 # v1.208.0
+        with:
+          ruby-version: "3.0"
+      - name: Install packagecloud
+        run: gem install package_cloud
+      # Download packages
+      - uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        if: inputs.LINUX != 'el' && inputs.LINUX != 'el9'
+        with:
+          name: package-${{ inputs.LINUX }}-${{ inputs.PACKAGE_ARCH }}
+          path: /tmp/${{ inputs.LINUX }}
+      - uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        if: inputs.LINUX == 'el' || inputs.LINUX == 'el9'
+        with:
+          name: package-rh${{ inputs.LINUX }}-${{ inputs.PACKAGE_ARCH }}
+          path: /tmp/${{ inputs.LINUX }}
+      # Remove existing packages
+      - name: Remove existing package
+        if: inputs.LINUX != 'el9' && inputs.LINUX != 'ubuntu-jammy'
+        run: package_cloud yank bunkerity/${{ inputs.REPO }}/${{ inputs.LINUX }}/${{ inputs.VERSION }} bunkerweb${{ inputs.SEPARATOR }}${{ inputs.BW_VERSION }}${{ inputs.SEPARATOR }}${{ inputs.SUFFIX }}${{ inputs.PACKAGE_ARCH }}.${{ inputs.PACKAGE }}
+        continue-on-error: true
+        env:
+          PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
+      - name: Remove existing package el9
+        if: inputs.LINUX == 'el9'
+        run: package_cloud yank bunkerity/${{ inputs.REPO }}/el/9 bunkerweb${{ inputs.SEPARATOR }}${{ inputs.BW_VERSION }}${{ inputs.SEPARATOR }}${{ inputs.SUFFIX }}${{ inputs.PACKAGE_ARCH }}.${{ inputs.PACKAGE }}
+        continue-on-error: true
+        env:
+          PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
+      - name: Remove existing package ubuntu-jammy
+        if: inputs.LINUX == 'ubuntu-jammy'
+        run: package_cloud yank bunkerity/${{ inputs.REPO }}/ubuntu/jammy bunkerweb${{ inputs.SEPARATOR }}${{ inputs.BW_VERSION }}${{ inputs.SEPARATOR }}${{ inputs.SUFFIX }}${{ inputs.PACKAGE_ARCH }}.${{ inputs.PACKAGE }}
+        continue-on-error: true
+        env:
+          PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
+      # Update name
+      - name: Rename package
+        if: inputs.BW_VERSION == '1.5'
+        run: sudo apt install -y rename && rename 's/dev/1.5-dev/' /tmp/${{ inputs.LINUX }}/*.${{ inputs.PACKAGE }}
+      # Push package
+      - name: Push package to packagecloud
+        if: inputs.LINUX != 'el9' && inputs.LINUX != 'ubuntu-jammy'
+        uses: danielmundi/upload-packagecloud@46cd0e61152bf952dbc0d1759e609d3d22649030 # v1
+        with:
+          PACKAGE-NAME: /tmp/${{ inputs.LINUX }}/*.${{ inputs.PACKAGE }}
+          PACKAGECLOUD-USERNAME: bunkerity
+          PACKAGECLOUD-REPO: ${{ inputs.REPO }}
+          PACKAGECLOUD-DISTRIB: ${{ inputs.LINUX }}/${{ inputs.VERSION }}
+          PACKAGECLOUD-TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
+      - name: Push package to packagecloud for el9
+        if: inputs.LINUX == 'el9'
+        uses: danielmundi/upload-packagecloud@46cd0e61152bf952dbc0d1759e609d3d22649030 # v1
+        with:
+          PACKAGE-NAME: /tmp/${{ inputs.LINUX }}/*.${{ inputs.PACKAGE }}
+          PACKAGECLOUD-USERNAME: bunkerity
+          PACKAGECLOUD-REPO: ${{ inputs.REPO }}
+          PACKAGECLOUD-DISTRIB: el/9
+          PACKAGECLOUD-TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
+      - name: Push package to packagecloud for ubuntu-jammy
+        if: inputs.LINUX == 'ubuntu-jammy'
+        uses: danielmundi/upload-packagecloud@46cd0e61152bf952dbc0d1759e609d3d22649030 # v1
+        with:
+          PACKAGE-NAME: /tmp/${{ inputs.LINUX }}/*.${{ inputs.PACKAGE }}
+          PACKAGECLOUD-USERNAME: bunkerity
+          PACKAGECLOUD-REPO: ${{ inputs.REPO }}
+          PACKAGECLOUD-DISTRIB: ubuntu/jammy
+          PACKAGECLOUD-TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}

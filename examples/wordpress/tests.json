@@ -1,0 +1,15 @@
+{
+  "name": "wordpress",
+  "kinds": ["docker", "autoconf", "swarm", "kubernetes", "linux"],
+  "timeout": 120,
+  "delay": 120,
+  "no_copy_container": true,
+  "tests": [
+    {
+      "type": "string",
+      "url": "https://www.example.com",
+      "string": "wordpress",
+      "tls": "www.example.com"
+    }
+  ]
+}

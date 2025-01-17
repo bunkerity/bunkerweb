@@ -1,0 +1,157 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: cr-bunkerweb
+rules:
+  - apiGroups: [""]
+    resources: ["services", "pods", "configmaps", "secrets"]
+    verbs: ["get", "watch", "list"]
+  - apiGroups: ["networking.k8s.io"]
+    resources: ["ingresses"]
+    verbs: ["get", "watch", "list"]
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: sa-bunkerweb
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: crb-bunkerweb
+subjects:
+  - kind: ServiceAccount
+    name: sa-bunkerweb
+    namespace: default
+    apiGroup: ""
+roleRef:
+  kind: ClusterRole
+  name: cr-bunkerweb
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: bunkerweb
+spec:
+  selector:
+    matchLabels:
+      app: bunkerweb
+  template:
+    metadata:
+      labels:
+        app: bunkerweb
+      annotations:
+        bunkerweb.io/AUTOCONF: "yes"
+    spec:
+      containers:
+        - name: bunkerweb
+          image: bunkerity/bunkerweb:1.4.6
+          imagePullPolicy: Always
+          securityContext:
+            runAsUser: 101
+            runAsGroup: 101
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          ports:
+            - containerPort: 8080
+            - containerPort: 8443
+          env:
+            - name: KUBERNETES_MODE
+              value: "yes"
+            # replace with your DNS resolvers
+            # e.g. : kube-dns.kube-system.svc.cluster.local
+            - name: DNS_RESOLVERS
+              value: "coredns.kube-system.svc.cluster.local"
+            - name: USE_API
+              value: "yes"
+            - name: API_WHITELIST_IP
+              value: "10.0.0.0/8 192.168.0.0/16 172.16.0.0/12 100.64.0.0/10"
+            - name: SERVER_NAME
+              value: ""
+            - name: MULTISITE
+              value: "yes"
+            - name: USE_REAL_IP
+              value: "yes"
+            - name: USE_PROXY_PROTOCOL
+              value: "yes"
+            - name: REAL_IP_HEADER
+              value: "proxy_protocol"
+            - name: REAL_IP_FROM
+              value: "10.0.0.0/8 192.168.0.0/16 172.16.0.0/12 100.64.0.0/10"
+            - name: USE_LETS_ENCRYPT_STAGING
+              value: "yes"
+          livenessProbe:
+            exec:
+              command:
+                - /opt/bunkerweb/helpers/healthcheck.sh
+            initialDelaySeconds: 30
+            periodSeconds: 5
+            timeoutSeconds: 1
+            failureThreshold: 3
+          readinessProbe:
+            exec:
+              command:
+                - /opt/bunkerweb/helpers/healthcheck.sh
+            initialDelaySeconds: 30
+            periodSeconds: 1
+            timeoutSeconds: 1
+            failureThreshold: 3
+      imagePullSecrets:
+        - name: secret-registry
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-bunkerweb
+spec:
+  clusterIP: None
+  selector:
+    app: bunkerweb
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-bunkerweb
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bunkerweb-controller
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: bunkerweb-controller
+  template:
+    metadata:
+      labels:
+        app: bunkerweb-controller
+    spec:
+      serviceAccountName: sa-bunkerweb
+      volumes:
+        - name: vol-bunkerweb
+          persistentVolumeClaim:
+            claimName: pvc-bunkerweb
+      containers:
+        - name: bunkerweb-controller
+          image: bunkerity/bunkerweb-autoconf:1.4.6
+          imagePullPolicy: Always
+          env:
+            - name: KUBERNETES_MODE
+              value: "yes"
+          volumeMounts:
+            - name: vol-bunkerweb
+              mountPath: /data
+      imagePullSecrets:
+        - name: secret-registry

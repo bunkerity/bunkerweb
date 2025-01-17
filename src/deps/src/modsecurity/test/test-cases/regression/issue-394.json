@@ -1,0 +1,38 @@
+[
+{
+  "enabled": 1,
+  "version_min": 209000,
+  "version_max": -1,
+  "title": "Segmentation fault when uploading file with SecStreamInBodyInspection enabled",
+  "url": "https:\/\/github.com\/SpiderLabs\/ModSecurity\/issues\/394",
+  "gihub_issue": 394,
+  "client": {
+    "ip": "200.249.12.31",
+    "port": 2313
+  },
+  "server": {
+    "ip": "200.249.12.31",
+    "port": 80
+  },
+  "request": {
+    "headers": "",
+    "body": "",
+    "method": "GET",
+    "http_version": 1.1
+  },
+  "response": {
+    "headers": "",
+    "body": ""
+  },
+  "expected": {
+    "audit_logs": "",
+    "debug_logs": "",
+    "error_logs": ""
+  },
+  "rules": [
+    "SecRuleEngine On",
+    "SecRequestBodyAccess On",
+    "SecResponseBodyAccess On"
+  ]
+}
+]

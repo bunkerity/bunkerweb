@@ -1,0 +1,25 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##! Prefix to ensure that the rule only matches when the
+##! value of the Referer header is not a URL (illegal header
+##! value).
+##!^ ^[^.]*?
+
+##! The following expressions in this file must be identical to the
+##! ones in 932200.
+
+##! - bar;cd+/etc;/bin$u/ca*+passwd
+##! - foo;ca\t+/et\c/pa\s\swd
+##! - foo;c'at'+/etc/pa's'swd
+[*?`\x5c'][^/\n]+/
+/[^/]+?[*?`\x5c']
+##! - foo;cat$u+/etc$u/passwd
+##! - foo;c$-at+/et$-c/pas$-swd
+##! - foo;c$_at+/et$_c/pas$_swd
+##! - foo;c$?at+/et$?c/pas$?swd
+##! - foo;c$*at+/et$*c/pas$*swd
+##! - foo;c$@at+/et$@c/pas$@swd
+##! - foo;c$!at+/et$!c/pas$!swd
+##! - foo;c$$at+/et$$c/pas$$swd
+\$[({\[#@!?*\-_$a-zA-Z0-9]

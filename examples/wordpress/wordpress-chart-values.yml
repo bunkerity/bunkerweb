@@ -1,0 +1,11 @@
+wordpressUsername: "user"
+wordpressPassword: "changeme42"
+wordpressEmail: "user@example.com"
+wordpressFirstName: "FirstName"
+wordpressLastName: "LastName"
+wordpressBlogName: "User's Blog!"
+wordpressTablePrefix: "changeme_"
+wordpressScheme: "https"
+mariadb:
+  auth:
+    password: "changeme1337"

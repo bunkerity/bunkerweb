@@ -1,0 +1,10 @@
+project = "resty.session"
+description = "Session Library for OpenResty"
+full_description = "`lua-resty-session` is a secure, and flexible session library for OpenResty"
+title = "Session Library for OpenResty Documentation"
+dir = "docs"
+use_markdown_titles = true
+package = "session"
+format = "discount"
+sort_modules=true
+file = "./lib/resty"

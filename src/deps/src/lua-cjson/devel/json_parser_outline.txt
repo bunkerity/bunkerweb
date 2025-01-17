@@ -1,0 +1,50 @@
+parser:
+	- call parse_value
+	- next_token
+	? <EOF>		nop.
+
+parse_value:
+	- next_token
+	? <OBJ_BEGIN>	call parse_object.
+	? <ARR_BEGIN>	call parse_array.
+	? <STRING>	push. return.
+	? <BOOLEAN>	push. return.
+	? <NULL>	push. return.
+	? <NUMBER>	push. return.
+
+parse_object:
+	- push table
+	- next_token
+	? <STRING>	push.
+	- next_token
+	? <COLON>	nop.
+	- call parse_value
+	- set table
+	- next_token
+	? <OBJ_END>	return.
+	? <COMMA>	loop parse_object.
+
+parse_array:
+	- push table
+	- call parse_value
+	- table append
+	- next_token
+	? <COMMA>	loop parse_array.
+	? ]		return.
+
+next_token:
+	- check next character
+	? {		return <OBJ_BEGIN>
+	? }		return <OBJ_END>
+	? [		return <ARR_BEGIN>
+	? ]		return <ARR_END>
+	? ,		return <COMMA>
+	? :		return <COLON>
+	? [-0-9]	gobble number. return <NUMBER>
+	? "		gobble string. return <STRING>
+	? [ \t\n]	eat whitespace.
+	? n		Check "null". return <NULL> or <UNKNOWN>
+	? t		Check "true". return <BOOLEAN> or <UNKNOWN>
+	? f		Check "false". return <BOOLEAN> or <UNKNOWN>
+	? .		return <UNKNOWN>
+	? \0		return <END>

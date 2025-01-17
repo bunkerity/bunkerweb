@@ -1,0 +1,16 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##! Word list for rule 932232 (RCE Unix command injection part 4/4)
+
+##!$ \b
+
+##!> assemble
+  ##!> include unix-shell-evasion-prefix
+
+  ##!> assemble
+    ##!> cmdline unix
+      ##!> include unix-shell-pl3
+    ##!<
+  ##!<
+##!<

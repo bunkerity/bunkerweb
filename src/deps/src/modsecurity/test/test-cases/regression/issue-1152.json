@@ -1,0 +1,204 @@
+[
+  {
+    "enabled": 1,
+    "version_min": 209000,
+    "version_max": -1,
+    "title": "Should libmodsec pass action clear m_actions?",
+    "url": "https:\/\/github.com\/SpiderLabs\/ModSecurity\/issues\/1152",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 2313
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "request": {
+      "headers": {
+        "Host": "net.tutsplus.com",
+        "User-Agent": "Mozilla\/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.5) Gecko\/20091102 Firefox\/3.5.5 (.NET CLR 3.5.30729)",
+        "Accept": "text\/html,application\/xhtml+xml,application\/xml;q=0.9,*\/*;q=0.8",
+        "Accept-Language": "en-us,en;q=0.5",
+        "Accept-Encoding": "gzip,deflate",
+        "Accept-Charset": "ISO-8859-1,utf-8;q=0.7,*;q=0.7",
+        "Keep-Alive": "300",
+        "Connection": "keep-alive",
+        "Cookie": "PHPSESSID=r2t5uvjq435r4q7ib3vtdjq120",
+        "Pragma": "no-cache",
+        "Cache-Control": "no-cache"
+      },
+      "uri": "\/test.pl?foo=bar",
+      "method": "GET",
+      "http_version": 1.1,
+      "body": ""
+    },
+    "response": {
+      "headers": {
+        "Content-Type": "text\/xml; charset=utf-8\n\r",
+        "Content-Length": "length\n\r"
+      }
+    },
+    "expected": {
+      "http_code": 403
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRule ARGS:foo \"bar\" \"id:'900017',phase:1,t:none,deny,nolog,msg:'foo = bar'\"",
+      "SecRule &TX:REAL_IP \"@eq 0\" \"id:'900021',phase:1,t:none,initcol:global=global,initcol:ip=%{remote_addr}_%{tx.ua_hash},setvar:tx.real_ip=%{remote_addr},nolog,pass\""
+    ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 209000,
+    "version_max": -1,
+    "title": "Should libmodsec pass action clear m_actions?",
+    "url": "https:\/\/github.com\/SpiderLabs\/ModSecurity\/issues\/1152",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 2313
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "request": {
+      "headers": {
+        "Host": "net.tutsplus.com",
+        "User-Agent": "Mozilla\/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.5) Gecko\/20091102 Firefox\/3.5.5 (.NET CLR 3.5.30729)",
+        "Accept": "text\/html,application\/xhtml+xml,application\/xml;q=0.9,*\/*;q=0.8",
+        "Accept-Language": "en-us,en;q=0.5",
+        "Accept-Encoding": "gzip,deflate",
+        "Accept-Charset": "ISO-8859-1,utf-8;q=0.7,*;q=0.7",
+        "Keep-Alive": "300",
+        "Connection": "keep-alive",
+        "Cookie": "PHPSESSID=r2t5uvjq435r4q7ib3vtdjq120",
+        "Pragma": "no-cache",
+        "Cache-Control": "no-cache"
+      },
+      "uri": "\/test.pl?foo=bar",
+      "method": "GET",
+      "http_version": 1.1,
+      "body": ""
+    },
+    "response": {
+      "headers": {
+        "Content-Type": "text\/xml; charset=utf-8\n\r",
+        "Content-Length": "length\n\r"
+      },
+      "body": [
+      ]
+    },
+    "expected": {
+      "http_code": 403
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRule ARGS:foo \"bar\" \"id:'900017',phase:1,t:none,deny,nolog,msg:'foo = bar'\"",
+      "SecRule &TX:REAL_IP \"@eq 0\" \"id:'900021',phase:1,t:none,initcol:global=global,initcol:ip=%{remote_addr}_%{tx.ua_hash},setvar:tx.real_ip=%{remote_addr},nolog\""
+    ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 209000,
+    "version_max": -1,
+    "title": "Should libmodsec pass action clear m_actions?",
+    "url": "https:\/\/github.com\/SpiderLabs\/ModSecurity\/issues\/1152",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 2313
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "request": {
+      "headers": {
+        "Host": "net.tutsplus.com",
+        "User-Agent": "Mozilla\/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.5) Gecko\/20091102 Firefox\/3.5.5 (.NET CLR 3.5.30729)",
+        "Accept": "text\/html,application\/xhtml+xml,application\/xml;q=0.9,*\/*;q=0.8",
+        "Accept-Language": "en-us,en;q=0.5",
+        "Accept-Encoding": "gzip,deflate",
+        "Accept-Charset": "ISO-8859-1,utf-8;q=0.7,*;q=0.7",
+        "Keep-Alive": "300",
+        "Connection": "keep-alive",
+        "Cookie": "PHPSESSID=r2t5uvjq435r4q7ib3vtdjq120",
+        "Pragma": "no-cache",
+        "Cache-Control": "no-cache"
+      },
+      "uri": "\/test.pl?foo=bar",
+      "method": "GET",
+      "http_version": 1.1,
+      "body": ""
+    },
+    "response": {
+      "headers": {
+        "Content-Type": "text\/xml; charset=utf-8\n\r",
+        "Content-Length": "length\n\r"
+      },
+      "body": [
+      ]
+    },
+    "expected": {
+      "http_code": 200
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRule ARGS:foo \"bar\" \"id:'900017',phase:1,t:none,nolog,msg:'foo = bar'\"",
+      "SecRule &TX:REAL_IP \"@eq 0\" \"id:'900021',phase:1,t:none,initcol:global=global,initcol:ip=%{remote_addr}_%{tx.ua_hash},setvar:tx.real_ip=%{remote_addr},nolog,deny,pass\""
+    ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 209000,
+    "version_max": -1,
+    "title": "Should libmodsec pass action clear m_actions?",
+    "url": "https:\/\/github.com\/SpiderLabs\/ModSecurity\/issues\/1152",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 2313
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "request": {
+      "headers": {
+        "Host": "net.tutsplus.com",
+        "User-Agent": "Mozilla\/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.5) Gecko\/20091102 Firefox\/3.5.5 (.NET CLR 3.5.30729)",
+        "Accept": "text\/html,application\/xhtml+xml,application\/xml;q=0.9,*\/*;q=0.8",
+        "Accept-Language": "en-us,en;q=0.5",
+        "Accept-Encoding": "gzip,deflate",
+        "Accept-Charset": "ISO-8859-1,utf-8;q=0.7,*;q=0.7",
+        "Keep-Alive": "300",
+        "Connection": "keep-alive",
+        "Cookie": "PHPSESSID=r2t5uvjq435r4q7ib3vtdjq120",
+        "Pragma": "no-cache",
+        "Cache-Control": "no-cache"
+      },
+      "uri": "\/test.pl?a=test&b=test&c=test&d=test",
+      "method": "GET",
+      "http_version": 1.1,
+      "body": ""
+    },
+    "response": {
+      "headers": {
+        "Content-Type": "text\/xml; charset=utf-8\n\r",
+        "Content-Length": "length\n\r"
+      },
+      "body": [
+      ]
+    },
+    "expected": {
+      "http_code": 200,
+      "debug_log": "Target value: \"4\" \\(Variable: TX:test\\)"
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "# Set TX.test to zero",
+      "SecAction \"phase:2,nolog,pass,setvar:TX.test=0,id:123\"",
+      "# Increment TX.test for every request parameter",
+      "SecRule ARGS \"test\" \"phase:2,log,pass,setvar:TX.test=+1,id:124\"",
+      "SecRule TX:test \"test\" \"phase:2,log,pass,id:125\""
+    ]
+  }
+]

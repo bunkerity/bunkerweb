@@ -1,0 +1,61 @@
+version: "3.5"
+
+services:
+  bw:
+    image: bunkerity/bunkerweb:1.6.0-beta
+    pull_policy: never
+    labels:
+      - "bunkerweb.INSTANCE=yes"
+    volumes:
+      - ./index.html:/var/www/html/index.html
+    environment:
+      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24 192.168.0.3"
+    networks:
+      bw-universe:
+      bw-services:
+        ipv4_address: 192.168.0.2
+
+  bw-scheduler:
+    image: bunkerity/bunkerweb-scheduler:1.6.0-beta
+    pull_policy: never
+    depends_on:
+      - bw
+    environment:
+      BUNKERWEB_INSTANCES: "bw"
+      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24 192.168.0.3"
+      HTTP_PORT: "80"
+      HTTPS_PORT: "443"
+      USE_BUNKERNET: "no"
+      USE_BLACKLIST: "no"
+      SEND_ANONYMOUS_REPORT: "no"
+      LOG_LEVEL: "info"
+      CUSTOM_LOG_LEVEL: "debug"
+
+      # ? LETS_ENCRYPT settings
+      AUTO_LETS_ENCRYPT: "no"
+      USE_LETS_ENCRYPT_STAGING: "yes"
+      CUSTOM_CONF_SERVER_HTTP_ready: |
+        location /ready {
+          default_type 'text/plain';
+          rewrite_by_lua_block {
+            ngx.print('ready')
+            ngx.flush(true)
+            ngx.exit(ngx.HTTP_OK)
+          }
+        }
+    networks:
+      - bw-universe
+
+networks:
+  bw-universe:
+    name: bw-universe
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.20.30.0/24
+  bw-services:
+    name: bw-services
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.168.0.0/24

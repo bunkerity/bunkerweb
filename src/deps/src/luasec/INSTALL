@@ -1,0 +1,39 @@
+LuaSec 1.3.2
+------------
+
+* OpenSSL options:
+
+    By default, this version includes options for OpenSSL 3.0.8
+
+    If you need to generate the options for a different version of OpenSSL:
+
+      $ cd src
+      $ lua options.lua -g /usr/include/openssl/ssl.h > options.c
+
+--------------------------------------------------------------------------------
+
+* On Linux, BSD, and Mac OS X:
+
+  - Edit 'Makefile'
+    * Inform the path to where install the Lua modules (LUAPATH) and binaries 
+      modules (LUACPATH)
+    * If Lua or OpenSSL are not in the default path, set the 
+      variables INCDIR and LIBDIR.
+    * For Mac OS X, set the variable MACOSX_VERSION.
+
+  - Use 'make <platform>' to compile
+    * Platforms: linux, bsd, or macosx
+
+  - Use 'make install' to install the modules.
+
+--------------------------------------------------------------------------------
+
+* On Windows:
+  
+  - Use the Visual C++ project to compile the library.
+
+  - Copy the 'ssl.lua' file to some place in your LUA_PATH.
+
+  - Copy the 'ssl.dll' file to some place in your LUA_CPATH.
+
+  - Create a directory 'ssl' in your LUA_PATH and copy 'https.lua' to it.

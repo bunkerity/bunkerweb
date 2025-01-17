@@ -1,0 +1,27 @@
+{% for _, c in ipairs(contact) do %}
+Contact: {*c*}
+{% end %}
+Expires: {*expires*}
+{% for _, e in ipairs(encryption) do %}
+Encryption: {*e*}
+{% end %}
+{% for _, a in ipairs(acknowledgements) do %}
+Acknowledgements: {*a*}
+{% end %}
+Preferred-Languages: {*preferred_lang*}
+{% if canonical and #canonical > 0 then %}
+  {% for _, ca in ipairs(canonical) do %}
+Canonical: {*ca*}
+  {% end %}
+{% else %}
+Canonical: https://{*server_name*}{*uri*}
+{% end %}
+{% for _, p in ipairs(policy) do %}
+Policy: {*p*}
+{% end %}
+{% for _, h in ipairs(hiring) do %}
+Hiring: {*h*}
+{% end %}
+{% for _, cs in ipairs(csaf) do %}
+CSAF: {*cs*}
+{% end %}

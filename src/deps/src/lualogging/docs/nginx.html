@@ -1,0 +1,98 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "https://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="https://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>LuaLogging: A simple API to use logging features in Lua</title>
+    <link rel="stylesheet" href="doc.css" type="text/css"/>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+  <div id="product_logo">
+    <img alt="LuaLogging logo" src="images/lualogging-128.png"/>
+  </div>
+  <div id="product_name"><big><strong>LuaLogging</strong></big></div>
+  <div id="product_description">A simple API to use logging features in Lua.</div>
+</div> <!-- id="product" -->
+
+<div id="main">
+
+<div id="navigation">
+<h1>LuaLogging</h1>
+  <ul>
+    <li><a href="index.html">Home</a></li>
+    <li><a href="manual.html">Manual</a>
+      <ul>
+        <li><a href="manual.html#installation">Installation</a></li>
+        <li><a href="manual.html#logger">Logger objects</a></li>
+        <li><a href="manual.html#examples">Examples</a></li>
+      </ul>
+    </li>
+    <li><a href="manual.html#appenders">Appenders</a>
+      <ul>
+        <li><a href="console.html">Console</a></li>
+        <li><a href="file.html">File</a></li>
+        <li><a href="rolling_file.html">Rolling File</a></li>
+        <li><a href="sql.html">SQL</a></li>
+        <li><a href="socket.html">Socket</a></li>
+        <li><a href="rsyslog.html">Rsyslog</a></li>
+        <li><a href="email.html">Email</a></li>
+        <li><strong>Nginx</strong></li>
+      </ul>
+    </li>
+    <li><a href="https://github.com/lunarmodules/lualogging">Project</a></li>
+    <li><a href="license.html">License</a></li>
+  </ul>
+</div> <!-- id="navigation" -->
+
+<div id="content">
+
+<h2>Nginx/Openresty appender</h2>
+
+<p>This appender has no configuration options, and simply forwards whatever is
+  being logged to the configured Nginx log. LuaLogging log-levels will be converted
+  to the equivalent Nginx ones, and initial log-level will be set to match the
+  Nginx system level.</p>
+<p>It makes sense to configure this logger and set it as the default logger on
+  Nginx/OpenResty startup. Any libraries will then be able to just grab the
+  defaultLogger from <code>logging.defaultLogger()</code> and won't need any
+  modifications to work with Nginx/OpenResty.</p>
+
+<h2>Examples</h2>
+
+<pre class="example">
+require("logging.nginx")
+local logging = require("logging")
+
+local logger = logging.nginx()
+logging.defaultLogger(logger)
+
+logger:info("logging.nginx test")
+logger:debug("debugging...")
+logger:error("error!")
+</pre>
+
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+
+</div> <!-- id="content" -->
+
+</div> <!-- id="main" -->
+
+<div id="about">
+  <p><a href="https://validator.w3.org/check?uri=referer">
+    <img src="https://www.w3.org/Icons/valid-xhtml10" alt="XHTML 1.0 v&aacute;lido!" height="31" width="88" /></a></p>
+</div> <!-- id="about" -->
+
+</div> <!-- id="container" -->
+
+</body>
+</html>

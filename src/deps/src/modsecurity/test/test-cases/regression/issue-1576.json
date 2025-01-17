@@ -1,0 +1,143 @@
+[
+  {
+    "enabled": 1,
+    "version_min": 209000,
+    "version_max": -1,
+    "title": "JSON array should be handled even without a key (1)",
+    "url": "https:\/\/github.com\/SpiderLabs\/ModSecurity\/issues\/1576",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Cookie": "PHPSESSID=rAAAAAAA2t5uvjq435r4q7ib3vtdjq120",
+        "Content-Type": "application/json"
+      },
+      "uri":"/?key=value&key=other_value",
+      "method":"POST",
+      "body": [
+        "{",
+        "   \"foo\":\"bar\",",
+        "   \"mod\":\"sec\",",
+        "   \"ops\": [",
+        "       [\"um\", \"um e meio\"], ",
+        "       \"dois\",",
+        "       \"tres\",",
+        "       { \"eins\": [\"zwei\", \"drei\"] }",
+        "    ],",
+        "   \"whee\": \"lhebs\"",
+        "}"
+      ]
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "expected":{
+      "debug_log": "zwei\" \\(Variable: ARGS:json.ops.array_3.eins.array_0"
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRequestBodyAccess On",
+        "SecRule REQUEST_HEADERS:Content-Type \"application/json\" \"id:'200001',phase:1,t:none,t:lowercase,pass,nolog,ctl:requestBodyProcessor=JSON\"",
+        "SecRule ARGS \"asdf\" \"id:'200441',phase:3,log\""
+    ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 209000,
+    "version_max": -1,
+    "title": "JSON array should be handled even without a key (2)",
+    "url": "https:\/\/github.com\/SpiderLabs\/ModSecurity\/issues\/1576",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Cookie": "PHPSESSID=rAAAAAAA2t5uvjq435r4q7ib3vtdjq120",
+        "Content-Type": "application/json"
+      },
+      "uri":"/?key=value&key=other_value",
+      "method":"POST",
+      "body": [
+        "[",
+        "   \"one\",",
+        "   \"two\",",
+        "   \"three\"",
+        "]"
+      ]
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "expected":{
+      "debug_log": "three\" \\(Variable: ARGS:json.array_2\\)"
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRequestBodyAccess On",
+        "SecRule REQUEST_HEADERS:Content-Type \"application/json\" \"id:'200001',phase:1,t:none,t:lowercase,pass,nolog,ctl:requestBodyProcessor=JSON\"",
+        "SecRule ARGS \"asdf\" \"id:'200441',phase:3,log\""
+    ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 209000,
+    "version_max": -1,
+    "title": "JSON array should be handled even without a key (3)",
+    "url": "https:\/\/github.com\/SpiderLabs\/ModSecurity\/issues\/1576",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Cookie": "PHPSESSID=rAAAAAAA2t5uvjq435r4q7ib3vtdjq120",
+        "Content-Type": "application/json"
+      },
+      "uri":"/?key=value&key=other_value",
+      "method":"POST",
+      "body": [
+        "{",
+        "   \"foo\":\"bar\",",
+        "   \"mod\":\"sec\",",
+        "   \"ops\": {",
+        "       \"um\": \"um e meio\", ",
+        "       \"dois\": \"tres\",",
+        "       \"quatro\": \"cinco\",",
+        "       \"seis\": {",
+        "           \"dez\": \"onze\",",
+        "           \"doze\": \"treze\"",
+        "       }",
+        "    },",
+        "   \"whee\": \"lhebs\"",
+        "}"
+      ]
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "expected":{
+      "debug_log": "treze\" \\(Variable: ARGS:json.ops.seis.doze\\)"
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRequestBodyAccess On",
+        "SecRule REQUEST_HEADERS:Content-Type \"application/json\" \"id:'200001',phase:1,t:none,t:lowercase,pass,nolog,ctl:requestBodyProcessor=JSON\"",
+        "SecRule ARGS \"asdf\" \"id:'200441',phase:3,log\""
+    ]
+  }
+]

@@ -1,0 +1,112 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##! The expression generated from this file matches a full HTTP
+##! `Accept` header by following the specification as far as
+##! necessary, while restricting the `charset` parameter
+##! to a list of explicitly allowed values.
+##! Where possible, the expression matches tokens "loosely",
+##! to reduce complexity and the risk of false positives.
+
+##! As this specification is used by several rules, we now
+##! store it as an include file.
+
+##! Specifications:
+##! https://httpwg.org/specs/rfc7231.html#request.conneg
+##! https://httpwg.org/specs/rfc7230.html
+
+##! Helpers
+##!> define non-token-without-dquote-chars (),/:;<=>?![\x5c\]{}
+
+##!> define non-token-chars \"{{non-token-without-dquote-chars}}
+
+##!> define token-chars [^{{non-token-chars}}]
+
+##!> define token-with-dquote-chars [^{{non-token-without-dquote-chars}}]
+
+##!> define type-subtype (?:\*|{{token-chars}}+)
+
+##! The specification does not allow `*` in place of `*/*` but
+##! enough clients use `*` for it to be an issue. Thus, it is
+##! explicitly allowed here.
+##!> define media-type (?:(?:{{type-subtype}}/{{type-subtype}})|\*)
+
+##! list of allowed charsets
+##!> assemble
+  (?:"?
+  ##!=>
+  ##!> include allowed-charsets
+  ##!=>
+  \b"?))
+  ##!=< allowed-charsets
+##!<
+
+
+##! Main assembly
+##!> assemble
+  (?:{{media-type}})
+  ##!=>
+  (?:\s*;\s*
+  ##!=>
+  (?:(?:charset\s*=\s*
+  ##!=>
+  ##!=> allowed-charsets
+
+  ##! If the first part wasn't a "charset", then
+  ##! anything is allowed here that is not "charset".
+  ##! Note that this doesn't follow the RFC strictly.
+  |(?:
+  ##!=>
+  ##! Do not match space, otherwise the following would be possible:
+  ##! "text/html; charset=invalid"
+  ##! `charset` would be matched by `{{token-chars}}`
+  [^c\s{{non-token-chars}}]{{token-chars}}*
+  c[^h{{non-token-chars}}]{{token-chars}}*
+  ch[^a{{non-token-chars}}]{{token-chars}}*
+  cha[^r{{non-token-chars}}]{{token-chars}}*
+  char[^s{{non-token-chars}}]{{token-chars}}*
+  chars[^e{{non-token-chars}}]{{token-chars}}*
+  charse[^t{{non-token-chars}}]{{token-chars}}*
+  ##!=>
+  )\s*=\s*{{token-with-dquote-chars}}+)
+  ##!=>
+  ##! Clients like to violate the RFC, be lenient with
+  ##! terminating semi-colons.
+  ;?
+  ##!=>
+  )*
+  ##!=>
+
+  ##! Multiple "media-range" expressions can be
+  ##! specified, comma separated.
+  (?:\s*,\s*
+  ##!=>
+  (?:{{media-type}})
+  ##!=>
+  (?:\s*;\s*
+  ##!=>
+  (?:(?:charset\s*=\s*
+  ##!=>
+  ##!=> allowed-charsets
+  |(?:
+  ##!=>
+  ##! Do not match space, otherwise the following would be possible:
+  ##! "text/html; charset=invalid"
+  ##! `charset` would be matched by `{{token-chars}}`
+  [^c\s{{non-token-chars}}]{{token-chars}}*
+  c[^h{{non-token-chars}}]{{token-chars}}*
+  ch[^a{{non-token-chars}}]{{token-chars}}*
+  cha[^r{{non-token-chars}}]{{token-chars}}*
+  char[^s{{non-token-chars}}]{{token-chars}}*
+  chars[^e{{non-token-chars}}]{{token-chars}}*
+  charse[^t{{non-token-chars}}]{{token-chars}}*
+  ##!=>
+  )\s*=\s*{{token-with-dquote-chars}}+)
+  ##!=>
+  ##! Clients like to violate the RFC, be lenient with
+  ##! terminating semi-colons.
+  ;?
+  ##!=>
+  )*)*
+  ##!=>
+##!<

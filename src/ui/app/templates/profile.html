@@ -1,0 +1,666 @@
+{% extends "dashboard.html" %}
+{% block content %}
+    {% set profile_url = url_for('profile') %}
+    {% set total_pages = (total_sessions // 3) + (1 if total_sessions % 3 > 0 else 0) %}
+    <!-- Content -->
+    <div class="d-flex row">
+        <div>
+            <ul class="nav nav-pills flex-column flex-md-row mb-6">
+                <li class="nav-item me-0 me-sm-2" role="presentation">
+                    <button type="button"
+                            class="nav-link d-flex align-items-center active"
+                            role="tab"
+                            data-bs-toggle="tab"
+                            data-bs-target="#navs-pills-profile"
+                            aria-controls="navs-pills-profile"
+                            aria-selected="true">
+                        <i class="tf-icons bx bx-user bx-sm"></i>
+                        <span class="d-none d-sm-inline">&nbsp;Profile</span>
+                    </button>
+                </li>
+                <li class="nav-item me-0 me-sm-2" role="presentation">
+                    <button type="button"
+                            class="nav-link d-flex align-items-center"
+                            role="tab"
+                            data-bs-toggle="tab"
+                            data-bs-target="#navs-pills-security"
+                            aria-controls="navs-pills-security">
+                        <i class="tf-icons bx bx-check-shield bx-sm"></i>
+                        <span class="d-none d-sm-inline">&nbsp;Security</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button type="button"
+                            class="nav-link d-flex align-items-center"
+                            role="tab"
+                            data-bs-toggle="tab"
+                            data-bs-target="#navs-pills-sessions"
+                            aria-controls="navs-pills-sessions">
+                        <i class="tf-icons bx bx-link-alt bx-sm"></i>
+                        <span class="d-none d-sm-inline">&nbsp;Sessions</span>
+                    </button>
+                </li>
+            </ul>
+        </div>
+        {% if total_pages > 1 %}
+            <div class="col-md-8 d-none">
+                <div class="tab-pane fade"
+                     id="navs-pills-sessions-pagination"
+                     role="tabpanel">
+                    <div id="sessions-current-page" class="visually-hidden">1</div>
+                    <ul class="pagination justify-content-center mt-1">
+                        <li class="page-item prev disabled">
+                            <button type="button" id="sessions-page-prev" class="page-link">
+                                <i class="tf-icon bx bx-chevrons-left bx-sm"></i>
+                            </button>
+                        </li>
+                        {% for x in range(1, total_pages + 1) %}
+                            <li class="page-item{% if loop.index == 1 %} active{% endif %}"
+                                data-page="{{ x }}">
+                                <button type="button"
+                                        id="sessions-page-{{ x }}"
+                                        class="page-link"
+                                        {% if loop.index== 1 %}aria-selected="true"{% endif %}>
+                                    {{ loop.index }}
+                                </button>
+                            </li>
+                        {% endfor %}
+                        <li class="page-item next">
+                            <button type="button" id="sessions-page-next" class="page-link">
+                                <i class="tf-icon bx bx-chevrons-right bx-sm"></i>
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+    <div class="tab-content p-0 position-relative">
+        <div class="tab-pane fade show active"
+             id="navs-pills-profile"
+             role="tabpanel">
+            <div class="d-flex row g-4">
+                <div class="col-md-6">
+                    <!-- Profile -->
+                    <div class="card position-relative">
+                        <i class='bx bx-user bx-sm position-absolute top-0 end-0 m-3'></i>
+                        <h5 class="card-header">Edit Profile</h5>
+                        <div class="card-body pb-2">
+                            <div class="d-flex align-items-start align-items-sm-center gap-6 pb-4 border-bottom">
+                                <img src="{{ avatar_url }}"
+                                     alt="User Avatar"
+                                     class="d-block w-px-100 h-px-100 rounded"
+                                     id="uploadedAvatar">
+                                <div class="button-wrapper"
+                                     data-bs-toggle="tooltip"
+                                     data-bs-placement="top"
+                                     data-bs-html="true"
+                                     data-bs-original-title="<i class='bx bx-rocket bx-xs'></i><span>Coming soon</span>">
+                                    <label for="upload" class="btn btn-primary me-3 mb-4 disabled" tabindex="0">
+                                        <i class="bx bx-upload me-0 me-sm-1"></i>
+                                        <span class="d-none d-sm-block">Upload new photo</span>
+                                        <input type="file"
+                                               id="upload"
+                                               class="account-file-input"
+                                               hidden=""
+                                               accept="image/png, image/jpeg, image/gif">
+                                    </label>
+                                    <button type="button"
+                                            class="btn btn-outline-secondary account-image-reset mb-4 disabled">
+                                        <i class="bx bx-reset me-0 me-sm-1"></i>
+                                        <span class="d-none d-sm-block">Reset</span>
+                                    </button>
+                                    <div>Allowed JPG, GIF or PNG. Max size of 800K</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body pb-4">
+                            <form method="POST" action="{{ profile_url }}/edit">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                                <div class="row g-3">
+                                    <div class="col-md-6"
+                                         {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Disabled by readonly"{% endif %}>
+                                        <label for="username" class="form-label">Username</label>
+                                        <input class="form-control"
+                                               type="text"
+                                               name="username"
+                                               value="{{ current_user.get_id() }}"
+                                               placeholder="john.doe@example.com"
+                                               aria-label="Username"
+                                               required
+                                               {% if is_readonly %}disabled{% endif %} />
+                                    </div>
+                                    <div class="col-md-6"
+                                         {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Disabled by readonly"{% endif %}>
+                                        <label for="email" class="form-label">E-mail</label>
+                                        <input class="form-control"
+                                               type="email"
+                                               name="email"
+                                               value="{{ current_user.email or '' }}"
+                                               placeholder="john.doe@example.com"
+                                               aria-label="E-mail"
+                                               {% if is_readonly %}disabled{% endif %} />
+                                    </div>
+                                    <div class="col-md-12 form-password-toggle">
+                                        <label class="form-label" for="password">Current password</label>
+                                        <div class="input-group input-group-merge"
+                                             {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Disabled by readonly"{% endif %}>
+                                            <input type="password"
+                                                   class="form-control"
+                                                   name="password"
+                                                   placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
+                                                   aria-describedby="Current password"
+                                                   required
+                                                   {% if is_readonly %}disabled{% endif %} />
+                                            <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mt-4 justify-content-center d-flex">
+                                    <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The database is in readonly, therefore the configuration is locked"{% endif %}>
+                                        <button type="submit"
+                                                class="btn btn-primary me-2{% if is_readonly %} disabled{% endif %}">
+                                            Save Changes
+                                        </button>
+                                    </div>
+                                    <button type="reset" class="btn btn-outline-secondary">Cancel</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <!-- /Profile -->
+                </div>
+                <div class="col-md-6">
+                    <!-- Theme -->
+                    <div class="card position-relative">
+                        <i class='bx bx-{% if theme == 'light' %}sun{% else %}moon{% endif %} bx-sm position-absolute top-0 end-0 m-3 dark-mode-toggle-icon'></i>
+                        <h5 class="card-header">Change Theme</h5>
+                        <div class="card-body pb-4">
+                            <form method="POST" action="{{ profile_url }}/edit">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                                <div class="row g-3">
+                                    <div class="col-md-12 form-floating">
+                                        <select class="form-select" id="theme-toggle" name="theme">
+                                            <option value="light" {% if theme == "light" %}selected{% endif %}>Light</option>
+                                            <option value="dark" {% if theme == "dark" %}selected{% endif %}>Dark</option>
+                                        </select>
+                                        <label for="theme">Theme</label>
+                                    </div>
+                                </div>
+                                <div class="mt-4 justify-content-center d-flex">
+                                    <button type="submit" class="btn btn-primary me-2">Save Changes</button>
+                                    <button type="reset" class="btn btn-outline-secondary">Cancel</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <!-- /Theme -->
+                </div>
+            </div>
+        </div>
+        <div class="tab-pane fade" id="navs-pills-security" role="tabpanel">
+            <div class="d-flex row g-4">
+                <div class="col-md-6">
+                    <!-- Password -->
+                    <div class="card mb-4 position-relative">
+                        <i class='bx bx-check-shield bx-sm position-absolute top-0 end-0 m-3'></i>
+                        <h5 class="card-header">Change Password</h5>
+                        <div class="card-body pb-4">
+                            <form method="POST" action="{{ profile_url }}/edit" autocomplete="off">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                                <div class="row g-3">
+                                    <div class="col-md-12 form-password-toggle">
+                                        <label for="new_password" class="form-label">New Password</label>
+                                        <div class="input-group input-group-merge"
+                                             {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Disabled by readonly"{% endif %}>
+                                            <input class="form-control"
+                                                   type="password"
+                                                   id="new_password"
+                                                   name="new_password"
+                                                   placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
+                                                   aria-label="New Password"
+                                                   autocomplete="off"
+                                                   required
+                                                   pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z0-9]).{8,}$"
+                                                   {% if is_readonly %}disabled{% endif %} />
+                                            <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
+                                        </div>
+                                        <div class="mt-3">
+                                            <ul class="list-unstyled" id="password-requirements">
+                                                <li id="length-check">
+                                                    <i class="bx bx-x text-danger"></i> Your password must
+                                                    have at least 8 characters.
+                                                </li>
+                                                <li id="uppercase-check">
+                                                    <i class="bx bx-x text-danger"></i> Your password must
+                                                    have at least 1 uppercase letter.
+                                                </li>
+                                                <li id="number-check">
+                                                    <i class="bx bx-x text-danger"></i> Your password must
+                                                    have at least 1 number.
+                                                </li>
+                                                <li id="special-check">
+                                                    <i class="bx bx-x text-danger"></i> Your password must
+                                                    have at least 1 special character.
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12 form-password-toggle">
+                                        <label for="new_password_confirm" class="form-label">Confirm Password</label>
+                                        <div class="input-group input-group-merge"
+                                             {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Disabled by readonly"{% endif %}>
+                                            <input class="form-control" type="password" id="new_password_confirm" name="new_password_confirm" placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;" aria-label="Confirm Password" autocomplete="off" required pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[ !&quot;#$%&'()*+,./:;<=>?@[\\\]^_`{|}~-]).{8,}$"
+                                            {% if is_readonly %}disabled{% endif %}
+                                            />
+                                            <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12 form-password-toggle">
+                                        <label class="form-label" for="password">Current password</label>
+                                        <div class="input-group input-group-merge"
+                                             {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Disabled by readonly"{% endif %}>
+                                            <input type="password"
+                                                   class="form-control"
+                                                   name="password"
+                                                   placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
+                                                   aria-describedby="Current password"
+                                                   required
+                                                   {% if is_readonly %}disabled{% endif %} />
+                                            <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mt-4 justify-content-center d-flex">
+                                    <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The database is in readonly, therefore the configuration is locked"{% endif %}>
+                                        <button type="submit"
+                                                class="btn btn-primary me-2{% if is_readonly %} disabled{% endif %}">
+                                            Save Changes
+                                        </button>
+                                    </div>
+                                    <button type="reset" class="btn btn-outline-secondary">Cancel</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <!-- /Password -->
+                </div>
+                <div class="col-md-6">
+                    <!-- Two-Factor Authentication (2FA) -->
+                    <div class="card mb-4 position-relative">
+                        <i class='bx bx-qr bx-sm position-absolute top-0 end-0 m-3'></i>
+                        <h5 class="card-header text-center">Two-Factor Authentication (2FA)</h5>
+                        <div class="card-body">
+                            {% if not is_totp %}
+                                <!-- Enable 2FA -->
+                                <form method="POST" action="{{ profile_url }}/totp-enable">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                                    <div class="row g-3">
+                                        <!-- QR Code Section -->
+                                        <div class="col-md-12 text-center">
+                                            <h5 class="mb-0">Enable 2FA</h5>
+                                            <img class="img-fluid qr-code"
+                                                 src="{{ totp_qr_image }}"
+                                                 alt="2FA QR Code"
+                                                 height="200"
+                                                 width="200" />
+                                        </div>
+                                        <div class="col-md-12 form-password-toggle">
+                                            <label for="secret_token" class="form-label text-start d-block">Secret Token</label>
+                                            <div class="input-group input-group-merge">
+                                                <input type="password"
+                                                       name="secret_token"
+                                                       class="form-control"
+                                                       placeholder="Secret Token"
+                                                       value="{{ totp_secret }}"
+                                                       readonly />
+                                                {% if request.is_secure %}
+                                                    <span class="input-group-text cursor-pointer copy-to-clipboard">
+                                                        <i class="bx bx-copy-alt"></i>
+                                                    </span>
+                                                {% endif %}
+                                                <span class="input-group-text cursor-pointer">
+                                                    <i class="bx bx-hide"></i>
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12"
+                                             {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Disabled by readonly"{% endif %}>
+                                            <label for="2fa_code" class="form-label text-start d-block">2FA Code</label>
+                                            <div class="input-group">
+                                                <input class="form-control"
+                                                       type="text"
+                                                       name="totp_token"
+                                                       placeholder="Enter code"
+                                                       aria-label="2FA Code"
+                                                       required
+                                                       {% if is_readonly %}disabled{% endif %} />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12 form-password-toggle">
+                                            <label class="form-label" for="password">Current password</label>
+                                            <div class="input-group input-group-merge"
+                                                 {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Disabled by readonly"{% endif %}>
+                                                <input type="password"
+                                                       class="form-control"
+                                                       name="password"
+                                                       placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
+                                                       aria-describedby="Current password"
+                                                       required
+                                                       {% if is_readonly %}disabled{% endif %} />
+                                                <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mt-4 justify-content-center d-flex">
+                                        <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The database is in readonly, therefore the configuration is locked"{% endif %}>
+                                            <button type="submit"
+                                                    class="btn btn-primary{% if is_readonly %} disabled{% endif %}">
+                                                Enable TOTP
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                                <!-- /Enable 2FA -->
+                            {% else %}
+                                <!-- Disable 2FA -->
+                                <form method="POST" action="{{ profile_url }}/totp-disable">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                                    <div class="row g-3">
+                                        <div class="col-md-12 text-center">
+                                            <h5 class="mb-0">Disable 2FA</h5>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <label for="totp_token" class="form-label text-start d-block">2FA Code or Recovery Code</label>
+                                            <div class="input-group"
+                                                 {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Disabled by readonly"{% endif %}>
+                                                <input class="form-control"
+                                                       type="text"
+                                                       name="totp_token"
+                                                       placeholder="Enter code"
+                                                       aria-label="2FA Code or Recovery Code"
+                                                       required
+                                                       {% if is_readonly %}disabled{% endif %} />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12 form-password-toggle">
+                                            <label class="form-label" for="password">Current password</label>
+                                            <div class="input-group input-group-merge"
+                                                 {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Disabled by readonly"{% endif %}>
+                                                <input type="password"
+                                                       class="form-control"
+                                                       name="password"
+                                                       placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
+                                                       aria-describedby="Current password"
+                                                       required
+                                                       {% if is_readonly %}disabled{% endif %} />
+                                                <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mt-4 justify-content-center d-flex">
+                                        <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The database is in readonly, therefore the configuration is locked"{% endif %}>
+                                            <button type="submit"
+                                                    class="btn btn-primary{% if is_readonly %} disabled{% endif %}">
+                                                Disable TOTP
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                                <!-- /Disable 2FA -->
+                            {% endif %}
+                        </div>
+                    </div>
+                    <!-- /Two-Factor Authentication (2FA) -->
+                    {% if is_totp %}
+                        <!-- Refresh Recovery Codes -->
+                        <div class="card mb-4 position-relative">
+                            <i class='bx bx-data bx-sm position-absolute top-0 end-0 m-3'></i>
+                            <h5 class="card-header">Refresh Recovery Codes</h5>
+                            <div class="card-body">
+                                <div class="alert alert-danger text-center" role="alert">
+                                    <strong>Notice:</strong> Refreshing your recovery codes will
+                                    invalidate the previous ones.
+                                </div>
+                                <form method="POST"
+                                      action="{{ profile_url }}/totp-refresh"
+                                      autocomplete="off">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                                    <div class="row g-3">
+                                        <div class="col-md-12 form-password-toggle"
+                                             {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Disabled by readonly"{% endif %}>
+                                            <label class="form-label" for="password">Current password</label>
+                                            <div class="input-group input-group-merge">
+                                                <input type="password"
+                                                       class="form-control"
+                                                       name="password"
+                                                       placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
+                                                       aria-describedby="Current password"
+                                                       required
+                                                       {% if is_readonly %}disabled{% endif %} />
+                                                <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mt-4 justify-content-center d-flex">
+                                        <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The database is in readonly, therefore the configuration is locked"{% endif %}>
+                                            <button type="submit"
+                                                    class="btn btn-primary{% if is_readonly %} disabled{% endif %}">
+                                                Refresh Recovery Codes
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        <!-- /Refresh Recovery Codes -->
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="tab-pane fade" id="navs-pills-sessions" role="tabpanel">
+            <div class="d-flex row g-2 justify-content-center">
+                <div class="col-md-4">
+                    <form method="POST" action="{{ profile_url }}/wipe-other-sessions">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                        <div class="card mb-4 position-relative">
+                            <i class='bx bx-history bx-sm position-absolute top-0 end-0 m-3'></i>
+                            <h5 class="card-header">Sessions</h5>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-md-12 form-password-toggle">
+                                        <label class="form-label" for="password">Current password</label>
+                                        <div class="input-group input-group-merge"
+                                             {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Disabled by readonly"{% endif %}>
+                                            <input type="password"
+                                                   class="form-control"
+                                                   name="password"
+                                                   placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
+                                                   aria-describedby="Current password"
+                                                   required
+                                                   {% if is_readonly %}disabled{% endif %} />
+                                            <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mt-4 d-flex justify-content-center">
+                                    <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The database is in readonly, therefore the configuration is locked"{% endif %}>
+                                        <button type="submit"
+                                                class="btn btn-danger{% if is_readonly %} disabled{% endif %}">
+                                            Wipe other sessions
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="col-md-8">
+                    <div id="sessions-page-content"
+                         class="tab-content position-relative p-0 ps-md-2 pe-md-2">
+                        {% for session in last_sessions %}
+                            {% if session["current"] %}
+                                {% set card_classes = "border-primary border-1 position-relative" %}
+                                {% set card_header_classes = "bg-primary text-white" %}
+                                {% set card_icon = "bx-star text-warning" %}
+                                {% set items_classes = "text-primary" %}
+                            {% else %}
+                                {% set card_classes = "border-secondary" %}
+                                {% set card_header_classes = "bg-secondary" %}
+                                {% set card_icon = "bx-history text-white" %}
+                                {% set items_classes = "text-secondary" %}
+                            {% endif %}
+                            <div class="card {{ card_classes }} shadow-sm mb-4 card-transition">
+                                <div class="card-header {{ card_header_classes }} d-flex justify-content-between align-items-center mb-2 p-3">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bx {{ card_icon }} me-2"></i>
+                                        <h5 class="mb-0 text-white">Session</h5>
+                                    </div>
+                                    {% if session["current"] %}
+                                        <span class="badge bg-bw-green text-white fs-6">
+                                            <i class="bx bx-user-check"></i> Current Session
+                                        </span>
+                                    {% endif %}
+                                </div>
+                                <div class="card-body">
+                                    <div class="list-group list-group-flush">
+                                        <div class="list-group-item d-flex align-items-center">
+                                            <strong>
+                                                <i class="bx bx-window-alt {{ items_classes }}"></i>
+                                            Browser:</strong>
+                                            &nbsp;{{ session["browser"]|safe }}
+                                        </div>
+                                        <div class="list-group-item d-flex align-items-center">
+                                            <strong>
+                                                <i class="bx bx-layer {{ items_classes }}"></i>
+                                            Operating System:</strong>
+                                            &nbsp;{{ session["os"]|safe }}
+                                        </div>
+                                        <div class="list-group-item d-flex align-items-center">
+                                            <strong>
+                                                <i class="bx bx-devices {{ items_classes }}"></i>
+                                            Device:</strong>
+                                            &nbsp;{{ session["device"]|safe }}
+                                        </div>
+                                        <div class="d-flex list-group-item form-password-toggle align-items-center">
+                                            <strong>
+                                                <i class="bx bx-network-chart {{ items_classes }}"></i>
+                                                IP Address:
+                                            </strong>
+                                            &nbsp;
+                                            <div class="input-group input-group-sm input-group-merge w-auto">
+                                                <input class="form-control"
+                                                       type="password"
+                                                       autocomplete="off"
+                                                       value="{{ session['ip'] }}"
+                                                       readonly />
+                                                <span class="input-group-text cursor-pointer">
+                                                    <i class="bx bx-hide"></i>
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="list-group-item d-flex align-items-center">
+                                            <strong>
+                                                <i class="bx bx-time {{ items_classes }}"></i>
+                                            Creation date:</strong>
+                                            &nbsp;{{ session["creation_date"] }}
+                                        </div>
+                                        <div class="list-group-item d-flex align-items-center">
+                                            <strong>
+                                                <i class="bx bx-time {{ items_classes }}"></i>
+                                            Last Activity:</strong>
+                                            &nbsp;{{ session["last_activity"] }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% if is_recovery_refreshed %}
+        <div class="modal fade"
+             id="modal-recovery-codes"
+             data-bs-backdrop="static"
+             tabindex="-1"
+             aria-hidden="true"
+             role="dialog">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Recovery Codes</h5>
+                        <button type="button"
+                                class="btn-close"
+                                data-bs-dismiss="modal"
+                                aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="alert alert-danger text-center" role="alert">
+                            <strong>Notice:</strong> These recovery codes will only be shown once.
+                            Please ensure you save them securely.
+                        </div>
+                        <div class="alert alert-primary text-center" role="alert">
+                            <strong>Important:</strong> Please save these recovery codes in a
+                            secure location (like a bunker). You can use them to access your account if you lose
+                            your authentication device.
+                        </div>
+                        <div class="row g-3">
+                            {% for code in totp_recovery_codes %}
+                                <div class="col-6">
+                                    <div class="p-3 border rounded bg-{% if theme == 'light' %}light{% else %}dark{% endif %} shadow-sm text-center recovery-code">
+                                        {{ code }}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="modal-footer justify-content-center">
+                        <button id="copy-codes-button" type="button" class="btn btn-primary">Copy Codes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script nonce="{{ script_nonce }}">
+  document.addEventListener("DOMContentLoaded", function () {
+    var modalElement = document.getElementById("modal-recovery-codes");
+    var modal = new bootstrap.Modal(modalElement);
+    modal.show();
+
+    document
+      .getElementById("copy-codes-button")
+      .addEventListener("click", function () {
+        // Get all elements that have the class 'recovery-code'
+        var codeElements = document.querySelectorAll(".recovery-code");
+
+        // Initialize a string to store all the codes
+        var allCodes = "";
+
+        // Loop through each element and add the text content to the string
+        codeElements.forEach(function (element) {
+          allCodes += element.textContent.trim() + "\n";
+        });
+
+        // Copy the concatenated codes to the clipboard
+        navigator.clipboard
+          .writeText(allCodes)
+          .then(() => {
+            // Show tooltip
+            const button = $(this);
+            button.attr("data-bs-original-title", "Copied!").tooltip("show");
+
+            // Hide tooltip after 2 seconds
+            setTimeout(() => {
+              button.tooltip("hide").attr("data-bs-original-title", "");
+            }, 2000);
+          })
+          .catch((err) => {
+            console.error("Failed to copy text: ", err);
+          });
+      });
+  });
+        </script>
+    {% endif %}
+    <!-- / Content -->
+{% endblock %}

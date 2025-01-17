@@ -1,0 +1,35 @@
+<div id="feedback-toast-container"
+     class="toast-container position-fixed bottom-0 end-0 mb-3 me-3">
+    <!-- prettier-ignore -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if pro_overlapped and current_endpoint != "pro" %}
+            {% if messages.append(('error', 'You have more services than allowed by your pro license. Upgrade your license or move some services to draft mode to unlock your pro license.')) %}
+            {% endif %}
+        {% endif %}
+        <!-- flash message-->
+        {% for category, message in messages %}
+            <div class="bs-toast toast fade show bg-{% if theme == 'light' %}white{% else %}dark{% endif %} border{% if category == 'error' %} border-danger{% elif category == 'warning' %} border-warning{% else %} border-primary{% endif %}"
+                 role="alert"
+                 aria-live="assertive"
+                 aria-atomic="true">
+                <div class="toast-header d-flex align-items-center{% if category == 'error' %} text-danger{% elif category == 'warning' %} text-warning{% else %} text-primary{% endif %}">
+                    <i class="d-block h-auto rounded tf-icons bx bx-xs bx-bell bx-tada me-2"></i>
+                    <span class="fw-medium me-auto">
+                        {% if category != 'message' %}
+                            {{ category|capitalize }}
+                        {% else %}
+                            Info
+                        {% endif %}
+                    </span>
+                    <small class="text-body-secondary">just now</small>
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="toast"
+                            aria-label="Close"></button>
+                </div>
+                <div class="toast-body">{{ message|safe }}</div>
+            </div>
+        {% endfor %}
+        <!-- end flash message-->
+    {% endwith %}
+</div>

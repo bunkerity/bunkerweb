@@ -1,0 +1,70 @@
+v1.0.3 - 2022-May-24
+--------------------
+
+ - Support http protocol versions besides 0.9, 1.0, 1.1, 2.0
+   [Issue #224 - @HQuest, @martinhsv]
+ - Support for building with nginx configured with PCRE2
+   [Issue #260 - @defanator]
+
+v1.0.2 - 2021-Jun-02
+--------------------
+
+ - Fix auditlog in case of internal redirect
+   [Issue #90 - @AirisX, @defanator]
+ - Fix nginx sends response without headers
+   [Issue #238 - @airween, @defanator]
+ - Fix nginx not clearing body cache (caused by incomplete fix for #187)
+   [Issue #216 - @krewi1, @martinhsv]
+ - Fix config setting not respected: client_body_in_file_only on
+   [Issue #187 - @martinhsv]
+ - Fix audit_log not generated for disruptive actions 
+   [Issue #170, #2220, #2237 - @victorhora]
+ - Exit more gracefully if uri length is zero
+   [@martinhsv]
+
+v1.0.1 - 2019-Dec-16
+--------------------
+
+ - Fixed obtaining of server_addr
+   [Issue #167, #168 - @defanator]
+ - Avoid processing of subrequests initiated by the error_page 
+   [Issue #76, #164, #165 - @defanator]
+ - Tests: extend request body tests
+   [Issue #142,#143 - @defanator]
+ - Added basic tests over HTTP/2
+   [Issue #145 - @defanator]
+ - Module configuration refactoring
+   [Issue #139 - @defanator]
+ - Restore r->write_event_handler after reading request body
+   [Issue #131 - @defanator]
+ - Increase log level for disruptive actions to "error"
+   [Issue #112 - @victorhora]
+ - Support for generating transaction ID in nginx
+   [Issue #126 - @defanator]
+ - Extend request body tests with ARGS_POST case
+   [Issue #124 - @defanator]
+ - Fix tests after 42a472a change in library
+   [Issue #122 - @defanator]
+ - Fix processing of response body when gzip compression is enabled
+   [Issue #107 - @turchanov]
+ - Fixed processing of response body chunks in
+   ngx_http_modsecurity_body_filter.
+   [Issue #105 - @turchanov, @defanator]
+ - Fix incorrect handling of request/response body data chain of ngx_buf_t
+   buffers
+   [Issue #104 - @turchanov, @defanator]
+ - Pool pointer is now handled in ngx_http_modsecurity_config_cleanup
+   [Issue #87 - @AirisX, @defanator, @zimmerle]
+ - Fix memory leak in intervention processing
+   [Issue #100 - @defanator]
+ - Emit connector version in error log
+   [Issue #88 - @defanator]
+ - Fixed memory leak on config cleanup.
+   [Issue #80 - @AirisX, @defanator]
+
+
+v1.0.0 - 2017-Dec-20
+--------------------
+
+ - First version of ModSecurity-nginx connector
+

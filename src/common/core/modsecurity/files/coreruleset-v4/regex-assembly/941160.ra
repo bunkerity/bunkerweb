@@ -1,0 +1,392 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##! The regular expressions in this file were copied from version 1 or 2 of the NoScript
+##! browser extension. The source code is available here: https://noscript.net/getit.
+##! The extension, among other things, looks for "dangerous" tags and doesn't care whether
+##! they are valid or actually carry a dangerous payload. Therefore, rule 941160 is rather
+##! aggressive in its detection, triggering on strings like `<img>`.
+
+##!+ i
+
+##!> assemble
+  ##! HTML tag opening bracket
+  <
+  ##!=>
+  ##! Quotes, punctuation, brackets, etc.
+  [^\w<>]*
+  ##!=>
+  ##! More or less `\w`, followed by `:`, which would match `xml:base`, together with the
+  ##! list defined later.
+  (?:[^<>\"'\s]*:)?
+  ##!=>
+  ##! Quotes, punctuation, brackets, etc.
+  [^\w<>]*
+  ##!=>
+  ##! Quotes, punctuation, brackets, etc., angle brackets allowed
+  \W*?
+  ##!=< html-tag-prefix
+##!<
+
+##!> assemble
+  s\W*?c\W*?r\W*?i\W*?p\W*?t
+  f\W*?o\W*?r\W*?m
+  d\W*?i\W*?a\W*?l\W*?o\W*?g
+  s\W*?t\W*?y\W*?l\W*?e
+  s\W*?v\W*?g
+  m\W*?a\W*?r\W*?q\W*?u\W*?e\W*?e
+  l\W*?i\W*?n\W*?k[^>\w]
+  o\W*?b\W*?j\W*?e\W*?c\W*?t[^>\w]
+  e\W*?m\W*?b\W*?e\W*?d[^>\w]
+  a\W*?p\W*?p\W*?l\W*?e\W*?t[^>\w]
+  p\W*?a\W*?r\W*?a\W*?m[^>\w]
+  i?\W*?f\W*?r\W*?a\W*?m\W*?e[^>\w]
+  b\W*?a\W*?s\W*?e[^>\w]
+  b\W*?o\W*?d\W*?y[^>\w]
+  m\W*?e\W*?t\W*?a[^>\w]
+  i\W*?m\W*?a?\W*?g\W*?e?[^>\w]
+  v\W*?i\W*?d\W*?e\W*?o[^>\w]
+  a\W*?u\W*?d\W*?i\W*?o[^>\w]
+  b\W*?i\W*?n\W*?d\W*?i\W*?n\W*?g\W*?s[^>\w]
+  s\W*?e\W*?t[^>\w]
+  a\W*?n\W*?i\W*?m\W*?a\W*?t\W*?e[^>\w]
+  ##!=< dangerous-html-tags
+##!<
+
+
+##!> assemble
+  (?:<\w.*[\s/]|['\"](?:.*[\s/])?)
+  ##!=< html-properties-prefix
+##!<
+
+##!> assemble
+  background
+  formaction
+  lowsrc
+  onabort
+  onactivate
+  onadapteradded
+  onaddtrack
+  onafterprint
+  onafterscriptexecute
+  onafterupdate
+  onalerting
+  onanimationcancel
+  onanimationend
+  onanimationiteration
+  onanimationstart
+  onantennastatechange
+  onappcommand
+  onaudioend
+  onaudioprocess
+  onaudiostart
+  onauxclick
+  onbeforeactivate
+  onbeforecopy
+  onbeforecut
+  onbeforedeactivate
+  onbeforeeditfocus
+  onbeforeinput
+  onbeforepaste
+  onbeforeprint
+  onbeforescriptexecute
+  onbeforetoggle
+  onbeforeunload
+  onbeforeupdate
+  onbegin
+  onbeginEvent
+  onblocked
+  onblur
+  onbounce
+  onboundary
+  onbroadcast
+  onbusy
+  oncached
+  oncallschanged
+  oncanplay
+  oncanplaythrough
+  oncardstatechange
+  oncellchange
+  oncfstatechange
+  onchange
+  onchargingchange
+  onchargingtimechange
+  onchecking
+  onclick
+  onclose
+  oncommand
+  oncommandupdate
+  oncomplete
+  oncompositionend
+  oncompositionstart
+  oncompositionupdate
+  onconnected
+  onconnecting
+  oncontextmenu
+  oncontrolselect
+  oncopy
+  oncuechange
+  oncut
+  ondataavailable
+  ondatachange
+  ondataerror
+  ondatasetchanged
+  ondatasetcomplete
+  ondblclick
+  ondeactivate
+  ondeliveryerror
+  ondeliverysuccess
+  ondevicefound
+  ondevicelight
+  ondevicemotion
+  ondeviceorientation
+  ondeviceproximity
+  ondialing
+  ondisabled
+  ondischargingtimechange
+  ondisconnected
+  ondisconnecting
+  ondomactivate
+  ondomattrmodified
+  ondomcharacterdatamodified
+  ondomfocusin
+  ondomfocusout
+  ondommousescroll
+  ondomnodeinserted
+  ondomnodeinsertedintodocument
+  ondomnoderemoved
+  ondomnoderemovedfromdocument
+  ondomsubtreemodified
+  ondownloading
+  ondragdrop
+  ondragend
+  ondragenter
+  ondragexit
+  ondraggesture
+  ondragleave
+  ondragover
+  ondragstart
+  ondrop
+  ondurationchange
+  onemptied
+  onenabled
+  onend
+  onended
+  onendEvent
+  onenter
+  onerror
+  onerrorupdate
+  onexit
+  onfailed
+  onfilterchange
+  onfinish
+  onfocus
+  onfocusin
+  onfocusout
+  onformchange
+  onforminput
+  onfullscreenchange
+  ongamepadaxismove
+  ongamepadbuttondown
+  ongamepadbuttonup
+  ongamepadconnected
+  ongamepaddisconnected
+  onget
+  onhashchange
+  onheadphoneschange
+  onheld
+  onhelp
+  onholding
+  onicccardlockerror
+  oniccinfochange
+  onincoming
+  oninput
+  oninvalid
+  onkeydown
+  onkeypress
+  onkeyup
+  onlevelchange
+  onload
+  onloadeddata
+  onloadedmetadata
+  onloadend
+  onloadstart
+  onlosecapture
+  only
+  onmark
+  onmessage
+  onmousedown
+  onmouseenter
+  onmouseleave
+  onmousemove
+  onmouseout
+  onmouseover
+  onmouseup
+  onmousewheel
+  onmove
+  onmoveend
+  onmovestart
+  onmozafterpaint
+  onmozaudioavailable
+  onmozbeforeresize
+  onmozedgeuicanceled
+  onmozedgeuicompleted
+  onmozedgeuistarted
+  onmozfullscreenchange
+  onmozfullscreenerror
+  onmozmagnifygesture
+  onmozmagnifygesturestart
+  onmozmagnifygestureupdate
+  onmozmousehittest
+  onmozmousepixelscroll
+  onmoznetworkdownload
+  onmoznetworkupload
+  onmozorientationchange
+  onmozpointerlockchange
+  onmozpointerlockerror
+  onmozpresstapgesture
+  onmozrotategesture
+  onmozrotategesturestart
+  onmozrotategestureupdate
+  onmozscrolledareachanged
+  onmozswipegesture
+  onmozswipegestureend
+  onmozswipegesturestart
+  onmozswipegestureupdate
+  onmoztapgesture
+  onmoztimechange
+  onnomatch
+  onnoupdate
+  onobsolete
+  onoffline
+  ononline
+  onopen
+  onoverflow
+  onoverflowchanged
+  onpagehide
+  onpageshow
+  onpaint
+  onpaste
+  onpause
+  onplay
+  onplaying
+  onpointerdown
+  onpointerenter
+  onpointerleave
+  onpointermove
+  onpointerout
+  onpointerover
+  onpointerrawupdate
+  onpointerup
+  onpopstate
+  onpopuphidden
+  onpopuphiding
+  onpopupshowing
+  onpopupshown
+  onprogress
+  onpropertychange
+  onratechange
+  onreadystatechange
+  onreceived
+  onremovetrack
+  onrepeat
+  onrepeatEvent
+  onrequest
+  onreset
+  onresize
+  onresult
+  onresume
+  onresuming
+  onretrieving
+  onrowenter
+  onrowexit
+  onrowsdelete
+  onrowsinserted
+  onscroll
+  onscrollend
+  onsearch
+  onseekcomplete
+  onseeked
+  onseeking
+  onselect
+  onselectionchange
+  onselectstart
+  onsending
+  onsent
+  onset
+  onshow
+  onsoundend
+  onsoundstart
+  onspeechend
+  onspeechstart
+  onstalled
+  onstart
+  onstatechange
+  onstatuschanged
+  onstkcommand
+  onstksessionend
+  onstop
+  onsubmit
+  onsuccess
+  onsuspend
+  onsvgabort
+  onsvgerror
+  onsvgload
+  onsvgresize
+  onsvgscroll
+  onsvgunload
+  onsvgzoom
+  ontext
+  ontimeout
+  ontimeupdate
+  ontoggle
+  ontouchcancel
+  ontouchend
+  ontouchenter
+  ontouchleave
+  ontouchmove
+  ontouchstart
+  ontransitioncancel
+  ontransitionend
+  ontransitionrun
+  ontransitionstart
+  onunderflow
+  onunhandledrejection
+  onunload
+  onupdateready
+  onupgradeneeded
+  onuserproximity
+  onussdreceived
+  onversionchange
+  onvoicechange
+  onvolumechange
+  onwaiting
+  onwarning
+  onwebkitanimationend
+  onwebkitanimationiteration
+  onwebkitanimationstart
+  onwebkitplaybacktargetavailabilitychanged
+  onwebkittransitionend
+  onwheel
+  onzoom
+  ping
+  src
+  style
+  ##!=< html-properties
+##!<
+
+##!> assemble
+  [\s\x08]*?=
+  ##!=< html-properties-end
+##!<
+
+##!> assemble
+  ##!=> html-tag-prefix
+  ##!=> dangerous-html-tags
+##!<
+
+##!> assemble
+  ##!=> html-properties-prefix
+  ##!=> html-properties
+  ##!=> html-properties-end
+##!<

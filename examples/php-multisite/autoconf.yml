@@ -1,0 +1,39 @@
+services:
+  myapp1:
+    image: php:fpm
+    # ⚠️ UID and GID of BunkerWeb (101:101) and php:fpm (33:33) are not the same ⚠️
+    # but both needs access to the files and folders of web-files
+    # don't forget to edit the permissions of the files and folders accordingly
+    # example : chown -R 33:101 ./www && find ./www -type f -exec chmod 0640 {} \; && find ./www -type d -exec chmod 0750 {} \;
+    volumes:
+      - ./www/app1.example.com:/app # folder containing PHP app1 (don't forget to rename it)
+    networks:
+      bw-services:
+        aliases:
+          - myapp1
+    labels:
+      - bunkerweb.SERVER_NAME=app1.example.com
+      - bunkerweb.REMOTE_PHP=myapp1
+      - bunkerweb.REMOTE_PHP_PATH=/app
+
+  myapp2:
+    image: php:fpm
+    # ⚠️ UID and GID of BunkerWeb (101:101) and php:fpm (33:33) are not the same ⚠️
+    # but both needs access to the files and folders of web-files
+    # don't forget to edit the permissions of the files and folders accordingly
+    # example : chown -R 33:101 ./www && find ./www -type f -exec chmod 0640 {} \; && find ./www -type d -exec chmod 0750 {} \;
+    volumes:
+      - ./www/app2.example.com:/app # folder containing PHP app2 (don't forget to rename it)
+    networks:
+      bw-services:
+        aliases:
+          - myapp2
+    labels:
+      - bunkerweb.SERVER_NAME=app2.example.com
+      - bunkerweb.REMOTE_PHP=myapp2
+      - bunkerweb.REMOTE_PHP_PATH=/app
+
+networks:
+  bw-services:
+    external:
+      name: bw-services

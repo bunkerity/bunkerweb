@@ -1,0 +1,15 @@
+/var/log/bunkerweb/*.log /var/log/bunkerweb/*.log.* /var/log/bunkerweb/letsencrypt/*.log /var/log/bunkerweb/letsencrypt/*.log.*
+{
+    su nginx nginx
+    daily
+    size 100M
+    rotate 7
+    copytruncate
+    compress
+    delaycompress
+    missingok
+    notifempty
+    dateext
+    dateformat -%Y-%m-%d
+    create 0640 root nginx
+}

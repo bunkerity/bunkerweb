@@ -1,0 +1,65 @@
+services:
+  mymagento:
+    image: bitnami/magento:2
+    networks:
+      - bw-services
+    volumes:
+      - magento-data:/bitnami/magento
+    environment:
+      - MAGENTO_USERNAME=admin # replace with admin username
+      - MAGENTO_PASSWORD=changeme42 # replace with a stronger password
+      - MAGENTO_EMAIL=contact@example.com # replace with admin email
+      - MAGENTO_HOST=www.example.com # replace with your domain
+      - MAGENTO_ENABLE_HTTPS=yes
+      - MAGENTO_ENABLE_ADMIN_HTTPS=yes
+      - MAGENTO_DATABASE_HOST=mydb
+      - MAGENTO_DATABASE_NAME=magentodb
+      - MAGENTO_DATABASE_USER=user
+      - MAGENTO_DATABASE_PASSWORD=db-user-pwd # replace with a stronger password (must match MYSQL_PASSWORD)
+      - ELASTICSEARCH_HOST=myelasticsearch
+    deploy:
+      placement:
+        constraints:
+          - "node.role==worker"
+      labels:
+        - bunkerweb.SERVER_NAME=www.example.com
+        - bunkerweb.USE_REVERSE_PROXY=yes
+        - bunkerweb.REVERSE_PROXY_URL=/
+        - bunkerweb.REVERSE_PROXY_HOST=http://mymagento:8080
+
+  myelasticsearch:
+    image: bitnami/elasticsearch:7
+    networks:
+      - bw-services
+    volumes:
+      - elasticsearch-data:/bitnami/elasticsearch/data
+    deploy:
+      placement:
+        constraints:
+          - "node.role==worker"
+
+  mydb:
+    image: mariadb:11
+    networks:
+      - bw-services
+    volumes:
+      - db-data:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=db-root-pwd # replace with a stronger password
+      - MYSQL_DATABASE=magentodb
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=db-user-pwd # replace with a stronger password (must match MAGENTO_DATABASE_PASSWORD)
+    deploy:
+      placement:
+        constraints:
+          - "node.role==worker"
+
+networks:
+  bw-services:
+    external: true
+    name: bw-services
+
+volumes:
+  db-data:
+  elasticsearch-data:
+  magento-data:

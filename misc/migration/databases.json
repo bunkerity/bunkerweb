@@ -1,0 +1,6 @@
+{
+  "sqlite": "sqlite:////var/lib/bunkerweb/db.sqlite3",
+  "mariadb": "mariadb+pymysql://bunkerweb:secret@bw-db:3306/db",
+  "mysql": "mysql+pymysql://bunkerweb:secret@bw-db:3306/db",
+  "postgresql": "postgresql+psycopg://bunkerweb:secret@bw-db:5432/db"
+}

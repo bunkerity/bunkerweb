@@ -1,0 +1,131 @@
+{
+  "id": "headers",
+  "name": "Headers",
+  "description": "Manage HTTP headers sent to clients.",
+  "version": "1.0",
+  "stream": "no",
+  "settings": {
+    "CUSTOM_HEADER": {
+      "context": "multisite",
+      "default": "",
+      "help": "Custom header to add (HeaderName: HeaderValue).",
+      "id": "custom-header",
+      "label": "Custom header (HeaderName: HeaderValue)",
+      "regex": "^([\\w\\-]+: .+)?$",
+      "type": "text",
+      "multiple": "custom-headers"
+    },
+    "REMOVE_HEADERS": {
+      "context": "multisite",
+      "default": "Server Expect-CT X-Powered-By X-AspNet-Version X-AspNetMvc-Version Public-Key-Pins",
+      "help": "Headers to remove (Header1 Header2 Header3 ...)",
+      "id": "remove-headers",
+      "label": "Remove headers",
+      "regex": "^(?! )( ?[\\w\\-]+)*$",
+      "type": "text"
+    },
+    "KEEP_UPSTREAM_HEADERS": {
+      "context": "multisite",
+      "default": "Content-Security-Policy Permissions-Policy X-Frame-Options",
+      "help": "Headers to keep from upstream (Header1 Header2 Header3 ... or * for all).",
+      "id": "keep-upstream-headers",
+      "label": "Keep upstream headers",
+      "regex": "^((?! )( ?[\\w\\-]+)+|\\*)?$",
+      "type": "text"
+    },
+    "STRICT_TRANSPORT_SECURITY": {
+      "context": "multisite",
+      "default": "max-age=63072000; includeSubDomains; preload",
+      "help": "Value for the Strict-Transport-Security (HSTS) header.",
+      "id": "strict-transport-security",
+      "label": "Strict-Transport-Security (HSTS)",
+      "regex": "^(max-age=\\d+(; includeSubDomains(; preload)?)?)?$",
+      "type": "text"
+    },
+    "COOKIE_FLAGS": {
+      "context": "multisite",
+      "default": "* HttpOnly SameSite=Lax",
+      "help": "Cookie flags automatically added to all cookies (value accepted for nginx_cookie_flag_module).",
+      "id": "cookie-flags",
+      "label": "Cookie flags",
+      "regex": "^(\\*|[^\\s;]+)?(\\s*(([Ee]xpires)(?!.*\\4)=[^\\s;]+|([Dd]omain)(?!.*\\5)=[^\\s;]+|([Pp]ath)(?!.*\\6)=[^\\s;]+|[Hh]ttp[Oo]nly|[Ss]ame[Ss]ite(=([Ll]ax|[Ss]trict|[NN]one))?|[Ss]ecure)(?!.*\\3))*$",
+      "type": "text",
+      "multiple": "cookie-flags"
+    },
+    "COOKIE_AUTO_SECURE_FLAG": {
+      "context": "multisite",
+      "default": "yes",
+      "help": "Automatically add the Secure flag to all cookies.",
+      "id": "cookie-auto-secure-flag",
+      "label": "Cookie auto Secure flag",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
+    "CONTENT_SECURITY_POLICY": {
+      "context": "multisite",
+      "default": "object-src 'none'; form-action 'self'; frame-ancestors 'self';",
+      "help": "Value for the Content-Security-Policy header.",
+      "id": "content-security-policy",
+      "label": "Content-Security-Policy",
+      "regex": "^.*$",
+      "type": "text"
+    },
+    "CONTENT_SECURITY_POLICY_REPORT_ONLY": {
+      "context": "multisite",
+      "default": "no",
+      "help": "Send reports for violations of the Content-Security-Policy header instead of blocking them.",
+      "id": "content-security-policy-report-only",
+      "label": "Content-Security-Policy-Report-Only",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
+    "REFERRER_POLICY": {
+      "context": "multisite",
+      "default": "strict-origin-when-cross-origin",
+      "help": "Value for the Referrer-Policy header.",
+      "id": "referrer-policy",
+      "label": "Referrer-Policy",
+      "regex": "^(?!^(,| ))((, )?(no-referrer-when-downgrade|no-referrer|origin-when-cross-origin|same-origin|strict-origin-when-cross-origin|strict-origin|origin|unsafe-url)(?!\\b.*, \\4\\b))*$",
+      "type": "text"
+    },
+    "PERMISSIONS_POLICY": {
+      "context": "multisite",
+      "default": "accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), compute-pressure=(), display-capture=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), identity-credentials-get=(), idle-detection=(), local-fonts=(), magnetometer=(), microphone=(), midi=(), otp-credentials=(), payment=(), picture-in-picture=(), publickey-credentials-create=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), speaker-selection=(), storage-access=(), usb=(), web-share=(), window-management=(), xr-spatial-tracking=(), interest-cohort=()",
+      "help": "Value for the Permissions-Policy header.",
+      "id": "permissions-policy",
+      "label": "Permissions-Policy",
+      "regex": "^(?![, ])(,? ?([a-z\\-]+)(?!.*[^\\-]\\2=)=(\\*|\\(( ?(self|\\u0022https?:\\/\\/[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*\\u0022)(?=[ \\)]))*\\)))*$",
+      "type": "text"
+    },
+    "X_FRAME_OPTIONS": {
+      "context": "multisite",
+      "default": "SAMEORIGIN",
+      "help": "Value for the X-Frame-Options header.",
+      "id": "x-frame-options",
+      "label": "X-Frame-Options",
+      "regex": "^(DENY|SAMEORIGIN)?$",
+      "type": "select",
+      "select": ["", "DENY", "SAMEORIGIN"]
+    },
+    "X_CONTENT_TYPE_OPTIONS": {
+      "context": "multisite",
+      "default": "nosniff",
+      "help": "Value for the X-Content-Type-Options header.",
+      "id": "x-content-type-options",
+      "label": "X-Content-Type-Options",
+      "regex": "^(nosniff)?$",
+      "type": "select",
+      "select": ["", "nosniff"]
+    },
+    "X_DNS_PREFETCH_CONTROL": {
+      "context": "multisite",
+      "default": "off",
+      "help": "Value for the X-DNS-Prefetch-Control header.",
+      "id": "x-dns-prefetch-control",
+      "label": "X-DNS-Prefetch-Control",
+      "regex": "^(on|off)$",
+      "type": "select",
+      "select": ["on", "off"]
+    }
+  }
+}

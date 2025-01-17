@@ -1,0 +1,5 @@
+@@ -168,3 +168,3 @@
+ ]])
+-local lib = ffi.load("libmaxminddb")
++local lib = ffi.load("/usr/share/bunkerweb/deps/lib/libmaxminddb.so")
+ local consume_map, consume_array

@@ -1,0 +1,41 @@
+{
+  "id": "bunkernet",
+  "name": "BunkerNet",
+  "description": "Share threat data with other BunkerWeb instances via BunkerNet.",
+  "version": "1.0",
+  "stream": "yes",
+  "settings": {
+    "USE_BUNKERNET": {
+      "context": "multisite",
+      "default": "yes",
+      "help": "Activate BunkerNet feature.",
+      "id": "use-bunkernet",
+      "label": "Activate BunkerNet",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
+    "BUNKERNET_SERVER": {
+      "context": "global",
+      "default": "https://api.bunkerweb.io",
+      "help": "Address of the BunkerNet API.",
+      "id": "bunkernet-server",
+      "label": "BunkerNet server",
+      "regex": "^https?:\\/\\/[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*$",
+      "type": "text"
+    }
+  },
+  "jobs": [
+    {
+      "name": "bunkernet-register",
+      "file": "bunkernet-register.py",
+      "every": "hour",
+      "reload": true
+    },
+    {
+      "name": "bunkernet-data",
+      "file": "bunkernet-data.py",
+      "every": "day",
+      "reload": true
+    }
+  ]
+}

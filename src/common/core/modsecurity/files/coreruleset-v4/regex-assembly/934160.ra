@@ -1,0 +1,9 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##! Match while(true) like loops
+##!> assemble
+##!^ while\s*\([\s(]*
+##!$ .*\)
+  ##!> include js-truthy-values
+##!<

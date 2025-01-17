@@ -1,0 +1,11 @@
+*.swp
+*.swo
+*~
+go
+t/servroot*
+reindex
+nginx
+ctags
+tags
+a.lua
+mockeagain.so

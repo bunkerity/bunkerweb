@@ -1,7 +1,0 @@
---TEST--
-sqli test, 1c type that is sqli
---INPUT--
-foo" OR "BAR"
---EXPECTED--
-
-

@@ -1,0 +1,8 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##! These expressions look for an ending '; pattern, but won't match if the quotes
+##! are balanced.
+^[^']*'\s*;
+^[^"]*"\s*;
+^[^`]*`\s*;

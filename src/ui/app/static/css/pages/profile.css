@@ -1,0 +1,21 @@
+/* Initial state for existing cards */
+.card-transition {
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+/* State for fading out existing cards */
+.card-transition.fade-out {
+  opacity: 0;
+}
+
+/* Initial state for placeholder cards (invisible) */
+.placeholder-transition {
+  opacity: 0;
+  transition: opacity 0.3s ease; /* Duration of the fade-in effect */
+}
+
+/* State for fading in placeholders */
+.placeholder-transition.fade-in {
+  opacity: 1;
+}

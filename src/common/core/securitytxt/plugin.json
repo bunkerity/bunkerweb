@@ -1,0 +1,115 @@
+{
+  "id": "securitytxt",
+  "name": "Security.txt",
+  "description": "Manage the security.txt file. A proposed standard which allows websites to define security policies.",
+  "version": "1.0",
+  "stream": "yes",
+  "settings": {
+    "USE_SECURITYTXT": {
+      "context": "multisite",
+      "default": "no",
+      "help": "Enable security.txt file.",
+      "id": "use-securitytxt",
+      "label": "Use security.txt",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
+    "SECURITYTXT_URI": {
+      "context": "multisite",
+      "default": "/.well-known/security.txt",
+      "help": "Indicates the URI where the \"security.txt\" file will be accessible from.",
+      "id": "securitytxt-uri",
+      "label": "Security.txt URI",
+      "regex": "^\\/\\S*$",
+      "type": "text"
+    },
+    "SECURITYTXT_CONTACT": {
+      "context": "multisite",
+      "default": "",
+      "help": "Indicates a method that researchers should use for reporting security vulnerabilities such as an email address, a phone number, and/or a web page with contact information. (If the value is empty, the security.txt file will not be created as it is a required field)",
+      "id": "securitytxt-contact",
+      "label": "Security.txt contact",
+      "regex": "^((mailto:|tel:|https:\\/\\/)\\S+)?$",
+      "type": "text",
+      "multiple": "securitytxt-contact"
+    },
+    "SECURITYTXT_EXPIRES": {
+      "context": "multisite",
+      "default": "",
+      "help": "Indicates the date and time after which the data contained in the \"security.txt\" file is considered stale and should not be used (If the value is empty, the value will always be the current date and time + 1 year).",
+      "id": "securitytxt-expiration",
+      "label": "Security.txt expiration",
+      "regex": "^([0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T([01][0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9])(Z|[+-]([01][0-9]|2[0-3]):[0-5][0-9]))?$",
+      "type": "text"
+    },
+    "SECURITYTXT_ENCRYPTION": {
+      "context": "multisite",
+      "default": "",
+      "help": "Indicates an encryption key that security researchers should use for encrypted communication.",
+      "id": "securitytxt-encryption",
+      "label": "Security.txt encryption",
+      "regex": "^((https:\\/\\/|dns:|openpgp4fpr:)\\S+)?$",
+      "type": "text",
+      "multiple": "securitytxt-encryption"
+    },
+    "SECURITYTXT_ACKNOWLEDGEMENTS": {
+      "context": "multisite",
+      "default": "",
+      "help": "Indicates a link to a page where security researchers are recognized for their reports.",
+      "id": "securitytxt-acknowledgement",
+      "label": "Security.txt acknowledgement",
+      "regex": "^(https:\\/\\/\\S+)?$",
+      "type": "text",
+      "multiple": "securitytxt-acknowledgement"
+    },
+    "SECURITYTXT_PREFERRED_LANG": {
+      "context": "multisite",
+      "default": "en",
+      "help": "Can be used to indicate a set of natural languages that are preferred when submitting security reports.",
+      "id": "securitytxt-preferred-lang",
+      "label": "Security.txt preferred language",
+      "regex": "^[a-zA-Z]{2,3}(-[a-zA-Z]{2})?(, [a-zA-Z]{2,3}(-[a-zA-Z]{2})?)*$",
+      "type": "text"
+    },
+    "SECURITYTXT_CANONICAL": {
+      "context": "multisite",
+      "default": "",
+      "help": "Indicates the canonical URIs where the \"security.txt\" file is located, which is usually something like \"https://example.com/.well-known/security.txt\". (If the value is empty, the default value will be automatically generated from the site URL + SECURITYTXT_URI)",
+      "id": "securitytxt-canonical",
+      "label": "Security.txt canonical",
+      "regex": "^(https:\\/\\/\\S+)?$",
+      "type": "text",
+      "multiple": "securitytxt-canonical"
+    },
+    "SECURITYTXT_POLICY": {
+      "context": "multisite",
+      "default": "",
+      "help": "Indicates a link to where the vulnerability disclosure policy is located.",
+      "id": "securitytxt-policy",
+      "label": "Security.txt policy",
+      "regex": "^(https:\\/\\/\\S+)?$",
+      "type": "text",
+      "multiple": "securitytxt-policy"
+    },
+    "SECURITYTXT_HIRING": {
+      "context": "multisite",
+      "default": "",
+      "help": "Used for linking to the vendor's security-related job positions.",
+      "id": "securitytxt-hiring",
+      "label": "Security.txt hiring",
+      "regex": "^(https:\\/\\/\\S+)?$",
+      "type": "text",
+      "multiple": "securitytxt-hiring"
+    },
+    "SECURITYTXT_CSAF": {
+      "context": "multisite",
+      "default": "",
+      "help": "A link to the provider-metadata.json of your CSAF (Common Security Advisory Framework) provider.",
+      "id": "securitytxt-csaf",
+      "label": "Security.txt CSAF",
+      "regex": "^(https:\\/\\/\\S+)?$",
+      "type": "text",
+      "multiple": "securitytxt-csaf"
+    }
+  }
+}

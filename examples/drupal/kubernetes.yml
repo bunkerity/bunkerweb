@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress
+  annotations:
+    bunkerweb.io/AUTO_LETS_ENCRYPT: "yes"
+    bunkerweb.io/LIMIT_REQ_URL_1: "/core/install.php"
+    bunkerweb.io/LIMIT_REQ_RATE_1: "5r/s"
+    # This is a CRS plugin specific to Drupal
+    bunkerweb.io/www.example.com_MODSECURITY_CRS_PLUGIN_URLS: "https://github.com/coreruleset/drupal-rule-exclusions-plugin/archive/refs/tags/v1.0.0.tar.gz"
+spec:
+  rules:
+    - host: www.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: drupal
+                port:
+                  number: 80

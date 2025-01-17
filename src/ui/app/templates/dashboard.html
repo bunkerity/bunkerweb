@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+{% block page %}
+    <!-- Layout wrapper -->
+    <div class="layout-wrapper layout-content-navbar">
+        <div class="layout-container">
+            {% include "menu.html" %}
+            <!-- Layout container -->
+            <div class="layout-page">
+                {% include "navbar.html" %}
+                <!-- Content wrapper -->
+                <div class="content-wrapper">
+                    <div class="flex-grow-1 container-p-y ps-6 pe-6">
+                        <!-- prettier-ignore -->
+                        <div class="d-flex justify-content-between align-items-center mb-5">
+                            {% include "breadcrumb.html" %}
+                            {% if current_endpoint == "global-config" or current_endpoint != "services" and "services" in request.path %}
+                                <!-- Floating button to toggle the menu -->
+                                <div class="position-fixed bottom-0 start-0 m-3 d-lg-none"
+                                     id="floating-modes-menu">
+                                    <button class="btn btn-sm btn-primary d-flex align-items-center justify-content-center rounded-pill me-1"
+                                            type="button"
+                                            data-bs-toggle="collapse"
+                                            data-bs-target="#mode-selection-floating"
+                                            aria-controls="mode-selection-floating"
+                                            aria-expanded="false"
+                                            aria-label="Toggle navigation">
+                                        <i class="bx bx-xs bx-menu"></i> Mode selection
+                                    </button>
+                                    <!-- Collapsible floating menu -->
+                                    <div class="collapse mt-2" id="mode-selection-floating">
+                                        <ul class="nav nav-pills flex-column bg-{% if theme == 'light' %}white{% else %}dark{% endif %} p-2 rounded shadow-sm mode-selection-menu"
+                                            role="tablist">
+                                            {% if current_endpoint != "global-config" %}
+                                                <li class="nav-item mb-1" role="presentation">
+                                                    <button type="button"
+                                                            class="btn btn-sm rounded-pill nav-link d-flex align-items-center{% if mode == 'easy' %} active{% endif %}"
+                                                            role="tab"
+                                                            data-bs-toggle="tab"
+                                                            data-bs-target="#navs-modes-easy"
+                                                            aria-controls="navs-modes-easy"
+                                                            {% if mode == 'easy' %}aria-selected="true"{% endif %}>
+                                                        <i class="bx bx-customize bx-sm"></i>
+                                                        &nbsp;
+                                                        <span class="don-jose">Easy</span>
+                                                    </button>
+                                                </li>
+                                            {% endif %}
+                                            <li class="nav-item mb-1" role="presentation">
+                                                <button type="button"
+                                                        class="btn btn-sm rounded-pill nav-link d-flex align-items-center{% if mode == 'advanced' %} active{% endif %}"
+                                                        role="tab"
+                                                        data-bs-toggle="tab"
+                                                        data-bs-target="#navs-modes-advanced"
+                                                        aria-controls="navs-modes-advanced"
+                                                        {% if mode == 'advanced' %}aria-selected="true"{% endif %}>
+                                                    <i class="bx bx-shield-quarter bx-sm"></i>
+                                                    &nbsp;
+                                                    <span class="don-jose">Advanced</span>
+                                                </button>
+                                            </li>
+                                            <li class="nav-item" role="presentation">
+                                                <button type="button"
+                                                        class="btn btn-sm rounded-pill nav-link d-flex align-items-center{% if mode == 'raw' %} active{% endif %}"
+                                                        role="tab"
+                                                        data-bs-toggle="tab"
+                                                        data-bs-target="#navs-modes-raw"
+                                                        aria-controls="navs-modes-raw"
+                                                        {% if mode == 'raw' %}aria-selected="true"{% endif %}>
+                                                    <i class="bx bx-notepad bx-sm"></i>
+                                                    &nbsp;
+                                                    <span class="don-jose">Raw</span>
+                                                </button>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <ul class="nav nav-pills flex-column flex-md-row d-none d-lg-flex mode-selection-menu"
+                                    role="tablist">
+                                    {% if current_endpoint != "global-config" %}
+                                        <li class="nav-item me-0 me-sm-3" role="presentation">
+                                            <button type="button"
+                                                    class="btn btn-sm rounded-pill nav-link d-flex align-items-center{% if mode == 'easy' %} active{% endif %}"
+                                                    role="tab"
+                                                    data-bs-toggle="tab"
+                                                    data-bs-target="#navs-modes-easy"
+                                                    aria-controls="navs-modes-easy"
+                                                    {% if mode == 'easy' %}aria-selected="true"{% endif %}>
+                                                <i class="bx bx-customize bx-xs"></i>
+                                                &nbsp;
+                                                <span class="d-none d-sm-inline don-jose">Easy</span>
+                                            </button>
+                                        </li>
+                                    {% endif %}
+                                    <li class="nav-item me-0 me-sm-3" role="presentation">
+                                        <button type="button"
+                                                class="btn btn-sm rounded-pill nav-link d-flex align-items-center{% if mode == 'advanced' %} active{% endif %}"
+                                                role="tab"
+                                                data-bs-toggle="tab"
+                                                data-bs-target="#navs-modes-advanced"
+                                                aria-controls="navs-modes-advanced"
+                                                {% if mode == 'advanced' %}aria-selected="true"{% endif %}>
+                                            <i class="bx bx-shield-quarter bx-xs"></i>
+                                            &nbsp;
+                                            <span class="d-none d-sm-inline don-jose">Advanced</span>
+                                        </button>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                        <button type="button"
+                                                class="btn btn-sm rounded-pill nav-link d-flex align-items-center{% if mode == 'raw' %} active{% endif %}"
+                                                role="tab"
+                                                data-bs-toggle="tab"
+                                                data-bs-target="#navs-modes-raw"
+                                                aria-controls="navs-modes-raw"
+                                                {% if mode == 'raw' %}aria-selected="true"{% endif %}>
+                                            <i class="bx bx-notepad bx-xs"></i>
+                                            &nbsp;
+                                            <span class="d-none d-sm-inline don-jose">Raw</span>
+                                        </button>
+                                    </li>
+                                </ul>
+                            {% endif %}
+                            <ul class="d-flex mb-0 list-unstyled">
+                                <li class="me-3">
+                                    <a role="button"
+                                       class="btn btn-sm btn-outline-{% if theme == 'light' %}dark{% else %}light{% endif %} d-flex align-items-center h-100"
+                                       aria-pressed="true"
+                                       href="https://panel.bunkerweb.io/order/support/?utm_campaign=self&utm_source=ui"
+                                       target="_blank"
+                                       rel="noopener">
+                                        <span class="bx bx-help-circle me-0 me-md-2"></span>
+                                        <span class="d-none d-md-inline">Need help?</span>
+                                    </a>
+                                </li>
+                                <li class="me-3 position-relative">
+                                    <button id="notifications-button"
+                                            type="button"
+                                            class="btn btn-sm btn-primary text-uppercase d-flex align-items-center"
+                                            aria-pressed="true"
+                                            data-bs-toggle="offcanvas"
+                                            data-bs-target="#side-offcanvas-notifications"
+                                            aria-controls="side-offcanvas-notifications">
+                                        <span class="bx bx-bell me-0 me-md-2"></span>
+                                        <span class="d-none d-md-inline">Notifications</span>
+                                    </button>
+                                    {% if flash_messages %}
+                                        <span id="unread-notifications"
+                                              class="badge-dot-text position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none">
+                                            {{ flash_messages|length }}
+                                            <span class="visually-hidden">unread notifications</span>
+                                        </span>
+                                    {% endif %}
+                                </li>
+                                <li class="position-relative">
+                                    <button id="news-button"
+                                            type="button"
+                                            class="btn btn-sm btn-{% if theme == 'light' %}dark{% else %}light{% endif %} text-uppercase d-flex align-items-center"
+                                            aria-pressed="true"
+                                            data-bs-toggle="offcanvas"
+                                            data-bs-target="#side-offcanvas-news"
+                                            aria-controls="side-offcanvas-news">
+                                        <span class="bx bx-news me-0 me-md-2"></span>
+                                        <span class="d-none d-md-inline">News</span>
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+                        {% block content %}{% endblock %}
+                    </div>
+                    <!-- prettier-ignore -->
+                    {% include "footer.html" %}
+                    {% include "sidebar-notifications.html" %}
+                    {% include "sidebar-news.html" %}
+                    <div class="content-backdrop fade"></div>
+                </div>
+                <!-- Content wrapper -->
+            </div>
+            <!-- / Layout page -->
+        </div>
+        <!-- Overlay -->
+        <div class="layout-overlay layout-menu-toggle"></div>
+    </div>
+    <!-- / Layout wrapper -->
+{% endblock %}

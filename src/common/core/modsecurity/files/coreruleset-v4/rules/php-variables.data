@@ -1,0 +1,30 @@
+# The data in this list comes from
+# https://www.php.net/manual/en/reserved.variables.php
+# https://www.php.net/manual/en/language.variables.superglobals.php
+# https://www.php.net/manual/en/language.constants.predefined.php
+
+#  These superglobal variables are:
+$GLOBALS
+$_COOKIE
+$_ENV
+$_FILES
+$_GET
+$_POST
+$_REQUEST
+$_SERVER
+$_SESSION
+$argc
+$argv
+$http_​response_​header
+# Deprecated
+$php_​errormsg
+
+# This is really old, completely deprecated vars (PHP >= 4 < 5.3)
+$HTTP_COOKIE_VARS
+$HTTP_ENV_VARS
+$HTTP_GET_VARS
+$HTTP_POST_FILES
+$HTTP_POST_VARS
+$HTTP_RAW_POST_DATA
+$HTTP_REQUEST_VARS
+$HTTP_SERVER_VARS

@@ -1,0 +1,101 @@
+services:
+  bunkerweb:
+    image: bunkerity/bunkerweb:1.6.0-rc2
+    container_name: bunkerweb
+    ports:
+      - "80:8080/tcp"
+      - "443:8443/tcp"
+      - "443:8443/udp" # for QUIC
+    environment:
+      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+      - bw-services
+
+  bw-scheduler:
+    image: bunkerity/bunkerweb-scheduler:1.6.0-rc2
+    container_name: bw-scheduler
+    depends_on:
+      - bunkerweb
+    volumes:
+      - bw-data:/data
+    environment:
+      BUNKERWEB_INSTANCES: "bunkerweb"
+      SERVER_NAME: "www.example.com" # replace with your domain
+      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+      SERVE_FILES: "no"
+      DISABLE_DEFAULT_SERVER: "yes"
+      AUTO_LETS_ENCRYPT: "yes"
+      USE_CLIENT_CACHE: "yes"
+      USE_GZIP: "yes"
+      USE_REVERSE_PROXY: "yes"
+      REVERSE_PROXY_URL: "/"
+      REVERSE_PROXY_HOST: "http://mymagento:8080"
+      CUSTOM_CONF_SERVER_HTTP_magento: |
+        proxy_busy_buffers_size 512k;
+        proxy_buffers 4 512k;
+        proxy_buffer_size 256k;
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+
+  mymagento:
+    image: bitnami/magento:2
+    volumes:
+      - magento-data:/bitnami/magento
+    environment:
+      MAGENTO_USERNAME: "admin" # replace with admin username
+      MAGENTO_PASSWORD: "changeme42" # replace with a stronger password
+      MAGENTO_EMAIL: "contact@example.com" # replace with admin email
+      MAGENTO_HOST: "www.example.com" # replace with your domain
+      MAGENTO_ENABLE_HTTPS: "yes"
+      MAGENTO_ENABLE_ADMIN_HTTPS: "yes"
+      MAGENTO_DATABASE_HOST: "mydb"
+      MAGENTO_DATABASE_NAME: "magentodb"
+      MAGENTO_DATABASE_USER: "user"
+      MAGENTO_DATABASE_PASSWORD: "db-user-pwd" # replace with a stronger password (must match MYSQL_PASSWORD)
+      ELASTICSEARCH_HOST: "myelasticsearch"
+    networks:
+      - magento-net
+      - bw-services
+
+  myelasticsearch:
+    image: bitnami/elasticsearch:7
+    # ⚠️ you need to create the directory and fix permissions ⚠️
+    # see setup-docker.sh
+    volumes:
+      - elasticsearch-data:/bitnami/elasticsearch/data
+    networks:
+      - magento-net
+
+  mydb:
+    image: mariadb:11
+    volumes:
+      - db-data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: "db-root-pwd" # replace with a stronger password
+      MYSQL_DATABASE: "magentodb"
+      MYSQL_USER: "user"
+      MYSQL_PASSWORD: "db-user-pwd" # replace with a stronger password (must match MAGENTO_DATABASE_PASSWORD)
+    networks:
+      - magento-net
+
+volumes:
+  bw-data:
+  db-data:
+  magento-data:
+  elasticsearch-data:
+
+
+networks:
+  bw-universe:
+    name: bw-universe
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.20.30.0/24
+  bw-services:
+    name: bw-services
+  magento-net:
+    name: magento-net

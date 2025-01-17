@@ -1,0 +1,219 @@
+No row with the given identifier
+open_basedir restriction in effect
+eval()'d code</b> on line <b>
+Cannot execute a blank command in
+Fatal error</b>:  preg_replace
+thrown in <b>
+#0 {main}
+Stack trace:
+</b> on line <b>
+() cannot be called statically
+- not a Class::Method
+::__toString() must not throw an exception
+Access to undeclared static property:
+An iterator cannot be used with foreach by reference
+Array callback has to contain indices 0 and 1
+Arrived at end of main loop which shouldn't happen
+Attempt to destruct pending exception
+Attempt to unset static property
+Balloc() allocation exceeds list boundary
+Balloc() failed to allocate memory
+Base lambda function for closure not found
+Call to a member function
+Call to private 
+Call to protected 
+Call to undefined function
+Call to undefined method
+Can only throw objects
+Cannot access empty property
+Cannot access parent:: when current class scope has no parent
+Cannot access parent:: when no class scope is active
+Cannot access property started with '\\0'
+Cannot access self:: when no class scope is active
+Cannot access static:: when no class scope is active
+Cannot access undefined property for object with overloaded property access
+Cannot assign by reference to overloaded object
+Cannot break/continue %d level%s
+Cannot call abstract method 
+Cannot call constructor
+Cannot call forward_static_call() when no class scope is active
+Cannot call non static method
+Cannot call overloaded function for non-object
+Cannot call private 
+Cannot create references to/from string offsets
+Cannot create references to/from string offsets nor overloaded objects
+Cannot declare self-referencing constant 
+Cannot destroy active lambda function
+Cannot get arguments for 
+Cannot increment/decrement overloaded objects nor string offsets
+Cannot instantiate abstract class 
+Cannot instantiate interface 
+Cannot instantiate trait 
+Cannot override final 
+Cannot pass parameter 
+Cannot redeclare 
+Cannot redeclare class 
+Cannot register a reverse output handler conflict outside of MINIT
+Cannot register an output handler alias outside of MINIT
+Cannot register an output handler conflict outside of MINIT
+Cannot resume an already running generator
+Cannot return string offsets by reference
+Cannot set non exception as previous exception
+Cannot unset string offsets
+Cannot use [] for reading
+Cannot use assign-op operators with overloaded objects nor string offsets
+Cannot use object as array
+Cannot use object of type 
+Cannot use string offset as an array
+Cannot use string offset as an object
+Cannot yield from finally in a force-closed generator
+Cannot yield string offsets by reference
+Class entry requested for an object without PHP class
+Class name must be a valid object or a string
+Corrupted fcall_info provided to zend_call_function()
+DCOM has been disabled by your administrator [com.allow_dcom=0]
+DateFormat class not defined
+DateTimeInterface can't be implemented by user classes
+EXTREMELY fatal error: jmpbuf unrecoverable; terminating
+EXTREMELY fatal error: jmpbuf unrecoverable; terminating.
+EXTREMELY fatal error: longjmp returned control; terminating
+Encoding: '*' may only be first arraySize value in list
+Encoding: Attribute 
+Encoding: Can't decode apache map, missing key
+Encoding: Can't decode apache map, missing value
+Encoding: Can't decode apache map, only Strings or Longs are allowd as keys
+Encoding: Cannot find encoding
+Encoding: Element 
+Encoding: Error calling from_xml callback
+Encoding: Error calling to_xml callback
+Encoding: External reference 
+Encoding: Internal Error
+Encoding: Invalid timestamp 
+Encoding: SoapVar has no 'enc_type' property
+Encoding: Unresolved reference 
+Encoding: Violation of encoding rules
+Encoding: Violation of id and ref information items 
+Encoding: object has no '
+Encoding: object has no 'any' property
+Encoding: string '
+Error installing signal handler for 
+Exception thrown without a stack frame
+Exceptions must be valid objects derived from the Exception base class
+Failed to clone SpoofChecker object
+Failed to register IntlDateFormatter class
+Failed to register MessageFormatter class
+Failed to register NumberFormatter class
+Failed to register ResourceBundle class
+Field width %d is too long
+First array member is not a valid class name or object
+Function name must be a string
+Illegal length modifier specified 
+Illegal offset type
+Input string is too long
+Invalid RelaxNG Validation Context
+Invalid Schema Validation Context
+Invalid opcode
+Invalid serialization data for DatePeriod object
+Invalid serialization data for DateTime object
+Invalid serialization data for DateTimeImmutable object
+Maximum execution time of
+Method name must be a string
+Need to supply an object when throwing an exception
+Nesting level too deep - recursive dependency?
+NumberFormatter class not defined
+Object does not support method calls
+Only variables can be passed by reference
+PDO: driver 
+Parsing Schema: <restriction> or <extension> expected in complexContent
+Parsing Schema: attribute
+Parsing Schema: attribute has both 'ref' and 'type' attributes
+Parsing Schema: attribute has both 'ref' attribute and subtype
+Parsing Schema: attribute has both 'type' attribute and subtype
+Parsing Schema: attribute has no 'name' nor 'ref' attributes
+Parsing Schema: attributeGroup 
+Parsing Schema: attributeGroup has both 'ref' attribute and subattribute
+Parsing Schema: attributeGroup has no 'name' nor 'ref' attributes
+Parsing Schema: can't import schema from 
+Parsing Schema: complexType has no 'name' attribute
+Parsing Schema: element has both 'default' and 'fixed' attributes
+Parsing Schema: element has both 'itemType' attribute and subtype
+Parsing Schema: element has both 'ref' and 'fixed' attributes
+Parsing Schema: element has both 'ref' and 'nillable' attributes
+Parsing Schema: element has both 'ref' and 'type' attributes
+Parsing Schema: element has both 'ref' attribute and subtype
+Parsing Schema: element has both 'type' attribute and subtype
+Parsing Schema: element has no 'name' nor 'ref' attributes
+Parsing Schema: expected <restriction> or <extension> in simpleContent
+Parsing Schema: expected <restriction>, <list> or <union> in simpleType
+Parsing Schema: extension has no 'base' attribute
+Parsing Schema: group has both 'ref' attribute and subcontent
+Parsing Schema: group has no 'name' nor 'ref' attributes
+Parsing Schema: include has no 'schemaLocation' attribute
+Parsing Schema: missing restriction value
+Parsing Schema: redefine has no 'schemaLocation' attribute
+Parsing Schema: restriction has no 'base' attribute
+Parsing Schema: simpleType has no 'name' attribute
+Parsing Schema: unexpected
+Parsing Schema: unresolved element 'ref' attribute 
+Parsing Schema: unresolved group 'ref' attribute 
+Parsing WSDL: <binding> 
+Parsing WSDL: <binding> has no name attribute
+Parsing WSDL: <fault> with name 
+Parsing WSDL: <message> has no name attribute
+Parsing WSDL: <portType> 
+Parsing WSDL: <portType> has no name attribute
+Parsing WSDL: <service> 
+Parsing WSDL: <service> has no name attribute
+Parsing WSDL: Could not find any usable binding services in WSDL.
+Parsing WSDL: Couldn't bind to service
+Parsing WSDL: Couldn't find <definitions> in 
+Parsing WSDL: Couldn't load from 
+Parsing WSDL: Missing 'name' attribute for <binding>
+Parsing WSDL: Missing 'name' attribute for <operation>
+Parsing WSDL: Missing 'type' attribute for <binding>
+Parsing WSDL: Missing <message> with name 
+Parsing WSDL: Missing <portType> with name 
+Parsing WSDL: Missing <portType>/<operation> with name 
+Parsing WSDL: Missing message attribute for <header>
+Parsing WSDL: Missing name for <fault> of 
+Parsing WSDL: Missing name for <input> of 
+Parsing WSDL: Missing name for <output> of 
+Parsing WSDL: Missing part '%s' in <message>
+Parsing WSDL: Missing part attribute for <header>
+Parsing WSDL: No <binding> element with name 
+Parsing WSDL: No address associated with <port>
+Parsing WSDL: No binding associated with <port>
+Parsing WSDL: No location associated with <port>
+Parsing WSDL: No name associated with <part> 
+Parsing WSDL: The fault message 
+Parsing WSDL: Unexpected WSDL element <
+Parsing WSDL: Unexpected extensibility element <
+Parsing WSDL: Unknown encodingStyle '
+Parsing WSDL: Unknown required WSDL extension '
+Parsing WSDL: Unspecified encodingStyle
+Possible integer overflow in memory allocation (
+Second array member is not a valid method
+Spoofchecker class not defined
+String size overflow
+The object to be iterated is in an invalid state: "
+Trying to clone an uncloneable object
+Trying to clone an uncloneable object of class 
+Unable to call 
+Unable to cast node to string
+Undefined class constant '
+Undefined constant '
+Undefined offset for object of type 
+Unexpected inconsistency in create_function()
+Unknown SOAP version
+Unknown typehint
+Unsupported operand types
+Using $this when not in object context
+Wrong parameters for ErrorException(
+Wrong parameters for Exception(
+You MUST load PDO before loading any PDO drivers
+[] operator not supported for strings
+and must therefore be declared abstract or implement the remaining methods
+namespace must not match the enclosing schema 'targetNamespace'
+requires PDO API version 
+PDO Connection Error: SQLSTATE[HY000] 
+(HY000/2002): Connection refused 
