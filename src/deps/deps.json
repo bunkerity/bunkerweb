@@ -56,16 +56,16 @@
     },
     {
       "id": "lua-nginx-module",
-      "name": "lua-nginx-module v0.10.27",
+      "name": "lua-nginx-module v0.10.28",
       "url": "https://github.com/openresty/lua-nginx-module.git",
-      "commit": "ea09d92adf835e30cab8d79343c7b8266e888128",
+      "commit": "5bd471a4bce6c02dd68b1ca72fbabb09fb2041d8",
       "post_install": "rm -r src/deps/src/lua-nginx-module/t"
     },
     {
       "id": "lua-resty-core",
-      "name": "lua-resty-core v0.1.30",
+      "name": "lua-resty-core v0.1.31",
       "url": "https://github.com/openresty/lua-resty-core.git",
-      "commit": "2da3d7719a05b2981f3808ca874517b558f29fa9",
+      "commit": "cb7264da6d94c259c4ad01ee5c61b5f65e3c7eb4",
       "post_install": "rm -r src/deps/src/lua-resty-core/t"
     },
     {
@@ -179,9 +179,9 @@
     },
     {
       "id": "luajit",
-      "name": "LuaJIT v2.1-20241113",
+      "name": "LuaJIT v2.1-20250117",
       "url": "https://github.com/openresty/luajit2.git",
-      "commit": "098183d9d24b8942a26dcc720fe8725b287ec77f",
+      "commit": "93162f34e7424cd0ea3c4046a9ffacce621626bc",
       "post_install": "rm -r src/deps/src/luajit/t"
     },
     {
@@ -260,9 +260,9 @@
     },
     {
       "id": "stream-lua-nginx-module",
-      "name": "stream-lua-nginx-module v0.0.15",
+      "name": "stream-lua-nginx-module v0.0.16",
       "url": "https://github.com/openresty/stream-lua-nginx-module.git",
-      "commit": "69f0cd762112a6e0cddb07f2b5192e9a65034a93",
+      "commit": "4169f1ba16860e30403372693a85171bebf1994d",
       "post_install": "rm -r src/deps/src/stream-lua-nginx-module/t"
     },
     {
