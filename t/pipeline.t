@@ -160,13 +160,13 @@ flushall: OK
                 return
             end
 
-            res, err = red:set("dog", "an aniaml")
+            ok, err = red:set("dog", "an aniaml")
             if not ok then
                 ngx.say("failed to set dog: ", err)
                 return
             end
 
-            ngx.say("set result: ", res)
+            ngx.say("set result: ", ok)
 
             local res, err = red:get("dog")
             if not res then

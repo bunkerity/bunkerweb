@@ -40,7 +40,7 @@ __DATA__
             end
         ';
 --- response_body eval
-qr/\Afailed to foo: ERR unknown command [`']foo[`'](?:, with args beginning with: `a`,\s*)?
+qr/\Afailed to foo: ERR unknown command [`']foo[`'](?:, with args beginning with: [`']a[`'],?\s*)?
 failed to bar: ERR unknown command [`']bar[`'](?:, with args beginning with:\s*)?
 \z/
 --- no_error_log

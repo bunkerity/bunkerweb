@@ -71,11 +71,12 @@ __DATA__
 
             red:close()
         }
---- response_body_like
-receive: 1
+--- response_body eval
+qr/receive: 1
 receive: 1
 receive: 1
 receive: 0
-ERR unknown command `test.get`.+
+ERR unknown command [`']test.get['`].+
+/ms
 --- no_error_log
 [error]

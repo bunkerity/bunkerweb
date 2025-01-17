@@ -35,7 +35,7 @@ __DATA__
                 return
             end
 
-            res, err = red:subscribe("dog")
+            local res, err = red:subscribe("dog")
             if not res then
                 ngx.say("1: failed to subscribe: ", err)
                 return
@@ -97,7 +97,7 @@ __DATA__
                 return
             end
 
-            res, err = red:subscribe("dog")
+            local res, err = red:subscribe("dog")
             if not res then
                 ngx.say("1: failed to subscribe: ", err)
                 return
@@ -190,7 +190,7 @@ __DATA__
                 return
             end
 
-            res, err = red:subscribe("dog")
+            local res, err = red:subscribe("dog")
             if not res then
                 ngx.say("1: failed to subscribe: ", err)
                 return
@@ -297,7 +297,7 @@ __DATA__
                 return
             end
 
-            res, err = red:subscribe("dog")
+            local res, err = red:subscribe("dog")
             if not res then
                 ngx.say("1: failed to subscribe: ", err)
                 return
@@ -363,7 +363,7 @@ __DATA__
                 return
             end
 
-            res, err = red:subscribe("dog")
+            local res, err = red:subscribe("dog")
             if not res then
                 ngx.say("1: failed to subscribe: ", err)
                 return
@@ -429,7 +429,7 @@ __DATA__
                 return
             end
 
-            res, err = red:subscribe("dog")
+            local res, err = red:subscribe("dog")
             if not res then
                 ngx.say("1: failed to subscribe: ", err)
                 return
@@ -481,7 +481,7 @@ __DATA__
                 return
             end
 
-            res, err = red:subscribe("dog")
+            local res, err = red:subscribe("dog")
             if not res then
                 ngx.say("1: failed to subscribe: ", err)
                 return
@@ -543,7 +543,7 @@ __DATA__
                 return
             end
 
-            res, err = red:subscribe("dog")
+            local res, err = red:subscribe("dog")
             if not res then
                 ngx.say("1: failed to subscribe: ", err)
                 return
