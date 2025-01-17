@@ -65,7 +65,7 @@ def get_download_url(repo_url, version=None) -> Tuple[bool, str]:
         # Try fetching the latest release
         release_api_url = f"{repo_url.replace('github.com', 'api.github.com/repos', 1)}/releases"
         LOGGER.debug(f"Checking {release_api_url}...")
-        response = get(release_api_url, timeout=5)
+        response = get(release_api_url, timeout=8)
         response.raise_for_status()
         releases = response.json()
         latest_release = None
@@ -82,7 +82,7 @@ def get_download_url(repo_url, version=None) -> Tuple[bool, str]:
             for branch in ("main", "master"):
                 branch_url = f"{repo_url}/archive/refs/heads/{branch}.zip"
                 LOGGER.debug(f"Checking {branch_url}...")
-                branch_check = head(branch_url, timeout=5)
+                branch_check = head(branch_url, timeout=8)
                 if branch_check.status_code < 400:
                     return True, branch_url
 
@@ -174,7 +174,7 @@ try:
                         "https://raw.githubusercontent.com/coreruleset/plugin-registry/refs/heads/main/README.md",
                         headers={"User-Agent": "BunkerWeb"},
                         stream=True,
-                        timeout=5,
+                        timeout=8,
                     )
                     if resp.status_code != 200:
                         LOGGER.error(f"Got status code {resp.status_code}, raising an exception...")
@@ -292,7 +292,7 @@ try:
             with BytesIO() as content:
                 try:
                     # Download the file
-                    resp = get(crs_plugin, headers={"User-Agent": "BunkerWeb"}, stream=True, timeout=5)
+                    resp = get(crs_plugin, headers={"User-Agent": "BunkerWeb"}, stream=True, timeout=8)
                     if resp.status_code != 200:
                         LOGGER.warning(f"Got status code {resp.status_code}, skipping download of plugin(s) with URL {crs_plugin}...")
                         continue
