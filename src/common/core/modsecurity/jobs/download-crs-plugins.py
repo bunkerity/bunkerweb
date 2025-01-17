@@ -9,6 +9,7 @@ from pathlib import Path
 from re import MULTILINE, compile as re_compile
 from subprocess import CalledProcessError, run
 from sys import exit as sys_exit, path as sys_path
+from time import sleep
 from typing import Dict, Set, Tuple
 from uuid import uuid4
 from json import dumps, loads
@@ -30,6 +31,7 @@ for deps_path in [
 
 from magic import Magic
 from requests import get, head
+from requests.exceptions import ConnectionError
 
 from logger import setup_logger  # type: ignore
 from jobs import Job  # type: ignore
@@ -65,7 +67,18 @@ def get_download_url(repo_url, version=None) -> Tuple[bool, str]:
         # Try fetching the latest release
         release_api_url = f"{repo_url.replace('github.com', 'api.github.com/repos', 1)}/releases"
         LOGGER.debug(f"Checking {release_api_url}...")
-        response = get(release_api_url, timeout=5)
+        max_retries = 3
+        retry_count = 0
+        while retry_count < max_retries:
+            try:
+                response = get(release_api_url, timeout=8)
+                break
+            except ConnectionError as e:
+                retry_count += 1
+                if retry_count == max_retries:
+                    raise e
+                LOGGER.warning(f"Connection refused, retrying in 3 seconds... ({retry_count}/{max_retries})")
+                sleep(3)
         response.raise_for_status()
         releases = response.json()
         latest_release = None
@@ -82,7 +95,18 @@ def get_download_url(repo_url, version=None) -> Tuple[bool, str]:
             for branch in ("main", "master"):
                 branch_url = f"{repo_url}/archive/refs/heads/{branch}.zip"
                 LOGGER.debug(f"Checking {branch_url}...")
-                branch_check = head(branch_url, timeout=5)
+                max_retries = 3
+                retry_count = 0
+                while retry_count < max_retries:
+                    try:
+                        branch_check = head(branch_url, timeout=8)
+                        break
+                    except ConnectionError as e:
+                        retry_count += 1
+                        if retry_count == max_retries:
+                            raise e
+                        LOGGER.warning(f"Connection refused, retrying in 3 seconds... ({retry_count}/{max_retries})")
+                        sleep(3)
                 if branch_check.status_code < 400:
                     return True, branch_url
 
@@ -170,12 +194,23 @@ try:
             with BytesIO() as content:
                 try:
                     # Download the file
-                    resp = get(
-                        "https://raw.githubusercontent.com/coreruleset/plugin-registry/refs/heads/main/README.md",
-                        headers={"User-Agent": "BunkerWeb"},
-                        stream=True,
-                        timeout=5,
-                    )
+                    max_retries = 3
+                    retry_count = 0
+                    while retry_count < max_retries:
+                        try:
+                            resp = get(
+                                "https://raw.githubusercontent.com/coreruleset/plugin-registry/refs/heads/main/README.md",
+                                headers={"User-Agent": "BunkerWeb"},
+                                stream=True,
+                                timeout=8,
+                            )
+                            break
+                        except ConnectionError as e:
+                            retry_count += 1
+                            if retry_count == max_retries:
+                                raise e
+                            LOGGER.warning(f"Connection refused, retrying in 3 seconds... ({retry_count}/{max_retries})")
+                            sleep(3)
                     if resp.status_code != 200:
                         LOGGER.error(f"Got status code {resp.status_code}, raising an exception...")
                         sys_exit(1)
@@ -292,7 +327,18 @@ try:
             with BytesIO() as content:
                 try:
                     # Download the file
-                    resp = get(crs_plugin, headers={"User-Agent": "BunkerWeb"}, stream=True, timeout=5)
+                    max_retries = 3
+                    retry_count = 0
+                    while retry_count < max_retries:
+                        try:
+                            resp = get(crs_plugin, headers={"User-Agent": "BunkerWeb"}, stream=True, timeout=8)
+                            break
+                        except ConnectionError as e:
+                            retry_count += 1
+                            if retry_count == max_retries:
+                                raise e
+                            LOGGER.warning(f"Connection refused, retrying in 3 seconds... ({retry_count}/{max_retries})")
+                            sleep(3)
                     if resp.status_code != 200:
                         LOGGER.warning(f"Got status code {resp.status_code}, skipping download of plugin(s) with URL {crs_plugin}...")
                         continue

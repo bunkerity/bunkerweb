@@ -9,12 +9,15 @@ from shutil import rmtree
 from subprocess import CalledProcessError, run
 from sys import exit as sys_exit, path as sys_path
 from tarfile import open as tar_open
+from time import sleep
+from traceback import format_exc
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("db",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
 from requests import RequestException, get
+from requests.exceptions import ConnectionError
 
 from logger import setup_logger  # type: ignore
 from jobs import Job  # type: ignore
@@ -51,7 +54,18 @@ try:
 
     commit_hash = JOB.get_cache("commit_hash")
 
-    resp = get("https://github.com/coreruleset/coreruleset/releases/tag/nightly", timeout=5)
+    max_retries = 3
+    retry_count = 0
+    while retry_count < max_retries:
+        try:
+            resp = get("https://github.com/coreruleset/coreruleset/releases/tag/nightly", timeout=5)
+            break
+        except ConnectionError as e:
+            retry_count += 1
+            if retry_count == max_retries:
+                raise e
+            LOGGER.warning(f"Connection refused, retrying in 3 seconds... ({retry_count}/{max_retries})")
+            sleep(3)
     resp.raise_for_status()
 
     content = resp.text
@@ -84,13 +98,25 @@ try:
 
     file_content = BytesIO()
     try:
-        with get("https://github.com/coreruleset/coreruleset/archive/refs/tags/nightly.tar.gz", stream=True, timeout=5) as resp:
-            resp.raise_for_status()
-            for chunk in resp.iter_content(chunk_size=4 * 1024):
-                if chunk:
-                    file_content.write(chunk)
-    except RequestException:
-        LOGGER.exception("Failed to download Core Rule Set (CRS) nightly tarball.")
+        max_retries = 3
+        retry_count = 0
+        while retry_count < max_retries:
+            try:
+                with get("https://github.com/coreruleset/coreruleset/archive/refs/tags/nightly.tar.gz", stream=True, timeout=5) as resp:
+                    resp.raise_for_status()
+                    for chunk in resp.iter_content(chunk_size=4 * 1024):
+                        if chunk:
+                            file_content.write(chunk)
+                break
+            except ConnectionError as e:
+                retry_count += 1
+                if retry_count == max_retries:
+                    raise e
+                LOGGER.warning(f"Connection refused, retrying in 3 seconds... ({retry_count}/{max_retries})")
+                sleep(3)
+    except RequestException as e:
+        LOGGER.debug(format_exc())
+        LOGGER.error(f"Failed to download Core Rule Set (CRS) nightly tarball: {e}")
         sys_exit(2)
 
     file_content.seek(0)

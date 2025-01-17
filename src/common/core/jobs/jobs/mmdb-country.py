@@ -7,6 +7,7 @@ from os import sep
 from os.path import join
 from pathlib import Path
 from sys import exit as sys_exit, path as sys_path
+from time import sleep
 from typing import Optional
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("db",))]:
@@ -15,6 +16,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 
 from maxminddb import open_database
 from requests import RequestException, Response, get
+from requests.exceptions import ConnectionError
 
 from logger import setup_logger  # type: ignore
 from common_utils import bytes_hash, file_hash  # type: ignore
@@ -26,7 +28,18 @@ status = 0
 
 def request_mmdb() -> Optional[Response]:
     try:
-        response = get("https://db-ip.com/db/download/ip-to-country-lite", timeout=5)
+        max_retries = 3
+        retry_count = 0
+        while retry_count < max_retries:
+            try:
+                response = get("https://db-ip.com/db/download/ip-to-country-lite", timeout=5)
+                break
+            except ConnectionError as e:
+                retry_count += 1
+                if retry_count == max_retries:
+                    raise e
+                LOGGER.warning(f"Connection refused, retrying in 3 seconds... ({retry_count}/{max_retries})")
+                sleep(3)
         response.raise_for_status()
         return response
     except RequestException:
@@ -76,11 +89,22 @@ try:
         LOGGER.info(f"Downloading mmdb file from url {mmdb_url} ...")
         file_content = BytesIO()
         try:
-            with get(mmdb_url, stream=True, timeout=5) as resp:
-                resp.raise_for_status()
-                for chunk in resp.iter_content(chunk_size=4 * 1024):
-                    if chunk:
-                        file_content.write(chunk)
+            max_retries = 3
+            retry_count = 0
+            while retry_count < max_retries:
+                try:
+                    with get(mmdb_url, stream=True, timeout=5) as resp:
+                        resp.raise_for_status()
+                        for chunk in resp.iter_content(chunk_size=4 * 1024):
+                            if chunk:
+                                file_content.write(chunk)
+                    break
+                except ConnectionError as e:
+                    retry_count += 1
+                    if retry_count == max_retries:
+                        raise e
+                    LOGGER.warning(f"Connection refused, retrying in 3 seconds... ({retry_count}/{max_retries})")
+                    sleep(3)
 
             assert file_content
 
