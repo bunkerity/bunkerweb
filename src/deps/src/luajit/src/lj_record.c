@@ -1,6 +1,6 @@
 /*
 ** Trace recorder (bytecode -> SSA IR).
-** Copyright (C) 2005-2025 Mike Pall. See Copyright Notice in luajit.h
+** Copyright (C) 2005-2023 Mike Pall. See Copyright Notice in luajit.h
 */
 
 #define lj_record_c
@@ -2007,7 +2007,7 @@ static void rec_varg(jit_State *J, BCReg dst, ptrdiff_t nresults)
 	J->maxslot = dst + (BCReg)nresults;
       }
     } else if (select_detect(J)) {  /* y = select(x, ...) */
-      TRef tridx = getslot(J, dst-1);
+      TRef tridx = J->base[dst-1];
       TRef tr = TREF_NIL;
       ptrdiff_t idx = lj_ffrecord_select_mode(J, tridx, &J->L->base[dst-1]);
       if (idx < 0) goto nyivarg;
@@ -2080,19 +2080,25 @@ static TRef rec_tnew(jit_State *J, uint32_t ah)
 
 typedef struct RecCatDataCP {
   jit_State *J;
-  BCReg baseslot, topslot;
-  TRef tr;
+  RecordIndex *ix;
 } RecCatDataCP;
 
 static TValue *rec_mm_concat_cp(lua_State *L, lua_CFunction dummy, void *ud)
 {
   RecCatDataCP *rcd = (RecCatDataCP *)ud;
-  jit_State *J = rcd->J;
-  BCReg baseslot = rcd->baseslot, topslot = rcd->topslot;
+  UNUSED(L); UNUSED(dummy);
+  rec_mm_arith(rcd->J, rcd->ix, MM_concat);  /* Call __concat metamethod. */
+  return NULL;
+}
+
+static TRef rec_cat(jit_State *J, BCReg baseslot, BCReg topslot)
+{
   TRef *top = &J->base[topslot];
+  TValue savetv[5+LJ_FR2];
   BCReg s;
   RecordIndex ix;
-  UNUSED(L); UNUSED(dummy);
+  RecCatDataCP rcd;
+  int errcode;
   lj_assertJ(baseslot < topslot, "bad CAT arg");
   for (s = baseslot; s <= topslot; s++)
     (void)getslot(J, s);  /* Ensure all arguments have a reference. */
@@ -2114,10 +2120,7 @@ static TValue *rec_mm_concat_cp(lua_State *L, lua_CFunction dummy, void *ud)
     } while (trp <= top);
     tr = emitir(IRTG(IR_BUFSTR, IRT_STR), tr, hdr);
     J->maxslot = (BCReg)(xbase - J->base);
-    if (xbase == base) {
-      rcd->tr = tr;  /* Return simple concatenation result. */
-      return NULL;
-    }
+    if (xbase == base) return tr;  /* Return simple concatenation result. */
     /* Pass partial result. */
     topslot = J->maxslot--;
     *xbase = tr;
@@ -2130,31 +2133,13 @@ static TValue *rec_mm_concat_cp(lua_State *L, lua_CFunction dummy, void *ud)
   copyTV(J->L, &ix.tabv, &J->L->base[topslot-1]);
   ix.tab = top[-1];
   ix.key = top[0];
-  rec_mm_arith(J, &ix, MM_concat);  /* Call __concat metamethod. */
-  rcd->tr = 0;  /* No result yet. */
-  return NULL;
-}
-
-static TRef rec_cat(jit_State *J, BCReg baseslot, BCReg topslot)
-{
-  lua_State *L = J->L;
-  ptrdiff_t delta = L->top - L->base;
-  TValue savetv[5+LJ_FR2], errobj;
-  RecCatDataCP rcd;
-  int errcode;
+  memcpy(savetv, &J->L->base[topslot-1], sizeof(savetv));  /* Save slots. */
   rcd.J = J;
-  rcd.baseslot = baseslot;
-  rcd.topslot = topslot;
-  memcpy(savetv, &L->base[topslot-1], sizeof(savetv));  /* Save slots. */
-  errcode = lj_vm_cpcall(L, NULL, &rcd, rec_mm_concat_cp);
-  if (errcode) copyTV(L, &errobj, L->top-1);
-  memcpy(&L->base[topslot-1], savetv, sizeof(savetv));  /* Restore slots. */
-  if (errcode) {
-    L->top = L->base + delta;
-    copyTV(L, L->top++, &errobj);
-    return (TRef)(-errcode);
-  }
-  return rcd.tr;
+  rcd.ix = &ix;
+  errcode = lj_vm_cpcall(J->L, NULL, &rcd, rec_mm_concat_cp);
+  memcpy(&J->L->base[topslot-1], savetv, sizeof(savetv));  /* Restore slots. */
+  if (errcode) return (TRef)(-errcode);
+  return 0;  /* No result yet. */
 }
 
 /* -- Record bytecode ops ------------------------------------------------- */
