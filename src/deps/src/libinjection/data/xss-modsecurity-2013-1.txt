@@ -1,2 +1,0 @@
-# http://blog.spiderlabs.com/2013/09/modsecurity-xss-evasion-challenge-results.html
-<scr%00ipt>confirm(0);</scr%00ipt>

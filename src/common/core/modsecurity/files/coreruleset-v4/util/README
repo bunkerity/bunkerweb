@@ -1,7 +1,0 @@
-The util directory contains many supporting tools/scripts that may be used with
-the OWASP ModSecurity CRS files.
-
-Docker Support
-==============
-A Dockerfile can be found in the docker/ directory, along with additional
-notes in docker/README.md
