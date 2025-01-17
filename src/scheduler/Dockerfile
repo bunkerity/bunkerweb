@@ -48,8 +48,6 @@ RUN apk add --no-cache bash unzip libgcc libstdc++ libpq openssl libmagic mariad
 # Fix CVEs
 # There are no CVEs for the following packages
 
-# Cleanup
-RUN rm -rf /var/cache/apk/*
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 /usr/share/bunkerweb /usr/share/bunkerweb
