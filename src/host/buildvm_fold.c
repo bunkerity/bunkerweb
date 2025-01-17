@@ -1,6 +1,6 @@
 /*
 ** LuaJIT VM builder: IR folding hash table generator.
-** Copyright (C) 2005-2023 Mike Pall. See Copyright Notice in luajit.h
+** Copyright (C) 2005-2025 Mike Pall. See Copyright Notice in luajit.h
 */
 
 #include "buildvm.h"
