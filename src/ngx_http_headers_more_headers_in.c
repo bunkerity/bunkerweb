@@ -748,6 +748,7 @@ ngx_http_set_connection_header(ngx_http_request_t *r,
     if (ngx_strcasestrn(value->data, "close", 5 - 1)) {
         r->headers_in.connection_type = NGX_HTTP_CONNECTION_CLOSE;
         r->headers_in.keep_alive_n = -1;
+        r->keepalive = 0;
 
     } else if (ngx_strcasestrn(value->data, "keep-alive", 10 - 1)) {
         r->headers_in.connection_type = NGX_HTTP_CONNECTION_KEEP_ALIVE;
@@ -763,7 +764,9 @@ ngx_http_set_builtin_multi_header(ngx_http_request_t *r,
 {
 #if defined(nginx_version) && nginx_version >= 1023000
     ngx_table_elt_t  **headers, **ph, *h;
+#if (DDEBUG)
     int                nelts;
+#endif
 
     if (r->headers_out.status == 400 || r->headers_in.headers.last == NULL) {
         /* must be a 400 Bad Request */
@@ -773,14 +776,16 @@ ngx_http_set_builtin_multi_header(ngx_http_request_t *r,
     headers = (ngx_table_elt_t **) ((char *) &r->headers_in + hv->offset);
 
     if (*headers) {
+#if (DDEBUG)
         nelts = 0;
         for (h = *headers; h; h = h->next) {
             nelts++;
         }
 
-        *headers = NULL;
-
         dd("clear multi-value headers: %d", nelts);
+#endif
+        
+        *headers = NULL;
     }
 
     if (ngx_http_set_header_helper(r, hv, value, &h) == NGX_ERROR) {

@@ -5,7 +5,7 @@ use Test::Nginx::Socket;
 
 repeat_each(2);
 
-plan tests => repeat_each() * 113;
+plan tests => repeat_each() * 123;
 
 #master_on();
 #workers(2);
@@ -565,3 +565,64 @@ hi
 --- response_body
 ok
 --- http09
+
+
+
+=== TEST 34: use the -a option to append the cookie field
+--- config
+    location /cookie {
+        more_set_headers -a 'Set-Cookie: name=lynch';
+        echo ok;
+    }
+--- request
+    GET /cookie
+--- response_headers
+Set-Cookie: name=lynch
+--- response_body
+ok
+
+
+
+=== TEST 35: the original Set-Cookie fields will not be overwritten, when using the -a option
+--- config
+    location /cookie {
+        more_set_headers 'Set-Cookie: name=lynch';
+        more_set_headers -a 'Set-Cookie: born=1981';
+        echo ok;
+    }
+--- request
+    GET /cookie
+--- raw_response_headers_like eval
+"Set-Cookie: name=lynch\r\nSet-Cookie: born=1981\r\n"
+--- response_body
+ok
+
+
+
+=== TEST 36: The behavior of builtin headers can not be changed
+--- config
+    location /foo {
+        more_set_headers -a "Server: myServer";
+        echo ok;
+    }
+--- request
+    GET /foo
+--- must_die
+--- error_log chomp
+can not append builtin headers
+--- suppress_stderr
+
+
+
+=== TEST 37: can not use -a option with more_clear_headers
+--- config
+    location /foo {
+        more_clear_headers -a 'Content-Type';
+        echo ok;
+    }
+--- request
+    GET /foo
+--- must_die
+--- error_log chomp
+invalid option name: "-a"
+--- suppress_stderr
