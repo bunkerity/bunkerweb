@@ -1,0 +1,10 @@
+--TEST--
+user() is a function, user(foo) is not. In this case user(foo) is completely folded away.
+--INPUT--
+1 USER()
+--EXPECTED--
+1 1
+f USER
+( (
+) )
+

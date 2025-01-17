@@ -1,0 +1,6 @@
+--TEST--
+keyword merging test
+--INPUT--
+UNION ALL
+--EXPECTED--
+U UNION ALL

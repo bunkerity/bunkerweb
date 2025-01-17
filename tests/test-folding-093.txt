@@ -1,0 +1,12 @@
+--TEST--
+test of IN bareword vs. IN (
+--INPUT--
+IN YOUR FACE
+--EXPECTED--
+n IN
+n YOUR
+n FACE
+
+
+
+

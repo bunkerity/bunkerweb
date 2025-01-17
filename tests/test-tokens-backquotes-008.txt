@@ -1,0 +1,8 @@
+--TEST--
+variable using backquotes
+--INPUT--
+SELECT @`foo``bar`;
+--EXPECTED--
+E SELECT
+v @`foo``bar`
+; ;

@@ -1,3 +1,0 @@
-mysql:
-  mysqlUser: "mattermost"
-  mysqlPassword: "changeme42!"

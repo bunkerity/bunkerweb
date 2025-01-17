@@ -1,0 +1,10 @@
+--TEST--
+pg-sql e-string
+--INPUT--
+select e'';
+--EXPECTED--
+E select
+s ''
+; ;
+
+

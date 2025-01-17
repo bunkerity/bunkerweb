@@ -1,0 +1,8 @@
+--TEST--
+variable using backquotes
+--INPUT--
+SELECT @@`version`;
+--EXPECTED--
+E SELECT
+v @@`version`
+; ;

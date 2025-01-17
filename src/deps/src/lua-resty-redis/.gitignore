@@ -1,8 +1,0 @@
-*.swp
-*.swo
-*~
-go
-t/servroot/
-reindex
-*.t_
-tags

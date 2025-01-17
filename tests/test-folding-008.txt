@@ -1,0 +1,6 @@
+--TEST--
+only one token
+--INPUT--
+123
+--EXPECTED--
+1 123

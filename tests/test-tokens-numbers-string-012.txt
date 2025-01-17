@@ -1,0 +1,10 @@
+--TEST--
+mysql b-string, b-lower-case single-quote [10]* single quote
+--INPUT--
+SELECT x X;
+--EXPECTED--
+E SELECT
+n x
+n X
+; ;
+

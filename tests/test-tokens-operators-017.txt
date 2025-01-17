@@ -1,0 +1,9 @@
+--TEST--
+!~ is a pgsql operator, but treating as two unary operators
+--INPUT--
+SELECT !~
+--EXPECTED--
+E SELECT
+o !
+o ~
+

@@ -1,0 +1,9 @@
+--TEST--
+'.' can start a number after a keyword
+--INPUT--
+SELECT.1
+--EXPECTED--
+E SELECT
+1 .1
+
+

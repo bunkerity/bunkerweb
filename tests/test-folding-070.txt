@@ -1,0 +1,13 @@
+--TEST--
+select 1,-1;
+--INPUT--
+select 1,-(2);
+--EXPECTED--
+E select
+1 1
+, ,
+( (
+1 2
+
+
+

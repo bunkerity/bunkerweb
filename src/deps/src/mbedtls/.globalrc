@@ -1,3 +1,0 @@
-default:\
-    :langmap=c\:.c.h.function:\
-

@@ -1,0 +1,9 @@
+--TEST--
+XML/HTML Entity definition
+--INPUT--
+<!ENTITY foo>
+--EXPECTED--
+TAG_COMMENT,10,ENTITY foo
+
+
+

@@ -1,0 +1,8 @@
+--TEST--
+variable using backquotes, escape backtick at end of string.  Not really valid sql but
+close enough and needed for testing for memory issues
+--INPUT--
+SELECT @`foobar``
+--EXPECTED--
+E SELECT
+v @`foobar``

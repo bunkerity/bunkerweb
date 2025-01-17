@@ -1,3 +1,0 @@
-[submodule "deps/brotli"]
-	path = deps/brotli
-	url = https://github.com/google/brotli.git

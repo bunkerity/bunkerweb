@@ -1,0 +1,12 @@
+--TEST--
+folding with left parens
+--INPUT--
+1))))))))))))))+1
+--EXPECTED--
+1 1
+) )
+o +
+1 1
+
+
+

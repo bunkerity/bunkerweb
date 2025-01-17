@@ -1,0 +1,9 @@
+--TEST--
+self-close, eof before final closed
+--INPUT--
+<foo   /
+--EXPECTED--
+TAG_NAME_OPEN,3,foo
+
+
+

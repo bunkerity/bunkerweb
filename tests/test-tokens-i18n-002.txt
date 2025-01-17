@@ -1,0 +1,9 @@
+--TEST--
+non-ascii word
+--INPUT--
+SELECT テスト;
+--EXPECTED--
+E SELECT
+n テスト
+; ;
+

@@ -1,0 +1,9 @@
+--TEST--
+non-ascii string
+--INPUT--
+SELECT "テスト";
+--EXPECTED--
+E SELECT
+s "テスト"
+; ;
+

@@ -1,0 +1,8 @@
+--TEST--
+Comments, C-style. MySQL dangling, but parsed under ansi
+--INPUT--
+SELECT 1 /*!00,2
+--EXPECTED--
+E SELECT
+1 1
+X /*!00,2

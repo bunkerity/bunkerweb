@@ -1,0 +1,7 @@
+--TEST--
+word and numbers
+--INPUT--
+1 + foo
+--EXPECTED--
+1 1
+

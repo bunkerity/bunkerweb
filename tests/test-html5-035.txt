@@ -1,0 +1,9 @@
+--TEST--
+bogus comment, with EOF
+--INPUT--
+<?foo
+--EXPECTED--
+TAG_COMMENT,3,foo
+
+
+

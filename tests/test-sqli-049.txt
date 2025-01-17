@@ -1,0 +1,10 @@
+--TEST--
+SQLi, folding tests
+--INPUT--
+1, -sin(1)) UNION SELECT 1
+--EXPECTED--
+1,f(1
+
+
+
+

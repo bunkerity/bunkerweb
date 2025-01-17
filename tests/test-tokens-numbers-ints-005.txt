@@ -1,0 +1,12 @@
+--TEST--
+smoke
+--INPUT--
+SELECT (-1);
+--EXPECTED--
+E SELECT
+( (
+o -
+1 1
+) )
+; ;
+

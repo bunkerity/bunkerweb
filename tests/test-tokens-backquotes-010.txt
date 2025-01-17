@@ -1,0 +1,9 @@
+--TEST--
+variable using backquotes, no ending quote. Not likely to be valid sql but
+weird enough we'll use it.  Also the test here is useful for memory
+and code-coverage tests
+--INPUT--
+SELECT @`foobar
+--EXPECTED--
+E SELECT
+v @`foobar

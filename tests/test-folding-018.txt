@@ -1,0 +1,10 @@
+--TEST--
+logical operators folding
+--INPUT--
+foo OR zap AND bar
+--EXPECTED--
+n foo
+& OR
+n bar
+
+

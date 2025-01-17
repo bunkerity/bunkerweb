@@ -1,0 +1,8 @@
+--TEST--
+Comments, C-style.  Test for Issue #71 for bug in memchr2
+--INPUT--
+/* foo **/1
+--EXPECTED--
+c /* foo **/
+1 1
+

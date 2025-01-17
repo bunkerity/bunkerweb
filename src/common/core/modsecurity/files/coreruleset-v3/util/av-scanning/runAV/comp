@@ -1,2 +1,0 @@
-gcc -c -o common.o -DEXTERN= common.c
-gcc -o runAV -DEXTERN=extern common.o runAV.c

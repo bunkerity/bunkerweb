@@ -1,0 +1,7 @@
+--TEST--
+smoke
+--INPUT--
+SELECT binary_double_nan
+--EXPECTED--
+E SELECT
+1 binary_double_nan

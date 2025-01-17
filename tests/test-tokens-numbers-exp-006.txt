@@ -1,0 +1,9 @@
+--TEST--
+floating point parsing
+--INPUT--
+SELECT .123e1;
+--EXPECTED--
+E SELECT
+1 .123e1
+; ;
+

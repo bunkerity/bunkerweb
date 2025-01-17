@@ -1,0 +1,8 @@
+--TEST--
+Variables
+--INPUT--
+SELECT @a`from 1`
+--EXPECTED--
+E SELECT
+v @a
+n from 1

@@ -1,0 +1,8 @@
+--TEST--
+pgsql, $-quoted strings
+--INPUT--
+;$s$s$$
+--EXPECTED--
+; ;
+s $s$$
+

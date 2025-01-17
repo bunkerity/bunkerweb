@@ -1,0 +1,7 @@
+--TEST--
+sqli test
+--INPUT--
+1 = "1" OR 1
+--EXPECTED--
+1os&1
+

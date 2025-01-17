@@ -1,0 +1,10 @@
+--TEST--
+SQLi, folding tests
+--INPUT--
+{``.``.id} UNION SELECT table_name from information_schemas LIMIT 1
+--EXPECTED--
+X 
+
+
+
+

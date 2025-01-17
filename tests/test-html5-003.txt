@@ -1,0 +1,4 @@
+--TEST--
+empty input string, expect nothing
+--INPUT--
+--EXPECTED--

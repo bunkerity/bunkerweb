@@ -1,0 +1,10 @@
+--TEST--
+keywords that can be a function
+--INPUT--
+select 1 AND -2 + 3;
+--EXPECTED--
+E select
+1 1
+& AND
+1 2
+; ;

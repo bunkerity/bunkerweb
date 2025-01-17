@@ -1,4 +1,0 @@
-modules = {
-    ["resty.redis.connector"] = "lib/resty/redis/connector.lua",
-    ["resty.redis.sentinel"] = "lib/resty/redis/sentinel.lua",
-}

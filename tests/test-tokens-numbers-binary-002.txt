@@ -1,0 +1,8 @@
+--TEST--
+'0B' works in pgsql, not mysql
+--INPUT--
+SELECT 0B0101010;
+--EXPECTED--
+E SELECT
+1 0B0101010
+; ;
