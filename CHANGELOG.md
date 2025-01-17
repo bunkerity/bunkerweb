@@ -17,6 +17,7 @@
 - [DEPS] Updated lua-nginx-module version to v0.10.28
 - [DEPS] Updated lua-resty-core version to v0.1.31
 - [DEPS] Updated lua-resty-dns version to v0.23
+- [DEPS] Updated lua-resty-redis version to v0.31
 - [DEPS] Updated stream-lua-nginx-module version to v0.0.16
 
 ## v1.6.0-rc1 - 2025/01/10

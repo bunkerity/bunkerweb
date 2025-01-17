@@ -131,9 +131,9 @@
     },
     {
       "id": "lua-resty-redis",
-      "name": "lua-resty-redis v0.30",
+      "name": "lua-resty-redis v0.31",
       "url": "https://github.com/openresty/lua-resty-redis.git",
-      "commit": "d7c25f1b339d79196ff67f061c547a73a920b580",
+      "commit": "193fbd42e9b7953f5157550eb5253c04c081b143",
       "post_install": "rm -r src/deps/src/lua-resty-redis/t"
     },
     {
