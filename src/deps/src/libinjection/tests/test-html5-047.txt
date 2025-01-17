@@ -1,0 +1,9 @@
+--TEST--
+doctype with other stuff, eof
+--INPUT--
+<!DOCTYPE "stuff"
+--EXPECTED--
+DOCTYPE,15,DOCTYPE "stuff"
+
+
+

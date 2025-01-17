@@ -14,6 +14,7 @@ package main
 #cgo LDFLAGS: -L./libinjection -linjection
 #include "libinjection.h"
 #include "libinjection_sqli.h"
+#include <stdlib.h>
 */
 import "C"
 import (
@@ -26,7 +27,9 @@ func main() {
 	sqlinjection := "asdf asd ; -1' and 1=1 union/* foo */select load_file('/etc/passwd')--"
 	var out [8]C.char
 	pointer := (*C.char)(unsafe.Pointer(&out[0]))
-	if found := C.libinjection_sqli(C.CString(sqlinjection), C.size_t(len(sqlinjection)), pointer); found == 1 {
+	inputcChar := C.CString(sqlinjection)
+	defer C.free(unsafe.Pointer(inputcChar))
+	if found := C.libinjection_sqli(inputcChar, C.size_t(len(sqlinjection)), pointer); found == 1 {
 		output := C.GoBytes(unsafe.Pointer(&out[0]), 8)
 		fmt.Printf("sqli with fingerprint of '%s'\n", string(output[:bytes.Index(output, []byte{0})]))
 	}

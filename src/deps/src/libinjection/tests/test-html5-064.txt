@@ -1,0 +1,9 @@
+--TEST--
+tag with name attribute, back-tick value
+--INPUT--
+<foo  bar   =   `xxx`
+--EXPECTED--
+TAG_NAME_OPEN,3,foo
+ATTR_NAME,3,bar
+ATTR_VALUE,3,xxx
+

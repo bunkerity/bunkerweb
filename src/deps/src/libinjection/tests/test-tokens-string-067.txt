@@ -1,0 +1,10 @@
+--TEST--
+pgsql e-string
+--INPUT--
+select e'123';
+--EXPECTED--
+E select
+s '123'
+; ;
+
+

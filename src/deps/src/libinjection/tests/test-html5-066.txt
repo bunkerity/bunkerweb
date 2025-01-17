@@ -1,0 +1,10 @@
+--TEST--
+bogus closing tags
+--INPUT--
+</ foo="><script>
+--EXPECTED--
+TAG_COMMENT,6, foo="
+TAG_NAME_OPEN,6,script
+TAG_NAME_CLOSE,1,>
+
+

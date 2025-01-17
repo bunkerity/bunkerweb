@@ -1,0 +1,8 @@
+--TEST--
+For keywords only, no space between keyword and unary operator
+--INPUT--
+SELECT-1.
+--EXPECTED--
+E SELECT
+o -
+1 1.

@@ -1,0 +1,11 @@
+--TEST--
+logical operators folding, this unfortunately isn't quite right.
+Want this to be "1"
+--INPUT--
+1+(-(1))
+--EXPECTED--
+1 1
+) )
+
+
+

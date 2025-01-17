@@ -1,0 +1,8 @@
+--TEST--
+Oracle's ending [dDfF] suffix
+--INPUT--
+SELECT 1d;
+--EXPECTED--
+E SELECT
+1 1d
+; ;

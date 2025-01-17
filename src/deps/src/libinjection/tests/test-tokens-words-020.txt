@@ -1,0 +1,10 @@
+--TEST--
+` breaks a word
+--INPUT--
+CURRENT_USER``BAR
+--EXPECTED--
+v CURRENT_USER
+n 
+n BAR
+
+

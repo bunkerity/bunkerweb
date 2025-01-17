@@ -1,0 +1,9 @@
+--TEST--
+oracle nq-string
+--INPUT--
+NQ'! foo !'more
+--EXPECTED--
+s q foo q
+n more
+
+

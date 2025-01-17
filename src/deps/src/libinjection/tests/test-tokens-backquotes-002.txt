@@ -1,0 +1,8 @@
+--TEST--
+keywords backquotes are not keywords
+--INPUT--
+SELECT `select`;
+--EXPECTED--
+E SELECT
+n select
+; ;

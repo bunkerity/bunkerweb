@@ -1,0 +1,9 @@
+--TEST--
+pgsql/mysql X-string for bit-literals, case sensitive
+--INPUT--
+SELECT x"1234";
+--EXPECTED--
+E SELECT
+n x
+s "1234"
+; ;

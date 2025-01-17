@@ -1,0 +1,13 @@
+--TEST--
+test folding of large words
+--INPUT--
+1 - (1 - 1) + 2
+--EXPECTED--
+1 1
+
+
+
+
+
+
+

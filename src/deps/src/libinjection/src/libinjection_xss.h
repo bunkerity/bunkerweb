@@ -13,7 +13,7 @@ extern "C" {
 
 #include <string.h>
 
-  int libinjection_is_xss(const char* s, size_t len, int flags);
+int libinjection_is_xss(const char *s, size_t len, int flags);
 
 #ifdef __cplusplus
 }

@@ -1,0 +1,8 @@
+--TEST--
+sqli with MSSQL sp_password past work length
+--INPUT--
+1--0000000000111111111122222222223333333333 sp_password
+--EXPECTED--
+1c
+
+

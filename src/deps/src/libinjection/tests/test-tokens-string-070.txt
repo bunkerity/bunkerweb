@@ -1,0 +1,10 @@
+--TEST--
+pgsql e-string
+--INPUT--
+select e'
+--EXPECTED--
+E select
+n e
+s '
+
+

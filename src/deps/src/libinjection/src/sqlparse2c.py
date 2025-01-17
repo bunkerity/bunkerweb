@@ -11,6 +11,7 @@ Converts a libinjection JSON data file to a C header (.h) file
 
 import sys
 
+
 def toc(obj):
     """ main routine """
 
@@ -54,43 +55,43 @@ static size_t parse_bword(sfilter * sf);
     # Mapping of character to function
     #
     fnmap = {
-        'CHAR_WORD' : 'parse_word',
+        'CHAR_WORD': 'parse_word',
         'CHAR_WHITE': 'parse_white',
-        'CHAR_OP1'  : 'parse_operator1',
-	'CHAR_UNARY': 'parse_operator1',
-        'CHAR_OP2'  : 'parse_operator2',
-	'CHAR_BANG' : 'parse_operator2',
-        'CHAR_BACK' : 'parse_backslash',
-        'CHAR_DASH' : 'parse_dash',
-        'CHAR_STR'  : 'parse_string',
-        'CHAR_HASH' : 'parse_hash',
-        'CHAR_NUM'  : 'parse_number',
+        'CHAR_OP1': 'parse_operator1',
+        'CHAR_UNARY': 'parse_operator1',
+        'CHAR_OP2': 'parse_operator2',
+        'CHAR_BANG': 'parse_operator2',
+        'CHAR_BACK': 'parse_backslash',
+        'CHAR_DASH': 'parse_dash',
+        'CHAR_STR': 'parse_string',
+        'CHAR_HASH': 'parse_hash',
+        'CHAR_NUM': 'parse_number',
         'CHAR_SLASH': 'parse_slash',
-        'CHAR_SEMICOLON' : 'parse_char',
-	'CHAR_COMMA': 'parse_char',
-	'CHAR_LEFTPARENS': 'parse_char',
-	'CHAR_RIGHTPARENS': 'parse_char',
-	'CHAR_LEFTBRACE': 'parse_char',
-	'CHAR_RIGHTBRACE': 'parse_char',
-        'CHAR_VAR'  : 'parse_var',
+        'CHAR_SEMICOLON': 'parse_char',
+        'CHAR_COMMA': 'parse_char',
+        'CHAR_LEFTPARENS': 'parse_char',
+        'CHAR_RIGHTPARENS': 'parse_char',
+        'CHAR_LEFTBRACE': 'parse_char',
+        'CHAR_RIGHTBRACE': 'parse_char',
+        'CHAR_VAR': 'parse_var',
         'CHAR_OTHER': 'parse_other',
         'CHAR_MONEY': 'parse_money',
-        'CHAR_TICK' : 'parse_tick',
+        'CHAR_TICK': 'parse_tick',
         'CHAR_UNDERSCORE': 'parse_underscore',
-        'CHAR_USTRING'   : 'parse_ustring',
-        'CHAR_QSTRING'   : 'parse_qstring',
-        'CHAR_NQSTRING'  : 'parse_nqstring',
-        'CHAR_XSTRING'   : 'parse_xstring',
-        'CHAR_BSTRING'   : 'parse_bstring',
-        'CHAR_ESTRING'   : 'parse_estring',
-        'CHAR_BWORD'     : 'parse_bword'
-        }
+        'CHAR_USTRING': 'parse_ustring',
+        'CHAR_QSTRING': 'parse_qstring',
+        'CHAR_NQSTRING': 'parse_nqstring',
+        'CHAR_XSTRING': 'parse_xstring',
+        'CHAR_BSTRING': 'parse_bstring',
+        'CHAR_ESTRING': 'parse_estring',
+        'CHAR_BWORD': 'parse_bword'
+    }
     print()
     print("typedef size_t (*pt2Function)(sfilter *sf);")
     print("static const pt2Function char_parse_map[] = {")
     pos = 0
     for character in obj['charmap']:
-        print("   &%s, /* %d */" % (fnmap[character], pos))
+        print("  &%s, /* %d */" % (fnmap[character], pos))
         pos += 1
     print("};")
     print()
@@ -99,12 +100,12 @@ static size_t parse_bword(sfilter * sf);
     #  load them
     keywords = obj['keywords']
 
-    for  fingerprint in list(obj['fingerprints']):
+    for fingerprint in list(obj['fingerprints']):
         fingerprint = '0' + fingerprint.upper()
         keywords[fingerprint] = 'F'
 
     needhelp = []
-    for key  in keywords.keys():
+    for key in keywords.keys():
         if key != key.upper():
             needhelp.append(key)
 
@@ -121,12 +122,13 @@ static size_t parse_bword(sfilter * sf);
 
         print("    {\"%s\", '%s'}," % (k, keywords[k]))
     print("};")
-    print("static const size_t sql_keywords_sz = %d;" % (len(keywords), ))
+    print("static const size_t sql_keywords_sz = %d;" % (len(keywords),))
 
     print("#endif")
     return 0
 
+
 if __name__ == '__main__':
     import json
-    sys.exit(toc(json.load(sys.stdin)))
 
+    sys.exit(toc(json.load(sys.stdin)))

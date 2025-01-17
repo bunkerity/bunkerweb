@@ -1,0 +1,9 @@
+--TEST--
+comments with dashess and bangs
+--INPUT--
+<!------->
+--EXPECTED--
+TAG_COMMENT,3,---
+
+
+

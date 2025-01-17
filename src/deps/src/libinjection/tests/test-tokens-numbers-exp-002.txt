@@ -1,0 +1,8 @@
+--TEST--
+smoke
+--INPUT--
+SELECT 1E2;
+--EXPECTED--
+E SELECT
+1 1E2
+; ;

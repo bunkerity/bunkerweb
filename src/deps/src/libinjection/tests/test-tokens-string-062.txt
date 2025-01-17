@@ -1,0 +1,10 @@
+--TEST--
+MySQL N-string
+--INPUT--
+select n'123';
+--EXPECTED--
+E select
+s '123'
+; ;
+
+

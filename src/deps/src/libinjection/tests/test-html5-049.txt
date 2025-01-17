@@ -1,0 +1,9 @@
+--TEST--
+cdata
+--INPUT--
+<![CDATA[foobar]]>
+--EXPECTED--
+DATA_TEXT,6,foobar
+
+
+

@@ -1,0 +1,11 @@
+--TEST--
+EQV is a MS-ACCESS operator
+--INPUT--
+SELECT 1 EQV 1;
+--EXPECTED--
+E SELECT
+1 1
+o EQV
+1 1
+; ;
+
