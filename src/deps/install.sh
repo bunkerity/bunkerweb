@@ -196,6 +196,9 @@ export CHANGE_DIR="/tmp/bunkerweb/deps/misc"
 do_and_check_cmd bash -c "mv ngx_http_modsecurity_access.c /tmp/bunkerweb/deps/src/modsecurity-nginx/src/"
 
 # Move brotli to ngx_brotli deps directory
+if [ ! -d "/tmp/bunkerweb/deps/src/ngx_brotli/deps" ] ; then
+	do_and_check_cmd mkdir /tmp/bunkerweb/deps/src/ngx_brotli/deps
+fi
 do_and_check_cmd mv /tmp/bunkerweb/deps/src/brotli /tmp/bunkerweb/deps/src/ngx_brotli/deps/brotli
 
 # Compile dynamic modules
