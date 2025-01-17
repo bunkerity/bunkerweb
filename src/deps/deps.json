@@ -250,6 +250,7 @@
       "name": "Nginx Brotli v1.0.9+",
       "url": "https://github.com/google/ngx_brotli.git",
       "commit": "a71f9312c2deb28875acc7bacfdd5695a111aa53",
+      "post_install": "rm -r src/deps/src/ngx_brotli/deps/brotli/.git src/deps/src/ngx_brotli/deps/brotli/tests",
       "submodules": true
     },
     {
