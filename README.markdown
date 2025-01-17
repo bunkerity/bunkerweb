@@ -169,6 +169,7 @@ API Implemented
 
 * [ngx.encode_base64](https://github.com/openresty/lua-nginx-module#ngxencode_base64)
 * [ngx.decode_base64](https://github.com/openresty/lua-nginx-module#ngxdecode_base64)
+* [ngx.decode_base64mime](https://github.com/openresty/lua-nginx-module#ngxdecode_base64mime)
 
 [Back to TOC](#table-of-contents)
 

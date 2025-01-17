@@ -12,6 +12,7 @@ Table of Contents
 * [Description](#description)
 * [Methods](#methods)
     * [add_header](#add_header)
+    * [set_status](#set_status)
 * [Community](#community)
     * [English Mailing List](#english-mailing-list)
     * [Chinese Mailing List](#chinese-mailing-list)
@@ -35,6 +36,10 @@ ngx_resp.add_header("Foo", "bar")
 ngx_resp.add_header("Foo", "baz")
 --> there will be two new headers in HTTP response:
 --> Foo: bar and Foo: baz
+
+
+ngx_resp.set(531, "user defined error")
+--> the response line will be: 531 user defiend error
 ```
 
 [Back to TOC](#table-of-contents)
@@ -70,6 +75,15 @@ one instead of overriding it.
 
 Unlike `add_header` directive, this method will override the builtin header
 instead of appending it.
+
+[Back to TOC](#table-of-contents)
+
+set_status
+----------
+**syntax:** *ngx_resp.status(status, reason?)*
+
+Unlike `ngx.status` which only sets the status, this function sets the response
+status with an optional reason. The `reason` should be a string.
 
 [Back to TOC](#table-of-contents)
 
