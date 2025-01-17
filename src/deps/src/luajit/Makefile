@@ -10,7 +10,7 @@
 # For MSVC, please follow the instructions given in src/msvcbuild.bat.
 # For MinGW and Cygwin, cd to src and run make with the Makefile there.
 #
-# Copyright (C) 2005-2023 Mike Pall. See Copyright Notice in luajit.h
+# Copyright (C) 2005-2025 Mike Pall. See Copyright Notice in luajit.h
 ##############################################################################
 
 MAJVER=  2
@@ -37,12 +37,13 @@ export MULTILIB= lib
 DPREFIX= $(DESTDIR)$(PREFIX)
 INSTALL_BIN=   $(DPREFIX)/bin
 INSTALL_LIB=   $(DPREFIX)/$(MULTILIB)
-INSTALL_SHARE= $(DPREFIX)/share
+INSTALL_SHARE_= $(PREFIX)/share
+INSTALL_SHARE= $(DESTDIR)$(INSTALL_SHARE_)
 INSTALL_DEFINC= $(DPREFIX)/include/luajit-$(MMVERSION)
 INSTALL_INC=   $(INSTALL_DEFINC)
 
-export INSTALL_LJLIBD= $(INSTALL_SHARE)/luajit-$(MMVERSION)
-INSTALL_JITLIB= $(INSTALL_LJLIBD)/jit
+export INSTALL_LJLIBD= $(INSTALL_SHARE_)/luajit-$(MMVERSION)
+INSTALL_JITLIB= $(DESTDIR)$(INSTALL_LJLIBD)/jit
 INSTALL_LMODD= $(INSTALL_SHARE)/lua
 INSTALL_LMOD= $(INSTALL_LMODD)/$(ABIVER)
 INSTALL_CMODD= $(INSTALL_LIB)/lua
@@ -71,7 +72,7 @@ INSTALL_PC= $(INSTALL_PKGCONFIG)/$(INSTALL_PCNAME)
 
 INSTALL_DIRS= $(INSTALL_BIN) $(INSTALL_LIB) $(INSTALL_INC) $(INSTALL_MAN) \
   $(INSTALL_PKGCONFIG) $(INSTALL_JITLIB) $(INSTALL_LMOD) $(INSTALL_CMOD)
-UNINSTALL_DIRS= $(INSTALL_JITLIB) $(INSTALL_LJLIBD) $(INSTALL_INC) \
+UNINSTALL_DIRS= $(INSTALL_JITLIB) $(DESTDIR)$(INSTALL_LJLIBD) $(INSTALL_INC) \
   $(INSTALL_LMOD) $(INSTALL_LMODD) $(INSTALL_CMOD) $(INSTALL_CMODD)
 
 RM= rm -f

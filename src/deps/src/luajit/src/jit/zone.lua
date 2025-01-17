@@ -1,7 +1,7 @@
 ----------------------------------------------------------------------------
 -- LuaJIT profiler zones.
 --
--- Copyright (C) 2005-2023 Mike Pall. All rights reserved.
+-- Copyright (C) 2005-2025 Mike Pall. All rights reserved.
 -- Released under the MIT license. See Copyright Notice in luajit.h
 ----------------------------------------------------------------------------
 --
