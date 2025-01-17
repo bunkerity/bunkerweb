@@ -49,16 +49,29 @@ do
   url="$(echo "$repo" | jq -r .url)"
   commit="$(echo "$repo" | jq -r .commit)"
   post_install="$(echo "$repo" | jq -r .post_install)"
+  submodules="$(echo "$repo" | jq -r .submodules)"
 
   echo "ℹ️ Clone ${name} from $url at commit/version $commit"
 
   if [ ! -d "src/deps/src/$id" ] ; then
-    do_and_check_cmd git subtree add --prefix "src/deps/src/$id" "$url" "$commit" --squash
+    do_and_check_cmd git clone "$url" "src/deps/src/$id"
+    cd "src/deps/src/$id" || exit 1
+    do_and_check_cmd git checkout "$commit"
+    if [ "$submodules" = "true" ]; then
+      do_and_check_cmd git submodule update --init --recursive
+    fi
+    cd - || exit 1
   else
-		echo "⚠️ Skipping clone of $url because target directory is already present"
+    echo "⚠️ Skipping clone of $url because target directory is already present"
     echo "ℹ️ Updating ${name} from $url at commit/version $commit"
-    do_and_check_cmd git subtree pull --prefix "src/deps/src/$id" "$url" "$commit" --squash
-	fi
+    cd "src/deps/src/$id" || exit 1
+    do_and_check_cmd git fetch
+    do_and_check_cmd git checkout "$commit"
+    if [ "$submodules" = "true" ]; then
+      do_and_check_cmd git submodule update --init --recursive
+    fi
+    cd - || exit 1
+  fi
 
   if [ -d "src/deps/src/$id/.git" ] ; then
     do_and_check_cmd rm -rf "src/deps/src/$id/.git"
