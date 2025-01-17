@@ -1,5 +1,5 @@
 sudo: required
-dist: trusty
+dist: focal
 
 os: linux
 
@@ -28,8 +28,8 @@ env:
     - LUAJIT_INC=$LUAJIT_PREFIX/include/luajit-2.1
     - LD_LIBRARY_PATH=$LUAJIT_LIB:$LD_LIBRARY_PATH
   matrix:
-    - NGINX_VERSION=1.9.15
-    - NGINX_VERSION=1.19.3
+    - NGINX_VERSION=1.21.4
+    - NGINX_VERSION=1.25.1
 
 install:
     - sudo cpanm --notest Test::Nginx > build.log 2>&1 || (cat build.log && exit 1)
@@ -48,6 +48,7 @@ before_script:
     - cd ..
 
 script:
+  - disable_pcre2=--without-pcre2; answer=`nginx-devel-utils/ngx-ver-ge "$NGINX_VERSION" 1.25.1`; if [ "$answer" = "N" ]; then disable_pcre2=""; fi; export disable_pcre2;
   - export PATH=$PWD/work/nginx/sbin:$PWD/nginx-devel-utils:$PATH
-  - ngx-build $NGINX_VERSION --with-debug --with-cc-opt="-DDEBUG_MALLOC" --with-ipv6 --add-module=../lua-nginx-module  > build.log 2>&1 || (cat build.log && exit 1)
-  - prove -r t
+  - ngx-build $NGINX_VERSION $disable_pcre2 --with-debug --with-cc-opt="-DDEBUG_MALLOC" --with-ipv6 --add-module=../lua-nginx-module  > build.log 2>&1 || (cat build.log && exit 1)
+  - prove -I. -r t
