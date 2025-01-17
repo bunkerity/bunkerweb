@@ -53,25 +53,17 @@ do
 
   echo "ℹ️ Clone ${name} from $url at commit/version $commit"
 
-  if [ ! -d "src/deps/src/$id" ] ; then
-    do_and_check_cmd git clone "$url" "src/deps/src/$id"
-    cd "src/deps/src/$id" || exit 1
-    do_and_check_cmd git checkout "$commit"
-    if [ "$submodules" = "true" ]; then
-      do_and_check_cmd git submodule update --init --recursive
-    fi
-    cd - || exit 1
-  else
-    echo "⚠️ Skipping clone of $url because target directory is already present"
-    echo "ℹ️ Updating ${name} from $url at commit/version $commit"
-    cd "src/deps/src/$id" || exit 1
-    do_and_check_cmd git fetch
-    do_and_check_cmd git checkout "$commit"
-    if [ "$submodules" = "true" ]; then
-      do_and_check_cmd git submodule update --init --recursive
-    fi
-    cd - || exit 1
+  if [ -d "src/deps/src/$id" ] ; then
+    rm -rf "src/deps/src/$id"
   fi
+
+  do_and_check_cmd git clone "$url" "src/deps/src/$id"
+  cd "src/deps/src/$id" || exit 1
+  do_and_check_cmd git checkout "$commit"
+  if [ "$submodules" = "true" ]; then
+    do_and_check_cmd git submodule update --init --recursive
+  fi
+  cd - || exit 1
 
   if [ -d "src/deps/src/$id/.git" ] ; then
     do_and_check_cmd rm -rf "src/deps/src/$id/.git"
