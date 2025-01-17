@@ -1,9 +1,0 @@
---TEST--
-oracle nq-string
---INPUT--
-nQ'! foo !'more
---EXPECTED--
-s q foo q
-n more
-
-

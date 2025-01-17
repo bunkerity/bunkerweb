@@ -1,8 +1,0 @@
---TEST--
-floating point parsing
---INPUT--
-SELECT .123e+1;
---EXPECTED--
-E SELECT
-1 .123e+1
-; ;

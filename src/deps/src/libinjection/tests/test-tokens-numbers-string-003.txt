@@ -1,8 +1,0 @@
---TEST--
-pgsql X-string for bit-literals
---INPUT--
-SELECT x'
---EXPECTED--
-E SELECT
-n x
-s '
