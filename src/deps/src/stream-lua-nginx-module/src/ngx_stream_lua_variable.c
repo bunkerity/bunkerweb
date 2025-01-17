@@ -32,18 +32,30 @@ ngx_stream_lua_ffi_var_get(ngx_stream_lua_request_t *r, u_char *name_data,
     ngx_uint_t                   hash;
     ngx_str_t                    name;
 
-    ngx_stream_variable_value_t         *vv;
+    ngx_stream_session_t          *session;
+    ngx_stream_lua_ctx_t          *ctx;
+    ngx_stream_lua_ssl_ctx_t      *cctx;
+    ngx_stream_variable_value_t   *vv;
 
     if (r == NULL) {
         *err = "no request object found";
         return NGX_ERROR;
     }
 
+    session = r->session;
     if ((r)->connection->fd == (ngx_socket_t) -1) {
-        *err = "API disabled in the current context";
-        return NGX_ERROR;
-    }
+        ctx = ngx_stream_lua_get_module_ctx(r, ngx_stream_lua_module);
+        if (ctx->context & (NGX_STREAM_LUA_CONTEXT_SSL_CERT
+                            | NGX_STREAM_LUA_CONTEXT_SSL_CLIENT_HELLO))
+        {
+            cctx = ngx_stream_lua_ssl_get_ctx(r->connection->ssl->connection);
+            session = cctx->connection->data;
 
+        } else {
+            *err = "API disabled in the current context";
+            return NGX_ERROR;
+        }
+    }
 
     hash = ngx_hash_strlow(lowcase_buf, name_data, name_len);
 
@@ -52,7 +64,7 @@ ngx_stream_lua_ffi_var_get(ngx_stream_lua_request_t *r, u_char *name_data,
 
     dd("variable name: %.*s", (int) name_len, lowcase_buf);
 
-    vv = ngx_stream_get_variable(r->session, &name, hash);
+    vv = ngx_stream_get_variable(session, &name, hash);
 
     if (vv == NULL || vv->not_found) {
         return NGX_DECLINED;
