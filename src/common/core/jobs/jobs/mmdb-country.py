@@ -3,7 +3,7 @@
 from datetime import date, datetime, timedelta
 from gzip import decompress
 from io import BytesIO
-from os import getenv, sep
+from os import sep
 from os.path import join
 from pathlib import Path
 from sys import exit as sys_exit, path as sys_path
@@ -20,7 +20,7 @@ from logger import setup_logger  # type: ignore
 from common_utils import bytes_hash, file_hash  # type: ignore
 from jobs import Job  # type: ignore
 
-LOGGER = setup_logger("JOBS.mmdb-country", getenv("LOG_LEVEL", "INFO"))
+LOGGER = setup_logger("JOBS.mmdb-country")
 status = 0
 
 

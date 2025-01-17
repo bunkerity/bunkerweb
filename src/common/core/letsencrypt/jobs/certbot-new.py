@@ -42,11 +42,11 @@ from common_utils import bytes_hash  # type: ignore
 from jobs import Job  # type: ignore
 from logger import setup_logger  # type: ignore
 
-LOGGER = setup_logger("LETS-ENCRYPT.new", getenv("LOG_LEVEL", "INFO"))
+LOGGER = setup_logger("LETS-ENCRYPT.new")
 CERTBOT_BIN = join(sep, "usr", "share", "bunkerweb", "deps", "python", "bin", "certbot")
 DEPS_PATH = join(sep, "usr", "share", "bunkerweb", "deps", "python")
 
-LOGGER_CERTBOT = setup_logger("LETS-ENCRYPT.new.certbot", getenv("LOG_LEVEL", "INFO"))
+LOGGER_CERTBOT = setup_logger("LETS-ENCRYPT.new.certbot")
 status = 0
 
 PLUGIN_PATH = Path(sep, "usr", "share", "bunkerweb", "core", "letsencrypt")

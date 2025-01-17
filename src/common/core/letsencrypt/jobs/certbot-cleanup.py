@@ -14,7 +14,7 @@ from common_utils import get_integration  # type: ignore
 from logger import setup_logger  # type: ignore
 from API import API  # type: ignore
 
-LOGGER = setup_logger("Lets-encrypt.cleanup", getenv("LOG_LEVEL", "INFO"))
+LOGGER = setup_logger("Lets-encrypt.cleanup")
 status = 0
 
 try:

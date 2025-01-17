@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from os import getenv, sep
+from os import sep
 from os.path import join
 from sys import exit as sys_exit, path as sys_path
 
@@ -13,7 +13,7 @@ from requests import get
 from common_utils import get_version  # type: ignore
 from logger import setup_logger  # type: ignore
 
-LOGGER = setup_logger("UPDATE-CHECK", getenv("LOG_LEVEL", "INFO"))
+LOGGER = setup_logger("UPDATE-CHECK")
 status = 0
 
 try:

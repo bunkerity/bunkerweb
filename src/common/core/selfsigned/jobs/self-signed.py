@@ -18,7 +18,7 @@ from cryptography.hazmat.backends import default_backend
 from logger import setup_logger  # type: ignore
 from jobs import Job  # type: ignore
 
-LOGGER = setup_logger("self-signed", getenv("LOG_LEVEL", "INFO"))
+LOGGER = setup_logger("self-signed")
 JOB = Job(LOGGER, __file__)
 status = 0
 

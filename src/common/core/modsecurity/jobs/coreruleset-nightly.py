@@ -19,7 +19,7 @@ from requests import RequestException, get
 from logger import setup_logger  # type: ignore
 from jobs import Job  # type: ignore
 
-LOGGER = setup_logger("MODSECURITY.coreruleset-nightly", getenv("LOG_LEVEL", "INFO"))
+LOGGER = setup_logger("MODSECURITY.coreruleset-nightly")
 status = 0
 
 CRS_NIGHTLY_PATH = Path(sep, "var", "cache", "bunkerweb", "modsecurity", "crs", "nightly")

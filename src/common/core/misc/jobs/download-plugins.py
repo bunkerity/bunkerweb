@@ -36,7 +36,7 @@ from logger import setup_logger  # type: ignore
 
 EXTERNAL_PLUGINS_DIR = Path(sep, "etc", "bunkerweb", "plugins")
 TMP_DIR = Path(sep, "var", "tmp", "bunkerweb", "plugins")
-LOGGER = setup_logger("Jobs.download-plugins", getenv("LOG_LEVEL", "INFO"))
+LOGGER = setup_logger("Jobs.download-plugins")
 status = 0
 
 
