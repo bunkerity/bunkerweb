@@ -30,6 +30,10 @@ if subsystem == "http" then
     int ngx_http_lua_ffi_decode_base64(const unsigned char *src,
                                        size_t len, unsigned char *dst,
                                        size_t *dlen);
+
+    int ngx_http_lua_ffi_decode_base64mime(const unsigned char *src,
+                                           size_t len, unsigned char *dst,
+                                           size_t *dlen);
     ]]
 
     ngx_lua_ffi_encode_base64 = C.ngx_http_lua_ffi_encode_base64
@@ -49,6 +53,7 @@ elseif subsystem == "stream" then
     ngx_lua_ffi_encode_base64 = C.ngx_stream_lua_ffi_encode_base64
     ngx_lua_ffi_decode_base64 = C.ngx_stream_lua_ffi_decode_base64
 end
+
 
 
 local function base64_encoded_length(len, no_padding)
@@ -103,6 +108,22 @@ ngx.decode_base64 = function (s)
     local dst = get_string_buf(dlen)
     local pdlen = get_size_ptr()
     local ok = ngx_lua_ffi_decode_base64(s, slen, dst, pdlen)
+    if ok == 0 then
+        return nil
+    end
+    return ffi_string(dst, pdlen[0])
+end
+
+
+ngx.decode_base64mime = function (s)
+    if type(s) ~= 'string' then
+        error("string argument only", 2)
+    end
+    local slen = #s
+    local dlen = base64_decoded_length(slen)
+    local dst = get_string_buf(dlen)
+    local pdlen = get_size_ptr()
+    local ok = C.ngx_http_lua_ffi_decode_base64mime(s, slen, dst, pdlen)
     if ok == 0 then
         return nil
     end
