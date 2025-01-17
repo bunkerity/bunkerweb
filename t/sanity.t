@@ -442,7 +442,7 @@ failed to query: bad name
 --- request
 GET /t
 --- response_body_like chop
-^records: \[(?:{"class":1,"name":"_xmpp-client._tcp.jabber.org","port":\d+,"priority":\d+,"section":1,"target":"[\w.]+\.jabber.org","ttl":\d+,"type":33,"weight":\d+},?)+\]$
+^records: \[(?:{"class":1,"name":"_xmpp-client._tcp.jabber.org","port":\d+,"priority":\d+,"section":1,"target":"[\w-]+.jabber.org","ttl":\d+,"type":33,"weight":\d+},?)+\]$
 --- no_error_log
 [error]
 --- no_check_leak
@@ -621,6 +621,8 @@ GET /t
 
 
 === TEST 19: RRTYPE larger than 255
+This test case skipped due to changes of the DNS response.
+--- SKIP
 --- http_config eval: $::HttpConfig
 --- config
     location /t {
@@ -681,6 +683,36 @@ GET /t
 GET /t
 --- response_body_like chop
 ^records: \[.*?"name":"google.com".*?\]$
+--- no_error_log
+[error]
+--- no_check_leak
+
+
+
+=== TEST 21: destroy
+--- http_config eval: $::HttpConfig
+--- config
+    location /t {
+        content_by_lua_block {
+            local resolver = require "resty.dns.resolver"
+
+            local r, err =
+                resolver:new{ nameservers = { "$TEST_NGINX_RESOLVER" } }
+            if not r then
+                ngx.say("failed to instantiate resolver: ", err)
+                return
+            end
+
+            r:destroy()
+            local udp = r.socks or "nil"
+            local tcp = r.tcp_sock or "nil"
+            ngx.say("udp socket: " .. udp .. ", tcp socket: " .. tcp)
+        }
+    }
+--- request
+GET /t
+--- response_body_like chop
+udp socket: nil, tcp socket: nil
 --- no_error_log
 [error]
 --- no_check_leak
