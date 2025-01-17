@@ -69,6 +69,9 @@ Synopsis
 
     server {
         location /test {
+            # need to specify the resolver to resolve the hostname
+            resolver 8.8.8.8;
+
             content_by_lua_block {
                 local redis = require "resty.redis"
                 local red = redis:new()
@@ -79,7 +82,12 @@ Synopsis
                 -- by a redis server:
                 --     local ok, err = red:connect("unix:/path/to/redis.sock")
 
+                -- connect via ip address directly
                 local ok, err = red:connect("127.0.0.1", 6379)
+
+                -- or connect via hostname, need to specify resolver just like above
+                local ok, err = red:connect("redis.openresty.com", 6379)
+
                 if not ok then
                     ngx.say("failed to connect: ", err)
                     return
@@ -167,7 +175,7 @@ The Redis command arguments can be directly fed into the corresponding method ca
     local res, err = red:get("key")
 ```
 
-Similarly, the "LRANGE" redis command accepts threee arguments, then you should call the "lrange" method like this:
+Similarly, the "LRANGE" redis command accepts three arguments, then you should call the "lrange" method like this:
 
 ```lua
     local res, err = red:lrange("nokey", 0, 1)
@@ -672,7 +680,29 @@ each request.
 
 [Back to TOC](#table-of-contents)
 
-Installation
+Installation - Build from source
+============
+
+```sh
+# Clone latest release , assuming v0.29
+wget https://github.com/openresty/lua-resty-redis/archive/refs/tags/v0.29.tar.gz
+
+# Extract
+tar -xvzf v0.29.tar.gz
+
+# go into directory
+cd lua-resty-redis-0.29
+
+export LUA_LIB_DIR=/usr/local/openresty/site/lualib
+
+# Compile and Install
+make install
+
+# Now compiled path will be outputted
+# /usr/local/lib/lua/resty = lua_package_path in nginx conf
+```
+
+Installation Notes
 ============
 
 If you are using the OpenResty bundle (http://openresty.org ), then
