@@ -26,7 +26,7 @@
       "id": "libinjection",
       "name": "libinjection v3.10.0+",
       "url": "https://github.com/libinjection/libinjection.git",
-      "commit": "49904c42a6e68dc8f16c022c693e897e4010a06c",
+      "commit": "73268cfd85f9ee625e1d73ec2b37672bb2fd83f6",
       "post_install": "rm -r src/deps/src/libinjection/tests"
     },
     {
