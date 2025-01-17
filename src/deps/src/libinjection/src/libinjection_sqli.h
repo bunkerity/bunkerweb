@@ -20,20 +20,19 @@ extern "C" {
 #include <string.h>
 
 enum sqli_flags {
-    FLAG_NONE            = 0
-    , FLAG_QUOTE_NONE    = 1   /* 1 << 0 */
-    , FLAG_QUOTE_SINGLE  = 2   /* 1 << 1 */
-    , FLAG_QUOTE_DOUBLE  = 4   /* 1 << 2 */
-
-    , FLAG_SQL_ANSI      = 8   /* 1 << 3 */
-    , FLAG_SQL_MYSQL     = 16  /* 1 << 4 */
+    FLAG_NONE = 0,
+    FLAG_QUOTE_NONE = 1,   /* 1 << 0 */
+    FLAG_QUOTE_SINGLE = 2, /* 1 << 1 */
+    FLAG_QUOTE_DOUBLE = 4, /* 1 << 2 */
+    FLAG_SQL_ANSI = 8,     /* 1 << 3 */
+    FLAG_SQL_MYSQL = 16    /* 1 << 4 */
 };
 
 enum lookup_type {
-    LOOKUP_WORD        = 1
-    , LOOKUP_TYPE        = 2
-    , LOOKUP_OPERATOR    = 3
-    , LOOKUP_FINGERPRINT = 4
+    LOOKUP_WORD = 1,
+    LOOKUP_TYPE = 2,
+    LOOKUP_OPERATOR = 3,
+    LOOKUP_FINGERPRINT = 4
 };
 
 struct libinjection_sqli_token {
@@ -51,7 +50,7 @@ struct libinjection_sqli_token {
      *  in type 'v', used for number of opening '@'
      *  but maybe used in other contexts
      */
-    int  count;
+    int count;
 
     char type;
     char str_open;
@@ -66,7 +65,8 @@ typedef struct libinjection_sqli_token stoken_t;
  *  returns '\0' for no match, else a char
  */
 struct libinjection_sqli_state;
-typedef char (*ptr_lookup_fn)(struct libinjection_sqli_state*, int lookuptype, const char* word, size_t len);
+typedef char (*ptr_lookup_fn)(struct libinjection_sqli_state *, int lookuptype,
+                              const char *word, size_t len);
 
 struct libinjection_sqli_state {
 #ifdef SWIG
@@ -88,7 +88,7 @@ struct libinjection_sqli_state {
      * How to lookup a word or fingerprint
      */
     ptr_lookup_fn lookup;
-    void*         userdata;
+    void *userdata;
 
     /*
      *
@@ -136,7 +136,7 @@ struct libinjection_sqli_state {
      *
      * All databases treat this as a comment.
      */
-     int stats_comment_ddw;
+    int stats_comment_ddw;
 
     /* Number of ddx (dash-dash-[notwhite]) comments
      *
@@ -169,13 +169,12 @@ struct libinjection_sqli_state {
      * total tokens processed
      */
     int stats_tokens;
-
 };
 
 typedef struct libinjection_sqli_state sfilter;
 
-struct libinjection_sqli_token* libinjection_sqli_get_token(
-    struct libinjection_sqli_state* sql_state, int i);
+struct libinjection_sqli_token *
+libinjection_sqli_get_token(struct libinjection_sqli_state *sql_state, int i);
 
 /*
  * Version info.
@@ -188,14 +187,13 @@ struct libinjection_sqli_token* libinjection_sqli_get_token(
  * See python's normalized version
  * http://www.python.org/dev/peps/pep-0386/#normalizedversion
  */
-const char* libinjection_version(void);
+const char *libinjection_version(void);
 
 /**
  *
  */
-void libinjection_sqli_init(struct libinjection_sqli_state *sf,
-                            const char* s, size_t len,
-                            int flags);
+void libinjection_sqli_init(struct libinjection_sqli_state *sf, const char *s,
+                            size_t len, int flags);
 
 /**
  * Main API: tests for SQLi in three possible contexts, no quotes,
@@ -205,21 +203,18 @@ void libinjection_sqli_init(struct libinjection_sqli_state *sf,
  *
  * \return 1 (true) if SQLi, 0 (false) if benign
  */
-int libinjection_is_sqli(struct libinjection_sqli_state* sql_state);
+int libinjection_is_sqli(struct libinjection_sqli_state *sql_state);
 
 /*  FOR HACKERS ONLY
  *   provides deep hooks into the decision making process
  */
 void libinjection_sqli_callback(struct libinjection_sqli_state *sf,
-                                ptr_lookup_fn fn,
-                                void* userdata);
-
+                                ptr_lookup_fn fn, void *userdata);
 
 /*
  * Resets state, but keeps initial string and callbacks
  */
-void libinjection_sqli_reset(struct libinjection_sqli_state *sf,
-                             int flags);
+void libinjection_sqli_reset(struct libinjection_sqli_state *sf, int flags);
 
 /**
  *
@@ -236,16 +231,16 @@ void libinjection_sqli_reset(struct libinjection_sqli_state *sf,
  *          do not free!
  *
  */
-const char* libinjection_sqli_fingerprint(struct libinjection_sqli_state *sql_state,
-                                          int flags);
+const char *
+libinjection_sqli_fingerprint(struct libinjection_sqli_state *sql_state,
+                              int flags);
 
 /**
  * The default "word" to token-type or fingerprint function.  This
  * uses a ASCII case-insensitive binary tree.
  */
 char libinjection_sqli_lookup_word(struct libinjection_sqli_state *sql_state,
-                                   int lookup_type,
-                                   const char* str,
+                                   int lookup_type, const char *str,
                                    size_t len);
 
 /* Streaming tokenization interface.
@@ -255,7 +250,7 @@ char libinjection_sqli_lookup_word(struct libinjection_sqli_state *sql_state,
  * \returns 1, has a token, keep going, or 0 no tokens
  *
  */
-int  libinjection_sqli_tokenize(struct libinjection_sqli_state *sf);
+int libinjection_sqli_tokenize(struct libinjection_sqli_state *sf);
 
 /**
  * parses and folds input, up to 5 tokens
@@ -270,22 +265,24 @@ int libinjection_sqli_fold(struct libinjection_sqli_state *sf);
  *     return libinjection_sqli_blacklist(sql_state) &&
  *        libinjection_sqli_not_whitelist(sql_state);
  *
- * \param sql_state should be filled out after libinjection_sqli_fingerprint is called
+ * \param sql_state should be filled out after libinjection_sqli_fingerprint is
+ * called
  */
-int libinjection_sqli_check_fingerprint(struct libinjection_sqli_state * sql_state);
+int libinjection_sqli_check_fingerprint(
+    struct libinjection_sqli_state *sql_state);
 
 /* Given a pattern determine if it's a SQLi pattern.
  *
  * \return TRUE if sqli, false otherwise
  */
-int libinjection_sqli_blacklist(struct libinjection_sqli_state* sql_state);
+int libinjection_sqli_blacklist(struct libinjection_sqli_state *sql_state);
 
 /* Given a positive match for a pattern (i.e. pattern is SQLi), this function
  * does additional analysis to reduce false positives.
  *
  * \return TRUE if SQLi, false otherwise
  */
-int libinjection_sqli_not_whitelist(struct libinjection_sqli_state * sql_state);
+int libinjection_sqli_not_whitelist(struct libinjection_sqli_state *sql_state);
 
 #ifdef __cplusplus
 }

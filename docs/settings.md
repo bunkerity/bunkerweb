@@ -57,6 +57,7 @@ STREAM support :warning:
 | `SECURITY_MODE`                | `block`                                                                                                                  | multisite | no       | Defines the response to threats: "detect" to monitor and log, or "block" to prevent access and log incidents. |
 
 
+
 ## Antibot
 
 STREAM support :x:
@@ -443,17 +444,17 @@ STREAM support :x:
 
 Management of the ModSecurity WAF.
 
-| Setting                               | Default        | Context   | Multiple | Description                                                                                                                                                        |
-| ------------------------------------- | -------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `USE_MODSECURITY`                     | `yes`          | multisite | no       | Enable ModSecurity WAF.                                                                                                                                            |
-| `USE_MODSECURITY_CRS`                 | `yes`          | multisite | no       | Enable OWASP Core Rule Set.                                                                                                                                        |
-| `USE_MODSECURITY_CRS_PLUGINS`         | `yes`          | multisite | no       | Enable OWASP Core Rule Set plugins.                                                                                                                                |
-| `MODSECURITY_CRS_VERSION`             | `4`            | multisite | no       | Version of the OWASP Core Rule Set to use with ModSecurity (3, 4 or nightly).                                                                                      |
-| `MODSECURITY_CRS_PLUGIN_URLS`         |                | multisite | no       | List of OWASP CRS plugins URLs (direct download to .zip or .tar file) to download and install (URLs are separated with space). (Not compatible with CRS version 3) |
-| `MODSECURITY_SEC_AUDIT_ENGINE`        | `RelevantOnly` | multisite | no       | SecAuditEngine directive of ModSecurity.                                                                                                                           |
-| `MODSECURITY_SEC_RULE_ENGINE`         | `On`           | multisite | no       | SecRuleEngine directive of ModSecurity.                                                                                                                            |
-| `MODSECURITY_SEC_AUDIT_LOG_PARTS`     | `ABCFHZ`       | multisite | no       | SecAuditLogParts directive of ModSecurity.                                                                                                                         |
-| `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` | `131072`       | multisite | no       | SecRequestBodyNoFilesLimit directive of ModSecurity.                                                                                                               |
+| Setting                               | Default        | Context   | Multiple | Description                                                                                                                               |
+| ------------------------------------- | -------------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_MODSECURITY`                     | `yes`          | multisite | no       | Enable ModSecurity WAF.                                                                                                                   |
+| `USE_MODSECURITY_CRS`                 | `yes`          | multisite | no       | Enable OWASP Core Rule Set.                                                                                                               |
+| `USE_MODSECURITY_CRS_PLUGINS`         | `yes`          | multisite | no       | Enable OWASP Core Rule Set plugins.                                                                                                       |
+| `MODSECURITY_CRS_VERSION`             | `4`            | multisite | no       | Version of the OWASP Core Rule Set to use with ModSecurity (3, 4 or nightly).                                                             |
+| `MODSECURITY_CRS_PLUGINS`             |                | multisite | no       | List of OWASP CRS plugins (plugin-name[/tag] or URL) to download and install (separated with spaces). (Not compatible with CRS version 3) |
+| `MODSECURITY_SEC_AUDIT_ENGINE`        | `RelevantOnly` | multisite | no       | SecAuditEngine directive of ModSecurity.                                                                                                  |
+| `MODSECURITY_SEC_RULE_ENGINE`         | `On`           | multisite | no       | SecRuleEngine directive of ModSecurity.                                                                                                   |
+| `MODSECURITY_SEC_AUDIT_LOG_PARTS`     | `ABCFHZ`       | multisite | no       | SecAuditLogParts directive of ModSecurity.                                                                                                |
+| `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` | `131072`       | multisite | no       | SecRequestBodyNoFilesLimit directive of ModSecurity.                                                                                      |
 
 ## Monitoring <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 

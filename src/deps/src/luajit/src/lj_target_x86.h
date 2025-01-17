@@ -1,6 +1,6 @@
 /*
 ** Definitions for x86 and x64 CPUs.
-** Copyright (C) 2005-2023 Mike Pall. See Copyright Notice in luajit.h
+** Copyright (C) 2005-2025 Mike Pall. See Copyright Notice in luajit.h
 */
 
 #ifndef _LJ_TARGET_X86_H

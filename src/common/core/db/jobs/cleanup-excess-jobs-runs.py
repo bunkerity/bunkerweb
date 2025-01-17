@@ -11,7 +11,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 from Database import Database  # type: ignore
 from logger import setup_logger  # type: ignore
 
-LOGGER = setup_logger("DB.CLEANUP-EXCESS-JOBS-RUNS", getenv("LOG_LEVEL", "INFO"))
+LOGGER = setup_logger("DB.CLEANUP-EXCESS-JOBS-RUNS")
 status = 0
 
 try:

@@ -17,7 +17,7 @@ from common_utils import bytes_hash  # type: ignore
 from jobs import Job  # type: ignore
 from logger import setup_logger  # type: ignore
 
-LOGGER = setup_logger("CUSTOM-CERT", getenv("LOG_LEVEL", "INFO"))
+LOGGER = setup_logger("CUSTOM-CERT")
 JOB = Job(LOGGER, __file__)
 
 

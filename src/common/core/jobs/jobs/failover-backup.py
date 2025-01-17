@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from os import getenv, sep
+from os import sep
 from os.path import join
 from sys import exit as sys_exit, path as sys_path
 
@@ -11,7 +11,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 from jobs import Job  # type: ignore
 from logger import setup_logger  # type: ignore
 
-LOGGER = setup_logger("FAILOVER-BACKUP", getenv("LOG_LEVEL", "INFO"))
+LOGGER = setup_logger("FAILOVER-BACKUP")
 status = 0
 
 try:

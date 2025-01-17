@@ -63,6 +63,7 @@ cppcheck --std=c89 \
          --inconclusive \
          --suppress=variableScope \
          --suppress=missingIncludeSystem \
+         --suppress=unusedFunction:src/fuzz/*.c \
          --quiet \
          --error-exitcode=1 \
          --template='{file}:{line} {id} {severity} {message}' \

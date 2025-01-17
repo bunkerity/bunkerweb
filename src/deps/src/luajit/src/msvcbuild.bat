@@ -1,5 +1,5 @@
 @rem Script to build LuaJIT with MSVC.
-@rem Copyright (C) 2005-2023 Mike Pall. See Copyright Notice in luajit.h
+@rem Copyright (C) 2005-2025 Mike Pall. See Copyright Notice in luajit.h
 @rem
 @rem Open a "Visual Studio Command Prompt" (either x86 or x64).
 @rem Then cd to this directory and run this script. Use the following
@@ -106,7 +106,7 @@ buildvm -m folddef -o lj_folddef.h lj_opt_fold.c
 @if "%1"=="static" goto :STATIC
 %LJCOMPILE% %LJDYNBUILD% lj_*.c lib_*.c
 @if errorlevel 1 goto :BAD
-%LJLINK% /DLL /out:%LJDLLNAME% lj_*.obj lib_*.obj
+%LJLINK% /DLL /OUT:%LJDLLNAME% lj_*.obj lib_*.obj
 @if errorlevel 1 goto :BAD
 @goto :MTDLL
 :STATIC
@@ -116,9 +116,16 @@ buildvm -m folddef -o lj_folddef.h lj_opt_fold.c
 @if errorlevel 1 goto :BAD
 @goto :MTDLL
 :AMALGDLL
+@if "%2"=="static" goto :AMALGSTATIC
 %LJCOMPILE% %LJDYNBUILD% ljamalg.c
 @if errorlevel 1 goto :BAD
-%LJLINK% /DLL /out:%LJDLLNAME% ljamalg.obj lj_vm.obj
+%LJLINK% /DLL /OUT:%LJDLLNAME% ljamalg.obj lj_vm.obj
+@if errorlevel 1 goto :BAD
+@goto :MTDLL
+:AMALGSTATIC
+%LJCOMPILE% ljamalg.c
+@if errorlevel 1 goto :BAD
+%LJLINK% /OUT:%LJDLLNAME% ljamalg.obj lj_vm.obj
 @if errorlevel 1 goto :BAD
 :MTDLL
 if exist %LJDLLNAME%.manifest^
@@ -126,7 +133,7 @@ if exist %LJDLLNAME%.manifest^
 
 %LJCOMPILE% luajit.c
 @if errorlevel 1 goto :BAD
-%LJLINK% /out:luajit.exe luajit.obj %LJLIBNAME%
+%LJLINK% /OUT:luajit.exe luajit.obj %LJLIBNAME%
 @if errorlevel 1 goto :BAD
 if exist luajit.exe.manifest^
   %LJMT% -manifest luajit.exe.manifest -outputresource:luajit.exe

@@ -16,6 +16,7 @@ local tonumber = tonumber
 local tostring = tostring
 local rawget = rawget
 local select = select
+local tb_clear = require "table.clear"
 --local error = error
 
 
@@ -24,7 +25,8 @@ if not ok or type(new_tab) ~= "function" then
     new_tab = function (narr, nrec) return {} end
 end
 
-
+local tab_pool_len = 0
+local tab_pool = new_tab(16, 0)
 local _M = new_tab(0, 55)
 
 _M._VERSION = '0.30'
@@ -57,6 +59,27 @@ local unsub_commands = {
 
 
 local mt = { __index = _M }
+
+
+local function get_tab_from_pool()
+    if tab_pool_len > 0 then
+        tab_pool_len = tab_pool_len - 1
+        return tab_pool[tab_pool_len + 1]
+    end
+
+    return new_tab(24, 0) -- one field takes 5 slots
+end
+
+
+local function put_tab_into_pool(tab)
+    if tab_pool_len >= 32 then
+        return
+    end
+
+    tb_clear(tab)
+    tab_pool_len = tab_pool_len + 1
+    tab_pool[tab_pool_len] = tab
+end
 
 
 function _M.new(self)
@@ -305,9 +328,11 @@ end
 local function _gen_req(args)
     local nargs = #args
 
-    local req = new_tab(nargs * 5 + 1, 0)
-    req[1] = "*" .. nargs .. "\r\n"
-    local nbits = 2
+    local req = get_tab_from_pool()
+    req[1] = "*"
+    req[2] = nargs
+    req[3] = "\r\n"
+    local nbits = 4
 
     for i = 1, nargs do
         local arg = args[i]
@@ -355,6 +380,8 @@ local function _do_cmd(self, ...)
     -- print("request: ", table.concat(req))
 
     local bytes, err = sock:send(req)
+    put_tab_into_pool(req)
+
     if not bytes then
         return nil, err
     end
@@ -625,6 +652,10 @@ function _M.commit_pipeline(self)
     end
 
     local bytes, err = sock:send(reqs)
+    for _, req in ipairs(reqs) do
+        put_tab_into_pool(req)
+    end
+
     if not bytes then
         return nil, err
     end

@@ -276,6 +276,23 @@ class CLI(ApiCaller):
 
         return True, cli_str
 
+    def plugin_list(self) -> Tuple[bool, str]:
+        if not self.__db:
+            raise Exception("This command can only be executed on the scheduler")
+
+        plugins = self.__db.get_plugins()
+        plugins_str = ""
+        for plugin in plugins:
+            if "bwcli" not in plugin:
+                continue
+
+            plugins_str += f"Plugin {plugin['id']} ({plugin['type']}) commands:\n"
+            for command in plugin["bwcli"]:
+                plugins_str += f"- {command}\n"
+            plugins_str += "\n"
+
+        return True, plugins_str
+
     def custom(self, plugin_id: str, command: str, *args: str, debug: bool = False) -> Tuple[bool, str]:
         if not self.__db:
             raise Exception("This command can only be executed on the scheduler")

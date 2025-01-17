@@ -50,7 +50,7 @@ def check_line(kind: str, line: bytes) -> Tuple[bool, bytes]:
     return False, b""
 
 
-LOGGER = setup_logger("BLACKLIST", getenv("LOG_LEVEL", "INFO"))
+LOGGER = setup_logger("BLACKLIST")
 status = 0
 
 KINDS = ("IP", "RDNS", "ASN", "USER_AGENT", "URI", "IGNORE_IP", "IGNORE_RDNS", "IGNORE_ASN", "IGNORE_USER_AGENT", "IGNORE_URI")

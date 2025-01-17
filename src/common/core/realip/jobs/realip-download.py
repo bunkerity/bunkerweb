@@ -29,7 +29,7 @@ def check_line(line):
     return False, b""
 
 
-LOGGER = setup_logger("REALIP", getenv("LOG_LEVEL", "INFO"))
+LOGGER = setup_logger("REALIP")
 REALIP_CACHE_PATH = join(sep, "var", "cache", "bunkerweb", "realip")
 status = 0
 

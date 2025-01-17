@@ -44,12 +44,6 @@ ngx_module_name=ngx_http_brotli_filter_module
 
 brotli="$ngx_addon_dir/deps/brotli/c"
 if [ ! -f "$brotli/include/brotli/encode.h" ]; then
-  brotli="/usr/local"
-fi
-if [ ! -f "$brotli/include/brotli/encode.h" ]; then
-  brotli="/usr"
-fi
-if [ ! -f "$brotli/include/brotli/encode.h" ]; then
 cat << END
 
 $0: error: \
@@ -63,33 +57,16 @@ END
     exit 1
 fi
 
-BROTLI_LISTS_FILE="$brotli/../scripts/sources.lst"
-
-if [ -f "$BROTLI_LISTS_FILE" ]; then
-
-BROTLI_LISTS=`cat "$BROTLI_LISTS_FILE" | grep -v "#" | tr '\n' '#' | \
-              sed 's/\\\\#//g' | tr -s ' ' '+' | tr -s '#' ' ' | \
-              sed 's/+c/+$brotli/g' | sed 's/+=+/=/g'`
-for ITEM in ${BROTLI_LISTS}; do
-  VAR=`echo $ITEM | sed 's/=.*//'`
-  VAL=`echo $ITEM | sed 's/.*=//' | tr '+' ' '`
-  eval ${VAR}=\"$VAL\"
-done
-
-else  # BROTLI_LISTS_FILE
-
+BROTLI_OUTPUT_DIRECTORY="$brotli/../out"
 BROTLI_ENC_H="$brotli/include/brotli/encode.h \
               $brotli/include/brotli/port.h \
               $brotli/include/brotli/types.h"
-BROTLI_ENC_LIB="-lbrotlienc"
 
-fi
 
 ngx_module_incs="$brotli/include"
-ngx_module_deps="$BROTLI_COMMON_H $BROTLI_ENC_H"
-ngx_module_srcs="$BROTLI_COMMON_C $BROTLI_ENC_C \
-                 $BROTLI_MODULE_SRC_DIR/ngx_http_brotli_filter_module.c"
-ngx_module_libs="$BROTLI_ENC_LIB -lm"
+ngx_module_deps="$BROTLI_ENC_H"
+ngx_module_srcs="$BROTLI_MODULE_SRC_DIR/ngx_http_brotli_filter_module.c"
+ngx_module_libs="-L$BROTLI_OUTPUT_DIRECTORY -lbrotlienc -lbrotlicommon -lm"
 ngx_module_order="$ngx_module_name \
                   ngx_pagespeed \
                   ngx_http_postpone_filter_module \
@@ -126,7 +103,11 @@ if [ "$ngx_module_link" != DYNAMIC ]; then
                          | sed "s/$next/$next $ngx_module_name/"`
 fi
 
-CFLAGS="$CFLAGS -Wno-deprecated-declarations"
+if [ "$NGX_MSVC_VER" = "" ]; then
+    CFLAGS="$CFLAGS -Wno-deprecated-declarations"
+else  # MSVC
+    CFLAGS="$CFLAGS -Y- -wd4127 -wd4189 -wd4201 -wd4334 -wd4702"
+fi
 
 have=NGX_HTTP_BROTLI_FILTER . auto/have
 have=NGX_HTTP_BROTLI_FILTER_MODULE . auto/have  # deprecated

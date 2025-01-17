@@ -1,7 +1,0 @@
---TEST--
-Variables
---INPUT--
-SELECT @"foo"
---EXPECTED--
-E SELECT
-v @"foo"

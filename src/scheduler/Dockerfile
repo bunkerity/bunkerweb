@@ -48,8 +48,6 @@ RUN apk add --no-cache bash unzip libgcc libstdc++ libpq openssl libmagic mariad
 # Fix CVEs
 # There are no CVEs for the following packages
 
-# Cleanup
-RUN rm -rf /var/cache/apk/*
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 /usr/share/bunkerweb /usr/share/bunkerweb
@@ -79,7 +77,7 @@ COPY --chown=root:scheduler --chmod=770 src/bw/misc/asn.mmdb /var/tmp/bunkerweb/
 COPY --chown=root:scheduler --chmod=770 src/bw/misc/country.mmdb /var/tmp/bunkerweb/country.mmdb
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
-LABEL version="1.6.0-rc1"
+LABEL version="1.6.0-rc2"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="scheduler"
 

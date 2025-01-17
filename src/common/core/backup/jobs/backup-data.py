@@ -14,9 +14,9 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 from Database import Database  # type: ignore
 from logger import setup_logger  # type: ignore
 from jobs import Job  # type: ignore
-from utils import backup_database, update_cache_file
+from backup import backup_database, update_cache_file
 
-LOGGER = setup_logger("BACKUP", getenv("LOG_LEVEL", "INFO"))
+LOGGER = setup_logger("BACKUP")
 status = 0
 
 try:

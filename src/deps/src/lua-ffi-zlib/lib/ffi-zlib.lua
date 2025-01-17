@@ -6,7 +6,7 @@ local ffi_copy = ffi.copy
 local tonumber = tonumber
 
 local _M = {
-    _VERSION = '0.5.0',
+    _VERSION = '0.6.0',
 }
 
 local mt = { __index = _M }
@@ -95,11 +95,12 @@ unsigned long crc32_combine(unsigned long, unsigned long, long);
 
 ]])
 
-local zlib           = ffi.load("/usr/share/bunkerweb/deps/lib/lua/libz.so")
-_M.zlib              = zlib
+local zlib = ffi.load("/usr/share/bunkerweb/deps/lib/lua/libz.so")
+
+_M.zlib = zlib
 
 -- Default to 16k output buffer
-local DEFAULT_CHUNK  = 16384
+local DEFAULT_CHUNK = 16384
 
 local Z_OK           = zlib.Z_OK
 local Z_NO_FLUSH     = zlib.Z_NO_FLUSH
@@ -119,7 +120,7 @@ local function createStream(bufsize)
     local stream = ffi_new("z_stream")
 
     -- Create input buffer var
-    local inbuf = ffi_new('char[?]', bufsize + 1)
+    local inbuf = ffi_new('char[?]', bufsize+1)
     stream.next_in, stream.avail_in = inbuf, 0
 
     -- create the output buffer
@@ -142,9 +143,9 @@ _M.initInflate = initInflate
 local function initDeflate(stream, options)
     -- Setup deflate process
     local method     = zlib.Z_DEFLATED
-    local level      = options.level or zlib.Z_DEFAULT_COMPRESSION
-    local memLevel   = options.memLevel or 8
-    local strategy   = options.strategy or zlib.Z_DEFAULT_STRATEGY
+    local level      = options.level      or zlib.Z_DEFAULT_COMPRESSION
+    local memLevel   = options.memLevel   or 8
+    local strategy   = options.strategy   or zlib.Z_DEFAULT_STRATEGY
     local windowBits = options.windowBits or (15 + 16) -- +16 sets gzip wrapper not zlib
     local version    = ffi_str(zlib.zlibVersion())
 
@@ -192,24 +193,25 @@ local function inflate(input, output, bufsize, stream, inbuf, outbuf)
             stream.next_out  = outbuf
             stream.avail_out = bufsize
             -- Process the stream, always Z_NO_FLUSH in inflate mode
-            err              = zlib_flate(stream, Z_NO_FLUSH)
+            err = zlib_flate(stream, Z_NO_FLUSH)
 
             -- Buffer errors are OK here
             if err == Z_BUF_ERROR then
                 err = Z_OK
             end
             if err < Z_OK or err == Z_NEED_DICT then
-                -- Error, clean up and return
-                zlib_flateEnd(stream)
-                return false, "INFLATE: " .. zlib_err(err), stream
+               -- Error, clean up and return
+               zlib_flateEnd(stream)
+               return false, "INFLATE: "..zlib_err(err), stream
             end
             -- Write the data out
             local err = flushOutput(stream, bufsize, output, outbuf)
             if err then
-                zlib_flateEnd(stream)
-                return false, "INFLATE: " .. err
+               zlib_flateEnd(stream)
+               return false, "INFLATE: "..err
             end
         until stream.avail_out ~= 0
+
     until err == Z_STREAM_END
 
     -- Stream finished, clean up and return
@@ -243,19 +245,19 @@ local function deflate(input, output, bufsize, stream, inbuf, outbuf)
             stream.avail_out = bufsize
 
             -- Process the stream
-            err              = zlib_flate(stream, mode)
+            err = zlib_flate(stream, mode)
 
             -- Only possible *bad* return value here
             if err == Z_STREAM_ERROR then
-                -- Error, clean up and return
-                zlib_flateEnd(stream)
-                return false, "DEFLATE: " .. zlib_err(err), stream
+               -- Error, clean up and return
+               zlib_flateEnd(stream)
+               return false, "DEFLATE: "..zlib_err(err), stream
             end
             -- Write the data out
             local err = flushOutput(stream, bufsize, output, outbuf)
             if err then
-                zlib_flateEnd(stream)
-                return false, "DEFLATE: " .. err
+               zlib_flateEnd(stream)
+               return false, "DEFLATE: "..err
             end
         until stream.avail_out ~= 0
 
@@ -264,6 +266,7 @@ local function deflate(input, output, bufsize, stream, inbuf, outbuf)
             zlib_flateEnd(stream)
             return false, "DEFLATE: Input not used"
         end
+
     until err == Z_STREAM_END
 
     -- Stream finished, clean up and return
@@ -299,7 +302,7 @@ function _M.inflateGzip(input, output, bufsize, windowBits)
     else
         -- Init error
         zlib.inflateEnd(stream)
-        return false, "INIT: " .. zlib_err(init)
+        return false, "INIT: "..zlib_err(init)
     end
 end
 
@@ -317,7 +320,7 @@ function _M.deflateGzip(input, output, bufsize, options)
     else
         -- Init error
         zlib.deflateEnd(stream)
-        return false, "INIT: " .. zlib_err(init)
+        return false, "INIT: "..zlib_err(init)
     end
 end
 

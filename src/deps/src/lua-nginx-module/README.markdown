@@ -269,7 +269,7 @@ memory use. Request contexts are segregated using lightweight Lua coroutines.
 Loaded Lua modules persist in the Nginx worker process level resulting in a
 small memory footprint in Lua even when under heavy loads.
 
-This module is plugged into Nginx's "http" subsystem so it can only speaks
+This module is plugged into Nginx's "http" subsystem so it can only speak
 downstream communication protocols in the HTTP family (HTTP 0.9/1.0/1.1/2.0,
 WebSockets, etc...).  If you want to do generic TCP communications with the
 downstream clients, then you should use the
@@ -283,7 +283,7 @@ Typical Uses
 
 Just to name a few:
 
-* Mashup'ing and processing outputs of various Nginx upstream outputs (proxy, drizzle, postgres, redis, memcached, and etc) in Lua,
+* Mashup'ing and processing outputs of various Nginx upstream outputs (proxy, drizzle, postgres, redis, memcached, etc.) in Lua,
 * doing arbitrarily complex access control and security checks in Lua before requests actually reach the upstream backends,
 * manipulating response headers in an arbitrary way (by Lua)
 * fetching backend information from external storage backends (like redis, memcached, mysql, postgresql) and use that information to choose which upstream backend to access on-the-fly,
@@ -337,7 +337,7 @@ It is discouraged to build this module with Nginx yourself since it is tricky
 to set up exactly right.
 
 Note that Nginx, LuaJIT, and OpenSSL official releases have various limitations
-and long standing bugs that can cause some of this module's features to be
+and long-standing bugs that can cause some of this module's features to be
 disabled, not work properly, or run slower. Official OpenResty releases are
 recommended because they bundle [OpenResty's optimized LuaJIT 2.1 fork](https://github.com/openresty/luajit2) and
 [Nginx/OpenSSL
@@ -421,7 +421,7 @@ While building this module either via OpenResty or with the Nginx core, you can 
 * `NGX_LUA_USE_ASSERT`
 	When defined, will enable assertions in the ngx_lua C code base. Recommended for debugging or testing builds. It can introduce some (small) runtime overhead when enabled. This macro was first introduced in the `v0.9.10` release.
 * `NGX_LUA_ABORT_AT_PANIC`
-	When the LuaJIT VM panics, ngx_lua will instruct the current nginx worker process to quit gracefully by default. By specifying this C macro, ngx_lua will abort the current nginx worker process (which usually result in a core dump file) immediately. This option is useful for debugging VM panics. This option was first introduced in the `v0.9.8` release.
+	When the LuaJIT VM panics, ngx_lua will instruct the current nginx worker process to quit gracefully by default. By specifying this C macro, ngx_lua will abort the current nginx worker process (which usually results in a core dump file) immediately. This option is useful for debugging VM panics. This option was first introduced in the `v0.9.8` release.
 
 To enable one or more of these macros, just pass extra C compiler options to the `./configure` script of either Nginx or OpenResty. For instance,
 
@@ -1184,7 +1184,7 @@ Directives
 The basic building blocks of scripting Nginx with Lua are directives. Directives are used to specify when the user Lua code is run and
 how the result will be used. Below is a diagram showing the order in which directives are executed.
 
-![Lua Nginx Modules Directives](https://cloud.githubusercontent.com/assets/2137369/15272097/77d1c09e-1a37-11e6-97ef-d9767035fc3e.png)
+![Lua Nginx Modules Directives](./doc/images/lua_nginx_modules_directives.drawio.png)
 
 [Back to TOC](#table-of-contents)
 
@@ -3695,6 +3695,7 @@ Nginx API for Lua
 * [ngx.decode_args](#ngxdecode_args)
 * [ngx.encode_base64](#ngxencode_base64)
 * [ngx.decode_base64](#ngxdecode_base64)
+* [ngx.decode_base64mime](#ngxdecode_base64mime)
 * [ngx.crc32_short](#ngxcrc32_short)
 * [ngx.crc32_long](#ngxcrc32_long)
 * [ngx.hmac_sha1](#ngxhmac_sha1)
@@ -4149,7 +4150,7 @@ Then `GET /main` will give the output
 
 Here, modification of the `ngx.ctx.blah` entry in the subrequest does not affect the one in the parent request. This is because they have two separate versions of `ngx.ctx.blah`.
 
-Internal redirects (triggered by nginx configuration directives like `error_page`, `try_files`, `index` and etc) will destroy the original request `ngx.ctx` data (if any) and the new request will have an empty `ngx.ctx` table. For instance,
+Internal redirects (triggered by nginx configuration directives like `error_page`, `try_files`, `index`, etc.) will destroy the original request `ngx.ctx` data (if any) and the new request will have an empty `ngx.ctx` table. For instance,
 
 ```nginx
 
@@ -6254,7 +6255,7 @@ ngx.encode_base64
 
 **context:** *set_by_lua&#42;, rewrite_by_lua&#42;, access_by_lua&#42;, content_by_lua&#42;, header_filter_by_lua&#42;, body_filter_by_lua&#42;, log_by_lua&#42;, ngx.timer.&#42;, balancer_by_lua&#42;, ssl_certificate_by_lua&#42;, ssl_session_fetch_by_lua&#42;, ssl_session_store_by_lua&#42;, ssl_client_hello_by_lua&#42;*
 
-Encodes `str` to a base64 digest.
+Encodes `str` to a base64 digest. For base64url encoding use [`base64.encode_base64url`](https://github.com/openresty/lua-resty-core/blob/master/lib/ngx/base64.md#encode_base64url).
 
 Since the `0.9.16` release, an optional boolean-typed `no_padding` argument can be specified to control whether the base64 padding should be appended to the resulting digest (default to `false`, i.e., with padding enabled).
 
@@ -6267,7 +6268,25 @@ ngx.decode_base64
 
 **context:** *set_by_lua&#42;, rewrite_by_lua&#42;, access_by_lua&#42;, content_by_lua&#42;, header_filter_by_lua&#42;, body_filter_by_lua&#42;, log_by_lua&#42;, ngx.timer.&#42;, balancer_by_lua&#42;, ssl_certificate_by_lua&#42;, ssl_session_fetch_by_lua&#42;, ssl_session_store_by_lua&#42;, ssl_client_hello_by_lua&#42;*
 
-Decodes the `str` argument as a base64 digest to the raw form. Returns `nil` if `str` is not well formed.
+Decodes the `str` argument as a base64 digest to the raw form. For base64url decoding use [`base64.decode_base64url`](https://github.com/openresty/lua-resty-core/blob/master/lib/ngx/base64.md#decode_base64url).
+
+The `str` should be standard 'base64' encoding for RFC 3548 or RFC 4648, and will returns `nil` if is not well formed or any characters not in the base encoding alphabet. Padding may be omitted from the input.
+
+[Back to TOC](#nginx-api-for-lua)
+
+ngx.decode_base64mime
+---------------------
+**syntax:** *newstr = ngx.decode_base64mime(str)*
+
+**context:** *set_by_lua&#42;, rewrite_by_lua&#42;, access_by_lua&#42;, content_by_lua&#42;, header_filter_by_lua&#42;, body_filter_by_lua&#42;, log_by_lua&#42;, ngx.timer.&#42;, balancer_by_lua&#42;, ssl_certificate_by_lua&#42;, ssl_session_fetch_by_lua&#42;, ssl_session_store_by_lua&#42;*
+
+**requires:** `resty.core.base64` or `resty.core`
+
+Decodes the `str` argument as a base64 digest to the raw form.
+The `str` follows base64 transfer encoding for MIME (RFC 2045), and will discard characters outside the base encoding alphabet.
+Returns `nil` if `str` is not well formed.
+
+ '''Note:''' This method requires the <code>resty.core.base64</code> or <code>resty.core</code> modules from the [lua-resty-core](https://github.com/openresty/lua-resty-core) library.
 
 [Back to TOC](#nginx-api-for-lua)
 
@@ -7971,14 +7990,14 @@ An optional Lua table can be specified as the last argument to this method to sp
 * `backlog`
 	if specified, this module will limit the total number of opened connections
 	for this pool. No more connections than `pool_size` can be opened
-	for this pool at any time. If the connection pool is full, subsequent
-	connect operations will be queued into a queue equal to this option's
-	value (the "backlog" queue).
+	for this pool at any time. If `pool_size` number of connections are in use,
+	subsequent connect operations will be queued into a queue equal to this
+	option's value (the "backlog" queue).
 	If the number of queued connect operations is equal to `backlog`,
 	subsequent connect operations will fail and return `nil` plus the
 	error string `"too many waiting connect operations"`.
-	The queued connect operations will be resumed once the number of connections
-	in the pool is less than `pool_size`.
+	The queued connect operations will be resumed once the number of active
+	connections becomes less than `pool_size`.
 	The queued connect operation will abort once they have been queued for more
 	than `connect_timeout`, controlled by
 	[settimeouts](#tcpsocksettimeouts), and will return `nil` plus
@@ -8996,7 +9015,7 @@ this context.
 
 You must notice that each timer will be based on a fake request (this fake request is also based on a fake connection). Because Nginx's memory release is based on the connection closure, if you run a lot of APIs that apply for memory resources in a timer, such as [tcpsock:connect](#tcpsockconnect), will cause the accumulation of memory resources. So it is recommended to create a new timer after running several times to release memory resources.
 
-You can pass most of the standard Lua values (nils, booleans, numbers, strings, tables, closures, file handles, and etc) into the timer callback, either explicitly as user arguments or implicitly as upvalues for the callback closure. There are several exceptions, however: you *cannot* pass any thread objects returned by [coroutine.create](#coroutinecreate) and [ngx.thread.spawn](#ngxthreadspawn) or any cosocket objects returned by [ngx.socket.tcp](#ngxsockettcp), [ngx.socket.udp](#ngxsocketudp), and [ngx.req.socket](#ngxreqsocket) because these objects' lifetime is bound to the request context creating them while the timer callback is detached from the creating request's context (by design) and runs in its own (fake) request context. If you try to share the thread or cosocket objects across the boundary of the creating request, then you will get the "no co ctx found" error (for threads) or "bad request" (for cosockets). It is fine, however, to create all these objects inside your timer callback.
+You can pass most of the standard Lua values (nils, booleans, numbers, strings, tables, closures, file handles, etc.) into the timer callback, either explicitly as user arguments or implicitly as upvalues for the callback closure. There are several exceptions, however: you *cannot* pass any thread objects returned by [coroutine.create](#coroutinecreate) and [ngx.thread.spawn](#ngxthreadspawn) or any cosocket objects returned by [ngx.socket.tcp](#ngxsockettcp), [ngx.socket.udp](#ngxsocketudp), and [ngx.req.socket](#ngxreqsocket) because these objects' lifetime is bound to the request context creating them while the timer callback is detached from the creating request's context (by design) and runs in its own (fake) request context. If you try to share the thread or cosocket objects across the boundary of the creating request, then you will get the "no co ctx found" error (for threads) or "bad request" (for cosockets). It is fine, however, to create all these objects inside your timer callback.
 
 Please note that the timer Lua handler has its own copy of the `ngx.ctx` magic
 table. It won't share the same `ngx.ctx` with the Lua handler creating the timer.
@@ -9489,7 +9508,7 @@ The type of `args` must be one of type below:
 * nil
 * table (the table may be recursive, and contains members of types above.)
 
-The `ok` is in boolean type, which indicate the C land error (failed to get thread from thread pool, pcall the module function failed, .etc). If `ok` is `false`, the `res1` is the error string.
+The `ok` is in boolean type, which indicate the C land error (failed to get thread from thread pool, pcall the module function failed, etc.). If `ok` is `false`, the `res1` is the error string.
 
 The return values (res1, ...) are returned by invocation of the module function. Normally, the `res1` should be in boolean type, so that the caller could inspect the error.
 

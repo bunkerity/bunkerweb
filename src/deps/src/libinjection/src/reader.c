@@ -1,7 +1,7 @@
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
 #include <assert.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "libinjection.h"
 #include "libinjection_sqli.h"
@@ -17,46 +17,64 @@
 static int g_test_ok = 0;
 static int g_test_fail = 0;
 
-typedef enum {
-    MODE_SQLI,
-    MODE_XSS
-} detect_mode_t;
+typedef enum { MODE_SQLI, MODE_XSS } detect_mode_t;
 
-static void usage(const char* argv[]);
-size_t modp_rtrim(char* str, size_t len);
-void modp_toprint(char* str, size_t len);
-void test_positive(FILE * fd, const char *fname, detect_mode_t mode,
+static void usage(const char *program_name);
+size_t modp_rtrim(char *str, size_t len);
+void modp_toprint(char *str, size_t len);
+void test_positive(FILE *fd, const char *fname, detect_mode_t mode,
                    int flag_invert, int flag_true, int flag_quiet);
 
 int urlcharmap(char ch);
-size_t modp_url_decode(char* dest, const char* s, size_t len);
+size_t modp_url_decode(char *dest, const char *s, size_t len);
 
 int urlcharmap(char ch) {
     switch (ch) {
-    case '0': return 0;
-    case '1': return 1;
-    case '2': return 2;
-    case '3': return 3;
-    case '4': return 4;
-    case '5': return 5;
-    case '6': return 6;
-    case '7': return 7;
-    case '8': return 8;
-    case '9': return 9;
-    case 'a': case 'A': return 10;
-    case 'b': case 'B': return 11;
-    case 'c': case 'C': return 12;
-    case 'd': case 'D': return 13;
-    case 'e': case 'E': return 14;
-    case 'f': case 'F': return 15;
+    case '0':
+        return 0;
+    case '1':
+        return 1;
+    case '2':
+        return 2;
+    case '3':
+        return 3;
+    case '4':
+        return 4;
+    case '5':
+        return 5;
+    case '6':
+        return 6;
+    case '7':
+        return 7;
+    case '8':
+        return 8;
+    case '9':
+        return 9;
+    case 'a':
+    case 'A':
+        return 10;
+    case 'b':
+    case 'B':
+        return 11;
+    case 'c':
+    case 'C':
+        return 12;
+    case 'd':
+    case 'D':
+        return 13;
+    case 'e':
+    case 'E':
+        return 14;
+    case 'f':
+    case 'F':
+        return 15;
     default:
         return 256;
     }
 }
 
-size_t modp_url_decode(char* dest, const char* s, size_t len)
-{
-    const char* deststart = dest;
+size_t modp_url_decode(char *dest, const char *s, size_t len) {
+    const char *deststart = dest;
 
     size_t i = 0;
     int d = 0;
@@ -67,10 +85,10 @@ size_t modp_url_decode(char* dest, const char* s, size_t len)
             i += 1;
             break;
         case '%':
-            if (i+2 < len) {
-                d = (urlcharmap(s[i+1]) << 4) | urlcharmap(s[i+2]);
-                if ( d < 256) {
-                    *dest = (char) d;
+            if (i + 2 < len) {
+                d = (urlcharmap(s[i + 1]) << 4) | urlcharmap(s[i + 2]);
+                if (d < 256) {
+                    *dest = (char)d;
                     dest++;
                     i += 3; /* loop will increment one time */
                 } else {
@@ -91,8 +109,7 @@ size_t modp_url_decode(char* dest, const char* s, size_t len)
     return (size_t)(dest - deststart); /* compute "strlen" of dest */
 }
 
-void modp_toprint(char* str, size_t len)
-{
+void modp_toprint(char *str, size_t len) {
     size_t i;
     for (i = 0; i < len; ++i) {
         if (str[i] < 32 || str[i] > 126) {
@@ -100,12 +117,11 @@ void modp_toprint(char* str, size_t len)
         }
     }
 }
-size_t modp_rtrim(char* str, size_t len)
-{
+size_t modp_rtrim(char *str, size_t len) {
     while (len) {
-        char c = str[len -1];
+        char c = str[len - 1];
         if (c == ' ' || c == '\n' || c == '\t' || c == '\r') {
-            str[len -1] = '\0';
+            str[len - 1] = '\0';
             len -= 1;
         } else {
             break;
@@ -114,9 +130,8 @@ size_t modp_rtrim(char* str, size_t len)
     return len;
 }
 
-void test_positive(FILE * fd, const char *fname, detect_mode_t mode,
-                   int flag_invert, int flag_true, int flag_quiet)
-{
+void test_positive(FILE *fd, const char *fname, detect_mode_t mode,
+                   int flag_invert, int flag_true, int flag_quiet) {
     char linebuf[8192];
     int issqli = 0;
     int linenum = 0;
@@ -133,7 +148,7 @@ void test_positive(FILE * fd, const char *fname, detect_mode_t mode,
             continue;
         }
 
-        len =  modp_url_decode(linebuf, linebuf, len);
+        len = modp_url_decode(linebuf, linebuf, len);
         switch (mode) {
         case MODE_SQLI: {
             libinjection_sqli_init(&sf, linebuf, len, 0);
@@ -146,7 +161,7 @@ void test_positive(FILE * fd, const char *fname, detect_mode_t mode,
         }
         default:
             assert(0);
-       }
+        }
 
         if (issqli) {
             g_test_ok += 1;
@@ -155,32 +170,30 @@ void test_positive(FILE * fd, const char *fname, detect_mode_t mode,
         }
 
         if (!flag_quiet) {
-            if ((issqli && flag_true && ! flag_invert) ||
-                (!issqli && flag_true && flag_invert) ||
-                !flag_true) {
+            if ((issqli && flag_true && !flag_invert) ||
+                (!issqli && flag_true && flag_invert) || !flag_true) {
 
                 modp_toprint(linebuf, len);
 
                 switch (mode) {
                 case MODE_SQLI: {
-		    /*
-		     * if we didn't find a SQLi and fingerprint from
+                    /*
+                     * if we didn't find a SQLi and fingerprint from
                      * sqlstats is is 'sns' or 'snsns' then redo using
                      * plain context
-		     */
+                     */
                     if (!issqli && (strcmp(sf.fingerprint, "sns") == 0 ||
-				    strcmp(sf.fingerprint, "snsns") == 0)) {
+                                    strcmp(sf.fingerprint, "snsns") == 0)) {
                         libinjection_sqli_fingerprint(&sf, 0);
                     }
 
-                    fprintf(stdout, "%s\t%d\t%s\t%s\t%s\n",
-                            fname, linenum,
-                            (issqli ? "True" : "False"), sf.fingerprint, linebuf);
+                    fprintf(stdout, "%s\t%d\t%s\t%s\t%s\n", fname, linenum,
+                            (issqli ? "True" : "False"), sf.fingerprint,
+                            linebuf);
                     break;
                 }
                 case MODE_XSS: {
-                    fprintf(stdout, "%s\t%d\t%s\t%s\n",
-                            fname, linenum,
+                    fprintf(stdout, "%s\t%d\t%s\t%s\n", fname, linenum,
                             (issqli ? "True" : "False"), linebuf);
                     break;
                 }
@@ -192,26 +205,27 @@ void test_positive(FILE * fd, const char *fname, detect_mode_t mode,
     }
 }
 
-static void usage(const char* argv[])
-{
-  fprintf(stdout, "usage: %s [flags] [files...]\n", argv[0]);
-  fprintf(stdout, "%s\n", "");
-  fprintf(stdout, "%s\n", "-q --quiet     : quiet mode");
-  fprintf(stdout, "%s\n", "-m --max-fails : number of failed cases need to fail entire test");
-  fprintf(stdout, "%s\n", "-s INTEGER     : repeat each test N time "
-	  "(for performance testing)");
-  fprintf(stdout, "%s\n", "-t             : only print positive matches");
-  fprintf(stdout, "%s\n", "-x --mode-xss  : test input for XSS");
-  fprintf(stdout, "%s\n", "-i --invert    : invert test logic "
-	  "(input is tested for being safe)");
+static void usage(const char *program_name) {
+    fprintf(stdout, "usage: %s [flags] [files...]\n", program_name);
+    fprintf(stdout, "%s\n", "");
+    fprintf(stdout, "%s\n", "-q --quiet     : quiet mode");
+    fprintf(stdout, "%s\n",
+            "-m --max-fails : number of failed cases need to fail entire test");
+    fprintf(stdout, "%s\n",
+            "-s INTEGER     : repeat each test N time "
+            "(for performance testing)");
+    fprintf(stdout, "%s\n", "-t             : only print positive matches");
+    fprintf(stdout, "%s\n", "-x --mode-xss  : test input for XSS");
+    fprintf(stdout, "%s\n",
+            "-i --invert    : invert test logic "
+            "(input is tested for being safe)");
 
-  fprintf(stdout, "%s\n", "");
-  fprintf(stdout, "%s\n", "-? -h -help --help : this page");
-  fprintf(stdout, "%s\n", "");
+    fprintf(stdout, "%s\n", "");
+    fprintf(stdout, "%s\n", "-? -h -help --help : this page");
+    fprintf(stdout, "%s\n", "");
 }
 
-int main(int argc, const char *argv[])
-{
+int main(int argc, const char *argv[]) {
     /*
      * invert output, by
      */
@@ -240,17 +254,17 @@ int main(int argc, const char *argv[])
     while (offset < argc) {
         if (strcmp(argv[offset], "-?") == 0 ||
             strcmp(argv[offset], "-h") == 0 ||
-	    strcmp(argv[offset], "-help") == 0 ||
-	    strcmp(argv[offset], "--help") == 0) {
-	  usage(argv);
-	  exit(0);
-	}
-	  
+            strcmp(argv[offset], "-help") == 0 ||
+            strcmp(argv[offset], "--help") == 0) {
+            usage(argv[0]);
+            exit(0);
+        }
+
         if (strcmp(argv[offset], "-i") == 0) {
             offset += 1;
             flag_invert = TRUE;
         } else if (strcmp(argv[offset], "-q") == 0 ||
-		   strcmp(argv[offset], "--quiet") == 0) {
+                   strcmp(argv[offset], "--quiet") == 0) {
             offset += 1;
             flag_quiet = TRUE;
         } else if (strcmp(argv[offset], "-t") == 0) {
@@ -260,12 +274,12 @@ int main(int argc, const char *argv[])
             offset += 1;
             flag_slow = 100;
         } else if (strcmp(argv[offset], "-m") == 0 ||
-		   strcmp(argv[offset], "--max-fails") == 0) {
-		     offset += 1;
+                   strcmp(argv[offset], "--max-fails") == 0) {
+            offset += 1;
             max = atoi(argv[offset]);
             offset += 1;
         } else if (strcmp(argv[offset], "-x") == 0 ||
-		   strcmp(argv[offset], "--mode-xss") == 0) {
+                   strcmp(argv[offset], "--mode-xss") == 0) {
             mode = MODE_XSS;
             offset += 1;
         } else {
@@ -278,9 +292,10 @@ int main(int argc, const char *argv[])
     } else {
         for (j = 0; j < flag_slow; ++j) {
             for (i = offset; i < argc; ++i) {
-                FILE* fd = fopen(argv[i], "r");
+                FILE *fd = fopen(argv[i], "r");
                 if (fd) {
-                    test_positive(fd, argv[i], mode, flag_invert, flag_true, flag_quiet);
+                    test_positive(fd, argv[i], mode, flag_invert, flag_true,
+                                  flag_quiet);
                     fclose(fd);
                 }
             }

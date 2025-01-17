@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from os import getenv, sep
+from os import sep
 from os.path import join
 from pathlib import Path
 from subprocess import DEVNULL, run
@@ -13,8 +13,8 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 from logger import setup_logger  # type: ignore
 from jobs import Job  # type: ignore
 
-LOGGER = setup_logger("DEFAULT-SERVER-CERT", getenv("LOG_LEVEL", "INFO"))
-LOGGER_OPENSSL = setup_logger("DEFAULT-SERVER-CERT.openssl", getenv("LOG_LEVEL", "INFO"))
+LOGGER = setup_logger("DEFAULT-SERVER-CERT")
+LOGGER_OPENSSL = setup_logger("DEFAULT-SERVER-CERT.openssl")
 status = 0
 
 try:

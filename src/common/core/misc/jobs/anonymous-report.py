@@ -17,7 +17,7 @@ from jobs import Job  # type: ignore
 
 from requests import post
 
-LOGGER = setup_logger("ANONYMOUS-REPORT", getenv("LOG_LEVEL", "INFO"))
+LOGGER = setup_logger("ANONYMOUS-REPORT")
 status = 0
 
 

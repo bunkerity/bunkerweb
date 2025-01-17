@@ -213,6 +213,8 @@ static ngx_int_t check_accept_encoding(ngx_http_request_t* req) {
   if (accept_encoding_entry == NULL) return NGX_DECLINED;
   accept_encoding = &accept_encoding_entry->value;
 
+  if (accept_encoding->len < kEncodingLen) return NGX_DECLINED;
+
   cursor = accept_encoding->data;
   end = cursor + accept_encoding->len;
   while (1) {
@@ -317,6 +319,9 @@ static ngx_int_t ngx_http_brotli_header_filter(ngx_http_request_t* r) {
   }
 
   h->hash = 1;
+#if nginx_version >= 1023000
+  h->next = NULL;
+#endif
   ngx_str_set(&h->key, "Content-Encoding");
   ngx_str_set(&h->value, "br");
   r->headers_out.content_encoding = h;

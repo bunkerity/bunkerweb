@@ -1,7 +1,0 @@
---TEST--
-'1c' type has too many false positives using '#' comment
---INPUT--
-1# blah blah
---EXPECTED--
-
-

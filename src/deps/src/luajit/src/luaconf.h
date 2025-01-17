@@ -1,6 +1,6 @@
 /*
 ** Configuration header.
-** Copyright (C) 2005-2023 Mike Pall. See Copyright Notice in luajit.h
+** Copyright (C) 2005-2025 Mike Pall. See Copyright Notice in luajit.h
 */
 
 #ifndef luaconf_h
@@ -9,7 +9,6 @@
 #ifndef WINVER
 #define WINVER 0x0501
 #endif
-#include <limits.h>
 #include <stddef.h>
 
 /* Default path for loading Lua and C modules with require(). */

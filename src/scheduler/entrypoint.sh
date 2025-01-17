@@ -72,21 +72,24 @@ LOGGER = setup_logger('Scheduler', getenv('CUSTOM_LOG_LEVEL', getenv('LOG_LEVEL'
 
 db = Database(LOGGER)
 with db.sql_engine.connect() as conn:
-	try:
-		result = conn.execute(sa.text('SELECT version FROM bw_metadata WHERE id = 1'))
-		print(next(result)[0])
-	except BaseException as e:
-		if 'doesn\'t exist' not in str(e) and 'no such table' not in str(e) and 'relation \"bw_metadata\" does not exist' not in str(e):
-			print('none')
-		else:
-			print('${installed_version}')
+    try:
+        result = conn.execute(sa.text('SELECT version FROM bw_metadata WHERE id = 1'))
+        print(next(result)[0])
+    except BaseException as e:
+        if \"doesn't exist\" not in str(e) and \"no such table\" not in str(e) and 'relation \"bw_metadata\" does not exist' not in str(e):
+            with open('/var/tmp/bunkerweb/database_error', 'w') as file:
+                file.write(str(e))
+            print('none')
+        else:
+            print('${installed_version}')
 
 with open('/var/tmp/bunkerweb/database_uri', 'w') as file:
-	file.write(db.database_uri)
+    file.write(db.database_uri)
 ")
 
 if [ "$current_version" == "none" ]; then
-	log "ENTRYPOINT" "❌" "Failed to retrieve database version"
+	log "ENTRYPOINT" "❌" "Failed to retrieve database version: $(cat /var/tmp/bunkerweb/database_error)"
+	rm -f /var/tmp/bunkerweb/database_error
 	exit 1
 fi
 

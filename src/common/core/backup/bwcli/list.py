@@ -8,7 +8,7 @@ deps_path = join(sep, "usr", "share", "bunkerweb", "core", "backup")
 if deps_path not in sys_path:
     sys_path.append(deps_path)
 
-from utils import BACKUP_DIR, LOGGER
+from backup import BACKUP_DIR, LOGGER
 
 try:
     backups = sorted(BACKUP_DIR.glob("*.zip"), reverse=True)

@@ -33,7 +33,7 @@ STATUS_MESSAGES = {
     "expired": "has expired",
     "suspended": "has been suspended",
 }
-LOGGER = setup_logger("Jobs.download-pro-plugins", getenv("LOG_LEVEL", "INFO"))
+LOGGER = setup_logger("Jobs.download-pro-plugins")
 status = 0
 
 
