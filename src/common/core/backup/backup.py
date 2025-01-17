@@ -21,7 +21,7 @@ from Database import Database  # type: ignore
 from logger import setup_logger  # type: ignore
 from model import Base  # type: ignore
 
-LOGGER = setup_logger("BACKUP", getenv("LOG_LEVEL", "INFO"))
+LOGGER = setup_logger("BACKUP")
 
 DB_STRING_RX = re_compile(r"^(?P<database>(mariadb|mysql)(\+pymysql)?|sqlite(\+pysqlite)?|postgresql(\+psycopg)?):/+(?P<path>/[^\s]+)")
 BACKUP_DIR = Path(getenv("BACKUP_DIRECTORY", "/var/lib/bunkerweb/backups"))

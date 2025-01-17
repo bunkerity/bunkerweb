@@ -10,7 +10,7 @@ deps_path = join(sep, "usr", "share", "bunkerweb", "core", "backup")
 if deps_path not in sys_path:
     sys_path.append(deps_path)
 
-from utils import acquire_db_lock, backup_database, BACKUP_DIR, DB_LOCK_FILE, LOGGER, update_cache_file
+from backup import acquire_db_lock, backup_database, BACKUP_DIR, DB_LOCK_FILE, LOGGER, update_cache_file
 
 status = 0
 
