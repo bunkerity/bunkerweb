@@ -18,7 +18,7 @@ NTASK="$(nproc)"
 # Compiling and installing lua
 echo "ℹ️ Compiling and installing lua-5.1.5"
 export CHANGE_DIR="/tmp/bunkerweb/deps/src/lua-5.1.5"
-do_and_check_cmd make -j "$NTASK" linux
+do_and_check_cmd make "CFLAGS=-O2 -Wall -fPIC -DLUA_USE_DLOPEN" "LFLAGS=-Wl,-rpath,/usr/share/bunkerweb/deps/lib" -j "$NTASK" linux
 do_and_check_cmd make INSTALL_TOP=/usr/share/bunkerweb/deps install
 
 # Compiling and installing libmaxminddb
