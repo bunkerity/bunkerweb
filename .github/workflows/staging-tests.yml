@@ -41,10 +41,11 @@ jobs:
       - name: Push images to local repo
         run: docker tag local/bunkerweb-tests:latest manager:5000/bunkerweb-tests:latest && docker push manager:5000/bunkerweb-tests:latest && docker tag local/scheduler-tests:latest manager:5000/scheduler-tests:latest && docker push manager:5000/scheduler-tests:latest && docker tag local/autoconf-tests:latest manager:5000/autoconf-tests:latest && docker push manager:5000/autoconf-tests:latest
         if: inputs.TYPE == 'swarm'
-      - name: Install Terraform
-        uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3.1.2
       - name: Install test dependencies
         run: PIP_BREAK_SYSTEM_PACKAGES=1 pip3 install --no-cache-dir --require-hashes --no-deps -r tests/requirements.txt
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3.1.2
+        if: inputs.TYPE == 'k8s'
       - uses: actions/download-artifact@v4.1.8
         with:
           name: tf-k8s
@@ -67,7 +68,7 @@ jobs:
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
           REG_USER: ${{ github.actor }}
           REG_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
+        if: inputs.TYPE == 'k8s'
       - uses: azure/setup-kubectl@3e0aec4d80787158d308d7b364cb1b702e7feb7f # v4.0.0
         if: inputs.TYPE == 'k8s'
         with:
