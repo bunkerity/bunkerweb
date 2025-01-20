@@ -500,7 +500,7 @@ if __name__ == "__main__":
         dotenv_env = {}
         if tmp_variables_path.is_file():
             with tmp_variables_path.open() as f:
-                dotenv_env = dict(line.strip().split("=", 1) for line in f if line.strip() and not line.startswith("#"))
+                dotenv_env = dict(line.strip().split("=", 1) for line in f if line.strip() and not line.startswith("#") and "=" in line)
 
         SCHEDULER = JobScheduler(environ, LOGGER, db=Database(LOGGER, sqlalchemy_string=dotenv_env.get("DATABASE_URI", getenv("DATABASE_URI", None))))  # type: ignore
 

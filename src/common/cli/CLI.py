@@ -59,7 +59,7 @@ class CLI(ApiCaller):
         self.__db = None
         if variables_path.is_file():
             with variables_path.open() as f:
-                self.__variables = dict(line.strip().split("=", 1) for line in f if line.strip() and not line.startswith("#"))
+                self.__variables = dict(line.strip().split("=", 1) for line in f if line.strip() and not line.startswith("#") and "=" in line)
 
         if Path(sep, "usr", "share", "bunkerweb", "db").exists():
             from Database import Database  # type: ignore
