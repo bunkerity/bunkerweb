@@ -74,7 +74,7 @@ if __name__ == "__main__":
             variables_path = Path(args.variables)
             LOGGER.info(f"Variables : {variables_path}")
             with variables_path.open() as f:
-                dotenv_env = dict(line.strip().split("=", 1) for line in f if line.strip() and not line.startswith("#"))
+                dotenv_env = dict(line.strip().split("=", 1) for line in f if line.strip() and not line.startswith("#") and "=" in line)
 
         db = None
         if DB_PATH.is_dir():
