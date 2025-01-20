@@ -43,7 +43,6 @@ jobs:
         if: inputs.TYPE == 'swarm'
       - name: Install Terraform
         uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3.1.2
-        if: inputs.TYPE == 'k8s'
       - name: Install test dependencies
         run: PIP_BREAK_SYSTEM_PACKAGES=1 pip3 install --no-cache-dir --require-hashes --no-deps -r tests/requirements.txt
       - uses: actions/download-artifact@v4.1.8
