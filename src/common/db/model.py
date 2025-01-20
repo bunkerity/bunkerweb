@@ -87,9 +87,11 @@ class Settings(Base):
 
 class Selects(Base):
     __tablename__ = "bw_selects"
+    __table_args__ = (UniqueConstraint("setting_id", "order"),)
 
     setting_id = Column(String(256), ForeignKey("bw_settings.id", onupdate="cascade", ondelete="cascade"), primary_key=True)
     value = Column(String(256), primary_key=True)
+    order = Column(Integer, default=0, nullable=False)
 
     setting = relationship("Settings", back_populates="selects")
 
@@ -314,7 +316,7 @@ class Metadata(Base):
     last_instances_change = Column(DateTime(timezone=True), nullable=True)
     failover = Column(Boolean, default=None, nullable=True)
     integration = Column(INTEGRATIONS_ENUM, default="Unknown", nullable=False)
-    version = Column(String(32), default="1.6.0-rc1", nullable=False)
+    version = Column(String(32), default="1.6.0-rc2", nullable=False)
 
 
 ## UI Models

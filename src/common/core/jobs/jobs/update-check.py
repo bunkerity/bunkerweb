@@ -1,25 +1,38 @@
 #!/usr/bin/env python3
 
-from os import getenv, sep
+from os import sep
 from os.path import join
 from sys import exit as sys_exit, path as sys_path
+from time import sleep
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
 from requests import get
+from requests.exceptions import ConnectionError
 
 from common_utils import get_version  # type: ignore
 from logger import setup_logger  # type: ignore
 
-LOGGER = setup_logger("UPDATE-CHECK", getenv("LOG_LEVEL", "INFO"))
+LOGGER = setup_logger("UPDATE-CHECK")
 status = 0
 
 try:
 
     def get_latest_stable_release():
-        response = get("https://api.github.com/repos/bunkerity/bunkerweb/releases", headers={"User-Agent": "BunkerWeb"}, timeout=3)
+        max_retries = 3
+        retry_count = 0
+        while retry_count < max_retries:
+            try:
+                response = get("https://api.github.com/repos/bunkerity/bunkerweb/releases", headers={"User-Agent": "BunkerWeb"}, timeout=3)
+                break
+            except ConnectionError as e:
+                retry_count += 1
+                if retry_count == max_retries:
+                    raise e
+                LOGGER.warning(f"Connection refused, retrying in 3 seconds... ({retry_count}/{max_retries})")
+                sleep(3)
         response.raise_for_status()
         releases = response.json()
 

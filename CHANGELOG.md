@@ -1,6 +1,28 @@
 # Changelog
 
-## v1.6.0-rc1 - ????/??/??
+## v1.6.0-rc2 - ????/??/??
+
+- [BUGFIX] Whitelisting a client no longer bypasses https redirect settings as the `ssl` plugin is now executed before the `whitelist` plugin
+- [UI] Fixed condition when validating the setup wizard form when a custom certificate is used
+- [FEATURE] Add extra validation of certificates in `customcert` plugin
+- [FEATURE] Introduce new `SSL` plugin to manage SSL/TLS settings without tweaking the `misc` plugin
+- [FEATURE] Add `stream` support in `Kubernetes` integration
+- [FEATURE] Renamed the `MODSECURITY_CRS_PLUGIN_URLS` setting to `MODSECURITY_CRS_PLUGINS` to make it more consistent as the setting now accepts plugin names directly as well as URLs and automatically downloads them
+[FEATURE] Add `plugin_list` command to `bwcli` for listing available plugins and their commands
+- [DOCS] Added Swarm deprecated notice in the documentation
+- [DEPS] Added Brotli v1.1.0 dependency for ngx_brotli
+- [DEPS] Updated headers-more-nginx-module version to v0.37
+- [DEPS] Updated libinjection to latest commit on main branch
+- [DEPS] Updated libmaxminddb version to v1.12.2
+- [DEPS] Updated luajit2 version to v2.1-20250117
+- [DEPS] Updated lua-nginx-module version to v0.10.28
+- [DEPS] Updated lua-resty-core version to v0.1.31
+- [DEPS] Updated lua-resty-dns version to v0.23
+- [DEPS] Updated lua-resty-redis version to v0.31
+- [DEPS] Updated ngx_brotli to latest commit on master branch
+- [DEPS] Updated stream-lua-nginx-module version to v0.0.16
+
+## v1.6.0-rc1 - 2025/01/10
 
 - [BUGFIX] Increase string length for service_id and id columns in database models to avoid issues with long service names
 - [BUGFIX] Fix shenanigans with setup wizard when a reverse proxy was already configured

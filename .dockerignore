@@ -2,6 +2,7 @@
 .idea/
 .vscode/
 __pycache__/
+
 env/
-src/ui/client/node_modules/
-src/ui/client/opt-dashboard/
+src/deps/tmp_venv/
+tests/

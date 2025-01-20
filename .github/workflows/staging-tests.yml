@@ -43,7 +43,10 @@ jobs:
         if: inputs.TYPE == 'swarm'
       - name: Install test dependencies
         run: PIP_BREAK_SYSTEM_PACKAGES=1 pip3 install --no-cache-dir --require-hashes --no-deps -r tests/requirements.txt
-      - uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3.1.2
+        if: inputs.TYPE == 'k8s'
+      - uses: actions/download-artifact@v4.1.8
         with:
           name: tf-k8s
           path: /tmp

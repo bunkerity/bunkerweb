@@ -1,9 +1,0 @@
---TEST--
-cdata, degenerate
---INPUT--
-<![CDATA
---EXPECTED--
-TAG_COMMENT,6,[CDATA
-
-
-

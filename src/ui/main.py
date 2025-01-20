@@ -9,6 +9,7 @@ from secrets import token_urlsafe
 from signal import SIGINT, signal, SIGTERM
 from sys import path as sys_path
 from time import time
+from traceback import format_exc
 
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("api",), ("db",))]:
@@ -250,6 +251,7 @@ def handle_csrf_error(_):
     :param e: The exception object
     :return: A template with the error message and a 401 status code.
     """
+    LOGGER.debug(format_exc())
     LOGGER.error(f"CSRF token is missing or invalid for {request.path} by {current_user.get_id()}")
     session.clear()
     logout_user()

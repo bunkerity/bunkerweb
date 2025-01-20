@@ -14,7 +14,7 @@ from Database import Database  # type: ignore
 from logger import setup_logger  # type: ignore
 from API import API  # type: ignore
 
-LOGGER = setup_logger("Lets-encrypt.deploy", getenv("LOG_LEVEL", "INFO"))
+LOGGER = setup_logger("Lets-encrypt.deploy")
 status = 0
 
 try:

@@ -7,6 +7,7 @@ from os import getenv, sep
 from os.path import join, normpath
 from re import compile as re_compile
 from sys import exit as sys_exit, path as sys_path
+from time import sleep
 from typing import Tuple
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("db",))]:
@@ -14,6 +15,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
         sys_path.append(deps_path)
 
 from requests import get
+from requests.exceptions import ConnectionError
 
 from common_utils import bytes_hash  # type: ignore
 from logger import setup_logger  # type: ignore
@@ -50,7 +52,7 @@ def check_line(kind: str, line: bytes) -> Tuple[bool, bytes]:
     return False, b""
 
 
-LOGGER = setup_logger("BLACKLIST", getenv("LOG_LEVEL", "INFO"))
+LOGGER = setup_logger("BLACKLIST")
 status = 0
 
 KINDS = ("IP", "RDNS", "ASN", "USER_AGENT", "URI", "IGNORE_IP", "IGNORE_RDNS", "IGNORE_ASN", "IGNORE_USER_AGENT", "IGNORE_URI")
@@ -147,7 +149,18 @@ try:
                             with open(normpath(url[7:]), "rb") as f:
                                 iterable = f.readlines()
                         else:
-                            resp = get(url, stream=True, timeout=10)
+                            max_retries = 3
+                            retry_count = 0
+                            while retry_count < max_retries:
+                                try:
+                                    resp = get(url, stream=True, timeout=10)
+                                    break
+                                except ConnectionError as e:
+                                    retry_count += 1
+                                    if retry_count == max_retries:
+                                        raise e
+                                    LOGGER.warning(f"Connection refused, retrying in 3 seconds... ({retry_count}/{max_retries})")
+                                    sleep(3)
 
                             if resp.status_code != 200:
                                 LOGGER.warning(f"Got status code {resp.status_code}, skipping...")

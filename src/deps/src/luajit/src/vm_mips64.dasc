@@ -1,6 +1,6 @@
 |// Low-level VM code for MIPS64 CPUs.
 |// Bytecode interpreter, fast functions and helper functions.
-|// Copyright (C) 2005-2023 Mike Pall. See Copyright Notice in luajit.h
+|// Copyright (C) 2005-2025 Mike Pall. See Copyright Notice in luajit.h
 |//
 |// Contributed by Djordje Kovacevic and Stefan Pejic from RT-RK.com.
 |// Sponsored by Cisco Systems, Inc.
@@ -1420,9 +1420,10 @@ static void build_subroutines(BuildCtx *ctx)
   |  sltu AT, TMP1, TMP2
   |  bnez AT, ->fff_fallback
   |.  lbu TMP3, DISPATCH_GL(hookmask)(DISPATCH)
-  |  daddiu NARGS8:RC, NARGS8:RC, -8
-  |  bltz NARGS8:RC, ->fff_fallback
+  |  daddiu NARGS8:TMP0, NARGS8:RC, -8
+  |  bltz NARGS8:TMP0, ->fff_fallback
   |.   move TMP2, BASE
+  |  move NARGS8:RC, NARGS8:TMP0
   |   daddiu BASE, BASE, 16
   |  // Remember active hook before pcall.
   |  srl TMP3, TMP3, HOOK_ACTIVE_SHIFT

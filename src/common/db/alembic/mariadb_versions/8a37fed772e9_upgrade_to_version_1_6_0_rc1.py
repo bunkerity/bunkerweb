@@ -62,11 +62,29 @@ def upgrade() -> None:
         if "id" in [c["name"] for c in batch_op.impl.dialect.get_columns(op.get_bind(), "bw_ui_users")]:
             batch_op.drop_column("id")
 
-    # Add the new order column to bw_template_settings
-    op.add_column("bw_template_settings", sa.Column("order", sa.Integer(), nullable=False))
+    # Add the new order column to bw_template_settings and set initial values
+    op.add_column("bw_template_settings", sa.Column("order", sa.Integer(), nullable=False, server_default="0"))
+    op.execute("SET @row_number = 0")
+    op.execute(
+        """
+        UPDATE bw_template_settings
+        SET `order` = (@row_number:=@row_number + 1)
+        ORDER BY template_id, setting_id
+    """
+    )
+    op.create_unique_constraint(None, "bw_template_settings", ["template_id", "setting_id", "order"])
 
     # Add the new order column to bw_template_custom_configs
     op.add_column("bw_template_custom_configs", sa.Column("order", sa.Integer(), nullable=False))
+    op.execute("SET @row_number = 0")
+    op.execute(
+        """
+        UPDATE bw_template_settings
+        SET `order` = (@row_number:=@row_number + 1)
+        ORDER BY template_id, setting_id
+    """
+    )
+    op.create_unique_constraint(None, "bw_template_custom_configs", ["template_id", "order"])
 
     # Update version in bw_metadata
     op.execute("UPDATE bw_metadata SET version = '1.6.0-rc1' WHERE id = 1")

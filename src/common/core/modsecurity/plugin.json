@@ -42,13 +42,13 @@
       "type": "select",
       "select": ["3", "4", "nightly"]
     },
-    "MODSECURITY_CRS_PLUGIN_URLS": {
+    "MODSECURITY_CRS_PLUGINS": {
       "context": "multisite",
       "default": "",
-      "help": "List of OWASP CRS plugins URLs (direct download to .zip or .tar file) to download and install (URLs are separated with space). (Not compatible with CRS version 3)",
-      "id": "modsecurity-crs-plugin-urls",
-      "label": "Core Rule Set Plugin URLs",
-      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
+      "help": "List of OWASP CRS plugins (plugin-name[/tag] or URL) to download and install (separated with spaces). (Not compatible with CRS version 3)",
+      "id": "modsecurity-crs-plugins",
+      "label": "Core Rule Set Plugins",
+      "regex": "^.*$",
       "type": "text"
     },
     "MODSECURITY_SEC_AUDIT_ENGINE": {

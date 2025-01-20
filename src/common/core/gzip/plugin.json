@@ -8,7 +8,7 @@
     "USE_GZIP": {
       "context": "multisite",
       "default": "no",
-      "help": "Use gzip",
+      "help": "Enable or disable Gzip compression.",
       "id": "use-gzip",
       "label": "Use gzip",
       "regex": "^(yes|no)$",
@@ -26,7 +26,7 @@
     "GZIP_MIN_LENGTH": {
       "context": "multisite",
       "default": "1000",
-      "help": "Minimum length for gzip compression.",
+      "help": "Minimum response size (in bytes) for Gzip compression to apply.",
       "id": "gzip-min-length",
       "label": "Minimum length",
       "regex": "^\\d+$",
@@ -35,7 +35,7 @@
     "GZIP_COMP_LEVEL": {
       "context": "multisite",
       "default": "5",
-      "help": "The compression level of the gzip algorithm.",
+      "help": "Compression level for Gzip (1 = least compression, 9 = maximum compression).",
       "id": "gzip-comp-level",
       "label": "Compression level",
       "regex": "^[1-9]$",
@@ -45,7 +45,7 @@
     "GZIP_PROXIED": {
       "context": "multisite",
       "default": "no-cache no-store private expired auth",
-      "help": "Which kind of proxied requests we should compress.",
+      "help": "Specifies which proxied requests should be compressed.",
       "id": "gzip-proxied",
       "label": "Proxied requests",
       "regex": "^.*$",

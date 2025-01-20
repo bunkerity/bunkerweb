@@ -177,7 +177,7 @@ def setup_page():
                             bool(request.form.get("custom_ssl_cert", "")),
                             bool(request.form.get("custom_ssl_key", "")),
                         ]
-                    ) or not all(
+                    ) and not all(
                         [
                             bool(request.form.get("custom_ssl_cert_data", "")),
                             bool(request.form.get("custom_ssl_key_data", "")),

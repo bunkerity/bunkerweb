@@ -198,3 +198,18 @@ updates:
     commit-message:
       prefix: "deps/terraform"
     target-branch: "dev"
+
+  # Migration
+  - package-ecosystem: "docker"
+    directory: "/misc/migration"
+    schedule:
+      interval: "daily"
+      time: "09:00"
+      timezone: "Europe/Paris"
+    assignees:
+      - "TheophileDiot"
+    reviewers:
+      - "TheophileDiot"
+    commit-message:
+      prefix: "deps/migration"
+    target-branch: "dev"

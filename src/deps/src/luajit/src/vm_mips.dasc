@@ -1,6 +1,6 @@
 |// Low-level VM code for MIPS CPUs.
 |// Bytecode interpreter, fast functions and helper functions.
-|// Copyright (C) 2005-2023 Mike Pall. See Copyright Notice in luajit.h
+|// Copyright (C) 2005-2025 Mike Pall. See Copyright Notice in luajit.h
 |//
 |// MIPS soft-float support contributed by Djordje Kovacevic and
 |// Stefan Pejic from RT-RK.com, sponsored by Cisco Systems, Inc.

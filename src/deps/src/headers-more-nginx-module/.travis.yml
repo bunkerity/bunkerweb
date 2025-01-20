@@ -1,5 +1,9 @@
 sudo: required
-dist: bionic
+dist: focal
+
+branches:
+  only:
+    - "master"
 
 os: linux
 
@@ -21,9 +25,8 @@ env:
     - LUAJIT_INC=$LUAJIT_PREFIX/include/luajit-2.1
     - LD_LIBRARY_PATH=$LUAJIT_LIB:$LD_LIBRARY_PATH
   matrix:
-    - NGINX_VERSION=1.19.3
-    - NGINX_VERSION=1.19.9
-    - NGINX_VERSION=1.23.0 WITHOUT_PCRE2=1
+    - NGINX_VERSION=1.21.4
+    - NGINX_VERSION=1.25.3 WITHOUT_PCRE2=1
 
 before_install:
   - sudo apt-get update -y

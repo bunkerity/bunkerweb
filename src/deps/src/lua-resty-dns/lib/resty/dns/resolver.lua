@@ -100,6 +100,29 @@ for i = 2, 64, 2 do
 end
 
 
+local function udp_socks_close(self)
+    if self.socks == nil then
+        return
+    end
+
+    for _, sock in ipairs(self.socks) do
+        sock:close()
+    end
+
+    self.socks = nil
+end
+
+
+local function tcp_socks_close(self)
+    if self.tcp_sock == nil then
+        return
+    end
+
+    self.tcp_sock:close()
+    self.tcp_sock = nil
+end
+
+
 function _M.new(class, opts)
     if not opts then
         return nil, "no options table specified"
@@ -159,6 +182,16 @@ function _M.new(class, opts)
                   retrans = opts.retrans or 5,
                   no_recurse = opts.no_recurse,
                 }, mt)
+end
+
+
+function _M:destroy()
+    udp_socks_close(self)
+    tcp_socks_close(self)
+    self.cur = nil
+    self.servers = nil
+    self.retrans = nil
+    self.no_recurse = nil
 end
 
 

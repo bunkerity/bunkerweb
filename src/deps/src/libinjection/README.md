@@ -5,7 +5,6 @@
 [![license](https://img.shields.io/badge/license-BSD_3--Clause-blue.svg?style=flat)](https://raw.githubusercontent.com/client9/libinjection/master/COPYING)
 
 
-
 SQL / SQLI tokenizer parser analyzer. For
 
 * C and C++
@@ -13,10 +12,9 @@ SQL / SQLI tokenizer parser analyzer. For
 * [Python](https://libinjection.client9.com/doc-sqli-python)
 * [Lua](/lua)
 * [Java](https://github.com/jeonglee/Libinjection) (external port)
-* [LuaJIT/FFI] (https://github.com/p0pr0ck5/lua-ffi-libinjection) (external port)
+* [LuaJIT/FFI](https://github.com/p0pr0ck5/lua-ffi-libinjection) (external port)
 
-See
-[https://www.client9.com/](https://www.client9.com/)
+See [https://www.client9.com/](https://www.client9.com/)
 for details and presentations.
 
 Simple example:
@@ -62,7 +60,7 @@ More advanced samples:
 VERSION INFORMATION
 ===================
 
-See [CHANGELOG](/CHANGELOG) for details.
+See [CHANGELOG](CHANGELOG.md) for details.
 
 Versions are listed as "major.minor.point"
 
@@ -79,8 +77,7 @@ Point releases are purely data changes.  These may be safely applied.
 QUALITY AND DIAGNOSITICS
 ========================
 
-The continuous integration results at
-https://travis-ci.org/client9/libinjection tests the following:
+The continuous integration results at GitHub tests the following:
 
 - [x] build and unit-tests under GCC
 - [x] build and unit-tests under Clang
@@ -96,10 +93,26 @@ Copyright (c) 2012-2016 Nick Galbreath
 Licensed under the standard [BSD 3-Clause](http://opensource.org/licenses/BSD-3-Clause) open source
 license.  See [COPYING](/COPYING) for details.
 
+## BUILD TARGETS
+
+Some of the previous help runners have been merged into the Makefile. E.g.:
+
+* run-clang-asan.sh -> `make clan-asan`
+* make-ci.sh -> `make ci`
+
+If you run `make cppcheck` you will see this warning printed:
+```
+nofile:0 information missingIncludeSystem Cppcheck cannot find all the include files (use --check-config for details)
+```
+You can safely ignore it as it is just saying that standard include files are being ignored (which is the recommended option):
+```
+example1.c:1:0: information: Include file: <stdio.h> not found. Please note: Cppcheck does not need standard library headers to get proper results. [missingIncludeSystem]
+```
+
 EMBEDDING
 =============
 
-The [src](https://github.com/client9/libinjection/tree/master/src)
+The [src](/src)
 directory contains everything, but you only need to copy the following
 into your source tree:
 
@@ -108,3 +121,11 @@ into your source tree:
 * [src/libinjection_sqli_data.h](/src/libinjection_sqli_data.h)
 * [COPYING](/COPYING)
 
+Usually the new autoconf build system takes care of the `LIBINJECTION_VERSION` definition.
+But that might now be available when you are embedding the above files.
+
+This is solved by manually defining the version you are embedding to your `CFLAGS`.
+
+E.g.: `CFLAGS="-DLIBINJECTION_VERSION=\"3.9.2.65-dfe6-dirty\""`
+
+An easy way to get the version tag is to execute `git describe` in this directory.

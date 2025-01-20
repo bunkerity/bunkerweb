@@ -1,7 +1,0 @@
---TEST--
-smoke
---INPUT--
-SELECT $
---EXPECTED--
-E SELECT
-n $

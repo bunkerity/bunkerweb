@@ -33,6 +33,7 @@
     "selfsigned"
   ],
   "access": [
+    "ssl",
     "whitelist",
     "letsencrypt",
     "blacklist",

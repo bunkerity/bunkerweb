@@ -1,0 +1,33 @@
+name: Fuzzing
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  fuzzing:
+    runs-on: ubuntu-latest
+    name: fuzzing
+    steps:
+      - uses: actions/checkout@v4
+      - name: build
+        run: |
+          ./autogen.sh
+          CC=clang CXX=clang++ ./configure --enable-sanitizers --enable-fuzzers
+          make
+      - name: fuzz
+        run: |
+          mkdir out
+          ./src/fuzz/fuzzer \
+            -max_total_time="${MAX_TOTAL_TIME:-300}" \
+            -print_pcs=1 \
+            -workers="${FUZZY_WORKERS:-0}" \
+            -jobs="${FUZZY_JOBS:-0}" \
+            -artifact_prefix=./out ./src/fuzz/corpus 
+
+      - name: Upload Crash
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: artifacts
+          path: ./out

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from datetime import datetime, timedelta
 from io import BytesIO
 from mimetypes import guess_type
 from os import getenv, sep
@@ -8,9 +9,10 @@ from pathlib import Path
 from re import MULTILINE, compile as re_compile
 from subprocess import CalledProcessError, run
 from sys import exit as sys_exit, path as sys_path
-from typing import Dict, Set
+from time import sleep
+from typing import Dict, Set, Tuple
 from uuid import uuid4
-from json import dumps
+from json import dumps, loads
 from shutil import copy, copytree, move, rmtree
 from tarfile import TarError, open as tar_open
 from zipfile import BadZipFile, ZipFile
@@ -28,7 +30,8 @@ for deps_path in [
         sys_path.append(deps_path)
 
 from magic import Magic
-from requests import get
+from requests import get, head
+from requests.exceptions import ConnectionError
 
 from logger import setup_logger  # type: ignore
 from jobs import Job  # type: ignore
@@ -40,8 +43,77 @@ CRS_PLUGINS_DIR = Path(sep, "var", "cache", "bunkerweb", "modsecurity", "crs", "
 NEW_PLUGINS_DIR = Path(sep, "var", "tmp", "bunkerweb", "crs-new-plugins")
 TMP_DIR = Path(sep, "var", "tmp", "bunkerweb", "crs-plugins")
 PATCH_SCRIPT = Path(sep, "usr", "share", "bunkerweb", "core", "modsecurity", "misc", "patch.sh")
-LOGGER = setup_logger("modsecurity.download-crs-plugins", getenv("LOG_LEVEL", "INFO"))
+LOGGER = setup_logger("modsecurity.download-crs-plugins")
 status = 0
+
+
+def get_download_url(repo_url, version=None) -> Tuple[bool, str]:
+    """
+    Get the URL of the downloadable file for the specified version or deduce the latest available version.
+    If the `main` branch doesn't exist, fall back to the `master` branch.
+
+    Args:
+        repo_url (str): The GitHub repository URL (e.g., https://github.com/owner/repo).
+        version (str, optional): The version tag. If not provided, deduces the latest release or falls back to the default branch.
+
+    Returns:
+        str: The deduced download URL.
+    """
+    try:
+        if version:
+            # If a specific version is provided, construct the URL for the downloadable file
+            return True, f"{repo_url}/archive/refs/tags/{version}.zip"
+
+        # Try fetching the latest release
+        release_api_url = f"{repo_url.replace('github.com', 'api.github.com/repos', 1)}/releases"
+        LOGGER.debug(f"Checking {release_api_url}...")
+        max_retries = 3
+        retry_count = 0
+        while retry_count < max_retries:
+            try:
+                response = get(release_api_url, timeout=8)
+                break
+            except ConnectionError as e:
+                retry_count += 1
+                if retry_count == max_retries:
+                    raise e
+                LOGGER.warning(f"Connection refused, retrying in 3 seconds... ({retry_count}/{max_retries})")
+                sleep(3)
+        response.raise_for_status()
+        releases = response.json()
+        latest_release = None
+
+        for release in releases:
+            if not release["prerelease"]:
+                latest_release = release["tag_name"]
+                break
+
+        if latest_release:
+            return True, f"{repo_url}/archive/refs/tags/{latest_release}.tar.gz"
+        else:
+            # Fall back to checking branches (main -> master)
+            for branch in ("main", "master"):
+                branch_url = f"{repo_url}/archive/refs/heads/{branch}.zip"
+                LOGGER.debug(f"Checking {branch_url}...")
+                max_retries = 3
+                retry_count = 0
+                while retry_count < max_retries:
+                    try:
+                        branch_check = head(branch_url, timeout=8)
+                        break
+                    except ConnectionError as e:
+                        retry_count += 1
+                        if retry_count == max_retries:
+                            raise e
+                        LOGGER.warning(f"Connection refused, retrying in 3 seconds... ({retry_count}/{max_retries})")
+                        sleep(3)
+                if branch_check.status_code < 400:
+                    return True, branch_url
+
+            return False, "No branches found"
+    except Exception as e:
+        raise RuntimeError(f"Failed to deduce the download URL: {e}")
+
 
 try:
     if not PATCH_SCRIPT.is_file():
@@ -59,7 +131,7 @@ try:
         sys_exit(0)
 
     services = services.split(" ")
-    services_plugin_urls = {}
+    services_plugins = {}
 
     if getenv("MULTISITE", "no") == "yes":
         for first_server in services:
@@ -69,9 +141,9 @@ try:
             if getenv(f"{first_server}_USE_MODSECURITY_CRS_PLUGINS", getenv("USE_MODSECURITY_CRS_PLUGINS", "no")) == "yes":
                 use_modsecurity_crs_plugins = True
 
-            service_plugin_urls = getenv(f"{first_server}_MODSECURITY_CRS_PLUGIN_URLS", getenv("MODSECURITY_CRS_PLUGIN_URLS", "")).strip()
-            if service_plugin_urls:
-                services_plugin_urls[first_server] = set(service_plugin_urls.split(" "))
+            service_plugins = getenv(f"{first_server}_MODSECURITY_CRS_PLUGINS", getenv("MODSECURITY_CRS_PLUGINS", "")).strip()
+            if service_plugins:
+                services_plugins[first_server] = set(service_plugins.split(" "))
     else:
         if getenv("MODSECURITY_CRS_VERSION", "4") != "3":
             use_right_crs_version = True
@@ -79,15 +151,15 @@ try:
         if getenv("USE_MODSECURITY_CRS_PLUGINS", "no") == "yes":
             use_modsecurity_crs_plugins = True
 
-        plugin_urls = getenv("MODSECURITY_CRS_PLUGIN_URLS", "").strip()
-        if plugin_urls:
-            services_plugin_urls[services[0]] = set(plugin_urls.split(" "))
+        plugins = getenv("MODSECURITY_CRS_PLUGINS", "").strip()
+        if plugins:
+            services_plugins[services[0]] = set(plugins.split(" "))
 
     if not use_modsecurity_crs_plugins:
         LOGGER.info("Core Rule Set (CRS) plugins are disabled, skipping download...")
         sys_exit(0)
-    elif not services_plugin_urls:
-        LOGGER.info("No Core Rule Set (CRS) plugins URLs found, skipping download...")
+    elif not services_plugins:
+        LOGGER.info("No Core Rule Set (CRS) plugins found, skipping download...")
         sys_exit(0)
     elif not use_right_crs_version:
         LOGGER.warning("No service is using a compatible Core Rule Set (CRS) version with the plugins (4 or nightly), skipping download...")
@@ -97,27 +169,178 @@ try:
 
     downloaded_plugins: Dict[str, Set[str]] = {}
     service_plugins: Dict[str, Set[str]] = {service: set() for service in services}
-    changes = False
 
-    # Loop on plugin URLs
+    # If there is at least one plugin that isn't an url, we need to check the registry
+    if any(not plugin.startswith("http") for plugins in services_plugins.values() for plugin in plugins):
+        LOGGER.info("One of the Core Rule Set (CRS) plugins is not an URL, checking the registry...")
+
+        plugin_registry = JOB.get_cache("plugin_registry.json", with_info=True, with_data=True)
+
+        if isinstance(plugin_registry, dict):
+            up_to_date = plugin_registry["last_update"] > (datetime.now().astimezone() - timedelta(hours=1)).timestamp()
+
+            if up_to_date:
+                try:
+                    plugin_registry = loads(plugin_registry["data"])
+                except Exception as e:
+                    LOGGER.error(f"Failed to load the plugin registry data from cache: {e}")
+                    plugin_registry = None
+            else:
+                LOGGER.info("The plugin registry has not been updated in the last hour, fetching the latest version...")
+                plugin_registry = None
+
+        if not isinstance(plugin_registry, dict):
+            LOGGER.info("Fetching the plugin registry from the GitHub repository...")
+            with BytesIO() as content:
+                try:
+                    # Download the file
+                    max_retries = 3
+                    retry_count = 0
+                    while retry_count < max_retries:
+                        try:
+                            resp = get(
+                                "https://raw.githubusercontent.com/coreruleset/plugin-registry/refs/heads/main/README.md",
+                                headers={"User-Agent": "BunkerWeb"},
+                                stream=True,
+                                timeout=8,
+                            )
+                            break
+                        except ConnectionError as e:
+                            retry_count += 1
+                            if retry_count == max_retries:
+                                raise e
+                            LOGGER.warning(f"Connection refused, retrying in 3 seconds... ({retry_count}/{max_retries})")
+                            sleep(3)
+                    if resp.status_code != 200:
+                        LOGGER.error(f"Got status code {resp.status_code}, raising an exception...")
+                        sys_exit(1)
+
+                    # Write content to BytesIO
+                    for chunk in resp.iter_content(chunk_size=8192):
+                        if chunk:
+                            content.write(chunk)
+
+                    content.seek(0)
+                except SystemExit as e:
+                    sys_exit(e.code)
+                except Exception as e:
+                    LOGGER.error(f"Exception while downloading the registry:\n{e}")
+                    sys_exit(1)
+
+                # Extract table lines (lines starting with "|")
+                table_lines = [line for line in content.read().decode().splitlines() if line.startswith("|")]
+
+            # Split each row into columns and clean the content
+            table = [row.strip("|").split("|") for row in table_lines]
+            table = [[cell.strip() for cell in row] for row in table]
+
+            # Extract headers and data
+            headers = table[0]  # First row as headers
+            data = table[2:]  # Skip header separator row
+
+            # Convert the registry table into a dictionary
+            plugin_registry = {}
+            clean_headers = [header.replace("*", "").strip().lower() for header in headers[1:]]
+
+            for row in data:
+                plugin_name = row[0].lower()
+                # Extract values from cells, removing parentheses
+                values = [cell.split("]")[-1].replace("(", "").replace(")", "").replace("&#9989;&nbsp;", "").strip().lower() for cell in row[1:]]
+                plugin_registry[plugin_name] = dict(zip(clean_headers, values))
+
+            cached, err = JOB.cache_file("plugin_registry.json", dumps(plugin_registry, indent=2).encode())
+            if not cached:
+                LOGGER.error(f"Error while caching plugin registry data: {err}")
+
+        # LOGGER.debug(f"Plugin registry:\n{plugin_registry}")
+
+        for service, plugins in services_plugins.items():
+            for plugin in plugins.copy():
+                if plugin.startswith(("http://", "https://")):
+                    continue
+
+                plugins.remove(plugin)
+                plugin_split = plugin.split("/")
+                plugin_version = None
+
+                if len(plugin_split) > 1:
+                    plugin_version = plugin_split[1]
+
+                plugin_name = plugin_split[0].lower()
+
+                if plugin_name not in plugin_registry:
+                    LOGGER.error(f"Plugin {plugin_name} not found in the registry, ignoring...")
+                    continue
+
+                plugin_data = plugin_registry[plugin_name]
+
+                if "repository" not in plugin_data:
+                    LOGGER.error(f"Plugin {plugin_name} is missing a Repository URL in the registry, ignoring...")
+                    continue
+                elif "private" in plugin_data.get("status", ""):
+                    LOGGER.error(f"Plugin {plugin_name} is private, ignoring...")
+                    continue
+
+                if plugin_version:
+                    LOGGER.info(f"Plugin {plugin} found in the registry, fetching version {plugin_version}...")
+                    success, url = get_download_url(plugin_data["repository"], plugin_version)
+                    if not success:
+                        LOGGER.error(f"Failed to get the download URL for plugin {plugin_name} (version: {plugin_version}): {url}")
+                        continue
+                    if plugin_data.get("status", "") != "tested":
+                        LOGGER.warning(
+                            f'Plugin {plugin_name} is marked as "{plugin_data["status"]}", be cautious when using it as there is no guarantee it will work'
+                        )
+                    LOGGER.debug(f"Plugin {plugin_name} (version: {plugin_version}) corresponds to URL {url}")
+                    plugins.add(url)
+                    continue
+
+                LOGGER.info(f"Plugin {plugin} found in the registry, fetching latest version...")
+                success, url = get_download_url(plugin_data["repository"])
+                if not success:
+                    LOGGER.error(f"Failed to get the download URL for plugin {plugin_name}: {url}")
+                    continue
+                if plugin_data.get("status", "") != "tested":
+                    LOGGER.warning(
+                        f'Plugin {plugin_name} is marked as "{plugin_data["status"]}", be cautious when using it as there is no guarantee it will work'
+                    )
+                LOGGER.debug(f"Plugin {plugin_name} corresponds to URL {url}")
+                plugins.add(url)
+
+            service_plugins[service] = plugins
+
+        LOGGER.debug(f"Service plugins:\n{service_plugins}")
+
+    # Loop on plugins
     LOGGER.info("Checking if any Core Rule Set (CRS) plugin needs to be updated...")
-    for service, plugin_urls in services_plugin_urls.items():
+    for service, plugins in services_plugins.items():
         installed_plugins = set()
 
-        for crs_plugin_url in plugin_urls:
-            if crs_plugin_url in downloaded_plugins:
-                LOGGER.debug(f"CRS plugin {crs_plugin_url} has already been downloaded, skipping...")
-                installed_plugins.update(downloaded_plugins[crs_plugin_url])
+        for crs_plugin in plugins:
+            if crs_plugin in downloaded_plugins:
+                LOGGER.debug(f"CRS plugin {crs_plugin} has already been downloaded, skipping...")
+                installed_plugins.update(downloaded_plugins[crs_plugin])
                 continue
 
-            downloaded_plugins[crs_plugin_url] = set()
+            downloaded_plugins[crs_plugin] = set()
 
             with BytesIO() as content:
                 try:
                     # Download the file
-                    resp = get(crs_plugin_url, headers={"User-Agent": "BunkerWeb"}, stream=True, timeout=5)
+                    max_retries = 3
+                    retry_count = 0
+                    while retry_count < max_retries:
+                        try:
+                            resp = get(crs_plugin, headers={"User-Agent": "BunkerWeb"}, stream=True, timeout=8)
+                            break
+                        except ConnectionError as e:
+                            retry_count += 1
+                            if retry_count == max_retries:
+                                raise e
+                            LOGGER.warning(f"Connection refused, retrying in 3 seconds... ({retry_count}/{max_retries})")
+                            sleep(3)
                     if resp.status_code != 200:
-                        LOGGER.warning(f"Got status code {resp.status_code}, skipping download of plugin(s) with URL {crs_plugin_url}...")
+                        LOGGER.warning(f"Got status code {resp.status_code}, skipping download of plugin(s) with URL {crs_plugin}...")
                         continue
 
                     # Write content to BytesIO
@@ -127,7 +350,7 @@ try:
 
                     content.seek(0)
                 except Exception as e:
-                    LOGGER.error(f"Exception while downloading plugin(s) with URL {crs_plugin_url}:\n{e}")
+                    LOGGER.error(f"Exception while downloading plugin(s) with URL {crs_plugin}:\n{e}")
                     continue
 
                 # Extract it to tmp folder
@@ -141,13 +364,13 @@ try:
 
                     # Fallback to file extension detection
                     if file_type == "application/octet-stream":
-                        file_type = guess_type(crs_plugin_url)[0] or "application/octet-stream"
+                        file_type = guess_type(crs_plugin)[0] or "application/octet-stream"
                         LOGGER.debug(f"Guessed file type from URL: {file_type}")
 
                     content.seek(0)
 
                     # Handle ZIP files
-                    if file_type == "application/zip" or crs_plugin_url.endswith(".zip"):
+                    if file_type == "application/zip" or crs_plugin.endswith(".zip"):
                         try:
                             with ZipFile(content) as zf:
                                 zf.extractall(path=temp_dir)
@@ -157,17 +380,15 @@ try:
                             continue
 
                     # Handle TAR files (all compression types)
-                    elif file_type.startswith("application/x-tar") or crs_plugin_url.endswith(
-                        (".tar", ".tar.gz", ".tgz", ".tar.bz2", ".tbz2", ".tar.xz", ".txz")
-                    ):
+                    elif file_type.startswith("application/x-tar") or crs_plugin.endswith((".tar", ".tar.gz", ".tgz", ".tar.bz2", ".tbz2", ".tar.xz", ".txz")):
                         try:
                             # Detect the appropriate tar mode
                             tar_mode = "r"
-                            if crs_plugin_url.endswith(".gz") or file_type == "application/gzip":
+                            if crs_plugin.endswith(".gz") or file_type == "application/gzip":
                                 tar_mode = "r:gz"
-                            elif crs_plugin_url.endswith(".bz2"):
+                            elif crs_plugin.endswith(".bz2"):
                                 tar_mode = "r:bz2"
-                            elif crs_plugin_url.endswith(".xz"):
+                            elif crs_plugin.endswith(".xz"):
                                 tar_mode = "r:xz"
 
                             with tar_open(fileobj=content, mode=tar_mode) as tar:
@@ -178,11 +399,11 @@ try:
                             continue
 
                     else:
-                        LOGGER.error(f"Unknown file type for {crs_plugin_url}, either ZIP or TAR is supported, skipping...")
+                        LOGGER.error(f"Unknown file type for {crs_plugin}, either ZIP or TAR is supported, skipping...")
                         continue
 
                 except Exception as e:
-                    LOGGER.error(f"Exception while decompressing plugin(s) from {crs_plugin_url}:\n{e}")
+                    LOGGER.error(f"Exception while decompressing plugin(s) from {crs_plugin}:\n{e}")
                     continue
 
             plugin_name = ""
@@ -249,7 +470,7 @@ try:
 
             LOGGER.info(f"Successfully patched Core Rule Set (CRS) plugin {plugin_name}.")
 
-            downloaded_plugins[crs_plugin_url] = installed_plugins.copy()
+            downloaded_plugins[crs_plugin] = installed_plugins.copy()
 
         service_plugins[service].update(installed_plugins)
 

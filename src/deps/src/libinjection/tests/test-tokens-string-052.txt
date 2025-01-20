@@ -1,9 +1,0 @@
---TEST--
-oracle nq-string
---INPUT--
-nq
---EXPECTED--
-n nq
-
-
-

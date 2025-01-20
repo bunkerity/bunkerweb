@@ -6,12 +6,14 @@ from ipaddress import ip_address, ip_network
 from os import getenv, sep
 from os.path import join, normpath
 from sys import exit as sys_exit, path as sys_path
+from time import sleep
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("db",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
 from requests import get
+from requests.exceptions import ConnectionError
 
 from logger import setup_logger  # type: ignore
 from common_utils import bytes_hash  # type: ignore
@@ -29,7 +31,7 @@ def check_line(line):
     return False, b""
 
 
-LOGGER = setup_logger("REALIP", getenv("LOG_LEVEL", "INFO"))
+LOGGER = setup_logger("REALIP")
 REALIP_CACHE_PATH = join(sep, "var", "cache", "bunkerweb", "realip")
 status = 0
 
@@ -122,7 +124,18 @@ try:
                         with open(normpath(url[7:]), "rb") as f:
                             iterable = f.readlines()
                     else:
-                        resp = get(url, stream=True, timeout=10)
+                        max_retries = 3
+                        retry_count = 0
+                        while retry_count < max_retries:
+                            try:
+                                resp = get(url, stream=True, timeout=10)
+                                break
+                            except ConnectionError as e:
+                                retry_count += 1
+                                if retry_count == max_retries:
+                                    raise e
+                                LOGGER.warning(f"Connection refused, retrying in 3 seconds... ({retry_count}/{max_retries})")
+                                sleep(3)
 
                         if resp.status_code != 200:
                             LOGGER.warning(f"Got status code {resp.status_code}, skipping...")

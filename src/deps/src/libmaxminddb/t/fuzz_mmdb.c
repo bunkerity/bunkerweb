@@ -7,13 +7,11 @@
 
 extern int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size);
 
-int
-LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
-{
-    int     status;
-    FILE    *fp;
-    MMDB_s  mmdb;
-    char    filename[256];
+int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
+    int status;
+    FILE *fp;
+    MMDB_s mmdb;
+    char filename[256];
 
     if (size < kMinInputLength || size > kMaxInputLength)
         return 0;

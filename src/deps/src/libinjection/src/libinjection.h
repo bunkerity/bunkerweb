@@ -11,11 +11,11 @@
 #define LIBINJECTION_H
 
 #ifdef __cplusplus
-# define LIBINJECTION_BEGIN_DECLS    extern "C" {
-# define LIBINJECTION_END_DECLS      }
+#define LIBINJECTION_BEGIN_DECLS extern "C" {
+#define LIBINJECTION_END_DECLS }
 #else
-# define LIBINJECTION_BEGIN_DECLS
-# define LIBINJECTION_END_DECLS
+#define LIBINJECTION_BEGIN_DECLS
+#define LIBINJECTION_END_DECLS
 #endif
 
 LIBINJECTION_BEGIN_DECLS
@@ -36,29 +36,29 @@ LIBINJECTION_BEGIN_DECLS
  * See python's normalized version
  * http://www.python.org/dev/peps/pep-0386/#normalizedversion
  */
-const char* libinjection_version(void);
+const char *libinjection_version(void);
 
 /**
  * Simple API for SQLi detection - returns a SQLi fingerprint or NULL
  * is benign input
  *
- * \param[in] s  input string, may contain nulls, does not need to be null-terminated
- * \param[in] slen input string length
- * \param[out] fingerprint buffer of 8+ characters.  c-string,
- * \return 1 if SQLi, 0 if benign.  fingerprint will be set or set to empty string.
+ * \param[in] s  input string, may contain nulls, does not need to be
+ * null-terminated \param[in] slen input string length \param[out] fingerprint
+ * buffer of 8+ characters.  c-string, \return 1 if SQLi, 0 if benign.
+ * fingerprint will be set or set to empty string.
  */
-int libinjection_sqli(const char* input, size_t slen, char fingerprint[]);
+int libinjection_sqli(const char *s, size_t slen, char fingerprint[]);
 
 /** ALPHA version of xss detector.
  *
  * NOT DONE.
  *
- * \param[in] s  input string, may contain nulls, does not need to be null-terminated
- * \param[in] slen input string length
- * \return 1 if XSS found, 0 if benign
+ * \param[in] s  input string, may contain nulls, does not need to be
+ * null-terminated \param[in] slen input string length \return 1 if XSS found, 0
+ * if benign
  *
  */
-int libinjection_xss(const char* s, size_t len);
+int libinjection_xss(const char *s, size_t slen);
 
 LIBINJECTION_END_DECLS
 
