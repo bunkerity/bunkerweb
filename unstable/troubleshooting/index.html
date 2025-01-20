@@ -418,12 +418,12 @@
   
   
     <li class="md-tabs__item">
-      <a href="../security-tuning/" class="md-tabs__link">
+      <a href="../advanced/" class="md-tabs__link">
         
   
     
   
-  Security tuning
+  Advanced
 
       </a>
     </li>
@@ -690,11 +690,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../security-tuning/" class="md-nav__link">
+      <a href="../advanced/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Security tuning
+    Advanced
   </span>
   
 
@@ -1024,6 +1024,11 @@ docker-compose<span class="w"> </span>logs<span class="w"> </span>myautoconf
 </code></pre></div></p>
 </div>
 <div class="tabbed-block">
+<div class="admonition warning">
+<p class="admonition-title">Deprecated</p>
+<p>The Swarm integration is deprecated and will be removed in a future release. Please consider using the <a href="#__tabbed_1_2">Docker autoconf integration</a> instead.</p>
+<p><strong>More information can be found in the <a href="../integrations/#swarm">Swarm integration documentation</a>.</strong></p>
+</div>
 <div class="admonition tip">
 <p class="admonition-title">List services</p>
 <p>To list the services, you can use the following command :
@@ -1170,6 +1175,11 @@ cat<span class="w"> </span>/var/log/bunkerweb/access.log
 </code></pre></div></p>
 </div>
 <div class="tabbed-block">
+<div class="admonition warning">
+<p class="admonition-title">Deprecated</p>
+<p>The Swarm integration is deprecated and will be removed in a future release. Please consider using the <a href="#__tabbed_2_2">Docker autoconf integration</a> instead.</p>
+<p><strong>More information can be found in the <a href="../integrations/#swarm">Swarm integration documentation</a>.</strong></p>
+</div>
 <p>You can use the <code>docker exec</code> command (replace <code>myautoconf</code> with the name of your service) :
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span><span class="k">$(</span>docker<span class="w"> </span>ps<span class="w"> </span>-q<span class="w"> </span>-f<span class="w"> </span><span class="nv">name</span><span class="o">=</span>myautoconf<span class="k">)</span><span class="w"> </span>bwcli<span class="w"> </span>unban<span class="w"> </span><span class="m">1</span>.2.3.4
 </code></pre></div></p>

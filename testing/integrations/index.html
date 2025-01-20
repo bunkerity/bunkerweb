@@ -420,12 +420,12 @@
   
   
     <li class="md-tabs__item">
-      <a href="../security-tuning/" class="md-tabs__link">
+      <a href="../advanced/" class="md-tabs__link">
         
   
     
   
-  Security tuning
+  Advanced
 
       </a>
     </li>
@@ -982,11 +982,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../security-tuning/" class="md-nav__link">
+      <a href="../advanced/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Security tuning
+    Advanced
   </span>
   
 
@@ -1751,7 +1751,7 @@ MY_SETTING_2=value2
 <span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span>
 </code></pre></div>
 <h3 id="namespaces">Namespaces</h3>
-<p>Starting from version <code>testing</code>, BunkerWeb's Autoconf stacks now support namespaces. This feature enables you to manage multiple "<em>clusters</em>" of BunkerWeb instances and services on the same Docker host. To take advantage of namespaces, simply set the <code>NAMESPACE</code> label on your services. Here's an example:</p>
+<p>Starting from version <code>1.6.0-beta</code>, BunkerWeb's Autoconf stacks now support namespaces. This feature enables you to manage multiple "<em>clusters</em>" of BunkerWeb instances and services on the same Docker host. To take advantage of namespaces, simply set the <code>NAMESPACE</code> label on your services. Here's an example:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">myapp</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mywebapp:4.2</span>
@@ -2115,7 +2115,7 @@ MY_SETTING_2=value2
 <span class="nn">...</span>
 </code></pre></div>
 <h3 id="namespaces_1">Namespaces</h3>
-<p>Starting from version <code>testing</code>, BunkerWeb's autoconf stacks now support namespaces. This feature enables you to manage multiple clusters of BunkerWeb instances and services on the same Kubernetes cluster. To take advantage of namespaces, simply set the <code>namespace</code> metadata field on your BunkerWeb instances and services. Here's an example:</p>
+<p>Starting from version <code>1.6.0-beta</code>, BunkerWeb's autoconf stacks now support namespaces. This feature enables you to manage multiple clusters of BunkerWeb instances and services on the same Kubernetes cluster. To take advantage of namespaces, simply set the <code>namespace</code> metadata field on your BunkerWeb instances and services. Here's an example:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DaemonSet</span>
 <span class="nt">metadata</span><span class="p">:</span>
@@ -2231,6 +2231,14 @@ MY_SETTING_2=value2
   </p>
 <figcaption>Docker Swarm integration</figcaption>
 </figure>
+<div class="admonition warning">
+<p class="admonition-title">Deprecated</p>
+<p>The Swarm integration is deprecated and will be removed in a future release. Please consider using the <a href="#docker-autoconf">Docker autoconf integration</a> instead.</p>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">PRO support</p>
+<p><strong>If you need Swarm support</strong>, please contact us at <a href="mailto:contact@bunkerity.com">contact@bunkerity.com</a> or via the <a href="https://panel.bunkerweb.io/contact.php">contact form</a>.</p>
+</div>
 <div class="admonition info">
 <p class="admonition-title">Docker autoconf</p>
 <p>The Swarm integration is similar to the Docker autoconf one (but with services instead of containers). Please read the <a href="#docker-autoconf">Docker autoconf integration section</a> first if needed.</p>
@@ -2414,7 +2422,7 @@ MY_SETTING_2=value2
 <span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span>
 </code></pre></div>
 <h3 id="namespaces_2">Namespaces</h3>
-<p>Starting from version <code>testing</code>, BunkerWeb's Autoconf stacks now support namespaces. This feature enables you to manage multiple "<em>clusters</em>" of BunkerWeb instances and services on the same Docker host. To take advantage of namespaces, simply set the <code>NAMESPACE</code> label on your services. Here's an example:</p>
+<p>Starting from version <code>1.6.0-beta</code>, BunkerWeb's Autoconf stacks now support namespaces. This feature enables you to manage multiple "<em>clusters</em>" of BunkerWeb instances and services on the same Docker host. To take advantage of namespaces, simply set the <code>NAMESPACE</code> label on your services. Here's an example:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">myapp</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mywebapp:4.2</span>

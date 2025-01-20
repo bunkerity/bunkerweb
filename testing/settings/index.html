@@ -13,7 +13,7 @@
         <link rel="canonical" href="https://docs.bunkerweb.io/latest/settings/">
       
       
-        <link rel="prev" href="../security-tuning/">
+        <link rel="prev" href="../advanced/">
       
       
         <link rel="next" href="../web-ui/">
@@ -418,12 +418,12 @@
   
   
     <li class="md-tabs__item">
-      <a href="../security-tuning/" class="md-tabs__link">
+      <a href="../advanced/" class="md-tabs__link">
         
   
     
   
-  Security tuning
+  Advanced
 
       </a>
     </li>
@@ -690,11 +690,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../security-tuning/" class="md-nav__link">
+      <a href="../advanced/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Security tuning
+    Advanced
   </span>
   
 
@@ -864,9 +864,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#custom-https-certificate" class="md-nav__link">
+  <a href="#custom-ssl-certificate" class="md-nav__link">
     <span class="md-ellipsis">
-      Custom HTTPS certificate
+      Custom SSL certificate
     </span>
   </a>
   
@@ -1074,6 +1074,15 @@
   <a href="#reverse-scan" class="md-nav__link">
     <span class="md-ellipsis">
       Reverse scan
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ssl" class="md-nav__link">
+    <span class="md-ellipsis">
+      SSL
     </span>
   </a>
   
@@ -1309,14 +1318,14 @@
 <td><code>HTTP_PORT</code></td>
 <td><code>8080</code></td>
 <td>global</td>
-<td>no</td>
+<td>yes</td>
 <td>HTTP port number which bunkerweb binds to.</td>
 </tr>
 <tr>
 <td><code>HTTPS_PORT</code></td>
 <td><code>8443</code></td>
 <td>global</td>
-<td>no</td>
+<td>yes</td>
 <td>HTTPS port number which bunkerweb binds to.</td>
 </tr>
 <tr>
@@ -1491,22 +1500,29 @@
 <td><code>LISTEN_STREAM_PORT</code></td>
 <td><code>1337</code></td>
 <td>multisite</td>
-<td>no</td>
+<td>yes</td>
 <td>Listening port for non-ssl (passthrough).</td>
 </tr>
 <tr>
 <td><code>LISTEN_STREAM_PORT_SSL</code></td>
 <td><code>4242</code></td>
 <td>multisite</td>
-<td>no</td>
+<td>yes</td>
 <td>Listening port for ssl (passthrough).</td>
+</tr>
+<tr>
+<td><code>USE_TCP</code></td>
+<td><code>yes</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>TCP listen (stream).</td>
 </tr>
 <tr>
 <td><code>USE_UDP</code></td>
 <td><code>no</code></td>
 <td>multisite</td>
 <td>no</td>
-<td>UDP listen instead of TCP (stream).</td>
+<td>UDP listen (stream).</td>
 </tr>
 <tr>
 <td><code>USE_IPV6</code></td>
@@ -1677,14 +1693,14 @@
 <td><code>AUTH_BASIC_USER</code></td>
 <td><code>changeme</code></td>
 <td>multisite</td>
-<td>no</td>
+<td>yes</td>
 <td>Username</td>
 </tr>
 <tr>
 <td><code>AUTH_BASIC_PASSWORD</code></td>
 <td><code>changeme</code></td>
 <td>multisite</td>
-<td>no</td>
+<td>yes</td>
 <td>Password</td>
 </tr>
 <tr>
@@ -2066,7 +2082,7 @@
 <td><code>no</code></td>
 <td>multisite</td>
 <td>no</td>
-<td>Use brotli</td>
+<td>Enable or disable Brotli compression.</td>
 </tr>
 <tr>
 <td><code>BROTLI_TYPES</code></td>
@@ -2080,14 +2096,14 @@
 <td><code>1000</code></td>
 <td>multisite</td>
 <td>no</td>
-<td>Minimum length for brotli compression.</td>
+<td>Minimum response size (in bytes) for Brotli compression to apply.</td>
 </tr>
 <tr>
 <td><code>BROTLI_COMP_LEVEL</code></td>
 <td><code>6</code></td>
 <td>multisite</td>
 <td>no</td>
-<td>The compression level of the brotli algorithm.</td>
+<td>Compression level for Brotli (0 = no compression, 11 = maximum compression).</td>
 </tr>
 </tbody>
 </table>
@@ -2288,9 +2304,9 @@
 </tr>
 </tbody>
 </table>
-<h2 id="custom-https-certificate">Custom HTTPS certificate</h2>
+<h2 id="custom-ssl-certificate">Custom SSL certificate</h2>
 <p>STREAM support <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/2705.svg" title=":white_check_mark:" /></p>
-<p>Choose custom certificate for HTTPS.</p>
+<p>Choose custom certificate for SSL.</p>
 <table>
 <thead>
 <tr>
@@ -2307,7 +2323,14 @@
 <td><code>no</code></td>
 <td>multisite</td>
 <td>no</td>
-<td>Use custom HTTPS certificate.</td>
+<td>Use custom SSL certificate.</td>
+</tr>
+<tr>
+<td><code>CUSTOM_SSL_CERT_PRIORITY</code></td>
+<td><code>file</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Choose whether to prioritize the certificate from file path or from base64 data. (file</td>
 </tr>
 <tr>
 <td><code>CUSTOM_SSL_CERT</code></td>
@@ -2562,7 +2585,7 @@
 <td><code>no</code></td>
 <td>multisite</td>
 <td>no</td>
-<td>Use gzip</td>
+<td>Enable or disable Gzip compression.</td>
 </tr>
 <tr>
 <td><code>GZIP_TYPES</code></td>
@@ -2576,21 +2599,21 @@
 <td><code>1000</code></td>
 <td>multisite</td>
 <td>no</td>
-<td>Minimum length for gzip compression.</td>
+<td>Minimum response size (in bytes) for Gzip compression to apply.</td>
 </tr>
 <tr>
 <td><code>GZIP_COMP_LEVEL</code></td>
 <td><code>5</code></td>
 <td>multisite</td>
 <td>no</td>
-<td>The compression level of the gzip algorithm.</td>
+<td>Compression level for Gzip (1 = least compression, 9 = maximum compression).</td>
 </tr>
 <tr>
 <td><code>GZIP_PROXIED</code></td>
 <td><code>no-cache no-store private expired auth</code></td>
 <td>multisite</td>
 <td>no</td>
-<td>Which kind of proxied requests we should compress.</td>
+<td>Specifies which proxied requests should be compressed.</td>
 </tr>
 </tbody>
 </table>
@@ -2661,10 +2684,10 @@
 </tr>
 <tr>
 <td><code>STRICT_TRANSPORT_SECURITY</code></td>
-<td><code>max-age=31536000; includeSubDomains; preload</code></td>
+<td><code>max-age=63072000; includeSubDomains; preload</code></td>
 <td>multisite</td>
 <td>no</td>
-<td>Value for the Strict-Transport-Security header.</td>
+<td>Value for the Strict-Transport-Security (HSTS) header.</td>
 </tr>
 <tr>
 <td><code>COOKIE_FLAGS</code></td>
@@ -2703,7 +2726,7 @@
 </tr>
 <tr>
 <td><code>PERMISSIONS_POLICY</code></td>
-<td><code>accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), compute-pressure=(), display-capture=(), document-domain=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), identity-credentials-get=(), idle-detection=(), local-fonts=(), magnetometer=(), microphone=(), midi=(), otp-credentials=(), payment=(), picture-in-picture=(), publickey-credentials-create=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), speaker-selection=(), storage-access=(), usb=(), web-share=(), window-management=(), xr-spatial-tracking=(), interest-cohort=()</code></td>
+<td><code>accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), compute-pressure=(), display-capture=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), identity-credentials-get=(), idle-detection=(), local-fonts=(), magnetometer=(), microphone=(), midi=(), otp-credentials=(), payment=(), picture-in-picture=(), publickey-credentials-create=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), speaker-selection=(), storage-access=(), usb=(), web-share=(), window-management=(), xr-spatial-tracking=(), interest-cohort=()</code></td>
 <td>multisite</td>
 <td>no</td>
 <td>Value for the Permissions-Policy header.</td>
@@ -2721,13 +2744,6 @@
 <td>multisite</td>
 <td>no</td>
 <td>Value for the X-Content-Type-Options header.</td>
-</tr>
-<tr>
-<td><code>X_XSS_PROTECTION</code></td>
-<td><code>1; mode=block</code></td>
-<td>multisite</td>
-<td>no</td>
-<td>Value for the X-XSS-Protection header.</td>
 </tr>
 <tr>
 <td><code>X_DNS_PREFETCH_CONTROL</code></td>
@@ -2919,10 +2935,17 @@
 </tr>
 <tr>
 <td><code>METRICS_MAX_BLOCKED_REQUESTS</code></td>
-<td><code>100</code></td>
+<td><code>1000</code></td>
 <td>global</td>
 <td>no</td>
 <td>Maximum number of blocked requests to store (per worker).</td>
+</tr>
+<tr>
+<td><code>METRICS_MAX_BLOCKED_REQUESTS_REDIS</code></td>
+<td><code>100000</code></td>
+<td>global</td>
+<td>no</td>
+<td>Maximum number of blocked requests to store in Redis.</td>
 </tr>
 </tbody>
 </table>
@@ -2958,20 +2981,6 @@
 <td>Close SSL/TLS connection if the SNI is unknown.</td>
 </tr>
 <tr>
-<td><code>REDIRECT_HTTP_TO_HTTPS</code></td>
-<td><code>no</code></td>
-<td>multisite</td>
-<td>no</td>
-<td>Redirect all HTTP request to HTTPS.</td>
-</tr>
-<tr>
-<td><code>AUTO_REDIRECT_HTTP_TO_HTTPS</code></td>
-<td><code>yes</code></td>
-<td>multisite</td>
-<td>no</td>
-<td>Try to detect if HTTPS is used and activate HTTP to HTTPS redirection if that's the case.</td>
-</tr>
-<tr>
 <td><code>ALLOWED_METHODS</code></td>
 <td><code>GET                    | POST      | HEAD</code></td>
 <td>multisite</td>
@@ -2998,13 +3007,6 @@
 <td>multisite</td>
 <td>no</td>
 <td>Root folder containing files to serve (/var/www/html/{server_name} if unset).</td>
-</tr>
-<tr>
-<td><code>SSL_PROTOCOLS</code></td>
-<td><code>TLSv1.2 TLSv1.3</code></td>
-<td>multisite</td>
-<td>no</td>
-<td>The supported version of TLS. We recommend the default value TLSv1.2 TLSv1.3 for compatibility reasons.</td>
 </tr>
 <tr>
 <td><code>HTTP2</code></td>
@@ -3135,11 +3137,11 @@
 <td>Version of the OWASP Core Rule Set to use with ModSecurity (3, 4 or nightly).</td>
 </tr>
 <tr>
-<td><code>MODSECURITY_CRS_PLUGIN_URLS</code></td>
+<td><code>MODSECURITY_CRS_PLUGINS</code></td>
 <td></td>
 <td>multisite</td>
 <td>no</td>
-<td>List of OWASP CRS plugins URLs (direct download to .zip or .tar file) to download and install (URLs are separated with space). (Not compatible with CRS version 3)</td>
+<td>List of OWASP CRS plugins (plugin-name[/tag] or URL) to download and install (separated with spaces). (Not compatible with CRS version 3)</td>
 </tr>
 <tr>
 <td><code>MODSECURITY_SEC_AUDIT_ENGINE</code></td>
@@ -3161,6 +3163,13 @@
 <td>multisite</td>
 <td>no</td>
 <td>SecAuditLogParts directive of ModSecurity.</td>
+</tr>
+<tr>
+<td><code>MODSECURITY_REQ_BODY_NO_FILES_LIMIT</code></td>
+<td><code>131072</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>SecRequestBodyNoFilesLimit directive of ModSecurity.</td>
 </tr>
 </tbody>
 </table>
@@ -3905,6 +3914,43 @@
 </tr>
 </tbody>
 </table>
+<h2 id="ssl">SSL</h2>
+<p>STREAM support <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/2705.svg" title=":white_check_mark:" /></p>
+<p>Handle SSL/TLS related settings.</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Default</th>
+<th>Context</th>
+<th>Multiple</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>REDIRECT_HTTP_TO_HTTPS</code></td>
+<td><code>no</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Redirect all HTTP request to HTTPS.</td>
+</tr>
+<tr>
+<td><code>AUTO_REDIRECT_HTTP_TO_HTTPS</code></td>
+<td><code>yes</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Try to detect if HTTPS is used and activate HTTP to HTTPS redirection if that's the case.</td>
+</tr>
+<tr>
+<td><code>SSL_PROTOCOLS</code></td>
+<td><code>TLSv1.2 TLSv1.3</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>The supported version of TLS. We recommend the default value TLSv1.2 TLSv1.3 for compatibility reasons.</td>
+</tr>
+</tbody>
+</table>
 <h2 id="securitytxt">Security.txt</h2>
 <p>STREAM support <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>Manage the security.txt file. A proposed standard which allows websites to define security policies.</p>
@@ -4153,7 +4199,7 @@
 </tr>
 <tr>
 <td><code>WHITELIST_IP</code></td>
-<td><code>20.191.45.212 40.88.21.235 40.76.173.151 40.76.163.7 20.185.79.47 52.142.26.175 20.185.79.15 52.142.24.149 40.76.162.208 40.76.163.23 40.76.162.191 40.76.162.247</code></td>
+<td></td>
 <td>multisite</td>
 <td>no</td>
 <td>List of IP/network, separated with spaces, to put into the whitelist.</td>
