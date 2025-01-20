@@ -42,8 +42,9 @@ jobs:
         if: inputs.HIDDEN == true
         run: |
           mike deploy --update-aliases --alias-type=copy ${{ inputs.VERSION }} ${{ inputs.ALIAS }}
-          mike props ${{ inputs.VERSION }} --set hidden=true
+          mike props ${{ inputs.VERSION }} --set hidden=true --push
       - name: Deploy documentation
+        if: inputs.HIDDEN == false
         run: mike deploy --update-aliases --push --alias-type=copy ${{ inputs.VERSION }} ${{ inputs.ALIAS }}
       - name: Set default doc
         if: inputs.ALIAS == 'latest'
