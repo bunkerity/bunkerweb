@@ -94,7 +94,7 @@ jobs:
     needs: [create-arm]
     strategy:
       matrix:
-        linux: [ubuntu, debian, fedora, rhel, rhel9]
+        linux: [ubuntu, debian, fedora, rhel, rhel9, ubuntu-jammy]
         platforms: [linux/amd64, linux/arm64]
         include:
           - release: beta
@@ -108,6 +108,8 @@ jobs:
             package: rpm
           - linux: rhel9
             package: rpm
+          - linux: ubuntu-jammy
+            package: deb
     uses: ./.github/workflows/linux-build.yml
     with:
       RELEASE: ${{ matrix.release }}
@@ -181,7 +183,7 @@ jobs:
     needs: [wait-builds]
     strategy:
       matrix:
-        linux: [ubuntu, debian, fedora, el, el9]
+        linux: [ubuntu, debian, fedora, el, el9, ubuntu-jammy]
         arch: [amd64, arm64]
         include:
           - release: beta
@@ -211,6 +213,11 @@ jobs:
             suffix: "1."
             version: 9
             package: rpm
+          - linux: ubuntu-jammy
+            separator: _
+            suffix: ""
+            version: jammy
+            package: deb
           - linux: ubuntu
             arch: amd64
             package_arch: amd64
@@ -226,6 +233,9 @@ jobs:
           - linux: el9
             arch: amd64
             package_arch: x86_64
+          - linux: ubuntu-jammy
+            arch: amd64
+            package_arch: amd64
           - linux: ubuntu
             arch: arm64
             package_arch: arm64
@@ -241,6 +251,9 @@ jobs:
           - linux: el9
             arch: arm64
             package_arch: aarch64
+          - linux: ubuntu-jammy
+            arch: arm64
+            package_arch: arm64
     uses: ./.github/workflows/push-packagecloud.yml
     with:
       SEPARATOR: ${{ matrix.separator }}
