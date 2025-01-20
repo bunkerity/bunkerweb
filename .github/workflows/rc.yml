@@ -94,7 +94,7 @@ jobs:
     needs: [create-arm]
     strategy:
       matrix:
-        linux: [ubuntu, debian, fedora, rhel, rhel9]
+        linux: [ubuntu, debian, fedora, rhel, rhel9, ubuntu-jammy]
         platforms: [linux/amd64, linux/arm64]
         include:
           - release: rc
@@ -183,7 +183,7 @@ jobs:
     needs: [wait-builds]
     strategy:
       matrix:
-        linux: [ubuntu, debian, fedora, el, el9]
+        linux: [ubuntu, debian, fedora, el, el9, ubuntu-jammy]
         arch: [amd64, arm64]
         include:
           - release: latest
