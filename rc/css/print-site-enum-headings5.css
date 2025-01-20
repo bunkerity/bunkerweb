@@ -1,0 +1,49 @@
+
+/* 
+Enumerate level 2 headings of CHAPTERS,
+that are part of an original included page
+
+Only displayed when set in mkdocs.yml:
+
+print-site:
+    - enumerate_headings: true 
+    - enumerate_headings_depth: 2 # or more
+*/
+
+.print-site-enumerate-headings .print-page h5:before {
+counter-increment: detail;
+content: counter(chapter) "." counter(section) "." counter(sub-section) "." counter(composite) "." counter(detail) " " !important;
+}
+    
+/* 
+Enumerate level 2 headings of SECTIONS,
+that are part of an original included page
+
+Only displayed when set in mkdocs.yml:
+
+print-site:
+    - enumerate_headings: true 
+    - enumerate_headings_depth: 2 # or more
+*/
+
+
+.print-site-enumerate-headings h5.nav-section-title:before {
+    counter-increment: sec-detail;
+    content: counter(sec-top, upper-roman) "." counter(sec-section, upper-roman) "." counter(sec-sub-section, upper-roman) "." counter(sec-composite, upper-roman) "." counter(sec-detail, upper-roman) " " !important;
+}
+
+
+/* Enumerate CHAPTERS in table of contents also */
+
+.print-site-enumerate-headings .print-site-toc-level-5 > li a:before {
+    counter-increment: toc-detail;
+    content: counter(toc-chapter) "." counter(toc-section) "." counter(toc-sub-section) "." counter(toc-composite) "." counter(toc-detail) " ";
+}
+
+
+/* Enumerate SECTIONS in table of contents also */
+
+.print-site-enumerate-headings li.toc-nav-section-title-level-5:before {
+    counter-increment: toc-detail;
+    content: counter(toc-sec-chapter, upper-roman) "." counter(toc-sec-section, upper-roman) "." counter(toc-sec-sub-section, upper-roman) "." counter(toc-sec-composite, upper-roman) "." counter(toc-sec-detail, upper-roman) " ";
+}
