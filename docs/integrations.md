@@ -812,7 +812,7 @@ metadata:
   name: cr-bunkerweb
 rules:
   - apiGroups: [""]
-    resources: ["services", "pods", "configmaps", "secrets"]
+    resources: ["services", "pods", "pods/log", "configmaps", "secrets"]
     verbs: ["get", "watch", "list"]
   - apiGroups: ["networking.k8s.io"]
     resources: ["ingresses"]
