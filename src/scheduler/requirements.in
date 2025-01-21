@@ -14,7 +14,7 @@ certbot-dns-route53==3.1.0
 certbot-dns-sakuracloud==3.1.0
 certbot-dns-scaleway==0.0.7
 cryptography==44.0.0
-importlib-metadata==8.5.0
+importlib-metadata==8.6.1
 maxminddb==2.6.3
 pydantic==2.10.5
 python-magic==0.4.27
