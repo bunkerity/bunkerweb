@@ -80,7 +80,7 @@ class IngressController(Controller):
         instance = {
             "name": controller_instance.metadata.name,
             "hostname": (
-                f"{controller_instance.status.pod_ip.replace('.','-')}.{controller_instance.metadata.namespace}.pod.{self.__domain_name}"
+                f"{controller_instance.status.pod_ip.replace('.','-') if controller_instance.status.pod_ip else controller_instance.metadata.name}.{controller_instance.metadata.namespace}.pod.{self.__domain_name}"
                 if self.__use_fqdn
                 else (controller_instance.status.pod_ip or controller_instance.metadata.name)
             ),
@@ -122,7 +122,6 @@ class IngressController(Controller):
 
         namespace = controller_service.metadata.namespace
         services = []
-        server_names = set()
 
         # parse rules
         for rule in controller_service.spec.rules:
@@ -132,7 +131,6 @@ class IngressController(Controller):
 
             service = {}
             service["SERVER_NAME"] = rule.host
-            server_names.add(rule.host.strip().split(" ")[0])
             if not rule.http:
                 services.append(service)
                 continue
@@ -187,38 +185,34 @@ class IngressController(Controller):
         # parse annotations
         if controller_service.metadata.annotations:
             for service in services:
-                server_name = service["SERVER_NAME"].strip().split(" ")[0]
-
                 for annotation, value in controller_service.metadata.annotations.items():
                     if not annotation.startswith("bunkerweb.io/"):
                         continue
-
-                    variable = annotation.replace("bunkerweb.io/", "", 1)
-                    if variable.startswith(f"{server_name}_") or not all(variable.startswith(f"{server_name}_") for server_name in server_names):
-                        service[variable.replace(f"{server_name}_", "", 1)] = value
+                    service[annotation.replace("bunkerweb.io/", "", 1)] = value
 
                 # Handle stream services
-                if service.get("SERVER_TYPE", "http") == "stream":
-                    reverse_proxy_found = False
-                    warned = False
-                    for setting in service.copy():
-                        if setting.startswith("REVERSE_PROXY_HOST_"):
-                            if not reverse_proxy_found:
-                                reverse_proxy_found = True
-                                suffix = setting.replace("REVERSE_PROXY_HOST_", "", 1)
-                                service["REVERSE_PROXY_HOST"] = service.pop(setting).replace(f"{self.__service_protocol}://", "", 1)
-                                service["REVERSE_PROXY_URL"] = service.pop(f"REVERSE_PROXY_URL_{suffix}", "/")
-                                continue
+                for server_name in service["SERVER_NAME"].strip().split(" "):
+                    if service.get(f"{server_name}_SERVER_TYPE", service.get("SERVER_TYPE", "http")) == "stream":
+                        reverse_proxy_found = False
+                        warned = False
+                        for setting in service.copy():
+                            if setting.startswith(f"{server_name}_REVERSE_PROXY_HOST_"):
+                                if not reverse_proxy_found:
+                                    reverse_proxy_found = True
+                                    suffix = setting.replace(f"{server_name}_REVERSE_PROXY_HOST_", "", 1)
+                                    service[f"{server_name}_REVERSE_PROXY_HOST"] = service.pop(setting).replace(f"{self.__service_protocol}://", "", 1)
+                                    service[f"{server_name}_REVERSE_PROXY_URL"] = service.pop(f"{server_name}_REVERSE_PROXY_URL_{suffix}", "/")
+                                    continue
 
-                            if not warned:
-                                warned = True
-                                self._logger.warning(
-                                    f"Service {server_name} is a stream service, we will only use the first reverse proxy config. Ignoring all others..."
-                                )
+                                if not warned:
+                                    warned = True
+                                    self._logger.warning(
+                                        f"Service {server_name} is a stream service, we will only use the first reverse proxy config. Ignoring all others..."
+                                    )
 
-                            del service[setting]
-                        elif setting.startswith("REVERSE_PROXY_URL_") and setting in service:
-                            del service[setting]
+                                del service[setting]
+                            elif setting.startswith(f"{server_name}_REVERSE_PROXY_URL_") and setting in service:
+                                del service[setting]
 
         # parse tls
         if controller_service.spec.tls:
@@ -248,6 +242,7 @@ class IngressController(Controller):
                                 service["USE_CUSTOM_SSL"] = "yes"
                                 service["CUSTOM_SSL_CERT_DATA"] = secret_tls.data["tls.crt"]
                                 service["CUSTOM_SSL_KEY_DATA"] = secret_tls.data["tls.key"]
+
         return services
 
     def get_configs(self) -> dict:
@@ -381,6 +376,7 @@ class IngressController(Controller):
 
                         to_apply = True
                         if waiting:
+                            self._logger.debug("Scheduler is already applying a configuration, retrying in 1 second ...")
                             sleep(1)
                             continue
 
@@ -421,12 +417,7 @@ class IngressController(Controller):
                     sleep(10)
 
     def apply_config(self) -> bool:
-        return self.apply(
-            self._instances,
-            self._services,
-            configs=self._configs,
-            first=not self._loaded,
-        )
+        return self.apply(self._instances, self._services, configs=self._configs, first=not self._loaded)
 
     def process_events(self):
         self._set_autoconf_load_db()
