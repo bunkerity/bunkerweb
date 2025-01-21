@@ -14,7 +14,7 @@ from Controller import Controller
 
 
 class IngressController(Controller):
-    def __init__(self):
+    def __init__(self, unique_warnings: List[str] = None):
         self.__internal_lock = Lock()
         super().__init__("kubernetes")
         config.load_incluster_config()
@@ -45,6 +45,8 @@ class IngressController(Controller):
             self._logger.warning(f"Unsupported service protocol {self.__service_protocol}")
             self.__service_protocol = "http"
         self._logger.info(f"Using service protocol: {self.__service_protocol}")
+        # add unique warnings
+        self.unique_warnings = unique_warnings if unique_warnings is not None else []
 
     def _get_controller_instances(self) -> list:
         instances = []
@@ -145,9 +147,20 @@ class IngressController(Controller):
                 elif not path.backend.service.port:
                     self._logger.warning("Ignoring unsupported ingress rule without backend service port.")
                     continue
-                elif not path.backend.service.port.number and not path.backend.service.port.name:
-                    self._logger.warning("Ignoring unsupported ingress rule without backend service port number or name.")
-                    continue
+                # this below condition is already removed in the master branch, i don't see the goal behind it,
+                # for me it's useless, as there are no proper service deployed without a port name or port number.
+                # elif not path.backend.service.port.number and not path.backend.service.port.name:
+                #     self._logger.warning("Ignoring unsupported ingress rule without backend service port number or name.")
+                #     continue
+                # These comments can be removed without any problem. Regards!
+                elif path.backend.service.port.number is None:
+                        if path.backend.service.name not in self.unique_warnings:
+                            self._logger.warning(
+                                "Ignoring unsupported ingress rule without backend service port number for service %s.",
+                                path.backend.service.name
+                            )
+                            self.unique_warnings.append(path.backend.service.name)
+                        continue
 
                 service_list = self.__corev1.list_namespaced_service(
                     namespace,
