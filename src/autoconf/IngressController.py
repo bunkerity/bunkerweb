@@ -11,12 +11,13 @@ from Controller import Controller
 
 
 class IngressController(Controller):
-    def __init__(self):
+    def __init__(self, unique_warnings: List[str] = None):
         self.__internal_lock = Lock()
         super().__init__("kubernetes")
         config.load_incluster_config()
         self.__corev1 = client.CoreV1Api()
         self.__networkingv1 = client.NetworkingV1Api()
+        self.unique_warnings = unique_warnings if unique_warnings is not None else []
 
     def _get_controller_instances(self) -> list:
         return [
@@ -95,11 +96,14 @@ class IngressController(Controller):
                         "Ignoring unsupported ingress rule without backend service port.",
                     )
                     continue
-                elif not path.backend.service.port.number:
-                    self._logger.warning(
-                        "Ignoring unsupported ingress rule without backend service port number.",
-                    )
-                    continue
+                elif path.backend.service.port.number is None:
+                        if path.backend.service.name not in self.unique_warnings:
+                            self._logger.warning(
+                                "Ignoring unsupported ingress rule without backend service port number for service %s.",
+                                path.backend.service.name
+                            )
+                            self.unique_warnings.append(path.backend.service.name)
+                        continue
 
                 service_list = self.__corev1.list_service_for_all_namespaces(
                     watch=False,
