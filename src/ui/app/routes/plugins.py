@@ -420,7 +420,7 @@ def upload_plugin():
     tmp_ui_path = TMP_DIR.joinpath("ui")
     tmp_ui_path.mkdir(parents=True, exist_ok=True)
 
-    for uploaded_file in request.files.getlist("file"):
+    for uploaded_file in request.files.values():
         if not uploaded_file.filename:
             return {"status": "ko"}, 422
 
@@ -430,8 +430,7 @@ def upload_plugin():
         file_name = Path(secure_filename(uploaded_file.filename)).name
         folder_name = file_name.rsplit(".", 2)[0]
 
-        with BytesIO() as plugin_file:
-            uploaded_file.save(plugin_file)
+        with BytesIO(uploaded_file.read()) as plugin_file:
             plugin_file.seek(0, 0)
             plugins = []
             if uploaded_file.filename.endswith(".zip"):
