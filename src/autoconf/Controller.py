@@ -22,7 +22,9 @@ class Controller(Config):
         if namespaces:
             self._namespaces = namespaces.strip().split(" ")
             self._logger.info(
-                "Only instances and services in the " + ", ".join(f"{namespace!r}" for namespace in self._namespaces) + " namespace(s) will be considered."
+                "Only instances and services in the "
+                + ", ".join(f"{namespace!r}" for namespace in self._namespaces)
+                + f" namespace{'s' if len(self._namespaces) > 1 else ''} will be managed."
             )
 
     def wait(self, wait_time: int) -> list:
