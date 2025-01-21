@@ -1512,6 +1512,47 @@ By default, BunkerWeb will only listen on IPv4 addresses and won't use IPv6 for 
     systemctl start bunkerweb bunkerweb-scheduler
     ```
 
+### Persistence of Bans and Reports
+
+By default, BunkerWeb stores bans and reports in a local Lua datastore. While simple and efficient, this setup means that data is lost when the instance is restarted. To ensure that bans and reports persist across restarts, you can configure BunkerWeb to use a remote Redis server.
+
+#### Why Use Redis?
+
+Redis is a powerful, in-memory data store commonly used as a database, cache, and message broker. It is highly scalable and supports a variety of data structures, including:
+
+- **Strings**: Basic key-value pairs.
+- **Hashes**: Field-value pairs within a single key.
+- **Lists**: Ordered collections of strings.
+- **Sets**: Unordered collections of unique strings.
+- **Sorted Sets**: Ordered collections with scores.
+
+By leveraging Redis, BunkerWeb can persistently store bans, reports, and cache data, ensuring durability and scalability.
+
+#### Enabling Redis Support
+
+To enable Redis support, configure the following settings in your BunkerWeb configuration file:
+
+```conf
+# Enable Redis support
+USE_REDIS=yes
+
+# Redis server hostname or IP address
+REDIS_HOST=<hostname>
+
+# Redis server port number (default: 6379)
+REDIS_PORT=6379
+
+# Redis database number (default: 0)
+REDIS_DATABASE=<database>
+```
+
+- **`USE_REDIS`**: Set to `yes` to enable Redis integration.
+- **`REDIS_HOST`**: Specify the hostname or IP address of the Redis server.
+- **`REDIS_PORT`**: Specify the port number for the Redis server. Defaults to `6379`.
+- **`REDIS_DATABASE`**: Specify the Redis database number to use. Defaults to `0`.
+
+If you require more advanced settings, such as authentication, SSL/TLS support, or Sentinel mode, refer to the [Redis plugin settings documentation](settings.md#redis) for detailed guidance.
+
 ## Security Mode
 
 STREAM support :white_check_mark:
