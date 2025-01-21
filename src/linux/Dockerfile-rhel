@@ -95,7 +95,7 @@ RUN install -m 755 helpers/bwcli /usr/bin/bwcli && \
     find . -path ./deps -prune -o -type d -print0 | xargs -0 chmod 0750 && \
     chmod 755 /var/log/bunkerweb && \
     touch /var/log/bunkerweb/error.log /var/log/bunkerweb/access.log /var/log/bunkerweb/modsec_audit.log && \
-    chmod 770 /var/cache/bunkerweb/ /var/tmp/bunkerweb/ /var/run/bunkerweb/ && \
+    chmod 770 /var/cache/bunkerweb/ /var/tmp/bunkerweb/ /var/run/bunkerweb/ db/alembic db/alembic/alembic.ini db/alembic/env.py && \
     chmod 750 gen/*.py scheduler/*.py cli/*.py ui/*.sh helpers/*.sh /var/www/ && \
     find core/ -type f -name "*.sh" ! -path "core/modsecurity/files/*" -print0 | xargs -0 chmod 750 && \
     find core/ ui/ -type f -name "*.py" ! -path "core/modsecurity/files/*" -print0 | xargs -0 chmod 750 && \
