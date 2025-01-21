@@ -98,9 +98,9 @@ export DATABASE_URI
 rm -f /var/tmp/bunkerweb/database_uri
 
 # Update configuration files
-if sed -i "s|^sqlalchemy\\.url =.*$|sqlalchemy.url = $DATABASE_URI|" alembic.ini; then
-	if sed -i "s|^version_locations =.*$|version_locations = ${DATABASE}_versions|" alembic.ini; then
-		if [ "$current_version" != "$installed_version" ]; then
+if [ "$current_version" != "$installed_version" ]; then
+	if sed -i "s|^sqlalchemy\\.url =.*$|sqlalchemy.url = $DATABASE_URI|" alembic.ini; then
+		if sed -i "s|^version_locations =.*$|version_locations = ${DATABASE}_versions|" alembic.ini; then
 			# Find the corresponding Alembic revision by scanning migration files
 			MIGRATION_DIR="/usr/share/bunkerweb/db/alembic/${DATABASE}_versions"
 			NORMALIZED_VERSION=$(echo "$current_version" | tr '.' '_' | tr '-' '_')
@@ -112,25 +112,23 @@ if sed -i "s|^sqlalchemy\\.url =.*$|sqlalchemy.url = $DATABASE_URI|" alembic.ini
 			fi
 
 			# Stamp the database with the determined revision
-			if ! python3 -m alembic stamp "$REVISION"; then
-					log "ENTRYPOINT" "❌" "Failed to stamp database with revision: $REVISION"
+			if python3 -m alembic stamp "$REVISION"; then
+				# Run database migration
+				log "ENTRYPOINT" "ℹ️" "Running database migration..."
+				if ! python3 -m alembic upgrade head; then
+					log "ENTRYPOINT" "❌" "Database migration failed"
 					exit 1
+				fi
+				log "ENTRYPOINT" "✅" "Database migration completed successfully"
+			else
+				log "ENTRYPOINT" "❌" "Failed to stamp database with revision: $REVISION, migration aborted"
 			fi
-
-			# Run database migration
-			log "ENTRYPOINT" "ℹ️" "Running database migration..."
-			if ! python3 -m alembic upgrade head; then
-				log "ENTRYPOINT" "❌" "Database migration failed"
-				exit 1
-			fi
-
-			log "ENTRYPOINT" "✅" "Database migration completed successfully"
+		else
+			log "ENTRYPOINT" "❌" "Failed to update version locations in configuration, migration aborted"
 		fi
 	else
-		log "ENTRYPOINT" "❌" "Failed to update version locations in configuration, migration aborted"
+		log "ENTRYPOINT" "❌" "Failed to update database URL in configuration, migration aborted"
 	fi
-else
-	log "ENTRYPOINT" "❌" "Failed to update database URL in configuration, migration aborted"
 fi
 
 cd - > /dev/null || exit 1
