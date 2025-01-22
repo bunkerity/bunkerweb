@@ -43,9 +43,9 @@ PLUGINS_SPECIFICS = {
 @login_required
 def plugins_page():
     tmp_ui_path = TMP_DIR.joinpath("ui")
-    # Remove tmp folder
-    if tmp_ui_path.is_dir():
-        rmtree(tmp_ui_path, ignore_errors=True)
+    # Remove everything in the tmp folder
+    rmtree(tmp_ui_path, ignore_errors=True)
+    tmp_ui_path.mkdir(parents=True, exist_ok=True)
     return render_template("plugins.html")
 
 
@@ -133,6 +133,7 @@ def run_action(plugin: str, function_name: str = "", *, tmp_dir: Optional[Path] 
         sys_path.pop()
         if function_name != "pre_render":
             rmtree(tmp_dir, ignore_errors=True)
+            TMP_DIR.joinpath("ui").mkdir(parents=True, exist_ok=True)
 
         LOGGER.error(f"An error occurred while importing the plugin: {e}")
         return {"status": "ko", "code": 500, "message": "An error occurred while importing the plugin, see logs for more details"}
@@ -166,6 +167,7 @@ def run_action(plugin: str, function_name: str = "", *, tmp_dir: Optional[Path] 
 
         if function_name != "pre_render":
             rmtree(tmp_dir, ignore_errors=True)
+            TMP_DIR.joinpath("ui").mkdir(parents=True, exist_ok=True)
 
         if message:
             LOGGER.error(message + (f": {exception}" if exception else ""))
@@ -418,7 +420,6 @@ def upload_plugin():
         return {"status": "ko"}, 400
 
     tmp_ui_path = TMP_DIR.joinpath("ui")
-    tmp_ui_path.mkdir(parents=True, exist_ok=True)
 
     for uploaded_file in request.files.values():
         if not uploaded_file.filename:

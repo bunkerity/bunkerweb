@@ -491,7 +491,7 @@ $(document).ready(function () {
 
   // File input change event
   fileInput.on("change", function () {
-    const files = fileInput.get(0).files;
+    const files = this.files;
     for (let i = 0; i < files.length; i++) {
       setTimeout(() => {
         const file = files[i];
