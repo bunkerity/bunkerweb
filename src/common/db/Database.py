@@ -421,7 +421,7 @@ class Database:
                 metadata = session.query(Metadata).with_entities(Metadata.version).filter_by(id=1).first()
                 if metadata:
                     return metadata.version
-                return "1.6.0-rc2"
+                return "1.6.0-rc3"
             except BaseException as e:
                 return f"Error: {e}"
 
@@ -451,7 +451,7 @@ class Database:
             "last_pro_plugins_change": None,
             "last_instances_change": None,
             "integration": "unknown",
-            "version": "1.6.0-rc2",
+            "version": "1.6.0-rc3",
             "database_version": "Unknown",  # ? Extracted from the database
             "default": True,  # ? Extra field to know if the returned data is the default one
         }
