@@ -156,11 +156,8 @@
                 <div class="text-truncate" data-i18n="Pro">Pro</div>
             </a>
         </li>
-        <li class="menu-item">
-            <a href="https://panel.bunkerweb.io/order/support/?utm_campaign=self&utm_source=ui"
-               target="_blank"
-               rel="noopener"
-               class="menu-link">
+        <li class="menu-item{% if current_endpoint == 'support' %} active{% endif %}">
+            <a href="{{ url_for('support') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-support"></i>
                 <div class="text-truncate" data-i18n="Support">Support</div>
             </a>

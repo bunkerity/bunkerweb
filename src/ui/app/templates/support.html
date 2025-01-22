@@ -1,0 +1,126 @@
+{% extends "dashboard.html" %}
+{% block content %}
+    <!-- Content -->
+    {% set support_url = url_for('support') %}
+    <div class="row g-3">
+        <div class="col-6 col-xl-3">
+            <div class="card p-4 position-relative h-100">
+                <i class='bx bxs-file-txt bx-sm position-absolute top-0 end-0 m-3 text-secondary'></i>
+                <div class="card-header p-2">
+                    <div class="card-title">
+                        <h5 class="me-2 text-secondary don-jose mb-0">Download logs</h5>
+                    </div>
+                </div>
+                <div class="card-body position-relative">
+                    <div class="d-flex align-items-center justify-content-center h-100 mb-3">
+                        <div class="text-center text-primary">
+                            <a href="{{ url_for("support") }}/logs"
+                               role="button"
+                               aria-pressed="true"
+                               class="btn btn-outline-secondary justify-content-center align-items-center"
+                               target="_blank"
+                               rel="noopener">
+                                <span class="bx bx-download me-0 me-md-2"></span>
+                                <span class="d-none d-md-inline">Download</span>
+                            </a>
+                        </div>
+                    </div>
+                    <small class="position-absolute bottom-0 end-0 text-muted">All private data will be anonymized</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-xl-5">
+            <div class="card p-4 position-relative h-100">
+                <i class='bx bxs-file-json bx-sm position-absolute top-0 end-0 m-3 text-secondary'></i>
+                <div class="card-header p-2">
+                    <div class="card-title">
+                        <h5 class="me-2 text-secondary don-jose mb-0">Extract configuration</h5>
+                    </div>
+                </div>
+                <div class="card-body position-relative d-flex align-items-center justify-content-evenly">
+                    <div class="d-flex align-items-center justify-content-center h-100 me-3">
+                        <div class="text-center text-primary">
+                            <a href="{{ support_url }}/config"
+                               role="button"
+                               aria-pressed="true"
+                               class="btn btn-outline-secondary justify-content-center align-items-center"
+                               target="_blank"
+                               rel="noopener">
+                                <i class="bx bx-cog me-0 me-md-2"></i>
+                                <span class="d-none d-md-inline">Entire config</span>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="dropdown btn-group me-3">
+                        <button id="select-service"
+                                type="button"
+                                class="btn btn-outline-primary dropdown-toggle"
+                                data-bs-toggle="dropdown"
+                                aria-haspopup="true"
+                                aria-expanded="false">
+                            <i class="bx bx-cube me-0 me-md-2"></i>
+                            <span class="d-none d-md-inline">Service</span>
+                        </button>
+                        <ul id="services-dropdown-menu"
+                            class="dropdown-menu nav-pills max-vh-60 overflow-auto pt-0"
+                            role="tablist">
+                            <div class="input-group input-group-merge mb-2">
+                                <span class="input-group-text p-2 border-0 border-primary border-bottom shadow-none"><i class="bx fs-6 bx-search"></i></span>
+                                <input id="service-search"
+                                       type="text"
+                                       class="form-control border-0 border-primary border-bottom shadow-none"
+                                       placeholder="Search..."
+                                       aria-label="Search...">
+                            </div>
+                            {% for service in services %}
+                                <li class="nav-item">
+                                    <a href="{{ support_url }}/config?service={{ service }}"
+                                       role="button"
+                                       aria-pressed="true"
+                                       class="dropdown-item"
+                                       target="_blank"
+                                       rel="noopener">{{ service }}</a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-xl-4">
+            <div class="card p-4 position-relative h-100">
+                <i class='bx bx-help-circle bx-sm position-absolute top-0 end-0 m-3'></i>
+                <div class="card-header p-2">
+                    <div class="card-title">
+                        <h5 class="me-2 text-primary shine don-jose mb-0">Support link</h5>
+                    </div>
+                </div>
+                <div class="card-body position-relative">
+                    <div class="d-flex align-items-center justify-content-center h-100">
+                        <div class="text-center text-primary">
+                            <a href="{% if is_pro_version %}https://panel.bunkerweb.io/submitticket.php?utm_campaign=self&utm_source=ui{% else %}https://panel.bunkerweb.io/order/support/?utm_campaign=self&utm_source=ui{% endif %}"
+                               role="button"
+                               aria-pressed="true"
+                               class="btn btn-pro-now courier-prime justify-content-center align-items-center"
+                               target="_blank"
+                               rel="noopener">
+                                <span class="me-1 me-md-2 d-flex h-100">
+                                    <img src="{{ url_for('static', filename='img/diamond-blue.svg') }}"
+                                         alt="Pro plugin"
+                                         width="18px"
+                                         height="15.5px">
+                                </span>
+                                {% if pro_status == "inactive" %}
+                                    Open a support ticket
+                                {% else %}
+                                    Order support
+                                {% endif %}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--/ Content -->
+{% endblock %}

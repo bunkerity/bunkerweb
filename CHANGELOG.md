@@ -2,6 +2,8 @@
 
 ## v1.6.0-rc3 - ????/??/??
 
+- [UI] Add support page for easy logs and configuration sharing while anonymizing sensitive data
+
 ## v1.6.0-rc2 - 2025/01/21
 
 - [BUGFIX] Whitelisting a client no longer bypasses https redirect settings as the `ssl` plugin is now executed before the `whitelist` plugin
