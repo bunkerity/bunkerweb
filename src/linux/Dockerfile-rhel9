@@ -17,7 +17,7 @@ RUN rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-Rocky-9
 RUN dnf install -y wget make yum-utils && \
   dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm && \
   dnf install -y --skip-broken --setopt=install_weak_deps=False --nobest openssl-libs openssl-devel && \
-  dnf install -y --skip-broken --setopt=install_weak_deps=False readline-devel python39 python3-devel brotli brotli-devel gperftools-devel perl libxslt-devel libxml2 yajl libxslt bash gd gd-devel gcc-c++ znc-modtcl gawk libtool pcre-devel automake autoconf gcc make git zlib-devel libxml2-devel pkgconf libcurl-devel libmaxminddb && \
+  dnf install -y --skip-broken --setopt=install_weak_deps=False readline-devel brotli brotli-devel gperftools-devel perl libxslt-devel libxml2 yajl libxslt bash gd gd-devel gcc-c++ znc-modtcl gawk libtool pcre-devel automake autoconf gcc make git zlib-devel libxml2-devel pkgconf libcurl-devel libmaxminddb bzip2-devel libffi-devel && \
   dnf install -y https://nginx.org/packages/rhel/9/$(uname -m)/RPMS/nginx-${NGINX_VERSION}-1.el9.ngx.$(uname -m).rpm
 
 WORKDIR /tmp/bunkerweb/deps
@@ -31,6 +31,16 @@ COPY --chmod=644 src/deps/install.sh install.sh
 # Compile and install dependencies
 RUN bash install.sh
 
+# Install Python3.10
+RUN wget https://www.python.org/ftp/python/3.10.16/Python-3.10.16.tgz && \
+  tar -xf Python-3.10.16.tgz && \
+  cd Python-3.10.16 && \
+  ./configure --with-system-ffi --with-computed-gotos --enable-loadable-sqlite-extensions  && \
+  make -j $(nproc) && \
+  make altinstall && \
+  cd .. && \
+  rm -rf Python-3.10.16*
+
 # Copy dependencies sources folder
 COPY src/deps/requirements.txt /tmp/requirements-deps.txt
 COPY src/scheduler/requirements.txt /tmp/req/requirements-scheduler.txt
@@ -43,9 +53,10 @@ WORKDIR /usr/share/bunkerweb
 # Compile and install dependencies
 RUN export MAKEFLAGS="-j$(nproc)" && \
   mkdir -p deps/python && \
-  python3 -m ensurepip --upgrade && \
-  python3 -m pip install --no-cache-dir --require-hashes --ignore-installed -r /tmp/requirements-deps.txt && \
-  python3 -m pip install --no-cache-dir --require-hashes --force-reinstall --target deps/python $(for file in $(ls /tmp/req/requirements*.txt) ; do echo "-r ${file}" ; done | xargs)
+  python3.10 -m ensurepip --upgrade && \
+  python3.10 -m pip install pip setuptools --upgrade && \
+  python3.10 -m pip install --no-cache-dir --require-hashes --ignore-installed -r /tmp/requirements-deps.txt && \
+  python3.10 -m pip install --no-cache-dir --require-hashes --force-reinstall --target deps/python $(for file in $(ls /tmp/req/requirements*.txt) ; do echo "-r ${file}" ; done | xargs)
 
 # Copy files
 # can't exclude deps from . so we are copying everything by hand
