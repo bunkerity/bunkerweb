@@ -145,9 +145,6 @@ class IngressController(Controller):
                 elif not path.backend.service.port:
                     self._logger.warning("Ignoring unsupported ingress rule without backend service port.")
                     continue
-                elif not path.backend.service.port.number and not path.backend.service.port.name:
-                    self._logger.warning("Ignoring unsupported ingress rule without backend service port number or name.")
-                    continue
 
                 service_list = self.__corev1.list_namespaced_service(
                     namespace,
