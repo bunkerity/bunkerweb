@@ -341,7 +341,14 @@ class Database:
                     session.remove()
 
     def is_valid_setting(
-        self, setting: str, *, value: Optional[str] = None, multisite: bool = False, session: Optional[scoped_session] = None
+        self,
+        setting: str,
+        *,
+        value: Optional[str] = None,
+        multisite: bool = False,
+        session: Optional[scoped_session] = None,
+        accept_prefixed: bool = True,
+        extra_services: Optional[List[str]] = None,
     ) -> Tuple[bool, str]:
         """Check if the setting exists in the database, if it's valid and if the value is valid"""
 
@@ -354,15 +361,21 @@ class Database:
 
                 db_setting = session.query(Settings).filter_by(id=setting).first()
 
-                if not db_setting:
-                    for service in session.query(Services).with_entities(Services.id):
-                        if setting.startswith(f"{service.id}_"):
-                            db_setting = session.query(Settings).filter_by(id=setting.replace(f"{service.id}_", "")).first()
-                            multisite = True
+                if accept_prefixed and not db_setting:
+                    for service in extra_services or []:
+                        if setting.startswith(f"{service}_"):
+                            db_setting = session.query(Settings).filter_by(id=setting.replace(f"{service}_", "")).first()
                             break
 
                     if not db_setting:
-                        return False, "missing"
+                        for service in session.query(Services).with_entities(Services.id):
+                            if setting.startswith(f"{service.id}_"):
+                                db_setting = session.query(Settings).filter_by(id=setting.replace(f"{service.id}_", "")).first()
+                                multisite = True
+                                break
+
+                if not db_setting:
+                    return False, "missing"
 
                 if multisite and db_setting.context != "multisite":
                     return False, "not multisite"
