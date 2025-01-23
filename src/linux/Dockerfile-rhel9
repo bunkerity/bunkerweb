@@ -44,11 +44,11 @@ WORKDIR /usr/share/bunkerweb
 RUN export MAKEFLAGS="-j$(nproc)" && \
     mkdir -p deps/python && \
     python3 -m ensurepip --upgrade && \
-    python3 -m pip install --no-cache-dir --require-hashes --break-system-packages --ignore-installed -r /tmp/requirements-deps.txt && \
-    python3 -m pip install --no-cache-dir --require-hashes --break-system-packages --target deps/python $(for file in $(ls /tmp/req/requirements*.txt) ; do echo "-r ${file}" ; done | xargs) && \
+    python3 -m pip install --no-cache-dir --require-hashes -r /tmp/requirements-deps.txt && \
+    python3 -m pip install --no-cache-dir --require-hashes --force-reinstall --target deps/python $(for file in $(ls /tmp/req/requirements*.txt) ; do echo "-r ${file}" ; done | xargs) && \
     python3 -m venv /tmp/venv && \
     . /tmp/venv/bin/activate && \
-    python3 -m pip install --no-cache-dir --require-hashes --break-system-packages -r /tmp/req/requirements-ui.txt && \
+    python3 -m pip install --no-cache-dir --require-hashes --force-reinstall -r /tmp/req/requirements-ui.txt && \
     rm -rf deps/python/zope* && \
     mv /tmp/venv/lib/python*/site-packages/zope* deps/python/
 
