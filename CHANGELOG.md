@@ -3,6 +3,7 @@
 ## v1.6.0-rc3 - ????/??/??
 
 - [UI] Add support page for easy logs and configuration sharing while anonymizing sensitive data
+- [LINUX] Support Fedora 41
 
 ## v1.6.0-rc2 - 2025/01/21
 

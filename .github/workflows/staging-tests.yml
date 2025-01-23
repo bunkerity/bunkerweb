@@ -84,6 +84,9 @@ jobs:
       - name: Pull BW linux fedora test image
         if: inputs.TYPE == 'linux'
         run: docker pull ghcr.io/bunkerity/fedora-tests:testing && docker tag ghcr.io/bunkerity/fedora-tests:testing local/fedora:latest
+      - name: Pull BW linux fedora 41 test image
+        if: inputs.TYPE == 'linux'
+        run: docker pull ghcr.io/bunkerity/fedora-41-tests:testing && docker tag ghcr.io/bunkerity/fedora-41-tests:testing local/fedora-41:latest
       - name: Pull BW linux rhel test image
         if: inputs.TYPE == 'linux'
         run: docker pull ghcr.io/bunkerity/rhel-tests:testing && docker tag ghcr.io/bunkerity/rhel-tests:testing local/rhel:latest
@@ -136,6 +139,12 @@ jobs:
       - name: Run Linux fedora tests
         if: inputs.TYPE == 'linux'
         run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "linux" "fedora"
+        env:
+          TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
+          ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
+      - name: Run Linux fedora 41 tests
+        if: inputs.TYPE == 'linux'
+        run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "linux" "fedora-41"
         env:
           TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
           ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
