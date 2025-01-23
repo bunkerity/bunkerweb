@@ -36,18 +36,13 @@ WORKDIR /usr/share/bunkerweb
 # Compile and install dependencies
 RUN export MAKEFLAGS="-j$(nproc)" && \
     mkdir -p deps/python && \
+    pip install --no-cache-dir --require-hashes --break-system-packages --ignore-installed -r /tmp/requirements-deps.txt && \
+    pip install --no-cache-dir --require-hashes --break-system-packages --target deps/python $(for file in $(ls /tmp/req/requirements*.txt) ; do echo "-r ${file}" ; done | xargs) && \
     python3 -m venv /tmp/venv && \
     . /tmp/venv/bin/activate && \
-    python3 -m pip install --no-cache-dir --require-hashes --force-reinstall --upgrade -r /tmp/requirements-deps.txt && \
-    python3 -m pip install --no-cache-dir --require-hashes --force-reinstall $(for file in $(ls /tmp/req/requirements*.txt) ; do echo "-r ${file}" ; done | xargs) && \
-    cp -r /tmp/venv/lib/python*/site-packages/* deps/python/ && \
-    cp -r /tmp/venv/bin deps/python/ && \
-    cp -r /tmp/venv/share deps/python/ && \
-    cp -r /tmp/venv/include deps/python/ && \
-    find deps/python -type f -name "activate*" -delete && \
-    find deps/python -type f -name "python*-config" -delete && \
-    find deps/python -type f -name "pip*" -delete && \
-    rm -rf deps/python/bin/wheel* deps/python/bin/easy_install* deps/python/bin/python* deps/python/bin/pyproject-build deps/python/bin/Activate.ps1 deps/python/pip deps/python/wheel
+    pip install --no-cache-dir --require-hashes --break-system-packages -r /tmp/req/requirements-ui.txt && \
+    rm -rf deps/python/zope* && \
+    mv /tmp/venv/lib/python*/site-packages/zope* deps/python/
 
 # Copy files
 # can't exclude deps from . so we are copying everything by hand
