@@ -15,6 +15,7 @@ local HTTP_INTERNAL_SERVER_ERROR = ngx.HTTP_INTERNAL_SERVER_ERROR
 local HTTP_OK = ngx.HTTP_OK
 local timer_at = ngx.timer.at
 local get_phase = ngx.get_phase
+local worker = ngx.worker
 local get_version = utils.get_version
 local get_integration = utils.get_integration
 local get_deny_status = utils.get_deny_status
@@ -44,8 +45,6 @@ function bunkernet:initialize(ctx)
 			self.bunkernet_id = id
 			self.version = get_version(self.ctx)
 			self.integration = get_integration(self.ctx)
-		else
-			self.logger:log(ERR, "can't get BunkerNet ID from datastore : " .. err)
 		end
 	end
 end
@@ -253,6 +252,21 @@ function bunkernet:log_stream()
 end
 
 function bunkernet:timer()
+
+	-- Only execute on worker 0
+	if worker.id() ~= 0 then
+		return self:ret(true, "skipped")
+	end
+
+	-- Check if BunkerNet is activated
+	local is_needed, err = has_variable("USE_BUNKERNET", "yes")
+	if is_needed == nil then
+		return self:ret(false, "can't check USE_BUNKERNET variable : " .. err)
+	end
+	if not is_needed then
+		return self:ret(true, "no service uses BunkerNet, skipping init")
+	end
+
 	local ret = true
 	local ret_err = "success"
 
@@ -264,7 +278,7 @@ function bunkernet:timer()
 
 	-- Loop on reports
 	local reports = {}
-	for i = 0, len do
+	for i = 1, len do
 		-- Pop the report and decode it
 		local report, report_err = self.datastore:lpop("plugin_bunkernet_reports")
 		if not report then

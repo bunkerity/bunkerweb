@@ -867,7 +867,7 @@ Some integrations provide more convenient ways to apply configurations, such as 
     metadata:
       name: cfg-bunkerweb-all-server-http
       annotations:
-    	bunkerweb.io/CONFIG_TYPE: "server-http"
+    	  bunkerweb.io/CONFIG_TYPE: "server-http"
     data:
       myconf: |
     	location /hello {
@@ -877,6 +877,22 @@ Some integrations provide more convenient ways to apply configurations, such as 
     		}
     	}
     ```
+
+    !!! tip "Custom Extra Config"
+        Since the `1.6.0-rc3` version, you can add/override settings using the `bunkerweb.io/CONFIG_TYPE=settings` annotation. Here is an example :
+
+        ```yaml
+        apiVersion: v1
+        kind: ConfigMap
+        metadata:
+          name: cfg-bunkerweb-extra-settings
+          annotations:
+            bunkerweb.io/CONFIG_TYPE: "settings"
+        data:
+          USE_ANTIBOT: "captcha" # multisite setting that will be applied to all services that do not override it
+          USE_REDIS: "yes" # global setting that will be applied globally
+          ...
+        ```
 
 === "Linux"
 

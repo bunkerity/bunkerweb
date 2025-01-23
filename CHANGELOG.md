@@ -2,6 +2,7 @@
 
 ## v1.6.0-rc3 - ????/??/??
 
+- [AUTOCONF] Add the possibility to add/override settings via ConfigMap in Kubernetes using the `bunkerweb.io/CONFIG_TYPE=settings` annotation
 - [UI] Add support page for easy logs and configuration sharing while anonymizing sensitive data
 - [LINUX] Support Fedora 41
 

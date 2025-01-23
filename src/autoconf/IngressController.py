@@ -4,7 +4,7 @@ from contextlib import suppress
 from os import getenv
 from time import sleep
 from traceback import format_exc
-from typing import List
+from typing import List, Tuple
 from kubernetes import client, config, watch
 from kubernetes.client import Configuration
 from kubernetes.client.exceptions import ApiException
@@ -122,6 +122,7 @@ class IngressController(Controller):
 
         namespace = controller_service.metadata.namespace
         services = []
+        server_names = set()
 
         # parse rules
         for rule in controller_service.spec.rules:
@@ -131,6 +132,7 @@ class IngressController(Controller):
 
             service = {}
             service["SERVER_NAME"] = rule.host
+            server_names.add(rule.host)
             if not rule.http:
                 services.append(service)
                 continue
@@ -182,10 +184,21 @@ class IngressController(Controller):
         # parse annotations
         if controller_service.metadata.annotations:
             for service in services:
+                server_name = service["SERVER_NAME"].strip().split(" ")[0]
+
                 for annotation, value in controller_service.metadata.annotations.items():
                     if not annotation.startswith("bunkerweb.io/"):
                         continue
-                    service[annotation.replace("bunkerweb.io/", "", 1)] = value
+                    setting = annotation.replace("bunkerweb.io/", "", 1)
+                    success, _ = self._db.is_valid_setting(setting, value=value, multisite=True)
+                    if success and not setting.startswith(f"{server_name}_"):
+                        if any(setting.startswith(f"{s}_") for s in server_names):
+                            continue
+                        if setting == "SERVER_NAME":
+                            self._logger.warning("Variable SERVER_NAME can't be set globally via annotations, ignoring it")
+                            continue
+                        setting = f"{server_name}_{setting}"
+                    service[setting] = value
 
                 # Handle stream services
                 for server_name in service["SERVER_NAME"].strip().split(" "):
@@ -242,8 +255,9 @@ class IngressController(Controller):
 
         return services
 
-    def get_configs(self) -> dict:
+    def get_configs(self) -> Tuple[dict, dict]:
         configs = {config_type: {} for config_type in self._supported_config_types}
+        config = {}
         for configmap in self.__corev1.list_config_map_for_all_namespaces(watch=False).items:
             if (
                 not configmap.metadata.annotations
@@ -253,25 +267,34 @@ class IngressController(Controller):
                 continue
 
             config_type = configmap.metadata.annotations["bunkerweb.io/CONFIG_TYPE"]
-            if config_type not in self._supported_config_types:
+            if config_type not in set(self._supported_config_types) | {"settings"}:
                 self._logger.warning(f"Ignoring unsupported CONFIG_TYPE {config_type} for ConfigMap {configmap.metadata.name}")
                 continue
             elif not configmap.data:
                 self._logger.warning(f"Ignoring blank ConfigMap {configmap.metadata.name}")
                 continue
 
-            config_site = ""
-            if "bunkerweb.io/CONFIG_SITE" in configmap.metadata.annotations:
-                if not self._is_service_present(configmap.metadata.annotations["bunkerweb.io/CONFIG_SITE"]):
-                    self._logger.warning(
-                        f"Ignoring config {configmap.metadata.name} because {configmap.metadata.annotations['bunkerweb.io/CONFIG_SITE']} doesn't exist"
-                    )
-                    continue
-                config_site = f"{configmap.metadata.annotations['bunkerweb.io/CONFIG_SITE']}/"
+            if config_type == "settings":
+                for config_name, config_data in configmap.data.items():
+                    if not self._db.is_valid_setting(config_name, value=config_data, accept_prefixed=False):
+                        self._logger.warning(
+                            f"Ignoring invalid setting {config_name} for ConfigMap {configmap.metadata.name} (the setting must exist and should not be prefixed)"
+                        )
+                        continue
+                    config[config_name] = config_data
+            else:
+                config_site = ""
+                if "bunkerweb.io/CONFIG_SITE" in configmap.metadata.annotations:
+                    if not self._is_service_present(configmap.metadata.annotations["bunkerweb.io/CONFIG_SITE"]):
+                        self._logger.warning(
+                            f"Ignoring config {configmap.metadata.name} because {configmap.metadata.annotations['bunkerweb.io/CONFIG_SITE']} doesn't exist"
+                        )
+                        continue
+                    config_site = f"{configmap.metadata.annotations['bunkerweb.io/CONFIG_SITE']}/"
 
-            for config_name, config_data in configmap.data.items():
-                configs[config_type][f"{config_site}{config_name}"] = config_data
-        return configs
+                for config_name, config_data in configmap.data.items():
+                    configs[config_type][f"{config_site}{config_name}"] = config_data
+        return config, configs
 
     def __process_event(self, event):
         obj = event["object"]
@@ -362,9 +385,9 @@ class IngressController(Controller):
                         self._update_settings()
                         self._instances = self.get_instances()
                         self._services = self.get_services()
-                        self._configs = self.get_configs()
+                        self._extra_config, self._configs = self.get_configs()
 
-                        if not to_apply and not self.update_needed(self._instances, self._services, configs=self._configs):
+                        if not to_apply and not self.update_needed(self._instances, self._services, self._configs, self._extra_config):
                             if locked:
                                 self.__internal_lock.release()
                                 locked = False
@@ -414,7 +437,7 @@ class IngressController(Controller):
                     sleep(10)
 
     def apply_config(self) -> bool:
-        return self.apply(self._instances, self._services, configs=self._configs, first=not self._loaded)
+        return self.apply(self._instances, self._services, configs=self._configs, first=not self._loaded, extra_config=self._extra_config)
 
     def process_events(self):
         self._set_autoconf_load_db()

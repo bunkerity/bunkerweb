@@ -30,6 +30,7 @@ class Config:
         )
         self.__configs = {config_type: {} for config_type in self._supported_config_types}
         self.__config = {}
+        self.__extra_config = {}
 
         self._db = Database(self.__logger)
 
@@ -48,12 +49,23 @@ class Config:
             server_name = service["SERVER_NAME"].split(" ")[0]
             if not server_name:
                 continue
+            config["SERVER_NAME"] += f" {server_name}"
+
+        for service in self.__services:
+            server_name = service["SERVER_NAME"].split(" ")[0]
+            if not server_name:
+                continue
             for variable, value in service.items():
                 if variable == "NAMESPACE" or variable.startswith("CUSTOM_CONF"):
                     continue
 
                 is_global = False
-                success, err = self._db.is_valid_setting(variable, value=value, multisite=True)
+                success, err = self._db.is_valid_setting(
+                    variable,
+                    value=value,
+                    multisite=True,
+                    extra_services=config["SERVER_NAME"].split(" "),
+                )
                 if not success:
                     if self._type == "kubernetes":
                         success, err = self._db.is_valid_setting(variable, value=value)
@@ -65,15 +77,24 @@ class Config:
                         continue
 
                 if is_global or variable.startswith(f"{server_name}_"):
+                    if variable == "SERVER_NAME":
+                        self.__logger.warning("Global variable SERVER_NAME can't be set via annotations, ignoring it")
+                        continue
                     config[variable] = value
                     continue
                 config[f"{server_name}_{variable}"] = value
-            config["SERVER_NAME"] += f" {server_name}"
         config["SERVER_NAME"] = config["SERVER_NAME"].strip()
         return config
 
-    def update_needed(self, instances: List[Dict[str, Any]], services: List[Dict[str, str]], configs: Optional[Dict[str, Dict[str, bytes]]] = None) -> bool:
+    def update_needed(
+        self,
+        instances: List[Dict[str, Any]],
+        services: List[Dict[str, str]],
+        configs: Optional[Dict[str, Dict[str, bytes]]] = None,
+        extra_config: Optional[Dict[str, str]] = None,
+    ) -> bool:
         configs = configs or {}
+        extra_config = extra_config or {}
 
         # Use sets for comparing lists of dictionaries
         if set(map(str, self.__instances)) != set(map(str, instances)):
@@ -86,6 +107,10 @@ class Config:
 
         if set(map(str, self.__configs.items())) != set(map(str, configs.items())):
             self.__logger.debug(f"Configs changed: {self.__configs} -> {configs}")
+            return True
+
+        if set(map(str, self.__extra_config.items())) != set(map(str, extra_config.items())):
+            self.__logger.debug(f"Extra config changed: {self.__extra_config} -> {extra_config}")
             return True
 
         return False
@@ -133,6 +158,7 @@ class Config:
         services: List[Dict[str, str]],
         configs: Optional[Dict[str, Dict[str, bytes]]] = None,
         first: bool = False,
+        extra_config: Optional[Dict[str, str]] = None,
     ) -> bool:
         success = True
 
@@ -154,9 +180,9 @@ class Config:
         if configs != self.__configs or first:
             self.__configs = configs
             changes.append("custom_configs")
-        if "instances" in changes or "services" in changes:
+        if "instances" in changes or "services" in changes or extra_config != self.__extra_config:
             old_env = self.__config.copy()
-            new_env = self.__get_full_env()
+            new_env = self.__get_full_env() | extra_config
             if old_env != new_env or first:
                 self.__config = new_env
                 changes.append("config")

@@ -43,11 +43,11 @@ WORKDIR /usr/share/bunkerweb
 RUN export MAKEFLAGS="-j$(nproc)" && \
     mkdir -p deps/python && \
     easy_install-3.9 pip && \
-    pip install --no-cache-dir --require-hashes --break-system-packages --ignore-installed -r /tmp/requirements-deps.txt && \
-    pip install --no-cache-dir --require-hashes --break-system-packages --target deps/python $(for file in $(ls /tmp/req/requirements*.txt) ; do echo "-r ${file}" ; done | xargs) && \
+    pip install --no-cache-dir --require-hashes -r /tmp/requirements-deps.txt && \
+    pip install --no-cache-dir --require-hashes --force-reinstall --target deps/python $(for file in $(ls /tmp/req/requirements*.txt) ; do echo "-r ${file}" ; done | xargs) && \
     python3 -m venv /tmp/venv && \
     . /tmp/venv/bin/activate && \
-    pip install --no-cache-dir --require-hashes --break-system-packages -r /tmp/req/requirements-ui.txt && \
+    pip install --no-cache-dir --require-hashes --force-reinstall -r /tmp/req/requirements-ui.txt && \
     rm -rf deps/python/zope* && \
     mv /tmp/venv/lib/python*/site-packages/zope* deps/python/
 
