@@ -23,7 +23,7 @@ RUN dnf update -y && \
     dnf install -y php-fpm curl gnupg2 ca-certificates redhat-lsb-core python3-pip which && \
     dnf install nginx-${NGINX_VERSION} -y
 
-COPY ./package-fedora/*.rpm /opt
+COPY ./package-fedora-41/*.rpm /opt
 
 VOLUME ["/sys/fs/cgroup"]
 
