@@ -169,6 +169,7 @@ class Config:
         self.wait_applying()
 
         configs = configs or {}
+        extra_config = extra_config or {}
 
         changes = []
         if instances != self.__instances or first:
