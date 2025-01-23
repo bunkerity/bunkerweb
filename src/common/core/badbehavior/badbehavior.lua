@@ -78,8 +78,80 @@ function badbehavior:log_stream()
 	return self:log()
 end
 
+function badbehavior:timer()
+	-- Our ret values
+	local ret = true
+	local ret_err = "success"
+
+	-- List of counters
+	local counters = {}
+
+	-- Loop on increase operations
+	local incr_len, incr_len_err = self.datastore:llen("plugin_badbehavior_incr")
+	if incr_len == nil then
+		return self:ret(false, "can't get incr list length : " .. incr_len_err)
+	end
+	for i = 1, incr_len do
+		-- Pop operation
+		local incr, incr_err = self.datastore:lpop("plugin_badbehavior_incr")
+		if incr == nil then
+			return self:ret(false, "can't get incr list element : " .. incr_err)
+		end
+		-- Call increase
+		local counter, counter_err = self:increase(incr["count_time"], incr["ban_time"], incr["threshold"], incr["use_redis"], incr["server_name"], incr["security_mode"], incr["country"])
+		if not counter then
+			ret = false
+			ret_err = "can't increase counter : " .. counter_err
+		else
+			-- Add counter to counters
+			counters[incr["ip"] .. "_" .. incr["server_name"]] = {
+				counter = counter,
+				count_time = incr["count_time"],
+				ban_time = incr["ban_time"],
+				threshold = incr["threshold"],
+				use_redis = incr["use_redis"],
+				server_name = incr["server_name"],
+				security_mode = incr["security_mode"],
+				country = incr["country"]
+			}
+		end
+	end
+	-- Loop on decrease operations
+	local decr_len, decr_len_err = self.datastore:llen("plugin_badbehavior_decr")
+	if decr_len == nil then
+		return self:ret(false, "can't get decr list length : " .. decr_len_err)
+	end
+	for i = 1, decr_len do
+		-- Pop operation
+		local decr, decr_err = self.datastore:lpop("plugin_badbehavior_decr")
+		if decr == nil then
+			return self:ret(false, "can't get decr list element : " .. decr_err)
+		end
+		-- Call increase and get counter
+		-- TODO : Redis case
+		-- TODO : fallback or no redis
+	end
+	-- Add bans if needed
+	for ip, counter in pairs(counters) do
+		if counter["threshold"] > counter["threshold"] then
+			local ok, err = add_ban(
+				counter["ip"],
+				"bad behavior",
+				tonumber(self.variables["BAD_BEHAVIOR_BAN_TIME"]),
+				self.ctx.bw.server_name,
+				counter["country"]
+			)
+			if not ok then
+				ret = false
+				ret_err = "can't save ban : " .. err
+			end
+		end
+	end
+
+end
+
 -- luacheck: ignore 212
-function badbehavior.increase(
+function badbehavior:increase(
 	premature,
 	ip,
 	count_time,
