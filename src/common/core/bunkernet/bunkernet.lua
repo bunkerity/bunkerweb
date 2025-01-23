@@ -10,6 +10,7 @@ local ngx = ngx
 local ERR = ngx.ERR
 local NOTICE = ngx.NOTICE
 local WARN = ngx.WARN
+local INFO = ngx.INFO
 local HTTP_INTERNAL_SERVER_ERROR = ngx.HTTP_INTERNAL_SERVER_ERROR
 local HTTP_OK = ngx.HTTP_OK
 local timer_at = ngx.timer.at
@@ -31,6 +32,7 @@ local encode = cjson.encode
 local decode = cjson.decode
 local http_new = http.new
 local match = string.match
+local table_insert = table.insert
 
 function bunkernet:initialize(ctx)
 	-- Call parent initialize
@@ -173,12 +175,14 @@ function bunkernet:access()
 end
 
 function bunkernet:log(bypass_checks)
+
 	if not bypass_checks then
 		-- Check if needed
 		if not self:is_needed() then
 			return self:ret(true, "service doesn't use BunkerNet, skipping log")
 		end
 	end
+
 	-- Check if IP has been blocked
 	local reason, reason_data = get_reason(self.ctx)
 	if not reason then
@@ -187,66 +191,44 @@ function bunkernet:log(bypass_checks)
 	if reason == "bunkernet" then
 		return self:ret(true, "skipping report because the reason is bunkernet")
 	end
+
 	-- Check if IP is global
 	if not self.ctx.bw.ip_is_global then
 		return self:ret(true, "IP is not global")
 	end
+
 	-- Check id
 	if not self.bunkernet_id then
 		return self:ret(false, "missing instance ID")
 	end
+
 	-- Check if IP has been reported recently
-	local ok, data = self.cachestore:get("plugin_bunkernet_" .. self.ctx.bw.remote_addr .. "_" .. reason)
-	if not ok then
-		self.logger:log(ERR, "can't check cachestore : " .. data)
-	elseif data then
-		return self:ret(true, "already reported recently")
-	end
-	local ok, err
-	-- luacheck: ignore 212 431
-	local function report_callback(
-		premature,
-		obj,
-		ip,
-		reason,
-		reason_data,
-		method,
-		url,
-		headers,
-		server_name,
-		use_redis
-	)
-		local status, _
-		ok, err, status, _ = obj:report(ip, reason, reason_data, method, url, headers, server_name)
-		if status == 429 then
-			obj.logger:log(WARN, "bunkernet API is rate limiting us")
-		elseif not ok then
-			obj.logger:log(ERR, "can't report IP : " .. err)
-		else
-			obj.logger:log(NOTICE, "successfully reported IP " .. ip .. " (reason : " .. reason .. ")")
-			local cachestore = require "bunkerweb.cachestore":new(use_redis, nil, true)
-			local ok, err = cachestore:set("plugin_bunkernet_" .. ip .. "_" .. reason, "reported", 3600)
-			if not ok then
-				obj.logger:log(ERR, "error from cachestore : " .. err)
-			end
+	local ret, err = self.datastore:get("plugin_bunkernet_" .. self.ctx.bw.remote_addr .. "_" .. reason)
+	if not ret and err ~= "not found" then
+		return self:ret(false, "can't get IP from datastore : " .. err)
+	elseif err == "not found" then
+		-- Push report
+		local report = {
+			["ip"] = self.ctx.bw.remote_addr,
+			["reason"] = reason,
+			["reason_data"] = reason_data,
+			["method"] = self.ctx.bw.request_method,
+			["url"] = self.ctx.bw.request_uri,
+			["headers"] = ngx.req.get_headers(),
+			["server_name"] = self.ctx.bw.server_name
+		}
+		ret, err = self.datastore.dict:rpush("plugin_bunkernet_reports", encode(report))
+		if not ret then
+			return self:ret(false, "can't set IP report into datastore : " .. err)
+		end
+		-- Store in recent reports
+		ret, err = self.datastore:set("plugin_bunkernet_" .. self.ctx.bw.remote_addr .. "_" .. reason, "added", 3600)
+		if not ret then
+			return self:ret(false, "can't set IP added into datastore : " .. err)
 		end
 	end
-	local hdr, err = timer_at(
-		0,
-		report_callback,
-		self,
-		self.ctx.bw.remote_addr,
-		reason,
-		reason_data,
-		self.ctx.bw.request_method,
-		self.ctx.bw.request_uri,
-		ngx.req.get_headers(),
-		self.ctx.bw.server_name
-	)
-	if not hdr then
-		return self:ret(false, "can't create report timer : " .. err)
-	end
-	return self:ret(true, "created report timer")
+
+	return self:ret(true, "IP already added to reports recently")
 end
 
 function bunkernet:log_default()
@@ -268,6 +250,66 @@ end
 
 function bunkernet:log_stream()
 	return self:log()
+end
+
+function bunkernet:timer()
+	local ret = true
+	local ret_err = "success"
+
+	-- Get reports list length
+	local len, len_err = self.datastore:llen("plugin_bunkernet_reports")
+	if len == nil then
+		return self:ret(false, "can't get list length : " .. len_err)
+	end
+
+	-- Loop on reports
+	local reports = {}
+	for i = 0, len do
+		-- Pop the report and decode it
+		local report, report_err = self.datastore:lpop("plugin_bunkernet_reports")
+		if not report then
+			self.logger:log(ERR, "can't lpop report : " .. report_err)
+		else
+			table_insert(reports, decode(report))
+		end
+	end
+
+	-- Send reports
+	local keep_reports = {}
+	local send = true
+	for i = 1, #reports do
+		if send then
+			local report = reports[i]
+			local ok, err, status, _ = self:report(report["ip"], report["reason"], report["reason_data"], report["method"], report["url"], report["headers"], report["server_name"])
+			if status == 429 then
+				table_insert(keep_reports, report)
+				ret = false
+				ret_err = "bunkernet API is rate limiting us"
+				send = false
+			elseif not ok then
+				table_insert(keep_reports, report)
+				ret = false 
+				ret_err = "can't report IP : " .. err
+				send = false
+			end
+		else
+			table_insert(keep_reports, report)
+		end
+	end
+
+	-- Push unset reports
+	for i = 1, #keep_reports do
+		local set_ok, set_err = self.datastore.dict:rpush("plugin_bunkernet_reports", encode(keep_reports[i]))
+		if not set_ok then
+			ret = false
+			ret_err = set_err
+		end
+	end
+
+	-- Show stats at INFO level
+	self.logger:log(INFO, "processed " .. tostring(#reports) .. " reports : " .. tostring(#reports - #keep_reports) .. " sent and " .. tostring(#keep_reports) .. " remaining")
+
+	return self:ret(ret, ret_err)
 end
 
 function bunkernet:request(method, url, data)

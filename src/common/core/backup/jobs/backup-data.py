@@ -66,6 +66,7 @@ try:
     else:
         db = Database(LOGGER, sqlalchemy_string=getenv("DATABASE_URI"))
 
+    backed_up = False
     if force_backup or not already_done:
         if not force_backup:
             db_metadata = db.get_metadata()
@@ -75,6 +76,7 @@ try:
                 sys_exit(0)
 
         backup_database(current_time, db, backup_dir)
+        backed_up = True
 
         if not force_backup:
             # Get all backup files in the directory
@@ -94,7 +96,8 @@ try:
                 LOGGER.warning(f"Removing old backup file: {file}, as the rotation limit has been reached ...")
                 file.unlink()
 
-        update_cache_file(db, backup_dir)
+        if backed_up:
+            update_cache_file(db, backup_dir)
 except SystemExit as e:
     status = e.code
 except BaseException as e:

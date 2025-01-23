@@ -10,6 +10,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 from logger import setup_logger  # type: ignore
 
 TMP_DIR = Path(sep, "var", "tmp", "bunkerweb")
+TMP_UI_DIR = TMP_DIR.joinpath("ui")
 RUN_DIR = Path(sep, "var", "run", "bunkerweb")
 LIB_DIR = Path(sep, "var", "lib", "bunkerweb")
 
@@ -37,7 +38,7 @@ chdir = join(sep, "usr", "share", "bunkerweb", "ui")
 umask = 0x027
 pidfile = PID_FILE.as_posix()
 worker_tmp_dir = join(sep, "dev", "shm")
-tmp_upload_dir = join(sep, "var", "tmp", "bunkerweb", "ui")
+tmp_upload_dir = TMP_UI_DIR.as_posix()
 secure_scheme_headers = {}
 forwarded_allow_ips = FORWARDED_ALLOW_IPS
 pythonpath = join(sep, "usr", "share", "bunkerweb", "deps", "python") + "," + join(sep, "usr", "share", "bunkerweb", "ui")
@@ -45,7 +46,7 @@ proxy_allow_ips = "*"
 casefold_http_method = True
 workers = 1
 bind = f"{LISTEN_ADDR}:{LISTEN_PORT}"
-worker_class = "gthread"
+worker_class = "sync"
 threads = 2
 max_requests_jitter = 0
 graceful_timeout = 0
@@ -65,6 +66,7 @@ if DEBUG:
 
 def on_starting(server):
     TMP_DIR.mkdir(parents=True, exist_ok=True)
+    TMP_UI_DIR.mkdir(parents=True, exist_ok=True)
     RUN_DIR.mkdir(parents=True, exist_ok=True)
     LIB_DIR.mkdir(parents=True, exist_ok=True)
 

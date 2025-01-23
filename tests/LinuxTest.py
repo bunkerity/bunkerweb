@@ -11,7 +11,7 @@ class LinuxTest(Test):
     def __init__(self, name, timeout, tests, distro, domains={}):
         super().__init__(name, "linux", timeout, tests, delay=20)
         self._domains = domains
-        if distro not in ("ubuntu", "debian", "fedora", "centos", "ubuntu-jammy") and not distro.startswith("rhel"):
+        if distro not in ("ubuntu", "debian", "fedora", "fedora-41", "centos", "ubuntu-jammy") and not distro.startswith("rhel"):
             raise Exception(f"unknown distro {distro}")
         self.__distro = distro
 
@@ -26,7 +26,7 @@ class LinuxTest(Test):
                 raise Exception("docker run failed (linux stack)")
             if distro in ("ubuntu", "debian", "ubuntu-jammy"):
                 cmd = "echo force-bad-version >> /etc/dpkg/dpkg.cfg ; apt install -y /opt/\\$(ls /opt | grep deb)"
-            elif distro in ("centos", "fedora") or distro.startswith("rhel"):
+            elif distro == "centos" or distro.startswith(("rhel", "fedora")):
                 cmd = "dnf install -y /opt/\\$(ls /opt | grep rpm)"
             proc = LinuxTest.docker_exec(distro, cmd)
             if proc.returncode != 0:
@@ -63,7 +63,7 @@ class LinuxTest(Test):
                         "/etc/php/8.1/fpm/pool.d/www.conf",
                     )
                     LinuxTest.docker_exec(distro, "systemctl stop php8.1-fpm ; systemctl start php8.1-fpm")
-            elif distro in ("centos", "fedora") or distro.startswith("rhel"):
+            elif distro == "centos" or distro.startswith(("rhel", "fedora")):
                 if distro.startswith("rhel"):
                     if distro == "rhel":
                         LinuxTest.docker_exec(distro, "dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm")

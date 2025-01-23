@@ -45,6 +45,7 @@ from app.routes.reports import reports
 from app.routes.services import services
 from app.routes.setup import setup
 from app.routes.totp import totp
+from app.routes.support import support
 
 from app.dependencies import BW_CONFIG, DATA, DB
 from app.models.models import AnonymousUser
@@ -534,6 +535,26 @@ def set_columns_preferences():
     return Response(status=200, response=dumps({"message": "ok"}), content_type="application/json")
 
 
-BLUEPRINTS = (about, services, profile, jobs, reports, totp, home, logout, instances, plugins, global_config, pro, cache, logs, login, configs, bans, setup)
+BLUEPRINTS = (
+    about,
+    services,
+    profile,
+    jobs,
+    reports,
+    totp,
+    home,
+    logout,
+    instances,
+    plugins,
+    global_config,
+    pro,
+    cache,
+    logs,
+    login,
+    configs,
+    bans,
+    setup,
+    support,
+)
 for blueprint in BLUEPRINTS:
     app.register_blueprint(blueprint)

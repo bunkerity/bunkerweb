@@ -4,16 +4,17 @@ from contextlib import suppress
 from datetime import datetime
 from os import getenv
 from time import sleep
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Literal, Optional, Union
 
 from Database import Database  # type: ignore
 from logger import setup_logger  # type: ignore
 
 
 class Config:
-    def __init__(self):
-        super().__init__()
+    def __init__(self, ctrl_type: Union[Literal["docker"], Literal["swarm"], Literal["kubernetes"]]):
+        self._type = ctrl_type
         self.__logger = setup_logger("Config", getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")))
+        self._settings = {}
         self.__instances = []
         self.__services = []
         self._supported_config_types = (
@@ -48,12 +49,23 @@ class Config:
             if not server_name:
                 continue
             for variable, value in service.items():
-                if variable == "NAMESPACE" or variable.startswith("CUSTOM_CONF") or not variable.isupper():
+                if variable == "NAMESPACE" or variable.startswith("CUSTOM_CONF"):
                     continue
 
+                is_global = False
                 success, err = self._db.is_valid_setting(variable, value=value, multisite=True)
                 if not success:
-                    self.__logger.warning(f"Variable {variable}: {value} is not a valid autoconf setting ({err}), ignoring it")
+                    if self._type == "kubernetes":
+                        success, err = self._db.is_valid_setting(variable, value=value)
+                        if success:
+                            is_global = True
+                            self.__logger.warning(f"Variable {variable} is a global value and will be applied globally")
+                    if not success:
+                        self.__logger.warning(f"Variable {variable}: {value} is not a valid autoconf setting ({err}), ignoring it")
+                        continue
+
+                if is_global or variable.startswith(f"{server_name}_"):
+                    config[variable] = value
                     continue
                 config[f"{server_name}_{variable}"] = value
             config["SERVER_NAME"] += f" {server_name}"
@@ -61,12 +73,21 @@ class Config:
         return config
 
     def update_needed(self, instances: List[Dict[str, Any]], services: List[Dict[str, str]], configs: Optional[Dict[str, Dict[str, bytes]]] = None) -> bool:
-        if instances != self.__instances:
+        configs = configs or {}
+
+        # Use sets for comparing lists of dictionaries
+        if set(map(str, self.__instances)) != set(map(str, instances)):
+            self.__logger.debug(f"Instances changed: {self.__instances} -> {instances}")
             return True
-        elif services != self.__services:
+
+        if set(map(str, self.__services)) != set(map(str, services)):
+            self.__logger.debug(f"Services changed: {self.__services} -> {services}")
             return True
-        elif (configs or {}) != self.__configs:
+
+        if set(map(str, self.__configs.items())) != set(map(str, configs.items())):
+            self.__logger.debug(f"Configs changed: {self.__configs} -> {configs}")
             return True
+
         return False
 
     def have_to_wait(self) -> bool:
@@ -107,7 +128,11 @@ class Config:
             raise Exception("Too many retries while waiting for scheduler to apply configuration...")
 
     def apply(
-        self, instances: List[Dict[str, Any]], services: List[Dict[str, str]], configs: Optional[Dict[str, Dict[str, bytes]]] = None, first: bool = False
+        self,
+        instances: List[Dict[str, Any]],
+        services: List[Dict[str, str]],
+        configs: Optional[Dict[str, Dict[str, bytes]]] = None,
+        first: bool = False,
     ) -> bool:
         success = True
 

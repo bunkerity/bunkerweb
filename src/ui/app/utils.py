@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from datetime import datetime
-from os import _exit, getenv
+from os import _exit
 from os.path import join, sep
 from pathlib import Path
 from subprocess import PIPE, Popen, call
@@ -18,7 +18,7 @@ from logger import setup_logger  # type: ignore
 TMP_DIR = Path(sep, "var", "tmp", "bunkerweb")
 LIB_DIR = Path(sep, "var", "lib", "bunkerweb")
 
-LOGGER = setup_logger("UI", getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")))
+LOGGER = setup_logger("UI")
 
 USER_PASSWORD_RX = re_compile(r"^(?=.*\p{Ll})(?=.*\p{Lu})(?=.*\d)(?=.*\P{Alnum}).{8,}$")
 PLUGIN_NAME_RX = re_compile(r"^[\w.-]{4,64}$")
