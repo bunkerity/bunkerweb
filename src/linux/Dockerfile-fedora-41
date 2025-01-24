@@ -36,9 +36,9 @@ RUN export MAKEFLAGS="-j$(nproc)" && \
     pip install --no-cache-dir --require-hashes --break-system-packages --target deps/python $(for file in $(ls /tmp/req/requirements*.txt) ; do echo "-r ${file}" ; done | xargs) && \
     python3 -m venv /tmp/venv && \
     . /tmp/venv/bin/activate && \
-    pip install --no-cache-dir --require-hashes --break-system-packages -r /tmp/req/requirements-ui.txt && \
-    rm -rf deps/python/zope* && \
-    mv /tmp/venv/lib/python*/site-packages/zope* deps/python/
+    pip install --no-cache-dir --break-system-packages gevent && \
+    rm -rf deps/python/zope* deps/python/gevent* && \
+    mv /tmp/venv/lib/python*/site-packages/zope* /tmp/venv/lib/python*/site-packages/gevent* deps/python/
 
 # Copy files
 # can't exclude deps from . so we are copying everything by hand
