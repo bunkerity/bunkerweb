@@ -129,7 +129,7 @@ class Job:
                             rmtree(file.parent, ignore_errors=True)
                             if file.parent == self.job_path:
                                 break
-                    elif file.is_dir() and not list(file.iterdir()):
+                    elif file.is_dir():
                         self.logger.debug(f"Removing empty directory {file}")
                         rmtree(file, ignore_errors=True)
 
