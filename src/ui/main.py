@@ -262,7 +262,7 @@ def update_latest_stable_release():
     DATA["LATEST_VERSION"] = get_latest_stable_release()
 
 
-def check_database_state():
+def check_database_state(request_method: str, request_path: str):
     DATA.load_from_file()
     if (
         DB.database_uri
@@ -293,8 +293,8 @@ def check_database_state():
     elif (
         DB.database_uri
         and not DATA.get("READONLY_MODE", False)
-        and request.method == "POST"
-        and not ("/totp" in request.path or "/login" in request.path or request.path.startswith("/plugins/upload"))
+        and request_method == "POST"
+        and not ("/totp" in request_path or "/login" in request_path or request_path.startswith("/plugins/upload"))
     ):
         try:
             DB.test_write()
@@ -341,7 +341,7 @@ def before_request():
             DATA["LATEST_VERSION_LAST_CHECK"] = datetime.now().astimezone().isoformat()
             Thread(target=update_latest_stable_release).start()
 
-        Thread(target=check_database_state).start()
+        Thread(target=check_database_state, args=(request.method, request.path)).start()
 
         DB.readonly = DATA.get("READONLY_MODE", False)
 
