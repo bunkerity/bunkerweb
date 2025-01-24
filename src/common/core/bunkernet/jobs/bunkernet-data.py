@@ -14,7 +14,7 @@ from logger import setup_logger  # type: ignore
 from jobs import Job  # type: ignore
 from common_utils import bytes_hash  # type: ignore
 
-LOGGER = setup_logger("BUNKERNET")
+LOGGER = setup_logger("BUNKERNET.data")
 exit_status = 0
 
 try:
@@ -42,8 +42,6 @@ try:
 
     # Create empty file in case it doesn't exist
     ip_list_path = bunkernet_path.joinpath("ip.list")
-    if not ip_list_path.is_file():
-        ip_list_path.touch(exist_ok=True)
 
     # Get ID from cache
     bunkernet_id = None
@@ -76,7 +74,7 @@ try:
         LOGGER.warning("BunkerNet API is rate limiting us, trying again later...")
         sys_exit(0)
     elif status == 403:
-        LOGGER.warning("BunkerNet has banned this instance, retrying a register later...")
+        LOGGER.warning("BunkerNet has banned this instance, retrying to download data later...")
         sys_exit(0)
 
     try:
