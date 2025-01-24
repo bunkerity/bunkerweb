@@ -1,12 +1,11 @@
 bcrypt==4.2.1
 beautifulsoup4==4.12.3
 Flask==3.1.0
-Flask-executor==1.0.0
 Flask-Login==0.6.3
 Flask-Principal==0.4.0
 Flask-Session[cachelib]==0.8.0
 Flask-WTF==1.2.2
-gunicorn[gevent]==23.0.0
+gunicorn[gthread]==23.0.0
 python-magic==0.4.27
 python_dateutil==2.9.0.post0
 qrcode==8.0

@@ -8,6 +8,7 @@ from os.path import join
 from secrets import token_urlsafe
 from signal import SIGINT, signal, SIGTERM
 from sys import path as sys_path
+from threading import Thread
 from time import time
 from traceback import format_exc
 
@@ -18,7 +19,6 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 
 from cachelib import FileSystemCache
 from flask import Flask, Response, flash as flask_flash, jsonify, make_response, redirect, render_template, request, session, url_for
-from flask_executor import Executor
 from flask_login import current_user, LoginManager, login_required, logout_user
 from flask_principal import ActionNeed, identity_loaded, Permission, Principal, RoleNeed, TypeNeed, UserNeed
 from flask_session import Session
@@ -138,10 +138,6 @@ with app.app_context():
         human_readable_number=human_readable_number,
         url_for=custom_url_for,
     )
-
-    # Executor
-    app.config["EXECUTOR_MAX_WORKERS"] = 4
-    executor = Executor(app)
 
 
 @app.context_processor
@@ -343,9 +339,9 @@ def before_request():
     if not request.path.startswith(("/css/", "/img/", "/js/", "/json/", "/fonts/", "/libs/")):
         if datetime.now().astimezone() - datetime.fromisoformat(DATA.get("LATEST_VERSION_LAST_CHECK", "1970-01-01T00:00:00")).astimezone() > timedelta(hours=1):
             DATA["LATEST_VERSION_LAST_CHECK"] = datetime.now().astimezone().isoformat()
-            executor.submit(update_latest_stable_release)
+            Thread(target=update_latest_stable_release).start()
 
-        executor.submit(check_database_state)
+        Thread(target=check_database_state).start()
 
         DB.readonly = DATA.get("READONLY_MODE", False)
 
@@ -432,7 +428,7 @@ def set_security_headers(response):
     )
 
     if not request.path.startswith(("/css/", "/img/", "/js/", "/json/", "/fonts/", "/libs/")) and current_user.is_authenticated and "session_id" in session:
-        executor.submit(mark_user_access, session["session_id"])
+        Thread(target=mark_user_access, args=(session["session_id"],)).start()
 
     return response
 
