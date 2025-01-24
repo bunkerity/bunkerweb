@@ -3,12 +3,14 @@
 from os import getenv, sep
 from pathlib import Path
 from requests import request as requests_request, ReadTimeout
-from typing import Literal, Optional, Tuple, Union
+from typing import Any, Dict, List, Literal, Optional, Tuple, Union
 
 from common_utils import get_os_info, get_integration, get_version  # type: ignore
 
 
-def request(method: Literal["POST", "GET"], url: str, _id: Optional[str] = None) -> Tuple[bool, Optional[int], Union[str, dict]]:
+def request(
+    method: Literal["POST", "GET"], url: str, _id: Optional[str] = None, *, additional_data: Dict[str, Any] = None
+) -> Tuple[bool, Optional[int], Union[str, dict]]:
     data = {
         "integration": get_integration(),
         "version": get_version(),
@@ -16,6 +18,8 @@ def request(method: Literal["POST", "GET"], url: str, _id: Optional[str] = None)
     }
     if _id:
         data["id"] = _id
+    if additional_data:
+        data.update(additional_data)
 
     try:
         resp = requests_request(
@@ -52,6 +56,10 @@ def ping(_id: Optional[str] = None) -> Tuple[bool, Optional[int], Union[str, dic
 
 def data() -> Tuple[bool, Optional[int], Union[str, dict]]:
     return request("GET", "/db", _id=get_id())
+
+
+def send_reports(reports: List[Dict[str, Any]]) -> Tuple[bool, Optional[int], Union[str, dict]]:
+    return request("POST", "/report", _id=get_id(), additional_data={"reports": reports})
 
 
 def get_id() -> str:

@@ -9,13 +9,9 @@ local bunkernet = class("bunkernet", plugin)
 local ngx = ngx
 local ERR = ngx.ERR
 local NOTICE = ngx.NOTICE
-local WARN = ngx.WARN
-local INFO = ngx.INFO
 local HTTP_INTERNAL_SERVER_ERROR = ngx.HTTP_INTERNAL_SERVER_ERROR
 local HTTP_OK = ngx.HTTP_OK
-local timer_at = ngx.timer.at
 local get_phase = ngx.get_phase
-local worker = ngx.worker
 local get_version = utils.get_version
 local get_integration = utils.get_integration
 local get_deny_status = utils.get_deny_status
@@ -40,7 +36,7 @@ function bunkernet:initialize(ctx)
 	plugin.initialize(self, "bunkernet", ctx)
 	-- Get BunkerNet ID and save info
 	if get_phase() ~= "init" and self:is_needed() then
-		local id, err = self.datastore:get("plugin_bunkernet_id", true)
+		local id, _ = self.datastore:get("plugin_bunkernet_id", true)
 		if id then
 			self.bunkernet_id = id
 			self.version = get_version(self.ctx)
@@ -174,7 +170,6 @@ function bunkernet:access()
 end
 
 function bunkernet:log(bypass_checks)
-
 	if not bypass_checks then
 		-- Check if needed
 		if not self:is_needed() then
@@ -210,21 +205,23 @@ function bunkernet:log(bypass_checks)
 		local report = {
 			["ip"] = self.ctx.bw.remote_addr,
 			["reason"] = reason,
-			["reason_data"] = reason_data,
+			["data"] = reason_data,
 			["method"] = self.ctx.bw.request_method,
 			["url"] = self.ctx.bw.request_uri,
 			["headers"] = ngx.req.get_headers(),
-			["server_name"] = self.ctx.bw.server_name
+			["server_name"] = self.ctx.bw.server_name,
+			["date"] = os.date("!%Y-%m-%dT%H:%M:%SZ", ngx.time()),
 		}
 		ret, err = self.datastore.dict:rpush("plugin_bunkernet_reports", encode(report))
 		if not ret then
 			return self:ret(false, "can't set IP report into datastore : " .. err)
 		end
 		-- Store in recent reports
-		ret, err = self.datastore:set("plugin_bunkernet_" .. self.ctx.bw.remote_addr .. "_" .. reason, "added", 3600)
+		ret, err = self.datastore:set("plugin_bunkernet_" .. self.ctx.bw.remote_addr .. "_" .. reason, "added", 5400)
 		if not ret then
 			return self:ret(false, "can't set IP added into datastore : " .. err)
 		end
+		return self:ret(true, "IP added to reports")
 	end
 
 	return self:ret(true, "IP already added to reports recently")
@@ -249,81 +246,6 @@ end
 
 function bunkernet:log_stream()
 	return self:log()
-end
-
-function bunkernet:timer()
-
-	-- Only execute on worker 0
-	if worker.id() ~= 0 then
-		return self:ret(true, "skipped")
-	end
-
-	-- Check if BunkerNet is activated
-	local is_needed, err = has_variable("USE_BUNKERNET", "yes")
-	if is_needed == nil then
-		return self:ret(false, "can't check USE_BUNKERNET variable : " .. err)
-	end
-	if not is_needed then
-		return self:ret(true, "no service uses BunkerNet, skipping init")
-	end
-
-	local ret = true
-	local ret_err = "success"
-
-	-- Get reports list length
-	local len, len_err = self.datastore:llen("plugin_bunkernet_reports")
-	if len == nil then
-		return self:ret(false, "can't get list length : " .. len_err)
-	end
-
-	-- Loop on reports
-	local reports = {}
-	for i = 1, len do
-		-- Pop the report and decode it
-		local report, report_err = self.datastore:lpop("plugin_bunkernet_reports")
-		if not report then
-			self.logger:log(ERR, "can't lpop report : " .. report_err)
-		else
-			table_insert(reports, decode(report))
-		end
-	end
-
-	-- Send reports
-	local keep_reports = {}
-	local send = true
-	for i = 1, #reports do
-		if send then
-			local report = reports[i]
-			local ok, err, status, _ = self:report(report["ip"], report["reason"], report["reason_data"], report["method"], report["url"], report["headers"], report["server_name"])
-			if status == 429 then
-				table_insert(keep_reports, report)
-				ret = false
-				ret_err = "bunkernet API is rate limiting us"
-				send = false
-			elseif not ok then
-				table_insert(keep_reports, report)
-				ret = false 
-				ret_err = "can't report IP : " .. err
-				send = false
-			end
-		else
-			table_insert(keep_reports, report)
-		end
-	end
-
-	-- Push unset reports
-	for i = 1, #keep_reports do
-		local set_ok, set_err = self.datastore.dict:rpush("plugin_bunkernet_reports", encode(keep_reports[i]))
-		if not set_ok then
-			ret = false
-			ret_err = set_err
-		end
-	end
-
-	-- Show stats at INFO level
-	self.logger:log(INFO, "processed " .. tostring(#reports) .. " reports : " .. tostring(#reports - #keep_reports) .. " sent and " .. tostring(#keep_reports) .. " remaining")
-
-	return self:ret(ret, ret_err)
 end
 
 function bunkernet:request(method, url, data)
@@ -420,7 +342,9 @@ end
 
 function bunkernet:api()
 	-- Match request
-	if not match(self.ctx.bw.uri, "^/bunkernet/ping$") or self.ctx.bw.request_method ~= "POST" then
+	local is_ping = match(self.ctx.bw.uri, "^/bunkernet/ping$") and self.ctx.bw.request_method == "POST"
+	local is_reports = match(self.ctx.bw.uri, "^/bunkernet/reports$") and self.ctx.bw.request_method == "GET"
+	if not (is_ping or is_reports) then
 		return self:ret(false, "success")
 	end
 	-- Check id
@@ -430,22 +354,48 @@ function bunkernet:api()
 	elseif not id then
 		return self:ret(true, "missing instance ID", HTTP_INTERNAL_SERVER_ERROR)
 	end
-	self.bunkernet_id = id
-	self.version = get_version(self.ctx)
-	self.integration = get_integration(self.ctx)
-	-- Send ping request
-	local ok, err, status, _ = self:ping()
-	if not ok then
-		return self:ret(true, "error while sending request to API : " .. err, HTTP_INTERNAL_SERVER_ERROR)
-	end
-	if status ~= 200 then
+
+	if match(self.ctx.bw.uri, "^/bunkernet/ping$") then
+		self.bunkernet_id = id
+		self.version = get_version(self.ctx)
+		self.integration = get_integration(self.ctx)
+		-- Send ping request
+		local ok, err, status, _ = self:ping()
+		if not ok then
+			return self:ret(true, "error while sending request to API : " .. err, HTTP_INTERNAL_SERVER_ERROR)
+		end
+		if status ~= 200 then
+			return self:ret(
+				true,
+				"received status " .. tostring(status) .. " from API using instance ID " .. self.bunkernet_id,
+				HTTP_INTERNAL_SERVER_ERROR
+			)
+		end
 		return self:ret(
 			true,
-			"received status " .. tostring(status) .. " from API using instance ID " .. self.bunkernet_id,
-			HTTP_INTERNAL_SERVER_ERROR
+			"connectivity with API using instance ID " .. self.bunkernet_id .. " is successful",
+			HTTP_OK
 		)
+	elseif match(self.ctx.bw.uri, "^/bunkernet/reports$") then
+		-- Get reports list length
+		local len, len_err = self.datastore:llen("plugin_bunkernet_reports")
+		if len == nil then
+			return self:ret(true, "can't get list length : " .. len_err, HTTP_INTERNAL_SERVER_ERROR)
+		end
+		-- Loop on reports
+		local reports = {}
+		for _ = 1, len do
+			-- Pop the report and decode it
+			local report, report_err = self.datastore:lpop("plugin_bunkernet_reports")
+			if not report then
+				self.logger:log(ERR, "can't lpop report : " .. report_err)
+			else
+				table_insert(reports, decode(report))
+			end
+		end
+		-- Return reports
+		return self:ret(true, reports, HTTP_OK)
 	end
-	return self:ret(true, "connectivity with API using instance ID " .. self.bunkernet_id .. " is successful", HTTP_OK)
 end
 
 return bunkernet

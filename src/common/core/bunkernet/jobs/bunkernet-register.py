@@ -12,7 +12,7 @@ from bunkernet import register
 from logger import setup_logger  # type: ignore
 from jobs import Job  # type: ignore
 
-LOGGER = setup_logger("BUNKERNET")
+LOGGER = setup_logger("BUNKERNET.register")
 exit_status = 0
 
 try:
