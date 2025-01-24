@@ -43,7 +43,7 @@ WORKDIR /usr/share/bunkerweb
 RUN export MAKEFLAGS="-j$(nproc)" && \
     mkdir -p deps/python && \
     easy_install-3.9 pip && \
-    pip install --no-cache-dir --require-hashes -r /tmp/requirements-deps.txt && \
+    pip install --no-cache-dir --require-hashes --ignore-installed -r /tmp/requirements-deps.txt && \
     pip install --no-cache-dir --require-hashes --force-reinstall --target deps/python $(for file in $(ls /tmp/req/requirements*.txt) ; do echo "-r ${file}" ; done | xargs)
 
 # Copy files
