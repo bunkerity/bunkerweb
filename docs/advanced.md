@@ -1829,7 +1829,7 @@ Below is the list of related settings:
 !!! warning "Wildcard certificates"
     Wildcard certificates are only available with DNS challenges. If you want to use them, you will need to set the `USE_LETS_ENCRYPT_WILDCARD` setting to `yes`.
 
-**Available DNS Providers**
+#### Available DNS Providers
 
 | Provider       | Description     | Mandatory Settings                                                                                           | Optional Settings                                                                                                                                                                                                                                                        | Link(s)                                                                               |
 | -------------- | --------------- | ------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------- |
