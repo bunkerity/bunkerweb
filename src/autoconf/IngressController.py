@@ -4,7 +4,7 @@ from contextlib import suppress
 from os import getenv
 from time import sleep
 from traceback import format_exc
-from typing import List
+from typing import List, Tuple
 from kubernetes import client, config, watch
 from kubernetes.client import Configuration
 from kubernetes.client.exceptions import ApiException
@@ -80,7 +80,7 @@ class IngressController(Controller):
         instance = {
             "name": controller_instance.metadata.name,
             "hostname": (
-                f"{controller_instance.status.pod_ip.replace('.','-')}.{controller_instance.metadata.namespace}.pod.{self.__domain_name}"
+                f"{controller_instance.status.pod_ip.replace('.','-') if controller_instance.status.pod_ip else controller_instance.metadata.name}.{controller_instance.metadata.namespace}.pod.{self.__domain_name}"
                 if self.__use_fqdn
                 else (controller_instance.status.pod_ip or controller_instance.metadata.name)
             ),
@@ -132,7 +132,7 @@ class IngressController(Controller):
 
             service = {}
             service["SERVER_NAME"] = rule.host
-            server_names.add(rule.host.strip().split(" ")[0])
+            server_names.add(rule.host)
             if not rule.http:
                 services.append(service)
                 continue
@@ -146,9 +146,6 @@ class IngressController(Controller):
                     continue
                 elif not path.backend.service.port:
                     self._logger.warning("Ignoring unsupported ingress rule without backend service port.")
-                    continue
-                elif not path.backend.service.port.number and not path.backend.service.port.name:
-                    self._logger.warning("Ignoring unsupported ingress rule without backend service port number or name.")
                     continue
 
                 service_list = self.__corev1.list_namespaced_service(
@@ -192,33 +189,40 @@ class IngressController(Controller):
                 for annotation, value in controller_service.metadata.annotations.items():
                     if not annotation.startswith("bunkerweb.io/"):
                         continue
-
-                    variable = annotation.replace("bunkerweb.io/", "", 1)
-                    if variable.startswith(f"{server_name}_") or not all(variable.startswith(f"{server_name}_") for server_name in server_names):
-                        service[variable.replace(f"{server_name}_", "", 1)] = value
+                    setting = annotation.replace("bunkerweb.io/", "", 1)
+                    success, _ = self._db.is_valid_setting(setting, value=value, multisite=True)
+                    if success and not setting.startswith(f"{server_name}_"):
+                        if any(setting.startswith(f"{s}_") for s in server_names):
+                            continue
+                        if setting == "SERVER_NAME":
+                            self._logger.warning("Variable SERVER_NAME can't be set globally via annotations, ignoring it")
+                            continue
+                        setting = f"{server_name}_{setting}"
+                    service[setting] = value
 
                 # Handle stream services
-                if service.get("SERVER_TYPE", "http") == "stream":
-                    reverse_proxy_found = False
-                    warned = False
-                    for setting in service.copy():
-                        if setting.startswith("REVERSE_PROXY_HOST_"):
-                            if not reverse_proxy_found:
-                                reverse_proxy_found = True
-                                suffix = setting.replace("REVERSE_PROXY_HOST_", "", 1)
-                                service["REVERSE_PROXY_HOST"] = service.pop(setting).replace(f"{self.__service_protocol}://", "", 1)
-                                service["REVERSE_PROXY_URL"] = service.pop(f"REVERSE_PROXY_URL_{suffix}", "/")
-                                continue
+                for server_name in service["SERVER_NAME"].strip().split(" "):
+                    if service.get(f"{server_name}_SERVER_TYPE", service.get("SERVER_TYPE", "http")) == "stream":
+                        reverse_proxy_found = False
+                        warned = False
+                        for setting in service.copy():
+                            if setting.startswith(f"{server_name}_REVERSE_PROXY_HOST_"):
+                                if not reverse_proxy_found:
+                                    reverse_proxy_found = True
+                                    suffix = setting.replace(f"{server_name}_REVERSE_PROXY_HOST_", "", 1)
+                                    service[f"{server_name}_REVERSE_PROXY_HOST"] = service.pop(setting).replace(f"{self.__service_protocol}://", "", 1)
+                                    service[f"{server_name}_REVERSE_PROXY_URL"] = service.pop(f"{server_name}_REVERSE_PROXY_URL_{suffix}", "/")
+                                    continue
 
-                            if not warned:
-                                warned = True
-                                self._logger.warning(
-                                    f"Service {server_name} is a stream service, we will only use the first reverse proxy config. Ignoring all others..."
-                                )
+                                if not warned:
+                                    warned = True
+                                    self._logger.warning(
+                                        f"Service {server_name} is a stream service, we will only use the first reverse proxy config. Ignoring all others..."
+                                    )
 
-                            del service[setting]
-                        elif setting.startswith("REVERSE_PROXY_URL_") and setting in service:
-                            del service[setting]
+                                del service[setting]
+                            elif setting.startswith(f"{server_name}_REVERSE_PROXY_URL_") and setting in service:
+                                del service[setting]
 
         # parse tls
         if controller_service.spec.tls:
@@ -248,10 +252,12 @@ class IngressController(Controller):
                                 service["USE_CUSTOM_SSL"] = "yes"
                                 service["CUSTOM_SSL_CERT_DATA"] = secret_tls.data["tls.crt"]
                                 service["CUSTOM_SSL_KEY_DATA"] = secret_tls.data["tls.key"]
+
         return services
 
-    def get_configs(self) -> dict:
+    def get_configs(self) -> Tuple[dict, dict]:
         configs = {config_type: {} for config_type in self._supported_config_types}
+        config = {}
         for configmap in self.__corev1.list_config_map_for_all_namespaces(watch=False).items:
             if (
                 not configmap.metadata.annotations
@@ -261,25 +267,34 @@ class IngressController(Controller):
                 continue
 
             config_type = configmap.metadata.annotations["bunkerweb.io/CONFIG_TYPE"]
-            if config_type not in self._supported_config_types:
+            if config_type not in set(self._supported_config_types) | {"settings"}:
                 self._logger.warning(f"Ignoring unsupported CONFIG_TYPE {config_type} for ConfigMap {configmap.metadata.name}")
                 continue
             elif not configmap.data:
                 self._logger.warning(f"Ignoring blank ConfigMap {configmap.metadata.name}")
                 continue
 
-            config_site = ""
-            if "bunkerweb.io/CONFIG_SITE" in configmap.metadata.annotations:
-                if not self._is_service_present(configmap.metadata.annotations["bunkerweb.io/CONFIG_SITE"]):
-                    self._logger.warning(
-                        f"Ignoring config {configmap.metadata.name} because {configmap.metadata.annotations['bunkerweb.io/CONFIG_SITE']} doesn't exist"
-                    )
-                    continue
-                config_site = f"{configmap.metadata.annotations['bunkerweb.io/CONFIG_SITE']}/"
+            if config_type == "settings":
+                for config_name, config_data in configmap.data.items():
+                    if not self._db.is_valid_setting(config_name, value=config_data, accept_prefixed=False):
+                        self._logger.warning(
+                            f"Ignoring invalid setting {config_name} for ConfigMap {configmap.metadata.name} (the setting must exist and should not be prefixed)"
+                        )
+                        continue
+                    config[config_name] = config_data
+            else:
+                config_site = ""
+                if "bunkerweb.io/CONFIG_SITE" in configmap.metadata.annotations:
+                    if not self._is_service_present(configmap.metadata.annotations["bunkerweb.io/CONFIG_SITE"]):
+                        self._logger.warning(
+                            f"Ignoring config {configmap.metadata.name} because {configmap.metadata.annotations['bunkerweb.io/CONFIG_SITE']} doesn't exist"
+                        )
+                        continue
+                    config_site = f"{configmap.metadata.annotations['bunkerweb.io/CONFIG_SITE']}/"
 
-            for config_name, config_data in configmap.data.items():
-                configs[config_type][f"{config_site}{config_name}"] = config_data
-        return configs
+                for config_name, config_data in configmap.data.items():
+                    configs[config_type][f"{config_site}{config_name}"] = config_data
+        return config, configs
 
     def __process_event(self, event):
         obj = event["object"]
@@ -370,9 +385,9 @@ class IngressController(Controller):
                         self._update_settings()
                         self._instances = self.get_instances()
                         self._services = self.get_services()
-                        self._configs = self.get_configs()
+                        self._extra_config, self._configs = self.get_configs()
 
-                        if not to_apply and not self.update_needed(self._instances, self._services, configs=self._configs):
+                        if not to_apply and not self.update_needed(self._instances, self._services, self._configs, self._extra_config):
                             if locked:
                                 self.__internal_lock.release()
                                 locked = False
@@ -381,6 +396,7 @@ class IngressController(Controller):
 
                         to_apply = True
                         if waiting:
+                            self._logger.debug("Scheduler is already applying a configuration, retrying in 1 second ...")
                             sleep(1)
                             continue
 
@@ -421,12 +437,7 @@ class IngressController(Controller):
                     sleep(10)
 
     def apply_config(self) -> bool:
-        return self.apply(
-            self._instances,
-            self._services,
-            configs=self._configs,
-            first=not self._loaded,
-        )
+        return self.apply(self._instances, self._services, configs=self._configs, first=not self._loaded, extra_config=self._extra_config)
 
     def process_events(self):
         self._set_autoconf_load_db()

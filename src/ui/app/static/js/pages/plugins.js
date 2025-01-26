@@ -102,7 +102,7 @@ $(document).ready(function () {
     const currentUrl = window.location.href.split("?")[0].split("#")[0];
     const uploadUrl = currentUrl.replace(/\/$/, "") + "/upload";
 
-    fileSize = (file.size / 1024).toFixed(2); // Size in KB
+    const fileSize = (file.size / 1024).toFixed(2);
     const fileItem = $(`
             <div class="file-item">
                 <strong>${file.name}</strong> (${fileSize} KB)
@@ -110,44 +110,44 @@ $(document).ready(function () {
         `);
     fileList.append(fileItem);
 
-    // Create a progress bar element
     const progressBar = $(
       '<div class="progress-bar" role="progressbar" style="width: 0%;"></div>',
     );
     const progress = $('<div class="progress mt-2"></div>').append(progressBar);
     fileList.append(progress);
 
-    const xhr = new XMLHttpRequest();
-    xhr.open("POST", uploadUrl);
-
-    // Update progress
-    xhr.upload.addEventListener("progress", (evt) => {
-      if (evt.lengthComputable) {
-        const percentComplete = (evt.loaded / evt.total) * 100;
-        progressBar.css("width", percentComplete + "%");
-        progressBar.attr("aria-valuenow", percentComplete);
-      }
-    });
-
-    xhr.onload = () => {
-      if (xhr.status === 201) {
+    $.ajax({
+      url: uploadUrl,
+      type: "POST",
+      data: formData,
+      processData: false,
+      contentType: false,
+      xhr: function () {
+        const xhr = new window.XMLHttpRequest();
+        xhr.upload.addEventListener(
+          "progress",
+          (evt) => {
+            if (evt.lengthComputable) {
+              const percentComplete = (evt.loaded / evt.total) * 100;
+              progressBar.css("width", percentComplete + "%");
+              progressBar.attr("aria-valuenow", percentComplete);
+            }
+          },
+          false,
+        );
+        return xhr;
+      },
+      success: function () {
         progressBar.addClass("bg-success");
         $("#add-plugins-submit").removeClass("disabled");
         fileItem.append('<span class="text-success ms-2">Uploaded</span>');
-      } else {
+      },
+      error: function () {
         progressBar.addClass("bg-danger");
         fileItem.append('<span class="text-danger ms-2">Failed</span>');
         alert("An error occurred while uploading the file. Please try again.");
-      }
-    };
-
-    xhr.onerror = () => {
-      console.error("Upload error:", xhr.statusText);
-      progressBar.addClass("bg-danger");
-      alert("An error occurred while uploading the file. Please try again.");
-    };
-
-    xhr.send(formData);
+      },
+    });
   };
 
   const layout = {
@@ -491,9 +491,10 @@ $(document).ready(function () {
 
   // File input change event
   fileInput.on("change", function () {
-    for (let i = 0; i < fileInput.get(0).files.length; i++) {
+    const files = this.files;
+    for (let i = 0; i < files.length; i++) {
       setTimeout(() => {
-        const file = fileInput.get(0).files[i];
+        const file = files[i];
         if (validateFile(file)) {
           uploadFile(file);
         } else {

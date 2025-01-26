@@ -1,6 +1,13 @@
 # Changelog
 
-## v1.6.0-rc2 - ????/??/??
+## v1.6.0-rc3 - ????/??/??
+
+- [FEATURE] Update BunkerNet's logic to send reports in bulk instead of one by one
+- [AUTOCONF] Add the possibility to add/override settings via ConfigMap in Kubernetes using the `bunkerweb.io/CONFIG_TYPE=settings` annotation
+- [UI] Add support page for easy logs and configuration sharing while anonymizing sensitive data
+- [LINUX] Support Fedora 41
+
+## v1.6.0-rc2 - 2025/01/21
 
 - [BUGFIX] Whitelisting a client no longer bypasses https redirect settings as the `ssl` plugin is now executed before the `whitelist` plugin
 - [UI] Fixed condition when validating the setup wizard form when a custom certificate is used

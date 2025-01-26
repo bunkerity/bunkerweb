@@ -36,6 +36,12 @@
       "file": "bunkernet-data.py",
       "every": "day",
       "reload": true
+    },
+    {
+      "name": "bunkernet-send",
+      "file": "bunkernet-send.py",
+      "every": "hour",
+      "reload": true
     }
   ]
 }

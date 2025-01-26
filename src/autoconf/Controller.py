@@ -3,7 +3,6 @@
 from abc import abstractmethod
 from os import getenv
 from time import sleep
-from typing import Literal, Union
 
 from Config import Config
 
@@ -11,23 +10,22 @@ from logger import setup_logger  # type: ignore
 
 
 class Controller(Config):
-    def __init__(
-        self,
-        ctrl_type: Union[Literal["docker"], Literal["swarm"], Literal["kubernetes"]],
-    ):
-        super().__init__()
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self._loaded = False
-        self._type = ctrl_type
         self._instances = []
         self._services = []
         self._configs = {config_type: {} for config_type in self._supported_config_types}
+        self._extra_config = {}
         self._logger = setup_logger(f"{self._type}-controller", getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")))
         self._namespaces = None
         namespaces = getenv("NAMESPACES")
         if namespaces:
             self._namespaces = namespaces.strip().split(" ")
             self._logger.info(
-                "Only instances and services in the " + ", ".join(f"{namespace!r}" for namespace in self._namespaces) + " namespace(s) will be considered."
+                "Only instances and services in the "
+                + ", ".join(f"{namespace!r}" for namespace in self._namespaces)
+                + f" namespace{'s' if len(self._namespaces) > 1 else ''} will be managed."
             )
 
     def wait(self, wait_time: int) -> list:
@@ -35,17 +33,13 @@ class Controller(Config):
         while not all_ready:
             self._instances = self.get_instances()
             if not self._instances:
-                self._logger.warning(
-                    f"No instance found, waiting {wait_time}s ...",
-                )
+                self._logger.warning(f"No instance found, waiting {wait_time}s ...")
                 sleep(wait_time)
                 continue
             all_ready = True
             for instance in self._instances:
                 if not instance["health"]:
-                    self._logger.warning(
-                        f"Instance {instance['name']} is not ready, waiting {wait_time}s ...",
-                    )
+                    self._logger.warning(f"Instance {instance['name']} is not ready, waiting {wait_time}s ...")
                     sleep(wait_time)
                     all_ready = False
                     break
@@ -82,9 +76,6 @@ class Controller(Config):
                 self._loaded = True
 
     def get_services(self):
-        while not self._get_controller_services():
-            sleep(1)
-
         services = []
         for controller_service in self._get_controller_services():
             services.extend(self._to_services(controller_service))

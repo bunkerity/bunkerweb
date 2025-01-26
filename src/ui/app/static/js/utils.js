@@ -499,4 +499,17 @@ $(document).ready(() => {
       theme,
     );
   });
+
+  $("#pluginsCollapse").on("show.bs.collapse", function () {
+    sessionStorage.setItem("pluginsCollapse", "show");
+  });
+
+  $("#pluginsCollapse").on("hide.bs.collapse", function () {
+    sessionStorage.setItem("pluginsCollapse", "hide");
+  });
+
+  const pluginsCollapse = sessionStorage.getItem("pluginsCollapse");
+  if (pluginsCollapse === "hide") {
+    $("#pluginsCollapse").collapse("hide");
+  }
 });

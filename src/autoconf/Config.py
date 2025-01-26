@@ -4,16 +4,17 @@ from contextlib import suppress
 from datetime import datetime
 from os import getenv
 from time import sleep
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Literal, Optional, Union
 
 from Database import Database  # type: ignore
 from logger import setup_logger  # type: ignore
 
 
 class Config:
-    def __init__(self):
-        super().__init__()
+    def __init__(self, ctrl_type: Union[Literal["docker"], Literal["swarm"], Literal["kubernetes"]]):
+        self._type = ctrl_type
         self.__logger = setup_logger("Config", getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")))
+        self._settings = {}
         self.__instances = []
         self.__services = []
         self._supported_config_types = (
@@ -29,6 +30,7 @@ class Config:
         )
         self.__configs = {config_type: {} for config_type in self._supported_config_types}
         self.__config = {}
+        self.__extra_config = {}
 
         self._db = Database(self.__logger)
 
@@ -47,26 +49,70 @@ class Config:
             server_name = service["SERVER_NAME"].split(" ")[0]
             if not server_name:
                 continue
+            config["SERVER_NAME"] += f" {server_name}"
+
+        for service in self.__services:
+            server_name = service["SERVER_NAME"].split(" ")[0]
+            if not server_name:
+                continue
             for variable, value in service.items():
-                if variable == "NAMESPACE" or variable.startswith("CUSTOM_CONF") or not variable.isupper():
+                if variable == "NAMESPACE" or variable.startswith("CUSTOM_CONF"):
                     continue
 
-                success, err = self._db.is_valid_setting(variable, value=value, multisite=True)
+                is_global = False
+                success, err = self._db.is_valid_setting(
+                    variable,
+                    value=value,
+                    multisite=True,
+                    extra_services=config["SERVER_NAME"].split(" "),
+                )
                 if not success:
-                    self.__logger.warning(f"Variable {variable}: {value} is not a valid autoconf setting ({err}), ignoring it")
+                    if self._type == "kubernetes":
+                        success, err = self._db.is_valid_setting(variable, value=value)
+                        if success:
+                            is_global = True
+                            self.__logger.warning(f"Variable {variable} is a global value and will be applied globally")
+                    if not success:
+                        self.__logger.warning(f"Variable {variable}: {value} is not a valid autoconf setting ({err}), ignoring it")
+                        continue
+
+                if is_global or variable.startswith(f"{server_name}_"):
+                    if variable == "SERVER_NAME":
+                        self.__logger.warning("Global variable SERVER_NAME can't be set via annotations, ignoring it")
+                        continue
+                    config[variable] = value
                     continue
                 config[f"{server_name}_{variable}"] = value
-            config["SERVER_NAME"] += f" {server_name}"
         config["SERVER_NAME"] = config["SERVER_NAME"].strip()
         return config
 
-    def update_needed(self, instances: List[Dict[str, Any]], services: List[Dict[str, str]], configs: Optional[Dict[str, Dict[str, bytes]]] = None) -> bool:
-        if instances != self.__instances:
+    def update_needed(
+        self,
+        instances: List[Dict[str, Any]],
+        services: List[Dict[str, str]],
+        configs: Optional[Dict[str, Dict[str, bytes]]] = None,
+        extra_config: Optional[Dict[str, str]] = None,
+    ) -> bool:
+        configs = configs or {}
+        extra_config = extra_config or {}
+
+        # Use sets for comparing lists of dictionaries
+        if set(map(str, self.__instances)) != set(map(str, instances)):
+            self.__logger.debug(f"Instances changed: {self.__instances} -> {instances}")
             return True
-        elif services != self.__services:
+
+        if set(map(str, self.__services)) != set(map(str, services)):
+            self.__logger.debug(f"Services changed: {self.__services} -> {services}")
             return True
-        elif (configs or {}) != self.__configs:
+
+        if set(map(str, self.__configs.items())) != set(map(str, configs.items())):
+            self.__logger.debug(f"Configs changed: {self.__configs} -> {configs}")
             return True
+
+        if set(map(str, self.__extra_config.items())) != set(map(str, extra_config.items())):
+            self.__logger.debug(f"Extra config changed: {self.__extra_config} -> {extra_config}")
+            return True
+
         return False
 
     def have_to_wait(self) -> bool:
@@ -107,7 +153,12 @@ class Config:
             raise Exception("Too many retries while waiting for scheduler to apply configuration...")
 
     def apply(
-        self, instances: List[Dict[str, Any]], services: List[Dict[str, str]], configs: Optional[Dict[str, Dict[str, bytes]]] = None, first: bool = False
+        self,
+        instances: List[Dict[str, Any]],
+        services: List[Dict[str, str]],
+        configs: Optional[Dict[str, Dict[str, bytes]]] = None,
+        first: bool = False,
+        extra_config: Optional[Dict[str, str]] = None,
     ) -> bool:
         success = True
 
@@ -118,6 +169,7 @@ class Config:
         self.wait_applying()
 
         configs = configs or {}
+        extra_config = extra_config or {}
 
         changes = []
         if instances != self.__instances or first:
@@ -129,9 +181,9 @@ class Config:
         if configs != self.__configs or first:
             self.__configs = configs
             changes.append("custom_configs")
-        if "instances" in changes or "services" in changes:
+        if "instances" in changes or "services" in changes or extra_config != self.__extra_config:
             old_env = self.__config.copy()
-            new_env = self.__get_full_env()
+            new_env = self.__get_full_env() | extra_config
             if old_env != new_env or first:
                 self.__config = new_env
                 changes.append("config")

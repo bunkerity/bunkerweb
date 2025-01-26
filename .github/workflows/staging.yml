@@ -43,13 +43,15 @@ jobs:
       packages: write
     strategy:
       matrix:
-        linux: [ubuntu, debian, fedora, rhel, rhel9, ubuntu-jammy]
+        linux: [ubuntu, debian, fedora, fedora-41, rhel, rhel9, ubuntu-jammy]
         include:
           - linux: ubuntu
             package: deb
           - linux: debian
             package: deb
           - linux: fedora
+            package: rpm
+          - linux: fedora-41
             package: rpm
           - linux: rhel
             package: rpm
@@ -157,7 +159,7 @@ jobs:
     needs: [staging-tests]
     strategy:
       matrix:
-        linux: [ubuntu, debian, fedora, el, el9, ubuntu-jammy]
+        linux: [ubuntu, debian, fedora, fedora-41, el, el9, ubuntu-jammy]
         arch: [amd64]
         include:
           - release: testing
@@ -179,6 +181,12 @@ jobs:
             separator: "-"
             suffix: "1."
             version: 40
+            package: rpm
+          - linux: fedora-41
+            package_arch: x86_64
+            separator: "-"
+            suffix: "1."
+            version: 41
             package: rpm
           - linux: el
             package_arch: x86_64

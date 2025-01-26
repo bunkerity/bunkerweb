@@ -94,7 +94,7 @@ jobs:
     needs: [create-arm]
     strategy:
       matrix:
-        linux: [ubuntu, debian, fedora, rhel, rhel9, ubuntu-jammy]
+        linux: [ubuntu, debian, fedora, fedora-41, rhel, rhel9, ubuntu-jammy]
         platforms: [linux/amd64, linux/arm64]
         include:
           - release: rc
@@ -103,6 +103,8 @@ jobs:
           - linux: debian
             package: deb
           - linux: fedora
+            package: rpm
+          - linux: fedora-41
             package: rpm
           - linux: rhel
             package: rpm
@@ -183,7 +185,7 @@ jobs:
     needs: [wait-builds]
     strategy:
       matrix:
-        linux: [ubuntu, debian, fedora, el, el9, ubuntu-jammy]
+        linux: [ubuntu, debian, fedora, fedora-41, el, el9, ubuntu-jammy]
         arch: [amd64, arm64]
         include:
           - release: latest
@@ -202,6 +204,11 @@ jobs:
             separator: "-"
             suffix: "1."
             version: 40
+            package: rpm
+          - linux: fedora-41
+            separator: "-"
+            suffix: "1."
+            version: 41
             package: rpm
           - linux: el
             separator: "-"
@@ -227,6 +234,9 @@ jobs:
           - linux: fedora
             arch: amd64
             package_arch: x86_64
+          - linux: fedora-41
+            arch: amd64
+            package_arch: x86_64
           - linux: el
             arch: amd64
             package_arch: x86_64
@@ -243,6 +253,9 @@ jobs:
             arch: arm64
             package_arch: arm64
           - linux: fedora
+            arch: arm64
+            package_arch: aarch64
+          - linux: fedora-41
             arch: arm64
             package_arch: aarch64
           - linux: el

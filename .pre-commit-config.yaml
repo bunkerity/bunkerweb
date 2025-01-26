@@ -58,7 +58,7 @@ repos:
         exclude: ^tests/
 
   - repo: https://github.com/codespell-project/codespell
-    rev: 193cd7d27cd571f79358af09a8fb8997e54f8fff # frozen: v2.3.0
+    rev: db0100e9569b92719311a5bf6727ca1bb4664409 # frozen: v2.4.0
     hooks:
       - id: codespell
         name: Codespell Spell Checker
@@ -68,7 +68,7 @@ repos:
         types: [text]
 
   - repo: https://github.com/gitleaks/gitleaks
-    rev: fc71f9df1b1edbc7396580766b73013d8bae8c2d # frozen: v8.23.0
+    rev: fdb44522d34ace953737f8501287e0b4fba52887 # frozen: v8.23.1
     hooks:
       - id: gitleaks
 
