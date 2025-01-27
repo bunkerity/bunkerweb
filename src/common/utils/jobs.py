@@ -109,9 +109,17 @@ class Job:
                     continue
                 cache_path.parent.mkdir(parents=True, exist_ok=True)
                 cache_path.write_bytes(job_cache_file["data"])
-                self.logger.debug(f"Restored cache file {job_cache_file['file_name']}")
+                ignored_dirs.add(cache_path.parent.as_posix())
+                self.logger.debug(
+                    "Restored cache file " + ((job_cache_file["service_id"] + "/") if job_cache_file["service_id"] else "") + job_cache_file["file_name"]
+                )
             except BaseException as e:
-                self.logger.error(f"Exception while restoring cache file {job_cache_file['file_name']} :\n{e}")
+                self.logger.error(
+                    "Exception while restoring cache file "
+                    + ((job_cache_file["service_id"] + "/") if job_cache_file["service_id"] else "")
+                    + job_cache_file["file_name"]
+                    + f" :\n{e}"
+                )
                 ret = False
 
         with LOCK:
@@ -124,13 +132,13 @@ class Job:
                     if file not in plugin_cache_files and file.is_file():
                         self.logger.debug(f"Removing non-cached file {file}")
                         file.unlink(missing_ok=True)
-                        if file.parent.is_dir() and not list(file.parent.iterdir()):
-                            self.logger.debug(f"Removing empty directory {file.parent}")
+                        if file.parent.is_dir():
+                            self.logger.debug(f"Removing directory {file.parent}")
                             rmtree(file.parent, ignore_errors=True)
                             if file.parent == self.job_path:
                                 break
                     elif file.is_dir():
-                        self.logger.debug(f"Removing empty directory {file}")
+                        self.logger.debug(f"Removing directory {file}")
                         rmtree(file, ignore_errors=True)
 
         return ret
