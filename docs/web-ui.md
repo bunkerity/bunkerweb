@@ -118,7 +118,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.0
+        image: bunkerity/bunkerweb:1.6.0-rc4
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -131,7 +131,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.0
+        image: bunkerity/bunkerweb-scheduler:1.6.0-rc4
         environment:
           <<: *bw-ui-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
@@ -147,7 +147,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
           - bw-db
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.0
+        image: bunkerity/bunkerweb-ui:1.6.0-rc4
         environment:
           <<: *bw-ui-env
           TOTP_SECRETS: "mysecret" # Remember to set a stronger secret key (see the Prerequisites section)
@@ -204,7 +204,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.0
+        image: bunkerity/bunkerweb:1.6.0-rc4
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -220,7 +220,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.0
+        image: bunkerity/bunkerweb-scheduler:1.6.0-rc4
         environment:
           <<: *bw-ui-env
           BUNKERWEB_INSTANCES: ""
@@ -236,7 +236,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.0
+        image: bunkerity/bunkerweb-autoconf:1.6.0-rc4
         depends_on:
           - bw-docker
         environment:
@@ -259,7 +259,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
           - bw-docker
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.0
+        image: bunkerity/bunkerweb-ui:1.6.0-rc4
         environment:
           <<: *bw-ui-env
           TOTP_SECRETS: "mysecret" # Remember to set a stronger secret key (see the Prerequisites section)
@@ -323,7 +323,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.0
+        image: bunkerity/bunkerweb:1.6.0-rc4
         ports:
           - published: 80
             target: 8080
@@ -353,7 +353,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
             - "bunkerweb.INSTANCE=yes"
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.0
+        image: bunkerity/bunkerweb-scheduler:1.6.0-rc4
         environment:
           <<: *bw-ui-env
           BUNKERWEB_INSTANCES: ""
@@ -371,7 +371,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.0
+        image: bunkerity/bunkerweb-autoconf:1.6.0-rc4
         environment:
           <<: *bw-ui-env
           DOCKER_HOST: "tcp://bw-docker:2375"
@@ -400,7 +400,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
               - "node.role == manager"
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.0
+        image: bunkerity/bunkerweb-ui:1.6.0-rc4
         environment:
           <<: *bw-ui-env
           TOTP_SECRETS: "mysecret" # Remember to set a stronger secret key (see the Prerequisites section)
@@ -516,7 +516,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
           containers:
             # using bunkerweb as name is mandatory
             - name: bunkerweb
-              image: bunkerity/bunkerweb:1.6.0
+              image: bunkerity/bunkerweb:1.6.0-rc4
               imagePullPolicy: Always
               securityContext:
                 runAsUser: 101
@@ -576,7 +576,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
           serviceAccountName: sa-bunkerweb
           containers:
             - name: bunkerweb-controller
-              image: bunkerity/bunkerweb-autoconf:1.6.0
+              image: bunkerity/bunkerweb-autoconf:1.6.0-rc4
               imagePullPolicy: Always
               env:
                 - name: KUBERNETES_MODE
@@ -603,7 +603,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
           serviceAccountName: sa-bunkerweb
           containers:
             - name: bunkerweb-scheduler
-              image: bunkerity/bunkerweb-scheduler:1.6.0
+              image: bunkerity/bunkerweb-scheduler:1.6.0-rc4
               imagePullPolicy: Always
               env:
                 - name: KUBERNETES_MODE
@@ -708,7 +708,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
           serviceAccountName: sa-bunkerweb
           containers:
             - name: bunkerweb-ui
-              image: bunkerity/bunkerweb-ui:1.6.0
+              image: bunkerity/bunkerweb-ui:1.6.0-rc4
               imagePullPolicy: Always
               env:
                 - name: KUBERNETES_MODE
@@ -806,7 +806,7 @@ To keep the logs accessible from the web UI, you will need to use `syslog-ng` to
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.0
+        image: bunkerity/bunkerweb:1.6.0-rc4
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -824,7 +824,7 @@ To keep the logs accessible from the web UI, you will need to use `syslog-ng` to
             syslog-address: "udp://10.20.30.254:514" # This is the syslog-ng container address
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.0
+        image: bunkerity/bunkerweb-scheduler:1.6.0-rc4
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
@@ -856,7 +856,7 @@ To keep the logs accessible from the web UI, you will need to use `syslog-ng` to
             syslog-address: "udp://10.20.30.254:514" # This is the syslog-ng container address
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.0
+        image: bunkerity/bunkerweb-ui:1.6.0-rc4
         environment:
           DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Remember to set a stronger password for the database
           ADMIN_USERNAME: "changeme"
@@ -927,7 +927,7 @@ To keep the logs accessible from the web UI, you will need to use `syslog-ng` to
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.0
+        image: bunkerity/bunkerweb:1.6.0-rc4
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -946,7 +946,7 @@ To keep the logs accessible from the web UI, you will need to use `syslog-ng` to
             syslog-address: "udp://10.20.30.254:514" # This is the syslog-ng container address
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.0
+        image: bunkerity/bunkerweb-scheduler:1.6.0-rc4
         environment:
           <<: *bw-ui-env
           BUNKERWEB_INSTANCES: "" # We don't need to specify the BunkerWeb instance here as they are automatically detected by the autoconf service
@@ -966,7 +966,7 @@ To keep the logs accessible from the web UI, you will need to use `syslog-ng` to
             syslog-address: "udp://10.20.30.254:514" # This is the syslog-ng container address
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.0
+        image: bunkerity/bunkerweb-autoconf:1.6.0-rc4
         depends_on:
           - bunkerweb
           - bw-docker
@@ -985,7 +985,7 @@ To keep the logs accessible from the web UI, you will need to use `syslog-ng` to
             syslog-address: "udp://10.20.30.254:514" # This is the syslog-ng container address
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.0
+        image: bunkerity/bunkerweb-ui:1.6.0-rc4
         environment:
           <<: *bw-ui-env
           ADMIN_USERNAME: "changeme"
@@ -1084,7 +1084,7 @@ To keep the logs accessible from the web UI, you will need to use `syslog-ng` to
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.0
+        image: bunkerity/bunkerweb:1.6.0-rc4
         ports:
           - published: 80
             target: 8080
@@ -1119,7 +1119,7 @@ To keep the logs accessible from the web UI, you will need to use `syslog-ng` to
             syslog-address: "udp://10.20.30.254:514" # This is the syslog-ng container address
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.0
+        image: bunkerity/bunkerweb-scheduler:1.6.0-rc4
         environment:
           <<: *ui-env
           BUNKERWEB_INSTANCES: ""
@@ -1141,7 +1141,7 @@ To keep the logs accessible from the web UI, you will need to use `syslog-ng` to
             syslog-address: "udp://10.20.30.254:514" # This is the syslog-ng container address
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.0
+        image: bunkerity/bunkerweb-autoconf:1.6.0-rc4
         environment:
           <<: *ui-env
           DOCKER_HOST: "tcp://bw-docker:2375"
@@ -1176,7 +1176,7 @@ To keep the logs accessible from the web UI, you will need to use `syslog-ng` to
               - "node.role == manager"
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.0
+        image: bunkerity/bunkerweb-ui:1.6.0-rc4
         environment:
           <<: *ui-env
           ADMIN_USERNAME: "changeme"
@@ -1435,7 +1435,7 @@ After a successful login/password combination, you will be prompted to enter you
 
     !!! info "Database backend"
 
-        If you want another Database backend than MariaDB please refer to the docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.0/misc/integrations) of the repository.
+        If you want another Database backend than MariaDB please refer to the docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.0-rc4/misc/integrations) of the repository.
 
     Here is the docker-compose boilerplate that you can use (don't forget to edit the `changeme` data) :
 
@@ -1446,7 +1446,7 @@ After a successful login/password combination, you will be prompted to enter you
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.0
+        image: bunkerity/bunkerweb:1.6.0-rc4
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1458,7 +1458,7 @@ After a successful login/password combination, you will be prompted to enter you
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.0
+        image: bunkerity/bunkerweb-scheduler:1.6.0-rc4
         environment:
           <<: *ui-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
@@ -1484,7 +1484,7 @@ After a successful login/password combination, you will be prompted to enter you
           - bw-db
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.0
+        image: bunkerity/bunkerweb-ui:1.6.0-rc4
         environment:
           <<: *ui-env
           ADMIN_USERNAME: "changeme"
@@ -1547,7 +1547,7 @@ After a successful login/password combination, you will be prompted to enter you
 
     !!! info "Database backend"
 
-        If you want another Database backend than MariaDB please refer to the docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.0/misc/integrations) of the repository.
+        If you want another Database backend than MariaDB please refer to the docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.0-rc4/misc/integrations) of the repository.
 
     Here is the docker-compose boilerplate that you can use (don't forget to edit the `changeme` data) :
 
@@ -1559,7 +1559,7 @@ After a successful login/password combination, you will be prompted to enter you
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.0
+        image: bunkerity/bunkerweb:1.6.0-rc4
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1574,7 +1574,7 @@ After a successful login/password combination, you will be prompted to enter you
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.0
+        image: bunkerity/bunkerweb-scheduler:1.6.0-rc4
         environment:
           <<: *ui-env
           BUNKERWEB_INSTANCES: ""
@@ -1588,7 +1588,7 @@ After a successful login/password combination, you will be prompted to enter you
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.0
+        image: bunkerity/bunkerweb-autoconf:1.6.0-rc4
         depends_on:
           - bw-docker
         environment:
@@ -1622,7 +1622,7 @@ After a successful login/password combination, you will be prompted to enter you
           - bw-db
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.0
+        image: bunkerity/bunkerweb-ui:1.6.0-rc4
         environment:
           <<: *ui-env
           ADMIN_USERNAME: "changeme"
@@ -1690,7 +1690,7 @@ After a successful login/password combination, you will be prompted to enter you
 
     !!! info "Database backend"
 
-        If you want another Database backend than MariaDB please refer to the stack files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.0/misc/integrations) of the repository.
+        If you want another Database backend than MariaDB please refer to the stack files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.0-rc4/misc/integrations) of the repository.
 
     Here is the stack boilerplate that you can use (don't forget to edit the `changeme` data) :
 
@@ -1702,7 +1702,7 @@ After a successful login/password combination, you will be prompted to enter you
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.0
+        image: bunkerity/bunkerweb:1.6.0-rc4
         ports:
           - published: 80
             target: 8080
@@ -1731,7 +1731,7 @@ After a successful login/password combination, you will be prompted to enter you
             - "bunkerweb.INSTANCE=yes"
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.0
+        image: bunkerity/bunkerweb-scheduler:1.6.0-rc4
         environment:
           <<: *ui-env
           BUNKERWEB_INSTANCES: ""
@@ -1747,7 +1747,7 @@ After a successful login/password combination, you will be prompted to enter you
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.0
+        image: bunkerity/bunkerweb-autoconf:1.6.0-rc4
         environment:
           <<: *ui-env
           DOCKER_HOST: "tcp://bw-docker:2375"
@@ -1792,7 +1792,7 @@ After a successful login/password combination, you will be prompted to enter you
           - bw-universe
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.0
+        image: bunkerity/bunkerweb-ui:1.6.0-rc4
         environment:
           <<: *ui-env
           ADMIN_USERNAME: "changeme"
@@ -1852,7 +1852,7 @@ After a successful login/password combination, you will be prompted to enter you
 
     !!! info "Database backend"
 
-        If you want another Database backend than MariaDB please refer to the yaml files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.0/misc/integrations) of the repository.
+        If you want another Database backend than MariaDB please refer to the yaml files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.0-rc4/misc/integrations) of the repository.
 
     Here is the yaml boilerplate that you can use (don't forget to edit the `changeme` data) :
 
@@ -1909,7 +1909,7 @@ After a successful login/password combination, you will be prompted to enter you
           containers:
             # using bunkerweb as name is mandatory
             - name: bunkerweb
-              image: bunkerity/bunkerweb:1.6.0
+              image: bunkerity/bunkerweb:1.6.0-rc4
               imagePullPolicy: Always
               securityContext:
                 runAsUser: 101
@@ -1969,7 +1969,7 @@ After a successful login/password combination, you will be prompted to enter you
           serviceAccountName: sa-bunkerweb
           containers:
             - name: bunkerweb-controller
-              image: bunkerity/bunkerweb-autoconf:1.6.0
+              image: bunkerity/bunkerweb-autoconf:1.6.0-rc4
               imagePullPolicy: Always
               env:
                 - name: KUBERNETES_MODE
@@ -1996,7 +1996,7 @@ After a successful login/password combination, you will be prompted to enter you
           serviceAccountName: sa-bunkerweb
           containers:
             - name: bunkerweb-scheduler
-              image: bunkerity/bunkerweb-scheduler:1.6.0
+              image: bunkerity/bunkerweb-scheduler:1.6.0-rc4
               imagePullPolicy: Always
               env:
                 - name: KUBERNETES_MODE
@@ -2099,7 +2099,7 @@ After a successful login/password combination, you will be prompted to enter you
           serviceAccountName: sa-bunkerweb
           containers:
             - name: bunkerweb-ui
-              image: bunkerity/bunkerweb-ui:1.6.0
+              image: bunkerity/bunkerweb-ui:1.6.0-rc4
               imagePullPolicy: Always
               env:
                 - name: KUBERNETES_MODE

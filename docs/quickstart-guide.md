@@ -6,7 +6,7 @@
 
 !!! tip "Going further"
 
-	To demonstrate the use of BunkerWeb, we will deploy a basic stack using the setup wizard as an example. See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.0/examples) of the repository to get real-world examples.
+	To demonstrate the use of BunkerWeb, we will deploy a basic stack using the setup wizard as an example. See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.0-rc4/examples) of the repository to get real-world examples.
 
 Protecting existing web applications already accessible with the HTTP(S) protocol is the main goal of BunkerWeb : it will act as a classical [reverse proxy](https://en.wikipedia.org/wiki/Reverse_proxy) with extra security features.
 
@@ -25,7 +25,7 @@ Protecting existing web applications already accessible with the HTTP(S) protoco
     services:
       bunkerweb:
         # This is the name that will be used to identify the instance in the Scheduler
-        image: bunkerity/bunkerweb:1.6.0
+        image: bunkerity/bunkerweb:1.6.0-rc4
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -38,7 +38,7 @@ Protecting existing web applications already accessible with the HTTP(S) protoco
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.0
+        image: bunkerity/bunkerweb-scheduler:1.6.0-rc4
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
@@ -53,7 +53,7 @@ Protecting existing web applications already accessible with the HTTP(S) protoco
           - bw-db
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.0
+        image: bunkerity/bunkerweb-ui:1.6.0-rc4
         environment:
           <<: *bw-env
         restart: "unless-stopped"

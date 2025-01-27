@@ -83,7 +83,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 
 !!! info "Going further"
 
-    You will find concrete examples of multisite mode in the [quickstart guide](quickstart-guide.md) of the documentation and the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.0/examples) directory of the repository.
+    You will find concrete examples of multisite mode in the [quickstart guide](quickstart-guide.md) of the documentation and the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.0-rc4/examples) directory of the repository.
 
 ## Custom configurations
 
@@ -97,7 +97,7 @@ By leveraging custom configurations, you unlock a world of possibilities to tail
 
 !!! info "Going further"
 
-    You will find concrete examples of custom configurations in the [quickstart guide](quickstart-guide.md) of the documentation and the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.0/examples) directory of the repository.
+    You will find concrete examples of custom configurations in the [quickstart guide](quickstart-guide.md) of the documentation and the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.0-rc4/examples) directory of the repository.
 
 ## Database
 
