@@ -1445,9 +1445,12 @@ class Database:
                                     value == template_setting_default
                                     if template_setting_default is not None
                                     else (
-                                        value == setting["default"]
-                                        if original_key not in config and original_key not in db_config
-                                        else value in (config.get(original_key), db_config.get(original_key))
+                                        not suffix
+                                        and (
+                                            value == setting["default"]
+                                            if original_key not in config and original_key not in db_config
+                                            else value in (config.get(original_key), db_config.get(original_key))
+                                        )
                                     )
                                 ):
                                     continue
@@ -1468,9 +1471,12 @@ class Database:
                                     value == template_setting_default
                                     if template_setting_default is not None
                                     else (
-                                        value == setting["default"]
-                                        if original_key not in config and original_key not in db_config
-                                        else value in (config.get(original_key), db_config.get(original_key))
+                                        not suffix
+                                        and (
+                                            value == setting["default"]
+                                            if original_key not in config and original_key not in db_config
+                                            else value in (config.get(original_key), db_config.get(original_key))
+                                        )
                                     )
                                 ):
                                     self.logger.debug(f"Removing setting {key} for service {server_name}")
@@ -1521,7 +1527,7 @@ class Database:
                                 if (
                                     template_setting_default is not None
                                     and value == template_setting_default
-                                    or (template_setting_default is None and value == setting["default"])
+                                    or (not suffix and template_setting_default is None and value == setting["default"])
                                 ):
                                     continue
 
@@ -1536,7 +1542,7 @@ class Database:
                                 if (
                                     template_setting_default is not None
                                     and value == template_setting_default
-                                    or (template_setting_default is None and value == setting["default"])
+                                    or (not suffix and template_setting_default is None and value == setting["default"])
                                 ):
                                     self.logger.debug(f"Removing global setting {key}")
                                     local_to_delete.append({"model": Global_values, "filter": {"setting_id": key, "suffix": suffix}})
