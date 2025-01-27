@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.6.0-rc4 - 2025/01/26
+## v1.6.0-rc4 - ????/??/??
 
 - [BUGFIX] Fix shenanigans with the configuration being wiped after a restart
 - [BUGFIX] Fix shenanigans with cache files being deleted for no reason
