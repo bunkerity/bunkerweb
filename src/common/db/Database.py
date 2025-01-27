@@ -1462,9 +1462,7 @@ class Database:
                                 local_to_update.append(
                                     {"model": Services, "filter": {"id": server_name}, "values": {"last_update": datetime.now().astimezone()}}
                                 )
-                            elif (
-                                method in (service_setting["method"], "autoconf") or (method == "scheduler" and service_setting["method"] != "autoconf")
-                            ) and service_setting["value"] != value:
+                            elif method in (service_setting["method"], "autoconf") and service_setting["value"] != value:
                                 local_changed_plugins.add(setting["plugin_id"])
 
                                 if key != "SERVER_NAME" and (
@@ -1534,9 +1532,7 @@ class Database:
                                 self.logger.debug(f"Adding global setting {key}")
                                 local_changed_plugins.add(setting["plugin_id"])
                                 local_to_put.append(Global_values(setting_id=key, value=value, suffix=suffix, method=method))
-                            elif (
-                                method in (global_value.method, "autoconf") or (method == "scheduler" and global_value.method != "autoconf")
-                            ) and global_value.value != value:
+                            elif method in (global_value.method, "autoconf") and global_value.value != value:
                                 local_changed_plugins.add(setting["plugin_id"])
 
                                 if (
@@ -1636,9 +1632,7 @@ class Database:
                             self.logger.debug(f"Adding global setting {key}")
                             changed_plugins.add(setting.plugin_id)
                             to_put.append(Global_values(setting_id=key, value=value, suffix=suffix, method=method))
-                        elif (
-                            method in (global_value.method, "autoconf") or (method == "scheduler" and global_value.method != "autoconf")
-                        ) and global_value.value != value:
+                        elif method in (global_value.method, "autoconf") and global_value.value != value:
                             changed_plugins.add(setting.plugin_id)
 
                             if value == (template_setting.default if template_setting is not None else setting.default):
@@ -1762,9 +1756,7 @@ class Database:
 
                 if not custom_conf:
                     to_put.append(Custom_configs(**custom_config))
-                elif custom_config["checksum"] != custom_conf.checksum and (
-                    method in (custom_conf.method, "autoconf") or (method == "scheduler" and custom_conf.method != "autoconf")
-                ):
+                elif custom_config["checksum"] != custom_conf.checksum and method in (custom_conf.method, "autoconf"):
                     custom_conf.data = custom_config["data"]
                     custom_conf.checksum = custom_config["checksum"]
                     custom_conf.method = method
