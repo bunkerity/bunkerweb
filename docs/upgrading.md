@@ -74,16 +74,16 @@
                 ```yaml
                 services:
                     bunkerweb:
-                        image: bunkerity/bunkerweb:1.6.0-rc3
+                        image: bunkerity/bunkerweb:1.6.0
                         ...
                     bw-scheduler:
-                        image: bunkerity/bunkerweb-scheduler:1.6.0-rc3
+                        image: bunkerity/bunkerweb-scheduler:1.6.0
                         ...
                     bw-autoconf:
-                        image: bunkerity/bunkerweb-autoconf:1.6.0-rc3
+                        image: bunkerity/bunkerweb-autoconf:1.6.0
                         ...
                     bw-ui:
-                        image: bunkerity/bunkerweb-ui:1.6.0-rc3
+                        image: bunkerity/bunkerweb-ui:1.6.0
                         ...
                 ```
 
@@ -116,7 +116,7 @@
                     Them, you can update BunkerWeb package :
 
                     ```shell
-                    sudo apt install -y bunkerweb=1.6.0-rc3
+                    sudo apt install -y bunkerweb=1.6.0
                     ```
 
                     To prevent upgrading BunkerWeb package when executing `apt upgrade`, you can use the following command :
@@ -140,7 +140,7 @@
                     Them, you can update BunkerWeb package :
 
                     ```shell
-                    sudo dnf install -y bunkerweb-1.6.0-rc3
+                    sudo dnf install -y bunkerweb-1.6.0
                     ```
 
                     To prevent upgrading BunkerWeb package when executing `dnf upgrade`, you can use the following command :
@@ -460,16 +460,16 @@
                 ```yaml
                 services:
                     bunkerweb:
-                        image: bunkerity/bunkerweb:1.6.0-rc3
+                        image: bunkerity/bunkerweb:1.6.0
                         ...
                     bw-scheduler:
-                        image: bunkerity/bunkerweb-scheduler:1.6.0-rc3
+                        image: bunkerity/bunkerweb-scheduler:1.6.0
                         ...
                     bw-autoconf:
-                        image: bunkerity/bunkerweb-autoconf:1.6.0-rc3
+                        image: bunkerity/bunkerweb-autoconf:1.6.0
                         ...
                     bw-ui:
-                        image: bunkerity/bunkerweb-ui:1.6.0-rc3
+                        image: bunkerity/bunkerweb-ui:1.6.0
                         ...
                 ```
 
@@ -502,7 +502,7 @@
                     Them, you can update BunkerWeb package :
 
                     ```shell
-                    sudo apt install -y bunkerweb=1.6.0-rc3
+                    sudo apt install -y bunkerweb=1.6.0
                     ```
 
                     To prevent upgrading BunkerWeb package when executing `apt upgrade`, you can use the following command :
@@ -526,7 +526,7 @@
                     Them, you can update BunkerWeb package :
 
                     ```shell
-                    sudo dnf install -y bunkerweb-1.6.0-rc3
+                    sudo dnf install -y bunkerweb-1.6.0
                     ```
 
                     To prevent upgrading BunkerWeb package when executing `dnf upgrade`, you can use the following command :
@@ -758,7 +758,7 @@ We added a **namespace** feature to the autoconf integrations. Namespaces allow 
 
 !!! warning "Read this if you were a 1.4.X user"
 
-    A lot of things changed since the 1.4.X releases. Container-based integrations stacks contain more services but, trust us, fundamental principles of BunkerWeb are still there. You will find ready to use boilerplates for various integrations in the [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.0-rc3/misc/integrations) folder of the repository.
+    A lot of things changed since the 1.4.X releases. Container-based integrations stacks contain more services but, trust us, fundamental principles of BunkerWeb are still there. You will find ready to use boilerplates for various integrations in the [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.0/misc/integrations) folder of the repository.
 
 ### Scheduler
 

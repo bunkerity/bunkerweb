@@ -372,7 +372,7 @@ This BunkerWeb plugin acts as a [CrowdSec](https://crowdsec.net/) bouncer. It wi
     ```yaml
     services:
         bunkerweb:
-            image: bunkerity/bunkerweb:1.6.0-rc3
+            image: bunkerity/bunkerweb:1.6.0
             ports:
               - "80:8080"
               - "443:8443"
@@ -389,7 +389,7 @@ This BunkerWeb plugin acts as a [CrowdSec](https://crowdsec.net/) bouncer. It wi
                     syslog-address: "udp://10.10.10.254:514"
 
         bw-scheduler:
-            image: bunkerity/bunkerweb-scheduler:1.6.0-rc3
+            image: bunkerity/bunkerweb-scheduler:1.6.0
             depends_on:
               - bunkerweb
             environment:
@@ -839,7 +839,7 @@ You can quickly protect sensitive resources like the admin area for example, by 
 
 ### Auth request
 
-You can deploy complex authentication (e.g. SSO), by using the auth request settings (see [here](https://docs.nginx.com/nginx/admin-guide/security-controls/configuring-subrequest-authentication/) for more information on the feature). Please note that you will find [Authelia](https://www.authelia.com/) and [Authentik](https://goauthentik.io/) examples in the [repository](https://github.com/bunkerity/bunkerweb/tree/v1.6.0-rc3/examples).
+You can deploy complex authentication (e.g. SSO), by using the auth request settings (see [here](https://docs.nginx.com/nginx/admin-guide/security-controls/configuring-subrequest-authentication/) for more information on the feature). Please note that you will find [Authelia](https://www.authelia.com/) and [Authentik](https://goauthentik.io/) examples in the [repository](https://github.com/bunkerity/bunkerweb/tree/v1.6.0/examples).
 
 **Auth request settings are related to reverse proxy rules.**
 
