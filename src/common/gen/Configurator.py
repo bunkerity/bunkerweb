@@ -213,6 +213,7 @@ class Configurator:
                         "DATABASE_RETRY_TIMEOUT",
                         "RELOAD_MIN_TIMEOUT",
                         "DISABLE_CONFIGURATION_TESTING",
+                        "IGNORE_FAIL_SENDING_CONFIG",
                         "GPG_KEY",
                         "HOME",
                         "HOSTNAME",
