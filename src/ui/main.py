@@ -395,7 +395,7 @@ def set_security_headers(response):
         + " default-src https: http: 'self' https://www.bunkerweb.io https://assets.bunkerity.com https://bunkerity.us1.list-manage.com https://api.github.com;"
         + f" script-src https: http: 'self' 'nonce-{app.config['SCRIPT_NONCE']}' 'strict-dynamic' 'unsafe-inline';"
         + " style-src 'self' 'unsafe-inline';"
-        + " img-src 'self' data: blob: https://assets.bunkerity.com https://*.tile.openstreetmap.org;"
+        + " img-src 'self' data: blob: https://www.bunkerweb.io https://assets.bunkerity.com https://*.tile.openstreetmap.org;"
         + " font-src 'self' data:;"
         + " base-uri 'self';"
         + " block-all-mixed-content;"

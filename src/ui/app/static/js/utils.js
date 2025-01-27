@@ -14,12 +14,14 @@ class News {
 
     const lastNews = sessionStorage.getItem("lastNews");
 
-    if (lastNews) {
+    if (lastNews && lastNews !== "undefined") {
       this.render(JSON.parse(lastNews));
     } else {
-      $.getJSON("https://www.bunkerweb.io/api/posts/0/3")
+      $.getJSON(
+        "https://www.bunkerweb.io/wp-json/wp/v2/posts?_embed&per_page=4&orderby=date&order=desc",
+      )
         .done((res) => {
-          const reverseData = res.data.reverse();
+          const reverseData = res.reverse();
           this.render(reverseData);
         })
         .fail((e) => {
@@ -75,37 +77,47 @@ class News {
     lastNews.reverse().forEach((news) => {
       const isLast = news === lastItem;
 
+      const filteredTitle = news.title.rendered
+        .trim()
+        .replace(/^<p>([\s\S]*?)<\/p>$/i, "$1");
+      const decodedTitle = $("<textarea/>").html(filteredTitle).text();
+
+      const filteredExcerpt = news.excerpt.rendered
+        .trim()
+        .replace(/^<p>([\s\S]*?)<\/p>$/i, "$1");
+      const decodedExcerpt = $("<textarea/>").html(filteredExcerpt).text();
+
       // Render for sidebar/news page
       const cardElement = this.template(
-        news.title,
-        news.slug,
-        news.photo.url,
-        news.excerpt,
+        decodedTitle,
+        news.link,
+        news._embedded?.["wp:featuredmedia"]?.[0]?.source_url,
+        decodedExcerpt,
         news.tags,
         news.date,
         isLast,
-        false, // isHome is false
+        false,
       );
       newsRow.append(cardElement);
 
       if (homeNewsContainer) {
         // Render for home page
         const homeCardElement = this.template(
-          news.title,
-          news.slug,
-          news.photo.url,
-          news.excerpt,
+          decodedTitle,
+          news.link,
+          news._embedded?.["wp:featuredmedia"]?.[0]?.source_url,
+          decodedExcerpt,
           news.tags,
           news.date,
           isLast,
-          true, // isHome is true
+          true,
         );
         homeNewsRow.append(homeCardElement);
       }
     });
   }
 
-  template(title, slug, img, excerpt, tags, date, last, isHome) {
+  template(title, link, img, excerpt, tags, date, last, isHome) {
     const colClass = !isHome && last ? "" : "mb-1";
     const colSize = isHome ? "col-md-12 col-xl-12" : "col-md-11 col-xl-11";
     const col = $("<div>", {
@@ -123,7 +135,7 @@ class News {
       const imgCol = $("<div>", { class: "col-md-5" }).appendTo(row);
       const imgLink = $("<a>", {
         class: "w-100",
-        href: `${this.BASE_URL}blog/post/${slug}?utm_campaign=self&utm_source=ui`,
+        href: `${link}?utm_campaign=self&utm_source=ui`,
         target: "_blank",
         rel: "noopener",
       }).append(
@@ -142,7 +154,7 @@ class News {
 
       const cardTitle = $("<h6>", { class: "card-title lh-sm mb-2" }).append(
         $("<a>", {
-          href: `${this.BASE_URL}blog/post/${slug}?utm_campaign=self&utm_source=ui`,
+          href: `${link}?utm_campaign=self&utm_source=ui`,
           target: "_blank",
           rel: "noopener",
           text: title,
@@ -171,7 +183,7 @@ class News {
       tags.forEach((tag) => {
         $("<a>", {
           role: "button",
-          href: `${this.BASE_URL}blog/tag/${tag.slug}?utm_campaign=self&utm_source=ui`,
+          href: `${this.BASE_URL}category/${tag.slug}?utm_campaign=self&utm_source=ui`,
           "aria-pressed": "true",
           class: "btn btn-xs btn-outline-primary",
           target: "_blank",
@@ -193,7 +205,7 @@ class News {
     } else {
       // Sidebar/news page layout with image on top
       const imgLink = $("<a>", {
-        href: `${this.BASE_URL}blog/post/${slug}?utm_campaign=self&utm_source=ui`,
+        href: `${link}?utm_campaign=self&utm_source=ui`,
         target: "_blank",
         rel: "noopener",
       }).append(
@@ -207,7 +219,7 @@ class News {
       const cardBody = $("<div>", { class: "card-body" });
       const cardTitle = $("<h5>", { class: "card-title" }).append(
         $("<a>", {
-          href: `${this.BASE_URL}blog/post/${slug}?utm_campaign=self&utm_source=ui`,
+          href: `${link}?utm_campaign=self&utm_source=ui`,
           target: "_blank",
           rel: "noopener",
           text: title,
@@ -222,7 +234,7 @@ class News {
       tags.forEach((tag) => {
         $("<a>", {
           role: "button",
-          href: `${this.BASE_URL}blog/tag/${tag.slug}?utm_campaign=self&utm_source=ui`,
+          href: `${this.BASE_URL}category/${tag.slug}?utm_campaign=self&utm_source=ui`,
           "aria-pressed": "true",
           class: "btn btn-sm btn-outline-primary",
           target: "_blank",
