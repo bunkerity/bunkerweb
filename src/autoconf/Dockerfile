@@ -40,7 +40,7 @@ RUN umask 027
 # Install bash and create autoconf user
 RUN apk add --no-cache bash tzdata && \
   addgroup -g 101 autoconf && \
-  adduser -h /var/cache/autoconf -g autoconf -s /bin/sh -G autoconf -D -H -u 101 autoconf
+  adduser -h /usr/share/bunkerweb/autoconf -g autoconf -s /sbin/nologin -G autoconf -D -H -u 101 --disabled-password autoconf
 
 # Fix CVEs
 # There are no CVEs for the following packages
