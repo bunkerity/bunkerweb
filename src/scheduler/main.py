@@ -197,12 +197,12 @@ def send_file_to_bunkerweb(file_path: Path, endpoint: str):
                     LOGGER.debug(f"Removing {db_instance['hostname']}:{db_instance['port']} from the list of reachable instances")
                     del SCHEDULER.apis[index]
 
-        LOGGER.warning(f"Error while sending {file_path} to some BunkerWeb instances, removing them from the list of reachable instances: {', '.join(fails)}")
-
     if not success:
         LOGGER.error(f"Error while sending {file_path} to BunkerWeb instances")
     elif not fails:
         LOGGER.info(f"Successfully sent {file_path} folder to reachable BunkerWeb instances")
+    elif not IGNORE_FAIL_SENDING_CONFIG:
+        LOGGER.warning(f"Error while sending {file_path} to some BunkerWeb instances, removing them from the list of reachable instances: {', '.join(fails)}")
 
 
 def generate_custom_configs(configs: Optional[List[Dict[str, Any]]] = None, *, original_path: Union[Path, str] = CUSTOM_CONFIGS_PATH):
