@@ -119,11 +119,9 @@
                             <h5 class="mb-1 me-2 don-jose">Request status</h5>
                         </div>
                     </div>
-                    <div class="card-body">
-                        <div class="d-flex justify-content-center align-items-center">
-                            <div id="requests-data" class="visually-hidden">{{ request_errors|tojson }}</div>
-                            <div id="requests-stats"></div>
-                        </div>
+                    <div class="card-body d-flex align-items-center justify-content-center">
+                        <div id="requests-data" class="visually-hidden">{{ request_errors|tojson }}</div>
+                        <div id="requests-stats"></div>
                     </div>
                 </div>
             </div>
@@ -134,19 +132,15 @@
                             <h5 class="mb-1 me-2 don-jose">Top 10 - Blocked ips</h5>
                         </div>
                     </div>
-                    <div class="card-body">
+                    <div class="card-body d-flex align-items-center justify-content-center">
                         {% if request_ips %}
                             {% set limited_request_ips = request_ips.items() | list %}
                             {% set top_ips = limited_request_ips[:10] %}
-                            <div class="d-flex justify-content-center align-items-center mb-6">
-                                <div id="requests-ips-data" class="visually-hidden">{{ request_ips|tojson }}</div>
-                                <div id="requests-ips"></div>
-                            </div>
+                            <div id="requests-ips-data" class="visually-hidden">{{ request_ips|tojson }}</div>
+                            <div id="requests-ips"></div>
                         {% else %}
-                            <div class="d-flex align-items-center justify-content-center h-100">
-                                <div class="text-center mt-2">
-                                    <p class="g-3 p-2 text-primary rounded-lg fw-bold">No data to show</p>
-                                </div>
+                            <div class="text-center mt-2">
+                                <p class="g-3 p-2 text-primary rounded-lg fw-bold">No data to show</p>
                             </div>
                         {% endif %}
                     </div>
