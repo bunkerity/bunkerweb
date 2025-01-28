@@ -3685,7 +3685,7 @@ chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span
 </code></pre></div>
 <div class="admonition tip">
 <p class="admonition-title">Custom Extra Config</p>
-<p>Since the <code>testing</code> version, you can add/override settings using the <code>bunkerweb.io/CONFIG_TYPE=settings</code> annotation. Here is an example :</p>
+<p>Since the <code>1.6.0-rc3</code> version, you can add/override settings using the <code>bunkerweb.io/CONFIG_TYPE=settings</code> annotation. Here is an example :</p>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ConfigMap</span>
 <span class="nt">metadata</span><span class="p">:</span>
@@ -5013,7 +5013,7 @@ REDIS_DATABASE=&lt;database&gt;
 <p>You can select from the following versions of the OWASP Core Rule Set (CRS) to suit your application's security needs:</p>
 <ul>
 <li><strong><code>3</code></strong>: The stable <a href="https://github.com/coreruleset/coreruleset/releases/tag/v3.3.7">v3.3.7</a> release of the OWASP CRS.</li>
-<li><strong><code>4</code></strong>: The stable <a href="https://github.com/coreruleset/coreruleset/releases/tag/v4.10.0">v4.10.0</a> release of the OWASP CRS (<strong>default</strong>).</li>
+<li><strong><code>4</code></strong>: The stable <a href="https://github.com/coreruleset/coreruleset/releases/tag/v4.11.0">v4.11.0</a> release of the OWASP CRS (<strong>default</strong>).</li>
 <li><strong><code>nightly</code></strong>: The <a href="https://github.com/coreruleset/coreruleset/releases/tag/nightly">nightly build</a>, which is updated daily with the latest rules and improvements.</li>
 </ul>
 <div class="admonition example">
@@ -12903,7 +12903,7 @@ sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">770</sp
 <p>If you are using the <code>Autoconf</code>, <code>Swarm</code>, or <code>Kubernetes</code> integrations, you can set the <code>BUNKERWEB_INSTANCES</code> environment variable to an empty string (so that it doesn't try to send the configuration to the default one which is <code>127.0.0.1</code>).</p>
 <p><strong>The instances will be automatically fetched by the controller</strong>. You can also add custom instances to the list that may not be picked up by the controller.</p>
 </div>
-<p>Since the 1.6.0-beta, the Scheduler also have a new <a href="#concepts-instances-healthcheck">built-in healthcheck system</a>, that will check the health of the instances. If an instance becomes unhealthy, the scheduler will stop sending the configuration to it. If the instance becomes healthy again, the scheduler will start sending the configuration to it again.</p>
+<p>Since the <code>1.6.0-beta</code>, the Scheduler also have a new <a href="#concepts-instances-healthcheck">built-in healthcheck system</a>, that will check the health of the instances. If an instance becomes unhealthy, the scheduler will stop sending the configuration to it. If the instance becomes healthy again, the scheduler will start sending the configuration to it again.</p>
 <h3 id="upgrading-bunkerweb-container">BunkerWeb container</h3>
 <p>Another important change is that the <strong>settings</strong> that were previously declared on the BunkerWeb container <strong>are now declared on the scheduler</strong>. This means that you'll have to move your settings from the BunkerWeb container to the Scheduler container.</p>
 <p>While the settings are now declared on the Scheduler container, <strong>you'll still need to declare api related mandatory settings on the BunkerWeb container</strong> like the <code>API_WHITELIST_IP</code> setting which is used to whitelist the Scheduler's IP address, so that it can send the configuration to the instance.</p>
