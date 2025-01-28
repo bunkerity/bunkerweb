@@ -530,7 +530,7 @@ def custom_plugin_page(plugin: str):
         return False
 
     is_metrics_on = db_config.get("USE_METRICS", "yes") != "no"
-    is_used = plugin in ALWAYS_USED_PLUGINS or plugin_used()
+    is_used = plugin in ALWAYS_USED_PLUGINS or plugin_used() or plugin_data["type"] in ("pro", "ui")
 
     if is_metrics_on and not is_used:
         # Check if at least one service is using metrics and/or the plugin
@@ -581,19 +581,19 @@ def custom_plugin_page(plugin: str):
         </p>
     </div>
 </div>"""
-            else:
-                try:
-                    plugin_page = (
-                        # deepcode ignore Ssti: We trust the plugin template
-                        Environment(
-                            loader=FileSystemLoader((tmp_page_dir.as_posix() + "/", join(sep, "usr", "share", "bunkerweb", "ui", "templates") + "/")),
-                            autoescape=select_autoescape(["html"]),
-                        )
-                        .from_string(page_content)
-                        .render(pre_render=pre_render, **current_app.jinja_env.globals)
+
+            try:
+                plugin_page = (
+                    # deepcode ignore Ssti: We trust the plugin template
+                    Environment(
+                        loader=FileSystemLoader((tmp_page_dir.as_posix() + "/", join(sep, "usr", "share", "bunkerweb", "ui", "templates") + "/")),
+                        autoescape=select_autoescape(["html"]),
                     )
-                except BaseException:
-                    LOGGER.exception("An error occurred while rendering the plugin page")
-                    plugin_page = '<div class="mt-2 mb-2 alert alert-danger text-center" role="alert">An error occurred while rendering the plugin page<br/>See logs for more details</div>'
+                    .from_string(page_content)
+                    .render(pre_render=pre_render, **current_app.jinja_env.globals, **current_app.config["ENV"])
+                )
+            except BaseException:
+                LOGGER.exception("An error occurred while rendering the plugin page")
+                plugin_page = '<div class="mt-2 mb-2 alert alert-danger text-center" role="alert">An error occurred while rendering the plugin page<br/>See logs for more details</div>'
 
     return render_template("plugin_page.html", plugin_page=plugin_page, plugin=plugin_data, is_used=is_used, is_metrics=is_metrics_on, pre_render=pre_render)
