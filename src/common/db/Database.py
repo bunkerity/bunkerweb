@@ -434,7 +434,7 @@ class Database:
                 metadata = session.query(Metadata).with_entities(Metadata.version).filter_by(id=1).first()
                 if metadata:
                     return metadata.version
-                return "1.6.0-rc3"
+                return "1.6.0-rc4"
             except BaseException as e:
                 return f"Error: {e}"
 
@@ -464,7 +464,7 @@ class Database:
             "last_pro_plugins_change": None,
             "last_instances_change": None,
             "integration": "unknown",
-            "version": "1.6.0-rc3",
+            "version": "1.6.0-rc4",
             "database_version": "Unknown",  # ? Extracted from the database
             "default": True,  # ? Extra field to know if the returned data is the default one
         }
@@ -1445,9 +1445,12 @@ class Database:
                                     value == template_setting_default
                                     if template_setting_default is not None
                                     else (
-                                        value == setting["default"]
-                                        if original_key not in config and original_key not in db_config
-                                        else value in (config.get(original_key), db_config.get(original_key))
+                                        not suffix
+                                        and (
+                                            value == setting["default"]
+                                            if original_key not in config and original_key not in db_config
+                                            else value in (config.get(original_key), db_config.get(original_key))
+                                        )
                                     )
                                 ):
                                     continue
@@ -1459,18 +1462,19 @@ class Database:
                                 local_to_update.append(
                                     {"model": Services, "filter": {"id": server_name}, "values": {"last_update": datetime.now().astimezone()}}
                                 )
-                            elif (
-                                method in (service_setting["method"], "autoconf") or (method == "scheduler" and service_setting["method"] != "autoconf")
-                            ) and service_setting["value"] != value:
+                            elif method in (service_setting["method"], "autoconf") and service_setting["value"] != value:
                                 local_changed_plugins.add(setting["plugin_id"])
 
                                 if key != "SERVER_NAME" and (
                                     value == template_setting_default
                                     if template_setting_default is not None
                                     else (
-                                        value == setting["default"]
-                                        if original_key not in config and original_key not in db_config
-                                        else value in (config.get(original_key), db_config.get(original_key))
+                                        not suffix
+                                        and (
+                                            value == setting["default"]
+                                            if original_key not in config and original_key not in db_config
+                                            else value in (config.get(original_key), db_config.get(original_key))
+                                        )
                                     )
                                 ):
                                     self.logger.debug(f"Removing setting {key} for service {server_name}")
@@ -1521,22 +1525,20 @@ class Database:
                                 if (
                                     template_setting_default is not None
                                     and value == template_setting_default
-                                    or (template_setting_default is None and value == setting["default"])
+                                    or (not suffix and template_setting_default is None and value == setting["default"])
                                 ):
                                     continue
 
                                 self.logger.debug(f"Adding global setting {key}")
                                 local_changed_plugins.add(setting["plugin_id"])
                                 local_to_put.append(Global_values(setting_id=key, value=value, suffix=suffix, method=method))
-                            elif (
-                                method in (global_value.method, "autoconf") or (method == "scheduler" and global_value.method != "autoconf")
-                            ) and global_value.value != value:
+                            elif method in (global_value.method, "autoconf") and global_value.value != value:
                                 local_changed_plugins.add(setting["plugin_id"])
 
                                 if (
                                     template_setting_default is not None
                                     and value == template_setting_default
-                                    or (template_setting_default is None and value == setting["default"])
+                                    or (not suffix and template_setting_default is None and value == setting["default"])
                                 ):
                                     self.logger.debug(f"Removing global setting {key}")
                                     local_to_delete.append({"model": Global_values, "filter": {"setting_id": key, "suffix": suffix}})
@@ -1630,9 +1632,7 @@ class Database:
                             self.logger.debug(f"Adding global setting {key}")
                             changed_plugins.add(setting.plugin_id)
                             to_put.append(Global_values(setting_id=key, value=value, suffix=suffix, method=method))
-                        elif (
-                            method in (global_value.method, "autoconf") or (method == "scheduler" and global_value.method != "autoconf")
-                        ) and global_value.value != value:
+                        elif method in (global_value.method, "autoconf") and global_value.value != value:
                             changed_plugins.add(setting.plugin_id)
 
                             if value == (template_setting.default if template_setting is not None else setting.default):
@@ -1756,9 +1756,7 @@ class Database:
 
                 if not custom_conf:
                     to_put.append(Custom_configs(**custom_config))
-                elif custom_config["checksum"] != custom_conf.checksum and (
-                    method in (custom_conf.method, "autoconf") or (method == "scheduler" and custom_conf.method != "autoconf")
-                ):
+                elif custom_config["checksum"] != custom_conf.checksum and method in (custom_conf.method, "autoconf"):
                     custom_conf.data = custom_config["data"]
                     custom_conf.checksum = custom_config["checksum"]
                     custom_conf.method = method

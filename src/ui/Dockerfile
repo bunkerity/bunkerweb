@@ -49,7 +49,7 @@ RUN export MAKEFLAGS="-j$(nproc)" && \
 # Install runtime dependencies and add ui user
 RUN apk add --no-cache bash unzip libmagic mariadb-connector-c mariadb-client postgresql-client sqlite tzdata && \
   addgroup -g 101 ui && \
-  adduser -h /var/cache/nginx -g ui -s /bin/bash -G ui -D -H -u 101 ui
+  adduser -h /usr/share/bunkerweb/ui -g ui -s /sbin/nologin -G ui -D -H -u 101 --disabled-password ui
 
 # Fix CVEs
 # There are no CVEs for the following packages
@@ -78,7 +78,7 @@ RUN echo "Docker" > INTEGRATION && \
   ln -s /proc/1/fd/2 /var/log/bunkerweb/tmp-ui.log
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
-LABEL version="1.6.0-rc3"
+LABEL version="1.6.0-rc4"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="ui"
 

@@ -40,7 +40,7 @@ RUN umask 027
 # Install bash and create autoconf user
 RUN apk add --no-cache bash tzdata && \
   addgroup -g 101 autoconf && \
-  adduser -h /var/cache/autoconf -g autoconf -s /bin/sh -G autoconf -D -H -u 101 autoconf
+  adduser -h /usr/share/bunkerweb/autoconf -g autoconf -s /sbin/nologin -G autoconf -D -H -u 101 --disabled-password autoconf
 
 # Fix CVEs
 # There are no CVEs for the following packages
@@ -67,7 +67,7 @@ RUN cp helpers/bwcli /usr/bin/ && \
   chmod 660 INTEGRATION
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
-LABEL version="1.6.0-rc3"
+LABEL version="1.6.0-rc4"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="autoconf"
 

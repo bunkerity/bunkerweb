@@ -105,6 +105,8 @@ DISABLE_CONFIGURATION_TESTING = getenv("DISABLE_CONFIGURATION_TESTING", "no").lo
 if DISABLE_CONFIGURATION_TESTING:
     LOGGER.warning("Configuration testing is disabled, changes will be applied without testing (we hope you know what you're doing) ...")
 
+IGNORE_FAIL_SENDING_CONFIG = getenv("IGNORE_FAIL_SENDING_CONFIG", "no").lower() == "yes"
+
 
 def handle_stop(signum, frame):
     current_time = datetime.now().astimezone()
@@ -169,38 +171,38 @@ def send_file_to_bunkerweb(file_path: Path, endpoint: str):
     success, responses = SCHEDULER.send_files(file_path.as_posix(), endpoint, response=True)
     fails = []
 
-    for db_instance in SCHEDULER.db.get_instances():
-        index = -1
-        with SCHEDULER_LOCK:
-            for i, api in enumerate(SCHEDULER.apis):
-                if api.endpoint == f"http://{db_instance['hostname']}:{db_instance['port']}/":
-                    index = i
-                    break
+    if not IGNORE_FAIL_SENDING_CONFIG:
+        for db_instance in SCHEDULER.db.get_instances():
+            index = -1
+            with SCHEDULER_LOCK:
+                for i, api in enumerate(SCHEDULER.apis):
+                    if api.endpoint == f"http://{db_instance['hostname']}:{db_instance['port']}/":
+                        index = i
+                        break
 
-        status = responses.get(db_instance["hostname"], {"status": "down"}).get("status", "down")
+            status = responses.get(db_instance["hostname"], {"status": "down"}).get("status", "down")
 
-        ret = SCHEDULER.db.update_instance(db_instance["hostname"], "up" if status == "success" else "down")
-        if ret:
-            LOGGER.error(f"Couldn't update instance {db_instance['hostname']} status to down in the database: {ret}")
+            ret = SCHEDULER.db.update_instance(db_instance["hostname"], "up" if status == "success" else "down")
+            if ret:
+                LOGGER.error(f"Couldn't update instance {db_instance['hostname']} status to down in the database: {ret}")
 
-        with SCHEDULER_LOCK:
-            if status == "success":
-                success = True
-                if index == -1:
-                    LOGGER.debug(f"Adding {db_instance['hostname']}:{db_instance['port']} to the list of reachable instances")
-                    SCHEDULER.apis.append(API(f"http://{db_instance['hostname']}:{db_instance['port']}", db_instance["server_name"]))
-            elif index != -1:
-                fails.append(f"{db_instance['hostname']}:{db_instance['port']}")
-                LOGGER.debug(f"Removing {db_instance['hostname']}:{db_instance['port']} from the list of reachable instances")
-                del SCHEDULER.apis[index]
+            with SCHEDULER_LOCK:
+                if status == "success":
+                    success = True
+                    if index == -1:
+                        LOGGER.debug(f"Adding {db_instance['hostname']}:{db_instance['port']} to the list of reachable instances")
+                        SCHEDULER.apis.append(API(f"http://{db_instance['hostname']}:{db_instance['port']}", db_instance["server_name"]))
+                elif index != -1:
+                    fails.append(f"{db_instance['hostname']}:{db_instance['port']}")
+                    LOGGER.debug(f"Removing {db_instance['hostname']}:{db_instance['port']} from the list of reachable instances")
+                    del SCHEDULER.apis[index]
 
     if not success:
         LOGGER.error(f"Error while sending {file_path} to BunkerWeb instances")
-        return
     elif not fails:
         LOGGER.info(f"Successfully sent {file_path} folder to reachable BunkerWeb instances")
-        return
-    LOGGER.warning(f"Error while sending {file_path} to some BunkerWeb instances, removing them from the list of reachable instances: {', '.join(fails)}")
+    elif not IGNORE_FAIL_SENDING_CONFIG:
+        LOGGER.warning(f"Error while sending {file_path} to some BunkerWeb instances, removing them from the list of reachable instances: {', '.join(fails)}")
 
 
 def generate_custom_configs(configs: Optional[List[Dict[str, Any]]] = None, *, original_path: Union[Path, str] = CUSTOM_CONFIGS_PATH):

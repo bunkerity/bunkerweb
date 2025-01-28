@@ -3,4 +3,7 @@
 
 ##!+ i
 
-##!> include sql-injection-function-names
+##!^ \b
+##!$ \W*\(
+
+##!> include-except sql-injection-function-names sql-injection-function-names-fps-pl1

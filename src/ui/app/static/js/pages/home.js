@@ -409,6 +409,16 @@ $(function () {
                 offsetY: 17,
                 fontFamily: "Public Sans",
               },
+              total: {
+                show: true,
+                fontSize: "13px",
+                color: legendColor,
+                label: "Most blocked IP",
+                formatter: function () {
+                  const topIP = Object.keys(topIpsData)[0];
+                  return `${topIP}`;
+                },
+              },
             },
           },
         },

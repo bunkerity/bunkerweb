@@ -4,7 +4,7 @@ x-env: &env
 
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.0-rc3
+    image: bunkerity/bunkerweb:1.6.0-rc4
     ports:
       - published: 80
         target: 8080
@@ -29,7 +29,7 @@ services:
         - "bunkerweb.INSTANCE=yes"
 
   bw-autoconf:
-    image: bunkerity/bunkerweb-autoconf:1.6.0-rc3
+    image: bunkerity/bunkerweb-autoconf:1.6.0-rc4
     environment:
       <<: *env
       DOCKER_HOST: "tcp://bw-docker:2375"
@@ -43,7 +43,7 @@ services:
           - "node.role == worker"
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.0-rc3
+    image: bunkerity/bunkerweb-scheduler:1.6.0-rc4
     environment:
       <<: *env
       BUNKERWEB_INSTANCES: ""

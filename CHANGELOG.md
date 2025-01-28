@@ -1,6 +1,14 @@
 # Changelog
 
-## v1.6.0-rc3 - ????/??/??
+## v1.6.0-rc4 - ????/??/??
+
+- [BUGFIX] Fix shenanigans with the configuration being wiped after a restart
+- [BUGFIX] Fix shenanigans with cache files being deleted for no reason
+- [BUGFIX] Refactor condition checks in Database class to avoid default value check when a multiple has a suffix so that it still saves important values
+- [DOCKER] Update Dockerfiles to change user home directories and set shell to nologin for autoconf, scheduler, and ui users
+- [DEPS] Updated coreruleset-v4 version to v4.11.0
+
+## v1.6.0-rc3 - 2025/01/26
 
 - [FEATURE] Update BunkerNet's logic to send reports in bulk instead of one by one
 - [AUTOCONF] Add the possibility to add/override settings via ConfigMap in Kubernetes using the `bunkerweb.io/CONFIG_TYPE=settings` annotation

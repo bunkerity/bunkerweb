@@ -3,4 +3,7 @@
 
 ##!+ i
 
+##!^ \b
+##!$ \W*\(
+
 ##!> include sql-injection-function-names

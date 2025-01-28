@@ -5,7 +5,22 @@
   or the CRS Google Group at
 * https://groups.google.com/a/owasp.org/g/modsecurity-core-rule-set-project
 
-## Version 4.11.0 - TBD
+## Version 4.12.0 - TBD
+
+## Version 4.11.0 - 2025-01-27
+
+## What's Changed
+### 🪦 Rule removals
+* feat: Remove rules for lack of viable attack scenario (920220 PL1, 920221 PL1) by @dune73 in https://github.com/coreruleset/coreruleset/pull/3969
+### 🧰 Other Changes
+* fix: remove aliases man, mi, si and resolve positives (932125 PL1) by @franbuehler in https://github.com/coreruleset/coreruleset/pull/3971
+* fix: remove where, if, for and vol and resolve false positives (932380 PL1) by @franbuehler in https://github.com/coreruleset/coreruleset/pull/3972
+* fix: make 932300 actually case-insensitive by @theseion in https://github.com/coreruleset/coreruleset/pull/3977
+* fix: remove sql function names to resolve false positives (942151 PL1) by @franbuehler in https://github.com/coreruleset/coreruleset/pull/3973
+* fix: issue 3809 by @Xhoenix in https://github.com/coreruleset/coreruleset/pull/3983
+
+
+**Full Changelog**: https://github.com/coreruleset/coreruleset/compare/v4.10.0...v4.11.0
 
 ## Version 4.10.0 - 2024-12-29
 
