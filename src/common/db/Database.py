@@ -930,7 +930,7 @@ class Database:
                 old_p = old_plugins[pid]
                 new_p = desired_plugins[pid]
                 attrs_to_check = ("name", "description", "version", "stream", "type", "method", "data", "checksum")
-                if any(getattr(old_p, attr, None) != new_p.get(attr) for attr in attrs_to_check):
+                if any(getattr(old_p, attr, None) != new_p.get(attr) for attr in attrs_to_check) and old_p.method == new_p.get("method", "manual"):
                     to_update.append({"type": "plugin", "filter": {"id": pid}, "data": {k: new_p[k] for k in attrs_to_check if k in new_p}})
 
             # Plugins to delete
@@ -2409,7 +2409,6 @@ class Database:
                         Plugins.description,
                         Plugins.version,
                         Plugins.method,
-                        Plugins.data,
                         Plugins.checksum,
                         Plugins.type,
                     )
@@ -2445,11 +2444,9 @@ class Database:
                     if plugin["method"] != db_plugin.method:
                         updates[Plugins.method] = plugin["method"]
 
-                    if plugin.get("data") != db_plugin.data:
-                        updates[Plugins.data] = plugin.get("data")
-
                     if plugin.get("checksum") != db_plugin.checksum:
                         updates[Plugins.checksum] = plugin.get("checksum")
+                        updates[Plugins.data] = plugin.get("data")
 
                     if plugin.get("type") != db_plugin.type:
                         updates[Plugins.type] = plugin.get("type")
