@@ -107,6 +107,9 @@ if DISABLE_CONFIGURATION_TESTING:
 
 IGNORE_FAIL_SENDING_CONFIG = getenv("IGNORE_FAIL_SENDING_CONFIG", "no").lower() == "yes"
 
+if IGNORE_FAIL_SENDING_CONFIG:
+    LOGGER.warning("Ignoring fail sending config to some BunkerWeb instances ...")
+
 
 def handle_stop(signum, frame):
     current_time = datetime.now().astimezone()
