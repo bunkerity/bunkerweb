@@ -1,0 +1,16 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##! This list excludes command words that are prone to cause false positives
+##! at paranoia level 1.
+
+convert
+degrees
+elt
+left
+likelihood
+lower
+position
+quarter
+space
+unlikely

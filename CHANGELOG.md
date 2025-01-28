@@ -6,6 +6,7 @@
 - [BUGFIX] Fix shenanigans with cache files being deleted for no reason
 - [BUGFIX] Refactor condition checks in Database class to avoid default value check when a multiple has a suffix so that it still saves important values
 - [DOCKER] Update Dockerfiles to change user home directories and set shell to nologin for autoconf, scheduler, and ui users
+- [DEPS] Updated coreruleset-v4 version to v4.11.0
 
 ## v1.6.0-rc3 - 2025/01/26
 
