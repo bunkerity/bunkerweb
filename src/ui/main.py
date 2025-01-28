@@ -78,6 +78,8 @@ with app.app_context():
         stop(1)
     FLASK_SECRET = LIB_DIR.joinpath(".flask_secret").read_text(encoding="utf-8").strip()
 
+    app.config["ENV"] = {}
+
     app.config["CHECK_PRIVATE_IP"] = getenv("CHECK_PRIVATE_IP", "yes").lower() == "yes"
     app.config["SECRET_KEY"] = FLASK_SECRET
 
@@ -142,53 +144,7 @@ with app.app_context():
 
 @app.context_processor
 def inject_variables():
-    current_endpoint = request.path.split("/")[-1]
-    if request.path.startswith(("/check", "/setup", "/loading", "/login", "/totp")):
-        return dict(current_endpoint=current_endpoint, script_nonce=app.config["SCRIPT_NONCE"])
-
-    DATA.load_from_file()
-    metadata = DB.get_metadata()
-
-    changes_ongoing = any(
-        v
-        for k, v in DB.get_metadata().items()
-        if k in ("custom_configs_changed", "external_plugins_changed", "pro_plugins_changed", "plugins_config_changed", "instances_changed")
-    )
-
-    if not changes_ongoing and DATA.get("PRO_LOADING"):
-        DATA["PRO_LOADING"] = False
-
-    if not request.path.startswith("/loading"):
-        if not changes_ongoing and metadata["failover"]:
-            flask_flash(
-                "The last changes could not be applied because it creates a configuration error on NGINX, please check the logs for more information. The configured fell back to the last working one.",
-                "error",
-            )
-        elif not changes_ongoing and not metadata["failover"] and DATA.get("CONFIG_CHANGED", False):
-            flash("The last changes have been applied successfully.", "success")
-            DATA["CONFIG_CHANGED"] = False
-
-    data = dict(
-        current_endpoint=current_endpoint,
-        script_nonce=app.config["SCRIPT_NONCE"],
-        bw_version=metadata["version"],
-        latest_version=DATA.get("LATEST_VERSION", "unknown"),
-        is_pro_version=metadata["is_pro"],
-        pro_status=metadata["pro_status"],
-        pro_services=metadata["pro_services"],
-        pro_expire=metadata["pro_expire"].strftime("%Y/%m/%d") if isinstance(metadata["pro_expire"], datetime) else "Unknown",
-        pro_overlapped=metadata["pro_overlapped"],
-        plugins=BW_CONFIG.get_plugins(),
-        flash_messages=session.get("flash_messages", []),
-        is_readonly=DATA.get("READONLY_MODE", False),
-        theme=current_user.theme if current_user.is_authenticated else "dark",
-        columns_preferences_defaults=COLUMNS_PREFERENCES_DEFAULTS,
-    )
-
-    if current_endpoint in COLUMNS_PREFERENCES_DEFAULTS:
-        data["columns_preferences"] = DB.get_ui_user_columns_preferences(current_user.get_id(), current_endpoint)
-
-    return data
+    return app.config["ENV"]
 
 
 @login_manager.user_loader
@@ -373,6 +329,55 @@ def before_request():
 
             if not passed:
                 return logout_page()
+
+    current_endpoint = request.path.split("/")[-1]
+    if request.path.startswith(("/check", "/setup", "/loading", "/login", "/totp")):
+        app.config["ENV"] = dict(current_endpoint=current_endpoint, script_nonce=app.config["SCRIPT_NONCE"])
+    else:
+
+        DATA.load_from_file()
+        metadata = DB.get_metadata()
+
+        changes_ongoing = any(
+            v
+            for k, v in DB.get_metadata().items()
+            if k in ("custom_configs_changed", "external_plugins_changed", "pro_plugins_changed", "plugins_config_changed", "instances_changed")
+        )
+
+        if not changes_ongoing and DATA.get("PRO_LOADING"):
+            DATA["PRO_LOADING"] = False
+
+        if not request.path.startswith("/loading"):
+            if not changes_ongoing and metadata["failover"]:
+                flask_flash(
+                    "The last changes could not be applied because it creates a configuration error on NGINX, please check the logs for more information. The configured fell back to the last working one.",
+                    "error",
+                )
+            elif not changes_ongoing and not metadata["failover"] and DATA.get("CONFIG_CHANGED", False):
+                flash("The last changes have been applied successfully.", "success")
+                DATA["CONFIG_CHANGED"] = False
+
+        data = dict(
+            current_endpoint=current_endpoint,
+            script_nonce=app.config["SCRIPT_NONCE"],
+            bw_version=metadata["version"],
+            latest_version=DATA.get("LATEST_VERSION", "unknown"),
+            is_pro_version=metadata["is_pro"],
+            pro_status=metadata["pro_status"],
+            pro_services=metadata["pro_services"],
+            pro_expire=metadata["pro_expire"].strftime("%Y/%m/%d") if isinstance(metadata["pro_expire"], datetime) else "Unknown",
+            pro_overlapped=metadata["pro_overlapped"],
+            plugins=BW_CONFIG.get_plugins(),
+            flash_messages=session.get("flash_messages", []),
+            is_readonly=DATA.get("READONLY_MODE", False),
+            theme=current_user.theme if current_user.is_authenticated else "dark",
+            columns_preferences_defaults=COLUMNS_PREFERENCES_DEFAULTS,
+        )
+
+        if current_endpoint in COLUMNS_PREFERENCES_DEFAULTS:
+            data["columns_preferences"] = DB.get_ui_user_columns_preferences(current_user.get_id(), current_endpoint)
+
+        app.config["ENV"] = data
 
 
 def mark_user_access(session_id):
