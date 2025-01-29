@@ -59,7 +59,7 @@
                                 <i class='bx bx-{% if up %}up{% else %}down{% endif %}-arrow-circle bx-sm position-absolute top-0 end-0 m-3 text-{% if up %}success{% else %}danger{% endif %}'></i>
                                 <div class="card-header p-1">
                                     <div class="card-title mb-0">
-                                        <h5 class="mb-1 me-2 don-jose">{{ value.get('title', 'STATUS') }}</h5>
+                                        <h5 class="mb-1 me-2 don-jose {{ value.get('title-classes', '') }}">{{ value.get('title', 'STATUS') }}</h5>
                                     </div>
                                 </div>
                                 <div class="card-body position-relative pb-0">
@@ -80,7 +80,7 @@
                                 <i class='bx bx-{% if key.startswith("info_") %}info-circle{% elif key.startswith("date_") %}calendar{% else %}slider-alt{% endif %} bx-sm position-absolute top-0 end-0 m-3{% if svg_color %} text-{{ svg_color }}{% endif %}'></i>
                                 <div class="card-header p-1">
                                     <div class="card-title mb-0">
-                                        <h5 class="mb-1 me-2 don-jose">{{ value.get("title") }}</h5>
+                                        <h5 class="mb-1 me-2 don-jose {{ value.get('title-classes', '') }}">{{ value.get("title") }}</h5>
                                     </div>
                                 </div>
                                 <div class="card-body position-relative">
@@ -120,7 +120,7 @@
                                 <i class='bx bx-list-{% if key.startswith("top_") %}ol{% else %}ul{% endif %} bx-sm position-absolute top-0 end-0 m-3{% if svg_color %} text-{{ svg_color }}{% endif %}'></i>
                                 <div class="card-header p-1">
                                     <div class="card-title mb-0">
-                                        <h5 class="mb-1 me-2 don-jose">{{ key.replace('_', ' ') }}</h5>
+                                        <h5 class="mb-1 me-2 don-jose {{ value.get('title-classes', '') }}">{{ key.replace('_', ' ') }}</h5>
                                     </div>
                                 </div>
                                 <div class="card-body p-0">
