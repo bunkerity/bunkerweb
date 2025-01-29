@@ -35,6 +35,8 @@ from API import API  # type: ignore
 from ApiCaller import ApiCaller  # type: ignore
 
 APPLYING_CHANGES = Event()
+BACKING_UP_FAILOVER = Event()
+
 RUN = True
 SCHEDULER: Optional[JobScheduler] = None
 SCHEDULER_LOCK = Lock()
@@ -481,6 +483,31 @@ def healthcheck_job():
     HEALTHCHECK_EVENT.clear()
 
 
+def backup_failover():
+    BACKING_UP_FAILOVER.set()
+    try:
+        rmtree(FAILOVER_PATH, ignore_errors=True)
+        FAILOVER_PATH.mkdir(parents=True, exist_ok=True)
+
+        for src, dst_name in (
+            (CONFIG_PATH, "config"),
+            (CUSTOM_CONFIGS_PATH, "custom_configs"),
+            (CACHE_PATH, "cache"),
+        ):
+            try:
+                copytree(src, FAILOVER_PATH / dst_name, dirs_exist_ok=True)
+            except Exception as e:
+                LOGGER.error(f"Error copying {src} to failover path: {e}")
+
+        success, err = JOB.cache_dir(FAILOVER_PATH, job_name="failover-backup")
+        if not success:
+            LOGGER.error(f"Error while caching failover backup: {err}")
+    except Exception as e:
+        LOGGER.error(f"Failed to initialize failover backup: {e}")
+    finally:
+        BACKING_UP_FAILOVER.clear()
+
+
 if __name__ == "__main__":
     try:
         # Don't execute if pid file exists
@@ -748,6 +775,10 @@ if __name__ == "__main__":
         while True:
             threads.clear()
 
+            while BACKING_UP_FAILOVER.is_set():
+                LOGGER.warning("Waiting for the failover backup to finish ...")
+                sleep(1)
+
             if RUN_JOBS_ONCE:
                 # Only run jobs once
                 if not SCHEDULER.reload(
@@ -897,13 +928,7 @@ if __name__ == "__main__":
                     LOGGER.warning("No BunkerWeb instance is reachable, skipping failover ...")
                 else:
                     LOGGER.info("Successfully reloaded bunkerweb")
-                    # Update the failover path with the working configuration
-                    rmtree(FAILOVER_PATH, ignore_errors=True)
-                    FAILOVER_PATH.mkdir(parents=True, exist_ok=True)
-                    copytree(CONFIG_PATH, FAILOVER_PATH.joinpath("config"))
-                    copytree(CUSTOM_CONFIGS_PATH, FAILOVER_PATH.joinpath("custom_configs"))
-                    copytree(CACHE_PATH, FAILOVER_PATH.joinpath("cache"))
-                    Thread(target=JOB.cache_dir, args=(FAILOVER_PATH,), kwargs={"job_name": "failover-backup"}).start()
+                    Thread(target=backup_failover).start()
             except BaseException as e:
                 LOGGER.error(f"Exception while executing failover logic : {e}")
 
