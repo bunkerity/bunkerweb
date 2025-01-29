@@ -90,7 +90,7 @@ The first step is to install the plugin by putting the plugin files inside the c
     services:
     ...
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.0-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.0-rc4
         volumes:
           - ./bw-data:/data
     ...
@@ -126,7 +126,7 @@ The first step is to install the plugin by putting the plugin files inside the c
     services:
     ...
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.0-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.0-rc4
         volumes:
           - ./bw-data:/data
     ...
@@ -169,7 +169,7 @@ The first step is to install the plugin by putting the plugin files inside the c
     services:
     ...
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.0-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.0-rc4
         volumes:
           - /shared/bw-plugins:/data/plugins
     ...
@@ -216,7 +216,7 @@ The first step is to install the plugin by putting the plugin files inside the c
           serviceAccountName: sa-bunkerweb
           containers:
             - name: bunkerweb-scheduler
-              image: bunkerity/bunkerweb-scheduler:1.6.0-rc3
+              image: bunkerity/bunkerweb-scheduler:1.6.0-rc4
               imagePullPolicy: Always
               env:
                 - name: KUBERNETES_MODE
@@ -256,7 +256,7 @@ The first step is to install the plugin by putting the plugin files inside the c
 
 !!! tip "Existing plugins"
 
-    If the documentation is not enough, you can have a look at the existing source code of [official plugins](https://github.com/bunkerity/bunkerweb-plugins) and the [core plugins](https://github.com/bunkerity/bunkerweb/tree/v1.6.0-rc3/src/common/core) (already included in BunkerWeb but they are plugins, technically speaking).
+    If the documentation is not enough, you can have a look at the existing source code of [official plugins](https://github.com/bunkerity/bunkerweb-plugins) and the [core plugins](https://github.com/bunkerity/bunkerweb/tree/v1.6.0-rc4/src/common/core) (already included in BunkerWeb but they are plugins, technically speaking).
 
 What a plugin structure looks like :
 ```
@@ -534,7 +534,7 @@ end
 
 !!! tip "More examples"
 
-    If you want to see the full list of available functions, you can have a look at the files present in the [lua directory](https://github.com/bunkerity/bunkerweb/tree/v1.6.0-rc3/src/bw/lua/bunkerweb) of the repository.
+    If you want to see the full list of available functions, you can have a look at the files present in the [lua directory](https://github.com/bunkerity/bunkerweb/tree/v1.6.0-rc4/src/bw/lua/bunkerweb) of the repository.
 
 ### Jobs
 

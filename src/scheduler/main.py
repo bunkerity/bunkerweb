@@ -35,6 +35,8 @@ from API import API  # type: ignore
 from ApiCaller import ApiCaller  # type: ignore
 
 APPLYING_CHANGES = Event()
+BACKING_UP_FAILOVER = Event()
+
 RUN = True
 SCHEDULER: Optional[JobScheduler] = None
 SCHEDULER_LOCK = Lock()
@@ -105,6 +107,11 @@ DISABLE_CONFIGURATION_TESTING = getenv("DISABLE_CONFIGURATION_TESTING", "no").lo
 if DISABLE_CONFIGURATION_TESTING:
     LOGGER.warning("Configuration testing is disabled, changes will be applied without testing (we hope you know what you're doing) ...")
 
+IGNORE_FAIL_SENDING_CONFIG = getenv("IGNORE_FAIL_SENDING_CONFIG", "no").lower() == "yes"
+
+if IGNORE_FAIL_SENDING_CONFIG:
+    LOGGER.warning("Ignoring fail sending config to some BunkerWeb instances ...")
+
 
 def handle_stop(signum, frame):
     current_time = datetime.now().astimezone()
@@ -169,38 +176,38 @@ def send_file_to_bunkerweb(file_path: Path, endpoint: str):
     success, responses = SCHEDULER.send_files(file_path.as_posix(), endpoint, response=True)
     fails = []
 
-    for db_instance in SCHEDULER.db.get_instances():
-        index = -1
-        with SCHEDULER_LOCK:
-            for i, api in enumerate(SCHEDULER.apis):
-                if api.endpoint == f"http://{db_instance['hostname']}:{db_instance['port']}/":
-                    index = i
-                    break
+    if not IGNORE_FAIL_SENDING_CONFIG:
+        for db_instance in SCHEDULER.db.get_instances():
+            index = -1
+            with SCHEDULER_LOCK:
+                for i, api in enumerate(SCHEDULER.apis):
+                    if api.endpoint == f"http://{db_instance['hostname']}:{db_instance['port']}/":
+                        index = i
+                        break
 
-        status = responses.get(db_instance["hostname"], {"status": "down"}).get("status", "down")
+            status = responses.get(db_instance["hostname"], {"status": "down"}).get("status", "down")
 
-        ret = SCHEDULER.db.update_instance(db_instance["hostname"], "up" if status == "success" else "down")
-        if ret:
-            LOGGER.error(f"Couldn't update instance {db_instance['hostname']} status to down in the database: {ret}")
+            ret = SCHEDULER.db.update_instance(db_instance["hostname"], "up" if status == "success" else "down")
+            if ret:
+                LOGGER.error(f"Couldn't update instance {db_instance['hostname']} status to down in the database: {ret}")
 
-        with SCHEDULER_LOCK:
-            if status == "success":
-                success = True
-                if index == -1:
-                    LOGGER.debug(f"Adding {db_instance['hostname']}:{db_instance['port']} to the list of reachable instances")
-                    SCHEDULER.apis.append(API(f"http://{db_instance['hostname']}:{db_instance['port']}", db_instance["server_name"]))
-            elif index != -1:
-                fails.append(f"{db_instance['hostname']}:{db_instance['port']}")
-                LOGGER.debug(f"Removing {db_instance['hostname']}:{db_instance['port']} from the list of reachable instances")
-                del SCHEDULER.apis[index]
+            with SCHEDULER_LOCK:
+                if status == "success":
+                    success = True
+                    if index == -1:
+                        LOGGER.debug(f"Adding {db_instance['hostname']}:{db_instance['port']} to the list of reachable instances")
+                        SCHEDULER.apis.append(API(f"http://{db_instance['hostname']}:{db_instance['port']}", db_instance["server_name"]))
+                elif index != -1:
+                    fails.append(f"{db_instance['hostname']}:{db_instance['port']}")
+                    LOGGER.debug(f"Removing {db_instance['hostname']}:{db_instance['port']} from the list of reachable instances")
+                    del SCHEDULER.apis[index]
 
     if not success:
         LOGGER.error(f"Error while sending {file_path} to BunkerWeb instances")
-        return
     elif not fails:
         LOGGER.info(f"Successfully sent {file_path} folder to reachable BunkerWeb instances")
-        return
-    LOGGER.warning(f"Error while sending {file_path} to some BunkerWeb instances, removing them from the list of reachable instances: {', '.join(fails)}")
+    elif not IGNORE_FAIL_SENDING_CONFIG:
+        LOGGER.warning(f"Error while sending {file_path} to some BunkerWeb instances, removing them from the list of reachable instances: {', '.join(fails)}")
 
 
 def generate_custom_configs(configs: Optional[List[Dict[str, Any]]] = None, *, original_path: Union[Path, str] = CUSTOM_CONFIGS_PATH):
@@ -476,6 +483,31 @@ def healthcheck_job():
     HEALTHCHECK_EVENT.clear()
 
 
+def backup_failover():
+    BACKING_UP_FAILOVER.set()
+    try:
+        rmtree(FAILOVER_PATH, ignore_errors=True)
+        FAILOVER_PATH.mkdir(parents=True, exist_ok=True)
+
+        for src, dst_name in (
+            (CONFIG_PATH, "config"),
+            (CUSTOM_CONFIGS_PATH, "custom_configs"),
+            (CACHE_PATH, "cache"),
+        ):
+            try:
+                copytree(src, FAILOVER_PATH / dst_name, dirs_exist_ok=True)
+            except Exception as e:
+                LOGGER.error(f"Error copying {src} to failover path: {e}")
+
+        success, err = JOB.cache_dir(FAILOVER_PATH, job_name="failover-backup")
+        if not success:
+            LOGGER.error(f"Error while caching failover backup: {err}")
+    except Exception as e:
+        LOGGER.error(f"Failed to initialize failover backup: {e}")
+    finally:
+        BACKING_UP_FAILOVER.clear()
+
+
 if __name__ == "__main__":
     try:
         # Don't execute if pid file exists
@@ -743,6 +775,10 @@ if __name__ == "__main__":
         while True:
             threads.clear()
 
+            while BACKING_UP_FAILOVER.is_set():
+                LOGGER.warning("Waiting for the failover backup to finish ...")
+                sleep(1)
+
             if RUN_JOBS_ONCE:
                 # Only run jobs once
                 if not SCHEDULER.reload(
@@ -892,13 +928,7 @@ if __name__ == "__main__":
                     LOGGER.warning("No BunkerWeb instance is reachable, skipping failover ...")
                 else:
                     LOGGER.info("Successfully reloaded bunkerweb")
-                    # Update the failover path with the working configuration
-                    rmtree(FAILOVER_PATH, ignore_errors=True)
-                    FAILOVER_PATH.mkdir(parents=True, exist_ok=True)
-                    copytree(CONFIG_PATH, FAILOVER_PATH.joinpath("config"))
-                    copytree(CUSTOM_CONFIGS_PATH, FAILOVER_PATH.joinpath("custom_configs"))
-                    copytree(CACHE_PATH, FAILOVER_PATH.joinpath("cache"))
-                    Thread(target=JOB.cache_dir, args=(FAILOVER_PATH,), kwargs={"job_name": "failover-backup"}).start()
+                    Thread(target=backup_failover).start()
             except BaseException as e:
                 LOGGER.error(f"Exception while executing failover logic : {e}")
 

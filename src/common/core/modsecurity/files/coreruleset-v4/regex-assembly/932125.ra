@@ -162,10 +162,10 @@
     iwr@
     ##! disabled for FP: kill
     ls
-    man@
+    ##! disabled for FP: man@
     md@
     ##! disabled for FP: measure
-    mi@
+    ##! disabled for FP: mi@
     mount@
     ##! disabled for FP: move
     mp@
@@ -212,7 +212,7 @@
     ##! disabled for FP: select
     ##! disabled for FP: set
     shcm
-    si@
+    ##! disabled for FP: si@
     sl@
     ##! disabled for FP: sleep
     sls@

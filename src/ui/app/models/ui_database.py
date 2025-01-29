@@ -418,14 +418,15 @@ class UIDatabase(Database):
         with self._db_session() as session:
             sessions = []
             if current_session_id:
-                current_session_query = session.query(UserSessions).filter_by(user_name=username, id=current_session_id)
-                other_sessions_query = (
+                current_session = session.query(UserSessions).filter_by(user_name=username, id=current_session_id).all()
+                other_sessions = (
                     session.query(UserSessions)
                     .filter_by(user_name=username)
                     .filter(UserSessions.id != current_session_id)
                     .order_by(UserSessions.creation_date.desc())
+                    .all()
                 )
-                query = current_session_query.union_all(other_sessions_query)
+                query = current_session + other_sessions
             else:
                 query = session.query(UserSessions).filter_by(user_name=username).order_by(UserSessions.creation_date.desc())
 
