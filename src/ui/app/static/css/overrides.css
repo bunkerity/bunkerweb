@@ -881,6 +881,10 @@ a.courier-prime:hover {
   color: #800000;
 }
 
+.text-teal {
+  color: #20c997;
+}
+
 .blur-overlay {
   position: relative;
 }
