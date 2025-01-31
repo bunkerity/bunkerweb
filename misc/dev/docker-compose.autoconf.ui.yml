@@ -81,6 +81,7 @@ services:
       DISABLE_DEFAULT_SERVER: "yes"
       USE_CLIENT_CACHE: "yes"
       USE_GZIP: "yes"
+      SESSIONS_CHECK_IP: "no"
     restart: "unless-stopped"
     networks:
       bw-universe:
@@ -110,6 +111,7 @@ services:
       <<: *env
       ADMIN_USERNAME: "admin"
       ADMIN_PASSWORD: "P@ssw0rd"
+      CHECK_PRIVATE_IP: "no"
       DEBUG: "1"
     restart: "unless-stopped"
     networks:

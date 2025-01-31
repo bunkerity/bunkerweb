@@ -51,6 +51,7 @@ services:
       DISABLE_DEFAULT_SERVER: "yes"
       USE_CLIENT_CACHE: "yes"
       USE_GZIP: "yes"
+      SESSIONS_CHECK_IP: "no"
       www.example.com_USE_TEMPLATE: "ui"
       www.example.com_USE_REVERSE_PROXY: "yes"
       www.example.com_REVERSE_PROXY_URL: "/admin"
@@ -87,6 +88,7 @@ services:
       <<: *env
       ADMIN_USERNAME: "admin"
       ADMIN_PASSWORD: "P@ssw0rd"
+      CHECK_PRIVATE_IP: "no"
       DEBUG: "1"
     restart: "unless-stopped"
     networks:

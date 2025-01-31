@@ -80,6 +80,7 @@ services:
       SERVE_FILES: "no"
       USE_CLIENT_CACHE: "yes"
       USE_GZIP: "yes"
+      SESSIONS_CHECK_IP: "no"
       UI_HOST: "http://bw-ui:7000"
     restart: "unless-stopped"
     networks:
@@ -108,6 +109,7 @@ services:
       - ../../src/ui/main.py:/usr/share/bunkerweb/ui/main.py:ro
     environment:
       <<: *env
+      CHECK_PRIVATE_IP: "no"
       DEBUG: "1"
     restart: "unless-stopped"
     networks:

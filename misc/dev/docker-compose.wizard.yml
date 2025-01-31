@@ -50,6 +50,7 @@ services:
       SERVE_FILES: "no"
       USE_CLIENT_CACHE: "yes"
       USE_GZIP: "yes"
+      SESSIONS_CHECK_IP: "no"
       UI_HOST: "http://bw-ui:7000"
       app1.example.com_USE_REVERSE_PROXY: "yes"
       app1.example.com_REVERSE_PROXY_URL: "/"
@@ -81,6 +82,7 @@ services:
       - ../../src/ui/main.py:/usr/share/bunkerweb/ui/main.py:ro
     environment:
       <<: *env
+      CHECK_PRIVATE_IP: "no"
       DEBUG: "1"
     restart: "unless-stopped"
     networks:

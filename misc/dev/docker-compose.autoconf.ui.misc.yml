@@ -82,6 +82,7 @@ services:
       DISABLE_DEFAULT_SERVER: "yes"
       USE_CLIENT_CACHE: "yes"
       USE_GZIP: "yes"
+      SESSIONS_CHECK_IP: "no"
       EXTERNAL_PLUGIN_URLS: "https://github.com/bunkerity/bunkerweb-plugins/archive/refs/heads/dev.zip"
       CUSTOM_CONF_MODSEC_CRS_reqbody-suppress: "SecRuleRemoveById 200002"
     restart: "unless-stopped"
@@ -113,6 +114,7 @@ services:
       <<: *env
       ADMIN_USERNAME: "admin"
       ADMIN_PASSWORD: "P@ssw0rd"
+      CHECK_PRIVATE_IP: "no"
       DEBUG: "1"
     restart: "unless-stopped"
     networks:
