@@ -103,6 +103,7 @@ with app.app_context():
     sess.init_app(app)
 
     # CSRF protection
+    app.config["WTF_CSRF_TIME_LIMIT"] = None
     app.config["WTF_CSRF_SSL_STRICT"] = False
     csrf = CSRFProtect()
     csrf.init_app(app)
