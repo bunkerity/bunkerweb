@@ -16,9 +16,9 @@ cairosvg==2.7.1 \
     --hash=sha256:432531d72347291b9a9ebfb6777026b607563fd8719c46ee742db0aef7271ba0 \
     --hash=sha256:8a5222d4e6c3f86f1f7046b63246877a63b49923a1cd202184c3a634ef546b3b
     # via mkdocs-material
-certifi==2024.12.14 \
-    --hash=sha256:1275f7a45be9464efc1173084eaa30f866fe2e47d389406136d332ed4967ec56 \
-    --hash=sha256:b650d30f370c2b724812bee08008be0c4163b163ddaec3f2546c1caf65f191db
+certifi==2025.1.31 \
+    --hash=sha256:3d5da6925056f6f18f119200434a4780a94263f10d1c21d032a6f6b2baa20651 \
+    --hash=sha256:ca78db4565a652026a4db2bcdf68f2fb589ea80d0be70e03929ed730746b84fe
     # via requests
 cffi==1.17.1 \
     --hash=sha256:045d61c734659cc045141be4bae381a41d89b741f795af1dd018bfb532fd0df8 \
@@ -335,9 +335,9 @@ mkdocs-get-deps==0.2.0 \
     --hash=sha256:162b3d129c7fad9b19abfdcb9c1458a651628e4b1dea628ac68790fb3061c60c \
     --hash=sha256:2bf11d0b133e77a0dd036abeeb06dec8775e46efa526dc70667d8863eefc6134
     # via mkdocs
-mkdocs-material==9.5.50 \
-    --hash=sha256:ae5fe16f3d7c9ccd05bb6916a7da7420cf99a9ce5e33debd9d40403a090d5825 \
-    --hash=sha256:f24100f234741f4d423a9d672a909d859668a4f404796be3cf035f10d6050385
+mkdocs-material==9.6.1 \
+    --hash=sha256:c1742d410be29811a9b7e863cb25a578b9e255fe6f04c69f8c6838863a58e141 \
+    --hash=sha256:da37dba220d9fbfc5f1fc567fafc4028e3c3d7d828f2779ed09ab726ceca77dc
     # via
     #   -r requirements.in
     #   mkdocs-print-site-plugin
@@ -463,9 +463,9 @@ pygments==2.19.1 \
     --hash=sha256:61c16d2a8576dc0649d9f39e089b5f02bcd27fba10d8fb4dcc28173f7a45151f \
     --hash=sha256:9ea1544ad55cecf4b8242fab6dd35a93bbce657034b0611ee383099054ab6d8c
     # via mkdocs-material
-pymdown-extensions==10.14.1 \
-    --hash=sha256:637951cbfbe9874ba28134fb3ce4b8bcadd6aca89ac4998ec29dcbafd554ae08 \
-    --hash=sha256:b65801996a0cd4f42a3110810c306c45b7313c09b0610a6f773730f2a9e3c96b
+pymdown-extensions==10.14.2 \
+    --hash=sha256:7a77b8116dc04193f2c01143760a43387bd9dc4aa05efacb7d838885a7791253 \
+    --hash=sha256:f45bc5892410e54fd738ab8ccd736098b7ff0cb27fdb4bf24d0a0c6584bc90e1
     # via mkdocs-material
 pyparsing==3.2.1 \
     --hash=sha256:506ff4f4386c4cec0590ec19e6302d3aedb992fdc02c761e90416f158dacf8e1 \
@@ -481,9 +481,9 @@ python-dateutil==2.9.0.post0 \
     # via
     #   ghp-import
     #   typepy
-pytz==2024.2 \
-    --hash=sha256:2aa355083c50a0f93fa581709deac0c9ad65cca8a9e9beac660adcbd493c798a \
-    --hash=sha256:31c7c1817eb7fae7ca4b8c7ee50c72f93aa2dd863de768e1ef4245d426aa0725
+pytz==2025.1 \
+    --hash=sha256:89dd22dca55b46eac6eda23b2d72721bf1bdfef212645d81513ef5d03038de57 \
+    --hash=sha256:c2db42be2a2518b28e65f9207c4d05e6ff547d1efa4086469ef855e4ab70178e
     # via typepy
 pyyaml==6.0.2 \
     --hash=sha256:01179a4a8559ab5de078078f37e5c1a30d76bb88519906844fd7bdea1b7729ff \

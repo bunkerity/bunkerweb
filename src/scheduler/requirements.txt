@@ -35,13 +35,13 @@ beautifulsoup4==4.12.3 \
     --hash=sha256:74e3d1928edc070d21748185c46e3fb33490f22f52a3addee9aee0f4f7781051 \
     --hash=sha256:b80878c9f40111313e55da8ba20bdba06d8fa3969fc68304167741bbf9e082ed
     # via dns-lexicon
-boto3==1.36.7 \
-    --hash=sha256:ab501f75557863e2d2c9fa731e4fe25c45f35e0d92ea0ee11a4eaa63929d3ede \
-    --hash=sha256:ae98634efa7b47ced1b0d7342e2940b32639eee913f33ab406590b8ed55ee94b
+boto3==1.36.10 \
+    --hash=sha256:5f8d5c2024a2d1411d3d67abb7357ec7d4c6162e3f1c396dc9b79d042cfd0a80 \
+    --hash=sha256:d2f1010db699326b26fbd465d91c4b49177c9d995d7e72c0f31335f139efa0d2
     # via certbot-dns-route53
-botocore==1.36.7 \
-    --hash=sha256:9abc64bde5e7d8f814ea91d6fc0a8142511fc96427c19fe9209677c20a0c9e6e \
-    --hash=sha256:a6c6772d777af2957ac9975207fac1ccc4ce101408b85e9b5e3c5ba0bb949102
+botocore==1.36.10 \
+    --hash=sha256:45c8a6e01dc18d44a13ba688f1d60ad562db8154b08c46b412387ea040a741c2 \
+    --hash=sha256:d27bb73f0ea81395527a6298ac0a7ea5b2958094169f7cf7d48e3f4e4bc21b65
     # via
     #   boto3
     #   s3transfer
@@ -124,9 +124,9 @@ certbot-dns-scaleway==0.0.7 \
     --hash=sha256:999dda5b8689277facb77e1757b8a6b207baeecc0ded0c27aea2c51331affc92 \
     --hash=sha256:bc0833ed71a5cd314a93f8d02144c54e17066ee1e2b950ed868b14b2211f5e9e
     # via -r requirements.in
-certifi==2024.12.14 \
-    --hash=sha256:1275f7a45be9464efc1173084eaa30f866fe2e47d389406136d332ed4967ec56 \
-    --hash=sha256:b650d30f370c2b724812bee08008be0c4163b163ddaec3f2546c1caf65f191db
+certifi==2025.1.31 \
+    --hash=sha256:3d5da6925056f6f18f119200434a4780a94263f10d1c21d032a6f6b2baa20651 \
+    --hash=sha256:ca78db4565a652026a4db2bcdf68f2fb589ea80d0be70e03929ed730746b84fe
     # via requests
 cffi==1.17.1 \
     --hash=sha256:045d61c734659cc045141be4bae381a41d89b741f795af1dd018bfb532fd0df8 \
@@ -687,9 +687,9 @@ python-magic==0.4.27 \
     --hash=sha256:c1ba14b08e4a5f5c31a302b7721239695b2f0f058d125bd5ce1ee36b9d9d3c3b \
     --hash=sha256:c212960ad306f700aa0d01e5d7a325d20548ff97eb9920dcd29513174f0294d3
     # via -r requirements.in
-pytz==2024.2 \
-    --hash=sha256:2aa355083c50a0f93fa581709deac0c9ad65cca8a9e9beac660adcbd493c798a \
-    --hash=sha256:31c7c1817eb7fae7ca4b8c7ee50c72f93aa2dd863de768e1ef4245d426aa0725
+pytz==2025.1 \
+    --hash=sha256:89dd22dca55b46eac6eda23b2d72721bf1bdfef212645d81513ef5d03038de57 \
+    --hash=sha256:c2db42be2a2518b28e65f9207c4d05e6ff547d1efa4086469ef855e4ab70178e
     # via
     #   acme
     #   certbot
