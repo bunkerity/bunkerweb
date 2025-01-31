@@ -219,46 +219,117 @@
         r.path +
         "</svg>"
       );
-    },
-    A = {},
-    F = function (e, o) {
-      var t = A[e] || (A[e] = []);
-      if (!(t.push(o) > 1)) {
-        var r = g(function () {
-          for (delete A[e]; (o = t.shift()); ) o.apply(null, arguments);
-        });
-        if (d) {
-          var n = new a();
-          m(n, "abort", r),
-            m(n, "error", r),
-            m(n, "load", function () {
-              var e;
-              try {
-                e = JSON.parse(this.responseText);
-              } catch (e) {
-                return void r(e);
-              }
-              r(200 !== this.status, e);
-            }),
-            n.open("GET", e),
-            n.send();
-        } else {
-          var i = this || window;
-          i._ = function (e) {
-            (i._ = null), r(200 !== e.meta.status, e.data);
-          };
-          var c = f(i.document)("script", {
-              async: !0,
-              src: e + (-1 !== e.indexOf("?") ? "&" : "?") + "callback=_",
-            }),
-            l = function () {
-              i._ && i._({ meta: {} });
-            };
-          m(c, "load", l),
-            m(c, "error", l),
-            x(c, /de|m/, l),
-            i.document.getElementsByTagName("head")[0].appendChild(c);
+    };
+
+  // ---------------------------------------------------------------------------
+  // Add localStorage-based caching layer
+  // ---------------------------------------------------------------------------
+  var CACHE_EXPIRATION = 3600000; // 1 hour = 3600000 ms
+  // Simple helper to check if localStorage is usable:
+  function storageAvailable() {
+    try {
+      var testKey = "__github_buttons_cache_test__";
+      localStorage.setItem(testKey, "1");
+      localStorage.removeItem(testKey);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  var A = {},
+    F = function (url, callback) {
+      var queue = A[url] || (A[url] = []);
+      if (queue.push(callback) > 1) return;
+
+      var fireQueue = g(function () {
+        delete A[url];
+        var args = arguments;
+        var cb;
+        while ((cb = queue.shift())) {
+          cb.apply(null, args);
         }
+      });
+
+      // Try retrieving cached data if localStorage is available.
+      if (storageAvailable()) {
+        var cachedItemStr = localStorage.getItem(url);
+        if (cachedItemStr) {
+          try {
+            var cachedItem = JSON.parse(cachedItemStr);
+            // If cached data is still valid
+            if (Date.now() < cachedItem.timestamp + CACHE_EXPIRATION) {
+              // Return the cached data (first argument "false" => no error)
+              fireQueue(false, cachedItem.data);
+              return;
+            } else {
+              // Expired - remove it
+              localStorage.removeItem(url);
+            }
+          } catch (err) {
+            // If there's some parse error, clear it
+            localStorage.removeItem(url);
+          }
+        }
+      }
+
+      // Otherwise, fetch fresh data
+      if (d) {
+        var xhr = new a();
+        m(xhr, "abort", fireQueue),
+          m(xhr, "error", fireQueue),
+          m(xhr, "load", function () {
+            var data;
+            try {
+              data = JSON.parse(this.responseText);
+            } catch (err) {
+              return void fireQueue(err);
+            }
+            // this.status != 200 => treat as error
+            var isError = this.status !== 200;
+            if (!isError && storageAvailable()) {
+              // On success, store data into localStorage for next time
+              var item = {
+                timestamp: Date.now(),
+                data: data,
+              };
+              localStorage.setItem(url, JSON.stringify(item));
+            }
+            fireQueue(isError, data);
+          }),
+          xhr.open("GET", url),
+          xhr.send();
+      } else {
+        // JSONP fallback
+        var that = this || window;
+        that._ = function (data) {
+          // If no meta or meta.status in the response, treat as error
+          var isError = !data.meta || data.meta.status !== 200;
+          if (!isError && data.data && storageAvailable()) {
+            // Store successful data for caching
+            var item = {
+              timestamp: Date.now(),
+              data: data.data,
+            };
+            localStorage.setItem(url, JSON.stringify(item));
+          }
+          that._ = null;
+          fireQueue(isError, data.data);
+        };
+        var script = f(that.document)("script", {
+            async: true,
+            src: url + (url.indexOf("?") !== -1 ? "&" : "?") + "callback=_",
+          }),
+          onScriptDone = function () {
+            if (that._) {
+              // We never got called, so treat as an error
+              that._({ meta: {} });
+            }
+          };
+        m(script, "load", onScriptDone),
+          m(script, "error", onScriptDone),
+          x(script, /de|m/, onScriptDone),
+          that.document.getElementsByTagName("head")[0].appendChild(script);
       }
     },
     E = function (e, o, t) {
@@ -364,30 +435,27 @@
       (e.style.width = o[0] + "px"), (e.style.height = o[1] + "px");
     },
     T = function (o, r) {
-      if (null != o && null != r)
-        if (
-          (o.getAttribute &&
-            (o = (function (e) {
-              var o = {
-                href: e.href,
-                title: e.title,
-                "aria-label": e.getAttribute("aria-label"),
-              };
-              return (
-                u(
-                  ["icon", "color-scheme", "text", "size", "show-count"],
-                  function (t) {
-                    var r = "data-" + t;
-                    o[r] = e.getAttribute(r);
-                  },
-                ),
-                null == o["data-text"] &&
-                  (o["data-text"] = e.textContent || e.innerText),
-                o
-              );
-            })(o)),
-          s)
-        ) {
+      if (null != o && null != r) {
+        if (o.getAttribute) {
+          o = (function (e) {
+            var o = {
+              href: e.href,
+              title: e.title,
+              "aria-label": e.getAttribute("aria-label"),
+            };
+            u(
+              ["icon", "color-scheme", "text", "size", "show-count"],
+              function (t) {
+                var r = "data-" + t;
+                o[r] = e.getAttribute(r);
+              },
+            );
+            null == o["data-text"] &&
+              (o["data-text"] = e.textContent || e.innerText);
+            return o;
+          })(o);
+        }
+        if (s) {
           var a = h("span");
           E(a.attachShadow({ mode: "closed" }), o, function () {
             r(a);
@@ -443,35 +511,42 @@
           };
           m(n, "load", c), e.body.appendChild(n);
         }
+      }
     };
-  o.protocol + "//" + o.host + o.pathname === i
-    ? E(e.body, v(window.name || o.hash.replace(/^#/, "")), function () {})
-    : (function (o) {
-        if (
-          "complete" === e.readyState ||
-          ("loading" !== e.readyState && !e.documentElement.doScroll)
-        )
-          setTimeout(o);
-        else if (e.addEventListener) {
-          var t = g(o);
-          k(e, "DOMContentLoaded", t), k(window, "load", t);
-        } else x(e, /m/, o);
-      })(function () {
-        var o,
-          t = e.querySelectorAll
-            ? e.querySelectorAll("a." + n)
-            : ((o = []),
-              u(e.getElementsByTagName("a"), function (e) {
-                -1 !==
-                  (" " + e.className + " ")
-                    .replace(/[ \t\n\f\r]+/g, " ")
-                    .indexOf(" " + n + " ") && o.push(e);
-              }),
-              o);
-        u(t, function (e) {
-          T(e, function (o) {
-            e.parentNode.replaceChild(o, e);
-          });
+
+  // If we’re loaded in the “buttons iframe”:
+  if (o.protocol + "//" + o.host + o.pathname === i) {
+    // Render the button into the iframe itself:
+    E(e.body, v(window.name || o.hash.replace(/^#/, "")), function () {});
+  } else {
+    // Otherwise, find all <a class="github-button"> in the parent page
+    (function (o) {
+      if (
+        "complete" === e.readyState ||
+        ("loading" !== e.readyState && !e.documentElement.doScroll)
+      )
+        setTimeout(o);
+      else if (e.addEventListener) {
+        var t = g(o);
+        k(e, "DOMContentLoaded", t), k(window, "load", t);
+      } else x(e, /m/, o);
+    })(function () {
+      var o,
+        t = e.querySelectorAll
+          ? e.querySelectorAll("a." + n)
+          : ((o = []),
+            u(e.getElementsByTagName("a"), function (e) {
+              -1 !==
+                (" " + e.className + " ")
+                  .replace(/[ \t\n\f\r]+/g, " ")
+                  .indexOf(" " + n + " ") && o.push(e);
+            }),
+            o);
+      u(t, function (e) {
+        T(e, function (o) {
+          e.parentNode.replaceChild(o, e);
         });
       });
+    });
+  }
 })();
