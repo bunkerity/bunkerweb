@@ -509,20 +509,19 @@ $(document).ready(function () {
           { title: "Security mode", tooltip: "Security mode" },
         ];
 
-        // Apply tooltips to column headers
         $(thead)
           .find("th")
-          .each(function (index) {
-            const header = headers[index - 1]; // Adjust index to skip expandable column
+          .each((index, element) => {
+            const header = headers[index - 1];
             if (header) {
-              $(this)
-                .attr("data-bs-toggle", "tooltip")
-                .attr("data-bs-placement", "bottom")
-                .attr("title", header.tooltip);
+              $(element).attr({
+                "data-bs-toggle": "tooltip",
+                "data-bs-placement": "bottom",
+                title: header.tooltip,
+              });
             }
           });
 
-        // Initialize Bootstrap tooltips
         $('[data-bs-toggle="tooltip"]').tooltip();
       },
     },
