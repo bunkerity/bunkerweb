@@ -473,17 +473,33 @@ def check():
 @login_required
 def check_reloading():
     DATA.load_from_file()
+    current_time = time()
 
-    if not DATA.get("RELOADING", False) or DATA.get("LAST_RELOAD", 0) + 60 < time():
+    db_metadata = DB.get_metadata()
+    if (
+        not any(
+            v
+            for k, v in db_metadata.items()
+            if k in ("custom_configs_changed", "external_plugins_changed", "pro_plugins_changed", "plugins_config_changed", "instances_changed")
+        )
+        and DATA.get("LAST_RELOAD", 0) + 2 < current_time
+    ):
+        DATA["RELOADING"] = False
+
+    if not DATA.get("RELOADING", False) or DATA.get("LAST_RELOAD", 0) + 60 < current_time:
         if DATA.get("RELOADING", False):
             LOGGER.warning("Reloading took too long, forcing the state to be reloaded")
             flask_flash("Forced the status to be reloaded", "error")
             DATA["RELOADING"] = False
 
-        for f in DATA.get("TO_FLASH", []):
-            flash(f["content"], f["type"], save=f.get("save", True))
-
-        DATA["TO_FLASH"] = []
+    seen = set()
+    for f in DATA.get("TO_FLASH", []):
+        content = f["content"]
+        if content in seen:
+            continue
+        seen.add(content)
+        flash(content, f["type"], save=f.get("save", True))
+    DATA["TO_FLASH"] = []
 
     return jsonify({"reloading": DATA.get("RELOADING", False)})
 

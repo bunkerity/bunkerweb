@@ -111,9 +111,13 @@ def manage_bunkerweb(
             DATA["TO_FLASH"].append({"content": operation, "type": "success"})
 
     if not threaded:
+        seen = set()
         for f in DATA.get("TO_FLASH", []):
-            flash(f["content"], f["type"], save=f.get("save", True))
-
+            content = f["content"]
+            if content in seen:
+                continue
+            seen.add(content)
+            flash(content, f["type"], save=f.get("save", True))
         DATA["TO_FLASH"] = []
 
     DATA["RELOADING"] = False

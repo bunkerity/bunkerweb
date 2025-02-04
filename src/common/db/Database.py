@@ -1267,6 +1267,49 @@ class Database:
         if method == "autoconf":
             db_config = self.get_non_default_settings(with_drafts=True)
 
+        def is_default_value(val: str, key: str, setting: dict, template_default: Optional[str] = None, suffix: int = 0, is_global: bool = False) -> bool:
+            """
+            Determines whether the provided value is considered the default value.
+            This function checks the value 'val' against an expected default based on several conditions:
+            1. If a 'template_default' is provided (i.e., not None), then the expected default is
+                this template value, and the function returns True only if 'val' exactly matches it.
+            2. If 'template_default' is None:
+                - If the configuration key 'key' is not present in both 'config' and 'db_config',
+                  then the expected default is defined by setting["default"].
+                - Otherwise, the expected default should be one of the values associated with 'key'
+                  in either 'config' or 'db_config'.
+            """
+            if template_default is not None:
+                return val == template_default
+
+            if (is_global and not suffix) or (key not in config and key not in db_config):
+                return val == setting["default"]
+
+            if is_global and not suffix:
+                return False
+
+            # Acceptable values are the ones from either config or db_config.
+            return val in (config.get(key), db_config.get(key))
+
+        def check_value(key: str, value: str, setting: dict, template_default: Optional[str], suffix: int, original_key: str, is_global: bool = False) -> bool:
+            """
+            Determine if a configuration value should be considered default.
+
+            Immediately returns False for the key "SERVER_NAME". For non-suffix values, if a template default
+            is provided, the value must match it; otherwise, the value must satisfy is_default_value using the
+            original key. For suffix values, if the base value (using key) is not default, the check passes;
+            otherwise, the suffix value must also be default (using original_key).
+            """
+            if not is_global and key == "SERVER_NAME":
+                return False
+
+            if not suffix:
+                return is_default_value(value, original_key, setting, template_default, suffix, is_global)
+
+            return is_default_value(value, key, setting, template_default, suffix, is_global) and is_default_value(
+                value, original_key, setting, template_default, suffix, is_global
+            )
+
         with self._db_session() as session:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
@@ -1441,18 +1484,7 @@ class Database:
 
                             # Determine if we need to add, update, or delete
                             if not service_setting:
-                                if key != "SERVER_NAME" and (
-                                    value == template_setting_default
-                                    if template_setting_default is not None
-                                    else (
-                                        not suffix
-                                        and (
-                                            value == setting["default"]
-                                            if original_key not in config and original_key not in db_config
-                                            else value in (config.get(original_key), db_config.get(original_key))
-                                        )
-                                    )
-                                ):
+                                if check_value(key, value, setting, template_setting_default, suffix, original_key):
                                     continue
 
                                 self.logger.debug(f"Adding setting {key} for service {server_name}")
@@ -1462,21 +1494,12 @@ class Database:
                                 local_to_update.append(
                                     {"model": Services, "filter": {"id": server_name}, "values": {"last_update": datetime.now().astimezone()}}
                                 )
-                            elif method in (service_setting["method"], "autoconf") and service_setting["value"] != value:
+                            elif (service_setting["value"] != value and method in (service_setting["method"], "autoconf")) or (
+                                method == "autoconf" and service_setting["method"] != "autoconf"
+                            ):
                                 local_changed_plugins.add(setting["plugin_id"])
 
-                                if key != "SERVER_NAME" and (
-                                    value == template_setting_default
-                                    if template_setting_default is not None
-                                    else (
-                                        not suffix
-                                        and (
-                                            value == setting["default"]
-                                            if original_key not in config and original_key not in db_config
-                                            else value in (config.get(original_key), db_config.get(original_key))
-                                        )
-                                    )
-                                ):
+                                if check_value(key, value, setting, template_setting_default, suffix, original_key):
                                     self.logger.debug(f"Removing setting {key} for service {server_name}")
                                     local_to_delete.append(
                                         {"model": Services_settings, "filter": {"service_id": server_name, "setting_id": key, "suffix": suffix}}
@@ -1522,24 +1545,18 @@ class Database:
                                 template_setting_default = templates.get(template, {}).get((key, suffix))
 
                             if not global_value:
-                                if (
-                                    template_setting_default is not None
-                                    and value == template_setting_default
-                                    or (not suffix and template_setting_default is None and value == setting["default"])
-                                ):
+                                if check_value(key, value, setting, template_setting_default, suffix, original_key, True):
                                     continue
 
                                 self.logger.debug(f"Adding global setting {key}")
                                 local_changed_plugins.add(setting["plugin_id"])
                                 local_to_put.append(Global_values(setting_id=key, value=value, suffix=suffix, method=method))
-                            elif method in (global_value.method, "autoconf") and global_value.value != value:
+                            elif (global_value.value != value and method in (global_value.method, "autoconf")) or (
+                                method == "autoconf" and global_value.method != "autoconf"
+                            ):
                                 local_changed_plugins.add(setting["plugin_id"])
 
-                                if (
-                                    template_setting_default is not None
-                                    and value == template_setting_default
-                                    or (not suffix and template_setting_default is None and value == setting["default"])
-                                ):
+                                if check_value(key, value, setting, template_setting_default, suffix, original_key, True):
                                     self.logger.debug(f"Removing global setting {key}")
                                     local_to_delete.append({"model": Global_values, "filter": {"setting_id": key, "suffix": suffix}})
                                     continue
@@ -3213,22 +3230,61 @@ class Database:
         return ""
 
     def get_plugins(self, *, _type: Literal["all", "external", "ui", "pro"] = "all", with_data: bool = False) -> List[Dict[str, Any]]:
-        """Get all plugins from the database."""
-        plugins = []
+        """Get all plugins from the database using batched queries to avoid N+1 issues."""
         with self._db_session() as session:
-            entities = [Plugins.id, Plugins.stream, Plugins.name, Plugins.description, Plugins.version, Plugins.type, Plugins.method, Plugins.checksum]
+            # Build the base query.
+            entities = [
+                Plugins.id,
+                Plugins.stream,
+                Plugins.name,
+                Plugins.description,
+                Plugins.version,
+                Plugins.type,
+                Plugins.method,
+                Plugins.checksum,
+            ]
             if with_data:
-                entities.append(Plugins.data)  # type: ignore
+                entities.append(Plugins.data)
 
-            db_plugins = session.query(Plugins).with_entities(*entities)
+            query = session.query(Plugins).with_entities(*entities)
             if _type == "external":
-                db_plugins = db_plugins.filter(Plugins.type.in_(["external", "ui"]))
+                query = query.filter(Plugins.type.in_(["external", "ui"]))
             elif _type != "all":
-                db_plugins = db_plugins.filter_by(type=_type)
+                query = query.filter_by(type=_type)
 
-            for plugin in db_plugins:
-                page = session.query(Plugin_pages).with_entities(Plugin_pages.id).filter_by(plugin_id=plugin.id).first()
-                data = {
+            plugins_list = query.all()
+            plugin_ids = [plugin.id for plugin in plugins_list]
+
+            # Pre-fetch plugin pages.
+            pages = session.query(Plugin_pages.plugin_id).filter(Plugin_pages.plugin_id.in_(plugin_ids)).all()
+            pages_map = {page.plugin_id: True for page in pages}
+
+            # Pre-fetch settings.
+            settings_rows = session.query(Settings).filter(Settings.plugin_id.in_(plugin_ids)).order_by(Settings.order).all()
+            settings_map = {}
+            # Also, collect setting IDs for select-type settings.
+            select_setting_ids = [s.id for s in settings_rows if s.type == "select"]
+
+            for setting in settings_rows:
+                settings_map.setdefault(setting.plugin_id, []).append(setting)
+
+            # Pre-fetch selects for settings of type "select".
+            selects_map: Dict[str, List[Any]] = {}
+            if select_setting_ids:
+                selects = session.query(Selects).filter(Selects.setting_id.in_(select_setting_ids)).order_by(Selects.order).all()
+                for sel in selects:
+                    selects_map.setdefault(sel.setting_id, []).append(sel.value)
+
+            # Pre-fetch bw_cli commands.
+            commands_rows = session.query(Bw_cli_commands).filter(Bw_cli_commands.plugin_id.in_(plugin_ids)).all()
+            commands_map: Dict[str, Dict[str, Any]] = {}
+            for cmd in commands_rows:
+                commands_map.setdefault(cmd.plugin_id, {})[cmd.name] = cmd.file_name
+
+            # Assemble the plugin data.
+            result = []
+            for plugin in plugins_list:
+                plugin_data: Dict[str, Any] = {
                     "id": plugin.id,
                     "stream": plugin.stream,
                     "name": plugin.name,
@@ -3236,28 +3292,15 @@ class Database:
                     "version": plugin.version,
                     "type": plugin.type,
                     "method": plugin.method,
-                    "page": page is not None,
+                    "page": pages_map.get(plugin.id, False),
                     "settings": {},
                     "checksum": plugin.checksum,
-                } | ({"data": plugin.data} if with_data else {})
+                }
+                if with_data:
+                    plugin_data["data"] = plugin.data
 
-                for setting in (
-                    session.query(Settings)
-                    .with_entities(
-                        Settings.id,
-                        Settings.context,
-                        Settings.default,
-                        Settings.help,
-                        Settings.name,
-                        Settings.label,
-                        Settings.regex,
-                        Settings.type,
-                        Settings.multiple,
-                    )
-                    .filter_by(plugin_id=plugin.id)
-                    .order_by(Settings.order)
-                ):
-                    data["settings"][setting.id] = {
+                for setting in settings_map.get(plugin.id, []):
+                    setting_data = {
                         "context": setting.context,
                         "default": setting.default,
                         "help": setting.help,
@@ -3265,22 +3308,19 @@ class Database:
                         "label": setting.label,
                         "regex": setting.regex,
                         "type": setting.type,
-                    } | ({"multiple": setting.multiple} if setting.multiple else {})
-
+                    }
+                    if setting.multiple:
+                        setting_data["multiple"] = setting.multiple
                     if setting.type == "select":
-                        data["settings"][setting.id]["select"] = [
-                            select.value
-                            for select in session.query(Selects).with_entities(Selects.value).filter_by(setting_id=setting.id).order_by(Selects.order)
-                        ]
+                        setting_data["select"] = selects_map.get(setting.id, [])
+                    plugin_data["settings"][setting.id] = setting_data
 
-                for command in session.query(Bw_cli_commands).with_entities(Bw_cli_commands.name, Bw_cli_commands.file_name).filter_by(plugin_id=plugin.id):
-                    if "bwcli" not in data:
-                        data["bwcli"] = {}
-                    data["bwcli"][command.name] = command.file_name
+                if plugin.id in commands_map:
+                    plugin_data["bwcli"] = commands_map[plugin.id]
 
-                plugins.append(data)
+                result.append(plugin_data)
 
-        return plugins
+            return result
 
     def get_plugins_errors(self) -> int:
         """Get plugins errors."""
