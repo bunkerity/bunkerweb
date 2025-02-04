@@ -294,7 +294,6 @@ $(document).ready(() => {
         if (settingType === "hidden") return;
 
         const settingName = $this.attr("name");
-        const originalValue = $this.data("original");
         let settingValue = $this.val();
 
         if ($this.is("select")) {
@@ -308,14 +307,6 @@ $(document).ready(() => {
           settingName &&
           $this.attr("id").startsWith("multiple-") &&
           /_\d+$/.test(settingName);
-
-        if (
-          !isEasy &&
-          settingName !== "SERVER_NAME" &&
-          settingValue == originalValue &&
-          !isMultipleSetting
-        )
-          return;
 
         appendHiddenInput(form, settingName, settingValue);
       });
@@ -1128,33 +1119,11 @@ $(document).ready(() => {
     }, 30);
   });
 
-  $(document).on("keydown", ".plugin-setting", function () {
+  $(document).on("keydown", ".plugin-setting", function (e) {
     if (e.key === "Enter") {
       e.preventDefault();
       $(".save-settings").trigger("click");
     }
-  });
-
-  $(window).on("beforeunload", function (e) {
-    if (isReadOnly) return;
-
-    const form = getFormFromSettings($(this));
-    let minSettings = 4;
-    if (!form.find("input[name='IS_DRAFT']").length) minSettings = 1;
-
-    const draftInput = $("#is-draft");
-    const wasDraft = draftInput.data("original") === "yes";
-    let isDraft = draftInput.val() === "yes";
-    if (currentMode === "raw")
-      isDraft = form.find("input[name='IS_DRAFT']").val() === "yes";
-
-    if (form.children().length <= minSettings && isDraft === wasDraft) return;
-
-    // Cross-browser compatibility (for older browsers)
-    var message =
-      "Are you sure you want to leave? Changes you made may not be saved.";
-    e.returnValue = message; // Standard for most browsers
-    return message; // Required for some browsers
   });
 
   isInit = false;
