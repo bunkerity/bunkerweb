@@ -1,6 +1,12 @@
 # Changelog
 
-## v1.6.0-rc4 - ????/??/??
+## v1.6.0 - ????/??/??
+
+- [AUTOCONF] Increase retry limit and improve stability of Kubernetes watch stream
+- [UI] Add caching for GitHub buttons to improve performance
+- [UI] Fix shenanigans with multiples
+
+## v1.6.0-rc4 - 2025/01/29
 
 - [BUGFIX] Fix shenanigans with the configuration being wiped after a restart
 - [BUGFIX] Fix shenanigans with cache files being deleted for no reason
