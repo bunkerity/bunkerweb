@@ -1,17 +1,20 @@
 $(document).ready(function () {
   var toastNum = 0;
   var actionLock = false;
+  var showLoadingModal = false;
   const instanceNumber = parseInt($("#instances_number").val());
   const isReadOnly = $("#is-read-only").val().trim() === "True";
 
   const pingInstances = (instances) => {
+    showLoadingModal = true;
+
     setTimeout(() => {
-      if (actionLock) {
+      if (actionLock && showLoadingModal) {
         $(".dt-button-background").click();
         $("#loadingModal").modal("show");
         setTimeout(() => {
           $("#loadingModal").modal("hide");
-        }, 5300);
+        }, 5000);
       }
     }, 500);
 
@@ -58,6 +61,7 @@ $(document).ready(function () {
       },
       complete: function () {
         actionLock = false;
+        showLoadingModal = false;
         $("#loadingModal").modal("hide");
       },
     });
