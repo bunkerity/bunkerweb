@@ -363,7 +363,7 @@ $(document).ready(() => {
       };
 
       // Parse original and default configurations
-      const configOriginals = parseConfig("#raw-config-originals");
+      const entireconfigOriginals = parseConfig("#raw-entire-config");
       const configDefaults = parseConfig("#raw-config-defaults");
 
       // Sets to keep track of processed keys
@@ -387,12 +387,6 @@ $(document).ready(() => {
             return;
           }
 
-          // Skip unchanged values except for 'IS_DRAFT'
-          if (key !== "IS_DRAFT" && configOriginals[key] === value) {
-            skippedKeys.add(key);
-            return;
-          }
-
           appendHiddenInput(form, key, value);
           formKeys.add(key);
         });
@@ -400,6 +394,14 @@ $(document).ready(() => {
 
       // Append default values if they are not already in the form and not skipped
       Object.entries(configDefaults).forEach(([key, value]) => {
+        if (!formKeys.has(key) && !skippedKeys.has(key)) {
+          appendHiddenInput(form, key, value);
+          formKeys.add(key);
+        }
+      });
+
+      // Append original values if they are not already in the form and not skipped
+      Object.entries(entireconfigOriginals).forEach(([key, value]) => {
         if (!formKeys.has(key) && !skippedKeys.has(key)) {
           appendHiddenInput(form, key, value);
           formKeys.add(key);
@@ -827,7 +829,6 @@ $(document).ready(() => {
         return;
       }
     }
-    $(window).off("beforeunload");
     form.appendTo("body").submit();
   });
 

@@ -279,11 +279,9 @@ def services_service_page(service: str):
 
             variables_to_check = variables.copy()
 
-            if mode != "easy" or service != "new":
-                # Remove already existing fields
-                for variable, value in variables.items():
-                    if (mode == "advanced" or variable != "SERVER_NAME") and value == db_config.get(variable, {"value": None})["value"]:
-                        del variables_to_check[variable]
+            for variable, value in variables.items():
+                if value == db_config.get(variable, {"value": None})["value"]:
+                    del variables_to_check[variable]
 
             variables = BW_CONFIG.check_variables(variables, db_config, variables_to_check, new=service == "new", threaded=True)
 
