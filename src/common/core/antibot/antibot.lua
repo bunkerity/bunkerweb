@@ -60,6 +60,8 @@ function antibot:header()
 		return self:ret(true, "client already resolved the challenge", nil, self.session_data.original_uri)
 	end
 
+	local hdr = ngx.header
+
 	-- Override CSP header
 	local csp_directives = {
 		["default-src"] = "'none'",
@@ -77,6 +79,7 @@ function antibot:header()
 		csp_directives["script-src"] = csp_directives["script-src"]
 			.. "  https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/"
 		csp_directives["frame-src"] = "https://www.google.com/recaptcha/ https://recaptcha.google.com/recaptcha/"
+		csp_directives["connect-src"] = "https://www.google.com/recaptcha/ https://recaptcha.google.com/recaptcha/"
 	elseif self.session_data.type == "hcaptcha" then
 		csp_directives["script-src"] = csp_directives["script-src"] .. "  https://hcaptcha.com https://*.hcaptcha.com"
 		csp_directives["frame-src"] = "https://hcaptcha.com https://*.hcaptcha.com"
@@ -85,13 +88,28 @@ function antibot:header()
 	elseif self.session_data.type == "turnstile" then
 		csp_directives["script-src"] = csp_directives["script-src"] .. "  https://challenges.cloudflare.com"
 		csp_directives["frame-src"] = "https://challenges.cloudflare.com"
+		-- Remove the picture-in-picture directive from the Permissions Policy header if it is present
+		if hdr["Permissions-Policy"] then
+			local policy = hdr["Permissions-Policy"]
+			if type(policy) == "table" then
+				policy = table.concat(policy, ", ")
+			end
+			if policy then
+				local directives = {}
+				for directive in policy:gmatch("[^,]+") do
+					if not directive:match("^%s*picture%-in%-picture=%(%)") then
+						table.insert(directives, directive:match("^%s*(.-)%s*$"))
+					end
+				end
+				local updated = table.concat(directives, ", ")
+				hdr["Permissions-Policy"] = #updated > 0 and updated or nil
+			end
+		end
 	end
 	local csp_content = ""
 	for directive, value in pairs(csp_directives) do
 		csp_content = csp_content .. directive .. " " .. value .. "; "
 	end
-
-	local hdr = ngx.header
 
 	hdr["Content-Security-Policy"] = csp_content
 
