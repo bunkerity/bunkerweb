@@ -133,7 +133,7 @@ function errors:render_template(code)
 
 	-- Render template
 	render("error.html", {
-		title = code .. " - " .. self.default_errors[code].title,
+		title = code .. " | " .. self.default_errors[code].title,
 		error_title = self.default_errors[code].title,
 		error_code = code,
 		error_text = self.default_errors[code].text,
