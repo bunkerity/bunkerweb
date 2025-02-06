@@ -5,6 +5,7 @@
 - [AUTOCONF] Increase retry limit and improve stability of Kubernetes watch stream
 - [UI] Add caching for GitHub buttons to improve performance
 - [UI] Fix shenanigans with multiples
+- [DEPS] Updated lua-resty-openssl version to 1.5.2
 
 ## v1.6.0-rc4 - 2025/01/29
 
