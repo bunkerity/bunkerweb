@@ -337,11 +337,11 @@ Please ensure that you have **NGINX 1.26.2 installed before installing BunkerWeb
     | sudo tee /etc/apt/sources.list.d/nginx.list
     ```
 
-    You should now be able to install NGINX 1.26.3 :
+    You should now be able to install NGINX 1.26.2 :
 
     ```shell
     sudo apt update && \
-    sudo apt install -y nginx=1.26.3-1~$(lsb_release -cs)
+    sudo apt install -y nginx=1.26.2-1~$(lsb_release -cs)
     ```
 
     !!! warning "Testing/dev version"
@@ -385,11 +385,11 @@ Please ensure that you have **NGINX 1.26.2 installed before installing BunkerWeb
     | sudo tee /etc/apt/sources.list.d/nginx.list
     ```
 
-    You should now be able to install NGINX 1.26.3 :
+    You should now be able to install NGINX 1.26.2 :
 
     ```shell
     sudo apt update && \
-    sudo apt install -y nginx=1.26.3-1~$(lsb_release -cs)
+    sudo apt install -y nginx=1.26.2-1~$(lsb_release -cs)
     ```
 
     !!! warning "Testing/dev version"
@@ -422,8 +422,12 @@ Please ensure that you have **NGINX 1.26.2 installed before installing BunkerWeb
 
 === "Fedora"
 
-    !!! warning "NGINX 1.26.3"
-        As of the writing of this documentation, the `1.26.3` version of NGINX is not yet available in the official Fedora repositories. So temporarily, you will need to use the version `1.26.2` provided by Fedora.
+    !!! info "Fedora Update Testing"
+        If you can't find the NGINX version listed in the stable repository, you can enable the `updates-testing` repository :
+
+        ```shell
+        sudo dnf config-manager --set-enabled updates-testing
+        ```
 
     Fedora already provides NGINX 1.26.2 that we support :
 
@@ -477,10 +481,10 @@ Please ensure that you have **NGINX 1.26.2 installed before installing BunkerWeb
     module_hotfixes=true
     ```
 
-    You should now be able to install NGINX 1.26.3 :
+    You should now be able to install NGINX 1.26.2 :
 
     ```shell
-    sudo dnf install nginx-1.26.3
+    sudo dnf install nginx-1.26.2
     ```
 
     !!! example "Disable the setup wizard"

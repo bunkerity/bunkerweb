@@ -241,9 +241,9 @@
     },
     {
       "id": "nginx",
-      "name": "Nginx v1.26.3",
+      "name": "Nginx v1.26.2",
       "url": "https://github.com/nginx/nginx.git",
-      "commit": "1be0fb0c9f9bc3489c7b40576efd6afe6b2eccd5",
+      "commit": "37fe98355461d2f03d73e6a8e82ac4e4cd85d711",
       "post_install": "rm -r src/deps/src/nginx/docs"
     },
     {
