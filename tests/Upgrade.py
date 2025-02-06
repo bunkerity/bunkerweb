@@ -4,7 +4,7 @@ import tempfile
 import time
 import pathlib
 
-NGINX_VERSION = "1.26.2"
+NGINX_VERSION = "1.26.3"
 
 distro = sys.argv[1]
 if distro == "ubuntu":
@@ -57,7 +57,7 @@ if distro == "ubuntu":
 
     # Installing test
     print("Installing bunkerweb...")
-    bash_script = """
+    bash_script = f"""
     apt update && apt install -y sudo && \
     sudo apt install -y curl gnupg2 ca-certificates lsb-release ubuntu-keyring && \
     curl https://nginx.org/keys/nginx_signing.key | gpg --dearmor \
@@ -66,7 +66,7 @@ if distro == "ubuntu":
     http://nginx.org/packages/ubuntu `lsb_release -cs` nginx" \
     | sudo tee /etc/apt/sources.list.d/nginx.list
     sudo apt update && \
-    sudo apt install -y nginx=1.22.1-1~jammy
+    sudo apt install -y nginx={NGINX_VERSION}-1~jammy
     sudo apt install /data/bunkerweb.deb -y
     """
 
@@ -588,14 +588,14 @@ elif distro == "debian":
 
     # Installing test
     print("Installing bunkerweb...")
-    bash_script = """
+    bash_script = f"""
     apt update && apt install -y sudo && \
     apt-get install gnupg2 ca-certificates lsb-release wget curl -y && \
     echo "deb https://nginx.org/packages/debian/ bookworm nginx" > /etc/apt/sources.list.d/nginx.list && \
     echo "deb-src https://nginx.org/packages/debian/ bookworm nginx" >> /etc/apt/sources.list.d/nginx.list && \
     apt-key adv --keyserver keyserver.ubuntu.com --recv-keys ABF5BD827BD9BF62 && \
     apt-get update && \
-    apt-get install -y --no-install-recommends nginx=1.26.2-1~bookworm
+    apt-get install -y --no-install-recommends nginx={NGINX_VERSION}-1~bookworm
     apt install /data/bunkerweb.deb -y
     """
 
@@ -939,7 +939,7 @@ elif distro == "debian":
         ]
     )
     print("Installing bunkerweb...")
-    bash_script = """
+    bash_script = f"""
     apt update && apt install -y sudo && \
     sudo apt install -y curl gnupg2 ca-certificates lsb-release debian-archive-keyring && \
     curl https://nginx.org/keys/nginx_signing.key | gpg --dearmor \
@@ -947,7 +947,7 @@ elif distro == "debian":
     echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] \
     http://nginx.org/packages/debian `lsb_release -cs` nginx" \
     | sudo tee /etc/apt/sources.list.d/nginx.list
-    sudo apt update && sudo apt install -y nginx=1.26.2-1~bookworm
+    sudo apt update && sudo apt install -y nginx={NGINX_VERSION}-1~bookworm
     curl -s https://repo.bunkerweb.io/install/script.deb.sh | sudo bash && \
     sudo apt update && \
     sudo apt install -y bunkerweb=1.4.5
@@ -1107,12 +1107,15 @@ elif distro == "fedora":
         ]
     )
 
+    # TODO: add 1.26.3 when available
+    NGINX_VERSION = "1.26.2"
+
     # Installing test
     print("Installing bunkerweb...")
-    bash_script = """
+    bash_script = f"""
     dnf update -y
     dnf install -y curl gnupg2 ca-certificates redhat-lsb-core
-    dnf install -y nginx-1.22.1-1.fc37
+    dnf install -y nginx-{NGINX_VERSION}-1.fc37
     dnf install /data/bunkerweb.rpm -y
     """
 
@@ -1552,7 +1555,7 @@ elif distro == "fedora":
             "systemd-fedora",
             "bash",
             "-c",
-            "sudo dnf install nginx-1.22.1-1.fc37 -y",
+            f"sudo dnf install nginx-{NGINX_VERSION}-1.fc37 -y",
         ]
     )
     subprocess.run(
@@ -1645,17 +1648,17 @@ elif distro.startswith("rhel"):
     # Installing test
     print("Installing bunkerweb...")
     bash_script = (
-        """
+        f"""
     dnf install yum-utils wget sudo -y
-    wget https://nginx.org/packages/rhel/9/x86_64/RPMS/nginx-1.26.2-1.el9.ngx.x86_64.rpm
-    dnf install nginx-1.26.2-1.el9.ngx.x86_64.rpm -y
+    wget https://nginx.org/packages/rhel/9/x86_64/RPMS/nginx-{NGINX_VERSION}-1.el9.ngx.x86_64.rpm
+    dnf install nginx-{NGINX_VERSION}-1.el9.ngx.x86_64.rpm -y
     dnf install /data/bunkerweb.rpm -y
     """
         if distro.endswith("9")
-        else """
+        else f"""
     dnf install yum-utils wget sudo -y
-    wget https://nginx.org/packages/rhel/8/x86_64/RPMS/nginx-1.26.2-1.el8.ngx.x86_64.rpm
-    dnf install nginx-1.26.2-1.el8.ngx.x86_64.rpm -y
+    wget https://nginx.org/packages/rhel/8/x86_64/RPMS/nginx-{NGINX_VERSION}-1.el8.ngx.x86_64.rpm
+    dnf install nginx-{NGINX_VERSION}-1.el8.ngx.x86_64.rpm -y
     dnf install /data/bunkerweb.rpm -y
     """
     )
@@ -2164,9 +2167,9 @@ elif distro == "centos":
 
     # Installing test
     print("Installing bunkerweb...")
-    bash_script = """
+    bash_script = f"""
     dnf install yum-utils epel-release redhat-lsb-core -y
-    dnf install -y nginx-1.22.1
+    dnf install -y nginx-{NGINX_VERSION}
     dnf install /data/bunkerweb.rpm -y
     """
 
