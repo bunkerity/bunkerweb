@@ -143,10 +143,18 @@ case "$1" in
         remove_path "/var/tmp/ui.env" "UI environment variables"
         remove_path "/var/tmp/scheduler.env" "Scheduler environment variables"
         remove_path "/var/tmp/db.sqlite3" "database"
-        do_and_check_cmd cp -f /etc/bunkerweb/variables.env /var/tmp/variables.env
-        do_and_check_cmd cp -f /etc/bunkerweb/ui.env /var/tmp/ui.env
-        do_and_check_cmd cp -f /etc/bunkerweb/scheduler.env /var/tmp/scheduler.env
-        do_and_check_cmd cp -f /var/lib/bunkerweb/db.sqlite3 /var/tmp/db.sqlite3
+        if [ -f /etc/bunkerweb/variables.env ]; then
+            do_and_check_cmd cp -f /etc/bunkerweb/variables.env /var/tmp/variables.env
+        fi
+        if [ -f /etc/bunkerweb/ui.env ]; then
+            do_and_check_cmd cp -f /etc/bunkerweb/ui.env /var/tmp/ui.env
+        fi
+        if [ -f /etc/bunkerweb/scheduler.env ]; then
+            do_and_check_cmd cp -f /etc/bunkerweb/scheduler.env /var/tmp/scheduler.env
+        fi
+        if [ -f /var/lib/bunkerweb/db.sqlite3 ]; then
+            do_and_check_cmd cp -f /var/lib/bunkerweb/db.sqlite3 /var/tmp/db.sqlite3
+        fi
         do_and_check_cmd touch /var/tmp/bunkerweb_upgrade
         ;;
 esac
