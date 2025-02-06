@@ -102,12 +102,6 @@ with app.app_context():
     sess = Session()
     sess.init_app(app)
 
-    # CSRF protection
-    app.config["WTF_CSRF_TIME_LIMIT"] = None
-    app.config["WTF_CSRF_SSL_STRICT"] = False
-    csrf = CSRFProtect()
-    csrf.init_app(app)
-
     principal = Principal()
     principal.init_app(app)
 
@@ -121,6 +115,12 @@ with app.app_context():
     login_manager.init_app(app)
     login_manager.login_view = "login.login_page"
     login_manager.anonymous_user = AnonymousUser
+
+    # CSRF protection
+    app.config["WTF_CSRF_METHODS"] = ("POST",)
+    app.config["WTF_CSRF_SSL_STRICT"] = False
+    csrf = CSRFProtect()
+    csrf.init_app(app)
 
     def custom_url_for(endpoint, **values):
         if endpoint:
