@@ -7,12 +7,12 @@
   <figcaption>BunkerWeb Cloud</figcaption>
 </figure>
 
-!!! example "Beta phase"
-    BunkerWeb Cloud offer is in beta phase. We are actively getting feedbacks from our precious beta tester to improve the offer.
+!!! example "Coming soon"
+    After a successful beta phase, we are working hard on the BunkerWeb Cloud offer to release it to the public.
 
-BunkerWeb Cloud is the easiest way to get started with BunkerWeb. It offers you a fully managed BunkerWeb service with no hassle. Think of a like a BunkerWeb-as-a-Service !
+BunkerWeb Cloud will be the easiest way to get started with BunkerWeb. It offers you a fully managed BunkerWeb service with no hassle. Think of a like a BunkerWeb-as-a-Service !
 
-You will find more information about BunkerWeb Cloud beta [here](https://www.bunkerweb.io/cloud?utm_campaign=self&utm_source=docs) and you can apply for free [in the BunkerWeb panel](https://panel.bunkerweb.io/order/bunkerweb-cloud/14?utm_campaign=self&utm_source=docs).
+If you are interested into the BunkerWeb Cloud offer, don't hesitate to [contact us](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=docs) so we can discuss about your needs.
 
 ## Docker
 
@@ -44,18 +44,6 @@ Docker images are also available on [GitHub packages](https://github.com/orgs/bu
 docker pull ghcr.io/bunkerity/bunkerweb:1.6.0-rc4
 ```
 
-Alternatively, if you prefer a more hands-on approach, you have the option to build the Docker image directly from the [source](https://github.com/bunkerity/bunkerweb). Building the image from source gives you greater control and customization over the deployment process. However, please note that this method may take some time to complete, depending on your hardware configuration.
-
-While the image is being built, you can take a moment to relax and enjoy a cup of coffee ☕, as the process may require some patience. Once the image is successfully built, you can proceed to deploy and utilize BunkerWeb within your Docker environment. This method allows you to tailor the image to your specific requirements and ensures a more personalized deployment of BunkerWeb.
-
-So, whether you choose to use the ready-to-use prebuilt images or embark on the journey of building the image from source, BunkerWeb in Docker provides you with the flexibility and options to seamlessly integrate it into your environment.
-
-```shell
-git clone https://github.com/bunkerity/bunkerweb.git && \
-cd bunkerweb && \
-docker build -t my-bunkerweb -f src/bw/Dockerfile .
-```
-
 Docker integration key concepts are :
 
 - **Environment variables** to configure BunkerWeb
@@ -71,7 +59,7 @@ When integrating BunkerWeb with Docker, there are key concepts to keep in mind, 
 - **Networks**: Docker networks play a vital role in the integration of BunkerWeb. These networks serve two main purposes: exposing ports to clients and connecting to upstream web services. By exposing ports, BunkerWeb can accept incoming requests from clients, allowing them to access the protected web services. Additionally, by connecting to upstream web services, BunkerWeb can efficiently route and manage the traffic, providing enhanced security and performance.
 
 !!! info "Database backend"
-    Please be aware that our instructions assume you are using SQLite as the default database backend, as configured by the `DATABASE_URI` setting. However, we understand that you may prefer to utilize alternative backends for your Docker integration. If that is the case, rest assured that other database backends are still possible. See docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.0-rc4/misc/integrations) folder of the repository for more information.
+    Please be aware that our instructions assume you are using SQLite as the default database backend, as configured by the `DATABASE_URI` setting. However, we understand that you may prefer to utilize alternative backends for your Docker integration. If that is the case, rest assured that other database backends are still possible. See docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.0-rc4/misc/integrations) of the repository for more information.
 
 ### Environment variables
 
@@ -99,17 +87,9 @@ The [scheduler](concepts.md#scheduler) is executed in its own container which is
 docker pull bunkerity/bunkerweb-scheduler:1.6.0-rc4
 ```
 
-Alternatively, you can build the Docker image directly from the [source](https://github.com/bunkerity/bunkerweb) (less coffee ☕ needed than the BunkerWeb image) :
-
-```shell
-git clone https://github.com/bunkerity/bunkerweb.git && \
-cd bunkerweb && \
-docker build -t my-scheduler -f src/scheduler/Dockerfile .
-```
-
 !!! info "BunkerWeb settings"
 
-    Since the `1.6.0-beta` version, the Scheduler container is the one who you will define the settings for BunkerWeb. The Scheduler will then push the configuration to the BunkerWeb container.
+    Since the `1.6.0` version, the Scheduler container is the one who you will define the settings for BunkerWeb. The Scheduler will then push the configuration to the BunkerWeb container.
 
     ⚠ **Important** : All API related settings (like `API_HTTP_PORT`, `API_LISTEN_IP`, `API_SERVER_NAME` and `API_WHITELIST_IP`) **must be defined in the BunkerWeb container as well**. (The settings have to be mirrored in both containers, else the BunkerWeb container will not accept API requests from the Scheduler).
 
@@ -311,6 +291,19 @@ networks:
     name: bw-services
 ```
 
+### Build from source
+
+Alternatively, if you prefer a more hands-on approach, you have the option to build the Docker image directly from the [source](https://github.com/bunkerity/bunkerweb). Building the image from source gives you greater control and customization over the deployment process. However, please note that this method may take some time to complete, depending on your hardware configuration  (you can take a coffee ☕ if needed).
+
+```shell
+git clone https://github.com/bunkerity/bunkerweb.git && \
+cd bunkerweb && \
+docker build -t bw -f src/bw/Dockerfile . && \
+docker build -t bw-scheduler -f src/scheduler/Dockerfile . && \
+docker build -t bw-autoconf -f src/autoconf/Dockerfile . && \
+docker build -t bw-ui -f src/ui/Dockerfile .
+```
+
 ## Linux
 
 <figure markdown>
@@ -323,10 +316,11 @@ Supported Linux distributions for BunkerWeb (amd64/x86_64 and arm64/aarch64 arch
 - Debian 12 "Bookworm"
 - Ubuntu 22.04 "Jammy"
 - Ubuntu 24.04 "Noble"
-- Fedora 40
 - Fedora 41
 - Red Hat Enterprise Linux (RHEL) 8.9
 - Red Hat Enterprise Linux (RHEL) 9.4
+
+### Installation using package manager
 
 Please ensure that you have **NGINX 1.26.2 installed before installing BunkerWeb**. For all distributions, except Fedora, it is mandatory to use prebuilt packages from the [official NGINX repository](https://nginx.org/en/linux_packages.html). Compiling NGINX from source or using packages from different repositories will not work with the official prebuilt packages of BunkerWeb. However, you have the option to build BunkerWeb from source.
 
@@ -516,7 +510,9 @@ Please ensure that you have **NGINX 1.26.2 installed before installing BunkerWeb
     sudo dnf versionlock add bunkerweb
     ```
 
-The configuration of BunkerWeb is done by editing the `/etc/bunkerweb/variables.env` file :
+### Configuration and service
+
+Manual configuration of BunkerWeb is done by editing the `/etc/bunkerweb/variables.env` file :
 
 ```conf
 MY_SETTING_1=value1
@@ -524,19 +520,15 @@ MY_SETTING_2=value2
 ...
 ```
 
-BunkerWeb is managed using systemctl :
+When installed, BunkerWeb comes with three services `bunkerweb`, `bunkerweb-scheduler` and `bunkerweb-ui` that you can manage using `systemctl`.
 
-- Check BunkerWeb status : `systemctl status bunkerweb`
-- Start it if it's stopped : `systemctl start bunkerweb`
-- Stop it if it's started : `systemctl stop bunkerweb`
-- Reload it to apply new configuration : `systemctl reload bunkerweb`
-- And restart it : `systemctl restart bunkerweb`
+If you manually edit the BunkerWeb configuration using `/etc/bunkerweb/variables.env` a restart of the `bunkerweb-scheduler` service will be enough to generate and reload the configuration without any downtime. But depending on the case (such as changing listening ports) you might need to restart the `bunkerweb` service.
 
 ### High availability
 
 The scheduler can be detached from the BunkerWeb instance to provide high availability. In this case, the scheduler will be installed on a separate server and will be able to manage multiple BunkerWeb instances.
 
-#### Manager
+**Manager**
 
 To install only the scheduler on a server, you can export the following variables before executing the BunkerWeb installation :
 
@@ -553,7 +545,7 @@ export SERVICE_BUNKERWEB=no
 export SERVICE_UI=no
 ```
 
-#### Worker
+**Worker**
 
 On another server, to install only BunkerWeb, you can export the following variables before executing the BunkerWeb installation :
 
@@ -569,7 +561,7 @@ export SERVICE_SCHEDULER=no
 export SERVICE_UI=no
 ```
 
-#### Web UI
+**Web UI**
 
 The Web UI can be installed on a separate server to provide a dedicated interface for managing BunkerWeb instances. To install only the Web UI, you can export the following variables before executing the BunkerWeb installation :
 
@@ -601,7 +593,7 @@ By adopting this approach, you can enjoy real-time reconfiguration of BunkerWeb 
     The Docker autoconf integration implies the use of **multisite mode**. Please refer to the [multisite section](concepts.md#multisite-mode) of the documentation for more information.
 
 !!! info "Database backend"
-    Please be aware that our instructions assume you are using MariaDB as the default database backend, as configured by the `DATABASE_URI` setting. However, we understand that you may prefer to utilize alternative backends for your Docker integration. If that is the case, rest assured that other database backends are still possible. See docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.0-rc4/misc/integrations) folder of the repository for more information.
+    Please be aware that our instructions assume you are using MariaDB as the default database backend, as configured by the `DATABASE_URI` setting. However, we understand that you may prefer to utilize alternative backends for your Docker integration. If that is the case, rest assured that other database backends are still possible. See docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.0-rc4/misc/integrations) of the repository for more information.
 
 To enable automated configuration updates, include an additional container called `bw-autoconf` in the stack. This container hosts the autoconf service, which manages dynamic configuration changes for BunkerWeb.
 
@@ -730,7 +722,7 @@ networks:
 
 ### Namespaces
 
-Starting from version `1.6.0-beta`, BunkerWeb's Autoconf stacks now support namespaces. This feature enables you to manage multiple "*clusters*" of BunkerWeb instances and services on the same Docker host. To take advantage of namespaces, simply set the `NAMESPACE` label on your services. Here's an example:
+Starting from version `1.6.0`, BunkerWeb's Autoconf stacks now support namespaces. This feature enables you to manage multiple "*clusters*" of BunkerWeb instances and services on the same Docker host. To take advantage of namespaces, simply set the `NAMESPACE` label on your services. Here's an example:
 
 ```yaml
 services:
@@ -792,7 +784,7 @@ For an optimal setup, it is recommended to define BunkerWeb as a **[DaemonSet](h
 Given the presence of multiple BunkerWeb instances, it is necessary to establish a shared data store implemented as a [Redis](https://redis.io/) service. This Redis service will be utilized by the instances to cache and share data among themselves. Further information about the Redis settings can be found [here](settings.md#redis).
 
 !!! info "Database backend"
-    Please be aware that our instructions assume you are using MariaDB as the default database backend, as configured by the `DATABASE_URI` setting. However, we understand that you may prefer to utilize alternative backends for your Docker integration. If that is the case, rest assured that other database backends are still possible. See docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.0-rc4/misc/integrations) folder of the repository for more information.
+    Please be aware that our instructions assume you are using MariaDB as the default database backend, as configured by the `DATABASE_URI` setting. However, we understand that you may prefer to utilize alternative backends for your Docker integration. If that is the case, rest assured that other database backends are still possible. See docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.0-rc4/misc/integrations) of the repository for more information.
 
     Clustered database backends setup are out-of-the-scope of this documentation.
 
@@ -802,6 +794,151 @@ Please ensure that the autoconf services have access to the Kubernetes API. It i
     If you use a custom CA for your Kubernetes API, you can mount a bundle file containing your intermediate(s) and root certificates on the ingress controller and set the `KUBERNETES_SSL_CA_CERT` environment value to the path of the bundle inside the container. Alternatively, even if it's not recommended, you can disable certificate verification by setting the `KUBERNETES_SSL_VERIFY` environment variable of the ingress controller to `no` (default is `yes`).
 
 Additionally, **it is crucial to set the `KUBERNETES_MODE` environment variable to `yes` when utilizing the Kubernetes integration**. This variable is mandatory for proper functionality.
+
+### Installation using Helm chart
+
+The recommended way to install Kubernetes is to use the Helm chart available at `https://repo.bunkerweb.io/charts` :
+
+```shell
+helm repo add bunkerweb https://repo.bunkerweb.io/charts
+```
+
+You can then use the bunkerweb helm chart from that repository :
+
+```shell
+helm install -f myvalues.yaml mybunkerweb bunkerweb/bunkerweb
+```
+
+The full list of values are listed in the [charts/bunkerweb/values.yaml file](https://github.com/bunkerity/bunkerweb-helm/blob/main/charts/bunkerweb/values.yaml) of the [bunkerity/bunkerweb-helm repository](https://github.com/bunkerity/bunkerweb-helm).
+
+### Ingress resources
+
+Once the BunkerWeb Kubernetes stack is successfully set up and operational (refer to the autoconf logs for detailed information), you can proceed with deploying web applications within the cluster and declaring your Ingress resource.
+
+It is important to note that the BunkerWeb settings need to be specified as annotations for the Ingress resource. For the domain part, please use the special value **`bunkerweb.io`**. By including the appropriate annotations, you can configure BunkerWeb accordingly for the Ingress resource.
+
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: my-ingress
+  annotations:
+    bunkerweb.io/MY_SETTING: "value"
+    bunkerweb.io/www.example.com_MY_SETTING: "value"
+spec:
+  rules:
+    - host: www.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: svc-my-app
+                port:
+                  number: 8000
+...
+```
+
+### Namespaces
+
+Starting from version `1.6.0`, BunkerWeb's autoconf stacks now support namespaces. This feature enables you to manage multiple clusters of BunkerWeb instances and services on the same Kubernetes cluster. To take advantage of namespaces, simply set the `namespace` metadata field on your BunkerWeb instances and services. Here's an example:
+
+```yaml
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: bunkerweb
+  namespace: my-namespace # Set the namespace for the BunkerWeb instance
+...
+```
+
+!!! info "Namespace behavior"
+
+    By default all Autoconf stacks listen to all namespaces. If you want to restrict a stack to a specific namespaces, you can set the `NAMESPACES` environment variable in the `bunkerweb-controller` deployment :
+
+    ```yaml
+    ...
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: bunkerweb-controller
+      namespace: my-namespace # Set the namespace for the Controller
+    spec:
+      replicas: 1
+      strategy:
+        type: Recreate
+      selector:
+        matchLabels:
+          app: bunkerweb-controller
+      template:
+        metadata:
+          labels:
+            app: bunkerweb-controller
+        spec:
+          serviceAccountName: sa-bunkerweb
+          containers:
+            - name: bunkerweb-controller
+              image: bunkerity/bunkerweb-autoconf:1.6.0-rc4
+              imagePullPolicy: Always
+              env:
+                - name: NAMESPACES
+                  value: "my-namespace my-other-namespace" # Only listen to these namespaces
+                ...
+    ...
+    ```
+
+    Keep in mind that the `NAMESPACES` environment variable is a space-separated list of namespaces.
+
+!!! warning "Namespace specifications"
+
+    There can only be **one database** and **one Scheduler** per namespace. If you try to create multiple databases or Schedulers in the same namespace, the configurations will end up conflicting with each other.
+
+    The Scheduler doesn't need the `NAMESPACE` annotation to work properly. It will only need the `DATABASE_URI` setting properly configured so that it can access the same database as the autoconf service.
+
+### Ingress class
+
+When installed using the official methods in the documentation, BunkerWeb comes with the following `IngressClass` definition :
+
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: IngressClass
+metadata:
+  name: bunkerweb
+spec:
+  controller: bunkerweb.io/ingress-controller
+```
+
+In order to restrict the `Ingress` resources monitored by the ingress controller, you can set the `KUBERNETES_INGRESS_CLASS` environment variable with the value `bunkerweb`. Then, you can leverage the `ingressClassName` directive in your `Ingress` definitions :
+
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: my-ingress
+  annotations:
+    bunkerweb.io/MY_SETTING: "value"
+    bunkerweb.io/www.example.com_MY_SETTING: "value"
+spec:
+  ingressClassName: bunkerweb
+  rules:
+    - host: www.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: svc-my-app
+                port:
+                  number: 8000
+```
+
+### Custom domain name
+
+If you use a custom domain name for your Kubernetes cluster different than the default `kubernetes.local` one, you can set the value using the `KUBERNETES_DOMAIN_NAME` environment variable on the scheduler container.
+
+### Full YAML file
 
 To assist you, here is a YAML boilerplate that can serve as a foundation for your configuration:
 
@@ -1084,167 +1221,6 @@ spec:
       storage: 5Gi
 ```
 
-### Ingress resources
-
-Once the BunkerWeb Kubernetes stack is successfully set up and operational (refer to the autoconf logs for detailed information), you can proceed with deploying web applications within the cluster and declaring your Ingress resource.
-
-It is important to note that the BunkerWeb settings need to be specified as annotations for the Ingress resource. For the domain part, please use the special value **`bunkerweb.io`**. By including the appropriate annotations, you can configure BunkerWeb accordingly for the Ingress resource.
-
-```yaml
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: my-ingress
-  annotations:
-    bunkerweb.io/MY_SETTING: "value"
-    bunkerweb.io/www.example.com_MY_SETTING: "value"
-spec:
-  rules:
-    - host: www.example.com
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: svc-my-app
-                port:
-                  number: 8000
-...
-```
-
-### Namespaces
-
-Starting from version `1.6.0-beta`, BunkerWeb's autoconf stacks now support namespaces. This feature enables you to manage multiple clusters of BunkerWeb instances and services on the same Kubernetes cluster. To take advantage of namespaces, simply set the `namespace` metadata field on your BunkerWeb instances and services. Here's an example:
-
-```yaml
-apiVersion: apps/v1
-kind: DaemonSet
-metadata:
-  name: bunkerweb
-  namespace: my-namespace # Set the namespace for the BunkerWeb instance
-...
-```
-
-!!! info "Namespace behavior"
-
-    By default all Autoconf stacks listen to all namespaces. If you want to restrict a stack to a specific namespaces, you can set the `NAMESPACES` environment variable in the `bunkerweb-controller` deployment :
-
-    ```yaml
-    ...
-    apiVersion: apps/v1
-    kind: Deployment
-    metadata:
-      name: bunkerweb-controller
-      namespace: my-namespace # Set the namespace for the Controller
-    spec:
-      replicas: 1
-      strategy:
-        type: Recreate
-      selector:
-        matchLabels:
-          app: bunkerweb-controller
-      template:
-        metadata:
-          labels:
-            app: bunkerweb-controller
-        spec:
-          serviceAccountName: sa-bunkerweb
-          containers:
-            - name: bunkerweb-controller
-              image: bunkerity/bunkerweb-autoconf:1.6.0-rc4
-              imagePullPolicy: Always
-              env:
-                - name: NAMESPACES
-                  value: "my-namespace my-other-namespace" # Only listen to these namespaces
-                ...
-    ...
-    ```
-
-    Keep in mind that the `NAMESPACES` environment variable is a space-separated list of namespaces.
-
-!!! warning "Namespace specifications"
-
-    There can only be **one database** and **one Scheduler** per namespace. If you try to create multiple databases or Schedulers in the same namespace, the configurations will end up conflicting with each other.
-
-    The Scheduler doesn't need the `NAMESPACE` annotation to work properly. It will only need the `DATABASE_URI` setting properly configured so that it can access the same database as the autoconf service.
-
-### Ingress class
-
-When installed using the official methods in the documentation, BunkerWeb comes with the following `IngressClass` definition :
-
-```yaml
-apiVersion: networking.k8s.io/v1
-kind: IngressClass
-metadata:
-  name: bunkerweb
-spec:
-  controller: bunkerweb.io/ingress-controller
-```
-
-In order to restrict the `Ingress` resources monitored by the ingress controller, you can set the `KUBERNETES_INGRESS_CLASS` environment variable with the value `bunkerweb`. Then, you can leverage the `ingressClassName` directive in your `Ingress` definitions :
-
-```yaml
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: my-ingress
-  annotations:
-    bunkerweb.io/MY_SETTING: "value"
-    bunkerweb.io/www.example.com_MY_SETTING: "value"
-spec:
-  ingressClassName: bunkerweb
-  rules:
-    - host: www.example.com
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: svc-my-app
-                port:
-                  number: 8000
-```
-
-### Minikube specificities
-
-We are aware of issues with Minikube and internal hostname resolution. To work around this, there is a specific setting that you can use in the `bunkerweb-controller` deployment :
-
-```yaml
-...
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: bunkerweb-controller
-spec:
-  replicas: 1
-  strategy:
-    type: Recreate
-  selector:
-    matchLabels:
-      app: bunkerweb-controller
-  template:
-    metadata:
-      labels:
-        app: bunkerweb-controller
-    spec:
-      serviceAccountName: sa-bunkerweb
-      containers:
-        - name: bunkerweb-controller
-          image: bunkerity/bunkerweb-autoconf:1.6.0-rc4
-          imagePullPolicy: Always
-          env:
-            - name: USE_KUBERNETES_FQDN
-              value: "no" # Disable the usage of FQDN and use the pods IPs instead (default is "yes")
-            ...
-...
-```
-
-### Custom domain name
-
-If you use a custom domain name for your Kubernetes cluster different than the default `kubernetes.local` one, you can set the value using the `KUBERNETES_DOMAIN_NAME` environment variable on the scheduler container.
-
 ## Swarm
 
 <figure markdown>
@@ -1253,7 +1229,7 @@ If you use a custom domain name for your Kubernetes cluster different than the d
 </figure>
 
 !!! warning "Deprecated"
-    The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Docker autoconf integration](#docker-autoconf) instead.
+    The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Kubernetes integration](#kubernetes) instead.
 
 !!! tip "PRO support"
     **If you need Swarm support**, please contact us at [contact@bunkerity.com](mailto:contact@bunkerity.com) or via the [contact form](https://panel.bunkerweb.io/contact.php).
@@ -1272,7 +1248,7 @@ Since multiple instances of BunkerWeb are running, a shared data store implement
 As for the database volume, the documentation does not specify a specific approach. Choosing either a shared folder or a specific driver for the database volume is dependent on your unique use-case and is left as an exercise for the reader.
 
 !!! info "Database backend"
-    Please be aware that our instructions assume you are using MariaDB as the default database backend, as configured by the `DATABASE_URI` setting. However, we understand that you may prefer to utilize alternative backends for your Docker integration. If that is the case, rest assured that other database backends are still possible. See docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.0-rc4/misc/integrations) folder of the repository for more information.
+    Please be aware that our instructions assume you are using MariaDB as the default database backend, as configured by the `DATABASE_URI` setting. However, we understand that you may prefer to utilize alternative backends for your Docker integration. If that is the case, rest assured that other database backends are still possible. See docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.0-rc4/misc/integrations) of the repository for more information.
 
     Clustered database backends setup are out-of-the-scope of this documentation.
 
@@ -1452,7 +1428,7 @@ networks:
 
 ### Namespaces
 
-Starting from version `1.6.0-beta`, BunkerWeb's Autoconf stacks now support namespaces. This feature enables you to manage multiple "*clusters*" of BunkerWeb instances and services on the same Docker host. To take advantage of namespaces, simply set the `NAMESPACE` label on your services. Here's an example:
+Starting from version `1.6.0`, BunkerWeb's Autoconf stacks now support namespaces. This feature enables you to manage multiple "*clusters*" of BunkerWeb instances and services on the same Docker host. To take advantage of namespaces, simply set the `NAMESPACE` label on your services. Here's an example:
 
 ```yaml
 services:
