@@ -5,7 +5,6 @@ from json import dumps, loads
 from os import environ, getenv
 from os.path import join, sep
 from pathlib import Path
-from re import compile as re_compile
 from subprocess import PIPE, run
 from sys import exit as sys_exit, path as sys_path
 from time import sleep
@@ -16,6 +15,8 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
+from sqlalchemy.engine.url import make_url
+
 from common_utils import bytes_hash  # type: ignore
 from Database import Database  # type: ignore
 from logger import setup_logger  # type: ignore
@@ -23,7 +24,6 @@ from model import Base  # type: ignore
 
 LOGGER = setup_logger("BACKUP")
 
-DB_STRING_RX = re_compile(r"^(?P<database>(mariadb|mysql)(\+pymysql)?|sqlite(\+pysqlite)?|postgresql(\+psycopg)?):/+(?P<path>/[^\s]+)")
 BACKUP_DIR = Path(getenv("BACKUP_DIRECTORY", "/var/lib/bunkerweb/backups"))
 DB_LOCK_FILE = Path(sep, "var", "lib", "bunkerweb", "db.lock")
 
@@ -58,7 +58,8 @@ def backup_database(current_time: datetime, db: Database = None, backup_dir: Pat
     """Backup the database."""
     db = db or Database(LOGGER)
 
-    database: Literal["sqlite", "mariadb", "mysql", "postgresql"] = db.database_uri.split(":")[0].split("+")[0]  # type: ignore
+    database_url = make_url(db.database_uri)
+    database: Literal["sqlite", "mariadb", "mysql", "postgresql"] = database_url.drivername.split("+")[0]
     backup_file = backup_dir.joinpath(f"backup-{database}-{current_time.strftime('%Y-%m-%d_%H-%M-%S')}.zip")
     LOGGER.debug(f"Backup file path: {backup_file}")
     stderr = "Table 'db.test_"
@@ -66,27 +67,18 @@ def backup_database(current_time: datetime, db: Database = None, backup_dir: Pat
 
     while "Table 'db.test_" in stderr and (datetime.now().astimezone() - current_time).total_seconds() < 10:
         if database == "sqlite":
-            match = DB_STRING_RX.search(db.database_uri)
-            if not match:
-                LOGGER.error(f"Invalid database string provided: {db.database_uri}, skipping backup ...")
-                sys_exit(1)
-
-            db_path = Path(match.group("path"))
+            db_path = Path(database_url.database)
 
             LOGGER.info("Creating a backup for the SQLite database ...")
 
             proc = run(["sqlite3", db_path.as_posix(), ".dump"], stdout=PIPE, stderr=PIPE)
         else:
-            db_host = db.database_uri.rsplit("@", 1)[1].split("/")[0].split(":")
-            db_port = None
-            if len(db_host) == 1:
-                db_host = db_host[0]
-            else:
-                db_host, db_port = db_host
-
-            db_user = db.database_uri.split("://")[1].split(":")[0]
-            db_password = db.database_uri.split("://")[1].split(":")[1].rsplit("@", 1)[0]
-            db_database_name = db.database_uri.split("/")[-1].split("?")[0]
+            url = make_url(db.database_uri)
+            db_user = url.username or ""
+            db_password = url.password or ""
+            db_host = url.host or ""
+            db_port = str(url.port) if url.port else ""
+            db_database_name = url.database or ""
 
             if database in ("mariadb", "mysql"):
                 LOGGER.info("Creating a backup for the MariaDB/MySQL database ...")
@@ -127,15 +119,11 @@ def restore_database(backup_file: Path, db: Database = None) -> Database:
     """Restore the database from a backup."""
     db = db or Database(LOGGER)
     Base.metadata.drop_all(db.sql_engine)
-    database: Literal["sqlite", "mariadb", "mysql", "postgresql"] = db.database_uri.split(":")[0].split("+")[0]  # type: ignore
+    database_url = make_url(db.database_uri)
+    database: Literal["sqlite", "mariadb", "mysql", "postgresql"] = database_url.drivername.split("+")[0]
 
     if database == "sqlite":
-        match = DB_STRING_RX.search(db.database_uri)
-        if not match:
-            LOGGER.error(f"Invalid database string provided: {db.database_uri}, skipping restore ...")
-            sys_exit(1)
-
-        db_path = Path(match.group("path"))
+        db_path = Path(database_url.database)
 
         # Clear the database
         proc = run(["sqlite3", db_path.as_posix(), ".read", "/dev/null"], stdout=PIPE, stderr=PIPE)
@@ -149,16 +137,12 @@ def restore_database(backup_file: Path, db: Database = None) -> Database:
         proc = run(["sqlite3", db_path.as_posix(), f".read {tmp_file.as_posix()}"], stdout=PIPE, stderr=PIPE)
         tmp_file.unlink(missing_ok=True)
     else:
-        db_host = db.database_uri.rsplit("@", 1)[1].split("/")[0].split(":")
-        db_port = None
-        if len(db_host) == 1:
-            db_host = db_host[0]
-        else:
-            db_host, db_port = db_host
-
-        db_user = db.database_uri.split("://")[1].split(":")[0]
-        db_password = db.database_uri.split("://")[1].split(":")[1].rsplit("@", 1)[0]
-        db_database_name = db.database_uri.split("/")[-1].split("?")[0]
+        url = make_url(db.database_uri)
+        db_user = url.username or ""
+        db_password = url.password or ""
+        db_host = url.host or ""
+        db_port = str(url.port) if url.port else ""
+        db_database_name = url.database or ""
 
         if database in ("mariadb", "mysql"):
             LOGGER.info("Restoring the MariaDB/MySQL database ...")
