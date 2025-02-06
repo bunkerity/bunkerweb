@@ -5,6 +5,7 @@
 - [AUTOCONF] Increase retry limit and improve stability of Kubernetes watch stream
 - [UI] Add caching for GitHub buttons to improve performance
 - [UI] Fix shenanigans with multiples
+- [DEPS] Updated NGINX version to `1.26.3` (For now, Fedora 40/41 doesn't support this version and therefor will use the version `1.26.2`)
 - [DEPS] Updated lua-resty-openssl version to 1.5.2
 
 ## v1.6.0-rc4 - 2025/01/29

@@ -3,7 +3,7 @@ FROM debian:bookworm@sha256:321341744acb788e251ebd374aecc1a42d60ce65da7bd4ee9207
 ENV container=docker
 ENV LC_ALL=C
 ENV DEBIAN_FRONTEND=noninteractive
-ENV NGINX_VERSION=1.26.2
+ENV NGINX_VERSION=1.26.3
 
 RUN apt-get update \
     && apt-get install -y systemd systemd-sysv \
