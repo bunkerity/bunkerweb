@@ -990,7 +990,11 @@ $(document).ready(() => {
     $(`button[data-bs-target="#navs-templates-${usedTemplate}"]`).tab("show");
   }
 
-  if (currentMode === "easy" && currentTemplate !== "low") {
+  if (
+    !$(`button[data-bs-target="#navs-templates-${currentTemplate}"]`).hasClass(
+      "active",
+    )
+  ) {
     $(`button[data-bs-target="#navs-templates-${currentTemplate}"]`).tab(
       "show",
     );
