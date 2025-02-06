@@ -11,7 +11,7 @@ nav:
   - Concepts: 'concepts.md'
   - Integrations: 'integrations.md'
   - Quickstart guide: 'quickstart-guide.md'
-  - Advanced: 'advanced.md'
+  - Advanced usages: 'advanced.md'
   # - Security tuning: 'security-tuning.md'
   - Settings: 'settings.md'
   - Web UI: 'web-ui.md'
