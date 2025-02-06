@@ -1,8 +1,14 @@
 # Concepts
 
+## Architecture
+
 <figure markdown>
   ![Overview](assets/img/concepts.svg){ align=center, width="600" }
 </figure>
+
+Within your infrastructure, BunkerWeb acts as a reverse proxy in front of your web services. The typical architecture consists of accessing BunkerWeb from the Internet, which then forwards requests to the appropriate application service on a secure network.  
+
+Using BunkerWeb that way (classical reverse proxy architecture) with TLS offloading and centralized security policies enhances performance by reducing encryption overhead on backend servers while ensuring consistent access control, threat mitigation, and compliance enforcement across all services.
 
 ## Integrations
 
@@ -24,9 +30,9 @@ If you think that a new integration should be supported, do not hesitate to open
 
 ## Settings
 
-!!! tip "Pro settings"
+!!! tip "PRO settings"
 
-    Some plugins are reserved for the **pro version**. [Find out more about the pro version here.](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#pro)
+    Some plugins are reserved for the **PRO version**. [Find out more about the pro version here.](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#pro)
 
 Once BunkerWeb is integrated into your environment, you will need to configure it to serve and protect your web applications.
 
@@ -43,6 +49,21 @@ USE_MODSECURITY=no
 USE_GZIP=yes
 USE_BROTLI=no
 ```
+
+Please note that if you are using the web User Interface, the setting names are also displayed in addition to a "human-friendly" label :
+
+<figure markdown>
+  ![Overview](assets/img/settings-ui1.png){ align=center, width="800" }
+  <figcaption>Settings name in the web UI</figcaption>
+</figure>
+
+You can also use the search bar and directly specify a setting name :
+
+<figure markdown>
+  ![Overview](assets/img/settings-ui2.png){ align=center, width="600" }
+  <figcaption>Settings search in the web UI</figcaption>
+</figure>
+
 
 !!! info "Going further"
 
@@ -81,6 +102,13 @@ app2.example.com_WHITELIST_COUNTRY=FR
 app3.example.com_USE_BAD_BEHAVIOR=no
 ```
 
+Please note that multisite mode is implicit when using the web User Interface. You have the option to apply configurations directly to your services or to set a global configuration that will be applied to all your services (you can still apply exceptions directly to specific services) :
+
+<figure markdown>
+  ![Overview](assets/img/ui-multisite.png){ align=center, width="600" }
+  <figcaption>Apply a setting to all services from the web UI</figcaption>
+</figure>
+
 !!! info "Going further"
 
     You will find concrete examples of multisite mode in the [quickstart guide](quickstart-guide.md) of the documentation and the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.0-rc4/examples) directory of the repository.
@@ -94,6 +122,13 @@ BunkerWeb is built on the renowned NGINX web server, which provides a powerful c
 Another integral component of BunkerWeb is the ModSecurity Web Application Firewall. With custom configurations, you have the flexibility to address false positives or add custom rules to further enhance the protection provided by ModSecurity. These custom configurations allow you to fine-tune the behavior of the firewall and ensure that it aligns with the specific requirements of your web applications.
 
 By leveraging custom configurations, you unlock a world of possibilities to tailor BunkerWeb's behavior and security measures precisely to your needs. Whether it's adjusting NGINX configurations or fine-tuning ModSecurity, BunkerWeb provides the flexibility to meet your unique challenges effectively.
+
+Managing custom configurations from the web User Interface is done through the **Configs** menu :
+
+<figure markdown>
+  ![Overview](assets/img/configs-ui.png){ align=center, width="800" }
+  <figcaption>Manage custom configurations from the web UI</figcaption>
+</figure>
 
 !!! info "Going further"
 
@@ -147,9 +182,17 @@ Depending on the integration approach, the execution environment of the schedule
 
 By employing the scheduler, BunkerWeb streamlines the automation and coordination of essential tasks, enabling efficient and reliable operation of the entire system.
 
-### Instances healthcheck
+If you are using the web User Interface, you can manage scheduler jobs by clicking on **Jobs** from the menu :
 
-Since the 1.6.0-beta, the Scheduler possess a built-in healthcheck system, that will check the health of the instances. If an instance becomes unhealthy, the scheduler will stop sending the configuration to it. If the instance becomes healthy again, the scheduler will start sending the configuration to it again.
+<figure markdown>
+  ![Overview](assets/img/jobs-ui.png){ align=center, width="800" }
+  <figcaption>Manage jobs from the web UI</figcaption>
+</figure>
+
+
+**Instances healthcheck**
+
+Since the 1.6.0, the Scheduler possess a built-in healthcheck system, that will check the health of the instances. If an instance becomes unhealthy, the scheduler will stop sending the configuration to it. If the instance becomes healthy again, the scheduler will start sending the configuration to it again.
 
 The healthcheck interval is set by the `HEALTHCHECK_INTERVAL` environment variable with a default value of `30` which means that the scheduler will check the health of the instances every 30 seconds.
 
@@ -164,7 +207,14 @@ BunkerWeb leverages the power of templates to simplify the configuration process
 
 - **Custom templates**: In addition to predefined templates, BunkerWeb allows users to create custom templates tailored to their specific requirements. Custom templates enable fine-tuning of settings and custom configurations, ensuring that BunkerWeb aligns perfectly with the user's needs.
 
-### Creating custom templates
+With the web User Interface, templates are available through **easy mode** when you add or edit a service :
+
+<figure markdown>
+  ![Overview](assets/img/templates-ui.png){ align=center, width="800" }
+  <figcaption>Templates usage from the web UI</figcaption>
+</figure>
+
+**Creating custom templates**
 
 Creating a custom template is a straightforward process that involves defining the desired settings, custom configurations and steps in a structured format.
 
