@@ -6,7 +6,7 @@
   ![Overview](assets/img/concepts.svg){ align=center, width="600" }
 </figure>
 
-Within your infrastructure, BunkerWeb acts as a reverse proxy in front of your web services. The typical architecture consists of accessing BunkerWeb from the Internet, which then forwards requests to the appropriate application service on a secure network.  
+Within your infrastructure, BunkerWeb acts as a reverse proxy in front of your web services. The typical architecture consists of accessing BunkerWeb from the Internet, which then forwards requests to the appropriate application service on a secure network.
 
 Using BunkerWeb that way (classical reverse proxy architecture) with TLS offloading and centralized security policies enhances performance by reducing encryption overhead on backend servers while ensuring consistent access control, threat mitigation, and compliance enforcement across all services.
 
@@ -111,7 +111,7 @@ Please note that multisite mode is implicit when using the web User Interface. Y
 
 !!! info "Going further"
 
-    You will find concrete examples of multisite mode in the [quickstart guide](quickstart-guide.md) of the documentation and the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.0-rc4/examples) directory of the repository.
+    You will find concrete examples of multisite mode in the [advanced usages](advanced.md) of the documentation and the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.0-rc4/examples) directory of the repository.
 
 ## Custom configurations
 
@@ -132,7 +132,7 @@ Managing custom configurations from the web User Interface is done through the *
 
 !!! info "Going further"
 
-    You will find concrete examples of custom configurations in the [quickstart guide](quickstart-guide.md) of the documentation and the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.0-rc4/examples) directory of the repository.
+    You will find concrete examples of custom configurations in the [advanced usages](advanced.md#custom-configurations) of the documentation and the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.0-rc4/examples) directory of the repository.
 
 ## Database
 

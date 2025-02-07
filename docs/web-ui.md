@@ -1431,7 +1431,7 @@ After a successful login/password combination, you will be prompted to enter you
 
         Please read the [Prerequisites](#prerequisites) section to check out all the environment variables you can set to customize the web UI.
 
-    Accessing the web UI through BunkerWeb is a classical [reverse proxy setup](quickstart-guide.md#protect-http-applications). We recommend you to connect BunkerWeb and web UI using a dedicated network (like `bw-universe` also used by the scheduler) so it won't be on the same network of your web services for obvious security reasons. Please note that the web UI container is listening on the `7000` port.
+    Accessing the web UI through BunkerWeb is a classical [reverse proxy setup](quickstart-guide.md). We recommend you to connect BunkerWeb and web UI using a dedicated network (like `bw-universe` also used by the scheduler) so it won't be on the same network of your web services for obvious security reasons. Please note that the web UI container is listening on the `7000` port.
 
     !!! info "Database backend"
 
@@ -1543,7 +1543,7 @@ After a successful login/password combination, you will be prompted to enter you
 
         Please read the [Prerequisites](#prerequisites) section to check out all the environment variables you can set to customize the web UI.
 
-    Accessing the web UI through BunkerWeb is a classical [reverse proxy setup](quickstart-guide.md#protect-http-applications). We recommend you to connect BunkerWeb and web UI using a dedicated network (like `bw-universe` also used by the scheduler and autoconf) so it won't be on the same network of your web services for obvious security reasons. Please note that the web UI container is listening on the `7000` port.
+    Accessing the web UI through BunkerWeb is a classical [reverse proxy setup](quickstart-guide.md). We recommend you to connect BunkerWeb and web UI using a dedicated network (like `bw-universe` also used by the scheduler and autoconf) so it won't be on the same network of your web services for obvious security reasons. Please note that the web UI container is listening on the `7000` port.
 
     !!! info "Database backend"
 
@@ -1686,7 +1686,7 @@ After a successful login/password combination, you will be prompted to enter you
 
         Please read the [Prerequisites](#prerequisites) section to check out all the environment variables you can set to customize the web UI.
 
-    Accessing the web UI through BunkerWeb is a classical [reverse proxy setup](quickstart-guide.md#protect-http-applications). We recommend you to connect BunkerWeb and web UI using a dedicated network (like `bw-universe` also used by the scheduler and autoconf) so it won't be on the same network of your web services for obvious security reasons. Please note that the web UI container is listening on the `7000` port.
+    Accessing the web UI through BunkerWeb is a classical [reverse proxy setup](quickstart-guide.md). We recommend you to connect BunkerWeb and web UI using a dedicated network (like `bw-universe` also used by the scheduler and autoconf) so it won't be on the same network of your web services for obvious security reasons. Please note that the web UI container is listening on the `7000` port.
 
     !!! info "Database backend"
 
@@ -1848,7 +1848,7 @@ After a successful login/password combination, you will be prompted to enter you
 
         Please read the [Prerequisites](#prerequisites) section to check out all the environment variables you can set to customize the web UI.
 
-    Accessing the web UI through BunkerWeb is a classical [reverse proxy setup](quickstart-guide.md#protect-http-applications). Network segmentation between web UI and web services is not covered in this documentation. Please note that the web UI container is listening on the `7000` port.
+    Accessing the web UI through BunkerWeb is a classical [reverse proxy setup](quickstart-guide.md). Network segmentation between web UI and web services is not covered in this documentation. Please note that the web UI container is listening on the `7000` port.
 
     !!! info "Database backend"
 
@@ -2230,7 +2230,7 @@ After a successful login/password combination, you will be prompted to enter you
     systemctl restart bunkerweb-ui
     ```
 
-    Accessing the web UI through BunkerWeb is a classical [reverse proxy setup](quickstart-guide.md#protect-http-applications). Please note that the web UI is listening on the `7000` port and only on the loopback interface.
+    Accessing the web UI through BunkerWeb is a classical [reverse proxy setup](quickstart-guide.md). Please note that the web UI is listening on the `7000` port and only on the loopback interface.
 
     Here is the `/etc/bunkerweb/variables.env` boilerplate you can use :
 

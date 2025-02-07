@@ -96,7 +96,7 @@ Here is how you can access the logs, depending on your integration :
 
 ## Permissions
 
-Don't forget that BunkerWeb runs as an unprivileged user for obvious security reasons. Double-check the permissions of files and folders used by BunkerWeb, especially if you use custom configurations (more info [here](quickstart-guide.md#custom-configurations)). You will need to set at least **RW** rights on files and **_RWX_** on folders.
+Don't forget that BunkerWeb runs as an unprivileged user for obvious security reasons. Double-check the permissions of files and folders used by BunkerWeb, especially if you use custom configurations (more info [here](advanced.md#custom-configurations)). You will need to set at least **RW** rights on files and **_RWX_** on folders.
 
 ## Disable security checks
 
@@ -191,7 +191,7 @@ As we can see, there are 3 different logs :
 
 One important thing to understand is that rule **949110** is not a "real" one : it's the one that will deny the request because the anomaly threshold is reached (which is **10** in this example). You should never remove the **949110** rule !
 
-If it's a false-positive, you should then focus on both **930120** and **932160** rules. ModSecurity and/or CRS tuning is out of the scope of this documentation but don't forget that you can apply custom configurations before and after the CRS is loaded (more info [here](quickstart-guide.md#custom-configurations)).
+If it's a false-positive, you should then focus on both **930120** and **932160** rules. ModSecurity and/or CRS tuning is out of the scope of this documentation but don't forget that you can apply custom configurations before and after the CRS is loaded (more info [here](advanced.md#custom-configurations)).
 
 ## Bad Behavior
 

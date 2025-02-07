@@ -271,7 +271,7 @@ plugin /
         plugin.json
 ```
 
-- **conf_name.conf** : add [custom NGINX configurations](quickstart-guide.md#custom-configurations) (as jinja2 templates)
+- **conf_name.conf** : add [custom NGINX configurations](advanced.md#custom-configurations) (as jinja2 templates)
 
 - **actions.py** : script to execute on flask server, this script is running on flask context, you have access to lib and utils like `jinja2`, `requests`, etc...
 
@@ -362,7 +362,7 @@ Each job has the following fields :
 
 ### Configurations
 
-You can add custom NGINX configurations by adding a folder named **confs** with content similar to the [custom configurations](quickstart-guide.md#custom-configurations). Each subfolder inside the **confs** will contain [jinja2](https://jinja.palletsprojects.com) templates that will be generated and loaded at the corresponding context (`http`, `server-http`, `default-server-http`, `stream`, `server-stream`, `modsec`, `modsec-crs`, `crs-plugins-before` and `crs-plugins-after`).
+You can add custom NGINX configurations by adding a folder named **confs** with content similar to the [custom configurations](advanced.md#custom-configurations). Each subfolder inside the **confs** will contain [jinja2](https://jinja.palletsprojects.com) templates that will be generated and loaded at the corresponding context (`http`, `server-http`, `default-server-http`, `stream`, `server-stream`, `modsec`, `modsec-crs`, `crs-plugins-before` and `crs-plugins-after`).
 
 Here is an example for a configuration template file inside the **confs/server-http** folder named **example.conf** :
 

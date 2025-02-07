@@ -260,7 +260,7 @@ You can choose between the following versions of the OWASP Core Rule Set :
 
 ### Custom configurations
 
-Tuning ModSecurity and the CRS can be done using [custom configurations](quickstart-guide.md#custom-configurations) :
+Tuning ModSecurity and the CRS can be done using [custom configurations](advanced.md#custom-configurations) :
 
 - modsec-crs : before the OWASP Core Rule Set is loaded
 - modsec : after the OWASP Core Rule Set is loaded (also used if CRS is not loaded)
