@@ -51,7 +51,7 @@ RUN umask 027
 RUN apk add --no-cache openssl pcre bash python3 yajl geoip libxml2 libgd curl tzdata
 
 # Fix CVEs
-# There are no CVEs for the following packages
+RUN apk add --no-cache "curl>=8.12.0-r0" "libcurl>=8.12.0-r0" # CVE-2025-0167 CVE-2025-0665 CVE-2025-0725
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 /usr/share/bunkerweb /usr/share/bunkerweb
