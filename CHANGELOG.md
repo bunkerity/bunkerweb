@@ -2,6 +2,7 @@
 
 ## v1.6.0 - ????/??/??
 
+- [FEATURE] Add mCaptcha antibot mode
 - [AUTOCONF] Increase retry limit and improve stability of Kubernetes watch stream
 - [UI] Add caching for GitHub buttons to improve performance
 - [UI] Fix shenanigans with multiples

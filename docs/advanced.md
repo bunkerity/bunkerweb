@@ -2264,27 +2264,97 @@ BunkerWeb includes a built-in "Antibot" feature to implement this type of securi
 - **Cookie**: Sends a cookie to the client and expects it to be returned on subsequent requests.
 - **JavaScript**: Requires the client to solve a computational challenge using JavaScript.
 - **Captcha**: Presents a traditional CAPTCHA challenge (no external dependencies).
-- **hCaptcha**: Challenges the client with a CAPTCHA provided by hCaptcha.
 - **reCAPTCHA**: Uses Google reCAPTCHA to ensure the client achieves a minimum score.
+- **hCaptcha**: Challenges the client with a CAPTCHA provided by hCaptcha.
 - **Turnstile**: Enforces rate limiting and access control using Cloudflare Turnstile, leveraging various mechanisms.
+- **mCaptcha**: Challenges the client with a CAPTCHA provided by mCaptcha.
 
 Here is the list of related settings :
 
-| Setting                     | Default      | Context   | Multiple | Description                                                                                                                    |
-| --------------------------- | ------------ | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `USE_ANTIBOT`               | `no`         | multisite | no       | Activate antibot feature.                                                                                                      |
-| `ANTIBOT_URI`               | `/challenge` | multisite | no       | Unused URI that clients will be redirected to to solve the challenge.                                                          |
-| `ANTIBOT_TIME_RESOLVE`      | `60`         | multisite | no       | Maximum time (in seconds) clients have to resolve the challenge. Once this time has passed, a new challenge will be generated. |
-| `ANTIBOT_TIME_VALID`        | `86400`      | multisite | no       | Maximum validity time of solved challenges. Once this time has passed, clients will need to resolve a new one.                 |
-| `ANTIBOT_RECAPTCHA_SCORE`   | `0.7`        | multisite | no       | Minimum score required for reCAPTCHA challenge (Only compatible with reCAPTCHA v3).                                            |
-| `ANTIBOT_RECAPTCHA_SITEKEY` |              | multisite | no       | Sitekey for reCAPTCHA challenge.                                                                                               |
-| `ANTIBOT_RECAPTCHA_SECRET`  |              | multisite | no       | Secret for reCAPTCHA challenge.                                                                                                |
-| `ANTIBOT_HCAPTCHA_SITEKEY`  |              | multisite | no       | Sitekey for hCaptcha challenge.                                                                                                |
-| `ANTIBOT_HCAPTCHA_SECRET`   |              | multisite | no       | Secret for hCaptcha challenge.                                                                                                 |
-| `ANTIBOT_TURNSTILE_SITEKEY` |              | multisite | no       | Sitekey for Turnstile challenge.                                                                                               |
-| `ANTIBOT_TURNSTILE_SECRET`  |              | multisite | no       | Secret for Turnstile challenge.                                                                                                |
+| Setting                     | Default                     | Context   | Multiple | Description                                                                                                                    |
+| --------------------------- | --------------------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `USE_ANTIBOT`               | `no`                        | multisite | no       | Activate antibot feature.                                                                                                      |
+| `ANTIBOT_URI`               | `/challenge`                | multisite | no       | Unused URI that clients will be redirected to to solve the challenge.                                                          |
+| `ANTIBOT_TIME_RESOLVE`      | `60`                        | multisite | no       | Maximum time (in seconds) clients have to resolve the challenge. Once this time has passed, a new challenge will be generated. |
+| `ANTIBOT_TIME_VALID`        | `86400`                     | multisite | no       | Maximum validity time of solved challenges. Once this time has passed, clients will need to resolve a new one.                 |
+| `ANTIBOT_RECAPTCHA_SCORE`   | `0.7`                       | multisite | no       | Minimum score required for reCAPTCHA challenge (Only compatible with reCAPTCHA v3).                                            |
+| `ANTIBOT_RECAPTCHA_SITEKEY` |                             | multisite | no       | Sitekey for reCAPTCHA challenge.                                                                                               |
+| `ANTIBOT_RECAPTCHA_SECRET`  |                             | multisite | no       | Secret for reCAPTCHA challenge.                                                                                                |
+| `ANTIBOT_HCAPTCHA_SITEKEY`  |                             | multisite | no       | Sitekey for hCaptcha challenge.                                                                                                |
+| `ANTIBOT_HCAPTCHA_SECRET`   |                             | multisite | no       | Secret for hCaptcha challenge.                                                                                                 |
+| `ANTIBOT_TURNSTILE_SITEKEY` |                             | multisite | no       | Sitekey for Turnstile challenge.                                                                                               |
+| `ANTIBOT_TURNSTILE_SECRET`  |                             | multisite | no       | Secret for Turnstile challenge.                                                                                                |
+| `ANTIBOT_MCAPTCHA_SITEKEY`  |                             | multisite | no       | Sitekey for mCaptcha challenge.                                                                                                |
+| `ANTIBOT_MCAPTCHA_SECRET`   |                             | multisite | no       | Secret for mCaptcha challenge.                                                                                                 |
+| `ANTIBOT_MCAPTCHA_URL`      | `https://demo.mcaptcha.org` | multisite | no       | Domain to use for mCaptcha challenge.                                                                                          |
 
 Please note that antibot feature is using a cookie to maintain a session with clients. If you are using BunkerWeb in a clustered environment, you will need to set the `SESSIONS_SECRET` and `SESSIONS_NAME` settings to another value than the default one (which is `random`). You will find more info about sessions [here](settings.md#sessions).
+
+### Captcha
+
+Our homemade Captcha mechanism offers a simple yet effective challenge designed and hosted entirely within your BunkerWeb environment. It generates dynamic, image-based challenges that test users' ability to recognize and interpret randomized characters, ensuring automated bots are effectively blocked without the need for any external API calls or third-party services.
+
+To enable the Captcha antibot mechanism, set the `USE_ANTIBOT` setting to `captcha` in your BunkerWeb configuration.
+
+### reCAPTCHA
+
+When enabled, reCAPTCHA runs in the background (v3) to assign a score based on user behavior. A score lower than the configured threshold will prompt further verification or block the request. For visible challenges (v2), users must interact with the reCAPTCHA widget before continuing.
+
+To use reCAPTCHA with BunkerWeb, you need to obtain your site and secret keys from the [Google reCAPTCHA admin console](https://www.google.com/recaptcha/admin). Once you have the keys, you can configure BunkerWeb to use reCAPTCHA as an antibot mechanism.
+
+Add or update the following settings as needed in your BunkerWeb configuration:
+
+| Setting                     | Default | Description                                         |
+| --------------------------- | ------- | --------------------------------------------------- |
+| `ANTIBOT_RECAPTCHA_SITEKEY` |         | Your Google reCAPTCHA site key.                     |
+| `ANTIBOT_RECAPTCHA_SECRET`  |         | Your Google reCAPTCHA secret key.                   |
+| `ANTIBOT_RECAPTCHA_SCORE`   | 0.7     | Minimum score required for reCAPTCHA v3 validation. |
+
+Make sure to set the `USE_ANTIBOT` setting to `recaptcha` to enable the reCAPTCHA antibot mechanism.
+
+### hCaptcha
+
+When enabled, hCaptcha provides an effective alternative to reCAPTCHA by verifying user interactions without relying on a scoring mechanism. It challenges users with a simple, interactive test to confirm their legitimacy.
+
+To integrate hCaptcha with BunkerWeb, you must obtain the necessary credentials from the hCaptcha dashboard at [hCaptcha](https://www.hcaptcha.com). These credentials include a site key and a secret key.
+
+After acquiring the keys, update your BunkerWeb configuration with the following settings to enable hCaptcha antibot protection:
+
+| Setting                    | Default | Description                                     |
+| -------------------------- | ------- | ----------------------------------------------- |
+| `ANTIBOT_HCAPTCHA_SITEKEY` |         | Your hCaptcha site key.                         |
+| `ANTIBOT_HCAPTCHA_SECRET`  |         | Your hCaptcha secret key used for verification. |
+
+Make sure to set the `USE_ANTIBOT` setting to `hcaptcha` to enable the hCaptcha antibot mechanism.
+
+### Turnstile
+
+Turnstile is a modern, privacy-friendly challenge mechanism that leverages Cloudflare’s technology to detect and block automated traffic. It validates user interactions in a seamless, background manner, reducing friction for legitimate users while effectively discouraging bots.
+
+To integrate Turnstile with BunkerWeb, ensure you obtain the necessary credentials from [Cloudflare Turnstile](https://www.cloudflare.com/turnstile) and update your configuration with the following settings:
+
+| Setting                     | Default | Description                                          |
+| --------------------------- | ------- | ---------------------------------------------------- |
+| `ANTIBOT_TURNSTILE_SITEKEY` |         | Your Cloudflare Turnstile site key.                  |
+| `ANTIBOT_TURNSTILE_SECRET`  |         | Your Cloudflare Turnstile secret key for validation. |
+
+Make sure to set the `USE_ANTIBOT` setting to `turnstile` to enable the Turnstile antibot mechanism.
+
+### mCaptcha
+
+mCaptcha is an alternative CAPTCHA challenge mechanism that verifies the legitimacy of users by presenting an interactive test similar to other antibot solutions. When enabled, it challenges users with a CAPTCHA provided by mCaptcha, ensuring that only genuine users bypass the automated security checks.
+
+mCaptcha is designed with privacy in mind. It is fully GDPR compliant, ensuring that all user data involved in the challenge process adheres to strict data protection standards. Additionally, mCaptcha offers the flexibility to be self-hosted, allowing organizations to maintain full control over their data and infrastructure. This self-hosting capability not only enhances privacy but also optimizes performance and customization to suit specific deployment needs.
+
+To integrate mCaptcha with BunkerWeb, you must obtain the necessary credentials from the [mCaptcha](https://mcaptcha.org/) platform or yours. These credentials include a site key and a secret key for verification. After acquiring the keys, update your BunkerWeb configuration with the following settings to enable mCaptcha antibot protection:
+
+| Setting                    | Default                     | Description                                          |
+| -------------------------- | --------------------------- | ---------------------------------------------------- |
+| `ANTIBOT_MCAPTCHA_SITEKEY` |                             | Your mCaptcha site key used in the challenge.        |
+| `ANTIBOT_MCAPTCHA_SECRET`  |                             | Your mCaptcha secret for verifying responses.        |
+| `ANTIBOT_MCAPTCHA_URL`     | `https://demo.mcaptcha.org` | The endpoint URL for mCaptcha challenge integration. |
+
+Make sure to set the `USE_ANTIBOT` setting to `mcaptcha` to enable the mCaptcha antibot mechanism.
 
 ## Blacklisting, whitelisting and greylisting
 

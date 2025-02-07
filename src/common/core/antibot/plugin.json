@@ -11,7 +11,7 @@
       "help": "Activate antibot feature.",
       "id": "use-antibot",
       "label": "Antibot challenge",
-      "regex": "^(no|cookie|javascript|captcha|recaptcha|hcaptcha|turnstile)$",
+      "regex": "^(no|cookie|javascript|captcha|recaptcha|hcaptcha|turnstile|mcaptcha)$",
       "type": "select",
       "select": [
         "no",
@@ -20,7 +20,8 @@
         "captcha",
         "recaptcha",
         "hcaptcha",
-        "turnstile"
+        "turnstile",
+        "mcaptcha"
       ]
     },
     "ANTIBOT_URI": {
@@ -65,7 +66,7 @@
       "help": "Sitekey for reCAPTCHA challenge.",
       "id": "antibot-recaptcha-sitekey",
       "label": "reCAPTCHA sitekey",
-      "regex": "^[\\w\\-]*$",
+      "regex": "^.*$",
       "type": "text"
     },
     "ANTIBOT_RECAPTCHA_SECRET": {
@@ -74,7 +75,7 @@
       "help": "Secret for reCAPTCHA challenge.",
       "id": "antibot-recaptcha-secret",
       "label": "reCAPTCHA secret",
-      "regex": "^[\\w\\-]*$",
+      "regex": "^.*$",
       "type": "password"
     },
     "ANTIBOT_HCAPTCHA_SITEKEY": {
@@ -83,7 +84,7 @@
       "help": "Sitekey for hCaptcha challenge.",
       "id": "antibot-hcaptcha-sitekey",
       "label": "hCaptcha sitekey",
-      "regex": "^[a-zA-Z0-9\\-]*$",
+      "regex": "^.*$",
       "type": "text"
     },
     "ANTIBOT_HCAPTCHA_SECRET": {
@@ -92,7 +93,7 @@
       "help": "Secret for hCaptcha challenge.",
       "id": "antibot-hcaptcha-secret",
       "label": "hCaptcha secret",
-      "regex": "^\\w*$",
+      "regex": "^.*$",
       "type": "password"
     },
     "ANTIBOT_TURNSTILE_SITEKEY": {
@@ -101,7 +102,7 @@
       "help": "Sitekey for Turnstile challenge.",
       "id": "antibot-turnstile-sitekey",
       "label": "Turnstile sitekey",
-      "regex": "^(0x[\\w\\-]+)?$",
+      "regex": "^.*$",
       "type": "text"
     },
     "ANTIBOT_TURNSTILE_SECRET": {
@@ -110,8 +111,35 @@
       "help": "Secret for Turnstile challenge.",
       "id": "antibot-turnstile-secret",
       "label": "Turnstile secret",
-      "regex": "^(0x[\\w\\-]+)?$",
+      "regex": "^.*$",
       "type": "password"
+    },
+    "ANTIBOT_MCAPTCHA_SITEKEY": {
+      "context": "multisite",
+      "default": "",
+      "help": "Sitekey for mCaptcha challenge.",
+      "id": "antibot-mcaptcha-sitekey",
+      "label": "mCaptcha sitekey",
+      "regex": "^.*$",
+      "type": "text"
+    },
+    "ANTIBOT_MCAPTCHA_SECRET": {
+      "context": "multisite",
+      "default": "",
+      "help": "Secret for mCaptcha challenge.",
+      "id": "antibot-mcaptcha-secret",
+      "label": "mCaptcha secret",
+      "regex": "^.*$",
+      "type": "password"
+    },
+    "ANTIBOT_MCAPTCHA_URL": {
+      "context": "multisite",
+      "default": "https://demo.mcaptcha.org",
+      "help": "Domain to use for mCaptcha challenge.",
+      "id": "antibot-mcaptcha-domain",
+      "label": "mCaptcha domain",
+      "regex": "^.*$",
+      "type": "text"
     }
   }
 }

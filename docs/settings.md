@@ -57,6 +57,21 @@ STREAM support :warning:
 | `SECURITY_MODE`                | `block`                                                                                                                  | multisite | no       | Defines the response to threats: "detect" to monitor and log, or "block" to prevent access and log incidents. |
 
 
+## Anti DDoS <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+
+
+STREAM support :x:
+
+Provides enhanced protection against DDoS attacks by analyzing and filtering suspicious traffic.
+
+| Setting                      | Default       | Context | Multiple | Description                                                             |
+| ---------------------------- | ------------- | ------- | -------- | ----------------------------------------------------------------------- |
+| `USE_ANTIDDOS`               | `no`          | global  | no       | Enable or disable anti DDoS protection to mitigate high traffic spikes. |
+| `ANTIDDOS_METRICS_DICT_SIZE` | `10M`         | global  | no       | Size of in-memory storage for DDoS metrics (e.g., 10M, 500k).           |
+| `ANTIDDOS_THRESHOLD`         | `100`         | global  | no       | Maximum suspicious requests allowed from a single IP before blocking.   |
+| `ANTIDDOS_WINDOW_TIME`       | `10`          | global  | no       | Time window (seconds) to detect abnormal request patterns.              |
+| `ANTIDDOS_STATUS_CODES`      | `429 403 444` | global  | no       | HTTP status codes treated as suspicious for DDoS analysis.              |
+| `ANTIDDOS_DISTINCT_IP`       | `5`           | global  | no       | Minimum distinct IP count before enabling anti DDoS measures.           |
 
 ## Antibot
 
@@ -64,19 +79,22 @@ STREAM support :x:
 
 Bot detection by using a challenge.
 
-| Setting                     | Default      | Context   | Multiple | Description                                                                                                                    |
-| --------------------------- | ------------ | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `USE_ANTIBOT`               | `no`         | multisite | no       | Activate antibot feature.                                                                                                      |
-| `ANTIBOT_URI`               | `/challenge` | multisite | no       | Unused URI that clients will be redirected to to solve the challenge.                                                          |
-| `ANTIBOT_TIME_RESOLVE`      | `60`         | multisite | no       | Maximum time (in seconds) clients have to resolve the challenge. Once this time has passed, a new challenge will be generated. |
-| `ANTIBOT_TIME_VALID`        | `86400`      | multisite | no       | Maximum validity time of solved challenges. Once this time has passed, clients will need to resolve a new one.                 |
-| `ANTIBOT_RECAPTCHA_SCORE`   | `0.7`        | multisite | no       | Minimum score required for reCAPTCHA challenge (Only compatible with reCAPTCHA v3).                                            |
-| `ANTIBOT_RECAPTCHA_SITEKEY` |              | multisite | no       | Sitekey for reCAPTCHA challenge.                                                                                               |
-| `ANTIBOT_RECAPTCHA_SECRET`  |              | multisite | no       | Secret for reCAPTCHA challenge.                                                                                                |
-| `ANTIBOT_HCAPTCHA_SITEKEY`  |              | multisite | no       | Sitekey for hCaptcha challenge.                                                                                                |
-| `ANTIBOT_HCAPTCHA_SECRET`   |              | multisite | no       | Secret for hCaptcha challenge.                                                                                                 |
-| `ANTIBOT_TURNSTILE_SITEKEY` |              | multisite | no       | Sitekey for Turnstile challenge.                                                                                               |
-| `ANTIBOT_TURNSTILE_SECRET`  |              | multisite | no       | Secret for Turnstile challenge.                                                                                                |
+| Setting                     | Default                     | Context   | Multiple | Description                                                                                                                    |
+| --------------------------- | --------------------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `USE_ANTIBOT`               | `no`                        | multisite | no       | Activate antibot feature.                                                                                                      |
+| `ANTIBOT_URI`               | `/challenge`                | multisite | no       | Unused URI that clients will be redirected to to solve the challenge.                                                          |
+| `ANTIBOT_TIME_RESOLVE`      | `60`                        | multisite | no       | Maximum time (in seconds) clients have to resolve the challenge. Once this time has passed, a new challenge will be generated. |
+| `ANTIBOT_TIME_VALID`        | `86400`                     | multisite | no       | Maximum validity time of solved challenges. Once this time has passed, clients will need to resolve a new one.                 |
+| `ANTIBOT_RECAPTCHA_SCORE`   | `0.7`                       | multisite | no       | Minimum score required for reCAPTCHA challenge (Only compatible with reCAPTCHA v3).                                            |
+| `ANTIBOT_RECAPTCHA_SITEKEY` |                             | multisite | no       | Sitekey for reCAPTCHA challenge.                                                                                               |
+| `ANTIBOT_RECAPTCHA_SECRET`  |                             | multisite | no       | Secret for reCAPTCHA challenge.                                                                                                |
+| `ANTIBOT_HCAPTCHA_SITEKEY`  |                             | multisite | no       | Sitekey for hCaptcha challenge.                                                                                                |
+| `ANTIBOT_HCAPTCHA_SECRET`   |                             | multisite | no       | Secret for hCaptcha challenge.                                                                                                 |
+| `ANTIBOT_TURNSTILE_SITEKEY` |                             | multisite | no       | Sitekey for Turnstile challenge.                                                                                               |
+| `ANTIBOT_TURNSTILE_SECRET`  |                             | multisite | no       | Secret for Turnstile challenge.                                                                                                |
+| `ANTIBOT_MCAPTCHA_SITEKEY`  |                             | multisite | no       | Sitekey for mCaptcha challenge.                                                                                                |
+| `ANTIBOT_MCAPTCHA_SECRET`   |                             | multisite | no       | Secret for mCaptcha challenge.                                                                                                 |
+| `ANTIBOT_MCAPTCHA_URL`      | `https://demo.mcaptcha.org` | multisite | no       | Domain to use for mCaptcha challenge.                                                                                          |
 
 ## Auth basic
 
