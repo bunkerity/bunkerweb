@@ -371,6 +371,12 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.0-rc4
     helm install mybw bunkerweb/bunkerweb --namespace bunkerweb --create-namespace
     ```
 
+    Once installed, you can get the IP address of the `LoadBalancer` to setup your domains :
+
+    ```shell
+    kubectl -n bunkerweb get svc mybw-external -o=jsonpath='{.status.loadBalancer.ingress[0].ip}'
+    ```
+
 === "Swarm"
 
     !!! warning "Deprecated"
