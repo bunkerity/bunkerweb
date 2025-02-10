@@ -504,9 +504,19 @@ $(document).ready(() => {
 
       if (!isStepValid) return;
 
+      if (currentStep === 1 && isNext) {
+        $(".authentication-inner .card-body").removeClass("pb-10");
+        $(".join-newsletter").addClass("d-none");
+      }
+
       currentStep = newStep;
       navigateToStep(newStep);
     } else {
+      if (currentStep === 2) {
+        $(".authentication-inner .card-body").addClass("pb-10");
+        $(".join-newsletter").removeClass("d-none");
+      }
+
       currentStep = newStep;
       navigateToStep(newStep);
     }
@@ -812,6 +822,47 @@ $(document).ready(() => {
     $key.prop("disabled", !isChecked);
     $certData.prop("disabled", !isChecked);
     $keyData.prop("disabled", !isChecked);
+  });
+
+  $(document).on("click", ".submit-newsletter", function (e) {
+    e.preventDefault();
+    const $email = $("#email");
+    const emailElement = $email.get(0);
+    if (!$email.val() || !emailElement.checkValidity()) {
+      const feedbackToast = $("#feedback-toast").clone(); // Clone the feedback toast
+      feedbackToast.attr("id", `feedback-toast-${toastNum++}`); // Set the ID for the toast
+      feedbackToast.addClass("border-danger");
+      feedbackToast.find(".toast-header").addClass("text-danger");
+      feedbackToast.find("span").text("Error");
+      feedbackToast
+        .find("div.toast-body")
+        .text(
+          "Please enter a valid email address to subscribe to the newsletter.",
+        );
+      feedbackToast.appendTo("#feedback-toast-container"); // Append the toast to the container
+      feedbackToast.toast("show");
+      return;
+    }
+
+    const $privacyPolicy = $("#setup-private-policy");
+    if (!$privacyPolicy.prop("checked")) {
+      const feedbackToast = $("#feedback-toast").clone(); // Clone the feedback toast
+      feedbackToast.attr("id", `feedback-toast-${toastNum++}`); // Set the ID for the toast
+      feedbackToast.addClass("border-danger");
+      feedbackToast.find(".toast-header").addClass("text-danger");
+      feedbackToast.find("span").text("Error");
+      feedbackToast
+        .find("div.toast-body")
+        .text(
+          "Please accept the privacy policy to subscribe to the newsletter.",
+        );
+      feedbackToast.appendTo("#feedback-toast-container"); // Append the toast to the container
+      feedbackToast.toast("show");
+      return;
+    }
+
+    $("#newsletter-email").val($email.val());
+    $("#setup-newsletter-form").submit();
   });
 
   // Before Unload Event to Warn Users About Unsaved Changes

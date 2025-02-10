@@ -72,7 +72,7 @@
                                     </span>
                                 </div>
                             </div>
-                            <div class="card-body p-2">
+                            <div class="card-body p-2 pb-10">
                                 <div class="d-flex justify-content-center">
                                     <nav class="p-3 template-steps-container align-items-center mw-100 rounded-top"
                                          aria-label="breadcrumb">
@@ -1092,12 +1092,37 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="d-flex justify-content-between mt-2">
+                            <div class="d-flex justify-content-between mt-2 position-relative">
                                 <button id="previous-step"
                                         class="btn btn-primary btn-prev previous-step disabled">
                                     <i class="bx bx-chevron-left bx-sm ms-sm-n2"></i>
                                     <span class="align-middle d-sm-inline-block d-none">Previous</span>
                                 </button>
+                                <div class="join-newsletter position-absolute bottom-0 start-50 translate-middle-x">
+                                    <h5 class="mb-3 text-primary">Join the Newsletter</h5>
+                                    <form id="setup-newsletter-form"
+                                          action="https://bunkerity.us1.list-manage.com/subscribe/post?u=ec5b1577cf427972b9bd491a6&id=37076d9d67"
+                                          target="_blank"
+                                          method="POST">
+                                        <div class="form-check mb-3">
+                                            <input id="newsletter-email" type="hidden" name="EMAIL" required />
+                                            <input
+                                            id="setup-private-policy"
+                                            type="checkbox"
+                                                   class="form-check-input"
+                                                   name="newsletter-check"
+                                                   required />
+                                            <label class="form-check-label" for="privacyPolicyCheck">
+                                                I've read and agree to the
+                                                <a class="fst-italic"
+                                                   href="https://www.bunkerity.com/en/privacy-policy?utm_campaign=self&utm_source=ui"
+                                                   target="_blank"
+                                                   rel="noopener">privacy policy</a>
+                                            </label>
+                                        </div>
+                                        <button class="btn btn-primary w-100 text-uppercase don-jose submit-newsletter">Subscribe</button>
+                                    </form>
+                                </div>
                                 <button type="button" class="btn btn-outline-bw-green save-settings d-none">
                                     <i class="bx bx-save bx-sm ms-sm-n2"></i>
                                     <span class="align-middle d-sm-inline-block d-none ms-sm-1">Setup</span>

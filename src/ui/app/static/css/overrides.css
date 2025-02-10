@@ -939,6 +939,14 @@ table.table.dataTable > tbody > tr.selected > * {
   z-index: 1080;
 }
 
+.bg-light-subtle {
+  overflow-x: hidden;
+}
+
+.bg-dark-subtle {
+  overflow-x: hidden;
+}
+
 /*
 * Dark mode overrides
 ******************************************************************************/
