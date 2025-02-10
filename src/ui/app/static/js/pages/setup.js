@@ -389,6 +389,29 @@ $(document).ready(() => {
           $confirmPasswordInput.removeClass("is-invalid");
           $confirmPasswordInput.siblings(".invalid-feedback").text("");
         }
+
+        const $subscribeNewsletter = $("#setup-subscribe-newsletter");
+        const $email = $("#email");
+        if (
+          $subscribeNewsletter.prop("checked") &&
+          (!$email.val() || !$email.get(0).checkValidity())
+        ) {
+          $("#email").addClass("is-invalid");
+          let $feedback = $("#email").siblings(".invalid-feedback");
+          if (!$feedback.length) {
+            const $textSpan = $("#email")
+              .parent()
+              .find("span.input-group-text");
+            $feedback = $(
+              '<div class="invalid-feedback">This field is required if you want to subscribe to the newsletter.</div>',
+            ).insertAfter($textSpan.length ? $textSpan : $("#email"));
+          } else {
+            $feedback.text(
+              "This field is required if you want to subscribe to the newsletter.",
+            );
+          }
+          isStepValid = false;
+        }
       } else if (!uiReverseProxy && currentStep === 2) {
         const autoLetsEncrypt = $("#AUTO_LETS_ENCRYPT").prop("checked");
         const letsEncryptChallenge = $("#LETS_ENCRYPT_CHALLENGE")
@@ -504,19 +527,9 @@ $(document).ready(() => {
 
       if (!isStepValid) return;
 
-      if (currentStep === 1 && isNext) {
-        $(".authentication-inner .card-body").removeClass("pb-10");
-        $(".join-newsletter").addClass("d-none");
-      }
-
       currentStep = newStep;
       navigateToStep(newStep);
     } else {
-      if (currentStep === 2) {
-        $(".authentication-inner .card-body").addClass("pb-10");
-        $(".join-newsletter").removeClass("d-none");
-      }
-
       currentStep = newStep;
       navigateToStep(newStep);
     }
@@ -558,6 +571,31 @@ $(document).ready(() => {
   $saveSettingsButton.on("click", function (e) {
     e.preventDefault();
     if (currentStep !== 3) return;
+    const $subscribeNewsletter = $("#setup-subscribe-newsletter");
+    if ($subscribeNewsletter.prop("checked")) {
+      const $email = $("#email");
+
+      if (!$email.length || !$email.val() || !$email.get(0).checkValidity()) {
+        // Show toast notification instead of validation error
+        const feedbackToast = $("#feedback-toast").clone();
+        feedbackToast.attr("id", `feedback-toast-${toastNum++}`);
+        feedbackToast.addClass("border-warning");
+        feedbackToast.find(".toast-header").addClass("text-warning");
+        feedbackToast.find("span").text("Newsletter Subscription");
+        feedbackToast
+          .find("div.toast-body")
+          .text(
+            "Please enter a valid email address to subscribe to the newsletter.",
+          );
+        feedbackToast.appendTo("#feedback-toast-container");
+        feedbackToast.toast("show");
+        return;
+      }
+
+      $("#newsletter-email").val($email.val());
+      $("#setup-newsletter-form").submit();
+    }
+
     $("#loadingModal").modal("show");
 
     // Create a new FormData object
@@ -824,45 +862,15 @@ $(document).ready(() => {
     $keyData.prop("disabled", !isChecked);
   });
 
-  $(document).on("click", ".submit-newsletter", function (e) {
+  $("#setup-newsletter-form").on("click", function (e) {
     e.preventDefault();
-    const $email = $("#email");
-    const emailElement = $email.get(0);
-    if (!$email.val() || !emailElement.checkValidity()) {
-      const feedbackToast = $("#feedback-toast").clone(); // Clone the feedback toast
-      feedbackToast.attr("id", `feedback-toast-${toastNum++}`); // Set the ID for the toast
-      feedbackToast.addClass("border-danger");
-      feedbackToast.find(".toast-header").addClass("text-danger");
-      feedbackToast.find("span").text("Error");
-      feedbackToast
-        .find("div.toast-body")
-        .text(
-          "Please enter a valid email address to subscribe to the newsletter.",
-        );
-      feedbackToast.appendTo("#feedback-toast-container"); // Append the toast to the container
-      feedbackToast.toast("show");
-      return;
-    }
+    const $checkbox = $("#setup-subscribe-newsletter");
+    $checkbox.prop("checked", !$checkbox.prop("checked"));
+    $checkbox.trigger("change");
+  });
 
-    const $privacyPolicy = $("#setup-private-policy");
-    if (!$privacyPolicy.prop("checked")) {
-      const feedbackToast = $("#feedback-toast").clone(); // Clone the feedback toast
-      feedbackToast.attr("id", `feedback-toast-${toastNum++}`); // Set the ID for the toast
-      feedbackToast.addClass("border-danger");
-      feedbackToast.find(".toast-header").addClass("text-danger");
-      feedbackToast.find("span").text("Error");
-      feedbackToast
-        .find("div.toast-body")
-        .text(
-          "Please accept the privacy policy to subscribe to the newsletter.",
-        );
-      feedbackToast.appendTo("#feedback-toast-container"); // Append the toast to the container
-      feedbackToast.toast("show");
-      return;
-    }
-
-    $("#newsletter-email").val($email.val());
-    $("#setup-newsletter-form").submit();
+  $("#setup-subscribe-newsletter").on("change", function () {
+    $("#email-optional").toggleClass("d-none", this.checked);
   });
 
   // Before Unload Event to Warn Users About Unsaved Changes

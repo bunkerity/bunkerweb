@@ -72,7 +72,7 @@
                                     </span>
                                 </div>
                             </div>
-                            <div class="card-body p-2 pb-10">
+                            <div class="card-body p-2 pb-8">
                                 <div class="d-flex justify-content-center">
                                     <nav class="p-3 template-steps-container align-items-center mw-100 rounded-top"
                                          aria-label="breadcrumb">
@@ -156,7 +156,7 @@
                                                         <label id="label-username"
                                                                for="username"
                                                                class="form-label fw-semibold text-truncate">
-                                                            Admin Email (<i>optional</i>)
+                                                            Admin Email<span id="email-optional"> (<i>optional</i>)</span>
                                                         </label>
                                                         <div class="d-flex align-items-center">
                                                             <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
@@ -1107,20 +1107,19 @@
                                         <div class="form-check mb-3">
                                             <input id="newsletter-email" type="hidden" name="EMAIL" required />
                                             <input
-                                            id="setup-private-policy"
+                                            id="setup-subscribe-newsletter"
                                             type="checkbox"
                                                    class="form-check-input"
                                                    name="newsletter-check"
                                                    required />
                                             <label class="form-check-label" for="privacyPolicyCheck">
-                                                I've read and agree to the
+                                                I want to subscribe to the newsletter and I've read and agree to the
                                                 <a class="fst-italic"
                                                    href="https://www.bunkerity.com/en/privacy-policy?utm_campaign=self&utm_source=ui"
                                                    target="_blank"
                                                    rel="noopener">privacy policy</a>
                                             </label>
                                         </div>
-                                        <button class="btn btn-primary w-100 text-uppercase don-jose submit-newsletter">Subscribe</button>
                                     </form>
                                 </div>
                                 <button type="button" class="btn btn-outline-bw-green save-settings d-none">
