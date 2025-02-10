@@ -1,5 +1,4 @@
 bcrypt==4.2.1
-beautifulsoup4==4.12.3
 Flask==3.1.0
 Flask-Login==0.6.3
 Flask-Principal==0.4.0
@@ -12,4 +11,3 @@ qrcode==8.0
 regex==2024.11.6
 urllib3<2.0.0
 user_agents==2.2.0
-werkzeug==3.1.3
