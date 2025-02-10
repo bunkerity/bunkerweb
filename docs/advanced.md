@@ -248,6 +248,290 @@ You will find more settings about real IP in the [settings section](settings.md#
         systemctl restart bunkerweb bunkerweb-scheduler
         ```
 
+### Custom configurations
+
+To customize and add custom configurations to BunkerWeb, you can take advantage of its NGINX foundation. Custom NGINX configurations can be added in different NGINX contexts, including configurations for the ModSecurity Web Application Firewall (WAF), which is a core component of BunkerWeb. More details about ModSecurity configurations can be found [here](security-tuning.md#modsecurity).
+
+Here are the available types of custom configurations:
+
+- **http**: Configurations at the HTTP level of NGINX.
+- **server-http**: Configurations at the HTTP/Server level of NGINX.
+- **default-server-http**: Configurations at the Server level of NGINX, specifically for the "default server" when the supplied client name doesn't match any server name in `SERVER_NAME`.
+- **modsec-crs**: Configurations applied before the OWASP Core Rule Set is loaded.
+- **modsec**: Configurations applied after the OWASP Core Rule Set is loaded, or used when the Core Rule Set is not loaded.
+- **stream**: Configurations at the Stream level of NGINX.
+- **server-stream**: Configurations at the Stream/Server level of NGINX.
+
+Custom configurations can be applied globally or specifically for a particular server, depending on the applicable context and whether the [multisite mode](concepts.md#multisite-mode) is enabled.
+
+The method for applying custom configurations depends on the integration being used. However, the underlying process involves adding files with the `.conf` suffix to specific folders. To apply a custom configuration for a specific server, the file should be placed in a subfolder named after the primary server name.
+
+Some integrations provide more convenient ways to apply configurations, such as using [Configs](https://docs.docker.com/engine/swarm/configs/) in Docker Swarm or [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/) in Kubernetes. These options offer simpler approaches for managing and applying configurations.
+
+=== "Docker"
+
+    When using the [Docker integration](integrations.md#docker), you have two choices for the addition of custom configurations :
+
+    - Using specific settings `*_CUSTOM_CONF_*` as environment variables (recommended)
+    - Writing .conf files to the volume mounted on /data of the scheduler
+
+    **Using settings**
+
+    The settings to use must follow the pattern `<SITE>_CUSTOM_CONF_<TYPE>_<NAME>` :
+
+    - `<SITE>` : optional primary server name if multisite mode is enabled and the config must be applied to a specific service
+    - `<TYPE>` : the type of config, accepted values are `HTTP`, `DEFAULT_SERVER_HTTP`, `SERVER_HTTP`, `MODSEC`, `MODSEC_CRS`, `STREAM` and `SERVER_STREAM`
+    - `<NAME>` : the name of config without the .conf suffix
+
+    Here is a dummy example using a docker-compose file :
+
+    ```yaml
+    ...
+    bw-scheduler:
+      image: bunkerity/bunkerweb-scheduler:1.6.0-rc4
+      environment:
+        - |
+          CUSTOM_CONF_SERVER_HTTP_hello-world=
+          location /hello {
+            default_type 'text/plain';
+            content_by_lua_block {
+              ngx.say('world')
+    	      }
+          }
+      ...
+    ```
+
+    **Using files**
+
+    The first thing to do is to create the folders :
+
+    ```shell
+    mkdir -p ./bw-data/configs/server-http
+    ```
+
+    You can now write your configurations :
+
+    ```shell
+    echo "location /hello {
+    	default_type 'text/plain';
+    	content_by_lua_block {
+    		ngx.say('world')
+    	}
+    }" > ./bw-data/configs/server-http/hello-world.conf
+    ```
+
+    Because the scheduler runs as an unprivileged user with UID and GID 101, you will need to edit the permissions :
+
+    ```shell
+    chown -R root:101 bw-data && \
+    chmod -R 770 bw-data
+    ```
+
+    When starting the scheduler container, you will need to mount the folder on /data :
+
+    ```yaml
+    bw-scheduler:
+      image: bunkerity/bunkerweb-scheduler:1.6.0-rc4
+      volumes:
+        - ./bw-data:/data
+      ...
+    ```
+
+=== "Docker autoconf"
+
+    When using the [Docker autoconf integration](integrations.md#docker-autoconf), you have two choices for adding custom configurations :
+
+    - Using specific settings `*_CUSTOM_CONF_*` as labels (easiest)
+    - Writing .conf files to the volume mounted on /data of the scheduler
+
+    **Using labels**
+
+    !!! warning "Limitations using labels"
+        When using labels with the Docker autoconf integration, you can only apply custom configurations for the corresponding web service. Applying **http**, **default-server-http**, **stream** or any global configurations (like **server-http** or **server-stream** for all services) is not possible : you will need to mount files for that purpose.
+
+    The labels to use must follow the pattern `bunkerweb.CUSTOM_CONF_<TYPE>_<NAME>` :
+
+    - `<TYPE>` : the type of config, accepted values are `SERVER_HTTP`, `MODSEC`, `MODSEC_CRS` and `SERVER_STREAM`
+    - `<NAME>` : the name of config without the .conf suffix
+
+    Here is a dummy example using a docker-compose file :
+
+    ```yaml
+    myapp:
+      image: nginxdemos/nginx-hello
+      labels:
+        - |
+          bunkerweb.CUSTOM_CONF_SERVER_HTTP_hello-world=
+          location /hello {
+            default_type 'text/plain';
+            content_by_lua_block {
+                ngx.say('world')
+            }
+    	    }
+      ...
+    ```
+
+    **Using files**
+
+    The first thing to do is to create the folders :
+
+    ```shell
+    mkdir -p ./bw-data/configs/server-http
+    ```
+
+    You can now write your configurations :
+
+    ```shell
+    echo "location /hello {
+    	default_type 'text/plain';
+    	content_by_lua_block {
+    		ngx.say('world')
+    	}
+    }" > ./bw-data/configs/server-http/hello-world.conf
+    ```
+
+    Because the scheduler runs as an unprivileged user with UID and GID 101, you will need to edit the permissions :
+
+    ```shell
+    chown -R root:101 bw-data && \
+    chmod -R 770 bw-data
+    ```
+
+    When starting the scheduler container, you will need to mount the folder on /data :
+
+    ```yaml
+    bw-scheduler:
+      image: bunkerity/bunkerweb-scheduler:1.6.0-rc4
+      volumes:
+        - ./bw-data:/data
+      ...
+    ```
+
+=== "Swarm"
+
+    !!! warning "Deprecated"
+        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Docker autoconf integration](#__tabbed_5_2) instead.
+
+        **More information can be found in the [Swarm integration documentation](integrations.md#swarm).**
+
+    When using the [Swarm integration](integrations.md#swarm), custom configurations are managed using [Docker Configs](https://docs.docker.com/engine/swarm/configs/).
+
+    To keep it simple, you don't even need to attach the Config to a service : the autoconf service is listening for Config events and will update the custom configurations when needed.
+
+    When creating a Config, you will need to add special labels :
+
+    * **bunkerweb.CONFIG_TYPE** : must be set to a valid custom configuration type (http, server-http, default-server-http, modsec, modsec-crs, stream or server-stream)
+    * **bunkerweb.CONFIG_SITE** : set to a server name to apply configuration to that specific server (optional, will be applied globally if unset)
+
+    Here is the example :
+
+    ```shell
+    echo "location /hello {
+    	default_type 'text/plain';
+    	content_by_lua_block {
+    		ngx.say('world')
+    	}
+    }" | docker config create -l bunkerweb.CONFIG_TYPE=server-http my-config -
+    ```
+
+    There is no update mechanism : the alternative is to remove an existing config using `docker config rm` and then recreate it.
+
+=== "Kubernetes"
+
+    When using the [Kubernetes integration](integrations.md#kubernetes), custom configurations are managed using [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/).
+
+    To keep it simple, you don't even need to use the ConfigMap with a Pod (e.g. as environment variable or volume) : the autoconf Pod is listening for ConfigMap events and will update the custom configurations when needed.
+
+    When creating a ConfigMap, you will need to add special labels :
+
+    * **bunkerweb.io/CONFIG_TYPE** : must be set to a valid custom configuration type (http, server-http, default-server-http, modsec, modsec-crs, stream or server-stream)
+    * **bunkerweb.io/CONFIG_SITE** : set to a server name to apply configuration to that specific server (optional, will be applied globally if unset)
+
+    Here is the example :
+
+    ```yaml
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: cfg-bunkerweb-all-server-http
+      annotations:
+    	  bunkerweb.io/CONFIG_TYPE: "server-http"
+    data:
+      myconf: |
+    	location /hello {
+    		default_type 'text/plain';
+    		content_by_lua_block {
+    			ngx.say('world')
+    		}
+    	}
+    ```
+
+    !!! tip "Custom Extra Config"
+        Since the `1.6.0-rc3` version, you can add/override settings using the `bunkerweb.io/CONFIG_TYPE=settings` annotation. Here is an example :
+
+        ```yaml
+        apiVersion: v1
+        kind: ConfigMap
+        metadata:
+          name: cfg-bunkerweb-extra-settings
+          annotations:
+            bunkerweb.io/CONFIG_TYPE: "settings"
+        data:
+          USE_ANTIBOT: "captcha" # multisite setting that will be applied to all services that do not override it
+          USE_REDIS: "yes" # global setting that will be applied globally
+          ...
+        ```
+
+=== "Linux"
+
+    When using the [Linux integration](integrations.md#linux), custom configurations must be written to the /etc/bunkerweb/configs folder.
+
+    Here is an example for server-http/hello-world.conf :
+
+    ```conf
+    location /hello {
+      default_type 'text/plain';
+      content_by_lua_block {
+        ngx.say('world')
+      }
+    }
+    ```
+
+    Because BunkerWeb runs as an unprivileged user (nginx:nginx), you will need to edit the permissions :
+
+    ```shell
+    chown -R root:nginx /etc/bunkerweb/configs && \
+    chmod -R 770 /etc/bunkerweb/configs
+    ```
+
+    Let's check the status of BunkerWeb :
+
+    ```shell
+    systemctl status bunkerweb
+    ```
+
+    Now let's check the status of the Scheduler :
+
+    ```shell
+    systemctl status bunkerweb-scheduler
+    ```
+
+    If they are already running, we can reload them :
+
+    ```shell
+    systemctl reload bunkerweb bunkerweb-scheduler
+    ```
+
+    Otherwise, we will need to start them :
+
+    ```shell
+    systemctl start bunkerweb bunkerweb-scheduler
+    ```
+
+### Running many services in production
+
+TODO : `USE_MODSECURITY_GLOBAL_CRS` + `--max-allowed-packet=67108864`
+
 ### Protect UDP/TCP applications
 
 !!! example "Experimental feature"
@@ -634,286 +918,6 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
     app2.example.com_REVERSE_PROXY_HOST=myapp2.domain.or.ip:9000
     app2.example.com_LISTEN_STREAM_PORT=20000
     ...
-    ```
-
-    Let's check the status of BunkerWeb :
-
-    ```shell
-    systemctl status bunkerweb
-    ```
-
-    Now let's check the status of the Scheduler :
-
-    ```shell
-    systemctl status bunkerweb-scheduler
-    ```
-
-    If they are already running, we can reload them :
-
-    ```shell
-    systemctl reload bunkerweb bunkerweb-scheduler
-    ```
-
-    Otherwise, we will need to start them :
-
-    ```shell
-    systemctl start bunkerweb bunkerweb-scheduler
-    ```
-
-### Custom configurations
-
-To customize and add custom configurations to BunkerWeb, you can take advantage of its NGINX foundation. Custom NGINX configurations can be added in different NGINX contexts, including configurations for the ModSecurity Web Application Firewall (WAF), which is a core component of BunkerWeb. More details about ModSecurity configurations can be found [here](security-tuning.md#modsecurity).
-
-Here are the available types of custom configurations:
-
-- **http**: Configurations at the HTTP level of NGINX.
-- **server-http**: Configurations at the HTTP/Server level of NGINX.
-- **default-server-http**: Configurations at the Server level of NGINX, specifically for the "default server" when the supplied client name doesn't match any server name in `SERVER_NAME`.
-- **modsec-crs**: Configurations applied before the OWASP Core Rule Set is loaded.
-- **modsec**: Configurations applied after the OWASP Core Rule Set is loaded, or used when the Core Rule Set is not loaded.
-- **stream**: Configurations at the Stream level of NGINX.
-- **server-stream**: Configurations at the Stream/Server level of NGINX.
-
-Custom configurations can be applied globally or specifically for a particular server, depending on the applicable context and whether the [multisite mode](concepts.md#multisite-mode) is enabled.
-
-The method for applying custom configurations depends on the integration being used. However, the underlying process involves adding files with the `.conf` suffix to specific folders. To apply a custom configuration for a specific server, the file should be placed in a subfolder named after the primary server name.
-
-Some integrations provide more convenient ways to apply configurations, such as using [Configs](https://docs.docker.com/engine/swarm/configs/) in Docker Swarm or [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/) in Kubernetes. These options offer simpler approaches for managing and applying configurations.
-
-=== "Docker"
-
-    When using the [Docker integration](integrations.md#docker), you have two choices for the addition of custom configurations :
-
-    - Using specific settings `*_CUSTOM_CONF_*` as environment variables (recommended)
-    - Writing .conf files to the volume mounted on /data of the scheduler
-
-    **Using settings**
-
-    The settings to use must follow the pattern `<SITE>_CUSTOM_CONF_<TYPE>_<NAME>` :
-
-    - `<SITE>` : optional primary server name if multisite mode is enabled and the config must be applied to a specific service
-    - `<TYPE>` : the type of config, accepted values are `HTTP`, `DEFAULT_SERVER_HTTP`, `SERVER_HTTP`, `MODSEC`, `MODSEC_CRS`, `STREAM` and `SERVER_STREAM`
-    - `<NAME>` : the name of config without the .conf suffix
-
-    Here is a dummy example using a docker-compose file :
-
-    ```yaml
-    ...
-    bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.0-rc4
-      environment:
-        - |
-          CUSTOM_CONF_SERVER_HTTP_hello-world=
-          location /hello {
-            default_type 'text/plain';
-            content_by_lua_block {
-              ngx.say('world')
-    	      }
-          }
-      ...
-    ```
-
-    **Using files**
-
-    The first thing to do is to create the folders :
-
-    ```shell
-    mkdir -p ./bw-data/configs/server-http
-    ```
-
-    You can now write your configurations :
-
-    ```shell
-    echo "location /hello {
-    	default_type 'text/plain';
-    	content_by_lua_block {
-    		ngx.say('world')
-    	}
-    }" > ./bw-data/configs/server-http/hello-world.conf
-    ```
-
-    Because the scheduler runs as an unprivileged user with UID and GID 101, you will need to edit the permissions :
-
-    ```shell
-    chown -R root:101 bw-data && \
-    chmod -R 770 bw-data
-    ```
-
-    When starting the scheduler container, you will need to mount the folder on /data :
-
-    ```yaml
-    bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.0-rc4
-      volumes:
-        - ./bw-data:/data
-      ...
-    ```
-
-=== "Docker autoconf"
-
-    When using the [Docker autoconf integration](integrations.md#docker-autoconf), you have two choices for adding custom configurations :
-
-    - Using specific settings `*_CUSTOM_CONF_*` as labels (easiest)
-    - Writing .conf files to the volume mounted on /data of the scheduler
-
-    **Using labels**
-
-    !!! warning "Limitations using labels"
-        When using labels with the Docker autoconf integration, you can only apply custom configurations for the corresponding web service. Applying **http**, **default-server-http**, **stream** or any global configurations (like **server-http** or **server-stream** for all services) is not possible : you will need to mount files for that purpose.
-
-    The labels to use must follow the pattern `bunkerweb.CUSTOM_CONF_<TYPE>_<NAME>` :
-
-    - `<TYPE>` : the type of config, accepted values are `SERVER_HTTP`, `MODSEC`, `MODSEC_CRS` and `SERVER_STREAM`
-    - `<NAME>` : the name of config without the .conf suffix
-
-    Here is a dummy example using a docker-compose file :
-
-    ```yaml
-    myapp:
-      image: nginxdemos/nginx-hello
-      labels:
-        - |
-          bunkerweb.CUSTOM_CONF_SERVER_HTTP_hello-world=
-          location /hello {
-            default_type 'text/plain';
-            content_by_lua_block {
-                ngx.say('world')
-            }
-    	    }
-      ...
-    ```
-
-    **Using files**
-
-    The first thing to do is to create the folders :
-
-    ```shell
-    mkdir -p ./bw-data/configs/server-http
-    ```
-
-    You can now write your configurations :
-
-    ```shell
-    echo "location /hello {
-    	default_type 'text/plain';
-    	content_by_lua_block {
-    		ngx.say('world')
-    	}
-    }" > ./bw-data/configs/server-http/hello-world.conf
-    ```
-
-    Because the scheduler runs as an unprivileged user with UID and GID 101, you will need to edit the permissions :
-
-    ```shell
-    chown -R root:101 bw-data && \
-    chmod -R 770 bw-data
-    ```
-
-    When starting the scheduler container, you will need to mount the folder on /data :
-
-    ```yaml
-    bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.0-rc4
-      volumes:
-        - ./bw-data:/data
-      ...
-    ```
-
-=== "Swarm"
-
-    !!! warning "Deprecated"
-        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Docker autoconf integration](#__tabbed_5_2) instead.
-
-        **More information can be found in the [Swarm integration documentation](integrations.md#swarm).**
-
-    When using the [Swarm integration](integrations.md#swarm), custom configurations are managed using [Docker Configs](https://docs.docker.com/engine/swarm/configs/).
-
-    To keep it simple, you don't even need to attach the Config to a service : the autoconf service is listening for Config events and will update the custom configurations when needed.
-
-    When creating a Config, you will need to add special labels :
-
-    * **bunkerweb.CONFIG_TYPE** : must be set to a valid custom configuration type (http, server-http, default-server-http, modsec, modsec-crs, stream or server-stream)
-    * **bunkerweb.CONFIG_SITE** : set to a server name to apply configuration to that specific server (optional, will be applied globally if unset)
-
-    Here is the example :
-
-    ```shell
-    echo "location /hello {
-    	default_type 'text/plain';
-    	content_by_lua_block {
-    		ngx.say('world')
-    	}
-    }" | docker config create -l bunkerweb.CONFIG_TYPE=server-http my-config -
-    ```
-
-    There is no update mechanism : the alternative is to remove an existing config using `docker config rm` and then recreate it.
-
-=== "Kubernetes"
-
-    When using the [Kubernetes integration](integrations.md#kubernetes), custom configurations are managed using [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/).
-
-    To keep it simple, you don't even need to use the ConfigMap with a Pod (e.g. as environment variable or volume) : the autoconf Pod is listening for ConfigMap events and will update the custom configurations when needed.
-
-    When creating a ConfigMap, you will need to add special labels :
-
-    * **bunkerweb.io/CONFIG_TYPE** : must be set to a valid custom configuration type (http, server-http, default-server-http, modsec, modsec-crs, stream or server-stream)
-    * **bunkerweb.io/CONFIG_SITE** : set to a server name to apply configuration to that specific server (optional, will be applied globally if unset)
-
-    Here is the example :
-
-    ```yaml
-    apiVersion: v1
-    kind: ConfigMap
-    metadata:
-      name: cfg-bunkerweb-all-server-http
-      annotations:
-    	  bunkerweb.io/CONFIG_TYPE: "server-http"
-    data:
-      myconf: |
-    	location /hello {
-    		default_type 'text/plain';
-    		content_by_lua_block {
-    			ngx.say('world')
-    		}
-    	}
-    ```
-
-    !!! tip "Custom Extra Config"
-        Since the `1.6.0-rc3` version, you can add/override settings using the `bunkerweb.io/CONFIG_TYPE=settings` annotation. Here is an example :
-
-        ```yaml
-        apiVersion: v1
-        kind: ConfigMap
-        metadata:
-          name: cfg-bunkerweb-extra-settings
-          annotations:
-            bunkerweb.io/CONFIG_TYPE: "settings"
-        data:
-          USE_ANTIBOT: "captcha" # multisite setting that will be applied to all services that do not override it
-          USE_REDIS: "yes" # global setting that will be applied globally
-          ...
-        ```
-
-=== "Linux"
-
-    When using the [Linux integration](integrations.md#linux), custom configurations must be written to the /etc/bunkerweb/configs folder.
-
-    Here is an example for server-http/hello-world.conf :
-
-    ```conf
-    location /hello {
-      default_type 'text/plain';
-      content_by_lua_block {
-        ngx.say('world')
-      }
-    }
-    ```
-
-    Because BunkerWeb runs as an unprivileged user (nginx:nginx), you will need to edit the permissions :
-
-    ```shell
-    chown -R root:nginx /etc/bunkerweb/configs && \
-    chmod -R 770 /etc/bunkerweb/configs
     ```
 
     Let's check the status of BunkerWeb :

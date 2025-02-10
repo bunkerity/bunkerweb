@@ -1,0 +1,40 @@
+{%- set pathlib = import("pathlib") -%}
+{%- set json = import("json") -%}
+{%- set service_id = SERVER_NAME.split(" ")[0] -%}
+
+# Process rules with disruptive actions
+{% if SECURITY_MODE == "block" -%}
+SecRuleEngine {{ MODSECURITY_SEC_RULE_ENGINE }}
+{% else -%}
+SecRuleEngine DetectionOnly
+{% endif %}
+
+# Maximum data size (Generated from MAX_CLIENT_SIZE)
+{% if MAX_CLIENT_SIZE.endswith("k") or MAX_CLIENT_SIZE.endswith("K") -%}
+SecRequestBodyLimit {{ MAX_CLIENT_SIZE[:-1] | int * 1024 }}
+{% elif MAX_CLIENT_SIZE.endswith("m") or MAX_CLIENT_SIZE.endswith("M") -%}
+SecRequestBodyLimit {{ MAX_CLIENT_SIZE[:-1] | int * 1024 * 1024 }}
+{% elif MAX_CLIENT_SIZE.endswith("g") or MAX_CLIENT_SIZE.endswith("G") -%}
+SecRequestBodyLimit {{ MAX_CLIENT_SIZE[:-1] | int * 1024 * 1024 * 1024 }}
+{% elif MAX_CLIENT_SIZE.isdigit() -%}
+SecRequestBodyLimit {{ MAX_CLIENT_SIZE }}
+{% else -%}
+SecRequestBodyLimit 13107200
+{% endif %}
+
+# Maximum data size for requests without files
+SecRequestBodyNoFilesLimit {{ MODSECURITY_REQ_BODY_NO_FILES_LIMIT }}
+
+# custom rules after loading the CRS
+{% if is_custom_conf("/etc/bunkerweb/configs/modsec") %}
+include /etc/bunkerweb/configs/modsec/*.conf
+{% endif %}
+{% if MULTISITE == "yes" and is_custom_conf("/etc/bunkerweb/configs/modsec/" + service_id) %}
+include /etc/bunkerweb/configs/modsec/{{ service_id }}/*.conf
+{% endif %}
+{% if is_custom_conf("/etc/nginx/modsec") %}
+include /etc/nginx/modsec/*.conf
+{% endif %}
+{% if MULTISITE == "yes" and is_custom_conf("/etc/nginx/" + service_id + "/modsec") %}
+include /etc/nginx/{{ service_id }}/modsec/*.conf
+{% endif %}

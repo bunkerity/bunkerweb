@@ -75,12 +75,12 @@ class Templator:
 
     def render(self) -> None:
         """Render the templates based on the provided configuration."""
-        self._render_global()
         servers = [self._config.get("SERVER_NAME", "").strip()]
         if self._config.get("MULTISITE", "no") == "yes":
             servers = self._config.get("SERVER_NAME", "").strip().split(" ")
         for server in servers:
             self._render_server(server)
+        self._render_global()
 
     def _load_jinja_env(self) -> Environment:
         """Load the Jinja2 environment with the appropriate search paths.
