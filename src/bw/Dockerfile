@@ -52,6 +52,8 @@ RUN apk add --no-cache openssl pcre bash python3 yajl geoip libxml2 libgd curl t
 
 # Fix CVEs
 RUN apk add --no-cache "curl>=8.12.0-r0" "libcurl>=8.12.0-r0" # CVE-2025-0167 CVE-2025-0665 CVE-2025-0725
+RUN apk add --no-cache "openssl>=3.3.2-r2" "libssl3>=3.3.2-r2" "libcrypto3>=3.3.2-r2" # CVE-2024-13176 CVE-2024-9143
+RUN apk add --no-cache "pyc>=3.12.9-r0" "python3>=3.12.9-r0" "python3-pyc>=3.12.9-r0" "python3-pycache-pyc0>=3.12.9-r0" # CVE-2025-0938
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 /usr/share/bunkerweb /usr/share/bunkerweb
