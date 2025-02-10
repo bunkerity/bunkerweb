@@ -2,10 +2,10 @@ from io import BytesIO
 
 from flask import Blueprint, Response, flash as flask_flash, redirect, render_template, request, send_file, url_for
 from flask_login import login_required
-from magic import Magic
 from werkzeug.utils import secure_filename
 
 from app.dependencies import BW_CONFIG, DB
+from app.utils import get_printable_content
 
 
 cache = Blueprint("cache", __name__)
@@ -54,9 +54,4 @@ def cache_view(service: str, plugin_id: str, job_name: str, file_name: str):
         flask_flash(f"Cache file {file_name} from job {job_name}, plugin {plugin_id}{', service ' + service if service != 'global' else ''} not found", "error")
         return redirect(url_for("cache.cache_page"))
 
-    file_type = Magic(mime=True).from_buffer(cache_file)
-
-    return render_template(
-        "cache_view.html",
-        cache_file=cache_file.decode("utf-8") if file_type in SHOWN_FILE_TYPES else f"File is of type {file_type}, Download it to view the content",
-    )
+    return render_template("cache_view.html", cache_file=get_printable_content(cache_file))
