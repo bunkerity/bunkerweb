@@ -1900,17 +1900,18 @@ In BunkerWeb, ModSecurity is integrated and enabled by default, paired with the 
 
 Below is the list of related settings:
 
-| Setting                               | Default        | Description                                                                                                                               |
-| ------------------------------------- | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_MODSECURITY`                     | `yes`          | Enable ModSecurity WAF.                                                                                                                   |
-| `USE_MODSECURITY_CRS`                 | `yes`          | Enable OWASP Core Rule Set.                                                                                                               |
-| `USE_MODSECURITY_CRS_PLUGINS`         | `yes`          | Enable OWASP Core Rule Set plugins.                                                                                                       |
-| `MODSECURITY_CRS_VERSION`             | `4`            | Version of the OWASP Core Rule Set to use with ModSecurity (3, 4 or nightly).                                                             |
-| `MODSECURITY_CRS_PLUGINS`             |                | List of OWASP CRS plugins (plugin-name[/tag] or URL) to download and install (separated with spaces). (Not compatible with CRS version 3) |
-| `MODSECURITY_SEC_AUDIT_ENGINE`        | `RelevantOnly` | SecAuditEngine directive of ModSecurity.                                                                                                  |
-| `MODSECURITY_SEC_RULE_ENGINE`         | `On`           | SecRuleEngine directive of ModSecurity.                                                                                                   |
-| `MODSECURITY_SEC_AUDIT_LOG_PARTS`     | `ABCFHZ`       | SecAuditLogParts directive of ModSecurity.                                                                                                |
-| `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` | `131072`       | SecRequestBodyNoFilesLimit directive of ModSecurity.                                                                                      |
+| Setting                               | Default        | Context   | Multiple | Description                                                                                                                               |
+| ------------------------------------- | -------------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_MODSECURITY`                     | `yes`          | multisite | no       | Enable ModSecurity WAF.                                                                                                                   |
+| `USE_MODSECURITY_CRS`                 | `yes`          | multisite | no       | Enable OWASP Core Rule Set.                                                                                                               |
+| `USE_MODSECURITY_CRS_PLUGINS`         | `yes`          | multisite | no       | Enable OWASP Core Rule Set plugins.                                                                                                       |
+| `MODSECURITY_CRS_VERSION`             | `4`            | multisite | no       | Version of the OWASP Core Rule Set to use with ModSecurity (3, 4 or nightly).                                                             |
+| `MODSECURITY_CRS_PLUGINS`             |                | multisite | no       | List of OWASP CRS plugins (plugin-name[/tag] or URL) to download and install (separated with spaces). (Not compatible with CRS version 3) |
+| `USE_MODSECURITY_GLOBAL_CRS`          | `no`           | global    | no       | Use ModSecurity CRS in global mode to improve rules loading when you have many services.                                                  |
+| `MODSECURITY_SEC_AUDIT_ENGINE`        | `RelevantOnly` | multisite | no       | SecAuditEngine directive of ModSecurity.                                                                                                  |
+| `MODSECURITY_SEC_RULE_ENGINE`         | `On`           | multisite | no       | SecRuleEngine directive of ModSecurity.                                                                                                   |
+| `MODSECURITY_SEC_AUDIT_LOG_PARTS`     | `ABCFHZ`       | multisite | no       | SecAuditLogParts directive of ModSecurity.                                                                                                |
+| `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` | `131072`       | multisite | no       | SecRequestBodyNoFilesLimit directive of ModSecurity.                                                                                      |
 
 !!! warning "ModSecurity and the OWASP Core Rule Set"
     **We strongly recommend keeping both ModSecurity and the OWASP Core Rule Set (CRS) enabled** to provide robust protection against common web vulnerabilities. While occasional false positives may occur, they can be resolved with some effort by fine-tuning rules or using predefined exclusions.

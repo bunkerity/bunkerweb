@@ -3,6 +3,7 @@
 ## v1.6.0 - ????/??/??
 
 - [FEATURE] Add mCaptcha antibot mode
+- [FEATURE] Add `USE_MODSECURITY_GLOBAL_CRS` setting to ModSecurity plugin to allow using the global CRS instead of the service CRS, which is useful to accelerate the configuration generation when you have a lot of services
 - [AUTOCONF] Increase retry limit and improve stability of Kubernetes watch stream
 - [UI] Add caching for GitHub buttons to improve performance
 - [UI] Fix shenanigans with multiples
