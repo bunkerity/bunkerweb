@@ -254,6 +254,7 @@ try:
 
         # LOGGER.debug(f"Plugin registry:\n{plugin_registry}")
 
+        download_url_cache = {}
         for service, plugins in services_plugins.items():
             for plugin in plugins.copy():
                 if plugin.startswith(("http://", "https://")):
@@ -281,6 +282,14 @@ try:
                     LOGGER.error(f"Plugin {plugin_name} is private, ignoring...")
                     continue
 
+                # Build cache key using plugin name and version (or 'latest' if not provided)
+                cache_key = f"{plugin_name}:{plugin_version}" if plugin_version else f"{plugin_name}:latest"
+
+                if cache_key in download_url_cache:
+                    LOGGER.debug(f"Using cached URL for plugin {plugin_name} with key {cache_key}")
+                    plugins.add(download_url_cache[cache_key])
+                    continue
+
                 if plugin_version:
                     LOGGER.info(f"Plugin {plugin} found in the registry, fetching version {plugin_version}...")
                     success, url = get_download_url(plugin_data["repository"], plugin_version)
@@ -293,6 +302,7 @@ try:
                         )
                     LOGGER.debug(f"Plugin {plugin_name} (version: {plugin_version}) corresponds to URL {url}")
                     plugins.add(url)
+                    download_url_cache[cache_key] = url
                     continue
 
                 LOGGER.info(f"Plugin {plugin} found in the registry, fetching latest version...")
@@ -304,10 +314,12 @@ try:
                     LOGGER.warning(
                         f'Plugin {plugin_name} is marked as "{plugin_data["status"]}", be cautious when using it as there is no guarantee it will work'
                     )
+
                 LOGGER.debug(f"Plugin {plugin_name} corresponds to URL {url}")
                 plugins.add(url)
+                download_url_cache[cache_key] = url
 
-            service_plugins[service] = plugins
+                service_plugins[service] = plugins
 
         LOGGER.debug(f"Service plugins:\n{service_plugins}")
 
