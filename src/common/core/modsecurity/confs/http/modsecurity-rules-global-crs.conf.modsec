@@ -140,19 +140,10 @@ include /var/cache/bunkerweb/modsecurity/crs/plugins/{{ plugin_id }}/*-before.co
 {% if is_custom_conf("/etc/bunkerweb/configs/modsec-crs") %}
 include /etc/bunkerweb/configs/modsec-crs/*.conf
 {% endif %}
-{% for service_id in SERVER_NAME.split(" ") %}
-  {% if is_custom_conf("/etc/bunkerweb/configs/modsec-crs/" + service_id) %}
-include /etc/bunkerweb/configs/modsec-crs/{{ service_id }}/*.conf
-  {% endif %}
-{% endfor %}
 {% if is_custom_conf("/etc/nginx/modsec-crs") %}
 include /etc/nginx/modsec-crs/*.conf
 {% endif %}
-{% for service_id in SERVER_NAME.split(" ") %}
-  {% if is_custom_conf("/etc/nginx/" + service_id + "/modsec-crs/") %}
-include /etc/nginx/{{ service_id }}/modsec-crs/*.conf
-  {% endif %}
-{% endfor %}
+include /etc/nginx/http/*.modsec-crs
 
 # Check if client is whitelisted
 SecRule ENV:is_whitelisted "yes" "id:1000,phase:1,allow,nolog,ctl:ruleEngine=Off"

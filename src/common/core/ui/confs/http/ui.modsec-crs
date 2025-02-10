@@ -1,0 +1,30 @@
+{% if has_variable(all, "USE_UI", "yes") and SERVER_NAME != "" %}
+    {% for server_name in SERVER_NAME.split(" ") %}
+        {% if all[server_name + "_USE_UI"] == "yes" %}
+SecRule REQUEST_FILENAME "@rx /(support/config|global-config|services/.+)$" \
+    "id:1007771,ctl:ruleRemoveById=932235,ctl:ruleRemoveById=941130,ctl:ruleRemoveByTag=attack-rfi,ctl:ruleRemoveByTag=attack-lfi,ctl:ruleRemoveByTag=attack-rce,ctl:ruleRemoveByTag=attack-protocol,nolog,chain"
+SecRule REQUEST_HEADERS:Host "@eq {{ server_name }}" \
+    "nolog"
+
+SecRule REQUEST_FILENAME "@rx /(services|cache)/.+$" \
+    "id:1007772,ctl:ruleRemoveById=920440,nolog,chain"
+SecRule REQUEST_HEADERS:Host "@eq {{ server_name }}" \
+    "nolog"
+
+SecRule REQUEST_FILENAME "@rx /(configs)/.+$" \
+    "id:1007773,ctl:ruleRemoveByTag=attack-rce,ctl:ruleRemoveByTag=attack-rfi,ctl:ruleRemoveByTag=attack-lfi,ctl:ruleRemoveByTag=attack-rce,nolog,chain"
+SecRule REQUEST_HEADERS:Host "@eq {{ server_name }}" \
+    "nolog"
+
+SecRule REQUEST_FILENAME "@endsWith /logs" \
+    "id:1007774,ctl:ruleRemoveById=953100,nolog,chain"
+SecRule REQUEST_HEADERS:Host "@eq {{ server_name }}" \
+    "nolog"
+
+SecRule REQUEST_FILENAME "@rx /plugins/.+$" \
+    "id:1007775,ctl:ruleRemoveByTag=language-java,nolog,chain"
+SecRule REQUEST_HEADERS:Host "@eq {{ server_name }}" \
+    "nolog"
+        {% endif %}
+    {% endfor %}
+{% endif %}
