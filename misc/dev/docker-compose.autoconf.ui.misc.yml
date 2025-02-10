@@ -17,7 +17,7 @@ services:
     labels:
       - "bunkerweb.INSTANCE=yes"
     environment:
-      - API_WHITELIST_IP=127.0.0.0/24 10.20.30.0/24
+      API_WHITELIST_IP: "127.0.0.0/24 10.20.30.0/24"
     restart: "unless-stopped"
     networks:
       bw-universe:
@@ -140,10 +140,10 @@ services:
   bw-db:
     image: mariadb:11
     environment:
-      - MYSQL_RANDOM_ROOT_PASSWORD=yes
-      - MYSQL_DATABASE=db
-      - MYSQL_USER=bunkerweb
-      - MYSQL_PASSWORD=secret
+      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+      MYSQL_DATABASE: "db"
+      MYSQL_USER: "bunkerweb"
+      MYSQL_PASSWORD: "secret"
     volumes:
       - bw-db:/var/lib/mysql
     restart: "unless-stopped"
@@ -157,8 +157,8 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
-      - CONTAINERS=1
-      - LOG_LEVEL=warning
+      CONTAINERS: "1"
+      LOG_LEVEL: "warning"
     restart: "unless-stopped"
     networks:
       bw-docker:
