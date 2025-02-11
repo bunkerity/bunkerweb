@@ -76,6 +76,7 @@ SecAuditLog /var/log/bunkerweb/modsec_audit.log
 # unset REASON* env vars
 SecAction "nolog,phase:1,setenv:REASON=none,setenv:REASON_DATA=none"
 
+{% if MULTISITE == "no" %}
 # Auto update allowed methods (Generated from ALLOWED_METHODS)
 SecAction \
  "id:900200,\
@@ -84,6 +85,25 @@ SecAction \
   pass,\
   t:none,\
   setvar:'tx.allowed_methods={{ ALLOWED_METHODS.replace("|", " ") }}'"
+{% else %}
+  {%- set allowed_methods_list = [] -%}
+  {%- for server_name in SERVER_NAME.split(" ") -%}
+    {%- set server_allowed_methods = all[server_name + "_ALLOWED_METHODS"].split("|") -%}
+    {%- for method in server_allowed_methods -%}
+      {%- if method not in allowed_methods_list -%}
+        {%- set tmp = allowed_methods_list.append(method) -%}
+      {%- endif -%}
+    {%- endfor -%}
+  {%- endfor -%}
+# Auto update allowed methods (Generated from all server-specific ALLOWED_METHODS)
+SecAction \
+ "id:900200,\
+  phase:1,\
+  nolog,\
+  pass,\
+  t:none,\
+  setvar:'tx.allowed_methods={{ allowed_methods_list | join(" ") }}'"
+{% endif %}
 
 {% if USE_MODSECURITY_CRS == "yes" -%}
 # include OWASP CRS configurations
@@ -103,39 +123,9 @@ include /usr/share/bunkerweb/core/modsecurity/files/crs-setup-v{{ MODSECURITY_CR
     {% if is_custom_conf("/etc/bunkerweb/configs/crs-plugins-before") %}
 include /etc/bunkerweb/configs/crs-plugins-before/*.conf
     {% endif %}
-    {% for service_id in SERVER_NAME.split(" ") %}
-      {% if is_custom_conf("/etc/bunkerweb/configs/crs-plugins-before/" + service_id) %}
-include /etc/bunkerweb/configs/crs-plugins-before/{{ service_id }}/*.conf
-      {% endif %}
-    {% endfor %}
     {% if is_custom_conf("/etc/nginx/crs-plugins-before") %}
 include /etc/nginx/crs-plugins-before/*.conf
     {% endif %}
-    {% for service_id in SERVER_NAME.split(" ") %}
-      {% if is_custom_conf("/etc/nginx/" + service_id + "/crs-plugins-before/") %}
-include /etc/bunkerweb/configs/crs-plugins-before/{{ service_id }}/*.conf
-      {% endif %}
-    {% endfor %}
-
-    {% with plugins_path = pathlib.Path("/var/cache/bunkerweb/modsecurity/crs/plugins") %}
-      {% with plugins_file = pathlib.Path("/var/cache/bunkerweb/modsecurity/crs-plugins.json") %}
-        {% if plugins_path.is_dir() and plugins_file.is_file() %}
-          {% with service_plugins = json.loads(plugins_file.read_text()) %}
-# include downloaded CRS plugins configurations and before rules
-            {% for service_id in SERVER_NAME.split(" ") %}
-              {% for plugin_id in service_plugins.get(service_id, []) %}
-                {% if plugins_path.joinpath(plugin_id).is_dir() %}
-include /var/cache/bunkerweb/modsecurity/crs/plugins/{{ plugin_id }}/*-config.conf
-                  {% if plugins_path.joinpath(plugin_id).glob("*-before.conf") | list %}
-include /var/cache/bunkerweb/modsecurity/crs/plugins/{{ plugin_id }}/*-before.conf
-                  {% endif %}
-                {% endif %}
-              {% endfor %}
-            {% endfor %}
-          {% endwith %}
-        {% endif %}
-      {% endwith %}
-    {% endwith %}
   {% endif %}
 
 # custom CRS configurations before loading rules (e.g. exclusions)
@@ -167,36 +157,9 @@ include /usr/share/bunkerweb/core/modsecurity/files/coreruleset-v{{ MODSECURITY_
     {%- if is_custom_conf("/etc/bunkerweb/configs/crs-plugins-after") %}
 include /etc/bunkerweb/configs/crs-plugins-after/*.conf
     {%- endif %}
-    {% for service_id in SERVER_NAME.split(" ") %}
-      {% if is_custom_conf("/etc/bunkerweb/configs/crs-plugins-after/" + service_id) %}
-include /etc/bunkerweb/configs/crs-plugins-after/{{ service_id }}/*.conf
-      {% endif %}
-    {% endfor %}
     {% if is_custom_conf("/etc/nginx/crs-plugins-after") %}
 include /etc/nginx/crs-plugins-after/*.conf
     {% endif %}
-    {% for service_id in SERVER_NAME.split(" ") %}
-      {% if is_custom_conf("/etc/nginx/" + service_id + "/crs-plugins-after/") %}
-include /etc/nginx/{{ service_id }}/crs-plugins-after/*.conf
-      {% endif %}
-    {% endfor %}
-
-    {% with plugins_path = pathlib.Path("/var/cache/bunkerweb/modsecurity/crs/plugins") %}
-      {% with plugins_file = pathlib.Path("/var/cache/bunkerweb/modsecurity/crs-plugins.json") %}
-        {% if plugins_path.is_dir() and plugins_file.is_file() %}
-# include downloaded CRS plugins after rules
-          {% with service_plugins = json.loads(plugins_file.read_text()) %}
-            {% for service_id in SERVER_NAME.split(" ") %}
-              {% for plugin_id in service_plugins.get(service_id, []) %}
-                {% if plugins_path.joinpath(plugin_id).is_dir() and plugins_path.joinpath(plugin_id).glob("*-after.conf") | list %}
-include /var/cache/bunkerweb/modsecurity/crs/plugins/{{ plugin_id }}/*-after.conf
-                {% endif %}
-              {% endfor %}
-            {% endfor %}
-          {% endwith %}
-        {% endif %}
-      {% endwith %}
-    {% endwith %}
   {% endif %}
 
 # set REASON env var
