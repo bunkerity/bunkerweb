@@ -451,9 +451,7 @@ Please ensure that you have **NGINX 1.26.3 installed before installing BunkerWeb
     And finally install BunkerWeb 1.6.0-rc4 :
 
     ```shell
-    curl -s https://repo.bunkerweb.io/install/script.rpm.sh | \
-  	sed 's/yum install -y pygpgme --disablerepo='\''bunkerity_bunkerweb'\''/yum install -y python-gnupg/g' | \
-  	sed 's/pypgpme_check=`rpm -qa | grep -qw pygpgme`/python-gnupg_check=`rpm -qa | grep -qw python-gnupg`/g' | sudo bash && \
+    curl -s https://repo.bunkerweb.io/install/script.rpm.sh | sudo bash && \
   	sudo dnf makecache && \
   	sudo -E dnf install -y bunkerweb-1.6.0-rc4
     ```
