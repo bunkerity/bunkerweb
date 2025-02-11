@@ -76,6 +76,7 @@ SecAuditLog /var/log/bunkerweb/modsec_audit.log
 # unset REASON* env vars
 SecAction "nolog,phase:1,setenv:REASON=none,setenv:REASON_DATA=none"
 
+# Auto update allowed methods (Generated from ALLOWED_METHODS)
 SecAction \
  "id:900200,\
   phase:1,\
