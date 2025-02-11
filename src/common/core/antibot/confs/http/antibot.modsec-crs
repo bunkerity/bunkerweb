@@ -1,15 +1,20 @@
 {% if SERVER_NAME != "" %}
     {% set hosts = [] %}
-    {% for server_name in SERVER_NAME.split(" ") %}
-        {% if all[server_name + "_USE_ANTIBOT"] != "no" %}
-            {% set server_names = all[server_name + "_SERVER_NAME"].split(" ") %}
-            {% for host in server_names %}
-                {% set tmp = hosts.append(host.replace('.', '\\.').replace('-', '\\-')) %}
-            {% endfor %}
-        {% endif %}
-    {% endfor %}
+    {% if MULTISITE == "no" %}
+        {% for host in SERVER_NAME.split(" ") %}
+            {% set _ = hosts.append(host | replace('.', '\\.') | replace('-', '\\-')) %}
+        {% endfor %}
+    {% else %}
+        {% for server_name in SERVER_NAME.split(" ") %}
+            {% if all[server_name + "_USE_ANTIBOT"] != "no" %}
+                {% for host in all[server_name + "_SERVER_NAME"].split(" ") %}
+                    {% set _ = hosts.append(host | replace('.', '\\.') | replace('-', '\\-')) %}
+                {% endfor %}
+            {% endif %}
+        {% endfor %}
+    {% endif %}
     {% if hosts %}
 SecRule REQUEST_FILENAME "@rx ^{{ ANTIBOT_URI }}$" "nolog,phase:4,allow,id:1010,chain"
-SecRule REQUEST_HEADERS:Host "@rx ^({{ hosts | join('|') }})$" "nolog"
+SecRule REQUEST_HEADERS:Host "@rx ^({{ hosts | join("|") }})$" "nolog"
     {% endif %}
 {% endif %}
