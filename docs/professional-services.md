@@ -22,7 +22,7 @@ One important thing to note is that the support service is based on "credit" sys
 
 In addition to the support service, we also offer custom services around the BunkerWeb solution to meet your specific needs :
 
-- Consulting : a dedicated expert will give you advices on your project
+- Consulting : a dedicated expert will give you advice on your project
 - Development : if you need specific features in BunkerWeb, we can do it for you
 
 ## How can I get more information ?
