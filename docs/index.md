@@ -11,7 +11,7 @@ BunkerWeb is a next-generation and open-source Web Application Firewall (WAF).
 
 Being a full-featured web server (based on [NGINX](https://nginx.org/) under the hood), it will protect your web services to make them "secure by default". BunkerWeb integrates seamlessly into your existing environments ([Linux](integrations.md#linux), [Docker](integrations.md#docker), [Swarm](integrations.md#swarm), [Kubernetes](integrations.md#kubernetes), …) and is fully configurable (don't panic, there is an [awesome web UI](web-ui.md) if you don't like the CLI) to meet your own use-cases . In other words, cybersecurity is no more a hassle.
 
-BunkerWeb contains primary [security features](security-tuning.md) as part of the core but can be easily extended with additional ones thanks to a [plugin system](plugins.md).
+BunkerWeb contains primary [security features](advanced.md#security-tuning) as part of the core but can be easily extended with additional ones thanks to a [plugin system](plugins.md).
 
 ## Why BunkerWeb ?
 
@@ -53,7 +53,7 @@ Explore the impressive array of security features offered by BunkerWeb. While no
 
 - **And much more...** : BunkerWeb is packed with a plethora of additional security features that go beyond this list, providing you with comprehensive protection and peace of mind.
 
-To delve deeper into the core security features, we invite you to explore the [security tuning](security-tuning.md) section of the documentation. Discover how BunkerWeb empowers you to fine-tune and optimize security measures according to your specific needs.
+To delve deeper into the core security features, we invite you to explore the [security tuning](advanced.md#security-tuning) section of the documentation. Discover how BunkerWeb empowers you to fine-tune and optimize security measures according to your specific needs.
 
 ## Demo
 

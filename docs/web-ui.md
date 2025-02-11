@@ -3,7 +3,7 @@
 ## Overview
 
 <p align="center">
- <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/Ao20SfvQyr4" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/tGS3pzquEjY" title="BunkerWeb web UI" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 </p>
 
 The "Web UI" is a web application that helps you manage your BunkerWeb instance using a user-friendly interface instead of the command-line one.
@@ -31,13 +31,11 @@ Because the web UI is a web application, the recommended installation procedure 
     * Do not open the web UI on the Internet without any further restrictions
     * Apply settings listed in the [security tuning section](security-tuning.md) of the documentation
 
-    **Please note that using HTTPS in front the web UI is mandatory since version 1.5.8 of BunkerWeb.**
-
 !!! info "Multisite mode"
 
     The usage of the web UI implies enabling the [multisite mode](concepts.md#multisite-mode).
 
-!!! tip "web UI specific environment variables"
+!!! tip "Web UI specific environment variables"
 
     The web UI uses the following environment variables :
 
