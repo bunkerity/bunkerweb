@@ -1,3 +1,9 @@
+/* zoom on image, custom z-index */
+.medium-zoom-overlay,
+.medium-zoom-image--opened {
+  z-index: 999;
+}
+
 /* avoid font to pop on family change */
 * {
   font-display: swap;
@@ -43,6 +49,7 @@ nav.md-tabs ul li.md-tabs__item--active a {
 nav.md-tabs ul li.md-tabs__item--active a:hover {
   filter: brightness(0.9);
 }
+
 /*
 @font-face {
 	font-family: Consolas, monaco, monospace;

@@ -45,7 +45,7 @@ You will find more settings about real IP in the [settings section](settings.md#
 
     === "Web UI"
 
-        Navigate to the **Global config**, select the **Real IP** plugin and fill out the following settings :
+        Navigate to the **Global config** page, select the **Real IP** plugin and fill out the following settings :
 
         <figure markdown>![Real IP settings (header) using web UI](assets/img/advanced-proxy1.png){ align=center }<figcaption>Real IP settings (header) using web UI</figcaption></figure>
 
@@ -156,7 +156,7 @@ You will find more settings about real IP in the [settings section](settings.md#
 
     === "Web UI"
 
-        Navigate to the **Global config**, select the **Real IP** plugin and fill out the following settings :
+        Navigate to the **Global config** page, select the **Real IP** plugin and fill out the following settings :
 
         <figure markdown>![Real IP settings (PROXY protocol) using web UI](assets/img/advanced-proxy2.png){ align=center }<figcaption>Real IP settings (PROXY protocol) using web UI</figcaption></figure>
 
@@ -279,6 +279,54 @@ Custom configurations can be applied globally or specifically for a particular s
 The method for applying custom configurations depends on the integration being used. However, the underlying process involves adding files with the `.conf` suffix to specific folders. To apply a custom configuration for a specific server, the file should be placed in a subfolder named after the primary server name.
 
 Some integrations provide more convenient ways to apply configurations, such as using [Configs](https://docs.docker.com/engine/swarm/configs/) in Docker Swarm or [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/) in Kubernetes. These options offer simpler approaches for managing and applying configurations.
+
+=== "Web UI"
+
+    Navigate to the **Configs** page, click on **Create new custom config**, you can then choose if it's a global one or specific to a service, the configuration type and the configuration name :
+
+    <figure markdown>![Custom configurations using web UI](assets/img/advanced-config.png){ align=center }<figcaption>Custom configurations using web UI</figcaption></figure>
+
+    Don't forget to click on the save button.
+
+=== "Linux"
+
+    When using the [Linux integration](integrations.md#linux), custom configurations must be written to the /etc/bunkerweb/configs folder.
+
+    Here is an example for server-http/hello-world.conf :
+
+    ```conf
+    location /hello {
+      default_type 'text/plain';
+      content_by_lua_block {
+        ngx.say('world')
+      }
+    }
+    ```
+
+    Because BunkerWeb runs as an unprivileged user (nginx:nginx), you will need to edit the permissions :
+
+    ```shell
+    chown -R root:nginx /etc/bunkerweb/configs && \
+    chmod -R 770 /etc/bunkerweb/configs
+    ```
+
+    Now let's check the status of the Scheduler :
+
+    ```shell
+    systemctl status bunkerweb-scheduler
+    ```
+
+    If they are already running, we can reload it :
+
+    ```shell
+    systemctl reload bunkerweb-scheduler
+    ```
+
+    Otherwise, we will need to start it :
+
+    ```shell
+    systemctl start bunkerweb-scheduler
+    ```
 
 === "Docker"
 
@@ -419,35 +467,6 @@ Some integrations provide more convenient ways to apply configurations, such as 
       ...
     ```
 
-=== "Swarm"
-
-    !!! warning "Deprecated"
-        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Docker autoconf integration](#__tabbed_5_2) instead.
-
-        **More information can be found in the [Swarm integration documentation](integrations.md#swarm).**
-
-    When using the [Swarm integration](integrations.md#swarm), custom configurations are managed using [Docker Configs](https://docs.docker.com/engine/swarm/configs/).
-
-    To keep it simple, you don't even need to attach the Config to a service : the autoconf service is listening for Config events and will update the custom configurations when needed.
-
-    When creating a Config, you will need to add special labels :
-
-    * **bunkerweb.CONFIG_TYPE** : must be set to a valid custom configuration type (http, server-http, default-server-http, modsec, modsec-crs, stream or server-stream)
-    * **bunkerweb.CONFIG_SITE** : set to a server name to apply configuration to that specific server (optional, will be applied globally if unset)
-
-    Here is the example :
-
-    ```shell
-    echo "location /hello {
-    	default_type 'text/plain';
-    	content_by_lua_block {
-    		ngx.say('world')
-    	}
-    }" | docker config create -l bunkerweb.CONFIG_TYPE=server-http my-config -
-    ```
-
-    There is no update mechanism : the alternative is to remove an existing config using `docker config rm` and then recreate it.
-
 === "Kubernetes"
 
     When using the [Kubernetes integration](integrations.md#kubernetes), custom configurations are managed using [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/).
@@ -494,55 +513,61 @@ Some integrations provide more convenient ways to apply configurations, such as 
           ...
         ```
 
-=== "Linux"
+=== "Swarm"
 
-    When using the [Linux integration](integrations.md#linux), custom configurations must be written to the /etc/bunkerweb/configs folder.
+    !!! warning "Deprecated"
+        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Docker autoconf integration](#__tabbed_5_2) instead.
 
-    Here is an example for server-http/hello-world.conf :
+        **More information can be found in the [Swarm integration documentation](integrations.md#swarm).**
 
-    ```conf
-    location /hello {
-      default_type 'text/plain';
-      content_by_lua_block {
-        ngx.say('world')
-      }
-    }
-    ```
+    When using the [Swarm integration](integrations.md#swarm), custom configurations are managed using [Docker Configs](https://docs.docker.com/engine/swarm/configs/).
 
-    Because BunkerWeb runs as an unprivileged user (nginx:nginx), you will need to edit the permissions :
+    To keep it simple, you don't even need to attach the Config to a service : the autoconf service is listening for Config events and will update the custom configurations when needed.
 
-    ```shell
-    chown -R root:nginx /etc/bunkerweb/configs && \
-    chmod -R 770 /etc/bunkerweb/configs
-    ```
+    When creating a Config, you will need to add special labels :
 
-    Let's check the status of BunkerWeb :
+    * **bunkerweb.CONFIG_TYPE** : must be set to a valid custom configuration type (http, server-http, default-server-http, modsec, modsec-crs, stream or server-stream)
+    * **bunkerweb.CONFIG_SITE** : set to a server name to apply configuration to that specific server (optional, will be applied globally if unset)
+
+    Here is the example :
 
     ```shell
-    systemctl status bunkerweb
+    echo "location /hello {
+    	default_type 'text/plain';
+    	content_by_lua_block {
+    		ngx.say('world')
+    	}
+    }" | docker config create -l bunkerweb.CONFIG_TYPE=server-http my-config -
     ```
 
-    Now let's check the status of the Scheduler :
-
-    ```shell
-    systemctl status bunkerweb-scheduler
-    ```
-
-    If they are already running, we can reload them :
-
-    ```shell
-    systemctl reload bunkerweb bunkerweb-scheduler
-    ```
-
-    Otherwise, we will need to start them :
-
-    ```shell
-    systemctl start bunkerweb bunkerweb-scheduler
-    ```
+    There is no update mechanism : the alternative is to remove an existing config using `docker config rm` and then recreate it.
 
 ### Running many services in production
 
-TODO : `USE_MODSECURITY_GLOBAL_CRS` + `--max-allowed-packet=67108864`
+**Global CRS**
+
+If you use BunkerWeb in production with a large number of services, and you enable the ModSecurity feature globally with CRS rules, the time required to load BunkerWeb configurations may become too long, potentially resulting in a timeout.
+
+The workaround is to load the CRS rules globally rather than per service. This behavior is not enabled by default for backward compatibility reasons and because it has a drawback: if you enable global CRS rule loading, it will no longer be possible to define modsec-crs rules (executed before the CRS rules) on a per-service basis. However, this limitation can be bypassed by writing global `modsec-crs` exclusion rules like this:
+
+```
+SecRule REQUEST_FILENAME "@rx ^/somewhere$" "nolog,phase:4,allow,id:1010,chain"
+SecRule REQUEST_HEADERS:Host "@rx ^app1\.example\.com$" "nolog"
+```
+
+You can enable the global CRS loading by setting `USE_MODSECURITY_GLOBAL_CRS` to `yes`.
+
+**Adjust max_allowed_packet for MariaDB/MySQL**
+
+It appears that the default value for the `max_allowed_packet` parameter in MariaDB and MySQL database servers is not sufficient when using BunkerWeb with a large number of services.
+
+If you encounter errors like this, especially on the scheduler:
+
+```
+[Warning] Aborted connection 5 to db: 'db' user: 'bunkerweb' host: '172.20.0.4' (Got a packet bigger than 'max_allowed_packet' bytes)
+```
+
+You will need to increase the `max_allowed_packet` on your database server.
 
 ### Persistence of bans and reports
 
@@ -973,28 +998,22 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
     ...
     ```
 
-    Let's check the status of BunkerWeb :
-
-    ```shell
-    systemctl status bunkerweb
-    ```
-
     Now let's check the status of the Scheduler :
 
     ```shell
     systemctl status bunkerweb-scheduler
     ```
 
-    If they are already running, we can reload them :
+    If they are already running, we can reload it :
 
     ```shell
-    systemctl reload bunkerweb bunkerweb-scheduler
+    systemctl reload bunkerweb-scheduler
     ```
 
-    Otherwise, we will need to start them :
+    Otherwise, we will need to start it :
 
     ```shell
-    systemctl start bunkerweb bunkerweb-scheduler
+    systemctl start bunkerweb-scheduler
     ```
 
 ### PHP
@@ -1475,30 +1494,22 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
     app3.example.com_LOCAL_PHP_PATH=/var/www/html/app3.example.com
     ```
 
-    Let's check the status of BunkerWeb :
-
-    Let's check the status of BunkerWeb :
-
-    ```shell
-    systemctl status bunkerweb
-    ```
-
     Now let's check the status of the Scheduler :
 
     ```shell
     systemctl status bunkerweb-scheduler
     ```
 
-    If they are already running, we can reload them :
+    If they are already running, we can reload it :
 
     ```shell
-    systemctl reload bunkerweb bunkerweb-scheduler
+    systemctl reload bunkerweb-scheduler
     ```
 
-    Otherwise, we will need to start them :
+    Otherwise, we will need to start it :
 
     ```shell
-    systemctl start bunkerweb bunkerweb-scheduler
+    systemctl start bunkerweb-scheduler
     ```
 
 ### IPv6
@@ -1567,22 +1578,16 @@ By default, BunkerWeb will only listen on IPv4 addresses and won't use IPv6 for 
     systemctl status bunkerweb
     ```
 
-    Now let's check the status of the Scheduler :
+    If they are already running, we can restart it :
 
     ```shell
-    systemctl status bunkerweb-scheduler
+    systemctl restart bunkerweb
     ```
 
-    If they are already running, we can reload them :
+    Otherwise, we will need to start it :
 
     ```shell
-    systemctl reload bunkerweb bunkerweb-scheduler
-    ```
-
-    Otherwise, we will need to start them :
-
-    ```shell
-    systemctl start bunkerweb bunkerweb-scheduler
+    systemctl start bunkerweb
     ```
 
 ## Security tuning
