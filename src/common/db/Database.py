@@ -41,6 +41,8 @@ from model import (
     Template_settings,
     Template_custom_configs,
     Metadata,
+    Users,
+    UserSessions,
 )
 
 for deps_path in [os_join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",))]:
@@ -60,7 +62,7 @@ from sqlalchemy.exc import (
     SAWarning,
     SQLAlchemyError,
 )
-from sqlalchemy.orm import scoped_session, sessionmaker
+from sqlalchemy.orm import joinedload, scoped_session, sessionmaker
 from sqlalchemy.pool import QueuePool
 from sqlite3 import Connection as SQLiteConnection
 
@@ -3762,3 +3764,62 @@ class Database:
             ):
                 settings[f"{setting.setting_id}_{setting.suffix}" if setting.suffix else setting.setting_id] = setting.default
             return settings
+
+    def get_ui_users(self, *, as_dict: bool = False) -> Union[str, List[Union[Users, dict]]]:
+        """Get ui users."""
+        with self._db_session() as session:
+            try:
+                users = session.query(Users).options(joinedload(Users.roles), joinedload(Users.recovery_codes), joinedload(Users.columns_preferences)).all()
+                if not as_dict:
+                    return users
+
+                users_data = []
+                for user in users:
+                    user_data = {
+                        "username": user.username,
+                        "email": user.email,
+                        "password": user.password.encode("utf-8"),
+                        "method": user.method,
+                        "theme": user.theme,
+                        "totp_secret": user.totp_secret,
+                        "creation_date": user.creation_date.astimezone(),
+                        "update_date": user.update_date.astimezone(),
+                        "roles": [role.role_name for role in user.roles],
+                        "recovery_codes": [recovery_code.code for recovery_code in user.recovery_codes],
+                    }
+
+                    users_data.append(user_data)
+
+                return users_data
+            except BaseException as e:
+                return str(e)
+
+    def get_ui_user_sessions(self, username: str, current_session_id: Optional[str] = None) -> List[dict]:
+        """Get ui user sessions."""
+        with self._db_session() as session:
+            sessions = []
+            if current_session_id:
+                current_session = session.query(UserSessions).filter_by(user_name=username, id=current_session_id).all()
+                other_sessions = (
+                    session.query(UserSessions)
+                    .filter_by(user_name=username)
+                    .filter(UserSessions.id != current_session_id)
+                    .order_by(UserSessions.creation_date.desc())
+                    .all()
+                )
+                query = current_session + other_sessions
+            else:
+                query = session.query(UserSessions).filter_by(user_name=username).order_by(UserSessions.creation_date.desc())
+
+            for session_data in query:
+                sessions.append(
+                    {
+                        "id": session_data.id,
+                        "ip": session_data.ip,
+                        "user_agent": session_data.user_agent,
+                        "creation_date": session_data.creation_date,
+                        "last_activity": session_data.last_activity,
+                    }
+                )
+
+            return sessions
