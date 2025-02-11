@@ -338,11 +338,13 @@ def services_service_page(service: str):
             DATA["RELOADING"] = False
 
         DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})
-        Thread(target=update_service, args=(service, variables, is_draft, mode)).start()
+        Thread(target=update_service, args=(service, variables.copy(), is_draft, mode)).start()
 
+        new_service = False
         if service == "new":
             if "SERVER_NAME" not in variables:
                 return redirect(url_for("loading", next=url_for("services.services_page")))
+            new_service = True
             service = variables["SERVER_NAME"].split(" ")[0]
 
         arguments = {}
@@ -354,11 +356,15 @@ def services_service_page(service: str):
         return redirect(
             url_for(
                 "loading",
-                next=url_for(
-                    "services.services_service_page",
-                    service=service,
-                )
-                + f"?{'&'.join([f'{k}={v}' for k, v in arguments.items()])}",
+                next=(
+                    url_for(
+                        "services.services_service_page",
+                        service=service,
+                    )
+                    + f"?{'&'.join([f'{k}={v}' for k, v in arguments.items()])}"
+                    if new_service or variables.get("SERVER_NAME", "").split(" ")[0] == variables.get("OLD_SERVER_NAME", "").split(" ")[0]
+                    else url_for("services.services_page")
+                ),
                 message=f"{'Saving' if service != 'new' else 'Creating'} configuration for {'draft ' if is_draft else ''}service {service}",
             )
         )
