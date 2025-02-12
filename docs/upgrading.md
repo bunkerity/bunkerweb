@@ -740,7 +740,7 @@ While the settings are now declared on the Scheduler container, **you'll still n
 
 ### Default values and new settings
 
-The default value of some settings have changed and we have added many other settings, we recommend you read the [security tuning](security-tuning.md) and [settings](settings.md) sections of the documentation.
+The default value of some settings have changed and we have added many other settings, we recommend you read the [security tuning](advanced.md#security-tuning) and [settings](settings.md) sections of the documentation.
 
 ### Templates
 
@@ -791,7 +791,3 @@ Security is not the only reason to have a shared data store for clustered integr
 We actually support **Redis** as a backend for the shared data store.
 
 See the list of [redis settings](settings.md#redis) and the corresponding documentation of your integration for more information.
-
-### Default values and new settings
-
-The default value of some settings have changed and we have added many other settings, we recommend you read the [security tuning](security-tuning.md) and [settings](settings.md) sections of the documentation.

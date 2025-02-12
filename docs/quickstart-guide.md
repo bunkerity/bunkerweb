@@ -838,3 +838,12 @@ You can now log in with the administrator account you created during the setup w
         external: true
         name: bw-services
     ```
+
+## Going further
+
+Congratulations! You've just installed BunkerWeb and secured your first web service. Please note that BunkerWeb is capable of much more, whether it comes to security or integrations with other systems and solutions. Here's a list of resources and actions that may help you continue to deepen your knowledge of the solution:
+
+- Join the Bunker community: [Discord](https://discord.com/invite/fTf46FmtyD), [LinkedIn](https://www.linkedin.com/company/bunkerity/), [GitHub](https://github.com/bunkerity), [X](https://x.com/bunkerity)
+- Check out the [official blog](https://www.bunkerweb.io/blog?utm_campaign=self&utm_source=doc)
+- Explore [advanced use cases](advanced.md) in the documentation
+- [Get in touch with us](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=doc) to discuss your organization's needs.

@@ -262,7 +262,7 @@ You will find more settings about real IP in the [settings section](settings.md#
 
 ### Custom configurations
 
-To customize and add custom configurations to BunkerWeb, you can take advantage of its NGINX foundation. Custom NGINX configurations can be added in different NGINX contexts, including configurations for the ModSecurity Web Application Firewall (WAF), which is a core component of BunkerWeb. More details about ModSecurity configurations can be found [here](security-tuning.md#modsecurity).
+To customize and add custom configurations to BunkerWeb, you can take advantage of its NGINX foundation. Custom NGINX configurations can be added in different NGINX contexts, including configurations for the ModSecurity Web Application Firewall (WAF), which is a core component of BunkerWeb. More details about ModSecurity configurations can be found [here](advanced.md#modsecurity).
 
 Here are the available types of custom configurations:
 
