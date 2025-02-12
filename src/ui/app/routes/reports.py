@@ -389,6 +389,18 @@ def reports_fetch():
                         "count": counts["count"],
                     }
                 )
+        elif field == "server_name":
+            search_panes_options["server_name"] = []
+            for name, counts in values.items():
+                display_name = "default server" if name == "_" else name
+                search_panes_options["server_name"].append(
+                    {
+                        "label": display_name,
+                        "value": name,
+                        "total": counts["total"],
+                        "count": counts["count"],
+                    }
+                )
         else:
             search_panes_options[field] = [
                 {

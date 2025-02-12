@@ -414,7 +414,6 @@ $(document).ready(function () {
           searchPanes: {
             show: true,
             combiner: "or",
-            // options: countriesSearchPanesOptions,
           },
           targets: 3,
           render: function (data) {
@@ -432,8 +431,18 @@ $(document).ready(function () {
           },
         },
         {
+          searchPanes: {
+            show: true,
+            combiner: "or",
+          },
+          targets: 9,
+          render: function (data) {
+            return data === "_" ? "default server" : data;
+          },
+        },
+        {
           searchPanes: { show: true },
-          targets: [2, 4, 5, 6, 8, 9, 11],
+          targets: [2, 4, 5, 6, 8, 11],
         },
       ],
       order: [[1, "desc"]],
