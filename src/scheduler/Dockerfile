@@ -46,7 +46,7 @@ RUN apk add --no-cache bash unzip libgcc libstdc++ libpq openssl libmagic mariad
   adduser -h /usr/share/bunkerweb/scheduler -g scheduler -s /sbin/nologin -G scheduler -D -H -u 101 --disabled-password scheduler
 
 # Fix CVEs
-# There are no CVEs for the following packages
+RUN apk add --no-cache "openssl>=3.3.3-r0" "libssl3>=3.3.3-r0" "libcrypto3>=3.3.3-r0" # CVE-2024-12797
 
 
 # Copy dependencies

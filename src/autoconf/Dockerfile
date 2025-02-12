@@ -43,7 +43,7 @@ RUN apk add --no-cache bash tzdata && \
   adduser -h /usr/share/bunkerweb/autoconf -g autoconf -s /sbin/nologin -G autoconf -D -H -u 101 --disabled-password autoconf
 
 # Fix CVEs
-RUN apk add --no-cache "libssl3>=3.3.2-r5" "libcrypto3>=3.3.2-r5" # CVE-2024-13176
+RUN apk add --no-cache "libssl3>=3.3.3-r0" "libcrypto3>=3.3.3-r0" # CVE-2024-12797
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 /usr/share/bunkerweb /usr/share/bunkerweb
