@@ -16,8 +16,10 @@ function ssl:access()
 	if
 		self.ctx.bw.scheme == "http"
 		and (
-			(self.ctx.bw.https_configured == "yes" and self.variables["AUTO_REDIRECT_HTTP_TO_HTTPS"] == "yes")
-			or self.variables["REDIRECT_HTTP_TO_HTTPS"] == "yes"
+			((self.ctx.bw.https_configured == "yes" and self.variables["AUTO_REDIRECT_HTTP_TO_HTTPS"] == "yes")
+			or self.variables["REDIRECT_HTTP_TO_HTTPS"] == "yes")
+			and self.ctx.bw.request_uri ~= nil
+			and self.ctx.bw.http_host ~= nil
 		)
 	then
 		return self:ret(
