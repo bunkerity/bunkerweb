@@ -17,6 +17,5 @@ src/ui/app/static/libs/*
 src/ui/app/static/css/core.css
 src/bw/loading/index.html
 src/common/core/misc/files/default.html
-src/common/core/errors/files/error.html
 src/common/core/antibot/files/*.html
 examples/
