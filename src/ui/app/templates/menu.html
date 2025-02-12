@@ -86,6 +86,20 @@
                     {% endif %}
                 </li>
             {% endfor %}
+            <li class="menu-item{% if current_endpoint == 'pro' %} active{% endif %}">
+                <a href="{{ url_for('pro') }}" class="menu-link">
+                    <img class="menu-icon tf-icons"
+                         src="{{ pro_diamond_url }}"
+                         alt="Pro plugin">
+                    <div class="text-truncate" data-i18n="Pro">Pro</div>
+                </a>
+            </li>
+            <li class="menu-item{% if current_endpoint == 'support' %} active{% endif %}">
+                <a href="{{ url_for('support') }}" class="menu-link">
+                    <i class="menu-icon tf-icons bx bx-support"></i>
+                    <div class="text-truncate" data-i18n="Support">Support</div>
+                </a>
+            </li>
             <!-- Plugins Pages -->
             <li class="menu-header text-uppercase align-items-center mb-0">
                 <span class="menu-header-text">Plugins Pages</span>
@@ -146,20 +160,6 @@
             <a href="{{ url_for('about') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-info-circle"></i>
                 <div class="text-truncate" data-i18n="About">About</div>
-            </a>
-        </li>
-        <li class="menu-item{% if current_endpoint == 'pro' %} active{% endif %}">
-            <a href="{{ url_for('pro') }}" class="menu-link">
-                <img class="menu-icon tf-icons"
-                     src="{{ pro_diamond_url }}"
-                     alt="Pro plugin">
-                <div class="text-truncate" data-i18n="Pro">Pro</div>
-            </a>
-        </li>
-        <li class="menu-item{% if current_endpoint == 'support' %} active{% endif %}">
-            <a href="{{ url_for('support') }}" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-support"></i>
-                <div class="text-truncate" data-i18n="Support">Support</div>
             </a>
         </li>
     </ul>
