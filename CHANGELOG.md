@@ -2,6 +2,7 @@
 
 ## v1.6.0 - ????/??/??
 
+- [BUGFIX] Fix CRS plugins not being included correctly in ModSecurity configuration
 - [FEATURE] Add mCaptcha antibot mode
 - [FEATURE] Add `USE_MODSECURITY_GLOBAL_CRS` setting to ModSecurity plugin to allow using the global CRS instead of the service CRS, which is useful to accelerate the configuration generation when you have a lot of services
 - [AUTOCONF] Increase retry limit and improve stability of Kubernetes watch stream

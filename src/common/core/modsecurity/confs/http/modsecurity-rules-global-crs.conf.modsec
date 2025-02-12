@@ -1,12 +1,13 @@
-{%- set pathlib = import("pathlib") -%}
-{%- set json = import("json") -%}
+{% if USE_MODSECURITY_GLOBAL_CRS == "yes" %}
+  {%- set pathlib = import("pathlib") -%}
+  {%- set json = import("json") -%}
 
 # Process rules with disruptive actions
-{% if SECURITY_MODE == "block" -%}
+  {% if SECURITY_MODE == "block" -%}
 SecRuleEngine {{ MODSECURITY_SEC_RULE_ENGINE }}
-{% else -%}
+  {% else -%}
 SecRuleEngine DetectionOnly
-{% endif %}
+  {% endif %}
 
 # Allow body checks
 SecRequestBodyAccess On
@@ -20,17 +21,17 @@ SecRule REQUEST_HEADERS:Content-Type "application/json" \
   "id:'200001',phase:1,t:none,t:lowercase,pass,nolog,ctl:requestBodyProcessor=JSON"
 
 # Maximum data size (Generated from MAX_CLIENT_SIZE)
-{% if MAX_CLIENT_SIZE.endswith("k") or MAX_CLIENT_SIZE.endswith("K") -%}
+  {% if MAX_CLIENT_SIZE.endswith("k") or MAX_CLIENT_SIZE.endswith("K") -%}
 SecRequestBodyLimit {{ MAX_CLIENT_SIZE[:-1] | int * 1024 }}
-{% elif MAX_CLIENT_SIZE.endswith("m") or MAX_CLIENT_SIZE.endswith("M") -%}
+  {% elif MAX_CLIENT_SIZE.endswith("m") or MAX_CLIENT_SIZE.endswith("M") -%}
 SecRequestBodyLimit {{ MAX_CLIENT_SIZE[:-1] | int * 1024 * 1024 }}
-{% elif MAX_CLIENT_SIZE.endswith("g") or MAX_CLIENT_SIZE.endswith("G") -%}
+  {% elif MAX_CLIENT_SIZE.endswith("g") or MAX_CLIENT_SIZE.endswith("G") -%}
 SecRequestBodyLimit {{ MAX_CLIENT_SIZE[:-1] | int * 1024 * 1024 * 1024 }}
-{% elif MAX_CLIENT_SIZE.isdigit() -%}
+  {% elif MAX_CLIENT_SIZE.isdigit() -%}
 SecRequestBodyLimit {{ MAX_CLIENT_SIZE }}
-{% else -%}
+  {% else -%}
 SecRequestBodyLimit 13107200
-{% endif %}
+  {% endif %}
 
 # Maximum data size for requests without files
 SecRequestBodyNoFilesLimit {{ MODSECURITY_REQ_BODY_NO_FILES_LIMIT }}
@@ -76,8 +77,8 @@ SecAuditLog /var/log/bunkerweb/modsec_audit.log
 # unset REASON* env vars
 SecAction "nolog,phase:1,setenv:REASON=none,setenv:REASON_DATA=none"
 
-{% if MULTISITE == "no" %}
 # Auto update allowed methods (Generated from ALLOWED_METHODS)
+  {% if MULTISITE == "no" %}
 SecAction \
  "id:900200,\
   phase:1,\
@@ -85,16 +86,16 @@ SecAction \
   pass,\
   t:none,\
   setvar:'tx.allowed_methods={{ ALLOWED_METHODS.replace("|", " ") }}'"
-{% else %}
-  {%- set allowed_methods_list = [] -%}
-  {%- for server_name in SERVER_NAME.split(" ") -%}
-    {%- set server_allowed_methods = all[server_name + "_ALLOWED_METHODS"].split("|") -%}
-    {%- for method in server_allowed_methods -%}
-      {%- if method not in allowed_methods_list -%}
-        {%- set tmp = allowed_methods_list.append(method) -%}
-      {%- endif -%}
+  {% else %}
+    {%- set allowed_methods_list = [] -%}
+    {%- for server_name in SERVER_NAME.split(" ") -%}
+      {%- set server_allowed_methods = all[server_name + "_ALLOWED_METHODS"].split("|") -%}
+      {%- for method in server_allowed_methods -%}
+        {%- if method not in allowed_methods_list -%}
+          {%- set tmp = allowed_methods_list.append(method) -%}
+        {%- endif -%}
+      {%- endfor -%}
     {%- endfor -%}
-  {%- endfor -%}
 # Auto update allowed methods (Generated from all server-specific ALLOWED_METHODS)
 SecAction \
  "id:900200,\
@@ -103,64 +104,64 @@ SecAction \
   pass,\
   t:none,\
   setvar:'tx.allowed_methods={{ allowed_methods_list | join(" ") }}'"
-{% endif %}
+  {% endif %}
 
-{% if USE_MODSECURITY_CRS == "yes" -%}
+  {% if USE_MODSECURITY_CRS == "yes" -%}
 # include OWASP CRS configurations
-  {% if MODSECURITY_CRS_VERSION == "nightly" %}
-    {%- if pathlib.Path("/var/cache/bunkerweb/modsecurity/crs/nightly/crs-setup-nightly.conf").is_file() %}
+    {% if MODSECURITY_CRS_VERSION == "nightly" %}
+      {%- if pathlib.Path("/var/cache/bunkerweb/modsecurity/crs/nightly/crs-setup-nightly.conf").is_file() %}
 include /var/cache/bunkerweb/modsecurity/crs/nightly/crs-setup-nightly.conf
-    {%- else %}
+      {%- else %}
 # fallback to the default CRS setup as the nightly one is not available
 include /usr/share/bunkerweb/core/modsecurity/files/crs-setup-v4.conf
-    {%- endif %}
-  {% else %}
+      {%- endif %}
+    {% else %}
 include /usr/share/bunkerweb/core/modsecurity/files/crs-setup-v{{ MODSECURITY_CRS_VERSION }}.conf
-  {% endif %}
+    {% endif %}
 
-  {% if USE_MODSECURITY_CRS_PLUGINS == "yes" and MODSECURITY_CRS_VERSION != "3" -%}
+    {% if USE_MODSECURITY_CRS_PLUGINS == "yes" and MODSECURITY_CRS_VERSION != "3" -%}
 # custom CRS plugins configurations before loading plugins
-    {% if is_custom_conf("/etc/bunkerweb/configs/crs-plugins-before") %}
+      {% if is_custom_conf("/etc/bunkerweb/configs/crs-plugins-before") %}
 include /etc/bunkerweb/configs/crs-plugins-before/*.conf
-    {% endif %}
-    {% if is_custom_conf("/etc/nginx/crs-plugins-before") %}
+      {% endif %}
+      {% if is_custom_conf("/etc/nginx/crs-plugins-before") %}
 include /etc/nginx/crs-plugins-before/*.conf
+      {% endif %}
     {% endif %}
-  {% endif %}
 
 # custom CRS configurations before loading rules (e.g. exclusions)
-  {% if is_custom_conf("/etc/bunkerweb/configs/modsec-crs") %}
+    {% if is_custom_conf("/etc/bunkerweb/configs/modsec-crs") %}
 include /etc/bunkerweb/configs/modsec-crs/*.conf
-  {% endif %}
-  {% if is_custom_conf("/etc/nginx/modsec-crs") %}
+    {% endif %}
+    {% if is_custom_conf("/etc/nginx/modsec-crs") %}
 include /etc/nginx/modsec-crs/*.conf
-  {% endif %}
+    {% endif %}
 include /etc/nginx/http/*.modsec-crs
 
 # Check if client is whitelisted
 SecRule ENV:is_whitelisted "yes" "id:1000,phase:1,allow,nolog,ctl:ruleEngine=Off"
 
 # include OWASP CRS rules
-  {% if MODSECURITY_CRS_VERSION == "nightly" %}
-    {%- if pathlib.Path("/var/cache/bunkerweb/modsecurity/crs/nightly/crs-nightly/rules").is_dir() %}
+    {% if MODSECURITY_CRS_VERSION == "nightly" %}
+      {%- if pathlib.Path("/var/cache/bunkerweb/modsecurity/crs/nightly/crs-nightly/rules").is_dir() %}
 include /var/cache/bunkerweb/modsecurity/crs/nightly/crs-nightly/rules/*.conf
-    {%- else %}
+      {%- else %}
 # fallback to the default CRS setup as the nightly one is not available
 include /usr/share/bunkerweb/core/modsecurity/files/coreruleset-v4/rules/*.conf
-    {%- endif %}
-  {% else %}
+      {%- endif %}
+    {% else %}
 include /usr/share/bunkerweb/core/modsecurity/files/coreruleset-v{{ MODSECURITY_CRS_VERSION }}/rules/*.conf
-  {% endif %}
-
-  {% if USE_MODSECURITY_CRS_PLUGINS == "yes" and MODSECURITY_CRS_VERSION != "3" %}
-# custom CRS plugins configurations after loading plugins
-    {%- if is_custom_conf("/etc/bunkerweb/configs/crs-plugins-after") %}
-include /etc/bunkerweb/configs/crs-plugins-after/*.conf
-    {%- endif %}
-    {% if is_custom_conf("/etc/nginx/crs-plugins-after") %}
-include /etc/nginx/crs-plugins-after/*.conf
     {% endif %}
-  {% endif %}
+
+    {% if USE_MODSECURITY_CRS_PLUGINS == "yes" and MODSECURITY_CRS_VERSION != "3" %}
+# custom CRS plugins configurations after loading plugins
+      {%- if is_custom_conf("/etc/bunkerweb/configs/crs-plugins-after") %}
+include /etc/bunkerweb/configs/crs-plugins-after/*.conf
+      {%- endif %}
+      {% if is_custom_conf("/etc/nginx/crs-plugins-after") %}
+include /etc/nginx/crs-plugins-after/*.conf
+      {% endif %}
+    {% endif %}
 
 # set REASON env var
 SecRuleUpdateActionById 949110 "t:none,deny,status:{{ DENY_HTTP_STATUS }},setenv:REASON=modsecurity,setenv:REASON_DATA=%{TX.BUNKERWEB_RULES}"
@@ -168,4 +169,5 @@ SecRuleUpdateActionById 959100 "t:none,deny,status:{{ DENY_HTTP_STATUS }},setenv
 
 # let BW manage when method is not allowed (and save up some computing)
 SecRuleUpdateActionById 911100 "t:none,allow,nolog"
-{% endif +%}
+  {% endif +%}
+{% endif %}
