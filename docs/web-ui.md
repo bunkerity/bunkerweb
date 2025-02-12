@@ -1097,36 +1097,26 @@ log {
 
 ## Account management
 
-You can access the account management page by clicking on `manage account` inside the sidebar menu :
+You can access the account management page by clicking on the profile image in the top right corner:
 
 <figure markdown>
-  ![Overview](assets/img/manage-account.webp){ align=center, width="350" }
-  <figcaption>Account page access from menu</figcaption>
+  ![Overview](assets/img/manage-account.png){ align=center, width="400" }
+  <figcaption>Account page access from top right corner</figcaption>
 </figure>
 
 ### Username / Password
-
-!!! tip "Overriding admin credentials from environment variables"
-
-    If you want to override the admin credentials from environment variables, you can set the following variables :
-
-    - `OVERRIDE_ADMIN_CREDS` : set it to `yes` to enable the override even if the admin credentials are already set (default is `no`)
-    - `ADMIN_USERNAME` : username to access the web UI
-    - `ADMIN_PASSWORD` : password to access the web UI
-
-    The web UI will use these variables to authenticate you.
 
 !!! warning "Lost password/username"
 
     In case you forgot your UI credentials, you can reset them from the CLI following [the steps described in the troubleshooting section](troubleshooting.md#web-ui).
 
-You can update your username or password by filling the dedicated forms. For security reason, you need to enter your current password even if you are connected.
+You can update your username or password by filling the dedicated forms in the **Security** tab. For security reason, you need to enter your current password even if you are connected.
 
 Please note that when your username or password is updated, you will be logout from the web UI to log in again.
 
 <figure markdown>
-  ![Overview](assets/img/profile-username-password.webp){ align=center, width="800" }
-  <figcaption>Username / Password forms</figcaption>
+  ![Overview](assets/img/profile-username-password.png){ align=center, width="650" }
+  <figcaption>Username / Password form</figcaption>
 </figure>
 
 ### Two-Factor authentication
@@ -1159,25 +1149,41 @@ The following steps are needed to enable the TOTP feature from the web UI :
 
     If you ever lose your recovery codes, **you can refresh them via the TOTP section of the account management page**. Please note that the old recovery codes will be invalidated.
 
-Once enabled, 2FA authentication can be disabled at the same place.
+You can enable or disable 2FA and also refresh recovery codes in the **Security** tab:
 
 <figure markdown>
-  ![Overview](assets/img/profile-totp.webp){ align=center, width="800" }
-  <figcaption>TOTP enable / disable forms</figcaption>
+  ![Overview](assets/img/profile-totp.png){ align=center, width="800" }
+  <figcaption>TOTP enable / disable / refresh recovery codes forms</figcaption>
 </figure>
 
-After a successful login/password combination, you will be prompted to enter your TOTP code :
+After a successful login/password combination, you will be prompted to enter your TOTP code:
 
 <figure markdown>
-  ![Overview](assets/img/profile-2fa.webp){ align=center, width="400" }
-  <figcaption>Additional TOTP page</figcaption>
+  ![Overview](assets/img/profile-2fa.png){ align=center, width="400" }
+  <figcaption>2FA on login page</figcaption>
 </figure>
 
 ### Current sessions
 
-TODO
+In the **Session** tab, you will be able to list and revoke current sessions:
+
+<figure markdown>
+  ![Overview](assets/img/sessions.png){ align=center, width="800" }
+  <figcaption>Manage sessions</figcaption>
+</figure>
+
 
 ## Advanced installation
+
+!!! tip "Overriding admin credentials from environment variables"
+
+    If you want to override the admin credentials from environment variables, you can set the following variables :
+
+    - `OVERRIDE_ADMIN_CREDS` : set it to `yes` to enable the override even if the admin credentials are already set (default is `no`)
+    - `ADMIN_USERNAME` : username to access the web UI
+    - `ADMIN_PASSWORD` : password to access the web UI
+
+    The web UI will use these variables to authenticate you.
 
 !!! tip "Web UI specific environment variables"
 
