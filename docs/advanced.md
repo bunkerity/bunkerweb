@@ -1594,6 +1594,14 @@ By default, BunkerWeb will only listen on IPv4 addresses and won't use IPv6 for 
 
 BunkerWeb offers many security features that you can configure with [settings](settings.md). Even if the default values of settings ensure a minimal "security by default", we strongly recommend you tune them. By doing so you will be able to ensure the security level of your choice but also manage false positives.
 
+!!! tip "Other settings"
+    This section only focuses on security tuning, see the [settings section](settings.md) of the documentation for other settings.
+
+<figure markdown>
+  ![Overview](assets/img/core-order.svg){ align=center }
+  <figcaption>Overview and order of the core security plugins</figcaption>
+</figure>
+
 ### Security Mode
 
 STREAM support :white_check_mark:
