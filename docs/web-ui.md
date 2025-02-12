@@ -1175,15 +1175,7 @@ In the **Session** tab, you will be able to list and revoke current sessions:
 
 ## Advanced installation
 
-!!! tip "Overriding admin credentials from environment variables"
-
-    If you want to override the admin credentials from environment variables, you can set the following variables :
-
-    - `OVERRIDE_ADMIN_CREDS` : set it to `yes` to enable the override even if the admin credentials are already set (default is `no`)
-    - `ADMIN_USERNAME` : username to access the web UI
-    - `ADMIN_PASSWORD` : password to access the web UI
-
-    The web UI will use these variables to authenticate you.
+The web UI can be deployed and configured without going through the setup wizard process: configuration is done through environment variables, which can be added directly to the containers or in the `/etc/bunkerweb/ui.env` file in the case of a Linux integration.
 
 !!! tip "Web UI specific environment variables"
 
@@ -1219,9 +1211,65 @@ In the **Session** tab, you will be able to list and revoke current sessions:
     python3 -c "from passlib import totp; print(' '.join(totp.generate_secret() for i in range(1, 6)))"
     ```
 
+=== "Linux"
+
+    The installation of the web UI using the [Linux integration](integrations.md#linux) is pretty straightforward because it is installed with BunkerWeb.
+
+    The web UI comes as systemd service named `bunkerweb-ui`, please ensure that it's enabled:
+
+    ```shell
+    sudo systemctl enable bunkerweb-ui && \
+    sudo systemctl status bunkerweb-ui
+    ```
+
+    A dedicated environment file located at `/etc/bunkerweb/ui.env` is used to configure the web UI:
+
+    ```conf
+    ADMIN_USERNAME=changeme
+    ADMIN_PASSWORD=changeme
+    TOTP_SECRETS=mysecret
+    ```
+
+    Replace the `changeme` data with your own values.
+
+    Remember to set a stronger secret key for the `TOTP_SECRETS`.
+
+    Each time you edit the `/etc/bunkerweb/ui.env` file, you will need to restart the service :
+
+    ```shell
+    systemctl restart bunkerweb-ui
+    ```
+
+    Accessing the web UI through BunkerWeb is a classical [reverse proxy setup](quickstart-guide.md). Please note that the web UI is listening on the `7000` port and only on the loopback interface.
+
+    Here is the `/etc/bunkerweb/variables.env` boilerplate you can use:
+
+    ```conf
+    HTTP_PORT=80
+    HTTPS_PORT=443
+    DNS_RESOLVERS=9.9.9.9 8.8.8.8 8.8.4.4
+    API_LISTEN_IP=127.0.0.1
+    SERVER_NAME=www.example.com
+    MULTISITE=yes
+    www.example.com_USE_UI=yes
+    www.example.com_USE_REVERSE_PROXY=yes
+    www.example.com_REVERSE_PROXY_URL=/changeme
+    www.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:7000
+    www.example.com_INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504
+    www.example.com_GENERATE_SELF_SIGNED_SSL=yes
+    www.example.com_MAX_CLIENT_SIZE=50m
+    www.example.com_ALLOWED_METHODS=GET|POST|PUT|DELETE
+    ```
+
+    Don't forget to reload the `bunkerweb` service:
+
+    ```shell
+    systemctl reload bunkerweb
+    ```
+
 === "Docker"
 
-    The web UI can be deployed using a dedicated container which is available on [Docker Hub](https://hub.docker.com/r/bunkerity/bunkerweb-ui) :
+    The web UI can be deployed using a dedicated container which is available on [Docker Hub](https://hub.docker.com/r/bunkerity/bunkerweb-ui):
 
     ```shell
     docker pull bunkerity/bunkerweb-ui
@@ -1235,17 +1283,13 @@ In the **Session** tab, you will be able to list and revoke current sessions:
     docker build -t my-bunkerweb-ui -f src/ui/Dockerfile .
     ```
 
-    !!! tip "Environment variables"
-
-        Please read the [Prerequisites](#prerequisites) section to check out all the environment variables you can set to customize the web UI.
-
     Accessing the web UI through BunkerWeb is a classical [reverse proxy setup](quickstart-guide.md). We recommend you to connect BunkerWeb and web UI using a dedicated network (like `bw-universe` also used by the scheduler) so it won't be on the same network of your web services for obvious security reasons. Please note that the web UI container is listening on the `7000` port.
 
     !!! info "Database backend"
 
         If you want another Database backend than MariaDB please refer to the docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.0-rc4/misc/integrations) of the repository.
 
-    Here is the docker-compose boilerplate that you can use (don't forget to edit the `changeme` data) :
+    Here is the docker-compose boilerplate that you can use (don't forget to edit the `changeme` data):
 
     ```yaml
     x-ui-env: &ui-env
@@ -1333,13 +1377,13 @@ In the **Session** tab, you will be able to list and revoke current sessions:
 
 === "Docker autoconf"
 
-    The web UI can be deployed using a dedicated container which is available on [Docker Hub](https://hub.docker.com/r/bunkerity/bunkerweb-ui) :
+    The web UI can be deployed using a dedicated container which is available on [Docker Hub](https://hub.docker.com/r/bunkerity/bunkerweb-ui):
 
     ```shell
     docker pull bunkerity/bunkerweb-ui
     ```
 
-    Alternatively, you can also build it yourself :
+    Alternatively, you can also build it yourself:
 
     ```shell
     git clone https://github.com/bunkerity/bunkerweb.git && \
@@ -1357,7 +1401,7 @@ In the **Session** tab, you will be able to list and revoke current sessions:
 
         If you want another Database backend than MariaDB please refer to the docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.0-rc4/misc/integrations) of the repository.
 
-    Here is the docker-compose boilerplate that you can use (don't forget to edit the `changeme` data) :
+    Here is the docker-compose boilerplate that you can use (don't forget to edit the `changeme` data):
 
     ```yaml
     x-ui-env: &ui-env
@@ -1469,6 +1513,35 @@ In the **Session** tab, you will be able to list and revoke current sessions:
         name: bw-db
     ```
 
+=== "Kubernetes"
+
+    The web UI can be deployed using a dedicated container which is available on [Docker Hub](https://hub.docker.com/r/bunkerity/bunkerweb-ui) and you can deploy as a standard [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/).
+
+    Accessing the web UI through BunkerWeb is a classical [reverse proxy setup](quickstart-guide.md). Network segmentation between web UI and web services is not covered in this documentation. Please note that the web UI container is listening on the `7000` port.
+
+    !!! info "Database backend"
+
+        If you want another Database backend than MariaDB please refer to the yaml files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.0-rc4/misc/integrations) of the repository.
+
+    Here is the corresponding part of your values.yaml file that you can use:
+
+    ```yaml
+    settings:
+      # Use an existing secret named bunkerweb and containing the following values :
+      # - admin-username
+      # - admin-password
+      # - flask-secret
+      # - totp-secrets
+      existingSecret: "secret-bunkerweb"
+    ui:
+      wizard: false
+      ingress:
+        enabled: true
+        serverName: "www.example.com"
+        serverPath: "/admin"
+      overrideAdminCreds: "yes"
+    ```
+
 === "Swarm"
 
     !!! warning "Deprecated"
@@ -1476,7 +1549,7 @@ In the **Session** tab, you will be able to list and revoke current sessions:
 
         **More information can be found in the [Swarm integration documentation](integrations.md#swarm).**
 
-    The web UI can be deployed using a dedicated container which is available on [Docker Hub](https://hub.docker.com/r/bunkerity/bunkerweb-ui) :
+    The web UI can be deployed using a dedicated container which is available on [Docker Hub](https://hub.docker.com/r/bunkerity/bunkerweb-ui):
 
     ```shell
     docker pull bunkerity/bunkerweb-ui
@@ -1489,10 +1562,6 @@ In the **Session** tab, you will be able to list and revoke current sessions:
     cd bunkerweb && \
     docker build -t my-bunkerweb-ui -f src/ui/Dockerfile .
     ```
-
-    !!! tip "Environment variables"
-
-        Please read the [Prerequisites](#prerequisites) section to check out all the environment variables you can set to customize the web UI.
 
     Accessing the web UI through BunkerWeb is a classical [reverse proxy setup](quickstart-guide.md). We recommend you to connect BunkerWeb and web UI using a dedicated network (like `bw-universe` also used by the scheduler and autoconf) so it won't be on the same network of your web services for obvious security reasons. Please note that the web UI container is listening on the `7000` port.
 
@@ -1646,421 +1715,4 @@ In the **Session** tab, you will be able to list and revoke current sessions:
         name: bw-db
         driver: overlay
         attachable: true
-    ```
-
-=== "Kubernetes"
-
-    The web UI can be deployed using a dedicated container which is available on [Docker Hub](https://hub.docker.com/r/bunkerity/bunkerweb-ui) as a standard [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/).
-
-    !!! tip "Environment variables"
-
-        Please read the [Prerequisites](#prerequisites) section to check out all the environment variables you can set to customize the web UI.
-
-    Accessing the web UI through BunkerWeb is a classical [reverse proxy setup](quickstart-guide.md). Network segmentation between web UI and web services is not covered in this documentation. Please note that the web UI container is listening on the `7000` port.
-
-    !!! info "Database backend"
-
-        If you want another Database backend than MariaDB please refer to the yaml files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.0-rc4/misc/integrations) of the repository.
-
-    Here is the yaml boilerplate that you can use (don't forget to edit the `changeme` data) :
-
-    ```yaml
-    apiVersion: rbac.authorization.k8s.io/v1
-    kind: ClusterRole
-    metadata:
-      name: cr-bunkerweb
-    rules:
-      - apiGroups: [""]
-        resources: ["services", "pods", "configmaps", "secrets"]
-        verbs: ["get", "watch", "list"]
-      - apiGroups: ["networking.k8s.io"]
-        resources: ["ingresses"]
-        verbs: ["get", "watch", "list"]
-    ---
-    apiVersion: v1
-    kind: ServiceAccount
-    metadata:
-      name: sa-bunkerweb
-      namespace: default
-    ---
-    apiVersion: rbac.authorization.k8s.io/v1
-    kind: ClusterRoleBinding
-    metadata:
-      name: crb-bunkerweb
-    subjects:
-      - kind: ServiceAccount
-        name: sa-bunkerweb
-        namespace: default
-        apiGroup: ""
-    roleRef:
-      kind: ClusterRole
-      name: cr-bunkerweb
-      apiGroup: rbac.authorization.k8s.io
-    ---
-    apiVersion: apps/v1
-    kind: DaemonSet
-    metadata:
-      name: bunkerweb
-    spec:
-      selector:
-        matchLabels:
-          app: bunkerweb
-      template:
-        metadata:
-          labels:
-            app: bunkerweb
-          # mandatory annotation
-          annotations:
-            bunkerweb.io/INSTANCE: "yes"
-        spec:
-          serviceAccountName: sa-bunkerweb
-          containers:
-            # using bunkerweb as name is mandatory
-            - name: bunkerweb
-              image: bunkerity/bunkerweb:1.6.0-rc4
-              imagePullPolicy: Always
-              securityContext:
-                runAsUser: 101
-                runAsGroup: 101
-                allowPrivilegeEscalation: false
-                capabilities:
-                  drop:
-                    - ALL
-              ports:
-                - containerPort: 8080
-                  hostPort: 80
-                - containerPort: 8443
-                  hostPort: 443
-              env:
-                - name: KUBERNETES_MODE
-                  value: "yes"
-                # replace with your DNS resolvers
-                # e.g. : kube-dns.kube-system.svc.cluster.local
-                - name: DNS_RESOLVERS
-                  value: "coredns.kube-system.svc.cluster.local"
-                # 10.0.0.0/8 is the cluster internal subnet
-                - name: API_WHITELIST_IP
-                  value: "127.0.0.0/8 10.0.0.0/8"
-              livenessProbe:
-                exec:
-                  command:
-                    - /usr/share/bunkerweb/helpers/healthcheck.sh
-                initialDelaySeconds: 30
-                periodSeconds: 5
-                timeoutSeconds: 1
-                failureThreshold: 3
-              readinessProbe:
-                exec:
-                  command:
-                    - /usr/share/bunkerweb/helpers/healthcheck.sh
-                initialDelaySeconds: 30
-                periodSeconds: 1
-                timeoutSeconds: 1
-                failureThreshold: 3
-    ---
-    apiVersion: apps/v1
-    kind: Deployment
-    metadata:
-      name: bunkerweb-controller
-    spec:
-      replicas: 1
-      strategy:
-        type: Recreate
-      selector:
-        matchLabels:
-          app: bunkerweb-controller
-      template:
-        metadata:
-          labels:
-            app: bunkerweb-controller
-        spec:
-          serviceAccountName: sa-bunkerweb
-          containers:
-            - name: bunkerweb-controller
-              image: bunkerity/bunkerweb-autoconf:1.6.0-rc4
-              imagePullPolicy: Always
-              env:
-                - name: KUBERNETES_MODE
-                  value: "yes"
-                - name: DATABASE_URI
-                  value: "mariadb+pymysql://bunkerweb:changeme@svc-bunkerweb-db:3306/db" # Remember to set a stronger password for the database
-    ---
-    apiVersion: apps/v1
-    kind: Deployment
-    metadata:
-      name: bunkerweb-scheduler
-    spec:
-      replicas: 1
-      strategy:
-        type: Recreate
-      selector:
-        matchLabels:
-          app: bunkerweb-scheduler
-      template:
-        metadata:
-          labels:
-            app: bunkerweb-scheduler
-        spec:
-          serviceAccountName: sa-bunkerweb
-          containers:
-            - name: bunkerweb-scheduler
-              image: bunkerity/bunkerweb-scheduler:1.6.0-rc4
-              imagePullPolicy: Always
-              env:
-                - name: KUBERNETES_MODE
-                  value: "yes"
-                - name: DATABASE_URI
-                  value: "mariadb+pymysql://bunkerweb:changeme@svc-bunkerweb-db:3306/db" # Remember to set a stronger password for the database
-                # replace with your DNS resolvers
-                # e.g. : kube-dns.kube-system.svc.cluster.local
-                - name: DNS_RESOLVERS
-                  value: "coredns.kube-system.svc.cluster.local"
-                # 10.0.0.0/8 is the cluster internal subnet
-                - name: API_WHITELIST_IP
-                  value: "127.0.0.0/8 10.0.0.0/8"
-                - name: BUNKERWEB_INSTANCES
-                  value: ""
-                - name: SERVER_NAME
-                  value: ""
-                - name: MULTISITE
-                  value: "yes"
-                - name: USE_REDIS
-                  value: "yes"
-                # replace with your Redis host
-                - name: REDIS_HOST
-                  value: "svc-bunkerweb-redis.default.svc.cluster.local"
-    ---
-    apiVersion: apps/v1
-    kind: Deployment
-    metadata:
-      name: bunkerweb-redis
-    spec:
-      replicas: 1
-      strategy:
-        type: Recreate
-      selector:
-        matchLabels:
-          app: bunkerweb-redis
-      template:
-        metadata:
-          labels:
-            app: bunkerweb-redis
-        spec:
-          containers:
-            - name: bunkerweb-redis
-              image: redis:7-alpine
-              imagePullPolicy: Always
-    ---
-    apiVersion: apps/v1
-    kind: Deployment
-    metadata:
-      name: bunkerweb-db
-    spec:
-      replicas: 1
-      strategy:
-        type: Recreate
-      selector:
-        matchLabels:
-          app: bunkerweb-db
-      template:
-        metadata:
-          labels:
-            app: bunkerweb-db
-        spec:
-          containers:
-            - name: bunkerweb-db
-              image: mariadb:11
-              imagePullPolicy: Always
-              env:
-                - name: MYSQL_RANDOM_ROOT_PASSWORD
-                  value: "yes"
-                - name: MYSQL_DATABASE
-                  value: "db"
-                - name: MYSQL_USER
-                  value: "bunkerweb"
-                - name: MYSQL_PASSWORD
-                  value: "changeme" # Remember to set a stronger password for the database
-              volumeMounts:
-                - mountPath: "/var/lib/mysql"
-                  name: vol-db
-          volumes:
-            - name: vol-db
-              persistentVolumeClaim:
-                claimName: pvc-bunkerweb
-    ---
-    apiVersion: apps/v1
-    kind: Deployment
-    metadata:
-      name: bunkerweb-ui
-    spec:
-      replicas: 1
-      strategy:
-        type: Recreate
-      selector:
-        matchLabels:
-          app: bunkerweb-ui
-      template:
-        metadata:
-          labels:
-            app: bunkerweb-ui
-        spec:
-          serviceAccountName: sa-bunkerweb
-          containers:
-            - name: bunkerweb-ui
-              image: bunkerity/bunkerweb-ui:1.6.0-rc4
-              imagePullPolicy: Always
-              env:
-                - name: KUBERNETES_MODE
-                  value: "yes"
-                - name: DATABASE_URI
-                  value: "mariadb+pymysql://bunkerweb:changeme@svc-bunkerweb-db:3306/db" # Remember to set a stronger password for the database
-                - name: ADMIN_USERNAME
-                  value: changeme
-                - name: ADMIN_PASSWORD
-                  value: "changeme" # Remember to set a stronger password for the ui user
-                - name: TOTP_SECRETS
-                  value: "mysecret" # Remember to set a stronger secret key (see the Prerequisites section)
-    ---
-    apiVersion: v1
-    kind: Service
-    metadata:
-      name: svc-bunkerweb
-    spec:
-      clusterIP: None
-      selector:
-        app: bunkerweb
-    ---
-    apiVersion: v1
-    kind: Service
-    metadata:
-      name: svc-bunkerweb-db
-    spec:
-      type: ClusterIP
-      selector:
-        app: bunkerweb-db
-      ports:
-        - name: sql
-          protocol: TCP
-          port: 3306
-          targetPort: 3306
-    ---
-    apiVersion: v1
-    kind: Service
-    metadata:
-      name: svc-bunkerweb-redis
-    spec:
-      type: ClusterIP
-      selector:
-        app: bunkerweb-redis
-      ports:
-        - name: redis
-          protocol: TCP
-          port: 6379
-          targetPort: 6379
-    ---
-    apiVersion: v1
-    kind: Service
-    metadata:
-      name: svc-bunkerweb-ui
-    spec:
-      type: ClusterIP
-      selector:
-        app: bunkerweb-ui
-      ports:
-        - name: http
-          protocol: TCP
-          port: 7000
-          targetPort: 7000
-    ---
-    apiVersion: v1
-    kind: PersistentVolumeClaim
-    metadata:
-      name: pvc-bunkerweb
-    spec:
-      accessModes:
-        - ReadWriteOnce
-      resources:
-        requests:
-          storage: 5Gi
-    ---
-    apiVersion: networking.k8s.io/v1
-    kind: Ingress
-    metadata:
-      name: ingress
-      annotations:
-        bunkerweb.io/www.example.com_SERVE_FILES: "no"
-        bunkerweb.io/www.example.com_USE_CLIENT_CACHE: "yes"
-        bunkerweb.io/www.example.com_USE_GZIP: "yes"
-        bunkerweb.io/www.example.com_USE_UI: "yes"
-        bunkerweb.io/www.example.com_INTERCEPTED_ERROR_CODES: "400 404 405 413 429 500 501 502 503 504"
-        bunkerweb.io/www.example.com_GENERATE_SELF_SIGNED_SSL: "yes"
-        bunkerweb.io/www.example.com_MAX_CLIENT_SIZE: "50m"
-        bunkerweb.io/www.example.com_ALLOWED_METHODS: "GET|POST|PUT|DELETE"
-    spec:
-      rules:
-        - host: www.example.com
-          http:
-            paths:
-              - path: /changeme
-                pathType: Prefix
-                backend:
-                  service:
-                    name: svc-bunkerweb-ui
-                    port:
-                      number: 7000
-    ```
-
-=== "Linux"
-
-    The installation of the web UI using the [Linux integration](integrations.md#linux) is pretty straightforward because it is installed with BunkerWeb.
-
-    The web UI comes as systemd service named `bunkerweb-ui` which is not enabled by default. If you want to start the web UI when on startup you can run the following command :
-
-    ```shell
-    systemctl enable bunkerweb-ui
-    ```
-
-    A dedicated environment file located at `/etc/bunkerweb/ui.env` is used to configure the web UI :
-
-    ```conf
-    ADMIN_USERNAME=changeme
-    ADMIN_PASSWORD=changeme
-    TOTP_SECRETS=mysecret
-    ```
-
-    Replace the `changeme` data with your own values.
-
-    Remember to set a stronger secret key for the `TOTP_SECRETS` variable, check the [Prerequisites](#prerequisites) section for more information.
-
-    Each time you edit the `/etc/bunkerweb/ui.env` file, you will need to restart the service :
-
-    ```shell
-    systemctl restart bunkerweb-ui
-    ```
-
-    Accessing the web UI through BunkerWeb is a classical [reverse proxy setup](quickstart-guide.md). Please note that the web UI is listening on the `7000` port and only on the loopback interface.
-
-    Here is the `/etc/bunkerweb/variables.env` boilerplate you can use :
-
-    ```conf
-    HTTP_PORT=80
-    HTTPS_PORT=443
-    DNS_RESOLVERS=9.9.9.9 8.8.8.8 8.8.4.4
-    API_LISTEN_IP=127.0.0.1
-    SERVER_NAME=www.example.com
-    MULTISITE=yes
-    www.example.com_USE_UI=yes
-    www.example.com_USE_REVERSE_PROXY=yes
-    www.example.com_REVERSE_PROXY_URL=/changeme
-    www.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:7000
-    www.example.com_INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504
-    www.example.com_GENERATE_SELF_SIGNED_SSL=yes
-    www.example.com_MAX_CLIENT_SIZE=50m
-    www.example.com_ALLOWED_METHODS=GET|POST|PUT|DELETE
-    ```
-
-    Don't forget to reload the `bunkerweb` service :
-
-    ```shell
-    systemctl reload bunkerweb
     ```
