@@ -846,4 +846,4 @@ Congratulations! You've just installed BunkerWeb and secured your first web serv
 - Join the Bunker community: [Discord](https://discord.com/invite/fTf46FmtyD), [LinkedIn](https://www.linkedin.com/company/bunkerity/), [GitHub](https://github.com/bunkerity), [X](https://x.com/bunkerity)
 - Check out the [official blog](https://www.bunkerweb.io/blog?utm_campaign=self&utm_source=doc)
 - Explore [advanced use cases](advanced.md) in the documentation
-- [Get in touch with us](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=doc) to discuss your organization's needs.
+- [Get in touch with us](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=doc) to discuss your organization's needs

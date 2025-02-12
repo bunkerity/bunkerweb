@@ -1,7 +1,10 @@
 # Advanced usages
 
-!!! tip "Other settings"
-    This section only focuses on advanced usages, see the [settings section](settings.md) of the documentation to see all the available settings.
+Many real-world use case examples are available in the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.0-rc4/examples) folder of the GitHub repository.
+
+We also provide numerous boilerplates, such as YAML files for various integrations and database types. These are available in the [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.0-rc4/misc/integrations) folder.
+
+This section only focuses on advanced usages and security tuning, see the [settings section](settings.md) of the documentation to see all the available settings. 
 
 ## Use cases
 
