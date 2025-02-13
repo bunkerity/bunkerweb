@@ -111,6 +111,8 @@ services:
       <<: *env
       CHECK_PRIVATE_IP: "no"
       DEBUG: "1"
+      MAX_WORKERS: "1"
+      MAX_THREADS: "4"
     restart: "unless-stopped"
     networks:
       bw-universe:
