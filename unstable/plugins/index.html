@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../assets/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.50">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.4">
     
     
       
@@ -28,7 +28,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.a40c8224.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.8608ea7d.min.css">
       
       
 
@@ -53,6 +53,7 @@
       })
     </script>
 
+    <script src="https://cdn.jsdelivr.net/npm/medium-zoom/dist/medium-zoom.min.js"></script>
 
     <script defer>
   // Lazy load images and embed youtube videos
@@ -120,19 +121,20 @@
       }
 
       function runBanner() {
+        startBannerLoop();
         // Try to get dynamic content
         // Else keep static ones
-        fetch("https://www.bunkerweb.io/api/bw-ui-news")
-        .then((res) => {
-          return res.json();
-        })
-        .then((res) => {
-          defaultContent = res.data[0].data;
-          startBannerLoop();
-        })
-        .catch((e) => {
-          startBannerLoop();
-});
+        // fetch("https://www.bunkerweb.io/api/bw-ui-news")
+        // .then((res) => {
+        //   return res.json();
+        // })
+        // .then((res) => {
+        //   defaultContent = res.data[0].data;
+        //   startBannerLoop();
+        // })
+        // .catch((e) => {
+        //   startBannerLoop();
+        // });
       }
 
         setBannerStyle();
@@ -244,7 +246,7 @@
     </a>
 
             </div>
-            <script>var el=document.querySelector("[data-md-component=outdated]"),outdated=__md_get("__outdated",sessionStorage);!0===outdated&&el&&(el.hidden=!1)</script>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL(".."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
           </aside>
         
       </div>
@@ -423,7 +425,7 @@
   
     
   
-  Advanced
+  Advanced usages
 
       </a>
     </li>
@@ -615,6 +617,7 @@
   
   <span class="md-ellipsis">
     Introduction
+    
   </span>
   
 
@@ -635,6 +638,7 @@
   
   <span class="md-ellipsis">
     Concepts
+    
   </span>
   
 
@@ -655,6 +659,7 @@
   
   <span class="md-ellipsis">
     Integrations
+    
   </span>
   
 
@@ -675,6 +680,7 @@
   
   <span class="md-ellipsis">
     Quickstart guide
+    
   </span>
   
 
@@ -694,7 +700,8 @@
         
   
   <span class="md-ellipsis">
-    Advanced
+    Advanced usages
+    
   </span>
   
 
@@ -715,6 +722,7 @@
   
   <span class="md-ellipsis">
     Settings
+    
   </span>
   
 
@@ -735,6 +743,7 @@
   
   <span class="md-ellipsis">
     Web UI
+    
   </span>
   
 
@@ -755,6 +764,7 @@
   
   <span class="md-ellipsis">
     Upgrading
+    
   </span>
   
 
@@ -775,6 +785,7 @@
   
   <span class="md-ellipsis">
     Troubleshooting
+    
   </span>
   
 
@@ -804,6 +815,7 @@
   
   <span class="md-ellipsis">
     Plugins
+    
   </span>
   
 
@@ -815,6 +827,7 @@
   
   <span class="md-ellipsis">
     Plugins
+    
   </span>
   
 
@@ -1050,6 +1063,7 @@
   
   <span class="md-ellipsis">
     Professional services
+    
   </span>
   
 
@@ -1070,6 +1084,7 @@
   
   <span class="md-ellipsis">
     About
+    
   </span>
   
 
@@ -1091,6 +1106,7 @@
               <article class="md-content__inner md-typeset">
                 
                   
+
 
   
   
@@ -1346,7 +1362,7 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 </code></pre></div></p>
 <ul>
 <li>
-<p><strong>conf_name.conf</strong> : add <a href="../quickstart-guide/#custom-configurations">custom NGINX configurations</a> (as jinja2 templates)</p>
+<p><strong>conf_name.conf</strong> : add <a href="../advanced/#custom-configurations">custom NGINX configurations</a> (as jinja2 templates)</p>
 </li>
 <li>
 <p><strong>actions.py</strong> : script to execute on flask server, this script is running on flask context, you have access to lib and utils like <code>jinja2</code>, <code>requests</code>, etc...</p>
@@ -1554,7 +1570,7 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 </tbody>
 </table>
 <h3 id="configurations">Configurations</h3>
-<p>You can add custom NGINX configurations by adding a folder named <strong>confs</strong> with content similar to the <a href="../quickstart-guide/#custom-configurations">custom configurations</a>. Each subfolder inside the <strong>confs</strong> will contain <a href="https://jinja.palletsprojects.com">jinja2</a> templates that will be generated and loaded at the corresponding context (<code>http</code>, <code>server-http</code>, <code>default-server-http</code>, <code>stream</code>, <code>server-stream</code>, <code>modsec</code>, <code>modsec-crs</code>, <code>crs-plugins-before</code> and <code>crs-plugins-after</code>).</p>
+<p>You can add custom NGINX configurations by adding a folder named <strong>confs</strong> with content similar to the <a href="../advanced/#custom-configurations">custom configurations</a>. Each subfolder inside the <strong>confs</strong> will contain <a href="https://jinja.palletsprojects.com">jinja2</a> templates that will be generated and loaded at the corresponding context (<code>http</code>, <code>server-http</code>, <code>default-server-http</code>, <code>stream</code>, <code>server-stream</code>, <code>modsec</code>, <code>modsec-crs</code>, <code>crs-plugins-before</code> and <code>crs-plugins-after</code>).</p>
 <p>Here is an example for a configuration template file inside the <strong>confs/server-http</strong> folder named <strong>example.conf</strong> :</p>
 <div class="highlight"><pre><span></span><code>location /setting {
     default_type &#39;text/plain&#39;;
@@ -1918,9 +1934,11 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
     <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../assets/javascripts/workers/search.f8cc74c7.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.60a45f97.min.js"></script>
+      <script src="../assets/javascripts/bundle.f1b6f286.min.js"></script>
       
         <script src="../js/print-site.js"></script>
+      
+        <script src="../assets/extra.js"></script>
       
     
   </body>

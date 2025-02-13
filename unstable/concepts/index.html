@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../assets/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.50">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.4">
     
     
       
@@ -28,7 +28,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.a40c8224.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.8608ea7d.min.css">
       
       
 
@@ -53,6 +53,7 @@
       })
     </script>
 
+    <script src="https://cdn.jsdelivr.net/npm/medium-zoom/dist/medium-zoom.min.js"></script>
 
     <script defer>
   // Lazy load images and embed youtube videos
@@ -120,19 +121,20 @@
       }
 
       function runBanner() {
+        startBannerLoop();
         // Try to get dynamic content
         // Else keep static ones
-        fetch("https://www.bunkerweb.io/api/bw-ui-news")
-        .then((res) => {
-          return res.json();
-        })
-        .then((res) => {
-          defaultContent = res.data[0].data;
-          startBannerLoop();
-        })
-        .catch((e) => {
-          startBannerLoop();
-});
+        // fetch("https://www.bunkerweb.io/api/bw-ui-news")
+        // .then((res) => {
+        //   return res.json();
+        // })
+        // .then((res) => {
+        //   defaultContent = res.data[0].data;
+        //   startBannerLoop();
+        // })
+        // .catch((e) => {
+        //   startBannerLoop();
+        // });
       }
 
         setBannerStyle();
@@ -244,7 +246,7 @@
     </a>
 
             </div>
-            <script>var el=document.querySelector("[data-md-component=outdated]"),outdated=__md_get("__outdated",sessionStorage);!0===outdated&&el&&(el.hidden=!1)</script>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL(".."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
           </aside>
         
       </div>
@@ -425,7 +427,7 @@
   
     
   
-  Advanced
+  Advanced usages
 
       </a>
     </li>
@@ -615,6 +617,7 @@
   
   <span class="md-ellipsis">
     Introduction
+    
   </span>
   
 
@@ -644,6 +647,7 @@
   
   <span class="md-ellipsis">
     Concepts
+    
   </span>
   
 
@@ -655,6 +659,7 @@
   
   <span class="md-ellipsis">
     Concepts
+    
   </span>
   
 
@@ -674,6 +679,15 @@
       Table of contents
     </label>
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      Architecture
+    </span>
+  </a>
+  
+</li>
       
         <li class="md-nav__item">
   <a href="#integrations" class="md-nav__link">
@@ -727,21 +741,6 @@
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Scheduler">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#instances-healthcheck" class="md-nav__link">
-    <span class="md-ellipsis">
-      Instances healthcheck
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
       
         <li class="md-nav__item">
@@ -750,21 +749,6 @@
       Templates
     </span>
   </a>
-  
-    <nav class="md-nav" aria-label="Templates">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#creating-custom-templates" class="md-nav__link">
-    <span class="md-ellipsis">
-      Creating custom templates
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -788,6 +772,7 @@
   
   <span class="md-ellipsis">
     Integrations
+    
   </span>
   
 
@@ -808,6 +793,7 @@
   
   <span class="md-ellipsis">
     Quickstart guide
+    
   </span>
   
 
@@ -827,7 +813,8 @@
         
   
   <span class="md-ellipsis">
-    Advanced
+    Advanced usages
+    
   </span>
   
 
@@ -848,6 +835,7 @@
   
   <span class="md-ellipsis">
     Settings
+    
   </span>
   
 
@@ -868,6 +856,7 @@
   
   <span class="md-ellipsis">
     Web UI
+    
   </span>
   
 
@@ -888,6 +877,7 @@
   
   <span class="md-ellipsis">
     Upgrading
+    
   </span>
   
 
@@ -908,6 +898,7 @@
   
   <span class="md-ellipsis">
     Troubleshooting
+    
   </span>
   
 
@@ -928,6 +919,7 @@
   
   <span class="md-ellipsis">
     Plugins
+    
   </span>
   
 
@@ -948,6 +940,7 @@
   
   <span class="md-ellipsis">
     Professional services
+    
   </span>
   
 
@@ -968,6 +961,7 @@
   
   <span class="md-ellipsis">
     About
+    
   </span>
   
 
@@ -990,14 +984,18 @@
                 
                   
 
+
   
   
 
 
 <h1 id="concepts">Concepts</h1>
+<h2 id="architecture">Architecture</h2>
 <figure>
 <p><img align="center," alt="Overview" src="../assets/img/concepts.svg" width="600" /></p>
 </figure>
+<p>Within your infrastructure, BunkerWeb acts as a reverse proxy in front of your web services. The typical architecture consists of accessing BunkerWeb from the Internet, which then forwards requests to the appropriate application service on a secure network.</p>
+<p>Using BunkerWeb that way (classical reverse proxy architecture) with TLS offloading and centralized security policies enhances performance by reducing encryption overhead on backend servers while ensuring consistent access control, threat mitigation, and compliance enforcement across all services.</p>
 <h2 id="integrations">Integrations</h2>
 <p>The first concept is the integration of BunkerWeb into the target environment. We prefer to use the word "integration" instead of "installation" because one of the goals of BunkerWeb is to integrate seamlessly into existing environments.</p>
 <p>The following integrations are officially supported :</p>
@@ -1015,8 +1013,8 @@
 </div>
 <h2 id="settings">Settings</h2>
 <div class="admonition tip">
-<p class="admonition-title">Pro settings</p>
-<p>Some plugins are reserved for the <strong>pro version</strong>. <a href="https://panel.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc#pro">Find out more about the pro version here.</a></p>
+<p class="admonition-title">PRO settings</p>
+<p>Some plugins are reserved for the <strong>PRO version</strong>. <a href="https://panel.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc#pro">Find out more about the pro version here.</a></p>
 </div>
 <p>Once BunkerWeb is integrated into your environment, you will need to configure it to serve and protect your web applications.</p>
 <p>The configuration of BunkerWeb is done by using what we call the "settings" or "variables". Each setting is identified by a name such as <code>AUTO_LETS_ENCRYPT</code> or <code>USE_ANTIBOT</code>. You can assign values to the settings to configure BunkerWeb.</p>
@@ -1029,6 +1027,18 @@ USE_MODSECURITY=no
 USE_GZIP=yes
 USE_BROTLI=no
 </code></pre></div>
+<p>Please note that if you are using the web User Interface, the setting names are also displayed in addition to a "human-friendly" label :</p>
+<figure>
+<p><img align="center," alt="Overview" src="../assets/img/settings-ui1.png" width="800" />
+  </p>
+<figcaption>Settings name in the web UI</figcaption>
+</figure>
+<p>You can also use the search bar and directly specify a setting name :</p>
+<figure>
+<p><img align="center," alt="Overview" src="../assets/img/settings-ui2.png" width="600" />
+  </p>
+<figcaption>Settings search in the web UI</figcaption>
+</figure>
 <div class="admonition info">
 <p class="admonition-title">Going further</p>
 <p>The complete list of available settings with descriptions and possible values is available in the <a href="../settings/">settings section</a> of the documentation.</p>
@@ -1056,18 +1066,30 @@ app2.example.com_USE_ANTIBOT=cookie
 app2.example.com_WHITELIST_COUNTRY=FR
 app3.example.com_USE_BAD_BEHAVIOR=no
 </code></pre></div>
+<p>Please note that multisite mode is implicit when using the web User Interface. You have the option to apply configurations directly to your services or to set a global configuration that will be applied to all your services (you can still apply exceptions directly to specific services) :</p>
+<figure>
+<p><img align="center," alt="Overview" src="../assets/img/ui-multisite.png" width="600" />
+  </p>
+<figcaption>Apply a setting to all services from the web UI</figcaption>
+</figure>
 <div class="admonition info">
 <p class="admonition-title">Going further</p>
-<p>You will find concrete examples of multisite mode in the <a href="../quickstart-guide/">quickstart guide</a> of the documentation and the <a href="https://github.com/bunkerity/bunkerweb/tree/vtesting/examples">examples</a> directory of the repository.</p>
+<p>You will find concrete examples of multisite mode in the <a href="../advanced/">advanced usages</a> of the documentation and the <a href="https://github.com/bunkerity/bunkerweb/tree/vtesting/examples">examples</a> directory of the repository.</p>
 </div>
 <h2 id="custom-configurations">Custom configurations</h2>
 <p>To address unique challenges and cater to specific use cases, BunkerWeb offers the flexibility of custom configurations. While the provided settings and <a href="../plugins/">external plugins</a> cover a wide range of scenarios, there may be situations that require additional customization.</p>
 <p>BunkerWeb is built on the renowned NGINX web server, which provides a powerful configuration system. This means you can leverage NGINX's configuration capabilities to meet your specific needs. Custom NGINX configurations can be included in various <a href="https://docs.nginx.com/nginx/admin-guide/basic-functionality/managing-configuration-files/#contexts">contexts</a> such as HTTP or server, allowing you to fine-tune the behavior of BunkerWeb according to your requirements. Whether you need to customize global settings or apply configurations to specific server blocks, BunkerWeb empowers you to optimize its behavior to align perfectly with your use case.</p>
 <p>Another integral component of BunkerWeb is the ModSecurity Web Application Firewall. With custom configurations, you have the flexibility to address false positives or add custom rules to further enhance the protection provided by ModSecurity. These custom configurations allow you to fine-tune the behavior of the firewall and ensure that it aligns with the specific requirements of your web applications.</p>
 <p>By leveraging custom configurations, you unlock a world of possibilities to tailor BunkerWeb's behavior and security measures precisely to your needs. Whether it's adjusting NGINX configurations or fine-tuning ModSecurity, BunkerWeb provides the flexibility to meet your unique challenges effectively.</p>
+<p>Managing custom configurations from the web User Interface is done through the <strong>Configs</strong> menu :</p>
+<figure>
+<p><img align="center," alt="Overview" src="../assets/img/configs-ui.png" width="800" />
+  </p>
+<figcaption>Manage custom configurations from the web UI</figcaption>
+</figure>
 <div class="admonition info">
 <p class="admonition-title">Going further</p>
-<p>You will find concrete examples of custom configurations in the <a href="../quickstart-guide/">quickstart guide</a> of the documentation and the <a href="https://github.com/bunkerity/bunkerweb/tree/vtesting/examples">examples</a> directory of the repository.</p>
+<p>You will find concrete examples of custom configurations in the <a href="../advanced/#custom-configurations">advanced usages</a> of the documentation and the <a href="https://github.com/bunkerity/bunkerweb/tree/vtesting/examples">examples</a> directory of the repository.</p>
 </div>
 <h2 id="database">Database</h2>
 <p>BunkerWeb securely stores its current configuration in a backend database, which contains essential data for smooth operation. The following information is stored in the database:</p>
@@ -1121,8 +1143,14 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <p>In essence, the scheduler serves as the brain of BunkerWeb, orchestrating various operations and ensuring the smooth functioning of the system.</p>
 <p>Depending on the integration approach, the execution environment of the scheduler may differ. In container-based integrations, the scheduler is executed within its dedicated container, providing isolation and flexibility. On the other hand, for Linux-based integrations, the scheduler is self-contained within the bunkerweb service, simplifying the deployment and management process.</p>
 <p>By employing the scheduler, BunkerWeb streamlines the automation and coordination of essential tasks, enabling efficient and reliable operation of the entire system.</p>
-<h3 id="instances-healthcheck">Instances healthcheck</h3>
-<p>Since the 1.6.0-beta, the Scheduler possess a built-in healthcheck system, that will check the health of the instances. If an instance becomes unhealthy, the scheduler will stop sending the configuration to it. If the instance becomes healthy again, the scheduler will start sending the configuration to it again.</p>
+<p>If you are using the web User Interface, you can manage scheduler jobs by clicking on <strong>Jobs</strong> from the menu :</p>
+<figure>
+<p><img align="center," alt="Overview" src="../assets/img/jobs-ui.png" width="800" />
+  </p>
+<figcaption>Manage jobs from the web UI</figcaption>
+</figure>
+<p><strong>Instances healthcheck</strong></p>
+<p>Since the testing, the Scheduler possess a built-in healthcheck system, that will check the health of the instances. If an instance becomes unhealthy, the scheduler will stop sending the configuration to it. If the instance becomes healthy again, the scheduler will start sending the configuration to it again.</p>
 <p>The healthcheck interval is set by the <code>HEALTHCHECK_INTERVAL</code> environment variable with a default value of <code>30</code> which means that the scheduler will check the health of the instances every 30 seconds.</p>
 <h2 id="templates">Templates</h2>
 <p>BunkerWeb leverages the power of templates to simplify the configuration process and enhance flexibility. Templates provide a structured and standardized approach to defining settings and custom configurations, ensuring consistency and ease of use.</p>
@@ -1139,7 +1167,13 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <p><strong>Custom templates</strong>: In addition to predefined templates, BunkerWeb allows users to create custom templates tailored to their specific requirements. Custom templates enable fine-tuning of settings and custom configurations, ensuring that BunkerWeb aligns perfectly with the user's needs.</p>
 </li>
 </ul>
-<h3 id="creating-custom-templates">Creating custom templates</h3>
+<p>With the web User Interface, templates are available through <strong>easy mode</strong> when you add or edit a service :</p>
+<figure>
+<p><img align="center," alt="Overview" src="../assets/img/templates-ui.png" width="800" />
+  </p>
+<figcaption>Templates usage from the web UI</figcaption>
+</figure>
+<p><strong>Creating custom templates</strong></p>
 <p>Creating a custom template is a straightforward process that involves defining the desired settings, custom configurations and steps in a structured format.</p>
 <ul>
 <li><strong>Template structure</strong>: A custom template consists of a name, series of settings, custom configurations and optional steps. The template structure is defined in a JSON file that adheres to the specified format. The key components of a custom template include:<ul>
@@ -1313,9 +1347,11 @@ app3.example.com_USE_BAD_BEHAVIOR=no
     <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../assets/javascripts/workers/search.f8cc74c7.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.60a45f97.min.js"></script>
+      <script src="../assets/javascripts/bundle.f1b6f286.min.js"></script>
       
         <script src="../js/print-site.js"></script>
+      
+        <script src="../assets/extra.js"></script>
       
     
   </body>

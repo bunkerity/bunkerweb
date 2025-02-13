@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../assets/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.50">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.4">
     
     
       
@@ -28,7 +28,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.a40c8224.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.8608ea7d.min.css">
       
       
 
@@ -53,6 +53,7 @@
       })
     </script>
 
+    <script src="https://cdn.jsdelivr.net/npm/medium-zoom/dist/medium-zoom.min.js"></script>
 
     <script defer>
   // Lazy load images and embed youtube videos
@@ -120,19 +121,20 @@
       }
 
       function runBanner() {
+        startBannerLoop();
         // Try to get dynamic content
         // Else keep static ones
-        fetch("https://www.bunkerweb.io/api/bw-ui-news")
-        .then((res) => {
-          return res.json();
-        })
-        .then((res) => {
-          defaultContent = res.data[0].data;
-          startBannerLoop();
-        })
-        .catch((e) => {
-          startBannerLoop();
-});
+        // fetch("https://www.bunkerweb.io/api/bw-ui-news")
+        // .then((res) => {
+        //   return res.json();
+        // })
+        // .then((res) => {
+        //   defaultContent = res.data[0].data;
+        //   startBannerLoop();
+        // })
+        // .catch((e) => {
+        //   startBannerLoop();
+        // });
       }
 
         setBannerStyle();
@@ -244,7 +246,7 @@
     </a>
 
             </div>
-            <script>var el=document.querySelector("[data-md-component=outdated]"),outdated=__md_get("__outdated",sessionStorage);!0===outdated&&el&&(el.hidden=!1)</script>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL(".."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
           </aside>
         
       </div>
@@ -423,7 +425,7 @@
   
     
   
-  Advanced
+  Advanced usages
 
       </a>
     </li>
@@ -615,6 +617,7 @@
   
   <span class="md-ellipsis">
     Introduction
+    
   </span>
   
 
@@ -635,6 +638,7 @@
   
   <span class="md-ellipsis">
     Concepts
+    
   </span>
   
 
@@ -655,6 +659,7 @@
   
   <span class="md-ellipsis">
     Integrations
+    
   </span>
   
 
@@ -675,6 +680,7 @@
   
   <span class="md-ellipsis">
     Quickstart guide
+    
   </span>
   
 
@@ -694,7 +700,8 @@
         
   
   <span class="md-ellipsis">
-    Advanced
+    Advanced usages
+    
   </span>
   
 
@@ -715,6 +722,7 @@
   
   <span class="md-ellipsis">
     Settings
+    
   </span>
   
 
@@ -735,6 +743,7 @@
   
   <span class="md-ellipsis">
     Web UI
+    
   </span>
   
 
@@ -755,6 +764,7 @@
   
   <span class="md-ellipsis">
     Upgrading
+    
   </span>
   
 
@@ -784,6 +794,7 @@
   
   <span class="md-ellipsis">
     Troubleshooting
+    
   </span>
   
 
@@ -795,6 +806,7 @@
   
   <span class="md-ellipsis">
     Troubleshooting
+    
   </span>
   
 
@@ -916,6 +928,7 @@
   
   <span class="md-ellipsis">
     Plugins
+    
   </span>
   
 
@@ -936,6 +949,7 @@
   
   <span class="md-ellipsis">
     Professional services
+    
   </span>
   
 
@@ -956,6 +970,7 @@
   
   <span class="md-ellipsis">
     About
+    
   </span>
   
 
@@ -977,6 +992,7 @@
               <article class="md-content__inner md-typeset">
                 
                   
+
 
   
   
@@ -1064,7 +1080,7 @@ cat<span class="w"> </span>/var/log/bunkerweb/access.log
 </div>
 </div>
 <h2 id="permissions">Permissions</h2>
-<p>Don't forget that BunkerWeb runs as an unprivileged user for obvious security reasons. Double-check the permissions of files and folders used by BunkerWeb, especially if you use custom configurations (more info <a href="../quickstart-guide/#custom-configurations">here</a>). You will need to set at least <strong>RW</strong> rights on files and <strong><em>RWX</em></strong> on folders.</p>
+<p>Don't forget that BunkerWeb runs as an unprivileged user for obvious security reasons. Double-check the permissions of files and folders used by BunkerWeb, especially if you use custom configurations (more info <a href="../advanced/#custom-configurations">here</a>). You will need to set at least <strong>RW</strong> rights on files and <strong><em>RWX</em></strong> on folders.</p>
 <h2 id="disable-security-checks">Disable security checks</h2>
 <p>For debugging purposes, you may need to temporarily disable the security checks made by BunkerWeb. One quick way of doing it is by adding everyone in the whitelist (e.g. <code>WHITELIST_IP=0.0.0.0/0</code>).</p>
 <h2 id="modsecurity">ModSecurity</h2>
@@ -1151,9 +1167,9 @@ cat<span class="w"> </span>/var/log/bunkerweb/access.log
 <li>Access denied (rule <strong>949110</strong>)</li>
 </ol>
 <p>One important thing to understand is that rule <strong>949110</strong> is not a "real" one : it's the one that will deny the request because the anomaly threshold is reached (which is <strong>10</strong> in this example). You should never remove the <strong>949110</strong> rule !</p>
-<p>If it's a false-positive, you should then focus on both <strong>930120</strong> and <strong>932160</strong> rules. ModSecurity and/or CRS tuning is out of the scope of this documentation but don't forget that you can apply custom configurations before and after the CRS is loaded (more info <a href="../quickstart-guide/#custom-configurations">here</a>).</p>
+<p>If it's a false-positive, you should then focus on both <strong>930120</strong> and <strong>932160</strong> rules. ModSecurity and/or CRS tuning is out of the scope of this documentation but don't forget that you can apply custom configurations before and after the CRS is loaded (more info <a href="../advanced/#custom-configurations">here</a>).</p>
 <h2 id="bad-behavior">Bad Behavior</h2>
-<p>A common false-positive case is when the client is banned because of the "bad behavior" feature which means that too many suspicious HTTP status codes were generated within a time period (more info <a href="../security-tuning/#bad-behavior">here</a>). You should start by reviewing the settings and then edit them according to your web application(s) like removing a suspicious HTTP code, decreasing the count time, increasing the threshold, ...</p>
+<p>A common false-positive case is when the client is banned because of the "bad behavior" feature which means that too many suspicious HTTP status codes were generated within a time period (more info <a href="../advanced/#bad-behavior">here</a>). You should start by reviewing the settings and then edit them according to your web application(s) like removing a suspicious HTTP code, decreasing the count time, increasing the threshold, ...</p>
 <h2 id="ip-unban">IP unban</h2>
 <p>You can manually unban an IP which can be useful when doing some tests but it needs the setting <code>USE_API</code> set to <code>yes</code> (which is not the default) so you can contact the internal API of BunkerWeb (replace <code>1.2.3.4</code> with the IP address to unban) :</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="2:5"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><input id="__tabbed_2_3" name="__tabbed_2" type="radio" /><input id="__tabbed_2_4" name="__tabbed_2" type="radio" /><input id="__tabbed_2_5" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Docker</label><label for="__tabbed_2_2">Docker autoconf</label><label for="__tabbed_2_3">Swarm</label><label for="__tabbed_2_4">Kubernetes</label><label for="__tabbed_2_5">Linux</label></div>
@@ -1197,7 +1213,7 @@ cat<span class="w"> </span>/var/log/bunkerweb/access.log
 </div>
 </div>
 <h2 id="whitelisting">Whitelisting</h2>
-<p>If you have bots that need to access your website, the recommended way to avoid any false positive is to whitelist them using the <a href="../security-tuning/#blacklisting-whitelisting-and-greylisting">whitelisting feature</a>. We don't recommend using the <code>WHITELIST_URI*</code> or <code>WHITELIST_USER_AGENT*</code> settings unless they are set to secret and unpredictable values. Common use cases are :</p>
+<p>If you have bots that need to access your website, the recommended way to avoid any false positive is to whitelist them using the <a href="../advanced/#blacklisting-whitelisting-and-greylisting">whitelisting feature</a>. We don't recommend using the <code>WHITELIST_URI*</code> or <code>WHITELIST_USER_AGENT*</code> settings unless they are set to secret and unpredictable values. Common use cases are :</p>
 <ul>
 <li>Healthcheck / status bot</li>
 <li>Callback like IPN or webhook</li>
@@ -1534,9 +1550,11 @@ sqlite&gt;
     <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../assets/javascripts/workers/search.f8cc74c7.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.60a45f97.min.js"></script>
+      <script src="../assets/javascripts/bundle.f1b6f286.min.js"></script>
       
         <script src="../js/print-site.js"></script>
+      
+        <script src="../assets/extra.js"></script>
       
     
   </body>

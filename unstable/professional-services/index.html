@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../assets/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.50">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.4">
     
     
       
@@ -28,7 +28,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.a40c8224.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.8608ea7d.min.css">
       
       
 
@@ -53,6 +53,7 @@
       })
     </script>
 
+    <script src="https://cdn.jsdelivr.net/npm/medium-zoom/dist/medium-zoom.min.js"></script>
 
     <script defer>
   // Lazy load images and embed youtube videos
@@ -120,19 +121,20 @@
       }
 
       function runBanner() {
+        startBannerLoop();
         // Try to get dynamic content
         // Else keep static ones
-        fetch("https://www.bunkerweb.io/api/bw-ui-news")
-        .then((res) => {
-          return res.json();
-        })
-        .then((res) => {
-          defaultContent = res.data[0].data;
-          startBannerLoop();
-        })
-        .catch((e) => {
-          startBannerLoop();
-});
+        // fetch("https://www.bunkerweb.io/api/bw-ui-news")
+        // .then((res) => {
+        //   return res.json();
+        // })
+        // .then((res) => {
+        //   defaultContent = res.data[0].data;
+        //   startBannerLoop();
+        // })
+        // .catch((e) => {
+        //   startBannerLoop();
+        // });
       }
 
         setBannerStyle();
@@ -244,7 +246,7 @@
     </a>
 
             </div>
-            <script>var el=document.querySelector("[data-md-component=outdated]"),outdated=__md_get("__outdated",sessionStorage);!0===outdated&&el&&(el.hidden=!1)</script>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL(".."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
           </aside>
         
       </div>
@@ -423,7 +425,7 @@
   
     
   
-  Advanced
+  Advanced usages
 
       </a>
     </li>
@@ -615,6 +617,7 @@
   
   <span class="md-ellipsis">
     Introduction
+    
   </span>
   
 
@@ -635,6 +638,7 @@
   
   <span class="md-ellipsis">
     Concepts
+    
   </span>
   
 
@@ -655,6 +659,7 @@
   
   <span class="md-ellipsis">
     Integrations
+    
   </span>
   
 
@@ -675,6 +680,7 @@
   
   <span class="md-ellipsis">
     Quickstart guide
+    
   </span>
   
 
@@ -694,7 +700,8 @@
         
   
   <span class="md-ellipsis">
-    Advanced
+    Advanced usages
+    
   </span>
   
 
@@ -715,6 +722,7 @@
   
   <span class="md-ellipsis">
     Settings
+    
   </span>
   
 
@@ -735,6 +743,7 @@
   
   <span class="md-ellipsis">
     Web UI
+    
   </span>
   
 
@@ -755,6 +764,7 @@
   
   <span class="md-ellipsis">
     Upgrading
+    
   </span>
   
 
@@ -775,6 +785,7 @@
   
   <span class="md-ellipsis">
     Troubleshooting
+    
   </span>
   
 
@@ -795,6 +806,7 @@
   
   <span class="md-ellipsis">
     Plugins
+    
   </span>
   
 
@@ -824,6 +836,7 @@
   
   <span class="md-ellipsis">
     Professional services
+    
   </span>
   
 
@@ -835,6 +848,7 @@
   
   <span class="md-ellipsis">
     Professional services
+    
   </span>
   
 
@@ -902,6 +916,7 @@
   
   <span class="md-ellipsis">
     About
+    
   </span>
   
 
@@ -924,6 +939,7 @@
                 
                   
 
+
   
   
 
@@ -941,7 +957,7 @@
 <p>One important thing to note is that the support service is based on "credit" system where you pay for a number of support hours dedicated for you. Time passed on your requests will be deducted to your credit. In other words, you only pay for real time dedicated to your needs.</p>
 <p>In addition to the support service, we also offer custom services around the BunkerWeb solution to meet your specific needs :</p>
 <ul>
-<li>Consulting : a dedicated expert will give you advices on your project</li>
+<li>Consulting : a dedicated expert will give you advice on your project</li>
 <li>Development : if you need specific features in BunkerWeb, we can do it for you</li>
 </ul>
 <h2 id="how-can-i-get-more-information">How can I get more information ?</h2>
@@ -1046,9 +1062,11 @@
     <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../assets/javascripts/workers/search.f8cc74c7.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.60a45f97.min.js"></script>
+      <script src="../assets/javascripts/bundle.f1b6f286.min.js"></script>
       
         <script src="../js/print-site.js"></script>
+      
+        <script src="../assets/extra.js"></script>
       
     
   </body>

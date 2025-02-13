@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../assets/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.50">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.4">
     
     
       
@@ -28,7 +28,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.a40c8224.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.8608ea7d.min.css">
       
       
 
@@ -53,6 +53,7 @@
       })
     </script>
 
+    <script src="https://cdn.jsdelivr.net/npm/medium-zoom/dist/medium-zoom.min.js"></script>
 
     <script defer>
   // Lazy load images and embed youtube videos
@@ -120,19 +121,20 @@
       }
 
       function runBanner() {
+        startBannerLoop();
         // Try to get dynamic content
         // Else keep static ones
-        fetch("https://www.bunkerweb.io/api/bw-ui-news")
-        .then((res) => {
-          return res.json();
-        })
-        .then((res) => {
-          defaultContent = res.data[0].data;
-          startBannerLoop();
-        })
-        .catch((e) => {
-          startBannerLoop();
-});
+        // fetch("https://www.bunkerweb.io/api/bw-ui-news")
+        // .then((res) => {
+        //   return res.json();
+        // })
+        // .then((res) => {
+        //   defaultContent = res.data[0].data;
+        //   startBannerLoop();
+        // })
+        // .catch((e) => {
+        //   startBannerLoop();
+        // });
       }
 
         setBannerStyle();
@@ -244,7 +246,7 @@
     </a>
 
             </div>
-            <script>var el=document.querySelector("[data-md-component=outdated]"),outdated=__md_get("__outdated",sessionStorage);!0===outdated&&el&&(el.hidden=!1)</script>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL(".."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
           </aside>
         
       </div>
@@ -423,7 +425,7 @@
   
     
   
-  Advanced
+  Advanced usages
 
       </a>
     </li>
@@ -615,6 +617,7 @@
   
   <span class="md-ellipsis">
     Introduction
+    
   </span>
   
 
@@ -635,6 +638,7 @@
   
   <span class="md-ellipsis">
     Concepts
+    
   </span>
   
 
@@ -655,6 +659,7 @@
   
   <span class="md-ellipsis">
     Integrations
+    
   </span>
   
 
@@ -675,6 +680,7 @@
   
   <span class="md-ellipsis">
     Quickstart guide
+    
   </span>
   
 
@@ -694,7 +700,8 @@
         
   
   <span class="md-ellipsis">
-    Advanced
+    Advanced usages
+    
   </span>
   
 
@@ -715,6 +722,7 @@
   
   <span class="md-ellipsis">
     Settings
+    
   </span>
   
 
@@ -735,6 +743,7 @@
   
   <span class="md-ellipsis">
     Web UI
+    
   </span>
   
 
@@ -764,6 +773,7 @@
   
   <span class="md-ellipsis">
     Upgrading
+    
   </span>
   
 
@@ -775,6 +785,7 @@
   
   <span class="md-ellipsis">
     Upgrading
+    
   </span>
   
 
@@ -839,22 +850,14 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#procedure_1" class="md-nav__link">
+  <a href="#what-changed" class="md-nav__link">
     <span class="md-ellipsis">
-      Procedure
+      What changed?
     </span>
   </a>
   
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#rollback_1" class="md-nav__link">
-    <span class="md-ellipsis">
-      Rollback
-    </span>
-  </a>
-  
-</li>
+    <nav class="md-nav" aria-label="What changed?">
+      <ul class="md-nav__list">
         
           <li class="md-nav__item">
   <a href="#scheduler" class="md-nav__link">
@@ -905,48 +908,20 @@
     </nav>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#upgrade-from-14x" class="md-nav__link">
-    <span class="md-ellipsis">
-      Upgrade from 1.4.X
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Upgrade from 1.4.X">
-      <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#scheduler_1" class="md-nav__link">
+  <a href="#procedure_1" class="md-nav__link">
     <span class="md-ellipsis">
-      Scheduler
+      Procedure
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#database" class="md-nav__link">
+  <a href="#rollback_1" class="md-nav__link">
     <span class="md-ellipsis">
-      Database
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#redis" class="md-nav__link">
-    <span class="md-ellipsis">
-      Redis
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#default-values-and-new-settings_1" class="md-nav__link">
-    <span class="md-ellipsis">
-      Default values and new settings
+      Rollback
     </span>
   </a>
   
@@ -977,6 +952,7 @@
   
   <span class="md-ellipsis">
     Troubleshooting
+    
   </span>
   
 
@@ -997,6 +973,7 @@
   
   <span class="md-ellipsis">
     Plugins
+    
   </span>
   
 
@@ -1017,6 +994,7 @@
   
   <span class="md-ellipsis">
     Professional services
+    
   </span>
   
 
@@ -1037,6 +1015,7 @@
   
   <span class="md-ellipsis">
     About
+    
   </span>
   
 
@@ -1058,6 +1037,7 @@
               <article class="md-content__inner md-typeset">
                 
                   
+
 
   
   
@@ -1398,6 +1378,43 @@ sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">770</sp
 </div>
 </div>
 <h2 id="upgrade-from-15x">Upgrade from 1.5.X</h2>
+<h3 id="what-changed">What changed?</h3>
+<h4 id="scheduler">Scheduler</h4>
+<p>Unlike the 1.5.X releases, the Scheduler service <strong>no longer uses the <em>docker socket proxy</em> to fetch BunkerWeb's instances</strong>. Instead, it uses the new <code>BUNKERWEB_INSTANCES</code> environment variable.</p>
+<div class="admonition info">
+<p class="admonition-title">About the <code>BUNKERWEB_INSTANCES</code> environment variable</p>
+<p>This new variable is a list of BunkerWeb instances separated by spaces in this format: <code>http://bunkerweb:5000 bunkerweb1:5000 bunkerweb2:5000 ...</code>. The scheduler will then use this list to fetch the instances' configuration and to send the configuration to them.</p>
+<ul>
+<li>The <code>http://</code> prefix is optional.</li>
+<li>The port is optional and defaults to the value of the <code>API_HTTP_PORT</code> environment variable.</li>
+<li>The default value of the <code>BUNKERWEB_INSTANCES</code> environment variable is <code>127.0.0.1</code>.</li>
+</ul>
+</div>
+<p>In other words, the new system is fully agnostic and generic: the scheduler is in charge of managing a list of BunkerWeb instances and doesn't need to care about the environment.</p>
+<div class="admonition tip">
+<p class="admonition-title">Autoconf/Kubernetes/Swarm integrations</p>
+<p>If you are using the <code>Autoconf</code>, <code>Kubernetes</code>, or <code>Swarm</code> integrations, you can set the <code>BUNKERWEB_INSTANCES</code> environment variable to an empty string (so that it doesn't try to send the configuration to the default one which is <code>127.0.0.1</code>).</p>
+<p><strong>The instances will be automatically fetched by the controller</strong>. You can also add custom instances to the list that may not be picked up by the controller.</p>
+</div>
+<p>Since the <code>1.6</code>, the Scheduler also have a new <a href="../concepts/">built-in healthcheck system</a>, that will check the health of the instances. If an instance becomes unhealthy, the scheduler will stop sending the configuration to it. If the instance becomes healthy again, the scheduler will start sending the configuration to it again.</p>
+<h4 id="bunkerweb-container">BunkerWeb container</h4>
+<p>Another important change is that the <strong>settings</strong> that were previously declared on the BunkerWeb container <strong>are now declared on the scheduler</strong>. This means that you'll have to move your settings from the BunkerWeb container to the Scheduler container.</p>
+<p>While the settings are now declared on the Scheduler container, <strong>you'll still need to declare api related mandatory settings on the BunkerWeb container</strong> like the <code>API_WHITELIST_IP</code> setting which is used to whitelist the Scheduler's IP address, so that it can send the configuration to the instance.</p>
+<div class="admonition warning">
+<p class="admonition-title">BunkerWeb's container settings</p>
+<p>Every API related setting that you declare on the BunkerWeb container <strong>have to be mirrored on the Scheduler container</strong> so that it keeps working, as the configuration will be overwritten by the Scheduler's generated configuration.</p>
+</div>
+<h4 id="default-values-and-new-settings">Default values and new settings</h4>
+<p>We tried our best not to change default value but we have added many other settings. It's highly recommended to read the <a href="../advanced/#security-tuning">security tuning</a> and <a href="../settings/">settings</a> sections of the documentation.</p>
+<h4 id="templates">Templates</h4>
+<p>We added a new feature called <strong>templates</strong>. Templates provide a structured and standardized approach to defining settings and custom configurations, check the <a href="../concepts/#templates">concepts/templates</a> section for more information.</p>
+<h4 id="autoconf-namespaces">Autoconf namespaces</h4>
+<p>We added a <strong>namespace</strong> feature to the autoconf integrations. Namespaces allow you to group your instances and apply settings only to them. Check the following sections according to your Integration for more information:</p>
+<ul>
+<li><a href="../integrations/#namespaces">Autoconf/namespaces</a></li>
+<li><a href="../integrations/#namespaces_1">Kubernetes/namespaces</a></li>
+<li><a href="../integrations/#namespaces_2">Swarm/namespaces</a></li>
+</ul>
 <h3 id="procedure_1">Procedure</h3>
 <ol>
 <li>
@@ -1798,67 +1815,6 @@ sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">770</sp
 </div>
 </div>
 </div>
-<h3 id="scheduler">Scheduler</h3>
-<p>Unlike the 1.5.X releases, the Scheduler service <strong>no longer uses the <em>docker socket proxy</em> to fetch BunkerWeb's instances</strong>. Instead, it uses the new <code>BUNKERWEB_INSTANCES</code> environment variable.</p>
-<div class="admonition info">
-<p class="admonition-title">About the <code>BUNKERWEB_INSTANCES</code> environment variable</p>
-<p>This new variable is a list of BunkerWeb instances separated by spaces in this format: <code>http://bunkerweb:5000 bunkerweb1:5000 bunkerweb2 ...</code>. The scheduler will then use this list to fetch the instances' configuration and to send the configuration to them.</p>
-<ul>
-<li>The <code>http://</code> prefix is optional.</li>
-<li>The port is optional and defaults to the value of the <code>API_HTTP_PORT</code> environment variable.</li>
-<li>The default value of the <code>BUNKERWEB_INSTANCES</code> environment variable is <code>127.0.0.1</code>.</li>
-</ul>
-</div>
-<div class="admonition tip">
-<p class="admonition-title">Autoconf/Swarm/Kubernetes integrations</p>
-<p>If you are using the <code>Autoconf</code>, <code>Swarm</code>, or <code>Kubernetes</code> integrations, you can set the <code>BUNKERWEB_INSTANCES</code> environment variable to an empty string (so that it doesn't try to send the configuration to the default one which is <code>127.0.0.1</code>).</p>
-<p><strong>The instances will be automatically fetched by the controller</strong>. You can also add custom instances to the list that may not be picked up by the controller.</p>
-</div>
-<p>Since the <code>1.6.0-beta</code>, the Scheduler also have a new <a href="../concepts/#instances-healthcheck">built-in healthcheck system</a>, that will check the health of the instances. If an instance becomes unhealthy, the scheduler will stop sending the configuration to it. If the instance becomes healthy again, the scheduler will start sending the configuration to it again.</p>
-<h3 id="bunkerweb-container">BunkerWeb container</h3>
-<p>Another important change is that the <strong>settings</strong> that were previously declared on the BunkerWeb container <strong>are now declared on the scheduler</strong>. This means that you'll have to move your settings from the BunkerWeb container to the Scheduler container.</p>
-<p>While the settings are now declared on the Scheduler container, <strong>you'll still need to declare api related mandatory settings on the BunkerWeb container</strong> like the <code>API_WHITELIST_IP</code> setting which is used to whitelist the Scheduler's IP address, so that it can send the configuration to the instance.</p>
-<div class="admonition warning">
-<p class="admonition-title">BunkerWeb's container settings</p>
-<p>Every api related setting that you declare on the BunkerWeb container <strong>have to be mirrored on the Scheduler container</strong> so that it keeps working, as the configuration will be overwritten by the Scheduler's generated configuration.</p>
-</div>
-<h3 id="default-values-and-new-settings">Default values and new settings</h3>
-<p>The default value of some settings have changed and we have added many other settings, we recommend you read the <a href="../security-tuning/">security tuning</a> and <a href="../settings/">settings</a> sections of the documentation.</p>
-<h3 id="templates">Templates</h3>
-<p>We added a new feature called <strong>templates</strong>. Templates provide a structured and standardized approach to defining settings and custom configurations, check the <a href="../concepts/#templates">concepts/templates</a> section for more information.</p>
-<h3 id="autoconf-namespaces">Autoconf namespaces</h3>
-<p>We added a <strong>namespace</strong> feature to the autoconf integrations. Namespaces allow you to group your instances and apply settings only to them. Check the following sections according to your Integration for more information:</p>
-<ul>
-<li><a href="../integrations/#namespaces">Autoconf/namespaces</a></li>
-<li><a href="../integrations/#namespaces_1">Kubernetes/namespaces</a></li>
-<li><a href="../integrations/#namespaces_2">Swarm/namespaces</a></li>
-</ul>
-<h2 id="upgrade-from-14x">Upgrade from 1.4.X</h2>
-<div class="admonition warning">
-<p class="admonition-title">Read this if you were a 1.4.X user</p>
-<p>A lot of things changed since the 1.4.X releases. Container-based integrations stacks contain more services but, trust us, fundamental principles of BunkerWeb are still there. You will find ready to use boilerplates for various integrations in the <a href="https://github.com/bunkerity/bunkerweb/tree/vtesting/misc/integrations">misc/integrations</a> folder of the repository.</p>
-</div>
-<h3 id="scheduler_1">Scheduler</h3>
-<p>Back to the 1.4.X releases, jobs (like Let's Encrypt certificate generation/renewal or blacklists download) <strong>were executed in the same container as BunkerWeb</strong>. For the purpose of <a href="https://en.wikipedia.org/wiki/Separation_of_concerns">separation of concerns</a>, we decided to create a <strong>separate service</strong> which is now responsible for managing jobs.</p>
-<p>Called <strong>Scheduler</strong>, this service also generates the final configuration used by BunkerWeb and acts as an intermediary between autoconf and BunkerWeb. In other words, the scheduler is the <strong>brain of the BunkerWeb 1.5.X stack</strong>.</p>
-<p>You will find more information about the scheduler <a href="../concepts/#scheduler">here</a>.</p>
-<h3 id="database">Database</h3>
-<p>BunkerWeb configuration is <strong>no more stored in a plain file</strong> (located at <code>/etc/nginx/variables.env</code> if you didn't know it). That's it, we now support a <strong>fully-featured database as a backend</strong> to store settings, cache, custom configs, ... 🥳</p>
-<p>Using a real database offers many advantages :</p>
-<ul>
-<li>Backup of the current configuration</li>
-<li>Usage with multiple services (scheduler, web UI, ...)</li>
-<li>Upgrade to a new BunkerWeb version</li>
-</ul>
-<p>Please note that we actually support, <strong>SQLite</strong>, <strong>MySQL</strong>, <strong>MariaDB</strong> and <strong>PostgreSQL</strong> as backends.</p>
-<p>You will find more information about the database <a href="../concepts/#database">here</a>.</p>
-<h3 id="redis">Redis</h3>
-<p>When BunkerWeb 1.4.X was used in cluster mode (Swarm or Kubernetes integrations), <strong>data were not shared among the nodes</strong>. For example, if an attacker was banned via the "bad behavior" feature on a specific node, <strong>he could still connect to the other nodes</strong>.</p>
-<p>Security is not the only reason to have a shared data store for clustered integrations, <strong>caching</strong> is also another one. We can now <strong>store results</strong> of time-consuming operations like (reverse) dns lookups so they are <strong>available for other nodes</strong>.</p>
-<p>We actually support <strong>Redis</strong> as a backend for the shared data store.</p>
-<p>See the list of <a href="../settings/#redis">redis settings</a> and the corresponding documentation of your integration for more information.</p>
-<h3 id="default-values-and-new-settings_1">Default values and new settings</h3>
-<p>The default value of some settings have changed and we have added many other settings, we recommend you read the <a href="../security-tuning/">security tuning</a> and <a href="../settings/">settings</a> sections of the documentation.</p>
 
 
 
@@ -1958,9 +1914,11 @@ sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">770</sp
     <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../assets/javascripts/workers/search.f8cc74c7.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.60a45f97.min.js"></script>
+      <script src="../assets/javascripts/bundle.f1b6f286.min.js"></script>
       
         <script src="../js/print-site.js"></script>
+      
+        <script src="../assets/extra.js"></script>
       
     
   </body>

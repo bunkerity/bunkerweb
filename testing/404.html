@@ -14,7 +14,7 @@
       
       
       <link rel="icon" href="/latest/assets/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.50">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.4">
     
     
       
@@ -22,7 +22,7 @@
       
     
     
-      <link rel="stylesheet" href="/latest/assets/stylesheets/main.a40c8224.min.css">
+      <link rel="stylesheet" href="/latest/assets/stylesheets/main.8608ea7d.min.css">
       
       
 
@@ -47,6 +47,7 @@
       })
     </script>
 
+    <script src="https://cdn.jsdelivr.net/npm/medium-zoom/dist/medium-zoom.min.js"></script>
 
     <script defer>
   // Lazy load images and embed youtube videos
@@ -114,19 +115,20 @@
       }
 
       function runBanner() {
+        startBannerLoop();
         // Try to get dynamic content
         // Else keep static ones
-        fetch("https://www.bunkerweb.io/api/bw-ui-news")
-        .then((res) => {
-          return res.json();
-        })
-        .then((res) => {
-          defaultContent = res.data[0].data;
-          startBannerLoop();
-        })
-        .catch((e) => {
-          startBannerLoop();
-});
+        // fetch("https://www.bunkerweb.io/api/bw-ui-news")
+        // .then((res) => {
+        //   return res.json();
+        // })
+        // .then((res) => {
+        //   defaultContent = res.data[0].data;
+        //   startBannerLoop();
+        // })
+        // .catch((e) => {
+        //   startBannerLoop();
+        // });
       }
 
         setBannerStyle();
@@ -207,7 +209,7 @@
     </a>
 
             </div>
-            <script>var el=document.querySelector("[data-md-component=outdated]"),outdated=__md_get("__outdated",sessionStorage);!0===outdated&&el&&(el.hidden=!1)</script>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL("/latest"),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
           </aside>
         
       </div>
@@ -386,7 +388,7 @@
   
     
   
-  Advanced
+  Advanced usages
 
       </a>
     </li>
@@ -576,6 +578,7 @@
   
   <span class="md-ellipsis">
     Introduction
+    
   </span>
   
 
@@ -596,6 +599,7 @@
   
   <span class="md-ellipsis">
     Concepts
+    
   </span>
   
 
@@ -616,6 +620,7 @@
   
   <span class="md-ellipsis">
     Integrations
+    
   </span>
   
 
@@ -636,6 +641,7 @@
   
   <span class="md-ellipsis">
     Quickstart guide
+    
   </span>
   
 
@@ -655,7 +661,8 @@
         
   
   <span class="md-ellipsis">
-    Advanced
+    Advanced usages
+    
   </span>
   
 
@@ -676,6 +683,7 @@
   
   <span class="md-ellipsis">
     Settings
+    
   </span>
   
 
@@ -696,6 +704,7 @@
   
   <span class="md-ellipsis">
     Web UI
+    
   </span>
   
 
@@ -716,6 +725,7 @@
   
   <span class="md-ellipsis">
     Upgrading
+    
   </span>
   
 
@@ -736,6 +746,7 @@
   
   <span class="md-ellipsis">
     Troubleshooting
+    
   </span>
   
 
@@ -756,6 +767,7 @@
   
   <span class="md-ellipsis">
     Plugins
+    
   </span>
   
 
@@ -776,6 +788,7 @@
   
   <span class="md-ellipsis">
     Professional services
+    
   </span>
   
 
@@ -796,6 +809,7 @@
   
   <span class="md-ellipsis">
     About
+    
   </span>
   
 
@@ -901,9 +915,11 @@
     <script id="__config" type="application/json">{"base": "/latest", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "/latest/assets/javascripts/workers/search.f8cc74c7.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
-      <script src="/latest/assets/javascripts/bundle.60a45f97.min.js"></script>
+      <script src="/latest/assets/javascripts/bundle.f1b6f286.min.js"></script>
       
         <script src="/latest/js/print-site.js"></script>
+      
+        <script src="/latest/assets/extra.js"></script>
       
     
   </body>

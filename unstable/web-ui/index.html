@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../assets/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.50">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.4">
     
     
       
@@ -28,7 +28,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.a40c8224.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.8608ea7d.min.css">
       
       
 
@@ -53,6 +53,7 @@
       })
     </script>
 
+    <script src="https://cdn.jsdelivr.net/npm/medium-zoom/dist/medium-zoom.min.js"></script>
 
     <script defer>
   // Lazy load images and embed youtube videos
@@ -120,19 +121,20 @@
       }
 
       function runBanner() {
+        startBannerLoop();
         // Try to get dynamic content
         // Else keep static ones
-        fetch("https://www.bunkerweb.io/api/bw-ui-news")
-        .then((res) => {
-          return res.json();
-        })
-        .then((res) => {
-          defaultContent = res.data[0].data;
-          startBannerLoop();
-        })
-        .catch((e) => {
-          startBannerLoop();
-});
+        // fetch("https://www.bunkerweb.io/api/bw-ui-news")
+        // .then((res) => {
+        //   return res.json();
+        // })
+        // .then((res) => {
+        //   defaultContent = res.data[0].data;
+        //   startBannerLoop();
+        // })
+        // .catch((e) => {
+        //   startBannerLoop();
+        // });
       }
 
         setBannerStyle();
@@ -244,7 +246,7 @@
     </a>
 
             </div>
-            <script>var el=document.querySelector("[data-md-component=outdated]"),outdated=__md_get("__outdated",sessionStorage);!0===outdated&&el&&(el.hidden=!1)</script>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL(".."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
           </aside>
         
       </div>
@@ -423,7 +425,7 @@
   
     
   
-  Advanced
+  Advanced usages
 
       </a>
     </li>
@@ -615,6 +617,7 @@
   
   <span class="md-ellipsis">
     Introduction
+    
   </span>
   
 
@@ -635,6 +638,7 @@
   
   <span class="md-ellipsis">
     Concepts
+    
   </span>
   
 
@@ -655,6 +659,7 @@
   
   <span class="md-ellipsis">
     Integrations
+    
   </span>
   
 
@@ -675,6 +680,7 @@
   
   <span class="md-ellipsis">
     Quickstart guide
+    
   </span>
   
 
@@ -694,7 +700,8 @@
         
   
   <span class="md-ellipsis">
-    Advanced
+    Advanced usages
+    
   </span>
   
 
@@ -715,6 +722,7 @@
   
   <span class="md-ellipsis">
     Settings
+    
   </span>
   
 
@@ -744,6 +752,7 @@
   
   <span class="md-ellipsis">
     Web UI
+    
   </span>
   
 
@@ -755,6 +764,7 @@
   
   <span class="md-ellipsis">
     Web UI
+    
   </span>
   
 
@@ -785,15 +795,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#features" class="md-nav__link">
-    <span class="md-ellipsis">
-      Features
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#prerequisites" class="md-nav__link">
     <span class="md-ellipsis">
       Prerequisites
@@ -803,9 +804,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#setup-wizard" class="md-nav__link">
+  <a href="#upgrade-to-pro" class="md-nav__link">
     <span class="md-ellipsis">
-      Setup wizard
+      Upgrade to PRO
     </span>
   </a>
   
@@ -820,6 +821,15 @@
   
     <nav class="md-nav" aria-label="Accessing logs">
       <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#compose-boilerplates" class="md-nav__link">
+    <span class="md-ellipsis">
+      Compose boilerplates
+    </span>
+  </a>
+  
+</li>
         
           <li class="md-nav__item">
   <a href="#syslog-ng-configuration" class="md-nav__link">
@@ -846,15 +856,6 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#upgrade-to-pro" class="md-nav__link">
-    <span class="md-ellipsis">
-      Upgrade to PRO
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#username-password" class="md-nav__link">
     <span class="md-ellipsis">
       Username / Password
@@ -866,7 +867,16 @@
           <li class="md-nav__item">
   <a href="#two-factor-authentication" class="md-nav__link">
     <span class="md-ellipsis">
-      Two-Factor Authentication
+      Two-Factor authentication
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#current-sessions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Current sessions
     </span>
   </a>
   
@@ -906,6 +916,7 @@
   
   <span class="md-ellipsis">
     Upgrading
+    
   </span>
   
 
@@ -926,6 +937,7 @@
   
   <span class="md-ellipsis">
     Troubleshooting
+    
   </span>
   
 
@@ -946,6 +958,7 @@
   
   <span class="md-ellipsis">
     Plugins
+    
   </span>
   
 
@@ -966,6 +979,7 @@
   
   <span class="md-ellipsis">
     Professional services
+    
   </span>
   
 
@@ -986,6 +1000,7 @@
   
   <span class="md-ellipsis">
     About
+    
   </span>
   
 
@@ -1008,6 +1023,7 @@
                 
                   
 
+
   
   
 
@@ -1015,100 +1031,96 @@
 <h1 id="web-ui">Web UI</h1>
 <h2 id="overview">Overview</h2>
 <p align="center">
- <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/Ao20SfvQyr4" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/tGS3pzquEjY" title="BunkerWeb web UI" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 </p>
 
 <p>The "Web UI" is a web application that helps you manage your BunkerWeb instance using a user-friendly interface instead of the command-line one.</p>
-<h2 id="features">Features</h2>
+<p>Here is the list of features offered by the web UI :</p>
 <ul>
+<li>Get a comprehensive view of the blocked attacks</li>
 <li>Start, stop, restart and reload your BunkerWeb instance</li>
 <li>Add, edit and delete settings for your web applications</li>
 <li>Add, edit and delete custom configurations for NGINX and ModSecurity</li>
 <li>Install and uninstall external plugins</li>
 <li>Explore the cached files</li>
-<li>Monitor jobs execution</li>
+<li>Monitor jobs execution and restart them when needed</li>
 <li>View the logs and search pattern</li>
 </ul>
 <h2 id="prerequisites">Prerequisites</h2>
-<p>Because the web UI is a web application, the recommended installation procedure is to use BunkerWeb in front of it as a reverse proxy.</p>
+<p>Because the web UI is a web application, the recommended architecture is to use BunkerWeb in front of it as a reverse proxy. The recommended installation procedure is to use the setup wizard, which will guide you step by step as described in the <a href="../quickstart-guide/">quickstart guide</a> section of the documentation.</p>
 <div class="admonition warning">
 <p class="admonition-title">Security considerations</p>
 <p>The security of the web UI is really important. If someone manages to gain access to the application, not only he will be able to edit your configurations but he could execute some code in the context of BunkerWeb (with a custom configuration containing LUA code for example). We highly recommend you to follow minimal security best practices like :</p>
 <ul>
 <li>Choose a strong password for the login (<strong>at least 8 chars with 1 lower case letter, 1 upper case letter, 1 digit and 1 special char is required</strong>)</li>
 <li>Put the web UI under a "hard to guess" URI</li>
+<li>Enable two-factor authentication (2FA)</li>
 <li>Do not open the web UI on the Internet without any further restrictions</li>
-<li>Apply settings listed in the <a href="../security-tuning/">security tuning section</a> of the documentation</li>
+<li>Apply best practices listed in the <a href="../advanced/#security-tuning">advanced usages section</a> of the documentation depending on your use case</li>
 </ul>
-<p><strong>Please note that using HTTPS in front the web UI is mandatory since version 1.5.8 of BunkerWeb.</strong></p>
 </div>
+<h2 id="upgrade-to-pro">Upgrade to PRO</h2>
 <div class="admonition info">
-<p class="admonition-title">Multisite mode</p>
-<p>The usage of the web UI implies enabling the <a href="../concepts/#multisite-mode">multisite mode</a>.</p>
+<p class="admonition-title">What is BunkerWeb PRO ?</p>
+<p>BunkerWeb PRO is an enhanced version of BunkerWeb open-source. Whether it's enhanced security, an enriched user experience, or technical monitoring, the BunkerWeb PRO version will allow you to fully benefit from BunkerWeb and respond to your professional needs. Do not hesitate to visit the <a href="https://panel.bunkerweb.io/knowledgebase?utm_campaign=self&amp;utm_source=doc">BunkerWeb panel</a> or <a href="https://panel.bunkerweb.io/contact.php?utm_campaign=self&amp;utm_source=doc">contact us</a> if you have any question regarding the PRO version.</p>
 </div>
-<div class="admonition tip">
-<p class="admonition-title">web UI specific environment variables</p>
-<p>The web UI uses the following environment variables :</p>
-<ul>
-<li><code>OVERRIDE_ADMIN_CREDS</code> : set it to <code>yes</code> to enable the override even if the admin credentials are already set (default is <code>no</code>).</li>
-<li><code>ADMIN_USERNAME</code> : username to access the web UI.</li>
-<li><code>ADMIN_PASSWORD</code> : password to access the web UI.</li>
-<li><code>FLASK_SECRET</code> : a secret key used to encrypt the session cookie (if not set, a random key will be generated).</li>
-<li><code>TOTP_SECRETS</code> : a list of TOTP secrets separated by spaces or a dictionary (e.g. : <code>{"1": "mysecretkey"}</code> or <code>mysecretkey</code> or <code>mysecretkey mysecretkey1</code>). <strong>We strongly recommend you to set this variable if you want to use 2FA, as it will be used to encrypt the TOTP secret keys</strong> (if not set, a random number of secret keys will be generated). Check out the <a href="https://passlib.readthedocs.io/en/stable/narr/totp-tutorial.html#application-secrets">passlib documentation</a> for more information.</li>
-<li><code>LISTEN_ADDR</code> : the address where the web UI will listen (default is <code>0.0.0.0</code> in <strong>Docker images</strong> and <code>127.0.0.1</code> on <strong>Linux installations</strong>).</li>
-<li><code>LISTEN_PORT</code> : the port where the web UI will listen (default is <code>7000</code>).</li>
-<li><code>MAX_WORKERS</code> : the number of workers used by the web UI (default is the number of CPUs).</li>
-<li><code>MAX_THREADS</code> : the number of threads used by the web UI (default is <code>MAX_WORKERS</code> * 2).</li>
-<li><code>FORWARDED_ALLOW_IPS</code> : a list of IP addresses or networks that are allowed to be used in the <code>X-Forwarded-For</code> header (default is <code>*</code> in <strong>Docker images</strong> and <code>127.0.0.1</code> on <strong>Linux installations</strong>).</li>
-<li><code>CHECK_PRIVATE_IP</code> : set it to <code>yes</code> to not disconnect users that have their IP address changed during a session if they are in a private network (default is <code>yes</code>). (Non-private IP addresses are always checked).</li>
-</ul>
-<p>The web UI will use these variables to authenticate you and handle the 2FA feature.</p>
-</div>
-<div class="admonition example">
-<p class="admonition-title">Generating recommended secrets</p>
-<p>To generate a valid <strong>ADMIN_PASSWORD</strong>, we recommend you to <strong>use a password manager</strong> or a <strong>password generator</strong>.</p>
-<p>You can generate a valid <strong>FLASK_SECRET</strong> using the following command :</p>
-<div class="highlight"><pre><span></span><code>python3<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import secrets; print(secrets.token_hex(64))&quot;</span>
-</code></pre></div>
-<p>You can generate valid space-separated <strong>TOTP_SECRETS</strong> using the following command (you will need the <code>passlib</code> package) :</p>
-<div class="highlight"><pre><span></span><code>python3<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;from passlib import totp; print(&#39; &#39;.join(totp.generate_secret() for i in range(1, 6)))&quot;</span>
-</code></pre></div>
-</div>
-<h2 id="setup-wizard">Setup wizard</h2>
-<div class="admonition info">
-<p class="admonition-title">Wizard</p>
-<p>The setup wizard is a feature that helps you to <strong>configure</strong> and <strong>install the web UI</strong> using a <strong>user-friendly interface</strong>. You will need to set the <code>UI_HOST</code> setting (<code>http://hostname-of-web-ui:7000</code>) and browse the <code>/setup</code> URI of your server to access the setup wizard.</p>
-</div>
+<p>Once you have your PRO license key from the <a href="https://panel.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc">BunkerWeb panel</a>, you can paste it into the PRO page of the web UI.</p>
 <figure>
-<p><img align="center," alt="Overview" src="../assets/img/ui-wizard-account.webp" width="350" />
+<p><img align="center," alt="PRO upgrade" src="../assets/img/pro-ui-upgrade.png" width="700" />
   </p>
-<figcaption>Account section of the setup wizard</figcaption>
+<figcaption>Upgrade to PRO from the web UI</figcaption>
 </figure>
-<p>Choose your administrator username and password. Please note that password must have at least 8 chars with 1 lower case letter, 1 upper case letter, 1 digit and 1 special char.</p>
-<figure>
-<p><img align="center," alt="Overview" src="../assets/img/ui-wizard-settings.webp" width="350" />
-  </p>
-<figcaption>Settings section of the setup wizard</figcaption>
-</figure>
-<p>Configure the following settings :</p>
-<ul>
-<li><code>UI Host</code> : internal http endpoint of your web UI</li>
-<li><code>UI URL</code> : the public path where your web UI will be accessible</li>
-<li><code>Server name</code> : the public server name where your web UI will be accessible</li>
-<li><code>Auto let's encrypt</code> : enable/disable HTTPS using automated let's encrypt</li>
-</ul>
-<p>Please note that your server name must have a valid DNS entry pointing to your BunkerWeb instance (or load balancer if you use Swarm/Kubernetes). You can check the DNS validity by clicking the <code>Check</code> button.</p>
-<p>Review your final BunkerWeb UI URL and then click on the <code>Setup</code> button. Once the setup is finished, you will be redirected to your web UI login page.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:5"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><input id="__tabbed_1_5" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Docker</label><label for="__tabbed_1_2">Docker autoconf</label><label for="__tabbed_1_3">Swarm</label><label for="__tabbed_1_4">Kubernetes</label><label for="__tabbed_1_5">Linux</label></div>
-<div class="tabbed-content">
-<div class="tabbed-block">
-<p>If you want to use the setup wizard, you will need to set the <code>UI_HOST</code> setting to the HTTP endpoint of your web UI container. For example, if your web UI container is named <code>bw-ui</code> and is listening on the <code>7000</code> port, you will need to set the <code>UI_HOST</code> setting to <code>http://bw-ui:7000</code>.</p>
-<div class="admonition tip">
-<p class="admonition-title">Accessing the setup wizard</p>
-<p>You can access the setup wizard by browsing the <code>https://your-ip-address-or-fqdn/setup</code> URI of your server.</p>
+<div class="admonition warning">
+<p class="admonition-title">Upgrade time</p>
+<p>The PRO version is downloaded in the background by the scheduler, it may take some time to upgrade.</p>
 </div>
-<p>Here is the docker-compose boilerplate that you can use (don't forget to edit the <code>changeme</code> data) :</p>
-<div class="highlight"><pre><span></span><code><span class="nt">x-ui-env</span><span class="p">:</span><span class="w"> </span><span class="nl">&amp;bw-ui-env</span>
+<p>When your BunkerWeb instance has upgraded to the PRO version, you will see your license expiration date and the maximum number of services you can protect.</p>
+<figure>
+<p><img align="center," alt="PRO upgrade" src="../assets/img/ui-pro.png" width="700" />
+  </p>
+<figcaption>PRO license information</figcaption>
+</figure>
+<!-- ## Setup wizard
+
+!!! info "Wizard"
+
+    The setup wizard is a feature that helps you to **configure** and **install the web UI** using a **user-friendly interface**. You will need to set the `UI_HOST` setting (`http://hostname-of-web-ui:7000`) and browse the `/setup` URI of your server to access the setup wizard.
+
+<figure markdown>
+  ![Overview](assets/img/ui-wizard-account.webp){ align=center, width="350" }
+  <figcaption>Account section of the setup wizard</figcaption>
+</figure>
+
+Choose your administrator username and password. Please note that password must have at least 8 chars with 1 lower case letter, 1 upper case letter, 1 digit and 1 special char.
+
+<figure markdown>
+  ![Overview](assets/img/ui-wizard-settings.webp){ align=center, width="350" }
+  <figcaption>Settings section of the setup wizard</figcaption>
+</figure>
+
+Configure the following settings :
+
+- `UI Host` : internal http endpoint of your web UI
+- `UI URL` : the public path where your web UI will be accessible
+- `Server name` : the public server name where your web UI will be accessible
+- `Auto let's encrypt` : enable/disable HTTPS using automated let's encrypt
+
+Please note that your server name must have a valid DNS entry pointing to your BunkerWeb instance (or load balancer if you use Swarm/Kubernetes). You can check the DNS validity by clicking the `Check` button.
+
+Review your final BunkerWeb UI URL and then click on the `Setup` button. Once the setup is finished, you will be redirected to your web UI login page.
+
+=== "Docker"
+
+    If you want to use the setup wizard, you will need to set the `UI_HOST` setting to the HTTP endpoint of your web UI container. For example, if your web UI container is named `bw-ui` and is listening on the `7000` port, you will need to set the `UI_HOST` setting to `http://bw-ui:7000`.
+
+    !!! tip "Accessing the setup wizard"
+
+        You can access the setup wizard by browsing the `https://your-ip-address-or-fqdn/setup` URI of your server.
+
+
+    Here is the docker-compose boilerplate that you can use (don't forget to edit the `changeme` data) :
+
+    <div class="highlight"><pre><span></span><code><span class="nt">x-ui-env</span><span class="p">:</span><span class="w"> </span><span class="nl">&amp;bw-ui-env</span>
 <span class="w">  </span><span class="c1"># We anchor the environment variables to avoid duplication</span>
 <span class="w">  </span><span class="nt">DATABASE_URI</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger password for the database</span>
 
@@ -1181,15 +1193,18 @@
 <span class="w">  </span><span class="nt">bw-db</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
 </code></pre></div>
-</div>
-<div class="tabbed-block">
-<p>If you want to use the setup wizard, you will need to set the <code>UI_HOST</code> setting to the HTTP endpoint of your web UI container. For example, if your web UI container is named <code>bw-ui</code> and is listening on the <code>7000</code> port, you will need to set the <code>UI_HOST</code> setting to <code>http://bw-ui:7000</code>.</p>
-<div class="admonition tip">
-<p class="admonition-title">Accessing the setup wizard</p>
-<p>You can access the setup wizard by browsing the <code>https://your-ip-address-or-fqdn/setup</code> URI of your server.</p>
-</div>
-<p>Here is the docker-compose boilerplate that you can use (don't forget to edit the <code>changeme</code> data) :</p>
-<div class="highlight"><pre><span></span><code><span class="nt">x-ui-env</span><span class="p">:</span><span class="w"> </span><span class="nl">&amp;bw-ui-env</span>
+
+=== "Docker autoconf"
+
+    If you want to use the setup wizard, you will need to set the `UI_HOST` setting to the HTTP endpoint of your web UI container. For example, if your web UI container is named `bw-ui` and is listening on the `7000` port, you will need to set the `UI_HOST` setting to `http://bw-ui:7000`.
+
+    !!! tip "Accessing the setup wizard"
+
+        You can access the setup wizard by browsing the `https://your-ip-address-or-fqdn/setup` URI of your server.
+
+    Here is the docker-compose boilerplate that you can use (don't forget to edit the `changeme` data) :
+
+    <div class="highlight"><pre><span></span><code><span class="nt">x-ui-env</span><span class="p">:</span><span class="w"> </span><span class="nl">&amp;bw-ui-env</span>
 <span class="w">  </span><span class="c1"># We anchor the environment variables to avoid duplication</span>
 <span class="w">  </span><span class="nt">AUTOCONF_MODE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
 <span class="w">  </span><span class="nt">DATABASE_URI</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger password for the database</span>
@@ -1291,20 +1306,23 @@
 <span class="w">  </span><span class="nt">bw-db</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
 </code></pre></div>
-</div>
-<div class="tabbed-block">
-<div class="admonition warning">
-<p class="admonition-title">Deprecated</p>
-<p>The Swarm integration is deprecated and will be removed in a future release. Please consider using the <a href="#__tabbed_1_2">Docker autoconf integration</a> instead.</p>
-<p><strong>More information can be found in the <a href="../integrations/#swarm">Swarm integration documentation</a>.</strong></p>
-</div>
-<p>If you want to use the setup wizard, you will need to set the <code>UI_HOST</code> setting to the HTTP endpoint of your web UI container. For example, if your web UI container is named <code>bw-ui</code> and is listening on the <code>7000</code> port, you will need to set the <code>UI_HOST</code> setting to <code>http://bw-ui:7000</code>.</p>
-<div class="admonition tip">
-<p class="admonition-title">Accessing the setup wizard</p>
-<p>You can access the setup wizard by browsing the <code>https://your-ip-address-or-fqdn/setup</code> URI of your server.</p>
-</div>
-<p>Here is the stack boilerplate that you can use (don't forget to edit the <code>changeme</code> data) :</p>
-<div class="highlight"><pre><span></span><code><span class="nt">x-ui-env</span><span class="p">:</span><span class="w"> </span><span class="nl">&amp;bw-ui-env</span>
+
+=== "Swarm"
+
+    !!! warning "Deprecated"
+        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Docker autoconf integration](#__tabbed_1_2) instead.
+
+        **More information can be found in the [Swarm integration documentation](integrations.md#swarm).**
+
+    If you want to use the setup wizard, you will need to set the `UI_HOST` setting to the HTTP endpoint of your web UI container. For example, if your web UI container is named `bw-ui` and is listening on the `7000` port, you will need to set the `UI_HOST` setting to `http://bw-ui:7000`.
+
+    !!! tip "Accessing the setup wizard"
+
+        You can access the setup wizard by browsing the `https://your-ip-address-or-fqdn/setup` URI of your server.
+
+    Here is the stack boilerplate that you can use (don't forget to edit the `changeme` data) :
+
+    <div class="highlight"><pre><span></span><code><span class="nt">x-ui-env</span><span class="p">:</span><span class="w"> </span><span class="nl">&amp;bw-ui-env</span>
 <span class="w">  </span><span class="c1"># We anchor the environment variables to avoid duplication</span>
 <span class="w">  </span><span class="nt">SWARM_MODE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
 <span class="w">  </span><span class="nt">DATABASE_URI</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger password for the database</span>
@@ -1440,15 +1458,18 @@
 <span class="w">    </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">overlay</span>
 <span class="w">    </span><span class="nt">attachable</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 </code></pre></div>
-</div>
-<div class="tabbed-block">
-<p>If you want to use the setup wizard, you will need to set the <code>UI_HOST</code> setting to the HTTP endpoint of your web UI SERVICE. For example, if your web UI service is named <code>svc-bunkerweb-ui</code> and is listening on the <code>7000</code> port, you will need to set the <code>UI_HOST</code> setting to <code>http://svc-bunkerweb-ui.default.svc.cluster.local:7000</code> (don't forget to replace the namespace and the service name accordingly).</p>
-<div class="admonition tip">
-<p class="admonition-title">Accessing the setup wizard</p>
-<p>You can access the setup wizard by browsing the <code>https://your-ip-address-or-fqdn/setup</code> URI of your server.</p>
-</div>
-<p>Here is the yaml boilerplate that you can use (don't forget to edit the <code>changeme</code> data) :</p>
-<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rbac.authorization.k8s.io/v1</span>
+
+=== "Kubernetes"
+
+    If you want to use the setup wizard, you will need to set the `UI_HOST` setting to the HTTP endpoint of your web UI SERVICE. For example, if your web UI service is named `svc-bunkerweb-ui` and is listening on the `7000` port, you will need to set the `UI_HOST` setting to `http://svc-bunkerweb-ui.default.svc.cluster.local:7000` (don't forget to replace the namespace and the service name accordingly).
+
+    !!! tip "Accessing the setup wizard"
+
+        You can access the setup wizard by browsing the `https://your-ip-address-or-fqdn/setup` URI of your server.
+
+    Here is the yaml boilerplate that you can use (don't forget to edit the `changeme` data) :
+
+    <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rbac.authorization.k8s.io/v1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ClusterRole</span>
 <span class="nt">metadata</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cr-bunkerweb</span>
@@ -1764,20 +1785,20 @@
 <span class="w">    </span><span class="nt">requests</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">storage</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5Gi</span>
 </code></pre></div>
-</div>
-<div class="tabbed-block">
-<p>If you don't want to use the setup wizard, you will need to run the following command <code>export UI_WIZARD=no</code> before installing BunkerWeb as described in <a href="../integrations/#linux">integrations section</a> of the documentation (this is an optional step).</p>
-<div class="admonition tip">
-<p class="admonition-title">Accessing the setup wizard</p>
-<p>You can access the setup wizard by browsing the <code>https://your-ip-address/setup</code> URI of your server.</p>
-</div>
-</div>
-</div>
-</div>
+
+=== "Linux"
+
+    If you don't want to use the setup wizard, you will need to run the following command `export UI_WIZARD=no` before installing BunkerWeb as described in [integrations section](integrations.md#linux) of the documentation (this is an optional step).
+
+    !!! tip "Accessing the setup wizard"
+
+        You can access the setup wizard by browsing the `https://your-ip-address/setup` URI of your server. -->
+
 <h2 id="accessing-logs">Accessing logs</h2>
-<p>Beginning with version <code>1.6.0-beta</code>, the method of accessing logs has changed. This update specifically impacts <strong>Docker, Autoconf, and Swarm</strong> Integrations. Logs are now exclusively accessed from the <code>/var/log/bunkerweb</code> directory.</p>
-<p>To keep the logs accessible from the web UI, you will need to use <code>syslog-ng</code> to forward the logs to a file in the <code>/var/log/bunkerweb</code> directory.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="2:5"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><input id="__tabbed_2_3" name="__tabbed_2" type="radio" /><input id="__tabbed_2_4" name="__tabbed_2" type="radio" /><input id="__tabbed_2_5" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Docker</label><label for="__tabbed_2_2">Docker Autoconf</label><label for="__tabbed_2_3">Swarm</label><label for="__tabbed_2_4">Kubernetes</label><label for="__tabbed_2_5">Linux</label></div>
+<p>Beginning with version <code>1.6</code>, the method of accessing logs has changed. This update specifically impacts container based integrations: the web UI will read the logs files from the <code>/var/log/bunkerweb</code> directory.</p>
+<p>To keep the logs accessible from the web UI, we recommend you to use a syslog server such as <code>syslog-ng</code> to read the logs and creates the corresponding files in the <code>/var/log/bunkerweb</code> directory.</p>
+<h3 id="compose-boilerplates">Compose boilerplates</h3>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Docker</label><label for="__tabbed_1_2">Docker Autoconf</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>To forward the logs correctly to the <code>/var/log/bunkerweb</code> directory on the Docker integration, you will need to stream the logs to a file using <code>syslog-ng</code>. Here is an example of how to do this :</p>
@@ -2045,201 +2066,6 @@
 <span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-docker</span>
 </code></pre></div>
 </div>
-<div class="tabbed-block">
-<div class="admonition warning">
-<p class="admonition-title">Deprecated</p>
-<p>The Swarm integration is deprecated and will be removed in a future release. Please consider using the <a href="#__tabbed_2_2">Docker autoconf integration</a> instead.</p>
-<p><strong>More information can be found in the <a href="../integrations/#swarm">Swarm integration documentation</a>.</strong></p>
-</div>
-<p>To forward the logs correctly to the <code>/var/log/bunkerweb</code> directory on the Swarm integration, you will need to stream the logs to a file using <code>syslog-ng</code>. Here is an example of how to do this :</p>
-<div class="highlight"><pre><span></span><code><span class="nt">x-ui-env</span><span class="p">:</span><span class="w"> </span><span class="nl">&amp;ui-env</span>
-<span class="w">  </span><span class="c1"># We anchor the environment variables to avoid duplication</span>
-<span class="w">  </span><span class="nt">SWARM_MODE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
-<span class="w">  </span><span class="nt">DATABASE_URI</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger password for the database</span>
-
-<span class="nt">services</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:testing</span>
-<span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">published</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span>
-<span class="w">        </span><span class="nt">target</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8080</span>
-<span class="w">        </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">host</span>
-<span class="w">        </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tcp</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">published</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">443</span>
-<span class="w">        </span><span class="nt">target</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8443</span>
-<span class="w">        </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">host</span>
-<span class="w">        </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tcp</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">published</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">443</span>
-<span class="w">        </span><span class="nt">target</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8443</span>
-<span class="w">        </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">host</span>
-<span class="w">        </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">udp</span><span class="w"> </span><span class="c1"># For QUIC / HTTP3 support</span>
-<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">SWARM_MODE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
-<span class="w">      </span><span class="nt">API_WHITELIST_IP</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;127.0.0.0/8</span><span class="nv"> </span><span class="s">10.20.30.0/24&quot;</span>
-<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
-<span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span>
-<span class="w">    </span><span class="nt">deploy</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">global</span>
-<span class="w">      </span><span class="nt">placement</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">constraints</span><span class="p">:</span>
-<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;node.role</span><span class="nv"> </span><span class="s">==</span><span class="nv"> </span><span class="s">worker&quot;</span>
-<span class="w">      </span><span class="nt">labels</span><span class="p">:</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.INSTANCE=yes&quot;</span>
-<span class="w">    </span><span class="nt">logging</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">syslog</span>
-<span class="w">      </span><span class="nt">options</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">tag</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerweb&quot;</span><span class="w"> </span><span class="c1"># This will be the tag used by syslog-ng to create the log file</span>
-<span class="w">        </span><span class="nt">syslog-address</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;udp://10.20.30.254:514&quot;</span><span class="w"> </span><span class="c1"># This is the syslog-ng container address</span>
-
-<span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:testing</span>
-<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*ui-env</span>
-<span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span>
-<span class="w">      </span><span class="nt">SERVER_NAME</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span>
-<span class="w">      </span><span class="nt">API_WHITELIST_IP</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;127.0.0.0/8</span><span class="nv"> </span><span class="s">10.20.30.0/24&quot;</span>
-<span class="w">      </span><span class="nt">MULTISITE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
-<span class="w">      </span><span class="nt">USE_REDIS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
-<span class="w">      </span><span class="nt">REDIS_HOST</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bw-redis&quot;</span>
-<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-data:/data</span><span class="w"> </span><span class="c1"># This is used to persist the cache and other data like the backups</span>
-<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
-<span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
-<span class="w">    </span><span class="nt">logging</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">syslog</span>
-<span class="w">      </span><span class="nt">options</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">tag</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bw-scheduler&quot;</span><span class="w"> </span><span class="c1"># This will be the tag used by syslog-ng to create the log file</span>
-<span class="w">        </span><span class="nt">syslog-address</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;udp://10.20.30.254:514&quot;</span><span class="w"> </span><span class="c1"># This is the syslog-ng container address</span>
-
-<span class="w">  </span><span class="nt">bw-autoconf</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:testing</span>
-<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*ui-env</span>
-<span class="w">      </span><span class="nt">DOCKER_HOST</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;tcp://bw-docker:2375&quot;</span>
-<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
-<span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-docker</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
-<span class="w">    </span><span class="nt">logging</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">syslog</span>
-<span class="w">      </span><span class="nt">options</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">tag</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bw-autoconf&quot;</span><span class="w"> </span><span class="c1"># This will be the tag used by syslog-ng to create the log file</span>
-<span class="w">        </span><span class="nt">syslog-address</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;udp://10.20.30.254:514&quot;</span><span class="w"> </span><span class="c1"># This is the syslog-ng container address</span>
-
-<span class="w">  </span><span class="nt">bw-docker</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tecnativa/docker-socket-proxy:nightly</span>
-<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/var/run/docker.sock:/var/run/docker.sock:ro</span>
-<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">CONFIGS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;1&quot;</span>
-<span class="w">      </span><span class="nt">CONTAINERS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;1&quot;</span>
-<span class="w">      </span><span class="nt">SERVICES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;1&quot;</span>
-<span class="w">      </span><span class="nt">SWARM</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;1&quot;</span>
-<span class="w">      </span><span class="nt">TASKS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;1&quot;</span>
-<span class="w">      </span><span class="nt">LOG_LEVEL</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;warning&quot;</span>
-<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
-<span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-docker</span>
-<span class="w">    </span><span class="nt">deploy</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">placement</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">constraints</span><span class="p">:</span>
-<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;node.role</span><span class="nv"> </span><span class="s">==</span><span class="nv"> </span><span class="s">manager&quot;</span>
-
-<span class="w">  </span><span class="nt">bw-ui</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:testing</span>
-<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*ui-env</span>
-<span class="w">      </span><span class="nt">ADMIN_USERNAME</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;changeme&quot;</span>
-<span class="w">      </span><span class="nt">ADMIN_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;changeme&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger password for the changeme user</span>
-<span class="w">      </span><span class="nt">TOTP_SECRETS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mysecret&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger secret key (see the Prerequisites section)</span>
-<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-logs:/var/log/bunkerweb</span><span class="w"> </span><span class="c1"># This is the volume used to store the logs</span>
-<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
-<span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
-<span class="w">    </span><span class="nt">deploy</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">labels</span><span class="p">:</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.SERVER_NAME=www.example.com&quot;</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.USE_UI=yes&quot;</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.USE_REVERSE_PROXY=yes&quot;</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.REVERSE_PROXY_URL=/changeme&quot;</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.REVERSE_PROXY_HOST=http://bw-ui:7000&quot;</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.REVERSE_PROXY_INTERCEPT_ERRORS=no&quot;</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.INTERCEPTED_ERROR_CODES=400</span><span class="nv"> </span><span class="s">404</span><span class="nv"> </span><span class="s">405</span><span class="nv"> </span><span class="s">413</span><span class="nv"> </span><span class="s">429</span><span class="nv"> </span><span class="s">500</span><span class="nv"> </span><span class="s">501</span><span class="nv"> </span><span class="s">502</span><span class="nv"> </span><span class="s">503</span><span class="nv"> </span><span class="s">504&quot;</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.GENERATE_SELF_SIGNED_SSL=yes&quot;</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.MAX_CLIENT_SIZE=50m&quot;</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.ALLOWED_METHODS=GET|POST|PUT|DELETE&quot;</span>
-<span class="w">    </span><span class="nt">logging</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">syslog</span>
-<span class="w">      </span><span class="nt">options</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">tag</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bw-ui&quot;</span><span class="w"> </span><span class="c1"># This will be the tag used by syslog-ng to create the log file</span>
-<span class="w">        </span><span class="nt">syslog-address</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;udp://10.20.30.254:514&quot;</span><span class="w"> </span><span class="c1"># This is the syslog-ng container address</span>
-
-<span class="w">  </span><span class="nt">bw-db</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mariadb:11</span>
-<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">MYSQL_RANDOM_ROOT_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
-<span class="w">      </span><span class="nt">MYSQL_DATABASE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;db&quot;</span>
-<span class="w">      </span><span class="nt">MYSQL_USER</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerweb&quot;</span>
-<span class="w">      </span><span class="nt">MYSQL_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;changeme&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger password for the database</span>
-<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db:/var/lib/mysql</span>
-<span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
-
-<span class="w">  </span><span class="nt">bw-redis</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">redis:7-alpine</span>
-<span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
-
-<span class="w">  </span><span class="nt">bw-syslog</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">balabit/syslog-ng:4.7.1</span>
-<span class="w">    </span><span class="c1"># image: lscr.io/linuxserver/syslog-ng:4.7.1-r1-ls116 # For aarch64 architecture</span>
-<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-logs:/var/log/bunkerweb</span><span class="w"> </span><span class="c1"># This is the volume used to store the logs</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf</span><span class="w"> </span><span class="c1"># This is the syslog-ng configuration file</span>
-<span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">bw-universe</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">ipv4_address</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10.20.30.254</span><span class="w"> </span><span class="c1"># Make sure to set the correct IP address</span>
-
-<span class="nt">volumes</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">bw-db</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">bw-data</span><span class="p">:</span>
-
-<span class="nt">networks</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">bw-universe</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
-<span class="w">    </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">overlay</span>
-<span class="w">    </span><span class="nt">attachable</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
-<span class="w">    </span><span class="nt">ipam</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">config</span><span class="p">:</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">subnet</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10.20.30.0/24</span>
-<span class="w">  </span><span class="nt">bw-services</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span>
-<span class="w">    </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">overlay</span>
-<span class="w">    </span><span class="nt">attachable</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
-<span class="w">  </span><span class="nt">bw-docker</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-docker</span>
-<span class="w">    </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">overlay</span>
-<span class="w">    </span><span class="nt">attachable</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
-<span class="w">  </span><span class="nt">bw-db</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
-<span class="w">    </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">overlay</span>
-<span class="w">    </span><span class="nt">attachable</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
-</code></pre></div>
-</div>
-<div class="tabbed-block">
-<p>Kubernetes does not support the <code>syslog</code> logging driver. If you want to access the logs you will have to use some other way like Loki, Fluentd, or any other log management system.</p>
-</div>
-<div class="tabbed-block">
-<p>For Linux this is the simplest way as the logs files are directly accessible from the filesystem.</p>
-</div>
 </div>
 </div>
 <h3 id="syslog-ng-configuration">Syslog-ng configuration</h3>
@@ -2281,56 +2107,25 @@ log {
 };
 </code></pre></div>
 <h2 id="account-management">Account management</h2>
-<p>You can access the account management page by clicking on <code>manage account</code> inside the sidebar menu :</p>
+<p>You can access the account management page by clicking on the profile image in the top right corner:</p>
 <figure>
-<p><img align="center," alt="Overview" src="../assets/img/manage-account.webp" width="350" />
+<p><img align="center," alt="Overview" src="../assets/img/manage-account.png" width="400" />
   </p>
-<figcaption>Account page access from menu</figcaption>
-</figure>
-<h3 id="upgrade-to-pro">Upgrade to PRO</h3>
-<div class="admonition info">
-<p class="admonition-title">What is BunkerWeb PRO ?</p>
-<p>BunkerWeb PRO is an enhanced version of BunkerWeb open-source. Whether it's enhanced security, an enriched user experience, or technical monitoring, the BunkerWeb PRO version will allow you to fully benefit from BunkerWeb and respond to your professional needs. Do not hesitate to visit the <a href="https://panel.bunkerweb.io/knowledgebase?utm_campaign=self&amp;utm_source=doc">BunkerWeb panel</a> or <a href="https://panel.bunkerweb.io/contact.php?utm_campaign=self&amp;utm_source=doc">contact us</a> if you have any question regarding the PRO version.</p>
-</div>
-<p>Once you have your PRO license key from the <a href="https://panel.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc">BunkerWeb panel</a>, you can paste it into the PRO section of the account management page.</p>
-<figure>
-<p><img align="center," alt="PRO upgrade" src="../assets/img/pro-ui-upgrade.webp" width="550" />
-  </p>
-<figcaption>Upgrade to PRO from the web UI</figcaption>
-</figure>
-<div class="admonition warning">
-<p class="admonition-title">Upgrade time</p>
-<p>The PRO version is downloaded in the background by the scheduler, it may take some time to upgrade.</p>
-</div>
-<p>When your BunkerWeb instance has upgraded to the PRO version, you will see your license expiration date and the maximum number of services you can protect.</p>
-<figure>
-<p><img align="center," alt="PRO upgrade" src="../assets/img/ui-pro.webp" width="550" />
-  </p>
-<figcaption>PRO license information</figcaption>
+<figcaption>Account page access from top right corner</figcaption>
 </figure>
 <h3 id="username-password">Username / Password</h3>
-<div class="admonition tip">
-<p class="admonition-title">Overriding admin credentials from environment variables</p>
-<p>If you want to override the admin credentials from environment variables, you can set the following variables :</p>
-<ul>
-<li><code>OVERRIDE_ADMIN_CREDS</code> : set it to <code>yes</code> to enable the override even if the admin credentials are already set (default is <code>no</code>)</li>
-<li><code>ADMIN_USERNAME</code> : username to access the web UI</li>
-<li><code>ADMIN_PASSWORD</code> : password to access the web UI</li>
-</ul>
-<p>The web UI will use these variables to authenticate you.</p>
-</div>
 <div class="admonition warning">
 <p class="admonition-title">Lost password/username</p>
 <p>In case you forgot your UI credentials, you can reset them from the CLI following <a href="../troubleshooting/#web-ui">the steps described in the troubleshooting section</a>.</p>
 </div>
-<p>You can update your username or password by filling the dedicated forms. For security reason, you need to enter your current password even if you are connected.</p>
+<p>You can update your username or password by filling the dedicated forms in the <strong>Security</strong> tab. For security reason, you need to enter your current password even if you are connected.</p>
 <p>Please note that when your username or password is updated, you will be logout from the web UI to log in again.</p>
 <figure>
-<p><img align="center," alt="Overview" src="../assets/img/profile-username-password.webp" width="800" />
+<p><img align="center," alt="Overview" src="../assets/img/profile-username-password.png" width="650" />
   </p>
-<figcaption>Username / Password forms</figcaption>
+<figcaption>Username / Password form</figcaption>
 </figure>
-<h3 id="two-factor-authentication">Two-Factor Authentication</h3>
+<h3 id="two-factor-authentication">Two-Factor authentication</h3>
 <div class="admonition warning">
 <p class="admonition-title">Lost secret key</p>
 <p>In case you lost your secret key, two options are available :</p>
@@ -2357,23 +2152,96 @@ log {
 <p>When you enable 2FA, you will be provided with <strong>5 recovery codes</strong>. These codes can be used to recover your account in case you have lost your TOTP secret key. Each code can only be used once. <strong>These codes will only be shown once so make sure to store them in a safe place</strong>.</p>
 <p>If you ever lose your recovery codes, <strong>you can refresh them via the TOTP section of the account management page</strong>. Please note that the old recovery codes will be invalidated.</p>
 </div>
-<p>Once enabled, 2FA authentication can be disabled at the same place.</p>
+<p>You can enable or disable 2FA and also refresh recovery codes in the <strong>Security</strong> tab:</p>
 <figure>
-<p><img align="center," alt="Overview" src="../assets/img/profile-totp.webp" width="800" />
+<p><img align="center," alt="Overview" src="../assets/img/profile-totp.png" width="800" />
   </p>
-<figcaption>TOTP enable / disable forms</figcaption>
+<figcaption>TOTP enable / disable / refresh recovery codes forms</figcaption>
 </figure>
-<p>After a successful login/password combination, you will be prompted to enter your TOTP code :</p>
+<p>After a successful login/password combination, you will be prompted to enter your TOTP code:</p>
 <figure>
-<p><img align="center," alt="Overview" src="../assets/img/profile-2fa.webp" width="400" />
+<p><img align="center," alt="Overview" src="../assets/img/profile-2fa.png" width="400" />
   </p>
-<figcaption>Additional TOTP page</figcaption>
+<figcaption>2FA on login page</figcaption>
+</figure>
+<h3 id="current-sessions">Current sessions</h3>
+<p>In the <strong>Session</strong> tab, you will be able to list and revoke current sessions:</p>
+<figure>
+<p><img align="center," alt="Overview" src="../assets/img/sessions.png" width="800" />
+  </p>
+<figcaption>Manage sessions</figcaption>
 </figure>
 <h2 id="advanced-installation">Advanced installation</h2>
-<div class="tabbed-set tabbed-alternate" data-tabs="3:5"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><input id="__tabbed_3_3" name="__tabbed_3" type="radio" /><input id="__tabbed_3_4" name="__tabbed_3" type="radio" /><input id="__tabbed_3_5" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">Docker</label><label for="__tabbed_3_2">Docker autoconf</label><label for="__tabbed_3_3">Swarm</label><label for="__tabbed_3_4">Kubernetes</label><label for="__tabbed_3_5">Linux</label></div>
+<p>The web UI can be deployed and configured without going through the setup wizard process: configuration is done through environment variables, which can be added directly to the containers or in the <code>/etc/bunkerweb/ui.env</code> file in the case of a Linux integration.</p>
+<div class="admonition tip">
+<p class="admonition-title">Web UI specific environment variables</p>
+<p>The web UI uses the following environment variables :</p>
+<ul>
+<li><code>OVERRIDE_ADMIN_CREDS</code> : set it to <code>yes</code> to enable the override even if the admin credentials are already set (default is <code>no</code>).</li>
+<li><code>ADMIN_USERNAME</code> : username to access the web UI.</li>
+<li><code>ADMIN_PASSWORD</code> : password to access the web UI.</li>
+<li><code>FLASK_SECRET</code> : a secret key used to encrypt the session cookie (if not set, a random key will be generated).</li>
+<li><code>TOTP_SECRETS</code> : a list of TOTP secrets separated by spaces or a dictionary (e.g. : <code>{"1": "mysecretkey"}</code> or <code>mysecretkey</code> or <code>mysecretkey mysecretkey1</code>). <strong>We strongly recommend you to set this variable if you want to use 2FA, as it will be used to encrypt the TOTP secret keys</strong> (if not set, a random number of secret keys will be generated). Check out the <a href="https://passlib.readthedocs.io/en/stable/narr/totp-tutorial.html#application-secrets">passlib documentation</a> for more information.</li>
+<li><code>LISTEN_ADDR</code> : the address where the web UI will listen (default is <code>0.0.0.0</code> in <strong>Docker images</strong> and <code>127.0.0.1</code> on <strong>Linux installations</strong>).</li>
+<li><code>LISTEN_PORT</code> : the port where the web UI will listen (default is <code>7000</code>).</li>
+<li><code>MAX_WORKERS</code> : the number of workers used by the web UI (default is the number of CPUs).</li>
+<li><code>MAX_THREADS</code> : the number of threads used by the web UI (default is <code>MAX_WORKERS</code> * 2).</li>
+<li><code>FORWARDED_ALLOW_IPS</code> : a list of IP addresses or networks that are allowed to be used in the <code>X-Forwarded-For</code> header (default is <code>*</code> in <strong>Docker images</strong> and <code>127.0.0.1</code> on <strong>Linux installations</strong>).</li>
+<li><code>CHECK_PRIVATE_IP</code> : set it to <code>yes</code> to not disconnect users that have their IP address changed during a session if they are in a private network (default is <code>yes</code>). (Non-private IP addresses are always checked).</li>
+</ul>
+<p>The web UI will use these variables to authenticate you and handle the 2FA feature.</p>
+</div>
+<div class="admonition example">
+<p class="admonition-title">Generating recommended secrets</p>
+<p>To generate a valid <strong>ADMIN_PASSWORD</strong>, we recommend you to <strong>use a password manager</strong> or a <strong>password generator</strong>.</p>
+<p>You can generate a valid <strong>FLASK_SECRET</strong> using the following command :</p>
+<div class="highlight"><pre><span></span><code>python3<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import secrets; print(secrets.token_hex(64))&quot;</span>
+</code></pre></div>
+<p>You can generate valid space-separated <strong>TOTP_SECRETS</strong> using the following command (you will need the <code>passlib</code> package) :</p>
+<div class="highlight"><pre><span></span><code>python3<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;from passlib import totp; print(&#39; &#39;.join(totp.generate_secret() for i in range(1, 6)))&quot;</span>
+</code></pre></div>
+</div>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:5"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><input id="__tabbed_2_3" name="__tabbed_2" type="radio" /><input id="__tabbed_2_4" name="__tabbed_2" type="radio" /><input id="__tabbed_2_5" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Linux</label><label for="__tabbed_2_2">Docker</label><label for="__tabbed_2_3">Docker autoconf</label><label for="__tabbed_2_4">Kubernetes</label><label for="__tabbed_2_5">Swarm</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<p>The web UI can be deployed using a dedicated container which is available on <a href="https://hub.docker.com/r/bunkerity/bunkerweb-ui">Docker Hub</a> :</p>
+<p>The installation of the web UI using the <a href="../integrations/#linux">Linux integration</a> is pretty straightforward because it is installed with BunkerWeb.</p>
+<p>The web UI comes as systemd service named <code>bunkerweb-ui</code>, please ensure that it's enabled:</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>bunkerweb-ui<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+sudo<span class="w"> </span>systemctl<span class="w"> </span>status<span class="w"> </span>bunkerweb-ui
+</code></pre></div>
+<p>A dedicated environment file located at <code>/etc/bunkerweb/ui.env</code> is used to configure the web UI:</p>
+<div class="highlight"><pre><span></span><code>ADMIN_USERNAME=changeme
+ADMIN_PASSWORD=changeme
+TOTP_SECRETS=mysecret
+</code></pre></div>
+<p>Replace the <code>changeme</code> data with your own values.</p>
+<p>Remember to set a stronger secret key for the <code>TOTP_SECRETS</code>.</p>
+<p>Each time you edit the <code>/etc/bunkerweb/ui.env</code> file, you will need to restart the service :</p>
+<div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>restart<span class="w"> </span>bunkerweb-ui
+</code></pre></div>
+<p>Accessing the web UI through BunkerWeb is a classical <a href="../quickstart-guide/">reverse proxy setup</a>. Please note that the web UI is listening on the <code>7000</code> port and only on the loopback interface.</p>
+<p>Here is the <code>/etc/bunkerweb/variables.env</code> boilerplate you can use:</p>
+<div class="highlight"><pre><span></span><code>HTTP_PORT=80
+HTTPS_PORT=443
+DNS_RESOLVERS=9.9.9.9 8.8.8.8 8.8.4.4
+API_LISTEN_IP=127.0.0.1
+SERVER_NAME=www.example.com
+MULTISITE=yes
+www.example.com_USE_UI=yes
+www.example.com_USE_REVERSE_PROXY=yes
+www.example.com_REVERSE_PROXY_URL=/changeme
+www.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:7000
+www.example.com_INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504
+www.example.com_GENERATE_SELF_SIGNED_SSL=yes
+www.example.com_MAX_CLIENT_SIZE=50m
+www.example.com_ALLOWED_METHODS=GET|POST|PUT|DELETE
+</code></pre></div>
+<p>Don't forget to reload the <code>bunkerweb</code> service:</p>
+<div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>reload<span class="w"> </span>bunkerweb
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>The web UI can be deployed using a dedicated container which is available on <a href="https://hub.docker.com/r/bunkerity/bunkerweb-ui">Docker Hub</a>:</p>
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>pull<span class="w"> </span>bunkerity/bunkerweb-ui
 </code></pre></div>
 <p>Alternatively, you can also build it yourself :</p>
@@ -2381,16 +2249,12 @@ log {
 <span class="nb">cd</span><span class="w"> </span>bunkerweb<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>my-bunkerweb-ui<span class="w"> </span>-f<span class="w"> </span>src/ui/Dockerfile<span class="w"> </span>.
 </code></pre></div>
-<div class="admonition tip">
-<p class="admonition-title">Environment variables</p>
-<p>Please read the <a href="#prerequisites">Prerequisites</a> section to check out all the environment variables you can set to customize the web UI.</p>
-</div>
-<p>Accessing the web UI through BunkerWeb is a classical <a href="../quickstart-guide/#protect-http-applications">reverse proxy setup</a>. We recommend you to connect BunkerWeb and web UI using a dedicated network (like <code>bw-universe</code> also used by the scheduler) so it won't be on the same network of your web services for obvious security reasons. Please note that the web UI container is listening on the <code>7000</code> port.</p>
+<p>Accessing the web UI through BunkerWeb is a classical <a href="../quickstart-guide/">reverse proxy setup</a>. We recommend you to connect BunkerWeb and web UI using a dedicated network (like <code>bw-universe</code> also used by the scheduler) so it won't be on the same network of your web services for obvious security reasons. Please note that the web UI container is listening on the <code>7000</code> port.</p>
 <div class="admonition info">
 <p class="admonition-title">Database backend</p>
 <p>If you want another Database backend than MariaDB please refer to the docker-compose files in the <a href="https://github.com/bunkerity/bunkerweb/tree/vtesting/misc/integrations">misc/integrations folder</a> of the repository.</p>
 </div>
-<p>Here is the docker-compose boilerplate that you can use (don't forget to edit the <code>changeme</code> data) :</p>
+<p>Here is the docker-compose boilerplate that you can use (don't forget to edit the <code>changeme</code> data):</p>
 <div class="highlight"><pre><span></span><code><span class="nt">x-ui-env</span><span class="p">:</span><span class="w"> </span><span class="nl">&amp;ui-env</span>
 <span class="w">  </span><span class="c1"># We anchor the environment variables to avoid duplication</span>
 <span class="w">  </span><span class="nt">DATABASE_URI</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger password for the database</span>
@@ -2475,10 +2339,10 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<p>The web UI can be deployed using a dedicated container which is available on <a href="https://hub.docker.com/r/bunkerity/bunkerweb-ui">Docker Hub</a> :</p>
+<p>The web UI can be deployed using a dedicated container which is available on <a href="https://hub.docker.com/r/bunkerity/bunkerweb-ui">Docker Hub</a>:</p>
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>pull<span class="w"> </span>bunkerity/bunkerweb-ui
 </code></pre></div>
-<p>Alternatively, you can also build it yourself :</p>
+<p>Alternatively, you can also build it yourself:</p>
 <div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/bunkerity/bunkerweb.git<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 <span class="nb">cd</span><span class="w"> </span>bunkerweb<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>my-bunkerweb-ui<span class="w"> </span>-f<span class="w"> </span>src/ui/Dockerfile<span class="w"> </span>.
@@ -2487,12 +2351,12 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 <p class="admonition-title">Environment variables</p>
 <p>Please read the <a href="#prerequisites">Prerequisites</a> section to check out all the environment variables you can set to customize the web UI.</p>
 </div>
-<p>Accessing the web UI through BunkerWeb is a classical <a href="../quickstart-guide/#protect-http-applications">reverse proxy setup</a>. We recommend you to connect BunkerWeb and web UI using a dedicated network (like <code>bw-universe</code> also used by the scheduler and autoconf) so it won't be on the same network of your web services for obvious security reasons. Please note that the web UI container is listening on the <code>7000</code> port.</p>
+<p>Accessing the web UI through BunkerWeb is a classical <a href="../quickstart-guide/">reverse proxy setup</a>. We recommend you to connect BunkerWeb and web UI using a dedicated network (like <code>bw-universe</code> also used by the scheduler and autoconf) so it won't be on the same network of your web services for obvious security reasons. Please note that the web UI container is listening on the <code>7000</code> port.</p>
 <div class="admonition info">
 <p class="admonition-title">Database backend</p>
 <p>If you want another Database backend than MariaDB please refer to the docker-compose files in the <a href="https://github.com/bunkerity/bunkerweb/tree/vtesting/misc/integrations">misc/integrations folder</a> of the repository.</p>
 </div>
-<p>Here is the docker-compose boilerplate that you can use (don't forget to edit the <code>changeme</code> data) :</p>
+<p>Here is the docker-compose boilerplate that you can use (don't forget to edit the <code>changeme</code> data):</p>
 <div class="highlight"><pre><span></span><code><span class="nt">x-ui-env</span><span class="p">:</span><span class="w"> </span><span class="nl">&amp;ui-env</span>
 <span class="w">  </span><span class="c1"># We anchor the environment variables to avoid duplication</span>
 <span class="w">  </span><span class="nt">AUTOCONF_MODE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
@@ -2603,12 +2467,36 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 </code></pre></div>
 </div>
 <div class="tabbed-block">
+<p>The web UI can be deployed using a dedicated container which is available on <a href="https://hub.docker.com/r/bunkerity/bunkerweb-ui">Docker Hub</a> and you can deploy as a standard <a href="https://kubernetes.io/docs/concepts/workloads/controllers/deployment/">Deployment</a>.</p>
+<p>Accessing the web UI through BunkerWeb is a classical <a href="../quickstart-guide/">reverse proxy setup</a>. Network segmentation between web UI and web services is not covered in this documentation. Please note that the web UI container is listening on the <code>7000</code> port.</p>
+<div class="admonition info">
+<p class="admonition-title">Database backend</p>
+<p>If you want another Database backend than MariaDB please refer to the yaml files in the <a href="https://github.com/bunkerity/bunkerweb/tree/vtesting/misc/integrations">misc/integrations folder</a> of the repository.</p>
+</div>
+<p>Here is the corresponding part of your values.yaml file that you can use:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">settings</span><span class="p">:</span>
+<span class="w">  </span><span class="c1"># Use an existing secret named bunkerweb and containing the following values :</span>
+<span class="w">  </span><span class="c1"># - admin-username</span>
+<span class="w">  </span><span class="c1"># - admin-password</span>
+<span class="w">  </span><span class="c1"># - flask-secret</span>
+<span class="w">  </span><span class="c1"># - totp-secrets</span>
+<span class="w">  </span><span class="nt">existingSecret</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;secret-bunkerweb&quot;</span>
+<span class="nt">ui</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">wizard</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">  </span><span class="nt">ingress</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="nt">serverName</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;www.example.com&quot;</span>
+<span class="w">    </span><span class="nt">serverPath</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/admin&quot;</span>
+<span class="w">  </span><span class="nt">overrideAdminCreds</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
 <div class="admonition warning">
 <p class="admonition-title">Deprecated</p>
-<p>The Swarm integration is deprecated and will be removed in a future release. Please consider using the <a href="#__tabbed_3_2">Docker autoconf integration</a> instead.</p>
+<p>The Swarm integration is deprecated and will be removed in a future release. Please consider using the <a href="../integrations/#kubernetes">Kubernetes integration</a> instead.</p>
 <p><strong>More information can be found in the <a href="../integrations/#swarm">Swarm integration documentation</a>.</strong></p>
 </div>
-<p>The web UI can be deployed using a dedicated container which is available on <a href="https://hub.docker.com/r/bunkerity/bunkerweb-ui">Docker Hub</a> :</p>
+<p>The web UI can be deployed using a dedicated container which is available on <a href="https://hub.docker.com/r/bunkerity/bunkerweb-ui">Docker Hub</a>:</p>
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>pull<span class="w"> </span>bunkerity/bunkerweb-ui
 </code></pre></div>
 <p>Alternatively, you can also build it yourself :</p>
@@ -2616,11 +2504,7 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 <span class="nb">cd</span><span class="w"> </span>bunkerweb<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>my-bunkerweb-ui<span class="w"> </span>-f<span class="w"> </span>src/ui/Dockerfile<span class="w"> </span>.
 </code></pre></div>
-<div class="admonition tip">
-<p class="admonition-title">Environment variables</p>
-<p>Please read the <a href="#prerequisites">Prerequisites</a> section to check out all the environment variables you can set to customize the web UI.</p>
-</div>
-<p>Accessing the web UI through BunkerWeb is a classical <a href="../quickstart-guide/#protect-http-applications">reverse proxy setup</a>. We recommend you to connect BunkerWeb and web UI using a dedicated network (like <code>bw-universe</code> also used by the scheduler and autoconf) so it won't be on the same network of your web services for obvious security reasons. Please note that the web UI container is listening on the <code>7000</code> port.</p>
+<p>Accessing the web UI through BunkerWeb is a classical <a href="../quickstart-guide/">reverse proxy setup</a>. We recommend you to connect BunkerWeb and web UI using a dedicated network (like <code>bw-universe</code> also used by the scheduler and autoconf) so it won't be on the same network of your web services for obvious security reasons. Please note that the web UI container is listening on the <code>7000</code> port.</p>
 <div class="admonition info">
 <p class="admonition-title">Database backend</p>
 <p>If you want another Database backend than MariaDB please refer to the stack files in the <a href="https://github.com/bunkerity/bunkerweb/tree/vtesting/misc/integrations">misc/integrations folder</a> of the repository.</p>
@@ -2771,399 +2655,6 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 <span class="w">    </span><span class="nt">attachable</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 </code></pre></div>
 </div>
-<div class="tabbed-block">
-<p>The web UI can be deployed using a dedicated container which is available on <a href="https://hub.docker.com/r/bunkerity/bunkerweb-ui">Docker Hub</a> as a standard <a href="https://kubernetes.io/docs/concepts/workloads/controllers/deployment/">Deployment</a>.</p>
-<div class="admonition tip">
-<p class="admonition-title">Environment variables</p>
-<p>Please read the <a href="#prerequisites">Prerequisites</a> section to check out all the environment variables you can set to customize the web UI.</p>
-</div>
-<p>Accessing the web UI through BunkerWeb is a classical <a href="../quickstart-guide/#protect-http-applications">reverse proxy setup</a>. Network segmentation between web UI and web services is not covered in this documentation. Please note that the web UI container is listening on the <code>7000</code> port.</p>
-<div class="admonition info">
-<p class="admonition-title">Database backend</p>
-<p>If you want another Database backend than MariaDB please refer to the yaml files in the <a href="https://github.com/bunkerity/bunkerweb/tree/vtesting/misc/integrations">misc/integrations folder</a> of the repository.</p>
-</div>
-<p>Here is the yaml boilerplate that you can use (don't forget to edit the <code>changeme</code> data) :</p>
-<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rbac.authorization.k8s.io/v1</span>
-<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ClusterRole</span>
-<span class="nt">metadata</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cr-bunkerweb</span>
-<span class="nt">rules</span><span class="p">:</span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">apiGroups</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;&quot;</span><span class="p p-Indicator">]</span>
-<span class="w">    </span><span class="nt">resources</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;services&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;pods&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;configmaps&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;secrets&quot;</span><span class="p p-Indicator">]</span>
-<span class="w">    </span><span class="nt">verbs</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;get&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;watch&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;list&quot;</span><span class="p p-Indicator">]</span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">apiGroups</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;networking.k8s.io&quot;</span><span class="p p-Indicator">]</span>
-<span class="w">    </span><span class="nt">resources</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;ingresses&quot;</span><span class="p p-Indicator">]</span>
-<span class="w">    </span><span class="nt">verbs</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;get&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;watch&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;list&quot;</span><span class="p p-Indicator">]</span>
-<span class="nn">---</span>
-<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
-<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ServiceAccount</span>
-<span class="nt">metadata</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sa-bunkerweb</span>
-<span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span>
-<span class="nn">---</span>
-<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rbac.authorization.k8s.io/v1</span>
-<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ClusterRoleBinding</span>
-<span class="nt">metadata</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">crb-bunkerweb</span>
-<span class="nt">subjects</span><span class="p">:</span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ServiceAccount</span>
-<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sa-bunkerweb</span>
-<span class="w">    </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span>
-<span class="w">    </span><span class="nt">apiGroup</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span>
-<span class="nt">roleRef</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ClusterRole</span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cr-bunkerweb</span>
-<span class="w">  </span><span class="nt">apiGroup</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rbac.authorization.k8s.io</span>
-<span class="nn">---</span>
-<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span>
-<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DaemonSet</span>
-<span class="nt">metadata</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span>
-<span class="nt">spec</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">selector</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span>
-<span class="w">  </span><span class="nt">template</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">metadata</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">labels</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span>
-<span class="w">      </span><span class="c1"># mandatory annotation</span>
-<span class="w">      </span><span class="nt">annotations</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">bunkerweb.io/INSTANCE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
-<span class="w">    </span><span class="nt">spec</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">serviceAccountName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sa-bunkerweb</span>
-<span class="w">      </span><span class="nt">containers</span><span class="p">:</span>
-<span class="w">        </span><span class="c1"># using bunkerweb as name is mandatory</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span>
-<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:testing</span>
-<span class="w">          </span><span class="nt">imagePullPolicy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Always</span>
-<span class="w">          </span><span class="nt">securityContext</span><span class="p">:</span>
-<span class="w">            </span><span class="nt">runAsUser</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">101</span>
-<span class="w">            </span><span class="nt">runAsGroup</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">101</span>
-<span class="w">            </span><span class="nt">allowPrivilegeEscalation</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
-<span class="w">            </span><span class="nt">capabilities</span><span class="p">:</span>
-<span class="w">              </span><span class="nt">drop</span><span class="p">:</span>
-<span class="w">                </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ALL</span>
-<span class="w">          </span><span class="nt">ports</span><span class="p">:</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">containerPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8080</span>
-<span class="w">              </span><span class="nt">hostPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">containerPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8443</span>
-<span class="w">              </span><span class="nt">hostPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">443</span>
-<span class="w">          </span><span class="nt">env</span><span class="p">:</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">KUBERNETES_MODE</span>
-<span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
-<span class="w">            </span><span class="c1"># replace with your DNS resolvers</span>
-<span class="w">            </span><span class="c1"># e.g. : kube-dns.kube-system.svc.cluster.local</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DNS_RESOLVERS</span>
-<span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;coredns.kube-system.svc.cluster.local&quot;</span>
-<span class="w">            </span><span class="c1"># 10.0.0.0/8 is the cluster internal subnet</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">API_WHITELIST_IP</span>
-<span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;127.0.0.0/8</span><span class="nv"> </span><span class="s">10.0.0.0/8&quot;</span>
-<span class="w">          </span><span class="nt">livenessProbe</span><span class="p">:</span>
-<span class="w">            </span><span class="nt">exec</span><span class="p">:</span>
-<span class="w">              </span><span class="nt">command</span><span class="p">:</span>
-<span class="w">                </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/usr/share/bunkerweb/helpers/healthcheck.sh</span>
-<span class="w">            </span><span class="nt">initialDelaySeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span>
-<span class="w">            </span><span class="nt">periodSeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
-<span class="w">            </span><span class="nt">timeoutSeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-<span class="w">            </span><span class="nt">failureThreshold</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
-<span class="w">          </span><span class="nt">readinessProbe</span><span class="p">:</span>
-<span class="w">            </span><span class="nt">exec</span><span class="p">:</span>
-<span class="w">              </span><span class="nt">command</span><span class="p">:</span>
-<span class="w">                </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/usr/share/bunkerweb/helpers/healthcheck.sh</span>
-<span class="w">            </span><span class="nt">initialDelaySeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span>
-<span class="w">            </span><span class="nt">periodSeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-<span class="w">            </span><span class="nt">timeoutSeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-<span class="w">            </span><span class="nt">failureThreshold</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
-<span class="nn">---</span>
-<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span>
-<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Deployment</span>
-<span class="nt">metadata</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-controller</span>
-<span class="nt">spec</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">replicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-<span class="w">  </span><span class="nt">strategy</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Recreate</span>
-<span class="w">  </span><span class="nt">selector</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-controller</span>
-<span class="w">  </span><span class="nt">template</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">metadata</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">labels</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-controller</span>
-<span class="w">    </span><span class="nt">spec</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">serviceAccountName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sa-bunkerweb</span>
-<span class="w">      </span><span class="nt">containers</span><span class="p">:</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-controller</span>
-<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:testing</span>
-<span class="w">          </span><span class="nt">imagePullPolicy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Always</span>
-<span class="w">          </span><span class="nt">env</span><span class="p">:</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">KUBERNETES_MODE</span>
-<span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DATABASE_URI</span>
-<span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mariadb+pymysql://bunkerweb:changeme@svc-bunkerweb-db:3306/db&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger password for the database</span>
-<span class="nn">---</span>
-<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span>
-<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Deployment</span>
-<span class="nt">metadata</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-scheduler</span>
-<span class="nt">spec</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">replicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-<span class="w">  </span><span class="nt">strategy</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Recreate</span>
-<span class="w">  </span><span class="nt">selector</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-scheduler</span>
-<span class="w">  </span><span class="nt">template</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">metadata</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">labels</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-scheduler</span>
-<span class="w">    </span><span class="nt">spec</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">serviceAccountName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sa-bunkerweb</span>
-<span class="w">      </span><span class="nt">containers</span><span class="p">:</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-scheduler</span>
-<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:testing</span>
-<span class="w">          </span><span class="nt">imagePullPolicy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Always</span>
-<span class="w">          </span><span class="nt">env</span><span class="p">:</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">KUBERNETES_MODE</span>
-<span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DATABASE_URI</span>
-<span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mariadb+pymysql://bunkerweb:changeme@svc-bunkerweb-db:3306/db&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger password for the database</span>
-<span class="w">            </span><span class="c1"># replace with your DNS resolvers</span>
-<span class="w">            </span><span class="c1"># e.g. : kube-dns.kube-system.svc.cluster.local</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DNS_RESOLVERS</span>
-<span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;coredns.kube-system.svc.cluster.local&quot;</span>
-<span class="w">            </span><span class="c1"># 10.0.0.0/8 is the cluster internal subnet</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">API_WHITELIST_IP</span>
-<span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;127.0.0.0/8</span><span class="nv"> </span><span class="s">10.0.0.0/8&quot;</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">BUNKERWEB_INSTANCES</span>
-<span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SERVER_NAME</span>
-<span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MULTISITE</span>
-<span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">USE_REDIS</span>
-<span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
-<span class="w">            </span><span class="c1"># replace with your Redis host</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">REDIS_HOST</span>
-<span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;svc-bunkerweb-redis.default.svc.cluster.local&quot;</span>
-<span class="nn">---</span>
-<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span>
-<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Deployment</span>
-<span class="nt">metadata</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-redis</span>
-<span class="nt">spec</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">replicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-<span class="w">  </span><span class="nt">strategy</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Recreate</span>
-<span class="w">  </span><span class="nt">selector</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-redis</span>
-<span class="w">  </span><span class="nt">template</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">metadata</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">labels</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-redis</span>
-<span class="w">    </span><span class="nt">spec</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">containers</span><span class="p">:</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-redis</span>
-<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">redis:7-alpine</span>
-<span class="w">          </span><span class="nt">imagePullPolicy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Always</span>
-<span class="nn">---</span>
-<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span>
-<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Deployment</span>
-<span class="nt">metadata</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-db</span>
-<span class="nt">spec</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">replicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-<span class="w">  </span><span class="nt">strategy</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Recreate</span>
-<span class="w">  </span><span class="nt">selector</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-db</span>
-<span class="w">  </span><span class="nt">template</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">metadata</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">labels</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-db</span>
-<span class="w">    </span><span class="nt">spec</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">containers</span><span class="p">:</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-db</span>
-<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mariadb:11</span>
-<span class="w">          </span><span class="nt">imagePullPolicy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Always</span>
-<span class="w">          </span><span class="nt">env</span><span class="p">:</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MYSQL_RANDOM_ROOT_PASSWORD</span>
-<span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MYSQL_DATABASE</span>
-<span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;db&quot;</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MYSQL_USER</span>
-<span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerweb&quot;</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MYSQL_PASSWORD</span>
-<span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;changeme&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger password for the database</span>
-<span class="w">          </span><span class="nt">volumeMounts</span><span class="p">:</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/var/lib/mysql&quot;</span>
-<span class="w">              </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vol-db</span>
-<span class="w">      </span><span class="nt">volumes</span><span class="p">:</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vol-db</span>
-<span class="w">          </span><span class="nt">persistentVolumeClaim</span><span class="p">:</span>
-<span class="w">            </span><span class="nt">claimName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pvc-bunkerweb</span>
-<span class="nn">---</span>
-<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span>
-<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Deployment</span>
-<span class="nt">metadata</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-ui</span>
-<span class="nt">spec</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">replicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-<span class="w">  </span><span class="nt">strategy</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Recreate</span>
-<span class="w">  </span><span class="nt">selector</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-ui</span>
-<span class="w">  </span><span class="nt">template</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">metadata</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">labels</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-ui</span>
-<span class="w">    </span><span class="nt">spec</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">serviceAccountName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sa-bunkerweb</span>
-<span class="w">      </span><span class="nt">containers</span><span class="p">:</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-ui</span>
-<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:testing</span>
-<span class="w">          </span><span class="nt">imagePullPolicy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Always</span>
-<span class="w">          </span><span class="nt">env</span><span class="p">:</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">KUBERNETES_MODE</span>
-<span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DATABASE_URI</span>
-<span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mariadb+pymysql://bunkerweb:changeme@svc-bunkerweb-db:3306/db&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger password for the database</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ADMIN_USERNAME</span>
-<span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">changeme</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ADMIN_PASSWORD</span>
-<span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;changeme&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger password for the ui user</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TOTP_SECRETS</span>
-<span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mysecret&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger secret key (see the Prerequisites section)</span>
-<span class="nn">---</span>
-<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
-<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Service</span>
-<span class="nt">metadata</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">svc-bunkerweb</span>
-<span class="nt">spec</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">clusterIP</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
-<span class="w">  </span><span class="nt">selector</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span>
-<span class="nn">---</span>
-<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
-<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Service</span>
-<span class="nt">metadata</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">svc-bunkerweb-db</span>
-<span class="nt">spec</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ClusterIP</span>
-<span class="w">  </span><span class="nt">selector</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-db</span>
-<span class="w">  </span><span class="nt">ports</span><span class="p">:</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sql</span>
-<span class="w">      </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TCP</span>
-<span class="w">      </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3306</span>
-<span class="w">      </span><span class="nt">targetPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3306</span>
-<span class="nn">---</span>
-<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
-<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Service</span>
-<span class="nt">metadata</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">svc-bunkerweb-redis</span>
-<span class="nt">spec</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ClusterIP</span>
-<span class="w">  </span><span class="nt">selector</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-redis</span>
-<span class="w">  </span><span class="nt">ports</span><span class="p">:</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">redis</span>
-<span class="w">      </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TCP</span>
-<span class="w">      </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">6379</span>
-<span class="w">      </span><span class="nt">targetPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">6379</span>
-<span class="nn">---</span>
-<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
-<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Service</span>
-<span class="nt">metadata</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">svc-bunkerweb-ui</span>
-<span class="nt">spec</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ClusterIP</span>
-<span class="w">  </span><span class="nt">selector</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-ui</span>
-<span class="w">  </span><span class="nt">ports</span><span class="p">:</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http</span>
-<span class="w">      </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TCP</span>
-<span class="w">      </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">7000</span>
-<span class="w">      </span><span class="nt">targetPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">7000</span>
-<span class="nn">---</span>
-<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
-<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PersistentVolumeClaim</span>
-<span class="nt">metadata</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pvc-bunkerweb</span>
-<span class="nt">spec</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">accessModes</span><span class="p">:</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ReadWriteOnce</span>
-<span class="w">  </span><span class="nt">resources</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">requests</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">storage</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5Gi</span>
-<span class="nn">---</span>
-<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.k8s.io/v1</span>
-<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ingress</span>
-<span class="nt">metadata</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ingress</span>
-<span class="w">  </span><span class="nt">annotations</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">bunkerweb.io/www.example.com_SERVE_FILES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;no&quot;</span>
-<span class="w">    </span><span class="nt">bunkerweb.io/www.example.com_USE_CLIENT_CACHE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
-<span class="w">    </span><span class="nt">bunkerweb.io/www.example.com_USE_GZIP</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
-<span class="w">    </span><span class="nt">bunkerweb.io/www.example.com_USE_UI</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
-<span class="w">    </span><span class="nt">bunkerweb.io/www.example.com_INTERCEPTED_ERROR_CODES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;400</span><span class="nv"> </span><span class="s">404</span><span class="nv"> </span><span class="s">405</span><span class="nv"> </span><span class="s">413</span><span class="nv"> </span><span class="s">429</span><span class="nv"> </span><span class="s">500</span><span class="nv"> </span><span class="s">501</span><span class="nv"> </span><span class="s">502</span><span class="nv"> </span><span class="s">503</span><span class="nv"> </span><span class="s">504&quot;</span>
-<span class="w">    </span><span class="nt">bunkerweb.io/www.example.com_GENERATE_SELF_SIGNED_SSL</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
-<span class="w">    </span><span class="nt">bunkerweb.io/www.example.com_MAX_CLIENT_SIZE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;50m&quot;</span>
-<span class="w">    </span><span class="nt">bunkerweb.io/www.example.com_ALLOWED_METHODS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;GET|POST|PUT|DELETE&quot;</span>
-<span class="nt">spec</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">rules</span><span class="p">:</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">www.example.com</span>
-<span class="w">      </span><span class="nt">http</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">paths</span><span class="p">:</span>
-<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/changeme</span>
-<span class="w">            </span><span class="nt">pathType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Prefix</span>
-<span class="w">            </span><span class="nt">backend</span><span class="p">:</span>
-<span class="w">              </span><span class="nt">service</span><span class="p">:</span>
-<span class="w">                </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">svc-bunkerweb-ui</span>
-<span class="w">                </span><span class="nt">port</span><span class="p">:</span>
-<span class="w">                  </span><span class="nt">number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">7000</span>
-</code></pre></div>
-</div>
-<div class="tabbed-block">
-<p>The installation of the web UI using the <a href="../integrations/#linux">Linux integration</a> is pretty straightforward because it is installed with BunkerWeb.</p>
-<p>The web UI comes as systemd service named <code>bunkerweb-ui</code> which is not enabled by default. If you want to start the web UI when on startup you can run the following command :</p>
-<div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>bunkerweb-ui
-</code></pre></div>
-<p>A dedicated environment file located at <code>/etc/bunkerweb/ui.env</code> is used to configure the web UI :</p>
-<div class="highlight"><pre><span></span><code>ADMIN_USERNAME=changeme
-ADMIN_PASSWORD=changeme
-TOTP_SECRETS=mysecret
-</code></pre></div>
-<p>Replace the <code>changeme</code> data with your own values.</p>
-<p>Remember to set a stronger secret key for the <code>TOTP_SECRETS</code> variable, check the <a href="#prerequisites">Prerequisites</a> section for more information.</p>
-<p>Each time you edit the <code>/etc/bunkerweb/ui.env</code> file, you will need to restart the service :</p>
-<div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>restart<span class="w"> </span>bunkerweb-ui
-</code></pre></div>
-<p>Accessing the web UI through BunkerWeb is a classical <a href="../quickstart-guide/#protect-http-applications">reverse proxy setup</a>. Please note that the web UI is listening on the <code>7000</code> port and only on the loopback interface.</p>
-<p>Here is the <code>/etc/bunkerweb/variables.env</code> boilerplate you can use :</p>
-<div class="highlight"><pre><span></span><code>HTTP_PORT=80
-HTTPS_PORT=443
-DNS_RESOLVERS=9.9.9.9 8.8.8.8 8.8.4.4
-API_LISTEN_IP=127.0.0.1
-SERVER_NAME=www.example.com
-MULTISITE=yes
-www.example.com_USE_UI=yes
-www.example.com_USE_REVERSE_PROXY=yes
-www.example.com_REVERSE_PROXY_URL=/changeme
-www.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:7000
-www.example.com_INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504
-www.example.com_GENERATE_SELF_SIGNED_SSL=yes
-www.example.com_MAX_CLIENT_SIZE=50m
-www.example.com_ALLOWED_METHODS=GET|POST|PUT|DELETE
-</code></pre></div>
-<p>Don't forget to reload the <code>bunkerweb</code> service :</p>
-<div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>reload<span class="w"> </span>bunkerweb
-</code></pre></div>
-</div>
 </div>
 </div>
 
@@ -3265,9 +2756,11 @@ www.example.com_ALLOWED_METHODS=GET|POST|PUT|DELETE
     <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../assets/javascripts/workers/search.f8cc74c7.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.60a45f97.min.js"></script>
+      <script src="../assets/javascripts/bundle.f1b6f286.min.js"></script>
       
         <script src="../js/print-site.js"></script>
+      
+        <script src="../assets/extra.js"></script>
       
     
   </body>
