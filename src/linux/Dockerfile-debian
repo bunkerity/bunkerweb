@@ -65,10 +65,8 @@ RUN umask 027
 # Install fpm
 RUN apt-get update && \
     apt-get -y install ruby ruby-dev rubygems build-essential autoconf libtool rpm binutils && \
-    gem install -N fpm
-
-# Cleanup
-RUN apt-get -f -y --auto-remove remove build-essential autoconf libtool && \
+    gem install -N fpm && \
+    apt-get -f -y --auto-remove remove build-essential autoconf libtool && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 

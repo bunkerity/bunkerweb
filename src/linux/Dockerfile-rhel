@@ -73,10 +73,8 @@ RUN umask 027
 RUN dnf install -y wget redhat-rpm-config rpm-build yum-utils gcc make && \
   dnf module -y reset ruby && dnf module -y enable ruby:3.1 && dnf module -y install ruby:3.1/common && \
   dnf install -y ruby-devel && \
-  gem install fpm
-
-# Cleanup
-RUN dnf -y --setopt=install_weak_deps=False autoremove && \
+  gem install fpm && \
+  dnf -y --setopt=install_weak_deps=False autoremove && \
   dnf clean all && \
   rm -rf /var/cache/dnf
 

@@ -61,10 +61,8 @@ RUN umask 027
 # Install fpm
 RUN dnf update -y && \
     dnf install -y ruby ruby-devel redhat-rpm-config rpm-build gcc make && \
-    gem install -N fpm
-
-# Cleanup
-RUN dnf -y --setopt=install_weak_deps=False autoremove && \
+    gem install -N fpm && \
+    dnf -y --setopt=install_weak_deps=False autoremove && \
     dnf clean all && \
     rm -rf /var/cache/dnf
 
