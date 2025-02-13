@@ -6,6 +6,14 @@
 
     This quickstart guide assumes that BunkerWeb is accessible from the Internet and you have configured at least two domains : one for the web UI and another one for your web service.
 
+    **System requirements**
+
+    The minimum recommended specifications for BunkerWeb are a machine with 2 (v)CPUs and 4 GB of RAM. Please note that this should be sufficient for testing environments or setups with very few services.  
+
+    For production environments with many services to protect, we recommend at least 4 (v)CPUs and 16 GB of RAM. Resources should be adjusted based on your use case, network traffic, and potential DDoS attacks you may face.  
+
+    It is highly recommended to enable global loading of CRS rules (by setting the `USE_MODSECURITY_GLOBAL_CRS` parameter to `yes`) if you are in environments with limited RAM or in production with many services. More details can be found in the [advanced usages](advanced.md#running-many-services-in-production) section of the documentation.
+
 This quickstart guide will help you to quickly install BunkerWeb and secure a web service using the web User Interface.
 
 Protecting existing web applications already accessible with the HTTP(S) protocol is the main goal of BunkerWeb : it will act as a classical [reverse proxy](https://en.wikipedia.org/wiki/Reverse_proxy) with extra security features.
