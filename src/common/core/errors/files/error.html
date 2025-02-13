@@ -127,8 +127,11 @@
         }
       }
       .card {
-        padding: 2em;
-        margin: 1em;
+        padding-top: 2em;
+        padding-bottom: 2em;
+        margin: 0.5em;
+        margin-top: 1em;
+        margin-bottom: 1em;
         min-height: 3em;
         border-radius: 9px;
         flex: 1;
@@ -142,7 +145,6 @@
         -webkit-box-direction: normal;
         -ms-flex-direction: row;
         flex-direction: row;
-        flex-wrap: wrap;
         -webkit-box-pack: center;
         -ms-flex-pack: center;
         justify-content: center;
@@ -151,9 +153,7 @@
         align-items: flex-end;
       }
       .icon {
-        flex: 1;
-        -webkit-box-flex: 1;
-        -ms-flex: 1;
+        flex: 0 0 auto;
         min-width: 260px;
         text-align: center;
       }
@@ -234,7 +234,7 @@
       }
       @media screen and (min-width: 1200px) {
         main {
-          margin: 8% 10%;
+          margin: 4% 5%;
         }
         header > * {
           display: inline-block;
