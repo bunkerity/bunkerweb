@@ -6,6 +6,7 @@ local ngx = ngx
 local rand = utils.rand
 local subsystem = ngx.config.subsystem
 local tostring = tostring
+local tonumber = tonumber
 
 local template
 local render = nil
@@ -20,6 +21,7 @@ function errors:initialize(ctx)
 	-- Call parent initialize
 	plugin.initialize(self, "errors", ctx)
 	-- Default error texts
+	self.default_solution = "Please try again in a few minutes"
 	self.default_errors = {
 		["301"] = {
 			title = "Moved Permanently",
@@ -32,10 +34,12 @@ function errors:initialize(ctx)
 		["400"] = {
 			title = "Bad Request",
 			text = "The server did not understand the request.",
+			solution = "Please check the request and try again",
 		},
 		["401"] = {
 			title = "Not Authorized",
 			text = "Valid authentication credentials needed for the target resource.",
+			solution = "Please check that you're authenticated and try again",
 		},
 		["403"] = {
 			title = "Forbidden",
@@ -44,14 +48,17 @@ function errors:initialize(ctx)
 		["404"] = {
 			title = "Not Found",
 			text = "The server cannot find the requested page.",
+			solution = "Please check the URL and try again",
 		},
 		["405"] = {
 			title = "Method Not Allowed",
 			text = "The method specified in the request is not allowed.",
+			solution = "Please check the request method and try again",
 		},
 		["413"] = {
 			title = "Request Entity Too Large",
 			text = "The server will not accept the request, because the request entity is too large.",
+			solution = "Please reduce the size of the request and try again",
 		},
 		["429"] = {
 			title = "Too Many Requests",
@@ -131,12 +138,22 @@ function errors:render_template(code)
 	-- Override Cache-Control header
 	ngx.header["Cache-Control"] = "no-cache, no-store, must-revalidate"
 
+	local error_type = "unknown"
+	local error_code = tonumber(code)
+	if error_code >= 500 and error_code <= 599 then
+		error_type = "server"
+	elseif error_code >= 400 and error_code <= 499 then
+		error_type = "client"
+	end
+
 	-- Render template
 	render("error.html", {
-		title = code .. " - " .. self.default_errors[code].title,
+		title = code .. " | " .. self.default_errors[code].title,
 		error_title = self.default_errors[code].title,
 		error_code = code,
 		error_text = self.default_errors[code].text,
+		error_type = error_type,
+		error_solution = self.default_errors[code].solution or self.default_solution,
 		nonce_script = nonce_script,
 		nonce_style = nonce_style,
 	})

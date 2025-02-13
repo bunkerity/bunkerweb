@@ -8,6 +8,7 @@ local bunkernet = class("bunkernet", plugin)
 
 local ngx = ngx
 local ERR = ngx.ERR
+local WARN = ngx.WARN
 local NOTICE = ngx.NOTICE
 local HTTP_INTERNAL_SERVER_ERROR = ngx.HTTP_INTERNAL_SERVER_ERROR
 local HTTP_OK = ngx.HTTP_OK
@@ -69,7 +70,8 @@ function bunkernet:init_worker()
 	end
 	-- Check id
 	if not self.bunkernet_id then
-		return self:ret(false, "missing instance ID")
+		self.logger:log(WARN, "missing instance ID")
+		return self:ret(true, "missing instance ID")
 	end
 	-- Send ping request
 	local ok, err, status, _ = self:ping()
@@ -94,7 +96,8 @@ function bunkernet:init()
 	-- Check if instance ID is present
 	local f, err = open("/var/cache/bunkerweb/bunkernet/instance.id", "r")
 	if not f then
-		return self:ret(false, "can't read instance id : " .. err)
+		self.logger:log(WARN, "instance ID not found, skipping instance id initialization: " .. tostring(err))
+		return self:ret(true, "instance ID not found")
 	end
 	-- Retrieve instance ID
 	local id = f:read("*all"):gsub("[\r\n]", "")
@@ -147,7 +150,8 @@ function bunkernet:access()
 	end
 	-- Check id
 	if not self.bunkernet_id then
-		return self:ret(false, "missing instance ID")
+		self.logger:log(WARN, "missing instance ID")
+		return self:ret(true, "missing instance ID")
 	end
 	-- Extract DB
 	local db, err = self.datastore:get("plugin_bunkernet_db", true)
@@ -193,7 +197,8 @@ function bunkernet:log(bypass_checks)
 
 	-- Check id
 	if not self.bunkernet_id then
-		return self:ret(false, "missing instance ID")
+		self.logger:log(WARN, "missing instance ID")
+		return self:ret(true, "missing instance ID")
 	end
 
 	-- Check if IP has been reported recently
@@ -347,15 +352,16 @@ function bunkernet:api()
 	if not (is_ping or is_reports) then
 		return self:ret(false, "success")
 	end
-	-- Check id
-	local id, err_id = self.datastore:get("plugin_bunkernet_id", true)
-	if not id and err_id ~= "not found" then
-		return self:ret(true, "error while getting bunkernet id : " .. err_id, HTTP_INTERNAL_SERVER_ERROR)
-	elseif not id then
-		return self:ret(true, "missing instance ID", HTTP_INTERNAL_SERVER_ERROR)
-	end
 
 	if match(self.ctx.bw.uri, "^/bunkernet/ping$") then
+		-- Check id
+		local id, err_id = self.datastore:get("plugin_bunkernet_id", true)
+		if not id and err_id ~= "not found" then
+			return self:ret(true, "error while getting bunkernet id : " .. err_id, HTTP_INTERNAL_SERVER_ERROR)
+		elseif not id then
+			return self:ret(true, "missing instance ID", HTTP_INTERNAL_SERVER_ERROR)
+		end
+
 		self.bunkernet_id = id
 		self.version = get_version(self.ctx)
 		self.integration = get_integration(self.ctx)
@@ -378,9 +384,9 @@ function bunkernet:api()
 		)
 	elseif match(self.ctx.bw.uri, "^/bunkernet/reports$") then
 		-- Get reports list length
-		local len, len_err = self.datastore:llen("plugin_bunkernet_reports")
+		local len, _ = self.datastore:llen("plugin_bunkernet_reports")
 		if len == nil then
-			return self:ret(true, "can't get list length : " .. len_err, HTTP_INTERNAL_SERVER_ERROR)
+			return self:ret(true, {}, HTTP_OK)
 		end
 		-- Loop on reports
 		local reports = {}

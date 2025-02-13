@@ -1,7 +1,7 @@
-FROM redhat/ubi8:8.10@sha256:2e863fb65e595839633113300a0c6709e9af81523a30001290068265c121a927 AS builder
+FROM redhat/ubi8:8.10@sha256:881aaf5fa0d1f85925a1b9668a1fc7f850a11ca30fd3e37ea194db4edff892a5 AS builder
 
 ENV OS=rhel
-ENV NGINX_VERSION=1.26.2
+ENV NGINX_VERSION=1.26.3
 
 # Copy rocky repo
 COPY src/linux/rocky-8.repo /etc/yum.repos.d/rocky.repo
@@ -64,7 +64,7 @@ COPY src/scheduler scheduler
 COPY src/VERSION VERSION
 COPY src/ui ui
 
-FROM redhat/ubi8:8.10@sha256:2e863fb65e595839633113300a0c6709e9af81523a30001290068265c121a927
+FROM redhat/ubi8:8.10@sha256:881aaf5fa0d1f85925a1b9668a1fc7f850a11ca30fd3e37ea194db4edff892a5
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
@@ -73,10 +73,8 @@ RUN umask 027
 RUN dnf install -y wget redhat-rpm-config rpm-build yum-utils gcc make && \
   dnf module -y reset ruby && dnf module -y enable ruby:3.1 && dnf module -y install ruby:3.1/common && \
   dnf install -y ruby-devel && \
-  gem install fpm
-
-# Cleanup
-RUN dnf -y --setopt=install_weak_deps=False autoremove && \
+  gem install fpm && \
+  dnf -y --setopt=install_weak_deps=False autoremove && \
   dnf clean all && \
   rm -rf /var/cache/dnf
 

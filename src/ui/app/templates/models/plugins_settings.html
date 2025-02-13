@@ -142,7 +142,8 @@
                             {{ plugin_data["name"] }}&nbsp;－&nbsp;v{{ plugin_data["version"] }}&nbsp;－&nbsp;{{ plugin_types[plugin_data["type"]].get('icon', '<img src="' + pro_diamond_url + '"
      alt="Pro plugin"
      width="18px"
-     height="15.5px">') |safe }}
+     height="15.5px"
+     loading="lazy">') |safe }}
                         </h5>
                         <p class="card-subtitle text-muted text-truncate mt-1 courier-prime">{{ plugin_data["description"] }}</p>
                     </div>

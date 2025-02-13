@@ -35,6 +35,7 @@
      "
      {% endif %}>
     {% set config_lines = ["IS_DRAFT=" + config.get('IS_DRAFT', {}).get('value', 'no')] if current_endpoint != "global-config" else [] %}
+    {% set entire_config = config_lines|list %}
     {% set default_settings = ["IS_DRAFT=no"] if current_endpoint != "global-config" else [] %}
     {% for plugin_data in plugins.values() %}
         {% set filtered_settings = get_filtered_settings(plugin_data["settings"], current_endpoint == "global-config") %}
@@ -50,6 +51,7 @@
                         {% set setting_value = "" %}
                     {% endif %}
                 {% endif %}
+                {% if entire_config.append(setting + "=" + setting_value) %}{% endif %}
                 {% if setting_value != setting_default %}
                     {% if config_lines.append(setting + "=" + setting_value) %}{% endif %}
                     {% if default_settings.append(setting + "=" + setting_default) %}{% endif %}
@@ -64,6 +66,7 @@
                         {% set setting_config = config.get(setting, {}) %}
                         {% set setting_default = setting_data.get("default", "") %}
                         {% set setting_value = setting_config.get("value", setting_default) %}
+                        {% if entire_config.append(setting + "=" + setting_value) %}{% endif %}
                         {% if setting_value != setting_default %}
                             {% if config_lines.append(setting + "=" + setting_value) %}{% endif %}
                             {% if default_settings.append(setting + "=" + setting_default) %}{% endif %}
@@ -75,10 +78,11 @@
     {% endfor %}
     <!-- Join the configuration lines with newlines -->
     {% set raw_config = config_lines | join('\r\n') %}
+    {% set raw_entire_config = entire_config | join('\r\n') %}
     <input type="hidden"
-           id="raw-config-originals"
-           name="raw-config"
-           value="{{ raw_config }}">
+           id="raw-entire-config"
+           name="raw-entire-config"
+           value="{{ raw_entire_config }}">
     <input type="hidden"
            id="raw-config-defaults"
            name="raw-config"

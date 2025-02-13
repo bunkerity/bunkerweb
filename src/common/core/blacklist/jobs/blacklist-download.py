@@ -117,8 +117,20 @@ try:
 
     urls = set()
     failed_urls = set()
+    # Initialize aggregation per kind with service tracking
+    aggregated_recap = {
+        kind: {
+            "total_services": set(),
+            "total_urls": 0,
+            "downloaded_urls": 0,
+            "skipped_urls": 0,
+            "failed_count": 0,
+            "total_lines": 0,
+        }
+        for kind in KINDS
+    }
 
-    # Loop on kinds
+    # Loop on services and kinds
     for service, kinds in services_blacklist_urls.items():
         for kind, urls_list in kinds.items():
             if not urls_list:
@@ -129,25 +141,41 @@ try:
                         LOGGER.warning(f"Couldn't delete {service} {kind}.list from cache : {err}")
                 continue
 
-            # Write combined data of the kind in memory and check if it has changed
+            # Track that this service provided URLs for the current kind
+            aggregated_recap[kind]["total_services"].add(service)
+
             content = b""
             for url in urls_list:
                 url_file = f"{bytes_hash(url, algorithm='sha1')}.list"
-                urls.add(url_file)
                 cached_url = JOB.get_cache(url_file, with_info=True, with_data=True)
                 try:
-                    # Check if the URL has already been downloaded
+                    if url_file not in urls:
+                        aggregated_recap[kind]["total_urls"] += 1
+
+                    # If the URL has recently been downloaded, use cache
                     if url in failed_urls:
-                        continue
+                        if url_file not in urls:
+                            aggregated_recap[kind]["failed_count"] += 1
                     elif isinstance(cached_url, dict) and cached_url["last_update"] > (datetime.now().astimezone() - timedelta(hours=1)).timestamp():
-                        LOGGER.info(f"URL {url} has already been downloaded less than 1 hour ago, skipping download...")
+                        LOGGER.debug(f"URL {url} has already been downloaded less than 1 hour ago, skipping download...")
+                        if url_file not in urls:
+                            aggregated_recap[kind]["skipped_urls"] += 1
                         # Remove first line (URL) and add to content
                         content += b"\n".join(cached_url["data"].split(b"\n")[1:]) + b"\n"
                     else:
+                        failed = False
                         LOGGER.info(f"Downloading blacklist data from {url} ...")
                         if url.startswith("file://"):
-                            with open(normpath(url[7:]), "rb") as f:
-                                iterable = f.readlines()
+                            try:
+                                with open(normpath(url[7:]), "rb") as f:
+                                    iterable = f.readlines()
+                            except OSError as e:
+                                status = 2
+                                LOGGER.error(f"Error while opening file {url[7:]} : {e}")
+                                failed_urls.add(url)
+                                if url_file not in urls:
+                                    aggregated_recap["failed_count"] += 1
+                                failed = True
                         else:
                             max_retries = 3
                             retry_count = 0
@@ -163,34 +191,42 @@ try:
                                     sleep(3)
 
                             if resp.status_code != 200:
+                                status = 2
                                 LOGGER.warning(f"Got status code {resp.status_code}, skipping...")
-                                continue
+                                failed_urls.add(url)
+                                if url_file not in urls:
+                                    aggregated_recap[kind]["failed_count"] += 1
+                                failed = True
+                            else:
+                                iterable = resp.iter_lines()
 
-                            iterable = resp.iter_lines()
+                        if not failed:
+                            if url_file not in urls:
+                                aggregated_recap[kind]["downloaded_urls"] += 1
 
-                        i = 0
-                        for line in iterable:
-                            line = line.strip()
+                            count_lines = 0
+                            for line in iterable:
+                                line = line.strip()
+                                if not line or line.startswith((b"#", b";")):
+                                    continue
+                                elif kind != "USER_AGENT":
+                                    line = line.split(b" ")[0]
+                                ok, data = check_line(kind, line)
+                                if ok:
+                                    content += data + b"\n"
+                                    count_lines += 1
+                            aggregated_recap[kind]["total_lines"] += count_lines
 
-                            if not line or line.startswith((b"#", b";")):
-                                continue
-                            elif kind != "USER_AGENT":
-                                line = line.split(b" ")[0]
-
-                            ok, data = check_line(kind, line)
-                            if ok:
-                                content += data + b"\n"
-                                i += 1
-
-                        LOGGER.info(f"Downloaded {i} bad {kind}")
-
-                        cached, err = JOB.cache_file(url_file, b"# Downloaded from " + url.encode("utf-8") + b"\n" + content)
-                        if not cached:
-                            LOGGER.error(f"Error while caching url content : {err}")
+                            cached, err = JOB.cache_file(url_file, b"# Downloaded from " + url.encode("utf-8") + b"\n" + content)
+                            if not cached:
+                                LOGGER.error(f"Error while caching url content for {url}: {err}")
                 except BaseException as e:
                     status = 2
                     LOGGER.error(f"Exception while getting {service} blacklist from {url} :\n{e}")
                     failed_urls.add(url)
+                    if url_file not in urls:
+                        aggregated_recap[kind]["failed_count"] += 1
+                urls.add(url_file)
 
             if not content:
                 LOGGER.warning(f"No data for {service} {kind}, skipping...")
@@ -200,12 +236,12 @@ try:
             new_hash = bytes_hash(content)
             old_hash = JOB.cache_hash(f"{kind}.list", service_id=service)
             if new_hash == old_hash:
-                LOGGER.info(f"New {service} file {kind}.list is identical to cache file, reload is not needed")
+                LOGGER.debug(f"{service} file {kind}.list is identical to cache file, reload is not needed")
                 continue
             elif old_hash:
-                LOGGER.info(f"New {service} file {kind}.list is different than cache file, reload is needed")
+                LOGGER.debug(f"{service} file {kind}.list is different than cache file, reload is needed")
             else:
-                LOGGER.info(f"New {service} file {kind}.list is not in cache, reload is needed")
+                LOGGER.debug(f"New {service} file {kind}.list is not in cache, reload is needed")
 
             # Put file in cache
             cached, err = JOB.cache_file(f"{kind}.list", content, service_id=service, checksum=new_hash)
@@ -215,6 +251,20 @@ try:
                 continue
 
             status = 1 if status != 2 else 2
+
+    # Log a detailed recap per kind across services, only if there is at least one service using the kind
+    for kind, recap in aggregated_recap.items():
+        service_count = len(recap["total_services"])
+        if service_count == 0:
+            continue
+        successful = recap["downloaded_urls"]
+        skipped = recap["skipped_urls"]
+        failed = recap["failed_count"]
+        total_lines = recap["total_lines"]
+        LOGGER.info(
+            f"Recap for {kind} urls: Total Services: {service_count}, Successful: {successful}, "
+            f"Skipped (cached): {skipped}, Failed: {failed}, Total Lines: {total_lines}"
+        )
 
     # Remove old files
     for url_file in JOB.job_path.glob("*.list"):

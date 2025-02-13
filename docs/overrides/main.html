@@ -32,6 +32,7 @@
       })
     </script>
 
+    <script src="https://cdn.jsdelivr.net/npm/medium-zoom/dist/medium-zoom.min.js"></script>
 
     <script defer>
   // Lazy load images and embed youtube videos
@@ -99,19 +100,20 @@
       }
 
       function runBanner() {
+        startBannerLoop();
         // Try to get dynamic content
         // Else keep static ones
-        fetch("https://www.bunkerweb.io/api/bw-ui-news")
-        .then((res) => {
-          return res.json();
-        })
-        .then((res) => {
-          defaultContent = res.data[0].data;
-          startBannerLoop();
-        })
-        .catch((e) => {
-          startBannerLoop();
-});
+        // fetch("https://www.bunkerweb.io/api/bw-ui-news")
+        // .then((res) => {
+        //   return res.json();
+        // })
+        // .then((res) => {
+        //   defaultContent = res.data[0].data;
+        //   startBannerLoop();
+        // })
+        // .catch((e) => {
+        //   startBannerLoop();
+        // });
       }
 
         setBannerStyle();

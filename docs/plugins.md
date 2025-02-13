@@ -90,7 +90,7 @@ The first step is to install the plugin by putting the plugin files inside the c
     services:
     ...
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.0-rc4
+        image: bunkerity/bunkerweb-scheduler:1.6.0
         volumes:
           - ./bw-data:/data
     ...
@@ -126,7 +126,7 @@ The first step is to install the plugin by putting the plugin files inside the c
     services:
     ...
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.0-rc4
+        image: bunkerity/bunkerweb-scheduler:1.6.0
         volumes:
           - ./bw-data:/data
     ...
@@ -169,7 +169,7 @@ The first step is to install the plugin by putting the plugin files inside the c
     services:
     ...
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.0-rc4
+        image: bunkerity/bunkerweb-scheduler:1.6.0
         volumes:
           - /shared/bw-plugins:/data/plugins
     ...
@@ -216,7 +216,7 @@ The first step is to install the plugin by putting the plugin files inside the c
           serviceAccountName: sa-bunkerweb
           containers:
             - name: bunkerweb-scheduler
-              image: bunkerity/bunkerweb-scheduler:1.6.0-rc4
+              image: bunkerity/bunkerweb-scheduler:1.6.0
               imagePullPolicy: Always
               env:
                 - name: KUBERNETES_MODE
@@ -256,7 +256,7 @@ The first step is to install the plugin by putting the plugin files inside the c
 
 !!! tip "Existing plugins"
 
-    If the documentation is not enough, you can have a look at the existing source code of [official plugins](https://github.com/bunkerity/bunkerweb-plugins) and the [core plugins](https://github.com/bunkerity/bunkerweb/tree/v1.6.0-rc4/src/common/core) (already included in BunkerWeb but they are plugins, technically speaking).
+    If the documentation is not enough, you can have a look at the existing source code of [official plugins](https://github.com/bunkerity/bunkerweb-plugins) and the [core plugins](https://github.com/bunkerity/bunkerweb/tree/v1.6.0/src/common/core) (already included in BunkerWeb but they are plugins, technically speaking).
 
 What a plugin structure looks like :
 ```
@@ -271,7 +271,7 @@ plugin /
         plugin.json
 ```
 
-- **conf_name.conf** : add [custom NGINX configurations](quickstart-guide.md#custom-configurations) (as jinja2 templates)
+- **conf_name.conf** : add [custom NGINX configurations](advanced.md#custom-configurations) (as jinja2 templates)
 
 - **actions.py** : script to execute on flask server, this script is running on flask context, you have access to lib and utils like `jinja2`, `requests`, etc...
 
@@ -362,7 +362,7 @@ Each job has the following fields :
 
 ### Configurations
 
-You can add custom NGINX configurations by adding a folder named **confs** with content similar to the [custom configurations](quickstart-guide.md#custom-configurations). Each subfolder inside the **confs** will contain [jinja2](https://jinja.palletsprojects.com) templates that will be generated and loaded at the corresponding context (`http`, `server-http`, `default-server-http`, `stream`, `server-stream`, `modsec`, `modsec-crs`, `crs-plugins-before` and `crs-plugins-after`).
+You can add custom NGINX configurations by adding a folder named **confs** with content similar to the [custom configurations](advanced.md#custom-configurations). Each subfolder inside the **confs** will contain [jinja2](https://jinja.palletsprojects.com) templates that will be generated and loaded at the corresponding context (`http`, `server-http`, `default-server-http`, `stream`, `server-stream`, `modsec`, `modsec-crs`, `crs-plugins-before` and `crs-plugins-after`).
 
 Here is an example for a configuration template file inside the **confs/server-http** folder named **example.conf** :
 
@@ -534,7 +534,7 @@ end
 
 !!! tip "More examples"
 
-    If you want to see the full list of available functions, you can have a look at the files present in the [lua directory](https://github.com/bunkerity/bunkerweb/tree/v1.6.0-rc4/src/bw/lua/bunkerweb) of the repository.
+    If you want to see the full list of available functions, you can have a look at the files present in the [lua directory](https://github.com/bunkerity/bunkerweb/tree/v1.6.0/src/bw/lua/bunkerweb) of the repository.
 
 ### Jobs
 

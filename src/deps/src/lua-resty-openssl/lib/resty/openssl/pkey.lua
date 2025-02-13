@@ -109,7 +109,7 @@ local function load_pem_der(txt, opts, funcs)
             C.ERR_clear_error()
             return nil, "passphrase must be a string"
           end
-          arg = { null, nil, passphrase }
+          arg = { null, null, passphrase }
         elseif opts.passphrase_cb then
           passphrase_cb = passphrase_cb or ffi_cast("pem_password_cb", function(buf, size)
             local p = opts.passphrase_cb()
@@ -439,8 +439,7 @@ local function compose_key(config)
          key_type == evp_macro.EVP_PKEY_X25519 or
          key_type == evp_macro.EVP_PKEY_ED448 or
          key_type == evp_macro.EVP_PKEY_X448 then
-    key_free = function() end
-    key, err = ecx_lib.set_parameters(key_type, nil, config.params)
+    return ecx_lib.set_parameters(key_type, nil, config.params)
   end
 
   if err then

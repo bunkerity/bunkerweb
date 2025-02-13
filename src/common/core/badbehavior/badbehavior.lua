@@ -1,7 +1,7 @@
+local cjson = require "cjson"
 local class = require "middleclass"
 local plugin = require "bunkerweb.plugin"
 local utils = require "bunkerweb.utils"
-local cjson = require "cjson"
 
 local badbehavior = class("badbehavior", plugin)
 
@@ -9,7 +9,6 @@ local ngx = ngx
 local ERR = ngx.ERR
 local WARN = ngx.WARN
 local NOTICE = ngx.NOTICE
-local timer_at = ngx.timer.at
 local worker = ngx.worker
 local add_ban = utils.add_ban
 local is_whitelisted = utils.is_whitelisted
@@ -70,7 +69,7 @@ function badbehavior:log()
 			security_mode = security_mode,
 			country = country,
 			timestamp = time(date("!*t")),
-			status = status
+			status = status,
 		})
 	)
 	if not ok then
@@ -89,7 +88,6 @@ function badbehavior:log_stream()
 end
 
 function badbehavior:timer()
-
 	-- Only execute on worker 0
 	if worker.id() ~= 0 then
 		return self:ret(true, "skipped")
@@ -108,7 +106,7 @@ function badbehavior:timer()
 	if decr_len == nil then
 		return self:ret(false, "can't get decr list length : " .. decr_len_err)
 	end
-	for i = 1, decr_len do
+	for _ = 1, decr_len do
 		-- Pop operation
 		local decr, decr_err = self.datastore:lpop("plugin_badbehavior_decr")
 		if decr == nil then
@@ -117,7 +115,15 @@ function badbehavior:timer()
 		decr = decode(decr)
 		if timestamp > decr["timestamp"] then
 			-- Call decrease
-			local ok, err = self:decrease(decr["ip"], decr["count_time"], decr["threshold"], decr["use_redis"], decr["server_name"], decr["status"], decr["old_counter"])
+			local ok, err = self:decrease(
+				decr["ip"],
+				decr["count_time"],
+				decr["threshold"],
+				decr["use_redis"],
+				decr["server_name"],
+				decr["status"],
+				decr["old_counter"]
+			)
 			if not ok then
 				ret = false
 				ret_err = "can't decrease counter : " .. err
@@ -133,97 +139,95 @@ function badbehavior:timer()
 	end
 
 	-- Loop on increase operations
-	local incr_len, incr_len_err = self.datastore:llen("plugin_badbehavior_incr")
-	if incr_len == nil then
-		return self:ret(false, "can't get incr list length : " .. incr_len_err)
+	local incr_len, incr_err = self.datastore:llen("plugin_badbehavior_incr")
+	if not incr_len then
+		return self:ret(false, "can't get incr list length : " .. incr_err)
 	end
-	for i = 1, incr_len do
-		-- Pop operation
-		local incr, incr_err = self.datastore:lpop("plugin_badbehavior_incr")
-		if incr == nil then
-			return self:ret(false, "can't get incr list element : " .. incr_err)
+	for _ = 1, incr_len do
+		local incr_json, lpop_err = self.datastore:lpop("plugin_badbehavior_incr")
+		if not incr_json then
+			return self:ret(false, "can't get incr list element : " .. lpop_err)
 		end
-		incr = decode(incr)
-		-- Call increase
-		local counter, counter_err = self:increase(incr["ip"], incr["count_time"], incr["ban_time"], incr["threshold"], incr["use_redis"], incr["server_name"], incr["security_mode"], incr["country"], incr["status"])
+		local incr = decode(incr_json)
+		local ip = incr.ip
+		local count_time = incr.count_time
+		local ban_time = incr.ban_time
+		local threshold = incr.threshold
+		local use_redis = incr.use_redis
+		local server_name = incr.server_name
+		local security_mode = incr.security_mode
+		local country = incr.country
+		local status = incr.status
+		local counter, counter_err =
+			self:increase(ip, count_time, ban_time, threshold, use_redis, server_name, security_mode, country, status)
 		if not counter then
 			ret = false
 			ret_err = "can't increase counter : " .. counter_err
 		else
 			-- Add decrease later
-			local ok, err = self.datastore.dict:rpush("plugin_badbehavior_decr", encode({
-				ip = incr["ip"],
+			local decr_payload = {
+				ip = ip,
 				old_counter = counter,
-				count_time = incr["count_time"],
-				threshold = incr["threshold"],
-				use_redis = incr["use_redis"],
-				timestamp = timestamp + incr["count_time"],
-				server_name = incr["server_name"],
-				status = incr["status"]
-			}))
+				count_time = count_time,
+				threshold = threshold,
+				use_redis = use_redis,
+				timestamp = timestamp + count_time,
+				server_name = server_name,
+				status = status,
+			}
+			local ok, err = self.datastore.dict:rpush("plugin_badbehavior_decr", encode(decr_payload))
 			if not ok then
 				ret = false
 				ret_err = "can't add decr list element : " .. err
 			end
-			-- Add counter to counters
-			counters[incr["ip"] .. "_" .. incr["server_name"]] = {
+			-- Save counter info indexed by "ip_serverName"
+			counters[ip .. "_" .. server_name] = {
+				ip = ip,
 				counter = counter,
-				ip = incr["ip"],
-				count_time = incr["count_time"],
-				ban_time = incr["ban_time"],
-				threshold = incr["threshold"],
-				use_redis = incr["use_redis"],
-				server_name = incr["server_name"],
-				security_mode = incr["security_mode"],
-				country = incr["country"],
-				status = incr["status"]
+				count_time = count_time,
+				ban_time = ban_time,
+				threshold = threshold,
+				use_redis = use_redis,
+				server_name = server_name,
+				security_mode = security_mode,
+				country = country,
+				status = status,
 			}
 		end
 	end
 
 	-- Add bans if needed
-	for ip_server_name, counter in pairs(counters) do
-		local ip, server_name = ip_server_name:match("([^_]+)_([^_]+)")
-		if counter["counter"] >= counter["threshold"] then
-			if counter["security_mode"] == "block" then
-				local ok, err = add_ban(
-					counter["ip"],
-					"bad behavior",
-					counter["ban_time"],
-					counter["server_name"],
-					counter["country"]
-				)
+	for _, data in pairs(counters) do
+		if data.counter >= data.threshold then
+			if data.security_mode == "block" then
+				local ok, err = add_ban(data.ip, "bad behavior", data.ban_time, data.server_name, data.country)
 				if not ok then
 					ret = false
 					ret_err = "can't save ban : " .. err
 				else
 					self.logger:log(
 						WARN,
-						"IP "
-							.. counter["ip"]
-							.. " is banned for "
-							.. counter["ban_time"]
-							.. "s ("
-							.. tostring(counter["counter"])
-							.. "/"
-							.. tostring(counter["threshold"])
-							.. ") on server "
-							.. counter["server_name"]
+						string.format(
+							"IP %s is banned for %ss (%s/%s) on server %s",
+							data.ip,
+							data.ban_time,
+							tostring(data.counter),
+							tostring(data.threshold),
+							data.server_name
+						)
 					)
 				end
 			else
 				self.logger:log(
 					WARN,
-					"detected IP "
-						.. counter["ip"]
-						.. " ban for "
-						.. counter["ban_time"]
-						.. "s ("
-						.. tostring(counter["counter"])
-						.. "/"
-						.. tostring(counter["threshold"])
-						.. ") on server "
-						.. counter["server_name"]
+					string.format(
+						"detected IP %s ban for %ss (%s/%s) on server %s",
+						data.ip,
+						data.ban_time,
+						tostring(data.counter),
+						tostring(data.threshold),
+						data.server_name
+					)
 				)
 			end
 		end
@@ -259,7 +263,7 @@ function badbehavior:increase(
 	if not counter then
 		local local_counter, err = self.datastore:get("plugin_badbehavior_count_" .. ip)
 		if not local_counter and err ~= "not found" then
-			logger:log(ERR, "(increase) can't get counts from the datastore : " .. err)
+			self.logger:log(ERR, "(increase) can't get counts from the datastore : " .. err)
 		end
 		if local_counter == nil then
 			local_counter = 0
@@ -274,7 +278,17 @@ function badbehavior:increase(
 	end
 	self.logger:log(
 		NOTICE,
-		"increased counter for IP " .. ip .. " (" .. tostring(counter) .. "/" .. tostring(threshold) .. ") on server " .. server_name .. " (status " .. status .. ")"
+		"increased counter for IP "
+			.. ip
+			.. " ("
+			.. tostring(counter)
+			.. "/"
+			.. tostring(threshold)
+			.. ") on server "
+			.. server_name
+			.. " (status "
+			.. status
+			.. ")"
 	)
 	return counter, "success"
 end
@@ -316,13 +330,22 @@ function badbehavior:decrease(ip, count_time, threshold, use_redis, server_name,
 	end
 	self.logger:log(
 		NOTICE,
-		"decreased counter for IP " .. ip .. " (" .. tostring(counter) .. "/" .. tostring(threshold) .. ") on server " .. server_name .. " (status " .. status .. ")"
+		"decreased counter for IP "
+			.. ip
+			.. " ("
+			.. tostring(counter)
+			.. "/"
+			.. tostring(threshold)
+			.. ") on server "
+			.. server_name
+			.. " (status "
+			.. status
+			.. ")"
 	)
 	return true, "success"
 end
 
 function badbehavior:redis_increase(ip, count_time, ban_time)
-
 	-- Our LUA script to execute on redis
 	local redis_script = [[
 		local ret_incr = redis.pcall("INCR", KEYS[1])
@@ -350,8 +373,15 @@ function badbehavior:redis_increase(ip, count_time, ban_time)
 		return false, err
 	end
 	-- Execute LUA script
-	local counter, err =
-		self.clusterstore:call("eval", redis_script, 2, "plugin_bad_behavior_" .. ip, "bans_ip" .. ip, count_time, ban_time)
+	local counter, err = self.clusterstore:call(
+		"eval",
+		redis_script,
+		2,
+		"plugin_bad_behavior_" .. ip,
+		"bans_ip" .. ip,
+		count_time,
+		ban_time
+	)
 	if not counter then
 		self.clusterstore:close()
 		return false, err

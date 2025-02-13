@@ -66,7 +66,7 @@ try:
 
     # Check if ID is present
     if not bunkernet_path.joinpath("instance.id").is_file():
-        LOGGER.error("Not sending BunkerNet data because instance is not registered")
+        LOGGER.warning("Not sending BunkerNet data because instance is not registered")
         sys_exit(2)
 
     # Create API instances for each database instance
@@ -92,6 +92,9 @@ try:
 
     # Check if forced send is needed due to time
     force_send = datetime.fromisoformat(cached_data["created"]) + timedelta(hours=24) < datetime.now().astimezone()
+
+    if force_send:
+        LOGGER.info("Forcing send of cached reports as they are older than 24 hours")
 
     # Process reports in batches of 100
     remaining = len(reports)

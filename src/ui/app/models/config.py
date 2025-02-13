@@ -110,102 +110,73 @@ class Config:
         """
         return self.__db.get_services_settings(methods=methods, with_drafts=with_drafts)
 
-    def check_variables(
-        self,
-        variables: dict,
-        config: dict,
-        *,
-        global_config: bool = False,
-        new: bool = False,
-        threaded: bool = False,
-    ) -> dict:
-        """Testify that the variables passed are valid
+    def check_variables(self, variables: dict, config: dict, to_check: dict, *, global_config: bool = False, new: bool = False, threaded: bool = False) -> dict:
+        """
+        Validate and filter variables based on allowed settings and patterns.
 
-        Parameters
-        ----------
-        variables : dict
-            The dict to check
+        This function checks each variable from 'to_check' to determine if it is editable:
+         - Variables on the blacklist are removed.
+         - Variables not defined in the plugin settings (or not matching the allowed multiple format)
+           are considered invalid and removed.
+         - Variables managed by a non-user method (i.e. not 'default' or 'ui') are not editable
+           and are removed.
+         - Each variable's value is validated against the regex provided in the plugin settings.
+           A RegexError will also result in the variable being removed.
 
-        Returns
-        -------
-        int
-            Return the error code
+        Error messages are either flashed immediately (non-threaded) or appended to
+        self.__data["TO_FLASH"] (threaded).
         """
         self.__data.load_from_file()
         plugins_settings = self.get_plugins_settings()
         blacklisted_settings = get_blacklisted_settings(global_config)
 
-        for k, v in variables.copy().items():
-            check = False
-
-            if k in plugins_settings:
-                setting = k
+        def report_error(message: str) -> None:
+            if threaded:
+                self.__data["TO_FLASH"].append({"content": message, "type": "error"})
             else:
-                setting = k[0 : k.rfind("_")]  # noqa: E203
-                if setting not in plugins_settings or "multiple" not in plugins_settings[setting]:
-                    content = f"Variable {k} is not valid."
-                    if threaded:
-                        self.__data["TO_FLASH"].append({"content": content, "type": "error"})
-                    else:
-                        flash(content, "error")
-                    variables.pop(k)
+                flash(message, "error")
+
+        # Iterate over a copy of the items to safely modify the dictionary.
+        for key, value in to_check.items():
+            # Remove blacklisted variables.
+            if key in blacklisted_settings:
+                report_error(f"Variable {key} is not editable, ignoring it.")
+                variables.pop(key, None)
+                continue
+
+            # Determine the base setting key.
+            setting = key
+            if key not in plugins_settings:
+                if "_" not in key:
+                    report_error(f"Variable {key} is not valid.")
+                    variables.pop(key, None)
                     continue
 
-            if setting in blacklisted_settings:
-                message = f"Variable {k} is not editable, ignoring it"
-                if threaded:
-                    self.__data["TO_FLASH"].append({"content": message, "type": "error"})
-                else:
-                    flash(message, "error")
-                variables.pop(k)
-                continue
-            elif setting not in config and plugins_settings[setting]["default"] == v:
-                variables.pop(k)
-                continue
-            elif (
+                setting, suffix = key.rsplit("_", 1)
+                if setting not in plugins_settings or "multiple" not in plugins_settings[setting] or not suffix.isdigit():
+                    report_error(f"Variable {key} is not valid.")
+                    variables.pop(key, None)
+                    continue
+
+            # Check if the variable is not editable because it is managed externally.
+            if (
                 not new
                 and setting != "IS_DRAFT"
-                and setting in config
-                and ((global_config or not config[setting]["global"]) and config[setting]["method"] not in ("default", "ui"))
+                and key in config
+                and ((global_config or not config[key].get("global", False)) and config[key].get("method") not in ("default", "ui"))
             ):
-                message = f"Variable {k} is not editable as is it managed by the {config[setting]['method']}, ignoring it"
-                if threaded:
-                    self.__data["TO_FLASH"].append({"content": message, "type": "error"})
-                else:
-                    flash(message, "error")
-                variables.pop(k)
+                report_error(f"Variable {key} is not editable as it is managed by the {config[key]['method']}, ignoring it.")
+                variables.pop(key, None)
                 continue
 
+            # Validate the variable's value against the regex pattern.
             try:
-                if re_search(plugins_settings[setting]["regex"], v):
-                    check = True
+                if not re_search(plugins_settings[setting]["regex"], value):
+                    report_error(f"Variable {key} is not valid.")
+                    variables.pop(key, None)
             except RegexError as e:
-                message = f"Invalid regex for setting {setting} : {plugins_settings[setting]['regex']}, ignoring regex check:{e}"
-                if threaded:
-                    self.__data["TO_FLASH"].append({"content": message, "type": "error"})
-                else:
-                    flash(message, "error")
-                variables.pop(k)
-                continue
-
-            if not check:
-                message = f"Variable {k} is not valid."
-                if threaded:
-                    self.__data["TO_FLASH"].append({"content": message, "type": "error"})
-                else:
-                    flash(message, "error")
-                variables.pop(k)
-
-        for k in config:
-            if k in plugins_settings:
-                continue
-            setting = k[0 : k.rfind("_")]  # noqa: E203
-
-            if setting not in plugins_settings or "multiple" not in plugins_settings[setting]:
-                continue
-
-            if k not in variables:
-                variables[k] = plugins_settings[setting]["default"]
+                report_error(f"Invalid regex for setting {setting}: {plugins_settings[setting]['regex']}. Ignoring regex check: {e}")
+                variables.pop(key, None)
 
         return variables
 
@@ -271,7 +242,7 @@ class Config:
                 services.pop(i)
 
         services.append(variables | {"IS_DRAFT": "yes" if is_draft else "no"})
-        config = self.get_config(methods=False)
+        config = self.get_config(global_only=True, methods=False)
 
         if changed_server_name and server_name_splitted[0] != old_server_name_splitted[0]:
             for k in config.copy():
@@ -296,9 +267,7 @@ class Config:
         str
             the confirmation message
         """
-        ret = self.gen_conf(
-            self.get_config(methods=False) | variables, self.get_services(methods=False), check_changes=check_changes, override_method=override_method
-        )
+        ret = self.gen_conf(variables, self.get_services(methods=False), check_changes=check_changes, override_method=override_method)
         if isinstance(ret, str):
             return ret, 1
         return "The global configuration has been edited.", 0

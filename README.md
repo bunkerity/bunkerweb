@@ -1,5 +1,5 @@
 <p align="center">
-	<img alt="BunkerWeb logo" src="https://github.com/bunkerity/bunkerweb/raw/v1.6.0-rc4/misc/logo.png" height=100 width=350 />
+	<img alt="BunkerWeb logo" src="https://github.com/bunkerity/bunkerweb/raw/v1.6.0/misc/logo.png" height=100 width=350 />
 </p>
 
 <p align="center">
@@ -26,7 +26,9 @@
 	 &#124;
 	👨‍💻 <a href="https://demo.bunkerweb.io/?utm_campaign=self&utm_source=github">Demo</a>
 	 &#124;
-	🛡️ <a href="https://github.com/bunkerity/bunkerweb/raw/v1.6.0-rc4/examples">Examples</a>
+	📱 <a href="https://demo-ui.bunkerweb.io/?utm_campaign=self&utm_source=github">Demo UI</a>
+	 &#124;
+	🛡️ <a href="https://github.com/bunkerity/bunkerweb/raw/v1.6.0/examples">Examples</a>
 	 &#124;
 	💬 <a href="https://discord.com/invite/fTf46FmtyD">Chat</a>
 	 &#124;
@@ -44,16 +46,20 @@
 # BunkerWeb
 
 <p align="center">
-	<img alt="Overview banner" src="https://github.com/bunkerity/bunkerweb/raw/v1.6.0-rc4/docs/assets/img/intro-overview.svg" />
+	<img alt="Overview banner" src="https://github.com/bunkerity/bunkerweb/raw/v1.6.0/docs/assets/img/intro-overview.svg" />
 </p>
 
 BunkerWeb is a next-generation and open-source Web Application Firewall (WAF).
 
-Being a full-featured web server (based on [NGINX](https://nginx.org/) under the hood), it will protect your web services to make them "secure by default". BunkerWeb integrates seamlessly into your existing environments ([Linux](https://docs.bunkerweb.io/1.6.0-rc4/integrations/?utm_campaign=self&utm_source=github#linux), [Docker](https://docs.bunkerweb.io/1.6.0-rc4/integrations/?utm_campaign=self&utm_source=github#docker), [Swarm](https://docs.bunkerweb.io/1.6.0-rc4/integrations/?utm_campaign=self&utm_source=github#swarm), [Kubernetes](https://docs.bunkerweb.io/1.6.0-rc4/integrations/?utm_campaign=self&utm_source=github#kubernetes), …) and is fully configurable (don't panic, there is an [awesome web UI](https://docs.bunkerweb.io/1.6.0-rc4/web-ui/?utm_campaign=self&utm_source=github) if you don't like the CLI) to meet your own use-cases . In other words, cybersecurity is no more a hassle.
+Being a full-featured web server (based on [NGINX](https://nginx.org/) under the hood), it will protect your web services to make them "secure by default". BunkerWeb integrates seamlessly into your existing environments ([Linux](https://docs.bunkerweb.io/1.6.0/integrations/?utm_campaign=self&utm_source=github#linux), [Docker](https://docs.bunkerweb.io/1.6.0/integrations/?utm_campaign=self&utm_source=github#docker), [Swarm](https://docs.bunkerweb.io/1.6.0/integrations/?utm_campaign=self&utm_source=github#swarm), [Kubernetes](https://docs.bunkerweb.io/1.6.0/integrations/?utm_campaign=self&utm_source=github#kubernetes), …) and is fully configurable (don't panic, there is an [awesome web UI](https://docs.bunkerweb.io/1.6.0/web-ui/?utm_campaign=self&utm_source=github) if you don't like the CLI) to meet your own use-cases . In other words, cybersecurity is no more a hassle.
 
-BunkerWeb contains primary [security features](https://docs.bunkerweb.io/1.6.0-rc4/security-tuning/?utm_campaign=self&utm_source=github) as part of the core but can be easily extended with additional ones thanks to a [plugin system](https://docs.bunkerweb.io/1.6.0-rc4/plugins/?utm_campaign=self&utm_source=github).
+BunkerWeb contains primary [security features](https://docs.bunkerweb.io/1.6.0/advanced/?utm_campaign=self&utm_source=github#security-tuning) as part of the core but can be easily extended with additional ones thanks to a [plugin system](https://docs.bunkerweb.io/1.6.0/plugins/?utm_campaign=self&utm_source=github).
 
 ## Why BunkerWeb ?
+
+<p align="center">
+	<a href="https://www.youtube.com/watch?v=oybLtyhWJIo" target="_blank"><img alt="BunkerWeb demo" src="https://img.youtube.com/vi/oybLtyhWJIo/0.jpg" /></a>
+</p>
 
 - **Easy integration into existing environments** : Seamlessly integrate BunkerWeb into various environments such as Linux, Docker, Swarm, Kubernetes and more. Enjoy a smooth transition and hassle-free implementation.
 - **Highly customizable** : Tailor BunkerWeb to your specific requirements with ease. Enable, disable, and configure features effortlessly, allowing you to customize the security settings according to your unique use case.
@@ -76,7 +82,7 @@ A non-exhaustive list of security features :
 - **Block known bad IPs** with external blacklists and DNSBL
 - And much more ...
 
-Learn more about the core security features in the [security tuning](https://docs.bunkerweb.io/1.6.0-rc4/security-tuning/?utm_campaign=self&utm_source=github) section of the documentation.
+Learn more about the core security features in the [security tuning](https://docs.bunkerweb.io/1.6.0/advanced/?utm_campaign=self&utm_source=github#security-tuning) section of the documentation.
 
 ## Demo
 
@@ -86,18 +92,26 @@ Learn more about the core security features in the [security tuning](https://doc
 
 A demo website protected with BunkerWeb is available at [demo.bunkerweb.io](https://demo.bunkerweb.io/?utm_campaign=self&utm_source=github). Feel free to visit it and perform some security tests.
 
+## Web UI
+
+<p align="center">
+	<a href="https://www.youtube.com/watch?v=tGS3pzquEjY" target="_blank"><img alt="BunkerWeb UI demo" src="https://img.youtube.com/vi/tGS3pzquEjY/0.jpg" /></a>
+</p>
+
+BunkerWeb offers an optional [user interface](web-ui.md) to manage your instances and their configurations. An online read-only demo is available at [demo-ui.bunkerweb.io](https://demo-ui.bunkerweb.io/?utm_campaign=self&utm_source=doc), feel free to test it by yourself.
+
 ## BunkerWeb Cloud
 
 Don't want to self-host and manage your own BunkerWeb instance(s) ? You might be interested into BunkerWeb Cloud, our fully managed SaaS offer for BunkerWeb.
 
-Try our [BunkerWeb Cloud beta offer for free](https://panel.bunkerweb.io/order/bunkerweb-cloud/14?utm_source=github&utm_campaign=self) and get access to :
+Try our [BunkerWeb Cloud beta offer for free](https://panel.bunkerweb.io/order/bunkerweb-cloud/14?utm_source=doc&utm_campaign=self) and get access to :
 
 - Fully managed BunkerWeb instance hosted in our cloud
 - All BunkerWeb features including PRO ones
 - Monitoring platform including dashboards and alerts
 - Technical support to assist you in the configuration
 
-You will find more information about BunkerWeb Cloud in the [FAQ page](https://panel.bunkerweb.io/knowledgebase/55/BunkerWeb-Cloud?utm_source=github&utm_campaign=self) of the BunkerWeb panel.
+You will find more information about BunkerWeb Cloud in the [FAQ page](https://panel.bunkerweb.io/knowledgebase/55/BunkerWeb-Cloud?utm_source=doc&utm_campaign=self) of the BunkerWeb panel.
 
 ## PRO version
 
@@ -105,13 +119,13 @@ When using BunkerWeb you have the choice of the version you want to use : open-s
 
 Whether it's enhanced security, an enriched user experience, or technical supervision, the BunkerWeb PRO version will allow you to fully benefit from BunkerWeb and respond to your professional needs.
 
-Be it in the documentation or the user interface, the PRO features are annotated with a crown <img src="https://docs.bunkerweb.io/1.6.0-rc4/assets/img/pro-icon.svg" alt="crow pro icon" height="24px" width="24px"> to distinguish them from those integrated into the open-source version.
+Be it in the documentation or the user interface, the PRO features are annotated with a crown <img src="https://docs.bunkerweb.io/1.6.0/assets/img/pro-icon.svg" alt="crow pro icon" height="24px" width="24px"> to distinguish them from those integrated into the open-source version.
 
 You can upgrade from the open-source version to the PRO one easily and at any time you want. The process is pretty straightforward :
 
 - Claim your [free trial on the BunkerWeb panel](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc)
 - Once connected to the client area, copy your PRO license key
-- Paste your private key into BunkerWeb using the [web UI](https://docs.bunkerweb.io/1.6.0-rc4/web-ui/#upgrade-to-pro) or [specific setting](https://docs.bunkerweb.io/1.6.0-rc4/settings/#pro)
+- Paste your private key into BunkerWeb using the [web UI](https://docs.bunkerweb.io/1.6.0/web-ui/#upgrade-to-pro) or [specific setting](https://docs.bunkerweb.io/1.6.0/settings/#pro)
 
 Do not hesitate to visit the [BunkerWeb panel](https://panel.bunkerweb.io/knowledgebase?utm_campaign=self&utm_source=doc) or [contact us](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=doc) if you have any question regarding the PRO version.
 
@@ -127,12 +141,13 @@ Don't hesitate to [contact us](https://panel.bunkerweb.io/contact.php?utm_campai
 
 Official websites, tools and resources about BunkerWeb :
 
-- [**Website**](https://www.bunkerweb.io/?utm_campaign=self&utm_source=github) : get more information, news and articles about BunkerWeb
-- [**Panel**](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=github) : dedicated platform to order and manage professional services (e.g. technical support) around BunkerWeb
-- [**Documentation**](https://docs.bunkerweb.io/?utm_campaign=self&utm_source=github) : technical documentation of the BunkerWeb solution
-- [**Demo**](https://demo.bunkerweb.io/?utm_campaign=self&utm_source=github) : demonstration website of BunkerWeb, don't hesitate to attempt attacks to test the robustness of the solution
-- [**Configurator**](https://config.bunkerweb.io/?utm_campaign=self&utm_source=github) : user-friendly tool to help you configure BunkerWeb
-- [**Threatmap**](https://threatmap.bunkerweb.io/?utm_campaign=self&utm_source=github) : live cyber attack blocked by BunkerWeb instances all around the world
+- [**Website**](https://www.bunkerweb.io/?utm_campaign=self&utm_source=doc) : get more information, news and articles about BunkerWeb
+- [**Panel**](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc) : dedicated platform to order and manage professional services (e.g. technical support) around BunkerWeb
+- [**Documentation**](https://docs.bunkerweb.io) : technical documentation of the BunkerWeb solution
+- [**Demo**](https://demo.bunkerweb.io/?utm_campaign=self&utm_source=doc) : demonstration website of BunkerWeb, don't hesitate to attempt attacks to test the robustness of the solution
+- [**Web UI**](https://demo-ui.bunkerweb.io/?utm_campaign=self&utm_source=doc) : online read-only demo of the web UI of BunkerWeb
+- [**Configurator**](https://config.bunkerweb.io/?utm_campaign=self&utm_source=doc) : user-friendly tool to help you configure BunkerWeb
+- [**Threatmap**](https://threatmap.bunkerweb.io/?utm_campaign=self&utm_source=doc) : live cyber attack blocked by BunkerWeb instances all around the world
 
 Community and social networks :
 
@@ -144,10 +159,10 @@ Community and social networks :
 # Concepts
 
 <p align="center">
-	<img alt="Concepts banner" src="https://github.com/bunkerity/bunkerweb/raw/v1.6.0-rc4/docs/assets/img/concepts.svg" />
+	<img alt="Concepts banner" src="https://github.com/bunkerity/bunkerweb/raw/v1.6.0/docs/assets/img/concepts.svg" />
 </p>
 
-You will find more information about the key concepts of BunkerWeb in the [documentation](https://docs.bunkerweb.io/1.6.0-rc4/concepts/?utm_campaign=self&utm_source=github).
+You will find more information about the key concepts of BunkerWeb in the [documentation](https://docs.bunkerweb.io/1.6.0/concepts/?utm_campaign=self&utm_source=github).
 
 ## Integrations
 
@@ -155,12 +170,12 @@ The first concept is the integration of BunkerWeb into the target environment. W
 
 The following integrations are officially supported :
 
-- [Docker](https://docs.bunkerweb.io/1.6.0-rc4/integrations/?utm_campaign=self&utm_source=github#docker)
-- [Linux](https://docs.bunkerweb.io/1.6.0-rc4/integrations/?utm_campaign=self&utm_source=github#linux)
-- [Docker autoconf](https://docs.bunkerweb.io/1.6.0-rc4/integrations/?utm_campaign=self&utm_source=github#docker-autoconf)
-- [Kubernetes](https://docs.bunkerweb.io/1.6.0-rc4/integrations/?utm_campaign=self&utm_source=github#kubernetes)
-- [Swarm](https://docs.bunkerweb.io/1.6.0-rc4/integrations/?utm_campaign=self&utm_source=github#swarm)
-- [Microsoft Azure](https://docs.bunkerweb.io/1.6.0-rc4/integrations/?utm_campaign=self&utm_source=github#microsoft-azure)
+- [Docker](https://docs.bunkerweb.io/1.6.0/integrations/?utm_campaign=self&utm_source=github#docker)
+- [Linux](https://docs.bunkerweb.io/1.6.0/integrations/?utm_campaign=self&utm_source=github#linux)
+- [Docker autoconf](https://docs.bunkerweb.io/1.6.0/integrations/?utm_campaign=self&utm_source=github#docker-autoconf)
+- [Kubernetes](https://docs.bunkerweb.io/1.6.0/integrations/?utm_campaign=self&utm_source=github#kubernetes)
+- [Swarm](https://docs.bunkerweb.io/1.6.0/integrations/?utm_campaign=self&utm_source=github#swarm)
+- [Microsoft Azure](https://docs.bunkerweb.io/1.6.0/integrations/?utm_campaign=self&utm_source=github#microsoft-azure)
 
 ## Settings
 
@@ -192,7 +207,7 @@ When multisite mode is enabled, BunkerWeb will serve and protect multiple web ap
 
 ## Custom configurations
 
-Because meeting all the use cases only using the settings is not an option (even with [external plugins](https://docs.bunkerweb.io/1.6.0-rc4/plugins/?utm_campaign=self&utm_source=github)), you can use custom configurations to solve your specific challenges.
+Because meeting all the use cases only using the settings is not an option (even with [external plugins](https://docs.bunkerweb.io/1.6.0/plugins/?utm_campaign=self&utm_source=github)), you can use custom configurations to solve your specific challenges.
 
 Under the hood, BunkerWeb uses the notorious NGINX web server, that's why you can leverage its configuration system for your specific needs. Custom NGINX configurations can be included in different [contexts](https://docs.nginx.com/nginx/admin-guide/basic-functionality/managing-configuration-files/#contexts) like HTTP or server (all servers and/or specific server block).
 
@@ -201,7 +216,7 @@ Another core component of BunkerWeb is the ModSecurity Web Application Firewall 
 ## Database
 
 <p align="center">
-	<img alt="Database model" src="https://github.com/bunkerity/bunkerweb/raw/v1.6.0-rc4/docs/assets/img/bunkerweb_db.svg" />
+	<img alt="Database model" src="https://github.com/bunkerity/bunkerweb/raw/v1.6.0/docs/assets/img/bunkerweb_db.svg" />
 </p>
 
 State of the current configuration of BunkerWeb is stored in a backend database which contains the following data :
@@ -230,67 +245,17 @@ In other words, the scheduler is the brain of BunkerWeb.
 ## BunkerWeb Cloud
 
 <p align="center">
-	<img alt="Docker banner" src="https://github.com/bunkerity/bunkerweb/raw/v1.6.0-rc4/docs/assets/img/bunkerweb-cloud.webp" />
+	<img alt="Docker banner" src="https://github.com/bunkerity/bunkerweb/raw/v1.6.0/docs/assets/img/bunkerweb-cloud.webp" />
 </p>
 
 BunkerWeb Cloud is the easiest way to get started with BunkerWeb. It offers you a fully managed BunkerWeb service with no hassle. Think of a like a BunkerWeb-as-a-Service !
 
 You will find more information about BunkerWeb Cloud beta [here](https://www.bunkerweb.io/cloud?utm_campaign=self&utm_source=docs) and you can apply for free [in the BunkerWeb panel](https://panel.bunkerweb.io/order/bunkerweb-cloud/14?utm_campaign=self&utm_source=docs).
 
-## Docker
-
-<p align="center">
-	<img alt="Docker banner" src="https://github.com/bunkerity/bunkerweb/raw/v1.6.0-rc4/docs/assets/img/integration-docker.svg" />
-</p>
-
-We provide ready to use prebuilt images for x64, x86, armv7 and arm64 platforms on [Docker Hub](https://hub.docker.com/u/bunkerity).
-
-Docker integration key concepts are :
-
-- **Environment variables** to configure BunkerWeb
-- **Scheduler** container to store configuration and execute jobs
-- **Networks** to expose ports for clients and connect to upstream web services
-
-You will find more information in the [Docker integration section](https://docs.bunkerweb.io/1.6.0-rc4/integrations/?utm_campaign=self&utm_source=github#docker) of the documentation.
-
-## Docker autoconf
-
-<p align="center">
-	<img alt="Docker autoconf banner" src="https://github.com/bunkerity/bunkerweb/raw/v1.6.0-rc4/docs/assets/img/integration-autoconf.svg" />
-</p>
-
-The downside of using environment variables is that the container needs to be recreated each time there is an update which is not very convenient. To counter that issue, you can use another image called **autoconf** which will listen for Docker events and automatically reconfigure BunkerWeb in real-time without recreating the container.
-
-Instead of defining environment variables for the BunkerWeb container, you simply add **labels** to your web applications containers and the **autoconf** will "automagically" take care of the rest.
-
-You will find more information in the [Docker autoconf section](https://docs.bunkerweb.io/1.6.0-rc4/integrations/?utm_campaign=self&utm_source=github#docker-autoconf) of the documentation.
-
-## Swarm
-
-<p align="center">
-	<img alt="Swarm banner" src="https://github.com/bunkerity/bunkerweb/raw/v1.6.0-rc4/docs/assets/img/integration-swarm.svg" />
-</p>
-
-To automatically configure BunkerWeb instances, a special service, called **autoconf** will listen for Docker Swarm events like service creation or deletion and automatically configure the **BunkerWeb instances** in real-time without downtime.
-
-Like the [Docker autoconf integration](https://docs.bunkerweb.io/1.6.0-rc4/integrations/?utm_campaign=self&utm_source=github#docker-autoconf), configuration for web services is defined using labels starting with the special **bunkerweb.** prefix.
-
-You will find more information in the [Swarm section](https://docs.bunkerweb.io/1.6.0-rc4/integrations/?utm_campaign=self&utm_source=github#swarm) of the documentation.
-
-## Kubernetes
-
-<p align="center">
-	<img alt="Kubernetes banner" src="https://github.com/bunkerity/bunkerweb/raw/v1.6.0-rc4/docs/assets/img/integration-kubernetes.svg" />
-</p>
-
-The autoconf acts as an [Ingress controller](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/) and will configure the BunkerWeb instances according to the [Ingress resources](https://kubernetes.io/docs/concepts/services-networking/ingress/). It also monitors other Kubernetes objects like [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/) for custom configurations.
-
-You will find more information in the [Kubernetes section](https://docs.bunkerweb.io/1.6.0-rc4/integrations/?utm_campaign=self&utm_source=github#kubernetes) of the documentation.
-
 ## Linux
 
 <p align="center">
-	<img alt="Linux banner" src="https://github.com/bunkerity/bunkerweb/raw/v1.6.0-rc4/docs/assets/img/integration-linux.svg" />
+	<img alt="Linux banner" src="https://github.com/bunkerity/bunkerweb/raw/v1.6.0/docs/assets/img/integration-linux.svg" />
 </p>
 
 List of supported Linux distros :
@@ -305,32 +270,77 @@ List of supported Linux distros :
 
 You will find more information in the [Linux section](https://docs.bunkerweb.io/1.5.10/integrations/?utm_campaign=self&utm_source=github#linux) of the documentation.
 
+## Docker
+
+<p align="center">
+	<img alt="Docker banner" src="https://github.com/bunkerity/bunkerweb/raw/v1.6.0/docs/assets/img/integration-docker.svg" />
+</p>
+
+We provide ready to use prebuilt images for x64, x86, armv7 and arm64 platforms on [Docker Hub](https://hub.docker.com/u/bunkerity).
+
+Docker integration key concepts are :
+
+- **Environment variables** to configure BunkerWeb
+- **Scheduler** container to store configuration and execute jobs
+- **Networks** to expose ports for clients and connect to upstream web services
+
+You will find more information in the [Docker integration section](https://docs.bunkerweb.io/1.6.0/integrations/?utm_campaign=self&utm_source=github#docker) of the documentation.
+
+## Docker autoconf
+
+<p align="center">
+	<img alt="Docker autoconf banner" src="https://github.com/bunkerity/bunkerweb/raw/v1.6.0/docs/assets/img/integration-autoconf.svg" />
+</p>
+
+The downside of using environment variables is that the container needs to be recreated each time there is an update which is not very convenient. To counter that issue, you can use another image called **autoconf** which will listen for Docker events and automatically reconfigure BunkerWeb in real-time without recreating the container.
+
+Instead of defining environment variables for the BunkerWeb container, you simply add **labels** to your web applications containers and the **autoconf** will "automagically" take care of the rest.
+
+You will find more information in the [Docker autoconf section](https://docs.bunkerweb.io/1.6.0/integrations/?utm_campaign=self&utm_source=github#docker-autoconf) of the documentation.
+
+## Kubernetes
+
+<p align="center">
+	<img alt="Kubernetes banner" src="https://github.com/bunkerity/bunkerweb/raw/v1.6.0/docs/assets/img/integration-kubernetes.svg" />
+</p>
+
+The autoconf acts as an [Ingress controller](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/) and will configure the BunkerWeb instances according to the [Ingress resources](https://kubernetes.io/docs/concepts/services-networking/ingress/). It also monitors other Kubernetes objects like [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/) for custom configurations.
+
+The official [Helm chart](https://helm.sh/) for BunkerWeb is available in the [bunkerity/bunkerweb-helm repository](https://github.com/bunkerity/bunkerweb-helm).
+
+You will find more information in the [Kubernetes section](https://docs.bunkerweb.io/1.6.0/integrations/?utm_campaign=self&utm_source=github#kubernetes) of the documentation.
+
 ## Microsoft Azure
 
 <p align="center">
-	<img alt="Azure banner" src="https://github.com/bunkerity/bunkerweb/raw/v1.6.0-rc4/docs/assets/img/integration-azure.webp" />
+	<img alt="Azure banner" src="https://github.com/bunkerity/bunkerweb/raw/v1.6.0/docs/assets/img/integration-azure.webp" />
 </p>
 
-BunkerWeb is referenced in the [Azure Marketplace](https://azuremarketplace.microsoft.com/fr-fr/marketplace/apps/bunkerity.bunkerweb?tab=Overview) and a ARM template is available in the [misc folder](https://github.com/bunkerity/bunkerweb/raw/v1.6.0-rc4/misc/integrations/azure-arm-template.json).
+BunkerWeb is referenced in the [Azure Marketplace](https://azuremarketplace.microsoft.com/fr-fr/marketplace/apps/bunkerity.bunkerweb?tab=Overview) and a ARM template is available in the [misc folder](https://github.com/bunkerity/bunkerweb/raw/v1.6.0/misc/integrations/azure-arm-template.json).
 
-You will find more information in the [Microsoft Azure section](https://docs.bunkerweb.io/1.6.0-rc4/integrations/?utm_campaign=self&utm_source=github#microsoft-azure) of the documentation.
+You will find more information in the [Microsoft Azure section](https://docs.bunkerweb.io/1.6.0/integrations/?utm_campaign=self&utm_source=github#microsoft-azure) of the documentation.
+
+## Swarm
+
+<p align="center">
+	<img alt="Swarm banner" src="https://github.com/bunkerity/bunkerweb/raw/v1.6.0/docs/assets/img/integration-swarm.svg" />
+</p>
+
+To automatically configure BunkerWeb instances, a special service, called **autoconf** will listen for Docker Swarm events like service creation or deletion and automatically configure the **BunkerWeb instances** in real-time without downtime.
+
+Like the [Docker autoconf integration](https://docs.bunkerweb.io/1.6.0/integrations/?utm_campaign=self&utm_source=github#docker-autoconf), configuration for web services is defined using labels starting with the special **bunkerweb.** prefix.
+
+You will find more information in the [Swarm section](https://docs.bunkerweb.io/1.6.0/integrations/?utm_campaign=self&utm_source=github#swarm) of the documentation.
 
 # Quickstart guide
 
-Once you have setup BunkerWeb with the integration of your choice, you can follow the [quickstart guide](https://docs.bunkerweb.io/1.6.0-rc4/quickstart-guide/?utm_campaign=self&utm_source=github) that will cover the following common use cases :
-
-- Protecting a single HTTP application
-- Protecting multiple HTTP application
-- Retrieving the real IP of clients when operating behind a load balancer
-- Adding custom configurations
-- Protecting generic TCP/UDP applications
-- In combination with PHP
+Once you have setup BunkerWeb with the integration of your choice, you can follow the [quickstart guide](https://docs.bunkerweb.io/1.6.0/quickstart-guide/?utm_campaign=self&utm_source=github) that will cover the installation and first configuration to protect a web service.
 
 # Security tuning
 
-BunkerWeb offers many security features that you can configure with [settings](https://docs.bunkerweb.io/1.6.0-rc4/settings/?utm_campaign=self&utm_source=github). Even if the default values of settings ensure a minimal "security by default", we strongly recommend you to tune them. By doing so you will be able to ensure a security level of your choice but also manage false positives.
+BunkerWeb offers many security features that you can configure with [settings](https://docs.bunkerweb.io/1.6.0/settings/?utm_campaign=self&utm_source=github). Even if the default values of settings ensure a minimal "security by default", we strongly recommend you to tune them. By doing so you will be able to ensure a security level of your choice but also manage false positives.
 
-You will find more information in the [security tuning section](https://docs.bunkerweb.io/1.6.0-rc4/security-tuning/?utm_campaign=self&utm_source=github) of the documentation.
+You will find more information in the [security tuning section](https://docs.bunkerweb.io/1.6.0/advanced/?utm_campaign=self&utm_source=github#security-tuning) of the documentation.
 
 # Settings
 
@@ -340,27 +350,28 @@ As a general rule when multisite mode is enabled, if you want to apply settings 
 
 When settings are considered as "multiple", it means that you can have multiple groups of settings for the same feature by adding numbers as suffix like `REVERSE_PROXY_URL_1=/subdir`, `REVERSE_PROXY_HOST_1=http://myhost1`, `REVERSE_PROXY_URL_2=/anotherdir`, `REVERSE_PROXY_HOST_2=http://myhost2`, ... for example.
 
-Check the [settings section](https://docs.bunkerweb.io/1.6.0-rc4/settings/?utm_campaign=self&utm_source=github) of the documentation to get the full list.
+Check the [settings section](https://docs.bunkerweb.io/1.6.0/settings/?utm_campaign=self&utm_source=github) of the documentation to get the full list.
 
 # Web UI
 
 <p align="center">
-	<a href="https://www.youtube.com/watch?v=Ao20SfvQyr4">
-		<img src="https://github.com/bunkerity/bunkerweb/raw/v1.6.0-rc4/docs/assets/img/user_interface_demo.webp" height="300" />
-	</a>
+	<a href="https://www.youtube.com/watch?v=tGS3pzquEjY" target="_blank"><img alt="BunkerWeb UI demo" src="https://img.youtube.com/vi/tGS3pzquEjY/0.jpg" /></a>
 </p>
 
 The "Web UI" is a web application that helps you manage your BunkerWeb instance using a user-friendly interface instead of the command-line one.
 
+Here is the list of features offered by the web UI :
+
+- Get a comprehensive view of the blocked attacks
 - Start, stop, restart and reload your BunkerWeb instance
 - Add, edit and delete settings for your web applications
 - Add, edit and delete custom configurations for NGINX and ModSecurity
 - Install and uninstall external plugins
 - Explore the cached files
-- Monitor jobs execution
+- Monitor jobs execution and restart them when needed
 - View the logs and search pattern
 
-You will find more information in the [Web UI section](https://docs.bunkerweb.io/1.6.0-rc4/web-ui/?utm_campaign=self&utm_source=github) of the documentation.
+You will find more information in the [Web UI section](https://docs.bunkerweb.io/1.6.0/web-ui/?utm_campaign=self&utm_source=github) of the documentation.
 
 # Plugins
 
@@ -378,7 +389,7 @@ Here is the list of "official" plugins that we maintain (see the [bunkerweb-plug
 | **VirusTotal** |   1.8   | Automatically scans uploaded files with the VirusTotal API and denies the request when a file is detected as malicious.          | [bunkerweb-plugins/virustotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal) |
 |  **WebHook**   |   1.8   | Send security notifications to a custom HTTP endpoint using a Webhook.                                                           |    [bunkerweb-plugins/webhook](https://github.com/bunkerity/bunkerweb-plugins/tree/main/webhook)    |
 
-You will find more information in the [plugins section](https://docs.bunkerweb.io/1.6.0-rc4/plugins/?utm_campaign=self&utm_source=github) of the documentation.
+You will find more information in the [plugins section](https://docs.bunkerweb.io/1.6.0/plugins/?utm_campaign=self&utm_source=github) of the documentation.
 
 # Support
 
@@ -401,15 +412,15 @@ Please don't use [GitHub issues](https://github.com/bunkerity/bunkerweb/issues) 
 
 # License
 
-This project is licensed under the terms of the [GNU Affero General Public License (AGPL) version 3](https://github.com/bunkerity/bunkerweb/raw/v1.6.0-rc4/LICENSE.md).
+This project is licensed under the terms of the [GNU Affero General Public License (AGPL) version 3](https://github.com/bunkerity/bunkerweb/raw/v1.6.0/LICENSE.md).
 
 # Contribute
 
-If you would like to contribute to the plugins you can read the [contributing guidelines](https://github.com/bunkerity/bunkerweb/raw/v1.6.0-rc4/CONTRIBUTING.md) to get started.
+If you would like to contribute to the plugins you can read the [contributing guidelines](https://github.com/bunkerity/bunkerweb/raw/v1.6.0/CONTRIBUTING.md) to get started.
 
 # Security policy
 
-We take security bugs as serious issues and encourage responsible disclosure, see our [security policy](https://github.com/bunkerity/bunkerweb/raw/v1.6.0-rc4/SECURITY.md) for more information.
+We take security bugs as serious issues and encourage responsible disclosure, see our [security policy](https://github.com/bunkerity/bunkerweb/raw/v1.6.0/SECURITY.md) for more information.
 
 # Star History
 

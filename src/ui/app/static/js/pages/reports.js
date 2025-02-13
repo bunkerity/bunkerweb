@@ -414,7 +414,6 @@ $(document).ready(function () {
           searchPanes: {
             show: true,
             combiner: "or",
-            // options: countriesSearchPanesOptions,
           },
           targets: 3,
           render: function (data) {
@@ -426,14 +425,25 @@ $(document).ready(function () {
                   countryCode === "local" ? "zz" : countryCode
                 }.svg"
                      class="border border-1 p-0 me-1"
-                     height="17" />
+                     height="17"
+                     loading="lazy" />
                 &nbsp;－&nbsp;${countryCode === "local" ? "N/A" : data}
               </span>`;
           },
         },
         {
+          searchPanes: {
+            show: true,
+            combiner: "or",
+          },
+          targets: 9,
+          render: function (data) {
+            return data === "_" ? "default server" : data;
+          },
+        },
+        {
           searchPanes: { show: true },
-          targets: [2, 4, 5, 6, 8, 9, 11],
+          targets: [2, 4, 5, 6, 8, 11],
         },
       ],
       order: [[1, "desc"]],
@@ -509,20 +519,19 @@ $(document).ready(function () {
           { title: "Security mode", tooltip: "Security mode" },
         ];
 
-        // Apply tooltips to column headers
         $(thead)
           .find("th")
-          .each(function (index) {
-            const header = headers[index - 1]; // Adjust index to skip expandable column
+          .each((index, element) => {
+            const header = headers[index - 1];
             if (header) {
-              $(this)
-                .attr("data-bs-toggle", "tooltip")
-                .attr("data-bs-placement", "bottom")
-                .attr("title", header.tooltip);
+              $(element).attr({
+                "data-bs-toggle": "tooltip",
+                "data-bs-placement": "bottom",
+                title: header.tooltip,
+              });
             }
           });
 
-        // Initialize Bootstrap tooltips
         $('[data-bs-toggle="tooltip"]').tooltip();
       },
     },

@@ -39,6 +39,8 @@
 
             {%- if f.type not in LUA_TYPES %}
             local toset = myassert(require("resty.openssl.{{ f.type }}").{{ tests.types[f.type].new_from }})
+            {%- elif f.test_fixture %}
+            local toset = {{ f.test_fixture }}
             {%- else %}
             local toset = {{ tests.types[f.type].new_from }}
             {%- endif %}

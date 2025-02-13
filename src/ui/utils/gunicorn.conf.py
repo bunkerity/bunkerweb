@@ -374,7 +374,7 @@ def on_starting(server):
 
     if TMP_PID_FILE.is_file():
         LOGGER.info("Stopping temporary UI...")
-        call(["kill", "-SIGQUIT", TMP_PID_FILE.read_text().strip()])
+        call(["kill", "-SIGTERM", TMP_PID_FILE.read_text().strip()])
         current_time = datetime.now().astimezone()
         while TMP_PID_FILE.is_file():
             if (datetime.now().astimezone() - current_time).total_seconds() > 60:

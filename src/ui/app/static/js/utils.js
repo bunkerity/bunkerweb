@@ -143,6 +143,7 @@ class News {
           class: "card-img card-img-left",
           src: img,
           alt: "News image",
+          loading: "lazy",
         }),
       );
       imgCol.append(imgLink);
@@ -213,6 +214,7 @@ class News {
           class: "card-img-top",
           src: img,
           alt: "News image",
+          loading: "lazy",
         }),
       );
 
@@ -338,7 +340,7 @@ $(document).ready(() => {
       const data = JSON.parse(bannerNews);
       newsItems = data.map((item) => item.content);
     } else {
-      console.log("TODO: Fetch data from API when endpoint is available");
+      // console.log("TODO: Fetch data from API when endpoint is available");
       // TODO: Fetch data from API when endpoint is available
       /*
       $.getJSON("https://www.bunkerweb.io/api/bw-ui-news-16")

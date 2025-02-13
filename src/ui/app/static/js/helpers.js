@@ -792,7 +792,7 @@ const Helpers = {
   // Init Password Toggle
   initPasswordToggle() {
     const toggler = document.querySelectorAll(
-      ".form-password-toggle i:not(.copy-to-clipboard)",
+      ".form-password-toggle i:not(.bx-copy-alt)",
     );
     if (typeof toggler !== "undefined" && toggler !== null) {
       toggler.forEach((el) => {

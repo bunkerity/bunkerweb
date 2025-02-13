@@ -35,6 +35,7 @@ cwIDAQAB
     "field": "version",
     "type": "number",
     "sample_printable": 1,
+    "test_fixture": "1", # override the automatic fixture
     "set_converter":
 '''
   -- Note: this is defined by standards (X.509 et al) to be one less than the certificate version.

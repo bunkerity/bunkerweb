@@ -94,7 +94,8 @@
                         {{ template|capitalize }}&nbsp;－&nbsp;{{ plugin_types[template_plugin["type"]].get('icon', '<img src="' + pro_diamond_url + '"
      alt="Pro plugin"
      width="18px"
-     height="15.5px">') |safe }}
+     height="15.5px"
+     loading="lazy">') |safe }}
                     </h5>
                     <p class="card-subtitle text-muted text-truncate mt-1 courier-prime">{{ template_data["name"] }}</p>
                 </div>

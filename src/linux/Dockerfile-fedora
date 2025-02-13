@@ -1,13 +1,13 @@
 FROM fedora:40@sha256:7cdd2b48396929bb8723ea2fa60e03bee39cc22e2a853cbd891587fab4eb1bc9 AS builder
 
 ENV OS=fedora
-ENV NGINX_VERSION=1.26.2
+ENV NGINX_VERSION=1.26.3
 
 # Install Nginx, fpm and dependencies
 RUN dnf update -y && \
     dnf install -y curl gnupg2 ca-certificates redhat-lsb-core make gcc && \
     dnf install -y --setopt=install_weak_deps=False python3 python3-devel python3-pip brotli brotli-devel gperftools-devel perl libxslt-devel libxml2 yajl yajl-devel libxslt bash gd gd-devel gcc-c++ kernel-devel znc-modtcl libmpc-devel gmp-devel gawk mpfr-devel libtool pcre-devel automake autoconf readline-devel gcc make openssl-devel git zlib-devel libxml2-devel pkgconf libcurl-devel geoip-devel lmdb-devel && \
-    dnf install nginx-${NGINX_VERSION} -y
+    dnf install --enablerepo=updates-testing nginx-${NGINX_VERSION} -y
 
 WORKDIR /tmp/bunkerweb/deps
 
@@ -61,10 +61,8 @@ RUN umask 027
 # Install fpm
 RUN dnf update -y && \
     dnf install -y ruby ruby-devel redhat-rpm-config rpm-build gcc make && \
-    gem install -N fpm
-
-# Cleanup
-RUN dnf -y --setopt=install_weak_deps=False autoremove && \
+    gem install -N fpm && \
+    dnf -y --setopt=install_weak_deps=False autoremove && \
     dnf clean all && \
     rm -rf /var/cache/dnf
 

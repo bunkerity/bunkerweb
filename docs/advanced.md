@@ -1,9 +1,10 @@
-# Advanced usage
+# Advanced usages
 
-BunkerWeb offers many security features that you can configure with [settings](settings.md). Even if the default values of settings ensure a minimal "security by default", we strongly recommend you tune them. By doing so you will be able to ensure the security level of your choice but also manage false positives.
+Many real-world use case examples are available in the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.0/examples) folder of the GitHub repository.
 
-!!! tip "Other settings"
-    This section only focuses on advanced usages, see the [settings section](settings.md) of the documentation to see all the available settings.
+We also provide numerous boilerplates, such as YAML files for various integrations and database types. These are available in the [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.0/misc/integrations) folder.
+
+This section only focuses on advanced usages and security tuning, see the [settings section](settings.md) of the documentation to see all the available settings.
 
 ## Use cases
 
@@ -45,80 +46,13 @@ You will find more settings about real IP in the [settings section](settings.md#
     - They use the `X-Forwarded-For` header to set the real IP
     - They have IPs in the `1.2.3.0/24` and `100.64.0.0/10` networks
 
-    === "Docker"
+    === "Web UI"
 
-        When starting the **Scheduler** container, you will need to add the settings :
+        Navigate to the **Global config** page, select the **Real IP** plugin and fill out the following settings :
 
-        ```yaml
-        bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.0-rc4
-          ...
-          environment:
-            USE_REAL_IP: "yes"
-            REAL_IP_FROM: "1.2.3.0/24 100.64.0.0/10"
-            REAL_IP_HEADER: "X-Forwarded-For"
-          ...
-        ```
+        <figure markdown>![Real IP settings (header) using web UI](assets/img/advanced-proxy1.png){ align=center }<figcaption>Real IP settings (header) using web UI</figcaption></figure>
 
-    === "Docker autoconf"
-
-        Before running the [Docker autoconf integration](integrations.md#docker-autoconf) stack, you will need to add the settings for the **Scheduler** container :
-
-        ```yaml
-        bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.0-rc4
-          ...
-          environment:
-            USE_REAL_IP: "yes"
-            REAL_IP_FROM: "1.2.3.0/24 100.64.0.0/10"
-            REAL_IP_HEADER: "X-Forwarded-For"
-          ...
-        ```
-
-    === "Swarm"
-
-        !!! warning "Deprecated"
-            The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Docker autoconf integration](#__tabbed_2_2) instead.
-
-            **More information can be found in the [Swarm integration documentation](integrations.md#swarm).**
-
-        Before running the [Swarm integration](integrations.md#swarm) stack, you will need to add the settings for the **Scheduler** service :
-
-        ```yaml
-        bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.0-rc4
-          ...
-          environment:
-            USE_REAL_IP: "yes"
-            REAL_IP_FROM: "1.2.3.0/24 100.64.0.0/10"
-            REAL_IP_HEADER: "X-Forwarded-For"
-          ...
-        ```
-
-    === "Kubernetes"
-
-        You will need to add the settings to the environment variables of the Scheduler container (doing it using the ingress is not supported because you will get into trouble when using things like Let's Encrypt) :
-
-        ```yaml
-        apiVersion: apps/v1
-        kind: DaemonSet
-        metadata:
-          name: bunkerweb-scheduler
-        spec:
-            ...
-            spec:
-              containers:
-                - name: bunkerweb-scheduler
-                  ...
-                  env:
-                    - name: USE_REAL_IP
-                      value: "yes"
-                    - name: REAL_IP_FROM
-                      value: "1.2.3.0/24 100.64.0.0/10"
-                    - name: REAL_IP_HEADER
-                      value: "X-Forwarded-For"
-        ...
-        ```
+        Please note that it's recommended to restart BunkerWeb when you change settings related to real IP.
 
     === "Linux"
 
@@ -132,11 +66,85 @@ You will find more settings about real IP in the [settings section](settings.md#
         ...
         ```
 
-        Please note that it's recommended to issue a restart instead of reload when configuring settings related to proxy protocols :
+        Please note that it's recommended to issue a restart instead of reload when configuring settings related to real IP :
 
         ```shell
-        systemctl restart bunkerweb bunkerweb-scheduler
+        sudo systemctl restart bunkerweb && \
+        sudo systemctl restart bunkerweb-scheduler
         ```
+
+    === "Docker"
+
+        You will need to add the settings to the environment variables of the BunkerWeb container(s) (doing it using the ingress is not supported because you will get into trouble when using things like Let's Encrypt).
+
+        ```yaml
+        bunkerweb:
+          image: bunkerity/bunkerweb:1.6.0
+          ...
+          environment:
+            USE_REAL_IP: "yes"
+            REAL_IP_FROM: "1.2.3.0/24 100.64.0.0/10"
+            REAL_IP_HEADER: "X-Forwarded-For"
+          ...
+        ```
+
+        Please note that if your container is already created, you will need to delete it and recreate it so the new environment variables will be updated.
+
+    === "Docker autoconf"
+
+        You will need to add the settings to the environment variables of the BunkerWeb container(s) (doing it using the ingress is not supported because you will get into trouble when using things like Let's Encrypt).
+
+        ```yaml
+        bunkerweb:
+          image: bunkerity/bunkerweb:1.6.0
+          ...
+          environment:
+            USE_REAL_IP: "yes"
+            REAL_IP_FROM: "1.2.3.0/24 100.64.0.0/10"
+            REAL_IP_HEADER: "X-Forwarded-For"
+          ...
+        ```
+
+        Please note that if your container is already created, you will need to delete it and recreate it so the new environment variables will be updated.
+
+    === "Kubernetes"
+
+        You will need to add the settings to the environment variables of the BunkerWeb container(s) (doing it using the ingress is not supported because you will get into trouble when using things like Let's Encrypt).
+
+        Here is the corresponding part of your `values.yaml` file that you can use :
+
+        ```yaml
+        bunkerweb:
+          extraEnvs:
+            - name: USE_REAL_IP
+              value: "yes"
+            - name: REAL_IP_FROM
+              value: "1.2.3.0/24 100.64.0.0/10"
+            - name: REAL_IP_HEADER
+              value: "X-Forwarded-For"
+        ```
+
+    === "Swarm"
+
+        !!! warning "Deprecated"
+            The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Docker autoconf integration](#__tabbed_2_2) instead.
+
+            **More information can be found in the [Swarm integration documentation](integrations.md#swarm).**
+
+        You will need to add the settings to the environment variables of the BunkerWeb container(s) (doing it using the ingress is not supported because you will get into trouble when using things like Let's Encrypt).
+
+        ```yaml
+        bunkerweb:
+          image: bunkerity/bunkerweb:1.6.0
+          ...
+          environment:
+            USE_REAL_IP: "yes"
+            REAL_IP_FROM: "1.2.3.0/24 100.64.0.0/10"
+            REAL_IP_HEADER: "X-Forwarded-For"
+          ...
+        ```
+
+        Please note that if your service is already created, you will need to delete it and recreate it so the new environment variables will be updated.
 
 === "Proxy protocol"
 
@@ -149,85 +157,13 @@ You will find more settings about real IP in the [settings section](settings.md#
     - They use the `PROXY protocol` v1 or v2 to set the real IP
     - They have IPs in the `1.2.3.0/24` and `100.64.0.0/10` networks
 
-    === "Docker"
+    === "Web UI"
 
-        When starting the **Scheduler** container, you will need to add the settings :
+        Navigate to the **Global config** page, select the **Real IP** plugin and fill out the following settings :
 
-        ```yaml
-        bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.0-rc4
-          ...
-          environment:
-            USE_REAL_IP: "yes"
-            USE_PROXY_PROTOCOL: "yes"
-            REAL_IP_FROM: "1.2.3.0/24 100.64.0.0/10"
-            REAL_IP_HEADER: "proxy_protocol"
-          ...
-        ```
+        <figure markdown>![Real IP settings (PROXY protocol) using web UI](assets/img/advanced-proxy2.png){ align=center }<figcaption>Real IP settings (PROXY protocol) using web UI</figcaption></figure>
 
-    === "Docker autoconf"
-
-        Before running the [Docker autoconf integration](integrations.md#docker-autoconf) stack, you will need to add the settings for the **Scheduler** container :
-
-        ```yaml
-        bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.0-rc4
-          ...
-          environment:
-            USE_REAL_IP: "yes"
-            USE_PROXY_PROTOCOL: "yes"
-            REAL_IP_FROM: "1.2.3.0/24 100.64.0.0/10"
-            REAL_IP_HEADER: "proxy_protocol"
-          ...
-        ```
-
-    === "Swarm"
-
-        !!! warning "Deprecated"
-            The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Docker autoconf integration](#__tabbed_3_2) instead.
-
-            **More information can be found in the [Swarm integration documentation](integrations.md#swarm).**
-
-        Before running the [Swarm integration](integrations.md#swarm) stack, you will need to add the settings for the **Scheduler** service :
-
-        ```yaml
-        bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.0-rc4
-          ...
-          environment:
-            USE_REAL_IP: "yes"
-            USE_PROXY_PROTOCOL: "yes"
-            REAL_IP_FROM: "1.2.3.0/24 100.64.0.0/10"
-            REAL_IP_HEADER: "proxy_protocol"
-          ...
-        ```
-
-    === "Kubernetes"
-
-        You will need to add the settings to the environment variables of the **Scheduler** containers (doing it using the ingress is not supported because you will get into trouble when using things like Let's Encrypt) :
-
-        ```yaml
-        apiVersion: apps/v1
-        kind: DaemonSet
-        metadata:
-          name: bunkerweb-scheduler
-        spec:
-            ...
-            spec:
-              containers:
-                - name: bunkerweb-scheduler
-                  ...
-                  env:
-                    - name: USE_REAL_IP
-                      value: "yes"
-                    - name: USE_PROXY_PROTOCOL
-                      value: "yes"
-                    - name: REAL_IP_FROM
-                      value: "1.2.3.0/24 100.64.0.0/10"
-                    - name: REAL_IP_HEADER
-                      value: "proxy_protocol"
-        ...
-        ```
+        Please note that it's recommended to restart BunkerWeb when you change settings related to real IP.
 
     === "Linux"
 
@@ -245,8 +181,437 @@ You will find more settings about real IP in the [settings section](settings.md#
         Please note that it's recommended to issue a restart instead of reload when configuring settings related to proxy protocols :
 
         ```shell
-        systemctl restart bunkerweb bunkerweb-scheduler
+        sudo systemctl restart bunkerweb && \
+        sudo systemctl restart bunkerweb-scheduler
         ```
+
+    === "Docker"
+
+        You will need to add the settings to the environment variables of the BunkerWeb container(s) (doing it using the ingress is not supported because you will get into trouble when using things like Let's Encrypt).
+
+        ```yaml
+        bw-scheduler:
+          image: bunkerity/bunkerweb-scheduler:1.6.0
+          ...
+          environment:
+            USE_REAL_IP: "yes"
+            USE_PROXY_PROTOCOL: "yes"
+            REAL_IP_FROM: "1.2.3.0/24 100.64.0.0/10"
+            REAL_IP_HEADER: "proxy_protocol"
+          ...
+        ```
+
+        Please note that if your container is already created, you will need to delete it and recreate it so the new environment variables will be updated.
+
+    === "Docker autoconf"
+
+        You will need to add the settings to the environment variables of the BunkerWeb container(s) (doing it using the ingress is not supported because you will get into trouble when using things like Let's Encrypt).
+
+        ```yaml
+        bw-scheduler:
+          image: bunkerity/bunkerweb-scheduler:1.6.0
+          ...
+          environment:
+            USE_REAL_IP: "yes"
+            USE_PROXY_PROTOCOL: "yes"
+            REAL_IP_FROM: "1.2.3.0/24 100.64.0.0/10"
+            REAL_IP_HEADER: "proxy_protocol"
+          ...
+        ```
+
+        Please note that if your container is already created, you will need to delete it and recreate it so the new environment variables will be updated.
+
+    === "Kubernetes"
+
+        You will need to add the settings to the environment variables of the BunkerWeb container(s) (doing it using the ingress is not supported because you will get into trouble when using things like Let's Encrypt).
+
+        Here is the corresponding part of your `values.yaml` file that you can use :
+
+        ```yaml
+        bunkerweb:
+          extraEnvs:
+            - name: USE_REAL_IP
+              value: "yes"
+            - name: USE_PROXY_PROTOCOL
+              value: "yes"
+            - name: REAL_IP_FROM
+              value: "1.2.3.0/24 100.64.0.0/10"
+            - name: REAL_IP_HEADER
+              value: "proxy_protocol"
+        ```
+
+    === "Swarm"
+
+        !!! warning "Deprecated"
+            The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Docker autoconf integration](#__tabbed_3_2) instead.
+
+            **More information can be found in the [Swarm integration documentation](integrations.md#swarm).**
+
+        You will need to add the settings to the environment variables of the BunkerWeb container(s) (doing it using the ingress is not supported because you will get into trouble when using things like Let's Encrypt).
+
+        ```yaml
+        bunkerweb:
+          image: bunkerity/bunkerweb:1.6.0
+          ...
+          environment:
+            USE_REAL_IP: "yes"
+            USE_PROXY_PROTOCOL: "yes"
+            REAL_IP_FROM: "1.2.3.0/24 100.64.0.0/10"
+            REAL_IP_HEADER: "proxy_protocol"
+          ...
+        ```
+
+        Please note that if your service is already created, you will need to delete it and recreate it so the new environment variables will be updated.
+
+### Custom configurations
+
+To customize and add custom configurations to BunkerWeb, you can take advantage of its NGINX foundation. Custom NGINX configurations can be added in different NGINX contexts, including configurations for the ModSecurity Web Application Firewall (WAF), which is a core component of BunkerWeb. More details about ModSecurity configurations can be found [here](advanced.md#modsecurity).
+
+Here are the available types of custom configurations:
+
+- **http**: Configurations at the HTTP level of NGINX.
+- **server-http**: Configurations at the HTTP/Server level of NGINX.
+- **default-server-http**: Configurations at the Server level of NGINX, specifically for the "default server" when the supplied client name doesn't match any server name in `SERVER_NAME`.
+- **modsec-crs**: Configurations applied before the OWASP Core Rule Set is loaded.
+- **modsec**: Configurations applied after the OWASP Core Rule Set is loaded, or used when the Core Rule Set is not loaded.
+- **stream**: Configurations at the Stream level of NGINX.
+- **server-stream**: Configurations at the Stream/Server level of NGINX.
+
+Custom configurations can be applied globally or specifically for a particular server, depending on the applicable context and whether the [multisite mode](concepts.md#multisite-mode) is enabled.
+
+The method for applying custom configurations depends on the integration being used. However, the underlying process involves adding files with the `.conf` suffix to specific folders. To apply a custom configuration for a specific server, the file should be placed in a subfolder named after the primary server name.
+
+Some integrations provide more convenient ways to apply configurations, such as using [Configs](https://docs.docker.com/engine/swarm/configs/) in Docker Swarm or [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/) in Kubernetes. These options offer simpler approaches for managing and applying configurations.
+
+=== "Web UI"
+
+    Navigate to the **Configs** page, click on **Create new custom config**, you can then choose if it's a global one or specific to a service, the configuration type and the configuration name :
+
+    <figure markdown>![Custom configurations using web UI](assets/img/advanced-config.png){ align=center }<figcaption>Custom configurations using web UI</figcaption></figure>
+
+    Don't forget to click on the save button.
+
+=== "Linux"
+
+    When using the [Linux integration](integrations.md#linux), custom configurations must be written to the /etc/bunkerweb/configs folder.
+
+    Here is an example for server-http/hello-world.conf :
+
+    ```conf
+    location /hello {
+      default_type 'text/plain';
+      content_by_lua_block {
+        ngx.say('world')
+      }
+    }
+    ```
+
+    Because BunkerWeb runs as an unprivileged user (nginx:nginx), you will need to edit the permissions :
+
+    ```shell
+    chown -R root:nginx /etc/bunkerweb/configs && \
+    chmod -R 770 /etc/bunkerweb/configs
+    ```
+
+    Now let's check the status of the Scheduler :
+
+    ```shell
+    systemctl status bunkerweb-scheduler
+    ```
+
+    If they are already running, we can reload it :
+
+    ```shell
+    systemctl reload bunkerweb-scheduler
+    ```
+
+    Otherwise, we will need to start it :
+
+    ```shell
+    systemctl start bunkerweb-scheduler
+    ```
+
+=== "Docker"
+
+    When using the [Docker integration](integrations.md#docker), you have two choices for the addition of custom configurations :
+
+    - Using specific settings `*_CUSTOM_CONF_*` as environment variables (recommended)
+    - Writing .conf files to the volume mounted on /data of the scheduler
+
+    **Using settings**
+
+    The settings to use must follow the pattern `<SITE>_CUSTOM_CONF_<TYPE>_<NAME>` :
+
+    - `<SITE>` : optional primary server name if multisite mode is enabled and the config must be applied to a specific service
+    - `<TYPE>` : the type of config, accepted values are `HTTP`, `DEFAULT_SERVER_HTTP`, `SERVER_HTTP`, `MODSEC`, `MODSEC_CRS`, `STREAM` and `SERVER_STREAM`
+    - `<NAME>` : the name of config without the .conf suffix
+
+    Here is a dummy example using a docker-compose file :
+
+    ```yaml
+    ...
+    bw-scheduler:
+      image: bunkerity/bunkerweb-scheduler:1.6.0
+      environment:
+        - |
+          CUSTOM_CONF_SERVER_HTTP_hello-world=
+          location /hello {
+            default_type 'text/plain';
+            content_by_lua_block {
+              ngx.say('world')
+    	      }
+          }
+      ...
+    ```
+
+    **Using files**
+
+    The first thing to do is to create the folders :
+
+    ```shell
+    mkdir -p ./bw-data/configs/server-http
+    ```
+
+    You can now write your configurations :
+
+    ```shell
+    echo "location /hello {
+    	default_type 'text/plain';
+    	content_by_lua_block {
+    		ngx.say('world')
+    	}
+    }" > ./bw-data/configs/server-http/hello-world.conf
+    ```
+
+    Because the scheduler runs as an unprivileged user with UID and GID 101, you will need to edit the permissions :
+
+    ```shell
+    chown -R root:101 bw-data && \
+    chmod -R 770 bw-data
+    ```
+
+    When starting the scheduler container, you will need to mount the folder on /data :
+
+    ```yaml
+    bw-scheduler:
+      image: bunkerity/bunkerweb-scheduler:1.6.0
+      volumes:
+        - ./bw-data:/data
+      ...
+    ```
+
+=== "Docker autoconf"
+
+    When using the [Docker autoconf integration](integrations.md#docker-autoconf), you have two choices for adding custom configurations :
+
+    - Using specific settings `*_CUSTOM_CONF_*` as labels (easiest)
+    - Writing .conf files to the volume mounted on /data of the scheduler
+
+    **Using labels**
+
+    !!! warning "Limitations using labels"
+        When using labels with the Docker autoconf integration, you can only apply custom configurations for the corresponding web service. Applying **http**, **default-server-http**, **stream** or any global configurations (like **server-http** or **server-stream** for all services) is not possible : you will need to mount files for that purpose.
+
+    The labels to use must follow the pattern `bunkerweb.CUSTOM_CONF_<TYPE>_<NAME>` :
+
+    - `<TYPE>` : the type of config, accepted values are `SERVER_HTTP`, `MODSEC`, `MODSEC_CRS` and `SERVER_STREAM`
+    - `<NAME>` : the name of config without the .conf suffix
+
+    Here is a dummy example using a docker-compose file :
+
+    ```yaml
+    myapp:
+      image: nginxdemos/nginx-hello
+      labels:
+        - |
+          bunkerweb.CUSTOM_CONF_SERVER_HTTP_hello-world=
+          location /hello {
+            default_type 'text/plain';
+            content_by_lua_block {
+                ngx.say('world')
+            }
+    	    }
+      ...
+    ```
+
+    **Using files**
+
+    The first thing to do is to create the folders :
+
+    ```shell
+    mkdir -p ./bw-data/configs/server-http
+    ```
+
+    You can now write your configurations :
+
+    ```shell
+    echo "location /hello {
+    	default_type 'text/plain';
+    	content_by_lua_block {
+    		ngx.say('world')
+    	}
+    }" > ./bw-data/configs/server-http/hello-world.conf
+    ```
+
+    Because the scheduler runs as an unprivileged user with UID and GID 101, you will need to edit the permissions :
+
+    ```shell
+    chown -R root:101 bw-data && \
+    chmod -R 770 bw-data
+    ```
+
+    When starting the scheduler container, you will need to mount the folder on /data :
+
+    ```yaml
+    bw-scheduler:
+      image: bunkerity/bunkerweb-scheduler:1.6.0
+      volumes:
+        - ./bw-data:/data
+      ...
+    ```
+
+=== "Kubernetes"
+
+    When using the [Kubernetes integration](integrations.md#kubernetes), custom configurations are managed using [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/).
+
+    To keep it simple, you don't even need to use the ConfigMap with a Pod (e.g. as environment variable or volume) : the autoconf Pod is listening for ConfigMap events and will update the custom configurations when needed.
+
+    When creating a ConfigMap, you will need to add special labels :
+
+    * **bunkerweb.io/CONFIG_TYPE** : must be set to a valid custom configuration type (http, server-http, default-server-http, modsec, modsec-crs, stream or server-stream)
+    * **bunkerweb.io/CONFIG_SITE** : set to a server name to apply configuration to that specific server (optional, will be applied globally if unset)
+
+    Here is the example :
+
+    ```yaml
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: cfg-bunkerweb-all-server-http
+      annotations:
+    	  bunkerweb.io/CONFIG_TYPE: "server-http"
+    data:
+      myconf: |
+    	location /hello {
+    		default_type 'text/plain';
+    		content_by_lua_block {
+    			ngx.say('world')
+    		}
+    	}
+    ```
+
+    !!! tip "Custom Extra Config"
+        Since the `1.6.0-rc3` version, you can add/override settings using the `bunkerweb.io/CONFIG_TYPE=settings` annotation. Here is an example :
+
+        ```yaml
+        apiVersion: v1
+        kind: ConfigMap
+        metadata:
+          name: cfg-bunkerweb-extra-settings
+          annotations:
+            bunkerweb.io/CONFIG_TYPE: "settings"
+        data:
+          USE_ANTIBOT: "captcha" # multisite setting that will be applied to all services that do not override it
+          USE_REDIS: "yes" # global setting that will be applied globally
+          ...
+        ```
+
+=== "Swarm"
+
+    !!! warning "Deprecated"
+        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Docker autoconf integration](#__tabbed_5_2) instead.
+
+        **More information can be found in the [Swarm integration documentation](integrations.md#swarm).**
+
+    When using the [Swarm integration](integrations.md#swarm), custom configurations are managed using [Docker Configs](https://docs.docker.com/engine/swarm/configs/).
+
+    To keep it simple, you don't even need to attach the Config to a service : the autoconf service is listening for Config events and will update the custom configurations when needed.
+
+    When creating a Config, you will need to add special labels :
+
+    * **bunkerweb.CONFIG_TYPE** : must be set to a valid custom configuration type (http, server-http, default-server-http, modsec, modsec-crs, stream or server-stream)
+    * **bunkerweb.CONFIG_SITE** : set to a server name to apply configuration to that specific server (optional, will be applied globally if unset)
+
+    Here is the example :
+
+    ```shell
+    echo "location /hello {
+    	default_type 'text/plain';
+    	content_by_lua_block {
+    		ngx.say('world')
+    	}
+    }" | docker config create -l bunkerweb.CONFIG_TYPE=server-http my-config -
+    ```
+
+    There is no update mechanism : the alternative is to remove an existing config using `docker config rm` and then recreate it.
+
+### Running many services in production
+
+**Global CRS**
+
+If you use BunkerWeb in production with a large number of services, and you enable the ModSecurity feature globally with CRS rules, the time required to load BunkerWeb configurations may become too long, potentially resulting in a timeout.
+
+The workaround is to load the CRS rules globally rather than per service. This behavior is not enabled by default for backward compatibility reasons and because it has a drawback: if you enable global CRS rule loading, it will no longer be possible to define modsec-crs rules (executed before the CRS rules) on a per-service basis. However, this limitation can be bypassed by writing global `modsec-crs` exclusion rules like this:
+
+```
+SecRule REQUEST_FILENAME "@rx ^/somewhere$" "nolog,phase:4,allow,id:1010,chain"
+SecRule REQUEST_HEADERS:Host "@rx ^app1\.example\.com$" "nolog"
+```
+
+You can enable the global CRS loading by setting `USE_MODSECURITY_GLOBAL_CRS` to `yes`.
+
+**Adjust max_allowed_packet for MariaDB/MySQL**
+
+It appears that the default value for the `max_allowed_packet` parameter in MariaDB and MySQL database servers is not sufficient when using BunkerWeb with a large number of services.
+
+If you encounter errors like this, especially on the scheduler:
+
+```
+[Warning] Aborted connection 5 to db: 'db' user: 'bunkerweb' host: '172.20.0.4' (Got a packet bigger than 'max_allowed_packet' bytes)
+```
+
+You will need to increase the `max_allowed_packet` on your database server.
+
+### Persistence of bans and reports
+
+By default, BunkerWeb stores bans and reports in a local Lua datastore. While simple and efficient, this setup means that data is lost when the instance is restarted. To ensure that bans and reports persist across restarts, you can configure BunkerWeb to use a remote Redis server.
+
+**Why Use Redis?**
+
+Redis is a powerful, in-memory data store commonly used as a database, cache, and message broker. It is highly scalable and supports a variety of data structures, including:
+
+- **Strings**: Basic key-value pairs.
+- **Hashes**: Field-value pairs within a single key.
+- **Lists**: Ordered collections of strings.
+- **Sets**: Unordered collections of unique strings.
+- **Sorted Sets**: Ordered collections with scores.
+
+By leveraging Redis, BunkerWeb can persistently store bans, reports, and cache data, ensuring durability and scalability.
+
+**Enabling Redis Support**
+
+To enable Redis support, configure the following settings in your BunkerWeb configuration file:
+
+```conf
+# Enable Redis support
+USE_REDIS=yes
+
+# Redis server hostname or IP address
+REDIS_HOST=<hostname>
+
+# Redis server port number (default: 6379)
+REDIS_PORT=6379
+
+# Redis database number (default: 0)
+REDIS_DATABASE=0
+```
+
+- **`USE_REDIS`**: Set to `yes` to enable Redis integration.
+- **`REDIS_HOST`**: Specify the hostname or IP address of the Redis server.
+- **`REDIS_PORT`**: Specify the port number for the Redis server. Defaults to `6379`.
+- **`REDIS_DATABASE`**: Specify the Redis database number to use. Defaults to `0`.
+
+If you require more advanced settings, such as authentication, SSL/TLS support, or Sentinel mode, refer to the [Redis plugin settings documentation](settings.md#redis) for detailed guidance.
 
 ### Protect UDP/TCP applications
 
@@ -295,7 +660,7 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.0-rc4
+        image: bunkerity/bunkerweb:1.6.0
         ports:
           - "80:8080" # Keep it if you want to use Let's Encrypt automation when using http challenge type
           - "10000:10000" # app1
@@ -310,7 +675,7 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.0-rc4
+        image: bunkerity/bunkerweb-scheduler:1.6.0
         volumes:
           - bw-data:/data
         environment:
@@ -361,7 +726,7 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.0-rc4
+        image: bunkerity/bunkerweb:1.6.0
         ports:
           - "80:8080" # Keep it if you want to use Let's Encrypt automation when using http challenge type
           - "10000:10000" # app1
@@ -415,7 +780,7 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.0-rc4
+        image: bunkerity/bunkerweb:1.6.0
         ports:
           # Keep it if you want to use Let's Encrypt automation when using http challenge type
           - published: 80
@@ -636,308 +1001,22 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
     ...
     ```
 
-    Let's check the status of BunkerWeb :
-
-    ```shell
-    systemctl status bunkerweb
-    ```
-
     Now let's check the status of the Scheduler :
 
     ```shell
     systemctl status bunkerweb-scheduler
     ```
 
-    If they are already running, we can reload them :
+    If they are already running, we can reload it :
 
     ```shell
-    systemctl reload bunkerweb bunkerweb-scheduler
+    systemctl reload bunkerweb-scheduler
     ```
 
-    Otherwise, we will need to start them :
+    Otherwise, we will need to start it :
 
     ```shell
-    systemctl start bunkerweb bunkerweb-scheduler
-    ```
-
-### Custom configurations
-
-To customize and add custom configurations to BunkerWeb, you can take advantage of its NGINX foundation. Custom NGINX configurations can be added in different NGINX contexts, including configurations for the ModSecurity Web Application Firewall (WAF), which is a core component of BunkerWeb. More details about ModSecurity configurations can be found [here](security-tuning.md#modsecurity).
-
-Here are the available types of custom configurations:
-
-- **http**: Configurations at the HTTP level of NGINX.
-- **server-http**: Configurations at the HTTP/Server level of NGINX.
-- **default-server-http**: Configurations at the Server level of NGINX, specifically for the "default server" when the supplied client name doesn't match any server name in `SERVER_NAME`.
-- **modsec-crs**: Configurations applied before the OWASP Core Rule Set is loaded.
-- **modsec**: Configurations applied after the OWASP Core Rule Set is loaded, or used when the Core Rule Set is not loaded.
-- **stream**: Configurations at the Stream level of NGINX.
-- **server-stream**: Configurations at the Stream/Server level of NGINX.
-
-Custom configurations can be applied globally or specifically for a particular server, depending on the applicable context and whether the [multisite mode](concepts.md#multisite-mode) is enabled.
-
-The method for applying custom configurations depends on the integration being used. However, the underlying process involves adding files with the `.conf` suffix to specific folders. To apply a custom configuration for a specific server, the file should be placed in a subfolder named after the primary server name.
-
-Some integrations provide more convenient ways to apply configurations, such as using [Configs](https://docs.docker.com/engine/swarm/configs/) in Docker Swarm or [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/) in Kubernetes. These options offer simpler approaches for managing and applying configurations.
-
-=== "Docker"
-
-    When using the [Docker integration](integrations.md#docker), you have two choices for the addition of custom configurations :
-
-    - Using specific settings `*_CUSTOM_CONF_*` as environment variables (recommended)
-    - Writing .conf files to the volume mounted on /data of the scheduler
-
-    **Using settings**
-
-    The settings to use must follow the pattern `<SITE>_CUSTOM_CONF_<TYPE>_<NAME>` :
-
-    - `<SITE>` : optional primary server name if multisite mode is enabled and the config must be applied to a specific service
-    - `<TYPE>` : the type of config, accepted values are `HTTP`, `DEFAULT_SERVER_HTTP`, `SERVER_HTTP`, `MODSEC`, `MODSEC_CRS`, `STREAM` and `SERVER_STREAM`
-    - `<NAME>` : the name of config without the .conf suffix
-
-    Here is a dummy example using a docker-compose file :
-
-    ```yaml
-    ...
-    bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.0-rc4
-      environment:
-        - |
-          CUSTOM_CONF_SERVER_HTTP_hello-world=
-          location /hello {
-            default_type 'text/plain';
-            content_by_lua_block {
-              ngx.say('world')
-    	      }
-          }
-      ...
-    ```
-
-    **Using files**
-
-    The first thing to do is to create the folders :
-
-    ```shell
-    mkdir -p ./bw-data/configs/server-http
-    ```
-
-    You can now write your configurations :
-
-    ```shell
-    echo "location /hello {
-    	default_type 'text/plain';
-    	content_by_lua_block {
-    		ngx.say('world')
-    	}
-    }" > ./bw-data/configs/server-http/hello-world.conf
-    ```
-
-    Because the scheduler runs as an unprivileged user with UID and GID 101, you will need to edit the permissions :
-
-    ```shell
-    chown -R root:101 bw-data && \
-    chmod -R 770 bw-data
-    ```
-
-    When starting the scheduler container, you will need to mount the folder on /data :
-
-    ```yaml
-    bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.0-rc4
-      volumes:
-        - ./bw-data:/data
-      ...
-    ```
-
-=== "Docker autoconf"
-
-    When using the [Docker autoconf integration](integrations.md#docker-autoconf), you have two choices for adding custom configurations :
-
-    - Using specific settings `*_CUSTOM_CONF_*` as labels (easiest)
-    - Writing .conf files to the volume mounted on /data of the scheduler
-
-    **Using labels**
-
-    !!! warning "Limitations using labels"
-        When using labels with the Docker autoconf integration, you can only apply custom configurations for the corresponding web service. Applying **http**, **default-server-http**, **stream** or any global configurations (like **server-http** or **server-stream** for all services) is not possible : you will need to mount files for that purpose.
-
-    The labels to use must follow the pattern `bunkerweb.CUSTOM_CONF_<TYPE>_<NAME>` :
-
-    - `<TYPE>` : the type of config, accepted values are `SERVER_HTTP`, `MODSEC`, `MODSEC_CRS` and `SERVER_STREAM`
-    - `<NAME>` : the name of config without the .conf suffix
-
-    Here is a dummy example using a docker-compose file :
-
-    ```yaml
-    myapp:
-      image: nginxdemos/nginx-hello
-      labels:
-        - |
-          bunkerweb.CUSTOM_CONF_SERVER_HTTP_hello-world=
-          location /hello {
-            default_type 'text/plain';
-            content_by_lua_block {
-                ngx.say('world')
-            }
-    	    }
-      ...
-    ```
-
-    **Using files**
-
-    The first thing to do is to create the folders :
-
-    ```shell
-    mkdir -p ./bw-data/configs/server-http
-    ```
-
-    You can now write your configurations :
-
-    ```shell
-    echo "location /hello {
-    	default_type 'text/plain';
-    	content_by_lua_block {
-    		ngx.say('world')
-    	}
-    }" > ./bw-data/configs/server-http/hello-world.conf
-    ```
-
-    Because the scheduler runs as an unprivileged user with UID and GID 101, you will need to edit the permissions :
-
-    ```shell
-    chown -R root:101 bw-data && \
-    chmod -R 770 bw-data
-    ```
-
-    When starting the scheduler container, you will need to mount the folder on /data :
-
-    ```yaml
-    bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.0-rc4
-      volumes:
-        - ./bw-data:/data
-      ...
-    ```
-
-=== "Swarm"
-
-    !!! warning "Deprecated"
-        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Docker autoconf integration](#__tabbed_5_2) instead.
-
-        **More information can be found in the [Swarm integration documentation](integrations.md#swarm).**
-
-    When using the [Swarm integration](integrations.md#swarm), custom configurations are managed using [Docker Configs](https://docs.docker.com/engine/swarm/configs/).
-
-    To keep it simple, you don't even need to attach the Config to a service : the autoconf service is listening for Config events and will update the custom configurations when needed.
-
-    When creating a Config, you will need to add special labels :
-
-    * **bunkerweb.CONFIG_TYPE** : must be set to a valid custom configuration type (http, server-http, default-server-http, modsec, modsec-crs, stream or server-stream)
-    * **bunkerweb.CONFIG_SITE** : set to a server name to apply configuration to that specific server (optional, will be applied globally if unset)
-
-    Here is the example :
-
-    ```shell
-    echo "location /hello {
-    	default_type 'text/plain';
-    	content_by_lua_block {
-    		ngx.say('world')
-    	}
-    }" | docker config create -l bunkerweb.CONFIG_TYPE=server-http my-config -
-    ```
-
-    There is no update mechanism : the alternative is to remove an existing config using `docker config rm` and then recreate it.
-
-=== "Kubernetes"
-
-    When using the [Kubernetes integration](integrations.md#kubernetes), custom configurations are managed using [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/).
-
-    To keep it simple, you don't even need to use the ConfigMap with a Pod (e.g. as environment variable or volume) : the autoconf Pod is listening for ConfigMap events and will update the custom configurations when needed.
-
-    When creating a ConfigMap, you will need to add special labels :
-
-    * **bunkerweb.io/CONFIG_TYPE** : must be set to a valid custom configuration type (http, server-http, default-server-http, modsec, modsec-crs, stream or server-stream)
-    * **bunkerweb.io/CONFIG_SITE** : set to a server name to apply configuration to that specific server (optional, will be applied globally if unset)
-
-    Here is the example :
-
-    ```yaml
-    apiVersion: v1
-    kind: ConfigMap
-    metadata:
-      name: cfg-bunkerweb-all-server-http
-      annotations:
-    	  bunkerweb.io/CONFIG_TYPE: "server-http"
-    data:
-      myconf: |
-    	location /hello {
-    		default_type 'text/plain';
-    		content_by_lua_block {
-    			ngx.say('world')
-    		}
-    	}
-    ```
-
-    !!! tip "Custom Extra Config"
-        Since the `1.6.0-rc3` version, you can add/override settings using the `bunkerweb.io/CONFIG_TYPE=settings` annotation. Here is an example :
-
-        ```yaml
-        apiVersion: v1
-        kind: ConfigMap
-        metadata:
-          name: cfg-bunkerweb-extra-settings
-          annotations:
-            bunkerweb.io/CONFIG_TYPE: "settings"
-        data:
-          USE_ANTIBOT: "captcha" # multisite setting that will be applied to all services that do not override it
-          USE_REDIS: "yes" # global setting that will be applied globally
-          ...
-        ```
-
-=== "Linux"
-
-    When using the [Linux integration](integrations.md#linux), custom configurations must be written to the /etc/bunkerweb/configs folder.
-
-    Here is an example for server-http/hello-world.conf :
-
-    ```conf
-    location /hello {
-      default_type 'text/plain';
-      content_by_lua_block {
-        ngx.say('world')
-      }
-    }
-    ```
-
-    Because BunkerWeb runs as an unprivileged user (nginx:nginx), you will need to edit the permissions :
-
-    ```shell
-    chown -R root:nginx /etc/bunkerweb/configs && \
-    chmod -R 770 /etc/bunkerweb/configs
-    ```
-
-    Let's check the status of BunkerWeb :
-
-    ```shell
-    systemctl status bunkerweb
-    ```
-
-    Now let's check the status of the Scheduler :
-
-    ```shell
-    systemctl status bunkerweb-scheduler
-    ```
-
-    If they are already running, we can reload them :
-
-    ```shell
-    systemctl reload bunkerweb bunkerweb-scheduler
-    ```
-
-    Otherwise, we will need to start them :
-
-    ```shell
-    systemctl start bunkerweb bunkerweb-scheduler
+    systemctl start bunkerweb-scheduler
     ```
 
 ### PHP
@@ -994,7 +1073,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.0-rc4
+        image: bunkerity/bunkerweb:1.6.0
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1009,7 +1088,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.0-rc4
+        image: bunkerity/bunkerweb-scheduler:1.6.0
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "bunkerweb" # This setting is mandatory to specify the BunkerWeb instance
@@ -1103,7 +1182,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.0-rc4
+        image: bunkerity/bunkerweb:1.6.0
         labels:
           - "bunkerweb.INSTANCE=yes"
         environment:
@@ -1116,7 +1195,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.0-rc4
+        image: bunkerity/bunkerweb-scheduler:1.6.0
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "" # We don't need to specify the BunkerWeb instance here as they are automatically detected by the autoconf service
@@ -1131,7 +1210,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.0-rc4
+        image: bunkerity/bunkerweb-autoconf:1.6.0
         depends_on:
           - bunkerweb
           - bw-docker
@@ -1281,7 +1360,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.0-rc4
+        image: bunkerity/bunkerweb:1.6.0
         volumes:
           - /shared/www:/var/www/html
     ...
@@ -1418,30 +1497,22 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
     app3.example.com_LOCAL_PHP_PATH=/var/www/html/app3.example.com
     ```
 
-    Let's check the status of BunkerWeb :
-
-    Let's check the status of BunkerWeb :
-
-    ```shell
-    systemctl status bunkerweb
-    ```
-
     Now let's check the status of the Scheduler :
 
     ```shell
     systemctl status bunkerweb-scheduler
     ```
 
-    If they are already running, we can reload them :
+    If they are already running, we can reload it :
 
     ```shell
-    systemctl reload bunkerweb bunkerweb-scheduler
+    systemctl reload bunkerweb-scheduler
     ```
 
-    Otherwise, we will need to start them :
+    Otherwise, we will need to start it :
 
     ```shell
-    systemctl start bunkerweb bunkerweb-scheduler
+    systemctl start bunkerweb-scheduler
     ```
 
 ### IPv6
@@ -1476,7 +1547,7 @@ By default, BunkerWeb will only listen on IPv4 addresses and won't use IPv6 for 
     ```yaml
     services:
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.0-rc4
+        image: bunkerity/bunkerweb-scheduler:1.6.0
         environment:
           USE_IPv6: "yes"
 
@@ -1510,66 +1581,31 @@ By default, BunkerWeb will only listen on IPv4 addresses and won't use IPv6 for 
     systemctl status bunkerweb
     ```
 
-    Now let's check the status of the Scheduler :
+    If they are already running, we can restart it :
 
     ```shell
-    systemctl status bunkerweb-scheduler
+    systemctl restart bunkerweb
     ```
 
-    If they are already running, we can reload them :
+    Otherwise, we will need to start it :
 
     ```shell
-    systemctl reload bunkerweb bunkerweb-scheduler
+    systemctl start bunkerweb
     ```
 
-    Otherwise, we will need to start them :
+## Security tuning
 
-    ```shell
-    systemctl start bunkerweb bunkerweb-scheduler
-    ```
+BunkerWeb offers many security features that you can configure with [settings](settings.md). Even if the default values of settings ensure a minimal "security by default", we strongly recommend you tune them. By doing so you will be able to ensure the security level of your choice but also manage false positives.
 
-### Persistence of Bans and Reports
+!!! tip "Other settings"
+    This section only focuses on security tuning, see the [settings section](settings.md) of the documentation for other settings.
 
-By default, BunkerWeb stores bans and reports in a local Lua datastore. While simple and efficient, this setup means that data is lost when the instance is restarted. To ensure that bans and reports persist across restarts, you can configure BunkerWeb to use a remote Redis server.
+<figure markdown>
+  ![Overview](assets/img/core-order.svg){ align=center }
+  <figcaption>Overview and order of the core security plugins</figcaption>
+</figure>
 
-#### Why Use Redis?
-
-Redis is a powerful, in-memory data store commonly used as a database, cache, and message broker. It is highly scalable and supports a variety of data structures, including:
-
-- **Strings**: Basic key-value pairs.
-- **Hashes**: Field-value pairs within a single key.
-- **Lists**: Ordered collections of strings.
-- **Sets**: Unordered collections of unique strings.
-- **Sorted Sets**: Ordered collections with scores.
-
-By leveraging Redis, BunkerWeb can persistently store bans, reports, and cache data, ensuring durability and scalability.
-
-#### Enabling Redis Support
-
-To enable Redis support, configure the following settings in your BunkerWeb configuration file:
-
-```conf
-# Enable Redis support
-USE_REDIS=yes
-
-# Redis server hostname or IP address
-REDIS_HOST=<hostname>
-
-# Redis server port number (default: 6379)
-REDIS_PORT=6379
-
-# Redis database number (default: 0)
-REDIS_DATABASE=<database>
-```
-
-- **`USE_REDIS`**: Set to `yes` to enable Redis integration.
-- **`REDIS_HOST`**: Specify the hostname or IP address of the Redis server.
-- **`REDIS_PORT`**: Specify the port number for the Redis server. Defaults to `6379`.
-- **`REDIS_DATABASE`**: Specify the Redis database number to use. Defaults to `0`.
-
-If you require more advanced settings, such as authentication, SSL/TLS support, or Sentinel mode, refer to the [Redis plugin settings documentation](settings.md#redis) for detailed guidance.
-
-## Security Mode
+### Security Mode
 
 STREAM support :white_check_mark:
 
@@ -1582,9 +1618,9 @@ The **Security Mode** setting determines how BunkerWeb handles detected threats.
     Switching to `detect` mode can help you identify and resolve potential false positives without disrupting legitimate clients. Once these issues are addressed, you can confidently switch back to `block` mode for full protection.
 
 
-## HTTP protocol
+### HTTP protocol
 
-### Deny status code
+#### Deny status code
 
 STREAM support :warning:
 
@@ -1597,7 +1633,7 @@ The default value is `403`. Setting it to `444` is recommended only if you have 
 
 In **stream mode**, this setting is always enforced as `444`, meaning the connection will be closed, regardless of the configured value.
 
-### Default server
+#### Default server
 
 STREAM support :warning:
 
@@ -1607,17 +1643,17 @@ To block requests with undefined or unknown `Host` values, you can enable the `D
 
 For stricter security, you can also close SSL/TLS connections when the [Server Name Indication (SNI)](https://en.wikipedia.org/wiki/Server_Name_Indication) is undefined or unknown by setting `DISABLE_DEFAULT_SERVER_STRICT_SNI` to `yes` (default: `no`). This approach blocks attackers at the SSL/TLS level. However, it may cause issues if your BunkerWeb instance is behind a reverse proxy that forwards HTTPS requests without SNI.
 
-### Allowed methods
+#### Allowed methods
 
 STREAM support :x:
 
 You can define the allowed HTTP methods using the `ALLOWED_METHODS` setting, listing them separated by a `|` (default: `GET|POST|HEAD`). If a client sends a request using a method not listed, they will receive a **405 - Method Not Allowed** response.
 
-!!! abstract "POST Requests"
+!!! abstract "CORS requests"
 
-    If you include `POST` in the allowed methods, you should also include `OPTIONS` to accommodate CORS pre-flight requests.
+    You should also include `OPTIONS` to accommodate CORS pre-flight requests if needed.
 
-### Max sizes
+#### Max sizes
 
 STREAM support :x:
 
@@ -1625,19 +1661,19 @@ The maximum request body size can be controlled using the `MAX_CLIENT_SIZE` sett
 
 To allow a request body of unlimited size, you can use the special value `0` (not recommended for security and performance reasons).
 
-### Serve files
+#### Serve files
 
 STREAM support :x:
 
 To prevent serving files from the `www` folder, set the `SERVE_FILES` option to `no` (default: `yes`). Using `no` is recommended if BunkerWeb is configured as a reverse proxy.
 
-### Headers
+#### Headers
 
 STREAM support :x:
 
 Headers play a crucial role in HTTP security. While some headers may be overly verbose, others might require enhanced verbosity to ensure better security, particularly on the client side.
 
-#### Remove headers
+##### Remove headers
 
 STREAM support :x:
 
@@ -1645,7 +1681,7 @@ You can use the `REMOVE_HEADERS` setting to automatically remove specific verbos
 
 Headers to be removed should be listed and separated by spaces.
 
-#### Keep upstream headers
+##### Keep upstream headers
 
 STREAM support :x:
 
@@ -1656,7 +1692,7 @@ The `KEEP_UPSTREAM_HEADERS` setting allows you to preserve specific headers from
 
 Headers to be preserved must be listed and separated by spaces.
 
-#### Cookies
+##### Cookies
 
 STREAM support :x:
 
@@ -1675,7 +1711,7 @@ To further enhance security, the `Secure` flag can be applied automatically for 
 !!! danger "Important"
     Disabling the `COOKIE_AUTO_SECURE_FLAG` setting may expose your cookies to interception over insecure HTTP connections.
 
-#### Security headers
+##### Security headers
 
 STREAM support :x:
 
@@ -1694,7 +1730,7 @@ STREAM support :x:
 !!! note "About Security Headers"
     Security headers are a **first line of defense** against malicious actors. Properly configuring them can drastically reduce the attack surface of your application. Use the BunkerWeb settings to fine-tune these headers and ensure your application adheres to the highest security standards.
 
-#### CORS
+##### CORS
 
 STREAM support :x:
 
@@ -1729,20 +1765,21 @@ Here are examples of possible values for the `CORS_ALLOW_ORIGIN` setting, along 
 - **`^https://(www\.example1\.com|www\.example2\.com)$`**: Allows requests from either `https://www.example1.com` or `https://www.example2.com`.
 - **`^https?://www\.example\.com$`**: Allows requests from both `https://www.example.com` and `http://www.example.com`.
 
-##### Helpful Resources for Configuring CORS Settings:
+Helpful resources for configuring CORS settings:
+
 - **Cross-Origin-Opener-Policy**: [MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Opener-Policy)
 - **Cross-Origin-Embedder-Policy**: [MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Embedder-Policy)
 - **Cross-Origin-Resource-Policy**: [MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Resource-Policy)
 
 These examples and resources will help you configure CORS policies effectively, ensuring secure and controlled access to your service.
 
-### Compression algorithms
+#### Compression algorithms
 
 STREAM support :x:
 
 Compression algorithms in BunkerWeb, such as Brotli and Gzip, optimize performance by reducing the size of HTTP responses. These algorithms help save bandwidth and improve loading times for end-users.
 
-#### Brotli
+##### Brotli
 
 The **Brotli** algorithm provides higher compression rates compared to Gzip, making it ideal for modern web applications.
 
@@ -1753,7 +1790,7 @@ The **Brotli** algorithm provides higher compression rates compared to Gzip, mak
 | `BROTLI_MIN_LENGTH` | `1000`                                                                                                                                                                                                                                                                                                                                                                                                                           | multisite | no       | Minimum response size (in bytes) for Brotli compression to apply.            |
 | `BROTLI_COMP_LEVEL` | `6`                                                                                                                                                                                                                                                                                                                                                                                                                              | multisite | no       | Compression level for Brotli (0 = no compression, 11 = maximum compression). |
 
-#### Gzip
+##### Gzip
 
 The **Gzip** algorithm is widely supported and ensures compatibility with older clients.
 
@@ -1773,7 +1810,7 @@ The **Gzip** algorithm is widely supported and ensures compatibility with older 
 !!! tip "Optimizing Compression Settings"
     Properly configuring MIME types and compression levels helps balance performance gains with resource usage.
 
-## HTTPS / SSL/TLS
+### HTTPS / SSL/TLS
 
 Strong SSL/TLS certificates are **essential** for ensuring secure communication between clients and your server. They protect sensitive data from being intercepted or tampered with and are a fundamental component of a secure HTTPS setup.
 
@@ -1798,7 +1835,7 @@ In addition to configuring HTTPS and SSL/TLS protocols, the following settings c
 
     Given the experimental nature of HTTP/3 support in NGINX, it may not be suitable for all use cases. Thorough testing is recommended before enabling it in a production setting.
 
-### Let's Encrypt
+#### Let's Encrypt
 
 STREAM support :white_check_mark:
 
@@ -1829,7 +1866,7 @@ Below is the list of related settings:
 !!! warning "Wildcard certificates"
     Wildcard certificates are only available with DNS challenges. If you want to use them, you will need to set the `USE_LETS_ENCRYPT_WILDCARD` setting to `yes`.
 
-#### Available DNS Providers
+##### Available DNS Providers
 
 | Provider       | Description     | Mandatory Settings                                                                                           | Optional Settings                                                                                                                                                                                                                                                        | Link(s)                                                                               |
 | -------------- | --------------- | ------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------- |
@@ -1839,7 +1876,7 @@ Below is the list of related settings:
 | `dnsmadeeasy`  | DNS Made Easy   | `api_key`<br>`secret_key`                                                                                    |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-dnsmadeeasy.readthedocs.io/en/stable/)            |
 | `gehirn`       | Gehirn DNS      | `api_token`<br>`api_secret`                                                                                  |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-gehirn.readthedocs.io/en/stable/)                 |
 | `google`       | Google Cloud    | `project_id`<br>`private_key_id`<br>`private_key`<br>`client_email`<br>`client_id`<br>`client_x509_cert_url` | `type` (default: `service_account`)<br>`auth_uri` (default: `https://accounts.google.com/o/oauth2/auth`)<br>`token_uri` (default: `https://accounts.google.com/o/oauth2/token`)<br>`auth_provider_x509_cert_url` (default: `https://www.googleapis.com/oauth2/v1/certs`) | [Documentation](https://certbot-dns-google.readthedocs.io/en/stable/)                 |
-| `linode`       | Linode          | `key`                                                                                                        | `version` (default: `4`)                                                                                                                                                                                                                                                 | [Documentation](https://certbot-dns-linode.readthedocs.io/en/stable/)                 |
+| `linode`       | Linode          | `key`                                                                                                        |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-linode.readthedocs.io/en/stable/)                 |
 | `luadns`       | LuaDNS          | `email`<br>`token`                                                                                           |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-luadns.readthedocs.io/en/stable/)                 |
 | `nsone`        | NS1             | `api_key`                                                                                                    |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-nsone.readthedocs.io/en/stable/)                  |
 | `ovh`          | OVH             | `application_key`<br>`application_secret`<br>`consumer_key`                                                  | `endpoint` (default: `ovh-eu`)                                                                                                                                                                                                                                           | [Documentation](https://certbot-dns-ovh.readthedocs.io/en/stable/)                    |
@@ -1850,7 +1887,7 @@ Below is the list of related settings:
 
 Full Let's Encrypt automation using the `http` challenge is fully working with stream mode as long as you open the `80/tcp` port from the outside. Please note that you will need to use the `LISTEN_STREAM_PORT_SSL` setting in order to choose your listening SSL/TLS port.
 
-### Custom certificate
+#### Custom certificates
 
 STREAM support :white_check_mark:
 
@@ -1870,7 +1907,7 @@ When you enable custom SSL/TLS by setting `USE_CUSTOM_SSL` to `yes`, BunkerWeb w
 
 For stream mode, you must configure the `LISTEN_STREAM_PORT_SSL` setting to specify the SSL/TLS listening port. This step is essential for proper operation in stream mode.
 
-### Self-signed
+#### Self-signed
 
 STREAM support :white_check_mark:
 
@@ -1886,7 +1923,7 @@ Below is the list of related settings:
 
 For stream mode, you must configure the `LISTEN_STREAM_PORT_SSL` setting to specify the SSL/TLS listening port. This step is essential for proper operation in stream mode.
 
-## ModSecurity
+### ModSecurity
 
 STREAM support :x:
 
@@ -1896,17 +1933,18 @@ In BunkerWeb, ModSecurity is integrated and enabled by default, paired with the 
 
 Below is the list of related settings:
 
-| Setting                               | Default        | Description                                                                                                                               |
-| ------------------------------------- | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_MODSECURITY`                     | `yes`          | Enable ModSecurity WAF.                                                                                                                   |
-| `USE_MODSECURITY_CRS`                 | `yes`          | Enable OWASP Core Rule Set.                                                                                                               |
-| `USE_MODSECURITY_CRS_PLUGINS`         | `yes`          | Enable OWASP Core Rule Set plugins.                                                                                                       |
-| `MODSECURITY_CRS_VERSION`             | `4`            | Version of the OWASP Core Rule Set to use with ModSecurity (3, 4 or nightly).                                                             |
-| `MODSECURITY_CRS_PLUGINS`             |                | List of OWASP CRS plugins (plugin-name[/tag] or URL) to download and install (separated with spaces). (Not compatible with CRS version 3) |
-| `MODSECURITY_SEC_AUDIT_ENGINE`        | `RelevantOnly` | SecAuditEngine directive of ModSecurity.                                                                                                  |
-| `MODSECURITY_SEC_RULE_ENGINE`         | `On`           | SecRuleEngine directive of ModSecurity.                                                                                                   |
-| `MODSECURITY_SEC_AUDIT_LOG_PARTS`     | `ABCFHZ`       | SecAuditLogParts directive of ModSecurity.                                                                                                |
-| `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` | `131072`       | SecRequestBodyNoFilesLimit directive of ModSecurity.                                                                                      |
+| Setting                               | Default        | Context   | Multiple | Description                                                                                                                               |
+| ------------------------------------- | -------------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_MODSECURITY`                     | `yes`          | multisite | no       | Enable ModSecurity WAF.                                                                                                                   |
+| `USE_MODSECURITY_CRS`                 | `yes`          | multisite | no       | Enable OWASP Core Rule Set.                                                                                                               |
+| `USE_MODSECURITY_CRS_PLUGINS`         | `yes`          | multisite | no       | Enable OWASP Core Rule Set plugins.                                                                                                       |
+| `MODSECURITY_CRS_VERSION`             | `4`            | multisite | no       | Version of the OWASP Core Rule Set to use with ModSecurity (3, 4 or nightly).                                                             |
+| `MODSECURITY_CRS_PLUGINS`             |                | multisite | no       | List of OWASP CRS plugins (plugin-name[/tag] or URL) to download and install (separated with spaces). (Not compatible with CRS version 3) |
+| `USE_MODSECURITY_GLOBAL_CRS`          | `no`           | global    | no       | Use ModSecurity CRS in global mode to improve rules loading when you have many services.                                                  |
+| `MODSECURITY_SEC_AUDIT_ENGINE`        | `RelevantOnly` | multisite | no       | SecAuditEngine directive of ModSecurity.                                                                                                  |
+| `MODSECURITY_SEC_RULE_ENGINE`         | `On`           | multisite | no       | SecRuleEngine directive of ModSecurity.                                                                                                   |
+| `MODSECURITY_SEC_AUDIT_LOG_PARTS`     | `ABCFHZ`       | multisite | no       | SecAuditLogParts directive of ModSecurity.                                                                                                |
+| `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` | `131072`       | multisite | no       | SecRequestBodyNoFilesLimit directive of ModSecurity.                                                                                      |
 
 !!! warning "ModSecurity and the OWASP Core Rule Set"
     **We strongly recommend keeping both ModSecurity and the OWASP Core Rule Set (CRS) enabled** to provide robust protection against common web vulnerabilities. While occasional false positives may occur, they can be resolved with some effort by fine-tuning rules or using predefined exclusions.
@@ -1922,7 +1960,7 @@ You can select from the following versions of the OWASP Core Rule Set (CRS) to s
 !!! example "Nightly Build"
     The **nightly build** contains the most up-to-date rules, offering the latest protections against emerging threats. However, since it is updated daily and may include experimental or untested changes, it is recommended to first use the nightly build in a **staging environment** before deploying it in production.
 
-### Custom configurations
+#### Custom configurations
 
 Tuning ModSecurity and the OWASP Core Rule Set (CRS) can be achieved through [custom configurations](#custom-configurations). These configurations allow you to customize behavior at specific stages of the security rules processing:
 
@@ -1933,7 +1971,7 @@ Tuning ModSecurity and the OWASP Core Rule Set (CRS) can be achieved through [cu
 
 This structure provides flexibility, allowing you to fine-tune ModSecurity and CRS settings to suit your application's specific needs while maintaining a clear configuration flow.
 
-#### Example 1: Adding CRS Exclusions with `modsec-crs`
+#### Adding CRS Exclusions with `modsec-crs`
 You can use a custom configuration of type `modsec-crs` to add exclusions for specific use cases, such as enabling predefined exclusions for WordPress:
 
 ```conf
@@ -1951,7 +1989,7 @@ In this example:
 - The action is executed in **Phase 1** (early in the request lifecycle).
 - It enables WordPress-specific CRS exclusions by setting the variable `tx.crs_exclusions_wordpress`.
 
-#### Example 2: Updating CRS Rules with `modsec`
+#### Updating CRS Rules with `modsec`
 To fine-tune the loaded CRS rules, you can use a custom configuration of type `modsec`. For example, you can remove specific rules or tags for certain request paths:
 
 ```conf
@@ -1992,7 +2030,7 @@ This approach provides precise control over the security rules, allowing you to 
     - **Post-CRS customizations** (`crs-plugins-after`, `modsec`) are ideal for overriding or extending rules after CRS and plugin rules have been applied.
     - This structure provides maximum flexibility, enabling precise control over rule execution and customization while maintaining a strong security baseline.
 
-### OWASP CRS Plugins
+#### OWASP CRS Plugins
 
 The OWASP Core Rule Set also supports a range of **plugins** designed to extend its functionality and improve compatibility with specific applications or environments. These plugins can help fine-tune the CRS for use with popular platforms such as WordPress, Nextcloud, and Drupal, or even custom setups. For more information and a list of available plugins, refer to the [OWASP CRS plugin registry](https://github.com/coreruleset/plugin-registry).
 
@@ -2076,7 +2114,7 @@ This BunkerWeb plugin acts as a [CrowdSec](https://crowdsec.net/) bouncer. It wi
     ```yaml
     services:
         bunkerweb:
-            image: bunkerity/bunkerweb:1.6.0-rc4
+            image: bunkerity/bunkerweb:1.6.0
             ports:
               - "80:8080"
               - "443:8443"
@@ -2093,7 +2131,7 @@ This BunkerWeb plugin acts as a [CrowdSec](https://crowdsec.net/) bouncer. It wi
                     syslog-address: "udp://10.10.10.254:514"
 
         bw-scheduler:
-            image: bunkerity/bunkerweb-scheduler:1.6.0-rc4
+            image: bunkerity/bunkerweb-scheduler:1.6.0
             depends_on:
               - bunkerweb
             environment:
@@ -2227,7 +2265,7 @@ This BunkerWeb plugin acts as a [CrowdSec](https://crowdsec.net/) bouncer. It wi
     sudo systemctl reload bunkerweb
     ``` -->
 
-## Bad behavior
+### Bad behavior
 
 STREAM support :white_check_mark:
 
@@ -2253,7 +2291,7 @@ In **stream mode**, only the `444` status code is considered "bad" and will trig
 
 This configuration helps prevent attackers from repeatedly probing your server for vulnerabilities while minimizing the impact on legitimate users.
 
-## Antibot
+### Antibot
 
 STREAM support :x:
 
@@ -2264,29 +2302,99 @@ BunkerWeb includes a built-in "Antibot" feature to implement this type of securi
 - **Cookie**: Sends a cookie to the client and expects it to be returned on subsequent requests.
 - **JavaScript**: Requires the client to solve a computational challenge using JavaScript.
 - **Captcha**: Presents a traditional CAPTCHA challenge (no external dependencies).
-- **hCaptcha**: Challenges the client with a CAPTCHA provided by hCaptcha.
 - **reCAPTCHA**: Uses Google reCAPTCHA to ensure the client achieves a minimum score.
+- **hCaptcha**: Challenges the client with a CAPTCHA provided by hCaptcha.
 - **Turnstile**: Enforces rate limiting and access control using Cloudflare Turnstile, leveraging various mechanisms.
+- **mCaptcha**: Challenges the client with a CAPTCHA provided by mCaptcha.
 
 Here is the list of related settings :
 
-| Setting                     | Default      | Context   | Multiple | Description                                                                                                                    |
-| --------------------------- | ------------ | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `USE_ANTIBOT`               | `no`         | multisite | no       | Activate antibot feature.                                                                                                      |
-| `ANTIBOT_URI`               | `/challenge` | multisite | no       | Unused URI that clients will be redirected to to solve the challenge.                                                          |
-| `ANTIBOT_TIME_RESOLVE`      | `60`         | multisite | no       | Maximum time (in seconds) clients have to resolve the challenge. Once this time has passed, a new challenge will be generated. |
-| `ANTIBOT_TIME_VALID`        | `86400`      | multisite | no       | Maximum validity time of solved challenges. Once this time has passed, clients will need to resolve a new one.                 |
-| `ANTIBOT_RECAPTCHA_SCORE`   | `0.7`        | multisite | no       | Minimum score required for reCAPTCHA challenge (Only compatible with reCAPTCHA v3).                                            |
-| `ANTIBOT_RECAPTCHA_SITEKEY` |              | multisite | no       | Sitekey for reCAPTCHA challenge.                                                                                               |
-| `ANTIBOT_RECAPTCHA_SECRET`  |              | multisite | no       | Secret for reCAPTCHA challenge.                                                                                                |
-| `ANTIBOT_HCAPTCHA_SITEKEY`  |              | multisite | no       | Sitekey for hCaptcha challenge.                                                                                                |
-| `ANTIBOT_HCAPTCHA_SECRET`   |              | multisite | no       | Secret for hCaptcha challenge.                                                                                                 |
-| `ANTIBOT_TURNSTILE_SITEKEY` |              | multisite | no       | Sitekey for Turnstile challenge.                                                                                               |
-| `ANTIBOT_TURNSTILE_SECRET`  |              | multisite | no       | Secret for Turnstile challenge.                                                                                                |
+| Setting                     | Default                     | Context   | Multiple | Description                                                                                                                    |
+| --------------------------- | --------------------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `USE_ANTIBOT`               | `no`                        | multisite | no       | Activate antibot feature.                                                                                                      |
+| `ANTIBOT_URI`               | `/challenge`                | multisite | no       | Unused URI that clients will be redirected to to solve the challenge.                                                          |
+| `ANTIBOT_TIME_RESOLVE`      | `60`                        | multisite | no       | Maximum time (in seconds) clients have to resolve the challenge. Once this time has passed, a new challenge will be generated. |
+| `ANTIBOT_TIME_VALID`        | `86400`                     | multisite | no       | Maximum validity time of solved challenges. Once this time has passed, clients will need to resolve a new one.                 |
+| `ANTIBOT_RECAPTCHA_SCORE`   | `0.7`                       | multisite | no       | Minimum score required for reCAPTCHA challenge (Only compatible with reCAPTCHA v3).                                            |
+| `ANTIBOT_RECAPTCHA_SITEKEY` |                             | multisite | no       | Sitekey for reCAPTCHA challenge.                                                                                               |
+| `ANTIBOT_RECAPTCHA_SECRET`  |                             | multisite | no       | Secret for reCAPTCHA challenge.                                                                                                |
+| `ANTIBOT_HCAPTCHA_SITEKEY`  |                             | multisite | no       | Sitekey for hCaptcha challenge.                                                                                                |
+| `ANTIBOT_HCAPTCHA_SECRET`   |                             | multisite | no       | Secret for hCaptcha challenge.                                                                                                 |
+| `ANTIBOT_TURNSTILE_SITEKEY` |                             | multisite | no       | Sitekey for Turnstile challenge.                                                                                               |
+| `ANTIBOT_TURNSTILE_SECRET`  |                             | multisite | no       | Secret for Turnstile challenge.                                                                                                |
+| `ANTIBOT_MCAPTCHA_SITEKEY`  |                             | multisite | no       | Sitekey for mCaptcha challenge.                                                                                                |
+| `ANTIBOT_MCAPTCHA_SECRET`   |                             | multisite | no       | Secret for mCaptcha challenge.                                                                                                 |
+| `ANTIBOT_MCAPTCHA_URL`      | `https://demo.mcaptcha.org` | multisite | no       | Domain to use for mCaptcha challenge.                                                                                          |
 
 Please note that antibot feature is using a cookie to maintain a session with clients. If you are using BunkerWeb in a clustered environment, you will need to set the `SESSIONS_SECRET` and `SESSIONS_NAME` settings to another value than the default one (which is `random`). You will find more info about sessions [here](settings.md#sessions).
 
-## Blacklisting, whitelisting and greylisting
+#### Captcha
+
+Our homemade Captcha mechanism offers a simple yet effective challenge designed and hosted entirely within your BunkerWeb environment. It generates dynamic, image-based challenges that test users' ability to recognize and interpret randomized characters, ensuring automated bots are effectively blocked without the need for any external API calls or third-party services.
+
+To enable the Captcha antibot mechanism, set the `USE_ANTIBOT` setting to `captcha` in your BunkerWeb configuration.
+
+#### reCAPTCHA
+
+When enabled, reCAPTCHA runs in the background (v3) to assign a score based on user behavior. A score lower than the configured threshold will prompt further verification or block the request. For visible challenges (v2), users must interact with the reCAPTCHA widget before continuing.
+
+To use reCAPTCHA with BunkerWeb, you need to obtain your site and secret keys from the [Google reCAPTCHA admin console](https://www.google.com/recaptcha/admin). Once you have the keys, you can configure BunkerWeb to use reCAPTCHA as an antibot mechanism.
+
+Add or update the following settings as needed in your BunkerWeb configuration:
+
+| Setting                     | Default | Description                                         |
+| --------------------------- | ------- | --------------------------------------------------- |
+| `ANTIBOT_RECAPTCHA_SITEKEY` |         | Your Google reCAPTCHA site key.                     |
+| `ANTIBOT_RECAPTCHA_SECRET`  |         | Your Google reCAPTCHA secret key.                   |
+| `ANTIBOT_RECAPTCHA_SCORE`   | 0.7     | Minimum score required for reCAPTCHA v3 validation. |
+
+Make sure to set the `USE_ANTIBOT` setting to `recaptcha` to enable the reCAPTCHA antibot mechanism.
+
+#### hCaptcha
+
+When enabled, hCaptcha provides an effective alternative to reCAPTCHA by verifying user interactions without relying on a scoring mechanism. It challenges users with a simple, interactive test to confirm their legitimacy.
+
+To integrate hCaptcha with BunkerWeb, you must obtain the necessary credentials from the hCaptcha dashboard at [hCaptcha](https://www.hcaptcha.com). These credentials include a site key and a secret key.
+
+After acquiring the keys, update your BunkerWeb configuration with the following settings to enable hCaptcha antibot protection:
+
+| Setting                    | Default | Description                                     |
+| -------------------------- | ------- | ----------------------------------------------- |
+| `ANTIBOT_HCAPTCHA_SITEKEY` |         | Your hCaptcha site key.                         |
+| `ANTIBOT_HCAPTCHA_SECRET`  |         | Your hCaptcha secret key used for verification. |
+
+Make sure to set the `USE_ANTIBOT` setting to `hcaptcha` to enable the hCaptcha antibot mechanism.
+
+#### Turnstile
+
+Turnstile is a modern, privacy-friendly challenge mechanism that leverages Cloudflare’s technology to detect and block automated traffic. It validates user interactions in a seamless, background manner, reducing friction for legitimate users while effectively discouraging bots.
+
+To integrate Turnstile with BunkerWeb, ensure you obtain the necessary credentials from [Cloudflare Turnstile](https://www.cloudflare.com/turnstile) and update your configuration with the following settings:
+
+| Setting                     | Default | Description                                          |
+| --------------------------- | ------- | ---------------------------------------------------- |
+| `ANTIBOT_TURNSTILE_SITEKEY` |         | Your Cloudflare Turnstile site key.                  |
+| `ANTIBOT_TURNSTILE_SECRET`  |         | Your Cloudflare Turnstile secret key for validation. |
+
+Make sure to set the `USE_ANTIBOT` setting to `turnstile` to enable the Turnstile antibot mechanism.
+
+#### mCaptcha
+
+mCaptcha is an alternative CAPTCHA challenge mechanism that verifies the legitimacy of users by presenting an interactive test similar to other antibot solutions. When enabled, it challenges users with a CAPTCHA provided by mCaptcha, ensuring that only genuine users bypass the automated security checks.
+
+mCaptcha is designed with privacy in mind. It is fully GDPR compliant, ensuring that all user data involved in the challenge process adheres to strict data protection standards. Additionally, mCaptcha offers the flexibility to be self-hosted, allowing organizations to maintain full control over their data and infrastructure. This self-hosting capability not only enhances privacy but also optimizes performance and customization to suit specific deployment needs.
+
+To integrate mCaptcha with BunkerWeb, you must obtain the necessary credentials from the [mCaptcha](https://mcaptcha.org/) platform or yours. These credentials include a site key and a secret key for verification. After acquiring the keys, update your BunkerWeb configuration with the following settings to enable mCaptcha antibot protection:
+
+| Setting                    | Default                     | Description                                          |
+| -------------------------- | --------------------------- | ---------------------------------------------------- |
+| `ANTIBOT_MCAPTCHA_SITEKEY` |                             | Your mCaptcha site key used in the challenge.        |
+| `ANTIBOT_MCAPTCHA_SECRET`  |                             | Your mCaptcha secret for verifying responses.        |
+| `ANTIBOT_MCAPTCHA_URL`     | `https://demo.mcaptcha.org` | The endpoint URL for mCaptcha challenge integration. |
+
+Make sure to set the `USE_ANTIBOT` setting to `mcaptcha` to enable the mCaptcha antibot mechanism.
+
+### Blacklisting, whitelisting and greylisting
 
 The security features for blacklisting, whitelisting, and greylisting are straightforward to understand:
 
@@ -2296,7 +2404,7 @@ The security features for blacklisting, whitelisting, and greylisting are straig
 
 These mechanisms can be configured simultaneously. If all three are enabled and a client meets criteria for multiple lists, **whitelisting takes precedence**, followed by blacklisting, and finally greylisting. In such cases, a whitelisted client will bypass both blacklisting and greylisting, regardless of overlapping criteria.
 
-### Blacklisting
+#### Blacklisting
 
 STREAM support :warning:
 
@@ -2333,7 +2441,7 @@ You can use the following settings to set up blacklisting :
 !!! tip "Ignore lists"
     The ignore lists are useful when you want to block a specific criterion but want to exclude some IPs, RDNS, ASN, User-Agent, or URI from the blacklist.
 
-### Greylisting
+#### Greylisting
 
 STREAM support :warning:
 
@@ -2357,7 +2465,7 @@ You can use the following settings to set up greylisting :
 !!! info "stream mode"
     When using stream mode, only IP, RDNS and ASN checks will be done.
 
-### Whitelisting
+#### Whitelisting
 
 STREAM support :warning:
 
@@ -2381,7 +2489,7 @@ You can use the following settings to set up whitelisting :
 !!! info "stream mode"
     When using stream mode, only IP, RDNS and ASN checks will be done.
 
-## Reverse scan
+### Reverse scan
 
 STREAM support :white_check_mark:
 
@@ -2397,7 +2505,7 @@ Here is the list of settings related to reverse scan :
 |  `REVERSE_SCAN_PORTS`  | `22 80 443 3128 8000 8080` | List of suspicious ports to scan.                         |
 | `REVERSE_SCAN_TIMEOUT` |           `500`            | Specify the maximum timeout (in ms) when scanning a port. |
 
-## BunkerNet
+### BunkerNet
 
 STREAM support :white_check_mark:
 
@@ -2409,7 +2517,7 @@ Beyond the enhanced security that comes from leveraging this collective intellig
 
 The setting used to enable or disable BunkerNet is `USE_BUNKERNET` (default : `yes`).
 
-### CrowdSec Console integration
+#### CrowdSec Console integration
 
 If you're not already familiar with it, [CrowdSec](https://www.crowdsec.net/?utm_campaign=bunkerweb&utm_source=doc) is an open-source cybersecurity solution that leverages crowdsourced intelligence to combat cyber threats. Think of it as the "Waze of cybersecurity"—when one server is attacked, other systems worldwide are alerted and protected from the same attackers. You can learn more about it [here](https://www.crowdsec.net/about?utm_campaign=bunkerweb&utm_source=blog).
 
@@ -2471,7 +2579,7 @@ Pro tip : when viewing your alerts, click on "columns" and tick the "context" ch
   <figcaption>BunkerWeb data shown in the context column</figcaption>
 </figure>
 
-## DNSBL
+### DNSBL
 
 STREAM support :white_check_mark:
 
@@ -2486,7 +2594,7 @@ Here is the list of settings related to DNSBL :
 | `USE_DNSBL`  |                        `yes`                        | When set to `yes`, will enable DNSBL checking. |
 | `DNSBL_LIST` | `bl.blocklist.de sbl.spamhaus.org xbl.spamhaus.org` | List of DNSBL servers to ask.                  |
 
-## Limiting
+### Limiting
 
 BunkerWeb allows you to enforce limit policies on the following:
 
@@ -2497,7 +2605,7 @@ While these policies are not designed to effectively mitigate DoS or DDoS attack
 
 In both cases—whether the limit applies to connections or requests—clients exceeding the defined limits will receive an HTTP status code **"429 - Too Many Requests"**, ensuring fair usage and protecting your resources.
 
-### Connections
+#### Connections
 
 STREAM support :white_check_mark:
 
@@ -2511,7 +2619,7 @@ The following settings are related to the Limiting connections feature :
 | `LIMIT_CONN_MAX_HTTP3`  |  `100`  | Maximum number of concurrent streams when using HTTP3 protocol.                            |
 | `LIMIT_CONN_MAX_STREAM` |  `10`   | Maximum number of connections per IP when using stream.                                    |
 
-### Requests
+#### Requests
 
 STREAM support :x:
 
@@ -2540,7 +2648,7 @@ This flexibility ensures tailored rate limits for different endpoints based on t
     - **Efficient Traffic Management**:
       Properly applied, these settings help balance resource usage, mitigate abuse, and protect critical endpoints without impacting legitimate users.
 
-## Country
+### Country
 
 STREAM support :white_check_mark:
 
@@ -2562,9 +2670,9 @@ Using both a country blacklist and a whitelist simultaneously is logically redun
 
 To avoid confusion and ensure clear policy enforcement, use either a blacklist or a whitelist based on your specific security requirements, but not both at the same time.
 
-## Authentication
+### Authentication
 
-### Auth basic
+#### Auth basic
 
 STREAM support :x:
 
@@ -2583,11 +2691,11 @@ Here is the list of related settings :
 !!! tip "multi users"
     You can set multiple users by using the following format : `AUTH_BASIC_USER_1`, `AUTH_BASIC_PASSWORD_1`, `AUTH_BASIC_USER_2`, `AUTH_BASIC_PASSWORD_2`, etc.
 
-### Auth request
+#### Auth request
 
 For more advanced authentication methods, such as Single Sign-On (SSO), you can leverage the **auth request settings**. This allows integration with external authentication systems by using subrequest-based authentication. For detailed information about this feature, refer to the [NGINX documentation](https://docs.nginx.com/nginx/admin-guide/security-controls/configuring-subrequest-authentication/).
 
-To help you get started, the [BunkerWeb repository](https://github.com/bunkerity/bunkerweb/tree/v1.6.0-rc4/examples) includes examples for popular authentication solutions like [Authelia](https://www.authelia.com/) and [Authentik](https://goauthentik.io/). These examples demonstrate how to integrate these tools seamlessly with your deployment.
+To help you get started, the [BunkerWeb repository](https://github.com/bunkerity/bunkerweb/tree/v1.6.0/examples) includes examples for popular authentication solutions like [Authelia](https://www.authelia.com/) and [Authentik](https://goauthentik.io/). These examples demonstrate how to integrate these tools seamlessly with your deployment.
 
 **Auth request settings are related to reverse proxy rules.**
 
@@ -2597,9 +2705,9 @@ To help you get started, the [BunkerWeb repository](https://github.com/bunkerity
 | `REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL` |         | multisite | yes      | Redirect clients to sign-in URL when using REVERSE_PROXY_AUTH_REQUEST (used when auth_request call returned 401).    |
 | `REVERSE_PROXY_AUTH_REQUEST_SET`        |         | multisite | yes      | List of variables to set from the authentication provider, separated with ; (values of auth_request_set directives). |
 
-## Monitoring and reporting
+### Monitoring and reporting
 
-### Monitoring <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+#### Monitoring <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
 STREAM support :x:
 
@@ -2619,7 +2727,7 @@ The monitoring plugin lets you collect and retrieve metrics about BunkerWeb. By 
 | `USE_MONITORING`               | `yes`   | global  | no       | Enable monitoring of BunkerWeb.               |
 | `MONITORING_METRICS_DICT_SIZE` | `10M`   | global  | no       | Size of the dict to store monitoring metrics. |
 
-### Prometheus exporter <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+#### Prometheus exporter <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
 STREAM support :x:
 
@@ -2645,7 +2753,7 @@ We also provide a [Grafana dashboard](https://grafana.com/grafana/dashboards/207
 | `PROMETHEUS_EXPORTER_URL`      | `/metrics`                                            | global  | no       | HTTP URL of the Prometheus exporter.                                     |
 | `PROMETHEUS_EXPORTER_ALLOW_IP` | `127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16` | global  | no       | List of IP/networks allowed to contact the Prometheus exporter endpoint. |
 
-### Reporting <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+#### Reporting <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
 STREAM support :x:
 
@@ -2687,13 +2795,13 @@ The Reporting plugin provides a comprehensive solution for regular reporting of 
     - case `REPORTING_SMTP_FROM_USER` isn't set but `REPORTING_SMTP_FROM_PASSWORD` is set, the plugin will use the `REPORTING_SMTP_FROM_EMAIL` as the username.
     - case the job fails, the plugin will retry sending the report in the next execution.
 
-## Backup and restore
+### Backup and restore
 
-### Backup
+#### Backup
 
 STREAM support :white_check_mark:
 
-#### Automated backup
+##### Automated backup
 
 !!! warning "Information for Red Hat Enterprise Linux (RHEL) 8.9 users"
     If you are using **RHEL 8.9** and plan on using an **external database**, you will need to install the `mysql-community-client` package to ensure the `mysqldump` command is available. You can install the package by executing the following commands:
@@ -2747,7 +2855,7 @@ Data is invaluable, especially in digital environments where it's susceptible to
 | `BACKUP_ROTATION`  | `7`                          | global  | no       | The number of backups to keep                 |
 | `BACKUP_DIRECTORY` | `/var/lib/bunkerweb/backups` | global  | no       | The directory where the backup will be stored |
 
-#### Manual backup
+##### Manual backup
 
 To manually initiate a backup, execute the following command:
 
@@ -2817,7 +2925,7 @@ You can also specify a custom directory for the backup by providing the `BACKUP_
             ...
         ```
 
-#### Manual restore
+##### Manual restore
 
 To manually initiate a restore, execute the following command:
 
@@ -2873,7 +2981,7 @@ You can also specify a custom backup file for the restore by providing the path 
         docker exec -it -e BACKUP_DIRECTORY=/var/tmp/bunkerweb/backups <scheduler_container> bwcli plugin backup restore
         ```
 
-### Backup S3 <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+#### Backup S3 <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
 STREAM support :white_check_mark:
 
@@ -2940,7 +3048,7 @@ By activating this feature, you're proactively safeguarding your **data's integr
 | `BACKUP_S3_ACCESS_KEY_SECRET` |         | global  | The S3 access key secret                     |
 | `BACKUP_S3_COMP_LEVEL`        | `6`     | global  | The compression level of the backup zip file |
 
-#### Manual backup
+##### Manual backup
 
 To manually initiate a backup, execute the following command:
 
@@ -3006,7 +3114,7 @@ You can also specify a custom S3 bucket for the backup by providing the `BACKUP_
             ...
         ```
 
-#### Manual restore
+##### Manual restore
 
 To manually initiate a restore, execute the following command:
 
@@ -3054,7 +3162,7 @@ You can also specify a custom backup file for the restore by providing the path 
         docker exec -it <scheduler_container> bwcli plugin backup_s3 restore
         ```
 
-## Migration <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+### Migration <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
 STREAM support :white_check_mark:
 
@@ -3068,7 +3176,7 @@ The Migration plugin **revolutionizes** BunkerWeb configuration transfers betwee
 
 - **Cross-Database Compatibility:** Enjoy seamless migration across various database platforms, including SQLite, MySQL, MariaDB, and PostgreSQL, ensuring compatibility with your preferred database environment.
 
-### Create a migration file
+#### Create a migration file
 
 To manually create a migration file, execute the following command:
 
@@ -3128,7 +3236,7 @@ This command will create a backup of your database and store it in the backup di
             ...
         ```
 
-### Initialize a migration
+#### Initialize a migration
 
 To manually initialize a migration, execute the following command:
 
@@ -3154,7 +3262,7 @@ To manually initialize a migration, execute the following command:
 
 This command seamlessly migrates your BunkerWeb data to precisely match the configuration outlined in the migration file.
 
-## Security.txt
+### Security.txt
 
 STREAM support :white_check_mark:
 

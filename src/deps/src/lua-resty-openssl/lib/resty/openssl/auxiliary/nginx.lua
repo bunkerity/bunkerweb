@@ -44,7 +44,8 @@ else
   local ngx_has_http_v3 = ngx_configure and ngx_configure:find("--with-http_v3_module", 1, true)
   -- https://github.com/nginx/nginx/blob/master/src/core/ngx_connection.h
   if ngx_version == 1017008 or ngx_version == 1019003 or ngx_version == 1019009 
-    or ngx_version == 1021004 or (not ngx_has_http_v3 and ngx_version == 1025003) then
+    or ngx_version == 1021004
+    or (not ngx_has_http_v3 and (ngx_version == 1025003 or ngx_version == 1027001)) then
     -- 1.17.8, 1.19.3, 1.19.9, 1.21.4, 1.25.3
     ffi.cdef [[
     typedef struct ngx_proxy_protocol_s ngx_proxy_protocol_t;
@@ -82,7 +83,7 @@ else
       // trimmed
     } ngx_connection_s;
   ]]
-  elseif ngx_has_http_v3 and ngx_version == 1025003 then
+  elseif ngx_has_http_v3 and (ngx_version == 1025003 or ngx_version == 1027001) then
     -- 1.25.3
     ffi.cdef [[
     typedef struct ngx_proxy_protocol_s ngx_proxy_protocol_t;
@@ -255,7 +256,7 @@ else
         ngx.config.ngx_lua_version and
         ngx.config.ngx_lua_version
 
-  if ngx_lua_version >= 10019 and ngx_lua_version <= 10026 then
+  if ngx_lua_version >= 10019 and ngx_lua_version <= 10027 then
     -- https://github.com/openresty/lua-nginx-module/blob/master/src/ngx_http_lua_socket_tcp.h
     ffi.cdef[[
       typedef struct {

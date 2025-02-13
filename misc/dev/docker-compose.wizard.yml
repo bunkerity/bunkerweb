@@ -13,7 +13,7 @@ services:
       - 443:8443/tcp
       - 443:8443/udp
     environment:
-      - API_WHITELIST_IP=127.0.0.0/24 10.20.30.0/24
+      API_WHITELIST_IP: "127.0.0.0/24 10.20.30.0/24"
     restart: "unless-stopped"
     networks:
       bw-universe:
@@ -50,6 +50,7 @@ services:
       SERVE_FILES: "no"
       USE_CLIENT_CACHE: "yes"
       USE_GZIP: "yes"
+      SESSIONS_CHECK_IP: "no"
       UI_HOST: "http://bw-ui:7000"
       app1.example.com_USE_REVERSE_PROXY: "yes"
       app1.example.com_REVERSE_PROXY_URL: "/"
@@ -81,7 +82,10 @@ services:
       - ../../src/ui/main.py:/usr/share/bunkerweb/ui/main.py:ro
     environment:
       <<: *env
+      CHECK_PRIVATE_IP: "no"
       DEBUG: "1"
+      MAX_WORKERS: "1"
+      MAX_THREADS: "4"
     restart: "unless-stopped"
     networks:
       bw-universe:
@@ -99,10 +103,10 @@ services:
   bw-db:
     image: mariadb:11
     environment:
-      - MYSQL_RANDOM_ROOT_PASSWORD=yes
-      - MYSQL_DATABASE=db
-      - MYSQL_USER=bunkerweb
-      - MYSQL_PASSWORD=secret
+      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+      MYSQL_DATABASE: "db"
+      MYSQL_USER: "bunkerweb"
+      MYSQL_PASSWORD: "secret"
     volumes:
       - bw-db:/var/lib/mysql
     restart: "unless-stopped"
