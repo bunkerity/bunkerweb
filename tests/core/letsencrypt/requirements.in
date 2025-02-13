@@ -1,2 +1,2 @@
-cryptography==43.0.3
+cryptography==44.0.1
 requests==2.32.3
