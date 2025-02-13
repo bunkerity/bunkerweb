@@ -6,6 +6,7 @@ from datetime import datetime
 from io import BytesIO
 from itertools import chain
 from json import load as json_load
+from logging import Logger
 from os import _exit, environ, getenv, getpid, sep
 from os.path import join
 from pathlib import Path
@@ -19,7 +20,9 @@ from time import sleep
 from traceback import format_exc
 from typing import Any, Dict, List, Literal, Optional, Union
 
-for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("api",), ("db",))]:
+BUNKERWEB_PATH = Path(sep, "usr", "share", "bunkerweb")
+
+for deps_path in [BUNKERWEB_PATH.joinpath(*paths).as_posix() for paths in (("deps", "python"), ("utils",), ("api",), ("db",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
@@ -63,6 +66,7 @@ for custom_config_dir in CUSTOM_CONFIGS_DIRS:
     CUSTOM_CONFIGS_PATH.joinpath(custom_config_dir).mkdir(parents=True, exist_ok=True)
 
 CONFIG_PATH = Path(sep, "etc", "nginx")
+NGINX_VARIABLES_PATH = CONFIG_PATH.joinpath("variables.env")
 
 EXTERNAL_PLUGINS_PATH = Path(sep, "etc", "bunkerweb", "plugins")
 EXTERNAL_PLUGINS_PATH.mkdir(parents=True, exist_ok=True)
@@ -72,6 +76,7 @@ PRO_PLUGINS_PATH.mkdir(parents=True, exist_ok=True)
 
 TMP_PATH = Path(sep, "var", "tmp", "bunkerweb")
 TMP_PATH.mkdir(parents=True, exist_ok=True)
+NGINX_TMP_VARIABLES_PATH = TMP_PATH.joinpath("variables.env")
 
 FAILOVER_PATH = TMP_PATH.joinpath("failover")
 FAILOVER_PATH.mkdir(parents=True, exist_ok=True)
@@ -143,9 +148,9 @@ def handle_reload(signum, frame):
             proc = subprocess_run(
                 [
                     "python3",
-                    join(sep, "usr", "share", "bunkerweb", "gen", "save_config.py"),
+                    BUNKERWEB_PATH.joinpath("gen", "save_config.py").as_posix(),
                     "--settings",
-                    join(sep, "usr", "share", "bunkerweb", "settings.json"),
+                    BUNKERWEB_PATH.joinpath("settings.json").as_posix(),
                     "--variables",
                     join(sep, "etc", "bunkerweb", "variables.env"),
                 ],
@@ -170,10 +175,10 @@ def stop(status):
     _exit(status)
 
 
-def send_file_to_bunkerweb(file_path: Path, endpoint: str):
+def send_file_to_bunkerweb(file_path: Path, endpoint: str, logger: Logger = LOGGER, *, api_caller: Optional[ApiCaller] = None):
     assert SCHEDULER is not None, "SCHEDULER is not defined"
-    LOGGER.info(f"Sending {file_path} to BunkerWeb instances ...")
-    success, responses = SCHEDULER.send_files(file_path.as_posix(), endpoint, response=True)
+    logger.info(f"Sending {file_path} to {'specific' if api_caller else 'all reachable'} BunkerWeb instances ...")
+    success, responses = (api_caller or SCHEDULER).send_files(file_path.as_posix(), endpoint, response=True)
     fails = []
 
     if not IGNORE_FAIL_SENDING_CONFIG:
@@ -189,28 +194,28 @@ def send_file_to_bunkerweb(file_path: Path, endpoint: str):
 
             ret = SCHEDULER.db.update_instance(db_instance["hostname"], "up" if status == "success" else "down")
             if ret:
-                LOGGER.error(f"Couldn't update instance {db_instance['hostname']} status to down in the database: {ret}")
+                logger.error(f"Couldn't update instance {db_instance['hostname']} status to down in the database: {ret}")
 
             with SCHEDULER_LOCK:
                 if status == "success":
                     success = True
                     if index == -1:
-                        LOGGER.debug(f"Adding {db_instance['hostname']}:{db_instance['port']} to the list of reachable instances")
+                        logger.debug(f"Adding {db_instance['hostname']}:{db_instance['port']} to the list of reachable instances")
                         SCHEDULER.apis.append(API(f"http://{db_instance['hostname']}:{db_instance['port']}", db_instance["server_name"]))
                 elif index != -1:
                     fails.append(f"{db_instance['hostname']}:{db_instance['port']}")
-                    LOGGER.debug(f"Removing {db_instance['hostname']}:{db_instance['port']} from the list of reachable instances")
+                    logger.debug(f"Removing {db_instance['hostname']}:{db_instance['port']} from the list of reachable instances")
                     del SCHEDULER.apis[index]
 
     if not success:
-        LOGGER.error(f"Error while sending {file_path} to BunkerWeb instances")
+        logger.error(f"Error while sending {file_path} to BunkerWeb instances")
     elif not fails:
-        LOGGER.info(f"Successfully sent {file_path} folder to reachable BunkerWeb instances")
+        logger.info(f"Successfully sent {file_path} folder to reachable BunkerWeb instances")
     elif not IGNORE_FAIL_SENDING_CONFIG:
-        LOGGER.warning(f"Error while sending {file_path} to some BunkerWeb instances, removing them from the list of reachable instances: {', '.join(fails)}")
+        logger.warning(f"Error while sending {file_path} to some BunkerWeb instances, removing them from the list of reachable instances: {', '.join(fails)}")
 
 
-def generate_custom_configs(configs: Optional[List[Dict[str, Any]]] = None, *, original_path: Union[Path, str] = CUSTOM_CONFIGS_PATH):
+def generate_custom_configs(configs: Optional[List[Dict[str, Any]]] = None, *, original_path: Union[Path, str] = CUSTOM_CONFIGS_PATH, send: bool = True):
     if not isinstance(original_path, Path):
         original_path = Path(original_path)
 
@@ -254,11 +259,11 @@ def generate_custom_configs(configs: Optional[List[Dict[str, Any]]] = None, *, o
                     f"Error while generating custom configs \"{custom_config['name']}\"{' for service ' + custom_config['service_id'] if custom_config['service_id'] else ''}: {e}"
                 )
 
-    if SCHEDULER and SCHEDULER.apis:
+    if send and SCHEDULER and SCHEDULER.apis:
         send_file_to_bunkerweb(original_path, "/custom_configs")
 
 
-def generate_external_plugins(original_path: Union[Path, str] = EXTERNAL_PLUGINS_PATH):
+def generate_external_plugins(original_path: Union[Path, str] = EXTERNAL_PLUGINS_PATH, *, send: bool = True):
     if not isinstance(original_path, Path):
         original_path = Path(original_path)
     pro = original_path.as_posix().endswith("/pro/plugins")
@@ -315,7 +320,7 @@ def generate_external_plugins(original_path: Union[Path, str] = EXTERNAL_PLUGINS
                 LOGGER.debug(format_exc())
                 LOGGER.error(f"Error while generating {'pro ' if pro else ''}external plugins \"{plugin['name']}\": {e}")
 
-    if SCHEDULER and SCHEDULER.apis:
+    if send and SCHEDULER and SCHEDULER.apis:
         LOGGER.info(f"Sending {'pro ' if pro else ''}external plugins to BunkerWeb")
         send_file_to_bunkerweb(original_path, "/pro_plugins" if original_path.as_posix().endswith("/pro/plugins") else "/plugins")
 
@@ -343,11 +348,10 @@ def generate_caches():
                 with tar_open(fileobj=BytesIO(job_cache_file["data"]), mode="r:gz") as tar:
                     assert isinstance(tar, TarFile)
                     try:
-                        for member in tar.getmembers():
-                            try:
-                                tar.extract(member, path=extract_path)
-                            except Exception as e:
-                                LOGGER.error(f"Error extracting {member.name}: {e}")
+                        try:
+                            tar.extractall(extract_path, filter="fully_trusted")
+                        except TypeError:
+                            tar.extractall(extract_path)
                     except Exception as e:
                         LOGGER.error(f"Error extracting tar file: {e}")
                 LOGGER.debug(f"Restored cache directory {extract_path}")
@@ -382,6 +386,38 @@ def generate_caches():
             file.chmod(0o750)
 
 
+def generate_configs(env: Dict[str, str], logger: Logger = LOGGER) -> bool:
+    content = ""
+    for k, v in env.items():
+        content += f"{k}={v}\n"
+    SCHEDULER_TMP_ENV_PATH.write_text(content)
+    # run the generator
+    proc = subprocess_run(
+        [
+            "python3",
+            BUNKERWEB_PATH.joinpath("gen", "main.py").as_posix(),
+            "--settings",
+            BUNKERWEB_PATH.joinpath("settings.json").as_posix(),
+            "--templates",
+            BUNKERWEB_PATH.joinpath("confs").as_posix(),
+            "--output",
+            CONFIG_PATH.as_posix(),
+            "--variables",
+            SCHEDULER_TMP_ENV_PATH.as_posix(),
+        ],
+        stdin=DEVNULL,
+        stderr=STDOUT,
+        check=False,
+    )
+
+    if proc.returncode != 0:
+        logger.error("Config generator failed, configuration will not work as expected...")
+        return False
+
+    copy(NGINX_VARIABLES_PATH.as_posix(), NGINX_TMP_VARIABLES_PATH.as_posix())
+    return True
+
+
 def healthcheck_job():
     if HEALTHCHECK_EVENT.is_set():
         HEALTHCHECK_LOGGER.warning("Healthcheck job is already running, skipping execution ...")
@@ -397,7 +433,7 @@ def healthcheck_job():
     if APPLYING_CHANGES.is_set():
         return
 
-    env = SCHEDULER.db.get_config()
+    env = None
 
     for db_instance in SCHEDULER.db.get_instances():
         bw_instance = API(f"http://{db_instance['hostname']}:{db_instance['port']}", db_instance["server_name"])
@@ -443,11 +479,69 @@ def healthcheck_job():
 
                 HEALTHCHECK_LOGGER.info(f"Instance {bw_instance.endpoint} is loading, sending config ...")
                 api_caller = ApiCaller([bw_instance])
-                api_caller.send_files(CUSTOM_CONFIGS_PATH, "/custom_configs")
-                api_caller.send_files(EXTERNAL_PLUGINS_PATH, "/plugins")
-                api_caller.send_files(PRO_PLUGINS_PATH, "/pro_plugins")
-                api_caller.send_files(join(sep, "etc", "nginx"), "/confs")
-                api_caller.send_files(CACHE_PATH, "/cache")
+
+                if env is None:
+                    env = SCHEDULER.db.get_config()
+                    env["DATABASE_URI"] = SCHEDULER.db.database_uri
+                    tz = getenv("TZ")
+                    if tz:
+                        env["TZ"] = tz
+
+                generate_configs(env, HEALTHCHECK_LOGGER)
+
+                tmp_threads = [
+                    Thread(
+                        target=send_file_to_bunkerweb,
+                        args=(
+                            CUSTOM_CONFIGS_PATH,
+                            "/custom_configs",
+                            HEALTHCHECK_LOGGER,
+                        ),
+                        kwargs={"api_caller": api_caller},
+                    ),
+                    Thread(
+                        target=send_file_to_bunkerweb,
+                        args=(
+                            EXTERNAL_PLUGINS_PATH,
+                            "/plugins",
+                            HEALTHCHECK_LOGGER,
+                        ),
+                        kwargs={"api_caller": api_caller},
+                    ),
+                    Thread(
+                        target=send_file_to_bunkerweb,
+                        args=(
+                            PRO_PLUGINS_PATH,
+                            "/pro_plugins",
+                            HEALTHCHECK_LOGGER,
+                        ),
+                        kwargs={"api_caller": api_caller},
+                    ),
+                    Thread(
+                        target=send_file_to_bunkerweb,
+                        args=(
+                            CONFIG_PATH,
+                            "/confs",
+                            HEALTHCHECK_LOGGER,
+                        ),
+                        kwargs={"api_caller": api_caller},
+                    ),
+                    Thread(
+                        target=send_file_to_bunkerweb,
+                        args=(
+                            CACHE_PATH,
+                            "/cache",
+                            HEALTHCHECK_LOGGER,
+                        ),
+                        kwargs={"api_caller": api_caller},
+                    ),
+                ]
+                for thread in tmp_threads:
+                    thread.start()
+
+                for thread in tmp_threads:
+                    thread.join()
+
                 if not api_caller.send_to_apis(
                     "POST",
                     f"/reload?test={'no' if DISABLE_CONFIGURATION_TESTING else 'yes'}",
@@ -526,8 +620,7 @@ if __name__ == "__main__":
         parser.add_argument("--variables", type=str, help="path to the file containing environment variables")
         args = parser.parse_args()
 
-        tmp_variables_path = Path(args.variables or join(sep, "var", "tmp", "bunkerweb", "variables.env"))
-        nginx_variables_path = CONFIG_PATH.joinpath("variables.env")
+        tmp_variables_path = Path(args.variables) if args.variables else NGINX_TMP_VARIABLES_PATH
 
         dotenv_env = {}
         if tmp_variables_path.is_file():
@@ -547,9 +640,9 @@ if __name__ == "__main__":
             proc = subprocess_run(
                 [
                     "python3",
-                    join(sep, "usr", "share", "bunkerweb", "gen", "save_config.py"),
+                    BUNKERWEB_PATH.joinpath("gen", "save_config.py").as_posix(),
                     "--settings",
-                    join(sep, "usr", "share", "bunkerweb", "settings.json"),
+                    BUNKERWEB_PATH.joinpath("settings.json").as_posix(),
                     "--first-run",
                 ]
                 + (["--variables", tmp_variables_path.as_posix()] if args.variables else []),
@@ -741,9 +834,9 @@ if __name__ == "__main__":
                 proc = subprocess_run(
                     [
                         "python3",
-                        join(sep, "usr", "share", "bunkerweb", "gen", "save_config.py"),
+                        BUNKERWEB_PATH.joinpath("gen", "save_config.py").as_posix(),
                         "--settings",
-                        join(sep, "usr", "share", "bunkerweb", "settings.json"),
+                        BUNKERWEB_PATH.joinpath("settings.json").as_posix(),
                     ]
                     + (["--variables", tmp_variables_path.as_posix()] if args.variables else []),
                     stdin=DEVNULL,
@@ -793,38 +886,11 @@ if __name__ == "__main__":
                 healthcheck_job_run = False
 
             if CONFIG_NEED_GENERATION:
-                content = ""
-                for k, v in env.items():
-                    content += f"{k}={v}\n"
-                SCHEDULER_TMP_ENV_PATH.write_text(content)
-                # run the generator
-                proc = subprocess_run(
-                    [
-                        "python3",
-                        join(sep, "usr", "share", "bunkerweb", "gen", "main.py"),
-                        "--settings",
-                        join(sep, "usr", "share", "bunkerweb", "settings.json"),
-                        "--templates",
-                        join(sep, "usr", "share", "bunkerweb", "confs"),
-                        "--output",
-                        CONFIG_PATH.as_posix(),
-                        "--variables",
-                        SCHEDULER_TMP_ENV_PATH.as_posix(),
-                    ],
-                    stdin=DEVNULL,
-                    stderr=STDOUT,
-                    check=False,
-                )
-
-                if proc.returncode != 0:
-                    LOGGER.error("Config generator failed, configuration will not work as expected...")
-                else:
-                    copy(nginx_variables_path.as_posix(), join(sep, "var", "tmp", "bunkerweb", "variables.env"))
-
-                    if SCHEDULER.apis:
-                        # send nginx configs
-                        threads.append(Thread(target=send_file_to_bunkerweb, args=(CONFIG_PATH, "/confs")))
-                        threads[-1].start()
+                ret = generate_configs(env)
+                if ret and SCHEDULER.apis:
+                    # send nginx configs
+                    threads.append(Thread(target=send_file_to_bunkerweb, args=(CONFIG_PATH, "/confs")))
+                    threads[-1].start()
 
             try:
                 success = True
