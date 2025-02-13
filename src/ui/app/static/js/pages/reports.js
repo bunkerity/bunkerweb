@@ -425,7 +425,8 @@ $(document).ready(function () {
                   countryCode === "local" ? "zz" : countryCode
                 }.svg"
                      class="border border-1 p-0 me-1"
-                     height="17" />
+                     height="17"
+                     loading="lazy" />
                 &nbsp;－&nbsp;${countryCode === "local" ? "N/A" : data}
               </span>`;
           },

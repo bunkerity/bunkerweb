@@ -69,7 +69,8 @@
                                  data-bs-original-title="{% if ban.get('country', 'local') in ("local", "unknown") %}N/A{% else %}{{ ban.get('country', 'local') }}{% endif %}">
                                 <img src="{{ base_flags_url }}/{% if ban.get('country', 'local') in ("local", "unknown") %}zz{% else %}{{ ban.get('country', 'local') |lower }}{% endif %}.svg"
                                      class="border border-1 p-0 me-1"
-                                     height="17" />
+                                     height="17"
+                                     loading="lazy" />
                                 &nbsp;－&nbsp;
                                 {% if ban.get('country', 'local') in ("local", "unknown") %}
                                     N/A

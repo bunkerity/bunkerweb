@@ -143,6 +143,7 @@ class News {
           class: "card-img card-img-left",
           src: img,
           alt: "News image",
+          loading: "lazy",
         }),
       );
       imgCol.append(imgLink);
@@ -213,6 +214,7 @@ class News {
           class: "card-img-top",
           src: img,
           alt: "News image",
+          loading: "lazy",
         }),
       );
 
