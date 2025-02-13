@@ -547,7 +547,10 @@ Some integrations provide more convenient ways to apply configurations, such as 
 
 ### Running many services in production
 
-**Global CRS**
+#### Global CRS
+
+!!! warning "CRS plugins"
+    When the CRS is loaded globally, **CRS plugins are not supported**. If you need to use them, you will need to load the CRS per service.
 
 If you use BunkerWeb in production with a large number of services, and you enable the ModSecurity feature globally with CRS rules, the time required to load BunkerWeb configurations may become too long, potentially resulting in a timeout.
 
@@ -560,7 +563,7 @@ SecRule REQUEST_HEADERS:Host "@rx ^app1\.example\.com$" "nolog"
 
 You can enable the global CRS loading by setting `USE_MODSECURITY_GLOBAL_CRS` to `yes`.
 
-**Adjust max_allowed_packet for MariaDB/MySQL**
+#### Adjust max_allowed_packet for MariaDB/MySQL
 
 It appears that the default value for the `max_allowed_packet` parameter in MariaDB and MySQL database servers is not sufficient when using BunkerWeb with a large number of services.
 
