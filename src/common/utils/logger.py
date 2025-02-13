@@ -53,8 +53,11 @@ def setup_logger(title: str, level: Optional[Union[str, int]] = None) -> Logger:
     logger.setLevel(level)
 
     if getenv("SCHEDULER_LOG_TO_FILE", "no") == "yes":
-        file_handler = FileHandler("/var/log/bunkerweb/scheduler.log")
-        file_handler.setFormatter(Formatter(fmt=LOG_FORMAT, datefmt=DATE_FORMAT))
-        logger.addHandler(file_handler)
+        # Check if a FileHandler already exists
+        has_file_handler = any(isinstance(handler, FileHandler) for handler in logger.handlers)
+        if not has_file_handler:
+            file_handler = FileHandler("/var/log/bunkerweb/scheduler.log")
+            file_handler.setFormatter(Formatter(fmt=LOG_FORMAT, datefmt=DATE_FORMAT))
+            logger.addHandler(file_handler)
 
     return logger
