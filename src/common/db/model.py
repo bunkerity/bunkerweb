@@ -316,7 +316,7 @@ class Metadata(Base):
     last_instances_change = Column(DateTime(timezone=True), nullable=True)
     failover = Column(Boolean, default=None, nullable=True)
     integration = Column(INTEGRATIONS_ENUM, default="Unknown", nullable=False)
-    version = Column(String(32), default="1.6.0-rc4", nullable=False)
+    version = Column(String(32), default="1.6.0", nullable=False)
 
 
 ## UI Models

@@ -1,10 +1,10 @@
 # Advanced usages
 
-Many real-world use case examples are available in the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.0-rc4/examples) folder of the GitHub repository.
+Many real-world use case examples are available in the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.0/examples) folder of the GitHub repository.
 
-We also provide numerous boilerplates, such as YAML files for various integrations and database types. These are available in the [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.0-rc4/misc/integrations) folder.
+We also provide numerous boilerplates, such as YAML files for various integrations and database types. These are available in the [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.0/misc/integrations) folder.
 
-This section only focuses on advanced usages and security tuning, see the [settings section](settings.md) of the documentation to see all the available settings. 
+This section only focuses on advanced usages and security tuning, see the [settings section](settings.md) of the documentation to see all the available settings.
 
 ## Use cases
 
@@ -79,7 +79,7 @@ You will find more settings about real IP in the [settings section](settings.md#
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.0-rc4
+          image: bunkerity/bunkerweb:1.6.0
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -96,7 +96,7 @@ You will find more settings about real IP in the [settings section](settings.md#
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.0-rc4
+          image: bunkerity/bunkerweb:1.6.0
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -135,7 +135,7 @@ You will find more settings about real IP in the [settings section](settings.md#
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.0-rc4
+          image: bunkerity/bunkerweb:1.6.0
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -191,7 +191,7 @@ You will find more settings about real IP in the [settings section](settings.md#
 
         ```yaml
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.0-rc4
+          image: bunkerity/bunkerweb-scheduler:1.6.0
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -209,7 +209,7 @@ You will find more settings about real IP in the [settings section](settings.md#
 
         ```yaml
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.0-rc4
+          image: bunkerity/bunkerweb-scheduler:1.6.0
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -251,7 +251,7 @@ You will find more settings about real IP in the [settings section](settings.md#
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.0-rc4
+          image: bunkerity/bunkerweb:1.6.0
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -351,7 +351,7 @@ Some integrations provide more convenient ways to apply configurations, such as 
     ```yaml
     ...
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.0-rc4
+      image: bunkerity/bunkerweb-scheduler:1.6.0
       environment:
         - |
           CUSTOM_CONF_SERVER_HTTP_hello-world=
@@ -394,7 +394,7 @@ Some integrations provide more convenient ways to apply configurations, such as 
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.0-rc4
+      image: bunkerity/bunkerweb-scheduler:1.6.0
       volumes:
         - ./bw-data:/data
       ...
@@ -464,7 +464,7 @@ Some integrations provide more convenient ways to apply configurations, such as 
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.0-rc4
+      image: bunkerity/bunkerweb-scheduler:1.6.0
       volumes:
         - ./bw-data:/data
       ...
@@ -660,7 +660,7 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.0-rc4
+        image: bunkerity/bunkerweb:1.6.0
         ports:
           - "80:8080" # Keep it if you want to use Let's Encrypt automation when using http challenge type
           - "10000:10000" # app1
@@ -675,7 +675,7 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.0-rc4
+        image: bunkerity/bunkerweb-scheduler:1.6.0
         volumes:
           - bw-data:/data
         environment:
@@ -726,7 +726,7 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.0-rc4
+        image: bunkerity/bunkerweb:1.6.0
         ports:
           - "80:8080" # Keep it if you want to use Let's Encrypt automation when using http challenge type
           - "10000:10000" # app1
@@ -780,7 +780,7 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.0-rc4
+        image: bunkerity/bunkerweb:1.6.0
         ports:
           # Keep it if you want to use Let's Encrypt automation when using http challenge type
           - published: 80
@@ -1073,7 +1073,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.0-rc4
+        image: bunkerity/bunkerweb:1.6.0
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1088,7 +1088,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.0-rc4
+        image: bunkerity/bunkerweb-scheduler:1.6.0
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "bunkerweb" # This setting is mandatory to specify the BunkerWeb instance
@@ -1182,7 +1182,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.0-rc4
+        image: bunkerity/bunkerweb:1.6.0
         labels:
           - "bunkerweb.INSTANCE=yes"
         environment:
@@ -1195,7 +1195,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.0-rc4
+        image: bunkerity/bunkerweb-scheduler:1.6.0
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "" # We don't need to specify the BunkerWeb instance here as they are automatically detected by the autoconf service
@@ -1210,7 +1210,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.0-rc4
+        image: bunkerity/bunkerweb-autoconf:1.6.0
         depends_on:
           - bunkerweb
           - bw-docker
@@ -1360,7 +1360,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.0-rc4
+        image: bunkerity/bunkerweb:1.6.0
         volumes:
           - /shared/www:/var/www/html
     ...
@@ -1547,7 +1547,7 @@ By default, BunkerWeb will only listen on IPv4 addresses and won't use IPv6 for 
     ```yaml
     services:
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.0-rc4
+        image: bunkerity/bunkerweb-scheduler:1.6.0
         environment:
           USE_IPv6: "yes"
 
@@ -2114,7 +2114,7 @@ This BunkerWeb plugin acts as a [CrowdSec](https://crowdsec.net/) bouncer. It wi
     ```yaml
     services:
         bunkerweb:
-            image: bunkerity/bunkerweb:1.6.0-rc4
+            image: bunkerity/bunkerweb:1.6.0
             ports:
               - "80:8080"
               - "443:8443"
@@ -2131,7 +2131,7 @@ This BunkerWeb plugin acts as a [CrowdSec](https://crowdsec.net/) bouncer. It wi
                     syslog-address: "udp://10.10.10.254:514"
 
         bw-scheduler:
-            image: bunkerity/bunkerweb-scheduler:1.6.0-rc4
+            image: bunkerity/bunkerweb-scheduler:1.6.0
             depends_on:
               - bunkerweb
             environment:
@@ -2695,7 +2695,7 @@ Here is the list of related settings :
 
 For more advanced authentication methods, such as Single Sign-On (SSO), you can leverage the **auth request settings**. This allows integration with external authentication systems by using subrequest-based authentication. For detailed information about this feature, refer to the [NGINX documentation](https://docs.nginx.com/nginx/admin-guide/security-controls/configuring-subrequest-authentication/).
 
-To help you get started, the [BunkerWeb repository](https://github.com/bunkerity/bunkerweb/tree/v1.6.0-rc4/examples) includes examples for popular authentication solutions like [Authelia](https://www.authelia.com/) and [Authentik](https://goauthentik.io/). These examples demonstrate how to integrate these tools seamlessly with your deployment.
+To help you get started, the [BunkerWeb repository](https://github.com/bunkerity/bunkerweb/tree/v1.6.0/examples) includes examples for popular authentication solutions like [Authelia](https://www.authelia.com/) and [Authentik](https://goauthentik.io/). These examples demonstrate how to integrate these tools seamlessly with your deployment.
 
 **Auth request settings are related to reverse proxy rules.**
 
