@@ -346,7 +346,7 @@ In other words, the new system is fully agnostic and generic: the scheduler is i
 
     **The instances will be automatically fetched by the controller**. You can also add custom instances to the list that may not be picked up by the controller.
 
-Since the `1.6`, the Scheduler also have a new [built-in healthcheck system](concepts.md#instances-healthcheck), that will check the health of the instances. If an instance becomes unhealthy, the scheduler will stop sending the configuration to it. If the instance becomes healthy again, the scheduler will start sending the configuration to it again.
+Since the `1.6`, the Scheduler also have a new [built-in healthcheck system](concepts.md), that will check the health of the instances. If an instance becomes unhealthy, the scheduler will stop sending the configuration to it. If the instance becomes healthy again, the scheduler will start sending the configuration to it again.
 
 #### BunkerWeb container
 

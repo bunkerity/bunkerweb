@@ -1545,7 +1545,7 @@ The web UI can be deployed and configured without going through the setup wizard
 === "Swarm"
 
     !!! warning "Deprecated"
-        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Docker autoconf integration](#__tabbed_3_2) instead.
+        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Kubernetes integration](integrations.md#kubernetes) instead.
 
         **More information can be found in the [Swarm integration documentation](integrations.md#swarm).**
 

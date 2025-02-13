@@ -353,7 +353,7 @@ Please ensure that you have **NGINX 1.26.3 installed before installing BunkerWeb
         ```
 
     !!! example "Disable the setup wizard"
-        If you don't want to use the automatically enabled [setup wizard](web-ui.md#setup-wizard) when BunkerWeb is installed, export the following variable :
+        If you don't want to use the setup wizard of the web UI when BunkerWeb is installed, export the following variable :
 
         ```shell
         export UI_WIZARD=no
@@ -401,7 +401,7 @@ Please ensure that you have **NGINX 1.26.3 installed before installing BunkerWeb
         ```
 
     !!! example "Disable the setup wizard"
-        If you don't want to use the automatically enabled [setup wizard](web-ui.md#setup-wizard) when BunkerWeb is installed, export the following variable :
+        If you don't want to use the setup wizard of the web UI when BunkerWeb is installed, export the following variable :
 
         ```shell
         export UI_WIZARD=no
@@ -442,7 +442,7 @@ Please ensure that you have **NGINX 1.26.3 installed before installing BunkerWeb
     ```
 
     !!! example "Disable the setup wizard"
-        If you don't want to use the automatically enabled [setup wizard](web-ui.md#setup-wizard) when BunkerWeb is installed, export the following variable :
+        If you don't want to use the setup wizard of the web UI when BunkerWeb is installed, export the following variable :
 
         ```shell
         export UI_WIZARD=no
@@ -492,7 +492,7 @@ Please ensure that you have **NGINX 1.26.3 installed before installing BunkerWeb
     ```
 
     !!! example "Disable the setup wizard"
-        If you don't want to use the automatically enabled [setup wizard](web-ui.md#setup-wizard) when BunkerWeb is installed, export the following variable :
+        If you don't want to use the setup wizard of the web UI when BunkerWeb is installed, export the following variable :
 
         ```shell
         export UI_WIZARD=no
