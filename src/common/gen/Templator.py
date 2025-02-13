@@ -77,12 +77,12 @@ class Templator:
 
     def render(self) -> None:
         """Render the templates based on the provided configuration."""
+        self._render_global()
         servers = [self._config.get("SERVER_NAME", "").strip()]
         if self._config.get("MULTISITE", "no") == "yes":
             servers = self._config.get("SERVER_NAME", "").strip().split(" ")
         for server in servers:
             self._render_server(server)
-        self._render_global()
 
     def _load_jinja_env(self) -> Environment:
         """Load the Jinja2 environment with the appropriate search paths.
@@ -198,6 +198,10 @@ class Templator:
             name = basename(template) if any(template.endswith(root_conf) for root_conf in global_templates_set) else None
             template_info.append((template, name))
 
+        # Separate templates into two groups
+        priority_templates = [info for info in template_info if any(info[0].startswith(prefix) for prefix in ["modsec", "modsec-crs", "crs-plugins-before", "crs-plugins-after"])]
+        other_templates = [info for info in template_info if info not in priority_templates]
+
         # Step 4: Define the rendering function
         def render_template(info):
             template, name = info
@@ -206,7 +210,10 @@ class Templator:
         # Step 5: Use ThreadPoolExecutor with optimized settings
         max_workers = min(32, len(template_info))  # Example: Limit to 32 or number of templates
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
-            executor.map(render_template, template_info)
+            # First, render priority templates
+            executor.map(render_template, priority_templates)
+            # Then, render other templates
+            executor.map(render_template, other_templates)
 
     def _render_template(
         self,
