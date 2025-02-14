@@ -56,13 +56,18 @@ $(document).ready(function () {
         if (textStatus === "timeout") {
           console.warn("Request timed out.");
         } else if (textStatus === "parsererror") {
-          const redirectUrl =
-            jqXHR.getResponseHeader("Location") || nextEndpoint;
-          const finalUrl = new URL(redirectUrl, window.location.origin);
-          if (window.location.hash) {
-            finalUrl.hash = window.location.hash;
+          if (
+            !$targetEndpoint.length &&
+            !window.location.pathname.includes("/setup/loading")
+          ) {
+            const redirectUrl =
+              jqXHR.getResponseHeader("Location") || nextEndpoint;
+            const finalUrl = new URL(redirectUrl, window.location.origin);
+            if (window.location.hash) {
+              finalUrl.hash = window.location.hash;
+            }
+            window.location.href = finalUrl.href;
           }
-          window.location.href = finalUrl.href;
         } else {
           console.error(
             "AJAX request failed:",

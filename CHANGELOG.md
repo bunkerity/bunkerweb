@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.6.0 - ????/??/??
+## v1.6.0 - 2025/02/13
 
 - [BUGFIX] Fix CRS plugins not being included correctly in ModSecurity configuration
 - [FEATURE] Add mCaptcha antibot mode
