@@ -75,7 +75,7 @@ def login_page():
                 )
 
             # redirect him to the page he originally wanted or to the home page
-            next_url = request.args.getlist("next")[-1] if request.args.getlist("next") else url_for("home.home_page")
+            next_url = request.args.get("next", "").split("?next=")[-1] or url_for("home.home_page")
             return redirect(url_for("loading", next=next_url))
         else:
             flask_flash("Invalid username or password", "error")
