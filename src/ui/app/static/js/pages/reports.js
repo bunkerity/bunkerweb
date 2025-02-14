@@ -281,6 +281,7 @@ $(document).ready(function () {
     },
     topStart: {},
     topEnd: {
+      search: true,
       buttons: [
         {
           extend: "auto_refresh",
@@ -291,7 +292,6 @@ $(document).ready(function () {
           className: "btn btn-sm btn-outline-primary toggle-filters",
         },
       ],
-      search: true,
     },
     bottomStart: {
       pageLength: {

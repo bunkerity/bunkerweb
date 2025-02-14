@@ -95,13 +95,13 @@ $(function () {
     },
     topStart: {},
     topEnd: {
+      search: true,
       buttons: [
         {
           extend: "toggle_filters",
           className: "btn btn-sm btn-outline-primary toggle-filters",
         },
       ],
-      search: true,
     },
     bottomStart: {
       info: true,

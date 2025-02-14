@@ -36,6 +36,9 @@ function initializeDataTable(config) {
     .attr("data-bs-placement", "top")
     .tooltip();
 
+  $(".dt-search label").addClass("visually-hidden");
+  $(".dt-search input[type=search]").attr("placeholder", "Search");
+
   $(tableSelector).removeClass("d-none");
   $(`#${tableName}-waiting`).addClass("visually-hidden");
 
