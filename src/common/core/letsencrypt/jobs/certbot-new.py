@@ -22,6 +22,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 from pydantic import ValidationError
 from letsencrypt import (
     CloudflareProvider,
+    DesecProvider,
     DigitalOceanProvider,
     DnsimpleProvider,
     DnsMadeEasyProvider,
@@ -115,9 +116,9 @@ def certbot_new(
             command.extend([f"--dns-{provider}-credentials", credentials_path.as_posix()])
 
         # * Adding plugin argument
-        if provider == "scaleway":
-            # ? Scaleway plugin uses different arguments
-            command.extend(["--authenticator", "dns-scaleway"])
+        if provider in ("desec", "scaleway"):
+            # ? Desec and Scaleway plugin uses different arguments
+            command.extend(["--authenticator", f"dns-{provider}"])
         else:
             command.append(f"--dns-{provider}")
     elif challenge_type == "http":
@@ -201,6 +202,7 @@ try:
             str,
             Union[
                 Type[CloudflareProvider],
+                Type[DesecProvider],
                 Type[DigitalOceanProvider],
                 Type[DnsimpleProvider],
                 Type[DnsMadeEasyProvider],
@@ -217,6 +219,7 @@ try:
             ],
         ] = {
             "cloudflare": CloudflareProvider,
+            "desec": DesecProvider,
             "digitalocean": DigitalOceanProvider,
             "dnsimple": DnsimpleProvider,
             "dnsmadeeasy": DnsMadeEasyProvider,
