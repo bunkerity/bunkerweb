@@ -44,6 +44,7 @@ RUN apk add --no-cache bash tzdata && \
 
 # Fix CVEs
 RUN apk add --no-cache "libssl3>=3.3.3-r0" "libcrypto3>=3.3.3-r0" # CVE-2024-12797
+RUN apk add --no-cache "musl>=1.2.5-r9" "musl-utils>=1.2.5-r9" # CVE-2025-26519
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 /usr/share/bunkerweb /usr/share/bunkerweb
