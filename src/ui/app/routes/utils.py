@@ -1,5 +1,4 @@
 from base64 import b64encode
-from copy import deepcopy
 from datetime import datetime
 from functools import wraps
 from io import BytesIO
@@ -217,102 +216,6 @@ def get_remain(seconds):
         time_parts[-1] = f"and {time_parts[-1]}"
 
     return " ".join(time_parts), term
-
-
-def get_service_data(page_name: str):
-
-    verify_data_in_form(
-        data={"csrf_token": None},
-        err_message=f"Missing csrf_token parameter on /{page_name}.",
-        redirect_url="services",
-    )
-
-    verify_data_in_form(
-        data={"operation": None},
-        err_message=f"Missing operation parameter on /{page_name}.",
-        redirect_url="services",
-    )
-
-    verify_data_in_form(
-        data={"operation": ("edit", "new", "delete")},
-        err_message="Invalid operation parameter on /{page_name}.",
-        redirect_url="services",
-    )
-
-    config = DB.get_config(methods=True, with_drafts=True)
-    # Check variables
-    variables = deepcopy(request.form.to_dict())
-    mode = variables.pop("mode", None)
-
-    del variables["csrf_token"]
-    operation = variables.pop("operation")
-
-    # Delete custom client variables
-    variables.pop("SECURITY_LEVEL", None)
-
-    # Get server name and old one
-    old_server_name = ""
-    if variables.get("OLD_SERVER_NAME"):
-        old_server_name = variables.get("OLD_SERVER_NAME", "")
-        del variables["OLD_SERVER_NAME"]
-
-    server_name = variables["SERVER_NAME"].split(" ")[0] if "SERVER_NAME" in variables else old_server_name
-
-    # Get draft if exists
-    was_draft = config.get(f"{server_name}_IS_DRAFT", {"value": "no"})["value"] == "yes"
-    is_draft = was_draft if not variables.get("is_draft") else variables.get("is_draft") == "yes"
-    if variables.get("is_draft"):
-        del variables["is_draft"]
-
-    is_draft_unchanged = is_draft == was_draft
-
-    # Get all variables starting with custom_config and delete them from variables
-    custom_configs = []
-    config_types = (
-        "http",
-        "stream",
-        "server-http",
-        "server-stream",
-        "default-server-http",
-        "default-server-stream",
-        "modsec",
-        "modsec-crs",
-        "crs-plugins-before",
-        "crs-plugins-after",
-    )
-
-    for variable in variables:
-        if variable.startswith("custom_config_"):
-            custom_configs.append(variable)
-            del variables[variable]
-
-    # custom_config variable format is custom_config_<type>_<filename>
-    # we want a list of dict with each dict containing type, filename, action and server name
-    # after getting all configs, we want to save them after the end of current service action
-    # to avoid create config for none existing service or in case editing server name
-    format_configs = []
-    for custom_config in custom_configs:
-        # first remove custom_config_ prefix
-        custom_config = custom_config.split("custom_config_")[1]
-        # then split the config into type, filename, action
-        custom_config = custom_config.split("_")
-        # check if the config is valid
-        if len(custom_config) == 2 and custom_config[0] in config_types:
-            format_configs.append({"type": custom_config[0], "filename": custom_config[1], "action": operation, "server_name": server_name})
-        else:
-            return handle_error(err_message=f"Invalid custom config {custom_config}", redirect_url="services", next=True)
-
-    # Edit check fields and remove already existing ones
-    for variable, value in variables.copy().items():
-        if (
-            variable in variables
-            and variable != "SERVER_NAME"
-            and value == config.get(f"{server_name}_{variable}" if request.form["operation"] == "edit" else variable, {"value": None})["value"]
-        ):
-            del variables[variable]
-
-    variables = BW_CONFIG.check_variables(variables, config)
-    return config, variables, format_configs, server_name, old_server_name, operation, is_draft, was_draft, is_draft_unchanged, mode
 
 
 def cors_required(f):
