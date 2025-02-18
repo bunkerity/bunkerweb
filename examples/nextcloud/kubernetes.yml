@@ -15,7 +15,7 @@ metadata:
     bunkerweb.io/www.example.com_LIMIT_REQ_URL_3: "/core/preview"
     bunkerweb.io/www.example.com_LIMIT_REQ_RATE_3: "5r/s"
     # This is a CRS plugin specific to Nextcloud
-    bunkerweb.io/www.example.com_MODSECURITY_CRS_PLUGIN_URLS: "https://github.com/coreruleset/nextcloud-rule-exclusions-plugin/archive/refs/tags/v1.2.0.tar.gz"
+    bunkerweb.io/www.example.com_MODSECURITY_CRS_PLUGINS: "nextcloud-rule-exclusions"
 spec:
   rules:
     - host: www.example.com
