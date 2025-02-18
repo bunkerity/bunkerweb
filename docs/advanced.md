@@ -2167,11 +2167,19 @@ This BunkerWeb plugin acts as a [CrowdSec](https://crowdsec.net/) bouncer. It wi
               - bw-plugins
 
         syslog:
-            image: balabit/syslog-ng:4.7.1 # For x86_64 architecture
-            # image: lscr.io/linuxserver/syslog-ng:4.7.1-r1-ls116 # For aarch64 architecture
+            image: balabit/syslog-ng:4.8.0
+            # image: lscr.io/linuxserver/syslog-ng:4.8.1-r1-ls147 # For aarch64 architecture
+            cap_add:
+              - NET_BIND_SERVICE  # Bind to low ports
+              - NET_BROADCAST  # Send broadcasts
+              - NET_RAW  # Use raw sockets
+              - DAC_READ_SEARCH  # Read files bypassing permissions
+              - DAC_OVERRIDE  # Override file permissions
+              - CHOWN  # Change ownership
+              - SYSLOG  # Write to system logs
             volumes:
-              - ./syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf # This is the syslog-ng configuration file created above
-              - bw-logs:/var/log
+              - bw-logs:/var/log/bunkerweb # This is the volume used to store the logs
+              - ./syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf # This is the syslog-ng configuration file
             networks:
                 bw-plugins:
                     ipv4_address: 10.10.10.254

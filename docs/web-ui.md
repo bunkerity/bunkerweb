@@ -870,8 +870,16 @@ To keep the logs accessible from the web UI, we recommend you to use a syslog se
           - bw-db
 
       bw-syslog:
-        image: balabit/syslog-ng:4.7.1
-        # image: lscr.io/linuxserver/syslog-ng:4.7.1-r1-ls116 # For aarch64 architecture
+        image: balabit/syslog-ng:4.8.0
+        # image: lscr.io/linuxserver/syslog-ng:4.8.1-r1-ls147 # For aarch64 architecture
+        cap_add:
+          - NET_BIND_SERVICE  # Bind to low ports
+          - NET_BROADCAST  # Send broadcasts
+          - NET_RAW  # Use raw sockets
+          - DAC_READ_SEARCH  # Read files bypassing permissions
+          - DAC_OVERRIDE  # Override file permissions
+          - CHOWN  # Change ownership
+          - SYSLOG  # Write to system logs
         volumes:
           - bw-logs:/var/log/bunkerweb # This is the volume used to store the logs
           - ./syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf # This is the syslog-ng configuration file
@@ -1016,8 +1024,16 @@ To keep the logs accessible from the web UI, we recommend you to use a syslog se
           - bw-docker
 
       bw-syslog:
-        image: balabit/syslog-ng:4.7.1
-        # image: lscr.io/linuxserver/syslog-ng:4.7.1-r1-ls116 # For aarch64 architecture
+        image: balabit/syslog-ng:4.8.0
+        # image: lscr.io/linuxserver/syslog-ng:4.8.1-r1-ls147 # For aarch64 architecture
+        cap_add:
+          - NET_BIND_SERVICE  # Bind to low ports
+          - NET_BROADCAST  # Send broadcasts
+          - NET_RAW  # Use raw sockets
+          - DAC_READ_SEARCH  # Read files bypassing permissions
+          - DAC_OVERRIDE  # Override file permissions
+          - CHOWN  # Change ownership
+          - SYSLOG  # Write to system logs
         volumes:
           - bw-logs:/var/log/bunkerweb # This is the volume used to store the logs
           - ./syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf # This is the syslog-ng configuration file
@@ -1050,7 +1066,7 @@ To keep the logs accessible from the web UI, we recommend you to use a syslog se
 Here is an example of a `syslog-ng.conf` file that you can use to forward the logs to a file :
 
 ```conf
-@version: 4.7
+@version: 4.8
 
 # Source configuration to receive logs from Docker containers
 source s_net {
