@@ -230,8 +230,13 @@ def setup_page():
         value for key, value in chain(db_config.items(), environ.items()) if key.startswith("LETS_ENCRYPT_DNS_CREDENTIAL_ITEM")
     ]
 
+    server_name = request.headers.get("Host", "").split(":")[0]
+    if not server_name:
+        server_name = "www.example.com"
+
     return render_template(
         "setup.html",
+        server_name=server_name,
         ui_user=admin_user,
         ui_reverse_proxy=ui_reverse_proxy,
         ui_reverse_proxy_url=ui_reverse_proxy_url,
