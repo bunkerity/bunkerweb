@@ -679,8 +679,6 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
 
       bw-scheduler:
         image: bunkerity/bunkerweb-scheduler:1.6.0
-        volumes:
-          - bw-data:/data
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "bunkerweb" # This setting is mandatory to specify the BunkerWeb instance
@@ -692,6 +690,8 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
           app1.example.com_LISTEN_STREAM_PORT: "10000"
           app2.example.com_REVERSE_PROXY_HOST: "myapp2:9000"
           app2.example.com_LISTEN_STREAM_PORT: "20000"
+        volumes:
+          - bw-storage:/data # This is used to persist the cache and other data like the backups
         restart: "unless-stopped"
         networks:
           - bw-universe
@@ -709,7 +709,7 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
           - bw-services
 
     volumes:
-      bw-data:
+      bw-storage:
 
     networks:
       bw-universe:
@@ -1102,7 +1102,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
           app2.example.com_REMOTE_PHP: "myapp2"
           app3.example.com_REMOTE_PHP: "myapp3"
         volumes:
-          - bw-data:/data
+          - bw-storage:/data # This is used to persist the cache and other data like the backups
         restart: "unless-stopped"
         networks:
           - bw-universe
@@ -1129,7 +1129,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
           - bw-services
 
     volumes:
-      bw-data:
+      bw-storage:
 
     networks:
       bw-universe:
@@ -1206,7 +1206,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
           MULTISITE: "yes" # Mandatory setting for autoconf
           DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Remember to set a stronger password for the database
         volumes:
-          - bw-data:/data # This is used to persist data like the backups
+          - bw-storage:/data # This is used to persist the cache and other data like the backups
         restart: "unless-stopped"
         networks:
           - bw-universe
@@ -1245,13 +1245,13 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
           MYSQL_USER: "bunkerweb"
           MYSQL_PASSWORD: "changeme" # Remember to set a stronger password for the database
         volumes:
-          - bw-db:/var/lib/mysql
+          - bw-data:/var/lib/mysql
         networks:
           - bw-docker
 
     volumes:
       bw-data:
-      bw-db:
+      bw-storage:
 
     networks:
       bw-universe:
@@ -2146,6 +2146,8 @@ This BunkerWeb plugin acts as a [CrowdSec](https://crowdsec.net/) bouncer. It wi
                 CROWDSEC_API: "http://crowdsec:8080" # This is the API URL of the CrowdSec instance
                 CROWDSEC_APPSEC_URL: "http://crowdsec:7422" # This is the AppSec Component URL of the CrowdSec instance, comment if you don't want to use it
                 CROWDSEC_API_KEY: "s3cr3tb0unc3rk3y" # This is the API key of the Bouncer, we recommend have a more complex key
+            volumes:
+              - bw-storage:/data # This is used to persist the cache and other data like the backups
             restart: "unless-stopped"
             networks:
               - bw-universe
@@ -2190,7 +2192,7 @@ This BunkerWeb plugin acts as a [CrowdSec](https://crowdsec.net/) bouncer. It wi
                 - subnet: 10.10.10.0/24
 
     volumes:
-        bw-data:
+        bw-storage:
         bw-logs:
         cs-data:
     ```

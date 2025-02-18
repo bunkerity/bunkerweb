@@ -124,7 +124,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
           API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24" # We mirror the API_WHITELIST_IP from the bunkerweb service
           UI_HOST: "http://bw-ui:7000" # Change it if needed
         volumes:
-          - bw-data:/data # This is used to persist the cache and other data like the backups
+          - bw-storage:/data # This is used to persist the cache and other data like the backups
         restart: "unless-stopped"
         networks:
           - bw-universe
@@ -148,14 +148,14 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
           MYSQL_USER: "bunkerweb"
           MYSQL_PASSWORD: "changeme" # Remember to set a stronger password for the database
         volumes:
-          - bw-db:/var/lib/mysql
+          - bw-data:/var/lib/mysql
         restart: "unless-stopped"
         networks:
           - bw-db
 
     volumes:
       bw-data:
-      bw-db:
+      bw-storage:
 
     networks:
       bw-universe:
@@ -213,7 +213,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
           MULTISITE: "yes"
           UI_HOST: "http://bw-ui:7000" # Change it if needed
         volumes:
-          - bw-data:/data # This is used to persist the cache and other data like the backups
+          - bw-storage:/data # This is used to persist the cache and other data like the backups
         restart: "unless-stopped"
         networks:
           - bw-universe
@@ -260,14 +260,14 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
           MYSQL_USER: "bunkerweb"
           MYSQL_PASSWORD: "changeme" # Remember to set a stronger password for the database
         volumes:
-          - bw-db:/var/lib/mysql
+          - bw-data:/var/lib/mysql
         restart: "unless-stopped"
         networks:
           - bw-db
 
     volumes:
       bw-data:
-      bw-db:
+      bw-storage:
 
     networks:
       bw-universe:
@@ -348,7 +348,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
           REDIS_HOST: "bw-redis"
           UI_HOST: "http://bw-ui:7000" # Change it if needed
         volumes:
-          - bw-data:/data # This is used to persist the cache and other data like the backups
+          - bw-storage:/data # This is used to persist the cache and other data like the backups
         restart: "unless-stopped"
         networks:
           - bw-universe
@@ -401,7 +401,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
           MYSQL_USER: "bunkerweb"
           MYSQL_PASSWORD: "changeme" # Remember to set a stronger password for the database
         volumes:
-          - bw-db:/var/lib/mysql
+          - bw-data:/var/lib/mysql
         restart: "unless-stopped"
         networks:
           - bw-db
@@ -412,8 +412,8 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
           - bw-universe
 
     volumes:
-      bw-db:
       bw-data:
+      bw-storage:
 
     networks:
       bw-universe:
@@ -821,16 +821,12 @@ To keep the logs accessible from the web UI, we recommend you to use a syslog se
           DISABLE_DEFAULT_SERVER: "yes"
           USE_CLIENT_CACHE: "yes"
           USE_GZIP: "yes"
-          www.example.com_USE_UI: "yes"
+          www.example.com_USE_TEMPLATE: "ui"
           www.example.com_USE_REVERSE_PROXY: "yes"
           www.example.com_REVERSE_PROXY_URL: "/changeme" # Change it to a hard to guess URI
           www.example.com_REVERSE_PROXY_HOST: "http://bw-ui:7000"
-          www.example.com_INTERCEPTED_ERROR_CODES: "400 404 405 413 429 500 501 502 503 504"
-          www.example.com_GENERATE_SELF_SIGNED_SSL: "yes"
-          www.example.com_MAX_CLIENT_SIZE: "50m"
-          www.example.com_ALLOWED_METHODS: "GET|POST|PUT|DELETE"
         volumes:
-          - bw-data:/data # This is used to persist the cache and other data like the backups
+          - bw-storage:/data # This is used to persist the cache and other data like the backups
         restart: "unless-stopped"
         networks:
           - bw-universe
@@ -868,7 +864,7 @@ To keep the logs accessible from the web UI, we recommend you to use a syslog se
           MYSQL_USER: "bunkerweb"
           MYSQL_PASSWORD: "changeme" # Remember to set a stronger password for the database
         volumes:
-          - bw-db:/var/lib/mysql
+          - bw-data:/var/lib/mysql
         restart: "unless-stopped"
         networks:
           - bw-db
@@ -885,7 +881,7 @@ To keep the logs accessible from the web UI, we recommend you to use a syslog se
 
     volumes:
       bw-data:
-      bw-db:
+      bw-storage:
       bw-logs:
 
     networks:
@@ -940,7 +936,7 @@ To keep the logs accessible from the web UI, we recommend you to use a syslog se
           MULTISITE: "yes" # Mandatory setting for autoconf / ui
           API_WHITELIST_IP: "127.0.0.0/24 10.20.30.0/24"
         volumes:
-          - bw-data:/data # This is used to persist the cache and other data like the backups
+          - bw-storage:/data # This is used to persist the cache and other data like the backups
         restart: "unless-stopped"
         networks:
           - bw-universe
@@ -985,14 +981,10 @@ To keep the logs accessible from the web UI, we recommend you to use a syslog se
           - bw-db
         labels:
           - "bunkerweb.SERVER_NAME=www.example.com"
-          - "bunkerweb.USE_UI=yes"
+          - "bunkerweb.USE_TEMPLATE=ui"
           - "bunkerweb.USE_REVERSE_PROXY=yes"
           - "bunkerweb.REVERSE_PROXY_URL=/changeme" # Change it to a hard to guess URI
           - "bunkerweb.REVERSE_PROXY_HOST=http://bw-ui:7000"
-          - "bunkerweb.INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504"
-          - "bunkerweb.GENERATE_SELF_SIGNED_SSL=yes"
-          - "bunkerweb.MAX_CLIENT_SIZE=50m"
-          - "bunkerweb.ALLOWED_METHODS=GET|POST|PUT|DELETE"
         logging:
           driver: syslog
           options:
@@ -1007,7 +999,7 @@ To keep the logs accessible from the web UI, we recommend you to use a syslog se
           MYSQL_USER: "bunkerweb"
           MYSQL_PASSWORD: "changeme" # Remember to set a stronger password for the database
         volumes:
-          - bw-db:/var/lib/mysql
+          - bw-data:/var/lib/mysql
         restart: "unless-stopped"
         networks:
           - bw-db
@@ -1035,7 +1027,7 @@ To keep the logs accessible from the web UI, we recommend you to use a syslog se
 
     volumes:
       bw-data:
-      bw-db:
+      bw-storage:
       bw-logs:
 
     networks:
@@ -1251,14 +1243,10 @@ The web UI can be deployed and configured without going through the setup wizard
     API_LISTEN_IP=127.0.0.1
     SERVER_NAME=www.example.com
     MULTISITE=yes
-    www.example.com_USE_UI=yes
+    www.example.com_USE_TEMPLATE=ui
     www.example.com_USE_REVERSE_PROXY=yes
     www.example.com_REVERSE_PROXY_URL=/changeme
     www.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:7000
-    www.example.com_INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504
-    www.example.com_GENERATE_SELF_SIGNED_SSL=yes
-    www.example.com_MAX_CLIENT_SIZE=50m
-    www.example.com_ALLOWED_METHODS=GET|POST|PUT|DELETE
     ```
 
     Don't forget to reload the `bunkerweb` service:
@@ -1321,16 +1309,12 @@ The web UI can be deployed and configured without going through the setup wizard
           DISABLE_DEFAULT_SERVER: "yes"
           USE_CLIENT_CACHE: "yes"
           USE_GZIP: "yes"
-          www.example.com_USE_UI: "yes"
+          www.example.com_USE_TEMPLATE: "ui"
           www.example.com_USE_REVERSE_PROXY: "yes"
           www.example.com_REVERSE_PROXY_URL: "/changeme" # Remember to set a stronger URI
           www.example.com_REVERSE_PROXY_HOST: "http://bw-ui:7000" # The web UI container is listening on the 7000 port by default
-          www.example.com_INTERCEPTED_ERROR_CODES: "400 404 405 413 429 500 501 502 503 504"
-          www.example.com_GENERATE_SELF_SIGNED_SSL: "yes"
-          www.example.com_MAX_CLIENT_SIZE: "50m"
-          www.example.com_ALLOWED_METHODS: "GET|POST|PUT|DELETE"
         volumes:
-          - bw-data:/data # This is used to persist the cache and other data like the backups
+          - bw-storage:/data # This is used to persist the cache and other data like the backups
         networks:
           - bw-universe
           - bw-db
@@ -1354,13 +1338,13 @@ The web UI can be deployed and configured without going through the setup wizard
           MYSQL_USER: "bunkerweb"
           MYSQL_PASSWORD: "changeme" # Remember to set a stronger password for the database
         volumes:
-          - bw-db:/var/lib/mysql
+          - bw-data:/var/lib/mysql
         networks:
           - bw-db
 
     volumes:
       bw-data:
-      bw-db:
+      bw-storage:
 
     networks:
       bw-universe:
@@ -1434,7 +1418,7 @@ The web UI can be deployed and configured without going through the setup wizard
           API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
           MULTISITE: "yes"
         volumes:
-          - bw-data:/data # This is used to persist the cache and other data like the backups
+          - bw-storage:/data # This is used to persist the cache and other data like the backups
         networks:
           - bw-universe
           - bw-db
@@ -1469,7 +1453,7 @@ The web UI can be deployed and configured without going through the setup wizard
           MYSQL_USER: "bunkerweb"
           MYSQL_PASSWORD: "changeme" # Remember to set a stronger password for the database
         volumes:
-          - bw-db:/var/lib/mysql
+          - bw-data:/var/lib/mysql
         networks:
           - bw-db
 
@@ -1482,21 +1466,17 @@ The web UI can be deployed and configured without going through the setup wizard
           TOTP_SECRETS: "mysecret" # Remember to set a stronger secret key (see the Prerequisites section)
         labels:
           - "bunkerweb.SERVER_NAME=www.example.com"
-          - "bunkerweb.USE_UI=yes"
+          - "bunkerweb.USE_TEMPLATE=ui"
           - "bunkerweb.USE_REVERSE_PROXY=yes"
           - "bunkerweb.REVERSE_PROXY_URL=/changeme"
           - "bunkerweb.REVERSE_PROXY_HOST=http://bw-ui:7000"
-          - "bunkerweb.INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504"
-          - "bunkerweb.GENERATE_SELF_SIGNED_SSL=yes"
-          - "bunkerweb.MAX_CLIENT_SIZE=50m"
-          - "bunkerweb.ALLOWED_METHODS=GET|POST|PUT|DELETE"
         networks:
           - bw-universe
           - bw-db
 
     volumes:
       bw-data:
-      bw-db:
+      bw-storage:
 
     networks:
       bw-universe:
@@ -1618,7 +1598,7 @@ The web UI can be deployed and configured without going through the setup wizard
           USE_REDIS: "yes"
           REDIS_HOST: "bw-redis"
         volumes:
-          - bw-data:/data # This is used to persist the cache and other data like the backups
+          - bw-storage:/data # This is used to persist the cache and other data like the backups
         networks:
           - bw-universe
           - bw-db
@@ -1659,7 +1639,7 @@ The web UI can be deployed and configured without going through the setup wizard
           MYSQL_USER: "bunkerweb"
           MYSQL_PASSWORD: "changeme" # Remember to set a stronger password for the database
         volumes:
-          - bw-db:/var/lib/mysql
+          - bw-data:/var/lib/mysql
         networks:
           - bw-db
 
@@ -1681,19 +1661,14 @@ The web UI can be deployed and configured without going through the setup wizard
         deploy:
           labels:
             - "bunkerweb.SERVER_NAME=www.example.com"
-            - "bunkerweb.USE_UI=yes"
+            - "bunkerweb.USE_TEMPLATE=ui"
             - "bunkerweb.USE_REVERSE_PROXY=yes"
             - "bunkerweb.REVERSE_PROXY_URL=/changeme"
             - "bunkerweb.REVERSE_PROXY_HOST=http://bw-ui:7000"
-            - "bunkerweb.REVERSE_PROXY_INTERCEPT_ERRORS=no"
-            - "bunkerweb.INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504"
-            - "bunkerweb.GENERATE_SELF_SIGNED_SSL=yes"
-            - "bunkerweb.MAX_CLIENT_SIZE=50m"
-            - "bunkerweb.ALLOWED_METHODS=GET|POST|PUT|DELETE"
 
     volumes:
-      bw-db:
       bw-data:
+      bw-storage:
 
     networks:
       bw-universe:

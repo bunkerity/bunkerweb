@@ -8,9 +8,9 @@
 
     **System requirements**
 
-    The minimum recommended specifications for BunkerWeb are a machine with 2 (v)CPUs and 4 GB of RAM. Please note that this should be sufficient for testing environments or setups with very few services.  
+    The minimum recommended specifications for BunkerWeb are a machine with 2 (v)CPUs and 4 GB of RAM. Please note that this should be sufficient for testing environments or setups with very few services.
 
-    For production environments with many services to protect, we recommend at least 4 (v)CPUs and 16 GB of RAM. Resources should be adjusted based on your use case, network traffic, and potential DDoS attacks you may face.  
+    For production environments with many services to protect, we recommend at least 4 (v)CPUs and 16 GB of RAM. Resources should be adjusted based on your use case, network traffic, and potential DDoS attacks you may face.
 
     It is highly recommended to enable global loading of CRS rules (by setting the `USE_MODSECURITY_GLOBAL_CRS` parameter to `yes`) if you are in environments with limited RAM or in production with many services. More details can be found in the [advanced usages](advanced.md#running-many-services-in-production) section of the documentation.
 
@@ -221,7 +221,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.0/exa
           MULTISITE: "yes"
           UI_HOST: "http://bw-ui:7000" # Change it if needed
         volumes:
-          - bw-data:/data # This is used to persist the cache and other data like the backups
+          - bw-storage:/data # This is used to persist the cache and other data like the backups
         restart: "unless-stopped"
         networks:
           - bw-universe
@@ -244,15 +244,14 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.0/exa
           MYSQL_USER: "bunkerweb"
           MYSQL_PASSWORD: "changeme" # Remember to set a stronger password for the database
         volumes:
-          - bw-db:/var/lib/mysql
+          - bw-data:/var/lib/mysql
         restart: "unless-stopped"
         networks:
           - bw-db
 
     volumes:
       bw-data:
-      bw-db:
-
+      bw-storage:
 
     networks:
       bw-universe:
@@ -304,7 +303,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.0/exa
           MULTISITE: "yes"
           UI_HOST: "http://bw-ui:7000" # Change it if needed
         volumes:
-          - bw-data:/data # This is used to persist the cache and other data like the backups
+          - bw-storage:/data # This is used to persist the cache and other data like the backups
         restart: "unless-stopped"
         networks:
           - bw-universe
@@ -351,14 +350,14 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.0/exa
           MYSQL_USER: "bunkerweb"
           MYSQL_PASSWORD: "changeme" # Remember to set a stronger password for the database
         volumes:
-          - bw-db:/var/lib/mysql
+          - bw-data:/var/lib/mysql
         restart: "unless-stopped"
         networks:
           - bw-db
 
     volumes:
       bw-data:
-      bw-db:
+      bw-storage:
 
     networks:
       bw-universe:
@@ -453,7 +452,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.0/exa
           REDIS_HOST: "bw-redis"
           UI_HOST: "http://bw-ui:7000" # Change it if needed
         volumes:
-          - bw-data:/data # This is used to persist the cache and other data like the backups
+          - bw-storage:/data # This is used to persist the cache and other data like the backups
         restart: "unless-stopped"
         networks:
           - bw-universe
@@ -506,7 +505,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.0/exa
           MYSQL_USER: "bunkerweb"
           MYSQL_PASSWORD: "changeme" # Remember to set a stronger password for the database
         volumes:
-          - bw-db:/var/lib/mysql
+          - bw-data:/var/lib/mysql
         restart: "unless-stopped"
         networks:
           - bw-db
@@ -517,8 +516,8 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.0/exa
           - bw-universe
 
     volumes:
-      bw-db:
       bw-data:
+      bw-storage:
 
     networks:
       bw-universe:

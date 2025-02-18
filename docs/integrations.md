@@ -73,6 +73,8 @@ services:
     environment:
       - MY_SETTING=value
       - ANOTHER_SETTING=another value
+    volumes:
+      - bw-storage:/data # This is used to persist the cache and other data like the backups
 ...
 ```
 
@@ -116,6 +118,8 @@ docker pull bunkerity/bunkerweb-scheduler:1.6.0
         environment:
           # This will set the API settings for the Scheduler container
           <<: *bw-api-env
+        volumes:
+          - bw-storage:/data # This is used to persist the cache and other data like the backups
         restart: "unless-stopped"
         networks:
           - bw-universe
@@ -123,7 +127,7 @@ docker pull bunkerity/bunkerweb-scheduler:1.6.0
     ```
 
 
-A volume is needed to store the SQLite database that will be used by the scheduler :
+A volume is needed to store the SQLite database and the backups that will be used by the scheduler :
 
 ```yaml
 ...
@@ -131,10 +135,10 @@ services:
   bw-scheduler:
     image: bunkerity/bunkerweb-scheduler:1.6.0
     volumes:
-      - bw-data:/data
+      - bw-storage:/data
 ...
 volumes:
-  bw-data:
+  bw-storage:
 ```
 
 !!! warning "Using local folder for persistent data"
@@ -227,10 +231,15 @@ services:
     environment:
       <<: *bw-api-env
       BUNKERWEB_INSTANCES: "bunkerweb" # This setting is mandatory to specify the BunkerWeb instance
+    volumes:
+      - bw-storage:/data # This is used to persist the cache and other data like the backups
     restart: "unless-stopped"
     networks:
       - bw-universe
 ...
+volumes:
+  bw-storage:
+
 networks:
   bw-universe:
     name: bw-universe
@@ -272,13 +281,13 @@ services:
       BUNKERWEB_INSTANCES: "bunkerweb" # This setting is mandatory to specify the BunkerWeb instance
       SERVER_NAME: "www.example.com"
     volumes:
-      - bw-data:/data
+      - bw-storage:/data # This is used to persist the cache and other data like the backups
     restart: "unless-stopped"
     networks:
       - bw-universe
 
 volumes:
-  bw-data:
+  bw-storage:
 
 networks:
   bw-universe:
@@ -634,7 +643,7 @@ services:
       MULTISITE: "yes" # Mandatory setting for autoconf
       DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Remember to set a stronger password for the database
     volumes:
-      - bw-data:/data # This is used to persist data like the backups
+      - bw-storage:/data # This is used to persist the cache and other data like the backups
     restart: "unless-stopped"
     networks:
       - bw-universe
@@ -674,14 +683,14 @@ services:
       MYSQL_USER: "bunkerweb"
       MYSQL_PASSWORD: "changeme" # Remember to set a stronger password for the database
     volumes:
-      - bw-db:/var/lib/mysql
+      - bw-data:/var/lib/mysql
     restart: "unless-stopped"
     networks:
       - bw-db
 
 volumes:
   bw-data:
-  bw-db:
+  bw-storage:
 
 networks:
   bw-universe:
@@ -1305,7 +1314,7 @@ services:
       USE_REDIS: "yes"
       REDIS_HOST: "bw-redis"
     volumes:
-      - bw-data:/data # This is used to persist data like the backups
+      - bw-storage:/data # This is used to persist the cache and other data like the backups
     restart: "unless-stopped"
     networks:
       - bw-universe
@@ -1358,7 +1367,7 @@ services:
       MYSQL_USER: "bunkerweb"
       MYSQL_PASSWORD: "changeme" # Remember to set a stronger password for the database
     volumes:
-      - bw-db:/var/lib/mysql
+      - bw-data:/var/lib/mysql
     restart: "unless-stopped"
     networks:
       - bw-db
@@ -1379,7 +1388,7 @@ services:
 
 volumes:
   bw-data:
-  bw-db:
+  bw-storage:
 
 networks:
   bw-universe:
