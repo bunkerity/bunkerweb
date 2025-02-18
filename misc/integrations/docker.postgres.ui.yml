@@ -20,7 +20,7 @@ services:
     depends_on:
       - bunkerweb
     volumes:
-      - bw-data:/data
+      - bw-storage:/data
     environment:
       <<: *env
       BUNKERWEB_INSTANCES: "bunkerweb"
@@ -60,13 +60,13 @@ services:
       POSTGRES_DB: "db"
       PGDATA: "/var/lib/postgresql/data/pgdata"
     volumes:
-      - bw-db:/var/lib/postgresql/data
+      - bw-data:/var/lib/postgresql/data
     networks:
       - bw-db
 
 volumes:
   bw-data:
-  bw-db:
+  bw-storage:
 
 networks:
   bw-universe:

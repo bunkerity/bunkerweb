@@ -21,7 +21,7 @@ services:
     depends_on:
       - bunkerweb
     volumes:
-      - bw-data:/data
+      - bw-storage:/data
     environment:
       <<: *env
       BUNKERWEB_INSTANCES: "bunkerweb"
@@ -61,13 +61,13 @@ services:
       MYSQL_USER: "bunkerweb"
       MYSQL_PASSWORD: "changeme" # Remember to set a stronger password for the database
     volumes:
-      - bw-db:/var/lib/mysql
+      - bw-data:/var/lib/mysql
     networks:
       - bw-db
 
 volumes:
   bw-data:
-  bw-db:
+  bw-storage:
 
 networks:
   bw-universe:

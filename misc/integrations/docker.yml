@@ -20,7 +20,7 @@ services:
     depends_on:
       - bunkerweb
     volumes:
-      - bw-data:/data
+      - bw-storage:/data
     environment:
       <<: *env
       BUNKERWEB_INSTANCES: "bunkerweb"
@@ -29,7 +29,7 @@ services:
       - bw-universe
 
 volumes:
-  bw-data:
+  bw-storage:
 
 networks:
   bw-universe:
