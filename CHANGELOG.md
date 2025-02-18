@@ -3,6 +3,7 @@
 ## v1.6.1-rc1 - ????/??/??
 
 - [FEATURE] Add `deSEC` DNS provider support in `letsencrypt` plugin
+- [UI] Enhance UX here and there
 
 ## v1.6.0 - 2025/02/13
 
