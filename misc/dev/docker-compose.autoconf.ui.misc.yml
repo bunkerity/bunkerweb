@@ -65,7 +65,7 @@ services:
     depends_on:
       - bunkerweb
     volumes:
-      - bw-data:/data
+      - bw-storage:/data
       - ./configs/server-http/hello.conf:/data/configs/server-http/hello.conf:ro
     environment:
       <<: *env
@@ -147,7 +147,7 @@ services:
       MYSQL_USER: "bunkerweb"
       MYSQL_PASSWORD: "secret"
     volumes:
-      - bw-db:/var/lib/mysql
+      - bw-data:/var/lib/mysql
     restart: "unless-stopped"
     networks:
       bw-db:
@@ -191,7 +191,7 @@ services:
 
 volumes:
   bw-data:
-  bw-db:
+  bw-storage:
   bw-logs:
 
 networks:
