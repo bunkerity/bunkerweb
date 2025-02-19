@@ -61,11 +61,6 @@ try:
 
     controller.wait_applying(True)
 
-    if not controller.apply_config():
-        LOGGER.error("Error while deploying initial configuration")
-    else:
-        LOGGER.info("Successfully deployed initial configuration 🚀")
-
     # Process events
     Path(sep, "var", "tmp", "bunkerweb", "autoconf.healthy").write_text("ok")
     LOGGER.info("Processing events ...")
