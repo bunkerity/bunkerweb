@@ -549,4 +549,9 @@ $(document).ready(() => {
   if (pluginsCollapse === "hide") {
     $("#pluginsCollapse").collapse("hide");
   }
+
+  $("#feedback-toast-container .bs-toast").each(function () {
+    const toast = new bootstrap.Toast(this);
+    toast.show();
+  });
 });
