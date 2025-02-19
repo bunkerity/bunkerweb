@@ -73,7 +73,7 @@ jobs:
         if: inputs.TYPE == 'k8s'
         with:
           version: "v1.29.1"
-      - uses: azure/setup-helm@fe7b79cd5ee1e45176fcad797de68ecaf3ca4814 # v4.2.0
+      - uses: azure/setup-helm@b9e51907a09c216f16ebe8536097933489208112 # v4.3.0
         if: inputs.TYPE == 'k8s'
       - name: Pull BW linux ubuntu test image
         if: inputs.TYPE == 'linux'

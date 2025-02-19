@@ -25,7 +25,7 @@ services:
     depends_on:
       - bunkerweb
     volumes:
-      - bw-data:/data
+      - bw-storage:/data
     environment:
       BUNKERWEB_INSTANCES: "bunkerweb"
       SERVER_NAME: "app1.example.com"
@@ -58,7 +58,7 @@ services:
           - app1
 
 volumes:
-  bw-data:
+  bw-storage:
 
 networks:
   bw-universe:

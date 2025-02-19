@@ -4,7 +4,7 @@ x-env: &env
 
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.0
+    image: bunkerity/bunkerweb:1.6.1-rc1
     ports:
       - 80:8080
       - 443:8443
@@ -17,11 +17,11 @@ services:
       - bw-services
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.0
+    image: bunkerity/bunkerweb-scheduler:1.6.1-rc1
     depends_on:
       - bunkerweb
     volumes:
-      - bw-data:/data
+      - bw-storage:/data
     environment:
       <<: *env
       BUNKERWEB_INSTANCES: "bunkerweb"
@@ -38,13 +38,13 @@ services:
       MYSQL_USER: "bunkerweb"
       MYSQL_PASSWORD: "changeme" # Remember to set a stronger password for the database
     volumes:
-      - bw-db:/var/lib/mysql
+      - bw-data:/var/lib/mysql
     networks:
       - bw-db
 
 volumes:
   bw-data:
-  bw-db:
+  bw-storage:
 
 networks:
   bw-universe:

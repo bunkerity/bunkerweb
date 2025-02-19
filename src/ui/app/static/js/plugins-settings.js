@@ -1057,11 +1057,11 @@ $(document).ready(() => {
     if ($serviceMethodInput.val() === "autoconf") {
       const feedbackToast = $("#feedback-toast").clone(); // Clone the feedback toast
       feedbackToast.attr("id", `feedback-toast-${toastNum++}`); // Corrected to set the ID for the failed toast
-      feedbackToast.find("span").text("The service method is autoconf.");
+      feedbackToast.find("span").text("Disclaimer");
       feedbackToast
         .find("div.toast-body")
         .html(
-          "<p>As the service method is set to autoconf, the configuration is locked. <div class='fw-bolder'>Any changes made will not be saved.</div><div class='fst-italic'>This is to prevent conflicts with the autoconf and the web UI.</div></p>",
+          "<div class='fw-bolder'>If the service is removed or restarted, your UI configuration will be lost.</div>This is because the service's method is 'autoconf', designed to prevent configuration conflicts.",
         );
       feedbackToast.attr("data-bs-autohide", "false");
       feedbackToast.appendTo("#feedback-toast-container"); // Ensure the toast is appended to the container

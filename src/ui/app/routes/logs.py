@@ -38,7 +38,7 @@ def logs_page():
     )
     page_num = 1
     if current_file:
-        with logs_path.joinpath(current_file).open(encoding="utf-8") as f:
+        with logs_path.joinpath(current_file).open(encoding="utf-8", errors="replace") as f:
             raw_logs = f.read().splitlines()
             page_num = len(raw_logs) // 10000 + 1
             if not page:

@@ -191,16 +191,10 @@
                 nonce="{{ script_nonce }}"></script>
         <script src="{{ url_for('static', filename='js/common.js') }}"
                 nonce="{{ script_nonce }}"></script>
-        {% if starting or current_endpoint in ("setup", "login", "totp", "loading") %}
-            <script src="{{ url_for('static', filename='js/pages/login.js') }}"
-                    nonce="{{ script_nonce }}"></script>
-        {% endif %}
-        {% if current_endpoint not in ("login", "totp") %}
-            <script async
-                    defer
-                    src="{{ url_for('static', filename='js/utils.js') }}"
-                    nonce="{{ script_nonce }}"></script>
-        {% endif %}
+        <script async
+                defer
+                src="{{ url_for('static', filename='js/utils.js') }}"
+                nonce="{{ script_nonce }}"></script>
         {% if current_endpoint == "global-config" or (current_endpoint != "services" and "services" in request.path) %}
             <script async
                     defer

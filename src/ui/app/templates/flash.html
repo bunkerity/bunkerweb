@@ -6,29 +6,34 @@
             {% if messages.append(('error', 'You have more services than allowed by your pro license. Upgrade your license or move some services to draft mode to unlock your pro license.')) %}
             {% endif %}
         {% endif %}
+        {% set unique_messages = {} %}
         <!-- flash message-->
         {% for category, message in messages %}
-            <div class="bs-toast toast fade show bg-{% if theme == 'light' %}white{% else %}dark{% endif %} border{% if category == 'error' %} border-danger{% elif category == 'warning' %} border-warning{% else %} border-primary{% endif %}"
-                 role="alert"
-                 aria-live="assertive"
-                 aria-atomic="true">
-                <div class="toast-header d-flex align-items-center{% if category == 'error' %} text-danger{% elif category == 'warning' %} text-warning{% else %} text-primary{% endif %}">
-                    <i class="d-block h-auto rounded tf-icons bx bx-xs bx-bell bx-tada me-2"></i>
-                    <span class="fw-medium me-auto">
-                        {% if category != 'message' %}
-                            {{ category|capitalize }}
-                        {% else %}
-                            Info
-                        {% endif %}
-                    </span>
-                    <small class="text-body-secondary">just now</small>
-                    <button type="button"
-                            class="btn-close"
-                            data-bs-dismiss="toast"
-                            aria-label="Close"></button>
+            {% if message not in unique_messages %}
+                {% if unique_messages.update({message: True}) %}{% endif %}
+                <div class="bs-toast toast fade show bg-{% if theme == 'light' %}white{% else %}dark{% endif %} border{% if category == 'error' %} border-danger{% elif category == 'warning' %} border-warning{% else %} border-primary{% endif %}"
+                     role="alert"
+                     aria-live="assertive"
+                     aria-atomic="true"
+                     {% if category == 'message' %}data-delay="5000" data-autohide="true"{% endif %}>
+                    <div class="toast-header d-flex align-items-center{% if category == 'error' %} text-danger{% elif category == 'warning' %} text-warning{% else %} text-primary{% endif %}">
+                        <i class="d-block h-auto rounded tf-icons bx bx-xs bx-bell bx-tada me-2"></i>
+                        <span class="fw-medium me-auto">
+                            {% if category != 'message' %}
+                                {{ category|capitalize }}
+                            {% else %}
+                                Info
+                            {% endif %}
+                        </span>
+                        <small class="text-body-secondary">just now</small>
+                        <button type="button"
+                                class="btn-close"
+                                data-bs-dismiss="toast"
+                                aria-label="Close"></button>
+                    </div>
+                    <div class="toast-body">{{ message|safe }}</div>
                 </div>
-                <div class="toast-body">{{ message|safe }}</div>
-            </div>
+            {% endif %}
         {% endfor %}
         <!-- end flash message-->
     {% endwith %}

@@ -56,6 +56,18 @@ class CloudflareProvider(Provider):
     )
 
 
+class DesecProvider(Provider):
+    """deSEC DNS provider."""
+
+    dns_desec_token: str
+
+    _validate_aliases = alias_model_validator(
+        {
+            "dns_desec_token": ("dns_desec_token", "desec_token", "token"),
+        }
+    )
+
+
 class DigitalOceanProvider(Provider):
     """DigitalOcean DNS provider."""
 

@@ -195,17 +195,10 @@ def setup_page():
                             "CUSTOM_SSL_KEY_DATA": request.form.get("custom_ssl_key_data", ""),
                         }
                     )
-                else:
-                    config.update(
-                        {
-                            "USE_CUSTOM_SSL": "yes",
-                            "CUSTOM_SSL_CERT": "/var/cache/bunkerweb/misc/default-server-cert.pem",
-                            "CUSTOM_SSL_KEY": "/var/cache/bunkerweb/misc/default-server-cert.key",
-                        }
-                    )
 
             if not config.get("MULTISITE", "no") == "yes":
-                BW_CONFIG.edit_global_conf({"MULTISITE": "yes"}, check_changes=False)
+                global_config = DB.get_config(global_only=True)
+                BW_CONFIG.edit_global_conf(global_config | {"MULTISITE": "yes"}, check_changes=False)
 
             LOGGER.debug(f"Creating new service with base_config: {base_config} and config: {config}")
 
@@ -230,8 +223,14 @@ def setup_page():
         value for key, value in chain(db_config.items(), environ.items()) if key.startswith("LETS_ENCRYPT_DNS_CREDENTIAL_ITEM")
     ]
 
+    server_name = request.headers.get("Host", "").split(":")[0]
+    if not server_name:
+        server_name = "www.example.com"
+
     return render_template(
         "setup.html",
+        plugins_settings=BW_CONFIG.get_plugins_settings(),
+        server_name=server_name,
         ui_user=admin_user,
         ui_reverse_proxy=ui_reverse_proxy,
         ui_reverse_proxy_url=ui_reverse_proxy_url,

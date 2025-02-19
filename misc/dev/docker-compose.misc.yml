@@ -25,7 +25,7 @@ services:
     depends_on:
       - bunkerweb
     volumes:
-      - bw-data:/data
+      - bw-storage:/data
       - ./configs/server-http/hello.conf:/data/configs/server-http/hello.conf:ro
     environment:
       BUNKERWEB_INSTANCES: "bunkerweb"
@@ -61,7 +61,7 @@ services:
           - app1
 
 volumes:
-  bw-data:
+  bw-storage:
 
 networks:
   bw-universe:

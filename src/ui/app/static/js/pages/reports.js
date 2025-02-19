@@ -1,6 +1,35 @@
 $(document).ready(function () {
   const baseFlagsUrl = $("#base_flags_url").val().trim();
 
+  const headers = [
+    {
+      title: "Date",
+      tooltip: "The date and time when the Report was created",
+    },
+    { title: "IP Address", tooltip: "The reported IP address" },
+    {
+      title: "Country",
+      tooltip: "The country of the reported IP address",
+    },
+    { title: "Method", tooltip: "The method used by the attacker" },
+    {
+      title: "URL",
+      tooltip: "The URL that was targeted by the attacker",
+    },
+    {
+      title: "Status Code",
+      tooltip: "The HTTP status code returned by BunkerWeb",
+    },
+    { title: "User-Agent", tooltip: "The User-Agent of the attacker" },
+    { title: "Reason", tooltip: "The reason why the Report was created" },
+    {
+      title: "Server name",
+      tooltip: "The Server name that created the report",
+    },
+    { title: "Data", tooltip: "Additional data about the Report" },
+    { title: "Security mode", tooltip: "Security mode" },
+  ];
+
   const countriesDataNames = {
     ad: "Andorra",
     ae: "United Arab Emirates",
@@ -281,6 +310,7 @@ $(document).ready(function () {
     },
     topStart: {},
     topEnd: {
+      search: true,
       buttons: [
         {
           extend: "auto_refresh",
@@ -291,7 +321,6 @@ $(document).ready(function () {
           className: "btn btn-sm btn-outline-primary toggle-filters",
         },
       ],
-      search: true,
     },
     bottomStart: {
       pageLength: {
@@ -490,52 +519,42 @@ $(document).ready(function () {
         { data: "security_mode", title: "Security mode" },
       ],
       headerCallback: function (thead) {
-        const headers = [
-          {
-            title: "Date",
-            tooltip: "The date and time when the Report was created",
-          },
-          { title: "IP Address", tooltip: "The reported IP address" },
-          {
-            title: "Country",
-            tooltip: "The country of the reported IP address",
-          },
-          { title: "Method", tooltip: "The method used by the attacker" },
-          {
-            title: "URL",
-            tooltip: "The URL that was targeted by the attacker",
-          },
-          {
-            title: "Status Code",
-            tooltip: "The HTTP status code returned by BunkerWeb",
-          },
-          { title: "User-Agent", tooltip: "The User-Agent of the attacker" },
-          { title: "Reason", tooltip: "The reason why the Report was created" },
-          {
-            title: "Server name",
-            tooltip: "The Server name that created the report",
-          },
-          { title: "Data", tooltip: "Additional data about the Report" },
-          { title: "Security mode", tooltip: "Security mode" },
-        ];
-
-        $(thead)
-          .find("th")
-          .each((index, element) => {
-            const header = headers[index - 1];
-            if (header) {
-              $(element).attr({
-                "data-bs-toggle": "tooltip",
-                "data-bs-placement": "bottom",
-                title: header.tooltip,
-              });
-            }
-          });
-
-        $('[data-bs-toggle="tooltip"]').tooltip();
+        updateHeaderTooltips(thead, headers);
       },
     },
   });
+
+  // Update tooltips when column visibility changes
+  reports_table.on("column-visibility.dt", function () {
+    updateHeaderTooltips("#reports thead", headers);
+  });
+
+  // Utility function to manage header tooltips
+  function updateHeaderTooltips(selector, headers) {
+    $(selector)
+      .find("th")
+      .each((index, element) => {
+        const thText = $(element).text().trim();
+        headers.forEach((header) => {
+          if (thText === header.title) {
+            $(element).attr({
+              "data-bs-toggle": "tooltip",
+              "data-bs-placement": "bottom",
+              title: header.tooltip,
+            });
+          }
+        });
+      });
+
+    // Clean up and reinitialize tooltips
+    $('[data-bs-toggle="tooltip"]').each(function () {
+      const instance = bootstrap.Tooltip.getInstance(this);
+      if (instance) {
+        instance.dispose();
+      }
+    });
+    $('[data-bs-toggle="tooltip"]').tooltip();
+  }
 
   if (sessionAutoRefresh === "true") {
     toggleAutoRefresh();

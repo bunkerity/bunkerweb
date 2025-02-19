@@ -8,9 +8,9 @@
 
     **System requirements**
 
-    The minimum recommended specifications for BunkerWeb are a machine with 2 (v)CPUs and 4 GB of RAM. Please note that this should be sufficient for testing environments or setups with very few services.  
+    The minimum recommended specifications for BunkerWeb are a machine with 2 (v)CPUs and 4 GB of RAM. Please note that this should be sufficient for testing environments or setups with very few services.
 
-    For production environments with many services to protect, we recommend at least 4 (v)CPUs and 16 GB of RAM. Resources should be adjusted based on your use case, network traffic, and potential DDoS attacks you may face.  
+    For production environments with many services to protect, we recommend at least 4 (v)CPUs and 16 GB of RAM. Resources should be adjusted based on your use case, network traffic, and potential DDoS attacks you may face.
 
     It is highly recommended to enable global loading of CRS rules (by setting the `USE_MODSECURITY_GLOBAL_CRS` parameter to `yes`) if you are in environments with limited RAM or in production with many services. More details can be found in the [advanced usages](advanced.md#running-many-services-in-production) section of the documentation.
 
@@ -18,7 +18,7 @@ This quickstart guide will help you to quickly install BunkerWeb and secure a we
 
 Protecting existing web applications already accessible with the HTTP(S) protocol is the main goal of BunkerWeb : it will act as a classical [reverse proxy](https://en.wikipedia.org/wiki/Reverse_proxy) with extra security features.
 
-See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.0/examples) of the repository to get real-world examples.
+See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.1-rc1/examples) of the repository to get real-world examples.
 
 ## Basic setup
 
@@ -53,12 +53,12 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.0/exa
             echo "force-bad-version" | sudo tee -a /etc/dpkg/dpkg.cfg
             ```
 
-        And finally install BunkerWeb 1.6.0 :
+        And finally install BunkerWeb 1.6.1-rc1 :
 
         ```shell
         curl -s https://repo.bunkerweb.io/install/script.deb.sh | sudo bash && \
         sudo apt update && \
-        sudo -E apt install -y bunkerweb=1.6.0
+        sudo -E apt install -y bunkerweb=1.6.1-rc1
         ```
 
         To prevent upgrading NGINX and/or BunkerWeb packages when executing `apt upgrade`, you can use the following command :
@@ -94,12 +94,12 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.0/exa
             echo "force-bad-version" | sudo tee -a /etc/dpkg/dpkg.cfg
             ```
 
-        And finally install BunkerWeb 1.6.0 :
+        And finally install BunkerWeb 1.6.1-rc1 :
 
         ```shell
         curl -s https://repo.bunkerweb.io/install/script.deb.sh | sudo bash && \
         sudo apt update && \
-        sudo -E apt install -y bunkerweb=1.6.0
+        sudo -E apt install -y bunkerweb=1.6.1-rc1
         ```
 
         To prevent upgrading NGINX and/or BunkerWeb packages when executing `apt upgrade`, you can use the following command :
@@ -128,12 +128,12 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.0/exa
         sudo dnf install -y nginx-1.26.3
         ```
 
-        And finally install BunkerWeb 1.6.0 :
+        And finally install BunkerWeb 1.6.1-rc1 :
 
         ```shell
         curl -s https://repo.bunkerweb.io/install/script.rpm.sh | sudo bash && \
         sudo dnf makecache && \
-        sudo -E dnf install -y bunkerweb-1.6.0
+        sudo -E dnf install -y bunkerweb-1.6.1-rc1
         ```
 
         To prevent upgrading NGINX and/or BunkerWeb packages when executing `dnf upgrade`, you can use the following command :
@@ -171,13 +171,13 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.0/exa
         sudo dnf install nginx-1.26.3
         ```
 
-        And finally install BunkerWeb 1.6.0 :
+        And finally install BunkerWeb 1.6.1-rc1 :
 
         ```shell
         sudo dnf install -y epel-release && \
         curl -s https://repo.bunkerweb.io/install/script.rpm.sh | sudo bash && \
         sudo dnf check-update && \
-        sudo -E dnf install -y bunkerweb-1.6.0
+        sudo -E dnf install -y bunkerweb-1.6.1-rc1
         ```
 
         To prevent upgrading NGINX and/or BunkerWeb packages when executing `dnf upgrade`, you can use the following command :
@@ -200,7 +200,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.0/exa
     services:
       bunkerweb:
         # This is the name that will be used to identify the instance in the Scheduler
-        image: bunkerity/bunkerweb:1.6.0
+        image: bunkerity/bunkerweb:1.6.1-rc1
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -213,7 +213,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.0/exa
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.0
+        image: bunkerity/bunkerweb-scheduler:1.6.1-rc1
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
@@ -221,14 +221,14 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.0/exa
           MULTISITE: "yes"
           UI_HOST: "http://bw-ui:7000" # Change it if needed
         volumes:
-          - bw-data:/data # This is used to persist the cache and other data like the backups
+          - bw-storage:/data # This is used to persist the cache and other data like the backups
         restart: "unless-stopped"
         networks:
           - bw-universe
           - bw-db
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.0
+        image: bunkerity/bunkerweb-ui:1.6.1-rc1
         environment:
           <<: *bw-env
         restart: "unless-stopped"
@@ -244,15 +244,14 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.0/exa
           MYSQL_USER: "bunkerweb"
           MYSQL_PASSWORD: "changeme" # Remember to set a stronger password for the database
         volumes:
-          - bw-db:/var/lib/mysql
+          - bw-data:/var/lib/mysql
         restart: "unless-stopped"
         networks:
           - bw-db
 
     volumes:
       bw-data:
-      bw-db:
-
+      bw-storage:
 
     networks:
       bw-universe:
@@ -279,7 +278,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.0/exa
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.0
+        image: bunkerity/bunkerweb:1.6.1-rc1
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -295,7 +294,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.0/exa
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.0
+        image: bunkerity/bunkerweb-scheduler:1.6.1-rc1
         environment:
           <<: *bw-ui-env
           BUNKERWEB_INSTANCES: ""
@@ -304,14 +303,14 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.0/exa
           MULTISITE: "yes"
           UI_HOST: "http://bw-ui:7000" # Change it if needed
         volumes:
-          - bw-data:/data # This is used to persist the cache and other data like the backups
+          - bw-storage:/data # This is used to persist the cache and other data like the backups
         restart: "unless-stopped"
         networks:
           - bw-universe
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.0
+        image: bunkerity/bunkerweb-autoconf:1.6.1-rc1
         depends_on:
           - bw-docker
         environment:
@@ -334,7 +333,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.0/exa
           - bw-docker
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.0
+        image: bunkerity/bunkerweb-ui:1.6.1-rc1
         environment:
           <<: *bw-ui-env
           TOTP_SECRETS: "mysecret" # Remember to set a stronger secret key (see the Prerequisites section)
@@ -351,14 +350,14 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.0/exa
           MYSQL_USER: "bunkerweb"
           MYSQL_PASSWORD: "changeme" # Remember to set a stronger password for the database
         volumes:
-          - bw-db:/var/lib/mysql
+          - bw-data:/var/lib/mysql
         restart: "unless-stopped"
         networks:
           - bw-db
 
     volumes:
       bw-data:
-      bw-db:
+      bw-storage:
 
     networks:
       bw-universe:
@@ -412,7 +411,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.0/exa
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.0
+        image: bunkerity/bunkerweb:1.6.1-rc1
         ports:
           - published: 80
             target: 8080
@@ -442,7 +441,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.0/exa
             - "bunkerweb.INSTANCE=yes"
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.0
+        image: bunkerity/bunkerweb-scheduler:1.6.1-rc1
         environment:
           <<: *bw-ui-env
           BUNKERWEB_INSTANCES: ""
@@ -453,14 +452,14 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.0/exa
           REDIS_HOST: "bw-redis"
           UI_HOST: "http://bw-ui:7000" # Change it if needed
         volumes:
-          - bw-data:/data # This is used to persist the cache and other data like the backups
+          - bw-storage:/data # This is used to persist the cache and other data like the backups
         restart: "unless-stopped"
         networks:
           - bw-universe
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.0
+        image: bunkerity/bunkerweb-autoconf:1.6.1-rc1
         environment:
           <<: *bw-ui-env
           DOCKER_HOST: "tcp://bw-docker:2375"
@@ -489,7 +488,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.0/exa
               - "node.role == manager"
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.0
+        image: bunkerity/bunkerweb-ui:1.6.1-rc1
         environment:
           <<: *bw-ui-env
           TOTP_SECRETS: "mysecret" # Remember to set a stronger secret key (see the Prerequisites section)
@@ -506,7 +505,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.0/exa
           MYSQL_USER: "bunkerweb"
           MYSQL_PASSWORD: "changeme" # Remember to set a stronger password for the database
         volumes:
-          - bw-db:/var/lib/mysql
+          - bw-data:/var/lib/mysql
         restart: "unless-stopped"
         networks:
           - bw-db
@@ -517,8 +516,8 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.0/exa
           - bw-universe
 
     volumes:
-      bw-db:
       bw-data:
+      bw-storage:
 
     networks:
       bw-universe:

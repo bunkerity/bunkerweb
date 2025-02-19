@@ -179,8 +179,12 @@
                             <form method="POST" action="{{ profile_url }}/edit">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                                 <div class="row g-3">
-                                    <div class="col-md-12 form-floating">
-                                        <select class="form-select" id="theme-toggle" name="theme">
+                                    <div class="col-md-12 form-floating"
+                                         {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Disabled by readonly"{% endif %}>
+                                        <select class="form-select"
+                                                id="theme-toggle"
+                                                name="theme"
+                                                {% if is_readonly %}disabled{% endif %}>
                                             <option value="light" {% if theme == "light" %}selected{% endif %}>Light</option>
                                             <option value="dark" {% if theme == "dark" %}selected{% endif %}>Dark</option>
                                         </select>
@@ -188,7 +192,12 @@
                                     </div>
                                 </div>
                                 <div class="mt-4 justify-content-center d-flex">
-                                    <button type="submit" class="btn btn-primary me-2">Save Changes</button>
+                                    <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The database is in readonly, therefore the configuration is locked"{% endif %}>
+                                        <button type="submit"
+                                                class="btn btn-primary me-2{% if is_readonly %} disabled{% endif %}">
+                                            Save Changes
+                                        </button>
+                                    </div>
                                     <button type="reset" class="btn btn-outline-secondary">Cancel</button>
                                 </div>
                             </form>

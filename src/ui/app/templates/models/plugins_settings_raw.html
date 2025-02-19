@@ -4,7 +4,7 @@
        value="{{ csrf_token() }}">
 <div class="position-absolute top-0 end-0 m-3" style="z-index: 1000">
     <div class="d-flex flex-wrap justify-content-center align-items-center">
-        <div class="card p-1 me-2"
+        <div class="card mt-1 me-2"
              {% if not request.is_secure %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The copy feature is only available over HTTPS"{% endif %}>
             <button type="button"
                     class="btn btn-sm btn-outline-secondary copy-settings{% if not request.is_secure %} disabled{% endif %}">
@@ -12,18 +12,11 @@
                 <span class="d-none d-md-inline">&nbsp;Copy</span>
             </button>
         </div>
-        <div class="card p-1"
-             {% if service_method == "autoconf" or is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{% if is_readonly %}The database is in readonly{% else %}The service was created using the autoconf method{% endif %}
-             therefore
-             the
-             configuration
-             is
-             locked
-             "
-             {% endif %}>
+        <div class="card mt-1 me-1"
+             {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The database is in readonly therefore the configuration is locked " {% endif %}>
             <!-- Save button container -->
             <button type="button"
-                    class="btn btn-sm btn-outline-bw-green save-settings {% if service_method == "autoconf" or is_readonly %}disabled{% endif %}">
+                    class="btn btn-sm btn-outline-bw-green save-settings{% if is_readonly %} disabled{% endif %}">
                 <i class="bx bx-save bx-xs"></i>
                 <span class="d-none d-md-inline">&nbsp;Save</span>
             </button>
@@ -31,7 +24,7 @@
     </div>
 </div>
 <div class="card bg-primary p-1 d-flex flex-column"
-     {% if service_method == "autoconf" or is_readonly %}data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Disabled by {% if is_readonly %}readonly{% else %}{{ service_method }}{% endif %}
+     {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Disabled by {% if is_readonly %}readonly{% else %}{{ service_method }}{% endif %}
      "
      {% endif %}>
     {% set config_lines = ["IS_DRAFT=" + config.get('IS_DRAFT', {}).get('value', 'no')] if current_endpoint != "global-config" else [] %}
@@ -92,7 +85,7 @@
                   rows="35"
                   id="raw-config"
                   aria-label="Raw configuration"
-                  {% if service_method == "autoconf" or is_readonly %}readonly{% endif %}>{{ raw_config|safe }}</textarea>
+                  {% if is_readonly %}readonly{% endif %}>{{ raw_config|safe }}</textarea>
         <label for="raw-config" class="text-white">Raw configuration</label>
     </div>
 </div>
