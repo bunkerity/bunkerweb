@@ -82,7 +82,7 @@ jobs:
     needs: [codeql, build-containers, build-packages]
     strategy:
       matrix:
-        type: [docker, autoconf, swarm, k8s, linux]
+        type: [docker, autoconf, k8s, linux]
     uses: ./.github/workflows/staging-create-infra.yml
     with:
       TYPE: ${{ matrix.type }}
@@ -94,14 +94,12 @@ jobs:
     needs: [create-infras]
     strategy:
       matrix:
-        type: [docker, autoconf, swarm, k8s, linux]
+        type: [docker, autoconf, k8s, linux]
         include:
           - type: docker
             runs_on: "['self-hosted', 'bw-docker']"
           - type: autoconf
             runs_on: "['self-hosted', 'bw-autoconf']"
-          - type: swarm
-            runs_on: "['self-hosted', 'bw-swarm']"
           - type: k8s
             runs_on: "['ubuntu-latest']"
           - type: linux
@@ -118,7 +116,7 @@ jobs:
     needs: [staging-tests]
     strategy:
       matrix:
-        type: [docker, autoconf, swarm, k8s, linux]
+        type: [docker, autoconf, k8s, linux]
     uses: ./.github/workflows/staging-delete-infra.yml
     with:
       TYPE: ${{ matrix.type }}
