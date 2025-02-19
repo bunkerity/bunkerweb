@@ -1,4 +1,5 @@
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from re import compile as re_compile
 from threading import Thread
 from time import time
 from typing import Literal
@@ -47,10 +48,20 @@ def instances_new():
 
     db_config = BW_CONFIG.get_config(global_only=True, methods=False, filtered_settings=("API_HTTP_PORT", "API_SERVER_NAME"))
 
+    port = None
+    hostname = request.form["hostname"].replace("http://", "").replace("https://", "").lower().split(":", 1)
+    if len(hostname) == 2:
+        port = hostname[1]
+    hostname = hostname[0]
+
+    domain_pattern = re_compile(r"^(?!.*\.\.)[^\s\/:]{1,256}$")
+    if not domain_pattern.match(hostname):
+        return handle_error(f"Invalid hostname: {hostname}. Please enter a valid domain.", "instances", True)
+
     instance = {
-        "hostname": request.form["hostname"].replace("http://", "").replace("https://", "").split(":")[0],
+        "hostname": hostname,
         "name": request.form["name"],
-        "port": db_config.get("API_HTTP_PORT", "5000"),
+        "port": port or db_config.get("API_HTTP_PORT", "5000"),
         "server_name": db_config.get("API_SERVER_NAME", "bwapi"),
         "method": "ui",
     }
