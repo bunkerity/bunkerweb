@@ -29,6 +29,14 @@ start() {
     export CAPTURE_OUTPUT="yes"
     # shellcheck disable=SC2046
     export $(cat /etc/bunkerweb/ui.env)
+
+    if [ -f "/var/run/bunkerweb/tmp-ui.pid" ]; then
+        rm -f /var/run/bunkerweb/tmp-ui.pid
+    fi
+    if [ -f "/var/run/bunkerweb/ui.pid" ]; then
+        rm -f /var/run/bunkerweb/ui.pid
+    fi
+
     sudo -E -u nginx -g nginx /bin/bash -c "PYTHONPATH=$PYTHONPATH python3 -m gunicorn --chdir /usr/share/bunkerweb/ui --logger-class utils.logger.TmpUiLogger --config /usr/share/bunkerweb/ui/utils/tmp-gunicorn.conf.py"
     sudo -E -u nginx -g nginx /bin/bash -c "PYTHONPATH=$PYTHONPATH python3 -m gunicorn --chdir /usr/share/bunkerweb/ui --logger-class utils.logger.UiLogger --config /usr/share/bunkerweb/ui/utils/gunicorn.conf.py"
 }
