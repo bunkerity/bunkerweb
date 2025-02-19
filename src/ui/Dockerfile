@@ -79,7 +79,7 @@ RUN echo "Docker" > INTEGRATION && \
   ln -s /proc/1/fd/2 /var/log/bunkerweb/tmp-ui.log
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
-LABEL version="1.6.0"
+LABEL version="1.6.1-rc1"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="ui"
 
