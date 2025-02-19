@@ -89,12 +89,18 @@ log "ENTRYPOINT" "ℹ️" "Web UI stopped with exit code $exit_code"
 if [ -f "/var/run/bunkerweb/tmp-ui.pid" ]; then
 	log "ENTRYPOINT" "ℹ️" "Waiting for temporary Web UI to stop ..."
 
-	# Wait in a loop until the temporary web UI process exits.
-	while [ -f "/var/run/bunkerweb/tmp-ui.pid" ]; do
+	# Wait in a loop until the temporary web UI process exits, with 60 second timeout
+	timeout=60
+	while [ -f "/var/run/bunkerweb/tmp-ui.pid" ] && [ $timeout -gt 0 ]; do
 		sleep 1
+		((timeout--))
 	done
 
-	log "ENTRYPOINT" "ℹ️" "Temporary Web UI stopped"
+	if [ $timeout -eq 0 ]; then
+		log "ENTRYPOINT" "⚠️" "Timeout waiting for temporary Web UI to stop"
+	else
+		log "ENTRYPOINT" "ℹ️" "Temporary Web UI stopped"
+	fi
 fi
 
 # Exit the script with the same exit code as the main web UI process.
