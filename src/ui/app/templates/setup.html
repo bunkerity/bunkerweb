@@ -316,14 +316,15 @@
                                                             </span>
                                                         </div>
                                                     </div>
+                                                    {% set server_name_setting = plugins_settings.get('SERVER_NAME', {'default': 'www.example.com', 'regex': '^.+$'}) %}
                                                     <input id="SERVER_NAME"
                                                            name="SERVER_NAME"
                                                            type="text"
-                                                           placeholder="www.example.com"
+                                                           placeholder="{{ server_name_setting['default'] }}"
                                                            value="{{ server_name }}"
                                                            class="form-control plugin-setting mt-1"
                                                            aria-labelledby="label-SERVER_NAME"
-                                                           pattern="^.+$"
+                                                           pattern="{{ server_name_setting['regex'] }}"
                                                            required />
                                                 </div>
                                                 <h6 class="mt-2 mb-2 fw-bold">Reverse Proxy</h6>
@@ -357,7 +358,7 @@
                                                            value="{{ ui_host }}"
                                                            class="form-control plugin-setting mt-1"
                                                            aria-labelledby="label-REVERSE_PROXY_HOST"
-                                                           pattern="^.+$"
+                                                           pattern="{{ plugins_settings.get('REVERSE_PROXY_HOST', {'regex': '^.+$'})['regex'] }}"
                                                            required />
                                                 </div>
                                                 <div class="col-12 col-md-6 pb-6">
@@ -382,13 +383,15 @@
                                                             </span>
                                                         </div>
                                                     </div>
+                                                    {% set reverse_proxy_url_setting = plugins_settings.get('REVERSE_PROXY_URL', {'default': '/', 'regex': '^.+$'}) %}
                                                     <input id="REVERSE_PROXY_URL"
                                                            name="REVERSE_PROXY_URL"
                                                            type="text"
-                                                           value="/"
+                                                           value="{{ reverse_proxy_url_setting['default'] }}"
                                                            class="form-control plugin-setting mt-1"
                                                            aria-labelledby="label-REVERSE_PROXY_URL"
-                                                           pattern="^.*$" />
+                                                           pattern="{{ reverse_proxy_url_setting['regex'] }}"
+                                                           required />
                                                 </div>
                                             </div>
                                             <div class="container">
@@ -558,7 +561,7 @@
                                                                        placeholder="John.doe@example.com"
                                                                        class="form-control plugin-setting mt-1"
                                                                        aria-labelledby="label-EMAIL_LETS_ENCRYPT"
-                                                                       pattern="^.*$" />
+                                                                       pattern="{{ plugins_settings.get('EMAIL_LETS_ENCRYPT', {'regex': '^.*$'})['regex'] }}" />
                                                             </div>
                                                             <div class="col-md-6 pb-3">
                                                                 <div class="d-flex justify-content-between align-items-center">
@@ -588,14 +591,12 @@
                                                                         name="LETS_ENCRYPT_CHALLENGE"
                                                                         class="form-select mt-1"
                                                                         aria-labelledby="label-LETS_ENCRYPT_CHALLENGE">
-                                                                    <option value="dns"
-                                                                            {% if lets_encrypt_challenge == "dns" %}selected{% endif %}>
-                                                                        dns
-                                                                    </option>
-                                                                    <option value="http"
-                                                                            {% if lets_encrypt_challenge == "http" %}selected{% endif %}>
-                                                                        http
-                                                                    </option>
+                                                                    {% for challenge in plugins_settings.get('LETS_ENCRYPT_CHALLENGE', {'select': ['http', 'dns']})['select'] %}
+                                                                        <option value="{{ challenge }}"
+                                                                                {% if lets_encrypt_challenge == challenge %}selected{% endif %}>
+                                                                            {{ challenge }}
+                                                                        </option>
+                                                                    {% endfor %}
                                                                 </select>
                                                             </div>
                                                             <div class="col-md-6 pb-3"
@@ -628,63 +629,29 @@
                                                                         class="form-select mt-1"
                                                                         aria-labelledby="label-LETS_ENCRYPT_DNS_PROVIDER"
                                                                         {% if lets_encrypt_challenge == 'http' %}disabled{% endif %}>
-                                                                    <option value="" {% if not lets_encrypt_dns_provider %}selected{% endif %}></option>
-                                                                    <option value="cloudflare"
-                                                                            {% if lets_encrypt_dns_provider == "cloudflare" %}selected{% endif %}>
-                                                                        cloudflare
-                                                                    </option>
-                                                                    <option value="digitalocean"
-                                                                            {% if lets_encrypt_dns_provider == "digitalocean" %}selected{% endif %}>
-                                                                        digitalocean
-                                                                    </option>
-                                                                    <option value="dnsimple"
-                                                                            {% if lets_encrypt_dns_provider == "dnsimple" %}selected{% endif %}>
-                                                                        dnsimple
-                                                                    </option>
-                                                                    <option value="dnsmadeeasy"
-                                                                            {% if lets_encrypt_dns_provider == "dnsmadeeasy" %}selected{% endif %}>
-                                                                        dnsmadeeasy
-                                                                    </option>
-                                                                    <option value="gehirn"
-                                                                            {% if lets_encrypt_dns_provider == "gehirn" %}selected{% endif %}>
-                                                                        gehirn
-                                                                    </option>
-                                                                    <option value="google"
-                                                                            {% if lets_encrypt_dns_provider == "google" %}selected{% endif %}>
-                                                                        google
-                                                                    </option>
-                                                                    <option value="linode"
-                                                                            {% if lets_encrypt_dns_provider == "linode" %}selected{% endif %}>
-                                                                        linode
-                                                                    </option>
-                                                                    <option value="luadns"
-                                                                            {% if lets_encrypt_dns_provider == "luadns" %}selected{% endif %}>
-                                                                        luadns
-                                                                    </option>
-                                                                    <option value="nsone"
-                                                                            {% if lets_encrypt_dns_provider == "nsone" %}selected{% endif %}>
-                                                                        nsone
-                                                                    </option>
-                                                                    <option value="ovh"
-                                                                            {% if lets_encrypt_dns_provider == "ovh" %}selected{% endif %}>
-                                                                        ovh
-                                                                    </option>
-                                                                    <option value="rfc2136"
-                                                                            {% if lets_encrypt_dns_provider == "rfc2136" %}selected{% endif %}>
-                                                                        rfc2136
-                                                                    </option>
-                                                                    <option value="route53"
-                                                                            {% if lets_encrypt_dns_provider == "route53" %}selected{% endif %}>
-                                                                        route53
-                                                                    </option>
-                                                                    <option value="sakuracloud"
-                                                                            {% if lets_encrypt_dns_provider == "sakuracloud" %}selected{% endif %}>
-                                                                        sakuracloud
-                                                                    </option>
-                                                                    <option value="scaleway"
-                                                                            {% if lets_encrypt_dns_provider == "scaleway" %}selected{% endif %}>
-                                                                        scaleway
-                                                                    </option>
+                                                                    {% for provider in plugins_settings.get('LETS_ENCRYPT_DNS_PROVIDER', {'select': [
+                                                                        "",
+                                                                        "cloudflare",
+                                                                        "desec",
+                                                                        "digitalocean",
+                                                                        "dnsimple",
+                                                                        "dnsmadeeasy",
+                                                                        "gehirn",
+                                                                        "google",
+                                                                        "linode",
+                                                                        "luadns",
+                                                                        "nsone",
+                                                                        "ovh",
+                                                                        "rfc2136",
+                                                                        "route53",
+                                                                        "sakuracloud",
+                                                                        "scaleway"
+                                                                        ]})['select'] %}
+                                                                        <option value="{{ provider }}"
+                                                                                {% if lets_encrypt_dns_provider == provider %}selected{% endif %}>
+                                                                            {{ provider }}
+                                                                        </option>
+                                                                    {% endfor %}
                                                                 </select>
                                                             </div>
                                                             <div class="col-md-6 pb-3"
@@ -718,7 +685,7 @@
                                                                        value="{{ lets_encrypt_dns_propagation }}"
                                                                        class="form-control plugin-setting mt-1"
                                                                        aria-labelledby="label-LETS_ENCRYPT_DNS_PROPAGATION"
-                                                                       pattern="^(default|\d+)$"
+                                                                       pattern="{{ plugins_settings.get('LETS_ENCRYPT_DNS_PROPAGATION', {'regex': '^(default|\\d+)$'})['regex'] }}"
                                                                        {% if lets_encrypt_challenge == 'http' %}disabled{% endif %} />
                                                             </div>
                                                             <div class="col-12 pb-3"
@@ -742,7 +709,7 @@
                                                                           name="LETS_ENCRYPT_DNS_CREDENTIAL_ITEMS"
                                                                           class="form-control plugin-setting mt-1"
                                                                           aria-labelledby="label-LETS_ENCRYPT_DNS_CREDENTIAL_ITEMS"
-                                                                          pattern="^.*$"
+                                                                          pattern="{{ plugins_settings.get('LETS_ENCRYPT_DNS_CREDENTIAL_ITEMS', {'regex': '^.*$'})['regex'] }}"
                                                                           {% if lets_encrypt_challenge == 'http' %}disabled{% endif %}>{% for item in lets_encrypt_dns_credential_items %}{{ item }}{% if not loop.last %}\n{% endif %}{% endfor %}</textarea>
                                                             </div>
                                                         </div>
@@ -817,14 +784,12 @@
                                                                         class="form-select mt-1"
                                                                         aria-labelledby="label-CUSTOM_SSL_CERT_PRIORITY"
                                                                         {% if use_custom_ssl == "no" %}disabled{% endif %}>
-                                                                    <option value="file"
-                                                                            {% if custom_ssl_cert_priority == "file" %}selected{% endif %}>
-                                                                        file
-                                                                    </option>
-                                                                    <option value="data"
-                                                                            {% if custom_ssl_cert_priority == "data" %}selected{% endif %}>
-                                                                        data
-                                                                    </option>
+                                                                    {% for priority in plugins_settings.get('CUSTOM_SSL_CERT_PRIORITY', {'select': ['file', 'data']})['select'] %}
+                                                                        <option value="{{ priority }}"
+                                                                                {% if custom_ssl_cert_priority == priority %}selected{% endif %}>
+                                                                            {{ priority }}
+                                                                        </option>
+                                                                    {% endfor %}
                                                                 </select>
                                                             </div>
                                                             <div class="col-6 pb-3">
@@ -858,7 +823,7 @@
                                                                        value="{{ custom_ssl_cert }}"
                                                                        class="form-control plugin-setting mt-1"
                                                                        aria-labelledby="label-CUSTOM_SSL_CERT"
-                                                                       pattern="^.*$"
+                                                                       pattern="{{ plugins_settings.get('CUSTOM_SSL_CERT', {'regex': '^.*$'})['regex'] }}"
                                                                        {% if use_custom_ssl == "no" %}disabled{% endif %} />
                                                             </div>
                                                             <div class="col-6 pb-3">
@@ -892,7 +857,7 @@
                                                                        value="{{ custom_ssl_key }}"
                                                                        class="form-control plugin-setting mt-1"
                                                                        aria-labelledby="label-CUSTOM_SSL_KEY"
-                                                                       pattern="^.*$"
+                                                                       pattern="{{ plugins_settings.get('CUSTOM_SSL_KEY', {'regex': '^.*$'})['regex'] }}"
                                                                        {% if use_custom_ssl == "no" %}disabled{% endif %} />
                                                             </div>
                                                             <div class="col-6 pb-3">
@@ -925,7 +890,7 @@
                                                                        value="{{ custom_ssl_cert_data }}"
                                                                        class="form-control plugin-setting mt-1"
                                                                        aria-labelledby="label-CUSTOM_SSL_CERT_DATA"
-                                                                       pattern="^.*$"
+                                                                       pattern="{{ plugins_settings.get('CUSTOM_SSL_CERT_DATA', {'regex': '^.*$'})['regex'] }}"
                                                                        {% if use_custom_ssl == "no" %}disabled{% endif %} />
                                                             </div>
                                                             <div class="col-6 pb-3">
@@ -958,7 +923,7 @@
                                                                        value="{{ custom_ssl_key_data }}"
                                                                        class="form-control plugin-setting mt-1"
                                                                        aria-labelledby="label-CUSTOM_SSL_KEY_DATA"
-                                                                       pattern="^.*$"
+                                                                       pattern="{{ plugins_settings.get('CUSTOM_SSL_KEY_DATA', {'regex': '^.*$'})['regex'] }}"
                                                                        {% if use_custom_ssl == "no" %}disabled{% endif %} />
                                                             </div>
                                                         </div>

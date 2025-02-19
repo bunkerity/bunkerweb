@@ -236,6 +236,7 @@ def setup_page():
 
     return render_template(
         "setup.html",
+        plugins_settings=BW_CONFIG.get_plugins_settings(),
         server_name=server_name,
         ui_user=admin_user,
         ui_reverse_proxy=ui_reverse_proxy,
