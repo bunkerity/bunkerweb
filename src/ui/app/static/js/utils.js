@@ -531,7 +531,8 @@ $(document).ready(() => {
     $("[name='theme']").val(theme);
     localStorage.setItem("theme", theme); // Save user preference
 
-    if (window.location.pathname.includes("/setup") || isReadOnly) return;
+    if (!rootUrl || window.location.pathname.includes("/setup") || isReadOnly)
+      return;
 
     saveTheme(rootUrl.replace(/\/profile$/, "/set_theme"), theme);
   }
