@@ -14,7 +14,8 @@
                 <div class="bs-toast toast fade show bg-{% if theme == 'light' %}white{% else %}dark{% endif %} border{% if category == 'error' %} border-danger{% elif category == 'warning' %} border-warning{% else %} border-primary{% endif %}"
                      role="alert"
                      aria-live="assertive"
-                     aria-atomic="true">
+                     aria-atomic="true"
+                     {% if category == 'message' %}data-delay="5000" data-autohide="true"{% endif %}>
                     <div class="toast-header d-flex align-items-center{% if category == 'error' %} text-danger{% elif category == 'warning' %} text-warning{% else %} text-primary{% endif %}">
                         <i class="d-block h-auto rounded tf-icons bx bx-xs bx-bell bx-tada me-2"></i>
                         <span class="fw-medium me-auto">
