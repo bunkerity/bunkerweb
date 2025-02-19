@@ -383,7 +383,7 @@ try:
             for env_key, env_value in environ.items():
                 if env_value and env_key.startswith(credential_key):
                     key, value = env_value.split(" ", 1)
-                    data["credential_items"][key.lower()] = value
+                    data["credential_items"][key.lower()] = value.removeprefix("= ").strip()
 
         LOGGER.debug(f"Data for service {first_server} : {dumps(data)}")
 
