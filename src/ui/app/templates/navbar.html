@@ -21,8 +21,9 @@
         {% elif current_endpoint == 'cache' %}
             {% set documentation_endpoint = "/concepts" %}
             {% set documentation_fragment = "#database" %}
-        {% elif current_endpoint == 'reports' or current_endpoint == 'bans' %}
-            {% set documentation_fragment = "#security-features" %}
+            {% elif current_endpoint == 'reports' or current_endpoint == 'bans' %}
+            {% set documentation_endpoint = "/advanced" %}
+            {% set documentation_fragment = "#persistence-of-bans-and-reports" %}
         {% elif current_endpoint == 'jobs' %}
             {% set documentation_endpoint = "/concepts" %}
             {% set documentation_fragment = "#scheduler" %}
@@ -30,7 +31,11 @@
             {% set documentation_endpoint = "/web-ui" %}
             {% set documentation_fragment = "#accessing-logs" %}
         {% elif current_endpoint == 'pro' %}
-            {% set documentation_endpoint = "/professional-services" %}
+        {% set documentation_endpoint = "/professional-services" %}
+        {% elif current_endpoint == 'support' %}
+        {% set documentation_endpoint = "/troubleshooting" %}
+        {% elif current_endpoint == 'about' %}
+        {% set documentation_endpoint = "/about" %}
         {% endif %}
         <div class="d-none d-md-inline navbar-nav align-items-center">
             <div class="nav-item d-flex align-items-center">
