@@ -485,4 +485,14 @@ $(function () {
     const service = $(this).data("service-id");
     setupDeletionModal([service]);
   });
+
+  $(document).on("click", ".convert-service", function () {
+    if (isReadOnly) {
+      alert("This action is not allowed in read-only mode.");
+      return;
+    }
+    const service = $(this).data("service-id");
+    const conversionType = $(this).data("value");
+    setupConversionModal([service], conversionType);
+  });
 });
