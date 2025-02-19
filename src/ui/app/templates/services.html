@@ -53,7 +53,7 @@
                                class="d-flex align-items-center"
                                data-bs-toggle="tooltip"
                                data-bs-placement="bottom"
-                               data-bs-original-title="{% if service['method'] == 'autoconf' or is_readonly %}View{% else %}Edit{% endif %} service {{ service['id'] }}"><i class="bx bx-{% if service['method'] == 'autoconf' or is_readonly %}show{% else %}edit{% endif %} bx-xs"></i>&nbsp;{{ service["id"] }}</a>
+                               data-bs-original-title="{% if is_readonly %}View{% else %}Edit{% endif %} service {{ service['id'] }}"><i class="bx bx-{% if is_readonly %}show{% else %}edit{% endif %} bx-xs"></i>&nbsp;{{ service["id"] }}</a>
                         </td>
                         <td>
                             {% if service['is_draft'] %}
@@ -88,8 +88,8 @@
                                    href="{{ url_for("services") }}/{{ service['id'] }}"
                                    data-bs-toggle="tooltip"
                                    data-bs-placement="bottom"
-                                   data-bs-original-title="{% if service['method'] == 'autoconf' or is_readonly %}View{% else %}Edit{% endif %} service {{ service['id'] }}">
-                                    <i class="bx bx-{% if service['method'] == 'autoconf' or is_readonly %}show{% else %}edit{% endif %} bx-xs"></i>
+                                   data-bs-original-title="{% if is_readonly %}View{% else %}Edit{% endif %} service {{ service['id'] }}">
+                                    <i class="bx bx-{% if is_readonly %}show{% else %}edit{% endif %} bx-xs"></i>
                                 </a>
                                 <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Disabled by readonly"{% endif %}>
                                     <a role="button"
