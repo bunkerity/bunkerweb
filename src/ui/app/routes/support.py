@@ -48,9 +48,10 @@ def support_logs():
         for file in logs_path.glob("*.log"):
             if file.is_file():
                 # Process file line by line to reduce memory usage
-                with file.open() as f:
+                with file.open("rb") as f:
                     content = []
                     for line in f:
+                        line = line.decode("utf-8", errors="replace")
                         line = pattern.sub(
                             lambda m: "[ANONYMIZED_DOMAIN]" if m.group("domain") else ("[ANONYMIZED_IPv4]" if m.group("ipv4") else "[ANONYMIZED_IPv6]"),
                             line,
