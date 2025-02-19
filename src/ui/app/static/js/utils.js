@@ -479,11 +479,11 @@ $(document).ready(() => {
   $("#dark-mode-toggle").on("change", function () {
     const darkMode = $(this).prop("checked");
     const theme = darkMode ? "dark" : "light";
-    applyTheme(theme);
+    applyTheme(theme, $(this).data("root-url"));
   });
 
   // Function to apply the theme
-  function applyTheme(theme) {
+  function applyTheme(theme, rootUrl = null) {
     $themeSelector = $("#theme-toggle");
 
     if (theme === "dark") {
@@ -531,14 +531,9 @@ $(document).ready(() => {
     $("[name='theme']").val(theme);
     localStorage.setItem("theme", theme); // Save user preference
 
-    if (isReadOnly) return;
+    if (window.location.pathname.includes("/setup") || isReadOnly) return;
 
-    saveTheme(
-      $(this)
-        .data("root-url")
-        .replace(/\/profile$/, "/set_theme"),
-      theme,
-    );
+    saveTheme(rootUrl.replace(/\/profile$/, "/set_theme"), theme);
   }
 
   $("#pluginsCollapse").on("show.bs.collapse", function () {
