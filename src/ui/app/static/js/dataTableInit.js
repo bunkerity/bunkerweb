@@ -1,6 +1,7 @@
 // dataTableInit.js
 
 function initializeDataTable(config) {
+  const isReadOnly = $("#is-read-only").val().trim() === "True";
   const {
     tableSelector,
     tableName,
@@ -109,6 +110,8 @@ function initializeDataTable(config) {
           JSON.stringify(columnVisibility),
         );
       }
+
+      if (isReadOnly) return;
 
       saveColumnsPreferences();
     });
