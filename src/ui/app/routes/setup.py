@@ -195,17 +195,10 @@ def setup_page():
                             "CUSTOM_SSL_KEY_DATA": request.form.get("custom_ssl_key_data", ""),
                         }
                     )
-                else:
-                    config.update(
-                        {
-                            "USE_CUSTOM_SSL": "yes",
-                            "CUSTOM_SSL_CERT": "/var/cache/bunkerweb/misc/default-server-cert.pem",
-                            "CUSTOM_SSL_KEY": "/var/cache/bunkerweb/misc/default-server-cert.key",
-                        }
-                    )
 
             if not config.get("MULTISITE", "no") == "yes":
-                BW_CONFIG.edit_global_conf({"MULTISITE": "yes"}, check_changes=False)
+                global_config = DB.get_config(global_only=True)
+                BW_CONFIG.edit_global_conf(global_config | {"MULTISITE": "yes"}, check_changes=False)
 
             LOGGER.debug(f"Creating new service with base_config: {base_config} and config: {config}")
 
