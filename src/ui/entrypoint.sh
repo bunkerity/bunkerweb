@@ -50,8 +50,8 @@ function trap_exit() {
 trap "trap_exit" TERM INT QUIT
 
 # Remove any existing PID file for the main web UI to avoid stale state issues.
-if [ -f /var/run/bunkerweb/tmp-ui.log ]; then
-	rm -f /var/run/bunkerweb/tmp-ui.log
+if [ -f /var/run/bunkerweb/tmp-ui.pid ]; then
+	rm -f /var/run/bunkerweb/tmp-ui.pid
 fi
 if [ -f /var/run/bunkerweb/ui.pid ]; then
 	rm -f /var/run/bunkerweb/ui.pid
