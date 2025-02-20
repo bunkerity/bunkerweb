@@ -2,8 +2,20 @@
 
 ## v1.6.1-rc1 - ????/??/??
 
+- [BUGFIX] Fix ModSecurity false positive on the web UI when the `UI_HOST` setting contains an IP address
+- [BUGFIX] Fix ModSecurity false positive when the web UI `SERVER_NAME` is set to an IP address
+- [BUGFIX] Fix PRO activation not working in the web UI
+- [BUGFIX] Fix log extraction was not working in the web UI when specific conditions were met (invalid UTF-8 characters)
+- [BUGFIX] Fix database migration logic to handle `dev` and `testing` versions
+- [BUGFIX] Fix web UI waiting for temporary web UI to stop indefinitely in some cases
 - [FEATURE] Add `deSEC` DNS provider support in `letsencrypt` plugin
 - [UI] Enhance UX here and there
+- [UI] Add an instance hostname validation in the `instances` page when adding a new instance
+- [UI] It is now possible to edit services created with the `autoconf` method
+- [UI] It is now possible to change the theme even if the database is in read-only mode
+- [UI] Added an auto-hide functionality to informative messages in the UI
+- [MISC] Update regex for `SERVER_NAME` to improve accuracy and avoid issues
+- [MISC] Revamped DNS credential validation to minimize configuration errors and enhance overall reliability.
 
 ## v1.6.0 - 2025/02/13
 
