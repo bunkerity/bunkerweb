@@ -976,11 +976,17 @@ div.dtsp-panesContainer
 }
 
 #plugins-dropdown-menu .input-group-text,
-#plugins-dropdown-menu .form-control {
+#plugins-dropdown-menu .form-control,
+#services-dropdown-menu .input-group-text,
+#services-dropdown-menu .form-control,
+#templates-dropdown-menu .input-group-text,
+#templates-dropdown-menu .form-control {
   border-radius: 0;
 }
 
-#plugins-dropdown-menu .input-group:focus-within {
+#plugins-dropdown-menu .input-group:focus-within,
+#services-dropdown-menu .input-group:focus-within,
+#templates-dropdown-menu .input-group:focus-within {
   box-shadow: none;
 }
 
