@@ -651,7 +651,7 @@ $(document).ready(() => {
         "lets_encrypt_dns_credential_items",
         $("#LETS_ENCRYPT_DNS_CREDENTIAL_ITEMS")
           .val()
-          .split("\n")
+          .split(/\r?\n/)
           .map((item) => item.trim())
           .filter((item) => item !== ""),
       );
