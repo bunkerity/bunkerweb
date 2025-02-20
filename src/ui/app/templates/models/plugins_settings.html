@@ -217,7 +217,14 @@
                                                 <span class="bx bx-spreadsheet bx-xs"></span>
                                             </span>
                                         {% endif %}
-                                        {% if current_endpoint != "global-config" and setting_config.get("global") and setting_value != setting_default %}
+                                        {% if setting_config.get("clone") %}
+                                            <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                                                  data-bs-toggle="tooltip"
+                                                  data-bs-placement="top"
+                                                  data-bs-original-title="Cloned from service {{ clone }}">
+                                                <span class="bx bx-copy-alt bx-xs"></span>
+                                            </span>
+                                        {% elif current_endpoint != "global-config" and setting_config.get("global") and setting_value != setting_default %}
                                             <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
                                                   data-bs-toggle="tooltip"
                                                   data-bs-placement="top"
@@ -349,7 +356,14 @@
                                                                             <span class="bx bx-spreadsheet bx-xs"></span>
                                                                         </span>
                                                                     {% endif %}
-                                                                    {% if current_endpoint != "global-config" and setting_config.get("global") and setting_value != setting_default %}
+                                                                    {% if setting_config.get("clone") %}
+                                                                        <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                                                                              data-bs-toggle="tooltip"
+                                                                              data-bs-placement="top"
+                                                                              data-bs-original-title="Cloned from service {{ clone }}">
+                                                                            <span class="bx bx-copy-alt bx-xs"></span>
+                                                                        </span>
+                                                                    {% elif current_endpoint != "global-config" and setting_config.get("global") and setting_value != setting_default %}
                                                                         <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
                                                                               data-bs-toggle="tooltip"
                                                                               data-bs-placement="top"

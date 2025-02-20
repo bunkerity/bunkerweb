@@ -377,11 +377,12 @@ def services_service_page(service: str):
     clone = None
     if service == "new":
         clone = request.args.get("clone", "")
+        db_config = DB.get_config(global_only=True, methods=True)
         if clone:
-            db_config = DB.get_config(methods=True, with_drafts=True, service=clone)
-            db_config["SERVER_NAME"]["value"] = ""
-        else:
-            db_config = DB.get_config(global_only=True, methods=True)
+            for key, setting in DB.get_config(methods=True, with_drafts=True, service=clone).items():
+                original_value = db_config.get(key, {}).get("value")
+                db_config[key] = setting | {"clone": original_value != setting.get("value")}
+            db_config["SERVER_NAME"].update({"value": "", "clone": False})
     else:
         db_config = DB.get_config(methods=True, with_drafts=True, service=service)
 
