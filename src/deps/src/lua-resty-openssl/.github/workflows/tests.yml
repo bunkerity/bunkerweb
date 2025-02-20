@@ -29,51 +29,65 @@ jobs:
         # TODO: arm64
         # latest and one version older for valgrind and perf test
         - nginx: "1.19.9"
-          openssl: "3.1.5"
+          openssl: "3.1.7"
           openssl_fips: "3.0.9"
           extras: "valgrind"
           lua_nginx_module: "v0.10.20"
           lua_resty_core: "v0.1.22"
           nginx_cc_opts: "-Wno-error"
         - nginx: "1.21.4"
-          openssl: "3.1.5"
+          openssl: "3.1.7"
           openssl_fips: "3.0.9"
           extras: "valgrind"
           lua_nginx_module: "v0.10.25"
           lua_resty_core: "v0.1.27"
           nginx_cc_opts: "-Wno-error"
         - nginx: "1.25.3"
+          openssl: "3.3.2"
+          openssl_fips: "3.0.9"
+          extras: "valgrind perf lua-kong-nginx-module"
+          lua_nginx_module: "v0.10.26"
+          lua_resty_core: "v0.1.28"
+          nginx_cc_opts: "-Wno-error"
+        - nginx: "1.27.1"
           openssl: "1.1.1w"
           extras: "valgrind perf"
-          lua_nginx_module: "v0.10.26"
-          lua_resty_core: "v0.1.28"
-        - nginx: "1.25.3"
-          openssl: "3.0.13"
+          lua_nginx_module: "v0.10.27"
+          lua_resty_core: "v0.1.30"
+        - nginx: "1.27.1"
+          openssl: "3.0.15"
           openssl_fips: "3.0.9"
           extras: "valgrind perf lua-kong-nginx-module"
-          lua_nginx_module: "v0.10.26"
-          lua_resty_core: "v0.1.28"
+          lua_nginx_module: "v0.10.27"
+          lua_resty_core: "v0.1.30"
           nginx_cc_opts: "-Wno-error"
-        - nginx: "1.25.3"
-          openssl: "3.1.5"
+        - nginx: "1.27.1"
+          openssl: "3.1.7"
           openssl_fips: "3.0.9"
           extras: "valgrind perf lua-kong-nginx-module"
-          lua_nginx_module: "v0.10.26"
-          lua_resty_core: "v0.1.28"
+          lua_nginx_module: "v0.10.27"
+          lua_resty_core: "v0.1.30"
           nginx_cc_opts: "-Wno-error"
-        - nginx: "1.25.3"
-          openssl: "3.2.1"
+        - nginx: "1.27.1"
+          openssl: "3.2.3"
           openssl_fips: "3.0.9"
           extras: "valgrind perf lua-kong-nginx-module"
-          lua_nginx_module: "v0.10.26"
-          lua_resty_core: "v0.1.28"
+          lua_nginx_module: "v0.10.27"
+          lua_resty_core: "v0.1.30"
           nginx_cc_opts: "-Wno-error"
-        - nginx: "1.25.3"
-          openssl: "3.3.0"
+        - nginx: "1.27.1"
+          openssl: "3.3.2"
           openssl_fips: "3.0.9"
           extras: "valgrind perf lua-kong-nginx-module"
-          lua_nginx_module: "v0.10.26"
-          lua_resty_core: "v0.1.28"
+          lua_nginx_module: "v0.10.27"
+          lua_resty_core: "v0.1.30"
+          nginx_cc_opts: "-Wno-error"
+        - nginx: "1.27.1"
+          openssl: "3.4.0"
+          openssl_fips: "3.0.9"
+          extras: "valgrind perf lua-kong-nginx-module"
+          lua_nginx_module: "v0.10.27"
+          lua_resty_core: "v0.1.30"
           nginx_cc_opts: "-Wno-error"
 
 
@@ -123,12 +137,17 @@ jobs:
         git clone https://github.com/openresty/lua-nginx-module.git ./lua-nginx-module -b ${{ matrix.lua_nginx_module }}
         git clone https://github.com/openresty/no-pool-nginx.git ./no-pool-nginx
         git clone https://github.com/fffonion/lua-resty-openssl-aux-module ./lua-resty-openssl-aux-module
-        git clone https://github.com/Kong/lua-kong-nginx-module.git ./lua-kong-nginx-module
+        git clone https://github.com/Kong/lua-kong-nginx-module.git -b 0.12.0 ./lua-kong-nginx-module
         # lua libraries at parent directory of current repository
         popd
         git clone https://github.com/openresty/lua-resty-core.git ../lua-resty-core -b ${{ matrix.lua_resty_core }}
         git clone https://github.com/openresty/lua-resty-lrucache.git ../lua-resty-lrucache
         git clone https://github.com/openresty/lua-resty-string ../lua-resty-string
+    
+    - name: Setup conditional tools
+      if: matrix.nginx == '1.21.4' || matrix.nginx == '1.19.9'
+      run: |
+        sudo apt-get install -qq -y libpcre3-dev
     
     - name: Build OpenSSL
       if: matrix.boringssl == ''

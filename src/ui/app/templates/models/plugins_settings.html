@@ -79,16 +79,9 @@
                     </button>
                 </div>
             {% endif %}
-            <div {% if service_method == "autoconf" or is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{% if is_readonly %}The database is in readonly{% else %}The service was created using the autoconf method{% endif %}
-                 therefore
-                 the
-                 configuration
-                 is
-                 locked
-                 "
-                 {% endif %}>
+            <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The database is in readonly therefore the configuration is locked " {% endif %}>
                 <button type="button"
-                        class="btn btn-sm btn-bw-green save-settings {% if service_method == "autoconf" or is_readonly %}disabled{% endif %}">
+                        class="btn btn-sm btn-bw-green save-settings{% if is_readonly %} disabled{% endif %}">
                     <i class="bx bx-save bx-sm"></i>
                     <span class="d-none d-md-inline">&nbsp;Save</span>
                 </button>
@@ -112,16 +105,9 @@
             </button>
         </div>
     {% endif %}
-    <div {% if service_method == "autoconf" or is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{% if is_readonly %}The database is in readonly{% else %}The service was created using the autoconf method{% endif %}
-         therefore
-         the
-         configuration
-         is
-         locked
-         "
-         {% endif %}>
+    <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The database is in readonly therefore the configuration is locked " {% endif %}>
         <button type="button"
-                class="btn btn-sm btn-bw-green save-settings p-1_5 {% if service_method == "autoconf" or is_readonly %}disabled{% endif %}">
+                class="btn btn-sm btn-bw-green save-settings p-1_5{% if is_readonly %} disabled{% endif %}">
             <i class="bx bx-save bx-xs"></i>
             &nbsp;Save
         </button>
@@ -142,7 +128,8 @@
                             {{ plugin_data["name"] }}&nbsp;－&nbsp;v{{ plugin_data["version"] }}&nbsp;－&nbsp;{{ plugin_types[plugin_data["type"]].get('icon', '<img src="' + pro_diamond_url + '"
      alt="Pro plugin"
      width="18px"
-     height="15.5px">') |safe }}
+     height="15.5px"
+     loading="lazy">') |safe }}
                         </h5>
                         <p class="card-subtitle text-muted text-truncate mt-1 courier-prime">{{ plugin_data["description"] }}</p>
                     </div>
@@ -186,10 +173,6 @@
                             {% set setting_method = setting_config.get("method", "default") %}
                             {% set setting_template = setting_config.get("template", "") %}
                             {% set disabled = setting_method not in ('ui', 'default') and (current_endpoint == "global-config" or not setting_config.get("global")) %}
-                            {% if service_method == "autoconf" %}
-                                {% set setting_method = "autoconf" %}
-                                {% set disabled = true %}
-                            {% endif %}
                             {% if current_endpoint == "new" or clone %}
                                 {% set setting_method = "default" %}
                                 {% set disabled = false %}
@@ -290,17 +273,10 @@
                                                 <div class="d-flex align-items-center">
                                                     {% if setting_suffix == "0" %}
                                                         <div class="me-1"
-                                                             {% if service_method == "autoconf" or is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{% if is_readonly %}The database is in readonly{% else %}The service was created using the autoconf method{% endif %}
-                                                             therefore
-                                                             multiple
-                                                             settings
-                                                             are
-                                                             locked
-                                                             "
-                                                             {% endif %}>
+                                                             {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The database is in readonly therefore multiple settings are locked " {% endif %}>
                                                             <button id="add-multiple-{{ plugin }}-{{ multiple }}"
                                                                     type="button"
-                                                                    class="btn btn-xs btn-text-bw-green rounded-pill add-multiple p-0 pe-2{% if service_method == "autoconf" or is_readonly %} disabled{% endif %}">
+                                                                    class="btn btn-xs btn-text-bw-green rounded-pill add-multiple p-0 pe-2{% if is_readonly %} disabled{% endif %}">
                                                                 <i class="bx bx-plus-circle bx-sm"></i>&nbsp;ADD
                                                             </button>
                                                         </div>
@@ -332,10 +308,6 @@
                                                         {% set setting_method = setting_config.get("method", "default") %}
                                                         {% set setting_template = setting_config.get("template", "") %}
                                                         {% set disabled = setting_method not in ('ui', 'default') and (current_endpoint == "global-config" or not setting_config.get("global")) %}
-                                                        {% if service_method == "autoconf" %}
-                                                            {% set setting_method = "autoconf" %}
-                                                            {% set disabled = true %}
-                                                        {% endif %}
                                                         {% if current_endpoint == "new" or clone %}
                                                             {% set setting_method = "default" %}
                                                             {% set disabled = false %}

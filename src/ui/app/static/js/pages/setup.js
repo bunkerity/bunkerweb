@@ -389,6 +389,29 @@ $(document).ready(() => {
           $confirmPasswordInput.removeClass("is-invalid");
           $confirmPasswordInput.siblings(".invalid-feedback").text("");
         }
+
+        const $subscribeNewsletter = $("#setup-subscribe-newsletter");
+        const $email = $("#email");
+        if (
+          $subscribeNewsletter.prop("checked") &&
+          (!$email.val() || !$email.get(0).checkValidity())
+        ) {
+          $("#email").addClass("is-invalid");
+          let $feedback = $("#email").siblings(".invalid-feedback");
+          if (!$feedback.length) {
+            const $textSpan = $("#email")
+              .parent()
+              .find("span.input-group-text");
+            $feedback = $(
+              '<div class="invalid-feedback">This field is required if you want to subscribe to the newsletter.</div>',
+            ).insertAfter($textSpan.length ? $textSpan : $("#email"));
+          } else {
+            $feedback.text(
+              "This field is required if you want to subscribe to the newsletter.",
+            );
+          }
+          isStepValid = false;
+        }
       } else if (!uiReverseProxy && currentStep === 2) {
         const autoLetsEncrypt = $("#AUTO_LETS_ENCRYPT").prop("checked");
         const letsEncryptChallenge = $("#LETS_ENCRYPT_CHALLENGE")
@@ -548,6 +571,31 @@ $(document).ready(() => {
   $saveSettingsButton.on("click", function (e) {
     e.preventDefault();
     if (currentStep !== 3) return;
+    const $subscribeNewsletter = $("#setup-subscribe-newsletter");
+    if ($subscribeNewsletter.prop("checked")) {
+      const $email = $("#email");
+
+      if (!$email.length || !$email.val() || !$email.get(0).checkValidity()) {
+        // Show toast notification instead of validation error
+        const feedbackToast = $("#feedback-toast").clone();
+        feedbackToast.attr("id", `feedback-toast-${toastNum++}`);
+        feedbackToast.addClass("border-warning");
+        feedbackToast.find(".toast-header").addClass("text-warning");
+        feedbackToast.find("span").text("Newsletter Subscription");
+        feedbackToast
+          .find("div.toast-body")
+          .text(
+            "Please enter a valid email address to subscribe to the newsletter.",
+          );
+        feedbackToast.appendTo("#feedback-toast-container");
+        feedbackToast.toast("show");
+        return;
+      }
+
+      $("#newsletter-email").val($email.val());
+      $("#setup-newsletter-form").submit();
+    }
+
     $("#loadingModal").modal("show");
 
     // Create a new FormData object
@@ -603,7 +651,7 @@ $(document).ready(() => {
         "lets_encrypt_dns_credential_items",
         $("#LETS_ENCRYPT_DNS_CREDENTIAL_ITEMS")
           .val()
-          .split("\n")
+          .split(/\r?\n/)
           .map((item) => item.trim())
           .filter((item) => item !== ""),
       );
@@ -812,6 +860,17 @@ $(document).ready(() => {
     $key.prop("disabled", !isChecked);
     $certData.prop("disabled", !isChecked);
     $keyData.prop("disabled", !isChecked);
+  });
+
+  $("#setup-newsletter-form").on("click", function (e) {
+    e.preventDefault();
+    const $checkbox = $("#setup-subscribe-newsletter");
+    $checkbox.prop("checked", !$checkbox.prop("checked"));
+    $checkbox.trigger("change");
+  });
+
+  $("#setup-subscribe-newsletter").on("change", function () {
+    $("#email-optional").toggleClass("d-none", this.checked);
   });
 
   // Before Unload Event to Warn Users About Unsaved Changes

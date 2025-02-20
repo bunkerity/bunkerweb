@@ -137,79 +137,62 @@ function limit:access()
 		return self:ret(true, "limit request not enabled")
 	end
 	-- Check if URI is limited
-	local rate
-	for k, v in pairs(self.rules) do
-		if k ~= "/" and regex_match(self.ctx.bw.uri, k) then
-			rate = v
+	local uri = self.ctx.bw.uri
+	local rate = self.rules["/"]
+	for pattern, r in pairs(self.rules) do
+		if pattern ~= "/" and regex_match(uri, pattern) then
+			rate = r
 			break
 		end
 	end
 	if not rate then
-		if self.rules["/"] then
-			rate = self.rules["/"]
-		else
-			return self:ret(true, "no rule for " .. self.ctx.bw.uri)
-		end
+		return self:ret(true, "no rule for " .. uri)
 	end
-	-- Check if limit is reached
-	local _, _, rate_max, rate_time = rate:find("(%d+)r/(.)")
-	local limited, err, current_rate = self:limit_req(tonumber(rate_max), rate_time)
+	-- Parse rate and extract the maximum limit and time unit
+	local rate_max, rate_time = rate:match("(%d+)r/(.)")
+	rate_max = tonumber(rate_max)
+	local limited, err, current_rate = self:limit_req(rate_max, rate_time)
 	if limited == nil then
 		return self:ret(false, err)
 	end
-	-- Limit reached
+
+	local addr = self.ctx.bw.remote_addr
+
 	if limited then
-		self:set_metric("counters", "limited_uri_" .. self.ctx.bw.uri, 1)
+		self:set_metric("counters", "limited_uri_" .. uri, 1)
 		local security_mode = get_security_mode(self.ctx)
+		local msg
 		if security_mode == "block" then
-			return self:ret(
-				true,
-				"client IP "
-					.. self.ctx.bw.remote_addr
-					.. " is limited for URL "
-					.. self.ctx.bw.uri
-					.. " (current rate = "
-					.. current_rate
-					.. "r/"
-					.. rate_time
-					.. " and max rate = "
-					.. rate
-					.. ")",
-				HTTP_TOO_MANY_REQUESTS
+			msg = string.format(
+				"client IP %s is limited for URL %s (current rate = %sr/%s and max rate = %s)",
+				addr,
+				uri,
+				current_rate,
+				rate_time,
+				rate
 			)
 		else
-			return self:ret(
-				true,
-				"detected client IP "
-					.. self.ctx.bw.remote_addr
-					.. " limit for URL "
-					.. self.ctx.bw.uri
-					.. " (current rate = "
-					.. current_rate
-					.. "r/"
-					.. rate_time
-					.. " and max rate = "
-					.. rate
-					.. ")",
-				HTTP_TOO_MANY_REQUESTS
+			msg = string.format(
+				"detected client IP %s limit for URL %s (current rate = %sr/%s and max rate = %s)",
+				addr,
+				uri,
+				current_rate,
+				rate_time,
+				rate
 			)
 		end
+		return self:ret(true, msg, HTTP_TOO_MANY_REQUESTS)
 	end
-	-- Limit not reached
-	return self:ret(
-		true,
-		"client IP "
-			.. self.ctx.bw.remote_addr
-			.. " is not limited for URL "
-			.. self.ctx.bw.uri
-			.. " (current rate = "
-			.. current_rate
-			.. "r/"
-			.. rate_time
-			.. " and max rate = "
-			.. rate
-			.. ")"
+
+	local msg = string.format(
+		"client IP %s is not limited for URL %s (current rate = %sr/%s and max rate = %s)",
+		addr,
+		uri,
+		current_rate,
+		rate_time,
+		rate
 	)
+	return self:ret(true, msg)
 end
 
 function limit:limit_req(rate_max, rate_time)

@@ -294,7 +294,6 @@ $(document).ready(() => {
         if (settingType === "hidden") return;
 
         const settingName = $this.attr("name");
-        const originalValue = $this.data("original");
         let settingValue = $this.val();
 
         if ($this.is("select")) {
@@ -308,14 +307,6 @@ $(document).ready(() => {
           settingName &&
           $this.attr("id").startsWith("multiple-") &&
           /_\d+$/.test(settingName);
-
-        if (
-          !isEasy &&
-          settingName !== "SERVER_NAME" &&
-          settingValue == originalValue &&
-          !isMultipleSetting
-        )
-          return;
 
         appendHiddenInput(form, settingName, settingValue);
       });
@@ -372,7 +363,7 @@ $(document).ready(() => {
       };
 
       // Parse original and default configurations
-      const configOriginals = parseConfig("#raw-config-originals");
+      const entireconfigOriginals = parseConfig("#raw-entire-config");
       const configDefaults = parseConfig("#raw-config-defaults");
 
       // Sets to keep track of processed keys
@@ -396,12 +387,6 @@ $(document).ready(() => {
             return;
           }
 
-          // Skip unchanged values except for 'IS_DRAFT'
-          if (key !== "IS_DRAFT" && configOriginals[key] === value) {
-            skippedKeys.add(key);
-            return;
-          }
-
           appendHiddenInput(form, key, value);
           formKeys.add(key);
         });
@@ -409,6 +394,14 @@ $(document).ready(() => {
 
       // Append default values if they are not already in the form and not skipped
       Object.entries(configDefaults).forEach(([key, value]) => {
+        if (!formKeys.has(key) && !skippedKeys.has(key)) {
+          appendHiddenInput(form, key, value);
+          formKeys.add(key);
+        }
+      });
+
+      // Append original values if they are not already in the form and not skipped
+      Object.entries(entireconfigOriginals).forEach(([key, value]) => {
         if (!formKeys.has(key) && !skippedKeys.has(key)) {
           appendHiddenInput(form, key, value);
           formKeys.add(key);
@@ -836,7 +829,6 @@ $(document).ready(() => {
         return;
       }
     }
-    $(window).off("beforeunload");
     form.appendTo("body").submit();
   });
 
@@ -998,7 +990,11 @@ $(document).ready(() => {
     $(`button[data-bs-target="#navs-templates-${usedTemplate}"]`).tab("show");
   }
 
-  if (currentMode === "easy" && currentTemplate !== "low") {
+  if (
+    !$(`button[data-bs-target="#navs-templates-${currentTemplate}"]`).hasClass(
+      "active",
+    )
+  ) {
     $(`button[data-bs-target="#navs-templates-${currentTemplate}"]`).tab(
       "show",
     );
@@ -1061,11 +1057,11 @@ $(document).ready(() => {
     if ($serviceMethodInput.val() === "autoconf") {
       const feedbackToast = $("#feedback-toast").clone(); // Clone the feedback toast
       feedbackToast.attr("id", `feedback-toast-${toastNum++}`); // Corrected to set the ID for the failed toast
-      feedbackToast.find("span").text("The service method is autoconf.");
+      feedbackToast.find("span").text("Disclaimer");
       feedbackToast
         .find("div.toast-body")
         .html(
-          "<p>As the service method is set to autoconf, the configuration is locked. <div class='fw-bolder'>Any changes made will not be saved.</div><div class='fst-italic'>This is to prevent conflicts with the autoconf and the web UI.</div></p>",
+          "<div class='fw-bolder'>If the service is removed or restarted, your UI configuration will be lost.</div>This is because the service's method is 'autoconf', designed to prevent configuration conflicts.",
         );
       feedbackToast.attr("data-bs-autohide", "false");
       feedbackToast.appendTo("#feedback-toast-container"); // Ensure the toast is appended to the container
@@ -1128,33 +1124,11 @@ $(document).ready(() => {
     }, 30);
   });
 
-  $(document).on("keydown", ".plugin-setting", function () {
+  $(document).on("keydown", ".plugin-setting", function (e) {
     if (e.key === "Enter") {
       e.preventDefault();
       $(".save-settings").trigger("click");
     }
-  });
-
-  $(window).on("beforeunload", function (e) {
-    if (isReadOnly) return;
-
-    const form = getFormFromSettings($(this));
-    let minSettings = 4;
-    if (!form.find("input[name='IS_DRAFT']").length) minSettings = 1;
-
-    const draftInput = $("#is-draft");
-    const wasDraft = draftInput.data("original") === "yes";
-    let isDraft = draftInput.val() === "yes";
-    if (currentMode === "raw")
-      isDraft = form.find("input[name='IS_DRAFT']").val() === "yes";
-
-    if (form.children().length <= minSettings && isDraft === wasDraft) return;
-
-    // Cross-browser compatibility (for older browsers)
-    var message =
-      "Are you sure you want to leave? Changes you made may not be saved.";
-    e.returnValue = message; // Standard for most browsers
-    return message; // Required for some browsers
   });
 
   isInit = false;

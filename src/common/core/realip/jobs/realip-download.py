@@ -7,6 +7,7 @@ from os import getenv, sep
 from os.path import join, normpath
 from sys import exit as sys_exit, path as sys_path
 from time import sleep
+from traceback import format_exc
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("db",))]:
     if deps_path not in sys_path:
@@ -94,35 +95,52 @@ try:
 
     urls = set()
     failed_urls = set()
+    # Initialize aggregation per kind with service tracking
+    aggregated_recap = {
+        "total_services": set(),
+        "total_urls": 0,
+        "downloaded_urls": 0,
+        "skipped_urls": 0,
+        "failed_count": 0,
+        "total_lines": 0,
+    }
 
     for service, urls_list in services_realip_urls.items():
-        if not urls_list:
-            if JOB.job_path.joinpath("" if service == "global" else service, "combined.list").is_file():
-                LOGGER.warning(f"{service} realip combined.list is cached but no URL is configured, removing from cache...")
-                deleted, err = JOB.del_cache("combined.list", service_id="" if service == "global" else service)
-                if not deleted:
-                    LOGGER.warning(f"Couldn't delete {service} combined.list from cache : {err}")
-            continue
+        # Track that this service provided URLs for the current kind
+        if service != "global":
+            aggregated_recap["total_services"].add(service)
 
-        # Write combined data of the kind in memory and check if it has changed
         content = b""
         for url in urls_list:
             url_file = f"{bytes_hash(url, algorithm='sha1')}.list"
-            urls.add(url_file)
             cached_url = JOB.get_cache(url_file, with_info=True, with_data=True)
             try:
-                # Check if the URL has already been downloaded
+                if url_file not in urls:
+                    aggregated_recap["total_urls"] += 1
+
+                # If the URL has recently been downloaded, use cache
                 if url in failed_urls:
-                    continue
+                    if url_file not in urls:
+                        aggregated_recap["failed_count"] += 1
                 elif isinstance(cached_url, dict) and cached_url["last_update"] > (datetime.now().astimezone() - timedelta(hours=1)).timestamp():
-                    LOGGER.info(f"URL {url} has already been downloaded less than 1 hour ago, skipping download...")
+                    LOGGER.debug(f"URL {url} has already been downloaded less than 1 hour ago, skipping download...")
+                    if url_file not in urls:
+                        aggregated_recap["skipped_urls"] += 1
                     # Remove first line (URL) and add to content
                     content += b"\n".join(cached_url["data"].split(b"\n")[1:]) + b"\n"
                 else:
-                    LOGGER.info(f"Downloading realip data from {url} ...")
+                    LOGGER.info(f"Downloading Real IP data from {url} ...")
+                    failed = False
                     if url.startswith("file://"):
-                        with open(normpath(url[7:]), "rb") as f:
-                            iterable = f.readlines()
+                        try:
+                            with open(normpath(url[7:]), "rb") as f:
+                                iterable = f.readlines()
+                        except OSError as e:
+                            failed_urls.add(url)
+                            if url_file not in urls:
+                                aggregated_recap["failed_count"] += 1
+                            LOGGER.error(f"Error while opening file {url[7:]} : {e}")
+                            failed = True
                     else:
                         max_retries = 3
                         retry_count = 0
@@ -139,55 +157,77 @@ try:
 
                         if resp.status_code != 200:
                             LOGGER.warning(f"Got status code {resp.status_code}, skipping...")
-                            continue
+                            failed_urls.add(url)
+                            if url_file not in urls:
+                                aggregated_recap["failed_count"] += 1
+                            failed = True
+                        else:
+                            iterable = resp.iter_lines()
 
-                        iterable = resp.iter_lines()
+                    if not failed:
+                        if url_file not in urls:
+                            aggregated_recap["downloaded_urls"] += 1
 
-                    i = 0
-                    for line in iterable:
-                        line = line.strip().split(b" ")[0]
+                        count_lines = 0
+                        for line in iterable:
+                            line = line.strip().split(b" ")[0]
 
-                        if not line or line.startswith((b"#", b";")):
-                            continue
+                            if not line or line.startswith((b"#", b";")):
+                                continue
 
-                        ok, data = check_line(line)
-                        if ok:
-                            content += data + b"\n"
-                            i += 1
+                            ok, data = check_line(line)
+                            if ok:
+                                content += data + b"\n"
+                                count_lines += 1
 
-                    LOGGER.info(f"Downloaded {i} realip from {url}")
+                        aggregated_recap["total_lines"] += count_lines
 
-                    cached, err = JOB.cache_file(url_file, b"# Downloaded from " + url.encode("utf-8") + b"\n" + content)
-                    if not cached:
-                        LOGGER.error(f"Error while caching url content : {err}")
+                        cached, err = JOB.cache_file(url_file, b"# Downloaded from " + url.encode("utf-8") + b"\n" + content)
+                        if not cached:
+                            LOGGER.error(f"Error while caching url content for {url}: {err}")
             except BaseException as e:
                 status = 2
-                LOGGER.error(f"Exception while getting {service} realip from {url} :\n{e}")
+                LOGGER.error(f"Exception while getting {service} data from {url} :\n{e}")
                 failed_urls.add(url)
+                if url_file not in urls:
+                    aggregated_recap["failed_count"] += 1
+            urls.add(url_file)
 
         if not content:
-            LOGGER.warning(f"No data for {service}, skipping...")
+            LOGGER.warning(f"No data for {service} combined.list, skipping...")
             continue
 
         # Check if file has changed
         new_hash = bytes_hash(content)
         old_hash = JOB.cache_hash("combined.list", service_id="" if service == "global" else service)
         if new_hash == old_hash:
-            LOGGER.info(f"New {service} file combined.list is identical to cache file, reload is not needed")
+            LOGGER.debug(f"{service} file combined.list is identical to cache file, reload is not needed")
             continue
         elif old_hash:
-            LOGGER.info(f"New {service} file combined.list is different than cache file, reload is needed")
+            LOGGER.debug(f"{service} file combined.list is different than cache file, reload is needed")
         else:
-            LOGGER.info(f"New {service} file combined.list is not in cache, reload is needed")
+            LOGGER.debug(f"New {service} file combined.list is not in cache, reload is needed")
 
         # Put file in cache
         cached, err = JOB.cache_file("combined.list", content, service_id="" if service == "global" else service, checksum=new_hash)
         if not cached:
-            LOGGER.error(f"Error while caching realip : {err}")
+            LOGGER.error(f"Error while caching combined list for {service} : {err}")
             status = 2
             continue
 
         status = 1 if status != 2 else 2
+
+    # Log a detailed recap per kind across services, only if there is at least one service using the kind
+    service_count = len(aggregated_recap["total_services"])
+    if service_count:
+        successful = aggregated_recap["downloaded_urls"]
+        skipped = aggregated_recap["skipped_urls"]
+        failed = aggregated_recap["failed_count"]
+        total_lines = aggregated_recap["total_lines"]
+        LOGGER.info(
+            f"Recap for combined.list urls: Total Services: {service_count}, Successful: {successful}, "
+            f"Skipped (cached): {skipped}, Failed: {failed}, Total Lines: {total_lines}"
+        )
 
     # Remove old files
     for url_file in JOB.job_path.glob("*.list"):
@@ -204,6 +244,7 @@ except SystemExit as e:
     status = e.code
 except BaseException as e:
     status = 2
+    LOGGER.debug(format_exc())
     LOGGER.error(f"Exception while running realip-download.py :\n{e}")
 
 sys_exit(status)

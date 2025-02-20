@@ -62,37 +62,6 @@ class UIDatabase(Database):
 
             return ui_user_data
 
-    def get_ui_users(self, *, as_dict: bool = False) -> Union[str, List[Union[UiUsers, dict]]]:
-        """Get ui users."""
-        with self._db_session() as session:
-            try:
-                users = (
-                    session.query(UiUsers).options(joinedload(UiUsers.roles), joinedload(UiUsers.recovery_codes), joinedload(UiUsers.columns_preferences)).all()
-                )
-                if not as_dict:
-                    return users
-
-                users_data = []
-                for user in users:
-                    user_data = {
-                        "username": user.username,
-                        "email": user.email,
-                        "password": user.password.encode("utf-8"),
-                        "method": user.method,
-                        "theme": user.theme,
-                        "totp_secret": user.totp_secret,
-                        "creation_date": user.creation_date.astimezone(),
-                        "update_date": user.update_date.astimezone(),
-                        "roles": [role.role_name for role in user.roles],
-                        "recovery_codes": [recovery_code.code for recovery_code in user.recovery_codes],
-                    }
-
-                    users_data.append(user_data)
-
-                return users_data
-            except BaseException as e:
-                return str(e)
-
     def create_ui_user(
         self,
         username: str,
@@ -412,36 +381,6 @@ class UIDatabase(Database):
                 return str(e)
 
         return ""
-
-    def get_ui_user_sessions(self, username: str, current_session_id: Optional[str] = None) -> List[dict]:
-        """Get ui user sessions."""
-        with self._db_session() as session:
-            sessions = []
-            if current_session_id:
-                current_session = session.query(UserSessions).filter_by(user_name=username, id=current_session_id).all()
-                other_sessions = (
-                    session.query(UserSessions)
-                    .filter_by(user_name=username)
-                    .filter(UserSessions.id != current_session_id)
-                    .order_by(UserSessions.creation_date.desc())
-                    .all()
-                )
-                query = current_session + other_sessions
-            else:
-                query = session.query(UserSessions).filter_by(user_name=username).order_by(UserSessions.creation_date.desc())
-
-            for session_data in query:
-                sessions.append(
-                    {
-                        "id": session_data.id,
-                        "ip": session_data.ip,
-                        "user_agent": session_data.user_agent,
-                        "creation_date": session_data.creation_date,
-                        "last_activity": session_data.last_activity,
-                    }
-                )
-
-            return sessions
 
     def delete_ui_user_old_sessions(self, username: str) -> str:
         """Delete ui user old sessions."""

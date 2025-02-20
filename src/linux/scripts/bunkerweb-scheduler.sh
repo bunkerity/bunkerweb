@@ -135,35 +135,55 @@ EOL
 
     # Update configuration files
     if [ "$current_version" != "$installed_version" ]; then
-        if sed -i "s|^sqlalchemy\\.url =.*$|sqlalchemy.url = $DATABASE_URI|" alembic.ini; then
-            if sed -i "s|^version_locations =.*$|version_locations = ${DATABASE}_versions|" alembic.ini; then
-                # Find the corresponding Alembic revision by scanning migration files
-                MIGRATION_DIR="/usr/share/bunkerweb/db/alembic/${DATABASE}_versions"
-                NORMALIZED_VERSION=$(echo "$current_version" | tr '.' '_' | tr '-' '_')
-                REVISION=$(find "$MIGRATION_DIR" -maxdepth 1 -type f -name "*_upgrade_to_version_${NORMALIZED_VERSION}.py" -exec basename {} \; | awk -F_ '{print $1}')
+        if [ "$current_version" != "dev" ] && [ "$current_version" != "testing" ]; then
+            if sed -i "s|^sqlalchemy\\.url =.*$|sqlalchemy.url = $DATABASE_URI|" alembic.ini; then
+                if sed -i "s|^version_locations =.*$|version_locations = ${DATABASE}_versions|" alembic.ini; then
+                    # Find the corresponding Alembic revision by scanning migration files
+                    MIGRATION_DIR="/usr/share/bunkerweb/db/alembic/${DATABASE}_versions"
+                    NORMALIZED_VERSION=$(echo "$current_version" | tr '.' '_' | tr '-' '_')
+                    REVISION=$(find "$MIGRATION_DIR" -maxdepth 1 -type f -name "*_upgrade_to_version_${NORMALIZED_VERSION}.py" -exec basename {} \; | awk -F_ '{print $1}')
 
-                if [ -z "$REVISION" ]; then
-                    log "SYSTEMCTL" "❌" "No migration file found for database version: $current_version"
-                    exit 1
-                fi
-
-                # Stamp the database with the determined revision
-                if python3 -m alembic stamp "$REVISION"; then
-                    # Run database migration
-                    log "SYSTEMCTL" "ℹ️" "Running database migration..."
-                    if ! python3 -m alembic upgrade head; then
-                        log "SYSTEMCTL" "❌" "Database migration failed"
+                    if [ "$current_version" != "dev" ] && [ "$current_version" != "testing" ] && [ -z "$REVISION" ]; then
+                        log "SYSTEMCTL" "❌" "No migration file found for database version: $current_version"
                         exit 1
                     fi
-                    log "SYSTEMCTL" "✅" "Database migration completed successfully"
+
+                    # Stamp the database with the determined revision
+                    if [ "$current_version" == "dev" ] || [ "$current_version" == "testing" ] || python3 -m alembic stamp "$REVISION"; then
+                        # Run database migration
+                        log "SYSTEMCTL" "ℹ️" "Running database migration..."
+                        if ! python3 -m alembic upgrade head; then
+                            log "SYSTEMCTL" "❌" "Database migration failed"
+                            exit 1
+                        fi
+                        log "SYSTEMCTL" "✅" "Database migration completed successfully"
+                    else
+                        log "SYSTEMCTL" "❌" "Failed to stamp database with revision: $REVISION, migration aborted"
+                    fi
                 else
-                    log "SYSTEMCTL" "❌" "Failed to stamp database with revision: $REVISION, migration aborted"
+                    log "SYSTEMCTL" "❌" "Failed to update version locations in configuration, migration aborted"
                 fi
             else
-                log "SYSTEMCTL" "❌" "Failed to update version locations in configuration, migration aborted"
+                log "SYSTEMCTL" "❌" "Failed to update database URL in configuration, migration aborted"
             fi
         else
-            log "SYSTEMCTL" "❌" "Failed to update database URL in configuration, migration aborted"
+            # Create temporary Python script to update version
+            cat > /tmp/version_update.py << EOL
+import sqlalchemy as sa
+from os import getenv
+
+from Database import Database
+from logger import setup_logger
+
+LOGGER = setup_logger('Scheduler', getenv('CUSTOM_LOG_LEVEL', getenv('LOG_LEVEL', 'INFO')))
+
+db = Database(LOGGER)
+with db.sql_engine.connect() as conn:
+    conn.execute(sa.text("UPDATE bw_metadata SET version = '${installed_version}' WHERE id = 1"))
+EOL
+
+            sudo -E -u nginx -g nginx /bin/bash -c "PYTHONPATH=$PYTHONPATH python3 /tmp/version_update.py"
+            rm -f /tmp/version_update.py
         fi
     fi
 

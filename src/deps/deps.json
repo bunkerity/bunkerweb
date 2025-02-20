@@ -125,9 +125,9 @@
     },
     {
       "id": "lua-resty-openssl",
-      "name": "lua-resty-openssl v1.5.1",
+      "name": "lua-resty-openssl v1.5.2",
       "url": "https://github.com/fffonion/lua-resty-openssl.git",
-      "commit": "a900c5f5897448c181dd58073e51cdeeb3fd0029",
+      "commit": "e901ea8c98f6e159482611952891d3418ab893e0",
       "post_install": "rm -r src/deps/src/lua-resty-openssl/t"
     },
     {
@@ -241,9 +241,9 @@
     },
     {
       "id": "nginx",
-      "name": "Nginx v1.26.2",
+      "name": "Nginx v1.26.3",
       "url": "https://github.com/nginx/nginx.git",
-      "commit": "37fe98355461d2f03d73e6a8e82ac4e4cd85d711",
+      "commit": "1be0fb0c9f9bc3489c7b40576efd6afe6b2eccd5",
       "post_install": "rm -r src/deps/src/nginx/docs"
     },
     {

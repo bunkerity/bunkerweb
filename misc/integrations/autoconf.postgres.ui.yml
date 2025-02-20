@@ -4,7 +4,7 @@ x-env: &env
 
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.0-rc4
+    image: bunkerity/bunkerweb:1.6.1-rc1
     ports:
       - 80:8080
       - 443:8443
@@ -18,7 +18,7 @@ services:
       - bw-services
 
   bw-autoconf:
-    image: bunkerity/bunkerweb-autoconf:1.6.0-rc4
+    image: bunkerity/bunkerweb-autoconf:1.6.1-rc1
     depends_on:
       - bunkerweb
       - bw-docker
@@ -31,11 +31,11 @@ services:
       - bw-db
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.0-rc4
+    image: bunkerity/bunkerweb-scheduler:1.6.1-rc1
     depends_on:
       - bunkerweb
     volumes:
-      - bw-data:/data
+      - bw-storage:/data
     environment:
       <<: *env
       BUNKERWEB_INSTANCES: ""
@@ -47,7 +47,7 @@ services:
       - bw-db
 
   bw-ui:
-    image: bunkerity/bunkerweb-ui:1.6.0-rc4
+    image: bunkerity/bunkerweb-ui:1.6.1-rc1
     networks:
       - bw-universe
       - bw-db
@@ -73,7 +73,7 @@ services:
       POSTGRES_DB: "db"
       PGDATA: "/var/lib/postgresql/data/pgdata"
     volumes:
-      - bw-db:/var/lib/postgresql/data
+      - bw-data:/var/lib/postgresql/data
     networks:
       - bw-db
 
@@ -89,7 +89,7 @@ services:
 
 volumes:
   bw-data:
-  bw-db:
+  bw-storage:
 
 networks:
   bw-universe:

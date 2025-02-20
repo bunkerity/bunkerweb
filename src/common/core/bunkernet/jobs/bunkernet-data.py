@@ -54,7 +54,7 @@ try:
 
     # Check if ID is present
     if not bunkernet_path.joinpath("instance.id").is_file():
-        LOGGER.error("Not downloading BunkerNet data because instance is not registered")
+        LOGGER.warning("Not downloading BunkerNet data because instance is not registered")
         sys_exit(2)
 
     # Don't go further if the cache is fresh

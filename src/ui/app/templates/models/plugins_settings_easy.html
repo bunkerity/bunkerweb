@@ -64,16 +64,9 @@
                     </button>
                 </div>
             {% endif %}
-            <div {% if service_method == "autoconf" or is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{% if is_readonly %}The database is in readonly{% else %}The service was created using the autoconf method{% endif %}
-                 therefore
-                 the
-                 configuration
-                 is
-                 locked
-                 "
-                 {% endif %}>
+            <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The database is in readonly therefore the configuration is locked " {% endif %}>
                 <button type="button"
-                        class="btn btn-sm btn-bw-green save-settings {% if service_method == "autoconf" or is_readonly %}disabled{% endif %}">
+                        class="btn btn-sm btn-bw-green save-settings{% if is_readonly %} disabled{% endif %}">
                     <i class="bx bx-save bx-sm"></i>
                     <span class="d-none d-md-inline">&nbsp;Save</span>
                 </button>
@@ -94,7 +87,8 @@
                         {{ template|capitalize }}&nbsp;－&nbsp;{{ plugin_types[template_plugin["type"]].get('icon', '<img src="' + pro_diamond_url + '"
      alt="Pro plugin"
      width="18px"
-     height="15.5px">') |safe }}
+     height="15.5px"
+     loading="lazy">') |safe }}
                     </h5>
                     <p class="card-subtitle text-muted text-truncate mt-1 courier-prime">{{ template_data["name"] }}</p>
                 </div>
@@ -151,10 +145,6 @@
                                                 {% if not clone %}
                                                     {% set setting_value = template_data["settings"].get(setting, setting_default) %}
                                                 {% endif %}
-                                            {% endif %}
-                                            {% if service_method == "autoconf" %}
-                                                {% set setting_method = "autoconf" %}
-                                                {% set disabled = true %}
                                             {% endif %}
                                             {% if is_readonly %}
                                                 {% set disabled = true %}
@@ -229,14 +219,7 @@
                                                 {% set step_config_method = step_config_value["method"] %}
                                             {% endif %}
                                             <div class="mb-3 pb-6 position-relative h-vh-40"
-                                                 {% if service_method == "autoconf" or is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{% if is_readonly %}The database is in readonly{% else %}The service was created using the autoconf method{% endif %}
-                                                 therefore
-                                                 the
-                                                 configuration
-                                                 is
-                                                 locked
-                                                 "
-                                                 {% endif %}>
+                                                 {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The database is in readonly therefore the configuration is locked " {% endif %}>
                                                 <label for="{{ step_config_id }}" class="form-label fw-semibold fs-6">{{ step_config }}</label>
                                                 <textarea id="{{ step_config_id }}-default" class="visually-hidden">{{ template_data["configs"].get(step_config, "") }}</textarea>
                                                 <div id="{{ step_config_id }}"
@@ -261,16 +244,9 @@
                                             <div></div>
                                         {% endif %}
                                         {% if loop.index == template_data["steps"]|length %}
-                                            <div {% if service_method == "autoconf" or is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{% if is_readonly %}The database is in readonly{% else %}The service was created using the autoconf method{% endif %}
-                                                 therefore
-                                                 the
-                                                 configuration
-                                                 is
-                                                 locked
-                                                 "
-                                                 {% endif %}>
+                                            <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The database is in readonly therefore the configuration is locked " {% endif %}>
                                                 <button type="button"
-                                                        class="btn btn-bw-green save-settings{% if service_method == "autoconf" or is_readonly %} disabled{% endif %}"
+                                                        class="btn btn-bw-green save-settings{% if is_readonly %} disabled{% endif %}"
                                                         data-template="{{ template }}">
                                                     <i class="bx bx-save bx-sm ms-sm-n2"></i>
                                                     <span class="align-middle d-sm-inline-block d-none ms-sm-1">Save</span>

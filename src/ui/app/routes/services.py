@@ -1,7 +1,6 @@
 from concurrent.futures import ThreadPoolExecutor
 from io import BytesIO
 from itertools import chain
-from re import match
 from threading import Thread
 from time import time
 from typing import Dict, List
@@ -11,6 +10,7 @@ from flask_login import login_required
 from app.dependencies import BW_CONFIG, DATA, DB
 
 from app.routes.utils import CUSTOM_CONF_RX, handle_error, verify_data_in_form, wait_applying
+from app.utils import get_blacklisted_settings
 
 services = Blueprint("services", __name__)
 
@@ -277,17 +277,22 @@ def services_service_page(service: str):
                     if "checksum" in data:
                         db_custom_configs[db_custom_config]["checksum"] = data["checksum"]
 
-            if mode != "easy" or service != "new":
-                # Remove already existing fields
-                for variable, value in variables.copy().items():
-                    if (mode == "advanced" or variable != "SERVER_NAME") and value == db_config.get(variable, {"value": None})["value"]:
-                        if match(r"^.+_\d+$", variable):
-                            continue
-                        del variables[variable]
+            variables_to_check = variables.copy()
 
-            variables = BW_CONFIG.check_variables(variables, db_config, new=service == "new", threaded=True)
+            for variable, value in variables.items():
+                if value == db_config.get(variable, {"value": None})["value"]:
+                    del variables_to_check[variable]
 
-            if service != "new" and was_draft == is_draft and not variables and not configs_changed:
+            variables = BW_CONFIG.check_variables(variables, db_config, variables_to_check, new=service == "new", threaded=True)
+
+            no_removed_settings = True
+            blacklist = get_blacklisted_settings()
+            for setting in db_config:
+                if setting not in blacklist and setting not in variables:
+                    no_removed_settings = False
+                    break
+
+            if no_removed_settings and service != "new" and was_draft == is_draft and not variables_to_check and not configs_changed:
                 DATA["TO_FLASH"].append(
                     {
                         "content": f"The service {service} was not edited because no values{' or custom configs' if mode == 'easy' else ''} were changed.",
@@ -333,11 +338,13 @@ def services_service_page(service: str):
             DATA["RELOADING"] = False
 
         DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})
-        Thread(target=update_service, args=(service, variables, is_draft, mode)).start()
+        Thread(target=update_service, args=(service, variables.copy(), is_draft, mode)).start()
 
+        new_service = False
         if service == "new":
             if "SERVER_NAME" not in variables:
                 return redirect(url_for("loading", next=url_for("services.services_page")))
+            new_service = True
             service = variables["SERVER_NAME"].split(" ")[0]
 
         arguments = {}
@@ -349,11 +356,15 @@ def services_service_page(service: str):
         return redirect(
             url_for(
                 "loading",
-                next=url_for(
-                    "services.services_service_page",
-                    service=service,
-                )
-                + f"?{'&'.join([f'{k}={v}' for k, v in arguments.items()])}",
+                next=(
+                    url_for(
+                        "services.services_service_page",
+                        service=service,
+                    )
+                    + f"?{'&'.join([f'{k}={v}' for k, v in arguments.items()])}"
+                    if new_service or variables.get("SERVER_NAME", "").split(" ")[0] == variables.get("OLD_SERVER_NAME", "").split(" ")[0]
+                    else url_for("services.services_page")
+                ),
                 message=f"{'Saving' if service != 'new' else 'Creating'} configuration for {'draft ' if is_draft else ''}service {service}",
             )
         )

@@ -1,7 +1,7 @@
 FROM redhat/ubi9:9.5@sha256:53d6c19d664f4f418ce5c823d3a33dbb562a2550ea249cf07ef10aa063ace38f AS builder
 
 ENV OS=rhel
-ENV NGINX_VERSION=1.26.2
+ENV NGINX_VERSION=1.26.3
 
 # Copy rocky repo
 COPY src/linux/rocky-9.repo /etc/yum.repos.d/rocky.repo
@@ -16,8 +16,8 @@ RUN rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-Rocky-9
 # Install Nginx, fpm and dependencies
 RUN dnf install -y wget make yum-utils && \
   dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm && \
-  dnf install -y --skip-broken --setopt=install_weak_deps=False --nobest openssl-libs openssl-devel && \
-  dnf install -y --skip-broken --setopt=install_weak_deps=False readline-devel python39 python3-devel brotli brotli-devel gperftools-devel perl libxslt-devel libxml2 yajl libxslt bash gd gd-devel gcc-c++ znc-modtcl gawk libtool pcre-devel automake autoconf gcc make git zlib-devel libxml2-devel pkgconf libcurl-devel libmaxminddb && \
+  rpm -e --nodeps openssl-fips-provider-so && \
+  dnf install -y --skip-broken --setopt=install_weak_deps=False openssl-libs openssl-devel readline-devel python39 python3-devel brotli brotli-devel gperftools-devel perl libxslt-devel libxml2 yajl libxslt bash gd gd-devel gcc-c++ znc-modtcl gawk libtool pcre-devel automake autoconf gcc make git zlib-devel libxml2-devel pkgconf libcurl-devel libmaxminddb && \
   dnf install -y https://nginx.org/packages/rhel/9/$(uname -m)/RPMS/nginx-${NGINX_VERSION}-1.el9.ngx.$(uname -m).rpm
 
 WORKDIR /tmp/bunkerweb/deps
@@ -76,10 +76,8 @@ RUN dnf install -y wget redhat-rpm-config rpm-build yum-utils gcc make && \
   rpm -Uvh epel-release*rpm && \
   dnf module -y reset ruby && dnf module -y enable ruby:3.1 && dnf module -y install ruby:3.1/common && \
   dnf install -y ruby-devel && \
-  gem install fpm
-
-# Cleanup
-RUN dnf -y --setopt=install_weak_deps=False autoremove && \
+  gem install fpm && \
+  dnf -y --setopt=install_weak_deps=False autoremove && \
   dnf clean all && \
   rm -rf /var/cache/dnf
 

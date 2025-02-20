@@ -1,6 +1,35 @@
 $(document).ready(function () {
   const baseFlagsUrl = $("#base_flags_url").val().trim();
 
+  const headers = [
+    {
+      title: "Date",
+      tooltip: "The date and time when the Report was created",
+    },
+    { title: "IP Address", tooltip: "The reported IP address" },
+    {
+      title: "Country",
+      tooltip: "The country of the reported IP address",
+    },
+    { title: "Method", tooltip: "The method used by the attacker" },
+    {
+      title: "URL",
+      tooltip: "The URL that was targeted by the attacker",
+    },
+    {
+      title: "Status Code",
+      tooltip: "The HTTP status code returned by BunkerWeb",
+    },
+    { title: "User-Agent", tooltip: "The User-Agent of the attacker" },
+    { title: "Reason", tooltip: "The reason why the Report was created" },
+    {
+      title: "Server name",
+      tooltip: "The Server name that created the report",
+    },
+    { title: "Data", tooltip: "Additional data about the Report" },
+    { title: "Security mode", tooltip: "Security mode" },
+  ];
+
   const countriesDataNames = {
     ad: "Andorra",
     ae: "United Arab Emirates",
@@ -281,6 +310,7 @@ $(document).ready(function () {
     },
     topStart: {},
     topEnd: {
+      search: true,
       buttons: [
         {
           extend: "auto_refresh",
@@ -291,7 +321,6 @@ $(document).ready(function () {
           className: "btn btn-sm btn-outline-primary toggle-filters",
         },
       ],
-      search: true,
     },
     bottomStart: {
       pageLength: {
@@ -414,7 +443,6 @@ $(document).ready(function () {
           searchPanes: {
             show: true,
             combiner: "or",
-            // options: countriesSearchPanesOptions,
           },
           targets: 3,
           render: function (data) {
@@ -426,14 +454,25 @@ $(document).ready(function () {
                   countryCode === "local" ? "zz" : countryCode
                 }.svg"
                      class="border border-1 p-0 me-1"
-                     height="17" />
+                     height="17"
+                     loading="lazy" />
                 &nbsp;－&nbsp;${countryCode === "local" ? "N/A" : data}
               </span>`;
           },
         },
         {
+          searchPanes: {
+            show: true,
+            combiner: "or",
+          },
+          targets: 9,
+          render: function (data) {
+            return data === "_" ? "default server" : data;
+          },
+        },
+        {
           searchPanes: { show: true },
-          targets: [2, 4, 5, 6, 8, 9, 11],
+          targets: [2, 4, 5, 6, 8, 11],
         },
       ],
       order: [[1, "desc"]],
@@ -480,53 +519,42 @@ $(document).ready(function () {
         { data: "security_mode", title: "Security mode" },
       ],
       headerCallback: function (thead) {
-        const headers = [
-          {
-            title: "Date",
-            tooltip: "The date and time when the Report was created",
-          },
-          { title: "IP Address", tooltip: "The reported IP address" },
-          {
-            title: "Country",
-            tooltip: "The country of the reported IP address",
-          },
-          { title: "Method", tooltip: "The method used by the attacker" },
-          {
-            title: "URL",
-            tooltip: "The URL that was targeted by the attacker",
-          },
-          {
-            title: "Status Code",
-            tooltip: "The HTTP status code returned by BunkerWeb",
-          },
-          { title: "User-Agent", tooltip: "The User-Agent of the attacker" },
-          { title: "Reason", tooltip: "The reason why the Report was created" },
-          {
-            title: "Server name",
-            tooltip: "The Server name that created the report",
-          },
-          { title: "Data", tooltip: "Additional data about the Report" },
-          { title: "Security mode", tooltip: "Security mode" },
-        ];
-
-        // Apply tooltips to column headers
-        $(thead)
-          .find("th")
-          .each(function (index) {
-            const header = headers[index - 1]; // Adjust index to skip expandable column
-            if (header) {
-              $(this)
-                .attr("data-bs-toggle", "tooltip")
-                .attr("data-bs-placement", "bottom")
-                .attr("title", header.tooltip);
-            }
-          });
-
-        // Initialize Bootstrap tooltips
-        $('[data-bs-toggle="tooltip"]').tooltip();
+        updateHeaderTooltips(thead, headers);
       },
     },
   });
+
+  // Update tooltips when column visibility changes
+  reports_table.on("column-visibility.dt", function () {
+    updateHeaderTooltips("#reports thead", headers);
+  });
+
+  // Utility function to manage header tooltips
+  function updateHeaderTooltips(selector, headers) {
+    $(selector)
+      .find("th")
+      .each((index, element) => {
+        const thText = $(element).text().trim();
+        headers.forEach((header) => {
+          if (thText === header.title) {
+            $(element).attr({
+              "data-bs-toggle": "tooltip",
+              "data-bs-placement": "bottom",
+              title: header.tooltip,
+            });
+          }
+        });
+      });
+
+    // Clean up and reinitialize tooltips
+    $('[data-bs-toggle="tooltip"]').each(function () {
+      const instance = bootstrap.Tooltip.getInstance(this);
+      if (instance) {
+        instance.dispose();
+      }
+    });
+    $('[data-bs-toggle="tooltip"]').tooltip();
+  }
 
   if (sessionAutoRefresh === "true") {
     toggleAutoRefresh();

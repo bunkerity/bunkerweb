@@ -37,10 +37,7 @@ jobs:
       - run: docker pull ghcr.io/bunkerity/scheduler-tests:testing && docker tag ghcr.io/bunkerity/scheduler-tests:testing local/scheduler-tests:latest
         if: contains(fromJSON('["linux", "k8s"]'), inputs.TYPE) != true
       - run: docker pull ghcr.io/bunkerity/autoconf-tests:testing && docker tag ghcr.io/bunkerity/autoconf-tests:testing local/autoconf-tests:latest
-        if: contains(fromJSON('["autoconf", "swarm"]'), inputs.TYPE)
-      - name: Push images to local repo
-        run: docker tag local/bunkerweb-tests:latest manager:5000/bunkerweb-tests:latest && docker push manager:5000/bunkerweb-tests:latest && docker tag local/scheduler-tests:latest manager:5000/scheduler-tests:latest && docker push manager:5000/scheduler-tests:latest && docker tag local/autoconf-tests:latest manager:5000/autoconf-tests:latest && docker push manager:5000/autoconf-tests:latest
-        if: inputs.TYPE == 'swarm'
+        if: contains(fromJSON('["autoconf"]'), inputs.TYPE)
       - name: Install test dependencies
         run: PIP_BREAK_SYSTEM_PACKAGES=1 pip3 install --no-cache-dir --require-hashes --no-deps -r tests/requirements.txt
       - name: Install Terraform
@@ -73,7 +70,7 @@ jobs:
         if: inputs.TYPE == 'k8s'
         with:
           version: "v1.29.1"
-      - uses: azure/setup-helm@fe7b79cd5ee1e45176fcad797de68ecaf3ca4814 # v4.2.0
+      - uses: azure/setup-helm@b9e51907a09c216f16ebe8536097933489208112 # v4.3.0
         if: inputs.TYPE == 'k8s'
       - name: Pull BW linux ubuntu test image
         if: inputs.TYPE == 'linux'
@@ -108,12 +105,6 @@ jobs:
         run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "${{ inputs.TYPE }}"
         env:
           TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_AUTOCONF }}
-          ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
-      - name: Run tests
-        if: inputs.TYPE == 'swarm'
-        run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "${{ inputs.TYPE }}"
-        env:
-          TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_SWARM }}
           ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
       - name: Run tests
         if: inputs.TYPE == 'k8s'

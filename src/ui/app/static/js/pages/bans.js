@@ -273,11 +273,11 @@ $(document).ready(function () {
   // Assuming baseFlagsUrl, dataCountries, and countriesDataNames are defined
   const countriesSearchPanesOptions = [
     {
-      label: `<img src="${baseFlagsUrl}/zz.svg" class="border border-1 p-0 me-1" height="17" />&nbsp;－&nbsp;N/A`,
+      label: `<img src="${baseFlagsUrl}/zz.svg" class="border border-1 p-0 me-1" height="17" loading="lazy" />&nbsp;－&nbsp;N/A`,
       value: (rowData) => rowData[4].includes("N/A"),
     },
     ...Object.entries(filteredCountriesDataNames).map(([code, name]) => ({
-      label: `<img src="${baseFlagsUrl}/${code.toLowerCase()}.svg" class="border border-1 p-0 me-1" height="17" />&nbsp;－&nbsp;${name}`,
+      label: `<img src="${baseFlagsUrl}/${code.toLowerCase()}.svg" class="border border-1 p-0 me-1" height="17" loading="lazy" />&nbsp;－&nbsp;${name}`,
       value: (rowData) =>
         rowData[4].includes(`data-bs-original-title="${code}"`),
     })),
@@ -440,13 +440,13 @@ $(document).ready(function () {
     },
     topStart: {},
     topEnd: {
+      search: true,
       buttons: [
         {
           extend: "toggle_filters",
           className: "btn btn-sm btn-outline-primary toggle-filters",
         },
       ],
-      search: true,
     },
     bottomStart: {
       info: true,

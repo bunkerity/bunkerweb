@@ -40,16 +40,14 @@
                     <i class="menu-icon tf-icons dark-mode-toggle-icon bx bx-{% if theme == "light" %}sun{% else %}moon{% endif %}"></i>
                     <div class="d-flex align-items-center justify-content-center w-100 h-100">
                         <label class="setting-checkbox-label me-2 mb-0" for="dark-mode-toggle">Light</label>
-                        <div class="form-check form-switch mb-0"
-                             {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The database is in readonly mode, therefore the theme cannot be changed"{% endif %}>
+                        <div class="form-check form-switch mb-0">
                             <input id="dark-mode-toggle"
                                    name="dark-mode-toggle"
                                    class="form-check-input"
                                    type="checkbox"
                                    role="switch"
                                    data-root-url="{{ url_for('profile') }}"
-                                   {% if theme == "dark" %}checked{% endif %}
-                                   {% if is_readonly %}disabled{% endif %} />
+                                   {% if theme == "dark" %}checked{% endif %} />
                         </div>
                         <label class="setting-checkbox-label mb-0" for="dark-mode-toggle">Dark</label>
                     </div>
@@ -86,6 +84,20 @@
                     {% endif %}
                 </li>
             {% endfor %}
+            <li class="menu-item{% if current_endpoint == 'pro' %} active{% endif %}">
+                <a href="{{ url_for('pro') }}" class="menu-link">
+                    <img class="menu-icon tf-icons"
+                         src="{{ pro_diamond_url }}"
+                         alt="Pro plugin">
+                    <div class="text-truncate" data-i18n="Pro">Pro</div>
+                </a>
+            </li>
+            <li class="menu-item{% if current_endpoint == 'support' %} active{% endif %}">
+                <a href="{{ url_for('support') }}" class="menu-link">
+                    <i class="menu-icon tf-icons bx bx-support"></i>
+                    <div class="text-truncate" data-i18n="Support">Support</div>
+                </a>
+            </li>
             <!-- Plugins Pages -->
             <li class="menu-header text-uppercase align-items-center mb-0">
                 <span class="menu-header-text">Plugins Pages</span>
@@ -146,20 +158,6 @@
             <a href="{{ url_for('about') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-info-circle"></i>
                 <div class="text-truncate" data-i18n="About">About</div>
-            </a>
-        </li>
-        <li class="menu-item{% if current_endpoint == 'pro' %} active{% endif %}">
-            <a href="{{ url_for('pro') }}" class="menu-link">
-                <img class="menu-icon tf-icons"
-                     src="{{ pro_diamond_url }}"
-                     alt="Pro plugin">
-                <div class="text-truncate" data-i18n="Pro">Pro</div>
-            </a>
-        </li>
-        <li class="menu-item{% if current_endpoint == 'support' %} active{% endif %}">
-            <a href="{{ url_for('support') }}" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-support"></i>
-                <div class="text-truncate" data-i18n="Support">Support</div>
             </a>
         </li>
     </ul>

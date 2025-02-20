@@ -58,8 +58,14 @@ def pro_key():
     if not license_key:
         return handle_error("Invalid license key", "pro")
 
-    global_config = DB.get_config(global_only=True, methods=True, filtered_settings=("PRO_LICENSE_KEY",))
-    variables = BW_CONFIG.check_variables({"PRO_LICENSE_KEY": license_key}, global_config, global_config=True)
+    global_config = DB.get_config(global_only=True)
+    global_config_methods = DB.get_config(global_only=True, methods=True)
+    variables = BW_CONFIG.check_variables(
+        global_config | {"PRO_LICENSE_KEY": license_key},
+        global_config_methods,
+        {"PRO_LICENSE_KEY": license_key},
+        global_config=True,
+    )
 
     if not variables:
         flash("The license key is the same as the current one.", "warning")

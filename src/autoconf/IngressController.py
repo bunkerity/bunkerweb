@@ -5,10 +5,12 @@ from os import getenv
 from time import sleep
 from traceback import format_exc
 from typing import List, Tuple
+from threading import Thread, Lock
+
 from kubernetes import client, config, watch
 from kubernetes.client import Configuration
 from kubernetes.client.exceptions import ApiException
-from threading import Thread, Lock
+from urllib3.exceptions import ProtocolError
 
 from Controller import Controller
 
@@ -329,23 +331,27 @@ class IngressController(Controller):
 
         return ret
 
-    def __get_stream_with_retries(self, watch_type, what, retries=3):
+    def __get_stream_with_retries(self, watch_type, what, retries=5):
         """
         Retry logic for streaming events with a capped retry limit.
         """
-        for attempt in range(retries):
+        attempt = 0
+        ignored = False
+        while attempt < retries:
             try:
-                self._logger.info(f"Starting Kubernetes watch for {watch_type}, attempt {attempt + 1}/{retries}")
+                if not ignored:
+                    self._logger.info(f"Starting Kubernetes watch for {watch_type}, attempt {attempt + 1}/{retries}")
+                ignored = False
                 yield from watch.Watch().stream(what)
-            except ApiException as e:
-                if e.status != 410:  # Not a 'Gone' error
-                    self._logger.debug(format_exc())
-                    self._logger.error(f"API exception while watching {watch_type} :\n{e}")
-                else:
-                    self._logger.warning(f"Resource version outdated for {watch_type}, retrying...")
+            except ProtocolError:
+                self._logger.debug(format_exc())
+                sleep(1)
+                ignored = True
+                continue
             except Exception as e:
                 self._logger.debug(format_exc())
                 self._logger.error(f"Unexpected error while watching {watch_type}:\n{e}")
+            attempt += 1
             self._logger.warning(f"Retrying {watch_type} in 5 seconds...")
             sleep(5)
         self._logger.error(f"Failed to watch {watch_type} after {retries} retries.")
@@ -396,7 +402,7 @@ class IngressController(Controller):
 
                         to_apply = True
                         if waiting:
-                            self._logger.debug("Scheduler is already applying a configuration, retrying in 1 second ...")
+                            self._logger.info("Scheduler is already applying a configuration, retrying in 1 second ...")
                             sleep(1)
                             continue
 

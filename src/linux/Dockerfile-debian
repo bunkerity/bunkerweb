@@ -1,7 +1,7 @@
 FROM debian:bookworm-slim@sha256:321341744acb788e251ebd374aecc1a42d60ce65da7bd4ee9207ff6be6686a62 AS builder
 
 ENV OS=debian
-ENV NGINX_VERSION=1.26.2
+ENV NGINX_VERSION=1.26.3
 
 # Install Nginx and dependencies
 RUN apt update && \
@@ -65,10 +65,8 @@ RUN umask 027
 # Install fpm
 RUN apt-get update && \
     apt-get -y install ruby ruby-dev rubygems build-essential autoconf libtool rpm binutils && \
-    gem install -N fpm
-
-# Cleanup
-RUN apt-get -f -y --auto-remove remove build-essential autoconf libtool && \
+    gem install -N fpm && \
+    apt-get -f -y --auto-remove remove build-essential autoconf libtool && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 

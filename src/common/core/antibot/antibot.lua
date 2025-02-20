@@ -60,6 +60,8 @@ function antibot:header()
 		return self:ret(true, "client already resolved the challenge", nil, self.session_data.original_uri)
 	end
 
+	local hdr = ngx.header
+
 	-- Override CSP header
 	local csp_directives = {
 		["default-src"] = "'none'",
@@ -77,6 +79,7 @@ function antibot:header()
 		csp_directives["script-src"] = csp_directives["script-src"]
 			.. "  https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/"
 		csp_directives["frame-src"] = "https://www.google.com/recaptcha/ https://recaptcha.google.com/recaptcha/"
+		csp_directives["connect-src"] = "https://www.google.com/recaptcha/ https://recaptcha.google.com/recaptcha/"
 	elseif self.session_data.type == "hcaptcha" then
 		csp_directives["script-src"] = csp_directives["script-src"] .. "  https://hcaptcha.com https://*.hcaptcha.com"
 		csp_directives["frame-src"] = "https://hcaptcha.com https://*.hcaptcha.com"
@@ -85,13 +88,30 @@ function antibot:header()
 	elseif self.session_data.type == "turnstile" then
 		csp_directives["script-src"] = csp_directives["script-src"] .. "  https://challenges.cloudflare.com"
 		csp_directives["frame-src"] = "https://challenges.cloudflare.com"
+		-- Remove the picture-in-picture directive from the Permissions Policy header if it is present
+		if hdr["Permissions-Policy"] then
+			local policy = hdr["Permissions-Policy"]
+			if type(policy) == "table" then
+				policy = table.concat(policy, ", ")
+			end
+			if policy then
+				local directives = {}
+				for directive in policy:gmatch("[^,]+") do
+					if not directive:match("^%s*picture%-in%-picture=%(%)") then
+						table.insert(directives, directive:match("^%s*(.-)%s*$"))
+					end
+				end
+				local updated = table.concat(directives, ", ")
+				hdr["Permissions-Policy"] = #updated > 0 and updated or nil
+			end
+		end
+	elseif self.session_data.type == "mcaptcha" then
+		csp_directives["frame-src"] = self.variables["ANTIBOT_MCAPTCHA_URL"]
 	end
 	local csp_content = ""
 	for directive, value in pairs(csp_directives) do
 		csp_content = csp_content .. directive .. " " .. value .. "; "
 	end
-
-	local hdr = ngx.header
 
 	hdr["Content-Security-Policy"] = csp_content
 
@@ -306,6 +326,12 @@ function antibot:display_challenge()
 		template_vars.turnstile_sitekey = self.variables["ANTIBOT_TURNSTILE_SITEKEY"]
 	end
 
+	-- mCaptcha case
+	if self.session_data.type == "mcaptcha" then
+		template_vars.mcaptcha_sitekey = self.variables["ANTIBOT_MCAPTCHA_SITEKEY"]
+		template_vars.mcaptcha_url = self.variables["ANTIBOT_MCAPTCHA_URL"]
+	end
+
 	-- Render content
 	render(self.session_data.type .. ".html", template_vars)
 
@@ -476,6 +502,47 @@ function antibot:check_challenge()
 			return nil, "error while decoding JSON from Turnstile API : " .. tdata, nil
 		end
 		if not tdata.success then
+			return false, "client failed challenge", nil
+		end
+		self.session_data.resolved = true
+		self.session_data.time_valid = now()
+		self:set_session_data()
+		return true, "resolved", self.session_data.original_uri
+	end
+
+	-- mCaptcha case
+	if self.session_data.type == "mcaptcha" then
+		read_body()
+		local args, err = get_post_args(1)
+		if err == "truncated" or not args or not args["mcaptcha__token"] then
+			return nil, "missing challenge arg", nil
+		end
+		local httpc, err = http_new()
+		if not httpc then
+			return nil, "can't instantiate http object : " .. err, nil, nil
+		end
+		local payload = {
+			token = args["mcaptcha__token"],
+			key = self.variables["ANTIBOT_MCAPTCHA_SITEKEY"],
+			secret = self.variables["ANTIBOT_MCAPTCHA_SECRET"],
+		}
+		local json_payload = cjson.encode(payload)
+		local res, err = httpc:request_uri(self.variables["ANTIBOT_MCAPTCHA_URL"] .. "/api/v1/pow/siteverify", {
+			method = "POST",
+			body = json_payload,
+			headers = {
+				["Content-Type"] = "application/json",
+			},
+		})
+		httpc:close()
+		if not res then
+			return nil, "can't send request to mCaptcha API : " .. err, nil
+		end
+		local ok, mdata = pcall(decode, res.body)
+		if not ok then
+			return nil, "error while decoding JSON from mCaptcha API : " .. mdata, nil
+		end
+		if not mdata.valid then
 			return false, "client failed challenge", nil
 		end
 		self.session_data.resolved = true

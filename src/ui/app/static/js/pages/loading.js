@@ -44,24 +44,37 @@ $(document).ready(function () {
           response &&
           (response.message === "ok" || response.reloading === false)
         ) {
-          // Clear all intervals and timeout
           clearInterval(reloadingInterval);
-
-          // Redirect to the sanitized nextEndpoint with the current hash if present
           const redirectUrl = new URL(nextEndpoint, window.location.origin);
           if (window.location.hash) {
             redirectUrl.hash = window.location.hash;
           }
-          window.location.href = redirectUrl.href; // Use window.location.href for compatibility
+          window.location.href = redirectUrl.href;
         }
       },
       error: function (jqXHR, textStatus, errorThrown) {
         if (textStatus === "timeout") {
-          // Handle timeout specifically if needed
           console.warn("Request timed out.");
+        } else if (textStatus === "parsererror") {
+          if (
+            !$targetEndpoint.length &&
+            !window.location.pathname.includes("/setup/loading")
+          ) {
+            const redirectUrl =
+              jqXHR.getResponseHeader("Location") || nextEndpoint;
+            const finalUrl = new URL(redirectUrl, window.location.origin);
+            if (window.location.hash) {
+              finalUrl.hash = window.location.hash;
+            }
+            window.location.href = finalUrl.href;
+          }
         } else {
-          // Handle other errors
-          console.error("AJAX request failed: ", textStatus, errorThrown);
+          console.error(
+            "AJAX request failed:",
+            jqXHR.status,
+            textStatus,
+            errorThrown,
+          );
         }
       },
     });

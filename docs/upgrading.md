@@ -74,16 +74,16 @@
                 ```yaml
                 services:
                     bunkerweb:
-                        image: bunkerity/bunkerweb:1.6.0-rc4
+                        image: bunkerity/bunkerweb:1.6.1-rc1
                         ...
                     bw-scheduler:
-                        image: bunkerity/bunkerweb-scheduler:1.6.0-rc4
+                        image: bunkerity/bunkerweb-scheduler:1.6.1-rc1
                         ...
                     bw-autoconf:
-                        image: bunkerity/bunkerweb-autoconf:1.6.0-rc4
+                        image: bunkerity/bunkerweb-autoconf:1.6.1-rc1
                         ...
                     bw-ui:
-                        image: bunkerity/bunkerweb-ui:1.6.0-rc4
+                        image: bunkerity/bunkerweb-ui:1.6.1-rc1
                         ...
                 ```
 
@@ -116,7 +116,7 @@
                     Them, you can update BunkerWeb package :
 
                     ```shell
-                    sudo apt install -y bunkerweb=1.6.0-rc4
+                    sudo apt install -y bunkerweb=1.6.1-rc1
                     ```
 
                     To prevent upgrading BunkerWeb package when executing `apt upgrade`, you can use the following command :
@@ -140,7 +140,7 @@
                     Them, you can update BunkerWeb package :
 
                     ```shell
-                    sudo dnf install -y bunkerweb-1.6.0-rc4
+                    sudo dnf install -y bunkerweb-1.6.1-rc1
                     ```
 
                     To prevent upgrading BunkerWeb package when executing `dnf upgrade`, you can use the following command :
@@ -324,6 +324,56 @@
 
 ## Upgrade from 1.5.X
 
+### What changed?
+
+#### Scheduler
+
+Unlike the 1.5.X releases, the Scheduler service **no longer uses the *docker socket proxy* to fetch BunkerWeb's instances**. Instead, it uses the new `BUNKERWEB_INSTANCES` environment variable.
+
+!!! info "About the `BUNKERWEB_INSTANCES` environment variable"
+
+    This new variable is a list of BunkerWeb instances separated by spaces in this format: `http://bunkerweb:5000 bunkerweb1:5000 bunkerweb2:5000 ...`. The scheduler will then use this list to fetch the instances' configuration and to send the configuration to them.
+
+    * The `http://` prefix is optional.
+    * The port is optional and defaults to the value of the `API_HTTP_PORT` environment variable.
+    * The default value of the `BUNKERWEB_INSTANCES` environment variable is `127.0.0.1`.
+
+In other words, the new system is fully agnostic and generic: the scheduler is in charge of managing a list of BunkerWeb instances and doesn't need to care about the environment.
+
+!!! tip "Autoconf/Kubernetes/Swarm integrations"
+
+    If you are using the `Autoconf`, `Kubernetes`, or `Swarm` integrations, you can set the `BUNKERWEB_INSTANCES` environment variable to an empty string (so that it doesn't try to send the configuration to the default one which is `127.0.0.1`).
+
+    **The instances will be automatically fetched by the controller**. You can also add custom instances to the list that may not be picked up by the controller.
+
+Since the `1.6`, the Scheduler also have a new [built-in healthcheck system](concepts.md), that will check the health of the instances. If an instance becomes unhealthy, the scheduler will stop sending the configuration to it. If the instance becomes healthy again, the scheduler will start sending the configuration to it again.
+
+#### BunkerWeb container
+
+Another important change is that the **settings** that were previously declared on the BunkerWeb container **are now declared on the scheduler**. This means that you'll have to move your settings from the BunkerWeb container to the Scheduler container.
+
+While the settings are now declared on the Scheduler container, **you'll still need to declare api related mandatory settings on the BunkerWeb container** like the `API_WHITELIST_IP` setting which is used to whitelist the Scheduler's IP address, so that it can send the configuration to the instance.
+
+!!! warning "BunkerWeb's container settings"
+
+    Every API related setting that you declare on the BunkerWeb container **have to be mirrored on the Scheduler container** so that it keeps working, as the configuration will be overwritten by the Scheduler's generated configuration.
+
+#### Default values and new settings
+
+We tried our best not to change default value but we have added many other settings. It's highly recommended to read the [security tuning](advanced.md#security-tuning) and [settings](settings.md) sections of the documentation.
+
+#### Templates
+
+We added a new feature called **templates**. Templates provide a structured and standardized approach to defining settings and custom configurations, check the [concepts/templates](concepts.md#templates) section for more information.
+
+#### Autoconf namespaces
+
+We added a **namespace** feature to the autoconf integrations. Namespaces allow you to group your instances and apply settings only to them. Check the following sections according to your Integration for more information:
+
+- [Autoconf/namespaces](integrations.md#namespaces)
+- [Kubernetes/namespaces](integrations.md#namespaces_1)
+- [Swarm/namespaces](integrations.md#namespaces_2)
+
 ### Procedure
 
 1. **Backup the database**:
@@ -460,16 +510,16 @@
                 ```yaml
                 services:
                     bunkerweb:
-                        image: bunkerity/bunkerweb:1.6.0-rc4
+                        image: bunkerity/bunkerweb:1.6.1-rc1
                         ...
                     bw-scheduler:
-                        image: bunkerity/bunkerweb-scheduler:1.6.0-rc4
+                        image: bunkerity/bunkerweb-scheduler:1.6.1-rc1
                         ...
                     bw-autoconf:
-                        image: bunkerity/bunkerweb-autoconf:1.6.0-rc4
+                        image: bunkerity/bunkerweb-autoconf:1.6.1-rc1
                         ...
                     bw-ui:
-                        image: bunkerity/bunkerweb-ui:1.6.0-rc4
+                        image: bunkerity/bunkerweb-ui:1.6.1-rc1
                         ...
                 ```
 
@@ -502,7 +552,7 @@
                     Them, you can update BunkerWeb package :
 
                     ```shell
-                    sudo apt install -y bunkerweb=1.6.0-rc4
+                    sudo apt install -y bunkerweb=1.6.1-rc1
                     ```
 
                     To prevent upgrading BunkerWeb package when executing `apt upgrade`, you can use the following command :
@@ -526,7 +576,7 @@
                     Them, you can update BunkerWeb package :
 
                     ```shell
-                    sudo dnf install -y bunkerweb-1.6.0-rc4
+                    sudo dnf install -y bunkerweb-1.6.1-rc1
                     ```
 
                     To prevent upgrading BunkerWeb package when executing `dnf upgrade`, you can use the following command :
@@ -707,91 +757,3 @@
 
     6. **Downgrade BunkerWeb**.
         - Downgrade BunkerWeb to the previous version by following the same steps as when upgrading BunkerWeb in the [integration Linux page](integrations.md#linux)
-
-### Scheduler
-
-Unlike the 1.5.X releases, the Scheduler service **no longer uses the *docker socket proxy* to fetch BunkerWeb's instances**. Instead, it uses the new `BUNKERWEB_INSTANCES` environment variable.
-
-!!! info "About the `BUNKERWEB_INSTANCES` environment variable"
-
-    This new variable is a list of BunkerWeb instances separated by spaces in this format: `http://bunkerweb:5000 bunkerweb1:5000 bunkerweb2 ...`. The scheduler will then use this list to fetch the instances' configuration and to send the configuration to them.
-
-    * The `http://` prefix is optional.
-    * The port is optional and defaults to the value of the `API_HTTP_PORT` environment variable.
-    * The default value of the `BUNKERWEB_INSTANCES` environment variable is `127.0.0.1`.
-
-!!! tip "Autoconf/Swarm/Kubernetes integrations"
-
-    If you are using the `Autoconf`, `Swarm`, or `Kubernetes` integrations, you can set the `BUNKERWEB_INSTANCES` environment variable to an empty string (so that it doesn't try to send the configuration to the default one which is `127.0.0.1`).
-
-    **The instances will be automatically fetched by the controller**. You can also add custom instances to the list that may not be picked up by the controller.
-
-Since the `1.6.0-beta`, the Scheduler also have a new [built-in healthcheck system](concepts.md#instances-healthcheck), that will check the health of the instances. If an instance becomes unhealthy, the scheduler will stop sending the configuration to it. If the instance becomes healthy again, the scheduler will start sending the configuration to it again.
-
-### BunkerWeb container
-
-Another important change is that the **settings** that were previously declared on the BunkerWeb container **are now declared on the scheduler**. This means that you'll have to move your settings from the BunkerWeb container to the Scheduler container.
-
-While the settings are now declared on the Scheduler container, **you'll still need to declare api related mandatory settings on the BunkerWeb container** like the `API_WHITELIST_IP` setting which is used to whitelist the Scheduler's IP address, so that it can send the configuration to the instance.
-
-!!! warning "BunkerWeb's container settings"
-
-    Every api related setting that you declare on the BunkerWeb container **have to be mirrored on the Scheduler container** so that it keeps working, as the configuration will be overwritten by the Scheduler's generated configuration.
-
-### Default values and new settings
-
-The default value of some settings have changed and we have added many other settings, we recommend you read the [security tuning](security-tuning.md) and [settings](settings.md) sections of the documentation.
-
-### Templates
-
-We added a new feature called **templates**. Templates provide a structured and standardized approach to defining settings and custom configurations, check the [concepts/templates](concepts.md#templates) section for more information.
-
-### Autoconf namespaces
-
-We added a **namespace** feature to the autoconf integrations. Namespaces allow you to group your instances and apply settings only to them. Check the following sections according to your Integration for more information:
-
-- [Autoconf/namespaces](integrations.md#namespaces)
-- [Kubernetes/namespaces](integrations.md#namespaces_1)
-- [Swarm/namespaces](integrations.md#namespaces_2)
-
-## Upgrade from 1.4.X
-
-!!! warning "Read this if you were a 1.4.X user"
-
-    A lot of things changed since the 1.4.X releases. Container-based integrations stacks contain more services but, trust us, fundamental principles of BunkerWeb are still there. You will find ready to use boilerplates for various integrations in the [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.0-rc4/misc/integrations) folder of the repository.
-
-### Scheduler
-
-Back to the 1.4.X releases, jobs (like Let's Encrypt certificate generation/renewal or blacklists download) **were executed in the same container as BunkerWeb**. For the purpose of [separation of concerns](https://en.wikipedia.org/wiki/Separation_of_concerns), we decided to create a **separate service** which is now responsible for managing jobs.
-
-Called **Scheduler**, this service also generates the final configuration used by BunkerWeb and acts as an intermediary between autoconf and BunkerWeb. In other words, the scheduler is the **brain of the BunkerWeb 1.5.X stack**.
-
-You will find more information about the scheduler [here](concepts.md#scheduler).
-
-### Database
-
-BunkerWeb configuration is **no more stored in a plain file** (located at `/etc/nginx/variables.env` if you didn't know it). That's it, we now support a **fully-featured database as a backend** to store settings, cache, custom configs, ... 🥳
-
-Using a real database offers many advantages :
-
-- Backup of the current configuration
-- Usage with multiple services (scheduler, web UI, ...)
-- Upgrade to a new BunkerWeb version
-
-Please note that we actually support, **SQLite**, **MySQL**, **MariaDB** and **PostgreSQL** as backends.
-
-You will find more information about the database [here](concepts.md#database).
-
-### Redis
-
-When BunkerWeb 1.4.X was used in cluster mode (Swarm or Kubernetes integrations), **data were not shared among the nodes**. For example, if an attacker was banned via the "bad behavior" feature on a specific node, **he could still connect to the other nodes**.
-
-Security is not the only reason to have a shared data store for clustered integrations, **caching** is also another one. We can now **store results** of time-consuming operations like (reverse) dns lookups so they are **available for other nodes**.
-
-We actually support **Redis** as a backend for the shared data store.
-
-See the list of [redis settings](settings.md#redis) and the corresponding documentation of your integration for more information.
-
-### Default values and new settings
-
-The default value of some settings have changed and we have added many other settings, we recommend you read the [security tuning](security-tuning.md) and [settings](settings.md) sections of the documentation.

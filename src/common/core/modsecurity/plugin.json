@@ -51,6 +51,15 @@
       "regex": "^.*$",
       "type": "text"
     },
+    "USE_MODSECURITY_GLOBAL_CRS": {
+      "context": "global",
+      "default": "no",
+      "help": "Use ModSecurity CRS in global mode to improve rules loading when you have many services.",
+      "id": "use-modsecurity-global-crs",
+      "label": "ModSecurity global CRS mode",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
     "MODSECURITY_SEC_AUDIT_ENGINE": {
       "context": "multisite",
       "default": "RelevantOnly",

@@ -40,7 +40,7 @@ def support_logs():
     ipv6_pattern = r"(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}"
     domains_pattern = "|".join(map(escape, services))
 
-    pattern = re_compile(rf"\b(?:{ipv4_pattern}|{ipv6_pattern}|{domains_pattern})\b")
+    pattern = re_compile(rf"\b(?:(?P<domain>{domains_pattern})|(?P<ipv4>{ipv4_pattern})|(?P<ipv6>{ipv6_pattern}))\b")
 
     # Create zip buffer
     zip_buffer = BytesIO()
@@ -48,11 +48,13 @@ def support_logs():
         for file in logs_path.glob("*.log"):
             if file.is_file():
                 # Process file line by line to reduce memory usage
-                with file.open() as f:
+                with file.open("rb") as f:
                     content = []
                     for line in f:
+                        line = line.decode("utf-8", errors="replace")
                         line = pattern.sub(
-                            lambda m: "[ANONYMIZED_IPv4]" if "." in m.group() else "[ANONYMIZED_IPv6]" if ":" in m.group() else "[ANONYMIZED_DOMAIN]", line
+                            lambda m: "[ANONYMIZED_DOMAIN]" if m.group("domain") else ("[ANONYMIZED_IPv4]" if m.group("ipv4") else "[ANONYMIZED_IPv6]"),
+                            line,
                         )
                         content.append(line)
                     zip_file.writestr(file.name, "".join(content))

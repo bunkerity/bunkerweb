@@ -56,6 +56,18 @@ class CloudflareProvider(Provider):
     )
 
 
+class DesecProvider(Provider):
+    """deSEC DNS provider."""
+
+    dns_desec_token: str
+
+    _validate_aliases = alias_model_validator(
+        {
+            "dns_desec_token": ("dns_desec_token", "desec_token", "token"),
+        }
+    )
+
+
 class DigitalOceanProvider(Provider):
     """DigitalOcean DNS provider."""
 
@@ -151,12 +163,10 @@ class LinodeProvider(Provider):
     """Linode DNS provider."""
 
     dns_linode_key: str
-    dns_linode_version: str = "4"
 
     _validate_aliases = alias_model_validator(
         {
             "dns_linode_key": ("dns_linode_key", "linode_key", "key"),
-            "dns_linode_version": ("dns_linode_version", "linode_version", "version"),
         }
     )
 

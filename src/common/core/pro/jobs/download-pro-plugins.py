@@ -129,7 +129,18 @@ try:
     if pro_license_key:
         LOGGER.info("BunkerWeb Pro license provided, checking if it's valid...")
         headers["Authorization"] = f"Bearer {pro_license_key}"
-        resp = get(f"{API_ENDPOINT}/pro/status", headers=headers, json=data, timeout=8, allow_redirects=True)
+        max_retries = 3
+        retry_count = 0
+        while retry_count < max_retries:
+            try:
+                resp = get(f"{API_ENDPOINT}/pro/status", headers=headers, json=data, timeout=8, allow_redirects=True)
+                break
+            except ConnectionError as e:
+                retry_count += 1
+                if retry_count == max_retries:
+                    raise e
+                LOGGER.warning(f"Connection refused, retrying in 3 seconds... ({retry_count}/{max_retries})")
+                sleep(3)
 
         if resp.status_code == 403:
             LOGGER.error(f"Access denied to {API_ENDPOINT}/pro-status - please check your BunkerWeb Pro access at https://panel.bunkerweb.io/")
@@ -183,7 +194,18 @@ try:
     if metadata["is_pro"]:
         LOGGER.info("🚀 Your BunkerWeb Pro license is valid, checking if there are new or updated Pro plugins...")
 
-        resp = get(f"{API_ENDPOINT}/pro/download", headers=headers, json=data, timeout=8, stream=True, allow_redirects=True)
+        max_retries = 3
+        retry_count = 0
+        while retry_count < max_retries:
+            try:
+                resp = get(f"{API_ENDPOINT}/pro/download", headers=headers, json=data, timeout=8, stream=True, allow_redirects=True)
+                break
+            except ConnectionError as e:
+                retry_count += 1
+                if retry_count == max_retries:
+                    raise e
+                LOGGER.warning(f"Connection refused, retrying in 3 seconds... ({retry_count}/{max_retries})")
+                sleep(3)
 
         if resp.status_code == 403:
             LOGGER.error(f"Access denied to {API_ENDPOINT}/pro - please check your BunkerWeb Pro access at https://panel.bunkerweb.io/")
