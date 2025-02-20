@@ -5,6 +5,7 @@ $(document).ready(function () {
   const fileList = $("#file-list");
   const pluginNumber = parseInt($("#plugins_number").val());
   const isReadOnly = $("#is-read-only").val().trim() === "True";
+  const userReadOnly = $("#user-read-only").val().trim() === "True";
 
   const setupDeletionModal = (plugins) => {
     const delete_modal = $("#modal-delete-plugins");
@@ -451,7 +452,11 @@ $(document).ready(function () {
           $("#plugins_wrapper .dt-buttons")
             .attr(
               "data-bs-original-title",
-              "The database is in readonly, therefore you cannot create add plugins.",
+              `${
+                userReadOnly
+                  ? "Your account is readonly"
+                  : "The database is in readonly"
+              }, therefore you cannot create add plugins.`,
             )
             .attr("data-bs-placement", "right")
             .tooltip();

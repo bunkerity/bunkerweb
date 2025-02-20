@@ -156,8 +156,10 @@ def load_user(username):
         return None
 
     ui_user.list_roles = [role.role_name for role in ui_user.roles]
+    ui_user.list_permissions = []
     for role in ui_user.list_roles:
         ui_user.list_permissions.extend(DB.get_ui_role_permissions(role))
+    ui_user.list_permissions = set(ui_user.list_permissions)
 
     if ui_user.totp_secret:
         ui_user.list_recovery_codes = [recovery_code.code for recovery_code in ui_user.recovery_codes]
@@ -351,7 +353,7 @@ def before_request():
         if not request.path.startswith("/loading"):
             if not changes_ongoing and metadata["failover"]:
                 flask_flash(
-                    "The last changes could not be applied because it creates a configuration error on NGINX, please check the logs for more information. The configured fell back to the last working one.",
+                    "The last changes could not be applied because it creates a configuration error on NGINX, please check BunkerWeb's logs for more information. The configuration fell back to the last working one.",
                     "error",
                 )
             elif not changes_ongoing and not metadata["failover"] and DATA.get("CONFIG_CHANGED", False):
@@ -370,7 +372,8 @@ def before_request():
             pro_overlapped=metadata["pro_overlapped"],
             plugins=BW_CONFIG.get_plugins(),
             flash_messages=session.get("flash_messages", []),
-            is_readonly=DATA.get("READONLY_MODE", False),
+            is_readonly=DATA.get("READONLY_MODE", False) or "write" not in current_user.list_permissions,
+            user_readonly="write" not in current_user.list_permissions,
             theme=current_user.theme if current_user.is_authenticated else "dark",
             columns_preferences_defaults=COLUMNS_PREFERENCES_DEFAULTS,
         )
@@ -382,7 +385,7 @@ def before_request():
 
 
 def mark_user_access(session_id):
-    if DB.readonly:
+    if "write" not in current_user.list_permissions or DB.readonly:
         return
 
     ret = DB.mark_ui_user_access(session_id, datetime.now().astimezone())
@@ -507,7 +510,13 @@ def check_reloading():
 @app.route("/set_theme", methods=["POST"])
 @login_required
 def set_theme():
-    if DB.readonly or request.form["theme"] not in ("dark", "light"):
+    if "write" not in current_user.list_permissions:
+        return Response(
+            status=403, response=dumps({"message": "You don't have the required permissions to change the theme."}), content_type="application/json"
+        )
+    elif DB.readonly:
+        return Response(status=423, response=dumps({"message": "Database is in read-only mode"}), content_type="application/json")
+    elif request.form["theme"] not in ("dark", "light"):
         return Response(status=400, response=dumps({"message": "Bad request"}), content_type="application/json")
 
     user_data = {
@@ -539,7 +548,8 @@ def set_columns_preferences():
         return Response(status=400, response=dumps({"message": "Bad request"}), content_type="application/json")
 
     if (
-        DB.readonly
+        "write" not in current_user.list_permissions
+        or DB.readonly
         or table_name not in COLUMNS_PREFERENCES_DEFAULTS
         or any(column not in COLUMNS_PREFERENCES_DEFAULTS[table_name] for column in columns_preferences)
     ):

@@ -28,14 +28,15 @@ function initializeDataTable(config) {
 
   $(".dt-type-numeric").removeClass("dt-type-numeric");
 
-  $(".action-button")
-    .parent()
-    .attr(
-      "data-bs-original-title",
-      "Please select one or more rows to perform an action.",
-    )
-    .attr("data-bs-placement", "top")
-    .tooltip();
+  if (!isReadOnly)
+    $(".action-button")
+      .parent()
+      .attr(
+        "data-bs-original-title",
+        "Please select one or more rows to perform an action.",
+      )
+      .attr("data-bs-placement", "top")
+      .tooltip();
 
   $(".dt-search label").addClass("visually-hidden");
   $(".dt-search input[type=search]").attr("placeholder", "Search");
@@ -172,16 +173,17 @@ function initializeDataTable(config) {
       const actionButton = $(".action-button");
       if (!actionButton.length) return;
 
-      actionButton
-        .addClass("disabled")
-        .parent()
-        .attr("data-bs-toggle", "tooltip")
-        .attr(
-          "data-bs-original-title",
-          "Please select one or more rows to perform an action.",
-        )
-        .attr("data-bs-placement", "top")
-        .tooltip();
+      if (!isReadOnly)
+        actionButton
+          .addClass("disabled")
+          .parent()
+          .attr("data-bs-toggle", "tooltip")
+          .attr(
+            "data-bs-original-title",
+            "Please select one or more rows to perform an action.",
+          )
+          .attr("data-bs-placement", "top")
+          .tooltip();
     }
   });
 

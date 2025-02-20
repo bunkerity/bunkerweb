@@ -9,6 +9,7 @@ $(document).ready(function () {
     .trim()
     .toUpperCase();
   const isReadOnly = $("#is-read-only").val().trim() === "True";
+  const userReadOnly = $("#user-read-only").val().trim() === "True";
 
   const servicesSearchPanesOptions = [
     {
@@ -446,7 +447,11 @@ $(document).ready(function () {
           $("#configs_wrapper .dt-buttons")
             .attr(
               "data-bs-original-title",
-              "The database is in readonly, therefore you cannot create new custom configurations.",
+              `${
+                userReadOnly
+                  ? "Your account is readonly"
+                  : "The database is in readonly"
+              }, therefore you cannot create new custom configurations.`,
             )
             .attr("data-bs-placement", "right")
             .tooltip();

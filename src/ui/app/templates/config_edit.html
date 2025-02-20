@@ -121,11 +121,12 @@
                           id="config-name-suffix">.conf</span>
                 </div>
             </div>
-            <div {% if not config_template and config_method and config_method != "ui" or is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{% if is_readonly %}The database is in readonly{% else %}The custom config was created using the {{ config_method }} method{% endif %}
+            <div {% if not config_template and config_method and config_method != "ui" or is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{% if user_readonly %}Readonly mode enabled{% else %}{% if is_readonly %}The database is in readonly{% else %}The custom config was created using the {{ config_method }} method{% endif %}
                  therefore
                  it
                  is
                  locked
+                 {% endif %}
                  "
                  {% endif %}>
                 <button type="button"

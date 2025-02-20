@@ -79,7 +79,8 @@
                     </button>
                 </div>
             {% endif %}
-            <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The database is in readonly therefore the configuration is locked " {% endif %}>
+            <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title={% if user_readonly %}"Readonly mode enabled"{% else %}"The database is in readonly, therefore the configuration is locked"{% endif %}
+                 {% endif %}>
                 <button type="button"
                         class="btn btn-sm btn-bw-green save-settings{% if is_readonly %} disabled{% endif %}">
                     <i class="bx bx-save bx-sm"></i>
@@ -105,7 +106,8 @@
             </button>
         </div>
     {% endif %}
-    <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The database is in readonly therefore the configuration is locked " {% endif %}>
+    <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title={% if user_readonly %}"Readonly mode enabled"{% else %}"The database is in readonly, therefore the configuration is locked"{% endif %}
+         {% endif %}>
         <button type="button"
                 class="btn btn-sm btn-bw-green save-settings p-1_5{% if is_readonly %} disabled{% endif %}">
             <i class="bx bx-save bx-xs"></i>
@@ -160,8 +162,8 @@
                 <div {% if plugin_data["type"] == "pro" and not is_pro_version %}class="blur-overlay"{% endif %}>
                     {% if plugin_data["type"] == "pro" and not is_pro_version %}
                         <div class="blur-message">
-                            <i class='bx bx-diamond bx-xs'></i>
-                            <a href="{{ url_for('pro') }}" class="text-white-80">Upgrade to Pro to access this feature</a>
+                            <i class='bx bx-diamond bx-xs me-1'></i>
+                            <a href="{{ url_for('pro') }}" class="text-white-80 courier-prime">Upgrade to Pro to access this feature</a>
                         </div>
                     {% endif %}
                     <div class="card-body row g-2 gx-6 pb-0">
@@ -280,7 +282,8 @@
                                                 <div class="d-flex align-items-center">
                                                     {% if setting_suffix == "0" %}
                                                         <div class="me-1"
-                                                             {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The database is in readonly therefore multiple settings are locked " {% endif %}>
+                                                             {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title={% if user_readonly %}"Readonly mode enabled"{% else %}"The database is in readonly, therefore the configuration is locked"{% endif %}
+                                                             {% endif %}>
                                                             <button id="add-multiple-{{ plugin }}-{{ multiple }}"
                                                                     type="button"
                                                                     class="btn btn-xs btn-text-bw-green rounded-pill add-multiple p-0 pe-2{% if is_readonly %} disabled{% endif %}">

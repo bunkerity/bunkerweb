@@ -100,7 +100,9 @@ def get_sessions():
 @profile.route("/profile/totp-refresh", methods=["POST"])
 @login_required
 def totp_refresh():
-    if DB.readonly:
+    if "write" not in current_user.list_permissions:
+        return Response("You don't have the required permissions to refresh the recovery codes.", 403)
+    elif DB.readonly:
         return handle_error("Database is in read-only mode", "profile")
 
     if not bool(current_user.totp_secret):
@@ -127,7 +129,9 @@ def totp_refresh():
 @profile.route("/profile/totp-disable", methods=["POST"])
 @login_required
 def totp_disable():
-    if DB.readonly:
+    if "write" not in current_user.list_permissions:
+        return Response("You don't have the required permissions to disable two-factor authentication.", 403)
+    elif DB.readonly:
         return handle_error("Database is in read-only mode", "profile")
 
     if not bool(current_user.totp_secret):
@@ -158,7 +162,9 @@ def totp_disable():
 @profile.route("/profile/totp-enable", methods=["POST"])
 @login_required
 def totp_enable():
-    if DB.readonly:
+    if "write" not in current_user.list_permissions:
+        return Response("You don't have the required permissions to enable two-factor authentication.", 403)
+    elif DB.readonly:
         return handle_error("Database is in read-only mode", "profile")
 
     if bool(current_user.totp_secret):
@@ -200,7 +206,9 @@ def totp_enable():
 @profile.route("/profile/edit", methods=["POST"])
 @login_required
 def edit_profile():
-    if DB.readonly:
+    if "write" not in current_user.list_permissions:
+        return Response("You don't have the required permissions to edit your profile.", 403)
+    elif DB.readonly:
         return handle_error("Database is in read-only mode", "profile")
 
     user_data = {
@@ -278,7 +286,9 @@ def edit_profile():
 @profile.route("/profile/wipe-other-sessions", methods=["POST"])
 @login_required
 def wipe_old_sessions():
-    if DB.readonly:
+    if "write" not in current_user.list_permissions:
+        return Response("You don't have the required permissions to wipe your other sessions.", 403)
+    elif DB.readonly:
         return handle_error("Database is in read-only mode", "profile")
 
     verify_data_in_form(data={"password": None}, err_message="Missing current password parameter on /profile/wipe-other-sessions.", redirect_url="profile")

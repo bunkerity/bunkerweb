@@ -3,6 +3,7 @@ $(function () {
   let actionLock = false;
   const serviceNumber = parseInt($("#services_number").val(), 10) || 0;
   const isReadOnly = $("#is-read-only").val().trim() === "True";
+  const userReadOnly = $("#user-read-only").val().trim() === "True";
 
   const setupModal = (services, modal) => {
     const headerList = $(`
@@ -468,7 +469,11 @@ $(function () {
             .find(".dt-buttons")
             .attr(
               "data-bs-original-title",
-              "The database is in read-only mode; you cannot create new services.",
+              `${
+                userReadOnly
+                  ? "Your account is readonly"
+                  : "The database is in readonly"
+              }, therefore you cannot create new services.`,
             )
             .attr("data-bs-placement", "right")
             .tooltip();
