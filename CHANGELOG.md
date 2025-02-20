@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.6.1-rc1 - ????/??/??
+## v1.6.1-rc1 - 2025/02/20
 
 - [BUGFIX] Fix ModSecurity false positive on the web UI when the `UI_HOST` setting contains an IP address
 - [BUGFIX] Fix ModSecurity false positive when the web UI `SERVER_NAME` is set to an IP address
