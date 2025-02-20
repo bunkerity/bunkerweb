@@ -2111,7 +2111,7 @@ chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span
 </code></pre></div>
 <div class="admonition tip">
 <p class="admonition-title">Custom Extra Config</p>
-<p>Since the <code>testing-rc3</code> version, you can add/override settings using the <code>bunkerweb.io/CONFIG_TYPE=settings</code> annotation. Here is an example :</p>
+<p>Since the <code>1.6.0-rc3</code> version, you can add/override settings using the <code>bunkerweb.io/CONFIG_TYPE=settings</code> annotation. Here is an example :</p>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ConfigMap</span>
 <span class="nt">metadata</span><span class="p">:</span>
@@ -2219,7 +2219,7 @@ REDIS_DATABASE=0
 <p>For complete list of settings regarding <code>stream</code> mode, please refer to the <a href="../settings/">settings</a> section of the documentation.</p>
 <div class="admonition tip">
 <p class="admonition-title">multiple listening ports</p>
-<p>Since the <code>testing-rc2</code> version, BunkerWeb supports multiple listening ports for the <code>stream</code> mode. You can specify them using the <code>LISTEN_STREAM_PORT</code> and <code>LISTEN_STREAM_PORT_SSL</code> settings.</p>
+<p>Since the <code>1.6.0-rc2</code> version, BunkerWeb supports multiple listening ports for the <code>stream</code> mode. You can specify them using the <code>LISTEN_STREAM_PORT</code> and <code>LISTEN_STREAM_PORT_SSL</code> settings.</p>
 <p>Here is an example :</p>
 <div class="highlight"><pre><span></span><code>...
 LISTEN_STREAM_PORT=4242
@@ -2255,8 +2255,6 @@ LISTEN_STREAM_PORT_SSL_1=4344
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:testing</span>
-<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-data:/data</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-api-env</span>
 <span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerweb&quot;</span><span class="w"> </span><span class="c1"># This setting is mandatory to specify the BunkerWeb instance</span>
@@ -2268,6 +2266,8 @@ LISTEN_STREAM_PORT_SSL_1=4344
 <span class="w">      </span><span class="nt">app1.example.com_LISTEN_STREAM_PORT</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;10000&quot;</span>
 <span class="w">      </span><span class="nt">app2.example.com_REVERSE_PROXY_HOST</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;myapp2:9000&quot;</span>
 <span class="w">      </span><span class="nt">app2.example.com_LISTEN_STREAM_PORT</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;20000&quot;</span>
+<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-storage:/data</span><span class="w"> </span><span class="c1"># This is used to persist the cache and other data like the backups</span>
 <span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
@@ -2285,7 +2285,7 @@ LISTEN_STREAM_PORT_SSL_1=4344
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span>
 
 <span class="nt">volumes</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">bw-data</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bw-storage</span><span class="p">:</span>
 
 <span class="nt">networks</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bw-universe</span><span class="p">:</span>
@@ -2641,7 +2641,7 @@ find<span class="w"> </span>./www<span class="w"> </span>-type<span class="w"> <
 <span class="w">      </span><span class="nt">app2.example.com_REMOTE_PHP</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;myapp2&quot;</span>
 <span class="w">      </span><span class="nt">app3.example.com_REMOTE_PHP</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;myapp3&quot;</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-data:/data</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-storage:/data</span><span class="w"> </span><span class="c1"># This is used to persist the cache and other data like the backups</span>
 <span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
@@ -2668,7 +2668,7 @@ find<span class="w"> </span>./www<span class="w"> </span>-type<span class="w"> <
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span>
 
 <span class="nt">volumes</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">bw-data</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bw-storage</span><span class="p">:</span>
 
 <span class="nt">networks</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bw-universe</span><span class="p">:</span>
@@ -2737,7 +2737,7 @@ find<span class="w"> </span>./www<span class="w"> </span>-type<span class="w"> <
 <span class="w">      </span><span class="nt">MULTISITE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span><span class="w"> </span><span class="c1"># Mandatory setting for autoconf</span>
 <span class="w">      </span><span class="nt">DATABASE_URI</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger password for the database</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-data:/data</span><span class="w"> </span><span class="c1"># This is used to persist data like the backups</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-storage:/data</span><span class="w"> </span><span class="c1"># This is used to persist the cache and other data like the backups</span>
 <span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
@@ -2776,13 +2776,13 @@ find<span class="w"> </span>./www<span class="w"> </span>-type<span class="w"> <
 <span class="w">      </span><span class="nt">MYSQL_USER</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerweb&quot;</span>
 <span class="w">      </span><span class="nt">MYSQL_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;changeme&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger password for the database</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db:/var/lib/mysql</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-data:/var/lib/mysql</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-docker</span>
 
 <span class="nt">volumes</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bw-data</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">bw-db</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bw-storage</span><span class="p">:</span>
 
 <span class="nt">networks</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bw-universe</span><span class="p">:</span>
@@ -3578,6 +3578,13 @@ USE_IPV6=yes
 <td><a href="https://certbot-dns-cloudflare.readthedocs.io/en/stable/">Documentation</a></td>
 </tr>
 <tr>
+<td><code>desec</code></td>
+<td>deSEC</td>
+<td><code>token</code></td>
+<td></td>
+<td><a href="https://github.com/desec-io/certbot-dns-desec/blob/main/README.md">Documentation</a></td>
+</tr>
+<tr>
 <td><code>digitalocean</code></td>
 <td>DigitalOcean</td>
 <td><code>token</code></td>
@@ -4030,6 +4037,8 @@ log {
 <span class="w">            </span><span class="nt">CROWDSEC_API</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;http://crowdsec:8080&quot;</span><span class="w"> </span><span class="c1"># This is the API URL of the CrowdSec instance</span>
 <span class="w">            </span><span class="nt">CROWDSEC_APPSEC_URL</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;http://crowdsec:7422&quot;</span><span class="w"> </span><span class="c1"># This is the AppSec Component URL of the CrowdSec instance, comment if you don&#39;t want to use it</span>
 <span class="w">            </span><span class="nt">CROWDSEC_API_KEY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;s3cr3tb0unc3rk3y&quot;</span><span class="w"> </span><span class="c1"># This is the API key of the Bouncer, we recommend have a more complex key</span>
+<span class="w">        </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-storage:/data</span><span class="w"> </span><span class="c1"># This is used to persist the cache and other data like the backups</span>
 <span class="w">        </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
 <span class="w">        </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
@@ -4049,11 +4058,19 @@ log {
 <span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-plugins</span>
 
 <span class="w">    </span><span class="nt">syslog</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">balabit/syslog-ng:4.7.1</span><span class="w"> </span><span class="c1"># For x86_64 architecture</span>
-<span class="w">        </span><span class="c1"># image: lscr.io/linuxserver/syslog-ng:4.7.1-r1-ls116 # For aarch64 architecture</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">balabit/syslog-ng:4.8.0</span>
+<span class="w">        </span><span class="c1"># image: lscr.io/linuxserver/syslog-ng:4.8.1-r1-ls147 # For aarch64 architecture</span>
+<span class="w">        </span><span class="nt">cap_add</span><span class="p">:</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NET_BIND_SERVICE</span><span class="w">  </span><span class="c1"># Bind to low ports</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NET_BROADCAST</span><span class="w">  </span><span class="c1"># Send broadcasts</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NET_RAW</span><span class="w">  </span><span class="c1"># Use raw sockets</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DAC_READ_SEARCH</span><span class="w">  </span><span class="c1"># Read files bypassing permissions</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DAC_OVERRIDE</span><span class="w">  </span><span class="c1"># Override file permissions</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CHOWN</span><span class="w">  </span><span class="c1"># Change ownership</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SYSLOG</span><span class="w">  </span><span class="c1"># Write to system logs</span>
 <span class="w">        </span><span class="nt">volumes</span><span class="p">:</span>
-<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf</span><span class="w"> </span><span class="c1"># This is the syslog-ng configuration file created above</span>
-<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-logs:/var/log</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-logs:/var/log/bunkerweb</span><span class="w"> </span><span class="c1"># This is the volume used to store the logs</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf</span><span class="w"> </span><span class="c1"># This is the syslog-ng configuration file</span>
 <span class="w">        </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">            </span><span class="nt">bw-plugins</span><span class="p">:</span>
 <span class="w">                </span><span class="nt">ipv4_address</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10.10.10.254</span>
@@ -4074,7 +4091,7 @@ log {
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">subnet</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10.10.10.0/24</span>
 
 <span class="nt">volumes</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">bw-data</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">bw-storage</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">bw-logs</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">cs-data</span><span class="p">:</span>
 </code></pre></div>

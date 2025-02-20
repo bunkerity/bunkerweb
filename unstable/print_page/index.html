@@ -1137,7 +1137,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <figcaption>Manage jobs from the web UI</figcaption>
 </figure>
 <p><strong>Instances healthcheck</strong></p>
-<p>Since the testing, the Scheduler possess a built-in healthcheck system, that will check the health of the instances. If an instance becomes unhealthy, the scheduler will stop sending the configuration to it. If the instance becomes healthy again, the scheduler will start sending the configuration to it again.</p>
+<p>Since the 1.6.0, the Scheduler possess a built-in healthcheck system, that will check the health of the instances. If an instance becomes unhealthy, the scheduler will stop sending the configuration to it. If the instance becomes healthy again, the scheduler will start sending the configuration to it again.</p>
 <p>The healthcheck interval is set by the <code>HEALTHCHECK_INTERVAL</code> environment variable with a default value of <code>30</code> which means that the scheduler will check the health of the instances every 30 seconds.</p>
 <h2 id="concepts-templates">Templates</h2>
 <p>BunkerWeb leverages the power of templates to simplify the configuration process and enhance flexibility. Templates provide a structured and standardized approach to defining settings and custom configurations, ensuring consistency and ease of use.</p>
@@ -1299,6 +1299,8 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MY_SETTING=value</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ANOTHER_SETTING=another value</span>
+<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-storage:/data</span><span class="w"> </span><span class="c1"># This is used to persist the cache and other data like the backups</span>
 <span class="nn">...</span>
 </code></pre></div>
 <div class="admonition info">
@@ -1311,7 +1313,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 </code></pre></div>
 <div class="admonition info">
 <p class="admonition-title">BunkerWeb settings</p>
-<p>Since the <code>testing</code> version, the Scheduler container is the one who you will define the settings for BunkerWeb. The Scheduler will then push the configuration to the BunkerWeb container.</p>
+<p>Since the <code>1.6.0</code> version, the Scheduler container is the one who you will define the settings for BunkerWeb. The Scheduler will then push the configuration to the BunkerWeb container.</p>
 <p>⚠ <strong>Important</strong> : All API related settings (like <code>API_HTTP_PORT</code>, <code>API_LISTEN_IP</code>, <code>API_SERVER_NAME</code> and <code>API_WHITELIST_IP</code>) <strong>must be defined in the BunkerWeb container as well</strong>. (The settings have to be mirrored in both containers, else the BunkerWeb container will not accept API requests from the Scheduler).</p>
 <div class="highlight"><pre><span></span><code><span class="nt">x-bw-api-env</span><span class="p">:</span><span class="w"> </span><span class="nl">&amp;bw-api-env</span>
 <span class="w">  </span><span class="c1"># We use an anchor to avoid repeating the same settings for both containers</span>
@@ -1335,22 +1337,24 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="c1"># This will set the API settings for the Scheduler container</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-api-env</span>
+<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-storage:/data</span><span class="w"> </span><span class="c1"># This is used to persist the cache and other data like the backups</span>
 <span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
 <span class="nn">...</span>
 </code></pre></div>
 </div>
-<p>A volume is needed to store the SQLite database that will be used by the scheduler :</p>
+<p>A volume is needed to store the SQLite database and the backups that will be used by the scheduler :</p>
 <div class="highlight"><pre><span></span><code><span class="nn">...</span>
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:testing</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-data:/data</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-storage:/data</span>
 <span class="nn">...</span>
 <span class="nt">volumes</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">bw-data</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bw-storage</span><span class="p">:</span>
 </code></pre></div>
 <div class="admonition warning">
 <p class="admonition-title">Using local folder for persistent data</p>
@@ -1423,10 +1427,15 @@ chmod -R 770 bw-data</code></p>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-api-env</span>
 <span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerweb&quot;</span><span class="w"> </span><span class="c1"># This setting is mandatory to specify the BunkerWeb instance</span>
+<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-storage:/data</span><span class="w"> </span><span class="c1"># This is used to persist the cache and other data like the backups</span>
 <span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
 <span class="nn">...</span>
+<span class="nt">volumes</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bw-storage</span><span class="p">:</span>
+
 <span class="nt">networks</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bw-universe</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
@@ -1465,13 +1474,13 @@ chmod -R 770 bw-data</code></p>
 <span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerweb&quot;</span><span class="w"> </span><span class="c1"># This setting is mandatory to specify the BunkerWeb instance</span>
 <span class="w">      </span><span class="nt">SERVER_NAME</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;www.example.com&quot;</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-data:/data</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-storage:/data</span><span class="w"> </span><span class="c1"># This is used to persist the cache and other data like the backups</span>
 <span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
 
 <span class="nt">volumes</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">bw-data</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bw-storage</span><span class="p">:</span>
 
 <span class="nt">networks</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bw-universe</span><span class="p">:</span>
@@ -1745,7 +1754,7 @@ MY_SETTING_2=value2
 <span class="w">      </span><span class="nt">MULTISITE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span><span class="w"> </span><span class="c1"># Mandatory setting for autoconf</span>
 <span class="w">      </span><span class="nt">DATABASE_URI</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger password for the database</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-data:/data</span><span class="w"> </span><span class="c1"># This is used to persist data like the backups</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-storage:/data</span><span class="w"> </span><span class="c1"># This is used to persist the cache and other data like the backups</span>
 <span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
@@ -1785,14 +1794,14 @@ MY_SETTING_2=value2
 <span class="w">      </span><span class="nt">MYSQL_USER</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerweb&quot;</span>
 <span class="w">      </span><span class="nt">MYSQL_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;changeme&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger password for the database</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db:/var/lib/mysql</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-data:/var/lib/mysql</span>
 <span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
 
 <span class="nt">volumes</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bw-data</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">bw-db</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bw-storage</span><span class="p">:</span>
 
 <span class="nt">networks</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bw-universe</span><span class="p">:</span>
@@ -1833,7 +1842,7 @@ MY_SETTING_2=value2
 <span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span>
 </code></pre></div>
 <h3 id="integrations-namespaces">Namespaces</h3>
-<p>Starting from version <code>testing</code>, BunkerWeb's Autoconf stacks now support namespaces. This feature enables you to manage multiple "<em>clusters</em>" of BunkerWeb instances and services on the same Docker host. To take advantage of namespaces, simply set the <code>NAMESPACE</code> label on your services. Here's an example:</p>
+<p>Starting from version <code>1.6.0</code>, BunkerWeb's Autoconf stacks now support namespaces. This feature enables you to manage multiple "<em>clusters</em>" of BunkerWeb instances and services on the same Docker host. To take advantage of namespaces, simply set the <code>NAMESPACE</code> label on your services. Here's an example:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">myapp</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mywebapp:4.2</span>
@@ -1927,7 +1936,7 @@ MY_SETTING_2=value2
 <span class="nn">...</span>
 </code></pre></div>
 <h3 id="integrations-namespaces_1">Namespaces</h3>
-<p>Starting from version <code>testing</code>, BunkerWeb's autoconf stacks now support namespaces. This feature enables you to manage multiple clusters of BunkerWeb instances and services on the same Kubernetes cluster. To take advantage of namespaces, simply set the <code>namespace</code> metadata field on your BunkerWeb instances and services. Here's an example:</p>
+<p>Starting from version <code>1.6.0</code>, BunkerWeb's autoconf stacks now support namespaces. This feature enables you to manage multiple clusters of BunkerWeb instances and services on the same Kubernetes cluster. To take advantage of namespaces, simply set the <code>namespace</code> metadata field on your BunkerWeb instances and services. Here's an example:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DaemonSet</span>
 <span class="nt">metadata</span><span class="p">:</span>
@@ -2361,7 +2370,7 @@ MY_SETTING_2=value2
 <span class="w">      </span><span class="nt">USE_REDIS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
 <span class="w">      </span><span class="nt">REDIS_HOST</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bw-redis&quot;</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-data:/data</span><span class="w"> </span><span class="c1"># This is used to persist data like the backups</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-storage:/data</span><span class="w"> </span><span class="c1"># This is used to persist the cache and other data like the backups</span>
 <span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
@@ -2414,7 +2423,7 @@ MY_SETTING_2=value2
 <span class="w">      </span><span class="nt">MYSQL_USER</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerweb&quot;</span>
 <span class="w">      </span><span class="nt">MYSQL_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;changeme&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger password for the database</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db:/var/lib/mysql</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-data:/var/lib/mysql</span>
 <span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
@@ -2435,7 +2444,7 @@ MY_SETTING_2=value2
 
 <span class="nt">volumes</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bw-data</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">bw-db</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bw-storage</span><span class="p">:</span>
 
 <span class="nt">networks</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bw-universe</span><span class="p">:</span>
@@ -2483,7 +2492,7 @@ MY_SETTING_2=value2
 <span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span>
 </code></pre></div>
 <h3 id="integrations-namespaces_2">Namespaces</h3>
-<p>Starting from version <code>testing</code>, BunkerWeb's Autoconf stacks now support namespaces. This feature enables you to manage multiple "<em>clusters</em>" of BunkerWeb instances and services on the same Docker host. To take advantage of namespaces, simply set the <code>NAMESPACE</code> label on your services. Here's an example:</p>
+<p>Starting from version <code>1.6.0</code>, BunkerWeb's Autoconf stacks now support namespaces. This feature enables you to manage multiple "<em>clusters</em>" of BunkerWeb instances and services on the same Docker host. To take advantage of namespaces, simply set the <code>NAMESPACE</code> label on your services. Here's an example:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">myapp</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mywebapp:4.2</span>
@@ -2589,8 +2598,8 @@ To deploy a virtual machine, you need Microsoft.Compute/virtualMachines/write an
 <p>We expect that you're already familiar with the <a href="#concepts">core concepts</a> and you have followed the <a href="#integrations">integrations instructions</a> for your environment.</p>
 <p>This quickstart guide assumes that BunkerWeb is accessible from the Internet and you have configured at least two domains : one for the web UI and another one for your web service.</p>
 <p><strong>System requirements</strong></p>
-<p>The minimum recommended specifications for BunkerWeb are a machine with 2 (v)CPUs and 4 GB of RAM. Please note that this should be sufficient for testing environments or setups with very few services.  </p>
-<p>For production environments with many services to protect, we recommend at least 4 (v)CPUs and 16 GB of RAM. Resources should be adjusted based on your use case, network traffic, and potential DDoS attacks you may face.  </p>
+<p>The minimum recommended specifications for BunkerWeb are a machine with 2 (v)CPUs and 4 GB of RAM. Please note that this should be sufficient for testing environments or setups with very few services.</p>
+<p>For production environments with many services to protect, we recommend at least 4 (v)CPUs and 16 GB of RAM. Resources should be adjusted based on your use case, network traffic, and potential DDoS attacks you may face.</p>
 <p>It is highly recommended to enable global loading of CRS rules (by setting the <code>USE_MODSECURITY_GLOBAL_CRS</code> parameter to <code>yes</code>) if you are in environments with limited RAM or in production with many services. More details can be found in the <a href="#advanced-running-many-services-in-production">advanced usages</a> section of the documentation.</p>
 </div>
 <p>This quickstart guide will help you to quickly install BunkerWeb and secure a web service using the web User Interface.</p>
@@ -2755,7 +2764,7 @@ sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w
 <span class="w">      </span><span class="nt">MULTISITE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
 <span class="w">      </span><span class="nt">UI_HOST</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;http://bw-ui:7000&quot;</span><span class="w"> </span><span class="c1"># Change it if needed</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-data:/data</span><span class="w"> </span><span class="c1"># This is used to persist the cache and other data like the backups</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-storage:/data</span><span class="w"> </span><span class="c1"># This is used to persist the cache and other data like the backups</span>
 <span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
@@ -2778,15 +2787,14 @@ sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w
 <span class="w">      </span><span class="nt">MYSQL_USER</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerweb&quot;</span>
 <span class="w">      </span><span class="nt">MYSQL_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;changeme&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger password for the database</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db:/var/lib/mysql</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-data:/var/lib/mysql</span>
 <span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
 
 <span class="nt">volumes</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bw-data</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">bw-db</span><span class="p">:</span>
-
+<span class="w">  </span><span class="nt">bw-storage</span><span class="p">:</span>
 
 <span class="nt">networks</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bw-universe</span><span class="p">:</span>
@@ -2835,7 +2843,7 @@ sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w
 <span class="w">      </span><span class="nt">MULTISITE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
 <span class="w">      </span><span class="nt">UI_HOST</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;http://bw-ui:7000&quot;</span><span class="w"> </span><span class="c1"># Change it if needed</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-data:/data</span><span class="w"> </span><span class="c1"># This is used to persist the cache and other data like the backups</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-storage:/data</span><span class="w"> </span><span class="c1"># This is used to persist the cache and other data like the backups</span>
 <span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
@@ -2882,14 +2890,14 @@ sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w
 <span class="w">      </span><span class="nt">MYSQL_USER</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerweb&quot;</span>
 <span class="w">      </span><span class="nt">MYSQL_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;changeme&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger password for the database</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db:/var/lib/mysql</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-data:/var/lib/mysql</span>
 <span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
 
 <span class="nt">volumes</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bw-data</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">bw-db</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bw-storage</span><span class="p">:</span>
 
 <span class="nt">networks</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bw-universe</span><span class="p">:</span>
@@ -2972,7 +2980,7 @@ sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w
 <span class="w">      </span><span class="nt">REDIS_HOST</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bw-redis&quot;</span>
 <span class="w">      </span><span class="nt">UI_HOST</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;http://bw-ui:7000&quot;</span><span class="w"> </span><span class="c1"># Change it if needed</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-data:/data</span><span class="w"> </span><span class="c1"># This is used to persist the cache and other data like the backups</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-storage:/data</span><span class="w"> </span><span class="c1"># This is used to persist the cache and other data like the backups</span>
 <span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
@@ -3025,7 +3033,7 @@ sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w
 <span class="w">      </span><span class="nt">MYSQL_USER</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerweb&quot;</span>
 <span class="w">      </span><span class="nt">MYSQL_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;changeme&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger password for the database</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db:/var/lib/mysql</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-data:/var/lib/mysql</span>
 <span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
@@ -3036,8 +3044,8 @@ sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
 
 <span class="nt">volumes</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">bw-db</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bw-data</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bw-storage</span><span class="p">:</span>
 
 <span class="nt">networks</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bw-universe</span><span class="p">:</span>
@@ -3725,7 +3733,7 @@ chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span
 </code></pre></div>
 <div class="admonition tip">
 <p class="admonition-title">Custom Extra Config</p>
-<p>Since the <code>testing-rc3</code> version, you can add/override settings using the <code>bunkerweb.io/CONFIG_TYPE=settings</code> annotation. Here is an example :</p>
+<p>Since the <code>1.6.0-rc3</code> version, you can add/override settings using the <code>bunkerweb.io/CONFIG_TYPE=settings</code> annotation. Here is an example :</p>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ConfigMap</span>
 <span class="nt">metadata</span><span class="p">:</span>
@@ -3833,7 +3841,7 @@ REDIS_DATABASE=0
 <p>For complete list of settings regarding <code>stream</code> mode, please refer to the <a href="#settings">settings</a> section of the documentation.</p>
 <div class="admonition tip">
 <p class="admonition-title">multiple listening ports</p>
-<p>Since the <code>testing-rc2</code> version, BunkerWeb supports multiple listening ports for the <code>stream</code> mode. You can specify them using the <code>LISTEN_STREAM_PORT</code> and <code>LISTEN_STREAM_PORT_SSL</code> settings.</p>
+<p>Since the <code>1.6.0-rc2</code> version, BunkerWeb supports multiple listening ports for the <code>stream</code> mode. You can specify them using the <code>LISTEN_STREAM_PORT</code> and <code>LISTEN_STREAM_PORT_SSL</code> settings.</p>
 <p>Here is an example :</p>
 <div class="highlight"><pre><span></span><code>...
 LISTEN_STREAM_PORT=4242
@@ -3869,8 +3877,6 @@ LISTEN_STREAM_PORT_SSL_1=4344
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:testing</span>
-<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-data:/data</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-api-env</span>
 <span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerweb&quot;</span><span class="w"> </span><span class="c1"># This setting is mandatory to specify the BunkerWeb instance</span>
@@ -3882,6 +3888,8 @@ LISTEN_STREAM_PORT_SSL_1=4344
 <span class="w">      </span><span class="nt">app1.example.com_LISTEN_STREAM_PORT</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;10000&quot;</span>
 <span class="w">      </span><span class="nt">app2.example.com_REVERSE_PROXY_HOST</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;myapp2:9000&quot;</span>
 <span class="w">      </span><span class="nt">app2.example.com_LISTEN_STREAM_PORT</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;20000&quot;</span>
+<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-storage:/data</span><span class="w"> </span><span class="c1"># This is used to persist the cache and other data like the backups</span>
 <span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
@@ -3899,7 +3907,7 @@ LISTEN_STREAM_PORT_SSL_1=4344
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span>
 
 <span class="nt">volumes</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">bw-data</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bw-storage</span><span class="p">:</span>
 
 <span class="nt">networks</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bw-universe</span><span class="p">:</span>
@@ -4255,7 +4263,7 @@ find<span class="w"> </span>./www<span class="w"> </span>-type<span class="w"> <
 <span class="w">      </span><span class="nt">app2.example.com_REMOTE_PHP</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;myapp2&quot;</span>
 <span class="w">      </span><span class="nt">app3.example.com_REMOTE_PHP</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;myapp3&quot;</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-data:/data</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-storage:/data</span><span class="w"> </span><span class="c1"># This is used to persist the cache and other data like the backups</span>
 <span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
@@ -4282,7 +4290,7 @@ find<span class="w"> </span>./www<span class="w"> </span>-type<span class="w"> <
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span>
 
 <span class="nt">volumes</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">bw-data</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bw-storage</span><span class="p">:</span>
 
 <span class="nt">networks</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bw-universe</span><span class="p">:</span>
@@ -4351,7 +4359,7 @@ find<span class="w"> </span>./www<span class="w"> </span>-type<span class="w"> <
 <span class="w">      </span><span class="nt">MULTISITE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span><span class="w"> </span><span class="c1"># Mandatory setting for autoconf</span>
 <span class="w">      </span><span class="nt">DATABASE_URI</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger password for the database</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-data:/data</span><span class="w"> </span><span class="c1"># This is used to persist data like the backups</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-storage:/data</span><span class="w"> </span><span class="c1"># This is used to persist the cache and other data like the backups</span>
 <span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
@@ -4390,13 +4398,13 @@ find<span class="w"> </span>./www<span class="w"> </span>-type<span class="w"> <
 <span class="w">      </span><span class="nt">MYSQL_USER</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerweb&quot;</span>
 <span class="w">      </span><span class="nt">MYSQL_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;changeme&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger password for the database</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db:/var/lib/mysql</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-data:/var/lib/mysql</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-docker</span>
 
 <span class="nt">volumes</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bw-data</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">bw-db</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bw-storage</span><span class="p">:</span>
 
 <span class="nt">networks</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bw-universe</span><span class="p">:</span>
@@ -5192,6 +5200,13 @@ USE_IPV6=yes
 <td><a href="https://certbot-dns-cloudflare.readthedocs.io/en/stable/">Documentation</a></td>
 </tr>
 <tr>
+<td><code>desec</code></td>
+<td>deSEC</td>
+<td><code>token</code></td>
+<td></td>
+<td><a href="https://github.com/desec-io/certbot-dns-desec/blob/main/README.md">Documentation</a></td>
+</tr>
+<tr>
 <td><code>digitalocean</code></td>
 <td>DigitalOcean</td>
 <td><code>token</code></td>
@@ -5644,6 +5659,8 @@ log {
 <span class="w">            </span><span class="nt">CROWDSEC_API</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;http://crowdsec:8080&quot;</span><span class="w"> </span><span class="c1"># This is the API URL of the CrowdSec instance</span>
 <span class="w">            </span><span class="nt">CROWDSEC_APPSEC_URL</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;http://crowdsec:7422&quot;</span><span class="w"> </span><span class="c1"># This is the AppSec Component URL of the CrowdSec instance, comment if you don&#39;t want to use it</span>
 <span class="w">            </span><span class="nt">CROWDSEC_API_KEY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;s3cr3tb0unc3rk3y&quot;</span><span class="w"> </span><span class="c1"># This is the API key of the Bouncer, we recommend have a more complex key</span>
+<span class="w">        </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-storage:/data</span><span class="w"> </span><span class="c1"># This is used to persist the cache and other data like the backups</span>
 <span class="w">        </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
 <span class="w">        </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
@@ -5663,11 +5680,19 @@ log {
 <span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-plugins</span>
 
 <span class="w">    </span><span class="nt">syslog</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">balabit/syslog-ng:4.7.1</span><span class="w"> </span><span class="c1"># For x86_64 architecture</span>
-<span class="w">        </span><span class="c1"># image: lscr.io/linuxserver/syslog-ng:4.7.1-r1-ls116 # For aarch64 architecture</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">balabit/syslog-ng:4.8.0</span>
+<span class="w">        </span><span class="c1"># image: lscr.io/linuxserver/syslog-ng:4.8.1-r1-ls147 # For aarch64 architecture</span>
+<span class="w">        </span><span class="nt">cap_add</span><span class="p">:</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NET_BIND_SERVICE</span><span class="w">  </span><span class="c1"># Bind to low ports</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NET_BROADCAST</span><span class="w">  </span><span class="c1"># Send broadcasts</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NET_RAW</span><span class="w">  </span><span class="c1"># Use raw sockets</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DAC_READ_SEARCH</span><span class="w">  </span><span class="c1"># Read files bypassing permissions</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DAC_OVERRIDE</span><span class="w">  </span><span class="c1"># Override file permissions</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CHOWN</span><span class="w">  </span><span class="c1"># Change ownership</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SYSLOG</span><span class="w">  </span><span class="c1"># Write to system logs</span>
 <span class="w">        </span><span class="nt">volumes</span><span class="p">:</span>
-<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf</span><span class="w"> </span><span class="c1"># This is the syslog-ng configuration file created above</span>
-<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-logs:/var/log</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-logs:/var/log/bunkerweb</span><span class="w"> </span><span class="c1"># This is the volume used to store the logs</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf</span><span class="w"> </span><span class="c1"># This is the syslog-ng configuration file</span>
 <span class="w">        </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">            </span><span class="nt">bw-plugins</span><span class="p">:</span>
 <span class="w">                </span><span class="nt">ipv4_address</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10.10.10.254</span>
@@ -5688,7 +5713,7 @@ log {
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">subnet</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10.10.10.0/24</span>
 
 <span class="nt">volumes</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">bw-data</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">bw-storage</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">bw-logs</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">cs-data</span><span class="p">:</span>
 </code></pre></div>
@@ -10796,7 +10821,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
 <span class="w">      </span><span class="nt">API_WHITELIST_IP</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;127.0.0.0/8</span><span class="nv"> </span><span class="s">10.20.30.0/24&quot;</span><span class="w"> </span><span class="c1"># We mirror the API_WHITELIST_IP from the bunkerweb service</span>
 <span class="w">      </span><span class="nt">UI_HOST</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;http://bw-ui:7000&quot;</span><span class="w"> </span><span class="c1"># Change it if needed</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-data:/data</span><span class="w"> </span><span class="c1"># This is used to persist the cache and other data like the backups</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-storage:/data</span><span class="w"> </span><span class="c1"># This is used to persist the cache and other data like the backups</span>
 <span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
@@ -10820,14 +10845,14 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
 <span class="w">      </span><span class="nt">MYSQL_USER</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerweb&quot;</span>
 <span class="w">      </span><span class="nt">MYSQL_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;changeme&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger password for the database</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db:/var/lib/mysql</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-data:/var/lib/mysql</span>
 <span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
 
 <span class="nt">volumes</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bw-data</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">bw-db</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bw-storage</span><span class="p">:</span>
 
 <span class="nt">networks</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bw-universe</span><span class="p">:</span>
@@ -10884,7 +10909,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
 <span class="w">      </span><span class="nt">MULTISITE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
 <span class="w">      </span><span class="nt">UI_HOST</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;http://bw-ui:7000&quot;</span><span class="w"> </span><span class="c1"># Change it if needed</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-data:/data</span><span class="w"> </span><span class="c1"># This is used to persist the cache and other data like the backups</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-storage:/data</span><span class="w"> </span><span class="c1"># This is used to persist the cache and other data like the backups</span>
 <span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
@@ -10931,14 +10956,14 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
 <span class="w">      </span><span class="nt">MYSQL_USER</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerweb&quot;</span>
 <span class="w">      </span><span class="nt">MYSQL_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;changeme&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger password for the database</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db:/var/lib/mysql</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-data:/var/lib/mysql</span>
 <span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
 
 <span class="nt">volumes</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bw-data</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">bw-db</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bw-storage</span><span class="p">:</span>
 
 <span class="nt">networks</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bw-universe</span><span class="p">:</span>
@@ -11018,7 +11043,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
 <span class="w">      </span><span class="nt">REDIS_HOST</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bw-redis&quot;</span>
 <span class="w">      </span><span class="nt">UI_HOST</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;http://bw-ui:7000&quot;</span><span class="w"> </span><span class="c1"># Change it if needed</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-data:/data</span><span class="w"> </span><span class="c1"># This is used to persist the cache and other data like the backups</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-storage:/data</span><span class="w"> </span><span class="c1"># This is used to persist the cache and other data like the backups</span>
 <span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
@@ -11071,7 +11096,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
 <span class="w">      </span><span class="nt">MYSQL_USER</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerweb&quot;</span>
 <span class="w">      </span><span class="nt">MYSQL_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;changeme&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger password for the database</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db:/var/lib/mysql</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-data:/var/lib/mysql</span>
 <span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
@@ -11082,8 +11107,8 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
 
 <span class="nt">volumes</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">bw-db</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bw-data</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bw-storage</span><span class="p">:</span>
 
 <span class="nt">networks</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bw-universe</span><span class="p">:</span>
@@ -11485,16 +11510,12 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
 <span class="w">      </span><span class="nt">DISABLE_DEFAULT_SERVER</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
 <span class="w">      </span><span class="nt">USE_CLIENT_CACHE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
 <span class="w">      </span><span class="nt">USE_GZIP</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
-<span class="w">      </span><span class="nt">www.example.com_USE_UI</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="w">      </span><span class="nt">www.example.com_USE_TEMPLATE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;ui&quot;</span>
 <span class="w">      </span><span class="nt">www.example.com_USE_REVERSE_PROXY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
 <span class="w">      </span><span class="nt">www.example.com_REVERSE_PROXY_URL</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/changeme&quot;</span><span class="w"> </span><span class="c1"># Change it to a hard to guess URI</span>
 <span class="w">      </span><span class="nt">www.example.com_REVERSE_PROXY_HOST</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;http://bw-ui:7000&quot;</span>
-<span class="w">      </span><span class="nt">www.example.com_INTERCEPTED_ERROR_CODES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;400</span><span class="nv"> </span><span class="s">404</span><span class="nv"> </span><span class="s">405</span><span class="nv"> </span><span class="s">413</span><span class="nv"> </span><span class="s">429</span><span class="nv"> </span><span class="s">500</span><span class="nv"> </span><span class="s">501</span><span class="nv"> </span><span class="s">502</span><span class="nv"> </span><span class="s">503</span><span class="nv"> </span><span class="s">504&quot;</span>
-<span class="w">      </span><span class="nt">www.example.com_GENERATE_SELF_SIGNED_SSL</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
-<span class="w">      </span><span class="nt">www.example.com_MAX_CLIENT_SIZE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;50m&quot;</span>
-<span class="w">      </span><span class="nt">www.example.com_ALLOWED_METHODS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;GET|POST|PUT|DELETE&quot;</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-data:/data</span><span class="w"> </span><span class="c1"># This is used to persist the cache and other data like the backups</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-storage:/data</span><span class="w"> </span><span class="c1"># This is used to persist the cache and other data like the backups</span>
 <span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
@@ -11532,14 +11553,22 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
 <span class="w">      </span><span class="nt">MYSQL_USER</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerweb&quot;</span>
 <span class="w">      </span><span class="nt">MYSQL_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;changeme&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger password for the database</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db:/var/lib/mysql</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-data:/var/lib/mysql</span>
 <span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
 
 <span class="w">  </span><span class="nt">bw-syslog</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">balabit/syslog-ng:4.7.1</span>
-<span class="w">    </span><span class="c1"># image: lscr.io/linuxserver/syslog-ng:4.7.1-r1-ls116 # For aarch64 architecture</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">balabit/syslog-ng:4.8.0</span>
+<span class="w">    </span><span class="c1"># image: lscr.io/linuxserver/syslog-ng:4.8.1-r1-ls147 # For aarch64 architecture</span>
+<span class="w">    </span><span class="nt">cap_add</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NET_BIND_SERVICE</span><span class="w">  </span><span class="c1"># Bind to low ports</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NET_BROADCAST</span><span class="w">  </span><span class="c1"># Send broadcasts</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NET_RAW</span><span class="w">  </span><span class="c1"># Use raw sockets</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DAC_READ_SEARCH</span><span class="w">  </span><span class="c1"># Read files bypassing permissions</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DAC_OVERRIDE</span><span class="w">  </span><span class="c1"># Override file permissions</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CHOWN</span><span class="w">  </span><span class="c1"># Change ownership</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SYSLOG</span><span class="w">  </span><span class="c1"># Write to system logs</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-logs:/var/log/bunkerweb</span><span class="w"> </span><span class="c1"># This is the volume used to store the logs</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf</span><span class="w"> </span><span class="c1"># This is the syslog-ng configuration file</span>
@@ -11549,7 +11578,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
 
 <span class="nt">volumes</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bw-data</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">bw-db</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bw-storage</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bw-logs</span><span class="p">:</span>
 
 <span class="nt">networks</span><span class="p">:</span>
@@ -11601,7 +11630,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
 <span class="w">      </span><span class="nt">MULTISITE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span><span class="w"> </span><span class="c1"># Mandatory setting for autoconf / ui</span>
 <span class="w">      </span><span class="nt">API_WHITELIST_IP</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;127.0.0.0/24</span><span class="nv"> </span><span class="s">10.20.30.0/24&quot;</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-data:/data</span><span class="w"> </span><span class="c1"># This is used to persist the cache and other data like the backups</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-storage:/data</span><span class="w"> </span><span class="c1"># This is used to persist the cache and other data like the backups</span>
 <span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
@@ -11646,14 +11675,10 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
 <span class="w">    </span><span class="nt">labels</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.SERVER_NAME=www.example.com&quot;</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.USE_UI=yes&quot;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.USE_TEMPLATE=ui&quot;</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.USE_REVERSE_PROXY=yes&quot;</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.REVERSE_PROXY_URL=/changeme&quot;</span><span class="w"> </span><span class="c1"># Change it to a hard to guess URI</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.REVERSE_PROXY_HOST=http://bw-ui:7000&quot;</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.INTERCEPTED_ERROR_CODES=400</span><span class="nv"> </span><span class="s">404</span><span class="nv"> </span><span class="s">405</span><span class="nv"> </span><span class="s">413</span><span class="nv"> </span><span class="s">429</span><span class="nv"> </span><span class="s">500</span><span class="nv"> </span><span class="s">501</span><span class="nv"> </span><span class="s">502</span><span class="nv"> </span><span class="s">503</span><span class="nv"> </span><span class="s">504&quot;</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.GENERATE_SELF_SIGNED_SSL=yes&quot;</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.MAX_CLIENT_SIZE=50m&quot;</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.ALLOWED_METHODS=GET|POST|PUT|DELETE&quot;</span>
 <span class="w">    </span><span class="nt">logging</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">syslog</span>
 <span class="w">      </span><span class="nt">options</span><span class="p">:</span>
@@ -11668,7 +11693,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
 <span class="w">      </span><span class="nt">MYSQL_USER</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerweb&quot;</span>
 <span class="w">      </span><span class="nt">MYSQL_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;changeme&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger password for the database</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db:/var/lib/mysql</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-data:/var/lib/mysql</span>
 <span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
@@ -11685,8 +11710,16 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-docker</span>
 
 <span class="w">  </span><span class="nt">bw-syslog</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">balabit/syslog-ng:4.7.1</span>
-<span class="w">    </span><span class="c1"># image: lscr.io/linuxserver/syslog-ng:4.7.1-r1-ls116 # For aarch64 architecture</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">balabit/syslog-ng:4.8.0</span>
+<span class="w">    </span><span class="c1"># image: lscr.io/linuxserver/syslog-ng:4.8.1-r1-ls147 # For aarch64 architecture</span>
+<span class="w">    </span><span class="nt">cap_add</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NET_BIND_SERVICE</span><span class="w">  </span><span class="c1"># Bind to low ports</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NET_BROADCAST</span><span class="w">  </span><span class="c1"># Send broadcasts</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NET_RAW</span><span class="w">  </span><span class="c1"># Use raw sockets</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DAC_READ_SEARCH</span><span class="w">  </span><span class="c1"># Read files bypassing permissions</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DAC_OVERRIDE</span><span class="w">  </span><span class="c1"># Override file permissions</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CHOWN</span><span class="w">  </span><span class="c1"># Change ownership</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SYSLOG</span><span class="w">  </span><span class="c1"># Write to system logs</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-logs:/var/log/bunkerweb</span><span class="w"> </span><span class="c1"># This is the volume used to store the logs</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf</span><span class="w"> </span><span class="c1"># This is the syslog-ng configuration file</span>
@@ -11696,7 +11729,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
 
 <span class="nt">volumes</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bw-data</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">bw-db</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bw-storage</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bw-logs</span><span class="p">:</span>
 
 <span class="nt">networks</span><span class="p">:</span>
@@ -11718,7 +11751,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
 </div>
 <h3 id="web-ui-syslog-ng-configuration">Syslog-ng configuration</h3>
 <p>Here is an example of a <code>syslog-ng.conf</code> file that you can use to forward the logs to a file :</p>
-<div class="highlight"><pre><span></span><code>@version: 4.7
+<div class="highlight"><pre><span></span><code>@version: 4.8
 
 # Source configuration to receive logs from Docker containers
 source s_net {
@@ -11875,14 +11908,10 @@ DNS_RESOLVERS=9.9.9.9 8.8.8.8 8.8.4.4
 API_LISTEN_IP=127.0.0.1
 SERVER_NAME=www.example.com
 MULTISITE=yes
-www.example.com_USE_UI=yes
+www.example.com_USE_TEMPLATE=ui
 www.example.com_USE_REVERSE_PROXY=yes
 www.example.com_REVERSE_PROXY_URL=/changeme
 www.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:7000
-www.example.com_INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504
-www.example.com_GENERATE_SELF_SIGNED_SSL=yes
-www.example.com_MAX_CLIENT_SIZE=50m
-www.example.com_ALLOWED_METHODS=GET|POST|PUT|DELETE
 </code></pre></div>
 <p>Don't forget to reload the <code>bunkerweb</code> service:</p>
 <div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>reload<span class="w"> </span>bunkerweb
@@ -11932,16 +11961,12 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 <span class="w">      </span><span class="nt">DISABLE_DEFAULT_SERVER</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
 <span class="w">      </span><span class="nt">USE_CLIENT_CACHE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
 <span class="w">      </span><span class="nt">USE_GZIP</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
-<span class="w">      </span><span class="nt">www.example.com_USE_UI</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="w">      </span><span class="nt">www.example.com_USE_TEMPLATE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;ui&quot;</span>
 <span class="w">      </span><span class="nt">www.example.com_USE_REVERSE_PROXY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
 <span class="w">      </span><span class="nt">www.example.com_REVERSE_PROXY_URL</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/changeme&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger URI</span>
 <span class="w">      </span><span class="nt">www.example.com_REVERSE_PROXY_HOST</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;http://bw-ui:7000&quot;</span><span class="w"> </span><span class="c1"># The web UI container is listening on the 7000 port by default</span>
-<span class="w">      </span><span class="nt">www.example.com_INTERCEPTED_ERROR_CODES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;400</span><span class="nv"> </span><span class="s">404</span><span class="nv"> </span><span class="s">405</span><span class="nv"> </span><span class="s">413</span><span class="nv"> </span><span class="s">429</span><span class="nv"> </span><span class="s">500</span><span class="nv"> </span><span class="s">501</span><span class="nv"> </span><span class="s">502</span><span class="nv"> </span><span class="s">503</span><span class="nv"> </span><span class="s">504&quot;</span>
-<span class="w">      </span><span class="nt">www.example.com_GENERATE_SELF_SIGNED_SSL</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
-<span class="w">      </span><span class="nt">www.example.com_MAX_CLIENT_SIZE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;50m&quot;</span>
-<span class="w">      </span><span class="nt">www.example.com_ALLOWED_METHODS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;GET|POST|PUT|DELETE&quot;</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-data:/data</span><span class="w"> </span><span class="c1"># This is used to persist the cache and other data like the backups</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-storage:/data</span><span class="w"> </span><span class="c1"># This is used to persist the cache and other data like the backups</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
@@ -11965,13 +11990,13 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 <span class="w">      </span><span class="nt">MYSQL_USER</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerweb&quot;</span>
 <span class="w">      </span><span class="nt">MYSQL_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;changeme&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger password for the database</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db:/var/lib/mysql</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-data:/var/lib/mysql</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
 
 <span class="nt">volumes</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bw-data</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">bw-db</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bw-storage</span><span class="p">:</span>
 
 <span class="nt">networks</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bw-universe</span><span class="p">:</span>
@@ -12035,7 +12060,7 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 <span class="w">      </span><span class="nt">API_WHITELIST_IP</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;127.0.0.0/8</span><span class="nv"> </span><span class="s">10.20.30.0/24&quot;</span>
 <span class="w">      </span><span class="nt">MULTISITE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-data:/data</span><span class="w"> </span><span class="c1"># This is used to persist the cache and other data like the backups</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-storage:/data</span><span class="w"> </span><span class="c1"># This is used to persist the cache and other data like the backups</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
@@ -12070,7 +12095,7 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 <span class="w">      </span><span class="nt">MYSQL_USER</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerweb&quot;</span>
 <span class="w">      </span><span class="nt">MYSQL_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;changeme&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger password for the database</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db:/var/lib/mysql</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-data:/var/lib/mysql</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
 
@@ -12083,21 +12108,17 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 <span class="w">      </span><span class="nt">TOTP_SECRETS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mysecret&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger secret key (see the Prerequisites section)</span>
 <span class="w">    </span><span class="nt">labels</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.SERVER_NAME=www.example.com&quot;</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.USE_UI=yes&quot;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.USE_TEMPLATE=ui&quot;</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.USE_REVERSE_PROXY=yes&quot;</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.REVERSE_PROXY_URL=/changeme&quot;</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.REVERSE_PROXY_HOST=http://bw-ui:7000&quot;</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.INTERCEPTED_ERROR_CODES=400</span><span class="nv"> </span><span class="s">404</span><span class="nv"> </span><span class="s">405</span><span class="nv"> </span><span class="s">413</span><span class="nv"> </span><span class="s">429</span><span class="nv"> </span><span class="s">500</span><span class="nv"> </span><span class="s">501</span><span class="nv"> </span><span class="s">502</span><span class="nv"> </span><span class="s">503</span><span class="nv"> </span><span class="s">504&quot;</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.GENERATE_SELF_SIGNED_SSL=yes&quot;</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.MAX_CLIENT_SIZE=50m&quot;</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.ALLOWED_METHODS=GET|POST|PUT|DELETE&quot;</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
 
 <span class="nt">volumes</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bw-data</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">bw-db</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bw-storage</span><span class="p">:</span>
 
 <span class="nt">networks</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bw-universe</span><span class="p">:</span>
@@ -12204,7 +12225,7 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 <span class="w">      </span><span class="nt">USE_REDIS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
 <span class="w">      </span><span class="nt">REDIS_HOST</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bw-redis&quot;</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-data:/data</span><span class="w"> </span><span class="c1"># This is used to persist the cache and other data like the backups</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-storage:/data</span><span class="w"> </span><span class="c1"># This is used to persist the cache and other data like the backups</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
@@ -12245,7 +12266,7 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 <span class="w">      </span><span class="nt">MYSQL_USER</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerweb&quot;</span>
 <span class="w">      </span><span class="nt">MYSQL_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;changeme&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger password for the database</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db:/var/lib/mysql</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-data:/var/lib/mysql</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
 
@@ -12267,19 +12288,14 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 <span class="w">    </span><span class="nt">deploy</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">labels</span><span class="p">:</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.SERVER_NAME=www.example.com&quot;</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.USE_UI=yes&quot;</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.USE_TEMPLATE=ui&quot;</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.USE_REVERSE_PROXY=yes&quot;</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.REVERSE_PROXY_URL=/changeme&quot;</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.REVERSE_PROXY_HOST=http://bw-ui:7000&quot;</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.REVERSE_PROXY_INTERCEPT_ERRORS=no&quot;</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.INTERCEPTED_ERROR_CODES=400</span><span class="nv"> </span><span class="s">404</span><span class="nv"> </span><span class="s">405</span><span class="nv"> </span><span class="s">413</span><span class="nv"> </span><span class="s">429</span><span class="nv"> </span><span class="s">500</span><span class="nv"> </span><span class="s">501</span><span class="nv"> </span><span class="s">502</span><span class="nv"> </span><span class="s">503</span><span class="nv"> </span><span class="s">504&quot;</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.GENERATE_SELF_SIGNED_SSL=yes&quot;</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.MAX_CLIENT_SIZE=50m&quot;</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.ALLOWED_METHODS=GET|POST|PUT|DELETE&quot;</span>
 
 <span class="nt">volumes</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">bw-db</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bw-data</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bw-storage</span><span class="p">:</span>
 
 <span class="nt">networks</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bw-universe</span><span class="p">:</span>
