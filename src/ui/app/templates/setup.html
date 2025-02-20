@@ -13,7 +13,7 @@
                    value="{{ csrf_token() }}" />
             <input type="hidden" name="theme" value="light" />
             <div class="container-xxl">
-                <div class="position-fixed top-0 end-0 m-5" style="z-index: 1050;">
+                <div class="position-fixed top-0 end-0 m-5 me-7" style="z-index: 1050;">
                     <!-- prettier-ignore -->
                     <div class="d-flex justify-content-end align-items-center mb-5">
                         <div class="toggle-container d-flex align-items-center bg-white p-2 rounded-pill shadow-lg me-3">
@@ -705,12 +705,8 @@
                                                                         </span>
                                                                     </div>
                                                                 </div>
-                                                                <textarea id="LETS_ENCRYPT_DNS_CREDENTIAL_ITEMS"
-                                                                          name="LETS_ENCRYPT_DNS_CREDENTIAL_ITEMS"
-                                                                          class="form-control plugin-setting mt-1"
-                                                                          aria-labelledby="label-LETS_ENCRYPT_DNS_CREDENTIAL_ITEMS"
-                                                                          pattern="^.*$"
-                                                                          {% if lets_encrypt_challenge == 'http' %}disabled{% endif %}>{% for item in lets_encrypt_dns_credential_items %}{{ item }}{% if not loop.last %}\n{% endif %}{% endfor %}</textarea>
+                                                                <textarea id="LETS_ENCRYPT_DNS_CREDENTIAL_ITEMS" name="LETS_ENCRYPT_DNS_CREDENTIAL_ITEMS" class="form-control plugin-setting mt-1" aria-labelledby="label-LETS_ENCRYPT_DNS_CREDENTIAL_ITEMS" pattern="^.*$" {% if lets_encrypt_challenge == 'http' %}disabled{% endif %}>{% for item in lets_encrypt_dns_credential_items %}{{ item }}{% if not loop.last %}
+{% endif %}{% endfor %}</textarea>
                                                             </div>
                                                         </div>
                                                     </div>
