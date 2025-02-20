@@ -919,6 +919,11 @@ a.courier-prime:hover {
   border-radius: 8px;
   text-align: center;
   font-weight: bold;
+  z-index: 1000;
+}
+
+.blur-overlay .blur-message a:hover {
+  font-style: italic;
 }
 
 .layout-page::before {
@@ -946,6 +951,12 @@ table.dataTable input.dt-select-checkbox:indeterminate:after {
 
 table.dataTable input.dt-select-checkbox:checked:after {
   margin-top: -5px;
+}
+
+:not(.btn-group):not(.input-group)
+  > .btn-group.dt-buttons
+  > .btn:not([class*="btn-outline-"]):first-child {
+  border-left-color: var(--bs-btn-disabled-border-color) !important;
 }
 
 .dtsp-searchPanes
