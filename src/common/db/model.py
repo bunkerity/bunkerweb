@@ -323,7 +323,7 @@ class Metadata(Base):
 ## UI Models
 
 THEMES_ENUM = Enum("light", "dark", name="themes_enum")
-TABLES_ENUM = Enum("bans", "configs", "instances", "jobs", "plugins", "reports", "services", name="tables_enum")
+TABLES_ENUM = Enum("bans", "cache", "configs", "instances", "jobs", "plugins", "reports", "services", name="tables_enum")
 
 
 class JSONText(TypeDecorator):

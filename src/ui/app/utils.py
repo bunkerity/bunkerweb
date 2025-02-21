@@ -33,6 +33,12 @@ COLUMNS_PREFERENCES_DEFAULTS = {
         "7": True,
         "8": True,
     },
+    "cache": {
+        "3": True,
+        "4": True,
+        "5": True,
+        "6": False,
+    },
     "configs": {
         "3": True,
         "4": True,
