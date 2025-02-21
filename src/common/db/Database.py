@@ -1329,12 +1329,25 @@ class Database:
                 if db_global_config.suffix:
                     key = f"{key}_{db_global_config.suffix}"
 
-                if key not in config and (db_global_config.suffix or f"{key}_0" not in config):
-                    global_settings_to_delete.append(db_global_config)
-                    plugin_id = session.query(Settings).with_entities(Settings.plugin_id).filter_by(id=db_global_config.setting_id).first().plugin_id
-                    changed_plugins.add(plugin_id)
-                    if key == "SERVER_NAME":
-                        changed_services = True
+                try:
+                    # Check if the setting should be deleted based on key presence
+                    should_delete = key not in config and (db_global_config.suffix or f"{key}_0" not in config)
+
+                    if should_delete:
+                        global_settings_to_delete.append(db_global_config)
+                        # Get plugin ID with safer query and null checking
+                        plugin_query = session.query(Settings).with_entities(Settings.plugin_id).filter_by(id=db_global_config.setting_id).first()
+                        if plugin_query:
+                            plugin_id = plugin_query.plugin_id
+                            if plugin_id:
+                                changed_plugins.add(plugin_id)
+
+                        # Handle special SERVER_NAME case
+                        if key == "SERVER_NAME":
+                            changed_services = True
+                except Exception as e:
+                    self.logger.warning(f"Error processing global config {db_global_config.setting_id}: {e}")
+                    continue
 
             self.logger.debug(f"Cleaning up {method} old services settings")
             # Collect service settings to delete
@@ -1344,10 +1357,25 @@ class Database:
                 if db_service_config.suffix:
                     key = f"{key}_{db_service_config.suffix}"
 
-                if key not in config and (db_service_config.suffix or f"{key}_0" not in config):
-                    service_settings_to_delete.append(db_service_config)
-                    plugin_id = session.query(Settings).with_entities(Settings.plugin_id).filter_by(id=db_service_config.setting_id).first().plugin_id
-                    changed_plugins.add(plugin_id)
+                try:
+                    # Check if the setting should be deleted based on key presence
+                    should_delete = key not in config and (db_service_config.suffix or f"{key}_0" not in config)
+
+                    if should_delete:
+                        service_settings_to_delete.append(db_service_config)
+                        # Get plugin ID with safer query and null checking
+                        plugin_query = session.query(Settings).with_entities(Settings.plugin_id).filter_by(id=db_service_config.setting_id).first()
+                        if plugin_query:
+                            plugin_id = plugin_query.plugin_id
+                            if plugin_id:
+                                changed_plugins.add(plugin_id)
+
+                        # Handle special SERVER_NAME case
+                        if key == "SERVER_NAME":
+                            changed_services = True
+                except Exception as e:
+                    self.logger.warning(f"Error processing service config {db_service_config.setting_id}: {e}")
+                    continue
 
             if config:
                 config.pop("DATABASE_URI", None)
