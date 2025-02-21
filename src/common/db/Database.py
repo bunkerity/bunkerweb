@@ -465,6 +465,7 @@ class Database:
             "last_external_plugins_change": None,
             "last_pro_plugins_change": None,
             "last_instances_change": None,
+            "reload_ui_plugins": False,
             "integration": "unknown",
             "version": "1.6.1-rc1",
             "database_version": "Unknown",  # ? Extracted from the database
@@ -524,7 +525,7 @@ class Database:
         value: Optional[bool] = False,
     ) -> str:
         """Set changed bit for config, custom configs, instances and plugins"""
-        changes = changes or ["config", "custom_configs", "external_plugins", "pro_plugins", "instances"]
+        changes = changes or ["config", "custom_configs", "external_plugins", "pro_plugins", "instances", "ui_plugins"]
         plugins_changes = plugins_changes or set()
         with self._db_session() as session:
             if self.readonly:
@@ -553,6 +554,8 @@ class Database:
                 if "instances" in changes:
                     metadata.instances_changed = value
                     metadata.last_instances_change = current_time
+                if "ui_plugins" in changes:
+                    metadata.reload_ui_plugins = value
 
                 if plugins_changes:
                     if plugins_changes == "all":
@@ -3173,9 +3176,11 @@ class Database:
                         if _type in ("external", "ui"):
                             metadata.external_plugins_changed = True
                             metadata.last_external_plugins_change = datetime.now().astimezone()
+                            metadata.reload_ui_plugins = True
                         elif _type == "pro":
                             metadata.pro_plugins_changed = True
                             metadata.last_pro_plugins_change = datetime.now().astimezone()
+                            metadata.reload_ui_plugins = True
 
             try:
                 session.add_all(to_put)
@@ -3221,9 +3226,11 @@ class Database:
                         if method in ("external", "ui"):
                             metadata.external_plugins_changed = True
                             metadata.last_external_plugins_change = datetime.now().astimezone()
+                            metadata.reload_ui_plugins = True
                         elif method == "pro":
                             metadata.pro_plugins_changed = True
                             metadata.last_pro_plugins_change = datetime.now().astimezone()
+                            metadata.reload_ui_plugins = True
 
             try:
                 session.commit()

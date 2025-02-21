@@ -4,7 +4,6 @@ from argparse import ArgumentParser
 from contextlib import suppress
 from datetime import datetime
 from io import BytesIO
-from itertools import chain
 from json import load as json_load
 from logging import Logger
 from os import _exit, environ, getenv, getpid, sep
@@ -12,6 +11,7 @@ from os.path import join
 from pathlib import Path
 from shutil import copy, rmtree, copytree
 from signal import SIGINT, SIGTERM, signal, SIGHUP
+from stat import S_IRGRP, S_IRUSR, S_IWUSR, S_IXGRP, S_IXUSR
 from subprocess import run as subprocess_run, DEVNULL, STDOUT
 from sys import path as sys_path
 from tarfile import TarFile, open as tar_open
@@ -144,10 +144,8 @@ def handle_reload(signum, frame):
                 LOGGER.warning("The database is read-only, no need to save the changes in the configuration as they will not be saved")
                 return
 
-            # run the config saver
             proc = subprocess_run(
                 [
-                    "python3",
                     BUNKERWEB_PATH.joinpath("gen", "save_config.py").as_posix(),
                     "--settings",
                     BUNKERWEB_PATH.joinpath("settings.json").as_posix(),
@@ -246,7 +244,9 @@ def generate_custom_configs(configs: Optional[List[Dict[str, Any]]] = None, *, o
                     )
                     tmp_path.parent.mkdir(parents=True, exist_ok=True)
                     tmp_path.write_bytes(custom_config["data"])
-                    tmp_path.chmod(0o640)
+                    desired_perms = S_IRUSR | S_IWUSR | S_IRGRP  # 0o640
+                    if tmp_path.stat().st_mode & 0o777 != desired_perms:
+                        tmp_path.chmod(desired_perms)
             except OSError as e:
                 LOGGER.debug(format_exc())
                 if custom_config["method"] != "manual":
@@ -310,8 +310,17 @@ def generate_external_plugins(original_path: Union[Path, str] = EXTERNAL_PLUGINS
                         except TypeError:
                             tar.extractall(original_path)
 
-                    for job_file in chain(original_path.joinpath(plugin["id"], "jobs").glob("*"), original_path.joinpath(plugin["id"], "bwcli").glob("*")):
-                        job_file.chmod(0o750)
+                    # Add u+x permissions to executable files
+                    plugin_path = original_path.joinpath(plugin["id"])
+                    desired_perms = S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IXGRP  # 0o750
+                    for subdir, pattern in (
+                        ("jobs", "*"),
+                        ("bwcli", "*"),
+                        ("ui", "*.py"),
+                    ):
+                        for executable_file in plugin_path.joinpath(subdir).rglob(pattern):
+                            if executable_file.stat().st_mode & 0o777 != desired_perms:
+                                executable_file.chmod(desired_perms)
             except OSError as e:
                 LOGGER.debug(format_exc())
                 if plugin["method"] != "manual":
@@ -358,32 +367,36 @@ def generate_caches():
                 continue
             cache_path.parent.mkdir(parents=True, exist_ok=True)
             cache_path.write_bytes(job_cache_file["data"])
-            cache_path.chmod(0o640)
+            desired_perms = S_IRUSR | S_IWUSR | S_IRGRP  # 0o640
+            if cache_path.stat().st_mode & 0o777 != desired_perms:
+                cache_path.chmod(desired_perms)
             LOGGER.debug(f"Restored cache file {job_cache_file['file_name']}")
         except BaseException as e:
             LOGGER.error(f"Exception while restoring cache file {job_cache_file['file_name']} :\n{e}")
 
     if job_path.is_dir():
-        for file in job_path.rglob("*"):
-            if file.as_posix().startswith(tuple(ignored_dirs)):
+        for resource_path in job_path.rglob("*"):
+            if resource_path.as_posix().startswith(tuple(ignored_dirs)):
                 continue
 
-            LOGGER.debug(f"Checking if {file} should be removed")
-            if file not in plugin_cache_files and file.is_file():
-                LOGGER.debug(f"Removing non-cached file {file}")
-                file.unlink(missing_ok=True)
-                if file.parent.is_dir() and not list(file.parent.iterdir()):
-                    LOGGER.debug(f"Removing empty directory {file.parent}")
-                    rmtree(file.parent, ignore_errors=True)
-                    if file.parent == job_path:
+            LOGGER.debug(f"Checking if {resource_path} should be removed")
+            if resource_path not in plugin_cache_files and resource_path.is_file():
+                LOGGER.debug(f"Removing non-cached file {resource_path}")
+                resource_path.unlink(missing_ok=True)
+                if resource_path.parent.is_dir() and not list(resource_path.parent.iterdir()):
+                    LOGGER.debug(f"Removing empty directory {resource_path.parent}")
+                    rmtree(resource_path.parent, ignore_errors=True)
+                    if resource_path.parent == job_path:
                         break
                 continue
-            elif file.is_dir() and not list(file.iterdir()):
-                LOGGER.debug(f"Removing empty directory {file}")
-                rmtree(file, ignore_errors=True)
+            elif resource_path.is_dir() and not list(resource_path.iterdir()):
+                LOGGER.debug(f"Removing empty directory {resource_path}")
+                rmtree(resource_path, ignore_errors=True)
                 continue
 
-            file.chmod(0o750)
+            desired_perms = S_IRUSR | S_IWUSR | S_IRGRP | S_IXUSR | S_IXGRP  # 0o750
+            if resource_path.stat().st_mode & 0o777 != desired_perms:
+                resource_path.chmod(desired_perms)
 
 
 def generate_configs(env: Dict[str, str], logger: Logger = LOGGER) -> bool:
@@ -394,7 +407,6 @@ def generate_configs(env: Dict[str, str], logger: Logger = LOGGER) -> bool:
     # run the generator
     proc = subprocess_run(
         [
-            "python3",
             BUNKERWEB_PATH.joinpath("gen", "main.py").as_posix(),
             "--settings",
             BUNKERWEB_PATH.joinpath("settings.json").as_posix(),
@@ -639,7 +651,6 @@ if __name__ == "__main__":
             # run the config saver
             proc = subprocess_run(
                 [
-                    "python3",
                     BUNKERWEB_PATH.joinpath("gen", "save_config.py").as_posix(),
                     "--settings",
                     BUNKERWEB_PATH.joinpath("settings.json").as_posix(),
@@ -833,7 +844,6 @@ if __name__ == "__main__":
                 LOGGER.info("Running config saver to save potential ignored external plugins settings ...")
                 proc = subprocess_run(
                     [
-                        "python3",
                         BUNKERWEB_PATH.joinpath("gen", "save_config.py").as_posix(),
                         "--settings",
                         BUNKERWEB_PATH.joinpath("settings.json").as_posix(),

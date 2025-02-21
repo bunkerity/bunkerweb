@@ -1,16 +1,21 @@
 #!/usr/bin/env python3
 from contextlib import suppress
 from datetime import datetime, timedelta
+from importlib.util import module_from_spec, spec_from_file_location
 from ipaddress import ip_address
+from itertools import chain
 from json import dumps, loads
-from os import getenv, sep
-from os.path import join
+from operator import itemgetter
+from os import getenv, getpid, sep
+from os.path import abspath, join
 from secrets import token_urlsafe
 from signal import SIGINT, signal, SIGTERM
 from sys import path as sys_path
 from threading import Thread
 from time import time
 from traceback import format_exc
+
+from jinja2 import ChoiceLoader, FileSystemLoader
 
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("api",), ("db",))]:
@@ -51,8 +56,10 @@ from app.dependencies import BW_CONFIG, DATA, DB
 from app.models.models import AnonymousUser
 from app.utils import (
     COLUMNS_PREFERENCES_DEFAULTS,
+    EXTERNAL_PLUGINS_PATH,
     LIB_DIR,
     LOGGER,
+    PRO_PLUGINS_PATH,
     flash,
     get_blacklisted_settings,
     get_filtered_settings,
@@ -60,14 +67,106 @@ from app.utils import (
     get_multiples,
     handle_stop,
     human_readable_number,
+    reload_plugins,
     stop,
 )
 
 signal(SIGINT, handle_stop)
 signal(SIGTERM, handle_stop)
 
+HOOKS = {
+    "before_request": {
+        "key": "BEFORE_REQUEST_HOOKS",
+        "log_prefix": "Before-request",
+    },
+    "after_request": {
+        "key": "AFTER_REQUEST_HOOKS",
+        "log_prefix": "After-request",
+    },
+    "teardown_request": {
+        "key": "TEARDOWN_REQUEST_HOOKS",
+        "log_prefix": "Teardown-request",
+    },
+    "context_processor": {
+        "key": "CONTEXT_PROCESSOR_HOOKS",
+        "log_prefix": "Context-processor",
+    },
+}
+
+
+class DynamicFlask(Flask):
+    def create_global_jinja_loader(self):
+        """
+        Override Flask's default template loader creation so that
+        blueprint template folders (especially plugins) take precedence
+        over the application's global template folder.
+        """
+        LOGGER.debug("Creating global jinja loader with custom blueprint priority handling")
+        # Collect loaders from each blueprint in descending order of 'plugin_priority'
+        # (or zero if not set).
+        blueprint_loaders = []
+        for name, bp in self.blueprints.items():
+            if bp.template_folder is not None:
+                # If the blueprint doesn't provide a custom loader,
+                # create a FileSystemLoader pointed at its template folder.
+                loader = bp.jinja_loader
+                if loader is None:
+                    template_path = abspath(bp.template_folder)
+                    loader = FileSystemLoader(template_path)
+                    LOGGER.debug(f"Created FileSystemLoader for blueprint '{name}' with path: {template_path}")
+                else:
+                    LOGGER.debug(f"Using existing jinja_loader for blueprint '{name}'")
+                # Priority: higher means we want it searched first.
+                priority = getattr(bp, "plugin_priority", 0)
+                LOGGER.debug(f"Blueprint '{name}' has plugin_priority: {priority}")
+                blueprint_loaders.append((priority, loader))
+
+        # Sort blueprint loaders descending by priority
+        blueprint_loaders.sort(key=itemgetter(0), reverse=True)
+        loaders_in_order = [ldr for (_prio, ldr) in blueprint_loaders]
+        LOGGER.debug(f"Blueprint loaders sorted by priority: {[p for p, _ in blueprint_loaders]}")
+
+        # Finally, add the app's own jinja_loader (which handles the global templates folder)
+        # at the end. This ensures plugin templates overshadow global templates if names clash.
+        if self.jinja_loader is not None:
+            loaders_in_order.append(self.jinja_loader)
+            LOGGER.debug("App's jinja_loader appended to the end of loaders list")
+
+        final_loader = ChoiceLoader(loaders_in_order)
+        LOGGER.debug("Global jinja loader created successfully")
+        return final_loader
+
+    def register_blueprint(self, blueprint, **options):
+        # Check if a blueprint with this name is already registered.
+        if blueprint.name in self.blueprints:
+            existing_bp = self.blueprints[blueprint.name]
+            existing_priority = getattr(existing_bp, "plugin_priority", 0)
+            new_priority = getattr(blueprint, "plugin_priority", 0)
+            if new_priority > existing_priority:
+                LOGGER.info(f"Overriding blueprint '{blueprint.name}': new priority {new_priority} over {existing_priority}")
+                # Remove the existing blueprint.
+                del self.blueprints[blueprint.name]
+                # Also remove all URL rules associated with the existing blueprint.
+                rules_to_remove = [rule for rule in list(self.url_map.iter_rules()) if rule.endpoint.startswith(blueprint.name + ".")]
+                for rule in rules_to_remove:
+                    self.url_map._rules.remove(rule)
+                    self.url_map._rules_by_endpoint.pop(rule.endpoint, None)
+            else:
+                LOGGER.info(f"Skipping blueprint '{blueprint.name}' with priority {new_priority} " f"(existing priority {existing_priority})")
+                return  # Do not register a lower- or equal-priority blueprint.
+
+        # Allow registration even after first request by temporarily resetting the flag.
+        original_got_first = self._got_first_request
+        self._got_first_request = False
+        try:
+            result = super().register_blueprint(blueprint, **options)
+        finally:
+            self._got_first_request = original_got_first
+        return result
+
+
 # Flask app
-app = Flask(__name__, static_url_path="/", static_folder="app/static", template_folder="app/templates")
+app = DynamicFlask(__name__, static_url_path="/", static_folder="app/static", template_folder="app/templates")
 
 with app.app_context():
     PROXY_NUMBERS = int(getenv("PROXY_NUMBERS", "1"))
@@ -141,6 +240,15 @@ with app.app_context():
         human_readable_number=human_readable_number,
         url_for=custom_url_for,
     )
+
+    app.config.update({hook_info["key"]: [] for hook_info in HOOKS.values()})
+
+    DATA.load_from_file()
+    if "WORKERS" not in DATA:
+        DATA["WORKERS"] = {}
+    DATA["WORKERS"][getpid()] = {"refresh_context": False}
+    DATA["FORCE_RELOAD_PLUGIN"] = True
+    DB.checked_changes(["ui_plugins"], value=True)
 
 
 @app.context_processor
@@ -272,6 +380,142 @@ def check_database_state(request_method: str, request_path: str):
             DATA["LAST_DATABASE_RETRY"] = DB.last_connection_retry.isoformat() if DB.last_connection_retry else datetime.now().astimezone().isoformat()
 
 
+def safe_reload_plugins():
+    DATA.load_from_file()
+    if DATA.get("FORCE_RELOAD_PLUGIN", False) or not DATA.get("IS_RELOADING_PLUGINS", False):
+        DATA["IS_RELOADING_PLUGINS"] = True
+        reload_plugins(DB)
+        DATA.update({"FORCE_RELOAD_PLUGIN": False, "IS_RELOADING_PLUGINS": False})
+
+        for worker_pid in DATA.get("WORKERS", {}):
+            DATA["WORKERS"][worker_pid]["refresh_context"] = True
+
+
+def refresh_app_context():
+    DATA.load_from_file()
+    external_hooks = EXTERNAL_PLUGINS_PATH.rglob("*/ui/hooks.py")
+    pro_hooks = PRO_PLUGINS_PATH.rglob("*/ui/hooks.py")
+
+    for hook_file in chain(external_hooks, pro_hooks):
+        if hook_file.is_file():
+            try:
+                # Create a unique module name based on the hook file path
+                module_name = f"hooks_{hook_file.parent.name}_{hook_file.stem}"
+                spec = spec_from_file_location(module_name, hook_file)
+                if spec is None or spec.loader is None:
+                    LOGGER.warning(f"Could not load spec for hook file: {hook_file}")
+                    continue
+                hook_module = module_from_spec(spec)
+                spec.loader.exec_module(hook_module)
+                for attr_name in dir(hook_module):
+                    for hook_type, hook_info in HOOKS.items():
+                        if attr_name.startswith(hook_type):
+                            hook_function = getattr(hook_module, attr_name)
+                            if callable(hook_function):
+                                app.config.setdefault(hook_info["key"], []).append(hook_function)
+                                LOGGER.info(f"{hook_info['log_prefix']} hook '{attr_name}' from {hook_file} loaded successfully.")
+                            else:
+                                LOGGER.warning(f"Attribute '{attr_name}' in {hook_file} is not callable and was skipped.")
+                            break
+            except Exception as exc:
+                LOGGER.error(f"Error loading before-request hooks from {hook_file}: {exc}")
+
+    # Temporary dictionary to collect blueprints keyed by name.
+    blueprint_registry = {}
+
+    # Iterate over both plugin types.
+    for bp_dir in chain(PRO_PLUGINS_PATH.rglob("*/ui/blueprints"), EXTERNAL_PLUGINS_PATH.rglob("*/ui/blueprints")):
+        if bp_dir.is_dir():
+            for bp_file in bp_dir.glob("*.py"):
+                try:
+                    # Create a unique module name based on the file path.
+                    module_name = f"blueprint_{bp_dir.parent.name}_{bp_file.stem}"
+                    spec = spec_from_file_location(module_name, bp_file)
+                    if spec is None or spec.loader is None:
+                        LOGGER.warning(f"Could not load spec for blueprint file: {bp_file}")
+                        continue
+                    bp_module = module_from_spec(spec)
+                    spec.loader.exec_module(bp_module)
+                    # Use the file name (without extension) as the variable name that holds the blueprint.
+                    blueprint_var_name = bp_file.stem
+                    bp = getattr(bp_module, blueprint_var_name, None)
+                    if bp:
+                        # Set plugin priority: 2 for PRO, 1 for External.
+                        new_priority = 2 if PRO_PLUGINS_PATH in bp_file.parents else 1
+                        bp.plugin_priority = new_priority
+
+                        # Ensure the blueprint's template_folder is an absolute path.
+                        if bp.template_folder:
+                            bp.template_folder = abspath(bp.template_folder)
+
+                        # If a blueprint with this name was already loaded, compare priority.
+                        if bp.name in blueprint_registry:
+                            existing_bp = blueprint_registry[bp.name]
+                            existing_priority = getattr(existing_bp, "plugin_priority", 0)
+                            if new_priority > existing_priority and bp != existing_bp:
+                                blueprint_registry[bp.name] = bp
+                                LOGGER.info(f"Overriding blueprint '{bp.name}' with higher priority from {bp_file}.")
+                            else:
+                                LOGGER.info(f"Skipping blueprint '{bp.name}' from {bp_file} due to lower priority or identical blueprint.")
+                        else:
+                            blueprint_registry[bp.name] = bp
+                            LOGGER.info(f"Blueprint '{bp.name}' from {bp_file} loaded successfully.")
+                    else:
+                        LOGGER.warning(f"No blueprint variable named '{bp_file.stem}' found in {bp_file}.")
+                except Exception as exc:
+                    LOGGER.error(f"Error loading blueprint from {bp_file}: {exc}")
+
+    # Now register the selected blueprints with the Flask app.
+    for bp_name, bp in blueprint_registry.items():
+        # Check if a blueprint with the same name is already registered.
+        if bp_name in app.blueprints:
+            existing_bp = app.blueprints[bp_name]
+            existing_priority = getattr(existing_bp, "plugin_priority", 0)
+            new_priority = getattr(bp, "plugin_priority", 0)
+            LOGGER.info(f"Existing blueprint '{bp_name}' priority: {existing_priority}; new blueprint priority: {new_priority}")
+            if new_priority > existing_priority:
+                # Remove the existing blueprint from app.blueprints.
+                app.blueprints.pop(bp_name, None)
+
+                # Remove URL rules associated with the blueprint.
+                rules_to_remove = [rule for rule in list(app.url_map.iter_rules()) if rule.endpoint.startswith(bp_name + ".")]
+                for rule in rules_to_remove:
+                    try:
+                        LOGGER.debug(f"Removing rule: {rule}")
+                        app.url_map._rules.remove(rule)
+                    except ValueError:
+                        LOGGER.warning(f"Rule already removed: {rule}")
+                    app.url_map._rules_by_endpoint.pop(rule.endpoint, None)
+
+                # Remove view functions registered by the blueprint.
+                endpoints_to_remove = [endpoint for endpoint in list(app.view_functions.keys()) if endpoint.startswith(bp_name + ".")]
+                for endpoint in endpoints_to_remove:
+                    LOGGER.debug(f"Removing endpoint: {endpoint}")
+                    app.view_functions.pop(endpoint, None)
+
+                LOGGER.info(f"Removed existing blueprint '{bp_name}' with priority {existing_priority}.")
+            else:
+                LOGGER.info(
+                    f"Skipping registration for blueprint '{bp_name}' from plugins " f"(new priority {new_priority} <= existing priority {existing_priority})."
+                )
+                continue
+
+        # Clear Jinja2 cache to force reloading templates.
+        app.jinja_env.cache = {}
+
+        # Register the new blueprint.
+        app.register_blueprint(bp)
+        LOGGER.info(f"Registered blueprint '{bp_name}' with priority {getattr(bp, 'plugin_priority', 0)}")
+
+    app.jinja_env.loader = app.create_global_jinja_loader()
+
+    worker_pid = getpid()
+    if worker_pid not in DATA.get("WORKERS", {}):
+        DATA["WORKERS"][worker_pid] = {}
+    DATA["WORKERS"][getpid()]["refresh_context"] = False
+    DATA.write_to_file()
+
+
 @app.before_request
 def before_request():
     DATA.load_from_file()
@@ -293,9 +537,18 @@ def before_request():
         app.config["REMEMBER_COOKIE_NAME"] = "bw_ui_remember_token"
         app.config["REMEMBER_COOKIE_SECURE"] = False
 
+    metadata = None
     app.config["SCRIPT_NONCE"] = token_urlsafe(32)
 
     if not request.path.startswith(("/css/", "/img/", "/js/", "/json/", "/fonts/", "/libs/")):
+        metadata = DB.get_metadata()
+
+        if DATA.get("FORCE_RELOAD_PLUGIN", False) or (metadata.get("reload_ui_plugins", False) and not DATA.get("IS_RELOADING_PLUGINS", False)):
+            safe_reload_plugins()
+            refresh_app_context()
+        elif DATA.get("WORKERS", {}).get(getpid(), {}).get("refresh_context", False):
+            refresh_app_context()
+
         if datetime.now().astimezone() - datetime.fromisoformat(DATA.get("LATEST_VERSION_LAST_CHECK", "1970-01-01T00:00:00")).astimezone() > timedelta(hours=1):
             DATA["LATEST_VERSION_LAST_CHECK"] = datetime.now().astimezone().isoformat()
             Thread(target=update_latest_stable_release).start()
@@ -337,13 +590,12 @@ def before_request():
     if request.path.startswith(("/check", "/setup", "/loading", "/login", "/totp")):
         app.config["ENV"] = dict(current_endpoint=current_endpoint, script_nonce=app.config["SCRIPT_NONCE"])
     else:
-
-        DATA.load_from_file()
-        metadata = DB.get_metadata()
+        if not metadata:
+            metadata = DB.get_metadata()
 
         changes_ongoing = any(
             v
-            for k, v in DB.get_metadata().items()
+            for k, v in metadata.items()
             if k in ("custom_configs_changed", "external_plugins_changed", "pro_plugins_changed", "plugins_config_changed", "instances_changed")
         )
 
@@ -383,9 +635,14 @@ def before_request():
 
         app.config["ENV"] = data
 
+    for hook in app.config["BEFORE_REQUEST_HOOKS"]:
+        resp = hook()
+        if resp:
+            return resp
 
-def mark_user_access(session_id):
-    if "write" not in current_user.list_permissions or DB.readonly:
+
+def mark_user_access(user, session_id):
+    if user and "write" not in user.list_permissions or DB.readonly:
         return
 
     ret = DB.mark_ui_user_access(session_id, datetime.now().astimezone())
@@ -437,7 +694,7 @@ def set_security_headers(response):
     )
 
     if not request.path.startswith(("/css/", "/img/", "/js/", "/json/", "/fonts/", "/libs/")) and current_user.is_authenticated and "session_id" in session:
-        Thread(target=mark_user_access, args=(session["session_id"],)).start()
+        Thread(target=mark_user_access, args=(current_user, session["session_id"])).start()
 
     return response
 
