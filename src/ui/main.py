@@ -272,6 +272,11 @@ with app.app_context():
 
 @app.context_processor
 def inject_variables():
+    for hook in app.config["CONTEXT_PROCESSOR_HOOKS"]:
+        resp = hook()
+        if resp:
+            return resp
+
     return app.config["ENV"]
 
 
@@ -736,7 +741,18 @@ def set_security_headers(response):
     if not request.path.startswith(("/css/", "/img/", "/js/", "/json/", "/fonts/", "/libs/")) and current_user.is_authenticated and "session_id" in session:
         Thread(target=mark_user_access, args=(current_user, session["session_id"])).start()
 
+    for hook in app.config["AFTER_REQUEST_HOOKS"]:
+        resp = hook()
+        if resp:
+            return resp
+
     return response
+
+
+@app.teardown_request
+def teardown_request(_):
+    for hook in app.config["TEARDOWN_REQUEST_HOOKS"]:
+        hook()
 
 
 ### * MISC ROUTES * ###
