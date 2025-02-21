@@ -1,17 +1,11 @@
 #!/usr/bin/env python3
 
-from contextlib import suppress
 from datetime import datetime
-from io import BytesIO
 from os import _exit
 from os.path import sep
 from pathlib import Path
-from shutil import rmtree
-from stat import S_IRGRP, S_IRUSR, S_IWUSR, S_IXGRP, S_IXUSR
 from string import printable
 from subprocess import PIPE, Popen, call
-from tarfile import open as tar_open
-from traceback import format_exc
 from typing import Dict, Set, Union
 
 from bcrypt import checkpw, gensalt, hashpw
@@ -20,14 +14,10 @@ from regex import compile as re_compile, match
 from requests import get
 
 from logger import setup_logger  # type: ignore
-from common_utils import bytes_hash  # type: ignore
 
 
 TMP_DIR = Path(sep, "var", "tmp", "bunkerweb")
 LIB_DIR = Path(sep, "var", "lib", "bunkerweb")
-
-EXTERNAL_PLUGINS_PATH = Path(sep, "etc", "bunkerweb", "plugins")
-PRO_PLUGINS_PATH = Path(sep, "etc", "bunkerweb", "pro", "plugins")
 
 LOGGER = setup_logger("UI")
 
@@ -226,68 +216,3 @@ def human_readable_number(value: Union[str, int]) -> str:
     elif value >= 1_000:
         return f"{value/1_000:.1f}k"
     return str(value)
-
-
-def reload_plugins(db):
-    plugins = db.get_plugins(_type="all", with_data=True)
-
-    ignored_plugins = set()
-    for plugin in plugins:
-        # Determine the correct extraction path based on the plugin type.
-        if plugin["type"] in ("external", "ui"):
-            plugin_path = EXTERNAL_PLUGINS_PATH
-        elif plugin["type"] == "pro":
-            plugin_path = PRO_PLUGINS_PATH
-        else:
-            continue
-
-        target = plugin_path / plugin["id"]
-
-        # If the target exists, compare its checksum.
-        if target.exists():
-            with suppress(StopIteration, IndexError):
-                with BytesIO() as plugin_content:
-                    with tar_open(fileobj=plugin_content, mode="w:gz", compresslevel=9) as tar:
-                        tar.add(target, arcname=target.name, recursive=True)
-                    plugin_content.seek(0)
-                    if bytes_hash(plugin_content, algorithm="sha256") == plugin["checksum"]:
-                        ignored_plugins.add(target.name)
-                        continue
-                db.logger.debug(f"Checksum of {target} has changed, removing it ...")
-
-                if target.is_symlink() or target.is_file():
-                    with suppress(OSError):
-                        target.unlink()
-                elif target.is_dir():
-                    rmtree(target, ignore_errors=True)
-
-        try:
-            if plugin["data"]:
-                with tar_open(fileobj=BytesIO(plugin["data"]), mode="r:gz") as tar:
-                    try:
-                        tar.extractall(plugin_path, filter="fully_trusted")
-                    except TypeError:
-                        tar.extractall(plugin_path)
-
-                plugin_folder = plugin_path / plugin["id"]
-                # Add u+x permissions to executable files
-                desired_perms = S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IXGRP  # 0o750
-                for subdir, pattern in (
-                    ("jobs", "*"),
-                    ("bwcli", "*"),
-                    ("ui", "*.py"),
-                ):
-                    for executable_file in plugin_folder.joinpath(subdir).rglob(pattern):
-                        if executable_file.stat().st_mode & 0o777 != desired_perms:
-                            executable_file.chmod(desired_perms)
-        except OSError as e:
-            db.logger.debug(format_exc())
-            if plugin["method"] != "manual":
-                db.logger.error(f"Error while generating {plugin['type']} plugins \"{plugin['name']}\": {e}")
-        except BaseException as e:
-            db.logger.debug(format_exc())
-            db.logger.error(f"Error while generating {plugin['type']} plugins \"{plugin['name']}\": {e}")
-
-    ret = db.checked_changes(["ui_plugins"])
-    if ret:
-        db.logger.error(f"An error occurred when setting the changes to checked in the database : {ret}")

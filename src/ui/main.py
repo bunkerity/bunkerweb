@@ -52,14 +52,12 @@ from app.routes.setup import setup
 from app.routes.totp import totp
 from app.routes.support import support
 
-from app.dependencies import BW_CONFIG, DATA, DB
+from app.dependencies import BW_CONFIG, DATA, DB, EXTERNAL_PLUGINS_PATH, PRO_PLUGINS_PATH, safe_reload_plugins
 from app.models.models import AnonymousUser
 from app.utils import (
     COLUMNS_PREFERENCES_DEFAULTS,
-    EXTERNAL_PLUGINS_PATH,
     LIB_DIR,
     LOGGER,
-    PRO_PLUGINS_PATH,
     flash,
     get_blacklisted_settings,
     get_filtered_settings,
@@ -67,7 +65,6 @@ from app.utils import (
     get_multiples,
     handle_stop,
     human_readable_number,
-    reload_plugins,
     stop,
 )
 
@@ -92,6 +89,28 @@ HOOKS = {
         "log_prefix": "Context-processor",
     },
 }
+
+BLUEPRINTS = (
+    about,
+    services,
+    profile,
+    jobs,
+    reports,
+    totp,
+    home,
+    logout,
+    instances,
+    plugins,
+    global_config,
+    pro,
+    cache,
+    logs,
+    login,
+    configs,
+    bans,
+    setup,
+    support,
+)
 
 
 class DynamicFlask(Flask):
@@ -380,25 +399,24 @@ def check_database_state(request_method: str, request_path: str):
             DATA["LAST_DATABASE_RETRY"] = DB.last_connection_retry.isoformat() if DB.last_connection_retry else datetime.now().astimezone().isoformat()
 
 
-def safe_reload_plugins():
-    DATA.load_from_file()
-    if DATA.get("FORCE_RELOAD_PLUGIN", False) or not DATA.get("IS_RELOADING_PLUGINS", False):
-        DATA["IS_RELOADING_PLUGINS"] = True
-        reload_plugins(DB)
-        DATA.update({"FORCE_RELOAD_PLUGIN": False, "IS_RELOADING_PLUGINS": False})
-
-        for worker_pid in DATA.get("WORKERS", {}):
-            DATA["WORKERS"][worker_pid]["refresh_context"] = True
-
-
 def refresh_app_context():
+    LOGGER.debug("Refreshing app context")
     DATA.load_from_file()
+
+    # Reset all hooks before reloading
+    for hook_info in HOOKS.values():
+        app.config[hook_info["key"]] = []
+
+    # Track active plugin paths to detect removed plugins
+    active_plugin_paths = set()
+
     external_hooks = EXTERNAL_PLUGINS_PATH.rglob("*/ui/hooks.py")
     pro_hooks = PRO_PLUGINS_PATH.rglob("*/ui/hooks.py")
 
     for hook_file in chain(external_hooks, pro_hooks):
         if hook_file.is_file():
             try:
+                active_plugin_paths.add(hook_file.parent.parent.parent)
                 # Create a unique module name based on the hook file path
                 module_name = f"hooks_{hook_file.parent.name}_{hook_file.stem}"
                 spec = spec_from_file_location(module_name, hook_file)
@@ -420,15 +438,24 @@ def refresh_app_context():
             except Exception as exc:
                 LOGGER.error(f"Error loading before-request hooks from {hook_file}: {exc}")
 
-    # Temporary dictionary to collect blueprints keyed by name.
-    blueprint_registry = {}
+    # Preserve the original (built-in) blueprints once.
+    if not hasattr(app, "original_blueprints"):
+        # Use the BLUEPRINTS constant imported/defined earlier.
+        app.original_blueprints = {bp.name: bp for bp in BLUEPRINTS}
 
-    # Iterate over both plugin types.
+    # Temporary dictionary to collect plugin blueprints keyed by name.
+    blueprint_registry = {}
+    # Set to record blueprint names found in plugin directories.
+    plugin_blueprints = set()
+
+    # --- LOAD PLUGIN BLUEPRINTS ---
     for bp_dir in chain(PRO_PLUGINS_PATH.rglob("*/ui/blueprints"), EXTERNAL_PLUGINS_PATH.rglob("*/ui/blueprints")):
         if bp_dir.is_dir():
+            # Optionally, track plugin paths
+            active_plugin_paths.add(bp_dir.parent.parent.parent)
             for bp_file in bp_dir.glob("*.py"):
                 try:
-                    # Create a unique module name based on the file path.
+                    # Create a unique module name.
                     module_name = f"blueprint_{bp_dir.parent.name}_{bp_file.stem}"
                     spec = spec_from_file_location(module_name, bp_file)
                     if spec is None or spec.loader is None:
@@ -436,10 +463,11 @@ def refresh_app_context():
                         continue
                     bp_module = module_from_spec(spec)
                     spec.loader.exec_module(bp_module)
-                    # Use the file name (without extension) as the variable name that holds the blueprint.
+                    # Assume the blueprint variable is named the same as the file stem.
                     blueprint_var_name = bp_file.stem
                     bp = getattr(bp_module, blueprint_var_name, None)
                     if bp:
+                        plugin_blueprints.add(bp.name)
                         # Set plugin priority: 2 for PRO, 1 for External.
                         new_priority = 2 if PRO_PLUGINS_PATH in bp_file.parents else 1
                         bp.plugin_priority = new_priority
@@ -448,7 +476,7 @@ def refresh_app_context():
                         if bp.template_folder:
                             bp.template_folder = abspath(bp.template_folder)
 
-                        # If a blueprint with this name was already loaded, compare priority.
+                        # In the registry, only keep the highest-priority blueprint for a given name.
                         if bp.name in blueprint_registry:
                             existing_bp = blueprint_registry[bp.name]
                             existing_priority = getattr(existing_bp, "plugin_priority", 0)
@@ -456,7 +484,7 @@ def refresh_app_context():
                                 blueprint_registry[bp.name] = bp
                                 LOGGER.info(f"Overriding blueprint '{bp.name}' with higher priority from {bp_file}.")
                             else:
-                                LOGGER.info(f"Skipping blueprint '{bp.name}' from {bp_file} due to lower priority or identical blueprint.")
+                                LOGGER.info(f"Skipping blueprint '{bp.name}' from {bp_file} due to lower priority or duplicate.")
                         else:
                             blueprint_registry[bp.name] = bp
                             LOGGER.info(f"Blueprint '{bp.name}' from {bp_file} loaded successfully.")
@@ -465,47 +493,57 @@ def refresh_app_context():
                 except Exception as exc:
                     LOGGER.error(f"Error loading blueprint from {bp_file}: {exc}")
 
-    # Now register the selected blueprints with the Flask app.
+    def remove_blueprint(bp_name):
+        """Helper to completely remove a blueprint and its associated rules and endpoints."""
+        app.blueprints.pop(bp_name, None)
+
+        for rule in list(app.url_map.iter_rules()):
+            if rule.endpoint.startswith(bp_name + "."):
+                try:
+                    LOGGER.debug(f"Removing rule: {rule}")
+                    app.url_map._rules.remove(rule)
+                except ValueError:
+                    LOGGER.warning(f"Rule already removed: {rule}")
+                app.url_map._rules_by_endpoint.pop(rule.endpoint, None)
+        for endpoint in [ep for ep in list(app.view_functions.keys()) if ep.startswith(bp_name + ".")]:
+            LOGGER.debug(f"Removing endpoint: {endpoint}")
+            app.view_functions.pop(endpoint, None)
+        LOGGER.debug(f"Blueprint '{bp_name}' was completely removed.")
+
+    # --- REMOVE BLUEPRINTS FOR DELETED PLUGINS ---
+    for bp_name in app.blueprints.copy():
+        if bp_name not in plugin_blueprints:
+            remove_blueprint(bp_name)
+
+    for bp_name in app.original_blueprints:
+        if bp_name not in app.blueprints:
+            # Re-register default blueprint if available.
+            default_bp = app.original_blueprints[bp_name]
+            app.register_blueprint(default_bp)
+
+    # --- REGISTER OR OVERRIDE PLUGIN BLUEPRINTS ---
     for bp_name, bp in blueprint_registry.items():
-        # Check if a blueprint with the same name is already registered.
+        new_priority = getattr(bp, "plugin_priority", 0)
         if bp_name in app.blueprints:
             existing_bp = app.blueprints[bp_name]
             existing_priority = getattr(existing_bp, "plugin_priority", 0)
-            new_priority = getattr(bp, "plugin_priority", 0)
             LOGGER.info(f"Existing blueprint '{bp_name}' priority: {existing_priority}; new blueprint priority: {new_priority}")
             if new_priority > existing_priority:
-                # Remove the existing blueprint from app.blueprints.
-                app.blueprints.pop(bp_name, None)
-
-                # Remove URL rules associated with the blueprint.
-                rules_to_remove = [rule for rule in list(app.url_map.iter_rules()) if rule.endpoint.startswith(bp_name + ".")]
-                for rule in rules_to_remove:
-                    try:
-                        LOGGER.debug(f"Removing rule: {rule}")
-                        app.url_map._rules.remove(rule)
-                    except ValueError:
-                        LOGGER.warning(f"Rule already removed: {rule}")
-                    app.url_map._rules_by_endpoint.pop(rule.endpoint, None)
-
-                # Remove view functions registered by the blueprint.
-                endpoints_to_remove = [endpoint for endpoint in list(app.view_functions.keys()) if endpoint.startswith(bp_name + ".")]
-                for endpoint in endpoints_to_remove:
-                    LOGGER.debug(f"Removing endpoint: {endpoint}")
-                    app.view_functions.pop(endpoint, None)
-
-                LOGGER.info(f"Removed existing blueprint '{bp_name}' with priority {existing_priority}.")
+                remove_blueprint(bp_name)
+                app.register_blueprint(bp)
+                LOGGER.info(f"Replaced blueprint '{bp_name}' with new priority {new_priority} (overriding {existing_priority}).")
             else:
                 LOGGER.info(
                     f"Skipping registration for blueprint '{bp_name}' from plugins " f"(new priority {new_priority} <= existing priority {existing_priority})."
                 )
-                continue
+        else:
+            app.register_blueprint(bp)
+            LOGGER.info(f"Registered new blueprint '{bp_name}' with priority {new_priority}.")
 
         # Clear Jinja2 cache to force reloading templates.
         app.jinja_env.cache = {}
-
-        # Register the new blueprint.
         app.register_blueprint(bp)
-        LOGGER.info(f"Registered blueprint '{bp_name}' with priority {getattr(bp, 'plugin_priority', 0)}")
+        LOGGER.info(f"Registered blueprint '{bp_name}' with priority {new_priority}")
 
     app.jinja_env.loader = app.create_global_jinja_loader()
 
@@ -543,10 +581,12 @@ def before_request():
     if not request.path.startswith(("/css/", "/img/", "/js/", "/json/", "/fonts/", "/libs/")):
         metadata = DB.get_metadata()
 
-        if DATA.get("FORCE_RELOAD_PLUGIN", False) or (metadata.get("reload_ui_plugins", False) and not DATA.get("IS_RELOADING_PLUGINS", False)):
+        if DATA.get("FORCE_RELOAD_PLUGIN", False) or (
+            not DATA.get("RELOADING", False) and metadata.get("reload_ui_plugins", False) and not DATA.get("IS_RELOADING_PLUGINS", False)
+        ):
             safe_reload_plugins()
             refresh_app_context()
-        elif DATA.get("WORKERS", {}).get(getpid(), {}).get("refresh_context", False):
+        elif not DATA.get("RELOADING", False) and DATA.get("WORKERS", {}).get(getpid(), {}).get("refresh_context", False):
             refresh_app_context()
 
         if datetime.now().astimezone() - datetime.fromisoformat(DATA.get("LATEST_VERSION_LAST_CHECK", "1970-01-01T00:00:00")).astimezone() > timedelta(hours=1):
@@ -820,26 +860,5 @@ def set_columns_preferences():
     return Response(status=200, response=dumps({"message": "ok"}), content_type="application/json")
 
 
-BLUEPRINTS = (
-    about,
-    services,
-    profile,
-    jobs,
-    reports,
-    totp,
-    home,
-    logout,
-    instances,
-    plugins,
-    global_config,
-    pro,
-    cache,
-    logs,
-    login,
-    configs,
-    bans,
-    setup,
-    support,
-)
 for blueprint in BLUEPRINTS:
     app.register_blueprint(blueprint)
