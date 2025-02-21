@@ -738,9 +738,6 @@ def set_security_headers(response):
         "accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), compute-pressure=(), display-capture=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), identity-credentials-get=(), idle-detection=(), local-fonts=(), magnetometer=(), microphone=(), midi=(), otp-credentials=(), payment=(), picture-in-picture=(), publickey-credentials-create=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), speaker-selection=(), storage-access=(), usb=(), web-share=(), window-management=(), xr-spatial-tracking=(), interest-cohort=()"
     )
 
-    if not request.path.startswith(("/css/", "/img/", "/js/", "/json/", "/fonts/", "/libs/")) and current_user.is_authenticated and "session_id" in session:
-        Thread(target=mark_user_access, args=(current_user, session["session_id"])).start()
-
     for hook in app.config["AFTER_REQUEST_HOOKS"]:
         resp = hook()
         if resp:
@@ -751,6 +748,9 @@ def set_security_headers(response):
 
 @app.teardown_request
 def teardown_request(_):
+    if not request.path.startswith(("/css/", "/img/", "/js/", "/json/", "/fonts/", "/libs/")) and current_user.is_authenticated and "session_id" in session:
+        Thread(target=mark_user_access, args=(current_user, session["session_id"])).start()
+
     for hook in app.config["TEARDOWN_REQUEST_HOOKS"]:
         hook()
 
