@@ -3815,6 +3815,7 @@ class Database:
                         "email": user.email,
                         "password": user.password.encode("utf-8"),
                         "method": user.method,
+                        "admin": user.admin,
                         "theme": user.theme,
                         "totp_secret": user.totp_secret,
                         "creation_date": user.creation_date.astimezone(),
