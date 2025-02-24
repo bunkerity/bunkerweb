@@ -240,6 +240,8 @@ with app.app_context():
     csrf = CSRFProtect()
     csrf.init_app(app)
 
+    app.config["EXTRA_PAGES"] = []
+
     def custom_url_for(endpoint, **values):
         if endpoint:
             try:
@@ -275,7 +277,7 @@ def inject_variables():
     for hook in app.config["CONTEXT_PROCESSOR_HOOKS"]:
         resp = hook()
         if resp:
-            return resp
+            app.config["ENV"] = {**app.config["ENV"], **resp}
 
     return app.config["ENV"]
 
@@ -510,9 +512,15 @@ def refresh_app_context():
                 except ValueError:
                     LOGGER.warning(f"Rule already removed: {rule}")
                 app.url_map._rules_by_endpoint.pop(rule.endpoint, None)
+
         for endpoint in [ep for ep in list(app.view_functions.keys()) if ep.startswith(bp_name + ".")]:
             LOGGER.debug(f"Removing endpoint: {endpoint}")
             app.view_functions.pop(endpoint, None)
+
+            endpoint_suffix = endpoint.split(".", 1)[1]
+            if endpoint_suffix in app.config["EXTRA_PAGES"]:
+                app.config["EXTRA_PAGES"].remove(endpoint_suffix)
+
         LOGGER.debug(f"Blueprint '{bp_name}' was completely removed.")
 
     # --- REMOVE BLUEPRINTS FOR DELETED PLUGINS ---
@@ -544,6 +552,10 @@ def refresh_app_context():
         else:
             app.register_blueprint(bp)
             LOGGER.info(f"Registered new blueprint '{bp_name}' with priority {new_priority}.")
+
+        for rule in list(app.url_map.iter_rules()):
+            if rule.endpoint.startswith(bp_name + ".") and str(rule) == f"/{bp_name}":
+                app.config["EXTRA_PAGES"].append(bp_name)
 
         # Clear Jinja2 cache to force reloading templates.
         app.jinja_env.cache = {}
@@ -673,6 +685,7 @@ def before_request():
             user_readonly="write" not in current_user.list_permissions,
             theme=current_user.theme if current_user.is_authenticated else "dark",
             columns_preferences_defaults=COLUMNS_PREFERENCES_DEFAULTS,
+            extra_pages=app.config["EXTRA_PAGES"],
         )
 
         if current_endpoint in COLUMNS_PREFERENCES_DEFAULTS:
@@ -739,7 +752,7 @@ def set_security_headers(response):
     )
 
     for hook in app.config["AFTER_REQUEST_HOOKS"]:
-        resp = hook()
+        resp = hook(response)
         if resp:
             return resp
 

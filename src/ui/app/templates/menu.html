@@ -98,6 +98,32 @@
                     <div class="text-truncate" data-i18n="Support">Support</div>
                 </a>
             </li>
+            {% if extra_pages %}
+            <!-- Extra Pages -->
+            <li class="menu-header text-uppercase align-items-center mb-0">
+                <span class="menu-header-text">Extra Pages</span>
+                <button class="btn btn-link menu-header-text p-0"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#extraPagesCollapse"
+                        aria-expanded="true"
+                        aria-controls="extraPagesCollapse">
+                    <i class="bx bx-chevron-right chevron-icon chevron-rotate"></i>
+                </button>
+            </li>
+            <div class="collapse py-1 show" id="extraPagesCollapse">
+                <div class="menu-inner">
+                    {% for page in extra_pages %}
+                        <li class="menu-item{% if current_endpoint == page|lower %} active{% endif %}">
+                            <a href="{{ url_for(page) }}" class="menu-link">
+                                <i class="menu-icon tf-icons bx bx-extension"></i>
+                                <div class="text-truncate" data-i18n="{{ page }}">{{ page|title }}</div>
+                            </a>
+                        </li>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
             <!-- Plugins Pages -->
             <li class="menu-header text-uppercase align-items-center mb-0">
                 <span class="menu-header-text">Plugins Pages</span>
