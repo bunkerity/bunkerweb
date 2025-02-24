@@ -505,6 +505,9 @@ def refresh_app_context():
         app.blueprints.pop(bp_name, None)
 
         for rule in list(app.url_map.iter_rules()):
+            if rule.endpoint.startswith(bp_name + ".") and str(rule) == f"/{bp_name}" and bp_name in app.config["EXTRA_PAGES"]:
+                app.config["EXTRA_PAGES"].remove(bp_name)
+
             if rule.endpoint.startswith(bp_name + "."):
                 try:
                     LOGGER.debug(f"Removing rule: {rule}")
@@ -516,10 +519,6 @@ def refresh_app_context():
         for endpoint in [ep for ep in list(app.view_functions.keys()) if ep.startswith(bp_name + ".")]:
             LOGGER.debug(f"Removing endpoint: {endpoint}")
             app.view_functions.pop(endpoint, None)
-
-            endpoint_suffix = endpoint.split(".", 1)[1]
-            if endpoint_suffix in app.config["EXTRA_PAGES"]:
-                app.config["EXTRA_PAGES"].remove(endpoint_suffix)
 
         LOGGER.debug(f"Blueprint '{bp_name}' was completely removed.")
 
@@ -554,7 +553,7 @@ def refresh_app_context():
             LOGGER.info(f"Registered new blueprint '{bp_name}' with priority {new_priority}.")
 
         for rule in list(app.url_map.iter_rules()):
-            if rule.endpoint.startswith(bp_name + ".") and str(rule) == f"/{bp_name}":
+            if rule.endpoint.startswith(bp_name + ".") and str(rule) == f"/{bp_name}" and bp_name not in app.config["EXTRA_PAGES"]:
                 app.config["EXTRA_PAGES"].append(bp_name)
 
         # Clear Jinja2 cache to force reloading templates.
