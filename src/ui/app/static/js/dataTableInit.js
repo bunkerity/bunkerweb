@@ -46,16 +46,18 @@ function initializeDataTable(config) {
 
   const $columnsPreferenceDefaults = $("#columns_preferences_defaults");
   const $columnsPreference = $("#columns_preferences");
+  let originalColumnsPreferences = {};
 
   if ($columnsPreferenceDefaults.length && $columnsPreference.length) {
     const defaultColsVisibility = JSON.parse(
       $columnsPreferenceDefaults.val().trim(),
     );
+    originalColumnsPreferences = JSON.parse($columnsPreference.val().trim());
 
     // Handle column visibility preferences
     let columnVisibility = localStorage.getItem(`bw-${tableName}-columns`);
     if (columnVisibility === null) {
-      columnVisibility = JSON.parse($columnsPreference.val().trim());
+      columnVisibility = { ...originalColumnsPreferences };
     } else {
       columnVisibility = JSON.parse(columnVisibility);
     }
@@ -112,7 +114,7 @@ function initializeDataTable(config) {
         );
       }
 
-      if (isReadOnly) return;
+      if (isReadOnly || !originalColumnsPreferences) return;
 
       saveColumnsPreferences();
     });
