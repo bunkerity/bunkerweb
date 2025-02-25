@@ -188,9 +188,9 @@ psycopg==3.2.4 \
 psycopg-c==3.2.4 \
     --hash=sha256:22097a04263efb2efd2cc8b00a51fa90e23f9cd4a2e09903fe4d9c6923dac17a
     # via psycopg
-psycopg-pool==3.2.4 \
-    --hash=sha256:61774b5bbf23e8d22bedc7504707135aaf744679f8ef9b3fe29942920746a6ed \
-    --hash=sha256:f6a22cff0f21f06d72fb2f5cb48c618946777c49385358e0c88d062c59cbd224
+psycopg-pool==3.2.5 \
+    --hash=sha256:507d845bd13da83df449ded7fb581b35dba613421bdb12962e608b16e70d6be9 \
+    --hash=sha256:522b9befae8631550217fd2ae9904622daaf4b28a0a36ccfcc87ba3d2abc7100
     # via psycopg
 pycparser==2.22 \
     --hash=sha256:491c8be9c040f5390f5bf44a5b07752bd07f56edf992381b05c701439eec10f6 \
