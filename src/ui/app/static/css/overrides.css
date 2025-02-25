@@ -955,7 +955,7 @@ table.dataTable input.dt-select-checkbox:checked:after {
 
 :not(.btn-group):not(.input-group)
   > .btn-group.dt-buttons
-  > .btn:not([class*="btn-outline-"]):first-child {
+  > .btn:not([class*="btn-outline-"]):first-child.disabled {
   border-left-color: var(--bs-btn-disabled-border-color) !important;
 }
 
