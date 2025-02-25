@@ -26,11 +26,6 @@ namespace modsecurity {
 namespace actions {
 
 
-bool SetUID::init(std::string *error) {
-    return true;
-}
-
-
 bool SetUID::evaluate(RuleWithActions *rule, Transaction *t) {
     std::string colNameExpanded(m_string->evaluate(t));
     ms_dbg_a(t, 8, "User collection initiated with value: \'"

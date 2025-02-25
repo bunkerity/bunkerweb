@@ -34,7 +34,7 @@ class ContainsWord : public Operator {
 
     bool evaluate(Transaction *transaction, RuleWithActions *rule,
         const std::string &str,
-        std::shared_ptr<RuleMessage> ruleMessage) override;
+        RuleMessage &ruleMessage) override;
 
  private:
     static bool acceptableChar(const std::string& a, size_t pos);

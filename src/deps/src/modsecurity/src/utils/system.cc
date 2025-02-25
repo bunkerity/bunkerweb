@@ -210,7 +210,7 @@ bool isFile(const std::string& f) {
         return false;
     }
     fstat(fileno(fp), &fileInfo);
-    if (!S_ISREG(fileInfo.st_mode)) {
+    if (!S_ISREG(fileInfo.st_mode)) { // cppcheck-suppress syntaxError ; false positive
         fclose(fp);
         return false;
     }

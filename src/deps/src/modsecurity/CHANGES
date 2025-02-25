@@ -1,3 +1,43 @@
+v3.0.14 - 2025-Feb-25
+---------------------
+
+  - [fix: fixed htmlEntityDecode methods]
+    [PR from private repo - @theseion,@airween; fixed CVE-2025-27110]
+  - fix: Added missing header to avoid build error with gcc-15
+    [PR #3342 - @airween]
+  - Fix for issue #3334: build not finding YAJL
+    [PR #3335 - @RooHTaylor]
+  - fix: add value checking to @validateByteRange
+    [PR #3322 - @airween]
+  - fix: build library on OSX without GeoIP brew package
+    [PR #3319 - @theseion,@airween]
+  - Update README.md
+    [PR #3314 - @ElevationsRPG]
+  - Fix: Add false positive cppcheck-suppress for compatibility with upda…
+    [PR #3307 - @gberkes]
+  - fix: align TIME_MON variable's behavior
+    [PR #3306 - @M4tteoP,@theseion,@airween]
+  - Fix m_requestHostName variable behavior
+    [PR #3298 - @airween]
+  - Add regression rules for test
+    [PR #3291 - @hnakamur]
+  - Fix modsecurity-regression-test-secremoterules.txt URL in example
+    [PR #3287 - @hnakamur]
+  - Use latest version of cppcheck (2.15.0) to analyze codebase
+    [PR #3283 - @eduar-hte]
+  - Replace usage of range-checked 'at' method when vector/string has already been size checked
+    [PR #3280 - @eduar-hte]
+  - chore: add 'log' action to rule 200005
+    [PR #3266 - @airween]
+  - docs: add a logo picture for github dark theme
+    [PR #3264 - @xuruidong]
+  - Leverage std::make_unique & std::make_shared to create objects in the heap
+    [PR #3254 - @eduar-hte]
+  - Simplified handling of RuleMessage by removing usage of std::shared_ptr
+    [PR #3253 - @eduar-hte]
+  - Simplified constructors, copy constructors & assignment operators
+    [PR #3248 - @eduar-hte]
+
 v3.0.13 - 2024-Sep-03
 ---------------------
 

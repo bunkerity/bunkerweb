@@ -38,7 +38,7 @@ static inline bool inplace(std::string &value) {
 
     auto d = reinterpret_cast<unsigned char*>(value.data());
     const unsigned char *data = d;
-    const auto end = data + value.size();
+    const auto *end = data + value.size();
 
     bool changed = false;
 

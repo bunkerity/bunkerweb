@@ -75,7 +75,7 @@ void json2bin(std::string *str) {
 }
 
 
-std::string UnitTest::print() {
+std::string UnitTest::print() const {
     std::stringstream i;
 
     i << KRED << "Test failed." << RESET;

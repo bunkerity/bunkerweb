@@ -69,12 +69,12 @@ int ValidateUrlEncoding::validate_url_encoding(const char *input,
 
 
 bool ValidateUrlEncoding::evaluate(Transaction *transaction, RuleWithActions *rule,
-    const std::string &input, std::shared_ptr<RuleMessage> ruleMessage) {
+    const std::string &input, RuleMessage &ruleMessage) {
     size_t offset = 0;
     bool res = false;
 
     if (input.empty() == true) {
-        return res; // cppcheck-suppress knownConditionTrueFalse
+        return res;
     }
 
     int rc = validate_url_encoding(input.c_str(), input.size(), &offset);

@@ -22,7 +22,7 @@ namespace modsecurity::actions::transformations {
 static inline bool inplace(std::string &value) {
     if (value.empty()) return false;
 
-    for(auto &c : value) {
+    for(auto &c : value) { // cppcheck-suppress constVariableReference ; false positive
         ((unsigned char&)c) &= 0x7f;
     }
 

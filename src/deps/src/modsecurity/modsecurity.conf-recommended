@@ -156,7 +156,7 @@ SecPcreMatchLimitRecursion 1000
 # MSC_PCRE_LIMITS_EXCEEDED: PCRE match limits were exceeded.
 #
 SecRule TX:/^MSC_/ "!@streq 0" \
-        "id:'200005',phase:2,t:none,deny,msg:'ModSecurity internal error flagged: %{MATCHED_VAR_NAME}'"
+    "id:'200005',phase:2,t:none,log,deny,msg:'ModSecurity internal error flagged: %{MATCHED_VAR_NAME}'"
 
 
 # -- Response body handling --------------------------------------------------

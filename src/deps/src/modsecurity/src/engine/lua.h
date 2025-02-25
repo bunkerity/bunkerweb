@@ -67,8 +67,8 @@ class Lua {
  public:
     Lua() { }
 
-    bool load(const std::string &script, std::string *err); // cppcheck-suppress functionStatic ; triggered when compiling without LUA
-    int run(Transaction *t, const std::string &str = "");   // cppcheck-suppress functionStatic ; triggered when compiling without LUA
+    bool load(const std::string &script, std::string *err);
+    int run(Transaction *t, const std::string &str = "");
     static bool isCompatible(const std::string &script, Lua *l, std::string *error);
 
 #ifdef WITH_LUA

@@ -190,26 +190,22 @@ const std::string& ModSecurity::getConnectorInformation() const {
     return m_connector;
 }
 
-void ModSecurity::serverLog(void *data, std::shared_ptr<RuleMessage> rm) {
+void ModSecurity::serverLog(void *data, const RuleMessage &rm) {
     if (m_logCb == NULL) {
-        std::cerr << "Server log callback is not set -- " << rm->errorLog();
+        std::cerr << "Server log callback is not set -- " << rm.errorLog();
         std::cerr << std::endl;
         return;
     }
 
-    if (rm == NULL) {
-        return;
-    }
-
     if (m_logProperties & TextLogProperty) {
-        auto d = rm->log();
-        const void *a = static_cast<const void *>(d.c_str());
+        auto d = rm.log();
+        auto a = static_cast<const void *>(d.c_str());
         m_logCb(data, a);
         return;
     }
 
     if (m_logProperties & RuleMessageLogProperty) {
-        const void *a = static_cast<const void *>(rm.get());
+        auto a = static_cast<const void *>(&rm);
         m_logCb(data, a);
         return;
     }

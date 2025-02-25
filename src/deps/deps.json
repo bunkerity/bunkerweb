@@ -227,9 +227,9 @@
     },
     {
       "id": "modsecurity",
-      "name": "ModSecurity v3.0.13",
+      "name": "ModSecurity v3.0.14",
       "url": "https://github.com/owasp-modsecurity/ModSecurity.git",
-      "commit": "580fe192df1694934f93e3e008058996ea479e35",
+      "commit": "a555e5a44573e50f04ad997b3b24c214c42f8e29",
       "post_install": "rm src/deps/src/modsecurity/.gitmodules && rm -rf src/deps/src/modsecurity/others/libinjection src/deps/src/modsecurity/others/mbedtls && patch --forward src/deps/src/modsecurity/configure.ac src/deps/misc/modsecurity.patch || rm src/deps/src/modsecurity/configure.ac.orig src/deps/src/modsecurity/configure.ac.rej"
     },
     {

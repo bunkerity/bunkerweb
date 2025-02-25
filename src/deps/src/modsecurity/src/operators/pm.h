@@ -40,10 +40,10 @@ class Pm : public Operator {
         : Operator(n, std::move(param)) {
         m_p = acmp_create(0);
     }
-    ~Pm();
+    ~Pm() override;
     bool evaluate(Transaction *transaction, RuleWithActions *rule,
         const std::string &str,
-        std::shared_ptr<RuleMessage> ruleMessage) override;
+        RuleMessage &ruleMessage) override;
 
 
     bool init(const std::string &file, std::string *error) override;

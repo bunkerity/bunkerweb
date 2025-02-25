@@ -102,7 +102,6 @@ jobs:
                        lua \
                        libmaxminddb \
                        libxml2 \
-                       geoip \
                        ssdeep \
                        pcre \
                        bison \
@@ -111,6 +110,16 @@ jobs:
         with:
           submodules: true
           fetch-depth: 0
+      - name: Build GeoIP
+        run: |
+          git clone --depth 1 --no-checkout https://github.com/maxmind/geoip-api-c.git
+          cd geoip-api-c
+          git fetch --tags
+          # Check out the last release, v1.6.12
+          git checkout 4b526e7331ca1d692b74a0509ddcc725622ed31a
+          autoreconf --install
+          ./configure --disable-dependency-tracking --disable-silent-rules --prefix=/opt/homebrew
+          make install
       - name: build.sh
         run: ./build.sh
       - name: configure
@@ -178,20 +187,21 @@ jobs:
           ctest -C ${{ matrix.configuration }} --output-on-failure
 
   cppcheck:
-    runs-on: [ubuntu-22.04]
+    runs-on: [macos-14]
     steps:
       - name: Setup Dependencies
         run: |
-          sudo apt-get update -y -qq
-          sudo apt-get install -y cppcheck
-      - name: Checkout source
-        uses: actions/checkout@v4
+          brew install autoconf \
+                       automake \
+                       libtool \
+                       cppcheck
+      - uses: actions/checkout@v4
         with:
           submodules: true
           fetch-depth: 0
-      - name: Configure libModSecurity
+      - name: configure
         run: |
           ./build.sh
           ./configure
-      - name: Run cppcheck on libModSecurity
+      - name: cppcheck
         run: make check-static

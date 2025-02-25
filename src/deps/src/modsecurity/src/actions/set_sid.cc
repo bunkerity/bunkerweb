@@ -26,11 +26,6 @@ namespace modsecurity {
 namespace actions {
 
 
-bool SetSID::init(std::string *error) {
-    return true;
-}
-
-
 bool SetSID::evaluate(RuleWithActions *rule, Transaction *t) {
     std::string colNameExpanded(m_string->evaluate(t));
     ms_dbg_a(t, 8, "Session ID initiated with value: \'"

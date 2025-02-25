@@ -26,11 +26,6 @@ namespace modsecurity {
 namespace actions {
 
 
-bool SetENV::init(std::string *error) {
-    return true;
-}
-
-
 bool SetENV::evaluate(RuleWithActions *rule, Transaction *t) {
     std::string colNameExpanded(m_string->evaluate(t));
 

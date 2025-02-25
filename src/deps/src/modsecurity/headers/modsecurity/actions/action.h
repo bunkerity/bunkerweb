@@ -81,27 +81,15 @@ class Action {
             set_name_and_payload(_action);
         }
 
-    Action(const Action &a)
-        : m_isNone(a.m_isNone),
-        temporaryAction(a.temporaryAction),
-        action_kind(a.action_kind),
-        m_name(a.m_name),
-        m_parser_payload(a.m_parser_payload) { }
+    Action(const Action &a) = delete;
 
-    Action &operator=(const Action& a) {
-        m_isNone = a.m_isNone;
-        temporaryAction = a.temporaryAction;
-        action_kind = a.action_kind;
-        m_name = a.m_name;
-        m_parser_payload = a.m_parser_payload;
-        return *this;
-    }
+    Action &operator=(const Action& a) = delete;
 
     virtual ~Action() { }
 
     virtual bool evaluate(RuleWithActions *rule, Transaction *transaction);
     virtual bool evaluate(RuleWithActions *rule, Transaction *transaction,
-        std::shared_ptr<RuleMessage> ruleMessage) {
+        RuleMessage &ruleMessage) {
         return evaluate(rule, transaction);
     }
     virtual bool init(std::string *error) { return true; }
@@ -117,11 +105,11 @@ class Action {
         }
 
         if (pos == std::string::npos) {
-            m_name = std::shared_ptr<std::string>(new std::string(data));
+            m_name = std::make_shared<std::string>(data);
             return;
         }
 
-        m_name = std::shared_ptr<std::string>(new std::string(data, 0, pos));
+        m_name = std::make_shared<std::string>(data, 0, pos);
         m_parser_payload = std::string(data, pos + 1, data.length());
 
         if (m_parser_payload.at(0) == '\'' && m_parser_payload.size() > 2) {
