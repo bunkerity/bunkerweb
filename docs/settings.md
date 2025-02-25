@@ -722,6 +722,13 @@ Integrate easily the BunkerWeb UI.
 | `USE_UI`  | `no`    | multisite | no       | Use UI                                       |
 | `UI_HOST` |         | global    | no       | Address of the web UI used for initial setup |
 
+## User Manager <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+
+
+STREAM support :x:
+
+Add the possibility to manage users on the web interface
+
 ## Whitelist
 
 STREAM support :warning:
