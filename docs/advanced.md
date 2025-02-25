@@ -3362,3 +3362,13 @@ With this plugin, administrators can effortlessly create, update, and disable us
 - **2FA Management:** Disable two-factor authentication based on administrative decisions.
 - **Comprehensive User Insights:** Monitor key user data including last login times, account creation dates, and active/inactive status.
 - **Audit Logging:** Maintain an audit trail for all user management actions for enhanced security and compliance.
+
+<figure markdown>
+  ![Overview](assets/img/user-manager.png){ align=center }
+  <figcaption>User Manager page</figcaption>
+</figure>
+
+<figure markdown>
+  ![Create user form](assets/img/user-manager-create.png){ align=center }
+  <figcaption>User Manager - Create user form</figcaption>
+</figure>
