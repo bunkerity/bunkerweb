@@ -79,4 +79,4 @@ USER autoconf:autoconf
 
 HEALTHCHECK --interval=10s --timeout=10s --start-period=60s --retries=6 CMD /usr/share/bunkerweb/helpers/healthcheck-autoconf.sh
 
-CMD [ "main.py" ]
+CMD [ "./main.py" ]
