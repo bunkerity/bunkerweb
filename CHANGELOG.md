@@ -2,6 +2,7 @@
 
 ## v1.6.1-rc2 - ????/??/??
 
+- [BUGFIX] Fix shenanigans with settings' plugin_id when updating the config
 - [UI] Introduced a visual label in the UI to clearly mark service settings that were cloned from the original.
 - [UI] Added support for custom plugins: developers can now create hooks and blueprints to override existing functionalities, not just a plugin page.
 - [DEPS] Updated ModSecurity version to v3.0.14
