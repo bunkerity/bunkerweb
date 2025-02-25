@@ -114,7 +114,8 @@ function initializeDataTable(config) {
         );
       }
 
-      if (isReadOnly || !originalColumnsPreferences) return;
+      if (isReadOnly || Object.keys(originalColumnsPreferences).length === 0)
+        return;
 
       saveColumnsPreferences();
     });
