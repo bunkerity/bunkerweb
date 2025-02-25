@@ -23,7 +23,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
         sys_path.append(deps_path)
 
 from cachelib import FileSystemCache
-from flask import Flask, Response, flash as flask_flash, jsonify, make_response, redirect, render_template, request, session, url_for
+from flask import Blueprint, Flask, Response, flash as flask_flash, jsonify, make_response, redirect, render_template, request, session, url_for
 from flask_login import current_user, LoginManager, login_required, logout_user
 from flask_principal import ActionNeed, identity_loaded, Permission, Principal, RoleNeed, TypeNeed, UserNeed
 from flask_session import Session
@@ -407,191 +407,224 @@ def check_database_state(request_method: str, request_path: str):
 
 
 def refresh_app_context():
+    """Refresh Flask app context by loading hooks and blueprints from plugins."""
     LOGGER.debug("Refreshing app context")
     DATA.load_from_file()
 
-    # Reset all hooks before reloading
+    # Initialize tracking structures if they don't exist
+    if not hasattr(app, "original_blueprints"):
+        app.original_blueprints = {bp.name: bp for bp in BLUEPRINTS}
+    if not hasattr(app, "hook_sys_paths"):
+        app.hook_sys_paths = {}
+    if not hasattr(app, "plugin_sys_paths"):
+        app.plugin_sys_paths = {}
+
+    # Reset hooks
     for hook_info in HOOKS.values():
         app.config[hook_info["key"]] = []
 
-    # Track active plugin paths to detect removed plugins
+    # Find all python files in ui directories
+    external_ui_py_files = list(EXTERNAL_PLUGINS_PATH.glob("*/ui/hooks.py"))
+    pro_ui_py_files = list(PRO_PLUGINS_PATH.glob("*/ui/hooks.py"))
+    external_bp_dirs = list(EXTERNAL_PLUGINS_PATH.glob("*/ui/blueprints"))
+    pro_bp_dirs = list(PRO_PLUGINS_PATH.glob("*/ui/blueprints"))
+
+    # Track active plugin paths and blueprints
     active_plugin_paths = set()
-
-    external_hooks = EXTERNAL_PLUGINS_PATH.rglob("*/ui/hooks.py")
-    pro_hooks = PRO_PLUGINS_PATH.rglob("*/ui/hooks.py")
-
-    for hook_file in chain(external_hooks, pro_hooks):
-        if hook_file.is_file():
-            try:
-                active_plugin_paths.add(hook_file.parent.parent.parent)
-                # Create a unique module name based on the hook file path
-                module_name = f"hooks_{hook_file.parent.name}_{hook_file.stem}"
-                spec = spec_from_file_location(module_name, hook_file)
-                if spec is None or spec.loader is None:
-                    LOGGER.warning(f"Could not load spec for hook file: {hook_file}")
-                    continue
-                hook_module = module_from_spec(spec)
-                spec.loader.exec_module(hook_module)
-                for attr_name in dir(hook_module):
-                    for hook_type, hook_info in HOOKS.items():
-                        if attr_name.startswith(hook_type):
-                            hook_function = getattr(hook_module, attr_name)
-                            if callable(hook_function):
-                                app.config.setdefault(hook_info["key"], []).append(hook_function)
-                                LOGGER.info(f"{hook_info['log_prefix']} hook '{attr_name}' from {hook_file} loaded successfully.")
-                            else:
-                                LOGGER.warning(f"Attribute '{attr_name}' in {hook_file} is not callable and was skipped.")
-                            break
-            except Exception as exc:
-                LOGGER.error(f"Error loading before-request hooks from {hook_file}: {exc}")
-
-    # Preserve the original (built-in) blueprints once.
-    if not hasattr(app, "original_blueprints"):
-        # Use the BLUEPRINTS constant imported/defined earlier.
-        app.original_blueprints = {bp.name: bp for bp in BLUEPRINTS}
-
-    # Temporary dictionary to collect plugin blueprints keyed by name.
-    blueprint_registry = {}
-    # Set to record blueprint names found in plugin directories.
+    active_hook_modules = set()
     plugin_blueprints = set()
+    blueprint_registry = {}
 
-    # --- LOAD PLUGIN BLUEPRINTS ---
-    for bp_dir in chain(PRO_PLUGINS_PATH.rglob("*/ui/blueprints"), EXTERNAL_PLUGINS_PATH.rglob("*/ui/blueprints")):
-        if bp_dir.is_dir():
-            # Optionally, track plugin paths
-            active_plugin_paths.add(bp_dir.parent.parent.parent)
-            for bp_file in bp_dir.glob("*.py"):
-                try:
-                    # Add blueprint directory to sys.path BEFORE loading the module
-                    blueprint_dir = str(bp_dir)
-                    if blueprint_dir not in sys_path:
-                        LOGGER.debug(f"Adding {blueprint_dir} to sys.path before loading blueprint from {bp_file}")
-                        sys_path.append(blueprint_dir)
+    # --- LOAD HOOKS ---
+    for py_file in chain(external_ui_py_files, pro_ui_py_files):
+        if not py_file.is_file():
+            continue
 
-                    # Create a unique module name.
-                    module_name = f"blueprint_{bp_dir.parent.name}_{bp_file.stem}"
-                    spec = spec_from_file_location(module_name, bp_file)
-                    if spec is None or spec.loader is None:
-                        LOGGER.warning(f"Could not load spec for blueprint file: {bp_file}")
-                        continue
-                    bp_module = module_from_spec(spec)
-                    spec.loader.exec_module(bp_module)
-                    # Assume the blueprint variable is named the same as the file stem.
-                    blueprint_var_name = bp_file.stem
-                    bp = getattr(bp_module, blueprint_var_name, None)
-                    if bp:
-                        plugin_blueprints.add(bp.name)
-                        # Set plugin priority: 2 for PRO, 1 for External.
-                        new_priority = 2 if PRO_PLUGINS_PATH in bp_file.parents else 1
-                        bp.plugin_priority = new_priority
+        active_plugin_paths.add(py_file.parent.parent.parent)
+        module_name = f"hooks_{py_file.parent.name}_{py_file.stem}"
+        active_hook_modules.add(module_name)
+        hook_dir = str(py_file.parent)
 
-                        # Set the import path to the blueprint directory
+        try:
+            # Check for a proxy file first
+            proxy_file = py_file.parent / "hooks_proxy.py"
+            target_file = proxy_file if proxy_file.exists() else py_file
+
+            # Add to sys.path if not already there
+            if hook_dir not in sys_path:
+                sys_path.append(hook_dir)
+                app.hook_sys_paths[module_name] = hook_dir
+
+            # Load the module
+            spec = spec_from_file_location(module_name, target_file)
+            if not spec or not spec.loader:
+                LOGGER.warning(f"Could not load spec for file: {target_file}")
+                continue
+
+            hook_module = module_from_spec(spec)
+            try:
+                spec.loader.exec_module(hook_module)
+            except Exception as exec_err:
+                LOGGER.warning(f"Error executing module {target_file}: {exec_err}")
+                continue
+
+            for hook_type, hook_info in HOOKS.items():
+                if hasattr(hook_module, hook_type) and callable(getattr(hook_module, hook_type)):
+                    hook_function = getattr(hook_module, hook_type)
+                    app.config.setdefault(hook_info["key"], []).append(hook_function)
+                    LOGGER.info(f"{hook_info['log_prefix']} hook '{hook_type}' from {py_file} loaded")
+        except Exception as exc:
+            LOGGER.error(f"Error loading potential hooks from {py_file}: {exc}")
+
+    # --- CLEAN UP OBSOLETE HOOK PATHS ---
+    for module_name, hook_dir in list(app.hook_sys_paths.items()):
+        if module_name not in active_hook_modules and hook_dir in sys_path:
+            sys_path.remove(hook_dir)
+            del app.hook_sys_paths[module_name]
+            LOGGER.debug(f"Removed {hook_dir} from sys.path for obsolete hook {module_name}")
+
+    # --- LOAD BLUEPRINTS ---
+    for bp_dir in chain(pro_bp_dirs, external_bp_dirs):
+        if not bp_dir.is_dir():
+            continue
+
+        # Track plugin path
+        active_plugin_paths.add(bp_dir.parent.parent.parent)
+        blueprint_dir = str(bp_dir)
+        is_pro = bp_dir in (p.parent for p in pro_bp_dirs)
+
+        # Add directory to sys.path
+        if blueprint_dir not in sys_path:
+            sys_path.append(blueprint_dir)
+
+        # Load blueprints from Python files
+        for bp_file in bp_dir.glob("*.py"):
+            if bp_file.name.endswith("_proxy.py"):
+                continue
+
+            try:
+                # Check for a proxy file first
+                proxy_file = bp_file.parent / f"{bp_file.stem}_proxy.py"
+                module_name = f"blueprint_{bp_dir.parent.name}_{bp_file.stem}"
+
+                # Use the proxy file if it exists, otherwise use the original file
+                target_file = proxy_file if proxy_file.exists() else bp_file
+
+                spec = spec_from_file_location(module_name, target_file)
+                if not spec or not spec.loader:
+                    continue
+
+                bp_module = module_from_spec(spec)
+                spec.loader.exec_module(bp_module)
+
+                # Look for a blueprint object with the same name as the file
+                bp_name = bp_file.stem
+                if hasattr(bp_module, bp_name):
+                    bp = getattr(bp_module, bp_name)
+                    # Verify it's a Blueprint or has blueprint-like characteristics
+                    if isinstance(bp, Blueprint) or (
+                        hasattr(bp, "name")
+                        and hasattr(bp, "route")
+                        and callable(getattr(bp, "route"))
+                        and hasattr(bp, "register")
+                        and callable(getattr(bp, "register"))
+                    ):
+                        plugin_blueprints.add(bp_name)
+
+                        # Set plugin priority and path
+                        bp.plugin_priority = 2 if is_pro else 1
                         bp.import_path = blueprint_dir
-                        LOGGER.debug(f"Set import_path to {bp.import_path} for blueprint {bp.name}")
+                        app.plugin_sys_paths[bp_name] = blueprint_dir
 
-                        # Ensure the blueprint's template_folder is an absolute path.
+                        # Make template folder absolute
                         if bp.template_folder:
                             bp.template_folder = abspath(bp.template_folder)
 
-                        # Track this blueprint's sys.path entry
-                        if not hasattr(app, "plugin_sys_paths"):
-                            app.plugin_sys_paths = {}  # Map blueprint names to their sys.path entries
-                        app.plugin_sys_paths[bp.name] = blueprint_dir
-
-                        # In the registry, only keep the highest-priority blueprint for a given name.
-                        if bp.name in blueprint_registry:
-                            existing_bp = blueprint_registry[bp.name]
-                            existing_priority = getattr(existing_bp, "plugin_priority", 0)
-                            if new_priority > existing_priority and bp != existing_bp:
-                                blueprint_registry[bp.name] = bp
-                                LOGGER.info(f"Overriding blueprint '{bp.name}' with higher priority from {bp_file}.")
-                            else:
-                                LOGGER.info(f"Skipping blueprint '{bp.name}' from {bp_file} due to lower priority or duplicate.")
-                        else:
-                            blueprint_registry[bp.name] = bp
-                            LOGGER.info(f"Blueprint '{bp.name}' from {bp_file} loaded successfully.")
+                        # Register in our blueprint registry by priority
+                        if bp_name not in blueprint_registry or bp.plugin_priority > getattr(blueprint_registry[bp_name], "plugin_priority", 0):
+                            blueprint_registry[bp_name] = bp
+                            LOGGER.info(f"Blueprint '{bp_name}' from {bp_file} registered with priority {bp.plugin_priority}")
                     else:
-                        LOGGER.warning(f"No blueprint variable named '{bp_file.stem}' found in {bp_file}.")
-                except Exception as exc:
-                    LOGGER.error(f"Error loading blueprint from {bp_file}: {exc}")
+                        LOGGER.warning(f"Object '{bp_name}' in {bp_file} is not a valid Blueprint")
+                else:
+                    LOGGER.debug(f"No blueprint named '{bp_name}' found in {bp_file}")
+            except Exception as exc:
+                LOGGER.error(f"Error loading blueprint from {bp_file}: {exc}")
 
-    # Track plugin directories that have been added to sys.path
-    if not hasattr(app, "plugin_sys_paths"):
-        app.plugin_sys_paths = {}  # Map blueprint names to their sys.path entries
+    # --- HANDLE BLUEPRINT CHANGES ---
+    # Remove blueprints for deleted plugins
+    for bp_name in list(app.blueprints.keys()):
+        if bp_name not in plugin_blueprints and bp_name not in app.original_blueprints:
+            # Remove blueprint and clean up
+            app.blueprints.pop(bp_name, None)
 
-    def remove_blueprint(bp_name):
-        """Helper to completely remove a blueprint and its associated rules and endpoints."""
-        app.blueprints.pop(bp_name, None)
+            # Clean up sys.path
+            if bp_name in app.plugin_sys_paths and app.plugin_sys_paths[bp_name] in sys_path:
+                sys_path.remove(app.plugin_sys_paths[bp_name])
+                del app.plugin_sys_paths[bp_name]
 
-        # Remove blueprint directory from sys.path if it was added
-        if bp_name in app.plugin_sys_paths and app.plugin_sys_paths[bp_name] in sys_path:
-            LOGGER.debug(f"Removing {app.plugin_sys_paths[bp_name]} from sys.path for blueprint {bp_name}")
-            sys_path.remove(app.plugin_sys_paths[bp_name])
-            del app.plugin_sys_paths[bp_name]
+            # Remove URL rules and endpoints
+            for rule in list(app.url_map.iter_rules()):
+                if rule.endpoint.startswith(f"{bp_name}."):
+                    if str(rule) == f"/{bp_name}" and bp_name in app.config["EXTRA_PAGES"]:
+                        app.config["EXTRA_PAGES"].remove(bp_name)
 
-        for rule in list(app.url_map.iter_rules()):
-            if rule.endpoint.startswith(bp_name + ".") and str(rule) == f"/{bp_name}" and bp_name in app.config["EXTRA_PAGES"]:
-                app.config["EXTRA_PAGES"].remove(bp_name)
+                    with suppress(ValueError):
+                        app.url_map._rules.remove(rule)
+                        app.url_map._rules_by_endpoint.pop(rule.endpoint, None)
 
-            if rule.endpoint.startswith(bp_name + "."):
-                try:
-                    LOGGER.debug(f"Removing rule: {rule}")
-                    app.url_map._rules.remove(rule)
-                except ValueError:
-                    LOGGER.warning(f"Rule already removed: {rule}")
-                app.url_map._rules_by_endpoint.pop(rule.endpoint, None)
+            # Remove view functions
+            for endpoint in [ep for ep in app.view_functions if ep.startswith(f"{bp_name}.")]:
+                app.view_functions.pop(endpoint, None)
 
-        for endpoint in [ep for ep in list(app.view_functions.keys()) if ep.startswith(bp_name + ".")]:
-            LOGGER.debug(f"Removing endpoint: {endpoint}")
-            app.view_functions.pop(endpoint, None)
+            LOGGER.debug(f"Blueprint '{bp_name}' was completely removed")
 
-        LOGGER.debug(f"Blueprint '{bp_name}' was completely removed.")
-
-    # --- REMOVE BLUEPRINTS FOR DELETED PLUGINS ---
-    for bp_name in app.blueprints.copy():
-        if bp_name not in plugin_blueprints:
-            remove_blueprint(bp_name)
-
-    for bp_name in app.original_blueprints:
+    # Restore original blueprints if missing
+    for bp_name, bp in app.original_blueprints.items():
         if bp_name not in app.blueprints:
-            # Re-register default blueprint if available.
-            default_bp = app.original_blueprints[bp_name]
-            app.register_blueprint(default_bp)
+            app.register_blueprint(bp)
+            LOGGER.debug(f"Re-registered original blueprint '{bp_name}'")
 
-    # --- REGISTER OR OVERRIDE PLUGIN BLUEPRINTS ---
+    # Register new and updated plugin blueprints
     for bp_name, bp in blueprint_registry.items():
-        new_priority = getattr(bp, "plugin_priority", 0)
+        # Check if we should replace existing blueprint
         if bp_name in app.blueprints:
             existing_bp = app.blueprints[bp_name]
             existing_priority = getattr(existing_bp, "plugin_priority", 0)
-            LOGGER.info(f"Existing blueprint '{bp_name}' priority: {existing_priority}; new blueprint priority: {new_priority}")
-            if new_priority > existing_priority:
-                remove_blueprint(bp_name)
-                app.register_blueprint(bp)
-                LOGGER.info(f"Replaced blueprint '{bp_name}' with new priority {new_priority} (overriding {existing_priority}).")
-            else:
-                LOGGER.info(
-                    f"Skipping registration for blueprint '{bp_name}' from plugins " f"(new priority {new_priority} <= existing priority {existing_priority})."
-                )
-        else:
-            app.register_blueprint(bp)
-            LOGGER.info(f"Registered new blueprint '{bp_name}' with priority {new_priority}.")
+            new_priority = getattr(bp, "plugin_priority", 0)
 
-        for rule in list(app.url_map.iter_rules()):
-            if rule.endpoint.startswith(bp_name + ".") and str(rule) == f"/{bp_name}" and bp_name not in app.config["EXTRA_PAGES"]:
-                app.config["EXTRA_PAGES"].append(bp_name)
+            if new_priority <= existing_priority:
+                LOGGER.debug(f"Skipping registration for '{bp_name}' (priority {new_priority} <= {existing_priority})")
+                continue
 
-        # Clear Jinja2 cache to force reloading templates.
-        app.jinja_env.cache = {}
+            # Remove existing blueprint before registering the new one
+            for rule in list(app.url_map.iter_rules()):
+                if rule.endpoint.startswith(f"{bp_name}."):
+                    app.url_map._rules.remove(rule)
+                    app.url_map._rules_by_endpoint.pop(rule.endpoint, None)
+
+            for endpoint in [ep for ep in app.view_functions if ep.startswith(f"{bp_name}.")]:
+                app.view_functions.pop(endpoint, None)
+
+        # Register the blueprint
         app.register_blueprint(bp)
-        LOGGER.info(f"Registered blueprint '{bp_name}' with priority {new_priority}")
+        LOGGER.info(f"Registered blueprint '{bp_name}' with priority {getattr(bp, 'plugin_priority', 0)}")
 
+        # Add to extra pages if it has a root route
+        for rule in app.url_map.iter_rules():
+            if rule.endpoint.startswith(f"{bp_name}.") and str(rule) == f"/{bp_name}" and bp_name not in app.config["EXTRA_PAGES"]:
+                app.config["EXTRA_PAGES"].append(bp_name)
+                break
+
+    # Reset Jinja2 environment to apply template changes
+    app.jinja_env.cache = {}
     app.jinja_env.loader = app.create_global_jinja_loader()
 
+    # Mark context refresh as complete
     worker_pid = getpid()
     if worker_pid not in DATA.get("WORKERS", {}):
         DATA["WORKERS"][worker_pid] = {}
-    DATA["WORKERS"][getpid()]["refresh_context"] = False
+    DATA["WORKERS"][worker_pid]["refresh_context"] = False
     DATA.write_to_file()
 
 
