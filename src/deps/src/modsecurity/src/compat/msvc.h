@@ -14,6 +14,7 @@
 #define pclose       _pclose
 
 inline tm* localtime_r(const time_t* tin, tm* tout) {
+  // cppcheck-suppress[uninitvar, ctuuninitvar]
   if (!localtime_s(tout, tin)) return tout;
 
   return nullptr;

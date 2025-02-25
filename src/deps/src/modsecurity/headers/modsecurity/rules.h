@@ -41,16 +41,16 @@ namespace modsecurity {
 class Rules {
  public:
     void dump() const {
-        for (int j = 0; j < m_rules.size(); j++) {
-            std::cout << "    Rule ID: " << m_rules.at(j)->getReference();
-            std::cout << "--" << m_rules.at(j) << std::endl;
+        for (const auto &r : m_rules) {
+            std::cout << "    Rule ID: " << r->getReference();
+            std::cout << "--" << r << std::endl;
         }
     }
 
     int append(Rules *from, const std::vector<int64_t> &ids, std::ostringstream *err) {
          size_t j = 0;
          for (; j < from->size(); j++) {
-            RuleWithOperator *rule = dynamic_cast<RuleWithOperator *>(from->at(j).get());
+            const RuleWithOperator *rule = dynamic_cast<RuleWithOperator *>(from->at(j).get());
             if (rule && std::binary_search(ids.begin(), ids.end(), rule->m_ruleId)) {
                  if (err != NULL) {
                      *err << "Rule id: " << std::to_string(rule->m_ruleId) \
@@ -68,7 +68,7 @@ class Rules {
     }
 
     bool insert(std::shared_ptr<Rule> rule, const std::vector<int64_t> *ids, std::ostringstream *err) {
-        RuleWithOperator *r = dynamic_cast<RuleWithOperator *>(rule.get());
+        const RuleWithOperator *r = dynamic_cast<RuleWithOperator *>(rule.get());
         if (r && ids != nullptr && std::binary_search(ids->begin(), ids->end(), r->m_ruleId)) {
             if (err != nullptr) {
                 *err << "Rule id: " << std::to_string(r->m_ruleId) \

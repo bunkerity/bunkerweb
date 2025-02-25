@@ -2,11 +2,10 @@
 
 from datetime import datetime
 from io import BytesIO
-from itertools import chain
 from os import getenv, sep
 from os.path import join
 from pathlib import Path
-from stat import S_IEXEC
+from stat import S_IRGRP, S_IRUSR, S_IWUSR, S_IXGRP, S_IXUSR
 from sys import exit as sys_exit, path as sys_path
 from time import sleep
 from traceback import format_exc
@@ -87,9 +86,16 @@ def install_plugin(plugin_path: Path, db, preview: bool = True) -> bool:
 
     # Copy the plugin
     copytree(plugin_path, new_plugin_path)
-    # Add u+x permissions to jobs files
-    for job_file in chain(new_plugin_path.joinpath("jobs").glob("*"), new_plugin_path.joinpath("bwcli").glob("*")):
-        job_file.chmod(job_file.stat().st_mode | S_IEXEC)
+    # Add u+x permissions to executable files
+    desired_perms = S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IXGRP  # 0o750
+    for subdir, pattern in (
+        ("jobs", "*"),
+        ("bwcli", "*"),
+        ("ui", "*.py"),
+    ):
+        for executable_file in new_plugin_path.joinpath(subdir).rglob(pattern):
+            if executable_file.stat().st_mode & 0o777 != desired_perms:
+                executable_file.chmod(desired_perms)
     LOGGER.info(f"✅ {'Preview version of ' if preview else ''}Pro plugin {metadata['id']} (version {metadata['version']}) installed successfully!")
     return True
 

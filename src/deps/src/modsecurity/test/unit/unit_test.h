@@ -35,7 +35,7 @@ class UnitTest {
  public:
     static UnitTest *from_yajl_node(const yajl_val &);
 
-    std::string print();
+    std::string print() const;
 
     std::string param;
     std::string input;

@@ -45,8 +45,8 @@ int RulesSetPhases::append(RulesSetPhases *from, std::ostringstream *err) {
 
     for (int i = 0; i < modsecurity::Phases::NUMBER_OF_PHASES; i++) {
         v.reserve(m_rulesAtPhase[i].size());
-        for (size_t z = 0; z < m_rulesAtPhase[i].size(); z++) {
-            RuleWithOperator *rule_ckc = dynamic_cast<RuleWithOperator *>(m_rulesAtPhase[i].at(z).get());
+        for (const auto &r : m_rulesAtPhase[i].m_rules) {
+            const auto *rule_ckc = dynamic_cast<const RuleWithOperator *>(r.get());
             if (!rule_ckc) {
                 continue;
             }

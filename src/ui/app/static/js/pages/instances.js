@@ -4,6 +4,7 @@ $(document).ready(function () {
   var showLoadingModal = false;
   const instanceNumber = parseInt($("#instances_number").val());
   const isReadOnly = $("#is-read-only").val().trim() === "True";
+  const userReadOnly = $("#user-read-only").val().trim() === "True";
 
   const pingInstances = (instances) => {
     showLoadingModal = true;
@@ -570,7 +571,11 @@ $(document).ready(function () {
           $("#instances_wrapper .dt-buttons")
             .attr(
               "data-bs-original-title",
-              "The database is in readonly, therefore you cannot create new instances.",
+              `${
+                userReadOnly
+                  ? "Your account is readonly"
+                  : "The database is in readonly"
+              }, therefore you cannot create new instances.`,
             )
             .attr("data-bs-placement", "right")
             .tooltip();

@@ -29,15 +29,14 @@ namespace modsecurity {
 namespace actions {
 
 
-bool Block::evaluate(RuleWithActions *rule, Transaction *transaction,
-    std::shared_ptr<RuleMessage> rm) {
+bool Block::evaluate(RuleWithActions *rule, Transaction *transaction, RuleMessage &ruleMessage) {
     ms_dbg_a(transaction, 8, "Marking request as disruptive.");
 
     for (auto &a : transaction->m_rules->m_defaultActions[rule->getPhase()]) {
         if (a->isDisruptive() == false) {
             continue;
         }
-        a->evaluate(rule, transaction, rm);
+        a->evaluate(rule, transaction, ruleMessage);
     }
 
     return true;

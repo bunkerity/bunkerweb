@@ -126,6 +126,7 @@
     <body>
         {% if not starting %}<input type="hidden" id="home-path" value="{{ url_for('home') }}" />{% endif %}
         <input type="hidden" id="is-read-only" value="{{ is_readonly }}" />
+        <input type="hidden" id="user-read-only" value="{{ user_readonly }}" />
         <input type="hidden" id="theme" value="{{ theme }}" />
         <input type="hidden"
                id="bw-logo"

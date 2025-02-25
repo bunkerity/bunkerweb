@@ -3,8 +3,8 @@ from json import JSONDecodeError, dumps, loads
 from math import floor
 from time import time
 
-from flask import Blueprint, flash as flask_flash, redirect, render_template, request, url_for
-from flask_login import login_required
+from flask import Blueprint, Response, flash as flask_flash, redirect, render_template, request, url_for
+from flask_login import current_user, login_required
 
 from app.dependencies import BW_INSTANCES_UTILS, DB
 from app.utils import flash
@@ -52,7 +52,9 @@ def bans_page():
 @bans.route("/bans/ban", methods=["POST"])
 @login_required
 def bans_ban():
-    if DB.readonly:
+    if "write" not in current_user.list_permissions:
+        return Response("You don't have the required permissions to ban IPs.", 403)
+    elif DB.readonly:
         return handle_error("Database is in read-only mode", "bans")
 
     verify_data_in_form(
@@ -102,7 +104,9 @@ def bans_ban():
 @bans.route("/bans/unban", methods=["POST"])
 @login_required
 def bans_unban():
-    if DB.readonly:
+    if "write" not in current_user.list_permissions:
+        return Response("You don't have the required permissions to unban IPs.", 403)
+    elif DB.readonly:
         return handle_error("Database is in read-only mode", "bans")
 
     verify_data_in_form(

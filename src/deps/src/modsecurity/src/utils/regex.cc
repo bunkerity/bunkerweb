@@ -154,7 +154,7 @@ std::list<SMatch> Regex::searchAll(const std::string& s) const {
             rc = pcre2_match(m_pc, pcre2_s, s.length(),
                             offset, PCRE2_NO_JIT, match_data, NULL);
         }
-        PCRE2_SIZE *ovector = pcre2_get_ovector_pointer(match_data);
+        const PCRE2_SIZE *ovector = pcre2_get_ovector_pointer(match_data);
 #else
     const char *subject = s.c_str();
     int ovector[OVECCOUNT];
@@ -207,7 +207,7 @@ RegexResult Regex::searchOneMatch(const std::string& s, std::vector<SMatchCaptur
     if (m_pcje != 0 || rc == PCRE2_ERROR_JIT_STACKLIMIT) {
         rc = pcre2_match(m_pc, pcre2_s, s.length(), 0, PCRE2_NO_JIT, match_data, match_context);
     }
-    PCRE2_SIZE *ovector = pcre2_get_ovector_pointer(match_data);
+    const PCRE2_SIZE *ovector = pcre2_get_ovector_pointer(match_data);
 #else
     const char *subject = s.c_str();
     int ovector[OVECCOUNT];
@@ -261,7 +261,7 @@ RegexResult Regex::searchGlobal(const std::string& s, std::vector<SMatchCapture>
         }
         int rc = pcre2_match(m_pc, pcre2_s, s.length(),
                             startOffset, pcre2_options, match_data, match_context);
-        PCRE2_SIZE *ovector = pcre2_get_ovector_pointer(match_data);
+        const PCRE2_SIZE *ovector = pcre2_get_ovector_pointer(match_data);
 
 #else
     const char *subject = s.c_str();

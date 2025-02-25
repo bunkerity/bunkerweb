@@ -40,80 +40,32 @@ class RuleWithActions : public Rule {
     RuleWithActions(
         Actions *a,
         Transformations *t,
-        std::unique_ptr<std::string> fileName,
+        const std::string &fileName,
         int lineNumber);
 
-    ~RuleWithActions();
+    ~RuleWithActions() override;
 
-    RuleWithActions(const RuleWithActions& r)
-        : Rule(r),
-        m_rev(r.m_rev),
-        m_ver(r.m_ver),
-        m_accuracy(r.m_accuracy),
-        m_maturity(r.m_maturity),
-        m_ruleId(r.m_ruleId),
-        m_chainedRuleChild(r.m_chainedRuleChild),
-        m_chainedRuleParent(r.m_chainedRuleParent),
-        m_disruptiveAction(r.m_disruptiveAction),
-        m_logData(r.m_logData),
-        m_msg(r.m_msg),
-        m_severity(r.m_severity),
-        m_actionsRuntimePos(r.m_actionsRuntimePos),
-        m_actionsSetVar(r.m_actionsSetVar),
-        m_actionsTag(r.m_actionsTag),
-        m_transformations(r.m_transformations),
-        m_containsCaptureAction(r.m_containsCaptureAction),
-        m_containsMultiMatchAction(r.m_containsMultiMatchAction),
-        m_containsStaticBlockAction(r.m_containsStaticBlockAction),
-        m_isChained(r.m_isChained)
-    { }
+    RuleWithActions(const RuleWithActions &r) = delete;
 
-    RuleWithActions &operator=(const RuleWithActions& r) {
-        Rule::operator = (r);
-        m_rev = r.m_rev;
-        m_ver = r.m_ver;
-        m_accuracy = r.m_accuracy;
-        m_maturity = r.m_maturity;
-        m_ruleId = r.m_ruleId;
-        m_chainedRuleChild = r.m_chainedRuleChild;
-        m_chainedRuleParent = r.m_chainedRuleParent;
-
-        m_disruptiveAction = r.m_disruptiveAction;
-        m_logData = r.m_logData;
-        m_msg = r.m_msg;
-        m_severity = r.m_severity;
-        m_actionsRuntimePos = r.m_actionsRuntimePos;
-        m_actionsSetVar = r.m_actionsSetVar;
-        m_actionsTag = r.m_actionsTag;
-
-        m_transformations = r.m_transformations;
-
-        m_containsCaptureAction = r.m_containsCaptureAction;
-        m_containsMultiMatchAction = r.m_containsMultiMatchAction;
-        m_containsStaticBlockAction = r.m_containsStaticBlockAction;
-        m_isChained = r.m_isChained;
-
-        return *this;
-    }
-
-    virtual bool evaluate(Transaction *transaction, std::shared_ptr<RuleMessage> ruleMessage) override;
+    RuleWithActions &operator=(const RuleWithActions &r) = delete;
 
     virtual bool evaluate(Transaction *transaction) override;
 
+    virtual bool evaluate(Transaction *transaction, RuleMessage &ruleMessage) override;
 
     void executeActionsIndependentOfChainedRuleResult(
         Transaction *trasn,
         bool *containsDisruptive,
-        std::shared_ptr<RuleMessage> ruleMessage);
+        RuleMessage &ruleMessage);
 
     void executeActionsAfterFullMatch(
         Transaction *trasn,
         bool containsDisruptive,
-        std::shared_ptr<RuleMessage> ruleMessage);
+        RuleMessage &ruleMessage);
 
     void executeAction(Transaction *trans,
         bool containsBlock,
-        std::shared_ptr<RuleMessage> ruleMessage,
+        RuleMessage &ruleMessage,
         actions::Action *a,
         bool context);
 
@@ -122,12 +74,12 @@ class RuleWithActions : public Rule {
         const Transaction *trasn, const std::string &value, TransformationResults &ret);
 
     void performLogging(Transaction *trans,
-        std::shared_ptr<RuleMessage> ruleMessage,
+        RuleMessage &ruleMessage,
         bool lastLog = true,
-        bool chainedParentNull = false);
+        bool chainedParentNull = false) const;
 
     std::vector<actions::Action *> getActionsByName(const std::string& name,
-        Transaction *t);
+        const Transaction *t);
     bool containsTag(const std::string& name, Transaction *t);
     bool containsMsg(const std::string& name, Transaction *t);
 

@@ -31,10 +31,7 @@ namespace actions {
 class Exec : public Action {
  public:
     explicit Exec(const std::string &action) 
-        : Action(action),
-        m_script("") { }
-
-    ~Exec() { }
+        : Action(action) { }
 
     bool evaluate(RuleWithActions *rule, Transaction *transaction) override;
     bool init(std::string *error) override;

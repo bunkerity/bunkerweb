@@ -13,7 +13,8 @@
             </button>
         </div>
         <div class="card mt-1 me-1"
-             {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The database is in readonly therefore the configuration is locked " {% endif %}>
+             {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title={% if user_readonly %}"Readonly mode enabled"{% else %}"The database is in readonly, therefore the configuration is locked"{% endif %}
+             {% endif %}>
             <!-- Save button container -->
             <button type="button"
                     class="btn btn-sm btn-outline-bw-green save-settings{% if is_readonly %} disabled{% endif %}">

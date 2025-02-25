@@ -39,8 +39,7 @@ class LogData : public Action {
         : Action("logdata"),
             m_string(std::move(z)) { }
 
-    bool evaluate(RuleWithActions *rule, Transaction *transaction,
-       std::shared_ptr<RuleMessage> rm) override;
+    bool evaluate(RuleWithActions *rule, Transaction *transaction, RuleMessage &ruleMessage) override;
 
     std::string data(Transaction *Transaction);
 

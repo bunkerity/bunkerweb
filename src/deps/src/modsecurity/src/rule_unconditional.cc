@@ -20,7 +20,7 @@ namespace modsecurity {
 
 
 bool RuleUnconditional::evaluate(Transaction *trans,
-    std::shared_ptr<RuleMessage> ruleMessage) {
+    RuleMessage &ruleMessage) {
     RuleWithActions::evaluate(trans, ruleMessage);
 
     // FIXME: This needs to be romeved on the runtime exeption review.

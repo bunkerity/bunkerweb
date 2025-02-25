@@ -1,8 +1,8 @@
 # Advanced usages
 
-Many real-world use case examples are available in the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.1-rc1/examples) folder of the GitHub repository.
+Many real-world use case examples are available in the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.1-rc2/examples) folder of the GitHub repository.
 
-We also provide numerous boilerplates, such as YAML files for various integrations and database types. These are available in the [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.1-rc1/misc/integrations) folder.
+We also provide numerous boilerplates, such as YAML files for various integrations and database types. These are available in the [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.1-rc2/misc/integrations) folder.
 
 This section only focuses on advanced usages and security tuning, see the [settings section](settings.md) of the documentation to see all the available settings.
 
@@ -79,7 +79,7 @@ You will find more settings about real IP in the [settings section](settings.md#
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.1-rc1
+          image: bunkerity/bunkerweb:1.6.1-rc2
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -96,7 +96,7 @@ You will find more settings about real IP in the [settings section](settings.md#
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.1-rc1
+          image: bunkerity/bunkerweb:1.6.1-rc2
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -135,7 +135,7 @@ You will find more settings about real IP in the [settings section](settings.md#
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.1-rc1
+          image: bunkerity/bunkerweb:1.6.1-rc2
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -191,7 +191,7 @@ You will find more settings about real IP in the [settings section](settings.md#
 
         ```yaml
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.1-rc1
+          image: bunkerity/bunkerweb-scheduler:1.6.1-rc2
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -209,7 +209,7 @@ You will find more settings about real IP in the [settings section](settings.md#
 
         ```yaml
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.1-rc1
+          image: bunkerity/bunkerweb-scheduler:1.6.1-rc2
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -251,7 +251,7 @@ You will find more settings about real IP in the [settings section](settings.md#
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.1-rc1
+          image: bunkerity/bunkerweb:1.6.1-rc2
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -351,7 +351,7 @@ Some integrations provide more convenient ways to apply configurations, such as 
     ```yaml
     ...
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.1-rc1
+      image: bunkerity/bunkerweb-scheduler:1.6.1-rc2
       environment:
         - |
           CUSTOM_CONF_SERVER_HTTP_hello-world=
@@ -394,7 +394,7 @@ Some integrations provide more convenient ways to apply configurations, such as 
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.1-rc1
+      image: bunkerity/bunkerweb-scheduler:1.6.1-rc2
       volumes:
         - ./bw-data:/data
       ...
@@ -464,7 +464,7 @@ Some integrations provide more convenient ways to apply configurations, such as 
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.1-rc1
+      image: bunkerity/bunkerweb-scheduler:1.6.1-rc2
       volumes:
         - ./bw-data:/data
       ...
@@ -663,7 +663,7 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.1-rc1
+        image: bunkerity/bunkerweb:1.6.1-rc2
         ports:
           - "80:8080" # Keep it if you want to use Let's Encrypt automation when using http challenge type
           - "10000:10000" # app1
@@ -678,7 +678,7 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.1-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.1-rc2
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "bunkerweb" # This setting is mandatory to specify the BunkerWeb instance
@@ -729,7 +729,7 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.1-rc1
+        image: bunkerity/bunkerweb:1.6.1-rc2
         ports:
           - "80:8080" # Keep it if you want to use Let's Encrypt automation when using http challenge type
           - "10000:10000" # app1
@@ -783,7 +783,7 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.1-rc1
+        image: bunkerity/bunkerweb:1.6.1-rc2
         ports:
           # Keep it if you want to use Let's Encrypt automation when using http challenge type
           - published: 80
@@ -1076,7 +1076,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.1-rc1
+        image: bunkerity/bunkerweb:1.6.1-rc2
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1091,7 +1091,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.1-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.1-rc2
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "bunkerweb" # This setting is mandatory to specify the BunkerWeb instance
@@ -1185,7 +1185,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.1-rc1
+        image: bunkerity/bunkerweb:1.6.1-rc2
         labels:
           - "bunkerweb.INSTANCE=yes"
         environment:
@@ -1198,7 +1198,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.1-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.1-rc2
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "" # We don't need to specify the BunkerWeb instance here as they are automatically detected by the autoconf service
@@ -1213,7 +1213,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.1-rc1
+        image: bunkerity/bunkerweb-autoconf:1.6.1-rc2
         depends_on:
           - bunkerweb
           - bw-docker
@@ -1363,7 +1363,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.1-rc1
+        image: bunkerity/bunkerweb:1.6.1-rc2
         volumes:
           - /shared/www:/var/www/html
     ...
@@ -1550,7 +1550,7 @@ By default, BunkerWeb will only listen on IPv4 addresses and won't use IPv6 for 
     ```yaml
     services:
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.1-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.1-rc2
         environment:
           USE_IPv6: "yes"
 
@@ -2118,7 +2118,7 @@ This BunkerWeb plugin acts as a [CrowdSec](https://crowdsec.net/) bouncer. It wi
     ```yaml
     services:
         bunkerweb:
-            image: bunkerity/bunkerweb:1.6.1-rc1
+            image: bunkerity/bunkerweb:1.6.1-rc2
             ports:
               - "80:8080"
               - "443:8443"
@@ -2135,7 +2135,7 @@ This BunkerWeb plugin acts as a [CrowdSec](https://crowdsec.net/) bouncer. It wi
                     syslog-address: "udp://10.10.10.254:514"
 
         bw-scheduler:
-            image: bunkerity/bunkerweb-scheduler:1.6.1-rc1
+            image: bunkerity/bunkerweb-scheduler:1.6.1-rc2
             depends_on:
               - bunkerweb
             environment:
@@ -2709,7 +2709,7 @@ Here is the list of related settings :
 
 For more advanced authentication methods, such as Single Sign-On (SSO), you can leverage the **auth request settings**. This allows integration with external authentication systems by using subrequest-based authentication. For detailed information about this feature, refer to the [NGINX documentation](https://docs.nginx.com/nginx/admin-guide/security-controls/configuring-subrequest-authentication/).
 
-To help you get started, the [BunkerWeb repository](https://github.com/bunkerity/bunkerweb/tree/v1.6.1-rc1/examples) includes examples for popular authentication solutions like [Authelia](https://www.authelia.com/) and [Authentik](https://goauthentik.io/). These examples demonstrate how to integrate these tools seamlessly with your deployment.
+To help you get started, the [BunkerWeb repository](https://github.com/bunkerity/bunkerweb/tree/v1.6.1-rc2/examples) includes examples for popular authentication solutions like [Authelia](https://www.authelia.com/) and [Authentik](https://goauthentik.io/). These examples demonstrate how to integrate these tools seamlessly with your deployment.
 
 **Auth request settings are related to reverse proxy rules.**
 
@@ -3311,3 +3311,54 @@ The Security.txt plugin allows you to easily create a `security.txt` file for yo
 !!! info "Autogenerated values"
     - The `SECURITYTXT_CANONICAL` setting is automatically generated from the site URL and the `SECURITYTXT_URI` setting (if the value is empty).
     - The `SECURITYTXT_EXPIRES` setting is automatically generated to be the current date and time + 1 year if the value is empty.
+
+### Anti DDoS <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+
+STREAM support :x:
+
+The **Anti DDoS** Plugin provides advanced protection against Distributed Denial of Service (DDoS) attacks by monitoring, analyzing, and filtering suspicious traffic in real-time.
+
+By employing a **sliding window mechanism**, the plugin maintains an in-memory dictionary of request timestamps to detect abnormal traffic spikes from individual IP addresses. Based on the configured security mode, it can either block offending connections or log the suspicious activity for further review.
+
+#### Features
+
+- **Real-Time Traffic Analysis:** Continuously monitors incoming requests to detect potential DDoS attacks.
+- **Sliding Window Mechanism:** Tracks recent request activity within a configurable time window.
+- **Configurable Thresholds:** Allows you to define the maximum number of suspicious requests per IP.
+- **Advanced Blocking Logic:** Evaluates both per-IP request counts and the number of distinct IPs exceeding the threshold.
+- **Flexible Security Modes:** Choose between immediate connection blocking or detection-only (logging) mode.
+- **Optimized In-Memory Datastore:** Ensures high-speed lookups and efficient metric tracking.
+- **Automatic Housekeeping:** Periodically clears outdated data to maintain optimal performance.
+
+#### Configuration
+
+Customize the plugin behavior using the following settings:
+
+| Setting                      | Default       | Context | Multiple | Description                                                                                    |
+| ---------------------------- | ------------- | ------- | -------- | ---------------------------------------------------------------------------------------------- |
+| `USE_ANTIDDOS`               | `no`          | global  | no       | Enable or disable the Anti DDoS protection. Set to `"yes"` to activate the plugin.             |
+| `ANTIDDOS_METRICS_DICT_SIZE` | `10M`         | global  | no       | Size of the in-memory datastore for tracking DDoS metrics (e.g., `10M`, `500k`).               |
+| `ANTIDDOS_THRESHOLD`         | `100`         | global  | no       | Maximum number of suspicious requests allowed per IP within the defined time window.           |
+| `ANTIDDOS_WINDOW_TIME`       | `10`          | global  | no       | Time window in seconds during which suspicious requests are tallied.                           |
+| `ANTIDDOS_STATUS_CODES`      | `429 403 444` | global  | no       | HTTP status codes considered suspicious and used to trigger anti-DDoS actions.                 |
+| `ANTIDDOS_DISTINCT_IP`       | `5`           | global  | no       | Minimum number of distinct IPs that must exceed the threshold before enforcing the block mode. |
+
+#### Best Practices
+
+- **Threshold Tuning:** Adjust `ANTIDDOS_THRESHOLD` and `ANTIDDOS_WINDOW_TIME` based on your typical traffic patterns.
+- **Status Code Review:** Regularly update `ANTIDDOS_STATUS_CODES` to capture new or evolving suspicious behaviors.
+- **Monitoring:** Analyze logs and metrics periodically to fine-tune settings and improve overall protection.
+
+### User Manager <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+
+The User Management Plugin offers a robust interface for administering user accounts within your system.
+
+With this plugin, administrators can effortlessly create, update, and disable user accounts, manage user roles, toggle two-factor authentication (2FA), and view detailed user information such as last login timestamps and account statuses (active or inactive). Designed with security and ease-of-use in mind, this plugin simplifies routine user management tasks while ensuring compliance and auditability.
+
+#### Features
+
+- **User Account Operations:** Create, edit, and delete user accounts with ease.
+- **Role-Based Access Control:** Assign and modify user roles to manage permissions and access levels.
+- **2FA Management:** Disable two-factor authentication based on administrative decisions.
+- **Comprehensive User Insights:** Monitor key user data including last login times, account creation dates, and active/inactive status.
+- **Audit Logging:** Maintain an audit trail for all user management actions for enhanced security and compliance.

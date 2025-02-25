@@ -30,8 +30,13 @@
 #include "src/utils/geo_lookup.h"
 
 
-namespace modsecurity {
-namespace operators {
+namespace modsecurity::operators {
+
+
+static bool debug(const Transaction *transaction, int x, const std::string &a) {
+    ms_dbg_a(transaction, x, a);
+    return true;
+}
 
 
 bool GeoLookup::evaluate(Transaction *trans, const std::string &exp) {
@@ -41,9 +46,9 @@ bool GeoLookup::evaluate(Transaction *trans, const std::string &exp) {
 
     if (trans) {
         ret = Utils::GeoLookup::getInstance().lookup(exp, trans,
-            std::bind(&GeoLookup::debug, this, trans, _1, _2));
+            std::bind(debug, trans, _1, _2));
     } else {
-        ret = Utils::GeoLookup::getInstance().lookup(exp, NULL,
+        ret = Utils::GeoLookup::getInstance().lookup(exp, nullptr,
             nullptr);
     }
 
@@ -51,5 +56,4 @@ bool GeoLookup::evaluate(Transaction *trans, const std::string &exp) {
 }
 
 
-}  // namespace operators
-}  // namespace modsecurity
+}  // namespace modsecurity::operators

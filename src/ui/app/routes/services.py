@@ -4,8 +4,8 @@ from itertools import chain
 from threading import Thread
 from time import time
 from typing import Dict, List
-from flask import Blueprint, redirect, render_template, request, send_file, url_for
-from flask_login import login_required
+from flask import Blueprint, Response, redirect, render_template, request, send_file, url_for
+from flask_login import current_user, login_required
 
 from app.dependencies import BW_CONFIG, DATA, DB
 
@@ -24,7 +24,9 @@ def services_page():
 @services.route("/services/convert", methods=["POST"])
 @login_required
 def services_convert():
-    if DB.readonly:
+    if "write" not in current_user.list_permissions:
+        return Response("You don't have the required permissions to convert services.", 403)
+    elif DB.readonly:
         return handle_error("Database is in read-only mode", "services")
 
     verify_data_in_form(
@@ -107,7 +109,9 @@ def services_convert():
 @services.route("/services/delete", methods=["POST"])
 @login_required
 def services_delete():
-    if DB.readonly:
+    if "write" not in current_user.list_permissions:
+        return Response("You don't have the required permissions to delete services.", 403)
+    elif DB.readonly:
         return handle_error("Database is in read-only mode", "services")
 
     verify_data_in_form(
@@ -185,7 +189,9 @@ def services_service_page(service: str):
         return redirect(url_for("services.services_page"))
 
     if request.method == "POST":
-        if DB.readonly:
+        if "write" not in current_user.list_permissions:
+            return Response("You don't have the required permissions to create/edit services.", 403)
+        elif DB.readonly:
             return handle_error("Database is in read-only mode", "services")
 
         DATA.load_from_file()
@@ -377,11 +383,12 @@ def services_service_page(service: str):
     clone = None
     if service == "new":
         clone = request.args.get("clone", "")
+        db_config = DB.get_config(global_only=True, methods=True)
         if clone:
-            db_config = DB.get_config(methods=True, with_drafts=True, service=clone)
-            db_config["SERVER_NAME"]["value"] = ""
-        else:
-            db_config = DB.get_config(global_only=True, methods=True)
+            for key, setting in DB.get_config(methods=True, with_drafts=True, service=clone).items():
+                original_value = db_config.get(key, {}).get("value")
+                db_config[key] = setting | {"clone": original_value != setting.get("value")}
+            db_config["SERVER_NAME"].update({"value": "", "clone": False})
     else:
         db_config = DB.get_config(methods=True, with_drafts=True, service=service)
 

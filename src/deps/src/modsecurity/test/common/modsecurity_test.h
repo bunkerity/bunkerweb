@@ -29,7 +29,7 @@ extern std::string default_test_path;
 namespace modsecurity_test {
 
 template <class T> class ModSecurityTest :
-    public std::unordered_map<std::string, std::vector<T *> *> {
+    public std::unordered_map<std::string, std::vector<std::unique_ptr<T>>> {
  public:
     ModSecurityTest()
         : m_test_number(0),

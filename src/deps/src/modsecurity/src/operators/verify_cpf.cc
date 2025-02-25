@@ -38,7 +38,7 @@ int VerifyCPF::convert_to_int(const char c) {
 }
 
 
-bool VerifyCPF::verify(const char *cpfnumber, int len) {
+bool VerifyCPF::verify(const char *cpfnumber, int len) const {
     int factor, part_1, part_2, var_len = len;
     unsigned int sum = 0, i = 0, cpf_len = 11, c;
     int cpf[11];
@@ -74,7 +74,7 @@ bool VerifyCPF::verify(const char *cpfnumber, int len) {
     c = cpf_len;
 
     for (i = 0; i < 9; i++) {
-        sum += (cpf[i] * --c); // cppcheck-suppress uninitvar
+        sum += (cpf[i] * --c);
     }
 
     factor = (sum % cpf_len);
@@ -109,7 +109,7 @@ bool VerifyCPF::verify(const char *cpfnumber, int len) {
 
 
 bool VerifyCPF::evaluate(Transaction *t, RuleWithActions *rule,
-    const std::string& input, std::shared_ptr<RuleMessage> ruleMessage) {
+    const std::string& input, RuleMessage &ruleMessage) {
     std::list<SMatch> matches;
     bool is_cpf = false;
     int i;

@@ -45,11 +45,11 @@ class VerifyCC : public Operator {
         m_pc(NULL),
         m_pce(NULL) { }
 #endif
-    ~VerifyCC();
+    ~VerifyCC() override;
 
     bool evaluate(Transaction *t, RuleWithActions *rule,
         const std::string& input,
-        std::shared_ptr<RuleMessage> ruleMessage)  override;
+        RuleMessage &ruleMessage)  override;
     bool init(const std::string &param, std::string *error) override;
  private:
 #if WITH_PCRE2

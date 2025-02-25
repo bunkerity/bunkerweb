@@ -57,7 +57,7 @@ private:
         ConvertOp convertOp) -> auto {
         char digest[DigestSize];
 
-        auto ret = digestOp(reinterpret_cast<const unsigned char *>(input.c_str()),
+        const auto ret = (*digestOp)(reinterpret_cast<const unsigned char *>(input.c_str()),
                  input.size(), reinterpret_cast<unsigned char *>(digest));
         assert(ret == 0);
 
