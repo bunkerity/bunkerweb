@@ -462,6 +462,12 @@ def refresh_app_context():
             active_plugin_paths.add(bp_dir.parent.parent.parent)
             for bp_file in bp_dir.glob("*.py"):
                 try:
+                    # Add blueprint directory to sys.path BEFORE loading the module
+                    blueprint_dir = str(bp_dir)
+                    if blueprint_dir not in sys_path:
+                        LOGGER.debug(f"Adding {blueprint_dir} to sys.path before loading blueprint from {bp_file}")
+                        sys_path.append(blueprint_dir)
+
                     # Create a unique module name.
                     module_name = f"blueprint_{bp_dir.parent.name}_{bp_file.stem}"
                     spec = spec_from_file_location(module_name, bp_file)
@@ -479,9 +485,18 @@ def refresh_app_context():
                         new_priority = 2 if PRO_PLUGINS_PATH in bp_file.parents else 1
                         bp.plugin_priority = new_priority
 
+                        # Set the import path to the blueprint directory
+                        bp.import_path = blueprint_dir
+                        LOGGER.debug(f"Set import_path to {bp.import_path} for blueprint {bp.name}")
+
                         # Ensure the blueprint's template_folder is an absolute path.
                         if bp.template_folder:
                             bp.template_folder = abspath(bp.template_folder)
+
+                        # Track this blueprint's sys.path entry
+                        if not hasattr(app, "plugin_sys_paths"):
+                            app.plugin_sys_paths = {}  # Map blueprint names to their sys.path entries
+                        app.plugin_sys_paths[bp.name] = blueprint_dir
 
                         # In the registry, only keep the highest-priority blueprint for a given name.
                         if bp.name in blueprint_registry:
@@ -500,9 +515,19 @@ def refresh_app_context():
                 except Exception as exc:
                     LOGGER.error(f"Error loading blueprint from {bp_file}: {exc}")
 
+    # Track plugin directories that have been added to sys.path
+    if not hasattr(app, "plugin_sys_paths"):
+        app.plugin_sys_paths = {}  # Map blueprint names to their sys.path entries
+
     def remove_blueprint(bp_name):
         """Helper to completely remove a blueprint and its associated rules and endpoints."""
         app.blueprints.pop(bp_name, None)
+
+        # Remove blueprint directory from sys.path if it was added
+        if bp_name in app.plugin_sys_paths and app.plugin_sys_paths[bp_name] in sys_path:
+            LOGGER.debug(f"Removing {app.plugin_sys_paths[bp_name]} from sys.path for blueprint {bp_name}")
+            sys_path.remove(app.plugin_sys_paths[bp_name])
+            del app.plugin_sys_paths[bp_name]
 
         for rule in list(app.url_map.iter_rules()):
             if rule.endpoint.startswith(bp_name + ".") and str(rule) == f"/{bp_name}" and bp_name in app.config["EXTRA_PAGES"]:
