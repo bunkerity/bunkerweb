@@ -75,9 +75,9 @@ def pro_key():
 
     DATA.load_from_file()
 
-    def update_license_key(license_key: str):
+    def update_license_key(variables: dict):
         wait_applying()
-        manage_bunkerweb("global_config", {"PRO_LICENSE_KEY": license_key}, threaded=True)
+        manage_bunkerweb("global_config", variables, threaded=True)
 
     DATA.update(
         {
@@ -88,7 +88,7 @@ def pro_key():
         }
     )
     flash("Checking license key.")
-    Thread(target=update_license_key, args=(license_key,)).start()
+    Thread(target=update_license_key, args=(variables,)).start()
     return redirect(
         url_for(
             "loading",
