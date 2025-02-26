@@ -4,6 +4,8 @@
 
 - [BUGFIX] Fix shenanigans with settings' plugin_id when updating the config
 - [BUGFIX] Fix rare error where "python3" is not found in docker images
+- [BUGFIX] Fix jobs runs excess cleanup method in Database
+- [FEATURE] Add `PROXY_BUFFER_SIZE` and `PROXY_BUFFERS` settings to control the proxy buffer size and the number of buffers in `multisite` mode
 - [UI] Introduced a visual label in the UI to clearly mark service settings that were cloned from the original.
 - [UI] Added support for custom plugins: developers can now create hooks and blueprints to override existing functionalities, not just a plugin page.
 - [DEPS] Updated ModSecurity version to v3.0.14
