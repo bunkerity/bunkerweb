@@ -20,6 +20,11 @@
   --bs-link-hover-color-rgb: 46, 172, 104;
 }
 
+body {
+  font-family: var(--bs-body-font-family), "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+}
+
 .offcanvas,
 .offcanvas-xxl,
 .offcanvas-xl,
