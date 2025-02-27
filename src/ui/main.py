@@ -276,9 +276,12 @@ with app.app_context():
 @app.context_processor
 def inject_variables():
     for hook in app.config["CONTEXT_PROCESSOR_HOOKS"]:
-        resp = hook()
-        if resp:
-            app.config["ENV"] = {**app.config["ENV"], **resp}
+        try:
+            resp = hook()
+            if resp:
+                app.config["ENV"] = {**app.config["ENV"], **resp}
+        except Exception:
+            LOGGER.exception("Error in context_processor hook")
 
     return app.config["ENV"]
 
@@ -739,7 +742,7 @@ def before_request():
             pro_overlapped=metadata["pro_overlapped"],
             plugins=BW_CONFIG.get_plugins(),
             flash_messages=session.get("flash_messages", []),
-            is_readonly=DATA.get("READONLY_MODE", False) or "write" not in current_user.list_permissions,
+            is_readonly=DATA.get("READONLY_MODE", False) or ("write" not in current_user.list_permissions and not request.path.startswith("/profile")),
             user_readonly="write" not in current_user.list_permissions,
             theme=current_user.theme if current_user.is_authenticated else "dark",
             columns_preferences_defaults=COLUMNS_PREFERENCES_DEFAULTS,
@@ -752,9 +755,12 @@ def before_request():
         app.config["ENV"] = data
 
     for hook in app.config["BEFORE_REQUEST_HOOKS"]:
-        resp = hook()
-        if resp:
-            return resp
+        try:
+            resp = hook()
+            if resp:
+                return resp
+        except Exception:
+            LOGGER.exception("Error in before_request hook")
 
 
 def mark_user_access(user, session_id):
@@ -810,9 +816,12 @@ def set_security_headers(response):
     )
 
     for hook in app.config["AFTER_REQUEST_HOOKS"]:
-        resp = hook(response)
-        if resp:
-            return resp
+        try:
+            resp = hook(response)
+            if resp:
+                return resp
+        except Exception:
+            LOGGER.exception("Error in after_request hook")
 
     return response
 
@@ -823,7 +832,10 @@ def teardown_request(_):
         Thread(target=mark_user_access, args=(current_user, session["session_id"])).start()
 
     for hook in app.config["TEARDOWN_REQUEST_HOOKS"]:
-        hook()
+        try:
+            hook()
+        except Exception:
+            LOGGER.exception("Error in teardown_request hook")
 
 
 ### * MISC ROUTES * ###

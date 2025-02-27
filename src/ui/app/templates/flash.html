@@ -6,7 +6,7 @@
             {% if messages.append(('error', 'You have more services than allowed by your pro license. Upgrade your license or move some services to draft mode to unlock your pro license.')) %}
             {% endif %}
         {% endif %}
-        {% if user_readonly %}
+        {% if user_readonly and current_endpoint != "profile" %}
             {% if messages.append(('warning', 'You are in read-only mode. You can\'t make changes that will be saved in the database.')) %}
             {% endif %}
         {% endif %}
