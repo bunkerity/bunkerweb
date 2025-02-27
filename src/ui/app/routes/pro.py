@@ -1,8 +1,8 @@
 from datetime import datetime
 from threading import Thread
 from time import time
-from flask import Blueprint, redirect, render_template, request, url_for
-from flask_login import login_required
+from flask import Blueprint, Response, redirect, render_template, request, url_for
+from flask_login import current_user, login_required
 
 from app.dependencies import BW_CONFIG, DATA, DB
 from app.routes.utils import get_remain, handle_error, manage_bunkerweb, verify_data_in_form, wait_applying
@@ -45,7 +45,9 @@ def pro_page():
 @pro.route("/pro/key", methods=["POST"])
 @login_required
 def pro_key():
-    if DB.readonly:
+    if "write" not in current_user.list_permissions:
+        return Response("You don't have the required permissions to update the license key.", 403)
+    elif DB.readonly:
         return handle_error("Database is in read-only mode", "pro")
 
     verify_data_in_form(
@@ -73,9 +75,9 @@ def pro_key():
 
     DATA.load_from_file()
 
-    def update_license_key(license_key: str):
+    def update_license_key(variables: dict):
         wait_applying()
-        manage_bunkerweb("global_config", {"PRO_LICENSE_KEY": license_key}, threaded=True)
+        manage_bunkerweb("global_config", variables, threaded=True)
 
     DATA.update(
         {
@@ -86,7 +88,7 @@ def pro_key():
         }
     )
     flash("Checking license key.")
-    Thread(target=update_license_key, args=(license_key,)).start()
+    Thread(target=update_license_key, args=(variables,)).start()
     return redirect(
         url_for(
             "loading",

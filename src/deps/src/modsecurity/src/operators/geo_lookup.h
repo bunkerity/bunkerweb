@@ -21,8 +21,8 @@
 #include "src/operators/operator.h"
 
 
-namespace modsecurity {
-namespace operators {
+namespace modsecurity::operators {
+
 
 class GeoLookup : public Operator {
  public:
@@ -30,17 +30,10 @@ class GeoLookup : public Operator {
     GeoLookup()
         : Operator("GeoLookup") { }
     bool evaluate(Transaction *transaction, const std::string &exp) override;
-
- protected:
-    // cppcheck-suppress functionStatic
-    bool debug(Transaction *transaction, int x, const std::string &a) {
-        ms_dbg_a(transaction, x, a);
-        return true;
-    }
 };
 
-}  // namespace operators
-}  // namespace modsecurity
+
+}  // namespace modsecurity::operators
 
 
 #endif  // SRC_OPERATORS_GEO_LOOKUP_H_

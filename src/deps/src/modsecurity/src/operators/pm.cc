@@ -32,7 +32,7 @@ static inline std::string parse_pm_content(const std::string &op_parm) {
 
     auto size = op_parm.size() - offset;
     if (size >= 2 &&
-        op_parm.at(offset) == '\"' && op_parm.back() == '\"') {
+        op_parm[offset] == '\"' && op_parm.back() == '\"') {
         offset++;
         size -= 2;
     }
@@ -140,7 +140,7 @@ void Pm::postOrderTraversal(acmp_btree_node_t *node) {
 
 
 bool Pm::evaluate(Transaction *transaction, RuleWithActions *rule,
-    const std::string &input, std::shared_ptr<RuleMessage> ruleMessage) {
+    const std::string &input, RuleMessage &ruleMessage) {
     int rc;
     ACMPT pt;
     pt.parser = m_p;

@@ -26,7 +26,7 @@ static inline int inplace(std::string &value) {
 
     const auto len = value.length();
     auto d = reinterpret_cast<unsigned char *>(value.data());
-    const auto data = d;
+    const auto *data = d;
 
     for (int i = 0; i <= len - 2; i += 2) {
         *d++ = utils::string::x2c(&data[i]);

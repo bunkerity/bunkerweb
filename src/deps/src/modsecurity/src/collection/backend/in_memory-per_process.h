@@ -74,7 +74,7 @@ class InMemoryPerProcess :
     public Collection {
  public:
     explicit InMemoryPerProcess(const std::string &name);
-    ~InMemoryPerProcess();
+    ~InMemoryPerProcess() override;
     void store(const std::string &key, const std::string &value);
 
     bool storeOrUpdateFirst(const std::string &key,

@@ -78,100 +78,147 @@ else
     echo "/var/www/html directory already exists, skipping copy..."
 fi
 
-# Create bunkerweb if needed
+# Manage the BunkerWeb service
+echo "Configuring BunkerWeb service..."
+systemctl daemon-reload
+
+# Determine if BunkerWeb should be enabled based on modes
+# Logic: enable if (standalone mode) OR (worker mode only) AND service not disabled
 if {
-    {
-        [ -z "$MANAGER_MODE" ] && [ -z "$WORKER_MODE" ];
-    } || {
-        {
-            [ -z "$MANAGER_MODE" ] || [ "${MANAGER_MODE:-yes}" = "no" ]
-        } && [ "${WORKER_MODE:-no}" != "no" ];
-    };
+    # Standalone mode (no manager or worker specified)
+    { [ -z "$MANAGER_MODE" ] && [ -z "$WORKER_MODE" ]; } ||
+    # Worker mode only (manager disabled or unset, worker enabled)
+    { [ -z "$MANAGER_MODE" ] || [ "${MANAGER_MODE:-yes}" = "no" ] && [ "${WORKER_MODE:-no}" != "no" ]; }
 } && [ "$SERVICE_BUNKERWEB" != "no" ]; then
+    # Upgrade scenario
     if [ -f /var/tmp/bunkerweb_upgrade ]; then
         if systemctl is-active --quiet bunkerweb; then
-            # Reload bunkerweb service
-            echo "Reloading the bunkerweb service..."
-            do_and_check_cmd systemctl reload bunkerweb
+            echo "📋 Reloading the BunkerWeb service after upgrade..."
+            do_and_check_cmd systemctl restart bunkerweb
         fi
+    # Fresh installation scenario
     else
-        # Stop and disable nginx on boot
-        echo "Stop and disable nginx on boot..."
-        do_and_check_cmd systemctl stop nginx
-        do_and_check_cmd systemctl disable nginx
+        # Stop nginx if it's running
+        if systemctl is-active --quiet nginx; then
+            echo "🛑 Stopping and disabling the nginx service..."
+            do_and_check_cmd systemctl stop nginx
+            do_and_check_cmd systemctl disable nginx
+        else
+            echo "ℹ️ Nginx service not running, no need to stop it."
+        fi
 
-        # Auto start BW service on boot and start it now
-        echo "Enabling and starting the bunkerweb service..."
+        echo "🚀 Enabling and starting the BunkerWeb service..."
         do_and_check_cmd systemctl enable bunkerweb
         do_and_check_cmd systemctl start bunkerweb
     fi
+# Disable BunkerWeb if it shouldn't be running but is active
 elif systemctl is-active --quiet bunkerweb; then
-    echo "Disabling the bunkerweb service..."
+    echo "🛑 Disabling and stopping the BunkerWeb service..."
     do_and_check_cmd systemctl stop bunkerweb
     do_and_check_cmd systemctl disable bunkerweb
+else
+    echo "ℹ️ BunkerWeb service is not enabled in the current configuration."
 fi
 
-# Create scheduler if necessary
+# Manage the BunkerWeb Scheduler service
+echo "Configuring BunkerWeb Scheduler service..."
+
+# Enable scheduler if: (standalone mode OR manager-only mode) AND service not disabled
 if {
-    {
-        [ -z "$MANAGER_MODE" ] && [ -z "$WORKER_MODE" ];
-    } || {
-        [ "${MANAGER_MODE:-yes}" != "no" ] && [ "${WORKER_MODE:-no}" = "no" ];
-    };
+    # Standalone mode (no manager or worker specified)
+    { [ -z "$MANAGER_MODE" ] && [ -z "$WORKER_MODE" ]; } ||
+    # Manager-only mode (manager enabled, worker disabled)
+    { [ "${MANAGER_MODE:-yes}" != "no" ] && [ "${WORKER_MODE:-no}" = "no" ]; }
 } && [ "$SERVICE_SCHEDULER" != "no" ]; then
+    # Fresh installation or explicit scheduler enablement
     if [[ -f /var/tmp/bunkerweb_enable_scheduler || ! -f /var/tmp/bunkerweb_upgrade ]]; then
-        # Auto start BW Scheduler service on boot and start it now
-        echo "Enabling and starting the bunkerweb-scheduler service..."
+        echo "🚀 Enabling and starting the BunkerWeb Scheduler service..."
         do_and_check_cmd systemctl enable bunkerweb-scheduler
         do_and_check_cmd systemctl start bunkerweb-scheduler
 
+        # Clean up scheduler enablement flag if it exists
         if [ -f /var/tmp/bunkerweb_enable_scheduler ]; then
-            rm -f /var/tmp/bunkerweb_enable_scheduler
+            echo "ℹ️ Removing scheduler enablement flag..."
+            do_and_check_cmd rm -f /var/tmp/bunkerweb_enable_scheduler
         fi
+    # Upgrade scenario
     else
-        # Reload the bunkerweb-scheduler service if running
+        # Restart the scheduler service only if it's already running
         if systemctl is-active --quiet bunkerweb-scheduler; then
-            echo "Restarting the bunkerweb-scheduler service..."
+            echo "📋 Restarting the BunkerWeb Scheduler service after upgrade..."
             do_and_check_cmd systemctl restart bunkerweb-scheduler
         fi
     fi
+# Disable scheduler if it shouldn't be running but is active
 elif systemctl is-active --quiet bunkerweb-scheduler; then
-    echo "Disabling the bunkerweb-scheduler service..."
+    echo "🛑 Disabling and stopping the BunkerWeb Scheduler service..."
     do_and_check_cmd systemctl stop bunkerweb-scheduler
     do_and_check_cmd systemctl disable bunkerweb-scheduler
+else
+    echo "ℹ️ BunkerWeb Scheduler service is not enabled in the current configuration."
 fi
 
-# Create web UI if necessary
+# Manage the BunkerWeb UI service
+echo "Configuring BunkerWeb UI service..."
+
+# Determine if BunkerWeb UI should be enabled based on modes
+# Logic: Enable UI if (standalone mode OR manager-only mode) AND UI service not disabled
 if {
-    {
-        [ -z "$MANAGER_MODE" ] && [ -z "$WORKER_MODE" ];
-    } || {
-        [ "${MANAGER_MODE:-yes}" != "no" ] && [ "${WORKER_MODE:-no}" = "no" ];
-    };
+    # Standalone mode (no manager or worker specified)
+    { [ -z "$MANAGER_MODE" ] && [ -z "$WORKER_MODE" ]; } ||
+    # Manager-only mode (manager enabled, worker disabled)
+    { [ "${MANAGER_MODE:-yes}" != "no" ] && [ "${WORKER_MODE:-no}" = "no" ]; }
 } && [ "$SERVICE_UI" != "no" ]; then
-    if [ -f /var/tmp/bunkerweb_upgrade ]; then
-        # Reload the bunkerweb-ui service if running
+    # Fresh installation or explicit UI enablement
+    if [ ! -f /var/tmp/bunkerweb_upgrade ]; then
+        if [ "${UI_WIZARD:-yes}" != "no" ]; then
+            echo "🧙 Setting up BunkerWeb UI with wizard..."
+
+            # Create default configuration for new installations
+            if [ ! -f /etc/bunkerweb/variables.env ]; then
+                cat > /etc/bunkerweb/variables.env << EOF
+DNS_RESOLVERS=9.9.9.9 149.112.112.112 8.8.8.8 8.8.4.4
+HTTP_PORT=80
+HTTPS_PORT=443
+API_LISTEN_IP=127.0.0.1
+MULTISITE=yes
+UI_HOST=http://127.0.0.1:7000
+SERVER_NAME=
+EOF
+            fi
+
+            # Create empty UI environment file
+            : > /etc/bunkerweb/ui.env
+
+            # Set proper permissions
+            do_and_check_cmd chown root:nginx /etc/bunkerweb/ui.env /etc/bunkerweb/variables.env
+            do_and_check_cmd chmod 660 /etc/bunkerweb/ui.env /etc/bunkerweb/variables.env
+
+            echo "🚀 Enabling and starting the BunkerWeb UI service..."
+            do_and_check_cmd systemctl enable bunkerweb-ui
+            do_and_check_cmd systemctl start bunkerweb-ui
+
+            echo "🧙 The setup wizard has been activated automatically."
+            echo "📝 Please complete the initial configuration at: https://your-ip-address-or-fqdn/setup"
+            echo ""
+            echo "⚠️  Note: Make sure that your firewall settings allow access to this URL."
+            echo ""
+        fi
+    # Upgrade scenario
+    else
+        # Restart the UI service only if it's already running
         if systemctl is-active --quiet bunkerweb-ui; then
-            echo "Reloading the bunkerweb-ui service..."
+            echo "📋 Restarting the BunkerWeb UI service after upgrade..."
             do_and_check_cmd systemctl restart bunkerweb-ui
         fi
-    elif [ "$UI_WIZARD" != "no" ] ; then
-        echo -ne 'DNS_RESOLVERS=9.9.9.9 149.112.112.112 8.8.8.8 8.8.4.4\nHTTP_PORT=80\nHTTPS_PORT=443\nAPI_LISTEN_IP=127.0.0.1\nMULTISITE=yes\nUI_HOST=http://127.0.0.1:7000\nSERVER_NAME=\n' > /etc/bunkerweb/variables.env
-        : > /etc/bunkerweb/ui.env
-        do_and_check_cmd chown root:nginx /etc/bunkerweb/ui.env /etc/bunkerweb/variables.env
-        do_and_check_cmd chmod 660 /etc/bunkerweb/ui.env /etc/bunkerweb/variables.env
-        do_and_check_cmd systemctl enable bunkerweb-ui
-        do_and_check_cmd systemctl start bunkerweb-ui
-        echo "🧙 The setup wizard has been activated automatically."
-        echo "Please complete the initial configuration at: https://your-ip-address-or-fqdn/setup"
-        echo ""
-        echo "Note: Make sure that your firewall settings allow access to this URL."
-        echo ""
     fi
+# Disable UI if it shouldn't be running but is active
 elif systemctl is-active --quiet bunkerweb-ui; then
-    echo "Disabling the bunkerweb-ui service..."
+    echo "🛑 Disabling and stopping the BunkerWeb UI service..."
     do_and_check_cmd systemctl stop bunkerweb-ui
     do_and_check_cmd systemctl disable bunkerweb-ui
+else
+    echo "ℹ️ BunkerWeb UI service is not enabled in the current configuration."
 fi
 
 if [ -f /var/tmp/bunkerweb_upgrade ]; then

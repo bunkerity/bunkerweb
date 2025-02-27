@@ -52,6 +52,7 @@ class UIDatabase(Database):
                 "email": ui_user.email,
                 "password": ui_user.password.encode("utf-8"),
                 "method": ui_user.method,
+                "admin": ui_user.admin,
                 "theme": ui_user.theme,
                 "totp_secret": ui_user.totp_secret,
                 "creation_date": ui_user.creation_date.astimezone(),

@@ -20,6 +20,11 @@
   --bs-link-hover-color-rgb: 46, 172, 104;
 }
 
+body {
+  font-family: var(--bs-body-font-family), "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+}
+
 .offcanvas,
 .offcanvas-xxl,
 .offcanvas-xl,
@@ -919,6 +924,11 @@ a.courier-prime:hover {
   border-radius: 8px;
   text-align: center;
   font-weight: bold;
+  z-index: 1000;
+}
+
+.blur-overlay .blur-message a:hover {
+  font-style: italic;
 }
 
 .layout-page::before {
@@ -946,6 +956,12 @@ table.dataTable input.dt-select-checkbox:indeterminate:after {
 
 table.dataTable input.dt-select-checkbox:checked:after {
   margin-top: -5px;
+}
+
+:not(.btn-group):not(.input-group)
+  > .btn-group.dt-buttons
+  > .btn:not([class*="btn-outline-"]):first-child.disabled {
+  border-left-color: var(--bs-btn-disabled-border-color) !important;
 }
 
 .dtsp-searchPanes
@@ -976,11 +992,17 @@ div.dtsp-panesContainer
 }
 
 #plugins-dropdown-menu .input-group-text,
-#plugins-dropdown-menu .form-control {
+#plugins-dropdown-menu .form-control,
+#services-dropdown-menu .input-group-text,
+#services-dropdown-menu .form-control,
+#templates-dropdown-menu .input-group-text,
+#templates-dropdown-menu .form-control {
   border-radius: 0;
 }
 
-#plugins-dropdown-menu .input-group:focus-within {
+#plugins-dropdown-menu .input-group:focus-within,
+#services-dropdown-menu .input-group:focus-within,
+#templates-dropdown-menu .input-group:focus-within {
   box-shadow: none;
 }
 

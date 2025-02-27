@@ -43,11 +43,10 @@ Driver::~Driver() {
 }
 
 
-int Driver::addSecMarker(const std::string& marker, std::unique_ptr<std::string> fileName, int lineNumber) {
+int Driver::addSecMarker(const std::string& marker, const std::string &fileName, int lineNumber) {
     // FIXME: we might move this to the parser.
     for (int i = 0; i < modsecurity::Phases::NUMBER_OF_PHASES; i++) {
-        RuleMarker *r = new RuleMarker(marker, std::unique_ptr<std::string>(new std::string(*fileName)), lineNumber);
-        std::unique_ptr<RuleMarker> rule(r);
+        auto rule = std::make_unique<RuleMarker>(marker, fileName, lineNumber);
         rule->setPhase(i);
         m_rulesSetPhases.insert(std::move(rule));
     }
@@ -108,9 +107,9 @@ int Driver::addSecRule(std::unique_ptr<RuleWithActions> r) {
     }
 
     for (int i = 0; i < modsecurity::Phases::NUMBER_OF_PHASES; i++) {
-        Rules *rules = m_rulesSetPhases[i];
+        const Rules *rules = m_rulesSetPhases[i];
         for (int j = 0; j < rules->size(); j++) {
-            RuleWithOperator *lr = dynamic_cast<RuleWithOperator *>(rules->at(j).get());
+            const RuleWithOperator *lr = dynamic_cast<RuleWithOperator *>(rules->at(j).get());
             if (lr && lr->m_ruleId == rule->m_ruleId) {
                 m_parserError << "Rule id: " << std::to_string(rule->m_ruleId) \
                     << " is duplicated" << std::endl;

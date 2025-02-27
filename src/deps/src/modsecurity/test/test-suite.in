@@ -73,6 +73,7 @@ TESTS+=test/test-cases/regression/issue-2196.json
 TESTS+=test/test-cases/regression/issue-2423-msg-in-chain.json
 TESTS+=test/test-cases/regression/issue-2427.json
 TESTS+=test/test-cases/regression/issue-2296.json
+TESTS+=test/test-cases/regression/issue-3340.json
 TESTS+=test/test-cases/regression/issue-394.json
 TESTS+=test/test-cases/regression/issue-849.json
 TESTS+=test/test-cases/regression/issue-960.json

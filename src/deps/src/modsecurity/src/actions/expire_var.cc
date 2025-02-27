@@ -32,11 +32,6 @@ namespace modsecurity {
 namespace actions {
 
 
-bool ExpireVar::init(std::string *error) {
-    return true;
-}
-
-
 bool ExpireVar::evaluate(RuleWithActions *rule, Transaction *t) {
 
     std::string expireExpressionExpanded(m_string->evaluate(t));
@@ -65,23 +60,23 @@ bool ExpireVar::evaluate(RuleWithActions *rule, Transaction *t) {
 
     std::string collection = fully_qualified_var.substr(0, posDot);
     std::string variable_name = fully_qualified_var.substr(posDot+1);
-    std::unique_ptr<RunTimeString> runTimeString(new RunTimeString());
+    auto runTimeString = std::make_unique<RunTimeString>();
     runTimeString->appendText(fully_qualified_var);
 
     if (collection == "ip") {
-        std::unique_ptr<modsecurity::variables::Ip_DynamicElement> ip_dynamicElement(new modsecurity::variables::Ip_DynamicElement(std::move(runTimeString)));
+        auto ip_dynamicElement = std::make_unique<modsecurity::variables::Ip_DynamicElement>(std::move(runTimeString));
         ip_dynamicElement->setExpiry(t, variable_name, expirySeconds);
     } else if (collection == "global") {
-        std::unique_ptr<modsecurity::variables::Global_DynamicElement> global_dynamicElement(new modsecurity::variables::Global_DynamicElement(std::move(runTimeString)));
+        auto global_dynamicElement = std::make_unique<modsecurity::variables::Global_DynamicElement>(std::move(runTimeString));
         global_dynamicElement->setExpiry(t, variable_name, expirySeconds);
     } else if (collection == "resource") {
-        std::unique_ptr<modsecurity::variables::Resource_DynamicElement> resource_dynamicElement(new modsecurity::variables::Resource_DynamicElement(std::move(runTimeString)));
+        auto resource_dynamicElement = std::make_unique<modsecurity::variables::Resource_DynamicElement>(std::move(runTimeString));
         resource_dynamicElement->setExpiry(t, variable_name, expirySeconds);
     } else if (collection == "session") {
-        std::unique_ptr<modsecurity::variables::Session_DynamicElement> session_dynamicElement(new modsecurity::variables::Session_DynamicElement(std::move(runTimeString)));
+        auto session_dynamicElement = std::make_unique<modsecurity::variables::Session_DynamicElement>(std::move(runTimeString));
         session_dynamicElement->setExpiry(t, variable_name, expirySeconds);
     } else if (collection == "user") {
-        std::unique_ptr<modsecurity::variables::User_DynamicElement> user_dynamicElement(new modsecurity::variables::User_DynamicElement(std::move(runTimeString)));
+        auto user_dynamicElement = std::make_unique<modsecurity::variables::User_DynamicElement>(std::move(runTimeString));
         user_dynamicElement->setExpiry(t, variable_name, expirySeconds);
     } else {
         ms_dbg_a(t, 5, "Invalid collection found in expirevar expression: collection must be `ip', `global', `resource', `user' or `session'");

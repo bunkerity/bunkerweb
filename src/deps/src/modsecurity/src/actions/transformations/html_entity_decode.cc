@@ -62,18 +62,18 @@ static inline bool inplace(std::string &value) {
                     }
                     j++; /* j is the position of the first digit now. */
 
-                    constexpr int MAX_HEX_DIGITS = 2;   // supports only bytes (max value 0xff)
                     auto k = j;
-                    while ((j - k < MAX_HEX_DIGITS) && (j < input_len) && (isxdigit(input[j]))) {
+                    while ((j < input_len) && (isxdigit(input[j]))) {
                         j++;
                     }
                     if (j > k) { /* Do we have at least one digit? */
                         /* Decode the entity. */
-                        char x[MAX_HEX_DIGITS + 1];
-                        memcpy(x, (const char *)&input[k], j - k);
+                        char *x = new char[(j - k) + 1];
+                        std::copy(input + k, input + j, x);
                         x[j - k] = '\0';
 
                         *d++ = (unsigned char)strtol(x, nullptr, 16);
+                        delete[] x;
 
                         /* Skip over the semicolon if it's there. */
                         if ((j < input_len) && (input[j] == ';')) {
@@ -87,18 +87,19 @@ static inline bool inplace(std::string &value) {
                     }
                 } else {
                     /* Decimal entity. */
-                    constexpr int MAX_DEC_DIGITS = 3;   // supports only bytes (max value 255)
                     auto k = j;
-                    while ((j - k < MAX_DEC_DIGITS) && (j < input_len) && (isdigit(input[j]))) {
+
+                    while ((j < input_len) && (isdigit(input[j]))) {
                         j++;
                     }
                     if (j > k) { /* Do we have at least one digit? */
                         /* Decode the entity. */
-                        char x[MAX_DEC_DIGITS + 1];
-                        memcpy(x, (const char *)&input[k], j - k);
-                        x[j - k] = '\0';
+                        char *x = new char[j - k + 1];
+                        std::copy(input + k, input + j, x);
 
+                        x[j - k] = '\0';
                         *d++ = (unsigned char)strtol(x, nullptr, 10);
+                        delete[] x;
 
                         /* Skip over the semicolon if it's there. */
                         if ((j < input_len) && (input[j] == ';')) {
@@ -118,7 +119,7 @@ static inline bool inplace(std::string &value) {
                     j++;
                 }
                 if (j > k) { /* Do we have at least one digit? */
-                    const auto x = reinterpret_cast<const char*>(&input[k]);
+                    const auto *x = reinterpret_cast<const char*>(&input[k]);
 
                     /* Decode the entity. */
                     /* ENH What about others? */

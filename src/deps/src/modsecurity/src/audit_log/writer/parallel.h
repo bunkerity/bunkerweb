@@ -65,7 +65,7 @@ class Parallel : public Writer {
      YearMonthDayAndTimeFileName = 8,
     };
 
-    static inline std::string logFilePath(time_t *t, int part);
+    static inline std::string logFilePath(const time_t *t, int part);
 };
 
 }  // namespace writer

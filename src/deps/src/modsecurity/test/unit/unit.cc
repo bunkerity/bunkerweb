@@ -32,6 +32,7 @@
 
 #include "test/common/modsecurity_test.h"
 #include "test/common/modsecurity_test_results.h"
+#include "test/common/modsecurity_test_context.h"
 #include "test/common/colors.h"
 #include "test/unit/unit_test.h"
 #include "src/utils/string.h"
@@ -69,8 +70,10 @@ struct OperatorTest {
         return op;
     }
 
-    static UnitTestResult eval(ItemType &op, const UnitTest &t) {
-        return {op.evaluate(nullptr, nullptr, t.input, nullptr), {}};
+    static UnitTestResult eval(ItemType &op, const UnitTest &t, modsecurity::Transaction &transaction) {
+        modsecurity::RuleWithActions rule{nullptr, nullptr, "dummy.conf", -1};
+        modsecurity::RuleMessage ruleMessage{rule, transaction};
+        return {op.evaluate(&transaction, &rule, t.input, ruleMessage), {}};
     }
 
     static bool check(const UnitTestResult &result, const UnitTest &t) {
@@ -89,9 +92,9 @@ struct TransformationTest {
         return tfn;
     }
 
-    static UnitTestResult eval(const ItemType &tfn, const UnitTest &t) {
-        std::string ret = t.input;
-        tfn.transform(ret, nullptr);
+    static UnitTestResult eval(const ItemType &tfn, const UnitTest &t, const modsecurity::Transaction &transaction) {
+        auto ret = t.input;
+        tfn.transform(ret, &transaction);
         return {1, ret};
     }
 
@@ -102,16 +105,16 @@ struct TransformationTest {
 
 
 template<typename TestType>
-UnitTestResult perform_unit_test_once(const UnitTest &t) {
+UnitTestResult perform_unit_test_once(const UnitTest &t, modsecurity::Transaction &transaction) { // cppcheck-suppress constParameterReference ; transaction can be const for transformations but not for operators
     std::unique_ptr<typename TestType::ItemType> item(TestType::init(t));
     assert(item.get() != nullptr);
 
-    return TestType::eval(*item.get(), t);
+    return TestType::eval(*item.get(), t, transaction);
 }
 
 
 template<typename TestType>
-UnitTestResult perform_unit_test_multithreaded(const UnitTest &t) {
+UnitTestResult perform_unit_test_multithreaded(const UnitTest &t, modsecurity::Transaction &transaction) {
 
     constexpr auto NUM_THREADS = 50;
     constexpr auto ITERATIONS = 5'000;
@@ -126,10 +129,10 @@ UnitTestResult perform_unit_test_multithreaded(const UnitTest &t) {
     {
         auto &result = results[i];
         threads[i] = std::thread(
-            [&item, &t, &result]()
+            [&item, &t, &result, &transaction]()
             {
                 for (auto j = 0; j != ITERATIONS; ++j)
-                    result = TestType::eval(*item.get(), t);
+                    result = TestType::eval(*item.get(), t, transaction);
             });
     }
 
@@ -150,12 +153,12 @@ UnitTestResult perform_unit_test_multithreaded(const UnitTest &t) {
 
 template<typename TestType>
 void perform_unit_test_helper(const ModSecurityTest<UnitTest> &test, UnitTest &t,
-    ModSecurityTestResults<UnitTest> &res) {
+    ModSecurityTestResults<UnitTest> &res, modsecurity::Transaction &transaction) {
 
     if (!test.m_test_multithreaded)
-        t.result = perform_unit_test_once<TestType>(t);
+        t.result = perform_unit_test_once<TestType>(t, transaction);
     else
-        t.result = perform_unit_test_multithreaded<TestType>(t);
+        t.result = perform_unit_test_multithreaded<TestType>(t, transaction);
 
     if (TestType::check(t.result, t)) {
         res.push_back(&t);
@@ -171,6 +174,11 @@ void perform_unit_test_helper(const ModSecurityTest<UnitTest> &test, UnitTest &t
 void perform_unit_test(const ModSecurityTest<UnitTest> &test, UnitTest &t,
     ModSecurityTestResults<UnitTest> &res) {
     bool found = true;
+
+    modsecurity_test::ModSecurityTestContext context("ModSecurity-unit v0.0.1-alpha"
+                                                        " (ModSecurity unit test utility)");
+
+    auto transaction = context.create_transaction();
 
     if (test.m_automake_output) {
         std::cout << ":test-result: ";
@@ -190,9 +198,9 @@ void perform_unit_test(const ModSecurityTest<UnitTest> &test, UnitTest &t,
     }
 
     if (t.type == "op") {
-        perform_unit_test_helper<OperatorTest>(test, t, res);
+        perform_unit_test_helper<OperatorTest>(test, t, res, transaction);
     } else if (t.type == "tfn") {
-        perform_unit_test_helper<TransformationTest>(test, t, res);
+        perform_unit_test_helper<TransformationTest>(test, t, res, transaction);
     } else {
         std::cerr << "Failed. Test type is unknown: << " << t.type;
         std::cerr << std::endl;
@@ -242,8 +250,8 @@ int main(int argc, char **argv) {
     }
 
     for (auto& [filename, tests] : test) {
-        total += tests->size();
-        for (auto t : *tests) {
+        total += tests.size();
+        for (auto &t : tests) {
             ModSecurityTestResults<UnitTest> r;
 
             if (!test.m_automake_output) {
@@ -301,13 +309,6 @@ int main(int argc, char **argv) {
                 std::cout << "skipped.";
             }
         }
-    }
-
-    for (auto a : test) {
-        auto vec = a.second;
-        for(auto t : *vec)
-            delete t;
-        delete vec;
     }
 
     return failed;

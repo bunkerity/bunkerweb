@@ -436,7 +436,7 @@ class Database:
                 metadata = session.query(Metadata).with_entities(Metadata.version).filter_by(id=1).first()
                 if metadata:
                     return metadata.version
-                return "1.6.1-rc1"
+                return "1.6.1-rc2"
             except BaseException as e:
                 return f"Error: {e}"
 
@@ -465,8 +465,9 @@ class Database:
             "last_external_plugins_change": None,
             "last_pro_plugins_change": None,
             "last_instances_change": None,
+            "reload_ui_plugins": False,
             "integration": "unknown",
-            "version": "1.6.1-rc1",
+            "version": "1.6.1-rc2",
             "database_version": "Unknown",  # ? Extracted from the database
             "default": True,  # ? Extra field to know if the returned data is the default one
         }
@@ -524,7 +525,7 @@ class Database:
         value: Optional[bool] = False,
     ) -> str:
         """Set changed bit for config, custom configs, instances and plugins"""
-        changes = changes or ["config", "custom_configs", "external_plugins", "pro_plugins", "instances"]
+        changes = changes or ["config", "custom_configs", "external_plugins", "pro_plugins", "instances", "ui_plugins"]
         plugins_changes = plugins_changes or set()
         with self._db_session() as session:
             if self.readonly:
@@ -553,6 +554,8 @@ class Database:
                 if "instances" in changes:
                     metadata.instances_changed = value
                     metadata.last_instances_change = current_time
+                if "ui_plugins" in changes:
+                    metadata.reload_ui_plugins = value
 
                 if plugins_changes:
                     if plugins_changes == "all":
@@ -1326,12 +1329,25 @@ class Database:
                 if db_global_config.suffix:
                     key = f"{key}_{db_global_config.suffix}"
 
-                if key not in config and (db_global_config.suffix or f"{key}_0" not in config):
-                    global_settings_to_delete.append(db_global_config)
-                    plugin_id = session.query(Settings).with_entities(Settings.plugin_id).filter_by(id=db_global_config.setting_id).first().plugin_id
-                    changed_plugins.add(plugin_id)
-                    if key == "SERVER_NAME":
-                        changed_services = True
+                try:
+                    # Check if the setting should be deleted based on key presence
+                    should_delete = key not in config and (db_global_config.suffix or f"{key}_0" not in config)
+
+                    if should_delete:
+                        global_settings_to_delete.append(db_global_config)
+                        # Get plugin ID with safer query and null checking
+                        plugin_query = session.query(Settings).with_entities(Settings.plugin_id).filter_by(id=db_global_config.setting_id).first()
+                        if plugin_query:
+                            plugin_id = plugin_query.plugin_id
+                            if plugin_id:
+                                changed_plugins.add(plugin_id)
+
+                        # Handle special SERVER_NAME case
+                        if key == "SERVER_NAME":
+                            changed_services = True
+                except Exception as e:
+                    self.logger.warning(f"Error processing global config {db_global_config.setting_id}: {e}")
+                    continue
 
             self.logger.debug(f"Cleaning up {method} old services settings")
             # Collect service settings to delete
@@ -1341,10 +1357,25 @@ class Database:
                 if db_service_config.suffix:
                     key = f"{key}_{db_service_config.suffix}"
 
-                if key not in config and (db_service_config.suffix or f"{key}_0" not in config):
-                    service_settings_to_delete.append(db_service_config)
-                    plugin_id = session.query(Settings).with_entities(Settings.plugin_id).filter_by(id=db_service_config.setting_id).first().plugin_id
-                    changed_plugins.add(plugin_id)
+                try:
+                    # Check if the setting should be deleted based on key presence
+                    should_delete = key not in config and (db_service_config.suffix or f"{key}_0" not in config)
+
+                    if should_delete:
+                        service_settings_to_delete.append(db_service_config)
+                        # Get plugin ID with safer query and null checking
+                        plugin_query = session.query(Settings).with_entities(Settings.plugin_id).filter_by(id=db_service_config.setting_id).first()
+                        if plugin_query:
+                            plugin_id = plugin_query.plugin_id
+                            if plugin_id:
+                                changed_plugins.add(plugin_id)
+
+                        # Handle special SERVER_NAME case
+                        if key == "SERVER_NAME":
+                            changed_services = True
+                except Exception as e:
+                    self.logger.warning(f"Error processing service config {db_service_config.setting_id}: {e}")
+                    continue
 
             if config:
                 config.pop("DATABASE_URI", None)
@@ -2300,9 +2331,10 @@ class Database:
         with self._db_session() as session:
             rows_count = session.query(Jobs_runs).count()
             if rows_count > max_runs:
-                result = (
-                    session.query(Jobs_runs).order_by(Jobs_runs.end_date.asc()).limit(rows_count - max_runs).with_for_update().delete(synchronize_session=False)
-                )
+                records_to_delete = session.query(Jobs_runs.id).order_by(Jobs_runs.end_date.asc()).limit(rows_count - max_runs).all()
+                ids_to_delete = [record.id for record in records_to_delete]
+                if ids_to_delete:
+                    result = session.query(Jobs_runs).filter(Jobs_runs.id.in_(ids_to_delete)).delete(synchronize_session=False)
 
                 try:
                     session.commit()
@@ -3173,9 +3205,11 @@ class Database:
                         if _type in ("external", "ui"):
                             metadata.external_plugins_changed = True
                             metadata.last_external_plugins_change = datetime.now().astimezone()
+                            metadata.reload_ui_plugins = True
                         elif _type == "pro":
                             metadata.pro_plugins_changed = True
                             metadata.last_pro_plugins_change = datetime.now().astimezone()
+                            metadata.reload_ui_plugins = True
 
             try:
                 session.add_all(to_put)
@@ -3221,9 +3255,11 @@ class Database:
                         if method in ("external", "ui"):
                             metadata.external_plugins_changed = True
                             metadata.last_external_plugins_change = datetime.now().astimezone()
+                            metadata.reload_ui_plugins = True
                         elif method == "pro":
                             metadata.pro_plugins_changed = True
                             metadata.last_pro_plugins_change = datetime.now().astimezone()
+                            metadata.reload_ui_plugins = True
 
             try:
                 session.commit()
@@ -3780,6 +3816,7 @@ class Database:
                         "email": user.email,
                         "password": user.password.encode("utf-8"),
                         "method": user.method,
+                        "admin": user.admin,
                         "theme": user.theme,
                         "totp_secret": user.totp_secret,
                         "creation_date": user.creation_date.astimezone(),

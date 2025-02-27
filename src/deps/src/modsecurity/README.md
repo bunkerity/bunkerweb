@@ -1,5 +1,9 @@
 
-<img src="https://github.com/owasp-modsecurity/ModSecurity/raw/v3/master/others/modsec.png" width="50%">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="./others/modsec_white_bg.png">
+  <source media="(prefers-color-scheme: light)" srcset="./others/modsec.png">
+  <img src="./others/modsec.png" width="50%">
+</picture>
 
 ![Quality Assurance](https://github.com/owasp-modsecurity/ModSecurity/workflows/Quality%20Assurance/badge.svg)
 [![Build Status](https://sonarcloud.io/api/project_badges/measure?project=owasp-modsecurity_ModSecurity&metric=alert_status)](https://sonarcloud.io/dashboard?id=owasp-modsecurity_ModSecurity)

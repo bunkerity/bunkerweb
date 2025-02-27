@@ -79,7 +79,8 @@
                     </button>
                 </div>
             {% endif %}
-            <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The database is in readonly therefore the configuration is locked " {% endif %}>
+            <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title={% if user_readonly %}"Readonly mode enabled"{% else %}"The database is in readonly, therefore the configuration is locked"{% endif %}
+                 {% endif %}>
                 <button type="button"
                         class="btn btn-sm btn-bw-green save-settings{% if is_readonly %} disabled{% endif %}">
                     <i class="bx bx-save bx-sm"></i>
@@ -105,7 +106,8 @@
             </button>
         </div>
     {% endif %}
-    <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The database is in readonly therefore the configuration is locked " {% endif %}>
+    <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title={% if user_readonly %}"Readonly mode enabled"{% else %}"The database is in readonly, therefore the configuration is locked"{% endif %}
+         {% endif %}>
         <button type="button"
                 class="btn btn-sm btn-bw-green save-settings p-1_5{% if is_readonly %} disabled{% endif %}">
             <i class="bx bx-save bx-xs"></i>
@@ -150,7 +152,8 @@
                             <i class="bx bx-link"></i><span class="d-none d-md-inline">&nbsp;More info</span>
                         </a>
                         {% if plugin_data["page"] %}
-                            <a href="{{ url_for("plugins") }}/{{ plugin }}"
+                            {% set plugin_blueprint = "#" if plugin_data["type"] == "core" else url_for(plugin) %}
+                            <a href="{% if plugin_blueprint == '#' %}{{ url_for("plugins") }}/{{ plugin }}{% else %}{{ plugin_blueprint }}{% endif %}"
                                class="btn btn-sm btn-primary rounded-pill ms-2">
                                 <i class="bx bxs-file-html"></i><span class="d-none d-md-inline">&nbsp;Plugin page</span>
                             </a>
@@ -160,8 +163,8 @@
                 <div {% if plugin_data["type"] == "pro" and not is_pro_version %}class="blur-overlay"{% endif %}>
                     {% if plugin_data["type"] == "pro" and not is_pro_version %}
                         <div class="blur-message">
-                            <i class='bx bx-diamond bx-xs'></i>
-                            <a href="{{ url_for('pro') }}" class="text-white-80">Upgrade to Pro to access this feature</a>
+                            <i class='bx bx-diamond bx-xs me-1'></i>
+                            <a href="{{ url_for('pro') }}" class="text-white-80 courier-prime">Upgrade to Pro to access this feature</a>
                         </div>
                     {% endif %}
                     <div class="card-body row g-2 gx-6 pb-0">
@@ -217,7 +220,14 @@
                                                 <span class="bx bx-spreadsheet bx-xs"></span>
                                             </span>
                                         {% endif %}
-                                        {% if current_endpoint != "global-config" and setting_config.get("global") and setting_value != setting_default %}
+                                        {% if setting_config.get("clone") %}
+                                            <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                                                  data-bs-toggle="tooltip"
+                                                  data-bs-placement="top"
+                                                  data-bs-original-title="Cloned from service {{ clone }}">
+                                                <span class="bx bx-copy-alt bx-xs"></span>
+                                            </span>
+                                        {% elif current_endpoint != "global-config" and setting_config.get("global") and setting_value != setting_default %}
                                             <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
                                                   data-bs-toggle="tooltip"
                                                   data-bs-placement="top"
@@ -273,7 +283,8 @@
                                                 <div class="d-flex align-items-center">
                                                     {% if setting_suffix == "0" %}
                                                         <div class="me-1"
-                                                             {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The database is in readonly therefore multiple settings are locked " {% endif %}>
+                                                             {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title={% if user_readonly %}"Readonly mode enabled"{% else %}"The database is in readonly, therefore the configuration is locked"{% endif %}
+                                                             {% endif %}>
                                                             <button id="add-multiple-{{ plugin }}-{{ multiple }}"
                                                                     type="button"
                                                                     class="btn btn-xs btn-text-bw-green rounded-pill add-multiple p-0 pe-2{% if is_readonly %} disabled{% endif %}">
@@ -349,7 +360,14 @@
                                                                             <span class="bx bx-spreadsheet bx-xs"></span>
                                                                         </span>
                                                                     {% endif %}
-                                                                    {% if current_endpoint != "global-config" and setting_config.get("global") and setting_value != setting_default %}
+                                                                    {% if setting_config.get("clone") %}
+                                                                        <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                                                                              data-bs-toggle="tooltip"
+                                                                              data-bs-placement="top"
+                                                                              data-bs-original-title="Cloned from service {{ clone }}">
+                                                                            <span class="bx bx-copy-alt bx-xs"></span>
+                                                                        </span>
+                                                                    {% elif current_endpoint != "global-config" and setting_config.get("global") and setting_value != setting_default %}
                                                                         <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
                                                                               data-bs-toggle="tooltip"
                                                                               data-bs-placement="top"

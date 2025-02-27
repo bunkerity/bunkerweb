@@ -28,10 +28,9 @@ namespace modsecurity {
 namespace actions {
 
 
-bool Log::evaluate(RuleWithActions *rule, Transaction *transaction,
-    std::shared_ptr<RuleMessage> rm) {
+bool Log::evaluate(RuleWithActions *rule, Transaction *transaction, RuleMessage &ruleMessage) {
     ms_dbg_a(transaction, 9, "Saving transaction to logs");
-    rm->m_saveMessage = true;
+    ruleMessage.m_saveMessage = true;
     return true;
 }
 

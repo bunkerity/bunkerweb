@@ -314,15 +314,16 @@ class Metadata(Base):
     last_pro_plugins_change = Column(DateTime(timezone=True), nullable=True)
     instances_changed = Column(Boolean, default=False, nullable=True)
     last_instances_change = Column(DateTime(timezone=True), nullable=True)
+    reload_ui_plugins = Column(Boolean, default=False, nullable=True)
     failover = Column(Boolean, default=None, nullable=True)
     integration = Column(INTEGRATIONS_ENUM, default="Unknown", nullable=False)
-    version = Column(String(32), default="1.6.1-rc1", nullable=False)
+    version = Column(String(32), default="1.6.1-rc2", nullable=False)
 
 
 ## UI Models
 
 THEMES_ENUM = Enum("light", "dark", name="themes_enum")
-TABLES_ENUM = Enum("bans", "configs", "instances", "jobs", "plugins", "reports", "services", name="tables_enum")
+TABLES_ENUM = Enum("bans", "cache", "configs", "instances", "jobs", "plugins", "reports", "services", name="tables_enum")
 
 
 class JSONText(TypeDecorator):

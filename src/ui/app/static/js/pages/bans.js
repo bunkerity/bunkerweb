@@ -7,6 +7,7 @@ $(document).ready(function () {
     .filter((code) => code && code !== "local");
   const baseFlagsUrl = $("#base_flags_url").val().trim();
   const isReadOnly = $("#is-read-only").val().trim() === "True";
+  const userReadOnly = $("#user-read-only").val().trim() === "True";
 
   const countriesDataNames = {
     AD: "Andorra",
@@ -758,7 +759,11 @@ $(document).ready(function () {
           $("#bans_wrapper .dt-buttons")
             .attr(
               "data-bs-original-title",
-              "The database is in readonly, therefore you cannot add bans.",
+              `${
+                userReadOnly
+                  ? "Your account is readonly"
+                  : "The database is in readonly"
+              }, therefore you cannot add bans.`,
             )
             .attr("data-bs-placement", "right")
             .tooltip();

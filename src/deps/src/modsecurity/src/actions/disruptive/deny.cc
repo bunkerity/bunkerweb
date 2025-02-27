@@ -29,7 +29,7 @@ namespace disruptive {
 
 
 bool Deny::evaluate(RuleWithActions *rule, Transaction *transaction,
-    std::shared_ptr<RuleMessage> rm) {
+    RuleMessage &ruleMessage) {
     ms_dbg_a(transaction, 8, "Running action deny");
 
     if (transaction->m_it.status == 200) {
@@ -38,9 +38,9 @@ bool Deny::evaluate(RuleWithActions *rule, Transaction *transaction,
 
     transaction->m_it.disruptive = true;
     intervention::freeLog(&transaction->m_it);
-    rm->m_isDisruptive = true;
+    ruleMessage.m_isDisruptive = true;
     transaction->m_it.log = strdup(
-        rm->log(RuleMessage::LogMessageInfo::ClientLogMessageInfo).c_str());
+        ruleMessage.log(RuleMessage::LogMessageInfo::ClientLogMessageInfo).c_str());
 
     return true;
 }

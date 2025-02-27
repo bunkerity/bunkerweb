@@ -366,5 +366,23 @@
     "regex": "^(detect|block)$",
     "type": "select",
     "select": ["detect", "block"]
+  },
+  "PROXY_BUFFER_SIZE": {
+    "context": "multisite",
+    "default": "auto",
+    "help": "Size of the buffer used for reading the first part of the response received from the proxied server. (auto or size)",
+    "id": "proxy-buffer-size",
+    "label": "Proxy buffer size",
+    "regex": "^(auto|\\d+[kKmMgG]?)$",
+    "type": "text"
+  },
+  "PROXY_BUFFERS": {
+    "context": "multisite",
+    "default": "auto",
+    "help": "Number and size of the buffers used for reading a response from the proxied server. (auto or number size)",
+    "id": "proxy-buffers",
+    "label": "Proxy buffers",
+    "regex": "^(auto|\\d+ \\d+[kKmMgG]?)$",
+    "type": "text"
   }
 }

@@ -6,6 +6,10 @@
             {% if messages.append(('error', 'You have more services than allowed by your pro license. Upgrade your license or move some services to draft mode to unlock your pro license.')) %}
             {% endif %}
         {% endif %}
+        {% if user_readonly and current_endpoint != "profile" %}
+            {% if messages.append(('warning', 'You are in read-only mode. You can\'t make changes that will be saved in the database.')) %}
+            {% endif %}
+        {% endif %}
         {% set unique_messages = {} %}
         <!-- flash message-->
         {% for category, message in messages %}
@@ -15,7 +19,7 @@
                      role="alert"
                      aria-live="polite"
                      aria-atomic="true"
-                     {% if category == 'message' %}data-bs-delay="5000"{% endif %}>
+                     {% if category == 'message' %}data-bs-delay="5000"{% else %}data-bs-autohide="false"{% endif %}>
                     <div class="toast-header d-flex align-items-center{% if category == 'error' %} text-danger{% elif category == 'warning' %} text-warning{% else %} text-primary{% endif %}">
                         <i class="d-block h-auto rounded tf-icons bx bx-xs bx-bell bx-tada me-2"></i>
                         <span class="fw-medium me-auto">

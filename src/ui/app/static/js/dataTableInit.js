@@ -28,14 +28,15 @@ function initializeDataTable(config) {
 
   $(".dt-type-numeric").removeClass("dt-type-numeric");
 
-  $(".action-button")
-    .parent()
-    .attr(
-      "data-bs-original-title",
-      "Please select one or more rows to perform an action.",
-    )
-    .attr("data-bs-placement", "top")
-    .tooltip();
+  if (!isReadOnly)
+    $(".action-button")
+      .parent()
+      .attr(
+        "data-bs-original-title",
+        "Please select one or more rows to perform an action.",
+      )
+      .attr("data-bs-placement", "top")
+      .tooltip();
 
   $(".dt-search label").addClass("visually-hidden");
   $(".dt-search input[type=search]").attr("placeholder", "Search");
@@ -45,16 +46,18 @@ function initializeDataTable(config) {
 
   const $columnsPreferenceDefaults = $("#columns_preferences_defaults");
   const $columnsPreference = $("#columns_preferences");
+  let originalColumnsPreferences = {};
 
   if ($columnsPreferenceDefaults.length && $columnsPreference.length) {
     const defaultColsVisibility = JSON.parse(
       $columnsPreferenceDefaults.val().trim(),
     );
+    originalColumnsPreferences = JSON.parse($columnsPreference.val().trim());
 
     // Handle column visibility preferences
     let columnVisibility = localStorage.getItem(`bw-${tableName}-columns`);
     if (columnVisibility === null) {
-      columnVisibility = JSON.parse($columnsPreference.val().trim());
+      columnVisibility = { ...originalColumnsPreferences };
     } else {
       columnVisibility = JSON.parse(columnVisibility);
     }
@@ -111,7 +114,8 @@ function initializeDataTable(config) {
         );
       }
 
-      if (isReadOnly) return;
+      if (isReadOnly || Object.keys(originalColumnsPreferences).length === 0)
+        return;
 
       saveColumnsPreferences();
     });
@@ -172,16 +176,17 @@ function initializeDataTable(config) {
       const actionButton = $(".action-button");
       if (!actionButton.length) return;
 
-      actionButton
-        .addClass("disabled")
-        .parent()
-        .attr("data-bs-toggle", "tooltip")
-        .attr(
-          "data-bs-original-title",
-          "Please select one or more rows to perform an action.",
-        )
-        .attr("data-bs-placement", "top")
-        .tooltip();
+      if (!isReadOnly)
+        actionButton
+          .addClass("disabled")
+          .parent()
+          .attr("data-bs-toggle", "tooltip")
+          .attr(
+            "data-bs-original-title",
+            "Please select one or more rows to perform an action.",
+          )
+          .attr("data-bs-placement", "top")
+          .tooltip();
     }
   });
 

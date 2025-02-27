@@ -550,6 +550,19 @@ $(document).ready(() => {
     $("#pluginsCollapse").collapse("hide");
   }
 
+  $("#extraPagesCollapse").on("show.bs.collapse", function () {
+    sessionStorage.setItem("extraPagesCollapse", "show");
+  });
+
+  $("#extraPagesCollapse").on("hide.bs.collapse", function () {
+    sessionStorage.setItem("extraPagesCollapse", "hide");
+  });
+
+  const extraPagesCollapse = sessionStorage.getItem("extraPagesCollapse");
+  if (extraPagesCollapse === "hide") {
+    $("#extraPagesCollapse").collapse("hide");
+  }
+
   $("#feedback-toast-container .bs-toast").each(function () {
     const toast = new bootstrap.Toast(this);
     toast.show();

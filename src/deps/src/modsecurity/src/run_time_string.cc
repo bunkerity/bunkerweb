@@ -31,7 +31,7 @@ namespace modsecurity {
 
 
 void RunTimeString::appendText(const std::string &text) {
-    std::unique_ptr<RunTimeElementHolder> r(new RunTimeElementHolder);
+    auto r = std::make_unique<RunTimeElementHolder>();
     r->m_string = text;
     m_elements.push_back(std::move(r));
 }
@@ -39,7 +39,7 @@ void RunTimeString::appendText(const std::string &text) {
 
 void RunTimeString::appendVar(
     std::unique_ptr<modsecurity::variables::Variable> var) {
-    std::unique_ptr<RunTimeElementHolder> r(new RunTimeElementHolder);
+    auto r = std::make_unique<RunTimeElementHolder>();
     r->m_var = std::move(var);
     m_elements.push_back(std::move(r));
     m_containsMacro = true;

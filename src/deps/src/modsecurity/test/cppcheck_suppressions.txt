@@ -1,3 +1,5 @@
+normalCheckLevelMaxBranches:*
+
 //
 // Ignore libinjection related stuff.
 //
@@ -27,6 +29,8 @@ noExplicitConstructor:seclang-parser.hh
 constParameter:seclang-parser.hh
 accessMoved:seclang-parser.hh
 returnTempReference:seclang-parser.hh
+duplInheritedMember:seclang-parser.hh
+constVariableReference:seclang-parser.hh
 
 unreadVariable:src/operators/rx.cc
 unreadVariable:src/operators/rx_global.cc

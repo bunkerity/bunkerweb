@@ -1,0 +1,1 @@
+SecRule REQUEST_FILENAME "@pmFromFile https://raw.githubusercontent.com/owasp-modsecurity/ModSecurity/refs/heads/v3/master/test/modsecurity-regression-ip-list.txt" "id:'123',phase:2,log,pass,t:none"

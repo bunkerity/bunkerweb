@@ -35,7 +35,7 @@ class EndsWith : public Operator {
         }
     bool evaluate(Transaction *transaction, RuleWithActions *rule,
         const std::string &str,
-        std::shared_ptr<RuleMessage> ruleMessage) override;
+        RuleMessage &ruleMessage) override;
 };
 
 

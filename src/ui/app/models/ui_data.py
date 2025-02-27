@@ -10,7 +10,7 @@ class UIData(dict):
         self.__lock = Lock()
         self.load_from_file()
 
-    def _write_to_file(self):
+    def write_to_file(self):
         with self.__lock:
             self.file_path.write_text(dumps(self))
 
@@ -24,12 +24,12 @@ class UIData(dict):
 
     def __setitem__(self, key, value):
         super().__setitem__(key, value)
-        self._write_to_file()
+        self.write_to_file()
 
     def __delitem__(self, key):
         super().__delitem__(key)
-        self._write_to_file()
+        self.write_to_file()
 
     def update(self, *args, **kwargs):
         super().update(*args, **kwargs)
-        self._write_to_file()
+        self.write_to_file()

@@ -53,7 +53,7 @@ class XML {
     static xmlParserInputBufferPtr unloadExternalEntity(const char *URI,
         xmlCharEncoding enc);
 
-    static void null_error(void *ctx, const char *msg, ...) {
+    static void null_error(void *ctx, const char *msg, ...) { // cppcheck-suppress[constParameterPointer,constParameterCallback]
     }
 
 
