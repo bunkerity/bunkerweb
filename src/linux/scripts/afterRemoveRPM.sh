@@ -110,22 +110,35 @@ if [ "$(id -u)" -ne 0 ]; then
 fi
 
 # Detect operating system
-if [ -f /etc/redhat-release ]; then
-    OS="redhat"
+DISTRO_ID=""
+
+# First try /etc/os-release as it's most commonly available
+if [ -f /etc/os-release ]; then
+    # Source the file to get variables directly
+    # shellcheck disable=SC1091
+    . /etc/os-release
+    DISTRO_ID=$(echo "$ID" | tr '[:upper:]' '[:lower:]')
+    echo "ℹ️ Detected OS from /etc/os-release: $DISTRO_ID"
+# Check for Red Hat specific file
+elif [ -f /etc/redhat-release ]; then
+    DISTRO_ID="redhat"
+    echo "ℹ️ Detected Red Hat-based system from /etc/redhat-release"
+# Try lsb_release if other methods didn't work
 elif command -v lsb_release >/dev/null 2>&1; then
-    OS=$(lsb_release -is | tr '[:upper:]' '[:lower:]')
+    DISTRO_ID=$(lsb_release -is 2>/dev/null | tr '[:upper:]' '[:lower:]')
+    echo "ℹ️ Detected OS from lsb_release: $DISTRO_ID"
 else
-    if [ -f /etc/os-release ]; then
-        OS=$(grep "^ID=" /etc/os-release | cut -d= -f2 | tr -d '"' | tr '[:upper:]' '[:lower:]')
-    else
-        echo "❌ Unable to detect operating system"
-        exit 1
-    fi
+    echo "❌ Unable to detect operating system"
+    exit 1
 fi
 
 # Support only Red Hat-based systems
-if ! [[ "$OS" =~ (redhat|centos|fedora) ]]; then
-    echo "❌ Unsupported operating system: $OS"
+if [[ "$DISTRO_ID" == "redhat" ]] || [[ "$DISTRO_ID" == "centos" ]] ||
+   [[ "$DISTRO_ID" == "fedora" ]] || [[ "$DISTRO_ID" == "rocky" ]] ||
+   [[ "$DISTRO_ID" == "almalinux" ]] || [[ "$DISTRO_ID" == "rhel" ]]; then
+    echo "ℹ️ Running on $DISTRO_ID"
+else
+    echo "❌ Unsupported operating system: $DISTRO_ID"
     exit 1
 fi
 
