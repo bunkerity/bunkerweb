@@ -186,6 +186,7 @@ class DynamicFlask(Flask):
 
 # Flask app
 app = DynamicFlask(__name__, static_url_path="/", static_folder="app/static", template_folder="app/templates")
+app.logger = LOGGER
 
 with app.app_context():
     PROXY_NUMBERS = int(getenv("PROXY_NUMBERS", "1"))
