@@ -39,6 +39,9 @@
                         data-bs-original-title="The reason why the Report was created">Reason</th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
+                        data-bs-original-title="The scope of the ban (global or service-specific)">Scope</th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
                         data-bs-original-title="The service that created the ban">Service</th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
@@ -80,6 +83,7 @@
                             </div>
                         </td>
                         <td>{{ ban["reason"] }}</td>
+                        <td>{{ ban.get('ban_scope', 'global') |capitalize }}</td>
                         <td>{{ ban["service"] if ban["service"] != "_" else "default server" }}</td>
                         <td class="ban-end-date">{{ ban["end_date"] }}</td>
                         <td>{{ ban["remain"] }}</td>
@@ -138,31 +142,66 @@
                             <ul id="bans-container" class="list-group rounded-top w-100">
                                 <li id="bans-header" class="list-group-item bg-secondary text-white">
                                     <div class="row">
-                                        <div class="col-12 col-md-3 text-center fw-bold">IP Address</div>
-                                        <div class="col-12 col-md-5 border-start text-center fw-bold">End Date</div>
-                                        <div class="col-12 col-md-3 border-start text-center fw-bold">Reason</div>
+                                        <div class="col-12 col-md-5 text-center fw-bold">Ban Details</div>
+                                        <div class="col-12 col-md-6 border-start text-center fw-bold">Ban Scope</div>
                                         <div class="col-12 col-md-1 border-start text-center fw-bold">Delete</div>
                                     </div>
                                 </li>
-                                <li id="ban-1" class="list-group-item rounded-0">
-                                    <div class="row align-items-center">
-                                        <div class="col-12 col-md-3 mb-2 mb-md-0">
-                                            <input type="text"
-                                                   name="ip"
-                                                   class="form-control"
-                                                   placeholder="127.0.0.1"
-                                                   required />
+                                <li id="ban-1" class="list-group-item rounded-0 ban-item">
+                                    <div class="row g-3">
+                                        <div class="col-12 col-md-5">
+                                            <div class="card shadow-sm border-0 h-100">
+                                                <div class="card-body p-3">
+                                                    <div class="mb-3">
+                                                        <label for="ip" class="form-label">IP Address</label>
+                                                        <input type="text"
+                                                               name="ip"
+                                                               class="form-control"
+                                                               placeholder="127.0.0.1"
+                                                               required />
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label for="datetime" class="form-label">End Date</label>
+                                                        <input type="flatpickr-datetime"
+                                                               name="datetime"
+                                                               class="form-control"
+                                                               required />
+                                                    </div>
+                                                    <div>
+                                                        <label for="reason" class="form-label">Reason</label>
+                                                        <input type="text"
+                                                               name="reason"
+                                                               class="form-control"
+                                                               value="ui"
+                                                               required />
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div class="col-12 col-md-5 mb-2 mb-md-0 border-start">
-                                            <input type="flatpickr-datetime"
-                                                   name="datetime"
-                                                   class="form-control"
-                                                   required />
+                                        <div class="col-12 col-md-6">
+                                            <div class="card shadow-sm border-0 h-100">
+                                                <div class="card-body p-3">
+                                                    <div class="mb-3">
+                                                        <label for="ban_scope" class="form-label">Ban Scope</label>
+                                                        <select name="ban_scope" class="form-select ban-scope-select">
+                                                            <option value="global" selected>Global (all services)</option>
+                                                            <option value="service">Service-specific</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="service-field mb-3">
+                                                        <label for="service" class="form-label">Service Name</label>
+                                                        <select name="service" class="form-select">
+                                                            <option value="" disabled selected>Select a service</option>
+                                                            {% for service in services %}<option value="{{ service }}">{{ service }}</option>{% endfor %}
+                                                        </select>
+                                                        <div class="form-text text-muted">
+                                                            Ban will apply only to this specific service
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div class="col-12 col-md-3 mb-2 mb-md-0 border-start">
-                                            <input type="text" name="reason" class="form-control" value="ui" required />
-                                        </div>
-                                        <div class="col-12 col-md-1 border-start text-center">
+                                        <div class="col-12 col-md-1 d-flex align-items-center justify-content-center">
                                             <button type="button"
                                                     class="btn btn-outline-danger btn-sm disabled"
                                                     data-bs-toggle="tooltip"

@@ -238,7 +238,22 @@ api.global.POST["^/unban$"] = function(self)
 	if not ok then
 		return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", "can't decode JSON : " .. ip)
 	end
+
+	-- Delete both system-wide and service-specific bans if they exist
 	datastore:delete("bans_ip_" .. ip["ip"])
+
+	-- If service is specified, delete service-specific ban
+	if ip["service"] then
+		datastore:delete("bans_service_" .. ip["service"] .. "_ip_" .. ip["ip"])
+	else
+		-- If no service specified, delete all service-specific bans for this IP
+		for _, k in ipairs(datastore:keys()) do
+			if k:find("^bans_service_.-_ip_" .. ip["ip"] .. "$") then
+				datastore:delete(k)
+			end
+		end
+	end
+
 	return self:response(HTTP_OK, "success", "ip " .. ip["ip"] .. " unbanned")
 end
 
@@ -266,6 +281,7 @@ api.global.POST["^/ban$"] = function(self)
 		reason = "manual",
 		service = "unknown",
 		country = "local",
+		ban_scope = "system",
 	}
 	ban.ip = ip["ip"]
 	if ip["exp"] then
@@ -277,19 +293,29 @@ api.global.POST["^/ban$"] = function(self)
 	if ip["service"] then
 		ban.service = ip["service"]
 	end
+	if ip["ban_scope"] then
+		ban.ban_scope = ip["ban_scope"]
+	end
 	local country, err = get_country(ban["ip"])
 	if not country then
 		country = "unknown"
 		logger:log(ERR, "can't get country code " .. err)
 	end
 	ban.country = country
+
+	local ban_key = "bans_ip_" .. ban["ip"]
+	if ban.ban_scope == "service" and ban.service ~= "unknown" then
+		ban_key = "bans_service_" .. ban["service"] .. "_ip_" .. ban["ip"]
+	end
+
 	datastore:set(
-		"bans_ip_" .. ban["ip"],
+		ban_key,
 		encode({
 			reason = ban["reason"],
 			service = ban["service"],
 			date = os.time(),
 			country = ban["country"],
+			ban_scope = ban["ban_scope"],
 		}),
 		ban["exp"]
 	)
@@ -298,6 +324,7 @@ end
 
 api.global.GET["^/bans$"] = function(self)
 	local data = {}
+	-- Get system-wide bans
 	for _, k in ipairs(datastore:keys()) do
 		if k:find("^bans_ip_") then
 			local result, err = datastore:get(k)
@@ -319,7 +346,7 @@ api.global.GET["^/bans$"] = function(self)
 			local ban_data
 			ok, ban_data = pcall(decode, result)
 			if not ok then
-				ban_data = { reason = result, service = "unknown", date = -1 }
+				ban_data = { reason = result, service = "unknown", date = -1, ban_scope = "system" }
 			end
 			table.insert(data, {
 				ip = k:sub(9, #k),
@@ -327,8 +354,46 @@ api.global.GET["^/bans$"] = function(self)
 				service = ban_data["service"],
 				date = ban_data["date"],
 				country = ban_data["country"],
+				ban_scope = ban_data["ban_scope"] or "system",
 				exp = math.floor(ttl),
 			})
+		elseif k:find("^bans_service_") then
+			-- Service-specific ban (format: bans_service_<servicename>_ip_<ipaddress>)
+			local result, err = datastore:get(k)
+			if err then
+				return self:response(
+					HTTP_INTERNAL_SERVER_ERROR,
+					"error",
+					"can't access " .. k .. " from datastore : " .. result
+				)
+			end
+			local ok, ttl = datastore:ttl(k)
+			if not ok then
+				return self:response(
+					HTTP_INTERNAL_SERVER_ERROR,
+					"error",
+					"can't access ttl " .. k .. " from datastore : " .. ttl
+				)
+			end
+
+			-- Extract service and IP from the key
+			local service, ip = k:match("^bans_service_(.-)_ip_(.+)$")
+			if service and ip then
+				local ban_data
+				ok, ban_data = pcall(decode, result)
+				if not ok then
+					ban_data = { reason = result, service = service, date = -1, ban_scope = "service" }
+				end
+				table.insert(data, {
+					ip = ip,
+					reason = ban_data["reason"],
+					service = service,
+					date = ban_data["date"],
+					country = ban_data["country"],
+					ban_scope = "service",
+					exp = math.floor(ttl),
+				})
+			end
 		end
 	end
 	return self:response(HTTP_OK, "success", data)

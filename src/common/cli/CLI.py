@@ -192,35 +192,58 @@ class CLI(ApiCaller):
     def __get_variable(self, variable: str, default: Optional[Any] = None) -> Optional[str]:
         return getenv(variable, self.__variables.get(variable, default))
 
-    def unban(self, ip: str) -> Tuple[bool, str]:
+    def unban(self, ip: str, service: Optional[str] = None) -> Tuple[bool, str]:
         if self.__redis:
             try:
+                # Delete global ban
                 ok = self.__redis.delete(f"bans_ip_{ip}")
                 if not ok:
                     self.__logger.error(f"Failed to delete ban for {ip} from redis")
+
+                # If service is specified, delete service-specific ban
+                if service:
+                    service_key = f"bans_service_{service}_ip_{ip}"
+                    ok = self.__redis.delete(service_key)
+                    if not ok:
+                        self.__logger.error(f"Failed to delete service-specific ban for {ip} on service {service} from redis")
+                else:
+                    # Delete all service-specific bans for this IP
+                    for key in self.__redis.scan_iter(f"bans_service_*_ip_{ip}"):
+                        self.__redis.delete(key)
+
             except Exception as e:
                 self.__logger.error(f"Failed to delete ban for {ip} from redis: {e}")
 
         try:
-            if self.send_to_apis("POST", "/unban", data={"ip": ip}):
-                return True, f"IP {ip} has been unbanned"
+            if self.send_to_apis("POST", "/unban", data={"ip": ip, "service": service}):
+                if service:
+                    return True, f"IP {ip} has been unbanned from service {service}"
+                else:
+                    return True, f"IP {ip} has been unbanned globally"
         except BaseException as e:
             return False, f"Failed to unban {ip}: {e}"
         return False, f"Failed to unban {ip}"
 
-    def ban(self, ip: str, exp: float, reason: str) -> Tuple[bool, str]:
+    def ban(self, ip: str, exp: float, reason: str, service: str = "bwcli", ban_scope: str = "global") -> Tuple[bool, str]:
         if self.__redis:
             try:
-                ok = self.__redis.set(f"bans_ip_{ip}", dumps({"reason": reason, "date": time(), "service": "bwcli"}))
+                ban_data = dumps({"reason": reason, "date": time(), "service": service, "ban_scope": ban_scope})
+
+                ban_key = f"bans_ip_{ip}"
+                if ban_scope == "service" and service != "bwcli" and service != "unknown":
+                    ban_key = f"bans_service_{service}_ip_{ip}"
+
+                ok = self.__redis.set(ban_key, ban_data)
                 if not ok:
                     self.__logger.error(f"Failed to ban {ip} in redis")
-                self.__redis.expire(f"bans_ip_{ip}", int(exp))
+                self.__redis.expire(ban_key, int(exp))
             except Exception as e:
                 self.__logger.error(f"Failed to ban {ip} in redis: {e}")
 
         try:
-            if self.send_to_apis("POST", "/ban", data={"ip": ip, "exp": exp, "reason": reason, "service": "bwcli"}):
-                return True, f"IP {ip} has been banned for {format_remaining_time(exp)} with reason {reason}"
+            if self.send_to_apis("POST", "/ban", data={"ip": ip, "exp": exp, "reason": reason, "service": service, "ban_scope": ban_scope}):
+                scope_msg = f"for service {service}" if ban_scope == "service" and service != "bwcli" else "globally"
+                return True, f"IP {ip} has been banned {scope_msg} for {format_remaining_time(exp)} with reason {reason}"
         except BaseException as e:
             return False, f"Failed to ban {ip}: {e}"
         return False, f"Failed to ban {ip}"
@@ -240,39 +263,102 @@ class CLI(ApiCaller):
 
         if self.__redis:
             servers["redis"] = []
+            # Get global bans
             for key in self.__redis.scan_iter("bans_ip_*"):
                 ip = key.decode("utf-8").replace("bans_ip_", "")
                 data = self.__redis.get(key)
                 if not data:
                     continue
                 exp = self.__redis.ttl(key)
-                servers["redis"].append({"ip": ip, "exp": exp} | loads(data))
+                ban_data = loads(data)
+                ban_data["ip"] = ip
+                ban_data["exp"] = exp
+                ban_data["ban_scope"] = ban_data.get("ban_scope", "global")
+                servers["redis"].append(ban_data)
+
+            # Get service-specific bans
+            for key in self.__redis.scan_iter("bans_service_*_ip_*"):
+                key_str = key.decode("utf-8")
+                service, ip = key_str.replace("bans_service_", "").split("_ip_")
+                data = self.__redis.get(key)
+                if not data:
+                    continue
+                exp = self.__redis.ttl(key)
+                ban_data = loads(data)
+                ban_data["ip"] = ip
+                ban_data["exp"] = exp
+                ban_data["service"] = service
+                ban_data["ban_scope"] = "service"
+                servers["redis"].append(ban_data)
 
         servers = {k: sorted(v, key=itemgetter("date")) for k, v in servers.items()}
 
+        # ANSI color codes
+        RESET = "\033[0m"
+        BOLD = "\033[1m"
+        BLUE = "\033[34m"
+        RED = "\033[31m"
+        GREEN = "\033[32m"
+        YELLOW = "\033[33m"
+        CYAN = "\033[36m"
+        WHITE = "\033[37m"
+
+        box_width = 70
         cli_str = ""
         for server, bans in servers.items():
-            cli_str += f"List of bans for {server}:\n"
+            header = f" {server} Bans "
+            padding = box_width - len(header) - 2  # -2 for the box corners
+            cli_str += f"\n{BOLD}{BLUE}┌{header}{'─' * padding}┐{RESET}\n"
+
             if not bans:
-                cli_str += "No ban found\n"
+                cli_str += f"{YELLOW}  No bans found{RESET}\n"
+                cli_str += f"{BLUE}└{'─' * (box_width - 2)}┘{RESET}\n"
+                continue
 
-            for ban in bans:
-                banned_country = ban.get("country", "unknown")
-                banned_date = ""
-                remaining = "for eternity"
-                if ban["date"] != -1:
-                    banned_date = f"the {datetime.fromtimestamp(ban['date']).strftime('%Y-%m-%d at %H:%M:%S %Z')} "
-                if ban["exp"] != -1:
-                    remaining = f"for {format_remaining_time(ban['exp'])} remaining"
-                cli_str += (
-                    f"- {ban['ip']} from country \"{banned_country}\" ; banned {banned_date}{remaining} with reason \"{ban.get('reason', 'no reason given')}\""
-                )
+            # Group bans by scope
+            global_bans = [ban for ban in bans if ban.get("ban_scope", "global") == "global"]
+            service_bans = [ban for ban in bans if ban.get("ban_scope", "") == "service"]
 
-                if ban.get("service", "unknown") != "unknown":
-                    cli_str += f" by {ban['service'] if ban['service'] != '_' else 'default server'}"
+            # Display global bans
+            if global_bans:
+                cli_str += f"{BOLD}{GREEN}  Global Bans:{RESET}\n"
+                for ban in global_bans:
+                    banned_country = ban.get("country", "unknown")
+                    banned_date = ""
+                    remaining = f"{RED}permanently{RESET}"
 
-                cli_str += "\n"
-            cli_str += "\n"
+                    if ban["date"] != -1:
+                        banned_date = f"on {WHITE}{datetime.fromtimestamp(ban['date']).strftime('%Y-%m-%d at %H:%M:%S')}{RESET} "
+                    if ban["exp"] != -1:
+                        remaining = f"for {CYAN}{format_remaining_time(ban['exp'])}{RESET}"
+
+                    cli_str += f"  • {BOLD}{WHITE}{ban['ip']}{RESET} [{banned_country}] - banned {banned_date}{remaining}\n"
+                    cli_str += f"    {YELLOW}Reason:{RESET} {ban.get('reason', 'no reason given')}\n"
+
+            # Display service bans
+            if service_bans:
+                if global_bans:  # Add spacing if we already displayed global bans
+                    cli_str += "\n"
+                cli_str += f"{BOLD}{GREEN}  Service-Specific Bans:{RESET}\n"
+                for ban in service_bans:
+                    service_name = ban.get("service", "unknown")
+                    if service_name == "_":
+                        service_name = "default server"
+
+                    banned_country = ban.get("country", "unknown")
+                    banned_date = ""
+                    remaining = f"{RED}permanently{RESET}"
+
+                    if ban["date"] != -1:
+                        banned_date = f"on {WHITE}{datetime.fromtimestamp(ban['date']).strftime('%Y-%m-%d at %H:%M:%S')}{RESET} "
+                    if ban["exp"] != -1:
+                        remaining = f"for {CYAN}{format_remaining_time(ban['exp'])}{RESET}"
+
+                    cli_str += f"  • {BOLD}{WHITE}{ban['ip']}{RESET} [{banned_country}] - {YELLOW}Service:{RESET} {service_name}\n"
+                    cli_str += f"    banned {banned_date}{remaining}\n"
+                    cli_str += f"    {YELLOW}Reason:{RESET} {ban.get('reason', 'no reason given')}\n"
+
+            cli_str += f"{BLUE}└{'─' * (box_width - 2)}┘{RESET}\n"
 
         return True, cli_str
 

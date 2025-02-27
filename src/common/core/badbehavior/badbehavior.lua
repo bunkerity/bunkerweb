@@ -40,7 +40,7 @@ function badbehavior:log()
 		return self:ret(true, "not increasing counter")
 	end
 	-- Check if we are already banned
-	if is_banned(self.ctx.bw.remote_addr) then
+	if is_banned(self.ctx.bw.remote_addr, self.ctx.bw.server_name) then
 		return self:ret(true, "already banned")
 	end
 	-- Get security mode
@@ -57,6 +57,7 @@ function badbehavior:log()
 	end
 	-- Add incr operation so timer can manage it
 	local status = tostring(ngx.status)
+	local ban_scope = self.variables["BAD_BEHAVIOR_BAN_SCOPE"]
 	local ok, err = self.datastore.dict:rpush(
 		"plugin_badbehavior_incr",
 		encode({
@@ -70,6 +71,7 @@ function badbehavior:log()
 			country = country,
 			timestamp = time(date("!*t")),
 			status = status,
+			ban_scope = ban_scope,
 		})
 	)
 	if not ok then
@@ -122,7 +124,8 @@ function badbehavior:timer()
 				decr["use_redis"],
 				decr["server_name"],
 				decr["status"],
-				decr["old_counter"]
+				decr["old_counter"],
+				decr["ban_scope"]
 			)
 			if not ok then
 				ret = false
@@ -158,8 +161,19 @@ function badbehavior:timer()
 		local security_mode = incr.security_mode
 		local country = incr.country
 		local status = incr.status
-		local counter, counter_err =
-			self:increase(ip, count_time, ban_time, threshold, use_redis, server_name, security_mode, country, status)
+		local ban_scope = incr.ban_scope or "global"
+		local counter, counter_err = self:increase(
+			ip,
+			count_time,
+			ban_time,
+			threshold,
+			use_redis,
+			server_name,
+			security_mode,
+			country,
+			status,
+			ban_scope
+		)
 		if not counter then
 			ret = false
 			ret_err = "can't increase counter : " .. counter_err
@@ -174,6 +188,7 @@ function badbehavior:timer()
 				timestamp = timestamp + count_time,
 				server_name = server_name,
 				status = status,
+				ban_scope = ban_scope,
 			}
 			local ok, err = self.datastore.dict:rpush("plugin_badbehavior_decr", encode(decr_payload))
 			if not ok then
@@ -181,7 +196,11 @@ function badbehavior:timer()
 				ret_err = "can't add decr list element : " .. err
 			end
 			-- Save counter info indexed by "ip_serverName"
-			counters[ip .. "_" .. server_name] = {
+			local counter_key = ip
+			if ban_scope == "service" then
+				counter_key = server_name .. "_" .. ip
+			end
+			counters[counter_key] = {
 				ip = ip,
 				counter = counter,
 				count_time = count_time,
@@ -192,6 +211,7 @@ function badbehavior:timer()
 				security_mode = security_mode,
 				country = country,
 				status = status,
+				ban_scope = ban_scope,
 			}
 		end
 	end
@@ -200,7 +220,8 @@ function badbehavior:timer()
 	for _, data in pairs(counters) do
 		if data.counter >= data.threshold then
 			if data.security_mode == "block" then
-				local ok, err = add_ban(data.ip, "bad behavior", data.ban_time, data.server_name, data.country)
+				local ok, err =
+					add_ban(data.ip, "bad behavior", data.ban_time, data.server_name, data.country, data.ban_scope)
 				if not ok then
 					ret = false
 					ret_err = "can't save ban : " .. err
@@ -208,12 +229,13 @@ function badbehavior:timer()
 					self.logger:log(
 						WARN,
 						string.format(
-							"IP %s is banned for %ss (%s/%s) on server %s",
+							"IP %s is banned for %ss (%s/%s) on server %s with scope %s",
 							data.ip,
 							data.ban_time,
 							tostring(data.counter),
 							tostring(data.threshold),
-							data.server_name
+							data.server_name,
+							data.ban_scope
 						)
 					)
 				end
@@ -221,12 +243,13 @@ function badbehavior:timer()
 				self.logger:log(
 					WARN,
 					string.format(
-						"detected IP %s ban for %ss (%s/%s) on server %s",
+						"detected IP %s ban for %ss (%s/%s) on server %s with scope %s",
 						data.ip,
 						data.ban_time,
 						tostring(data.counter),
 						tostring(data.threshold),
-						data.server_name
+						data.server_name,
+						data.ban_scope
 					)
 				)
 			end
@@ -245,14 +268,19 @@ function badbehavior:increase(
 	server_name,
 	security_mode,
 	country,
-	status
+	status,
+	ban_scope
 )
 	-- Declare counter
 	local counter = false
+	local key_suffix = ip
+	if ban_scope == "service" then
+		key_suffix = server_name .. "_" .. ip
+	end
 
 	-- Redis case
 	if use_redis then
-		local redis_counter, err = self:redis_increase(ip, count_time, ban_time)
+		local redis_counter, err = self:redis_increase(ip, count_time, ban_time, server_name, ban_scope)
 		if not redis_counter then
 			self.logger:log(ERR, "(increase) redis_increase failed, falling back to local : " .. err)
 		else
@@ -261,7 +289,7 @@ function badbehavior:increase(
 	end
 	-- Local case
 	if not counter then
-		local local_counter, err = self.datastore:get("plugin_badbehavior_count_" .. ip)
+		local local_counter, err = self.datastore:get("plugin_badbehavior_count_" .. key_suffix)
 		if not local_counter and err ~= "not found" then
 			self.logger:log(ERR, "(increase) can't get counts from the datastore : " .. err)
 		end
@@ -271,7 +299,7 @@ function badbehavior:increase(
 		counter = local_counter + 1
 	end
 	-- Store local counter
-	local ok, err = self.datastore:set("plugin_badbehavior_count_" .. ip, counter, count_time)
+	local ok, err = self.datastore:set("plugin_badbehavior_count_" .. key_suffix, counter, count_time)
 	if not ok then
 		self.logger:log(ERR, "(increase) can't save counts to the datastore : " .. err)
 		return false, err
@@ -288,17 +316,24 @@ function badbehavior:increase(
 			.. server_name
 			.. " (status "
 			.. status
+			.. ", scope "
+			.. ban_scope
 			.. ")"
 	)
 	return counter, "success"
 end
 
-function badbehavior:decrease(ip, count_time, threshold, use_redis, server_name, status, old_counter)
+function badbehavior:decrease(ip, count_time, threshold, use_redis, server_name, status, old_counter, ban_scope)
 	-- Declare counter
 	local counter = false
+	local key_suffix = ip
+	if ban_scope == "service" then
+		key_suffix = server_name .. "_" .. ip
+	end
+
 	-- Redis case
 	if use_redis then
-		local redis_counter, err = self:redis_decrease(ip, count_time)
+		local redis_counter, err = self:redis_decrease(ip, count_time, server_name, ban_scope)
 		if not redis_counter then
 			self.logger:log(ERR, "(decrease) redis_decrease failed, falling back to local : " .. err)
 		else
@@ -307,7 +342,7 @@ function badbehavior:decrease(ip, count_time, threshold, use_redis, server_name,
 	end
 	-- Local case
 	if not counter then
-		local local_counter, err = self.datastore:get("plugin_badbehavior_count_" .. ip)
+		local local_counter, err = self.datastore:get("plugin_badbehavior_count_" .. key_suffix)
 		if not local_counter and err ~= "not found" then
 			self.logger:log(ERR, "(decrease) can't get counts from the datastore : " .. err)
 		end
@@ -320,9 +355,9 @@ function badbehavior:decrease(ip, count_time, threshold, use_redis, server_name,
 	-- Store local counter
 	if counter <= 0 then
 		counter = 0
-		self.datastore:delete("plugin_badbehavior_count_" .. ip)
+		self.datastore:delete("plugin_badbehavior_count_" .. key_suffix)
 	else
-		local ok, err = self.datastore:set("plugin_badbehavior_count_" .. ip, counter, count_time)
+		local ok, err = self.datastore:set("plugin_badbehavior_count_" .. key_suffix, counter, count_time)
 		if not ok then
 			self.logger:log(ERR, "(decrease) can't save counts to the datastore : " .. err)
 			return false, err
@@ -340,12 +375,22 @@ function badbehavior:decrease(ip, count_time, threshold, use_redis, server_name,
 			.. server_name
 			.. " (status "
 			.. status
+			.. ", scope "
+			.. (ban_scope or "global")
 			.. ")"
 	)
 	return true, "success"
 end
 
-function badbehavior:redis_increase(ip, count_time, ban_time)
+function badbehavior:redis_increase(ip, count_time, ban_time, server_name, ban_scope)
+	-- Determine key based on ban scope
+	local counter_key = "plugin_bad_behavior_" .. ip
+	local ban_key = "bans_ip_" .. ip
+	if ban_scope == "service" then
+		counter_key = "plugin_bad_behavior_" .. server_name .. "_" .. ip
+		ban_key = "bans_service_" .. server_name .. "_ip_" .. ip
+	end
+
 	-- Our LUA script to execute on redis
 	local redis_script = [[
 		local ret_incr = redis.pcall("INCR", KEYS[1])
@@ -373,15 +418,7 @@ function badbehavior:redis_increase(ip, count_time, ban_time)
 		return false, err
 	end
 	-- Execute LUA script
-	local counter, err = self.clusterstore:call(
-		"eval",
-		redis_script,
-		2,
-		"plugin_bad_behavior_" .. ip,
-		"bans_ip" .. ip,
-		count_time,
-		ban_time
-	)
+	local counter, err = self.clusterstore:call("eval", redis_script, 2, counter_key, ban_key, count_time, ban_time)
 	if not counter then
 		self.clusterstore:close()
 		return false, err
@@ -391,7 +428,13 @@ function badbehavior:redis_increase(ip, count_time, ban_time)
 	return counter
 end
 
-function badbehavior:redis_decrease(ip, count_time)
+function badbehavior:redis_decrease(ip, count_time, server_name, ban_scope)
+	-- Determine key based on ban scope
+	local counter_key = "plugin_bad_behavior_" .. ip
+	if ban_scope == "service" then
+		counter_key = "plugin_bad_behavior_" .. server_name .. "_" .. ip
+	end
+
 	-- Our LUA script to execute on redis
 	local redis_script = [[
 		local ret_decr = redis.pcall("DECR", KEYS[1])
@@ -418,7 +461,7 @@ function badbehavior:redis_decrease(ip, count_time)
 	if not ok then
 		return false, err
 	end
-	local counter, err = self.clusterstore:call("eval", redis_script, 1, "plugin_bad_behavior_" .. ip, count_time)
+	local counter, err = self.clusterstore:call("eval", redis_script, 1, counter_key, count_time)
 	if not counter then
 		self.clusterstore:close()
 		return false, err
