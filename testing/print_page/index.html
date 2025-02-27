@@ -16,7 +16,7 @@
       
       
       <link rel="icon" href="../assets/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.4">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.5">
     
     
       
@@ -7607,7 +7607,105 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422 # Comment if you don&#39;t want to use
 <li>The <code>SECURITYTXT_CANONICAL</code> setting is automatically generated from the site URL and the <code>SECURITYTXT_URI</code> setting (if the value is empty).</li>
 <li>The <code>SECURITYTXT_EXPIRES</code> setting is automatically generated to be the current date and time + 1 year if the value is empty.</li>
 </ul>
-</div></section><section class="print-page" id="settings"><h1 id="settings-settings">Settings</h1>
+</div>
+<h3 id="advanced-anti-ddos-pro">Anti DDoS <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h3>
+<p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
+<p>The <strong>Anti DDoS</strong> Plugin provides advanced protection against Distributed Denial of Service (DDoS) attacks by monitoring, analyzing, and filtering suspicious traffic in real-time.</p>
+<p>By employing a <strong>sliding window mechanism</strong>, the plugin maintains an in-memory dictionary of request timestamps to detect abnormal traffic spikes from individual IP addresses. Based on the configured security mode, it can either block offending connections or log the suspicious activity for further review.</p>
+<h4 id="advanced-features">Features</h4>
+<ul>
+<li><strong>Real-Time Traffic Analysis:</strong> Continuously monitors incoming requests to detect potential DDoS attacks.</li>
+<li><strong>Sliding Window Mechanism:</strong> Tracks recent request activity within a configurable time window.</li>
+<li><strong>Configurable Thresholds:</strong> Allows you to define the maximum number of suspicious requests per IP.</li>
+<li><strong>Advanced Blocking Logic:</strong> Evaluates both per-IP request counts and the number of distinct IPs exceeding the threshold.</li>
+<li><strong>Flexible Security Modes:</strong> Choose between immediate connection blocking or detection-only (logging) mode.</li>
+<li><strong>Optimized In-Memory Datastore:</strong> Ensures high-speed lookups and efficient metric tracking.</li>
+<li><strong>Automatic Housekeeping:</strong> Periodically clears outdated data to maintain optimal performance.</li>
+</ul>
+<h4 id="advanced-configuration">Configuration</h4>
+<p>Customize the plugin behavior using the following settings:</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Default</th>
+<th>Context</th>
+<th>Multiple</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>USE_ANTIDDOS</code></td>
+<td><code>no</code></td>
+<td>global</td>
+<td>no</td>
+<td>Enable or disable the Anti DDoS protection. Set to <code>"yes"</code> to activate the plugin.</td>
+</tr>
+<tr>
+<td><code>ANTIDDOS_METRICS_DICT_SIZE</code></td>
+<td><code>10M</code></td>
+<td>global</td>
+<td>no</td>
+<td>Size of the in-memory datastore for tracking DDoS metrics (e.g., <code>10M</code>, <code>500k</code>).</td>
+</tr>
+<tr>
+<td><code>ANTIDDOS_THRESHOLD</code></td>
+<td><code>100</code></td>
+<td>global</td>
+<td>no</td>
+<td>Maximum number of suspicious requests allowed per IP within the defined time window.</td>
+</tr>
+<tr>
+<td><code>ANTIDDOS_WINDOW_TIME</code></td>
+<td><code>10</code></td>
+<td>global</td>
+<td>no</td>
+<td>Time window in seconds during which suspicious requests are tallied.</td>
+</tr>
+<tr>
+<td><code>ANTIDDOS_STATUS_CODES</code></td>
+<td><code>429 403 444</code></td>
+<td>global</td>
+<td>no</td>
+<td>HTTP status codes considered suspicious and used to trigger anti-DDoS actions.</td>
+</tr>
+<tr>
+<td><code>ANTIDDOS_DISTINCT_IP</code></td>
+<td><code>5</code></td>
+<td>global</td>
+<td>no</td>
+<td>Minimum number of distinct IPs that must exceed the threshold before enforcing the block mode.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="advanced-best-practices">Best Practices</h4>
+<ul>
+<li><strong>Threshold Tuning:</strong> Adjust <code>ANTIDDOS_THRESHOLD</code> and <code>ANTIDDOS_WINDOW_TIME</code> based on your typical traffic patterns.</li>
+<li><strong>Status Code Review:</strong> Regularly update <code>ANTIDDOS_STATUS_CODES</code> to capture new or evolving suspicious behaviors.</li>
+<li><strong>Monitoring:</strong> Analyze logs and metrics periodically to fine-tune settings and improve overall protection.</li>
+</ul>
+<h3 id="advanced-user-manager-pro">User Manager <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h3>
+<p>The User Management Plugin offers a robust interface for administering user accounts within your system.</p>
+<p>With this plugin, administrators can effortlessly create, update, and disable user accounts, manage user roles, toggle two-factor authentication (2FA), and view detailed user information such as last login timestamps and account statuses (active or inactive). Designed with security and ease-of-use in mind, this plugin simplifies routine user management tasks while ensuring compliance and auditability.</p>
+<h4 id="advanced-features_1">Features</h4>
+<ul>
+<li><strong>User Account Operations:</strong> Create, edit, and delete user accounts with ease.</li>
+<li><strong>Role-Based Access Control:</strong> Assign and modify user roles to manage permissions and access levels.</li>
+<li><strong>2FA Management:</strong> Disable two-factor authentication based on administrative decisions.</li>
+<li><strong>Comprehensive User Insights:</strong> Monitor key user data including last login times, account creation dates, and active/inactive status.</li>
+<li><strong>Audit Logging:</strong> Maintain an audit trail for all user management actions for enhanced security and compliance.</li>
+</ul>
+<figure>
+<p><img align="center" alt="Overview" src="../assets/img/user-manager.png" />
+  </p>
+<figcaption>User Manager page</figcaption>
+</figure>
+<figure>
+<p><img align="center" alt="Create user form" src="../assets/img/user-manager-create.png" />
+  </p>
+<figcaption>User Manager - Create user form</figcaption>
+</figure></section><section class="print-page" id="settings"><h1 id="settings-settings">Settings</h1>
 <div class="admonition info">
 <p class="admonition-title">Settings generator tool</p>
 <p>To help you tune BunkerWeb, we have made an easy-to-use settings generator tool available at <a href="https://config.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc">config.bunkerweb.io</a>.</p>
@@ -10602,6 +10700,9 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422 # Comment if you don&#39;t want to use
 </tr>
 </tbody>
 </table>
+<h2 id="settings-user-manager-pro">User Manager <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
+<p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
+<p>Add the possibility to manage users on the web interface</p>
 <h2 id="settings-whitelist">Whitelist</h2>
 <p>STREAM support <img alt="⚠" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/26a0.svg" title=":warning:" /></p>
 <p>Allow access based on internal and external IP/network/rDNS/ASN whitelists.</p>
@@ -11532,7 +11633,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
 <span class="w">      </span><span class="nt">DATABASE_URI</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger password for the database</span>
 <span class="w">      </span><span class="nt">ADMIN_USERNAME</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;changeme&quot;</span>
 <span class="w">      </span><span class="nt">ADMIN_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;changeme&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger password for the admin user</span>
-<span class="w">      </span><span class="nt">TOPT_SECRETS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mysecret&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger secret key (see the Prerequisites section)</span>
+<span class="w">      </span><span class="nt">TOTP_SECRETS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mysecret&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger secret key (see the Prerequisites section)</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-logs:/var/log/bunkerweb</span><span class="w"> </span><span class="c1"># This is the volume used to store the logs</span>
 <span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
@@ -11666,7 +11767,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-ui-env</span>
 <span class="w">      </span><span class="nt">ADMIN_USERNAME</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;changeme&quot;</span>
 <span class="w">      </span><span class="nt">ADMIN_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;changeme&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger password for the admin user</span>
-<span class="w">      </span><span class="nt">TOPT_SECRETS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mysecret&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger secret key (see the Prerequisites section)</span>
+<span class="w">      </span><span class="nt">TOTP_SECRETS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mysecret&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger secret key (see the Prerequisites section)</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-logs:/var/log/bunkerweb</span>
 <span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
@@ -13780,38 +13881,48 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 <p class="admonition-title">Existing plugins</p>
 <p>If the documentation is not enough, you can have a look at the existing source code of <a href="https://github.com/bunkerity/bunkerweb-plugins">official plugins</a> and the <a href="https://github.com/bunkerity/bunkerweb/tree/vtesting/src/common/core">core plugins</a> (already included in BunkerWeb but they are plugins, technically speaking).</p>
 </div>
-<p>What a plugin structure looks like :
+<p>What a plugin structure looks like:
 <div class="highlight"><pre><span></span><code>plugin /
-        confs / conf_type / conf_name.conf
-        ui / actions.py
-             template.html
-        jobs / my-job.py
-        templates / my-template.json
-                    my-template / configs / conf_type / conf_name.conf
-        plugin.lua
-        plugin.json
+    confs / conf_type / conf_name.conf
+    ui / actions.py
+         hooks.py
+         template.html
+         blueprints / &lt;blueprint_file(s)&gt;
+              templates / &lt;blueprint_template(s)&gt;
+    jobs / my-job.py
+    templates / my-template.json
+          my-template / configs / conf_type / conf_name.conf
+    plugin.lua
+    plugin.json
 </code></pre></div></p>
 <ul>
 <li>
-<p><strong>conf_name.conf</strong> : add <a href="#advanced-custom-configurations">custom NGINX configurations</a> (as jinja2 templates)</p>
+<p><strong>conf_name.conf</strong> : Add <a href="#advanced-custom-configurations">custom NGINX configurations</a> (as Jinja2 templates).</p>
 </li>
 <li>
-<p><strong>actions.py</strong> : script to execute on flask server, this script is running on flask context, you have access to lib and utils like <code>jinja2</code>, <code>requests</code>, etc...</p>
+<p><strong>actions.py</strong> : Script to execute on the Flask server. This script runs in a Flask context, giving you access to libraries and utilities like <code>jinja2</code> and <code>requests</code>.</p>
 </li>
 <li>
-<p><strong>template.html</strong> : custom plugin page you can access from ui</p>
+<p><strong>hooks.py</strong> : Custom Python file that contains flask's hooks and will be executed when the plugin is loaded.</p>
 </li>
 <li>
-<p><strong>jobs py file</strong> : custom python files executed as jobs by the scheduler</p>
+<p><strong>template.html</strong> : Custom plugin page accessed via the UI.</p>
 </li>
 <li>
-<p><strong>my-template.json</strong> : add <a href="#concepts-templates">custom templates</a> for the plugin to override settings' default values and apply custom configurations in an easy way</p>
+<p><strong>blueprints folder (within ui)</strong>:
+  This folder is used to override existing Flask blueprints or create new ones. Inside, you can include blueprint files and an optional <strong>templates</strong> subfolder for blueprint-specific templates.</p>
 </li>
 <li>
-<p><strong>plugin.lua</strong> : code to execute on NGINX using <a href="https://github.com/openresty/lua-nginx-module">NGINX LUA module</a></p>
+<p><strong>jobs py file</strong> : Custom Python files executed as jobs by the scheduler.</p>
 </li>
 <li>
-<p><strong>plugin.json</strong> : metadata, settings and jobs for your settings</p>
+<p><strong>my-template.json</strong> : Add <a href="#concepts-templates">custom templates</a> to override the default values of settings and apply custom configurations easily.</p>
+</li>
+<li>
+<p><strong>plugin.lua</strong> : Code executed on NGINX using the <a href="https://github.com/openresty/lua-nginx-module">NGINX LUA module</a>.</p>
+</li>
+<li>
+<p><strong>plugin.json</strong> : Metadata, settings, and job definitions for your plugin.</p>
 </li>
 </ul>
 <h3 id="plugins-getting-started">Getting started</h3>
@@ -14265,7 +14376,144 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 <p><strong>template</strong>
 <div class="highlight"><pre><span></span><code><span class="cm">&lt;!-- metadata + config --&gt;</span>
 <span class="p">&lt;</span><span class="nt">div</span><span class="p">&gt;</span>{{ pre_render }}<span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
-</code></pre></div></p></section><section class="print-page" id="professional-services"><h1 id="professional-services-professional-services">Professional services</h1>
+</code></pre></div></p>
+<h3 id="plugins-hookspy">Hooks.py</h3>
+<p>This documentation outlines the lifecycle hooks used for managing different stages of a request within the application. Each hook is associated with a specific phase.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:4"><input checked="checked" id="plugins-__tabbed_2_1" name="plugins-__tabbed_2" type="radio" /><input id="plugins-__tabbed_2_2" name="plugins-__tabbed_2" type="radio" /><input id="plugins-__tabbed_2_3" name="plugins-__tabbed_2" type="radio" /><input id="plugins-__tabbed_2_4" name="plugins-__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="plugins-__tabbed_2_1">before_request</label><label for="plugins-__tabbed_2_2">after_request</label><label for="plugins-__tabbed_2_3">teardown_request</label><label for="plugins-__tabbed_2_4">context_processor</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>These hooks are executed <strong>before</strong> processing an incoming request. They are typically used for pre-processing tasks such as authentication, validation, or logging.</p>
+<p>If the hook returns a response object, Flask will skip the request handling and return the response directly. This can be useful for short-circuiting the request processing pipeline.</p>
+<p><strong>Example:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">flask</span><span class="w"> </span><span class="kn">import</span> <span class="n">request</span><span class="p">,</span> <span class="n">Response</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">before_request</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Before-request: Validating request...&quot;</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="c1"># Perform authentication, validation, or logging here</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_valid_request</span><span class="p">(</span><span class="n">request</span><span class="p">):</span> <span class="c1"># We are in the app context</span>
+        <span class="k">return</span> <span class="n">Response</span><span class="p">(</span><span class="s2">&quot;Invalid request!&quot;</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span><span class="mi">400</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">is_valid_request</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="c1"># Dummy validation logic</span>
+    <span class="k">return</span> <span class="s2">&quot;user&quot;</span> <span class="ow">in</span> <span class="n">request</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>These hooks that run <strong>after</strong> the request has been processed. They are ideal for post-processing tasks such as cleanup, additional logging, or modifying the response before it is sent back.</p>
+<p>They receive the response object as an argument and can modify it before returning it. The first after_request hook to return a response will be used as the final response.</p>
+<p><strong>Example:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">flask</span><span class="w"> </span><span class="kn">import</span> <span class="n">request</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">after_request</span><span class="p">(</span><span class="n">response</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;After-request: Logging response...&quot;</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="c1"># Perform logging, cleanup, or response modifications here</span>
+    <span class="n">log_response</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">response</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">log_response</span><span class="p">(</span><span class="n">response</span><span class="p">):</span>
+    <span class="c1"># Dummy logging logic</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Response logged:&quot;</span><span class="p">,</span> <span class="n">response</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>These hooks are invoked when the request context is being torn down. These hooks are used for releasing resources or handling errors that occurred during the request lifecycle.</p>
+<p><strong>Example:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">teardown_request</span><span class="p">(</span><span class="n">error</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Teardown-request: Cleaning up resources...&quot;</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="c1"># Perform cleanup, release resources, or handle errors here</span>
+    <span class="k">if</span> <span class="n">error</span><span class="p">:</span>
+        <span class="n">handle_error</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+    <span class="n">cleanup_resources</span><span class="p">()</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">handle_error</span><span class="p">(</span><span class="n">error</span><span class="p">):</span>
+    <span class="c1"># Dummy error handling logic</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error encountered:&quot;</span><span class="p">,</span> <span class="n">error</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">cleanup_resources</span><span class="p">():</span>
+    <span class="c1"># Dummy resource cleanup logic</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Resources have been cleaned up.&quot;</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>These hooks are used to inject additional context into templates or views. They enrich the runtime context by passing common data (like user information or configuration settings) to the templates.</p>
+<p>If a context processor returns a dictionary, the keys and values will be added to the context for all templates. This allows you to share data across multiple views or templates.</p>
+<p><strong>Example:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">context_processor</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Context-processor: Injecting context data...&quot;</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="c1"># Return a dictionary containing context data for templates/views</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">&quot;current_user&quot;</span><span class="p">:</span> <span class="s2">&quot;John Doe&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;app_version&quot;</span><span class="p">:</span> <span class="s2">&quot;1.0.0&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;feature_flags&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;new_ui&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span>
+    <span class="p">}</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<p>This lifecycle hook design provides a modular and systematic approach to managing various aspects of a request's lifecycle:</p>
+<ul>
+<li><strong>Modularity:</strong> Each hook is responsible for a distinct phase, ensuring that concerns are separated.</li>
+<li><strong>Maintainability:</strong> Developers can easily add, modify, or remove hook implementations without impacting other parts of the request lifecycle.</li>
+<li><strong>Extensibility:</strong> The framework is flexible, allowing for additional hooks or enhancements as application requirements evolve.</li>
+</ul>
+<p>By clearly defining the responsibilities of each hook and their associated logging prefixes, the system ensures that each stage of request processing is transparent and manageable.</p>
+<h3 id="plugins-blueprints">Blueprints</h3>
+<p>In Flask, <strong>blueprints</strong> serve as a modular way to organize related components—such as views, templates, and static files—within your application. They allow you to group functionality logically and can be used to create new sections of your app or override existing ones.</p>
+<h4 id="plugins-creating-a-blueprint">Creating a Blueprint</h4>
+<p>To define a blueprint, you create an instance of the <code>Blueprint</code> class, specifying its name and import path. You then define routes and views associated with this blueprint.</p>
+<p><strong>Example: Defining a New Blueprint</strong></p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">os.path</span><span class="w"> </span><span class="kn">import</span> <span class="n">dirname</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">flask</span><span class="w"> </span><span class="kn">import</span> <span class="n">Blueprint</span><span class="p">,</span> <span class="n">render_template</span>
+
+<span class="c1"># Define the blueprint</span>
+<span class="n">my_blueprint</span> <span class="o">=</span> <span class="n">Blueprint</span><span class="p">(</span><span class="s1">&#39;my_blueprint&#39;</span><span class="p">,</span> <span class="vm">__name__</span><span class="p">,</span> <span class="n">template_folder</span><span class="o">=</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;/templates&#39;</span><span class="p">)</span> <span class="c1"># The template_folder is set to avoid conflicts with the original blueprint</span>
+
+<span class="c1"># Define a route within the blueprint</span>
+<span class="nd">@my_blueprint</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/my_blueprint&#39;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">my_blueprint_page</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;my_blueprint.html&#39;</span><span class="p">)</span>
+</code></pre></div>
+<p>In this example, a blueprint named <code>my_blueprint</code> is created, and a route <code>/my_blueprint</code> is defined within it.</p>
+<h4 id="plugins-overriding-an-existing-blueprint">Overriding an Existing Blueprint</h4>
+<p>Blueprints can also override existing ones to modify or extend functionality. To do this, ensure that the new blueprint has the same name as the one you're overriding and register it after the original.</p>
+<p><strong>Example: Overriding an Existing Blueprint</strong></p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">os.path</span><span class="w"> </span><span class="kn">import</span> <span class="n">dirname</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">flask</span><span class="w"> </span><span class="kn">import</span> <span class="n">Flask</span><span class="p">,</span> <span class="n">Blueprint</span>
+
+<span class="c1"># Original blueprint</span>
+<span class="n">instances</span> <span class="o">=</span> <span class="n">Blueprint</span><span class="p">(</span><span class="s1">&#39;instances&#39;</span><span class="p">,</span> <span class="vm">__name__</span><span class="p">,</span> <span class="n">template_folder</span><span class="o">=</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;/templates&#39;</span><span class="p">)</span> <span class="c1"># The template_folder is set to avoid conflicts with the original blueprint</span>
+
+<span class="nd">@instances</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/instances&#39;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">override_instances</span><span class="p">():</span>
+    <span class="k">return</span> <span class="s2">&quot;My new instances page&quot;</span>
+</code></pre></div>
+<p>In this scenario, accessing the URL <code>/instances</code> will display "My new instances page" because the <code>instances</code> blueprint, registered last, overrides the original <code>instances</code> blueprint.</p>
+<div class="admonition warning">
+<p class="admonition-title">About overriding</p>
+<p>Be cautious when overriding existing blueprints, as it can impact the behavior of the application. Ensure that the changes align with the application's requirements and do not introduce unexpected side effects.</p>
+<p>All existing routes will be removed from he original blueprint, so you will need to re-implement them if needed.</p>
+</div>
+<h4 id="plugins-naming-conventions">Naming Conventions</h4>
+<div class="admonition danger">
+<p class="admonition-title">Important</p>
+<p>Ensure the blueprint’s name matches the blueprint variable name, else it will not be considered as a valid blueprint and will not be registered.</p>
+</div>
+<p>For consistency and clarity, it's advisable to follow these naming conventions:</p>
+<ul>
+<li>
+<p><strong>Blueprint Names</strong>: Use short, all-lowercase names. Underscores can be used for readability, e.g., <code>user_auth</code>.</p>
+</li>
+<li>
+<p><strong>File Names</strong>: Match the filename to the blueprint name, ensuring it's all lowercase with underscores as needed, e.g., <code>user_auth.py</code>.</p>
+</li>
+</ul>
+<p>This practice aligns with Python's module naming conventions and helps maintain a clear project structure.</p>
+<p><strong>Example: Blueprint and File Naming</strong></p>
+<div class="highlight"><pre><span></span><code>plugin /
+    ui / blueprints / user_auth.py
+                      templates / user_auth.html
+</code></pre></div>
+<p>In this structure, <code>user_auth.py</code> contains the <code>user_auth</code> blueprint, and <code>user_auth.html</code> is the associated template, adhering to the recommended naming conventions.</p></section><section class="print-page" id="professional-services"><h1 id="professional-services-professional-services">Professional services</h1>
 <h2 id="professional-services-why-should-i-get-professional-services">Why should I get professional services ?</h2>
 <p>Since BunkerWeb is a free (as in freedom) software, you've the right to use it freely as long as you respect the <a href="https://www.gnu.org/licenses/agpl-3.0.en.html">AGPLv3 license</a>.</p>
 <p>You can also upgrade BunkerWeb to the PRO version at any time. By doing so, you will get an enhanced experience to assist you in the security of your web services. Our goal is to help you focus on your business needs. The PRO version is updated regularly and we try our best to gather feedbacks from enterprises to include the needed features.</p>

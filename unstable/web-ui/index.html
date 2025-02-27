@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../assets/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.4">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.5">
     
     
       
@@ -1859,7 +1859,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
 <span class="w">      </span><span class="nt">DATABASE_URI</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger password for the database</span>
 <span class="w">      </span><span class="nt">ADMIN_USERNAME</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;changeme&quot;</span>
 <span class="w">      </span><span class="nt">ADMIN_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;changeme&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger password for the admin user</span>
-<span class="w">      </span><span class="nt">TOPT_SECRETS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mysecret&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger secret key (see the Prerequisites section)</span>
+<span class="w">      </span><span class="nt">TOTP_SECRETS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mysecret&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger secret key (see the Prerequisites section)</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-logs:/var/log/bunkerweb</span><span class="w"> </span><span class="c1"># This is the volume used to store the logs</span>
 <span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
@@ -1993,7 +1993,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-ui-env</span>
 <span class="w">      </span><span class="nt">ADMIN_USERNAME</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;changeme&quot;</span>
 <span class="w">      </span><span class="nt">ADMIN_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;changeme&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger password for the admin user</span>
-<span class="w">      </span><span class="nt">TOPT_SECRETS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mysecret&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger secret key (see the Prerequisites section)</span>
+<span class="w">      </span><span class="nt">TOTP_SECRETS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mysecret&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger secret key (see the Prerequisites section)</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-logs:/var/log/bunkerweb</span>
 <span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>

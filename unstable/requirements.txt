@@ -335,9 +335,9 @@ mkdocs-get-deps==0.2.0 \
     --hash=sha256:162b3d129c7fad9b19abfdcb9c1458a651628e4b1dea628ac68790fb3061c60c \
     --hash=sha256:2bf11d0b133e77a0dd036abeeb06dec8775e46efa526dc70667d8863eefc6134
     # via mkdocs
-mkdocs-material==9.6.4 \
-    --hash=sha256:414e8376551def6d644b8e6f77226022868532a792eb2c9accf52199009f568f \
-    --hash=sha256:4d1d35e1c1d3e15294cb7fa5d02e0abaee70d408f75027dc7be6e30fb32e6867
+mkdocs-material==9.6.5 \
+    --hash=sha256:aad3e6fb860c20870f75fb2a69ef901f1be727891e41adb60b753efcae19453b \
+    --hash=sha256:b714679a8c91b0ffe2188e11ed58c44d2523e9c2ae26a29cc652fa7478faa21f
     # via
     #   -r requirements.in
     #   mkdocs-print-site-plugin
@@ -655,9 +655,9 @@ requests==2.32.3 \
     #   importlib-resources
 
 # The following packages are considered to be unsafe in a requirements file:
-setuptools==75.8.0 \
-    --hash=sha256:c5afc8f407c626b8313a86e10311dd3f661c6cd9c09d4bf8c15c0e11f9f2b0e6 \
-    --hash=sha256:e3982f444617239225d675215d51f6ba05f845d4eec313da4418fdbb56fb27e3
+setuptools==75.8.1 \
+    --hash=sha256:3bc32c0b84c643299ca94e77f834730f126efd621de0cc1de64119e0e17dab1f \
+    --hash=sha256:65fb779a8f28895242923582eadca2337285f0891c2c9e160754df917c3d2530
     # via mkdocs-material
 six==1.17.0 \
     --hash=sha256:4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274 \
