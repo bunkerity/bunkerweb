@@ -152,7 +152,8 @@
                             <i class="bx bx-link"></i><span class="d-none d-md-inline">&nbsp;More info</span>
                         </a>
                         {% if plugin_data["page"] %}
-                            <a href="{{ url_for("plugins") }}/{{ plugin }}"
+                            {% set plugin_blueprint = "#" if plugin_data["type"] == "core" else url_for(plugin) %}
+                            <a href="{% if plugin_blueprint == '#' %}{{ url_for("plugins") }}/{{ plugin }}{% else %}{{ plugin_blueprint }}{% endif %}"
                                class="btn btn-sm btn-primary rounded-pill ms-2">
                                 <i class="bx bxs-file-html"></i><span class="d-none d-md-inline">&nbsp;Plugin page</span>
                             </a>
