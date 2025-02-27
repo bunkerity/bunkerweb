@@ -843,7 +843,7 @@ To keep the logs accessible from the web UI, we recommend you to use a syslog se
           DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Remember to set a stronger password for the database
           ADMIN_USERNAME: "changeme"
           ADMIN_PASSWORD: "changeme" # Remember to set a stronger password for the admin user
-          TOPT_SECRETS: "mysecret" # Remember to set a stronger secret key (see the Prerequisites section)
+          TOTP_SECRETS: "mysecret" # Remember to set a stronger secret key (see the Prerequisites section)
         volumes:
           - bw-logs:/var/log/bunkerweb # This is the volume used to store the logs
         restart: "unless-stopped"
@@ -980,7 +980,7 @@ To keep the logs accessible from the web UI, we recommend you to use a syslog se
           <<: *bw-ui-env
           ADMIN_USERNAME: "changeme"
           ADMIN_PASSWORD: "changeme" # Remember to set a stronger password for the admin user
-          TOPT_SECRETS: "mysecret" # Remember to set a stronger secret key (see the Prerequisites section)
+          TOTP_SECRETS: "mysecret" # Remember to set a stronger secret key (see the Prerequisites section)
         volumes:
           - bw-logs:/var/log/bunkerweb
         restart: "unless-stopped"
