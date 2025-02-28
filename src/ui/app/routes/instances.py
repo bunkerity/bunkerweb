@@ -144,7 +144,7 @@ def instances_action(action: Literal["ping", "reload", "stop", "delete"]):  # TO
         ret = DB.delete_instances(delete_instances)
         if ret:
             return handle_error(f"Couldn't delete the instance{'s' if len(delete_instances) > 1 else ''} in the database: {ret}", "instances", True)
-        flash(f"Instance{'s' if len(delete_instances) > 1 else ''} {', '.join(delete_instances)} Deleted successfully.", "success")
+        flash(f"Instance{'s' if len(delete_instances) > 1 else ''} {', '.join(delete_instances)} Deleted successfully.")
     else:
 
         def execute_action(instance):

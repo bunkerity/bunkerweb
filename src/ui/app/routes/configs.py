@@ -333,7 +333,7 @@ def configs_edit(service: str, config_type: str, name: str):
         if error:
             flash(f"An error occurred while saving the custom configs: {error}", "error")
         else:
-            flash(f"Saved custom configuration {new_type}/{new_name}{' for service ' + new_service if new_service else ''}", "success")
+            flash(f"Saved custom configuration {new_type}/{new_name}{' for service ' + new_service if new_service else ''}")
 
         return redirect(
             url_for(

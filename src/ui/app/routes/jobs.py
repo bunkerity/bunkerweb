@@ -42,7 +42,7 @@ def jobs_run():
     if ret:
         return handle_error(ret, "jobs", True)
 
-    flash(f"Job{'s' if len(jobs) > 1 else ''}'s plugins will be run in the background by the scheduler.", "success")
+    flash(f"Job{'s' if len(jobs) > 1 else ''}'s plugins will be run in the background by the scheduler.")
     return redirect(
         url_for(
             "loading",

@@ -76,7 +76,7 @@ def global_config_page():
                     if threaded:
                         DATA["TO_FLASH"].append({"content": "Checking license key to upgrade.", "type": "success", "save": False})
                     else:
-                        flask_flash("Checking license key to upgrade.", "success")
+                        flask_flash("Checking license key to upgrade.")
 
             manage_bunkerweb("global_config", variables, threaded=threaded)
 

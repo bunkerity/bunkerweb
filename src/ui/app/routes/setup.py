@@ -132,7 +132,7 @@ def setup_page():
             if ret:
                 return handle_error(f"Couldn't create the admin user in the database: {ret}", "setup", False, "error")
 
-            flash("The admin user was created successfully", "success")
+            flash("The admin user was created successfully")
 
         if not ui_reverse_proxy:
             server_names = db_config["SERVER_NAME"].split(" ")
