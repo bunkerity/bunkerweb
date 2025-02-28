@@ -16,6 +16,16 @@ local INFO = ngx.INFO
 local tonumber = tonumber
 local tostring = tostring
 
+-- Helper function to get timer log level with validation
+local function get_timer_log_level()
+	local level_name = utils.get_variable("TIMERS_LOG_LEVEL", false):upper()
+	if ngx[level_name] then
+		return ngx[level_name]
+	else
+		return INFO -- Default to INFO if invalid
+	end
+end
+
 function clusterstore:initialize(pool)
 	-- Get variables
 	local variables = {
@@ -149,7 +159,8 @@ function clusterstore:connect(readonly)
 		self:close()
 		return false, "error while getting reused times : " .. err
 	end
-	logger:log(INFO, "redis reused times = " .. tostring(times))
+	local timers_log_level = get_timer_log_level()
+	logger:log(timers_log_level, "redis reused times = " .. tostring(times))
 	return true, "success", times
 end
 
