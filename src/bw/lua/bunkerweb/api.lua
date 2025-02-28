@@ -346,7 +346,7 @@ api.global.GET["^/bans$"] = function(self)
 			local ban_data
 			ok, ban_data = pcall(decode, result)
 			if not ok then
-				ban_data = { reason = result, service = "unknown", date = -1, ban_scope = "system" }
+				ban_data = { reason = result, service = "unknown", date = -1, ban_scope = "global" }
 			end
 			table.insert(data, {
 				ip = k:sub(9, #k),
@@ -354,7 +354,7 @@ api.global.GET["^/bans$"] = function(self)
 				service = ban_data["service"],
 				date = ban_data["date"],
 				country = ban_data["country"],
-				ban_scope = ban_data["ban_scope"] or "system",
+				ban_scope = ban_data["ban_scope"] or "global",
 				exp = math.floor(ttl),
 			})
 		elseif k:find("^bans_service_") then
