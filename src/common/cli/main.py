@@ -51,15 +51,8 @@ if __name__ == "__main__":
         parser_ban.add_argument(
             "-service",
             type=str,
-            help="service that triggered the ban (default : bwcli)",
+            help="service that triggered the ban (default: bwcli). If specified with a valid service name, ban will be service-specific",
             default="bwcli",
-        )
-        parser_ban.add_argument(
-            "-scope",
-            type=str,
-            choices=["global", "service"],
-            help="scope of the ban (default : global)",
-            default="global",
         )
 
         # Bans subparser
@@ -86,7 +79,7 @@ if __name__ == "__main__":
         if args.command == "unban":
             ret, err = cli.unban(args.ip, args.service)
         elif args.command == "ban":
-            ret, err = cli.ban(args.ip, args.exp, args.reason, args.service, args.scope)
+            ret, err = cli.ban(args.ip, args.exp, args.reason, args.service)
         elif args.command == "bans":
             ret, err = cli.bans()
         elif args.command == "plugin_list":

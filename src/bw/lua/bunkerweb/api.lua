@@ -239,10 +239,10 @@ api.global.POST["^/unban$"] = function(self)
 		return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", "can't decode JSON : " .. ip)
 	end
 
-	-- Delete both system-wide and service-specific bans if they exist
+	-- Delete global ban
 	datastore:delete("bans_ip_" .. ip["ip"])
 
-	-- If service is specified, delete service-specific ban
+	-- If service is specified, delete service-specific ban only
 	if ip["service"] then
 		datastore:delete("bans_service_" .. ip["service"] .. "_ip_" .. ip["ip"])
 	else
@@ -281,7 +281,7 @@ api.global.POST["^/ban$"] = function(self)
 		reason = "manual",
 		service = "unknown",
 		country = "local",
-		ban_scope = "system",
+		ban_scope = "global", -- Default to global for consistency
 	}
 	ban.ip = ip["ip"]
 	if ip["exp"] then
@@ -304,7 +304,7 @@ api.global.POST["^/ban$"] = function(self)
 	ban.country = country
 
 	local ban_key = "bans_ip_" .. ban["ip"]
-	if ban.ban_scope == "service" and ban.service ~= "unknown" then
+	if ban.ban_scope == "service" and ban.service ~= "unknown" and ban.service ~= "bwcli" then
 		ban_key = "bans_service_" .. ban["service"] .. "_ip_" .. ban["ip"]
 	end
 
