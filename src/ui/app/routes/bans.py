@@ -34,7 +34,7 @@ def bans_page():
 
         # Get service-specific bans
         for key in redis_client.scan_iter("bans_service_*_ip_*"):
-            service, ip = key.decode("utf-8").replace("bans_service_", "").split("_ip_")
+            service, ip = key.replace("bans_service_", "").split("_ip_")
             data = redis_client.get(key)
             if not data:
                 continue
