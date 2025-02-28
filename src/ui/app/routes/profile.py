@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Dict, Generator, Tuple, Union
 from flask import Blueprint, Response, jsonify, redirect, render_template, request, stream_with_context, url_for, session
-from flask_login import current_user, login_required, logout_user
+from flask_login import current_user, login_required
 from user_agents import parse
 
 from app.models.totp import totp as TOTP
@@ -267,11 +267,11 @@ def edit_profile():
     if ret:
         return handle_error(f"Couldn't update the {current_user.get_id()} user in the database: {ret}", "profile")
 
-    if "new_password" in request.form:
-        session.clear()
-        logout_user()
-
     flash("The profile has been successfully updated.")
+
+    if "new_password" in request.form:
+        return redirect(url_for("logout.logout_page"))
+
     return redirect(url_for("profile.profile_page"))
 
 
