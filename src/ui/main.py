@@ -727,7 +727,7 @@ def before_request():
                     "error",
                 )
             elif not changes_ongoing and not metadata["failover"] and DATA.get("CONFIG_CHANGED", False):
-                flash("The last changes have been applied successfully.", "success")
+                flash("The last changes have been applied successfully.")
                 DATA["CONFIG_CHANGED"] = False
 
         data = dict(

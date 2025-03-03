@@ -107,24 +107,31 @@ class Instance:
             return f"Instance {self.hostname} has been restarted."
         return f"Can't restart instance {self.hostname}"
 
-    def ban(self, ip: str, exp: float, reason: str, service: str) -> str:
+    def ban(self, ip: str, exp: float, reason: str, service: str, ban_scope: str = "global") -> str:
         try:
-            result = self.apiCaller.send_to_apis("POST", "/ban", data={"ip": ip, "exp": exp, "reason": reason, "service": service})[0]
+            result = self.apiCaller.send_to_apis("POST", "/ban", data={"ip": ip, "exp": exp, "reason": reason, "service": service, "ban_scope": ban_scope})[0]
         except BaseException as e:
             return f"Can't ban {ip} on instance {self.hostname}: {e}"
 
         if result:
-            return f"IP {ip} has been banned on instance {self.hostname} for {exp} seconds{f' with reason: {reason}' if reason else ''}."
+            scope_text = "globally" if ban_scope == "global" else f"for service {service}"
+            return f"IP {ip} has been banned {scope_text} on instance {self.hostname} for {exp} seconds{f' with reason: {reason}' if reason else ''}."
         return f"Can't ban {ip} on instance {self.hostname}"
 
-    def unban(self, ip: str) -> str:
+    def unban(self, ip: str, service: str = None) -> str:
         try:
-            result = self.apiCaller.send_to_apis("POST", "/unban", data={"ip": ip})[0]
+            data = {"ip": ip}
+            if service:
+                data["service"] = service
+
+            result = self.apiCaller.send_to_apis("POST", "/unban", data=data)[0]
         except BaseException as e:
-            return f"Can't unban {ip} on instance {self.hostname}: {e}"
+            service_text = f" for service {service}" if service else ""
+            return f"Can't unban {ip}{service_text} on instance {self.hostname}: {e}"
 
         if result:
-            return f"IP {ip} has been unbanned on instance {self.hostname}."
+            service_text = f" for service {service}" if service else ""
+            return f"IP {ip} has been unbanned{service_text} on instance {self.hostname}."
         return f"Can't unban {ip} on instance {self.hostname}"
 
     def bans(self) -> Tuple[str, dict[str, Any]]:
@@ -194,13 +201,17 @@ class InstancesUtils:
             instance.name for instance in instances or self.get_instances() if instance.status == "down" or instance.reload().startswith("Can't reload")
         ] or "Successfully reloaded instances"
 
-    def ban(self, ip: str, exp: float, reason: str, service: str, *, instances: Optional[List[Instance]] = None) -> Union[list[str], str]:
+    def ban(
+        self, ip: str, exp: float, reason: str, service: str, ban_scope: str = "global", *, instances: Optional[List[Instance]] = None
+    ) -> Union[list[str], str]:
         return [
-            instance.name for instance in instances or self.get_instances(status="up") if instance.ban(ip, exp, reason, service).startswith("Can't ban")
+            instance.name
+            for instance in instances or self.get_instances(status="up")
+            if instance.ban(ip, exp, reason, service, ban_scope).startswith("Can't ban")
         ] or ""
 
-    def unban(self, ip: str, *, instances: Optional[List[Instance]] = None) -> Union[list[str], str]:
-        return [instance.name for instance in instances or self.get_instances(status="up") if instance.unban(ip).startswith("Can't unban")] or ""
+    def unban(self, ip: str, service: str = None, *, instances: Optional[List[Instance]] = None) -> Union[list[str], str]:
+        return [instance.name for instance in instances or self.get_instances(status="up") if instance.unban(ip, service).startswith("Can't unban")] or ""
 
     def get_bans(self, hostname: Optional[str] = None, *, instances: Optional[List[Instance]] = None) -> List[dict[str, Any]]:
         """Get unique bans from all instances or a specific instance and sort them by expiration date"""

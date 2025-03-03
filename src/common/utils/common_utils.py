@@ -3,7 +3,8 @@ from io import BytesIO
 from os import getenv, sep
 from pathlib import Path
 from platform import machine
-from typing import Dict, Union
+from typing import Dict, List, Optional, Union, Any
+import logging
 
 
 def dict_to_frozenset(d):
@@ -88,3 +89,152 @@ def bytes_hash(bio: Union[str, bytes, BytesIO], *, algorithm: str = "sha512") ->
         _hash.update(data)
     bio.seek(0, 0)
     return _hash.hexdigest()
+
+
+def get_redis_client(
+    use_redis: bool = False,
+    redis_host: Optional[str] = None,
+    redis_port: Union[str, int] = "6379",
+    redis_db: Union[str, int] = "0",
+    redis_timeout: Union[str, float] = "1000.0",
+    redis_keepalive_pool: Union[str, int] = "10",
+    redis_ssl: bool = False,
+    redis_username: Optional[str] = None,
+    redis_password: Optional[str] = None,
+    redis_sentinel_hosts: Union[List[List[str]], List[tuple], str] = [],
+    redis_sentinel_username: Optional[str] = None,
+    redis_sentinel_password: Optional[str] = None,
+    redis_sentinel_master: str = "",
+    logger: Optional[logging.Logger] = None,
+    decode_responses: bool = False,
+) -> Any:
+    """
+    Get a Redis client using provided configuration parameters.
+
+    Args:
+        use_redis: Whether to use Redis or not
+        redis_host: Redis host address
+        redis_port: Redis port number
+        redis_db: Redis database number
+        redis_timeout: Connection timeout in milliseconds
+        redis_keepalive_pool: Maximum connections in pool
+        redis_ssl: Whether to use SSL for connection
+        redis_username: Redis username for authentication
+        redis_password: Redis password for authentication
+        redis_sentinel_hosts: List of Redis Sentinel hosts
+        redis_sentinel_username: Redis Sentinel username
+        redis_sentinel_password: Redis Sentinel password
+        redis_sentinel_master: Redis Sentinel master name
+        logger: Logger instance for logging errors
+        decode_responses: Whether to decode byte responses to strings
+
+    Returns:
+        Redis client instance or None if connection fails
+    """
+    if not use_redis:
+        return None
+
+    try:
+        from redis import StrictRedis, Sentinel
+    except ImportError:
+        if logger:
+            logger.error("Redis package is not installed")
+        return None
+
+    if not redis_host and not redis_sentinel_hosts:
+        if logger:
+            logger.error("Neither redis_host nor redis_sentinel_hosts is provided")
+        return None
+
+    # Convert string parameters to appropriate types
+    try:
+        if isinstance(redis_port, str):
+            redis_port = int(redis_port)
+
+        if isinstance(redis_db, str):
+            redis_db = int(redis_db)
+
+        if isinstance(redis_timeout, str):
+            redis_timeout = float(redis_timeout)
+
+        if isinstance(redis_keepalive_pool, str):
+            redis_keepalive_pool = int(redis_keepalive_pool)
+    except ValueError as e:
+        if logger:
+            logger.error(f"Error converting redis parameters: {e}")
+            logger.error("Using defaults: redis_port=6379, redis_db=0, redis_timeout=1000.0, redis_keepalive_pool=10")
+        redis_port = 6379
+        redis_db = 0
+        redis_timeout = 1000.0
+        redis_keepalive_pool = 10
+
+    # Process sentinel hosts if provided as string
+    if isinstance(redis_sentinel_hosts, str):
+        redis_sentinel_hosts = [host.split(":") if ":" in host else (host, "26379") for host in redis_sentinel_hosts.split() if host]
+
+    redis_client = None
+
+    try:
+        # Connect via Sentinel if sentinel hosts are provided
+        if redis_sentinel_hosts:
+            if logger:
+                logger.info(f"Connecting to Redis Sentinel cluster: {redis_sentinel_hosts}")
+
+            sentinel = Sentinel(
+                redis_sentinel_hosts,
+                username=redis_sentinel_username,
+                password=redis_sentinel_password,
+                ssl=redis_ssl,
+                socket_timeout=redis_timeout / 1000,
+                socket_connect_timeout=redis_timeout / 1000,
+                socket_keepalive=True,
+                max_connections=redis_keepalive_pool,
+            )
+
+            try:
+                # Test the connection
+                sentinel.discover_master(redis_sentinel_master)
+
+                # Get master connection
+                redis_client = sentinel.master_for(
+                    redis_sentinel_master,
+                    db=redis_db,
+                    username=redis_username,
+                    password=redis_password,
+                    decode_responses=decode_responses,
+                )
+            except Exception as e:
+                if logger:
+                    logger.error(f"Failed to connect to Redis Sentinel: {e}")
+                return None
+
+        # Direct connection to Redis
+        else:
+            if logger:
+                logger.info(f"Connecting to Redis at {redis_host}:{redis_port}")
+
+            redis_client = StrictRedis(
+                host=redis_host,
+                port=redis_port,
+                db=redis_db,
+                username=redis_username,
+                password=redis_password,
+                socket_timeout=redis_timeout / 1000,
+                socket_connect_timeout=redis_timeout / 1000,
+                socket_keepalive=True,
+                max_connections=redis_keepalive_pool,
+                ssl=redis_ssl,
+                decode_responses=decode_responses,
+            )
+
+        # Test the connection
+        redis_client.ping()
+        if logger:
+            logger.info("Successfully connected to Redis")
+
+        return redis_client
+
+    except Exception as e:
+        if logger:
+            logger.error(f"Failed to connect to Redis: {e}")
+        return None

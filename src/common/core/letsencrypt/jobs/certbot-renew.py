@@ -58,7 +58,8 @@ try:
             WORK_DIR,
             "--logs-dir",
             LOGS_DIR,
-        ],
+        ]
+        + (["-v"] if getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")).upper() == "DEBUG" else []),
         stdin=DEVNULL,
         stderr=PIPE,
         universal_newlines=True,

@@ -436,7 +436,7 @@ $(document).ready(function () {
         viewTotal: true,
         cascadePanes: true,
         collapse: false,
-        columns: [2, 4, 6, 7],
+        columns: [2, 4, 7, 8],
       },
     },
     topStart: {},
@@ -622,7 +622,7 @@ $(document).ready(function () {
           targets: -1,
         },
         {
-          targets: [2, 7],
+          targets: [2, 8],
           render: function (data, type, row) {
             if (type === "display" || type === "filter") {
               const date = new Date(data);
@@ -690,7 +690,7 @@ $(document).ready(function () {
               {
                 label: "Next 24 hours",
                 value: function (rowData, rowIdx) {
-                  const date = new Date(rowData[7]);
+                  const date = new Date(rowData[8]);
                   const now = new Date();
                   return date - now < 24 * 60 * 60 * 1000;
                 },
@@ -698,7 +698,7 @@ $(document).ready(function () {
               {
                 label: "Next 7 days",
                 value: function (rowData, rowIdx) {
-                  const date = new Date(rowData[7]);
+                  const date = new Date(rowData[8]);
                   const now = new Date();
                   return date - now < 7 * 24 * 60 * 60 * 1000;
                 },
@@ -706,7 +706,7 @@ $(document).ready(function () {
               {
                 label: "Next 30 days",
                 value: function (rowData, rowIdx) {
-                  const date = new Date(rowData[7]);
+                  const date = new Date(rowData[8]);
                   const now = new Date();
                   return date - now < 30 * 24 * 60 * 60 * 1000;
                 },
@@ -714,7 +714,7 @@ $(document).ready(function () {
               {
                 label: "More than 30 days",
                 value: function (rowData, rowIdx) {
-                  const date = new Date(rowData[7]);
+                  const date = new Date(rowData[8]);
                   const now = new Date();
                   return date - now >= 30 * 24 * 60 * 60 * 1000;
                 },
@@ -723,14 +723,14 @@ $(document).ready(function () {
             combiner: "or",
             orderable: false,
           },
-          targets: 7,
+          targets: 8,
         },
         {
           searchPanes: { show: true },
-          targets: 6,
+          targets: 7,
         },
       ],
-      order: [[6, "asc"]],
+      order: [[7, "asc"]],
       autoFill: false,
       responsive: true,
       select: {
@@ -812,10 +812,25 @@ $(document).ready(function () {
     });
     banClone.find("input[name='reason']").val("ui");
 
-    const deleteButton = banClone.find(".delete-ban");
-    deleteButton.removeClass("disabled");
+    // Replace delete button with a functional one
+    const deleteButtonContainer = banClone.find(".col-12.col-md-1");
+    deleteButtonContainer.html(`
+      <button type="button"
+              class="btn btn-outline-danger btn-sm delete-ban"
+              data-bs-toggle="tooltip"
+              data-bs-placement="right"
+              title="Remove this ban entry">
+        <i class="bx bx-trash bx-xs"></i>
+      </button>
+    `);
+
+    // Initialize ban scope handlers for the cloned item
+    initializeBanScopeHandlers(banClone);
 
     $("#bans-container").append(banClone);
+
+    // Initialize tooltip for the new delete button
+    banClone.find('[data-bs-toggle="tooltip"]').tooltip();
   });
 
   $("#clear-bans").on("click", function () {
@@ -836,9 +851,19 @@ $(document).ready(function () {
       alert("This action is not allowed in read-only mode.");
       return;
     }
-    const banContainer = $(this).closest("li");
-    if (banContainer.attr("id") === "ban-1") return;
-    banContainer.remove();
+
+    // Get the ban item container and remove it
+    const banContainer = $(this).closest("li.ban-item");
+
+    // Double check that we're not deleting the first ban entry
+    if (banContainer.attr("id") === "ban-1") {
+      return;
+    }
+
+    // Fade out and remove
+    banContainer.fadeOut(300, function () {
+      $(this).remove();
+    });
   });
 
   $("#modal-ban-ips").on("hidden.bs.modal", function () {
@@ -934,10 +959,18 @@ $(document).ready(function () {
         const ip = $this.find("input[name='ip']").val().trim();
         const end_date = $this.find(".flatpickr-input").val();
         const reason = $this.find("input[name='reason']").val().trim();
+        const ban_scope = $this.find("select[name='ban_scope']").val();
+        const service =
+          ban_scope === "service"
+            ? $this.find("select[name='service']").val()
+            : "Web UI";
+
         bans.push({
           ip: ip,
           end_date: `${end_date}${getTimeZoneOffset()}`,
           reason: reason,
+          ban_scope: ban_scope,
+          service: service,
         });
       });
 
@@ -966,4 +999,31 @@ $(document).ready(function () {
     // Append the form to the body and submit it
     form.appendTo("body").submit();
   });
+
+  // Initialize ban scope selection for the first ban item
+  initializeBanScopeHandlers($("#ban-1"));
+
+  function initializeBanScopeHandlers($banItem) {
+    const $banScopeSelect = $banItem.find(".ban-scope-select");
+    const $serviceField = $banItem.find(".service-field");
+    const $serviceSelect = $serviceField.find('select[name="service"]');
+
+    // Initial setup
+    toggleServiceField($banScopeSelect.val(), $serviceField, $serviceSelect);
+
+    // Handle change events
+    $banScopeSelect.on("change", function () {
+      toggleServiceField($(this).val(), $serviceField, $serviceSelect);
+    });
+  }
+
+  function toggleServiceField(scopeValue, $serviceField, $serviceSelect) {
+    if (scopeValue === "service") {
+      $serviceField.addClass("show");
+      $serviceSelect.attr("required", true);
+    } else {
+      $serviceField.removeClass("show");
+      $serviceSelect.removeAttr("required");
+    }
+  }
 });

@@ -66,10 +66,10 @@ jobs:
           SSH_IP: ${{ secrets.ARM_SSH_IP }}
           SSH_CONFIG: ${{ secrets.ARM_SSH_CONFIG }}
       - name: Setup Buildx
-        uses: docker/setup-buildx-action@f7ce87c1d6bead3e36075b2ce75da1f6cc28aaca # v3.9.0
+        uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3.10.0
         if: inputs.CACHE_SUFFIX != 'arm'
       - name: Setup Buildx (ARM)
-        uses: docker/setup-buildx-action@f7ce87c1d6bead3e36075b2ce75da1f6cc28aaca # v3.9.0
+        uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3.10.0
         if: inputs.CACHE_SUFFIX == 'arm'
         with:
           endpoint: ssh://root@arm
@@ -89,13 +89,13 @@ jobs:
       # Compute metadata
       - name: Extract metadata
         id: meta
-        uses: docker/metadata-action@369eb591f429131d6889c46b94e711f089e6ca96 # v5.6.1
+        uses: docker/metadata-action@902fa8ec7d6ecbf8d84d538b9b233a880e428804 # v5.7.0
         with:
           images: bunkerity/${{ inputs.IMAGE }}
       # Build cached image
       - name: Build image
         if: inputs.CACHE == true
-        uses: docker/build-push-action@0adf9959216b96bec444f325f1e493d4aa344497 # v6.14.0
+        uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4 # v6.15.0
         with:
           context: .
           file: ${{ inputs.DOCKERFILE }}
@@ -108,7 +108,7 @@ jobs:
       # Build non-cached image
       - name: Build image
         if: inputs.CACHE != true
-        uses: docker/build-push-action@0adf9959216b96bec444f325f1e493d4aa344497 # v6.14.0
+        uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4 # v6.15.0
         with:
           context: .
           file: ${{ inputs.DOCKERFILE }}

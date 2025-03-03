@@ -666,91 +666,131 @@ utils.save_session = function(ctx)
 	end
 end
 
-utils.is_banned = function(ip)
-	-- Check on local datastore
-	local result, err = datastore:get("bans_ip_" .. ip)
-	if not result and err ~= "not found" then
-		return nil, "datastore:get() error : " .. result
-	elseif result and err ~= "not found" then
-		local ok, ban_data = pcall(decode, result)
-		if ok then
-			result = ban_data["reason"]
-		end
-		local ttl
-		ok, ttl = datastore:ttl("bans_ip_" .. ip)
-		if not ok then
-			return true, result, -1
-		end
-		return true, result, ttl
-	end
-	-- Redis case
+utils.is_banned = function(ip, server_name)
+	-- Get Redis config once
 	local use_redis, err = utils.get_variable("USE_REDIS", false)
 	if not use_redis then
-		return nil, "can't get USE_REDIS variable : " .. err
-	elseif use_redis ~= "yes" then
+		return nil, "can't get USE_REDIS variable: " .. err
+	end
+	use_redis = use_redis == "yes"
+
+	local clusterstore
+	if use_redis then
+		clusterstore = require "bunkerweb.clusterstore":new()
+		local ok, connect_err = clusterstore:connect(true)
+		if not ok then
+			return nil, "can't connect to redis: " .. connect_err
+		end
+	end
+
+	-- Helper function to check ban in datastore and Redis
+	local function check_ban(key)
+		-- Check local datastore first
+		local result
+		result, err = datastore:get(key)
+		if result and err ~= "not found" then
+			local ok, ban_data = pcall(decode, result)
+			if ok then
+				result = ban_data["reason"]
+			end
+
+			local ttl
+			-- luacheck: ignore 311
+			ok, ttl = datastore:ttl(key)
+			return true, result, ttl or -1
+		elseif err ~= "not found" then
+			return nil, "datastore:get() error: " .. tostring(result)
+		end
+
+		-- Check Redis if enabled
+		if not use_redis then
+			return false, "not banned"
+		end
+
+		-- Redis atomic script for GET+TTL
+		local redis_script = [[
+			local ret_get = redis.pcall("GET", KEYS[1])
+			if type(ret_get) == "table" and ret_get["err"] ~= nil then
+				return {err = ret_get["err"]}
+			end
+			local ret_ttl = nil
+			if ret_get ~= nil then
+				ret_ttl = redis.pcall("TTL", KEYS[1])
+				if type(ret_ttl) == "table" and ret_ttl["err"] ~= nil then
+					return {err = ret_ttl["err"]}
+				end
+			end
+			return {ret_get, ret_ttl}
+		]]
+
+		-- Execute Redis script
+		local data, script_err = clusterstore:call("eval", redis_script, 1, key)
+		if not data then
+			return nil, "redis call error: " .. script_err
+		elseif data.err then
+			return nil, "redis script error: " .. data.err
+		elseif data[1] ~= null then
+			-- Update local cache
+			local ok, cache_err = datastore:set(key, data[1], data[2])
+			if not ok then
+				logger:log(WARN, "datastore:set() error: " .. cache_err)
+			end
+
+			-- Parse ban data
+			local ban_data
+			ok, ban_data = pcall(decode, data[1])
+			if ok then
+				data[1] = ban_data["reason"]
+			end
+			return true, data[1], data[2]
+		end
+
 		return false, "not banned"
 	end
-	-- Connect
-	local clusterstore = require "bunkerweb.clusterstore":new()
-	local ok, err = clusterstore:connect(true)
-	if not ok then
-		return nil, "can't connect to redis server : " .. err
-	end
-	-- Redis atomic script : GET+TTL
-	local redis_script = [[
-		local ret_get = redis.pcall("GET", KEYS[1])
-		if type(ret_get) == "table" and ret_get["err"] ~= nil then
-			redis.log(redis.LOG_WARNING, "access GET error : " .. ret_get["err"])
-			return ret_get
-		end
-		local ret_ttl = nil
-		if ret_get ~= nil then
-			ret_ttl = redis.pcall("TTL", KEYS[1])
-			if type(ret_ttl) == "table" and ret_ttl["err"] ~= nil then
-				redis.log(redis.LOG_WARNING, "access TTL error : " .. ret_ttl["err"])
-				return ret_ttl
+
+	-- Check for service-specific ban first if server_name is provided
+	if server_name then
+		local service_key = "bans_service_" .. server_name .. "_ip_" .. ip
+		local banned, reason, ttl = check_ban(service_key)
+		if banned or banned == nil then
+			if clusterstore then
+				clusterstore:close()
 			end
+			return banned, reason, ttl
 		end
-		return {ret_get, ret_ttl}
-	]]
-	-- Execute redis script
-	local data, err = clusterstore:call("eval", redis_script, 1, "bans_ip_" .. ip)
-	if not data then
-		clusterstore:close()
-		return nil, "redis call error : " .. err
-	elseif data.err then
-		clusterstore:close()
-		return nil, "redis script error : " .. data.err
-	elseif data[1] ~= null then
-		clusterstore:close()
-		-- Update local cache
-		ok, err = datastore:set("bans_ip_" .. ip, data[1], data[2])
-		if not ok then
-			return nil, "datastore:set() error : " .. err
-		end
-		local ban_data
-		ok, ban_data = pcall(decode, data[1])
-		if ok then
-			data[1] = ban_data["reason"]
-		end
-		return true, data[1], data[2]
 	end
-	clusterstore:close()
-	return false, "not banned"
+
+	-- Always check for global ban regardless of scope
+	local banned, reason, ttl = check_ban("bans_ip_" .. ip)
+
+	-- Close Redis connection if opened
+	if clusterstore then
+		clusterstore:close()
+	end
+
+	return banned, reason, ttl
 end
 
-utils.add_ban = function(ip, reason, ttl, service, country)
+utils.add_ban = function(ip, reason, ttl, service, country, ban_scope)
+	-- Determine ban key based on scope
+	local ban_key = "bans_ip_" .. ip
+	if ban_scope == "service" and service then
+		ban_key = "bans_service_" .. service .. "_ip_" .. ip
+	end
+
 	-- Set on local datastore
 	local ban_data = encode({
 		reason = reason,
 		service = service or "unknown",
 		date = os.time(),
 		country = country or "local",
+		ban_scope = ban_scope or "global",
 	})
-	local ok, err = datastore:set("bans_ip_" .. ip, ban_data, ttl)
+	local ok, err = datastore:set(ban_key, ban_data, ttl)
 	if not ok then
 		return false, "datastore:set() error : " .. err
 	end
+
 	-- Set on redis
 	local use_redis, err = utils.get_variable("USE_REDIS", false)
 	if not use_redis then
@@ -758,6 +798,7 @@ utils.add_ban = function(ip, reason, ttl, service, country)
 	elseif use_redis ~= "yes" then
 		return true, "success"
 	end
+
 	-- Connect
 	local clusterstore = require "bunkerweb.clusterstore":new()
 	ok, err = clusterstore:connect()
@@ -765,7 +806,7 @@ utils.add_ban = function(ip, reason, ttl, service, country)
 		return false, "can't connect to redis server : " .. err
 	end
 	-- SET call
-	ok, err = clusterstore:call("set", "bans_ip_" .. ip, ban_data, "EX", ttl)
+	ok, err = clusterstore:call("set", ban_key, ban_data, "EX", ttl)
 	if not ok then
 		clusterstore:close()
 		return false, "redis SET failed : " .. err

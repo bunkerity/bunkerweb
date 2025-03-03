@@ -1,6 +1,16 @@
 # Changelog
 
-## v1.6.1-rc2 - ????/??/??
+## v1.6.1-rc3 - ????/??/??
+
+- [BUGFIX] Fix issue where Redis Server returns a `NOPERM` error, ensuring proper handling and preventing 500 errors in the web UI
+- [FEATURE] Enhance ban management with service-specific options and UI improvements
+- [FEATURE] Add `BAD_BEHAVIOR_BAN_SCOPE` setting to control the scope of the ban when using the `Bad Behavior` plugin (default is `service`) - before the bans were global
+- [FEATURE] Add verbose logging option for certbot commands based on log level (when set to `DEBUG`)
+- [FEATURE] Enhance `bwcli` rendering and added support for new service-specific ban options
+- [AUTOCONF] Add missing `redis` dependency
+- [DEPS] Updated coreruleset-v4 version to v4.12.0
+
+## v1.6.1-rc2 - 2025/02/27
 
 - [BUGFIX] Fix shenanigans with settings' plugin_id when updating the config
 - [BUGFIX] Fix rare error where "python3" is not found in docker images
