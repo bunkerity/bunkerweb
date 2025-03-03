@@ -19,54 +19,34 @@ function do_and_check_cmd() {
 echo "Setting ownership for all necessary directories to nginx user and group..."
 do_and_check_cmd chown -R nginx:nginx /usr/share/bunkerweb /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb
 
-# Copy old line from environment file to new one
-# Check if old environment file exists
-if [ -f /var/tmp/variables.env ]; then
-    echo "Old environment file found!"
-    echo "Copying old line from environment file to new one..."
-    while read -r line; do
-        echo "$line" >> /etc/bunkerweb/variables.env
-    done < /var/tmp/variables.env
-    # Remove old environment files
-    echo "Removing old environment files..."
-    do_and_check_cmd rm -f /var/tmp/variables.env
-    do_and_check_cmd chown root:nginx /etc/bunkerweb/variables.env
-    do_and_check_cmd chmod 660 /etc/bunkerweb/variables.env
-else
-    echo "Old environment file not found. Skipping copy..."
-fi
+# Function to migrate files from old locations to new ones
+function migrate_file() {
+    local old_path="$1"
+    local new_path="$2"
 
-# Copy old line from ui environment file to new one
-# Check if old environment file exists
-if [ -f /var/tmp/ui.env ]; then
-    echo "Old ui environment file found!"
-    touch /var/tmp/bunkerweb_upgrade
-    echo "Copying old line from ui environment file to new one..."
-    while read -r line; do
-        echo "$line" >> /etc/bunkerweb/ui.env
-    done < /var/tmp/ui.env
-    # Remove old environment files
-    echo "Removing old environment files..."
-    do_and_check_cmd rm -f /var/tmp/ui.env
-    do_and_check_cmd chown root:nginx /etc/bunkerweb/ui.env
-    do_and_check_cmd chmod 660 /etc/bunkerweb/ui.env
-else
-    echo "Old ui environment file not found. Skipping copy..."
-fi
+    if [ -f "$old_path" ]; then
+        echo "Old file $old_path found!"
+        if [ ! -f /var/tmp/bunkerweb_upgrade ]; then
+            touch /var/tmp/bunkerweb_upgrade
+        fi
+        echo "Copying old file to new location: $new_path..."
+        cp "$old_path" "$new_path"
+        echo "Removing old file..."
+        do_and_check_cmd rm -f "$old_path"
+        do_and_check_cmd chown root:nginx "$new_path"
+        do_and_check_cmd chmod 660 "$new_path"
+        return 0  # Success
+    else
+        echo "Old file $old_path not found. Skipping copy..."
+        return 1  # File not found
+    fi
+}
 
-# Check if old db.sqlite3 file exists
-if [ -f /var/tmp/db.sqlite3 ]; then
-    echo "Old db.sqlite3 file found!"
-    touch /var/tmp/bunkerweb_upgrade
-    do_and_check_cmd cp /var/tmp/db.sqlite3 /var/lib/bunkerweb/db.sqlite3
-    # Remove old db.sqlite3 file
-    echo "Copying old db.sqlite3 file to new one..."
-    do_and_check_cmd rm -f /var/tmp/db.sqlite3
-    do_and_check_cmd chown root:nginx /var/lib/bunkerweb/db.sqlite3
-    do_and_check_cmd chmod 660 /var/lib/bunkerweb/db.sqlite3
-else
-    echo "Old database file not found. Skipping copy..."
-fi
+# Migrate configuration files from old to new locations
+migrate_file "/var/tmp/variables.env" "/etc/bunkerweb/variables.env"
+migrate_file "/var/tmp/scheduler.env" "/etc/bunkerweb/scheduler.env"
+migrate_file "/var/tmp/ui.env" "/etc/bunkerweb/ui.env"
+migrate_file "/var/tmp/db.sqlite3" "/var/lib/bunkerweb/db.sqlite3"
 
 # Create /var/www/html if needed
 if [ ! -d /var/www/html ] ; then
@@ -78,9 +58,10 @@ else
     echo "/var/www/html directory already exists, skipping copy..."
 fi
 
+systemctl daemon-reload
+
 # Manage the BunkerWeb service
 echo "Configuring BunkerWeb service..."
-systemctl daemon-reload
 
 # Determine if BunkerWeb should be enabled based on modes
 # Logic: enable if (standalone mode) OR (worker mode only) AND service not disabled
@@ -187,8 +168,10 @@ SERVER_NAME=
 EOF
             fi
 
-            # Create empty UI environment file
-            : > /etc/bunkerweb/ui.env
+            # Create empty UI environment file if it doesn't exist
+            if [ ! -f /etc/bunkerweb/ui.env ]; then
+                touch /etc/bunkerweb/ui.env
+            fi
 
             # Set proper permissions
             do_and_check_cmd chown root:nginx /etc/bunkerweb/ui.env /etc/bunkerweb/variables.env
