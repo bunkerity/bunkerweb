@@ -1958,7 +1958,7 @@ Below is the list of related settings:
 You can select from the following versions of the OWASP Core Rule Set (CRS) to suit your application's security needs:
 
 - **`3`**: The stable [v3.3.7](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.7) release of the OWASP CRS.
-- **`4`**: The stable [v4.11.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.11.0) release of the OWASP CRS (**default**).
+- **`4`**: The stable [v4.12.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.12.0) release of the OWASP CRS (**default**).
 - **`nightly`**: The [nightly build](https://github.com/coreruleset/coreruleset/releases/tag/nightly), which is updated daily with the latest rules and improvements.
 
 !!! example "Nightly Build"

@@ -8,8 +8,6 @@ The first step is to download the CRS itself. The CRS project strongly recommend
 
 Official CRS releases can be found at the following URL: https://github.com/coreruleset/coreruleset/releases.
 
-For *production* environments, it is recommended to use the latest release, which is v4.0.0. For *testing* the bleeding edge CRS version, nightly releases are also provided.
-
 ### Verifying Releases
 
 {{% notice note %}}

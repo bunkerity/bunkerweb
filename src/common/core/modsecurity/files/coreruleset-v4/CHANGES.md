@@ -5,7 +5,26 @@
   or the CRS Google Group at
 * https://groups.google.com/a/owasp.org/g/modsecurity-core-rule-set-project
 
-## Version 4.12.0 - TBD
+## Version 4.12.0 - 2025-03-01
+
+## What's Changed
+### 🆕 New features and detections 🎉
+* feat: prevent V1 cookie format use by @fzipi in https://github.com/coreruleset/coreruleset/pull/4006
+* feat: added new restricted files for openstack and docker compose by @azurit in https://github.com/coreruleset/coreruleset/pull/4021
+### 🧰 Other Changes
+* fix: multipart header tag consistency by @Xhoenix in https://github.com/coreruleset/coreruleset/pull/3992
+* fix: prevent invalid commands matches on 5 characters or less (932220 PL-2, 932230 PL-1, 932232 PL-3, 932235 PL-1, 932236 PL-2, 932237 PL-3, 932238 PL-3, 932239 PL-2, 932250 PL-1, 932260 PL-1) by @EsadCetiner in https://github.com/coreruleset/coreruleset/pull/3735
+* docs: add warning about default charsets modification by @fzipi in https://github.com/coreruleset/coreruleset/pull/4003
+* fix: response splitting rules and tests by @theseion in https://github.com/coreruleset/coreruleset/pull/4009
+* fix(933160): use better regex by @fzipi in https://github.com/coreruleset/coreruleset/pull/4010
+* fix: move fopen to 933160 to resolve fp with `RootAndLeafOpenCamera.jpg` (933150 PL-1, 933160 PL-1) by @EsadCetiner in https://github.com/coreruleset/coreruleset/pull/4016
+* fix(941210): update log message to reflect rule javascript word detection by @fzipi in https://github.com/coreruleset/coreruleset/pull/4023
+* fix: remove .env from lfi-os-files.data by @theseion in https://github.com/coreruleset/coreruleset/pull/4024
+
+## New Contributors
+* @renovate made their first contribution in https://github.com/coreruleset/coreruleset/pull/4000
+
+**Full Changelog**: https://github.com/coreruleset/coreruleset/compare/v4.11.0...v4.12.0
 
 ## Version 4.11.0 - 2025-01-27
 

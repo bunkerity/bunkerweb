@@ -33,7 +33,7 @@
 .dbus/
 .docker
 .drush/
-.env
+# .env
 .eslintignore
 .fbcindex
 .forward

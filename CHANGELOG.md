@@ -1,6 +1,11 @@
 # Changelog
 
-## v1.6.1-rc2 - ????/??/??
+## v1.6.1 - ????/??/??
+
+- [BUGFIX] Fix issue where Redis Server returns a `NOPERM` error, ensuring proper handling and preventing 500 errors in the web UI
+- [DEPS] Updated coreruleset-v4 version to v4.12.0
+
+## v1.6.1-rc2 - 2025/02/27
 
 - [BUGFIX] Fix shenanigans with settings' plugin_id when updating the config
 - [BUGFIX] Fix rare error where "python3" is not found in docker images

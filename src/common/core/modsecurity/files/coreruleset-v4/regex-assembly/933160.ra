@@ -18,7 +18,7 @@
 ##!$ \)?\s*
 
 ##! mandatory parentheses containing optional parameters
-##!$ \(.*\)
+##!$ \([^)]*\)
 
 assert
 assert_options
@@ -28,6 +28,7 @@ eval
 exec
 file
 filegroup
+fopen
 glob
 imagegif
 imagejpeg

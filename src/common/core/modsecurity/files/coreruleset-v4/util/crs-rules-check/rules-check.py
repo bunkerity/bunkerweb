@@ -374,7 +374,7 @@ class Check(object):
                     if oparg:
                         for o in oparg:
                             o = o.lower()
-                            o = re.sub(r"tx\.", "", o, re.I)
+                            o = re.sub(r"tx\.", "", o, count = 0, flags = re.I)
                             if (o not in self.globtxvars or phase < self.globtxvars[o]['phase']) and \
                               not re.match(r"^\d$", o) and \
                               not re.match(r"/.*/", o) and \
