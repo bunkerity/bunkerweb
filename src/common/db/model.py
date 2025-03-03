@@ -317,7 +317,7 @@ class Metadata(Base):
     reload_ui_plugins = Column(Boolean, default=False, nullable=True)
     failover = Column(Boolean, default=None, nullable=True)
     integration = Column(INTEGRATIONS_ENUM, default="Unknown", nullable=False)
-    version = Column(String(32), default="1.6.1", nullable=False)
+    version = Column(String(32), default="1.6.1-rc3", nullable=False)
 
 
 ## UI Models
