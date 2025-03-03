@@ -76,6 +76,8 @@ def instances_new():
     if ret:
         return handle_error(f"Couldn't create the instance in the database: {ret}", "instances", True)
 
+    flash(f"Instance {instance['hostname']} created successfully.")
+
     return redirect(url_for("loading", next=url_for("instances.instances_page"), message=f"Creating new instance {instance['hostname']}"))
 
 
