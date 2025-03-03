@@ -67,6 +67,14 @@ reload() {
     start
 }
 
+# Function to restart the UI
+restart() {
+    echo "Restarting UI service..."
+    stop
+    sleep 2
+    start
+}
+
 # Check the command line argument
 case $1 in
     "start")
@@ -78,8 +86,11 @@ case $1 in
     "reload")
         reload
         ;;
+    "restart")
+        restart
+        ;;
     *)
-        echo "Usage: $0 {start|stop|reload}"
+        echo "Usage: $0 {start|stop|reload|restart}"
         exit 1
         ;;
 esac

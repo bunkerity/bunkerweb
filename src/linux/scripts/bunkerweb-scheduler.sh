@@ -21,11 +21,12 @@ fi
 
 # Display usage information
 function display_help() {
-    echo "Usage: $(basename "$0") [start|stop|reload]"
+    echo "Usage: $(basename "$0") [start|stop|reload|restart]"
     echo "Options:"
     echo "  start:   Create configurations and run necessary jobs for the bunkerweb service."
     echo "  stop:    Stop the bunkerweb scheduler service."
     echo "  reload:  Reload the bunkerweb scheduler service."
+    echo "  restart: Stop and then start the bunkerweb scheduler service."
 }
 
 # Start the bunkerweb service
@@ -258,6 +259,13 @@ function reload()
     log "SYSTEMCTL" "ℹ️" "BunkerWeb Scheduler service reloaded ..."
 }
 
+function restart() {
+    log "SYSTEMCTL" "ℹ️" "Restarting BunkerWeb Scheduler service ..."
+    stop
+    sleep 2
+    start
+}
+
 # List of different args
 case $1 in
     "start")
@@ -268,6 +276,9 @@ case $1 in
     ;;
     "reload")
     reload
+    ;;
+    "restart")
+    restart
     ;;
     *)
     echo "Invalid option!"
