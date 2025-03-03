@@ -7,17 +7,27 @@ source /usr/share/bunkerweb/helpers/utils.sh
 # Set the PYTHONPATH
 export PYTHONPATH=/usr/share/bunkerweb/deps/python:/usr/share/bunkerweb/db
 
-# Create the scheduler.env file if it doesn't exist
-if [ ! -f /etc/bunkerweb/scheduler.env ]; then
-    {
-        echo "LOG_LEVEL=info"
-        echo "LOG_TO_FILE=yes"
-        echo "HEALTHCHECK_INTERVAL=30 # in seconds"
-        echo "RELOAD_MIN_TIMEOUT=5 # in seconds (the minimum is calculated by the formula and whichever is greater: RELOAD_MIN_TIMEOUT or count(SERVERS) * 2))"
-    } > /etc/bunkerweb/scheduler.env
-    chown root:nginx /etc/bunkerweb/scheduler.env
-    chmod 660 /etc/bunkerweb/scheduler.env
-fi
+# Helper function to extract variables with fallback
+function get_env_var() {
+    local var_name=$1
+    local default_value=$2
+    local value
+
+    # First try scheduler.env
+    value=$(grep "^${var_name}=" /etc/bunkerweb/scheduler.env 2>/dev/null | cut -d '=' -f 2)
+
+    # If not found, try variables.env
+    if [ -z "$value" ] && [ -f /etc/bunkerweb/variables.env ]; then
+        value=$(grep "^${var_name}=" /etc/bunkerweb/variables.env 2>/dev/null | cut -d '=' -f 2)
+    fi
+
+    # Return default if still not found
+    if [ -z "$value" ]; then
+        echo "$default_value"
+    else
+        echo "$value"
+    fi
+}
 
 # Display usage information
 function display_help() {
@@ -38,6 +48,21 @@ function start() {
     # Check if the scheduler is already running
     stop
 
+    # Create the scheduler.env file if it doesn't exist
+    if [ ! -f /etc/bunkerweb/scheduler.env ]; then
+        {
+            echo "LOG_LEVEL=info"
+            echo "LOG_TO_FILE=yes"
+            echo "# in seconds"
+            echo "HEALTHCHECK_INTERVAL=30"
+            echo ""
+            echo "# in seconds (the minimum is calculated by the formula and whichever is greater: RELOAD_MIN_TIMEOUT or count(SERVERS) * 2))"
+            echo "RELOAD_MIN_TIMEOUT=5"
+        } > /etc/bunkerweb/scheduler.env
+        chown root:nginx /etc/bunkerweb/scheduler.env
+        chmod 660 /etc/bunkerweb/scheduler.env
+    fi
+
     # Create dummy variables.env
     if [ ! -f /etc/bunkerweb/variables.env ]; then
         {
@@ -54,18 +79,19 @@ function start() {
         log "SYSTEMCTL" "ℹ️" "Created dummy variables.env file"
     fi
 
-    CUSTOM_LOG_LEVEL="$(grep "^LOG_LEVEL=" /etc/bunkerweb/scheduler.env | cut -d '=' -f 2)"
+    # Extract environment variables with fallback
+    CUSTOM_LOG_LEVEL=$(get_env_var "LOG_LEVEL" "INFO")
     export CUSTOM_LOG_LEVEL
 
-    SCHEDULER_LOG_TO_FILE="$(grep "^SCHEDULER_LOG_TO_FILE=" /etc/bunkerweb/variables.env | cut -d '=' -f 2)"
-    if [ -z "$SCHEDULER_LOG_TO_FILE" ] ; then
-        SCHEDULER_LOG_TO_FILE="$(grep "^LOG_TO_FILE=" /etc/bunkerweb/scheduler.env | cut -d '=' -f 2)"
-
-        if [ -z "$SCHEDULER_LOG_TO_FILE" ] ; then
-            SCHEDULER_LOG_TO_FILE="yes"
-        fi
+    SCHEDULER_LOG_TO_FILE=$(get_env_var "SCHEDULER_LOG_TO_FILE" "")
+    if [ -z "$SCHEDULER_LOG_TO_FILE" ]; then
+        SCHEDULER_LOG_TO_FILE=$(get_env_var "LOG_TO_FILE" "yes")
     fi
     export SCHEDULER_LOG_TO_FILE
+
+    # Extract DATABASE_URI with fallback
+    DATABASE_URI=$(get_env_var "DATABASE_URI" "sqlite:////var/lib/bunkerweb/db.sqlite3")
+    export DATABASE_URI
 
     # Database migration section
     log "SYSTEMCTL" "ℹ️" "Checking database configuration..."
@@ -75,21 +101,7 @@ function start() {
     }
 
     # Extract and validate database type
-    DATABASE_URI=${DATABASE_URI:-sqlite:////var/lib/bunkerweb/db.sqlite3}
-    export DATABASE_URI
     DATABASE=$(echo "$DATABASE_URI" | awk -F: '{print $1}' | awk -F+ '{print $1}')
-
-    # Validate database type with case-insensitive comparison
-    db_type=$(echo "$DATABASE" | tr '[:upper:]' '[:lower:]')
-    case "$db_type" in
-        sqlite|mysql|mariadb|postgresql)
-            log "SYSTEMCTL" "ℹ️" "Using database type: $DATABASE"
-            ;;
-        *)
-            log "SYSTEMCTL" "❌" "Unsupported database type: $DATABASE"
-            exit 1
-            ;;
-    esac
 
     # Check current version and stamp
     log "SYSTEMCTL" "ℹ️" "Checking database version..."

@@ -46,18 +46,6 @@ DATABASE_URI=${DATABASE_URI:-sqlite:////var/lib/bunkerweb/db.sqlite3}
 export DATABASE_URI
 DATABASE=$(echo "$DATABASE_URI" | awk -F: '{print $1}' | awk -F+ '{print $1}')
 
-# Validate database type with case-insensitive comparison
-db_type=$(echo "$DATABASE" | tr '[:upper:]' '[:lower:]')
-case "$db_type" in
-	sqlite|mysql|mariadb|postgresql)
-		log "ENTRYPOINT" "ℹ️" "Using database type: $DATABASE"
-		;;
-	*)
-		log "ENTRYPOINT" "❌" "Unsupported database type: $DATABASE"
-		exit 1
-		;;
-esac
-
 # Check current version and stamp
 log "ENTRYPOINT" "ℹ️" "Checking database version..."
 installed_version=$(cat /usr/share/bunkerweb/VERSION)
