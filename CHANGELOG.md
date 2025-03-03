@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.6.1 - ????/??/??
+## v1.6.1-rc3 - ????/??/??
 
 - [BUGFIX] Fix issue where Redis Server returns a `NOPERM` error, ensuring proper handling and preventing 500 errors in the web UI
 - [FEATURE] Enhance ban management with service-specific options and UI improvements
