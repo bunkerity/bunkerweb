@@ -7,7 +7,7 @@ from flask import Blueprint, Response, flash as flask_flash, redirect, render_te
 from flask_login import current_user, login_required
 
 from app.dependencies import BW_CONFIG, BW_INSTANCES_UTILS, DB
-from app.utils import flash
+from app.utils import LOGGER, flash
 
 from app.routes.utils import get_redis_client, get_remain, handle_error, verify_data_in_form
 
@@ -21,28 +21,33 @@ def bans_page():
 
     bans = []
     if redis_client:
-        # Get global bans
-        for key in redis_client.scan_iter("bans_ip_*"):
-            ip = key.replace("bans_ip_", "")
-            data = redis_client.get(key)
-            if not data:
-                continue
-            exp = redis_client.ttl(key)
-            ban_data = loads(data)
-            ban_data["ban_scope"] = ban_data.get("ban_scope", "global")  # Default to global scope if not specified
-            bans.append({"ip": ip, "exp": exp} | ban_data)  # type: ignore
+        try:
+            # Get global bans
+            for key in redis_client.scan_iter("bans_ip_*"):
+                ip = key.replace("bans_ip_", "")
+                data = redis_client.get(key)
+                if not data:
+                    continue
+                exp = redis_client.ttl(key)
+                ban_data = loads(data)
+                ban_data["ban_scope"] = ban_data.get("ban_scope", "global")  # Default to global scope if not specified
+                bans.append({"ip": ip, "exp": exp} | ban_data)  # type: ignore
 
-        # Get service-specific bans
-        for key in redis_client.scan_iter("bans_service_*_ip_*"):
-            service, ip = key.replace("bans_service_", "").split("_ip_")
-            data = redis_client.get(key)
-            if not data:
-                continue
-            exp = redis_client.ttl(key)
-            ban_data = loads(data)
-            ban_data["ban_scope"] = "service"  # Always service scope for these keys
-            ban_data["service"] = service
-            bans.append({"ip": ip, "exp": exp} | ban_data)  # type: ignore
+            # Get service-specific bans
+            for key in redis_client.scan_iter("bans_service_*_ip_*"):
+                service, ip = key.replace("bans_service_", "").split("_ip_")
+                data = redis_client.get(key)
+                if not data:
+                    continue
+                exp = redis_client.ttl(key)
+                ban_data = loads(data)
+                ban_data["ban_scope"] = "service"  # Always service scope for these keys
+                ban_data["service"] = service
+                bans.append({"ip": ip, "exp": exp} | ban_data)  # type: ignore
+        except BaseException as e:
+            LOGGER.error(f"Couldn't get bans from redis: {e}")
+            flash("Failed to fetch bans from Redis, see logs for more information.", "error")
+            bans = []
 
     instance_bans = BW_INSTANCES_UTILS.get_bans()
 
@@ -145,17 +150,21 @@ def bans_ban():
             continue
 
         if redis_client:
-            # Determine key based on ban scope from the request
-            if ban_scope == "service" and service != "Web UI":
-                ban_key = f"bans_service_{service}_ip_{ban['ip']}"
-            else:
-                ban_key = f"bans_ip_{ban['ip']}"
-                ban_scope = "global"  # Ensure consistency if service is missing
+            try:
+                # Determine key based on ban scope from the request
+                if ban_scope == "service" and service != "Web UI":
+                    ban_key = f"bans_service_{service}_ip_{ban['ip']}"
+                else:
+                    ban_key = f"bans_ip_{ban['ip']}"
+                    ban_scope = "global"  # Ensure consistency if service is missing
 
-            ok = redis_client.set(ban_key, dumps({"reason": reason, "date": time(), "service": service, "ban_scope": ban_scope}))
-            if not ok:
-                flash(f"Couldn't ban {ban['ip']} on redis", "error")
-            redis_client.expire(ban_key, int(ban_end))
+                ok = redis_client.set(ban_key, dumps({"reason": reason, "date": time(), "service": service, "ban_scope": ban_scope}))
+                if not ok:
+                    flash(f"Couldn't ban {ban['ip']} on redis", "error")
+                redis_client.expire(ban_key, int(ban_end))
+            except BaseException as e:
+                LOGGER.error(f"Couldn't ban {ban['ip']} on redis: {e}")
+                flash(f"Failed to ban {ban['ip']} on redis, see logs for more information.", "error")
 
         resp = BW_INSTANCES_UTILS.ban(ban["ip"], ban_end, reason, service, ban_scope)
         if resp:
@@ -200,16 +209,20 @@ def bans_unban():
             service = None
 
         if redis_client:
-            # Delete global ban
-            redis_client.delete(f"bans_ip_{unban['ip']}")
+            try:
+                # Delete global ban
+                redis_client.delete(f"bans_ip_{unban['ip']}")
 
-            # If service is specified, only delete that service-specific ban
-            if service and service not in ("unknown", "Web UI"):
-                redis_client.delete(f"bans_service_{service}_ip_{unban['ip']}")
-            else:
-                # Otherwise, scan and delete all service-specific bans for this IP
-                for key in redis_client.scan_iter(f"bans_service_*_ip_{unban['ip']}"):
-                    redis_client.delete(key)
+                # If service is specified, only delete that service-specific ban
+                if service and service not in ("unknown", "Web UI"):
+                    redis_client.delete(f"bans_service_{service}_ip_{unban['ip']}")
+                else:
+                    # Otherwise, scan and delete all service-specific bans for this IP
+                    for key in redis_client.scan_iter(f"bans_service_*_ip_{unban['ip']}"):
+                        redis_client.delete(key)
+            except BaseException as e:
+                LOGGER.error(f"Couldn't unban {unban['ip']} on redis: {e}")
+                flash(f"Failed to unban {unban['ip']} on redis, see logs for more information.", "error")
 
         # Pass the service to the unban method
         resp = BW_INSTANCES_UTILS.unban(unban["ip"], service)

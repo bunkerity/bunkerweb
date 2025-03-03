@@ -279,6 +279,6 @@ def get_redis_client():
     )
 
     if not redis_client:
-        flash("Couldn't connect to redis, ban list might be incomplete", "error")
+        flash("Couldn't connect to redis", "error")
 
     return redis_client

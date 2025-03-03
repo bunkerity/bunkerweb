@@ -189,7 +189,6 @@ class CLI(ApiCaller):
                     # Delete all service-specific bans for this IP
                     for key in self.__redis.scan_iter(f"bans_service_*_ip_{ip}"):
                         self.__redis.delete(key)
-
             except Exception as e:
                 self.__logger.error(f"Failed to delete ban for {ip} from redis: {e}")
 
@@ -283,34 +282,37 @@ class CLI(ApiCaller):
             servers[k] = v.get("data", [])
 
         if self.__redis:
-            servers["redis"] = []
-            # Get global bans
-            for key in self.__redis.scan_iter("bans_ip_*"):
-                ip = key.replace("bans_ip_", "")
-                data = self.__redis.get(key)
-                if not data:
-                    continue
-                exp = self.__redis.ttl(key)
-                ban_data = loads(data)
-                ban_data["ip"] = ip
-                ban_data["exp"] = exp
-                ban_data["ban_scope"] = ban_data.get("ban_scope", "global")
-                servers["redis"].append(ban_data)
+            try:
+                servers["redis"] = []
+                # Get global bans
+                for key in self.__redis.scan_iter("bans_ip_*"):
+                    ip = key.replace("bans_ip_", "")
+                    data = self.__redis.get(key)
+                    if not data:
+                        continue
+                    exp = self.__redis.ttl(key)
+                    ban_data = loads(data)
+                    ban_data["ip"] = ip
+                    ban_data["exp"] = exp
+                    ban_data["ban_scope"] = ban_data.get("ban_scope", "global")
+                    servers["redis"].append(ban_data)
 
-            # Get service-specific bans
-            for key in self.__redis.scan_iter("bans_service_*_ip_*"):
-                key_str = key
-                service, ip = key_str.replace("bans_service_", "").split("_ip_")
-                data = self.__redis.get(key)
-                if not data:
-                    continue
-                exp = self.__redis.ttl(key)
-                ban_data = loads(data)
-                ban_data["ip"] = ip
-                ban_data["exp"] = exp
-                ban_data["service"] = service
-                ban_data["ban_scope"] = "service"
-                servers["redis"].append(ban_data)
+                # Get service-specific bans
+                for key in self.__redis.scan_iter("bans_service_*_ip_*"):
+                    key_str = key
+                    service, ip = key_str.replace("bans_service_", "").split("_ip_")
+                    data = self.__redis.get(key)
+                    if not data:
+                        continue
+                    exp = self.__redis.ttl(key)
+                    ban_data = loads(data)
+                    ban_data["ip"] = ip
+                    ban_data["exp"] = exp
+                    ban_data["service"] = service
+                    ban_data["ban_scope"] = "service"
+                    servers["redis"].append(ban_data)
+            except Exception as e:
+                self.__logger.error(f"Failed to get bans from redis: {e}")
 
         servers = {k: sorted(v, key=itemgetter("date")) for k, v in servers.items()}
 
