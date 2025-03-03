@@ -140,6 +140,9 @@ def certbot_new(
     if force:
         command.append("--force-renewal")
 
+    if getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")).upper() == "DEBUG":
+        command.append("-v")
+
     current_date = datetime.now()
     process = Popen(command, stdin=DEVNULL, stderr=PIPE, universal_newlines=True, env=cmd_env)
 

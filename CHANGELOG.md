@@ -3,6 +3,7 @@
 ## v1.6.1 - ????/??/??
 
 - [BUGFIX] Fix issue where Redis Server returns a `NOPERM` error, ensuring proper handling and preventing 500 errors in the web UI
+- [FEATURE] Add verbose logging option for certbot commands based on log level (when set to `DEBUG`)
 - [DEPS] Updated coreruleset-v4 version to v4.12.0
 
 ## v1.6.1-rc2 - 2025/02/27
