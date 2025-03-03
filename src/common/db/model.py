@@ -323,7 +323,6 @@ class Metadata(Base):
 ## UI Models
 
 THEMES_ENUM = Enum("light", "dark", name="themes_enum")
-TABLES_ENUM = Enum("bans", "cache", "configs", "instances", "jobs", "plugins", "reports", "services", name="tables_enum")
 
 
 class JSONText(TypeDecorator):
@@ -448,7 +447,7 @@ class UserColumnsPreferences(Base):
 
     id = Column(Integer, Identity(start=1, increment=1), primary_key=True)
     user_name = Column(String(256), ForeignKey("bw_ui_users.username", onupdate="cascade", ondelete="cascade"), nullable=False)
-    table_name = Column(TABLES_ENUM, nullable=False)
+    table_name = Column(String(256), nullable=False)
     columns = Column(JSONText, nullable=False)
 
     user = relationship("Users", back_populates="columns_preferences")
