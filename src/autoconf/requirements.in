@@ -1,4 +1,4 @@
 docker==7.1.0
 kubernetes==32.0.1
 pytz==2025.1
-redis==5.2.1
+redis[hiredis]==5.2.1
