@@ -24,6 +24,10 @@ resource "scaleway_instance_server" "instance" {
   image = "debian_bookworm"
   # routed_ip_enabled = true
   ip_id = var.linux_ip_id
+  root_volume {
+    volume_type = "l_ssd"
+    size_in_gb = 30
+  }
 }
 
 # Create Ansible inventory file
