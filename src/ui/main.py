@@ -842,13 +842,13 @@ def set_security_headers(response):
 
 
 @app.teardown_request
-def teardown_request(_):
+def teardown_request(teardown):
     if not request.path.startswith(("/css/", "/img/", "/js/", "/json/", "/fonts/", "/libs/")) and current_user.is_authenticated and "session_id" in session:
         Thread(target=mark_user_access, args=(current_user, session["session_id"])).start()
 
     for hook in app.config["TEARDOWN_REQUEST_HOOKS"]:
         try:
-            hook()
+            hook(teardown)
         except Exception:
             LOGGER.exception("Error in teardown_request hook")
 
