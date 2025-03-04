@@ -730,6 +730,21 @@ def before_request():
                 flash("The last changes have been applied successfully.")
                 DATA["CONFIG_CHANGED"] = False
 
+        # Determine if this is a CORS or AJAX request
+        fetch_mode = request.headers.get("Sec-Fetch-Mode")
+        x_requested_with = request.headers.get("X-Requested-With")
+        is_cors = fetch_mode == "cors" or (x_requested_with and x_requested_with.lower() == "xmlhttprequest")
+
+        if not is_cors:
+            seen = set()
+            for f in DATA.get("TO_FLASH", []):
+                content = f["content"]
+                if content in seen:
+                    continue
+                seen.add(content)
+                flash(content, f["type"], save=f.get("save", True))
+            DATA["TO_FLASH"] = []
+
         data = dict(
             current_endpoint=current_endpoint,
             script_nonce=app.config["SCRIPT_NONCE"],
@@ -890,15 +905,6 @@ def check_reloading():
             LOGGER.warning("Reloading took too long, forcing the state to be reloaded")
             flask_flash("Forced the status to be reloaded", "error")
             DATA["RELOADING"] = False
-
-    seen = set()
-    for f in DATA.get("TO_FLASH", []):
-        content = f["content"]
-        if content in seen:
-            continue
-        seen.add(content)
-        flash(content, f["type"], save=f.get("save", True))
-    DATA["TO_FLASH"] = []
 
     return jsonify({"reloading": DATA.get("RELOADING", False)})
 

@@ -333,13 +333,14 @@ def services_service_page(service: str):
                 DATA["TO_FLASH"].append({"content": operation, "type": "warning"})
                 operation = None
             elif not error:
-                operation = f"Configuration successfully {'created' if service == 'new' else 'saved'} for service {variables['SERVER_NAME'].split(' ')[0]}, the Scheduler will be in charge of applying the changes."
+                operation = f"Configuration successfully {'created' if service == 'new' else 'saved'} for service {variables['SERVER_NAME'].split(' ')[0]}."
 
             if operation:
                 if operation.startswith(("Can't", "The database is read-only")):
                     DATA["TO_FLASH"].append({"content": operation, "type": "error"})
                 else:
                     DATA["TO_FLASH"].append({"content": operation, "type": "success"})
+                    DATA["TO_FLASH"].append({"content": "The Scheduler will be in charge of applying the changes.", "type": "success", "save": False})
 
             DATA["RELOADING"] = False
 
