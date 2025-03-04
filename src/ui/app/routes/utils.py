@@ -275,7 +275,6 @@ def get_redis_client():
         redis_sentinel_password=db_config.get("REDIS_SENTINEL_PASSWORD") or None,
         redis_sentinel_master=db_config.get("REDIS_SENTINEL_MASTER", ""),
         logger=LOGGER,
-        decode_responses=True,
     )
 
     if not redis_client:

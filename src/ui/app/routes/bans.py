@@ -2,6 +2,7 @@ from datetime import datetime
 from json import JSONDecodeError, dumps, loads
 from math import floor
 from time import time
+from traceback import format_exc
 
 from flask import Blueprint, Response, flash as flask_flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
@@ -24,27 +25,38 @@ def bans_page():
         try:
             # Get global bans
             for key in redis_client.scan_iter("bans_ip_*"):
-                ip = key.replace("bans_ip_", "")
+                key_str = key.decode("utf-8", "replace")
+                ip = key_str.replace("bans_ip_", "")
                 data = redis_client.get(key)
                 if not data:
                     continue
                 exp = redis_client.ttl(key)
-                ban_data = loads(data)
-                ban_data["ban_scope"] = ban_data.get("ban_scope", "global")  # Default to global scope if not specified
-                bans.append({"ip": ip, "exp": exp} | ban_data)  # type: ignore
+                try:
+                    ban_data = loads(data.decode("utf-8", "replace"))
+                    ban_data["ban_scope"] = ban_data.get("ban_scope", "global")  # Default to global scope if not specified
+                    bans.append({"ip": ip, "exp": exp} | ban_data)
+                except Exception as e:
+                    LOGGER.debug(format_exc())
+                    LOGGER.error(f"Failed to decode ban data for {ip}: {e}")
 
             # Get service-specific bans
             for key in redis_client.scan_iter("bans_service_*_ip_*"):
-                service, ip = key.replace("bans_service_", "").split("_ip_")
+                key_str = key.decode("utf-8", "replace")
+                service, ip = key_str.replace("bans_service_", "").split("_ip_")
                 data = redis_client.get(key)
                 if not data:
                     continue
                 exp = redis_client.ttl(key)
-                ban_data = loads(data)
-                ban_data["ban_scope"] = "service"  # Always service scope for these keys
-                ban_data["service"] = service
-                bans.append({"ip": ip, "exp": exp} | ban_data)  # type: ignore
+                try:
+                    ban_data = loads(data.decode("utf-8", "replace"))
+                    ban_data["ban_scope"] = "service"  # Always service scope for these keys
+                    ban_data["service"] = service
+                    bans.append({"ip": ip, "exp": exp} | ban_data)
+                except Exception as e:
+                    LOGGER.debug(format_exc())
+                    LOGGER.error(f"Failed to decode ban data for {ip} on service {service}: {e}")
         except BaseException as e:
+            LOGGER.debug(format_exc())
             LOGGER.error(f"Couldn't get bans from redis: {e}")
             flash("Failed to fetch bans from Redis, see logs for more information.", "error")
             bans = []

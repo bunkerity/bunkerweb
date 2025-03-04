@@ -3,13 +3,14 @@
 from datetime import datetime
 from json import dumps, loads
 from operator import itemgetter
-from time import time
 from os import environ, get_terminal_size, getenv, sep
 from os.path import join
 from pathlib import Path
 from subprocess import DEVNULL, STDOUT, run
 from sys import path as sys_path
+from traceback import format_exc
 from typing import Any, Optional, Tuple
+from time import time
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("api",), ("db",))]:
     if deps_path not in sys_path:
@@ -119,7 +120,6 @@ class CLI(ApiCaller):
             redis_sentinel_password=self.__get_variable("REDIS_SENTINEL_PASSWORD", None) or None,
             redis_sentinel_master=self.__get_variable("REDIS_SENTINEL_MASTER", ""),
             logger=self.__logger,
-            decode_responses=True,
         )
 
         if self.__use_redis and not self.__redis:
@@ -291,11 +291,15 @@ class CLI(ApiCaller):
                     if not data:
                         continue
                     exp = self.__redis.ttl(key)
-                    ban_data = loads(data)
-                    ban_data["ip"] = ip
-                    ban_data["exp"] = exp
-                    ban_data["ban_scope"] = ban_data.get("ban_scope", "global")
-                    servers["redis"].append(ban_data)
+                    try:
+                        ban_data = loads(data.decode("utf-8", "replace"))
+                        ban_data["ip"] = ip
+                        ban_data["exp"] = exp
+                        ban_data["ban_scope"] = ban_data.get("ban_scope", "global")
+                        servers["redis"].append(ban_data)
+                    except Exception as e:
+                        self.__logger.debug(format_exc())
+                        self.__logger.error(f"Failed to decode ban data for {ip}: {e}")
 
                 # Get service-specific bans
                 for key in self.__redis.scan_iter("bans_service_*_ip_*"):
@@ -305,12 +309,16 @@ class CLI(ApiCaller):
                     if not data:
                         continue
                     exp = self.__redis.ttl(key)
-                    ban_data = loads(data)
-                    ban_data["ip"] = ip
-                    ban_data["exp"] = exp
-                    ban_data["service"] = service
-                    ban_data["ban_scope"] = "service"
-                    servers["redis"].append(ban_data)
+                    try:
+                        ban_data = loads(data.decode("utf-8", "replace"))
+                        ban_data["ip"] = ip
+                        ban_data["exp"] = exp
+                        ban_data["service"] = service
+                        ban_data["ban_scope"] = "service"
+                        servers["redis"].append(ban_data)
+                    except Exception as e:
+                        self.__logger.debug(format_exc())
+                        self.__logger.error(f"Failed to decode ban data for {ip} on service {service}: {e}")
             except Exception as e:
                 self.__logger.error(f"Failed to get bans from redis: {e}")
 

@@ -106,7 +106,6 @@ def get_redis_client(
     redis_sentinel_password: Optional[str] = None,
     redis_sentinel_master: str = "",
     logger: Optional[logging.Logger] = None,
-    decode_responses: bool = False,
 ) -> Any:
     """
     Get a Redis client using provided configuration parameters.
@@ -126,7 +125,6 @@ def get_redis_client(
         redis_sentinel_password: Redis Sentinel password
         redis_sentinel_master: Redis Sentinel master name
         logger: Logger instance for logging errors
-        decode_responses: Whether to decode byte responses to strings
 
     Returns:
         Redis client instance or None if connection fails
@@ -201,7 +199,6 @@ def get_redis_client(
                     db=redis_db,
                     username=redis_username,
                     password=redis_password,
-                    decode_responses=decode_responses,
                 )
             except Exception as e:
                 if logger:
@@ -224,7 +221,6 @@ def get_redis_client(
                 socket_keepalive=True,
                 max_connections=redis_keepalive_pool,
                 ssl=redis_ssl,
-                decode_responses=decode_responses,
             )
 
         # Test the connection
