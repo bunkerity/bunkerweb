@@ -8,6 +8,7 @@
 - [FEATURE] Add verbose logging option for certbot commands based on log level (when set to `DEBUG`)
 - [FEATURE] Enhance `bwcli` rendering and added support for new service-specific ban options
 - [AUTOCONF] Add missing `redis` dependency
+- [MISC] improve Redis data handling and error logging in CLI and routes
 - [DEPS] Updated coreruleset-v4 version to v4.12.0
 
 ## v1.6.1-rc2 - 2025/02/27

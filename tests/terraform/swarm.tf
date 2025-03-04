@@ -28,7 +28,7 @@ resource "scaleway_instance_server" "instances" {
   name = "cicd_bw_swarm_${count.index}"
   type = "DEV1-L"
   image = "debian_bookworm"
-  routed_ip_enabled = true
+  # routed_ip_enabled = true
   ip_id = var.swarm_ips_id[count.index]
 }
 

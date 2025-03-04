@@ -22,7 +22,7 @@ resource "scaleway_instance_server" "instance" {
   name = "cicd_bw_linux"
   type = "DEV1-M"
   image = "debian_bookworm"
-  routed_ip_enabled = true
+  # routed_ip_enabled = true
   ip_id = var.linux_ip_id
 }
 

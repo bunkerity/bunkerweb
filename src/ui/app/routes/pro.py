@@ -5,7 +5,7 @@ from flask import Blueprint, Response, redirect, render_template, request, url_f
 from flask_login import current_user, login_required
 
 from app.dependencies import BW_CONFIG, DATA, DB
-from app.routes.utils import get_remain, handle_error, manage_bunkerweb, verify_data_in_form, wait_applying
+from app.routes.utils import get_remain, handle_error, verify_data_in_form, wait_applying
 from app.utils import flash
 
 
@@ -77,7 +77,22 @@ def pro_key():
 
     def update_license_key(variables: dict):
         wait_applying()
-        manage_bunkerweb("global_config", variables, threaded=True)
+
+        operation, error = BW_CONFIG.edit_global_conf(variables, check_changes=True)
+
+        if not error:
+            operation = "The PRO license key was updated successfully."
+
+        if operation:
+            if operation.startswith(("Can't", "The database is read-only")):
+                DATA["TO_FLASH"].append({"content": operation, "type": "error"})
+            else:
+                DATA["TO_FLASH"].append({"content": operation, "type": "success"})
+                DATA["TO_FLASH"].append(
+                    {"content": "The Scheduler will be in charge of applying the changes and downloading the PRO plugins.", "type": "success", "save": False}
+                )
+
+        DATA["RELOADING"] = False
 
     DATA.update(
         {
