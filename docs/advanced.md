@@ -2289,13 +2289,14 @@ This security measure, known as **"Bad Behavior,"** is implemented and enabled b
 
 Below is the list of related settings:
 
-|           Setting           |            Default            | Description                                                                  |
-| :-------------------------: | :---------------------------: | :--------------------------------------------------------------------------- |
-|     `USE_BAD_BEHAVIOR`      |             `yes`             | When set to `yes`, the Bad behavior feature will be enabled.                 |
-| `BAD_BEHAVIOR_STATUS_CODES` | `400 401 403 404 405 429 444` | List of HTTP status codes considered as "suspicious".                        |
-|  `BAD_BEHAVIOR_THRESHOLD`   |             `10`              | Maximum number of "suspicious" HTTP status codes within the time period.     |
-|  `BAD_BEHAVIOR_COUNT_TIME`  |             `60`              | Period of time during which we count "suspicious" HTTP status codes.         |
-|   `BAD_BEHAVIOR_BAN_TIME`   |            `86400`            | The duration time (in seconds) of a ban when a client reached the threshold. |
+|           Setting           |            Default            | Description                                                                                                                     |
+| :-------------------------: | :---------------------------: | :------------------------------------------------------------------------------------------------------------------------------ |
+|     `USE_BAD_BEHAVIOR`      |             `yes`             | When set to `yes`, the Bad behavior feature will be enabled.                                                                    |
+| `BAD_BEHAVIOR_STATUS_CODES` | `400 401 403 404 405 429 444` | List of HTTP status codes considered as "suspicious".                                                                           |
+|  `BAD_BEHAVIOR_THRESHOLD`   |             `10`              | Maximum number of "suspicious" HTTP status codes within the time period.                                                        |
+|  `BAD_BEHAVIOR_COUNT_TIME`  |             `60`              | Period of time during which we count "suspicious" HTTP status codes.                                                            |
+|   `BAD_BEHAVIOR_BAN_TIME`   |            `86400`            | The duration time (in seconds) of a ban when a client reached the threshold.                                                    |
+|  `BAD_BEHAVIOR_BAN_SCOPE`   |           `service`           | Determines the level of the ban. 'service' will ban the IP for the service only, 'global' will ban the IP for the whole system. |
 
 By default, BunkerWeb's **"Bad Behavior"** feature works as follows:
 
@@ -2488,7 +2489,7 @@ You can use the following settings to set up whitelisting :
 | Setting                     | Default                                                                                                                                                                      | Context   | Multiple | Description                                                                                                                                                         |
 | --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `USE_WHITELIST`             | `yes`                                                                                                                                                                        | multisite | no       | Activate whitelist feature.                                                                                                                                         |
-| `WHITELIST_IP`              | ``                                                                                                                                                                           | multisite | no       | List of IP/network, separated with spaces, to put into the whitelist.                                                                                               |
+| `WHITELIST_IP`              |                                                                                                                                                                              | multisite | no       | List of IP/network, separated with spaces, to put into the whitelist.                                                                                               |
 | `WHITELIST_RDNS`            | `.google.com .googlebot.com .yandex.ru .yandex.net .yandex.com .search.msn.com .baidu.com .baidu.jp .crawl.yahoo.net .fwd.linkedin.com .twitter.com .twttr.com .discord.com` | multisite | no       | List of reverse DNS suffixes, separated with spaces, to whitelist.                                                                                                  |
 | `WHITELIST_RDNS_GLOBAL`     | `yes`                                                                                                                                                                        | multisite | no       | Only perform RDNS whitelist checks on global IP addresses.                                                                                                          |
 | `WHITELIST_ASN`             | `32934`                                                                                                                                                                      | multisite | no       | List of ASN numbers, separated with spaces, to whitelist.                                                                                                           |
