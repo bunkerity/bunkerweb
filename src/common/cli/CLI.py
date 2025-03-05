@@ -127,8 +127,13 @@ class CLI(ApiCaller):
             self.__use_redis = False
 
         super().__init__()
-        # Add terminal width detection
-        self.__terminal_width = get_terminal_size().columns
+        # Add terminal width detection with error handling for non-TTY environments
+        try:
+            self.__terminal_width = get_terminal_size().columns
+        except (OSError, IOError):
+            self.__logger.debug("Unable to determine terminal size. Using default width.")
+            self.__terminal_width = 80  # Default width for non-TTY environments
+
         if self.__db:
             for db_instance in self.__db.get_instances():
                 self.apis.append(API(f"http://{db_instance['hostname']}:{db_instance['port']}", db_instance["server_name"]))
