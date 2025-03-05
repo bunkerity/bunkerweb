@@ -4,6 +4,7 @@
     "local>coreruleset/renovate-config",
     "schedule:weekly"
   ],
+  "ignorePaths": [],
   "enabledManagers": [
     "docker-compose"
   ]

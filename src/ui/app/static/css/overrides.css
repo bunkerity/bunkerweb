@@ -1029,12 +1029,30 @@ div.dtsp-panesContainer
   z-index: 1080;
 }
 
-.bg-light-subtle {
-  overflow-x: hidden;
+/* Service field transition effects */
+.service-field {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  transition: all 0.3s ease-in-out;
 }
 
-.bg-dark-subtle {
-  overflow-x: hidden;
+.service-field.show {
+  max-height: 120px; /* Adjust based on content size */
+  opacity: 1;
+  margin-bottom: 1rem;
+  padding-top: 0.5rem;
+}
+
+/* Make modal transitions smoother */
+.modal.fade .modal-dialog {
+  transition: transform 0.2s ease-out;
+}
+
+.modal-content {
+  transition: all 0.2s ease;
 }
 
 /*
@@ -1460,4 +1478,51 @@ html.dark-style div.dts div.dataTables_scrollBody table {
 
 .dark-style .form-control:disabled {
   background-color: #133044;
+}
+
+/* Ban modal scrollability improvements */
+#modal-ban-ips .modal-body {
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+#bans-container {
+  overflow-y: visible;
+  padding-bottom: 10px;
+}
+
+@media (max-height: 768px) {
+  #modal-ban-ips .modal-body {
+    max-height: 50vh;
+  }
+}
+
+@media (max-height: 576px) {
+  #modal-ban-ips .modal-body {
+    max-height: 40vh;
+  }
+}
+
+/* Keep the header and buttons visible when scrolling */
+#modal-ban-ips .modal-header {
+  position: sticky;
+  top: 0;
+  background-color: inherit;
+  z-index: 5;
+  border-top-left-radius: inherit;
+  border-top-right-radius: inherit;
+}
+
+#modal-ban-ips .modal-footer {
+  position: sticky;
+  bottom: 0;
+  background-color: inherit;
+  z-index: 5;
+  border-bottom-left-radius: inherit;
+  border-bottom-right-radius: inherit;
+}
+
+/* Ensure the ban items have proper spacing */
+#bans-container .ban-item {
+  margin-bottom: 8px;
 }

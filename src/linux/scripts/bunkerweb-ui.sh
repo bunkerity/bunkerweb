@@ -3,32 +3,71 @@
 # Set the PYTHONPATH
 export PYTHONPATH=/usr/share/bunkerweb/deps/python:/usr/share/bunkerweb/ui
 
-# Create the ui.env file if it doesn't exist
-if [ ! -f /etc/bunkerweb/ui.env ]; then
-    {
-        echo "# OVERRIDE_ADMIN_CREDS=no"
-        echo "ADMIN_USERNAME="
-        echo "ADMIN_PASSWORD="
-        echo "# FLASK_SECRET=changeme"
-        echo "# TOTP_SECRETS=changeme"
-        echo "LISTEN_ADDR=127.0.0.1"
-        echo "# LISTEN_PORT=7000"
-        echo "FORWARDED_ALLOW_IPS=127.0.0.1"
-    } > /etc/bunkerweb/ui.env
-    chown root:nginx /etc/bunkerweb/ui.env
-    chmod 660 /etc/bunkerweb/ui.env
-fi
+# Helper function to extract variables with fallback
+function get_env_var() {
+    local var_name=$1
+    local default_value=$2
+    local value
+
+    # First try ui.env
+    value=$(grep "^${var_name}=" /etc/bunkerweb/ui.env 2>/dev/null | cut -d '=' -f 2)
+
+    # If not found, try variables.env
+    if [ -z "$value" ] && [ -f /etc/bunkerweb/variables.env ]; then
+        value=$(grep "^${var_name}=" /etc/bunkerweb/variables.env 2>/dev/null | cut -d '=' -f 2)
+    fi
+
+    # Return default if still not found
+    if [ -z "$value" ]; then
+        echo "$default_value"
+    else
+        echo "$value"
+    fi
+}
 
 # Function to start the UI
 start() {
     stop
 
     echo "Starting UI"
-    export LISTEN_ADDR="127.0.0.1"
-    export FORWARDED_ALLOW_IPS="127.0.0.1"
+
+    # Create the ui.env file if it doesn't exist
+    if [ ! -f /etc/bunkerweb/ui.env ]; then
+        {
+            echo "# OVERRIDE_ADMIN_CREDS=no"
+            echo "ADMIN_USERNAME="
+            echo "ADMIN_PASSWORD="
+            echo "# FLASK_SECRET=changeme"
+            echo "# TOTP_SECRETS=changeme"
+            echo "LISTEN_ADDR=127.0.0.1"
+            echo "# LISTEN_PORT=7000"
+            echo "FORWARDED_ALLOW_IPS=127.0.0.1"
+        } > /etc/bunkerweb/ui.env
+        chown root:nginx /etc/bunkerweb/ui.env
+        chmod 660 /etc/bunkerweb/ui.env
+    fi
+
+    # Extract environment variables with fallback
+    LISTEN_ADDR=$(get_env_var "LISTEN_ADDR" "127.0.0.1")
+    export LISTEN_ADDR
+
+    FORWARDED_ALLOW_IPS=$(get_env_var "FORWARDED_ALLOW_IPS" "127.0.0.1")
+    export FORWARDED_ALLOW_IPS
+
     export CAPTURE_OUTPUT="yes"
-    # shellcheck disable=SC2046
-    export $(cat /etc/bunkerweb/ui.env)
+
+    # Export all variables from variables.env
+    if [ -f /etc/bunkerweb/variables.env ]; then
+        # shellcheck disable=SC2046
+        export $(grep -v '^#' /etc/bunkerweb/variables.env | xargs)
+    fi
+
+    # Export all variables from ui.env
+    # But we keep the above explicit exports to ensure defaults are properly set
+    if [ -f /etc/bunkerweb/ui.env ]; then
+        # shellcheck disable=SC2046
+        export $(grep -v '^#' /etc/bunkerweb/ui.env | xargs)
+    fi
 
     if [ -f "/var/run/bunkerweb/tmp-ui.pid" ]; then
         rm -f /var/run/bunkerweb/tmp-ui.pid
@@ -67,6 +106,14 @@ reload() {
     start
 }
 
+# Function to restart the UI
+restart() {
+    echo "Restarting UI service..."
+    stop
+    sleep 2
+    start
+}
+
 # Check the command line argument
 case $1 in
     "start")
@@ -78,8 +125,11 @@ case $1 in
     "reload")
         reload
         ;;
+    "restart")
+        restart
+        ;;
     *)
-        echo "Usage: $0 {start|stop|reload}"
+        echo "Usage: $0 {start|stop|reload|restart}"
         exit 1
         ;;
 esac

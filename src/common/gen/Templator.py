@@ -66,7 +66,7 @@ class Templator:
         self._jinja_cache_dir = Path(sep, "var", "cache", "bunkerweb", "jinja_cache")
         self._jinja_cache_dir.mkdir(parents=True, exist_ok=True)
         self._templates = templates
-        self._global_templates = [template.name for template in Path(self._templates).glob("**/*.conf")]
+        self._global_templates = [template.name for template in Path(self._templates).rglob("*.conf")]
         self._core = Path(core)
         self._plugins = Path(plugins)
         self._pro_plugins = Path(pro_plugins)
@@ -199,7 +199,9 @@ class Templator:
             template_info.append((template, name))
 
         # Separate templates into two groups
-        priority_templates = [info for info in template_info if any(info[0].startswith(prefix) for prefix in ["modsec", "modsec-crs", "crs-plugins-before", "crs-plugins-after"])]
+        priority_templates = [
+            info for info in template_info if any(info[0].startswith(prefix) for prefix in ("modsec", "modsec-crs", "crs-plugins-before", "crs-plugins-after"))
+        ]
         other_templates = [info for info in template_info if info not in priority_templates]
 
         # Step 4: Define the rendering function

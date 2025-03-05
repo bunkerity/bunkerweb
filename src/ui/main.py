@@ -727,8 +727,23 @@ def before_request():
                     "error",
                 )
             elif not changes_ongoing and not metadata["failover"] and DATA.get("CONFIG_CHANGED", False):
-                flash("The last changes have been applied successfully.", "success")
+                flash("The last changes have been applied successfully.")
                 DATA["CONFIG_CHANGED"] = False
+
+        # Determine if this is a CORS or AJAX request
+        fetch_mode = request.headers.get("Sec-Fetch-Mode")
+        x_requested_with = request.headers.get("X-Requested-With")
+        is_cors = fetch_mode == "cors" or (x_requested_with and x_requested_with.lower() == "xmlhttprequest")
+
+        if not is_cors:
+            seen = set()
+            for f in DATA.get("TO_FLASH", []):
+                content = f["content"]
+                if content in seen:
+                    continue
+                seen.add(content)
+                flash(content, f["type"], save=f.get("save", True))
+            DATA["TO_FLASH"] = []
 
         data = dict(
             current_endpoint=current_endpoint,
@@ -827,13 +842,13 @@ def set_security_headers(response):
 
 
 @app.teardown_request
-def teardown_request(_):
+def teardown_request(teardown):
     if not request.path.startswith(("/css/", "/img/", "/js/", "/json/", "/fonts/", "/libs/")) and current_user.is_authenticated and "session_id" in session:
         Thread(target=mark_user_access, args=(current_user, session["session_id"])).start()
 
     for hook in app.config["TEARDOWN_REQUEST_HOOKS"]:
         try:
-            hook()
+            hook(teardown)
         except Exception:
             LOGGER.exception("Error in teardown_request hook")
 
@@ -890,15 +905,6 @@ def check_reloading():
             LOGGER.warning("Reloading took too long, forcing the state to be reloaded")
             flask_flash("Forced the status to be reloaded", "error")
             DATA["RELOADING"] = False
-
-    seen = set()
-    for f in DATA.get("TO_FLASH", []):
-        content = f["content"]
-        if content in seen:
-            continue
-        seen.add(content)
-        flash(content, f["type"], save=f.get("save", True))
-    DATA["TO_FLASH"] = []
 
     return jsonify({"reloading": DATA.get("RELOADING", False)})
 

@@ -140,6 +140,9 @@ def certbot_new(
     if force:
         command.append("--force-renewal")
 
+    if getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")).upper() == "DEBUG":
+        command.append("-v")
+
     current_date = datetime.now()
     process = Popen(command, stdin=DEVNULL, stderr=PIPE, universal_newlines=True, env=cmd_env)
 
@@ -527,7 +530,7 @@ try:
         LOGGER.info("No wildcard domains found, skipping wildcard certificate(s) generation...")
 
     # * Clearing all missing credentials files
-    for file in CACHE_PATH.glob("**/*"):
+    for file in CACHE_PATH.rglob("*"):
         if "etc" in file.parts or not file.is_file() or file.suffix not in (".ini", ".env", ".json"):
             continue
         # ? If the file is not in the wildcard groups, remove it

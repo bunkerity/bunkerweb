@@ -141,7 +141,7 @@
                id="avatar-url-white"
                value="{{ url_for('static', filename='img/avatar_profil_BW-white.png') }}" />
         <!-- prettier-ignore -->
-        {% if not starting and  current_endpoint != "loading" %}
+        {% if not starting and current_endpoint != "loading" %}
             {% include "flash.html" %}
         {% endif %}
         {% block page %}{% endblock %}

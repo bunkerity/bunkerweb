@@ -51,6 +51,8 @@ bin/ar
 bin/arch
 bin/aria2c
 bin/arj
+bin/arjdisp
+bin/arj-register
 bin/arp
 bin/as
 bin/ascii-xfr
@@ -95,7 +97,9 @@ bin/bzless
 bin/bzmore
 bin/bzz
 bin/c89
+bin/c89-gcc
 bin/c99
+bin/c99-gcc
 bin/cancel
 bin/capsh
 bin/cat
@@ -111,6 +115,7 @@ bin/check_raid
 bin/check_ssl_cert
 bin/check_statusfile
 bin/chef
+bin/chef-
 bin/chflags
 bin/chgrp
 bin/chmod
@@ -124,6 +129,7 @@ bin/clang
 bin/clang++
 bin/cmp
 bin/cobc
+bin/cobcrun
 bin/column
 bin/comm
 bin/command
@@ -165,6 +171,7 @@ bin/docker
 bin/done
 bin/dosbox
 bin/dpkg
+bin/dpkg-
 bin/du
 bin/dvips
 bin/e2fsck
@@ -193,6 +200,10 @@ bin/export
 bin/expr
 bin/facter
 bin/fc
+bin/fdfind
+bin/fdisk
+bin/fdmount
+bin/fdumount
 bin/fetch
 bin/fg
 bin/fgrep
@@ -207,6 +218,7 @@ bin/fmt
 bin/fold
 bin/foreach
 bin/fping
+bin/fping6
 bin/ftp
 bin/ftpstats
 bin/ftpwho
@@ -223,13 +235,16 @@ bin/HEAD
 bin/POST
 bin/getfacl
 bin/ghc
+bin/ghc-
 bin/ghci
+bin/ghci-
 bin/gimp
 bin/ginsh
 bin/git
 bin/go
 bin/gpg
 bin/grc
+bin/grcat
 bin/grep
 bin/groupmod
 bin/gtester
@@ -259,6 +274,9 @@ bin/ionice
 bin/ip
 bin/ip6tables
 bin/ipconfig
+bin/ippeveprinter
+bin/ippfind
+bin/ipptool
 bin/iptables
 bin/irb
 bin/ispell
@@ -400,6 +418,9 @@ bin/paste
 bin/patch
 bin/pax
 bin/pdb
+bin/pdb2mb
+bin/pdb3
+bin/pdb3.
 bin/pdflatex
 bin/pdftex
 bin/pdksh
@@ -457,6 +478,7 @@ bin/rc
 bin/rcp
 bin/readelf
 bin/realpath
+bin/reboot
 bin/red
 bin/redcarpet
 bin/rename
@@ -476,6 +498,7 @@ bin/rpmdb
 bin/rpmquery
 bin/rpmverify
 bin/rsync
+bin/rsync-ssl
 bin/ruby
 bin/run-mailcap
 bin/run-parts
@@ -522,7 +545,21 @@ bin/strace
 bin/strings
 bin/su
 bin/sudo
+bin/sudoedit
+bin/sudoreplay
+bin/sudo_
 bin/svn
+bin/svnadmin
+bin/svnauthz
+bin/svnbench
+bin/svndumpfilter
+bin/svnfsfs
+bin/svnlook
+bin/svnmucc
+bin/svnrdump
+bin/svnserve
+bin/svnsync
+bin/svnversion
 bin/sysctl
 bin/systemctl
 bin/systemd-resolve

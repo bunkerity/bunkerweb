@@ -27,17 +27,38 @@ class UIDatabase(Database):
     def get_ui_user(self, *, username: Optional[str] = None, as_dict: bool = False) -> Optional[Union[UiUsers, dict]]:
         """Get ui user. If username is None, return the first admin user."""
         with self._db_session() as session:
-            if username:
-                query = session.query(UiUsers).filter_by(username=username)
-            else:
-                query = session.query(UiUsers).filter_by(admin=True)
+            # Build query based on parameters
+            query = session.query(UiUsers)
+            query = query.filter_by(username=username) if username else query.filter_by(admin=True)
             query = query.options(joinedload(UiUsers.roles), joinedload(UiUsers.recovery_codes), joinedload(UiUsers.columns_preferences))
 
             ui_user = query.first()
-
             if not ui_user:
                 return None
 
+            # Ensure admin users have the "admin" role
+            if ui_user.admin and not self.readonly:
+                admin_role_exists = any(role.role_name == "admin" for role in ui_user.roles)
+
+                if not admin_role_exists:
+                    # Check if admin role exists, create it if not
+                    admin_role = session.query(Roles).filter_by(name="admin").first()
+                    if not admin_role:
+                        current_time = datetime.now().astimezone()
+                        admin_role = Roles(name="admin", description="Admins can create new users, edit and read the data.", update_datetime=current_time)
+                        session.add(admin_role)
+
+                        # Add default permissions
+                        for permission in ("manage", "write", "read"):
+                            if not session.query(Permissions).filter_by(name=permission).first():
+                                session.add(Permissions(name=permission))
+                            session.add(RolesPermissions(role_name="admin", permission_name=permission))
+
+                    session.add(RolesUsers(user_name=ui_user.username, role_name="admin"))
+                    session.commit()
+                    session.refresh(ui_user)
+
+            # Add default column preferences if missing
             if not ui_user.columns_preferences and not self.readonly:
                 for table_name, columns in COLUMNS_PREFERENCES_DEFAULTS.items():
                     session.add(UserColumnsPreferences(user_name=ui_user.username, table_name=table_name, columns=columns))
@@ -47,7 +68,7 @@ class UIDatabase(Database):
             if not as_dict:
                 return ui_user
 
-            ui_user_data = {
+            return {
                 "username": ui_user.username,
                 "email": ui_user.email,
                 "password": ui_user.password.encode("utf-8"),
@@ -58,10 +79,8 @@ class UIDatabase(Database):
                 "creation_date": ui_user.creation_date.astimezone(),
                 "update_date": ui_user.update_date.astimezone(),
                 "roles": [role.role_name for role in ui_user.roles],
-                "recovery_codes": [recovery_code.code for recovery_code in ui_user.recovery_codes],
+                "recovery_codes": [rc.code for rc in ui_user.recovery_codes],
             }
-
-            return ui_user_data
 
     def create_ui_user(
         self,
@@ -432,6 +451,10 @@ class UIDatabase(Database):
         with self._db_session() as session:
             columns_preferences = session.query(UserColumnsPreferences).filter_by(user_name=username, table_name=table_name).first()
             if not columns_preferences:
-                return COLUMNS_PREFERENCES_DEFAULTS.get(table_name, {})
+                default_columns = COLUMNS_PREFERENCES_DEFAULTS.get(table_name, {})
+                if not self.readonly and session.query(UiUsers).filter_by(username=username).first():
+                    session.add(UserColumnsPreferences(user_name=username, table_name=table_name, columns=default_columns))
+                    session.commit()
+                return default_columns
 
             return columns_preferences.columns
