@@ -14,7 +14,7 @@ from typing import List, Optional, Union
 from uuid import uuid4
 from zipfile import BadZipFile, ZipFile
 
-from flask import Blueprint, Response, current_app, flash, jsonify, redirect, render_template, request, url_for
+from flask import Blueprint, Response, current_app, jsonify, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from werkzeug.utils import secure_filename
@@ -202,7 +202,6 @@ def plugins_refresh():
         next=True,
     )
 
-    error = 0
     # Upload plugins
     if not tmp_ui_path.exists() or not listdir(str(tmp_ui_path)):
         return handle_error("Please upload new plugins to reload plugins", "plugins", True)
@@ -234,10 +233,9 @@ def plugins_refresh():
                         zip_file.extractall(str(temp_folder_path))
                 except BadZipFile:
                     errors += 1
-                    error = 1
                     message = f"{file} is not a valid zip file. ({folder_name or temp_folder_name})"
                     LOGGER.exception(message)
-                    flash(message, "error")
+                    DATA["TO_FLASH"].append({"content": f"{message}, check logs for more details", "type": "error", "save": False})
             else:
                 try:
                     with tar_open(str(tmp_ui_path.joinpath(file)), errorlevel=2) as tar_file:
@@ -253,22 +251,19 @@ def plugins_refresh():
                             tar_file.extractall(str(temp_folder_path))
                 except ReadError:
                     errors += 1
-                    error = 1
                     message = f"Couldn't read file {file} ({folder_name or temp_folder_name})"
                     LOGGER.exception(message)
-                    flash(message, "error")
+                    DATA["TO_FLASH"].append({"content": f"{message}, check logs for more details", "type": "error", "save": False})
                 except CompressionError:
                     errors += 1
-                    error = 1
                     message = f"{file} is not a valid tar file ({folder_name or temp_folder_name})"
                     LOGGER.exception(message)
-                    flash(message, "error")
+                    DATA["TO_FLASH"].append({"content": f"{message}, check logs for more details", "type": "error", "save": False})
                 except HeaderError:
                     errors += 1
-                    error = 1
                     message = f"The file plugin.json in {file} is not valid ({folder_name or temp_folder_name})"
                     LOGGER.exception(message)
-                    flash(message, "error")
+                    DATA["TO_FLASH"].append({"content": f"{message}, check logs for more details", "type": "error", "save": False})
 
             if is_dir:
                 dirs = [d for d in listdir(str(temp_folder_path)) if temp_folder_path.joinpath(d).is_dir()]
@@ -295,10 +290,12 @@ def plugins_refresh():
 
             if not PLUGIN_NAME_RX.match(folder_name):
                 errors += 1
-                error = 1
-                flash(
-                    f"Invalid plugin name for {temp_folder_name}. (Can only contain numbers, letters, underscores and hyphens (min 4 characters and max 64))",
-                    "error",
+                DATA["TO_FLASH"].append(
+                    {
+                        "content": f"Invalid plugin name for {temp_folder_name}. (Can only contain numbers, letters, underscores and hyphens (min 4 characters and max 64))",
+                        "type": "error",
+                        "save": False,
+                    }
                 )
                 raise Exception
 
@@ -329,87 +326,63 @@ def plugins_refresh():
             new_plugins_ids.append(folder_name)
         except KeyError:
             errors += 1
-            error = 1
-            flash(
-                f"{file} is not a valid plugin (plugin.json file is missing) ({folder_name or temp_folder_name})",
-                "error",
+            DATA["TO_FLASH"].append(
+                {
+                    "content": f"{file} is not a valid plugin (plugin.json file is missing) ({folder_name or temp_folder_name})",
+                    "type": "error",
+                    "save": False,
+                }
             )
         except JSONDecodeError as e:
             errors += 1
-            error = 1
-            flash(
-                f"The file plugin.json in {file} is not valid ({e.msg}: line {e.lineno} column {e.colno} (char {e.pos})) ({folder_name or temp_folder_name})",
-                "error",
+            DATA["TO_FLASH"].append(
+                {
+                    "content": f"The file plugin.json in {file} is not valid ({e.msg}: line {e.lineno} column {e.colno} (char {e.pos})) ({folder_name or temp_folder_name})",
+                    "type": "error",
+                    "save": False,
+                }
             )
         except ValueError:
             errors += 1
-            error = 1
-            flash(
-                f"The file plugin.json is missing one or more of the following keys: <i>{', '.join(PLUGIN_KEYS)}</i> ({folder_name or temp_folder_name})",
-                "error",
+            DATA["TO_FLASH"].append(
+                {
+                    "content": f"The file plugin.json is missing one or more of the following keys: <i>{', '.join(PLUGIN_KEYS)}</i> ({folder_name or temp_folder_name})",
+                    "type": "error",
+                    "save": False,
+                }
             )
         except FileExistsError:
             errors += 1
-            error = 1
-            flash(
-                f"A plugin named {folder_name} already exists",
-                "error",
-            )
+            DATA["TO_FLASH"].append({"content": f"A plugin named {folder_name} already exists", "type": "error", "save": False})
         except (TarError, OSError) as e:
             errors += 1
-            error = 1
-            flash(str(e), "error")
+            DATA["TO_FLASH"].append({"content": str(e), "type": "error", "save": False})
         except Exception as e:
             errors += 1
-            error = 1
-            flash(str(e), "error")
-        finally:
-            if error != 1:
-                flash(f"Successfully created plugin: <b><i>{folder_name}</i></b>")
-
-            error = 0
+            DATA["TO_FLASH"].append({"content": str(e), "type": "error", "save": False})
 
     if errors >= files_count:
         return redirect(url_for("loading", next=url_for("plugins.plugins_page")))
 
-    db_metadata = DB.get_metadata()
-
-    def update_plugins(threaded: bool = False):
+    def update_plugins():
         wait_applying()
 
         plugins = BW_CONFIG.get_plugins(_type="ui", with_data=True)
         for plugin in plugins:
             if plugin in new_plugins_ids:
-                flash(f"Plugin {plugin} already exists", "error")
+                DATA["TO_FLASH"].append({"content": f"Plugin {plugin} already exists", "type": "error"})
                 del new_plugins[new_plugins_ids.index(plugin)]
 
         err = DB.update_external_plugins(new_plugins, _type="ui", delete_missing=False)
         if err:
-            message = f"Couldn't update ui plugins to database: {err}"
-            if threaded:
-                DATA["TO_FLASH"].append({"content": message, "type": "error"})
-            else:
-                flash(message, "error")
+            DATA["TO_FLASH"].append({"content": f"Couldn't update ui plugins to database: {err}", "type": "error"})
         else:
-            message = "Plugins uploaded successfully"
-            if threaded:
-                DATA["TO_FLASH"].append({"content": message, "type": "success"})
-            else:
-                flash("Plugins uploaded successfully")
+            DATA["TO_FLASH"].append({"content": "Plugins uploaded successfully", "type": "success"})
 
         DATA["RELOADING"] = False
 
-    if any(
-        v
-        for k, v in db_metadata.items()
-        if k in ("custom_configs_changed", "external_plugins_changed", "pro_plugins_changed", "plugins_config_changed", "instances_changed")
-    ):
-        DATA["RELOADING"] = True
-        DATA["LAST_RELOAD"] = time()
-
-        Thread(target=update_plugins, args=(True,)).start()
-    else:
-        update_plugins()
+    DATA.update({"RELOADING": True, "LAST_RELOAD": time()})
+    Thread(target=update_plugins).start()
 
     return redirect(url_for("loading", next=url_for("plugins.plugins_page"), message="Reloading plugins"))
 
