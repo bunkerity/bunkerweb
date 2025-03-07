@@ -373,6 +373,10 @@ def plugins_refresh():
                 DATA["TO_FLASH"].append({"content": f"Plugin {plugin} already exists", "type": "error"})
                 del new_plugins[new_plugins_ids.index(plugin)]
 
+        if not new_plugins:
+            DATA["RELOADING"] = False
+            return
+
         err = DB.update_external_plugins(new_plugins, _type="ui", delete_missing=False)
         if err:
             DATA["TO_FLASH"].append({"content": f"Couldn't update ui plugins to database: {err}", "type": "error"})
