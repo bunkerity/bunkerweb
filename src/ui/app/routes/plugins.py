@@ -21,11 +21,10 @@ from werkzeug.utils import secure_filename
 
 from common_utils import bytes_hash  # type: ignore
 
-from app.dependencies import BW_CONFIG, BW_INSTANCES_UTILS, DATA, DB
+from app.dependencies import CORE_PLUGINS_PATH, BW_CONFIG, BW_INSTANCES_UTILS, DATA, DB, EXTERNAL_PLUGINS_PATH, PRO_PLUGINS_PATH
 from app.utils import LOGGER, PLUGIN_NAME_RX, TMP_DIR
 
 from app.routes.utils import PLUGIN_KEYS, error_message, handle_error, verify_data_in_form, wait_applying
-
 
 plugins = Blueprint("plugins", __name__)
 
@@ -91,37 +90,76 @@ def delete_plugin():
     return redirect(url_for("loading", next=url_for("plugins.plugins_page"), message=f"Deleting plugins: {', '.join(plugins)}"))
 
 
+def get_plugin_path(plugin_id: str) -> Optional[Path]:
+    """
+    Find the filesystem path for a plugin given its ID.
+    First checks in pro plugins path, then in external plugins path.
+
+    Args:
+        plugin_id: The plugin ID to search for
+
+    Returns:
+        Path object if found, None otherwise
+    """
+    # Look in pro plugins first (higher priority)
+    pro_path = PRO_PLUGINS_PATH / plugin_id
+    if (pro_path / "ui").exists():
+        return pro_path
+
+    # Then look in external plugins
+    ext_path = EXTERNAL_PLUGINS_PATH / plugin_id
+    if (ext_path / "ui").exists():
+        return ext_path
+
+    # And finally in core plugins
+    core_path = CORE_PLUGINS_PATH / plugin_id
+    if (core_path / "ui").exists():
+        return core_path
+
+    # Plugin not found in filesystem
+    return None
+
+
 def run_action(plugin: str, function_name: str = "", *, tmp_dir: Optional[Path] = None) -> Union[dict, Response]:
     message = ""
+
+    # Try to load from filesystem first if tmp_dir is not provided
     if not tmp_dir:
-        page = DB.get_plugin_page(plugin)
+        plugin_path = get_plugin_path(plugin)
 
-        if not page:
-            return {"status": "ko", "code": 404, "message": "The plugin does not have a page"}
+        if plugin_path and (plugin_path / "ui" / "actions.py").exists():
+            # Plugin exists in filesystem
+            tmp_dir = plugin_path / "ui"
+        else:
+            # Fall back to database if not found in filesystem
+            page = DB.get_plugin_page(plugin)
 
-        try:
-            # Try to import the plugin's custom page
-            tmp_dir = TMP_DIR.joinpath("ui", "action", str(uuid4()))
-            tmp_dir.mkdir(parents=True, exist_ok=True)
+            if not page:
+                return {"status": "ko", "code": 404, "message": "The plugin does not have a page"}
 
-            with tar_open(fileobj=BytesIO(page), mode="r:gz") as tar:
-                for member in tar.getmembers():
-                    # Prevent absolute paths and paths with '..'
-                    if member.name.startswith("/") or ".." in Path(member.name).parts:
-                        return {"status": "ko", "code": 400, "message": "Invalid file path"}
+            try:
+                # Extract from database blob
+                tmp_dir = TMP_DIR.joinpath("ui", "action", str(uuid4()))
+                tmp_dir.mkdir(parents=True, exist_ok=True)
 
-                    # Construct the target path and ensure it is within tmp_dir
-                    target_path = tmp_dir.joinpath(member.name).resolve()
-                    if not str(target_path).startswith(str(tmp_dir)):
-                        return {"status": "ko", "code": 400, "message": "Invalid file path"}
+                with tar_open(fileobj=BytesIO(page), mode="r:gz") as tar:
+                    for member in tar.getmembers():
+                        # Prevent absolute paths and paths with '..'
+                        if member.name.startswith("/") or ".." in Path(member.name).parts:
+                            return {"status": "ko", "code": 400, "message": "Invalid file path"}
 
-                    # Extract the file safely
-                    tar.extract(member, tmp_dir)
+                        # Construct the target path and ensure it is within tmp_dir
+                        target_path = tmp_dir.joinpath(member.name).resolve()
+                        if not str(target_path).startswith(str(tmp_dir)):
+                            return {"status": "ko", "code": 400, "message": "Invalid file path"}
 
-            tmp_dir = tmp_dir.joinpath("ui")
-        except BaseException as e:
-            LOGGER.error(f"An error occurred while extracting the plugin: {e}")
-            return {"status": "ko", "code": 500, "message": "An error occurred while extracting the plugin, see logs for more details"}
+                        # Extract the file safely
+                        tar.extract(member, tmp_dir)
+
+                tmp_dir = tmp_dir.joinpath("ui")
+            except BaseException as e:
+                LOGGER.error(f"An error occurred while extracting the plugin: {e}")
+                return {"status": "ko", "code": 500, "message": "An error occurred while extracting the plugin, see logs for more details"}
 
     try:
         action_file = tmp_dir.joinpath("actions.py")
@@ -133,7 +171,7 @@ def run_action(plugin: str, function_name: str = "", *, tmp_dir: Optional[Path] 
         actions = loader.load_module()
     except BaseException as e:
         sys_path.pop()
-        if function_name != "pre_render":
+        if function_name != "pre_render" and not str(tmp_dir).startswith((str(EXTERNAL_PLUGINS_PATH), str(PRO_PLUGINS_PATH))):
             rmtree(tmp_dir, ignore_errors=True)
             TMP_DIR.joinpath("ui").mkdir(parents=True, exist_ok=True)
 
@@ -167,7 +205,8 @@ def run_action(plugin: str, function_name: str = "", *, tmp_dir: Optional[Path] 
     finally:
         sys_path.pop()
 
-        if function_name != "pre_render":
+        # Only clean up temporary directories that aren't permanent plugin paths
+        if function_name != "pre_render" and not str(tmp_dir).startswith((str(EXTERNAL_PLUGINS_PATH), str(PRO_PLUGINS_PATH))):
             rmtree(tmp_dir, ignore_errors=True)
             TMP_DIR.joinpath("ui").mkdir(parents=True, exist_ok=True)
 
@@ -527,35 +566,50 @@ def custom_plugin_page(plugin: str):
 
     pre_render = {}
     plugin_page = ""
+
     if is_used and is_metrics_on:
-        page = DB.get_plugin_page(plugin)
-        if not page:
-            return error_message("The plugin does not have a page"), 404
+        # Try loading from filesystem first
+        plugin_fs_path = get_plugin_path(plugin)
+        tmp_page_dir = None
 
-        tmp_page_dir = TMP_DIR.joinpath("ui", "page", str(uuid4()))
-        tmp_page_dir.mkdir(parents=True, exist_ok=True)
+        if plugin_fs_path and (plugin_fs_path / "ui").exists():
+            # Use the filesystem path directly
+            tmp_page_dir = plugin_fs_path / "ui"
+            LOGGER.debug(f"Using filesystem path for plugin {plugin}: {tmp_page_dir}")
+        else:
+            # Fall back to database if not found in filesystem
+            page = DB.get_plugin_page(plugin)
+            if not page:
+                return error_message("The plugin does not have a page"), 404
 
-        with tar_open(fileobj=BytesIO(page), mode="r:gz") as tar:
-            for member in tar.getmembers():
-                # Prevent absolute paths and paths with '..'
-                if member.name.startswith("/") or ".." in Path(member.name).parts:
-                    return {"status": "ko", "code": 400, "message": "Invalid file path"}
+            # Extract from database blob to temporary location
+            tmp_page_dir = TMP_DIR.joinpath("ui", "page", str(uuid4()))
+            tmp_page_dir.mkdir(parents=True, exist_ok=True)
 
-                # Construct the target path and ensure it is within tmp_dir
-                target_path = tmp_page_dir.joinpath(member.name).resolve()
-                if not str(target_path).startswith(str(tmp_page_dir)):
-                    return {"status": "ko", "code": 400, "message": "the plugin page has an invalid file path"}
+            with tar_open(fileobj=BytesIO(page), mode="r:gz") as tar:
+                for member in tar.getmembers():
+                    # Prevent absolute paths and paths with '..'
+                    if member.name.startswith("/") or ".." in Path(member.name).parts:
+                        return {"status": "ko", "code": 400, "message": "Invalid file path"}
 
-                # Extract the file safely
-                tar.extract(member, tmp_page_dir)
+                    # Construct the target path and ensure it is within tmp_dir
+                    target_path = tmp_page_dir.joinpath(member.name).resolve()
+                    if not str(target_path).startswith(str(tmp_page_dir)):
+                        return {"status": "ko", "code": 400, "message": "the plugin page has an invalid file path"}
 
-        tmp_page_dir = tmp_page_dir.joinpath("ui")
+                    # Extract the file safely
+                    tar.extract(member, tmp_page_dir)
 
-        LOGGER.debug(f"Plugin {plugin} page extracted successfully")
+            tmp_page_dir = tmp_page_dir.joinpath("ui")
+            LOGGER.debug(f"Plugin {plugin} page extracted from database successfully")
 
+        # Execute pre-render action if exists
         pre_render = run_action(plugin, "pre_render", tmp_dir=tmp_page_dir)
-        if tmp_page_dir.joinpath("template.html").is_file():
-            page_content = tmp_page_dir.joinpath("template.html").read_text(encoding="utf-8")
+        template_path = tmp_page_dir / "template.html"
+
+        if template_path.is_file():
+            page_content = template_path.read_text(encoding="utf-8")
+
             if page_content.startswith('{% extends "base.html" %}'):
                 page_content = """<div class="d-flex align-items-center justify-content-center">
     <div class="text-center text-primary">
@@ -566,8 +620,8 @@ def custom_plugin_page(plugin: str):
 </div>"""
 
             try:
+                # deepcode ignore Ssti: We trust the plugin template
                 plugin_page = (
-                    # deepcode ignore Ssti: We trust the plugin template
                     Environment(
                         loader=FileSystemLoader((tmp_page_dir.as_posix() + "/", join(sep, "usr", "share", "bunkerweb", "ui", "templates") + "/")),
                         autoescape=select_autoescape(["html"]),
@@ -578,5 +632,9 @@ def custom_plugin_page(plugin: str):
             except BaseException:
                 LOGGER.exception("An error occurred while rendering the plugin page")
                 plugin_page = '<div class="mt-2 mb-2 alert alert-danger text-center" role="alert">An error occurred while rendering the plugin page<br/>See logs for more details</div>'
+
+            # Clean up temporary directories if extracted from database
+            if not str(tmp_page_dir).startswith((str(EXTERNAL_PLUGINS_PATH), str(PRO_PLUGINS_PATH))):
+                rmtree(tmp_page_dir.parent, ignore_errors=True)
 
     return render_template("plugin_page.html", plugin_page=plugin_page, plugin=plugin_data, is_used=is_used, is_metrics=is_metrics_on, pre_render=pre_render)

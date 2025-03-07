@@ -500,7 +500,7 @@ def refresh_app_context():
         blueprint_dir = str(bp_dir)
         is_pro = bp_dir in (p.parent for p in pro_bp_dirs)
 
-        # Add directory to sys.path
+        # Add directory to sys_path
         if blueprint_dir not in sys_path:
             sys_path.append(blueprint_dir)
 
