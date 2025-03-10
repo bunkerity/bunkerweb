@@ -753,7 +753,14 @@ def before_request():
         if not request.path.startswith("/loading"):
             if not changes_ongoing and metadata["failover"]:
                 flask_flash(
-                    "The last changes could not be applied because it creates a configuration error on NGINX, please check BunkerWeb's logs for more information. The configuration fell back to the last working one.",
+                    "<p class='p-0 m-0 fst-italic'>The last changes could not be applied because it creates a configuration error on NGINX, please check BunkerWeb's logs for more information. The configuration fell back to the last working one.</p>",
+                    "error",
+                )
+                flask_flash(
+                    f"""<div class='d-flex flex-column'>
+                        <h6 class='fw-bold mb-1'>Failover Message:</h6>
+                        <p class='p-0 m-0 fst-italic'>{metadata['failover_message']}</p>
+                    </div>""",
                     "error",
                 )
             elif not changes_ongoing and not metadata["failover"] and DATA.get("CONFIG_CHANGED", False):
