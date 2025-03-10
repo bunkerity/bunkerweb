@@ -1,5 +1,5 @@
 from logging.config import fileConfig
-
+from os import environ
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 from sqlalchemy.schema import Identity
@@ -20,6 +20,14 @@ if config.config_file_name is not None:
 from model import Base
 
 target_metadata = Base.metadata
+
+# Override sqlalchemy.url with DATABASE_URI environment variable if present
+if "DATABASE_URI" in environ:
+    config.set_main_option("sqlalchemy.url", environ["DATABASE_URI"])
+
+    # Extract the database type from the URI and set version_locations accordingly
+    database_type = environ["DATABASE_URI"].split(":")[0].split("+")[0]
+    config.set_main_option("version_locations", f"{database_type}_versions")
 
 
 # Custom function to exclude Identity columns
