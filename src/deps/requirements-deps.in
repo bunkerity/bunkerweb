@@ -3,7 +3,7 @@ pip==25.0.1
 pip-compile-multi==2.7.1
 pip-tools==7.4.1
 pip-upgrader==1.4.15
-setuptools==75.8.2
+setuptools==76.0.0
 tomli==2.2.1
 urllib3<2.0.0
 wheel==0.45.1
