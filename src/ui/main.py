@@ -268,7 +268,6 @@ with app.app_context():
     DATA.load_from_file()
     if "WORKERS" not in DATA:
         DATA["WORKERS"] = {}
-    DATA["WORKERS"][getpid()] = {"refresh_context": False}
     DATA["FORCE_RELOAD_PLUGIN"] = True
     DB.checked_changes(["ui_plugins"], value=True)
 
@@ -412,7 +411,11 @@ def check_database_state(request_method: str, request_path: str):
 
 def refresh_app_context():
     """Refresh Flask app context by loading hooks and blueprints from plugins."""
-    LOGGER.debug("Refreshing app context")
+    worker_pid = str(getpid())
+    current_generation = DATA.get("REFRESH_GENERATION", 0)
+    worker_generation = DATA.get("WORKERS", {}).get(worker_pid, {}).get("refresh_generation", 0)
+
+    LOGGER.debug(f"Worker {worker_pid} refreshing context (generation {worker_generation} → {current_generation})")
     DATA.load_from_file()
 
     # Initialize tracking structures if they don't exist
@@ -497,7 +500,7 @@ def refresh_app_context():
         blueprint_dir = str(bp_dir)
         is_pro = bp_dir in (p.parent for p in pro_bp_dirs)
 
-        # Add directory to sys.path
+        # Add directory to sys_path
         if blueprint_dir not in sys_path:
             sys_path.append(blueprint_dir)
 
@@ -624,12 +627,20 @@ def refresh_app_context():
     app.jinja_env.cache = {}
     app.jinja_env.loader = app.create_global_jinja_loader()
 
-    # Mark context refresh as complete
-    worker_pid = getpid()
-    if worker_pid not in DATA.get("WORKERS", {}):
-        DATA["WORKERS"][worker_pid] = {}
-    DATA["WORKERS"][worker_pid]["refresh_context"] = False
-    DATA.write_to_file()
+    # Update the worker's refresh generation using set_nested to ensure it's saved properly
+    DATA.set_nested(["WORKERS", worker_pid, "refresh_generation"], current_generation)
+
+    # Remove legacy keys if they exist
+    if "refresh_context" in DATA.get("WORKERS", {}).get(worker_pid, {}):
+        # Use set_nested again to ensure proper update
+        DATA.set_nested(["WORKERS", worker_pid, "refresh_context"], None)
+        DATA["WORKERS"][worker_pid].pop("refresh_context", None)
+
+    # Remove other legacy flags
+    if "NEEDS_CONTEXT_REFRESH" in DATA:
+        del DATA["NEEDS_CONTEXT_REFRESH"]
+
+    LOGGER.debug(f"Worker {worker_pid} completed context refresh to generation {current_generation}")
 
 
 @app.before_request
@@ -658,13 +669,32 @@ def before_request():
 
     if not request.path.startswith(("/css/", "/img/", "/js/", "/json/", "/fonts/", "/libs/")):
         metadata = DB.get_metadata()
+        worker_pid = str(getpid())
 
+        # Ensure worker exists in DATA structure
+        if "WORKERS" not in DATA:
+            DATA["WORKERS"] = {}
+        if worker_pid not in DATA["WORKERS"]:
+            # Use set_nested to properly initialize the worker data
+            DATA.set_nested(["WORKERS", worker_pid, "refresh_generation"], 0)
+
+        # Get current refresh generation and worker's refresh generation
+        current_generation = DATA.get("REFRESH_GENERATION", 0)
+        worker_generation = DATA["WORKERS"][worker_pid].get("refresh_generation", 0)
+
+        # Plugin reload trigger
         if DATA.get("FORCE_RELOAD_PLUGIN", False) or (
             not DATA.get("RELOADING", False) and metadata.get("reload_ui_plugins", False) and not DATA.get("IS_RELOADING_PLUGINS", False)
         ):
             safe_reload_plugins()
+            # Increment refresh generation to trigger refresh for all workers
+            DATA["REFRESH_GENERATION"] = current_generation + 1
+            LOGGER.info(f"Incremented refresh generation to {DATA['REFRESH_GENERATION']}")
+            # Refresh this worker immediately
             refresh_app_context()
-        elif not DATA.get("RELOADING", False) and DATA.get("WORKERS", {}).get(getpid(), {}).get("refresh_context", False):
+        # Normal request - check if this worker needs to refresh
+        elif not DATA.get("RELOADING", False) and worker_generation < current_generation:
+            LOGGER.debug(f"Worker {worker_pid} refreshing (generation {worker_generation} < {current_generation})")
             refresh_app_context()
 
         if datetime.now().astimezone() - datetime.fromisoformat(DATA.get("LATEST_VERSION_LAST_CHECK", "1970-01-01T00:00:00")).astimezone() > timedelta(hours=1):
@@ -723,7 +753,14 @@ def before_request():
         if not request.path.startswith("/loading"):
             if not changes_ongoing and metadata["failover"]:
                 flask_flash(
-                    "The last changes could not be applied because it creates a configuration error on NGINX, please check BunkerWeb's logs for more information. The configuration fell back to the last working one.",
+                    "<p class='p-0 m-0 fst-italic'>The last changes could not be applied because it creates a configuration error on NGINX, please check BunkerWeb's logs for more information. The configuration fell back to the last working one.</p>",
+                    "error",
+                )
+                flask_flash(
+                    f"""<div class='d-flex flex-column'>
+                        <h6 class='fw-bold mb-1'>Failover Message:</h6>
+                        <p class='p-0 m-0 fst-italic'>{metadata['failover_message']}</p>
+                    </div>""",
                     "error",
                 )
             elif not changes_ongoing and not metadata["failover"] and DATA.get("CONFIG_CHANGED", False):

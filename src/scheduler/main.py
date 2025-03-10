@@ -902,6 +902,7 @@ if __name__ == "__main__":
                     threads.append(Thread(target=send_file_to_bunkerweb, args=(CONFIG_PATH, "/confs")))
                     threads[-1].start()
 
+            failover_message = ""
             try:
                 success = True
                 reachable = True
@@ -926,9 +927,18 @@ if __name__ == "__main__":
                     LOGGER.debug(responses)
 
                     for db_instance in SCHEDULER.db.get_instances():
-                        status = responses.get(db_instance["hostname"], {"status": "down"}).get("status", "down")
+                        metadata = responses.get(db_instance["hostname"], {})
+                        status = metadata.get("status", "down")
+
                         if status == "success":
                             success = True
+                        else:
+                            message = metadata.get("msg", "couldn't get message")
+                            if "\n" in message:
+                                message = message.split("\n", 1)[1]
+
+                            failover_message += f"{db_instance['hostname']}:{db_instance['port']} - {message}\n"
+
                         ret = SCHEDULER.db.update_instance(
                             db_instance["hostname"],
                             (
@@ -967,7 +977,7 @@ if __name__ == "__main__":
                 LOGGER.error(f"Exception while reloading after running jobs once scheduling : {e}")
 
             try:
-                SCHEDULER.db.set_metadata({"failover": not success})
+                SCHEDULER.db.set_metadata({"failover": not success, "failover_message": failover_message})
             except BaseException as e:
                 LOGGER.error(f"Error while setting failover to true in the database: {e}")
 

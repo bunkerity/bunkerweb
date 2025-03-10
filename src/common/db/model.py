@@ -316,8 +316,9 @@ class Metadata(Base):
     last_instances_change = Column(DateTime(timezone=True), nullable=True)
     reload_ui_plugins = Column(Boolean, default=False, nullable=True)
     failover = Column(Boolean, default=None, nullable=True)
+    failover_message = Column(TEXT, nullable=True)
     integration = Column(INTEGRATIONS_ENUM, default="Unknown", nullable=False)
-    version = Column(String(32), default="1.6.1-rc3", nullable=False)
+    version = Column(String(32), default="1.6.1", nullable=False)
 
 
 ## UI Models

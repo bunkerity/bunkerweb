@@ -156,7 +156,7 @@ if {
             echo "🧙 Setting up BunkerWeb UI with wizard..."
 
             # Create default configuration for new installations
-            if [ ! -f /etc/bunkerweb/variables.env ]; then
+            if [ ! -f /etc/bunkerweb/variables.env ] || grep -q "IS_LOADING=yes" /etc/bunkerweb/variables.env; then
                 cat > /etc/bunkerweb/variables.env << EOF
 DNS_RESOLVERS=9.9.9.9 149.112.112.112 8.8.8.8 8.8.4.4
 HTTP_PORT=80

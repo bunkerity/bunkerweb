@@ -83,8 +83,24 @@
                             </div>
                         </td>
                         <td>{{ ban["reason"] }}</td>
-                        <td>{{ ban.get('ban_scope', 'global') |capitalize }}</td>
-                        <td>{{ ban["service"] if ban["service"] != "_" else "default server" }}</td>
+                        <td>
+                            {% if ban.get('ban_scope', 'global') == 'service' %}
+                                <span class="badge bg-info">
+                                    <i class="bx bx-server me-1"></i>Service
+                                </span>
+                            {% else %}
+                                <span class="badge bg-primary">
+                                    <i class="bx bx-globe me-1"></i>Global
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if ban.get('ban_scope', 'global') == 'service' %}
+                                <strong>{{ ban["service"] if ban["service"] != "_" else "default server" }}</strong>
+                            {% else %}
+                                <span class="text-muted fst-italic">All services</span>
+                            {% endif %}
+                        </td>
                         <td class="ban-end-date">{{ ban["end_date"] }}</td>
                         <td>{{ ban["remain"] }}</td>
                         <td>

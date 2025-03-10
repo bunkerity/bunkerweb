@@ -387,6 +387,9 @@ $(document).ready(function () {
         </div>
       </li>
       <li class="list-group-item bg-secondary text-white" style="flex: 1 0;">
+        <div class="fw-bold">Scope</div>
+      </li>
+      <li class="list-group-item bg-secondary text-white" style="flex: 1 0;">
         <div class="fw-bold">Time left</div>
       </li>
       </ul>`,
@@ -405,6 +408,17 @@ $(document).ready(function () {
         </div>
       </li>`);
       list.append(listItem);
+
+      const scopeItem = $(`<li class="list-group-item" style="flex: 1 0;">
+        <div class="ms-2 me-auto">
+          ${ban.ban_scope || "global"}${
+            ban.service && ban.ban_scope === "service"
+              ? ` (${ban.service})`
+              : ""
+          }
+        </div>
+      </li>`);
+      list.append(scopeItem);
 
       const timeLeft = $(`<li class="list-group-item" style="flex: 1 0;">
         <div class="ms-2 me-auto">
@@ -553,8 +567,16 @@ $(document).ready(function () {
     const bans = [];
     $("tr.selected").each(function () {
       const ip = $(this).find("td:eq(3)").text().trim();
-      const time_remaining = $(this).find("td:eq(6)").text().trim();
-      bans.push({ ip: ip, time_remaining: time_remaining });
+      const time_remaining = $(this).find("td:eq(9)").text().trim();
+      const ban_scope = $(this).find("td:eq(6)").text().trim().toLowerCase();
+      const service = $(this).find("td:eq(7)").text().trim();
+
+      bans.push({
+        ip: ip,
+        time_remaining: time_remaining,
+        ban_scope: ban_scope,
+        service: service !== "All services" ? service : null,
+      });
     });
     return bans;
   };
@@ -781,8 +803,17 @@ $(document).ready(function () {
       return;
     }
     $this = $(this);
+    const row = $this.closest("tr");
+    const ban_scope = row.find("td:eq(6)").text().trim().toLowerCase();
+    const service = row.find("td:eq(7)").text().trim();
+
     setupUnbanModal([
-      { ip: $this.data("ip"), time_remaining: $this.data("time-left") },
+      {
+        ip: $this.data("ip"),
+        time_remaining: $this.data("time-left"),
+        ban_scope: ban_scope,
+        service: service !== "All services" ? service : null,
+      },
     ]);
   });
 
@@ -878,8 +909,9 @@ $(document).ready(function () {
     /^(?:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(?:\.(?!$)|$)){4}$|^((?:[A-Fa-f0-9]{1,4}:){7}[A-Fa-f0-9]{1,4}|(?:[A-Fa-f0-9]{1,4}:){1,7}:|:(?::[A-Fa-f0-9]{1,4}){1,7}|::)$/i,
   );
 
-  const validateBan = (ban, ipSet) => {
-    const value = ban.val().trim();
+  // Modified validateBan function to cleanly separate global and service bans
+  const validateBan = (banIpInput, ipServiceMap) => {
+    const value = banIpInput.val().trim();
     let errorMessage = "";
     let isValid = true;
 
@@ -889,18 +921,45 @@ $(document).ready(function () {
     } else if (!ipRegex.test(value)) {
       errorMessage = "Please enter a valid IP address.";
       isValid = false;
-    } else if (ipSet.has(value)) {
-      errorMessage = "This IP address has already been entered.";
-      isValid = false;
+    } else {
+      // Get the ban container
+      const banContainer = banIpInput.closest("li.ban-item");
+      const banScope = banContainer.find('select[name="ban_scope"]').val();
+
+      if (banScope === "global") {
+        // For global scope bans, check if this IP already has a global ban
+        if (ipServiceMap.has(`${value}:global`)) {
+          errorMessage = "This IP address already has a global ban entry.";
+          isValid = false;
+        }
+        // Note: We allow an IP to have both global and service-specific bans
+      } else if (banScope === "service") {
+        const service = banContainer.find('select[name="service"]').val();
+
+        // Check service is selected
+        if (!service) {
+          errorMessage = "Please select a service for this ban.";
+          isValid = false;
+        }
+        // Check for duplicate service ban
+        else if (ipServiceMap.has(`${value}:service:${service}`)) {
+          errorMessage = `This IP is already banned for the service "${service}".`;
+          isValid = false;
+        }
+      }
     }
 
     // Toggle valid/invalid classes
-    ban.toggleClass("is-valid", isValid).toggleClass("is-invalid", !isValid);
+    banIpInput
+      .toggleClass("is-valid", isValid)
+      .toggleClass("is-invalid", !isValid);
 
     // Manage the invalid-feedback element
-    let $feedback = ban.next(".invalid-feedback");
+    let $feedback = banIpInput.next(".invalid-feedback");
     if (!$feedback.length) {
-      $feedback = $('<div class="invalid-feedback"></div>').insertAfter(ban);
+      $feedback = $('<div class="invalid-feedback"></div>').insertAfter(
+        banIpInput,
+      );
     }
 
     $feedback.text(errorMessage);
@@ -908,49 +967,130 @@ $(document).ready(function () {
     return isValid;
   };
 
+  // Update input validation to use the new service-aware validation
   $("#bans-container").on("input", "input[name='ip']", function () {
     debounce(() => {
       const $input = $(this);
-      const ipSet = new Set();
+      // Map to store IP:scope or IP:service combinations
+      const ipServiceMap = new Map();
 
-      // Gather all other IPs except the current one
+      // Gather all other ban entries except the current one
       $("#bans-container")
-        .find("input[name='ip']")
-        .not($input)
+        .find("li.ban-item")
+        .not($input.closest("li.ban-item"))
         .each(function () {
-          ipSet.add($(this).val().trim());
+          const $li = $(this);
+          const ip = $li.find("input[name='ip']").val().trim();
+          if (!ip) return; // Skip empty IPs
+
+          const banScope = $li.find("select[name='ban_scope']").val();
+          if (banScope === "global") {
+            ipServiceMap.set(`${ip}:global`, true);
+          } else if (banScope === "service") {
+            const service = $li.find("select[name='service']").val();
+            if (service) {
+              ipServiceMap.set(`${ip}:service:${service}`, true);
+            }
+          }
         });
 
-      validateBan($input, ipSet);
+      validateBan($input, ipServiceMap);
     }, 100)();
   });
 
-  $("#bans-container").on("focusout", "input[name='ip']", function () {
-    $(this).removeClass("is-valid");
-  });
-
+  // Also update form submission validation
   $("#bans-form").on("submit", function (e) {
     e.preventDefault();
 
     let allValid = true;
-    const ipSet = new Set();
+    const ipServiceMap = new Map();
 
+    // First pass - collect all existing IP + scope/service combinations
     $("#bans-container")
-      .find("input[name='ip']")
+      .find("li.ban-item")
       .each(function () {
-        const $input = $(this);
+        const $li = $(this);
+        const $input = $li.find("input[name='ip']");
         const ip = $input.val().trim();
 
-        // Validate and check for duplicates
-        if (!validateBan($input, ipSet)) {
+        if (!ip) return; // Skip empty IPs
+
+        const banScope = $li.find("select[name='ban_scope']").val();
+
+        // Validate global ban
+        if (banScope === "global") {
+          const key = `${ip}:global`;
+
+          if (ipServiceMap.has(key)) {
+            allValid = false;
+            $input.addClass("is-invalid");
+
+            let $feedback = $input.next(".invalid-feedback");
+            if (!$feedback.length) {
+              $feedback = $('<div class="invalid-feedback"></div>').insertAfter(
+                $input,
+              );
+            }
+            $feedback.text("Duplicate global ban for this IP");
+          } else {
+            ipServiceMap.set(key, true);
+          }
+        }
+        // Validate service ban
+        else if (banScope === "service") {
+          const service = $li.find("select[name='service']").val();
+
+          if (!service) {
+            allValid = false;
+            $input.addClass("is-invalid");
+
+            let $feedback = $input.next(".invalid-feedback");
+            if (!$feedback.length) {
+              $feedback = $('<div class="invalid-feedback"></div>').insertAfter(
+                $input,
+              );
+            }
+            $feedback.text("Please select a service for this ban");
+          } else {
+            const key = `${ip}:service:${service}`;
+
+            if (ipServiceMap.has(key)) {
+              allValid = false;
+              $input.addClass("is-invalid");
+
+              let $feedback = $input.next(".invalid-feedback");
+              if (!$feedback.length) {
+                $feedback = $(
+                  '<div class="invalid-feedback"></div>',
+                ).insertAfter($input);
+              }
+              $feedback.text(
+                `This IP is already banned for the service "${service}"`,
+              );
+            } else {
+              ipServiceMap.set(key, true);
+            }
+          }
+        }
+
+        // Always validate IP format
+        if (!ipRegex.test(ip)) {
           allValid = false;
-        } else {
-          ipSet.add(ip);
+          $input.addClass("is-invalid");
+
+          let $feedback = $input.next(".invalid-feedback");
+          if (!$feedback.length) {
+            $feedback = $('<div class="invalid-feedback"></div>').insertAfter(
+              $input,
+            );
+          }
+          $feedback.text("Please enter a valid IP address");
         }
       });
 
     if (!allValid) return;
 
+    // Rest of the form submission code
     const bans = [];
     $("#bans-container")
       .find("li.rounded-0")
@@ -1000,6 +1140,17 @@ $(document).ready(function () {
     form.appendTo("body").submit();
   });
 
+  // Add validation on service selection change
+  $("#bans-container").on("change", "select[name='service']", function () {
+    const $banItem = $(this).closest("li.ban-item");
+    const $ipInput = $banItem.find("input[name='ip']");
+
+    if ($ipInput.val().trim()) {
+      // Re-validate this IP if it already has a value
+      $ipInput.trigger("input");
+    }
+  });
+
   // Initialize ban scope selection for the first ban item
   initializeBanScopeHandlers($("#ban-1"));
 
@@ -1013,7 +1164,22 @@ $(document).ready(function () {
 
     // Handle change events
     $banScopeSelect.on("change", function () {
-      toggleServiceField($(this).val(), $serviceField, $serviceSelect);
+      const newScope = $(this).val();
+      toggleServiceField(newScope, $serviceField, $serviceSelect);
+
+      // Clear any validation errors when switching scope
+      const $ipInput = $banItem.find("input[name='ip']");
+      $ipInput.removeClass("is-invalid");
+      const $feedback = $ipInput.next(".invalid-feedback");
+      if ($feedback.length) {
+        $feedback.text("");
+      }
+
+      // Re-validate after switching scope if we have an IP address
+      if ($ipInput.val().trim()) {
+        // Short delay to let the DOM update
+        setTimeout(() => $ipInput.trigger("input"), 50);
+      }
     });
   }
 
