@@ -71,11 +71,7 @@ RUN echo "Docker" > INTEGRATION && \
   chmod -R 770 /data /var/cache/bunkerweb /var/lib/bunkerweb /var/www/html /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb && \
   chmod 750 gen/*.py ui/*.sh helpers/*.sh deps/python/bin/* && \
   find ui/ -type f -name "*.py" -print0 | xargs -0 chmod 750 && \
-  chmod 660 INTEGRATION && \
-  ln -s /proc/1/fd/1 /var/log/bunkerweb/ui-access.log && \
-  ln -s /proc/1/fd/2 /var/log/bunkerweb/ui.log && \
-  ln -s /proc/1/fd/1 /var/log/bunkerweb/tmp-ui-access.log && \
-  ln -s /proc/1/fd/2 /var/log/bunkerweb/tmp-ui.log
+  chmod 660 INTEGRATION
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
 LABEL version="1.6.1"
