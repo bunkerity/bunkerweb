@@ -50,9 +50,9 @@ CAPTURE_OUTPUT = getenv("CAPTURE_OUTPUT", "no").lower() == "yes"
 
 wsgi_app = "main:app"
 proc_name = "bunkerweb-ui"
-accesslog = join(sep, "var", "log", "bunkerweb", "ui-access.log")
+accesslog = join(sep, "var", "log", "bunkerweb", "ui-access.log") if CAPTURE_OUTPUT else "-"
 access_log_format = '%({x-forwarded-for}i)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s"'
-errorlog = join(sep, "var", "log", "bunkerweb", "ui.log")
+errorlog = join(sep, "var", "log", "bunkerweb", "ui.log") if CAPTURE_OUTPUT else "-"
 capture_output = CAPTURE_OUTPUT
 limit_request_line = 0
 limit_request_fields = 32768

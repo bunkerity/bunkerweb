@@ -122,12 +122,14 @@ api.global.POST["^/reload"] = function(self)
 		logger:log(NOTICE, "Checking Nginx configuration")
 		local handle = io.popen("/usr/sbin/nginx -t 2>&1")
 		local result = handle:read("*a")
-		local success = handle:close()
+		handle:close()
 
-		if not success then
+		-- Check for success message in output regardless of exit code
+		if string.match(result, "configuration file .+ test is successful") then
+			logger:log(NOTICE, "Nginx configuration is valid")
+		else
 			return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", "config check failed: " .. result)
 		end
-		logger:log(NOTICE, "Nginx configuration is valid")
 	end
 
 	-- Reload Nginx

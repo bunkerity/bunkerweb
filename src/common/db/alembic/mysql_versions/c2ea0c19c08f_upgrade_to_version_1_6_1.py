@@ -22,6 +22,8 @@ depends_on: Union[str, Sequence[str], None] = None
 def upgrade() -> None:
     op.add_column("bw_metadata", sa.Column("failover_message", sa.TEXT(), nullable=True))
 
+    op.execute("UPDATE bw_plugins SET type = 'core', data = NULL, checksum = NULL WHERE id = 'crowdsec' AND type = 'external'")
+
     # Update the version in bw_metadata
     op.execute("UPDATE bw_metadata SET version = '1.6.1' WHERE id = 1")
 
