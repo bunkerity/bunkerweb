@@ -260,6 +260,31 @@ Deny access based on the country of the client IP.
 | `BLACKLIST_COUNTRY` |         | multisite | no       | Deny access if the country of the client is in the list (ISO 3166-1 alpha-2 format separated with spaces).     |
 | `WHITELIST_COUNTRY` |         | multisite | no       | Deny access if the country of the client is not in the list (ISO 3166-1 alpha-2 format separated with spaces). |
 
+## CrowdSec
+
+STREAM support :x:
+
+CrowdSec bouncer for BunkerWeb.
+
+| Setting                           | Default                | Context   | Multiple | Description                                                                                                |
+| --------------------------------- | ---------------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------- |
+| `USE_CROWDSEC`                    | `no`                   | multisite | no       | Activate CrowdSec bouncer.                                                                                 |
+| `CROWDSEC_API`                    | `http://crowdsec:8080` | global    | no       | Address of the CrowdSec API.                                                                               |
+| `CROWDSEC_API_KEY`                |                        | global    | no       | Key for the CrowdSec API given by cscli bouncer add.                                                       |
+| `CROWDSEC_MODE`                   | `live`                 | global    | no       | Mode of the CrowdSec API (live or stream).                                                                 |
+| `CROWDSEC_ENABLE_INTERNAL`        | `no`                   | global    | no       | Enable the analysis of the internal traffic.                                                               |
+| `CROWDSEC_REQUEST_TIMEOUT`        | `1000`                 | global    | no       | Timeout in milliseconds for the HTTP requests done by the bouncer to query CrowdSec local API.             |
+| `CROWDSEC_EXCLUDE_LOCATION`       |                        | global    | no       | The locations to exclude while bouncing. It is a list of location, separated by commas.                    |
+| `CROWDSEC_CACHE_EXPIRATION`       | `1`                    | global    | no       | The cache expiration, in second, for IPs that the bouncer store in cache in live mode.                     |
+| `CROWDSEC_UPDATE_FREQUENCY`       | `10`                   | global    | no       | The frequency of update, in second, to pull new/old IPs from the CrowdSec local API.                       |
+| `CROWDSEC_APPSEC_URL`             |                        | global    | no       | URL of the Application Security Component.                                                                 |
+| `CROWDSEC_APPSEC_FAILURE_ACTION`  | `passthrough`          | global    | no       | Behavior when the AppSec Component return a 500. Can let the request passthrough or deny it.               |
+| `CROWDSEC_APPSEC_CONNECT_TIMEOUT` | `100`                  | global    | no       | The timeout in milliseconds of the connection between the remediation component and AppSec Component.      |
+| `CROWDSEC_APPSEC_SEND_TIMEOUT`    | `100`                  | global    | no       | The timeout in milliseconds to send data from the remediation component to the AppSec Component.           |
+| `CROWDSEC_APPSEC_PROCESS_TIMEOUT` | `500`                  | global    | no       | The timeout in milliseconds to process the request from the remediation component to the AppSec Component. |
+| `CROWDSEC_ALWAYS_SEND_TO_APPSEC`  | `no`                   | global    | no       | Send the request to the AppSec Component even if there is a decision for the IP.                           |
+| `CROWDSEC_APPSEC_SSL_VERIFY`      | `no`                   | global    | no       | Verify the AppSec Component SSL certificate validity.                                                      |
+
 ## Custom SSL certificate
 
 STREAM support :white_check_mark:
