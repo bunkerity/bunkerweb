@@ -11,7 +11,7 @@ jobs:
   build-containers:
     strategy:
       matrix:
-        image: [bunkerweb, scheduler, autoconf, ui]
+        image: [bunkerweb, scheduler, autoconf, ui, all-in-one]
         arch: [linux/amd64, linux/386]
         include:
           - release: beta
@@ -25,6 +25,8 @@ jobs:
             dockerfile: src/autoconf/Dockerfile
           - image: ui
             dockerfile: src/ui/Dockerfile
+          - image: all-in-one
+            dockerfile: src/all-in-one/Dockerfile
           - arch: linux/amd64
             cache_suffix: amd64
           - arch: linux/386
@@ -58,7 +60,7 @@ jobs:
     needs: [create-arm]
     strategy:
       matrix:
-        image: [bunkerweb, scheduler, autoconf, ui]
+        image: [bunkerweb, scheduler, autoconf, ui, all-in-one]
         arch: ["linux/arm64,linux/arm/v7"]
         include:
           - release: beta
@@ -73,6 +75,8 @@ jobs:
             dockerfile: src/autoconf/Dockerfile
           - image: ui
             dockerfile: src/ui/Dockerfile
+          - image: all-in-one
+            dockerfile: src/all-in-one/Dockerfile
     uses: ./.github/workflows/container-build.yml
     with:
       RELEASE: ${{ matrix.release }}
@@ -152,7 +156,13 @@ jobs:
     strategy:
       matrix:
         image:
-          [bunkerweb, bunkerweb-scheduler, bunkerweb-autoconf, bunkerweb-ui]
+          [
+            bunkerweb,
+            bunkerweb-scheduler,
+            bunkerweb-autoconf,
+            bunkerweb-ui,
+            bunkerweb-all-in-one,
+          ]
         include:
           - release: beta
           - image: bunkerweb
@@ -167,6 +177,9 @@ jobs:
           - image: bunkerweb-ui
             cache_from: ui
             dockerfile: src/ui/Dockerfile
+          - image: bunkerweb-all-in-one
+            cache_from: all-in-one
+            dockerfile: src/all-in-one/Dockerfile
     uses: ./.github/workflows/push-docker.yml
     with:
       IMAGE: ${{ matrix.image }}
