@@ -10,6 +10,7 @@ from contextlib import suppress
 from typing import Sequence, Union
 
 from alembic import op
+import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision: str = "8c096ca1beb8"
@@ -19,19 +20,29 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
+    # Get database connection
+    connection = op.get_bind()
+
+    # Execute each operation with its own exception handling
     with suppress(Exception):
-        op.drop_constraint("bw_jobs_name_plugin_id_key", "bw_jobs", type_="unique")
+        connection.execute(sa.text("ALTER TABLE bw_jobs DROP CONSTRAINT IF EXISTS bw_jobs_name_plugin_id_key"))
 
     with suppress(Exception):
-        op.create_foreign_key(None, "bw_jobs_cache", "bw_jobs", ["job_name"], ["name"], onupdate="cascade", ondelete="cascade")
+        connection.execute(
+            sa.text(
+                "ALTER TABLE bw_jobs_cache ADD CONSTRAINT bw_jobs_cache_job_name_fkey "
+                "FOREIGN KEY (job_name) REFERENCES bw_jobs(name) ON UPDATE CASCADE ON DELETE CASCADE"
+            )
+        )
 
     with suppress(Exception):
-        op.create_unique_constraint(None, "bw_plugin_pages", ["plugin_id"])
+        connection.execute(sa.text("ALTER TABLE bw_plugin_pages ADD CONSTRAINT bw_plugin_pages_plugin_id_key UNIQUE (plugin_id)"))
 
     # Update the version in bw_metadata
-    op.execute("UPDATE bw_metadata SET version = '1.6.1-rc1' WHERE id = 1")
+    connection.execute(sa.text("UPDATE bw_metadata SET version = '1.6.1-rc1' WHERE id = 1"))
 
 
 def downgrade() -> None:
     # Revert the version in bw_metadata
-    op.execute("UPDATE bw_metadata SET version = '1.6.0' WHERE id = 1")
+    connection = op.get_bind()
+    connection.execute(sa.text("UPDATE bw_metadata SET version = '1.6.0' WHERE id = 1"))
