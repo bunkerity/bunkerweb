@@ -18,6 +18,7 @@ WORKDIR /usr/share/bunkerweb
 
 # Copy python requirements
 COPY src/deps/requirements.txt /tmp/requirements-deps.txt
+COPY src/autoconf/requirements.txt /tmp/req/requirements-autoconf.txt
 COPY src/scheduler/requirements.txt /tmp/req/requirements-scheduler.txt
 COPY src/ui/requirements.txt /tmp/req/requirements-ui.txt
 COPY src/common/gen/requirements.txt /tmp/req/requirements-gen.txt
@@ -44,6 +45,7 @@ COPY src/common/gen gen
 COPY src/common/helpers helpers
 COPY src/common/settings.json settings.json
 COPY src/common/utils utils
+COPY src/autoconf autoconf
 COPY src/scheduler scheduler
 COPY src/ui ui
 COPY src/VERSION VERSION
@@ -76,7 +78,7 @@ RUN cp helpers/bwcli /usr/bin/ && \
     find core/ -type f -name "*.sh" ! -path "core/modsecurity/files/*" -print0 | xargs -0 chmod 750 && \
     find core/ -type f -name "*.py" ! -path "core/modsecurity/files/*" -print0 | xargs -0 chmod 750 && \
     find ui/ -type f -name "*.py" -print0 | xargs -0 chmod 750 && \
-	chmod 750 cli/main.py gen/*.py helpers/*.sh scheduler/main.py scheduler/entrypoint.sh ui/*.sh entrypoint.sh /usr/bin/bwcli deps/python/bin/* && \
+	chmod 750 cli/main.py gen/*.py helpers/*.sh autoconf/main.py scheduler/main.py scheduler/entrypoint.sh ui/*.sh entrypoint.sh /usr/bin/bwcli deps/python/bin/* && \
     chmod 770 db/alembic db/alembic/alembic.ini db/alembic/env.py && \
     chmod 660 INTEGRATION && \
     mkdir -p /var/log/nginx && \
@@ -85,11 +87,13 @@ RUN cp helpers/bwcli /usr/bin/ && \
     rm -rf /var/log/bunkerweb/* && \
 	ln -s /proc/1/fd/1 /var/log/bunkerweb/access.log && \
     ln -s /proc/1/fd/1 /var/log/bunkerweb/bunkerweb.stdout.log && \
+    ln -s /proc/1/fd/1 /var/log/bunkerweb/autoconf.stdout.log && \
     ln -s /proc/1/fd/1 /var/log/bunkerweb/scheduler.stdout.log && \
     ln -s /proc/1/fd/1 /var/log/bunkerweb/ui.stdout.log && \
 	ln -s /proc/1/fd/2 /var/log/bunkerweb/error.log && \
 	ln -s /proc/1/fd/2 /var/log/bunkerweb/modsec_audit.log && \
     ln -s /proc/1/fd/2 /var/log/bunkerweb/bunkerweb.stderr.log && \
+    ln -s /proc/1/fd/2 /var/log/bunkerweb/autoconf.stderr.log && \
     ln -s /proc/1/fd/2 /var/log/bunkerweb/scheduler.stderr.log && \
     ln -s /proc/1/fd/2 /var/log/bunkerweb/ui.stderr.log
 
