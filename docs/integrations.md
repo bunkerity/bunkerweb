@@ -313,6 +313,38 @@ docker build -t bw-autoconf -f src/autoconf/Dockerfile . && \
 docker build -t bw-ui -f src/ui/Dockerfile .
 ```
 
+### All-In-One Image
+
+!!! warning "Do not use in production"
+    The All-In-One Image is ideal for testing and small-scale deployments. In production environments, consider using a multi-container setup to improve scalability, isolation, and monitoring.
+
+The All-In-One Image simplifies deployment by combining all BunkerWeb components (core, scheduler, autoconf, and web UI) into a single container. It uses Supervisor to manage processes and directs logs to Docker’s logging system.
+
+To deploy the all-in-one container, run:
+
+```shell
+docker run -v bw-storage:/data -p 80:8080 -p 443:8443 bunkerity/bunkerweb-all-in-one:1.6.1
+```
+
+By default, the container exposes:
+
+- 8080/tcp for HTTP
+- 8443/tcp for HTTPS
+- 8443/udp for QUIC
+- 7000/tcp for the web UI access without BunkerWeb in front
+
+You can control the services with the following environment variables:
+
+- `SERVICE_SCHEDULER` (default: `yes`)
+- `SERVICE_UI` (default: `yes`)
+- `AUTOCONF_MODE` (default: `no`)
+
+For example, to disable the Web UI:
+
+```shell
+docker run -v bw-storage:/data -e SERVICE_UI=no -p 80:8080 -p 443:8443 bunkerity/bunkerweb-all-in-one:1.6.1
+```
+
 ## Linux
 
 <figure markdown>
