@@ -323,7 +323,7 @@ The All-In-One Image simplifies deployment by combining all BunkerWeb components
 To deploy the all-in-one container, run:
 
 ```shell
-docker run -v bw-storage:/data -p 80:8080 -p 443:8443 bunkerity/bunkerweb-all-in-one:1.6.1
+docker run -d -v bw-storage:/data -p 80:8080/tcp -p 443:8443/tcp -p 443/8443/udp bunkerity/bunkerweb-all-in-one:1.6.1
 ```
 
 By default, the container exposes:
@@ -342,7 +342,7 @@ You can control the services with the following environment variables:
 For example, to disable the Web UI:
 
 ```shell
-docker run -v bw-storage:/data -e SERVICE_UI=no -p 80:8080 -p 443:8443 bunkerity/bunkerweb-all-in-one:1.6.1
+docker run -d -v bw-storage:/data -e SERVICE_UI=no -p 80:8080/tcp -p 443:8443/tcp -p 443/8443/udp bunkerity/bunkerweb-all-in-one:1.6.1
 ```
 
 ## Linux
