@@ -78,16 +78,16 @@ try:
         current_version_padded = current_version_line.center(longest_line_length)
         LOGGER.warning(
             (
-                f"\n\033[1;91m{'*' * (longest_line_length - 5)}\n"
-                f"\033[1;91m*{' ' * (longest_line_length - 7)}*\n"
-                f"\033[1;91m*  \033[1;97m{alert_message_padded}\033[0m  \033[0;91m*\n"
-                f"\033[1;91m*{' ' * (longest_line_length - 7)}*\n"
-                f"\033[1;91m*  \033[1;97m{latest_version_padded}\033[0;91m  *\n"
-                f"\033[1;91m*  \033[1;97m{current_version_padded}\033[0;91m  *\n"
-                f"\033[1;91m*{' ' * (longest_line_length - 7)}*\n"
-                f"\033[1;91m*  \033[1;97m{release_notes_url_line}\033[0;91m  *\n"
-                f"\033[1;91m*{' ' * (longest_line_length - 7)}*\n"
-                f"\033[1;91m{'*' * (longest_line_length - 5)}\033[0m"
+                f"\n\033[1;91m+{'—' * (longest_line_length - 7)}+\033[0m\n"
+                f"\033[1;91m|{' ' * (longest_line_length - 7)}|\033[0m\n"
+                f"\033[1;91m|  \033[1;97m{alert_message_padded}\033[1;91m  |\033[0m\n"
+                f"\033[1;91m|{' ' * (longest_line_length - 7)}|\033[0m\n"
+                f"\033[1;91m|  \033[1;97m{latest_version_padded}\033[1;91m  |\033[0m\n"
+                f"\033[1;91m|  \033[1;97m{current_version_padded}\033[1;91m  |\033[0m\n"
+                f"\033[1;91m|{' ' * (longest_line_length - 7)}|\033[0m\n"
+                f"\033[1;91m|  \033[1;97m{release_notes_url_line}\033[1;91m  |\033[0m\n"
+                f"\033[1;91m|{' ' * (longest_line_length - 7)}|\033[0m\n"
+                f"\033[1;91m+{'—' * (longest_line_length - 7)}+\033[0m"
             )
         )
     else:
