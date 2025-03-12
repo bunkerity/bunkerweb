@@ -1151,8 +1151,9 @@ docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> 
 <ol>
 <li>
 <p><strong>Stop the services</strong>:
-    <div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>stop<span class="w"> </span>bunkerweb
-systemctl<span class="w"> </span>stop<span class="w"> </span>bunkerweb-ui
+    <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>stop<span class="w"> </span>bunkerweb
+sudo<span class="w"> </span>systemctl<span class="w"> </span>stop<span class="w"> </span>bunkerweb-ui
+sudo<span class="w"> </span>systemctl<span class="w"> </span>stop<span class="w"> </span>bunkerweb-scheduler
 </code></pre></div></p>
 </li>
 <li>
@@ -1162,31 +1163,43 @@ systemctl<span class="w"> </span>stop<span class="w"> </span>bunkerweb-ui
 <div class="tabbed-block">
 <p>First, if you have previously hold the BunkerWeb package, unhold it :</p>
 <p>You can print a list of packages on hold with <code>apt-mark showhold</code></p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt-mark<span class="w"> </span>unhold<span class="w"> </span>bunkerweb
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt-mark<span class="w"> </span>unhold<span class="w"> </span>bunkerweb<span class="w"> </span>nginx
 </code></pre></div>
 <p>Them, you can update BunkerWeb package :</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span><span class="nv">bunkerweb</span><span class="o">=</span>testing
 </code></pre></div>
 <p>To prevent upgrading BunkerWeb package when executing <code>apt upgrade</code>, you can use the following command :</p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt-mark<span class="w"> </span>hold<span class="w"> </span>bunkerweb
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt-mark<span class="w"> </span>hold<span class="w"> </span>bunkerweb<span class="w"> </span>nginx
 </code></pre></div>
 <p>More details in the <a href="../integrations/#__tabbed_1_1">integration Linux page</a>.</p>
 </div>
 <div class="tabbed-block">
 <p>First, if you have previously hold the BunkerWeb package, unhold it :</p>
 <p>You can print a list of packages on hold with <code>dnf versionlock list</code></p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>delete<span class="w"> </span>package<span class="w"> </span>bunkerweb
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>delete<span class="w"> </span>package<span class="w"> </span>bunkerweb<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>delete<span class="w"> </span>package<span class="w"> </span>nginx
 </code></pre></div>
 <p>Them, you can update BunkerWeb package :</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>bunkerweb-testing
 </code></pre></div>
 <p>To prevent upgrading BunkerWeb package when executing <code>dnf upgrade</code>, you can use the following command :</p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>add<span class="w"> </span>bunkerweb
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>add<span class="w"> </span>bunkerweb<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>add<span class="w"> </span>nginx
 </code></pre></div>
 <p>More details in the <a href="../integrations/#__tabbed_1_3">integration Linux page</a>.</p>
 </div>
 </div>
 </div>
+</li>
+<li>
+<p><strong>Start the services</strong>:
+        <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>start<span class="w"> </span>bunkerweb
+sudo<span class="w"> </span>systemctl<span class="w"> </span>start<span class="w"> </span>bunkerweb-ui
+sudo<span class="w"> </span>systemctl<span class="w"> </span>start<span class="w"> </span>bunkerweb-scheduler
+</code></pre></div>
+        Or reboot the system:
+        <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>reboot
+</code></pre></div></p>
 </li>
 </ol>
 </div>
@@ -1327,7 +1340,7 @@ docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </spa
 <ol>
 <li>
 <p><strong>Stop the services</strong>.</p>
-<div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>stop<span class="w"> </span>bunkerweb<span class="w"> </span>bunkerweb-ui
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>stop<span class="w"> </span>bunkerweb<span class="w"> </span>bunkerweb-ui<span class="w"> </span>bunkerweb-scheduler
 </code></pre></div>
 </li>
 <li>
@@ -1366,6 +1379,11 @@ sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">770</sp
 </div>
 </div>
 </div>
+</li>
+<li>
+<p><strong>Start the services</strong>.</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>start<span class="w"> </span>bunkerweb<span class="w"> </span>bunkerweb-ui<span class="w"> </span>bunkerweb-scheduler
+</code></pre></div>
 </li>
 <li>
 <p><strong>Downgrade BunkerWeb</strong>.</p>
@@ -1589,8 +1607,8 @@ docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> 
 <ol>
 <li>
 <p><strong>Stop the services</strong>:
-    <div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>stop<span class="w"> </span>bunkerweb
-systemctl<span class="w"> </span>stop<span class="w"> </span>bunkerweb-ui
+    <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>stop<span class="w"> </span>bunkerweb
+sudo<span class="w"> </span>systemctl<span class="w"> </span>stop<span class="w"> </span>bunkerweb-ui
 </code></pre></div></p>
 </li>
 <li>
@@ -1600,31 +1618,42 @@ systemctl<span class="w"> </span>stop<span class="w"> </span>bunkerweb-ui
 <div class="tabbed-block">
 <p>First, if you have previously hold the BunkerWeb package, unhold it :</p>
 <p>You can print a list of packages on hold with <code>apt-mark showhold</code></p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt-mark<span class="w"> </span>unhold<span class="w"> </span>bunkerweb
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt-mark<span class="w"> </span>unhold<span class="w"> </span>bunkerweb<span class="w"> </span>nginx
 </code></pre></div>
 <p>Them, you can update BunkerWeb package :</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span><span class="nv">bunkerweb</span><span class="o">=</span>testing
 </code></pre></div>
 <p>To prevent upgrading BunkerWeb package when executing <code>apt upgrade</code>, you can use the following command :</p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt-mark<span class="w"> </span>hold<span class="w"> </span>bunkerweb
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt-mark<span class="w"> </span>hold<span class="w"> </span>bunkerweb<span class="w"> </span>nginx
 </code></pre></div>
 <p>More details in the <a href="../integrations/#__tabbed_1_1">integration Linux page</a>.</p>
 </div>
 <div class="tabbed-block">
 <p>First, if you have previously hold the BunkerWeb package, unhold it :</p>
 <p>You can print a list of packages on hold with <code>dnf versionlock list</code></p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>delete<span class="w"> </span>package<span class="w"> </span>bunkerweb
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>delete<span class="w"> </span>package<span class="w"> </span>bunkerweb<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>delete<span class="w"> </span>package<span class="w"> </span>nginx
 </code></pre></div>
 <p>Them, you can update BunkerWeb package :</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>bunkerweb-testing
 </code></pre></div>
 <p>To prevent upgrading BunkerWeb package when executing <code>dnf upgrade</code>, you can use the following command :</p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>add<span class="w"> </span>bunkerweb
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>add<span class="w"> </span>bunkerweb<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>add<span class="w"> </span>nginx
 </code></pre></div>
 <p>More details in the <a href="../integrations/#__tabbed_1_3">integration Linux page</a>.</p>
 </div>
 </div>
 </div>
+</li>
+<li>
+<p><strong>Start the services</strong>:
+        <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>start<span class="w"> </span>bunkerweb
+sudo<span class="w"> </span>systemctl<span class="w"> </span>start<span class="w"> </span>bunkerweb-ui
+</code></pre></div>
+        Or reboot the system:
+        <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>reboot
+</code></pre></div></p>
 </li>
 </ol>
 </div>
@@ -1765,7 +1794,7 @@ docker compose down
 <ol>
 <li>
 <p><strong>Stop the services</strong>.</p>
-<div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>stop<span class="w"> </span>bunkerweb<span class="w"> </span>bunkerweb-ui
+<div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>stop<span class="w"> </span>bunkerweb<span class="w"> </span>bunkerweb-ui<span class="w"> </span>bunkerweb-scheduler
 </code></pre></div>
 </li>
 <li>
@@ -1804,6 +1833,11 @@ sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">770</sp
 </div>
 </div>
 </div>
+</li>
+<li>
+<p><strong>Start the services</strong>.</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>start<span class="w"> </span>bunkerweb<span class="w"> </span>bunkerweb-ui
+</code></pre></div>
 </li>
 <li>
 <p><strong>Downgrade BunkerWeb</strong>.</p>

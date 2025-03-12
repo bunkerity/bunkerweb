@@ -1501,6 +1501,31 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>bw-autoconf<span class="w"> </span>-f<span class="w"> </span>src/autoconf/Dockerfile<span class="w"> </span>.<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>bw-ui<span class="w"> </span>-f<span class="w"> </span>src/ui/Dockerfile<span class="w"> </span>.
 </code></pre></div>
+<h3 id="integrations-all-in-one-image">All-In-One Image</h3>
+<div class="admonition warning">
+<p class="admonition-title">Do not use in production</p>
+<p>The All-In-One Image is ideal for testing and small-scale deployments. In production environments, consider using a multi-container setup to improve scalability, isolation, and monitoring.</p>
+</div>
+<p>The All-In-One Image simplifies deployment by combining all BunkerWeb components (core, scheduler, autoconf, and web UI) into a single container. It uses Supervisor to manage processes and directs logs to Docker’s logging system.</p>
+<p>To deploy the all-in-one container, run:</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>-v<span class="w"> </span>bw-storage:/data<span class="w"> </span>-p<span class="w"> </span><span class="m">80</span>:8080/tcp<span class="w"> </span>-p<span class="w"> </span><span class="m">443</span>:8443/tcp<span class="w"> </span>-p<span class="w"> </span><span class="m">443</span>/8443/udp<span class="w"> </span>bunkerity/bunkerweb-all-in-one:testing
+</code></pre></div>
+<p>By default, the container exposes:</p>
+<ul>
+<li>8080/tcp for HTTP</li>
+<li>8443/tcp for HTTPS</li>
+<li>8443/udp for QUIC</li>
+<li>7000/tcp for the web UI access without BunkerWeb in front</li>
+</ul>
+<p>You can control the services with the following environment variables:</p>
+<ul>
+<li><code>SERVICE_SCHEDULER</code> (default: <code>yes</code>)</li>
+<li><code>SERVICE_UI</code> (default: <code>yes</code>)</li>
+<li><code>AUTOCONF_MODE</code> (default: <code>no</code>)</li>
+</ul>
+<p>For example, to disable the Web UI:</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>-v<span class="w"> </span>bw-storage:/data<span class="w"> </span>-e<span class="w"> </span><span class="nv">SERVICE_UI</span><span class="o">=</span>no<span class="w"> </span>-p<span class="w"> </span><span class="m">80</span>:8080/tcp<span class="w"> </span>-p<span class="w"> </span><span class="m">443</span>:8443/tcp<span class="w"> </span>-p<span class="w"> </span><span class="m">443</span>/8443/udp<span class="w"> </span>bunkerity/bunkerweb-all-in-one:testing
+</code></pre></div>
 <h2 id="integrations-linux">Linux</h2>
 <figure>
 <p><img align="center," alt="Overview" src="../assets/img/integration-linux.svg" width="600" />
@@ -1903,7 +1928,8 @@ MY_SETTING_2=value2
 <p>If you use a custom CA for your Kubernetes API, you can mount a bundle file containing your intermediate(s) and root certificates on the ingress controller and set the <code>KUBERNETES_SSL_CA_CERT</code> environment value to the path of the bundle inside the container. Alternatively, even if it's not recommended, you can disable certificate verification by setting the <code>KUBERNETES_SSL_VERIFY</code> environment variable of the ingress controller to <code>no</code> (default is <code>yes</code>).</p>
 </div>
 <p>Additionally, <strong>it is crucial to set the <code>KUBERNETES_MODE</code> environment variable to <code>yes</code> when utilizing the Kubernetes integration</strong>. This variable is mandatory for proper functionality.</p>
-<h3 id="integrations-installation-using-helm-chart">Installation using Helm chart</h3>
+<h3 id="integrations-installation-methods">Installation methods</h3>
+<h4 id="integrations-using-helm-chart-recommended">Using helm chart (recommended)</h4>
 <p>The recommended way to install Kubernetes is to use the Helm chart available at <code>https://repo.bunkerweb.io/charts</code> :</p>
 <div class="highlight"><pre><span></span><code>helm<span class="w"> </span>repo<span class="w"> </span>add<span class="w"> </span>bunkerweb<span class="w"> </span>https://repo.bunkerweb.io/charts
 </code></pre></div>
@@ -1911,6 +1937,8 @@ MY_SETTING_2=value2
 <div class="highlight"><pre><span></span><code>helm<span class="w"> </span>install<span class="w"> </span>-f<span class="w"> </span>myvalues.yaml<span class="w"> </span>mybunkerweb<span class="w"> </span>bunkerweb/bunkerweb
 </code></pre></div>
 <p>The full list of values are listed in the <a href="https://github.com/bunkerity/bunkerweb-helm/blob/main/charts/bunkerweb/values.yaml">charts/bunkerweb/values.yaml file</a> of the <a href="https://github.com/bunkerity/bunkerweb-helm">bunkerity/bunkerweb-helm repository</a>.</p>
+<h4 id="integrations-full-yaml-files">Full YAML files</h4>
+<p>Instead of using the helm chart, you can also use the YAML boilerplates inside the <a href="https://github.com/bunkerity/bunkerweb/tree/vtesting/misc/integrations">misc/integrations folder</a> of the GitHub repository. Please note that we highly recommend to use the helm chart instead.</p>
 <h3 id="integrations-ingress-resources">Ingress resources</h3>
 <p>Once the BunkerWeb Kubernetes stack is successfully set up and operational (refer to the autoconf logs for detailed information), you can proceed with deploying web applications within the cluster and declaring your Ingress resource.</p>
 <p>It is important to note that the BunkerWeb settings need to be specified as annotations for the Ingress resource. For the domain part, please use the special value <strong><code>bunkerweb.io</code></strong>. By including the appropriate annotations, you can configure BunkerWeb accordingly for the Ingress resource.</p>
@@ -2016,285 +2044,171 @@ MY_SETTING_2=value2
 </code></pre></div>
 <h3 id="integrations-custom-domain-name">Custom domain name</h3>
 <p>If you use a custom domain name for your Kubernetes cluster different than the default <code>kubernetes.local</code> one, you can set the value using the <code>KUBERNETES_DOMAIN_NAME</code> environment variable on the scheduler container.</p>
-<h3 id="integrations-full-yaml-file">Full YAML file</h3>
-<p>To assist you, here is a YAML boilerplate that can serve as a foundation for your configuration:</p>
-<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rbac.authorization.k8s.io/v1</span>
-<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ClusterRole</span>
-<span class="nt">metadata</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cr-bunkerweb</span>
-<span class="nt">rules</span><span class="p">:</span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">apiGroups</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;&quot;</span><span class="p p-Indicator">]</span>
-<span class="w">    </span><span class="nt">resources</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;services&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;pods&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;configmaps&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;secrets&quot;</span><span class="p p-Indicator">]</span>
-<span class="w">    </span><span class="nt">verbs</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;get&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;watch&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;list&quot;</span><span class="p p-Indicator">]</span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">apiGroups</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;networking.k8s.io&quot;</span><span class="p p-Indicator">]</span>
-<span class="w">    </span><span class="nt">resources</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;ingresses&quot;</span><span class="p p-Indicator">]</span>
-<span class="w">    </span><span class="nt">verbs</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;get&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;watch&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;list&quot;</span><span class="p p-Indicator">]</span>
-<span class="nn">---</span>
-<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
-<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ServiceAccount</span>
-<span class="nt">metadata</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sa-bunkerweb</span>
-<span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span>
-<span class="nn">---</span>
-<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rbac.authorization.k8s.io/v1</span>
-<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ClusterRoleBinding</span>
-<span class="nt">metadata</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">crb-bunkerweb</span>
-<span class="nt">subjects</span><span class="p">:</span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ServiceAccount</span>
-<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sa-bunkerweb</span>
-<span class="w">    </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span>
-<span class="w">    </span><span class="nt">apiGroup</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span>
-<span class="nt">roleRef</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ClusterRole</span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cr-bunkerweb</span>
-<span class="w">  </span><span class="nt">apiGroup</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rbac.authorization.k8s.io</span>
-<span class="nn">---</span>
-<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.k8s.io/v1</span>
-<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">IngressClass</span>
-<span class="nt">metadata</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span>
-<span class="nt">spec</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">controller</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb.io/ingress-controller</span>
-<span class="nn">---</span>
-<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span>
-<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DaemonSet</span>
-<span class="nt">metadata</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span>
-<span class="nt">spec</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">selector</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span>
-<span class="w">  </span><span class="nt">template</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">metadata</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">labels</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span>
-<span class="w">      </span><span class="c1"># mandatory annotation</span>
-<span class="w">      </span><span class="nt">annotations</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">bunkerweb.io/INSTANCE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
-<span class="w">    </span><span class="nt">spec</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">serviceAccountName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sa-bunkerweb</span>
-<span class="w">      </span><span class="nt">containers</span><span class="p">:</span>
-<span class="w">        </span><span class="c1"># using bunkerweb as name is mandatory</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span>
-<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:testing</span>
-<span class="w">          </span><span class="nt">imagePullPolicy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Always</span>
-<span class="w">          </span><span class="nt">securityContext</span><span class="p">:</span>
-<span class="w">            </span><span class="nt">runAsUser</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">101</span>
-<span class="w">            </span><span class="nt">runAsGroup</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">101</span>
-<span class="w">            </span><span class="nt">allowPrivilegeEscalation</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
-<span class="w">            </span><span class="nt">capabilities</span><span class="p">:</span>
-<span class="w">              </span><span class="nt">drop</span><span class="p">:</span>
-<span class="w">                </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ALL</span>
-<span class="w">          </span><span class="nt">ports</span><span class="p">:</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">containerPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8080</span>
-<span class="w">              </span><span class="nt">hostPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">containerPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8443</span>
-<span class="w">              </span><span class="nt">hostPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">443</span>
-<span class="w">          </span><span class="nt">env</span><span class="p">:</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">KUBERNETES_MODE</span>
-<span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
-<span class="w">            </span><span class="c1"># replace with your DNS resolvers</span>
-<span class="w">            </span><span class="c1"># e.g. : kube-dns.kube-system.svc.cluster.local</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DNS_RESOLVERS</span>
-<span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;coredns.kube-system.svc.cluster.local&quot;</span>
-<span class="w">            </span><span class="c1"># 10.0.0.0/8 is the cluster internal subnet</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">API_WHITELIST_IP</span>
-<span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;127.0.0.0/8</span><span class="nv"> </span><span class="s">10.0.0.0/8&quot;</span>
-<span class="w">          </span><span class="nt">livenessProbe</span><span class="p">:</span>
-<span class="w">            </span><span class="nt">exec</span><span class="p">:</span>
-<span class="w">              </span><span class="nt">command</span><span class="p">:</span>
-<span class="w">                </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/usr/share/bunkerweb/helpers/healthcheck.sh</span>
-<span class="w">            </span><span class="nt">initialDelaySeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span>
-<span class="w">            </span><span class="nt">periodSeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
-<span class="w">            </span><span class="nt">timeoutSeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-<span class="w">            </span><span class="nt">failureThreshold</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
-<span class="w">          </span><span class="nt">readinessProbe</span><span class="p">:</span>
-<span class="w">            </span><span class="nt">exec</span><span class="p">:</span>
-<span class="w">              </span><span class="nt">command</span><span class="p">:</span>
-<span class="w">                </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/usr/share/bunkerweb/helpers/healthcheck.sh</span>
-<span class="w">            </span><span class="nt">initialDelaySeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span>
-<span class="w">            </span><span class="nt">periodSeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-<span class="w">            </span><span class="nt">timeoutSeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-<span class="w">            </span><span class="nt">failureThreshold</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
-<span class="nn">---</span>
-<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span>
-<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Deployment</span>
-<span class="nt">metadata</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-controller</span>
-<span class="nt">spec</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">replicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-<span class="w">  </span><span class="nt">strategy</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Recreate</span>
-<span class="w">  </span><span class="nt">selector</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-controller</span>
-<span class="w">  </span><span class="nt">template</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">metadata</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">labels</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-controller</span>
-<span class="w">    </span><span class="nt">spec</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">serviceAccountName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sa-bunkerweb</span>
-<span class="w">      </span><span class="nt">containers</span><span class="p">:</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-controller</span>
-<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:testing</span>
-<span class="w">          </span><span class="nt">imagePullPolicy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Always</span>
-<span class="w">          </span><span class="nt">env</span><span class="p">:</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">KUBERNETES_MODE</span>
-<span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DATABASE_URI</span>
-<span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mariadb+pymysql://bunkerweb:changeme@svc-bunkerweb-db:3306/db&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger password for the database</span>
-<span class="nn">---</span>
-<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span>
-<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Deployment</span>
-<span class="nt">metadata</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-scheduler</span>
-<span class="nt">spec</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">replicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-<span class="w">  </span><span class="nt">strategy</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Recreate</span>
-<span class="w">  </span><span class="nt">selector</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-scheduler</span>
-<span class="w">  </span><span class="nt">template</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">metadata</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">labels</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-scheduler</span>
-<span class="w">    </span><span class="nt">spec</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">serviceAccountName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sa-bunkerweb</span>
-<span class="w">      </span><span class="nt">containers</span><span class="p">:</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-scheduler</span>
-<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:testing</span>
-<span class="w">          </span><span class="nt">imagePullPolicy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Always</span>
-<span class="w">          </span><span class="nt">env</span><span class="p">:</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">KUBERNETES_MODE</span>
-<span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DATABASE_URI</span>
-<span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mariadb+pymysql://bunkerweb:changeme@svc-bunkerweb-db:3306/db&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger password for the database</span>
-<span class="w">            </span><span class="c1"># replace with your DNS resolvers</span>
-<span class="w">            </span><span class="c1"># e.g. : kube-dns.kube-system.svc.cluster.local</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DNS_RESOLVERS</span>
-<span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;coredns.kube-system.svc.cluster.local&quot;</span>
-<span class="w">            </span><span class="c1"># 10.0.0.0/8 is the cluster internal subnet</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">API_WHITELIST_IP</span>
-<span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;127.0.0.0/8</span><span class="nv"> </span><span class="s">10.0.0.0/8&quot;</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">BUNKERWEB_INSTANCES</span>
-<span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="w"> </span><span class="c1"># We don&#39;t need to specify the BunkerWeb instance here as they are automatically detected by the ingress controller</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SERVER_NAME</span>
-<span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="w"> </span><span class="c1"># The server name will be filled with services annotations</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MULTISITE</span>
-<span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span><span class="w"> </span><span class="c1"># Mandatory setting for autoconf</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">USE_REDIS</span>
-<span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">REDIS_HOST</span>
-<span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;svc-bunkerweb-redis.default.svc.cluster.local&quot;</span>
-<span class="nn">---</span>
-<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span>
-<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Deployment</span>
-<span class="nt">metadata</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-redis</span>
-<span class="nt">spec</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">replicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-<span class="w">  </span><span class="nt">strategy</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Recreate</span>
-<span class="w">  </span><span class="nt">selector</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-redis</span>
-<span class="w">  </span><span class="nt">template</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">metadata</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">labels</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-redis</span>
-<span class="w">    </span><span class="nt">spec</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">containers</span><span class="p">:</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-redis</span>
-<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">redis:7-alpine</span>
-<span class="w">          </span><span class="nt">imagePullPolicy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Always</span>
-<span class="nn">---</span>
-<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span>
-<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Deployment</span>
-<span class="nt">metadata</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-db</span>
-<span class="nt">spec</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">replicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-<span class="w">  </span><span class="nt">strategy</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Recreate</span>
-<span class="w">  </span><span class="nt">selector</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-db</span>
-<span class="w">  </span><span class="nt">template</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">metadata</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">labels</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-db</span>
-<span class="w">    </span><span class="nt">spec</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">containers</span><span class="p">:</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-db</span>
-<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mariadb:11</span>
-<span class="w">          </span><span class="nt">imagePullPolicy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Always</span>
-<span class="w">          </span><span class="nt">env</span><span class="p">:</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MYSQL_RANDOM_ROOT_PASSWORD</span>
-<span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MYSQL_DATABASE</span>
-<span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;db&quot;</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MYSQL_USER</span>
-<span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerweb&quot;</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MYSQL_PASSWORD</span>
-<span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;changeme&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger password for the database</span>
-<span class="w">          </span><span class="nt">volumeMounts</span><span class="p">:</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/var/lib/mysql&quot;</span>
-<span class="w">              </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vol-db</span>
-<span class="w">      </span><span class="nt">volumes</span><span class="p">:</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vol-db</span>
-<span class="w">          </span><span class="nt">persistentVolumeClaim</span><span class="p">:</span>
-<span class="w">            </span><span class="nt">claimName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pvc-bunkerweb</span>
-<span class="nn">---</span>
-<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
-<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Service</span>
-<span class="nt">metadata</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">svc-bunkerweb</span>
-<span class="nt">spec</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">clusterIP</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
-<span class="w">  </span><span class="nt">selector</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span>
-<span class="nn">---</span>
-<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
-<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Service</span>
-<span class="nt">metadata</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">svc-bunkerweb-db</span>
-<span class="nt">spec</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ClusterIP</span>
-<span class="w">  </span><span class="nt">selector</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-db</span>
-<span class="w">  </span><span class="nt">ports</span><span class="p">:</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sql</span>
-<span class="w">      </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TCP</span>
-<span class="w">      </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3306</span>
-<span class="w">      </span><span class="nt">targetPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3306</span>
-<span class="nn">---</span>
-<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
-<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Service</span>
-<span class="nt">metadata</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">svc-bunkerweb-redis</span>
-<span class="nt">spec</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ClusterIP</span>
-<span class="w">  </span><span class="nt">selector</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-redis</span>
-<span class="w">  </span><span class="nt">ports</span><span class="p">:</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">redis</span>
-<span class="w">      </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TCP</span>
-<span class="w">      </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">6379</span>
-<span class="w">      </span><span class="nt">targetPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">6379</span>
-<span class="nn">---</span>
-<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
-<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PersistentVolumeClaim</span>
-<span class="nt">metadata</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pvc-bunkerweb</span>
-<span class="nt">spec</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">accessModes</span><span class="p">:</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ReadWriteOnce</span>
-<span class="w">  </span><span class="nt">resources</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">requests</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">storage</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5Gi</span>
+<h3 id="integrations-use-with-existing-ingress-controller">Use with existing ingress controller</h3>
+<div class="admonition info">
+<p class="admonition-title">Keeping both existing ingress controller and BunkerWeb</p>
+<p>This is a use-case where you want to keep an existing ingress controller such as the nginx one. Typical traffic flow will be : Load Balancer =&gt; Ingress Controller =&gt; BunkerWeb =&gt; Application.</p>
+</div>
+<p><strong>nginx ingress controller install</strong></p>
+<p>Install ingress nginx helm repo:</p>
+<div class="highlight"><pre><span></span><code>helm<span class="w"> </span>repo<span class="w"> </span>add<span class="w"> </span>ingress-nginx<span class="w"> </span>https://kubernetes.github.io/ingress-nginx
+helm<span class="w"> </span>repo<span class="w"> </span>update
 </code></pre></div>
+<p>Install nginx ingress controller with default values (might not work on your own cluster out-of-the-box, please check the <a href="https://kubernetes.github.io/ingress-nginx/">documentation</a>):</p>
+<div class="highlight"><pre><span></span><code>helm<span class="w"> </span>install<span class="w"> </span>--namespace<span class="w"> </span>nginx<span class="w"> </span>--create-namespace<span class="w"> </span>nginx<span class="w"> </span>ingress-nginx/ingress-nginx
+</code></pre></div>
+<p>Extract IP address of LB:</p>
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>get<span class="w"> </span>svc<span class="w"> </span>nginx-ingress-nginx-controller<span class="w"> </span>-n<span class="w"> </span>nginx<span class="w"> </span>-o<span class="w"> </span><span class="nv">jsonpath</span><span class="o">=</span><span class="s1">&#39;{.status.loadBalancer.ingress[0].ip}&#39;</span>
+</code></pre></div>
+<p>Setup DNS entries to IP of LB (e.g <code>bunkerweb</code> subdomain for BW UI and <code>myapp</code> for application):</p>
+<div class="highlight"><pre><span></span><code>$<span class="w"> </span>nslookup<span class="w"> </span>bunkerweb.example.com
+Server:<span class="w">         </span><span class="m">172</span>.26.112.1
+Address:<span class="w">        </span><span class="m">172</span>.26.112.1#53
+
+Non-authoritative<span class="w"> </span>answer:
+Name:<span class="w">   </span>bunkerweb.example.com
+Address:<span class="w"> </span><span class="m">1</span>.2.3.4
+$<span class="w"> </span>nslookup<span class="w"> </span>myapp.example.com
+Server:<span class="w">         </span><span class="m">172</span>.26.112.1
+Address:<span class="w">        </span><span class="m">172</span>.26.112.1#53
+
+Non-authoritative<span class="w"> </span>answer:
+Name:<span class="w">   </span>myapp.example.com
+Address:<span class="w"> </span><span class="m">1</span>.2.3.4
+</code></pre></div>
+<p><strong>BunkerWeb install</strong></p>
+<p>Install BunkerWeb helm repo:</p>
+<div class="highlight"><pre><span></span><code>helm<span class="w"> </span>repo<span class="w"> </span>add<span class="w"> </span>bunkerweb<span class="w"> </span>https://repo.bunkerweb.io/charts
+helm<span class="w"> </span>repo<span class="w"> </span>update
+</code></pre></div>
+<p>Create <code>values.yaml</code> file:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Here we will setup the values needed to setup BunkerWeb behind an existing ingress controller</span>
+<span class="c1"># Traffic flow with BW : LB =&gt; existing Ingress Controller =&gt; BunkerWeb =&gt; Service</span>
+<span class="c1"># Traffic flow without BW : LB =&gt; existing Ingress Controller =&gt; Service</span>
+
+<span class="c1"># Global settings</span>
+<span class="nt">settings</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">misc</span><span class="p">:</span>
+<span class="w">    </span><span class="c1"># Replace with your DNS resolver</span>
+<span class="w">    </span><span class="c1"># to get it : kubectl exec in a random pod then cat /etc/resolv.conf</span>
+<span class="w">    </span><span class="c1"># if you have an IP as nameserver then do a reverse DNS lookup : nslookup &lt;IP&gt;</span>
+<span class="w">    </span><span class="c1"># most of the time it&#39;s coredns.kube-system.svc.cluster.local or kube-dns.kube-system.svc.cluster.local</span>
+<span class="w">    </span><span class="nt">dnsResolvers</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;kube-dns.kube-system.svc.cluster.local&quot;</span>
+<span class="w">  </span><span class="nt">kubernetes</span><span class="p">:</span>
+<span class="w">    </span><span class="c1"># We only consider Ingress resources with ingressClass bunkerweb to avoid conflicts with existing ingress controller</span>
+<span class="w">    </span><span class="nt">ingressClass</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerweb&quot;</span>
+<span class="w">    </span><span class="c1"># Optional : you can choose namespace(s) where BunkerWeb will listen for Ingress/ConfigMap changes</span>
+<span class="w">    </span><span class="c1"># Default (blank value) is all namespaces</span>
+<span class="w">    </span><span class="nt">namespaces</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span>
+
+<span class="c1"># Override the bunkerweb-external service type to ClusterIP</span>
+<span class="c1"># Since we don&#39;t need to expose it to the outside world</span>
+<span class="c1"># We will use the existing ingress controller to route traffic to BunkerWeb</span>
+<span class="nt">service</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ClusterIP</span>
+
+<span class="c1"># BunkerWeb settings</span>
+<span class="nt">bunkerweb</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">tag</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">testing</span>
+
+<span class="c1"># Scheduler settings</span>
+<span class="nt">scheduler</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">tag</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">testing</span>
+<span class="w">  </span><span class="nt">extraEnvs</span><span class="p">:</span>
+<span class="w">    </span><span class="c1"># Enable real IP module to get real IP of clients</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">USE_REAL_IP</span>
+<span class="w">      </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+
+<span class="c1"># Controller settings</span>
+<span class="nt">controller</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">tag</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">testing</span>
+
+<span class="c1"># UI settings</span>
+<span class="nt">ui</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">tag</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">testing</span>
+</code></pre></div>
+<p>Install BunkerWeb with custom values:</p>
+<div class="highlight"><pre><span></span><code>helm<span class="w"> </span>install<span class="w"> </span>--namespace<span class="w"> </span>bunkerweb<span class="w"> </span>--create-namespace<span class="w"> </span>-f<span class="w"> </span>values.yaml<span class="w"> </span>bunkerweb<span class="w"> </span>bunkerweb/bunkerweb
+</code></pre></div>
+<p>Check logs and wait until everything is ready.</p>
+<p><strong>Web UI install</strong></p>
+<p>Setup the following ingress (assuming nginx controller is installed):</p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.k8s.io/v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ingress</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ui-bunkerweb</span>
+<span class="w">  </span><span class="c1"># Replace with your namespace of BW if needed</span>
+<span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span>
+<span class="w">  </span><span class="nt">annotations</span><span class="p">:</span>
+<span class="w">    </span><span class="c1"># HTTPS is mandatory for web UI even if traffic is internal</span>
+<span class="w">    </span><span class="nt">nginx.ingress.kubernetes.io/backend-protocol</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;HTTPS&quot;</span>
+<span class="w">    </span><span class="c1"># We must set SNI so BW can serve the right vhost</span>
+<span class="w">    </span><span class="c1"># Replace with your domain</span>
+<span class="w">    </span><span class="nt">nginx.ingress.kubernetes.io/proxy-ssl-name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerweb.example.com&quot;</span>
+<span class="w">    </span><span class="nt">nginx.ingress.kubernetes.io/proxy-ssl-server-name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;on&quot;</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="c1"># Only served by nginx controller and not BW</span>
+<span class="w">  </span><span class="nt">ingressClassName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx</span>
+<span class="w">  </span><span class="c1"># Uncomment and edit if you want to use your own certificate</span>
+<span class="w">  </span><span class="c1"># tls:</span>
+<span class="w">  </span><span class="c1"># - hosts:</span>
+<span class="w">  </span><span class="c1">#   - bunkerweb.example.com</span>
+<span class="w">  </span><span class="c1">#   secretName: tls-secret</span>
+<span class="w">  </span><span class="nt">rules</span><span class="p">:</span>
+<span class="w">  </span><span class="c1"># Replace with your domain</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb.example.com</span>
+<span class="w">    </span><span class="nt">http</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">paths</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/</span>
+<span class="w">        </span><span class="nt">pathType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Prefix</span>
+<span class="w">        </span><span class="nt">backend</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">service</span><span class="p">:</span>
+<span class="w">            </span><span class="c1"># Created by Helm chart</span>
+<span class="w">            </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-external</span>
+<span class="w">            </span><span class="nt">port</span><span class="p">:</span>
+<span class="w">              </span><span class="c1"># Using HTTPS port is mandatory for UI</span>
+<span class="w">              </span><span class="nt">number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">443</span>
+</code></pre></div>
+<p>And you can now proceed to the setup wizard by browsing to <code>https://bunkerweb.example.com/setup</code>.</p>
+<p><strong>Protecting existing application</strong></p>
+<p><strong>First of all, you will need to go to Global Config, select the SSL plugin and then disable the Auto redirect HTTP to HTTPS. Please note that you only need to do it one time.</strong></p>
+<p>Let's assume that you have an application in the <code>myapp</code> namespace which is accessible using the <code>myapp-service</code> service on port <code>5000</code>.</p>
+<p>You will need to add a new service on the web UI and fill the required information :</p>
+<ul>
+<li>Server name : the public facing domain of your application (e.g. <code>myapp.example.com</code>)</li>
+<li>SSL/TLS : your ingress controller take care of that part so don't enable it on BunkerWeb since traffic is internal within the cluster</li>
+<li>Reverse proxy host : the full URL of your application within the cluster (e.g. <code>http://myapp-service.myapp.svc.cluster.local:5000</code>)</li>
+</ul>
+<p>Once the new service has been added, you can now declare an Ingress resource for that service and route it to the BunkerWeb service on HTTP port :</p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.k8s.io/v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ingress</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">myapp</span>
+<span class="w">  </span><span class="c1"># Replace with your namespace of BW if needed</span>
+<span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="c1"># Only served by nginx controller and not BW</span>
+<span class="w">  </span><span class="nt">ingressClassName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx</span>
+<span class="w">  </span><span class="c1"># Uncomment and edit if you want to use your own certificate</span>
+<span class="w">  </span><span class="c1"># tls:</span>
+<span class="w">  </span><span class="c1"># - hosts:</span>
+<span class="w">  </span><span class="c1">#   - myapp.example.com</span>
+<span class="w">  </span><span class="c1">#   secretName: tls-secret</span>
+<span class="w">  </span><span class="nt">rules</span><span class="p">:</span>
+<span class="w">  </span><span class="c1"># Replace with your domain</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">myapp.example.com</span>
+<span class="w">    </span><span class="nt">http</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">paths</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/</span>
+<span class="w">        </span><span class="nt">pathType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Prefix</span>
+<span class="w">        </span><span class="nt">backend</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">service</span><span class="p">:</span>
+<span class="w">            </span><span class="c1"># Created by Helm chart</span>
+<span class="w">            </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-external</span>
+<span class="w">            </span><span class="nt">port</span><span class="p">:</span>
+<span class="w">              </span><span class="nt">number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span>
+</code></pre></div>
+<p>You can visit <code>http(s)://myapp.example.com</code>, which is now protected with BunkerWeb 🛡️</p>
 <h2 id="integrations-swarm">Swarm</h2>
 <figure>
 <p><img align="center," alt="Overview" src="../assets/img/integration-swarm.svg" width="600" />
@@ -5564,34 +5478,34 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <li><code>https://github.com/coreruleset/dos-protection-plugin-modsecurity/archive/refs/heads/main.zip</code> &lt;---- <em>Download the plugin directly from the URL.</em></li>
 </ul>
 </div>
-<!-- ## CrowdSec
-
-STREAM support :x:
-
-<figure markdown>
-  ![Overview](assets/img/crowdsec.svg){ align=center, width="600" }
+<h3 id="advanced-crowdsec">CrowdSec</h3>
+<p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
+<figure>
+<p><img align="center," alt="Overview" src="../assets/img/crowdsec.svg" width="600" /></p>
 </figure>
-
-This BunkerWeb plugin acts as a [CrowdSec](https://crowdsec.net/) bouncer. It will deny requests based on the decision of your CrowdSec API. Not only you will benefinit from the crowdsourced blacklist, you can also configure [scenarios](https://docs.crowdsec.net/docs/concepts#scenarios) to automatically ban IPs based on suspicious behaviors.
-
-### Setup
-
-=== "Docker"
-    **Acquisition file**
-
-    You will need to run CrowdSec instance and configure it to parse BunkerWeb logs. Because BunkerWeb is based on NGINX, you can use the `nginx` value for the `type` parameter in your acquisition file (assuming that BunkerWeb logs are stored "as is" without additional data) :
-
-    <div class="highlight"><pre><span></span><code><span class="nt">filenames</span><span class="p">:</span>
-<span class="w">   </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/var/log/bunkerweb.log</span>
+<p>This BunkerWeb plugin acts as a <a href="https://crowdsec.net/?utm_source=external-docs&amp;utm_medium=cta&amp;utm_campaign=bunker-web-docs">CrowdSec</a> bouncer. It will deny requests based on the decision of your CrowdSec API. Not only you will benefinit from the crowdsourced blacklist, you can also configure <a href="https://docs.crowdsec.net/docs/concepts?utm_source=external-docs&amp;utm_medium=cta&amp;utm_campaign=bunker-web-docs#scenarios">scenarios</a> to automatically ban IPs based on suspicious behaviors.</p>
+<h4 id="advanced-setup">Setup</h4>
+<div class="tabbed-set tabbed-alternate" data-tabs="8:2"><input checked="checked" id="advanced-__tabbed_8_1" name="advanced-__tabbed_8" type="radio" /><input id="advanced-__tabbed_8_2" name="advanced-__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="advanced-__tabbed_8_1">Docker</label><label for="advanced-__tabbed_8_2">Linux</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p><strong>Acquisition file</strong></p>
+<p>You will need to run CrowdSec instance and configure it to parse BunkerWeb logs. Because BunkerWeb is based on NGINX, you can use the <code>nginx</code> value for the <code>type</code> parameter in your acquisition file (assuming that BunkerWeb logs are stored "as is" without additional data) :</p>
+<div class="highlight"><pre><span></span><code><span class="nt">filenames</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/var/log/bunkerweb.log</span>
 <span class="nt">labels</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx</span>
+<span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx</span>
 </code></pre></div>
-
-    **Syslog**
-
-    For container-based integrations, we recommend you to redirect the logs of the BunkerWeb container to a syslog service that will store the logs so CrowdSec can access it easily. Here is an example configuration for syslog-ng that will store raw logs coming from BunkerWeb to a local `/var/log/bunkerweb.log` file :
-
-    <div class="highlight"><pre><span></span><code>@version: 4.7
+<p><strong>Application Security Component (<em>optional</em>)</strong></p>
+<p>CrowdSec also provides an <a href="https://docs.crowdsec.net/docs/appsec/intro?utm_source=external-docs&amp;utm_medium=cta&amp;utm_campaign=bunker-web-docs">Application Security Component</a> that can be used to protect your application from attacks. You can configure the plugin to send requests to the AppSec Component for further analysis. If you want to use it, you will need to create another acquisition file for the AppSec Component :</p>
+<div class="highlight"><pre><span></span><code><span class="nt">appsec_config</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">crowdsecurity/appsec-default</span>
+<span class="nt">labels</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">appsec</span>
+<span class="nt">listen_addr</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0.0.0:7422</span>
+<span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">appsec</span>
+</code></pre></div>
+<p><strong>Syslog</strong></p>
+<p>For container-based integrations, we recommend you to redirect the logs of the BunkerWeb container to a syslog service that will store the logs so CrowdSec can access it easily. Here is an example configuration for syslog-ng that will store raw logs coming from BunkerWeb to a local <code>/var/log/bunkerweb.log</code> file :</p>
+<div class="highlight"><pre><span></span><code>@version: 4.8
 
 source s_net {
     udp(
@@ -5613,178 +5527,170 @@ log {
     destination(d_file);
 };
 </code></pre></div>
+<p><strong>Docker Compose</strong></p>
+<p>Here is the docker-compose boilerplate that you can use (<strong>don't forget to edit the bouncer key</strong>) :</p>
+<div class="highlight"><pre><span></span><code><span class="nt">x-bw-env</span><span class="p">:</span><span class="w"> </span><span class="nl">&amp;bw-env</span>
+<span class="w">  </span><span class="c1"># We use an anchor to avoid repeating the same settings for both services</span>
+<span class="w">  </span><span class="nt">API_WHITELIST_IP</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;127.0.0.0/8</span><span class="nv"> </span><span class="s">10.20.30.0/24&quot;</span><span class="w"> </span><span class="c1"># Make sure to set the correct IP range so the scheduler can send the configuration to the instance</span>
 
-    **Optional : Application Security Component**
+<span class="nt">services</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
+<span class="w">    </span><span class="c1"># This is the name that will be used to identify the instance in the Scheduler</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:testing</span>
+<span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;80:8080/tcp&quot;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;443:8443/tcp&quot;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;443:8443/udp&quot;</span><span class="w"> </span><span class="c1"># For QUIC / HTTP3 support</span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-env</span><span class="w"> </span><span class="c1"># We use the anchor to avoid repeating the same settings for all services</span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
+<span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-plugins</span>
+<span class="w">    </span><span class="nt">logging</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">syslog</span><span class="w"> </span><span class="c1"># Send logs to syslog</span>
+<span class="w">      </span><span class="nt">options</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">syslog-address</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;udp://10.10.10.254:514&quot;</span><span class="w"> </span><span class="c1"># The IP address of the syslog service</span>
 
-    CrowdSec also provides an [Application Security Component](https://docs.crowdsec.net/docs/appsec/intro) that can be used to protect your application from attacks. You can configure the plugin to send requests to the AppSec Component for further analysis. If you want to use it, you will need to create another acquisition file for the AppSec Component :
+<span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:testing</span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-env</span>
+<span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerweb&quot;</span><span class="w"> </span><span class="c1"># Make sure to set the correct instance name</span>
+<span class="w">      </span><span class="nt">DATABASE_URI</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger password for the database</span>
+<span class="w">      </span><span class="nt">SERVER_NAME</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span>
+<span class="w">      </span><span class="nt">MULTISITE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="w">      </span><span class="nt">USE_CROWDSEC</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="w">      </span><span class="nt">CROWDSEC_API</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;http://crowdsec:8080&quot;</span><span class="w"> </span><span class="c1"># This is the address of the CrowdSec container API in the same network</span>
+<span class="w">      </span><span class="nt">CROWDSEC_APPSEC_URL</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;http://crowdsec:7422&quot;</span><span class="w"> </span><span class="c1"># Comment if you don&#39;t want to use the AppSec Component</span>
+<span class="w">      </span><span class="nt">CROWDSEC_API_KEY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;s3cr3tb0unc3rk3y&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger key for the bouncer</span>
+<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-storage:/data</span><span class="w"> </span><span class="c1"># This is used to persist the cache and other data like the backups</span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
+<span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
 
-    <div class="highlight"><pre><span></span><code><span class="nt">appsec_config</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">crowdsecurity/appsec-default</span>
-<span class="nt">labels</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">appsec</span>
-<span class="nt">listen_addr</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0.0.0:7422</span>
-<span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">appsec</span>
-</code></pre></div>
+<span class="w">  </span><span class="nt">bw-db</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mariadb:11</span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">MYSQL_RANDOM_ROOT_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="w">      </span><span class="nt">MYSQL_DATABASE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;db&quot;</span>
+<span class="w">      </span><span class="nt">MYSQL_USER</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerweb&quot;</span>
+<span class="w">      </span><span class="nt">MYSQL_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;changeme&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger password for the database</span>
+<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-data:/var/lib/mysql</span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
+<span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
 
-    **Docker Compose**
+<span class="w">  </span><span class="nt">crowdsec</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">crowdsecurity/crowdsec:v1.6.5</span><span class="w"> </span><span class="c1"># Use the latest version but always pin the version for a better stability/security</span>
+<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cs-data:/var/lib/crowdsec/data</span><span class="w"> </span><span class="c1"># To persist the CrowdSec data</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-logs:/var/log:ro</span><span class="w"> </span><span class="c1"># The logs of BunkerWeb for CrowdSec to parse</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./acquis.yaml:/etc/crowdsec/acquis.yaml</span><span class="w"> </span><span class="c1"># The acquisition file for BunkerWeb logs</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./appsec.yaml:/etc/crowdsec/acquis.d/appsec.yaml</span><span class="w"> </span><span class="c1"># Comment if you don&#39;t want to use the AppSec Component</span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">BOUNCER_KEY_bunkerweb</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;s3cr3tb0unc3rk3y&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger key for the bouncer</span>
+<span class="w">      </span><span class="nt">COLLECTIONS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;crowdsecurity/nginx</span><span class="nv"> </span><span class="s">crowdsecurity/appsec-virtual-patching</span><span class="nv"> </span><span class="s">crowdsecurity/appsec-generic-rules&quot;</span>
+<span class="w">      </span><span class="c1">#   COLLECTIONS: &quot;crowdsecurity/nginx&quot; # If you don&#39;t want to use the AppSec Component use this line instead</span>
+<span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-plugins</span>
 
-    Here is the docker-compose boilerplate that you can use (**don't forget to edit the bouncer key**) :
-
-    <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:testing</span>
-<span class="w">        </span><span class="nt">ports</span><span class="p">:</span>
-<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;80:8080&quot;</span>
-<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;443:8443&quot;</span>
-<span class="w">        </span><span class="nt">environment</span><span class="p">:</span>
-<span class="w">            </span><span class="nt">API_WHITELIST_IP</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;127.0.0.0/24</span><span class="nv"> </span><span class="s">10.20.30.0/24&quot;</span>
-<span class="w">        </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
-<span class="w">        </span><span class="nt">networks</span><span class="p">:</span>
-<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
-<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span>
-<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-plugins</span>
-<span class="w">        </span><span class="nt">logging</span><span class="p">:</span>
-<span class="w">            </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">syslog</span>
-<span class="w">            </span><span class="nt">options</span><span class="p">:</span>
-<span class="w">                </span><span class="nt">syslog-address</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;udp://10.10.10.254:514&quot;</span>
-
-<span class="w">    </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:testing</span>
-<span class="w">        </span><span class="nt">depends_on</span><span class="p">:</span>
-<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span>
-<span class="w">        </span><span class="nt">environment</span><span class="p">:</span>
-<span class="w">            </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerweb&quot;</span>
-<span class="w">            </span><span class="nt">SERVER_NAME</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;www.example.com&quot;</span>
-<span class="w">            </span><span class="nt">API_WHITELIST_IP</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;127.0.0.0/24</span><span class="nv"> </span><span class="s">10.20.30.0/24&quot;</span>
-<span class="w">            </span><span class="nt">USE_CROWDSEC</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
-<span class="w">            </span><span class="nt">CROWDSEC_API</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;http://crowdsec:8080&quot;</span><span class="w"> </span><span class="c1"># This is the API URL of the CrowdSec instance</span>
-<span class="w">            </span><span class="nt">CROWDSEC_APPSEC_URL</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;http://crowdsec:7422&quot;</span><span class="w"> </span><span class="c1"># This is the AppSec Component URL of the CrowdSec instance, comment if you don&#39;t want to use it</span>
-<span class="w">            </span><span class="nt">CROWDSEC_API_KEY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;s3cr3tb0unc3rk3y&quot;</span><span class="w"> </span><span class="c1"># This is the API key of the Bouncer, we recommend have a more complex key</span>
-<span class="w">        </span><span class="nt">volumes</span><span class="p">:</span>
-<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-storage:/data</span><span class="w"> </span><span class="c1"># This is used to persist the cache and other data like the backups</span>
-<span class="w">        </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
-<span class="w">        </span><span class="nt">networks</span><span class="p">:</span>
-<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
-
-<span class="w">    </span><span class="nt">crowdsec</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">crowdsecurity/crowdsec:v1.6.2</span>
-<span class="w">        </span><span class="nt">volumes</span><span class="p">:</span>
-<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cs-data:/var/lib/crowdsec/data</span>
-<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./acquis.yaml:/etc/crowdsec/acquis.yaml</span><span class="w"> </span><span class="c1"># This is the acquisition file for CrowdSec created above</span>
-<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./appsec.yaml:/etc/crowdsec/acquis.d/appsec.yaml</span><span class="w"> </span><span class="c1"># Comment if you don&#39;t want to use the AppSec Component</span>
-<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-logs:/var/log:ro</span>
-<span class="w">        </span><span class="nt">environment</span><span class="p">:</span>
-<span class="w">            </span><span class="nt">BOUNCER_KEY_bunkerweb</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;s3cr3tb0unc3rk3y&quot;</span><span class="w"> </span><span class="c1"># This is the API key of the Bouncer, we recommend have a more complex key (it must match the one configured)</span>
-<span class="w">            </span><span class="nt">COLLECTIONS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;crowdsecurity/nginx</span><span class="nv"> </span><span class="s">crowdsecurity/appsec-virtual-patching</span><span class="nv"> </span><span class="s">crowdsecurity/appsec-generic-rules&quot;</span>
-<span class="w">            </span><span class="c1">#   COLLECTIONS: &quot;crowdsecurity/nginx&quot; # If you don&#39;t want to use the AppSec Component use this line instead</span>
-<span class="w">        </span><span class="nt">networks</span><span class="p">:</span>
-<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-plugins</span>
-
-<span class="w">    </span><span class="nt">syslog</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">balabit/syslog-ng:4.8.0</span>
-<span class="w">        </span><span class="c1"># image: lscr.io/linuxserver/syslog-ng:4.8.1-r1-ls147 # For aarch64 architecture</span>
-<span class="w">        </span><span class="nt">cap_add</span><span class="p">:</span>
-<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NET_BIND_SERVICE</span><span class="w">  </span><span class="c1"># Bind to low ports</span>
-<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NET_BROADCAST</span><span class="w">  </span><span class="c1"># Send broadcasts</span>
-<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NET_RAW</span><span class="w">  </span><span class="c1"># Use raw sockets</span>
-<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DAC_READ_SEARCH</span><span class="w">  </span><span class="c1"># Read files bypassing permissions</span>
-<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DAC_OVERRIDE</span><span class="w">  </span><span class="c1"># Override file permissions</span>
-<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CHOWN</span><span class="w">  </span><span class="c1"># Change ownership</span>
-<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SYSLOG</span><span class="w">  </span><span class="c1"># Write to system logs</span>
-<span class="w">        </span><span class="nt">volumes</span><span class="p">:</span>
-<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-logs:/var/log/bunkerweb</span><span class="w"> </span><span class="c1"># This is the volume used to store the logs</span>
-<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf</span><span class="w"> </span><span class="c1"># This is the syslog-ng configuration file</span>
-<span class="w">        </span><span class="nt">networks</span><span class="p">:</span>
-<span class="w">            </span><span class="nt">bw-plugins</span><span class="p">:</span>
-<span class="w">                </span><span class="nt">ipv4_address</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10.10.10.254</span>
-
-<span class="nt">networks</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">bw-services</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span>
-<span class="w">    </span><span class="nt">bw-universe</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
-<span class="w">        </span><span class="nt">ipam</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span>
-<span class="w">        </span><span class="nt">config</span><span class="p">:</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">subnet</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10.20.30.0/24</span>
-<span class="w">    </span><span class="nt">bw-plugins</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">ipam</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span>
-<span class="w">        </span><span class="nt">config</span><span class="p">:</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">subnet</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10.10.10.0/24</span>
+<span class="w">  </span><span class="nt">syslog</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">balabit/syslog-ng:4.8.0</span>
+<span class="w">    </span><span class="c1"># image: lscr.io/linuxserver/syslog-ng:4.8.1-r1-ls147 # For aarch64 architecture</span>
+<span class="w">    </span><span class="nt">cap_add</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NET_BIND_SERVICE</span><span class="w">  </span><span class="c1"># Bind to low ports</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NET_BROADCAST</span><span class="w">  </span><span class="c1"># Send broadcasts</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NET_RAW</span><span class="w">  </span><span class="c1"># Use raw sockets</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DAC_READ_SEARCH</span><span class="w">  </span><span class="c1"># Read files bypassing permissions</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DAC_OVERRIDE</span><span class="w">  </span><span class="c1"># Override file permissions</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CHOWN</span><span class="w">  </span><span class="c1"># Change ownership</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SYSLOG</span><span class="w">  </span><span class="c1"># Write to system logs</span>
+<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-logs:/var/log/bunkerweb</span><span class="w"> </span><span class="c1"># This is the volume used to store the logs</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf</span><span class="w"> </span><span class="c1"># This is the syslog-ng configuration file</span>
+<span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">bw-plugins</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">ipv4_address</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10.10.10.254</span>
 
 <span class="nt">volumes</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">bw-storage</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">bw-logs</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">cs-data</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bw-data</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bw-storage</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bw-logs</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">cs-data</span><span class="p">:</span>
+
+<span class="nt">networks</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bw-universe</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
+<span class="w">    </span><span class="nt">ipam</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span>
+<span class="w">      </span><span class="nt">config</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">subnet</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10.20.30.0/24</span><span class="w"> </span><span class="c1"># Make sure to set the correct IP range so the scheduler can send the configuration to the instance</span>
+<span class="w">  </span><span class="nt">bw-services</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span>
+<span class="w">  </span><span class="nt">bw-db</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
+<span class="w">  </span><span class="nt">bw-plugins</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">ipam</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span>
+<span class="w">      </span><span class="nt">config</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">subnet</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10.10.10.0/24</span>
 </code></pre></div>
-
-=== "Linux"
-
-    You'll need to install CrowdSec and configure it to parse BunkerWeb logs. To do so, you can follow the [official documentation](https://doc.crowdsec.net/docs/getting_started/install_crowdsec).
-
-    For CrowdSec to parse BunkerWeb logs, you have to add the following lines to your acquisition file located in `/etc/crowdsec/acquis.yaml` :
-
-    <div class="highlight"><pre><span></span><code><span class="nt">filenames</span><span class="p">:</span>
+</div>
+<div class="tabbed-block">
+<p>You'll need to install CrowdSec and configure it to parse BunkerWeb logs. To do so, you can follow the <a href="https://doc.crowdsec.net/docs/getting_started/install_crowdsec?utm_source=external-docs&amp;utm_medium=cta&amp;utm_campaign=bunker-web-docs#scenarios">official documentation</a>.</p>
+<p>For CrowdSec to parse BunkerWeb logs, you have to add the following lines to your acquisition file located in <code>/etc/crowdsec/acquis.yaml</code> :</p>
+<div class="highlight"><pre><span></span><code><span class="nt">filenames</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/var/log/bunkerweb/access.log</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/var/log/bunkerweb/error.log</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/var/log/bunkerweb/modsec_audit.log</span>
 <span class="nt">labels</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx</span>
 </code></pre></div>
-
-    Now we have to add our custom bouncer to the CrowdSec API. To do so, you can use the `cscli` tool :
-
-    <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>cscli<span class="w"> </span>bouncers<span class="w"> </span>add<span class="w"> </span>crowdsec-bunkerweb-bouncer/v1.6
+<p>Now we have to add our custom bouncer to the CrowdSec API. To do so, you can use the <code>cscli</code> tool :</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>cscli<span class="w"> </span>bouncers<span class="w"> </span>add<span class="w"> </span>crowdsec-bunkerweb-bouncer/v1.6
 </code></pre></div>
-
-    !!! warning "API key"
-        Keep the key generated by the `cscli` command, you will need it later.
-
-    Now restart the CrowdSec service :
-
-    <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>crowdsec
+<div class="admonition warning">
+<p class="admonition-title">API key</p>
+<p>Keep the key generated by the <code>cscli</code> command, you will need it later.</p>
+</div>
+<p>Now restart the CrowdSec service :</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>crowdsec
 </code></pre></div>
-
-    **Optional : Application Security Component with Linux**
-
-    If you want to use the AppSec Component, you will need to create another acquisition file for it located in `/etc/crowdsec/acquis.d/appsec.yaml` :
-
-    <div class="highlight"><pre><span></span><code><span class="nt">appsec_config</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">crowdsecurity/appsec-default</span>
+<p><strong>Application Security Component (<em>optional</em>)</strong></p>
+<p>If you want to use the AppSec Component, you will need to create another acquisition file for it located in <code>/etc/crowdsec/acquis.d/appsec.yaml</code> :</p>
+<div class="highlight"><pre><span></span><code><span class="nt">appsec_config</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">crowdsecurity/appsec-default</span>
 <span class="nt">labels</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">appsec</span>
 <span class="nt">listen_addr</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">127.0.0.1:7422</span>
 <span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">appsec</span>
 </code></pre></div>
-
-    And you will need to install the AppSec Component's collections :
-
-    <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>cscli<span class="w"> </span>collections<span class="w"> </span>install<span class="w"> </span>crowdsecurity/appsec-virtual-patching
+<p>And you will need to install the AppSec Component's collections :</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>cscli<span class="w"> </span>collections<span class="w"> </span>install<span class="w"> </span>crowdsecurity/appsec-virtual-patching
 sudo<span class="w"> </span>cscli<span class="w"> </span>collections<span class="w"> </span>install<span class="w"> </span>crowdsecurity/appsec-generic-rules
 </code></pre></div>
-
-    Now you just have to restart the CrowdSec service :
-
-    <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>crowdsec
+<p>Now you just have to restart the CrowdSec service :</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>crowdsec
 </code></pre></div>
-
-    If you need more information about the AppSec Component, you can refer to the [official documentation](https://docs.crowdsec.net/docs/appsec/intro).
-
-    **Settings**
-
-    Now you can configure the plugin by adding the following settings to your BunkerWeb configuration file :
-
-    <div class="highlight"><pre><span></span><code>USE_CROWDSEC=yes
+<p>If you need more information about the AppSec Component, you can refer to the <a href="https://docs.crowdsec.net/docs/appsec/intro?utm_source=external-docs&amp;utm_medium=cta&amp;utm_campaign=bunker-web-docs#scenarios">official documentation</a>.</p>
+<p><strong>Settings</strong></p>
+<p>Now you can configure the plugin by adding the following settings to your BunkerWeb configuration file :</p>
+<div class="highlight"><pre><span></span><code>USE_CROWDSEC=yes
 CROWDSEC_API=http://127.0.0.1:8080
 CROWDSEC_API_KEY=&lt;The key provided by cscli&gt;
-CROWDSEC_APPSEC_URL=http://127.0.0.1:7422 # Comment if you don&#39;t want to use the AppSec Component
+# Comment if you don&#39;t want to use the AppSec Component
+CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </code></pre></div>
-
-    And finally reload the BunkerWeb service :
-
-    ```shell
-    sudo systemctl reload bunkerweb
-    ``` -->
-
+<p>And finally reload the BunkerWeb service :</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>reload<span class="w"> </span>bunkerweb
+</code></pre></div>
+</div>
+</div>
+</div>
 <h3 id="advanced-bad-behavior">Bad behavior</h3>
 <p>STREAM support <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>Attackers often generate "suspicious" HTTP status codes when probing for or exploiting vulnerabilities—codes that a typical user is unlikely to trigger within a given time frame. By detecting this behavior, BunkerWeb can automatically ban the offending IP address, forcing the attacker to switch to a new IP to continue their attempts.</p>
@@ -5823,6 +5729,11 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422 # Comment if you don&#39;t want to use
 <td style="text-align: center;"><code>BAD_BEHAVIOR_BAN_TIME</code></td>
 <td style="text-align: center;"><code>86400</code></td>
 <td style="text-align: left;">The duration time (in seconds) of a ban when a client reached the threshold.</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>BAD_BEHAVIOR_BAN_SCOPE</code></td>
+<td style="text-align: center;"><code>service</code></td>
+<td style="text-align: left;">Determines the level of the ban. 'service' will ban the IP for the service only, 'global' will ban the IP for the whole system.</td>
 </tr>
 </tbody>
 </table>
@@ -6351,7 +6262,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422 # Comment if you don&#39;t want to use
 </tr>
 <tr>
 <td><code>WHITELIST_IP</code></td>
-<td>``</td>
+<td></td>
 <td>multisite</td>
 <td>no</td>
 <td>List of IP/network, separated with spaces, to put into the whitelist.</td>
@@ -6988,7 +6899,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422 # Comment if you don&#39;t want to use
 <div class="admonition warning">
 <p class="admonition-title">Information for Red Hat Enterprise Linux (RHEL) 8.9 users</p>
 <p>If you are using <strong>RHEL 8.9</strong> and plan on using an <strong>external database</strong>, you will need to install the <code>mysql-community-client</code> package to ensure the <code>mysqldump</code> command is available. You can install the package by executing the following commands:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="8:2"><input checked="checked" id="advanced-__tabbed_8_1" name="advanced-__tabbed_8" type="radio" /><input id="advanced-__tabbed_8_2" name="advanced-__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="advanced-__tabbed_8_1">MySQL/MariaDB</label><label for="advanced-__tabbed_8_2">PostgreSQL</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="9:2"><input checked="checked" id="advanced-__tabbed_9_1" name="advanced-__tabbed_9" type="radio" /><input id="advanced-__tabbed_9_2" name="advanced-__tabbed_9" type="radio" /><div class="tabbed-labels"><label for="advanced-__tabbed_9_1">MySQL/MariaDB</label><label for="advanced-__tabbed_9_2">PostgreSQL</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <ol>
@@ -7074,7 +6985,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422 # Comment if you don&#39;t want to use
 </table>
 <h5 id="advanced-manual-backup">Manual backup</h5>
 <p>To manually initiate a backup, execute the following command:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="9:2"><input checked="checked" id="advanced-__tabbed_9_1" name="advanced-__tabbed_9" type="radio" /><input id="advanced-__tabbed_9_2" name="advanced-__tabbed_9" type="radio" /><div class="tabbed-labels"><label for="advanced-__tabbed_9_1">Linux</label><label for="advanced-__tabbed_9_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="10:2"><input checked="checked" id="advanced-__tabbed_10_1" name="advanced-__tabbed_10" type="radio" /><input id="advanced-__tabbed_10_2" name="advanced-__tabbed_10" type="radio" /><div class="tabbed-labels"><label for="advanced-__tabbed_10_1">Linux</label><label for="advanced-__tabbed_10_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"> </span>save
@@ -7088,7 +6999,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422 # Comment if you don&#39;t want to use
 </div>
 <p>This command will create a backup of your database and store it in the backup directory specified in the <code>BACKUP_DIRECTORY</code> setting.</p>
 <p>You can also specify a custom directory for the backup by providing the <code>BACKUP_DIRECTORY</code> environment variable when executing the command:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="10:2"><input checked="checked" id="advanced-__tabbed_10_1" name="advanced-__tabbed_10" type="radio" /><input id="advanced-__tabbed_10_2" name="advanced-__tabbed_10" type="radio" /><div class="tabbed-labels"><label for="advanced-__tabbed_10_1">Linux</label><label for="advanced-__tabbed_10_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="11:2"><input checked="checked" id="advanced-__tabbed_11_1" name="advanced-__tabbed_11" type="radio" /><input id="advanced-__tabbed_11_2" name="advanced-__tabbed_11" type="radio" /><div class="tabbed-labels"><label for="advanced-__tabbed_11_1">Linux</label><label for="advanced-__tabbed_11_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nv">BACKUP_DIRECTORY</span><span class="o">=</span>/path/to/backup/directory<span class="w"> </span>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"> </span>save
@@ -7111,7 +7022,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422 # Comment if you don&#39;t want to use
 <div class="highlight"><pre><span></span><code><span class="k">ALTER</span><span class="w"> </span><span class="k">USER</span><span class="w"> </span><span class="s1">&#39;yourusername&#39;</span><span class="o">@</span><span class="s1">&#39;localhost&#39;</span><span class="w"> </span><span class="n">IDENTIFIED</span><span class="w"> </span><span class="k">WITH</span><span class="w"> </span><span class="n">mysql_native_password</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="s1">&#39;youpassword&#39;</span><span class="p">;</span>
 </code></pre></div>
 <p>If you're using the Docker integration, you can add the following command to the <code>docker-compose.yml</code> file to automatically change the authentication plugin:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="11:2"><input checked="checked" id="advanced-__tabbed_11_1" name="advanced-__tabbed_11" type="radio" /><input id="advanced-__tabbed_11_2" name="advanced-__tabbed_11" type="radio" /><div class="tabbed-labels"><label for="advanced-__tabbed_11_1">MariaDB</label><label for="advanced-__tabbed_11_2">MySQL</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="12:2"><input checked="checked" id="advanced-__tabbed_12_1" name="advanced-__tabbed_12" type="radio" /><input id="advanced-__tabbed_12_2" name="advanced-__tabbed_12" type="radio" /><div class="tabbed-labels"><label for="advanced-__tabbed_12_1">MariaDB</label><label for="advanced-__tabbed_12_2">MySQL</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nt">bw-db</span><span class="p">:</span>
@@ -7132,7 +7043,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422 # Comment if you don&#39;t want to use
 </div>
 <h5 id="advanced-manual-restore">Manual restore</h5>
 <p>To manually initiate a restore, execute the following command:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="12:2"><input checked="checked" id="advanced-__tabbed_12_1" name="advanced-__tabbed_12" type="radio" /><input id="advanced-__tabbed_12_2" name="advanced-__tabbed_12" type="radio" /><div class="tabbed-labels"><label for="advanced-__tabbed_12_1">Linux</label><label for="advanced-__tabbed_12_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="13:2"><input checked="checked" id="advanced-__tabbed_13_1" name="advanced-__tabbed_13" type="radio" /><input id="advanced-__tabbed_13_2" name="advanced-__tabbed_13" type="radio" /><div class="tabbed-labels"><label for="advanced-__tabbed_13_1">Linux</label><label for="advanced-__tabbed_13_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"> </span>restore
@@ -7146,7 +7057,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422 # Comment if you don&#39;t want to use
 </div>
 <p>This command will create a temporary backup of your database in <code>/var/tmp/bunkerweb/backups</code> and restore your database to the latest backup available in the backup directory specified in the <code>BACKUP_DIRECTORY</code> setting.</p>
 <p>You can also specify a custom backup file for the restore by providing the path to it as an argument when executing the command:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="13:2"><input checked="checked" id="advanced-__tabbed_13_1" name="advanced-__tabbed_13" type="radio" /><input id="advanced-__tabbed_13_2" name="advanced-__tabbed_13" type="radio" /><div class="tabbed-labels"><label for="advanced-__tabbed_13_1">Linux</label><label for="advanced-__tabbed_13_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="14:2"><input checked="checked" id="advanced-__tabbed_14_1" name="advanced-__tabbed_14" type="radio" /><input id="advanced-__tabbed_14_2" name="advanced-__tabbed_14" type="radio" /><div class="tabbed-labels"><label for="advanced-__tabbed_14_1">Linux</label><label for="advanced-__tabbed_14_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"> </span>restore<span class="w"> </span>/path/to/backup/file
@@ -7163,7 +7074,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422 # Comment if you don&#39;t want to use
 <div class="admonition example">
 <p class="admonition-title">In case of failure</p>
 <p>Don't worry if the restore fails, you can always restore your database to the previous state by executing the command again but with the <code>BACKUP_DIRECTORY</code> setting set to <code>/var/tmp/bunkerweb/backups</code>:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="14:2"><input checked="checked" id="advanced-__tabbed_14_1" name="advanced-__tabbed_14" type="radio" /><input id="advanced-__tabbed_14_2" name="advanced-__tabbed_14" type="radio" /><div class="tabbed-labels"><label for="advanced-__tabbed_14_1">Linux</label><label for="advanced-__tabbed_14_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="15:2"><input checked="checked" id="advanced-__tabbed_15_1" name="advanced-__tabbed_15" type="radio" /><input id="advanced-__tabbed_15_2" name="advanced-__tabbed_15" type="radio" /><div class="tabbed-labels"><label for="advanced-__tabbed_15_1">Linux</label><label for="advanced-__tabbed_15_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nv">BACKUP_DIRECTORY</span><span class="o">=</span>/var/tmp/bunkerweb/backups<span class="w"> </span>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"> </span>restore
@@ -7185,7 +7096,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422 # Comment if you don&#39;t want to use
 <div class="admonition warning">
 <p class="admonition-title">Information for Red Hat Enterprise Linux (RHEL) 8.9 users</p>
 <p>If you are using <strong>RHEL 8.9</strong> and plan on using an <strong>external database</strong>, you will need to install the <code>mysql-community-client</code> package to ensure the <code>mysqldump</code> command is available. You can install the package by executing the following commands:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="15:2"><input checked="checked" id="advanced-__tabbed_15_1" name="advanced-__tabbed_15" type="radio" /><input id="advanced-__tabbed_15_2" name="advanced-__tabbed_15" type="radio" /><div class="tabbed-labels"><label for="advanced-__tabbed_15_1">MySQL/MariaDB</label><label for="advanced-__tabbed_15_2">PostgreSQL</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="16:2"><input checked="checked" id="advanced-__tabbed_16_1" name="advanced-__tabbed_16" type="radio" /><input id="advanced-__tabbed_16_2" name="advanced-__tabbed_16" type="radio" /><div class="tabbed-labels"><label for="advanced-__tabbed_16_1">MySQL/MariaDB</label><label for="advanced-__tabbed_16_2">PostgreSQL</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <ol>
@@ -7305,7 +7216,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422 # Comment if you don&#39;t want to use
 </table>
 <h5 id="advanced-manual-backup_1">Manual backup</h5>
 <p>To manually initiate a backup, execute the following command:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="16:2"><input checked="checked" id="advanced-__tabbed_16_1" name="advanced-__tabbed_16" type="radio" /><input id="advanced-__tabbed_16_2" name="advanced-__tabbed_16" type="radio" /><div class="tabbed-labels"><label for="advanced-__tabbed_16_1">Linux</label><label for="advanced-__tabbed_16_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="17:2"><input checked="checked" id="advanced-__tabbed_17_1" name="advanced-__tabbed_17" type="radio" /><input id="advanced-__tabbed_17_2" name="advanced-__tabbed_17" type="radio" /><div class="tabbed-labels"><label for="advanced-__tabbed_17_1">Linux</label><label for="advanced-__tabbed_17_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup_s3<span class="w"> </span>save
@@ -7319,7 +7230,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422 # Comment if you don&#39;t want to use
 </div>
 <p>This command will create a backup of your database and store it in the S3 bucket specified in the <code>BACKUP_S3_BUCKET</code> setting.</p>
 <p>You can also specify a custom S3 bucket for the backup by providing the <code>BACKUP_S3_BUCKET</code> environment variable when executing the command:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="17:2"><input checked="checked" id="advanced-__tabbed_17_1" name="advanced-__tabbed_17" type="radio" /><input id="advanced-__tabbed_17_2" name="advanced-__tabbed_17" type="radio" /><div class="tabbed-labels"><label for="advanced-__tabbed_17_1">Linux</label><label for="advanced-__tabbed_17_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="18:2"><input checked="checked" id="advanced-__tabbed_18_1" name="advanced-__tabbed_18" type="radio" /><input id="advanced-__tabbed_18_2" name="advanced-__tabbed_18" type="radio" /><div class="tabbed-labels"><label for="advanced-__tabbed_18_1">Linux</label><label for="advanced-__tabbed_18_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nv">BACKUP_S3_BUCKET</span><span class="o">=</span>your-bucket-name<span class="w"> </span>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup_s3<span class="w"> </span>save
@@ -7340,7 +7251,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422 # Comment if you don&#39;t want to use
 <div class="highlight"><pre><span></span><code><span class="k">ALTER</span><span class="w"> </span><span class="k">USER</span><span class="w"> </span><span class="s1">&#39;yourusername&#39;</span><span class="o">@</span><span class="s1">&#39;localhost&#39;</span><span class="w"> </span><span class="n">IDENTIFIED</span><span class="w"> </span><span class="k">WITH</span><span class="w"> </span><span class="n">mysql_native_password</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="s1">&#39;youpassword&#39;</span><span class="p">;</span>
 </code></pre></div>
 <p>If you're using the Docker integration, you can add the following command to the <code>docker-compose.yml</code> file to automatically change the authentication plugin:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="18:2"><input checked="checked" id="advanced-__tabbed_18_1" name="advanced-__tabbed_18" type="radio" /><input id="advanced-__tabbed_18_2" name="advanced-__tabbed_18" type="radio" /><div class="tabbed-labels"><label for="advanced-__tabbed_18_1">MariaDB</label><label for="advanced-__tabbed_18_2">MySQL</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="19:2"><input checked="checked" id="advanced-__tabbed_19_1" name="advanced-__tabbed_19" type="radio" /><input id="advanced-__tabbed_19_2" name="advanced-__tabbed_19" type="radio" /><div class="tabbed-labels"><label for="advanced-__tabbed_19_1">MariaDB</label><label for="advanced-__tabbed_19_2">MySQL</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nt">bw-db</span><span class="p">:</span>
@@ -7361,7 +7272,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422 # Comment if you don&#39;t want to use
 </div>
 <h5 id="advanced-manual-restore_1">Manual restore</h5>
 <p>To manually initiate a restore, execute the following command:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="19:2"><input checked="checked" id="advanced-__tabbed_19_1" name="advanced-__tabbed_19" type="radio" /><input id="advanced-__tabbed_19_2" name="advanced-__tabbed_19" type="radio" /><div class="tabbed-labels"><label for="advanced-__tabbed_19_1">Linux</label><label for="advanced-__tabbed_19_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="20:2"><input checked="checked" id="advanced-__tabbed_20_1" name="advanced-__tabbed_20" type="radio" /><input id="advanced-__tabbed_20_2" name="advanced-__tabbed_20" type="radio" /><div class="tabbed-labels"><label for="advanced-__tabbed_20_1">Linux</label><label for="advanced-__tabbed_20_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup_s3<span class="w"> </span>restore
@@ -7375,7 +7286,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422 # Comment if you don&#39;t want to use
 </div>
 <p>This command will create a temporary backup of your database in the S3 bucket specified in the <code>BACKUP_S3_BUCKET</code> setting and restore your database to the latest backup available in the bucket.</p>
 <p>You can also specify a custom backup file for the restore by providing the path to it as an argument when executing the command:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="20:2"><input checked="checked" id="advanced-__tabbed_20_1" name="advanced-__tabbed_20" type="radio" /><input id="advanced-__tabbed_20_2" name="advanced-__tabbed_20" type="radio" /><div class="tabbed-labels"><label for="advanced-__tabbed_20_1">Linux</label><label for="advanced-__tabbed_20_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="21:2"><input checked="checked" id="advanced-__tabbed_21_1" name="advanced-__tabbed_21" type="radio" /><input id="advanced-__tabbed_21_2" name="advanced-__tabbed_21" type="radio" /><div class="tabbed-labels"><label for="advanced-__tabbed_21_1">Linux</label><label for="advanced-__tabbed_21_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup_s3<span class="w"> </span>restore<span class="w"> </span>s3_backup_file.zip
@@ -7390,7 +7301,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422 # Comment if you don&#39;t want to use
 <div class="admonition example">
 <p class="admonition-title">In case of failure</p>
 <p>Don't worry if the restore fails, you can always restore your database to the previous state by executing the command again as a backup is created before the restore:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="21:2"><input checked="checked" id="advanced-__tabbed_21_1" name="advanced-__tabbed_21" type="radio" /><input id="advanced-__tabbed_21_2" name="advanced-__tabbed_21" type="radio" /><div class="tabbed-labels"><label for="advanced-__tabbed_21_1">Linux</label><label for="advanced-__tabbed_21_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="22:2"><input checked="checked" id="advanced-__tabbed_22_1" name="advanced-__tabbed_22" type="radio" /><input id="advanced-__tabbed_22_2" name="advanced-__tabbed_22" type="radio" /><div class="tabbed-labels"><label for="advanced-__tabbed_22_1">Linux</label><label for="advanced-__tabbed_22_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup_s3<span class="w"> </span>restore
@@ -7420,7 +7331,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422 # Comment if you don&#39;t want to use
 </ul>
 <h4 id="advanced-create-a-migration-file">Create a migration file</h4>
 <p>To manually create a migration file, execute the following command:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="22:2"><input checked="checked" id="advanced-__tabbed_22_1" name="advanced-__tabbed_22" type="radio" /><input id="advanced-__tabbed_22_2" name="advanced-__tabbed_22" type="radio" /><div class="tabbed-labels"><label for="advanced-__tabbed_22_1">Linux</label><label for="advanced-__tabbed_22_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="23:2"><input checked="checked" id="advanced-__tabbed_23_1" name="advanced-__tabbed_23" type="radio" /><input id="advanced-__tabbed_23_2" name="advanced-__tabbed_23" type="radio" /><div class="tabbed-labels"><label for="advanced-__tabbed_23_1">Linux</label><label for="advanced-__tabbed_23_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>migration<span class="w"> </span>create<span class="w"> </span>/path/to/migration/file
@@ -7452,7 +7363,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422 # Comment if you don&#39;t want to use
 <div class="highlight"><pre><span></span><code><span class="k">ALTER</span><span class="w"> </span><span class="k">USER</span><span class="w"> </span><span class="s1">&#39;yourusername&#39;</span><span class="o">@</span><span class="s1">&#39;localhost&#39;</span><span class="w"> </span><span class="n">IDENTIFIED</span><span class="w"> </span><span class="k">WITH</span><span class="w"> </span><span class="n">mysql_native_password</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="s1">&#39;youpassword&#39;</span><span class="p">;</span>
 </code></pre></div>
 <p>If you're using the Docker integration, you can add the following command to the <code>docker-compose.yml</code> file to automatically change the authentication plugin:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="23:2"><input checked="checked" id="advanced-__tabbed_23_1" name="advanced-__tabbed_23" type="radio" /><input id="advanced-__tabbed_23_2" name="advanced-__tabbed_23" type="radio" /><div class="tabbed-labels"><label for="advanced-__tabbed_23_1">MariaDB</label><label for="advanced-__tabbed_23_2">MySQL</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="24:2"><input checked="checked" id="advanced-__tabbed_24_1" name="advanced-__tabbed_24" type="radio" /><input id="advanced-__tabbed_24_2" name="advanced-__tabbed_24" type="radio" /><div class="tabbed-labels"><label for="advanced-__tabbed_24_1">MariaDB</label><label for="advanced-__tabbed_24_2">MySQL</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nt">bw-db</span><span class="p">:</span>
@@ -7473,7 +7384,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422 # Comment if you don&#39;t want to use
 </div>
 <h4 id="advanced-initialize-a-migration">Initialize a migration</h4>
 <p>To manually initialize a migration, execute the following command:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="24:2"><input checked="checked" id="advanced-__tabbed_24_1" name="advanced-__tabbed_24" type="radio" /><input id="advanced-__tabbed_24_2" name="advanced-__tabbed_24" type="radio" /><div class="tabbed-labels"><label for="advanced-__tabbed_24_1">Linux</label><label for="advanced-__tabbed_24_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="25:2"><input checked="checked" id="advanced-__tabbed_25_1" name="advanced-__tabbed_25" type="radio" /><input id="advanced-__tabbed_25_2" name="advanced-__tabbed_25" type="radio" /><div class="tabbed-labels"><label for="advanced-__tabbed_25_1">Linux</label><label for="advanced-__tabbed_25_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>migration<span class="w"> </span>migrate<span class="w"> </span>/path/to/migration/file
@@ -7992,6 +7903,20 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422 # Comment if you don&#39;t want to use
 <td>no</td>
 <td>Defines the response to threats: "detect" to monitor and log, or "block" to prevent access and log incidents.</td>
 </tr>
+<tr>
+<td><code>PROXY_BUFFER_SIZE</code></td>
+<td><code>auto</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Size of the buffer used for reading the first part of the response received from the proxied server. (auto or size)</td>
+</tr>
+<tr>
+<td><code>PROXY_BUFFERS</code></td>
+<td><code>auto</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Number and size of the buffers used for reading a response from the proxied server. (auto or number size)</td>
+</tr>
 </tbody>
 </table>
 <h2 id="settings-anti-ddos-pro">Anti DDoS <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
@@ -8395,6 +8320,13 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422 # Comment if you don&#39;t want to use
 <td>multisite</td>
 <td>no</td>
 <td>The duration time (in seconds) of a ban when the corresponding IP has reached the threshold.</td>
+</tr>
+<tr>
+<td><code>BAD_BEHAVIOR_BAN_SCOPE</code></td>
+<td><code>service</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Determines the level of the ban. 'service' will ban the IP for the service only, 'global' will ban the IP for the whole system.</td>
 </tr>
 </tbody>
 </table>
@@ -8806,6 +8738,134 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422 # Comment if you don&#39;t want to use
 <td>multisite</td>
 <td>no</td>
 <td>Deny access if the country of the client is not in the list (ISO 3166-1 alpha-2 format separated with spaces).</td>
+</tr>
+</tbody>
+</table>
+<h2 id="settings-crowdsec">CrowdSec</h2>
+<p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
+<p>CrowdSec bouncer for BunkerWeb.</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Default</th>
+<th>Context</th>
+<th>Multiple</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>USE_CROWDSEC</code></td>
+<td><code>no</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Activate CrowdSec bouncer.</td>
+</tr>
+<tr>
+<td><code>CROWDSEC_API</code></td>
+<td><code>http://crowdsec:8080</code></td>
+<td>global</td>
+<td>no</td>
+<td>Address of the CrowdSec API.</td>
+</tr>
+<tr>
+<td><code>CROWDSEC_API_KEY</code></td>
+<td></td>
+<td>global</td>
+<td>no</td>
+<td>Key for the CrowdSec API given by cscli bouncer add.</td>
+</tr>
+<tr>
+<td><code>CROWDSEC_MODE</code></td>
+<td><code>live</code></td>
+<td>global</td>
+<td>no</td>
+<td>Mode of the CrowdSec API (live or stream).</td>
+</tr>
+<tr>
+<td><code>CROWDSEC_ENABLE_INTERNAL</code></td>
+<td><code>no</code></td>
+<td>global</td>
+<td>no</td>
+<td>Enable the analysis of the internal traffic.</td>
+</tr>
+<tr>
+<td><code>CROWDSEC_REQUEST_TIMEOUT</code></td>
+<td><code>1000</code></td>
+<td>global</td>
+<td>no</td>
+<td>Timeout in milliseconds for the HTTP requests done by the bouncer to query CrowdSec local API.</td>
+</tr>
+<tr>
+<td><code>CROWDSEC_EXCLUDE_LOCATION</code></td>
+<td></td>
+<td>global</td>
+<td>no</td>
+<td>The locations to exclude while bouncing. It is a list of location, separated by commas.</td>
+</tr>
+<tr>
+<td><code>CROWDSEC_CACHE_EXPIRATION</code></td>
+<td><code>1</code></td>
+<td>global</td>
+<td>no</td>
+<td>The cache expiration, in second, for IPs that the bouncer store in cache in live mode.</td>
+</tr>
+<tr>
+<td><code>CROWDSEC_UPDATE_FREQUENCY</code></td>
+<td><code>10</code></td>
+<td>global</td>
+<td>no</td>
+<td>The frequency of update, in second, to pull new/old IPs from the CrowdSec local API.</td>
+</tr>
+<tr>
+<td><code>CROWDSEC_APPSEC_URL</code></td>
+<td></td>
+<td>global</td>
+<td>no</td>
+<td>URL of the Application Security Component.</td>
+</tr>
+<tr>
+<td><code>CROWDSEC_APPSEC_FAILURE_ACTION</code></td>
+<td><code>passthrough</code></td>
+<td>global</td>
+<td>no</td>
+<td>Behavior when the AppSec Component return a 500. Can let the request passthrough or deny it.</td>
+</tr>
+<tr>
+<td><code>CROWDSEC_APPSEC_CONNECT_TIMEOUT</code></td>
+<td><code>100</code></td>
+<td>global</td>
+<td>no</td>
+<td>The timeout in milliseconds of the connection between the remediation component and AppSec Component.</td>
+</tr>
+<tr>
+<td><code>CROWDSEC_APPSEC_SEND_TIMEOUT</code></td>
+<td><code>100</code></td>
+<td>global</td>
+<td>no</td>
+<td>The timeout in milliseconds to send data from the remediation component to the AppSec Component.</td>
+</tr>
+<tr>
+<td><code>CROWDSEC_APPSEC_PROCESS_TIMEOUT</code></td>
+<td><code>500</code></td>
+<td>global</td>
+<td>no</td>
+<td>The timeout in milliseconds to process the request from the remediation component to the AppSec Component.</td>
+</tr>
+<tr>
+<td><code>CROWDSEC_ALWAYS_SEND_TO_APPSEC</code></td>
+<td><code>no</code></td>
+<td>global</td>
+<td>no</td>
+<td>Send the request to the AppSec Component even if there is a decision for the IP.</td>
+</tr>
+<tr>
+<td><code>CROWDSEC_APPSEC_SSL_VERIFY</code></td>
+<td><code>no</code></td>
+<td>global</td>
+<td>no</td>
+<td>Verify the AppSec Component SSL certificate validity.</td>
 </tr>
 </tbody>
 </table>
@@ -10703,6 +10763,26 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422 # Comment if you don&#39;t want to use
 <h2 id="settings-user-manager-pro">User Manager <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
 <p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
 <p>Add the possibility to manage users on the web interface</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Default</th>
+<th>Context</th>
+<th>Multiple</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>USERS_REQUIRE_2FA</code></td>
+<td><code>no</code></td>
+<td>global</td>
+<td>no</td>
+<td>Require two-factor authentication for all users</td>
+</tr>
+</tbody>
+</table>
 <h2 id="settings-whitelist">Whitelist</h2>
 <p>STREAM support <img alt="⚠" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/26a0.svg" title=":warning:" /></p>
 <p>Allow access based on internal and external IP/network/rDNS/ASN whitelists.</p>
@@ -12529,8 +12609,9 @@ docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> 
 <ol>
 <li>
 <p><strong>Stop the services</strong>:
-    <div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>stop<span class="w"> </span>bunkerweb
-systemctl<span class="w"> </span>stop<span class="w"> </span>bunkerweb-ui
+    <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>stop<span class="w"> </span>bunkerweb
+sudo<span class="w"> </span>systemctl<span class="w"> </span>stop<span class="w"> </span>bunkerweb-ui
+sudo<span class="w"> </span>systemctl<span class="w"> </span>stop<span class="w"> </span>bunkerweb-scheduler
 </code></pre></div></p>
 </li>
 <li>
@@ -12540,31 +12621,43 @@ systemctl<span class="w"> </span>stop<span class="w"> </span>bunkerweb-ui
 <div class="tabbed-block">
 <p>First, if you have previously hold the BunkerWeb package, unhold it :</p>
 <p>You can print a list of packages on hold with <code>apt-mark showhold</code></p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt-mark<span class="w"> </span>unhold<span class="w"> </span>bunkerweb
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt-mark<span class="w"> </span>unhold<span class="w"> </span>bunkerweb<span class="w"> </span>nginx
 </code></pre></div>
 <p>Them, you can update BunkerWeb package :</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span><span class="nv">bunkerweb</span><span class="o">=</span>testing
 </code></pre></div>
 <p>To prevent upgrading BunkerWeb package when executing <code>apt upgrade</code>, you can use the following command :</p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt-mark<span class="w"> </span>hold<span class="w"> </span>bunkerweb
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt-mark<span class="w"> </span>hold<span class="w"> </span>bunkerweb<span class="w"> </span>nginx
 </code></pre></div>
 <p>More details in the <a href="#integrations-__tabbed_1_1">integration Linux page</a>.</p>
 </div>
 <div class="tabbed-block">
 <p>First, if you have previously hold the BunkerWeb package, unhold it :</p>
 <p>You can print a list of packages on hold with <code>dnf versionlock list</code></p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>delete<span class="w"> </span>package<span class="w"> </span>bunkerweb
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>delete<span class="w"> </span>package<span class="w"> </span>bunkerweb<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>delete<span class="w"> </span>package<span class="w"> </span>nginx
 </code></pre></div>
 <p>Them, you can update BunkerWeb package :</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>bunkerweb-testing
 </code></pre></div>
 <p>To prevent upgrading BunkerWeb package when executing <code>dnf upgrade</code>, you can use the following command :</p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>add<span class="w"> </span>bunkerweb
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>add<span class="w"> </span>bunkerweb<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>add<span class="w"> </span>nginx
 </code></pre></div>
 <p>More details in the <a href="#integrations-__tabbed_1_3">integration Linux page</a>.</p>
 </div>
 </div>
 </div>
+</li>
+<li>
+<p><strong>Start the services</strong>:
+        <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>start<span class="w"> </span>bunkerweb
+sudo<span class="w"> </span>systemctl<span class="w"> </span>start<span class="w"> </span>bunkerweb-ui
+sudo<span class="w"> </span>systemctl<span class="w"> </span>start<span class="w"> </span>bunkerweb-scheduler
+</code></pre></div>
+        Or reboot the system:
+        <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>reboot
+</code></pre></div></p>
 </li>
 </ol>
 </div>
@@ -12705,7 +12798,7 @@ docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </spa
 <ol>
 <li>
 <p><strong>Stop the services</strong>.</p>
-<div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>stop<span class="w"> </span>bunkerweb<span class="w"> </span>bunkerweb-ui
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>stop<span class="w"> </span>bunkerweb<span class="w"> </span>bunkerweb-ui<span class="w"> </span>bunkerweb-scheduler
 </code></pre></div>
 </li>
 <li>
@@ -12744,6 +12837,11 @@ sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">770</sp
 </div>
 </div>
 </div>
+</li>
+<li>
+<p><strong>Start the services</strong>.</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>start<span class="w"> </span>bunkerweb<span class="w"> </span>bunkerweb-ui<span class="w"> </span>bunkerweb-scheduler
+</code></pre></div>
 </li>
 <li>
 <p><strong>Downgrade BunkerWeb</strong>.</p>
@@ -12967,8 +13065,8 @@ docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> 
 <ol>
 <li>
 <p><strong>Stop the services</strong>:
-    <div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>stop<span class="w"> </span>bunkerweb
-systemctl<span class="w"> </span>stop<span class="w"> </span>bunkerweb-ui
+    <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>stop<span class="w"> </span>bunkerweb
+sudo<span class="w"> </span>systemctl<span class="w"> </span>stop<span class="w"> </span>bunkerweb-ui
 </code></pre></div></p>
 </li>
 <li>
@@ -12978,31 +13076,42 @@ systemctl<span class="w"> </span>stop<span class="w"> </span>bunkerweb-ui
 <div class="tabbed-block">
 <p>First, if you have previously hold the BunkerWeb package, unhold it :</p>
 <p>You can print a list of packages on hold with <code>apt-mark showhold</code></p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt-mark<span class="w"> </span>unhold<span class="w"> </span>bunkerweb
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt-mark<span class="w"> </span>unhold<span class="w"> </span>bunkerweb<span class="w"> </span>nginx
 </code></pre></div>
 <p>Them, you can update BunkerWeb package :</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span><span class="nv">bunkerweb</span><span class="o">=</span>testing
 </code></pre></div>
 <p>To prevent upgrading BunkerWeb package when executing <code>apt upgrade</code>, you can use the following command :</p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt-mark<span class="w"> </span>hold<span class="w"> </span>bunkerweb
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt-mark<span class="w"> </span>hold<span class="w"> </span>bunkerweb<span class="w"> </span>nginx
 </code></pre></div>
 <p>More details in the <a href="#integrations-__tabbed_1_1">integration Linux page</a>.</p>
 </div>
 <div class="tabbed-block">
 <p>First, if you have previously hold the BunkerWeb package, unhold it :</p>
 <p>You can print a list of packages on hold with <code>dnf versionlock list</code></p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>delete<span class="w"> </span>package<span class="w"> </span>bunkerweb
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>delete<span class="w"> </span>package<span class="w"> </span>bunkerweb<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>delete<span class="w"> </span>package<span class="w"> </span>nginx
 </code></pre></div>
 <p>Them, you can update BunkerWeb package :</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>bunkerweb-testing
 </code></pre></div>
 <p>To prevent upgrading BunkerWeb package when executing <code>dnf upgrade</code>, you can use the following command :</p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>add<span class="w"> </span>bunkerweb
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>add<span class="w"> </span>bunkerweb<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>add<span class="w"> </span>nginx
 </code></pre></div>
 <p>More details in the <a href="#integrations-__tabbed_1_3">integration Linux page</a>.</p>
 </div>
 </div>
 </div>
+</li>
+<li>
+<p><strong>Start the services</strong>:
+        <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>start<span class="w"> </span>bunkerweb
+sudo<span class="w"> </span>systemctl<span class="w"> </span>start<span class="w"> </span>bunkerweb-ui
+</code></pre></div>
+        Or reboot the system:
+        <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>reboot
+</code></pre></div></p>
 </li>
 </ol>
 </div>
@@ -13143,7 +13252,7 @@ docker compose down
 <ol>
 <li>
 <p><strong>Stop the services</strong>.</p>
-<div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>stop<span class="w"> </span>bunkerweb<span class="w"> </span>bunkerweb-ui
+<div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>stop<span class="w"> </span>bunkerweb<span class="w"> </span>bunkerweb-ui<span class="w"> </span>bunkerweb-scheduler
 </code></pre></div>
 </li>
 <li>
@@ -13182,6 +13291,11 @@ sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">770</sp
 </div>
 </div>
 </div>
+</li>
+<li>
+<p><strong>Start the services</strong>.</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>start<span class="w"> </span>bunkerweb<span class="w"> </span>bunkerweb-ui
+</code></pre></div>
 </li>
 <li>
 <p><strong>Downgrade BunkerWeb</strong>.</p>
@@ -13660,43 +13774,37 @@ sqlite&gt;
 <tbody>
 <tr>
 <td style="text-align: center;"><strong>ClamAV</strong></td>
-<td style="text-align: center;">1.8</td>
+<td style="text-align: center;">1.9</td>
 <td style="text-align: left;">Automatically scans uploaded files with the ClamAV antivirus engine and denies the request when a file is detected as malicious.</td>
 <td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav">bunkerweb-plugins/clamav</a></td>
 </tr>
 <tr>
 <td style="text-align: center;"><strong>Coraza</strong></td>
-<td style="text-align: center;">1.8</td>
+<td style="text-align: center;">1.9</td>
 <td style="text-align: left;">Inspect requests using a the Coraza WAF (alternative of ModSecurity).</td>
 <td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/coraza">bunkerweb-plugins/coraza</a></td>
 </tr>
 <tr>
-<td style="text-align: center;"><strong>CrowdSec</strong></td>
-<td style="text-align: center;">1.8</td>
-<td style="text-align: left;">CrowdSec bouncer for BunkerWeb.</td>
-<td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/crowdsec">bunkerweb-plugins/crowdsec</a></td>
-</tr>
-<tr>
 <td style="text-align: center;"><strong>Discord</strong></td>
-<td style="text-align: center;">1.8</td>
+<td style="text-align: center;">1.9</td>
 <td style="text-align: left;">Send security notifications to a Discord channel using a Webhook.</td>
 <td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/discord">bunkerweb-plugins/discord</a></td>
 </tr>
 <tr>
 <td style="text-align: center;"><strong>Slack</strong></td>
-<td style="text-align: center;">1.8</td>
+<td style="text-align: center;">1.9</td>
 <td style="text-align: left;">Send security notifications to a Slack channel using a Webhook.</td>
 <td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/slack">bunkerweb-plugins/slack</a></td>
 </tr>
 <tr>
 <td style="text-align: center;"><strong>VirusTotal</strong></td>
-<td style="text-align: center;">1.8</td>
+<td style="text-align: center;">1.9</td>
 <td style="text-align: left;">Automatically scans uploaded files with the VirusTotal API and denies the request when a file is detected as malicious.</td>
 <td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal">bunkerweb-plugins/virustotal</a></td>
 </tr>
 <tr>
 <td style="text-align: center;"><strong>WebHook</strong></td>
-<td style="text-align: center;">1.8</td>
+<td style="text-align: center;">1.9</td>
 <td style="text-align: left;">Send security notifications to a custom HTTP endpoint using a  Webhook.</td>
 <td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/webhook">bunkerweb-plugins/webhook</a></td>
 </tr>
@@ -13705,7 +13813,7 @@ sqlite&gt;
 <h2 id="plugins-how-to-use-a-plugin">How to use a plugin</h2>
 <h3 id="plugins-automatic">Automatic</h3>
 <p>If you want to quickly install external plugins, you can use the <code>EXTERNAL_PLUGIN_URLS</code> setting. It takes a list of URLs, separated with space, pointing to compressed (zip format) archive containing one or more plugin(s).</p>
-<p>You can use the following value if you want to automatically install the official plugins : <code>EXTERNAL_PLUGIN_URLS=https://github.com/bunkerity/bunkerweb-plugins/archive/refs/tags/v1.8.zip</code></p>
+<p>You can use the following value if you want to automatically install the official plugins : <code>EXTERNAL_PLUGIN_URLS=https://github.com/bunkerity/bunkerweb-plugins/archive/refs/tags/v1.9.zip</code></p>
 <h3 id="plugins-manual">Manual</h3>
 <p>The first step is to install the plugin by putting the plugin files inside the corresponding <code>plugins</code> data folder, the procedure depends on your integration :</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:5"><input checked="checked" id="plugins-__tabbed_1_1" name="plugins-__tabbed_1" type="radio" /><input id="plugins-__tabbed_1_2" name="plugins-__tabbed_1" type="radio" /><input id="plugins-__tabbed_1_3" name="plugins-__tabbed_1" type="radio" /><input id="plugins-__tabbed_1_4" name="plugins-__tabbed_1" type="radio" /><input id="plugins-__tabbed_1_5" name="plugins-__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="plugins-__tabbed_1_1">Docker</label><label for="plugins-__tabbed_1_2">Docker autoconf</label><label for="plugins-__tabbed_1_3">Swarm</label><label for="plugins-__tabbed_1_4">Kubernetes</label><label for="plugins-__tabbed_1_5">Linux</label></div>

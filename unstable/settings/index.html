@@ -882,6 +882,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#crowdsec" class="md-nav__link">
+    <span class="md-ellipsis">
+      CrowdSec
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#custom-ssl-certificate" class="md-nav__link">
     <span class="md-ellipsis">
       Custom SSL certificate
@@ -1600,6 +1609,20 @@
 <td>no</td>
 <td>Defines the response to threats: "detect" to monitor and log, or "block" to prevent access and log incidents.</td>
 </tr>
+<tr>
+<td><code>PROXY_BUFFER_SIZE</code></td>
+<td><code>auto</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Size of the buffer used for reading the first part of the response received from the proxied server. (auto or size)</td>
+</tr>
+<tr>
+<td><code>PROXY_BUFFERS</code></td>
+<td><code>auto</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Number and size of the buffers used for reading a response from the proxied server. (auto or number size)</td>
+</tr>
 </tbody>
 </table>
 <h2 id="anti-ddos-pro">Anti DDoS <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
@@ -2003,6 +2026,13 @@
 <td>multisite</td>
 <td>no</td>
 <td>The duration time (in seconds) of a ban when the corresponding IP has reached the threshold.</td>
+</tr>
+<tr>
+<td><code>BAD_BEHAVIOR_BAN_SCOPE</code></td>
+<td><code>service</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Determines the level of the ban. 'service' will ban the IP for the service only, 'global' will ban the IP for the whole system.</td>
 </tr>
 </tbody>
 </table>
@@ -2414,6 +2444,134 @@
 <td>multisite</td>
 <td>no</td>
 <td>Deny access if the country of the client is not in the list (ISO 3166-1 alpha-2 format separated with spaces).</td>
+</tr>
+</tbody>
+</table>
+<h2 id="crowdsec">CrowdSec</h2>
+<p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
+<p>CrowdSec bouncer for BunkerWeb.</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Default</th>
+<th>Context</th>
+<th>Multiple</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>USE_CROWDSEC</code></td>
+<td><code>no</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Activate CrowdSec bouncer.</td>
+</tr>
+<tr>
+<td><code>CROWDSEC_API</code></td>
+<td><code>http://crowdsec:8080</code></td>
+<td>global</td>
+<td>no</td>
+<td>Address of the CrowdSec API.</td>
+</tr>
+<tr>
+<td><code>CROWDSEC_API_KEY</code></td>
+<td></td>
+<td>global</td>
+<td>no</td>
+<td>Key for the CrowdSec API given by cscli bouncer add.</td>
+</tr>
+<tr>
+<td><code>CROWDSEC_MODE</code></td>
+<td><code>live</code></td>
+<td>global</td>
+<td>no</td>
+<td>Mode of the CrowdSec API (live or stream).</td>
+</tr>
+<tr>
+<td><code>CROWDSEC_ENABLE_INTERNAL</code></td>
+<td><code>no</code></td>
+<td>global</td>
+<td>no</td>
+<td>Enable the analysis of the internal traffic.</td>
+</tr>
+<tr>
+<td><code>CROWDSEC_REQUEST_TIMEOUT</code></td>
+<td><code>1000</code></td>
+<td>global</td>
+<td>no</td>
+<td>Timeout in milliseconds for the HTTP requests done by the bouncer to query CrowdSec local API.</td>
+</tr>
+<tr>
+<td><code>CROWDSEC_EXCLUDE_LOCATION</code></td>
+<td></td>
+<td>global</td>
+<td>no</td>
+<td>The locations to exclude while bouncing. It is a list of location, separated by commas.</td>
+</tr>
+<tr>
+<td><code>CROWDSEC_CACHE_EXPIRATION</code></td>
+<td><code>1</code></td>
+<td>global</td>
+<td>no</td>
+<td>The cache expiration, in second, for IPs that the bouncer store in cache in live mode.</td>
+</tr>
+<tr>
+<td><code>CROWDSEC_UPDATE_FREQUENCY</code></td>
+<td><code>10</code></td>
+<td>global</td>
+<td>no</td>
+<td>The frequency of update, in second, to pull new/old IPs from the CrowdSec local API.</td>
+</tr>
+<tr>
+<td><code>CROWDSEC_APPSEC_URL</code></td>
+<td></td>
+<td>global</td>
+<td>no</td>
+<td>URL of the Application Security Component.</td>
+</tr>
+<tr>
+<td><code>CROWDSEC_APPSEC_FAILURE_ACTION</code></td>
+<td><code>passthrough</code></td>
+<td>global</td>
+<td>no</td>
+<td>Behavior when the AppSec Component return a 500. Can let the request passthrough or deny it.</td>
+</tr>
+<tr>
+<td><code>CROWDSEC_APPSEC_CONNECT_TIMEOUT</code></td>
+<td><code>100</code></td>
+<td>global</td>
+<td>no</td>
+<td>The timeout in milliseconds of the connection between the remediation component and AppSec Component.</td>
+</tr>
+<tr>
+<td><code>CROWDSEC_APPSEC_SEND_TIMEOUT</code></td>
+<td><code>100</code></td>
+<td>global</td>
+<td>no</td>
+<td>The timeout in milliseconds to send data from the remediation component to the AppSec Component.</td>
+</tr>
+<tr>
+<td><code>CROWDSEC_APPSEC_PROCESS_TIMEOUT</code></td>
+<td><code>500</code></td>
+<td>global</td>
+<td>no</td>
+<td>The timeout in milliseconds to process the request from the remediation component to the AppSec Component.</td>
+</tr>
+<tr>
+<td><code>CROWDSEC_ALWAYS_SEND_TO_APPSEC</code></td>
+<td><code>no</code></td>
+<td>global</td>
+<td>no</td>
+<td>Send the request to the AppSec Component even if there is a decision for the IP.</td>
+</tr>
+<tr>
+<td><code>CROWDSEC_APPSEC_SSL_VERIFY</code></td>
+<td><code>no</code></td>
+<td>global</td>
+<td>no</td>
+<td>Verify the AppSec Component SSL certificate validity.</td>
 </tr>
 </tbody>
 </table>
@@ -4299,6 +4457,26 @@
 <h2 id="user-manager-pro">User Manager <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
 <p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
 <p>Add the possibility to manage users on the web interface</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Default</th>
+<th>Context</th>
+<th>Multiple</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>USERS_REQUIRE_2FA</code></td>
+<td><code>no</code></td>
+<td>global</td>
+<td>no</td>
+<td>Require two-factor authentication for all users</td>
+</tr>
+</tbody>
+</table>
 <h2 id="whitelist">Whitelist</h2>
 <p>STREAM support <img alt="⚠" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/26a0.svg" title=":warning:" /></p>
 <p>Allow access based on internal and external IP/network/rDNS/ASN whitelists.</p>
