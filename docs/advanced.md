@@ -2047,7 +2047,7 @@ The OWASP Core Rule Set also supports a range of **plugins** designed to extend 
     * `wordpress-rule-exclusions/v1.0.0` <---- *Download the version 1.0.0 of the plugin.*
     * `https://github.com/coreruleset/dos-protection-plugin-modsecurity/archive/refs/heads/main.zip` <---- *Download the plugin directly from the URL.*
 
-## CrowdSec
+### CrowdSec
 
 STREAM support :x:
 
@@ -2057,7 +2057,7 @@ STREAM support :x:
 
 This BunkerWeb plugin acts as a [CrowdSec](https://crowdsec.net/?utm_source=external-docs&utm_medium=cta&utm_campaign=bunker-web-docs) bouncer. It will deny requests based on the decision of your CrowdSec API. Not only you will benefinit from the crowdsourced blacklist, you can also configure [scenarios](https://docs.crowdsec.net/docs/concepts?utm_source=external-docs&utm_medium=cta&utm_campaign=bunker-web-docs#scenarios) to automatically ban IPs based on suspicious behaviors.
 
-### Setup
+#### Setup
 
 === "Docker"
     **Acquisition file**
