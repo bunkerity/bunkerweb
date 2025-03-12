@@ -1,6 +1,22 @@
 # Changelog
 
-## v1.6.1-rc3 - ????/??/??
+## v1.6.1 - ????/??/??
+
+- [BUGFIX] Enhance Alembic configuration to support database URIs args
+- [BUGFIX] Made `SERVER_NAME` setting's regex more permissive (removed the duplication check)
+- [BUGFIX] Add selective table support in `Backup` plugin to avoid issues when restoring the database
+- [DOCS] Document how to use BunkerWeb with and existing Ingress controller in Kubernetes
+- [DOCS] Add documentation about new `all-in-one` image for BunkerWeb in the Docker section of the Integrations page
+- [DOCS] Edit documentation about thew `User Manager` PRO plugin
+- [FEATURE] Add a new `all-in-one` image for BunkerWeb that includes all the services in one image (BunkerWeb, Scheduler, Autoconf, and UI)
+- [FEATURE] Add `CrowdSec` as a core plugin
+- [MISC] Improve update check output formatting for better readability
+- [UI] Enhance ban handling with improved validation and informative responses for ban scope and service
+- [UI] Improve plugin page template handling logic
+- [UI] Add a failover message reporting
+- [UI] Prevent interference with newsletter form checkbox click handler
+
+## v1.6.1-rc3 - 2025/03/05
 
 - [BUGFIX] Fix issue where Redis Server returns a `NOPERM` error, ensuring proper handling and preventing 500 errors in the web UI
 - [FEATURE] Enhance ban management with service-specific options and UI improvements
