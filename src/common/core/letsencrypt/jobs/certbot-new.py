@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+from base64 import b64decode
 from copy import deepcopy
 from datetime import datetime, timedelta
 from itertools import chain
-from json import dumps
+from json import dumps, loads
 from os import environ, getenv, sep
 from os.path import join
 from pathlib import Path
-from re import MULTILINE, search
+from re import MULTILINE, match, search
 from select import select
 from shutil import rmtree
 from subprocess import DEVNULL, PIPE, STDOUT, Popen, run
@@ -383,10 +384,42 @@ try:
         # * Getting the DNS provider data if necessary
         if data["challenge"] == "dns":
             credential_key = f"{first_server}_LETS_ENCRYPT_DNS_CREDENTIAL_ITEM" if IS_MULTISITE else "LETS_ENCRYPT_DNS_CREDENTIAL_ITEM"
+            credential_items = {}
+
+            # Collect all credential items
             for env_key, env_value in environ.items():
                 if env_value and env_key.startswith(credential_key):
+                    if " " not in env_value:
+                        credential_items["json_data"] = env_value
+                        continue
                     key, value = env_value.split(" ", 1)
-                    data["credential_items"][key.lower()] = value.removeprefix("= ").strip()
+                    credential_items[key.lower()] = value.removeprefix("= ").strip()
+
+            if "json_data" in credential_items:
+                value = credential_items.pop("json_data")
+                # Handle the case of a single credential that might be base64-encoded JSON
+                if not credential_items and len(value) % 4 == 0 and match(r"^[A-Za-z0-9+/=]+$", value):
+                    try:
+                        decoded = b64decode(value).decode("utf-8")
+                        json_data = loads(decoded)
+                        if isinstance(json_data, dict):
+                            data["credential_items"] = {k.lower(): str(v) for k, v in json_data.items()}
+                    except BaseException:
+                        LOGGER.error(f"Error while decoding JSON data for service {first_server} : {value}")
+
+            if not data["credential_items"]:
+                # Process regular credentials
+                data["credential_items"] = {}
+                for key, value in credential_items.items():
+                    # Check for base64 encoding
+                    if len(value) % 4 == 0 and match(r"^[A-Za-z0-9+/=]+$", value):
+                        try:
+                            decoded = b64decode(value).decode("utf-8")
+                            if decoded != value:
+                                value = decoded
+                        except BaseException:
+                            LOGGER.debug(f"Error while decoding credential item {key} for service {first_server} : {value}")
+                    data["credential_items"][key] = value
 
         LOGGER.debug(f"Data for service {first_server} : {dumps(data)}")
 
@@ -403,7 +436,9 @@ try:
                 )
                 continue
             elif not data["credential_items"]:
-                LOGGER.warning(f"No credentials items found for service {first_server} (you should have at least one), skipping certificate(s) generation...")
+                LOGGER.warning(
+                    f"No valid credentials items found for service {first_server} (you should have at least one), skipping certificate(s) generation..."
+                )
                 continue
 
             # * Validating the credentials
