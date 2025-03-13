@@ -10,6 +10,7 @@ from re import MULTILINE, compile as re_compile
 from subprocess import CalledProcessError, run
 from sys import exit as sys_exit, path as sys_path
 from time import sleep
+from traceback import format_exc
 from typing import Dict, Set, Tuple
 from uuid import uuid4
 from json import dumps, loads
@@ -182,8 +183,9 @@ try:
             if up_to_date:
                 try:
                     plugin_registry = loads(plugin_registry["data"])
-                except Exception as e:
-                    LOGGER.error(f"Failed to load the plugin registry data from cache: {e}")
+                except BaseException as e:
+                    LOGGER.debug(format_exc())
+                    LOGGER.error(f"Failed to load the plugin registry data from cache: \n{e}")
                     plugin_registry = None
             else:
                 LOGGER.info("The plugin registry has not been updated in the last hour, fetching the latest version...")
@@ -223,7 +225,8 @@ try:
                     content.seek(0)
                 except SystemExit as e:
                     sys_exit(e.code)
-                except Exception as e:
+                except BaseException as e:
+                    LOGGER.debug(format_exc())
                     LOGGER.error(f"Exception while downloading the registry:\n{e}")
                     sys_exit(1)
 
@@ -361,8 +364,9 @@ try:
                             content.write(chunk)
 
                     content.seek(0)
-                except Exception as e:
-                    LOGGER.error(f"Exception while downloading plugin(s) with URL {crs_plugin}:\n{e}")
+                except BaseException as e:
+                    LOGGER.debug(format_exc())
+                    LOGGER.error(f"Exception while downloading plugin(s) with URL {crs_plugin} :\n{e}")
                     continue
 
                 # Extract it to tmp folder
@@ -388,6 +392,7 @@ try:
                                 zf.extractall(path=temp_dir)
                             LOGGER.info(f"Successfully extracted ZIP file to {temp_dir}")
                         except BadZipFile as e:
+                            LOGGER.debug(format_exc())
                             LOGGER.error(f"Invalid ZIP file: {e}")
                             continue
 
@@ -407,6 +412,7 @@ try:
                                 tar.extractall(path=temp_dir)
                             LOGGER.info(f"Successfully extracted TAR file to {temp_dir}")
                         except TarError as e:
+                            LOGGER.debug(format_exc())
                             LOGGER.error(f"Invalid TAR file: {e}")
                             continue
 
@@ -414,7 +420,8 @@ try:
                         LOGGER.error(f"Unknown file type for {crs_plugin}, either ZIP or TAR is supported, skipping...")
                         continue
 
-                except Exception as e:
+                except BaseException as e:
+                    LOGGER.debug(format_exc())
                     LOGGER.error(f"Exception while decompressing plugin(s) from {crs_plugin}:\n{e}")
                     continue
 
@@ -468,6 +475,7 @@ try:
                     LOGGER.info(f"CRS plugin {plugin_name} (version: {plugin_version}) has been installed")
                     installed_plugins.add(plugin_id)
                 except BaseException as e:
+                    LOGGER.debug(format_exc())
                     LOGGER.error(f"Exception while checking plugin {plugin_config} :\n{e}")
                     status = 2
                     continue
@@ -477,6 +485,7 @@ try:
                 LOGGER.info(f"Patching Core Rule Set (CRS) plugin {plugin_name}...")
                 result = run([PATCH_SCRIPT.as_posix(), NEW_PLUGINS_DIR.joinpath(plugin_id).as_posix()], check=True)
             except CalledProcessError as e:
+                LOGGER.debug(format_exc())
                 LOGGER.error(f"Failed to patch Core Rule Set (CRS) plugin {plugin_name}: {e}")
                 sys_exit(1)
 
@@ -510,6 +519,7 @@ except SystemExit as e:
     status = e.code
 except BaseException as e:
     status = 2
+    LOGGER.debug(format_exc())
     LOGGER.error(f"Exception while running download-crs-plugins.py :\n{e}")
 
 rmtree(TMP_DIR, ignore_errors=True)

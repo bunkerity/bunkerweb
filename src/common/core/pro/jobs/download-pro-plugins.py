@@ -58,8 +58,9 @@ def install_plugin(plugin_path: Path, db, preview: bool = True) -> bool:
     # Load plugin.json
     try:
         metadata = loads(plugin_file.read_text(encoding="utf-8"))
-    except JSONDecodeError:
-        LOGGER.error(f"Skipping installation of {'preview version of ' if preview else ''}Pro plugin {plugin_path.name} (plugin.json is not valid)")
+    except JSONDecodeError as e:
+        LOGGER.debug(format_exc())
+        LOGGER.error(f"Skipping installation of {'preview version of ' if preview else ''}Pro plugin {plugin_path.name} (plugin.json is not valid) :\n{e}")
         return False
 
     new_plugin_path = PRO_PLUGINS_DIR.joinpath(metadata["id"])
@@ -310,8 +311,9 @@ try:
                     plugin_nbr += 1
             except FileExistsError:
                 LOGGER.warning(f"Skipping installation of pro plugin {plugin_path.name} (already installed)")
-    except:
-        LOGGER.exception("Exception while installing pro plugin(s)")
+    except BaseException as e:
+        LOGGER.debug(format_exc())
+        LOGGER.error(f"Exception while installing pro plugin(s) :\n{e}")
         status = 2
         sys_exit(status)
 
@@ -364,8 +366,8 @@ try:
 except SystemExit as e:
     status = e.code
 except BaseException as e:
-    LOGGER.debug(format_exc())
     status = 2
+    LOGGER.debug(format_exc())
     LOGGER.error(f"Exception while running download-pro-plugins.py :\n{e}")
 
 for plugin_tmp in TMP_DIR.glob("*"):

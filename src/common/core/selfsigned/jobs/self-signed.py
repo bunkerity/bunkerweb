@@ -6,6 +6,7 @@ from os.path import join
 from pathlib import Path
 from subprocess import DEVNULL, run
 from sys import exit as sys_exit, path as sys_path
+from traceback import format_exc
 from typing import Tuple
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("db",))]:
@@ -150,6 +151,7 @@ except SystemExit as e:
     status = e.code
 except BaseException as e:
     status = 2
+    LOGGER.debug(format_exc())
     LOGGER.error(f"Exception while running self-signed.py :\n{e}")
 
 sys_exit(status)

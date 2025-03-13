@@ -8,6 +8,7 @@ from os.path import join, normpath
 from re import compile as re_compile
 from sys import exit as sys_exit, path as sys_path
 from time import sleep
+from traceback import format_exc
 from typing import Tuple
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("db",))]:
@@ -171,6 +172,7 @@ try:
                                     iterable = f.readlines()
                             except OSError as e:
                                 status = 2
+                                LOGGER.debug(format_exc())
                                 LOGGER.error(f"Error while opening file {url[7:]} : {e}")
                                 failed_urls.add(url)
                                 if url_file not in urls:
@@ -222,6 +224,7 @@ try:
                                 LOGGER.error(f"Error while caching url content for {url}: {err}")
                 except BaseException as e:
                     status = 2
+                    LOGGER.debug(format_exc())
                     LOGGER.error(f"Exception while getting {service} whitelist from {url} :\n{e}")
                     failed_urls.add(url)
                     if url_file not in urls:
@@ -278,6 +281,7 @@ except SystemExit as e:
     status = e.code
 except BaseException as e:
     status = 2
+    LOGGER.debug(format_exc())
     LOGGER.error(f"Exception while running whitelist-download.py :\n{e}")
 
 sys_exit(status)

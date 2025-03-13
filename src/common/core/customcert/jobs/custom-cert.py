@@ -7,6 +7,7 @@ from subprocess import DEVNULL, run
 from sys import exit as sys_exit, path as sys_path
 from base64 import b64decode
 from tempfile import NamedTemporaryFile
+from traceback import format_exc
 from typing import Tuple, Union
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("db",))]:
@@ -122,8 +123,9 @@ try:
                 else:
                     try:
                         cert_file = b64decode(cert_data)
-                    except BaseException:
-                        LOGGER.exception(f"Error while decoding cert data, skipping server {first_server}...")
+                    except BaseException as e:
+                        LOGGER.debug(format_exc())
+                        LOGGER.error(f"Error while decoding cert data, skipping server {first_server} :\n{e}")
                         skipped_servers.append(first_server)
                         status = 2
                         continue
@@ -133,8 +135,9 @@ try:
                 else:
                     try:
                         key_file = b64decode(key_data)
-                    except BaseException:
-                        LOGGER.exception(f"Error while decoding key data, skipping server {first_server}...")
+                    except BaseException as e:
+                        LOGGER.debug(format_exc())
+                        LOGGER.error(f"Error while decoding key data, skipping server {first_server} :\n{e}")
                         skipped_servers.append(first_server)
                         status = 2
                         continue
@@ -170,6 +173,7 @@ except SystemExit as e:
     status = e.code
 except BaseException as e:
     status = 2
+    LOGGER.debug(format_exc())
     LOGGER.error(f"Exception while running custom-cert.py :\n{e}")
 
 sys_exit(status)
