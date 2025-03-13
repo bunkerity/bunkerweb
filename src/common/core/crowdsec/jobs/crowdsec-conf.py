@@ -76,8 +76,9 @@ try:
     LOGGER.info("CrowdSec configuration successfully generated")
 except SystemExit as e:
     status = e.code
-except:
+except BaseException as e:
     status = 2
-    LOGGER.error(f"Exception while running crowdsec-init.py :\n{format_exc()}")
+    LOGGER.debug(format_exc())
+    LOGGER.error(f"Exception while running crowdsec-init.py :\n{e}")
 
 sys_exit(status)

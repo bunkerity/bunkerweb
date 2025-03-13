@@ -8,6 +8,7 @@ from pathlib import Path
 from stat import S_IRGRP, S_IRUSR, S_IWUSR, S_IXGRP, S_IXUSR
 from sys import exit as sys_exit, path as sys_path
 from time import sleep
+from traceback import format_exc
 from uuid import uuid4
 from json import JSONDecodeError, load as json_load, loads
 from shutil import copytree, rmtree
@@ -51,8 +52,9 @@ def install_plugin(plugin_path: Path, db) -> bool:
     # Load plugin.json
     try:
         metadata = loads(plugin_file.read_text(encoding="utf-8"))
-    except JSONDecodeError:
-        LOGGER.error(f"Skipping installation of plugin {plugin_path.name} (plugin.json is not valid)")
+    except JSONDecodeError as e:
+        LOGGER.debug(format_exc())
+        LOGGER.error(f"Skipping installation of plugin {plugin_path.name} (plugin.json is not valid) :\n{e}")
         return False
 
     new_plugin_path = EXTERNAL_PLUGINS_DIR.joinpath(metadata["id"])
@@ -134,6 +136,7 @@ try:
 
                     content.seek(0)
             except BaseException as e:
+                LOGGER.debug(format_exc())
                 LOGGER.error(f"Exception while downloading plugin(s) from {plugin_url} :\n{e}")
                 status = 2
                 continue
@@ -161,6 +164,7 @@ try:
                             zf.extractall(path=temp_dir)
                         LOGGER.info(f"Successfully extracted ZIP file to {temp_dir}")
                     except BadZipFile as e:
+                        LOGGER.debug(format_exc())
                         LOGGER.error(f"Invalid ZIP file: {e}")
                         continue
 
@@ -180,6 +184,7 @@ try:
                             tar.extractall(path=temp_dir)
                         LOGGER.info(f"Successfully extracted TAR file to {temp_dir}")
                     except TarError as e:
+                        LOGGER.debug(format_exc())
                         LOGGER.error(f"Invalid TAR file: {e}")
                         continue
 
@@ -187,7 +192,8 @@ try:
                     LOGGER.error(f"Unknown file type for {plugin_url}, either ZIP or TAR is supported, skipping...")
                     continue
 
-            except Exception as e:
+            except BaseException as e:
+                LOGGER.debug(format_exc())
                 LOGGER.error(f"Exception while decompressing plugin(s) from {plugin_url}:\n{e}")
                 continue
 
@@ -200,6 +206,7 @@ try:
                 except FileExistsError:
                     LOGGER.warning(f"Skipping installation of plugin {plugin_path.parent.name} (already installed)")
         except BaseException as e:
+            LOGGER.debug(format_exc())
             LOGGER.error(f"Exception while installing plugin(s) from {plugin_url} :\n{e}")
             status = 2
 
@@ -253,6 +260,7 @@ except SystemExit as e:
     status = e.code
 except BaseException as e:
     status = 2
+    LOGGER.debug(format_exc())
     LOGGER.error(f"Exception while running download-plugins.py :\n{e}")
 
 rmtree(TMP_DIR, ignore_errors=True)

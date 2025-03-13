@@ -14,6 +14,7 @@ from select import select
 from shutil import rmtree
 from subprocess import DEVNULL, PIPE, STDOUT, Popen, run
 from sys import exit as sys_exit, path as sys_path
+from traceback import format_exc
 from typing import Dict, Literal, Type, Union
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("db",))]:
@@ -303,7 +304,8 @@ try:
 
             try:
                 cert_domains = search(r"Domains: (?P<domains>.*)\n\s*Expiry Date: (?P<expiry_date>.*)\n", certificate_block, MULTILINE)
-            except Exception as e:
+            except BaseException as e:
+                LOGGER.debug(format_exc())
                 LOGGER.error(f"[{original_first_server}] Error while parsing certificate block: {e}")
                 continue
 
@@ -407,8 +409,9 @@ try:
                                 k.lower(): str(v).removeprefix("= ").replace("\\n", "\n").replace("\\t", "\t").replace("\\r", "\r").strip()
                                 for k, v in json_data.items()
                             }
-                    except BaseException:
-                        LOGGER.error(f"Error while decoding JSON data for service {first_server} : {value}")
+                    except BaseException as e:
+                        LOGGER.debug(format_exc())
+                        LOGGER.error(f"Error while decoding JSON data for service {first_server} : {value} : \n{e}")
 
             if not data["credential_items"]:
                 # Process regular credentials
@@ -420,8 +423,9 @@ try:
                             decoded = b64decode(value).decode("utf-8")
                             if decoded != value:
                                 value = decoded.removeprefix("= ").replace("\\n", "\n").replace("\\t", "\t").replace("\\r", "\r").strip()
-                        except BaseException:
-                            LOGGER.debug(f"Error while decoding credential item {key} for service {first_server} : {value}")
+                        except BaseException as e:
+                            LOGGER.debug(format_exc())
+                            LOGGER.debug(f"Error while decoding credential item {key} for service {first_server} : {value} : \n{e}")
                     data["credential_items"][key] = value
 
         LOGGER.debug(f"Data for service {first_server} : {dumps(data)}")
@@ -448,6 +452,7 @@ try:
             try:
                 provider = provider_classes[data["provider"]](**data["credential_items"])
             except ValidationError as ve:
+                LOGGER.debug(format_exc())
                 LOGGER.error(f"Error while validating credentials for service {first_server} :\n{ve}")
                 continue
 
@@ -597,8 +602,9 @@ try:
             LOGGER.info("Successfully saved data to db cache")
 except SystemExit as e:
     status = e.code
-except:
+except BaseException as e:
     status = 1
-    LOGGER.exception("Exception while running certbot-new.py")
+    LOGGER.debug(format_exc())
+    LOGGER.error(f"Exception while running certbot-new.py :\n{e}")
 
 sys_exit(status)
