@@ -57,86 +57,16 @@ Print site table of contents styling
 }
 
 #print-page-toc ul {
-    /* margin-left: 1.6em; */
-    margin-top: 0;
-    margin-bottom: 0;
-    padding-left: 0;
     list-style-position: inside;
-}
-#print-page-toc ul.print-site-toc-level-2,
-#print-page-toc ul.print-site-toc-level-3,
-#print-page-toc ul.print-site-toc-level-4,
-#print-page-toc ul.print-site-toc-level-5,
-#print-page-toc ul.print-site-toc-level-6 {
-    margin-left: 1.6em;
-}
-#print-page-toc ul li {
-    margin-left: 0;
-    margin-bottom: 0.2em;
-}
-ul.print-site-toc-level-1 {
     list-style-type: none;
 }
-ul.print-site-toc-level-1 li a {
-    font-weight: bold;
-    font-size: 120%;
-}
-ul.print-site-toc-level-2 li a {
-    font-weight: normal;
-    font-size: 100%;
-    margin-bottom: 0em;
-}
-#print-site-page ul li.toc-nav-section-title {
-    padding-top: 1em;
-    padding-bottom: 0em;
-    font-size: 110%;
-    letter-spacing: 1px;
-}
-#print-site-page ul.toc-section-line-border { 
-    border-left: 5px solid grey;
-    padding-left: 1.5em;
-    margin-top: 0.5em;
-    margin-bottom: 1em;
-}
-
 
 #print-site-page ul {
     margin-left: 0em;
 }
 
-
-
-
-/* Don't display the section headings that we added
-For now, we added them for use only in the table of contents */
-#print-site-page h1.nav-section-title,
-#print-site-page h2.nav-section-title,
-#print-site-page h3.nav-section-title,
-#print-site-page h4.nav-section-title,
-#print-site-page h5.nav-section-title,
-#print-site-page h6.nav-section-title { 
-    padding-top: 1.5em;
-    padding-bottom: 1em;
-    padding-left: 1em;
-    font-size: 2.2em;
-    font-weight: 300;
-    line-height: 1.3;
-    color: var(--md-default-fg-color--light);
-}
-#print-site-page h1.nav-section-title-end,
-#print-site-page h2.nav-section-title-end,
-#print-site-page h3.nav-section-title-end,
-#print-site-page h4.nav-section-title-end,
-#print-site-page h5.nav-section-title-end,
-#print-site-page h6.nav-section-title-end { display: none; }
-
-/* In the TOC, we want lines that are children of a section to be displayed with a left margin */
-#print-site-page ul li.toc-nav-section-child { padding-left: 1em; }
-
 /* Be able to not print certain elements */
 #print-site-page .print-site-plugin-ignore { display: none;}
-
-
 
 @media print {    
 
@@ -169,19 +99,16 @@ For now, we added them for use only in the table of contents */
     #print-site-page section.print-page {
         page-break-before: always;
     }
-    #print-site-page section.print-page:first-of-type {
+    #print-site-page > section.print-page:first-of-type {
         page-break-before: avoid;
     }
+
     /* PDF page breaks - separate title page for each section */
-    #print-site-page .nav-section-title {
-        page-break-before: always;
-        page-break-after: always;
+    #print-site-page section.print-page.md-section > h1 {
         align-content: center;
         text-align: center;
         vertical-align: middle;
-        padding-top: 150px !important;
-        padding-bottom: 0em;
-        padding-left: 0em;
+        padding: 5rem 0rem;
         font-size: 2.5em;
     }
 
@@ -199,13 +126,12 @@ For now, we added them for use only in the table of contents */
     }
     #print-site-page h1::after {
         content: "";
-        display: block;
+        /* display: block; */
         height: 100px;
         margin-bottom: -100px;
     }
 
     #print-site-page footer { display : none; }
-
     
     #print-site-cover-page {
         display: block;
@@ -215,6 +141,4 @@ For now, we added them for use only in the table of contents */
     #print-site-cover-page h1 {
         font-size: 300%;
     }
-
 }
-

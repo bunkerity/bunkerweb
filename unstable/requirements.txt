@@ -353,9 +353,9 @@ mkdocs-material-extensions==1.3.1 \
     --hash=sha256:10c9511cea88f568257f960358a467d12b970e1f7b2c0e5fb2bb48cab1928443 \
     --hash=sha256:adff8b62700b25cb77b53358dad940f3ef973dd6db797907c49e3c2ef3ab4e31
     # via mkdocs-material
-mkdocs-print-site-plugin==2.6.0 \
-    --hash=sha256:621e3eed4907b87c93f930a065c5c423ef11e0a2a058e78c6bd9a149df0ab918 \
-    --hash=sha256:f226686cafb549a6b6fa20b1f7acd50e8da98b16978a7df5df5457168cf2adda
+mkdocs-print-site-plugin==2.7.0 \
+    --hash=sha256:2396f529296e112b2ed04ec9384e374159dddcf826578d25d8bad93e6970283a \
+    --hash=sha256:c142a116bad5bf099d088c3b7fc967b03085803ed74c8a77e4b62e2f7b7404fd
     # via -r requirements.in
 packaging==24.2 \
     --hash=sha256:09abb1bccd265c01f4a3aa3f7a7db064b36514d2cba19a2f694fe6150451a759 \

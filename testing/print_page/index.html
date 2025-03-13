@@ -144,18 +144,6 @@
       
     
     
-      <link rel="stylesheet" href="../css/print-site-enum-headings1.css">
-    
-      <link rel="stylesheet" href="../css/print-site-enum-headings2.css">
-    
-      <link rel="stylesheet" href="../css/print-site-enum-headings3.css">
-    
-      <link rel="stylesheet" href="../css/print-site-enum-headings4.css">
-    
-      <link rel="stylesheet" href="../css/print-site-enum-headings5.css">
-    
-      <link rel="stylesheet" href="../css/print-site-enum-headings6.css">
-    
       <link rel="stylesheet" href="../css/print-site.css">
     
       <link rel="stylesheet" href="../css/print-site-material.css">
@@ -187,7 +175,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#" class="md-skip">
+        <a href="#index" class="md-skip">
           Skip to content
         </a>
       
@@ -855,7 +843,7 @@
                 </nav>
             </div>
         </section>
-        <section class="print-page" id="index"><h1 id="index-introduction">Introduction</h1>
+        <section class="print-page" id="index" heading-number="1"><h1 id="index-introduction">Introduction</h1>
 <h2 id="index-overview">Overview</h2>
 <figure>
 <p><img align="center," alt="Overview" src="../assets/img/intro-overview.svg" width="800" />
@@ -976,7 +964,7 @@
 <li><a href="https://www.linkedin.com/company/bunkerity/"><strong>LinkedIn</strong></a></li>
 <li><a href="https://twitter.com/bunkerity"><strong>Twitter</strong></a></li>
 <li><a href="https://www.reddit.com/r/BunkerWeb/"><strong>Reddit</strong></a></li>
-</ul></section><section class="print-page" id="concepts"><h1 id="concepts-concepts">Concepts</h1>
+</ul></section><section class="print-page" id="concepts" heading-number="2"><h1 id="concepts-concepts">Concepts</h1>
 <h2 id="concepts-architecture">Architecture</h2>
 <figure>
 <p><img align="center," alt="Overview" src="../assets/img/concepts.svg" width="600" /></p>
@@ -1234,7 +1222,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
     │       └── modsec-crs
     │           └── custom_rules.conf
     └── my_template.json
-</code></pre></div></p></section><section class="print-page" id="integrations"><h1 id="integrations-integrations">Integrations</h1>
+</code></pre></div></p></section><section class="print-page" id="integrations" heading-number="3"><h1 id="integrations-integrations">Integrations</h1>
 <h2 id="integrations-bunkerweb-cloud">BunkerWeb Cloud</h2>
 <figure>
 <p><img align="center," alt="Overview" src="../assets/img/bunkerweb-cloud.webp" width="600" />
@@ -2506,7 +2494,7 @@ To deploy a virtual machine, you need Microsoft.Compute/virtualMachines/write an
 </div>
 </div>
 </div>
-<p>You can access the setup wizard by browsing the <code>https://your-ip-address/setup</code> URI of your virtual machine.</p></section><section class="print-page" id="quickstart-guide"><h1 id="quickstart-guide-quickstart-guide">Quickstart guide</h1>
+<p>You can access the setup wizard by browsing the <code>https://your-ip-address/setup</code> URI of your virtual machine.</p></section><section class="print-page" id="quickstart-guide" heading-number="4"><h1 id="quickstart-guide-quickstart-guide">Quickstart guide</h1>
 <div class="admonition info">
 <p class="admonition-title">Prerequisites</p>
 <p>We expect that you're already familiar with the <a href="#concepts">core concepts</a> and you have followed the <a href="#integrations">integrations instructions</a> for your environment.</p>
@@ -3251,7 +3239,7 @@ www.example.com_REVERSE_PROXY_HOST<span class="o">=</span>http://myapp:8080
 <li>Check out the <a href="https://www.bunkerweb.io/blog?utm_campaign=self&amp;utm_source=doc">official blog</a></li>
 <li>Explore <a href="#advanced">advanced use cases</a> in the documentation</li>
 <li><a href="https://panel.bunkerweb.io/contact.php?utm_campaign=self&amp;utm_source=doc">Get in touch with us</a> to discuss your organization's needs</li>
-</ul></section><section class="print-page" id="advanced"><h1 id="advanced-advanced-usages">Advanced usages</h1>
+</ul></section><section class="print-page" id="advanced" heading-number="5"><h1 id="advanced-advanced-usages">Advanced usages</h1>
 <p>Many real-world use case examples are available in the <a href="https://github.com/bunkerity/bunkerweb/tree/vtesting/examples">examples</a> folder of the GitHub repository.</p>
 <p>We also provide numerous boilerplates, such as YAML files for various integrations and database types. These are available in the <a href="https://github.com/bunkerity/bunkerweb/tree/vtesting/misc/integrations">misc/integrations</a> folder.</p>
 <p>This section only focuses on advanced usages and security tuning, see the <a href="#settings">settings section</a> of the documentation to see all the available settings.</p>
@@ -5060,7 +5048,7 @@ USE_IPV6=yes
 <tr>
 <td style="text-align: center;"><code>LETS_ENCRYPT_DNS_CREDENTIAL_ITEM</code></td>
 <td style="text-align: center;"></td>
-<td style="text-align: left;">Configuration item that will be added to the credentials.ini file for the DNS provider (e.g. 'cloudflare_api_token 123456') for DNS challenges.</td>
+<td style="text-align: left;">Configuration item that will be added to the credentials.ini file for the DNS provider (e.g. 'cloudflare_api_token 123456') for DNS challenges. (Values can also be base64 encoded or it can be a base64 encoded json object)</td>
 </tr>
 <tr>
 <td style="text-align: center;"><code>USE_LETS_ENCRYPT_WILDCARD</code></td>
@@ -7616,7 +7604,12 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <p><img align="center" alt="Create user form" src="../assets/img/user-manager-create.png" />
   </p>
 <figcaption>User Manager - Create user form</figcaption>
-</figure></section><section class="print-page" id="settings"><h1 id="settings-settings">Settings</h1>
+</figure>
+<figure>
+<p><img align="center" alt="Activities page" src="../assets/img/user-manager-activities.png" />
+  </p>
+<figcaption>User Manager - Activities page</figcaption>
+</figure></section><section class="print-page" id="settings" heading-number="6"><h1 id="settings-settings">Settings</h1>
 <div class="admonition info">
 <p class="admonition-title">Settings generator tool</p>
 <p>To help you tune BunkerWeb, we have made an easy-to-use settings generator tool available at <a href="https://config.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc">config.bunkerweb.io</a>.</p>
@@ -9385,7 +9378,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <td></td>
 <td>multisite</td>
 <td>yes</td>
-<td>Configuration item that will be added to the credentials.ini file for the DNS provider (e.g. 'cloudflare_api_token 123456') for DNS challenges.</td>
+<td>Configuration item that will be added to the credentials.ini file for the DNS provider (e.g. 'cloudflare_api_token 123456') for DNS challenges. (Values can also be base64 encoded or it can be a base64 encoded json object)</td>
 </tr>
 <tr>
 <td><code>USE_LETS_ENCRYPT_WILDCARD</code></td>
@@ -10882,7 +10875,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <td>List of URLs, separated with spaces, containing bad URI to whitelist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.</td>
 </tr>
 </tbody>
-</table></section><section class="print-page" id="web-ui"><h1 id="web-ui-web-ui">Web UI</h1>
+</table></section><section class="print-page" id="web-ui" heading-number="7"><h1 id="web-ui-web-ui">Web UI</h1>
 <h2 id="web-ui-overview">Overview</h2>
 <p align="center">
     <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/tGS3pzquEjY" title="BunkerWeb web UI" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
@@ -12501,7 +12494,7 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 </code></pre></div>
 </div>
 </div>
-</div></section><section class="print-page" id="upgrading"><h1 id="upgrading-upgrading">Upgrading</h1>
+</div></section><section class="print-page" id="upgrading" heading-number="8"><h1 id="upgrading-upgrading">Upgrading</h1>
 <h2 id="upgrading-upgrade-from-16x">Upgrade from 1.6.X</h2>
 <div class="admonition warning">
 <p class="admonition-title">Read me first</p>
@@ -13306,7 +13299,7 @@ sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">770</sp
 </ol>
 </div>
 </div>
-</div></section><section class="print-page" id="troubleshooting"><h1 id="troubleshooting-troubleshooting">Troubleshooting</h1>
+</div></section><section class="print-page" id="troubleshooting" heading-number="9"><h1 id="troubleshooting-troubleshooting">Troubleshooting</h1>
 <div class="admonition info">
 <p class="admonition-title">BunkerWeb Panel</p>
 <p>If you are unable to resolve your problems, you can <a href="https://panel.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc">contact us directly via our panel</a>. This centralises all requests relating to the BunkerWeb solution.</p>
@@ -13758,7 +13751,7 @@ sqlite&gt;
 <ul>
 <li>Missing package to manage compressed files on your integration, in which case you will need to add the necessary packages</li>
 <li>Safari browser : the 'safe mode' may prevent you from being able to add a plugin. You will need to make the necessary changes on your machine</li>
-</ul></section><section class="print-page" id="plugins"><h1 id="plugins-plugins">Plugins</h1>
+</ul></section><section class="print-page" id="plugins" heading-number="10"><h1 id="plugins-plugins">Plugins</h1>
 <p>BunkerWeb comes with a plugin system making it possible to easily add new features. Once a plugin is installed, you can manage it using additional settings defined by the plugin.</p>
 <h2 id="plugins-official-plugins">Official plugins</h2>
 <p>Here is the list of "official" plugins that we maintain (see the <a href="https://github.com/bunkerity/bunkerweb-plugins">bunkerweb-plugins</a> repository for more information) :</p>
@@ -14621,7 +14614,7 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
     ui / blueprints / user_auth.py
                       templates / user_auth.html
 </code></pre></div>
-<p>In this structure, <code>user_auth.py</code> contains the <code>user_auth</code> blueprint, and <code>user_auth.html</code> is the associated template, adhering to the recommended naming conventions.</p></section><section class="print-page" id="professional-services"><h1 id="professional-services-professional-services">Professional services</h1>
+<p>In this structure, <code>user_auth.py</code> contains the <code>user_auth</code> blueprint, and <code>user_auth.html</code> is the associated template, adhering to the recommended naming conventions.</p></section><section class="print-page" id="professional-services" heading-number="11"><h1 id="professional-services-professional-services">Professional services</h1>
 <h2 id="professional-services-why-should-i-get-professional-services">Why should I get professional services ?</h2>
 <p>Since BunkerWeb is a free (as in freedom) software, you've the right to use it freely as long as you respect the <a href="https://www.gnu.org/licenses/agpl-3.0.en.html">AGPLv3 license</a>.</p>
 <p>You can also upgrade BunkerWeb to the PRO version at any time. By doing so, you will get an enhanced experience to assist you in the security of your web services. Our goal is to help you focus on your business needs. The PRO version is updated regularly and we try our best to gather feedbacks from enterprises to include the needed features.</p>
@@ -14639,7 +14632,7 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 </ul>
 <h2 id="professional-services-how-can-i-get-more-information">How can I get more information ?</h2>
 <p>You will find more information by visiting the <a href="https://panel.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc">BunkerWeb Panel</a>, our dedicated platform for professional services.</p>
-<p>Don't hesitate to <a href="https://panel.bunkerweb.io/contact.php?utm_campaign=self&amp;utm_source=doc">contact us</a> if you have any question, we will be more than happy to respond to your needs.</p></section><section class="print-page" id="about"><h1 id="about-about">About</h1>
+<p>Don't hesitate to <a href="https://panel.bunkerweb.io/contact.php?utm_campaign=self&amp;utm_source=doc">contact us</a> if you have any question, we will be more than happy to respond to your needs.</p></section><section class="print-page" id="about" heading-number="12"><h1 id="about-about">About</h1>
 <h2 id="about-who-maintains-bunkerweb">Who maintains BunkerWeb ?</h2>
 <p>BunkerWeb is maintained by <a href="https://www.bunkerity.com/?utm_campaign=self&amp;utm_source=doc">Bunkerity</a>, a French 🇫🇷 company specialized in Cybersecurity 🛡️.</p>
 <h2 id="about-do-you-have-a-professional-version">Do you have a professional version ?</h2>
@@ -14737,7 +14730,102 @@ SOk62kZ0lqEctwgKDe3MNQnPxt9+tU9L1pIkyXgXihcOLiCMl434K0djJXxIbiX0
 JvbFAfI3qteepvnjBQ==
 =g1tf
 -----END PGP PUBLIC KEY BLOCK-----
-</code></pre></div></section></div>
+</code></pre></div></section></div><style>.print-site-enumerate-headings #index > h1:before { content: '1 ' }
+
+                .print-site-enumerate-headings #index h2 { counter-reset: counter-index-3 1; counter-increment: counter-index-2 }
+                .print-site-enumerate-headings #index h2:before { content: '1.' counter(counter-index-2) ' ' }
+            
+                .print-site-enumerate-headings #index h3 { counter-reset: ; counter-increment: counter-index-3 }
+                .print-site-enumerate-headings #index h3:before { content: '1.' counter(counter-index-2) '.' counter(counter-index-3) ' ' }
+            
+.print-site-enumerate-headings #concepts > h1:before { content: '2 ' }
+
+                .print-site-enumerate-headings #concepts h2 { counter-reset: counter-concepts-3 1; counter-increment: counter-concepts-2 }
+                .print-site-enumerate-headings #concepts h2:before { content: '2.' counter(counter-concepts-2) ' ' }
+            
+                .print-site-enumerate-headings #concepts h3 { counter-reset: ; counter-increment: counter-concepts-3 }
+                .print-site-enumerate-headings #concepts h3:before { content: '2.' counter(counter-concepts-2) '.' counter(counter-concepts-3) ' ' }
+            
+.print-site-enumerate-headings #integrations > h1:before { content: '3 ' }
+
+                .print-site-enumerate-headings #integrations h2 { counter-reset: counter-integrations-3 1; counter-increment: counter-integrations-2 }
+                .print-site-enumerate-headings #integrations h2:before { content: '3.' counter(counter-integrations-2) ' ' }
+            
+                .print-site-enumerate-headings #integrations h3 { counter-reset: ; counter-increment: counter-integrations-3 }
+                .print-site-enumerate-headings #integrations h3:before { content: '3.' counter(counter-integrations-2) '.' counter(counter-integrations-3) ' ' }
+            
+.print-site-enumerate-headings #quickstart-guide > h1:before { content: '4 ' }
+
+                .print-site-enumerate-headings #quickstart-guide h2 { counter-reset: counter-quickstart-guide-3 1; counter-increment: counter-quickstart-guide-2 }
+                .print-site-enumerate-headings #quickstart-guide h2:before { content: '4.' counter(counter-quickstart-guide-2) ' ' }
+            
+                .print-site-enumerate-headings #quickstart-guide h3 { counter-reset: ; counter-increment: counter-quickstart-guide-3 }
+                .print-site-enumerate-headings #quickstart-guide h3:before { content: '4.' counter(counter-quickstart-guide-2) '.' counter(counter-quickstart-guide-3) ' ' }
+            
+.print-site-enumerate-headings #advanced > h1:before { content: '5 ' }
+
+                .print-site-enumerate-headings #advanced h2 { counter-reset: counter-advanced-3 1; counter-increment: counter-advanced-2 }
+                .print-site-enumerate-headings #advanced h2:before { content: '5.' counter(counter-advanced-2) ' ' }
+            
+                .print-site-enumerate-headings #advanced h3 { counter-reset: ; counter-increment: counter-advanced-3 }
+                .print-site-enumerate-headings #advanced h3:before { content: '5.' counter(counter-advanced-2) '.' counter(counter-advanced-3) ' ' }
+            
+.print-site-enumerate-headings #settings > h1:before { content: '6 ' }
+
+                .print-site-enumerate-headings #settings h2 { counter-reset: counter-settings-3 1; counter-increment: counter-settings-2 }
+                .print-site-enumerate-headings #settings h2:before { content: '6.' counter(counter-settings-2) ' ' }
+            
+                .print-site-enumerate-headings #settings h3 { counter-reset: ; counter-increment: counter-settings-3 }
+                .print-site-enumerate-headings #settings h3:before { content: '6.' counter(counter-settings-2) '.' counter(counter-settings-3) ' ' }
+            
+.print-site-enumerate-headings #web-ui > h1:before { content: '7 ' }
+
+                .print-site-enumerate-headings #web-ui h2 { counter-reset: counter-web-ui-3 1; counter-increment: counter-web-ui-2 }
+                .print-site-enumerate-headings #web-ui h2:before { content: '7.' counter(counter-web-ui-2) ' ' }
+            
+                .print-site-enumerate-headings #web-ui h3 { counter-reset: ; counter-increment: counter-web-ui-3 }
+                .print-site-enumerate-headings #web-ui h3:before { content: '7.' counter(counter-web-ui-2) '.' counter(counter-web-ui-3) ' ' }
+            
+.print-site-enumerate-headings #upgrading > h1:before { content: '8 ' }
+
+                .print-site-enumerate-headings #upgrading h2 { counter-reset: counter-upgrading-3 1; counter-increment: counter-upgrading-2 }
+                .print-site-enumerate-headings #upgrading h2:before { content: '8.' counter(counter-upgrading-2) ' ' }
+            
+                .print-site-enumerate-headings #upgrading h3 { counter-reset: ; counter-increment: counter-upgrading-3 }
+                .print-site-enumerate-headings #upgrading h3:before { content: '8.' counter(counter-upgrading-2) '.' counter(counter-upgrading-3) ' ' }
+            
+.print-site-enumerate-headings #troubleshooting > h1:before { content: '9 ' }
+
+                .print-site-enumerate-headings #troubleshooting h2 { counter-reset: counter-troubleshooting-3 1; counter-increment: counter-troubleshooting-2 }
+                .print-site-enumerate-headings #troubleshooting h2:before { content: '9.' counter(counter-troubleshooting-2) ' ' }
+            
+                .print-site-enumerate-headings #troubleshooting h3 { counter-reset: ; counter-increment: counter-troubleshooting-3 }
+                .print-site-enumerate-headings #troubleshooting h3:before { content: '9.' counter(counter-troubleshooting-2) '.' counter(counter-troubleshooting-3) ' ' }
+            
+.print-site-enumerate-headings #plugins > h1:before { content: '10 ' }
+
+                .print-site-enumerate-headings #plugins h2 { counter-reset: counter-plugins-3 1; counter-increment: counter-plugins-2 }
+                .print-site-enumerate-headings #plugins h2:before { content: '10.' counter(counter-plugins-2) ' ' }
+            
+                .print-site-enumerate-headings #plugins h3 { counter-reset: ; counter-increment: counter-plugins-3 }
+                .print-site-enumerate-headings #plugins h3:before { content: '10.' counter(counter-plugins-2) '.' counter(counter-plugins-3) ' ' }
+            
+.print-site-enumerate-headings #professional-services > h1:before { content: '11 ' }
+
+                .print-site-enumerate-headings #professional-services h2 { counter-reset: counter-professional-services-3 1; counter-increment: counter-professional-services-2 }
+                .print-site-enumerate-headings #professional-services h2:before { content: '11.' counter(counter-professional-services-2) ' ' }
+            
+                .print-site-enumerate-headings #professional-services h3 { counter-reset: ; counter-increment: counter-professional-services-3 }
+                .print-site-enumerate-headings #professional-services h3:before { content: '11.' counter(counter-professional-services-2) '.' counter(counter-professional-services-3) ' ' }
+            
+.print-site-enumerate-headings #about > h1:before { content: '12 ' }
+
+                .print-site-enumerate-headings #about h2 { counter-reset: counter-about-3 1; counter-increment: counter-about-2 }
+                .print-site-enumerate-headings #about h2:before { content: '12.' counter(counter-about-2) ' ' }
+            
+                .print-site-enumerate-headings #about h3 { counter-reset: ; counter-increment: counter-about-3 }
+                .print-site-enumerate-headings #about h3:before { content: '12.' counter(counter-about-2) '.' counter(counter-about-3) ' ' }
+            </style>
 
 
 
