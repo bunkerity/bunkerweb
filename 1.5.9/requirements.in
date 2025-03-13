@@ -1,5 +1,0 @@
-mike==2.1.2
-mkdocs-material[imaging]==9.5.29
-mkdocs-print-site-plugin==2.5.0
-pytablewriter==1.2.0
-zipp>=3.19.1
