@@ -11,6 +11,7 @@
 - [FEATURE] Add a new `all-in-one` image for BunkerWeb that includes all the services in one image (BunkerWeb, Scheduler, Autoconf, and UI)
 - [FEATURE] Add `CrowdSec` as a core plugin
 - [MISC] Improve update check output formatting for better readability
+- [MISC] Enhance `Let's Encrypt` DNS credential handling to support base64-encoded values, while also refining credential item processing to handle escape sequences and improve data integrity.
 - [UI] Enhance ban handling with improved validation and informative responses for ban scope and service
 - [UI] Improve plugin page template handling logic
 - [UI] Add a failover message reporting
