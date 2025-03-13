@@ -393,7 +393,7 @@ try:
                         credential_items["json_data"] = env_value
                         continue
                     key, value = env_value.split(" ", 1)
-                    credential_items[key.lower()] = value.removeprefix("= ").strip()
+                    credential_items[key.lower()] = value.removeprefix("= ").replace("\\n", "\n").replace("\\t", "\t").replace("\\r", "\r").strip()
 
             if "json_data" in credential_items:
                 value = credential_items.pop("json_data")
@@ -403,7 +403,10 @@ try:
                         decoded = b64decode(value).decode("utf-8")
                         json_data = loads(decoded)
                         if isinstance(json_data, dict):
-                            data["credential_items"] = {k.lower(): str(v) for k, v in json_data.items()}
+                            data["credential_items"] = {
+                                k.lower(): str(v).removeprefix("= ").replace("\\n", "\n").replace("\\t", "\t").replace("\\r", "\r").strip()
+                                for k, v in json_data.items()
+                            }
                     except BaseException:
                         LOGGER.error(f"Error while decoding JSON data for service {first_server} : {value}")
 
@@ -416,7 +419,7 @@ try:
                         try:
                             decoded = b64decode(value).decode("utf-8")
                             if decoded != value:
-                                value = decoded
+                                value = decoded.removeprefix("= ").replace("\\n", "\n").replace("\\t", "\t").replace("\\r", "\r").strip()
                         except BaseException:
                             LOGGER.debug(f"Error while decoding credential item {key} for service {first_server} : {value}")
                     data["credential_items"][key] = value
