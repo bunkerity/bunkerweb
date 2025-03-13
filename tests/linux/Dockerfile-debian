@@ -1,4 +1,4 @@
-FROM debian:bookworm@sha256:321341744acb788e251ebd374aecc1a42d60ce65da7bd4ee9207ff6be6686a62
+FROM debian:bookworm@sha256:12c396bd585df7ec21d5679bb6a83d4878bc4415ce926c9e5ea6426d23c60bdc
 
 ENV container=docker
 ENV LC_ALL=C
