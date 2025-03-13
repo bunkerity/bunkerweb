@@ -3397,3 +3397,8 @@ With this plugin, administrators can effortlessly create, update, and disable us
   ![Create user form](assets/img/user-manager-create.png){ align=center }
   <figcaption>User Manager - Create user form</figcaption>
 </figure>
+
+<figure markdown>
+  ![Activities page](assets/img/user-manager-activities.png){ align=center }
+  <figcaption>User Manager - Activities page</figcaption>
+</figure>
