@@ -185,12 +185,12 @@ greenlet==3.1.1 \
     --hash=sha256:f406b22b7c9a9b4f8aa9d2ab13d6ae0ac3e85c9a809bd590ad53fed2bf70dc79 \
     --hash=sha256:f6ff3b14f2df4c41660a7dec01045a045653998784bf8cfcb5a525bdffffbc8f
     # via sqlalchemy
-psycopg==3.2.5 \
-    --hash=sha256:b782130983e5b3de30b4c529623d3687033b4dafa05bb661fc6bf45837ca5879 \
-    --hash=sha256:f5f750611c67cb200e85b408882f29265c66d1de7f813add4f8125978bfd70e8
+psycopg==3.2.6 \
+    --hash=sha256:16fa094efa2698f260f2af74f3710f781e4a6f226efe9d1fd0c37f384639ed8a \
+    --hash=sha256:f3ff5488525890abb0566c429146add66b329e20d6d4835662b920cbbf90ac58
     # via -r requirements.armv7.in
-psycopg-c==3.2.5 \
-    --hash=sha256:57ad4cfd28de278c424aaceb1f2ad5c7910466e315dfe84e403f3c7a0a2ce81b
+psycopg-c==3.2.6 \
+    --hash=sha256:b5fd4ce70f82766a122ca5076a36c4d5818eaa9df9bf76870bc83a064ffaed3a
     # via psycopg
 psycopg-pool==3.2.6 \
     --hash=sha256:0f92a7817719517212fbfe2fd58b8c35c1850cdd2a80d36b581ba2085d9148e5 \
