@@ -3,8 +3,9 @@
 .htaccess
 .htdigest
 .htpasswd
-# home level dotfiles (keep in sync with lfi-os-files.data)
-# grep -E '^\.' lfi-os-files.data
+# home level dotfiles (keep in sync with lfi-os-files.data).
+# Also include commented values (e.g., `# .env`), but not comments.
+# grep -E '^(?:#\s*)?\.[^\s]+$' lfi-os-files.data | sed 's/^#\s*//'
 .addressbook
 .aptitude/config
 .aws/
@@ -187,6 +188,18 @@ sendgrid.env
 fish_variables
 # CVE-2023-5003
 ldap-authentication-report.csv
+# OpenStack-Ansible credentials file
+user_secrets.yml
+# File used by Visual Studio to store sensitive data
+secrets.json
+# Docker definition files, first two are commented out
+# as they are matched by the rest of the files
+#docker-compose.yml
+#docker-compose.yaml
+compose.yml
+compose.yaml
+# cloud-init definition file
+cloud-config.yml
 
 # /proc entries (keep in sync with lfi-os-files.data)
 # grep -E "^proc/" lfi-os-files.data

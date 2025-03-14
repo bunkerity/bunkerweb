@@ -46,7 +46,7 @@ void TimeMon::evaluate(Transaction *transaction,
     struct tm timeinfo;
     localtime_r(&timer, &timeinfo);
 
-    transaction->m_variableTimeMin.assign(std::to_string(timeinfo.tm_mon));
+    transaction->m_variableTimeMin.assign(std::to_string(timeinfo.tm_mon + 1));
 
     l->push_back(new VariableValue(&m_retName,
         &transaction->m_variableTimeMin));

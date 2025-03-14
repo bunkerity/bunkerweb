@@ -2,6 +2,9 @@
   "name": "Basic settings when using the web UI",
   "settings": {
     "USE_UI": "yes",
+    "SERVE_FILES": "no",
+    "USE_CLIENT_CACHE": "yes",
+    "USE_GZIP": "yes",
     "USE_CORS": "yes",
     "CORS_ALLOW_ORIGIN": "self",
     "INTERCEPTED_ERROR_CODES": "400 404 405 413 429 500 501 502 503 504",
@@ -15,6 +18,9 @@
       "subtitle": "This is a dummy step to show the basic settings when using the web UI",
       "settings": [
         "USE_UI",
+        "SERVE_FILES",
+        "USE_CLIENT_CACHE",
+        "USE_GZIP",
         "USE_CORS",
         "CORS_ALLOW_ORIGIN",
         "INTERCEPTED_ERROR_CODES",

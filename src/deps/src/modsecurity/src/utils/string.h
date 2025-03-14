@@ -107,12 +107,12 @@ inline std::string toHexIfNeeded(const std::string &str, bool escape_spec = fals
     // spec chars: '"' (quotation mark, ascii 34), '\' (backslash, ascii 92)
     std::stringstream res;
 
-    for (int i = 0; i < str.size(); i++) {
-        int c = (unsigned char)str.at(i);
+    for (const auto ch : str) {
+        int c = (unsigned char)ch;
         if (c < 32 || c > 126 || (escape_spec == true && (c == 34 || c == 92))) {
             res << "\\x" << std::setw(2) << std::setfill('0') << std::hex << c;
         } else {
-            res << str.at(i);
+            res << ch;
         }
     }
 
@@ -177,10 +177,10 @@ inline void replaceAll(std::string &str, std::string_view from,
 
 
 inline std::string removeWhiteSpacesIfNeeded(std::string a) {
-    while (a.size() > 1 && a.at(0) == ' ') {
+    while (a.size() > 1 && a.front() == ' ') {
         a.erase(0, 1);
     }
-    while (a.size() > 1 && a.at(a.length()-1) == ' ') {
+    while (a.size() > 1 && a.back() == ' ') {
         a.pop_back();
     }
     return a;
@@ -188,11 +188,11 @@ inline std::string removeWhiteSpacesIfNeeded(std::string a) {
 
 
 inline std::string removeBracketsIfNeeded(std::string a) {
-    if (a.length() > 1 && a.at(0) == '"' && a.at(a.length()-1) == '"') {
+    if (a.length() > 1 && a.front() == '"' && a.back() == '"') {
         a.pop_back();
         a.erase(0, 1);
     }
-    if (a.length() > 1 && a.at(0) == '\'' && a.at(a.length()-1) == '\'') {
+    if (a.length() > 1 && a.front() == '\'' && a.back() == '\'') {
         a.pop_back();
         a.erase(0, 1);
     }
@@ -257,7 +257,7 @@ inline std::string string_to_hex(std::string_view input) {
 
 
 template<typename Operation>
-inline std::string toCaseHelper(std::string str, Operation op) {
+inline std::string toCaseHelper(std::string str, Operation op) { // cppcheck-suppress syntaxError ; false positive
     std::transform(str.begin(),
             str.end(),
             str.begin(),

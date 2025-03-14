@@ -79,7 +79,7 @@ class JSON {
     static int yajl_end_array(void *ctx);
 
     bool isPreviousArray() const {
-        JSONContainerArray *prev = NULL;
+        const JSONContainerArray *prev = NULL;
         if (m_containers.size() < 1) {
             return false;
         }

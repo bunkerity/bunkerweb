@@ -14,7 +14,7 @@ jobs:
       packages: write
     strategy:
       matrix:
-        image: [bunkerweb, scheduler, autoconf, ui]
+        image: [bunkerweb, scheduler, autoconf, ui, all-in-one]
         include:
           - image: bunkerweb
             dockerfile: src/bw/Dockerfile
@@ -24,6 +24,8 @@ jobs:
             dockerfile: src/autoconf/Dockerfile
           - image: ui
             dockerfile: src/ui/Dockerfile
+          - image: all-in-one
+            dockerfile: src/all-in-one/Dockerfile
     uses: ./.github/workflows/container-build.yml
     with:
       RELEASE: testing
@@ -82,7 +84,7 @@ jobs:
     needs: [codeql, build-containers, build-packages]
     strategy:
       matrix:
-        type: [docker, autoconf, swarm, k8s, linux]
+        type: [docker, autoconf, k8s, linux]
     uses: ./.github/workflows/staging-create-infra.yml
     with:
       TYPE: ${{ matrix.type }}
@@ -94,14 +96,12 @@ jobs:
     needs: [create-infras]
     strategy:
       matrix:
-        type: [docker, autoconf, swarm, k8s, linux]
+        type: [docker, autoconf, k8s, linux]
         include:
           - type: docker
             runs_on: "['self-hosted', 'bw-docker']"
           - type: autoconf
             runs_on: "['self-hosted', 'bw-autoconf']"
-          - type: swarm
-            runs_on: "['self-hosted', 'bw-swarm']"
           - type: k8s
             runs_on: "['ubuntu-latest']"
           - type: linux
@@ -118,7 +118,7 @@ jobs:
     needs: [staging-tests]
     strategy:
       matrix:
-        type: [docker, autoconf, swarm, k8s, linux]
+        type: [docker, autoconf, k8s, linux]
     uses: ./.github/workflows/staging-delete-infra.yml
     with:
       TYPE: ${{ matrix.type }}
@@ -153,6 +153,8 @@ jobs:
         run: docker pull ghcr.io/bunkerity/ui-tests:testing && docker tag ghcr.io/bunkerity/ui-tests:testing bunkerity/bunkerweb-ui:testing && docker push bunkerity/bunkerweb-ui:testing && docker tag bunkerity/bunkerweb-ui:testing ghcr.io/bunkerity/bunkerweb-ui:testing && docker push ghcr.io/bunkerity/bunkerweb-ui:testing
       - name: Push autoconf image
         run: docker pull ghcr.io/bunkerity/autoconf-tests:testing && docker tag ghcr.io/bunkerity/autoconf-tests:testing bunkerity/bunkerweb-autoconf:testing && docker push bunkerity/bunkerweb-autoconf:testing && docker tag bunkerity/bunkerweb-autoconf:testing ghcr.io/bunkerity/bunkerweb-autoconf:testing && docker push ghcr.io/bunkerity/bunkerweb-autoconf:testing
+      - name: Push all-in-one image
+        run: docker pull ghcr.io/bunkerity/all-in-one-tests:testing && docker tag ghcr.io/bunkerity/all-in-one-tests:testing bunkerity/bunkerweb-all-in-one:testing && docker push bunkerity/bunkerweb-all-in-one:testing && docker tag bunkerity/bunkerweb-all-in-one:testing ghcr.io/bunkerity/bunkerweb-all-in-one:testing && docker push ghcr.io/bunkerity/bunkerweb-all-in-one:testing
 
   # Push Linux packages
   push-packages:

@@ -1,18 +1,20 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+from base64 import b64decode
 from copy import deepcopy
 from datetime import datetime, timedelta
 from itertools import chain
-from json import dumps
+from json import dumps, loads
 from os import environ, getenv, sep
 from os.path import join
 from pathlib import Path
-from re import MULTILINE, search
+from re import MULTILINE, match, search
 from select import select
 from shutil import rmtree
 from subprocess import DEVNULL, PIPE, STDOUT, Popen, run
 from sys import exit as sys_exit, path as sys_path
+from traceback import format_exc
 from typing import Dict, Literal, Type, Union
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("db",))]:
@@ -22,6 +24,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 from pydantic import ValidationError
 from letsencrypt import (
     CloudflareProvider,
+    DesecProvider,
     DigitalOceanProvider,
     DnsimpleProvider,
     DnsMadeEasyProvider,
@@ -115,9 +118,9 @@ def certbot_new(
             command.extend([f"--dns-{provider}-credentials", credentials_path.as_posix()])
 
         # * Adding plugin argument
-        if provider == "scaleway":
-            # ? Scaleway plugin uses different arguments
-            command.extend(["--authenticator", "dns-scaleway"])
+        if provider in ("desec", "scaleway"):
+            # ? Desec and Scaleway plugin uses different arguments
+            command.extend(["--authenticator", f"dns-{provider}"])
         else:
             command.append(f"--dns-{provider}")
     elif challenge_type == "http":
@@ -138,6 +141,9 @@ def certbot_new(
 
     if force:
         command.append("--force-renewal")
+
+    if getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")).upper() == "DEBUG":
+        command.append("-v")
 
     current_date = datetime.now()
     process = Popen(command, stdin=DEVNULL, stderr=PIPE, universal_newlines=True, env=cmd_env)
@@ -201,6 +207,7 @@ try:
             str,
             Union[
                 Type[CloudflareProvider],
+                Type[DesecProvider],
                 Type[DigitalOceanProvider],
                 Type[DnsimpleProvider],
                 Type[DnsMadeEasyProvider],
@@ -217,6 +224,7 @@ try:
             ],
         ] = {
             "cloudflare": CloudflareProvider,
+            "desec": DesecProvider,
             "digitalocean": DigitalOceanProvider,
             "dnsimple": DnsimpleProvider,
             "dnsmadeeasy": DnsMadeEasyProvider,
@@ -296,7 +304,8 @@ try:
 
             try:
                 cert_domains = search(r"Domains: (?P<domains>.*)\n\s*Expiry Date: (?P<expiry_date>.*)\n", certificate_block, MULTILINE)
-            except Exception as e:
+            except BaseException as e:
+                LOGGER.debug(format_exc())
                 LOGGER.error(f"[{original_first_server}] Error while parsing certificate block: {e}")
                 continue
 
@@ -377,10 +386,47 @@ try:
         # * Getting the DNS provider data if necessary
         if data["challenge"] == "dns":
             credential_key = f"{first_server}_LETS_ENCRYPT_DNS_CREDENTIAL_ITEM" if IS_MULTISITE else "LETS_ENCRYPT_DNS_CREDENTIAL_ITEM"
+            credential_items = {}
+
+            # Collect all credential items
             for env_key, env_value in environ.items():
                 if env_value and env_key.startswith(credential_key):
+                    if " " not in env_value:
+                        credential_items["json_data"] = env_value
+                        continue
                     key, value = env_value.split(" ", 1)
-                    data["credential_items"][key.lower()] = value
+                    credential_items[key.lower()] = value.removeprefix("= ").replace("\\n", "\n").replace("\\t", "\t").replace("\\r", "\r").strip()
+
+            if "json_data" in credential_items:
+                value = credential_items.pop("json_data")
+                # Handle the case of a single credential that might be base64-encoded JSON
+                if not credential_items and len(value) % 4 == 0 and match(r"^[A-Za-z0-9+/=]+$", value):
+                    try:
+                        decoded = b64decode(value).decode("utf-8")
+                        json_data = loads(decoded)
+                        if isinstance(json_data, dict):
+                            data["credential_items"] = {
+                                k.lower(): str(v).removeprefix("= ").replace("\\n", "\n").replace("\\t", "\t").replace("\\r", "\r").strip()
+                                for k, v in json_data.items()
+                            }
+                    except BaseException as e:
+                        LOGGER.debug(format_exc())
+                        LOGGER.error(f"Error while decoding JSON data for service {first_server} : {value} : \n{e}")
+
+            if not data["credential_items"]:
+                # Process regular credentials
+                data["credential_items"] = {}
+                for key, value in credential_items.items():
+                    # Check for base64 encoding
+                    if len(value) % 4 == 0 and match(r"^[A-Za-z0-9+/=]+$", value):
+                        try:
+                            decoded = b64decode(value).decode("utf-8")
+                            if decoded != value:
+                                value = decoded.removeprefix("= ").replace("\\n", "\n").replace("\\t", "\t").replace("\\r", "\r").strip()
+                        except BaseException as e:
+                            LOGGER.debug(format_exc())
+                            LOGGER.debug(f"Error while decoding credential item {key} for service {first_server} : {value} : \n{e}")
+                    data["credential_items"][key] = value
 
         LOGGER.debug(f"Data for service {first_server} : {dumps(data)}")
 
@@ -397,13 +443,16 @@ try:
                 )
                 continue
             elif not data["credential_items"]:
-                LOGGER.warning(f"No credentials items found for service {first_server} (you should have at least one), skipping certificate(s) generation...")
+                LOGGER.warning(
+                    f"No valid credentials items found for service {first_server} (you should have at least one), skipping certificate(s) generation..."
+                )
                 continue
 
             # * Validating the credentials
             try:
                 provider = provider_classes[data["provider"]](**data["credential_items"])
             except ValidationError as ve:
+                LOGGER.debug(format_exc())
                 LOGGER.error(f"Error while validating credentials for service {first_server} :\n{ve}")
                 continue
 
@@ -524,7 +573,7 @@ try:
         LOGGER.info("No wildcard domains found, skipping wildcard certificate(s) generation...")
 
     # * Clearing all missing credentials files
-    for file in CACHE_PATH.glob("**/*"):
+    for file in CACHE_PATH.rglob("*"):
         if "etc" in file.parts or not file.is_file() or file.suffix not in (".ini", ".env", ".json"):
             continue
         # ? If the file is not in the wildcard groups, remove it
@@ -553,8 +602,9 @@ try:
             LOGGER.info("Successfully saved data to db cache")
 except SystemExit as e:
     status = e.code
-except:
+except BaseException as e:
     status = 1
-    LOGGER.exception("Exception while running certbot-new.py")
+    LOGGER.debug(format_exc())
+    LOGGER.error(f"Exception while running certbot-new.py :\n{e}")
 
 sys_exit(status)

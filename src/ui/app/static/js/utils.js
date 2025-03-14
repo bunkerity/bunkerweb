@@ -285,6 +285,7 @@ $(document).ready(() => {
   const intervalTime = 7000;
   let interval;
   const $bannerText = $("#banner-text");
+  const isReadOnly = $("#is-read-only").val().trim() === "True";
 
   function calculateMinHeight() {
     // Create a hidden element to measure the max height
@@ -460,13 +461,32 @@ $(document).ready(() => {
       });
   }, 1000);
 
-  $("#dark-mode-toggle").on("change", function () {
-    // If endpoint is "setup", ignore the theme change
-    if (window.location.pathname.includes("/setup")) return;
+  // Check if there's a saved theme preference in localStorage
+  let savedTheme = localStorage.getItem("theme");
 
-    $themeSelector = $("#theme-toggle");
+  if (!savedTheme) {
+    // If no saved preference, use the system's preferred color scheme
+    const systemPrefersDark = window.matchMedia(
+      "(prefers-color-scheme: dark)",
+    ).matches;
+    savedTheme = systemPrefersDark ? "dark" : "light";
+  }
+
+  // Apply the saved or system-preferred theme
+  applyTheme(savedTheme);
+
+  // Toggle theme on change
+  $("#dark-mode-toggle").on("change", function () {
     const darkMode = $(this).prop("checked");
-    if (darkMode) {
+    const theme = darkMode ? "dark" : "light";
+    applyTheme(theme, $(this).data("root-url"));
+  });
+
+  // Function to apply the theme
+  function applyTheme(theme, rootUrl = null) {
+    $themeSelector = $("#theme-toggle");
+
+    if (theme === "dark") {
       $("html")
         .removeClass("light-style")
         .addClass("dark-style dark")
@@ -476,10 +496,12 @@ $(document).ready(() => {
         .removeClass("btn-outline-dark");
       $(".btn-dark").addClass("btn-light").removeClass("btn-dark");
       $(".bg-white").addClass("bg-dark").removeClass("bg-white");
+      $(".bs-toast.bg-white").addClass("bg-dark").removeClass("bg-white");
       $(".bg-light-subtle")
         .addClass("bg-dark-subtle")
         .removeClass("bg-light-subtle");
       $(".dark-mode-toggle-icon").removeClass("bx-sun").addClass("bx-moon");
+      $("#dark-mode-toggle").prop("checked", true);
       $("[alt='BunkerWeb logo']").attr("src", $("#bw-logo-white").val());
       $("[alt='User Avatar']").attr("src", $("#avatar-url-white").val());
       $themeSelector.find("option[value='dark']").prop("selected", true);
@@ -491,28 +513,29 @@ $(document).ready(() => {
       $(".btn-outline-light")
         .addClass("btn-outline-dark")
         .removeClass("btn-outline-light");
+      $(".bs-toast.bg-dark").addClass("bg-white").removeClass("bg-dark");
       $(".btn-light").addClass("btn-dark").removeClass("btn-light");
       $(".bg-dark").addClass("bg-white").removeClass("bg-dark");
       $(".bg-dark-subtle")
         .addClass("bg-light-subtle")
         .removeClass("bg-dark-subtle");
       $(".dark-mode-toggle-icon").removeClass("bx-moon").addClass("bx-sun");
+      $("#dark-mode-toggle").prop("checked", false);
       $("[alt='BunkerWeb logo']").attr("src", $("#bw-logo").val());
       $("[alt='User Avatar']").attr("src", $("#avatar-url").val());
       $themeSelector.find("option[value='light']").prop("selected", true);
     }
 
-    $("#theme").val(darkMode ? "dark" : "light");
-    const theme = darkMode ? "dark" : "light";
+    // Update input values
+    $("#theme").val(theme);
+    $("[name='theme']").val(theme);
     localStorage.setItem("theme", theme); // Save user preference
 
-    saveTheme(
-      $(this)
-        .data("root-url")
-        .replace(/\/profile$/, "/set_theme"),
-      theme,
-    );
-  });
+    if (!rootUrl || window.location.pathname.includes("/setup") || isReadOnly)
+      return;
+
+    saveTheme(rootUrl.replace(/\/profile$/, "/set_theme"), theme);
+  }
 
   $("#pluginsCollapse").on("show.bs.collapse", function () {
     sessionStorage.setItem("pluginsCollapse", "show");
@@ -526,4 +549,22 @@ $(document).ready(() => {
   if (pluginsCollapse === "hide") {
     $("#pluginsCollapse").collapse("hide");
   }
+
+  $("#extraPagesCollapse").on("show.bs.collapse", function () {
+    sessionStorage.setItem("extraPagesCollapse", "show");
+  });
+
+  $("#extraPagesCollapse").on("hide.bs.collapse", function () {
+    sessionStorage.setItem("extraPagesCollapse", "hide");
+  });
+
+  const extraPagesCollapse = sessionStorage.getItem("extraPagesCollapse");
+  if (extraPagesCollapse === "hide") {
+    $("#extraPagesCollapse").collapse("hide");
+  }
+
+  $("#feedback-toast-container .bs-toast").each(function () {
+    const toast = new bootstrap.Toast(this);
+    toast.show();
+  });
 });

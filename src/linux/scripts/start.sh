@@ -9,11 +9,12 @@ export PYTHONPATH=/usr/share/bunkerweb/deps/python
 
 # Display usage information
 function display_help() {
-    echo "Usage: $(basename "$0") [start|stop|reload]"
+    echo "Usage: $(basename "$0") [start|stop|reload|restart]"
     echo "Options:"
     echo "  start:   Create configurations and start the bunkerweb service."
     echo "  stop:    Stop the bunkerweb service."
     echo "  reload:  Reload the bunkerweb service."
+    echo "  restart: Stop and then start the bunkerweb service."
 }
 
 # Start the bunkerweb service
@@ -218,6 +219,13 @@ function reload()
     log "SYSTEMCTL" "ℹ️" "BunkerWeb service reloaded ..."
 }
 
+function restart() {
+    log "SYSTEMCTL" "ℹ️" "Restarting BunkerWeb service ..."
+    stop
+    sleep 2
+    start
+}
+
 # List of different args
 case $1 in
     "start")
@@ -228,6 +236,9 @@ case $1 in
     ;;
     "reload")
     reload
+    ;;
+    "restart")
+    restart
     ;;
     *)
     echo "Invalid option!"

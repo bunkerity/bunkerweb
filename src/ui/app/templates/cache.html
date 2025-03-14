@@ -15,6 +15,10 @@
                id="csrf_token"
                name="csrf_token"
                value="{{ csrf_token() }}" />
+        <textarea type="hidden"
+                  id="columns_preferences_defaults"
+                  class="visually-hidden">{{ columns_preferences_defaults['cache']|tojson }}</textarea>
+        <textarea type="hidden" id="columns_preferences" class="visually-hidden">{{ columns_preferences|tojson }}</textarea>
         <p id="cache-waiting"
            class="text-center relative w-full p-2 text-primary rounded-lg fw-bold">Loading cache files...</p>
         <table id="cache"

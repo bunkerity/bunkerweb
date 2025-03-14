@@ -54,7 +54,7 @@ void Env::evaluate(Transaction *transaction,
     }
 
     const auto hasName = m_name.length() > 0;
-    for (auto& x : transaction->m_variableEnvs) {
+    for (const auto& x : transaction->m_variableEnvs) {
 #ifndef WIN32
         if (hasName && x.first != m_name) {
 #else

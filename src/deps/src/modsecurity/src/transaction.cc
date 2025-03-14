@@ -102,91 +102,23 @@ namespace modsecurity {
  * @endcode
  *
  */
-Transaction::Transaction(ModSecurity *ms, RulesSet *rules, void *logCbData)
-    : m_creationTimeStamp(utils::cpu_seconds()),
-     m_clientIpAddress(std::make_shared<std::string>("")),
-    m_httpVersion(""),
-    m_serverIpAddress(std::make_shared<std::string>("")),
-    m_requestHostName(std::make_shared<std::string>("")),
-    m_uri(""),
-    m_uri_no_query_string_decoded(std::make_shared<std::string>("")),
-    m_ARGScombinedSizeDouble(0),
-    m_clientPort(0),
-    m_highestSeverityAction(255),
-    m_httpCodeReturned(200),
-    m_serverPort(0),
-    m_ms(ms),
-    m_requestBodyType(UnknownFormat),
-    m_requestBodyProcessor(UnknownFormat),
-    m_rules(rules),
-    m_ruleRemoveById(),
-    m_ruleRemoveByIdRange(),
-    m_ruleRemoveByTag(),
-    m_ruleRemoveTargetByTag(),
-    m_ruleRemoveTargetById(),
-    m_requestBodyAccess(RulesSet::PropertyNotSetConfigBoolean),
-    m_auditLogModifier(),
-    m_ctlAuditEngine(AuditLog::AuditLogStatus::NotSetLogStatus),
-    m_rulesMessages(),
-    m_requestBody(),
-    m_responseBody(),
-    /* m_id(), */
-    m_skip_next(0),
-    m_allowType(modsecurity::actions::disruptive::NoneAllowType),
-    m_uri_decoded(""),
-    m_actions(),
-    m_it(),
-    m_timeStamp(std::time(NULL)),
-    m_collections(ms->m_global_collection, ms->m_ip_collection,
-        ms->m_session_collection, ms->m_user_collection,
-        ms->m_resource_collection),
-    m_matched(),
-#ifdef WITH_LIBXML2
-    m_xml(new RequestBodyProcessor::XML(this)),
-#else
-    m_xml(NULL),
-#endif
-#ifdef WITH_YAJL
-    m_json(new RequestBodyProcessor::JSON(this)),
-#else
-    m_json(NULL),
-#endif
-    m_secRuleEngine(RulesSetProperties::PropertyNotSetRuleEngine),
-    m_variableDuration(""),
-    m_variableEnvs(),
-    m_variableHighestSeverityAction(""),
-    m_variableRemoteUser(""),
-    m_variableTime(""),
-    m_variableTimeDay(""),
-    m_variableTimeEpoch(""),
-    m_variableTimeHour(""),
-    m_variableTimeMin(""),
-    m_variableTimeSec(""),
-    m_variableTimeWDay(""),
-    m_variableTimeYear(""),
-    m_logCbData(logCbData),
-    TransactionAnchoredVariables(this) {
-    m_id = std::unique_ptr<std::string>( new std::string(
-        std::to_string(m_timeStamp)
-        + std::to_string(modsecurity::utils::generate_transaction_unique_id())));
 
-    m_variableUrlEncodedError.set("0", 0);
-    m_variableMscPcreError.set("0", 0);
-    m_variableMscPcreLimitsExceeded.set("0", 0);
-
-    ms_dbg(4, "Initializing transaction");
-
-    intervention::clean(&m_it);
+static std::string get_id(const char *id, const time_t timestamp) {
+    return (id == nullptr) ?
+        std::to_string(timestamp) +
+            std::to_string(modsecurity::utils::generate_transaction_unique_id())
+        : id;
 }
 
-Transaction::Transaction(ModSecurity *ms, RulesSet *rules, char *id, void *logCbData)
+Transaction::Transaction(ModSecurity *ms, RulesSet *rules, void *logCbData)
+    : Transaction(ms, rules, nullptr, logCbData) { }
+
+Transaction::Transaction(ModSecurity *ms, RulesSet *rules, const char *id, void *logCbData)
+    : Transaction(ms, rules, id, logCbData, std::time(nullptr)) { }
+
+Transaction::Transaction(ModSecurity *ms, RulesSet *rules, const char *id,
+    void *logCbData, const time_t timestamp)
     : m_creationTimeStamp(utils::cpu_seconds()),
-    m_clientIpAddress(std::make_shared<std::string>("")),
-    m_httpVersion(""),
-    m_serverIpAddress(std::make_shared<std::string>("")),
-    m_requestHostName(std::make_shared<std::string>("")),
-    m_uri(""),
-    m_uri_no_query_string_decoded(std::make_shared<std::string>("")),
     m_ARGScombinedSizeDouble(0),
     m_clientPort(0),
     m_highestSeverityAction(255),
@@ -196,54 +128,28 @@ Transaction::Transaction(ModSecurity *ms, RulesSet *rules, char *id, void *logCb
     m_requestBodyType(UnknownFormat),
     m_requestBodyProcessor(UnknownFormat),
     m_rules(rules),
-    m_ruleRemoveById(),
-    m_ruleRemoveByIdRange(),
-    m_ruleRemoveByTag(),
-    m_ruleRemoveTargetByTag(),
-    m_ruleRemoveTargetById(),
     m_requestBodyAccess(RulesSet::PropertyNotSetConfigBoolean),
-    m_auditLogModifier(),
     m_ctlAuditEngine(AuditLog::AuditLogStatus::NotSetLogStatus),
-    m_rulesMessages(),
-    m_requestBody(),
-    m_responseBody(),
-    m_id(std::unique_ptr<std::string>(new std::string(id))),
+    m_id(get_id(id, timestamp)),
     m_skip_next(0),
     m_allowType(modsecurity::actions::disruptive::NoneAllowType),
-    m_uri_decoded(""),
-    m_actions(),
-    m_it(),
-    m_timeStamp(std::time(NULL)),
+    m_timeStamp(timestamp),
     m_collections(ms->m_global_collection, ms->m_ip_collection,
         ms->m_session_collection, ms->m_user_collection,
         ms->m_resource_collection),
-    m_matched(),
 #ifdef WITH_LIBXML2
     m_xml(new RequestBodyProcessor::XML(this)),
 #else
-    m_xml(NULL),
+    m_xml(nullptr),
 #endif
 #ifdef WITH_YAJL
     m_json(new RequestBodyProcessor::JSON(this)),
 #else
-    m_json(NULL),
+    m_json(nullptr),
 #endif
     m_secRuleEngine(RulesSetProperties::PropertyNotSetRuleEngine),
-    m_variableDuration(""),
-    m_variableEnvs(),
-    m_variableHighestSeverityAction(""),
-    m_variableRemoteUser(""),
-    m_variableTime(""),
-    m_variableTimeDay(""),
-    m_variableTimeEpoch(""),
-    m_variableTimeHour(""),
-    m_variableTimeMin(""),
-    m_variableTimeSec(""),
-    m_variableTimeWDay(""),
-    m_variableTimeYear(""),
     m_logCbData(logCbData),
     TransactionAnchoredVariables(this) {
-
     m_variableUrlEncodedError.set("0", 0);
     m_variableMscPcreError.set("0", 0);
     m_variableMscPcreLimitsExceeded.set("0", 0);
@@ -292,7 +198,7 @@ void Transaction::debug(int level, const std::string& message) const {
         return;
     }
 
-    m_rules->debug(level, *m_id.get(), m_uri, message);
+    m_rules->debug(level, m_id, m_uri, message);
 }
 #endif
 
@@ -319,19 +225,21 @@ void Transaction::debug(int level, const std::string& message) const {
  */
 int Transaction::processConnection(const char *client, int cPort,
     const char *server, int sPort) {
-    m_clientIpAddress = std::unique_ptr<std::string>(new std::string(client));
-    m_serverIpAddress = std::unique_ptr<std::string>(new std::string(server));
-    m_requestHostName = std::unique_ptr<std::string>(new std::string(server));
+    m_clientIpAddress = client;
+    m_serverIpAddress = server;
+    if (m_requestHostName.empty() == true) {
+        m_requestHostName = server;
+    }
     this->m_clientPort = cPort;
     this->m_serverPort = sPort;
     ms_dbg(4, "Transaction context created.");
     ms_dbg(4, "Starting phase CONNECTION. (SecRules 0)");
 
 
-    m_variableRemoteHost.set(*m_clientIpAddress.get(), m_variableOffset);
-    m_variableUniqueID.set(*m_id.get(), m_variableOffset);
-    m_variableRemoteAddr.set(*m_clientIpAddress.get(), m_variableOffset);
-    m_variableServerAddr.set(*m_serverIpAddress.get(), m_variableOffset);
+    m_variableRemoteHost.set(m_clientIpAddress, m_variableOffset);
+    m_variableUniqueID.set(m_id, m_variableOffset);
+    m_variableRemoteAddr.set(m_clientIpAddress, m_variableOffset);
+    m_variableServerAddr.set(m_serverIpAddress, m_variableOffset);
     m_variableServerPort.set(std::to_string(this->m_serverPort),
         m_variableOffset);
     m_variableRemotePort.set(std::to_string(this->m_clientPort),
@@ -467,9 +375,7 @@ int Transaction::processURI(const char *uri, const char *method,
     m_variableRequestProtocol.set("HTTP/" + std::string(http_version),
         m_variableOffset + requestLine.size() + 1);
 
-    m_uri_no_query_string_decoded = std::unique_ptr<std::string>(
-        new std::string(path_info));
-
+    m_uri_no_query_string_decoded = path_info;
 
     if (pos_raw_query != std::string::npos) {
         std::string qry = std::string(uri_s, pos_raw_query + 1,
@@ -501,7 +407,7 @@ int Transaction::processURI(const char *uri, const char *method,
 
     std::string parsedURI = m_uri_decoded;
     // The more popular case is without domain
-    if (!m_uri_decoded.empty() && m_uri_decoded.at(0) != '/') {
+    if (!m_uri_decoded.empty() && m_uri_decoded[0] != '/') {
         bool fullDomain = true;
         size_t scheme = m_uri_decoded.find(":")+1;
         if (scheme == std::string::npos) {
@@ -636,7 +542,7 @@ int Transaction::addRequestHeader(const std::string& key,
             }
 
             // ltrim the key - following the modsec v2 way
-            while (ckey.empty() == false && isspace(ckey.at(0))) {
+            while (ckey.empty() == false && isspace(ckey[0])) {
                 ckey.erase(0, 1);
                 localOffset++;
             }
@@ -1271,7 +1177,7 @@ int Transaction::processResponseBody() {
 int Transaction::appendResponseBody(const unsigned char *buf, size_t len) {
     int current_size = this->m_responseBody.tellp();
 
-    std::set<std::string> &bi = \
+    const std::set<std::string> &bi = \
         this->m_rules->m_responseBodyTypeToBeInspected.m_value;
     auto t = bi.find(m_variableResponseContentType.m_value);
     if (t == bi.end() && bi.empty() == false) {
@@ -1495,7 +1401,7 @@ std::string Transaction::toOldAuditLogFormatIndex(const std::string &filename,
     ss << utils::string::dash_if_empty(
        m_variableRequestHeaders.resolveFirst("Host").get())
         << " ";
-    ss << utils::string::dash_if_empty(this->m_clientIpAddress.get()) << " ";
+    ss << utils::string::dash_if_empty(&this->m_clientIpAddress) << " ";
     /** TODO: Check variable */
     variables::RemoteUser *r = new variables::RemoteUser("REMOTE_USER");
     std::vector<const VariableValue *> l;
@@ -1530,7 +1436,7 @@ std::string Transaction::toOldAuditLogFormatIndex(const std::string &filename,
     ss << utils::string::dash_if_empty(
         m_variableRequestHeaders.resolveFirst("User-Agent").get());
     ss << "\" ";
-    ss << *m_id.get() << " ";
+    ss << m_id << " ";
     /** TODO: Check variable */
     ss << utils::string::dash_if_empty(
         m_variableRequestHeaders.resolveFirst("REFERER").get()) << " ";
@@ -1556,10 +1462,10 @@ std::string Transaction::toOldAuditLogFormat(int parts,
 
     audit_log << "--" << trailer << "-" << "A--" << std::endl;
     audit_log << tstr;
-    audit_log << " " << m_id->c_str();
-    audit_log << " " << this->m_clientIpAddress->c_str();
+    audit_log << " " << m_id;
+    audit_log << " " << this->m_clientIpAddress;
     audit_log << " " << this->m_clientPort;
-    audit_log << " " << m_serverIpAddress->c_str();
+    audit_log << " " << m_serverIpAddress;
     audit_log << " " << this->m_serverPort;
     audit_log << std::endl;
 
@@ -1625,7 +1531,7 @@ std::string Transaction::toOldAuditLogFormat(int parts,
     }
     if (parts & audit_log::AuditLog::HAuditLogPart) {
         audit_log << "--" << trailer << "-" << "H--" << std::endl;
-        for (auto a : m_rulesMessages) {
+        for (const auto &a : m_rulesMessages) {
             audit_log << a.log(0, m_httpCodeReturned) << std::endl;
         }
         audit_log << std::endl;
@@ -1676,13 +1582,13 @@ std::string Transaction::toJSON(int parts) {
 
     yajl_gen_map_open(g);
     /* Part: A (header mandatory) */
-    LOGFY_ADD("client_ip", this->m_clientIpAddress->c_str());
+    LOGFY_ADD("client_ip", m_clientIpAddress.c_str());
     LOGFY_ADD("time_stamp", ts.c_str());
     LOGFY_ADD("server_id", uniqueId.c_str());
     LOGFY_ADD_NUM("client_port", m_clientPort);
-    LOGFY_ADD("host_ip", m_serverIpAddress->c_str());
+    LOGFY_ADD("host_ip", m_serverIpAddress.c_str());
     LOGFY_ADD_NUM("host_port", m_serverPort);
-    LOGFY_ADD("unique_id", m_id->c_str());
+    LOGFY_ADD("unique_id", m_id.c_str());
 
     /* request */
     yajl_gen_string(g, reinterpret_cast<const unsigned char*>("request"),
@@ -1773,7 +1679,7 @@ std::string Transaction::toJSON(int parts) {
             strlen("components"));
 
         yajl_gen_array_open(g);
-        for (auto a : m_rules->m_components) {
+        for (const auto &a : m_rules->m_components) {
             yajl_gen_string(g,
                 reinterpret_cast<const unsigned char*>
                     (a.c_str()), a.length());
@@ -1797,13 +1703,13 @@ std::string Transaction::toJSON(int parts) {
             yajl_gen_map_open(g);
             LOGFY_ADD("match", a.m_match.c_str());
             LOGFY_ADD("reference", a.m_reference.c_str());
-            LOGFY_ADD("ruleId", std::to_string(a.m_ruleId).c_str());
-            LOGFY_ADD("file", a.m_ruleFile->c_str());
-            LOGFY_ADD("lineNumber", std::to_string(a.m_ruleLine).c_str());
+            LOGFY_ADD("ruleId", std::to_string(a.m_rule.m_ruleId).c_str());
+            LOGFY_ADD("file", a.m_rule.getFileName().c_str());
+            LOGFY_ADD("lineNumber", std::to_string(a.m_rule.getLineNumber()).c_str());
             LOGFY_ADD("data", a.m_data.c_str());
             LOGFY_ADD("severity", std::to_string(a.m_severity).c_str());
-            LOGFY_ADD("ver", a.m_ver.c_str());
-            LOGFY_ADD("rev", a.m_rev.c_str());
+            LOGFY_ADD("ver", a.m_rule.m_ver.c_str());
+            LOGFY_ADD("rev", a.m_rule.m_rev.c_str());
 
             yajl_gen_string(g,
                 reinterpret_cast<const unsigned char*>("tags"),
@@ -1816,8 +1722,8 @@ std::string Transaction::toJSON(int parts) {
             }
             yajl_gen_array_close(g);
 
-            LOGFY_ADD("maturity", std::to_string(a.m_maturity).c_str());
-            LOGFY_ADD("accuracy", std::to_string(a.m_accuracy).c_str());
+            LOGFY_ADD("maturity", std::to_string(a.m_rule.m_maturity).c_str());
+            LOGFY_ADD("accuracy", std::to_string(a.m_rule.m_accuracy).c_str());
             yajl_gen_map_close(g);
             yajl_gen_map_close(g);
         }
@@ -1846,7 +1752,7 @@ std::string Transaction::toJSON(int parts) {
 }
 
 
-void Transaction::serverLog(std::shared_ptr<RuleMessage> rm) {
+void Transaction::serverLog(const RuleMessage &rm) {
     m_ms->serverLog(m_logCbData, rm);
 }
 
@@ -1907,7 +1813,7 @@ extern "C" Transaction *msc_new_transaction(ModSecurity *ms,
     return new Transaction(ms, rules, logCbData);
 }
 extern "C" Transaction *msc_new_transaction_with_id(ModSecurity *ms,
-    RulesSet *rules, char *id, void *logCbData) {
+    RulesSet *rules, const char *id, void *logCbData) {
     return new Transaction(ms, rules, id, logCbData);
 }
 
@@ -2293,7 +2199,7 @@ extern "C" void msc_intervention_cleanup(ModSecurityIntervention *it) {
  * @retval NULL Nothing was updated.
  *
  */
-extern "C" const char *msc_get_response_body(Transaction *transaction) {
+extern "C" const char *msc_get_response_body(const Transaction *transaction) {
     return transaction->getResponseBody();
 }
 
@@ -2384,7 +2290,7 @@ extern "C" int msc_update_status_code(Transaction *transaction, int status) {
 int Transaction::setRequestHostName(const std::string& hostname) {
 
     if (hostname != "") {
-        m_requestHostName = std::unique_ptr<std::string>(new std::string(hostname));
+        m_requestHostName = hostname;
     }
 
     return true;

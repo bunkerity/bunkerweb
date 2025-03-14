@@ -35,7 +35,7 @@ bool Redirect::init(std::string *error) {
 
 
 bool Redirect::evaluate(RuleWithActions *rule, Transaction *transaction,
-    std::shared_ptr<RuleMessage> rm) {
+    RuleMessage &ruleMessage) {
     std::string m_urlExpanded(m_string->evaluate(transaction));
     /* if it was changed before, lets keep it. */
     if (transaction->m_it.status == 200
@@ -47,9 +47,9 @@ bool Redirect::evaluate(RuleWithActions *rule, Transaction *transaction,
     transaction->m_it.url = strdup(m_urlExpanded.c_str());
     transaction->m_it.disruptive = true;
     intervention::freeLog(&transaction->m_it);
-    rm->m_isDisruptive = true;
+    ruleMessage.m_isDisruptive = true;
     transaction->m_it.log = strdup(
-        rm->log(RuleMessage::LogMessageInfo::ClientLogMessageInfo).c_str());
+        ruleMessage.log(RuleMessage::LogMessageInfo::ClientLogMessageInfo).c_str());
 
     return true;
 }

@@ -111,7 +111,7 @@ invalid:
 
 
 bool VerifySSN::evaluate(Transaction *t, RuleWithActions *rule,
-    const std::string& input, std::shared_ptr<RuleMessage> ruleMessage) {
+    const std::string& input, RuleMessage &ruleMessage) {
     std::list<SMatch> matches;
     bool is_ssn = false;
     int i;

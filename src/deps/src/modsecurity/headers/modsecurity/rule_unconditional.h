@@ -13,15 +13,6 @@
  *
  */
 
-#ifdef __cplusplus
-#include <stack>
-#include <vector>
-#include <string>
-#include <list>
-#include <memory>
-#include <utility>
-#endif
-
 #ifndef HEADERS_MODSECURITY_RULE_UNCONDITIONAL_H_
 #define HEADERS_MODSECURITY_RULE_UNCONDITIONAL_H_
 
@@ -34,30 +25,18 @@
 
 #ifdef __cplusplus
 
+#include <vector>
+#include <string>
+#include <memory>
+
 namespace modsecurity {
 
 
 class RuleUnconditional : public RuleWithActions {
  public:
-    RuleUnconditional(
-        std::vector<actions::Action *> *actions,
-        Transformations *transformations,
-        std::unique_ptr<std::string> fileName,
-        int lineNumber)
-        : RuleWithActions(actions, transformations, std::move(fileName), lineNumber) { }
+    using RuleWithActions::RuleWithActions;
 
-    RuleUnconditional(const RuleUnconditional& r)
-        : RuleWithActions(r)
-    { }
-
-    RuleUnconditional &operator=(const RuleUnconditional& r) {
-        RuleWithActions::operator = (r);
-        return *this;
-    }
-
-    virtual bool evaluate(Transaction *transaction, std::shared_ptr<RuleMessage> ruleMessage) override;
-
- private:
+    virtual bool evaluate(Transaction *transaction, RuleMessage &ruleMessage) override;
 };
 
 

@@ -4,6 +4,7 @@ from os import sep
 from os.path import join
 from sys import exit as sys_exit, path as sys_path
 from time import sleep
+from traceback import format_exc
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",))]:
     if deps_path not in sys_path:
@@ -78,22 +79,23 @@ try:
         current_version_padded = current_version_line.center(longest_line_length)
         LOGGER.warning(
             (
-                f"\n\033[1;91m{'*' * (longest_line_length - 5)}\n"
-                f"\033[1;91m*{' ' * (longest_line_length - 7)}*\n"
-                f"\033[1;91m*  \033[1;97m{alert_message_padded}\033[0m  \033[0;91m*\n"
-                f"\033[1;91m*{' ' * (longest_line_length - 7)}*\n"
-                f"\033[1;91m*  \033[1;97m{latest_version_padded}\033[0;91m  *\n"
-                f"\033[1;91m*  \033[1;97m{current_version_padded}\033[0;91m  *\n"
-                f"\033[1;91m*{' ' * (longest_line_length - 7)}*\n"
-                f"\033[1;91m*  \033[1;97m{release_notes_url_line}\033[0;91m  *\n"
-                f"\033[1;91m*{' ' * (longest_line_length - 7)}*\n"
-                f"\033[1;91m{'*' * (longest_line_length - 5)}\033[0m"
+                f"\n\033[1;91m+{'—' * (longest_line_length - 7)}+\033[0m\n"
+                f"\033[1;91m|{' ' * (longest_line_length - 7)}|\033[0m\n"
+                f"\033[1;91m|  \033[1;97m{alert_message_padded}\033[1;91m  |\033[0m\n"
+                f"\033[1;91m|{' ' * (longest_line_length - 7)}|\033[0m\n"
+                f"\033[1;91m|  \033[1;97m{latest_version_padded}\033[1;91m  |\033[0m\n"
+                f"\033[1;91m|  \033[1;97m{current_version_padded}\033[1;91m  |\033[0m\n"
+                f"\033[1;91m|{' ' * (longest_line_length - 7)}|\033[0m\n"
+                f"\033[1;91m|  \033[1;97m{release_notes_url_line}\033[1;91m  |\033[0m\n"
+                f"\033[1;91m|{' ' * (longest_line_length - 7)}|\033[0m\n"
+                f"\033[1;91m+{'—' * (longest_line_length - 7)}+\033[0m"
             )
         )
     else:
         LOGGER.info(f"Latest version is already installed: {current_version}")
 except BaseException as e:
     status = 2
+    LOGGER.debug(format_exc())
     LOGGER.error(f"Exception while running update-check.py :\n{e}")
 
 sys_exit(status)

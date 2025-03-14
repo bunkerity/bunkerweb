@@ -52,7 +52,7 @@
     "help": "List of the virtual hosts served by bunkerweb.",
     "id": "server-name",
     "label": "Server name",
-    "regex": "^((?!.*\\.\\.)([^\\s/]{1,256})(?!.*\\s\\2(\\s|$)))?(\\s(((?!.*\\.\\.))([^\\s/]{1,256})(?!.*\\s\\7(\\s|$))))*$",
+    "regex": "^(?!.*\\.\\.)(?:(\\b[^\\s\\/:A-Z]{1,255}\\b)(?:\\s\\b[^\\s\\/:A-Z]{1,255}\\b)*)?$",
     "type": "text"
   },
   "WORKER_PROCESSES": {
@@ -366,5 +366,14 @@
     "regex": "^(detect|block)$",
     "type": "select",
     "select": ["detect", "block"]
+  },
+  "SERVER_NAMES_HASH_BUCKET_SIZE": {
+    "context": "global",
+    "default": "",
+    "help": "Value for the server_names_hash_bucket_size directive.",
+    "id": "server-names-hash-bucket-size",
+    "label": "Server names hash bucket size",
+    "regex": "^.*$",
+    "type": "text"
   }
 }

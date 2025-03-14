@@ -254,11 +254,11 @@ bool RulesExceptions::merge(RulesExceptions *from) {
                     p.second));
     }
 
-    for (auto &p : from->m_remove_rule_by_msg) {
+    for (const auto &p : from->m_remove_rule_by_msg) {
         m_remove_rule_by_msg.push_back(p);
     }
 
-    for (auto &p : from->m_remove_rule_by_tag) {
+    for (const auto &p : from->m_remove_rule_by_tag) {
         m_remove_rule_by_tag.push_back(p);
     }
 

@@ -31,7 +31,8 @@ EXTRA_DIST = \
 noinst_PROGRAMS += unit_tests
 unit_tests_SOURCES = \
         unit/unit.cc \
-        unit/unit_test.cc
+        unit/unit_test.cc \
+        common/custom_debug_log.cc
 
 
 noinst_HEADERS = \
@@ -94,7 +95,7 @@ noinst_PROGRAMS += regression_tests
 regression_tests_SOURCES = \
         regression/regression.cc \
         regression/regression_test.cc \
-        regression/custom_debug_log.cc
+        common/custom_debug_log.cc
 
 regression_tests_LDADD = \
 	$(CURL_LDADD) \

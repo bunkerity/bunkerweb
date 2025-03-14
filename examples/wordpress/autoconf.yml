@@ -20,7 +20,7 @@ services:
       - bunkerweb.REVERSE_PROXY_URL=/
       - bunkerweb.REVERSE_PROXY_HOST=http://mywp
       # This is a CRS plugin specific to WordPress
-      - bunkerweb.MODSECURITY_CRS_PLUGIN_URLS=https://github.com/coreruleset/wordpress-rule-exclusions-plugin/archive/refs/tags/v1.0.1.tar.gz
+      - bunkerweb.MODSECURITY_CRS_PLUGINS=wordpress-rule-exclusions
 
 
   mydb:

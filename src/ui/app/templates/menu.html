@@ -40,16 +40,14 @@
                     <i class="menu-icon tf-icons dark-mode-toggle-icon bx bx-{% if theme == "light" %}sun{% else %}moon{% endif %}"></i>
                     <div class="d-flex align-items-center justify-content-center w-100 h-100">
                         <label class="setting-checkbox-label me-2 mb-0" for="dark-mode-toggle">Light</label>
-                        <div class="form-check form-switch mb-0"
-                             {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The database is in readonly mode, therefore the theme cannot be changed"{% endif %}>
+                        <div class="form-check form-switch mb-0">
                             <input id="dark-mode-toggle"
                                    name="dark-mode-toggle"
                                    class="form-check-input"
                                    type="checkbox"
                                    role="switch"
                                    data-root-url="{{ url_for('profile') }}"
-                                   {% if theme == "dark" %}checked{% endif %}
-                                   {% if is_readonly %}disabled{% endif %} />
+                                   {% if theme == "dark" %}checked{% endif %} />
                         </div>
                         <label class="setting-checkbox-label mb-0" for="dark-mode-toggle">Dark</label>
                     </div>
@@ -100,6 +98,32 @@
                     <div class="text-truncate" data-i18n="Support">Support</div>
                 </a>
             </li>
+            {% if extra_pages %}
+                <!-- Extra Pages -->
+                <li class="menu-header text-uppercase align-items-center mb-0">
+                    <span class="menu-header-text">Extra Pages</span>
+                    <button class="btn btn-link menu-header-text p-0"
+                            type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#extraPagesCollapse"
+                            aria-expanded="true"
+                            aria-controls="extraPagesCollapse">
+                        <i class="bx bx-chevron-right chevron-icon chevron-rotate"></i>
+                    </button>
+                </li>
+                <div class="collapse py-1 show" id="extraPagesCollapse">
+                    <div class="menu-inner">
+                        {% for page in extra_pages %}
+                            <li class="menu-item{% if current_endpoint == page|lower %} active{% endif %}">
+                                <a href="{{ url_for(page) }}" class="menu-link">
+                                    <i class="menu-icon tf-icons bx bx-extension"></i>
+                                    <div class="text-truncate" data-i18n="{{ page }}">{{ page | replace('-', ' ') | replace('_', ' ') |title }}</div>
+                                </a>
+                            </li>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
             <!-- Plugins Pages -->
             <li class="menu-header text-uppercase align-items-center mb-0">
                 <span class="menu-header-text">Plugins Pages</span>
@@ -127,7 +151,7 @@
                 <div class="menu-inner">
                     {% for plugin, plugin_data in plugins.items() %}
                         {% with not_pro_pro_plugin = not is_pro_version and plugin_data['type'] == "pro" %}
-                            {% if not_pro_pro_plugin or plugin_data['page'] %}
+                            {% if (not_pro_pro_plugin or plugin_data['page']) and url_for(plugin) == "#" %}
                                 <li class="menu-item{% if current_endpoint == plugin|lower %} active{% endif %}"{% if not_pro_pro_plugin %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" data-bs-original-title="<i class='bx bx-diamond bx-xs'></i><span>Pro feature</span>"
                                 {% endif %}
                                 >

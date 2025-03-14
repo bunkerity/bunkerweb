@@ -1,4 +1,4 @@
-FROM squidfunk/mkdocs-material@sha256:e5f28aa0c3ac8206f93e44a0c52ea85616b0d6c674319cd1d87a241594788355
+FROM squidfunk/mkdocs-material@sha256:047452c6641137c9caa3647d050ddb7fa67b59ed48cc67ec3a4995f3d360ab32
 
 COPY mkdocs.yml /docs
 COPY docs /docs/docs

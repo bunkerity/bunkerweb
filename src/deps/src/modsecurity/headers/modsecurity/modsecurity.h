@@ -190,7 +190,7 @@ namespace modsecurity {
 
 #define MODSECURITY_MAJOR "3"
 #define MODSECURITY_MINOR "0"
-#define MODSECURITY_PATCHLEVEL "13"
+#define MODSECURITY_PATCHLEVEL "14"
 #define MODSECURITY_TAG ""
 #define MODSECURITY_TAG_NUM "100"
 
@@ -198,7 +198,7 @@ namespace modsecurity {
     MODSECURITY_MINOR "." MODSECURITY_PATCHLEVEL \
     MODSECURITY_TAG
 
-#define MODSECURITY_VERSION_NUM 30130100
+#define MODSECURITY_VERSION_NUM 30140100
 
 #define MODSECURITY_CHECK_VERSION(a) (MODSECURITY_VERSION_NUM <= a)
 
@@ -292,7 +292,7 @@ class ModSecurity {
      */
     void setServerLogCb(ModSecLogCb cb, int properties);
 
-    void serverLog(void *data, std::shared_ptr<RuleMessage> rm);
+    void serverLog(void *data, const RuleMessage &rm);
 
     const std::string& getConnectorInformation() const;
 

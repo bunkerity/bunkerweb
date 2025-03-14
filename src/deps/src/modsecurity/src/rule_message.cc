@@ -23,55 +23,55 @@
 namespace modsecurity {
 
 
-std::string RuleMessage::_details(const RuleMessage *rm) {
+std::string RuleMessage::_details(const RuleMessage &rm) {
     std::string msg;
 
-    msg.append(" [file \"" + std::string(*rm->m_ruleFile.get()) + "\"]");
-    msg.append(" [line \"" + std::to_string(rm->m_ruleLine) + "\"]");
-    msg.append(" [id \"" + std::to_string(rm->m_ruleId) + "\"]");
-    msg.append(" [rev \"" + utils::string::toHexIfNeeded(rm->m_rev, true) + "\"]");
-    msg.append(" [msg \"" + rm->m_message + "\"]");
-    msg.append(" [data \"" + utils::string::toHexIfNeeded(utils::string::limitTo(200, rm->m_data), true) + "\"]");
+    msg.append(" [file \"" + rm.m_rule.getFileName() + "\"]");
+    msg.append(" [line \"" + std::to_string(rm.m_rule.getLineNumber()) + "\"]");
+    msg.append(" [id \"" + std::to_string(rm.m_rule.m_ruleId) + "\"]");
+    msg.append(" [rev \"" + utils::string::toHexIfNeeded(rm.m_rule.m_rev, true) + "\"]");
+    msg.append(" [msg \"" + rm.m_message + "\"]");
+    msg.append(" [data \"" + utils::string::toHexIfNeeded(utils::string::limitTo(200, rm.m_data), true) + "\"]");
     msg.append(" [severity \"" +
-        std::to_string(rm->m_severity) + "\"]");
-    msg.append(" [ver \"" + utils::string::toHexIfNeeded(rm->m_ver, true) + "\"]");
-    msg.append(" [maturity \"" + std::to_string(rm->m_maturity) + "\"]");
-    msg.append(" [accuracy \"" + std::to_string(rm->m_accuracy) + "\"]");
+        std::to_string(rm.m_severity) + "\"]");
+    msg.append(" [ver \"" + utils::string::toHexIfNeeded(rm.m_rule.m_ver, true) + "\"]");
+    msg.append(" [maturity \"" + std::to_string(rm.m_rule.m_maturity) + "\"]");
+    msg.append(" [accuracy \"" + std::to_string(rm.m_rule.m_accuracy) + "\"]");
 
-    for (const auto &a : rm->m_tags) {
+    for (const auto &a : rm.m_tags) {
         msg.append(" [tag \"" + utils::string::toHexIfNeeded(a, true) + "\"]");
     }
 
-    msg.append(" [hostname \"" + *rm->m_requestHostName.get() + "\"]");
-
-    msg.append(" [uri \"" + utils::string::limitTo(200, *rm->m_uriNoQueryStringDecoded.get()) + "\"]");
-    msg.append(" [unique_id \"" + *rm->m_id + "\"]");
-    msg.append(" [ref \"" + utils::string::limitTo(200, rm->m_reference) + "\"]");
+    msg.append(" [hostname \"" + rm.m_transaction.m_requestHostName \
+        + "\"]");
+    msg.append(" [uri \"" + utils::string::limitTo(200, rm.m_transaction.m_uri_no_query_string_decoded) + "\"]");
+    msg.append(" [unique_id \"" + rm.m_transaction.m_id + "\"]");
+    msg.append(" [ref \"" + utils::string::limitTo(200, rm.m_reference) + "\"]");
 
     return msg;
 }
 
 
-std::string RuleMessage::_errorLogTail(const RuleMessage *rm) {
+std::string RuleMessage::_errorLogTail(const RuleMessage &rm) {
     std::string msg;
 
-    msg.append("[hostname \"" + *rm->m_serverIpAddress.get() + "\"]");
-    msg.append(" [uri \"" + utils::string::limitTo(200, *rm->m_uriNoQueryStringDecoded.get()) + "\"]");
-    msg.append(" [unique_id \"" + *rm->m_id + "\"]");
+    msg.append("[hostname \"" + rm.m_transaction.m_serverIpAddress + "\"]");
+    msg.append(" [uri \"" + utils::string::limitTo(200, rm.m_transaction.m_uri_no_query_string_decoded) + "\"]");
+    msg.append(" [unique_id \"" + rm.m_transaction.m_id + "\"]");
 
     return msg;
 }
 
 
-std::string RuleMessage::log(const RuleMessage *rm, int props, int code) {
+std::string RuleMessage::log(const RuleMessage &rm, int props, int code) {
     std::string msg("");
     msg.reserve(2048);
 
     if (props & ClientLogMessageInfo) {
-        msg.append("[client " + std::string(*rm->m_clientIpAddress.get()) + "] ");
+        msg.append("[client " + rm.m_transaction.m_clientIpAddress + "] ");
     }
 
-    if (rm->m_isDisruptive) {
+    if (rm.m_isDisruptive) {
         msg.append("ModSecurity: Access denied with code ");
         if (code == -1) {
             msg.append("%d");
@@ -79,12 +79,12 @@ std::string RuleMessage::log(const RuleMessage *rm, int props, int code) {
             msg.append(std::to_string(code));
         }
         msg.append(" (phase ");
-        msg.append(std::to_string(rm->m_rule->getPhase() - 1) + "). ");
+        msg.append(std::to_string(rm.getPhase()) + "). ");
     } else {
         msg.append("ModSecurity: Warning. ");
     }
 
-    msg.append(rm->m_match);
+    msg.append(rm.m_match);
     msg.append(_details(rm));
 
     if (props & ErrorLogTailLogMessageInfo) {

@@ -27,11 +27,10 @@ namespace modsecurity {
 namespace actions {
 
 
-bool AuditLog::evaluate(RuleWithActions *rule, Transaction *transaction,
-    std::shared_ptr<RuleMessage> rm) {
-    rm->m_noAuditLog = false;
+bool AuditLog::evaluate(RuleWithActions *rule, Transaction *transaction, RuleMessage &ruleMessage) {
+    ruleMessage.m_noAuditLog = false;
     ms_dbg_a(transaction, 9, "Saving transaction to logs");
-    rm->m_saveMessage = true;
+    ruleMessage.m_saveMessage = true;
 
     return true;
 }

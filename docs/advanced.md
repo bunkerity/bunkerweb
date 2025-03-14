@@ -1,8 +1,8 @@
 # Advanced usages
 
-Many real-world use case examples are available in the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.0/examples) folder of the GitHub repository.
+Many real-world use case examples are available in the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.1/examples) folder of the GitHub repository.
 
-We also provide numerous boilerplates, such as YAML files for various integrations and database types. These are available in the [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.0/misc/integrations) folder.
+We also provide numerous boilerplates, such as YAML files for various integrations and database types. These are available in the [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.1/misc/integrations) folder.
 
 This section only focuses on advanced usages and security tuning, see the [settings section](settings.md) of the documentation to see all the available settings.
 
@@ -79,7 +79,7 @@ You will find more settings about real IP in the [settings section](settings.md#
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.0
+          image: bunkerity/bunkerweb:1.6.1
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -96,7 +96,7 @@ You will find more settings about real IP in the [settings section](settings.md#
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.0
+          image: bunkerity/bunkerweb:1.6.1
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -135,7 +135,7 @@ You will find more settings about real IP in the [settings section](settings.md#
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.0
+          image: bunkerity/bunkerweb:1.6.1
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -191,7 +191,7 @@ You will find more settings about real IP in the [settings section](settings.md#
 
         ```yaml
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.0
+          image: bunkerity/bunkerweb-scheduler:1.6.1
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -209,7 +209,7 @@ You will find more settings about real IP in the [settings section](settings.md#
 
         ```yaml
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.0
+          image: bunkerity/bunkerweb-scheduler:1.6.1
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -251,7 +251,7 @@ You will find more settings about real IP in the [settings section](settings.md#
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.0
+          image: bunkerity/bunkerweb:1.6.1
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -351,7 +351,7 @@ Some integrations provide more convenient ways to apply configurations, such as 
     ```yaml
     ...
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.0
+      image: bunkerity/bunkerweb-scheduler:1.6.1
       environment:
         - |
           CUSTOM_CONF_SERVER_HTTP_hello-world=
@@ -394,7 +394,7 @@ Some integrations provide more convenient ways to apply configurations, such as 
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.0
+      image: bunkerity/bunkerweb-scheduler:1.6.1
       volumes:
         - ./bw-data:/data
       ...
@@ -464,7 +464,7 @@ Some integrations provide more convenient ways to apply configurations, such as 
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.0
+      image: bunkerity/bunkerweb-scheduler:1.6.1
       volumes:
         - ./bw-data:/data
       ...
@@ -663,7 +663,7 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.0
+        image: bunkerity/bunkerweb:1.6.1
         ports:
           - "80:8080" # Keep it if you want to use Let's Encrypt automation when using http challenge type
           - "10000:10000" # app1
@@ -678,9 +678,7 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.0
-        volumes:
-          - bw-data:/data
+        image: bunkerity/bunkerweb-scheduler:1.6.1
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "bunkerweb" # This setting is mandatory to specify the BunkerWeb instance
@@ -692,6 +690,8 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
           app1.example.com_LISTEN_STREAM_PORT: "10000"
           app2.example.com_REVERSE_PROXY_HOST: "myapp2:9000"
           app2.example.com_LISTEN_STREAM_PORT: "20000"
+        volumes:
+          - bw-storage:/data # This is used to persist the cache and other data like the backups
         restart: "unless-stopped"
         networks:
           - bw-universe
@@ -709,7 +709,7 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
           - bw-services
 
     volumes:
-      bw-data:
+      bw-storage:
 
     networks:
       bw-universe:
@@ -729,7 +729,7 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.0
+        image: bunkerity/bunkerweb:1.6.1
         ports:
           - "80:8080" # Keep it if you want to use Let's Encrypt automation when using http challenge type
           - "10000:10000" # app1
@@ -783,7 +783,7 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.0
+        image: bunkerity/bunkerweb:1.6.1
         ports:
           # Keep it if you want to use Let's Encrypt automation when using http challenge type
           - published: 80
@@ -1076,7 +1076,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.0
+        image: bunkerity/bunkerweb:1.6.1
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1091,7 +1091,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.0
+        image: bunkerity/bunkerweb-scheduler:1.6.1
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "bunkerweb" # This setting is mandatory to specify the BunkerWeb instance
@@ -1102,7 +1102,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
           app2.example.com_REMOTE_PHP: "myapp2"
           app3.example.com_REMOTE_PHP: "myapp3"
         volumes:
-          - bw-data:/data
+          - bw-storage:/data # This is used to persist the cache and other data like the backups
         restart: "unless-stopped"
         networks:
           - bw-universe
@@ -1129,7 +1129,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
           - bw-services
 
     volumes:
-      bw-data:
+      bw-storage:
 
     networks:
       bw-universe:
@@ -1185,7 +1185,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.0
+        image: bunkerity/bunkerweb:1.6.1
         labels:
           - "bunkerweb.INSTANCE=yes"
         environment:
@@ -1198,7 +1198,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.0
+        image: bunkerity/bunkerweb-scheduler:1.6.1
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "" # We don't need to specify the BunkerWeb instance here as they are automatically detected by the autoconf service
@@ -1206,14 +1206,14 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
           MULTISITE: "yes" # Mandatory setting for autoconf
           DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Remember to set a stronger password for the database
         volumes:
-          - bw-data:/data # This is used to persist data like the backups
+          - bw-storage:/data # This is used to persist the cache and other data like the backups
         restart: "unless-stopped"
         networks:
           - bw-universe
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.0
+        image: bunkerity/bunkerweb-autoconf:1.6.1
         depends_on:
           - bunkerweb
           - bw-docker
@@ -1245,13 +1245,13 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
           MYSQL_USER: "bunkerweb"
           MYSQL_PASSWORD: "changeme" # Remember to set a stronger password for the database
         volumes:
-          - bw-db:/var/lib/mysql
+          - bw-data:/var/lib/mysql
         networks:
           - bw-docker
 
     volumes:
       bw-data:
-      bw-db:
+      bw-storage:
 
     networks:
       bw-universe:
@@ -1363,7 +1363,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.0
+        image: bunkerity/bunkerweb:1.6.1
         volumes:
           - /shared/www:/var/www/html
     ...
@@ -1550,7 +1550,7 @@ By default, BunkerWeb will only listen on IPv4 addresses and won't use IPv6 for 
     ```yaml
     services:
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.0
+        image: bunkerity/bunkerweb-scheduler:1.6.1
         environment:
           USE_IPv6: "yes"
 
@@ -1849,17 +1849,17 @@ BunkerWeb offers automatic Let's Encrypt certificate generation and renewal, mak
 
 Below is the list of related settings:
 
-|              Setting               |         Default          | Description                                                                                                                                                                   |
-| :--------------------------------: | :----------------------: | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-|        `AUTO_LETS_ENCRYPT`         |           `no`           | When set to `yes`, HTTPS / SSL/TLS will be enabled with automatic certificate generation and renewal from Let's Encrypt.                                                      |
-|        `EMAIL_LETS_ENCRYPT`        | `contact@{FIRST_SERVER}` | Email to use when generating certificates. Let's Encrypt will send notifications to that email like certificate expiration.                                                   |
-|      `LETS_ENCRYPT_CHALLENGE`      |          `http`          | The challenge type to use for Let's Encrypt (http or dns).                                                                                                                    |
-|    `LETS_ENCRYPT_DNS_PROVIDER`     |                          | The DNS provider to use for DNS challenges.                                                                                                                                   |
-|   `LETS_ENCRYPT_DNS_PROPAGATION`   |        `default`         | The time to wait for DNS propagation in seconds for DNS challenges.                                                                                                           |
-| `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` |                          | Configuration item that will be added to the credentials.ini file for the DNS provider (e.g. 'cloudflare_api_token 123456') for DNS challenges.                               |
-|    `USE_LETS_ENCRYPT_WILDCARD`     |           `no`           | Create wildcard certificates for all domains. This allows a single certificate to secure multiple subdomains. (Only available with DNS challenges)                            |
-|     `USE_LETS_ENCRYPT_STAGING`     |           `no`           | Use the staging environment for Let’s Encrypt certificate generation. Useful when you are testing your deployments to avoid being rate limited in the production environment. |
-|   `LETS_ENCRYPT_CLEAR_OLD_CERTS`   |           `no`           | Clear old certificates when renewing.                                                                                                                                         |
+|              Setting               |         Default          | Description                                                                                                                                                                                                                   |
+| :--------------------------------: | :----------------------: | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|        `AUTO_LETS_ENCRYPT`         |           `no`           | When set to `yes`, HTTPS / SSL/TLS will be enabled with automatic certificate generation and renewal from Let's Encrypt.                                                                                                      |
+|        `EMAIL_LETS_ENCRYPT`        | `contact@{FIRST_SERVER}` | Email to use when generating certificates. Let's Encrypt will send notifications to that email like certificate expiration.                                                                                                   |
+|      `LETS_ENCRYPT_CHALLENGE`      |          `http`          | The challenge type to use for Let's Encrypt (http or dns).                                                                                                                                                                    |
+|    `LETS_ENCRYPT_DNS_PROVIDER`     |                          | The DNS provider to use for DNS challenges.                                                                                                                                                                                   |
+|   `LETS_ENCRYPT_DNS_PROPAGATION`   |        `default`         | The time to wait for DNS propagation in seconds for DNS challenges.                                                                                                                                                           |
+| `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` |                          | Configuration item that will be added to the credentials.ini file for the DNS provider (e.g. 'cloudflare_api_token 123456') for DNS challenges. (Values can also be base64 encoded or it can be a base64 encoded json object) |
+|    `USE_LETS_ENCRYPT_WILDCARD`     |           `no`           | Create wildcard certificates for all domains. This allows a single certificate to secure multiple subdomains. (Only available with DNS challenges)                                                                            |
+|     `USE_LETS_ENCRYPT_STAGING`     |           `no`           | Use the staging environment for Let’s Encrypt certificate generation. Useful when you are testing your deployments to avoid being rate limited in the production environment.                                                 |
+|   `LETS_ENCRYPT_CLEAR_OLD_CERTS`   |           `no`           | Clear old certificates when renewing.                                                                                                                                                                                         |
 
 !!! info "Information and behavior"
     - The `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` setting is a multiple setting and can be used to set multiple items for the DNS provider. The items will be saved as a cache file and Certbot will read the credentials from it.
@@ -1874,6 +1874,7 @@ Below is the list of related settings:
 | Provider       | Description     | Mandatory Settings                                                                                           | Optional Settings                                                                                                                                                                                                                                                        | Link(s)                                                                               |
 | -------------- | --------------- | ------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------- |
 | `cloudflare`   | Cloudflare      | `api_token`                                                                                                  |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-cloudflare.readthedocs.io/en/stable/)             |
+| `desec`        | deSEC           | `token`                                                                                                      |                                                                                                                                                                                                                                                                          | [Documentation](https://github.com/desec-io/certbot-dns-desec/blob/main/README.md)    |
 | `digitalocean` | DigitalOcean    | `token`                                                                                                      |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-digitalocean.readthedocs.io/en/stable/)           |
 | `dnsimple`     | DNSimple        | `token`                                                                                                      |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-dnsimple.readthedocs.io/en/stable/)               |
 | `dnsmadeeasy`  | DNS Made Easy   | `api_key`<br>`secret_key`                                                                                    |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-dnsmadeeasy.readthedocs.io/en/stable/)            |
@@ -1957,7 +1958,7 @@ Below is the list of related settings:
 You can select from the following versions of the OWASP Core Rule Set (CRS) to suit your application's security needs:
 
 - **`3`**: The stable [v3.3.7](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.7) release of the OWASP CRS.
-- **`4`**: The stable [v4.11.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.11.0) release of the OWASP CRS (**default**).
+- **`4`**: The stable [v4.12.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.12.0) release of the OWASP CRS (**default**).
 - **`nightly`**: The [nightly build](https://github.com/coreruleset/coreruleset/releases/tag/nightly), which is updated daily with the latest rules and improvements.
 
 !!! example "Nightly Build"
@@ -2046,7 +2047,7 @@ The OWASP Core Rule Set also supports a range of **plugins** designed to extend 
     * `wordpress-rule-exclusions/v1.0.0` <---- *Download the version 1.0.0 of the plugin.*
     * `https://github.com/coreruleset/dos-protection-plugin-modsecurity/archive/refs/heads/main.zip` <---- *Download the plugin directly from the URL.*
 
-<!-- ## CrowdSec
+### CrowdSec
 
 STREAM support :x:
 
@@ -2054,9 +2055,9 @@ STREAM support :x:
   ![Overview](assets/img/crowdsec.svg){ align=center, width="600" }
 </figure>
 
-This BunkerWeb plugin acts as a [CrowdSec](https://crowdsec.net/) bouncer. It will deny requests based on the decision of your CrowdSec API. Not only you will benefinit from the crowdsourced blacklist, you can also configure [scenarios](https://docs.crowdsec.net/docs/concepts#scenarios) to automatically ban IPs based on suspicious behaviors.
+This BunkerWeb plugin acts as a [CrowdSec](https://crowdsec.net/?utm_source=external-docs&utm_medium=cta&utm_campaign=bunker-web-docs) bouncer. It will deny requests based on the decision of your CrowdSec API. Not only you will benefinit from the crowdsourced blacklist, you can also configure [scenarios](https://docs.crowdsec.net/docs/concepts?utm_source=external-docs&utm_medium=cta&utm_campaign=bunker-web-docs#scenarios) to automatically ban IPs based on suspicious behaviors.
 
-### Setup
+#### Setup
 
 === "Docker"
     **Acquisition file**
@@ -2065,9 +2066,21 @@ This BunkerWeb plugin acts as a [CrowdSec](https://crowdsec.net/) bouncer. It wi
 
     ```yaml
     filenames:
-       - /var/log/bunkerweb.log
+      - /var/log/bunkerweb.log
     labels:
-        type: nginx
+      type: nginx
+    ```
+
+    **Application Security Component (*optional*)**
+
+    CrowdSec also provides an [Application Security Component](https://docs.crowdsec.net/docs/appsec/intro?utm_source=external-docs&utm_medium=cta&utm_campaign=bunker-web-docs) that can be used to protect your application from attacks. You can configure the plugin to send requests to the AppSec Component for further analysis. If you want to use it, you will need to create another acquisition file for the AppSec Component :
+
+    ```yaml
+    appsec_config: crowdsecurity/appsec-default
+    labels:
+      type: appsec
+    listen_addr: 0.0.0.0:7422
+    source: appsec
     ```
 
     **Syslog**
@@ -2075,7 +2088,7 @@ This BunkerWeb plugin acts as a [CrowdSec](https://crowdsec.net/) bouncer. It wi
     For container-based integrations, we recommend you to redirect the logs of the BunkerWeb container to a syslog service that will store the logs so CrowdSec can access it easily. Here is an example configuration for syslog-ng that will store raw logs coming from BunkerWeb to a local `/var/log/bunkerweb.log` file :
 
     ```syslog
-    @version: 4.7
+    @version: 4.8
 
     source s_net {
         udp(
@@ -2098,105 +2111,126 @@ This BunkerWeb plugin acts as a [CrowdSec](https://crowdsec.net/) bouncer. It wi
     };
     ```
 
-    **Optional : Application Security Component**
-
-    CrowdSec also provides an [Application Security Component](https://docs.crowdsec.net/docs/appsec/intro) that can be used to protect your application from attacks. You can configure the plugin to send requests to the AppSec Component for further analysis. If you want to use it, you will need to create another acquisition file for the AppSec Component :
-
-    ```yaml
-    appsec_config: crowdsecurity/appsec-default
-    labels:
-        type: appsec
-    listen_addr: 0.0.0.0:7422
-    source: appsec
-    ```
-
     **Docker Compose**
 
     Here is the docker-compose boilerplate that you can use (**don't forget to edit the bouncer key**) :
 
     ```yaml
+    x-bw-env: &bw-env
+      # We use an anchor to avoid repeating the same settings for both services
+      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24" # Make sure to set the correct IP range so the scheduler can send the configuration to the instance
+
     services:
-        bunkerweb:
-            image: bunkerity/bunkerweb:1.6.0
-            ports:
-              - "80:8080"
-              - "443:8443"
-            environment:
-                API_WHITELIST_IP: "127.0.0.0/24 10.20.30.0/24"
-            restart: "unless-stopped"
-            networks:
-              - bw-universe
-              - bw-services
-              - bw-plugins
-            logging:
-                driver: syslog
-                options:
-                    syslog-address: "udp://10.10.10.254:514"
+      bunkerweb:
+        # This is the name that will be used to identify the instance in the Scheduler
+        image: bunkerity/bunkerweb:1.6.1
+        ports:
+          - "80:8080/tcp"
+          - "443:8443/tcp"
+          - "443:8443/udp" # For QUIC / HTTP3 support
+        environment:
+          <<: *bw-env # We use the anchor to avoid repeating the same settings for all services
+        restart: "unless-stopped"
+        networks:
+          - bw-universe
+          - bw-services
+          - bw-plugins
+        logging:
+          driver: syslog # Send logs to syslog
+          options:
+            syslog-address: "udp://10.10.10.254:514" # The IP address of the syslog service
 
-        bw-scheduler:
-            image: bunkerity/bunkerweb-scheduler:1.6.0
-            depends_on:
-              - bunkerweb
-            environment:
-                BUNKERWEB_INSTANCES: "bunkerweb"
-                SERVER_NAME: "www.example.com"
-                API_WHITELIST_IP: "127.0.0.0/24 10.20.30.0/24"
-                USE_CROWDSEC: "yes"
-                CROWDSEC_API: "http://crowdsec:8080" # This is the API URL of the CrowdSec instance
-                CROWDSEC_APPSEC_URL: "http://crowdsec:7422" # This is the AppSec Component URL of the CrowdSec instance, comment if you don't want to use it
-                CROWDSEC_API_KEY: "s3cr3tb0unc3rk3y" # This is the API key of the Bouncer, we recommend have a more complex key
-            restart: "unless-stopped"
-            networks:
-              - bw-universe
+      bw-scheduler:
+        image: bunkerity/bunkerweb-scheduler:1.6.1
+        environment:
+          <<: *bw-env
+          BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
+          DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Remember to set a stronger password for the database
+          SERVER_NAME: ""
+          MULTISITE: "yes"
+          USE_CROWDSEC: "yes"
+          CROWDSEC_API: "http://crowdsec:8080" # This is the address of the CrowdSec container API in the same network
+          CROWDSEC_APPSEC_URL: "http://crowdsec:7422" # Comment if you don't want to use the AppSec Component
+          CROWDSEC_API_KEY: "s3cr3tb0unc3rk3y" # Remember to set a stronger key for the bouncer
+        volumes:
+          - bw-storage:/data # This is used to persist the cache and other data like the backups
+        restart: "unless-stopped"
+        networks:
+          - bw-universe
+          - bw-db
 
-        crowdsec:
-            image: crowdsecurity/crowdsec:v1.6.2
-            volumes:
-              - cs-data:/var/lib/crowdsec/data
-              - ./acquis.yaml:/etc/crowdsec/acquis.yaml # This is the acquisition file for CrowdSec created above
-              - ./appsec.yaml:/etc/crowdsec/acquis.d/appsec.yaml # Comment if you don't want to use the AppSec Component
-              - bw-logs:/var/log:ro
-            environment:
-                BOUNCER_KEY_bunkerweb: "s3cr3tb0unc3rk3y" # This is the API key of the Bouncer, we recommend have a more complex key (it must match the one configured)
-                COLLECTIONS: "crowdsecurity/nginx crowdsecurity/appsec-virtual-patching crowdsecurity/appsec-generic-rules"
-                #   COLLECTIONS: "crowdsecurity/nginx" # If you don't want to use the AppSec Component use this line instead
-            networks:
-              - bw-plugins
+      bw-db:
+        image: mariadb:11
+        environment:
+          MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+          MYSQL_DATABASE: "db"
+          MYSQL_USER: "bunkerweb"
+          MYSQL_PASSWORD: "changeme" # Remember to set a stronger password for the database
+        volumes:
+          - bw-data:/var/lib/mysql
+        restart: "unless-stopped"
+        networks:
+          - bw-db
 
-        syslog:
-            image: balabit/syslog-ng:4.7.1 # For x86_64 architecture
-            # image: lscr.io/linuxserver/syslog-ng:4.7.1-r1-ls116 # For aarch64 architecture
-            volumes:
-              - ./syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf # This is the syslog-ng configuration file created above
-              - bw-logs:/var/log
-            networks:
-                bw-plugins:
-                    ipv4_address: 10.10.10.254
+      crowdsec:
+        image: crowdsecurity/crowdsec:v1.6.5 # Use the latest version but always pin the version for a better stability/security
+        volumes:
+          - cs-data:/var/lib/crowdsec/data # To persist the CrowdSec data
+          - bw-logs:/var/log:ro # The logs of BunkerWeb for CrowdSec to parse
+          - ./acquis.yaml:/etc/crowdsec/acquis.yaml # The acquisition file for BunkerWeb logs
+          - ./appsec.yaml:/etc/crowdsec/acquis.d/appsec.yaml # Comment if you don't want to use the AppSec Component
+        environment:
+          BOUNCER_KEY_bunkerweb: "s3cr3tb0unc3rk3y" # Remember to set a stronger key for the bouncer
+          COLLECTIONS: "crowdsecurity/nginx crowdsecurity/appsec-virtual-patching crowdsecurity/appsec-generic-rules"
+          #   COLLECTIONS: "crowdsecurity/nginx" # If you don't want to use the AppSec Component use this line instead
+        networks:
+          - bw-plugins
 
-    networks:
-        bw-services:
-            name: bw-services
-        bw-universe:
-            name: bw-universe
-            ipam:
-            driver: default
-            config:
-                - subnet: 10.20.30.0/24
-        bw-plugins:
-            ipam:
-            driver: default
-            config:
-                - subnet: 10.10.10.0/24
+      syslog:
+        image: balabit/syslog-ng:4.8.0
+        # image: lscr.io/linuxserver/syslog-ng:4.8.1-r1-ls147 # For aarch64 architecture
+        cap_add:
+          - NET_BIND_SERVICE  # Bind to low ports
+          - NET_BROADCAST  # Send broadcasts
+          - NET_RAW  # Use raw sockets
+          - DAC_READ_SEARCH  # Read files bypassing permissions
+          - DAC_OVERRIDE  # Override file permissions
+          - CHOWN  # Change ownership
+          - SYSLOG  # Write to system logs
+        volumes:
+          - bw-logs:/var/log/bunkerweb # This is the volume used to store the logs
+          - ./syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf # This is the syslog-ng configuration file
+        networks:
+            bw-plugins:
+              ipv4_address: 10.10.10.254
 
     volumes:
-        bw-data:
-        bw-logs:
-        cs-data:
+      bw-data:
+      bw-storage:
+      bw-logs:
+      cs-data:
+
+    networks:
+      bw-universe:
+        name: bw-universe
+        ipam:
+          driver: default
+          config:
+            - subnet: 10.20.30.0/24 # Make sure to set the correct IP range so the scheduler can send the configuration to the instance
+      bw-services:
+        name: bw-services
+      bw-db:
+        name: bw-db
+      bw-plugins:
+        ipam:
+          driver: default
+          config:
+            - subnet: 10.10.10.0/24
     ```
 
 === "Linux"
 
-    You'll need to install CrowdSec and configure it to parse BunkerWeb logs. To do so, you can follow the [official documentation](https://doc.crowdsec.net/docs/getting_started/install_crowdsec).
+    You'll need to install CrowdSec and configure it to parse BunkerWeb logs. To do so, you can follow the [official documentation](https://doc.crowdsec.net/docs/getting_started/install_crowdsec?utm_source=external-docs&utm_medium=cta&utm_campaign=bunker-web-docs#scenarios).
 
     For CrowdSec to parse BunkerWeb logs, you have to add the following lines to your acquisition file located in `/etc/crowdsec/acquis.yaml` :
 
@@ -2224,7 +2258,7 @@ This BunkerWeb plugin acts as a [CrowdSec](https://crowdsec.net/) bouncer. It wi
     sudo systemctl restart crowdsec
     ```
 
-    **Optional : Application Security Component with Linux**
+    **Application Security Component (*optional*)**
 
     If you want to use the AppSec Component, you will need to create another acquisition file for it located in `/etc/crowdsec/acquis.d/appsec.yaml` :
 
@@ -2249,7 +2283,7 @@ This BunkerWeb plugin acts as a [CrowdSec](https://crowdsec.net/) bouncer. It wi
     sudo systemctl restart crowdsec
     ```
 
-    If you need more information about the AppSec Component, you can refer to the [official documentation](https://docs.crowdsec.net/docs/appsec/intro).
+    If you need more information about the AppSec Component, you can refer to the [official documentation](https://docs.crowdsec.net/docs/appsec/intro?utm_source=external-docs&utm_medium=cta&utm_campaign=bunker-web-docs#scenarios).
 
     **Settings**
 
@@ -2259,14 +2293,15 @@ This BunkerWeb plugin acts as a [CrowdSec](https://crowdsec.net/) bouncer. It wi
     USE_CROWDSEC=yes
     CROWDSEC_API=http://127.0.0.1:8080
     CROWDSEC_API_KEY=<The key provided by cscli>
-    CROWDSEC_APPSEC_URL=http://127.0.0.1:7422 # Comment if you don't want to use the AppSec Component
+    # Comment if you don't want to use the AppSec Component
+    CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
     ```
 
     And finally reload the BunkerWeb service :
 
     ```shell
     sudo systemctl reload bunkerweb
-    ``` -->
+    ```
 
 ### Bad behavior
 
@@ -2278,13 +2313,14 @@ This security measure, known as **"Bad Behavior,"** is implemented and enabled b
 
 Below is the list of related settings:
 
-|           Setting           |            Default            | Description                                                                  |
-| :-------------------------: | :---------------------------: | :--------------------------------------------------------------------------- |
-|     `USE_BAD_BEHAVIOR`      |             `yes`             | When set to `yes`, the Bad behavior feature will be enabled.                 |
-| `BAD_BEHAVIOR_STATUS_CODES` | `400 401 403 404 405 429 444` | List of HTTP status codes considered as "suspicious".                        |
-|  `BAD_BEHAVIOR_THRESHOLD`   |             `10`              | Maximum number of "suspicious" HTTP status codes within the time period.     |
-|  `BAD_BEHAVIOR_COUNT_TIME`  |             `60`              | Period of time during which we count "suspicious" HTTP status codes.         |
-|   `BAD_BEHAVIOR_BAN_TIME`   |            `86400`            | The duration time (in seconds) of a ban when a client reached the threshold. |
+|           Setting           |            Default            | Description                                                                                                                     |
+| :-------------------------: | :---------------------------: | :------------------------------------------------------------------------------------------------------------------------------ |
+|     `USE_BAD_BEHAVIOR`      |             `yes`             | When set to `yes`, the Bad behavior feature will be enabled.                                                                    |
+| `BAD_BEHAVIOR_STATUS_CODES` | `400 401 403 404 405 429 444` | List of HTTP status codes considered as "suspicious".                                                                           |
+|  `BAD_BEHAVIOR_THRESHOLD`   |             `10`              | Maximum number of "suspicious" HTTP status codes within the time period.                                                        |
+|  `BAD_BEHAVIOR_COUNT_TIME`  |             `60`              | Period of time during which we count "suspicious" HTTP status codes.                                                            |
+|   `BAD_BEHAVIOR_BAN_TIME`   |            `86400`            | The duration time (in seconds) of a ban when a client reached the threshold.                                                    |
+|  `BAD_BEHAVIOR_BAN_SCOPE`   |           `service`           | Determines the level of the ban. 'service' will ban the IP for the service only, 'global' will ban the IP for the whole system. |
 
 By default, BunkerWeb's **"Bad Behavior"** feature works as follows:
 
@@ -2477,7 +2513,7 @@ You can use the following settings to set up whitelisting :
 | Setting                     | Default                                                                                                                                                                      | Context   | Multiple | Description                                                                                                                                                         |
 | --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `USE_WHITELIST`             | `yes`                                                                                                                                                                        | multisite | no       | Activate whitelist feature.                                                                                                                                         |
-| `WHITELIST_IP`              | ``                                                                                                                                                                           | multisite | no       | List of IP/network, separated with spaces, to put into the whitelist.                                                                                               |
+| `WHITELIST_IP`              |                                                                                                                                                                              | multisite | no       | List of IP/network, separated with spaces, to put into the whitelist.                                                                                               |
 | `WHITELIST_RDNS`            | `.google.com .googlebot.com .yandex.ru .yandex.net .yandex.com .search.msn.com .baidu.com .baidu.jp .crawl.yahoo.net .fwd.linkedin.com .twitter.com .twttr.com .discord.com` | multisite | no       | List of reverse DNS suffixes, separated with spaces, to whitelist.                                                                                                  |
 | `WHITELIST_RDNS_GLOBAL`     | `yes`                                                                                                                                                                        | multisite | no       | Only perform RDNS whitelist checks on global IP addresses.                                                                                                          |
 | `WHITELIST_ASN`             | `32934`                                                                                                                                                                      | multisite | no       | List of ASN numbers, separated with spaces, to whitelist.                                                                                                           |
@@ -2698,7 +2734,7 @@ Here is the list of related settings :
 
 For more advanced authentication methods, such as Single Sign-On (SSO), you can leverage the **auth request settings**. This allows integration with external authentication systems by using subrequest-based authentication. For detailed information about this feature, refer to the [NGINX documentation](https://docs.nginx.com/nginx/admin-guide/security-controls/configuring-subrequest-authentication/).
 
-To help you get started, the [BunkerWeb repository](https://github.com/bunkerity/bunkerweb/tree/v1.6.0/examples) includes examples for popular authentication solutions like [Authelia](https://www.authelia.com/) and [Authentik](https://goauthentik.io/). These examples demonstrate how to integrate these tools seamlessly with your deployment.
+To help you get started, the [BunkerWeb repository](https://github.com/bunkerity/bunkerweb/tree/v1.6.1/examples) includes examples for popular authentication solutions like [Authelia](https://www.authelia.com/) and [Authentik](https://goauthentik.io/). These examples demonstrate how to integrate these tools seamlessly with your deployment.
 
 **Auth request settings are related to reverse proxy rules.**
 
@@ -3300,3 +3336,69 @@ The Security.txt plugin allows you to easily create a `security.txt` file for yo
 !!! info "Autogenerated values"
     - The `SECURITYTXT_CANONICAL` setting is automatically generated from the site URL and the `SECURITYTXT_URI` setting (if the value is empty).
     - The `SECURITYTXT_EXPIRES` setting is automatically generated to be the current date and time + 1 year if the value is empty.
+
+### Anti DDoS <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+
+STREAM support :x:
+
+The **Anti DDoS** Plugin provides advanced protection against Distributed Denial of Service (DDoS) attacks by monitoring, analyzing, and filtering suspicious traffic in real-time.
+
+By employing a **sliding window mechanism**, the plugin maintains an in-memory dictionary of request timestamps to detect abnormal traffic spikes from individual IP addresses. Based on the configured security mode, it can either block offending connections or log the suspicious activity for further review.
+
+#### Features
+
+- **Real-Time Traffic Analysis:** Continuously monitors incoming requests to detect potential DDoS attacks.
+- **Sliding Window Mechanism:** Tracks recent request activity within a configurable time window.
+- **Configurable Thresholds:** Allows you to define the maximum number of suspicious requests per IP.
+- **Advanced Blocking Logic:** Evaluates both per-IP request counts and the number of distinct IPs exceeding the threshold.
+- **Flexible Security Modes:** Choose between immediate connection blocking or detection-only (logging) mode.
+- **Optimized In-Memory Datastore:** Ensures high-speed lookups and efficient metric tracking.
+- **Automatic Housekeeping:** Periodically clears outdated data to maintain optimal performance.
+
+#### Configuration
+
+Customize the plugin behavior using the following settings:
+
+| Setting                      | Default       | Context | Multiple | Description                                                                                    |
+| ---------------------------- | ------------- | ------- | -------- | ---------------------------------------------------------------------------------------------- |
+| `USE_ANTIDDOS`               | `no`          | global  | no       | Enable or disable the Anti DDoS protection. Set to `"yes"` to activate the plugin.             |
+| `ANTIDDOS_METRICS_DICT_SIZE` | `10M`         | global  | no       | Size of the in-memory datastore for tracking DDoS metrics (e.g., `10M`, `500k`).               |
+| `ANTIDDOS_THRESHOLD`         | `100`         | global  | no       | Maximum number of suspicious requests allowed per IP within the defined time window.           |
+| `ANTIDDOS_WINDOW_TIME`       | `10`          | global  | no       | Time window in seconds during which suspicious requests are tallied.                           |
+| `ANTIDDOS_STATUS_CODES`      | `429 403 444` | global  | no       | HTTP status codes considered suspicious and used to trigger anti-DDoS actions.                 |
+| `ANTIDDOS_DISTINCT_IP`       | `5`           | global  | no       | Minimum number of distinct IPs that must exceed the threshold before enforcing the block mode. |
+
+#### Best Practices
+
+- **Threshold Tuning:** Adjust `ANTIDDOS_THRESHOLD` and `ANTIDDOS_WINDOW_TIME` based on your typical traffic patterns.
+- **Status Code Review:** Regularly update `ANTIDDOS_STATUS_CODES` to capture new or evolving suspicious behaviors.
+- **Monitoring:** Analyze logs and metrics periodically to fine-tune settings and improve overall protection.
+
+### User Manager <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+
+The User Management Plugin offers a robust interface for administering user accounts within your system.
+
+With this plugin, administrators can effortlessly create, update, and disable user accounts, manage user roles, toggle two-factor authentication (2FA), and view detailed user information such as last login timestamps and account statuses (active or inactive). Designed with security and ease-of-use in mind, this plugin simplifies routine user management tasks while ensuring compliance and auditability.
+
+#### Features
+
+- **User Account Operations:** Create, edit, and delete user accounts with ease.
+- **Role-Based Access Control:** Assign and modify user roles to manage permissions and access levels.
+- **2FA Management:** Disable two-factor authentication based on administrative decisions.
+- **Comprehensive User Insights:** Monitor key user data including last login times, account creation dates, and active/inactive status.
+- **Audit Logging:** Maintain an audit trail for all user management actions for enhanced security and compliance.
+
+<figure markdown>
+  ![Overview](assets/img/user-manager.png){ align=center }
+  <figcaption>User Manager page</figcaption>
+</figure>
+
+<figure markdown>
+  ![Create user form](assets/img/user-manager-create.png){ align=center }
+  <figcaption>User Manager - Create user form</figcaption>
+</figure>
+
+<figure markdown>
+  ![Activities page](assets/img/user-manager-activities.png){ align=center }
+  <figcaption>User Manager - Activities page</figcaption>
+</figure>

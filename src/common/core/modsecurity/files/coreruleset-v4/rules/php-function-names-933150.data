@@ -41,7 +41,6 @@ fclose
 file_exists
 file_get_contents
 finfo_open
-fopen
 fputs
 fsockopen
 ftp_connect

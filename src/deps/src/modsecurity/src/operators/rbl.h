@@ -33,8 +33,8 @@
 #include "src/operators/operator.h"
 
 
-namespace modsecurity {
-namespace operators {
+namespace modsecurity::operators {
+
 
 class Rbl : public Operator {
  public:
@@ -66,44 +66,41 @@ class Rbl : public Operator {
 
     /** @ingroup ModSecurity_Operator */
     explicit Rbl(std::unique_ptr<RunTimeString> param)
-        : m_service(),
-        m_demandsPassword(false),
-        m_provider(RblProvider::UnknownProvider),
-        Operator("Rbl", std::move(param)) {
-        m_service = m_string->evaluate(); // cppcheck-suppress useInitializationList
+        : Operator("Rbl", std::move(param)),
+        m_service(m_string->evaluate()) {
         if (m_service.find("httpbl.org") != std::string::npos)
         {
             m_demandsPassword = true;
             m_provider = RblProvider::httpbl;
-            } else if (m_service.find("uribl.com") != std::string::npos) {
-                m_provider = RblProvider::uribl;
-            } else if (m_service.find("spamhaus.org") != std::string::npos) {
-                m_provider = RblProvider::spamhaus;
-            }
+        } else if (m_service.find("uribl.com") != std::string::npos) {
+            m_provider = RblProvider::uribl;
+        } else if (m_service.find("spamhaus.org") != std::string::npos) {
+            m_provider = RblProvider::spamhaus;
         }
+    }
     bool evaluate(Transaction *transaction, RuleWithActions *rule,
         const std::string& input,
-        std::shared_ptr<RuleMessage> ruleMessage) override;
+        RuleMessage &ruleMessage) override;
 
     std::string mapIpToAddress(const std::string &ipStr, Transaction *trans) const;
 
     static void futherInfo_httpbl(struct sockaddr_in *sin, const std::string &ipStr,
-        Transaction *trans);
+        const Transaction *trans);
     static void futherInfo_spamhaus(unsigned int high8bits, const std::string &ipStr,
-        Transaction *trans);
+        const Transaction *trans);
     static void futherInfo_uribl(unsigned int high8bits, const std::string &ipStr,
-        Transaction *trans);
+        const Transaction *trans);
     static void furtherInfo(struct sockaddr_in *sin, const std::string &ipStr,
-        Transaction *trans, RblProvider provider);
+        const Transaction *trans, RblProvider provider);
 
  private:
     std::string m_service;
-    bool m_demandsPassword;
-    RblProvider m_provider;
+    bool m_demandsPassword = false;
+    RblProvider m_provider = RblProvider::UnknownProvider;
 };
 
-}  // namespace operators
-}  // namespace modsecurity
+
+}  // namespace modsecurity::operators
 
 
 #endif  // SRC_OPERATORS_RBL_H_

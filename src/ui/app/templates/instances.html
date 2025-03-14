@@ -76,7 +76,7 @@
                         <td>
                             {% if instance.status == "up" %}
                                 <span id="status-{{ instance.hostname }}"
-                                      class="badge rounded-pill bg-label-primary">Up</span>
+                                      class="badge rounded-pill bg-label-bw-green">Up</span>
                             {% elif instance.status == "loading" %}
                                 <span id="status-{{ instance.hostname }}"
                                       class="badge rounded-pill bg-label-warning">Loading</span>
@@ -182,14 +182,27 @@
                         <div class="modal-body">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                             <div class="mb-3">
-                                <label for="hostname" class="form-label">Hostname</label>
+                                <label for="hostname" class="form-label fw-medium">Hostname</label>
                                 <input type="text"
-                                       class="form-control"
+                                       class="form-control form-control-lg mb-3"
                                        id="hostname"
                                        name="hostname"
-                                       placeholder="http://bunkerweb"
+                                       placeholder="http://bunkerweb:5000"
+                                       pattern="^(https?://)?(?!.*\.\.)[^\s\/:]{1,256}(:\d+)?$"
                                        maxlength="256"
                                        required />
+                                <div class="alert p-1">
+                                    <ul class="list-group list-group-flush">
+                                        <li class="list-group-item bg-transparent border-0 d-flex align-items-center">
+                                            <i class="bx bx-info-circle me-2"></i>
+                                            The hostname is limited to 256 characters long.
+                                        </li>
+                                        <li class="list-group-item bg-transparent border-0 d-flex align-items-center">
+                                            <i class="bx bx-info-circle me-2"></i>
+                                            Only <code class="d-inline ms-1 me-1">/</code> and <code class="d-inline ms-1 me-1">:</code> are allowed in protocol/port.
+                                        </li>
+                                    </ul>
+                                </div>
                             </div>
                             <div class="mb-3">
                                 <label for="name" class="form-label">Name</label>

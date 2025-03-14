@@ -35,26 +35,21 @@ class VerifyCPF : public Operator {
  public:
     /** @ingroup ModSecurity_Operator */
     explicit VerifyCPF(std::unique_ptr<RunTimeString> param)
-        : Operator("VerifyCPF", std::move(param)) {
-        m_re = new Regex(m_param);
-    }
-
-    ~VerifyCPF() {
-        delete m_re;
-    }
+        : Operator("VerifyCPF", std::move(param))
+        , m_re(std::make_unique<Regex>(m_param)) { }
 
     bool operator=(const VerifyCPF &a) = delete;
     VerifyCPF(const VerifyCPF &a) = delete;
 
     bool evaluate(Transaction *transaction, RuleWithActions *rule,
         const std::string& input,
-        std::shared_ptr<RuleMessage> ruleMessage) override;
+        RuleMessage &ruleMessage) override;
 
-    bool verify(const char *ssnumber, int len);
+    bool verify(const char *ssnumber, int len) const;
 
  private:
     static int convert_to_int(const char c);
-    Regex *m_re;
+    std::unique_ptr<Regex> m_re;
     const char bad_cpf[12][12] = { "00000000000",
         "01234567890",
         "11111111111",
