@@ -270,6 +270,10 @@ If you see the following error `upstream sent too big header while reading respo
 - `PROXY_BUFFER_SIZE`
 - `PROXY_BUSY_BUFFERS_SIZE`
 
+### Could not build server_names_hash
+
+If you see the following error `could not build server_names_hash, you should increase server_names_hash_bucket_size` in the logs, you will need to tweak the `SERVER_NAMES_HASH_BUCKET_SIZE` setting.
+
 ## Timezone
 
 When using container-based integrations, the timezone of the container may not match the one of the host machine. To resolve that, you can set the `TZ` environment variable to the timezone of your choice on your containers (e.g. `TZ=Europe/Paris`). You will find the list of timezone identifiers [here](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List).
