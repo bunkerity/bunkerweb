@@ -791,33 +791,36 @@ const Helpers = {
   // ---
   // Init Password Toggle
   initPasswordToggle() {
-    const toggler = document.querySelectorAll(
-      ".form-password-toggle i:not(.bx-copy-alt)",
-    );
-    if (typeof toggler !== "undefined" && toggler !== null) {
-      toggler.forEach((el) => {
-        el.addEventListener("click", (e) => {
-          e.preventDefault();
-          const formPasswordToggle = el.closest(".form-password-toggle");
-          const formPasswordToggleInput =
-            formPasswordToggle.querySelector("input");
+    // Function to handle the toggle functionality
+    const handlePasswordToggle = function () {
+      const $el = $(this);
+      const $formPasswordToggle = $el.closest(".form-password-toggle");
+      const $formPasswordToggleInput = $formPasswordToggle.find("input");
 
-          if (formPasswordToggleInput.getAttribute("type") === "text") {
-            formPasswordToggleInput.setAttribute("type", "password");
-            formPasswordToggle
-              .querySelector("i.bx-show")
-              .classList.replace("bx-show", "bx-hide");
-          } else if (
-            formPasswordToggleInput.getAttribute("type") === "password"
-          ) {
-            formPasswordToggleInput.setAttribute("type", "text");
-            formPasswordToggle
-              .querySelector("i.bx-hide")
-              .classList.replace("bx-hide", "bx-show");
-          }
-        });
-      });
-    }
+      if ($formPasswordToggleInput.attr("type") === "text") {
+        $formPasswordToggleInput.attr("type", "password");
+        $formPasswordToggle
+          .find("i.bx-show")
+          .removeClass("bx-show")
+          .addClass("bx-hide");
+      } else if ($formPasswordToggleInput.attr("type") === "password") {
+        $formPasswordToggleInput.attr("type", "text");
+        $formPasswordToggle
+          .find("i.bx-hide")
+          .removeClass("bx-hide")
+          .addClass("bx-show");
+      }
+    };
+
+    // Initial binding for existing elements
+    $(document).on(
+      "click",
+      ".form-password-toggle i:not(.bx-copy-alt)",
+      function (e) {
+        e.preventDefault();
+        handlePasswordToggle.call(this);
+      },
+    );
   },
 
   // ---
