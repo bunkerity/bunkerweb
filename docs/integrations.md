@@ -868,15 +868,25 @@ Once the BunkerWeb Kubernetes stack is successfully set up and operational (refe
 
 It is important to note that the BunkerWeb settings need to be specified as annotations for the Ingress resource. For the domain part, please use the special value **`bunkerweb.io`**. By including the appropriate annotations, you can configure BunkerWeb accordingly for the Ingress resource.
 
+!!! info "TLS support"
+    BunkerWeb ingress controller fully supports custom HTTPS certificates using the tls spec as shown in the example. Configuring solutions such as `cert-manager` to automacally generate tls secrets is out of the scope of this documentation.
+
 ```yaml
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: my-ingress
   annotations:
+    # Will be applied to all host in this ingress
     bunkerweb.io/MY_SETTING: "value"
+    # Will only be applied to the www.example.com host
     bunkerweb.io/www.example.com_MY_SETTING: "value"
 spec:
+  # TLS is optional, you can also use builtin Let's Encrypt for example
+  # tls:
+  #   - hosts:
+  #       - www.example.com
+  #     secretName: secret-example-tls
   rules:
     - host: www.example.com
       http:
