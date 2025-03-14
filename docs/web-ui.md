@@ -779,6 +779,47 @@ Beginning with version `1.6`, the method of accessing logs has changed. This upd
 
 To keep the logs accessible from the web UI, we recommend you to use a syslog server such as `syslog-ng` to read the logs and creates the corresponding files in the `/var/log/bunkerweb` directory.
 
+!!! warning "Using local folder for logs"
+    The web UI runs as an **unprivileged user with UID 101 and GID 101** inside the container. The reason behind this is security : in case a vulnerability is exploited, the attacker won't have full root (UID/GID 0) privileges.
+
+    But there is a downside : if you use a **local folder for the logs**, you will need to **set the correct permissions** so the unprivileged user can read the log files. Something like that should do the trick :
+
+    ```shell
+    mkdir bw-logs && \
+    chown root:101 bw-logs && \
+    chmod 770 bw-logs
+    ```
+
+    Alternatively, if the folder already exists :
+
+    ```shell
+    chown -R root:101 bw-logs && \
+    chmod -R 770 bw-logs
+    ```
+
+    If you are using [Docker in rootless mode](https://docs.docker.com/engine/security/rootless) or [podman](https://podman.io/), UIDs and GIDs in the container will be mapped to different ones in the host. You will first need to check your initial subuid and subgid :
+
+    ```shell
+    grep ^$(whoami): /etc/subuid && \
+    grep ^$(whoami): /etc/subgid
+    ```
+
+    For example, if you have a value of **100000**, the mapped UID/GID will be **100100** (100000 + 100) :
+
+    ```shell
+    mkdir bw-logs && \
+    sudo chgrp 100100 bw-logs && \
+    chmod 770 bw-logs
+    ```
+
+    Or if the folder already exists :
+
+    ```shell
+    sudo chgrp -R 100100 bw-logs && \
+    sudo chmod -R 770 bw-logs
+    ```
+
+
 ### Compose boilerplates
 
 === "Docker"
