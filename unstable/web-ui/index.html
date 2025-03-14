@@ -1785,6 +1785,32 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
 <h2 id="accessing-logs">Accessing logs</h2>
 <p>Beginning with version <code>1.6</code>, the method of accessing logs has changed. This update specifically impacts container based integrations: the web UI will read the logs files from the <code>/var/log/bunkerweb</code> directory.</p>
 <p>To keep the logs accessible from the web UI, we recommend you to use a syslog server such as <code>syslog-ng</code> to read the logs and creates the corresponding files in the <code>/var/log/bunkerweb</code> directory.</p>
+<div class="admonition warning">
+<p class="admonition-title">Using local folder for logs</p>
+<p>The web UI runs as an <strong>unprivileged user with UID 101 and GID 101</strong> inside the container. The reason behind this is security : in case a vulnerability is exploited, the attacker won't have full root (UID/GID 0) privileges.</p>
+<p>But there is a downside : if you use a <strong>local folder for the logs</strong>, you will need to <strong>set the correct permissions</strong> so the unprivileged user can read the log files. Something like that should do the trick :</p>
+<div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>bw-logs<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+chown<span class="w"> </span>root:101<span class="w"> </span>bw-logs<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>bw-logs
+</code></pre></div>
+<p>Alternatively, if the folder already exists :</p>
+<div class="highlight"><pre><span></span><code>chown<span class="w"> </span>-R<span class="w"> </span>root:101<span class="w"> </span>bw-logs<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span><span class="w"> </span>bw-logs
+</code></pre></div>
+<p>If you are using <a href="https://docs.docker.com/engine/security/rootless">Docker in rootless mode</a> or <a href="https://podman.io/">podman</a>, UIDs and GIDs in the container will be mapped to different ones in the host. You will first need to check your initial subuid and subgid :</p>
+<div class="highlight"><pre><span></span><code>grep<span class="w"> </span>^<span class="k">$(</span>whoami<span class="k">)</span>:<span class="w"> </span>/etc/subuid<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+grep<span class="w"> </span>^<span class="k">$(</span>whoami<span class="k">)</span>:<span class="w"> </span>/etc/subgid
+</code></pre></div>
+<p>For example, if you have a value of <strong>100000</strong>, the mapped UID/GID will be <strong>100100</strong> (100000 + 100) :</p>
+<div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>bw-logs<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+sudo<span class="w"> </span>chgrp<span class="w"> </span><span class="m">100100</span><span class="w"> </span>bw-logs<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>bw-logs
+</code></pre></div>
+<p>Or if the folder already exists :</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>chgrp<span class="w"> </span>-R<span class="w"> </span><span class="m">100100</span><span class="w"> </span>bw-logs<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span><span class="w"> </span>bw-logs
+</code></pre></div>
+</div>
 <h3 id="compose-boilerplates">Compose boilerplates</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Docker</label><label for="__tabbed_1_2">Docker Autoconf</label></div>
 <div class="tabbed-content">

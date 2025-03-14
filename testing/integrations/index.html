@@ -1317,8 +1317,8 @@
 </code></pre></div>
 <div class="admonition warning">
 <p class="admonition-title">Using local folder for persistent data</p>
-<p>The scheduler runs as an <strong>unprivileged user with UID 101 and GID 101</strong> inside the container. The reason behind this is security : in case a vulnerability is exploited, the attacker won't have full root (UID/GID 0) privileges.
-But there is a downside : if you use a <strong>local folder for the persistent data</strong>, you will need to <strong>set the correct permissions</strong> so the unprivileged user can write data to it. Something like that should do the trick :</p>
+<p>The scheduler runs as an <strong>unprivileged user with UID 101 and GID 101</strong> inside the container. The reason behind this is security : in case a vulnerability is exploited, the attacker won't have full root (UID/GID 0) privileges.</p>
+<p>But there is a downside : if you use a <strong>local folder for the persistent data</strong>, you will need to <strong>set the correct permissions</strong> so the unprivileged user can write data to it. Something like that should do the trick :</p>
 <div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>bw-data<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 chown<span class="w"> </span>root:101<span class="w"> </span>bw-data<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>bw-data
@@ -1337,9 +1337,9 @@ sudo<span class="w"> </span>chgrp<span class="w"> </span><span class="m">100100<
 chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>bw-data
 </code></pre></div>
 <p>Or if the folder already exists :</p>
-<p><code>shell
-sudo chgrp -R 100100 bw-data &amp;&amp; \
-chmod -R 770 bw-data</code></p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>chgrp<span class="w"> </span>-R<span class="w"> </span><span class="m">100100</span><span class="w"> </span>bw-data<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span><span class="w"> </span>bw-data
+</code></pre></div>
 </div>
 <h3 id="networks">Networks</h3>
 <p>By default, BunkerWeb container is listening (inside the container) on <strong>8080/tcp</strong> for <strong>HTTP</strong>, <strong>8443/tcp</strong> for <strong>HTTPS</strong> and <strong>8443/udp</strong> for <strong>QUIC</strong>.</p>
@@ -1901,14 +1901,25 @@ MY_SETTING_2=value2
 <h3 id="ingress-resources">Ingress resources</h3>
 <p>Once the BunkerWeb Kubernetes stack is successfully set up and operational (refer to the autoconf logs for detailed information), you can proceed with deploying web applications within the cluster and declaring your Ingress resource.</p>
 <p>It is important to note that the BunkerWeb settings need to be specified as annotations for the Ingress resource. For the domain part, please use the special value <strong><code>bunkerweb.io</code></strong>. By including the appropriate annotations, you can configure BunkerWeb accordingly for the Ingress resource.</p>
+<div class="admonition info">
+<p class="admonition-title">TLS support</p>
+<p>BunkerWeb ingress controller fully supports custom HTTPS certificates using the tls spec as shown in the example. Configuring solutions such as <code>cert-manager</code> to automatically generate tls secrets is out of the scope of this documentation.</p>
+</div>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.k8s.io/v1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ingress</span>
 <span class="nt">metadata</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-ingress</span>
 <span class="w">  </span><span class="nt">annotations</span><span class="p">:</span>
+<span class="w">    </span><span class="c1"># Will be applied to all host in this ingress</span>
 <span class="w">    </span><span class="nt">bunkerweb.io/MY_SETTING</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;value&quot;</span>
+<span class="w">    </span><span class="c1"># Will only be applied to the www.example.com host</span>
 <span class="w">    </span><span class="nt">bunkerweb.io/www.example.com_MY_SETTING</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;value&quot;</span>
 <span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="c1"># TLS is optional, you can also use builtin Let&#39;s Encrypt for example</span>
+<span class="w">  </span><span class="c1"># tls:</span>
+<span class="w">  </span><span class="c1">#   - hosts:</span>
+<span class="w">  </span><span class="c1">#       - www.example.com</span>
+<span class="w">  </span><span class="c1">#     secretName: secret-example-tls</span>
 <span class="w">  </span><span class="nt">rules</span><span class="p">:</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">www.example.com</span>
 <span class="w">      </span><span class="nt">http</span><span class="p">:</span>
