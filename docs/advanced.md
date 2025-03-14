@@ -75,11 +75,19 @@ You will find more settings about real IP in the [settings section](settings.md#
 
     === "Docker"
 
-        You will need to add the settings to the environment variables of the BunkerWeb container(s) (doing it using the ingress is not supported because you will get into trouble when using things like Let's Encrypt).
+        You will need to add the settings to the environment variables of both the BunkerWeb and scheduler containers:
 
         ```yaml
         bunkerweb:
           image: bunkerity/bunkerweb:1.6.1
+          ...
+          environment:
+            USE_REAL_IP: "yes"
+            REAL_IP_FROM: "1.2.3.0/24 100.64.0.0/10"
+            REAL_IP_HEADER: "X-Forwarded-For"
+          ...
+        bw-scheduler:
+          image: bunkerity/bunkerweb-scheduler:1.6.1
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -92,11 +100,19 @@ You will find more settings about real IP in the [settings section](settings.md#
 
     === "Docker autoconf"
 
-        You will need to add the settings to the environment variables of the BunkerWeb container(s) (doing it using the ingress is not supported because you will get into trouble when using things like Let's Encrypt).
+        You will need to add the settings to the environment variables of both the BunkerWeb and scheduler containers:
 
         ```yaml
         bunkerweb:
           image: bunkerity/bunkerweb:1.6.1
+          ...
+          environment:
+            USE_REAL_IP: "yes"
+            REAL_IP_FROM: "1.2.3.0/24 100.64.0.0/10"
+            REAL_IP_HEADER: "X-Forwarded-For"
+          ...
+        bw-scheduler:
+          image: bunkerity/bunkerweb-scheduler:1.6.1
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -109,12 +125,20 @@ You will find more settings about real IP in the [settings section](settings.md#
 
     === "Kubernetes"
 
-        You will need to add the settings to the environment variables of the BunkerWeb container(s) (doing it using the ingress is not supported because you will get into trouble when using things like Let's Encrypt).
+        You will need to add the settings to the environment variables of both the BunkerWeb and scheduler pods.
 
         Here is the corresponding part of your `values.yaml` file that you can use :
 
         ```yaml
         bunkerweb:
+          extraEnvs:
+            - name: USE_REAL_IP
+              value: "yes"
+            - name: REAL_IP_FROM
+              value: "1.2.3.0/24 100.64.0.0/10"
+            - name: REAL_IP_HEADER
+              value: "X-Forwarded-For"
+        scheduler:
           extraEnvs:
             - name: USE_REAL_IP
               value: "yes"
@@ -131,11 +155,19 @@ You will find more settings about real IP in the [settings section](settings.md#
 
             **More information can be found in the [Swarm integration documentation](integrations.md#swarm).**
 
-        You will need to add the settings to the environment variables of the BunkerWeb container(s) (doing it using the ingress is not supported because you will get into trouble when using things like Let's Encrypt).
+        You will need to add the settings to the environment variables of both the BunkerWeb and scheduler services:
 
         ```yaml
         bunkerweb:
           image: bunkerity/bunkerweb:1.6.1
+          ...
+          environment:
+            USE_REAL_IP: "yes"
+            REAL_IP_FROM: "1.2.3.0/24 100.64.0.0/10"
+            REAL_IP_HEADER: "X-Forwarded-For"
+          ...
+        bw-scheduler:
+          image: bunkerity/bunkerweb-scheduler:1.6.1
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -187,9 +219,19 @@ You will find more settings about real IP in the [settings section](settings.md#
 
     === "Docker"
 
-        You will need to add the settings to the environment variables of the BunkerWeb container(s) (doing it using the ingress is not supported because you will get into trouble when using things like Let's Encrypt).
+        You will need to add the settings to the environment variables of both the BunkerWeb and scheduler containers:
 
         ```yaml
+        bunkerweb:
+          image: bunkerity/bunkerweb:1.6.1
+          ...
+          environment:
+            USE_REAL_IP: "yes"
+            USE_PROXY_PROTOCOL: "yes"
+            REAL_IP_FROM: "1.2.3.0/24 100.64.0.0/10"
+            REAL_IP_HEADER: "proxy_protocol"
+          ...
+        ...
         bw-scheduler:
           image: bunkerity/bunkerweb-scheduler:1.6.1
           ...
@@ -205,9 +247,19 @@ You will find more settings about real IP in the [settings section](settings.md#
 
     === "Docker autoconf"
 
-        You will need to add the settings to the environment variables of the BunkerWeb container(s) (doing it using the ingress is not supported because you will get into trouble when using things like Let's Encrypt).
+        You will need to add the settings to the environment variables of both the BunkerWeb and scheduler containers:
 
         ```yaml
+        bunkerweb:
+          image: bunkerity/bunkerweb:1.6.1
+          ...
+          environment:
+            USE_REAL_IP: "yes"
+            USE_PROXY_PROTOCOL: "yes"
+            REAL_IP_FROM: "1.2.3.0/24 100.64.0.0/10"
+            REAL_IP_HEADER: "proxy_protocol"
+          ...
+        ...
         bw-scheduler:
           image: bunkerity/bunkerweb-scheduler:1.6.1
           ...
@@ -223,12 +275,22 @@ You will find more settings about real IP in the [settings section](settings.md#
 
     === "Kubernetes"
 
-        You will need to add the settings to the environment variables of the BunkerWeb container(s) (doing it using the ingress is not supported because you will get into trouble when using things like Let's Encrypt).
+        You will need to add the settings to the environment variables of both the BunkerWeb and scheduler pods.
 
-        Here is the corresponding part of your `values.yaml` file that you can use :
+        Here is the corresponding part of your `values.yaml` file that you can use:
 
         ```yaml
         bunkerweb:
+          extraEnvs:
+            - name: USE_REAL_IP
+              value: "yes"
+            - name: USE_PROXY_PROTOCOL
+              value: "yes"
+            - name: REAL_IP_FROM
+              value: "1.2.3.0/24 100.64.0.0/10"
+            - name: REAL_IP_HEADER
+              value: "proxy_protocol"
+        scheduler:
           extraEnvs:
             - name: USE_REAL_IP
               value: "yes"
@@ -247,11 +309,21 @@ You will find more settings about real IP in the [settings section](settings.md#
 
             **More information can be found in the [Swarm integration documentation](integrations.md#swarm).**
 
-        You will need to add the settings to the environment variables of the BunkerWeb container(s) (doing it using the ingress is not supported because you will get into trouble when using things like Let's Encrypt).
+        You will need to add the settings to the environment variables of both the BunkerWeb and scheduler services.
 
         ```yaml
         bunkerweb:
           image: bunkerity/bunkerweb:1.6.1
+          ...
+          environment:
+            USE_REAL_IP: "yes"
+            USE_PROXY_PROTOCOL: "yes"
+            REAL_IP_FROM: "1.2.3.0/24 100.64.0.0/10"
+            REAL_IP_HEADER: "proxy_protocol"
+          ...
+        ...
+        bw-scheduler:
+          image: bunkerity/bunkerweb-scheduler:1.6.1
           ...
           environment:
             USE_REAL_IP: "yes"
