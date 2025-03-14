@@ -98,11 +98,67 @@ Here is how you can access the logs, depending on your integration :
 
 Don't forget that BunkerWeb runs as an unprivileged user for obvious security reasons. Double-check the permissions of files and folders used by BunkerWeb, especially if you use custom configurations (more info [here](advanced.md#custom-configurations)). You will need to set at least **RW** rights on files and **_RWX_** on folders.
 
-## Disable security checks
+## IP unban
 
-For debugging purposes, you may need to temporarily disable the security checks made by BunkerWeb. One quick way of doing it is by adding everyone in the whitelist (e.g. `WHITELIST_IP=0.0.0.0/0`).
+You can manually unban an IP which can be useful when doing some tests so you can contact the internal API of BunkerWeb (replace `1.2.3.4` with the IP address to unban) :
 
-## ModSecurity
+=== "Docker"
+
+    You can use the `docker exec` command (replace `mybunker` with the name of your container) :
+    ```shell
+    docker exec mybunker bwcli unban 1.2.3.4
+    ```
+
+    Here is the docker-compose equivalent (replace `mybunker` with the name of the services declared in the docker-compose.yml file) :
+    ```shell
+    docker-compose exec mybunker bwcli unban 1.2.3.4
+    ```
+
+=== "Docker autoconf"
+
+    You can use the `docker exec` command (replace `myautoconf` with the name of your container) :
+    ```shell
+    docker exec myautoconf bwcli unban 1.2.3.4
+    ```
+
+    Here is the docker-compose equivalent (replace `myautoconf` with the name of the services declared in the docker-compose.yml file) :
+    ```shell
+    docker-compose exec myautoconf bwcli unban 1.2.3.4
+    ```
+
+=== "Swarm"
+
+    !!! warning "Deprecated"
+        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Docker autoconf integration](#__tabbed_2_2) instead.
+
+        **More information can be found in the [Swarm integration documentation](integrations.md#swarm).**
+
+    You can use the `docker exec` command (replace `myautoconf` with the name of your service) :
+    ```shell
+    docker exec $(docker ps -q -f name=myautoconf) bwcli unban 1.2.3.4
+    ```
+
+=== "Kubernetes"
+
+    You can use the `kubectl exec` command (replace `myautoconf` with the name of your pod) :
+    ```shell
+    kubectl exec myautoconf bwcli unban 1.2.3.4
+    ```
+
+=== "Linux"
+
+    You can use the `bwcli` command (as root) :
+    ```shell
+    sudo bwcli unban 1.2.3.4
+    ```
+
+## False positives
+
+### Detect only mode
+
+For debugging/test purposes, you can set BunkerWeb in [detect only mode](http://localhost:8000/advanced/#security-mode) so it won't block request and will act as a classical reverse proxy.
+
+### ModSecurity
 
 The default BunkerWeb configuration of ModSecurity is to load the Core Rule Set in anomaly scoring mode with a paranoia level (PL) of 1 :
 
@@ -193,71 +249,26 @@ One important thing to understand is that rule **949110** is not a "real" one : 
 
 If it's a false-positive, you should then focus on both **930120** and **932160** rules. ModSecurity and/or CRS tuning is out of the scope of this documentation but don't forget that you can apply custom configurations before and after the CRS is loaded (more info [here](advanced.md#custom-configurations)).
 
-## Bad Behavior
+### Bad Behavior
 
 A common false-positive case is when the client is banned because of the "bad behavior" feature which means that too many suspicious HTTP status codes were generated within a time period (more info [here](advanced.md#bad-behavior)). You should start by reviewing the settings and then edit them according to your web application(s) like removing a suspicious HTTP code, decreasing the count time, increasing the threshold, ...
 
-## IP unban
+### Whitelisting
 
-You can manually unban an IP which can be useful when doing some tests but it needs the setting `USE_API` set to `yes` (which is not the default) so you can contact the internal API of BunkerWeb (replace `1.2.3.4` with the IP address to unban) :
-
-=== "Docker"
-
-    You can use the `docker exec` command (replace `mybunker` with the name of your container) :
-    ```shell
-    docker exec mybunker bwcli unban 1.2.3.4
-    ```
-
-    Here is the docker-compose equivalent (replace `mybunker` with the name of the services declared in the docker-compose.yml file) :
-    ```shell
-    docker-compose exec mybunker bwcli unban 1.2.3.4
-    ```
-
-=== "Docker autoconf"
-
-    You can use the `docker exec` command (replace `myautoconf` with the name of your container) :
-    ```shell
-    docker exec myautoconf bwcli unban 1.2.3.4
-    ```
-
-    Here is the docker-compose equivalent (replace `myautoconf` with the name of the services declared in the docker-compose.yml file) :
-    ```shell
-    docker-compose exec myautoconf bwcli unban 1.2.3.4
-    ```
-
-=== "Swarm"
-
-    !!! warning "Deprecated"
-        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Docker autoconf integration](#__tabbed_2_2) instead.
-
-        **More information can be found in the [Swarm integration documentation](integrations.md#swarm).**
-
-    You can use the `docker exec` command (replace `myautoconf` with the name of your service) :
-    ```shell
-    docker exec $(docker ps -q -f name=myautoconf) bwcli unban 1.2.3.4
-    ```
-
-=== "Kubernetes"
-
-    You can use the `kubectl exec` command (replace `myautoconf` with the name of your pod) :
-    ```shell
-    kubectl exec myautoconf bwcli unban 1.2.3.4
-    ```
-
-=== "Linux"
-
-    You can use the `bwcli` command (as root) :
-    ```shell
-    sudo bwcli unban 1.2.3.4
-    ```
-
-## Whitelisting
-
-If you have bots that need to access your website, the recommended way to avoid any false positive is to whitelist them using the [whitelisting feature](advanced.md#blacklisting-whitelisting-and-greylisting). We don't recommend using the `WHITELIST_URI*` or `WHITELIST_USER_AGENT*` settings unless they are set to secret and unpredictable values. Common use cases are :
+If you have bots (or admins) that need to access your website, the recommended way to avoid any false positive is to whitelist them using the [whitelisting feature](advanced.md#blacklisting-whitelisting-and-greylisting). We don't recommend using the `WHITELIST_URI*` or `WHITELIST_USER_AGENT*` settings unless they are set to secret and unpredictable values. Common use cases are :
 
 - Healthcheck / status bot
 - Callback like IPN or webhook
 - Social media crawler
+
+## Common errors
+
+### Upstream sent too big header
+
+If you see the following error `upstream sent too big header while reading response header from upstream` in the logs, you will need to tweak the various proxy buffers size using the following settings :
+- `PROXY_BUFFERS`
+- `PROXY_BUFFER_SIZE`
+- `PROXY_BUSY_BUFFERS_SIZE`
 
 ## Timezone
 
