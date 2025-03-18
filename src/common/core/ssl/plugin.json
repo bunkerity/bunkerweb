@@ -38,6 +38,7 @@
       "help": "Preset security level for SSL cipher suites. 'Modern' is most secure but may not work with older devices.",
       "id": "ssl-ciphers-level",
       "label": "SSL Ciphers Level",
+      "regex": "^(modern|intermediate|old)$",
       "type": "select",
       "select": ["modern", "intermediate", "old"]
     },
@@ -47,6 +48,7 @@
       "help": "Custom SSL cipher suite string. If specified, overrides the SSL Ciphers Level. Leave empty to use level-based configuration.",
       "id": "ssl-ciphers-custom",
       "label": "Custom SSL Ciphers",
+      "regex": "^(?!:)(:?[A-Za-z0-9-]+)*$",
       "type": "text"
     }
   }
