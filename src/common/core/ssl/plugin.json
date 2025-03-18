@@ -31,6 +31,23 @@
       "label": "HTTPS protocols",
       "regex": "^(?! )( ?TLSv1\\.[0-3])*$",
       "type": "text"
+    },
+    "SSL_CIPHERS_LEVEL": {
+      "context": "multisite",
+      "default": "modern",
+      "help": "Preset security level for SSL cipher suites. 'Modern' is most secure but may not work with older devices.",
+      "id": "ssl-ciphers-level",
+      "label": "SSL Ciphers Level",
+      "type": "select",
+      "select": ["modern", "intermediate", "old"]
+    },
+    "SSL_CIPHERS_CUSTOM": {
+      "context": "multisite",
+      "default": "",
+      "help": "Custom SSL cipher suite string. If specified, overrides the SSL Ciphers Level. Leave empty to use level-based configuration.",
+      "id": "ssl-ciphers-custom",
+      "label": "Custom SSL Ciphers",
+      "type": "text"
     }
   }
 }
