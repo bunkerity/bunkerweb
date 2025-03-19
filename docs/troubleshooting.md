@@ -266,6 +266,7 @@ If you have bots (or admins) that need to access your website, the recommended w
 ### Upstream sent too big header
 
 If you see the following error `upstream sent too big header while reading response header from upstream` in the logs, you will need to tweak the various proxy buffers size using the following settings :
+
 - `PROXY_BUFFERS`
 - `PROXY_BUFFER_SIZE`
 - `PROXY_BUSY_BUFFERS_SIZE`
