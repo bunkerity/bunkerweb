@@ -32,13 +32,10 @@ services:
       DISABLE_DEFAULT_SERVER: "yes"
       USE_CLIENT_CACHE: "yes"
       USE_GZIP: "yes"
-      www.example.com_USE_UI: "yes"
+      www.example.com_USE_TEMPLATE: "ui"
       www.example.com_USE_REVERSE_PROXY: "yes"
       www.example.com_REVERSE_PROXY_URL: "/changeme"
       www.example.com_REVERSE_PROXY_HOST: "http://bw-ui:7000"
-      www.example.com_INTERCEPTED_ERROR_CODES: "400 404 405 413 429 500 501 502 503 504"
-      www.example.com_MAX_CLIENT_SIZE: "50m"
-      www.example.com_ALLOWED_METHODS: "GET|POST|PUT|DELETE"
     networks:
       - bw-universe
       - bw-db
