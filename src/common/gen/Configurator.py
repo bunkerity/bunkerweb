@@ -230,6 +230,9 @@ class Configurator:
                         "TZ",
                         "DYNPKG_RELEASE",
                         "OLDPWD",
+                        "SUPERVISOR_",
+                        "SERVICE_SCHEDULER",
+                        "SERVICE_UI",
                     )
                 )
             ):
