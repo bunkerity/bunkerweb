@@ -66,7 +66,7 @@ try:
 		result = conn.execute(sa.text('SELECT version FROM bw_metadata WHERE id = 1'))
 		print(next(result)[0])
 except BaseException as e:
-	if \"doesn't exist\" not in str(e) and \"no such table\" not in str(e) and 'relation \"bw_metadata\" does not exist' not in str(e):
+	if \"doesn't exist\" not in str(e) and \"does not exist\" not in str(e) and \"no such table\" not in str(e):
 		with open('/var/tmp/bunkerweb/database_error', 'w') as file:
 			file.write(format_exc())
 		print('none')

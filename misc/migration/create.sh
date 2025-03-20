@@ -7,6 +7,67 @@ log() {
   echo "[$(date +'%Y-%m-%d %H:%M:%S')] $*"
 }
 
+# Version comparison function for regular, beta, and rc versions
+version_lt() {
+  # For identical versions, compare the full strings
+  if [[ "$1" == "$2" ]]; then
+    return 1
+  fi
+
+  # Extract main version numbers
+  local v1_main
+  v1_main=$(echo "$1" | sed -E 's/([0-9]+\.[0-9]+\.[0-9]+).*/\1/')
+  local v2_main
+  v2_main=$(echo "$2" | sed -E 's/([0-9]+\.[0-9]+\.[0-9]+).*/\1/')
+
+  # If main versions are different, compare them
+  if [[ "$v1_main" != "$v2_main" ]]; then
+    if [[ "$(printf '%s\n' "$v1_main" "$v2_main" | sort -V | head -n1)" == "$v1_main" ]]; then
+      return 0  # v1 is less than v2
+    else
+      return 1  # v1 is greater than v2
+    fi
+  fi
+
+  # Main versions are equal, check for beta/rc suffixes
+  local v1_suffix
+  v1_suffix=$(echo "$1" | grep -oE '(beta|rc)[0-9]*$' || echo "")
+  local v2_suffix
+  v2_suffix=$(echo "$2" | grep -oE '(beta|rc)[0-9]*$' || echo "")
+
+  # No suffix is higher than any suffix
+  if [[ -z "$v1_suffix" && -n "$v2_suffix" ]]; then
+    return 1  # v1 is greater (no suffix)
+  elif [[ -n "$v1_suffix" && -z "$v2_suffix" ]]; then
+    return 0  # v1 is less (has suffix)
+  elif [[ -z "$v1_suffix" && -z "$v2_suffix" ]]; then
+    return 1  # Both have no suffix, they're equal (already checked for exact equality)
+  fi
+
+  # Both have suffixes - beta is less than rc
+  if [[ "$v1_suffix" == beta* && "$v2_suffix" == rc* ]]; then
+    return 0  # v1 (beta) is less than v2 (rc)
+  elif [[ "$v1_suffix" == rc* && "$v2_suffix" == beta* ]]; then
+    return 1  # v1 (rc) is greater than v2 (beta)
+  fi
+
+  # Same type of suffix, compare the numbers
+  local type1
+  type1=$(echo "$v1_suffix" | grep -oE '^(beta|rc)')
+  local type2
+  type2=$(echo "$v2_suffix" | grep -oE '^(beta|rc)')
+  local num1
+  num1=$(echo "$v1_suffix" | grep -oE '[0-9]+$' || echo "0")
+  local num2
+  num2=$(echo "$v2_suffix" | grep -oE '[0-9]+$' || echo "0")
+
+  if [[ "$type1" == "$type2" && "$num1" -lt "$num2" ]]; then
+    return 0  # v1 is less than v2
+  else
+    return 1  # v1 is not less than v2
+  fi
+}
+
 # Fetch and process tags
 log "🌐 Fetching tags from GitHub"
 tags=$(curl -s https://api.github.com/repos/bunkerity/bunkerweb/tags |
@@ -50,6 +111,12 @@ jq -r 'to_entries[] | "\(.key) \(.value)"' databases.json | while read -r databa
 
   for tag in $(echo "$tags" | jq -r '.[]'); do
     if [ "$tag" == "$NEXT_TAG" ]; then
+      continue
+    fi
+
+    # Skip Oracle migrations for versions earlier than 1.6.2-rc1
+    if [[ "$database" == "oracle" ]] && version_lt "$tag" "1.6.2-rc1"; then
+      log "⏭️ Skipping Oracle migration for version $tag (Oracle support starts from 1.6.2-rc1)"
       continue
     fi
 
