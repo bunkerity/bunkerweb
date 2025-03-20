@@ -29,7 +29,7 @@ def upgrade() -> None:
     # Create temp table
     op.create_table(
         "bw_global_values_new",
-        sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
+        sa.Column("id", sa.Integer(), sa.Identity(start=1, increment=1), nullable=False),
         sa.Column("setting_id", sa.String(256), nullable=False),
         sa.Column("value", sa.Text(), nullable=True),
         sa.Column("suffix", sa.Integer(), nullable=True),
@@ -62,7 +62,7 @@ def upgrade() -> None:
     # Create temp table
     op.create_table(
         "bw_selects_new",
-        sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
+        sa.Column("id", sa.Integer(), sa.Identity(start=1, increment=1), nullable=False),
         sa.Column("setting_id", sa.String(256), nullable=False),
         sa.Column("value", sa.String(256), nullable=True),
         sa.Column("order", sa.Integer(), nullable=False),
@@ -88,7 +88,7 @@ def upgrade() -> None:
     # Create temp table
     op.create_table(
         "bw_services_settings_new",
-        sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
+        sa.Column("id", sa.Integer(), sa.Identity(start=1, increment=1), nullable=False),
         sa.Column("service_id", sa.String(256), nullable=False),
         sa.Column("setting_id", sa.String(256), nullable=False),
         sa.Column("value", sa.Text(), nullable=True),
@@ -126,7 +126,7 @@ def upgrade() -> None:
     # Create temp table with the desired structure
     op.create_table(
         "bw_template_settings_new",
-        sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
+        sa.Column("id", sa.Integer(), sa.Identity(start=1, increment=1), nullable=False),
         sa.Column("template_id", sa.String(256), nullable=False),
         sa.Column("setting_id", sa.String(256), nullable=False),
         sa.Column("step_id", sa.Integer(), nullable=False),
