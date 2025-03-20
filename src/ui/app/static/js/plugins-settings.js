@@ -9,7 +9,7 @@ $(document).ready(() => {
     window.location.href = window.location.href.split("/new")[0];
 
   const $templateInput = $("#used-template");
-  let usedTemplate = "advanced";
+  let usedTemplate = "low";
   if ($templateInput.length) {
     usedTemplate = $templateInput.val().trim();
   }
@@ -985,12 +985,10 @@ $(document).ready(() => {
     (usedTemplate === "" || usedTemplate === "ui") &&
     currentMode === "easy"
   ) {
-    $(`button[data-bs-target="#navs-modes-advanced"]`).tab("show");
+    $('button[data-bs-target="#navs-modes-advanced"]').tab("show");
   } else if (usedTemplate !== "low" && currentMode === "easy") {
     $(`button[data-bs-target="#navs-templates-${usedTemplate}"]`).tab("show");
-  }
-
-  if (
+  } else if (
     !$(`button[data-bs-target="#navs-templates-${currentTemplate}"]`).hasClass(
       "active",
     )
