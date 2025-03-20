@@ -126,6 +126,7 @@ def backup_database(current_time: datetime, db: Database = None, backup_dir: Pat
                 proc = run(cmd, stdout=PIPE, stderr=PIPE, env=environ | pg_env)
             elif database == "oracle":
                 LOGGER.warning("Creating a database backup for Oracle is not supported")
+                return db
 
         stderr = proc.stderr.decode() if hasattr(proc, "stderr") else ""
         if "Table 'db.test_" not in stderr and proc.returncode != 0:
@@ -216,6 +217,7 @@ def restore_database(backup_file: Path, db: Database = None) -> Database:
                 proc = run(cmd, stdout=PIPE, stderr=PIPE, env=environ | pg_env, input=zipf.read(backup_file.with_suffix(".sql").name))
         elif database == "oracle":
             LOGGER.warning("Restoring a database backup for Oracle is not supported")
+            return db
 
     if proc.returncode != 0:
         LOGGER.error(f"Failed to restore the database: {proc.stderr.decode()}")
