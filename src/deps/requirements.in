@@ -1,6 +1,6 @@
 importlib-metadata==8.6.1
 pip==25.0.1
 pip-tools==7.4.1
-setuptools==76.1.0
+setuptools==77.0.1
 urllib3>2.0.0
 wheel==0.45.1
