@@ -51,6 +51,7 @@ COPY src/common/utils utils
 COPY src/autoconf autoconf
 COPY src/scheduler scheduler
 COPY src/ui ui
+COPY src/all-in-one all-in-one
 COPY src/VERSION VERSION
 COPY misc/*.ascii misc/
 
@@ -81,7 +82,7 @@ RUN cp helpers/bwcli /usr/bin/ && \
     find core/ -type f -name "*.sh" ! -path "core/modsecurity/files/*" -print0 | xargs -0 chmod 750 && \
     find core/ -type f -name "*.py" ! -path "core/modsecurity/files/*" -print0 | xargs -0 chmod 750 && \
     find ui/ -type f -name "*.py" -print0 | xargs -0 chmod 750 && \
-	chmod 750 cli/main.py gen/*.py helpers/*.sh autoconf/main.py scheduler/main.py scheduler/entrypoint.sh ui/*.sh entrypoint.sh /usr/bin/bwcli deps/python/bin/* && \
+	chmod 750 cli/main.py gen/*.py helpers/*.sh all-in-one/entrypoint.sh autoconf/main.py scheduler/main.py scheduler/entrypoint.sh ui/*.sh entrypoint.sh /usr/bin/bwcli deps/python/bin/* && \
     chmod 770 db/alembic db/alembic/alembic.ini db/alembic/env.py && \
     chmod 660 INTEGRATION && \
     mkdir -p /var/log/nginx && \
@@ -104,9 +105,8 @@ COPY --chown=root:nginx --chmod=770 src/bw/misc/asn.mmdb /var/tmp/bunkerweb/asn.
 COPY --chown=root:nginx --chmod=770 src/bw/misc/country.mmdb /var/tmp/bunkerweb/country.mmdb
 
 # Set up supervisor configuration
-RUN mkdir -p /etc/supervisor.d
-COPY src/all-in-one/supervisord.conf /etc/supervisord.conf
-COPY src/all-in-one/supervisor.d/*.ini /etc/supervisor.d/
+RUN mv /usr/share/bunkerweb/all-in-one/supervisord.conf /etc/supervisord.conf && \
+    mv /usr/share/bunkerweb/all-in-one/supervisor.d /etc/supervisor.d
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
 LABEL version="1.6.1"
@@ -126,4 +126,4 @@ ENV SERVICE_SCHEDULER="yes"
 
 USER nginx:nginx
 
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
+ENTRYPOINT ["/usr/share/bunkerweb/all-in-one/entrypoint.sh"]
