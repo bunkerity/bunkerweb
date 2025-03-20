@@ -343,9 +343,9 @@ mkdocs-get-deps==0.2.0 \
     --hash=sha256:162b3d129c7fad9b19abfdcb9c1458a651628e4b1dea628ac68790fb3061c60c \
     --hash=sha256:2bf11d0b133e77a0dd036abeeb06dec8775e46efa526dc70667d8863eefc6134
     # via mkdocs
-mkdocs-material==9.6.7 \
-    --hash=sha256:3e2c1fceb9410056c2d91f334a00cdea3215c28750e00c691c1e46b2a33309b4 \
-    --hash=sha256:8a159e45e80fcaadd9fbeef62cbf928569b93df954d4dc5ba76d46820caf7b47
+mkdocs-material==9.6.9 \
+    --hash=sha256:6e61b7fb623ce2aa4622056592b155a9eea56ff3487d0835075360be45a4c8d1 \
+    --hash=sha256:a4872139715a1f27b2aa3f3dc31a9794b7bbf36333c0ba4607cf04786c94f89c
     # via
     #   -r requirements.in
     #   mkdocs-print-site-plugin
@@ -353,9 +353,9 @@ mkdocs-material-extensions==1.3.1 \
     --hash=sha256:10c9511cea88f568257f960358a467d12b970e1f7b2c0e5fb2bb48cab1928443 \
     --hash=sha256:adff8b62700b25cb77b53358dad940f3ef973dd6db797907c49e3c2ef3ab4e31
     # via mkdocs-material
-mkdocs-print-site-plugin==2.7.0 \
-    --hash=sha256:2396f529296e112b2ed04ec9384e374159dddcf826578d25d8bad93e6970283a \
-    --hash=sha256:c142a116bad5bf099d088c3b7fc967b03085803ed74c8a77e4b62e2f7b7404fd
+mkdocs-print-site-plugin==2.7.1 \
+    --hash=sha256:7b8cc34b02d5a5179821bba9cac71e041b904df179efb3b45fafdd2162793e34 \
+    --hash=sha256:f991afa9a2dc81ee5b9c0e80889d8aef5afd24dabfbc86b02d30cb2bf62e007c
     # via -r requirements.in
 packaging==24.2 \
     --hash=sha256:09abb1bccd265c01f4a3aa3f7a7db064b36514d2cba19a2f694fe6150451a759 \
@@ -567,9 +567,9 @@ requests==2.32.3 \
     #   importlib-resources
 
 # The following packages are considered to be unsafe in a requirements file:
-setuptools==76.0.0 \
-    --hash=sha256:199466a166ff664970d0ee145839f5582cb9bca7a0a3a2e795b6a9cb2308e9c6 \
-    --hash=sha256:43b4ee60e10b0d0ee98ad11918e114c70701bc6051662a9a675a0496c1a158f4
+setuptools==76.1.0 \
+    --hash=sha256:34750dcb17d046929f545dec9b8349fe42bf4ba13ddffee78428aec422dbfb73 \
+    --hash=sha256:4959b9ad482ada2ba2320c8f1a8d8481d4d8d668908a7a1b84d987375cd7f5bd
     # via mkdocs-material
 six==1.17.0 \
     --hash=sha256:4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274 \

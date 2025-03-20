@@ -27,21 +27,21 @@ annotated-types==0.7.0 \
     --hash=sha256:1f02e8b43a8fbbc3f3e0d4f0f4bfc8131bcb4eebe8849b8e5c773f3a1c582a53 \
     --hash=sha256:aff07c09a53a08bc8cfccb9c85b05f1aa9a2a6f23728d790723543408344ce89
     # via pydantic
-attrs==25.2.0 \
-    --hash=sha256:18a06db706db43ac232cce80443fcd9f2500702059ecf53489e3c5a3f417acaf \
-    --hash=sha256:611344ff0a5fed735d86d7784610c84f8126b95e549bcad9ff61b4242f2d386b
+attrs==25.3.0 \
+    --hash=sha256:427318ce031701fea540783410126f03899a97ffc6f61596ad581ac2e40e3bc3 \
+    --hash=sha256:75d7cefc7fb576747b2c81b4442d4d4a1ce0900973527c011d1030fd3bf4af1b
     # via jsonlines
 beautifulsoup4==4.13.3 \
     --hash=sha256:1bd32405dacc920b42b83ba01644747ed77456a65760e285fbc47633ceddaf8b \
     --hash=sha256:99045d7d3f08f91f0d656bc9b7efbae189426cd913d830294a15eefa0ea4df16
     # via dns-lexicon
-boto3==1.37.11 \
-    --hash=sha256:8eec08363ef5db05c2fbf58e89f0c0de6276cda2fdce01e76b3b5f423cd5c0f4 \
-    --hash=sha256:da6c22fc8a7e9bca5d7fc465a877ac3d45b6b086d776bd1a6c55bdde60523741
+boto3==1.37.15 \
+    --hash=sha256:586332456fff19328d57a88214a2ac2eda1bafab743556a836eda46a4ce613c6 \
+    --hash=sha256:78cc1b483cc637e1df8e81498d66f89550d4ee92175ccab5be1a2226672fe6b9
     # via certbot-dns-route53
-botocore==1.37.11 \
-    --hash=sha256:02505309b1235f9f15a6da79103ca224b3f3dc5f6a62f8630fbb2c6ed05e2da8 \
-    --hash=sha256:72eb3a9a58b064be26ba154e5e56373633b58f951941c340ace0d379590d98b5
+botocore==1.37.15 \
+    --hash=sha256:72e6f1db6ebc4112d6ba719c97ad71ac7cf4a2f3729ae74fa225641e3ddcba92 \
+    --hash=sha256:996b8d6a342ad7735eb07d8b4a81dad86e60ce0889ccb3edec0cd66eece85393
     # via
     #   boto3
     #   s3transfer
@@ -372,9 +372,9 @@ dnspython==2.7.0 \
     # via
     #   certbot-dns-rfc2136
     #   dns-lexicon
-filelock==3.17.0 \
-    --hash=sha256:533dc2f7ba78dc2f0f531fc6c4940addf7b70a481e269a5a3b93be94ffbe8338 \
-    --hash=sha256:ee4e77401ef576ebb38cd7f13b9b28893194acc20a8e68e18730ba9c0e54660e
+filelock==3.18.0 \
+    --hash=sha256:adbc88eabb99d2fec8c9c1b229b171f18afa655400173ddc653d5d01501fb9f2 \
+    --hash=sha256:c401f4f8377c4464e6db25fff06205fd89bdd83b65eb0488ed1b160f780e21de
     # via tldextract
 google-api-core==2.24.2 \
     --hash=sha256:810a63ac95f3c441b7c0e43d344e372887f62ce9071ba972eacf32672e072de9 \
@@ -396,9 +396,9 @@ google-auth-httplib2==0.2.0 \
     --hash=sha256:38aa7badf48f974f1eb9861794e9c0cb2a0511a4ec0679b1f886d108f5640e05 \
     --hash=sha256:b65a0a2123300dd71281a7bf6e64d65a0759287df52729bdd1ae2e47dc311a3d
     # via google-api-python-client
-googleapis-common-protos==1.69.1 \
-    --hash=sha256:4077f27a6900d5946ee5a369fab9c8ded4c0ef1c6e880458ea2f70c14f7b70d5 \
-    --hash=sha256:e20d2d8dda87da6fe7340afbbdf4f0bcb4c8fae7e6cadf55926c31f946b0b9b1
+googleapis-common-protos==1.69.2 \
+    --hash=sha256:0b30452ff9c7a27d80bfc5718954063e8ab53dd3697093d3bc99581f5fd24212 \
+    --hash=sha256:3e1b904a27a33c821b4b749fd31d334c0c9c30e6113023d495e48979a3dc9c5f
     # via google-api-core
 httplib2==0.22.0 \
     --hash=sha256:14ae0a53c1ba8f3d37e9e27cf37eabb0fb9980f435ba405d546948b009dd64dc \
@@ -532,18 +532,16 @@ proto-plus==1.26.1 \
     --hash=sha256:13285478c2dcf2abb829db158e1047e2f1e8d63a077d94263c2b88b043c75a66 \
     --hash=sha256:21a515a4c4c0088a773899e23c7bbade3d18f9c66c73edd4c7ee3816bc96a012
     # via google-api-core
-protobuf==5.29.3 \
-    --hash=sha256:0a18ed4a24198528f2333802eb075e59dea9d679ab7a6c5efb017a59004d849f \
-    --hash=sha256:0eb32bfa5219fc8d4111803e9a690658aa2e6366384fd0851064b963b6d1f2a7 \
-    --hash=sha256:3ea51771449e1035f26069c4c7fd51fba990d07bc55ba80701c78f886bf9c888 \
-    --hash=sha256:5da0f41edaf117bde316404bad1a486cb4ededf8e4a54891296f648e8e076620 \
-    --hash=sha256:6ce8cc3389a20693bfde6c6562e03474c40851b44975c9b2bf6df7d8c4f864da \
-    --hash=sha256:84a57163a0ccef3f96e4b6a20516cedcf5bb3a95a657131c5c3ac62200d23252 \
-    --hash=sha256:a4fa6f80816a9a0678429e84973f2f98cbc218cca434abe8db2ad0bffc98503a \
-    --hash=sha256:a8434404bbf139aa9e1300dbf989667a83d42ddda9153d8ab76e0d5dcaca484e \
-    --hash=sha256:b89c115d877892a512f79a8114564fb435943b59067615894c3b13cd3e1fa107 \
-    --hash=sha256:c027e08a08be10b67c06bf2370b99c811c466398c357e615ca88c91c07f0910f \
-    --hash=sha256:daaf63f70f25e8689c072cfad4334ca0ac1d1e05a92fc15c54eb9cf23c3efd84
+protobuf==6.30.1 \
+    --hash=sha256:3c25e51e1359f1f5fa3b298faa6016e650d148f214db2e47671131b9063c53be \
+    --hash=sha256:47cd320b7db63e8c9ac35f5596ea1c1e61491d8a8eb6d8b45edc44760b53a4f6 \
+    --hash=sha256:535fb4e44d0236893d5cf1263a0f706f1160b689a7ab962e9da8a9ce4050b780 \
+    --hash=sha256:554d7e61cce2aa4c63ca27328f757a9f3867bce8ec213bf09096a8d16bcdcb6a \
+    --hash=sha256:aa4f7dfaed0d840b03d08d14bfdb41348feaee06a828a8c455698234135b4075 \
+    --hash=sha256:b510f55ce60f84dc7febc619b47215b900466e3555ab8cb1ba42deb4496d6cc0 \
+    --hash=sha256:ba0706f948d0195f5cac504da156d88174e03218d9364ab40d903788c1903d7e \
+    --hash=sha256:e3083660225fa94748ac2e407f09a899e6a28bf9c0e70c75def8d15706bf85fc \
+    --hash=sha256:ed484f9ddd47f0f1bf0648806cccdb4fe2fb6b19820f9b79a5adf5dcfd1b8c5f
     # via
     #   google-api-core
     #   googleapis-common-protos
@@ -800,9 +798,9 @@ schedule==1.2.2 \
     # via importlib-metadata
 
 # The following packages are considered to be unsafe in a requirements file:
-setuptools==76.0.0 \
-    --hash=sha256:199466a166ff664970d0ee145839f5582cb9bca7a0a3a2e795b6a9cb2308e9c6 \
-    --hash=sha256:43b4ee60e10b0d0ee98ad11918e114c70701bc6051662a9a675a0496c1a158f4
+setuptools==76.1.0 \
+    --hash=sha256:34750dcb17d046929f545dec9b8349fe42bf4ba13ddffee78428aec422dbfb73 \
+    --hash=sha256:4959b9ad482ada2ba2320c8f1a8d8481d4d8d668908a7a1b84d987375cd7f5bd
     # via -r requirements.in
 six==1.17.0 \
     --hash=sha256:4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274 \
