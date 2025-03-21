@@ -1055,6 +1055,10 @@ div.dtsp-panesContainer
   transition: all 0.2s ease;
 }
 
+.qr-code {
+  background-color: #fff;
+}
+
 /*
 * Dark mode overrides
 ******************************************************************************/
@@ -1190,7 +1194,6 @@ div.dtsp-panesContainer
   color: #fff;
 }
 
-.dark-style .img-fluid.qr-code,
 .dark-style .x-logo {
   filter: brightness(0) invert(1);
 }
