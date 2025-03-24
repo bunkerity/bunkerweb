@@ -3776,7 +3776,7 @@ class Database:
             query = (
                 session.query(Templates)
                 .with_entities(Templates.id, Templates.plugin_id, Templates.name)
-                .order_by(case((Templates.name == "low", 0), else_=1))  # Pass as positional arguments
+                .order_by(case((Templates.id == "low", 1), (Templates.id == "medium", 2), (Templates.id == "high", 3), else_=4), Templates.name)
             )
 
             if plugin:
