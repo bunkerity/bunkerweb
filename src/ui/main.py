@@ -355,7 +355,9 @@ def handle_csrf_error(_):
 
 
 def update_latest_stable_release():
-    DATA["LATEST_VERSION"] = get_latest_stable_release()
+    latest_release = get_latest_stable_release()
+    if latest_release:
+        DATA["LATEST_VERSION"] = latest_release
 
 
 def check_database_state(request_method: str, request_path: str):
