@@ -79,14 +79,9 @@ if {
         fi
     # Fresh installation scenario
     else
-        # Stop nginx if it's running
-        if systemctl is-active --quiet nginx; then
-            echo "🛑 Stopping and disabling the nginx service..."
-            do_and_check_cmd systemctl stop nginx
-            do_and_check_cmd systemctl disable nginx
-        else
-            echo "ℹ️ Nginx service not running, no need to stop it."
-        fi
+        echo "🛑 Stopping and disabling the nginx service..."
+        do_and_check_cmd systemctl stop nginx
+        do_and_check_cmd systemctl disable nginx
 
         echo "🚀 Enabling and starting the BunkerWeb service..."
         do_and_check_cmd systemctl enable bunkerweb
