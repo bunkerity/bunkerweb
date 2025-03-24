@@ -99,7 +99,11 @@
                                             </div>
                                         </div>
                                     {% else %}
-                                        <p class="card-text mb-0">{{ human_readable_number(value.get("value") ) }}</p>
+                                        <div class="d-flex align-items-center justify-content-center h-100">
+                                            <div class="text-center mt-2">
+                                                <p class="card-text mb-0">{{ human_readable_number(value.get("value") ) }}</p>
+                                            </div>
+                                        </div>
                                     {% endif %}
                                     {% set subtitle = value.get("subtitle") %}
                                     {% if subtitle %}
