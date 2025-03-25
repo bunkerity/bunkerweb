@@ -1,4 +1,4 @@
-<div class="form-floating mt-1{% if setting_data['type'] == 'password' %} input-group input-group-merge form-password-toggle{% endif %}">
+<div class="form-floating mt-1 overflow-hidden{% if setting_data['type'] == 'password' %} input-group input-group-merge form-password-toggle{% endif %}">
     <input id="{{ setting_id_prefix }}{{ setting_data['id'] }}{{ setting_id_suffix }}"
            name="{{ setting }}"
            type="{{ setting_data['type'] }}"
@@ -12,7 +12,7 @@
            {% if disabled %}disabled{% endif %}
            {% if required %}required{% endif %}
            {% if input_readonly %}readonly{% endif %}>
-    <label for="{{ setting_id_prefix }}{{ setting_data['id'] }}{{ setting_id_suffix }}">{{ setting }}</label>
+    <label for="{{ setting_id_prefix }}{{ setting_data['id'] }}{{ setting_id_suffix }}" class="text-truncate">{{ setting }}</label>
     {% if setting_data['type'] == 'password' %}
         <span class="input-group-text cursor-pointer rounded-end"><i class="bx bx-hide"></i></span>
     {% endif %}

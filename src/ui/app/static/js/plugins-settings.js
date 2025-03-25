@@ -1,9 +1,9 @@
 $(document).ready(() => {
-  var toastNum = 0;
+  let toastNum = 0;
   let currentPlugin = "general";
   let currentStep = 1;
   const isReadOnly = $("#is-read-only").val().trim() === "True";
-  var isInit = true;
+  let isInit = true;
 
   if (isReadOnly && window.location.pathname.endsWith("/new"))
     window.location.href = window.location.href.split("/new")[0];
@@ -112,17 +112,77 @@ $(document).ready(() => {
       editor.gotoLine(0);
     });
 
-    if (currentStep > 1) {
-      setTimeout(() => {
-        currentStep = 2;
-        $(`#navs-steps-${currentTemplate}-2`)
-          .find(".previous-step")
-          .trigger("click");
-      }, 100);
-    }
+    // Reset to first step with a delay to ensure proper rendering
+    setTimeout(() => {
+      // Force select the first step
+      const firstStep = $(
+        `.step-navigation-item[data-step="1"][data-template="${currentTemplate}"]`,
+      );
+      if (firstStep.length) {
+        // Set currentStep to ensure proper navigation
+        currentStep = 1;
+
+        // Update UI state - properly managing show/active classes
+        $(`.step-navigation-item[data-template="${currentTemplate}"]`).each(
+          function () {
+            const $item = $(this);
+            const step = parseInt($item.data("step"));
+            const isActive = step === 1; // First step is active
+
+            // Apply styling with proper classes
+            styleStepNavItem($item, isActive, false);
+          },
+        );
+
+        // Show the first step content with proper fade transition
+        const stepId = firstStep.data("step-id");
+        // Find all active panes and remove show first
+        const $activePanes = $(
+          `#navs-templates-${currentTemplate} .template-steps-content .tab-pane.active`,
+        );
+        $activePanes.removeClass("show");
+
+        // After fade-out completes, switch active panes
+        setTimeout(() => {
+          $activePanes.removeClass("active");
+          const $targetPane = $(`#${stepId}`);
+          $targetPane.addClass("active");
+
+          // Then trigger fade-in
+          requestAnimationFrame(() => {
+            $targetPane.addClass("show");
+          });
+        }, 150);
+
+        // Update button states
+        $(`#navs-templates-${currentTemplate} .previous-step`).addClass(
+          "disabled",
+        );
+        $(`#navs-templates-${currentTemplate} .next-step`).removeClass(
+          "disabled",
+        );
+      }
+    }, 100);
   };
 
+  // Enhanced handleTabChange function with validation check
   const handleTabChange = (targetClass) => {
+    // If we're changing templates in easy mode, validate current step first
+    if (
+      targetClass.includes("navs-templates-") &&
+      currentMode === "easy" &&
+      !isInit
+    ) {
+      const currentStepId = `navs-steps-${currentTemplate}-${currentStep}`;
+      const currentStepContainer = $(`#${currentStepId}`);
+
+      // Only proceed if validation passes
+      if (!validateCurrentStepInputs(currentStepContainer)) {
+        // If validation fails, prevent the tab change
+        return false;
+      }
+    }
+
     // Prepare the params for URL (parameters to be updated in the URL)
     const params = {};
     if (currentMode !== ($("#navs-modes-easy").length ? "easy" : "advanced"))
@@ -164,6 +224,8 @@ $(document).ready(() => {
         }
       }, 200);
     }
+
+    return true; // Tab change is allowed
   };
 
   const highlightSettings = (matchedSettings, fadeTimeout = 600) => {
@@ -205,9 +267,23 @@ $(document).ready(() => {
     }
   };
 
-  // Function to validate inputs and display error messages
-  const validateCurrentStepInputs = (currentStepContainer) => {
+  // Enhanced validation function with support for validation without UI focus
+  const validateCurrentStepInputs = (currentStepContainer, options = {}) => {
+    const { focusOnError = true, markStepInvalid = true } = options;
     let isStepValid = true;
+    let firstInvalidInput = null;
+
+    // Get step number and template from container
+    const stepNumber = currentStepContainer.data("step");
+    const template = currentStepContainer.attr("id").split("-")[2]; // Extract template name
+
+    // Find the nav item for this step
+    const $navItem = $(
+      `.step-navigation-item[data-step="${stepNumber}"][data-template="${template}"]`,
+    );
+
+    // Count of invalid fields to track
+    let invalidFieldsCount = 0;
 
     currentStepContainer.find(".plugin-setting").each(function () {
       const $input = $(this);
@@ -255,14 +331,31 @@ $(document).ready(() => {
       if (!isValid) {
         $feedback.text(errorMessage);
         isStepValid = false;
+        invalidFieldsCount++;
+
+        // Store the first invalid input for focusing later
+        if (!firstInvalidInput) {
+          firstInvalidInput = $input;
+        }
       } else {
         $feedback.text("");
       }
     });
 
-    if (!isStepValid) {
-      // Focus the first invalid input
-      currentStepContainer.find(".is-invalid").first().focus();
+    // If validation failed and we should focus on errors
+    if (!isStepValid && firstInvalidInput && focusOnError) {
+      // Scroll the input into view with a small delay to ensure UI has updated
+      setTimeout(() => {
+        const $setting = firstInvalidInput.closest(".col-12");
+        highlightSettings($setting);
+        firstInvalidInput.focus();
+      }, 100);
+    }
+
+    // If requested, mark the step as invalid or valid with improved styling
+    if (markStepInvalid) {
+      const isActive = $navItem.hasClass("active");
+      styleStepNavItem($navItem, isActive, !isStepValid);
     }
 
     return isStepValid;
@@ -499,6 +592,25 @@ $(document).ready(() => {
     },
   );
 
+  // Add validation to tab clicks for plugin/template changes
+  $('#plugins-dropdown-menu button[data-bs-toggle="tab"]').on(
+    "click",
+    function (e) {
+      // Always allow tab changes in advanced mode
+      if (currentMode !== "easy") return;
+
+      // In easy mode, ensure there are no validation errors in the current template
+      const currentStepId = `navs-steps-${currentTemplate}-${currentStep}`;
+      const currentStepContainer = $(`#${currentStepId}`);
+
+      if (!validateCurrentStepInputs(currentStepContainer)) {
+        e.preventDefault(); // Prevent tab change
+        e.stopPropagation(); // Stop event bubbling
+        return false;
+      }
+    },
+  );
+
   $('#plugins-dropdown-menu button[data-bs-toggle="tab"]').on(
     "shown.bs.tab",
     (e) => {
@@ -507,9 +619,55 @@ $(document).ready(() => {
   );
 
   $('#templates-dropdown-menu button[data-bs-toggle="tab"]').on(
+    "click",
+    function (e) {
+      // Skip validation for initial load or if not in easy mode
+      if (isInit || currentMode !== "easy") return;
+
+      // Validate current step before allowing template change
+      const currentStepId = `navs-steps-${currentTemplate}-${currentStep}`;
+      const currentStepContainer = $(`#${currentStepId}`);
+
+      if (!validateCurrentStepInputs(currentStepContainer)) {
+        e.preventDefault(); // Prevent tab change
+        e.stopPropagation(); // Stop event bubbling
+        return false;
+      }
+    },
+  );
+
+  $('#templates-dropdown-menu button[data-bs-toggle="tab"]').on(
     "shown.bs.tab",
     (e) => {
-      handleTabChange($(e.target).data("bs-target"));
+      if (!handleTabChange($(e.target).data("bs-target"))) {
+        // If handleTabChange returns false, revert to the previous tab
+        $(`button[data-bs-target="#navs-templates-${currentTemplate}"]`).tab(
+          "show",
+        );
+      }
+    },
+  );
+
+  // Update the mode change handler to validate before switching from easy mode
+  $('.mode-selection-menu button[data-bs-toggle="tab"]').on(
+    "click",
+    function (e) {
+      const targetMode = $(this)
+        .data("bs-target")
+        .substring(1)
+        .replace("navs-modes-", "");
+
+      // If switching from easy mode, validate current step first
+      if (currentMode === "easy" && targetMode !== "easy") {
+        const currentStepId = `navs-steps-${currentTemplate}-${currentStep}`;
+        const currentStepContainer = $(`#${currentStepId}`);
+
+        if (!validateCurrentStepInputs(currentStepContainer)) {
+          e.preventDefault(); // Prevent tab change
+          e.stopPropagation(); // Stop event bubbling
+          return false;
+        }
+      }
     },
   );
 
@@ -807,28 +965,122 @@ $(document).ready(() => {
     });
   });
 
+  // Helper function to clear validation styling from all steps - improved styling
+  const clearStepValidationStyles = (template) => {
+    $(`.step-navigation-item[data-template="${template}"]`).each(function () {
+      const $stepItem = $(this);
+      const isActive = $stepItem.hasClass("active");
+
+      // Reset styling with no errors
+      styleStepNavItem($stepItem, isActive, false);
+    });
+  };
+
+  // Helper function to validate all steps with visual feedback
+  const validateAllSteps = (template) => {
+    const totalSteps = $(
+      `.step-navigation-item[data-template="${template}"]`,
+    ).length;
+    let allValid = true;
+    let firstInvalidStep = null;
+
+    // Clear previous validation styles first
+    clearStepValidationStyles(template);
+
+    // Validate each step
+    for (let step = 1; step <= totalSteps; step++) {
+      const stepId = `navs-steps-${template}-${step}`;
+      const stepContainer = $(`#${stepId}`);
+
+      // Validate without focusing (we'll handle focus separately)
+      const isStepValid = validateCurrentStepInputs(stepContainer, {
+        focusOnError: false,
+        markStepInvalid: true,
+      });
+
+      if (!isStepValid) {
+        allValid = false;
+        if (!firstInvalidStep) {
+          firstInvalidStep = step;
+        }
+      }
+    }
+
+    // If there are invalid steps, navigate to the first one
+    if (!allValid && firstInvalidStep) {
+      const targetStepId = `navs-steps-${template}-${firstInvalidStep}`;
+      const targetStepContainer = $(`#${targetStepId}`);
+
+      // Navigate to the invalid step
+      navigateToStep(template, firstInvalidStep);
+
+      // Now focus on the first invalid input in that step
+      setTimeout(() => {
+        const firstInvalidInput = targetStepContainer
+          .find(".is-invalid")
+          .first();
+        if (firstInvalidInput.length) {
+          const $setting = firstInvalidInput.closest(".col-12");
+          highlightSettings($setting);
+          firstInvalidInput.focus();
+        }
+      }, 300); // Slightly longer delay to allow for navigation
+    }
+
+    return allValid;
+  };
+
   $(".save-settings").on("click", function () {
     if (isReadOnly) {
       alert("This action is not allowed in read-only mode.");
       return;
     }
 
-    const form = getFormFromSettings($(this));
+    // For easy mode, validate all steps before saving
     if (currentMode === "easy") {
+      const totalSteps = $(
+        `.step-navigation-item[data-template="${currentTemplate}"]`,
+      ).length;
+
+      // First validate the current step
       const currentStepId = `navs-steps-${currentTemplate}-${currentStep}`;
       const currentStepContainer = $(`#${currentStepId}`);
-      const isStepValid = validateCurrentStepInputs(currentStepContainer);
-      if (!isStepValid) return;
+      if (!validateCurrentStepInputs(currentStepContainer)) {
+        return; // Don't proceed if current step is invalid
+      }
+
+      // Then validate all other steps
+      let allStepsValid = true;
+
+      for (let step = 1; step <= totalSteps; step++) {
+        if (step === currentStep) continue; // Skip current step as it was already validated
+
+        const stepToValidateId = `navs-steps-${currentTemplate}-${step}`;
+        const stepToValidateContainer = $(`#${stepToValidateId}`);
+
+        if (!validateCurrentStepInputs(stepToValidateContainer)) {
+          // Navigate to the invalid step
+          navigateToStep(currentTemplate, step);
+          allStepsValid = false;
+          break;
+        }
+      }
+
+      if (!allStepsValid) return;
     } else if (currentMode === "raw") {
+      // Raw mode validation logic
       const draftInput = $("#is-draft");
       const wasDraft = draftInput.data("original") === "yes";
-      isDraft = form.find("input[name='IS_DRAFT']").val() === "yes";
+      const isDraft = form.find("input[name='IS_DRAFT']").val() === "yes";
 
       if (form.children().length < 2 && isDraft === wasDraft) {
         alert("No changes detected.");
         return;
       }
     }
+
+    // If all validations pass, submit the form
+    const form = getFormFromSettings($(this));
     form.appendTo("body").submit();
   });
 
@@ -867,50 +1119,134 @@ $(document).ready(() => {
 
   $(document).on("click", ".next-step, .previous-step", function () {
     const isNext = $(this).hasClass("next-step");
+    const template = $(this).data("template");
 
     // Determine the new step
     const newStep = isNext ? currentStep + 1 : currentStep - 1;
-    const currentStepId = `navs-steps-${currentTemplate}-${currentStep}`;
-    const newStepId = `navs-steps-${currentTemplate}-${newStep}`;
 
-    const currentStepContainer = $(`#${currentStepId}`);
-    const newTabTrigger = $(`button[data-bs-target="#${newStepId}"]`);
+    // Validate current step if going forward
+    if (isNext) {
+      const currentStepId = `navs-steps-${template}-${currentStep}`;
+      const currentStepContainer = $(`#${currentStepId}`);
+      const isStepValid = validateCurrentStepInputs(currentStepContainer);
 
-    if (newTabTrigger.length) {
-      if (isNext) {
-        const isStepValid = validateCurrentStepInputs(currentStepContainer);
+      if (!isStepValid) {
+        // Prevent proceeding to the next step
+        return;
+      }
+    }
 
-        if (!isStepValid) {
-          // Prevent proceeding to the next step
+    // Trigger click on the target step navigation item
+    $(
+      `.step-navigation-item[data-step="${newStep}"][data-template="${template}"]`,
+    ).trigger("click");
+  });
+
+  // Update the step navigation item click handler to manage button states
+  $(document).on("click", ".step-navigation-item", function () {
+    const targetStep = parseInt($(this).data("step"));
+    const template = $(this).data("template");
+    const stepId = $(this).data("step-id");
+
+    // Don't proceed if already on this step
+    if (targetStep === currentStep) return;
+
+    // If trying to navigate to a future step, validate current step first
+    if (targetStep > currentStep) {
+      const currentStepId = `navs-steps-${template}-${currentStep}`;
+      const currentStepContainer = $(`#${currentStepId}`);
+      const isStepValid = validateCurrentStepInputs(currentStepContainer);
+
+      if (!isStepValid) {
+        // Prevent navigation if validation fails
+        return;
+      }
+
+      // Validate all steps between current and target
+      for (let step = currentStep + 1; step < targetStep; step++) {
+        const stepToValidateId = `navs-steps-${template}-${step}`;
+        const stepToValidateContainer = $(`#${stepToValidateId}`);
+        if (!validateCurrentStepInputs(stepToValidateContainer)) {
+          // Show the invalid step instead of the requested one
+          $(
+            `.step-navigation-item[data-step="${step}"][data-template="${template}"]`,
+          ).trigger("click");
           return;
         }
-        currentStep++;
-      } else currentStep--;
+      }
+    }
 
-      $(`#navs-templates-${currentTemplate}`)
-        .find(".template-steps-container .breadcrumb-item")
-        .each(function () {
-          $(this)
-            .find("div.text-primary")
-            .removeClass("text-primary")
-            .addClass("text-muted");
-          $(this).find("button").addClass("disabled");
-        });
+    // Update active state in step navigation
+    $(`.step-navigation-item[data-template="${template}"]`).removeClass(
+      "active",
+    );
+    $(`.step-navigation-item[data-template="${template}"] .step-number`)
+      .addClass("disabled btn-outline-primary")
+      .removeClass("btn-primary");
+    $(`.step-navigation-item[data-template="${template}"] .fw-bold`)
+      .removeClass("text-primary")
+      .addClass("text-muted");
 
-      // Activate the new tab
-      const newTab = new bootstrap.Tab(newTabTrigger[0]);
-      newTab.show();
-      newTabTrigger
-        .parent()
-        .find("div.text-muted")
-        .removeClass("text-muted")
-        .addClass("text-primary");
-      newTabTrigger.removeClass("disabled");
-      newTabTrigger[0].scrollIntoView({
-        behavior: "smooth",
-        block: "nearest",
-        inline: "center",
-      });
+    $(this).addClass("active");
+    $(this).find(".step-number").removeClass("disabled");
+    $(this).find(".fw-bold").removeClass("text-muted").addClass("text-primary");
+
+    // Update currentStep
+    currentStep = targetStep;
+
+    // Handle tab pane display - properly using Bootstrap's fade functionality
+    // First hide all step panes
+    $(
+      `#navs-templates-${template} .template-steps-content .tab-pane`,
+    ).removeClass("show active");
+
+    // Then show the target step pane
+    $(`#${stepId}`).addClass("show active");
+
+    // Update previous/next button states
+    const totalSteps = $(
+      `.step-navigation-item[data-template="${template}"]`,
+    ).length;
+    const $previousBtn = $(`#navs-templates-${template}`).find(
+      ".previous-step",
+    );
+    const $nextBtn = $(`#navs-templates-${template}`).find(".next-step");
+
+    $previousBtn.toggleClass("disabled", currentStep === 1);
+    $nextBtn.toggleClass("disabled", currentStep === totalSteps);
+
+    // Scroll the step content into view
+    $(`#${stepId}`)[0].scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+
+  // Simplify the next/previous step handlers - they should just trigger the appropriate step navigation item
+  $(document).on("click", ".next-step, .previous-step", function () {
+    if ($(this).hasClass("disabled")) return; // Don't do anything if button is disabled
+
+    const isNext = $(this).hasClass("next-step");
+    const template = $(this).data("template");
+
+    // Determine the new step
+    const newStep = isNext ? currentStep + 1 : currentStep - 1;
+
+    // Validate current step if going forward
+    if (isNext) {
+      const currentStepId = `navs-steps-${template}-${currentStep}`;
+      const currentStepContainer = $(`#${currentStepId}`);
+      const isStepValid = validateCurrentStepInputs(currentStepContainer);
+
+      if (!isStepValid) {
+        // Prevent proceeding to the next step
+        return;
+      }
+    }
+
+    // Find and trigger click on the target step navigation item
+    const $targetStepItem = $(
+      `.step-navigation-item[data-step="${newStep}"][data-template="${template}"]`,
+    );
+    if ($targetStepItem.length) {
+      $targetStepItem.trigger("click");
     }
   });
 
@@ -1127,6 +1463,238 @@ $(document).ready(() => {
       e.preventDefault();
       $(".save-settings").trigger("click");
     }
+  });
+
+  // Remove all previously attached handlers to avoid duplication
+  $(document).off("click", ".step-navigation-item");
+  $(document).off("click", ".next-step, .previous-step");
+
+  // Helper functions for styling step buttons and navigation
+  const stepButtonStyles = {
+    // Active states
+    activeValid: {
+      step: "btn-primary",
+      remove: "disabled btn-outline-primary btn-outline-danger btn-danger",
+    },
+    activeError: {
+      step: "btn-danger", // Active step with errors should have btn-danger
+      remove: "disabled btn-outline-primary btn-outline-danger btn-primary",
+    },
+    // Inactive states
+    inactiveValid: {
+      step: "btn-outline-primary disabled", // Always disabled for inactive
+      remove: "btn-primary btn-outline-danger btn-danger",
+    },
+    inactiveError: {
+      step: "btn-outline-danger disabled", // Always disabled for inactive
+      remove: "btn-primary btn-outline-primary btn-danger",
+    },
+  };
+
+  // Text styling for steps
+  const textStyles = {
+    active: { add: "text-primary", remove: "text-muted" },
+    inactive: { add: "text-muted", remove: "text-primary" },
+  };
+
+  // Apply button styling based on state
+  const applyStepButtonStyle = ($stepItem, styleType) => {
+    const style = stepButtonStyles[styleType];
+    $stepItem
+      .find(".step-number")
+      .addClass(style.step)
+      .removeClass(style.remove);
+  };
+
+  // Apply text styling based on state
+  const applyStepTextStyle = ($stepItem, isActive) => {
+    const style = isActive ? textStyles.active : textStyles.inactive;
+    $stepItem.find(".fw-bold").addClass(style.add).removeClass(style.remove);
+  };
+
+  // Set complete styling for a step based on state
+  const styleStepNavItem = ($stepItem, isActive, hasError) => {
+    // Toggle active/show classes for the list-group-item
+    $stepItem.toggleClass("active show", isActive);
+
+    // Set button style based on active state and validation status
+    if (isActive) {
+      applyStepButtonStyle($stepItem, hasError ? "activeError" : "activeValid");
+      // Remove border-danger class - we'll use the button color instead
+      $stepItem.find(".step-number").removeClass("border-danger");
+    } else {
+      applyStepButtonStyle(
+        $stepItem,
+        hasError ? "inactiveError" : "inactiveValid",
+      );
+      $stepItem.find(".step-number").removeClass("border-danger");
+    }
+
+    // Set text style based on active state
+    applyStepTextStyle($stepItem, isActive);
+
+    // Set error indicator class
+    $stepItem.toggleClass("has-validation-error", hasError);
+  };
+
+  // Improved navigateToStep function with proper fade transitions
+  const navigateToStep = (template, targetStep) => {
+    // Find the target step item
+    const $targetStepItem = $(
+      `.step-navigation-item[data-step="${targetStep}"][data-template="${template}"]`,
+    );
+
+    if (!$targetStepItem.length) return; // Target step not found
+
+    const stepId = $targetStepItem.data("step-id");
+
+    // Get validation state of all steps before changing active state
+    const stepStates = [];
+    $(`.step-navigation-item[data-template="${template}"]`).each(function () {
+      stepStates.push({
+        step: parseInt($(this).data("step")),
+        hasError: $(this).hasClass("has-validation-error"),
+      });
+    });
+
+    // Update all step navigation items while preserving validation state
+    $(`.step-navigation-item[data-template="${template}"]`).each(function () {
+      const $item = $(this);
+      const step = parseInt($item.data("step"));
+      const isActive = step === targetStep;
+
+      // Find this step's validation state from our saved states
+      const stepState = stepStates.find((s) => s.step === step);
+      const hasError = stepState ? stepState.hasError : false;
+
+      // Apply styling
+      styleStepNavItem($item, isActive, hasError);
+    });
+
+    // Update currentStep variable
+    currentStep = targetStep;
+
+    // Properly handle fade transition to ensure it happens every time
+    const $currentPane = $(
+      `#navs-templates-${template} .template-steps-content .tab-pane.active`,
+    );
+    const $targetPane = $(`#${stepId}`);
+
+    // First remove 'show' to start fade-out transition
+    $currentPane.removeClass("show");
+
+    // After fade-out completes, switch the active panes
+    setTimeout(() => {
+      $currentPane.removeClass("active");
+      $targetPane.addClass("active");
+
+      // Then shortly after add 'show' to trigger the fade-in transition
+      requestAnimationFrame(() => {
+        $targetPane.addClass("show");
+      });
+    }, 150); // The 150ms delay corresponds to Bootstrap's transition time
+
+    // Update previous/next button states
+    const totalSteps = $(
+      `.step-navigation-item[data-template="${template}"]`,
+    ).length;
+    const $previousBtn = $(`#navs-templates-${template} .previous-step`);
+    const $nextBtn = $(`#navs-templates-${template} .next-step`);
+
+    $previousBtn.toggleClass("disabled", targetStep === 1);
+    $nextBtn.toggleClass("disabled", targetStep === totalSteps);
+
+    // Scroll into view after transition is complete
+    setTimeout(() => {
+      $(`#${stepId}`)[0].scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 350); // Give enough time for the fade-in to complete
+  };
+
+  // Unified and improved step navigation handler
+  $(document).on(
+    "click",
+    ".step-navigation-item, .next-step, .previous-step",
+    function (e) {
+      // Determine if we're handling a direct step click or a next/prev button
+      const isDirectStepClick = $(this).hasClass("step-navigation-item");
+      const isNextButton = $(this).hasClass("next-step");
+      const isPrevButton = $(this).hasClass("previous-step");
+
+      // Skip action if button is disabled
+      if ((isNextButton || isPrevButton) && $(this).hasClass("disabled")) {
+        return;
+      }
+
+      // Get template and determine target step
+      let template, targetStep;
+
+      if (isDirectStepClick) {
+        targetStep = parseInt($(this).data("step"));
+        template = $(this).data("template");
+
+        // Don't proceed if already on this step
+        if (targetStep === currentStep) return;
+      } else {
+        template = $(this).data("template");
+        targetStep = isNextButton ? currentStep + 1 : currentStep - 1;
+      }
+
+      // Always validate current step to update its validation state
+      // regardless of whether we're going forward or backward
+      const currentStepId = `navs-steps-${template}-${currentStep}`;
+      const currentStepContainer = $(`#${currentStepId}`);
+
+      // Validate but don't block navigation - just update the UI indicators
+      validateCurrentStepInputs(currentStepContainer, {
+        focusOnError: false,
+        markStepInvalid: true,
+      });
+
+      // Only block forward navigation if validation fails
+      if (targetStep > currentStep) {
+        const isStepValid = validateCurrentStepInputs(currentStepContainer, {
+          focusOnError: true,
+          markStepInvalid: true,
+        });
+
+        if (!isStepValid) {
+          return; // Don't navigate forward if validation fails
+        }
+      }
+
+      // If we get here, navigate to the target step
+      navigateToStep(template, targetStep);
+    },
+  );
+
+  // Add improved input event handler to update validation status immediately
+  $(document).on("input change", ".plugin-setting", function () {
+    // Find the step container for this input
+    const stepContainer = $(this).closest(".tab-pane");
+    if (!stepContainer.length) return;
+
+    // Debounce to avoid excessive validation
+    debounce(() => {
+      // Get the template and step number
+      const template = stepContainer.attr("id").split("-")[2];
+      const step = parseInt(stepContainer.data("step"));
+
+      // Validate without focusing
+      const isStepValid = validateCurrentStepInputs(stepContainer, {
+        focusOnError: false,
+        markStepInvalid: true,
+      });
+
+      // Update the step indicator styling
+      const $stepItem = $(
+        `.step-navigation-item[data-step="${step}"][data-template="${template}"]`,
+      );
+
+      if ($stepItem.length) {
+        const isActive = step === currentStep;
+        styleStepNavItem($stepItem, isActive, !isStepValid);
+      }
+    }, 200)();
   });
 
   isInit = false;
