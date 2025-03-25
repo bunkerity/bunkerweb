@@ -1257,7 +1257,7 @@ The web UI can be deployed and configured without going through the setup wizard
     You can generate valid space-separated **TOTP_SECRETS** using the following command (you will need the `passlib` package) :
 
     ```shell
-    python3 -c "from passlib import totp; print(' '.join(totp.generate_secret() for i in range(1, 6)))"
+    python3 -c "from passlib import totp; print(totp.generate_secret())"
     ```
 
 === "Linux"
