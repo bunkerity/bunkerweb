@@ -60,8 +60,10 @@ body:
         - Swarm
         - Kubernetes
         - Linux
+        - All-in-one
         - Ansible
         - Vagrant
+        - Azure
       default: 0
     validations:
       required: true
