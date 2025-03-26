@@ -4,7 +4,7 @@ Many real-world use case examples are available in the [examples](https://github
 
 We also provide numerous boilerplates, such as YAML files for various integrations and database types. These are available in the [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.2-rc1/misc/integrations) folder.
 
-This section only focuses on advanced usages and security tuning, see the [settings section](settings.md) of the documentation to see all the available settings.
+This section only focuses on advanced usages and security tuning, see the [settings section](features.md) of the documentation to see all the available settings.
 
 ## Use cases
 
@@ -37,7 +37,7 @@ The following settings can be used :
 - `REAL_IP_FROM` : list of trusted IP/network address allowed to send us the "real IP"
 - `REAL_IP_HEADER` : the HTTP header containing the real IP or special value `proxy_protocol` when using PROXY protocol
 
-You will find more settings about real IP in the [settings section](settings.md#real-ip) of the documentation.
+You will find more settings about real IP in the [settings section](features.md#real-ip) of the documentation.
 
 === "HTTP header"
 
@@ -686,7 +686,7 @@ REDIS_DATABASE=0
 - **`REDIS_PORT`**: Specify the port number for the Redis server. Defaults to `6379`.
 - **`REDIS_DATABASE`**: Specify the Redis database number to use. Defaults to `0`.
 
-If you require more advanced settings, such as authentication, SSL/TLS support, or Sentinel mode, refer to the [Redis plugin settings documentation](settings.md#redis) for detailed guidance.
+If you require more advanced settings, such as authentication, SSL/TLS support, or Sentinel mode, refer to the [Redis plugin settings documentation](features.md#redis) for detailed guidance.
 
 ### Protect UDP/TCP applications
 
@@ -696,7 +696,7 @@ If you require more advanced settings, such as authentication, SSL/TLS support, 
 
 BunkerWeb offers the capability to function as a **generic UDP/TCP reverse proxy**, allowing you to protect any network-based applications operating at least on layer 4 of the OSI model. Instead of utilizing the "classical" HTTP module, BunkerWeb leverages the [stream module](https://nginx.org/en/docs/stream/ngx_stream_core_module.html) of NGINX.
 
-It's important to note that **not all settings and security features are available when using the stream module**. Additional information on this can be found in the [settings](settings.md) sections of the documentation.
+It's important to note that **not all settings and security features are available when using the stream module**. Additional information on this can be found in the [settings](features.md) sections of the documentation.
 
 Configuring a basic reverse proxy is quite similar to the HTTP setup, as it involves using the same settings: `USE_REVERSE_PROXY=yes` and `REVERSE_PROXY_HOST=myapp:9000`. Even when BunkerWeb is positioned behind a Load Balancer, the settings remain the same (with **PROXY protocol** being the supported option due to evident reasons).
 
@@ -707,7 +707,7 @@ On top of that, the following specific settings are used :
 - `LISTEN_STREAM_PORT_SSL=4343` : the listening "ssl/tls" port that BunkerWeb will listen on
 - `USE_UDP=no` : listen for and forward UDP packets instead of TCP
 
-For complete list of settings regarding `stream` mode, please refer to the [settings](settings.md) section of the documentation.
+For complete list of settings regarding `stream` mode, please refer to the [settings](features.md) section of the documentation.
 
 !!! tip "multiple listening ports"
 
@@ -1670,10 +1670,10 @@ By default, BunkerWeb will only listen on IPv4 addresses and won't use IPv6 for 
 
 ## Security tuning
 
-BunkerWeb offers many security features that you can configure with [settings](settings.md). Even if the default values of settings ensure a minimal "security by default", we strongly recommend you tune them. By doing so you will be able to ensure the security level of your choice but also manage false positives.
+BunkerWeb offers many security features that you can configure with [settings](features.md). Even if the default values of settings ensure a minimal "security by default", we strongly recommend you tune them. By doing so you will be able to ensure the security level of your choice but also manage false positives.
 
 !!! tip "Other settings"
-    This section only focuses on security tuning, see the [settings section](settings.md) of the documentation for other settings.
+    This section only focuses on security tuning, see the [settings section](features.md) of the documentation for other settings.
 
 <figure markdown>
   ![Overview](assets/img/core-order.svg){ align=center }
@@ -1692,7 +1692,7 @@ The **Security Mode** setting determines how BunkerWeb handles detected threats.
 !!! tip "Detect mode"
     Switching to `detect` mode can help you identify and resolve potential false positives without disrupting legitimate clients. Once these issues are addressed, you can confidently switch back to `block` mode for full protection.
 
-
+<!--
 ### HTTP protocol
 
 #### Deny status code
@@ -2437,7 +2437,7 @@ Here is the list of related settings :
 | `ANTIBOT_MCAPTCHA_SECRET`   |                             | multisite | no       | Secret for mCaptcha challenge.                                                                                                 |
 | `ANTIBOT_MCAPTCHA_URL`      | `https://demo.mcaptcha.org` | multisite | no       | Domain to use for mCaptcha challenge.                                                                                          |
 
-Please note that antibot feature is using a cookie to maintain a session with clients. If you are using BunkerWeb in a clustered environment, you will need to set the `SESSIONS_SECRET` and `SESSIONS_NAME` settings to another value than the default one (which is `random`). You will find more info about sessions [here](settings.md#sessions).
+Please note that antibot feature is using a cookie to maintain a session with clients. If you are using BunkerWeb in a clustered environment, you will need to set the `SESSIONS_SECRET` and `SESSIONS_NAME` settings to another value than the default one (which is `random`). You will find more info about sessions [here](features.md#sessions).
 
 #### Captcha
 
@@ -3473,4 +3473,4 @@ With this plugin, administrators can effortlessly create, update, and disable us
 <figure markdown>
   ![Activities page](assets/img/user-manager-activities.png){ align=center }
   <figcaption>User Manager - Activities page</figcaption>
-</figure>
+</figure> -->

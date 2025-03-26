@@ -67,7 +67,7 @@ You can also use the search bar and directly specify a setting name :
 
 !!! info "Going further"
 
-    The complete list of available settings with descriptions and possible values is available in the [settings section](settings.md) of the documentation.
+    The complete list of available settings with descriptions and possible values is available in the [settings section](features.md) of the documentation.
 
 !!! info "Settings generator tool"
 

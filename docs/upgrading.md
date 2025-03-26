@@ -4,7 +4,7 @@
 
 !!! warning "Read me first"
 
-    We often add new features and settings to BunkerWeb. We recommend you read the [settings](settings.md) sections of the documentation or the GitHub releases to see what's new.
+    We often add new features and settings to BunkerWeb. We recommend you read the [settings](features.md) sections of the documentation or the GitHub releases to see what's new.
 
 ### Procedure
 
@@ -381,7 +381,7 @@ While the settings are now declared on the Scheduler container, **you'll still n
 
 #### Default values and new settings
 
-We tried our best not to change default value but we have added many other settings. It's highly recommended to read the [security tuning](advanced.md#security-tuning) and [settings](settings.md) sections of the documentation.
+We tried our best not to change default value but we have added many other settings. It's highly recommended to read the [security tuning](advanced.md#security-tuning) and [settings](features.md) sections of the documentation.
 
 #### Templates
 
