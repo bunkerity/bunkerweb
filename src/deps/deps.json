@@ -268,9 +268,9 @@
     },
     {
       "id": "ngx_devel_kit",
-      "name": "Nginx devel kit v0.3.3",
+      "name": "Nginx devel kit v0.3.4",
       "url": "https://github.com/vision5/ngx_devel_kit.git",
-      "commit": "91e30eb05085e7f9762f130cbb883a0e753cf74d",
+      "commit": "bd44d16302273052d6005d7bdb55f74e23813de3",
       "post_install": "rm -r src/deps/src/ngx_devel_kit/examples"
     },
     {

@@ -13,8 +13,8 @@
 #include    <ngx_http.h>
 
 
-#define     ndk_version     2015
-#define     NDK_VERSION     "0.2.15"
+#define     ndk_version     3004
+#define     NDK_VERSION     "0.3.4"
 
 
 #if (NGX_DEBUG)
@@ -27,11 +27,6 @@
 #endif
 #endif
 
-
-#if !(NDK)
-#error At least one module requires the Nginx Development Kit to be compiled with \
-the source (add --with-module=/path/to/devel/kit/src to configure command)
-#endif
 
 #include    <ndk_config.h>
 
