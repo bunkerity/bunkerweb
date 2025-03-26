@@ -189,7 +189,7 @@
       "name": "lua-upstream-nginx-module v0.07",
       "url": "https://github.com/openresty/lua-upstream-nginx-module.git",
       "commit": "a84fbbb3d3b07684c232f642eccbc5334bafcbfe",
-      "post_install": "rm -r src/deps/lua-upstream-nginx-module/t"
+      "post_install": "rm -r src/deps/src/lua-upstream-nginx-module/t/t"
     },
     {
       "id": "luajit",
