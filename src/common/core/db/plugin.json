@@ -1,6 +1,6 @@
 {
   "id": "db",
-  "name": "DB",
+  "name": "Database",
   "description": "Integrate easily the Database.",
   "version": "1.0",
   "stream": "yes",
