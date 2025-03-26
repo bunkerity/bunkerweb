@@ -48,10 +48,14 @@ class CloudflareProvider(Provider):
     """Cloudflare DNS provider."""
 
     dns_cloudflare_api_token: str
+    dns_cloudflare_email: str
+    dns_cloudflare_api_key: str
 
     _validate_aliases = alias_model_validator(
         {
             "dns_cloudflare_api_token": ("dns_cloudflare_api_token", "cloudflare_api_token", "api_token"),
+            "dns_cloudflare_email": ("dns_cloudflare_email", "cloudflare_email", "email"),
+            "dns_cloudflare_api_key": ("dns_cloudflare_api_key", "cloudflare_api_key", "api_key"),
         }
     )
 
