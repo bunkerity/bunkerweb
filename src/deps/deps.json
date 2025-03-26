@@ -227,9 +227,9 @@
     },
     {
       "id": "mbedtls",
-      "name": "Mbed TLS v3.6.2",
+      "name": "Mbed TLS v3.6.3",
       "url": "https://github.com/Mbed-TLS/mbedtls.git",
-      "commit": "107ea89daaefb9867ea9121002fbbdf926780e98",
+      "commit": "22098d41c6620ce07cf8a0134d37302355e1e5ef",
       "post_install": "rm -r src/deps/src/mbedtls/tests src/deps/src/mbedtls/docs src/deps/src/mbedtls/programs"
     },
     {

@@ -28,18 +28,11 @@ EOF
 # Copyright The Mbed TLS Contributors
 # SPDX-License-Identifier: Apache-2.0 OR GPL-2.0-or-later
 
+# This script must be invoked from the project's root.
+
 set -eu
 
-# Project detection
-PROJECT_NAME_FILE='./scripts/project_name.txt'
-if read -r PROJECT_NAME < "$PROJECT_NAME_FILE"; then :; else
-    echo "$PROJECT_NAME_FILE does not exist... Exiting..." >&2
-    exit 1
-fi
-
-in_mbedtls_repo () {
-    test "$PROJECT_NAME" = "Mbed TLS"
-}
+. framework/scripts/project_detection.sh
 
 # Collect stats and build a HTML report.
 lcov_library_report () {
