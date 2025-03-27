@@ -53,9 +53,18 @@ def get_readme_content(plugin_dir):
     return None
 
 
+def get_global_readme_content():
+    """Read README.md content for global settings if it exists."""
+    readme_path = Path("src/common/README.md")
+    if readme_path.exists():
+        with readme_path.open("r") as f:
+            return f.read()
+    return None
+
+
 doc = StringIO()
 
-print("# Core\n", file=doc)
+print("# Features\n", file=doc)
 print(
     '!!! info "Settings generator tool"\n\n    To help you tune BunkerWeb, we have made an easy-to-use settings generator tool available at [config.bunkerweb.io](https://config.bunkerweb.io/?utm_campaign=self&utm_source=doc).\n',
     file=doc,
@@ -66,23 +75,28 @@ print(
     + " Please follow the instructions for your own [integration](integrations.md) on how to apply the settings.\n",
     file=doc,
 )
-print(
-    "As a general rule when multisite mode is enabled, if you want to apply settings with multisite context to a specific server, you will need to add the primary"
-    + " (first) server name as a prefix like `www.example.com_USE_ANTIBOT=captcha` or `myapp.example.com_USE_GZIP=yes` for example.\n",
-    file=doc,
-)
-print(
-    'When settings are considered as "multiple", it means that you can have multiple groups of settings for the same feature by adding numbers as suffix like `REVERSE_PROXY_URL_1=/subdir`,'
-    + " `REVERSE_PROXY_HOST_1=http://myhost1`, `REVERSE_PROXY_URL_2=/anotherdir`, `REVERSE_PROXY_HOST_2=http://myhost2`, ... for example.\n",
-    file=doc,
-)
+# print(
+#     "As a general rule when multisite mode is enabled, if you want to apply settings with multisite context to a specific server, you will need to add the primary"
+#     + " (first) server name as a prefix like `www.example.com_USE_ANTIBOT=captcha` or `myapp.example.com_USE_GZIP=yes` for example.\n",
+#     file=doc,
+# )
+# print(
+#     'When settings are considered as "multiple", it means that you can have multiple groups of settings for the same feature by adding numbers as suffix like `REVERSE_PROXY_URL_1=/subdir`,'
+#     + " `REVERSE_PROXY_HOST_1=http://myhost1`, `REVERSE_PROXY_URL_2=/anotherdir`, `REVERSE_PROXY_HOST_2=http://myhost2`, ... for example.\n",
+#     file=doc,
+# )
 
 # Print global settings
 print("## Global settings\n", file=doc)
 print(f"\n{stream_support('partial')}\n", file=doc)
-with open("src/common/settings.json", "r") as f:
-    print(print_md_table(loads(f.read())), file=doc)
-    print(file=doc)
+# Check if README.md exists for global settings and use its content instead
+global_readme = get_global_readme_content()
+if global_readme:
+    print(global_readme, file=doc)
+else:
+    with open("src/common/settings.json", "r") as f:
+        print(print_md_table(loads(f.read())), file=doc)
+        print(file=doc)
 
 # Get core plugins
 core_settings = {}

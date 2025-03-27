@@ -107,3 +107,30 @@ Follow these steps to configure and use the Redis plugin:
     REDIS_KEEPALIVE_IDLE: "60"
     REDIS_KEEPALIVE_POOL: "5"
     ```
+
+### Redis Best Practices
+
+When using Redis with BunkerWeb, consider these best practices to ensure optimal performance, security, and reliability:
+
+#### Memory Management
+- **Monitor memory usage**: Configure Redis with appropriate `maxmemory` settings to prevent out-of-memory errors
+- **Set an eviction policy**: Use `maxmemory-policy` (e.g., `volatile-lru` or `allkeys-lru`) appropriate for your use case
+- **Avoid large keys**: Keep individual Redis keys reasonably sized to prevent performance degradation
+
+#### Data Persistence
+- **Enable RDB snapshots**: Configure periodic snapshots for data persistence without significant performance impact
+- **Consider AOF**: For critical data, enable AOF (Append-Only File) persistence with an appropriate fsync policy
+- **Backup strategy**: Implement regular Redis backups as part of your disaster recovery plan
+
+#### Performance Optimization
+- **Connection pooling**: BunkerWeb already implements this, but ensure other applications follow this practice
+- **Pipelining**: When possible, use pipelining for bulk operations to reduce network overhead
+- **Avoid expensive operations**: Be cautious with commands like KEYS in production environments
+- **Benchmark your workload**: Use redis-benchmark to test your specific workload patterns
+
+### Further Resources
+
+- [Redis Documentation](https://redis.io/documentation)
+- [Redis Security Guide](https://redis.io/topics/security)
+- [Redis High Availability](https://redis.io/topics/sentinel)
+- [Redis Persistence](https://redis.io/topics/persistence)
