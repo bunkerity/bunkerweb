@@ -1,6 +1,6 @@
 The Auth Basic plugin provides HTTP basic authentication to protect your website or specific resources. This feature adds an extra layer of security by requiring users to enter a username and password before they can access the protected content. This type of authentication is simple to implement and widely supported by browsers.
 
-**Here's how the Auth Basic feature works:**
+**How it works:**
 
 1. When a user tries to access a protected area of your website, the server sends a challenge requesting authentication.
 2. The browser displays a login dialog box prompting the user for a username and password.

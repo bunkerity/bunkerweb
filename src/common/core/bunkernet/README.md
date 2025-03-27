@@ -1,6 +1,6 @@
 The BunkerNet plugin enables collective threat intelligence sharing between BunkerWeb instances, creating a powerful network of protection against malicious actors. By participating in BunkerNet, your instance both benefits from and contributes to a global database of known threats, enhancing security for the entire BunkerWeb community.
 
-**Here's how the BunkerNet feature works:**
+**How it works:**
 
 1. Your BunkerWeb instance automatically registers with the BunkerNet API to receive a unique identifier.
 2. When your instance detects and blocks a malicious IP address or behavior, it anonymously reports this threat to BunkerNet.

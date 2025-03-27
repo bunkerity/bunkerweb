@@ -1692,55 +1692,7 @@ The **Security Mode** setting determines how BunkerWeb handles detected threats.
 !!! tip "Detect mode"
     Switching to `detect` mode can help you identify and resolve potential false positives without disrupting legitimate clients. Once these issues are addressed, you can confidently switch back to `block` mode for full protection.
 
-<!--
 ### HTTP protocol
-
-#### Deny status code
-
-STREAM support :warning:
-
-The first step in handling denied client access is defining the appropriate action. This can be configured using the `DENY_HTTP_STATUS` setting, which supports the following values:
-
-- **`403`**: Sends a standard "Forbidden" HTTP status code. A web page or custom content will be displayed to the client.
-- **`444`**: Silently closes the connection without displaying any web page or custom content.
-
-The default value is `403`. Setting it to `444` is recommended only if you have thoroughly addressed false positives, are experienced with BunkerWeb, and require a higher level of security.
-
-In **stream mode**, this setting is always enforced as `444`, meaning the connection will be closed, regardless of the configured value.
-
-#### Default server
-
-STREAM support :warning:
-
-In the HTTP protocol, the `Host` header specifies the server the client intends to contact. However, this header is optional and may be missing or set to an unknown value. This scenario is common, as many bots scan the internet to exploit services or perform fingerprinting.
-
-To block requests with undefined or unknown `Host` values, you can enable the `DISABLE_DEFAULT_SERVER` setting by setting it to `yes` (default: `no`). When enabled, such requests are silently denied by closing the TCP connection using NGINX's special `444` status code, meaning no response is sent to the client.
-
-For stricter security, you can also close SSL/TLS connections when the [Server Name Indication (SNI)](https://en.wikipedia.org/wiki/Server_Name_Indication) is undefined or unknown by setting `DISABLE_DEFAULT_SERVER_STRICT_SNI` to `yes` (default: `no`). This approach blocks attackers at the SSL/TLS level. However, it may cause issues if your BunkerWeb instance is behind a reverse proxy that forwards HTTPS requests without SNI.
-
-#### Allowed methods
-
-STREAM support :x:
-
-You can define the allowed HTTP methods using the `ALLOWED_METHODS` setting, listing them separated by a `|` (default: `GET|POST|HEAD`). If a client sends a request using a method not listed, they will receive a **405 - Method Not Allowed** response.
-
-!!! abstract "CORS requests"
-
-    You should also include `OPTIONS` to accommodate CORS pre-flight requests if needed.
-
-#### Max sizes
-
-STREAM support :x:
-
-The maximum request body size can be controlled using the `MAX_CLIENT_SIZE` setting (default: `10m`). Accepted values follow the syntax described [here](https://nginx.org/en/docs/syntax.html).
-
-To allow a request body of unlimited size, you can use the special value `0` (not recommended for security and performance reasons).
-
-#### Serve files
-
-STREAM support :x:
-
-To prevent serving files from the `www` folder, set the `SERVE_FILES` option to `no` (default: `yes`). Using `no` is recommended if BunkerWeb is configured as a reverse proxy.
 
 #### Headers
 
@@ -3473,4 +3425,4 @@ With this plugin, administrators can effortlessly create, update, and disable us
 <figure markdown>
   ![Activities page](assets/img/user-manager-activities.png){ align=center }
   <figcaption>User Manager - Activities page</figcaption>
-</figure> -->
+</figure>

@@ -2,7 +2,7 @@ The Brotli plugin enables efficient compression of HTTP responses using the Brot
 
 Compared to other compression methods like gzip, Brotli typically achieves higher compression ratios, resulting in smaller file sizes and faster content delivery.
 
-**Here's how the Brotli feature works:**
+**How it works:**
 
 1. When a client requests content from your website, BunkerWeb checks if the client supports Brotli compression.
 2. If supported, BunkerWeb compresses the response using the Brotli algorithm at your configured compression level.

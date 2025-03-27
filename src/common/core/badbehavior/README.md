@@ -1,6 +1,6 @@
 The Bad Behavior plugin protects your website by automatically detecting and banning IP addresses that generate too many errors or "bad" HTTP status codes within a specified period of time. This helps defend against brute force attacks, web scrapers, vulnerability scanners, and other malicious activities that might generate numerous error responses.
 
-**Here's how the Bad Behavior feature works:**
+**How it works:**
 
 1. The plugin monitors HTTP responses from your site.
 2. When a visitor receives a "bad" HTTP status code (like 400, 401, 403, 404, etc.), the counter for that IP address is incremented.

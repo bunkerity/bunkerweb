@@ -1,6 +1,6 @@
 Attackers often use automated tools (bots) to try and exploit your website. To protect against this, BunkerWeb includes an "Antibot" feature that challenges users to prove they are human. If a user successfully completes the challenge, they are granted access to your website. This feature is disabled by default.
 
-**Here's a breakdown of how the Antibot feature works:**
+**How it works:**
 
 1.  When a user visits your site, BunkerWeb checks if they've already passed the antibot challenge.
 2.  If not, the user is redirected to a challenge page.
@@ -22,46 +22,81 @@ Follow these steps to enable and configure the Antibot feature:
 !!! warning "Session Configuration in Clustered Environments"
     The antibot feature uses cookies to track whether a user has completed the challenge. If you are running BunkerWeb in a clustered environment (multiple BunkerWeb instances), you **must** configure session management properly. This involves setting the `SESSIONS_SECRET` and `SESSIONS_NAME` settings to the **same values** across all BunkerWeb instances. If you don't do this, users may be repeatedly prompted to complete the antibot challenge. You can find more information about session configuration [here](#sessions).
 
+### Common Settings
+
+The following settings are shared across all challenge mechanisms:
+
+| Setting                | Default      | Context   | Multiple | Description                                                                                                                                         |
+| ---------------------- | ------------ | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ANTIBOT_URI`          | `/challenge` | multisite | no       | **Challenge URL:** The URL where users will be redirected to complete the challenge. Make sure this URL is not used for anything else on your site. |
+| `ANTIBOT_TIME_RESOLVE` | `60`         | multisite | no       | **Challenge Time Limit:** The maximum time (in seconds) a user has to complete the challenge. After this time, a new challenge will be generated.   |
+| `ANTIBOT_TIME_VALID`   | `86400`      | multisite | no       | **Challenge Validity:** How long (in seconds) a completed challenge is valid. After this time, users will have to solve a new challenge.            |
+
 ### Supported Challenge Mechanisms
 
 === "Cookie"
 
-    Sends a cookie to the client and expects it to be returned on subsequent requests.
+    The Cookie challenge is a lightweight mechanism that relies on setting a cookie in the user's browser. When a user accesses the site, the server sends a cookie to the client. On subsequent requests, the server checks for the presence of this cookie to verify that the user is legitimate. This method is simple and effective for basic bot protection without requiring additional user interaction.
+
+    **How it works:**
+
+    1. The server generates a unique cookie and sends it to the client.
+    2. The client must return the cookie in subsequent requests.
+    3. If the cookie is missing or invalid, the user is redirected to the challenge page.
 
     **Configuration Settings:**
 
-    | Setting                | Default      | Context   | Multiple | Description                                                                                                                                         |
-    | ---------------------- | ------------ | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-    | `USE_ANTIBOT`          | `no`         | multisite | no       | **Enable Antibot:** Set to `cookie` to enable the Cookie challenge.                                                                                 |
-    | `ANTIBOT_URI`          | `/challenge` | multisite | no       | **Challenge URL:** The URL where users will be redirected to complete the challenge. Make sure this URL is not used for anything else on your site. |
-    | `ANTIBOT_TIME_RESOLVE` | `60`         | multisite | no       | **Challenge Time Limit:** The maximum time (in seconds) a user has to complete the challenge. After this time, a new challenge will be generated.   |
-    | `ANTIBOT_TIME_VALID`   | `86400`      | multisite | no       | **Challenge Validity:** How long (in seconds) a completed challenge is valid. After this time, users will have to solve a new challenge.            |
+    | Setting       | Default | Context   | Multiple | Description                                                         |
+    | ------------- | ------- | --------- | -------- | ------------------------------------------------------------------- |
+    | `USE_ANTIBOT` | `no`    | multisite | no       | **Enable Antibot:** Set to `cookie` to enable the Cookie challenge. |
+
+    Refer to the [Common Settings](#common-settings) for additional configuration options.
 
 === "JavaScript"
 
-    Requires the client to solve a computational challenge using JavaScript.
+    The JavaScript challenge requires the client to solve a computational task using JavaScript. This mechanism ensures that the client has JavaScript enabled and can execute the required code, which is typically beyond the capability of most bots.
+
+    **How it works:**
+
+    1. The server sends a JavaScript script to the client.
+    2. The script performs a computational task (e.g., hashing) and submits the result back to the server.
+    3. The server verifies the result to confirm the client's legitimacy.
+
+    **Key Features:**
+
+    - The challenge dynamically generates a unique task for each client.
+    - The computational task involves hashing with specific conditions (e.g., finding a hash with a certain prefix).
 
     **Configuration Settings:**
 
-    | Setting                | Default      | Context   | Multiple | Description                                                                                                                                         |
-    | ---------------------- | ------------ | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-    | `USE_ANTIBOT`          | `no`         | multisite | no       | **Enable Antibot:** Set to `javascript` to enable the JavaScript challenge.                                                                         |
-    | `ANTIBOT_URI`          | `/challenge` | multisite | no       | **Challenge URL:** The URL where users will be redirected to complete the challenge. Make sure this URL is not used for anything else on your site. |
-    | `ANTIBOT_TIME_RESOLVE` | `60`         | multisite | no       | **Challenge Time Limit:** The maximum time (in seconds) a user has to complete the challenge. After this time, a new challenge will be generated.   |
-    | `ANTIBOT_TIME_VALID`   | `86400`      | multisite | no       | **Challenge Validity:** How long (in seconds) a completed challenge is valid. After this time, users will have to solve a new challenge.            |
+    | Setting       | Default | Context   | Multiple | Description                                                                 |
+    | ------------- | ------- | --------- | -------- | --------------------------------------------------------------------------- |
+    | `USE_ANTIBOT` | `no`    | multisite | no       | **Enable Antibot:** Set to `javascript` to enable the JavaScript challenge. |
+
+    Refer to the [Common Settings](#common-settings) for additional configuration options.
 
 === "Captcha"
 
-    Our homemade Captcha mechanism offers a simple yet effective challenge designed and hosted entirely within your BunkerWeb environment. It generates dynamic, image-based challenges that test users' ability to recognize and interpret randomized characters, ensuring automated bots are effectively blocked without the need for any external API calls or third-party services.
+    The Captcha challenge is a homemade mechanism that generates image-based challenges hosted entirely within your BunkerWeb environment. It tests users' ability to recognize and interpret randomized characters, ensuring automated bots are effectively blocked without relying on external services.
+
+    **How it works:**
+
+    1. The server generates a CAPTCHA image containing randomized characters.
+    2. The user must enter the characters displayed in the image into a text field.
+    3. The server validates the user's input against the generated CAPTCHA.
+
+    **Key Features:**
+
+    - Fully self-hosted, eliminating the need for third-party APIs.
+    - Dynamically generated challenges ensure uniqueness for each user session.
 
     **Configuration Settings:**
 
-    | Setting                | Default      | Context   | Multiple | Description                                                                                                                                         |
-    | ---------------------- | ------------ | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-    | `USE_ANTIBOT`          | `no`         | multisite | no       | **Enable Antibot:** Set to `captcha` to enable the Captcha challenge.                                                                               |
-    | `ANTIBOT_URI`          | `/challenge` | multisite | no       | **Challenge URL:** The URL where users will be redirected to complete the challenge. Make sure this URL is not used for anything else on your site. |
-    | `ANTIBOT_TIME_RESOLVE` | `60`         | multisite | no       | **Challenge Time Limit:** The maximum time (in seconds) a user has to complete the challenge. After this time, a new challenge will be generated.   |
-    | `ANTIBOT_TIME_VALID`   | `86400`      | multisite | no       | **Challenge Validity:** How long (in seconds) a completed challenge is valid. After this time, users will have to solve a new challenge.            |
+    | Setting       | Default | Context   | Multiple | Description                                                           |
+    | ------------- | ------- | --------- | -------- | --------------------------------------------------------------------- |
+    | `USE_ANTIBOT` | `no`    | multisite | no       | **Enable Antibot:** Set to `captcha` to enable the Captcha challenge. |
+
+    Refer to the [Common Settings](#common-settings) for additional configuration options.
 
 === "reCAPTCHA"
 
@@ -71,15 +106,14 @@ Follow these steps to enable and configure the Antibot feature:
 
     **Configuration Settings:**
 
-    | Setting                     | Default      | Context   | Multiple | Description                                                                                                                                                                |
-    | --------------------------- | ------------ | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-    | `USE_ANTIBOT`               | `no`         | multisite | no       | **Enable Antibot:** Set to `recaptcha` to enable the reCAPTCHA challenge.                                                                                                  |
-    | `ANTIBOT_RECAPTCHA_SITEKEY` |              | multisite | no       | **reCAPTCHA Site Key:** Your reCAPTCHA site key (get this from Google).                                                                                                    |
-    | `ANTIBOT_RECAPTCHA_SECRET`  |              | multisite | no       | **reCAPTCHA Secret Key:** Your reCAPTCHA secret key (get this from Google).                                                                                                |
-    | `ANTIBOT_RECAPTCHA_SCORE`   | `0.7`        | multisite | no       | **reCAPTCHA Minimum Score:** The minimum score required for reCAPTCHA to pass a user (only for reCAPTCHA v3). A higher score means more confidence that the user is human. |
-    | `ANTIBOT_URI`               | `/challenge` | multisite | no       | **Challenge URL:** The URL where users will be redirected to complete the challenge. Make sure this URL is not used for anything else on your site.                        |
-    | `ANTIBOT_TIME_RESOLVE`      | `60`         | multisite | no       | **Challenge Time Limit:** The maximum time (in seconds) a user has to complete the challenge. After this time, a new challenge will be generated.                          |
-    | `ANTIBOT_TIME_VALID`        | `86400`      | multisite | no       | **Challenge Validity:** How long (in seconds) a completed challenge is valid. After this time, users will have to solve a new challenge.                                   |
+    | Setting                     | Default | Context   | Multiple | Description                                                                                                   |
+    | --------------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------- |
+    | `USE_ANTIBOT`               | `no`    | multisite | no       | **Enable Antibot:** Set to `recaptcha` to enable the reCAPTCHA challenge.                                     |
+    | `ANTIBOT_RECAPTCHA_SITEKEY` |         | multisite | no       | **reCAPTCHA Site Key:** Your reCAPTCHA site key (get this from Google).                                       |
+    | `ANTIBOT_RECAPTCHA_SECRET`  |         | multisite | no       | **reCAPTCHA Secret Key:** Your reCAPTCHA secret key (get this from Google).                                   |
+    | `ANTIBOT_RECAPTCHA_SCORE`   | `0.7`   | multisite | no       | **reCAPTCHA Minimum Score:** The minimum score required for reCAPTCHA to pass a user (only for reCAPTCHA v3). |
+
+    Refer to the [Common Settings](#common-settings) for additional configuration options.
 
 === "hCaptcha"
 
@@ -89,14 +123,13 @@ Follow these steps to enable and configure the Antibot feature:
 
     **Configuration Settings:**
 
-    | Setting                    | Default      | Context   | Multiple | Description                                                                                                                                         |
-    | -------------------------- | ------------ | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-    | `USE_ANTIBOT`              | `no`         | multisite | no       | **Enable Antibot:** Set to `hcaptcha` to enable the hCaptcha challenge.                                                                             |
-    | `ANTIBOT_HCAPTCHA_SITEKEY` |              | multisite | no       | **hCaptcha Site Key:** Your hCaptcha site key (get this from hCaptcha).                                                                             |
-    | `ANTIBOT_HCAPTCHA_SECRET`  |              | multisite | no       | **hCaptcha Secret Key:** Your hCaptcha secret key (get this from hCaptcha).                                                                         |
-    | `ANTIBOT_URI`              | `/challenge` | multisite | no       | **Challenge URL:** The URL where users will be redirected to complete the challenge. Make sure this URL is not used for anything else on your site. |
-    | `ANTIBOT_TIME_RESOLVE`     | `60`         | multisite | no       | **Challenge Time Limit:** The maximum time (in seconds) a user has to complete the challenge. After this time, a new challenge will be generated.   |
-    | `ANTIBOT_TIME_VALID`       | `86400`      | multisite | no       | **Challenge Validity:** How long (in seconds) a completed challenge is valid. After this time, users will have to solve a new challenge.            |
+    | Setting                    | Default | Context   | Multiple | Description                                                                 |
+    | -------------------------- | ------- | --------- | -------- | --------------------------------------------------------------------------- |
+    | `USE_ANTIBOT`              | `no`    | multisite | no       | **Enable Antibot:** Set to `hcaptcha` to enable the hCaptcha challenge.     |
+    | `ANTIBOT_HCAPTCHA_SITEKEY` |         | multisite | no       | **hCaptcha Site Key:** Your hCaptcha site key (get this from hCaptcha).     |
+    | `ANTIBOT_HCAPTCHA_SECRET`  |         | multisite | no       | **hCaptcha Secret Key:** Your hCaptcha secret key (get this from hCaptcha). |
+
+    Refer to the [Common Settings](#common-settings) for additional configuration options.
 
 === "Turnstile"
 
@@ -106,14 +139,13 @@ Follow these steps to enable and configure the Antibot feature:
 
     **Configuration Settings:**
 
-    | Setting                     | Default      | Context   | Multiple | Description                                                                                                                                         |
-    | --------------------------- | ------------ | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-    | `USE_ANTIBOT`               | `no`         | multisite | no       | **Enable Antibot:** Set to `turnstile` to enable the Turnstile challenge.                                                                           |
-    | `ANTIBOT_TURNSTILE_SITEKEY` |              | multisite | no       | **Turnstile Site Key:** Your Turnstile site key (get this from Cloudflare).                                                                         |
-    | `ANTIBOT_TURNSTILE_SECRET`  |              | multisite | no       | **Turnstile Secret Key:** Your Turnstile secret key (get this from Cloudflare).                                                                     |
-    | `ANTIBOT_URI`               | `/challenge` | multisite | no       | **Challenge URL:** The URL where users will be redirected to complete the challenge. Make sure this URL is not used for anything else on your site. |
-    | `ANTIBOT_TIME_RESOLVE`      | `60`         | multisite | no       | **Challenge Time Limit:** The maximum time (in seconds) a user has to complete the challenge. After this time, a new challenge will be generated.   |
-    | `ANTIBOT_TIME_VALID`        | `86400`      | multisite | no       | **Challenge Validity:** How long (in seconds) a completed challenge is valid. After this time, users will have to solve a new challenge.            |
+    | Setting                     | Default | Context   | Multiple | Description                                                                     |
+    | --------------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------- |
+    | `USE_ANTIBOT`               | `no`    | multisite | no       | **Enable Antibot:** Set to `turnstile` to enable the Turnstile challenge.       |
+    | `ANTIBOT_TURNSTILE_SITEKEY` |         | multisite | no       | **Turnstile Site Key:** Your Turnstile site key (get this from Cloudflare).     |
+    | `ANTIBOT_TURNSTILE_SECRET`  |         | multisite | no       | **Turnstile Secret Key:** Your Turnstile secret key (get this from Cloudflare). |
+
+    Refer to the [Common Settings](#common-settings) for additional configuration options.
 
 === "mCaptcha"
 
@@ -125,12 +157,100 @@ Follow these steps to enable and configure the Antibot feature:
 
     **Configuration Settings:**
 
-    | Setting                    | Default                     | Context   | Multiple | Description                                                                                                                                         |
-    | -------------------------- | --------------------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-    | `USE_ANTIBOT`              | `no`                        | multisite | no       | **Enable Antibot:** Set to `mcaptcha` to enable the mCaptcha challenge.                                                                             |
-    | `ANTIBOT_MCAPTCHA_SITEKEY` |                             | multisite | no       | **mCaptcha Site Key:** Your mCaptcha site key (get this from mCaptcha).                                                                             |
-    | `ANTIBOT_MCAPTCHA_SECRET`  |                             | multisite | no       | **mCaptcha Secret Key:** Your mCaptcha secret key (get this from mCaptcha).                                                                         |
-    | `ANTIBOT_MCAPTCHA_URL`     | `https://demo.mcaptcha.org` | multisite | no       | **mCaptcha Domain:** The domain to use for the mCaptcha challenge. Generally, you should leave this as the default.                                 |
-    | `ANTIBOT_URI`              | `/challenge`                | multisite | no       | **Challenge URL:** The URL where users will be redirected to complete the challenge. Make sure this URL is not used for anything else on your site. |
-    | `ANTIBOT_TIME_RESOLVE`     | `60`                        | multisite | no       | **Challenge Time Limit:** The maximum time (in seconds) a user has to complete the challenge. After this time, a new challenge will be generated.   |
-    | `ANTIBOT_TIME_VALID`       | `86400`                     | multisite | no       | **Challenge Validity:** How long (in seconds) a completed challenge is valid. After this time, users will have to solve a new challenge.            |
+    | Setting                    | Default                     | Context   | Multiple | Description                                                                 |
+    | -------------------------- | --------------------------- | --------- | -------- | --------------------------------------------------------------------------- |
+    | `USE_ANTIBOT`              | `no`                        | multisite | no       | **Enable Antibot:** Set to `mcaptcha` to enable the mCaptcha challenge.     |
+    | `ANTIBOT_MCAPTCHA_SITEKEY` |                             | multisite | no       | **mCaptcha Site Key:** Your mCaptcha site key (get this from mCaptcha).     |
+    | `ANTIBOT_MCAPTCHA_SECRET`  |                             | multisite | no       | **mCaptcha Secret Key:** Your mCaptcha secret key (get this from mCaptcha). |
+    | `ANTIBOT_MCAPTCHA_URL`     | `https://demo.mcaptcha.org` | multisite | no       | **mCaptcha Domain:** The domain to use for the mCaptcha challenge.          |
+
+    Refer to the [Common Settings](#common-settings) for additional configuration options.
+
+### Example Configurations
+
+=== "Cookie Challenge"
+
+    Example configuration for enabling the Cookie challenge:
+
+    ```yaml
+    USE_ANTIBOT: "cookie"
+    ANTIBOT_URI: "/challenge"
+    ANTIBOT_TIME_RESOLVE: "60"
+    ANTIBOT_TIME_VALID: "86400"
+    ```
+
+=== "JavaScript Challenge"
+
+    Example configuration for enabling the JavaScript challenge:
+
+    ```yaml
+    USE_ANTIBOT: "javascript"
+    ANTIBOT_URI: "/challenge"
+    ANTIBOT_TIME_RESOLVE: "60"
+    ANTIBOT_TIME_VALID: "86400"
+    ```
+
+=== "Captcha Challenge"
+
+    Example configuration for enabling the Captcha challenge:
+
+    ```yaml
+    USE_ANTIBOT: "captcha"
+    ANTIBOT_URI: "/challenge"
+    ANTIBOT_TIME_RESOLVE: "60"
+    ANTIBOT_TIME_VALID: "86400"
+    ```
+
+=== "reCAPTCHA Challenge"
+
+    Example configuration for enabling the reCAPTCHA challenge:
+
+    ```yaml
+    USE_ANTIBOT: "recaptcha"
+    ANTIBOT_RECAPTCHA_SITEKEY: "your-site-key"
+    ANTIBOT_RECAPTCHA_SECRET: "your-secret-key"
+    ANTIBOT_RECAPTCHA_SCORE: "0.7"
+    ANTIBOT_URI: "/challenge"
+    ANTIBOT_TIME_RESOLVE: "60"
+    ANTIBOT_TIME_VALID: "86400"
+    ```
+
+=== "hCaptcha Challenge"
+
+    Example configuration for enabling the hCaptcha challenge:
+
+    ```yaml
+    USE_ANTIBOT: "hcaptcha"
+    ANTIBOT_HCAPTCHA_SITEKEY: "your-site-key"
+    ANTIBOT_HCAPTCHA_SECRET: "your-secret-key"
+    ANTIBOT_URI: "/challenge"
+    ANTIBOT_TIME_RESOLVE: "60"
+    ANTIBOT_TIME_VALID: "86400"
+    ```
+
+=== "Turnstile Challenge"
+
+    Example configuration for enabling the Turnstile challenge:
+
+    ```yaml
+    USE_ANTIBOT: "turnstile"
+    ANTIBOT_TURNSTILE_SITEKEY: "your-site-key"
+    ANTIBOT_TURNSTILE_SECRET: "your-secret-key"
+    ANTIBOT_URI: "/challenge"
+    ANTIBOT_TIME_RESOLVE: "60"
+    ANTIBOT_TIME_VALID: "86400"
+    ```
+
+=== "mCaptcha Challenge"
+
+    Example configuration for enabling the mCaptcha challenge:
+
+    ```yaml
+    USE_ANTIBOT: "mcaptcha"
+    ANTIBOT_MCAPTCHA_SITEKEY: "your-site-key"
+    ANTIBOT_MCAPTCHA_SECRET: "your-secret-key"
+    ANTIBOT_MCAPTCHA_URL: "https://demo.mcaptcha.org"
+    ANTIBOT_URI: "/challenge"
+    ANTIBOT_TIME_RESOLVE: "60"
+    ANTIBOT_TIME_VALID: "86400"
+    ```

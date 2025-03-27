@@ -2,7 +2,7 @@ The Greylist plugin provides a flexible security approach that allows access to 
 
 Unlike traditional blacklist/whitelist approaches that completely block or allow access, greylisting creates a middle ground where certain visitors get access while still being subject to security checks.
 
-**Here's how the Greylist feature works:**
+**How it works:**
 
 1. You define criteria for visitors who should be "greylisted" (*IP addresses, networks, rDNS, ASN, User-Agent, or URI patterns*).
 2. When a visitor matches any of these criteria, they are allowed access to your site while the other security features remain active.

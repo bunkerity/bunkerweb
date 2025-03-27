@@ -1,6 +1,6 @@
 The DNSBL (DNS-based Blacklist) plugin enables protection against known malicious IP addresses by checking client IPs against external DNSBL servers. This feature helps guard your website against spam, botnets, and various types of cyber threats by leveraging community-maintained lists of problematic IP addresses.
 
-**Here's how the DNSBL feature works:**
+**How it works:**
 
 1. When a visitor connects to your website, BunkerWeb checks their IP address against configured DNSBL servers.
 2. The check is performed by sending a reverse DNS query to each DNSBL server with the visitor's IP address.

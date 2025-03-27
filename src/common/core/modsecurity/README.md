@@ -1,6 +1,6 @@
 The ModSecurity plugin integrates the powerful [ModSecurity](https://modsecurity.org) Web Application Firewall (WAF) into BunkerWeb. This integration delivers robust protection against a wide range of web attacks by leveraging the [OWASP Core Rule Set (CRS)](https://coreruleset.org) to detect and block threats such as SQL injection, cross-site scripting (XSS), local file inclusion, and more.
 
-**How the ModSecurity feature works:**
+**How it works:**
 
 1. When a request is received, ModSecurity evaluates it against the active rule set.
 2. The OWASP Core Rule Set inspects headers, cookies, URL parameters, and body content.

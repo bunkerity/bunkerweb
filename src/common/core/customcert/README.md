@@ -1,6 +1,6 @@
 The Custom SSL certificate plugin allows you to use your own SSL/TLS certificates with BunkerWeb instead of the automatically generated ones. This feature is particularly useful when you have existing certificates from a trusted Certificate Authority (CA), need to use certificates with specific configurations, or want to maintain consistent certificate management across your infrastructure.
 
-**Here's how the Custom SSL certificate feature works:**
+**How it works:**
 
 1. You provide BunkerWeb with your certificate and private key files, either by specifying file paths or by providing the data in base64-encoded format.
 2. BunkerWeb validates your certificate and key to ensure they're properly formatted and usable.

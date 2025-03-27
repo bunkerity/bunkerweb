@@ -1,6 +1,6 @@
 The HTML Injection plugin enables you to seamlessly add custom HTML code to your website's pages before either the closing `</body>` or `</head>` tags. This feature is particularly useful for adding analytics scripts, tracking pixels, custom JavaScript, CSS styles, or other third-party integrations without modifying your website's source code.
 
-**Here's how the HTML Injection feature works:**
+**How it works:**
 
 1. When a page is served from your website, BunkerWeb examines the HTML response.
 2. If you've configured body injection, BunkerWeb inserts your custom HTML code just before the closing `</body>` tag.

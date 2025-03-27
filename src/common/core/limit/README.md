@@ -1,6 +1,6 @@
 The Limit plugin provides powerful request rate limiting and connection control capabilities for your website. This feature helps protect your services from abuse, denial-of-service attacks, and excessive resource consumption by restricting the number of requests and concurrent connections from individual IP addresses.
 
-**Here's how the Limit feature works:**
+**How it works:**
 
 1. **Rate Limiting:** The plugin tracks the number of requests from each client IP address to specific URLs.
 2. If a client exceeds the configured request rate limit, subsequent requests are temporarily denied.

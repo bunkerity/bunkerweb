@@ -1,6 +1,6 @@
 The Blacklist plugin provides robust protection for your website by allowing you to block access based on various client attributes. This feature helps defend against known malicious entities, scanners, and suspicious visitors by denying access to IPs, networks, reverse DNS entries, ASNs, user agents, and specific URI patterns.
 
-**Here's how the Blacklist feature works:**
+**How it works:**
 
 1. The plugin checks incoming requests against multiple blacklist criteria (*IP addresses, networks, rDNS, ASN, User-Agent, or URI patterns*).
 2. Blacklists can be specified directly in your configuration or loaded from external URLs.

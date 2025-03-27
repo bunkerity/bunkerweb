@@ -1,6 +1,6 @@
 The Backup plugin provides an automatic backup solution to protect your BunkerWeb data. This feature ensures the safety and availability of your important database by creating regular backups according to your preferred schedule. Backups are stored in a designated location and can be easily managed through both automatic processes and manual commands.
 
-**Here's how the Backup feature works:**
+**How it works:**
 
 1. Your database is automatically backed up according to the schedule you set (daily, weekly, or monthly).
 2. Backups are stored in a specified directory on your system.

@@ -6,7 +6,7 @@ The CrowdSec plugin integrates BunkerWeb with the CrowdSec security engine, prov
 
 CrowdSec is a modern, open-source security engine that detects and blocks malicious IP addresses based on behavior analysis and collective intelligence from its community. You can also configure [scenarios](https://docs.crowdsec.net/docs/concepts?utm_source=external-docs&utm_medium=cta&utm_campaign=bunker-web-docs#scenarios) to automatically ban IPs based on suspicious behaviors, benefiting from a crowdsourced blacklist.
 
-**Here's how the CrowdSec feature works:**
+**How it works:**
 
 1. The CrowdSec engine analyzes logs and detects suspicious activities on your infrastructure.
 2. When a malicious activity is detected, CrowdSec creates a "decision" to block the offending IP address.
@@ -98,11 +98,10 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
         networks:
           - bw-universe
           - bw-services
-          - bw-plugins
         logging:
           driver: syslog # Send logs to syslog
           options:
-            syslog-address: "udp://10.10.10.254:514" # The IP address of the syslog service
+            syslog-address: "udp://10.20.30.254:514" # The IP address of the syslog service
 
       bw-scheduler:
         image: bunkerity/bunkerweb-scheduler:1.6.2-rc1
@@ -148,7 +147,7 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
           COLLECTIONS: "crowdsecurity/nginx crowdsecurity/appsec-virtual-patching crowdsecurity/appsec-generic-rules"
           #   COLLECTIONS: "crowdsecurity/nginx" # If you don't want to use the AppSec Component use this line instead
         networks:
-          - bw-plugins
+          - bw-universe
 
       syslog:
         image: balabit/syslog-ng:4.8.0
@@ -165,8 +164,8 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
           - bw-logs:/var/log/bunkerweb # This is the volume used to store the logs
           - ./syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf # This is the syslog-ng configuration file
         networks:
-            bw-plugins:
-              ipv4_address: 10.10.10.254
+            bw-universe:
+              ipv4_address: 10.20.30.254
 
     volumes:
       bw-data:
@@ -185,11 +184,6 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
         name: bw-services
       bw-db:
         name: bw-db
-      bw-plugins:
-        ipam:
-          driver: default
-          config:
-            - subnet: 10.10.10.0/24
     ```
 
 === "Linux"

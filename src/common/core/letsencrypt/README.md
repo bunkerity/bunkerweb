@@ -1,6 +1,6 @@
 The Let's Encrypt plugin simplifies SSL/TLS certificate management by automating the creation, renewal, and configuration of free certificates from Let's Encrypt. This feature enables secure HTTPS connections for your websites without the complexity of manual certificate management, reducing both cost and administrative overhead.
 
-**Here's how the Let's Encrypt feature works:**
+**How it works:**
 
 1. When enabled, BunkerWeb automatically detects the domain names configured for your site.
 2. BunkerWeb requests free SSL/TLS certificates from Let's Encrypt's certificate authority.

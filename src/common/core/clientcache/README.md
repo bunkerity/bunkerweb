@@ -1,6 +1,6 @@
 The Client Cache plugin optimizes website performance by controlling how browsers cache your static content. This feature helps reduce bandwidth usage, server load, and improves page load times by instructing client browsers to store and reuse static assets like images, CSS, and JavaScript files locally instead of requesting them on every page visit.
 
-**Here's how the Client Cache feature works:**
+**How it works:**
 
 1. When enabled, BunkerWeb adds Cache-Control headers to responses for static files.
 2. These headers tell browsers how long they should cache the content locally.

@@ -1,6 +1,6 @@
 The CORS plugin enables Cross-Origin Resource Sharing for your website, allowing controlled access to your resources from different domains. This feature helps you safely share your content with trusted third-party websites while maintaining security by explicitly defining which origins, methods, and headers are permitted.
 
-**Here's how the CORS feature works:**
+**How it works:**
 
 1. When a browser makes a cross-origin request to your website, it first sends a preflight request with the `OPTIONS` method.
 2. BunkerWeb checks if the requesting origin is permitted based on your configuration.

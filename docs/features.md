@@ -58,6 +58,28 @@ STREAM support :warning:
 | `SERVER_NAMES_HASH_BUCKET_SIZE` |                                                                                                                          | global    | no       | Value for the server_names_hash_bucket_size directive.                                                        |
 
 
+## Alerting <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+
+
+STREAM support :x:
+
+Determine a threshold in percentage for a metric and send an alert via email or webhook if it is reached in the defined interval. Monitoring pro plugin must be activated.
+
+| Setting                       | Default | Context | Multiple | Description                                                                                                                        |
+| ----------------------------- | ------- | ------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_ALERTING_WEBHOOK`        | `yes`   | global  | no       | Enable sending the alert via webhook.                                                                                              |
+| `ALERTING_DELAY`              | `350`   | global  | no       | Number of seconds between each check and replacement of values to check for new delay.                                             |
+| `ALERTING_WEBHOOK_URLS`       |         | global  | no       | List of webhook URLs to receive the alert in Markdown (separated by spaces).                                                       |
+| `ALERTING_SMTP_EMAILS`        |         | global  | no       | List of email addresses to receive the alert in HTML format (separated by spaces).                                                 |
+| `ALERTING_SMTP_HOST`          |         | global  | no       | The host server used for SMTP sending.                                                                                             |
+| `ALERTING_SMTP_PORT`          | `465`   | global  | no       | The port used for SMTP. Please note that there are different standards depending on the type of connection (SSL = 465, TLS = 587). |
+| `ALERTING_SMTP_FROM_EMAIL`    |         | global  | no       | The email address used as the sender. Note that 2FA must be disabled for this email address.                                       |
+| `ALERTING_SMTP_FROM_USER`     |         | global  | no       | The user authentication value for sending via the from email address.                                                              |
+| `ALERTING_SMTP_FROM_PASSWORD` |         | global  | no       | The password authentication value for sending via the from email address.                                                          |
+| `ALERTING_SMTP_SSL`           | `SSL`   | global  | no       | Determine whether or not to use a secure connection for SMTP.                                                                      |
+| `ALERTING_METRIC`             |         | global  | yes      | Define the metric to be checked for alerting.                                                                                      |
+| `ALERTING_THRESHOLD`          | `100`   | global  | yes      | Define the threshold in percentage for the alerting metric that must be reached to trigger an alert between interval.              |
+
 ## Anti DDoS <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
@@ -80,7 +102,7 @@ STREAM support :x:
 
 Attackers often use automated tools (bots) to try and exploit your website. To protect against this, BunkerWeb includes an "Antibot" feature that challenges users to prove they are human. If a user successfully completes the challenge, they are granted access to your website. This feature is disabled by default.
 
-**Here's a breakdown of how the Antibot feature works:**
+**How it works:**
 
 1.  When a user visits your site, BunkerWeb checks if they've already passed the antibot challenge.
 2.  If not, the user is redirected to a challenge page.
@@ -102,46 +124,81 @@ Follow these steps to enable and configure the Antibot feature:
 !!! warning "Session Configuration in Clustered Environments"
     The antibot feature uses cookies to track whether a user has completed the challenge. If you are running BunkerWeb in a clustered environment (multiple BunkerWeb instances), you **must** configure session management properly. This involves setting the `SESSIONS_SECRET` and `SESSIONS_NAME` settings to the **same values** across all BunkerWeb instances. If you don't do this, users may be repeatedly prompted to complete the antibot challenge. You can find more information about session configuration [here](#sessions).
 
+### Common Settings
+
+The following settings are shared across all challenge mechanisms:
+
+| Setting                | Default      | Context   | Multiple | Description                                                                                                                                         |
+| ---------------------- | ------------ | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ANTIBOT_URI`          | `/challenge` | multisite | no       | **Challenge URL:** The URL where users will be redirected to complete the challenge. Make sure this URL is not used for anything else on your site. |
+| `ANTIBOT_TIME_RESOLVE` | `60`         | multisite | no       | **Challenge Time Limit:** The maximum time (in seconds) a user has to complete the challenge. After this time, a new challenge will be generated.   |
+| `ANTIBOT_TIME_VALID`   | `86400`      | multisite | no       | **Challenge Validity:** How long (in seconds) a completed challenge is valid. After this time, users will have to solve a new challenge.            |
+
 ### Supported Challenge Mechanisms
 
 === "Cookie"
 
-    Sends a cookie to the client and expects it to be returned on subsequent requests.
+    The Cookie challenge is a lightweight mechanism that relies on setting a cookie in the user's browser. When a user accesses the site, the server sends a cookie to the client. On subsequent requests, the server checks for the presence of this cookie to verify that the user is legitimate. This method is simple and effective for basic bot protection without requiring additional user interaction.
+
+    **How it works:**
+
+    1. The server generates a unique cookie and sends it to the client.
+    2. The client must return the cookie in subsequent requests.
+    3. If the cookie is missing or invalid, the user is redirected to the challenge page.
 
     **Configuration Settings:**
 
-    | Setting                | Default      | Context   | Multiple | Description                                                                                                                                         |
-    | ---------------------- | ------------ | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-    | `USE_ANTIBOT`          | `no`         | multisite | no       | **Enable Antibot:** Set to `cookie` to enable the Cookie challenge.                                                                                 |
-    | `ANTIBOT_URI`          | `/challenge` | multisite | no       | **Challenge URL:** The URL where users will be redirected to complete the challenge. Make sure this URL is not used for anything else on your site. |
-    | `ANTIBOT_TIME_RESOLVE` | `60`         | multisite | no       | **Challenge Time Limit:** The maximum time (in seconds) a user has to complete the challenge. After this time, a new challenge will be generated.   |
-    | `ANTIBOT_TIME_VALID`   | `86400`      | multisite | no       | **Challenge Validity:** How long (in seconds) a completed challenge is valid. After this time, users will have to solve a new challenge.            |
+    | Setting       | Default | Context   | Multiple | Description                                                         |
+    | ------------- | ------- | --------- | -------- | ------------------------------------------------------------------- |
+    | `USE_ANTIBOT` | `no`    | multisite | no       | **Enable Antibot:** Set to `cookie` to enable the Cookie challenge. |
+
+    Refer to the [Common Settings](#common-settings) for additional configuration options.
 
 === "JavaScript"
 
-    Requires the client to solve a computational challenge using JavaScript.
+    The JavaScript challenge requires the client to solve a computational task using JavaScript. This mechanism ensures that the client has JavaScript enabled and can execute the required code, which is typically beyond the capability of most bots.
+
+    **How it works:**
+
+    1. The server sends a JavaScript script to the client.
+    2. The script performs a computational task (e.g., hashing) and submits the result back to the server.
+    3. The server verifies the result to confirm the client's legitimacy.
+
+    **Key Features:**
+
+    - The challenge dynamically generates a unique task for each client.
+    - The computational task involves hashing with specific conditions (e.g., finding a hash with a certain prefix).
 
     **Configuration Settings:**
 
-    | Setting                | Default      | Context   | Multiple | Description                                                                                                                                         |
-    | ---------------------- | ------------ | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-    | `USE_ANTIBOT`          | `no`         | multisite | no       | **Enable Antibot:** Set to `javascript` to enable the JavaScript challenge.                                                                         |
-    | `ANTIBOT_URI`          | `/challenge` | multisite | no       | **Challenge URL:** The URL where users will be redirected to complete the challenge. Make sure this URL is not used for anything else on your site. |
-    | `ANTIBOT_TIME_RESOLVE` | `60`         | multisite | no       | **Challenge Time Limit:** The maximum time (in seconds) a user has to complete the challenge. After this time, a new challenge will be generated.   |
-    | `ANTIBOT_TIME_VALID`   | `86400`      | multisite | no       | **Challenge Validity:** How long (in seconds) a completed challenge is valid. After this time, users will have to solve a new challenge.            |
+    | Setting       | Default | Context   | Multiple | Description                                                                 |
+    | ------------- | ------- | --------- | -------- | --------------------------------------------------------------------------- |
+    | `USE_ANTIBOT` | `no`    | multisite | no       | **Enable Antibot:** Set to `javascript` to enable the JavaScript challenge. |
+
+    Refer to the [Common Settings](#common-settings) for additional configuration options.
 
 === "Captcha"
 
-    Our homemade Captcha mechanism offers a simple yet effective challenge designed and hosted entirely within your BunkerWeb environment. It generates dynamic, image-based challenges that test users' ability to recognize and interpret randomized characters, ensuring automated bots are effectively blocked without the need for any external API calls or third-party services.
+    The Captcha challenge is a homemade mechanism that generates image-based challenges hosted entirely within your BunkerWeb environment. It tests users' ability to recognize and interpret randomized characters, ensuring automated bots are effectively blocked without relying on external services.
+
+    **How it works:**
+
+    1. The server generates a CAPTCHA image containing randomized characters.
+    2. The user must enter the characters displayed in the image into a text field.
+    3. The server validates the user's input against the generated CAPTCHA.
+
+    **Key Features:**
+
+    - Fully self-hosted, eliminating the need for third-party APIs.
+    - Dynamically generated challenges ensure uniqueness for each user session.
 
     **Configuration Settings:**
 
-    | Setting                | Default      | Context   | Multiple | Description                                                                                                                                         |
-    | ---------------------- | ------------ | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-    | `USE_ANTIBOT`          | `no`         | multisite | no       | **Enable Antibot:** Set to `captcha` to enable the Captcha challenge.                                                                               |
-    | `ANTIBOT_URI`          | `/challenge` | multisite | no       | **Challenge URL:** The URL where users will be redirected to complete the challenge. Make sure this URL is not used for anything else on your site. |
-    | `ANTIBOT_TIME_RESOLVE` | `60`         | multisite | no       | **Challenge Time Limit:** The maximum time (in seconds) a user has to complete the challenge. After this time, a new challenge will be generated.   |
-    | `ANTIBOT_TIME_VALID`   | `86400`      | multisite | no       | **Challenge Validity:** How long (in seconds) a completed challenge is valid. After this time, users will have to solve a new challenge.            |
+    | Setting       | Default | Context   | Multiple | Description                                                           |
+    | ------------- | ------- | --------- | -------- | --------------------------------------------------------------------- |
+    | `USE_ANTIBOT` | `no`    | multisite | no       | **Enable Antibot:** Set to `captcha` to enable the Captcha challenge. |
+
+    Refer to the [Common Settings](#common-settings) for additional configuration options.
 
 === "reCAPTCHA"
 
@@ -151,15 +208,14 @@ Follow these steps to enable and configure the Antibot feature:
 
     **Configuration Settings:**
 
-    | Setting                     | Default      | Context   | Multiple | Description                                                                                                                                                                |
-    | --------------------------- | ------------ | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-    | `USE_ANTIBOT`               | `no`         | multisite | no       | **Enable Antibot:** Set to `recaptcha` to enable the reCAPTCHA challenge.                                                                                                  |
-    | `ANTIBOT_RECAPTCHA_SITEKEY` |              | multisite | no       | **reCAPTCHA Site Key:** Your reCAPTCHA site key (get this from Google).                                                                                                    |
-    | `ANTIBOT_RECAPTCHA_SECRET`  |              | multisite | no       | **reCAPTCHA Secret Key:** Your reCAPTCHA secret key (get this from Google).                                                                                                |
-    | `ANTIBOT_RECAPTCHA_SCORE`   | `0.7`        | multisite | no       | **reCAPTCHA Minimum Score:** The minimum score required for reCAPTCHA to pass a user (only for reCAPTCHA v3). A higher score means more confidence that the user is human. |
-    | `ANTIBOT_URI`               | `/challenge` | multisite | no       | **Challenge URL:** The URL where users will be redirected to complete the challenge. Make sure this URL is not used for anything else on your site.                        |
-    | `ANTIBOT_TIME_RESOLVE`      | `60`         | multisite | no       | **Challenge Time Limit:** The maximum time (in seconds) a user has to complete the challenge. After this time, a new challenge will be generated.                          |
-    | `ANTIBOT_TIME_VALID`        | `86400`      | multisite | no       | **Challenge Validity:** How long (in seconds) a completed challenge is valid. After this time, users will have to solve a new challenge.                                   |
+    | Setting                     | Default | Context   | Multiple | Description                                                                                                   |
+    | --------------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------- |
+    | `USE_ANTIBOT`               | `no`    | multisite | no       | **Enable Antibot:** Set to `recaptcha` to enable the reCAPTCHA challenge.                                     |
+    | `ANTIBOT_RECAPTCHA_SITEKEY` |         | multisite | no       | **reCAPTCHA Site Key:** Your reCAPTCHA site key (get this from Google).                                       |
+    | `ANTIBOT_RECAPTCHA_SECRET`  |         | multisite | no       | **reCAPTCHA Secret Key:** Your reCAPTCHA secret key (get this from Google).                                   |
+    | `ANTIBOT_RECAPTCHA_SCORE`   | `0.7`   | multisite | no       | **reCAPTCHA Minimum Score:** The minimum score required for reCAPTCHA to pass a user (only for reCAPTCHA v3). |
+
+    Refer to the [Common Settings](#common-settings) for additional configuration options.
 
 === "hCaptcha"
 
@@ -169,14 +225,13 @@ Follow these steps to enable and configure the Antibot feature:
 
     **Configuration Settings:**
 
-    | Setting                    | Default      | Context   | Multiple | Description                                                                                                                                         |
-    | -------------------------- | ------------ | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-    | `USE_ANTIBOT`              | `no`         | multisite | no       | **Enable Antibot:** Set to `hcaptcha` to enable the hCaptcha challenge.                                                                             |
-    | `ANTIBOT_HCAPTCHA_SITEKEY` |              | multisite | no       | **hCaptcha Site Key:** Your hCaptcha site key (get this from hCaptcha).                                                                             |
-    | `ANTIBOT_HCAPTCHA_SECRET`  |              | multisite | no       | **hCaptcha Secret Key:** Your hCaptcha secret key (get this from hCaptcha).                                                                         |
-    | `ANTIBOT_URI`              | `/challenge` | multisite | no       | **Challenge URL:** The URL where users will be redirected to complete the challenge. Make sure this URL is not used for anything else on your site. |
-    | `ANTIBOT_TIME_RESOLVE`     | `60`         | multisite | no       | **Challenge Time Limit:** The maximum time (in seconds) a user has to complete the challenge. After this time, a new challenge will be generated.   |
-    | `ANTIBOT_TIME_VALID`       | `86400`      | multisite | no       | **Challenge Validity:** How long (in seconds) a completed challenge is valid. After this time, users will have to solve a new challenge.            |
+    | Setting                    | Default | Context   | Multiple | Description                                                                 |
+    | -------------------------- | ------- | --------- | -------- | --------------------------------------------------------------------------- |
+    | `USE_ANTIBOT`              | `no`    | multisite | no       | **Enable Antibot:** Set to `hcaptcha` to enable the hCaptcha challenge.     |
+    | `ANTIBOT_HCAPTCHA_SITEKEY` |         | multisite | no       | **hCaptcha Site Key:** Your hCaptcha site key (get this from hCaptcha).     |
+    | `ANTIBOT_HCAPTCHA_SECRET`  |         | multisite | no       | **hCaptcha Secret Key:** Your hCaptcha secret key (get this from hCaptcha). |
+
+    Refer to the [Common Settings](#common-settings) for additional configuration options.
 
 === "Turnstile"
 
@@ -186,14 +241,13 @@ Follow these steps to enable and configure the Antibot feature:
 
     **Configuration Settings:**
 
-    | Setting                     | Default      | Context   | Multiple | Description                                                                                                                                         |
-    | --------------------------- | ------------ | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-    | `USE_ANTIBOT`               | `no`         | multisite | no       | **Enable Antibot:** Set to `turnstile` to enable the Turnstile challenge.                                                                           |
-    | `ANTIBOT_TURNSTILE_SITEKEY` |              | multisite | no       | **Turnstile Site Key:** Your Turnstile site key (get this from Cloudflare).                                                                         |
-    | `ANTIBOT_TURNSTILE_SECRET`  |              | multisite | no       | **Turnstile Secret Key:** Your Turnstile secret key (get this from Cloudflare).                                                                     |
-    | `ANTIBOT_URI`               | `/challenge` | multisite | no       | **Challenge URL:** The URL where users will be redirected to complete the challenge. Make sure this URL is not used for anything else on your site. |
-    | `ANTIBOT_TIME_RESOLVE`      | `60`         | multisite | no       | **Challenge Time Limit:** The maximum time (in seconds) a user has to complete the challenge. After this time, a new challenge will be generated.   |
-    | `ANTIBOT_TIME_VALID`        | `86400`      | multisite | no       | **Challenge Validity:** How long (in seconds) a completed challenge is valid. After this time, users will have to solve a new challenge.            |
+    | Setting                     | Default | Context   | Multiple | Description                                                                     |
+    | --------------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------- |
+    | `USE_ANTIBOT`               | `no`    | multisite | no       | **Enable Antibot:** Set to `turnstile` to enable the Turnstile challenge.       |
+    | `ANTIBOT_TURNSTILE_SITEKEY` |         | multisite | no       | **Turnstile Site Key:** Your Turnstile site key (get this from Cloudflare).     |
+    | `ANTIBOT_TURNSTILE_SECRET`  |         | multisite | no       | **Turnstile Secret Key:** Your Turnstile secret key (get this from Cloudflare). |
+
+    Refer to the [Common Settings](#common-settings) for additional configuration options.
 
 === "mCaptcha"
 
@@ -205,15 +259,103 @@ Follow these steps to enable and configure the Antibot feature:
 
     **Configuration Settings:**
 
-    | Setting                    | Default                     | Context   | Multiple | Description                                                                                                                                         |
-    | -------------------------- | --------------------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-    | `USE_ANTIBOT`              | `no`                        | multisite | no       | **Enable Antibot:** Set to `mcaptcha` to enable the mCaptcha challenge.                                                                             |
-    | `ANTIBOT_MCAPTCHA_SITEKEY` |                             | multisite | no       | **mCaptcha Site Key:** Your mCaptcha site key (get this from mCaptcha).                                                                             |
-    | `ANTIBOT_MCAPTCHA_SECRET`  |                             | multisite | no       | **mCaptcha Secret Key:** Your mCaptcha secret key (get this from mCaptcha).                                                                         |
-    | `ANTIBOT_MCAPTCHA_URL`     | `https://demo.mcaptcha.org` | multisite | no       | **mCaptcha Domain:** The domain to use for the mCaptcha challenge. Generally, you should leave this as the default.                                 |
-    | `ANTIBOT_URI`              | `/challenge`                | multisite | no       | **Challenge URL:** The URL where users will be redirected to complete the challenge. Make sure this URL is not used for anything else on your site. |
-    | `ANTIBOT_TIME_RESOLVE`     | `60`                        | multisite | no       | **Challenge Time Limit:** The maximum time (in seconds) a user has to complete the challenge. After this time, a new challenge will be generated.   |
-    | `ANTIBOT_TIME_VALID`       | `86400`                     | multisite | no       | **Challenge Validity:** How long (in seconds) a completed challenge is valid. After this time, users will have to solve a new challenge.            |
+    | Setting                    | Default                     | Context   | Multiple | Description                                                                 |
+    | -------------------------- | --------------------------- | --------- | -------- | --------------------------------------------------------------------------- |
+    | `USE_ANTIBOT`              | `no`                        | multisite | no       | **Enable Antibot:** Set to `mcaptcha` to enable the mCaptcha challenge.     |
+    | `ANTIBOT_MCAPTCHA_SITEKEY` |                             | multisite | no       | **mCaptcha Site Key:** Your mCaptcha site key (get this from mCaptcha).     |
+    | `ANTIBOT_MCAPTCHA_SECRET`  |                             | multisite | no       | **mCaptcha Secret Key:** Your mCaptcha secret key (get this from mCaptcha). |
+    | `ANTIBOT_MCAPTCHA_URL`     | `https://demo.mcaptcha.org` | multisite | no       | **mCaptcha Domain:** The domain to use for the mCaptcha challenge.          |
+
+    Refer to the [Common Settings](#common-settings) for additional configuration options.
+
+### Example Configurations
+
+=== "Cookie Challenge"
+
+    Example configuration for enabling the Cookie challenge:
+
+    ```yaml
+    USE_ANTIBOT: "cookie"
+    ANTIBOT_URI: "/challenge"
+    ANTIBOT_TIME_RESOLVE: "60"
+    ANTIBOT_TIME_VALID: "86400"
+    ```
+
+=== "JavaScript Challenge"
+
+    Example configuration for enabling the JavaScript challenge:
+
+    ```yaml
+    USE_ANTIBOT: "javascript"
+    ANTIBOT_URI: "/challenge"
+    ANTIBOT_TIME_RESOLVE: "60"
+    ANTIBOT_TIME_VALID: "86400"
+    ```
+
+=== "Captcha Challenge"
+
+    Example configuration for enabling the Captcha challenge:
+
+    ```yaml
+    USE_ANTIBOT: "captcha"
+    ANTIBOT_URI: "/challenge"
+    ANTIBOT_TIME_RESOLVE: "60"
+    ANTIBOT_TIME_VALID: "86400"
+    ```
+
+=== "reCAPTCHA Challenge"
+
+    Example configuration for enabling the reCAPTCHA challenge:
+
+    ```yaml
+    USE_ANTIBOT: "recaptcha"
+    ANTIBOT_RECAPTCHA_SITEKEY: "your-site-key"
+    ANTIBOT_RECAPTCHA_SECRET: "your-secret-key"
+    ANTIBOT_RECAPTCHA_SCORE: "0.7"
+    ANTIBOT_URI: "/challenge"
+    ANTIBOT_TIME_RESOLVE: "60"
+    ANTIBOT_TIME_VALID: "86400"
+    ```
+
+=== "hCaptcha Challenge"
+
+    Example configuration for enabling the hCaptcha challenge:
+
+    ```yaml
+    USE_ANTIBOT: "hcaptcha"
+    ANTIBOT_HCAPTCHA_SITEKEY: "your-site-key"
+    ANTIBOT_HCAPTCHA_SECRET: "your-secret-key"
+    ANTIBOT_URI: "/challenge"
+    ANTIBOT_TIME_RESOLVE: "60"
+    ANTIBOT_TIME_VALID: "86400"
+    ```
+
+=== "Turnstile Challenge"
+
+    Example configuration for enabling the Turnstile challenge:
+
+    ```yaml
+    USE_ANTIBOT: "turnstile"
+    ANTIBOT_TURNSTILE_SITEKEY: "your-site-key"
+    ANTIBOT_TURNSTILE_SECRET: "your-secret-key"
+    ANTIBOT_URI: "/challenge"
+    ANTIBOT_TIME_RESOLVE: "60"
+    ANTIBOT_TIME_VALID: "86400"
+    ```
+
+=== "mCaptcha Challenge"
+
+    Example configuration for enabling the mCaptcha challenge:
+
+    ```yaml
+    USE_ANTIBOT: "mcaptcha"
+    ANTIBOT_MCAPTCHA_SITEKEY: "your-site-key"
+    ANTIBOT_MCAPTCHA_SECRET: "your-secret-key"
+    ANTIBOT_MCAPTCHA_URL: "https://demo.mcaptcha.org"
+    ANTIBOT_URI: "/challenge"
+    ANTIBOT_TIME_RESOLVE: "60"
+    ANTIBOT_TIME_VALID: "86400"
+    ```
 
 ## Auth basic
 
@@ -221,7 +363,7 @@ STREAM support :x:
 
 The Auth Basic plugin provides HTTP basic authentication to protect your website or specific resources. This feature adds an extra layer of security by requiring users to enter a username and password before they can access the protected content. This type of authentication is simple to implement and widely supported by browsers.
 
-**Here's how the Auth Basic feature works:**
+**How it works:**
 
 1. When a user tries to access a protected area of your website, the server sends a challenge requesting authentication.
 2. The browser displays a login dialog box prompting the user for a username and password.
@@ -308,7 +450,7 @@ STREAM support :white_check_mark:
 
 The Backup plugin provides an automatic backup solution to protect your BunkerWeb data. This feature ensures the safety and availability of your important database by creating regular backups according to your preferred schedule. Backups are stored in a designated location and can be easily managed through both automatic processes and manual commands.
 
-**Here's how the Backup feature works:**
+**How it works:**
 
 1. Your database is automatically backed up according to the schedule you set (daily, weekly, or monthly).
 2. Backups are stored in a specified directory on your system.
@@ -423,7 +565,7 @@ STREAM support :white_check_mark:
 
 The Bad Behavior plugin protects your website by automatically detecting and banning IP addresses that generate too many errors or "bad" HTTP status codes within a specified period of time. This helps defend against brute force attacks, web scrapers, vulnerability scanners, and other malicious activities that might generate numerous error responses.
 
-**Here's how the Bad Behavior feature works:**
+**How it works:**
 
 1. The plugin monitors HTTP responses from your site.
 2. When a visitor receives a "bad" HTTP status code (like 400, 401, 403, 404, etc.), the counter for that IP address is incremented.
@@ -513,7 +655,7 @@ STREAM support :warning:
 
 The Blacklist plugin provides robust protection for your website by allowing you to block access based on various client attributes. This feature helps defend against known malicious entities, scanners, and suspicious visitors by denying access to IPs, networks, reverse DNS entries, ASNs, user agents, and specific URI patterns.
 
-**Here's how the Blacklist feature works:**
+**How it works:**
 
 1. The plugin checks incoming requests against multiple blacklist criteria (*IP addresses, networks, rDNS, ASN, User-Agent, or URI patterns*).
 2. Blacklists can be specified directly in your configuration or loaded from external URLs.
@@ -657,7 +799,7 @@ The Brotli plugin enables efficient compression of HTTP responses using the Brot
 
 Compared to other compression methods like gzip, Brotli typically achieves higher compression ratios, resulting in smaller file sizes and faster content delivery.
 
-**Here's how the Brotli feature works:**
+**How it works:**
 
 1. When a client requests content from your website, BunkerWeb checks if the client supports Brotli compression.
 2. If supported, BunkerWeb compresses the response using the Brotli algorithm at your configured compression level.
@@ -731,7 +873,7 @@ STREAM support :white_check_mark:
 
 The BunkerNet plugin enables collective threat intelligence sharing between BunkerWeb instances, creating a powerful network of protection against malicious actors. By participating in BunkerNet, your instance both benefits from and contributes to a global database of known threats, enhancing security for the entire BunkerWeb community.
 
-**Here's how the BunkerNet feature works:**
+**How it works:**
 
 1. Your BunkerWeb instance automatically registers with the BunkerNet API to receive a unique identifier.
 2. When your instance detects and blocks a malicious IP address or behavior, it anonymously reports this threat to BunkerNet.
@@ -804,7 +946,7 @@ STREAM support :x:
 
 The CORS plugin enables Cross-Origin Resource Sharing for your website, allowing controlled access to your resources from different domains. This feature helps you safely share your content with trusted third-party websites while maintaining security by explicitly defining which origins, methods, and headers are permitted.
 
-**Here's how the CORS feature works:**
+**How it works:**
 
 1. When a browser makes a cross-origin request to your website, it first sends a preflight request with the `OPTIONS` method.
 2. BunkerWeb checks if the requesting origin is permitted based on your configuration.
@@ -922,7 +1064,7 @@ STREAM support :x:
 
 The Client Cache plugin optimizes website performance by controlling how browsers cache your static content. This feature helps reduce bandwidth usage, server load, and improves page load times by instructing client browsers to store and reuse static assets like images, CSS, and JavaScript files locally instead of requesting them on every page visit.
 
-**Here's how the Client Cache feature works:**
+**How it works:**
 
 1. When enabled, BunkerWeb adds Cache-Control headers to responses for static files.
 2. These headers tell browsers how long they should cache the content locally.
@@ -996,7 +1138,7 @@ STREAM support :white_check_mark:
 
 The Country plugin enables geo-blocking functionality for your website, allowing you to restrict access based on the geographic location of your visitors. This feature helps you comply with regional regulations, prevent fraudulent activities from high-risk regions, or implement content restrictions based on geographic boundaries.
 
-**Here's how the Country feature works:**
+**How it works:**
 
 1. When a visitor accesses your website, BunkerWeb determines their country based on their IP address.
 2. Your configuration specifies either a whitelist (allowed countries) or a blacklist (blocked countries).
@@ -1078,7 +1220,7 @@ The CrowdSec plugin integrates BunkerWeb with the CrowdSec security engine, prov
 
 CrowdSec is a modern, open-source security engine that detects and blocks malicious IP addresses based on behavior analysis and collective intelligence from its community. You can also configure [scenarios](https://docs.crowdsec.net/docs/concepts?utm_source=external-docs&utm_medium=cta&utm_campaign=bunker-web-docs#scenarios) to automatically ban IPs based on suspicious behaviors, benefiting from a crowdsourced blacklist.
 
-**Here's how the CrowdSec feature works:**
+**How it works:**
 
 1. The CrowdSec engine analyzes logs and detects suspicious activities on your infrastructure.
 2. When a malicious activity is detected, CrowdSec creates a "decision" to block the offending IP address.
@@ -1170,11 +1312,10 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
         networks:
           - bw-universe
           - bw-services
-          - bw-plugins
         logging:
           driver: syslog # Send logs to syslog
           options:
-            syslog-address: "udp://10.10.10.254:514" # The IP address of the syslog service
+            syslog-address: "udp://10.20.30.254:514" # The IP address of the syslog service
 
       bw-scheduler:
         image: bunkerity/bunkerweb-scheduler:1.6.2-rc1
@@ -1220,7 +1361,7 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
           COLLECTIONS: "crowdsecurity/nginx crowdsecurity/appsec-virtual-patching crowdsecurity/appsec-generic-rules"
           #   COLLECTIONS: "crowdsecurity/nginx" # If you don't want to use the AppSec Component use this line instead
         networks:
-          - bw-plugins
+          - bw-universe
 
       syslog:
         image: balabit/syslog-ng:4.8.0
@@ -1237,8 +1378,8 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
           - bw-logs:/var/log/bunkerweb # This is the volume used to store the logs
           - ./syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf # This is the syslog-ng configuration file
         networks:
-            bw-plugins:
-              ipv4_address: 10.10.10.254
+            bw-universe:
+              ipv4_address: 10.20.30.254
 
     volumes:
       bw-data:
@@ -1257,11 +1398,6 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
         name: bw-services
       bw-db:
         name: bw-db
-      bw-plugins:
-        ipam:
-          driver: default
-          config:
-            - subnet: 10.10.10.0/24
     ```
 
 === "Linux"
@@ -1407,7 +1543,7 @@ STREAM support :white_check_mark:
 
 The Custom SSL certificate plugin allows you to use your own SSL/TLS certificates with BunkerWeb instead of the automatically generated ones. This feature is particularly useful when you have existing certificates from a trusted Certificate Authority (CA), need to use certificates with specific configurations, or want to maintain consistent certificate management across your infrastructure.
 
-**Here's how the Custom SSL certificate feature works:**
+**How it works:**
 
 1. You provide BunkerWeb with your certificate and private key files, either by specifying file paths or by providing the data in base64-encoded format.
 2. BunkerWeb validates your certificate and key to ensure they're properly formatted and usable.
@@ -1488,7 +1624,7 @@ STREAM support :white_check_mark:
 
 The DNSBL (DNS-based Blacklist) plugin enables protection against known malicious IP addresses by checking client IPs against external DNSBL servers. This feature helps guard your website against spam, botnets, and various types of cyber threats by leveraging community-maintained lists of problematic IP addresses.
 
-**Here's how the DNSBL feature works:**
+**How it works:**
 
 1. When a visitor connects to your website, BunkerWeb checks their IP address against configured DNSBL servers.
 2. The check is performed by sending a reverse DNS query to each DNSBL server with the visitor's IP address.
@@ -1557,7 +1693,7 @@ The Database plugin provides a robust database integration system for BunkerWeb,
 
 This core component supports multiple database engines, including SQLite, PostgreSQL, MySQL/MariaDB, and Oracle - allowing you to choose the database solution that best fits your environment and requirements.
 
-**Here's how the Database feature works:**
+**How it works:**
 
 1. BunkerWeb connects to your configured database using the provided URI, following SQLAlchemy format.
 2. Critical configuration data, runtime information, and job logs are stored securely in the database.
@@ -1605,7 +1741,7 @@ STREAM support :x:
 
 The Errors plugin provides customizable error handling for your website, allowing you to configure how HTTP error responses are displayed to users. This feature helps you present user-friendly, branded error pages that enhance user experience during error scenarios, instead of displaying the default server error pages that can appear technical and confusing to visitors.
 
-**Here's how the Errors feature works:**
+**How it works:**
 
 1. When a client encounters an HTTP error (like 400, 404, 500), BunkerWeb intercepts the error response.
 2. Instead of showing the default error page, BunkerWeb displays a custom, professionally designed error page.
@@ -1677,7 +1813,7 @@ The Greylist plugin provides a flexible security approach that allows access to 
 
 Unlike traditional blacklist/whitelist approaches that completely block or allow access, greylisting creates a middle ground where certain visitors get access while still being subject to security checks.
 
-**Here's how the Greylist feature works:**
+**How it works:**
 
 1. You define criteria for visitors who should be "greylisted" (*IP addresses, networks, rDNS, ASN, User-Agent, or URI patterns*).
 2. When a visitor matches any of these criteria, they are allowed access to your site while the other security features remain active.
@@ -1797,7 +1933,7 @@ STREAM support :x:
 
 The GZIP plugin enhances website performance by compressing HTTP responses using the gzip algorithm. This feature helps reduce bandwidth usage and improve page load times by compressing web content before it's sent to the client's browser, resulting in faster content delivery and improved user experience.
 
-**Here's how the GZIP feature works:**
+**How it works:**
 
 1. When a client requests content from your website, BunkerWeb checks if the client supports gzip compression.
 2. If supported, BunkerWeb compresses the response using the gzip algorithm at your configured compression level.
@@ -1889,7 +2025,7 @@ STREAM support :x:
 
 The HTML Injection plugin enables you to seamlessly add custom HTML code to your website's pages before either the closing `</body>` or `</head>` tags. This feature is particularly useful for adding analytics scripts, tracking pixels, custom JavaScript, CSS styles, or other third-party integrations without modifying your website's source code.
 
-**Here's how the HTML Injection feature works:**
+**How it works:**
 
 1. When a page is served from your website, BunkerWeb examines the HTML response.
 2. If you've configured body injection, BunkerWeb inserts your custom HTML code just before the closing `</body>` tag.
@@ -1967,12 +2103,12 @@ Follow these steps to configure and use the HTML Injection feature:
 
 STREAM support :x:
 
-The Headers plugin enables comprehensive management of HTTP headers sent to clients, enhancing both security and functionality of your website. This feature allows you to control which headers are sent, removed, or preserved from upstream servers, helping you implement security best practices like Content Security Policy, prevent information leakage, and set cookie security flags.
+Headers play a crucial role in HTTP security. The Headers plugin provides robust management of both standard and custom HTTP headers, enhancing security and functionality. It dynamically applies security measures such as [HSTS](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Strict-Transport-Security), [CSP](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy) (including a reporting mode), and custom header injection while preventing information leakage.
 
-**Here's how the Headers feature works:**
+**How it works**
 
 1. When a client requests content from your website, BunkerWeb processes the response headers.
-2. Security headers like `Strict-Transport-Security`, `Content-Security-Policy`, and `X-Frame-Options` are applied according to your configuration.
+2. Security headers are applied according to your configuration.
 3. Custom headers can be added to provide additional information or functionality to clients.
 4. Unwanted headers that might leak server information are automatically removed.
 5. Cookies are modified to include appropriate security flags based on your settings.
@@ -1982,38 +2118,87 @@ The Headers plugin enables comprehensive management of HTTP headers sent to clie
 
 Follow these steps to configure and use the Headers feature:
 
-1. **Configure security headers:** Set values for common security headers like `Strict-Transport-Security`, `Content-Security-Policy`, and `X-Frame-Options`.
-2. **Add custom headers:** Define any custom headers you want to add to responses using the `CUSTOM_HEADER` setting.
-3. **Remove information leakage:** Use `REMOVE_HEADERS` to specify headers that should not be sent to clients.
-4. **Set cookie security:** Configure cookie flags to enhance security with settings like `HttpOnly`, `SameSite`, and `Secure`.
-5. **Preserve upstream headers:** If needed, specify which headers from upstream servers should be preserved using `KEEP_UPSTREAM_HEADERS`.
+1. **Configure security headers:** Set values for common headers.
+2. **Add custom headers:** Define any custom headers using the `CUSTOM_HEADER` setting.
+3. **Remove unwanted headers:** Use `REMOVE_HEADERS` to ensure headers that could leak server details are stripped out.
+4. **Set cookie security:** Enable robust cookie security by configuring `COOKIE_FLAGS` and setting `COOKIE_AUTO_SECURE_FLAG` to `yes` so that the Secure flag is automatically added on HTTPS.
+5. **Preserve upstream headers:** Specify which upstream headers to retain by using `KEEP_UPSTREAM_HEADERS`.
+6. **Leverage conditional header application:** If you wish to test policies without disruption, enable [CSP Report-Only](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy-Report-Only) mode via `CONTENT_SECURITY_POLICY_REPORT_ONLY`.
 
-### Configuration Settings
+### Configuration Guide
 
-| Setting                               | Default                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | Context   | Multiple | Description                                                                                                         |
-| ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------- |
-| `CUSTOM_HEADER`                       |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | multisite | yes      | **Custom Header:** Add custom headers to responses in the format `HeaderName: HeaderValue`.                         |
-| `REMOVE_HEADERS`                      | `Server Expect-CT X-Powered-By X-AspNet-Version X-AspNetMvc-Version Public-Key-Pins`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | multisite | no       | **Remove Headers:** List of headers to remove from responses, separated by spaces.                                  |
-| `KEEP_UPSTREAM_HEADERS`               | `Content-Security-Policy Permissions-Policy X-Frame-Options`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | multisite | no       | **Keep Upstream Headers:** Headers to preserve from upstream servers, separated by spaces (or `*` for all).         |
-| `STRICT_TRANSPORT_SECURITY`           | `max-age=63072000; includeSubDomains; preload`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | multisite | no       | **HSTS:** Value for the Strict-Transport-Security header to enforce HTTPS connections.                              |
-| `COOKIE_FLAGS`                        | `* HttpOnly SameSite=Lax`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | multisite | yes      | **Cookie Flags:** Flags automatically added to cookies (using nginx_cookie_flag_module format).                     |
-| `COOKIE_AUTO_SECURE_FLAG`             | `yes`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | multisite | no       | **Auto Secure Flag:** When set to `yes`, automatically adds the Secure flag to all cookies on HTTPS connections.    |
-| `CONTENT_SECURITY_POLICY`             | `object-src 'none'; form-action 'self'; frame-ancestors 'self';`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | multisite | no       | **CSP:** Value for the Content-Security-Policy header to control resource loading.                                  |
-| `CONTENT_SECURITY_POLICY_REPORT_ONLY` | `no`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | multisite | no       | **CSP Report Mode:** When `yes`, sends violations as reports instead of blocking them.                              |
-| `REFERRER_POLICY`                     | `strict-origin-when-cross-origin`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | multisite | no       | **Referrer Policy:** Controls how much referrer information is included with requests.                              |
-| `PERMISSIONS_POLICY`                  | `accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), compute-pressure=(), display-capture=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), identity-credentials-get=(), idle-detection=(), local-fonts=(), magnetometer=(), microphone=(), midi=(), otp-credentials=(), payment=(), picture-in-picture=(), publickey-credentials-create=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), speaker-selection=(), storage-access=(), usb=(), web-share=(), window-management=(), xr-spatial-tracking=(), interest-cohort=()` | multisite | no       | **Permissions Policy:** Controls which browser features and APIs can be used in your site.                          |
-| `X_FRAME_OPTIONS`                     | `SAMEORIGIN`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | multisite | no       | **X-Frame-Options:** Controls whether your site can be embedded in frames (helps prevent clickjacking).             |
-| `X_CONTENT_TYPE_OPTIONS`              | `nosniff`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | multisite | no       | **X-Content-Type-Options:** Prevents browsers from MIME-sniffing a response away from its declared content type.    |
-| `X_DNS_PREFETCH_CONTROL`              | `off`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | multisite | no       | **X-DNS-Prefetch-Control:** Controls DNS prefetching, a feature by which browsers proactively resolve domain names. |
+=== "Security Headers"
 
-!!! tip "Security Headers"
-    The default header values follow security best practices and are suitable for most websites. These headers help protect against various attacks including XSS, clickjacking, and information leakage. Mozilla's [Observatory](https://observatory.mozilla.org/) is a great tool to check your site's security headers.
+    **Overview**
 
-!!! info "Content Security Policy"
-    Content-Security-Policy (CSP) is a powerful defense against content injection attacks. The default policy blocks inline scripts and restricts frame embedding, but you may need to customize it based on your site's requirements. Consider starting with CSP Report-Only mode (`CONTENT_SECURITY_POLICY_REPORT_ONLY: "yes"`) to identify needed changes before enforcing the policy.
+    Security headers enforce secure communication, restrict resource loading, and prevent attacks like clickjacking and injection. Properly configured headers create a robust defensive layer for your website.
 
-!!! warning "Custom Headers"
-    When adding custom headers, be aware that certain headers might have security implications. Custom headers should follow the format `HeaderName: HeaderValue` and be added individually using the `CUSTOM_HEADER` setting.
+    !!! success "Benefits of Security Headers"
+        - **HSTS:** Ensures all connections are encrypted, protecting against protocol downgrade attacks.
+        - **CSP:** Prevents malicious scripts from executing, reducing the risk of XSS attacks.
+        - **X-Frame-Options:** Blocks clickjacking attempts by controlling iframe embedding.
+        - **Referrer Policy:** Limits sensitive information leakage through referrer headers.
+
+    | Setting                               | Default                                                                                             | Context   | Multiple | Description                                                                                                                  |
+    | ------------------------------------- | --------------------------------------------------------------------------------------------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------- |
+    | `STRICT_TRANSPORT_SECURITY`           | `max-age=63072000; includeSubDomains; preload`                                                      | multisite | no       | **HSTS:** Enforces secure HTTPS connections, reducing risks of man-in-the-middle attacks.                                    |
+    | `CONTENT_SECURITY_POLICY`             | `object-src 'none'; form-action 'self'; frame-ancestors 'self';`                                    | multisite | no       | **CSP:** Restricts resource loading to trusted sources, mitigating cross-site scripting and data injection attacks.          |
+    | `CONTENT_SECURITY_POLICY_REPORT_ONLY` | `no`                                                                                                | multisite | no       | **CSP Report Mode:** Reports violations without blocking content, helping in testing security policies while capturing logs. |
+    | `X_FRAME_OPTIONS`                     | `SAMEORIGIN`                                                                                        | multisite | no       | **X-Frame-Options:** Prevents clickjacking by controlling whether your site can be framed.                                   |
+    | `X_CONTENT_TYPE_OPTIONS`              | `nosniff`                                                                                           | multisite | no       | **X-Content-Type-Options:** Prevents browsers from MIME-sniffing, protecting against drive-by download attacks.              |
+    | `X_DNS_PREFETCH_CONTROL`              | `off`                                                                                               | multisite | no       | **X-DNS-Prefetch-Control:** Regulates DNS prefetching to reduce unintentional network requests and enhance privacy.          |
+    | `REFERRER_POLICY`                     | `strict-origin-when-cross-origin`                                                                   | multisite | no       | **Referrer Policy:** Controls the amount of referrer information sent, safeguarding user privacy.                            |
+    | `PERMISSIONS_POLICY`                  | `accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), ...` | multisite | no       | **Permissions Policy:** Restricts browser feature access, reducing potential attack vectors.                                 |
+    | `KEEP_UPSTREAM_HEADERS`               | `Content-Security-Policy Permissions-Policy X-Frame-Options`                                        | multisite | no       | **Keep Headers:** Preserves selected upstream headers, aiding legacy integration while maintaining security.                 |
+
+    !!! tip "Best Practices"
+        - Regularly review and update your security headers to align with evolving security standards.
+        - Use tools like [Mozilla Observatory](https://observatory.mozilla.org/) to validate your header configuration.
+        - Test CSP in `Report-Only` mode before enforcing it to avoid breaking functionality.
+
+=== "Cookie Settings"
+
+    **Overview**
+
+    Proper cookie settings ensure secure user sessions by preventing hijacking, fixation, and cross-site scripting. Secure cookies maintain session integrity over HTTPS and enhance overall user data protection.
+
+    !!! success "Benefits of Secure Cookies"
+        - **HttpOnly Flag:** Prevents client-side scripts from accessing cookies, mitigating XSS risks.
+        - **SameSite Flag:** Reduces CSRF attacks by restricting cross-origin cookie usage.
+        - **Secure Flag:** Ensures cookies are transmitted only over encrypted HTTPS connections.
+
+    | Setting                   | Default                   | Context   | Multiple | Description                                                                                                                                            |
+    | ------------------------- | ------------------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+    | `COOKIE_FLAGS`            | `* HttpOnly SameSite=Lax` | multisite | yes      | **Cookie Flags:** Automatically adds security flags such as HttpOnly and SameSite, protecting cookies from client-side script access and CSRF attacks. |
+    | `COOKIE_AUTO_SECURE_FLAG` | `yes`                     | multisite | no       | **Auto Secure Flag:** Ensures cookies are only sent over secure HTTPS connections by appending the Secure flag automatically.                          |
+
+    !!! tip "Best Practices"
+        - Use `SameSite=Strict` for sensitive cookies to prevent cross-origin access.
+        - Regularly audit your cookie settings to ensure compliance with security and privacy regulations.
+        - Avoid setting cookies without the Secure flag in production environments.
+
+=== "Custom Headers"
+
+    **Overview**
+
+    Custom headers allow you to add specific HTTP headers to meet application or performance requirements. They offer flexibility but must be carefully configured to avoid exposing sensitive server details.
+
+    !!! success "Benefits of Custom Headers"
+        - Enhance security by removing unnecessary headers that may leak server details.
+        - Add application-specific headers to improve functionality or debugging.
+
+    | Setting          | Default                                                                              | Context   | Multiple | Description                                                                                                                                                 |
+    | ---------------- | ------------------------------------------------------------------------------------ | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `CUSTOM_HEADER`  |                                                                                      | multisite | yes      | **Custom Header:** Provides a means to add user-defined headers in the format HeaderName: HeaderValue for specialized security or performance enhancements. |
+    | `REMOVE_HEADERS` | `Server Expect-CT X-Powered-By X-AspNet-Version X-AspNetMvc-Version Public-Key-Pins` | multisite | no       | **Remove Headers:** Specifies headers to remove, decreasing the chance of exposing internal server details and known vulnerabilities.                       |
+
+    !!! warning "Security Considerations"
+        - Avoid exposing sensitive information through custom headers.
+        - Regularly review and update custom headers to align with your application's requirements.
+
+    !!! tip "Best Practices"
+        - Use `REMOVE_HEADERS` to strip out headers like `Server` and `X-Powered-By` to reduce fingerprinting risks.
+        - Test custom headers in a staging environment before deploying them to production.
 
 ### Example Configurations
 
@@ -2067,7 +2252,7 @@ STREAM support :white_check_mark:
 
 The Let's Encrypt plugin simplifies SSL/TLS certificate management by automating the creation, renewal, and configuration of free certificates from Let's Encrypt. This feature enables secure HTTPS connections for your websites without the complexity of manual certificate management, reducing both cost and administrative overhead.
 
-**Here's how the Let's Encrypt feature works:**
+**How it works:**
 
 1. When enabled, BunkerWeb automatically detects the domain names configured for your site.
 2. BunkerWeb requests free SSL/TLS certificates from Let's Encrypt's certificate authority.
@@ -2235,7 +2420,7 @@ STREAM support :warning:
 
 The Limit plugin provides powerful request rate limiting and connection control capabilities for your website. This feature helps protect your services from abuse, denial-of-service attacks, and excessive resource consumption by restricting the number of requests and concurrent connections from individual IP addresses.
 
-**Here's how the Limit feature works:**
+**How it works:**
 
 1. **Rate Limiting:** The plugin tracks the number of requests from each client IP address to specific URLs.
 2. If a client exceeds the configured request rate limit, subsequent requests are temporarily denied.
@@ -2390,7 +2575,7 @@ STREAM support :warning:
 
 The Metrics plugin provides comprehensive monitoring and data collection capabilities for your BunkerWeb instance. This feature enables you to track various performance indicators, security events, and system statistics, giving you valuable insights into the behavior and health of your protected websites and services.
 
-**Here's how the Metrics feature works:**
+**How it works:**
 
 1. BunkerWeb collects key metrics during the processing of requests and responses.
 2. These metrics include counters for blocked requests, performance measurements, and various security-related statistics.
@@ -2398,6 +2583,17 @@ The Metrics plugin provides comprehensive monitoring and data collection capabil
 4. For multi-instance setups, Redis can be used to centralize and aggregate metrics data.
 5. The collected metrics can be accessed through the API or visualized in the [web UI](web-ui.md).
 6. This information helps you identify security threats, troubleshoot issues, and optimize your configuration.
+
+### Technical Implementation
+
+The metrics plugin works by:
+
+- Using shared dictionaries in NGINX (`metrics_datastore` for HTTP and `metrics_datastore_stream` for TCP/UDP traffic)
+- Leveraging an LRU cache for efficient in-memory storage
+- Periodically synchronizing data between workers using timers
+- Storing detailed information about blocked requests including IP, country, timestamp, request details, and block reason
+- Supporting plugin-specific metrics through a common metrics collection interface
+- Providing API endpoints for querying collected metrics
 
 ### How to Use
 
@@ -2408,6 +2604,50 @@ Follow these steps to configure and use the Metrics feature:
 3. **Set storage limits:** Define how many blocked requests to store per worker and in Redis with the respective settings.
 4. **Access the data:** View the collected metrics through the [web UI](web-ui.md) or API endpoints.
 5. **Analyze the information:** Use the gathered data to identify patterns, detect security issues, and optimize your configuration.
+
+### Collected Metrics
+
+The metrics plugin collects the following information:
+
+1. **Blocked Requests**: For each blocked request, the following data is stored:
+      - Request ID and timestamp
+      - Client IP address and country (when available)
+      - HTTP method and URL
+      - HTTP status code
+      - User agent
+      - Block reason and security mode
+      - Server name
+      - Additional data related to the block reason
+
+2. **Plugin Counters**: Various plugin-specific counters that track activities and events
+
+### API Access
+
+Metrics data can be accessed via BunkerWeb's internal API endpoints:
+
+- **Endpoint**: `/metrics/{filter}`
+- **Method**: GET
+- **Description**: Retrieves metrics data based on the specified filter
+- **Response Format**: JSON object containing the requested metrics
+
+Example: `/metrics/requests` will return information about blocked requests.
+
+!!! info "API Access Configuration"
+    To access metrics via the API, you must ensure that:
+
+    1. The API feature is enabled with `USE_API: "yes"` (enabled by default)
+    2. Your client IP is included in the `API_WHITELIST_IP` setting (default is `127.0.0.0/8`)
+    3. You're accessing the API on the configured port (default is `5000` via the `API_HTTP_PORT` setting)
+    4. You're using the correct `API_SERVER_NAME` value in the Host header (default is `bwapi`)
+
+    A typical API request would look like:
+    ```
+    curl -H "Host: bwapi" http://your-bunkerweb-instance:5000/metrics/requests
+    ```
+
+    If you've customized the `API_SERVER_NAME` to something other than the default `bwapi`, you must use that value in the Host header instead.
+
+    For secure production environments, make sure to restrict API access to trusted IPs only.
 
 ### Configuration Settings
 
@@ -2426,6 +2666,9 @@ Follow these steps to configure and use the Metrics feature:
 
 !!! warning "Performance Considerations"
     Setting very high values for `METRICS_MAX_BLOCKED_REQUESTS` or `METRICS_MAX_BLOCKED_REQUESTS_REDIS` can increase memory usage. Monitor your system resources and adjust these values according to your actual needs and available resources.
+
+!!! note "Worker-Specific Storage"
+    Each NGINX worker maintains its own metrics in memory. When accessing metrics through the API, data from all workers is automatically aggregated to provide a complete view.
 
 ### Example Configurations
 
@@ -2511,57 +2754,107 @@ Whether you need to restrict HTTP methods, manage request sizes, optimize file c
 
     **Default Server Controls**
 
-    | Setting                             | Default | Context | Multiple | Description                                                                                                         |
-    | ----------------------------------- | ------- | ------- | -------- | ------------------------------------------------------------------------------------------------------------------- |
-    | `DISABLE_DEFAULT_SERVER`            | `no`    | global  | no       | **Default Server:** Set to `yes` to disable the default server when no hostname matches the request.                |
-    | `DISABLE_DEFAULT_SERVER_STRICT_SNI` | `no`    | global  | no       | **Strict SNI:** When set to `yes`, requires SNI for HTTPS connections and rejects connections without valid SNI.    |
-    | `DENY_HTTP_STATUS`                  | `403`   | global  | no       | **Deny HTTP Status:** HTTP status code to send when request is denied (403 or 444). Code 444 closes the connection. |
+    In HTTP, the `Host` header specifies the target server but may be missing or unknown, often due to bots scanning for vulnerabilities.
 
-    !!! warning "Default Server Security"
-        The default server settings can have significant security implications. When `DISABLE_DEFAULT_SERVER` is set to `yes`, clients that don't specify a valid hostname will receive an error, which can help prevent certain reconnaissance techniques.
+    To block such requests:
 
-        For SSL/TLS connections, enabling `DISABLE_DEFAULT_SERVER_STRICT_SNI` provides an additional layer of security by requiring a valid Server Name Indication.
+    - Set `DISABLE_DEFAULT_SERVER` to `yes` to silently deny them using [NGINX's `444` status code](https://http.dev/444).
+    - For stricter security, enable `DISABLE_DEFAULT_SERVER_STRICT_SNI` to reject SSL/TLS connections without valid SNI.
 
-=== "System Settings"
+    !!! success "Security Benefits"
+        - Blocks Host header manipulation and virtual host scanning
+        - Mitigates HTTP request smuggling risks
+        - Removes the default server as an attack vector
 
-    **Plugin and System Management**
+    | Setting                             | Default | Context | Multiple | Description                                                                                                      |
+    | ----------------------------------- | ------- | ------- | -------- | ---------------------------------------------------------------------------------------------------------------- |
+    | `DISABLE_DEFAULT_SERVER`            | `no`    | global  | no       | **Default Server:** Set to `yes` to disable the default server when no hostname matches the request.             |
+    | `DISABLE_DEFAULT_SERVER_STRICT_SNI` | `no`    | global  | no       | **Strict SNI:** When set to `yes`, requires SNI for HTTPS connections and rejects connections without valid SNI. |
 
-    | Setting                 | Default | Context | Multiple | Description                                                                    |
-    | ----------------------- | ------- | ------- | -------- | ------------------------------------------------------------------------------ |
-    | `SEND_ANONYMOUS_REPORT` | `yes`   | global  | no       | **Anonymous Reports:** Send anonymous usage reports to BunkerWeb maintainers.  |
-    | `EXTERNAL_PLUGIN_URLS`  |         | global  | no       | **External Plugins:** URLs for external plugins to download (space-separated). |
+    !!! warning "SNI Enforcement"
+        Enabling strict SNI validation provides stronger security but may cause issues if BunkerWeb is behind a reverse proxy that forwards HTTPS requests without preserving SNI information. Test thoroughly before enabling in production environments.
 
-    !!! info "Anonymous Reporting"
-        Anonymous usage reports help the BunkerWeb team understand how the software is being used and identify areas for improvement. No sensitive data is collected.
+=== "Deny HTTP Status"
+
+    **HTTP Status Control**
+
+    The first step in handling denied client access is defining the appropriate action. This can be configured using the `DENY_HTTP_STATUS` setting. When BunkerWeb denies a request, you can control its response using this setting. By default, it returns a `403 Forbidden` status, displaying a web page or custom content to the client.
+
+    Alternatively, setting it to `444` closes the connection immediately without sending any response. This [non-standard status code](https://http.dev/444), specific to NGINX, is useful for silently dropping unwanted requests.
+
+    | Setting            | Default | Context | Multiple | Description                                                                                                         |
+    | ------------------ | ------- | ------- | -------- | ------------------------------------------------------------------------------------------------------------------- |
+    | `DENY_HTTP_STATUS` | `403`   | global  | no       | **Deny HTTP Status:** HTTP status code to send when request is denied (403 or 444). Code 444 closes the connection. |
+
+    !!! warning "444 Status Code considerations"
+        Since clients receive no feedback, troubleshooting can be more challenging. Setting `444` is recommended only if you have thoroughly addressed false positives, are experienced with BunkerWeb, and require a higher level of security.
+
+    !!! info "Stream mode"
+        In **stream mode**, this setting is always enforced as `444`, meaning the connection will be closed, regardless of the configured value.
 
 === "HTTP Methods"
 
     **HTTP Method Control**
 
+    Restricting HTTP methods to only those required by your application is a fundamental security measure that adheres to the principle of least privilege. By explicitly defining acceptable HTTP methods, you can minimize the risk of exploitation through unused or dangerous methods.
+
+    This feature is configured using the `ALLOWED_METHODS` setting, where methods are listed and separated by a `|` (default: `GET|POST|HEAD`). If a client attempts to use a method not listed, the server will respond with a **405 - Method Not Allowed** status.
+
+    For most websites, the default `GET|POST|HEAD` is sufficient. If your application uses RESTful APIs, you may need to include methods like `PUT` and `DELETE`.
+
+    !!! success "Security Benefits"
+        - Prevents exploitation of unused or unnecessary HTTP methods
+        - Reduces the attack surface by disabling potentially harmful methods
+        - Blocks HTTP method enumeration techniques used by attackers
+
     | Setting           | Default | Context | Multiple | Description |
     | ----------------- | ------- | ------- | -------- | ----------- |
     | `ALLOWED_METHODS` | `GET    | POST    | HEAD`    | multisite   | no | **HTTP Methods:** List of HTTP methods that are allowed, separated by pipe characters. |
 
-    !!! tip "Allowed Methods"
-        Restricting HTTP methods to only those needed by your application is a security best practice. For most websites, the default `GET|POST|HEAD` is sufficient. Add `PUT` and `DELETE` only if your application uses RESTful APIs that require these methods.
+    !!! abstract "CORS and Pre-flight Requests"
+        If your application supports [Cross-Origin Resource Sharing (CORS)](#cors), you should include the `OPTIONS` method in the `ALLOWED_METHODS` setting to handle pre-flight requests. This ensures proper functionality for browsers making cross-origin requests.
 
-=== "Request Handling"
+    !!! danger "Security Considerations"
+        - **Avoid enabling `TRACE` or `CONNECT`:** These methods are rarely needed and can introduce significant security risks, such as enabling Cross-Site Tracing (XST) or tunneling attacks.
+        - **Regularly review allowed methods:** Periodically audit the `ALLOWED_METHODS` setting to ensure it aligns with your application's current requirements.
+        - **Test thoroughly before deployment:** Changes to HTTP method restrictions can impact application functionality. Validate your configuration in a staging environment before applying it to production.
+
+=== "Request Size Limits"
 
     **Request Size Limits**
+
+    The maximum request body size can be controlled using the `MAX_CLIENT_SIZE` setting (default: `10m`). This setting determines the maximum size of any request body sent to your server, including form submissions and file uploads. Accepted values follow the syntax described [here](https://nginx.org/en/docs/syntax.html).
+
+    !!! success "Security Benefits"
+        - Protects against denial-of-service attacks caused by excessive payload sizes
+        - Mitigates buffer overflow vulnerabilities
+        - Prevents file upload attacks
+        - Reduces the risk of server resource exhaustion
 
     | Setting           | Default | Context   | Multiple | Description                                                                                        |
     | ----------------- | ------- | --------- | -------- | -------------------------------------------------------------------------------------------------- |
     | `MAX_CLIENT_SIZE` | `10m`   | multisite | no       | **Maximum Request Size:** The maximum allowed size for client request bodies (e.g., file uploads). |
 
-    Common `MAX_CLIENT_SIZE` values:
+    !!! tip "Request Size Configuration Best Practices"
+        If you need to allow a request body of unlimited size, you can set the `MAX_CLIENT_SIZE` value to `0`. However, this is **not recommended** due to potential security and performance risks.
 
-    - `1m` - Suitable for forms with small file uploads
-    - `10m` - Default, balanced for most websites
-    - `100m` - For services that handle large file uploads
+        **Best Practices:**
+
+        - Always configure `MAX_CLIENT_SIZE` to the smallest value that meets your application's legitimate requirements.
+        - Regularly review and adjust this setting to align with your application's evolving needs.
+        - Avoid setting `0` unless absolutely necessary, as it can expose your server to denial-of-service attacks and resource exhaustion.
+
+        By carefully managing this setting, you can ensure optimal security and performance for your application.
 
 === "Protocol Support"
 
     **HTTP Protocol Settings**
+
+    Modern HTTP protocols like HTTP/2 and HTTP/3 improve performance and security. BunkerWeb allows easy configuration of these protocols.
+
+    !!! success "Security and Performance Benefits"
+        - **Security Advantages:** Modern protocols like HTTP/2 and HTTP/3 enforce TLS/HTTPS by default, reduce susceptibility to certain attacks, and improve privacy through encrypted headers (HTTP/3).
+        - **Performance Benefits:** Features like multiplexing, header compression, server push, and binary data transfer enhance speed and efficiency.
 
     | Setting              | Default | Context   | Multiple | Description                                                             |
     | -------------------- | ------- | --------- | -------- | ----------------------------------------------------------------------- |
@@ -2570,45 +2863,162 @@ Whether you need to restrict HTTP methods, manage request sizes, optimize file c
     | `HTTP3`              | `yes`   | multisite | no       | **HTTP3:** Support HTTP3 protocol when HTTPS is enabled.                |
     | `HTTP3_ALT_SVC_PORT` | `443`   | multisite | no       | **HTTP3 Alt-Svc Port:** Port to use in the Alt-Svc header for HTTP3.    |
 
-    !!! info "Modern Protocol Support"
-        HTTP/2 and HTTP/3 provide significant performance improvements over HTTP/1.1, including multiplexing, header compression, and reduced latency. Enabling these protocols is recommended for most websites.
+    !!! example "About HTTP/3"
+        HTTP/3, the latest version of the Hypertext Transfer Protocol, uses QUIC over UDP instead of TCP, addressing issues like head-of-line blocking for faster, more reliable connections.
+
+        NGINX introduced experimental support for HTTP/3 and QUIC starting with version 1.25.0. However, this feature is still experimental, and caution is advised for production use. For more details, see [NGINX's official documentation](https://nginx.org/en/docs/quic.html).
+
+        Thorough testing is recommended before enabling HTTP/3 in production environments.
 
 === "Static File Serving"
 
     **File Serving Configuration**
 
-    | Setting       | Default | Context   | Multiple | Description                                                                                            |
-    | ------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------------------------ |
-    | `SERVE_FILES` | `yes`   | multisite | no       | **Serve Files:** When set to `yes`, BunkerWeb will serve static files from the configured root folder. |
-    | `ROOT_FOLDER` |         | multisite | no       | **Root Folder:** The directory from which to serve static files. Empty means use the default location. |
+    BunkerWeb can serve static files directly or act as a reverse proxy to an application server. When serving files directly, you can specify the root directory using the `ROOT_FOLDER` setting. By default, files are served from `/var/www/html/{server_name}`.
 
-    To configure static file serving:
+    | Setting       | Default                       | Context   | Multiple | Description                                                                                            |
+    | ------------- | ----------------------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------ |
+    | `SERVE_FILES` | `yes`                         | multisite | no       | **Serve Files:** When set to `yes`, BunkerWeb will serve static files from the configured root folder. |
+    | `ROOT_FOLDER` | `/var/www/html/{server_name}` | multisite | no       | **Root Folder:** The directory from which to serve static files. Empty means use the default location. |
 
-    - Enable or disable serving static files with the `SERVE_FILES` setting
-    - Specify a custom root directory with `ROOT_FOLDER` or leave empty to use the default location
+    !!! tip "Best Practices for Static File Serving"
+        - **Direct Serving:** Enable file serving (`SERVE_FILES=yes`) when BunkerWeb is responsible for serving static files directly.
+        - **Reverse Proxy:** If BunkerWeb acts as a reverse proxy, **deactivate file serving** (`SERVE_FILES=no`) to reduce the attack surface and avoid exposing unnecessary directories.
+        - **Permissions:** Ensure proper file permissions and path configurations to prevent unauthorized access.
+        - **Security:** Avoid exposing sensitive directories or files through misconfigurations.
+
+        By carefully managing static file serving, you can optimize performance while maintaining a secure environment.
+
+=== "System Settings"
+
+    **Plugin and System Management**
+
+    These settings manage BunkerWeb's interaction with external systems and contribute to improving the product through optional anonymous usage statistics.
+
+    **Anonymous Reporting**
+
+    Anonymous reporting provides the BunkerWeb team with insights into how the software is being used. This helps identify areas for improvement and prioritize feature development. The reports are strictly statistical and do not include any sensitive or personally identifiable information. They cover:
+
+    - Enabled features
+    - General configuration patterns
+
+    You can disable this feature if desired by setting `SEND_ANONYMOUS_REPORT` to `no`.
+
+    **External Plugins**
+
+    External plugins enable you to extend BunkerWeb's functionality by integrating third-party modules. This allows for additional customization and advanced use cases.
+
+    !!! danger "External Plugin Security"
+        **External plugins can introduce security risks if not properly vetted.** Follow these best practices to minimize potential threats:
+
+        - Only use plugins from trusted sources.
+        - Verify plugin integrity using checksums when available.
+        - Regularly review and update plugins to ensure security and compatibility.
+
+        For more details, refer to the [Plugins documentation](plugins.md).
+
+    | Setting                 | Default | Context | Multiple | Description                                                                    |
+    | ----------------------- | ------- | ------- | -------- | ------------------------------------------------------------------------------ |
+    | `SEND_ANONYMOUS_REPORT` | `yes`   | global  | no       | **Anonymous Reports:** Send anonymous usage reports to BunkerWeb maintainers.  |
+    | `EXTERNAL_PLUGIN_URLS`  |         | global  | no       | **External Plugins:** URLs for external plugins to download (space-separated). |
 
 === "File Caching"
 
     **File Cache Optimization**
 
-    | Setting                    | Default                 | Context   | Multiple | Description                                                                                                     |
-    | -------------------------- | ----------------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------- |
-    | `USE_OPEN_FILE_CACHE`      | `no`                    | multisite | no       | **Open File Cache:** Set to `yes` to enable caching of file descriptors and metadata to improve performance.    |
-    | `OPEN_FILE_CACHE`          | `max=1000 inactive=20s` | multisite | no       | **Cache Configuration:** Settings for the open file cache in nginx format.                                      |
-    | `OPEN_FILE_CACHE_ERRORS`   | `yes`                   | multisite | no       | **Cache Errors:** Set to `yes` to cache file descriptor lookup errors as well as successful lookups.            |
-    | `OPEN_FILE_CACHE_MIN_USES` | `2`                     | multisite | no       | **Minimum Uses:** The minimum number of file accesses during the inactive period for the file to remain cached. |
-    | `OPEN_FILE_CACHE_VALID`    | `30s`                   | multisite | no       | **Cache Valid:** The time after which open file cache elements are validated.                                   |
+    The open file cache improves performance by storing file descriptors and metadata in memory, reducing the need for repeated file system operations. This feature is particularly beneficial for websites serving many static files.
 
-    To optimize file caching:
+    !!! success "Benefits of File Caching"
+        - **Performance:** Reduces filesystem I/O, decreases latency, and lowers CPU usage for file operations.
+        - **Security:** Mitigates timing attacks by caching error responses and reduces the impact of DoS attacks targeting the filesystem.
 
-    - Enable the open file cache with `USE_OPEN_FILE_CACHE`
-    - Configure cache parameters with `OPEN_FILE_CACHE` (format: `max=N inactive=Ts`)
-    - Control error caching with `OPEN_FILE_CACHE_ERRORS`
-    - Set minimum access count with `OPEN_FILE_CACHE_MIN_USES`
-    - Define validation period with `OPEN_FILE_CACHE_VALID`
+    | Setting                    | Default                 | Context   | Multiple | Description                                                                                          |
+    | -------------------------- | ----------------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------- |
+    | `USE_OPEN_FILE_CACHE`      | `no`                    | multisite | no       | **Enable Cache:** Enable caching of file descriptors and metadata to improve performance.            |
+    | `OPEN_FILE_CACHE`          | `max=1000 inactive=20s` | multisite | no       | **Cache Configuration:** Configure the open file cache (e.g., maximum entries and inactive timeout). |
+    | `OPEN_FILE_CACHE_ERRORS`   | `yes`                   | multisite | no       | **Cache Errors:** Cache file descriptor lookup errors as well as successful lookups.                 |
+    | `OPEN_FILE_CACHE_MIN_USES` | `2`                     | multisite | no       | **Minimum Uses:** Minimum number of accesses during the inactive period for a file to remain cached. |
+    | `OPEN_FILE_CACHE_VALID`    | `30s`                   | multisite | no       | **Cache Validity:** Time after which cached elements are revalidated.                                |
 
-    !!! info "Open File Cache"
-        Enabling the open file cache can significantly improve performance for websites serving many static files, as it reduces the need for repeated file system operations. However, in dynamic environments where files change frequently, you may need to adjust the cache validity period or disable this feature.
+    **Configuration Guide**
+
+    To enable and configure file caching:
+
+    1. Set `USE_OPEN_FILE_CACHE` to `yes` to activate the feature.
+    2. Adjust `OPEN_FILE_CACHE` parameters to define the maximum number of cached entries and their inactive timeout.
+    3. Use `OPEN_FILE_CACHE_ERRORS` to cache both successful and failed lookups, reducing repeated filesystem operations.
+    4. Set `OPEN_FILE_CACHE_MIN_USES` to specify the minimum number of accesses required for a file to remain cached.
+    5. Define the cache validity period with `OPEN_FILE_CACHE_VALID` to control how often cached elements are revalidated.
+
+    !!! tip "Best Practices"
+        - Enable file caching for websites with many static files to improve performance.
+        - Regularly review and fine-tune cache settings to balance performance and resource usage.
+        - In dynamic environments where files change frequently, consider reducing the cache validity period or disabling the feature to ensure content freshness.
+
+### Example Configurations
+
+=== "Default Server Security"
+
+    Example configuration for disabling the default server and enforcing strict SNI:
+
+    ```yaml
+    DISABLE_DEFAULT_SERVER: "yes"
+    DISABLE_DEFAULT_SERVER_STRICT_SNI: "yes"
+    ```
+
+=== "Deny HTTP Status"
+
+    Example configuration for silently dropping unwanted requests:
+
+    ```yaml
+    DENY_HTTP_STATUS: "444"
+    ```
+
+=== "HTTP Methods"
+
+    Example configuration for restricting HTTP methods to only those required by a RESTful API:
+
+    ```yaml
+    ALLOWED_METHODS: "GET|POST|PUT|DELETE"
+    ```
+
+=== "Request Size Limits"
+
+    Example configuration for limiting the maximum request body size:
+
+    ```yaml
+    MAX_CLIENT_SIZE: "5m"
+    ```
+
+=== "Protocol Support"
+
+    Example configuration for enabling HTTP/2 and HTTP/3 with a custom Alt-Svc port:
+
+    ```yaml
+    HTTP2: "yes"
+    HTTP3: "yes"
+    HTTP3_ALT_SVC_PORT: "443"
+    ```
+
+=== "Static File Serving"
+
+    Example configuration for serving static files from a custom root folder:
+
+    ```yaml
+    SERVE_FILES: "yes"
+    ROOT_FOLDER: "/var/www/custom-folder"
+    ```
+
+=== "File Caching"
+
+    Example configuration for enabling and optimizing file caching:
+
+    ```yaml
+    USE_OPEN_FILE_CACHE: "yes"
+    OPEN_FILE_CACHE: "max=2000 inactive=30s"
+    OPEN_FILE_CACHE_ERRORS: "yes"
+    OPEN_FILE_CACHE_MIN_USES: "3"
+    OPEN_FILE_CACHE_VALID: "60s"
 
 ## ModSecurity
 
@@ -2616,7 +3026,7 @@ STREAM support :x:
 
 The ModSecurity plugin integrates the powerful [ModSecurity](https://modsecurity.org) Web Application Firewall (WAF) into BunkerWeb. This integration delivers robust protection against a wide range of web attacks by leveraging the [OWASP Core Rule Set (CRS)](https://coreruleset.org) to detect and block threats such as SQL injection, cross-site scripting (XSS), local file inclusion, and more.
 
-**How the ModSecurity feature works:**
+**How it works:**
 
 1. When a request is received, ModSecurity evaluates it against the active rule set.
 2. The OWASP Core Rule Set inspects headers, cookies, URL parameters, and body content.
@@ -2855,25 +3265,151 @@ BunkerWeb monitoring pro system. This plugin is a prerequisite for some other pl
 
 STREAM support :x:
 
-Manage local or remote PHP-FPM.
+The PHP plugin provides seamless integration with PHP-FPM for BunkerWeb, enabling dynamic PHP processing for your websites. This feature supports both local PHP-FPM instances running on the same machine and remote PHP-FPM servers, giving you flexibility in how you configure your PHP environment.
 
-| Setting           | Default | Context   | Multiple | Description                                                  |
-| ----------------- | ------- | --------- | -------- | ------------------------------------------------------------ |
-| `REMOTE_PHP`      |         | multisite | no       | Hostname of the remote PHP-FPM instance.                     |
-| `REMOTE_PHP_PATH` |         | multisite | no       | Root folder containing files in the remote PHP-FPM instance. |
-| `REMOTE_PHP_PORT` | `9000`  | multisite | no       | Port of the remote PHP-FPM instance.                         |
-| `LOCAL_PHP`       |         | multisite | no       | Path to the PHP-FPM socket file.                             |
-| `LOCAL_PHP_PATH`  |         | multisite | no       | Root folder containing files in the local PHP-FPM instance.  |
+**How it works:**
+
+1. When a client requests a PHP file from your website, BunkerWeb routes the request to the configured PHP-FPM instance.
+2. For local PHP-FPM, BunkerWeb communicates with the PHP interpreter through a Unix socket file.
+3. For remote PHP-FPM, BunkerWeb forwards requests to the specified host and port using FastCGI protocol.
+4. PHP-FPM processes the script and returns the generated content to BunkerWeb, which then delivers it to the client.
+5. URL rewriting is automatically configured to support common PHP frameworks and applications that use "pretty URLs".
+
+### How to Use
+
+Follow these steps to configure and use the PHP feature:
+
+1. **Choose your PHP-FPM setup:** Decide whether you'll use a local or remote PHP-FPM instance.
+2. **Configure the connection:** For local PHP, specify the socket path; for remote PHP, provide the hostname and port.
+3. **Set the document root:** Configure the root folder that contains your PHP files using the appropriate path setting.
+4. **Let BunkerWeb handle the rest:** Once configured, BunkerWeb automatically routes PHP requests to your PHP-FPM instance.
+
+### Configuration Settings
+
+| Setting           | Default | Context   | Multiple | Description                                                                                 |
+| ----------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------------- |
+| `REMOTE_PHP`      |         | multisite | no       | **Remote PHP Host:** Hostname of the remote PHP-FPM instance. Leave empty to use local PHP. |
+| `REMOTE_PHP_PATH` |         | multisite | no       | **Remote Path:** Root folder containing files in the remote PHP-FPM instance.               |
+| `REMOTE_PHP_PORT` | `9000`  | multisite | no       | **Remote Port:** Port of the remote PHP-FPM instance.                                       |
+| `LOCAL_PHP`       |         | multisite | no       | **Local PHP Socket:** Path to the PHP-FPM socket file. Leave empty to use remote PHP.       |
+| `LOCAL_PHP_PATH`  |         | multisite | no       | **Local Path:** Root folder containing files in the local PHP-FPM instance.                 |
+
+!!! tip "Local vs. Remote PHP-FPM"
+    Choose the setup that best fits your infrastructure:
+
+    - **Local PHP-FPM** offers better performance due to socket-based communication and is ideal when PHP runs on the same machine as BunkerWeb.
+    - **Remote PHP-FPM** provides more flexibility and scalability by allowing PHP processing to occur on separate servers.
+
+!!! warning "Path Configuration"
+    The `REMOTE_PHP_PATH` or `LOCAL_PHP_PATH` must match the actual filesystem path where your PHP files are stored. Incorrect paths will result in "File not found" errors.
+
+!!! info "URL Rewriting"
+    The PHP plugin automatically configures URL rewriting to support modern PHP applications. Requests for non-existent files will be directed to `index.php` with the original request URI available as a query parameter.
+
+### Example Configurations
+
+=== "Local PHP-FPM Configuration"
+
+    Configuration for using a local PHP-FPM instance:
+
+    ```yaml
+    LOCAL_PHP: "/var/run/php/php8.1-fpm.sock"
+    LOCAL_PHP_PATH: "/var/www/html"
+    ```
+
+=== "Remote PHP-FPM Configuration"
+
+    Configuration for using a remote PHP-FPM instance:
+
+    ```yaml
+    REMOTE_PHP: "php-server.example.com"
+    REMOTE_PHP_PORT: "9000"
+    REMOTE_PHP_PATH: "/var/www/html"
+    ```
+
+=== "Custom Port Configuration"
+
+    Configuration for using PHP-FPM on a non-standard port:
+
+    ```yaml
+    REMOTE_PHP: "php-server.example.com"
+    REMOTE_PHP_PORT: "9001"
+    REMOTE_PHP_PATH: "/var/www/html"
+    ```
+
+=== "WordPress Configuration"
+
+    Configuration optimized for WordPress:
+
+    ```yaml
+    LOCAL_PHP: "/var/run/php/php8.1-fpm.sock"
+    LOCAL_PHP_PATH: "/var/www/html/wordpress"
+    ```
 
 ## Pro
 
 STREAM support :x:
 
-Pro settings for the Pro version of BunkerWeb.
+The Pro plugin provides access to premium features and enhancements for BunkerWeb users with an active Pro license. This feature unlocks additional capabilities, premium plugins, and extended functionality that complement the core BunkerWeb platform, delivering enhanced security, performance, and management options for enterprise-grade deployments.
 
-| Setting           | Default | Context | Multiple | Description                                       |
-| ----------------- | ------- | ------- | -------- | ------------------------------------------------- |
-| `PRO_LICENSE_KEY` |         | global  | no       | The License Key for the Pro version of BunkerWeb. |
+**How it works:**
+
+1. With a valid Pro license key, BunkerWeb connects to the Pro API server to validate your subscription.
+2. Once authenticated, the plugin automatically downloads and installs Pro-exclusive plugins and extensions.
+3. Your Pro status is periodically verified to ensure continued access to premium features.
+4. Premium plugins are seamlessly integrated with your existing BunkerWeb configuration.
+5. All Pro features work harmoniously with the open-source core, enhancing rather than replacing functionality.
+
+!!! success "Key benefits"
+
+      1. **Premium Extensions:** Access to exclusive plugins and features not available in the community edition.
+      2. **Enhanced Performance:** Optimized configurations and advanced caching mechanisms.
+      3. **Enterprise Support:** Priority assistance and dedicated support channels.
+      4. **Seamless Integration:** Pro features work alongside community features without configuration conflicts.
+      5. **Automatic Updates:** Premium plugins are automatically downloaded and kept current.
+
+### How to Use
+
+Follow these steps to configure and use the Pro features:
+
+1. **Obtain a license key:** Purchase a Pro license from the [BunkerWeb Panel](https://panel.bunkerweb.io/order/bunkerweb-pro?utm_campaign=self&utm_source=doc).
+2. **Configure the license key:** Set your license key using the `PRO_LICENSE_KEY` setting.
+3. **Let BunkerWeb handle the rest:** Once configured with a valid license, Pro plugins will be automatically downloaded and activated.
+4. **Monitor your Pro status:** Check the health indicators in the [web UI](web-ui.md) to confirm your Pro subscription status.
+
+### Configuration Settings
+
+| Setting           | Default | Context | Multiple | Description                                                             |
+| ----------------- | ------- | ------- | -------- | ----------------------------------------------------------------------- |
+| `PRO_LICENSE_KEY` |         | global  | no       | **Pro License Key:** Your BunkerWeb Pro license key for authentication. |
+
+!!! tip "License Management"
+    Your Pro license is tied to your specific deployment environment. If you need to transfer your license or have questions about your subscription, please contact support through the [BunkerWeb Panel](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=doc).
+
+!!! info "Pro Features"
+    The specific Pro features available may evolve over time as new capabilities are added. The Pro plugin automatically handles the installation and configuration of all available features.
+
+!!! warning "Network Requirements"
+    The Pro plugin requires outbound internet access to connect to the BunkerWeb API for license verification and to download premium plugins. Ensure your firewall allows connections to `api.bunkerweb.io` on port 443 (HTTPS).
+
+### Frequently Asked Questions
+
+**Q: What happens if my Pro license expires?**
+
+A: If your Pro license expires, access to premium features and plugins will be disabled. However, your BunkerWeb installation will continue to operate with all community edition features intact. To regain access to Pro features, simply renew your license.
+
+**Q: Will Pro features disrupt my existing configuration?**
+
+A: No, Pro features are designed to integrate seamlessly with your current BunkerWeb setup. They enhance functionality without altering or interfering with your existing configuration, ensuring a smooth and reliable experience.
+
+**Q: Can I try Pro features before committing to a purchase?**
+
+A: Absolutely! BunkerWeb offers two Pro plans to suit your needs:
+
+- **BunkerWeb PRO Standard:** Full access to Pro features without technical support.
+- **BunkerWeb PRO Enterprise:** Full access to Pro features with dedicated technical support.
+
+You can explore Pro features with a free 1-month trial by using the promo code `freetrial`. Visit the [BunkerWeb Panel](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc) to activate your trial and learn more about flexible pricing options based on the number of services protected by BunkerWeb PRO.
 
 ## Prometheus exporter <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
@@ -2894,52 +3430,315 @@ Prometheus exporter for BunkerWeb internal metrics.
 
 STREAM support :warning:
 
-Get real IP of clients when BunkerWeb is behind a reverse proxy / load balancer.
+The Real IP plugin allows BunkerWeb to accurately identify the true IP address of visitors when operating behind reverse proxies, load balancers, or CDNs. This is essential for properly applying security rules, rate limiting, and logging, as without it, all requests would appear to come from your proxy's IP rather than the actual client's IP.
 
-| Setting              | Default                                   | Context   | Multiple | Description                                                                                                                                                                               |
-| -------------------- | ----------------------------------------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_REAL_IP`        | `no`                                      | multisite | no       | Retrieve the real IP of client.                                                                                                                                                           |
-| `USE_PROXY_PROTOCOL` | `no`                                      | global    | no       | Enable PROXY protocol communication.                                                                                                                                                      |
-| `REAL_IP_FROM`       | `192.168.0.0/16 172.16.0.0/12 10.0.0.0/8` | multisite | no       | List of trusted IPs / networks, separated with spaces, where proxied requests come from.                                                                                                  |
-| `REAL_IP_HEADER`     | `X-Forwarded-For`                         | multisite | no       | HTTP header containing the real IP or special value proxy_protocol for PROXY protocol.                                                                                                    |
-| `REAL_IP_RECURSIVE`  | `yes`                                     | multisite | no       | Perform a recursive search in the header container IP address.                                                                                                                            |
-| `REAL_IP_FROM_URLS`  |                                           | multisite | no       | List of URLs containing trusted IPs / networks, separated with spaces, where proxied requests come from. Also supports file:// URLs and and auth basic using http://user:pass@url scheme. |
+**How it works:**
+
+1. When enabled, BunkerWeb examines incoming requests for specific headers (like [`X-Forwarded-For`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-Forwarded-For)) that contain the client's original IP address.
+2. BunkerWeb checks if the connecting IP is in your trusted proxy list (`REAL_IP_FROM`), ensuring only legitimate proxies can pass client IPs.
+3. The original client IP is extracted from the specified header (`REAL_IP_HEADER`) and used for all security evaluations and logging.
+4. For recursive IP chains, BunkerWeb can trace through multiple proxy hops to find the originating client IP.
+5. Additionally, PROXY protocol support can be enabled to receive client IPs directly from compatible proxies like [HAProxy](https://www.haproxy.org/).
+6. Trusted proxy IP lists can be automatically downloaded and updated from external sources via URLs.
+
+### How to Use
+
+Follow these steps to configure and use the Real IP feature:
+
+1. **Enable the feature:** Set the `USE_REAL_IP` setting to `yes` to enable real IP detection.
+2. **Define trusted proxies:** List the IP addresses or networks of your trusted proxies using the `REAL_IP_FROM` setting.
+3. **Specify the header:** Configure which header contains the real IP using the `REAL_IP_HEADER` setting.
+4. **Configure recursion:** Decide whether to trace IP chains recursively with the `REAL_IP_RECURSIVE` setting.
+5. **Optional URL sources:** Set up automatic downloads of trusted proxy lists with `REAL_IP_FROM_URLS`.
+6. **PROXY protocol:** For direct proxy communication, enable with `USE_PROXY_PROTOCOL` if your upstream supports it.
+
+!!! danger "PROXY Protocol Warning"
+    Enabling `USE_PROXY_PROTOCOL` without properly configuring your upstream proxy to send PROXY protocol headers will **break your application**. Only enable this setting if you are certain that your upstream proxy is properly configured to send PROXY protocol information. If your proxy is not sending PROXY protocol headers, all connections to BunkerWeb will fail with protocol errors.
+
+### Configuration Settings
+
+| Setting              | Default                                   | Context   | Multiple | Description                                                                                                           |
+| -------------------- | ----------------------------------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------- |
+| `USE_REAL_IP`        | `no`                                      | multisite | no       | **Enable Real IP:** Set to `yes` to enable retrieving client's real IP from headers or PROXY protocol.                |
+| `REAL_IP_FROM`       | `192.168.0.0/16 172.16.0.0/12 10.0.0.0/8` | multisite | no       | **Trusted Proxies:** List of trusted IP addresses or networks where proxied requests come from, separated by spaces.  |
+| `REAL_IP_HEADER`     | `X-Forwarded-For`                         | multisite | no       | **Real IP Header:** HTTP header containing the real IP or special value `proxy_protocol` for PROXY protocol.          |
+| `REAL_IP_RECURSIVE`  | `yes`                                     | multisite | no       | **Recursive Search:** When set to `yes`, performs a recursive search in header containing multiple IP addresses.      |
+| `REAL_IP_FROM_URLS`  |                                           | multisite | no       | **IP List URLs:** URLs containing trusted proxy IPs/networks to download, separated by spaces. Supports file:// URLs. |
+| `USE_PROXY_PROTOCOL` | `no`                                      | global    | no       | **PROXY Protocol:** Set to `yes` to enable PROXY protocol support for direct proxy-to-BunkerWeb communication.        |
+
+!!! tip "Cloud Provider Networks"
+    If you're using a cloud provider like AWS, GCP, or Azure, consider adding their load balancer IP ranges to your `REAL_IP_FROM` setting to ensure proper client IP identification.
+
+!!! danger "Security Considerations"
+    Only include trusted proxy IPs in your configuration. Adding untrusted sources could allow IP spoofing attacks, where malicious actors could forge the client IP by manipulating headers.
+
+!!! info "Multiple IP Addresses"
+    When `REAL_IP_RECURSIVE` is enabled and a header contains multiple IPs (e.g., `X-Forwarded-For: client, proxy1, proxy2`), BunkerWeb will identify the leftmost IP not in your trusted proxy list as the client IP.
+
+### Example Configurations
+
+=== "Basic Configuration"
+
+    A simple configuration for a site behind a reverse proxy:
+
+    ```yaml
+    USE_REAL_IP: "yes"
+    REAL_IP_FROM: "192.168.1.0/24 10.0.0.5"
+    REAL_IP_HEADER: "X-Forwarded-For"
+    REAL_IP_RECURSIVE: "yes"
+    ```
+
+=== "Cloud Load Balancer"
+
+    Configuration for a site behind a cloud load balancer:
+
+    ```yaml
+    USE_REAL_IP: "yes"
+    REAL_IP_FROM: "192.168.0.0/16 172.16.0.0/12 10.0.0.0/8"
+    REAL_IP_HEADER: "X-Forwarded-For"
+    REAL_IP_RECURSIVE: "yes"
+    ```
+
+=== "PROXY Protocol"
+
+    Configuration using PROXY protocol with a compatible load balancer:
+
+    ```yaml
+    USE_REAL_IP: "yes"
+    REAL_IP_FROM: "192.168.1.0/24"
+    REAL_IP_HEADER: "proxy_protocol"
+    USE_PROXY_PROTOCOL: "yes"
+    ```
+
+=== "Multiple Proxy Sources with URLs"
+
+    Advanced configuration with automatically updated proxy IP lists:
+
+    ```yaml
+    USE_REAL_IP: "yes"
+    REAL_IP_FROM: "192.168.0.0/16 172.16.0.0/12 10.0.0.0/8"
+    REAL_IP_HEADER: "X-Real-IP"
+    REAL_IP_RECURSIVE: "yes"
+    REAL_IP_FROM_URLS: "https://example.com/proxy-ips.txt file:///etc/bunkerweb/custom-proxies.txt"
+    ```
+
+=== "CDN Configuration"
+
+    Configuration for a website behind a CDN:
+
+    ```yaml
+    USE_REAL_IP: "yes"
+    REAL_IP_FROM: "192.168.0.0/16 172.16.0.0/12 10.0.0.0/8"
+    REAL_IP_FROM_URLS: "https://cdn-provider.com/ip-ranges.txt"
+    REAL_IP_HEADER: "CF-Connecting-IP"  # Example for Cloudflare
+    REAL_IP_RECURSIVE: "no"  # Not needed with single IP headers
+    ```
+
+=== "Behind Cloudflare"
+
+    Configuration for a website behind Cloudflare:
+
+    ```yaml
+    USE_REAL_IP: "yes"
+    REAL_IP_FROM: "" # We only trust Cloudflare IPs
+    REAL_IP_FROM_URLS: "https://www.cloudflare.com/ips-v4/ https://www.cloudflare.com/ips-v6/" # Download Cloudflare IPs automatically
+    REAL_IP_HEADER: "CF-Connecting-IP"  # Cloudflare header for client IP
+    REAL_IP_RECURSIVE: "yes"
+    ```
 
 ## Redirect
 
 STREAM support :x:
 
-Manage HTTP redirects.
+The Redirect plugin provides simple and efficient HTTP redirection capabilities for your BunkerWeb-protected websites. This feature allows you to easily redirect visitors from one site to another, supporting both full domain redirects and path-preserving redirection.
 
-| Setting                   | Default | Context   | Multiple | Description                                       |
-| ------------------------- | ------- | --------- | -------- | ------------------------------------------------- |
-| `REDIRECT_TO`             |         | multisite | no       | Redirect a whole site to another one.             |
-| `REDIRECT_TO_REQUEST_URI` | `no`    | multisite | no       | Append the requested URI to the redirect address. |
-| `REDIRECT_TO_STATUS_CODE` | `301`   | multisite | no       | Status code to send to client when redirecting.   |
+**How it works:**
+
+1. When a visitor accesses your website, BunkerWeb checks if a redirection is configured.
+2. If enabled, BunkerWeb redirects the visitor to the specified destination URL.
+3. You can configure whether to preserve the original request path (appending it to the destination URL) or redirect to the exact destination URL.
+4. The HTTP status code used for the redirection can be customized between permanent (301) and temporary (302) redirects.
+5. This functionality is ideal for domain migrations, implementing canonical domains, or redirecting deprecated URLs.
+
+### How to Use
+
+Follow these steps to configure and use the Redirect feature:
+
+1. **Set the destination URL:** Configure the target URL where visitors should be redirected using the `REDIRECT_TO` setting.
+2. **Choose redirection type:** Decide whether to preserve the original request path with the `REDIRECT_TO_REQUEST_URI` setting.
+3. **Select status code:** Set the appropriate HTTP status code with the `REDIRECT_TO_STATUS_CODE` setting to indicate permanent or temporary redirection.
+4. **Let BunkerWeb handle the rest:** Once configured, all requests to the site will be automatically redirected according to your settings.
+
+### Configuration Settings
+
+| Setting                   | Default | Context   | Multiple | Description                                                                                                         |
+| ------------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------- |
+| `REDIRECT_TO`             |         | multisite | no       | **Destination URL:** The target URL where visitors will be redirected. Leave empty to disable redirection.          |
+| `REDIRECT_TO_REQUEST_URI` | `no`    | multisite | no       | **Preserve Path:** When set to `yes`, appends the original request URI to the destination URL.                      |
+| `REDIRECT_TO_STATUS_CODE` | `301`   | multisite | no       | **HTTP Status Code:** The HTTP status code to use for redirection. Options: `301` (permanent) or `302` (temporary). |
+
+!!! tip "Choosing the Right Status Code"
+    - Use `301` (Moved Permanently) when the redirect is permanent, such as for domain migrations or establishing canonical URLs. This helps search engines update their indexes.
+    - Use `302` (Found/Temporary Redirect) when the redirect is temporary or you may want to reuse the original URL in the future.
+
+!!! info "Path Preservation"
+    When `REDIRECT_TO_REQUEST_URI` is set to `yes`, BunkerWeb preserves the original request path. For example, if a user visits `https://old-domain.com/blog/post-1` and you've set up a redirect to `https://new-domain.com`, they'll be redirected to `https://new-domain.com/blog/post-1`.
+
+### Example Configurations
+
+=== "Simple Domain Redirect"
+
+    A configuration that redirects all visitors to a new domain:
+
+    ```yaml
+    REDIRECT_TO: "https://new-domain.com"
+    REDIRECT_TO_REQUEST_URI: "no"
+    REDIRECT_TO_STATUS_CODE: "301"
+    ```
+
+=== "Path-Preserving Redirect"
+
+    A configuration that redirects visitors to a new domain while preserving the requested path:
+
+    ```yaml
+    REDIRECT_TO: "https://new-domain.com"
+    REDIRECT_TO_REQUEST_URI: "yes"
+    REDIRECT_TO_STATUS_CODE: "301"
+    ```
+
+=== "Temporary Redirect"
+
+    A configuration for a temporary redirect to a maintenance site:
+
+    ```yaml
+    REDIRECT_TO: "https://maintenance.example.com"
+    REDIRECT_TO_REQUEST_URI: "no"
+    REDIRECT_TO_STATUS_CODE: "302"
+    ```
+
+=== "Subdomain Consolidation"
+
+    A configuration to redirect a subdomain to a specific path on the main domain:
+
+    ```yaml
+    REDIRECT_TO: "https://example.com/support"
+    REDIRECT_TO_REQUEST_URI: "yes"
+    REDIRECT_TO_STATUS_CODE: "301"
+    ```
 
 ## Redis
 
 STREAM support :white_check_mark:
 
-Redis server configuration when using BunkerWeb in cluster mode.
+The Redis plugin provides integration with Redis for BunkerWeb, enabling efficient data storage, caching, and communication between multiple BunkerWeb instances in a cluster. This feature is essential for deploying BunkerWeb in high-availability environments where session data, metrics, and other shared information must be accessible across multiple nodes.
 
-| Setting                   | Default | Context | Multiple | Description                                                         |
-| ------------------------- | ------- | ------- | -------- | ------------------------------------------------------------------- |
-| `USE_REDIS`               | `no`    | global  | no       | Activate Redis.                                                     |
-| `REDIS_HOST`              |         | global  | no       | Redis server IP or hostname.                                        |
-| `REDIS_PORT`              | `6379`  | global  | no       | Redis server port.                                                  |
-| `REDIS_DATABASE`          | `0`     | global  | no       | Redis database number.                                              |
-| `REDIS_SSL`               | `no`    | global  | no       | Use SSL/TLS connection with Redis server.                           |
-| `REDIS_SSL_VERIFY`        | `no`    | global  | no       | Verify the certificate of Redis server.                             |
-| `REDIS_TIMEOUT`           | `1000`  | global  | no       | Redis server timeout (in ms) for connect, read and write.           |
-| `REDIS_USERNAME`          |         | global  | no       | Redis username used in AUTH command.                                |
-| `REDIS_PASSWORD`          |         | global  | no       | Redis password used in AUTH command.                                |
-| `REDIS_SENTINEL_HOSTS`    |         | global  | no       | Redis sentinel hosts with format host:[port] separated with spaces. |
-| `REDIS_SENTINEL_USERNAME` |         | global  | no       | Redis sentinel username.                                            |
-| `REDIS_SENTINEL_PASSWORD` |         | global  | no       | Redis sentinel password.                                            |
-| `REDIS_SENTINEL_MASTER`   |         | global  | no       | Redis sentinel master name.                                         |
-| `REDIS_KEEPALIVE_IDLE`    | `30000` | global  | no       | Max idle time (in ms) before closing redis connection in the pool.  |
-| `REDIS_KEEPALIVE_POOL`    | `10`    | global  | no       | Max number of redis connection(s) kept in the pool.                 |
+**How it works:**
+
+1. When enabled, BunkerWeb establishes a connection to your configured Redis server.
+2. Critical data such as session information, metrics, and security-related data are stored in Redis.
+3. Multiple BunkerWeb instances can share this data, enabling seamless clustering and load balancing.
+4. The plugin supports various Redis deployment options, including standalone servers, password authentication, SSL/TLS encryption, and Redis Sentinel for high availability.
+5. Automatic reconnection and configurable timeouts ensure robustness in production environments.
+
+### How to Use
+
+Follow these steps to configure and use the Redis plugin:
+
+1. **Enable the feature:** Set the `USE_REDIS` setting to `yes` to enable Redis integration.
+2. **Configure connection details:** Specify your Redis server's hostname/IP and port.
+3. **Set security options:** Configure authentication credentials if your Redis server requires them.
+4. **Configure advanced options:** Set database selection, SSL options, and timeouts as needed.
+5. **For high availability:** Configure Sentinel settings if you're using Redis Sentinel.
+
+### Configuration Settings
+
+| Setting                   | Default    | Context | Multiple | Description                                                                              |
+| ------------------------- | ---------- | ------- | -------- | ---------------------------------------------------------------------------------------- |
+| `USE_REDIS`               | `no`       | global  | no       | **Enable Redis:** Set to `yes` to enable Redis integration for cluster mode.             |
+| `REDIS_HOST`              |            | global  | no       | **Redis Server:** IP address or hostname of the Redis server.                            |
+| `REDIS_PORT`              | `6379`     | global  | no       | **Redis Port:** Port number of the Redis server.                                         |
+| `REDIS_DATABASE`          | `0`        | global  | no       | **Redis Database:** Database number to use on the Redis server (0-15).                   |
+| `REDIS_SSL`               | `no`       | global  | no       | **Redis SSL:** Set to `yes` to enable SSL/TLS encryption for the Redis connection.       |
+| `REDIS_SSL_VERIFY`        | `yes`      | global  | no       | **Redis SSL Verify:** Set to `yes` to verify the Redis server's SSL certificate.         |
+| `REDIS_TIMEOUT`           | `5`        | global  | no       | **Redis Timeout:** Connection timeout in seconds for Redis operations.                   |
+| `REDIS_USERNAME`          |            | global  | no       | **Redis Username:** Username for Redis authentication (Redis 6.0+).                      |
+| `REDIS_PASSWORD`          |            | global  | no       | **Redis Password:** Password for Redis authentication.                                   |
+| `REDIS_SENTINEL_HOSTS`    |            | global  | no       | **Sentinel Hosts:** Space-separated list of Redis Sentinel hosts (hostname:port).        |
+| `REDIS_SENTINEL_USERNAME` |            | global  | no       | **Sentinel Username:** Username for Redis Sentinel authentication.                       |
+| `REDIS_SENTINEL_PASSWORD` |            | global  | no       | **Sentinel Password:** Password for Redis Sentinel authentication.                       |
+| `REDIS_SENTINEL_MASTER`   | `mymaster` | global  | no       | **Sentinel Master:** Name of the master in Redis Sentinel configuration.                 |
+| `REDIS_KEEPALIVE_IDLE`    | `300`      | global  | no       | **Keepalive Idle:** Time (in seconds) between TCP keepalive probes for idle connections. |
+| `REDIS_KEEPALIVE_POOL`    | `3`        | global  | no       | **Keepalive Pool:** Maximum number of Redis connections kept in the pool.                |
+
+!!! tip "High Availability with Redis Sentinel"
+    For production environments requiring high availability, configure Redis Sentinel settings. This provides automatic failover capabilities if the primary Redis server becomes unavailable.
+
+!!! warning "Security Considerations"
+    When using Redis in production:
+
+    - Always set strong passwords for both Redis and Sentinel authentication
+    - Consider enabling SSL/TLS encryption for Redis connections
+    - Ensure your Redis server is not exposed to the public internet
+    - Restrict access to the Redis port using firewalls or network segmentation
+
+!!! info "Cluster Requirements"
+    When deploying BunkerWeb in a cluster:
+
+    - All BunkerWeb instances should connect to the same Redis server or Sentinel cluster
+    - Configure the same database number across all instances
+    - Ensure network connectivity between all BunkerWeb instances and Redis servers
+
+### Example Configurations
+
+=== "Basic Configuration"
+
+    A simple configuration for connecting to a Redis server on the local machine:
+
+    ```yaml
+    USE_REDIS: "yes"
+    REDIS_HOST: "localhost"
+    REDIS_PORT: "6379"
+    ```
+
+=== "Secure Configuration"
+
+    Configuration with password authentication and SSL enabled:
+
+    ```yaml
+    USE_REDIS: "yes"
+    REDIS_HOST: "redis.example.com"
+    REDIS_PORT: "6379"
+    REDIS_PASSWORD: "your-strong-password"
+    REDIS_SSL: "yes"
+    REDIS_SSL_VERIFY: "yes"
+    ```
+
+=== "Redis Sentinel Configuration"
+
+    Configuration for high availability using Redis Sentinel:
+
+    ```yaml
+    USE_REDIS: "yes"
+    REDIS_SENTINEL_HOSTS: "sentinel1:26379 sentinel2:26379 sentinel3:26379"
+    REDIS_SENTINEL_MASTER: "mymaster"
+    REDIS_SENTINEL_PASSWORD: "sentinel-password"
+    REDIS_PASSWORD: "redis-password"
+    ```
+
+=== "Advanced Tuning"
+
+    Configuration with advanced connection parameters for performance optimization:
+
+    ```yaml
+    USE_REDIS: "yes"
+    REDIS_HOST: "redis.example.com"
+    REDIS_PORT: "6379"
+    REDIS_PASSWORD: "your-strong-password"
+    REDIS_DATABASE: "3"
+    REDIS_TIMEOUT: "3"
+    REDIS_KEEPALIVE_IDLE: "60"
+    REDIS_KEEPALIVE_POOL: "5"
+    ```
 
 ## Reporting <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
@@ -2967,55 +3766,413 @@ Regular reporting of important data from BunkerWeb (global, attacks, bans, reque
 
 STREAM support :warning:
 
-Manage reverse proxy configurations.
+The Reverse Proxy plugin provides seamless proxying capabilities for BunkerWeb, allowing you to route requests to backend servers and services. This feature enables BunkerWeb to act as a secure frontend for your applications while providing additional benefits such as SSL termination, and security filtering.
 
-| Setting                                 | Default                            | Context   | Multiple | Description                                                                                                                   |
-| --------------------------------------- | ---------------------------------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| `USE_REVERSE_PROXY`                     | `no`                               | multisite | no       | Activate reverse proxy mode.                                                                                                  |
-| `REVERSE_PROXY_INTERCEPT_ERRORS`        | `yes`                              | multisite | no       | Intercept and rewrite errors.                                                                                                 |
-| `REVERSE_PROXY_CUSTOM_HOST`             |                                    | multisite | no       | Override Host header sent to upstream server.                                                                                 |
-| `REVERSE_PROXY_SSL_SNI`                 | `no`                               | multisite | no       | Enable or disable sending SNI to upstream server.                                                                             |
-| `REVERSE_PROXY_SSL_SNI_NAME`            |                                    | multisite | no       | Sets the SNI host to send to upstream server.                                                                                 |
-| `REVERSE_PROXY_HOST`                    |                                    | multisite | yes      | Full URL of the proxied resource (proxy_pass).                                                                                |
-| `REVERSE_PROXY_URL`                     | `/`                                | multisite | yes      | Location URL that will be proxied.                                                                                            |
-| `REVERSE_PROXY_WS`                      | `no`                               | multisite | yes      | Enable websocket on the proxied resource.                                                                                     |
-| `REVERSE_PROXY_HEADERS`                 |                                    | multisite | yes      | List of HTTP headers to send to proxied resource separated with semicolons (values for proxy_set_header directive).           |
-| `REVERSE_PROXY_HEADERS_CLIENT`          |                                    | multisite | yes      | List of HTTP headers to send to client separated with semicolons (values for add_header directive).                           |
-| `REVERSE_PROXY_BUFFERING`               | `yes`                              | multisite | yes      | Enable or disable buffering of responses from proxied resource.                                                               |
-| `REVERSE_PROXY_KEEPALIVE`               | `no`                               | multisite | yes      | Enable or disable keepalive connections with the proxied resource.                                                            |
-| `REVERSE_PROXY_AUTH_REQUEST`            |                                    | multisite | yes      | Enable authentication using an external provider (value of auth_request directive).                                           |
-| `REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL` |                                    | multisite | yes      | Redirect clients to sign-in URL when using REVERSE_PROXY_AUTH_REQUEST (used when auth_request call returned 401).             |
-| `REVERSE_PROXY_AUTH_REQUEST_SET`        |                                    | multisite | yes      | List of variables to set from the authentication provider, separated with semicolons (values of auth_request_set directives). |
-| `REVERSE_PROXY_CONNECT_TIMEOUT`         | `60s`                              | multisite | yes      | Timeout when connecting to the proxied resource.                                                                              |
-| `REVERSE_PROXY_READ_TIMEOUT`            | `60s`                              | multisite | yes      | Timeout when reading from the proxied resource.                                                                               |
-| `REVERSE_PROXY_SEND_TIMEOUT`            | `60s`                              | multisite | yes      | Timeout when sending to the proxied resource.                                                                                 |
-| `REVERSE_PROXY_INCLUDES`                |                                    | multisite | yes      | Additional configuration to include in the location block, separated with spaces.                                             |
-| `REVERSE_PROXY_PASS_REQUEST_BODY`       | `yes`                              | multisite | yes      | Enable or disable passing the request body to the proxied resource.                                                           |
-| `USE_PROXY_CACHE`                       | `no`                               | multisite | no       | Enable or disable caching of the proxied resources.                                                                           |
-| `PROXY_CACHE_PATH_LEVELS`               | `1:2`                              | global    | no       | Hierarchy levels of the cache.                                                                                                |
-| `PROXY_CACHE_PATH_ZONE_SIZE`            | `10m`                              | global    | no       | Maximum size of cached metadata when caching proxied resources.                                                               |
-| `PROXY_CACHE_PATH_PARAMS`               | `max_size=100m`                    | global    | no       | Additional parameters to add to the proxy_cache directive.                                                                    |
-| `PROXY_CACHE_METHODS`                   | `GET HEAD`                         | multisite | no       | HTTP methods that should trigger a cache operation.                                                                           |
-| `PROXY_CACHE_MIN_USES`                  | `2`                                | multisite | no       | The minimum number of requests before a response is cached.                                                                   |
-| `PROXY_CACHE_KEY`                       | `$scheme$host$request_uri`         | multisite | no       | The key used to uniquely identify a cached response.                                                                          |
-| `PROXY_CACHE_VALID`                     | `200=24h 301=1h 302=24h`           | multisite | no       | Define the caching time depending on the HTTP status code (list of status=time), separated with spaces.                       |
-| `PROXY_NO_CACHE`                        | `$http_pragma $http_authorization` | multisite | no       | Conditions to disable caching of responses.                                                                                   |
-| `PROXY_CACHE_BYPASS`                    | `0`                                | multisite | no       | Conditions to bypass caching of responses.                                                                                    |
-| `PROXY_BUFFERS`                         |                                    | multisite | no       | Value for proxy_buffers directive.                                                                                            |
-| `PROXY_BUFFER_SIZE`                     |                                    | multisite | no       | Value for proxy_buffer_size directive.                                                                                        |
-| `PROXY_BUSY_BUFFERS_SIZE`               |                                    | multisite | no       | Value for proxy_busy_buffers_size directive.                                                                                  |
+**How it works:**
+
+1. When a client sends a request to BunkerWeb, the Reverse Proxy plugin forwards the request to your configured backend server.
+2. BunkerWeb adds security headers, applies WAF rules, and performs other security checks before passing requests to your application.
+3. The backend server processes the request and returns a response to BunkerWeb.
+4. BunkerWeb applies additional security measures to the response before sending it back to the client.
+5. The plugin supports both HTTP and TCP/UDP stream proxying, enabling a wide range of applications including WebSockets and other non-HTTP protocols.
+
+### How to Use
+
+Follow these steps to configure and use the Reverse Proxy feature:
+
+1. **Enable the feature:** Set the `USE_REVERSE_PROXY` setting to `yes` to enable reverse proxy functionality.
+2. **Configure your backend servers:** Specify the upstream servers using the `REVERSE_PROXY_HOST` setting.
+3. **Adjust proxy settings:** Fine-tune behavior with optional settings for timeouts, buffer sizes, and other parameters.
+4. **Configure protocol-specific options:** For WebSockets or special HTTP requirements, adjust the corresponding settings.
+5. **Set up caching (optional):** Enable and configure proxy caching to improve performance for frequently accessed content.
+
+### Configuration Guide
+
+=== "Basic Configuration"
+
+    **Core Settings**
+
+    The essential configuration settings enable and control the basic functionality of the reverse proxy feature.
+
+    !!! success "Benefits of Reverse Proxy"
+        - **Security Enhancement:** All traffic passes through BunkerWeb's security layers before reaching your applications
+        - **SSL Termination:** Manage SSL/TLS certificates centrally while backend services can use unencrypted connections
+        - **Protocol Handling:** Support for HTTP, HTTPS, WebSockets, and other protocols
+        - **Error Interception:** Customize error pages for a consistent user experience
+
+    | Setting                          | Default | Context   | Multiple | Description                                                                              |
+    | -------------------------------- | ------- | --------- | -------- | ---------------------------------------------------------------------------------------- |
+    | `USE_REVERSE_PROXY`              | `no`    | multisite | no       | **Enable Reverse Proxy:** Set to `yes` to enable reverse proxy functionality.            |
+    | `REVERSE_PROXY_INTERCEPT_ERRORS` | `yes`   | multisite | no       | **Intercept Errors:** Whether to intercept and rewrite error responses from the backend. |
+    | `REVERSE_PROXY_CUSTOM_HOST`      |         | multisite | no       | **Custom Host:** Override Host header sent to upstream server.                           |
+    | `REVERSE_PROXY_HOST`             |         | multisite | yes      | **Backend Host:** Full URL of the proxied resource (proxy_pass).                         |
+    | `REVERSE_PROXY_URL`              | `/`     | multisite | yes      | **Location URL:** Path that will be proxied to the backend server.                       |
+
+    !!! tip "Best Practices"
+        - Always specify the full URL in `REVERSE_PROXY_HOST` including the protocol (http:// or https://)
+        - Use `REVERSE_PROXY_INTERCEPT_ERRORS` to provide consistent error pages across all your services
+        - When configuring multiple backends, use the numbered suffix format (e.g., `REVERSE_PROXY_HOST_2`, `REVERSE_PROXY_URL_2`)
+
+=== "Connection Settings"
+
+    **Connection and Timeout Configuration**
+
+    These settings control connection behavior, buffering, and timeout values for the proxied connections.
+
+    !!! success "Benefits"
+        - **Optimized Performance:** Adjust buffer sizes and connection settings based on your application needs
+        - **Resource Management:** Control memory usage through appropriate buffer configurations
+        - **Reliability:** Configure appropriate timeouts to handle slow connections or backend issues
+
+    | Setting                         | Default | Context   | Multiple | Description                                                                                             |
+    | ------------------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------------------------- |
+    | `REVERSE_PROXY_CONNECT_TIMEOUT` | `60s`   | multisite | yes      | **Connect Timeout:** Maximum time to establish a connection to the backend server.                      |
+    | `REVERSE_PROXY_READ_TIMEOUT`    | `60s`   | multisite | yes      | **Read Timeout:** Maximum time between transmissions of two successive packets from the backend server. |
+    | `REVERSE_PROXY_SEND_TIMEOUT`    | `60s`   | multisite | yes      | **Send Timeout:** Maximum time between transmissions of two successive packets to the backend server.   |
+    | `REVERSE_PROXY_BUFFERING`       | `yes`   | multisite | yes      | **Response Buffering:** Enable or disable buffering of responses from proxied resource.                 |
+    | `REVERSE_PROXY_KEEPALIVE`       | `no`    | multisite | yes      | **Keep-Alive:** Enable or disable keepalive connections with the proxied resource.                      |
+    | `PROXY_BUFFERS`                 |         | multisite | no       | **Buffers:** Number and size of buffers for reading the response from the backend server.               |
+    | `PROXY_BUFFER_SIZE`             |         | multisite | no       | **Buffer Size:** Size of the buffer for reading the first part of the response from the backend server. |
+    | `PROXY_BUSY_BUFFERS_SIZE`       |         | multisite | no       | **Busy Buffers Size:** Size of buffers that can be busy sending response to the client.                 |
+
+    !!! warning "Timeout Considerations"
+        - Setting timeouts too low may cause legitimate but slow connections to be terminated
+        - Setting timeouts too high may leave connections open unnecessarily, potentially exhausting resources
+        - For WebSocket applications, increase the read and send timeouts significantly (300s or more recommended)
+
+=== "SSL/TLS Configuration"
+
+    **SSL/TLS Settings for Backend Connections**
+
+    These settings control how BunkerWeb establishes secure connections to backend servers.
+
+    !!! success "Benefits"
+        - **End-to-End Encryption:** Maintain encrypted connections from client to backend
+        - **Certificate Validation:** Control how backend server certificates are validated
+        - **SNI Support:** Specify Server Name Indication for backends that host multiple sites
+
+    | Setting                      | Default | Context   | Multiple | Description                                                                          |
+    | ---------------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------ |
+    | `REVERSE_PROXY_SSL_SNI`      | `no`    | multisite | no       | **SSL SNI:** Enable or disable sending SNI (Server Name Indication) to upstream.     |
+    | `REVERSE_PROXY_SSL_SNI_NAME` |         | multisite | no       | **SSL SNI Name:** Sets the SNI hostname to send to upstream when SSL SNI is enabled. |
+
+    !!! info "SNI Explained"
+        Server Name Indication (SNI) is an extension to TLS that allows a client to specify which hostname it is attempting to connect to at the start of the handshaking process. This enables servers to present multiple certificates on the same IP address and port, allowing multiple secure (HTTPS) websites to be served from a single IP address without requiring all those sites to use the same certificate.
+
+=== "Protocol Support"
+
+    **Protocol-Specific Configuration**
+
+    Configure special protocol handling, particularly for WebSockets and other non-HTTP protocols.
+
+    !!! success "Benefits"
+        - **Protocol Flexibility:** Support for WebSockets enables real-time applications
+        - **Modern Web Applications:** Enable interactive features requiring bidirectional communication
+
+    | Setting            | Default | Context   | Multiple | Description                                                       |
+    | ------------------ | ------- | --------- | -------- | ----------------------------------------------------------------- |
+    | `REVERSE_PROXY_WS` | `no`    | multisite | yes      | **WebSocket Support:** Enable WebSocket protocol on the resource. |
+
+    !!! tip "WebSocket Configuration"
+        - When enabling WebSockets with `REVERSE_PROXY_WS: "yes"`, consider increasing timeout values
+        - WebSocket connections stay open longer than typical HTTP connections
+        - For WebSocket applications, a recommended configuration is:
+          ```yaml
+          REVERSE_PROXY_WS: "yes"
+          REVERSE_PROXY_READ_TIMEOUT: "300s"
+          REVERSE_PROXY_SEND_TIMEOUT: "300s"
+          ```
+
+=== "Header Management"
+
+    **HTTP Header Configuration**
+
+    Control which headers are sent to backend servers and to clients, allowing you to add, modify, or preserve HTTP headers.
+
+    !!! success "Benefits"
+        - **Information Control:** Precisely manage what information is shared between clients and backends
+        - **Security Enhancement:** Add security-related headers or remove headers that might leak sensitive information
+        - **Integration Support:** Provide necessary headers for authentication and proper backend operation
+
+    | Setting                        | Default | Context   | Multiple | Description                                                                    |
+    | ------------------------------ | ------- | --------- | -------- | ------------------------------------------------------------------------------ |
+    | `REVERSE_PROXY_HEADERS`        |         | multisite | yes      | **Custom Headers:** HTTP headers to send to backend separated with semicolons. |
+    | `REVERSE_PROXY_HEADERS_CLIENT` |         | multisite | yes      | **Client Headers:** HTTP headers to send to client separated with semicolons.  |
+
+    !!! warning "Security Considerations"
+        When using the reverse proxy feature, be cautious about what headers you forward to your backend applications. Certain headers might expose sensitive information about your infrastructure or bypass security controls.
+
+    !!! example "Header Format Examples"
+        Custom headers to backend servers:
+        ```
+        REVERSE_PROXY_HEADERS: "X-Real-IP $remote_addr;X-Forwarded-For $proxy_add_x_forwarded_for;X-Forwarded-Proto $scheme"
+        ```
+
+        Custom headers to clients:
+        ```
+        REVERSE_PROXY_HEADERS_CLIENT: "X-Powered-By BunkerWeb;X-Frame-Options SAMEORIGIN"
+        ```
+
+=== "Authentication"
+
+    **External Authentication Configuration**
+
+    Integrate with external authentication systems to centralize authorization logic across your applications.
+
+    !!! success "Benefits"
+        - **Centralized Authentication:** Implement a single authentication point for multiple applications
+        - **Consistent Security:** Apply uniform authentication policies across different services
+        - **Enhanced Control:** Forward authentication details to backend applications via headers or variables
+
+    | Setting                                 | Default | Context   | Multiple | Description                                                                 |
+    | --------------------------------------- | ------- | --------- | -------- | --------------------------------------------------------------------------- |
+    | `REVERSE_PROXY_AUTH_REQUEST`            |         | multisite | yes      | **Auth Request:** Enable authentication using an external provider.         |
+    | `REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL` |         | multisite | yes      | **Sign-in URL:** Redirect clients to sign-in URL when authentication fails. |
+    | `REVERSE_PROXY_AUTH_REQUEST_SET`        |         | multisite | yes      | **Auth Request Set:** Variables to set from the authentication provider.    |
+
+    !!! tip "Authentication Integration"
+        - The auth request feature enables implementation of centralized authentication microservices
+        - Your authentication service should return a 200 status code for successful authentication or 401/403 for failures
+        - Use the auth_request_set directive to extract and forward information from the authentication service
+
+=== "Advanced Configuration"
+
+    **Additional Configuration Options**
+
+    These settings provide further customization of the reverse proxy behavior for specialized scenarios.
+
+    !!! success "Benefits"
+        - **Customization:** Include additional configuration snippets for complex requirements
+        - **Performance Optimization:** Fine-tune request handling for specific use cases
+        - **Flexibility:** Adapt to unique application requirements with specialized configurations
+
+    | Setting                           | Default | Context   | Multiple | Description                                                                  |
+    | --------------------------------- | ------- | --------- | -------- | ---------------------------------------------------------------------------- |
+    | `REVERSE_PROXY_INCLUDES`          |         | multisite | yes      | **Additional Configurations:** Include additional configs in location block. |
+    | `REVERSE_PROXY_PASS_REQUEST_BODY` | `yes`   | multisite | yes      | **Pass Request Body:** Enable or disable passing the request body.           |
+
+    !!! warning "Security Considerations"
+        Be careful when including custom configuration snippets as they may override BunkerWeb's security settings or introduce vulnerabilities if not properly configured.
+
+=== "Caching Configuration"
+
+    **Response Caching Settings**
+
+    Improve performance by caching responses from backend servers, reducing load and improving response times.
+
+    !!! success "Benefits"
+        - **Performance:** Reduce load on backend servers by serving cached content
+        - **Reduced Latency:** Faster response times for frequently requested content
+        - **Bandwidth Savings:** Minimize internal network traffic by caching responses
+        - **Customization:** Configure exactly what, when, and how content is cached
+
+    | Setting                      | Default                            | Context   | Multiple | Description                                                                    |
+    | ---------------------------- | ---------------------------------- | --------- | -------- | ------------------------------------------------------------------------------ |
+    | `USE_PROXY_CACHE`            | `no`                               | multisite | no       | **Enable Caching:** Set to `yes` to enable caching of backend responses.       |
+    | `PROXY_CACHE_PATH_LEVELS`    | `1:2`                              | global    | no       | **Cache Path Levels:** How to structure the cache directory hierarchy.         |
+    | `PROXY_CACHE_PATH_ZONE_SIZE` | `10m`                              | global    | no       | **Cache Zone Size:** Size of the shared memory zone used for cache metadata.   |
+    | `PROXY_CACHE_PATH_PARAMS`    | `max_size=100m`                    | global    | no       | **Cache Path Parameters:** Additional parameters for the cache path.           |
+    | `PROXY_CACHE_METHODS`        | `GET HEAD`                         | multisite | no       | **Cache Methods:** HTTP methods that can be cached.                            |
+    | `PROXY_CACHE_MIN_USES`       | `2`                                | multisite | no       | **Cache Min Uses:** Minimum number of requests before a response is cached.    |
+    | `PROXY_CACHE_KEY`            | `$scheme$host$request_uri`         | multisite | no       | **Cache Key:** The key used to uniquely identify a cached response.            |
+    | `PROXY_CACHE_VALID`          | `200=24h 301=1h 302=24h`           | multisite | no       | **Cache Valid:** How long to cache specific response codes.                    |
+    | `PROXY_NO_CACHE`             | `$http_pragma $http_authorization` | multisite | no       | **No Cache:** Conditions for not caching responses even if normally cacheable. |
+    | `PROXY_CACHE_BYPASS`         | `0`                                | multisite | no       | **Cache Bypass:** Conditions under which to bypass the cache.                  |
+
+    !!! tip "Caching Best Practices"
+        - Cache only content that doesn't change frequently or isn't personalized
+        - Use appropriate cache durations based on content type (static assets can be cached longer)
+        - Configure `PROXY_NO_CACHE` to avoid caching sensitive or personalized content
+        - Monitor cache hit rates and adjust settings accordingly
+
+!!! danger "Docker Compose Users - NGINX Variables"
+    When using Docker Compose with NGINX variables in your configurations, you must escape the dollar sign (`$`) by using double dollar signs (`$$`). This applies to all settings that contain NGINX variables like `$remote_addr`, `$proxy_add_x_forwarded_for`, etc.
+
+    Without this escaping, Docker Compose will try to substitute these variables with environment variables, which typically don't exist, resulting in empty values in your NGINX configuration.
+
+### Example Configurations
+
+=== "Basic HTTP Proxy"
+
+    A simple configuration for proxying HTTP requests to a backend application server:
+
+    ```yaml
+    USE_REVERSE_PROXY: "yes"
+    REVERSE_PROXY_HOST: "http://application:8080"
+    REVERSE_PROXY_URL: "/"
+    REVERSE_PROXY_CONNECT_TIMEOUT: "10s"
+    REVERSE_PROXY_SEND_TIMEOUT: "60s"
+    REVERSE_PROXY_READ_TIMEOUT: "60s"
+    ```
+
+=== "WebSocket Application"
+
+    Configuration optimized for a WebSocket application with longer timeouts:
+
+    ```yaml
+    USE_REVERSE_PROXY: "yes"
+    REVERSE_PROXY_HOST: "http://websocket-app:8080"
+    REVERSE_PROXY_URL: "/"
+    REVERSE_PROXY_WS: "yes"
+    REVERSE_PROXY_CONNECT_TIMEOUT: "10s"
+    REVERSE_PROXY_SEND_TIMEOUT: "300s"
+    REVERSE_PROXY_READ_TIMEOUT: "300s"
+    ```
+
+=== "Multiple Locations"
+
+    Configuration for routing different paths to different backend services:
+
+    ```yaml
+    USE_REVERSE_PROXY: "yes"
+
+    # API Backend
+    REVERSE_PROXY_HOST: "http://api-server:8080"
+    REVERSE_PROXY_URL: "/api/"
+
+    # Admin Backend
+    REVERSE_PROXY_HOST_2: "http://admin-server:8080"
+    REVERSE_PROXY_URL_2: "/admin/"
+
+    # Frontend App
+    REVERSE_PROXY_HOST_3: "http://frontend:3000"
+    REVERSE_PROXY_URL_3: "/"
+    ```
+
+=== "Caching Configuration"
+
+    Configuration with proxy caching enabled for better performance:
+
+    ```yaml
+    USE_REVERSE_PROXY: "yes"
+    REVERSE_PROXY_HOST: "http://application:8080"
+    REVERSE_PROXY_URL: "/"
+    USE_PROXY_CACHE: "yes"
+    PROXY_CACHE_VALID: "200=24h 301=1h 302=24h"
+    PROXY_CACHE_METHODS: "GET HEAD"
+    PROXY_NO_CACHE: "$http_authorization"
+    ```
+
+=== "Advanced Header Management"
+
+    Configuration with custom header manipulation:
+
+    ```yaml
+    USE_REVERSE_PROXY: "yes"
+    REVERSE_PROXY_HOST: "http://application:8080"
+    REVERSE_PROXY_URL: "/"
+
+    # Custom headers to backend
+    REVERSE_PROXY_HEADERS: "X-Real-IP $remote_addr;X-Forwarded-For $proxy_add_x_forwarded_for;X-Forwarded-Proto $scheme"
+
+    # Custom headers to client
+    REVERSE_PROXY_HEADERS_CLIENT: "X-Powered-By BunkerWeb;X-Frame-Options SAMEORIGIN"
+    ```
+
+=== "Authentication Integration"
+
+    Configuration with external authentication:
+
+    ```yaml
+    USE_REVERSE_PROXY: "yes"
+    REVERSE_PROXY_HOST: "http://application:8080"
+    REVERSE_PROXY_URL: "/"
+
+    # Authentication configuration
+    REVERSE_PROXY_AUTH_REQUEST: "/auth"
+    REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL: "https://login.example.com"
+    REVERSE_PROXY_AUTH_REQUEST_SET: "$auth_user $upstream_http_x_user;$auth_role $upstream_http_x_role"
+
+    # Auth service backend
+    REVERSE_PROXY_HOST_2: "http://auth-service:8080"
+    REVERSE_PROXY_URL_2: "/auth"
+    ```
 
 ## Reverse scan
 
 STREAM support :white_check_mark:
 
-Scan clients ports to detect proxies or servers.
+The Reverse Scan plugin provides robust protection against proxy bypassing by scanning clients' ports to detect if they are running proxy servers or other network services. This feature helps identify and block potential threats from clients who may be attempting to hide their true identity or origin, enhancing your website's security posture.
 
-| Setting                | Default                    | Context   | Multiple | Description                                                        |
-| ---------------------- | -------------------------- | --------- | -------- | ------------------------------------------------------------------ |
-| `USE_REVERSE_SCAN`     | `no`                       | multisite | no       | Enable scanning of clients ports and deny access if one is opened. |
-| `REVERSE_SCAN_PORTS`   | `22 80 443 3128 8000 8080` | multisite | no       | List of port to scan when using reverse scan feature.              |
-| `REVERSE_SCAN_TIMEOUT` | `500`                      | multisite | no       | Specify the maximum timeout (in ms) when scanning a port.          |
+**How it works:**
+
+1. When a client connects to your server, BunkerWeb attempts to scan specific ports on the client's IP address.
+2. The plugin checks if any common proxy ports (such as 80, 443, 8080, etc.) are open on the client side.
+3. If open ports are detected, suggesting the client may be running a proxy server, the connection is denied.
+4. This adds an extra layer of security against automated tools, bots, and malicious users attempting to mask their identity.
+
+!!! success "Key benefits"
+
+      1. **Enhanced Security:** Identifies clients potentially running proxy servers that could be used for malicious purposes.
+      2. **Proxy Detection:** Helps detect and block clients attempting to hide their true identity.
+      3. **Configurable Settings:** Customize which ports to scan based on your specific security requirements.
+      4. **Performance Optimized:** Intelligent scanning with configurable timeouts to minimize impact on legitimate users.
+      5. **Seamless Integration:** Works transparently with your existing security layers.
+
+### How to Use
+
+Follow these steps to configure and use the Reverse Scan feature:
+
+1. **Enable the feature:** Set the `USE_REVERSE_SCAN` setting to `yes` to enable client port scanning.
+2. **Configure ports to scan:** Customize the `REVERSE_SCAN_PORTS` setting to specify which client ports should be checked.
+3. **Set scan timeout:** Adjust the `REVERSE_SCAN_TIMEOUT` to balance thorough scanning with performance.
+4. **Monitor scan activity:** Check logs and the [web UI](web-ui.md) to review scan results and potential security incidents.
+
+### Configuration Settings
+
+| Setting                | Default                    | Context   | Multiple | Description                                                                   |
+| ---------------------- | -------------------------- | --------- | -------- | ----------------------------------------------------------------------------- |
+| `USE_REVERSE_SCAN`     | `no`                       | multisite | no       | **Enable Reverse Scan:** Set to `yes` to enable scanning of clients ports.    |
+| `REVERSE_SCAN_PORTS`   | `22 80 443 3128 8000 8080` | multisite | no       | **Ports to Scan:** Space-separated list of ports to check on the client side. |
+| `REVERSE_SCAN_TIMEOUT` | `500`                      | multisite | no       | **Scan Timeout:** Maximum time in milliseconds allowed for scanning a port.   |
+
+!!! warning "Performance Considerations"
+    Scanning multiple ports can add latency to client connections. Use an appropriate timeout value and limit the number of ports scanned to maintain good performance.
+
+!!! info "Common Proxy Ports"
+    The default configuration includes common ports used by proxy servers (80, 443, 8080, 3128) and SSH (22). You may want to customize this list based on your threat model.
+
+### Example Configurations
+
+=== "Basic Configuration"
+
+    A simple configuration for enabling client port scanning:
+
+    ```yaml
+    USE_REVERSE_SCAN: "yes"
+    REVERSE_SCAN_TIMEOUT: "500"
+    REVERSE_SCAN_PORTS: "80 443 8080"
+    ```
+
+=== "Comprehensive Scanning"
+
+    A more thorough configuration that checks additional ports:
+
+    ```yaml
+    USE_REVERSE_SCAN: "yes"
+    REVERSE_SCAN_TIMEOUT: "1000"
+    REVERSE_SCAN_PORTS: "22 80 443 3128 8080 8000 8888 1080 3333 8081"
+    ```
+
+=== "Performance-Optimized Configuration"
+
+    Configuration tuned for better performance by checking fewer ports with lower timeout:
+
+    ```yaml
+    USE_REVERSE_SCAN: "yes"
+    REVERSE_SCAN_TIMEOUT: "250"
+    REVERSE_SCAN_PORTS: "80 443 8080"
+    ```
+
+=== "High-Security Configuration"
+
+    Configuration focused on maximum security with extended scanning:
+
+    ```yaml
+    USE_REVERSE_SCAN: "yes"
+    REVERSE_SCAN_TIMEOUT: "1500"
+    REVERSE_SCAN_PORTS: "22 25 80 443 1080 3128 3333 4444 5555 6588 6666 7777 8000 8080 8081 8800 8888 9999"
+    ```
 
 ## SSL
 
@@ -3035,21 +4192,92 @@ Handle SSL/TLS related settings.
 
 STREAM support :white_check_mark:
 
-Manage the security.txt file. A proposed standard which allows websites to define security policies.
+The Security.txt plugin implements the [Security.txt](https://securitytxt.org/) standard (RFC 9116) for your website. This feature helps security researchers discover your security policies and provides a standardized way for them to report security vulnerabilities they find in your systems.
 
-| Setting                        | Default                     | Context   | Multiple | Description                                                                                                                                                                                                                                                              |
-| ------------------------------ | --------------------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `USE_SECURITYTXT`              | `no`                        | multisite | no       | Enable security.txt file.                                                                                                                                                                                                                                                |
-| `SECURITYTXT_URI`              | `/.well-known/security.txt` | multisite | no       | Indicates the URI where the "security.txt" file will be accessible from.                                                                                                                                                                                                 |
-| `SECURITYTXT_CONTACT`          |                             | multisite | yes      | Indicates a method that researchers should use for reporting security vulnerabilities such as an email address, a phone number, and/or a web page with contact information. (If the value is empty, the security.txt file will not be created as it is a required field) |
-| `SECURITYTXT_EXPIRES`          |                             | multisite | no       | Indicates the date and time after which the data contained in the "security.txt" file is considered stale and should not be used (If the value is empty, the value will always be the current date and time + 1 year).                                                   |
-| `SECURITYTXT_ENCRYPTION`       |                             | multisite | yes      | Indicates an encryption key that security researchers should use for encrypted communication.                                                                                                                                                                            |
-| `SECURITYTXT_ACKNOWLEDGEMENTS` |                             | multisite | yes      | Indicates a link to a page where security researchers are recognized for their reports.                                                                                                                                                                                  |
-| `SECURITYTXT_PREFERRED_LANG`   | `en`                        | multisite | no       | Can be used to indicate a set of natural languages that are preferred when submitting security reports.                                                                                                                                                                  |
-| `SECURITYTXT_CANONICAL`        |                             | multisite | yes      | Indicates the canonical URIs where the "security.txt" file is located, which is usually something like "https://example.com/.well-known/security.txt". (If the value is empty, the default value will be automatically generated from the site URL + SECURITYTXT_URI)    |
-| `SECURITYTXT_POLICY`           |                             | multisite | yes      | Indicates a link to where the vulnerability disclosure policy is located.                                                                                                                                                                                                |
-| `SECURITYTXT_HIRING`           |                             | multisite | yes      | Used for linking to the vendor's security-related job positions.                                                                                                                                                                                                         |
-| `SECURITYTXT_CSAF`             |                             | multisite | yes      | A link to the provider-metadata.json of your CSAF (Common Security Advisory Framework) provider.                                                                                                                                                                         |
+**How it works:**
+
+1. When enabled, BunkerWeb creates a `/.well-known/security.txt` file at the root of your website.
+2. This file contains information about your security policies, contacts, and other relevant security information.
+3. Security researchers and automated tools can easily find this file at the standard location.
+4. The content is configured through simple settings, allowing you to specify contact information, encryption keys, policies, and acknowledgments.
+5. BunkerWeb automatically ensures the file is properly formatted according to the RFC 9116 standard.
+
+### How to Use
+
+Follow these steps to configure and use the Security.txt feature:
+
+1. **Enable the feature:** Set the `USE_SECURITYTXT` setting to `yes` to enable the security.txt file.
+2. **Configure contact information:** Specify at least one contact method using the `SECURITYTXT_CONTACT` setting.
+3. **Set additional information:** Configure optional fields like expiration date, encryption, acknowledgments, and policy URLs.
+4. **Let BunkerWeb handle the rest:** Once configured, BunkerWeb will automatically create and serve the security.txt file at the standard location.
+
+### Configuration Settings
+
+| Setting                        | Default                     | Context   | Multiple | Description                                                                                              |
+| ------------------------------ | --------------------------- | --------- | -------- | -------------------------------------------------------------------------------------------------------- |
+| `USE_SECURITYTXT`              | `no`                        | multisite | no       | **Enable Security.txt:** Set to `yes` to enable the security.txt file.                                   |
+| `SECURITYTXT_URI`              | `/.well-known/security.txt` | multisite | no       | **Security.txt URI:** Indicates the URI where the security.txt file will be accessible.                  |
+| `SECURITYTXT_CONTACT`          |                             | multisite | yes      | **Contact Information:** How security researchers can contact you (e.g., `mailto:security@example.com`). |
+| `SECURITYTXT_EXPIRES`          |                             | multisite | no       | **Expiration Date:** When this security.txt file should be considered expired (ISO 8601 format).         |
+| `SECURITYTXT_ENCRYPTION`       |                             | multisite | yes      | **Encryption:** URL pointing to encryption keys to be used for secure communication.                     |
+| `SECURITYTXT_ACKNOWLEDGEMENTS` |                             | multisite | yes      | **Acknowledgements:** URL where security researchers are recognized for their reports.                   |
+| `SECURITYTXT_POLICY`           |                             | multisite | yes      | **Security Policy:** URL pointing to the security policy describing how to report vulnerabilities.       |
+| `SECURITYTXT_HIRING`           |                             | multisite | yes      | **Security Jobs:** URL pointing to security-related job openings.                                        |
+| `SECURITYTXT_CANONICAL`        |                             | multisite | yes      | **Canonical URL:** The canonical URI(s) for this security.txt file.                                      |
+| `SECURITYTXT_PREFERRED_LANG`   | `en`                        | multisite | no       | **Preferred Language:** The language(s) used in communications. Specified as an ISO 639-1 language code. |
+| `SECURITYTXT_CSAF`             |                             | multisite | yes      | **CSAF:** Link to the provider-metadata.json of your Common Security Advisory Framework provider.        |
+
+!!! warning "Expiration Date Required"
+    According to RFC 9116, the `Expires` field is required. If you don't provide a value for `SECURITYTXT_EXPIRES`, BunkerWeb will automatically set an expiration date one year from the current date.
+
+!!! info "Contact Information Is Essential"
+    The `Contact` field is the most important part of the security.txt file. You should provide at least one way for security researchers to contact you. This can be an email address, a web form, a phone number, or any other method that works for your organization.
+
+!!! warning "URLs Must Use HTTPS"
+  According to RFC 9116, all URLs in the security.txt file (except for `mailto:` and `tel:` links) MUST use HTTPS. Using non-HTTPS URLs will not comply with the standard and may lead to security issues when researchers access these resources. Therefore, all `http` URLs will automatically be converted to `https` by BunkerWeb to ensure compliance with the standard.
+
+### Example Configurations
+
+=== "Basic Configuration"
+
+    A minimal configuration with just contact information:
+
+    ```yaml
+    USE_SECURITYTXT: "yes"
+    SECURITYTXT_CONTACT: "mailto:security@example.com"
+    SECURITYTXT_POLICY: "https://example.com/security-policy"
+    ```
+
+=== "Comprehensive Configuration"
+
+    A more complete configuration with all fields:
+
+    ```yaml
+    USE_SECURITYTXT: "yes"
+    SECURITYTXT_CONTACT: "mailto:security@example.com"
+    SECURITYTXT_CONTACT_2: "https://example.com/security-contact-form"
+    SECURITYTXT_EXPIRES: "2023-12-31T23:59:59+00:00"
+    SECURITYTXT_ENCRYPTION: "https://example.com/pgp-key.txt"
+    SECURITYTXT_ACKNOWLEDGEMENTS: "https://example.com/hall-of-fame"
+    SECURITYTXT_POLICY: "https://example.com/security-policy"
+    SECURITYTXT_HIRING: "https://example.com/jobs/security"
+    SECURITYTXT_CANONICAL: "https://example.com/.well-known/security.txt"
+    SECURITYTXT_PREFERRED_LANG: "en"
+    SECURITYTXT_CSAF: "https://example.com/provider-metadata.json"
+    ```
+
+=== "Multiple Contacts Configuration"
+
+    Configuration with multiple contact methods:
+
+    ```yaml
+    USE_SECURITYTXT: "yes"
+    SECURITYTXT_CONTACT: "mailto:security@example.com"
+    SECURITYTXT_CONTACT_2: "tel:+1-201-555-0123"
+    SECURITYTXT_CONTACT_3: "https://example.com/security-form"
+    SECURITYTXT_POLICY: "https://example.com/security-policy"
+    SECURITYTXT_EXPIRES: "2024-06-30T23:59:59+00:00"
+    ```
 
 ## Self-signed certificate
 

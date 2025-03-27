@@ -1,6 +1,6 @@
 The Errors plugin provides customizable error handling for your website, allowing you to configure how HTTP error responses are displayed to users. This feature helps you present user-friendly, branded error pages that enhance user experience during error scenarios, instead of displaying the default server error pages that can appear technical and confusing to visitors.
 
-**Here's how the Errors feature works:**
+**How it works:**
 
 1. When a client encounters an HTTP error (like 400, 404, 500), BunkerWeb intercepts the error response.
 2. Instead of showing the default error page, BunkerWeb displays a custom, professionally designed error page.

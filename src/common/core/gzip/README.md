@@ -1,6 +1,6 @@
 The GZIP plugin enhances website performance by compressing HTTP responses using the gzip algorithm. This feature helps reduce bandwidth usage and improve page load times by compressing web content before it's sent to the client's browser, resulting in faster content delivery and improved user experience.
 
-**Here's how the GZIP feature works:**
+**How it works:**
 
 1. When a client requests content from your website, BunkerWeb checks if the client supports gzip compression.
 2. If supported, BunkerWeb compresses the response using the gzip algorithm at your configured compression level.

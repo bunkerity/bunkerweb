@@ -1,6 +1,6 @@
 The Metrics plugin provides comprehensive monitoring and data collection capabilities for your BunkerWeb instance. This feature enables you to track various performance indicators, security events, and system statistics, giving you valuable insights into the behavior and health of your protected websites and services.
 
-**Here's how the Metrics feature works:**
+**How it works:**
 
 1. BunkerWeb collects key metrics during the processing of requests and responses.
 2. These metrics include counters for blocked requests, performance measurements, and various security-related statistics.
@@ -8,6 +8,17 @@ The Metrics plugin provides comprehensive monitoring and data collection capabil
 4. For multi-instance setups, Redis can be used to centralize and aggregate metrics data.
 5. The collected metrics can be accessed through the API or visualized in the [web UI](web-ui.md).
 6. This information helps you identify security threats, troubleshoot issues, and optimize your configuration.
+
+### Technical Implementation
+
+The metrics plugin works by:
+
+- Using shared dictionaries in NGINX (`metrics_datastore` for HTTP and `metrics_datastore_stream` for TCP/UDP traffic)
+- Leveraging an LRU cache for efficient in-memory storage
+- Periodically synchronizing data between workers using timers
+- Storing detailed information about blocked requests including IP, country, timestamp, request details, and block reason
+- Supporting plugin-specific metrics through a common metrics collection interface
+- Providing API endpoints for querying collected metrics
 
 ### How to Use
 
@@ -18,6 +29,50 @@ Follow these steps to configure and use the Metrics feature:
 3. **Set storage limits:** Define how many blocked requests to store per worker and in Redis with the respective settings.
 4. **Access the data:** View the collected metrics through the [web UI](web-ui.md) or API endpoints.
 5. **Analyze the information:** Use the gathered data to identify patterns, detect security issues, and optimize your configuration.
+
+### Collected Metrics
+
+The metrics plugin collects the following information:
+
+1. **Blocked Requests**: For each blocked request, the following data is stored:
+      - Request ID and timestamp
+      - Client IP address and country (when available)
+      - HTTP method and URL
+      - HTTP status code
+      - User agent
+      - Block reason and security mode
+      - Server name
+      - Additional data related to the block reason
+
+2. **Plugin Counters**: Various plugin-specific counters that track activities and events
+
+### API Access
+
+Metrics data can be accessed via BunkerWeb's internal API endpoints:
+
+- **Endpoint**: `/metrics/{filter}`
+- **Method**: GET
+- **Description**: Retrieves metrics data based on the specified filter
+- **Response Format**: JSON object containing the requested metrics
+
+Example: `/metrics/requests` will return information about blocked requests.
+
+!!! info "API Access Configuration"
+    To access metrics via the API, you must ensure that:
+
+    1. The API feature is enabled with `USE_API: "yes"` (enabled by default)
+    2. Your client IP is included in the `API_WHITELIST_IP` setting (default is `127.0.0.0/8`)
+    3. You're accessing the API on the configured port (default is `5000` via the `API_HTTP_PORT` setting)
+    4. You're using the correct `API_SERVER_NAME` value in the Host header (default is `bwapi`)
+
+    A typical API request would look like:
+    ```
+    curl -H "Host: bwapi" http://your-bunkerweb-instance:5000/metrics/requests
+    ```
+
+    If you've customized the `API_SERVER_NAME` to something other than the default `bwapi`, you must use that value in the Host header instead.
+
+    For secure production environments, make sure to restrict API access to trusted IPs only.
 
 ### Configuration Settings
 
@@ -36,6 +91,9 @@ Follow these steps to configure and use the Metrics feature:
 
 !!! warning "Performance Considerations"
     Setting very high values for `METRICS_MAX_BLOCKED_REQUESTS` or `METRICS_MAX_BLOCKED_REQUESTS_REDIS` can increase memory usage. Monitor your system resources and adjust these values according to your actual needs and available resources.
+
+!!! note "Worker-Specific Storage"
+    Each NGINX worker maintains its own metrics in memory. When accessing metrics through the API, data from all workers is automatically aggregated to provide a complete view.
 
 ### Example Configurations
 

@@ -2,7 +2,7 @@ The Database plugin provides a robust database integration system for BunkerWeb,
 
 This core component supports multiple database engines, including SQLite, PostgreSQL, MySQL/MariaDB, and Oracle - allowing you to choose the database solution that best fits your environment and requirements.
 
-**Here's how the Database feature works:**
+**How it works:**
 
 1. BunkerWeb connects to your configured database using the provided URI, following SQLAlchemy format.
 2. Critical configuration data, runtime information, and job logs are stored securely in the database.
