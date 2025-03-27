@@ -29,7 +29,7 @@
       "help": "Self-signed certificate subject.",
       "id": "self-signed-ssl-subj",
       "label": "Certificate subject",
-      "regex": "^/CN=[^,]+$",
+      "regex": "^/[^/]+/$",
       "type": "text"
     }
   },
