@@ -218,8 +218,6 @@ class Configurator:
                         "HOME",
                         "HOSTNAME",
                         "LANG",
-                        "LANGUAGE",
-                        "LC_ALL",
                         "PATH",
                         "NGINX_VERSION",
                         "NJS_VERSION",

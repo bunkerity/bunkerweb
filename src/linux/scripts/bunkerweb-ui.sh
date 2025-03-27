@@ -56,11 +56,6 @@ start() {
 
     export CAPTURE_OUTPUT="yes"
 
-    # Set the locale
-    export LANG=en_US.UTF-8
-    export LC_ALL=en_US.UTF-8
-    export LANGUAGE=en_US
-
     # Export all variables from variables.env
     if [ -f /etc/bunkerweb/variables.env ]; then
         # shellcheck disable=SC2046

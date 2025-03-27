@@ -78,10 +78,6 @@ LABEL version="1.6.2-rc1"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="ui"
 
-ENV LANG=en_US.UTF-8
-ENV LC_ALL=en_US.UTF-8
-ENV LANGUAGE=en_US
-
 VOLUME /data
 
 EXPOSE 7000
