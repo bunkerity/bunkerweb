@@ -115,25 +115,28 @@ from traceback import format_exc
 from Database import Database
 from logger import setup_logger
 
-LOGGER = setup_logger('Scheduler', getenv('CUSTOM_LOG_LEVEL', getenv('LOG_LEVEL', 'INFO')))
+LOGGER = setup_logger("Scheduler", getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")))
 
 db = None
 try:
-	db = Database(LOGGER)
-	with db.sql_engine.connect() as conn:
-		result = conn.execute(sa.text('SELECT version FROM bw_metadata WHERE id = 1'))
-		print(next(result)[0])
+    db = Database(LOGGER)
+    with db.sql_engine.connect() as conn:
+        # Check if the table exists first
+        inspector = sa.inspect(db.sql_engine)
+        if "bw_metadata" in inspector.get_table_names():
+            result = conn.execute(sa.text("SELECT version FROM bw_metadata WHERE id = 1"))
+            print(next(result)[0])
+        else:
+            # Table doesn't exist, use installed version
+            print("${installed_version}")
 except BaseException as e:
-	if "doesn't exist" not in str(e) and "does not exist" not in str(e) and "no such table" not in str(e):
-		with open('/var/tmp/bunkerweb/database_error', 'w') as file:
-			file.write(format_exc())
-		print('none')
-	else:
-		print('${installed_version}')
+    with open("/var/tmp/bunkerweb/database_error", "w") as file:
+        file.write(format_exc())
+    print("none")
 
 if db:
-	with open('/var/tmp/bunkerweb/database_uri', 'w') as file:
-		file.write(db.database_uri)
+    with open("/var/tmp/bunkerweb/database_uri", "w") as file:
+        file.write(db.database_uri)
 EOL
 
     current_version=$(sudo -E -u nginx -g nginx /bin/bash -c "PYTHONPATH=$PYTHONPATH python3 /tmp/version_check.py")

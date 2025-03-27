@@ -487,7 +487,7 @@ class Database:
             "default": True,  # ? Extra field to know if the returned data is the default one
         }
         with self._db_session() as session:
-            try:
+            with suppress(BaseException):
                 database = self.database_uri.split(":")[0].split("+")[0]
                 if database == "sqlite":
                     sql_query = text("SELECT sqlite_version()")
@@ -512,9 +512,6 @@ class Database:
                     plugin.id: plugin.last_config_change
                     for plugin in session.query(Plugins).with_entities(Plugins.id, Plugins.last_config_change).filter_by(config_changed=True).all()
                 }
-            except BaseException as e:
-                if "doesn't exist" not in str(e):
-                    self.logger.debug(f"Can't get the metadata: {e}")
 
         return data
 
