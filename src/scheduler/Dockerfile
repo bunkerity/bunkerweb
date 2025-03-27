@@ -80,6 +80,10 @@ LABEL version="1.6.2-rc1"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="scheduler"
 
+ENV LANG=en_US.UTF-8
+ENV LC_ALL=en_US.UTF-8
+ENV LANGUAGE=en_US
+
 VOLUME /data
 
 WORKDIR /usr/share/bunkerweb/scheduler

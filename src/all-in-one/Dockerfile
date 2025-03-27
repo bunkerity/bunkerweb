@@ -114,6 +114,10 @@ LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="all-in-one"
 LABEL bunkerweb.INSTANCE="bunkerweb"
 
+ENV LANG=en_US.UTF-8
+ENV LC_ALL=en_US.UTF-8
+ENV LANGUAGE=en_US
+
 VOLUME /data
 
 EXPOSE 8080/tcp 8443/tcp 8443/udp 7000/tcp

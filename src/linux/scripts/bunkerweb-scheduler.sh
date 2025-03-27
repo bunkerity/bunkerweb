@@ -48,6 +48,11 @@ function start() {
     # Check if the scheduler is already running
     stop
 
+    # Set the locale
+    export LANG=en_US.UTF-8
+    export LC_ALL=en_US.UTF-8
+    export LANGUAGE=en_US
+
     # Create the scheduler.env file if it doesn't exist
     if [ ! -f /etc/bunkerweb/scheduler.env ]; then
         {
