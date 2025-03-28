@@ -1,5 +1,8 @@
 FROM nginx:1.26.3-alpine-slim@sha256:b72dec66dea425356956e863bfbccca6c1f8748f5913e094d4ca20b71e4ba2c3 AS builder
 
+# Export var for specific actions on linux/arm/v7
+ARG TARGETPLATFORM
+
 # Install temporary requirements for the dependencies
 RUN apk add --no-cache bash autoconf libtool automake geoip-dev g++ gcc curl-dev libxml2-dev pcre-dev make linux-headers musl-dev gd-dev gnupg brotli-dev openssl-dev patch readline-dev yajl yajl-dev yajl-tools py3-pip python3-dev libffi-dev postgresql-dev cargo
 
@@ -48,6 +51,7 @@ COPY src/common/utils utils
 COPY src/autoconf autoconf
 COPY src/scheduler scheduler
 COPY src/ui ui
+COPY src/all-in-one all-in-one
 COPY src/VERSION VERSION
 COPY misc/*.ascii misc/
 
@@ -78,32 +82,20 @@ RUN cp helpers/bwcli /usr/bin/ && \
     find core/ -type f -name "*.sh" ! -path "core/modsecurity/files/*" -print0 | xargs -0 chmod 750 && \
     find core/ -type f -name "*.py" ! -path "core/modsecurity/files/*" -print0 | xargs -0 chmod 750 && \
     find ui/ -type f -name "*.py" -print0 | xargs -0 chmod 750 && \
-	chmod 750 cli/main.py gen/*.py helpers/*.sh autoconf/main.py scheduler/main.py scheduler/entrypoint.sh ui/*.sh entrypoint.sh /usr/bin/bwcli deps/python/bin/* && \
+	chmod 750 cli/main.py gen/*.py helpers/*.sh all-in-one/*.sh autoconf/main.py scheduler/main.py scheduler/entrypoint.sh ui/*.sh entrypoint.sh /usr/bin/bwcli deps/python/bin/* && \
     chmod 770 db/alembic db/alembic/alembic.ini db/alembic/env.py && \
     chmod 660 INTEGRATION && \
     mkdir -p /var/log/nginx && \
     chown -R nginx:nginx /var/log/nginx && \
     chmod -R 755 /var/log/nginx && \
-    rm -rf /var/log/bunkerweb/* && \
-	ln -s /proc/1/fd/1 /var/log/bunkerweb/access.log && \
-    ln -s /proc/1/fd/1 /var/log/bunkerweb/bunkerweb.stdout.log && \
-    ln -s /proc/1/fd/1 /var/log/bunkerweb/autoconf.stdout.log && \
-    ln -s /proc/1/fd/1 /var/log/bunkerweb/scheduler.stdout.log && \
-    ln -s /proc/1/fd/1 /var/log/bunkerweb/ui.stdout.log && \
-	ln -s /proc/1/fd/2 /var/log/bunkerweb/error.log && \
-	ln -s /proc/1/fd/2 /var/log/bunkerweb/modsec_audit.log && \
-    ln -s /proc/1/fd/2 /var/log/bunkerweb/bunkerweb.stderr.log && \
-    ln -s /proc/1/fd/2 /var/log/bunkerweb/autoconf.stderr.log && \
-    ln -s /proc/1/fd/2 /var/log/bunkerweb/scheduler.stderr.log && \
-    ln -s /proc/1/fd/2 /var/log/bunkerweb/ui.stderr.log
+    rm -rf /var/log/bunkerweb/*
 
 COPY --chown=root:nginx --chmod=770 src/bw/misc/asn.mmdb /var/tmp/bunkerweb/asn.mmdb
 COPY --chown=root:nginx --chmod=770 src/bw/misc/country.mmdb /var/tmp/bunkerweb/country.mmdb
 
 # Set up supervisor configuration
-RUN mkdir -p /etc/supervisor.d
-COPY src/all-in-one/supervisord.conf /etc/supervisord.conf
-COPY src/all-in-one/supervisor.d/*.ini /etc/supervisor.d/
+RUN mv /usr/share/bunkerweb/all-in-one/supervisord.conf /etc/supervisord.conf && \
+    mv /usr/share/bunkerweb/all-in-one/supervisor.d /etc/supervisor.d
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
 LABEL version="1.6.1"
@@ -123,4 +115,4 @@ ENV SERVICE_SCHEDULER="yes"
 
 USER nginx:nginx
 
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
+ENTRYPOINT ["/usr/share/bunkerweb/all-in-one/entrypoint.sh"]

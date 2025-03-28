@@ -4,7 +4,7 @@
 
 !!! warning "Read me first"
 
-    We often add new features and settings to BunkerWeb. We recommend you read the [settings](settings.md) sections of the documentation or the GitHub releases to see what's new.
+    We often add new features and settings to BunkerWeb. We recommend you read the [settings](features.md) sections of the documentation or the GitHub releases to see what's new.
 
 ### Procedure
 
@@ -74,16 +74,16 @@
                 ```yaml
                 services:
                     bunkerweb:
-                        image: bunkerity/bunkerweb:1.6.1
+                        image: bunkerity/bunkerweb:1.6.2-rc1
                         ...
                     bw-scheduler:
-                        image: bunkerity/bunkerweb-scheduler:1.6.1
+                        image: bunkerity/bunkerweb-scheduler:1.6.2-rc1
                         ...
                     bw-autoconf:
-                        image: bunkerity/bunkerweb-autoconf:1.6.1
+                        image: bunkerity/bunkerweb-autoconf:1.6.2-rc1
                         ...
                     bw-ui:
-                        image: bunkerity/bunkerweb-ui:1.6.1
+                        image: bunkerity/bunkerweb-ui:1.6.2-rc1
                         ...
                 ```
 
@@ -117,7 +117,7 @@
                     Them, you can update BunkerWeb package :
 
                     ```shell
-                    sudo apt install -y bunkerweb=1.6.1
+                    sudo apt install -y bunkerweb=1.6.2-rc1
                     ```
 
                     To prevent upgrading BunkerWeb package when executing `apt upgrade`, you can use the following command :
@@ -142,7 +142,7 @@
                     Them, you can update BunkerWeb package :
 
                     ```shell
-                    sudo dnf install -y bunkerweb-1.6.1
+                    sudo dnf install -y bunkerweb-1.6.2-rc1
                     ```
 
                     To prevent upgrading BunkerWeb package when executing `dnf upgrade`, you can use the following command :
@@ -381,7 +381,7 @@ While the settings are now declared on the Scheduler container, **you'll still n
 
 #### Default values and new settings
 
-We tried our best not to change default value but we have added many other settings. It's highly recommended to read the [security tuning](advanced.md#security-tuning) and [settings](settings.md) sections of the documentation.
+We tried our best not to change default value but we have added many other settings. It's highly recommended to read the [security tuning](advanced.md#security-tuning) and [settings](features.md) sections of the documentation.
 
 #### Templates
 
@@ -531,16 +531,16 @@ We added a **namespace** feature to the autoconf integrations. Namespaces allow 
                 ```yaml
                 services:
                     bunkerweb:
-                        image: bunkerity/bunkerweb:1.6.1
+                        image: bunkerity/bunkerweb:1.6.2-rc1
                         ...
                     bw-scheduler:
-                        image: bunkerity/bunkerweb-scheduler:1.6.1
+                        image: bunkerity/bunkerweb-scheduler:1.6.2-rc1
                         ...
                     bw-autoconf:
-                        image: bunkerity/bunkerweb-autoconf:1.6.1
+                        image: bunkerity/bunkerweb-autoconf:1.6.2-rc1
                         ...
                     bw-ui:
-                        image: bunkerity/bunkerweb-ui:1.6.1
+                        image: bunkerity/bunkerweb-ui:1.6.2-rc1
                         ...
                 ```
 
@@ -573,7 +573,7 @@ We added a **namespace** feature to the autoconf integrations. Namespaces allow 
                     Them, you can update BunkerWeb package :
 
                     ```shell
-                    sudo apt install -y bunkerweb=1.6.1
+                    sudo apt install -y bunkerweb=1.6.2-rc1
                     ```
 
                     To prevent upgrading BunkerWeb package when executing `apt upgrade`, you can use the following command :
@@ -598,7 +598,7 @@ We added a **namespace** feature to the autoconf integrations. Namespaces allow 
                     Them, you can update BunkerWeb package :
 
                     ```shell
-                    sudo dnf install -y bunkerweb-1.6.1
+                    sudo dnf install -y bunkerweb-1.6.2-rc1
                     ```
 
                     To prevent upgrading BunkerWeb package when executing `dnf upgrade`, you can use the following command :

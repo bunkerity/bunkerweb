@@ -1,10 +1,10 @@
 # Advanced usages
 
-Many real-world use case examples are available in the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.1/examples) folder of the GitHub repository.
+Many real-world use case examples are available in the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.2-rc1/examples) folder of the GitHub repository.
 
-We also provide numerous boilerplates, such as YAML files for various integrations and database types. These are available in the [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.1/misc/integrations) folder.
+We also provide numerous boilerplates, such as YAML files for various integrations and database types. These are available in the [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.2-rc1/misc/integrations) folder.
 
-This section only focuses on advanced usages and security tuning, see the [settings section](settings.md) of the documentation to see all the available settings.
+This section only focuses on advanced usages and security tuning, see the [settings section](features.md) of the documentation to see all the available settings.
 
 ## Use cases
 
@@ -37,7 +37,7 @@ The following settings can be used :
 - `REAL_IP_FROM` : list of trusted IP/network address allowed to send us the "real IP"
 - `REAL_IP_HEADER` : the HTTP header containing the real IP or special value `proxy_protocol` when using PROXY protocol
 
-You will find more settings about real IP in the [settings section](settings.md#real-ip) of the documentation.
+You will find more settings about real IP in the [settings section](features.md#real-ip) of the documentation.
 
 === "HTTP header"
 
@@ -75,11 +75,19 @@ You will find more settings about real IP in the [settings section](settings.md#
 
     === "Docker"
 
-        You will need to add the settings to the environment variables of the BunkerWeb container(s) (doing it using the ingress is not supported because you will get into trouble when using things like Let's Encrypt).
+        You will need to add the settings to the environment variables of both the BunkerWeb and scheduler containers:
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.1
+          image: bunkerity/bunkerweb:1.6.2-rc1
+          ...
+          environment:
+            USE_REAL_IP: "yes"
+            REAL_IP_FROM: "1.2.3.0/24 100.64.0.0/10"
+            REAL_IP_HEADER: "X-Forwarded-For"
+          ...
+        bw-scheduler:
+          image: bunkerity/bunkerweb-scheduler:1.6.2-rc1
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -92,11 +100,19 @@ You will find more settings about real IP in the [settings section](settings.md#
 
     === "Docker autoconf"
 
-        You will need to add the settings to the environment variables of the BunkerWeb container(s) (doing it using the ingress is not supported because you will get into trouble when using things like Let's Encrypt).
+        You will need to add the settings to the environment variables of both the BunkerWeb and scheduler containers:
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.1
+          image: bunkerity/bunkerweb:1.6.2-rc1
+          ...
+          environment:
+            USE_REAL_IP: "yes"
+            REAL_IP_FROM: "1.2.3.0/24 100.64.0.0/10"
+            REAL_IP_HEADER: "X-Forwarded-For"
+          ...
+        bw-scheduler:
+          image: bunkerity/bunkerweb-scheduler:1.6.2-rc1
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -109,12 +125,20 @@ You will find more settings about real IP in the [settings section](settings.md#
 
     === "Kubernetes"
 
-        You will need to add the settings to the environment variables of the BunkerWeb container(s) (doing it using the ingress is not supported because you will get into trouble when using things like Let's Encrypt).
+        You will need to add the settings to the environment variables of both the BunkerWeb and scheduler pods.
 
         Here is the corresponding part of your `values.yaml` file that you can use :
 
         ```yaml
         bunkerweb:
+          extraEnvs:
+            - name: USE_REAL_IP
+              value: "yes"
+            - name: REAL_IP_FROM
+              value: "1.2.3.0/24 100.64.0.0/10"
+            - name: REAL_IP_HEADER
+              value: "X-Forwarded-For"
+        scheduler:
           extraEnvs:
             - name: USE_REAL_IP
               value: "yes"
@@ -131,11 +155,19 @@ You will find more settings about real IP in the [settings section](settings.md#
 
             **More information can be found in the [Swarm integration documentation](integrations.md#swarm).**
 
-        You will need to add the settings to the environment variables of the BunkerWeb container(s) (doing it using the ingress is not supported because you will get into trouble when using things like Let's Encrypt).
+        You will need to add the settings to the environment variables of both the BunkerWeb and scheduler services:
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.1
+          image: bunkerity/bunkerweb:1.6.2-rc1
+          ...
+          environment:
+            USE_REAL_IP: "yes"
+            REAL_IP_FROM: "1.2.3.0/24 100.64.0.0/10"
+            REAL_IP_HEADER: "X-Forwarded-For"
+          ...
+        bw-scheduler:
+          image: bunkerity/bunkerweb-scheduler:1.6.2-rc1
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -187,11 +219,21 @@ You will find more settings about real IP in the [settings section](settings.md#
 
     === "Docker"
 
-        You will need to add the settings to the environment variables of the BunkerWeb container(s) (doing it using the ingress is not supported because you will get into trouble when using things like Let's Encrypt).
+        You will need to add the settings to the environment variables of both the BunkerWeb and scheduler containers:
 
         ```yaml
+        bunkerweb:
+          image: bunkerity/bunkerweb:1.6.2-rc1
+          ...
+          environment:
+            USE_REAL_IP: "yes"
+            USE_PROXY_PROTOCOL: "yes"
+            REAL_IP_FROM: "1.2.3.0/24 100.64.0.0/10"
+            REAL_IP_HEADER: "proxy_protocol"
+          ...
+        ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.1
+          image: bunkerity/bunkerweb-scheduler:1.6.2-rc1
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -205,11 +247,21 @@ You will find more settings about real IP in the [settings section](settings.md#
 
     === "Docker autoconf"
 
-        You will need to add the settings to the environment variables of the BunkerWeb container(s) (doing it using the ingress is not supported because you will get into trouble when using things like Let's Encrypt).
+        You will need to add the settings to the environment variables of both the BunkerWeb and scheduler containers:
 
         ```yaml
+        bunkerweb:
+          image: bunkerity/bunkerweb:1.6.2-rc1
+          ...
+          environment:
+            USE_REAL_IP: "yes"
+            USE_PROXY_PROTOCOL: "yes"
+            REAL_IP_FROM: "1.2.3.0/24 100.64.0.0/10"
+            REAL_IP_HEADER: "proxy_protocol"
+          ...
+        ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.1
+          image: bunkerity/bunkerweb-scheduler:1.6.2-rc1
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -223,12 +275,22 @@ You will find more settings about real IP in the [settings section](settings.md#
 
     === "Kubernetes"
 
-        You will need to add the settings to the environment variables of the BunkerWeb container(s) (doing it using the ingress is not supported because you will get into trouble when using things like Let's Encrypt).
+        You will need to add the settings to the environment variables of both the BunkerWeb and scheduler pods.
 
-        Here is the corresponding part of your `values.yaml` file that you can use :
+        Here is the corresponding part of your `values.yaml` file that you can use:
 
         ```yaml
         bunkerweb:
+          extraEnvs:
+            - name: USE_REAL_IP
+              value: "yes"
+            - name: USE_PROXY_PROTOCOL
+              value: "yes"
+            - name: REAL_IP_FROM
+              value: "1.2.3.0/24 100.64.0.0/10"
+            - name: REAL_IP_HEADER
+              value: "proxy_protocol"
+        scheduler:
           extraEnvs:
             - name: USE_REAL_IP
               value: "yes"
@@ -247,11 +309,21 @@ You will find more settings about real IP in the [settings section](settings.md#
 
             **More information can be found in the [Swarm integration documentation](integrations.md#swarm).**
 
-        You will need to add the settings to the environment variables of the BunkerWeb container(s) (doing it using the ingress is not supported because you will get into trouble when using things like Let's Encrypt).
+        You will need to add the settings to the environment variables of both the BunkerWeb and scheduler services.
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.1
+          image: bunkerity/bunkerweb:1.6.2-rc1
+          ...
+          environment:
+            USE_REAL_IP: "yes"
+            USE_PROXY_PROTOCOL: "yes"
+            REAL_IP_FROM: "1.2.3.0/24 100.64.0.0/10"
+            REAL_IP_HEADER: "proxy_protocol"
+          ...
+        ...
+        bw-scheduler:
+          image: bunkerity/bunkerweb-scheduler:1.6.2-rc1
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -351,7 +423,7 @@ Some integrations provide more convenient ways to apply configurations, such as 
     ```yaml
     ...
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.1
+      image: bunkerity/bunkerweb-scheduler:1.6.2-rc1
       environment:
         - |
           CUSTOM_CONF_SERVER_HTTP_hello-world=
@@ -394,7 +466,7 @@ Some integrations provide more convenient ways to apply configurations, such as 
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.1
+      image: bunkerity/bunkerweb-scheduler:1.6.2-rc1
       volumes:
         - ./bw-data:/data
       ...
@@ -464,7 +536,7 @@ Some integrations provide more convenient ways to apply configurations, such as 
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.1
+      image: bunkerity/bunkerweb-scheduler:1.6.2-rc1
       volumes:
         - ./bw-data:/data
       ...
@@ -614,7 +686,7 @@ REDIS_DATABASE=0
 - **`REDIS_PORT`**: Specify the port number for the Redis server. Defaults to `6379`.
 - **`REDIS_DATABASE`**: Specify the Redis database number to use. Defaults to `0`.
 
-If you require more advanced settings, such as authentication, SSL/TLS support, or Sentinel mode, refer to the [Redis plugin settings documentation](settings.md#redis) for detailed guidance.
+If you require more advanced settings, such as authentication, SSL/TLS support, or Sentinel mode, refer to the [Redis plugin settings documentation](features.md#redis) for detailed guidance.
 
 ### Protect UDP/TCP applications
 
@@ -624,7 +696,7 @@ If you require more advanced settings, such as authentication, SSL/TLS support, 
 
 BunkerWeb offers the capability to function as a **generic UDP/TCP reverse proxy**, allowing you to protect any network-based applications operating at least on layer 4 of the OSI model. Instead of utilizing the "classical" HTTP module, BunkerWeb leverages the [stream module](https://nginx.org/en/docs/stream/ngx_stream_core_module.html) of NGINX.
 
-It's important to note that **not all settings and security features are available when using the stream module**. Additional information on this can be found in the [settings](settings.md) sections of the documentation.
+It's important to note that **not all settings and security features are available when using the stream module**. Additional information on this can be found in the [settings](features.md) sections of the documentation.
 
 Configuring a basic reverse proxy is quite similar to the HTTP setup, as it involves using the same settings: `USE_REVERSE_PROXY=yes` and `REVERSE_PROXY_HOST=myapp:9000`. Even when BunkerWeb is positioned behind a Load Balancer, the settings remain the same (with **PROXY protocol** being the supported option due to evident reasons).
 
@@ -635,7 +707,7 @@ On top of that, the following specific settings are used :
 - `LISTEN_STREAM_PORT_SSL=4343` : the listening "ssl/tls" port that BunkerWeb will listen on
 - `USE_UDP=no` : listen for and forward UDP packets instead of TCP
 
-For complete list of settings regarding `stream` mode, please refer to the [settings](settings.md) section of the documentation.
+For complete list of settings regarding `stream` mode, please refer to the [settings](features.md) section of the documentation.
 
 !!! tip "multiple listening ports"
 
@@ -663,7 +735,7 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.1
+        image: bunkerity/bunkerweb:1.6.2-rc1
         ports:
           - "80:8080" # Keep it if you want to use Let's Encrypt automation when using http challenge type
           - "10000:10000" # app1
@@ -678,7 +750,7 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.1
+        image: bunkerity/bunkerweb-scheduler:1.6.2-rc1
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "bunkerweb" # This setting is mandatory to specify the BunkerWeb instance
@@ -729,7 +801,7 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.1
+        image: bunkerity/bunkerweb:1.6.2-rc1
         ports:
           - "80:8080" # Keep it if you want to use Let's Encrypt automation when using http challenge type
           - "10000:10000" # app1
@@ -783,7 +855,7 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.1
+        image: bunkerity/bunkerweb:1.6.2-rc1
         ports:
           # Keep it if you want to use Let's Encrypt automation when using http challenge type
           - published: 80
@@ -1076,7 +1148,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.1
+        image: bunkerity/bunkerweb:1.6.2-rc1
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1091,7 +1163,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.1
+        image: bunkerity/bunkerweb-scheduler:1.6.2-rc1
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "bunkerweb" # This setting is mandatory to specify the BunkerWeb instance
@@ -1185,7 +1257,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.1
+        image: bunkerity/bunkerweb:1.6.2-rc1
         labels:
           - "bunkerweb.INSTANCE=yes"
         environment:
@@ -1198,7 +1270,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.1
+        image: bunkerity/bunkerweb-scheduler:1.6.2-rc1
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "" # We don't need to specify the BunkerWeb instance here as they are automatically detected by the autoconf service
@@ -1213,7 +1285,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.1
+        image: bunkerity/bunkerweb-autoconf:1.6.2-rc1
         depends_on:
           - bunkerweb
           - bw-docker
@@ -1363,7 +1435,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.1
+        image: bunkerity/bunkerweb:1.6.2-rc1
         volumes:
           - /shared/www:/var/www/html
     ...
@@ -1550,7 +1622,7 @@ By default, BunkerWeb will only listen on IPv4 addresses and won't use IPv6 for 
     ```yaml
     services:
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.1
+        image: bunkerity/bunkerweb-scheduler:1.6.2-rc1
         environment:
           USE_IPv6: "yes"
 
@@ -1598,10 +1670,10 @@ By default, BunkerWeb will only listen on IPv4 addresses and won't use IPv6 for 
 
 ## Security tuning
 
-BunkerWeb offers many security features that you can configure with [settings](settings.md). Even if the default values of settings ensure a minimal "security by default", we strongly recommend you tune them. By doing so you will be able to ensure the security level of your choice but also manage false positives.
+BunkerWeb offers many security features that you can configure with [settings](features.md). Even if the default values of settings ensure a minimal "security by default", we strongly recommend you tune them. By doing so you will be able to ensure the security level of your choice but also manage false positives.
 
 !!! tip "Other settings"
-    This section only focuses on security tuning, see the [settings section](settings.md) of the documentation for other settings.
+    This section only focuses on security tuning, see the [settings section](features.md) of the documentation for other settings.
 
 <figure markdown>
   ![Overview](assets/img/core-order.svg){ align=center }
@@ -1620,55 +1692,7 @@ The **Security Mode** setting determines how BunkerWeb handles detected threats.
 !!! tip "Detect mode"
     Switching to `detect` mode can help you identify and resolve potential false positives without disrupting legitimate clients. Once these issues are addressed, you can confidently switch back to `block` mode for full protection.
 
-
 ### HTTP protocol
-
-#### Deny status code
-
-STREAM support :warning:
-
-The first step in handling denied client access is defining the appropriate action. This can be configured using the `DENY_HTTP_STATUS` setting, which supports the following values:
-
-- **`403`**: Sends a standard "Forbidden" HTTP status code. A web page or custom content will be displayed to the client.
-- **`444`**: Silently closes the connection without displaying any web page or custom content.
-
-The default value is `403`. Setting it to `444` is recommended only if you have thoroughly addressed false positives, are experienced with BunkerWeb, and require a higher level of security.
-
-In **stream mode**, this setting is always enforced as `444`, meaning the connection will be closed, regardless of the configured value.
-
-#### Default server
-
-STREAM support :warning:
-
-In the HTTP protocol, the `Host` header specifies the server the client intends to contact. However, this header is optional and may be missing or set to an unknown value. This scenario is common, as many bots scan the internet to exploit services or perform fingerprinting.
-
-To block requests with undefined or unknown `Host` values, you can enable the `DISABLE_DEFAULT_SERVER` setting by setting it to `yes` (default: `no`). When enabled, such requests are silently denied by closing the TCP connection using NGINX's special `444` status code, meaning no response is sent to the client.
-
-For stricter security, you can also close SSL/TLS connections when the [Server Name Indication (SNI)](https://en.wikipedia.org/wiki/Server_Name_Indication) is undefined or unknown by setting `DISABLE_DEFAULT_SERVER_STRICT_SNI` to `yes` (default: `no`). This approach blocks attackers at the SSL/TLS level. However, it may cause issues if your BunkerWeb instance is behind a reverse proxy that forwards HTTPS requests without SNI.
-
-#### Allowed methods
-
-STREAM support :x:
-
-You can define the allowed HTTP methods using the `ALLOWED_METHODS` setting, listing them separated by a `|` (default: `GET|POST|HEAD`). If a client sends a request using a method not listed, they will receive a **405 - Method Not Allowed** response.
-
-!!! abstract "CORS requests"
-
-    You should also include `OPTIONS` to accommodate CORS pre-flight requests if needed.
-
-#### Max sizes
-
-STREAM support :x:
-
-The maximum request body size can be controlled using the `MAX_CLIENT_SIZE` setting (default: `10m`). Accepted values follow the syntax described [here](https://nginx.org/en/docs/syntax.html).
-
-To allow a request body of unlimited size, you can use the special value `0` (not recommended for security and performance reasons).
-
-#### Serve files
-
-STREAM support :x:
-
-To prevent serving files from the `www` folder, set the `SERVE_FILES` option to `no` (default: `yes`). Using `no` is recommended if BunkerWeb is configured as a reverse proxy.
 
 #### Headers
 
@@ -2123,7 +2147,7 @@ This BunkerWeb plugin acts as a [CrowdSec](https://crowdsec.net/?utm_source=exte
     services:
       bunkerweb:
         # This is the name that will be used to identify the instance in the Scheduler
-        image: bunkerity/bunkerweb:1.6.1
+        image: bunkerity/bunkerweb:1.6.2-rc1
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -2141,7 +2165,7 @@ This BunkerWeb plugin acts as a [CrowdSec](https://crowdsec.net/?utm_source=exte
             syslog-address: "udp://10.10.10.254:514" # The IP address of the syslog service
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.1
+        image: bunkerity/bunkerweb-scheduler:1.6.2-rc1
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
@@ -2173,7 +2197,7 @@ This BunkerWeb plugin acts as a [CrowdSec](https://crowdsec.net/?utm_source=exte
           - bw-db
 
       crowdsec:
-        image: crowdsecurity/crowdsec:v1.6.5 # Use the latest version but always pin the version for a better stability/security
+        image: crowdsecurity/crowdsec:v1.6.6 # Use the latest version but always pin the version for a better stability/security
         volumes:
           - cs-data:/var/lib/crowdsec/data # To persist the CrowdSec data
           - bw-logs:/var/log:ro # The logs of BunkerWeb for CrowdSec to parse
@@ -2365,7 +2389,7 @@ Here is the list of related settings :
 | `ANTIBOT_MCAPTCHA_SECRET`   |                             | multisite | no       | Secret for mCaptcha challenge.                                                                                                 |
 | `ANTIBOT_MCAPTCHA_URL`      | `https://demo.mcaptcha.org` | multisite | no       | Domain to use for mCaptcha challenge.                                                                                          |
 
-Please note that antibot feature is using a cookie to maintain a session with clients. If you are using BunkerWeb in a clustered environment, you will need to set the `SESSIONS_SECRET` and `SESSIONS_NAME` settings to another value than the default one (which is `random`). You will find more info about sessions [here](settings.md#sessions).
+Please note that antibot feature is using a cookie to maintain a session with clients. If you are using BunkerWeb in a clustered environment, you will need to set the `SESSIONS_SECRET` and `SESSIONS_NAME` settings to another value than the default one (which is `random`). You will find more info about sessions [here](features.md#sessions).
 
 #### Captcha
 
@@ -2734,7 +2758,7 @@ Here is the list of related settings :
 
 For more advanced authentication methods, such as Single Sign-On (SSO), you can leverage the **auth request settings**. This allows integration with external authentication systems by using subrequest-based authentication. For detailed information about this feature, refer to the [NGINX documentation](https://docs.nginx.com/nginx/admin-guide/security-controls/configuring-subrequest-authentication/).
 
-To help you get started, the [BunkerWeb repository](https://github.com/bunkerity/bunkerweb/tree/v1.6.1/examples) includes examples for popular authentication solutions like [Authelia](https://www.authelia.com/) and [Authentik](https://goauthentik.io/). These examples demonstrate how to integrate these tools seamlessly with your deployment.
+To help you get started, the [BunkerWeb repository](https://github.com/bunkerity/bunkerweb/tree/v1.6.2-rc1/examples) includes examples for popular authentication solutions like [Authelia](https://www.authelia.com/) and [Authentik](https://goauthentik.io/). These examples demonstrate how to integrate these tools seamlessly with your deployment.
 
 **Auth request settings are related to reverse proxy rules.**
 

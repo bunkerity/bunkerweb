@@ -347,7 +347,7 @@ utils.set_reason = function(reason, reason_data, ctx, security_mode)
 	if ctx and ctx.bw then
 		ctx.bw.reason = reason or "unknown"
 		ctx.bw.reason_data = reason_data or {}
-		ctx.bw.security_mode = security_mode
+		ctx.bw.security_mode = security_mode or utils.get_security_mode(ctx)
 	end
 	if var.reason then
 		var.reason = reason

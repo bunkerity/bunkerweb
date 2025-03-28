@@ -88,7 +88,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_USRDLL;MBEDTLS_EXPORTS;KRML_VERIFIED_UINT128;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>
-../../library;../../include;../../3rdparty/everest/include/;../../3rdparty/everest/include/everest;../../3rdparty/everest/include/everest/vs2013;../../3rdparty/everest/include/everest/kremlib;../../tests/include      </AdditionalIncludeDirectories>
+../../library;../../include;../../3rdparty/everest/include/;../../3rdparty/everest/include/everest;../../3rdparty/everest/include/everest/vs2013;../../3rdparty/everest/include/everest/kremlib;../../tests/include;../../framework/tests/include;../../framework/tests/programs      </AdditionalIncludeDirectories>
       <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
     <Link>
@@ -103,7 +103,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_USRDLL;MBEDTLS_EXPORTS;KRML_VERIFIED_UINT128;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>
-../../library;../../include;../../3rdparty/everest/include/;../../3rdparty/everest/include/everest;../../3rdparty/everest/include/everest/vs2013;../../3rdparty/everest/include/everest/kremlib;../../tests/include      </AdditionalIncludeDirectories>
+../../library;../../include;../../3rdparty/everest/include/;../../3rdparty/everest/include/everest;../../3rdparty/everest/include/everest/vs2013;../../3rdparty/everest/include/everest/kremlib;../../tests/include;../../framework/tests/include;../../framework/tests/programs      </AdditionalIncludeDirectories>
       <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
     <Link>
@@ -120,7 +120,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_USRDLL;MBEDTLS_EXPORTS;KRML_VERIFIED_UINT128;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>
-../../library;../../include;../../3rdparty/everest/include/;../../3rdparty/everest/include/everest;../../3rdparty/everest/include/everest/vs2013;../../3rdparty/everest/include/everest/kremlib;../../tests/include      </AdditionalIncludeDirectories>
+../../library;../../include;../../3rdparty/everest/include/;../../3rdparty/everest/include/everest;../../3rdparty/everest/include/everest/vs2013;../../3rdparty/everest/include/everest/kremlib;../../tests/include;../../framework/tests/include;../../framework/tests/programs      </AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -138,7 +138,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN64;NDEBUG;_WINDOWS;_USRDLL;MBEDTLS_EXPORTS;KRML_VERIFIED_UINT128;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>
-../../library;../../include;../../3rdparty/everest/include/;../../3rdparty/everest/include/everest;../../3rdparty/everest/include/everest/vs2013;../../3rdparty/everest/include/everest/kremlib;../../tests/include      </AdditionalIncludeDirectories>
+../../library;../../include;../../3rdparty/everest/include/;../../3rdparty/everest/include/everest;../../3rdparty/everest/include/everest/vs2013;../../3rdparty/everest/include/everest/kremlib;../../tests/include;../../framework/tests/include;../../framework/tests/programs      </AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -245,40 +245,41 @@
     <ClInclude Include="..\..\include\psa\crypto_struct.h" />
     <ClInclude Include="..\..\include\psa\crypto_types.h" />
     <ClInclude Include="..\..\include\psa\crypto_values.h" />
-    <ClInclude Include="..\..\tests\include\test\arguments.h" />
-    <ClInclude Include="..\..\tests\include\test\asn1_helpers.h" />
-    <ClInclude Include="..\..\tests\include\test\bignum_helpers.h" />
+    <ClInclude Include="..\..\framework\tests\include\test\arguments.h" />
+    <ClInclude Include="..\..\framework\tests\include\test\asn1_helpers.h" />
+    <ClInclude Include="..\..\framework\tests\include\test\bignum_codepath_check.h" />
+    <ClInclude Include="..\..\framework\tests\include\test\bignum_helpers.h" />
+    <ClInclude Include="..\..\framework\tests\include\test\constant_flow.h" />
+    <ClInclude Include="..\..\framework\tests\include\test\fake_external_rng_for_test.h" />
+    <ClInclude Include="..\..\framework\tests\include\test\helpers.h" />
+    <ClInclude Include="..\..\framework\tests\include\test\macros.h" />
+    <ClInclude Include="..\..\framework\tests\include\test\memory.h" />
+    <ClInclude Include="..\..\framework\tests\include\test\psa_crypto_helpers.h" />
+    <ClInclude Include="..\..\framework\tests\include\test\psa_exercise_key.h" />
+    <ClInclude Include="..\..\framework\tests\include\test\psa_helpers.h" />
+    <ClInclude Include="..\..\framework\tests\include\test\psa_memory_poisoning_wrappers.h" />
+    <ClInclude Include="..\..\framework\tests\include\test\random.h" />
+    <ClInclude Include="..\..\framework\tests\include\test\test_keys.h" />
+    <ClInclude Include="..\..\framework\tests\include\test\threading_helpers.h" />
     <ClInclude Include="..\..\tests\include\test\certs.h" />
-    <ClInclude Include="..\..\tests\include\test\constant_flow.h" />
-    <ClInclude Include="..\..\tests\include\test\fake_external_rng_for_test.h" />
-    <ClInclude Include="..\..\tests\include\test\helpers.h" />
-    <ClInclude Include="..\..\tests\include\test\macros.h" />
-    <ClInclude Include="..\..\tests\include\test\memory.h" />
-    <ClInclude Include="..\..\tests\include\test\psa_crypto_helpers.h" />
-    <ClInclude Include="..\..\tests\include\test\psa_exercise_key.h" />
-    <ClInclude Include="..\..\tests\include\test\psa_helpers.h" />
-    <ClInclude Include="..\..\tests\include\test\psa_memory_poisoning_wrappers.h" />
     <ClInclude Include="..\..\tests\include\test\psa_test_wrappers.h" />
-    <ClInclude Include="..\..\tests\include\test\random.h" />
     <ClInclude Include="..\..\tests\include\test\ssl_helpers.h" />
-    <ClInclude Include="..\..\tests\include\test\threading_helpers.h" />
-    <ClInclude Include="..\..\tests\include\test\drivers\aead.h" />
-    <ClInclude Include="..\..\tests\include\test\drivers\asymmetric_encryption.h" />
-    <ClInclude Include="..\..\tests\include\test\drivers\cipher.h" />
-    <ClInclude Include="..\..\tests\include\test\drivers\config_test_driver.h" />
-    <ClInclude Include="..\..\tests\include\test\drivers\crypto_config_test_driver_extension.h" />
-    <ClInclude Include="..\..\tests\include\test\drivers\hash.h" />
-    <ClInclude Include="..\..\tests\include\test\drivers\key_agreement.h" />
-    <ClInclude Include="..\..\tests\include\test\drivers\key_management.h" />
-    <ClInclude Include="..\..\tests\include\test\drivers\mac.h" />
-    <ClInclude Include="..\..\tests\include\test\drivers\pake.h" />
-    <ClInclude Include="..\..\tests\include\test\drivers\signature.h" />
-    <ClInclude Include="..\..\tests\include\test\drivers\test_driver.h" />
+    <ClInclude Include="..\..\framework\tests\include\test\drivers\aead.h" />
+    <ClInclude Include="..\..\framework\tests\include\test\drivers\asymmetric_encryption.h" />
+    <ClInclude Include="..\..\framework\tests\include\test\drivers\cipher.h" />
+    <ClInclude Include="..\..\framework\tests\include\test\drivers\hash.h" />
+    <ClInclude Include="..\..\framework\tests\include\test\drivers\key_agreement.h" />
+    <ClInclude Include="..\..\framework\tests\include\test\drivers\key_management.h" />
+    <ClInclude Include="..\..\framework\tests\include\test\drivers\mac.h" />
+    <ClInclude Include="..\..\framework\tests\include\test\drivers\pake.h" />
+    <ClInclude Include="..\..\framework\tests\include\test\drivers\signature.h" />
+    <ClInclude Include="..\..\framework\tests\include\test\drivers\test_driver.h" />
     <ClInclude Include="..\..\library\aesce.h" />
     <ClInclude Include="..\..\library\aesni.h" />
     <ClInclude Include="..\..\library\alignment.h" />
     <ClInclude Include="..\..\library\base64_internal.h" />
     <ClInclude Include="..\..\library\bignum_core.h" />
+    <ClInclude Include="..\..\library\bignum_core_invasive.h" />
     <ClInclude Include="..\..\library\bignum_internal.h" />
     <ClInclude Include="..\..\library\bignum_mod.h" />
     <ClInclude Include="..\..\library\bignum_mod_raw.h" />
@@ -334,6 +335,7 @@
     <ClInclude Include="..\..\library\ssl_tls13_invasive.h" />
     <ClInclude Include="..\..\library\ssl_tls13_keys.h" />
     <ClInclude Include="..\..\library\x509_internal.h" />
+    <ClInclude Include="..\..\framework\tests\programs\query_config.h" />
     <ClInclude Include="..\..\3rdparty\everest\include\everest\everest.h" />
     <ClInclude Include="..\..\3rdparty\everest\include\everest\Hacl_Curve25519.h" />
     <ClInclude Include="..\..\3rdparty\everest\include\everest\kremlib.h" />
@@ -448,29 +450,30 @@
     <ClCompile Include="..\..\library\x509write.c" />
     <ClCompile Include="..\..\library\x509write_crt.c" />
     <ClCompile Include="..\..\library\x509write_csr.c" />
-    <ClCompile Include="..\..\tests\src\asn1_helpers.c" />
-    <ClCompile Include="..\..\tests\src\bignum_helpers.c" />
+    <ClCompile Include="..\..\framework\tests\src\asn1_helpers.c" />
+    <ClCompile Include="..\..\framework\tests\src\bignum_codepath_check.c" />
+    <ClCompile Include="..\..\framework\tests\src\bignum_helpers.c" />
+    <ClCompile Include="..\..\framework\tests\src\fake_external_rng_for_test.c" />
+    <ClCompile Include="..\..\framework\tests\src\helpers.c" />
+    <ClCompile Include="..\..\framework\tests\src\psa_crypto_helpers.c" />
+    <ClCompile Include="..\..\framework\tests\src\psa_crypto_stubs.c" />
+    <ClCompile Include="..\..\framework\tests\src\psa_exercise_key.c" />
+    <ClCompile Include="..\..\framework\tests\src\psa_memory_poisoning_wrappers.c" />
+    <ClCompile Include="..\..\framework\tests\src\random.c" />
+    <ClCompile Include="..\..\framework\tests\src\test_memory.c" />
+    <ClCompile Include="..\..\framework\tests\src\threading_helpers.c" />
     <ClCompile Include="..\..\tests\src\certs.c" />
-    <ClCompile Include="..\..\tests\src\fake_external_rng_for_test.c" />
-    <ClCompile Include="..\..\tests\src\helpers.c" />
-    <ClCompile Include="..\..\tests\src\psa_crypto_helpers.c" />
-    <ClCompile Include="..\..\tests\src\psa_crypto_stubs.c" />
-    <ClCompile Include="..\..\tests\src\psa_exercise_key.c" />
-    <ClCompile Include="..\..\tests\src\psa_memory_poisoning_wrappers.c" />
     <ClCompile Include="..\..\tests\src\psa_test_wrappers.c" />
-    <ClCompile Include="..\..\tests\src\random.c" />
-    <ClCompile Include="..\..\tests\src\test_memory.c" />
-    <ClCompile Include="..\..\tests\src\threading_helpers.c" />
-    <ClCompile Include="..\..\tests\src\drivers\hash.c" />
-    <ClCompile Include="..\..\tests\src\drivers\platform_builtin_keys.c" />
-    <ClCompile Include="..\..\tests\src\drivers\test_driver_aead.c" />
-    <ClCompile Include="..\..\tests\src\drivers\test_driver_asymmetric_encryption.c" />
-    <ClCompile Include="..\..\tests\src\drivers\test_driver_cipher.c" />
-    <ClCompile Include="..\..\tests\src\drivers\test_driver_key_agreement.c" />
-    <ClCompile Include="..\..\tests\src\drivers\test_driver_key_management.c" />
-    <ClCompile Include="..\..\tests\src\drivers\test_driver_mac.c" />
-    <ClCompile Include="..\..\tests\src\drivers\test_driver_pake.c" />
-    <ClCompile Include="..\..\tests\src\drivers\test_driver_signature.c" />
+    <ClCompile Include="..\..\framework\tests\src\drivers\hash.c" />
+    <ClCompile Include="..\..\framework\tests\src\drivers\platform_builtin_keys.c" />
+    <ClCompile Include="..\..\framework\tests\src\drivers\test_driver_aead.c" />
+    <ClCompile Include="..\..\framework\tests\src\drivers\test_driver_asymmetric_encryption.c" />
+    <ClCompile Include="..\..\framework\tests\src\drivers\test_driver_cipher.c" />
+    <ClCompile Include="..\..\framework\tests\src\drivers\test_driver_key_agreement.c" />
+    <ClCompile Include="..\..\framework\tests\src\drivers\test_driver_key_management.c" />
+    <ClCompile Include="..\..\framework\tests\src\drivers\test_driver_mac.c" />
+    <ClCompile Include="..\..\framework\tests\src\drivers\test_driver_pake.c" />
+    <ClCompile Include="..\..\framework\tests\src\drivers\test_driver_signature.c" />
     <ClCompile Include="..\..\3rdparty\everest\library\everest.c" />
     <ClCompile Include="..\..\3rdparty\everest\library\Hacl_Curve25519_joined.c" />
     <ClCompile Include="..\..\3rdparty\everest\library\x25519.c" />

@@ -2,7 +2,7 @@
 
 from json import dumps, loads
 from typing import Any, Optional
-from sqlalchemy import TEXT, Boolean, Column, DateTime, Enum, ForeignKey, Identity, Integer, LargeBinary, String, Text, TypeDecorator, UnicodeText
+from sqlalchemy import Boolean, Column, DateTime, Enum, ForeignKey, Identity, Integer, LargeBinary, String, Text, TypeDecorator, UnicodeText
 from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy.schema import UniqueConstraint
 
@@ -70,7 +70,7 @@ class Settings(Base):
     name = Column(String(256), unique=True, nullable=False)
     plugin_id = Column(String(64), ForeignKey("bw_plugins.id", onupdate="cascade", ondelete="cascade"), nullable=False)
     context = Column(CONTEXTS_ENUM, nullable=False)
-    default = Column(TEXT, nullable=True, default="")
+    default = Column(Text, nullable=True, default="")
     help = Column(String(512), nullable=False)
     label = Column(String(256), nullable=True)
     regex = Column(String(1024), nullable=False)
@@ -87,10 +87,14 @@ class Settings(Base):
 
 class Selects(Base):
     __tablename__ = "bw_selects"
-    __table_args__ = (UniqueConstraint("setting_id", "order"),)
+    __table_args__ = (
+        UniqueConstraint("setting_id", "value"),
+        UniqueConstraint("setting_id", "order"),
+    )
 
-    setting_id = Column(String(256), ForeignKey("bw_settings.id", onupdate="cascade", ondelete="cascade"), primary_key=True)
-    value = Column(String(256), primary_key=True)
+    id = Column(Integer, Identity(start=1, increment=1), primary_key=True)
+    setting_id = Column(String(256), ForeignKey("bw_settings.id", onupdate="cascade", ondelete="cascade"), nullable=False)
+    value = Column(String(256), nullable=True, default="")
     order = Column(Integer, default=0, nullable=False)
 
     setting = relationship("Settings", back_populates="selects")
@@ -98,10 +102,12 @@ class Selects(Base):
 
 class Global_values(Base):
     __tablename__ = "bw_global_values"
+    __table_args__ = (UniqueConstraint("setting_id", "suffix"),)
 
-    setting_id = Column(String(256), ForeignKey("bw_settings.id", onupdate="cascade", ondelete="cascade"), primary_key=True)
-    value = Column(TEXT, nullable=False)
-    suffix = Column(Integer, primary_key=True, nullable=True, default=0)
+    id = Column(Integer, Identity(start=1, increment=1), primary_key=True)
+    setting_id = Column(String(256), ForeignKey("bw_settings.id", onupdate="cascade", ondelete="cascade"), nullable=False)
+    value = Column(Text, nullable=True, default="")
+    suffix = Column(Integer, nullable=True, default=0)
     method = Column(METHODS_ENUM, nullable=False)
 
     setting = relationship("Settings", back_populates="global_value")
@@ -123,11 +129,13 @@ class Services(Base):
 
 class Services_settings(Base):
     __tablename__ = "bw_services_settings"
+    __table_args__ = (UniqueConstraint("service_id", "setting_id", "suffix"),)
 
-    service_id = Column(String(256), ForeignKey("bw_services.id", onupdate="cascade", ondelete="cascade"), primary_key=True)
-    setting_id = Column(String(256), ForeignKey("bw_settings.id", onupdate="cascade", ondelete="cascade"), primary_key=True)
-    value = Column(TEXT, nullable=False)
-    suffix = Column(Integer, primary_key=True, nullable=True, default=0)
+    id = Column(Integer, Identity(start=1, increment=1), primary_key=True)
+    service_id = Column(String(256), ForeignKey("bw_services.id", onupdate="cascade", ondelete="cascade"), nullable=False)
+    setting_id = Column(String(256), ForeignKey("bw_settings.id", onupdate="cascade", ondelete="cascade"), nullable=False)
+    value = Column(Text, nullable=True, default="")
+    suffix = Column(Integer, nullable=True, default=0)
     method = Column(METHODS_ENUM, nullable=False)
 
     service = relationship("Services", back_populates="settings")
@@ -246,8 +254,8 @@ class Template_steps(Base):
 
     id = Column(Integer, primary_key=True)
     template_id = Column(String(256), ForeignKey("bw_templates.id", onupdate="cascade", ondelete="cascade"), primary_key=True)
-    title = Column(TEXT, nullable=False)
-    subtitle = Column(TEXT, nullable=True)
+    title = Column(Text, nullable=False)
+    subtitle = Column(Text, nullable=True)
 
     template = relationship("Templates", back_populates="steps")
 
@@ -263,9 +271,9 @@ class Template_settings(Base):
     template_id = Column(String(256), ForeignKey("bw_templates.id", onupdate="cascade", ondelete="cascade"), nullable=False)
     setting_id = Column(String(256), ForeignKey("bw_settings.id", onupdate="cascade", ondelete="cascade"), nullable=False)
     step_id = Column(Integer, nullable=False)
-    default = Column(TEXT, nullable=False)
+    default = Column(Text, nullable=True, default="")
     suffix = Column(Integer, nullable=True, default=0)
-    order = Column(Integer, default=0, nullable=False)
+    order = Column(Integer, nullable=False, default=0)
 
     template = relationship("Templates", back_populates="settings")
     setting = relationship("Settings", back_populates="templates")
@@ -316,9 +324,9 @@ class Metadata(Base):
     last_instances_change = Column(DateTime(timezone=True), nullable=True)
     reload_ui_plugins = Column(Boolean, default=False, nullable=True)
     failover = Column(Boolean, default=None, nullable=True)
-    failover_message = Column(TEXT, nullable=True)
+    failover_message = Column(Text, nullable=True, default="")
     integration = Column(INTEGRATIONS_ENUM, default="Unknown", nullable=False)
-    version = Column(String(32), default="1.6.1", nullable=False)
+    version = Column(String(32), default="1.6.2-rc1", nullable=False)
 
 
 ## UI Models
@@ -435,7 +443,7 @@ class UserSessions(Base):
     id = Column(Integer, Identity(start=1, increment=1), primary_key=True)
     user_name = Column(String(256), ForeignKey("bw_ui_users.username", onupdate="cascade", ondelete="cascade"), nullable=False)
     ip = Column(String(39), nullable=False)
-    user_agent = Column(TEXT, nullable=False)
+    user_agent = Column(Text, nullable=True, default="")
     creation_date = Column(DateTime(timezone=True), nullable=False)
     last_activity = Column(DateTime(timezone=True), nullable=False)
 

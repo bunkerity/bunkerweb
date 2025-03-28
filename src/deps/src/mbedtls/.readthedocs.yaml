@@ -17,7 +17,7 @@ build:
     python: "3.9"
   jobs:
     pre_build:
-    - ./scripts/apidoc_full.sh
+    - ./framework/scripts/apidoc_full.sh
     - breathe-apidoc -o docs/api apidoc/xml
     post_build:
     - |

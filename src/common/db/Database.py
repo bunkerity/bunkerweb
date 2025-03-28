@@ -83,7 +83,7 @@ filterwarnings("ignore", category=SAWarning, message="DELETE statement on table 
 
 
 class Database:
-    DB_STRING_RX = re_compile(r"^(?P<database>(mariadb|mysql)(\+pymysql)?|sqlite(\+pysqlite)?|postgresql(\+psycopg)?):/+(?P<path>/[^\s]+)")
+    DB_STRING_RX = re_compile(r"^(?P<database>(mariadb|mysql)(\+pymysql)?|sqlite(\+pysqlite)?|postgresql(\+psycopg)?|oracle(\+oracledb)?):/+(?P<path>/[^\s]+)")
     READONLY_ERROR = ("readonly", "read-only", "command denied", "Access denied")
     RESTRICTED_TEMPLATE_SETTINGS = ("USE_TEMPLATE", "IS_DRAFT")
     MULTISITE_CUSTOM_CONFIG_TYPES = ("server-http", "modsec-crs", "modsec", "server-stream", "crs-plugins-before", "crs-plugins-after")
@@ -145,6 +145,8 @@ class Database:
                 return db_string.replace(db_type, f"{db_type}+pymysql"), match
             elif db_type.startswith("postgresql") and not db_type.endswith("+psycopg"):
                 return db_string.replace(db_type, f"{db_type}+psycopg"), match
+            elif db_type.startswith("oracle") and not db_type.endswith("+oracledb"):
+                return db_string.replace(db_type, f"{db_type}+oracledb"), match
 
             return db_string, match
 
@@ -159,6 +161,14 @@ class Database:
         match = main_match
         if self.database_uri_readonly and not self.database_uri and readonly_match:
             match = readonly_match
+
+        if main_match and main_match.group("database") == "oracle":
+            self.logger.error("Oracle database is not supported yet")
+            _exit(1)
+
+        if readonly_match and readonly_match.group("database") == "oracle":
+            self.logger.error("Oracle database is not supported yet")
+            _exit(1)
 
         self._engine_kwargs = {
             "future": True,
@@ -259,6 +269,18 @@ class Database:
 
         if self.sql_engine:
             self.sql_engine.dispose()
+
+    def _empty_if_none(self, value: Any) -> Any:
+        """Return an empty string if the value is None or convert None values in collections"""
+        if value is None:
+            return ""
+        elif isinstance(value, dict):
+            return {k: self._empty_if_none(v) for k, v in value.items()}
+        elif isinstance(value, list):
+            return [self._empty_if_none(item) for item in value]
+        elif isinstance(value, tuple):
+            return tuple(self._empty_if_none(item) for item in value)
+        return value
 
     def test_read(self):
         """Test the read access to the database"""
@@ -436,7 +458,7 @@ class Database:
                 metadata = session.query(Metadata).with_entities(Metadata.version).filter_by(id=1).first()
                 if metadata:
                     return metadata.version
-                return "1.6.1"
+                return "1.6.2-rc1"
             except BaseException as e:
                 return f"Error: {e}"
 
@@ -468,16 +490,25 @@ class Database:
             "last_instances_change": None,
             "reload_ui_plugins": False,
             "integration": "unknown",
-            "version": "1.6.1",
+            "version": "1.6.2-rc1",
             "database_version": "Unknown",  # ? Extracted from the database
             "default": True,  # ? Extra field to know if the returned data is the default one
         }
         with self._db_session() as session:
-            try:
+            with suppress(BaseException):
                 database = self.database_uri.split(":")[0].split("+")[0]
-                data["database_version"] = (
-                    session.execute(text("SELECT sqlite_version()" if database == "sqlite" else "SELECT VERSION()")).first() or ["unknown"]
-                )[0]
+                if database == "sqlite":
+                    sql_query = text("SELECT sqlite_version()")
+                elif database == "oracle":
+                    # Use PRODUCT_COMPONENT_VERSION which is more accessible than v$instance
+                    sql_query = text("SELECT version FROM PRODUCT_COMPONENT_VERSION WHERE PRODUCT LIKE 'Oracle%' AND ROWNUM = 1")
+                else:
+                    sql_query = text("SELECT VERSION()")
+
+                try:
+                    data["database_version"] = (session.execute(sql_query).first() or ["unknown"])[0]
+                except Exception:
+                    data["database_version"] = "Unknown (access restricted)"
                 metadata = session.query(Metadata).filter_by(id=1).first()
                 if metadata:
                     for key in data.copy():
@@ -489,9 +520,6 @@ class Database:
                     plugin.id: plugin.last_config_change
                     for plugin in session.query(Plugins).with_entities(Plugins.id, Plugins.last_config_change).filter_by(config_changed=True).all()
                 }
-            except BaseException as e:
-                if "doesn't exist" not in str(e):
-                    self.logger.debug(f"Can't get the metadata: {e}")
 
         return data
 
@@ -625,7 +653,7 @@ class Database:
             # For selects:
             old_selects = {}
             for sel in old_data.get("bw_selects", []):
-                old_selects[(sel.setting_id, sel.value, sel.order)] = sel
+                old_selects[(sel.setting_id, self._empty_if_none(sel.value), sel.order)] = sel
 
             # For jobs:
             old_jobs = {}
@@ -743,7 +771,9 @@ class Database:
                         value["order"] = order
 
                         desired_settings[(base_plugin["id"], setting_id)] = value
-                        desired_selects.update((setting_id, sel_val, sel_order) for sel_order, sel_val in enumerate(select_values, start=1))
+                        desired_selects.update(
+                            (setting_id, self._empty_if_none(sel_val), sel_order) for sel_order, sel_val in enumerate(select_values, start=1)
+                        )
                         plugin_saved_settings.add(setting_id)
                         order += 1
 
@@ -984,20 +1014,22 @@ class Database:
             # desired_selects is a set of (setting_id, value, order)
             # We must correlate with known settings. If setting_id belongs to a plugin_id?
             # Original code just handled removing selects not present. We'll trust that logic:
-            # Insert new selects
-            for sel in desired_selects - old_select_keys:
-                # We only have setting_id, value and order.
-                to_put.append(Selects(setting_id=sel[0], value=sel[1], order=sel[2]))
 
-            for sel in old_select_keys & desired_selects:
-                # We only have setting_id, value and order.
-                # We don't have a way to update a select, so we'll delete and reinsert
-                to_delete.append({"type": "select", "filter": {"setting_id": sel[0], "value": sel[1]}})
-                to_put.append(Selects(setting_id=sel[0], value=sel[1], order=sel[2]))
+            # First delete all selects for setting_ids that are being updated
+            settings_being_updated = set()
+            settings_being_updated.update({sel[0] for sel in desired_selects})
 
-            # Delete old selects not needed
+            for setting_id in settings_being_updated:
+                to_delete.append({"type": "select", "filter": {"setting_id": setting_id}})
+
+            # Now insert all new selects
+            for sel in desired_selects:
+                to_put.append(Selects(setting_id=sel[0], value=self._empty_if_none(sel[1]), order=sel[2]))
+
+            # Delete old selects not needed (for settings not in our updated list)
             for sel in old_select_keys - desired_selects:
-                to_delete.append({"type": "select", "filter": {"setting_id": sel[0], "value": sel[1]}})
+                if sel[0] not in settings_being_updated:  # Only delete if not already handled above
+                    to_delete.append({"type": "select", "filter": {"setting_id": sel[0], "value": self._empty_if_none(sel[1]), "order": sel[2]}})
 
             # JOBS
             old_job_keys = set(old_jobs.keys())
@@ -1119,7 +1151,7 @@ class Database:
                         {
                             "type": "template_setting",
                             "filter": filter_data,
-                            "data": {"default": new_default, "suffix": suffix},
+                            "data": {"default": self._empty_if_none(new_default), "suffix": suffix},
                         }
                     )
 
@@ -1456,14 +1488,15 @@ class Database:
 
                     # Collect necessary data before threading
                     settings_data = session.query(Settings.id, Settings.default, Settings.plugin_id).all()
-                    settings_dict = {s.id: {"default": s.default, "plugin_id": s.plugin_id} for s in settings_data}
+                    settings_dict = {s.id: {"default": self._empty_if_none(s.default), "plugin_id": s.plugin_id} for s in settings_data}
 
                     # Collect existing service settings
                     existing_service_settings = session.query(
                         Services_settings.service_id, Services_settings.setting_id, Services_settings.suffix, Services_settings.value, Services_settings.method
                     ).all()
                     existing_service_settings_dict = {
-                        (s.service_id, s.setting_id, s.suffix or 0): {"value": s.value, "method": s.method} for s in existing_service_settings
+                        (s.service_id, s.setting_id, s.suffix or 0): {"value": self._empty_if_none(s.value), "method": s.method}
+                        for s in existing_service_settings
                     }
 
                     # Collect template settings
@@ -1546,7 +1579,7 @@ class Database:
                                         {
                                             "model": Services_settings,
                                             "filter": {"service_id": server_name, "setting_id": key, "suffix": suffix},
-                                            "values": {"value": value, "method": method},
+                                            "values": {"value": self._empty_if_none(value), "method": method},
                                         },
                                         {"model": Services, "filter": {"id": server_name}, "values": {"last_update": datetime.now().astimezone()}},
                                     ]
@@ -1597,7 +1630,11 @@ class Database:
 
                                 self.logger.debug(f"Updating global setting {key}")
                                 local_to_update.append(
-                                    {"model": Global_values, "filter": {"setting_id": key, "suffix": suffix}, "values": {"value": value, "method": method}}
+                                    {
+                                        "model": Global_values,
+                                        "filter": {"setting_id": key, "suffix": suffix},
+                                        "values": {"value": self._empty_if_none(value), "method": method},
+                                    }
                                 )
 
                         return local_to_put, local_to_update, local_to_delete, local_changed_plugins, False
@@ -1693,7 +1730,11 @@ class Database:
 
                             self.logger.debug(f"Updating global setting {key}")
                             to_update.append(
-                                {"model": Global_values, "filter": {"setting_id": key, "suffix": suffix}, "values": {"value": value, "method": method}}
+                                {
+                                    "model": Global_values,
+                                    "filter": {"setting_id": key, "suffix": suffix},
+                                    "values": {"value": self._empty_if_none(value), "method": method},
+                                }
                             )
 
             if changed_services:
@@ -1874,10 +1915,10 @@ class Database:
             for global_value in results:
                 setting_id = global_value.setting_id + (f"_{global_value.suffix}" if global_value.multiple and global_value.suffix > 0 else "")
                 config[setting_id] = {
-                    "value": global_value.value,
+                    "value": self._empty_if_none(global_value.value),
                     "global": True,
                     "method": global_value.method,
-                    "default": global_value.default,
+                    "default": self._empty_if_none(global_value.default),
                     "template": None,
                 }
 
@@ -1902,7 +1943,7 @@ class Database:
                         "value": "yes" if db_service.is_draft else "no",
                         "global": False,
                         "method": "default",
-                        "default": config.get("IS_DRAFT", {"value": "no"})["value"],
+                        "default": self._empty_if_none(config.get("IS_DRAFT", {"value": "no"})["value"]),
                         "template": None,
                     }
                     servers += f"{db_service.id} "
@@ -1939,7 +1980,7 @@ class Database:
                 for result in results:
                     if service and result.service_id != service:
                         continue
-                    value = result.value
+                    value = self._empty_if_none(result.value)
 
                     if result.setting_id == "SERVER_NAME" and not search(r"^" + escape(result.service_id) + r"( |$)", value):
                         split = set(value.split(" "))
@@ -1947,10 +1988,10 @@ class Database:
                         value = result.service_id + " " + " ".join(split)
 
                     config[f"{result.service_id}_{result.setting_id}" + (f"_{result.suffix}" if result.multiple and result.suffix else "")] = {
-                        "value": value,
+                        "value": self._empty_if_none(value),
                         "global": False,
                         "method": result.method,
-                        "default": config.get(result.setting_id, {"value": result.default})["value"],
+                        "default": self._empty_if_none(config.get(result.setting_id, {"value": self._empty_if_none(result.default)})["value"]),
                         "template": None,
                     }
             else:
@@ -2012,7 +2053,13 @@ class Database:
                 query = query.filter(Settings.id.in_(filtered_settings))
 
             for setting in query:
-                config[setting.id] = {"value": setting.default or "", "global": True, "method": "default", "default": setting.default, "template": None}
+                config[setting.id] = {
+                    "value": self._empty_if_none(setting.default),
+                    "global": True,
+                    "method": "default",
+                    "default": self._empty_if_none(setting.default),
+                    "template": None,
+                }
                 if setting.context == "multisite":
                     multisite.add(setting.id)
 
@@ -2045,16 +2092,16 @@ class Database:
                         continue
 
                     config[key] = {
-                        "value": template_setting.default,
+                        "value": self._empty_if_none(template_setting.default),
                         "global": True,
                         "method": "default",
-                        "default": template_setting.default,
+                        "default": self._empty_if_none(template_setting.default),
                         "template": template_used,
                     }
 
             if not global_only and config["MULTISITE"]["value"] == "yes":
                 for service_id in config["SERVER_NAME"]["value"].split(" "):
-                    service_template_used = config.get(f"{service_id}_USE_TEMPLATE", {"value": template_used})["value"]
+                    service_template_used = config.get(f"{service_id}_USE_TEMPLATE", {"value": self._empty_if_none(template_used)})["value"]
                     if service_template_used:
                         query = (
                             session.query(Template_settings)
@@ -2072,10 +2119,10 @@ class Database:
                                 continue
 
                             config[key] = {
-                                "value": setting.default,
+                                "value": self._empty_if_none(setting.default),
                                 "global": False,
                                 "method": "default",
-                                "default": setting.default,
+                                "default": self._empty_if_none(setting.default),
                                 "template": service_template_used,
                             }
 
@@ -2281,10 +2328,10 @@ class Database:
                 elif key not in service_settings:
                     tmp_config[key] = (
                         {
-                            "value": value["value"],
+                            "value": self._empty_if_none(value["value"]),
                             "global": value["global"],
                             "method": value["method"],
-                            "default": value["default"],
+                            "default": self._empty_if_none(value["default"]),
                             "template": value["template"],
                         }
                         if methods
@@ -2546,7 +2593,7 @@ class Database:
                         if setting not in db_ids or not db_setting:
                             changes = True
                             for sel_order, select in enumerate(value.pop("select", []), start=1):
-                                to_put.append(Selects(setting_id=value["id"], value=select, order=sel_order))
+                                to_put.append(Selects(setting_id=value["id"], value=self._empty_if_none(select), order=sel_order))
 
                             to_put.append(Settings(**value | {"order": order}))
                         else:
@@ -2584,7 +2631,7 @@ class Database:
                                 session.query(Settings).filter(Settings.id == setting).update(updates)
 
                             db_values = [
-                                (select.value, select.order)
+                                (self._empty_if_none(select.value), select.order)
                                 for select in session.query(Selects).with_entities(Selects.value, Selects.order).filter_by(setting_id=setting)
                             ]
                             select_values = enumerate(value.get("select", []), start=1)
@@ -2596,7 +2643,7 @@ class Database:
                                 session.query(Selects).filter(Selects.setting_id == setting).delete()
                                 # Add new selects with the new values
                                 for sel_order, select in enumerate(value.get("select", []), start=1):
-                                    to_put.append(Selects(setting_id=setting, value=select, order=sel_order))
+                                    to_put.append(Selects(setting_id=setting, value=self._empty_if_none(select), order=sel_order))
 
                         order += 1
 
@@ -3018,7 +3065,7 @@ class Database:
                     value.update({"plugin_id": plugin["id"], "name": value["id"], "id": setting})
 
                     for sel_order, select in enumerate(value.pop("select", []), start=1):
-                        to_put.append(Selects(setting_id=value["id"], value=select, order=sel_order))
+                        to_put.append(Selects(setting_id=value["id"], value=self._empty_if_none(select), order=sel_order))
 
                     to_put.append(Settings(**value | {"order": order}))
                     order += 1
@@ -3312,7 +3359,7 @@ class Database:
             if select_setting_ids:
                 selects = session.query(Selects).filter(Selects.setting_id.in_(select_setting_ids)).order_by(Selects.order).all()
                 for sel in selects:
-                    selects_map.setdefault(sel.setting_id, []).append(sel.value)
+                    selects_map.setdefault(sel.setting_id, []).append(self._empty_if_none(sel.value))
 
             # Pre-fetch bw_cli commands.
             commands_rows = session.query(Bw_cli_commands).filter(Bw_cli_commands.plugin_id.in_(plugin_ids)).all()
@@ -3341,7 +3388,7 @@ class Database:
                 for setting in settings_map.get(plugin.id, []):
                     setting_data = {
                         "context": setting.context,
-                        "default": setting.default,
+                        "default": self._empty_if_none(setting.default),
                         "help": setting.help,
                         "id": setting.name,
                         "label": setting.label,
@@ -3734,7 +3781,7 @@ class Database:
             query = (
                 session.query(Templates)
                 .with_entities(Templates.id, Templates.plugin_id, Templates.name)
-                .order_by(case((Templates.name == "low", 0), else_=1))  # Pass as positional arguments
+                .order_by(case((Templates.id == "low", 1), (Templates.id == "medium", 2), (Templates.id == "high", 3), else_=4), Templates.name)
             )
 
             if plugin:
@@ -3752,7 +3799,7 @@ class Database:
                     .order_by(Template_settings.order)
                 ):
                     key = f"{setting.setting_id}_{setting.suffix}" if setting.suffix else setting.setting_id
-                    templates[template.id]["settings"][key] = setting.default
+                    templates[template.id]["settings"][key] = self._empty_if_none(setting.default)
 
                     if setting.step_id:
                         if setting.step_id not in steps_settings:
@@ -3780,7 +3827,7 @@ class Database:
                     .filter_by(template_id=template.id)
                     .order_by(Template_steps.id)
                 ):
-                    step_data = {"title": step.title, "subtitle": step.subtitle}
+                    step_data = {"title": step.title, "subtitle": self._empty_if_none(step.subtitle)}
                     if step.id in steps_settings:
                         step_data["settings"] = steps_settings[step.id]
                     if step.id in steps_configs:
@@ -3799,7 +3846,7 @@ class Database:
                 .filter_by(template_id=template_id)
                 .order_by(Template_settings.order)
             ):
-                settings[f"{setting.setting_id}_{setting.suffix}" if setting.suffix else setting.setting_id] = setting.default
+                settings[f"{setting.setting_id}_{setting.suffix}" if setting.suffix else setting.setting_id] = self._empty_if_none(setting.default)
             return settings
 
     def get_ui_users(self, *, as_dict: bool = False) -> Union[str, List[Union[Users, dict]]]:
@@ -3854,7 +3901,7 @@ class Database:
                     {
                         "id": session_data.id,
                         "ip": session_data.ip,
-                        "user_agent": session_data.user_agent,
+                        "user_agent": self._empty_if_none(session_data.user_agent),
                         "creation_date": session_data.creation_date,
                         "last_activity": session_data.last_activity,
                     }

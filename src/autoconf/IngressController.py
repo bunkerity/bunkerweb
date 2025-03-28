@@ -343,11 +343,6 @@ class IngressController(Controller):
                     self._logger.info(f"Starting Kubernetes watch for {watch_type}, attempt {attempt + 1}/{retries}")
                 ignored = False
                 yield from watch.Watch().stream(what)
-            except ProtocolError:
-                self._logger.debug(format_exc())
-                sleep(1)
-                ignored = True
-                continue
             except Exception as e:
                 self._logger.debug(format_exc())
                 self._logger.error(f"Unexpected error while watching {watch_type}:\n{e}")

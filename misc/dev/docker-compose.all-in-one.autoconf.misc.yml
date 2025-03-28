@@ -14,10 +14,7 @@ services:
       - ../../src/ui/utils:/usr/share/bunkerweb/ui/utils:ro
       - ../../src/ui/main.py:/usr/share/bunkerweb/ui/main.py:ro
     environment:
-      SERVER_NAME: ""
-      MULTISITE: "yes"
       DATABASE_URI: "mariadb+pymysql://bunkerweb:secret@bw-db:3306/db"
-      API_WHITELIST_IP: "127.0.0.0/24"
       USE_BUNKERNET: "no"
       USE_BLACKLIST: "no"
       USE_WHITELIST: "no"
@@ -28,7 +25,7 @@ services:
       USE_CLIENT_CACHE: "yes"
       USE_GZIP: "yes"
       SESSIONS_CHECK_IP: "no"
-      UI_HOST: "http://127.0.0.1:7000"
+      GENERATE_SELF_SIGNED_SSL: "yes"
 
       # Autoconf
       AUTOCONF_MODE: "yes"

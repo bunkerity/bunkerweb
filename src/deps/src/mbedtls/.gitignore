@@ -35,6 +35,7 @@ massif-*
 
 # Unix-like build artifacts:
 *.o
+*.s
 
 # MSVC build artifacts:
 *.exe

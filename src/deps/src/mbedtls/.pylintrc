@@ -1,5 +1,5 @@
 [MASTER]
-init-hook='import sys; sys.path.append("scripts")'
+init-hook='import sys; sys.path.append("scripts"); sys.path.append("framework/scripts")'
 min-similarity-lines=10
 
 [BASIC]

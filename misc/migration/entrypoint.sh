@@ -26,16 +26,12 @@ check_file_exists "script.py.mako"
 
 # Validate database type
 case "$DATABASE" in
-  sqlite|mariadb|mysql|postgresql)
+  sqlite|mariadb|mysql|postgresql|oracle)
     ;;
   *)
     exit_with_error "Unsupported database type: $DATABASE"
     ;;
 esac
-
-# Configure SQLAlchemy URL in alembic.ini
-echo "🔧 Configuring SQLAlchemy URL in alembic.ini"
-sed -i "s|^sqlalchemy\\.url =.*$|sqlalchemy.url = ${DATABASE_URI}|" alembic.ini || exit_with_error "Failed to update SQLAlchemy URL in alembic.ini"
 
 # Test database connection
 echo "🔗 Testing database connection..."

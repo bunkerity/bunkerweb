@@ -6,6 +6,7 @@ certbot-dns-dnsimple==3.3.0
 certbot-dns-dnsmadeeasy==3.3.0
 certbot-dns-gehirn==3.3.0
 certbot-dns-google==3.3.0
+certbot-dns-infomaniak==0.2.3
 certbot-dns-linode==3.3.0
 certbot-dns-luadns==3.3.0
 certbot-dns-nsone==3.3.0
@@ -17,7 +18,7 @@ certbot-dns-scaleway==0.0.7
 cryptography==44.0.2
 importlib-metadata==8.6.1
 maxminddb==2.6.3
-pydantic==2.10.6
+pydantic==2.11.0
 python-magic==0.4.27
 requests==2.32.3
 schedule==1.2.2

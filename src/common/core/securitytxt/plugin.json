@@ -29,7 +29,7 @@
       "help": "Indicates a method that researchers should use for reporting security vulnerabilities such as an email address, a phone number, and/or a web page with contact information. (If the value is empty, the security.txt file will not be created as it is a required field)",
       "id": "securitytxt-contact",
       "label": "Security.txt contact",
-      "regex": "^((mailto:|tel:|https:\\/\\/)\\S+)?$",
+      "regex": "^((mailto:|tel:|https?:\\/\\/)\\S+)?$",
       "type": "text",
       "multiple": "securitytxt-contact"
     },
@@ -48,7 +48,7 @@
       "help": "Indicates an encryption key that security researchers should use for encrypted communication.",
       "id": "securitytxt-encryption",
       "label": "Security.txt encryption",
-      "regex": "^((https:\\/\\/|dns:|openpgp4fpr:)\\S+)?$",
+      "regex": "^((https?:\\/\\/|dns:|openpgp4fpr:)\\S+)?$",
       "type": "text",
       "multiple": "securitytxt-encryption"
     },
@@ -58,7 +58,7 @@
       "help": "Indicates a link to a page where security researchers are recognized for their reports.",
       "id": "securitytxt-acknowledgement",
       "label": "Security.txt acknowledgement",
-      "regex": "^(https:\\/\\/\\S+)?$",
+      "regex": "^(https?:\\/\\/\\S+)?$",
       "type": "text",
       "multiple": "securitytxt-acknowledgement"
     },
@@ -77,7 +77,7 @@
       "help": "Indicates the canonical URIs where the \"security.txt\" file is located, which is usually something like \"https://example.com/.well-known/security.txt\". (If the value is empty, the default value will be automatically generated from the site URL + SECURITYTXT_URI)",
       "id": "securitytxt-canonical",
       "label": "Security.txt canonical",
-      "regex": "^(https:\\/\\/\\S+)?$",
+      "regex": "^(https?:\\/\\/\\S+)?$",
       "type": "text",
       "multiple": "securitytxt-canonical"
     },
@@ -87,7 +87,7 @@
       "help": "Indicates a link to where the vulnerability disclosure policy is located.",
       "id": "securitytxt-policy",
       "label": "Security.txt policy",
-      "regex": "^(https:\\/\\/\\S+)?$",
+      "regex": "^(https?:\\/\\/\\S+)?$",
       "type": "text",
       "multiple": "securitytxt-policy"
     },
@@ -97,7 +97,7 @@
       "help": "Used for linking to the vendor's security-related job positions.",
       "id": "securitytxt-hiring",
       "label": "Security.txt hiring",
-      "regex": "^(https:\\/\\/\\S+)?$",
+      "regex": "^(https?:\\/\\/\\S+)?$",
       "type": "text",
       "multiple": "securitytxt-hiring"
     },
@@ -107,7 +107,7 @@
       "help": "A link to the provider-metadata.json of your CSAF (Common Security Advisory Framework) provider.",
       "id": "securitytxt-csaf",
       "label": "Security.txt CSAF",
-      "regex": "^(https:\\/\\/\\S+)?$",
+      "regex": "^(https?:\\/\\/\\S+)?$",
       "type": "text",
       "multiple": "securitytxt-csaf"
     }

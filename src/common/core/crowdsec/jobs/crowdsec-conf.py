@@ -12,7 +12,6 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
         sys_path.append(deps_path)
 
 from jinja2 import Environment, FileSystemLoader
-from common_utils import get_version  # type: ignore
 from logger import setup_logger  # type: ignore
 from jobs import Job  # type: ignore
 
@@ -37,11 +36,7 @@ try:
         LOGGER.info("CrowdSec is not activated, skipping job...")
         sys_exit(status)
 
-    bunkerweb_version_split = get_version().split(".")
-    if len(bunkerweb_version_split) > 1 and int(bunkerweb_version_split[1]) < 6:
-        JOB = Job(LOGGER)
-    else:
-        JOB = Job(LOGGER, __file__)
+    JOB = Job(LOGGER, __file__)
 
     # Generate content
     jinja_env = Environment(loader=FileSystemLoader(PLUGIN_PATH.joinpath("misc")))
