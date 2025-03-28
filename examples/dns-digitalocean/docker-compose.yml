@@ -35,9 +35,9 @@ services:
       AUTO_LETS_ENCRYPT: "yes"
       EMAIL_LETS_ENCRYPT: "changeme@example.com" # replace with your email to receive notifications about certificate expiration
       LETS_ENCRYPT_CHALLENGE: "dns"
-      LETS_ENCRYPT_DNS_PROVIDER: "cloudflare"
+      LETS_ENCRYPT_DNS_PROVIDER: "digitalocean"
       LETS_ENCRYPT_DNS_PROPAGATION: "default" # change this to a number of seconds if you have a slow DNS provider (It's recommended to use the default value)
-      LETS_ENCRYPT_DNS_CREDENTIAL_ITEM: "dns_cloudflare_api_token <your-cloudflare-api-token>" # replace with your Cloudflare API token
+      LETS_ENCRYPT_DNS_CREDENTIAL_ITEM: "dns_digitalocean_token <your-digitalocean-api-token>" # replace with your DigitalOcean API token
 
       # Reverse proxy configuration
       app1.example.com_REVERSE_PROXY_URL: "/"
