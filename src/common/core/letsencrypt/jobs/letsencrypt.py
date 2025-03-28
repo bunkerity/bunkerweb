@@ -356,3 +356,24 @@ class WildcardGenerator:
             # ? Add the raw domain to the wildcards
             wildcards.add(domain)
         return sorted(wildcards, key=lambda x: x[0] != "*")
+
+    @staticmethod
+    def get_wildcard_group_name(domain: str, provider: str, challenge_type: str, staging: bool, content_hash: str) -> str:
+        """
+        Generate a consistent group name for wildcards based on the domain's TLD.
+
+        Args:
+            domain: The domain name
+            provider: The DNS provider name
+            challenge_type: The challenge type (dns or http)
+            staging: Whether this is a staging certificate
+            content_hash: A hash of the credential content
+
+        Returns:
+            A string representing the group name
+        """
+        base_domain = WildcardGenerator.get_wildcards_from_domains((domain,))[-1].replace(".", "-")
+        env = "staging" if staging else "prod"
+        challenge = provider if challenge_type == "dns" else "http"
+
+        return f"{challenge}_{env}_{base_domain}_{content_hash}"
