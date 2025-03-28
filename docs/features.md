@@ -4565,23 +4565,25 @@ The Self-signed Certificate plugin automatically generates and manages SSL/TLS c
 Follow these steps to configure and use the Self-signed Certificate feature:
 
 1. **Enable the feature:** Set the `GENERATE_SELF_SIGNED_SSL` setting to `yes` to enable self-signed certificate generation.
-2. **Configure validity period:** Optionally set how long the certificate should be valid using the `SELF_SIGNED_SSL_EXPIRY` setting.
-3. **Set certificate subject:** Configure the certificate subject using the `SELF_SIGNED_SSL_SUBJ` setting.
-4. **Let BunkerWeb handle the rest:** Once configured, certificates are automatically generated and applied to your domains.
+2. **Choose cryptographic algorithm:** Select your preferred algorithm using the `SELF_SIGNED_SSL_ALGORITHM` setting.
+3. **Configure validity period:** Optionally set how long the certificate should be valid using the `SELF_SIGNED_SSL_EXPIRY` setting.
+4. **Set certificate subject:** Configure the certificate subject using the `SELF_SIGNED_SSL_SUBJ` setting.
+5. **Let BunkerWeb handle the rest:** Once configured, certificates are automatically generated and applied to your domains.
 
 ### Configuration Settings
 
-| Setting                    | Default                | Context   | Multiple | Description                                                                                             |
-| -------------------------- | ---------------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------- |
-| `GENERATE_SELF_SIGNED_SSL` | `no`                   | multisite | no       | **Enable Self-signed:** Set to `yes` to enable automatic self-signed certificate generation.            |
-| `SELF_SIGNED_SSL_EXPIRY`   | `365`                  | multisite | no       | **Certificate Validity:** Number of days the self-signed certificate should be valid (default: 1 year). |
-| `SELF_SIGNED_SSL_SUBJ`     | `/CN=www.example.com/` | multisite | no       | **Certificate Subject:** Subject field for the certificate that identifies the domain.                  |
+| Setting                     | Default                | Context   | Multiple | Description                                                                                                                       |
+| --------------------------- | ---------------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `GENERATE_SELF_SIGNED_SSL`  | `no`                   | multisite | no       | **Enable Self-signed:** Set to `yes` to enable automatic self-signed certificate generation.                                      |
+| `SELF_SIGNED_SSL_ALGORITHM` | `ec-prime256v1`        | multisite | no       | **Certificate Algorithm:** Algorithm used for certificate generation: `ec-prime256v1`, `ec-secp384r1`, `rsa-2048`, or `rsa-4096`. |
+| `SELF_SIGNED_SSL_EXPIRY`    | `365`                  | multisite | no       | **Certificate Validity:** Number of days the self-signed certificate should be valid (default: 1 year).                           |
+| `SELF_SIGNED_SSL_SUBJ`      | `/CN=www.example.com/` | multisite | no       | **Certificate Subject:** Subject field for the certificate that identifies the domain.                                            |
 
 !!! tip "Development Environments"
     Self-signed certificates are ideal for development and testing environments where you need HTTPS but don't require certificates trusted by public browsers. They provide the same encryption strength as CA-issued certificates without the external validation.
 
 !!! info "Certificate Information"
-    The generated self-signed certificates use Elliptic Curve cryptography (prime256v1 curve) and include the configured subject, ensuring proper functionality for your domains.
+    The generated self-signed certificates use the specified algorithm (default is Elliptic Curve cryptography with prime256v1 curve) and include the configured subject, ensuring proper functionality for your domains.
 
 ### Example Configurations
 
@@ -4591,6 +4593,7 @@ Follow these steps to configure and use the Self-signed Certificate feature:
 
     ```yaml
     GENERATE_SELF_SIGNED_SSL: "yes"
+    SELF_SIGNED_SSL_ALGORITHM: "ec-prime256v1"
     SELF_SIGNED_SSL_EXPIRY: "365"
     SELF_SIGNED_SSL_SUBJ: "/CN=mysite.local/"
     ```
@@ -4601,17 +4604,19 @@ Follow these steps to configure and use the Self-signed Certificate feature:
 
     ```yaml
     GENERATE_SELF_SIGNED_SSL: "yes"
+    SELF_SIGNED_SSL_ALGORITHM: "ec-prime256v1"
     SELF_SIGNED_SSL_EXPIRY: "90"
     SELF_SIGNED_SSL_SUBJ: "/CN=dev.example.com/"
     ```
 
-=== "Testing with Self-signed Certificates"
+=== "Testing with RSA Certificates"
 
-    Configuration for a testing environment where a domain uses self-signed certificates:
+    Configuration for a testing environment where a domain uses self-signed RSA certificates:
 
     ```yaml
     SERVER_NAME: "test.example.com"
     GENERATE_SELF_SIGNED_SSL: "yes"
+    SELF_SIGNED_SSL_ALGORITHM: "rsa-4096"
     SELF_SIGNED_SSL_EXPIRY: "365"
     SELF_SIGNED_SSL_SUBJ: "/CN=test.example.com/"
     ```

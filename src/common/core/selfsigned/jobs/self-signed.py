@@ -64,26 +64,44 @@ def generate_cert(first_server: str, days: str, subj: str, self_signed_path: Pat
 
     LOGGER.info(f"Generating self-signed certificate for {first_server}")
     server_path.mkdir(parents=True, exist_ok=True)
+
+    # Get the algorithm from environment variable
+    algorithm = getenv(f"{first_server}_SELF_SIGNED_SSL_ALGORITHM", getenv("SELF_SIGNED_SSL_ALGORITHM", "ec-prime256v1"))
+
+    # Prepare openssl command based on the selected algorithm
+    openssl_cmd = [
+        "openssl",
+        "req",
+        "-nodes",
+        "-x509",
+        "-newkey",
+    ]
+
+    # Add algorithm-specific options
+    if algorithm.startswith("ec-"):
+        curve = algorithm.split("-")[1]
+        openssl_cmd.extend(["ec", "-pkeyopt", f"ec_paramgen_curve:{curve}"])
+    elif algorithm.startswith("rsa-"):
+        bits = algorithm.split("-")[1]
+        openssl_cmd.extend(["rsa", "-pkeyopt", f"rsa_keygen_bits:{bits}"])
+
+    # Add the rest of the common options
+    openssl_cmd.extend(
+        [
+            "-keyout",
+            key_path.as_posix(),
+            "-out",
+            cert_path.as_posix(),
+            "-days",
+            days,
+            "-subj",
+            subj,
+        ]
+    )
+
     if (
         run(
-            [
-                "openssl",
-                "req",
-                "-nodes",
-                "-x509",
-                "-newkey",
-                "ec",
-                "-pkeyopt",
-                "ec_paramgen_curve:prime256v1",
-                "-keyout",
-                key_path.as_posix(),
-                "-out",
-                cert_path.as_posix(),
-                "-days",
-                days,
-                "-subj",
-                subj,
-            ],
+            openssl_cmd,
             stdin=DEVNULL,
             stderr=DEVNULL,
             check=False,
