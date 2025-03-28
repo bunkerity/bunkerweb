@@ -32,6 +32,36 @@ The following settings are shared across all challenge mechanisms:
 | `ANTIBOT_TIME_RESOLVE` | `60`         | multisite | no       | **Challenge Time Limit:** The maximum time (in seconds) a user has to complete the challenge. After this time, a new challenge will be generated.   |
 | `ANTIBOT_TIME_VALID`   | `86400`      | multisite | no       | **Challenge Validity:** How long (in seconds) a completed challenge is valid. After this time, users will have to solve a new challenge.            |
 
+### Excluding Traffic from Challenges
+
+BunkerWeb allows you to specify certain users, IPs, or requests that should bypass the antibot challenge completely. This is useful for whitelisting trusted services, internal networks, or specific pages that should always be accessible without challenge:
+
+| Setting                     | Default | Context   | Multiple | Description                                                                                                       |
+| --------------------------- | ------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------- |
+| `ANTIBOT_IGNORE_URI`        |       | multisite | no       | **Excluded URLs:** List of URI regex patterns separated by spaces that should bypass the challenge.               |
+| `ANTIBOT_IGNORE_IP`         |       | multisite | no       | **Excluded IPs:** List of IP addresses or CIDR ranges separated by spaces that should bypass the challenge.       |
+| `ANTIBOT_IGNORE_RDNS`       |       | multisite | no       | **Excluded Reverse DNS:** List of reverse DNS suffixes separated by spaces that should bypass the challenge.      |
+| `ANTIBOT_RDNS_GLOBAL`       | `yes`   | multisite | no       | **Global IPs Only:** If set to `yes`, only perform reverse DNS checks on public IP addresses.                     |
+| `ANTIBOT_IGNORE_ASN`        |       | multisite | no       | **Excluded ASNs:** List of ASN numbers separated by spaces that should bypass the challenge.                      |
+| `ANTIBOT_IGNORE_USER_AGENT` |       | multisite | no       | **Excluded User Agents:** List of User-Agent regex patterns separated by spaces that should bypass the challenge. |
+
+**Examples:**
+
+- `ANTIBOT_IGNORE_URI: "^/api/ ^/webhook/ ^/assets/"`
+  This will exclude all URIs starting with `/api/`, `/webhook/`, or `/assets/` from the antibot challenge.
+
+- `ANTIBOT_IGNORE_IP: "192.168.1.0/24 10.0.0.1"`
+  This will exclude the internal network `192.168.1.0/24` and the specific IP `10.0.0.1` from the antibot challenge.
+
+- `ANTIBOT_IGNORE_RDNS: ".googlebot.com .bingbot.com"`
+  This will exclude requests from hosts with reverse DNS ending with `googlebot.com` or `bingbot.com` from the antibot challenge.
+
+- `ANTIBOT_IGNORE_ASN: "15169 8075"`
+  This will exclude requests from ASN 15169 (Google) and ASN 8075 (Microsoft) from the antibot challenge.
+
+- `ANTIBOT_IGNORE_USER_AGENT: "^Mozilla.+Chrome.+Safari"`
+  This will exclude requests with User-Agents matching the specified regex pattern from the antibot challenge.
+
 ### Supported Challenge Mechanisms
 
 === "Cookie"
