@@ -1,12 +1,12 @@
-The Real IP plugin allows BunkerWeb to accurately identify the true IP address of visitors when operating behind reverse proxies, load balancers, or CDNs. This is essential for properly applying security rules, rate limiting, and logging, as without it, all requests would appear to come from your proxy's IP rather than the actual client's IP.
+The Real IP plugin ensures that BunkerWeb correctly identifies the client’s IP address even when behind proxies. This is essential for applying security rules, rate limiting, and logging properly; without it, all requests would appear to come from your proxy's IP rather than the client's actual IP.
 
 **How it works:**
 
 1. When enabled, BunkerWeb examines incoming requests for specific headers (like [`X-Forwarded-For`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-Forwarded-For)) that contain the client's original IP address.
-2. BunkerWeb checks if the connecting IP is in your trusted proxy list (`REAL_IP_FROM`), ensuring only legitimate proxies can pass client IPs.
+2. BunkerWeb checks if the incoming IP is in your trusted proxy list (`REAL_IP_FROM`), ensuring that only legitimate proxies can pass client IPs.
 3. The original client IP is extracted from the specified header (`REAL_IP_HEADER`) and used for all security evaluations and logging.
-4. For recursive IP chains, BunkerWeb can trace through multiple proxy hops to find the originating client IP.
-5. Additionally, PROXY protocol support can be enabled to receive client IPs directly from compatible proxies like [HAProxy](https://www.haproxy.org/).
+4. For recursive IP chains, BunkerWeb can trace through multiple proxy hops to determine the originating client IP.
+5. Additionally, [PROXY protocol](https://netnut.io/what-is-proxy-protocol-and-how-does-it-work/) support can be enabled to receive client IPs directly from compatible proxies such as [HAProxy](https://www.haproxy.org/).
 6. Trusted proxy IP lists can be automatically downloaded and updated from external sources via URLs.
 
 ### How to Use

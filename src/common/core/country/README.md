@@ -1,4 +1,4 @@
-The Country plugin enables geo-blocking functionality for your website, allowing you to restrict access based on the geographic location of your visitors. This feature helps you comply with regional regulations, prevent fraudulent activities from high-risk regions, or implement content restrictions based on geographic boundaries.
+The Country plugin enables geo-blocking functionality for your website, allowing you to restrict access based on the geographic location of your visitors. This feature helps you comply with regional regulations, prevent fraudulent activities often associated with high-risk regions, and implement content restrictions based on geographic boundaries.
 
 **How it works:**
 
@@ -31,7 +31,7 @@ Follow these steps to configure and use the Country feature:
     - Use the blacklist when you want to block access from specific problematic regions while allowing everyone else.
 
 !!! warning "Precedence Rule"
-    If both whitelist and blacklist are configured, the whitelist takes precedence. This means the system will first check if a country is whitelisted; if not, access is denied regardless of the blacklist setting.
+    If both whitelist and blacklist are configured, the whitelist takes precedence. This means the system first checks if a country is whitelisted; if not, access is denied regardless of the blacklist configuration.
 
 !!! info "Country Detection"
     BunkerWeb uses the [lite db-ip mmdb database](https://db-ip.com/db/download/ip-to-country-lite) to determine the country of origin based on IP addresses.

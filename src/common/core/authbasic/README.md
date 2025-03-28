@@ -1,8 +1,8 @@
-The Auth Basic plugin provides HTTP basic authentication to protect your website or specific resources. This feature adds an extra layer of security by requiring users to enter a username and password before they can access the protected content. This type of authentication is simple to implement and widely supported by browsers.
+The Auth Basic plugin provides HTTP basic authentication to protect your website or specific resources. This feature adds an extra layer of security by requiring users to enter a username and password before accessing protected content. This type of authentication is simple to implement and widely supported by browsers.
 
 **How it works:**
 
-1. When a user tries to access a protected area of your website, the server sends a challenge requesting authentication.
+1. When a user tries to access a protected area of your website, the server sends an authentication challenge.
 2. The browser displays a login dialog box prompting the user for a username and password.
 3. The user enters their credentials, which are sent to the server.
 4. If the credentials are valid, the user is granted access to the requested content.
@@ -28,7 +28,7 @@ Follow these steps to enable and configure Auth Basic authentication:
 | `AUTH_BASIC_TEXT`     | `Restricted area` | multisite | no       | **Prompt Text:** The message displayed in the authentication prompt shown to users.                                                        |
 
 !!! warning "Security Considerations"
-    HTTP Basic Authentication transmits credentials encoded (not encrypted) in Base64. While this is fine when used over HTTPS, it should not be considered secure over plain HTTP. Always enable SSL/TLS when using basic authentication.
+    HTTP Basic Authentication transmits credentials encoded (not encrypted) in Base64. While this is acceptable when used over HTTPS, it should not be considered secure over plain HTTP. Always enable SSL/TLS when using basic authentication.
 
 !!! tip "Using Multiple Credentials"
     You can configure multiple username/password pairs for access. Each `AUTH_BASIC_USER` setting should have a corresponding `AUTH_BASIC_PASSWORD` setting.

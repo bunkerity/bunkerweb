@@ -1,11 +1,11 @@
-Headers play a crucial role in HTTP security. The Headers plugin provides robust management of both standard and custom HTTP headers, enhancing security and functionality. It dynamically applies security measures such as [HSTS](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Strict-Transport-Security), [CSP](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy) (including a reporting mode), and custom header injection while preventing information leakage.
+Headers play a crucial role in HTTP security. The Headers plugin provides robust management of both standard and custom HTTP headers—enhancing security and functionality. It dynamically applies security measures, such as [HSTS](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Strict-Transport-Security), [CSP](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy) (including a reporting mode), and custom header injection, while preventing information leakage.
 
 **How it works**
 
 1. When a client requests content from your website, BunkerWeb processes the response headers.
-2. Security headers are applied according to your configuration.
+2. Security headers are applied in accordance with your configuration.
 3. Custom headers can be added to provide additional information or functionality to clients.
-4. Unwanted headers that might leak server information are automatically removed.
+4. Unwanted headers that might reveal server information are automatically removed.
 5. Cookies are modified to include appropriate security flags based on your settings.
 6. Headers from upstream servers can be selectively preserved when needed.
 
@@ -15,8 +15,8 @@ Follow these steps to configure and use the Headers feature:
 
 1. **Configure security headers:** Set values for common headers.
 2. **Add custom headers:** Define any custom headers using the `CUSTOM_HEADER` setting.
-3. **Remove unwanted headers:** Use `REMOVE_HEADERS` to ensure headers that could leak server details are stripped out.
-4. **Set cookie security:** Enable robust cookie security by configuring `COOKIE_FLAGS` and setting `COOKIE_AUTO_SECURE_FLAG` to `yes` so that the Secure flag is automatically added on HTTPS.
+3. **Remove unwanted headers:** Use `REMOVE_HEADERS` to ensure headers that could expose server details are stripped out.
+4. **Set cookie security:** Enable robust cookie security by configuring `COOKIE_FLAGS` and setting `COOKIE_AUTO_SECURE_FLAG` to `yes` so that the Secure flag is automatically added on HTTPS connections.
 5. **Preserve upstream headers:** Specify which upstream headers to retain by using `KEEP_UPSTREAM_HEADERS`.
 6. **Leverage conditional header application:** If you wish to test policies without disruption, enable [CSP Report-Only](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy-Report-Only) mode via `CONTENT_SECURITY_POLICY_REPORT_ONLY`.
 

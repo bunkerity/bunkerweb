@@ -26,7 +26,7 @@ Follow these steps to configure and use the HTML Injection feature:
 
 !!! tip "Best Practices"
     - For performance reasons, place JavaScript files at the end of the body to prevent render blocking.
-    - Place CSS and critical JavaScript in the head section to avoid flash of unstyled content.
+    - Place CSS and critical JavaScript in the head section to avoid a flash of unstyled content.
     - Be careful with injected content that could potentially break your site's functionality.
 
 !!! info "Common Use Cases"

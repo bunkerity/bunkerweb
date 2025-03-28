@@ -1,10 +1,10 @@
-The Blacklist plugin provides robust protection for your website by allowing you to block access based on various client attributes. This feature helps defend against known malicious entities, scanners, and suspicious visitors by denying access to IPs, networks, reverse DNS entries, ASNs, user agents, and specific URI patterns.
+The Blacklist plugin provides robust protection for your website by blocking access based on various client attributes. This feature defends against known malicious entities, scanners, and suspicious visitors by denying access based on IP addresses, networks, reverse DNS entries, ASNs, user agents, and specific URI patterns.
 
 **How it works:**
 
-1. The plugin checks incoming requests against multiple blacklist criteria (*IP addresses, networks, rDNS, ASN, User-Agent, or URI patterns*).
+1. The plugin checks incoming requests against multiple blacklist criteria (IP addresses, networks, rDNS, ASN, User-Agent, or URI patterns).
 2. Blacklists can be specified directly in your configuration or loaded from external URLs.
-3. If a visitor matches any blacklist rule (and doesn't match any ignore rule), their access is denied.
+3. If a visitor matches any blacklist rule (and does not match any ignore rule), access is denied.
 4. Blacklists are automatically updated on a regular schedule from configured URLs.
 5. You can customize exactly which criteria are checked and ignored based on your specific security needs.
 
@@ -17,6 +17,9 @@ Follow these steps to configure and use the Blacklist feature:
 3. **Set up ignore rules:** Specify any exceptions that should bypass the blacklist checks.
 4. **Add external sources:** Configure URLs for automatically downloading and updating blacklist data.
 5. **Monitor effectiveness:** Check the [web UI](web-ui.md) to see statistics on blocked requests.
+
+!!! info "stream mode"
+    When using stream mode, only IP, rDNS, and ASN checks will be performed.
 
 ### Configuration Settings
 
@@ -39,7 +42,7 @@ Follow these steps to configure and use the Blacklist feature:
     The default `BLACKLIST_IP_URLS` setting includes a URL that provides a **list of known Tor exit nodes**. This is a common source of malicious traffic and is a good starting point for many sites.
 
 === "Reverse DNS"
-    **What this does:** Blocks visitors based on their domain name (in reverse). This is useful for blocking known scanners and crawlers by their organization's domain.
+    **What this does:** Blocks visitors based on their reverse domain name. This is useful for blocking known scanners and crawlers based on their organization domains.
 
     | Setting                      | Default                 | Context   | Multiple | Description                                                                                          |
     | ---------------------------- | ----------------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------- |
@@ -52,7 +55,7 @@ Follow these steps to configure and use the Blacklist feature:
     The default `BLACKLIST_RDNS` setting includes common scanner domains like **Shodan** and **Censys**. These are often used by security researchers and scanners to identify vulnerable sites.
 
 === "ASN"
-    **What this does:** Blocks visitors from specific network providers. ASNs are like zip codes for the internet - they identify which provider or organization an IP belongs to.
+    **What this does:** Blocks visitors from specific network providers. ASNs are like ZIP codes for the Internet—they identify which provider or organization an IP belongs to.
 
     | Setting                     | Default | Context   | Multiple | Description                                                                         |
     | --------------------------- | ------- | --------- | -------- | ----------------------------------------------------------------------------------- |
@@ -62,7 +65,7 @@ Follow these steps to configure and use the Blacklist feature:
     | `BLACKLIST_IGNORE_ASN_URLS` |         | multisite | no       | **ASN Ignore List URLs:** List of URLs containing ASNs to ignore.                   |
 
 === "User Agent"
-    **What this does:** Blocks visitors based on what browser or tool they claim to be using. This is effective against many bots that honestly identify themselves (like "ScannerBot" or "WebHarvestTool").
+    **What this does:** Blocks visitors based on the browser or tool they claim to be using. This is effective against bots that honestly identify themselves (such as "ScannerBot" or "WebHarvestTool").
 
     | Setting                            | Default                                                                                                                        | Context   | Multiple | Description                                                                                             |
     | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ | --------- | -------- | ------------------------------------------------------------------------------------------------------- |

@@ -1,22 +1,22 @@
-The Client Cache plugin optimizes website performance by controlling how browsers cache your static content. This feature helps reduce bandwidth usage, server load, and improves page load times by instructing client browsers to store and reuse static assets like images, CSS, and JavaScript files locally instead of requesting them on every page visit.
+The Client Cache plugin optimizes website performance by controlling how browsers cache static content. It reduces bandwidth usage, lowers server load, and improves page load times by instructing browsers to store and reuse static assets—such as images, CSS, and JavaScript files—locally instead of requesting them on every page visit.
 
 **How it works:**
 
 1. When enabled, BunkerWeb adds Cache-Control headers to responses for static files.
 2. These headers tell browsers how long they should cache the content locally.
 3. For files with specified extensions (like images, CSS, JavaScript), BunkerWeb applies the configured caching policy.
-4. Optional ETag support provides additional validation mechanisms to determine if cached content is still fresh.
-5. When visitors return to your site, their browsers can use locally cached files instead of downloading them again, resulting in faster page loads.
+4. Optional ETag support provides an additional validation mechanism to determine whether cached content is still fresh.
+5. When visitors return to your site, their browsers can use locally cached files instead of downloading them again, resulting in faster page load times.
 
 ### How to Use
 
 Follow these steps to configure and use the Client Cache feature:
 
-1. **Enable the feature:** The Client Cache feature is disabled by default. Set the `USE_CLIENT_CACHE` setting to `yes` to enable it.
+1. **Enable the feature:** The Client Cache feature is disabled by default; set the `USE_CLIENT_CACHE` setting to `yes` to enable it.
 2. **Configure file extensions:** Specify which file types should be cached using the `CLIENT_CACHE_EXTENSIONS` setting.
 3. **Set cache control directives:** Customize how clients should cache content using the `CLIENT_CACHE_CONTROL` setting.
 4. **Configure ETag support:** Decide whether to enable ETags for validating cache freshness with the `CLIENT_CACHE_ETAG` setting.
-5. **Let BunkerWeb handle the rest:** Once configured, caching headers will be automatically applied to eligible responses.
+5. **Let BunkerWeb handle the rest:** Once configured, caching headers are applied automatically to eligible responses.
 
 ### Configuration Settings
 

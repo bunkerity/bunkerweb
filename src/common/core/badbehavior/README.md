@@ -1,5 +1,7 @@
 The Bad Behavior plugin protects your website by automatically detecting and banning IP addresses that generate too many errors or "bad" HTTP status codes within a specified period of time. This helps defend against brute force attacks, web scrapers, vulnerability scanners, and other malicious activities that might generate numerous error responses.
 
+Attackers often generate "suspicious" HTTP status codes when probing for or exploiting vulnerabilities—codes that a typical user is unlikely to trigger within a given time frame. By detecting this behavior, BunkerWeb can automatically ban the offending IP address, forcing the attacker to use a new IP address to continue their attempts.
+
 **How it works:**
 
 1. The plugin monitors HTTP responses from your site.
@@ -23,8 +25,11 @@ Follow these steps to configure and use the Bad Behavior feature:
 1. **Enable the feature:** The Bad Behavior feature is enabled by default. If needed, you can control this with the `USE_BAD_BEHAVIOR` setting.
 2. **Configure status codes:** Define which HTTP status codes should be considered "bad" using the `BAD_BEHAVIOR_STATUS_CODES` setting.
 3. **Set threshold values:** Determine how many "bad" responses should trigger a ban using the `BAD_BEHAVIOR_THRESHOLD` setting.
-4. **Configure time periods:** Set how long to count bad responses and how long bans should last using the `BAD_BEHAVIOR_COUNT_TIME` and `BAD_BEHAVIOR_BAN_TIME` settings.
-5. **Choose ban scope:** Decide whether bans should apply to just the current service or globally across all services using the `BAD_BEHAVIOR_BAN_SCOPE` setting.
+4. **Configure time periods:** Specify the duration for counting bad responses and the ban duration using the `BAD_BEHAVIOR_COUNT_TIME` and `BAD_BEHAVIOR_BAN_TIME` settings.
+5. **Choose ban scope:** Decide whether the bans should apply only to the current service or globally across all services using the `BAD_BEHAVIOR_BAN_SCOPE` setting.
+
+!!! tip "Stream Mode"
+    In **stream mode**, only the `444` status code is considered "bad" and will trigger this behavior.
 
 ### Configuration Settings
 
@@ -38,10 +43,10 @@ Follow these steps to configure and use the Bad Behavior feature:
 | `BAD_BEHAVIOR_BAN_SCOPE`    | `service`                     | multisite | no       | **Ban Scope:** Determines whether bans apply only to the current service (`service`) or to all services (`global`).                  |
 
 !!! warning "False Positives"
-    Be careful when setting the threshold and count time. Setting these values too low could potentially ban legitimate users who accidentally encounter errors while browsing your site.
+    Be careful when setting the threshold and count time. Setting these values too low may inadvertently ban legitimate users who encounter errors while browsing your site.
 
 !!! tip "Tuning Your Configuration"
-    Start with conservative settings (higher threshold, shorter ban time) and adjust based on your specific needs and traffic patterns. Monitor your logs to ensure legitimate users aren't being incorrectly banned.
+    Start with conservative settings (higher threshold, shorter ban time) and adjust based on your specific needs and traffic patterns. Monitor your logs to ensure that legitimate users are not mistakenly banned.
 
 ### Example Configurations
 

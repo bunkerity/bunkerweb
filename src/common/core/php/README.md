@@ -4,7 +4,7 @@ The PHP plugin provides seamless integration with PHP-FPM for BunkerWeb, enablin
 
 1. When a client requests a PHP file from your website, BunkerWeb routes the request to the configured PHP-FPM instance.
 2. For local PHP-FPM, BunkerWeb communicates with the PHP interpreter through a Unix socket file.
-3. For remote PHP-FPM, BunkerWeb forwards requests to the specified host and port using FastCGI protocol.
+3. For remote PHP-FPM, BunkerWeb forwards requests to the specified host and port using the FastCGI protocol.
 4. PHP-FPM processes the script and returns the generated content to BunkerWeb, which then delivers it to the client.
 5. URL rewriting is automatically configured to support common PHP frameworks and applications that use "pretty URLs".
 
@@ -19,13 +19,13 @@ Follow these steps to configure and use the PHP feature:
 
 ### Configuration Settings
 
-| Setting           | Default | Context   | Multiple | Description                                                                                 |
-| ----------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------------- |
-| `REMOTE_PHP`      |         | multisite | no       | **Remote PHP Host:** Hostname of the remote PHP-FPM instance. Leave empty to use local PHP. |
-| `REMOTE_PHP_PATH` |         | multisite | no       | **Remote Path:** Root folder containing files in the remote PHP-FPM instance.               |
-| `REMOTE_PHP_PORT` | `9000`  | multisite | no       | **Remote Port:** Port of the remote PHP-FPM instance.                                       |
-| `LOCAL_PHP`       |         | multisite | no       | **Local PHP Socket:** Path to the PHP-FPM socket file. Leave empty to use remote PHP.       |
-| `LOCAL_PHP_PATH`  |         | multisite | no       | **Local Path:** Root folder containing files in the local PHP-FPM instance.                 |
+| Setting           | Default | Context   | Multiple | Description                                                                                          |
+| ----------------- | ------- | --------- | -------- | ---------------------------------------------------------------------------------------------------- |
+| `REMOTE_PHP`      |         | multisite | no       | **Remote PHP Host:** Hostname of the remote PHP-FPM instance. Leave empty to use local PHP.          |
+| `REMOTE_PHP_PATH` |         | multisite | no       | **Remote Path:** Root folder containing files in the remote PHP-FPM instance.                        |
+| `REMOTE_PHP_PORT` | `9000`  | multisite | no       | **Remote Port:** Port of the remote PHP-FPM instance.                                                |
+| `LOCAL_PHP`       |         | multisite | no       | **Local PHP Socket:** Path to the PHP-FPM socket file. Leave empty to use a remote PHP-FPM instance. |
+| `LOCAL_PHP_PATH`  |         | multisite | no       | **Local Path:** Root folder containing files in the local PHP-FPM instance.                          |
 
 !!! tip "Local vs. Remote PHP-FPM"
     Choose the setup that best fits your infrastructure:
@@ -34,7 +34,7 @@ Follow these steps to configure and use the PHP feature:
     - **Remote PHP-FPM** provides more flexibility and scalability by allowing PHP processing to occur on separate servers.
 
 !!! warning "Path Configuration"
-    The `REMOTE_PHP_PATH` or `LOCAL_PHP_PATH` must match the actual filesystem path where your PHP files are stored. Incorrect paths will result in "File not found" errors.
+    The `REMOTE_PHP_PATH` or `LOCAL_PHP_PATH` must match the actual filesystem path where your PHP files are stored; otherwise, a "File not found" error will occur.
 
 !!! info "URL Rewriting"
     The PHP plugin automatically configures URL rewriting to support modern PHP applications. Requests for non-existent files will be directed to `index.php` with the original request URI available as a query parameter.

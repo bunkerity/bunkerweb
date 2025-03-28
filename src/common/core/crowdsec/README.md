@@ -4,13 +4,13 @@
 
 The CrowdSec plugin integrates BunkerWeb with the CrowdSec security engine, providing an additional layer of protection against various cyber threats. This plugin acts as a [CrowdSec](https://crowdsec.net/?utm_source=external-docs&utm_medium=cta&utm_campaign=bunker-web-docs) bouncer, denying requests based on decisions from the CrowdSec API.
 
-CrowdSec is a modern, open-source security engine that detects and blocks malicious IP addresses based on behavior analysis and collective intelligence from its community. You can also configure [scenarios](https://docs.crowdsec.net/docs/concepts?utm_source=external-docs&utm_medium=cta&utm_campaign=bunker-web-docs#scenarios) to automatically ban IPs based on suspicious behaviors, benefiting from a crowdsourced blacklist.
+CrowdSec is a modern, open-source security engine that detects and blocks malicious IP addresses based on behavioral analysis and collective intelligence from its community. You can also configure [scenarios](https://docs.crowdsec.net/docs/concepts?utm_source=external-docs&utm_medium=cta&utm_campaign=bunker-web-docs#scenarios) to automatically ban IP addresses based on suspicious behavior, benefiting from a crowdsourced blacklist.
 
 **How it works:**
 
 1. The CrowdSec engine analyzes logs and detects suspicious activities on your infrastructure.
-2. When a malicious activity is detected, CrowdSec creates a "decision" to block the offending IP address.
-3. BunkerWeb, acting as a "bouncer," queries the CrowdSec Local API for decisions about incoming requests.
+2. When malicious activity is detected, CrowdSec creates a decision to block the offending IP address.
+3. BunkerWeb, acting as a bouncer, queries the CrowdSec Local API for decisions about incoming requests.
 4. If a client's IP address has an active block decision, BunkerWeb denies access to the protected services.
 5. Optionally, the Application Security Component can perform deep request inspection for enhanced security.
 
@@ -26,7 +26,7 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
 === "Docker"
     **Acquisition file**
 
-    You will need to run CrowdSec instance and configure it to parse BunkerWeb logs. Because BunkerWeb is based on NGINX, you can use the `nginx` value for the `type` parameter in your acquisition file (assuming that BunkerWeb logs are stored "as is" without additional data) :
+    You will need to run a CrowdSec instance and configure it to parse BunkerWeb logs. Since BunkerWeb is based on NGINX, you can use the `nginx` value for the `type` parameter in your acquisition file (assuming that BunkerWeb logs are stored as is without additional data):
 
     ```yaml
     filenames:
@@ -37,7 +37,7 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
 
     **Application Security Component (*optional*)**
 
-    CrowdSec also provides an [Application Security Component](https://docs.crowdsec.net/docs/appsec/intro?utm_source=external-docs&utm_medium=cta&utm_campaign=bunker-web-docs) that can be used to protect your application from attacks. You can configure the plugin to send requests to the AppSec Component for further analysis. If you want to use it, you will need to create another acquisition file for the AppSec Component :
+    CrowdSec also provides an [Application Security Component](https://docs.crowdsec.net/docs/appsec/intro?utm_source=external-docs&utm_medium=cta&utm_campaign=bunker-web-docs) that can be used to protect your application from attacks. If you want to use it, you must create another acquisition file for the AppSec Component:
 
     ```yaml
     appsec_config: crowdsecurity/appsec-default
@@ -49,7 +49,7 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
 
     **Syslog**
 
-    For container-based integrations, we recommend you to redirect the logs of the BunkerWeb container to a syslog service that will store the logs so CrowdSec can access it easily. Here is an example configuration for syslog-ng that will store raw logs coming from BunkerWeb to a local `/var/log/bunkerweb.log` file :
+    For container-based integrations, we recommend redirecting the logs of the BunkerWeb container to a syslog service so CrowdSec can access them easily. Here is an example configuration for syslog-ng that will store raw logs coming from BunkerWeb to a local `/var/log/bunkerweb.log` file:
 
     ```syslog
     @version: 4.8
@@ -77,7 +77,7 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
 
     **Docker Compose**
 
-    Here is the docker-compose boilerplate that you can use (**don't forget to edit the bouncer key**) :
+    Here is the docker-compose boilerplate that you can use (don’t forget to update the bouncer key):
 
     ```yaml
     x-bw-env: &bw-env
@@ -188,9 +188,9 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
 
 === "Linux"
 
-    You'll need to install CrowdSec and configure it to parse BunkerWeb logs. To do so, you can follow the [official documentation](https://doc.crowdsec.net/docs/getting_started/install_crowdsec?utm_source=external-docs&utm_medium=cta&utm_campaign=bunker-web-docs#scenarios).
+    You need to install CrowdSec and configure it to parse BunkerWeb logs. Follow the [official documentation](https://doc.crowdsec.net/docs/getting_started/install_crowdsec?utm_source=external-docs&utm_medium=cta&utm_campaign=bunker-web-docs#scenarios).
 
-    For CrowdSec to parse BunkerWeb logs, you have to add the following lines to your acquisition file located in `/etc/crowdsec/acquis.yaml` :
+    To enable CrowdSec to parse BunkerWeb logs, add the following lines to your acquisition file located at `/etc/crowdsec/acquis.yaml`:
 
     ```yaml
     filenames:
@@ -201,16 +201,16 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
         type: nginx
     ```
 
-    Now we have to add our custom bouncer to the CrowdSec API. To do so, you can use the `cscli` tool :
+    Now, add your custom bouncer to the CrowdSec API using the `cscli` tool:
 
     ```shell
     sudo cscli bouncers add crowdsec-bunkerweb-bouncer/v1.6
     ```
 
     !!! warning "API key"
-        Keep the key generated by the `cscli` command, you will need it later.
+        Keep the key generated by the `cscli` command; you will need it later.
 
-    Now restart the CrowdSec service :
+    Then restart the CrowdSec service:
 
     ```shell
     sudo systemctl restart crowdsec
@@ -218,7 +218,7 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
 
     **Application Security Component (*optional*)**
 
-    If you want to use the AppSec Component, you will need to create another acquisition file for it located in `/etc/crowdsec/acquis.d/appsec.yaml` :
+    If you want to use the AppSec Component, you must create another acquisition file for it located at `/etc/crowdsec/acquis.d/appsec.yaml`:
 
     ```yaml
     appsec_config: crowdsecurity/appsec-default
@@ -228,24 +228,22 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
     source: appsec
     ```
 
-    And you will need to install the AppSec Component's collections :
+    You will also need to install the AppSec Component's collections:
 
     ```shell
     sudo cscli collections install crowdsecurity/appsec-virtual-patching
     sudo cscli collections install crowdsecurity/appsec-generic-rules
     ```
 
-    Now you just have to restart the CrowdSec service :
+    Finally, restart the CrowdSec service:
 
     ```shell
     sudo systemctl restart crowdsec
     ```
 
-    If you need more information about the AppSec Component, you can refer to the [official documentation](https://docs.crowdsec.net/docs/appsec/intro?utm_source=external-docs&utm_medium=cta&utm_campaign=bunker-web-docs#scenarios).
-
     **Settings**
 
-    Now you can configure the plugin by adding the following settings to your BunkerWeb configuration file :
+    Configure the plugin by adding the following settings to your BunkerWeb configuration file:
 
     ```env
     USE_CROWDSEC=yes
@@ -255,7 +253,7 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
     CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
     ```
 
-    And finally reload the BunkerWeb service :
+    Finally, reload the BunkerWeb service:
 
     ```shell
     sudo systemctl reload bunkerweb
@@ -289,13 +287,13 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
 
 !!! info "About Operation Modes"
     - **Live mode** queries the CrowdSec API for each incoming request, providing real-time protection at the cost of higher latency.
-    - **Stream mode** periodically downloads all decisions from the CrowdSec API and caches them locally, reducing latency but with a slight delay in applying new decisions.
+    - **Stream mode** periodically downloads all decisions from the CrowdSec API and caches them locally, reducing latency with a slight delay in applying new decisions.
 
 ### Example Configurations
 
 === "Basic Configuration"
 
-    A simple configuration with CrowdSec running on the same host:
+    This is a simple configuration for when CrowdSec runs on the same host:
 
     ```yaml
     USE_CROWDSEC: "yes"

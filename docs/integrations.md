@@ -8,11 +8,11 @@
 </figure>
 
 !!! example "Coming soon"
-    After a successful beta phase, we are working hard on the BunkerWeb Cloud offer to release it to the public.
+    After a successful beta phase, we are working hard on the BunkerWeb Cloud offering to release it to the public.
 
-BunkerWeb Cloud will be the easiest way to get started with BunkerWeb. It offers you a fully managed BunkerWeb service with no hassle. Think of a like a BunkerWeb-as-a-Service !
+BunkerWeb Cloud will be the easiest way to get started with BunkerWeb. It offers you a fully managed BunkerWeb service with no hassle. Think of it as a BunkerWeb-as-a-Service!
 
-If you are interested into the BunkerWeb Cloud offer, don't hesitate to [contact us](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=docs) so we can discuss about your needs.
+If you are interested in the BunkerWeb Cloud offering, don't hesitate to [contact us](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=docs) so we can discuss your needs.
 
 ## Docker
 
@@ -21,7 +21,7 @@ If you are interested into the BunkerWeb Cloud offer, don't hesitate to [contact
   <figcaption>Docker integration</figcaption>
 </figure>
 
-Utilizing BunkerWeb as a [Docker](https://www.docker.com/) container offers a convenient and straightforward approach for testing and utilizing the solution, particularly if you are already familiar with Docker technology.
+Using BunkerWeb as a [Docker](https://www.docker.com/) container offers a convenient and straightforward approach for testing and utilizing the solution, particularly if you are already familiar with Docker technology.
 
 To facilitate your Docker deployment, we provide readily available prebuilt images on [Docker Hub](https://hub.docker.com/r/bunkerity/bunkerweb), supporting multiple architectures. These prebuilt images are optimized and prepared for use on the following architectures:
 
@@ -38,32 +38,24 @@ Whether you're conducting tests, developing applications, or deploying BunkerWeb
 docker pull bunkerity/bunkerweb:1.6.2-rc1
 ```
 
-Docker images are also available on [GitHub packages](https://github.com/orgs/bunkerity/packages?repo_name=bunkerweb) and can be downloaded using the `ghcr.io` repository address :
+Docker images are also available on [GitHub packages](https://github.com/orgs/bunkerity/packages?repo_name=bunkerweb) and can be downloaded using the `ghcr.io` repository address:
 
 ```shell
 docker pull ghcr.io/bunkerity/bunkerweb:1.6.2-rc1
 ```
 
-Docker integration key concepts are :
+Key concepts for Docker integration include:
 
-- **Environment variables** to configure BunkerWeb
-- **Scheduler** container to store configuration and execute jobs
-- **Networks** to expose ports for clients and connect to upstream web services
-
-When integrating BunkerWeb with Docker, there are key concepts to keep in mind, ensuring a smooth and efficient deployment:
-
-- **Environment variables**: BunkerWeb can be easily configured using environment variables. These variables allow you to customize various aspects of BunkerWeb's behavior, such as network settings, security options, and other parameters.
-
-- **Scheduler container**: To effectively manage the configuration and execution of jobs, BunkerWeb utilizes a dedicated container called the [scheduler](concepts.md#scheduler).
-
-- **Networks**: Docker networks play a vital role in the integration of BunkerWeb. These networks serve two main purposes: exposing ports to clients and connecting to upstream web services. By exposing ports, BunkerWeb can accept incoming requests from clients, allowing them to access the protected web services. Additionally, by connecting to upstream web services, BunkerWeb can efficiently route and manage the traffic, providing enhanced security and performance.
+- **Environment variables**: Configure BunkerWeb easily using environment variables. These variables allow you to customize various aspects of BunkerWeb's behavior, such as network settings, security options, and other parameters.
+- **Scheduler container**: Manage configuration and execute jobs using a dedicated container called the [scheduler](concepts.md#scheduler).
+- **Networks**: Docker networks play a vital role in the integration of BunkerWeb. These networks serve two main purposes: exposing ports to clients and connecting to upstream web services. By exposing ports, BunkerWeb can accept incoming requests from clients, allowing them to access the protected web services. Additionally, by connecting to upstream web services, BunkerWeb can efficiently route and manage traffic, providing enhanced security and performance.
 
 !!! info "Database backend"
-    Please be aware that our instructions assume you are using SQLite as the default database backend, as configured by the `DATABASE_URI` setting. However, we understand that you may prefer to utilize alternative backends for your Docker integration. If that is the case, rest assured that other database backends are still possible. See docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.2-rc1/misc/integrations) of the repository for more information.
+    Please note that our instructions assume you are using SQLite as the default database backend, as configured by the `DATABASE_URI` setting. However, other database backends are also supported. See the docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.2-rc1/misc/integrations) of the repository for more information.
 
 ### Environment variables
 
-Settings are passed to the Scheduler using Docker environment variables :
+Settings are passed to the Scheduler using Docker environment variables:
 
 ```yaml
 ...
@@ -74,7 +66,7 @@ services:
       - MY_SETTING=value
       - ANOTHER_SETTING=another value
     volumes:
-      - bw-storage:/data # This is used to persist the cache and other data like the backups
+      - bw-storage:/data # This is used to persist the cache and other data like backups
 ...
 ```
 
@@ -83,7 +75,7 @@ services:
 
 ### Scheduler
 
-The [scheduler](concepts.md#scheduler) is executed in its own container which is also available on Docker Hub :
+The [scheduler](concepts.md#scheduler) runs in its own container, which is also available on Docker Hub:
 
 ```shell
 docker pull bunkerity/bunkerweb-scheduler:1.6.2-rc1
@@ -91,9 +83,9 @@ docker pull bunkerity/bunkerweb-scheduler:1.6.2-rc1
 
 !!! info "BunkerWeb settings"
 
-    Since the `1.6.0` version, the Scheduler container is the one who you will define the settings for BunkerWeb. The Scheduler will then push the configuration to the BunkerWeb container.
+    Since version `1.6.0`, the Scheduler container is where you define the settings for BunkerWeb. The Scheduler then pushes the configuration to the BunkerWeb container.
 
-    ⚠ **Important** : All API related settings (like `API_HTTP_PORT`, `API_LISTEN_IP`, `API_SERVER_NAME` and `API_WHITELIST_IP`) **must be defined in the BunkerWeb container as well**. (The settings have to be mirrored in both containers, else the BunkerWeb container will not accept API requests from the Scheduler).
+    ⚠ **Important**: All API-related settings (like `API_HTTP_PORT`, `API_LISTEN_IP`, `API_SERVER_NAME`, and `API_WHITELIST_IP`) **must also be defined in the BunkerWeb container**. (The settings must be mirrored in both containers; otherwise, the BunkerWeb container will not accept API requests from the Scheduler).
 
     ```yaml
     x-bw-api-env: &bw-api-env
@@ -119,15 +111,14 @@ docker pull bunkerity/bunkerweb-scheduler:1.6.2-rc1
           # This will set the API settings for the Scheduler container
           <<: *bw-api-env
         volumes:
-          - bw-storage:/data # This is used to persist the cache and other data like the backups
+          - bw-storage:/data # This is used to persist the cache and other data like backups
         restart: "unless-stopped"
         networks:
           - bw-universe
     ...
     ```
 
-
-A volume is needed to store the SQLite database and the backups that will be used by the scheduler :
+A volume is needed to store the SQLite database and backups used by the scheduler:
 
 ```yaml
 ...
@@ -141,10 +132,10 @@ volumes:
   bw-storage:
 ```
 
-!!! warning "Using local folder for persistent data"
-    The scheduler runs as an **unprivileged user with UID 101 and GID 101** inside the container. The reason behind this is security : in case a vulnerability is exploited, the attacker won't have full root (UID/GID 0) privileges.
+!!! warning "Using a local folder for persistent data"
+    The scheduler runs as an **unprivileged user with UID 101 and GID 101** inside the container. This enhances security: in case a vulnerability is exploited, the attacker won't have full root (UID/GID 0) privileges.
 
-    But there is a downside : if you use a **local folder for the persistent data**, you will need to **set the correct permissions** so the unprivileged user can write data to it. Something like that should do the trick :
+    However, if you use a **local folder for persistent data**, you must **set the correct permissions** so the unprivileged user can write data to it. For example:
 
     ```shell
     mkdir bw-data && \
@@ -152,21 +143,21 @@ volumes:
     chmod 770 bw-data
     ```
 
-    Alternatively, if the folder already exists :
+    Alternatively, if the folder already exists:
 
     ```shell
     chown -R root:101 bw-data && \
     chmod -R 770 bw-data
     ```
 
-    If you are using [Docker in rootless mode](https://docs.docker.com/engine/security/rootless) or [podman](https://podman.io/), UIDs and GIDs in the container will be mapped to different ones in the host. You will first need to check your initial subuid and subgid :
+    If you are using [Docker in rootless mode](https://docs.docker.com/engine/security/rootless) or [Podman](https://podman.io/), UIDs and GIDs in the container will be mapped to different ones on the host. You will first need to check your initial subuid and subgid:
 
     ```shell
     grep ^$(whoami): /etc/subuid && \
     grep ^$(whoami): /etc/subgid
     ```
 
-    For example, if you have a value of **100000**, the mapped UID/GID will be **100100** (100000 + 100) :
+    For example, if you have a value of **100000**, the mapped UID/GID will be **100100** (100000 + 100):
 
     ```shell
     mkdir bw-data && \
@@ -174,7 +165,7 @@ volumes:
     chmod 770 bw-data
     ```
 
-    Or if the folder already exists :
+    Or if the folder already exists:
 
     ```shell
     sudo chgrp -R 100100 bw-data && \
@@ -183,28 +174,29 @@ volumes:
 
 ### Networks
 
-By default, BunkerWeb container is listening (inside the container) on **8080/tcp** for **HTTP**, **8443/tcp** for **HTTPS** and **8443/udp** for **QUIC**.
+By default, the BunkerWeb container listens (inside the container) on **8080/tcp** for **HTTP**, **8443/tcp** for **HTTPS**, and **8443/udp** for **QUIC**.
 
-!!! warning "Privileged ports in rootless mode or when using podman"
+!!! warning "Privileged ports in rootless mode or when using Podman"
     If you are using [Docker in rootless mode](https://docs.docker.com/engine/security/rootless) and want to redirect privileged ports (< 1024) like 80 and 443 to BunkerWeb, please refer to the prerequisites [here](https://docs.docker.com/engine/security/rootless/#exposing-privileged-ports).
 
-    If you are using [podman](https://podman.io/) you can lower the minimum number for unprivileged ports :
+    If you are using [Podman](https://podman.io/), you can lower the minimum number for unprivileged ports:
     ```shell
     sudo sysctl net.ipv4.ip_unprivileged_port_start=1
     ```
 
-The typical BunkerWeb stack when using the Docker integration contains the following containers :
+The typical BunkerWeb stack when using Docker integration contains the following containers:
 
 - BunkerWeb
 - Scheduler
 - Your services
 
-For defense in depth purposes, we strongly recommend to create at least three different Docker networks :
+For defense-in-depth purposes, we strongly recommend creating at least three different Docker networks:
 
-- `bw-services` : for BunkerWeb and your web services
-- `bw-universe` : for BunkerWeb and scheduler
+- `bw-services`: for BunkerWeb and your web services
+- `bw-universe`: for BunkerWeb and the scheduler
+- `bw-db`: for the database (if you are using one)
 
-To secure the communication between the scheduler and BunkerWeb API, **it is important to authorize API calls**. You can use the `API_WHITELIST_IP` setting to specify allowed IP addresses and subnets.
+To secure communication between the scheduler and the BunkerWeb API, **it is important to authorize API calls**. You can use the `API_WHITELIST_IP` setting to specify allowed IP addresses and subnets.
 
 **It is strongly recommended to use a static subnet for the `bw-universe` network** to enhance security. By implementing these measures, you can ensure that only authorized sources can access the BunkerWeb API, reducing the risk of unauthorized access or malicious activities:
 
@@ -233,7 +225,7 @@ services:
       <<: *bw-api-env
       BUNKERWEB_INSTANCES: "bunkerweb" # This setting is mandatory to specify the BunkerWeb instance
     volumes:
-      - bw-storage:/data # This is used to persist the cache and other data like the backups
+      - bw-storage:/data # This is used to persist the cache and other data like backups
     restart: "unless-stopped"
     networks:
       - bw-universe
@@ -282,7 +274,7 @@ services:
       BUNKERWEB_INSTANCES: "bunkerweb" # This setting is mandatory to specify the BunkerWeb instance
       SERVER_NAME: "www.example.com"
     volumes:
-      - bw-storage:/data # This is used to persist the cache and other data like the backups
+      - bw-storage:/data # This is used to persist the cache and other data like backups
     restart: "unless-stopped"
     networks:
       - bw-universe
@@ -303,7 +295,7 @@ networks:
 
 ### Build from source
 
-Alternatively, if you prefer a more hands-on approach, you have the option to build the Docker image directly from the [source](https://github.com/bunkerity/bunkerweb). Building the image from source gives you greater control and customization over the deployment process. However, please note that this method may take some time to complete, depending on your hardware configuration  (you can take a coffee ☕ if needed).
+Alternatively, if you prefer a more hands-on approach, you have the option to build the Docker image directly from the [source](https://github.com/bunkerity/bunkerweb). Building the image from source gives you greater control and customization over the deployment process. However, please note that this method may take some time to complete, depending on your hardware configuration (you can take a coffee ☕ if needed).
 
 ```shell
 git clone https://github.com/bunkerity/bunkerweb.git && \
@@ -369,7 +361,7 @@ Please ensure that you have **NGINX 1.26.3 installed before installing BunkerWeb
 
 === "Debian"
 
-    The first step is to add NGINX official repository :
+    The first step is to add NGINX official repository:
 
     ```shell
     sudo apt install -y curl gnupg2 ca-certificates lsb-release debian-archive-keyring && \
@@ -380,7 +372,7 @@ Please ensure that you have **NGINX 1.26.3 installed before installing BunkerWeb
     | sudo tee /etc/apt/sources.list.d/nginx.list
     ```
 
-    You should now be able to install NGINX 1.26.3 :
+    You should now be able to install NGINX 1.26.3:
 
     ```shell
     sudo apt update && \
@@ -395,13 +387,13 @@ Please ensure that you have **NGINX 1.26.3 installed before installing BunkerWeb
         ```
 
     !!! example "Disable the setup wizard"
-        If you don't want to use the setup wizard of the web UI when BunkerWeb is installed, export the following variable :
+        If you don't want to use the setup wizard of the web UI when BunkerWeb is installed, export the following variable:
 
         ```shell
         export UI_WIZARD=no
         ```
 
-    And finally install BunkerWeb 1.6.2-rc1 :
+    And finally install BunkerWeb 1.6.2-rc1:
 
     ```shell
     curl -s https://repo.bunkerweb.io/install/script.deb.sh | sudo bash && \
@@ -409,7 +401,7 @@ Please ensure that you have **NGINX 1.26.3 installed before installing BunkerWeb
     sudo -E apt install -y bunkerweb=1.6.2-rc1
     ```
 
-    To prevent upgrading NGINX and/or BunkerWeb packages when executing `apt upgrade`, you can use the following command :
+    To prevent upgrading NGINX and/or BunkerWeb packages when executing `apt upgrade`, you can use the following command:
 
     ```shell
     sudo apt-mark hold nginx bunkerweb
@@ -417,7 +409,7 @@ Please ensure that you have **NGINX 1.26.3 installed before installing BunkerWeb
 
 === "Ubuntu"
 
-    The first step is to add NGINX official repository :
+    The first step is to add NGINX official repository:
 
     ```shell
     sudo apt install -y curl gnupg2 ca-certificates lsb-release ubuntu-keyring && \
@@ -428,7 +420,7 @@ Please ensure that you have **NGINX 1.26.3 installed before installing BunkerWeb
     | sudo tee /etc/apt/sources.list.d/nginx.list
     ```
 
-    You should now be able to install NGINX 1.26.3 :
+    You should now be able to install NGINX 1.26.3:
 
     ```shell
     sudo apt update && \
@@ -443,13 +435,13 @@ Please ensure that you have **NGINX 1.26.3 installed before installing BunkerWeb
         ```
 
     !!! example "Disable the setup wizard"
-        If you don't want to use the setup wizard of the web UI when BunkerWeb is installed, export the following variable :
+        If you don't want to use the setup wizard of the web UI when BunkerWeb is installed, export the following variable:
 
         ```shell
         export UI_WIZARD=no
         ```
 
-    And finally install BunkerWeb 1.6.2-rc1 :
+    And finally install BunkerWeb 1.6.2-rc1:
 
     ```shell
     curl -s https://repo.bunkerweb.io/install/script.deb.sh | sudo bash && \
@@ -457,7 +449,7 @@ Please ensure that you have **NGINX 1.26.3 installed before installing BunkerWeb
     sudo -E apt install -y bunkerweb=1.6.2-rc1
     ```
 
-    To prevent upgrading NGINX and/or BunkerWeb packages when executing `apt upgrade`, you can use the following command :
+    To prevent upgrading NGINX and/or BunkerWeb packages when executing `apt upgrade`, you can use the following command:
 
     ```shell
     sudo apt-mark hold nginx bunkerweb
@@ -466,7 +458,7 @@ Please ensure that you have **NGINX 1.26.3 installed before installing BunkerWeb
 === "Fedora"
 
     !!! info "Fedora Update Testing"
-        If you can't find the NGINX version listed in the stable repository, you can enable the `updates-testing` repository :
+        If you can't find the NGINX version listed in the stable repository, you can enable the `updates-testing` repository:
 
         === "Fedora 41"
             ```shell
@@ -477,20 +469,20 @@ Please ensure that you have **NGINX 1.26.3 installed before installing BunkerWeb
             sudo dnf config-manager --set-enabled updates-testing
             ```
 
-    Fedora already provides NGINX 1.26.3 that we support :
+    Fedora already provides NGINX 1.26.3 that we support:
 
     ```shell
     sudo dnf install -y nginx-1.26.3
     ```
 
     !!! example "Disable the setup wizard"
-        If you don't want to use the setup wizard of the web UI when BunkerWeb is installed, export the following variable :
+        If you don't want to use the setup wizard of the web UI when BunkerWeb is installed, export the following variable:
 
         ```shell
         export UI_WIZARD=no
         ```
 
-    And finally install BunkerWeb 1.6.2-rc1 :
+    And finally install BunkerWeb 1.6.2-rc1:
 
     ```shell
     curl -s https://repo.bunkerweb.io/install/script.rpm.sh | sudo bash && \
@@ -498,7 +490,7 @@ Please ensure that you have **NGINX 1.26.3 installed before installing BunkerWeb
   	sudo -E dnf install -y bunkerweb-1.6.2-rc1
     ```
 
-    To prevent upgrading NGINX and/or BunkerWeb packages when executing `dnf upgrade`, you can use the following command :
+    To prevent upgrading NGINX and/or BunkerWeb packages when executing `dnf upgrade`, you can use the following command:
 
     ```shell
     sudo dnf versionlock add nginx && \
@@ -507,7 +499,7 @@ Please ensure that you have **NGINX 1.26.3 installed before installing BunkerWeb
 
 === "RedHat"
 
-    The first step is to add NGINX official repository. Create the following file at `/etc/yum.repos.d/nginx.repo` :
+    The first step is to add NGINX official repository. Create the following file at `/etc/yum.repos.d/nginx.repo`:
 
     ```conf
     [nginx-stable]
@@ -527,20 +519,20 @@ Please ensure that you have **NGINX 1.26.3 installed before installing BunkerWeb
     module_hotfixes=true
     ```
 
-    You should now be able to install NGINX 1.26.3 :
+    You should now be able to install NGINX 1.26.3:
 
     ```shell
     sudo dnf install nginx-1.26.3
     ```
 
     !!! example "Disable the setup wizard"
-        If you don't want to use the setup wizard of the web UI when BunkerWeb is installed, export the following variable :
+        If you don't want to use the setup wizard of the web UI when BunkerWeb is installed, export the following variable:
 
         ```shell
         export UI_WIZARD=no
         ```
 
-    And finally install BunkerWeb 1.6.2-rc1 :
+    And finally install BunkerWeb 1.6.2-rc1:
 
     ```shell
 	  sudo dnf install -y epel-release && \
@@ -549,7 +541,7 @@ Please ensure that you have **NGINX 1.26.3 installed before installing BunkerWeb
     sudo -E dnf install -y bunkerweb-1.6.2-rc1
     ```
 
-    To prevent upgrading NGINX and/or BunkerWeb packages when executing `dnf upgrade`, you can use the following command :
+    To prevent upgrading NGINX and/or BunkerWeb packages when executing `dnf upgrade`, you can use the following command:
 
     ```shell
     sudo dnf versionlock add nginx && \
@@ -558,7 +550,7 @@ Please ensure that you have **NGINX 1.26.3 installed before installing BunkerWeb
 
 ### Configuration and service
 
-Manual configuration of BunkerWeb is done by editing the `/etc/bunkerweb/variables.env` file :
+Manual configuration of BunkerWeb is done by editing the `/etc/bunkerweb/variables.env` file:
 
 ```conf
 MY_SETTING_1=value1
@@ -576,14 +568,14 @@ The scheduler can be detached from the BunkerWeb instance to provide high availa
 
 **Manager**
 
-To install only the scheduler on a server, you can export the following variables before executing the BunkerWeb installation :
+To install only the scheduler on a server, you can export the following variables before executing the BunkerWeb installation:
 
 ```shell
 export MANAGER_MODE=yes
 export UI_WIZARD=no
 ```
 
-Alternatively, you can also export the following variables to only enable the scheduler :
+Alternatively, you can also export the following variables to only enable the scheduler:
 
 ```shell
 export SERVICE_SCHEDULER=yes
@@ -593,13 +585,13 @@ export SERVICE_UI=no
 
 **Worker**
 
-On another server, to install only BunkerWeb, you can export the following variables before executing the BunkerWeb installation :
+On another server, to install only BunkerWeb, you can export the following variables before executing the BunkerWeb installation:
 
 ```shell
 export WORKER_MODE=yes
 ```
 
-Alternatively, you can also export the following variables to only enable BunkerWeb :
+Alternatively, you can also export the following variables to only enable BunkerWeb:
 
 ```shell
 export SERVICE_BUNKERWEB=yes
@@ -609,7 +601,7 @@ export SERVICE_UI=no
 
 **Web UI**
 
-The Web UI can be installed on a separate server to provide a dedicated interface for managing BunkerWeb instances. To install only the Web UI, you can export the following variables before executing the BunkerWeb installation :
+The Web UI can be installed on a separate server to provide a dedicated interface for managing BunkerWeb instances. To install only the Web UI, you can export the following variables before executing the BunkerWeb installation:
 
 ```shell
 export SERVICE_BUNKERWEB=no
@@ -676,7 +668,7 @@ services:
       MULTISITE: "yes" # Mandatory setting for autoconf
       DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Remember to set a stronger password for the database
     volumes:
-      - bw-storage:/data # This is used to persist the cache and other data like the backups
+      - bw-storage:/data # This is used to persist the cache and other data like backups
     restart: "unless-stopped"
     networks:
       - bw-universe
@@ -744,11 +736,11 @@ networks:
     The database container is intentionally not included in the `bw-universe` network. It is used by the `bw-autoconf` and `bw-scheduler` containers rather than directly by BunkerWeb. Therefore, the database container is part of the `bw-db` network, which enhances security by making external access to the database more challenging. **This deliberate design choice helps safeguard the database and strengthens the overall security perspective of the system**.
 
 !!! warning "Using Docker in rootless mode"
-    If you are using [Docker in rootless mode](https://docs.docker.com/engine/security/rootless), you will need to replace the mount of the docker socket with the following value : `$XDG_RUNTIME_DIR/docker.sock:/var/run/docker.sock:ro`.
+    If you are using [Docker in rootless mode](https://docs.docker.com/engine/security/rootless), you will need to replace the mount of the docker socket with the following value: `$XDG_RUNTIME_DIR/docker.sock:/var/run/docker.sock:ro`.
 
 ### Autoconf services
 
-Once the stack is set up, you will be able to create the web application container and add the settings as labels using the "bunkerweb." prefix in order to automatically set up BunkerWeb :
+Once the stack is set up, you will be able to create the web application container and add the settings as labels using the "bunkerweb." prefix in order to automatically set up BunkerWeb:
 
 ```yaml
 services:
@@ -789,7 +781,7 @@ networks:
 
 !!! info "Namespace behavior"
 
-    By default all Autoconf stacks listen to all namespaces. If you want to restrict a stack to a specific namespaces, you can set the `NAMESPACES` environment variable in the `bw-autoconf` service :
+    By default all Autoconf stacks listen to all namespaces. If you want to restrict a stack to specific namespaces, you can set the `NAMESPACES` environment variable in the `bw-autoconf` service:
 
     ```yaml
     ...
@@ -845,13 +837,13 @@ Additionally, **it is crucial to set the `KUBERNETES_MODE` environment variable 
 
 #### Using helm chart (recommended)
 
-The recommended way to install Kubernetes is to use the Helm chart available at `https://repo.bunkerweb.io/charts` :
+The recommended way to install Kubernetes is to use the Helm chart available at `https://repo.bunkerweb.io/charts`:
 
 ```shell
 helm repo add bunkerweb https://repo.bunkerweb.io/charts
 ```
 
-You can then use the bunkerweb helm chart from that repository :
+You can then use the bunkerweb helm chart from that repository:
 
 ```shell
 helm install -f myvalues.yaml mybunkerweb bunkerweb/bunkerweb
@@ -917,7 +909,7 @@ metadata:
 
 !!! info "Namespace behavior"
 
-    By default all Autoconf stacks listen to all namespaces. If you want to restrict a stack to a specific namespaces, you can set the `NAMESPACES` environment variable in the `bunkerweb-controller` deployment :
+    By default all Autoconf stacks listen to all namespaces. If you want to restrict a stack to specific namespaces, you can set the `NAMESPACES` environment variable in the `bunkerweb-controller` deployment:
 
     ```yaml
     ...
@@ -960,7 +952,7 @@ metadata:
 
 ### Ingress class
 
-When installed using the official methods in the documentation, BunkerWeb comes with the following `IngressClass` definition :
+When installed using the official methods in the documentation, BunkerWeb comes with the following `IngressClass` definition:
 
 ```yaml
 apiVersion: networking.k8s.io/v1
@@ -971,7 +963,7 @@ spec:
   controller: bunkerweb.io/ingress-controller
 ```
 
-In order to restrict the `Ingress` resources monitored by the ingress controller, you can set the `KUBERNETES_INGRESS_CLASS` environment variable with the value `bunkerweb`. Then, you can leverage the `ingressClassName` directive in your `Ingress` definitions :
+In order to restrict the `Ingress` resources monitored by the ingress controller, you can set the `KUBERNETES_INGRESS_CLASS` environment variable with the value `bunkerweb`. Then, you can leverage the `ingressClassName` directive in your `Ingress` definitions:
 
 ```yaml
 apiVersion: networking.k8s.io/v1
@@ -1004,7 +996,7 @@ If you use a custom domain name for your Kubernetes cluster different than the d
 
 !!! info "Keeping both existing ingress controller and BunkerWeb"
 
-    This is a use-case where you want to keep an existing ingress controller such as the nginx one. Typical traffic flow will be : Load Balancer => Ingress Controller => BunkerWeb => Application.
+    This is a use-case where you want to keep an existing ingress controller such as the nginx one. Typical traffic flow will be: Load Balancer => Ingress Controller => BunkerWeb => Application.
 
 **nginx ingress controller install**
 
@@ -1059,21 +1051,21 @@ Create `values.yaml` file:
 
 ```yaml
 # Here we will setup the values needed to setup BunkerWeb behind an existing ingress controller
-# Traffic flow with BW : LB => existing Ingress Controller => BunkerWeb => Service
-# Traffic flow without BW : LB => existing Ingress Controller => Service
+# Traffic flow with BW: LB => existing Ingress Controller => BunkerWeb => Service
+# Traffic flow without BW: LB => existing Ingress Controller => Service
 
 # Global settings
 settings:
   misc:
     # Replace with your DNS resolver
-    # to get it : kubectl exec in a random pod then cat /etc/resolv.conf
-    # if you have an IP as nameserver then do a reverse DNS lookup : nslookup <IP>
+    # to get it: kubectl exec in a random pod then cat /etc/resolv.conf
+    # if you have an IP as nameserver then do a reverse DNS lookup: nslookup <IP>
     # most of the time it's coredns.kube-system.svc.cluster.local or kube-dns.kube-system.svc.cluster.local
     dnsResolvers: "kube-dns.kube-system.svc.cluster.local"
   kubernetes:
     # We only consider Ingress resources with ingressClass bunkerweb to avoid conflicts with existing ingress controller
     ingressClass: "bunkerweb"
-    # Optional : you can choose namespace(s) where BunkerWeb will listen for Ingress/ConfigMap changes
+    # Optional: you can choose namespace(s) where BunkerWeb will listen for Ingress/ConfigMap changes
     # Default (blank value) is all namespaces
     namespaces: ""
 
@@ -1162,13 +1154,13 @@ And you can now proceed to the setup wizard by browsing to `https://bunkerweb.ex
 
 Let's assume that you have an application in the `myapp` namespace which is accessible using the `myapp-service` service on port `5000`.
 
-You will need to add a new service on the web UI and fill the required information :
+You will need to add a new service on the web UI and fill the required information:
 
-- Server name : the public facing domain of your application (e.g. `myapp.example.com`)
-- SSL/TLS : your ingress controller take care of that part so don't enable it on BunkerWeb since traffic is internal within the cluster
-- Reverse proxy host : the full URL of your application within the cluster (e.g. `http://myapp-service.myapp.svc.cluster.local:5000`)
+- Server name: the public facing domain of your application (e.g. `myapp.example.com`)
+- SSL/TLS: your ingress controller takes care of that part so don't enable it on BunkerWeb since traffic is internal within the cluster
+- Reverse proxy host: the full URL of your application within the cluster (e.g. `http://myapp-service.myapp.svc.cluster.local:5000`)
 
-Once the new service has been added, you can now declare an Ingress resource for that service and route it to the BunkerWeb service on HTTP port :
+Once the new service has been added, you can now declare an Ingress resource for that service and route it to the BunkerWeb service on HTTP port:
 
 ```yaml
 apiVersion: networking.k8s.io/v1
@@ -1233,7 +1225,7 @@ As for the database volume, the documentation does not specify a specific approa
 
     Clustered database backends setup are out-of-the-scope of this documentation.
 
-Here is the stack boilerplate that you can deploy using `docker stack deploy` :
+Here is the stack boilerplate that you can deploy using `docker stack deploy`:
 
 ```yaml
 x-bw-env: &bw-env
@@ -1282,7 +1274,7 @@ services:
       USE_REDIS: "yes"
       REDIS_HOST: "bw-redis"
     volumes:
-      - bw-storage:/data # This is used to persist the cache and other data like the backups
+      - bw-storage:/data # This is used to persist the cache and other data like backups
     restart: "unless-stopped"
     networks:
       - bw-universe
@@ -1385,7 +1377,7 @@ networks:
 
 ### Swarm services
 
-Once the BunkerWeb Swarm stack is set up and running (see autoconf and scheduler logs for more information), you will be able to deploy web applications in the cluster and use labels to dynamically configure BunkerWeb :
+Once the BunkerWeb Swarm stack is set up and running (see autoconf and scheduler logs for more information), you will be able to deploy web applications in the cluster and use labels to dynamically configure BunkerWeb:
 
 ```yaml
 services:
@@ -1434,7 +1426,7 @@ networks:
 
 !!! info "Namespace behavior"
 
-    By default all Autoconf stacks listen to all namespaces. If you want to restrict a stack to a specific namespaces, you can set the `NAMESPACES` environment variable in the `bw-autoconf` service :
+    By default all Autoconf stacks listen to all namespaces. If you want to restrict a stack to specific namespaces, you can set the `NAMESPACES` environment variable in the `bw-autoconf` service:
 
     ```yaml
     ...

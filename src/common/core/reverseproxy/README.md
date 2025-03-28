@@ -1,4 +1,4 @@
-The Reverse Proxy plugin provides seamless proxying capabilities for BunkerWeb, allowing you to route requests to backend servers and services. This feature enables BunkerWeb to act as a secure frontend for your applications while providing additional benefits such as SSL termination, and security filtering.
+The Reverse Proxy plugin provides seamless proxying capabilities for BunkerWeb, allowing you to route requests to backend servers and services. This feature enables BunkerWeb to act as a secure frontend for your applications while providing additional benefits such as SSL termination and security filtering.
 
 **How it works:**
 
@@ -6,7 +6,7 @@ The Reverse Proxy plugin provides seamless proxying capabilities for BunkerWeb, 
 2. BunkerWeb adds security headers, applies WAF rules, and performs other security checks before passing requests to your application.
 3. The backend server processes the request and returns a response to BunkerWeb.
 4. BunkerWeb applies additional security measures to the response before sending it back to the client.
-5. The plugin supports both HTTP and TCP/UDP stream proxying, enabling a wide range of applications including WebSockets and other non-HTTP protocols.
+5. The plugin supports both HTTP and TCP/UDP stream proxying, enabling a wide range of applications, including WebSockets and other non-HTTP protocols.
 
 ### How to Use
 
@@ -89,7 +89,7 @@ Follow these steps to configure and use the Reverse Proxy feature:
     | `REVERSE_PROXY_SSL_SNI_NAME` |         | multisite | no       | **SSL SNI Name:** Sets the SNI hostname to send to upstream when SSL SNI is enabled. |
 
     !!! info "SNI Explained"
-        Server Name Indication (SNI) is an extension to TLS that allows a client to specify which hostname it is attempting to connect to at the start of the handshaking process. This enables servers to present multiple certificates on the same IP address and port, allowing multiple secure (HTTPS) websites to be served from a single IP address without requiring all those sites to use the same certificate.
+        Server Name Indication (SNI) is a TLS extension that allows a client to specify the hostname it is attempting to connect to during the handshake process. This enables servers to present multiple certificates on the same IP address and port, allowing multiple secure (HTTPS) websites to be served from a single IP address without requiring all those sites to use the same certificate.
 
 === "Protocol Support"
 

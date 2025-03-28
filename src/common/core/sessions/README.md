@@ -1,4 +1,4 @@
-The Sessions plugin provides robust HTTP session management for BunkerWeb, enabling secure and reliable user session tracking across requests. This core feature is essential for maintaining user state, authentication persistence, and supporting other features that require identity continuity like antibot protection and user authentication systems.
+The Sessions plugin provides robust HTTP session management for BunkerWeb, enabling secure and reliable user session tracking across requests. This core feature is essential for maintaining user state, authentication persistence, and supporting other features that require identity continuity, such as [anti‑bot](#antibot) protection and user authentication systems.
 
 **How it works:**
 
@@ -7,7 +7,7 @@ The Sessions plugin provides robust HTTP session management for BunkerWeb, enabl
 3. On subsequent requests, BunkerWeb retrieves the session identifier from the cookie and uses it to access the user's session data.
 4. Session data can be stored locally or in [Redis](#redis) for distributed environments with multiple BunkerWeb instances.
 5. Sessions are automatically managed with configurable timeouts, ensuring security while maintaining usability.
-6. The cryptographic security of sessions is ensured through a secret key that's used to sign session cookies.
+6. The cryptographic security of sessions is ensured through a secret key that is used to sign session cookies.
 
 ### How to Use
 

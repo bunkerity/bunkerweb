@@ -1,10 +1,10 @@
-The Backup plugin provides an automatic backup solution to protect your BunkerWeb data. This feature ensures the safety and availability of your important database by creating regular backups according to your preferred schedule. Backups are stored in a designated location and can be easily managed through both automatic processes and manual commands.
+The Backup plugin provides an automated backup solution to protect your BunkerWeb data. This feature ensures the safety and availability of your important database by creating regular backups according to your preferred schedule. Backups are stored in a designated location and can be easily managed through both automated processes and manual commands.
 
 **How it works:**
 
 1. Your database is automatically backed up according to the schedule you set (daily, weekly, or monthly).
 2. Backups are stored in a specified directory on your system.
-3. Old backups are automatically rotated out based on your retention settings.
+3. Old backups are automatically rotated based on your retention settings.
 4. You can manually create backups, list existing backups, or restore from a backup at any time.
 5. Before any restore operation, the current state is automatically backed up as a safety measure.
 
@@ -49,10 +49,10 @@ bwcli plugin backup restore /path/to/backup/backup-sqlite-2023-08-15_12-34-56.zi
 ```
 
 !!! tip "Safety First"
-    Before any restore operation, the Backup plugin automatically creates a backup of your current database state in a temporary location. This provides an additional safety net in case you need to revert the restore operation.
+    Before any restore operation, the Backup plugin automatically creates a backup of your current database state in a temporary location. This provides an extra safeguard in case you need to revert the restore operation.
 
 !!! warning "Database Compatibility"
-    The Backup plugin supports SQLite, MySQL/MariaDB, and PostgreSQL databases. Oracle databases are currently not supported for backup and restore operations.
+    The Backup plugin supports SQLite, MySQL/MariaDB, and PostgreSQL databases. Oracle databases are not currently supported for backup and restore operations.
 
 ### Example Configurations
 
