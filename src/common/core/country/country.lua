@@ -10,9 +10,24 @@ local get_deny_status = utils.get_deny_status
 local decode = cjson.decode
 local encode = cjson.encode
 
+-- Helper function to convert space-separated string to a set
+local function string_to_set(str)
+	local set = {}
+	if str and str ~= "" then
+		for item in str:gmatch("%S+") do
+			set[item] = true
+		end
+	end
+	return set
+end
+
 function country:initialize(ctx)
 	-- Call parent initialize
 	plugin.initialize(self, "country", ctx)
+
+	-- Initialize whitelist and blacklist sets once
+	self.whitelist = string_to_set(self.variables["WHITELIST_COUNTRY"])
+	self.blacklist = string_to_set(self.variables["BLACKLIST_COUNTRY"])
 end
 
 function country:access()
@@ -20,6 +35,7 @@ function country:access()
 	if self.variables["WHITELIST_COUNTRY"] == "" and self.variables["BLACKLIST_COUNTRY"] == "" then
 		return self:ret(true, "country not activated")
 	end
+
 	-- Check if IP is in cache
 	local _, data = self:is_in_cache(self.ctx.bw.remote_addr)
 	if data then
@@ -68,21 +84,20 @@ function country:access()
 
 	-- Process whitelist first
 	if self.variables["WHITELIST_COUNTRY"] ~= "" then
-		for wh_country in self.variables["WHITELIST_COUNTRY"]:gmatch "%S+" do
-			if wh_country == country_data then
-				-- luacheck: ignore 421
-				local ok, err = self:add_to_cache(self.ctx.bw.remote_addr, country_data, "ok")
-				if not ok then
-					return self:ret(false, "error while adding item to cache : " .. err)
-				end
-				return self:ret(
-					true,
-					"client IP " .. self.ctx.bw.remote_addr .. " is whitelisted (country = " .. country_data .. ")"
-				)
+		if self.whitelist[country_data] then
+			local ok
+			ok, err = self:add_to_cache(self.ctx.bw.remote_addr, country_data, "ok")
+			if not ok then
+				return self:ret(false, "error while adding item to cache : " .. err)
 			end
+			return self:ret(
+				true,
+				"client IP " .. self.ctx.bw.remote_addr .. " is whitelisted (country = " .. country_data .. ")"
+			)
 		end
-		-- luacheck: ignore 421
-		local ok, err = self:add_to_cache(self.ctx.bw.remote_addr, country_data, "ko")
+
+		local ok
+		ok, err = self:add_to_cache(self.ctx.bw.remote_addr, country_data, "ko")
 		if not ok then
 			return self:ret(false, "error while adding item to cache : " .. err)
 		end
@@ -101,24 +116,23 @@ function country:access()
 
 	-- And then blacklist
 	if self.variables["BLACKLIST_COUNTRY"] ~= "" then
-		for bl_country in self.variables["BLACKLIST_COUNTRY"]:gmatch "%S+" do
-			if bl_country == country_data then
-				local ok, err = self:add_to_cache(self.ctx.bw.remote_addr, country_data, "ko")
-				if not ok then
-					return self:ret(false, "error while adding item to cache : " .. err)
-				end
-				self:set_metric("counters", "failed_country", 1)
-				return self:ret(
-					true,
-					"client IP " .. self.ctx.bw.remote_addr .. " is blacklisted (country = " .. country_data .. ")",
-					get_deny_status(),
-					nil,
-					{
-						id = "country",
-						country = country_data,
-					}
-				)
+		if self.blacklist[country_data] then
+			local ok
+			ok, err = self:add_to_cache(self.ctx.bw.remote_addr, country_data, "ko")
+			if not ok then
+				return self:ret(false, "error while adding item to cache : " .. err)
 			end
+			self:set_metric("counters", "failed_country", 1)
+			return self:ret(
+				true,
+				"client IP " .. self.ctx.bw.remote_addr .. " is blacklisted (country = " .. country_data .. ")",
+				get_deny_status(),
+				nil,
+				{
+					id = "country",
+					country = country_data,
+				}
+			)
 		end
 	end
 
