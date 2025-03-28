@@ -29,7 +29,7 @@
       "help": "The supported version of TLS. We recommend the default value TLSv1.2 TLSv1.3 for compatibility reasons.",
       "id": "https-protocols",
       "label": "HTTPS protocols",
-      "regex": "^(?! )( ?TLSv1\\.[0-3])*$",
+      "regex": "^(?! )( ?(?:SSLv[23]|TLSv1(?:\\.[1-3])?))+$",
       "type": "text"
     },
     "SSL_CIPHERS_LEVEL": {
