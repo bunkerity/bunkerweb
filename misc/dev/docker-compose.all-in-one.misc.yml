@@ -26,6 +26,7 @@ services:
       USE_CLIENT_CACHE: "yes"
       USE_GZIP: "yes"
       SESSIONS_CHECK_IP: "no"
+      GENERATE_SELF_SIGNED_SSL: "yes"
       app1.example.com_USE_REVERSE_PROXY: "yes"
       app1.example.com_REVERSE_PROXY_URL: "/"
       app1.example.com_REVERSE_PROXY_HOST: "http://app1:8080"
