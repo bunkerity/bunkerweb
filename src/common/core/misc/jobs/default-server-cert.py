@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 
-from os import sep
+from os import chmod, sep
 from os.path import join
 from pathlib import Path
+from stat import S_IRUSR, S_IWUSR
 from subprocess import DEVNULL, run
 from sys import exit as sys_exit, path as sys_path
 from traceback import format_exc
@@ -36,15 +37,18 @@ try:
                     "-newkey",
                     "ec",
                     "-pkeyopt",
-                    "ec_paramgen_curve:prime256v1",
+                    "ec_paramgen_curve:secp384r1",
                     "-keyout",
                     str(cert_path.joinpath("default-server-cert.key")),
                     "-out",
                     str(cert_path.joinpath("default-server-cert.pem")),
                     "-days",
                     "3650",
+                    "-sha384",
                     "-subj",
                     "/C=AU/ST=Some-State/O=Internet Widgits Pty Ltd/CN=www.example.org/",
+                    "-extensions",
+                    "v3_req",
                 ],
                 stdin=DEVNULL,
                 stderr=DEVNULL,
@@ -56,6 +60,8 @@ try:
             status = 2
         else:
             LOGGER.info("Successfully generated self-signed certificate for default server")
+            # Set restrictive permissions on the key file
+            chmod(str(cert_path.joinpath("default-server-cert.key")), S_IRUSR | S_IWUSR)  # 0o600 - read/write for owner only
             status = 1
 
         cached, err = JOB.cache_file("default-server-cert.pem", cert_path.joinpath("default-server-cert.pem"), overwrite_file=False)
