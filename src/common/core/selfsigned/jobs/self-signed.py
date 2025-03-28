@@ -29,6 +29,9 @@ def generate_cert(first_server: str, days: str, subj: str, self_signed_path: Pat
     cert_path = server_path.joinpath("cert.pem")
     key_path = server_path.joinpath("key.pem")
 
+    # Get the algorithm from environment variable
+    algorithm = getenv(f"{first_server}_SELF_SIGNED_SSL_ALGORITHM", getenv("SELF_SIGNED_SSL_ALGORITHM", "ec-prime256v1"))
+
     if cert_path.is_file() and key_path.is_file():
         if (
             run(
@@ -50,7 +53,21 @@ def generate_cert(first_server: str, days: str, subj: str, self_signed_path: Pat
                 not_valid_after = certificate.not_valid_after
                 not_valid_before = certificate.not_valid_before
 
-            if sorted(attribute.rfc4514_string() for attribute in certificate.subject) != sorted(v for v in subj.split("/") if v):
+            # Check if the current certificate uses the same algorithm as specified in the config
+            current_algorithm = None
+            public_key = certificate.public_key()
+            if hasattr(public_key, "curve"):
+                # For EC keys
+                current_algorithm = f"ec-{public_key.curve.name}"
+            elif hasattr(public_key, "key_size"):
+                # For RSA keys
+                current_algorithm = f"rsa-{public_key.key_size}"
+
+            if current_algorithm and current_algorithm != algorithm:
+                LOGGER.warning(
+                    f"Algorithm of self-signed certificate for {first_server} ({current_algorithm}) is different from the one in the configuration ({algorithm}), regenerating ..."
+                )
+            elif sorted(attribute.rfc4514_string() for attribute in certificate.subject) != sorted(v for v in subj.split("/") if v):
                 LOGGER.warning(f"Subject of self-signed certificate for {first_server} is different from the one in the configuration, regenerating ...")
             elif not_valid_after - not_valid_before != timedelta(days=int(days)):
                 LOGGER.warning(
@@ -64,9 +81,6 @@ def generate_cert(first_server: str, days: str, subj: str, self_signed_path: Pat
 
     LOGGER.info(f"Generating self-signed certificate for {first_server}")
     server_path.mkdir(parents=True, exist_ok=True)
-
-    # Get the algorithm from environment variable
-    algorithm = getenv(f"{first_server}_SELF_SIGNED_SSL_ALGORITHM", getenv("SELF_SIGNED_SSL_ALGORITHM", "ec-prime256v1"))
 
     # Prepare openssl command based on the selected algorithm
     openssl_cmd = [
