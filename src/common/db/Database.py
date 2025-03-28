@@ -162,6 +162,14 @@ class Database:
         if self.database_uri_readonly and not self.database_uri and readonly_match:
             match = readonly_match
 
+        if main_match.group("database") == "oracle":
+            self.logger.error("Oracle database is not supported yet")
+            _exit(1)
+
+        if readonly_match.group("database") == "oracle":
+            self.logger.error("Oracle database is not supported yet")
+            _exit(1)
+
         self._engine_kwargs = {
             "future": True,
             "poolclass": QueuePool,
