@@ -61,6 +61,7 @@ certbot==3.3.0 \
     #   certbot-dns-dnsmadeeasy
     #   certbot-dns-gehirn
     #   certbot-dns-google
+    #   certbot-dns-infomaniak
     #   certbot-dns-linode
     #   certbot-dns-luadns
     #   certbot-dns-nsone
@@ -96,6 +97,10 @@ certbot-dns-gehirn==3.3.0 \
 certbot-dns-google==3.3.0 \
     --hash=sha256:4087aa95dd79f03212ccad79154d82a61d95d0a72883e454a7e5a60cf64d9d3f \
     --hash=sha256:b351e1a458eb1bd1d51720aa59b7d3f41579a8ba23e11cf393cdfa151fb4acae
+    # via -r requirements.in
+certbot-dns-infomaniak==0.2.3 \
+    --hash=sha256:711fc69e781c5845a4edb295da212bec1070d641cc022c9938b5a3f6e4c23912 \
+    --hash=sha256:754ce4cd641309b11b7877081b493a183cda38125b48684763ff2ac81f6e68a8
     # via -r requirements.in
 certbot-dns-linode==3.3.0 \
     --hash=sha256:1449762531dec230846e815c8c0e9a6e8c22339f754b98673b2a448074876fce \
@@ -410,6 +415,7 @@ idna==3.10 \
     --hash=sha256:12f65c9b470abda6dc35cf8e63cc574b1c52b11df2c86030af0ac09b01b13ea9 \
     --hash=sha256:946d195a0d259cbba61165e88e65941f16e9b36ea6ddb97f00452bae8b1287d3
     # via
+    #   certbot-dns-infomaniak
     #   requests
     #   tldextract
 importlib-metadata==8.6.1 \
@@ -767,6 +773,7 @@ requests==2.32.3 \
     #   -r requirements.in
     #   acme
     #   certbot-dns-desec
+    #   certbot-dns-infomaniak
     #   certbot-dns-scaleway
     #   cloudflare
     #   dns-lexicon
@@ -782,7 +789,9 @@ requests-file==2.1.0 \
 requests-mock==1.12.1 \
     --hash=sha256:b1e37054004cdd5e56c84454cc7df12b25f90f382159087f4b6915aaeef39563 \
     --hash=sha256:e9e12e333b525156e82a3c852f22016b9158220d2f47454de9cae8a77d371401
-    # via certbot-dns-scaleway
+    # via
+    #   certbot-dns-infomaniak
+    #   certbot-dns-scaleway
 rsa==4.9 \
     --hash=sha256:90260d9058e514786967344d0ef75fa8727eed8a7d2e43ce9f4bcf1b536174f7 \
     --hash=sha256:e38464a49c6c85d7f1351b0126661487a7e0a14a50f1675ec50eb34d4f20ef21
@@ -842,4 +851,5 @@ zipp==3.21.0 \
     --hash=sha256:ac1bbe05fd2991f160ebce24ffbac5f6d11d83dc90891255885223d42b3cd931
     # via
     #   certbot-dns-desec
+    #   certbot-dns-infomaniak
     #   certbot-dns-scaleway

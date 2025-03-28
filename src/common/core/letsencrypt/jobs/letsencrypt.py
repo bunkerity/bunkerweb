@@ -163,6 +163,18 @@ class GoogleProvider(Provider):
         return "json"
 
 
+class InfomaniakProvider(Provider):
+    """Infomaniak DNS provider."""
+
+    dns_infomaniak_token: str
+
+    _validate_aliases = alias_model_validator(
+        {
+            "dns_infomaniak_token": ("dns_infomaniak_token", "infomaniak_token", "token"),
+        }
+    )
+
+
 class LinodeProvider(Provider):
     """Linode DNS provider."""
 
