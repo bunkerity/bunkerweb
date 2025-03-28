@@ -1,12 +1,12 @@
-The Security.txt plugin implements the [Security.txt](https://securitytxt.org/) standard (RFC 9116) for your website. This feature helps security researchers discover your security policies and provides a standardized way for them to report security vulnerabilities they find in your systems.
+The Security.txt plugin implements the [Security.txt](https://securitytxt.org/) standard ([RFC 9116](https://www.rfc-editor.org/rfc/rfc9116)) for your website. This feature helps security researchers access your security policies and provides a standardized way for them to report security vulnerabilities they discover in your systems.
 
 **How it works:**
 
 1. When enabled, BunkerWeb creates a `/.well-known/security.txt` file at the root of your website.
-2. This file contains information about your security policies, contacts, and other relevant security information.
+2. This file contains information about your security policies, contacts, and other relevant details.
 3. Security researchers and automated tools can easily find this file at the standard location.
-4. The content is configured through simple settings, allowing you to specify contact information, encryption keys, policies, and acknowledgments.
-5. BunkerWeb automatically ensures the file is properly formatted according to the RFC 9116 standard.
+4. The content is configured using simple settings that allow you to specify contact information, encryption keys, policies, and acknowledgments.
+5. BunkerWeb automatically formats the file in accordance with RFC 9116.
 
 ### How to Use
 
@@ -34,13 +34,13 @@ Follow these steps to configure and use the Security.txt feature:
 | `SECURITYTXT_CSAF`             |                             | multisite | yes      | **CSAF:** Link to the provider-metadata.json of your Common Security Advisory Framework provider.        |
 
 !!! warning "Expiration Date Required"
-    According to RFC 9116, the `Expires` field is required. If you don't provide a value for `SECURITYTXT_EXPIRES`, BunkerWeb will automatically set an expiration date one year from the current date.
+    According to RFC 9116, the `Expires` field is required. If you don't provide a value for `SECURITYTXT_EXPIRES`, BunkerWeb automatically sets the expiration date to one year from the current date.
 
 !!! info "Contact Information Is Essential"
     The `Contact` field is the most important part of the security.txt file. You should provide at least one way for security researchers to contact you. This can be an email address, a web form, a phone number, or any other method that works for your organization.
 
 !!! warning "URLs Must Use HTTPS"
-  According to RFC 9116, all URLs in the security.txt file (except for `mailto:` and `tel:` links) MUST use HTTPS. Using non-HTTPS URLs will not comply with the standard and may lead to security issues when researchers access these resources. Therefore, all `http` URLs will automatically be converted to `https` by BunkerWeb to ensure compliance with the standard.
+    According to RFC 9116, all URLs in the security.txt file (except for `mailto:` and `tel:` links) MUST use HTTPS. Non-HTTPS URLs will automatically be converted to HTTPS by BunkerWeb to ensure compliance with the standard.
 
 ### Example Configurations
 

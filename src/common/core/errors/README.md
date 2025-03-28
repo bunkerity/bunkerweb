@@ -1,20 +1,20 @@
-The Errors plugin provides customizable error handling for your website, allowing you to configure how HTTP error responses are displayed to users. This feature helps you present user-friendly, branded error pages that enhance user experience during error scenarios, instead of displaying the default server error pages that can appear technical and confusing to visitors.
+The Errors plugin provides customizable error handling for your website, letting you configure how HTTP error responses appear to users. This feature helps you present user-friendly, branded error pages that enhance the user experience during error scenarios, rather than displaying default server error pages, which can seem technical and confusing to visitors.
 
 **How it works:**
 
-1. When a client encounters an HTTP error (like 400, 404, 500), BunkerWeb intercepts the error response.
+1. When a client encounters an HTTP error (for example, 400, 404, or 500), BunkerWeb intercepts the error response.
 2. Instead of showing the default error page, BunkerWeb displays a custom, professionally designed error page.
-3. Error pages are fully customizable through your configuration, letting you specify custom pages for specific error codes.
+3. Error pages are fully customizable through your configuration, allowing you to specify custom pages for specific error codes.
 4. The default error pages provide clear explanations, helping users understand what went wrong and what they can do next.
 
 ### How to Use
 
 Follow these steps to configure and use the Errors feature:
 
-1. **Define custom error pages:** Specify which HTTP error codes should use custom error pages with the `ERRORS` setting.
+1. **Define custom error pages:** Specify which HTTP error codes should use custom error pages using the `ERRORS` setting.
 2. **Configure your error pages:** For each error code, you can use the default BunkerWeb error page or provide your own custom HTML page.
 3. **Set intercepted error codes:** Select which error codes should always be handled by BunkerWeb with the `INTERCEPTED_ERROR_CODES` setting.
-4. **Let BunkerWeb handle the rest:** Once configured, error handling happens automatically for all specified error codes.
+4. **Let BunkerWeb handle the rest:** Once configured, error handling occurs automatically for all specified error codes.
 
 ### Configuration Settings
 
@@ -24,18 +24,18 @@ Follow these steps to configure and use the Errors feature:
 | `INTERCEPTED_ERROR_CODES` | `400 401 403 404 405 413 429 500 501 502 503 504` | multisite | no       | **Intercepted Errors:** List of HTTP error codes that BunkerWeb should handle with its default error page when no custom page is specified. |
 
 !!! tip "Error Page Design"
-    The default BunkerWeb error pages are designed to be informative, user-friendly, and provide a professional appearance. They include:
+    The default BunkerWeb error pages are designed to be informative, user-friendly, and professional in appearance. They include:
 
     - Clear error descriptions
     - Information about what might have caused the error
-    - Suggested actions for the user to resolve the issue
-    - Visual indicators to help users understand if the issue is on their side or the server side
+    - Suggested actions for users to resolve the issue
+    - Visual indicators that help users understand whether the issue is on the client or the server side
 
 !!! info "Error Types"
     Error codes are categorized by type:
 
-    - **4xx errors (client-side):** These indicate issues with the client's request, such as trying to access non-existent pages or lacking proper authentication.
-    - **5xx errors (server-side):** These indicate issues with the server's ability to fulfill a valid request, like internal server errors or temporary unavailability.
+    - **4xx errors (client-side):** These indicate issues with the client's request, such as attempting to access non-existent pages or lacking proper authentication.
+    - **5xx errors (server-side):** These indicate issues with the server's ability to fulfill a valid request, such as internal server errors or temporary unavailability.
 
 ### Example Configurations
 

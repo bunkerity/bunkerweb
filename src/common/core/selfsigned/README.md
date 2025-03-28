@@ -1,4 +1,4 @@
-The Self-signed Certificate plugin automatically generates and manages SSL/TLS certificates directly within BunkerWeb, enabling secure HTTPS connections without requiring an external certificate authority. This feature is particularly useful for development environments, internal networks, or when you need to quickly deploy HTTPS without configuring external certificates.
+The Self-signed Certificate plugin automatically generates and manages SSL/TLS certificates directly within BunkerWeb, enabling secure HTTPS connections without requiring an external certificate authority. This feature is particularly useful in development environments, internal networks, or whenever you need to quickly deploy HTTPS without configuring external certificates.
 
 **How it works:**
 
@@ -20,6 +20,9 @@ Follow these steps to configure and use the Self-signed Certificate feature:
 4. **Set certificate subject:** Configure the certificate subject using the `SELF_SIGNED_SSL_SUBJ` setting.
 5. **Let BunkerWeb handle the rest:** Once configured, certificates are automatically generated and applied to your domains.
 
+!!! tip "Stream Mode Configuration"
+    For stream mode, configure the `LISTEN_STREAM_PORT_SSL` setting to specify the SSL/TLS listening port. This step is essential for proper operation in stream mode.
+
 ### Configuration Settings
 
 | Setting                     | Default                | Context   | Multiple | Description                                                                                                                       |
@@ -30,10 +33,10 @@ Follow these steps to configure and use the Self-signed Certificate feature:
 | `SELF_SIGNED_SSL_SUBJ`      | `/CN=www.example.com/` | multisite | no       | **Certificate Subject:** Subject field for the certificate that identifies the domain.                                            |
 
 !!! tip "Development Environments"
-    Self-signed certificates are ideal for development and testing environments where you need HTTPS but don't require certificates trusted by public browsers. They provide the same encryption strength as CA-issued certificates without the external validation.
+    Self-signed certificates are ideal for development and testing environments where you need HTTPS but do not require certificates trusted by public browsers.
 
 !!! info "Certificate Information"
-    The generated self-signed certificates use the specified algorithm (default is Elliptic Curve cryptography with prime256v1 curve) and include the configured subject, ensuring proper functionality for your domains.
+    The generated self-signed certificates use the specified algorithm (defaulting to Elliptic Curve cryptography with the prime256v1 curve) and include the configured subject, ensuring proper functionality for your domains.
 
 ### Example Configurations
 

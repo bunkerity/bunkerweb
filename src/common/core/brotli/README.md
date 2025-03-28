@@ -1,4 +1,4 @@
-The Brotli plugin enables efficient compression of HTTP responses using the Brotli algorithm. This feature helps reduce bandwidth usage and improve page load times by compressing web content before it's sent to the client's browser.
+The Brotli plugin enables efficient compression of HTTP responses using the Brotli algorithm. This feature helps reduce bandwidth usage and improve page load times by compressing web content before it is sent to the client's browser.
 
 Compared to other compression methods like gzip, Brotli typically achieves higher compression ratios, resulting in smaller file sizes and faster content delivery.
 

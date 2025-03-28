@@ -28,11 +28,11 @@ Whether you need to restrict HTTP methods, manage request sizes, optimize file c
 
     **Default Server Controls**
 
-    In HTTP, the `Host` header specifies the target server but may be missing or unknown, often due to bots scanning for vulnerabilities.
+    In HTTP, the `Host` header specifies the target server, but it may be missing or unknown, often due to bots scanning for vulnerabilities.
 
     To block such requests:
 
-    - Set `DISABLE_DEFAULT_SERVER` to `yes` to silently deny them using [NGINX's `444` status code](https://http.dev/444).
+    - Set `DISABLE_DEFAULT_SERVER` to `yes` to silently deny such requests using [NGINX's `444` status code](https://http.dev/444).
     - For stricter security, enable `DISABLE_DEFAULT_SERVER_STRICT_SNI` to reject SSL/TLS connections without valid SNI.
 
     !!! success "Security Benefits"
@@ -97,7 +97,7 @@ Whether you need to restrict HTTP methods, manage request sizes, optimize file c
 
     **Request Size Limits**
 
-    The maximum request body size can be controlled using the `MAX_CLIENT_SIZE` setting (default: `10m`). This setting determines the maximum size of any request body sent to your server, including form submissions and file uploads. Accepted values follow the syntax described [here](https://nginx.org/en/docs/syntax.html).
+    The maximum request body size can be controlled using the `MAX_CLIENT_SIZE` setting (default: `10m`). Accepted values follow the syntax described [here](https://nginx.org/en/docs/syntax.html).
 
     !!! success "Security Benefits"
         - Protects against denial-of-service attacks caused by excessive payload sizes
@@ -148,7 +148,7 @@ Whether you need to restrict HTTP methods, manage request sizes, optimize file c
 
     **File Serving Configuration**
 
-    BunkerWeb can serve static files directly or act as a reverse proxy to an application server. When serving files directly, you can specify the root directory using the `ROOT_FOLDER` setting. By default, files are served from `/var/www/html/{server_name}`.
+    BunkerWeb can serve static files directly or act as a reverse proxy to an application server. By default, files are served from `/var/www/html/{server_name}`.
 
     | Setting       | Default                       | Context   | Multiple | Description                                                                                            |
     | ------------- | ----------------------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------ |
@@ -200,7 +200,7 @@ Whether you need to restrict HTTP methods, manage request sizes, optimize file c
 
     **File Cache Optimization**
 
-    The open file cache improves performance by storing file descriptors and metadata in memory, reducing the need for repeated file system operations. This feature is particularly beneficial for websites serving many static files.
+    The open file cache improves performance by storing file descriptors and metadata in memory, reducing the need for repeated file system operations.
 
     !!! success "Benefits of File Caching"
         - **Performance:** Reduces filesystem I/O, decreases latency, and lowers CPU usage for file operations.
@@ -217,7 +217,6 @@ Whether you need to restrict HTTP methods, manage request sizes, optimize file c
     **Configuration Guide**
 
     To enable and configure file caching:
-
     1. Set `USE_OPEN_FILE_CACHE` to `yes` to activate the feature.
     2. Adjust `OPEN_FILE_CACHE` parameters to define the maximum number of cached entries and their inactive timeout.
     3. Use `OPEN_FILE_CACHE_ERRORS` to cache both successful and failed lookups, reducing repeated filesystem operations.

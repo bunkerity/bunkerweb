@@ -1,4 +1,4 @@
-The Redis plugin provides integration with Redis for BunkerWeb, enabling efficient data storage, caching, and communication between multiple BunkerWeb instances in a cluster. This feature is essential for deploying BunkerWeb in high-availability environments where session data, metrics, and other shared information must be accessible across multiple nodes.
+The Redis plugin integrates Redis into BunkerWeb for caching and fast data retrieval. This feature is essential for deploying BunkerWeb in high-availability environments where session data, metrics, and other shared information must be accessible across multiple nodes.
 
 **How it works:**
 
@@ -13,10 +13,10 @@ The Redis plugin provides integration with Redis for BunkerWeb, enabling efficie
 Follow these steps to configure and use the Redis plugin:
 
 1. **Enable the feature:** Set the `USE_REDIS` setting to `yes` to enable Redis integration.
-2. **Configure connection details:** Specify your Redis server's hostname/IP and port.
+2. **Configure connection details:** Specify your Redis server's hostname/IP address and port.
 3. **Set security options:** Configure authentication credentials if your Redis server requires them.
-4. **Configure advanced options:** Set database selection, SSL options, and timeouts as needed.
-5. **For high availability:** Configure Sentinel settings if you're using Redis Sentinel.
+4. **Configure advanced options:** Set the database selection, SSL options, and timeouts as needed.
+5. **For high availability,** configure Sentinel settings if you're using Redis Sentinel.
 
 ### Configuration Settings
 
@@ -113,20 +113,20 @@ Follow these steps to configure and use the Redis plugin:
 When using Redis with BunkerWeb, consider these best practices to ensure optimal performance, security, and reliability:
 
 #### Memory Management
-- **Monitor memory usage**: Configure Redis with appropriate `maxmemory` settings to prevent out-of-memory errors
-- **Set an eviction policy**: Use `maxmemory-policy` (e.g., `volatile-lru` or `allkeys-lru`) appropriate for your use case
-- **Avoid large keys**: Keep individual Redis keys reasonably sized to prevent performance degradation
+- **Monitor memory usage:** Configure Redis with appropriate `maxmemory` settings to prevent out-of-memory errors
+- **Set an eviction policy:** Use `maxmemory-policy` (e.g., `volatile-lru` or `allkeys-lru`) appropriate for your use case
+- **Avoid large keys:** Ensure individual Redis keys are kept to a reasonable size to prevent performance degradation
 
 #### Data Persistence
-- **Enable RDB snapshots**: Configure periodic snapshots for data persistence without significant performance impact
-- **Consider AOF**: For critical data, enable AOF (Append-Only File) persistence with an appropriate fsync policy
-- **Backup strategy**: Implement regular Redis backups as part of your disaster recovery plan
+- **Enable RDB snapshots:** Configure periodic snapshots for data persistence without significant performance impact
+- **Consider AOF:** For critical data, enable AOF (Append-Only File) persistence with an appropriate fsync policy
+- **Backup strategy:** Implement regular Redis backups as part of your disaster recovery plan
 
 #### Performance Optimization
-- **Connection pooling**: BunkerWeb already implements this, but ensure other applications follow this practice
-- **Pipelining**: When possible, use pipelining for bulk operations to reduce network overhead
-- **Avoid expensive operations**: Be cautious with commands like KEYS in production environments
-- **Benchmark your workload**: Use redis-benchmark to test your specific workload patterns
+- **Connection pooling:** BunkerWeb already implements this, but ensure other applications follow this practice
+- **Pipelining:** When possible, use pipelining for bulk operations to reduce network overhead
+- **Avoid expensive operations:** Be cautious with commands like KEYS in production environments
+- **Benchmark your workload:** Use redis-benchmark to test your specific workload patterns
 
 ### Further Resources
 

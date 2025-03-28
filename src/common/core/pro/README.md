@@ -1,4 +1,4 @@
-The Pro plugin provides access to premium features and enhancements for BunkerWeb users with an active Pro license. This feature unlocks additional capabilities, premium plugins, and extended functionality that complement the core BunkerWeb platform, delivering enhanced security, performance, and management options for enterprise-grade deployments.
+The Pro plugin bundles advanced features and enhancements for enterprise deployments of BunkerWeb. It unlocks additional capabilities, premium plugins, and extended functionality that complement the core BunkerWeb platform. It delivers enhanced security, performance, and management options for enterprise-grade deployments.
 
 **How it works:**
 
@@ -21,8 +21,8 @@ The Pro plugin provides access to premium features and enhancements for BunkerWe
 Follow these steps to configure and use the Pro features:
 
 1. **Obtain a license key:** Purchase a Pro license from the [BunkerWeb Panel](https://panel.bunkerweb.io/order/bunkerweb-pro?utm_campaign=self&utm_source=doc).
-2. **Configure the license key:** Set your license key using the `PRO_LICENSE_KEY` setting.
-3. **Let BunkerWeb handle the rest:** Once configured with a valid license, Pro plugins will be automatically downloaded and activated.
+2. **Configure your license key:** Use the `PRO_LICENSE_KEY` setting to configure your license.
+3. **Let BunkerWeb handle the rest:** Once configured with a valid license, Pro plugins are automatically downloaded and activated.
 4. **Monitor your Pro status:** Check the health indicators in the [web UI](web-ui.md) to confirm your Pro subscription status.
 
 ### Configuration Settings

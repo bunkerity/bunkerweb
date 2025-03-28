@@ -13,10 +13,10 @@ The Metrics plugin provides comprehensive monitoring and data collection capabil
 
 The metrics plugin works by:
 
-- Using shared dictionaries in NGINX (`metrics_datastore` for HTTP and `metrics_datastore_stream` for TCP/UDP traffic)
+- Using shared dictionaries in NGINX, where `metrics_datastore` is used for HTTP and `metrics_datastore_stream` for TCP/UDP traffic
 - Leveraging an LRU cache for efficient in-memory storage
 - Periodically synchronizing data between workers using timers
-- Storing detailed information about blocked requests including IP, country, timestamp, request details, and block reason
+- Storing detailed information about blocked requests, including the client IP address, country, timestamp, request details, and block reason
 - Supporting plugin-specific metrics through a common metrics collection interface
 - Providing API endpoints for querying collected metrics
 
@@ -44,7 +44,7 @@ The metrics plugin collects the following information:
       - Server name
       - Additional data related to the block reason
 
-2. **Plugin Counters**: Various plugin-specific counters that track activities and events
+2. **Plugin Counters**: Various plugin-specific counters that track activities and events.
 
 ### API Access
 
@@ -55,22 +55,22 @@ Metrics data can be accessed via BunkerWeb's internal API endpoints:
 - **Description**: Retrieves metrics data based on the specified filter
 - **Response Format**: JSON object containing the requested metrics
 
-Example: `/metrics/requests` will return information about blocked requests.
+For example, `/metrics/requests` returns information about blocked requests.
 
 !!! info "API Access Configuration"
     To access metrics via the API, you must ensure that:
 
     1. The API feature is enabled with `USE_API: "yes"` (enabled by default)
     2. Your client IP is included in the `API_WHITELIST_IP` setting (default is `127.0.0.0/8`)
-    3. You're accessing the API on the configured port (default is `5000` via the `API_HTTP_PORT` setting)
-    4. You're using the correct `API_SERVER_NAME` value in the Host header (default is `bwapi`)
+    3. You are accessing the API on the configured port (default is `5000` via the `API_HTTP_PORT` setting)
+    4. You are using the correct `API_SERVER_NAME` value in the Host header (default is `bwapi`)
 
     A typical API request would look like:
     ```
     curl -H "Host: bwapi" http://your-bunkerweb-instance:5000/metrics/requests
     ```
 
-    If you've customized the `API_SERVER_NAME` to something other than the default `bwapi`, you must use that value in the Host header instead.
+    If you have customized the `API_SERVER_NAME` to something other than the default `bwapi`, use that value in the Host header instead.
 
     For secure production environments, make sure to restrict API access to trusted IPs only.
 

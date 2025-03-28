@@ -1,14 +1,14 @@
-The Database plugin provides a robust database integration system for BunkerWeb, enabling centralized storage and management of configuration data, logs, and other important information.
+The Database plugin provides a robust database integration for BunkerWeb by enabling centralized storage and management of configuration data, logs, and other essential information.
 
-This core component supports multiple database engines, including SQLite, PostgreSQL, MySQL/MariaDB, and Oracle - allowing you to choose the database solution that best fits your environment and requirements.
+This core component supports multiple database engines, including SQLite, PostgreSQL, MySQL/MariaDB, and Oracle, allowing you to choose the database solution that best fits your environment and requirements.
 
 **How it works:**
 
-1. BunkerWeb connects to your configured database using the provided URI, following SQLAlchemy format.
+1. BunkerWeb connects to your configured database using the provided URI in the SQLAlchemy format.
 2. Critical configuration data, runtime information, and job logs are stored securely in the database.
-3. Automatic maintenance processes keep your database optimized by managing data growth and cleaning up excess records.
-4. For high-availability scenarios, you can configure a read-only database URI that serves as both a failover and a way to offload read operations.
-5. Database operations are logged according to your specified log level, providing visibility into database interactions as needed.
+3. Automatic maintenance processes optimize your database by managing data growth and cleaning up excess records.
+4. For high-availability scenarios, you can configure a read-only database URI that serves both as a failover and as a method to offload read operations.
+5. Database operations are logged according to your specified log level, providing appropriate visibility into database interactions.
 
 ### How to Use
 
@@ -22,7 +22,7 @@ Follow these steps to configure and use the Database feature:
 
 | Setting                  | Default                                   | Context | Multiple | Description                                                                                                           |
 | ------------------------ | ----------------------------------------- | ------- | -------- | --------------------------------------------------------------------------------------------------------------------- |
-| `DATABASE_URI`           | `sqlite:////var/lib/bunkerweb/db.sqlite3` | global  | no       | **Database URI:** The primary database connection string, following the SQLAlchemy format.                            |
+| `DATABASE_URI`           | `sqlite:////var/lib/bunkerweb/db.sqlite3` | global  | no       | **Database URI:** The primary database connection string in the SQLAlchemy format.                                    |
 | `DATABASE_URI_READONLY`  |                                           | global  | no       | **Read-Only Database URI:** Optional database for read-only operations or as a failover if the main database is down. |
 | `DATABASE_LOG_LEVEL`     | `warning`                                 | global  | no       | **Log Level:** The verbosity level for database logs. Options: `debug`, `info`, `warn`, `warning`, or `error`.        |
 | `DATABASE_MAX_JOBS_RUNS` | `10000`                                   | global  | no       | **Maximum Job Runs:** The maximum number of job execution records to retain in the database before automatic cleanup. |
@@ -42,4 +42,4 @@ Follow these steps to configure and use the Database feature:
     - Oracle: `oracle://username:password@hostname:port/database`
 
 !!! warning "Database Maintenance"
-    The plugin automatically runs a daily job to clean up excess job runs based on the `DATABASE_MAX_JOBS_RUNS` setting. This prevents unbounded database growth while maintaining a useful history of job executions.
+    The plugin automatically runs a daily job that cleans up excess job runs based on the `DATABASE_MAX_JOBS_RUNS` setting. This prevents unbounded database growth while maintaining a useful history of job executions.

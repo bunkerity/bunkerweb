@@ -1,10 +1,10 @@
-The Reverse Scan plugin provides robust protection against proxy bypassing by scanning clients' ports to detect if they are running proxy servers or other network services. This feature helps identify and block potential threats from clients who may be attempting to hide their true identity or origin, enhancing your website's security posture.
+The Reverse Scan plugin robustly protects against proxy bypass attempts by scanning clients' ports to detect whether they are running proxy servers or other network services. This feature helps identify and block potential threats from clients that may be attempting to hide their true identity or origin, thereby enhancing your website's security posture.
 
 **How it works:**
 
 1. When a client connects to your server, BunkerWeb attempts to scan specific ports on the client's IP address.
 2. The plugin checks if any common proxy ports (such as 80, 443, 8080, etc.) are open on the client side.
-3. If open ports are detected, suggesting the client may be running a proxy server, the connection is denied.
+3. If open ports are detected, indicating that the client may be running a proxy server, the connection is denied.
 4. This adds an extra layer of security against automated tools, bots, and malicious users attempting to mask their identity.
 
 !!! success "Key benefits"

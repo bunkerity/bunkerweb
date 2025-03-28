@@ -2,43 +2,43 @@ The Let's Encrypt plugin simplifies SSL/TLS certificate management by automating
 
 **How it works:**
 
-1. When enabled, BunkerWeb automatically detects the domain names configured for your site.
+1. When enabled, BunkerWeb automatically detects the domains configured for your website.
 2. BunkerWeb requests free SSL/TLS certificates from Let's Encrypt's certificate authority.
-3. Domain ownership is verified through either HTTP challenges (proving you control the website) or DNS challenges (proving you control the domain's DNS).
+3. Domain ownership is verified through either HTTP challenges (proving you control the website) or DNS challenges (proving you control your domain's DNS).
 4. Certificates are automatically installed and configured for your domains.
 5. BunkerWeb handles certificate renewals in the background before expiration, ensuring continuous HTTPS availability.
-6. The entire process is fully automated, requiring minimal intervention after initial setup.
+6. The entire process is fully automated, requiring minimal intervention after the initial setup.
 
 !!! info "Prerequisites"
-    To use this feature, ensure proper DNS **A records** are set up for each domain, pointing to the public IP(s) where BunkerWeb is accessible. Without correct DNS configuration, the domain verification process will fail.
+    To use this feature, ensure that proper DNS **A records** are configured for each domain, pointing to the public IP(s) where BunkerWeb is accessible. Without correct DNS configuration, the domain verification process will fail.
 
 ### How to Use
 
 Follow these steps to configure and use the Let's Encrypt feature:
 
 1. **Enable the feature:** Set the `AUTO_LETS_ENCRYPT` setting to `yes` to enable automatic certificate issuance and renewal.
-2. **Provide contact email:** Enter your email address with the `EMAIL_LETS_ENCRYPT` setting for important notifications about your certificates.
+2. **Provide contact email:** Enter your email address using the `EMAIL_LETS_ENCRYPT` setting to receive important notifications about your certificates.
 3. **Choose challenge type:** Select either `http` or `dns` verification with the `LETS_ENCRYPT_CHALLENGE` setting.
 4. **Configure DNS provider:** If using DNS challenges, specify your DNS provider and credentials.
 5. **Let BunkerWeb handle the rest:** Once configured, certificates are automatically issued, installed, and renewed as needed.
 
 ### Configuration Settings
 
-| Setting                            | Default                  | Context   | Multiple | Description                                                                                                                                                                 |
-| ---------------------------------- | ------------------------ | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `AUTO_LETS_ENCRYPT`                | `no`                     | multisite | no       | **Enable Let's Encrypt:** Set to `yes` to enable automatic certificate issuance and renewal.                                                                                |
-| `EMAIL_LETS_ENCRYPT`               | `contact@{FIRST_SERVER}` | multisite | no       | **Contact Email:** Email address used for Let's Encrypt notifications and included in certificates.                                                                         |
-| `LETS_ENCRYPT_CHALLENGE`           | `http`                   | multisite | no       | **Challenge Type:** Method used to verify domain ownership. Options: `http` or `dns`.                                                                                       |
-| `LETS_ENCRYPT_DNS_PROVIDER`        |                          | multisite | no       | **DNS Provider:** When using DNS challenges, the DNS provider to use (e.g., cloudflare, route53, digitalocean).                                                             |
-| `LETS_ENCRYPT_DNS_PROPAGATION`     | `default`                | multisite | no       | **DNS Propagation:** The time to wait for DNS propagation in seconds. Set to `default` to use provider's recommended value.                                                 |
-| `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` |                          | multisite | yes      | **Credential Item:** Configuration items for DNS provider authentication (e.g., `cloudflare_api_token 123456`). Values can be raw text, base64 encoded, or a JSON object.   |
-| `USE_LETS_ENCRYPT_WILDCARD`        | `no`                     | multisite | no       | **Wildcard Certificates:** When set to `yes`, creates wildcard certificates for all domains. Only available with DNS challenges.                                            |
-| `USE_LETS_ENCRYPT_STAGING`         | `no`                     | multisite | no       | **Use Staging:** When set to `yes`, uses Let's Encrypt's staging environment for testing. Staging has higher rate limits but produces certificates not trusted by browsers. |
-| `LETS_ENCRYPT_CLEAR_OLD_CERTS`     | `no`                     | global    | no       | **Clear Old Certificates:** When set to `yes`, removes old certificates that are no longer needed during renewal.                                                           |
+| Setting                            | Default                  | Context   | Multiple | Description                                                                                                                                                                          |
+| ---------------------------------- | ------------------------ | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `AUTO_LETS_ENCRYPT`                | `no`                     | multisite | no       | **Enable Let's Encrypt:** Set to `yes` to enable automatic certificate issuance and renewal.                                                                                         |
+| `EMAIL_LETS_ENCRYPT`               | `contact@{FIRST_SERVER}` | multisite | no       | **Contact Email:** Email address that is used for Let's Encrypt notifications and is included in certificates.                                                                       |
+| `LETS_ENCRYPT_CHALLENGE`           | `http`                   | multisite | no       | **Challenge Type:** Method used to verify domain ownership. Options: `http` or `dns`.                                                                                                |
+| `LETS_ENCRYPT_DNS_PROVIDER`        |                          | multisite | no       | **DNS Provider:** When using DNS challenges, the DNS provider to use (e.g., cloudflare, route53, digitalocean).                                                                      |
+| `LETS_ENCRYPT_DNS_PROPAGATION`     | `default`                | multisite | no       | **DNS Propagation:** The time to wait for DNS propagation in seconds. If no value is provided, the provider's default propagation time is used.                                      |
+| `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` |                          | multisite | yes      | **Credential Item:** Configuration items for DNS provider authentication (e.g., `cloudflare_api_token 123456`). Values can be raw text, base64 encoded, or a JSON object.            |
+| `USE_LETS_ENCRYPT_WILDCARD`        | `no`                     | multisite | no       | **Wildcard Certificates:** When set to `yes`, creates wildcard certificates for all domains. Only available with DNS challenges.                                                     |
+| `USE_LETS_ENCRYPT_STAGING`         | `no`                     | multisite | no       | **Use Staging:** When set to `yes`, uses Let's Encrypt's staging environment for testing. Staging has higher rate limits but produces certificates that are not trusted by browsers. |
+| `LETS_ENCRYPT_CLEAR_OLD_CERTS`     | `no`                     | global    | no       | **Clear Old Certificates:** When set to `yes`, removes old certificates that are no longer needed during renewal.                                                                    |
 
 !!! info "Information and behavior"
-    - The `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` setting is a multiple setting and can be used to set multiple items for the DNS provider. The items will be saved as a cache file and Certbot will read the credentials from it.
-    - If no `LETS_ENCRYPT_DNS_PROPAGATION` setting is set, the provider's default propagation time will be used.
+    - The `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` setting is a multiple setting and can be used to set multiple items for the DNS provider. The items will be saved as a cache file, and Certbot will read the credentials from it.
+    - If no `LETS_ENCRYPT_DNS_PROPAGATION` setting is provided, the provider's default propagation time is used.
     - Full Let's Encrypt automation using the `http` challenge works in stream mode as long as you open the `80/tcp` port from the outside. Use the `LISTEN_STREAM_PORT_SSL` setting to choose your listening SSL/TLS port.
 
 !!! tip "HTTP vs. DNS Challenges"

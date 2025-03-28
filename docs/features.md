@@ -226,10 +226,10 @@ Attackers often use automated tools (bots) to try and exploit your website. To p
 
 Follow these steps to enable and configure the Antibot feature:
 
-1.  **Choose a challenge type:** Decide which type of antibot challenge you want to use (e.g., [captcha](#__tabbed_1_3), [hcaptcha](#__tabbed_1_5), [javascript](#__tabbed_1_2)).
-2.  **Enable the feature:** Set the `USE_ANTIBOT` setting to your chosen challenge type in your BunkerWeb configuration.
-3.  **Configure the settings:** Adjust the other `ANTIBOT_*` settings as needed. For reCAPTCHA, hCaptcha, Turnstile and mCaptcha, you'll need to create an account with the respective service and obtain API keys.
-4.  **Important:** Ensure the `ANTIBOT_URI` is a unique URL on your site that is not in use.
+1. **Choose a challenge type:** Decide which type of antibot challenge to use (e.g., [captcha](#__tabbed_1_3), [hcaptcha](#__tabbed_1_5), [javascript](#__tabbed_1_2)).
+2. **Enable the feature:** Set the `USE_ANTIBOT` setting to your chosen challenge type in your BunkerWeb configuration.
+3. **Configure the settings:** Adjust the other `ANTIBOT_*` settings as needed. For reCAPTCHA, hCaptcha, Turnstile, and mCaptcha, you must create an account with the respective service and obtain API keys.
+4. **Important:** Ensure the `ANTIBOT_URI` is a unique URL on your site that is not in use.
 
 !!! important "About the `ANTIBOT_URI` Setting"
     Ensure the `ANTIBOT_URI` is a unique URL on your site that is not in use.
@@ -398,7 +398,7 @@ BunkerWeb allows you to specify certain users, IPs, or requests that should bypa
 
     mCaptcha is designed with privacy in mind. It is fully GDPR compliant, ensuring that all user data involved in the challenge process adheres to strict data protection standards. Additionally, mCaptcha offers the flexibility to be self-hosted, allowing organizations to maintain full control over their data and infrastructure. This self-hosting capability not only enhances privacy but also optimizes performance and customization to suit specific deployment needs.
 
-    To integrate mCaptcha with BunkerWeb, you must obtain the necessary credentials from the [mCaptcha](https://mcaptcha.org/) platform or yours. These credentials include a site key and a secret key for verification.
+    To integrate mCaptcha with BunkerWeb, you must obtain the necessary credentials from the [mCaptcha](https://mcaptcha.org/) platform or your own provider. These credentials include a site key and a secret key for verification.
 
     **Configuration Settings:**
 
@@ -504,11 +504,11 @@ BunkerWeb allows you to specify certain users, IPs, or requests that should bypa
 
 STREAM support :x:
 
-The Auth Basic plugin provides HTTP basic authentication to protect your website or specific resources. This feature adds an extra layer of security by requiring users to enter a username and password before they can access the protected content. This type of authentication is simple to implement and widely supported by browsers.
+The Auth Basic plugin provides HTTP basic authentication to protect your website or specific resources. This feature adds an extra layer of security by requiring users to enter a username and password before accessing protected content. This type of authentication is simple to implement and widely supported by browsers.
 
 **How it works:**
 
-1. When a user tries to access a protected area of your website, the server sends a challenge requesting authentication.
+1. When a user tries to access a protected area of your website, the server sends an authentication challenge.
 2. The browser displays a login dialog box prompting the user for a username and password.
 3. The user enters their credentials, which are sent to the server.
 4. If the credentials are valid, the user is granted access to the requested content.
@@ -534,7 +534,7 @@ Follow these steps to enable and configure Auth Basic authentication:
 | `AUTH_BASIC_TEXT`     | `Restricted area` | multisite | no       | **Prompt Text:** The message displayed in the authentication prompt shown to users.                                                        |
 
 !!! warning "Security Considerations"
-    HTTP Basic Authentication transmits credentials encoded (not encrypted) in Base64. While this is fine when used over HTTPS, it should not be considered secure over plain HTTP. Always enable SSL/TLS when using basic authentication.
+    HTTP Basic Authentication transmits credentials encoded (not encrypted) in Base64. While this is acceptable when used over HTTPS, it should not be considered secure over plain HTTP. Always enable SSL/TLS when using basic authentication.
 
 !!! tip "Using Multiple Credentials"
     You can configure multiple username/password pairs for access. Each `AUTH_BASIC_USER` setting should have a corresponding `AUTH_BASIC_PASSWORD` setting.
@@ -591,13 +591,13 @@ Follow these steps to enable and configure Auth Basic authentication:
 
 STREAM support :white_check_mark:
 
-The Backup plugin provides an automatic backup solution to protect your BunkerWeb data. This feature ensures the safety and availability of your important database by creating regular backups according to your preferred schedule. Backups are stored in a designated location and can be easily managed through both automatic processes and manual commands.
+The Backup plugin provides an automated backup solution to protect your BunkerWeb data. This feature ensures the safety and availability of your important database by creating regular backups according to your preferred schedule. Backups are stored in a designated location and can be easily managed through both automated processes and manual commands.
 
 **How it works:**
 
 1. Your database is automatically backed up according to the schedule you set (daily, weekly, or monthly).
 2. Backups are stored in a specified directory on your system.
-3. Old backups are automatically rotated out based on your retention settings.
+3. Old backups are automatically rotated based on your retention settings.
 4. You can manually create backups, list existing backups, or restore from a backup at any time.
 5. Before any restore operation, the current state is automatically backed up as a safety measure.
 
@@ -642,10 +642,10 @@ bwcli plugin backup restore /path/to/backup/backup-sqlite-2023-08-15_12-34-56.zi
 ```
 
 !!! tip "Safety First"
-    Before any restore operation, the Backup plugin automatically creates a backup of your current database state in a temporary location. This provides an additional safety net in case you need to revert the restore operation.
+    Before any restore operation, the Backup plugin automatically creates a backup of your current database state in a temporary location. This provides an extra safeguard in case you need to revert the restore operation.
 
 !!! warning "Database Compatibility"
-    The Backup plugin supports SQLite, MySQL/MariaDB, and PostgreSQL databases. Oracle databases are currently not supported for backup and restore operations.
+    The Backup plugin supports SQLite, MySQL/MariaDB, and PostgreSQL databases. Oracle databases are not currently supported for backup and restore operations.
 
 ### Example Configurations
 
@@ -708,6 +708,8 @@ STREAM support :white_check_mark:
 
 The Bad Behavior plugin protects your website by automatically detecting and banning IP addresses that generate too many errors or "bad" HTTP status codes within a specified period of time. This helps defend against brute force attacks, web scrapers, vulnerability scanners, and other malicious activities that might generate numerous error responses.
 
+Attackers often generate "suspicious" HTTP status codes when probing for or exploiting vulnerabilities—codes that a typical user is unlikely to trigger within a given time frame. By detecting this behavior, BunkerWeb can automatically ban the offending IP address, forcing the attacker to use a new IP address to continue their attempts.
+
 **How it works:**
 
 1. The plugin monitors HTTP responses from your site.
@@ -731,8 +733,11 @@ Follow these steps to configure and use the Bad Behavior feature:
 1. **Enable the feature:** The Bad Behavior feature is enabled by default. If needed, you can control this with the `USE_BAD_BEHAVIOR` setting.
 2. **Configure status codes:** Define which HTTP status codes should be considered "bad" using the `BAD_BEHAVIOR_STATUS_CODES` setting.
 3. **Set threshold values:** Determine how many "bad" responses should trigger a ban using the `BAD_BEHAVIOR_THRESHOLD` setting.
-4. **Configure time periods:** Set how long to count bad responses and how long bans should last using the `BAD_BEHAVIOR_COUNT_TIME` and `BAD_BEHAVIOR_BAN_TIME` settings.
-5. **Choose ban scope:** Decide whether bans should apply to just the current service or globally across all services using the `BAD_BEHAVIOR_BAN_SCOPE` setting.
+4. **Configure time periods:** Specify the duration for counting bad responses and the ban duration using the `BAD_BEHAVIOR_COUNT_TIME` and `BAD_BEHAVIOR_BAN_TIME` settings.
+5. **Choose ban scope:** Decide whether the bans should apply only to the current service or globally across all services using the `BAD_BEHAVIOR_BAN_SCOPE` setting.
+
+!!! tip "Stream Mode"
+    In **stream mode**, only the `444` status code is considered "bad" and will trigger this behavior.
 
 ### Configuration Settings
 
@@ -746,10 +751,10 @@ Follow these steps to configure and use the Bad Behavior feature:
 | `BAD_BEHAVIOR_BAN_SCOPE`    | `service`                     | multisite | no       | **Ban Scope:** Determines whether bans apply only to the current service (`service`) or to all services (`global`).                  |
 
 !!! warning "False Positives"
-    Be careful when setting the threshold and count time. Setting these values too low could potentially ban legitimate users who accidentally encounter errors while browsing your site.
+    Be careful when setting the threshold and count time. Setting these values too low may inadvertently ban legitimate users who encounter errors while browsing your site.
 
 !!! tip "Tuning Your Configuration"
-    Start with conservative settings (higher threshold, shorter ban time) and adjust based on your specific needs and traffic patterns. Monitor your logs to ensure legitimate users aren't being incorrectly banned.
+    Start with conservative settings (higher threshold, shorter ban time) and adjust based on your specific needs and traffic patterns. Monitor your logs to ensure that legitimate users are not mistakenly banned.
 
 ### Example Configurations
 
@@ -796,13 +801,13 @@ Follow these steps to configure and use the Bad Behavior feature:
 
 STREAM support :warning:
 
-The Blacklist plugin provides robust protection for your website by allowing you to block access based on various client attributes. This feature helps defend against known malicious entities, scanners, and suspicious visitors by denying access to IPs, networks, reverse DNS entries, ASNs, user agents, and specific URI patterns.
+The Blacklist plugin provides robust protection for your website by blocking access based on various client attributes. This feature defends against known malicious entities, scanners, and suspicious visitors by denying access based on IP addresses, networks, reverse DNS entries, ASNs, user agents, and specific URI patterns.
 
 **How it works:**
 
-1. The plugin checks incoming requests against multiple blacklist criteria (*IP addresses, networks, rDNS, ASN, User-Agent, or URI patterns*).
+1. The plugin checks incoming requests against multiple blacklist criteria (IP addresses, networks, rDNS, ASN, User-Agent, or URI patterns).
 2. Blacklists can be specified directly in your configuration or loaded from external URLs.
-3. If a visitor matches any blacklist rule (and doesn't match any ignore rule), their access is denied.
+3. If a visitor matches any blacklist rule (and does not match any ignore rule), access is denied.
 4. Blacklists are automatically updated on a regular schedule from configured URLs.
 5. You can customize exactly which criteria are checked and ignored based on your specific security needs.
 
@@ -815,6 +820,9 @@ Follow these steps to configure and use the Blacklist feature:
 3. **Set up ignore rules:** Specify any exceptions that should bypass the blacklist checks.
 4. **Add external sources:** Configure URLs for automatically downloading and updating blacklist data.
 5. **Monitor effectiveness:** Check the [web UI](web-ui.md) to see statistics on blocked requests.
+
+!!! info "stream mode"
+    When using stream mode, only IP, rDNS, and ASN checks will be performed.
 
 ### Configuration Settings
 
@@ -837,7 +845,7 @@ Follow these steps to configure and use the Blacklist feature:
     The default `BLACKLIST_IP_URLS` setting includes a URL that provides a **list of known Tor exit nodes**. This is a common source of malicious traffic and is a good starting point for many sites.
 
 === "Reverse DNS"
-    **What this does:** Blocks visitors based on their domain name (in reverse). This is useful for blocking known scanners and crawlers by their organization's domain.
+    **What this does:** Blocks visitors based on their reverse domain name. This is useful for blocking known scanners and crawlers based on their organization domains.
 
     | Setting                      | Default                 | Context   | Multiple | Description                                                                                          |
     | ---------------------------- | ----------------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------- |
@@ -850,7 +858,7 @@ Follow these steps to configure and use the Blacklist feature:
     The default `BLACKLIST_RDNS` setting includes common scanner domains like **Shodan** and **Censys**. These are often used by security researchers and scanners to identify vulnerable sites.
 
 === "ASN"
-    **What this does:** Blocks visitors from specific network providers. ASNs are like zip codes for the internet - they identify which provider or organization an IP belongs to.
+    **What this does:** Blocks visitors from specific network providers. ASNs are like ZIP codes for the Internet—they identify which provider or organization an IP belongs to.
 
     | Setting                     | Default | Context   | Multiple | Description                                                                         |
     | --------------------------- | ------- | --------- | -------- | ----------------------------------------------------------------------------------- |
@@ -860,7 +868,7 @@ Follow these steps to configure and use the Blacklist feature:
     | `BLACKLIST_IGNORE_ASN_URLS` |         | multisite | no       | **ASN Ignore List URLs:** List of URLs containing ASNs to ignore.                   |
 
 === "User Agent"
-    **What this does:** Blocks visitors based on what browser or tool they claim to be using. This is effective against many bots that honestly identify themselves (like "ScannerBot" or "WebHarvestTool").
+    **What this does:** Blocks visitors based on the browser or tool they claim to be using. This is effective against bots that honestly identify themselves (such as "ScannerBot" or "WebHarvestTool").
 
     | Setting                            | Default                                                                                                                        | Context   | Multiple | Description                                                                                             |
     | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ | --------- | -------- | ------------------------------------------------------------------------------------------------------- |
@@ -938,7 +946,7 @@ Follow these steps to configure and use the Blacklist feature:
 
 STREAM support :x:
 
-The Brotli plugin enables efficient compression of HTTP responses using the Brotli algorithm. This feature helps reduce bandwidth usage and improve page load times by compressing web content before it's sent to the client's browser.
+The Brotli plugin enables efficient compression of HTTP responses using the Brotli algorithm. This feature helps reduce bandwidth usage and improve page load times by compressing web content before it is sent to the client's browser.
 
 Compared to other compression methods like gzip, Brotli typically achieves higher compression ratios, resulting in smaller file sizes and faster content delivery.
 
@@ -1019,10 +1027,10 @@ The BunkerNet plugin enables collective threat intelligence sharing between Bunk
 **How it works:**
 
 1. Your BunkerWeb instance automatically registers with the BunkerNet API to receive a unique identifier.
-2. When your instance detects and blocks a malicious IP address or behavior, it anonymously reports this threat to BunkerNet.
+2. When your instance detects and blocks a malicious IP address or behavior, it anonymously reports the threat to BunkerNet.
 3. BunkerNet aggregates threat intelligence from all participating instances and distributes the consolidated database.
 4. Your instance regularly downloads an updated database of known threats from BunkerNet.
-5. This collective intelligence allows your instance to proactively block IPs that have exhibited malicious behavior on other BunkerWeb instances.
+5. This collective intelligence allows your instance to proactively block IP addresses that have exhibited malicious behavior on other BunkerWeb instances.
 
 !!! success "Key benefits"
 
@@ -1039,7 +1047,7 @@ Follow these steps to configure and use the BunkerNet feature:
 1. **Enable the feature:** The BunkerNet feature is enabled by default. If needed, you can control this with the `USE_BUNKERNET` setting.
 2. **Initial registration:** Upon first startup, your instance will automatically register with the BunkerNet API and receive a unique identifier.
 3. **Automatic updates:** Your instance will automatically download the latest threat database on a regular schedule.
-4. **Automatic reporting:** When your instance blocks a malicious IP, it will automatically contribute this data to the community.
+4. **Automatic reporting:** When your instance blocks a malicious IP address, it will automatically contribute this data to the community.
 5. **Monitor protection:** Check the [web UI](web-ui.md) to see statistics on threats blocked by BunkerNet intelligence.
 
 ### Configuration Settings
@@ -1053,7 +1061,7 @@ Follow these steps to configure and use the BunkerNet feature:
     When BunkerNet detects that an IP address has been involved in malicious activity across multiple BunkerWeb instances, it adds that IP to a collective blacklist. This provides a proactive defense layer, protecting your site from threats before they can target you directly.
 
 !!! info "Anonymous Reporting"
-    When reporting threat information to BunkerNet, your instance only shares the necessary data to identify the threat: the IP address, the reason for blocking, and minimal contextual data. No personal information about your users or sensitive details about your site are shared.
+    When reporting threat information to BunkerNet, your instance only shares the necessary data to identify the threat: the IP address, the reason for blocking, and minimal contextual data. No personal information about your users or sensitive details about your site is shared.
 
 ### Example Configurations
 
@@ -1083,6 +1091,67 @@ Follow these steps to configure and use the BunkerNet feature:
     BUNKERNET_SERVER: "https://bunkernet.example.com"
     ```
 
+### CrowdSec Console integration
+
+If you aren’t already familiar with CrowdSec Console integration, [CrowdSec](https://www.crowdsec.net/?utm_campaign=bunkerweb&utm_source=doc) leverages crowdsourced intelligence to combat cyber threats. Think of it as the "Waze of cybersecurity"—when one server is attacked, other systems worldwide are alerted and protected from the same attackers. You can learn more about it [here](https://www.crowdsec.net/about?utm_campaign=bunkerweb&utm_source=blog).
+
+Through our partnership with CrowdSec, you can enroll your BunkerWeb instances into your [CrowdSec Console](https://app.crowdsec.net/signup?utm_source=external-blog&utm_medium=cta&utm_campaign=bunker-web-integration). This means that attacks blocked by BunkerWeb will be visible in your CrowdSec Console alongside attacks blocked by CrowdSec Security Engines, giving you a unified view of threats.
+
+Importantly, CrowdSec does not need to be installed for this integration (though we highly recommend trying it out with the [CrowdSec plugin for BunkerWeb](https://github.com/bunkerity/bunkerweb-plugins/tree/main/crowdsec) to further enhance the security of your web services). Additionally, you can enroll your CrowdSec Security Engines into the same Console account for even greater synergy.
+
+**Step #1: Create your CrowdSec Console account**
+
+Go to the [CrowdSec Console](https://app.crowdsec.net/signup?utm_source=external-blog&utm_medium=cta&utm_campaign=bunker-web-integration) and register if you don’t already have an account. Once done, note the enroll key found under "Security Engines" after clicking on "Add Security Engine":
+
+<figure markdown>
+  ![Overview](assets/img/crowdity1.png){ align=center }
+  <figcaption>Get your Crowdsec Console enroll key</figcaption>
+</figure>
+
+**Step #2: Get your BunkerNet ID**
+
+Activating the BunkerNet feature (enabled by default) is mandatory if you want to enroll your BunkerWeb instance(s) in your CrowdSec Console. Enable it by setting `USE_BUNKERNET` to `yes`.
+
+For Docker, get your BunkerNet ID using:
+
+```shell
+docker exec my-bw-scheduler cat /var/cache/bunkerweb/bunkernet/instance.id
+```
+
+For Linux, use:
+
+```shell
+cat /var/cache/bunkerweb/bunkernet/instance.id
+```
+
+**Step #3: Enroll your instance using the Panel**
+
+Once you have your BunkerNet ID and CrowdSec Console enroll key, [order the free product "BunkerNet / CrowdSec" on the Panel](https://panel.bunkerweb.io/order/bunkernet/11?utm_campaign=self&utm_source=doc). You may be prompted to create an account if you haven’t already.
+
+You can now select the "BunkerNet / CrowdSec" service and fill out the form by pasting your BunkerNet ID and CrowdSec Console enroll key:
+
+<figure markdown>
+  ![Overview](assets/img/crowdity2.png){ align=center }
+  <figcaption>Enroll your BunkerWeb instance into the CrowdSec Console</figcaption>
+</figure>
+
+**Step #4: Accept the new security engine on the Console**
+
+Then, go back to your CrowdSec Console and accept the new Security Engine:
+
+<figure markdown>
+  ![Overview](assets/img/crowdity3.png){ align=center }
+  <figcaption>Accept enroll into the CrowdSec Console</figcaption>
+</figure>
+
+**Congratulations, your BunkerWeb instance is now enrolled in your CrowdSec Console!**
+
+Pro tip: When viewing your alerts, click the "columns" option and check the "context" checkbox to access BunkerWeb-specific data.
+
+<figure markdown>
+  ![Overview](assets/img/crowdity4.png){ align=center }
+  <figcaption>BunkerWeb data shown in the context column</figcaption>
+</figure>
 ## CORS
 
 STREAM support :x:
@@ -1094,8 +1163,8 @@ The CORS plugin enables Cross-Origin Resource Sharing for your website, allowing
 1. When a browser makes a cross-origin request to your website, it first sends a preflight request with the `OPTIONS` method.
 2. BunkerWeb checks if the requesting origin is permitted based on your configuration.
 3. If allowed, BunkerWeb responds with the appropriate CORS headers that define what the requesting site can do.
-4. For non-permitted origins, the request can be either denied completely or served without CORS headers.
-5. Additional cross-origin policies (COEP, COOP, CORP) can be configured to further enhance security.
+4. For non-permitted origins, the request can be either completely denied or served without CORS headers.
+5. Additional cross-origin policies, such as [COEP](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Embedder-Policy), [COOP](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Opener-Policy), and [CORP](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Resource-Policy), can be configured to further enhance security.
 
 ### How to Use
 
@@ -1109,27 +1178,36 @@ Follow these steps to configure and use the CORS feature:
 
 ### Configuration Settings
 
-| Setting                        | Default                                                                              | Context   | Multiple | Description                                                                                                  |
-| ------------------------------ | ------------------------------------------------------------------------------------ | --------- | -------- | ------------------------------------------------------------------------------------------------------------ |
-| `USE_CORS`                     | `no`                                                                                 | multisite | no       | **Enable CORS:** Set to `yes` to enable Cross-Origin Resource Sharing.                                       |
-| `CORS_ALLOW_ORIGIN`            | `self`                                                                               | multisite | no       | **Allowed Origins:** PCRE regex of allowed origins, `*` for any origin, or `self` for same-origin only.      |
-| `CORS_ALLOW_METHODS`           | `GET, POST, OPTIONS`                                                                 | multisite | no       | **Allowed Methods:** HTTP methods that can be used in cross-origin requests.                                 |
-| `CORS_ALLOW_HEADERS`           | `DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range` | multisite | no       | **Allowed Headers:** HTTP headers that can be used in cross-origin requests.                                 |
-| `CORS_ALLOW_CREDENTIALS`       | `no`                                                                                 | multisite | no       | **Allow Credentials:** Set to `yes` to allow credentials (cookies, HTTP authentication) in CORS requests.    |
-| `CORS_EXPOSE_HEADERS`          | `Content-Length,Content-Range`                                                       | multisite | no       | **Exposed Headers:** HTTP headers that browsers are permitted to access from cross-origin responses.         |
-| `CROSS_ORIGIN_OPENER_POLICY`   | `same-origin`                                                                        | multisite | no       | **Cross-Origin-Opener-Policy:** Controls communication between browsing contexts.                            |
-| `CROSS_ORIGIN_EMBEDDER_POLICY` | `require-corp`                                                                       | multisite | no       | **Cross-Origin-Embedder-Policy:** Controls whether document can load resources from other origins.           |
-| `CROSS_ORIGIN_RESOURCE_POLICY` | `same-site`                                                                          | multisite | no       | **Cross-Origin-Resource-Policy:** Controls which websites can embed your resources.                          |
-| `CORS_MAX_AGE`                 | `86400`                                                                              | multisite | no       | **Preflight Cache Duration:** How long (in seconds) browsers should cache the preflight response.            |
-| `CORS_DENY_REQUEST`            | `yes`                                                                                | multisite | no       | **Deny Unauthorized Origins:** When `yes`, requests from unauthorized origins are denied with an error code. |
+| Setting                        | Default                                                                              | Context   | Multiple | Description                                                                                                                        |
+| ------------------------------ | ------------------------------------------------------------------------------------ | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_CORS`                     | `no`                                                                                 | multisite | no       | **Enable CORS:** Set to `yes` to enable Cross-Origin Resource Sharing.                                                             |
+| `CORS_ALLOW_ORIGIN`            | `self`                                                                               | multisite | no       | **Allowed Origins:** PCRE regular expression representing allowed origins; use `*` for any origin, or `self` for same-origin only. |
+| `CORS_ALLOW_METHODS`           | `GET, POST, OPTIONS`                                                                 | multisite | no       | **Allowed Methods:** HTTP methods that can be used in cross-origin requests.                                                       |
+| `CORS_ALLOW_HEADERS`           | `DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range` | multisite | no       | **Allowed Headers:** HTTP headers that can be used in cross-origin requests.                                                       |
+| `CORS_ALLOW_CREDENTIALS`       | `no`                                                                                 | multisite | no       | **Allow Credentials:** Set to `yes` to allow credentials (cookies, HTTP authentication) in CORS requests.                          |
+| `CORS_EXPOSE_HEADERS`          | `Content-Length,Content-Range`                                                       | multisite | no       | **Exposed Headers:** HTTP headers that browsers are permitted to access from cross-origin responses.                               |
+| `CROSS_ORIGIN_OPENER_POLICY`   | `same-origin`                                                                        | multisite | no       | **Cross-Origin-Opener-Policy:** Controls communication between browsing contexts.                                                  |
+| `CROSS_ORIGIN_EMBEDDER_POLICY` | `require-corp`                                                                       | multisite | no       | **Cross-Origin-Embedder-Policy:** Controls whether a document can load resources from other origins.                               |
+| `CROSS_ORIGIN_RESOURCE_POLICY` | `same-site`                                                                          | multisite | no       | **Cross-Origin-Resource-Policy:** Controls which websites can embed your resources.                                                |
+| `CORS_MAX_AGE`                 | `86400`                                                                              | multisite | no       | **Preflight Cache Duration:** How long (in seconds) browsers should cache the preflight response.                                  |
+| `CORS_DENY_REQUEST`            | `yes`                                                                                | multisite | no       | **Deny Unauthorized Origins:** When `yes`, requests from unauthorized origins are denied with an error code.                       |
 
 !!! tip "Optimizing Preflight Requests"
     The `CORS_MAX_AGE` setting determines how long browsers will cache the results of a preflight request. Setting this to a higher value (like the default 86400 seconds/24 hours) reduces the number of preflight requests, improving performance for frequently accessed resources.
 
 !!! warning "Security Considerations"
-    Be cautious when setting `CORS_ALLOW_ORIGIN` to `*` (all origins) or `CORS_ALLOW_CREDENTIALS` to `yes`, as these configurations can introduce security risks if not properly managed. It's generally safer to explicitly list trusted origins and limit the allowed methods and headers.
+    Be cautious when setting `CORS_ALLOW_ORIGIN` to `*` (all origins) or `CORS_ALLOW_CREDENTIALS` to `yes` because these configurations may introduce security risks if not properly managed. It's generally safer to explicitly list trusted origins and limit the allowed methods and headers.
 
 ### Example Configurations
+
+Here are examples of possible values for the `CORS_ALLOW_ORIGIN` setting, along with their behavior:
+
+- **`*`**: Allows requests from all origins.
+- **`self`**: Automatically allows requests from the same origin as the configured server_name.
+- **`^https://www\.example\.com$`**: Allows requests only from `https://www.example.com`.
+- **`^https://.+\.example\.com$`**: Allows requests from any subdomain ending with `.example.com`.
+- **`^https://(www\.example1\.com|www\.example2\.com)$`**: Allows requests from either `https://www.example1.com` or `https://www.example2.com`.
+- **`^https?://www\.example\.com$`**: Allows requests from both `https://www.example.com` and `http://www.example.com`.
 
 === "Basic Configuration"
 
@@ -1160,7 +1238,7 @@ Follow these steps to configure and use the CORS feature:
 
 === "Multiple Trusted Domains"
 
-    Configuration for allowing multiple specific domains with a single PCRE regex pattern:
+    Configuration for allowing multiple specific domains with a single PCRE regular expression pattern:
 
     ```yaml
     USE_CORS: "yes"
@@ -1175,7 +1253,7 @@ Follow these steps to configure and use the CORS feature:
 
 === "Subdomain Wildcard"
 
-    Configuration allowing all subdomains of a primary domain using PCRE regex pattern:
+    Configuration allowing all subdomains of a primary domain using a PCRE regular expression pattern:
 
     ```yaml
     USE_CORS: "yes"
@@ -1205,25 +1283,25 @@ Follow these steps to configure and use the CORS feature:
 
 STREAM support :x:
 
-The Client Cache plugin optimizes website performance by controlling how browsers cache your static content. This feature helps reduce bandwidth usage, server load, and improves page load times by instructing client browsers to store and reuse static assets like images, CSS, and JavaScript files locally instead of requesting them on every page visit.
+The Client Cache plugin optimizes website performance by controlling how browsers cache static content. It reduces bandwidth usage, lowers server load, and improves page load times by instructing browsers to store and reuse static assets—such as images, CSS, and JavaScript files—locally instead of requesting them on every page visit.
 
 **How it works:**
 
 1. When enabled, BunkerWeb adds Cache-Control headers to responses for static files.
 2. These headers tell browsers how long they should cache the content locally.
 3. For files with specified extensions (like images, CSS, JavaScript), BunkerWeb applies the configured caching policy.
-4. Optional ETag support provides additional validation mechanisms to determine if cached content is still fresh.
-5. When visitors return to your site, their browsers can use locally cached files instead of downloading them again, resulting in faster page loads.
+4. Optional ETag support provides an additional validation mechanism to determine whether cached content is still fresh.
+5. When visitors return to your site, their browsers can use locally cached files instead of downloading them again, resulting in faster page load times.
 
 ### How to Use
 
 Follow these steps to configure and use the Client Cache feature:
 
-1. **Enable the feature:** The Client Cache feature is disabled by default. Set the `USE_CLIENT_CACHE` setting to `yes` to enable it.
+1. **Enable the feature:** The Client Cache feature is disabled by default; set the `USE_CLIENT_CACHE` setting to `yes` to enable it.
 2. **Configure file extensions:** Specify which file types should be cached using the `CLIENT_CACHE_EXTENSIONS` setting.
 3. **Set cache control directives:** Customize how clients should cache content using the `CLIENT_CACHE_CONTROL` setting.
 4. **Configure ETag support:** Decide whether to enable ETags for validating cache freshness with the `CLIENT_CACHE_ETAG` setting.
-5. **Let BunkerWeb handle the rest:** Once configured, caching headers will be automatically applied to eligible responses.
+5. **Let BunkerWeb handle the rest:** Once configured, caching headers are applied automatically to eligible responses.
 
 ### Configuration Settings
 
@@ -1279,7 +1357,7 @@ Follow these steps to configure and use the Client Cache feature:
 
 STREAM support :white_check_mark:
 
-The Country plugin enables geo-blocking functionality for your website, allowing you to restrict access based on the geographic location of your visitors. This feature helps you comply with regional regulations, prevent fraudulent activities from high-risk regions, or implement content restrictions based on geographic boundaries.
+The Country plugin enables geo-blocking functionality for your website, allowing you to restrict access based on the geographic location of your visitors. This feature helps you comply with regional regulations, prevent fraudulent activities often associated with high-risk regions, and implement content restrictions based on geographic boundaries.
 
 **How it works:**
 
@@ -1312,7 +1390,7 @@ Follow these steps to configure and use the Country feature:
     - Use the blacklist when you want to block access from specific problematic regions while allowing everyone else.
 
 !!! warning "Precedence Rule"
-    If both whitelist and blacklist are configured, the whitelist takes precedence. This means the system will first check if a country is whitelisted; if not, access is denied regardless of the blacklist setting.
+    If both whitelist and blacklist are configured, the whitelist takes precedence. This means the system first checks if a country is whitelisted; if not, access is denied regardless of the blacklist configuration.
 
 !!! info "Country Detection"
     BunkerWeb uses the [lite db-ip mmdb database](https://db-ip.com/db/download/ip-to-country-lite) to determine the country of origin based on IP addresses.
@@ -1361,13 +1439,13 @@ STREAM support :x:
 
 The CrowdSec plugin integrates BunkerWeb with the CrowdSec security engine, providing an additional layer of protection against various cyber threats. This plugin acts as a [CrowdSec](https://crowdsec.net/?utm_source=external-docs&utm_medium=cta&utm_campaign=bunker-web-docs) bouncer, denying requests based on decisions from the CrowdSec API.
 
-CrowdSec is a modern, open-source security engine that detects and blocks malicious IP addresses based on behavior analysis and collective intelligence from its community. You can also configure [scenarios](https://docs.crowdsec.net/docs/concepts?utm_source=external-docs&utm_medium=cta&utm_campaign=bunker-web-docs#scenarios) to automatically ban IPs based on suspicious behaviors, benefiting from a crowdsourced blacklist.
+CrowdSec is a modern, open-source security engine that detects and blocks malicious IP addresses based on behavioral analysis and collective intelligence from its community. You can also configure [scenarios](https://docs.crowdsec.net/docs/concepts?utm_source=external-docs&utm_medium=cta&utm_campaign=bunker-web-docs#scenarios) to automatically ban IP addresses based on suspicious behavior, benefiting from a crowdsourced blacklist.
 
 **How it works:**
 
 1. The CrowdSec engine analyzes logs and detects suspicious activities on your infrastructure.
-2. When a malicious activity is detected, CrowdSec creates a "decision" to block the offending IP address.
-3. BunkerWeb, acting as a "bouncer," queries the CrowdSec Local API for decisions about incoming requests.
+2. When malicious activity is detected, CrowdSec creates a decision to block the offending IP address.
+3. BunkerWeb, acting as a bouncer, queries the CrowdSec Local API for decisions about incoming requests.
 4. If a client's IP address has an active block decision, BunkerWeb denies access to the protected services.
 5. Optionally, the Application Security Component can perform deep request inspection for enhanced security.
 
@@ -1383,7 +1461,7 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
 === "Docker"
     **Acquisition file**
 
-    You will need to run CrowdSec instance and configure it to parse BunkerWeb logs. Because BunkerWeb is based on NGINX, you can use the `nginx` value for the `type` parameter in your acquisition file (assuming that BunkerWeb logs are stored "as is" without additional data) :
+    You will need to run a CrowdSec instance and configure it to parse BunkerWeb logs. Since BunkerWeb is based on NGINX, you can use the `nginx` value for the `type` parameter in your acquisition file (assuming that BunkerWeb logs are stored as is without additional data):
 
     ```yaml
     filenames:
@@ -1394,7 +1472,7 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
 
     **Application Security Component (*optional*)**
 
-    CrowdSec also provides an [Application Security Component](https://docs.crowdsec.net/docs/appsec/intro?utm_source=external-docs&utm_medium=cta&utm_campaign=bunker-web-docs) that can be used to protect your application from attacks. You can configure the plugin to send requests to the AppSec Component for further analysis. If you want to use it, you will need to create another acquisition file for the AppSec Component :
+    CrowdSec also provides an [Application Security Component](https://docs.crowdsec.net/docs/appsec/intro?utm_source=external-docs&utm_medium=cta&utm_campaign=bunker-web-docs) that can be used to protect your application from attacks. If you want to use it, you must create another acquisition file for the AppSec Component:
 
     ```yaml
     appsec_config: crowdsecurity/appsec-default
@@ -1406,7 +1484,7 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
 
     **Syslog**
 
-    For container-based integrations, we recommend you to redirect the logs of the BunkerWeb container to a syslog service that will store the logs so CrowdSec can access it easily. Here is an example configuration for syslog-ng that will store raw logs coming from BunkerWeb to a local `/var/log/bunkerweb.log` file :
+    For container-based integrations, we recommend redirecting the logs of the BunkerWeb container to a syslog service so CrowdSec can access them easily. Here is an example configuration for syslog-ng that will store raw logs coming from BunkerWeb to a local `/var/log/bunkerweb.log` file:
 
     ```syslog
     @version: 4.8
@@ -1434,7 +1512,7 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
 
     **Docker Compose**
 
-    Here is the docker-compose boilerplate that you can use (**don't forget to edit the bouncer key**) :
+    Here is the docker-compose boilerplate that you can use (don’t forget to update the bouncer key):
 
     ```yaml
     x-bw-env: &bw-env
@@ -1545,9 +1623,9 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
 
 === "Linux"
 
-    You'll need to install CrowdSec and configure it to parse BunkerWeb logs. To do so, you can follow the [official documentation](https://doc.crowdsec.net/docs/getting_started/install_crowdsec?utm_source=external-docs&utm_medium=cta&utm_campaign=bunker-web-docs#scenarios).
+    You need to install CrowdSec and configure it to parse BunkerWeb logs. Follow the [official documentation](https://doc.crowdsec.net/docs/getting_started/install_crowdsec?utm_source=external-docs&utm_medium=cta&utm_campaign=bunker-web-docs#scenarios).
 
-    For CrowdSec to parse BunkerWeb logs, you have to add the following lines to your acquisition file located in `/etc/crowdsec/acquis.yaml` :
+    To enable CrowdSec to parse BunkerWeb logs, add the following lines to your acquisition file located at `/etc/crowdsec/acquis.yaml`:
 
     ```yaml
     filenames:
@@ -1558,16 +1636,16 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
         type: nginx
     ```
 
-    Now we have to add our custom bouncer to the CrowdSec API. To do so, you can use the `cscli` tool :
+    Now, add your custom bouncer to the CrowdSec API using the `cscli` tool:
 
     ```shell
     sudo cscli bouncers add crowdsec-bunkerweb-bouncer/v1.6
     ```
 
     !!! warning "API key"
-        Keep the key generated by the `cscli` command, you will need it later.
+        Keep the key generated by the `cscli` command; you will need it later.
 
-    Now restart the CrowdSec service :
+    Then restart the CrowdSec service:
 
     ```shell
     sudo systemctl restart crowdsec
@@ -1575,7 +1653,7 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
 
     **Application Security Component (*optional*)**
 
-    If you want to use the AppSec Component, you will need to create another acquisition file for it located in `/etc/crowdsec/acquis.d/appsec.yaml` :
+    If you want to use the AppSec Component, you must create another acquisition file for it located at `/etc/crowdsec/acquis.d/appsec.yaml`:
 
     ```yaml
     appsec_config: crowdsecurity/appsec-default
@@ -1585,24 +1663,22 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
     source: appsec
     ```
 
-    And you will need to install the AppSec Component's collections :
+    You will also need to install the AppSec Component's collections:
 
     ```shell
     sudo cscli collections install crowdsecurity/appsec-virtual-patching
     sudo cscli collections install crowdsecurity/appsec-generic-rules
     ```
 
-    Now you just have to restart the CrowdSec service :
+    Finally, restart the CrowdSec service:
 
     ```shell
     sudo systemctl restart crowdsec
     ```
 
-    If you need more information about the AppSec Component, you can refer to the [official documentation](https://docs.crowdsec.net/docs/appsec/intro?utm_source=external-docs&utm_medium=cta&utm_campaign=bunker-web-docs#scenarios).
-
     **Settings**
 
-    Now you can configure the plugin by adding the following settings to your BunkerWeb configuration file :
+    Configure the plugin by adding the following settings to your BunkerWeb configuration file:
 
     ```env
     USE_CROWDSEC=yes
@@ -1612,7 +1688,7 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
     CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
     ```
 
-    And finally reload the BunkerWeb service :
+    Finally, reload the BunkerWeb service:
 
     ```shell
     sudo systemctl reload bunkerweb
@@ -1646,13 +1722,13 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
 
 !!! info "About Operation Modes"
     - **Live mode** queries the CrowdSec API for each incoming request, providing real-time protection at the cost of higher latency.
-    - **Stream mode** periodically downloads all decisions from the CrowdSec API and caches them locally, reducing latency but with a slight delay in applying new decisions.
+    - **Stream mode** periodically downloads all decisions from the CrowdSec API and caches them locally, reducing latency with a slight delay in applying new decisions.
 
 ### Example Configurations
 
 === "Basic Configuration"
 
-    A simple configuration with CrowdSec running on the same host:
+    This is a simple configuration for when CrowdSec runs on the same host:
 
     ```yaml
     USE_CROWDSEC: "yes"
@@ -1684,25 +1760,31 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
 
 STREAM support :white_check_mark:
 
-The Custom SSL certificate plugin allows you to use your own SSL/TLS certificates with BunkerWeb instead of the automatically generated ones. This feature is particularly useful when you have existing certificates from a trusted Certificate Authority (CA), need to use certificates with specific configurations, or want to maintain consistent certificate management across your infrastructure.
+The Custom SSL certificate plugin allows you to use your own SSL/TLS certificates with BunkerWeb instead of the automatically generated ones. This feature is particularly useful if you have existing certificates from a trusted Certificate Authority (CA), need to use certificates with specific configurations, or want to maintain consistent certificate management across your infrastructure.
 
 **How it works:**
 
 1. You provide BunkerWeb with your certificate and private key files, either by specifying file paths or by providing the data in base64-encoded format.
-2. BunkerWeb validates your certificate and key to ensure they're properly formatted and usable.
+2. BunkerWeb validates your certificate and key to ensure they are properly formatted and usable.
 3. When a secure connection is established, BunkerWeb serves your custom certificate instead of the auto-generated one.
-4. BunkerWeb automatically monitors your certificate's validity and will display warnings if it's approaching expiration.
+4. BunkerWeb automatically monitors your certificate's validity and displays warnings if it is approaching expiration.
 5. You have full control over certificate management, allowing you to use certificates from any issuer you prefer.
+
+!!! info "Automatic Certificate Monitoring"
+    When you enable custom SSL/TLS by setting `USE_CUSTOM_SSL` to `yes`, BunkerWeb automatically monitors the custom certificate specified in `CUSTOM_SSL_CERT`. It checks for changes daily and reloads NGINX if any modifications are detected, ensuring the latest certificate is always in use.
 
 ### How to Use
 
 Follow these steps to configure and use the Custom SSL certificate feature:
 
 1. **Enable the feature:** Set the `USE_CUSTOM_SSL` setting to `yes` to enable custom certificate support.
-2. **Choose a method:** Decide whether to provide certificates via file paths or as base64-encoded data, and set the priority with `CUSTOM_SSL_CERT_PRIORITY`.
+2. **Choose a method:** Decide whether to provide certificates via file paths or as base64-encoded data, and set the priority using `CUSTOM_SSL_CERT_PRIORITY`.
 3. **Provide certificate files:** If using file paths, specify the locations of your certificate and private key files.
 4. **Or provide certificate data:** If using base64 data, provide your certificate and key as base64-encoded strings.
-5. **Let BunkerWeb handle the rest:** Once configured, BunkerWeb will automatically use your custom certificates for all HTTPS connections.
+5. **Let BunkerWeb handle the rest:** Once configured, BunkerWeb automatically uses your custom certificates for all HTTPS connections.
+
+!!! tip "Stream Mode Configuration"
+    For stream mode, you must configure the `LISTEN_STREAM_PORT_SSL` setting to specify the SSL/TLS listening port. This step is essential for proper operation in stream mode.
 
 ### Configuration Settings
 
@@ -1723,6 +1805,7 @@ Follow these steps to configure and use the Custom SSL certificate feature:
 
 !!! info "Certificate Chains"
     If your certificate includes a chain (intermediates), you should provide the full certificate chain in the correct order, with your certificate first, followed by any intermediate certificates.
+
 
 ### Example Configurations
 
@@ -1765,13 +1848,13 @@ Follow these steps to configure and use the Custom SSL certificate feature:
 
 STREAM support :white_check_mark:
 
-The DNSBL (DNS-based Blacklist) plugin enables protection against known malicious IP addresses by checking client IPs against external DNSBL servers. This feature helps guard your website against spam, botnets, and various types of cyber threats by leveraging community-maintained lists of problematic IP addresses.
+The DNSBL (Domain Name System Blacklist) plugin provides protection against known malicious IP addresses by checking client IP addresses against external DNSBL servers. This feature helps guard your website against spam, botnets, and various types of cyber threats by leveraging community-maintained lists of problematic IP addresses.
 
 **How it works:**
 
-1. When a visitor connects to your website, BunkerWeb checks their IP address against configured DNSBL servers.
-2. The check is performed by sending a reverse DNS query to each DNSBL server with the visitor's IP address.
-3. If the IP is listed in any of the DNSBL servers, access to your website is denied.
+1. When a client connects to your website, BunkerWeb queries the DNSBL servers you have chosen using the DNS protocol.
+2. The check is performed by sending a reverse DNS query to each DNSBL server with the client's IP address.
+3. If any DNSBL server confirms that the client's IP address is listed as malicious, BunkerWeb will automatically ban the client, preventing potential threats from reaching your application.
 4. Results are cached to improve performance for repeat visitors from the same IP address.
 5. Lookups are performed efficiently using asynchronous queries to minimize impact on page load times.
 
@@ -1832,17 +1915,17 @@ Follow these steps to configure and use the DNSBL feature:
 
 STREAM support :white_check_mark:
 
-The Database plugin provides a robust database integration system for BunkerWeb, enabling centralized storage and management of configuration data, logs, and other important information.
+The Database plugin provides a robust database integration for BunkerWeb by enabling centralized storage and management of configuration data, logs, and other essential information.
 
-This core component supports multiple database engines, including SQLite, PostgreSQL, MySQL/MariaDB, and Oracle - allowing you to choose the database solution that best fits your environment and requirements.
+This core component supports multiple database engines, including SQLite, PostgreSQL, MySQL/MariaDB, and Oracle, allowing you to choose the database solution that best fits your environment and requirements.
 
 **How it works:**
 
-1. BunkerWeb connects to your configured database using the provided URI, following SQLAlchemy format.
+1. BunkerWeb connects to your configured database using the provided URI in the SQLAlchemy format.
 2. Critical configuration data, runtime information, and job logs are stored securely in the database.
-3. Automatic maintenance processes keep your database optimized by managing data growth and cleaning up excess records.
-4. For high-availability scenarios, you can configure a read-only database URI that serves as both a failover and a way to offload read operations.
-5. Database operations are logged according to your specified log level, providing visibility into database interactions as needed.
+3. Automatic maintenance processes optimize your database by managing data growth and cleaning up excess records.
+4. For high-availability scenarios, you can configure a read-only database URI that serves both as a failover and as a method to offload read operations.
+5. Database operations are logged according to your specified log level, providing appropriate visibility into database interactions.
 
 ### How to Use
 
@@ -1856,7 +1939,7 @@ Follow these steps to configure and use the Database feature:
 
 | Setting                  | Default                                   | Context | Multiple | Description                                                                                                           |
 | ------------------------ | ----------------------------------------- | ------- | -------- | --------------------------------------------------------------------------------------------------------------------- |
-| `DATABASE_URI`           | `sqlite:////var/lib/bunkerweb/db.sqlite3` | global  | no       | **Database URI:** The primary database connection string, following the SQLAlchemy format.                            |
+| `DATABASE_URI`           | `sqlite:////var/lib/bunkerweb/db.sqlite3` | global  | no       | **Database URI:** The primary database connection string in the SQLAlchemy format.                                    |
 | `DATABASE_URI_READONLY`  |                                           | global  | no       | **Read-Only Database URI:** Optional database for read-only operations or as a failover if the main database is down. |
 | `DATABASE_LOG_LEVEL`     | `warning`                                 | global  | no       | **Log Level:** The verbosity level for database logs. Options: `debug`, `info`, `warn`, `warning`, or `error`.        |
 | `DATABASE_MAX_JOBS_RUNS` | `10000`                                   | global  | no       | **Maximum Job Runs:** The maximum number of job execution records to retain in the database before automatic cleanup. |
@@ -1876,29 +1959,29 @@ Follow these steps to configure and use the Database feature:
     - Oracle: `oracle://username:password@hostname:port/database`
 
 !!! warning "Database Maintenance"
-    The plugin automatically runs a daily job to clean up excess job runs based on the `DATABASE_MAX_JOBS_RUNS` setting. This prevents unbounded database growth while maintaining a useful history of job executions.
+    The plugin automatically runs a daily job that cleans up excess job runs based on the `DATABASE_MAX_JOBS_RUNS` setting. This prevents unbounded database growth while maintaining a useful history of job executions.
 
 ## Errors
 
 STREAM support :x:
 
-The Errors plugin provides customizable error handling for your website, allowing you to configure how HTTP error responses are displayed to users. This feature helps you present user-friendly, branded error pages that enhance user experience during error scenarios, instead of displaying the default server error pages that can appear technical and confusing to visitors.
+The Errors plugin provides customizable error handling for your website, letting you configure how HTTP error responses appear to users. This feature helps you present user-friendly, branded error pages that enhance the user experience during error scenarios, rather than displaying default server error pages, which can seem technical and confusing to visitors.
 
 **How it works:**
 
-1. When a client encounters an HTTP error (like 400, 404, 500), BunkerWeb intercepts the error response.
+1. When a client encounters an HTTP error (for example, 400, 404, or 500), BunkerWeb intercepts the error response.
 2. Instead of showing the default error page, BunkerWeb displays a custom, professionally designed error page.
-3. Error pages are fully customizable through your configuration, letting you specify custom pages for specific error codes.
+3. Error pages are fully customizable through your configuration, allowing you to specify custom pages for specific error codes.
 4. The default error pages provide clear explanations, helping users understand what went wrong and what they can do next.
 
 ### How to Use
 
 Follow these steps to configure and use the Errors feature:
 
-1. **Define custom error pages:** Specify which HTTP error codes should use custom error pages with the `ERRORS` setting.
+1. **Define custom error pages:** Specify which HTTP error codes should use custom error pages using the `ERRORS` setting.
 2. **Configure your error pages:** For each error code, you can use the default BunkerWeb error page or provide your own custom HTML page.
 3. **Set intercepted error codes:** Select which error codes should always be handled by BunkerWeb with the `INTERCEPTED_ERROR_CODES` setting.
-4. **Let BunkerWeb handle the rest:** Once configured, error handling happens automatically for all specified error codes.
+4. **Let BunkerWeb handle the rest:** Once configured, error handling occurs automatically for all specified error codes.
 
 ### Configuration Settings
 
@@ -1908,18 +1991,18 @@ Follow these steps to configure and use the Errors feature:
 | `INTERCEPTED_ERROR_CODES` | `400 401 403 404 405 413 429 500 501 502 503 504` | multisite | no       | **Intercepted Errors:** List of HTTP error codes that BunkerWeb should handle with its default error page when no custom page is specified. |
 
 !!! tip "Error Page Design"
-    The default BunkerWeb error pages are designed to be informative, user-friendly, and provide a professional appearance. They include:
+    The default BunkerWeb error pages are designed to be informative, user-friendly, and professional in appearance. They include:
 
     - Clear error descriptions
     - Information about what might have caused the error
-    - Suggested actions for the user to resolve the issue
-    - Visual indicators to help users understand if the issue is on their side or the server side
+    - Suggested actions for users to resolve the issue
+    - Visual indicators that help users understand whether the issue is on the client or the server side
 
 !!! info "Error Types"
     Error codes are categorized by type:
 
-    - **4xx errors (client-side):** These indicate issues with the client's request, such as trying to access non-existent pages or lacking proper authentication.
-    - **5xx errors (server-side):** These indicate issues with the server's ability to fulfill a valid request, like internal server errors or temporary unavailability.
+    - **4xx errors (client-side):** These indicate issues with the client's request, such as attempting to access non-existent pages or lacking proper authentication.
+    - **5xx errors (server-side):** These indicate issues with the server's ability to fulfill a valid request, such as internal server errors or temporary unavailability.
 
 ### Example Configurations
 
@@ -1952,16 +2035,16 @@ Follow these steps to configure and use the Errors feature:
 
 STREAM support :warning:
 
-The Greylist plugin provides a flexible security approach that allows access to visitors while still maintaining security features.
+The Greylist plugin provides a flexible security approach that allows visitors access while still maintaining essential security features.
 
-Unlike traditional [blacklist](#blacklist)/[whitelist](#whitelist) approaches that completely block or allow access, greylisting creates a middle ground where certain visitors get access while still being subject to security checks.
+Unlike traditional [blacklist](#blacklist)/[whitelist](#whitelist) approaches—that completely block or allow access—greylisting creates a middle ground by granting access to certain visitors while still subjecting them to security checks.
 
 **How it works:**
 
-1. You define criteria for visitors who should be "greylisted" (*IP addresses, networks, rDNS, ASN, User-Agent, or URI patterns*).
-2. When a visitor matches any of these criteria, they are allowed access to your site while the other security features remain active.
-3. If a visitor doesn't match any greylist criteria, their access is denied.
-4. Greylists can be automatically updated from external sources on a regular schedule.
+1. You define criteria for visitors to be greylisted (*IP addresses, networks, rDNS, ASN, User-Agent, or URI patterns*).
+2. When a visitor matches any of these criteria, they are granted access to your site while the other security features remain active.
+3. If a visitor does not match any greylist criteria, their access is denied.
+4. Greylist data can be automatically updated from external sources on a regular schedule.
 
 ### How to Use
 
@@ -1969,27 +2052,36 @@ Follow these steps to configure and use the Greylist feature:
 
 1. **Enable the feature:** The Greylist feature is disabled by default. Set the `USE_GREYLIST` setting to `yes` to enable it.
 2. **Configure greylist rules:** Define which IPs, networks, rDNS patterns, ASNs, User-Agents, or URIs should be greylisted.
-3. **Add external sources:** Optionally configure URLs for automatically downloading and updating greylist data.
+3. **Add external sources:** Optionally, configure URLs for automatically downloading and updating greylist data.
 4. **Monitor access:** Check the [web UI](web-ui.md) to see which visitors are being allowed or denied.
+
+!!! tip "Access Control Behavior"
+    When the greylist feature is enabled with the `USE_GREYLIST` setting set to `yes`:
+
+    1. **Greylisted visitors:** Are allowed access but are still subject to all security checks.
+    2. **Non-greylisted visitors:** Are completely denied access.
+
+!!! info "stream mode"
+    When using stream mode, only IP, rDNS, and ASN checks are performed.
 
 ### Configuration Settings
 
 **General**
 
-| Setting        | Default | Context   | Multiple | Description                                                          |
-| -------------- | ------- | --------- | -------- | -------------------------------------------------------------------- |
-| `USE_GREYLIST` | `no`    | multisite | no       | **Enable Greylist:** Set to `yes` to enable the greylisting feature. |
+| Setting        | Default | Context   | Multiple | Description                                              |
+| -------------- | ------- | --------- | -------- | -------------------------------------------------------- |
+| `USE_GREYLIST` | `no`    | multisite | no       | **Enable Greylist:** Set to `yes` to enable greylisting. |
 
 === "IP Address"
-    **What this does:** Greylists visitors based on their IP address or network. These visitors get access but remain subject to security checks.
+    **What this does:** Greylist visitors based on their IP address or network. These visitors gain access but remain subject to security checks.
 
     | Setting            | Default | Context   | Multiple | Description                                                                                              |
     | ------------------ | ------- | --------- | -------- | -------------------------------------------------------------------------------------------------------- |
-    | `GREYLIST_IP`      |         | multisite | no       | **IP Greylist:** List of IP addresses or networks (CIDR notation) to greylist, separated by spaces.      |
+    | `GREYLIST_IP`      |         | multisite | no       | **IP Greylist:** List of IP addresses or networks (in CIDR notation) to greylist, separated by spaces.   |
     | `GREYLIST_IP_URLS` |         | multisite | no       | **IP Greylist URLs:** List of URLs containing IP addresses or networks to greylist, separated by spaces. |
 
 === "Reverse DNS"
-    **What this does:** Greylists visitors based on their domain name (in reverse). This is useful for allowing conditional access to visitors from specific organizations or networks.
+    **What this does:** Greylist visitors based on their domain name (in reverse). Useful for allowing conditional access to visitors from specific organizations or networks.
 
     | Setting                | Default | Context   | Multiple | Description                                                                                            |
     | ---------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------------------------ |
@@ -1998,7 +2090,7 @@ Follow these steps to configure and use the Greylist feature:
     | `GREYLIST_RDNS_URLS`   |         | multisite | no       | **rDNS Greylist URLs:** List of URLs containing reverse DNS suffixes to greylist, separated by spaces. |
 
 === "ASN"
-    **What this does:** Greylists visitors from specific network providers using Autonomous System Numbers. ASNs identify which provider or organization an IP belongs to.
+    **What this does:** Greylist visitors from specific network providers using Autonomous System Numbers. ASNs identify which provider or organization an IP belongs to.
 
     | Setting             | Default | Context   | Multiple | Description                                                                           |
     | ------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------- |
@@ -2006,7 +2098,7 @@ Follow these steps to configure and use the Greylist feature:
     | `GREYLIST_ASN_URLS` |         | multisite | no       | **ASN Greylist URLs:** List of URLs containing ASNs to greylist, separated by spaces. |
 
 === "User Agent"
-    **What this does:** Greylists visitors based on what browser or tool they claim to be using. This allows controlled access for specific tools while maintaining security checks.
+    **What this does:** Greylist visitors based on the browser or tool they claim to be using. This allows controlled access for specific tools while maintaining security checks.
 
     | Setting                    | Default | Context   | Multiple | Description                                                                                         |
     | -------------------------- | ------- | --------- | -------- | --------------------------------------------------------------------------------------------------- |
@@ -2014,7 +2106,7 @@ Follow these steps to configure and use the Greylist feature:
     | `GREYLIST_USER_AGENT_URLS` |         | multisite | no       | **User-Agent Greylist URLs:** List of URLs containing User-Agent patterns to greylist.              |
 
 === "URI"
-    **What this does:** Greylists requests to specific URLs on your site. This allows conditional access to specific endpoints while maintaining security checks.
+    **What this does:** Greylist requests to specific URLs on your site. This allows conditional access to certain endpoints while maintaining security checks.
 
     | Setting             | Default | Context   | Multiple | Description                                                                                   |
     | ------------------- | ------- | --------- | -------- | --------------------------------------------------------------------------------------------- |
@@ -2025,19 +2117,14 @@ Follow these steps to configure and use the Greylist feature:
     All `*_URLS` settings support HTTP/HTTPS URLs as well as local file paths using the `file:///` prefix. Basic authentication is supported using the `http://user:pass@url` format.
 
 !!! tip "Regular Updates"
-    Greylists from URLs are automatically downloaded and updated hourly to ensure your protection remains current with the latest trusted sources.
+    Greylists from URLs are automatically downloaded and updated hourly to ensure that your protection remains current with the latest trusted sources.
 
-!!! warning "Access Control Behavior"
-    When the greylist feature is enabled with the `USE_GREYLIST` setting set to `yes`:
-
-    1. **Greylisted visitors:** Are allowed access but still subject to all security checks
-    2. **Non-greylisted visitors:** Are denied access completely
 
 ### Example Configurations
 
 === "Basic Configuration"
 
-    A simple configuration that greylists a company's internal network and crawler:
+    A simple configuration that applies greylisting to a company's internal network and crawler:
 
     ```yaml
     USE_GREYLIST: "yes"
@@ -2091,15 +2178,15 @@ Follow these steps to configure and use the Greylist feature:
 
 STREAM support :x:
 
-The GZIP plugin enhances website performance by compressing HTTP responses using the gzip algorithm. This feature helps reduce bandwidth usage and improve page load times by compressing web content before it's sent to the client's browser, resulting in faster content delivery and improved user experience.
+The GZIP plugin enhances website performance by compressing HTTP responses using the GZIP algorithm. This feature reduces bandwidth usage and improves page load times by compressing web content before it is sent to the client's browser, resulting in faster delivery and an improved user experience.
 
-**How it works:**
+### How It Works
 
-1. When a client requests content from your website, BunkerWeb checks if the client supports gzip compression.
-2. If supported, BunkerWeb compresses the response using the gzip algorithm at your configured compression level.
-3. The compressed content is sent to the client with appropriate headers indicating gzip compression.
-4. The client's browser decompresses the content before rendering it to the user.
-5. Both bandwidth usage and page load times are reduced, improving overall site performance and user experience.
+1. When a client requests content from your website, BunkerWeb checks if the client supports GZIP compression.
+2. If supported, BunkerWeb compresses the response using the GZIP algorithm at your configured compression level.
+3. The compressed content is sent to the client with appropriate headers indicating GZIP compression.
+4. The client's browser decompresses the content before rendering it.
+5. Both bandwidth usage and page load times are reduced, enhancing overall site performance and user experience.
 
 ### How to Use
 
@@ -2107,16 +2194,16 @@ Follow these steps to configure and use the GZIP compression feature:
 
 1. **Enable the feature:** The GZIP feature is disabled by default. Enable it by setting the `USE_GZIP` setting to `yes`.
 2. **Configure MIME types:** Specify which content types should be compressed using the `GZIP_TYPES` setting.
-3. **Set minimum size:** Define the minimum response size for compression with `GZIP_MIN_LENGTH` to avoid compressing tiny files.
-4. **Choose compression level:** Select your preferred balance between speed and compression ratio with `GZIP_COMP_LEVEL`.
-5. **Configure proxied settings:** Determine which proxied requests should be compressed using the `GZIP_PROXIED` setting.
+3. **Set minimum size:** Define the minimum response size required for compression with the `GZIP_MIN_LENGTH` setting to avoid compressing small files.
+4. **Choose a compression level:** Select your preferred balance between speed and compression ratio using the `GZIP_COMP_LEVEL` setting.
+5. **Configure proxied requests:** Specify which proxied requests should be compressed using the `GZIP_PROXIED` setting.
 
 ### Configuration Settings
 
 | Setting           | Default                                                                                                                                                                                                                                                                                                                                                                                                                          | Context   | Multiple | Description                                                                                                                      |
 | ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------------- |
 | `USE_GZIP`        | `no`                                                                                                                                                                                                                                                                                                                                                                                                                             | multisite | no       | **Enable GZIP:** Set to `yes` to enable GZIP compression.                                                                        |
-| `GZIP_TYPES`      | `application/atom+xml application/javascript application/json application/rss+xml application/vnd.ms-fontobject application/x-font-opentype application/x-font-truetype application/x-font-ttf application/x-javascript application/xhtml+xml application/xml font/eot font/opentype font/otf font/truetype image/svg+xml image/vnd.microsoft.icon image/x-icon image/x-win-bitmap text/css text/javascript text/plain text/xml` | multisite | no       | **MIME Types:** List of content types that will be compressed with gzip.                                                         |
+| `GZIP_TYPES`      | `application/atom+xml application/javascript application/json application/rss+xml application/vnd.ms-fontobject application/x-font-opentype application/x-font-truetype application/x-font-ttf application/x-javascript application/xhtml+xml application/xml font/eot font/opentype font/otf font/truetype image/svg+xml image/vnd.microsoft.icon image/x-icon image/x-win-bitmap text/css text/javascript text/plain text/xml` | multisite | no       | **MIME Types:** List of content types that will be compressed with GZIP.                                                         |
 | `GZIP_MIN_LENGTH` | `1000`                                                                                                                                                                                                                                                                                                                                                                                                                           | multisite | no       | **Minimum Size:** The minimum response size (in bytes) for GZIP compression to be applied.                                       |
 | `GZIP_COMP_LEVEL` | `5`                                                                                                                                                                                                                                                                                                                                                                                                                              | multisite | no       | **Compression Level:** Level of compression from 1 (minimum compression) to 9 (maximum compression). Higher values use more CPU. |
 | `GZIP_PROXIED`    | `no-cache no-store private expired auth`                                                                                                                                                                                                                                                                                                                                                                                         | multisite | no       | **Proxied Requests:** Specifies which proxied requests should be compressed based on response headers.                           |
@@ -2211,7 +2298,7 @@ Follow these steps to configure and use the HTML Injection feature:
 
 !!! tip "Best Practices"
     - For performance reasons, place JavaScript files at the end of the body to prevent render blocking.
-    - Place CSS and critical JavaScript in the head section to avoid flash of unstyled content.
+    - Place CSS and critical JavaScript in the head section to avoid a flash of unstyled content.
     - Be careful with injected content that could potentially break your site's functionality.
 
 !!! info "Common Use Cases"
@@ -2263,14 +2350,14 @@ Follow these steps to configure and use the HTML Injection feature:
 
 STREAM support :x:
 
-Headers play a crucial role in HTTP security. The Headers plugin provides robust management of both standard and custom HTTP headers, enhancing security and functionality. It dynamically applies security measures such as [HSTS](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Strict-Transport-Security), [CSP](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy) (including a reporting mode), and custom header injection while preventing information leakage.
+Headers play a crucial role in HTTP security. The Headers plugin provides robust management of both standard and custom HTTP headers—enhancing security and functionality. It dynamically applies security measures, such as [HSTS](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Strict-Transport-Security), [CSP](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy) (including a reporting mode), and custom header injection, while preventing information leakage.
 
 **How it works**
 
 1. When a client requests content from your website, BunkerWeb processes the response headers.
-2. Security headers are applied according to your configuration.
+2. Security headers are applied in accordance with your configuration.
 3. Custom headers can be added to provide additional information or functionality to clients.
-4. Unwanted headers that might leak server information are automatically removed.
+4. Unwanted headers that might reveal server information are automatically removed.
 5. Cookies are modified to include appropriate security flags based on your settings.
 6. Headers from upstream servers can be selectively preserved when needed.
 
@@ -2280,8 +2367,8 @@ Follow these steps to configure and use the Headers feature:
 
 1. **Configure security headers:** Set values for common headers.
 2. **Add custom headers:** Define any custom headers using the `CUSTOM_HEADER` setting.
-3. **Remove unwanted headers:** Use `REMOVE_HEADERS` to ensure headers that could leak server details are stripped out.
-4. **Set cookie security:** Enable robust cookie security by configuring `COOKIE_FLAGS` and setting `COOKIE_AUTO_SECURE_FLAG` to `yes` so that the Secure flag is automatically added on HTTPS.
+3. **Remove unwanted headers:** Use `REMOVE_HEADERS` to ensure headers that could expose server details are stripped out.
+4. **Set cookie security:** Enable robust cookie security by configuring `COOKIE_FLAGS` and setting `COOKIE_AUTO_SECURE_FLAG` to `yes` so that the Secure flag is automatically added on HTTPS connections.
 5. **Preserve upstream headers:** Specify which upstream headers to retain by using `KEEP_UPSTREAM_HEADERS`.
 6. **Leverage conditional header application:** If you wish to test policies without disruption, enable [CSP Report-Only](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy-Report-Only) mode via `CONTENT_SECURITY_POLICY_REPORT_ONLY`.
 
@@ -2414,43 +2501,43 @@ The Let's Encrypt plugin simplifies SSL/TLS certificate management by automating
 
 **How it works:**
 
-1. When enabled, BunkerWeb automatically detects the domain names configured for your site.
+1. When enabled, BunkerWeb automatically detects the domains configured for your website.
 2. BunkerWeb requests free SSL/TLS certificates from Let's Encrypt's certificate authority.
-3. Domain ownership is verified through either HTTP challenges (proving you control the website) or DNS challenges (proving you control the domain's DNS).
+3. Domain ownership is verified through either HTTP challenges (proving you control the website) or DNS challenges (proving you control your domain's DNS).
 4. Certificates are automatically installed and configured for your domains.
 5. BunkerWeb handles certificate renewals in the background before expiration, ensuring continuous HTTPS availability.
-6. The entire process is fully automated, requiring minimal intervention after initial setup.
+6. The entire process is fully automated, requiring minimal intervention after the initial setup.
 
 !!! info "Prerequisites"
-    To use this feature, ensure proper DNS **A records** are set up for each domain, pointing to the public IP(s) where BunkerWeb is accessible. Without correct DNS configuration, the domain verification process will fail.
+    To use this feature, ensure that proper DNS **A records** are configured for each domain, pointing to the public IP(s) where BunkerWeb is accessible. Without correct DNS configuration, the domain verification process will fail.
 
 ### How to Use
 
 Follow these steps to configure and use the Let's Encrypt feature:
 
 1. **Enable the feature:** Set the `AUTO_LETS_ENCRYPT` setting to `yes` to enable automatic certificate issuance and renewal.
-2. **Provide contact email:** Enter your email address with the `EMAIL_LETS_ENCRYPT` setting for important notifications about your certificates.
+2. **Provide contact email:** Enter your email address using the `EMAIL_LETS_ENCRYPT` setting to receive important notifications about your certificates.
 3. **Choose challenge type:** Select either `http` or `dns` verification with the `LETS_ENCRYPT_CHALLENGE` setting.
 4. **Configure DNS provider:** If using DNS challenges, specify your DNS provider and credentials.
 5. **Let BunkerWeb handle the rest:** Once configured, certificates are automatically issued, installed, and renewed as needed.
 
 ### Configuration Settings
 
-| Setting                            | Default                  | Context   | Multiple | Description                                                                                                                                                                 |
-| ---------------------------------- | ------------------------ | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `AUTO_LETS_ENCRYPT`                | `no`                     | multisite | no       | **Enable Let's Encrypt:** Set to `yes` to enable automatic certificate issuance and renewal.                                                                                |
-| `EMAIL_LETS_ENCRYPT`               | `contact@{FIRST_SERVER}` | multisite | no       | **Contact Email:** Email address used for Let's Encrypt notifications and included in certificates.                                                                         |
-| `LETS_ENCRYPT_CHALLENGE`           | `http`                   | multisite | no       | **Challenge Type:** Method used to verify domain ownership. Options: `http` or `dns`.                                                                                       |
-| `LETS_ENCRYPT_DNS_PROVIDER`        |                          | multisite | no       | **DNS Provider:** When using DNS challenges, the DNS provider to use (e.g., cloudflare, route53, digitalocean).                                                             |
-| `LETS_ENCRYPT_DNS_PROPAGATION`     | `default`                | multisite | no       | **DNS Propagation:** The time to wait for DNS propagation in seconds. Set to `default` to use provider's recommended value.                                                 |
-| `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` |                          | multisite | yes      | **Credential Item:** Configuration items for DNS provider authentication (e.g., `cloudflare_api_token 123456`). Values can be raw text, base64 encoded, or a JSON object.   |
-| `USE_LETS_ENCRYPT_WILDCARD`        | `no`                     | multisite | no       | **Wildcard Certificates:** When set to `yes`, creates wildcard certificates for all domains. Only available with DNS challenges.                                            |
-| `USE_LETS_ENCRYPT_STAGING`         | `no`                     | multisite | no       | **Use Staging:** When set to `yes`, uses Let's Encrypt's staging environment for testing. Staging has higher rate limits but produces certificates not trusted by browsers. |
-| `LETS_ENCRYPT_CLEAR_OLD_CERTS`     | `no`                     | global    | no       | **Clear Old Certificates:** When set to `yes`, removes old certificates that are no longer needed during renewal.                                                           |
+| Setting                            | Default                  | Context   | Multiple | Description                                                                                                                                                                          |
+| ---------------------------------- | ------------------------ | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `AUTO_LETS_ENCRYPT`                | `no`                     | multisite | no       | **Enable Let's Encrypt:** Set to `yes` to enable automatic certificate issuance and renewal.                                                                                         |
+| `EMAIL_LETS_ENCRYPT`               | `contact@{FIRST_SERVER}` | multisite | no       | **Contact Email:** Email address that is used for Let's Encrypt notifications and is included in certificates.                                                                       |
+| `LETS_ENCRYPT_CHALLENGE`           | `http`                   | multisite | no       | **Challenge Type:** Method used to verify domain ownership. Options: `http` or `dns`.                                                                                                |
+| `LETS_ENCRYPT_DNS_PROVIDER`        |                          | multisite | no       | **DNS Provider:** When using DNS challenges, the DNS provider to use (e.g., cloudflare, route53, digitalocean).                                                                      |
+| `LETS_ENCRYPT_DNS_PROPAGATION`     | `default`                | multisite | no       | **DNS Propagation:** The time to wait for DNS propagation in seconds. If no value is provided, the provider's default propagation time is used.                                      |
+| `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` |                          | multisite | yes      | **Credential Item:** Configuration items for DNS provider authentication (e.g., `cloudflare_api_token 123456`). Values can be raw text, base64 encoded, or a JSON object.            |
+| `USE_LETS_ENCRYPT_WILDCARD`        | `no`                     | multisite | no       | **Wildcard Certificates:** When set to `yes`, creates wildcard certificates for all domains. Only available with DNS challenges.                                                     |
+| `USE_LETS_ENCRYPT_STAGING`         | `no`                     | multisite | no       | **Use Staging:** When set to `yes`, uses Let's Encrypt's staging environment for testing. Staging has higher rate limits but produces certificates that are not trusted by browsers. |
+| `LETS_ENCRYPT_CLEAR_OLD_CERTS`     | `no`                     | global    | no       | **Clear Old Certificates:** When set to `yes`, removes old certificates that are no longer needed during renewal.                                                                    |
 
 !!! info "Information and behavior"
-    - The `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` setting is a multiple setting and can be used to set multiple items for the DNS provider. The items will be saved as a cache file and Certbot will read the credentials from it.
-    - If no `LETS_ENCRYPT_DNS_PROPAGATION` setting is set, the provider's default propagation time will be used.
+    - The `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` setting is a multiple setting and can be used to set multiple items for the DNS provider. The items will be saved as a cache file, and Certbot will read the credentials from it.
+    - If no `LETS_ENCRYPT_DNS_PROPAGATION` setting is provided, the provider's default propagation time is used.
     - Full Let's Encrypt automation using the `http` challenge works in stream mode as long as you open the `80/tcp` port from the outside. Use the `LISTEN_STREAM_PORT_SSL` setting to choose your listening SSL/TLS port.
 
 !!! tip "HTTP vs. DNS Challenges"
@@ -2579,34 +2666,33 @@ The Let's Encrypt plugin supports a wide range of DNS providers for DNS challeng
 
 STREAM support :warning:
 
-The Limit plugin provides powerful request rate limiting and connection control capabilities for your website. This feature helps protect your services from abuse, denial-of-service attacks, and excessive resource consumption by restricting the number of requests and concurrent connections from individual IP addresses.
+The Limit plugin in BunkerWeb provides robust capabilities to enforce limiting policies on your website, ensuring fair usage and protecting your resources from abuse, denial-of-service attacks, and excessive resource consumption. These policies include:
 
-**How it works:**
+- **Number of connections per IP address** (STREAM support :white_check_mark:)
+- **Number of requests per IP address and URL within a specific time period** (STREAM support :x:)
 
-1. **Rate Limiting:** The plugin tracks the number of requests from each client IP address to specific URLs.
-2. If a client exceeds the configured request rate limit, subsequent requests are temporarily denied.
-3. **Connection Limiting:** The plugin monitors and restricts the number of concurrent connections from each client IP.
-4. Different connection limits can be applied based on the protocol being used (HTTP/1, HTTP/2, HTTP/3, or stream).
-5. When limits are exceeded, clients receive a 429 "Too Many Requests" response, preventing server overload.
+### How it Works
 
-### How to Use
+1. **Rate Limiting:** Tracks the number of requests from each client IP address to specific URLs. If a client exceeds the configured rate limit, subsequent requests are temporarily denied.
+2. **Connection Limiting:** Monitors and restricts the number of concurrent connections from each client IP address. Different connection limits can be applied based on the protocol used (HTTP/1, HTTP/2, HTTP/3, or stream).
+3. In both cases, clients that exceed the defined limits receive an HTTP status code **"429 - Too Many Requests"**, which helps prevent server overload.
 
-Follow these steps to configure and use the Limit feature:
+### Steps to Use
 
-1. **Configure request rate limiting:** Enable the feature with `USE_LIMIT_REQ` and define URL patterns and their corresponding rate limits.
-2. **Configure connection limiting:** Enable with `USE_LIMIT_CONN` and set the maximum number of concurrent connections for different protocols.
-3. **Apply granular control:** Create multiple rate limit rules for different URLs to provide varying levels of protection across your site.
-4. **Monitor effectiveness:** Check the [web UI](web-ui.md) to see statistics on limited requests.
+1. **Enable Request Rate Limiting:** Use `USE_LIMIT_REQ` to enable request rate limiting and define URL patterns along with their corresponding rate limits.
+2. **Enable Connection Limiting:** Use `USE_LIMIT_CONN` to enable connection limiting and set the maximum number of concurrent connections for different protocols.
+3. **Apply Granular Control:** Create multiple rate limit rules for different URLs to provide varying levels of protection across your site.
+4. **Monitor Effectiveness:** Use the [web UI](web-ui.md) to view statistics on limited requests and connections.
 
 ### Configuration Settings
 
 === "Request Rate Limiting"
 
-    | Setting          | Default | Context   | Multiple | Description                                                                                                                        |
-    | ---------------- | ------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-    | `USE_LIMIT_REQ`  | `yes`   | multisite | no       | **Enable Request Limiting:** Set to `yes` to enable request rate limiting feature.                                                 |
-    | `LIMIT_REQ_URL`  | `/`     | multisite | yes      | **URL Pattern:** URL pattern (PCRE regex) where the rate limit will be applied, or `/` for all requests.                           |
-    | `LIMIT_REQ_RATE` | `2r/s`  | multisite | yes      | **Rate Limit:** Maximum request rate in format `Nr/t` where N is the number of requests and t is s/m/h/d (second/minute/hour/day). |
+    | Setting          | Default | Context   | Multiple | Description                                                                                                                                                        |
+    | ---------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+    | `USE_LIMIT_REQ`  | `yes`   | multisite | no       | **Enable Request Limiting:** Set to `yes` to enable the request rate limiting feature.                                                                             |
+    | `LIMIT_REQ_URL`  | `/`     | multisite | yes      | **URL Pattern:** URL pattern (PCRE regex) to which the rate limit will be applied; use `/` to apply for all requests.                                              |
+    | `LIMIT_REQ_RATE` | `2r/s`  | multisite | yes      | **Rate Limit:** Maximum request rate in the format `Nr/t`, where N is the number of requests and t is the time unit: s (second), m (minute), h (hour), or d (day). |
 
     !!! tip "Rate Limiting Format"
         The rate limit format is specified as `Nr/t` where:
@@ -2616,33 +2702,32 @@ Follow these steps to configure and use the Limit feature:
         - `/` is a literal slash
         - `t` is the time unit: `s` (second), `m` (minute), `h` (hour), or `d` (day)
 
-        For example, `5r/m` means 5 requests per minute are allowed from each IP address.
+        For example, `5r/m` means that 5 requests per minute are allowed from each IP address.
 
 === "Connection Limiting"
 
     | Setting                 | Default | Context   | Multiple | Description                                                                                 |
     | ----------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------------- |
-    | `USE_LIMIT_CONN`        | `yes`   | multisite | no       | **Enable Connection Limiting:** Set to `yes` to enable connection limiting feature.         |
+    | `USE_LIMIT_CONN`        | `yes`   | multisite | no       | **Enable Connection Limiting:** Set to `yes` to enable the connection limiting feature.     |
     | `LIMIT_CONN_MAX_HTTP1`  | `10`    | multisite | no       | **HTTP/1.X Connections:** Maximum number of concurrent HTTP/1.X connections per IP address. |
     | `LIMIT_CONN_MAX_HTTP2`  | `100`   | multisite | no       | **HTTP/2 Streams:** Maximum number of concurrent HTTP/2 streams per IP address.             |
     | `LIMIT_CONN_MAX_HTTP3`  | `100`   | multisite | no       | **HTTP/3 Streams:** Maximum number of concurrent HTTP/3 streams per IP address.             |
     | `LIMIT_CONN_MAX_STREAM` | `10`    | multisite | no       | **Stream Connections:** Maximum number of concurrent stream connections per IP address.     |
 
-
 !!! info "Connection vs. Request Limiting"
-    - **Connection limiting** restricts the number of simultaneous connections that a single IP can maintain.
-    - **Request rate limiting** restricts how many requests an IP can make within a defined period of time.
+    - **Connection limiting** restricts the number of simultaneous connections that a single IP address can maintain.
+    - **Request rate limiting** restricts the number of requests an IP address can make within a defined period of time.
 
-    Using both provides comprehensive protection against different types of abuse.
+    Using both methods provides comprehensive protection against various types of abuse.
 
 !!! warning "Setting Appropriate Limits"
-    Setting limits too restrictively may impact legitimate users, especially for HTTP/2 and HTTP/3 where browsers commonly use multiple streams. The default values are balanced for most use cases, but consider adjusting based on your application's needs and user behavior.
+    Setting limits too restrictively may impact legitimate users, especially for HTTP/2 and HTTP/3 where browsers often use multiple streams. The default values are balanced for most use cases, but consider adjusting them based on your application's needs and user behavior.
 
 ### Example Configurations
 
 === "Basic Protection"
 
-    A simple configuration with default settings to protect your entire site:
+    A simple configuration using default settings to protect your entire site:
 
     ```yaml
     USE_LIMIT_REQ: "yes"
@@ -2749,10 +2834,10 @@ The Metrics plugin provides comprehensive monitoring and data collection capabil
 
 The metrics plugin works by:
 
-- Using shared dictionaries in NGINX (`metrics_datastore` for HTTP and `metrics_datastore_stream` for TCP/UDP traffic)
+- Using shared dictionaries in NGINX, where `metrics_datastore` is used for HTTP and `metrics_datastore_stream` for TCP/UDP traffic
 - Leveraging an LRU cache for efficient in-memory storage
 - Periodically synchronizing data between workers using timers
-- Storing detailed information about blocked requests including IP, country, timestamp, request details, and block reason
+- Storing detailed information about blocked requests, including the client IP address, country, timestamp, request details, and block reason
 - Supporting plugin-specific metrics through a common metrics collection interface
 - Providing API endpoints for querying collected metrics
 
@@ -2780,7 +2865,7 @@ The metrics plugin collects the following information:
       - Server name
       - Additional data related to the block reason
 
-2. **Plugin Counters**: Various plugin-specific counters that track activities and events
+2. **Plugin Counters**: Various plugin-specific counters that track activities and events.
 
 ### API Access
 
@@ -2791,22 +2876,22 @@ Metrics data can be accessed via BunkerWeb's internal API endpoints:
 - **Description**: Retrieves metrics data based on the specified filter
 - **Response Format**: JSON object containing the requested metrics
 
-Example: `/metrics/requests` will return information about blocked requests.
+For example, `/metrics/requests` returns information about blocked requests.
 
 !!! info "API Access Configuration"
     To access metrics via the API, you must ensure that:
 
     1. The API feature is enabled with `USE_API: "yes"` (enabled by default)
     2. Your client IP is included in the `API_WHITELIST_IP` setting (default is `127.0.0.0/8`)
-    3. You're accessing the API on the configured port (default is `5000` via the `API_HTTP_PORT` setting)
-    4. You're using the correct `API_SERVER_NAME` value in the Host header (default is `bwapi`)
+    3. You are accessing the API on the configured port (default is `5000` via the `API_HTTP_PORT` setting)
+    4. You are using the correct `API_SERVER_NAME` value in the Host header (default is `bwapi`)
 
     A typical API request would look like:
     ```
     curl -H "Host: bwapi" http://your-bunkerweb-instance:5000/metrics/requests
     ```
 
-    If you've customized the `API_SERVER_NAME` to something other than the default `bwapi`, you must use that value in the Host header instead.
+    If you have customized the `API_SERVER_NAME` to something other than the default `bwapi`, use that value in the Host header instead.
 
     For secure production environments, make sure to restrict API access to trusted IPs only.
 
@@ -2915,11 +3000,11 @@ Whether you need to restrict HTTP methods, manage request sizes, optimize file c
 
     **Default Server Controls**
 
-    In HTTP, the `Host` header specifies the target server but may be missing or unknown, often due to bots scanning for vulnerabilities.
+    In HTTP, the `Host` header specifies the target server, but it may be missing or unknown, often due to bots scanning for vulnerabilities.
 
     To block such requests:
 
-    - Set `DISABLE_DEFAULT_SERVER` to `yes` to silently deny them using [NGINX's `444` status code](https://http.dev/444).
+    - Set `DISABLE_DEFAULT_SERVER` to `yes` to silently deny such requests using [NGINX's `444` status code](https://http.dev/444).
     - For stricter security, enable `DISABLE_DEFAULT_SERVER_STRICT_SNI` to reject SSL/TLS connections without valid SNI.
 
     !!! success "Security Benefits"
@@ -2984,7 +3069,7 @@ Whether you need to restrict HTTP methods, manage request sizes, optimize file c
 
     **Request Size Limits**
 
-    The maximum request body size can be controlled using the `MAX_CLIENT_SIZE` setting (default: `10m`). This setting determines the maximum size of any request body sent to your server, including form submissions and file uploads. Accepted values follow the syntax described [here](https://nginx.org/en/docs/syntax.html).
+    The maximum request body size can be controlled using the `MAX_CLIENT_SIZE` setting (default: `10m`). Accepted values follow the syntax described [here](https://nginx.org/en/docs/syntax.html).
 
     !!! success "Security Benefits"
         - Protects against denial-of-service attacks caused by excessive payload sizes
@@ -3035,7 +3120,7 @@ Whether you need to restrict HTTP methods, manage request sizes, optimize file c
 
     **File Serving Configuration**
 
-    BunkerWeb can serve static files directly or act as a reverse proxy to an application server. When serving files directly, you can specify the root directory using the `ROOT_FOLDER` setting. By default, files are served from `/var/www/html/{server_name}`.
+    BunkerWeb can serve static files directly or act as a reverse proxy to an application server. By default, files are served from `/var/www/html/{server_name}`.
 
     | Setting       | Default                       | Context   | Multiple | Description                                                                                            |
     | ------------- | ----------------------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------ |
@@ -3087,7 +3172,7 @@ Whether you need to restrict HTTP methods, manage request sizes, optimize file c
 
     **File Cache Optimization**
 
-    The open file cache improves performance by storing file descriptors and metadata in memory, reducing the need for repeated file system operations. This feature is particularly beneficial for websites serving many static files.
+    The open file cache improves performance by storing file descriptors and metadata in memory, reducing the need for repeated file system operations.
 
     !!! success "Benefits of File Caching"
         - **Performance:** Reduces filesystem I/O, decreases latency, and lowers CPU usage for file operations.
@@ -3104,7 +3189,6 @@ Whether you need to restrict HTTP methods, manage request sizes, optimize file c
     **Configuration Guide**
 
     To enable and configure file caching:
-
     1. Set `USE_OPEN_FILE_CACHE` to `yes` to activate the feature.
     2. Adjust `OPEN_FILE_CACHE` parameters to define the maximum number of cached entries and their inactive timeout.
     3. Use `OPEN_FILE_CACHE_ERRORS` to cache both successful and failed lookups, reducing repeated filesystem operations.
@@ -3191,7 +3275,7 @@ The ModSecurity plugin integrates the powerful [ModSecurity](https://modsecurity
 
 1. When a request is received, ModSecurity evaluates it against the active rule set.
 2. The OWASP Core Rule Set inspects headers, cookies, URL parameters, and body content.
-3. Each detected violation adds to an overall "anomaly score."
+3. Each detected violation contributes to an overall anomaly score.
 4. If this score exceeds the configured threshold, the request is blocked.
 5. Detailed logs are created to help diagnose which rules were triggered and why.
 
@@ -3207,7 +3291,7 @@ The ModSecurity plugin integrates the powerful [ModSecurity](https://modsecurity
 
 Follow these steps to configure and use ModSecurity:
 
-1. **Enable the feature:** ModSecurity is enabled by default. Control this via the `USE_MODSECURITY` setting.
+1. **Enable the feature:** ModSecurity is enabled by default. This can be controlled using the `USE_MODSECURITY` setting.
 2. **Select a CRS version:** Choose a version of the OWASP Core Rule Set (v3, v4, or nightly).
 3. **Add plugins:** Optionally activate CRS plugins to enhance rule coverage.
 4. **Monitor and tune:** Use logs and the [web UI](web-ui.md) to identify false positives and adjust settings.
@@ -3432,7 +3516,7 @@ The PHP plugin provides seamless integration with PHP-FPM for BunkerWeb, enablin
 
 1. When a client requests a PHP file from your website, BunkerWeb routes the request to the configured PHP-FPM instance.
 2. For local PHP-FPM, BunkerWeb communicates with the PHP interpreter through a Unix socket file.
-3. For remote PHP-FPM, BunkerWeb forwards requests to the specified host and port using FastCGI protocol.
+3. For remote PHP-FPM, BunkerWeb forwards requests to the specified host and port using the FastCGI protocol.
 4. PHP-FPM processes the script and returns the generated content to BunkerWeb, which then delivers it to the client.
 5. URL rewriting is automatically configured to support common PHP frameworks and applications that use "pretty URLs".
 
@@ -3447,13 +3531,13 @@ Follow these steps to configure and use the PHP feature:
 
 ### Configuration Settings
 
-| Setting           | Default | Context   | Multiple | Description                                                                                 |
-| ----------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------------- |
-| `REMOTE_PHP`      |         | multisite | no       | **Remote PHP Host:** Hostname of the remote PHP-FPM instance. Leave empty to use local PHP. |
-| `REMOTE_PHP_PATH` |         | multisite | no       | **Remote Path:** Root folder containing files in the remote PHP-FPM instance.               |
-| `REMOTE_PHP_PORT` | `9000`  | multisite | no       | **Remote Port:** Port of the remote PHP-FPM instance.                                       |
-| `LOCAL_PHP`       |         | multisite | no       | **Local PHP Socket:** Path to the PHP-FPM socket file. Leave empty to use remote PHP.       |
-| `LOCAL_PHP_PATH`  |         | multisite | no       | **Local Path:** Root folder containing files in the local PHP-FPM instance.                 |
+| Setting           | Default | Context   | Multiple | Description                                                                                          |
+| ----------------- | ------- | --------- | -------- | ---------------------------------------------------------------------------------------------------- |
+| `REMOTE_PHP`      |         | multisite | no       | **Remote PHP Host:** Hostname of the remote PHP-FPM instance. Leave empty to use local PHP.          |
+| `REMOTE_PHP_PATH` |         | multisite | no       | **Remote Path:** Root folder containing files in the remote PHP-FPM instance.                        |
+| `REMOTE_PHP_PORT` | `9000`  | multisite | no       | **Remote Port:** Port of the remote PHP-FPM instance.                                                |
+| `LOCAL_PHP`       |         | multisite | no       | **Local PHP Socket:** Path to the PHP-FPM socket file. Leave empty to use a remote PHP-FPM instance. |
+| `LOCAL_PHP_PATH`  |         | multisite | no       | **Local Path:** Root folder containing files in the local PHP-FPM instance.                          |
 
 !!! tip "Local vs. Remote PHP-FPM"
     Choose the setup that best fits your infrastructure:
@@ -3462,7 +3546,7 @@ Follow these steps to configure and use the PHP feature:
     - **Remote PHP-FPM** provides more flexibility and scalability by allowing PHP processing to occur on separate servers.
 
 !!! warning "Path Configuration"
-    The `REMOTE_PHP_PATH` or `LOCAL_PHP_PATH` must match the actual filesystem path where your PHP files are stored. Incorrect paths will result in "File not found" errors.
+    The `REMOTE_PHP_PATH` or `LOCAL_PHP_PATH` must match the actual filesystem path where your PHP files are stored; otherwise, a "File not found" error will occur.
 
 !!! info "URL Rewriting"
     The PHP plugin automatically configures URL rewriting to support modern PHP applications. Requests for non-existent files will be directed to `index.php` with the original request URI available as a query parameter.
@@ -3511,7 +3595,7 @@ Follow these steps to configure and use the PHP feature:
 
 STREAM support :x:
 
-The Pro plugin provides access to premium features and enhancements for BunkerWeb users with an active Pro license. This feature unlocks additional capabilities, premium plugins, and extended functionality that complement the core BunkerWeb platform, delivering enhanced security, performance, and management options for enterprise-grade deployments.
+The Pro plugin bundles advanced features and enhancements for enterprise deployments of BunkerWeb. It unlocks additional capabilities, premium plugins, and extended functionality that complement the core BunkerWeb platform. It delivers enhanced security, performance, and management options for enterprise-grade deployments.
 
 **How it works:**
 
@@ -3534,8 +3618,8 @@ The Pro plugin provides access to premium features and enhancements for BunkerWe
 Follow these steps to configure and use the Pro features:
 
 1. **Obtain a license key:** Purchase a Pro license from the [BunkerWeb Panel](https://panel.bunkerweb.io/order/bunkerweb-pro?utm_campaign=self&utm_source=doc).
-2. **Configure the license key:** Set your license key using the `PRO_LICENSE_KEY` setting.
-3. **Let BunkerWeb handle the rest:** Once configured with a valid license, Pro plugins will be automatically downloaded and activated.
+2. **Configure your license key:** Use the `PRO_LICENSE_KEY` setting to configure your license.
+3. **Let BunkerWeb handle the rest:** Once configured with a valid license, Pro plugins are automatically downloaded and activated.
 4. **Monitor your Pro status:** Check the health indicators in the [web UI](web-ui.md) to confirm your Pro subscription status.
 
 ### Configuration Settings
@@ -3591,15 +3675,15 @@ Prometheus exporter for BunkerWeb internal metrics.
 
 STREAM support :warning:
 
-The Real IP plugin allows BunkerWeb to accurately identify the true IP address of visitors when operating behind reverse proxies, load balancers, or CDNs. This is essential for properly applying security rules, rate limiting, and logging, as without it, all requests would appear to come from your proxy's IP rather than the actual client's IP.
+The Real IP plugin ensures that BunkerWeb correctly identifies the client’s IP address even when behind proxies. This is essential for applying security rules, rate limiting, and logging properly; without it, all requests would appear to come from your proxy's IP rather than the client's actual IP.
 
 **How it works:**
 
 1. When enabled, BunkerWeb examines incoming requests for specific headers (like [`X-Forwarded-For`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-Forwarded-For)) that contain the client's original IP address.
-2. BunkerWeb checks if the connecting IP is in your trusted proxy list (`REAL_IP_FROM`), ensuring only legitimate proxies can pass client IPs.
+2. BunkerWeb checks if the incoming IP is in your trusted proxy list (`REAL_IP_FROM`), ensuring that only legitimate proxies can pass client IPs.
 3. The original client IP is extracted from the specified header (`REAL_IP_HEADER`) and used for all security evaluations and logging.
-4. For recursive IP chains, BunkerWeb can trace through multiple proxy hops to find the originating client IP.
-5. Additionally, PROXY protocol support can be enabled to receive client IPs directly from compatible proxies like [HAProxy](https://www.haproxy.org/).
+4. For recursive IP chains, BunkerWeb can trace through multiple proxy hops to determine the originating client IP.
+5. Additionally, [PROXY protocol](https://netnut.io/what-is-proxy-protocol-and-how-does-it-work/) support can be enabled to receive client IPs directly from compatible proxies such as [HAProxy](https://www.haproxy.org/).
 6. Trusted proxy IP lists can be automatically downloaded and updated from external sources via URLs.
 
 ### How to Use
@@ -3711,15 +3795,15 @@ Follow these steps to configure and use the Real IP feature:
 
 STREAM support :x:
 
-The Redirect plugin provides simple and efficient HTTP redirection capabilities for your BunkerWeb-protected websites. This feature allows you to easily redirect visitors from one site to another, supporting both full domain redirects and path-preserving redirection.
+The Redirect plugin provides simple and efficient HTTP redirection capabilities for your BunkerWeb-protected websites. This feature enables you to easily redirect visitors from one site to another, supporting both full-domain redirects and path-preserving redirections.
 
 **How it works:**
 
-1. When a visitor accesses your website, BunkerWeb checks if a redirection is configured.
+1. When a visitor accesses your website, BunkerWeb verifies whether a redirection is configured.
 2. If enabled, BunkerWeb redirects the visitor to the specified destination URL.
-3. You can configure whether to preserve the original request path (appending it to the destination URL) or redirect to the exact destination URL.
+3. You can configure whether to preserve the original request path (automatically appending it to the destination URL) or redirect to the exact destination URL.
 4. The HTTP status code used for the redirection can be customized between permanent (301) and temporary (302) redirects.
-5. This functionality is ideal for domain migrations, implementing canonical domains, or redirecting deprecated URLs.
+5. This functionality is ideal for domain migrations, establishing canonical domains, or redirecting deprecated URLs.
 
 ### How to Use
 
@@ -3728,7 +3812,7 @@ Follow these steps to configure and use the Redirect feature:
 1. **Set the destination URL:** Configure the target URL where visitors should be redirected using the `REDIRECT_TO` setting.
 2. **Choose redirection type:** Decide whether to preserve the original request path with the `REDIRECT_TO_REQUEST_URI` setting.
 3. **Select status code:** Set the appropriate HTTP status code with the `REDIRECT_TO_STATUS_CODE` setting to indicate permanent or temporary redirection.
-4. **Let BunkerWeb handle the rest:** Once configured, all requests to the site will be automatically redirected according to your settings.
+4. **Let BunkerWeb handle the rest:** Once configured, all requests to the site will be automatically redirected based on your settings.
 
 ### Configuration Settings
 
@@ -3740,7 +3824,7 @@ Follow these steps to configure and use the Redirect feature:
 
 !!! tip "Choosing the Right Status Code"
     - Use `301` (Moved Permanently) when the redirect is permanent, such as for domain migrations or establishing canonical URLs. This helps search engines update their indexes.
-    - Use `302` (Found/Temporary Redirect) when the redirect is temporary or you may want to reuse the original URL in the future.
+    - Use `302` (Found/Temporary Redirect) when the redirect is temporary or if you may want to reuse the original URL in the future.
 
 !!! info "Path Preservation"
     When `REDIRECT_TO_REQUEST_URI` is set to `yes`, BunkerWeb preserves the original request path. For example, if a user visits `https://old-domain.com/blog/post-1` and you've set up a redirect to `https://new-domain.com`, they'll be redirected to `https://new-domain.com/blog/post-1`.
@@ -3791,7 +3875,7 @@ Follow these steps to configure and use the Redirect feature:
 
 STREAM support :white_check_mark:
 
-The Redis plugin provides integration with Redis for BunkerWeb, enabling efficient data storage, caching, and communication between multiple BunkerWeb instances in a cluster. This feature is essential for deploying BunkerWeb in high-availability environments where session data, metrics, and other shared information must be accessible across multiple nodes.
+The Redis plugin integrates Redis into BunkerWeb for caching and fast data retrieval. This feature is essential for deploying BunkerWeb in high-availability environments where session data, metrics, and other shared information must be accessible across multiple nodes.
 
 **How it works:**
 
@@ -3806,10 +3890,10 @@ The Redis plugin provides integration with Redis for BunkerWeb, enabling efficie
 Follow these steps to configure and use the Redis plugin:
 
 1. **Enable the feature:** Set the `USE_REDIS` setting to `yes` to enable Redis integration.
-2. **Configure connection details:** Specify your Redis server's hostname/IP and port.
+2. **Configure connection details:** Specify your Redis server's hostname/IP address and port.
 3. **Set security options:** Configure authentication credentials if your Redis server requires them.
-4. **Configure advanced options:** Set database selection, SSL options, and timeouts as needed.
-5. **For high availability:** Configure Sentinel settings if you're using Redis Sentinel.
+4. **Configure advanced options:** Set the database selection, SSL options, and timeouts as needed.
+5. **For high availability,** configure Sentinel settings if you're using Redis Sentinel.
 
 ### Configuration Settings
 
@@ -3906,20 +3990,20 @@ Follow these steps to configure and use the Redis plugin:
 When using Redis with BunkerWeb, consider these best practices to ensure optimal performance, security, and reliability:
 
 #### Memory Management
-- **Monitor memory usage**: Configure Redis with appropriate `maxmemory` settings to prevent out-of-memory errors
-- **Set an eviction policy**: Use `maxmemory-policy` (e.g., `volatile-lru` or `allkeys-lru`) appropriate for your use case
-- **Avoid large keys**: Keep individual Redis keys reasonably sized to prevent performance degradation
+- **Monitor memory usage:** Configure Redis with appropriate `maxmemory` settings to prevent out-of-memory errors
+- **Set an eviction policy:** Use `maxmemory-policy` (e.g., `volatile-lru` or `allkeys-lru`) appropriate for your use case
+- **Avoid large keys:** Ensure individual Redis keys are kept to a reasonable size to prevent performance degradation
 
 #### Data Persistence
-- **Enable RDB snapshots**: Configure periodic snapshots for data persistence without significant performance impact
-- **Consider AOF**: For critical data, enable AOF (Append-Only File) persistence with an appropriate fsync policy
-- **Backup strategy**: Implement regular Redis backups as part of your disaster recovery plan
+- **Enable RDB snapshots:** Configure periodic snapshots for data persistence without significant performance impact
+- **Consider AOF:** For critical data, enable AOF (Append-Only File) persistence with an appropriate fsync policy
+- **Backup strategy:** Implement regular Redis backups as part of your disaster recovery plan
 
 #### Performance Optimization
-- **Connection pooling**: BunkerWeb already implements this, but ensure other applications follow this practice
-- **Pipelining**: When possible, use pipelining for bulk operations to reduce network overhead
-- **Avoid expensive operations**: Be cautious with commands like KEYS in production environments
-- **Benchmark your workload**: Use redis-benchmark to test your specific workload patterns
+- **Connection pooling:** BunkerWeb already implements this, but ensure other applications follow this practice
+- **Pipelining:** When possible, use pipelining for bulk operations to reduce network overhead
+- **Avoid expensive operations:** Be cautious with commands like KEYS in production environments
+- **Benchmark your workload:** Use redis-benchmark to test your specific workload patterns
 
 ### Further Resources
 
@@ -3954,7 +4038,7 @@ Regular reporting of important data from BunkerWeb (global, attacks, bans, reque
 
 STREAM support :warning:
 
-The Reverse Proxy plugin provides seamless proxying capabilities for BunkerWeb, allowing you to route requests to backend servers and services. This feature enables BunkerWeb to act as a secure frontend for your applications while providing additional benefits such as SSL termination, and security filtering.
+The Reverse Proxy plugin provides seamless proxying capabilities for BunkerWeb, allowing you to route requests to backend servers and services. This feature enables BunkerWeb to act as a secure frontend for your applications while providing additional benefits such as SSL termination and security filtering.
 
 **How it works:**
 
@@ -3962,7 +4046,7 @@ The Reverse Proxy plugin provides seamless proxying capabilities for BunkerWeb, 
 2. BunkerWeb adds security headers, applies WAF rules, and performs other security checks before passing requests to your application.
 3. The backend server processes the request and returns a response to BunkerWeb.
 4. BunkerWeb applies additional security measures to the response before sending it back to the client.
-5. The plugin supports both HTTP and TCP/UDP stream proxying, enabling a wide range of applications including WebSockets and other non-HTTP protocols.
+5. The plugin supports both HTTP and TCP/UDP stream proxying, enabling a wide range of applications, including WebSockets and other non-HTTP protocols.
 
 ### How to Use
 
@@ -4045,7 +4129,7 @@ Follow these steps to configure and use the Reverse Proxy feature:
     | `REVERSE_PROXY_SSL_SNI_NAME` |         | multisite | no       | **SSL SNI Name:** Sets the SNI hostname to send to upstream when SSL SNI is enabled. |
 
     !!! info "SNI Explained"
-        Server Name Indication (SNI) is an extension to TLS that allows a client to specify which hostname it is attempting to connect to at the start of the handshaking process. This enables servers to present multiple certificates on the same IP address and port, allowing multiple secure (HTTPS) websites to be served from a single IP address without requiring all those sites to use the same certificate.
+        Server Name Indication (SNI) is a TLS extension that allows a client to specify the hostname it is attempting to connect to during the handshake process. This enables servers to present multiple certificates on the same IP address and port, allowing multiple secure (HTTPS) websites to be served from a single IP address without requiring all those sites to use the same certificate.
 
 === "Protocol Support"
 
@@ -4280,13 +4364,13 @@ Follow these steps to configure and use the Reverse Proxy feature:
 
 STREAM support :white_check_mark:
 
-The Reverse Scan plugin provides robust protection against proxy bypassing by scanning clients' ports to detect if they are running proxy servers or other network services. This feature helps identify and block potential threats from clients who may be attempting to hide their true identity or origin, enhancing your website's security posture.
+The Reverse Scan plugin robustly protects against proxy bypass attempts by scanning clients' ports to detect whether they are running proxy servers or other network services. This feature helps identify and block potential threats from clients that may be attempting to hide their true identity or origin, thereby enhancing your website's security posture.
 
 **How it works:**
 
 1. When a client connects to your server, BunkerWeb attempts to scan specific ports on the client's IP address.
 2. The plugin checks if any common proxy ports (such as 80, 443, 8080, etc.) are open on the client side.
-3. If open ports are detected, suggesting the client may be running a proxy server, the connection is denied.
+3. If open ports are detected, indicating that the client may be running a proxy server, the connection is denied.
 4. This adds an extra layer of security against automated tools, bots, and malicious users attempting to mask their identity.
 
 !!! success "Key benefits"
@@ -4404,7 +4488,7 @@ Follow these steps to configure and use the SSL feature:
     After configuring your SSL settings, use the [Qualys SSL Labs Server Test](https://www.ssllabs.com/ssltest/) to verify your configuration and check for potential security issues. A proper BunkerWeb SSL configuration should achieve an A+ rating.
 
 !!! warning "Protocol Selection"
-    Support for older protocols like SSLv3, TLSv1.0, and TLSv1.1 is intentionally disabled by default due to known vulnerabilities. Only enable these protocols if you absolutely need to support legacy clients, and understand the security implications of doing so.
+    Support for older protocols like SSLv3, TLSv1.0, and TLSv1.1 is intentionally disabled by default due to known vulnerabilities. Only enable these protocols if you absolutely need to support legacy clients and understand the security implications of doing so.
 
 ### Example Configurations
 
@@ -4458,15 +4542,15 @@ Follow these steps to configure and use the SSL feature:
 
 STREAM support :white_check_mark:
 
-The Security.txt plugin implements the [Security.txt](https://securitytxt.org/) standard (RFC 9116) for your website. This feature helps security researchers discover your security policies and provides a standardized way for them to report security vulnerabilities they find in your systems.
+The Security.txt plugin implements the [Security.txt](https://securitytxt.org/) standard ([RFC 9116](https://www.rfc-editor.org/rfc/rfc9116)) for your website. This feature helps security researchers access your security policies and provides a standardized way for them to report security vulnerabilities they discover in your systems.
 
 **How it works:**
 
 1. When enabled, BunkerWeb creates a `/.well-known/security.txt` file at the root of your website.
-2. This file contains information about your security policies, contacts, and other relevant security information.
+2. This file contains information about your security policies, contacts, and other relevant details.
 3. Security researchers and automated tools can easily find this file at the standard location.
-4. The content is configured through simple settings, allowing you to specify contact information, encryption keys, policies, and acknowledgments.
-5. BunkerWeb automatically ensures the file is properly formatted according to the RFC 9116 standard.
+4. The content is configured using simple settings that allow you to specify contact information, encryption keys, policies, and acknowledgments.
+5. BunkerWeb automatically formats the file in accordance with RFC 9116.
 
 ### How to Use
 
@@ -4494,13 +4578,13 @@ Follow these steps to configure and use the Security.txt feature:
 | `SECURITYTXT_CSAF`             |                             | multisite | yes      | **CSAF:** Link to the provider-metadata.json of your Common Security Advisory Framework provider.        |
 
 !!! warning "Expiration Date Required"
-    According to RFC 9116, the `Expires` field is required. If you don't provide a value for `SECURITYTXT_EXPIRES`, BunkerWeb will automatically set an expiration date one year from the current date.
+    According to RFC 9116, the `Expires` field is required. If you don't provide a value for `SECURITYTXT_EXPIRES`, BunkerWeb automatically sets the expiration date to one year from the current date.
 
 !!! info "Contact Information Is Essential"
     The `Contact` field is the most important part of the security.txt file. You should provide at least one way for security researchers to contact you. This can be an email address, a web form, a phone number, or any other method that works for your organization.
 
 !!! warning "URLs Must Use HTTPS"
-  According to RFC 9116, all URLs in the security.txt file (except for `mailto:` and `tel:` links) MUST use HTTPS. Using non-HTTPS URLs will not comply with the standard and may lead to security issues when researchers access these resources. Therefore, all `http` URLs will automatically be converted to `https` by BunkerWeb to ensure compliance with the standard.
+    According to RFC 9116, all URLs in the security.txt file (except for `mailto:` and `tel:` links) MUST use HTTPS. Non-HTTPS URLs will automatically be converted to HTTPS by BunkerWeb to ensure compliance with the standard.
 
 ### Example Configurations
 
@@ -4549,7 +4633,7 @@ Follow these steps to configure and use the Security.txt feature:
 
 STREAM support :white_check_mark:
 
-The Self-signed Certificate plugin automatically generates and manages SSL/TLS certificates directly within BunkerWeb, enabling secure HTTPS connections without requiring an external certificate authority. This feature is particularly useful for development environments, internal networks, or when you need to quickly deploy HTTPS without configuring external certificates.
+The Self-signed Certificate plugin automatically generates and manages SSL/TLS certificates directly within BunkerWeb, enabling secure HTTPS connections without requiring an external certificate authority. This feature is particularly useful in development environments, internal networks, or whenever you need to quickly deploy HTTPS without configuring external certificates.
 
 **How it works:**
 
@@ -4571,6 +4655,9 @@ Follow these steps to configure and use the Self-signed Certificate feature:
 4. **Set certificate subject:** Configure the certificate subject using the `SELF_SIGNED_SSL_SUBJ` setting.
 5. **Let BunkerWeb handle the rest:** Once configured, certificates are automatically generated and applied to your domains.
 
+!!! tip "Stream Mode Configuration"
+    For stream mode, configure the `LISTEN_STREAM_PORT_SSL` setting to specify the SSL/TLS listening port. This step is essential for proper operation in stream mode.
+
 ### Configuration Settings
 
 | Setting                     | Default                | Context   | Multiple | Description                                                                                                                       |
@@ -4581,10 +4668,10 @@ Follow these steps to configure and use the Self-signed Certificate feature:
 | `SELF_SIGNED_SSL_SUBJ`      | `/CN=www.example.com/` | multisite | no       | **Certificate Subject:** Subject field for the certificate that identifies the domain.                                            |
 
 !!! tip "Development Environments"
-    Self-signed certificates are ideal for development and testing environments where you need HTTPS but don't require certificates trusted by public browsers. They provide the same encryption strength as CA-issued certificates without the external validation.
+    Self-signed certificates are ideal for development and testing environments where you need HTTPS but do not require certificates trusted by public browsers.
 
 !!! info "Certificate Information"
-    The generated self-signed certificates use the specified algorithm (default is Elliptic Curve cryptography with prime256v1 curve) and include the configured subject, ensuring proper functionality for your domains.
+    The generated self-signed certificates use the specified algorithm (defaulting to Elliptic Curve cryptography with the prime256v1 curve) and include the configured subject, ensuring proper functionality for your domains.
 
 ### Example Configurations
 
@@ -4626,7 +4713,7 @@ Follow these steps to configure and use the Self-signed Certificate feature:
 
 STREAM support :white_check_mark:
 
-The Sessions plugin provides robust HTTP session management for BunkerWeb, enabling secure and reliable user session tracking across requests. This core feature is essential for maintaining user state, authentication persistence, and supporting other features that require identity continuity like antibot protection and user authentication systems.
+The Sessions plugin provides robust HTTP session management for BunkerWeb, enabling secure and reliable user session tracking across requests. This core feature is essential for maintaining user state, authentication persistence, and supporting other features that require identity continuity, such as [anti‑bot](#antibot) protection and user authentication systems.
 
 **How it works:**
 
@@ -4635,7 +4722,7 @@ The Sessions plugin provides robust HTTP session management for BunkerWeb, enabl
 3. On subsequent requests, BunkerWeb retrieves the session identifier from the cookie and uses it to access the user's session data.
 4. Session data can be stored locally or in [Redis](#redis) for distributed environments with multiple BunkerWeb instances.
 5. Sessions are automatically managed with configurable timeouts, ensuring security while maintaining usability.
-6. The cryptographic security of sessions is ensured through a secret key that's used to sign session cookies.
+6. The cryptographic security of sessions is ensured through a secret key that is used to sign session cookies.
 
 ### How to Use
 
@@ -4754,12 +4841,15 @@ Add the possibility to manage users on the web interface
 
 STREAM support :warning:
 
-The Whitelist plugin provides a comprehensive approach to explicitly allow access to your website based on various client attributes. This feature creates a security mechanism where visitors matching specific criteria are granted immediate access, while all others must pass regular security checks.
+The Whitelist plugin lets you define a list of trusted IP addresses that bypass other security filters.
+For blocking unwanted clients instead, refer to the [Blacklist plugin](#blacklist).
+
+The Whitelist plugin provides a comprehensive approach to explicitly allow access to your website based on various client attributes. This feature provides a security mechanism: visitors matching specific criteria are granted immediate access, while all others must pass regular security checks.
 
 **How it works:**
 
 1. You define criteria for visitors who should be "whitelisted" (*IP addresses, networks, rDNS, ASN, User-Agent, or URI patterns*).
-2. When a visitor attempts to access your site, BunkerWeb checks if they match any of these whitelist criteria.
+2. When a visitor attempts to access your site, BunkerWeb checks whether they match any of these whitelist criteria.
 3. If a visitor matches any whitelist rule (and doesn't match any ignore rule), they are granted access to your site and **bypass all other security checks**.
 4. If a visitor doesn't match any whitelist criteria, they proceed through all normal security checks as usual.
 5. Whitelists can be automatically updated from external sources on a regular schedule.
@@ -4773,6 +4863,9 @@ Follow these steps to configure and use the Whitelist feature:
 3. **Set up ignore rules:** Specify any exceptions that should bypass the whitelist checks.
 4. **Add external sources:** Configure URLs for automatically downloading and updating whitelist data.
 5. **Monitor access:** Check the [web UI](web-ui.md) to see which visitors are being allowed or denied.
+
+!!! info "stream mode"
+    When using stream mode, only IP, rDNS, and ASN checks are performed.
 
 ### Configuration Settings
 

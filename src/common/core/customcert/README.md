@@ -1,22 +1,28 @@
-The Custom SSL certificate plugin allows you to use your own SSL/TLS certificates with BunkerWeb instead of the automatically generated ones. This feature is particularly useful when you have existing certificates from a trusted Certificate Authority (CA), need to use certificates with specific configurations, or want to maintain consistent certificate management across your infrastructure.
+The Custom SSL certificate plugin allows you to use your own SSL/TLS certificates with BunkerWeb instead of the automatically generated ones. This feature is particularly useful if you have existing certificates from a trusted Certificate Authority (CA), need to use certificates with specific configurations, or want to maintain consistent certificate management across your infrastructure.
 
 **How it works:**
 
 1. You provide BunkerWeb with your certificate and private key files, either by specifying file paths or by providing the data in base64-encoded format.
-2. BunkerWeb validates your certificate and key to ensure they're properly formatted and usable.
+2. BunkerWeb validates your certificate and key to ensure they are properly formatted and usable.
 3. When a secure connection is established, BunkerWeb serves your custom certificate instead of the auto-generated one.
-4. BunkerWeb automatically monitors your certificate's validity and will display warnings if it's approaching expiration.
+4. BunkerWeb automatically monitors your certificate's validity and displays warnings if it is approaching expiration.
 5. You have full control over certificate management, allowing you to use certificates from any issuer you prefer.
+
+!!! info "Automatic Certificate Monitoring"
+    When you enable custom SSL/TLS by setting `USE_CUSTOM_SSL` to `yes`, BunkerWeb automatically monitors the custom certificate specified in `CUSTOM_SSL_CERT`. It checks for changes daily and reloads NGINX if any modifications are detected, ensuring the latest certificate is always in use.
 
 ### How to Use
 
 Follow these steps to configure and use the Custom SSL certificate feature:
 
 1. **Enable the feature:** Set the `USE_CUSTOM_SSL` setting to `yes` to enable custom certificate support.
-2. **Choose a method:** Decide whether to provide certificates via file paths or as base64-encoded data, and set the priority with `CUSTOM_SSL_CERT_PRIORITY`.
+2. **Choose a method:** Decide whether to provide certificates via file paths or as base64-encoded data, and set the priority using `CUSTOM_SSL_CERT_PRIORITY`.
 3. **Provide certificate files:** If using file paths, specify the locations of your certificate and private key files.
 4. **Or provide certificate data:** If using base64 data, provide your certificate and key as base64-encoded strings.
-5. **Let BunkerWeb handle the rest:** Once configured, BunkerWeb will automatically use your custom certificates for all HTTPS connections.
+5. **Let BunkerWeb handle the rest:** Once configured, BunkerWeb automatically uses your custom certificates for all HTTPS connections.
+
+!!! tip "Stream Mode Configuration"
+    For stream mode, you must configure the `LISTEN_STREAM_PORT_SSL` setting to specify the SSL/TLS listening port. This step is essential for proper operation in stream mode.
 
 ### Configuration Settings
 
@@ -37,6 +43,7 @@ Follow these steps to configure and use the Custom SSL certificate feature:
 
 !!! info "Certificate Chains"
     If your certificate includes a chain (intermediates), you should provide the full certificate chain in the correct order, with your certificate first, followed by any intermediate certificates.
+
 
 ### Example Configurations
 

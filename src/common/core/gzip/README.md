@@ -1,12 +1,12 @@
-The GZIP plugin enhances website performance by compressing HTTP responses using the gzip algorithm. This feature helps reduce bandwidth usage and improve page load times by compressing web content before it's sent to the client's browser, resulting in faster content delivery and improved user experience.
+The GZIP plugin enhances website performance by compressing HTTP responses using the GZIP algorithm. This feature reduces bandwidth usage and improves page load times by compressing web content before it is sent to the client's browser, resulting in faster delivery and an improved user experience.
 
-**How it works:**
+### How It Works
 
-1. When a client requests content from your website, BunkerWeb checks if the client supports gzip compression.
-2. If supported, BunkerWeb compresses the response using the gzip algorithm at your configured compression level.
-3. The compressed content is sent to the client with appropriate headers indicating gzip compression.
-4. The client's browser decompresses the content before rendering it to the user.
-5. Both bandwidth usage and page load times are reduced, improving overall site performance and user experience.
+1. When a client requests content from your website, BunkerWeb checks if the client supports GZIP compression.
+2. If supported, BunkerWeb compresses the response using the GZIP algorithm at your configured compression level.
+3. The compressed content is sent to the client with appropriate headers indicating GZIP compression.
+4. The client's browser decompresses the content before rendering it.
+5. Both bandwidth usage and page load times are reduced, enhancing overall site performance and user experience.
 
 ### How to Use
 
@@ -14,16 +14,16 @@ Follow these steps to configure and use the GZIP compression feature:
 
 1. **Enable the feature:** The GZIP feature is disabled by default. Enable it by setting the `USE_GZIP` setting to `yes`.
 2. **Configure MIME types:** Specify which content types should be compressed using the `GZIP_TYPES` setting.
-3. **Set minimum size:** Define the minimum response size for compression with `GZIP_MIN_LENGTH` to avoid compressing tiny files.
-4. **Choose compression level:** Select your preferred balance between speed and compression ratio with `GZIP_COMP_LEVEL`.
-5. **Configure proxied settings:** Determine which proxied requests should be compressed using the `GZIP_PROXIED` setting.
+3. **Set minimum size:** Define the minimum response size required for compression with the `GZIP_MIN_LENGTH` setting to avoid compressing small files.
+4. **Choose a compression level:** Select your preferred balance between speed and compression ratio using the `GZIP_COMP_LEVEL` setting.
+5. **Configure proxied requests:** Specify which proxied requests should be compressed using the `GZIP_PROXIED` setting.
 
 ### Configuration Settings
 
 | Setting           | Default                                                                                                                                                                                                                                                                                                                                                                                                                          | Context   | Multiple | Description                                                                                                                      |
 | ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------------- |
 | `USE_GZIP`        | `no`                                                                                                                                                                                                                                                                                                                                                                                                                             | multisite | no       | **Enable GZIP:** Set to `yes` to enable GZIP compression.                                                                        |
-| `GZIP_TYPES`      | `application/atom+xml application/javascript application/json application/rss+xml application/vnd.ms-fontobject application/x-font-opentype application/x-font-truetype application/x-font-ttf application/x-javascript application/xhtml+xml application/xml font/eot font/opentype font/otf font/truetype image/svg+xml image/vnd.microsoft.icon image/x-icon image/x-win-bitmap text/css text/javascript text/plain text/xml` | multisite | no       | **MIME Types:** List of content types that will be compressed with gzip.                                                         |
+| `GZIP_TYPES`      | `application/atom+xml application/javascript application/json application/rss+xml application/vnd.ms-fontobject application/x-font-opentype application/x-font-truetype application/x-font-ttf application/x-javascript application/xhtml+xml application/xml font/eot font/opentype font/otf font/truetype image/svg+xml image/vnd.microsoft.icon image/x-icon image/x-win-bitmap text/css text/javascript text/plain text/xml` | multisite | no       | **MIME Types:** List of content types that will be compressed with GZIP.                                                         |
 | `GZIP_MIN_LENGTH` | `1000`                                                                                                                                                                                                                                                                                                                                                                                                                           | multisite | no       | **Minimum Size:** The minimum response size (in bytes) for GZIP compression to be applied.                                       |
 | `GZIP_COMP_LEVEL` | `5`                                                                                                                                                                                                                                                                                                                                                                                                                              | multisite | no       | **Compression Level:** Level of compression from 1 (minimum compression) to 9 (maximum compression). Higher values use more CPU. |
 | `GZIP_PROXIED`    | `no-cache no-store private expired auth`                                                                                                                                                                                                                                                                                                                                                                                         | multisite | no       | **Proxied Requests:** Specifies which proxied requests should be compressed based on response headers.                           |

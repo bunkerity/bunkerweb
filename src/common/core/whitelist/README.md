@@ -1,9 +1,12 @@
-The Whitelist plugin provides a comprehensive approach to explicitly allow access to your website based on various client attributes. This feature creates a security mechanism where visitors matching specific criteria are granted immediate access, while all others must pass regular security checks.
+The Whitelist plugin lets you define a list of trusted IP addresses that bypass other security filters.
+For blocking unwanted clients instead, refer to the [Blacklist plugin](#blacklist).
+
+The Whitelist plugin provides a comprehensive approach to explicitly allow access to your website based on various client attributes. This feature provides a security mechanism: visitors matching specific criteria are granted immediate access, while all others must pass regular security checks.
 
 **How it works:**
 
 1. You define criteria for visitors who should be "whitelisted" (*IP addresses, networks, rDNS, ASN, User-Agent, or URI patterns*).
-2. When a visitor attempts to access your site, BunkerWeb checks if they match any of these whitelist criteria.
+2. When a visitor attempts to access your site, BunkerWeb checks whether they match any of these whitelist criteria.
 3. If a visitor matches any whitelist rule (and doesn't match any ignore rule), they are granted access to your site and **bypass all other security checks**.
 4. If a visitor doesn't match any whitelist criteria, they proceed through all normal security checks as usual.
 5. Whitelists can be automatically updated from external sources on a regular schedule.
@@ -17,6 +20,9 @@ Follow these steps to configure and use the Whitelist feature:
 3. **Set up ignore rules:** Specify any exceptions that should bypass the whitelist checks.
 4. **Add external sources:** Configure URLs for automatically downloading and updating whitelist data.
 5. **Monitor access:** Check the [web UI](web-ui.md) to see which visitors are being allowed or denied.
+
+!!! info "stream mode"
+    When using stream mode, only IP, rDNS, and ASN checks are performed.
 
 ### Configuration Settings
 

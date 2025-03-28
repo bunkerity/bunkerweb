@@ -11,10 +11,10 @@ Attackers often use automated tools (bots) to try and exploit your website. To p
 
 Follow these steps to enable and configure the Antibot feature:
 
-1.  **Choose a challenge type:** Decide which type of antibot challenge you want to use (e.g., [captcha](#__tabbed_1_3), [hcaptcha](#__tabbed_1_5), [javascript](#__tabbed_1_2)).
-2.  **Enable the feature:** Set the `USE_ANTIBOT` setting to your chosen challenge type in your BunkerWeb configuration.
-3.  **Configure the settings:** Adjust the other `ANTIBOT_*` settings as needed. For reCAPTCHA, hCaptcha, Turnstile and mCaptcha, you'll need to create an account with the respective service and obtain API keys.
-4.  **Important:** Ensure the `ANTIBOT_URI` is a unique URL on your site that is not in use.
+1. **Choose a challenge type:** Decide which type of antibot challenge to use (e.g., [captcha](#__tabbed_1_3), [hcaptcha](#__tabbed_1_5), [javascript](#__tabbed_1_2)).
+2. **Enable the feature:** Set the `USE_ANTIBOT` setting to your chosen challenge type in your BunkerWeb configuration.
+3. **Configure the settings:** Adjust the other `ANTIBOT_*` settings as needed. For reCAPTCHA, hCaptcha, Turnstile, and mCaptcha, you must create an account with the respective service and obtain API keys.
+4. **Important:** Ensure the `ANTIBOT_URI` is a unique URL on your site that is not in use.
 
 !!! important "About the `ANTIBOT_URI` Setting"
     Ensure the `ANTIBOT_URI` is a unique URL on your site that is not in use.
@@ -38,12 +38,12 @@ BunkerWeb allows you to specify certain users, IPs, or requests that should bypa
 
 | Setting                     | Default | Context   | Multiple | Description                                                                                                       |
 | --------------------------- | ------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------- |
-| `ANTIBOT_IGNORE_URI`        |       | multisite | no       | **Excluded URLs:** List of URI regex patterns separated by spaces that should bypass the challenge.               |
-| `ANTIBOT_IGNORE_IP`         |       | multisite | no       | **Excluded IPs:** List of IP addresses or CIDR ranges separated by spaces that should bypass the challenge.       |
-| `ANTIBOT_IGNORE_RDNS`       |       | multisite | no       | **Excluded Reverse DNS:** List of reverse DNS suffixes separated by spaces that should bypass the challenge.      |
+| `ANTIBOT_IGNORE_URI`        |         | multisite | no       | **Excluded URLs:** List of URI regex patterns separated by spaces that should bypass the challenge.               |
+| `ANTIBOT_IGNORE_IP`         |         | multisite | no       | **Excluded IPs:** List of IP addresses or CIDR ranges separated by spaces that should bypass the challenge.       |
+| `ANTIBOT_IGNORE_RDNS`       |         | multisite | no       | **Excluded Reverse DNS:** List of reverse DNS suffixes separated by spaces that should bypass the challenge.      |
 | `ANTIBOT_RDNS_GLOBAL`       | `yes`   | multisite | no       | **Global IPs Only:** If set to `yes`, only perform reverse DNS checks on public IP addresses.                     |
-| `ANTIBOT_IGNORE_ASN`        |       | multisite | no       | **Excluded ASNs:** List of ASN numbers separated by spaces that should bypass the challenge.                      |
-| `ANTIBOT_IGNORE_USER_AGENT` |       | multisite | no       | **Excluded User Agents:** List of User-Agent regex patterns separated by spaces that should bypass the challenge. |
+| `ANTIBOT_IGNORE_ASN`        |         | multisite | no       | **Excluded ASNs:** List of ASN numbers separated by spaces that should bypass the challenge.                      |
+| `ANTIBOT_IGNORE_USER_AGENT` |         | multisite | no       | **Excluded User Agents:** List of User-Agent regex patterns separated by spaces that should bypass the challenge. |
 
 **Examples:**
 
@@ -183,7 +183,7 @@ BunkerWeb allows you to specify certain users, IPs, or requests that should bypa
 
     mCaptcha is designed with privacy in mind. It is fully GDPR compliant, ensuring that all user data involved in the challenge process adheres to strict data protection standards. Additionally, mCaptcha offers the flexibility to be self-hosted, allowing organizations to maintain full control over their data and infrastructure. This self-hosting capability not only enhances privacy but also optimizes performance and customization to suit specific deployment needs.
 
-    To integrate mCaptcha with BunkerWeb, you must obtain the necessary credentials from the [mCaptcha](https://mcaptcha.org/) platform or yours. These credentials include a site key and a secret key for verification.
+    To integrate mCaptcha with BunkerWeb, you must obtain the necessary credentials from the [mCaptcha](https://mcaptcha.org/) platform or your own provider. These credentials include a site key and a secret key for verification.
 
     **Configuration Settings:**
 

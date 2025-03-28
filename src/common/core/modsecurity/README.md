@@ -4,7 +4,7 @@ The ModSecurity plugin integrates the powerful [ModSecurity](https://modsecurity
 
 1. When a request is received, ModSecurity evaluates it against the active rule set.
 2. The OWASP Core Rule Set inspects headers, cookies, URL parameters, and body content.
-3. Each detected violation adds to an overall "anomaly score."
+3. Each detected violation contributes to an overall anomaly score.
 4. If this score exceeds the configured threshold, the request is blocked.
 5. Detailed logs are created to help diagnose which rules were triggered and why.
 
@@ -20,7 +20,7 @@ The ModSecurity plugin integrates the powerful [ModSecurity](https://modsecurity
 
 Follow these steps to configure and use ModSecurity:
 
-1. **Enable the feature:** ModSecurity is enabled by default. Control this via the `USE_MODSECURITY` setting.
+1. **Enable the feature:** ModSecurity is enabled by default. This can be controlled using the `USE_MODSECURITY` setting.
 2. **Select a CRS version:** Choose a version of the OWASP Core Rule Set (v3, v4, or nightly).
 3. **Add plugins:** Optionally activate CRS plugins to enhance rule coverage.
 4. **Monitor and tune:** Use logs and the [web UI](web-ui.md) to identify false positives and adjust settings.
