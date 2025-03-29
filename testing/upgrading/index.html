@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../assets/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.9">
     
     
       
@@ -28,7 +28,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.8608ea7d.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.4af4bdda.min.css">
       
       
 
@@ -408,12 +408,12 @@
   
   
     <li class="md-tabs__item">
-      <a href="../advanced/" class="md-tabs__link">
+      <a href="../features/" class="md-tabs__link">
         
   
     
   
-  Advanced usages
+  Features
 
       </a>
     </li>
@@ -425,12 +425,12 @@
   
   
     <li class="md-tabs__item">
-      <a href="../settings/" class="md-tabs__link">
+      <a href="../advanced/" class="md-tabs__link">
         
   
     
   
-  Settings
+  Advanced usages
 
       </a>
     </li>
@@ -684,11 +684,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../advanced/" class="md-nav__link">
+      <a href="../features/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Advanced usages
+    Features
     
   </span>
   
@@ -705,11 +705,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../settings/" class="md-nav__link">
+      <a href="../advanced/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Settings
+    Advanced usages
     
   </span>
   
@@ -1035,14 +1035,14 @@
 <h2 id="upgrade-from-16x">Upgrade from 1.6.X</h2>
 <div class="admonition warning">
 <p class="admonition-title">Read me first</p>
-<p>We often add new features and settings to BunkerWeb. We recommend you read the <a href="../settings/">settings</a> sections of the documentation or the GitHub releases to see what's new.</p>
+<p>We often add new features and settings to BunkerWeb. We recommend you read the <a href="../features/">settings</a> sections of the documentation or the GitHub releases to see what's new.</p>
 </div>
 <h3 id="procedure">Procedure</h3>
 <ol>
 <li>
 <p><strong>Backup the database</strong>:</p>
 <ul>
-<li>Before proceeding with the database upgrade, ensure to perform a complete backup of the current state of the database.</li>
+<li>Before proceeding with the database upgrade, ensure that you perform a complete backup of the current state of the database.</li>
 <li>Use appropriate tools to backup the entire database, including data, schemas, and configurations.</li>
 </ul>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Docker</label><label for="__tabbed_1_2">Linux</label></div>
@@ -1149,28 +1149,28 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>stop<span class="w"
 <div class="tabbed-set tabbed-alternate" data-tabs="4:2"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">Debian/Ubuntu</label><label for="__tabbed_4_2">Fedora/RedHat</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<p>First, if you have previously hold the BunkerWeb package, unhold it :</p>
+<p>First, if you have previously held the BunkerWeb package, unhold it :</p>
 <p>You can print a list of packages on hold with <code>apt-mark showhold</code></p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt-mark<span class="w"> </span>unhold<span class="w"> </span>bunkerweb<span class="w"> </span>nginx
 </code></pre></div>
-<p>Them, you can update BunkerWeb package :</p>
+<p>Then, you can update the BunkerWeb package :</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span><span class="nv">bunkerweb</span><span class="o">=</span>testing
 </code></pre></div>
-<p>To prevent upgrading BunkerWeb package when executing <code>apt upgrade</code>, you can use the following command :</p>
+<p>To prevent the BunkerWeb package from upgrading when executing <code>apt upgrade</code>, you can use the following command :</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt-mark<span class="w"> </span>hold<span class="w"> </span>bunkerweb<span class="w"> </span>nginx
 </code></pre></div>
 <p>More details in the <a href="../integrations/#__tabbed_1_1">integration Linux page</a>.</p>
 </div>
 <div class="tabbed-block">
-<p>First, if you have previously hold the BunkerWeb package, unhold it :</p>
+<p>First, if you have previously held the BunkerWeb package, unhold it :</p>
 <p>You can print a list of packages on hold with <code>dnf versionlock list</code></p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>delete<span class="w"> </span>package<span class="w"> </span>bunkerweb<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>delete<span class="w"> </span>package<span class="w"> </span>nginx
 </code></pre></div>
-<p>Them, you can update BunkerWeb package :</p>
+<p>Then, you can update the BunkerWeb package :</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>bunkerweb-testing
 </code></pre></div>
-<p>To prevent upgrading BunkerWeb package when executing <code>dnf upgrade</code>, you can use the following command :</p>
+<p>To prevent the BunkerWeb package from upgrading when executing <code>dnf upgrade</code>, you can use the following command :</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>add<span class="w"> </span>bunkerweb<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>add<span class="w"> </span>nginx
 </code></pre></div>
@@ -1253,7 +1253,7 @@ docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </spa
 </code></pre></div>
 </li>
 <li>
-<p><strong>Stop the Stack.</strong></p>
+<p><strong>Stop the stack.</strong></p>
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>down
 </code></pre></div>
 </li>
@@ -1267,7 +1267,7 @@ docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </spa
 </code></pre></div>
 </li>
 <li>
-<p><strong>Stop the Stack.</strong></p>
+<p><strong>Stop the stack.</strong></p>
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>down
 </code></pre></div>
 </li>
@@ -1291,7 +1291,7 @@ docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </spa
 </code></pre></div>
 </li>
 <li>
-<p><strong>Stop the Stack.</strong></p>
+<p><strong>Stop the stack.</strong></p>
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>down
 </code></pre></div>
 </li>
@@ -1411,7 +1411,7 @@ sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">770</sp
 <p>Every API related setting that you declare on the BunkerWeb container <strong>have to be mirrored on the Scheduler container</strong> so that it keeps working, as the configuration will be overwritten by the Scheduler's generated configuration.</p>
 </div>
 <h4 id="default-values-and-new-settings">Default values and new settings</h4>
-<p>We tried our best not to change default value but we have added many other settings. It's highly recommended to read the <a href="../advanced/#security-tuning">security tuning</a> and <a href="../settings/">settings</a> sections of the documentation.</p>
+<p>We tried our best not to change default value but we have added many other settings. It's highly recommended to read the <a href="../advanced/#security-tuning">security tuning</a> and <a href="../features/">settings</a> sections of the documentation.</p>
 <h4 id="templates">Templates</h4>
 <p>We added a new feature called <strong>templates</strong>. Templates provide a structured and standardized approach to defining settings and custom configurations, check the <a href="../concepts/#templates">concepts/templates</a> section for more information.</p>
 <h4 id="autoconf-namespaces">Autoconf namespaces</h4>
@@ -1426,7 +1426,7 @@ sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">770</sp
 <li>
 <p><strong>Backup the database</strong>:</p>
 <ul>
-<li>Before proceeding with the database upgrade, ensure to perform a complete backup of the current state of the database.</li>
+<li>Before proceeding with the database upgrade, ensure that you perform a complete backup of the current state of the database.</li>
 <li>Use appropriate tools to backup the entire database, including data, schemas, and configurations.</li>
 </ul>
 <div class="tabbed-set tabbed-alternate" data-tabs="9:2"><input checked="checked" id="__tabbed_9_1" name="__tabbed_9" type="radio" /><input id="__tabbed_9_2" name="__tabbed_9" type="radio" /><div class="tabbed-labels"><label for="__tabbed_9_1">1.5.7 and later</label><label for="__tabbed_9_2">1.5.6 and earlier</label></div>
@@ -1604,28 +1604,28 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>stop<span class="w"
 <div class="tabbed-set tabbed-alternate" data-tabs="18:2"><input checked="checked" id="__tabbed_18_1" name="__tabbed_18" type="radio" /><input id="__tabbed_18_2" name="__tabbed_18" type="radio" /><div class="tabbed-labels"><label for="__tabbed_18_1">Debian/Ubuntu</label><label for="__tabbed_18_2">Fedora/RedHat</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<p>First, if you have previously hold the BunkerWeb package, unhold it :</p>
+<p>First, if you have previously held the BunkerWeb package, unhold it :</p>
 <p>You can print a list of packages on hold with <code>apt-mark showhold</code></p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt-mark<span class="w"> </span>unhold<span class="w"> </span>bunkerweb<span class="w"> </span>nginx
 </code></pre></div>
-<p>Them, you can update BunkerWeb package :</p>
+<p>Then, you can update the BunkerWeb package :</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span><span class="nv">bunkerweb</span><span class="o">=</span>testing
 </code></pre></div>
-<p>To prevent upgrading BunkerWeb package when executing <code>apt upgrade</code>, you can use the following command :</p>
+<p>To prevent the BunkerWeb package from upgrading when executing <code>apt upgrade</code>, you can use the following command :</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt-mark<span class="w"> </span>hold<span class="w"> </span>bunkerweb<span class="w"> </span>nginx
 </code></pre></div>
 <p>More details in the <a href="../integrations/#__tabbed_1_1">integration Linux page</a>.</p>
 </div>
 <div class="tabbed-block">
-<p>First, if you have previously hold the BunkerWeb package, unhold it :</p>
+<p>First, if you have previously held the BunkerWeb package, unhold it :</p>
 <p>You can print a list of packages on hold with <code>dnf versionlock list</code></p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>delete<span class="w"> </span>package<span class="w"> </span>bunkerweb<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>delete<span class="w"> </span>package<span class="w"> </span>nginx
 </code></pre></div>
-<p>Them, you can update BunkerWeb package :</p>
+<p>Then, you can update the BunkerWeb package :</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>bunkerweb-testing
 </code></pre></div>
-<p>To prevent upgrading BunkerWeb package when executing <code>dnf upgrade</code>, you can use the following command :</p>
+<p>To prevent the BunkerWeb package from upgrading when executing <code>dnf upgrade</code>, you can use the following command :</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>add<span class="w"> </span>bunkerweb<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>add<span class="w"> </span>nginx
 </code></pre></div>
@@ -1706,12 +1706,12 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>start<span class="w
 docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-u<span class="w"> </span><span class="m">0</span><span class="w"> </span>-i<span class="w"> </span>&lt;scheduler_container&gt;<span class="w"> </span>chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>/var/lib/bunkerweb/db.sqlite3
 </code></pre></div>
 </li>
+<li>
+<p><strong>Stop the stack.</strong></p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>down
+</code></pre></div>
+</li>
 </ol>
-<p>''. <strong>Stop the Stack.</strong></p>
-<pre><code>```bash
-docker compose down
-```
-</code></pre>
 </div>
 <div class="tabbed-block">
 <ol>
@@ -1721,7 +1721,7 @@ docker compose down
 </code></pre></div>
 </li>
 <li>
-<p><strong>Stop the Stack.</strong></p>
+<p><strong>Stop the stack.</strong></p>
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>down
 </code></pre></div>
 </li>
@@ -1745,7 +1745,7 @@ docker compose down
 </code></pre></div>
 </li>
 <li>
-<p><strong>Stop the Stack.</strong></p>
+<p><strong>Stop the stack.</strong></p>
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>down
 </code></pre></div>
 </li>
@@ -1782,7 +1782,7 @@ docker compose down
 <ol>
 <li>
 <p><strong>Stop the services</strong>.</p>
-<div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>stop<span class="w"> </span>bunkerweb<span class="w"> </span>bunkerweb-ui<span class="w"> </span>bunkerweb-scheduler
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>stop<span class="w"> </span>bunkerweb<span class="w"> </span>bunkerweb-ui<span class="w"> </span>bunkerweb-scheduler
 </code></pre></div>
 </li>
 <li>
@@ -1824,7 +1824,7 @@ sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">770</sp
 </li>
 <li>
 <p><strong>Start the services</strong>.</p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>start<span class="w"> </span>bunkerweb<span class="w"> </span>bunkerweb-ui
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>start<span class="w"> </span>bunkerweb<span class="w"> </span>bunkerweb-ui<span class="w"> </span>bunkerweb-scheduler
 </code></pre></div>
 </li>
 <li>

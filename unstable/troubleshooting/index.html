@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../assets/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.9">
     
     
       
@@ -28,7 +28,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.8608ea7d.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.4af4bdda.min.css">
       
       
 
@@ -408,12 +408,12 @@
   
   
     <li class="md-tabs__item">
-      <a href="../advanced/" class="md-tabs__link">
+      <a href="../features/" class="md-tabs__link">
         
   
     
   
-  Advanced usages
+  Features
 
       </a>
     </li>
@@ -425,12 +425,12 @@
   
   
     <li class="md-tabs__item">
-      <a href="../settings/" class="md-tabs__link">
+      <a href="../advanced/" class="md-tabs__link">
         
   
     
   
-  Settings
+  Advanced usages
 
       </a>
     </li>
@@ -684,11 +684,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../advanced/" class="md-nav__link">
+      <a href="../features/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Advanced usages
+    Features
     
   </span>
   
@@ -705,11 +705,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../settings/" class="md-nav__link">
+      <a href="../advanced/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Settings
+    Advanced usages
     
   </span>
   
@@ -1037,11 +1037,11 @@
 <h1 id="troubleshooting">Troubleshooting</h1>
 <div class="admonition info">
 <p class="admonition-title">BunkerWeb Panel</p>
-<p>If you are unable to resolve your problems, you can <a href="https://panel.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc">contact us directly via our panel</a>. This centralises all requests relating to the BunkerWeb solution.</p>
+<p>If you are unable to resolve your issue, you can <a href="https://panel.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc">contact us directly via our panel</a>. This centralizes all requests related to the BunkerWeb solution.</p>
 </div>
 <h2 id="logs">Logs</h2>
 <p>When troubleshooting, logs are your best friends. We try our best to provide user-friendly logs to help you understand what's happening.</p>
-<p>Please note that you can set <code>LOG_LEVEL</code> setting to <code>info</code> (default : <code>notice</code>) to increase the verbosity of BunkerWeb.</p>
+<p>Please note that you can set the <code>LOG_LEVEL</code> to <code>info</code> (default: <code>notice</code>) to increase BunkerWeb’s verbosity.</p>
 <p>Here is how you can access the logs, depending on your integration :</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:5"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><input id="__tabbed_1_5" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Docker</label><label for="__tabbed_1_2">Docker autoconf</label><label for="__tabbed_1_3">Swarm</label><label for="__tabbed_1_4">Kubernetes</label><label for="__tabbed_1_5">Linux</label></div>
 <div class="tabbed-content">
@@ -1105,7 +1105,7 @@ kubectl<span class="w"> </span>logs<span class="w"> </span>myautoconf
 </code></pre></div></p>
 </div>
 <div class="tabbed-block">
-<p>For errors related to BunkerWeb services (e.g. not starting), you can use <code>journalctl</code> :
+<p>For errors related to BunkerWeb services (e.g., not starting), you can use <code>journalctl</code> :
 <div class="highlight"><pre><span></span><code>journalctl<span class="w"> </span>-u<span class="w"> </span>bunkerweb<span class="w"> </span>--no-pager
 </code></pre></div></p>
 <p>Common logs are located inside the <code>/var/log/bunkerweb</code> directory :
@@ -1118,7 +1118,7 @@ cat<span class="w"> </span>/var/log/bunkerweb/access.log
 <h2 id="permissions">Permissions</h2>
 <p>Don't forget that BunkerWeb runs as an unprivileged user for obvious security reasons. Double-check the permissions of files and folders used by BunkerWeb, especially if you use custom configurations (more info <a href="../advanced/#custom-configurations">here</a>). You will need to set at least <strong>RW</strong> rights on files and <strong><em>RWX</em></strong> on folders.</p>
 <h2 id="ip-unban">IP unban</h2>
-<p>You can manually unban an IP which can be useful when doing some tests so you can contact the internal API of BunkerWeb (replace <code>1.2.3.4</code> with the IP address to unban) :</p>
+<p>You can manually unban an IP, which is useful when performing tests so that you can contact the internal API of BunkerWeb (replace <code>1.2.3.4</code> with the IP address to unban) :</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="2:5"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><input id="__tabbed_2_3" name="__tabbed_2" type="radio" /><input id="__tabbed_2_4" name="__tabbed_2" type="radio" /><input id="__tabbed_2_5" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Docker</label><label for="__tabbed_2_2">Docker autoconf</label><label for="__tabbed_2_3">Swarm</label><label for="__tabbed_2_4">Kubernetes</label><label for="__tabbed_2_5">Linux</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -1258,16 +1258,18 @@ cat<span class="w"> </span>/var/log/bunkerweb/access.log
 </ul>
 <h2 id="common-errors">Common errors</h2>
 <h3 id="upstream-sent-too-big-header">Upstream sent too big header</h3>
-<p>If you see the following error <code>upstream sent too big header while reading response header from upstream</code> in the logs, you will need to tweak the various proxy buffers size using the following settings :
-- <code>PROXY_BUFFERS</code>
-- <code>PROXY_BUFFER_SIZE</code>
-- <code>PROXY_BUSY_BUFFERS_SIZE</code></p>
+<p>If you see the following error <code>upstream sent too big header while reading response header from upstream</code> in the logs, you will need to tweak the various proxy buffers size using the following settings :</p>
+<ul>
+<li><code>PROXY_BUFFERS</code></li>
+<li><code>PROXY_BUFFER_SIZE</code></li>
+<li><code>PROXY_BUSY_BUFFERS_SIZE</code></li>
+</ul>
 <h3 id="could-not-build-server_names_hash">Could not build server_names_hash</h3>
 <p>If you see the following error <code>could not build server_names_hash, you should increase server_names_hash_bucket_size</code> in the logs, you will need to tweak the <code>SERVER_NAMES_HASH_BUCKET_SIZE</code> setting.</p>
 <h2 id="timezone">Timezone</h2>
-<p>When using container-based integrations, the timezone of the container may not match the one of the host machine. To resolve that, you can set the <code>TZ</code> environment variable to the timezone of your choice on your containers (e.g. <code>TZ=Europe/Paris</code>). You will find the list of timezone identifiers <a href="https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List">here</a>.</p>
+<p>When using container-based integrations, the timezone of the container may not match that of the host machine. To resolve that, you can set the <code>TZ</code> environment variable to the timezone of your choice on your containers (e.g. <code>TZ=Europe/Paris</code>). You will find the list of timezone identifiers <a href="https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List">here</a>.</p>
 <h2 id="web-ui">Web UI</h2>
-<p>In case you lost your UI credentials or have 2FA issues, you can connect to the database to retrieve access.</p>
+<p>In case you forgot your UI credentials or are experiencing 2FA issues, you can connect to the database to regain access.</p>
 <p><strong>Access database</strong></p>
 <div class="tabbed-set tabbed-alternate" data-tabs="3:2"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">SQLite</label><label for="__tabbed_3_2">MariaDB / MySQL</label></div>
 <div class="tabbed-content">
@@ -1275,10 +1277,10 @@ cat<span class="w"> </span>/var/log/bunkerweb/access.log
 <div class="tabbed-set tabbed-alternate" data-tabs="4:2"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">Linux</label><label for="__tabbed_4_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<p>Install SQLite (Debian/Ubuntu) :</p>
+<p>Install SQLite (Debian/Ubuntu):</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>sqlite3
 </code></pre></div>
-<p>Install SQLite (Fedora/RedHat) :</p>
+<p>Install SQLite (Fedora/RedHat):</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>sqlite
 </code></pre></div>
 </div>
@@ -1328,7 +1330,7 @@ sqlite&gt;
 <p>Access your local database :</p>
 <div class="highlight"><pre><span></span><code>mysql<span class="w"> </span>-u<span class="w"> </span>&lt;user&gt;<span class="w"> </span>-p<span class="w"> </span>&lt;database&gt;
 </code></pre></div>
-<p>Then enter your password of the database user and you should be able to access your database.</p>
+<p>Then enter the database user’s password and you should be able to access your database.</p>
 </div>
 <div class="tabbed-block">
 <p>Access your database container :</p>
@@ -1344,7 +1346,7 @@ sqlite&gt;
 </div>
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-u<span class="w"> </span><span class="m">0</span><span class="w"> </span>-it<span class="w"> </span>&lt;bunkerweb_db_container&gt;<span class="w"> </span>mysql<span class="w"> </span>-u<span class="w"> </span>&lt;user&gt;<span class="w"> </span>-p<span class="w"> </span>&lt;database&gt;
 </code></pre></div>
-<p>Then enter your password of the database user and you should be able to access your database.</p>
+<p>Then enter the database user’s password and you should be able to access your database.</p>
 </div>
 </div>
 </div>
