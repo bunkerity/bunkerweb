@@ -461,6 +461,33 @@ $(document).ready(function () {
           },
         },
         {
+          targets: 5,
+          render: function (data, type, row) {
+            if (type !== "display") {
+              return data;
+            }
+
+            // For display, check if URL is too long
+            const maxUrlLength = 30;
+            if (data && data.length > maxUrlLength) {
+              // Create shortened version with ellipsis
+              const shortUrl = data.substring(0, maxUrlLength - 3) + "...";
+              return `<div data-bs-toggle="tooltip"
+                        title="Click to view full URL"
+                        data-bs-placement="top"><a href="#"
+                        class="text-truncate url-truncated text-decoration-underline"
+                        data-bs-toggle="modal"
+                        data-bs-target="#fullUrlModal"
+                        data-url="${data.replace(/"/g, "&quot;")}"
+                        style="cursor: pointer;">
+                        ${shortUrl}
+                      </a></div>`;
+            }
+
+            return data;
+          },
+        },
+        {
           searchPanes: {
             show: true,
             combiner: "or",
@@ -495,9 +522,17 @@ $(document).ready(function () {
           d.csrf_token = $("#csrf_token").val(); // Add CSRF token if needed
           return d;
         },
-      },
-      initComplete: () => {
-        updateCountryTooltips();
+        // Add error handling for ajax requests
+        error: function (jqXHR, textStatus, errorThrown) {
+          console.error("DataTables AJAX error:", textStatus, errorThrown);
+          $("#reports").addClass("d-none");
+          $("#reports-waiting")
+            .removeClass("d-none")
+            .text("Error loading reports. Please try refreshing the page.")
+            .addClass("text-danger");
+          // Remove any loading indicators
+          $(".dataTables_processing").hide();
+        },
       },
       columns: [
         {
@@ -515,13 +550,78 @@ $(document).ready(function () {
         { data: "user_agent", title: "User-Agent" },
         { data: "reason", title: "Reason" },
         { data: "server_name", title: "Server name" },
-        { data: "data", title: "Data" },
+        {
+          data: "data",
+          title: "Data",
+          render: function (data, type, row) {
+            if (type === "display" || type === "filter") {
+              try {
+                // Try to parse the data as JSON if it's a string
+                const jsonData =
+                  typeof data === "string" ? JSON.parse(data) : data;
+                // Format it for display
+                return JSON.stringify(jsonData, null, 2);
+              } catch (e) {
+                console.warn("Error parsing data JSON:", e);
+                // Return a safe fallback if parsing fails
+                return "{}";
+              }
+            }
+            return data;
+          },
+        },
         { data: "security_mode", title: "Security mode" },
       ],
       headerCallback: function (thead) {
         updateHeaderTooltips(thead, headers);
       },
     },
+  });
+
+  // Create the modal for displaying full URLs once at document ready
+  $("body").append(`
+    <div class="modal fade" id="fullUrlModal" tabindex="-1" aria-labelledby="fullUrlModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="fullUrlModalLabel">Full URL</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <span id="fullUrlContent" class="text-break"></span>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" id="copyUrlBtn" class="btn btn-sm btn-outline-primary me-1">
+              <span class="tf-icons bx bx-copy me-1"></span>Copy
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `);
+
+  // Add copy functionality to the copy button
+  $(document).on("click", "#copyUrlBtn", function () {
+    const textToCopy = $("#fullUrlContent").text();
+    navigator.clipboard.writeText(textToCopy).then(() => {
+      // Change button text temporarily to indicate success
+      const $btn = $(this);
+      const originalHtml = $btn.html();
+      $btn.html('<span class="tf-icons bx bx-check me-1"></span>Copied!');
+      setTimeout(() => {
+        $btn.html(originalHtml);
+      }, 2000);
+    });
+  });
+
+  // Update the handler for the modal to display the full URL
+  $("#fullUrlModal").on("show.bs.modal", function (event) {
+    const button = $(event.relatedTarget); // Button that triggered the modal
+    const url = button.data("url"); // Extract URL from data-url attribute
+    $("#fullUrlContent").text(url);
   });
 
   // Update tooltips when column visibility changes
@@ -563,7 +663,12 @@ $(document).ready(function () {
   $("#reports_wrapper").find(".btn-secondary").removeClass("btn-secondary");
 
   // Update tooltips after table draw
-  reports_table.on("draw.dt", updateCountryTooltips);
+  reports_table.on("draw.dt", function () {
+    updateCountryTooltips();
+
+    // Clean up any existing tooltips to prevent memory leaks
+    $(".tooltip").remove();
+  });
 
   const hashValue = location.hash;
   if (hashValue) {

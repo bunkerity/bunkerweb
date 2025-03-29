@@ -1,0 +1,80 @@
+services:
+  bunkerweb:
+    image: bunkerity/bunkerweb:1.6.2-rc1
+    container_name: bunkerweb
+    ports:
+      - "80:8080/tcp"
+      - "443:8443/tcp"
+      - "443:8443/udp" # for QUIC
+    environment:
+      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+      - bw-services
+
+  bw-scheduler:
+    image: bunkerity/bunkerweb-scheduler:1.6.2-rc1
+    container_name: bw-scheduler
+    depends_on:
+      - bunkerweb
+    volumes:
+      - bw-data:/data
+    environment:
+      BUNKERWEB_INSTANCES: "bunkerweb"
+      SERVER_NAME: "app1.example.com app2.example.com app3.example.com" # replace with your domains
+      MULTISITE: "yes"
+      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+      SERVE_FILES: "no"
+      DISABLE_DEFAULT_SERVER: "yes"
+      USE_CLIENT_CACHE: "yes"
+      USE_GZIP: "yes"
+      USE_REVERSE_PROXY: "yes"
+
+      # Let's Encrypt configuration
+      AUTO_LETS_ENCRYPT: "yes"
+      EMAIL_LETS_ENCRYPT: "changeme@example.com" # replace with your email to receive notifications about certificate expiration
+      LETS_ENCRYPT_CHALLENGE: "dns"
+      LETS_ENCRYPT_DNS_PROVIDER: "desec"
+      LETS_ENCRYPT_DNS_PROPAGATION: "default" # change this to a number of seconds if you have a slow DNS provider
+      LETS_ENCRYPT_DNS_CREDENTIAL_ITEM: "dns_desec_token <your-desec-auth-token>" # replace with your DeSEC auth token
+
+      # Reverse proxy configuration
+      app1.example.com_REVERSE_PROXY_URL: "/"
+      app1.example.com_REVERSE_PROXY_HOST: "http://app1:8080"
+      app2.example.com_REVERSE_PROXY_URL: "/"
+      app2.example.com_REVERSE_PROXY_HOST: "http://app2:8080"
+      app3.example.com_REVERSE_PROXY_URL: "/"
+      app3.example.com_REVERSE_PROXY_HOST: "http://app3:8080"
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+
+  app1:
+    image: nginxdemos/nginx-hello
+    networks:
+      - bw-services
+
+  app2:
+    image: nginxdemos/nginx-hello
+    networks:
+      - bw-services
+
+  app3:
+    image: nginxdemos/nginx-hello
+    networks:
+      - bw-services
+
+volumes:
+  bw-data:
+
+
+networks:
+  bw-universe:
+    name: bw-universe
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.20.30.0/24
+  bw-services:
+    name: bw-services

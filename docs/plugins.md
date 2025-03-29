@@ -8,29 +8,28 @@ Here is the list of "official" plugins that we maintain (see the [bunkerweb-plug
 
 |      Name      | Version | Description                                                                                                                      |                                                Link                                                 |
 | :------------: | :-----: | :------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------: |
-|   **ClamAV**   |   1.8   | Automatically scans uploaded files with the ClamAV antivirus engine and denies the request when a file is detected as malicious. |     [bunkerweb-plugins/clamav](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav)     |
-|   **Coraza**   |   1.8   | Inspect requests using a the Coraza WAF (alternative of ModSecurity).                                                            |     [bunkerweb-plugins/coraza](https://github.com/bunkerity/bunkerweb-plugins/tree/main/coraza)     |
-|  **CrowdSec**  |   1.8   | CrowdSec bouncer for BunkerWeb.                                                                                                  |   [bunkerweb-plugins/crowdsec](https://github.com/bunkerity/bunkerweb-plugins/tree/main/crowdsec)   |
-|  **Discord**   |   1.8   | Send security notifications to a Discord channel using a Webhook.                                                                |    [bunkerweb-plugins/discord](https://github.com/bunkerity/bunkerweb-plugins/tree/main/discord)    |
-|   **Slack**    |   1.8   | Send security notifications to a Slack channel using a Webhook.                                                                  |      [bunkerweb-plugins/slack](https://github.com/bunkerity/bunkerweb-plugins/tree/main/slack)      |
-| **VirusTotal** |   1.8   | Automatically scans uploaded files with the VirusTotal API and denies the request when a file is detected as malicious.          | [bunkerweb-plugins/virustotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal) |
-|  **WebHook**   |   1.8   | Send security notifications to a custom HTTP endpoint using a	Webhook.                                                           |    [bunkerweb-plugins/webhook](https://github.com/bunkerity/bunkerweb-plugins/tree/main/webhook)    |
+|   **ClamAV**   |   1.9   | Automatically scans uploaded files with the ClamAV antivirus engine and denies the request when a file is detected as malicious. |     [bunkerweb-plugins/clamav](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav)     |
+|   **Coraza**   |   1.9   | Inspect requests using the Coraza WAF (alternative of ModSecurity).                                                              |     [bunkerweb-plugins/coraza](https://github.com/bunkerity/bunkerweb-plugins/tree/main/coraza)     |
+|  **Discord**   |   1.9   | Send security notifications to a Discord channel using a Webhook.                                                                |    [bunkerweb-plugins/discord](https://github.com/bunkerity/bunkerweb-plugins/tree/main/discord)    |
+|   **Slack**    |   1.9   | Send security notifications to a Slack channel using a Webhook.                                                                  |      [bunkerweb-plugins/slack](https://github.com/bunkerity/bunkerweb-plugins/tree/main/slack)      |
+| **VirusTotal** |   1.9   | Automatically scans uploaded files with the VirusTotal API and denies the request when a file is detected as malicious.          | [bunkerweb-plugins/virustotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal) |
+|  **WebHook**   |   1.9   | Send security notifications to a custom HTTP endpoint using a	Webhook.                                                           |    [bunkerweb-plugins/webhook](https://github.com/bunkerity/bunkerweb-plugins/tree/main/webhook)    |
 
 ## How to use a plugin
 
 ### Automatic
 
-If you want to quickly install external plugins, you can use the `EXTERNAL_PLUGIN_URLS` setting. It takes a list of URLs, separated with space, pointing to compressed (zip format) archive containing one or more plugin(s).
+If you want to quickly install external plugins, you can use the `EXTERNAL_PLUGIN_URLS` setting. It takes a list of URLs separated by spaces, each pointing to a compressed (zip format) archive containing one or more plugins.
 
-You can use the following value if you want to automatically install the official plugins : `EXTERNAL_PLUGIN_URLS=https://github.com/bunkerity/bunkerweb-plugins/archive/refs/tags/v1.8.zip`
+You can use the following value if you want to automatically install the official plugins : `EXTERNAL_PLUGIN_URLS=https://github.com/bunkerity/bunkerweb-plugins/archive/refs/tags/v1.9.zip`
 
 ### Manual
 
-The first step is to install the plugin by putting the plugin files inside the corresponding `plugins` data folder, the procedure depends on your integration :
+The first step is to install the plugin by placing its files inside the corresponding `plugins` data folder. The procedure depends on your integration :
 
 === "Docker"
 
-    When using the [Docker integration](integrations.md#docker), plugins must be written to the volume mounted on `/data/plugins` into the scheduler container.
+    When using the [Docker integration](integrations.md#docker), plugins must be placed in the volume mounted on `/data/plugins` in the scheduler container.
 
     The first thing to do is to create the plugins folder :
 
@@ -90,7 +89,7 @@ The first step is to install the plugin by putting the plugin files inside the c
     services:
     ...
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.1-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.2-rc1
         volumes:
           - ./bw-data:/data
     ...
@@ -98,7 +97,7 @@ The first step is to install the plugin by putting the plugin files inside the c
 
 === "Docker autoconf"
 
-    When using the [Docker autoconf integration](integrations.md#docker-autoconf), plugins must be written to the volume mounted on `/data/plugins` into the scheduler container.
+    When using the [Docker autoconf integration](integrations.md#docker-autoconf), plugins must be placed in the volume mounted on `/data/plugins` in the scheduler container.
 
 
     The first thing to do is to create the plugins folder :
@@ -126,7 +125,7 @@ The first step is to install the plugin by putting the plugin files inside the c
     services:
     ...
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.1-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.2-rc1
         volumes:
           - ./bw-data:/data
     ...
@@ -139,7 +138,7 @@ The first step is to install the plugin by putting the plugin files inside the c
 
         **More information can be found in the [Swarm integration documentation](integrations.md#swarm).**
 
-    When using the [Swarm integration](integrations.md#swarm), plugins must be written to the volume mounted on `/data/plugins` into the scheduler container.
+    When using the [Swarm integration](integrations.md#swarm), plugins must be placed in the volume mounted on `/data/plugins` in the scheduler container.
 
     !!! info "Swarm volume"
         Configuring a Swarm volume that will persist when the scheduler service is running on different nodes is not covered is in this documentation. We will assume that you have a shared folder mounted on `/shared` across all nodes.
@@ -169,7 +168,7 @@ The first step is to install the plugin by putting the plugin files inside the c
     services:
     ...
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.1-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.2-rc1
         volumes:
           - /shared/bw-plugins:/data/plugins
     ...
@@ -177,9 +176,9 @@ The first step is to install the plugin by putting the plugin files inside the c
 
 === "Kubernetes"
 
-    When using the [Kubernetes integration](integrations.md#kubernetes), plugins must be written to the volume mounted on `/data/plugins` into the scheduler container.
+    When using the [Kubernetes integration](integrations.md#kubernetes), plugins must be placed in the volume mounted on `/data/plugins` in the scheduler container.
 
-    The fist thing to do is to declare a [PersistentVolumeClaim](https://kubernetes.io/docs/concepts/storage/persistent-volumes/) that will contain our plugins data :
+    The first thing to do is to declare a [PersistentVolumeClaim](https://kubernetes.io/docs/concepts/storage/persistent-volumes/) that will contain our plugins data :
 
     ```yaml
     apiVersion: v1
@@ -194,7 +193,7 @@ The first step is to install the plugin by putting the plugin files inside the c
         storage: 5Gi
     ```
 
-    You can now add the volume mount and an init containers to automatically provision the volume :
+    You can now add the volume mount and an init container to automatically provision the volume :
 
     ```yaml
     apiVersion: apps/v1
@@ -216,7 +215,7 @@ The first step is to install the plugin by putting the plugin files inside the c
           serviceAccountName: sa-bunkerweb
           containers:
             - name: bunkerweb-scheduler
-              image: bunkerity/bunkerweb-scheduler:1.6.1-rc3
+              image: bunkerity/bunkerweb-scheduler:1.6.2-rc1
               imagePullPolicy: Always
               env:
                 - name: KUBERNETES_MODE
@@ -256,7 +255,7 @@ The first step is to install the plugin by putting the plugin files inside the c
 
 !!! tip "Existing plugins"
 
-    If the documentation is not enough, you can have a look at the existing source code of [official plugins](https://github.com/bunkerity/bunkerweb-plugins) and the [core plugins](https://github.com/bunkerity/bunkerweb/tree/v1.6.1-rc3/src/common/core) (already included in BunkerWeb but they are plugins, technically speaking).
+    If the documentation is not enough, you can have a look at the existing source code of [official plugins](https://github.com/bunkerity/bunkerweb-plugins) and the [core plugins](https://github.com/bunkerity/bunkerweb/tree/v1.6.2-rc1/src/common/core) (already included in BunkerWeb but they are plugins, technically speaking).
 
 What a plugin structure looks like:
 ```
@@ -542,7 +541,7 @@ end
 
 !!! tip "More examples"
 
-    If you want to see the full list of available functions, you can have a look at the files present in the [lua directory](https://github.com/bunkerity/bunkerweb/tree/v1.6.1-rc3/src/bw/lua/bunkerweb) of the repository.
+    If you want to see the full list of available functions, you can have a look at the files present in the [lua directory](https://github.com/bunkerity/bunkerweb/tree/v1.6.2-rc1/src/bw/lua/bunkerweb) of the repository.
 
 ### Jobs
 

@@ -10,6 +10,6 @@
            {% if setting_value == "yes" %}checked{% endif %}
            {% if disabled %}disabled{% endif %}
            {% if required %}required{% endif %}>
-    <label class="form-check setting-checkbox-label d-flex align-items-center ps-0"
+    <label class="form-check setting-checkbox-label d-flex align-items-center text-truncate ps-0"
            for="{{ setting_id_prefix }}{{ setting_data['id'] }}{{ setting_id_suffix }}">{{ setting }}</label>
 </div>

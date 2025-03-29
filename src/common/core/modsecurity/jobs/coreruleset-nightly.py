@@ -116,7 +116,7 @@ try:
                 sleep(3)
     except RequestException as e:
         LOGGER.debug(format_exc())
-        LOGGER.error(f"Failed to download Core Rule Set (CRS) nightly tarball: {e}")
+        LOGGER.error(f"Failed to download Core Rule Set (CRS) nightly tarball: \n{e}")
         sys_exit(2)
 
     file_content.seek(0)
@@ -145,7 +145,8 @@ try:
         LOGGER.info("Patching Core Rule Set (CRS) nightly rules...")
         result = run([PATCH_SCRIPT.as_posix(), CRS_NIGHTLY_PATH.as_posix()], check=True)
     except CalledProcessError as e:
-        LOGGER.error(f"Failed to patch Core Rule Set (CRS) nightly rules: {e}")
+        LOGGER.debug(format_exc())
+        LOGGER.error(f"Failed to patch Core Rule Set (CRS) nightly rules: \n{e}")
         sys_exit(1)
 
     LOGGER.info("Successfully patched Core Rule Set (CRS) nightly rules.")
@@ -162,6 +163,7 @@ except SystemExit as e:
     status = e.code
 except BaseException as e:
     status = 2
+    LOGGER.debug(format_exc())
     LOGGER.error(f"Exception while running coreruleset-nightly.py :\n{e}")
 
 sys_exit(status)

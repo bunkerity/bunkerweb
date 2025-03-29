@@ -1,5 +1,87 @@
 Mbed TLS ChangeLog (Sorted per branch, date)
 
+= Mbed TLS 3.6.3 branch released 2025-03-24
+
+Default behavior changes
+   * In TLS clients, if mbedtls_ssl_set_hostname() has not been called,
+     mbedtls_ssl_handshake() now fails with
+     MBEDTLS_ERR_SSL_CERTIFICATE_VERIFICATION_WITHOUT_HOSTNAME
+     if certificate-based authentication of the server is attempted.
+     This is because authenticating a server without knowing what name
+     to expect is usually insecure. To restore the old behavior, either
+     call mbedtls_ssl_set_hostname() with NULL as the hostname, or
+     enable the new compile-time option
+     MBEDTLS_SSL_CLI_ALLOW_WEAK_CERTIFICATE_VERIFICATION_WITHOUT_HOSTNAME.
+
+Features
+   * Added new configuration option MBEDTLS_PSA_STATIC_KEY_SLOTS, which
+     uses static storage for keys, enabling malloc-less use of key slots.
+     The size of each buffer is given by the option
+     MBEDTLS_PSA_STATIC_KEY_SLOT_BUFFER_SIZE. By default it accommodates the
+     largest PSA key enabled in the build.
+   * MD module can now perform PSA dispatching also when
+     `MBEDTLS_PSA_CRYPTO_CLIENT && !MBEDTLS_PSA_CRYPTO_C`, even though this
+     configuration is not officially supported. This requires that a
+     PSA Crypto provider library which:
+     * supports the required `PSA_WANT_ALG_xxx` and
+     * implements `psa_can_do_hash()` on the client interface
+     is linked against Mbed TLS and that `psa_crypto_init()` is called before
+     performing any PSA call.
+
+Security
+   * Note that TLS clients should generally call mbedtls_ssl_set_hostname()
+     if they use certificate authentication (i.e. not pre-shared keys).
+     Otherwise, in many scenarios, the server could be impersonated.
+     The library will now prevent the handshake and return
+     MBEDTLS_ERR_SSL_CERTIFICATE_VERIFICATION_WITHOUT_HOSTNAME
+     if mbedtls_ssl_set_hostname() has not been called.
+     CVE-2025-27809
+   * Zeroize a temporary heap buffer used in psa_key_derivation_output_key()
+     when deriving an ECC key pair.
+   * Zeroize temporary heap buffers used in PSA operations.
+   * Fix a vulnerability in the TLS 1.2 handshake. If memory allocation failed
+     or there was a cryptographic hardware failure when calculating the
+     Finished message, it could be calculated incorrectly. This would break
+     the security guarantees of the TLS handshake.
+     CVE-2025-27810
+
+Bugfix
+   * When MBEDTLS_SSL_TLS1_3_COMPATIBILITY_MODE is disabled, work with
+     peers that have middlebox compatibility enabled, as long as no
+     problematic middlebox is in the way. Fixes #9551.
+   * Fix invalid JSON schemas for driver descriptions used by
+     generate_driver_wrappers.py.
+   * Use 'mbedtls_net_close' instead of 'close' in 'mbedtls_net_bind'
+     and 'mbedtls_net_connect' to prevent possible double close fd
+     problems. Fixes #9711.
+   * Fix undefined behavior in some cases when mbedtls_psa_raw_to_der() or
+     mbedtls_psa_der_to_raw() is called with bits=0.
+   * Fix compilation on MS-DOS DJGPP. Fixes #9813.
+   * Fix missing constraints on the AES-NI inline assembly which is used on
+     GCC-like compilers when building AES for generic x86_64 targets. This
+     may have resulted in incorrect code with some compilers, depending on
+     optimizations. Fixes #9819.
+   * Support re-assembly of fragmented handshake messages in TLS (both
+     1.2 and 1.3). The lack of support was causing handshake failures with
+     some servers, especially with TLS 1.3 in practice. There are a few
+     limitations, notably a fragmented ClientHello is only supported when
+     TLS 1.3 support is enabled. See the documentation of
+     mbedtls_ssl_handshake() for details.
+   * Fix definition of MBEDTLS_PRINTF_SIZET to prevent runtime crashes that
+     occurred whenever SSL debugging was enabled on a copy of Mbed TLS built
+     with Visual Studio 2013 or MinGW.
+     Fixes #10017.
+   * Remove Everest Visual Studio 2010 compatibility headers, which could
+     shadow standard CRT headers inttypes.h and stdbool.h with incomplete
+     implementatios if placed on the include path, eg. when building Mbed TLS
+     with the .sln file shipped with the project.
+   * Fix issue where psa_key_derivation_input_integer() is not detecting
+     bad state after an operation has been aborted.
+
+Changes
+   * Improve performance of PSA key generation with ECC keys: it no longer
+     computes the public key (which was immediately discarded). Fixes #9732.
+
 = Mbed TLS 3.6.2 branch released 2024-10-14
 
 Security
@@ -2610,9 +2692,9 @@ Changes
      fit into the record buffer. Previously, such extensions were silently
      dropped. As a consequence, the TLS handshake now fails when the output
      buffer is not large enough to hold the ClientHello.
-   * The unit tests now rely on header files in tests/include/test and source
-     files in tests/src. When building with make or cmake, the files in
-     tests/src are compiled and the resulting object linked into each test
+   * The unit tests now rely on header files in framework/tests/include/test and source
+     files in framework/tests/src. When building with make or cmake, the files in
+     framework/tests/src are compiled and the resulting object linked into each test
      executable.
    * The ECP module, enabled by `MBEDTLS_ECP_C`, now depends on
      `MBEDTLS_CTR_DRBG_C` or `MBEDTLS_HMAC_DRBG_C` for some side-channel

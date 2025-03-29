@@ -109,6 +109,14 @@ class Instance:
 
     def ban(self, ip: str, exp: float, reason: str, service: str, ban_scope: str = "global") -> str:
         try:
+            # Ensure ban_scope is either 'global' or 'service'
+            if ban_scope not in ("global", "service"):
+                ban_scope = "global"
+
+            # If ban_scope is service but no service provided, default to global
+            if ban_scope == "service" and (not service or service == "Web UI"):
+                ban_scope = "global"
+
             result = self.apiCaller.send_to_apis("POST", "/ban", data={"ip": ip, "exp": exp, "reason": reason, "service": service, "ban_scope": ban_scope})[0]
         except BaseException as e:
             return f"Can't ban {ip} on instance {self.hostname}: {e}"
@@ -120,9 +128,15 @@ class Instance:
 
     def unban(self, ip: str, service: str = None) -> str:
         try:
+            # Prepare request data
             data = {"ip": ip}
-            if service:
+
+            # Only include service if it's specified and not a placeholder
+            if service and service not in ("unknown", "Web UI", "default server"):
                 data["service"] = service
+                data["ban_scope"] = "service"
+            else:
+                data["ban_scope"] = "global"
 
             result = self.apiCaller.send_to_apis("POST", "/unban", data=data)[0]
         except BaseException as e:
@@ -232,8 +246,23 @@ class InstancesUtils:
             for instance in instances or self.get_instances(status="up"):
                 bans.extend(get_instance_bans(instance))
 
+        # Improved deduplication that considers IP, scope, and service combination
+        # A unique ban is defined by the combination of IP address, ban scope, and service
         unique_bans = {}
-        return [unique_bans.setdefault(item["ip"], item) for item in sorted(bans, key=itemgetter("exp")) if item["ip"] not in unique_bans]
+        for item in sorted(bans, key=itemgetter("exp")):
+            # Normalize ban scope if not present
+            if "ban_scope" not in item:
+                if item.get("service", "_") == "_":
+                    item["ban_scope"] = "global"
+                else:
+                    item["ban_scope"] = "service"
+
+            # Create a unique key that combines IP, ban scope, and service
+            ban_key = (item["ip"], item["ban_scope"], item.get("service", "_"))
+            if ban_key not in unique_bans:
+                unique_bans[ban_key] = item
+
+        return list(unique_bans.values())
 
     def get_reports(self, hostname: Optional[str] = None, *, instances: Optional[List[Instance]] = None) -> List[dict[str, Any]]:
         """Get reports from all instances or a specific instance and sort them by date"""

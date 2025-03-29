@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+from base64 import b64decode
 from copy import deepcopy
 from datetime import datetime, timedelta
-from itertools import chain
-from json import dumps
+from json import dumps, loads
 from os import environ, getenv, sep
 from os.path import join
 from pathlib import Path
-from re import MULTILINE, search
+from re import MULTILINE, match, search
 from select import select
-from shutil import rmtree
 from subprocess import DEVNULL, PIPE, STDOUT, Popen, run
 from sys import exit as sys_exit, path as sys_path
+from traceback import format_exc
 from typing import Dict, Literal, Type, Union
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("db",))]:
@@ -28,6 +28,7 @@ from letsencrypt import (
     DnsMadeEasyProvider,
     GehirnProvider,
     GoogleProvider,
+    InfomaniakProvider,
     LinodeProvider,
     LuaDnsProvider,
     NSOneProvider,
@@ -115,12 +116,17 @@ def certbot_new(
         else:
             command.extend([f"--dns-{provider}-credentials", credentials_path.as_posix()])
 
+        # * Adding the RSA key size argument like in the infomaniak plugin documentation
+        if provider == "infomaniak":
+            command.extend(["--rsa-key-size", "4096"])
+
         # * Adding plugin argument
-        if provider in ("desec", "scaleway"):
-            # ? Desec and Scaleway plugin uses different arguments
+        if provider in ("desec", "infomaniak", "scaleway"):
+            # ? Desec, Infomaniak and Scaleway plugins use different arguments
             command.extend(["--authenticator", f"dns-{provider}"])
         else:
             command.append(f"--dns-{provider}")
+
     elif challenge_type == "http":
         # * Adding HTTP challenge hooks
         command.extend(
@@ -211,6 +217,7 @@ try:
                 Type[DnsMadeEasyProvider],
                 Type[GehirnProvider],
                 Type[GoogleProvider],
+                Type[InfomaniakProvider],
                 Type[LinodeProvider],
                 Type[LuaDnsProvider],
                 Type[NSOneProvider],
@@ -228,6 +235,7 @@ try:
             "dnsmadeeasy": DnsMadeEasyProvider,
             "gehirn": GehirnProvider,
             "google": GoogleProvider,
+            "infomaniak": InfomaniakProvider,
             "linode": LinodeProvider,
             "luadns": LuaDnsProvider,
             "nsone": NSOneProvider,
@@ -270,6 +278,7 @@ try:
     credential_paths = set()
     generated_domains = set()
     domains_to_ask = {}
+    active_cert_names = set()  # Track ALL active certificate names, not just processed ones
 
     if proc.returncode != 0:
         LOGGER.error(f"Error while checking certificates :\n{proc.stdout}")
@@ -283,11 +292,14 @@ try:
             original_first_server = deepcopy(first_server)
 
             if letsencrypt_challenge == "dns" and getenv(f"{first_server}_USE_LETS_ENCRYPT_WILDCARD", getenv("USE_LETS_ENCRYPT_WILDCARD", "no")) == "yes":
-                wildcards = WildcardGenerator.get_wildcards_from_domains((first_server,))
+                wildcards = WILDCARD_GENERATOR.get_wildcards_from_domains((first_server,))
                 first_server = wildcards[0].lstrip("*.")
                 domains = set(wildcards)
             else:
                 domains = set(domains.split(" "))
+
+            # Add the certificate name to our active set regardless if we're generating it or not
+            active_cert_names.add(first_server)
 
             certificate_block = None
             for block in certificate_blocks:
@@ -302,7 +314,8 @@ try:
 
             try:
                 cert_domains = search(r"Domains: (?P<domains>.*)\n\s*Expiry Date: (?P<expiry_date>.*)\n", certificate_block, MULTILINE)
-            except Exception as e:
+            except BaseException as e:
+                LOGGER.debug(format_exc())
                 LOGGER.error(f"[{original_first_server}] Error while parsing certificate block: {e}")
                 continue
 
@@ -383,10 +396,47 @@ try:
         # * Getting the DNS provider data if necessary
         if data["challenge"] == "dns":
             credential_key = f"{first_server}_LETS_ENCRYPT_DNS_CREDENTIAL_ITEM" if IS_MULTISITE else "LETS_ENCRYPT_DNS_CREDENTIAL_ITEM"
+            credential_items = {}
+
+            # Collect all credential items
             for env_key, env_value in environ.items():
                 if env_value and env_key.startswith(credential_key):
+                    if " " not in env_value:
+                        credential_items["json_data"] = env_value
+                        continue
                     key, value = env_value.split(" ", 1)
-                    data["credential_items"][key.lower()] = value.removeprefix("= ").strip()
+                    credential_items[key.lower()] = value.removeprefix("= ").replace("\\n", "\n").replace("\\t", "\t").replace("\\r", "\r").strip()
+
+            if "json_data" in credential_items:
+                value = credential_items.pop("json_data")
+                # Handle the case of a single credential that might be base64-encoded JSON
+                if not credential_items and len(value) % 4 == 0 and match(r"^[A-Za-z0-9+/=]+$", value):
+                    try:
+                        decoded = b64decode(value).decode("utf-8")
+                        json_data = loads(decoded)
+                        if isinstance(json_data, dict):
+                            data["credential_items"] = {
+                                k.lower(): str(v).removeprefix("= ").replace("\\n", "\n").replace("\\t", "\t").replace("\\r", "\r").strip()
+                                for k, v in json_data.items()
+                            }
+                    except BaseException as e:
+                        LOGGER.debug(format_exc())
+                        LOGGER.error(f"Error while decoding JSON data for service {first_server} : {value} : \n{e}")
+
+            if not data["credential_items"]:
+                # Process regular credentials
+                data["credential_items"] = {}
+                for key, value in credential_items.items():
+                    # Check for base64 encoding
+                    if len(value) % 4 == 0 and match(r"^[A-Za-z0-9+/=]+$", value):
+                        try:
+                            decoded = b64decode(value).decode("utf-8")
+                            if decoded != value:
+                                value = decoded.removeprefix("= ").replace("\\n", "\n").replace("\\t", "\t").replace("\\r", "\r").strip()
+                        except BaseException as e:
+                            LOGGER.debug(format_exc())
+                            LOGGER.debug(f"Error while decoding credential item {key} for service {first_server} : {value} : \n{e}")
+                    data["credential_items"][key] = value
 
         LOGGER.debug(f"Data for service {first_server} : {dumps(data)}")
 
@@ -403,13 +453,16 @@ try:
                 )
                 continue
             elif not data["credential_items"]:
-                LOGGER.warning(f"No credentials items found for service {first_server} (you should have at least one), skipping certificate(s) generation...")
+                LOGGER.warning(
+                    f"No valid credentials items found for service {first_server} (you should have at least one), skipping certificate(s) generation..."
+                )
                 continue
 
             # * Validating the credentials
             try:
                 provider = provider_classes[data["provider"]](**data["credential_items"])
             except ValidationError as ve:
+                LOGGER.debug(format_exc())
                 LOGGER.error(f"Error while validating credentials for service {first_server} :\n{ve}")
                 continue
 
@@ -421,7 +474,15 @@ try:
         file_type = provider.get_file_type() if data["challenge"] == "dns" else "txt"
         file_path = (first_server, f"credentials.{file_type}")
         if data["use_wildcard"]:
-            group = f"{data['provider'] if data['challenge'] == 'dns' else 'http'}_{bytes_hash(content, algorithm='sha1')}"
+            # Use the enhanced method for generating consistent group names
+            group = WILDCARD_GENERATOR.get_wildcard_group_name(
+                domain=first_server,
+                provider=data["provider"] if data["challenge"] == "dns" else "http",
+                challenge_type=data["challenge"],
+                staging=data["staging"],
+                content_hash=bytes_hash(content, algorithm="sha1"),
+            )
+
             LOGGER.info(
                 f"Service {first_server} is using wildcard, "
                 + ("the propagation time will be the provider's default and " if data["challenge"] == "dns" else "")
@@ -429,6 +490,7 @@ try:
             )
             WILDCARD_GENERATOR.extend(group, domains.split(" "), data["email"], data["staging"])
             file_path = (f"{group}.{file_type}",)
+            LOGGER.debug(f"[{first_server}] Wildcard group {group}")
 
         # * Generating the credentials file
         credentials_path = CACHE_PATH.joinpath(*file_path)
@@ -466,6 +528,7 @@ try:
         LOGGER.info(
             f"Asking certificates for domain(s) : {domains} (email = {data['email']}){' using staging' if data['staging'] else ''} with {data['challenge']} challenge..."
         )
+
         if (
             certbot_new(
                 data["challenge"],
@@ -507,6 +570,13 @@ try:
                 LOGGER.info(
                     f"Asking wildcard certificates for domain(s) : {domains} (email = {email}){' using staging ' if staging else ''} with {'dns' if provider in provider_classes else 'http'} challenge..."
                 )
+
+                # Add wildcard certificate names to active set
+                for domain in domains.split(","):
+                    # Extract the base domain from the wildcard domain
+                    base_domain = domain.lstrip("*.")
+                    active_cert_names.add(base_domain)
+
                 if (
                     certbot_new(
                         "dns" if provider in provider_classes else "http",
@@ -541,14 +611,68 @@ try:
     # * Clearing all no longer needed certificates
     if getenv("LETS_ENCRYPT_CLEAR_OLD_CERTS", "no") == "yes":
         LOGGER.info("Clear old certificates is activated, removing old / no longer used certificates...")
-        for elem in chain(DATA_PATH.glob("archive/*"), DATA_PATH.glob("live/*"), DATA_PATH.glob("renewal/*")):
-            cert_name = elem.name.replace(".conf", "")
-            if cert_name not in generated_domains and cert_name not in domains_to_ask and elem.name != "README":
-                LOGGER.warning(f"Removing old certificate {elem}")
-                if elem.is_dir():
-                    rmtree(elem, ignore_errors=True)
+
+        # Get list of all certificates
+        proc = run(
+            [
+                CERTBOT_BIN,
+                "certificates",
+                "--config-dir",
+                DATA_PATH.as_posix(),
+                "--work-dir",
+                WORK_DIR,
+                "--logs-dir",
+                LOGS_DIR,
+            ],
+            stdin=DEVNULL,
+            stdout=PIPE,
+            stderr=STDOUT,
+            text=True,
+            env=env,
+            check=False,
+        )
+
+        if proc.returncode == 0:
+            certificate_blocks = proc.stdout.split("Certificate Name: ")[1:]
+            for block in certificate_blocks:
+                cert_name = block.split("\n", 1)[0].strip()
+
+                # Skip certificates that are in our active list
+                if cert_name in active_cert_names:
+                    LOGGER.debug(f"Keeping active certificate: {cert_name}")
+                    continue
+
+                LOGGER.warning(f"Removing old certificate {cert_name} (not in active certificates list)")
+
+                # Use certbot's delete command
+                delete_proc = run(
+                    [
+                        CERTBOT_BIN,
+                        "delete",
+                        "--config-dir",
+                        DATA_PATH.as_posix(),
+                        "--work-dir",
+                        WORK_DIR,
+                        "--logs-dir",
+                        LOGS_DIR,
+                        "--cert-name",
+                        cert_name,
+                        "-n",  # non-interactive
+                    ],
+                    stdin=DEVNULL,
+                    stdout=PIPE,
+                    stderr=STDOUT,
+                    text=True,
+                    env=env,
+                    check=False,
+                )
+
+                if delete_proc.returncode == 0:
+                    LOGGER.info(f"Successfully deleted certificate {cert_name}")
                 else:
-                    elem.unlink(missing_ok=True)
+                    LOGGER.error(f"Failed to delete certificate {cert_name}: {delete_proc.stdout}")
+        else:
+            LOGGER.error(f"Error listing certificates: {proc.stdout}")
 
     # * Save data to db cache
     if DATA_PATH.is_dir() and list(DATA_PATH.iterdir()):
@@ -559,8 +683,9 @@ try:
             LOGGER.info("Successfully saved data to db cache")
 except SystemExit as e:
     status = e.code
-except:
+except BaseException as e:
     status = 1
-    LOGGER.exception("Exception while running certbot-new.py")
+    LOGGER.debug(format_exc())
+    LOGGER.error(f"Exception while running certbot-new.py :\n{e}")
 
 sys_exit(status)

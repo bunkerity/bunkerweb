@@ -14,7 +14,7 @@ jobs:
       packages: write
     strategy:
       matrix:
-        image: [bunkerweb, scheduler, autoconf, ui]
+        image: [bunkerweb, scheduler, autoconf, ui, all-in-one]
         include:
           - image: bunkerweb
             dockerfile: src/bw/Dockerfile
@@ -24,6 +24,8 @@ jobs:
             dockerfile: src/autoconf/Dockerfile
           - image: ui
             dockerfile: src/ui/Dockerfile
+          - image: all-in-one
+            dockerfile: src/all-in-one/Dockerfile
     uses: ./.github/workflows/container-build.yml
     with:
       RELEASE: testing
@@ -133,12 +135,12 @@ jobs:
       packages: write
     steps:
       - name: Login to Docker Hub
-        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
+        uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3.4.0
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
       - name: Login to ghcr
-        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
+        uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3.4.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -151,6 +153,8 @@ jobs:
         run: docker pull ghcr.io/bunkerity/ui-tests:testing && docker tag ghcr.io/bunkerity/ui-tests:testing bunkerity/bunkerweb-ui:testing && docker push bunkerity/bunkerweb-ui:testing && docker tag bunkerity/bunkerweb-ui:testing ghcr.io/bunkerity/bunkerweb-ui:testing && docker push ghcr.io/bunkerity/bunkerweb-ui:testing
       - name: Push autoconf image
         run: docker pull ghcr.io/bunkerity/autoconf-tests:testing && docker tag ghcr.io/bunkerity/autoconf-tests:testing bunkerity/bunkerweb-autoconf:testing && docker push bunkerity/bunkerweb-autoconf:testing && docker tag bunkerity/bunkerweb-autoconf:testing ghcr.io/bunkerity/bunkerweb-autoconf:testing && docker push ghcr.io/bunkerity/bunkerweb-autoconf:testing
+      - name: Push all-in-one image
+        run: docker pull ghcr.io/bunkerity/all-in-one-tests:testing && docker tag ghcr.io/bunkerity/all-in-one-tests:testing bunkerity/bunkerweb-all-in-one:testing && docker push bunkerity/bunkerweb-all-in-one:testing && docker tag bunkerity/bunkerweb-all-in-one:testing ghcr.io/bunkerity/bunkerweb-all-in-one:testing && docker push ghcr.io/bunkerity/bunkerweb-all-in-one:testing
 
   # Push Linux packages
   push-packages:

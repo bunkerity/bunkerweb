@@ -12,7 +12,7 @@
         {% if current_endpoint == 'instances' %}
             {% set documentation_endpoint = "/integrations" %}
         {% elif current_endpoint == 'global-config' or 'services' in request.path %}
-            {% set documentation_endpoint = "/settings" %}
+            {% set documentation_endpoint = "/features" %}
         {% elif current_endpoint == 'configs' %}
             {% set documentation_endpoint = "/concepts" %}
             {% set documentation_fragment = "#custom-configurations" %}
@@ -42,7 +42,7 @@
                 <a role="button"
                    class="btn btn-text-secondary p-1 p-md-2"
                    aria-pressed="true"
-                   href="https://docs.bunkerweb.io/latest{{ documentation_endpoint }}/?utm_campaign=self&utm_source=ui{{ documentation_fragment }}"
+                   href="https://docs.bunkerweb.io/{{ bw_version }}{{ documentation_endpoint }}/?utm_campaign=self&utm_source=ui{{ documentation_fragment }}"
                    target="_blank"
                    rel="noopener">
                     <span class="tf-icons bx bx-file me-md-2"></span>

@@ -33,7 +33,7 @@ def pre_render(**kwargs):
         return ret
 
     try:
-        ret["counter_redis_nb_keys"]["value"] = kwargs["bw_instances_utils"].get_metrics("redis").get("counter_redis_nb_keys", 0)
+        ret["counter_redis_nb_keys"]["value"] = kwargs["bw_instances_utils"].get_metrics("redis").get("redis_nb_keys", 0)
     except BaseException as e:
         logger.debug(format_exc())
         logger.error(f"Failed to get redis metrics: {e}")

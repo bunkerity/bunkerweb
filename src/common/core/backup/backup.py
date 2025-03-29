@@ -59,11 +59,15 @@ def backup_database(current_time: datetime, db: Database = None, backup_dir: Pat
     db = db or Database(LOGGER)
 
     database_url = make_url(db.database_uri)
-    database: Literal["sqlite", "mariadb", "mysql", "postgresql"] = database_url.drivername.split("+")[0]
+    database: Literal["sqlite", "mariadb", "mysql", "postgresql", "oracle"] = database_url.drivername.split("+")[0]
     backup_file = backup_dir.joinpath(f"backup-{database}-{current_time.strftime('%Y-%m-%d_%H-%M-%S')}.zip")
     LOGGER.debug(f"Backup file path: {backup_file}")
     stderr = "Table 'db.test_"
     current_time = datetime.now().astimezone()
+
+    # Get table names from the SQLAlchemy model
+    model_tables = list(Base.metadata.tables.keys())
+    LOGGER.info(f"Backing up {len(model_tables)} tables defined in the model")
 
     while "Table 'db.test_" in stderr and (datetime.now().astimezone() - current_time).total_seconds() < 10:
         if database == "sqlite":
@@ -71,7 +75,8 @@ def backup_database(current_time: datetime, db: Database = None, backup_dir: Pat
 
             LOGGER.info("Creating a backup for the SQLite database ...")
 
-            proc = run(["sqlite3", db_path.as_posix(), ".dump"], stdout=PIPE, stderr=PIPE)
+            # For SQLite, use a different approach to dump only specific tables
+            proc = run(["sqlite3", db_path.as_posix()], input="\n".join([f".dump {table}" for table in model_tables]).encode(), stdout=PIPE, stderr=PIPE)
         else:
             url = make_url(db.database_uri)
             db_user = url.username or ""
@@ -79,6 +84,7 @@ def backup_database(current_time: datetime, db: Database = None, backup_dir: Pat
             db_host = url.host or ""
             db_port = str(url.port) if url.port else ""
             db_database_name = url.database or ""
+            db_query_args = url.query if hasattr(url, "query") else {}
 
             if database in ("mariadb", "mysql"):
                 LOGGER.info("Creating a backup for the MariaDB/MySQL database ...")
@@ -86,6 +92,16 @@ def backup_database(current_time: datetime, db: Database = None, backup_dir: Pat
                 cmd = ["mysqldump" if database == "mysql" else "mariadb-dump", "-h", db_host, "-u", db_user, db_database_name]
                 if db_port:
                     cmd.extend(["-P", db_port])
+
+                # Apply additional arguments from query parameters
+                for key, value in db_query_args.items():
+                    if key == "ssl" and value == "true":
+                        cmd.append("--ssl")
+                    elif key == "charset":
+                        cmd.extend(["--default-character-set", value])
+
+                # Add specific tables to backup
+                cmd.extend(model_tables)
 
                 proc = run(cmd, stdout=PIPE, stderr=PIPE, env=environ | {"MYSQL_PWD": db_password})
             elif database == "postgresql":
@@ -95,9 +111,24 @@ def backup_database(current_time: datetime, db: Database = None, backup_dir: Pat
                 if db_port:
                     cmd.extend(["-p", db_port])
 
-                proc = run(cmd, stdout=PIPE, stderr=PIPE, env=environ | {"PGPASSWORD": db_password})
+                # Apply additional arguments from query parameters
+                pg_env = {"PGPASSWORD": db_password}
+                for key, value in db_query_args.items():
+                    if key == "sslmode":
+                        pg_env["PGSSLMODE"] = value
+                    elif key == "sslrootcert":
+                        pg_env["PGSSLROOTCERT"] = value
 
-        stderr = proc.stderr.decode()
+                # Add specific tables to backup
+                for table in model_tables:
+                    cmd.extend(["-t", table])
+
+                proc = run(cmd, stdout=PIPE, stderr=PIPE, env=environ | pg_env)
+            elif database == "oracle":
+                LOGGER.warning("Creating a database backup for Oracle is not supported")
+                return db
+
+        stderr = proc.stderr.decode() if hasattr(proc, "stderr") else ""
         if "Table 'db.test_" not in stderr and proc.returncode != 0:
             LOGGER.error(f"Failed to dump the database: {stderr}")
             sys_exit(1)
@@ -120,7 +151,7 @@ def restore_database(backup_file: Path, db: Database = None) -> Database:
     db = db or Database(LOGGER)
     Base.metadata.drop_all(db.sql_engine)
     database_url = make_url(db.database_uri)
-    database: Literal["sqlite", "mariadb", "mysql", "postgresql"] = database_url.drivername.split("+")[0]
+    database: Literal["sqlite", "mariadb", "mysql", "postgresql", "oracle"] = database_url.drivername.split("+")[0]
 
     if database == "sqlite":
         db_path = Path(database_url.database)
@@ -143,6 +174,7 @@ def restore_database(backup_file: Path, db: Database = None) -> Database:
         db_host = url.host or ""
         db_port = str(url.port) if url.port else ""
         db_database_name = url.database or ""
+        db_query_args = url.query if hasattr(url, "query") else {}
 
         if database in ("mariadb", "mysql"):
             LOGGER.info("Restoring the MariaDB/MySQL database ...")
@@ -150,6 +182,13 @@ def restore_database(backup_file: Path, db: Database = None) -> Database:
             cmd = ["mysql", "-h", db_host, "-u", db_user, db_database_name]
             if db_port:
                 cmd.extend(["-P", db_port])
+
+            # Apply additional arguments from query parameters
+            for key, value in db_query_args.items():
+                if key == "ssl" and value == "true":
+                    cmd.append("--ssl")
+                elif key == "charset":
+                    cmd.extend(["--default-character-set", value])
 
             with ZipFile(backup_file, "r") as zipf:
                 proc = run(
@@ -166,14 +205,19 @@ def restore_database(backup_file: Path, db: Database = None) -> Database:
             if db_port:
                 cmd.extend(["-p", db_port])
 
+            # Apply additional arguments from query parameters
+            pg_env = {"PGPASSWORD": db_password}
+            for key, value in db_query_args.items():
+                if key == "sslmode":
+                    pg_env["PGSSLMODE"] = value
+                elif key == "sslrootcert":
+                    pg_env["PGSSLROOTCERT"] = value
+
             with ZipFile(backup_file, "r") as zipf:
-                proc = run(
-                    cmd,
-                    stdout=PIPE,
-                    stderr=PIPE,
-                    env=environ | {"PGPASSWORD": db_password},
-                    input=zipf.read(backup_file.with_suffix(".sql").name),
-                )
+                proc = run(cmd, stdout=PIPE, stderr=PIPE, env=environ | pg_env, input=zipf.read(backup_file.with_suffix(".sql").name))
+        elif database == "oracle":
+            LOGGER.warning("Restoring a database backup for Oracle is not supported")
+            return db
 
     if proc.returncode != 0:
         LOGGER.error(f"Failed to restore the database: {proc.stderr.decode()}")

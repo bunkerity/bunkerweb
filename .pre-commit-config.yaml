@@ -33,13 +33,13 @@ repos:
     rev: d28c0d0a381ac3e2a8efcab1433c732fbc249d86 # frozen: v2.0.2
     hooks:
       - id: stylua-github
-        exclude: ^src/(bw/lua/middleclass.lua|common/core/antibot/captcha.lua)$
+        exclude: ^src/(bw/lua/middleclass.lua$|common/core/antibot/captcha.lua$|common/core/crowdsec/lib)
 
   - repo: https://github.com/lunarmodules/luacheck
     rev: cc089e3f65acdd1ef8716cc73a3eca24a6b845e4 # frozen: v1.2.0
     hooks:
       - id: luacheck
-        exclude: ^src/(bw/lua/middleclass.lua|common/core/antibot/captcha.lua)$
+        exclude: ^src/(bw/lua/middleclass.lua$|common/core/antibot/captcha.lua$|common/core/crowdsec/lib)
         args: ["--std", "min", "--codes", "--ranges", "--no-cache"]
 
   - repo: https://github.com/pycqa/flake8

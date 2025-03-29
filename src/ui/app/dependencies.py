@@ -21,6 +21,7 @@ DATA = UIData(Path(sep, "var", "tmp", "bunkerweb").joinpath("ui_data.json"))
 BW_CONFIG = Config(DB, data=DATA)
 BW_INSTANCES_UTILS = InstancesUtils(DB)
 
+CORE_PLUGINS_PATH = Path(sep, "usr", "share", "bunkerweb", "core")
 EXTERNAL_PLUGINS_PATH = Path(sep, "etc", "bunkerweb", "plugins")
 PRO_PLUGINS_PATH = Path(sep, "etc", "bunkerweb", "pro", "plugins")
 

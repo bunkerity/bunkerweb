@@ -11,7 +11,7 @@
       "help": "Deny access if the country of the client is in the list (ISO 3166-1 alpha-2 format separated with spaces).",
       "id": "country-blacklist",
       "label": "Country blacklist",
-      "regex": "^(?! )( *([A-Z]{2})(?!.*\\2) *)*$",
+      "regex": "^( *([A-Z]{2}) *)*$",
       "type": "text"
     },
     "WHITELIST_COUNTRY": {
@@ -20,7 +20,7 @@
       "help": "Deny access if the country of the client is not in the list (ISO 3166-1 alpha-2 format separated with spaces).",
       "id": "country-whitelist",
       "label": "Country whitelist",
-      "regex": "^(?! )( *([A-Z]{2})(?!.*\\2) *)*$",
+      "regex": "^( *([A-Z]{2}) *)*$",
       "type": "text"
     }
   }

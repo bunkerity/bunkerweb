@@ -1,41 +1,41 @@
 # About
 
-## Who maintains BunkerWeb ?
+## Who maintains BunkerWeb?
 
 BunkerWeb is maintained by [Bunkerity](https://www.bunkerity.com/?utm_campaign=self&utm_source=doc), a French 🇫🇷 company specialized in Cybersecurity 🛡️.
 
-## Do you have a professional version ?
+## Do you have a professional version?
 
-Yes, we do offer a professional version of BunkerWeb called "BunkerWeb PRO".
+Yes, we do offer a professional version of BunkerWeb called "BunkerWeb PRO."
 
-Here are the main benefits of BunkerWeb PRO :
+Here are the main benefits of BunkerWeb PRO:
 
 - Unlock all features of BunkerWeb
-- Pay per protected services
+- Pay per protected service
 - Respond to professional needs
-- Free trial with no credit card
-- Best effort support included
+- Free trial with no credit card required
+- Best-effort support included
 
-You can go the [BunkerWeb panel](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc) to get more information and claim your free trial.
+You can go to the [BunkerWeb panel](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc) to get more information and claim your free trial.
 
-## Do you offer professional services ?
+## Do you offer professional services?
 
 Yes, we offer professional services related to BunkerWeb.
 
-You can get in touch with us about any of the following :
+You can get in touch with us about any of the following:
 
 - Consulting
 - Support
 - Custom development
-- Partnership
+- Partnerships
 
 We have a [dedicated panel](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc) to centralize all professional requests.
 
-You can also contact use at [contact@bunkerity.com](mailto:contact@bunkerity.com) if you are interested.
+You can also contact us at [contact@bunkerity.com](mailto:contact@bunkerity.com) if you are interested.
 
-## Where to get community support ?
+## Where to get community support?
 
-To get free community support, you can use the following media :
+To get free community support, you can use the following media:
 
 - The #help channel of BunkerWeb in the [Discord server](https://discord.com/invite/fTf46FmtyD)
 - The help category of [GitHub discussions](https://github.com/bunkerity/bunkerweb/discussions)
@@ -44,9 +44,9 @@ To get free community support, you can use the following media :
 
 Please don't use [GitHub issues](https://github.com/bunkerity/bunkerweb/issues) to ask for help, use it only for bug reports and feature requests.
 
-## How can I contribute ?
+## How can I contribute?
 
-Here is a non-exhaustive list of what you can do :
+Here is a non-exhaustive list of what you can do:
 
 - Join the [Discord server](https://discord.com/invite/fTf46FmtyD), [/r/BunkerWeb](https://www.reddit.com/r/BunkerWeb) subreddit and [GitHub discussions](https://github.com/bunkerity/bunkerweb/discussions) to talk about the project and help others
 - Follow us on [LinkedIn](https://www.linkedin.com/company/bunkerity/), [Twitter](https://twitter.com/bunkerity) and [GitHub](https://github.com/bunkerity)
@@ -55,9 +55,9 @@ Here is a non-exhaustive list of what you can do :
 - Write an awesome [plugin](plugins.md)
 - Talk about BunkerWeb to your friends/colleagues, on social media, on your blog, ...
 
-## How to report security issue ?
+## How to report security issues?
 
-Please contact us at [security@bunkerity.com](mailto:security@bunkerity.com) using the following PGP key :
+Please contact us at [security@bunkerity.com](mailto:security@bunkerity.com) using the following PGP key:
 
 ```conf
 -----BEGIN PGP PUBLIC KEY BLOCK-----

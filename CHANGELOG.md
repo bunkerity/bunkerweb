@@ -1,6 +1,58 @@
 # Changelog
 
-## v1.6.1-rc3 - ????/??/??
+## v1.6.2-rc1 - ????/??/??
+
+- [BUGFIX] Fix database migration issues when upgrading from older versions to v1.6.1-rc1 with a PostgreSQL database
+- [BUGFIX] Fix shenanigans with templates in the web UI when editing/creating a service using the easy mode
+- [BUGFIX] Improve database table existence checks and error handling in scripts to avoid errors when the LANG is not en_US.UTF-8
+- [BUGFIX] Fix `Country` plugin regex to avoid false positives and deduplicate entries in the lua code
+- [BUGFIX] Fix `Let's Encrypt` clear old certificates logic to avoid deleting the wrong certificates
+- [DOCS] Enhance documentation about `all-in-one` image
+- [DOCS] Refactor the settings documentation to make it more consistent and easier to read, it is now renamed to `Features`
+- [FEATURE] Enhance `SSL` plugin configuration with customizable cipher levels `modern`, `intermediate`, and `old` for better control over SSL/TLS settings and the ability to set a custom cipher list
+- [FEATURE] Add the possibility to ignore `URI`, `IP`, `reverse DNS`, `ASN`, and `User-Agent` in the `Antibot` plugin
+- [FEATURE] Add the possibility to configure the algorithm used when generating the `self-signed` certificate in the `Self-signed certificate` plugin (default is `ec-prime256v1`)
+- [FEATURE] Add `Infomaniak` as a DNS provider in the `letsencrypt` plugin
+- [MISC] Add the possibility to use the less secure `dns_cloudflare_email` and `dns_cloudflare_api_key` credentials in the `letsencrypt` plugin for Cloudflare DNS provider
+- [MISC] Update regex in the `Self-signed certificate` plugin for subject validation so we don't have to always start with `/CN=`
+- [MISC] Update regex in the `Security.txt` plugin to support both HTTP and HTTPS URLs and add an helper function to convert HTTP URLs to HTTPS
+- [MISC] Update regex in the `SSL` plugin to support older HTTPS protocols
+- [MISC] Make the default certificate more secure by using the `secp384r1` curve and the `sha384` hash algorithm instead of the `secp256r1` curve and the `sha256` hash algorithm
+- [AUTOCONF] Remove possible infinite loop in Kubernetes integration
+- [UI] The temporary web UI will now accept X-Forwarded-For headers to allow the use of a reverse proxy in front of it
+- [UI] Persist DataTable page length in localStorage for consistent user experience.
+- [UI] Fix 2FA setup page QR code not being scannable when using the dark mode
+- [UI] Update latest stable release only if available to avoid unnecessary updates prompting
+- [UI] Fix correct key retrieval for `Redis` metrics
+- [UI] Enhance report data formatting and error handling in reports module
+- [UI] Templates are now listed in an appropriate order in the web UI when creating a new service in easy mode (`low` -> `medium` -> `high` -> `custom`)
+- [UI] Refactor easy mode to improve the user experience and make it more intuitive
+- [ALL-IN-ONE] Enhance supervisord configuration to ensure proper startup and shutdown of all services in the all-in-one image
+- [ALL-IN-ONE] Improve logging mechanism in the all-in-one image to ensure that logs are properly captured and displayed
+- [LINUX] Fix NGINX service not being disabled correctly in the post-install script
+- [DEPS] Add lua-upstream-nginx-module
+- [DEPS] Update lua-resty-redis version to v0.32
+- [DEPS] Update ngx_devel_kit version to v0.3.4
+- [DEPS] Update mbedtls version to v3.6.3
+
+## v1.6.1 - 2025/03/15
+
+- [BUGFIX] Enhance Alembic configuration to support database URIs args
+- [BUGFIX] Made `SERVER_NAME` setting's regex more permissive (removed the duplication check)
+- [BUGFIX] Add selective table support in `Backup` plugin to avoid issues when restoring the database
+- [DOCS] Document how to use BunkerWeb with and existing Ingress controller in Kubernetes
+- [DOCS] Add documentation about new `all-in-one` image for BunkerWeb in the Docker section of the Integrations page
+- [DOCS] Edit documentation about thew `User Manager` PRO plugin
+- [FEATURE] Add a new `all-in-one` image for BunkerWeb that includes all the services in one image (BunkerWeb, Scheduler, Autoconf, and UI)
+- [FEATURE] Add `CrowdSec` as a core plugin
+- [MISC] Improve update check output formatting for better readability
+- [MISC] Enhance `Let's Encrypt` DNS credential handling to support base64-encoded values, while also refining credential item processing to handle escape sequences and improve data integrity.
+- [UI] Enhance ban handling with improved validation and informative responses for ban scope and service
+- [UI] Improve plugin page template handling logic
+- [UI] Add a failover message reporting
+- [UI] Prevent interference with newsletter form checkbox click handler
+
+## v1.6.1-rc3 - 2025/03/05
 
 - [BUGFIX] Fix issue where Redis Server returns a `NOPERM` error, ensuring proper handling and preventing 500 errors in the web UI
 - [FEATURE] Enhance ban management with service-specific options and UI improvements

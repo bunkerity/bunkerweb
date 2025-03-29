@@ -348,19 +348,50 @@ def reports_fetch():
 
     # Format reports for the response
     def format_report(report):
-        return {
-            "date": datetime.fromtimestamp(report.get("date", 0)).isoformat() if report.get("date") else "N/A",
-            "ip": report.get("ip", "N/A"),
-            "country": report.get("country", "N/A"),
-            "method": report.get("method", "N/A"),
-            "url": report.get("url", "N/A"),
-            "status": report.get("status", "N/A"),
-            "user_agent": report.get("user_agent", "N/A"),
-            "reason": report.get("reason", "N/A"),
-            "server_name": report.get("server_name", "N/A"),
-            "data": dumps(report.get("data", {})),
-            "security_mode": report.get("security_mode", "N/A"),
-        }
+        try:
+            # Handle the data field safely - ensure it's proper JSON or convert safely
+            data_field = report.get("data", {})
+            if isinstance(data_field, str):
+                try:
+                    # Try to parse if it's already a JSON string
+                    data_json = loads(data_field)
+                    data_output = dumps(data_json)
+                except (ValueError, TypeError):
+                    # If parsing fails, just dump it as a string
+                    data_output = dumps(data_field)
+            else:
+                # If it's not a string, dump the object directly
+                data_output = dumps(data_field)
+
+            return {
+                "date": datetime.fromtimestamp(report.get("date", 0)).isoformat() if report.get("date") else "N/A",
+                "ip": report.get("ip", "N/A"),
+                "country": report.get("country", "N/A"),
+                "method": report.get("method", "N/A"),
+                "url": report.get("url", "N/A"),
+                "status": report.get("status", "N/A"),
+                "user_agent": report.get("user_agent", "N/A"),
+                "reason": report.get("reason", "N/A"),
+                "server_name": report.get("server_name", "N/A"),
+                "data": data_output,
+                "security_mode": report.get("security_mode", "N/A"),
+            }
+        except Exception as e:
+            LOGGER.error(f"Error formatting report: {e}")
+            # Return a safe fallback if formatting fails
+            return {
+                "date": "N/A",
+                "ip": report.get("ip", "N/A"),
+                "country": "N/A",
+                "method": "N/A",
+                "url": "N/A",
+                "status": "N/A",
+                "user_agent": "N/A",
+                "reason": "Error parsing report data",
+                "server_name": "N/A",
+                "data": "{}",
+                "security_mode": "N/A",
+            }
 
     formatted_reports = [format_report(report) for report in paginated_reports]
 

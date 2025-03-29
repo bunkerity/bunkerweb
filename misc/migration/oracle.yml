@@ -1,0 +1,15 @@
+services:
+  bw-db:
+    image: gvenzl/oracle-free:23-slim-faststart
+    environment:
+      ORACLE_RANDOM_PASSWORD: "yes"
+      APP_USER: "bunkerweb"
+      APP_USER_PASSWORD: "secret"
+    networks:
+      bw-db:
+        aliases:
+          - bw-db
+
+networks:
+  bw-db:
+    name: bw-db

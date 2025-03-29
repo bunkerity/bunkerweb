@@ -48,10 +48,14 @@ class CloudflareProvider(Provider):
     """Cloudflare DNS provider."""
 
     dns_cloudflare_api_token: str
+    dns_cloudflare_email: str
+    dns_cloudflare_api_key: str
 
     _validate_aliases = alias_model_validator(
         {
             "dns_cloudflare_api_token": ("dns_cloudflare_api_token", "cloudflare_api_token", "api_token"),
+            "dns_cloudflare_email": ("dns_cloudflare_email", "cloudflare_email", "email"),
+            "dns_cloudflare_api_key": ("dns_cloudflare_api_key", "cloudflare_api_key", "api_key"),
         }
     )
 
@@ -157,6 +161,18 @@ class GoogleProvider(Provider):
     def get_file_type() -> Literal["json"]:
         """Return the file type that the credentials should be written to."""
         return "json"
+
+
+class InfomaniakProvider(Provider):
+    """Infomaniak DNS provider."""
+
+    dns_infomaniak_token: str
+
+    _validate_aliases = alias_model_validator(
+        {
+            "dns_infomaniak_token": ("dns_infomaniak_token", "infomaniak_token", "token"),
+        }
+    )
 
 
 class LinodeProvider(Provider):
@@ -352,3 +368,24 @@ class WildcardGenerator:
             # ? Add the raw domain to the wildcards
             wildcards.add(domain)
         return sorted(wildcards, key=lambda x: x[0] != "*")
+
+    @staticmethod
+    def get_wildcard_group_name(domain: str, provider: str, challenge_type: str, staging: bool, content_hash: str) -> str:
+        """
+        Generate a consistent group name for wildcards based on the domain's TLD.
+
+        Args:
+            domain: The domain name
+            provider: The DNS provider name
+            challenge_type: The challenge type (dns or http)
+            staging: Whether this is a staging certificate
+            content_hash: A hash of the credential content
+
+        Returns:
+            A string representing the group name
+        """
+        base_domain = WildcardGenerator.get_wildcards_from_domains((domain,))[-1].replace(".", "-")
+        env = "staging" if staging else "prod"
+        challenge = provider if challenge_type == "dns" else "http"
+
+        return f"{challenge}_{env}_{base_domain}_{content_hash}"

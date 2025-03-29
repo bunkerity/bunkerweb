@@ -13,7 +13,7 @@
                 <p class="card-subtitle text-muted text-truncate mt-1 courier-prime">{{ plugin["description"] }}</p>
             </div>
             <div class="d-flex flex-grow-0 flex-shrink-0 justify-content-end align-items-center">
-                <a href="{% if plugin['type'] == 'core' %}https://docs.bunkerweb.io/latest/settings/?utm_campaign=self&utm_source=ui#{% if plugin['id'] == 'general' %}global-settings{% else %}{{ plugin['id'] }}{% endif %}{% else %}https://docs.bunkerweb.io/latest/plugins/?utm_campaign=self&utm_source=ui{% endif %}"
+                <a href="{% if plugin['type'] == 'core' %}https://docs.bunkerweb.io/{{ bw_version }}/features/?utm_campaign=self&utm_source=ui#{% if plugin['id'] == 'general' %}global-settings{% else %}{{ plugin['id'] }}{% endif %}{% else %}https://docs.bunkerweb.io/{{ bw_version }}/plugins/?utm_campaign=self&utm_source=ui{% endif %}"
                    class="btn btn-sm btn-primary rounded-pill ms-2"
                    target="_blank"
                    rel="noopener">
@@ -38,7 +38,9 @@
                 </p>
             </div>
         </div>
-    {% elif "Plugin page uses old template" not in plugin_page and pre_render.get("status", False) and pre_render.get("status", False) == "ko" or "error" in pre_render.get("data", {}) or pre_render.get("data") is not mapping %}
+    {% elif plugin_page and "Plugin page uses old template" not in plugin_page %}
+        {{ plugin_page|safe }}
+    {% elif pre_render.get("status", False) and pre_render.get("status", False) == "ko" or "error" in pre_render.get("data", {}) or pre_render.get("data") is not mapping %}
         <div class="d-flex align-items-center justify-content-center">
             <div class="text-center text-primary">
                 <p class="text-center relative w-full p-2 text-primary rounded-lg fw-bold">
@@ -47,9 +49,7 @@
             </div>
         </div>
     {% else %}
-        {% if plugin_page %}
-            {{ plugin_page|safe }}
-        {% elif pre_render.get("status", "ko") == "ok" and pre_render.get("data") is mapping and "error" not in pre_render.get("data", {}) %}
+        {% if pre_render.get("status", "ko") == "ok" and pre_render.get("data") is mapping and "error" not in pre_render.get("data", {}) %}
             <div class="row g-4">
                 {% for key, value in pre_render.get("data", {}).items() %}
                     {% if key.startswith("ping_") %}
@@ -99,7 +99,11 @@
                                             </div>
                                         </div>
                                     {% else %}
-                                        <p class="card-text mb-0">{{ human_readable_number(value.get("value") ) }}</p>
+                                        <div class="d-flex align-items-center justify-content-center h-100">
+                                            <div class="text-center mt-2">
+                                                <p class="card-text mb-0">{{ human_readable_number(value.get("value") ) }}</p>
+                                            </div>
+                                        </div>
                                     {% endif %}
                                     {% set subtitle = value.get("subtitle") %}
                                     {% if subtitle %}

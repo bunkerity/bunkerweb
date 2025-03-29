@@ -202,7 +202,7 @@ class Configurator:
                 variable == "KUBERNETES_MODE"
                 or (
                     "CUSTOM_CONF" not in variable
-                    and not variable.startswith(("_", "PYTHON", "KUBERNETES_", "SVC_", "LB_"))
+                    and not variable.startswith(("_", "PYTHON", "KUBERNETES_", "SVC_", "LB_", "SUPERVISOR_"))
                     and variable
                     not in (
                         "DOCKER_HOST",
@@ -230,6 +230,8 @@ class Configurator:
                         "TZ",
                         "DYNPKG_RELEASE",
                         "OLDPWD",
+                        "SERVICE_SCHEDULER",
+                        "SERVICE_UI",
                     )
                 )
             ):

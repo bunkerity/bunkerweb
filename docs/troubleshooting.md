@@ -1,13 +1,13 @@
 # Troubleshooting
 
 !!! info "BunkerWeb Panel"
-	If you are unable to resolve your problems, you can [contact us directly via our panel](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc). This centralises all requests relating to the BunkerWeb solution.
+	If you are unable to resolve your issue, you can [contact us directly via our panel](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc). This centralizes all requests related to the BunkerWeb solution.
 
 ## Logs
 
 When troubleshooting, logs are your best friends. We try our best to provide user-friendly logs to help you understand what's happening.
 
-Please note that you can set `LOG_LEVEL` setting to `info` (default : `notice`) to increase the verbosity of BunkerWeb.
+Please note that you can set the `LOG_LEVEL` to `info` (default: `notice`) to increase BunkerWeb’s verbosity.
 
 Here is how you can access the logs, depending on your integration :
 
@@ -83,7 +83,7 @@ Here is how you can access the logs, depending on your integration :
 
 === "Linux"
 
-    For errors related to BunkerWeb services (e.g. not starting), you can use `journalctl` :
+    For errors related to BunkerWeb services (e.g., not starting), you can use `journalctl` :
     ```shell
     journalctl -u bunkerweb --no-pager
     ```
@@ -98,11 +98,67 @@ Here is how you can access the logs, depending on your integration :
 
 Don't forget that BunkerWeb runs as an unprivileged user for obvious security reasons. Double-check the permissions of files and folders used by BunkerWeb, especially if you use custom configurations (more info [here](advanced.md#custom-configurations)). You will need to set at least **RW** rights on files and **_RWX_** on folders.
 
-## Disable security checks
+## IP unban
 
-For debugging purposes, you may need to temporarily disable the security checks made by BunkerWeb. One quick way of doing it is by adding everyone in the whitelist (e.g. `WHITELIST_IP=0.0.0.0/0`).
+You can manually unban an IP, which is useful when performing tests so that you can contact the internal API of BunkerWeb (replace `1.2.3.4` with the IP address to unban) :
 
-## ModSecurity
+=== "Docker"
+
+    You can use the `docker exec` command (replace `mybunker` with the name of your container) :
+    ```shell
+    docker exec mybunker bwcli unban 1.2.3.4
+    ```
+
+    Here is the docker-compose equivalent (replace `mybunker` with the name of the services declared in the docker-compose.yml file) :
+    ```shell
+    docker-compose exec mybunker bwcli unban 1.2.3.4
+    ```
+
+=== "Docker autoconf"
+
+    You can use the `docker exec` command (replace `myautoconf` with the name of your container) :
+    ```shell
+    docker exec myautoconf bwcli unban 1.2.3.4
+    ```
+
+    Here is the docker-compose equivalent (replace `myautoconf` with the name of the services declared in the docker-compose.yml file) :
+    ```shell
+    docker-compose exec myautoconf bwcli unban 1.2.3.4
+    ```
+
+=== "Swarm"
+
+    !!! warning "Deprecated"
+        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Docker autoconf integration](#__tabbed_2_2) instead.
+
+        **More information can be found in the [Swarm integration documentation](integrations.md#swarm).**
+
+    You can use the `docker exec` command (replace `myautoconf` with the name of your service) :
+    ```shell
+    docker exec $(docker ps -q -f name=myautoconf) bwcli unban 1.2.3.4
+    ```
+
+=== "Kubernetes"
+
+    You can use the `kubectl exec` command (replace `myautoconf` with the name of your pod) :
+    ```shell
+    kubectl exec myautoconf bwcli unban 1.2.3.4
+    ```
+
+=== "Linux"
+
+    You can use the `bwcli` command (as root) :
+    ```shell
+    sudo bwcli unban 1.2.3.4
+    ```
+
+## False positives
+
+### Detect only mode
+
+For debugging/test purposes, you can set BunkerWeb in [detect only mode](http://localhost:8000/advanced/#security-mode) so it won't block request and will act as a classical reverse proxy.
+
+### ModSecurity
 
 The default BunkerWeb configuration of ModSecurity is to load the Core Rule Set in anomaly scoring mode with a paranoia level (PL) of 1 :
 
@@ -193,79 +249,39 @@ One important thing to understand is that rule **949110** is not a "real" one : 
 
 If it's a false-positive, you should then focus on both **930120** and **932160** rules. ModSecurity and/or CRS tuning is out of the scope of this documentation but don't forget that you can apply custom configurations before and after the CRS is loaded (more info [here](advanced.md#custom-configurations)).
 
-## Bad Behavior
+### Bad Behavior
 
 A common false-positive case is when the client is banned because of the "bad behavior" feature which means that too many suspicious HTTP status codes were generated within a time period (more info [here](advanced.md#bad-behavior)). You should start by reviewing the settings and then edit them according to your web application(s) like removing a suspicious HTTP code, decreasing the count time, increasing the threshold, ...
 
-## IP unban
+### Whitelisting
 
-You can manually unban an IP which can be useful when doing some tests but it needs the setting `USE_API` set to `yes` (which is not the default) so you can contact the internal API of BunkerWeb (replace `1.2.3.4` with the IP address to unban) :
-
-=== "Docker"
-
-    You can use the `docker exec` command (replace `mybunker` with the name of your container) :
-    ```shell
-    docker exec mybunker bwcli unban 1.2.3.4
-    ```
-
-    Here is the docker-compose equivalent (replace `mybunker` with the name of the services declared in the docker-compose.yml file) :
-    ```shell
-    docker-compose exec mybunker bwcli unban 1.2.3.4
-    ```
-
-=== "Docker autoconf"
-
-    You can use the `docker exec` command (replace `myautoconf` with the name of your container) :
-    ```shell
-    docker exec myautoconf bwcli unban 1.2.3.4
-    ```
-
-    Here is the docker-compose equivalent (replace `myautoconf` with the name of the services declared in the docker-compose.yml file) :
-    ```shell
-    docker-compose exec myautoconf bwcli unban 1.2.3.4
-    ```
-
-=== "Swarm"
-
-    !!! warning "Deprecated"
-        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Docker autoconf integration](#__tabbed_2_2) instead.
-
-        **More information can be found in the [Swarm integration documentation](integrations.md#swarm).**
-
-    You can use the `docker exec` command (replace `myautoconf` with the name of your service) :
-    ```shell
-    docker exec $(docker ps -q -f name=myautoconf) bwcli unban 1.2.3.4
-    ```
-
-=== "Kubernetes"
-
-    You can use the `kubectl exec` command (replace `myautoconf` with the name of your pod) :
-    ```shell
-    kubectl exec myautoconf bwcli unban 1.2.3.4
-    ```
-
-=== "Linux"
-
-    You can use the `bwcli` command (as root) :
-    ```shell
-    sudo bwcli unban 1.2.3.4
-    ```
-
-## Whitelisting
-
-If you have bots that need to access your website, the recommended way to avoid any false positive is to whitelist them using the [whitelisting feature](advanced.md#blacklisting-whitelisting-and-greylisting). We don't recommend using the `WHITELIST_URI*` or `WHITELIST_USER_AGENT*` settings unless they are set to secret and unpredictable values. Common use cases are :
+If you have bots (or admins) that need to access your website, the recommended way to avoid any false positive is to whitelist them using the [whitelisting feature](advanced.md#blacklisting-whitelisting-and-greylisting). We don't recommend using the `WHITELIST_URI*` or `WHITELIST_USER_AGENT*` settings unless they are set to secret and unpredictable values. Common use cases are :
 
 - Healthcheck / status bot
 - Callback like IPN or webhook
 - Social media crawler
 
+## Common errors
+
+### Upstream sent too big header
+
+If you see the following error `upstream sent too big header while reading response header from upstream` in the logs, you will need to tweak the various proxy buffers size using the following settings :
+
+- `PROXY_BUFFERS`
+- `PROXY_BUFFER_SIZE`
+- `PROXY_BUSY_BUFFERS_SIZE`
+
+### Could not build server_names_hash
+
+If you see the following error `could not build server_names_hash, you should increase server_names_hash_bucket_size` in the logs, you will need to tweak the `SERVER_NAMES_HASH_BUCKET_SIZE` setting.
+
 ## Timezone
 
-When using container-based integrations, the timezone of the container may not match the one of the host machine. To resolve that, you can set the `TZ` environment variable to the timezone of your choice on your containers (e.g. `TZ=Europe/Paris`). You will find the list of timezone identifiers [here](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List).
+When using container-based integrations, the timezone of the container may not match that of the host machine. To resolve that, you can set the `TZ` environment variable to the timezone of your choice on your containers (e.g. `TZ=Europe/Paris`). You will find the list of timezone identifiers [here](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List).
 
 ## Web UI
 
-In case you lost your UI credentials or have 2FA issues, you can connect to the database to retrieve access.
+In case you forgot your UI credentials or are experiencing 2FA issues, you can connect to the database to regain access.
 
 **Access database**
 
@@ -273,13 +289,13 @@ In case you lost your UI credentials or have 2FA issues, you can connect to the 
 
     === "Linux"
 
-        Install SQLite (Debian/Ubuntu) :
+        Install SQLite (Debian/Ubuntu):
 
         ```shell
         sudo apt install sqlite3
         ```
 
-        Install SQLite (Fedora/RedHat) :
+        Install SQLite (Fedora/RedHat):
 
         ```shell
         sudo dnf install sqlite
@@ -337,7 +353,7 @@ In case you lost your UI credentials or have 2FA issues, you can connect to the 
         mysql -u <user> -p <database>
         ```
 
-        Then enter your password of the database user and you should be able to access your database.
+        Then enter the database user’s password and you should be able to access your database.
 
     === "Docker"
 
@@ -354,7 +370,7 @@ In case you lost your UI credentials or have 2FA issues, you can connect to the 
         docker exec -u 0 -it <bunkerweb_db_container> mysql -u <user> -p <database>
         ```
 
-        Then enter your password of the database user and you should be able to access your database.
+        Then enter the database user’s password and you should be able to access your database.
 
 **Troubleshooting actions**
 

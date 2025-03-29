@@ -20,6 +20,15 @@ function initializeDataTable(config) {
     },
   };
 
+  // Check for saved pageLength in localStorage
+  const savedPageLength = localStorage.getItem(`bw-${tableName}-pageLength`);
+  if (savedPageLength !== null) {
+    // Apply saved pageLength to the options if it exists
+    if (dataTableOptions.pageLength === undefined) {
+      dataTableOptions.pageLength = parseInt(savedPageLength, 10);
+    }
+  }
+
   // Initialize DataTable
   const dataTable = new DataTable(tableSelector, dataTableOptions);
 
@@ -120,6 +129,11 @@ function initializeDataTable(config) {
       saveColumnsPreferences();
     });
   }
+
+  // Page length change event
+  dataTable.on("length.dt", function (e, settings, len) {
+    localStorage.setItem(`bw-${tableName}-pageLength`, len);
+  });
 
   $(document).on("hidden.bs.toast", ".toast", function (event) {
     if (event.target.id.startsWith("feedback-toast")) {

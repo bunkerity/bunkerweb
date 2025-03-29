@@ -141,9 +141,9 @@ pip==25.0.1 \
     # via
     #   build
     #   pip-upgrader
-pip-compile-multi==2.7.1 \
-    --hash=sha256:2f0bfba7f298287e7a63a54db6aa847d42fce6ea71c8490d570764bd63616f09 \
-    --hash=sha256:83c3e36839e49c86ae908e2309d05261041db2eb25d92d05decd740b80f3af79
+pip-compile-multi==2.8.0 \
+    --hash=sha256:17159e83c2e354358921ee34e6b750223ae76aef2beb301286b68a4886076f63 \
+    --hash=sha256:59bb8bea7291b9dec95cb3e380f0f77a936b2e98d64cf9346c0c4ca0012fb6a2
     # via -r requirements-deps.in
 pip-tools==7.4.1 \
     --hash=sha256:4c690e5fbae2f21e87843e89c26191f0d9454f362d8acdbd695716493ec8b3a9 \
@@ -167,9 +167,9 @@ requests==2.32.3 \
     # via
     #   -r requirements-deps.in
     #   pip-tools
-setuptools==75.8.2 \
-    --hash=sha256:4880473a969e5f23f2a2be3646b2dfd84af9028716d398e46192f84bc36900d2 \
-    --hash=sha256:558e47c15f1811c1fa7adbd0096669bf76c1d3f433f58324df69f3f5ecac4e8f
+setuptools==78.1.0 \
+    --hash=sha256:18fd474d4a82a5f83dac888df697af65afa82dec7323d09c3e37d1f14288da54 \
+    --hash=sha256:3e386e96793c8702ae83d17b853fb93d3e09ef82ec62722e61da5cd22376dcd8
     # via pip-upgrader
 terminaltables==3.1.10 \
     --hash=sha256:ba6eca5cb5ba02bba4c9f4f985af80c54ec3dccf94cfcd190154386255e47543 \

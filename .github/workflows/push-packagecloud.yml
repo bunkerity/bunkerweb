@@ -42,18 +42,18 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: Install ruby
-        uses: ruby/setup-ruby@32110d4e311bd8996b2a82bf2a43b714ccc91777 # v1.221.0
+        uses: ruby/setup-ruby@354a1ad156761f5ee2b7b13fa8e09943a5e8d252 # v1.229.0
         with:
           ruby-version: "3.0"
       - name: Install packagecloud
         run: gem install package_cloud
       # Download packages
-      - uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4.1.9
+      - uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
         if: inputs.LINUX != 'el' && inputs.LINUX != 'el9'
         with:
           name: package-${{ inputs.LINUX }}-${{ inputs.PACKAGE_ARCH }}
           path: /tmp/${{ inputs.LINUX }}
-      - uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4.1.9
+      - uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
         if: inputs.LINUX == 'el' || inputs.LINUX == 'el9'
         with:
           name: package-rh${{ inputs.LINUX }}-${{ inputs.PACKAGE_ARCH }}

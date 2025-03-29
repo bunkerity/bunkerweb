@@ -198,7 +198,7 @@ def get_redis_client():
         logger=LOGGER,
     )
 
-    if not redis_client:
+    if use_redis and not redis_client:
         flash("Couldn't connect to redis", "error")
 
     return redis_client
