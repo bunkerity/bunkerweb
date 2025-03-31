@@ -20,7 +20,7 @@
       "help": "Algorithm to use for self-signed certificate.",
       "id": "self-signed-ssl-algorithm",
       "label": "Certificate algorithm",
-      "regex": "^(ec-prime256v1|ec-secp384r1|rsa-2048|rsa-4096)$",
+      "regex": "^(ec-(prime256v1|secp384r1)|(rsa-(2048|4096)))$",
       "type": "select",
       "select": ["ec-prime256v1", "ec-secp384r1", "rsa-2048", "rsa-4096"]
     },
