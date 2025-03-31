@@ -1680,18 +1680,6 @@ BunkerWeb offers many security features that you can configure with [settings](f
   <figcaption>Overview and order of the core security plugins</figcaption>
 </figure>
 
-### Security Mode
-
-STREAM support :white_check_mark:
-
-The **Security Mode** setting determines how BunkerWeb handles detected threats. This flexible feature allows you to choose between monitoring or actively blocking suspicious activity, depending on their specific needs.
-
-- **`detect`**: Logs potential threats without blocking access. This mode is useful for identifying and analyzing false positives in a safe, non-disruptive manner.
-- **`block`** (default): Actively blocks detected threats while logging incidents to prevent unauthorized access and protect your application.
-
-!!! tip "Detect mode"
-    Switching to `detect` mode can help you identify and resolve potential false positives without disrupting legitimate clients. Once these issues are addressed, you can confidently switch back to `block` mode for full protection.
-
 ## CrowdSec Console integration
 
 If you aren’t already familiar with CrowdSec Console integration, [CrowdSec](https://www.crowdsec.net/?utm_campaign=bunkerweb&utm_source=doc) leverages crowdsourced intelligence to combat cyber threats. Think of it as the "Waze of cybersecurity"—when one server is attacked, other systems worldwide are alerted and protected from the same attackers. You can learn more about it [here](https://www.crowdsec.net/about?utm_campaign=bunkerweb&utm_source=blog).
