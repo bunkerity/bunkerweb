@@ -171,6 +171,7 @@ def on_starting(server):
                 LOGGER.error("Failed to load TOTP secrets from file. Falling back to environment or generating new secrets.")
 
         # * Step 2: Check environment variable if no valid file
+        totp_secrets_env = None
         if not totp_secrets:
             totp_secrets_env = getenv("TOTP_SECRETS", "").strip()
             if totp_secrets_env:
@@ -204,8 +205,12 @@ def on_starting(server):
         if previous_env_hash and current_env_hash == previous_env_hash:
             LOGGER.info("The TOTP_SECRETS environment variable has not changed since the last restart.")
         else:
-            LOGGER.warning("The TOTP_SECRETS environment variable has changed or is being set for the first time.")
-            invalid_totp_secrets = True
+            if not totp_secrets_env:
+                LOGGER.warning("The TOTP_SECRETS environment variable has changed or is being set for the first time.")
+                invalid_totp_secrets = True
+            else:
+                LOGGER.info("We won't reset the TOTP secrets, as the TOTP_SECRETS environment variable is set.")
+
             with TOTP_SECRETS_FILE.open("w", encoding="utf-8") as file:
                 dump(totp_secrets, file, indent=2)
             set_secure_permissions(TOTP_SECRETS_FILE)
