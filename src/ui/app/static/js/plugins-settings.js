@@ -85,7 +85,10 @@ $(document).ready(() => {
     const templateContainer = $(`#navs-templates-${currentTemplate}`);
     templateContainer.find("input, select").each(function () {
       const type = $(this).attr("type");
-      const templateValue = $(`#${this.id}-template`).val();
+      const isNewEndpoint = window.location.pathname.endsWith("/new");
+      const templateValue = isNewEndpoint
+        ? $(`#${this.id}-template`).val()
+        : $(this).data("original");
       if ($(this).prop("disabled") || type === "hidden") {
         return;
       }
