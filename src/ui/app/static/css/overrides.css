@@ -1161,15 +1161,6 @@ div.dtsp-panesContainer
   animation: pulse-error 1.5s 1;
 }
 
-/* Adjust dark mode styles for validation */
-.dark-style .step-navigation-item.has-validation-error {
-  background-color: rgba(var(--bs-danger-rgb), 0.15);
-}
-
-.dark-style .step-navigation-item.has-validation-error:hover {
-  background-color: rgba(var(--bs-danger-rgb), 0.2);
-}
-
 .steps-nav-container {
   top: 95px;
 }
@@ -1643,4 +1634,20 @@ html.dark-style div.dts div.dataTables_scrollBody table {
 /* Ensure the ban items have proper spacing */
 #bans-container .ban-item {
   margin-bottom: 8px;
+}
+
+/* Adjust dark mode styles for validation */
+.dark-style .step-navigation-item.has-validation-error {
+  background-color: rgba(var(--bs-danger-rgb), 0.15);
+}
+
+.dark-style .step-navigation-item.has-validation-error:hover {
+  background-color: rgba(var(--bs-danger-rgb), 0.2);
+}
+
+.dark-style .list-group-item.active,
+.list-group-item.active:hover,
+.list-group-item.active:focus {
+  background-color: #0a4b69 !important;
+  color: #fff !important;
 }
