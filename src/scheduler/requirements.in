@@ -18,7 +18,7 @@ certbot-dns-scaleway==0.0.7
 cryptography==44.0.2
 importlib-metadata==8.6.1
 maxminddb==2.6.3
-pydantic==2.11.0
+pydantic==2.11.2
 python-magic==0.4.27
 requests==2.32.3
 schedule==1.2.2
