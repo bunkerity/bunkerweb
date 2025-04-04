@@ -1,6 +1,10 @@
 # Changelog
 
-## v1.6.2-rc1 - ????/??/??
+## v1.6.2-rc2 - ????/??/??
+
+- [DEPS] Update coreruleset-v4 version to v4.13.0
+
+## v1.6.2-rc1 - 2025/03/29
 
 - [BUGFIX] Fix database migration issues when upgrading from older versions to v1.6.1-rc1 with a PostgreSQL database
 - [BUGFIX] Fix shenanigans with templates in the web UI when editing/creating a service using the easy mode

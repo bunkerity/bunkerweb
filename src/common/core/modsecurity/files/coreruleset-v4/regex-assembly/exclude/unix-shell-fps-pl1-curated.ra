@@ -13,9 +13,36 @@
 ##! This list contains a subset of commands extracted from the file unix-shell-fps-pl1.ra
 ##! It specifically includes commands for which false positive reports were received.
 
+date
+date@
+date~
+group
+group@
+group~
 more
 more@
 more~
 time
 time@
 time~
+jobs
+jobs@
+jobs~
+last
+last@
+last~
+less
+less@
+less~
+links
+links@
+links~
+local
+local@
+local~
+source
+source@
+source~
+watch
+watch@
+watch~

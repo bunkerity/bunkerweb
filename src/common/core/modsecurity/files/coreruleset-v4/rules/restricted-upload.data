@@ -5,29 +5,35 @@
 # w
 # q
 # EOF
-# words="$(awk ' !/^#/ {split($0, segments, "/")} {word = segments[length(segments)]} length(word) > 3 {print word}' rules/restricted-files.data | \
-#   sort | uniq)"
+# words="$(awk ' !/^#/ && NF {
+#  n = split($0, segments, "/");
+#  word = segments[n];
+#  if (length(word) > 3) print word
+# }' rules/restricted-files.data | sort | uniq)"
 # while read -r word; do
 #   if [ "$(util/fp-finder/spell.sh -m -e - <<<"${word}")" != "${word}" ]; then
 #     echo "${word}" >> rules/restricted-upload.data
 #   fi
 # done <<<"${words}"
-
-.DS_Store
 .addressbook
 .bash_
 .bashrc
+.boto
 .bowerrc
 .cshrc
-.docker
+.DS_Store
 .env
+.envrc
 .eslintignore
 .eslintrc
 .fbcindex
+.fish
 .forward
 .gitattributes
 .gitconfig
 .gitignore
+.gitkeep
+.gitmodules
 .gitlab-ci.yml
 .google_authenticator
 .hgignore
@@ -45,7 +51,9 @@
 .my.cnf
 .mysql_history
 .nano_history
+.netrc
 .node_repl_history
+.npmrc
 .nsconfig
 .nsr
 .oh-my-
@@ -65,50 +73,64 @@
 .rediscli_history
 .rhistory
 .rhosts
+.selected_editor
 .sh_history
 .sqlite_history
+.svnignore
 .tcshrc
+.tmux.conf
+.travis.yaml
 .travis.yml
 .user.ini
 .viminfo
 .vimrc
+.vscode
 .ws_ftp.ini
 .www_acl
 .wwwacl
 .xauthority
+.yarnrc
 .zhistory
 .zsh_history
+.zshenv
 .zshrc
-Desktop.ini
-Dockerfile
-Thumbs.db
-Web.config
 acpi
 asound
 auth.json
+aws.yaml
+aws.yml
+aws-key.yaml
+aws-key.yml
+BlockCypher.log
 bootconfig
 bower.json
 buddyinfo
 cgroups
+cloud-config.yml
 cmdline
+compose.yaml
+compose.yml
 composer.json
 composer.lock
+config_dev.yml
+config_prod.yml
+config_test.yml
 config.gz
 config.inc.php
 config.php
 config.sample.php
 config.yml
-config_dev.yml
-config_prod.yml
-config_test.yml
 cpuinfo
 database.yml
-defaults.inc.php
 default.settings.php
+defaults.inc.php
+Desktop.ini
 diskstats
+Dockerfile
 dynamic_debug
 execdomains
 filesystems
+fish_variables
 gruntfile.js
 hplip.conf
 hypervisor
@@ -123,6 +145,7 @@ kpagecgroup
 kpagecount
 kpageflags
 latency_stats
+ldap-authentication-report.csv
 loadavg
 local.xml
 mdstat
@@ -138,15 +161,17 @@ packages.json
 pagetypeinfo
 parameters.php
 parameters.yml
-php.ini
 php_error.log
 php_errors.log
+php.ini
 phpcs.xml
 phpcs.xml.dist
 routing.yml
 sched_debug
 schedstat
+secrets.json
 security.yml
+sendgrid.env
 services.yml
 settings.inc.php
 settings.local.php
@@ -159,14 +184,18 @@ sslvpn_websession
 sysrq-trigger
 sysvipc
 thread-self
+Thumbs.db
 timer_list
 timer_stats
 tsconfig.json
+user_secrets.yml
 version_signature
 vmallocinfo
 vmstat
+Web.config
 weblogic.xml
 webpack.config.js
+wp-config.copy
 wp-config.bak
 wp-config.old
 wp-config.php
