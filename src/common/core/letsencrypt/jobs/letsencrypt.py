@@ -159,6 +159,22 @@ class GoogleProvider(Provider):
         return "json"
 
 
+class IonosProvider(Provider):
+    """Ionos DNS provider."""
+
+    dns_ionos_endpoint: str = "https://api.hosting.ionos.com"
+    dns_ionos_prefix : str
+    dns_ionos_secret : str
+
+    _validate_aliases = alias_model_validator(
+        {
+            "dns_ionos_endpoint": ("dns_ionos_endpoint", "ionos_endpoint", "endpoint"),
+            "dns_ionos_prefix": ("dns_ionos_prefix", "ionos_prefix", "ionos_prefix"),
+            "dns_ionos_secret": ("dns_ionos_secret", "ionos_secret", "secret"),
+        }
+    )
+
+
 class LinodeProvider(Provider):
     """Linode DNS provider."""
 

@@ -30,6 +30,7 @@ from letsencrypt import (
     DnsMadeEasyProvider,
     GehirnProvider,
     GoogleProvider,
+    IonosProvider,
     LinodeProvider,
     LuaDnsProvider,
     NSOneProvider,
@@ -118,7 +119,7 @@ def certbot_new(
             command.extend([f"--dns-{provider}-credentials", credentials_path.as_posix()])
 
         # * Adding plugin argument
-        if provider in ("desec", "scaleway"):
+        if provider in ("desec", "ionos", "scaleway"):
             # ? Desec and Scaleway plugin uses different arguments
             command.extend(["--authenticator", f"dns-{provider}"])
         else:
@@ -213,6 +214,7 @@ try:
                 Type[DnsMadeEasyProvider],
                 Type[GehirnProvider],
                 Type[GoogleProvider],
+                Type[IonosProvider],
                 Type[LinodeProvider],
                 Type[LuaDnsProvider],
                 Type[NSOneProvider],
@@ -230,6 +232,7 @@ try:
             "dnsmadeeasy": DnsMadeEasyProvider,
             "gehirn": GehirnProvider,
             "google": GoogleProvider,
+            "ionos": IonosProvider,
             "linode": LinodeProvider,
             "luadns": LuaDnsProvider,
             "nsone": NSOneProvider,
