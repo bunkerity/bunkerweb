@@ -51,6 +51,7 @@
 - [DOCS] Edit documentation about thew `User Manager` PRO plugin
 - [FEATURE] Add a new `all-in-one` image for BunkerWeb that includes all the services in one image (BunkerWeb, Scheduler, Autoconf, and UI)
 - [FEATURE] Add `CrowdSec` as a core plugin
+- [FEATURE] Add `IONOS` DNS provider support in `letsencrypt` plugin
 - [MISC] Improve update check output formatting for better readability
 - [MISC] Enhance `Let's Encrypt` DNS credential handling to support base64-encoded values, while also refining credential item processing to handle escape sequences and improve data integrity.
 - [UI] Enhance ban handling with improved validation and informative responses for ban scope and service
