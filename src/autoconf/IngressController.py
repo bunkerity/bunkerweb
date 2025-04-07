@@ -315,8 +315,7 @@ class IngressController(Controller):
         elif obj.kind == "Ingress":
             if self.__ingress_class:
                 ingress_class_name = getattr(obj.spec, "ingress_class_name", None)
-                if not ingress_class_name or ingress_class_name != self.__ingress_class:
-                    ret = False
+                ret = ingress_class_name and ingress_class_name == self.__ingress_class
             else:
                 ret = True
         elif obj.kind == "ConfigMap":
