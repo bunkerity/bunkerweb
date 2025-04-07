@@ -138,9 +138,9 @@
     },
     {
       "id": "lua-resty-redis",
-      "name": "lua-resty-redis v0.31",
+      "name": "lua-resty-redis v0.32",
       "url": "https://github.com/openresty/lua-resty-redis.git",
-      "commit": "193fbd42e9b7953f5157550eb5253c04c081b143",
+      "commit": "11609088f4265a111d42203c6631e5fd0e86baf0",
       "post_install": "rm -r src/deps/src/lua-resty-redis/t"
     },
     {
@@ -185,6 +185,13 @@
       "post_install": "rm -r src/deps/src/lua-resty-upload/t"
     },
     {
+      "id": "lua-upstream-nginx-module",
+      "name": "lua-upstream-nginx-module v0.07",
+      "url": "https://github.com/openresty/lua-upstream-nginx-module.git",
+      "commit": "a84fbbb3d3b07684c232f642eccbc5334bafcbfe",
+      "post_install": "rm -r src/deps/src/lua-upstream-nginx-module/t/t"
+    },
+    {
       "id": "luajit",
       "name": "LuaJIT v2.1-20250117",
       "url": "https://github.com/openresty/luajit2.git",
@@ -220,9 +227,9 @@
     },
     {
       "id": "mbedtls",
-      "name": "Mbed TLS v3.6.2",
+      "name": "Mbed TLS v3.6.3",
       "url": "https://github.com/Mbed-TLS/mbedtls.git",
-      "commit": "107ea89daaefb9867ea9121002fbbdf926780e98",
+      "commit": "22098d41c6620ce07cf8a0134d37302355e1e5ef",
       "post_install": "rm -r src/deps/src/mbedtls/tests src/deps/src/mbedtls/docs src/deps/src/mbedtls/programs"
     },
     {
@@ -261,9 +268,9 @@
     },
     {
       "id": "ngx_devel_kit",
-      "name": "Nginx devel kit v0.3.3",
+      "name": "Nginx devel kit v0.3.4",
       "url": "https://github.com/vision5/ngx_devel_kit.git",
-      "commit": "91e30eb05085e7f9762f130cbb883a0e753cf74d",
+      "commit": "bd44d16302273052d6005d7bdb55f74e23813de3",
       "post_install": "rm -r src/deps/src/ngx_devel_kit/examples"
     },
     {

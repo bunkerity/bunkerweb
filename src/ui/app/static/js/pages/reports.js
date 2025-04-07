@@ -522,9 +522,17 @@ $(document).ready(function () {
           d.csrf_token = $("#csrf_token").val(); // Add CSRF token if needed
           return d;
         },
-      },
-      initComplete: () => {
-        updateCountryTooltips();
+        // Add error handling for ajax requests
+        error: function (jqXHR, textStatus, errorThrown) {
+          console.error("DataTables AJAX error:", textStatus, errorThrown);
+          $("#reports").addClass("d-none");
+          $("#reports-waiting")
+            .removeClass("d-none")
+            .text("Error loading reports. Please try refreshing the page.")
+            .addClass("text-danger");
+          // Remove any loading indicators
+          $(".dataTables_processing").hide();
+        },
       },
       columns: [
         {
@@ -542,7 +550,26 @@ $(document).ready(function () {
         { data: "user_agent", title: "User-Agent" },
         { data: "reason", title: "Reason" },
         { data: "server_name", title: "Server name" },
-        { data: "data", title: "Data" },
+        {
+          data: "data",
+          title: "Data",
+          render: function (data, type, row) {
+            if (type === "display" || type === "filter") {
+              try {
+                // Try to parse the data as JSON if it's a string
+                const jsonData =
+                  typeof data === "string" ? JSON.parse(data) : data;
+                // Format it for display
+                return JSON.stringify(jsonData, null, 2);
+              } catch (e) {
+                console.warn("Error parsing data JSON:", e);
+                // Return a safe fallback if parsing fails
+                return "{}";
+              }
+            }
+            return data;
+          },
+        },
         { data: "security_mode", title: "Security mode" },
       ],
       headerCallback: function (thead) {

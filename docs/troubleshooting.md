@@ -1,13 +1,13 @@
 # Troubleshooting
 
 !!! info "BunkerWeb Panel"
-	If you are unable to resolve your problems, you can [contact us directly via our panel](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc). This centralises all requests relating to the BunkerWeb solution.
+	If you are unable to resolve your issue, you can [contact us directly via our panel](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc). This centralizes all requests related to the BunkerWeb solution.
 
 ## Logs
 
 When troubleshooting, logs are your best friends. We try our best to provide user-friendly logs to help you understand what's happening.
 
-Please note that you can set `LOG_LEVEL` setting to `info` (default : `notice`) to increase the verbosity of BunkerWeb.
+Please note that you can set the `LOG_LEVEL` to `info` (default: `notice`) to increase BunkerWeb’s verbosity.
 
 Here is how you can access the logs, depending on your integration :
 
@@ -83,7 +83,7 @@ Here is how you can access the logs, depending on your integration :
 
 === "Linux"
 
-    For errors related to BunkerWeb services (e.g. not starting), you can use `journalctl` :
+    For errors related to BunkerWeb services (e.g., not starting), you can use `journalctl` :
     ```shell
     journalctl -u bunkerweb --no-pager
     ```
@@ -100,7 +100,7 @@ Don't forget that BunkerWeb runs as an unprivileged user for obvious security re
 
 ## IP unban
 
-You can manually unban an IP which can be useful when doing some tests so you can contact the internal API of BunkerWeb (replace `1.2.3.4` with the IP address to unban) :
+You can manually unban an IP, which is useful when performing tests so that you can contact the internal API of BunkerWeb (replace `1.2.3.4` with the IP address to unban) :
 
 === "Docker"
 
@@ -266,6 +266,7 @@ If you have bots (or admins) that need to access your website, the recommended w
 ### Upstream sent too big header
 
 If you see the following error `upstream sent too big header while reading response header from upstream` in the logs, you will need to tweak the various proxy buffers size using the following settings :
+
 - `PROXY_BUFFERS`
 - `PROXY_BUFFER_SIZE`
 - `PROXY_BUSY_BUFFERS_SIZE`
@@ -276,11 +277,11 @@ If you see the following error `could not build server_names_hash, you should in
 
 ## Timezone
 
-When using container-based integrations, the timezone of the container may not match the one of the host machine. To resolve that, you can set the `TZ` environment variable to the timezone of your choice on your containers (e.g. `TZ=Europe/Paris`). You will find the list of timezone identifiers [here](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List).
+When using container-based integrations, the timezone of the container may not match that of the host machine. To resolve that, you can set the `TZ` environment variable to the timezone of your choice on your containers (e.g. `TZ=Europe/Paris`). You will find the list of timezone identifiers [here](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List).
 
 ## Web UI
 
-In case you lost your UI credentials or have 2FA issues, you can connect to the database to retrieve access.
+In case you forgot your UI credentials or are experiencing 2FA issues, you can connect to the database to regain access.
 
 **Access database**
 
@@ -288,13 +289,13 @@ In case you lost your UI credentials or have 2FA issues, you can connect to the 
 
     === "Linux"
 
-        Install SQLite (Debian/Ubuntu) :
+        Install SQLite (Debian/Ubuntu):
 
         ```shell
         sudo apt install sqlite3
         ```
 
-        Install SQLite (Fedora/RedHat) :
+        Install SQLite (Fedora/RedHat):
 
         ```shell
         sudo dnf install sqlite
@@ -352,7 +353,7 @@ In case you lost your UI credentials or have 2FA issues, you can connect to the 
         mysql -u <user> -p <database>
         ```
 
-        Then enter your password of the database user and you should be able to access your database.
+        Then enter the database user’s password and you should be able to access your database.
 
     === "Docker"
 
@@ -369,7 +370,7 @@ In case you lost your UI credentials or have 2FA issues, you can connect to the 
         docker exec -u 0 -it <bunkerweb_db_container> mysql -u <user> -p <database>
         ```
 
-        Then enter your password of the database user and you should be able to access your database.
+        Then enter the database user’s password and you should be able to access your database.
 
 **Troubleshooting actions**
 

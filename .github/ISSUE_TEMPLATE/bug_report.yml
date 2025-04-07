@@ -47,7 +47,7 @@ body:
       label: BunkerWeb version
       description: What version of BunkerWeb are you running?
       placeholder: Version
-      value: 1.6.1
+      value: 1.6.2-rc1
     validations:
       required: true
   - type: dropdown
@@ -60,8 +60,10 @@ body:
         - Swarm
         - Kubernetes
         - Linux
+        - All-in-one
         - Ansible
         - Vagrant
+        - Azure
       default: 0
     validations:
       required: true

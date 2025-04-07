@@ -136,7 +136,7 @@
                         <p class="card-subtitle text-muted text-truncate mt-1 courier-prime">{{ plugin_data["description"] }}</p>
                     </div>
                     <div class="d-flex flex-grow-0 flex-shrink-0 justify-content-end align-items-center">
-                        <a href="https://docs.bunkerweb.io/latest/quickstart-guide/?utm_campaign=self&utm_source=ui#protect-udptcp-applications"
+                        <a href="https://docs.bunkerweb.io/{{ bw_version }}/advanced/?utm_campaign=self&utm_source=ui#protect-udptcp-applications"
                            class="btn btn-sm btn-outline-{% if plugin_data['stream'] == 'yes' %}bw-green{% elif plugin_data['stream'] == 'partial' %}warning{% else %}danger{% endif %} rounded-pill"
                            target="_blank"
                            rel="noopener"
@@ -145,7 +145,7 @@
                            data-bs-original-title="{% if plugin_data['stream'] != 'no' %}Supports{% else %}Doesn't support{% endif %} STREAM mode{% if plugin_data['stream'] == 'partial' %} partially{% endif %}">
                             <i class="bx bx-{% if plugin_data['stream'] == 'yes' %}badge-check{% elif plugin_data['stream'] == 'partial' %}message-square-detail{% else %}no-entry{% endif %}"></i><span class="d-none d-md-inline">&nbsp;STREAM</span>
                         </a>
-                        <a href="{% if plugin_data['type'] == 'core' %}https://docs.bunkerweb.io/latest/settings/?utm_campaign=self&utm_source=ui#{% if plugin == 'general' %}global-settings{% else %}{{ plugin }}{% endif %}{% else %}https://docs.bunkerweb.io/latest/plugins/?utm_campaign=self&utm_source=ui{% endif %}"
+                        <a href="{% if plugin_data['type'] == 'core' %}https://docs.bunkerweb.io/{{ bw_version }}/features/?utm_campaign=self&utm_source=ui#{% if plugin == 'general' %}global-settings{% else %}{{ plugin }}{% endif %}{% else %}https://docs.bunkerweb.io/{{ bw_version }}/plugins/?utm_campaign=self&utm_source=ui{% endif %}"
                            class="btn btn-sm btn-primary rounded-pill ms-2"
                            target="_blank"
                            rel="noopener">
@@ -202,7 +202,7 @@
                                     <div class="d-flex align-items-center">
                                         {% if current_endpoint == "global-config" and setting_data["context"] == "multisite" %}
                                             <a role="badge"
-                                               href='https://docs.bunkerweb.io/latest/concepts/?utm_campaign=self&utm_source=ui#multisite-mode'
+                                               href='https://docs.bunkerweb.io/{{ bw_version }}/concepts/?utm_campaign=self&utm_source=ui#multisite-mode'
                                                class="badge badge-center rounded-pill bg-secondary d-flex align-items-center justify-content-center p-1 me-1"
                                                data-bs-toggle="tooltip"
                                                data-bs-placement="top"
@@ -342,7 +342,7 @@
                                                                 <div class="d-flex align-items-center">
                                                                     {% if current_endpoint == "global-config" and setting_data["context"] == "multisite" %}
                                                                         <a role="badge"
-                                                                           href='https://docs.bunkerweb.io/latest/concepts/?utm_campaign=self&utm_source=ui#multisite-mode'
+                                                                           href='https://docs.bunkerweb.io/{{ bw_version }}/concepts/?utm_campaign=self&utm_source=ui#multisite-mode'
                                                                            class="badge badge-center rounded-pill bg-secondary d-flex align-items-center justify-content-center p-1 me-1"
                                                                            data-bs-toggle="tooltip"
                                                                            data-bs-placement="top"

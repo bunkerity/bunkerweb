@@ -315,8 +315,7 @@ class IngressController(Controller):
         elif obj.kind == "Ingress":
             if self.__ingress_class:
                 ingress_class_name = getattr(obj.spec, "ingress_class_name", None)
-                if not ingress_class_name or ingress_class_name != self.__ingress_class:
-                    ret = False
+                ret = ingress_class_name and ingress_class_name == self.__ingress_class
             else:
                 ret = True
         elif obj.kind == "ConfigMap":
@@ -343,11 +342,6 @@ class IngressController(Controller):
                     self._logger.info(f"Starting Kubernetes watch for {watch_type}, attempt {attempt + 1}/{retries}")
                 ignored = False
                 yield from watch.Watch().stream(what)
-            except ProtocolError:
-                self._logger.debug(format_exc())
-                sleep(1)
-                ignored = True
-                continue
             except ApiException as e:
                 if e.status == 410 and "Expired: too old resource version: " in e.reason:
                     self._logger.debug(f"{e.reason} while watching {watch_type}, resetting watch stream")

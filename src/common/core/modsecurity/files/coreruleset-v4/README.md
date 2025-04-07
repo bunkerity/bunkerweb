@@ -31,6 +31,6 @@ Read also our documentation on [how to contribute](./CONTRIBUTING.md).
 ## License
 
 Copyright (c) 2006-2020 Trustwave and contributors. All rights reserved.</br>
-Copyright (c) 2021-2024 CRS project. All rights reserved.
+Copyright (c) 2021-2025 CRS project. All rights reserved.
 
 The OWASP CRS is distributed under Apache Software License (ASL) version 2. Please see the enclosed LICENSE file for full details.

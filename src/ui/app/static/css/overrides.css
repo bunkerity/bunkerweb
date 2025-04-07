@@ -221,7 +221,7 @@ button.list-group-item-secondary.active {
 }
 
 .toast-container {
-  z-index: 1100;
+  z-index: 1089;
 }
 
 /*
@@ -543,7 +543,7 @@ a.badge:hover {
   background-color: rgba(255, 255, 255, 0.88) !important;
   backdrop-filter: saturate(200%) blur(6px);
   top: 85px;
-  z-index: 1000;
+  z-index: 1100;
 }
 
 #floating-modes-menu {
@@ -1055,6 +1055,116 @@ div.dtsp-panesContainer
   transition: all 0.2s ease;
 }
 
+.qr-code {
+  background-color: #fff;
+}
+
+/* Template Steps Navigation Styles */
+.step-navigation-list {
+  max-height: calc(100vh - 200px);
+  overflow-y: auto;
+  border-radius: 0.375rem;
+}
+
+.step-navigation-item {
+  border-left: 3px solid transparent;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.step-navigation-item.active {
+  border-left-color: var(--bs-primary);
+  background-color: rgba(var(--bs-primary-rgb), 0.05);
+  box-shadow: 0 0 0 1px rgba(var(--bs-primary-rgb), 0.1);
+}
+
+.step-navigation-item:hover:not(.active) {
+  background-color: rgba(var(--bs-primary-rgb), 0.03);
+  border-left-color: rgba(var(--bs-primary-rgb), 0.3);
+}
+
+.step-navigation-item .step-number {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease-in-out;
+}
+
+.step-navigation-item:not(.active) .step-number:hover {
+  opacity: 0.8;
+}
+
+.step-content-wrapper {
+  max-height: calc(100vh - 220px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+  padding-right: 0.5rem;
+}
+
+/* Ensure proper Bootstrap tab behavior */
+.template-steps-content .tab-pane {
+  display: none;
+}
+
+.template-steps-content .tab-pane.active {
+  display: block;
+}
+
+.template-steps-content .tab-pane.show.active {
+  display: block;
+}
+
+/* Always hide inactive tab panes regardless of fade classes */
+.template-steps-content .tab-pane:not(.active) {
+  display: none !important;
+}
+
+/* Step validation styles */
+.step-navigation-item.has-validation-error {
+  border-left-color: var(--bs-danger);
+  background-color: rgba(var(--bs-danger-rgb), 0.05);
+}
+
+.step-navigation-item.has-validation-error .fw-bold {
+  color: var(--bs-danger) !important;
+}
+
+.step-navigation-item.has-validation-error:hover {
+  background-color: rgba(var(--bs-danger-rgb), 0.1);
+}
+
+.step-number.btn-danger {
+  background-color: var(--bs-danger);
+  border-color: var(--bs-danger);
+}
+
+/* Subtle animation for validation errors */
+@keyframes pulse-error {
+  0% {
+    box-shadow: 0 0 0 0 rgba(var(--bs-danger-rgb), 0.2);
+  }
+  70% {
+    box-shadow: 0 0 0 4px rgba(var(--bs-danger-rgb), 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(var(--bs-danger-rgb), 0);
+  }
+}
+
+.step-number.btn-danger,
+.step-number.btn-outline-danger {
+  animation: pulse-error 1.5s 1;
+}
+
+.steps-nav-container {
+  top: 95px;
+}
+
 /*
 * Dark mode overrides
 ******************************************************************************/
@@ -1190,7 +1300,6 @@ div.dtsp-panesContainer
   color: #fff;
 }
 
-.dark-style .img-fluid.qr-code,
 .dark-style .x-logo {
   filter: brightness(0) invert(1);
 }
@@ -1525,4 +1634,20 @@ html.dark-style div.dts div.dataTables_scrollBody table {
 /* Ensure the ban items have proper spacing */
 #bans-container .ban-item {
   margin-bottom: 8px;
+}
+
+/* Adjust dark mode styles for validation */
+.dark-style .step-navigation-item.has-validation-error {
+  background-color: rgba(var(--bs-danger-rgb), 0.15);
+}
+
+.dark-style .step-navigation-item.has-validation-error:hover {
+  background-color: rgba(var(--bs-danger-rgb), 0.2);
+}
+
+.dark-style .list-group-item.active,
+.list-group-item.active:hover,
+.list-group-item.active:focus {
+  background-color: #0a4b69 !important;
+  color: #fff !important;
 }

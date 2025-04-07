@@ -40,12 +40,12 @@ cmake_policy(SET CMP0012 NEW)
 if(TEST_CPP)
     project("Mbed TLS"
         LANGUAGES C CXX
-        VERSION 3.6.2
+        VERSION 3.6.3
     )
 else()
     project("Mbed TLS"
         LANGUAGES C
-        VERSION 3.6.2
+        VERSION 3.6.3
     )
 endif()
 
@@ -61,6 +61,7 @@ endif()
 
 # Set the project root directory.
 set(MBEDTLS_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+set(MBEDTLS_FRAMEWORK_DIR ${CMAKE_CURRENT_SOURCE_DIR}/framework)
 
 option(ENABLE_PROGRAMS "Build Mbed TLS programs." ON)
 
@@ -229,7 +230,21 @@ if(CMAKE_COMPILER_IS_GNU)
     set(CMAKE_C_FLAGS_RELEASE     "-O2")
     set(CMAKE_C_FLAGS_DEBUG       "-O0 -g3")
     set(CMAKE_C_FLAGS_COVERAGE    "-O0 -g3 --coverage")
-    set(CMAKE_C_FLAGS_ASAN        "-fsanitize=address -fno-common -fsanitize=undefined -fno-sanitize-recover=all -O3")
+    # Old GCC versions hit a performance problem with test_suite_pkwrite
+    # "Private keey write check EC" tests when building with Asan+UBSan
+    # and -O3: those tests take more than 100x time than normal, with
+    # test_suite_pkwrite taking >3h on the CI. Observed with GCC 5.4 on
+    # Ubuntu 16.04 x86_64 and GCC 6.5 on Ubuntu 18.04 x86_64.
+    # GCC 7.5 and above on Ubuntu 18.04 appear fine.
+    # To avoid the performance problem, we use -O2 when GCC version is lower than 7.0.
+    # It doesn't slow down much even with modern compiler versions.
+    if (GCC_VERSION VERSION_LESS 7.0)
+        message(STATUS "USING O2")
+        set(CMAKE_C_FLAGS_ASAN        "-fsanitize=address -fno-common -fsanitize=undefined -fno-sanitize-recover=all -O2")
+    else()
+        message(STATUS "USING O3")
+        set(CMAKE_C_FLAGS_ASAN        "-fsanitize=address -fno-common -fsanitize=undefined -fno-sanitize-recover=all -O3")
+    endif()
     set(CMAKE_C_FLAGS_ASANDBG     "-fsanitize=address -fno-common -fsanitize=undefined -fno-sanitize-recover=all -O1 -g3 -fno-omit-frame-pointer -fno-optimize-sibling-calls")
     set(CMAKE_C_FLAGS_TSAN        "-fsanitize=thread -O3")
     set(CMAKE_C_FLAGS_TSANDBG     "-fsanitize=thread -O1 -g3 -fno-omit-frame-pointer -fno-optimize-sibling-calls")
@@ -301,7 +316,11 @@ if(LIB_INSTALL_DIR)
 endif()
 
 if (NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/framework/CMakeLists.txt")
-    message(FATAL_ERROR "${CMAKE_CURRENT_SOURCE_DIR}/framework/CMakeLists.txt not found. Run `git submodule update --init` from the source tree to fetch the submodule contents.")
+    if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/.git")
+        message(FATAL_ERROR "${CMAKE_CURRENT_SOURCE_DIR}CMakeLists.txt not found (and does appear to be a git checkout). Run `git submodule update --init` from the source tree to fetch the submodule contents.")
+    else ()
+        message(FATAL_ERROR "${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists.txt not found (and does not appear to be a git checkout). Please ensure you have downloaded the right archive from the release page on GitHub.")
+    endif()
 endif()
 add_subdirectory(framework)
 
@@ -314,7 +333,7 @@ add_subdirectory(library)
 add_subdirectory(pkgconfig)
 
 #
-# The C files in tests/src directory contain test code shared among test suites
+# The C files in framework/tests/src directory contain test code shared among test suites
 # and programs. This shared test code is compiled and linked to test suites and
 # programs objects as a set of compiled objects. The compiled objects are NOT
 # built into a library that the test suite and program objects would link
@@ -330,23 +349,24 @@ add_subdirectory(pkgconfig)
 if(ENABLE_TESTING OR ENABLE_PROGRAMS)
     file(GLOB MBEDTLS_TEST_FILES
          ${CMAKE_CURRENT_SOURCE_DIR}/tests/src/*.c
-         ${CMAKE_CURRENT_SOURCE_DIR}/tests/src/drivers/*.c)
+         ${CMAKE_CURRENT_SOURCE_DIR}/framework/tests/src/*.c
+         ${CMAKE_CURRENT_SOURCE_DIR}/framework/tests/src/drivers/*.c)
     add_library(mbedtls_test OBJECT ${MBEDTLS_TEST_FILES})
     if(GEN_FILES)
         add_custom_command(
             OUTPUT
-                ${CMAKE_CURRENT_SOURCE_DIR}/tests/src/test_keys.h
+                ${CMAKE_CURRENT_SOURCE_DIR}/framework/tests/include/test/test_keys.h
             WORKING_DIRECTORY
                 ${CMAKE_CURRENT_SOURCE_DIR}/tests
             COMMAND
                 "${MBEDTLS_PYTHON_EXECUTABLE}"
                 "${CMAKE_CURRENT_SOURCE_DIR}/framework/scripts/generate_test_keys.py"
                 "--output"
-                "${CMAKE_CURRENT_SOURCE_DIR}/tests/src/test_keys.h"
+                "${CMAKE_CURRENT_SOURCE_DIR}/framework/tests/include/test/test_keys.h"
             DEPENDS
                 ${CMAKE_CURRENT_SOURCE_DIR}/framework/scripts/generate_test_keys.py
         )
-        add_custom_target(test_keys_header DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/tests/src/test_keys.h)
+        add_custom_target(test_keys_header DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/framework/tests/include/test/test_keys.h)
         add_custom_command(
             OUTPUT
                 ${CMAKE_CURRENT_SOURCE_DIR}/tests/src/test_certs.h
@@ -364,6 +384,7 @@ if(ENABLE_TESTING OR ENABLE_PROGRAMS)
         add_dependencies(mbedtls_test test_keys_header test_certs_header)
     endif()
     target_include_directories(mbedtls_test
+        PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/framework/tests/include
         PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests/include
         PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include
         PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/library)
@@ -374,6 +395,7 @@ if(ENABLE_TESTING OR ENABLE_PROGRAMS)
          ${CMAKE_CURRENT_SOURCE_DIR}/tests/src/test_helpers/*.c)
     add_library(mbedtls_test_helpers OBJECT ${MBEDTLS_TEST_HELPER_FILES})
     target_include_directories(mbedtls_test_helpers
+        PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/framework/tests/include
         PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests/include
         PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include
         PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/library
@@ -395,6 +417,9 @@ if(ENABLE_TESTING OR ENABLE_PROGRAMS)
 endif()
 
 if(ENABLE_PROGRAMS)
+    set(ssl_opt_target "${MBEDTLS_TARGET_PREFIX}ssl-opt")
+    add_custom_target(${ssl_opt_target})
+
     add_subdirectory(programs)
 endif()
 
@@ -449,7 +474,7 @@ if(NOT DISABLE_PACKAGE_CONFIG_AND_INSTALL)
     write_basic_package_version_file(
         "cmake/MbedTLSConfigVersion.cmake"
             COMPATIBILITY SameMajorVersion
-            VERSION 3.6.2)
+            VERSION 3.6.3)
 
     install(
         FILES "${CMAKE_CURRENT_BINARY_DIR}/cmake/MbedTLSConfig.cmake"

@@ -3,6 +3,7 @@ local captcha = require "antibot.captcha"
 local cjson = require "cjson"
 local class = require "middleclass"
 local http = require "resty.http"
+local ipmatcher = require "resty.ipmatcher"
 local plugin = require "bunkerweb.plugin"
 local sha256 = require "resty.sha256"
 local str = require "resty.string"
@@ -12,7 +13,9 @@ local ngx = ngx
 local subsystem = ngx.config.subsystem
 local HTTP_INTERNAL_SERVER_ERROR = ngx.HTTP_INTERNAL_SERVER_ERROR
 local OK = ngx.OK
+local ERR = ngx.ERR
 local INFO = ngx.INFO
+local get_phase = ngx.get_phase
 local tonumber = tonumber
 local tostring = tostring
 local get_session = utils.get_session
@@ -24,6 +27,10 @@ local base64_encode = base64.encode
 local to_hex = str.to_hex
 local http_new = http.new
 local decode = cjson.decode
+local get_rdns = utils.get_rdns
+local get_asn = utils.get_asn
+local regex_match = utils.regex_match
+local ipmatcher_new = ipmatcher.new
 
 local template
 local render = nil
@@ -33,10 +40,34 @@ if subsystem == "http" then
 end
 
 local antibot = class("antibot", plugin)
+local CACHE_PREFIX = "plugin_antibot_"
+
+local function get_http_client()
+	local httpc, err = http_new()
+	if not httpc then
+		return nil, "can't instantiate http object: " .. err
+	end
+	return httpc
+end
 
 function antibot:initialize(ctx)
 	-- Call parent initialize
 	plugin.initialize(self, "antibot", ctx)
+	-- Decode lists only once
+	if get_phase() ~= "init" and self.use_antibot ~= "no" then
+		self.lists = {}
+		for _, list in ipairs({ "IGNORE_URI", "IGNORE_IP", "IGNORE_RDNS", "IGNORE_ASN", "IGNORE_USER_AGENT" }) do
+			self.lists[list] = {}
+			local list_var = self.variables["ANTIBOT_" .. list]
+			if list_var then
+				for data in list_var:gmatch("%S+") do
+					if data ~= "" then
+						table.insert(self.lists[list], data)
+					end
+				end
+			end
+		end
+	end
 end
 
 function antibot:header()
@@ -137,6 +168,64 @@ function antibot:access()
 	self.session = session
 	self.session_data = session:get("antibot") or {}
 	self.ctx.bw.antibot_session_data = self.session_data
+
+	-- Check the caches
+	local checks = {
+		["IP"] = "ip" .. self.ctx.bw.remote_addr,
+	}
+	if self.ctx.bw.http_user_agent then
+		checks["UA"] = "ua" .. self.ctx.bw.http_user_agent
+	end
+	if self.ctx.bw.uri then
+		checks["URI"] = "uri" .. self.ctx.bw.uri
+	end
+	local already_cached = {
+		["IP"] = false,
+		["URI"] = false,
+		["UA"] = false,
+	}
+	for k, v in pairs(checks) do
+		local ok, cached = self:is_in_cache(v)
+		if not ok then
+			self.logger:log(ERR, "error while checking cache : " .. cached)
+		elseif cached and cached ~= "ko" then
+			return self:ret(
+				true,
+				k .. " is in cached antibot ignored (info : " .. cached .. ")",
+				nil,
+				self.session_data.original_uri
+			)
+		end
+		if ok and cached then
+			already_cached[k] = true
+		end
+	end
+
+	if self.lists then
+		-- Perform checks
+		for k, _ in pairs(checks) do
+			if not already_cached[k] then
+				local ok, ignored = self:is_ignored(k)
+				if ok == nil then
+					self.logger:log(ERR, "error while checking if " .. k .. " is ignored : " .. ignored)
+				else
+					-- luacheck: ignore 421
+					local ok, err = self:add_to_cache(self:kind_to_ele(k), ignored)
+					if not ok then
+						self.logger:log(ERR, "error while adding element to cache : " .. err)
+					end
+					if ignored ~= "ko" then
+						return self:ret(
+							true,
+							k .. " is ignored (info : " .. ignored .. ")",
+							nil,
+							self.session_data.original_uri
+						)
+					end
+				end
+			end
+		end
+	end
 
 	-- Check if session is valid
 	local msg = self:check_session()
@@ -264,22 +353,31 @@ end
 
 function antibot:prepare_challenge()
 	if not self.session_data.prepared then
-		self.session_data.prepared = true
-		self.session_data.time_resolve = ngx.now()
-		self.session_data.type = self.variables["USE_ANTIBOT"]
-		self.session_data.resolved = false
-		self.session_data.original_uri = self.ctx.bw.request_uri
-		if self.ctx.bw.uri == self.variables["ANTIBOT_URI"] then
-			self.session_data.original_uri = "/"
+		-- Set all session data at once instead of multiple individual assignments
+		local now_time = now()
+		local session_update = {
+			prepared = true,
+			time_resolve = now_time,
+			type = self.variables["USE_ANTIBOT"],
+			resolved = false,
+			original_uri = self.ctx.bw.uri == self.variables["USE_ANTIBOT"] and "/" or self.ctx.bw.request_uri,
+		}
+
+		-- Set type-specific fields
+		if session_update.type == "cookie" then
+			session_update.resolved = true
+			session_update.time_valid = now_time
+		elseif session_update.type == "javascript" then
+			session_update.random = rand(20)
+		elseif session_update.type == "captcha" then
+			session_update.captcha = rand(6, true)
 		end
-		if self.session_data.type == "cookie" then
-			self.session_data.resolved = true
-			self.session_data.time_valid = now()
-		elseif self.session_data.type == "javascript" then
-			self.session_data.random = rand(20)
-		elseif self.session_data.type == "captcha" then
-			self.session_data.captcha = rand(6, true)
+
+		-- Update session data with all changes at once
+		for k, v in pairs(session_update) do
+			self.session_data[k] = v
 		end
+
 		self:set_session_data()
 	end
 end
@@ -394,9 +492,9 @@ function antibot:check_challenge()
 		if err == "truncated" or not args or not args["token"] then
 			return nil, "missing challenge arg", nil
 		end
-		local httpc, err = http_new()
+		local httpc, err = get_http_client()
 		if not httpc then
-			return nil, "can't instantiate http object : " .. err, nil, nil
+			return nil, err, nil, nil
 		end
 		local res, err = httpc:request_uri("https://www.google.com/recaptcha/api/siteverify", {
 			method = "POST",
@@ -437,9 +535,9 @@ function antibot:check_challenge()
 		if err == "truncated" or not args or not args["token"] then
 			return nil, "missing challenge arg", nil
 		end
-		local httpc, err = http_new()
+		local httpc, err = get_http_client()
 		if not httpc then
-			return nil, "can't instantiate http object : " .. err, nil, nil
+			return nil, err, nil, nil
 		end
 		local res, err = httpc:request_uri("https://hcaptcha.com/siteverify", {
 			method = "POST",
@@ -477,9 +575,9 @@ function antibot:check_challenge()
 		if err == "truncated" or not args or not args["token"] then
 			return nil, "missing challenge arg", nil
 		end
-		local httpc, err = http_new()
+		local httpc, err = get_http_client()
 		if not httpc then
-			return nil, "can't instantiate http object : " .. err, nil, nil
+			return nil, err, nil, nil
 		end
 		local res, err = httpc:request_uri("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
 			method = "POST",
@@ -517,9 +615,9 @@ function antibot:check_challenge()
 		if err == "truncated" or not args or not args["mcaptcha__token"] then
 			return nil, "missing challenge arg", nil
 		end
-		local httpc, err = http_new()
+		local httpc, err = get_http_client()
 		if not httpc then
-			return nil, "can't instantiate http object : " .. err, nil, nil
+			return nil, err, nil, nil
 		end
 		local payload = {
 			token = args["mcaptcha__token"],
@@ -552,6 +650,127 @@ function antibot:check_challenge()
 	end
 
 	return nil, "unknown", nil
+end
+
+function antibot:kind_to_ele(kind)
+	if kind == "IP" then
+		return "ip" .. self.ctx.bw.remote_addr
+	elseif kind == "UA" then
+		return "ua" .. self.ctx.bw.http_user_agent
+	elseif kind == "URI" then
+		return "uri" .. self.ctx.bw.uri
+	end
+end
+
+function antibot:is_in_cache(ele)
+	local cache_key = CACHE_PREFIX .. self.ctx.bw.server_name .. ele
+	local ok, data = self.cachestore_local:get(cache_key)
+	if not ok then
+		return false, data
+	end
+	return true, data
+end
+
+function antibot:add_to_cache(ele, value)
+	local cache_key = CACHE_PREFIX .. self.ctx.bw.server_name .. ele
+	local ok, err = self.cachestore_local:set(cache_key, value, 86400)
+	if not ok then
+		return false, err
+	end
+	return true
+end
+
+function antibot:is_ignored(kind)
+	if kind == "IP" then
+		return self:is_ignored_ip()
+	elseif kind == "URI" then
+		return self:is_ignored_uri()
+	elseif kind == "UA" then
+		return self:is_ignored_ua()
+	end
+	return false, "unknown kind " .. kind
+end
+
+function antibot:is_ignored_ip()
+	-- Use a pre-compiled IP matcher during initialization
+	if not self.ip_matcher then
+		local ipm, err = ipmatcher_new(self.lists["IGNORE_IP"])
+		if not ipm then
+			return nil, err
+		end
+		self.ip_matcher = ipm
+	end
+
+	-- Fast path check
+	local match, err = self.ip_matcher:match(self.ctx.bw.remote_addr)
+	if err then
+		return nil, err
+	end
+	if match then
+		return true, "ip"
+	end
+
+	-- Check if rDNS is needed
+	local check_rdns = true
+	if self.variables["ANTIBOT_RDNS_GLOBAL"] == "yes" and not self.ctx.bw.ip_is_global then
+		check_rdns = false
+	end
+	if check_rdns then
+		-- Get rDNS
+		-- luacheck: ignore 421
+		local rdns_list, err = get_rdns(self.ctx.bw.remote_addr, self.ctx, true)
+		if rdns_list then
+			-- Check if rDNS is in ignore list
+			for _, rdns in ipairs(rdns_list) do
+				for _, suffix in ipairs(self.lists["IGNORE_RDNS"]) do
+					if rdns:sub(-#suffix) == suffix then
+						return true, "rDNS " .. suffix
+					end
+				end
+			end
+		else
+			self.logger:log(ERR, "error while getting rdns : " .. err)
+		end
+	end
+
+	-- Check if ASN is in ignore list
+	if self.ctx.bw.ip_is_global then
+		local asn, err = get_asn(self.ctx.bw.remote_addr)
+		if not asn then
+			self.logger:log(ngx.ERR, "can't get ASN of IP " .. self.ctx.bw.remote_addr .. " : " .. err)
+		else
+			for _, ignore_asn in ipairs(self.lists["IGNORE_ASN"]) do
+				if ignore_asn == tostring(asn) then
+					return true, "ASN " .. ignore_asn
+				end
+			end
+		end
+	end
+
+	-- Not ignored
+	return false, "ko"
+end
+
+function antibot:is_ignored_uri()
+	-- Check if URI is in ignore list
+	for _, ignore_uri in ipairs(self.lists["IGNORE_URI"]) do
+		if regex_match(self.ctx.bw.uri, ignore_uri) then
+			return true, "URI " .. ignore_uri
+		end
+	end
+	-- URI is not ignored
+	return false, "ko"
+end
+
+function antibot:is_ignored_ua()
+	-- Check if UA is in ignore list
+	for _, ignore_ua in ipairs(self.lists["IGNORE_USER_AGENT"]) do
+		if regex_match(self.ctx.bw.http_user_agent, ignore_ua) then
+			return true, "UA " .. ignore_ua
+		end
+	end
+	-- UA is not ignored
+	return false, "ko"
 end
 
 return antibot

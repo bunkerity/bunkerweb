@@ -6,6 +6,7 @@ from signal import SIGINT, SIGTERM, signal
 from subprocess import PIPE, Popen, call
 from sys import path as sys_path
 
+
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("api",), ("db",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
@@ -13,6 +14,8 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 from flask import Flask, render_template, request
 
 from logger import setup_logger  # type: ignore
+
+from app.models.reverse_proxied import ReverseProxied
 
 LOGGER = setup_logger("TMP-UI", getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")))
 
@@ -43,7 +46,12 @@ signal(SIGTERM, handle_stop)
 app = Flask(__name__, static_url_path="/", static_folder="app/static", template_folder="app/templates")
 app.url_map.strict_slashes = False
 
-app.config["SCRIPT_NONCE"] = ""
+with app.app_context():
+    PROXY_NUMBERS = int(getenv("PROXY_NUMBERS", "1"))
+    app.wsgi_app = ReverseProxied(app.wsgi_app, x_for=PROXY_NUMBERS, x_proto=PROXY_NUMBERS, x_host=PROXY_NUMBERS, x_prefix=PROXY_NUMBERS)
+
+    app.config["ENV"] = {}
+    app.config["SCRIPT_NONCE"] = ""
 
 
 @app.before_request
