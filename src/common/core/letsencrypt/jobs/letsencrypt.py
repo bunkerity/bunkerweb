@@ -184,7 +184,7 @@ class IonosProvider(Provider):
 
     _validate_aliases = alias_model_validator(
         {
-            "dns_ionos_prefix": ("dns_ionos_prefix", "ionos_prefix", "ionos_prefix"),
+            "dns_ionos_prefix": ("dns_ionos_prefix", "ionos_prefix", "prefix"),
             "dns_ionos_secret": ("dns_ionos_secret", "ionos_secret", "secret"),
             "dns_ionos_endpoint": ("dns_ionos_endpoint", "ionos_endpoint", "endpoint"),
         }
