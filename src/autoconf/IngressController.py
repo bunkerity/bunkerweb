@@ -342,6 +342,13 @@ class IngressController(Controller):
                     self._logger.info(f"Starting Kubernetes watch for {watch_type}, attempt {attempt + 1}/{retries}")
                 ignored = False
                 yield from watch.Watch().stream(what)
+            except ApiException as e:
+                if e.status == 410 and "Expired: too old resource version: " in e.reason:
+                    self._logger.debug(f"{e.reason} while watching {watch_type}, resetting watch stream")
+                    ignored = True
+                    continue
+                self._logger.debug(format_exc())
+                self._logger.error(f"Unexpected ApiException while watching {watch_type}:\n{e}")
             except Exception as e:
                 self._logger.debug(format_exc())
                 self._logger.error(f"Unexpected error while watching {watch_type}:\n{e}")
