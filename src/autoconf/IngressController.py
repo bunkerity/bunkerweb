@@ -10,7 +10,6 @@ from threading import Thread, Lock
 from kubernetes import client, config, watch
 from kubernetes.client import Configuration
 from kubernetes.client.exceptions import ApiException
-from urllib3.exceptions import ProtocolError
 
 from Controller import Controller
 
