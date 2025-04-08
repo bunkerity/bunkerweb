@@ -27,7 +27,9 @@ packaging==24.2 \
 pip==25.0.1 \
     --hash=sha256:88f96547ea48b940a3a385494e181e29fb8637898f88d88737c5049780f196ea \
     --hash=sha256:c46efd13b6aa8279f33f2864459c8ce587ea6a1a59ee20de055868d8f7688f7f
-    # via build
+    # via
+    #   build
+    #   wheel
 pip-tools==7.4.1 \
     --hash=sha256:4c690e5fbae2f21e87843e89c26191f0d9454f362d8acdbd695716493ec8b3a9 \
     --hash=sha256:864826f5073864450e24dbeeb85ce3920cdfb09848a3d69ebf537b521f14bcc9
@@ -84,9 +86,9 @@ urllib3==2.3.0 \
     --hash=sha256:1cee9ad369867bfdbbb48b7dd50374c0967a0bb7710050facf0dd6911440e3df \
     --hash=sha256:f8c5449b3cf0861679ce7e0503c7b44b5ec981bec0d1d3795a07f1ba96f0204d
     # via -r requirements.in
-wheel==0.45.1 \
-    --hash=sha256:661e1abd9198507b1409a20c02106d9670b2576e916d58f520316666abca6729 \
-    --hash=sha256:708e7481cc80179af0e556bbf0cc00b8444c7321e2700b8d8580231d13017248
+wheel==0.46.0 \
+    --hash=sha256:8c1909305dc5a40979693cece1ec872eed10cc49af2038201213461b0688b7b4 \
+    --hash=sha256:bd9fadc35ff6a3624bdd00bc78437bcded40e2edc1fbb29076308de503fe9a4b
     # via
     #   -r requirements.in
     #   pip-tools

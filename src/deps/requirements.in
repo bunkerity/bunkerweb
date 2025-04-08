@@ -3,4 +3,4 @@ pip==25.0.1
 pip-tools==7.4.1
 setuptools==78.1.0
 urllib3>2.0.0
-wheel==0.45.1
+wheel==0.46.0

@@ -343,9 +343,9 @@ mkdocs-get-deps==0.2.0 \
     --hash=sha256:162b3d129c7fad9b19abfdcb9c1458a651628e4b1dea628ac68790fb3061c60c \
     --hash=sha256:2bf11d0b133e77a0dd036abeeb06dec8775e46efa526dc70667d8863eefc6134
     # via mkdocs
-mkdocs-material==9.6.9 \
-    --hash=sha256:6e61b7fb623ce2aa4622056592b155a9eea56ff3487d0835075360be45a4c8d1 \
-    --hash=sha256:a4872139715a1f27b2aa3f3dc31a9794b7bbf36333c0ba4607cf04786c94f89c
+mkdocs-material==9.6.11 \
+    --hash=sha256:0b7f4a0145c5074cdd692e4362d232fb25ef5b23328d0ec1ab287af77cc0deff \
+    --hash=sha256:47f21ef9cbf4f0ebdce78a2ceecaa5d413581a55141e4464902224ebbc0b1263
     # via
     #   -r requirements.in
     #   mkdocs-print-site-plugin
@@ -353,9 +353,9 @@ mkdocs-material-extensions==1.3.1 \
     --hash=sha256:10c9511cea88f568257f960358a467d12b970e1f7b2c0e5fb2bb48cab1928443 \
     --hash=sha256:adff8b62700b25cb77b53358dad940f3ef973dd6db797907c49e3c2ef3ab4e31
     # via mkdocs-material
-mkdocs-print-site-plugin==2.7.1 \
-    --hash=sha256:7b8cc34b02d5a5179821bba9cac71e041b904df179efb3b45fafdd2162793e34 \
-    --hash=sha256:f991afa9a2dc81ee5b9c0e80889d8aef5afd24dabfbc86b02d30cb2bf62e007c
+mkdocs-print-site-plugin==2.7.2 \
+    --hash=sha256:7de6ae4a8195994eb08629aed42f5ffbf892139ba01bed57bbce058f90287d77 \
+    --hash=sha256:f70138607a9a3a9549ddcf6bae1582c82cee177735a8b744e4794180cdb432e7
     # via -r requirements.in
 packaging==24.2 \
     --hash=sha256:09abb1bccd265c01f4a3aa3f7a7db064b36514d2cba19a2f694fe6150451a759 \

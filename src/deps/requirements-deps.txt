@@ -141,6 +141,7 @@ pip==25.0.1 \
     # via
     #   build
     #   pip-upgrader
+    #   wheel
 pip-compile-multi==2.8.0 \
     --hash=sha256:17159e83c2e354358921ee34e6b750223ae76aef2beb301286b68a4886076f63 \
     --hash=sha256:59bb8bea7291b9dec95cb3e380f0f77a936b2e98d64cf9346c0c4ca0012fb6a2
@@ -222,9 +223,9 @@ urllib3==1.26.20 \
     # via
     #   -r requirements-deps.in
     #   requests
-wheel==0.45.1 \
-    --hash=sha256:661e1abd9198507b1409a20c02106d9670b2576e916d58f520316666abca6729 \
-    --hash=sha256:708e7481cc80179af0e556bbf0cc00b8444c7321e2700b8d8580231d13017248
+wheel==0.46.0 \
+    --hash=sha256:8c1909305dc5a40979693cece1ec872eed10cc49af2038201213461b0688b7b4 \
+    --hash=sha256:bd9fadc35ff6a3624bdd00bc78437bcded40e2edc1fbb29076308de503fe9a4b
     # via
     #   -r requirements-deps.in
     #   pip-tools
