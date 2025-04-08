@@ -106,6 +106,16 @@
       "label": "Clear old certificates when they are no longer needed",
       "regex": "^(yes|no)$",
       "type": "check"
+    },
+    "LETS_ENCRYPT_PROFILE": {
+      "context": "multisite",
+      "default": "classic",
+      "help": "Select the certificate profile to use with Let's Encrypt. 'classic' is a general-purpose certificate with 90-day lifetime and broad compatibility. 'tlsserver' is optimized for TLS server authentication with 90-day lifetime and smaller payload. 'shortlived' offers 7-day certificates for enhanced security in automated environments.",
+      "id": "lets-encrypt-profile",
+      "label": "Certificate Profile",
+      "regex": "^(classic|tlsserver|shortlived)$",
+      "type": "select",
+      "select": ["classic", "tlsserver", "shortlived"]
     }
   },
   "jobs": [

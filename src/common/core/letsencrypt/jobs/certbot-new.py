@@ -66,6 +66,7 @@ def certbot_new(
     provider: str = None,
     credentials_path: Union[str, Path] = None,
     propagation: str = "default",
+    profile: str = "classic",
     staging: bool = False,
     force: bool = False,
     cmd_env: Dict[str, str] = None,
@@ -90,6 +91,7 @@ def certbot_new(
         email,
         "--agree-tos",
         "--expand",
+        f"--preferred-profile={profile}",
     ]
 
     if not cmd_env:
@@ -381,6 +383,7 @@ try:
             "use_wildcard": getenv(f"{first_server}_USE_LETS_ENCRYPT_WILDCARD", getenv("USE_LETS_ENCRYPT_WILDCARD", "no")) == "yes",
             "provider": getenv(f"{first_server}_LETS_ENCRYPT_DNS_PROVIDER", getenv("LETS_ENCRYPT_DNS_PROVIDER", "")),
             "propagation": getenv(f"{first_server}_LETS_ENCRYPT_DNS_PROPAGATION", getenv("LETS_ENCRYPT_DNS_PROPAGATION", "default")),
+            "profile": getenv(f"{first_server}_LETS_ENCRYPT_PROFILE", getenv("LETS_ENCRYPT_PROFILE", "classic")),
             "credential_items": {},
         }
 

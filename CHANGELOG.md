@@ -3,6 +3,7 @@
 ## v1.6.2-rc2 - ????/??/??
 
 - [DEPS] Update coreruleset-v4 version to v4.13.0
+- [FEATURE] Add the possibility to choose a profile when generating certificates with Let's Encrypt using the `LETS_ENCRYPT_PROFILE` setting (`classic` (default), `tlsserver` for server-only validation, and `shortlived` for reduced 7-day validity) to provide flexibility in certificate configuration based on security requirements
 
 ## v1.6.2-rc1 - 2025/03/29
 
