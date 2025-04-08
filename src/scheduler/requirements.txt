@@ -4,9 +4,9 @@
 #
 #    pip-compile --allow-unsafe --generate-hashes --strip-extras requirements.in
 #
-acme==3.3.0 \
-    --hash=sha256:8e049964eafd89ebbf42ab8e3340222c6332a3cf62ceb2e30325b934d33b57b7 \
-    --hash=sha256:c026edc0db13a36fb80d802d2e0256525b52272543beca3b8ddf2264bd8ef1f8
+acme==4.0.0 \
+    --hash=sha256:972d6e0b160000ae833aaa9619901896336e5dc7ca82003fa6ff465bafcbdf52 \
+    --hash=sha256:a3f595166108a5df537b4609ff783b33dbdc8f5d385f82412311c9e84f23dc59
     # via
     #   certbot
     #   certbot-dns-cloudflare
@@ -49,9 +49,9 @@ cachetools==5.5.2 \
     --hash=sha256:1a661caa9175d26759571b2e19580f9d6393969e5dfca11fdb1f947a23e640d4 \
     --hash=sha256:d26a22bcc62eb95c3beabd9f1ee5e820d3d2704fe2967cbe350e20c8ffcd3f0a
     # via google-auth
-certbot==3.3.0 \
-    --hash=sha256:38c5cdf6e34f6a7976837a607d96151fa1ea4870f25c6cef74fd18702603d512 \
-    --hash=sha256:40482fde0dd36b08e811d847df40ed04b6a3da52979c55456384a96807801d07
+certbot==4.0.0 \
+    --hash=sha256:66435e76d602be2826f4e7060c35b9f2a62727e43818f3c8c9f85c3bca6a5aeb \
+    --hash=sha256:a867bfbb5126516c12d4c8a93909ef1e4d5309fc4e9f5b97b2d987b0ffd4bbe3
     # via
     #   -r requirements.in
     #   certbot-dns-cloudflare
@@ -431,9 +431,9 @@ jmespath==1.0.1 \
     # via
     #   boto3
     #   botocore
-josepy==1.15.0 \
-    --hash=sha256:46c9b13d1a5104ffbfa5853e555805c915dcde71c2cd91ce5386e84211281223 \
-    --hash=sha256:878c08cedd0a892c98c6d1a90b3cb869736f9c751f68ec8901e7b05a0c040fed
+josepy==2.0.0 \
+    --hash=sha256:e7d7acd2fe77435cda76092abe4950bb47b597243a8fb733088615fa6de9ec40 \
+    --hash=sha256:eb50ec564b1b186b860c7738769274b97b19b5b831239669c0f3d5c86b62a4c0
     # via
     #   acme
     #   certbot
@@ -674,9 +674,7 @@ pydantic-core==2.33.0 \
 pyopenssl==25.0.0 \
     --hash=sha256:424c247065e46e76a37411b9ab1782541c23bb658bf003772c3405fbaa128e90 \
     --hash=sha256:cd2cef799efa3936bb08e8ccb9433a575722b9dd986023f1cabc4ae64e9dac16
-    # via
-    #   acme
-    #   josepy
+    # via acme
 pyotp==2.9.0 \
     --hash=sha256:346b6642e0dbdde3b4ff5a930b664ca82abfa116356ed48cc42c7d6590d36f63 \
     --hash=sha256:81c2e5865b8ac55e825b0358e496e1d9387c811e85bb40e71a3b29b288963612
@@ -803,12 +801,6 @@ s3transfer==0.11.4 \
 schedule==1.2.2 \
     --hash=sha256:15fe9c75fe5fd9b9627f3f19cc0ef1420508f9f9a46f45cd0769ef75ede5f0b7 \
     --hash=sha256:5bef4a2a0183abf44046ae0d164cadcac21b1db011bdd8102e4a0c1e91e06a7d
-    # via importlib-metadata
-
-# The following packages are considered to be unsafe in a requirements file:
-setuptools==78.1.0 \
-    --hash=sha256:18fd474d4a82a5f83dac888df697af65afa82dec7323d09c3e37d1f14288da54 \
-    --hash=sha256:3e386e96793c8702ae83d17b853fb93d3e09ef82ec62722e61da5cd22376dcd8
     # via -r requirements.in
 six==1.17.0 \
     --hash=sha256:4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274 \
@@ -849,6 +841,12 @@ urllib3==1.26.20 \
 zipp==3.21.0 \
     --hash=sha256:2c9958f6430a2040341a52eb608ed6dd93ef4392e02ffe219417c1b28b5dd1f4 \
     --hash=sha256:ac1bbe05fd2991f160ebce24ffbac5f6d11d83dc90891255885223d42b3cd931
+    # via importlib-metadata
+
+# The following packages are considered to be unsafe in a requirements file:
+setuptools==78.1.0 \
+    --hash=sha256:18fd474d4a82a5f83dac888df697af65afa82dec7323d09c3e37d1f14288da54 \
+    --hash=sha256:3e386e96793c8702ae83d17b853fb93d3e09ef82ec62722e61da5cd22376dcd8
     # via
     #   certbot-dns-desec
     #   certbot-dns-infomaniak
