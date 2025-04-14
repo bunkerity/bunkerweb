@@ -15,46 +15,25 @@ from threading import Thread
 from time import time
 from traceback import format_exc
 
-from jinja2 import ChoiceLoader, FileSystemLoader
-
-
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("api",), ("db",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
 from cachelib import FileSystemCache
 from flask import Blueprint, Flask, Response, flash as flask_flash, jsonify, make_response, redirect, render_template, request, session, url_for
-from flask_login import current_user, LoginManager, login_required, logout_user
-from flask_principal import ActionNeed, identity_loaded, Permission, Principal, RoleNeed, TypeNeed, UserNeed
+from flask_login import current_user, LoginManager, login_required
 from flask_session import Session
 from flask_wtf.csrf import CSRFProtect, CSRFError
+from jinja2 import ChoiceLoader, FileSystemLoader
 from werkzeug.routing.exceptions import BuildError
 
+from app.models.biscuit import BiscuitMiddleware
 from app.models.reverse_proxied import ReverseProxied
-
-from app.routes.about import about
-from app.routes.bans import bans
-from app.routes.cache import cache
-from app.routes.configs import configs
-from app.routes.global_config import global_config
-from app.routes.home import home
-from app.routes.instances import instances
-from app.routes.jobs import jobs
-from app.routes.login import login
-from app.routes.logout import logout, logout_page
-from app.routes.logs import logs
-from app.routes.plugins import plugins
-from app.routes.pro import pro
-from app.routes.profile import profile
-from app.routes.reports import reports
-from app.routes.services import services
-from app.routes.setup import setup
-from app.routes.totp import totp
-from app.routes.support import support
 
 from app.dependencies import BW_CONFIG, DATA, DB, EXTERNAL_PLUGINS_PATH, PRO_PLUGINS_PATH, safe_reload_plugins
 from app.models.models import AnonymousUser
 from app.utils import (
+    BISCUIT_PUBLIC_KEY_FILE,
     COLUMNS_PREFERENCES_DEFAULTS,
     LIB_DIR,
     LOGGER,
@@ -89,28 +68,6 @@ HOOKS = {
         "log_prefix": "Context-processor",
     },
 }
-
-BLUEPRINTS = (
-    about,
-    services,
-    profile,
-    jobs,
-    reports,
-    totp,
-    home,
-    logout,
-    instances,
-    plugins,
-    global_config,
-    pro,
-    cache,
-    logs,
-    login,
-    configs,
-    bans,
-    setup,
-    support,
-)
 
 
 class DynamicFlask(Flask):
@@ -197,6 +154,8 @@ with app.app_context():
         stop(1)
     FLASK_SECRET = LIB_DIR.joinpath(".flask_secret").read_text(encoding="utf-8").strip()
 
+    app.config["BISCUIT_PUBLIC_KEY_PATH"] = BISCUIT_PUBLIC_KEY_FILE.as_posix()
+
     app.config["ENV"] = {}
 
     app.config["CHECK_PRIVATE_IP"] = getenv("CHECK_PRIVATE_IP", "yes").lower() == "yes"
@@ -221,13 +180,7 @@ with app.app_context():
     sess = Session()
     sess.init_app(app)
 
-    principal = Principal()
-    principal.init_app(app)
-
-    admin_permission = Permission(TypeNeed("super_admin"))
-    manage_permission = Permission(TypeNeed("super_admin"), ActionNeed("manage"))
-    edit_permission = Permission(TypeNeed("super_admin"), ActionNeed("manage"), ActionNeed("write"))
-    read_permission = Permission(TypeNeed("super_admin"), ActionNeed("manage"), ActionNeed("write"), ActionNeed("read"))
+    biscuit = BiscuitMiddleware(app)
 
     login_manager = LoginManager()
     login_manager.session_protection = "strong"
@@ -318,24 +271,6 @@ def load_user(username):
     return ui_user
 
 
-@identity_loaded.connect_via(app)
-def on_identity_loaded(sender, identity):
-    # Set the identity user object
-    identity.user = current_user
-
-    # Add the UserNeed to the identity
-    identity.provides.add(UserNeed(current_user.get_id()))
-
-    for role in current_user.list_roles:
-        identity.provides.add(RoleNeed(role))
-
-    for action in current_user.list_permissions:
-        identity.provides.add(ActionNeed(action))
-
-    if current_user.admin:
-        identity.provides.add(TypeNeed("super_admin"))
-
-
 @app.errorhandler(CSRFError)
 def handle_csrf_error(_):
     """
@@ -346,12 +281,9 @@ def handle_csrf_error(_):
     """
     LOGGER.debug(format_exc())
     LOGGER.error(f"CSRF token is missing or invalid for {request.path} by {current_user.get_id()}")
-    session.clear()
-    logout_user()
-    flask_flash("Wrong CSRF token !", "error")
     if not current_user:
         return redirect(url_for("setup.setup_page")), 403
-    return redirect(url_for("login.login_page")), 403
+    return logout_page(), 403
 
 
 def update_latest_stable_release():
@@ -734,7 +666,7 @@ def before_request():
                 passed = False
 
             if not passed:
-                return logout_page()
+                return logout_page(), 403
 
     current_endpoint = request.path.split("/")[-1]
     if request.path.startswith(("/check", "/setup", "/loading", "/login", "/totp")):
@@ -1003,6 +935,48 @@ def set_columns_preferences():
 
     return Response(status=200, response=dumps({"message": "ok"}), content_type="application/json")
 
+
+from app.routes.about import about
+from app.routes.bans import bans
+from app.routes.cache import cache
+from app.routes.configs import configs
+from app.routes.global_config import global_config
+from app.routes.home import home
+from app.routes.instances import instances
+from app.routes.jobs import jobs
+from app.routes.login import login
+from app.routes.logout import logout, logout_page
+from app.routes.logs import logs
+from app.routes.plugins import plugins
+from app.routes.pro import pro
+from app.routes.profile import profile
+from app.routes.reports import reports
+from app.routes.services import services
+from app.routes.setup import setup
+from app.routes.totp import totp
+from app.routes.support import support
+
+BLUEPRINTS = (
+    about,
+    services,
+    profile,
+    jobs,
+    reports,
+    totp,
+    home,
+    logout,
+    instances,
+    plugins,
+    global_config,
+    pro,
+    cache,
+    logs,
+    login,
+    configs,
+    bans,
+    setup,
+    support,
+)
 
 for blueprint in BLUEPRINTS:
     app.register_blueprint(blueprint)

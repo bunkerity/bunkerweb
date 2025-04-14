@@ -5,7 +5,8 @@ from flask import Blueprint, current_app, flash as flask_flash, redirect, render
 from flask_login import current_user, login_user
 
 from app.dependencies import DB
-from app.utils import LOGGER, flash
+from app.utils import BISCUIT_PRIVATE_KEY_FILE, LOGGER, flash
+from app.models.biscuit import BiscuitTokenFactory, PrivateKey
 
 login = Blueprint("login", __name__)
 
@@ -51,6 +52,18 @@ def login_page():
             if not login_user(ui_user, remember=remember_me):
                 flask_flash("Couldn't log you in, please try again", "error")
                 return (render_template("login.html", error="Couldn't log you in, please try again"),)
+
+            # Generate and add Biscuit token to session
+            try:
+                if BISCUIT_PRIVATE_KEY_FILE.exists():
+                    private_key = PrivateKey.from_hex(BISCUIT_PRIVATE_KEY_FILE.read_text().strip())
+                    token_factory = BiscuitTokenFactory(private_key)
+                    role = "super_admin" if ui_user.admin else [role.role_name for role in ui_user.roles][0]  # For now we shall only have one role per user
+                    session["biscuit_token"] = token_factory.create_token_for_role(role, ui_user.username).to_base64()
+                else:
+                    LOGGER.warning("BISCUIT_PRIVATE_KEY_PATH not configured, skipping Biscuit token generation")
+            except Exception as e:
+                LOGGER.error(f"Failed to create Biscuit token: {e}")
 
             ret = DB.update_ui_user(
                 **{

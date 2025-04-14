@@ -15,12 +15,13 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
+from biscuit_auth import KeyPair, PublicKey, PrivateKey
 from passlib.totp import generate_secret
 
 from logger import setup_logger  # type: ignore
 
 from app.models.ui_database import UIDatabase
-from app.utils import USER_PASSWORD_RX, check_password, gen_password_hash, get_latest_stable_release
+from app.utils import BISCUIT_PRIVATE_KEY_FILE, BISCUIT_PUBLIC_KEY_FILE, USER_PASSWORD_RX, check_password, gen_password_hash, get_latest_stable_release
 
 TMP_DIR = Path(sep, "var", "tmp", "bunkerweb")
 TMP_UI_DIR = TMP_DIR.joinpath("ui")
@@ -40,6 +41,8 @@ FLASK_SECRET_FILE = LIB_DIR.joinpath(".flask_secret")
 FLASK_SECRET_HASH_FILE = FLASK_SECRET_FILE.with_suffix(".hash")  # File to store hash of Flask secret
 TOTP_SECRETS_FILE = LIB_DIR.joinpath(".totp_secrets.json")
 TOTP_HASH_FILE = TOTP_SECRETS_FILE.with_suffix(".hash")  # File to store hash of TOTP secrets
+BISCUIT_PUBLIC_KEY_HASH_FILE = BISCUIT_PUBLIC_KEY_FILE.with_suffix(".hash")  # File to store hash of Biscuit public key
+BISCUIT_PRIVATE_KEY_HASH_FILE = BISCUIT_PRIVATE_KEY_FILE.with_suffix(".hash")  # File to store hash of Biscuit private key
 
 MAX_WORKERS = int(getenv("MAX_WORKERS", max((cpu_count() or 1) - 1, 1)))
 LOG_LEVEL = getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "info"))
@@ -223,6 +226,112 @@ def on_starting(server):
         LOGGER.info("TOTP environment hash securely stored for change detection.")
     except Exception as e:
         message = f"An error occurred while handling TOTP secrets: {e}"
+        LOGGER.debug(format_exc())
+        LOGGER.critical(message)
+        ERROR_FILE.write_text(message, encoding="utf-8")
+        exit(1)
+
+    # * Handle Biscuit keys
+    try:
+        biscuit_public_key_hex = None
+        biscuit_private_key_hex = None
+        keys_loaded = False
+        keys_generated = False
+
+        # * Step 1: Load Biscuit keys from files and validate
+        if BISCUIT_PUBLIC_KEY_FILE.is_file() and BISCUIT_PRIVATE_KEY_FILE.is_file():
+            try:
+                pub_hex = BISCUIT_PUBLIC_KEY_FILE.read_text(encoding="utf-8").strip()
+                priv_hex = BISCUIT_PRIVATE_KEY_FILE.read_text(encoding="utf-8").strip()
+                if not pub_hex or not priv_hex:
+                    raise ValueError("One or both Biscuit key files are empty.")
+
+                # Validate by attempting to load
+                PublicKey.from_hex(pub_hex)
+                PrivateKey.from_hex(priv_hex)
+                biscuit_public_key_hex = pub_hex
+                biscuit_private_key_hex = priv_hex
+                keys_loaded = True
+                LOGGER.info("Valid Biscuit keys successfully loaded from files.")
+            except Exception as e:
+                LOGGER.error(f"Failed to load or validate Biscuit keys from files: {e}. Falling back.")
+                biscuit_public_key_hex = None  # Ensure reset if loading failed
+                biscuit_private_key_hex = None
+
+        # * Step 2: Check environment variables if no valid files loaded
+        if not keys_loaded:
+            pub_hex_env = getenv("BISCUIT_PUBLIC_KEY", "").strip()
+            priv_hex_env = getenv("BISCUIT_PRIVATE_KEY", "").strip()
+            if pub_hex_env and priv_hex_env:
+                try:
+                    # Validate by attempting to load
+                    PublicKey.from_hex(pub_hex_env)
+                    PrivateKey.from_hex(priv_hex_env)
+                    biscuit_public_key_hex = pub_hex_env
+                    biscuit_private_key_hex = priv_hex_env
+                    keys_loaded = True
+                    LOGGER.info("Valid Biscuit keys successfully loaded from environment variables.")
+                except Exception as e:
+                    LOGGER.error(f"Failed to validate Biscuit keys from environment variables: {e}. Falling back.")
+                    biscuit_public_key_hex = None  # Ensure reset if env validation failed
+                    biscuit_private_key_hex = None
+
+        # * Step 3: Generate new keys if none found or loaded/validated successfully
+        if not keys_loaded:
+            LOGGER.warning("No valid Biscuit keys found from files or environment. Generating new random keys...")
+            # Generate new keys using the biscuit library
+            keypair = KeyPair()
+            biscuit_private_key_obj = keypair.private_key
+            biscuit_public_key_obj = keypair.public_key
+            biscuit_private_key_hex = biscuit_private_key_obj.to_hex()
+            biscuit_public_key_hex = biscuit_public_key_obj.to_hex()
+            keys_generated = True
+            LOGGER.info("Generated new Biscuit key pair.")
+
+        # Ensure we have keys before proceeding
+        if not biscuit_public_key_hex or not biscuit_private_key_hex:
+            raise RuntimeError("Failed to load or generate required Biscuit keys.")
+
+        # * Step 4: Hash for change detection
+        current_public_key_hash = sha256(biscuit_public_key_hex.encode("utf-8")).hexdigest()
+        current_private_key_hash = sha256(biscuit_private_key_hex.encode("utf-8")).hexdigest()
+        previous_public_key_hash = BISCUIT_PUBLIC_KEY_HASH_FILE.read_text(encoding="utf-8").strip() if BISCUIT_PUBLIC_KEY_HASH_FILE.is_file() else None
+        previous_private_key_hash = BISCUIT_PRIVATE_KEY_HASH_FILE.read_text(encoding="utf-8").strip() if BISCUIT_PRIVATE_KEY_HASH_FILE.is_file() else None
+
+        # * Step 5: Compare hashes and update if necessary
+        public_key_changed = previous_public_key_hash is None or current_public_key_hash != previous_public_key_hash
+        private_key_changed = previous_private_key_hash is None or current_private_key_hash != previous_private_key_hash
+
+        if public_key_changed or private_key_changed or keys_generated:
+            if keys_generated:
+                LOGGER.warning("Saving newly generated Biscuit keys.")
+            else:
+                LOGGER.warning("The Biscuit keys have changed or are being set for the first time.")
+
+            # Update public key file and hash
+            with BISCUIT_PUBLIC_KEY_FILE.open("w", encoding="utf-8") as file:
+                file.write(biscuit_public_key_hex)
+            set_secure_permissions(BISCUIT_PUBLIC_KEY_FILE)
+
+            with BISCUIT_PUBLIC_KEY_HASH_FILE.open("w", encoding="utf-8") as file:
+                file.write(current_public_key_hash)
+            set_secure_permissions(BISCUIT_PUBLIC_KEY_HASH_FILE)
+
+            # Update private key file and hash
+            with BISCUIT_PRIVATE_KEY_FILE.open("w", encoding="utf-8") as file:
+                file.write(biscuit_private_key_hex)
+            set_secure_permissions(BISCUIT_PRIVATE_KEY_FILE)
+
+            with BISCUIT_PRIVATE_KEY_HASH_FILE.open("w", encoding="utf-8") as file:
+                file.write(current_private_key_hash)
+            set_secure_permissions(BISCUIT_PRIVATE_KEY_HASH_FILE)
+        else:
+            LOGGER.info("The Biscuit keys have not changed since the last restart.")
+
+        LOGGER.info("Biscuit keys securely stored.")
+        LOGGER.info("Biscuit key hashes securely stored for change detection.")
+    except Exception as e:
+        message = f"An error occurred while handling Biscuit keys: {e}"
         LOGGER.debug(format_exc())
         LOGGER.critical(message)
         ERROR_FILE.write_text(message, encoding="utf-8")

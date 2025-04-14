@@ -15,7 +15,7 @@ from uuid import uuid4
 from zipfile import BadZipFile, ZipFile
 
 from flask import Blueprint, Response, current_app, jsonify, redirect, render_template, request, url_for
-from flask_login import current_user, login_required
+from flask_login import login_required
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from werkzeug.utils import secure_filename
 
@@ -51,9 +51,7 @@ def plugins_page():
 @plugins.route("/plugins/delete", methods=["POST"])
 @login_required
 def delete_plugin():
-    if "write" not in current_user.list_permissions:
-        return Response("You do not have the required permissions to delete plugins", 403)
-    elif DB.readonly:
+    if DB.readonly:
         return Response("Database is in read-only mode", 403)
 
     verify_data_in_form(
@@ -228,9 +226,7 @@ def run_action(plugin: str, function_name: str = "", *, tmp_dir: Optional[Path] 
 @plugins.route("/plugins/refresh", methods=["POST"])
 @login_required
 def plugins_refresh():
-    if "write" not in current_user.list_permissions:
-        return Response("You do not have the required permissions to refresh plugins", 403)
-    elif DB.readonly:
+    if DB.readonly:
         return handle_error("Database is in read-only mode", "plugins")
     tmp_ui_path = TMP_DIR.joinpath("ui")
 
@@ -433,9 +429,7 @@ def plugins_refresh():
 @plugins.route("/plugins/upload", methods=["POST"])
 @login_required
 def upload_plugin():
-    if "write" not in current_user.list_permissions:
-        return {"status": "ko", "message": "You do not have the required permissions to upload plugins"}, 403
-    elif DB.readonly:
+    if DB.readonly:
         return {"status": "ko", "message": "Database is in read-only mode"}, 403
 
     if not request.files:
