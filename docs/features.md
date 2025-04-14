@@ -1502,7 +1502,7 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
     };
 
     destination d_file {
-        file("/var/log/bunkerweb.log" template(t_imp));
+        file("/var/log/bunkerweb/bunkerweb.log" template(t_imp));
     };
 
     log {
