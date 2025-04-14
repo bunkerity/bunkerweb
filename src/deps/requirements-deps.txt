@@ -223,9 +223,9 @@ urllib3==1.26.20 \
     # via
     #   -r requirements-deps.in
     #   requests
-wheel==0.46.0 \
-    --hash=sha256:8c1909305dc5a40979693cece1ec872eed10cc49af2038201213461b0688b7b4 \
-    --hash=sha256:bd9fadc35ff6a3624bdd00bc78437bcded40e2edc1fbb29076308de503fe9a4b
+wheel==0.46.1 \
+    --hash=sha256:f796f65d72750ccde090663e466d0ca37cd72b62870f7520b96d34cdc07d86d8 \
+    --hash=sha256:fd477efb5da0f7df1d3c76c73c14394002c844451bd63229d8570f376f5e6a38
     # via
     #   -r requirements-deps.in
     #   pip-tools

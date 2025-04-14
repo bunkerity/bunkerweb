@@ -35,13 +35,13 @@ beautifulsoup4==4.13.3 \
     --hash=sha256:1bd32405dacc920b42b83ba01644747ed77456a65760e285fbc47633ceddaf8b \
     --hash=sha256:99045d7d3f08f91f0d656bc9b7efbae189426cd913d830294a15eefa0ea4df16
     # via dns-lexicon
-boto3==1.37.29 \
-    --hash=sha256:5702e38356b93c56ed2a27e17f7664d791f1fe2eafd58ae6ab3853b2804cadd2 \
-    --hash=sha256:869979050e2cf6f5461503e0f1c8f226e47ec02802e88a2210f085ec22485945
+boto3==1.37.33 \
+    --hash=sha256:4390317a1578af73f1514651bd180ba25802dcbe0a23deafa13851d54d3c3203 \
+    --hash=sha256:7b1b1bc69762975824e5a5d570880abebf634f7594f88b3dc175e8800f35be1a
     # via certbot-dns-route53
-botocore==1.37.29 \
-    --hash=sha256:092c41e346df37a8d7cf60a799791f8225ad3a5ba7cda749047eb31d1440b9c5 \
-    --hash=sha256:728c1ef3b66a0f79bc08008a59f6fd6bef2a0a0195e5b3b9e9bef255df519890
+botocore==1.37.33 \
+    --hash=sha256:09b213b0d0500040f85c7daee912ea767c724e43ed61909e624c803ff6925222 \
+    --hash=sha256:4a167dfecae51e9140de24067de1c339acde5ade3dad524a4600ac2c72055e23
     # via
     #   boto3
     #   s3transfer
@@ -359,9 +359,9 @@ distro==1.9.0 \
     --hash=sha256:2fa77c6fd8940f116ee1d6b94a2f90b13b5ea8d019b98bc8bafdcabcdd9bdbed \
     --hash=sha256:7bffd925d65168f85027d8da9af6bddab658135b840670a223589bc0c8ef02b2
     # via certbot
-dns-lexicon==3.20.1 \
-    --hash=sha256:32eaeefc686004f4919ac52327b8b76e6a886117b0e0474f3c50e9b4e340fa7e \
-    --hash=sha256:c487db887a5d75952318d63abd02d5d66d9e8916790d622609941d4a376069b8
+dns-lexicon==3.21.0 \
+    --hash=sha256:30b9c1e0ed9b6884c11957355d5386b8f5e1cadd90e979034bec667e850ef484 \
+    --hash=sha256:f6bcd707cfbfbb58c408bb8bf05f25c8079e2d693f8b74c279befaf2c121aa8c
     # via
     #   certbot-dns-dnsimple
     #   certbot-dns-dnsmadeeasy
@@ -385,9 +385,9 @@ google-api-core==2.24.2 \
     --hash=sha256:810a63ac95f3c441b7c0e43d344e372887f62ce9071ba972eacf32672e072de9 \
     --hash=sha256:81718493daf06d96d6bc76a91c23874dbf2fac0adbbf542831b805ee6e974696
     # via google-api-python-client
-google-api-python-client==2.166.0 \
-    --hash=sha256:b8cf843bd9d736c134aef76cf1dc7a47c9283a2ef24267b97207b9dd43b30ef7 \
-    --hash=sha256:dd8cc74d9fc18538ab05cbd2e93cb4f82382f910c5f6945db06c91f1deae6e45
+google-api-python-client==2.167.0 \
+    --hash=sha256:a458d402572e1c2caf9db090d8e7b270f43ff326bd9349c731a86b19910e3995 \
+    --hash=sha256:ce25290cc229505d770ca5c8d03850e0ae87d8e998fc6dd743ecece018baa396
     # via certbot-dns-google
 google-auth==2.38.0 \
     --hash=sha256:8285113607d3b80a3f1543b75962447ba8a09fe85783432a784fdeef6ac094c4 \
@@ -401,9 +401,9 @@ google-auth-httplib2==0.2.0 \
     --hash=sha256:38aa7badf48f974f1eb9861794e9c0cb2a0511a4ec0679b1f886d108f5640e05 \
     --hash=sha256:b65a0a2123300dd71281a7bf6e64d65a0759287df52729bdd1ae2e47dc311a3d
     # via google-api-python-client
-googleapis-common-protos==1.69.2 \
-    --hash=sha256:0b30452ff9c7a27d80bfc5718954063e8ab53dd3697093d3bc99581f5fd24212 \
-    --hash=sha256:3e1b904a27a33c821b4b749fd31d334c0c9c30e6113023d495e48979a3dc9c5f
+googleapis-common-protos==1.70.0 \
+    --hash=sha256:0e1b44e0ea153e6594f9f394fef15193a68aaaea2d843f83e2742717ca753257 \
+    --hash=sha256:b8bfcca8c25a2bb253e0e0b0adaf8c00773e5e6af6fd92397576680b807e0fd8
     # via google-api-core
 httplib2==0.22.0 \
     --hash=sha256:14ae0a53c1ba8f3d37e9e27cf37eabb0fb9980f435ba405d546948b009dd64dc \
@@ -566,9 +566,9 @@ pycparser==2.22 \
     --hash=sha256:491c8be9c040f5390f5bf44a5b07752bd07f56edf992381b05c701439eec10f6 \
     --hash=sha256:c3702b6d3dd8c7abc1afa565d7e63d53a1d0bd86cdc24edd75470f4de499cfcc
     # via cffi
-pydantic==2.11.2 \
-    --hash=sha256:2138628e050bd7a1e70b91d4bf4a91167f4ad76fdb83209b107c8d84b854917e \
-    --hash=sha256:7f17d25846bcdf89b670a86cdfe7b29a9f1c9ca23dee154221c9aa81845cfca7
+pydantic==2.11.3 \
+    --hash=sha256:7471657138c16adad9322fe3070c0116dd6c3ad8d649300e3cbdfe91f4db4ec3 \
+    --hash=sha256:a082753436a07f9ba1289c6ffa01cd93db3548776088aa917cc43b63f68fa60f
     # via -r requirements.in
 pydantic-core==2.33.1 \
     --hash=sha256:0483847fa9ad5e3412265c1bd72aad35235512d9ce9d27d81a56d935ef489672 \
@@ -820,9 +820,9 @@ tldextract==5.2.0 \
     --hash=sha256:59509cbf99628c9440f4d19d3a1fd8488d50297ea23879c136576263c5a04eba \
     --hash=sha256:c3a8c4daf2c25a57f54d6ef6762aeac7eff5ac3da04cdb607130be757b8457ab
     # via dns-lexicon
-typing-extensions==4.13.1 \
-    --hash=sha256:4b6cf02909eb5495cfbc3f6e8fd49217e6cc7944e145cdda8caa3734777f9e69 \
-    --hash=sha256:98795af00fb9640edec5b8e31fc647597b4691f099ad75f469a2616be1a76dff
+typing-extensions==4.13.2 \
+    --hash=sha256:a439e7c04b49fec3e5d3e2beaa21755cadbbdc391694e28ccdd36ca4a1408f8c \
+    --hash=sha256:e6c81219bd689f51865d9e372991c540bda33a0379d5573cddb9a3a23f7caaef
     # via
     #   beautifulsoup4
     #   pydantic

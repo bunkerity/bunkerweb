@@ -244,9 +244,9 @@ jinja2==3.1.6 \
     #   mike
     #   mkdocs
     #   mkdocs-material
-markdown==3.7 \
-    --hash=sha256:2ae2471477cfd02dbbf038d5d9bc226d40def84b4fe2986e49b59b6b472bbed2 \
-    --hash=sha256:7eb6df5690b81a1d7942992c97fad2938e956e79df20cbc6186e9c3a77b1c803
+markdown==3.8 \
+    --hash=sha256:794a929b79c5af141ef5ab0f2f642d0f7b1872981250230e72682346f7cc90dc \
+    --hash=sha256:7df81e63f0df5c4b24b7d156eb81e4690595239b7d70937d0409f1b0de319c6f
     # via
     #   mkdocs
     #   mkdocs-material
@@ -596,9 +596,9 @@ typepy==1.3.4 \
     #   dataproperty
     #   pytablewriter
     #   tabledata
-urllib3==2.3.0 \
-    --hash=sha256:1cee9ad369867bfdbbb48b7dd50374c0967a0bb7710050facf0dd6911440e3df \
-    --hash=sha256:f8c5449b3cf0861679ce7e0503c7b44b5ec981bec0d1d3795a07f1ba96f0204d
+urllib3==2.4.0 \
+    --hash=sha256:414bc6535b787febd7567804cc015fee39daab8ad86268f1310a9250697de466 \
+    --hash=sha256:4e16665048960a0900c702d4a66415956a584919c03361cac9f1df5c5dd7e813
     # via requests
 verspec==0.1.0 \
     --hash=sha256:741877d5633cc9464c45a469ae2a31e801e6dbbaa85b9675d481cda100f11c31 \
