@@ -647,14 +647,18 @@ $(document).ready(() => {
         "lets_encrypt_dns_propagation",
         $("#LETS_ENCRYPT_DNS_PROPAGATION").val(),
       );
-      formData.append(
-        "lets_encrypt_dns_credential_items",
-        $("#LETS_ENCRYPT_DNS_CREDENTIAL_ITEMS")
-          .val()
-          .split(/\r?\n/)
-          .map((item) => item.trim())
-          .filter((item) => item !== ""),
-      );
+
+      // Fix: Process credentials items as separate entries
+      const credentialItems = $("#LETS_ENCRYPT_DNS_CREDENTIAL_ITEMS")
+        .val()
+        .split(/\r?\n/)
+        .map((item) => item.trim())
+        .filter((item) => item !== "");
+
+      credentialItems.forEach((item) => {
+        formData.append("lets_encrypt_dns_credential_items", item);
+      });
+
       formData.append(
         "use_custom_ssl",
         $("#USE_CUSTOM_SSL").prop("checked") ? "yes" : "no",
