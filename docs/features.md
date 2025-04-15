@@ -1502,7 +1502,7 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
     };
 
     destination d_file {
-        file("/var/log/bunkerweb/bunkerweb.log" template(t_imp));
+        file("/var/log/bunkerweb.log" template(t_imp));
     };
 
     log {
@@ -1765,7 +1765,7 @@ The Custom SSL certificate plugin allows you to use your own SSL/TLS certificate
 
 **How it works:**
 
-1. You provide BunkerWeb with your certificate and private key files, either by specifying file paths or by providing the data in base64-encoded format.
+1. You provide BunkerWeb with your certificate and private key files, either by specifying file paths or by providing the data in base64-encoded or plaintext PEM format.
 2. BunkerWeb validates your certificate and key to ensure they are properly formatted and usable.
 3. When a secure connection is established, BunkerWeb serves your custom certificate instead of the auto-generated one.
 4. BunkerWeb automatically monitors your certificate's validity and displays warnings if it is approaching expiration.
@@ -1779,9 +1779,9 @@ The Custom SSL certificate plugin allows you to use your own SSL/TLS certificate
 Follow these steps to configure and use the Custom SSL certificate feature:
 
 1. **Enable the feature:** Set the `USE_CUSTOM_SSL` setting to `yes` to enable custom certificate support.
-2. **Choose a method:** Decide whether to provide certificates via file paths or as base64-encoded data, and set the priority using `CUSTOM_SSL_CERT_PRIORITY`.
+2. **Choose a method:** Decide whether to provide certificates via file paths or as base64-encoded/plaintext data, and set the priority using `CUSTOM_SSL_CERT_PRIORITY`.
 3. **Provide certificate files:** If using file paths, specify the locations of your certificate and private key files.
-4. **Or provide certificate data:** If using base64 data, provide your certificate and key as base64-encoded strings.
+4. **Or provide certificate data:** If using data, provide your certificate and key as either base64-encoded strings or plaintext PEM format.
 5. **Let BunkerWeb handle the rest:** Once configured, BunkerWeb automatically uses your custom certificates for all HTTPS connections.
 
 !!! tip "Stream Mode Configuration"
@@ -1795,8 +1795,8 @@ Follow these steps to configure and use the Custom SSL certificate feature:
 | `CUSTOM_SSL_CERT_PRIORITY` | `file`  | multisite | no       | **Certificate Priority:** Choose whether to prioritize the certificate from file path or from base64 data (`file` or `data`). |
 | `CUSTOM_SSL_CERT`          |         | multisite | no       | **Certificate Path:** Full path to your SSL certificate or certificate bundle file.                                           |
 | `CUSTOM_SSL_KEY`           |         | multisite | no       | **Private Key Path:** Full path to your SSL private key file.                                                                 |
-| `CUSTOM_SSL_CERT_DATA`     |         | multisite | no       | **Certificate Data:** Your certificate encoded in base64 format.                                                              |
-| `CUSTOM_SSL_KEY_DATA`      |         | multisite | no       | **Private Key Data:** Your private key encoded in base64 format.                                                              |
+| `CUSTOM_SSL_CERT_DATA`     |         | multisite | no       | **Certificate Data:** Your certificate encoded in base64 format or as plaintext PEM.                                          |
+| `CUSTOM_SSL_KEY_DATA`      |         | multisite | no       | **Private Key Data:** Your private key encoded in base64 format or as plaintext PEM.                                          |
 
 !!! warning "Security Considerations"
     When using custom certificates, ensure your private key is properly secured and has appropriate permissions. The files must be readable by the BunkerWeb scheduler.
@@ -1830,6 +1830,23 @@ Follow these steps to configure and use the Custom SSL certificate feature:
     CUSTOM_SSL_CERT_PRIORITY: "data"
     CUSTOM_SSL_CERT_DATA: "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUR...base64 encoded certificate...Cg=="
     CUSTOM_SSL_KEY_DATA: "LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JSEV...base64 encoded key...Cg=="
+    ```
+
+=== "Using Plaintext PEM Data"
+
+    A configuration using plaintext certificate and key data in PEM format:
+
+    ```yaml
+    USE_CUSTOM_SSL: "yes"
+    CUSTOM_SSL_CERT_PRIORITY: "data"
+    CUSTOM_SSL_CERT_DATA: |
+      -----BEGIN CERTIFICATE-----
+      MIIDdzCCAl+gAwIBAgIUJH...certificate content...AAAA
+      -----END CERTIFICATE-----
+    CUSTOM_SSL_KEY_DATA: |
+      -----BEGIN PRIVATE KEY-----
+      MIIEvQIBADAN...key content...AAAA
+      -----END PRIVATE KEY-----
     ```
 
 === "Fallback Configuration"
@@ -2835,18 +2852,21 @@ STREAM support :x:
 
 Provides load balancing feature to group of upstreams with optional healthchecks.
 
-| Setting                                   | Default   | Context | Multiple | Description                                                        |
-| ----------------------------------------- | --------- | ------- | -------- | ------------------------------------------------------------------ |
-| `LOADBALANCER_HEALTHCHECK_DICT_SIZE`      | `10m`     | global  | no       | Shared dict size (datastore for all healthchecks).                 |
-| `LOADBALANCER_UPSTREAM_NAME`              |           | global  | yes      | Name of the upstream (used in REVERSE_PROXY_HOST).                 |
-| `LOADBALANCER_UPSTREAM_SERVERS`           |           | global  | yes      | List of servers/IPs in the server group.                           |
-| `LOADBALANCER_HEALTHCHECK_URL`            | `/status` | global  | yes      | The healthcheck URL.                                               |
-| `LOADBALANCER_HEALTHCHECK_INTERVAL`       | `2000`    | global  | yes      | Healthcheck interval in milliseconds.                              |
-| `LOADBALANCER_HEALTHCHECK_TIMEOUT`        | `1000`    | global  | yes      | Healthcheck timeout in milliseconds.                               |
-| `LOADBALANCER_HEALTHCHECK_FALL`           | `3`       | global  | yes      | Number of failed healthchecks before marking the server as down.   |
-| `LOADBALANCER_HEALTHCHECK_RISE`           | `1`       | global  | yes      | Number of successful healthchecks before marking the server as up. |
-| `LOADBALANCER_HEALTHCHECK_VALID_STATUSES` | `200`     | global  | yes      | HTTP status considered valid in healthchecks.                      |
-| `LOADBALANCER_HEALTHCHECK_CONCURRENCY`    | `10`      | global  | yes      | Maximum number of concurrent healthchecks.                         |
+| Setting                                   | Default             | Context | Multiple | Description                                                                         |
+| ----------------------------------------- | ------------------- | ------- | -------- | ----------------------------------------------------------------------------------- |
+| `LOADBALANCER_HEALTHCHECK_DICT_SIZE`      | `10m`               | global  | no       | Shared dict size (datastore for all healthchecks).                                  |
+| `LOADBALANCER_UPSTREAM_NAME`              |                     | global  | yes      | Name of the upstream (used in REVERSE_PROXY_HOST).                                  |
+| `LOADBALANCER_UPSTREAM_SERVERS`           |                     | global  | yes      | List of servers/IPs in the server group.                                            |
+| `LOADBALANCER_UPSTREAM_MODE`              | `round-robin`       | global  | yes      | Load balancing mode (round-robin or sticky).                                        |
+| `LOADBALANCER_UPSTREAM_STICKY`            | `srv_id expires=4h` | global  | yes      | Settings when load balancing mode is set to sticky (see sticky directive of nginx). |
+| `LOADBALANCER_UPSTREAM_RESOLVE`           | `no`                | global  | yes      | Dynamically resolve upstream hostnames.                                             |
+| `LOADBALANCER_HEALTHCHECK_URL`            | `/status`           | global  | yes      | The healthcheck URL.                                                                |
+| `LOADBALANCER_HEALTHCHECK_INTERVAL`       | `2000`              | global  | yes      | Healthcheck interval in milliseconds.                                               |
+| `LOADBALANCER_HEALTHCHECK_TIMEOUT`        | `1000`              | global  | yes      | Healthcheck timeout in milliseconds.                                                |
+| `LOADBALANCER_HEALTHCHECK_FALL`           | `3`                 | global  | yes      | Number of failed healthchecks before marking the server as down.                    |
+| `LOADBALANCER_HEALTHCHECK_RISE`           | `1`                 | global  | yes      | Number of successful healthchecks before marking the server as up.                  |
+| `LOADBALANCER_HEALTHCHECK_VALID_STATUSES` | `200`               | global  | yes      | HTTP status considered valid in healthchecks.                                       |
+| `LOADBALANCER_HEALTHCHECK_CONCURRENCY`    | `10`                | global  | yes      | Maximum number of concurrent healthchecks.                                          |
 
 ## Metrics
 
