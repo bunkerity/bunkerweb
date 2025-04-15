@@ -1700,5 +1700,37 @@ $(document).ready(() => {
     }, 200)();
   });
 
+  // Reset setting handler
+  $(document).on("click", ".reset-setting", function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    // Find the associated input/select/checkbox
+    const $settingField = $(this).closest("div").find(".plugin-setting");
+    const settingType = $settingField.attr("type");
+    const isGlobal = $(this).attr("data-bs-original-title").includes("global");
+
+    // Get default or global value depending on the button tooltip
+    const valueToSet = isGlobal
+      ? $settingField.data("original")
+      : $settingField.data("default");
+
+    // Apply the value based on field type
+    if ($settingField.is("select")) {
+      $settingField.find("option").each(function () {
+        $(this).prop("selected", $(this).val() === valueToSet);
+      });
+      $settingField.val(valueToSet).trigger("change");
+    } else if (settingType === "checkbox") {
+      $settingField.prop("checked", valueToSet === "yes").trigger("change");
+    } else {
+      $settingField.val(valueToSet).trigger("input");
+    }
+
+    // Highlight the field to indicate it's been reset
+    const $setting = $settingField.closest(".col-12");
+    highlightSettings($setting);
+  });
+
   isInit = false;
 });
