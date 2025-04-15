@@ -1,16 +1,12 @@
 certbot==4.0.0
 
 # Official certbot plugins
-
 certbot-dns-cloudflare==4.0.0
-certbot-dns-desec==1.2.1
 certbot-dns-digitalocean==4.0.0
 certbot-dns-dnsimple==4.0.0
 certbot-dns-dnsmadeeasy==4.0.0
 certbot-dns-gehirn==4.0.0
 certbot-dns-google==4.0.0
-certbot-dns-infomaniak==0.2.3
-certbot-dns-ionos==2024.11.9
 certbot-dns-linode==4.0.0
 certbot-dns-luadns==4.0.0
 certbot-dns-nsone==4.0.0
@@ -20,6 +16,9 @@ certbot-dns-route53==4.0.0
 certbot-dns-sakuracloud==4.0.0
 
 # Third-party certbot plugins
+certbot-dns-desec==1.2.1
+certbot-dns-infomaniak==0.2.3
+certbot-dns-ionos==2024.11.9
 certbot-dns-scaleway==0.0.7
 
 cryptography==44.0.2

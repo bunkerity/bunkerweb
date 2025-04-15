@@ -9,6 +9,7 @@ repos:
         name: Fix requirements.txt and requirements.in files
         description: Sorts entries in requirements.txt and requirements.in files.
         files: (requirements|constraints).*\.(txt|in)$
+        exclude: ^src/scheduler/requirements.in$
       - id: trailing-whitespace
       - id: end-of-file-fixer
       - id: check-yaml
