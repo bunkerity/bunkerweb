@@ -64,7 +64,8 @@ RUN umask 027
 RUN apk add --no-cache bash curl geoip grep libgcc libgd libmagic libpq libstdc++ libxml2 mariadb-client mariadb-connector-c openssl pcre postgresql-client python3 sed sqlite tzdata unzip yajl supervisor
 
 # Fix CVEs
-# There are no CVEs for the following packages
+RUN apk add --no-cache "perl>=5.38.3-r1" # CVE-2024-56406
+RUN apk add --no-cache "xz-libs>=5.6.2-r1" # CVE-2025-31115
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 /usr/share/bunkerweb /usr/share/bunkerweb
