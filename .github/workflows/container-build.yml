@@ -137,12 +137,7 @@ jobs:
         with:
           command: cves,recommendations
           image: local/${{ inputs.IMAGE }}
-          sarif-file: docker-scout-results.sarif
           only-fixed: true
-      - name: Upload Docker Scout SARIF report
-        uses: github/codeql-action/upload-sarif@45775bd8235c68ba998cffa5171334d58593da47 # v3.28.15
-        with:
-          sarif_file: docker-scout-results.sarif
       # Push image
       - name: Push image
         if: inputs.PUSH == true
