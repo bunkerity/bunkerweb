@@ -5,6 +5,7 @@
 - [DEPS] Update coreruleset-v4 version to v4.13.0
 - [FEATURE] Add the possibility to choose a profile when generating certificates with Let's Encrypt using the `LETS_ENCRYPT_PROFILE` setting (`classic` (default), `tlsserver` for server-only validation, and `shortlived` for reduced 7-day validity) to provide flexibility in certificate configuration based on security requirements
 - [FEATURE] Add the possibility to declare custom certificates and keys data as plaintext as well as base64-encoded data in the `customcert` plugin using the `CUSTOM_SSL_CERT_DATA` and `CUSTOM_SSL_KEY_DATA` settings
+- [FEATURE] Add `IONOS` as a DNS provider in the `letsencrypt` plugin
 - [UI] Integrate Biscuit authentication and key management
 
 ## v1.6.2-rc1 - 2025/03/29
