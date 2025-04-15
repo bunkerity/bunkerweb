@@ -9,6 +9,7 @@ repos:
         name: Fix requirements.txt and requirements.in files
         description: Sorts entries in requirements.txt and requirements.in files.
         files: (requirements|constraints).*\.(txt|in)$
+        exclude: ^src/scheduler/requirements.in$
       - id: trailing-whitespace
       - id: end-of-file-fixer
       - id: check-yaml
@@ -43,7 +44,7 @@ repos:
         args: ["--std", "min", "--codes", "--ranges", "--no-cache"]
 
   - repo: https://github.com/pycqa/flake8
-    rev: bddd87797f8dfc07d2a10c894776018d9bec590b # frozen: 7.1.2
+    rev: 4b5e89b4b108a6c1a000c591d334a99a80d34c7b # frozen: 7.2.0
     hooks:
       - id: flake8
         name: Flake8 Python Linter
@@ -68,7 +69,7 @@ repos:
         types: [text]
 
   - repo: https://github.com/gitleaks/gitleaks
-    rev: f565e4e10c6c8081e374235bb4e4bcb8c0c2fa63 # frozen: v8.24.0
+    rev: 9c72c5f9f05200fdc06e3f1b16e9aaa89fbe9f75 # frozen: v8.24.2
     hooks:
       - id: gitleaks
 

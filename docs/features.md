@@ -1152,6 +1152,7 @@ Pro tip: When viewing your alerts, click the "columns" option and check the "con
   ![Overview](assets/img/crowdity4.png){ align=center }
   <figcaption>BunkerWeb data shown in the context column</figcaption>
 </figure>
+
 ## CORS
 
 STREAM support :x:
@@ -1764,7 +1765,7 @@ The Custom SSL certificate plugin allows you to use your own SSL/TLS certificate
 
 **How it works:**
 
-1. You provide BunkerWeb with your certificate and private key files, either by specifying file paths or by providing the data in base64-encoded format.
+1. You provide BunkerWeb with your certificate and private key files, either by specifying file paths or by providing the data in base64-encoded or plaintext PEM format.
 2. BunkerWeb validates your certificate and key to ensure they are properly formatted and usable.
 3. When a secure connection is established, BunkerWeb serves your custom certificate instead of the auto-generated one.
 4. BunkerWeb automatically monitors your certificate's validity and displays warnings if it is approaching expiration.
@@ -1778,9 +1779,9 @@ The Custom SSL certificate plugin allows you to use your own SSL/TLS certificate
 Follow these steps to configure and use the Custom SSL certificate feature:
 
 1. **Enable the feature:** Set the `USE_CUSTOM_SSL` setting to `yes` to enable custom certificate support.
-2. **Choose a method:** Decide whether to provide certificates via file paths or as base64-encoded data, and set the priority using `CUSTOM_SSL_CERT_PRIORITY`.
+2. **Choose a method:** Decide whether to provide certificates via file paths or as base64-encoded/plaintext data, and set the priority using `CUSTOM_SSL_CERT_PRIORITY`.
 3. **Provide certificate files:** If using file paths, specify the locations of your certificate and private key files.
-4. **Or provide certificate data:** If using base64 data, provide your certificate and key as base64-encoded strings.
+4. **Or provide certificate data:** If using data, provide your certificate and key as either base64-encoded strings or plaintext PEM format.
 5. **Let BunkerWeb handle the rest:** Once configured, BunkerWeb automatically uses your custom certificates for all HTTPS connections.
 
 !!! tip "Stream Mode Configuration"
@@ -1794,8 +1795,8 @@ Follow these steps to configure and use the Custom SSL certificate feature:
 | `CUSTOM_SSL_CERT_PRIORITY` | `file`  | multisite | no       | **Certificate Priority:** Choose whether to prioritize the certificate from file path or from base64 data (`file` or `data`). |
 | `CUSTOM_SSL_CERT`          |         | multisite | no       | **Certificate Path:** Full path to your SSL certificate or certificate bundle file.                                           |
 | `CUSTOM_SSL_KEY`           |         | multisite | no       | **Private Key Path:** Full path to your SSL private key file.                                                                 |
-| `CUSTOM_SSL_CERT_DATA`     |         | multisite | no       | **Certificate Data:** Your certificate encoded in base64 format.                                                              |
-| `CUSTOM_SSL_KEY_DATA`      |         | multisite | no       | **Private Key Data:** Your private key encoded in base64 format.                                                              |
+| `CUSTOM_SSL_CERT_DATA`     |         | multisite | no       | **Certificate Data:** Your certificate encoded in base64 format or as plaintext PEM.                                          |
+| `CUSTOM_SSL_KEY_DATA`      |         | multisite | no       | **Private Key Data:** Your private key encoded in base64 format or as plaintext PEM.                                          |
 
 !!! warning "Security Considerations"
     When using custom certificates, ensure your private key is properly secured and has appropriate permissions. The files must be readable by the BunkerWeb scheduler.
@@ -1829,6 +1830,23 @@ Follow these steps to configure and use the Custom SSL certificate feature:
     CUSTOM_SSL_CERT_PRIORITY: "data"
     CUSTOM_SSL_CERT_DATA: "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUR...base64 encoded certificate...Cg=="
     CUSTOM_SSL_KEY_DATA: "LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JSEV...base64 encoded key...Cg=="
+    ```
+
+=== "Using Plaintext PEM Data"
+
+    A configuration using plaintext certificate and key data in PEM format:
+
+    ```yaml
+    USE_CUSTOM_SSL: "yes"
+    CUSTOM_SSL_CERT_PRIORITY: "data"
+    CUSTOM_SSL_CERT_DATA: |
+      -----BEGIN CERTIFICATE-----
+      MIIDdzCCAl+gAwIBAgIUJH...certificate content...AAAA
+      -----END CERTIFICATE-----
+    CUSTOM_SSL_KEY_DATA: |
+      -----BEGIN PRIVATE KEY-----
+      MIIEvQIBADAN...key content...AAAA
+      -----END PRIVATE KEY-----
     ```
 
 === "Fallback Configuration"
@@ -2519,7 +2537,17 @@ Follow these steps to configure and use the Let's Encrypt feature:
 2. **Provide contact email:** Enter your email address using the `EMAIL_LETS_ENCRYPT` setting to receive important notifications about your certificates.
 3. **Choose challenge type:** Select either `http` or `dns` verification with the `LETS_ENCRYPT_CHALLENGE` setting.
 4. **Configure DNS provider:** If using DNS challenges, specify your DNS provider and credentials.
-5. **Let BunkerWeb handle the rest:** Once configured, certificates are automatically issued, installed, and renewed as needed.
+5. **Select certificate profile:** Choose your preferred certificate profile using the `LETS_ENCRYPT_PROFILE` setting (classic, tlsserver, or shortlived).
+6. **Let BunkerWeb handle the rest:** Once configured, certificates are automatically issued, installed, and renewed as needed.
+
+!!! tip "Certificate Profiles"
+    Let's Encrypt provides different certificate profiles for different use cases:
+    - **classic**: General-purpose certificates with 90-day validity (default)
+    - **tlsserver**: Optimized for TLS server authentication with 90-day validity and smaller payload
+    - **shortlived**: Enhanced security with 7-day validity for automated environments
+
+!!! info "Profile Availability"
+    Note that the `tlsserver` and `shortlived` profiles may not be available in all environments or with all ACME clients at this time. The `classic` profile has the widest compatibility and is recommended for most users. If a selected profile is not available, the system will automatically fall back to the `classic` profile.
 
 ### Configuration Settings
 
@@ -2534,6 +2562,7 @@ Follow these steps to configure and use the Let's Encrypt feature:
 | `USE_LETS_ENCRYPT_WILDCARD`        | `no`                     | multisite | no       | **Wildcard Certificates:** When set to `yes`, creates wildcard certificates for all domains. Only available with DNS challenges.                                                     |
 | `USE_LETS_ENCRYPT_STAGING`         | `no`                     | multisite | no       | **Use Staging:** When set to `yes`, uses Let's Encrypt's staging environment for testing. Staging has higher rate limits but produces certificates that are not trusted by browsers. |
 | `LETS_ENCRYPT_CLEAR_OLD_CERTS`     | `no`                     | global    | no       | **Clear Old Certificates:** When set to `yes`, removes old certificates that are no longer needed during renewal.                                                                    |
+| `LETS_ENCRYPT_PROFILE`             | `classic`                | multisite | no       | **Certificate Profile:** Select the certificate profile to use. Options: `classic` (general-purpose), `tlsserver` (optimized for TLS servers), or `shortlived` (7-day certificates). |
 
 !!! info "Information and behavior"
     - The `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` setting is a multiple setting and can be used to set multiple items for the DNS provider. The items will be saved as a cache file, and Certbot will read the credentials from it.
@@ -2560,6 +2589,7 @@ Follow these steps to configure and use the Let's Encrypt feature:
 !!! warning "Rate Limits"
     Let's Encrypt imposes rate limits on certificate issuance. When testing configurations, use the staging environment by setting `USE_LETS_ENCRYPT_STAGING` to `yes` to avoid hitting production rate limits. Staging certificates are not trusted by browsers but are useful for validating your setup.
 
+
 ### Supported DNS Providers
 
 The Let's Encrypt plugin supports a wide range of DNS providers for DNS challenges. Each provider requires specific credentials that must be provided using the `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` setting.
@@ -2574,6 +2604,7 @@ The Let's Encrypt plugin supports a wide range of DNS providers for DNS challeng
 | `gehirn`       | Gehirn DNS      | `api_token`<br>`api_secret`                                                                                  |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-gehirn.readthedocs.io/en/stable/)                 |
 | `google`       | Google Cloud    | `project_id`<br>`private_key_id`<br>`private_key`<br>`client_email`<br>`client_id`<br>`client_x509_cert_url` | `type` (default: `service_account`)<br>`auth_uri` (default: `https://accounts.google.com/o/oauth2/auth`)<br>`token_uri` (default: `https://accounts.google.com/o/oauth2/token`)<br>`auth_provider_x509_cert_url` (default: `https://www.googleapis.com/oauth2/v1/certs`) | [Documentation](https://certbot-dns-google.readthedocs.io/en/stable/)                 |
 | `infomaniak`   | Infomaniak      | `token`                                                                                                      |                                                                                                                                                                                                                                                                          | [Documentation](https://github.com/infomaniak/certbot-dns-infomaniak)                 |
+| `ionos`        | IONOS           | `prefix`<br>`secret`                                                                                         | `endpoint` (default: `https://api.hosting.ionos.com`)                                                                                                                                                                                                                    | [Documentation](https://github.com/helgeerbe/certbot-dns-ionos/blob/master/README.md) |
 | `linode`       | Linode          | `key`                                                                                                        |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-linode.readthedocs.io/en/stable/)                 |
 | `luadns`       | LuaDNS          | `email`<br>`token`                                                                                           |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-luadns.readthedocs.io/en/stable/)                 |
 | `nsone`        | NS1             | `api_key`                                                                                                    |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-nsone.readthedocs.io/en/stable/)                  |
@@ -2814,6 +2845,29 @@ The Limit plugin in BunkerWeb provides robust capabilities to enforce limiting p
     LIMIT_CONN_MAX_HTTP3: "100"
     LIMIT_CONN_MAX_STREAM: "20"
     ```
+
+## Load Balancer <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+
+
+STREAM support :x:
+
+Provides load balancing feature to group of upstreams with optional healthchecks.
+
+| Setting                                   | Default             | Context | Multiple | Description                                                                         |
+| ----------------------------------------- | ------------------- | ------- | -------- | ----------------------------------------------------------------------------------- |
+| `LOADBALANCER_HEALTHCHECK_DICT_SIZE`      | `10m`               | global  | no       | Shared dict size (datastore for all healthchecks).                                  |
+| `LOADBALANCER_UPSTREAM_NAME`              |                     | global  | yes      | Name of the upstream (used in REVERSE_PROXY_HOST).                                  |
+| `LOADBALANCER_UPSTREAM_SERVERS`           |                     | global  | yes      | List of servers/IPs in the server group.                                            |
+| `LOADBALANCER_UPSTREAM_MODE`              | `round-robin`       | global  | yes      | Load balancing mode (round-robin or sticky).                                        |
+| `LOADBALANCER_UPSTREAM_STICKY`            | `srv_id expires=4h` | global  | yes      | Settings when load balancing mode is set to sticky (see sticky directive of nginx). |
+| `LOADBALANCER_UPSTREAM_RESOLVE`           | `no`                | global  | yes      | Dynamically resolve upstream hostnames.                                             |
+| `LOADBALANCER_HEALTHCHECK_URL`            | `/status`           | global  | yes      | The healthcheck URL.                                                                |
+| `LOADBALANCER_HEALTHCHECK_INTERVAL`       | `2000`              | global  | yes      | Healthcheck interval in milliseconds.                                               |
+| `LOADBALANCER_HEALTHCHECK_TIMEOUT`        | `1000`              | global  | yes      | Healthcheck timeout in milliseconds.                                                |
+| `LOADBALANCER_HEALTHCHECK_FALL`           | `3`                 | global  | yes      | Number of failed healthchecks before marking the server as down.                    |
+| `LOADBALANCER_HEALTHCHECK_RISE`           | `1`                 | global  | yes      | Number of successful healthchecks before marking the server as up.                  |
+| `LOADBALANCER_HEALTHCHECK_VALID_STATUSES` | `200`               | global  | yes      | HTTP status considered valid in healthchecks.                                       |
+| `LOADBALANCER_HEALTHCHECK_CONCURRENCY`    | `10`                | global  | yes      | Maximum number of concurrent healthchecks.                                          |
 
 ## Metrics
 
@@ -3321,7 +3375,7 @@ Follow these steps to configure and use ModSecurity:
 Select a CRS version to best match your security needs:
 
 - **`3`**: Stable [v3.3.7](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.7).
-- **`4`**: Stable [v4.12.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.12.0) (**default**).
+- **`4`**: Stable [v4.13.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.13.0) (**default**).
 - **`nightly`**: [Nightly build](https://github.com/coreruleset/coreruleset/releases/tag/nightly) offering the latest rule updates.
 
 !!! example "Nightly Build"

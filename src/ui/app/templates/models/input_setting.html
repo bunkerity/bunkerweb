@@ -1,4 +1,4 @@
-<div class="form-floating mt-1 overflow-hidden{% if setting_data['type'] == 'password' %} input-group input-group-merge form-password-toggle{% endif %}">
+<div class="form-floating mt-1 overflow-hidden{% if setting_data['type'] == 'password' %} input-group input-group-merge form-password-toggle{% endif %} position-relative">
     <input id="{{ setting_id_prefix }}{{ setting_data['id'] }}{{ setting_id_suffix }}"
            name="{{ setting }}"
            type="{{ setting_data['type'] }}"
@@ -12,8 +12,18 @@
            {% if disabled %}disabled{% endif %}
            {% if required %}required{% endif %}
            {% if input_readonly %}readonly{% endif %}>
-    <label for="{{ setting_id_prefix }}{{ setting_data['id'] }}{{ setting_id_suffix }}" class="text-truncate">{{ setting }}</label>
+    <label for="{{ setting_id_prefix }}{{ setting_data['id'] }}{{ setting_id_suffix }}"
+           class="text-truncate">{{ setting }}</label>
     {% if setting_data['type'] == 'password' %}
         <span class="input-group-text cursor-pointer rounded-end"><i class="bx bx-hide"></i></span>
+    {% endif %}
+    {% if setting_config %}
+        <button type="button"
+                class="btn btn-sm btn-link {% if disabled or input_readonly %}text-muted{% else %}text-danger{% endif %} position-absolute end-0 top-0 mt-1 me-1 reset-setting"
+                {% if not disabled and not input_readonly %}data-bs-toggle="tooltip" data-bs-placement="left" data-bs-original-title="{% if current_endpoint != 'global-config' and setting_config and setting_config.get('global') and setting_value != setting_default %}Reset to global value{% else %}Reset to default value{% endif %}
+                "
+                {% endif %}>
+            <i class="bx bx-sm bx-reset"></i>
+        </button>
     {% endif %}
 </div>

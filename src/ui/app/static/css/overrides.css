@@ -221,7 +221,7 @@ button.list-group-item-secondary.active {
 }
 
 .toast-container {
-  z-index: 1100;
+  z-index: 1089;
 }
 
 /*
@@ -1161,17 +1161,53 @@ div.dtsp-panesContainer
   animation: pulse-error 1.5s 1;
 }
 
-/* Adjust dark mode styles for validation */
-.dark-style .step-navigation-item.has-validation-error {
-  background-color: rgba(var(--bs-danger-rgb), 0.15);
-}
-
-.dark-style .step-navigation-item.has-validation-error:hover {
-  background-color: rgba(var(--bs-danger-rgb), 0.2);
-}
-
 .steps-nav-container {
   top: 95px;
+}
+
+/* Reset setting button styling */
+.reset-setting {
+  position: absolute !important;
+  right: 2.5rem;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  z-index: 2;
+  margin: 0 !important;
+  padding: 0.25rem 0.5rem 0.25rem 0.25rem !important;
+  transition: none !important;
+}
+
+/* Adjust position when near validation feedback */
+.is-invalid ~ .reset-setting:where(.invalid-feedback ~ *) {
+  top: calc(50% - 10px) !important;
+}
+
+.reset-setting.text-muted {
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.reset-setting:hover {
+  transform: translateY(-50%) scale(1.05) !important;
+  transition: none !important;
+}
+
+/* Add more space for select arrows */
+.form-select,
+.form-select:focus {
+  background-position: right 2.25rem center;
+}
+
+.was-validated .form-select:valid,
+.form-select.is-valid {
+  background-position:
+    right 2.25rem center,
+    center right 3.9rem;
+}
+
+.was-validated .form-check-input:valid:checked,
+.form-check-input.is-valid:checked {
+  background-color: #0b354a;
 }
 
 /*
@@ -1643,4 +1679,20 @@ html.dark-style div.dts div.dataTables_scrollBody table {
 /* Ensure the ban items have proper spacing */
 #bans-container .ban-item {
   margin-bottom: 8px;
+}
+
+/* Adjust dark mode styles for validation */
+.dark-style .step-navigation-item.has-validation-error {
+  background-color: rgba(var(--bs-danger-rgb), 0.15);
+}
+
+.dark-style .step-navigation-item.has-validation-error:hover {
+  background-color: rgba(var(--bs-danger-rgb), 0.2);
+}
+
+.dark-style .list-group-item.active,
+.list-group-item.active:hover,
+.list-group-item.active:focus {
+  background-color: #0a4b69 !important;
+  color: #fff !important;
 }

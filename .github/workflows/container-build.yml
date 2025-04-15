@@ -132,6 +132,12 @@ jobs:
           trivyignores: .trivyignore
         env:
           TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db
+      - name: Docker Scout Analysis
+        uses: docker/scout-action@d341d36d6eebbe05c0b25760c63afa19e8f23269 # v1.17.0
+        with:
+          command: cves,recommendations
+          image: local/${{ inputs.IMAGE }}
+          only-fixed: true
       # Push image
       - name: Push image
         if: inputs.PUSH == true

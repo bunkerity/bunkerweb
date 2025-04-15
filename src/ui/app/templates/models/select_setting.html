@@ -1,7 +1,7 @@
-<div class="form-floating mt-1 overflow-hidden">
+<div class="form-floating mt-1 overflow-hidden position-relative">
     <select id="{{ setting_id_prefix }}{{ setting_data['id'] }}{{ setting_id_suffix }}"
             name="{{ setting }}"
-            class="form-select"
+            class="form-select plugin-setting"
             aria-labelledby="label-{{ setting_id_prefix }}{{ setting_data['id'] }}{{ setting_id_suffix }}"
             data-original="{% if current_endpoint != 'new' %}{{ setting_value }}{% else %}{{ setting_default }}{% endif %}"
             data-default="{{ setting_default }}"
@@ -13,4 +13,13 @@
         {% endfor %}
     </select>
     <label for="{{ setting_id_prefix }}{{ setting_data['id'] }}{{ setting_id_suffix }}">{{ setting }}</label>
+    {% if setting_config %}
+        <button type="button"
+                class="btn btn-sm btn-link {% if disabled %}text-muted{% else %}text-danger{% endif %} position-absolute end-0 top-0 mt-1 me-1 reset-setting"
+                {% if not disabled %}data-bs-toggle="tooltip" data-bs-placement="left" data-bs-original-title="{% if current_endpoint != 'global-config' and setting_config and setting_config.get('global') and setting_value != setting_default %}Reset to global value{% else %}Reset to default value{% endif %}
+                "
+                {% endif %}>
+            <i class="bx bx-sm bx-reset"></i>
+        </button>
+    {% endif %}
 </div>

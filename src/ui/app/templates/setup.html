@@ -705,7 +705,7 @@
                                                                         </span>
                                                                     </div>
                                                                 </div>
-                                                                <textarea id="LETS_ENCRYPT_DNS_CREDENTIAL_ITEMS" name="LETS_ENCRYPT_DNS_CREDENTIAL_ITEMS" class="form-control plugin-setting mt-1" aria-labelledby="label-LETS_ENCRYPT_DNS_CREDENTIAL_ITEMS" pattern="^.*$" {% if lets_encrypt_challenge == 'http' %}disabled{% endif %}>{% for item in lets_encrypt_dns_credential_items %}{{ item }}{% if not loop.last %}
+                                                                <textarea id="LETS_ENCRYPT_DNS_CREDENTIAL_ITEMS" name="LETS_ENCRYPT_DNS_CREDENTIAL_ITEMS" class="form-control plugin-setting mt-1" aria-labelledby="label-LETS_ENCRYPT_DNS_CREDENTIAL_ITEMS" {% if lets_encrypt_challenge == 'http' %}disabled{% endif %}>{% for item in lets_encrypt_dns_credential_items %}{{ item }}{% if not loop.last %}
 {% endif %}{% endfor %}</textarea>
                                                             </div>
                                                         </div>

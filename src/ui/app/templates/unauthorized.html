@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block page %}
+    <div class="bg-{% if theme == 'light' %}light{% else %}dark{% endif %}-subtle">
+        <div class="login-background d-flex justify-content-center align-items-center min-vh-100">
+            <div class="container-xxl">
+                <div class="authentication-wrapper authentication-basic container-p-y">
+                    <div class="container-xxl d-flex justify-content-center align-items-center">
+                        <div class="authentication-inner py-4">
+                            <div class="layout-main-wrapper mt-0 mb-0">
+                                <div class="layout-main-placeholder d-flex justify-content-center align-items-center">
+                                    <div class="text-center">
+                                        <div class="mb-4">
+                                            {% if error_code == 404 %}
+                                                <i class="bx bx-error text-warning fs-1 display-1"></i>
+                                            {% elif error_code >= 500 %}
+                                                <i class="bx bx-server-down text-danger fs-1 display-1"></i>
+                                            {% elif error_code == 401 %}
+                                                <i class="bx bx-shield-quarter text-danger fs-1 display-1"></i>
+                                            {% else %}
+                                                <i class="bx bx-lock-alt text-danger fs-1 display-1"></i>
+                                            {% endif %}
+                                        </div>
+                                        <div class="mb-4">
+                                            <div class="alert alert-danger p-3">
+                                                <h2 class="alert-heading">
+                                                    {% if error_code == 404 %}
+                                                        Not Found
+                                                    {% elif error_code >= 500 %}
+                                                        Server Error
+                                                    {% elif error_code == 401 %}
+                                                        Authentication Required
+                                                    {% else %}
+                                                        Access Denied
+                                                    {% endif %}
+                                                </h2>
+                                                <p class="mb-0">
+                                                    {% if error_code == 404 %}
+                                                        The requested resource could not be found.
+                                                    {% elif error_code >= 500 %}
+                                                        An unexpected server error occurred.
+                                                    {% elif error_code == 401 %}
+                                                        Please log in to continue.
+                                                    {% else %}
+                                                        You don't have permission to access this page.
+                                                    {% endif %}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="layout-main-info mt-3 mb-1 text-center">
+                                    <h3 class="mb-0 don-jose text-danger">{{ message|default("Unauthorized Access") }}</h3>
+                                    {% if detail %}
+                                        <p class="mb-3 mt-2 text-{% if theme == 'light' %}dark{% else %}light{% endif %}-emphasis">{{ detail }}</p>
+                                    {% else %}
+                                        <p class="mb-3 mt-2 text-{% if theme == 'light' %}dark{% else %}light{% endif %}-emphasis">
+                                            {% if error_code == 404 %}
+                                                Please check that the URL is correct or contact an administrator if you believe this is an error.
+                                            {% elif error_code >= 500 %}
+                                                Please try again later or contact an administrator if the problem persists.
+                                            {% elif error_code == 401 %}
+                                                You must be logged in to access this resource.
+                                            {% else %}
+                                                Please verify your credentials or contact an administrator if you believe this is an error.
+                                            {% endif %}
+                                        </p>
+                                    {% endif %}
+                                    {% if next %}
+                                        <div class="mt-3">
+                                            <a href="{{ next }}" class="btn btn-primary d-grid w-100">
+                                                <i class="bx bx-arrow-back me-2"></i>Return to Safety
+                                            </a>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% if next %}<input type="hidden" id="next-endpoint" value="{{ next }}" />{% endif %}
+    {% if auto_redirect %}
+        <script nonce="{{ script_nonce }}">
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                window.location.href = "{{ next }}";
+            }, {{ redirect_delay|default(3000) }});
+        });
+        </script>
+    {% endif %}
+{% endblock %}

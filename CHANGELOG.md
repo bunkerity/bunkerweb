@@ -1,6 +1,24 @@
 # Changelog
 
-## v1.6.2-rc1 - ????/??/??
+## v1.6.2-rc2 - ????/??/??
+
+- [FEATURE] Add the possibility to choose a profile when generating certificates with Let's Encrypt using the `LETS_ENCRYPT_PROFILE` setting (`classic` (default), `tlsserver` for server-only validation, and `shortlived` for reduced 7-day validity) to provide flexibility in certificate configuration based on security requirements
+- [FEATURE] Add the possibility to declare custom certificates and keys data as plaintext as well as base64-encoded data in the `customcert` plugin using the `CUSTOM_SSL_CERT_DATA` and `CUSTOM_SSL_KEY_DATA` settings
+- [FEATURE] Add `IONOS` as a DNS provider in the `letsencrypt` plugin
+- [UI] Fix shenanigans when editing a service in easy mode
+- [UI] Fix false positive with the newer CRS version (v4.13.0) on the web UI when fetching fonts
+- [UI] Add reset functionality to settings with UI updates for input, checkbox, and select elements
+- [UI] Fix LEDNS credential handling in setup wizard and reset button visibility in settings templates
+- [MISC] Add algorithm normalization for self-signed certificate generation to avoid regenerating the certificate if the algorithm is already the right one but the setting is not set to the same value
+- [MISC] Refactor the way we fetch the entire config from the database to avoid issues with default values and multiple settings in the lua code
+- [MISC] Add new container security using docker scout in CI/CD pipeline
+- [AUTOCONF] (Re) Remove possible infinite loop in Kubernetes integration
+- [UI] Integrate Biscuit authentication and key management
+- [DEPS] Update coreruleset-v4 version to v4.13.0
+- [CONTRIBUTION] Thank you @nimro27 for your contribution to the Ingress controller (#2141 and #2143)
+- [CONTRIBUTION] Thank you @TomVivant for your contribution to the `letsencrypt` plugin (#2149)
+
+## v1.6.2-rc1 - 2025/03/29
 
 - [BUGFIX] Fix database migration issues when upgrading from older versions to v1.6.1-rc1 with a PostgreSQL database
 - [BUGFIX] Fix shenanigans with templates in the web UI when editing/creating a service using the easy mode
