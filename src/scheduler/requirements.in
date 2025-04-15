@@ -10,6 +10,7 @@ certbot-dns-dnsmadeeasy==4.0.0
 certbot-dns-gehirn==4.0.0
 certbot-dns-google==4.0.0
 certbot-dns-infomaniak==0.2.3
+certbot-dns-ionos==2024.11.9
 certbot-dns-linode==4.0.0
 certbot-dns-luadns==4.0.0
 certbot-dns-nsone==4.0.0

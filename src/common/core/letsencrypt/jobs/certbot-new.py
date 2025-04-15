@@ -29,6 +29,7 @@ from letsencrypt import (
     GehirnProvider,
     GoogleProvider,
     InfomaniakProvider,
+    IonosProvider,
     LinodeProvider,
     LuaDnsProvider,
     NSOneProvider,
@@ -119,12 +120,12 @@ def certbot_new(
             command.extend([f"--dns-{provider}-credentials", credentials_path.as_posix()])
 
         # * Adding the RSA key size argument like in the infomaniak plugin documentation
-        if provider == "infomaniak":
+        if provider in ("infomaniak", "ionos"):
             command.extend(["--rsa-key-size", "4096"])
 
         # * Adding plugin argument
-        if provider in ("desec", "infomaniak", "scaleway"):
-            # ? Desec, Infomaniak and Scaleway plugins use different arguments
+        if provider in ("desec", "infomaniak", "ionos", "scaleway"):
+            # ? Desec, Infomaniak, IONOS and Scaleway plugins use different arguments
             command.extend(["--authenticator", f"dns-{provider}"])
         else:
             command.append(f"--dns-{provider}")
@@ -220,6 +221,7 @@ try:
                 Type[GehirnProvider],
                 Type[GoogleProvider],
                 Type[InfomaniakProvider],
+                Type[IonosProvider],
                 Type[LinodeProvider],
                 Type[LuaDnsProvider],
                 Type[NSOneProvider],
@@ -238,6 +240,7 @@ try:
             "gehirn": GehirnProvider,
             "google": GoogleProvider,
             "infomaniak": InfomaniakProvider,
+            "ionos": IonosProvider,
             "linode": LinodeProvider,
             "luadns": LuaDnsProvider,
             "nsone": NSOneProvider,

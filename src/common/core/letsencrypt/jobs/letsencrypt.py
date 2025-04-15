@@ -175,6 +175,22 @@ class InfomaniakProvider(Provider):
     )
 
 
+class IonosProvider(Provider):
+    """Ionos DNS provider."""
+
+    dns_ionos_prefix: str
+    dns_ionos_secret: str
+    dns_ionos_endpoint: str = "https://api.hosting.ionos.com"
+
+    _validate_aliases = alias_model_validator(
+        {
+            "dns_ionos_prefix": ("dns_ionos_prefix", "ionos_prefix", "prefix"),
+            "dns_ionos_secret": ("dns_ionos_secret", "ionos_secret", "secret"),
+            "dns_ionos_endpoint": ("dns_ionos_endpoint", "ionos_endpoint", "endpoint"),
+        }
+    )
+
+
 class LinodeProvider(Provider):
     """Linode DNS provider."""
 
