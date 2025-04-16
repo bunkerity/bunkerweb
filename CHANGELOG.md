@@ -5,6 +5,7 @@
 - [FEATURE] Add the possibility to choose a profile when generating certificates with Let's Encrypt using the `LETS_ENCRYPT_PROFILE` setting (`classic` (default), `tlsserver` for server-only validation, and `shortlived` for reduced 7-day validity) to provide flexibility in certificate configuration based on security requirements
 - [FEATURE] Add the possibility to declare custom certificates and keys data as plaintext as well as base64-encoded data in the `customcert` plugin using the `CUSTOM_SSL_CERT_DATA` and `CUSTOM_SSL_KEY_DATA` settings
 - [FEATURE] Add `IONOS` as a DNS provider in the `letsencrypt` plugin
+- [FEATURE] Add `REVERSE_PROXY_UNDERSCORES_IN_HEADERS` setting to control if underscores in headers should be allowed or not in the `Reverse Proxy` plugin (default is `no`)
 - [UI] Fix shenanigans when editing a service in easy mode
 - [UI] Fix false positive with the newer CRS version (v4.13.0) on the web UI when fetching fonts
 - [UI] Add reset functionality to settings with UI updates for input, checkbox, and select elements
