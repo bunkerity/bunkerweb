@@ -66,7 +66,7 @@ RUN apk add --no-cache bash curl geoip grep libgcc libgd libmagic libpq libstdc+
 # Fix CVEs
 RUN apk add --no-cache "perl>=5.38.3-r1" # CVE-2024-56406
 RUN apk add --no-cache "xz-libs>=5.6.2-r1" # CVE-2025-31115
-RUN apk add --no-cache "sqlite>=3.48.0-r1" "sqlite-libs>=3.48.0-r1" # CVE-2025-29087
+RUN apk add --no-cache "sqlite>=3.45.3-r2" "sqlite-libs>=3.45.3-r2" # CVE-2025-29087
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 /usr/share/bunkerweb /usr/share/bunkerweb
