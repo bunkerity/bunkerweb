@@ -113,7 +113,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.2-rc1
         !!! info "Fedora Update Testing"
             If you cannot find the NGINX version listed in the stable repository, you can enable the `updates-testing` repository:
 
-            === "Fedora 41"
+            === "Fedora 41/42"
                 ```shell
                 sudo dnf config-manager setopt updates-testing.enabled=1
                 ```

@@ -1,4 +1,4 @@
-FROM fedora:41@sha256:3ec60eb34fa1a095c0c34dd37cead9fd38afb62612d43892fcf1d3425c32bc1e AS builder
+FROM fedora:40@sha256:7cdd2b48396929bb8723ea2fa60e03bee39cc22e2a853cbd891587fab4eb1bc9 AS builder
 
 ENV OS=fedora
 ENV NGINX_VERSION=1.26.3
@@ -53,7 +53,7 @@ COPY src/scheduler scheduler
 COPY src/VERSION VERSION
 COPY src/ui ui
 
-FROM fedora:41@sha256:3ec60eb34fa1a095c0c34dd37cead9fd38afb62612d43892fcf1d3425c32bc1e
+FROM fedora:40@sha256:7cdd2b48396929bb8723ea2fa60e03bee39cc22e2a853cbd891587fab4eb1bc9
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
@@ -93,7 +93,7 @@ COPY --chmod=660 src/bw/misc/country.mmdb /var/tmp/bunkerweb/country.mmdb
 # Copy Linux files
 COPY --chmod=740 src/linux/scripts scripts
 COPY --chmod=740 src/linux/fpm.sh /usr/share/fpm.sh
-COPY src/linux/fpm-fedora-41 /usr/share/.fpm
+COPY src/linux/fpm-fedora-40 /usr/share/.fpm
 COPY --chmod=644 src/linux/*.service /lib/systemd/system/
 COPY --chmod=644 src/linux/bunkerweb.logrotate /etc/logrotate.d/bunkerweb
 

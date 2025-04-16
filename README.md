@@ -265,6 +265,7 @@ List of supported Linux distros:
 - Ubuntu 24.04 "Jammy"
 - Fedora 40
 - Fedora 41
+- Fedora 42
 - RHEL 8.9
 - RHEL 9.4
 

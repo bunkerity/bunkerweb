@@ -1,4 +1,4 @@
-FROM fedora:40@sha256:7cdd2b48396929bb8723ea2fa60e03bee39cc22e2a853cbd891587fab4eb1bc9
+FROM fedora:42@sha256:ee88ab8a5c8bf78687ddcecadf824767e845adc19d8cdedb56f48521eb162b43
 
 ENV container=docker
 ENV NGINX_VERSION=1.26.3
@@ -20,12 +20,11 @@ RUN rm -f /lib/systemd/system/multi-user.target.wants/* \
 
 # Nginx
 RUN dnf update -y && \
-    dnf install -y php-fpm curl gnupg2 ca-certificates redhat-lsb-core python3-pip which && \
-    dnf install 'dnf-command(config-manager)' -y && \
-    dnf config-manager --set-enabled updates-testing && \
+    dnf install -y php-fpm curl gnupg2 ca-certificates python3-pip which && \
+    dnf config-manager setopt updates-testing.enabled=1 && \
     dnf install nginx-${NGINX_VERSION} -y
 
-COPY ./package-fedora/*.rpm /opt
+COPY ./package-fedora-42/*.rpm /opt
 
 VOLUME ["/sys/fs/cgroup"]
 

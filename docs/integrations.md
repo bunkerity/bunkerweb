@@ -352,6 +352,7 @@ Supported Linux distributions for BunkerWeb (amd64/x86_64 and arm64/aarch64 arch
 - Ubuntu 24.04 "Noble"
 - Fedora 40
 - Fedora 41
+- Fedora 42
 - Red Hat Enterprise Linux (RHEL) 8.9
 - Red Hat Enterprise Linux (RHEL) 9.4
 
@@ -460,7 +461,7 @@ Please ensure that you have **NGINX 1.26.3 installed before installing BunkerWeb
     !!! info "Fedora Update Testing"
         If you can't find the NGINX version listed in the stable repository, you can enable the `updates-testing` repository:
 
-        === "Fedora 41"
+        === "Fedora 41/42"
             ```shell
             sudo dnf config-manager setopt updates-testing.enabled=1
             ```
