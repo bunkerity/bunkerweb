@@ -52,6 +52,7 @@ RUN apk add --no-cache openssl pcre bash python3 yajl geoip libxml2 libgd curl t
 
 # Fix CVEs
 RUN apk add --no-cache "xz-libs>=5.6.2-r1" # CVE-2025-31115
+RUN apk add --no-cache "sqlite-libs>=3.48.0-r1" # CVE-2025-29087
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 /usr/share/bunkerweb /usr/share/bunkerweb
