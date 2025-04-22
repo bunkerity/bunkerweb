@@ -267,7 +267,7 @@ class Config:
         str
             the confirmation message
         """
-        ret = self.gen_conf(variables, self.get_services(methods=False), check_changes=check_changes, override_method=override_method)
+        ret = self.gen_conf(variables, self.get_services(methods=False, with_drafts=True), check_changes=check_changes, override_method=override_method)
         if isinstance(ret, str):
             return ret, 1
         return "The global configuration has been edited.", 0
