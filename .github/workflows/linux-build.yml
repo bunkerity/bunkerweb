@@ -123,6 +123,7 @@ jobs:
           command: cves,recommendations
           image: local/bunkerweb-${{ inputs.LINUX }}:latest
           only-fixed: true
+          exit-code: true
       # Generate package
       - name: Generate package
         if: startsWith(env.ARCH, 'arm') == false

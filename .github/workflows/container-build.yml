@@ -138,6 +138,7 @@ jobs:
           command: cves,recommendations
           image: local/${{ inputs.IMAGE }}
           only-fixed: true
+          exit-code: true
       # Push image
       - name: Push image
         if: inputs.PUSH == true
