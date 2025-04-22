@@ -65,7 +65,7 @@ COPY src/scheduler scheduler
 COPY src/VERSION VERSION
 COPY src/ui ui
 
-FROM redhat/ubi9:9.5@sha256:abee61497643f88620d86fdc8d1057c805ccdc7ea19d71d661629896b884af8d
+FROM redhat/ubi9:9.5@sha256:ea57285741f007e83f2ee20423c20b0cbcce0b59cc3da027c671692cc7efe4dd
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
