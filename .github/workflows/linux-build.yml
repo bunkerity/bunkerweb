@@ -116,6 +116,13 @@ jobs:
           file: src/linux/Dockerfile-${{ inputs.LINUX }}
           platforms: ${{ inputs.PLATFORMS }}
           tags: local/bunkerweb-${{ inputs.LINUX }}:latest
+      # Check for vulnerabilities
+      - name: Docker Scout Analysis
+        uses: docker/scout-action@d341d36d6eebbe05c0b25760c63afa19e8f23269 # v1.17.0
+        with:
+          command: cves,recommendations
+          image: local/bunkerweb-${{ inputs.LINUX }}:latest
+          only-fixed: true
       # Generate package
       - name: Generate package
         if: startsWith(env.ARCH, 'arm') == false
