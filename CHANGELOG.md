@@ -10,6 +10,7 @@
 - [UI] Fix false positive with the newer CRS version (v4.13.0) on the web UI when fetching fonts
 - [UI] Add reset functionality to settings with UI updates for input, checkbox, and select elements
 - [UI] Fix LEDNS credential handling in setup wizard and reset button visibility in settings templates
+- [UI] Update time formatting in requests chart to use 12-hour format in home page
 - [MISC] Add algorithm normalization for self-signed certificate generation to avoid regenerating the certificate if the algorithm is already the right one but the setting is not set to the same value
 - [MISC] Refactor the way we fetch the entire config from the database to avoid issues with default values and multiple settings in the lua code
 - [MISC] Add new container security using docker scout in CI/CD pipeline

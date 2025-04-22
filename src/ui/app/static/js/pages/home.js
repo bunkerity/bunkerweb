@@ -448,9 +448,9 @@ $(function () {
   );
   const categories = Object.keys(blockingData).map((key) =>
     new Date(key).toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
+      hour: "numeric",
+      minute: undefined,
+      hour12: true,
     }),
   );
 
