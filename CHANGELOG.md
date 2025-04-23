@@ -12,6 +12,7 @@
 - [UI] Fix LEDNS credential handling in setup wizard and reset button visibility in settings templates
 - [UI] Update time formatting in requests chart to use 12-hour format in home page
 - [UI] Add multi-language support for the web UI (`ar`, `bn`, `en`, `es`, `fr`, `hi`, `pt`, `ru`, `ur`, `zh`) - These are the top 10 languages spoken in the world
+- [UI] Update apexcharts.js to version 4.6.0
 - [MISC] Add algorithm normalization for self-signed certificate generation to avoid regenerating the certificate if the algorithm is already the right one but the setting is not set to the same value
 - [MISC] Refactor the way we fetch the entire config from the database to avoid issues with default values and multiple settings in the lua code
 - [MISC] Add new container security using docker scout in CI/CD pipeline

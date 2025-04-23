@@ -107,10 +107,10 @@
               nonce="{{ style_nonce }}" />
         {% if current_endpoint == "home" or current_endpoint != "plugins" and "plugins" in request.path %}
             <link rel="preload"
-                  href="{{ url_for('static', filename='libs/apexcharts/apexcharts.css') }}"
+                  href="{{ url_for('static', filename='libs/apexcharts/apexcharts.min.css') }}"
                   as="style" />
             <link rel="stylesheet"
-                  href="{{ url_for('static', filename='libs/apexcharts/apexcharts.css') }}"
+                  href="{{ url_for('static', filename='libs/apexcharts/apexcharts.min.css') }}"
                   nonce="{{ style_nonce }}" />
             <link rel="stylesheet"
                   href="{{ url_for('static', filename='libs/leaflet/leaflet.css') }}"
