@@ -118,7 +118,7 @@ jobs:
           tags: local/bunkerweb-${{ inputs.LINUX }}:latest
       # Check for vulnerabilities
       - name: Docker Scout Analysis
-        uses: docker/scout-action@d341d36d6eebbe05c0b25760c63afa19e8f23269 # v1.17.0
+        uses: docker/scout-action@381b657c498a4d287752e7f2cfb2b41823f566d9 # v1.17.1
         with:
           command: cves,recommendations
           image: local/bunkerweb-${{ inputs.LINUX }}:latest
