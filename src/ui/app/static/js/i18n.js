@@ -58,15 +58,39 @@ function applyTranslations() {
 // Update the language selector dropdown to show current language
 function updateLanguageSelector(lang) {
   const alpha2 = getAlpha2(lang);
+  // Map language codes to flag codes
+  const flagCodeMap = {
+    en: "us",
+    zh: "cn",
+    hi: "in",
+    es: "es",
+    ar: "ae",
+    fr: "fr",
+    bn: "bd",
+    ru: "ru",
+    pt: "pt",
+    ur: "pk",
+  };
+
+  const flagCode = flagCodeMap[alpha2] || "us";
   const flagSrc = $("#current-lang-flag")
     .attr("src")
-    .replace(/\/[a-z]{2}\.svg$/, `/${alpha2 === "en" ? "us" : alpha2}.svg`);
+    .replace(/\/[a-z]{2}\.svg$/, `/${flagCode}.svg`);
+
   $("#current-lang-flag").attr("src", flagSrc);
 
   // Set the text based on the language
   const langNames = {
     en: "English",
+    zh: "中文",
+    hi: "हिन्दी",
+    es: "Español",
+    ar: "العربية",
     fr: "Français",
+    bn: "বাংলা",
+    ru: "Русский",
+    pt: "Português",
+    ur: "اردو",
   };
   $("#current-lang-text").text(langNames[alpha2] || "English");
 }
@@ -142,6 +166,18 @@ i18next
         convertDetectedLanguage: getAlpha2,
       },
       lng: savedLang || getAlpha2(i18next.language),
+      supportedLngs: [
+        "en",
+        "zh",
+        "hi",
+        "es",
+        "ar",
+        "fr",
+        "bn",
+        "ru",
+        "pt",
+        "ur",
+      ],
     },
     function (err) {
       if (err) return console.error("Error initializing i18next:", err);

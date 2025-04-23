@@ -11,7 +11,29 @@
              height="17"
              alt="Current language flag"
              loading="lazy" />
-        <span id="current-lang-text">{% if not language or language == 'en' %}English{% elif language == 'fr' %}Français{% endif %}</span>
+        <span id="current-lang-text">
+            {% if not language or language == 'en' %}
+                English
+            {% elif language == 'zh' %}
+                中文
+            {% elif language == 'hi' %}
+                हिन्दी
+            {% elif language == 'es' %}
+                Español
+            {% elif language == 'ar' %}
+                العربية
+            {% elif language == 'fr' %}
+                Français
+            {% elif language == 'bn' %}
+                বাংলা
+            {% elif language == 'ru' %}
+                Русский
+            {% elif language == 'pt' %}
+                Português
+            {% elif language == 'ur' %}
+                اردو
+            {% endif %}
+        </span>
     </button>
     <ul class="dropdown-menu dropdown-menu-end"
         aria-labelledby="language-dropdown">
@@ -28,6 +50,54 @@
             </a>
         </li>
         <li>
+            <a class="dropdown-item d-flex align-items-center lang-option {% if language == 'zh' %}active{% endif %}"
+               href="#"
+               data-lang="zh">
+                <img src="{{ url_for('static', filename='img/flags/cn.svg') }}"
+                     class="border border-1 p-0 me-2"
+                     height="17"
+                     alt="中文"
+                     loading="lazy" />
+                <span>中文</span>
+            </a>
+        </li>
+        <li>
+            <a class="dropdown-item d-flex align-items-center lang-option {% if language == 'hi' %}active{% endif %}"
+               href="#"
+               data-lang="hi">
+                <img src="{{ url_for('static', filename='img/flags/in.svg') }}"
+                     class="border border-1 p-0 me-2"
+                     height="17"
+                     alt="हिन्दी"
+                     loading="lazy" />
+                <span>हिन्दी</span>
+            </a>
+        </li>
+        <li>
+            <a class="dropdown-item d-flex align-items-center lang-option {% if language == 'es' %}active{% endif %}"
+               href="#"
+               data-lang="es">
+                <img src="{{ url_for('static', filename='img/flags/es.svg') }}"
+                     class="border border-1 p-0 me-2"
+                     height="17"
+                     alt="Español"
+                     loading="lazy" />
+                <span>Español</span>
+            </a>
+        </li>
+        <li>
+            <a class="dropdown-item d-flex align-items-center lang-option {% if language == 'ar' %}active{% endif %}"
+               href="#"
+               data-lang="ar">
+                <img src="{{ url_for('static', filename='img/flags/ae.svg') }}"
+                     class="border border-1 p-0 me-2"
+                     height="17"
+                     alt="العربية"
+                     loading="lazy" />
+                <span>العربية</span>
+            </a>
+        </li>
+        <li>
             <a class="dropdown-item d-flex align-items-center lang-option {% if language == 'fr' %}active{% endif %}"
                href="#"
                data-lang="fr">
@@ -39,23 +109,53 @@
                 <span>Français</span>
             </a>
         </li>
-        <!-- <li>
-            <a class="dropdown-item d-flex align-items-center lang-option {% if language == 'es' %}active{% endif %}" href="#" data-lang="es">
-                <img src="{{ url_for('static', filename='img/flags/es.svg') }}" class="border border-1 p-0 me-2" height="17" alt="Español" loading="lazy" />
-                <span>Español</span>
+        <li>
+            <a class="dropdown-item d-flex align-items-center lang-option {% if language == 'bn' %}active{% endif %}"
+               href="#"
+               data-lang="bn">
+                <img src="{{ url_for('static', filename='img/flags/bd.svg') }}"
+                     class="border border-1 p-0 me-2"
+                     height="17"
+                     alt="বাংলা"
+                     loading="lazy" />
+                <span>বাংলা</span>
             </a>
         </li>
         <li>
-            <a class="dropdown-item d-flex align-items-center lang-option {% if language == 'de' %}active{% endif %}" href="#" data-lang="de">
-                <img src="{{ url_for('static', filename='img/flags/de.svg') }}" class="border border-1 p-0 me-2" height="17" alt="Deutsch" loading="lazy" />
-                <span>Deutsch</span>
+            <a class="dropdown-item d-flex align-items-center lang-option {% if language == 'ru' %}active{% endif %}"
+               href="#"
+               data-lang="ru">
+                <img src="{{ url_for('static', filename='img/flags/ru.svg') }}"
+                     class="border border-1 p-0 me-2"
+                     height="17"
+                     alt="Русский"
+                     loading="lazy" />
+                <span>Русский</span>
             </a>
         </li>
         <li>
-            <a class="dropdown-item d-flex align-items-center lang-option {% if language == 'cn' %}active{% endif %}" href="#" data-lang="cn">
-                <img src="{{ url_for('static', filename='img/flags/cn.svg') }}" class="border border-1 p-0 me-2" height="17" alt="中文" loading="lazy" />
-                <span>中文</span>
+            <a class="dropdown-item d-flex align-items-center lang-option {% if language == 'pt' %}active{% endif %}"
+               href="#"
+               data-lang="pt">
+                <img src="{{ url_for('static', filename='img/flags/pt.svg') }}"
+                     class="border border-1 p-0 me-2"
+                     height="17"
+                     alt="Português"
+                     loading="lazy" />
+                <span>Português</span>
             </a>
-        </li> -->
+        </li>
+        <li>
+            <a class="dropdown-item d-flex align-items-center lang-option {% if language == 'ur' %}active{% endif %}"
+               href="#"
+               data-lang="ur">
+                <img src="{{ url_for('static', filename='img/flags/pk.svg') }}"
+                     class="border border-1 p-0 me-2"
+                     height="17"
+                     alt="اردو"
+                     loading="lazy" />
+                <span>اردو</span>
+            </a>
+        </li>
     </ul>
 </div>

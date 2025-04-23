@@ -912,7 +912,7 @@ def set_theme():
 def set_language():
     if DB.readonly:
         return Response(status=423, response=dumps({"message": "Database is in read-only mode"}), content_type="application/json")
-    elif request.form["language"] not in ("en", "fr"):
+    elif request.form["language"] not in ("en", "zh", "hi", "es", "ar", "fr", "bn", "ru", "pt", "ur"):
         return Response(status=400, response=dumps({"message": "Bad request"}), content_type="application/json")
 
     user_data = {

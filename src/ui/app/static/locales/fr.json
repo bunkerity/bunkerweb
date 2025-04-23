@@ -414,14 +414,26 @@
         "title": "Requêtes Bloquées par Pays"
       },
       "blocking_status": {
-        "title": "Statut de Blocage Temporel"
+        "title": "Statut de Blocage Temporel",
+        "subtitle": "Requêtes bloquées au fil du temps",
+        "blocked_requests": "Requêtes Bloquées",
+        "time": "Heure",
+        "count": "Nombre"
       },
       "request_status": {
-        "title": "Distribution du Statut des Requêtes"
+        "title": "Distribution du Statut des Requêtes",
+        "blocked": "Requêtes Bloquées"
       },
       "top_blocked_ips": {
-        "title": "Top 10 des IP Bloquées"
+        "title": "Top 10 des IP Bloquées",
+        "most_blocked": "IP la plus bloquée"
       }
+    },
+    "map": {
+      "blocked_requests": "Requêtes Bloquées",
+      "hover_info": "Survolez un pays",
+      "no_data": "Aucune donnée",
+      "legend": "Légende"
     }
   },
   "datatable": {

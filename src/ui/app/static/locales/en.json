@@ -414,14 +414,26 @@
         "title": "Blocked Requests by Country"
       },
       "blocking_status": {
-        "title": "Blocking Status Over Time"
+        "title": "Blocking Status Over Time",
+        "subtitle": "Blocked requests over time",
+        "blocked_requests": "Blocked Requests",
+        "time": "Time",
+        "count": "Count"
       },
       "request_status": {
-        "title": "Request Status Distribution"
+        "title": "Request Status Distribution",
+        "blocked": "Blocked Requests"
       },
       "top_blocked_ips": {
-        "title": "Top 10 Blocked IPs"
+        "title": "Top 10 Blocked IPs",
+        "most_blocked": "Most Blocked IP"
       }
+    },
+    "map": {
+      "blocked_requests": "Blocked Requests",
+      "hover_info": "Hover over a country",
+      "no_data": "No data",
+      "legend": "Legend"
     }
   },
   "datatable": {
