@@ -147,19 +147,18 @@ end
 -- @treturn table|nil session metadata
 -- @treturn string error message
 local function READ_METADATA(storage, red, name, audience, subject, current_time)
-  local sessions = {}
   local meta_key = get_name(storage, name, audience, subject)
   local res, err = red:zrange(meta_key, current_time, "+inf", "BYSCORE", "WITHSCORES")
   if not res then
     return nil, err
   end
 
+  local sessions = {}
   for i, v in ipairs(res) do
     if i % 2 ~= 0 then
       sessions[v] = res[i + 1]
     end
   end
-
   return sessions
 end
 

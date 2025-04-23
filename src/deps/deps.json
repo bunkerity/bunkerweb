@@ -152,9 +152,9 @@
     },
     {
       "id": "lua-resty-session",
-      "name": "lua-resty-session v4.0.5",
+      "name": "lua-resty-session v4.1.1",
       "url": "https://github.com/bungle/lua-resty-session.git",
-      "commit": "5f2aed616d16fa7ca04dc40e23d6941740cd634d",
+      "commit": "e4ee19ab9788293ee868f01e56a5303387cf7d04",
       "post_install": "rm -r src/deps/src/lua-resty-session/t"
     },
     {

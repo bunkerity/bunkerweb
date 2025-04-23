@@ -3,6 +3,27 @@
 All notable changes to `lua-resty-session` will be documented in this file.
 
 
+## [4.1.1] - 2025-04-15
+### Fixed
+- fix(deps): bump minimum resty.openssl to 1.5.0 (fix #190)
+- fix(session): fix a backward incompatible change in 4.1.0 where storage was given as `false`
+  (the `false` is again a synonym to `"cookie"`)
+
+
+## [4.1.0] - 2025-04-15
+### Fixed
+- fix(session): take absolute timeout in account when calculating storage ttl
+- fix(session): remember function didn't store flags as expected
+
+### Added
+- feat(session): allow binding session to external data
+
+### Changed
+- chore(utils): safer utils.is_fips_mode (fix #176)
+- chore(session): a bit more relaxed assertions (fix #175)
+- chore(utils): better caching of crypto primitives and move to non-deprecated crypto
+
+
 ## [4.0.5] - 2023-08-16
 ### Fixed
 - fix(dshm/memcached): add a missing return parameter as otherwise pool parameters are not respected, fix #171
