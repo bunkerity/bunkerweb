@@ -6,7 +6,7 @@ from os.path import sep
 from pathlib import Path
 from string import printable
 from subprocess import PIPE, Popen, call
-from typing import Dict, Set, Union
+from typing import Dict, Optional, Set, Union
 
 from bcrypt import checkpw, gensalt, hashpw
 from flask import flash as flask_flash, session
@@ -209,7 +209,10 @@ def get_latest_stable_release():
     return None
 
 
-def flash(message: str, category: str = "success", *, save: bool = True) -> None:
+def flash(message: str, category: str = "success", i18n_key: Optional[str] = None, *, save: bool = True) -> None:
+    if i18n_key:
+        message = f'<span data-i18n="{i18n_key}">{message}</span>'
+
     if category != "success":
         flask_flash(message, category)
     else:

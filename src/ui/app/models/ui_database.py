@@ -152,6 +152,7 @@ class UIDatabase(Database):
         email: Optional[str] = None,
         totp_recovery_codes: Optional[List[str]] = None,
         method: str = "manual",
+        language: str = "en",
     ) -> str:
         """Update ui user."""
         totp_changed = False
@@ -182,6 +183,7 @@ class UIDatabase(Database):
             user.totp_secret = totp_secret
             user.method = method
             user.theme = theme
+            user.language = language
             user.update_date = datetime.now().astimezone()
 
             try:

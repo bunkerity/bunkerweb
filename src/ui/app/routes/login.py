@@ -65,17 +65,17 @@ def login_page():
             except Exception as e:
                 LOGGER.error(f"Failed to create Biscuit token: {e}")
 
-            ret = DB.update_ui_user(
-                **{
-                    "username": current_user.get_id(),
-                    "password": current_user.password.encode("utf-8"),
-                    "email": current_user.email,
-                    "totp_secret": current_user.totp_secret,
-                    "method": current_user.method,
-                    "theme": request.form["theme"],
-                },
-                old_username=current_user.get_id(),
-            )
+            user_data = {
+                "username": current_user.get_id(),
+                "password": current_user.password.encode("utf-8"),
+                "email": current_user.email,
+                "totp_secret": current_user.totp_secret,
+                "method": current_user.method,
+                "theme": request.form.get("theme", "light"),
+                "language": request.form.get("language", "en"),
+            }
+
+            ret = DB.update_ui_user(**user_data, old_username=current_user.get_id())
             if ret:
                 LOGGER.error(f"Couldn't update the user {current_user.get_id()}: {ret}")
 

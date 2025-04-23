@@ -372,6 +372,7 @@ class Users(Base):
     method = Column(METHODS_ENUM, nullable=False, default="manual")
     admin = Column(Boolean, nullable=False, default=False)
     theme = Column(THEMES_ENUM, nullable=False, default="light")
+    language = Column(String(2), nullable=False, default="en")
 
     # 2FA
     totp_secret = Column(String(256), nullable=True)

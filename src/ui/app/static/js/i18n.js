@@ -71,6 +71,52 @@ function updateLanguageSelector(lang) {
   $("#current-lang-text").text(langNames[alpha2] || "English");
 }
 
+// Function to save language preference to the server
+function saveLanguage(rootUrl, language) {
+  // Don't send request if we're in setup mode or readonly
+  const isReadOnly = $("#is-read-only").val().trim() === "True";
+  if (window.location.pathname.includes("/setup") || isReadOnly) {
+    return;
+  }
+
+  const csrfToken = $("#csrf_token").val();
+  if (!csrfToken) {
+    console.warn(
+      "CSRF token not found, cannot save language preference to server",
+    );
+    return;
+  }
+
+  const data = new FormData();
+  data.append("language", language);
+  data.append("csrf_token", csrfToken);
+
+  fetch(rootUrl, {
+    method: "POST",
+    body: data,
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+    })
+    .catch((error) => {
+      console.error("Error saving language preference to server:", error);
+    });
+}
+
+// Debounce function to prevent multiple rapid requests
+function debounce(func, wait) {
+  let timeout;
+  return function (...args) {
+    const context = this;
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func.apply(context, args), wait);
+  };
+}
+
+const debouncedSaveLanguage = debounce(saveLanguage, 1000);
+
 // Check if language preference exists in localStorage
 const savedLang = localStorage.getItem("language");
 
@@ -103,6 +149,7 @@ i18next
       // Apply translation after i18next is initialized
       applyTranslations();
       updateLanguageSelector(i18next.language);
+      $("[name='language']").val(i18next.language);
 
       i18next.on("languageChanged", function (lng) {
         i18next.language = getAlpha2(lng);
@@ -127,6 +174,15 @@ function changeLanguage(lang) {
   // Save language preference to localStorage
   localStorage.setItem("language", alpha2);
   i18next.changeLanguage(alpha2);
+
+  // Get the root URL for the API endpoint
+  const rootUrl = $("#home-path")
+    .val()
+    .trim()
+    .replace(/\/home$/, "/set_language");
+
+  // Save language preference to server
+  debouncedSaveLanguage(rootUrl, alpha2);
 }
 
 // Handle DataTables collection button translations
