@@ -100,7 +100,7 @@ function _M:init(key, iv, opts)
   if not key or #key ~= self.key_size then
     return false, string.format("cipher:init: incorrect key size, expect %d", self.key_size)
   end
-  if not iv or #iv ~= self.iv_size then
+  if self.iv_size > 0 and (not iv or #iv ~= self.iv_size) then
     return false, string.format("cipher:init: incorrect iv size, expect %d", self.iv_size)
   end
 

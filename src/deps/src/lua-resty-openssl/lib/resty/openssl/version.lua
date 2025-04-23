@@ -104,6 +104,7 @@ return setmetatable({
       return ffi_str(info_func(t))
     end,
     -- the following has implict upper bound of 4.x
+    OPENSSL_30 = version_num >= 0x30000000 and version_num < 0x30100000,
     OPENSSL_3X = version_num >= 0x30000000 and version_num < 0x40000000,
     OPENSSL_111 = version_num >= 0x10101000 and version_num < 0x10200000,
   }, {
