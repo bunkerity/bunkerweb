@@ -114,7 +114,7 @@ To keep the logs accessible from the web UI, we recommend that you use a syslog 
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.2-rc1
+        image: bunkerity/bunkerweb:1.6.2-rc2
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -132,7 +132,7 @@ To keep the logs accessible from the web UI, we recommend that you use a syslog 
             syslog-address: "udp://10.20.30.254:514" # This is the syslog-ng container address
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.2-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.2-rc2
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
@@ -160,7 +160,7 @@ To keep the logs accessible from the web UI, we recommend that you use a syslog 
             syslog-address: "udp://10.20.30.254:514" # This is the syslog-ng container address
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.2-rc1
+        image: bunkerity/bunkerweb-ui:1.6.2-rc2
         environment:
           DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Remember to set a stronger password for the database
           ADMIN_USERNAME: "changeme"
@@ -239,7 +239,7 @@ To keep the logs accessible from the web UI, we recommend that you use a syslog 
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.2-rc1
+        image: bunkerity/bunkerweb:1.6.2-rc2
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -258,7 +258,7 @@ To keep the logs accessible from the web UI, we recommend that you use a syslog 
             syslog-address: "udp://10.20.30.254:514" # This is the syslog-ng container address
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.2-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.2-rc2
         environment:
           <<: *bw-ui-env
           BUNKERWEB_INSTANCES: "" # We don't need to specify the BunkerWeb instance here as they are automatically detected by the autoconf service
@@ -278,7 +278,7 @@ To keep the logs accessible from the web UI, we recommend that you use a syslog 
             syslog-address: "udp://10.20.30.254:514" # This is the syslog-ng container address
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.2-rc1
+        image: bunkerity/bunkerweb-autoconf:1.6.2-rc2
         depends_on:
           - bunkerweb
           - bw-docker
@@ -297,7 +297,7 @@ To keep the logs accessible from the web UI, we recommend that you use a syslog 
             syslog-address: "udp://10.20.30.254:514" # This is the syslog-ng container address
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.2-rc1
+        image: bunkerity/bunkerweb-ui:1.6.2-rc2
         environment:
           <<: *bw-ui-env
           ADMIN_USERNAME: "changeme"
@@ -612,7 +612,7 @@ The web UI can be deployed and configured without going through the setup wizard
 
     !!! info "Database backend"
 
-        If you want another Database backend than MariaDB please refer to the docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.2-rc1/misc/integrations) of the repository.
+        If you want another Database backend than MariaDB please refer to the docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.2-rc2/misc/integrations) of the repository.
 
     Here is the docker-compose boilerplate that you can use (don't forget to edit the `changeme` data):
 
@@ -623,7 +623,7 @@ The web UI can be deployed and configured without going through the setup wizard
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.2-rc1
+        image: bunkerity/bunkerweb:1.6.2-rc2
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -635,7 +635,7 @@ The web UI can be deployed and configured without going through the setup wizard
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.2-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.2-rc2
         environment:
           <<: *ui-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
@@ -657,7 +657,7 @@ The web UI can be deployed and configured without going through the setup wizard
           - bw-db
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.2-rc1
+        image: bunkerity/bunkerweb-ui:1.6.2-rc2
         environment:
           <<: *ui-env
           ADMIN_USERNAME: "changeme"
@@ -720,7 +720,7 @@ The web UI can be deployed and configured without going through the setup wizard
 
     !!! info "Database backend"
 
-        If you want another Database backend than MariaDB please refer to the docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.2-rc1/misc/integrations) of the repository.
+        If you want another Database backend than MariaDB please refer to the docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.2-rc2/misc/integrations) of the repository.
 
     Here is the docker-compose boilerplate that you can use (don't forget to edit the `changeme` data):
 
@@ -732,7 +732,7 @@ The web UI can be deployed and configured without going through the setup wizard
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.2-rc1
+        image: bunkerity/bunkerweb:1.6.2-rc2
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -747,7 +747,7 @@ The web UI can be deployed and configured without going through the setup wizard
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.2-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.2-rc2
         environment:
           <<: *ui-env
           BUNKERWEB_INSTANCES: ""
@@ -761,7 +761,7 @@ The web UI can be deployed and configured without going through the setup wizard
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.2-rc1
+        image: bunkerity/bunkerweb-autoconf:1.6.2-rc2
         depends_on:
           - bw-docker
         environment:
@@ -795,7 +795,7 @@ The web UI can be deployed and configured without going through the setup wizard
           - bw-db
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.2-rc1
+        image: bunkerity/bunkerweb-ui:1.6.2-rc2
         environment:
           <<: *ui-env
           ADMIN_USERNAME: "changeme"
@@ -838,7 +838,7 @@ The web UI can be deployed and configured without going through the setup wizard
 
     !!! info "Database backend"
 
-        If you want another Database backend than MariaDB please refer to the yaml files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.2-rc1/misc/integrations) of the repository.
+        If you want another Database backend than MariaDB please refer to the yaml files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.2-rc2/misc/integrations) of the repository.
 
     Here is the corresponding part of your values.yaml file that you can use:
 
@@ -884,7 +884,7 @@ The web UI can be deployed and configured without going through the setup wizard
 
     !!! info "Database backend"
 
-        If you want another Database backend than MariaDB please refer to the stack files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.2-rc1/misc/integrations) of the repository.
+        If you want another Database backend than MariaDB please refer to the stack files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.2-rc2/misc/integrations) of the repository.
 
     Here is the stack boilerplate that you can use (don't forget to edit the `changeme` data):
 
@@ -896,7 +896,7 @@ The web UI can be deployed and configured without going through the setup wizard
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.2-rc1
+        image: bunkerity/bunkerweb:1.6.2-rc2
         ports:
           - published: 80
             target: 8080
@@ -925,7 +925,7 @@ The web UI can be deployed and configured without going through the setup wizard
             - "bunkerweb.INSTANCE=yes"
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.2-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.2-rc2
         environment:
           <<: *ui-env
           BUNKERWEB_INSTANCES: ""
@@ -941,7 +941,7 @@ The web UI can be deployed and configured without going through the setup wizard
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.2-rc1
+        image: bunkerity/bunkerweb-autoconf:1.6.2-rc2
         environment:
           <<: *ui-env
           DOCKER_HOST: "tcp://bw-docker:2375"
@@ -986,7 +986,7 @@ The web UI can be deployed and configured without going through the setup wizard
           - bw-universe
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.2-rc1
+        image: bunkerity/bunkerweb-ui:1.6.2-rc2
         environment:
           <<: *ui-env
           ADMIN_USERNAME: "changeme"
