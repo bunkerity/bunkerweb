@@ -12,35 +12,56 @@
                name="csrf_token"
                value="{{ csrf_token() }}" />
         <p id="services-waiting"
-           class="text-center relative w-full p-2 text-primary rounded-lg fw-bold">Loading services...</p>
+           class="text-center relative w-full p-2 text-primary rounded-lg fw-bold"
+           data-i18n="status.loading_services">Loading services...</p>
         <table id="services"
                class="table responsive nowrap position-relative w-100 d-none">
             <thead>
                 <tr>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
-                        data-bs-original-title="Show the services' details"></th>
+                        data-bs-original-title="Show the Services' details"
+                        data-i18n="tooltip.table.services.details"></th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
-                        data-bs-original-title="Select all services"></th>
+                        data-bs-original-title="Select all Services"
+                        data-i18n="tooltip.table.services.select_all"></th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
-                        data-bs-original-title="The name of the service">Service name</th>
+                        data-bs-original-title="The Service's name"
+                        data-i18n="tooltip.table.services.name">
+                        <span data-i18n="table.header.name">Name</span>
+                    </th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
-                        data-bs-original-title="The type of the Service">Type</th>
+                        data-bs-original-title="The Service's type"
+                        data-i18n="tooltip.table.services.type">
+                        <span data-i18n="table.header.type">Type</span>
+                    </th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
-                        data-bs-original-title="The creation method of the Service">Method</th>
+                        data-bs-original-title="The Service's creation method"
+                        data-i18n="tooltip.table.services.method">
+                        <span data-i18n="table.header.method">Method</span>
+                    </th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
-                        data-bs-original-title="The date and time when the Service was created">Created</th>
+                        data-bs-original-title="The Service's creation date"
+                        data-i18n="tooltip.table.services.created">
+                        <span data-i18n="table.header.created">Created</span>
+                    </th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
-                        data-bs-original-title="The date and time when the Service was last updated">Last Update</th>
+                        data-bs-original-title="The Service's last update date"
+                        data-i18n="tooltip.table.services.last_update">
+                        <span data-i18n="table.header.last_update">Last update</span>
+                    </th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
-                        data-bs-original-title="The actions that can be performed on the Service">Actions</th>
+                        data-bs-original-title="The actions that can be performed on the Service"
+                        data-i18n="tooltip.table.services.actions">
+                        <span data-i18n="table.header.actions">Actions</span>
+                    </th>
                 </tr>
             </thead>
             <tbody>
@@ -59,11 +80,13 @@
                             {% if service['is_draft'] %}
                                 <span id="type-{{ service['id'].replace('.', '-') }}"
                                       data-value="draft"
-                                      class="badge rounded-pill bg-label-secondary">Draft</span>
+                                      class="badge rounded-pill bg-label-secondary"
+                                      data-i18n="status.draft">Draft</span>
                             {% else %}
                                 <span id="type-{{ service['id'].replace('.', '-') }}"
                                       data-value="online"
-                                      class="badge rounded-pill bg-label-primary">Online</span>
+                                      class="badge rounded-pill bg-label-primary"
+                                      data-i18n="status.online">Online</span>
                             {% endif %}
                         </td>
                         <td id="method-{{ service['id'].replace('.', '-') }}">{{ service["method"] }}</td>
@@ -71,13 +94,15 @@
                         <td class="service-last-update-date">{{ service['last_update'].astimezone().isoformat() }}</td>
                         <td>
                             <div class="d-flex justify-content-evenly">
-                                <div {% if service['is_draft'] %}data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Disabled by draft mode"{% endif %}>
+                                <div {% if service['is_draft'] %}data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Disabled by draft mode" data-i18n="tooltip.disabled_draft"{% endif %}>
                                     <a role="button"
                                        class="btn btn-outline-primary btn-sm me-1{% if service['is_draft'] %} disabled{% endif %}"
                                        href="https://{{ service['id'] }}"
                                        data-bs-toggle="tooltip"
                                        data-bs-placement="bottom"
                                        data-bs-original-title="Access service {{ service['id'] }}"
+                                       data-i18n="tooltip.link.access_service"
+                                       data-i18n-options='{"name": "{{ service['id'] }}"}'
                                        target="_blank"
                                        rel="noreferrer">
                                         <i class="bx bx-link-external bx-xs"></i>
@@ -88,7 +113,9 @@
                                    href="{{ url_for("services") }}/{{ service['id'] }}"
                                    data-bs-toggle="tooltip"
                                    data-bs-placement="bottom"
-                                   data-bs-original-title="{% if is_readonly %}View{% else %}Edit{% endif %} service {{ service['id'] }}">
+                                   data-bs-original-title="..."
+                                   data-i18n="{% if is_readonly %}tooltip.link.view_service{% else %}tooltip.link.edit_service{% endif %}"
+                                   data-i18n-options='{"name": "{{ service['id'] }}"}'>
                                     <i class="bx bx-{% if is_readonly %}show{% else %}edit{% endif %} bx-xs"></i>
                                 </a>
                                 <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Disabled by readonly"{% endif %}>
@@ -97,18 +124,22 @@
                                        href="{{ url_for("services") }}/new?clone={{ service['id'] }}"
                                        data-bs-toggle="tooltip"
                                        data-bs-placement="bottom"
-                                       data-bs-original-title="Clone service {{ service['id'] }}">
+                                       data-bs-original-title="Clone service {{ service['id'] }}"
+                                       data-i18n="tooltip.link.clone_service"
+                                       data-i18n-options='{"name": "{{ service['id'] }}"}'>
                                         <i class="bx bx-copy-alt bx-xs"></i>
                                     </a>
                                 </div>
-                                <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Disabled by readonly"{% endif %}>
+                                <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Disabled by readonly" data-i18n="tooltip.disabled_readonly"{% endif %}>
                                     <button type="button"
                                             class="btn btn-outline-secondary btn-sm me-1 convert-service{% if is_readonly %} disabled{% endif %}"
                                             data-service-id="{{ service['id'] }}"
                                             data-value="{{ 'online' if service['is_draft'] else 'draft' }}"
                                             data-bs-toggle="tooltip"
                                             data-bs-placement="bottom"
-                                            data-bs-original-title="Convert service {{ service['id'] }} to {{ 'online' if service['is_draft'] else 'draft' }}">
+                                            data-bs-original-title="..."
+                                            data-i18n="tooltip.button.convert_service_to_{{ 'online' if service['is_draft'] else 'draft' }}"
+                                            data-i18n-options='{"name": "{{ service['id'] }}"}'>
                                         <i class="bx bx-transfer bx-xs"></i>
                                     </button>
                                 </div>
@@ -118,13 +149,19 @@
                                    data-bs-toggle="tooltip"
                                    data-bs-placement="bottom"
                                    data-bs-original-title="Export service {{ service['id'] }} configuration"
+                                   data-i18n="tooltip.link.export_service"
+                                   data-i18n-options='{"name": "{{ service['id'] }}"}'
                                    target="_blank"
                                    rel="noreferrer">
                                     <i class="bx bx-export bx-xs"></i>
                                 </a>
+                                {% set delete_tooltip_key = 'tooltip.disabled_readonly' if user_readonly else ('tooltip.disabled_db_readonly' if is_readonly else ('tooltip.disabled_by_method' if service['method'] != 'ui' else 'tooltip.button.delete_service')) %}
+                                {% set delete_tooltip_options = '{"method": "' ~ service['method'] ~ '"}' if service['method'] != 'ui' and not is_readonly else '{"name": "' ~ service['id'] ~ '"}' %}
                                 <div data-bs-toggle="tooltip"
                                      data-bs-placement="bottom"
-                                     data-bs-original-title="{% if service['method'] != 'ui' or is_readonly %}Disabled by {% if is_readonly %}readonly{% else %}{{ service['method'] }}{% endif %}{% else %}Delete service {{ service['id'] }}{% endif %}">
+                                     data-bs-original-title="..."
+                                     data-i18n="{{ delete_tooltip_key }}"
+                                     data-i18n-options='{{ delete_tooltip_options }}'>
                                     <button type="button"
                                             data-service-id="{{ service['id'] }}"
                                             class="btn btn-outline-danger btn-sm me-1 delete-service{% if service['method'] != 'ui' %} disabled{% endif %}">
@@ -150,13 +187,14 @@
         <div class="toast-header d-flex align-items-center text-warning">
             <i class="d-block h-auto rounded tf-icons bx bx-xs bx-bell bx-tada me-2"></i>
             <span class="fw-medium me-auto">BunkerWeb Forever</span>
-            <small class="text-body-secondary">just now</small>
+            <small class="text-body-secondary" data-i18n="flash.time.just_now">just now</small>
             <button type="button"
                     class="btn-close"
                     data-bs-dismiss="toast"
-                    aria-label="Close"></button>
+                    aria-label="Close"
+                    data-i18n="aria.label.close"></button>
         </div>
-        <div class="toast-body">If you read this, it means that you're curious 👀</div>
+        <div class="toast-body" data-i18n="flash.easter_egg">If you read this, it means that you're curious 👀</div>
     </div>
     {% if not is_readonly %}
         <div class="modal fade"
@@ -168,11 +206,12 @@
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">Confirm Conversion</h5>
+                        <h5 class="modal-title" data-i18n="modal.title.confirm_conversion">Confirm Conversion</h5>
                         <button type="button"
                                 class="btn-close"
                                 data-bs-dismiss="modal"
-                                aria-label="Close"></button>
+                                aria-label="Close"
+                                data-i18n="aria.label.close"></button>
                     </div>
                     <form action="{{ url_for("services") }}/convert" method="POST">
                         <div class="modal-body">
@@ -182,14 +221,21 @@
                                    id="selected-services-input-convert"
                                    name="services"
                                    value="" />
-                            <div class="alert alert-danger text-center" role="alert">Are you sure you want to convert the selected services?</div>
+                            <div class="alert alert-danger text-center"
+                                 role="alert"
+                                 data-i18n="modal.body.services_conversion_confirmation">
+                                Are you sure you want to convert the selected services?
+                            </div>
                             <div id="selected-services-convert" class="mb-3"></div>
                         </div>
                         <div class="modal-footer justify-content-center">
-                            <button type="submit" class="btn btn-outline-primary me-2">Convert services</button>
+                            <button type="submit"
+                                    class="btn btn-outline-primary me-2"
+                                    data-i18n="button.convert_services">Convert services</button>
                             <button type="reset"
                                     class="btn btn-outline-secondary"
-                                    data-bs-dismiss="modal">Cancel</button>
+                                    data-bs-dismiss="modal"
+                                    data-i18n="button.cancel">Cancel</button>
                         </div>
                     </form>
                 </div>
@@ -204,11 +250,12 @@
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">Confirm deletion</h5>
+                        <h5 class="modal-title" data-i18n="modal.title.confirm_deletion">Confirm deletion</h5>
                         <button type="button"
                                 class="btn-close"
                                 data-bs-dismiss="modal"
-                                aria-label="Close"></button>
+                                aria-label="Close"
+                                data-i18n="aria.label.close"></button>
                     </div>
                     <form action="{{ url_for("services") }}/delete" method="POST">
                         <div class="modal-body">
@@ -217,14 +264,21 @@
                                    id="selected-services-input-delete"
                                    name="services"
                                    value="" />
-                            <div class="alert alert-danger text-center" role="alert">Are you sure you want to delete the selected services?</div>
+                            <div class="alert alert-danger text-center"
+                                 role="alert"
+                                 data-i18n="modal.body.services_deletion_confirmation">
+                                Are you sure you want to delete the selected services?
+                            </div>
                             <div id="selected-services-delete" class="mb-3"></div>
                         </div>
                         <div class="modal-footer justify-content-center">
-                            <button type="submit" class="btn btn-outline-danger me-2">Delete</button>
+                            <button type="submit"
+                                    class="btn btn-outline-danger me-2"
+                                    data-i18n="button.delete">Delete</button>
                             <button type="reset"
                                     class="btn btn-outline-secondary"
-                                    data-bs-dismiss="modal">Cancel</button>
+                                    data-bs-dismiss="modal"
+                                    data-i18n="button.cancel">Cancel</button>
                         </div>
                     </form>
                 </div>

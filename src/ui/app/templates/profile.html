@@ -15,7 +15,7 @@
                             aria-controls="navs-pills-profile"
                             aria-selected="true">
                         <i class="tf-icons bx bx-user bx-sm"></i>
-                        <span class="d-none d-sm-inline">&nbsp;Profile</span>
+                        <span class="d-none d-sm-inline">&nbsp;<span data-i18n="profile.tab.profile">Profile</span></span>
                     </button>
                 </li>
                 <li class="nav-item me-0 me-sm-2" role="presentation">
@@ -26,7 +26,7 @@
                             data-bs-target="#navs-pills-security"
                             aria-controls="navs-pills-security">
                         <i class="tf-icons bx bx-check-shield bx-sm"></i>
-                        <span class="d-none d-sm-inline">&nbsp;Security</span>
+                        <span class="d-none d-sm-inline">&nbsp;<span data-i18n="profile.tab.security">Security</span></span>
                     </button>
                 </li>
                 <li class="nav-item" role="presentation">
@@ -37,7 +37,7 @@
                             data-bs-target="#navs-pills-sessions"
                             aria-controls="navs-pills-sessions">
                         <i class="tf-icons bx bx-link-alt bx-sm"></i>
-                        <span class="d-none d-sm-inline">&nbsp;Sessions</span>
+                        <span class="d-none d-sm-inline">&nbsp;<span data-i18n="profile.tab.sessions">Sessions</span></span>
                     </button>
                 </li>
             </ul>
@@ -84,7 +84,7 @@
                     <!-- Profile -->
                     <div class="card position-relative">
                         <i class='bx bx-user bx-sm position-absolute top-0 end-0 m-3'></i>
-                        <h5 class="card-header">Edit Profile</h5>
+                        <h5 class="card-header" data-i18n="profile.card.title.edit_profile">Edit Profile</h5>
                         <div class="card-body pb-2">
                             <div class="d-flex align-items-start align-items-sm-center gap-6 pb-4 border-bottom">
                                 <img src="{{ avatar_url }}"
@@ -95,10 +95,10 @@
                                      data-bs-toggle="tooltip"
                                      data-bs-placement="top"
                                      data-bs-html="true"
-                                     data-bs-original-title="<i class='bx bx-rocket bx-xs'></i><span>Coming soon</span>">
+                                     data-bs-original-title="<i class='bx bx-rocket bx-xs'></i><span data-i18n='profile.card.coming_soon'>Coming Soon</span>">
                                     <label for="upload" class="btn btn-primary me-3 mb-4 disabled" tabindex="0">
                                         <i class="bx bx-upload me-0 me-sm-1"></i>
-                                        <span class="d-none d-sm-block">Upload new photo</span>
+                                        <span class="d-none d-sm-block" data-i18n="button.upload_photo">Upload new photo</span>
                                         <input type="file"
                                                id="upload"
                                                class="account-file-input"
@@ -108,9 +108,9 @@
                                     <button type="button"
                                             class="btn btn-outline-secondary account-image-reset mb-4 disabled">
                                         <i class="bx bx-reset me-0 me-sm-1"></i>
-                                        <span class="d-none d-sm-block">Reset</span>
+                                        <span class="d-none d-sm-block" data-i18n="button.reset">Reset</span>
                                     </button>
-                                    <div>Allowed JPG, GIF or PNG. Max size of 800K</div>
+                                    <div data-i18n="profile.help.photo_extensions">Allowed JPG, GIF or PNG. Max size of 800K</div>
                                 </div>
                             </div>
                         </div>
@@ -120,19 +120,20 @@
                                 <div class="row g-3">
                                     <div class="col-md-6"
                                          {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Disabled by readonly"{% endif %}>
-                                        <label for="username" class="form-label">Username</label>
+                                        <label for="username" class="form-label" data-i18n="form.label.username">Username</label>
                                         <input class="form-control"
                                                type="text"
                                                name="username"
                                                value="{{ current_user.get_id() }}"
-                                               placeholder="john.doe@example.com"
+                                               placeholder="John Doe"
                                                aria-label="Username"
+                                               data-i18n="form.placeholder.username_example"
                                                required
                                                {% if is_readonly %}disabled{% endif %} />
                                     </div>
                                     <div class="col-md-6"
                                          {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Disabled by readonly"{% endif %}>
-                                        <label for="email" class="form-label">E-mail</label>
+                                        <label for="email" class="form-label" data-i18n="form.label.email">E-mail</label>
                                         <input class="form-control"
                                                type="email"
                                                name="email"
@@ -142,7 +143,9 @@
                                                {% if is_readonly %}disabled{% endif %} />
                                     </div>
                                     <div class="col-md-12 form-password-toggle">
-                                        <label class="form-label" for="password">Current password</label>
+                                        <label class="form-label"
+                                               for="password"
+                                               data-i18n="form.label.current_password">Current password</label>
                                         <div class="input-group input-group-merge"
                                              {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Disabled by readonly"{% endif %}>
                                             <input type="password"
@@ -159,11 +162,12 @@
                                 <div class="mt-4 justify-content-center d-flex">
                                     <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The database is in readonly, therefore the configuration is locked" {% endif %}>
                                         <button type="submit"
-                                                class="btn btn-primary me-2{% if is_readonly %} disabled{% endif %}">
-                                            Save Changes
-                                        </button>
+                                                class="btn btn-primary me-2{% if is_readonly %} disabled{% endif %}"
+                                                data-i18n="button.save_changes">Save Changes</button>
                                     </div>
-                                    <button type="reset" class="btn btn-outline-secondary">Cancel</button>
+                                    <button type="reset"
+                                            class="btn btn-outline-secondary"
+                                            data-i18n="button.cancel">Cancel</button>
                                 </div>
                             </form>
                         </div>
@@ -174,7 +178,7 @@
                     <!-- Theme -->
                     <div class="card position-relative">
                         <i class='bx bx-{% if theme == 'light' %}sun{% else %}moon{% endif %} bx-sm position-absolute top-0 end-0 m-3 dark-mode-toggle-icon'></i>
-                        <h5 class="card-header">Change Theme</h5>
+                        <h5 class="card-header" data-i18n="profile.card.title.change_theme">Change Theme</h5>
                         <div class="card-body pb-4">
                             <form method="POST" action="{{ profile_url }}/edit">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
@@ -185,20 +189,25 @@
                                                 id="theme-toggle"
                                                 name="theme"
                                                 {% if is_readonly %}disabled{% endif %}>
-                                            <option value="light" {% if theme == "light" %}selected{% endif %}>Light</option>
-                                            <option value="dark" {% if theme == "dark" %}selected{% endif %}>Dark</option>
+                                            <option value="light"
+                                                    data-i18n="theme.light"
+                                                    {% if theme == "light" %}selected{% endif %}>Light</option>
+                                            <option value="dark"
+                                                    data-i18n="theme.dark"
+                                                    {% if theme == "dark" %}selected{% endif %}>Dark</option>
                                         </select>
-                                        <label for="theme">Theme</label>
+                                        <label for="theme" data-i18n="form.label.theme">Theme</label>
                                     </div>
                                 </div>
                                 <div class="mt-4 justify-content-center d-flex">
                                     <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The database is in readonly, therefore the configuration is locked" {% endif %}>
                                         <button type="submit"
-                                                class="btn btn-primary me-2{% if is_readonly %} disabled{% endif %}">
-                                            Save Changes
-                                        </button>
+                                                class="btn btn-primary me-2{% if is_readonly %} disabled{% endif %}"
+                                                data-i18n="button.save_changes">Save Changes</button>
                                     </div>
-                                    <button type="reset" class="btn btn-outline-secondary">Cancel</button>
+                                    <button type="reset"
+                                            class="btn btn-outline-secondary"
+                                            data-i18n="button.cancel">Cancel</button>
                                 </div>
                             </form>
                         </div>
@@ -213,13 +222,15 @@
                     <!-- Password -->
                     <div class="card mb-4 position-relative">
                         <i class='bx bx-check-shield bx-sm position-absolute top-0 end-0 m-3'></i>
-                        <h5 class="card-header">Change Password</h5>
+                        <h5 class="card-header" data-i18n="profile.card.title.change_password">Change Password</h5>
                         <div class="card-body pb-4">
                             <form method="POST" action="{{ profile_url }}/edit" autocomplete="off">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                                 <div class="row g-3">
                                     <div class="col-md-12 form-password-toggle">
-                                        <label for="new_password" class="form-label">New Password</label>
+                                        <label for="new_password"
+                                               class="form-label"
+                                               data-i18n="form.label.new_password">New Password</label>
                                         <div class="input-group input-group-merge"
                                              {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Disabled by readonly"{% endif %}>
                                             <input class="form-control"
@@ -237,26 +248,28 @@
                                         <div class="mt-3">
                                             <ul class="list-unstyled" id="password-requirements">
                                                 <li id="length-check">
-                                                    <i class="bx bx-x text-danger"></i> Your password must
-                                                    have at least 8 characters.
+                                                    <i class="bx bx-x text-danger"></i> <span data-i18n="form.validation.password_length">Your password must
+                                                    have at least 8 characters.</span>
                                                 </li>
                                                 <li id="uppercase-check">
-                                                    <i class="bx bx-x text-danger"></i> Your password must
-                                                    have at least 1 uppercase letter.
+                                                    <i class="bx bx-x text-danger"></i> <span data-i18n="form.validation.password_uppercase">Your password must
+                                                    have at least 1 uppercase letter.</span>
                                                 </li>
                                                 <li id="number-check">
-                                                    <i class="bx bx-x text-danger"></i> Your password must
-                                                    have at least 1 number.
+                                                    <i class="bx bx-x text-danger"></i> <span data-i18n="form.validation.password_number">Your password must
+                                                    have at least 1 number.</span>
                                                 </li>
                                                 <li id="special-check">
-                                                    <i class="bx bx-x text-danger"></i> Your password must
-                                                    have at least 1 special character.
+                                                    <i class="bx bx-x text-danger"></i> <span data-i18n="form.validation.password_special">Your password must
+                                                    have at least 1 special character.</span>
                                                 </li>
                                             </ul>
                                         </div>
                                     </div>
                                     <div class="col-md-12 form-password-toggle">
-                                        <label for="new_password_confirm" class="form-label">Confirm Password</label>
+                                        <label for="new_password_confirm"
+                                               class="form-label"
+                                               data-i18n="form.label.confirm_password">Confirm Password</label>
                                         <div class="input-group input-group-merge"
                                              {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Disabled by readonly"{% endif %}>
                                             <input class="form-control" type="password" id="new_password_confirm" name="new_password_confirm" placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;" aria-label="Confirm Password" autocomplete="off" required pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[ !&quot;#$%&'()*+,./:;<=>?@[\\\]^_`{|}~-]).{8,}$"
@@ -266,7 +279,9 @@
                                         </div>
                                     </div>
                                     <div class="col-md-12 form-password-toggle">
-                                        <label class="form-label" for="password">Current password</label>
+                                        <label class="form-label"
+                                               for="password"
+                                               data-i18n="form.label.current_password">Current password</label>
                                         <div class="input-group input-group-merge"
                                              {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Disabled by readonly"{% endif %}>
                                             <input type="password"
@@ -283,11 +298,12 @@
                                 <div class="mt-4 justify-content-center d-flex">
                                     <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The database is in readonly, therefore the configuration is locked" {% endif %}>
                                         <button type="submit"
-                                                class="btn btn-primary me-2{% if is_readonly %} disabled{% endif %}">
-                                            Save Changes
-                                        </button>
+                                                class="btn btn-primary me-2{% if is_readonly %} disabled{% endif %}"
+                                                data-i18n="button.save_changes">Save Changes</button>
                                     </div>
-                                    <button type="reset" class="btn btn-outline-secondary">Cancel</button>
+                                    <button type="reset"
+                                            class="btn btn-outline-secondary"
+                                            data-i18n="button.cancel">Cancel</button>
                                 </div>
                             </form>
                         </div>
@@ -298,7 +314,7 @@
                     <!-- Two-Factor Authentication (2FA) -->
                     <div class="card mb-4 position-relative">
                         <i class='bx bx-qr bx-sm position-absolute top-0 end-0 m-3'></i>
-                        <h5 class="card-header text-center">Two-Factor Authentication (2FA)</h5>
+                        <h5 class="card-header text-center" data-i18n="profile.card.title.2fa">Two-Factor Authentication (2FA)</h5>
                         <div class="card-body">
                             {% if not is_totp %}
                                 <!-- Enable 2FA -->
@@ -307,7 +323,7 @@
                                     <div class="row g-3">
                                         <!-- QR Code Section -->
                                         <div class="col-md-12 text-center">
-                                            <h5 class="mb-0">Enable 2FA</h5>
+                                            <h5 class="mb-0" data-i18n="profile.2fa.enable_title">Enable 2FA</h5>
                                             <img class="img-fluid qr-code"
                                                  src="{{ totp_qr_image }}"
                                                  alt="2FA QR Code"
@@ -315,13 +331,16 @@
                                                  width="200" />
                                         </div>
                                         <div class="col-md-12 form-password-toggle">
-                                            <label for="secret_token" class="form-label text-start d-block">Secret Token</label>
+                                            <label for="secret_token"
+                                                   class="form-label text-start d-block"
+                                                   data-i18n="form.label.secret_token">Secret Token</label>
                                             <div class="input-group input-group-merge">
                                                 <input type="password"
                                                        name="secret_token"
                                                        class="form-control"
                                                        placeholder="Secret Token"
                                                        value="{{ totp_secret }}"
+                                                       data-i18n="form.placeholder.secret_token"
                                                        readonly />
                                                 {% if request.is_secure %}
                                                     <span class="input-group-text cursor-pointer copy-to-clipboard">
@@ -335,19 +354,24 @@
                                         </div>
                                         <div class="col-md-12"
                                              {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Disabled by readonly"{% endif %}>
-                                            <label for="2fa_code" class="form-label text-start d-block">2FA Code</label>
+                                            <label for="2fa_code"
+                                                   class="form-label text-start d-block"
+                                                   data-i18n="form.label.2fa_code">2FA Code</label>
                                             <div class="input-group">
                                                 <input class="form-control"
                                                        type="text"
                                                        name="totp_token"
                                                        placeholder="Enter code"
                                                        aria-label="2FA Code"
+                                                       data-i18n="form.placeholder.2fa_code"
                                                        required
                                                        {% if is_readonly %}disabled{% endif %} />
                                             </div>
                                         </div>
                                         <div class="col-md-12 form-password-toggle">
-                                            <label class="form-label" for="password">Current password</label>
+                                            <label class="form-label"
+                                                   for="password"
+                                                   data-i18n="form.label.current_password">Current password</label>
                                             <div class="input-group input-group-merge"
                                                  {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Disabled by readonly"{% endif %}>
                                                 <input type="password"
@@ -364,9 +388,8 @@
                                     <div class="mt-4 justify-content-center d-flex">
                                         <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The database is in readonly, therefore the configuration is locked" {% endif %}>
                                             <button type="submit"
-                                                    class="btn btn-primary{% if is_readonly %} disabled{% endif %}">
-                                                Enable TOTP
-                                            </button>
+                                                    class="btn btn-primary{% if is_readonly %} disabled{% endif %}"
+                                                    data-i18n="button.enable_totp">Enable TOTP</button>
                                         </div>
                                     </div>
                                 </form>
@@ -377,10 +400,14 @@
                                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                                     <div class="row g-3">
                                         <div class="col-md-12 text-center">
-                                            <h5 class="mb-0">Disable 2FA</h5>
+                                            <h5 class="mb-0" data-i18n="profile.2fa.disable_title">Disable 2FA</h5>
                                         </div>
                                         <div class="col-md-12">
-                                            <label for="totp_token" class="form-label text-start d-block">2FA Code or Recovery Code</label>
+                                            <label for="totp_token"
+                                                   class="form-label text-start d-block"
+                                                   data-i18n="form.label.2fa_code_or_recovery">
+                                                2FA Code or Recovery Code
+                                            </label>
                                             <div class="input-group"
                                                  {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Disabled by readonly"{% endif %}>
                                                 <input class="form-control"
@@ -388,12 +415,15 @@
                                                        name="totp_token"
                                                        placeholder="Enter code"
                                                        aria-label="2FA Code or Recovery Code"
+                                                       data-i18n="form.placeholder.2fa_or_recovery"
                                                        required
                                                        {% if is_readonly %}disabled{% endif %} />
                                             </div>
                                         </div>
                                         <div class="col-md-12 form-password-toggle">
-                                            <label class="form-label" for="password">Current password</label>
+                                            <label class="form-label"
+                                                   for="password"
+                                                   data-i18n="form.label.current_password">Current password</label>
                                             <div class="input-group input-group-merge"
                                                  {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Disabled by readonly"{% endif %}>
                                                 <input type="password"
@@ -410,9 +440,8 @@
                                     <div class="mt-4 justify-content-center d-flex">
                                         <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The database is in readonly, therefore the configuration is locked" {% endif %}>
                                             <button type="submit"
-                                                    class="btn btn-primary{% if is_readonly %} disabled{% endif %}">
-                                                Disable TOTP
-                                            </button>
+                                                    class="btn btn-primary{% if is_readonly %} disabled{% endif %}"
+                                                    data-i18n="button.disable_totp">Disable TOTP</button>
                                         </div>
                                     </div>
                                 </form>
@@ -425,11 +454,12 @@
                         <!-- Refresh Recovery Codes -->
                         <div class="card mb-4 position-relative">
                             <i class='bx bx-data bx-sm position-absolute top-0 end-0 m-3'></i>
-                            <h5 class="card-header">Refresh Recovery Codes</h5>
+                            <h5 class="card-header"
+                                data-i18n="profile.card.title.refresh_recovery_codes">Refresh Recovery Codes</h5>
                             <div class="card-body">
                                 <div class="alert alert-danger text-center" role="alert">
-                                    <strong>Notice:</strong> Refreshing your recovery codes will
-                                    invalidate the previous ones.
+                                    <strong data-i18n="alert.notice">Notice</strong>: <span data-i18n="profile.alert.refresh_recovery_codes">Refreshing your recovery codes will
+                                    invalidate the previous ones.</span>
                                 </div>
                                 <form method="POST"
                                       action="{{ profile_url }}/totp-refresh"
@@ -438,7 +468,9 @@
                                     <div class="row g-3">
                                         <div class="col-md-12 form-password-toggle"
                                              {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Disabled by readonly"{% endif %}>
-                                            <label class="form-label" for="password">Current password</label>
+                                            <label class="form-label"
+                                                   for="password"
+                                                   data-i18n="form.label.current_password">Current password</label>
                                             <div class="input-group input-group-merge">
                                                 <input type="password"
                                                        class="form-control"
@@ -454,7 +486,8 @@
                                     <div class="mt-4 justify-content-center d-flex">
                                         <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The database is in readonly, therefore the configuration is locked" {% endif %}>
                                             <button type="submit"
-                                                    class="btn btn-primary{% if is_readonly %} disabled{% endif %}">
+                                                    class="btn btn-primary{% if is_readonly %} disabled{% endif %}"
+                                                    data-i18n="button.refresh_recovery_codes">
                                                 Refresh Recovery Codes
                                             </button>
                                         </div>
@@ -474,11 +507,13 @@
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                         <div class="card mb-4 position-relative">
                             <i class='bx bx-history bx-sm position-absolute top-0 end-0 m-3'></i>
-                            <h5 class="card-header">Sessions</h5>
+                            <h5 class="card-header" data-i18n="profile.card.title.sessions">Sessions</h5>
                             <div class="card-body">
                                 <div class="row g-3">
                                     <div class="col-md-12 form-password-toggle">
-                                        <label class="form-label" for="password">Current password</label>
+                                        <label class="form-label"
+                                               for="password"
+                                               data-i18n="form.label.current_password">Current password</label>
                                         <div class="input-group input-group-merge"
                                              {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Disabled by readonly"{% endif %}>
                                             <input type="password"
@@ -495,9 +530,8 @@
                                 <div class="mt-4 d-flex justify-content-center">
                                     <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The database is in readonly, therefore the configuration is locked" {% endif %}>
                                         <button type="submit"
-                                                class="btn btn-danger{% if is_readonly %} disabled{% endif %}">
-                                            Wipe other sessions
-                                        </button>
+                                                class="btn btn-danger{% if is_readonly %} disabled{% endif %}"
+                                                data-i18n="button.wipe_other_sessions">Wipe other sessions</button>
                                     </div>
                                 </div>
                             </div>
@@ -523,11 +557,11 @@
                                 <div class="card-header {{ card_header_classes }} d-flex justify-content-between align-items-center mb-2 p-3">
                                     <div class="d-flex align-items-center">
                                         <i class="bx {{ card_icon }} me-2"></i>
-                                        <h5 class="mb-0 text-white">Session</h5>
+                                        <h5 class="mb-0 text-white" data-i18n="profile.session.title">Session</h5>
                                     </div>
                                     {% if session["current"] %}
                                         <span class="badge bg-bw-green text-white fs-6">
-                                            <i class="bx bx-user-check"></i> Current Session
+                                            <i class="bx bx-user-check"></i> <span data-i18n="profile.session.current_session">Current Session</span>
                                         </span>
                                     {% endif %}
                                 </div>
@@ -536,25 +570,25 @@
                                         <div class="list-group-item d-flex align-items-center">
                                             <strong>
                                                 <i class="bx bx-window-alt {{ items_classes }}"></i>
-                                            Browser:</strong>
+                                                <span data-i18n="profile.session.browser">Browser</span>:</strong>
                                             &nbsp;{{ session["browser"]|safe }}
                                         </div>
                                         <div class="list-group-item d-flex align-items-center">
                                             <strong>
                                                 <i class="bx bx-layer {{ items_classes }}"></i>
-                                            Operating System:</strong>
+                                                <span data-i18n="profile.session.os">Operating System</span>:</strong>
                                             &nbsp;{{ session["os"]|safe }}
                                         </div>
                                         <div class="list-group-item d-flex align-items-center">
                                             <strong>
                                                 <i class="bx bx-devices {{ items_classes }}"></i>
-                                            Device:</strong>
+                                                <span data-i18n="profile.session.device">Device</span>:</strong>
                                             &nbsp;{{ session["device"]|safe }}
                                         </div>
                                         <div class="d-flex list-group-item form-password-toggle align-items-center">
                                             <strong>
                                                 <i class="bx bx-network-chart {{ items_classes }}"></i>
-                                                IP Address:
+                                                <span data-i18n="profile.session.ip_address">IP Address</span>:
                                             </strong>
                                             &nbsp;
                                             <div class="input-group input-group-sm input-group-merge w-auto">
@@ -571,13 +605,13 @@
                                         <div class="list-group-item d-flex align-items-center">
                                             <strong>
                                                 <i class="bx bx-time {{ items_classes }}"></i>
-                                            Creation date:</strong>
+                                                <span data-i18n="profile.session.creation_date">Creation date</span>:</strong>
                                             &nbsp;{{ session["creation_date"] }}
                                         </div>
                                         <div class="list-group-item d-flex align-items-center">
                                             <strong>
                                                 <i class="bx bx-time {{ items_classes }}"></i>
-                                            Last Activity:</strong>
+                                                <span data-i18n="profile.session.last_activity">Last Activity</span>:</strong>
                                             &nbsp;{{ session["last_activity"] }}
                                         </div>
                                     </div>
@@ -599,21 +633,22 @@
             <div class="modal-dialog modal-lg modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">Recovery Codes</h5>
+                        <h5 class="modal-title" data-i18n="modal.title.recovery_codes">Recovery Codes</h5>
                         <button type="button"
                                 class="btn-close"
                                 data-bs-dismiss="modal"
-                                aria-label="Close"></button>
+                                aria-label="Close"
+                                data-i18n="aria.label.close"></button>
                     </div>
                     <div class="modal-body">
                         <div class="alert alert-danger text-center" role="alert">
-                            <strong>Notice:</strong> These recovery codes will only be shown once.
-                            Please ensure you save them securely.
+                            <strong data-i18n="alert.notice">Notice</strong>: <span data-i18n="modal.body.recovery_codes_shown_once_alert">These recovery codes will only be shown once.
+                            Please ensure you save them securely.</span>
                         </div>
                         <div class="alert alert-primary text-center" role="alert">
-                            <strong>Important:</strong> Please save these recovery codes in a
-                            secure location (like a bunker). You can use them to access your account if you lose
-                            your authentication device.
+                            <strong data-i18n="alert.important">Important</strong>: <span data-i18n="modal.body.recovery_codes_save_alert">Please save these recovery codes in a
+                                secure location (like a bunker). You can use them to access your account if you lose
+                            your authentication device.</span>
                         </div>
                         <div class="row g-3">
                             {% for code in totp_recovery_codes %}
@@ -626,7 +661,10 @@
                         </div>
                     </div>
                     <div class="modal-footer justify-content-center">
-                        <button id="copy-codes-button" type="button" class="btn btn-primary">Copy Codes</button>
+                        <button id="copy-codes-button"
+                                type="button"
+                                class="btn btn-primary"
+                                data-i18n="button.copy_codes">Copy Codes</button>
                     </div>
                 </div>
             </div>

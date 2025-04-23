@@ -43,22 +43,24 @@
         <button type="button"
                 class="btn-close text-reset"
                 data-bs-dismiss="offcanvas"
-                aria-label="Close"></button>
+                aria-label="Close"
+                data-i18n="aria.label.close"></button>
     </div>
     <div class="offcanvas-body position-relative ps-3 pe-3">
         <div id="data-news-container">
-            <p class="text-center relative w-full p-2 text-primary rounded-lg fw-bold">Impossible to connect to blog news.</p>
+            <p class="text-center relative w-full p-2 text-primary rounded-lg fw-bold"
+               data-i18n="status.blog_connection_fail">Impossible to connect to blog news.</p>
         </div>
         <div class="text-center relative w-full p-2 text-primary rounded-lg fw-bold mt-4">
             <a href="https://www.bunkerweb.io/blog?utm_campaign=self&utm_source=ui"
                class="text-decoration-underline link-underline-primary position-relative pe-4"
                target="_blank"
-               rel="noopener">More news <i class="bx bx-xs bx-right-arrow-alt position-absolute end-0 top-0 mt-0_5"></i></a>
+               rel="noopener"><span data-i18n="link.more_news">More news</span> <i class="bx bx-xs bx-right-arrow-alt position-absolute end-0 top-0 mt-0_5"></i></a>
         </div>
     </div>
     <!-- Newsletter Signup Section -->
     <div class="newsletter-signup position-sticky bottom-0 start-0 w-100 p-4 bg-{% if theme == 'light' %}light{% else %}dark{% endif %}-subtle border-top">
-        <h5 class="mb-3 text-primary">Join the Newsletter</h5>
+        <h5 class="mb-3 text-primary" data-i18n="newsletter.title">Join the Newsletter</h5>
         <form action="https://bunkerity.us1.list-manage.com/subscribe/post?u=ec5b1577cf427972b9bd491a6&id=37076d9d67"
               method="POST">
             <div class="mb-3">
@@ -74,14 +76,17 @@
                        name="newsletter-check"
                        required />
                 <label class="form-check-label" for="privacyPolicyCheck">
-                    I've read and agree to the
+                    <span data-i18n="newsletter.legal_agreement">I want to subscribe to the newsletter and I've read and agree to the:&nbsp;</span>
                     <a class="fst-italic"
                        href="https://www.bunkerity.com/en/privacy-policy?utm_campaign=self&utm_source=ui"
                        target="_blank"
-                       rel="noopener">privacy policy</a>
+                       rel="noopener"
+                       data-i18n="link.privacy_policy">privacy policy</a>
                 </label>
             </div>
-            <button type="submit" class="btn btn-primary w-100 text-uppercase don-jose">Subscribe</button>
+            <button type="submit"
+                    class="btn btn-primary w-100 text-uppercase don-jose"
+                    data-i18n="button.subscribe">Subscribe</button>
         </form>
     </div>
     <!-- End Newsletter Signup Section -->

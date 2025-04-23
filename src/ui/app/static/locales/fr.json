@@ -1,0 +1,1288 @@
+{
+  "about": {
+    "build_with": "Créé Avec",
+    "gnu_license": "Licence Publique Générale Affero GNU v3.0",
+    "license_title": "Licence",
+    "socials": "Réseaux Sociaux",
+    "tagline": "Protection Puissante, Simplifiée",
+    "version": "Version : {{version}}"
+  },
+  "alert": {
+    "important": "Important",
+    "no_changes_detected": "Aucun changement détecté.",
+    "notice": "Avis",
+    "ping_error": "Une erreur est survenue lors du ping des instances.",
+    "readonly_mode": "Cette action est désactivée en mode lecture seule."
+  },
+  "aria": {
+    "label": {
+      "close": "Fermer",
+      "raw_configuration": "Configuration brute"
+    }
+  },
+  "badge": {
+    "from_template": "Depuis modèle",
+    "new_version": "Nouvelle version",
+    "no_template": "Pas de Modèle",
+    "unread_notifications": "Notifications non lues",
+    "unread_news": "Actualités non lues"
+  },
+  "banner": {
+    "community": "Faites partie de la communauté Bunker en rejoignant le <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://discord.bunkerweb.io/?utm_campaign=self&utm_source=banner\">chat Discord</a> et en nous suivant sur <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://www.linkedin.com/company/bunkerity/\">LinkedIn</a>.",
+    "link": {
+      "here": "ici"
+    },
+    "pro": "Tirez le meilleur parti de BunkerWeb en passant à la version PRO. Plus d'infos et essai gratuit <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#pro\">ici</a>.",
+    "support": "Besoin d'un support premium ou de conseils sur mesure pour BunkerWeb ? Consultez nos <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">services professionnels</a>."
+  },
+  "breadcrumb": {
+    "about": "À propos",
+    "bans": "Bannissements",
+    "cache": "Cache",
+    "configs": "Configurations",
+    "extra_pages": "Pages Supplémentaires",
+    "global_config": "Config Globale",
+    "home": "Accueil",
+    "instances": "Instances",
+    "jobs": "Tâches",
+    "logs": "Logs",
+    "misc": "Divers",
+    "mode_selection": "Sélection du Mode",
+    "more": "Plus...",
+    "new": "Nouveau",
+    "plugins": "Plugins",
+    "plugins_pages": "Pages des Plugins",
+    "pro": "Pro",
+    "reports": "Rapports",
+    "services": "Services",
+    "support": "Support",
+    "templates": "Modèles"
+  },
+  "button": {
+    "actions": "Actions",
+    "activate_key": "Activer la Clé",
+    "add": "INSÉRER",
+    "add_ban_plural": "Ajouter Bannissement(s)",
+    "add_plugin_plural": "Ajouter Plugin(s)",
+    "add_plugins": "Ajouter les Plugins",
+    "auto_refresh": "Actualisation Auto",
+    "ban": "Bannir",
+    "cache": "Cache",
+    "cancel": "Annuler",
+    "clear": "EFFACER",
+    "close": "Fermer",
+    "columns": "Colonnes",
+    "convert_services": "Convertir les Services",
+    "copy": "Copier",
+    "copy_codes": "Copier les Codes",
+    "copy_visible": "Copier Visible",
+    "create_config": "Créer Config Perso",
+    "create_instance": "Créer Instance",
+    "create_service": "Créer un nouveau Service",
+    "delete": "Supprimer",
+    "delete_instance": "Supprimer Instances",
+    "disable_totp": "Désactiver TOTP",
+    "download": "Télécharger",
+    "enable_totp": "Activer TOTP",
+    "entire_config": "Config Entière",
+    "export": "Exporter",
+    "filters_suffix": " Filtres",
+    "github_stars": "Étoiles",
+    "hide": "Masquer",
+    "history": "Historique",
+    "login": "Connexion",
+    "multiple_add": "AJOUTER",
+    "multiple_hide": "MASQUER",
+    "multiple_remove": "RETIRER",
+    "multiple_show": "AFFICHER",
+    "need_help": "Besoin d'Aide ?",
+    "news": "Actualités",
+    "notifications": "Notifications",
+    "open_support_ticket": "Ouvrir un Ticket de Support",
+    "order_support": "Commander du Support",
+    "ping": "Ping",
+    "plugin_page": "Page du Plugin",
+    "proceed": "Continuer",
+    "refresh_recovery_codes": "Rafraîchir les Codes de Récupération",
+    "reload": "Recharger",
+    "reset": "Réinitialiser",
+    "reset_columns": "Réinitialiser Colonnes",
+    "return_to_safety": "Retourner en Lieu Sûr",
+    "run": "Exécuter",
+    "run_selected_jobs": "Exécuter les Tâches Sélectionnées",
+    "save": "Enregistrer",
+    "save_changes": "Enregistrer les Modifications",
+    "select_file": "Choisir Fichier",
+    "select_page": "Choisir Page",
+    "service": "Service",
+    "setup": "Configuration",
+    "show": "Afficher",
+    "stop": "Arrêter",
+    "submit": "Envoyer",
+    "subscribe": "S'abonner",
+    "unban": "Débannir",
+    "update_key": "Mettre à Jour la Clé",
+    "upload_photo": "Télécharger Nouvelle Photo",
+    "wipe_other_sessions": "Effacer les Autres Sessions"
+  },
+  "country": {
+    "AD": "Andorre",
+    "AE": "Émirats Arabes Unis",
+    "AF": "Afghanistan",
+    "AG": "Antigua-et-Barbuda",
+    "AI": "Anguilla",
+    "AL": "Albanie",
+    "AM": "Arménie",
+    "AO": "Angola",
+    "AQ": "Antarctique",
+    "AR": "Argentine",
+    "AS": "Samoa Américaines",
+    "AT": "Autriche",
+    "AU": "Australie",
+    "AW": "Aruba",
+    "AX": "Îles Åland",
+    "AZ": "Azerbaïdjan",
+    "BA": "Bosnie-Herzégovine",
+    "BB": "Barbade",
+    "BD": "Bangladesh",
+    "BE": "Belgique",
+    "BF": "Burkina Faso",
+    "BG": "Bulgarie",
+    "BH": "Bahreïn",
+    "BI": "Burundi",
+    "BJ": "Bénin",
+    "BL": "Saint-Barthélemy",
+    "BM": "Bermudes",
+    "BN": "Brunei Darussalam",
+    "BO": "Bolivie",
+    "BQ": "Pays-Bas Caribéens",
+    "BR": "Brésil",
+    "BS": "Bahamas",
+    "BT": "Bhoutan",
+    "BV": "Île Bouvet",
+    "BW": "Botswana",
+    "BY": "Biélorussie",
+    "BZ": "Belize",
+    "CA": "Canada",
+    "CC": "Îles Cocos (Keeling)",
+    "CD": "RD Congo",
+    "CF": "République Centrafricaine",
+    "CG": "République du Congo",
+    "CH": "Suisse",
+    "CI": "Côte d'Ivoire",
+    "CK": "Îles Cook",
+    "CL": "Chili",
+    "CM": "Cameroun",
+    "CN": "Chine",
+    "CO": "Colombie",
+    "CR": "Costa Rica",
+    "CU": "Cuba",
+    "CV": "Cap-Vert",
+    "CW": "Curaçao",
+    "CX": "Île Christmas",
+    "CY": "Chypre",
+    "CZ": "République Tchèque",
+    "DE": "Allemagne",
+    "DJ": "Djibouti",
+    "DK": "Danemark",
+    "DM": "Dominique",
+    "DO": "République Dominicaine",
+    "DZ": "Algérie",
+    "EC": "Équateur",
+    "EE": "Estonie",
+    "EG": "Égypte",
+    "EH": "Sahara Occidental",
+    "ER": "Érythrée",
+    "ES": "Espagne",
+    "ET": "Éthiopie",
+    "EU": "Europe",
+    "FI": "Finlande",
+    "FJ": "Fidji",
+    "FK": "Îles Malouines (Falkland)",
+    "FM": "Micronésie",
+    "FO": "Îles Féroé",
+    "FR": "France",
+    "GA": "Gabon",
+    "GB": "Royaume-Uni",
+    "GD": "Grenade",
+    "GE": "Géorgie",
+    "GF": "Guyane Française",
+    "GG": "Guernesey",
+    "GH": "Ghana",
+    "GI": "Gibraltar",
+    "GL": "Groenland",
+    "GM": "Gambie",
+    "GN": "Guinée",
+    "GP": "Guadeloupe",
+    "GQ": "Guinée Équatoriale",
+    "GR": "Grèce",
+    "GS": "Géorgie du Sud et les Îles Sandwich du Sud",
+    "GT": "Guatemala",
+    "GU": "Guam",
+    "GW": "Guinée-Bissau",
+    "GY": "Guyana",
+    "HK": "Hong Kong",
+    "HM": "Îles Heard et McDonald",
+    "HN": "Honduras",
+    "HR": "Croatie",
+    "HT": "Haïti",
+    "HU": "Hongrie",
+    "ID": "Indonésie",
+    "IE": "Irlande",
+    "IL": "Israël",
+    "IM": "Île de Man",
+    "IN": "Inde",
+    "IO": "Territoire Britannique de l'Océan Indien",
+    "IQ": "Irak",
+    "IR": "Iran",
+    "IS": "Islande",
+    "IT": "Italie",
+    "JE": "Jersey",
+    "JM": "Jamaïque",
+    "JO": "Jordanie",
+    "JP": "Japon",
+    "KE": "Kenya",
+    "KG": "Kirghizistan",
+    "KH": "Cambodge",
+    "KI": "Kiribati",
+    "KM": "Comores",
+    "KN": "Saint-Kitts-et-Nevis",
+    "KP": "Corée du Nord",
+    "KR": "Corée du Sud",
+    "KW": "Koweït",
+    "KY": "Îles Caïmans",
+    "KZ": "Kazakhstan",
+    "LA": "Laos",
+    "LB": "Liban",
+    "LC": "Sainte-Lucie",
+    "LI": "Liechtenstein",
+    "LK": "Sri Lanka",
+    "LR": "Libéria",
+    "LS": "Lesotho",
+    "LT": "Lituanie",
+    "LU": "Luxembourg",
+    "LV": "Lettonie",
+    "LY": "Libye",
+    "MA": "Maroc",
+    "MC": "Monaco",
+    "MD": "Moldavie",
+    "ME": "Monténégro",
+    "MF": "Saint-Martin",
+    "MG": "Madagascar",
+    "MH": "Îles Marshall",
+    "MK": "Macédoine du Nord",
+    "ML": "Mali",
+    "MM": "Myanmar",
+    "MN": "Mongolie",
+    "MO": "Macao",
+    "MP": "Îles Mariannes du Nord",
+    "MQ": "Martinique",
+    "MR": "Mauritanie",
+    "MS": "Montserrat",
+    "MT": "Malte",
+    "MU": "Maurice",
+    "MV": "Maldives",
+    "MW": "Malawi",
+    "MX": "Mexique",
+    "MY": "Malaisie",
+    "MZ": "Mozambique",
+    "NA": "Namibie",
+    "NC": "Nouvelle-Calédonie",
+    "NE": "Niger",
+    "NF": "Île Norfolk",
+    "NG": "Nigéria",
+    "NI": "Nicaragua",
+    "NL": "Pays-Bas",
+    "NO": "Norvège",
+    "NP": "Népal",
+    "NR": "Nauru",
+    "NU": "Niue",
+    "NZ": "Nouvelle-Zélande",
+    "OM": "Oman",
+    "PA": "Panama",
+    "PE": "Pérou",
+    "PF": "Polynésie Française",
+    "PG": "Papouasie-Nouvelle-Guinée",
+    "PH": "Philippines",
+    "PK": "Pakistan",
+    "PL": "Pologne",
+    "PM": "Saint-Pierre-et-Miquelon",
+    "PN": "Pitcairn",
+    "PR": "Porto Rico",
+    "PS": "Palestine",
+    "PT": "Portugal",
+    "PW": "Palaos",
+    "PY": "Paraguay",
+    "QA": "Qatar",
+    "RE": "Réunion",
+    "RO": "Roumanie",
+    "RS": "Serbie",
+    "RU": "Fédération de Russie",
+    "RW": "Rwanda",
+    "SA": "Arabie Saoudite",
+    "SB": "Îles Salomon",
+    "SC": "Seychelles",
+    "SD": "Soudan",
+    "SE": "Suède",
+    "SG": "Singapour",
+    "SH": "Sainte-Hélène, Ascension et Tristan da Cunha",
+    "SI": "Slovénie",
+    "SJ": "Svalbard et Jan Mayen",
+    "SK": "Slovaquie",
+    "SL": "Sierra Leone",
+    "SM": "Saint-Marin",
+    "SN": "Sénégal",
+    "SO": "Somalie",
+    "SR": "Suriname",
+    "SS": "Soudan du Sud",
+    "ST": "Sao Tomé-et-Principe",
+    "SV": "El Salvador",
+    "SX": "Sint Maarten (partie néerlandaise)",
+    "SY": "Syrie",
+    "SZ": "Eswatini",
+    "TC": "Îles Turques-et-Caïques",
+    "TD": "Tchad",
+    "TF": "Terres Australes Françaises",
+    "TG": "Togo",
+    "TH": "Thaïlande",
+    "TJ": "Tadjikistan",
+    "TK": "Tokelau",
+    "TL": "Timor-Leste",
+    "TM": "Turkménistan",
+    "TN": "Tunisie",
+    "TO": "Tonga",
+    "TR": "Turquie",
+    "TT": "Trinité-et-Tobago",
+    "TV": "Tuvalu",
+    "TW": "Taïwan",
+    "TZ": "Tanzanie",
+    "UA": "Ukraine",
+    "UG": "Ouganda",
+    "UM": "Îles Mineures Éloignées des États-Unis",
+    "US": "États-Unis",
+    "UY": "Uruguay",
+    "UZ": "Ouzbékistan",
+    "VA": "Saint-Siège (État de la Cité du Vatican)",
+    "VC": "Saint-Vincent-et-les-Grenadines",
+    "VE": "Venezuela",
+    "VG": "Îles Vierges Britanniques",
+    "VI": "Îles Vierges Américaines",
+    "VN": "Vietnam",
+    "VU": "Vanuatu",
+    "WF": "Wallis-et-Futuna",
+    "WS": "Samoa",
+    "XK": "Kosovo",
+    "YE": "Yémen",
+    "YT": "Mayotte",
+    "ZA": "Afrique du Sud",
+    "ZM": "Zambie",
+    "ZW": "Zimbabwe",
+    "not_applicable": "N/A"
+  },
+  "dashboard": {
+    "card": {
+      "blocked_requests": {
+        "title": "Requêtes Bloquées"
+      },
+      "blocked_unique_ips": {
+        "title": "IP Uniques Bloquées"
+      },
+      "instances": {
+        "status": "{{up}} actives / {{down}} inactives / {{loading}} chargement",
+        "title": "Instances"
+      },
+      "news": {
+        "title": "Actualités"
+      },
+      "plan": {
+        "title": "Plan"
+      },
+      "plugins": {
+        "status": "{{core}} core / {{pro}} PRO / {{external}} externe",
+        "title": "Plugins"
+      },
+      "services": {
+        "status": "{{online}} en ligne / {{draft}} brouillon",
+        "title": "Services"
+      },
+      "total_requests": {
+        "title": "Requêtes Totales"
+      }
+    },
+    "chart": {
+      "blocked_request_countries": {
+        "title": "Requêtes Bloquées par Pays"
+      },
+      "blocking_status": {
+        "title": "Statut de Blocage Temporel"
+      },
+      "request_status": {
+        "title": "Distribution du Statut des Requêtes"
+      },
+      "top_blocked_ips": {
+        "title": "Top 10 des IP Bloquées"
+      }
+    }
+  },
+  "datatable": {
+    "info_bans": "Affichage de {{start}} à {{end}} sur {{total}} Bannissements",
+    "info_cache": "Affichage de {{start}} à {{end}} sur {{total}} Fichiers Cache",
+    "info_configs": "Affichage de {{start}} à {{end}} sur {{total}} Configurations Personnalisées",
+    "info_empty_bans": "Aucun Bannissement disponible",
+    "info_empty_cache": "Aucun Fichier Cache disponible",
+    "info_empty_configs": "Aucune Configuration Personnalisée disponible",
+    "info_empty_instances": "Aucune Instance disponible",
+    "info_empty_jobs": "Aucune Tâche disponible",
+    "info_empty_plugins": "Aucun Plugin disponible",
+    "info_empty_reports": "Aucun Rapport disponible",
+    "info_empty_services": "Aucun Service disponible",
+    "info_filtered_bans": "(filtré sur _MAX_ Bannissements au total)",
+    "info_filtered_cache": "(filtré sur _MAX_ Fichiers Cache au total)",
+    "info_filtered_configs": "(filtré sur _MAX_ Configurations Personnalisées au total)",
+    "info_filtered_instances": "(filtré sur _MAX_ Instances au total)",
+    "info_filtered_jobs": "(filtré sur _MAX_ Tâches au total)",
+    "info_filtered_plugins": "(filtré sur _MAX_ Plugins au total)",
+    "info_filtered_reports": "(filtré sur _MAX_ Rapports au total)",
+    "info_filtered_services": "(filtré sur _MAX_ Services au total)",
+    "info_instances": "Affichage de {{start}} à {{end}} sur {{total}} Instances",
+    "info_jobs": "Affichage de {{start}} à {{end}} sur {{total}} Tâches",
+    "info_plugins": "Affichage de {{start}} à {{end}} sur {{total}} Plugins",
+    "info_reports": "Affichage de {{start}} à {{end}} sur {{total}} Rapports",
+    "info_services": "Affichage de {{start}} à {{end}} sur {{total}} Services",
+    "length_all": "Tous",
+    "length_menu_bans": "Afficher _MENU_ Bannissements",
+    "length_menu_cache": "Afficher _MENU_ Fichiers Cache",
+    "length_menu_configs": "Afficher _MENU_ Configurations Personnalisées",
+    "length_menu_instances": "Afficher _MENU_ Instances",
+    "length_menu_jobs": "Afficher _MENU_ Tâches",
+    "length_menu_plugins": "Afficher _MENU_ Plugins",
+    "length_menu_reports": "Afficher _MENU_ Rapports",
+    "length_menu_services": "Afficher _MENU_ Services",
+    "paginate": {
+      "first": "Premier",
+      "last": "Dernier",
+      "next": "Suivant",
+      "previous": "Précédent"
+    },
+    "processing": "Traitement...",
+    "search": "Rechercher :",
+    "select_rows_bans_0": "Aucun Bannissement sélectionné",
+    "select_rows_bans_1": "1 Bannissement sélectionné",
+    "select_rows_bans_plural": "%d Bannissements sélectionnés",
+    "select_rows_cache_0": "Aucun Fichier Cache sélectionné",
+    "select_rows_cache_1": "1 Fichier Cache sélectionné",
+    "select_rows_cache_plural": "%d Fichiers Cache sélectionnés",
+    "select_rows_configs_0": "Aucune Configuration Personnalisée sélectionnée",
+    "select_rows_configs_1": "1 Configuration Personnalisée sélectionnée",
+    "select_rows_configs_plural": "%d Configurations Personnalisées sélectionnées",
+    "select_rows_instances_0": "Aucune Instance sélectionnée",
+    "select_rows_instances_1": "1 Instance sélectionnée",
+    "select_rows_instances_plural": "%d Instances sélectionnées",
+    "select_rows_jobs_0": "Aucune Tâche sélectionnée",
+    "select_rows_jobs_1": "1 Tâche sélectionnée",
+    "select_rows_jobs_plural": "%d Tâches sélectionnées",
+    "select_rows_plugins_0": "Aucun Plugin sélectionné",
+    "select_rows_plugins_1": "1 Plugin sélectionné",
+    "select_rows_plugins_plural": "%d Plugins sélectionnés",
+    "select_rows_reports_0": "Aucun Rapport sélectionné",
+    "select_rows_reports_1": "1 Rapport sélectionné",
+    "select_rows_reports_plural": "%d Rapports sélectionnés",
+    "select_rows_services_0": "Aucun Service sélectionné",
+    "select_rows_services_1": "1 Service sélectionné",
+    "select_rows_services_plural": "%d Services sélectionnés",
+    "zero_records_bans": "Aucun Bannissement correspondant trouvé",
+    "zero_records_cache": "Aucun Fichier Cache correspondant trouvé",
+    "zero_records_configs": "Aucune Configuration Personnalisée correspondante trouvée",
+    "zero_records_instances": "Aucune Instance correspondante trouvée",
+    "zero_records_jobs": "Aucune Tâche correspondante trouvée",
+    "zero_records_plugins": "Aucun Plugin correspondant trouvé",
+    "zero_records_reports": "Aucun Rapport correspondant trouvé",
+    "zero_records_services": "Aucun Service correspondant trouvé"
+  },
+  "dev_log": {
+    "copy_failed": "Échec de la copie du texte :",
+    "news_fetch_fail": "Échec de la récupération des actualités :",
+    "skipping_malformed_line": "Ligne malformée ignorée : {{line}}"
+  },
+  "error": {
+    "401": {
+      "help": "Vous devez être connecté pour accéder à cette ressource.",
+      "message": "Veuillez vous connecter pour continuer.",
+      "title": "Authentification Requise"
+    },
+    "403": {
+      "help": "Veuillez vérifier vos identifiants ou contacter un administrateur si vous pensez qu'il s'agit d'une erreur.",
+      "message": "Vous n'avez pas la permission d'accéder à cette page.",
+      "title": "Accès Refusé"
+    },
+    "404": {
+      "help": "Veuillez vérifier que l'URL est correcte ou contacter un administrateur si vous pensez qu'il s'agit d'une erreur.",
+      "message": "La ressource demandée n'a pas pu être trouvée.",
+      "title": "Non Trouvé"
+    },
+    "5xx": {
+      "help": "Veuillez réessayer plus tard ou contacter un administrateur si le problème persiste.",
+      "message": "Une erreur serveur inattendue s'est produite.",
+      "title": "Erreur Serveur"
+    },
+    "reports_load_error": "Erreur lors du chargement des rapports. Veuillez essayer de rafraîchir la page."
+  },
+  "flash": {
+    "easter_egg": "Si vous lisez ceci, c'est que vous êtes curieux 👀",
+    "error": "Erreur",
+    "message": "Info",
+    "time": {
+      "just_now": "à l'instant"
+    },
+    "warning": "Avertissement"
+  },
+  "footer": {
+    "blog": "Blog",
+    "documentation": "Documentation",
+    "license": "Licence",
+    "made_by": "créé par",
+    "privacy": "Confidentialité",
+    "support": "Support"
+  },
+  "form": {
+    "checkbox": {
+      "remember_me": "Se Souvenir de Moi"
+    },
+    "help": {
+      "ban_specific_service": "Le bannissement s'appliquera uniquement à ce service spécifique.",
+      "hostname_length_limit": "Le nom d'hôte est limité à 256 caractères.",
+      "hostname_special_chars": "Seuls `/` et `:` sont autorisés pour la spécification du protocole/port.",
+      "photo_extensions": "JPG, GIF ou PNG autorisés. Taille max : 800 Ko."
+    },
+    "label": {
+      "2fa_code": "Code 2FA",
+      "2fa_code_or_recovery": "Code 2FA ou Code de Récupération",
+      "admin_email": "Email Administrateur",
+      "admin_password": "Mot de Passe Administrateur",
+      "admin_username": "Nom d'Utilisateur Admin",
+      "auto_lets_encrypt": "Let's Encrypt Auto",
+      "ban_scope": "Portée du Bannissement",
+      "certificate_priority": "Priorité du Certificat",
+      "challenge_type": "Type de Challenge",
+      "config_type": "Type de Config",
+      "configuration_name": "Nom de la Configuration",
+      "confirm_password": "Confirmer le Mot de Passe",
+      "current_password": "Mot de Passe Actuel",
+      "custom_ssl_certificate": "Certificat SSL Personnalisé",
+      "custom_ssl_certificate_data": "Données Certificat SSL Perso (Base64/PEM)",
+      "custom_ssl_key": "Clé SSL Personnalisée",
+      "custom_ssl_key_data": "Données Clé SSL Perso (Base64/PEM)",
+      "dns_credential_items": "Identifiants DNS Let's Encrypt",
+      "dns_propagation": "Délai Propagation DNS",
+      "dns_provider": "Fournisseur DNS",
+      "email": "Email",
+      "email_for_lets_encrypt": "Email pour Let's Encrypt",
+      "end_date": "Date de Fin",
+      "hostname": "Nom d'hôte",
+      "ip_address": "Adresse IP",
+      "keywords": "Mots-clés",
+      "license_key": "Clé de Licence",
+      "name": "Nom",
+      "new_password": "Nouveau Mot de Passe",
+      "optional": "(Optionnel)",
+      "password": "Mot de Passe",
+      "raw_configuration": "Configuration Brute",
+      "reason": "Raison",
+      "secret_token": "Jeton Secret",
+      "server_name": "Nom du Serveur",
+      "service_name": "Nom du Service",
+      "theme": "Thème",
+      "type": "Type",
+      "ui_host": "Hôte UI",
+      "ui_url": "URL UI",
+      "use_custom_ssl": "Utiliser SSL Personnalisé",
+      "use_lets_encrypt_staging": "Utiliser Let's Encrypt Staging",
+      "username": "Nom d'utilisateur",
+      "wildcard_certificates": "Certificats Wildcard"
+    },
+    "placeholder": {
+      "2fa_code": "Entrez le code",
+      "2fa_or_recovery": "Entrez le code ou code de récupération",
+      "config_name": "ma-config-perso",
+      "enter_username": "Entrez votre nom d'utilisateur",
+      "keywords": "Mots-clés...",
+      "search": "Rechercher...",
+      "select_service": "Sélectionner un Service",
+      "secret_token": "Jeton Secret",
+      "username_example": "jeandupon"
+    },
+    "validation": {
+      "confirm_password_match": "Les mots de passe ne correspondent pas.",
+      "password_length": "Le mot de passe doit contenir au moins 8 caractères.",
+      "password_number": "Le mot de passe doit contenir au moins 1 chiffre.",
+      "password_special": "Le mot de passe doit contenir au moins 1 caractère spécial.",
+      "password_uppercase": "Le mot de passe doit contenir au moins 1 lettre majuscule."
+    }
+  },
+  "instance": {
+    "type": {
+      "container": "Conteneur",
+      "pod": "Pod",
+      "static": "Statique"
+    }
+  },
+  "interval": {
+    "day": "Quotidien",
+    "hour": "Horaire",
+    "once": "Une fois",
+    "week": "Hebdomadaire"
+  },
+  "job": {
+    "history": {
+      "end_date": "Date de Fin",
+      "start_date": "Date de Début",
+      "success": "Succès"
+    }
+  },
+  "link": {
+    "back_to_login": "Retour à la Connexion",
+    "forgot_password": "Mot de Passe Oublié ?",
+    "here": "ici",
+    "more_info": "Plus d'Infos",
+    "more_news": "Plus d'Actualités",
+    "privacy_policy": "Politique de Confidentialité",
+    "read_more": "Lire Plus",
+    "see_more": "Voir Plus",
+    "upgrade": "Mettre à niveau ?"
+  },
+  "modal": {
+    "body": {
+      "add_plugin_dropzone": "Glissez-déposez votre archive de plugin ici ou cliquez pour sélectionner des fichiers.",
+      "confirm_configs_deletion_alert": "Êtes-vous sûr de vouloir supprimer la configuration personnalisée sélectionnée ?",
+      "confirm_configs_deletion_alert_plural": "Êtes-vous sûr de vouloir supprimer les configurations personnalisées sélectionnées ?",
+      "confirm_conversion_confirmation": "Êtes-vous sûr de vouloir convertir les services sélectionnés ?",
+      "confirm_next_step": "Êtes-vous sûr de vouloir passer à l'étape suivante ?",
+      "confirm_plugin_deletion": "Êtes-vous sûr de vouloir supprimer le plugin sélectionné ?",
+      "confirm_plugin_deletion_plural": "Êtes-vous sûr de vouloir supprimer les plugins sélectionnés ?",
+      "confirmation_instance_deletion": "Êtes-vous sûr de vouloir supprimer l'instance sélectionnée ?",
+      "delete_confirmation_alert": "Êtes-vous sûr de vouloir supprimer l'instance sélectionnée ?",
+      "delete_confirmation_alert_plural": "Êtes-vous sûr de vouloir supprimer les instances sélectionnées ?",
+      "instance_creation_alert": "Vous n'avez pas besoin de fournir le port ou le nom du serveur ; les valeurs de `API_HTTP_PORT` et `API_SERVER_NAME` seront utilisées pour la configuration de l'instance.",
+      "next_step_in_case_of_issue": "Si vous rencontrez des problèmes, vous pouvez accepter manuellement le certificat non sécurisé :",
+      "recovery_codes_save_alert": "Veuillez sauvegarder ces codes de récupération dans un endroit sûr (comme un gestionnaire de mots de passe ou un bunker). Vous pourrez les utiliser pour accéder à votre compte si vous perdez votre appareil d'authentification.",
+      "recovery_codes_shown_once_alert": "Ces codes de récupération ne sont affichés qu'une seule fois. Veuillez vous assurer de les sauvegarder en lieu sûr.",
+      "reset_template_alert": "Êtes-vous sûr de vouloir réinitialiser les paramètres du modèle actuel et les configurations personnalisées ?",
+      "services_deletion_confirmation": "Êtes-vous sûr de vouloir supprimer les services sélectionnés ?",
+      "unban_confirmation_alert": "Êtes-vous sûr de vouloir débannir l'adresse IP sélectionnée ?",
+      "unban_confirmation_alert_plural": "Êtes-vous sûr de vouloir débannir les adresses IP sélectionnées ?"
+    },
+    "button": {
+      "reset_template_confirm": "Réinitialiser la Configuration du Modèle"
+    },
+    "section": {
+      "ban_details": "Détails du Bannissement",
+      "ban_scope": "Portée du Bannissement",
+      "delete": "Supprimer"
+    },
+    "title": {
+      "add_bans": "Ajouter Bannissement(s)",
+      "add_plugins": "Ajouter des Plugins",
+      "confirm_conversion": "Confirmer la Conversion",
+      "confirm_deletion": "Confirmer la Suppression",
+      "confirm_unban": "Confirmer le Débannissement",
+      "create_new_instance": "Créer une Nouvelle Instance",
+      "delete_instance": "Supprimer des Instances",
+      "from_plugin": "du Plugin",
+      "full_url": "URL Complète",
+      "job_history": "10 Dernières Exécutions de la Tâche",
+      "job_history_count": "{{count}} dernières exécutions de la Tâche",
+      "recovery_codes": "Codes de Récupération",
+      "reset_template_config": "Réinitialiser la Configuration du Modèle ?",
+      "server_name_not_unique": "Le Nom du Serveur n'est pas Unique"
+    }
+  },
+  "mode": {
+    "advanced": "Avancé",
+    "easy": "Facile",
+    "raw": "Brut"
+  },
+  "navbar": {
+    "button": {
+      "upgrade_to_pro": "Passer à PRO"
+    },
+    "dropdown": {
+      "logout": "Déconnexion"
+    },
+    "link": {
+      "documentation": "Documentation"
+    },
+    "version": "Version"
+  },
+  "navigation": {
+    "about": "À Propos",
+    "bans": "Bannissements",
+    "cache": "Cache",
+    "configs": "Configurations",
+    "extra_pages": "Pages Supplémentaires",
+    "global_config": "Config Globale",
+    "home": "Accueil",
+    "instances": "Instances",
+    "jobs": "Tâches",
+    "logs": "Logs",
+    "misc": "Divers",
+    "mode_selection": "Sélection du Mode",
+    "more": "Plus...",
+    "plugins": "Plugins",
+    "plugins_pages": "Pages des Plugins",
+    "pro": "Pro",
+    "reports": "Rapports",
+    "services": "Services",
+    "support": "Support",
+    "templates": "Modèles"
+  },
+  "news": {
+    "image_alt": "Image d'actualité",
+    "posted_on": "Publié le"
+  },
+  "newsletter": {
+    "legal_agreement": "Je souhaite m'abonner à la newsletter, et j'ai lu et accepte la :",
+    "title": "Rejoindre la Newsletter"
+  },
+  "pagination": {
+    "page": "Page"
+  },
+  "plan": {
+    "free": "GRATUIT",
+    "pro": "PRO"
+  },
+  "plugin": {
+    "page": {
+      "status": {
+        "deactivated": "Le plugin est désactivé ; par conséquent, aucune information n'est disponible.",
+        "metrics_deactivated": "Le plugin de métriques n'est pas activé ; par conséquent, aucune information n'est disponible.",
+        "not_available": "La page du plugin n'est pas encore disponible pendant la phase bêta."
+      }
+    },
+    "type": {
+      "all": "Tous",
+      "core": "Core",
+      "external": "Externe",
+      "pro": "Pro",
+      "ui": "UI"
+    }
+  },
+  "pro": {
+    "alert": {
+      "overlapped_1": "Vous avez plus de services actifs que votre licence ne le permet !",
+      "overlapped_2": "Supprimez ou passez certains services en mode Brouillon pour atteindre la limite de {{pro_services}} services."
+    },
+    "button": {
+      "all_features_available": "Toutes les Fonctionnalités Disponibles",
+      "awaiting_compliance": "En Attente de Conformité...",
+      "renew_license": "Renouveler la Licence",
+      "suspended_license": "Licence Suspendue",
+      "upgrade_to_pro": "Passer à PRO"
+    },
+    "expiration_date": {
+      "expires_in": "Expire dans",
+      "title": "Date d'Expiration Pro",
+      "unknown": "Date d'expiration inconnue"
+    },
+    "key": {
+      "title": {
+        "activate": "Activer la Clé",
+        "update": "Mettre à Jour la Clé"
+      }
+    },
+    "overlay": {
+      "pro_feature": "Fonctionnalité Pro",
+      "upgrade_required": "Passez à Pro pour accéder à cette fonctionnalité"
+    },
+    "status": {
+      "draft_services_count": "{{draft_services}} service(s) Brouillon",
+      "expired": "EXPIRÉ",
+      "free_version": "Version GRATUITE",
+      "overlapped": "DÉPASSÉ",
+      "pro_version": "Version PRO",
+      "services_count": "{{online_services}} Service(s) En Ligne / {{pro_services}} Service(s) PRO",
+      "suspended": "SUSPENDU",
+      "title": "Statut"
+    }
+  },
+  "profile": {
+    "2fa": {
+      "disable_title": "Désactiver 2FA",
+      "enable_title": "Activer 2FA"
+    },
+    "alert": {
+      "refresh_recovery_codes": "Rafraîchir vos codes de récupération invalidera les précédents."
+    },
+    "card": {
+      "coming_soon": "Bientôt Disponible",
+      "title": {
+        "2fa": "Authentification à Deux Facteurs (2FA)",
+        "change_password": "Changer le Mot de Passe",
+        "change_theme": "Changer le Thème",
+        "coming_soon": "Bientôt Disponible",
+        "edit_profile": "Modifier le Profil",
+        "refresh_recovery_codes": "Rafraîchir les Codes de Récupération",
+        "sessions": "Sessions"
+      }
+    },
+    "help": {
+      "photo_extensions": "JPG, GIF ou PNG autorisés. Taille max : 800 Ko."
+    },
+    "session": {
+      "browser": "Navigateur",
+      "creation_date": "Date de Création",
+      "current_session": "Session Actuelle",
+      "device": "Appareil",
+      "ip_address": "Adresse IP",
+      "last_activity": "Dernière Activité",
+      "os": "Système d'Exploitation",
+      "title": "Session"
+    },
+    "tab": {
+      "profile": "Profil",
+      "security": "Sécurité",
+      "sessions": "Sessions"
+    }
+  },
+  "scope": {
+    "all_services": "Tous les Services",
+    "global": "Global",
+    "global_all_services": "Global (tous les services)",
+    "service_specific": "Spécifique au service"
+  },
+  "searchpane": {
+    "active": "Actif",
+    "async": "Asynchrone",
+    "clear": "Tout Effacer",
+    "collapse_0": "Volets de Recherche",
+    "collapse_message": "Tout Réduire",
+    "collapse_plural": "Volets de Recherche (%d)",
+    "count": "{total}",
+    "countFiltered": "{shown} ({total})",
+    "country": "Pays",
+    "created": "Créé le",
+    "data": "Données",
+    "empty": "Aucun volet de recherche disponible",
+    "end_date": "Date de Fin",
+    "first_seen": "Vu la Première Fois",
+    "future_30d": "Dans plus de 30 jours",
+    "health": "Santé",
+    "interval": "Intervalle",
+    "ip_address": "Adresse IP",
+    "job_name": "Nom de la Tâche",
+    "last_24h": "Dernières 24 heures",
+    "last_30d": "Derniers 30 jours",
+    "last_7d": "Derniers 7 jours",
+    "last_run_state": "État Dernière Exécution",
+    "last_seen": "Vu la Dernière Fois",
+    "last_update": "Dernière MàJ",
+    "loading": "Chargement des volets de recherche...",
+    "method": "Méthode",
+    "next_24h": "Prochaines 24 heures",
+    "next_30d": "Prochains 30 jours",
+    "next_7d": "Prochains 7 jours",
+    "older_30d": "Plus de 30 jours",
+    "plugin": "Plugin",
+    "reason": "Raison",
+    "reload": "Rechargement Requis",
+    "scope": "Portée",
+    "security_mode": "Mode de Sécurité",
+    "server_name": "Nom du Service",
+    "service": "Service",
+    "show_message": "Tout Afficher",
+    "start_date": "Date de Début",
+    "status_code": "Code de Statut",
+    "stream": "Support Stream",
+    "template": "Modèle",
+    "title_0": "Aucun Filtre Actif",
+    "title_1": "Filtre Actif - 1",
+    "title_plural": "Filtres Actifs - %d",
+    "type": "Type",
+    "url": "URL",
+    "version": "Version"
+  },
+  "settings": {
+    "custom_config": {
+      "title": "Configuration Personnalisée"
+    },
+    "multiple": {
+      "description": "Configurez ici plusieurs instances de paramètres pour ce plugin.",
+      "title": "Paramètres Multiples"
+    }
+  },
+  "setup": {
+    "step1": {
+      "subtitle": "Créez votre compte administrateur.",
+      "title": "Utilisateur Admin"
+    },
+    "step2": {
+      "section": {
+        "custom_certificate": "Certificat Personnalisé",
+        "lets_encrypt": "Let's Encrypt",
+        "reverse_proxy": "Proxy Inverse"
+      },
+      "subtitle": "Configurez les paramètres spécifiques à l'interface Web.",
+      "title": "Paramètres UI"
+    },
+    "step3": {
+      "label": {
+        "final_url": "URL de l'UI BunkerWeb"
+      },
+      "subtitle": "Vérifiez vos paramètres avant de terminer la configuration.",
+      "title": "Aperçu"
+    },
+    "status": {
+      "admin_user_exists": "🧑‍🚀 Un utilisateur admin existe déjà. Veuillez passer à l'étape suivante.",
+      "reverse_proxy_configured": "↪️ Un proxy inverse est déjà configuré pour l'interface web. Veuillez passer à l'étape suivante.",
+      "secure_password": "Mot de Passe Sécurisé",
+      "unique_server_name": "Nom de Serveur Unique"
+    },
+    "subtitle": "Suivez les étapes pour terminer l'assistant de configuration.",
+    "title": "Assistant de Configuration"
+  },
+  "status": {
+    "admin_user_exists": "🧑‍🚀 Un utilisateur admin existe déjà. Veuillez passer à l'étape suivante.",
+    "blog_connection_fail": "Impossible de se connecter au blog pour les actualités.",
+    "default_server": "serveur par défaut",
+    "down": "Inactif",
+    "draft": "Brouillon",
+    "failed": "Échoué",
+    "loading": "Chargement...",
+    "loading_bans": "Chargement des bannissements...",
+    "loading_cache_file": "Chargement du fichier cache...",
+    "loading_cache_files": "Chargement des fichiers cache...",
+    "loading_custom_config": "Chargement de la configuration personnalisée...",
+    "loading_custom_configs": "Chargement des configurations personnalisées...",
+    "loading_instances": "Chargement des instances...",
+    "loading_jobs": "Chargement des tâches...",
+    "loading_logs": "Chargement des logs...",
+    "loading_plugins": "Chargement des plugins...",
+    "loading_reports": "Chargement des rapports...",
+    "loading_services": "Chargement des services...",
+    "news_connection_error": "Impossible de se connecter au blog pour les actualités.",
+    "no": "Non",
+    "no_data": "Aucune donnée à afficher.",
+    "no_history": "Aucun historique disponible.",
+    "no_item": "Aucun élément",
+    "no_notifications": "Aucune notification à afficher.",
+    "no_steps": "Aucune Étape Disponible",
+    "no_steps_description": "Ce modèle n'a aucune étape à configurer.",
+    "online": "En Ligne",
+    "partial": "Partiel",
+    "pinging_instances": "Ping des instances, veuillez patienter...",
+    "plugin_page": {
+      "status": {
+        "deactivated": "Le plugin est désactivé ; par conséquent, aucune information n'est disponible.",
+        "metrics_deactivated": "Le plugin de métriques n'est pas activé ; par conséquent, aucune information n'est disponible.",
+        "not_available": "La page du plugin n'est pas encore disponible pendant la phase bêta."
+      }
+    },
+    "reverse_proxy_configured": "↪️ Un proxy inverse est déjà configuré pour l'interface web. Veuillez passer à l'étape suivante.",
+    "secure_password": "Mot de Passe Sécurisé",
+    "setting_up_bunkerweb": "Configuration de votre BunkerWeb, veuillez patienter...",
+    "success": "Succès",
+    "template_in_use": "Ce service utilise actuellement le modèle \"{{template}}\" qui est géré via \"{{method}}\".",
+    "template_in_use_description": "Les modifications en dehors du modèle actuel ne sont pas autorisées. Veuillez effectuer les modifications en utilisant le modèle actuel ou passer en mode Avancé/Brut.",
+    "unique_server_name": "Nom de Serveur Unique",
+    "up": "Actif",
+    "yes": "Oui"
+  },
+  "step": {
+    "next": "Suivant",
+    "previous": "Précédent"
+  },
+  "support": {
+    "card": {
+      "download_logs": {
+        "help": "Toutes les données privées seront anonymisées.",
+        "title": "Télécharger les Logs"
+      },
+      "extract_config": {
+        "title": "Extraire la Configuration"
+      },
+      "support_link": {
+        "title": "Lien de Support"
+      }
+    }
+  },
+  "tab": {
+    "custom_certificate": "Certificat Personnalisé",
+    "lets_encrypt": "Let's Encrypt"
+  },
+  "table": {
+    "header": {
+      "actions": "Actions",
+      "active": "Actif",
+      "async": "Asynchrone",
+      "checksum": "Checksum",
+      "country": "Pays",
+      "created": "Créé le",
+      "data": "Données",
+      "date": "Date",
+      "description": "Description",
+      "end_date": "Date de Fin",
+      "file_name": "Nom du Fichier",
+      "health": "Santé",
+      "hostname": "Nom d'hôte",
+      "id": "ID",
+      "interval": "Intervalle",
+      "ip_address": "Adresse IP",
+      "job_name": "Nom de la Tâche",
+      "last_run": "Dernière Exécution",
+      "last_seen": "Vu Dernièrement",
+      "last_update": "Dernière MàJ",
+      "method": "Méthode",
+      "name": "Nom",
+      "plugin": "Plugin",
+      "reason": "Raison",
+      "reload": "Recharger",
+      "scope": "Portée",
+      "security_mode": "Mode de Sécurité",
+      "server_name": "Nom du Serveur",
+      "service": "Service",
+      "service_name": "Nom du Service",
+      "status_code": "Code d'État",
+      "stream": "Stream",
+      "template": "Modèle",
+      "time_left": "Temps Restant",
+      "type": "Type",
+      "url": "URL",
+      "user_agent": "User-Agent",
+      "version": "Version"
+    }
+  },
+  "template": {
+    "none": "Aucun Modèle"
+  },
+  "theme": {
+    "dark": "Sombre",
+    "light": "Clair"
+  },
+  "toast": {
+    "autoconf_disclaimer_bold": "Si le service est supprimé ou redémarré, votre configuration UI sera perdue.",
+    "autoconf_disclaimer_detail": "Ceci est dû au fait que la méthode du service est 'autoconf', conçue pour éviter les conflits de configuration.",
+    "body": {
+      "ping_succeed": "Instances : {{instances}}"
+    },
+    "copied": "Copié !",
+    "disclaimer_title": "Avertissement",
+    "header": {
+      "ping_failed": "Échec du Ping",
+      "ping_succeed": "Ping réussi"
+    }
+  },
+  "tooltip": {
+    "auto_lets_encrypt": "Indique s'il faut demander automatiquement un certificat Let's Encrypt.",
+    "button": {
+      "convert_service_to_draft": "Convertir le Service {{name}} en Brouillon",
+      "convert_service_to_online": "Convertir le Service {{name}} en En Ligne",
+      "delete_config": "Supprimer la Config Perso {{name}}",
+      "delete_instance": "Supprimer l'Instance {{hostname}}",
+      "delete_plugin": "Supprimer le Plugin {{name}}",
+      "delete_service": "Supprimer le Service {{name}}",
+      "ping_instance": "Pinger l'Instance {{hostname}}",
+      "reload_instance": "Recharger l'Instance {{hostname}}",
+      "reset_default": "Réinitialiser à la valeur par défaut",
+      "reset_global": "Réinitialiser à la valeur globale",
+      "run_job": "Exécuter la Tâche {{job}}",
+      "stop_instance": "Arrêter l'Instance {{hostname}}",
+      "unban_ip": "Débannir {{ip}}"
+    },
+    "cannot_delete_original_ban": "Impossible de supprimer l'entrée de bannissement originale.",
+    "cannot_remove_disabled": "Impossible de supprimer car un ou plusieurs paramètres sont désactivés.",
+    "certificate_priority": "Choisir s'il faut prioriser le certificat depuis le chemin du fichier ou depuis les données base64.",
+    "challenge_type": "Le type de challenge à utiliser pour la vérification Let's Encrypt (http ou dns).",
+    "config_type": {
+      "crs_plugins_after": "Configurations appliquées après le chargement des plugins OWASP Core Rule Set.",
+      "crs_plugins_before": "Configurations appliquées avant le chargement des plugins OWASP Core Rule Set.",
+      "default_server_http": "Configurations au niveau Serveur de Nginx, spécifiquement pour le bloc 'default server', utilisé lorsque la requête client ne correspond à aucun nom de serveur configuré.",
+      "http": "Configurations appliquées globalement au niveau HTTP de Nginx.",
+      "modsec": "Configurations ModSecurity appliquées après le chargement de l'OWASP Core Rule Set, ou utilisées si le Core Rule Set n'est pas chargé.",
+      "modsec_crs": "Configurations ModSecurity appliquées avant le chargement de l'OWASP Core Rule Set.",
+      "server_http": "Configurations appliquées au niveau Serveur HTTP (hôte virtuel) de Nginx.",
+      "server_stream": "Configurations appliquées au niveau Serveur Stream de Nginx.",
+      "stream": "Configurations appliquées globalement au niveau Stream de Nginx."
+    },
+    "confirm_password_match": "Le mot de passe de confirmation doit correspondre au mot de passe saisi ci-dessus.",
+    "copied": "Copié !",
+    "copy_https_only": "La fonction de copie n'est disponible qu'en HTTPS.",
+    "custom_ssl_cert_data": "Les données du certificat SSL personnalisé (format PEM ou encodé en Base64).",
+    "custom_ssl_cert_path": "Chemin vers le fichier du certificat SSL personnalisé.",
+    "custom_ssl_key_data": "Les données de la clé privée SSL personnalisée (format PEM ou encodé en Base64).",
+    "custom_ssl_key_path": "Chemin vers le fichier de la clé privée SSL personnalisée.",
+    "disabled_by_method": "Désactivé : Géré via la méthode '{{method}}'.",
+    "disabled_db_readonly": "Désactivé : La base de données est en lecture seule.",
+    "disabled_draft": "Désactivé : Le service est en mode Brouillon.",
+    "disabled_readonly": "Désactivé : Le mode lecture seule est actif.",
+    "dns_check_url": "Si la page affiche 'ok', le nom de serveur est probablement disponible.",
+    "dns_credential_items": "Identifiants pour le fournisseur DNS, utilisés pour les challenges DNS (ex : 'cloudflare_api_token=123456'). Le format requis dépend du fournisseur.",
+    "dns_credentials_dns_only": "Les identifiants ne sont applicables que pour les challenges DNS.",
+    "dns_propagation": "Temps (en secondes) à attendre pour la propagation des changements DNS lors des challenges DNS.",
+    "dns_propagation_dns_only": "Le délai de propagation DNS n'est applicable que pour les challenges DNS.",
+    "dns_provider": "Le fournisseur DNS à utiliser pour les challenges DNS de Let's Encrypt.",
+    "dns_provider_dns_only": "La sélection du fournisseur DNS n'est applicable que pour les challenges DNS.",
+    "download_file": "Télécharger le fichier",
+    "draft_toggle_disabled": "Le mode Brouillon ne peut être basculé que pour les services créés via l'UI.",
+    "email_lets_encrypt": "L'adresse email à enregistrer auprès de Let's Encrypt pour la gestion des certificats et les notifications.",
+    "email_length": "L'email doit contenir entre 1 et 256 caractères.",
+    "global_config_source": "Valeur héritée de la configuration globale.",
+    "instance_not_up": "L'instance {{hostname}} ne répond pas actuellement ('up').",
+    "latest_version_installed": "Vous utilisez la dernière version.",
+    "license_key": "Votre clé de licence BunkerWeb PRO.",
+    "link": {
+      "access_plugin_page": "Accéder à la Page {{name}}",
+      "access_service": "Accéder au Service {{name}}",
+      "clone_config": "Cloner la Config Perso {{name}}",
+      "clone_service": "Cloner le Service {{name}}",
+      "download_file": "Télécharger {{filename}}",
+      "edit_config": "Modifier la Config Perso {{name}}",
+      "edit_service": "Modifier le Service {{service}}",
+      "export_service": "Exporter la Configuration du Service {{name}}",
+      "view_config": "Voir la Config Perso {{name}}",
+      "view_file": "Voir {{filename}}",
+      "view_service": "Voir le Service {{name}}"
+    },
+    "modal": {
+      "title": {
+        "full_url": "URL Complète"
+      }
+    },
+    "multisite_setting": "Ceci est un paramètre multisite, affectant plusieurs services s'il est défini globalement.",
+    "new_version_available": "Une nouvelle version est disponible !",
+    "no_cache": "Aucun fichier cache trouvé pour cette tâche.",
+    "no_history": "Aucun historique d'exécution trouvé pour cette tâche.",
+    "no_log_files": "Aucun fichier log disponible.",
+    "no_page_available": "Aucune page dédiée disponible pour ce plugin.",
+    "password_requirements": "Le mot de passe doit comporter au moins 8 caractères et inclure 1 majuscule, 1 chiffre et 1 caractère spécial.",
+    "pro_feature": "Ceci est une fonctionnalité PRO.",
+    "readonly_db_action_disabled": "Désactivé : La base de données est en lecture seule, action '{{action}}' désactivée.",
+    "readonly_user_action_disabled": "Désactivé : Votre compte est en lecture seule, action '{{action}}' désactivée.",
+    "remove_ban_entry": "Retirer cette entrée de bannissement de la liste.",
+    "reset_template_settings": "Réinitialiser tous les paramètres de la vue modèle actuelle à leurs valeurs par défaut.",
+    "server_name": "Le nom de domaine principal ou nom de serveur pour ce service.",
+    "stream_support": {
+      "no": "Ne supporte pas le mode STREAM.",
+      "partial": "Supporte partiellement le mode STREAM.",
+      "yes": "Supporte le mode STREAM."
+    },
+    "table": {
+      "bans": {
+        "actions": "Actions disponibles pour ce Bannissement",
+        "country": "Pays de l'adresse IP bannie",
+        "date": "Date et heure de création du Bannissement",
+        "details": "Afficher les détails du Bannissement",
+        "end_date": "Date et heure d'expiration du Bannissement",
+        "ip_address": "Adresse IP bannie",
+        "reason": "Raison du bannissement",
+        "scope": "Portée du bannissement (Global ou Spécifique au service)",
+        "select_all": "Sélectionner tous les Bannissements",
+        "service": "Service d'origine du bannissement (si portée Spécifique)",
+        "time_left": "Temps restant avant l'expiration du Bannissement"
+      },
+      "cache": {
+        "actions": "Actions disponibles pour ce fichier cache",
+        "checksum": "Checksum du fichier cache",
+        "details": "Afficher les détails du fichier cache",
+        "file_name": "Nom du fichier cache",
+        "job_name": "Tâche ayant généré ce fichier cache",
+        "last_update": "Date et heure de la dernière mise à jour du fichier cache",
+        "plugin": "Plugin associé à la tâche ayant généré ce fichier cache",
+        "service": "Service associé à ce fichier cache (ou Global)"
+      },
+      "configs": {
+        "actions": "Actions disponibles pour cette Config Perso",
+        "checksum": "Checksum du contenu de la Config Perso",
+        "details": "Afficher les détails de la Config Perso",
+        "method": "Méthode de création de la Config Perso (ex: ui, file)",
+        "name": "Nom de la Config Perso",
+        "select_all": "Sélectionner toutes les Configs Perso",
+        "service": "Service associé à la Config Perso (ou Global)",
+        "template": "Indique si la Config Perso provient d'un modèle",
+        "type": "Type ou contexte de la Config Perso (ex: HTTP, MODSEC)"
+      },
+      "instances": {
+        "actions": "Actions disponibles pour cette Instance",
+        "created": "Date et heure d'enregistrement initial de l'Instance",
+        "details": "Afficher les détails de l'Instance",
+        "health": "État de santé de l'Instance (Actif, Inactif, Chargement)",
+        "hostname": "Nom d'hôte ou URL de l'Instance",
+        "last_seen": "Date et heure de dernière vue de l'Instance",
+        "method": "Méthode de création de l'Instance (ex: ui, autoconf)",
+        "name": "Nom défini par l'utilisateur ou auto-généré de l'Instance",
+        "select_all": "Sélectionner toutes les Instances",
+        "type": "Type de l'Instance (ex: Conteneur, Statique)"
+      },
+      "jobs": {
+        "actions": "Actions disponibles pour cette Tâche",
+        "async": "Indique si la Tâche s'exécute de manière asynchrone",
+        "details": "Afficher les détails de la Tâche",
+        "interval": "Fréquence d'exécution de la Tâche",
+        "last_run": "Statut de la dernière exécution de la Tâche (Succès/Échec)",
+        "name": "Nom de la Tâche",
+        "plugin": "Plugin associé à la Tâche",
+        "reload": "Indique si la Tâche déclenche un rechargement de BunkerWeb",
+        "select_all": "Sélectionner toutes les Tâches"
+      },
+      "plugins": {
+        "actions": "Actions disponibles pour ce Plugin",
+        "description": "Description du Plugin",
+        "details": "Afficher les détails du Plugin",
+        "id": "Identifiant unique du Plugin",
+        "method": "Méthode de création du Plugin (ex: ui, core)",
+        "name": "Nom du Plugin",
+        "select_all": "Sélectionner tous les Plugins",
+        "stream": "Indique si le plugin supporte le mode stream",
+        "type": "Type du Plugin (Core, Externe, Pro, UI)",
+        "version": "Version du Plugin"
+      },
+      "reports": {
+        "country": "Pays associé à l'adresse IP signalée",
+        "data": "Données supplémentaires liées au rapport",
+        "date": "Date et heure de génération du rapport",
+        "details": "Afficher les détails du Rapport",
+        "ip_address": "Adresse IP ayant déclenché le rapport",
+        "method": "Méthode HTTP de la requête signalée",
+        "reason": "Raison pour laquelle le rapport a été généré",
+        "security_mode": "Mode de sécurité actif lors de la génération du rapport",
+        "select_all": "Sélectionner tous les Rapports",
+        "server_name": "Nom du serveur (vhost) ayant généré le rapport",
+        "status_code": "Code d'état HTTP retourné pour la requête signalée",
+        "url": "URL ciblée dans la requête signalée",
+        "user_agent": "Chaîne User-Agent de la requête signalée"
+      },
+      "select_rows_for_action": "Veuillez sélectionner une ou plusieurs lignes pour effectuer une action.",
+      "services": {
+        "actions": "Actions disponibles pour ce Service",
+        "created": "Date et heure de création du Service",
+        "details": "Afficher les détails du Service",
+        "last_update": "Date et heure de la dernière mise à jour du Service",
+        "method": "Méthode de création du Service (ex: ui, file)",
+        "name": "Nom du Service",
+        "select_all": "Sélectionner tous les Services",
+        "type": "Type du Service (En Ligne/Brouillon)"
+      }
+    },
+    "ui_host": "Le nom d'hôte ou l'adresse IP qui servira l'UI BunkerWeb via le proxy inverse.",
+    "ui_url": "Le chemin d'URL utilisé pour accéder à l'UI BunkerWeb via le proxy inverse.",
+    "ui_url_security": "Utiliser un chemin d'URL non standard et difficile à deviner améliore la sécurité.",
+    "use_custom_ssl": "Indique s'il faut utiliser un certificat SSL personnalisé au lieu de Let's Encrypt.",
+    "use_lets_encrypt_staging": "Indique s'il faut utiliser l'environnement de staging Let's Encrypt pour les tests (génère des certificats non fiables).",
+    "username_length": "Le nom d'utilisateur doit contenir entre 1 et 256 caractères.",
+    "view_full_url": "Cliquez pour voir l'URL complète",
+    "wildcard_certificates": "Générer des certificats wildcard (*.domaine.com). Nécessite le challenge DNS.",
+    "wildcard_dns_only": "Les certificats wildcard ne sont supportés qu'avec le type de challenge DNS."
+  },
+  "totp": {
+    "prompt": "Veuillez entrer votre code TOTP."
+  },
+  "validation": {
+    "default_field_name": "Ce champ",
+    "invalid_date": "Date invalide",
+    "ip_global_duplicate": "Cette adresse IP est déjà bannie globalement.",
+    "ip_invalid": "Format d'adresse IP invalide.",
+    "ip_required": "L'adresse IP est requise.",
+    "ip_service_duplicate": "Cette adresse IP est déjà bannie pour le service sélectionné ({{service}}).",
+    "pattern": "Veuillez entrer une valeur valide pour {{field}}.",
+    "required": "{{field}} est requis.",
+    "service_required_for_ban": "Un service doit être sélectionné pour un bannissement spécifique au service."
+  }
+}

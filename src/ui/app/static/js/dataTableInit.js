@@ -1,6 +1,14 @@
 // dataTableInit.js
 
+/**
+ * Initialize a DataTable with i18n and user preferences.
+ * @param {Object} config - Configuration object for the DataTable.
+ * @returns {DataTable} - The initialized DataTable instance.
+ */
 function initializeDataTable(config) {
+  // Ensure i18next is loaded before using it
+  let t = typeof i18next !== "undefined" ? i18next.t : (key) => key; // Fallback
+
   const isReadOnly = $("#is-read-only").val().trim() === "True";
   const {
     tableSelector,
@@ -9,8 +17,44 @@ function initializeDataTable(config) {
     dataTableOptions,
   } = config;
 
+  // Ensure dataTableOptions is always an object
+  const safeDataTableOptions =
+    dataTableOptions && typeof dataTableOptions === "object"
+      ? dataTableOptions
+      : {};
+
+  const applyLanguageSettings = (dtInstance, translator) => {
+    const languageConfig = configureI18n(translator, tableName);
+    // Merge new settings into existing ones to preserve any custom settings
+    dtInstance.settings()[0].oLanguage = $.extend(
+      true,
+      dtInstance.settings()[0].oLanguage || {}, // Ensure oLanguage exists
+      languageConfig,
+    );
+  };
+
+  // Configure initial internationalization
+  if (
+    Object.prototype.hasOwnProperty.call(safeDataTableOptions, "language") &&
+    typeof safeDataTableOptions.language === "object"
+  ) {
+    safeDataTableOptions.language = {
+      ...configureI18n(t, tableName),
+      ...safeDataTableOptions.language,
+    };
+  } else {
+    safeDataTableOptions.language = configureI18n(t, tableName);
+  }
+
   $.fn.dataTable.ext.buttons.toggle_filters = {
-    text: '<span class="tf-icons bx bx-filter bx-18px me-2"></span><span id="show-filters">Show</span><span id="hide-filters" class="d-none">Hide</span><span class="d-none d-md-inline"> filters</span>',
+    // Use i18next.t for translatable parts
+    text: `<span class="tf-icons bx bx-filter bx-18px me-2"></span><span id="show-filters" data-i18n="button.show">${t(
+      "button.show",
+    )}</span><span id="hide-filters" class="d-none" data-i18n="button.hide">${t(
+      "button.hide",
+    )}</span><span class="d-none d-md-inline" data-i18n="button.filters_suffix">${t(
+      "button.filters_suffix",
+    )}</span>`, // Assuming 'filters_suffix' key exists for " filters"
     action: function (e, dt, node, config) {
       const searchPanesContainer = dataTable.searchPanes.container();
       if (!searchPanesContainer) return;
@@ -29,8 +73,39 @@ function initializeDataTable(config) {
     }
   }
 
+  if (safeDataTableOptions.infoCallback === undefined) {
+    safeDataTableOptions.infoCallback = function (
+      settings,
+      start,
+      end,
+      max,
+      total,
+    ) {
+      if (total === 0) {
+        return t(
+          `datatable.info_empty_${tableName}`,
+          `No ${tableName} available`,
+        );
+      }
+      return t(`datatable.info_${tableName}`, {
+        start: start,
+        end: end,
+        total: total,
+      });
+    };
+  }
+
   // Initialize DataTable
-  const dataTable = new DataTable(tableSelector, dataTableOptions);
+  const dataTable = new DataTable(tableSelector, safeDataTableOptions);
+  applyTranslations();
+
+  $("input.dtsp-paneInputButton.search").each(function () {
+    const $this = $(this);
+    const placeholder = $this.attr("placeholder") || "";
+    const i18nSuffix = placeholder.toLowerCase().replace(/\s+/g, "_").trim();
+
+    if (i18nSuffix) $this.attr("data-i18n", `searchpane.${i18nSuffix}`);
+  });
 
   if (dataTable.searchPanes.container())
     dataTable.searchPanes.container().hide();
@@ -40,15 +115,16 @@ function initializeDataTable(config) {
   if (!isReadOnly)
     $(".action-button")
       .parent()
-      .attr(
-        "data-bs-original-title",
-        "Please select one or more rows to perform an action.",
-      )
+      .attr("data-bs-original-title", t("tooltip.table.select_rows_for_action"))
+      .attr("data-i18n", "tooltip.table.select_rows_for_action")
       .attr("data-bs-placement", "top")
       .tooltip();
 
   $(".dt-search label").addClass("visually-hidden");
-  $(".dt-search input[type=search]").attr("placeholder", "Search");
+  // Use i18next.t for the placeholder
+  $(".dt-search input[type=search]")
+    .attr("placeholder", t("form.placeholder.search"))
+    .attr("data-i18n", "form.placeholder.search");
 
   $(tableSelector).removeClass("d-none");
   $(`#${tableName}-waiting`).addClass("visually-hidden");
@@ -100,6 +176,47 @@ function initializeDataTable(config) {
           console.error("There was a problem with the fetch operation:", error);
         });
     }, 1000);
+
+    if (typeof i18next !== "undefined") {
+      i18next.on("languageChanged", (lng) => {
+        // Update the local translator function
+        t = i18next.t;
+        // Re-apply language settings to the existing DataTable instance
+        applyLanguageSettings(dataTable, t);
+        // Redraw the table to reflect changes in info, pagination etc.
+        dataTable.draw(false);
+        // Re-apply translations to static elements within the table wrapper if needed
+        // (e.g., custom buttons, search input placeholder if not handled by draw)
+        $(`${tableSelector}_wrapper [data-i18n]`).each(function () {
+          const element = $(this);
+          const key = element.attr("data-i18n");
+          // Basic translation update, assuming no complex options needed here
+          const translation = t(key);
+          if (element.is("input[placeholder]")) {
+            element.attr("placeholder", translation);
+          } else if (element.is("button") || element.is("span")) {
+            // Update text, handle potential nested spans if necessary
+            const textNode = element
+              .contents()
+              .filter(function () {
+                return this.nodeType === 3; // Node.TEXT_NODE
+              })
+              .first();
+            if (textNode.length) {
+              textNode.replaceWith(translation);
+            } else {
+              element.text(translation); // Fallback if no direct text node
+            }
+          }
+          // Add more conditions if other element types need updates
+        });
+        // Update search pane titles and buttons specifically if they exist
+        const searchPanesContainer = dataTable.searchPanes.container();
+        if (searchPanesContainer && $(searchPanesContainer).length) {
+          updateFilterTranslations(); // Reuse function from i18n.js if available globally or redefine needed parts
+        }
+      });
+    }
 
     // Column visibility event
     dataTable.on("column-visibility.dt", function (e, settings, column, state) {
@@ -197,12 +314,152 @@ function initializeDataTable(config) {
           .attr("data-bs-toggle", "tooltip")
           .attr(
             "data-bs-original-title",
-            "Please select one or more rows to perform an action.",
+            t("tooltip.table.select_rows_for_action"),
           )
+          .attr("data-i18n", "tooltip.table.select_rows_for_action")
           .attr("data-bs-placement", "top")
           .tooltip();
     }
   });
 
   return dataTable;
+}
+
+/**
+ * Configure DataTable internationalization using i18next
+ * @param {Function} t - The i18next translation function
+ * @param {string} tableName - The name of the table for context-specific translations
+ * @returns {Object} - DataTables language configuration object
+ */
+function configureI18n(t, tableName) {
+  // Ensure t is a function, provide a fallback if not (e.g., during initial load before i18next is ready)
+  const translate =
+    typeof t === "function" ? t : (key, fallback) => fallback || key;
+  const entityName = tableName || "items";
+
+  return {
+    emptyTable: translate(
+      `datatable.info_empty_${entityName}`,
+      `No ${entityName} available`,
+    ),
+    info: translate(
+      `datatable.info_${entityName}`,
+      "Showing _START_ to _END_ of _TOTAL_ entries",
+    ),
+    infoEmpty: translate(
+      `datatable.info_empty_${entityName}`,
+      `No ${entityName} available`,
+    ),
+    infoFiltered: translate(
+      `datatable.info_filtered_${entityName}`,
+      "(_MAX_ total entries)",
+    ),
+    lengthMenu: translate(
+      `datatable.length_menu_${entityName}`,
+      "Display _MENU_ entries",
+    ),
+    zeroRecords: translate(
+      `datatable.zero_records_${entityName}`,
+      `No matching ${entityName} found`,
+    ),
+    processing: translate("datatable.processing", "Processing..."),
+    search: translate("datatable.search", "Search:"),
+    select: {
+      rows: {
+        _: translate(
+          `datatable.select_rows_${entityName}_plural`,
+          "Selected %d entries",
+        ),
+        0: translate(
+          `datatable.select_rows_${entityName}_0`,
+          "No entries selected",
+        ),
+        1: translate(
+          `datatable.select_rows_${entityName}_1`,
+          "Selected 1 entry",
+        ),
+      },
+    },
+    searchPanes: {
+      emptyPanes: translate("searchpane.empty", "No search panes available"),
+      loadMessage: translate("searchpane.loading", "Loading search panes..."),
+      title: {
+        _: translate("searchpane.title_plural", "Active Filters - %d"),
+        0: translate("searchpane.title_0", "No Active Filter"),
+        1: translate("searchpane.title_1", "Active Filter - 1"),
+      },
+      clearMessage: translate("searchpane.clear", "Clear All"),
+      collapse: {
+        0: translate("searchpane.collapse_0", "SearchPanes"),
+        _: translate("searchpane.collapse_plural", "SearchPanes (%d)"),
+      },
+      collapseMessage: translate("searchpane.collapse_message", "Collapse All"),
+      showMessage: translate("searchpane.show_message", "Show All"),
+      count: translate("searchpane.count", "{total}"),
+      countFiltered: translate("searchpane.countFiltered", "{shown} ({total})"),
+    },
+  };
+}
+
+// Expose configureI18n globally so it can be used by i18n.js for language switching
+window.configureI18n = configureI18n;
+
+// Helper function to update translations for filter elements (if needed within this file)
+// Consider making this globally available if used by both files.
+function updateFilterTranslations() {
+  const translate =
+    typeof i18next !== "undefined"
+      ? i18next.t
+      : (key, fallback) => fallback || key;
+  $(".dtsp-name [data-i18n], .dtsp-paneInputButton[data-i18n]").each(
+    function () {
+      const element = $(this);
+      const key = element.attr("data-i18n");
+      let options = {};
+      const optionsAttr = element.attr("data-i18n-options");
+      if (optionsAttr) {
+        try {
+          options = JSON.parse(optionsAttr.replace(/'/g, '"'));
+        } catch (e) {
+          console.error(
+            `Error parsing data-i18n-options for key "${key}":`,
+            e,
+            optionsAttr,
+          );
+          return;
+        }
+      }
+      const translation = translate(key, options);
+      if (element.is("input")) {
+        element.attr("placeholder", translation);
+      } else {
+        element.text(translation);
+      }
+    },
+  );
+  // Update SearchPanes title
+  const searchPanes = $(".dtsp-title");
+  if (searchPanes.length) {
+    const currentTitle = searchPanes.text();
+    // Attempt to extract the count if present
+    const match = currentTitle.match(/\((\d+)\)/);
+    const count = match ? parseInt(match[1], 10) : 0;
+    const titleKey =
+      count === 0
+        ? "searchpane.title_0"
+        : count === 1
+          ? "searchpane.title_1"
+          : "searchpane.title_plural";
+    searchPanes.text(translate(titleKey, { count: count }));
+  }
+  // Update SearchPanes clear/collapse buttons
+  $(".dtsp-clearAll, .dtsp-collapseAll, .dtsp-showAll").each(function () {
+    const $button = $(this);
+    let key = "";
+    if ($button.hasClass("dtsp-clearAll")) key = "searchpane.clear";
+    else if ($button.hasClass("dtsp-collapseAll"))
+      key = "searchpane.collapse_message";
+    else if ($button.hasClass("dtsp-showAll")) key = "searchpane.show_message";
+    if (key) $button.text(translate(key));
+  });
 }

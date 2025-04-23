@@ -422,7 +422,7 @@ def reports_fetch():
                 country_name = COUNTRIES_DATA_NAMES.get(country_code, "N/A")
                 search_panes_options["country"].append(
                     {
-                        "label": f"""<img src="{base_flags_url}/{'zz' if code == 'local' else country_code}.svg" class="border border-1 p-0 me-1" height="17" />&nbsp;－&nbsp;{'N/A' if code == 'local' else country_name}""",
+                        "label": f"""<img src="{base_flags_url}/{'zz' if code == 'local' else country_code}.svg" class="border border-1 p-0 me-1" height="17" />&nbsp;－&nbsp;<span data-i18n="country.{'not_applicable' if code == 'local' else code.upper()}">{'N/A' if code == 'local' else country_name}</span>""",
                         "value": code,
                         "total": counts["total"],
                         "count": counts["count"],

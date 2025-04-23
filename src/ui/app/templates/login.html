@@ -1,25 +1,29 @@
 {% extends "base.html" %}
 {% block page %}
     <!-- Content -->
-    <!-- Dark Mode Toggle - Enhanced Floating Button -->
-    <div class="theme-toggle position-fixed top-0 end-0 p-6"
-         style="z-index: 1030">
-        <div class="toggle-container d-flex align-items-center bg-{% if theme == 'light' %}white{% else %}dark{% endif %} p-3 rounded-pill shadow-lg">
-            <label class="setting-checkbox-label pe-2 mb-0 fw-bold text-secondary"
-                   for="dark-mode-toggle">Light</label>
-            <div class="form-switch">
-                <input id="dark-mode-toggle"
-                       name="dark-mode-toggle"
-                       class="form-check-input"
-                       type="checkbox"
-                       role="switch"
-                       {% if theme == "dark" %}checked{% endif %} />
+    <div class="position-fixed top-0 end-0 m-5 me-7" style="z-index: 1030">
+        <div class="d-flex justify-content-end align-items-center">
+            <!-- Language Selector -->
+            <div class="me-3">{% include "language-selector.html" %}</div>
+            <!-- Theme Toggle -->
+            <div class="toggle-container d-flex align-items-center bg-{% if theme == 'light' %}white{% else %}dark{% endif %} p-3 rounded-pill shadow-lg">
+                <label class="setting-checkbox-label pe-2 mb-0 fw-bold text-secondary"
+                       for="dark-mode-toggle"
+                       data-i18n="theme.light">Light</label>
+                <div class="form-switch">
+                    <input id="dark-mode-toggle"
+                           name="dark-mode-toggle"
+                           class="form-check-input"
+                           type="checkbox"
+                           role="switch"
+                           {% if theme == "dark" %}checked{% endif %} />
+                </div>
+                <label class="setting-checkbox-label mb-0 fw-bold text-secondary"
+                       for="dark-mode-toggle"
+                       data-i18n="theme.dark">Dark</label>
             </div>
-            <label class="setting-checkbox-label mb-0 fw-bold text-secondary"
-                   for="dark-mode-toggle">Dark</label>
         </div>
     </div>
-    <!-- /Dark Mode Toggle -->
     <div class="bg-light-subtle">
         <div class="login-background">
             <div class="container-xxl">
@@ -49,17 +53,18 @@
                                            value="{{ request.values.get('next', '') }}" />
                                     <input type="hidden" name="theme" value="light" />
                                     <div class="mb-6">
-                                        <label for="username" class="form-label">Username</label>
+                                        <label for="username" class="form-label" data-i18n="form.label.username">Username</label>
                                         <input type="text"
                                                class="form-control"
                                                id="username"
                                                name="username"
                                                placeholder="Enter your username"
+                                               data-i18n="form.placeholder.enter_username"
                                                autofocus
                                                required />
                                     </div>
                                     <div class="mb-6 form-password-toggle">
-                                        <label class="form-label" for="password">Password</label>
+                                        <label class="form-label" for="password" data-i18n="form.label.password">Password</label>
                                         <div class="input-group input-group-merge">
                                             <input type="password"
                                                    id="password"
@@ -78,17 +83,21 @@
                                                        type="checkbox"
                                                        id="remember-me"
                                                        name="remember-me" />
-                                                <label class="form-check-label" for="remember-me">Remember Me</label>
+                                                <label class="form-check-label"
+                                                       for="remember-me"
+                                                       data-i18n="form.checkbox.remember_me">Remember Me</label>
                                             </div>
                                             <a href="https://docs.bunkerweb.io/{{ bw_version }}/troubleshooting/?utm_campaign=self&utm_source=ui#__tabbed_6_2"
                                                target="_blank"
                                                rel="noopener">
-                                                <span>Forgot Password?</span>
+                                                <span data-i18n="link.forgot_password">Forgot Password?</span>
                                             </a>
                                         </div>
                                     </div>
                                     <div class="mb-6">
-                                        <button class="btn btn-primary d-grid w-100 don-jose" type="submit">Login</button>
+                                        <button class="btn btn-primary d-grid w-100 don-jose"
+                                                type="submit"
+                                                data-i18n="button.login">Login</button>
                                     </div>
                                 </form>
                             </div>

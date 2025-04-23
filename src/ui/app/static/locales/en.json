@@ -1,0 +1,1288 @@
+{
+  "about": {
+    "build_with": "Built With",
+    "gnu_license": "GNU Affero General Public License v3.0",
+    "license_title": "License",
+    "socials": "Socials",
+    "tagline": "Powerful Protection, Simplified",
+    "version": "Version: {{version}}"
+  },
+  "alert": {
+    "important": "Important",
+    "no_changes_detected": "No changes detected.",
+    "notice": "Notice",
+    "ping_error": "An error occurred while pinging the instances.",
+    "readonly_mode": "This action is disabled in read-only mode."
+  },
+  "aria": {
+    "label": {
+      "close": "Close",
+      "raw_configuration": "Raw configuration"
+    }
+  },
+  "badge": {
+    "from_template": "From template",
+    "new_version": "New version",
+    "no_template": "No Template",
+    "unread_notifications": "Unread notifications",
+    "unread_news": "Unread news"
+  },
+  "banner": {
+    "community": "Be part of the Bunker community by joining the <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://discord.bunkerweb.io/?utm_campaign=self&utm_source=banner\">Discord chat</a> and following us on <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://www.linkedin.com/company/bunkerity/\">LinkedIn</a>.",
+    "link": {
+      "here": "here"
+    },
+    "pro": "Get the most out of BunkerWeb by upgrading to the PRO version. More info and free trial <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#pro\">here</a>.",
+    "support": "Need premium support or tailored consulting for BunkerWeb? Check out our <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">professional services</a>."
+  },
+  "breadcrumb": {
+    "about": "About",
+    "bans": "Bans",
+    "cache": "Cache",
+    "configs": "Configs",
+    "extra_pages": "Extra Pages",
+    "global_config": "Global Config",
+    "home": "Home",
+    "instances": "Instances",
+    "jobs": "Jobs",
+    "logs": "Logs",
+    "misc": "Misc",
+    "mode_selection": "Mode Selection",
+    "more": "More...",
+    "new": "New",
+    "plugins": "Plugins",
+    "plugins_pages": "Plugins Pages",
+    "pro": "Pro",
+    "reports": "Reports",
+    "services": "Services",
+    "support": "Support",
+    "templates": "Templates"
+  },
+  "button": {
+    "actions": "Actions",
+    "activate_key": "Activate Key",
+    "add": "INSERT",
+    "add_ban_plural": "Add Ban(s)",
+    "add_plugin_plural": "Add Plugin(s)",
+    "add_plugins": "Add Plugins",
+    "auto_refresh": "Auto Refresh",
+    "ban": "Ban",
+    "cache": "Cache",
+    "cancel": "Cancel",
+    "clear": "CLEAR",
+    "close": "Close",
+    "columns": "Columns",
+    "convert_services": "Convert Services",
+    "copy": "Copy",
+    "copy_codes": "Copy Codes",
+    "copy_visible": "Copy Visible",
+    "create_config": "Create Custom Config",
+    "create_instance": "Create Instance",
+    "create_service": "Create new service",
+    "delete": "Delete",
+    "delete_instance": "Delete Instances",
+    "disable_totp": "Disable TOTP",
+    "download": "Download",
+    "enable_totp": "Enable TOTP",
+    "entire_config": "Entire Config",
+    "export": "Export",
+    "filters_suffix": " Filters",
+    "github_stars": "Stars",
+    "hide": "Hide",
+    "history": "History",
+    "login": "Login",
+    "multiple_add": "ADD",
+    "multiple_hide": "HIDE",
+    "multiple_remove": "REMOVE",
+    "multiple_show": "SHOW",
+    "need_help": "Need Help?",
+    "news": "News",
+    "notifications": "Notifications",
+    "open_support_ticket": "Open a Support Ticket",
+    "order_support": "Order Support",
+    "ping": "Ping",
+    "plugin_page": "Plugin Page",
+    "proceed": "Proceed",
+    "refresh_recovery_codes": "Refresh Recovery Codes",
+    "reload": "Reload",
+    "reset": "Reset",
+    "reset_columns": "Reset Columns",
+    "return_to_safety": "Return to Safety",
+    "run": "Run",
+    "run_selected_jobs": "Run Selected Jobs",
+    "save": "Save",
+    "save_changes": "Save Changes",
+    "select_file": "Select File",
+    "select_page": "Select Page",
+    "service": "Service",
+    "setup": "Setup",
+    "show": "Show",
+    "stop": "Stop",
+    "submit": "Submit",
+    "subscribe": "Subscribe",
+    "unban": "Unban",
+    "update_key": "Update Key",
+    "upload_photo": "Upload New Photo",
+    "wipe_other_sessions": "Wipe Other Sessions"
+  },
+  "country": {
+    "AD": "Andorra",
+    "AE": "United Arab Emirates",
+    "AF": "Afghanistan",
+    "AG": "Antigua and Barbuda",
+    "AI": "Anguilla",
+    "AL": "Albania",
+    "AM": "Armenia",
+    "AO": "Angola",
+    "AQ": "Antarctica",
+    "AR": "Argentina",
+    "AS": "American Samoa",
+    "AT": "Austria",
+    "AU": "Australia",
+    "AW": "Aruba",
+    "AX": "Åland Islands",
+    "AZ": "Azerbaijan",
+    "BA": "Bosnia and Herzegovina",
+    "BB": "Barbados",
+    "BD": "Bangladesh",
+    "BE": "Belgium",
+    "BF": "Burkina Faso",
+    "BG": "Bulgaria",
+    "BH": "Bahrain",
+    "BI": "Burundi",
+    "BJ": "Benin",
+    "BL": "Saint Barthélemy",
+    "BM": "Bermuda",
+    "BN": "Brunei Darussalam",
+    "BO": "Bolivia",
+    "BQ": "Caribbean Netherlands",
+    "BR": "Brazil",
+    "BS": "Bahamas",
+    "BT": "Bhutan",
+    "BV": "Bouvet Island",
+    "BW": "Botswana",
+    "BY": "Belarus",
+    "BZ": "Belize",
+    "CA": "Canada",
+    "CC": "Cocos (Keeling) Islands",
+    "CD": "DR Congo",
+    "CF": "Central African Republic",
+    "CG": "Republic of the Congo",
+    "CH": "Switzerland",
+    "CI": "Côte d'Ivoire",
+    "CK": "Cook Islands",
+    "CL": "Chile",
+    "CM": "Cameroon",
+    "CN": "China",
+    "CO": "Colombia",
+    "CR": "Costa Rica",
+    "CU": "Cuba",
+    "CV": "Cape Verde",
+    "CW": "Curaçao",
+    "CX": "Christmas Island",
+    "CY": "Cyprus",
+    "CZ": "Czech Republic",
+    "DE": "Germany",
+    "DJ": "Djibouti",
+    "DK": "Denmark",
+    "DM": "Dominica",
+    "DO": "Dominican Republic",
+    "DZ": "Algeria",
+    "EC": "Ecuador",
+    "EE": "Estonia",
+    "EG": "Egypt",
+    "EH": "Western Sahara",
+    "ER": "Eritrea",
+    "ES": "Spain",
+    "ET": "Ethiopia",
+    "EU": "Europe",
+    "FI": "Finland",
+    "FJ": "Fiji",
+    "FK": "Falkland Islands (Malvinas)",
+    "FM": "Micronesia",
+    "FO": "Faroe Islands",
+    "FR": "France",
+    "GA": "Gabon",
+    "GB": "United Kingdom",
+    "GD": "Grenada",
+    "GE": "Georgia",
+    "GF": "French Guiana",
+    "GG": "Guernsey",
+    "GH": "Ghana",
+    "GI": "Gibraltar",
+    "GL": "Greenland",
+    "GM": "Gambia",
+    "GN": "Guinea",
+    "GP": "Guadeloupe",
+    "GQ": "Equatorial Guinea",
+    "GR": "Greece",
+    "GS": "South Georgia and the South Sandwich Islands",
+    "GT": "Guatemala",
+    "GU": "Guam",
+    "GW": "Guinea-Bissau",
+    "GY": "Guyana",
+    "HK": "Hong Kong",
+    "HM": "Heard Island and McDonald Islands",
+    "HN": "Honduras",
+    "HR": "Croatia",
+    "HT": "Haiti",
+    "HU": "Hungary",
+    "ID": "Indonesia",
+    "IE": "Ireland",
+    "IL": "Israel",
+    "IM": "Isle of Man",
+    "IN": "India",
+    "IO": "British Indian Ocean Territory",
+    "IQ": "Iraq",
+    "IR": "Iran",
+    "IS": "Iceland",
+    "IT": "Italy",
+    "JE": "Jersey",
+    "JM": "Jamaica",
+    "JO": "Jordan",
+    "JP": "Japan",
+    "KE": "Kenya",
+    "KG": "Kyrgyzstan",
+    "KH": "Cambodia",
+    "KI": "Kiribati",
+    "KM": "Comoros",
+    "KN": "Saint Kitts and Nevis",
+    "KP": "North Korea",
+    "KR": "South Korea",
+    "KW": "Kuwait",
+    "KY": "Cayman Islands",
+    "KZ": "Kazakhstan",
+    "LA": "Laos",
+    "LB": "Lebanon",
+    "LC": "Saint Lucia",
+    "LI": "Liechtenstein",
+    "LK": "Sri Lanka",
+    "LR": "Liberia",
+    "LS": "Lesotho",
+    "LT": "Lithuania",
+    "LU": "Luxembourg",
+    "LV": "Latvia",
+    "LY": "Libya",
+    "MA": "Morocco",
+    "MC": "Monaco",
+    "MD": "Moldova",
+    "ME": "Montenegro",
+    "MF": "Saint Martin",
+    "MG": "Madagascar",
+    "MH": "Marshall Islands",
+    "MK": "North Macedonia",
+    "ML": "Mali",
+    "MM": "Myanmar",
+    "MN": "Mongolia",
+    "MO": "Macao",
+    "MP": "Northern Mariana Islands",
+    "MQ": "Martinique",
+    "MR": "Mauritania",
+    "MS": "Montserrat",
+    "MT": "Malta",
+    "MU": "Mauritius",
+    "MV": "Maldives",
+    "MW": "Malawi",
+    "MX": "Mexico",
+    "MY": "Malaysia",
+    "MZ": "Mozambique",
+    "NA": "Namibia",
+    "NC": "New Caledonia",
+    "NE": "Niger",
+    "NF": "Norfolk Island",
+    "NG": "Nigeria",
+    "NI": "Nicaragua",
+    "NL": "Netherlands",
+    "NO": "Norway",
+    "NP": "Nepal",
+    "NR": "Nauru",
+    "NU": "Niue",
+    "NZ": "New Zealand",
+    "OM": "Oman",
+    "PA": "Panama",
+    "PE": "Peru",
+    "PF": "French Polynesia",
+    "PG": "Papua New Guinea",
+    "PH": "Philippines",
+    "PK": "Pakistan",
+    "PL": "Poland",
+    "PM": "Saint Pierre and Miquelon",
+    "PN": "Pitcairn",
+    "PR": "Puerto Rico",
+    "PS": "Palestine",
+    "PT": "Portugal",
+    "PW": "Palau",
+    "PY": "Paraguay",
+    "QA": "Qatar",
+    "RE": "Réunion",
+    "RO": "Romania",
+    "RS": "Serbia",
+    "RU": "Russian Federation",
+    "RW": "Rwanda",
+    "SA": "Saudi Arabia",
+    "SB": "Solomon Islands",
+    "SC": "Seychelles",
+    "SD": "Sudan",
+    "SE": "Sweden",
+    "SG": "Singapore",
+    "SH": "Saint Helena, Ascension and Tristan da Cunha",
+    "SI": "Slovenia",
+    "SJ": "Svalbard and Jan Mayen Islands",
+    "SK": "Slovakia",
+    "SL": "Sierra Leone",
+    "SM": "San Marino",
+    "SN": "Senegal",
+    "SO": "Somalia",
+    "SR": "Suriname",
+    "SS": "South Sudan",
+    "ST": "Sao Tome and Principe",
+    "SV": "El Salvador",
+    "SX": "Sint Maarten (Dutch part)",
+    "SY": "Syria",
+    "SZ": "Eswatini",
+    "TC": "Turks and Caicos Islands",
+    "TD": "Chad",
+    "TF": "French Southern Territories",
+    "TG": "Togo",
+    "TH": "Thailand",
+    "TJ": "Tajikistan",
+    "TK": "Tokelau",
+    "TL": "Timor-Leste",
+    "TM": "Turkmenistan",
+    "TN": "Tunisia",
+    "TO": "Tonga",
+    "TR": "Turkey",
+    "TT": "Trinidad and Tobago",
+    "TV": "Tuvalu",
+    "TW": "Taiwan",
+    "TZ": "Tanzania",
+    "UA": "Ukraine",
+    "UG": "Uganda",
+    "UM": "US Minor Outlying Islands",
+    "US": "United States",
+    "UY": "Uruguay",
+    "UZ": "Uzbekistan",
+    "VA": "Holy See (Vatican City State)",
+    "VC": "Saint Vincent and the Grenadines",
+    "VE": "Venezuela",
+    "VG": "Virgin Islands, British",
+    "VI": "Virgin Islands, U.S.",
+    "VN": "Vietnam",
+    "VU": "Vanuatu",
+    "WF": "Wallis and Futuna Islands",
+    "WS": "Samoa",
+    "XK": "Kosovo",
+    "YE": "Yemen",
+    "YT": "Mayotte",
+    "ZA": "South Africa",
+    "ZM": "Zambia",
+    "ZW": "Zimbabwe",
+    "not_applicable": "N/A"
+  },
+  "dashboard": {
+    "card": {
+      "blocked_requests": {
+        "title": "Blocked Requests"
+      },
+      "blocked_unique_ips": {
+        "title": "Blocked Unique IPs"
+      },
+      "instances": {
+        "status": "{{up}} up / {{down}} down / {{loading}} loading",
+        "title": "Instances"
+      },
+      "news": {
+        "title": "News"
+      },
+      "plan": {
+        "title": "Plan"
+      },
+      "plugins": {
+        "status": "{{core}} core / {{pro}} PRO / {{external}} external",
+        "title": "Plugins"
+      },
+      "services": {
+        "status": "{{online}} online / {{draft}} draft",
+        "title": "Services"
+      },
+      "total_requests": {
+        "title": "Total Requests"
+      }
+    },
+    "chart": {
+      "blocked_request_countries": {
+        "title": "Blocked Requests by Country"
+      },
+      "blocking_status": {
+        "title": "Blocking Status Over Time"
+      },
+      "request_status": {
+        "title": "Request Status Distribution"
+      },
+      "top_blocked_ips": {
+        "title": "Top 10 Blocked IPs"
+      }
+    }
+  },
+  "datatable": {
+    "info_bans": "Showing {{start}} to {{end}} of {{total}} Bans",
+    "info_cache": "Showing {{start}} to {{end}} of {{total}} Cache Files",
+    "info_configs": "Showing {{start}} to {{end}} of {{total}} Custom Configs",
+    "info_empty_bans": "No Bans available",
+    "info_empty_cache": "No Cache Files available",
+    "info_empty_configs": "No Custom Configs available",
+    "info_empty_instances": "No Instances available",
+    "info_empty_jobs": "No Jobs available",
+    "info_empty_plugins": "No Plugins available",
+    "info_empty_reports": "No Reports available",
+    "info_empty_services": "No Services available",
+    "info_filtered_bans": "(filtered from _MAX_ total Bans)",
+    "info_filtered_cache": "(filtered from _MAX_ total Cache Files)",
+    "info_filtered_configs": "(filtered from _MAX_ total Custom Configs)",
+    "info_filtered_instances": "(filtered from _MAX_ total Instances)",
+    "info_filtered_jobs": "(filtered from _MAX_ total Jobs)",
+    "info_filtered_plugins": "(filtered from _MAX_ total Plugins)",
+    "info_filtered_reports": "(filtered from _MAX_ total Reports)",
+    "info_filtered_services": "(filtered from _MAX_ total Services)",
+    "info_instances": "Showing {{start}} to {{end}} of {{total}} Instances",
+    "info_jobs": "Showing {{start}} to {{end}} of {{total}} Jobs",
+    "info_plugins": "Showing {{start}} to {{end}} of {{total}} Plugins",
+    "info_reports": "Showing {{start}} to {{end}} of {{total}} Reports",
+    "info_services": "Showing {{start}} to {{end}} of {{total}} Services",
+    "length_all": "All",
+    "length_menu_bans": "Display _MENU_ Bans",
+    "length_menu_cache": "Display _MENU_ Cache Files",
+    "length_menu_configs": "Display _MENU_ Custom Configs",
+    "length_menu_instances": "Display _MENU_ Instances",
+    "length_menu_jobs": "Display _MENU_ Jobs",
+    "length_menu_plugins": "Display _MENU_ Plugins",
+    "length_menu_reports": "Display _MENU_ Reports",
+    "length_menu_services": "Display _MENU_ Services",
+    "paginate": {
+      "first": "First",
+      "last": "Last",
+      "next": "Next",
+      "previous": "Previous"
+    },
+    "processing": "Processing...",
+    "search": "Search:",
+    "select_rows_bans_0": "No Bans selected",
+    "select_rows_bans_1": "Selected 1 Ban",
+    "select_rows_bans_plural": "Selected %d Bans",
+    "select_rows_cache_0": "No Cache Files selected",
+    "select_rows_cache_1": "Selected 1 Cache File",
+    "select_rows_cache_plural": "Selected %d Cache Files",
+    "select_rows_configs_0": "No Custom Configs selected",
+    "select_rows_configs_1": "Selected 1 Custom Config",
+    "select_rows_configs_plural": "Selected %d Custom Configs",
+    "select_rows_instances_0": "No Instances selected",
+    "select_rows_instances_1": "Selected 1 Instance",
+    "select_rows_instances_plural": "Selected %d Instances",
+    "select_rows_jobs_0": "No Jobs selected",
+    "select_rows_jobs_1": "Selected 1 Job",
+    "select_rows_jobs_plural": "Selected %d Jobs",
+    "select_rows_plugins_0": "No Plugins selected",
+    "select_rows_plugins_1": "Selected 1 Plugin",
+    "select_rows_plugins_plural": "Selected %d Plugins",
+    "select_rows_reports_0": "No Reports selected",
+    "select_rows_reports_1": "Selected 1 Report",
+    "select_rows_reports_plural": "Selected %d Reports",
+    "select_rows_services_0": "No Services selected",
+    "select_rows_services_1": "Selected 1 Service",
+    "select_rows_services_plural": "Selected %d Services",
+    "zero_records_bans": "No matching Bans found",
+    "zero_records_cache": "No matching Cache Files found",
+    "zero_records_configs": "No matching Custom Configs found",
+    "zero_records_instances": "No matching Instances found",
+    "zero_records_jobs": "No matching Jobs found",
+    "zero_records_plugins": "No matching Plugins found",
+    "zero_records_reports": "No matching Reports found",
+    "zero_records_services": "No matching Services found"
+  },
+  "dev_log": {
+    "copy_failed": "Failed to copy text:",
+    "news_fetch_fail": "Failed to fetch news:",
+    "skipping_malformed_line": "Skipping malformed line: {{line}}"
+  },
+  "error": {
+    "401": {
+      "help": "You must be logged in to access this resource.",
+      "message": "Please log in to continue.",
+      "title": "Authentication Required"
+    },
+    "403": {
+      "help": "Please verify your credentials or contact an administrator if you believe this is an error.",
+      "message": "You don't have permission to access this page.",
+      "title": "Access Denied"
+    },
+    "404": {
+      "help": "Please check that the URL is correct or contact an administrator if you believe this is an error.",
+      "message": "The requested resource could not be found.",
+      "title": "Not Found"
+    },
+    "5xx": {
+      "help": "Please try again later or contact an administrator if the problem persists.",
+      "message": "An unexpected server error occurred.",
+      "title": "Server Error"
+    },
+    "reports_load_error": "Error loading reports. Please try refreshing the page."
+  },
+  "flash": {
+    "easter_egg": "If you read this, it means that you're curious 👀",
+    "error": "Error",
+    "message": "Info",
+    "time": {
+      "just_now": "just now"
+    },
+    "warning": "Warning"
+  },
+  "footer": {
+    "blog": "Blog",
+    "documentation": "Documentation",
+    "license": "License",
+    "made_by": "made by",
+    "privacy": "Privacy",
+    "support": "Support"
+  },
+  "form": {
+    "checkbox": {
+      "remember_me": "Remember Me"
+    },
+    "help": {
+      "ban_specific_service": "Ban will apply only to this specific service.",
+      "hostname_length_limit": "The hostname is limited to 256 characters.",
+      "hostname_special_chars": "Only `/` and `:` are allowed for protocol/port specification.",
+      "photo_extensions": "Allowed JPG, GIF, or PNG. Max size: 800KB."
+    },
+    "label": {
+      "2fa_code": "2FA Code",
+      "2fa_code_or_recovery": "2FA Code or Recovery Code",
+      "admin_email": "Admin Email",
+      "admin_password": "Admin Password",
+      "admin_username": "Admin Username",
+      "auto_lets_encrypt": "Auto Let's Encrypt",
+      "ban_scope": "Ban Scope",
+      "certificate_priority": "Certificate Priority",
+      "challenge_type": "Challenge Type",
+      "config_type": "Config Type",
+      "configuration_name": "Configuration Name",
+      "confirm_password": "Confirm Password",
+      "current_password": "Current Password",
+      "custom_ssl_certificate": "Custom SSL Certificate",
+      "custom_ssl_certificate_data": "Custom SSL Certificate Data (Base64/PEM)",
+      "custom_ssl_key": "Custom SSL Key",
+      "custom_ssl_key_data": "Custom SSL Key Data (Base64/PEM)",
+      "dns_credential_items": "Let's Encrypt DNS Credential Items",
+      "dns_propagation": "DNS Propagation Delay",
+      "dns_provider": "DNS Provider",
+      "email": "Email",
+      "email_for_lets_encrypt": "Email for Let's Encrypt",
+      "end_date": "End Date",
+      "hostname": "Hostname",
+      "ip_address": "IP Address",
+      "keywords": "Keywords",
+      "license_key": "License Key",
+      "name": "Name",
+      "new_password": "New Password",
+      "optional": "(Optional)",
+      "password": "Password",
+      "raw_configuration": "Raw Configuration",
+      "reason": "Reason",
+      "secret_token": "Secret Token",
+      "server_name": "Server Name",
+      "service_name": "Service Name",
+      "theme": "Theme",
+      "type": "Type",
+      "ui_host": "UI Host",
+      "ui_url": "UI URL",
+      "use_custom_ssl": "Use Custom SSL",
+      "use_lets_encrypt_staging": "Use Let's Encrypt Staging",
+      "username": "Username",
+      "wildcard_certificates": "Wildcard Certificates"
+    },
+    "placeholder": {
+      "2fa_code": "Enter code",
+      "2fa_or_recovery": "Enter code or recovery code",
+      "config_name": "my-custom-config",
+      "enter_username": "Enter username",
+      "keywords": "Keywords",
+      "search": "Search...",
+      "select_service": "Select Service",
+      "secret_token": "Secret Token",
+      "username_example": "johndoe"
+    },
+    "validation": {
+      "confirm_password_match": "Passwords do not match.",
+      "password_length": "Password must have at least 8 characters.",
+      "password_number": "Password must have at least 1 number.",
+      "password_special": "Password must have at least 1 special character.",
+      "password_uppercase": "Password must have at least 1 uppercase letter."
+    }
+  },
+  "instance": {
+    "type": {
+      "container": "Container",
+      "pod": "Pod",
+      "static": "Static"
+    }
+  },
+  "interval": {
+    "day": "Daily",
+    "hour": "Hourly",
+    "once": "Once",
+    "week": "Weekly"
+  },
+  "job": {
+    "history": {
+      "end_date": "End Date",
+      "start_date": "Start Date",
+      "success": "Success"
+    }
+  },
+  "link": {
+    "back_to_login": "Back to Login",
+    "forgot_password": "Forgot Password?",
+    "here": "here",
+    "more_info": "More Info",
+    "more_news": "More News",
+    "privacy_policy": "Privacy Policy",
+    "read_more": "Read More",
+    "see_more": "See More",
+    "upgrade": "Upgrade?"
+  },
+  "modal": {
+    "body": {
+      "add_plugin_dropzone": "Drag and drop your plugin archive here or click to select files.",
+      "confirm_configs_deletion_alert": "Are you sure you want to delete the selected custom configuration?",
+      "confirm_configs_deletion_alert_plural": "Are you sure you want to delete the selected custom configurations?",
+      "confirm_conversion_confirmation": "Are you sure you want to convert the selected services?",
+      "confirm_next_step": "Are you sure you want to proceed to the next step?",
+      "confirm_plugin_deletion": "Are you sure you want to delete the selected plugin?",
+      "confirm_plugin_deletion_plural": "Are you sure you want to delete the selected plugins?",
+      "confirmation_instance_deletion": "Are you sure you want to delete the selected instance?",
+      "delete_confirmation_alert": "Are you sure you want to delete the selected instance?",
+      "delete_confirmation_alert_plural": "Are you sure you want to delete the selected instances?",
+      "instance_creation_alert": "You don't need to provide the port or the server name; the values of `API_HTTP_PORT` and `API_SERVER_NAME` will be used for the instance configuration.",
+      "next_step_in_case_of_issue": "If you encounter issues, you can manually accept the unsafe certificate:",
+      "recovery_codes_save_alert": "Please save these recovery codes in a secure location (like a password manager or bunker). You can use them to access your account if you lose your authentication device.",
+      "recovery_codes_shown_once_alert": "These recovery codes are shown only once. Please ensure you save them securely.",
+      "reset_template_alert": "Are you sure you want to reset the current template settings and custom configurations?",
+      "services_deletion_confirmation": "Are you sure you want to delete the selected services?",
+      "unban_confirmation_alert": "Are you sure you want to unban the selected IP address?",
+      "unban_confirmation_alert_plural": "Are you sure you want to unban the selected IP addresses?"
+    },
+    "button": {
+      "reset_template_confirm": "Reset Template Configuration"
+    },
+    "section": {
+      "ban_details": "Ban Details",
+      "ban_scope": "Ban Scope",
+      "delete": "Delete"
+    },
+    "title": {
+      "add_bans": "Add Ban(s)",
+      "add_plugins": "Add Plugins",
+      "confirm_conversion": "Confirm Conversion",
+      "confirm_deletion": "Confirm Deletion",
+      "confirm_unban": "Confirm Unban",
+      "create_new_instance": "Create New Instance",
+      "delete_instance": "Delete Instances",
+      "from_plugin": "from plugin",
+      "full_url": "Full URL",
+      "job_history": "Last 10 Job Executions",
+      "job_history_count": "Last {{count}} executions of Job",
+      "recovery_codes": "Recovery Codes",
+      "reset_template_config": "Reset Template Configuration?",
+      "server_name_not_unique": "Server Name Is Not Unique"
+    }
+  },
+  "mode": {
+    "advanced": "Advanced",
+    "easy": "Easy",
+    "raw": "Raw"
+  },
+  "navbar": {
+    "button": {
+      "upgrade_to_pro": "Upgrade to PRO"
+    },
+    "dropdown": {
+      "logout": "Log Out"
+    },
+    "link": {
+      "documentation": "Documentation"
+    },
+    "version": "Version"
+  },
+  "navigation": {
+    "about": "About",
+    "bans": "Bans",
+    "cache": "Cache",
+    "configs": "Configs",
+    "extra_pages": "Extra Pages",
+    "global_config": "Global Config",
+    "home": "Home",
+    "instances": "Instances",
+    "jobs": "Jobs",
+    "logs": "Logs",
+    "misc": "Misc",
+    "mode_selection": "Mode Selection",
+    "more": "More...",
+    "plugins": "Plugins",
+    "plugins_pages": "Plugins Pages",
+    "pro": "Pro",
+    "reports": "Reports",
+    "services": "Services",
+    "support": "Support",
+    "templates": "Templates"
+  },
+  "news": {
+    "image_alt": "News image",
+    "posted_on": "Posted on"
+  },
+  "newsletter": {
+    "legal_agreement": "I want to subscribe to the newsletter, and I've read and agree to the:",
+    "title": "Join the Newsletter"
+  },
+  "pagination": {
+    "page": "Page"
+  },
+  "plan": {
+    "free": "FREE",
+    "pro": "PRO"
+  },
+  "plugin": {
+    "page": {
+      "status": {
+        "deactivated": "Plugin is deactivated; therefore, no information is available.",
+        "metrics_deactivated": "Metrics plugin isn't activated; therefore, no information is available.",
+        "not_available": "Plugin page not yet available during the beta phase."
+      }
+    },
+    "type": {
+      "all": "All",
+      "core": "Core",
+      "external": "External",
+      "pro": "Pro",
+      "ui": "UI"
+    }
+  },
+  "pro": {
+    "alert": {
+      "overlapped_1": "You have more active services than your license allows!",
+      "overlapped_2": "Delete or convert some services to Draft mode to reach the {{pro_services}} service limit."
+    },
+    "button": {
+      "all_features_available": "All Features Available",
+      "awaiting_compliance": "Awaiting Compliance...",
+      "renew_license": "Renew License",
+      "suspended_license": "Suspended License",
+      "upgrade_to_pro": "Upgrade to PRO"
+    },
+    "expiration_date": {
+      "expires_in": "Expires in",
+      "title": "Pro Expiration Date",
+      "unknown": "Unknown expiration date"
+    },
+    "key": {
+      "title": {
+        "activate": "Activate Key",
+        "update": "Update Key"
+      }
+    },
+    "overlay": {
+      "pro_feature": "Pro Feature",
+      "upgrade_required": "Upgrade to Pro to access this feature"
+    },
+    "status": {
+      "draft_services_count": "{{draft_services}} Draft service(s)",
+      "expired": "EXPIRED",
+      "free_version": "FREE Version",
+      "overlapped": "OVERLAPPED",
+      "pro_version": "PRO Version",
+      "services_count": "{{online_services}} Online Service(s) / {{pro_services}} PRO Service(s)",
+      "suspended": "SUSPENDED",
+      "title": "Status"
+    }
+  },
+  "profile": {
+    "2fa": {
+      "disable_title": "Disable 2FA",
+      "enable_title": "Enable 2FA"
+    },
+    "alert": {
+      "refresh_recovery_codes": "Refreshing your recovery codes will invalidate the previous ones."
+    },
+    "card": {
+      "coming_soon": "Coming Soon",
+      "title": {
+        "2fa": "Two-Factor Authentication (2FA)",
+        "change_password": "Change Password",
+        "change_theme": "Change Theme",
+        "coming_soon": "Coming Soon",
+        "edit_profile": "Edit Profile",
+        "refresh_recovery_codes": "Refresh Recovery Codes",
+        "sessions": "Sessions"
+      }
+    },
+    "help": {
+      "photo_extensions": "Allowed JPG, GIF, or PNG. Max size: 800KB."
+    },
+    "session": {
+      "browser": "Browser",
+      "creation_date": "Creation Date",
+      "current_session": "Current Session",
+      "device": "Device",
+      "ip_address": "IP Address",
+      "last_activity": "Last Activity",
+      "os": "Operating System",
+      "title": "Session"
+    },
+    "tab": {
+      "profile": "Profile",
+      "security": "Security",
+      "sessions": "Sessions"
+    }
+  },
+  "scope": {
+    "all_services": "All Services",
+    "global": "Global",
+    "global_all_services": "Global (all services)",
+    "service_specific": "Service-specific"
+  },
+  "searchpane": {
+    "active": "Active",
+    "async": "Async",
+    "clear": "Clear All",
+    "collapse_0": "Search Panes",
+    "collapse_message": "Collapse All",
+    "collapse_plural": "Search Panes (%d)",
+    "count": "{total}",
+    "countFiltered": "{shown} ({total})",
+    "country": "Country",
+    "created": "Created",
+    "data": "Data",
+    "empty": "No search panes available",
+    "end_date": "End Date",
+    "first_seen": "First Seen",
+    "future_30d": "More than 30 days away",
+    "health": "Health",
+    "interval": "Interval",
+    "ip_address": "IP Address",
+    "job_name": "Job Name",
+    "last_24h": "Last 24 hours",
+    "last_30d": "Last 30 days",
+    "last_7d": "Last 7 days",
+    "last_run": "Last Run State",
+    "last_seen": "Last Seen",
+    "last_update": "Last Update",
+    "loading": "Loading Search Panes...",
+    "method": "Method",
+    "next_24h": "Next 24 hours",
+    "next_30d": "Next 30 days",
+    "next_7d": "Next 7 days",
+    "older_30d": "More than 30 days ago",
+    "plugin": "Plugin",
+    "reason": "Reason",
+    "reload": "Reload Required",
+    "scope": "Scope",
+    "security_mode": "Security Mode",
+    "server_name": "Server Name",
+    "service": "Service",
+    "show_message": "Show All",
+    "start_date": "Start Date",
+    "status_code": "Status Code",
+    "stream": "Stream Support",
+    "template": "Template",
+    "title_0": "No Active Filters",
+    "title_1": "Active Filter - 1",
+    "title_plural": "Active Filters - %d",
+    "type": "Type",
+    "url": "URL",
+    "version": "Version"
+  },
+  "settings": {
+    "custom_config": {
+      "title": "Custom Configuration"
+    },
+    "multiple": {
+      "description": "Configure multiple instances of settings for this plugin here.",
+      "title": "Multiple Settings"
+    }
+  },
+  "setup": {
+    "step1": {
+      "subtitle": "Create your administrator account.",
+      "title": "Admin User"
+    },
+    "step2": {
+      "section": {
+        "custom_certificate": "Custom Certificate",
+        "lets_encrypt": "Let's Encrypt",
+        "reverse_proxy": "Reverse Proxy"
+      },
+      "subtitle": "Configure Web UI specific settings.",
+      "title": "UI Settings"
+    },
+    "step3": {
+      "label": {
+        "final_url": "BunkerWeb UI URL"
+      },
+      "subtitle": "Review your settings before completing the setup.",
+      "title": "Overview"
+    },
+    "status": {
+      "admin_user_exists": "🧑‍🚀 An admin user already exists. Please proceed to the next step.",
+      "reverse_proxy_configured": "↪️ A reverse proxy is already configured for the web interface. Please proceed to the next step.",
+      "secure_password": "Secure Password",
+      "unique_server_name": "Unique Server Name"
+    },
+    "subtitle": "Follow the steps to complete the setup wizard.",
+    "title": "Setup Wizard"
+  },
+  "status": {
+    "admin_user_exists": "🧑‍🚀 An admin user already exists. Please proceed to the next step.",
+    "blog_connection_fail": "Could not connect to the blog for news updates.",
+    "default_server": "default server",
+    "down": "Down",
+    "draft": "Draft",
+    "failed": "Failed",
+    "loading": "Loading...",
+    "loading_bans": "Loading bans...",
+    "loading_cache_file": "Loading cache file...",
+    "loading_cache_files": "Loading cache files...",
+    "loading_custom_config": "Loading custom configuration...",
+    "loading_custom_configs": "Loading custom configurations...",
+    "loading_instances": "Loading instances...",
+    "loading_jobs": "Loading jobs...",
+    "loading_logs": "Loading logs...",
+    "loading_plugins": "Loading plugins...",
+    "loading_reports": "Loading reports...",
+    "loading_services": "Loading services...",
+    "news_connection_error": "Could not connect to the blog for news updates.",
+    "no": "No",
+    "no_data": "No data to show.",
+    "no_history": "No history available.",
+    "no_item": "No Item",
+    "no_notifications": "No notifications to show.",
+    "no_steps": "No Steps Available",
+    "no_steps_description": "This template does not have any steps to configure.",
+    "online": "Online",
+    "partial": "Partial",
+    "pinging_instances": "Pinging instances, please wait...",
+    "plugin_page": {
+      "status": {
+        "deactivated": "Plugin is deactivated; therefore, no information is available.",
+        "metrics_deactivated": "Metrics plugin isn't activated; therefore, no information is available.",
+        "not_available": "Plugin page not yet available during the beta phase."
+      }
+    },
+    "reverse_proxy_configured": "↪️ A reverse proxy is already configured for the web interface. Please proceed to the next step.",
+    "secure_password": "Secure Password",
+    "setting_up_bunkerweb": "Setting up your BunkerWeb, please wait...",
+    "success": "Success",
+    "template_in_use": "This service currently uses the \"{{template}}\" template which is managed via \"{{method}}\".",
+    "template_in_use_description": "Changes outside the current template are not allowed. Please make changes using the current template or switch to Advanced/Raw mode.",
+    "unique_server_name": "Unique Server Name",
+    "up": "Up",
+    "yes": "Yes"
+  },
+  "step": {
+    "next": "Next",
+    "previous": "Previous"
+  },
+  "support": {
+    "card": {
+      "download_logs": {
+        "help": "All private data will be anonymized.",
+        "title": "Download Logs"
+      },
+      "extract_config": {
+        "title": "Extract Configuration"
+      },
+      "support_link": {
+        "title": "Support Link"
+      }
+    }
+  },
+  "tab": {
+    "custom_certificate": "Custom Certificate",
+    "lets_encrypt": "Let's Encrypt"
+  },
+  "table": {
+    "header": {
+      "actions": "Actions",
+      "active": "Active",
+      "async": "Async",
+      "checksum": "Checksum",
+      "country": "Country",
+      "created": "Created",
+      "data": "Data",
+      "date": "Date",
+      "description": "Description",
+      "end_date": "End Date",
+      "file_name": "File Name",
+      "health": "Health",
+      "hostname": "Hostname",
+      "id": "ID",
+      "interval": "Interval",
+      "ip_address": "IP Address",
+      "job_name": "Job Name",
+      "last_run": "Last Run",
+      "last_seen": "Last Seen",
+      "last_update": "Last Update",
+      "method": "Method",
+      "name": "Name",
+      "plugin": "Plugin",
+      "reason": "Reason",
+      "reload": "Reload",
+      "scope": "Scope",
+      "security_mode": "Security Mode",
+      "server_name": "Server Name",
+      "service": "Service",
+      "service_name": "Service Name",
+      "status_code": "Status Code",
+      "stream": "Stream",
+      "template": "Template",
+      "time_left": "Time Left",
+      "type": "Type",
+      "user_agent": "User-Agent",
+      "url": "URL",
+      "version": "Version"
+    }
+  },
+  "template": {
+    "none": "No Template"
+  },
+  "theme": {
+    "dark": "Dark",
+    "light": "Light"
+  },
+  "toast": {
+    "autoconf_disclaimer_bold": "If the service is removed or restarted, your UI configuration will be lost.",
+    "autoconf_disclaimer_detail": "This is because the service's method is 'autoconf', which is designed to prevent configuration conflicts.",
+    "body": {
+      "ping_succeed": "Instances: {{instances}}"
+    },
+    "copied": "Copied!",
+    "disclaimer_title": "Disclaimer",
+    "header": {
+      "ping_failed": "Ping failed",
+      "ping_succeed": "Ping successful"
+    }
+  },
+  "tooltip": {
+    "auto_lets_encrypt": "Whether to automatically request a Let's Encrypt certificate.",
+    "button": {
+      "convert_service_to_draft": "Convert Service {{name}} to Draft",
+      "convert_service_to_online": "Convert Service {{name}} to Online",
+      "delete_config": "Delete Custom Config {{name}}",
+      "delete_instance": "Delete Instance {{hostname}}",
+      "delete_plugin": "Delete Plugin {{name}}",
+      "delete_service": "Delete Service {{name}}",
+      "ping_instance": "Ping Instance {{hostname}}",
+      "reload_instance": "Reload Instance {{hostname}}",
+      "reset_default": "Reset to default value",
+      "reset_global": "Reset to global value",
+      "run_job": "Run Job {{job}}",
+      "stop_instance": "Stop Instance {{hostname}}",
+      "unban_ip": "Unban {{ip}}"
+    },
+    "cannot_delete_original_ban": "Cannot delete the original Ban entry.",
+    "cannot_remove_disabled": "Cannot remove because one or more settings are disabled.",
+    "certificate_priority": "Choose whether to prioritize the certificate from the file path or from the base64 data.",
+    "challenge_type": "The challenge type to use for Let's Encrypt verification (http or dns).",
+    "config_type": {
+      "crs_plugins_after": "Configurations applied after the OWASP Core Rule Set plugins are loaded.",
+      "crs_plugins_before": "Configurations applied before the OWASP Core Rule Set plugins are loaded.",
+      "default_server_http": "Configurations at the Server level of Nginx, specifically for the 'default server' block, used when the client request doesn't match any configured server name.",
+      "http": "Configurations applied globally at the HTTP level of Nginx.",
+      "modsec": "ModSecurity configurations applied after the OWASP Core Rule Set is loaded, or used if the Core Rule Set is not loaded.",
+      "modsec_crs": "ModSecurity configurations applied before the OWASP Core Rule Set is loaded.",
+      "server_http": "Configurations applied at the HTTP Server (virtual host) level of Nginx.",
+      "server_stream": "Configurations applied at the Stream Server level of Nginx.",
+      "stream": "Configurations applied globally at the Stream level of Nginx."
+    },
+    "confirm_password_match": "Confirm password must match the password entered above.",
+    "copied": "Copied!",
+    "copy_https_only": "The copy feature is only available over HTTPS.",
+    "custom_ssl_cert_data": "The custom SSL certificate data (PEM format or Base64 encoded).",
+    "custom_ssl_cert_path": "Path to the custom SSL certificate file.",
+    "custom_ssl_key_data": "The custom SSL private key data (PEM format or Base64 encoded).",
+    "custom_ssl_key_path": "Path to the custom SSL private key file.",
+    "disabled_by_method": "Disabled: Managed via method '{{method}}'.",
+    "disabled_db_readonly": "Disabled: The database is in read-only mode.",
+    "disabled_draft": "Disabled: Service is in Draft mode.",
+    "disabled_readonly": "Disabled: Read-only mode is active.",
+    "dns_check_url": "If the page shows 'ok', the server name is likely available.",
+    "dns_credential_items": "Credentials for the DNS provider, used for DNS challenges (e.g., 'cloudflare_api_token=123456'). Required format depends on the provider.",
+    "dns_credentials_dns_only": "Credentials are only applicable for DNS challenges.",
+    "dns_propagation": "Time (in seconds) to wait for DNS changes to propagate during DNS challenges.",
+    "dns_propagation_dns_only": "DNS propagation delay is only applicable for DNS challenges.",
+    "dns_provider": "The DNS provider to use for Let's Encrypt DNS challenges.",
+    "dns_provider_dns_only": "DNS provider selection is only applicable for DNS challenges.",
+    "download_file": "Download file",
+    "draft_toggle_disabled": "Draft mode can only be toggled for services created via the UI.",
+    "email_lets_encrypt": "The email address to register with Let's Encrypt for certificate management and notifications.",
+    "email_length": "Email must be between 1 and 256 characters.",
+    "global_config_source": "Value inherited from global configuration.",
+    "instance_not_up": "Instance {{hostname}} is currently not responding ('up').",
+    "latest_version_installed": "You are running the latest version.",
+    "license_key": "Your BunkerWeb PRO license key.",
+    "link": {
+      "access_plugin_page": "Access {{name}} Page",
+      "access_service": "Access Service {{name}}",
+      "clone_config": "Clone Custom Config {{name}}",
+      "clone_service": "Clone Service {{name}}",
+      "download_file": "Download {{filename}}",
+      "edit_config": "Edit Custom Config {{name}}",
+      "edit_service": "Edit Service {{service}}",
+      "export_service": "Export Service {{name}} Configuration",
+      "view_config": "View Custom Config {{name}}",
+      "view_file": "View {{filename}}",
+      "view_service": "View Service {{name}}"
+    },
+    "modal": {
+      "title": {
+        "full_url": "Full URL"
+      }
+    },
+    "multisite_setting": "This is a multisite setting, affecting multiple services if defined globally.",
+    "new_version_available": "A new version is available!",
+    "no_cache": "No cache files found for this job.",
+    "no_history": "No execution history found for this job.",
+    "no_log_files": "No log files available.",
+    "no_page_available": "No dedicated page available for this plugin.",
+    "password_requirements": "Password must be at least 8 characters long and include 1 uppercase letter, 1 number, and 1 special character.",
+    "pro_feature": "This is a PRO feature.",
+    "readonly_db_action_disabled": "Disabled: The database is in read-only mode.",
+    "readonly_user_action_disabled": "Disabled: Your account is read-only, action '{{action}}' disabled.",
+    "remove_ban_entry": "Remove this ban entry from the list.",
+    "reset_template_settings": "Reset all settings in the current template view to their defaults.",
+    "server_name": "The primary domain name or server name for this service.",
+    "stream_support": {
+      "no": "Does not support STREAM mode.",
+      "partial": "Partially supports STREAM mode.",
+      "yes": "Supports STREAM mode."
+    },
+    "table": {
+      "bans": {
+        "actions": "Actions available for this Ban",
+        "country": "Country of the banned IP address",
+        "date": "Date and time when the Ban was created",
+        "details": "Show Ban details",
+        "end_date": "Date and time when the Ban expires",
+        "ip_address": "Banned IP address",
+        "reason": "Reason for the ban",
+        "scope": "Scope of the ban (Global or Service-specific)",
+        "select_all": "Select all Bans",
+        "service": "Service where the ban originated (if scope is Service-specific)",
+        "time_left": "Time remaining until the Ban expires"
+      },
+      "cache": {
+        "actions": "Actions available for this cache file",
+        "checksum": "Checksum of the cache file",
+        "details": "Show cache file details",
+        "file_name": "Name of the cache file",
+        "job_name": "Job that generated this cache file",
+        "last_update": "Date and time when the cache file was last updated",
+        "plugin": "Plugin associated with the job that generated this cache file",
+        "service": "Service associated with this cache file (or Global)"
+      },
+      "configs": {
+        "actions": "Actions available for this Custom Config",
+        "checksum": "Checksum of the Custom Config content",
+        "details": "Show Custom Config details",
+        "method": "Creation method of the Custom Config (e.g., ui, file)",
+        "name": "Name of the Custom Config",
+        "select_all": "Select all Custom Configs",
+        "service": "Service associated with the Custom Config (or Global)",
+        "template": "Indicates if the Custom Config originates from a template",
+        "type": "Type or context of the Custom Config (e.g., HTTP, MODSEC)"
+      },
+      "instances": {
+        "actions": "Actions available for this Instance",
+        "created": "Date and time when the Instance was first registered",
+        "details": "Show Instance details",
+        "health": "Health status of the Instance (Up, Down, Loading)",
+        "hostname": "Hostname or URL of the Instance",
+        "last_seen": "Date and time when the Instance was last seen",
+        "method": "Creation method of the Instance (e.g., ui, autoconf)",
+        "name": "User-defined or auto-generated name of the Instance",
+        "select_all": "Select all Instances",
+        "type": "Type of the Instance (e.g., Container, Static)"
+      },
+      "jobs": {
+        "actions": "Actions available for this Job",
+        "async": "Indicates if the Job runs asynchronously",
+        "details": "Show Job details",
+        "interval": "Execution frequency of the Job",
+        "last_run": "Status of the last Job execution (Success/Failed)",
+        "name": "Name of the Job",
+        "plugin": "Plugin associated with the Job",
+        "reload": "Indicates if the Job triggers a BunkerWeb reload",
+        "select_all": "Select all Jobs"
+      },
+      "plugins": {
+        "actions": "Actions available for this Plugin",
+        "description": "Description of the Plugin",
+        "details": "Show Plugin details",
+        "id": "Unique identifier of the Plugin",
+        "method": "Creation method of the Plugin (e.g., ui, core)",
+        "name": "Name of the Plugin",
+        "select_all": "Select all Plugins",
+        "stream": "Indicates if the plugin supports stream mode",
+        "type": "Type of the Plugin (Core, External, Pro, UI)",
+        "version": "Version of the Plugin"
+      },
+      "reports": {
+        "country": "Country associated with the reported IP address",
+        "data": "Additional data related to the report",
+        "date": "Date and time when the report was generated",
+        "details": "Show Report details",
+        "ip_address": "IP address that triggered the report",
+        "method": "HTTP method of the reported request",
+        "reason": "Reason why the report was generated",
+        "security_mode": "Security mode active when the report was generated",
+        "select_all": "Select all Reports",
+        "server_name": "Server name (vhost) that generated the report",
+        "status_code": "HTTP status code returned for the reported request",
+        "url": "URL targeted in the reported request",
+        "user_agent": "User-Agent string from the reported request"
+      },
+      "select_rows_for_action": "Please select one or more rows to perform an action.",
+      "services": {
+        "actions": "Actions available for this Service",
+        "created": "Date and time when the Service was created",
+        "details": "Show Service details",
+        "last_update": "Date and time when the Service was last updated",
+        "method": "Creation method of the Service (e.g., ui, file)",
+        "name": "Name of the Service",
+        "select_all": "Select all Services",
+        "type": "Service type (Online/Draft)"
+      }
+    },
+    "ui_host": "The hostname or IP address that will serve the BunkerWeb UI via the reverse proxy.",
+    "ui_url": "The URL path used to access the BunkerWeb UI via the reverse proxy.",
+    "ui_url_security": "Using a non-standard, hard-to-guess URL path enhances security.",
+    "use_custom_ssl": "Whether to use a custom SSL certificate instead of Let's Encrypt.",
+    "use_lets_encrypt_staging": "Whether to use the Let's Encrypt staging environment for testing (generates untrusted certificates).",
+    "username_length": "Username must be between 1 and 256 characters.",
+    "view_full_url": "Click to view full URL",
+    "wildcard_certificates": "Generate wildcard certificates (*.domain.com). Requires DNS challenge.",
+    "wildcard_dns_only": "Wildcard certificates are only supported with the DNS challenge type."
+  },
+  "totp": {
+    "prompt": "Please enter your TOTP code."
+  },
+  "validation": {
+    "default_field_name": "This field",
+    "invalid_date": "Invalid date",
+    "ip_global_duplicate": "This IP address is already globally banned.",
+    "ip_invalid": "Invalid IP address format.",
+    "ip_required": "IP address is required.",
+    "ip_service_duplicate": "This IP address is already banned for the selected service ({{service}}).",
+    "pattern": "Please enter a valid value for {{field}}.",
+    "required": "{{field}} is required.",
+    "service_required_for_ban": "A service must be selected for a service-specific ban."
+  }
+}

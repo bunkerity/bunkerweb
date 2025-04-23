@@ -4,6 +4,7 @@
         {% with breadcrumbs = request.path.split("/") %}
             {% set breadcrumbs_ns = namespace(working_url="") %}
             {% for breadcrumb in breadcrumbs %}
+                {% set check_i18n = true %}
                 {% set breadcrumb_prefix = "" %}
                 {% set breadcrumb_url = url_for(breadcrumb.replace('_', '-')) %}
                 {% if breadcrumb == current_endpoint %}
@@ -17,24 +18,41 @@
                 {% if current_endpoint != "configs" and "configs" in request.path %}
                     {% set breadcrumb_url = url_for("configs") %}
                     {% if loop.index == 3 %}
-                        {% set breadcrumb_prefix = "?service=" + breadcrumb %}
+                        {% if breadcrumb == "new" %}
+                            {% set breadcrumb_url = url_for("configs", action="new") %}
+                        {% else %}
+                            {% set check_i18n = false %}
+                            {% set breadcrumb_prefix = "?service=" + breadcrumb %}
+                        {% endif %}
                     {% elif loop.index == 4 %}
+                        {% set check_i18n = false %}
                         {% set breadcrumb_prefix = "?type=" + breadcrumb %}
+                    {% elif loop.index > 4 %}
+                        {% set check_i18n = false %}
                     {% endif %}
                 {% endif %}
                 {% if current_endpoint != "cache" and "cache" in request.path %}
                     {% set breadcrumb_url = url_for("cache") %}
                     {% if loop.index == 3 %}
+                        {% set check_i18n = false %}
                         {% set breadcrumb_prefix = "?service=" + breadcrumb %}
                     {% elif loop.index == 4 %}
+                        {% set check_i18n = false %}
                         {% set breadcrumb_prefix = "?plugin=" + breadcrumb %}
                     {% elif loop.index == 5 %}
+                        {% set check_i18n = false %}
                         {% set breadcrumb_prefix = "?job_name=" + breadcrumb %}
+                    {% elif loop.index > 5 %}
+                        {% set check_i18n = false %}
                     {% endif %}
                 {% endif %}
                 <li class="breadcrumb-item{% if breadcrumb == current_endpoint %} active{% endif %}"
                     {% if breadcrumb == current_endpoint %}aria-current="page"{% endif %}>
-                    <a href="{{ breadcrumb_url }}{{ breadcrumb_prefix }}">{{ breadcrumb }}</a>
+                    <a {% if breadcrumb and breadcrumb_url or (current_endpoint == "new" and loop.index > 1) %}href="{{ breadcrumb_url }}{{ breadcrumb_prefix }}"{% if check_i18n %} data-i18n="breadcrumb.{{ breadcrumb | lower | replace('-', '_') }}"{% endif %}
+                       {% elif loop.index == 2 %}
+                       href="#"
+                       data-i18n="breadcrumb.{{ current_endpoint | replace('-', '_') }}"
+                       {% endif %}>{{ breadcrumb }}</a>
                 </li>
             {% endfor %}
         {% endwith %}

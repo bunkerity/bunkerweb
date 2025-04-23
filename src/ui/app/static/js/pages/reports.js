@@ -1,33 +1,67 @@
 $(document).ready(function () {
+  // Ensure i18next is loaded before using it
+  const t =
+    typeof i18next !== "undefined"
+      ? i18next.t
+      : (key, fallback) => fallback || key; // Fallback
   const baseFlagsUrl = $("#base_flags_url").val().trim();
 
   const headers = [
     {
       title: "Date",
       tooltip: "The date and time when the Report was created",
+      i18n: "tooltip.table.reports.date",
     },
-    { title: "IP Address", tooltip: "The reported IP address" },
+    {
+      title: "IP Address",
+      tooltip: "The reported IP address",
+      i18n: "tooltip.table.reports.ip_address",
+    },
     {
       title: "Country",
       tooltip: "The country of the reported IP address",
+      i18n: "tooltip.table.reports.country",
     },
-    { title: "Method", tooltip: "The method used by the attacker" },
+    {
+      title: "Method",
+      tooltip: "The method used by the attacker",
+      i18n: "tooltip.table.reports.method",
+    },
     {
       title: "URL",
       tooltip: "The URL that was targeted by the attacker",
+      i18n: "tooltip.table.reports.url",
     },
     {
       title: "Status Code",
       tooltip: "The HTTP status code returned by BunkerWeb",
+      i18n: "tooltip.table.reports.status_code",
     },
-    { title: "User-Agent", tooltip: "The User-Agent of the attacker" },
-    { title: "Reason", tooltip: "The reason why the Report was created" },
+    {
+      title: "User-Agent",
+      tooltip: "The User-Agent of the attacker",
+      i18n: "tooltip.table.reports.user_agent",
+    },
+    {
+      title: "Reason",
+      tooltip: "The reason why the Report was created",
+      i18n: "tooltip.table.reports.reason",
+    },
     {
       title: "Server name",
       tooltip: "The Server name that created the report",
+      i18n: "tooltip.table.reports.server_name",
     },
-    { title: "Data", tooltip: "Additional data about the Report" },
-    { title: "Security mode", tooltip: "Security mode" },
+    {
+      title: "Data",
+      tooltip: "Additional data about the Report",
+      i18n: "tooltip.table.reports.data",
+    },
+    {
+      title: "Security mode",
+      tooltip: "Security mode",
+      i18n: "tooltip.table.reports.security_mode",
+    },
   ];
 
   const countriesDataNames = {
@@ -286,16 +320,21 @@ $(document).ready(function () {
 
   // Batch update tooltips
   const updateCountryTooltips = () => {
-    $("[data-bs-original-title]").each(function () {
+    $("[data-country]").each(function () {
       const $elem = $(this);
-      const countryCode = $elem.attr("data-bs-original-title");
-      const countryName = countriesDataNames[countryCode];
-      if (countryName) {
+      const countryCode = $elem.data("country");
+
+      const countryName = t(
+        countryCode === "unknown"
+          ? "country.not_applicable"
+          : `country.${countryCode}`,
+        countriesDataNames[countryCode],
+      );
+      if (countryName && countryName !== "country.not_applicable") {
         $elem.attr("data-bs-original-title", countryName);
       }
     });
-    // Initialize tooltips once
-    $('[data-bs-toggle="tooltip"]').tooltip();
+    $('[data-bs-toggle="tooltip"]').tooltip("dispose").tooltip();
   };
 
   // Configure DataTable layout
@@ -335,25 +374,49 @@ $(document).ready(function () {
     {
       extend: "colvis",
       columns: "th:not(:nth-child(-n+3))",
-      text: '<span class="tf-icons bx bx-columns bx-18px me-2"></span>Columns',
-      className: "btn btn-sm btn-outline-primary",
+      text: `<span class="tf-icons bx bx-columns bx-18px me-md-2"></span><span class="d-none d-md-inline" data-i18n="button.columns">${t(
+        "button.columns",
+        "Columns",
+      )}</span>`,
+      className: "btn btn-sm btn-outline-primary rounded-start",
       columnText: function (dt, idx, title) {
-        return idx + 1 + ". " + title;
+        const headerCell = dt.column(idx).header();
+        const $header = $(headerCell);
+        const $translatableElement = $header.find("[data-i18n]");
+        let i18nKey = $translatableElement.data("i18n");
+        let translatedTitle = title;
+        if (i18nKey) {
+          translatedTitle = t(i18nKey, title);
+        } else {
+          translatedTitle = $header.text().trim() || title;
+        }
+        return `${idx + 1}. <span data-i18n="${
+          i18nKey || ""
+        }">${translatedTitle}</span>`;
       },
     },
     {
       extend: "colvisRestore",
-      text: '<span class="tf-icons bx bx-reset bx-18px me-md-2"></span><span class="d-none d-md-inline">Reset columns</span>',
-      className: "btn btn-sm btn-outline-primary",
+      text: `<span class="tf-icons bx bx-reset bx-18px me-2"></span><span class="d-none d-md-inline" data-i18n="button.reset_columns">${t(
+        "button.reset_columns",
+        "Reset columns",
+      )}</span>`,
+      className: "btn btn-sm btn-outline-primary d-none d-md-inline",
     },
     {
       extend: "collection",
-      text: '<span class="tf-icons bx bx-export bx-18px me-md-2"></span><span class="d-none d-md-inline">Export</span>',
+      text: `<span class="tf-icons bx bx-export bx-18px me-md-2"></span><span class="d-none d-md-inline" data-i18n="button.export">${t(
+        "button.export",
+        "Export",
+      )}</span>`,
       className: "btn btn-sm btn-outline-primary",
       buttons: [
         {
           extend: "copy",
-          text: '<span class="tf-icons bx bx-copy bx-18px me-2"></span>Copy visible',
+          text: `<span class="tf-icons bx bx-copy bx-18px me-2"></span><span data-i18n="button.copy_visible">${t(
+            "button.copy_visible",
+            "Copy visible",
+          )}</span>`,
           exportOptions: {
             columns: ":visible:not(:first-child)",
           },
@@ -398,7 +461,7 @@ $(document).ready(function () {
         if (!autoRefresh) {
           clearInterval(interval);
         } else {
-          reports_table.ajax.reload(null, false);
+          $("#reports").DataTable().ajax.reload(null, false);
         }
       }, 10000); // 10 seconds
     } else {
@@ -411,14 +474,14 @@ $(document).ready(function () {
   }
 
   $.fn.dataTable.ext.buttons.auto_refresh = {
-    text: '<span class="bx bx-loader bx-18px lh-1"></span>&nbsp;&nbsp;Auto refresh',
+    text: '<span class="bx bx-loader bx-18px lh-1"></span>&nbsp;&nbsp;<span data-i18n="button.auto_refresh">Auto refresh</span>',
     action: (e, dt, node, config) => {
       toggleAutoRefresh();
     },
   };
 
   // Initialize DataTable
-  const reports_table = initializeDataTable({
+  const reports_config = {
     tableSelector: "#reports",
     tableName: "reports",
     columnVisibilityCondition: (column) => column > 2 && column < 12,
@@ -426,7 +489,15 @@ $(document).ready(function () {
       columnDefs: [
         { orderable: false, targets: -1 },
         { visible: false, targets: [4, 5, 6, 7, 10] },
-        { type: "ip-address", targets: 2 },
+        {
+          searchPanes: {
+            show: true,
+            header: t("searchpane.ip_address", "IP Address"),
+            combiner: "or",
+          },
+          type: "ip-address",
+          targets: 2,
+        },
         {
           render: function (data, type, row) {
             if (type === "display" || type === "filter") {
@@ -442,6 +513,7 @@ $(document).ready(function () {
         {
           searchPanes: {
             show: true,
+            header: t("searchpane.country", "Country"),
             combiner: "or",
           },
           targets: 3,
@@ -449,7 +521,13 @@ $(document).ready(function () {
             const countryCode = data.toLowerCase();
             const tooltipContent = countriesDataNames[countryCode] || "N/A";
             return `
-              <span data-bs-toggle="tooltip" data-bs-original-title="${tooltipContent}">
+              <span data-bs-toggle="tooltip" data-bs-original-title="${tooltipContent}" data-i18n="country.${
+                countryCode === "local"
+                  ? "not_applicable"
+                  : countryCode.toUpperCase()
+              }" data-country="${
+                countryCode === "local" ? "unknown" : countryCode.toUpperCase()
+              }">
                 <img src="${baseFlagsUrl}/${
                   countryCode === "local" ? "zz" : countryCode
                 }.svg"
@@ -461,6 +539,11 @@ $(document).ready(function () {
           },
         },
         {
+          searchPanes: {
+            show: true,
+            header: t("searchpane.url", "URL"),
+            combiner: "or",
+          },
           targets: 5,
           render: function (data, type, row) {
             if (type !== "display") {
@@ -490,6 +573,7 @@ $(document).ready(function () {
         {
           searchPanes: {
             show: true,
+            header: t("searchpane.server_name", "Server name"),
             combiner: "or",
           },
           targets: 9,
@@ -498,21 +582,74 @@ $(document).ready(function () {
           },
         },
         {
-          searchPanes: { show: true },
-          targets: [2, 4, 5, 6, 8, 11],
+          searchPanes: {
+            show: true,
+            header: t("searchpane.ip_address", "IP Address"),
+            combiner: "or",
+          },
+          targets: 2,
+        },
+        {
+          searchPanes: {
+            show: true,
+            header: t("searchpane.method", "Method"),
+            combiner: "or",
+          },
+          targets: 4,
+        },
+        {
+          searchPanes: {
+            show: true,
+            header: t("searchpane.url", "URL"),
+            combiner: "or",
+          },
+          targets: 5,
+        },
+        {
+          searchPanes: {
+            show: true,
+            header: t("searchpane.status_code", "Status Code"),
+            combiner: "or",
+          },
+          targets: 6,
+        },
+        {
+          searchPanes: {
+            show: true,
+            header: t("searchpane.reason", "Reason"),
+            combiner: "or",
+          },
+          targets: 8,
+        },
+        {
+          searchPanes: {
+            show: true,
+            header: t("searchpane.server_name", "Server name"),
+            combiner: "or",
+          },
+          targets: 9,
+        },
+        {
+          searchPanes: {
+            show: true,
+            header: t("searchpane.data", "Data"),
+            combiner: "or",
+          },
+          targets: 10,
+        },
+        {
+          searchPanes: {
+            show: true,
+            header: t("searchpane.security_mode", "Security mode"),
+            combiner: "or",
+          },
+          targets: 11,
         },
       ],
       order: [[1, "desc"]],
       autoFill: false,
       responsive: true,
       layout: layout,
-      language: {
-        info: "Showing _START_ to _END_ of _TOTAL_ reports",
-        infoEmpty: "No reports available",
-        infoFiltered: "(filtered from _MAX_ total reports)",
-        lengthMenu: "Display _MENU_ reports",
-        zeroRecords: "No matching reports found",
-      },
       processing: true,
       serverSide: true,
       ajax: {
@@ -541,18 +678,44 @@ $(document).ready(function () {
           orderable: false,
           className: "dtr-control",
         },
-        { data: "date", title: "Date" },
-        { data: "ip", title: "IP Address" },
-        { data: "country", title: "Country" },
-        { data: "method", title: "Method" },
-        { data: "url", title: "URL" },
-        { data: "status", title: "Status Code" },
-        { data: "user_agent", title: "User-Agent" },
-        { data: "reason", title: "Reason" },
-        { data: "server_name", title: "Server name" },
+        {
+          data: "date",
+          title: "<span data-i18n='table.header.date'>Date</span>",
+        },
+        {
+          data: "ip",
+          title: "<span data-i18n='table.header.ip_address'>IP Address</span>",
+        },
+        {
+          data: "country",
+          title: "<span data-i18n='table.header.country'>Country</span>",
+        },
+        {
+          data: "method",
+          title: "<span data-i18n='table.header.method'>Method</span>",
+        },
+        { data: "url", title: "<span data-i18n='table.header.url'>URL</span>" },
+        {
+          data: "status",
+          title:
+            "<span data-i18n='table.header.status_code'>Status Code</span>",
+        },
+        {
+          data: "user_agent",
+          title: "<span data-i18n='table.header.user_agent'>User-Agent</span>",
+        },
+        {
+          data: "reason",
+          title: "<span data-i18n='table.header.reason'>Reason</span>",
+        },
+        {
+          data: "server_name",
+          title:
+            "<span data-i18n='table.header.server_name'>Server name</span>",
+        },
         {
           data: "data",
-          title: "Data",
+          title: "<span data-i18n='table.header.data'>Data</span>",
           render: function (data, type, row) {
             if (type === "display" || type === "filter") {
               try {
@@ -570,13 +733,17 @@ $(document).ready(function () {
             return data;
           },
         },
-        { data: "security_mode", title: "Security mode" },
+        {
+          data: "security_mode",
+          title:
+            "<span data-i18n='table.header.security_mode'>Security mode</span>",
+        },
       ],
       headerCallback: function (thead) {
         updateHeaderTooltips(thead, headers);
       },
     },
-  });
+  };
 
   // Create the modal for displaying full URLs once at document ready
   $("body").append(`
@@ -624,10 +791,33 @@ $(document).ready(function () {
     $("#fullUrlContent").text(url);
   });
 
-  // Update tooltips when column visibility changes
-  reports_table.on("column-visibility.dt", function () {
-    updateHeaderTooltips("#reports thead", headers);
-  });
+  // Wait for window.i18nextReady = true before continuing
+  if (typeof window.i18nextReady === "undefined" || !window.i18nextReady) {
+    const waitForI18next = (resolve) => {
+      if (window.i18nextReady) {
+        resolve();
+      } else {
+        setTimeout(() => waitForI18next(resolve), 50);
+      }
+    };
+
+    new Promise((resolve) => {
+      waitForI18next(resolve);
+    }).then(() => {
+      const dt = initializeDataTable(reports_config);
+      dt.on("column-visibility.dt", function () {
+        updateHeaderTooltips("#reports thead", headers);
+      });
+      dt.on("draw.dt", function () {
+        updateCountryTooltips();
+
+        // Clean up any existing tooltips to prevent memory leaks
+        $(".tooltip").remove();
+      });
+      $("#reports_wrapper").find(".btn-secondary").removeClass("btn-secondary");
+      return dt;
+    });
+  }
 
   // Utility function to manage header tooltips
   function updateHeaderTooltips(selector, headers) {
@@ -640,35 +830,20 @@ $(document).ready(function () {
             $(element).attr({
               "data-bs-toggle": "tooltip",
               "data-bs-placement": "bottom",
+              "data-i18n": header.i18n,
               title: header.tooltip,
             });
           }
         });
       });
+    applyTranslations();
 
-    // Clean up and reinitialize tooltips
-    $('[data-bs-toggle="tooltip"]').each(function () {
-      const instance = bootstrap.Tooltip.getInstance(this);
-      if (instance) {
-        instance.dispose();
-      }
-    });
-    $('[data-bs-toggle="tooltip"]').tooltip();
+    $('[data-bs-toggle="tooltip"]').tooltip("dispose").tooltip();
   }
 
   if (sessionAutoRefresh === "true") {
     toggleAutoRefresh();
   }
-
-  $("#reports_wrapper").find(".btn-secondary").removeClass("btn-secondary");
-
-  // Update tooltips after table draw
-  reports_table.on("draw.dt", function () {
-    updateCountryTooltips();
-
-    // Clean up any existing tooltips to prevent memory leaks
-    $(".tooltip").remove();
-  });
 
   const hashValue = location.hash;
   if (hashValue) {

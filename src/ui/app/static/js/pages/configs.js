@@ -1,8 +1,14 @@
 $(document).ready(function () {
+  // Ensure i18next is loaded before using it
+  const t =
+    typeof i18next !== "undefined"
+      ? i18next.t
+      : (key, fallback) => fallback || key; // Fallback
+
   var actionLock = false;
   const configNumber = parseInt($("#configs_number").val());
-  const services = $("#services").val().trim().split(" ");
-  const templates = $("#templates").val().trim().split(" ");
+  const services = ($("#services").val() || "").trim().split(" ");
+  const templates = ($("#templates").val() || "").trim().split(" ");
   const configServiceSelection = $("#configs_service_selection").val().trim();
   const configTypeSelection = $("#configs_type_selection")
     .val()
@@ -13,56 +19,70 @@ $(document).ready(function () {
 
   const servicesSearchPanesOptions = [
     {
-      label: "global",
-      value: function (rowData) {
-        return $(rowData[5]).text().trim() === "global";
-      },
+      label: `<span data-i18n="scope.global">${t(
+        "scope.global",
+        "global",
+      )}</span>`,
+      value: (rowData) => rowData[5].includes("scope.global"),
     },
   ];
   const templatesSearchPanesOptions = [
     {
-      label: "no template",
-      value: function (rowData) {
-        return $(rowData[6]).text().trim() === "no template";
-      },
+      label: `<span data-i18n="template.none">${t(
+        "template.none",
+        "no template",
+      )}</span>`,
+      value: (rowData) => rowData[6].includes("template.none"),
     },
   ];
 
   services.forEach((service) => {
-    servicesSearchPanesOptions.push({
-      label: service,
-      value: function (rowData) {
-        return $(rowData[5]).text().trim() === service;
-      },
-    });
+    if (service) {
+      servicesSearchPanesOptions.push({
+        label: service,
+        value: (rowData) => $(rowData[5]).text().trim() === service,
+      });
+    }
   });
   templates.forEach((template) => {
-    templatesSearchPanesOptions.push({
-      label: template,
-      value: function (rowData) {
-        return $(rowData[6]).text().trim() === template;
-      },
-    });
+    if (template) {
+      templatesSearchPanesOptions.push({
+        label: template,
+        value: (rowData) => $(rowData[6]).text().trim() === template,
+      });
+    }
   });
 
   const setupDeletionModal = (configs) => {
     const delete_modal = $("#modal-delete-configs");
-    const list = $(
-      `<ul class="list-group list-group-horizontal w-100">
-      <li class="list-group-item bg-secondary text-white" style="flex: 1 1 0;">
-        <div class="ms-2 me-auto">
-          <div class="fw-bold">Name</div>
-        </div>
-      </li>
-      <li class="list-group-item bg-secondary text-white" style="flex: 1 1 0;">
-        <div class="fw-bold">Type</div>
-      </li>
-      <li class="list-group-item bg-secondary text-white" style="flex: 1 1 0;">
-        <div class="fw-bold">Service</div>
-      </li>
-      </ul>`,
-    );
-    $("#selected-configs-delete").append(list);
+    const $modalBody = $("#selected-configs-delete");
+    $modalBody.empty(); // Clear previous content
+
+    // Create and append the header row with translated headers
+    const $header = $(`
+      <ul class="list-group list-group-horizontal w-100">
+        <li class="list-group-item bg-secondary text-white" style="flex: 1 1 0;">
+          <div class="ms-2 me-auto">
+            <div class="fw-bold" data-i18n="table.header.name">${t(
+              "table.header.name",
+              "Name",
+            )}</div>
+          </div>
+        </li>
+        <li class="list-group-item bg-secondary text-white" style="flex: 1 1 0;">
+          <div class="fw-bold" data-i18n="table.header.type">${t(
+            "table.header.type",
+            "Type",
+          )}</div>
+        </li>
+        <li class="list-group-item bg-secondary text-white" style="flex: 1 1 0;">
+          <div class="fw-bold" data-i18n="table.header.service">${t(
+            "table.header.service",
+            "Service",
+          )}</div>
+        </li>
+      </ul>`);
+    $modalBody.append($header);
 
     configs.forEach((config) => {
       const list = $(
@@ -71,10 +91,10 @@ $(document).ready(function () {
 
       // Create the list item using template literals
       const listItem = $(`<li class="list-group-item" style="flex: 1 1 0;">
-  <div class="ms-2 me-auto">
-    <div class="fw-bold">${config.name}</div>
-  </div>
-</li>`);
+          <div class="ms-2 me-auto">
+            <div class="fw-bold">${config.name}</div>
+          </div>
+        </li>`);
       list.append(listItem);
 
       const id = `${config.type.toLowerCase()}-${config.service.replaceAll(
@@ -97,27 +117,39 @@ $(document).ready(function () {
       );
       serviceListItem.append(serviceClone.removeClass("highlight"));
       list.append(serviceListItem);
-      serviceClone.find('[data-bs-toggle="tooltip"]').tooltip();
+      serviceClone
+        .find('[data-bs-toggle="tooltip"]')
+        .tooltip("dispose")
+        .tooltip(); // Reinitialize tooltip
 
-      $("#selected-configs-delete").append(list);
+      $modalBody.append(list);
     });
 
-    const modal = new bootstrap.Modal(delete_modal);
+    const modalInstance = new bootstrap.Modal(delete_modal[0]);
+
+    // Update the alert text using i18next
+    const alertTextKey =
+      configs.length > 1
+        ? "modal.body.delete_confirmation_alert_plural"
+        : "modal.body.delete_confirmation_alert";
     delete_modal
       .find(".alert")
       .text(
-        `Are you sure you want to delete the selected custom configuration${"s".repeat(
-          configs.length > 1,
-        )}?`,
+        t(
+          alertTextKey,
+          `Are you sure you want to delete the selected custom configuration${
+            configs.length > 1 ? "s" : ""
+          }?`,
+        ),
       );
-    modal.show();
+    modalInstance.show();
 
-    configs.forEach((config) => {
-      if (config.service === "global") {
-        config.service = null;
-      }
-    });
-    $("#selected-configs-input-delete").val(JSON.stringify(configs));
+    // Prepare data for submission (handle 'global' service)
+    const configsToSubmit = configs.map((cfg) => ({
+      ...cfg,
+      service: cfg.service === t("scope.global", "global") ? null : cfg.service,
+    }));
+    $("#selected-configs-input-delete").val(JSON.stringify(configsToSubmit));
   };
 
   const layout = {
@@ -147,20 +179,12 @@ $(document).ready(function () {
 
   if (configNumber > 10) {
     const menu = [10];
-    if (configNumber > 25) {
-      menu.push(25);
-    }
-    if (configNumber > 50) {
-      menu.push(50);
-    }
-    if (configNumber > 100) {
-      menu.push(100);
-    }
-    menu.push({ label: "All", value: -1 });
+    if (configNumber > 25) menu.push(25);
+    if (configNumber > 50) menu.push(50);
+    if (configNumber > 100) menu.push(100);
+    menu.push({ label: t("datatable.length_all", "All"), value: -1 });
     layout.bottomStart = {
-      pageLength: {
-        menu: menu,
-      },
+      pageLength: { menu: menu },
       info: true,
     };
     layout.bottomEnd.paging = true;
@@ -173,49 +197,72 @@ $(document).ready(function () {
     {
       extend: "colvis",
       columns: "th:not(:nth-child(-n+3)):not(:last-child)",
-      text: '<span class="tf-icons bx bx-columns bx-18px me-md-2"></span><span class="d-none d-md-inline">Columns</span>',
+      text: `<span class="tf-icons bx bx-columns bx-18px me-md-2"></span><span class="d-none d-md-inline" data-i18n="button.columns">${t(
+        "button.columns",
+        "Columns",
+      )}</span>`,
       className: "btn btn-sm btn-outline-primary rounded-start",
       columnText: function (dt, idx, title) {
-        return idx + 1 + ". " + title;
+        const headerCell = dt.column(idx).header();
+        const $header = $(headerCell);
+        const $translatableElement = $header.find("[data-i18n]");
+        let i18nKey = $translatableElement.data("i18n");
+        let translatedTitle = title;
+        if (i18nKey) {
+          translatedTitle = t(i18nKey, title);
+        } else {
+          translatedTitle = $header.text().trim() || title;
+          console.warn(
+            `ColVis: No data-i18n key found for column index ${idx}, using header text or title: '${translatedTitle}'`,
+          );
+        }
+        return `${idx + 1}. <span data-i18n="${
+          i18nKey || ""
+        }">${translatedTitle}</span>`;
       },
     },
     {
       extend: "colvisRestore",
-      text: '<span class="tf-icons bx bx-reset bx-18px me-2"></span>Reset columns',
+      text: `<span class="tf-icons bx bx-reset bx-18px me-2"></span><span class="d-none d-md-inline" data-i18n="button.reset_columns">${t(
+        "button.reset_columns",
+        "Reset columns",
+      )}</span>`,
       className: "btn btn-sm btn-outline-primary d-none d-md-inline",
     },
     {
       extend: "collection",
-      text: '<span class="tf-icons bx bx-export bx-18px me-md-2"></span><span class="d-none d-md-inline">Export</span>',
+      text: `<span class="tf-icons bx bx-export bx-18px me-md-2"></span><span class="d-none d-md-inline" data-i18n="button.export">${t(
+        "button.export",
+        "Export",
+      )}</span>`,
       className: "btn btn-sm btn-outline-primary",
       buttons: [
         {
           extend: "copy",
-          text: '<span class="tf-icons bx bx-copy bx-18px me-2"></span>Copy visible',
+          text: `<span class="tf-icons bx bx-copy bx-18px me-2"></span><span data-i18n="button.copy_visible">${t(
+            "button.copy_visible",
+            "Copy visible",
+          )}</span>`,
           exportOptions: {
             columns: ":visible:not(:nth-child(-n+2)):not(:last-child)",
           },
         },
         {
           extend: "csv",
-          text: '<span class="tf-icons bx bx-table bx-18px me-2"></span>CSV',
+          text: `<span class="tf-icons bx bx-table bx-18px me-2"></span>CSV`,
           bom: true,
           filename: "bw_custom_configs",
           exportOptions: {
-            modifier: {
-              search: "none",
-            },
+            modifier: { search: "none" },
             columns: ":not(:nth-child(-n+2)):not(:last-child)",
           },
         },
         {
           extend: "excel",
-          text: '<span class="tf-icons bx bx-table bx-18px me-2"></span>Excel',
+          text: `<span class="tf-icons bx bx-table bx-18px me-2"></span>Excel`,
           filename: "bw_custom_configs",
           exportOptions: {
-            modifier: {
-              search: "none",
-            },
+            modifier: { search: "none" },
             columns: ":not(:nth-child(-n+2)):not(:last-child)",
           },
         },
@@ -223,7 +270,10 @@ $(document).ready(function () {
     },
     {
       extend: "collection",
-      text: '<span class="tf-icons bx bx-play bx-18px me-md-2"></span><span class="d-none d-md-inline">Actions</span>',
+      text: `<span class="tf-icons bx bx-play bx-18px me-md-2"></span><span class="d-none d-md-inline" data-i18n="button.actions">${t(
+        "button.actions",
+        "Actions",
+      )}</span>`,
       className: "btn btn-sm btn-outline-primary action-button disabled",
       buttons: [
         {
@@ -250,91 +300,96 @@ $(document).ready(function () {
   const getSelectedConfigs = () => {
     const configs = [];
     $("tr.selected").each(function () {
-      const $this = $(this);
-      const name = $this.find("td:eq(2)").find("a").text().trim();
-      const type = $this.find("td:eq(3)").text().trim();
-      let service = $this.find("td:eq(5)");
-      if (service.find("a").length > 0) {
-        service = service.find("a").text().trim();
+      const $row = $(this);
+      const name = $row.find("td:eq(2)").find("a").text().trim();
+      const type = $row.find("td:eq(3)").text().trim();
+      let service;
+      const $serviceCell = $row.find("td:eq(5)");
+      const $serviceLink = $serviceCell.find("a");
+      if ($serviceLink.length > 0) {
+        service = $serviceLink.text().trim();
       } else {
-        service = service.text().trim();
+        const $serviceSpan = $serviceCell.find("span[data-i18n]");
+        service = $serviceSpan.length
+          ? $serviceSpan.text().trim()
+          : $serviceCell.text().trim();
       }
+
       configs.push({ name: name, type: type, service: service });
     });
     return configs;
   };
 
   $.fn.dataTable.ext.buttons.create_config = {
-    text: '<span class="tf-icons bx bx-plus"></span><span class="d-none d-md-inline">&nbsp;Create new custom config</span>',
+    text: `<span class="tf-icons bx bx-plus"></span><span class="d-none d-md-inline" data-i18n="button.create_config"> ${t(
+      "button.create_config",
+      "Create new custom config",
+    )}</span>`,
     className: `btn btn-sm rounded me-4 btn-bw-green${
       isReadOnly ? " disabled" : ""
     }`,
     action: function (e, dt, node, config) {
       if (isReadOnly) {
-        alert("This action is not allowed in read-only mode.");
+        alert(
+          t(
+            "alert.readonly_mode",
+            "This action is not allowed in read-only mode.",
+          ),
+        );
         return;
       }
-      window.location.href = `${window.location.href}/new`;
+      window.location.href = `${window.location.pathname}/new`;
     },
   };
 
   $.fn.dataTable.ext.buttons.delete_configs = {
-    text: '<span class="tf-icons bx bx-trash bx-18px me-2"></span>Delete',
+    text: `<span class="tf-icons bx bx-trash bx-18px me-2"></span><span data-i18n="button.delete">${t(
+      "button.delete",
+      "Delete",
+    )}</span>`,
     action: function (e, dt, node, config) {
       if (isReadOnly) {
-        alert("This action is not allowed in read-only mode.");
+        alert(
+          t(
+            "alert.readonly_mode",
+            "This action is not allowed in read-only mode.",
+          ),
+        );
         return;
       }
-      if (actionLock) {
-        return;
-      }
+      if (actionLock) return;
       actionLock = true;
-      $(".dt-button-background").click();
+      $(".dt-button-background").click(); // Close collection dropdown if open
 
       const configs = getSelectedConfigs();
       if (configs.length === 0) {
         actionLock = false;
         return;
       }
-
       setupDeletionModal(configs);
-
       actionLock = false;
     },
   };
 
-  const configs_table = initializeDataTable({
+  const configs_config = {
     tableSelector: "#configs",
     tableName: "configs",
     columnVisibilityCondition: (column) => column > 2 && column < 8,
     dataTableOptions: {
       columnDefs: [
-        {
-          orderable: false,
-          className: "dtr-control",
-          targets: 0,
-        },
-        {
-          orderable: false,
-          render: DataTable.render.select(),
-          targets: 1,
-        },
-        {
-          orderable: false,
-          targets: -1,
-        },
-        {
-          visible: false,
-          targets: 7,
-        },
+        { orderable: false, className: "dtr-control", targets: 0 },
+        { orderable: false, render: DataTable.render.select(), targets: 1 },
+        { orderable: false, targets: -1 },
+        { visible: false, targets: 7 },
         {
           searchPanes: {
             show: true,
+            header: t("searchpane.type", "Type"),
             options: [
               {
                 label: '<i class="bx bx-xs bx-window-alt"></i>HTTP',
                 value: function (rowData, rowIdx) {
-                  $(rowData[3]).text().trim() === "HTTP";
+                  return $(rowData[3]).text().trim() === "HTTP";
                 },
               },
               {
@@ -390,12 +445,14 @@ $(document).ready(function () {
               },
             ],
             combiner: "or",
+            orderable: false,
           },
           targets: 3,
         },
         {
           searchPanes: {
             show: true,
+            header: t("searchpane.active", "Active"),
             combiner: "or",
             orderable: false,
           },
@@ -404,6 +461,7 @@ $(document).ready(function () {
         {
           searchPanes: {
             show: true,
+            header: t("searchpane.service", "Service"),
             combiner: "or",
             options: servicesSearchPanesOptions,
           },
@@ -412,6 +470,7 @@ $(document).ready(function () {
         {
           searchPanes: {
             show: true,
+            header: t("searchpane.template", "Template"),
             combiner: "or",
             options: templatesSearchPanesOptions,
           },
@@ -427,55 +486,95 @@ $(document).ready(function () {
         headerCheckbox: true,
       },
       layout: layout,
-      language: {
-        info: "Showing _START_ to _END_ of _TOTAL_ custom configs",
-        infoEmpty: "No custom configs available",
-        infoFiltered: "(filtered from _MAX_ total custom configs)",
-        lengthMenu: "Display _MENU_ custom configs",
-        zeroRecords: "No matching custom configs found",
-        select: {
-          rows: {
-            _: "Selected %d custom configs",
-            0: "No custom configs selected",
-            1: "Selected 1 custom config",
-          },
-        },
-      },
       initComplete: function (settings, json) {
         $("#configs_wrapper .btn-secondary").removeClass("btn-secondary");
-        if (isReadOnly)
+        if (isReadOnly) {
+          const titleKey = userReadOnly
+            ? "tooltip.readonly_user_action_disabled"
+            : "tooltip.readonly_db_action_disabled";
+          const defaultTitle = userReadOnly
+            ? "Your account is readonly, action disabled."
+            : "The database is in readonly, action disabled.";
           $("#configs_wrapper .dt-buttons")
             .attr(
               "data-bs-original-title",
-              `${
-                userReadOnly
-                  ? "Your account is readonly"
-                  : "The database is in readonly"
-              }, therefore you cannot create new custom configurations.`,
+              t(titleKey, defaultTitle, { action: t("button.create_config") }),
             )
             .attr("data-bs-placement", "right")
             .tooltip();
+        }
       },
     },
-  });
+  };
 
-  $(`#DataTables_Table_0 span[title='${configTypeSelection}']`).trigger(
-    "click",
-  );
-
-  $(`#DataTables_Table_2 span[title='${configServiceSelection}']`).trigger(
-    "click",
-  );
-
-  if (configTypeSelection || configServiceSelection) {
-    configs_table.searchPanes.container().show();
-    $("#show-filters").toggleClass("d-none"); // Toggle the visibility of the 'Show' span
-    $("#hide-filters").toggleClass("d-none"); // Toggle the visibility of the 'Hide' span
+  // Trigger initial search pane selections if applicable
+  if (configTypeSelection) {
+    const typeLabelElement = $(
+      `#DataTables_Table_0 span[data-i18n='${configTypeMap[configTypeSelection]?.key}']`,
+    );
+    if (typeLabelElement.length) {
+      typeLabelElement.closest("span.dtsp-name").trigger("click"); // Click the parent span which has the DT handler
+    } else {
+      console.warn(
+        `Could not find search pane option for type: ${configTypeSelection}`,
+      );
+    }
   }
 
+  if (configServiceSelection) {
+    const serviceLabelElement = $(
+      `#DataTables_Table_2 span:contains('${configServiceSelection}')`,
+    );
+    if (serviceLabelElement.length) {
+      const targetElement = serviceLabelElement.filter(
+        (_, el) => $(el).text().trim() === configServiceSelection,
+      );
+      if (targetElement.length) {
+        targetElement.closest("span.dtsp-name").trigger("click");
+      } else {
+        console.warn(
+          `Could not find exact match for service pane option: ${configServiceSelection}`,
+        );
+      }
+    } else {
+      console.warn(
+        `Could not find any search pane option containing: ${configServiceSelection}`,
+      );
+    }
+  }
+
+  // Wait for window.i18nextReady = true before continuing
+  if (typeof window.i18nextReady === "undefined" || !window.i18nextReady) {
+    const waitForI18next = (resolve) => {
+      if (window.i18nextReady) {
+        resolve();
+      } else {
+        setTimeout(() => waitForI18next(resolve), 50);
+      }
+    };
+    new Promise((resolve) => {
+      waitForI18next(resolve);
+    }).then(() => {
+      const dt = initializeDataTable(configs_config);
+      // Show/hide filters based on initial selections
+      if (configTypeSelection || configServiceSelection) {
+        dt.searchPanes.container().show();
+        $("#show-filters").toggleClass("d-none");
+        $("#hide-filters").toggleClass("d-none");
+      }
+      return dt;
+    });
+  }
+
+  // Handle individual delete button click
   $(document).on("click", ".delete-config", function () {
     if (isReadOnly) {
-      alert("This action is not allowed in read-only mode.");
+      alert(
+        t(
+          "alert.readonly_mode",
+          "This action is not allowed in read-only mode.",
+        ),
+      );
       return;
     }
     const config = {

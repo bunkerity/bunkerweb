@@ -13,21 +13,21 @@
                     <i class='bx bxs-rocket bx-sm position-absolute top-0 end-0 m-3'></i>
                 {% endif %}
                 <p class="ps-4 fs-4 mb-2 text-white">
-                    Plan
+                    <span data-i18n="dashboard.card.plan.title">Plan</span>
                     <br />
                     <span class="fs-3 fw-bold don-jose">
                         {% if is_pro_version %}
-                            PRO
+                            <span data-i18n="plan.pro">PRO</span>
                         {% else %}
-                            FREE
+                            <span data-i18n="plan.free">FREE</span>
                         {% endif %}
                     </span>
                 </p>
                 <a class="ps-4 text-underline text-white-80" href="{{ url_for('pro') }}">
                     {% if is_pro_version %}
-                        More info
+                        <span data-i18n="link.more_info">More info</span>
                     {% else %}
-                        Upgrade?
+                        <span data-i18n="link.upgrade">Upgrade?</span>
                     {% endif %}
                 </a>
             </div>
@@ -38,7 +38,7 @@
                class="card p-4 position-relative shadow-sm rounded-3 h-100">
                 <i class='bx bx-server bx-sm position-absolute top-0 end-0 m-3 text-secondary'></i>
                 <p class="ps-4 fs-4 mb-2">
-                    Instances
+                    <span data-i18n="dashboard.card.instances.title">Instances</span>
                     <br />
                     <span class="fs-3 don-jose">
                         {{ '0' if instances|length < 10 else '' }}{{ instances|length }}
@@ -55,7 +55,8 @@
                             {% set ns.loading_instances = ns.loading_instances + 1 %}
                         {% endif %}
                     {% endfor %}
-                    {{ ns.up_instances }} up / {{ ns.down_instances }} down / {{ ns.loading_instances }} loading
+                    <span data-i18n="dashboard.card.instances.status"
+                          data-i18n-options='{"up": {{ ns.up_instances }}, "down": {{ ns.down_instances }}, "loading": {{ ns.loading_instances }}}'>{{ ns.up_instances }} up / {{ ns.down_instances }} down / {{ ns.loading_instances }} loading</span>
                 </small>
             </a>
         </div>
@@ -65,7 +66,7 @@
                class="card p-4 position-relative shadow-sm rounded-3 h-100">
                 <i class='bx bx-cube bx-sm position-absolute top-0 end-0 m-3 text-secondary'></i>
                 <p class="ps-4 fs-4 mb-2">
-                    Services
+                    <span data-i18n="dashboard.card.services.title">Services</span>
                     <br />
                     <span class="fs-3 don-jose">
                         {{ '0' if services|length < 10 else '' }}{{ services|length }}
@@ -80,7 +81,8 @@
                             {% set ns.online_services = ns.online_services + 1 %}
                         {% endif %}
                     {% endfor %}
-                    {{ ns.online_services }} online / {{ ns.draft_services }} draft
+                    <span data-i18n="dashboard.card.services.status"
+                          data-i18n-options='{"online": {{ ns.online_services }}, "draft": {{ ns.draft_services }}}'>{{ ns.online_services }} online / {{ ns.draft_services }} draft</span>
                 </small>
             </a>
         </div>
@@ -90,7 +92,7 @@
                class="card p-4 position-relative shadow-sm rounded-3 h-100">
                 <i class='bx bx-plug bx-sm position-absolute top-0 end-0 m-3 text-secondary'></i>
                 <p class="ps-4 fs-4 mb-2">
-                    Plugins
+                    <span data-i18n="dashboard.card.plugins.title">Plugins</span>
                     <br />
                     <span class="fs-3 don-jose">
                         {{ '0' if plugins|length < 10 else '' }}{{ plugins|length }}
@@ -107,7 +109,8 @@
                             {% set ns.external_plugins = ns.external_plugins + 1 %}
                         {% endif %}
                     {% endfor %}
-                    {{ ns.core_plugins }} core / {{ ns.pro_plugins }} PRO / {{ ns.external_plugins }} external
+                    <span data-i18n="dashboard.card.plugins.status"
+                          data-i18n-options='{"core": {{ ns.core_plugins }}, "pro": {{ ns.pro_plugins }}, "external": {{ ns.external_plugins }}}'>{{ ns.core_plugins }} core / {{ ns.pro_plugins }} PRO / {{ ns.external_plugins }} external</span>
                 </small>
             </a>
         </div>
@@ -115,7 +118,7 @@
             <div class="card p-4 position-relative shadow-sm rounded-3 bg-secondary text-white h-100">
                 <i class='bx bx-broadcast bx-sm position-absolute top-0 end-0 m-3 text-white'></i>
                 <p class="ps-4 fs-4 mb-2">
-                    Total Requests
+                    <span data-i18n="dashboard.card.total_requests.title">Total Requests</span>
                     <br />
                     <span class="fs-3 don-jose">{{ human_readable_number(request_errors.values() |sum) }}</span>
                 </p>
@@ -127,7 +130,7 @@
                href="{{ url_for('loading', next=url_for('reports') ) }}">
                 <i class='bx bx-block bx-sm position-absolute top-0 end-0 m-3 text-danger'></i>
                 <p class="ps-4 fs-4 mb-2">
-                    Blocked Requests
+                    <span data-i18n="dashboard.card.blocked_requests.title">Blocked Requests</span>
                     <br />
                     <span class="fs-3 don-jose">
                         {% set ns = namespace(blocked_requests=0) %}
@@ -145,7 +148,7 @@
             <div class="card p-4 position-relative shadow-sm rounded-3 h-100">
                 <i class='bx bx-globe bx-sm position-absolute top-0 end-0 m-3 text-danger'></i>
                 <p class="ps-4 fs-4 mb-2">
-                    Blocked Unique Ips
+                    <span data-i18n="dashboard.card.blocked_unique_ips.title">Blocked Unique IPs</span>
                     <br />
                     {% set ips_ns = namespace(ips=0, blocked_ips=0) %}
                     {% for data in request_ips.values() %}
@@ -162,7 +165,8 @@
                 <div class="card p-4 position-relative shadow-sm rounded-3 h-100">
                     <div class="card-header p-2">
                         <div class="card-title mb-0">
-                            <h5 class="mb-1 me-2 don-jose">Request status</h5>
+                            <h5 class="mb-1 me-2 don-jose"
+                                data-i18n="dashboard.chart.request_status.title">Request status</h5>
                         </div>
                     </div>
                     <div class="card-body d-flex align-items-center justify-content-center">
@@ -175,7 +179,8 @@
                 <div class="card p-4 position-relative shadow-sm rounded-3 h-100">
                     <div class="card-header p-2">
                         <div class="card-title mb-0">
-                            <h5 class="mb-1 me-2 don-jose">Top 10 - Blocked ips</h5>
+                            <h5 class="mb-1 me-2 don-jose"
+                                data-i18n="dashboard.chart.top_blocked_ips.title">Top 10 - Blocked IPs</h5>
                         </div>
                     </div>
                     <div class="card-body d-flex align-items-center justify-content-center">
@@ -186,7 +191,8 @@
                             <div id="requests-ips"></div>
                         {% else %}
                             <div class="text-center mt-2">
-                                <p class="g-3 p-2 text-primary rounded-lg fw-bold">No data to show</p>
+                                <p class="g-3 p-2 text-primary rounded-lg fw-bold"
+                                   data-i18n="status.no_data">No data to show</p>
                             </div>
                         {% endif %}
                     </div>
@@ -196,7 +202,10 @@
                 <div class="card p-4 position-relative shadow-sm rounded-3 h-100">
                     <div class="card-header p-2">
                         <div class="card-title mb-0">
-                            <h5 class="me-2 don-jose mb-0">Blocked Requests countries</h5>
+                            <h5 class="me-2 don-jose mb-0"
+                                data-i18n="dashboard.chart.blocked_request_countries.title">
+                                Blocked Requests countries
+                            </h5>
                         </div>
                     </div>
                     <div class="card-body p-0">
@@ -210,11 +219,12 @@
             <div class="card p-4 position-relative shadow-sm rounded-3 h-100">
                 <div class="card-header p-2">
                     <div class="card-title mb-0 d-flex justify-content-between">
-                        <h5 class="don-jose mb-0">News</h5>
+                        <h5 class="don-jose mb-0" data-i18n="dashboard.card.news.title">News</h5>
                         <a class="text-decoration-underline link-underline-primary"
                            href="https://www.bunkerweb.io/blog?utm_campaign=self&utm_source=ui"
                            target="_blank"
-                           rel="noopener">See more</a>
+                           rel="noopener"
+                           data-i18n="link.see_more">See more</a>
                     </div>
                 </div>
                 <div class="bg-bw-green position-relative w-100 p-2 text-white rounded fw-bold overflow-hidden">
@@ -222,10 +232,11 @@
                         <div class="flex-grow-1 overflow-hidden me-2">
                             <div id="banner-container">
                                 <p id="banner-text" class="mb-0 slide-in">
-                                    Get the most of BunkerWeb by upgrading to the PRO version. More info and free trial <a class="light-href text-white-80"
+                                    <span data-i18n="banner.pro">Get the most of BunkerWeb by upgrading to the PRO version. More info and free trial</span> <a class="light-href text-white-80"
     target="_blank"
     rel="noopener"
-    href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#pro">here</a>.
+    href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#pro"
+    data-i18n="banner.link.here">here</a>.
                                 </p>
                             </div>
                         </div>
@@ -233,7 +244,8 @@
                     </div>
                 </div>
                 <div id="data-news-container-home" class="mt-3">
-                    <p class="text-center relative w-full p-2 text-primary rounded-lg fw-bold">Impossible to connect to blog news.</p>
+                    <p class="text-center relative w-full p-2 text-primary rounded-lg fw-bold"
+                       data-i18n="status.news_connection_error">Impossible to connect to blog news.</p>
                 </div>
             </div>
         </div>
@@ -241,7 +253,8 @@
             <div class="card p-4 position-relative shadow-sm rounded-3">
                 <div class="card-header p-2">
                     <div class="card-title mb-0">
-                        <h5 class="mb-1 me-2 don-jose">Blocking status</h5>
+                        <h5 class="mb-1 me-2 don-jose"
+                            data-i18n="dashboard.chart.blocking_status.title">Blocking status</h5>
                     </div>
                 </div>
                 <div class="card-body">
