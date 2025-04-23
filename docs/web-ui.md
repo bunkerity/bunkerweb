@@ -1028,3 +1028,28 @@ The web UI can be deployed and configured without going through the setup wizard
         driver: overlay
         attachable: true
     ```
+
+## Language Support & Localization
+
+The BunkerWeb UI supports multiple languages. Translations are managed in the `src/ui/app/static/locales` directory. The following languages are currently available:
+
+- English (en)
+- French (fr)
+- Arabic (ar)
+- Bengali (bn)
+- Spanish (es)
+- Hindi (hi)
+- Portuguese (pt)
+- Russian (ru)
+- Urdu (ur)
+- Chinese (zh)
+
+See the [locales/README.md](../src/ui/app/static/locales/README.md) for details on translation provenance and review status.
+
+### Contributing Translations
+
+We welcome contributions to improve or add new locale files!
+
+- To add a new language, copy `en.json` as a template, translate the values, and update the table in `locales/README.md`.
+- For updates, edit the relevant file and update the provenance table as needed.
+- See the [locales/README.md](../src/ui/app/static/locales/README.md) for full guidelines.

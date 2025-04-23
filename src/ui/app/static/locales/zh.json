@@ -1,0 +1,1300 @@
+{
+  "about": {
+    "build_with": "构建工具",
+    "gnu_license": "GNU Affero 通用公共许可证 v3.0",
+    "license_title": "许可证",
+    "socials": "社交媒体",
+    "tagline": "强大保护，化繁为简",
+    "version": "版本：{{version}}"
+  },
+  "alert": {
+    "important": "重要",
+    "no_changes_detected": "未检测到任何更改。",
+    "notice": "注意",
+    "ping_error": "Ping 实例时发生错误。",
+    "readonly_mode": "此操作在只读模式下被禁用。"
+  },
+  "aria": {
+    "label": {
+      "close": "关闭",
+      "raw_configuration": "原始配置"
+    }
+  },
+  "badge": {
+    "from_template": "来自模板",
+    "new_version": "新版本",
+    "no_template": "无模板",
+    "unread_news": "未读新闻",
+    "unread_notifications": "未读通知"
+  },
+  "banner": {
+    "community": "加入 Bunker 社区，加入 <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://discord.bunkerweb.io/?utm_campaign=self&utm_source=banner\">Discord 聊天</a>并在 <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://www.linkedin.com/company/bunkerity/\">LinkedIn</a> 上关注我们。",
+    "link": {
+      "here": "这里"
+    },
+    "pro": "升级到 PRO 版本，充分利用 BunkerWeb。更多信息和免费试用请点击<a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#pro\">这里</a>。",
+    "support": "需要 BunkerWeb 的高级支持或定制咨询服务？查看我们的<a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">专业服务</a>。"
+  },
+  "breadcrumb": {
+    "about": "关于",
+    "bans": "封禁",
+    "cache": "缓存",
+    "configs": "配置",
+    "extra_pages": "附加页面",
+    "global_config": "全局配置",
+    "home": "主页",
+    "instances": "实例",
+    "jobs": "任务",
+    "logs": "日志",
+    "misc": "杂项",
+    "mode_selection": "模式选择",
+    "more": "更多...",
+    "new": "新建",
+    "plugins": "插件",
+    "plugins_pages": "插件页面",
+    "pro": "Pro",
+    "reports": "报告",
+    "services": "服务",
+    "support": "支持",
+    "templates": "模板"
+  },
+  "button": {
+    "actions": "操作",
+    "activate_key": "激活密钥",
+    "add": "插入",
+    "add_ban_plural": "添加封禁",
+    "add_plugin_plural": "添加插件",
+    "add_plugins": "添加插件",
+    "auto_refresh": "自动刷新",
+    "ban": "封禁",
+    "cache": "缓存",
+    "cancel": "取消",
+    "clear": "清除",
+    "close": "关闭",
+    "columns": "列",
+    "convert_services": "转换服务",
+    "copy": "复制",
+    "copy_codes": "复制代码",
+    "copy_visible": "复制可见",
+    "create_config": "创建自定义配置",
+    "create_instance": "创建实例",
+    "create_service": "创建新服务",
+    "delete": "删除",
+    "delete_instance": "删除实例",
+    "disable_totp": "禁用 TOTP",
+    "download": "下载",
+    "enable_totp": "启用 TOTP",
+    "entire_config": "完整配置",
+    "export": "导出",
+    "filters_suffix": " 过滤器",
+    "github_stars": "星标",
+    "hide": "隐藏",
+    "history": "历史记录",
+    "login": "登录",
+    "multiple_add": "添加",
+    "multiple_hide": "隐藏",
+    "multiple_remove": "移除",
+    "multiple_show": "显示",
+    "need_help": "需要帮助？",
+    "news": "新闻",
+    "notifications": "通知",
+    "open_support_ticket": "提交支持工单",
+    "order_support": "订购支持",
+    "ping": "Ping",
+    "plugin_page": "插件页面",
+    "proceed": "继续",
+    "refresh_recovery_codes": "刷新恢复代码",
+    "reload": "重新加载",
+    "reset": "重置",
+    "reset_columns": "重置列",
+    "return_to_safety": "返回安全区域",
+    "run": "运行",
+    "run_selected_jobs": "运行选定任务",
+    "save": "保存",
+    "save_changes": "保存更改",
+    "select_file": "选择文件",
+    "select_page": "选择页面",
+    "service": "服务",
+    "setup": "设置",
+    "show": "显示",
+    "stop": "停止",
+    "submit": "提交",
+    "subscribe": "订阅",
+    "unban": "解禁",
+    "update_key": "更新密钥",
+    "upload_photo": "上传新照片",
+    "wipe_other_sessions": "清除其他会话"
+  },
+  "country": {
+    "AD": "安道尔",
+    "AE": "阿拉伯联合酋长国",
+    "AF": "阿富汗",
+    "AG": "安提瓜和巴布达",
+    "AI": "安圭拉",
+    "AL": "阿尔巴尼亚",
+    "AM": "亚美尼亚",
+    "AO": "安哥拉",
+    "AQ": "南极洲",
+    "AR": "阿根廷",
+    "AS": "美属萨摩亚",
+    "AT": "奥地利",
+    "AU": "澳大利亚",
+    "AW": "阿鲁巴",
+    "AX": "奥兰群岛",
+    "AZ": "阿塞拜疆",
+    "BA": "波斯尼亚和黑塞哥维那",
+    "BB": "巴巴多斯",
+    "BD": "孟加拉国",
+    "BE": "比利时",
+    "BF": "布基纳法索",
+    "BG": "保加利亚",
+    "BH": "巴林",
+    "BI": "布隆迪",
+    "BJ": "贝宁",
+    "BL": "圣巴泰勒米",
+    "BM": "百慕大",
+    "BN": "文莱达鲁萨兰国",
+    "BO": "玻利维亚",
+    "BQ": "荷兰加勒比区",
+    "BR": "巴西",
+    "BS": "巴哈马",
+    "BT": "不丹",
+    "BV": "布韦岛",
+    "BW": "博茨瓦纳",
+    "BY": "白俄罗斯",
+    "BZ": "伯利兹",
+    "CA": "加拿大",
+    "CC": "科科斯（基林）群岛",
+    "CD": "刚果民主共和国",
+    "CF": "中非共和国",
+    "CG": "刚果共和国",
+    "CH": "瑞士",
+    "CI": "科特迪瓦",
+    "CK": "库克群岛",
+    "CL": "智利",
+    "CM": "喀麦隆",
+    "CN": "中国",
+    "CO": "哥伦比亚",
+    "CR": "哥斯达黎加",
+    "CU": "古巴",
+    "CV": "佛得角",
+    "CW": "库拉索",
+    "CX": "圣诞岛",
+    "CY": "塞浦路斯",
+    "CZ": "捷克共和国",
+    "DE": "德国",
+    "DJ": "吉布提",
+    "DK": "丹麦",
+    "DM": "多米尼克",
+    "DO": "多米尼加共和国",
+    "DZ": "阿尔及利亚",
+    "EC": "厄瓜多尔",
+    "EE": "爱沙尼亚",
+    "EG": "埃及",
+    "EH": "西撒哈拉",
+    "ER": "厄立特里亚",
+    "ES": "西班牙",
+    "ET": "埃塞俄比亚",
+    "EU": "欧洲",
+    "FI": "芬兰",
+    "FJ": "斐济",
+    "FK": "福克兰群岛（马尔维纳斯）",
+    "FM": "密克罗尼西亚",
+    "FO": "法罗群岛",
+    "FR": "法国",
+    "GA": "加蓬",
+    "GB": "英国",
+    "GD": "格林纳达",
+    "GE": "格鲁吉亚",
+    "GF": "法属圭亚那",
+    "GG": "根西岛",
+    "GH": "加纳",
+    "GI": "直布罗陀",
+    "GL": "格陵兰",
+    "GM": "冈比亚",
+    "GN": "几内亚",
+    "GP": "瓜德罗普",
+    "GQ": "赤道几内亚",
+    "GR": "希腊",
+    "GS": "南乔治亚和南桑威奇群岛",
+    "GT": "危地马拉",
+    "GU": "关岛",
+    "GW": "几内亚比绍",
+    "GY": "圭亚那",
+    "HK": "香港",
+    "HM": "赫德岛和麦克唐纳群岛",
+    "HN": "洪都拉斯",
+    "HR": "克罗地亚",
+    "HT": "海地",
+    "HU": "匈牙利",
+    "ID": "印度尼西亚",
+    "IE": "爱尔兰",
+    "IL": "以色列",
+    "IM": "马恩岛",
+    "IN": "印度",
+    "IO": "英属印度洋领地",
+    "IQ": "伊拉克",
+    "IR": "伊朗",
+    "IS": "冰岛",
+    "IT": "意大利",
+    "JE": "泽西岛",
+    "JM": "牙买加",
+    "JO": "约旦",
+    "JP": "日本",
+    "KE": "肯尼亚",
+    "KG": "吉尔吉斯斯坦",
+    "KH": "柬埔寨",
+    "KI": "基里巴斯",
+    "KM": "科摩罗",
+    "KN": "圣基茨和尼维斯",
+    "KP": "朝鲜",
+    "KR": "韩国",
+    "KW": "科威特",
+    "KY": "开曼群岛",
+    "KZ": "哈萨克斯坦",
+    "LA": "老挝",
+    "LB": "黎巴嫩",
+    "LC": "圣卢西亚",
+    "LI": "列支敦士登",
+    "LK": "斯里兰卡",
+    "LR": "利比里亚",
+    "LS": "莱索托",
+    "LT": "立陶宛",
+    "LU": "卢森堡",
+    "LV": "拉脱维亚",
+    "LY": "利比亚",
+    "MA": "摩洛哥",
+    "MC": "摩纳哥",
+    "MD": "摩尔多瓦",
+    "ME": "黑山",
+    "MF": "圣马丁",
+    "MG": "马达加斯加",
+    "MH": "马绍尔群岛",
+    "MK": "北马其顿",
+    "ML": "马里",
+    "MM": "缅甸",
+    "MN": "蒙古",
+    "MO": "澳门",
+    "MP": "北马里亚纳群岛",
+    "MQ": "马提尼克",
+    "MR": "毛里塔尼亚",
+    "MS": "蒙特塞拉特",
+    "MT": "马耳他",
+    "MU": "毛里求斯",
+    "MV": "马尔代夫",
+    "MW": "马拉维",
+    "MX": "墨西哥",
+    "MY": "马来西亚",
+    "MZ": "莫桑比克",
+    "NA": "纳米比亚",
+    "NC": "新喀里多尼亚",
+    "NE": "尼日尔",
+    "NF": "诺福克岛",
+    "NG": "尼日利亚",
+    "NI": "尼加拉瓜",
+    "NL": "荷兰",
+    "NO": "挪威",
+    "NP": "尼泊尔",
+    "NR": "瑙鲁",
+    "NU": "纽埃",
+    "NZ": "新西兰",
+    "OM": "阿曼",
+    "PA": "巴拿马",
+    "PE": "秘鲁",
+    "PF": "法属波利尼西亚",
+    "PG": "巴布亚新几内亚",
+    "PH": "菲律宾",
+    "PK": "巴基斯坦",
+    "PL": "波兰",
+    "PM": "圣皮埃尔和密克隆",
+    "PN": "皮特凯恩",
+    "PR": "波多黎各",
+    "PS": "巴勒斯坦",
+    "PT": "葡萄牙",
+    "PW": "帕劳",
+    "PY": "巴拉圭",
+    "QA": "卡塔尔",
+    "RE": "留尼汪",
+    "RO": "罗马尼亚",
+    "RS": "塞尔维亚",
+    "RU": "俄罗斯联邦",
+    "RW": "卢旺达",
+    "SA": "沙特阿拉伯",
+    "SB": "所罗门群岛",
+    "SC": "塞舌尔",
+    "SD": "苏丹",
+    "SE": "瑞典",
+    "SG": "新加坡",
+    "SH": "圣赫勒拿、阿森松和特里斯坦-达库尼亚",
+    "SI": "斯洛文尼亚",
+    "SJ": "斯瓦尔巴和扬马延",
+    "SK": "斯洛伐克",
+    "SL": "塞拉利昂",
+    "SM": "圣马力诺",
+    "SN": "塞内加尔",
+    "SO": "索马里",
+    "SR": "苏里南",
+    "SS": "南苏丹",
+    "ST": "圣多美和普林西比",
+    "SV": "萨尔瓦多",
+    "SX": "圣马丁（荷兰部分）",
+    "SY": "叙利亚",
+    "SZ": "斯威士兰",
+    "TC": "特克斯和凯科斯群岛",
+    "TD": "乍得",
+    "TF": "法属南方领土",
+    "TG": "多哥",
+    "TH": "泰国",
+    "TJ": "塔吉克斯坦",
+    "TK": "托克劳",
+    "TL": "东帝汶",
+    "TM": "土库曼斯坦",
+    "TN": "突尼斯",
+    "TO": "汤加",
+    "TR": "土耳其",
+    "TT": "特立尼达和多巴哥",
+    "TV": "图瓦卢",
+    "TW": "台湾",
+    "TZ": "坦桑尼亚",
+    "UA": "乌克兰",
+    "UG": "乌干达",
+    "UM": "美国本土外小岛屿",
+    "US": "美国",
+    "UY": "乌拉圭",
+    "UZ": "乌兹别克斯坦",
+    "VA": "梵蒂冈城国",
+    "VC": "圣文森特和格林纳丁斯",
+    "VE": "委内瑞拉",
+    "VG": "英属维尔京群岛",
+    "VI": "美属维尔京群岛",
+    "VN": "越南",
+    "VU": "瓦努阿图",
+    "WF": "瓦利斯和富图纳",
+    "WS": "萨摩亚",
+    "XK": "科索沃",
+    "YE": "也门",
+    "YT": "马约特",
+    "ZA": "南非",
+    "ZM": "赞比亚",
+    "ZW": "津巴布韦",
+    "not_applicable": "不适用"
+  },
+  "dashboard": {
+    "card": {
+      "blocked_requests": {
+        "title": "被阻止的请求"
+      },
+      "blocked_unique_ips": {
+        "title": "被阻止的唯一 IP"
+      },
+      "instances": {
+        "status": "{{up}} 运行中 / {{down}} 已停止 / {{loading}} 加载中",
+        "title": "实例"
+      },
+      "news": {
+        "title": "新闻"
+      },
+      "plan": {
+        "title": "计划"
+      },
+      "plugins": {
+        "status": "{{core}} 核心 / {{pro}} PRO / {{external}} 外部",
+        "title": "插件"
+      },
+      "services": {
+        "status": "{{online}} 在线 / {{draft}} 草稿",
+        "title": "服务"
+      },
+      "total_requests": {
+        "title": "总请求数"
+      }
+    },
+    "chart": {
+      "blocked_request_countries": {
+        "title": "按国家/地区阻止的请求"
+      },
+      "blocking_status": {
+        "title": "阻止状态随时间变化",
+        "subtitle": "随时间变化的被阻止请求",
+        "blocked_requests": "被阻止的请求",
+        "time": "时间",
+        "count": "数量"
+      },
+      "request_status": {
+        "title": "请求状态分布",
+        "blocked": "被阻止的请求"
+      },
+      "top_blocked_ips": {
+        "title": "前 10 名被阻止的 IP",
+        "most_blocked": "被阻止最多的 IP"
+      }
+    },
+    "map": {
+      "blocked_requests": "被阻止的请求",
+      "hover_info": "将鼠标悬停在国家/地区上",
+      "no_data": "无数据",
+      "legend": "图例"
+    }
+  },
+  "datatable": {
+    "info_bans": "显示 {{start}} 到 {{end}} 条，共 {{total}} 条封禁",
+    "info_cache": "显示 {{start}} 到 {{end}} 条，共 {{total}} 个缓存文件",
+    "info_configs": "显示 {{start}} 到 {{end}} 条，共 {{total}} 条自定义配置",
+    "info_empty_bans": "无可用封禁",
+    "info_empty_cache": "无可用缓存文件",
+    "info_empty_configs": "无可用自定义配置",
+    "info_empty_instances": "无可用实例",
+    "info_empty_jobs": "无可用任务",
+    "info_empty_plugins": "无可用插件",
+    "info_empty_reports": "无可用报告",
+    "info_empty_services": "无可用服务",
+    "info_filtered_bans": "（从 _MAX_ 条总封禁中筛选）",
+    "info_filtered_cache": "（从 _MAX_ 个总缓存文件中筛选）",
+    "info_filtered_configs": "（从 _MAX_ 条总自定义配置中筛选）",
+    "info_filtered_instances": "（从 _MAX_ 个总实例中筛选）",
+    "info_filtered_jobs": "（从 _MAX_ 个总任务中筛选）",
+    "info_filtered_plugins": "（从 _MAX_ 个总插件中筛选）",
+    "info_filtered_reports": "（从 _MAX_ 个总报告中筛选）",
+    "info_filtered_services": "（从 _MAX_ 个总服务中筛选）",
+    "info_instances": "显示 {{start}} 到 {{end}} 条，共 {{total}} 个实例",
+    "info_jobs": "显示 {{start}} 到 {{end}} 条，共 {{total}} 个任务",
+    "info_plugins": "显示 {{start}} 到 {{end}} 条，共 {{total}} 个插件",
+    "info_reports": "显示 {{start}} 到 {{end}} 条，共 {{total}} 个报告",
+    "info_services": "显示 {{start}} 到 {{end}} 条，共 {{total}} 个服务",
+    "length_all": "全部",
+    "length_menu_bans": "显示 _MENU_ 条封禁",
+    "length_menu_cache": "显示 _MENU_ 个缓存文件",
+    "length_menu_configs": "显示 _MENU_ 条自定义配置",
+    "length_menu_instances": "显示 _MENU_ 个实例",
+    "length_menu_jobs": "显示 _MENU_ 个任务",
+    "length_menu_plugins": "显示 _MENU_ 个插件",
+    "length_menu_reports": "显示 _MENU_ 个报告",
+    "length_menu_services": "显示 _MENU_ 个服务",
+    "paginate": {
+      "first": "首页",
+      "last": "末页",
+      "next": "下一页",
+      "previous": "上一页"
+    },
+    "processing": "处理中...",
+    "search": "搜索：",
+    "select_rows_bans_0": "未选择封禁",
+    "select_rows_bans_1": "已选择 1 条封禁",
+    "select_rows_bans_plural": "已选择 %d 条封禁",
+    "select_rows_cache_0": "未选择缓存文件",
+    "select_rows_cache_1": "已选择 1 个缓存文件",
+    "select_rows_cache_plural": "已选择 %d 个缓存文件",
+    "select_rows_configs_0": "未选择自定义配置",
+    "select_rows_configs_1": "已选择 1 条自定义配置",
+    "select_rows_configs_plural": "已选择 %d 条自定义配置",
+    "select_rows_instances_0": "未选择实例",
+    "select_rows_instances_1": "已选择 1 个实例",
+    "select_rows_instances_plural": "已选择 %d 个实例",
+    "select_rows_jobs_0": "未选择任务",
+    "select_rows_jobs_1": "已选择 1 个任务",
+    "select_rows_jobs_plural": "已选择 %d 个任务",
+    "select_rows_plugins_0": "未选择插件",
+    "select_rows_plugins_1": "已选择 1 个插件",
+    "select_rows_plugins_plural": "已选择 %d 个插件",
+    "select_rows_reports_0": "未选择报告",
+    "select_rows_reports_1": "已选择 1 个报告",
+    "select_rows_reports_plural": "已选择 %d 个报告",
+    "select_rows_services_0": "未选择服务",
+    "select_rows_services_1": "已选择 1 个服务",
+    "select_rows_services_plural": "已选择 %d 个服务",
+    "zero_records_bans": "未找到匹配的封禁",
+    "zero_records_cache": "未找到匹配的缓存文件",
+    "zero_records_configs": "未找到匹配的自定义配置",
+    "zero_records_instances": "未找到匹配的实例",
+    "zero_records_jobs": "未找到匹配的任务",
+    "zero_records_plugins": "未找到匹配的插件",
+    "zero_records_reports": "未找到匹配的报告",
+    "zero_records_services": "未找到匹配的服务"
+  },
+  "dev_log": {
+    "copy_failed": "复制文本失败：",
+    "news_fetch_fail": "获取新闻失败：",
+    "skipping_malformed_line": "跳过格式错误的行：{{line}}"
+  },
+  "error": {
+    "401": {
+      "help": "您必须登录才能访问此资源。",
+      "message": "请登录后继续。",
+      "title": "需要身份验证"
+    },
+    "403": {
+      "help": "请验证您的凭据，如果您认为这是一个错误，请联系管理员。",
+      "message": "您无权访问此页面。",
+      "title": "访问被拒绝"
+    },
+    "404": {
+      "help": "请检查 URL 是否正确，如果您认为这是一个错误，请联系管理员。",
+      "message": "找不到请求的资源。",
+      "title": "未找到"
+    },
+    "5xx": {
+      "help": "请稍后重试，如果问题仍然存在，请联系管理员。",
+      "message": "发生意外的服务器错误。",
+      "title": "服务器错误"
+    },
+    "reports_load_error": "加载报告时出错。请尝试刷新页面。"
+  },
+  "flash": {
+    "easter_egg": "如果你读到了这条信息，说明你很好奇 👀",
+    "error": "错误",
+    "message": "信息",
+    "time": {
+      "just_now": "刚才"
+    },
+    "warning": "警告"
+  },
+  "footer": {
+    "blog": "博客",
+    "documentation": "文档",
+    "license": "许可证",
+    "made_by": "由",
+    "privacy": "隐私",
+    "support": "支持"
+  },
+  "form": {
+    "checkbox": {
+      "remember_me": "记住我"
+    },
+    "help": {
+      "ban_specific_service": "封禁将仅适用于此特定服务。",
+      "hostname_length_limit": "主机名限制为 256 个字符。",
+      "hostname_special_chars": "协议/端口规范中只允许使用 `/` 和 `:`。",
+      "photo_extensions": "允许的格式：JPG、GIF 或 PNG。最大大小：800KB。"
+    },
+    "label": {
+      "2fa_code": "2FA 代码",
+      "2fa_code_or_recovery": "2FA 代码或恢复代码",
+      "admin_email": "管理员邮箱",
+      "admin_password": "管理员密码",
+      "admin_username": "管理员用户名",
+      "auto_lets_encrypt": "自动 Let's Encrypt",
+      "ban_scope": "封禁范围",
+      "certificate_priority": "证书优先级",
+      "challenge_type": "质询类型",
+      "config_type": "配置类型",
+      "configuration_name": "配置名称",
+      "confirm_password": "确认密码",
+      "current_password": "当前密码",
+      "custom_ssl_certificate": "自定义 SSL 证书",
+      "custom_ssl_certificate_data": "自定义 SSL 证书数据 (Base64/PEM)",
+      "custom_ssl_key": "自定义 SSL 密钥",
+      "custom_ssl_key_data": "自定义 SSL 密钥数据 (Base64/PEM)",
+      "dns_credential_items": "Let's Encrypt DNS 凭证项",
+      "dns_propagation": "DNS 传播延迟",
+      "dns_provider": "DNS 提供商",
+      "email": "邮箱",
+      "email_for_lets_encrypt": "用于 Let's Encrypt 的邮箱",
+      "end_date": "结束日期",
+      "hostname": "主机名",
+      "ip_address": "IP 地址",
+      "keywords": "关键词",
+      "license_key": "许可证密钥",
+      "name": "名称",
+      "new_password": "新密码",
+      "optional": "（可选）",
+      "password": "密码",
+      "raw_configuration": "原始配置",
+      "reason": "原因",
+      "secret_token": "密钥",
+      "server_name": "服务器名称",
+      "service_name": "服务名称",
+      "theme": "主题",
+      "type": "类型",
+      "ui_host": "UI 主机",
+      "ui_url": "UI URL",
+      "use_custom_ssl": "使用自定义 SSL",
+      "use_lets_encrypt_staging": "使用 Let's Encrypt Staging",
+      "username": "用户名",
+      "wildcard_certificates": "通配符证书"
+    },
+    "placeholder": {
+      "2fa_code": "输入代码",
+      "2fa_or_recovery": "输入代码或恢复代码",
+      "config_name": "我的自定义配置",
+      "enter_username": "输入您的用户名",
+      "keywords": "关键词...",
+      "search": "搜索...",
+      "select_service": "选择服务",
+      "secret_token": "密钥",
+      "username_example": "张三"
+    },
+    "validation": {
+      "confirm_password_match": "密码不匹配。",
+      "password_length": "密码必须至少包含 8 个字符。",
+      "password_number": "密码必须至少包含 1 个数字。",
+      "password_special": "密码必须至少包含 1 个特殊字符。",
+      "password_uppercase": "密码必须至少包含 1 个大写字母。"
+    }
+  },
+  "instance": {
+    "type": {
+      "container": "容器",
+      "pod": "Pod",
+      "static": "静态"
+    }
+  },
+  "interval": {
+    "day": "每天",
+    "hour": "每小时",
+    "once": "一次",
+    "week": "每周"
+  },
+  "job": {
+    "history": {
+      "end_date": "结束日期",
+      "start_date": "开始日期",
+      "success": "成功"
+    }
+  },
+  "link": {
+    "back_to_login": "返回登录",
+    "forgot_password": "忘记密码？",
+    "here": "这里",
+    "more_info": "更多信息",
+    "more_news": "更多新闻",
+    "privacy_policy": "隐私政策",
+    "read_more": "阅读更多",
+    "see_more": "查看更多",
+    "upgrade": "升级？"
+  },
+  "modal": {
+    "body": {
+      "add_plugin_dropzone": "将您的插件存档拖放到此处或单击以选择文件。",
+      "confirm_configs_deletion_alert": "您确定要删除选定的自定义配置吗？",
+      "confirm_configs_deletion_alert_plural": "您确定要删除选定的自定义配置吗？",
+      "confirm_conversion_confirmation": "您确定要转换选定的服务吗？",
+      "confirm_next_step": "您确定要继续下一步吗？",
+      "confirm_plugin_deletion": "您确定要删除选定的插件吗？",
+      "confirm_plugin_deletion_plural": "您确定要删除选定的插件吗？",
+      "confirmation_instance_deletion": "您确定要删除选定的实例吗？",
+      "delete_confirmation_alert": "您确定要删除选定的实例吗？",
+      "delete_confirmation_alert_plural": "您确定要删除选定的实例吗？",
+      "instance_creation_alert": "您不需要提供端口或服务器名称；`API_HTTP_PORT` 和 `API_SERVER_NAME` 的值将用于实例配置。",
+      "next_step_in_case_of_issue": "如果遇到问题，您可以手动接受不安全的证书：",
+      "recovery_codes_save_alert": "请将这些恢复代码保存在安全的位置（例如密码管理器或保险箱）。如果丢失身份验证设备，您可以使用它们访问您的帐户。",
+      "recovery_codes_shown_once_alert": "这些恢复代码仅显示一次。请确保将其安全保存。",
+      "reset_template_alert": "您确定要重置当前模板设置和自定义配置吗？",
+      "services_deletion_confirmation": "您确定要删除选定的服务吗？",
+      "unban_confirmation_alert": "您确定要解禁选定的 IP 地址吗？",
+      "unban_confirmation_alert_plural": "您确定要解禁选定的 IP 地址吗？"
+    },
+    "button": {
+      "reset_template_confirm": "重置模板配置"
+    },
+    "section": {
+      "ban_details": "封禁详情",
+      "ban_scope": "封禁范围",
+      "delete": "删除"
+    },
+    "title": {
+      "add_bans": "添加封禁",
+      "add_plugins": "添加插件",
+      "confirm_conversion": "确认转换",
+      "confirm_deletion": "确认删除",
+      "confirm_unban": "确认解禁",
+      "create_new_instance": "创建新实例",
+      "delete_instance": "删除实例",
+      "from_plugin": "来自插件",
+      "full_url": "完整 URL",
+      "job_history": "最近 10 次任务执行",
+      "job_history_count": "任务 {{count}} 次执行",
+      "recovery_codes": "恢复代码",
+      "reset_template_config": "重置模板配置？",
+      "server_name_not_unique": "服务器名称不是唯一的"
+    }
+  },
+  "mode": {
+    "advanced": "高级",
+    "easy": "简单",
+    "raw": "原始"
+  },
+  "navbar": {
+    "button": {
+      "upgrade_to_pro": "升级到 PRO"
+    },
+    "dropdown": {
+      "logout": "登出"
+    },
+    "link": {
+      "documentation": "文档"
+    },
+    "version": "版本"
+  },
+  "navigation": {
+    "about": "关于",
+    "bans": "封禁",
+    "cache": "缓存",
+    "configs": "配置",
+    "extra_pages": "附加页面",
+    "global_config": "全局配置",
+    "home": "主页",
+    "instances": "实例",
+    "jobs": "任务",
+    "logs": "日志",
+    "misc": "杂项",
+    "mode_selection": "模式选择",
+    "more": "更多...",
+    "plugins": "插件",
+    "plugins_pages": "插件页面",
+    "pro": "Pro",
+    "reports": "报告",
+    "services": "服务",
+    "support": "支持",
+    "templates": "模板"
+  },
+  "news": {
+    "image_alt": "新闻图片",
+    "posted_on": "发布于"
+  },
+  "newsletter": {
+    "legal_agreement": "我想要订阅新闻通讯，并且我已经阅读并同意：",
+    "title": "加入新闻通讯"
+  },
+  "pagination": {
+    "page": "页"
+  },
+  "plan": {
+    "free": "免费",
+    "pro": "PRO"
+  },
+  "plugin": {
+    "page": {
+      "status": {
+        "deactivated": "插件已停用；因此，没有可用信息。",
+        "metrics_deactivated": "指标插件未激活；因此，没有可用信息。",
+        "not_available": "插件页面在 Beta 阶段尚不可用。"
+      }
+    },
+    "type": {
+      "all": "全部",
+      "core": "核心",
+      "external": "外部",
+      "pro": "Pro",
+      "ui": "UI"
+    }
+  },
+  "pro": {
+    "alert": {
+      "overlapped_1": "您的活动服务数量超出了许可证允许的范围！",
+      "overlapped_2": "删除或将某些服务转换为草稿模式，以达到 {{pro_services}} 个服务的限制。"
+    },
+    "button": {
+      "all_features_available": "所有功能可用",
+      "awaiting_compliance": "等待合规...",
+      "renew_license": "续订许可证",
+      "suspended_license": "许可证已暂停",
+      "upgrade_to_pro": "升级到 PRO"
+    },
+    "expiration_date": {
+      "expires_in": "有效期至",
+      "title": "Pro 到期日期",
+      "unknown": "未知的到期日期"
+    },
+    "key": {
+      "title": {
+        "activate": "激活密钥",
+        "update": "更新密钥"
+      }
+    },
+    "overlay": {
+      "pro_feature": "Pro 功能",
+      "upgrade_required": "升级到 Pro 以访问此功能"
+    },
+    "status": {
+      "draft_services_count": "{{draft_services}} 个草稿服务",
+      "expired": "已过期",
+      "free_version": "免费版本",
+      "overlapped": "已超额",
+      "pro_version": "PRO 版本",
+      "services_count": "{{online_services}} 个在线服务 / {{pro_services}} 个 PRO 服务",
+      "suspended": "已暂停",
+      "title": "状态"
+    }
+  },
+  "profile": {
+    "2fa": {
+      "disable_title": "禁用 2FA",
+      "enable_title": "启用 2FA"
+    },
+    "alert": {
+      "refresh_recovery_codes": "刷新恢复代码将使之前的代码失效。"
+    },
+    "card": {
+      "coming_soon": "即将推出",
+      "title": {
+        "2fa": "双因素身份验证 (2FA)",
+        "change_password": "更改密码",
+        "change_theme": "更改主题",
+        "coming_soon": "即将推出",
+        "edit_profile": "编辑个人资料",
+        "refresh_recovery_codes": "刷新恢复代码",
+        "sessions": "会话"
+      }
+    },
+    "help": {
+      "photo_extensions": "允许的格式：JPG、GIF 或 PNG。最大大小：800KB。"
+    },
+    "session": {
+      "browser": "浏览器",
+      "creation_date": "创建日期",
+      "current_session": "当前会话",
+      "device": "设备",
+      "ip_address": "IP 地址",
+      "last_activity": "最后活动",
+      "os": "操作系统",
+      "title": "会话"
+    },
+    "tab": {
+      "profile": "个人资料",
+      "security": "安全",
+      "sessions": "会话"
+    }
+  },
+  "scope": {
+    "all_services": "所有服务",
+    "global": "全局",
+    "global_all_services": "全局（所有服务）",
+    "service_specific": "特定服务"
+  },
+  "searchpane": {
+    "active": "活动",
+    "async": "异步",
+    "clear": "清除全部",
+    "collapse_0": "搜索窗格",
+    "collapse_message": "全部折叠",
+    "collapse_plural": "搜索窗格 (%d)",
+    "count": "{total}",
+    "countFiltered": "{shown} ({total})",
+    "country": "国家/地区",
+    "created": "创建时间",
+    "data": "数据",
+    "empty": "无可用搜索窗格",
+    "end_date": "结束日期",
+    "first_seen": "首次出现",
+    "future_30d": "超过 30 天后",
+    "health": "健康状况",
+    "interval": "间隔",
+    "ip_address": "IP 地址",
+    "job_name": "任务名称",
+    "last_24h": "过去 24 小时",
+    "last_30d": "过去 30 天",
+    "last_7d": "过去 7 天",
+    "last_run_state": "上次运行状态",
+    "last_seen": "最后出现",
+    "last_update": "最后更新",
+    "loading": "正在加载搜索窗格...",
+    "method": "方法",
+    "next_24h": "未来 24 小时",
+    "next_30d": "未来 30 天",
+    "next_7d": "未来 7 天",
+    "older_30d": "超过 30 天前",
+    "plugin": "插件",
+    "reason": "原因",
+    "reload": "需要重新加载",
+    "scope": "范围",
+    "security_mode": "安全模式",
+    "server_name": "服务器名称",
+    "service": "服务",
+    "show_message": "全部显示",
+    "start_date": "开始日期",
+    "status_code": "状态码",
+    "stream": "流支持",
+    "template": "模板",
+    "title_0": "无活动过滤器",
+    "title_1": "活动过滤器 - 1",
+    "title_plural": "活动过滤器 - %d",
+    "type": "类型",
+    "url": "URL",
+    "version": "版本"
+  },
+  "settings": {
+    "custom_config": {
+      "title": "自定义配置"
+    },
+    "multiple": {
+      "description": "在此配置此插件的多个设置实例。",
+      "title": "多个设置"
+    }
+  },
+  "setup": {
+    "step1": {
+      "subtitle": "创建您的管理员帐户。",
+      "title": "管理员用户"
+    },
+    "step2": {
+      "section": {
+        "custom_certificate": "自定义证书",
+        "lets_encrypt": "Let's Encrypt",
+        "reverse_proxy": "反向代理"
+      },
+      "subtitle": "配置 Web UI 特定设置。",
+      "title": "UI 设置"
+    },
+    "step3": {
+      "label": {
+        "final_url": "BunkerWeb UI URL"
+      },
+      "subtitle": "在完成设置前检查您的设置。",
+      "title": "概览"
+    },
+    "status": {
+      "admin_user_exists": "🧑‍🚀 管理员用户已存在。请继续下一步。",
+      "reverse_proxy_configured": "↪️ Web 界面已配置反向代理。请继续下一步。",
+      "secure_password": "安全密码",
+      "unique_server_name": "唯一服务器名称"
+    },
+    "subtitle": "按照步骤完成设置向导。",
+    "title": "设置向导"
+  },
+  "status": {
+    "admin_user_exists": "🧑‍🚀 管理员用户已存在。请继续下一步。",
+    "blog_connection_fail": "无法连接到博客获取新闻更新。",
+    "default_server": "默认服务器",
+    "down": "已停止",
+    "draft": "草稿",
+    "failed": "失败",
+    "loading": "加载中...",
+    "loading_bans": "正在加载封禁...",
+    "loading_cache_file": "正在加载缓存文件...",
+    "loading_cache_files": "正在加载缓存文件...",
+    "loading_custom_config": "正在加载自定义配置...",
+    "loading_custom_configs": "正在加载自定义配置...",
+    "loading_instances": "正在加载实例...",
+    "loading_jobs": "正在加载任务...",
+    "loading_logs": "正在加载日志...",
+    "loading_plugins": "正在加载插件...",
+    "loading_reports": "正在加载报告...",
+    "loading_services": "正在加载服务...",
+    "news_connection_error": "无法连接到博客获取新闻更新。",
+    "no": "否",
+    "no_data": "无数据显示。",
+    "no_history": "无可用历史记录。",
+    "no_item": "无项目",
+    "no_notifications": "无通知显示。",
+    "no_steps": "无可用步骤",
+    "no_steps_description": "此模板没有任何可配置的步骤。",
+    "online": "在线",
+    "partial": "部分",
+    "pinging_instances": "正在 Ping 实例，请稍候...",
+    "plugin_page": {
+      "status": {
+        "deactivated": "插件已停用；因此，没有可用信息。",
+        "metrics_deactivated": "指标插件未激活；因此，没有可用信息。",
+        "not_available": "插件页面在 Beta 阶段尚不可用。"
+      }
+    },
+    "reverse_proxy_configured": "↪️ Web 界面已配置反向代理。请继续下一步。",
+    "secure_password": "安全密码",
+    "setting_up_bunkerweb": "正在设置您的 BunkerWeb，请稍候...",
+    "success": "成功",
+    "template_in_use": "此服务当前使用通过“{{method}}”管理的模板“{{template}}”。",
+    "template_in_use_description": "不允许在当前模板之外进行更改。请使用当前模板进行更改或切换到高级/原始模式。",
+    "unique_server_name": "唯一服务器名称",
+    "up": "运行中",
+    "yes": "是"
+  },
+  "step": {
+    "next": "下一步",
+    "previous": "上一步"
+  },
+  "support": {
+    "card": {
+      "download_logs": {
+        "help": "所有私人数据将被匿名化。",
+        "title": "下载日志"
+      },
+      "extract_config": {
+        "title": "提取配置"
+      },
+      "support_link": {
+        "title": "支持链接"
+      }
+    }
+  },
+  "tab": {
+    "custom_certificate": "自定义证书",
+    "lets_encrypt": "Let's Encrypt"
+  },
+  "table": {
+    "header": {
+      "actions": "操作",
+      "active": "活动",
+      "async": "异步",
+      "checksum": "校验和",
+      "country": "国家/地区",
+      "created": "创建时间",
+      "data": "数据",
+      "date": "日期",
+      "description": "描述",
+      "end_date": "结束日期",
+      "file_name": "文件名",
+      "health": "健康状况",
+      "hostname": "主机名",
+      "id": "ID",
+      "interval": "间隔",
+      "ip_address": "IP 地址",
+      "job_name": "任务名称",
+      "last_run": "上次运行",
+      "last_seen": "最后出现",
+      "last_update": "最后更新",
+      "method": "方法",
+      "name": "名称",
+      "plugin": "插件",
+      "reason": "原因",
+      "reload": "重新加载",
+      "scope": "范围",
+      "security_mode": "安全模式",
+      "server_name": "服务器名称",
+      "service": "服务",
+      "service_name": "服务名称",
+      "status_code": "状态码",
+      "stream": "流",
+      "template": "模板",
+      "time_left": "剩余时间",
+      "type": "类型",
+      "url": "URL",
+      "user_agent": "User-Agent",
+      "version": "版本"
+    }
+  },
+  "template": {
+    "none": "无模板"
+  },
+  "theme": {
+    "dark": "深色",
+    "light": "浅色"
+  },
+  "toast": {
+    "autoconf_disclaimer_bold": "如果服务被移除或重启，您的 UI 配置将会丢失。",
+    "autoconf_disclaimer_detail": "这是因为服务的创建方法是 'autoconf'，旨在防止配置冲突。",
+    "body": {
+      "ping_succeed": "实例：{{instances}}"
+    },
+    "copied": "已复制！",
+    "disclaimer_title": "免责声明",
+    "header": {
+      "ping_failed": "Ping 失败",
+      "ping_succeed": "Ping 成功"
+    }
+  },
+  "tooltip": {
+    "auto_lets_encrypt": "是否自动请求 Let's Encrypt 证书。",
+    "button": {
+      "convert_service_to_draft": "将服务 {{name}} 转换为草稿",
+      "convert_service_to_online": "将服务 {{name}} 转换为在线",
+      "delete_config": "删除自定义配置 {{name}}",
+      "delete_instance": "删除实例 {{hostname}}",
+      "delete_plugin": "删除插件 {{name}}",
+      "delete_service": "删除服务 {{name}}",
+      "ping_instance": "Ping 实例 {{hostname}}",
+      "reload_instance": "重新加载实例 {{hostname}}",
+      "reset_default": "重置为默认值",
+      "reset_global": "重置为全局值",
+      "run_job": "运行任务 {{job}}",
+      "stop_instance": "停止实例 {{hostname}}",
+      "unban_ip": "解禁 {{ip}}"
+    },
+    "cannot_delete_original_ban": "无法删除原始封禁条目。",
+    "cannot_remove_disabled": "无法移除，因为一个或多个设置被禁用。",
+    "certificate_priority": "选择是优先使用文件路径中的证书还是 base64 数据中的证书。",
+    "challenge_type": "用于 Let's Encrypt 验证的质询类型（http 或 dns）。",
+    "config_type": {
+      "crs_plugins_after": "在加载 OWASP 核心规则集插件后应用的配置。",
+      "crs_plugins_before": "在加载 OWASP 核心规则集插件前应用的配置。",
+      "default_server_http": "Nginx 服务器级别的配置，特别用于“默认服务器”块，当客户端请求与任何配置的服务器名称不匹配时使用。",
+      "http": "全局应用于 Nginx HTTP 级别的配置。",
+      "modsec": "在加载 OWASP 核心规则集后应用的 ModSecurity 配置，或者在未加载核心规则集时使用。",
+      "modsec_crs": "在加载 OWASP 核心规则集前应用的 ModSecurity 配置。",
+      "server_http": "应用于 Nginx HTTP 服务器（虚拟主机）级别的配置。",
+      "server_stream": "应用于 Nginx 流服务器级别的配置。",
+      "stream": "全局应用于 Nginx 流级别的配置。"
+    },
+    "confirm_password_match": "确认密码必须与上面输入的密码匹配。",
+    "copied": "已复制！",
+    "copy_https_only": "复制功能仅在 HTTPS 下可用。",
+    "custom_ssl_cert_data": "自定义 SSL 证书数据（PEM 格式或 Base64 编码）。",
+    "custom_ssl_cert_path": "自定义 SSL 证书文件的路径。",
+    "custom_ssl_key_data": "自定义 SSL 私钥数据（PEM 格式或 Base64 编码）。",
+    "custom_ssl_key_path": "自定义 SSL 私钥文件的路径。",
+    "disabled_by_method": "已禁用：通过方法 '{{method}}' 管理。",
+    "disabled_db_readonly": "已禁用：数据库处于只读模式。",
+    "disabled_draft": "已禁用：服务处于草稿模式。",
+    "disabled_readonly": "已禁用：只读模式已激活。",
+    "dns_check_url": "如果页面显示 'ok'，则服务器名称很可能可用。",
+    "dns_credential_items": "DNS 提供商的凭证，用于 DNS 质询（例如 'cloudflare_api_token=123456'）。所需格式取决于提供商。",
+    "dns_credentials_dns_only": "凭证仅适用于 DNS 质询。",
+    "dns_propagation": "在 DNS 质询期间等待 DNS 更改传播的时间（秒）。",
+    "dns_propagation_dns_only": "DNS 传播延迟仅适用于 DNS 质询。",
+    "dns_provider": "用于 Let's Encrypt DNS 质询的 DNS 提供商。",
+    "dns_provider_dns_only": "DNS 提供商选择仅适用于 DNS 质询。",
+    "download_file": "下载文件",
+    "draft_toggle_disabled": "草稿模式只能在通过 UI 创建的服务上切换。",
+    "email_lets_encrypt": "用于向 Let's Encrypt 注册以进行证书管理和通知的电子邮件地址。",
+    "email_length": "电子邮件必须在 1 到 256 个字符之间。",
+    "global_config_source": "值继承自全局配置。",
+    "instance_not_up": "实例 {{hostname}} 当前未响应 ('up')。",
+    "latest_version_installed": "您正在运行最新版本。",
+    "license_key": "您的 BunkerWeb PRO 许可证密钥。",
+    "link": {
+      "access_plugin_page": "访问 {{name}} 页面",
+      "access_service": "访问服务 {{name}}",
+      "clone_config": "克隆自定义配置 {{name}}",
+      "clone_service": "克隆服务 {{name}}",
+      "download_file": "下载 {{filename}}",
+      "edit_config": "编辑自定义配置 {{name}}",
+      "edit_service": "编辑服务 {{service}}",
+      "export_service": "导出服务 {{name}} 配置",
+      "view_config": "查看自定义配置 {{name}}",
+      "view_file": "查看 {{filename}}",
+      "view_service": "查看服务 {{name}}"
+    },
+    "modal": {
+      "title": {
+        "full_url": "完整 URL"
+      }
+    },
+    "multisite_setting": "这是一个多站点设置，如果全局定义，将影响多个服务。",
+    "new_version_available": "有新版本可用！",
+    "no_cache": "未找到此任务的缓存文件。",
+    "no_history": "未找到此任务的执行历史记录。",
+    "no_log_files": "无可用日志文件。",
+    "no_page_available": "此插件无专用页面。",
+    "password_requirements": "密码必须至少包含 8 个字符，并包括 1 个大写字母、1 个数字和 1 个特殊字符。",
+    "pro_feature": "这是一个 PRO 功能。",
+    "readonly_db_action_disabled": "已禁用：数据库处于只读模式。",
+    "readonly_user_action_disabled": "已禁用：您的帐户是只读的，操作 '{{action}}' 已禁用。",
+    "remove_ban_entry": "从列表中移除此封禁条目。",
+    "reset_template_settings": "将当前模板视图中的所有设置重置为其默认值。",
+    "server_name": "此服务的主域名或服务器名称。",
+    "stream_support": {
+      "no": "不支持 STREAM 模式。",
+      "partial": "部分支持 STREAM 模式。",
+      "yes": "支持 STREAM 模式。"
+    },
+    "table": {
+      "bans": {
+        "actions": "此封禁可用的操作",
+        "country": "被封禁 IP 地址的国家/地区",
+        "date": "封禁创建的日期和时间",
+        "details": "显示封禁详情",
+        "end_date": "封禁到期的日期和时间",
+        "ip_address": "被封禁的 IP 地址",
+        "reason": "封禁的原因",
+        "scope": "封禁的范围（全局或特定服务）",
+        "select_all": "选择所有封禁",
+        "service": "封禁来源的服务（如果范围是特定服务）",
+        "time_left": "封禁到期前的剩余时间"
+      },
+      "cache": {
+        "actions": "此缓存文件可用的操作",
+        "checksum": "缓存文件的校验和",
+        "details": "显示缓存文件详情",
+        "file_name": "缓存文件的名称",
+        "job_name": "生成此缓存文件的任务",
+        "last_update": "缓存文件最后更新的日期和时间",
+        "plugin": "与生成此缓存文件的任务关联的插件",
+        "service": "与此缓存文件关联的服务（或全局）"
+      },
+      "configs": {
+        "actions": "此自定义配置可用的操作",
+        "checksum": "自定义配置内容的校验和",
+        "details": "显示自定义配置详情",
+        "method": "自定义配置的创建方法（例如，ui, file）",
+        "name": "自定义配置的名称",
+        "select_all": "选择所有自定义配置",
+        "service": "与自定义配置关联的服务（或全局）",
+        "template": "指示自定义配置是否源自模板",
+        "type": "自定义配置的类型或上下文（例如，HTTP, MODSEC）"
+      },
+      "instances": {
+        "actions": "此实例可用的操作",
+        "created": "实例首次注册的日期和时间",
+        "details": "显示实例详情",
+        "health": "实例的健康状况（运行中、已停止、加载中）",
+        "hostname": "实例的主机名或 URL",
+        "last_seen": "实例最后出现的日期和时间",
+        "method": "实例的创建方法（例如，ui, autoconf）",
+        "name": "用户定义或自动生成的实例名称",
+        "select_all": "选择所有实例",
+        "type": "实例的类型（例如，容器、静态）"
+      },
+      "jobs": {
+        "actions": "此任务可用的操作",
+        "async": "指示任务是否异步运行",
+        "details": "显示任务详情",
+        "interval": "任务的执行频率",
+        "last_run": "上次任务执行的状态（成功/失败）",
+        "name": "任务的名称",
+        "plugin": "与任务关联的插件",
+        "reload": "指示任务是否触发 BunkerWeb 重新加载",
+        "select_all": "选择所有任务"
+      },
+      "plugins": {
+        "actions": "此插件可用的操作",
+        "description": "插件的描述",
+        "details": "显示插件详情",
+        "id": "插件的唯一标识符",
+        "method": "插件的创建方法（例如，ui, core）",
+        "name": "插件的名称",
+        "select_all": "选择所有插件",
+        "stream": "指示插件是否支持流模式",
+        "type": "插件的类型（核心、外部、Pro、UI）",
+        "version": "插件的版本"
+      },
+      "reports": {
+        "country": "与报告的 IP 地址关联的国家/地区",
+        "data": "与报告相关的附加数据",
+        "date": "报告生成的日期和时间",
+        "details": "显示报告详情",
+        "ip_address": "触发报告的 IP 地址",
+        "method": "报告的请求的 HTTP 方法",
+        "reason": "生成报告的原因",
+        "security_mode": "生成报告时活动的安全模式",
+        "select_all": "选择所有报告",
+        "server_name": "生成报告的服务器名称 (vhost)",
+        "status_code": "为报告的请求返回的 HTTP 状态码",
+        "url": "报告的请求中针对的 URL",
+        "user_agent": "报告的请求中的 User-Agent 字符串"
+      },
+      "select_rows_for_action": "请选择一行或多行以执行操作。",
+      "services": {
+        "actions": "此服务可用的操作",
+        "created": "服务创建的日期和时间",
+        "details": "显示服务详情",
+        "last_update": "服务最后更新的日期和时间",
+        "method": "服务的创建方法（例如，ui, file）",
+        "name": "服务的名称",
+        "select_all": "选择所有服务",
+        "type": "服务类型（在线/草稿）"
+      }
+    },
+    "ui_host": "将通过反向代理提供 BunkerWeb UI 的主机名或 IP 地址。",
+    "ui_url": "通过反向代理访问 BunkerWeb UI 的 URL 路径。",
+    "ui_url_security": "使用非标准、难以猜测的 URL 路径可增强安全性。",
+    "use_custom_ssl": "是否使用自定义 SSL 证书而不是 Let's Encrypt。",
+    "use_lets_encrypt_staging": "是否使用 Let's Encrypt 的 staging 环境进行测试（生成不受信任的证书）。",
+    "username_length": "用户名必须在 1 到 256 个字符之间。",
+    "view_full_url": "点击查看完整 URL",
+    "wildcard_certificates": "生成通配符证书 (*.domain.com)。需要 DNS 质询。",
+    "wildcard_dns_only": "通配符证书仅支持 DNS 质询类型。"
+  },
+  "totp": {
+    "prompt": "请输入您的 TOTP 代码。"
+  },
+  "validation": {
+    "default_field_name": "此字段",
+    "invalid_date": "无效日期",
+    "ip_global_duplicate": "此 IP 地址已被全局封禁。",
+    "ip_invalid": "IP 地址格式无效。",
+    "ip_required": "需要 IP 地址。",
+    "ip_service_duplicate": "此 IP 地址已针对所选服务 ({{service}}) 被封禁。",
+    "pattern": "请输入有效的 {{field}} 值。",
+    "required": "{{field}} 是必填项。",
+    "service_required_for_ban": "对于特定于服务的封禁，必须选择一个服务。"
+  }
+}

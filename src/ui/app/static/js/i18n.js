@@ -93,6 +93,12 @@ function updateLanguageSelector(lang) {
     ur: "اردو",
   };
   $("#current-lang-text").text(langNames[alpha2] || "English");
+
+  // Set active class on the correct language option
+  $("#language-dropdown-menu .lang-option").removeClass("active");
+  $(
+    "#language-dropdown-menu .lang-option[data-lang='" + alpha2 + "']",
+  ).addClass("active");
 }
 
 // Function to save language preference to the server
