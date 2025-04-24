@@ -1054,7 +1054,7 @@ We welcome contributions to improve or add new locale files!
 
 **How to contribute a translation:**
 
-1. Edit the `src/ui/app/lang_config.py` file to add your language (code, name, flag).
+1. Edit the `src/ui/app/lang_config.py` file to add your language (code, name, flag, english_name).
 2. Copy `en.json` as a template in `src/ui/app/static/locales/`, rename it to your language code (e.g., `de.json` for German).
 3. Translate the values in your new file.
 4. Update the table in `locales/README.md` to add your language and indicate who created/reviewed it.

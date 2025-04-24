@@ -1,11 +1,10 @@
-{# Use supported_languages from context, provided by backend #}
 {% set current_lang = (language or 'en')|lower %}
-<!-- Language dropdown with flags -->
-<div class="dropdown">
+<div class="dropdown btn-group">
     <button class="btn btn-sm btn-outline-secondary dropdown-toggle d-flex align-items-center"
             type="button"
             id="language-dropdown"
             data-bs-toggle="dropdown"
+            aria-haspopup="true"
             aria-expanded="false">
         {% set current = (supported_languages | selectattr('code', 'equalto', current_lang) | list | first) or supported_languages[0] %}
         <img id="current-lang-flag"
@@ -16,12 +15,21 @@
              loading="lazy" />
         <span id="current-lang-text">{{ current.name }}</span>
     </button>
-    <ul class="dropdown-menu dropdown-menu-end"
+    <ul class="dropdown-menu nav-pills max-vh-60 overflow-auto pt-0"
         aria-labelledby="language-dropdown"
-        id="language-dropdown-menu">
+        id="language-dropdown-menu"
+        role="menu">
+        <div class="input-group input-group-merge mb-2">
+            <span class="input-group-text p-2 border-0 border-primary border-bottom shadow-none"><i class="bx fs-6 bx-search"></i></span>
+            <input id="language-search"
+                   type="text"
+                   class="form-control border-0 border-primary border-bottom shadow-none"
+                   placeholder="Search..."
+                   aria-label="Search...">
+        </div>
         {% for lang in supported_languages %}
-            <li>
-                <a class="dropdown-item d-flex align-items-center lang-option {% if current_lang == lang.code %}active{% endif %}"
+            <li class="nav-item" data-lang="{{ lang.code }}">
+                <a class="dropdown-item lang-option d-flex align-items-center{% if current_lang == lang.code %} active{% endif %}"
                    href="#"
                    data-lang="{{ lang.code }}">
                     <img src="{{ url_for('static', filename='img/flags/' + lang.flag) }}"

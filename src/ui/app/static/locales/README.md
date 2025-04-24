@@ -32,7 +32,7 @@ This directory contains translation files for the BunkerWeb UI. Below is a summa
 We welcome contributions to improve or add new locale files!
 
 ### Adding a New Locale
-1. Edit `src/ui/app/lang_config.py` to add your language (code, name, flag). This is the single source of truth for supported languages.
+1. Edit `src/ui/app/lang_config.py` to add your language (code, name, flag, english_name). This is the single source of truth for supported languages.
 2. Copy `en.json` as a template and rename it to the target language code (e.g., `de.json` for German).
 3. Translate the values for each key. You may use manual translation or an AI tool, but please indicate which method you used in the table above.
 4. Add a new row to the table above, specifying the file, creator, and reviewer.

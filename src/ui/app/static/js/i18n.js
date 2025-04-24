@@ -69,8 +69,12 @@ const supportedLngs = supportedLanguages.map((l) => l.code);
 const flagCodeMap = Object.fromEntries(
   supportedLanguages.map((l) => [l.code, l.flag.replace(".svg", "")]),
 );
+// Update langNames and add langEnglishNames for search
 const langNames = Object.fromEntries(
   supportedLanguages.map((l) => [l.code, l.name]),
+);
+const langEnglishNames = Object.fromEntries(
+  supportedLanguages.map((l) => [l.code, l.english_name || l.name]),
 );
 
 // Update the language selector dropdown to show current language
@@ -299,3 +303,34 @@ $(document).on(
 );
 
 $(document).on("click", ".toggle-filters", updateFilterTranslations);
+
+// Language selector search logic
+$(document).on("input", "#language-search", function () {
+  const searchValue = $(this).val().toLowerCase().trim();
+  let visibleItems = 0;
+  $("#language-dropdown-menu li.nav-item").each(function () {
+    const $item = $(this);
+    const langCode = $item.data("lang");
+    const englishName = langEnglishNames[langCode]
+      ? langEnglishNames[langCode].toLowerCase()
+      : "";
+    const localizedName = langNames[langCode]
+      ? langNames[langCode].toLowerCase()
+      : "";
+    const matches =
+      englishName.includes(searchValue) || localizedName.includes(searchValue);
+    $item.toggle(matches);
+    if (matches) visibleItems++;
+  });
+  if (visibleItems === 0) {
+    if ($("#language-dropdown-menu .no-language-items").length === 0) {
+      $("#language-dropdown-menu").append(
+        `<li class="no-language-items dropdown-item text-muted">${i18next.t(
+          "status.no_item",
+        )}</li>`,
+      );
+    }
+  } else {
+    $("#language-dropdown-menu .no-language-items").remove();
+  }
+});
