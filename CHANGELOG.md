@@ -14,6 +14,7 @@
 - [UI] Update time formatting in requests chart to use 12-hour format in home page
 - [UI] Introduce multi‑language support in the web UI: `ar`, `bn`, `en`, `es`, `fr`, `hi`, `pt`, `ru`, `ur`, `zh`, `de`, `it` — covering the world’s top 10 and Europe’s top 5 languages.
 - [UI] Refactor TOTP Pretty key generation to avoid separating the parts with a `-` character (this was causing issues with some QR code readers)
+- [UI] Refactor bans management to process the data on the serverSide like done with the reports
 - [UI] Update apexcharts.js to version 4.6.0
 - [UI] Update ace editor to version 1.40.1
 - [UI] Update DOMPurify to version 3.2.5

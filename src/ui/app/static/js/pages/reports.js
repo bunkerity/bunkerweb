@@ -551,15 +551,18 @@ $(document).ready(function () {
       waitForI18next(resolve);
     }).then(() => {
       const dt = initializeDataTable(reports_config);
-      dt.on("column-visibility.dt", function () {
-        updateHeaderTooltips("#reports thead", headers);
+      dt.on("column-visibility.dt", function (e, settings, column, state) {
+        updateHeaderTooltips(dt.table().header(), headers);
+        $(".tooltip").remove();
       });
       dt.on("draw.dt", function () {
         updateCountryTooltips();
-
+        updateHeaderTooltips(dt.table().header(), headers);
         // Clean up any existing tooltips to prevent memory leaks
         $(".tooltip").remove();
       });
+      // Ensure tooltips are set after initialization
+      updateHeaderTooltips(dt.table().header(), headers);
       $("#reports_wrapper").find(".btn-secondary").removeClass("btn-secondary");
       return dt;
     });
@@ -570,20 +573,27 @@ $(document).ready(function () {
     $(selector)
       .find("th")
       .each((index, element) => {
-        const thText = $(element).text().trim();
-        headers.forEach((header) => {
-          if (thText === header.title) {
-            $(element).attr({
+        const $th = $(element);
+        // Try to get the data-i18n attribute from the header's span
+        const i18nKey =
+          $th.find("[data-i18n]").data("i18n") || $th.data("i18n");
+        if (i18nKey) {
+          const header = headers.find(
+            (h) =>
+              h.i18n ===
+              i18nKey.replace("table.header.", "tooltip.table.reports."),
+          );
+          if (header) {
+            $th.attr({
               "data-bs-toggle": "tooltip",
               "data-bs-placement": "bottom",
               "data-i18n": header.i18n,
               title: header.tooltip,
             });
           }
-        });
+        }
       });
     applyTranslations();
-
     $('[data-bs-toggle="tooltip"]').tooltip("dispose").tooltip();
   }
 

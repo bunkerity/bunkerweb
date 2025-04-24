@@ -8,289 +8,51 @@ $(document).ready(function () {
   var actionLock = false;
   let addBanNumber = 1;
   const banNumber = parseInt($("#bans_number").val());
-  const dataCountries = ($("#countries").val() || "")
-    .split(",")
-    .filter((code) => code && code !== "local");
   const baseFlagsUrl = $("#base_flags_url").val().trim();
   const isReadOnly = $("#is-read-only").val().trim() === "True";
   const userReadOnly = $("#user-read-only").val().trim() === "True";
 
-  const countriesDataNames = {
-    AD: "Andorra",
-    AE: "United Arab Emirates",
-    AF: "Afghanistan",
-    AG: "Antigua and Barbuda",
-    AI: "Anguilla",
-    AL: "Albania",
-    AM: "Armenia",
-    AO: "Angola",
-    AQ: "Antarctica",
-    AR: "Argentina",
-    AS: "American Samoa",
-    AT: "Austria",
-    AU: "Australia",
-    AW: "Aruba",
-    AX: "Åland Islands",
-    AZ: "Azerbaijan",
-    BA: "Bosnia and Herzegovina",
-    BB: "Barbados",
-    BD: "Bangladesh",
-    BE: "Belgium",
-    BF: "Burkina Faso",
-    BG: "Bulgaria",
-    BH: "Bahrain",
-    BI: "Burundi",
-    BJ: "Benin",
-    BL: "Saint Barthélemy",
-    BM: "Bermuda",
-    BN: "Brunei Darussalam",
-    BO: "Bolivia, Plurinational State of",
-    BQ: "Caribbean Netherlands",
-    BR: "Brazil",
-    BS: "Bahamas",
-    BT: "Bhutan",
-    BV: "Bouvet Island",
-    BW: "Botswana",
-    BY: "Belarus",
-    BZ: "Belize",
-    CA: "Canada",
-    CC: "Cocos (Keeling) Islands",
-    CD: "Congo, the Democratic Republic of the",
-    CF: "Central African Republic",
-    CG: "Republic of the Congo",
-    CH: "Switzerland",
-    CI: "Côte d'Ivoire",
-    CK: "Cook Islands",
-    CL: "Chile",
-    CM: "Cameroon",
-    CN: "China (People's Republic of China)",
-    CO: "Colombia",
-    CR: "Costa Rica",
-    CU: "Cuba",
-    CV: "Cape Verde",
-    CW: "Curaçao",
-    CX: "Christmas Island",
-    CY: "Cyprus",
-    CZ: "Czech Republic",
-    DE: "Germany",
-    DJ: "Djibouti",
-    DK: "Denmark",
-    DM: "Dominica",
-    DO: "Dominican Republic",
-    DZ: "Algeria",
-    EC: "Ecuador",
-    EE: "Estonia",
-    EG: "Egypt",
-    EH: "Western Sahara",
-    ER: "Eritrea",
-    ES: "Spain",
-    ET: "Ethiopia",
-    EU: "Europe",
-    FI: "Finland",
-    FJ: "Fiji",
-    FK: "Falkland Islands (Malvinas)",
-    FM: "Micronesia, Federated States of",
-    FO: "Faroe Islands",
-    FR: "France",
-    GA: "Gabon",
-    GB: "United Kingdom",
-    GD: "Grenada",
-    GE: "Georgia",
-    GF: "French Guiana",
-    GG: "Guernsey",
-    GH: "Ghana",
-    GI: "Gibraltar",
-    GL: "Greenland",
-    GM: "Gambia",
-    GN: "Guinea",
-    GP: "Guadeloupe",
-    GQ: "Equatorial Guinea",
-    GR: "Greece",
-    GS: "South Georgia and the South Sandwich Islands",
-    GT: "Guatemala",
-    GU: "Guam",
-    GW: "Guinea-Bissau",
-    GY: "Guyana",
-    HK: "Hong Kong",
-    HM: "Heard Island and McDonald Islands",
-    HN: "Honduras",
-    HR: "Croatia",
-    HT: "Haiti",
-    HU: "Hungary",
-    ID: "Indonesia",
-    IE: "Ireland",
-    IL: "Israel",
-    IM: "Isle of Man",
-    IN: "India",
-    IO: "British Indian Ocean Territory",
-    IQ: "Iraq",
-    IR: "Iran, Islamic Republic of",
-    IS: "Iceland",
-    IT: "Italy",
-    JE: "Jersey",
-    JM: "Jamaica",
-    JO: "Jordan",
-    JP: "Japan",
-    KE: "Kenya",
-    KG: "Kyrgyzstan",
-    KH: "Cambodia",
-    KI: "Kiribati",
-    KM: "Comoros",
-    KN: "Saint Kitts and Nevis",
-    KP: "Korea, Democratic People's Republic of",
-    KR: "Korea, Republic of",
-    KW: "Kuwait",
-    KY: "Cayman Islands",
-    KZ: "Kazakhstan",
-    LA: "Laos (Lao People's Democratic Republic)",
-    LB: "Lebanon",
-    LC: "Saint Lucia",
-    LI: "Liechtenstein",
-    LK: "Sri Lanka",
-    LR: "Liberia",
-    LS: "Lesotho",
-    LT: "Lithuania",
-    LU: "Luxembourg",
-    LV: "Latvia",
-    LY: "Libya",
-    MA: "Morocco",
-    MC: "Monaco",
-    MD: "Moldova, Republic of",
-    ME: "Montenegro",
-    MF: "Saint Martin",
-    MG: "Madagascar",
-    MH: "Marshall Islands",
-    MK: "North Macedonia",
-    ML: "Mali",
-    MM: "Myanmar",
-    MN: "Mongolia",
-    MO: "Macao",
-    MP: "Northern Mariana Islands",
-    MQ: "Martinique",
-    MR: "Mauritania",
-    MS: "Montserrat",
-    MT: "Malta",
-    MU: "Mauritius",
-    MV: "Maldives",
-    MW: "Malawi",
-    MX: "Mexico",
-    MY: "Malaysia",
-    MZ: "Mozambique",
-    NA: "Namibia",
-    NC: "New Caledonia",
-    NE: "Niger",
-    NF: "Norfolk Island",
-    NG: "Nigeria",
-    NI: "Nicaragua",
-    NL: "Netherlands",
-    NO: "Norway",
-    NP: "Nepal",
-    NR: "Nauru",
-    NU: "Niue",
-    NZ: "New Zealand",
-    OM: "Oman",
-    PA: "Panama",
-    PE: "Peru",
-    PF: "French Polynesia",
-    PG: "Papua New Guinea",
-    PH: "Philippines",
-    PK: "Pakistan",
-    PL: "Poland",
-    PM: "Saint Pierre and Miquelon",
-    PN: "Pitcairn",
-    PR: "Puerto Rico",
-    PS: "Palestine",
-    PT: "Portugal",
-    PW: "Palau",
-    PY: "Paraguay",
-    QA: "Qatar",
-    RE: "Réunion",
-    RO: "Romania",
-    RS: "Serbia",
-    RU: "Russian Federation",
-    RW: "Rwanda",
-    SA: "Saudi Arabia",
-    SB: "Solomon Islands",
-    SC: "Seychelles",
-    SD: "Sudan",
-    SE: "Sweden",
-    SG: "Singapore",
-    SH: "Saint Helena, Ascension and Tristan da Cunha",
-    SI: "Slovenia",
-    SJ: "Svalbard and Jan Mayen Islands",
-    SK: "Slovakia",
-    SL: "Sierra Leone",
-    SM: "San Marino",
-    SN: "Senegal",
-    SO: "Somalia",
-    SR: "Suriname",
-    SS: "South Sudan",
-    ST: "Sao Tome and Principe",
-    SV: "El Salvador",
-    SX: "Sint Maarten (Dutch part)",
-    SY: "Syrian Arab Republic",
-    SZ: "Swaziland",
-    TC: "Turks and Caicos Islands",
-    TD: "Chad",
-    TF: "French Southern Territories",
-    TG: "Togo",
-    TH: "Thailand",
-    TJ: "Tajikistan",
-    TK: "Tokelau",
-    TL: "Timor-Leste",
-    TM: "Turkmenistan",
-    TN: "Tunisia",
-    TO: "Tonga",
-    TR: "Turkey",
-    TT: "Trinidad and Tobago",
-    TV: "Tuvalu",
-    TW: "Taiwan (Republic of China)",
-    TZ: "Tanzania, United Republic of",
-    UA: "Ukraine",
-    UG: "Uganda",
-    UM: "US Minor Outlying Islands",
-    US: "United States",
-    UY: "Uruguay",
-    UZ: "Uzbekistan",
-    VA: "Holy See (Vatican City State)",
-    VC: "Saint Vincent and the Grenadines",
-    VE: "Venezuela, Bolivarian Republic of",
-    VG: "Virgin Islands, British",
-    VI: "Virgin Islands, U.S.",
-    VN: "Vietnam",
-    VU: "Vanuatu",
-    WF: "Wallis and Futuna Islands",
-    WS: "Samoa",
-    XK: "Kosovo",
-    YE: "Yemen",
-    YT: "Mayotte",
-    ZA: "South Africa",
-    ZM: "Zambia",
-    ZW: "Zimbabwe",
-  };
-
-  // Filter countriesDataNames to include only necessary countries
-  const filteredCountriesDataNames = dataCountries.reduce((obj, code) => {
-    if (countriesDataNames[code]) {
-      obj[code] = countriesDataNames[code];
-    }
-    return obj;
-  }, {});
-
-  const countriesSearchPanesOptions = [
+  const headers = [
     {
-      label: `<img src="${baseFlagsUrl}/zz.svg" class="border border-1 p-0 me-1" height="17" loading="lazy" />&nbsp;－&nbsp;<span data-i18n="country.not_applicable">${t(
-        "country.not_applicable",
-        "N/A",
-      )}</span>`,
-      value: (rowData) => rowData[4].includes('data-country="unknown"'),
+      title: "Date",
+      tooltip: "The date and time when the Ban was created",
+      i18n: "tooltip.table.bans.date",
     },
-    ...Object.entries(filteredCountriesDataNames).map(
-      ([code, fallbackName]) => ({
-        label: `<img src="${baseFlagsUrl}/${code.toLowerCase()}.svg" class="border border-1 p-0 me-1" height="17" loading="lazy" />&nbsp;－&nbsp;<span data-i18n="country.${code}">${code}</span>`,
-        value: (rowData) => rowData[4].includes(`data-country="${code}"`),
-      }),
-    ),
+    {
+      title: "IP Address",
+      tooltip: "The banned IP address",
+      i18n: "tooltip.table.bans.ip_address",
+    },
+    {
+      title: "Country",
+      tooltip: "The banned IP country",
+      i18n: "tooltip.table.bans.country",
+    },
+    {
+      title: "Reason",
+      tooltip: "The reason why the Report was created",
+      i18n: "tooltip.table.bans.reason",
+    },
+    {
+      title: "Scope",
+      tooltip: "The scope of the ban (global or service-specific)",
+      i18n: "tooltip.table.bans.scope",
+    },
+    {
+      title: "Service",
+      tooltip: "The service that created the ban",
+      i18n: "tooltip.table.bans.service",
+    },
+    {
+      title: "End date",
+      tooltip: "The end date of the Ban",
+      i18n: "tooltip.table.bans.end_date",
+    },
+    {
+      title: "Time left",
+      tooltip: "The time left until the Ban expires",
+      i18n: "tooltip.table.bans.time_left",
+    },
   ];
 
   // Batch update tooltips
@@ -303,7 +65,7 @@ $(document).ready(function () {
         countryCode === "unknown"
           ? "country.not_applicable"
           : `country.${countryCode}`,
-        countriesDataNames[countryCode],
+        "Unknown",
       );
       if (countryName && countryName !== "country.not_applicable") {
         $elem.attr("data-bs-original-title", countryName);
@@ -483,7 +245,7 @@ $(document).ready(function () {
         viewTotal: true,
         cascadePanes: true,
         collapse: false,
-        columns: [2, 4, 7, 8],
+        columns: [2, 4, 6, 7, 8],
       },
     },
     topStart: {},
@@ -491,29 +253,22 @@ $(document).ready(function () {
       search: true,
       buttons: [
         {
+          extend: "auto_refresh",
+          className: "btn btn-sm btn-outline-primary d-flex align-items-center",
+        },
+        {
           extend: "toggle_filters",
           className: "btn btn-sm btn-outline-primary toggle-filters",
         },
       ],
     },
     bottomStart: {
+      pageLength: {
+        menu: [10, 25, 50, 100, { label: "All", value: -1 }],
+      },
       info: true,
     },
-    bottomEnd: {},
   };
-
-  if (banNumber > 10) {
-    const menu = [10];
-    if (banNumber > 25) menu.push(25);
-    if (banNumber > 50) menu.push(50);
-    if (banNumber > 100) menu.push(100);
-    menu.push({ label: t("datatable.length_all", "All"), value: -1 }); // Translate "All"
-    layout.bottomStart = {
-      pageLength: { menu: menu },
-      info: true,
-    };
-    layout.bottomEnd.paging = true;
-  }
 
   layout.topStart.buttons = [
     { extend: "add_ban" },
@@ -526,20 +281,15 @@ $(document).ready(function () {
       )}</span>`,
       className: "btn btn-sm btn-outline-primary rounded-start",
       columnText: function (dt, idx, title) {
-        const headerCell = dt.column(idx).header(); // Get header cell DOM element
+        const headerCell = dt.column(idx).header();
         const $header = $(headerCell);
-        // Find the element with data-i18n (likely a span inside the th)
         const $translatableElement = $header.find("[data-i18n]");
         let i18nKey = $translatableElement.data("i18n");
-        let translatedTitle = title; // Use original title as fallback
-
+        let translatedTitle = title;
         if (i18nKey) {
-          translatedTitle = t(i18nKey, title); // Pass original title as defaultValue
+          translatedTitle = t(i18nKey, title);
         } else {
-          translatedTitle = $header.text().trim() || title; // Use text content or DT title
-          console.warn(
-            `ColVis: No data-i18n key found for column index ${idx}, using header text or title: '${translatedTitle}'`,
-          );
+          translatedTitle = $header.text().trim() || title;
         }
         return `${idx + 1}. <span data-i18n="${
           i18nKey || ""
@@ -604,6 +354,45 @@ $(document).ready(function () {
     },
   ];
 
+  let autoRefresh = false;
+  let autoRefreshInterval = null;
+  const sessionAutoRefresh = sessionStorage.getItem("bansAutoRefresh");
+
+  function toggleAutoRefresh() {
+    autoRefresh = !autoRefresh;
+    sessionStorage.setItem("bansAutoRefresh", autoRefresh);
+    if (autoRefresh) {
+      $(".bx-loader")
+        .addClass("bx-spin")
+        .closest(".btn")
+        .removeClass("btn-outline-primary")
+        .addClass("btn-primary");
+      if (autoRefreshInterval) clearInterval(autoRefreshInterval);
+      autoRefreshInterval = setInterval(() => {
+        if (!autoRefresh) {
+          clearInterval(autoRefreshInterval);
+          autoRefreshInterval = null;
+        } else {
+          $("#bans").DataTable().ajax.reload(null, false);
+        }
+      }, 10000); // 10 seconds
+    } else {
+      $(".bx-loader")
+        .removeClass("bx-spin")
+        .closest(".btn")
+        .removeClass("btn-primary")
+        .addClass("btn-outline-primary");
+      if (autoRefreshInterval) {
+        clearInterval(autoRefreshInterval);
+        autoRefreshInterval = null;
+      }
+    }
+  }
+
+  if (sessionAutoRefresh === "true") {
+    toggleAutoRefresh();
+  }
+
   $("#modal-unban-ips").on("hidden.bs.modal", function () {
     $("#selected-ips-unban").empty();
     $("#selected-ips-input-unban").val("");
@@ -645,6 +434,13 @@ $(document).ready(function () {
       });
     });
     return bans;
+  };
+
+  $.fn.dataTable.ext.buttons.auto_refresh = {
+    text: '<span class="bx bx-loader bx-18px lh-1"></span>&nbsp;&nbsp;<span data-i18n="button.auto_refresh">Auto refresh</span>',
+    action: (e, dt, node, config) => {
+      toggleAutoRefresh();
+    },
   };
 
   // Custom Button Definitions
@@ -727,49 +523,36 @@ $(document).ready(function () {
           searchPanes: {
             show: true,
             combiner: "or",
-            options: countriesSearchPanesOptions,
             header: t("searchpane.country", "Country"),
           },
           targets: 4,
+          render: function (data) {
+            const countryCode = data.toLowerCase();
+            const tooltipContent = "N/A";
+            return `
+              <span data-bs-toggle="tooltip" data-bs-original-title="${tooltipContent}" data-i18n="country.${
+                countryCode === "unknown"
+                  ? "not_applicable"
+                  : countryCode.toUpperCase()
+              }" data-country="${
+                countryCode === "unknown"
+                  ? "unknown"
+                  : countryCode.toUpperCase()
+              }">
+                <img src="${baseFlagsUrl}/${
+                  countryCode === "unknown" ? "zz" : countryCode
+                }.svg"
+                     class="border border-1 p-0 me-1"
+                     height="17"
+                     loading="lazy" />
+                &nbsp;－&nbsp;${countryCode === "unknown" ? "N/A" : data}
+              </span>`;
+          },
         },
         {
           searchPanes: {
             show: true,
-            header: t("searchpane.start_date", "Start Date"),
-            options: [
-              {
-                label: `<span data-i18n="searchpane.last_24h">${t(
-                  "searchpane.last_24h",
-                  "Last 24 hours",
-                )}</span>`,
-                value: (rowData) =>
-                  new Date() - new Date(rowData[2]) < 86400000,
-              },
-              {
-                label: `<span data-i18n="searchpane.last_7d">${t(
-                  "searchpane.last_7d",
-                  "Last 7 days",
-                )}</span>`,
-                value: (rowData) =>
-                  new Date() - new Date(rowData[2]) < 604800000,
-              },
-              {
-                label: `<span data-i18n="searchpane.last_30d">${t(
-                  "searchpane.last_30d",
-                  "Last 30 days",
-                )}</span>`,
-                value: (rowData) =>
-                  new Date() - new Date(rowData[2]) < 2592000000,
-              },
-              {
-                label: `<span data-i18n="searchpane.older_30d">${t(
-                  "searchpane.older_30d",
-                  "More than 30 days",
-                )}</span>`,
-                value: (rowData) =>
-                  new Date() - new Date(rowData[2]) >= 2592000000,
-              },
-            ],
+            header: t("searchpane.date", "Date"),
             combiner: "or",
             orderable: false,
           },
@@ -779,26 +562,29 @@ $(document).ready(function () {
           searchPanes: {
             show: true,
             header: t("searchpane.scope", "Scope"),
-            options: [
-              {
-                label: `<i class="bx bx-xs bx-globe"></i> <span data-i18n="scope.global">${t(
-                  "scope.global",
-                  "Global",
-                )}</span>`,
-                value: (rowData) => rowData[6].includes("scope.global"),
-              },
-              {
-                label: `<i class="bx bx-xs bx-server"></i> <span data-i18n="scope.service_specific">${t(
-                  "scope.service_specific",
-                  "Service",
-                )}</span>`,
-                value: (rowData) => rowData[6].includes("scope.service"),
-              },
-            ],
             combiner: "or",
             orderable: false,
           },
           targets: 6,
+          render: function (data, type, row) {
+            if (data === "service") {
+              return `<span class="badge bg-info">
+                <i class="bx bx-server me-1"></i>
+                <span data-i18n="scope.service_specific">${t(
+                  "scope.service_specific",
+                  "Service",
+                )}</span>
+              </span>`;
+            } else {
+              return `<span class="badge bg-primary">
+                <i class="bx bx-globe me-1"></i>
+                <span data-i18n="scope.global">${t(
+                  "scope.global",
+                  "Global",
+                )}</span>
+              </span>`;
+            }
+          },
         },
         {
           searchPanes: {
@@ -806,45 +592,27 @@ $(document).ready(function () {
             header: t("searchpane.service", "Service"),
           },
           targets: 7,
+          render: function (data, type, row) {
+            const scope = row["scope"];
+            const service = data;
+            if (scope === "service") {
+              const serviceLabel =
+                service === "_" || !service
+                  ? t("service.default_server", "default server")
+                  : service;
+              return `<strong>${serviceLabel}</strong>`;
+            } else {
+              return `<span class="text-muted fst-italic" data-i18n="scope.all_services">${t(
+                "scope.all_services",
+                "All services",
+              )}</span>`;
+            }
+          },
         },
         {
           searchPanes: {
             show: true,
             header: t("searchpane.end_date", "End Date"),
-            options: [
-              {
-                label: `<span data-i18n="searchpane.next_24h">${t(
-                  "searchpane.next_24h",
-                  "Next 24 hours",
-                )}</span>`,
-                value: (rowData) =>
-                  new Date(rowData[8]) - new Date() < 86400000,
-              },
-              {
-                label: `<span data-i18n="searchpane.next_7d">${t(
-                  "searchpane.next_7d",
-                  "Next 7 days",
-                )}</span>`,
-                value: (rowData) =>
-                  new Date(rowData[8]) - new Date() < 604800000,
-              },
-              {
-                label: `<span data-i18n="searchpane.next_30d">${t(
-                  "searchpane.next_30d",
-                  "Next 30 days",
-                )}</span>`,
-                value: (rowData) =>
-                  new Date(rowData[8]) - new Date() < 2592000000,
-              },
-              {
-                label: `<span data-i18n="searchpane.future_30d">${t(
-                  "searchpane.future_30d",
-                  "More than 30 days",
-                )}</span>`,
-                value: (rowData) =>
-                  new Date(rowData[8]) - new Date() >= 2592000000,
-              },
-            ],
             combiner: "or",
             orderable: false,
           },
@@ -860,6 +628,68 @@ $(document).ready(function () {
         headerCheckbox: true,
       },
       layout: layout,
+      processing: true,
+      serverSide: true,
+      ajax: {
+        url: `${window.location.pathname}/fetch`,
+        type: "POST",
+        data: function (d) {
+          d.csrf_token = $("#csrf_token").val(); // Add CSRF token if needed
+          return d;
+        },
+        // Add error handling for ajax requests
+        error: function (jqXHR, textStatus, errorThrown) {
+          console.error("DataTables AJAX error:", textStatus, errorThrown);
+          $("#bans").addClass("d-none");
+          $("#bans-waiting")
+            .removeClass("d-none")
+            .text("Error loading bans. Please try refreshing the page.")
+            .addClass("text-danger");
+          // Remove any loading indicators
+          $(".dataTables_processing").hide();
+        },
+      },
+      columns: [
+        {
+          data: null,
+          defaultContent: "",
+          orderable: false,
+          className: "dtr-control",
+        },
+        { data: null, defaultContent: "", orderable: false },
+        {
+          data: "date",
+          title: "<span data-i18n='table.header.date'>Date</span>",
+        },
+        {
+          data: "ip",
+          title: "<span data-i18n='table.header.ip_address'>IP Address</span>",
+        },
+        {
+          data: "country",
+          title: "<span data-i18n='table.header.country'>Country</span>",
+        },
+        {
+          data: "reason",
+          title: "<span data-i18n='table.header.reason'>Reason</span>",
+        },
+        {
+          data: "scope",
+          title: "<span data-i18n='table.header.scope'>Scope</span>",
+        },
+        {
+          data: "service",
+          title: "<span data-i18n='table.header.service'>Service</span>",
+        },
+        {
+          data: "end_date",
+          title: "<span data-i18n='table.header.end_date'>End Date</span>",
+        },
+        {
+          data: "time_left",
+          title: "<span data-i18n='table.header.time_left'>Time Left</span>",
+        },
+      ],
       initComplete: function (settings, json) {
         $("#bans_wrapper .btn-secondary").removeClass("btn-secondary");
         if (isReadOnly) {
@@ -881,6 +711,9 @@ $(document).ready(function () {
         }
         updateCountryTooltips();
       },
+      headerCallback: function (thead) {
+        updateHeaderTooltips(thead, headers);
+      },
     },
   };
 
@@ -897,50 +730,49 @@ $(document).ready(function () {
       waitForI18next(resolve);
     }).then(() => {
       const dt = initializeDataTable(bans_config);
-      dt.on("draw.dt", updateCountryTooltips);
+      dt.on("draw.dt", function () {
+        updateCountryTooltips();
+        updateHeaderTooltips(dt.table().header(), headers);
+        $(".tooltip").remove();
+      });
+      dt.on("column-visibility.dt", function (e, settings, column, state) {
+        updateHeaderTooltips(dt.table().header(), headers);
+        $(".tooltip").remove();
+      });
+      // Ensure tooltips are set after initialization
+      updateHeaderTooltips(dt.table().header(), headers);
       return dt;
     });
   }
 
-  $(document).on("click", ".unban-ip", function () {
-    if (isReadOnly) {
-      alert(
-        t(
-          "alert.readonly_mode",
-          "This action is not allowed in read-only mode.",
-        ),
-      );
-      return;
-    }
-    const $this = $(this);
-    const $row = $this.closest("tr");
-    const $scopeCell = $row.find("td:eq(6)");
-    const $serviceCell = $row.find("td:eq(7)");
-
-    const scopeText =
-      $scopeCell.find("span[data-i18n]").text().trim() ||
-      $scopeCell.text().trim();
-    const serviceText =
-      $serviceCell.find("strong").text().trim() ||
-      $serviceCell.find("span[data-i18n]").text().trim() ||
-      $serviceCell.text().trim();
-
-    const ban_scope =
-      scopeText === t("scope.global", "Global") ? "global" : "service";
-    const service =
-      serviceText === t("scope.all_services", "All services")
-        ? null
-        : serviceText;
-
-    setupUnbanModal([
-      {
-        ip: $this.data("ip"),
-        time_remaining: $this.data("time-left"),
-        ban_scope: ban_scope,
-        service: service,
-      },
-    ]);
-  });
+  // Utility function to manage header tooltips
+  function updateHeaderTooltips(selector, headers) {
+    $(selector)
+      .find("th")
+      .each((index, element) => {
+        const $th = $(element);
+        // Try to get the data-i18n attribute from the header's span
+        const i18nKey =
+          $th.find("[data-i18n]").data("i18n") || $th.data("i18n");
+        if (i18nKey) {
+          const header = headers.find(
+            (h) =>
+              h.i18n ===
+              i18nKey.replace("table.header.", "tooltip.table.bans."),
+          );
+          if (header) {
+            $th.attr({
+              "data-bs-toggle": "tooltip",
+              "data-bs-placement": "bottom",
+              "data-i18n": header.i18n,
+              title: header.tooltip,
+            });
+          }
+        }
+      });
+    applyTranslations();
+    $('[data-bs-toggle="tooltip"]').tooltip("dispose").tooltip();
+  }
 
   $("#add-ban").on("click", function () {
     const originalBan = $("#ban-1");

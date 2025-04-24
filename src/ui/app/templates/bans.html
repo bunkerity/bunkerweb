@@ -3,7 +3,6 @@
     <!-- Content -->
     <div class="card table-responsive text-nowrap p-4 pb-8 min-vh-70">
         {% set base_flags_url = url_for('static', filename='img/flags') %}
-        <input type="hidden" id="bans_number" value="{{ bans|length }}" />
         <input type="hidden" id="base_flags_url" value="{{ base_flags_url }}" />
         <textarea type="hidden"
                   id="columns_preferences_defaults"
@@ -18,145 +17,10 @@
            data-i18n="status.loading_bans">Loading bans...</p>
         <table id="bans"
                class="table responsive nowrap position-relative w-100 d-none">
-            <thead>
-                <tr>
-                    <th data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        data-bs-original-title="Show the Bans' details"
-                        data-i18n="tooltip.table.bans.details"></th>
-                    <th data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        data-bs-original-title="Select all Bans"
-                        data-i18n="tooltip.table.bans.select_all"></th>
-                    <th data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        data-bs-original-title="The date and time when the Ban was created"
-                        data-i18n="tooltip.table.bans.date">
-                        <span data-i18n="table.header.date">Date</span>
-                    </th>
-                    <th data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        data-bs-original-title="The banned IP address"
-                        data-i18n="tooltip.table.bans.ip_address">
-                        <span data-i18n="table.header.ip_address">IP</span>
-                    </th>
-                    <th data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        data-bs-original-title="The banned IP country"
-                        data-i18n="tooltip.table.bans.country">
-                        <span data-i18n="table.header.country">Country</span>
-                    </th>
-                    <th data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        data-bs-original-title="The reason why the Report was created"
-                        data-i18n="tooltip.table.bans.reason">
-                        <span data-i18n="table.header.reason">Reason</span>
-                    </th>
-                    <th data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        data-bs-original-title="The scope of the ban (global or service-specific)"
-                        data-i18n="tooltip.table.bans.scope">
-                        <span data-i18n="table.header.scope">Scope</span>
-                    </th>
-                    <th data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        data-bs-original-title="The service that created the ban"
-                        data-i18n="tooltip.table.bans.service">
-                        <span data-i18n="table.header.service">Service</span>
-                    </th>
-                    <th data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        data-bs-original-title="The end date of the Ban"
-                        data-i18n="tooltip.table.bans.end_date">
-                        <span data-i18n="table.header.end_date">End date</span>
-                    </th>
-                    <th data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        data-bs-original-title="The time left until the Ban expires"
-                        data-i18n="tooltip.table.bans.time_left">
-                        <span data-i18n="table.header.time_left">Time left</span>
-                    </th>
-                    <th data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        data-bs-original-title="The actions that can be performed on the Ban"
-                        data-i18n="tooltip.table.bans.actions">
-                        <span data-i18n="table.header.actions">Actions</span>
-                    </th>
-                </tr>
-            </thead>
-            <tbody>
-                {% set ns = namespace(countries=[]) %}
-                {% for ban in bans %}
-                    {% if ban.get("country", "local") and ban.get('country', 'local') not in ns.countries %}
-                        {% set ns.countries = ns.countries + [ban.get('country', 'local')] %}
-                    {% endif %}
-                    <tr>
-                        <td></td>
-                        <td></td>
-                        <td class="ban-start-date">{{ ban["start_date"] }}</td>
-                        <td>{{ ban["ip"] }}</td>
-                        <td>
-                            {% set country_code = ban.get('country', 'local') %}
-                            {% set is_unknown = country_code in ('local', 'unknown') %}
-                            <div class="d-flex align-items-center"
-                                 data-bs-toggle="tooltip"
-                                 data-bs-placement="top"
-                                 data-bs-original-title="{{ 'N/A' if is_unknown else country_code }}"
-                                 data-i18n="{{ 'country.not_applicable' if is_unknown else 'country.' ~ country_code }}"
-                                 data-country="{{ country_code if country_code else 'unknown' }}">
-                                <img src="{{ base_flags_url }}/{{ 'zz' if is_unknown else country_code|lower }}.svg"
-                                     class="border border-1 p-0 me-1"
-                                     height="17"
-                                     loading="lazy" />
-                                &nbsp;－&nbsp;
-                                {{ 'N/A' if is_unknown else country_code }}
-                            </div>
-                        </td>
-                        <td>{{ ban["reason"] }}</td>
-                        <td>
-                            {% if ban.get('ban_scope', 'global') == 'service' %}
-                                <span class="badge bg-info">
-                                    <i class="bx bx-server me-1"></i><span data-i18n="scope.service_specific">Service</span>
-                                </span>
-                            {% else %}
-                                <span class="badge bg-primary">
-                                    <i class="bx bx-globe me-1"></i><span data-i18n="scope.global">Global</span>
-                                </span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if ban.get('ban_scope', 'global') == 'service' %}
-                                <strong>{{ ban["service"] if ban["service"] != "_" else "default server" }}</strong>
-                            {% else %}
-                                <span class="text-muted fst-italic" data-i18n="scope.all_services">All services</span>
-                            {% endif %}
-                        </td>
-                        <td class="ban-end-date">{{ ban["end_date"] }}</td>
-                        <td>{{ ban["remain"] }}</td>
-                        <td>
-                            <div class="d-flex justify-content-center">
-                                <div data-bs-toggle="tooltip"
-                                     data-bs-placement="bottom"
-                                     data-bs-original-title="{% if is_readonly %}Disabled by readonly{% else %}Unban {{ ban['ip'] }}{% endif %}"
-                                     data-i18n="{% if is_readonly %}tooltip.disabled_readonly{% else %}tooltip.button.unban_ip{% endif %}"
-                                     data-i18n-options='{"ip": "{{ ban['ip'] }}"}'>
-                                    <button type="button"
-                                            data-ip="{{ ban['ip'] }}"
-                                            data-time-left="{{ ban['remain'] }}"
-                                            class="btn btn-outline-danger btn-sm me-1 unban-ip{% if is_readonly %} disabled{% endif %}">
-                                        <i class="bx bxs-buoy bx-xs"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-            <input type="hidden" id="countries" value="{{ ns.countries|join(',') }}" />
-            <span class="position-absolute bottom-0 start-50 translate-middle badge rounded-pill bg-secondary">
-                TZ: <script nonce="{{ script_nonce }}">document.write(Intl.DateTimeFormat().resolvedOptions().timeZone);</script>
-            </span>
         </table>
+        <span class="position-absolute bottom-0 start-50 translate-middle badge rounded-pill bg-secondary">
+            TZ: <script nonce="{{ script_nonce }}">document.write(Intl.DateTimeFormat().resolvedOptions().timeZone);</script>
+        </span>
     </div>
     {% if not is_readonly %}
         <div class="modal modal-xl fade"

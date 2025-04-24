@@ -89,8 +89,7 @@ def reports_fetch():
     filtered_reports = list(filter_by_search_panes(filtered_reports))
     sort_reports(filtered_reports)
 
-    # Pagination
-    paginated_reports = filtered_reports[start : start + length]  # noqa: E203
+    paginated_reports = filtered_reports if length == -1 else filtered_reports[start : start + length]  # noqa: E203
 
     # Format reports for the response
     def format_report(report):
