@@ -800,14 +800,16 @@ $(document).ready(() => {
 
   $(document).on("click", ".show-multiple", function () {
     const currentTextKey =
-      $(this).text().trim() === t("button.show")
-        ? "button.hide"
-        : "button.show";
-    const iconClass = currentTextKey === "button.show" ? "hide" : "show-alt";
+      $(this).text().trim() === t("button.multiple_show")
+        ? "button.multiple_hide"
+        : "button.multiple_show";
+    const iconClass =
+      currentTextKey === "button.multiple_show" ? "hide" : "show-alt";
     $(this).html(
-      `<i class="bx bx-${iconClass} bx-sm"></i> ${t(currentTextKey)}`,
+      `<i class="bx bx-${iconClass} bx-sm"></i>&nbsp;<span data-i18n="${currentTextKey}">${t(
+        currentTextKey,
+      )}</span>`,
     );
-    $(this).attr("data-i18n", currentTextKey);
   });
 
   $(".add-multiple").on("click", function () {
