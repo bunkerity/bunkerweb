@@ -2,6 +2,7 @@
 
 ## v1.6.2-rc2 - ????/??/??
 
+- [BUGFIX] Fix draft services deletion when editing the global config in the web UI
 - [FEATURE] Add the possibility to choose a profile when generating certificates with Let's Encrypt using the `LETS_ENCRYPT_PROFILE` setting (`classic` (default), `tlsserver` for server-only validation, and `shortlived` for reduced 7-day validity) to provide flexibility in certificate configuration based on security requirements
 - [FEATURE] Add the possibility to declare custom certificates and keys data as plaintext as well as base64-encoded data in the `customcert` plugin using the `CUSTOM_SSL_CERT_DATA` and `CUSTOM_SSL_KEY_DATA` settings
 - [FEATURE] Add `IONOS` as a DNS provider in the `letsencrypt` plugin
@@ -12,6 +13,7 @@
 - [UI] Fix LEDNS credential handling in setup wizard and reset button visibility in settings templates
 - [UI] Update time formatting in requests chart to use 12-hour format in home page
 - [UI] Introduce multi‑language support in the web UI: `ar`, `bn`, `en`, `es`, `fr`, `hi`, `pt`, `ru`, `ur`, `zh`, `de`, `it` — covering the world’s top 10 and Europe’s top 5 languages.
+- [UI] Refactor TOTP Pretty key generation to avoid separating the parts with a `-` character (this was causing issues with some QR code readers)
 - [UI] Update apexcharts.js to version 4.6.0
 - [UI] Update ace editor to version 1.40.1
 - [UI] Update DOMPurify to version 3.2.5
