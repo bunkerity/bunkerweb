@@ -96,6 +96,7 @@ class Database:
         self.logger = logger
         self.readonly = False
         self.last_connection_retry = None
+        self.__ignore_regex_check = getenv("IGNORE_REGEX_CHECK", "no").lower() == "yes"
 
         if pool:
             self.logger.warning("The pool parameter is deprecated, it will be removed in the next version")
@@ -408,7 +409,7 @@ class Database:
 
                 if value is not None:
                     try:
-                        if search(db_setting.regex, value) is None:
+                        if not self.__ignore_regex_check and search(db_setting.regex, value) is None:
                             return False, f"not matching regex: {db_setting.regex!r}"
                     except RegexError:
                         return False, f"invalid regex: {db_setting.regex!r}"
@@ -1982,7 +1983,7 @@ class Database:
                         continue
                     value = self._empty_if_none(result.value)
 
-                    if result.setting_id == "SERVER_NAME" and not search(r"^" + escape(result.service_id) + r"( |$)", value):
+                    if result.setting_id == "SERVER_NAME" and search(r"^" + escape(result.service_id) + r"( |$)", value) is None:
                         split = set(value.split(" "))
                         split.discard(result.service_id)
                         value = result.service_id + " " + " ".join(split)

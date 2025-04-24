@@ -3,7 +3,7 @@
 from concurrent.futures import ThreadPoolExecutor
 from copy import deepcopy
 from operator import itemgetter
-from os import sep
+from os import getenv, sep
 from flask import flash
 from json import loads as json_loads
 from pathlib import Path
@@ -18,6 +18,7 @@ class Config:
         self.__settings = json_loads(Path(sep, "usr", "share", "bunkerweb", "settings.json").read_text(encoding="utf-8"))
         self.__db = db
         self.__data = data
+        self.__ignore_regex_check = getenv("IGNORE_REGEX_CHECK", "no").lower() == "yes"
 
     def gen_conf(
         self, global_conf: dict, services_conf: list[dict], *, check_changes: bool = True, changed_service: Optional[str] = None, override_method: str = "ui"
@@ -171,7 +172,7 @@ class Config:
 
             # Validate the variable's value against the regex pattern.
             try:
-                if not re_search(plugins_settings[setting]["regex"], value):
+                if not self.__ignore_regex_check and re_search(plugins_settings[setting]["regex"], value) is None:
                     report_error(f"Variable {key} is not valid.")
                     variables.pop(key, None)
             except RegexError as e:

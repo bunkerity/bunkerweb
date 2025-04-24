@@ -6,7 +6,7 @@ from functools import cache
 from io import BytesIO
 from json import loads
 from logging import Logger
-from os import listdir, sep
+from os import getenv, listdir, sep
 from os.path import join
 from pathlib import Path
 from re import compile as re_compile, error as RegexError, search as re_search
@@ -31,6 +31,7 @@ class Configurator:
         logger: Logger,
     ):
         self.__logger = logger
+        self.__ignore_regex_check = getenv("IGNORE_REGEX_CHECK", "no").lower() == "yes"
         self.__plugin_id_rx = re_compile(r"^[\w.-]{1,64}$")
         self.__plugin_version_rx = re_compile(r"^\d+\.\d+(\.\d+)?$")
         self.__setting_id_rx = re_compile(r"^[A-Z0-9_]{1,256}$")
@@ -80,14 +81,14 @@ class Configurator:
         server_names = [s for s in self.__variables["SERVER_NAME"].strip().split(" ") if s]
 
         for server_name in server_names:
-            if not server_regex.search(server_name):
+            if not self.__ignore_regex_check and not server_regex.search(server_name):
                 self.__logger.warning(f"Ignoring server name {server_name} because regex is not valid")
                 continue
 
             server_name_var = f"{server_name}_SERVER_NAME"
             if server_name_var in self.__variables:
                 names_str = self.__variables[server_name_var].strip()
-                if not server_regex.search(names_str):
+                if not self.__ignore_regex_check and not server_regex.search(names_str):
                     self.__logger.warning(f"Ignoring {server_name_var} because regex is not valid")
                     servers[server_name] = [server_name]
                 else:
@@ -272,7 +273,7 @@ class Configurator:
                 return False, f"variable name {variable} doesn't exist"
 
             try:
-                if re_search(where[real_var]["regex"], value) is None:
+                if not self.__ignore_regex_check and re_search(where[real_var]["regex"], value) is None:
                     return (False, f"value {value} doesn't match regex {where[real_var]['regex']}")
             except RegexError:
                 self.__logger.warning(f"Invalid regex for {variable} : {where[real_var]['regex']}, ignoring regex check")
@@ -287,7 +288,7 @@ class Configurator:
             return False, f"context of {variable} isn't multisite"
 
         try:
-            if not re_search(where[real_var]["regex"], value):
+            if not self.__ignore_regex_check and re_search(where[real_var]["regex"], value) is None:
                 return (False, f"value {value} doesn't match regex {where[real_var]['regex']}")
         except RegexError:
             self.__logger.warning(f"Invalid regex for {variable} : {where[real_var]['regex']}, ignoring regex check")
