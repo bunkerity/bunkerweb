@@ -908,4 +908,16 @@ utils.read_files = function(files)
 	return true, data
 end
 
+utils.deduplicate_list = function(list)
+	local seen = {}
+	local deduped = {}
+	for _, v in ipairs(list) do
+		if not seen[v] then
+			seen[v] = true
+			table.insert(deduped, v)
+		end
+	end
+	return deduped
+end
+
 return utils
