@@ -11,7 +11,7 @@
 - [UI] Add reset functionality to settings with UI updates for input, checkbox, and select elements
 - [UI] Fix LEDNS credential handling in setup wizard and reset button visibility in settings templates
 - [UI] Update time formatting in requests chart to use 12-hour format in home page
-- [UI] Add multi-language support for the web UI (`ar`, `bn`, `en`, `es`, `fr`, `hi`, `pt`, `ru`, `ur`, `zh`) - These are the top 10 languages spoken in the world
+- [UI] Introduce multi‑language support in the web UI: `ar`, `bn`, `en`, `es`, `fr`, `hi`, `pt`, `ru`, `ur`, `zh`, `de`, `it` — covering the world’s top 10 and Europe’s top 5 languages.
 - [UI] Update apexcharts.js to version 4.6.0
 - [UI] Update ace editor to version 1.40.1
 - [UI] Update DOMPurify to version 3.2.5

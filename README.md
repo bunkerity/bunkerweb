@@ -405,6 +405,8 @@ BunkerWeb UI supports multiple languages. Translations are managed in the `src/u
 - Russian (ru)
 - Urdu (ur)
 - Chinese (zh)
+- German (de)
+- Italian (it)
 
 See the [locales/README.md](src/ui/app/static/locales/README.md) for details on translation provenance and review status.
 
@@ -412,9 +414,17 @@ See the [locales/README.md](src/ui/app/static/locales/README.md) for details on 
 
 We welcome contributions to improve or add new locale files!
 
-- To add a new language, copy `en.json` as a template, translate the values, and update the table in `locales/README.md`.
-- For updates, edit the relevant file and update the provenance table as needed.
-- See the [locales/README.md](src/ui/app/static/locales/README.md) for full guidelines.
+**How to contribute a translation:**
+
+1. Edit the `src/ui/app/lang_config.py` file to add your language (code, name, flag).
+2. Copy `en.json` as a template in `src/ui/app/static/locales/`, rename it to your language code (e.g., `de.json` for German).
+3. Translate the values in your new file.
+4. Update the table in `locales/README.md` to add your language and indicate who created/reviewed it.
+5. Submit a pull request.
+
+For updates, edit the relevant file and update the provenance table as needed.
+
+See the [locales/README.md](src/ui/app/static/locales/README.md) for full guidelines.
 
 # Support
 

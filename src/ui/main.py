@@ -46,6 +46,7 @@ from app.utils import (
     human_readable_number,
     stop,
 )
+from app.lang_config import SUPPORTED_LANGUAGES
 
 signal(SIGINT, handle_stop)
 signal(SIGTERM, handle_stop)
@@ -670,7 +671,7 @@ def before_request():
 
     current_endpoint = request.path.split("/")[-1]
     if request.path.startswith(("/check", "/setup", "/loading", "/login", "/totp")):
-        app.config["ENV"] = dict(current_endpoint=current_endpoint, script_nonce=app.config["SCRIPT_NONCE"])
+        app.config["ENV"] = dict(current_endpoint=current_endpoint, script_nonce=app.config["SCRIPT_NONCE"], supported_languages=SUPPORTED_LANGUAGES)
     else:
         if not metadata:
             metadata = DB.get_metadata()
@@ -732,6 +733,7 @@ def before_request():
             user_readonly="write" not in current_user.list_permissions,
             theme=current_user.theme if current_user.is_authenticated else "dark",
             language=current_user.language if current_user.is_authenticated else "en",
+            supported_languages=SUPPORTED_LANGUAGES,
             columns_preferences_defaults=COLUMNS_PREFERENCES_DEFAULTS,
             extra_pages=app.config["EXTRA_PAGES"],
         )
@@ -910,9 +912,11 @@ def set_theme():
 @app.route("/set_language", methods=["POST"])
 @login_required
 def set_language():
+    allowed_languages = {lang["code"] for lang in SUPPORTED_LANGUAGES}
+    lang = request.form["language"].lower()
     if DB.readonly:
         return Response(status=423, response=dumps({"message": "Database is in read-only mode"}), content_type="application/json")
-    elif request.form["language"] not in ("en", "zh", "hi", "es", "ar", "fr", "bn", "ru", "pt", "ur"):
+    elif lang not in allowed_languages:
         return Response(status=400, response=dumps({"message": "Bad request"}), content_type="application/json")
 
     user_data = {
@@ -922,7 +926,7 @@ def set_language():
         "totp_secret": current_user.totp_secret,
         "method": current_user.method,
         "theme": current_user.theme,
-        "language": request.form["language"],
+        "language": lang,
     }
 
     ret = DB.update_ui_user(**user_data, old_username=current_user.get_id())
