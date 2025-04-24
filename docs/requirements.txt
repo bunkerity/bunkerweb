@@ -343,9 +343,9 @@ mkdocs-get-deps==0.2.0 \
     --hash=sha256:162b3d129c7fad9b19abfdcb9c1458a651628e4b1dea628ac68790fb3061c60c \
     --hash=sha256:2bf11d0b133e77a0dd036abeeb06dec8775e46efa526dc70667d8863eefc6134
     # via mkdocs
-mkdocs-material==9.6.11 \
-    --hash=sha256:0b7f4a0145c5074cdd692e4362d232fb25ef5b23328d0ec1ab287af77cc0deff \
-    --hash=sha256:47f21ef9cbf4f0ebdce78a2ceecaa5d413581a55141e4464902224ebbc0b1263
+mkdocs-material==9.6.12 \
+    --hash=sha256:92b4fbdc329e4febc267ca6e2c51e8501fa97b2225c5f4deb4d4e43550f8e61e \
+    --hash=sha256:add6a6337b29f9ea7912cb1efc661de2c369060b040eb5119855d794ea85b473
     # via
     #   -r requirements.in
     #   mkdocs-print-site-plugin
@@ -357,9 +357,9 @@ mkdocs-print-site-plugin==2.7.2 \
     --hash=sha256:7de6ae4a8195994eb08629aed42f5ffbf892139ba01bed57bbce058f90287d77 \
     --hash=sha256:f70138607a9a3a9549ddcf6bae1582c82cee177735a8b744e4794180cdb432e7
     # via -r requirements.in
-packaging==24.2 \
-    --hash=sha256:09abb1bccd265c01f4a3aa3f7a7db064b36514d2cba19a2f694fe6150451a759 \
-    --hash=sha256:c228a6dc5e932d346bc5739379109d49e8853dd8223571c7c5b55260edc0b97f
+packaging==25.0 \
+    --hash=sha256:29572ef2b1f17581046b3a2227d5c611fb25ec70ca1ba8554b24b0e69331a484 \
+    --hash=sha256:d443872c98d677bf60f6a1f2f8c1cb748e8fe762d2bf9d3148b5599295b0fc4f
     # via
     #   mkdocs
     #   typepy
@@ -567,9 +567,9 @@ requests==2.32.3 \
     #   importlib-resources
 
 # The following packages are considered to be unsafe in a requirements file:
-setuptools==78.1.0 \
-    --hash=sha256:18fd474d4a82a5f83dac888df697af65afa82dec7323d09c3e37d1f14288da54 \
-    --hash=sha256:3e386e96793c8702ae83d17b853fb93d3e09ef82ec62722e61da5cd22376dcd8
+setuptools==79.0.0 \
+    --hash=sha256:9828422e7541213b0aacb6e10bbf9dd8febeaa45a48570e09b6d100e063fc9f9 \
+    --hash=sha256:b9ab3a104bedb292323f53797b00864e10e434a3ab3906813a7169e4745b912a
     # via mkdocs-material
 six==1.17.0 \
     --hash=sha256:4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274 \
