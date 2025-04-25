@@ -1,0 +1,1303 @@
+{
+  "about": {
+    "build_with": "Şununla Geliştirildi",
+    "gnu_license": "GNU Affero Genel Kamu Lisansı v3.0",
+    "license_title": "Lisans",
+    "socials": "Sosyal Medya",
+    "tagline": "Güçlü Koruma, Basitlik",
+    "version": "Versiyon: {{version}}"
+  },
+  "alert": {
+    "important": "Önemli",
+    "no_changes_detected": "Değişiklik tespit edilmedi.",
+    "notice": "Bildirim",
+    "ping_error": "Instances pinglenirken bir hata oluştu.",
+    "readonly_mode": "Bu işlem salt okunur modda devre dışı."
+  },
+  "aria": {
+    "label": {
+      "close": "Kapat",
+      "raw_configuration": "Ham yapılandırma"
+    }
+  },
+  "badge": {
+    "from_template": "Şablondan",
+    "new_version": "Yeni sürüm",
+    "no_template": "Şablon Yok",
+    "unread_notifications": "Okunmamış bildirimler",
+    "unread_news": "Okunmamış haberler"
+  },
+  "banner": {
+    "community": "<a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://discord.bunkerweb.io/?utm_campaign=self&utm_source=banner\">Discord sohbetine</a> katılarak ve <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://www.linkedin.com/company/bunkerity/\">LinkedIn</a>'de bizi takip ederek Bunker topluluğunun bir parçası olun.",
+    "link": {
+      "here": "burada"
+    },
+    "pro": "BunkerWeb'den en iyi şekilde yararlanmak için PRO sürümüne yükseltin. Daha fazla bilgi ve ücretsiz deneme <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#pro\">burada</a>.",
+    "support": "BunkerWeb için premium destek veya özel danışmanlık mı gerekiyor? <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">Profesyonel hizmetlerimize</a> göz atın."
+  },
+  "breadcrumb": {
+    "about": "Hakkında",
+    "bans": "Yasaklamalar",
+    "cache": "Önbellek",
+    "configs": "Yapılandırmalar",
+    "extra_pages": "Ekstra Sayfalar",
+    "global_config": "Küresel Yapılandırma",
+    "home": "Ana Sayfa",
+    "instances": "Instanceslar",
+    "jobs": "İşler",
+    "logs": "Kayıtlar",
+    "misc": "Çeşitli",
+    "mode_selection": "Mod Seçimi",
+    "more": "Daha fazla...",
+    "new": "Yeni",
+    "plugins": "Eklentiler",
+    "plugins_pages": "Eklentiler Sayfası",
+    "pro": "Pro",
+    "reports": "Raporlar",
+    "services": "Servisler",
+    "support": "Destek",
+    "templates": "Şablonlar"
+  },
+  "button": {
+    "actions": "Aksiyonlar",
+    "activate_key": "Anahtarı Etkinleştir",
+    "add": "EKLE",
+    "add_ban_plural": "Yasaklama(lar) Ekle",
+    "add_plugin_plural": "Eklenti(ler) Ekle",
+    "add_plugins": "Eklenti Ekle",
+    "auto_refresh": "Otomatik Yenile",
+    "ban": "Yasakla",
+    "cache": "Önbellek",
+    "cancel": "İptal",
+    "clear": "TEMİZLE",
+    "close": "Kapat",
+    "columns": "Sütunlar",
+    "convert_services": "Servisleri Dönüştür",
+    "copy": "Kopyala",
+    "copy_codes": "Kodları Kopyala",
+    "copy_visible": "Görüneni Kopyala",
+    "create_config": "Özel Yapılandırma Oluştur",
+    "create_instance": "Instance Oluştur",
+    "create_service": "Yeni Servis Oluştur",
+    "delete": "Sil",
+    "delete_instance": "Instance'ları Sil",
+    "disable_totp": "TOTP'yi Devre Dışı Bırak",
+    "download": "İndir",
+    "enable_totp": "TOTP'yi Etkinleştir",
+    "entire_config": "Tüm Yapılandırma",
+    "export": "Dışa Aktar",
+    "filters_suffix": " Filtreler",
+    "github_stars": "Yıldızlar",
+    "hide": "Gizle",
+    "history": "Geçmiş",
+    "login": "Giriş Yap",
+    "multiple_add": "EKLE",
+    "multiple_hide": "GİZLE",
+    "multiple_remove": "KALDIR",
+    "multiple_show": "GÖSTER",
+    "need_help": "Yardıma mı ihtiyacınız var?",
+    "news": "Haberler",
+    "notifications": "Bildirimler",
+    "open_support_ticket": "Destek Talebi Oluştur",
+    "order_support": "Destek Siparişi Ver",
+    "ping": "Ping",
+    "plugin_page": "Eklenti Sayfası",
+    "proceed": "Devam Et",
+    "refresh_recovery_codes": "Kurtarma Kodlarını Yenile",
+    "reload": "Yeniden Yükle",
+    "reset": "Sıfırla",
+    "reset_columns": "Sütunları Sıfırla",
+    "return_to_safety": "Güvenliğe Dön",
+    "run": "Çalıştır",
+    "run_selected_jobs": "Seçili İşleri Çalıştır",
+    "save": "Kaydet",
+    "save_changes": "Değişiklikleri Kaydet",
+    "select_file": "Dosya Seç",
+    "select_page": "Sayfa Seç",
+    "service": "Servis",
+    "setup": "Kurulum",
+    "show": "Göster",
+    "stop": "Durdur",
+    "submit": "Gönder",
+    "subscribe": "Abone Ol",
+    "unban": "Yasağı Kaldır",
+    "update_key": "Anahtarı Güncelle",
+    "upload_photo": "Yeni Fotoğraf Yükle",
+    "wipe_other_sessions": "Diğer Oturumları Sonlandır"
+  },
+  "country": {
+    "AD": "Andorra",
+    "AE": "Birleşik Arap Emirlikleri",
+    "AF": "Afganistan",
+    "AG": "Antigua ve Barbuda",
+    "AI": "Anguilla",
+    "AL": "Arnavutluk",
+    "AM": "Ermenistan",
+    "AO": "Angola",
+    "AQ": "Antarktika",
+    "AR": "Arjantin",
+    "AS": "Amerikan Samoası",
+    "AT": "Avusturya",
+    "AU": "Avustralya",
+    "AW": "Aruba",
+    "AX": "Aland Adaları",
+    "AZ": "Azerbaycan",
+    "BA": "Bosna-Hersek",
+    "BB": "Barbados",
+    "BD": "Bangladeş",
+    "BE": "Belçika",
+    "BF": "Burkina Faso",
+    "BG": "Bulgaristan",
+    "BH": "Bahreyn",
+    "BI": "Burundi",
+    "BJ": "Benin",
+    "BL": "Saint Barthélemy",
+    "BM": "Bermuda",
+    "BN": "Brunei Darussalam",
+    "BO": "Bolivya",
+    "BQ": "Karayip Hollandası",
+    "BR": "Brezilya",
+    "BS": "Bahamalar",
+    "BT": "Bhutan",
+    "BV": "Bouvet Adası",
+    "BW": "Botswana",
+    "BY": "Belarus",
+    "BZ": "Belize",
+    "CA": "Kanada",
+    "CC": "Cocos (Keeling) Adaları",
+    "CD": "Demokratik Kongo",
+    "CF": "Orta Afrika Cumhuriyeti",
+    "CG": "Kongo Cumhuriyeti",
+    "CH": "İsviçre",
+    "CI": "Côte d'Ivoire",
+    "CK": "Cook Adaları",
+    "CL": "Şili",
+    "CM": "Kamerun",
+    "CN": "Çin",
+    "CO": "Kolombiya",
+    "CR": "Kosta Rika",
+    "CU": "Cuba",
+    "CV": "Cape Verde",
+    "CW": "Curaçao",
+    "CX": "Christmas Adası",
+    "CY": "Kıbrıs",
+    "CZ": "Çek Cumhuriyeti",
+    "DE": "Almanya",
+    "DJ": "Cibuti",
+    "DK": "Danimarka",
+    "DM": "Dominika",
+    "DO": "Dominik Cumhuriyeti",
+    "DZ": "Cezayir",
+    "EC": "Ekvador",
+    "EE": "Estonya",
+    "EG": "Mısır",
+    "EH": "Batı Sahra",
+    "ER": "Eritre",
+    "ES": "İspanya",
+    "ET": "Etiyopya",
+    "EU": "Avrupa",
+    "FI": "Finlandiya",
+    "FJ": "Fiji",
+    "FK": "Falkland Adaları (Malvinas)",
+    "FM": "Mikronezya",
+    "FO": "Faroe Adaları",
+    "FR": "Fransa",
+    "GA": "Gabon",
+    "GB": "Birleşik Krallık",
+    "GD": "Grenada",
+    "GE": "Georgia",
+    "GF": "Fransız Guyanası",
+    "GG": "Guernsey",
+    "GH": "Gana",
+    "GI": "Cebelitarık",
+    "GL": "Grönland",
+    "GM": "Gambia",
+    "GN": "Gine",
+    "GP": "Guadeloupe",
+    "GQ": "Ekvator Ginesi",
+    "GR": "Yunanistan",
+    "GS": "Güney Georgia ve Güney Sandwich Adaları",
+    "GT": "Guatemala",
+    "GU": "Guam",
+    "GW": "Gine-Bissau",
+    "GY": "Guyana",
+    "HK": "Hong Kong",
+    "HM": "Heard Adası ve McDonald Adaları",
+    "HN": "Honduras",
+    "HR": "Hırvatistan",
+    "HT": "Haiti",
+    "HU": "Macaristan",
+    "ID": "Endonezya",
+    "IE": "İrlanda",
+    "IL": "İsrail",
+    "IM": "Isle of Man",
+    "IN": "Hindistan",
+    "IO": "Britanya Hint Okyanusu Toprakları",
+    "IQ": "Irak",
+    "IR": "Iran",
+    "IS": "Iceland",
+    "IT": "İtalya",
+    "JE": "Jersey",
+    "JM": "Jamaika",
+    "JO": "Ürdün",
+    "JP": "Japonya",
+    "KE": "Kenya",
+    "KG": "Kırgızistan",
+    "KH": "Kamboçya",
+    "KI": "Kiribati",
+    "KM": "Komorlar",
+    "KN": "Saint Kitts ve Nevis",
+    "KP": "Kuzey Kore",
+    "KR": "Güney Kore",
+    "KW": "Kuveyt",
+    "KY": "Cayman Adaları",
+    "KZ": "Kazakistan",
+    "LA": "Laos",
+    "LB": "Lübnan",
+    "LC": "Saint Lucia",
+    "LI": "Lihtenştayn",
+    "LK": "Sri Lanka",
+    "LR": "Liberya",
+    "LS": "Lesotho",
+    "LT": "Litvanya",
+    "LU": "Lüksemburg",
+    "LV": "Letonya",
+    "LY": "Libya",
+    "MA": "Fas",
+    "MC": "Monako",
+    "MD": "Moldova",
+    "ME": "Karadağ",
+    "MF": "Saint Martin",
+    "MG": "Madagaskar",
+    "MH": "Marshall Adaları",
+    "MK": "Kuzey Makedonya",
+    "ML": "Mali",
+    "MM": "Myanmar",
+    "MN": "Moğolistan",
+    "MO": "Macao",
+    "MP": "Kuzey Mariana Adaları",
+    "MQ": "Martinique",
+    "MR": "Moritanya",
+    "MS": "Montserrat",
+    "MT": "Malta",
+    "MU": "Mauritius",
+    "MV": "Maldivler",
+    "MW": "Malawi",
+    "MX": "Meksika",
+    "MY": "Malezya",
+    "MZ": "Mozambik",
+    "NA": "Namibya",
+    "NC": "Yeni Kaledonya",
+    "NE": "Nijer",
+    "NF": "Norfolk Adası",
+    "NG": "Nijerya",
+    "NI": "Nikaragua",
+    "NL": "Hollanda",
+    "NO": "Norveç",
+    "NP": "Nepal",
+    "NR": "Nauru",
+    "NU": "Niue",
+    "NZ": "Yeni Zelanda",
+    "OM": "Oman",
+    "PA": "Panama",
+    "PE": "Peru",
+    "PF": "French Polynesia",
+    "PG": "Papua Yeni Gine",
+    "PH": "Filipinler",
+    "PK": "Pakistan",
+    "PL": "Polonya",
+    "PM": "Saint Pierre ve Miquelon",
+    "PN": "Pitcairn",
+    "PR": "Porto Riko",
+    "PS": "Filistin",
+    "PT": "Portekiz",
+    "PW": "Palau",
+    "PY": "Paraguay",
+    "QA": "Qatar",
+    "RE": "Réunion",
+    "RO": "Romanya",
+    "RS": "Sırbistan",
+    "RU": "Rusya Federasyonu",
+    "RW": "Rwanda",
+    "SA": "Suudi Arabistan",
+    "SB": "Solomon Adaları",
+    "SC": "Seyşeller",
+    "SD": "Sudan",
+    "SE": "İsveç",
+    "SG": "Singapur",
+    "SH": "Saint Helena, Ascension ve Tristan da Cunha",
+    "SI": "Slovenya",
+    "SJ": "Svalbard ve Jan Mayen Adaları",
+    "SK": "Slovakya",
+    "SL": "Sierra Leone",
+    "SM": "San Marino",
+    "SN": "Senegal",
+    "SO": "Somali",
+    "SR": "Surinam",
+    "SS": "Güney Sudan",
+    "ST": "Sao Tome ve Principe",
+    "SV": "El Salvador",
+    "SX": "Sint Maarten (Hollanda kısmı)",
+    "SY": "Suriye",
+    "SZ": "Eswatini",
+    "TC": "Turks ve Caicos Adaları",
+    "TD": "Çad",
+    "TF": "Fransız Güney Toprakları",
+    "TG": "Togo",
+    "TH": "Tayland",
+    "TJ": "Tacikistan",
+    "TK": "Tokelau",
+    "TL": "Timor-Leste",
+    "TM": "Türkmenistan",
+    "TN": "Tunus",
+    "TO": "Tonga",
+    "TR": "Türkiye",
+    "TT": "Trinidad ve Tobago",
+    "TV": "Tuvalu",
+    "TW": "Tayvan",
+    "TZ": "Tanzanya",
+    "UA": "Ukrayna",
+    "UG": "Uganda",
+    "UM": "ABD'nin Küçük Dış Adaları",
+    "US": "Amerika Birleşmiş Devletler",
+    "UY": "Uruguay",
+    "UZ": "Özbekistan",
+    "VA": "Holy See (Vatikan Şehir Devleti)",
+    "VC": "Saint Vincent ve Grenadinler",
+    "VE": "Venezuela",
+    "VG": "Virgin Adaları, İngiliz",
+    "VI": "Virgin Islands, U.S.",
+    "VN": "Vietnam",
+    "VU": "Vanuatu",
+    "WF": "Wallis ve Futuna Adaları",
+    "WS": "Samoa",
+    "XK": "Kosova",
+    "YE": "Yemen",
+    "YT": "Mayotte",
+    "ZA": "Güney Afrika",
+    "ZM": "Zambiya",
+    "ZW": "Zimbabve",
+    "not_applicable": "N/A"
+  },
+  "dashboard": {
+    "card": {
+      "blocked_requests": {
+        "title": "Engellenen İstekler"
+      },
+      "blocked_unique_ips": {
+        "title": "Engellenen Benzersiz IP'ler"
+      },
+      "instances": {
+        "status": "{{up}} aktif / {{down}} deaktif / {{loading}} yükleniyor",
+        "title": "Instanceslar"
+      },
+      "news": {
+        "title": "Haberler"
+      },
+      "plan": {
+        "title": "Plan"
+      },
+      "plugins": {
+        "status": "{{core}} çekirdek / {{pro}} PRO / {{external}} harici",
+        "title": "Eklentiler"
+      },
+      "services": {
+        "status": "{{online}} çevrimiçi / {{draft}} taslak",
+        "title": "Servisler"
+      },
+      "total_requests": {
+        "title": "Toplam İstekler"
+      }
+    },
+    "chart": {
+      "blocked_request_countries": {
+        "title": "Ülkeye Göre Engellenen İstekler"
+      },
+      "blocking_status": {
+        "title": "Zaman İçinde Engelleme Durumu",
+        "subtitle": "Zaman içinde engellenen istekler",
+        "blocked_requests": "Engellenen İstekler",
+        "time": "Zaman",
+        "count": "Adet"
+      },
+      "request_status": {
+        "title": "İstek Durumu Dağılımı",
+        "blocked": "Engellenen İstekler"
+      },
+      "top_blocked_ips": {
+        "title": "En Çok Engellenen 10 IP",
+        "most_blocked": "En Çok Engellenen IP"
+      }
+    },
+    "map": {
+      "blocked_requests": "Engellenen İstekler",
+      "hover_info": "Bir ülkenin üzerine gelin",
+      "no_data": "Veri yok",
+      "legend": "Açıklama"
+    }
+  },
+  "datatable": {
+    "info_bans": "{{start}} ile {{end}} arası gösteriliyor, toplam {{total}} Yasaklama",
+    "info_cache": "{{start}} ile {{end}} arası gösteriliyor, toplam {{total}} Önbellek Dosyası",
+    "info_configs": "{{start}} ile {{end}} arası gösteriliyor, toplam {{total}} Özel Yapılandırma",
+    "info_empty_bans": "Hiç Yasaklama yok",
+    "info_empty_cache": "Hiç Önbellek Dosyası yok",
+    "info_empty_configs": "Hiç Özel Yapılandırma yok",
+    "info_empty_instances": "Hiç Instance yok",
+    "info_empty_jobs": "Hiç İş yok",
+    "info_empty_plugins": "Hiç Eklenti yok",
+    "info_empty_reports": "Hiç Rapor yok",
+    "info_empty_services": "Hiç Servis yok",
+    "info_filtered_bans": "(_MAX_ toplam Yasaklama içinden filtrelendi)",
+    "info_filtered_cache": "(_MAX_ toplam Önbellek Dosyası içinden filtrelendi)",
+    "info_filtered_configs": "(_MAX_ toplam Özel Yapılandırma içinden filtrelendi)",
+    "info_filtered_instances": "(_MAX_ toplam Instance içinden filtrelendi)",
+    "info_filtered_jobs": "(_MAX_ toplam İş içinden filtrelendi)",
+    "info_filtered_plugins": "(_MAX_ toplam Eklenti içinden filtrelendi)",
+    "info_filtered_reports": "(_MAX_ toplam Rapor içinden filtrelendi)",
+    "info_filtered_services": "(_MAX_ toplam Servis içinden filtrelendi)",
+    "info_instances": "{{start}} ile {{end}} arası gösteriliyor, toplam {{total}} Instance",
+    "info_jobs": "{{start}} ile {{end}} arası gösteriliyor, toplam {{total}} İş",
+    "info_plugins": "{{start}} ile {{end}} arası gösteriliyor, toplam {{total}} Eklenti",
+    "info_reports": "{{start}} ile {{end}} arası gösteriliyor, toplam {{total}} Rapor",
+    "info_services": "{{start}} ile {{end}} arası gösteriliyor, toplam {{total}} Servis",
+    "length_all": "Tümü",
+    "length_menu_bans": "_MENU_ Yasaklama Göster",
+    "length_menu_cache": "_MENU_ Önbellek Dosyası Göster",
+    "length_menu_configs": "_MENU_ Özel Yapılandırma Göster",
+    "length_menu_instances": "_MENU_ Instance Göster",
+    "length_menu_jobs": "_MENU_ İş Göster",
+    "length_menu_plugins": "_MENU_ Eklenti Göster",
+    "length_menu_reports": "_MENU_ Rapor Göster",
+    "length_menu_services": "_MENU_ Servis Göster",
+    "paginate": {
+      "first": "İlk",
+      "last": "Son",
+      "next": "Sonraki",
+      "previous": "Önceki"
+    },
+    "processing": "İşleniyor...",
+    "search": "Ara:",
+    "select_rows_bans_0": "Hiç Yasaklama seçilmedi",
+    "select_rows_bans_1": "1 Yasaklama seçildi",
+    "select_rows_bans_plural": "%d Yasaklama seçildi",
+    "select_rows_cache_0": "Hiç Önbellek Dosyası seçilmedi",
+    "select_rows_cache_1": "1 Önbellek Dosyası seçildi",
+    "select_rows_cache_plural": "%d Önbellek Dosyası seçildi",
+    "select_rows_configs_0": "Hiç Özel Yapılandırma seçilmedi",
+    "select_rows_configs_1": "1 Özel Yapılandırma seçildi",
+    "select_rows_configs_plural": "%d Özel Yapılandırma seçildi",
+    "select_rows_instances_0": "Hiç Instance seçilmedi",
+    "select_rows_instances_1": "1 Instance seçildi",
+    "select_rows_instances_plural": "%d Instance seçildi",
+    "select_rows_jobs_0": "Hiç İş seçilmedi",
+    "select_rows_jobs_1": "1 İş seçildi",
+    "select_rows_jobs_plural": "%d İş seçildi",
+    "select_rows_plugins_0": "Hiç Eklenti seçilmedi",
+    "select_rows_plugins_1": "1 Eklenti seçildi",
+    "select_rows_plugins_plural": "%d Eklenti seçildi",
+    "select_rows_reports_0": "Hiç Rapor seçilmedi",
+    "select_rows_reports_1": "1 Rapor seçildi",
+    "select_rows_reports_plural": "%d Rapor seçildi",
+    "select_rows_services_0": "Hiç Servis seçilmedi",
+    "select_rows_services_1": "1 Servis seçildi",
+    "select_rows_services_plural": "%d Servis seçildi",
+    "zero_records_bans": "Eşleşen Yasaklama bulunamadı",
+    "zero_records_cache": "Eşleşen Önbellek Dosyası bulunamadı",
+    "zero_records_configs": "Eşleşen Özel Yapılandırma bulunamadı",
+    "zero_records_instances": "Eşleşen Instance bulunamadı",
+    "zero_records_jobs": "Eşleşen İş bulunamadı",
+    "zero_records_plugins": "Eşleşen Eklenti bulunamadı",
+    "zero_records_reports": "Eşleşen Rapor bulunamadı",
+    "zero_records_services": "Eşleşen Servis bulunamadı"
+  },
+  "dev_log": {
+    "copy_failed": "Metin kopyalanamadı:",
+    "news_fetch_fail": "Haberler alınamadı:",
+    "skipping_malformed_line": "Bozuk satır atlanıyor: {{line}}"
+  },
+  "error": {
+    "401": {
+      "help": "Bu kaynağa erişmek için giriş yapmalısınız.",
+      "message": "Devam etmek için lütfen giriş yapın.",
+      "title": "Kimlik Doğrulama Gerekli"
+    },
+    "403": {
+      "help": "Lütfen kimlik bilgilerinizi doğrulayın veya bunun bir hata olduğunu düşünüyorsanız bir yöneticiyle iletişime geçin.",
+      "message": "Bu sayfaya erişim izniniz yok.",
+      "title": "Erişim Reddedildi"
+    },
+    "404": {
+      "help": "Lütfen URL'nin doğru olduğundan emin olun veya bunun bir hata olduğunu düşünüyorsanız bir yöneticiyle iletişime geçin.",
+      "message": "İstenen kaynak bulunamadı.",
+      "title": "Bulunamadı"
+    },
+    "5xx": {
+      "help": "Lütfen daha sonra tekrar deneyin veya sorun devam ederse bir yöneticiyle iletişime geçin.",
+      "message": "Beklenmeyen bir sunucu hatası oluştu.",
+      "title": "Sunucu Hatası"
+    },
+    "reports_load_error": "Raporlar yüklenirken hata oluştu. Lütfen sayfayı yenilemeyi deneyin."
+  },
+  "flash": {
+    "easter_egg": "Bunu okuyorsan meraklısın demektir 👀",
+    "error": "Hata",
+    "message": "Bilgi",
+    "time": {
+      "just_now": "az önce"
+    },
+    "warning": "Uyarı"
+  },
+  "footer": {
+    "blog": "Blog",
+    "documentation": "Dokümantasyon",
+    "license": "Lisans",
+    "made_by": "tarafından yapıldı",
+    "privacy": "Gizlilik",
+    "support": "Destek"
+  },
+  "form": {
+    "checkbox": {
+      "remember_me": "Beni Hatırla"
+    },
+    "help": {
+      "ban_specific_service": "Yasaklama yalnızca bu servise uygulanacaktır.",
+      "hostname_length_limit": "Hostname 256 karakter ile sınırlıdır.",
+      "hostname_special_chars": "Protokol/port belirtimi için yalnızca `/` ve `:` kullanılabilir.",
+      "photo_extensions": "İzin verilen JPG, GIF veya PNG. Maksimum boyut: 800KB."
+    },
+    "label": {
+      "2fa_code": "2FA Kodu",
+      "2fa_code_or_recovery": "2FA Kodu veya Kurtarma Kodu",
+      "admin_email": "Admin E-posta",
+      "admin_password": "Admin Şifre",
+      "admin_username": "Admin Kullanıcı Adı",
+      "auto_lets_encrypt": "Otomatik Let's Encrypt",
+      "ban_scope": "Yasaklama Kapsamı",
+      "certificate_priority": "Sertifika Önceliği",
+      "challenge_type": "Doğrulama Türü",
+      "config_type": "Konfigürasyon Türü",
+      "configuration_name": "Konfigürasyon Adı",
+      "confirm_password": "Şifreyi Onayla",
+      "current_password": "Mevcut Şifre",
+      "custom_ssl_certificate": "Özel SSL Sertifikası",
+      "custom_ssl_certificate_data": "Özel SSL Sertifikası Verisi (Base64/PEM)",
+      "custom_ssl_key": "Özel SSL Anahtarı",
+      "custom_ssl_key_data": "Özel SSL Anahtar Verisi (Base64/PEM)",
+      "dns_credential_items": "Let's Encrypt DNS Kimlik Bilgileri",
+      "dns_propagation": "DNS Yayılma Gecikmesi",
+      "dns_provider": "DNS Sağlayıcı",
+      "email": "E-posta",
+      "email_for_lets_encrypt": "Let's Encrypt için E-posta",
+      "end_date": "Bitiş Tarihi",
+      "hostname": "Hostname",
+      "ip_address": "IP Adresi",
+      "keywords": "Anahtar Kelimeler",
+      "lets_encrypt_dns_credential_items": "Let's Encrypt DNS Kimlik Bilgileri",
+      "lets_encrypt_profile": "Let's Encrypt Profili",
+      "license_key": "Lisans Anahtarı",
+      "name": "Ad",
+      "new_password": "Yeni Şifre",
+      "optional": "(Opsiyonel)",
+      "password": "Şifre",
+      "raw_configuration": "Ham Konfigürasyon",
+      "reason": "Sebep",
+      "secret_token": "Gizli Token",
+      "server_name": "Sunucu Adı",
+      "service_name": "Servis Adı",
+      "theme": "Tema",
+      "type": "Tür",
+      "ui_host": "UI Host",
+      "ui_url": "UI URL",
+      "use_custom_ssl": "Özel SSL Kullan",
+      "use_lets_encrypt_staging": "Let's Encrypt Staging Kullan",
+      "username": "Kullanıcı Adı",
+      "wildcard_certificates": "Wildcard Sertifikalar"
+    },
+    "placeholder": {
+      "2fa_code": "Kod girin",
+      "2fa_or_recovery": "Kod veya kurtarma kodu girin",
+      "config_name": "ozel-konfig-adim",
+      "enter_username": "Kullanıcı adı girin",
+      "keywords": "Anahtar Kelimeler",
+      "search": "Ara...",
+      "select_service": "Servis Seç",
+      "secret_token": "Gizli Token",
+      "username_example": "mehmetyilmaz"
+    },
+    "validation": {
+      "confirm_password_match": "Şifreler eşleşmiyor.",
+      "password_length": "Şifre en az 8 karakter olmalıdır.",
+      "password_number": "Şifre en az 1 rakam içermelidir.",
+      "password_special": "Şifre en az 1 özel karakter içermelidir.",
+      "password_uppercase": "Şifre en az 1 büyük harf içermelidir."
+    }
+  },
+  "instance": {
+    "type": {
+      "container": "Konteyner",
+      "pod": "Pod",
+      "static": "Statik"
+    }
+  },
+  "interval": {
+    "day": "Günlük",
+    "hour": "Saatlik",
+    "once": "Bir Kez",
+    "week": "Haftalık"
+  },
+  "job": {
+    "history": {
+      "end_date": "Bitiş Tarihi",
+      "start_date": "Başlangıç Tarihi",
+      "success": "Başarılı"
+    }
+  },
+  "link": {
+    "back_to_login": "Girişe Dön",
+    "forgot_password": "Şifremi Unuttum?",
+    "here": "burada",
+    "more_info": "Daha Fazla Bilgi",
+    "more_news": "Daha Fazla Haber",
+    "privacy_policy": "Gizlilik Politikası",
+    "read_more": "Devamını Oku",
+    "see_more": "Daha Fazlası",
+    "upgrade": "Yükselt?"
+  },
+  "modal": {
+    "body": {
+      "add_plugin_dropzone": "Eklenti arşivinizi buraya sürükleyip bırakın veya dosya seçmek için tıklayın.",
+      "confirm_configs_deletion_alert": "Seçili özel yapılandırmayı silmek istediğinizden emin misiniz?",
+      "confirm_configs_deletion_alert_plural": "Seçili özel yapılandırmaları silmek istediğinizden emin misiniz?",
+      "confirm_conversion_confirmation": "Seçili servisleri dönüştürmek istediğinizden emin misiniz?",
+      "confirm_next_step": "Bir sonraki adıma geçmek istediğinizden emin misiniz?",
+      "confirm_plugin_deletion": "Seçili eklentiyi silmek istediğinizden emin misiniz?",
+      "confirm_plugin_deletion_plural": "Seçili eklentileri silmek istediğinizden emin misiniz?",
+      "confirmation_instance_deletion": "Seçili instance'ı silmek istediğinizden emin misiniz?",
+      "delete_confirmation_alert": "Seçili instance'ı silmek istediğinizden emin misiniz?",
+      "delete_confirmation_alert_plural": "Seçili instance'ları silmek istediğinizden emin misiniz?",
+      "instance_creation_alert": "`API_HTTP_PORT` ve `API_SERVER_NAME` değerleri instance yapılandırmasında kullanılacağı için port veya sunucu adı belirtmenize gerek yoktur.",
+      "next_step_in_case_of_issue": "Sorun yaşarsanız, güvensiz sertifikayı manuel olarak kabul edebilirsiniz:",
+      "recovery_codes_save_alert": "Lütfen bu kurtarma kodlarını güvenli bir yerde (şifre yöneticisi veya kasa gibi) saklayın. Kimlik doğrulama cihazınızı kaybederseniz hesabınıza erişmek için kullanabilirsiniz.",
+      "recovery_codes_shown_once_alert": "Bu kurtarma kodları yalnızca bir kez gösterilir. Lütfen güvenli bir şekilde sakladığınızdan emin olun.",
+      "reset_template_alert": "Mevcut şablon ayarlarını ve özel yapılandırmaları sıfırlamak istediğinizden emin misiniz?",
+      "services_deletion_confirmation": "Seçili servisleri silmek istediğinizden emin misiniz?",
+      "unban_confirmation_alert": "Seçili IP adresinin yasağını kaldırmak istediğinizden emin misiniz?",
+      "unban_confirmation_alert_plural": "Seçili IP adreslerinin yasağını kaldırmak istediğinizden emin misiniz?"
+    },
+    "button": {
+      "reset_template_confirm": "Şablon Yapılandırmasını Sıfırla"
+    },
+    "section": {
+      "ban_details": "Yasaklama Detayları",
+      "ban_scope": "Yasaklama Kapsamı",
+      "delete": "Sil"
+    },
+    "title": {
+      "add_bans": "Yasaklama(lar) Ekle",
+      "add_plugins": "Eklenti Ekle",
+      "confirm_conversion": "Dönüştürmeyi Onayla",
+      "confirm_deletion": "Silme İşlemini Onayla",
+      "confirm_unban": "Yasağı Kaldırmayı Onayla",
+      "create_new_instance": "Yeni Instance Oluştur",
+      "delete_instance": "Instance Sil",
+      "from_plugin": "eklenti üzerinden",
+      "full_url": "Tam URL",
+      "job_history": "Son 10 İş Çalıştırması",
+      "job_history_count": "İşin Son {{count}} Çalıştırması",
+      "recovery_codes": "Kurtarma Kodları",
+      "reset_template_config": "Şablon Yapılandırması Sıfırlansın mı?",
+      "server_name_not_unique": "Sunucu Adı Benzersiz Değil"
+    }
+  },
+  "mode": {
+    "advanced": "Gelişmiş",
+    "easy": "Kolay",
+    "raw": "Ham"
+  },
+  "navbar": {
+    "button": {
+      "upgrade_to_pro": "PRO'ya Yükselt"
+    },
+    "dropdown": {
+      "logout": "Çıkış Yap"
+    },
+    "link": {
+      "documentation": "Dokümantasyon"
+    },
+    "version": "Versiyon"
+  },
+  "navigation": {
+    "about": "Hakkında",
+    "bans": "Yasaklamalar",
+    "cache": "Önbellek",
+    "configs": "Yapılandırmalar",
+    "extra_pages": "Ekstra Sayfalar",
+    "global_config": "Küresel Yapılandırma",
+    "home": "Ana Sayfa",
+    "instances": "Instanceslar",
+    "jobs": "İşler",
+    "logs": "Kayıtlar",
+    "misc": "Çeşitli",
+    "mode_selection": "Mod Seçimi",
+    "more": "Daha fazla...",
+    "plugins": "Eklentiler",
+    "plugins_pages": "Eklentiler Sayfası",
+    "pro": "Pro",
+    "reports": "Raporlar",
+    "services": "Servisler",
+    "support": "Destek",
+    "templates": "Şablonlar"
+  },
+  "news": {
+    "image_alt": "Haber görseli",
+    "posted_on": "Yayınlanma tarihi"
+  },
+  "newsletter": {
+    "legal_agreement": "Bültene abone olmak istiyorum ve şunları okudum ve kabul ediyorum:",
+    "title": "Bültene Katıl"
+  },
+  "pagination": {
+    "page": "Sayfa"
+  },
+  "plan": {
+    "free": "ÜCRETSİZ",
+    "pro": "PRO"
+  },
+  "plugin": {
+    "page": {
+      "status": {
+        "deactivated": "Eklenti devre dışı; bu nedenle bilgi mevcut değil.",
+        "metrics_deactivated": "Metrics eklentisi etkin değil; bu nedenle bilgi mevcut değil.",
+        "not_available": "Eklenti sayfası beta aşamasında henüz mevcut değil."
+      }
+    },
+    "type": {
+      "all": "Tümü",
+      "core": "Çekirdek",
+      "external": "Harici",
+      "pro": "Pro",
+      "ui": "UI"
+    }
+  },
+  "pro": {
+    "alert": {
+      "overlapped_1": "Lisansınızın izin verdiğinden daha fazla aktif servise sahipsiniz!",
+      "overlapped_2": "Sınır olan {{pro_services}} servise ulaşmak için bazı servisleri silin veya Taslak moduna dönüştürün."
+    },
+    "button": {
+      "all_features_available": "Tüm Özellikler Mevcut",
+      "awaiting_compliance": "Uyumluluk Bekleniyor...",
+      "renew_license": "Lisansı Yenile",
+      "suspended_license": "Lisans Askıya Alındı",
+      "upgrade_to_pro": "PRO'ya Yükselt"
+    },
+    "expiration_date": {
+      "expires_in": "Bitiş süresi",
+      "title": "Pro Bitiş Tarihi",
+      "unknown": "Bilinmeyen bitiş tarihi"
+    },
+    "key": {
+      "title": {
+        "activate": "Anahtarı Etkinleştir",
+        "update": "Anahtarı Güncelle"
+      }
+    },
+    "overlay": {
+      "pro_feature": "Pro Özelliği",
+      "upgrade_required": "Bu özelliğe erişmek için Pro'ya yükseltin"
+    },
+    "status": {
+      "draft_services_count": "{{draft_services}} Taslak servis",
+      "expired": "SÜRESİ DOLDU",
+      "free_version": "ÜCRETSİZ Sürüm",
+      "overlapped": "AŞIM",
+      "pro_version": "PRO Sürüm",
+      "services_count": "{{online_services}} Çevrimiçi Servis / {{pro_services}} PRO Servis",
+      "suspended": "ASKIYA ALINDI",
+      "title": "Durum"
+    }
+  },
+  "profile": {
+    "2fa": {
+      "disable_title": "2FA'yı Devre Dışı Bırak",
+      "enable_title": "2FA'yı Etkinleştir"
+    },
+    "alert": {
+      "refresh_recovery_codes": "Kurtarma kodlarınızı yenilemek, önceki kodları geçersiz kılacaktır."
+    },
+    "card": {
+      "coming_soon": "Çok Yakında",
+      "title": {
+        "2fa": "İki Faktörlü Kimlik Doğrulama (2FA)",
+        "change_password": "Şifreyi Değiştir",
+        "change_theme": "Temayı Değiştir",
+        "coming_soon": "Çok Yakında",
+        "edit_profile": "Profili Düzenle",
+        "refresh_recovery_codes": "Kurtarma Kodlarını Yenile",
+        "sessions": "Oturumlar"
+      }
+    },
+    "help": {
+      "photo_extensions": "İzin verilen JPG, GIF veya PNG. Maksimum boyut: 800KB."
+    },
+    "session": {
+      "browser": "Tarayıcı",
+      "creation_date": "Oluşturulma Tarihi",
+      "current_session": "Mevcut Oturum",
+      "device": "Cihaz",
+      "ip_address": "IP Adresi",
+      "last_activity": "Son Aktivite",
+      "os": "İşletim Sistemi",
+      "title": "Oturum"
+    },
+    "tab": {
+      "profile": "Profil",
+      "security": "Güvenlik",
+      "sessions": "Oturumlar"
+    }
+  },
+  "scope": {
+    "all_services": "Tüm Servisler",
+    "global": "Global",
+    "global_all_services": "Global (tüm servisler)",
+    "service_specific": "Servise özel"
+  },
+  "searchpane": {
+    "active": "Aktif",
+    "async": "Asenkron",
+    "clear": "Tümünü Temizle",
+    "collapse_0": "Arama Panelleri",
+    "collapse_message": "Tümünü Daralt",
+    "collapse_plural": "Arama Panelleri (%d)",
+    "count": "{total}",
+    "countFiltered": "{shown} ({total})",
+    "country": "Ülke",
+    "created": "Oluşturulma",
+    "data": "Veri",
+    "empty": "Kullanılabilir arama paneli yok",
+    "end_date": "Bitiş Tarihi",
+    "first_seen": "İlk Görülme",
+    "future_30d": "30 günden fazla kaldı",
+    "health": "Sağlık",
+    "interval": "Aralık",
+    "ip_address": "IP Adresi",
+    "job_name": "İş Adı",
+    "last_24h": "Son 24 saat",
+    "last_30d": "Son 30 gün",
+    "last_7d": "Son 7 gün",
+    "last_run": "Son Çalıştırma Durumu",
+    "last_seen": "Son Görülme",
+    "last_update": "Son Güncelleme",
+    "loading": "Arama Panelleri Yükleniyor...",
+    "method": "Yöntem",
+    "next_24h": "Sonraki 24 saat",
+    "next_30d": "Sonraki 30 gün",
+    "next_7d": "Sonraki 7 gün",
+    "older_30d": "30 günden daha eski",
+    "plugin": "Eklenti",
+    "reason": "Sebep",
+    "reload": "Yeniden Yükleme Gerekli",
+    "scope": "Kapsam",
+    "security_mode": "Güvenlik Modu",
+    "server_name": "Sunucu Adı",
+    "service": "Servis",
+    "show_message": "Tümünü Göster",
+    "start_date": "Başlangıç Tarihi",
+    "status_code": "Durum Kodu",
+    "stream": "Stream Desteği",
+    "template": "Şablon",
+    "title_0": "Aktif Filtre Yok",
+    "title_1": "Aktif Filtre - 1",
+    "title_plural": "Aktif Filtreler - %d",
+    "type": "Tür",
+    "url": "URL",
+    "version": "Versiyon"
+  },
+  "settings": {
+    "custom_config": {
+      "title": "Özel Yapılandırma"
+    },
+    "multiple": {
+      "description": "Bu eklenti için ayarların birden fazla örneğini burada yapılandırabilirsiniz.",
+      "title": "Çoklu Ayarlar"
+    }
+  },
+  "setup": {
+    "step1": {
+      "subtitle": "Yönetici hesabınızı oluşturun.",
+      "title": "Admin Kullanıcı"
+    },
+    "step2": {
+      "section": {
+        "custom_certificate": "Özel Sertifika",
+        "lets_encrypt": "Let's Encrypt",
+        "reverse_proxy": "Ters Proxy"
+      },
+      "subtitle": "Web UI'ya özel ayarları yapılandırın.",
+      "title": "UI Ayarları"
+    },
+    "step3": {
+      "label": {
+        "final_url": "BunkerWeb UI URL'si"
+      },
+      "subtitle": "Kurulumu tamamlamadan önce ayarlarınızı gözden geçirin.",
+      "title": "Genel Bakış"
+    },
+    "status": {
+      "admin_user_exists": "🧑‍🚀 Bir admin kullanıcısı zaten mevcut. Lütfen bir sonraki adıma geçin.",
+      "reverse_proxy_configured": "↪️ Web arayüzü için bir ters proxy zaten yapılandırılmış. Lütfen bir sonraki adıma geçin.",
+      "secure_password": "Güvenli Şifre",
+      "unique_server_name": "Benzersiz Sunucu Adı"
+    },
+    "subtitle": "Kurulum sihirbazını tamamlamak için adımları izleyin.",
+    "title": "Kurulum Sihirbazı"
+  },
+  "status": {
+    "admin_user_exists": "🧑‍🚀 Bir admin kullanıcısı zaten mevcut. Lütfen bir sonraki adıma geçin.",
+    "blog_connection_fail": "Haber güncellemeleri için bloga bağlanılamadı.",
+    "default_server": "varsayılan sunucu",
+    "down": "Kapalı",
+    "draft": "Taslak",
+    "failed": "Başarısız",
+    "loading": "Yükleniyor...",
+    "loading_bans": "Yasaklamalar yükleniyor...",
+    "loading_cache_file": "Önbellek dosyası yükleniyor...",
+    "loading_cache_files": "Önbellek dosyaları yükleniyor...",
+    "loading_custom_config": "Özel yapılandırma yükleniyor...",
+    "loading_custom_configs": "Özel yapılandırmalar yükleniyor...",
+    "loading_instances": "Instanceslar yükleniyor...",
+    "loading_jobs": "İşler yükleniyor...",
+    "loading_logs": "Kayıtlar yükleniyor...",
+    "loading_plugins": "Eklentiler yükleniyor...",
+    "loading_reports": "Raporlar yükleniyor...",
+    "loading_services": "Servisler yükleniyor...",
+    "news_connection_error": "Haber güncellemeleri için bloga bağlanılamadı.",
+    "no": "Hayır",
+    "no_data": "Gösterilecek veri yok.",
+    "no_history": "Geçmiş yok.",
+    "no_item": "Öğe Yok",
+    "no_notifications": "Gösterilecek bildirim yok.",
+    "no_steps": "Adım Yok",
+    "no_steps_description": "Bu şablonda yapılandırılacak adım yok.",
+    "online": "Çevrimiçi",
+    "partial": "Kısmi",
+    "pinging_instances": "Instanceslara ping atılıyor, lütfen bekleyin...",
+    "plugin_page": {
+      "status": {
+        "deactivated": "Eklenti devre dışı; bu nedenle bilgi mevcut değil.",
+        "metrics_deactivated": "Metrics eklentisi etkin değil; bu nedenle bilgi mevcut değil.",
+        "not_available": "Eklenti sayfası beta aşamasında henüz mevcut değil."
+      }
+    },
+    "reverse_proxy_configured": "↪️ Web arayüzü için bir ters proxy zaten yapılandırılmış. Lütfen bir sonraki adıma geçin.",
+    "secure_password": "Güvenli Şifre",
+    "setting_up_bunkerweb": "BunkerWeb kuruluyor, lütfen bekleyin...",
+    "success": "Başarılı",
+    "template_in_use": "Bu servis şu anda \"{{template}}\" şablonunu kullanıyor ve \"{{method}}\" ile yönetiliyor.",
+    "template_in_use_description": "Mevcut şablon dışında değişiklik yapılamaz. Lütfen değişiklikleri mevcut şablon üzerinden yapın veya Gelişmiş/Ham moda geçin.",
+    "unique_server_name": "Benzersiz Sunucu Adı",
+    "up": "Açık",
+    "yes": "Evet"
+  },
+  "step": {
+    "next": "İleri",
+    "previous": "Geri"
+  },
+  "support": {
+    "card": {
+      "download_logs": {
+        "help": "Tüm özel veriler anonimleştirilecektir.",
+        "title": "Kayıtları İndir"
+      },
+      "extract_config": {
+        "title": "Yapılandırmayı Çıkar"
+      },
+      "support_link": {
+        "title": "Destek Linki"
+      }
+    }
+  },
+  "tab": {
+    "custom_certificate": "Özel Sertifika",
+    "lets_encrypt": "Let's Encrypt"
+  },
+  "table": {
+    "header": {
+      "actions": "Aksiyonlar",
+      "active": "Aktif",
+      "async": "Asenkron",
+      "checksum": "Sağlama",
+      "country": "Ülke",
+      "created": "Oluşturulma",
+      "data": "Veri",
+      "date": "Tarih",
+      "description": "Açıklama",
+      "end_date": "Bitiş Tarihi",
+      "file_name": "Dosya Adı",
+      "health": "Sağlık",
+      "hostname": "Hostname",
+      "id": "ID",
+      "interval": "Aralık",
+      "ip_address": "IP Adresi",
+      "job_name": "İş Adı",
+      "last_run": "Son Çalıştırma",
+      "last_seen": "Son Görülme",
+      "last_update": "Son Güncelleme",
+      "method": "Yöntem",
+      "name": "Ad",
+      "plugin": "Eklenti",
+      "reason": "Sebep",
+      "reload": "Yeniden Yükle",
+      "scope": "Kapsam",
+      "security_mode": "Güvenlik Modu",
+      "server_name": "Sunucu Adı",
+      "service": "Servis",
+      "service_name": "Servis Adı",
+      "status_code": "Durum Kodu",
+      "stream": "Stream",
+      "template": "Şablon",
+      "time_left": "Kalan Süre",
+      "type": "Tür",
+      "user_agent": "User-Agent",
+      "url": "URL",
+      "version": "Versiyon"
+    }
+  },
+  "template": {
+    "none": "Şablon Yok"
+  },
+  "theme": {
+    "dark": "Koyu",
+    "light": "Açık"
+  },
+  "toast": {
+    "autoconf_disclaimer_bold": "Servis kaldırılır veya yeniden başlatılırsa, UI yapılandırmanız kaybolacaktır.",
+    "autoconf_disclaimer_detail": "Bunun nedeni, servisin yönteminin 'autoconf' olmasıdır ve bu, yapılandırma çakışmalarını önlemek için tasarlanmıştır.",
+    "body": {
+      "ping_succeed": "Instances: {{instances}}"
+    },
+    "copied": "Kopyalandı!",
+    "disclaimer_title": "Uyarı",
+    "header": {
+      "ping_failed": "Ping başarısız",
+      "ping_succeed": "Ping başarılı"
+    }
+  },
+  "tooltip": {
+    "auto_lets_encrypt": "Otomatik olarak Let's Encrypt sertifikası isteyip istemediği.",
+    "button": {
+      "convert_service_to_draft": "Servisi Taslağa Dönüştür: {{name}}",
+      "convert_service_to_online": "Servisi Çevrimiçine Dönüştür: {{name}}",
+      "delete_config": "Özel Yapılandırmayı Sil: {{name}}",
+      "delete_instance": "Instance Sil: {{hostname}}",
+      "delete_plugin": "Eklentiyi Sil: {{name}}",
+      "delete_service": "Servisi Sil: {{name}}",
+      "ping_instance": "Instance'a Ping At: {{hostname}}",
+      "reload_instance": "Instance'ı Yeniden Yükle: {{hostname}}",
+      "reset_default": "Varsayılana sıfırla",
+      "reset_global": "Global değere sıfırla",
+      "run_job": "İşi Çalıştır: {{job}}",
+      "stop_instance": "Instance'ı Durdur: {{hostname}}",
+      "unban_ip": "{{ip}} yasağını kaldır"
+    },
+    "cannot_delete_original_ban": "Orijinal Yasaklama girdisi silinemez.",
+    "cannot_remove_disabled": "Bir veya daha fazla ayar devre dışı olduğu için kaldırılamaz.",
+    "certificate_priority": "Sertifikanın dosya yolundan mı yoksa base64 verisinden mi öncelikli alınacağını seçin.",
+    "challenge_type": "Let's Encrypt doğrulaması için kullanılacak doğrulama türü (http veya dns).",
+    "config_type": {
+      "crs_plugins_after": "OWASP Core Rule Set eklentileri yüklendikten sonra uygulanan yapılandırmalar.",
+      "crs_plugins_before": "OWASP Core Rule Set eklentileri yüklenmeden önce uygulanan yapılandırmalar.",
+      "default_server_http": "Nginx'in Sunucu seviyesinde, özellikle 'varsayılan sunucu' bloğu için yapılan yapılandırmalar; istemci isteği herhangi bir yapılandırılmış sunucu adıyla eşleşmediğinde kullanılır.",
+      "http": "Nginx'in HTTP seviyesinde global olarak uygulanan yapılandırmalar.",
+      "modsec": "OWASP Core Rule Set yüklendikten sonra veya Core Rule Set yüklenmediyse uygulanan ModSecurity yapılandırmaları.",
+      "modsec_crs": "OWASP Core Rule Set yüklenmeden önce uygulanan ModSecurity yapılandırmaları.",
+      "server_http": "Nginx'in HTTP Sunucu (sanal host) seviyesinde uygulanan yapılandırmalar.",
+      "server_stream": "Nginx'in Stream Sunucu seviyesinde uygulanan yapılandırmalar.",
+      "stream": "Nginx'in Stream seviyesinde global olarak uygulanan yapılandırmalar."
+    },
+    "confirm_password_match": "Şifreler eşleşmelidir.",
+    "copied": "Kopyalandı!",
+    "copy_https_only": "Kopyalama özelliği yalnızca HTTPS üzerinden kullanılabilir.",
+    "custom_ssl_cert_data": "Özel SSL sertifikası verisi (PEM formatında veya Base64 kodlu).",
+    "custom_ssl_cert_path": "Özel SSL sertifika dosyasının yolu.",
+    "custom_ssl_key_data": "Özel SSL özel anahtar verisi (PEM formatında veya Base64 kodlu).",
+    "custom_ssl_key_path": "Özel SSL özel anahtar dosyasının yolu.",
+    "disabled_by_method": "Devre dışı: '{{method}}' yöntemiyle yönetiliyor.",
+    "disabled_db_readonly": "Devre dışı: Veritabanı salt okunur modda.",
+    "disabled_draft": "Devre dışı: Servis Taslak modunda.",
+    "disabled_readonly": "Devre dışı: Salt okunur mod aktif.",
+    "dns_check_url": "Sayfada 'ok' görünüyorsa, sunucu adı muhtemelen kullanılabilir.",
+    "dns_credential_items": "DNS sağlayıcısı için kimlik bilgileri, DNS doğrulaması için kullanılır (örn. 'cloudflare_api_token=123456'). Gerekli format sağlayıcıya bağlıdır.",
+    "dns_credentials_dns_only": "Kimlik bilgileri yalnızca DNS doğrulamaları için geçerlidir.",
+    "dns_propagation": "DNS doğrulamalarında DNS değişikliklerinin yayılması için bekleme süresi (saniye cinsinden).",
+    "dns_propagation_dns_only": "DNS yayılma gecikmesi yalnızca DNS doğrulamaları için geçerlidir.",
+    "dns_provider": "Let's Encrypt DNS doğrulamaları için kullanılacak DNS sağlayıcısı.",
+    "dns_provider_dns_only": "DNS sağlayıcı seçimi yalnızca DNS doğrulamaları için geçerlidir.",
+    "download_file": "Dosyayı indir",
+    "draft_toggle_disabled": "Taslak modu yalnızca UI üzerinden oluşturulan servisler için değiştirilebilir.",
+    "email_lets_encrypt": "Let's Encrypt ile sertifika yönetimi ve bildirimler için kaydedilecek e-posta adresi.",
+    "email_length": "E-posta 1 ile 256 karakter arasında olmalıdır.",
+    "global_config_source": "Değer global yapılandırmadan miras alınmıştır.",
+    "instance_not_up": "Instance {{hostname}} şu anda yanıt vermiyor ('açık' değil).",
+    "lets_encrypt_profile": "Let's Encrypt için kullanılacak profil (classic, tlsserver, shortlived).",
+    "latest_version_installed": "En son sürümü kullanıyorsunuz.",
+    "license_key": "BunkerWeb PRO lisans anahtarınız.",
+    "link": {
+      "access_plugin_page": "{{name}} Sayfasına Eriş",
+      "access_service": "{{name}} Servisine Eriş",
+      "clone_config": "{{name}} Özel Yapılandırmasını Klonla",
+      "clone_service": "{{name}} Servisini Klonla",
+      "download_file": "{{filename}} İndir",
+      "edit_config": "{{name}} Özel Yapılandırmasını Düzenle",
+      "edit_service": "{{service}} Servisini Düzenle",
+      "export_service": "{{name}} Servis Yapılandırmasını Dışa Aktar",
+      "view_config": "{{name}} Özel Yapılandırmasını Görüntüle",
+      "view_file": "{{filename}} Görüntüle",
+      "view_service": "{{name}} Servisini Görüntüle"
+    },
+    "modal": {
+      "title": {
+        "full_url": "Tam URL"
+      }
+    },
+    "multisite_setting": "Bu bir çoklu site ayarıdır, global olarak tanımlanırsa birden fazla servisi etkiler.",
+    "new_version_available": "Yeni bir sürüm mevcut!",
+    "no_cache": "Bu iş için önbellek dosyası bulunamadı.",
+    "no_history": "Bu iş için çalıştırma geçmişi bulunamadı.",
+    "no_log_files": "Kayıt dosyası yok.",
+    "no_page_available": "Bu eklenti için özel bir sayfa yok.",
+    "password_requirements": "Şifre en az 8 karakter uzunluğunda olmalı ve 1 büyük harf, 1 rakam ve 1 özel karakter içermelidir.",
+    "pro_feature": "Bu bir PRO özelliğidir.",
+    "readonly_db_action_disabled": "Devre dışı: Veritabanı salt okunur modda.",
+    "readonly_user_action_disabled": "Devre dışı: Hesabınız salt okunur, '{{action}}' işlemi devre dışı.",
+    "remove_ban_entry": "Bu yasaklama kaydını listeden kaldır.",
+    "reset_template_settings": "Mevcut şablon görünümündeki tüm ayarları varsayılanlara sıfırla.",
+    "server_name": "Bu servisin birincil alan adı veya sunucu adı.",
+    "stream_support": {
+      "no": "STREAM modunu desteklemez.",
+      "partial": "STREAM modunu kısmen destekler.",
+      "yes": "STREAM modunu destekler."
+    },
+    "table": {
+      "bans": {
+        "actions": "Bu Yasaklama için mevcut aksiyonlar",
+        "country": "Yasaklanan IP adresinin ülkesi",
+        "date": "Yasaklamanın oluşturulma tarihi ve saati",
+        "details": "Yasaklama detaylarını göster",
+        "end_date": "Yasaklamanın sona ereceği tarih ve saat",
+        "ip_address": "Yasaklanan IP adresi",
+        "reason": "Yasaklama sebebi",
+        "scope": "Yasaklama kapsamı (Global veya Servise özel)",
+        "select_all": "Tüm Yasaklamaları seç",
+        "service": "Yasaklamanın uygulandığı servis (kapsam Servise özel ise)",
+        "time_left": "Yasaklamanın sona ermesine kalan süre"
+      },
+      "cache": {
+        "actions": "Bu önbellek dosyası için mevcut aksiyonlar",
+        "checksum": "Önbellek dosyasının sağlama değeri",
+        "details": "Önbellek dosyası detaylarını göster",
+        "file_name": "Önbellek dosyasının adı",
+        "job_name": "Bu önbellek dosyasını oluşturan iş",
+        "last_update": "Önbellek dosyasının son güncellenme tarihi ve saati",
+        "plugin": "Önbellek dosyasını oluşturan işle ilişkili eklenti",
+        "service": "Bu önbellek dosyasıyla ilişkili servis (veya Global)"
+      },
+      "configs": {
+        "actions": "Bu Özel Yapılandırma için mevcut aksiyonlar",
+        "checksum": "Özel Yapılandırma içeriğinin sağlama değeri",
+        "details": "Özel Yapılandırma detaylarını göster",
+        "method": "Özel Yapılandırmanın oluşturulma yöntemi (örn. ui, dosya)",
+        "name": "Özel Yapılandırmanın adı",
+        "select_all": "Tüm Özel Yapılandırmaları seç",
+        "service": "Özel Yapılandırmayla ilişkili servis (veya Global)",
+        "template": "Özel Yapılandırmanın bir şablondan gelip gelmediğini belirtir",
+        "type": "Özel Yapılandırmanın türü veya bağlamı (örn. HTTP, MODSEC)"
+      },
+      "instances": {
+        "actions": "Bu Instance için mevcut aksiyonlar",
+        "created": "Instance'ın ilk kaydedildiği tarih ve saat",
+        "details": "Instance detaylarını göster",
+        "health": "Instance'ın sağlık durumu (Açık, Kapalı, Yükleniyor)",
+        "hostname": "Instance'ın Hostname veya URL'si",
+        "last_seen": "Instance'ın en son görüldüğü tarih ve saat",
+        "method": "Instance'ın oluşturulma yöntemi (örn. ui, autoconf)",
+        "name": "Kullanıcı tanımlı veya otomatik oluşturulan Instance adı",
+        "select_all": "Tüm Instance'ları seç",
+        "type": "Instance türü (örn. Konteyner, Statik)"
+      },
+      "jobs": {
+        "actions": "Bu İş için mevcut aksiyonlar",
+        "async": "İşin asenkron çalışıp çalışmadığını belirtir",
+        "details": "İş detaylarını göster",
+        "interval": "İşin çalıştırılma sıklığı",
+        "last_run": "Son İş çalıştırmasının durumu (Başarılı/Başarısız)",
+        "name": "İşin adı",
+        "plugin": "İş ile ilişkili eklenti",
+        "reload": "İşin BunkerWeb'i yeniden yükleyip yüklemediğini belirtir",
+        "select_all": "Tüm İşleri seç"
+      },
+      "plugins": {
+        "actions": "Bu Eklenti için mevcut aksiyonlar",
+        "description": "Eklentinin açıklaması",
+        "details": "Eklenti detaylarını göster",
+        "id": "Eklentinin benzersiz kimliği",
+        "method": "Eklentinin oluşturulma yöntemi (örn. ui, core)",
+        "name": "Eklentinin adı",
+        "select_all": "Tüm Eklentileri seç",
+        "stream": "Eklentinin stream modunu destekleyip desteklemediğini belirtir",
+        "type": "Eklenti türü (Çekirdek, Harici, Pro, UI)",
+        "version": "Eklentinin versiyonu"
+      },
+      "reports": {
+        "country": "Raporlanan IP adresinin ülkesi",
+        "data": "Raporla ilgili ek veri",
+        "date": "Raporun oluşturulduğu tarih ve saat",
+        "details": "Rapor detaylarını göster",
+        "ip_address": "Raporu tetikleyen IP adresi",
+        "method": "Raporlanan isteğin HTTP yöntemi",
+        "reason": "Raporun oluşturulma sebebi",
+        "security_mode": "Rapor oluşturulurken aktif olan güvenlik modu",
+        "select_all": "Tüm Raporları seç",
+        "server_name": "Raporu oluşturan sunucu adı (vhost)",
+        "status_code": "Raporlanan istek için dönen HTTP durum kodu",
+        "url": "Raporlanan istekte hedeflenen URL",
+        "user_agent": "Raporlanan isteğin User-Agent bilgisi"
+      },
+      "select_rows_for_action": "Bir işlem yapmak için lütfen bir veya daha fazla satır seçin.",
+      "services": {
+        "actions": "Bu Servis için mevcut aksiyonlar",
+        "created": "Servisin oluşturulduğu tarih ve saat",
+        "details": "Servis detaylarını göster",
+        "last_update": "Servisin en son güncellendiği tarih ve saat",
+        "method": "Servisin oluşturulma yöntemi (örn. ui, dosya)",
+        "name": "Servisin adı",
+        "select_all": "Tüm Servisleri seç",
+        "type": "Servis türü (Çevrimiçi/Taslak)"
+      }
+    },
+    "ui_host": "BunkerWeb UI'nın ters proxy üzerinden sunulacağı hostname veya IP adresi.",
+    "ui_url": "BunkerWeb UI'ya ters proxy üzerinden erişmek için kullanılacak URL yolu.",
+    "ui_url_security": "Standart dışı, tahmin edilmesi zor bir URL yolu kullanmak güvenliği artırır.",
+    "use_custom_ssl": "Let's Encrypt yerine özel bir SSL sertifikası kullanılıp kullanılmayacağı.",
+    "use_lets_encrypt_staging": "Test için Let's Encrypt staging ortamının kullanılıp kullanılmayacağı (güvenilmeyen sertifikalar üretir).",
+    "username_length": "Kullanıcı adı 1 ile 256 karakter arasında olmalıdır.",
+    "view_full_url": "Tam URL'yi görüntülemek için tıklayın",
+    "wildcard_certificates": "Wildcard sertifikalar (*.domain.com) üret. DNS doğrulaması gerektirir.",
+    "wildcard_dns_only": "Wildcard sertifikalar yalnızca DNS doğrulama türü ile desteklenir."
+  },
+  "totp": {
+    "prompt": "Lütfen TOTP kodunuzu girin."
+  },
+  "validation": {
+    "default_field_name": "Bu alan",
+    "invalid_date": "Geçersiz tarih",
+    "ip_global_duplicate": "Bu IP adresi zaten global olarak yasaklanmış.",
+    "ip_invalid": "Geçersiz IP adresi formatı.",
+    "ip_required": "IP adresi gereklidir.",
+    "ip_service_duplicate": "Bu IP adresi seçili servis için zaten yasaklanmış ({{service}}).",
+    "pattern": "Lütfen {{field}} için geçerli bir değer girin.",
+    "required": "{{field}} gereklidir.",
+    "service_required_for_ban": "Servise özel bir yasaklama için bir servis seçilmelidir."
+  }
+}
