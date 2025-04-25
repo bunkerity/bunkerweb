@@ -593,6 +593,8 @@
       "hostname": "主机名",
       "ip_address": "IP 地址",
       "keywords": "关键词",
+      "lets_encrypt_dns_credential_items": "Let's Encrypt DNS 凭证项",
+      "lets_encrypt_profile": "Let's Encrypt 配置文件",
       "license_key": "许可证密钥",
       "name": "名称",
       "new_password": "新密码",
@@ -1138,6 +1140,7 @@
     "email_length": "电子邮件必须在 1 到 256 个字符之间。",
     "global_config_source": "值继承自全局配置。",
     "instance_not_up": "实例 {{hostname}} 当前未响应 ('up')。",
+    "lets_encrypt_profile": "用于 Let's Encrypt 的配置文件（classic、tlsserver、shortlived）。",
     "latest_version_installed": "您正在运行最新版本。",
     "license_key": "您的 BunkerWeb PRO 许可证密钥。",
     "link": {

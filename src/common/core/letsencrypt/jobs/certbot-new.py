@@ -487,6 +487,7 @@ try:
                 challenge_type=data["challenge"],
                 staging=data["staging"],
                 content_hash=bytes_hash(content, algorithm="sha1"),
+                profile=data["profile"],
             )
 
             LOGGER.info(

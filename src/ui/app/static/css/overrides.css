@@ -1183,6 +1183,10 @@ div.dtsp-panesContainer
   transition: none !important;
 }
 
+span.cursor-pointer ~ .reset-setting {
+  right: 3rem !important;
+}
+
 /* Adjust position when near validation feedback */
 .is-invalid ~ .reset-setting:where(.invalid-feedback ~ *) {
   top: calc(50% - 10px) !important;

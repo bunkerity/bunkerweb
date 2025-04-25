@@ -593,6 +593,8 @@
       "hostname": "Hostname",
       "ip_address": "IP-Adresse",
       "keywords": "Schlüsselwörter",
+      "lets_encrypt_dns_credential_items": "Let's Encrypt DNS-Anmeldeinformationen",
+      "lets_encrypt_profile": "Let's Encrypt-Profil",
       "license_key": "Lizenzschlüssel",
       "name": "Name",
       "new_password": "Neues Passwort",
@@ -1138,6 +1140,7 @@
     "email_length": "Die E-Mail muss zwischen 1 und 256 Zeichen lang sein.",
     "global_config_source": "Wert von globaler Konfiguration geerbt.",
     "instance_not_up": "Instanz {{hostname}} antwortet derzeit nicht ('up').",
+    "lets_encrypt_profile": "Das Profil, das für Let's Encrypt verwendet werden soll (classic, tlsserver, shortlived).",
     "latest_version_installed": "Sie verwenden die neueste Version.",
     "license_key": "Ihr BunkerWeb PRO Lizenzschlüssel.",
     "link": {

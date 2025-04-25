@@ -35,6 +35,7 @@ def setup_page():
             "USE_LETS_ENCRYPT_STAGING",
             "EMAIL_LETS_ENCRYPT",
             "LETS_ENCRYPT_CHALLENGE",
+            "LETS_ENCRYPT_PROFILE",
             "LETS_ENCRYPT_DNS_PROVIDER",
             "LETS_ENCRYPT_DNS_PROPAGATION",
             "USE_LETS_ENCRYPT_WILDCARD",
@@ -162,6 +163,7 @@ def setup_page():
                 "USE_LETS_ENCRYPT_WILDCARD": request.form["lets_encrypt_wildcard"],
                 "EMAIL_LETS_ENCRYPT": request.form["email_lets_encrypt"],
                 "LETS_ENCRYPT_CHALLENGE": request.form["lets_encrypt_challenge"],
+                "LETS_ENCRYPT_PROFILE": request.form["lets_encrypt_profile"],
                 "LETS_ENCRYPT_DNS_PROVIDER": request.form["lets_encrypt_dns_provider"],
                 "LETS_ENCRYPT_DNS_PROPAGATION": request.form["lets_encrypt_dns_propagation"],
             }
@@ -243,6 +245,7 @@ def setup_page():
         lets_encrypt_wildcard=db_config.get("USE_LETS_ENCRYPT_WILDCARD", getenv("USE_LETS_ENCRYPT_WILDCARD", "no")),
         email_lets_encrypt=db_config.get("EMAIL_LETS_ENCRYPT", getenv("EMAIL_LETS_ENCRYPT", "")),
         lets_encrypt_challenge=db_config.get("LETS_ENCRYPT_CHALLENGE", getenv("LETS_ENCRYPT_CHALLENGE", "http")),
+        lets_encrypt_profile=db_config.get("LETS_ENCRYPT_PROFILE", getenv("LETS_ENCRYPT_PROFILE", "classic")),
         lets_encrypt_dns_provider=db_config.get("LETS_ENCRYPT_DNS_PROVIDER", getenv("LETS_ENCRYPT_DNS_PROVIDER", "")),
         lets_encrypt_dns_propagation=db_config.get("LETS_ENCRYPT_DNS_PROPAGATION", getenv("LETS_ENCRYPT_DNS_PROPAGATION", "default")),
         lets_encrypt_dns_credential_items=lets_encrypt_dns_credential_items,

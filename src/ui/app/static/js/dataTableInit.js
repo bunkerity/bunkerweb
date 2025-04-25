@@ -202,9 +202,21 @@ function initializeDataTable(config) {
                 return this.nodeType === 3; // Node.TEXT_NODE
               })
               .first();
-            if (textNode.length) {
+            if (element.is("[placeholder]")) {
+              element.attr("placeholder", translation);
+            } else if (element.is("[title]")) {
+              element.attr("title", translation);
+            } else if (element.is("[data-bs-original-title]")) {
+              element.attr("data-bs-original-title", translation);
+            } else if (element.is("[aria-label]")) {
+              element.attr("aria-label", translation);
+            } else if (textNode.length) {
               textNode.replaceWith(translation);
             } else {
+              element.text(translation);
+              if (element.parent().is("span.dtsp-name[title]")) {
+                element.parent().attr("title", ` ${translation}`);
+              }
               element.text(translation); // Fallback if no direct text node
             }
           }

@@ -143,6 +143,14 @@ const debouncedSaveLanguage = debounce(saveLanguage, 1000);
 // Check if language preference exists in localStorage
 const savedLang = localStorage.getItem("language");
 
+const isSetup = window.location.pathname.endsWith("/setup");
+const localesPath = isSetup
+  ? "/setup/locales"
+  : $("#home-path")
+      .val()
+      .trim()
+      .replace(/\/home$/, "/locales");
+
 i18next
   .use(i18nextHttpBackend)
   .use(i18nextBrowserLanguageDetector)
@@ -153,10 +161,7 @@ i18next
       ns: ["messages"],
       defaultNS: "messages",
       backend: {
-        loadPath: `${$("#home-path")
-          .val()
-          .trim()
-          .replace(/\/home$/, "/locales")}/{{lng}}.json`,
+        loadPath: `${localesPath}/{{lng}}.json`,
       },
       detection: {
         order: ["localStorage", "navigator", "htmlTag"],
@@ -174,11 +179,13 @@ i18next
       applyTranslations();
       updateLanguageSelector(i18next.language);
       $("[name='language']").val(i18next.language);
+      $("#newsletter-locale").val(i18next.language);
 
       i18next.on("languageChanged", function (lng) {
         i18next.language = getAlpha2(lng);
         applyTranslations();
         updateLanguageSelector(lng);
+        $("#newsletter-locale").val(i18next.language);
       });
 
       // Handle language selection clicks
@@ -199,14 +206,16 @@ function changeLanguage(lang) {
   localStorage.setItem("language", alpha2);
   i18next.changeLanguage(alpha2);
 
-  // Get the root URL for the API endpoint
-  const rootUrl = $("#home-path")
-    .val()
-    .trim()
-    .replace(/\/home$/, "/set_language");
+  if (!isSetup) {
+    // Get the root URL for the API endpoint
+    const rootUrl = $("#home-path")
+      .val()
+      .trim()
+      .replace(/\/home$/, "/set_language");
 
-  // Save language preference to server
-  debouncedSaveLanguage(rootUrl, alpha2);
+    // Save language preference to server
+    debouncedSaveLanguage(rootUrl, alpha2);
+  }
 }
 
 // Handle DataTables collection button translations

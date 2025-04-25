@@ -640,6 +640,10 @@ $(document).ready(() => {
         $("#LETS_ENCRYPT_CHALLENGE").find(":selected").val(),
       );
       formData.append(
+        "lets_encrypt_profile",
+        $("#LETS_ENCRYPT_PROFILE").find(":selected").val(),
+      );
+      formData.append(
         "lets_encrypt_dns_provider",
         $("#LETS_ENCRYPT_DNS_PROVIDER").find(":selected").val(),
       );

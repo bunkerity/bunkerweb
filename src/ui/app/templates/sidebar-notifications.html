@@ -83,8 +83,14 @@
     <!-- Newsletter Signup Section -->
     <div class="newsletter-signup position-sticky bottom-0 start-0 w-100 p-4 bg-{% if theme == 'light' %}light{% else %}dark{% endif %}-subtle border-top">
         <h5 class="mb-3 text-primary" data-i18n="newsletter.title">Join the Newsletter</h5>
-        <form action="https://bunkerity.us1.list-manage.com/subscribe/post?u=ec5b1577cf427972b9bd491a6&id=37076d9d67"
-              method="POST">
+        <form action="https://sibforms.com/serve/MUIFAHoWe6WZdJ2ergvcJd8d2gn5T_x7bUzVM6jJd1FmAMfS6v-S9cUN3Iqw6DFiq7mRlDMvTXSIM9voEv8sCkZmEhtoDukSdI4BomhnTtgJAMXFkXUIj07KNw5gBWJ-1kPYCoSJlcabngBdufuqPnzGQ87UMecHcke3Hv2-AgAZOMYbCgKg2mx4ki8vhCkQtEpfBQhNZY22UY5y"
+              method="POST"
+              target="_blank">
+            <input id="newsletter-email-check"
+                   type="hidden"
+                   name="email_address_check"
+                   value="" />
+            <input id="newsletter-locale" type="hidden" name="locale" value="en" />
             <div class="mb-3">
                 <input type="email"
                        name="EMAIL"
@@ -93,10 +99,7 @@
                        required />
             </div>
             <div class="form-check mb-3">
-                <input type="checkbox"
-                       class="form-check-input"
-                       name="newsletter-check"
-                       required />
+                <input type="checkbox" class="form-check-input" name="OPT_IN" required />
                 <label class="form-check-label" for="privacyPolicyCheck">
                     <span data-i18n="newsletter.legal_agreement">I want to subscribe to the newsletter and I've read and agree to the:&nbsp;</span>
                     <a class="fst-italic"
