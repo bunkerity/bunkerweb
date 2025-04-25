@@ -1,6 +1,6 @@
 {
   "about": {
-    "build_with": "Costruito Con",
+    "build_with": "Sviluppato con",
     "gnu_license": "GNU Affero General Public License v3.0",
     "license_title": "Licenza",
     "socials": "Social",
@@ -17,13 +17,13 @@
   "aria": {
     "label": {
       "close": "Chiudi",
-      "raw_configuration": "Configurazione Grezza"
+      "raw_configuration": "Configurazione in formato raw"
     }
   },
   "badge": {
-    "from_template": "Da modello",
+    "from_template": "Da template",
     "new_version": "Nuova versione",
-    "no_template": "Nessun Modello",
+    "no_template": "Nessun template",
     "unread_news": "Notizie non lette",
     "unread_notifications": "Notifiche non lette"
   },
@@ -37,7 +37,7 @@
   },
   "breadcrumb": {
     "about": "Informazioni",
-    "bans": "Divieti",
+    "bans": "Ban",
     "cache": "Cache",
     "configs": "Configurazioni",
     "extra_pages": "Pagine Extra",
@@ -47,7 +47,7 @@
     "jobs": "Processi",
     "logs": "Log",
     "misc": "Varie",
-    "mode_selection": "Selezione Modalità",
+    "mode_selection": "Selezione modalità",
     "more": "Altro...",
     "new": "Nuovo",
     "plugins": "Plugin",
@@ -56,27 +56,27 @@
     "reports": "Report",
     "services": "Servizi",
     "support": "Supporto",
-    "templates": "Modelli"
+    "templates": "Templates"
   },
   "button": {
     "actions": "Azioni",
-    "activate_key": "Attiva Chiave",
+    "activate_key": "Attiva chiave",
     "add": "INSERISCI",
-    "add_ban_plural": "Aggiungi Divieto/i",
-    "add_plugin_plural": "Aggiungi Plugin",
-    "add_plugins": "Aggiungi Plugin",
-    "auto_refresh": "Aggiornamento Automatico",
-    "ban": "Vieta",
+    "add_ban_plural": "Aggiungi ban",
+    "add_plugin_plural": "Aggiungi plugin",
+    "add_plugins": "Aggiungi plugin",
+    "auto_refresh": "Aggiornamento automatico",
+    "ban": "Ban",
     "cache": "Cache",
     "cancel": "Annulla",
     "clear": "PULISCI",
     "close": "Chiudi",
     "columns": "Colonne",
-    "convert_services": "Converti Servizi",
+    "convert_services": "Converti servizi",
     "copy": "Copia",
-    "copy_codes": "Copia Codici",
-    "copy_visible": "Copia Visibili",
-    "create_config": "Crea Configurazione Personalizzata",
+    "copy_codes": "Copia codici",
+    "copy_visible": "Copia visibili",
+    "create_config": "Crea configurazione personalizzata",
     "create_instance": "Crea Istanza",
     "create_service": "Crea nuovo Servizio",
     "delete": "Elimina",
@@ -382,10 +382,10 @@
   "dashboard": {
     "card": {
       "blocked_requests": {
-        "title": "Richieste Bloccate"
+        "title": "Richieste bloccate"
       },
       "blocked_unique_ips": {
-        "title": "IP Unici Bloccati"
+        "title": "IP unici bloccati"
       },
       "instances": {
         "status": "{{up}} attive / {{down}} inattive / {{loading}} in caricamento",
@@ -406,110 +406,110 @@
         "title": "Servizi"
       },
       "total_requests": {
-        "title": "Richieste Totali"
+        "title": "Richieste totali"
       }
     },
     "chart": {
       "blocked_request_countries": {
-        "title": "Richieste Bloccate per Paese"
+        "title": "Richieste bloccate in base al paese"
       },
       "blocking_status": {
-        "title": "Stato Blocco nel Tempo",
+        "title": "Stato del blocco nel tempo",
         "subtitle": "Richieste bloccate nel tempo",
-        "blocked_requests": "Richieste Bloccate",
+        "blocked_requests": "Richieste bloccate",
         "time": "Ora",
         "count": "Quantità"
       },
       "request_status": {
-        "title": "Distribuzione Stato Richieste",
-        "blocked": "Richieste Bloccate"
+        "title": "Distribuzione stato richieste",
+        "blocked": "Richieste bloccate"
       },
       "top_blocked_ips": {
-        "title": "Top 10 IP Bloccati",
+        "title": "Top 10 IP bloccati",
         "most_blocked": "IP più bloccato"
       }
     },
     "map": {
-      "blocked_requests": "Richieste Bloccate",
+      "blocked_requests": "Richieste bloccate",
       "hover_info": "Passa il mouse su un paese",
       "no_data": "Nessun dato",
       "legend": "Legenda"
     }
   },
   "datatable": {
-    "info_bans": "Mostrando da {{start}} a {{end}} di {{total}} Divieti",
-    "info_cache": "Mostrando da {{start}} a {{end}} di {{total}} File Cache",
-    "info_configs": "Mostrando da {{start}} a {{end}} di {{total}} Configurazioni Personalizzate",
-    "info_empty_bans": "Nessun Divieto disponibile",
-    "info_empty_cache": "Nessun File Cache disponibile",
-    "info_empty_configs": "Nessuna Configurazione Personalizzata disponibile",
-    "info_empty_instances": "Nessuna Istanza disponibile",
-    "info_empty_jobs": "Nessuna Tarefa disponibile",
-    "info_empty_plugins": "Nessun Plugin disponibile",
-    "info_empty_reports": "Nessun Report disponibile",
-    "info_empty_services": "Nessun Servizio disponibile",
-    "info_filtered_bans": "(filtrato da _MAX_ Divieti totali)",
-    "info_filtered_cache": "(filtrato da _MAX_ File Cache totali)",
-    "info_filtered_configs": "(filtrato da _MAX_ Configurazioni Personalizzate totali)",
-    "info_filtered_instances": "(filtrato da _MAX_ Istanze totali)",
-    "info_filtered_jobs": "(filtrato da _MAX_ Tarefas totais)",
-    "info_filtered_plugins": "(filtrato da _MAX_ Plugins totali)",
-    "info_filtered_reports": "(filtrato da _MAX_ Reports totali)",
-    "info_filtered_services": "(filtrato da _MAX_ Servizi totali)",
+    "info_bans": "Mostrando dal {{start}} al {{end}} di {{total}} ban",
+    "info_cache": "Mostrando dal {{start}} al {{end}} di {{total}} file cache",
+    "info_configs": "Mostrando dal {{start}} al {{end}} di {{total}} configurazioni personalizzate",
+    "info_empty_bans": "Nessun ban disponibile",
+    "info_empty_cache": "Nessun file cache disponibile",
+    "info_empty_configs": "Nessuna configurazione personalizzata disponibile",
+    "info_empty_instances": "Nessuna istanza disponibile",
+    "info_empty_jobs": "Nessuna processo disponibile",
+    "info_empty_plugins": "Nessun plugin disponibile",
+    "info_empty_reports": "Nessun report disponibile",
+    "info_empty_services": "Nessun servizio disponibile",
+    "info_filtered_bans": "(filtrato da _MAX_ ban totali)",
+    "info_filtered_cache": "(filtrato da _MAX_ file cache totali)",
+    "info_filtered_configs": "(filtrato da _MAX_ configurazioni personalizzate totali)",
+    "info_filtered_instances": "(filtrato da _MAX_ istanze totali)",
+    "info_filtered_jobs": "(filtrato da _MAX_ processi totali)",
+    "info_filtered_plugins": "(filtrato da _MAX_ plugin totali)",
+    "info_filtered_reports": "(filtrato da _MAX_ report totali)",
+    "info_filtered_services": "(filtrato da _MAX_ servizi totali)",
     "info_instances": "Mostrando da {{start}} a {{end}} di {{total}} Istanze",
-    "info_jobs": "Mostrando da {{start}} a {{end}} di {{total}} Tarefas",
-    "info_plugins": "Mostrando da {{start}} a {{end}} di {{total}} Plugins",
-    "info_reports": "Mostrando da {{start}} a {{end}} di {{total}} Reports",
-    "info_services": "Mostrando da {{start}} a {{end}} di {{total}} Servizi",
+    "info_jobs": "Mostrando dal {{start}} al {{end}} di {{total}} processi",
+    "info_plugins": "Mostrando dal {{start}} al {{end}} di {{total}} plugin",
+    "info_reports": "Mostrando dal {{start}} al {{end}} di {{total}} report",
+    "info_services": "Mostrando dal {{start}} al {{end}} di {{total}} servizi",
     "length_all": "Tutti",
-    "length_menu_bans": "Mostra _MENU_ Divieti",
-    "length_menu_cache": "Mostra _MENU_ File Cache",
-    "length_menu_configs": "Mostra _MENU_ Configurazioni Personalizzate",
+    "length_menu_bans": "Mostra _MENU_ ban",
+    "length_menu_cache": "Mostra _MENU_ file cache",
+    "length_menu_configs": "Mostra _MENU_ Configurazioni personalizzate",
     "length_menu_instances": "Mostra _MENU_ Istanze",
-    "length_menu_jobs": "Mostra _MENU_ Tarefas",
-    "length_menu_plugins": "Mostra _MENU_ Plugins",
-    "length_menu_reports": "Mostra _MENU_ Reports",
-    "length_menu_services": "Mostra _MENU_ Servizi",
+    "length_menu_jobs": "Mostra _MENU_ processi",
+    "length_menu_plugins": "Mostra _MENU_ plugin",
+    "length_menu_reports": "Mostra _MENU_ report",
+    "length_menu_services": "Mostra _MENU_ servizi",
     "paginate": {
       "first": "Primo",
       "last": "Ultimo",
       "next": "Successivo",
       "previous": "Precedente"
     },
-    "processing": "Elaborazione...",
+    "processing": "In elaborazione...",
     "search": "Cerca:",
-    "select_rows_bans_0": "Nessun Divieto selezionato",
-    "select_rows_bans_1": "1 Divieto selezionato",
-    "select_rows_bans_plural": "%d Divieti selezionati",
-    "select_rows_cache_0": "Nessun File Cache selezionato",
-    "select_rows_cache_1": "1 File Cache selezionato",
-    "select_rows_cache_plural": "%d File Cache selezionati",
-    "select_rows_configs_0": "Nessuna Configurazione Personalizzata selezionata",
-    "select_rows_configs_1": "1 Configurazione Personalizzata selezionata",
-    "select_rows_configs_plural": "%d Configurazioni Personalizzate selezionate",
-    "select_rows_instances_0": "Nessuna Istanza selezionata",
-    "select_rows_instances_1": "1 Istanza selezionata",
-    "select_rows_instances_plural": "%d Istanze selezionate",
-    "select_rows_jobs_0": "Nessuna Tarefa selezionata",
-    "select_rows_jobs_1": "1 Tarefa selezionata",
-    "select_rows_jobs_plural": "%d Tarefas selezionate",
-    "select_rows_plugins_0": "Nessun Plugin selezionato",
-    "select_rows_plugins_1": "1 Plugin selezionato",
-    "select_rows_plugins_plural": "%d Plugins selezionati",
-    "select_rows_reports_0": "Nessun Report selezionato",
-    "select_rows_reports_1": "1 Report selezionato",
-    "select_rows_reports_plural": "%d Reports selezionati",
-    "select_rows_services_0": "Nessun Servizio selezionato",
-    "select_rows_services_1": "1 Servizio selezionato",
-    "select_rows_services_plural": "%d Servizi selezionati",
-    "zero_records_bans": "Nessun Divieto corrispondente trovato",
-    "zero_records_cache": "Nessun File Cache corrispondente trovato",
-    "zero_records_configs": "Nessuna Configurazione Personalizzata corrispondente trovata",
-    "zero_records_instances": "Nessuna Istanza corrispondente trovata",
-    "zero_records_jobs": "Nessuna Tarefa corrispondente trovata",
-    "zero_records_plugins": "Nessun Plugin corrispondente trovato",
-    "zero_records_reports": "Nessun Report corrispondente trovato",
-    "zero_records_services": "Nessun Servizio corrispondente trovato"
+    "select_rows_bans_0": "Nessun ban selezionato",
+    "select_rows_bans_1": "1 ban selezionato",
+    "select_rows_bans_plural": "%d ban selezionati",
+    "select_rows_cache_0": "Nessun file cache selezionato",
+    "select_rows_cache_1": "1 file cache selezionato",
+    "select_rows_cache_plural": "%d file cache selezionati",
+    "select_rows_configs_0": "Nessuna configurazione personalizzata selezionata",
+    "select_rows_configs_1": "1 configurazione personalizzata selezionata",
+    "select_rows_configs_plural": "%d configurazioni personalizzate selezionate",
+    "select_rows_instances_0": "Nessuna istanza selezionata",
+    "select_rows_instances_1": "1 istanza selezionata",
+    "select_rows_instances_plural": "%d istanze selezionate",
+    "select_rows_jobs_0": "Nessun processo selezionato",
+    "select_rows_jobs_1": "1 processo selezionato",
+    "select_rows_jobs_plural": "%d processi selezionati",
+    "select_rows_plugins_0": "Nessun plugin selezionato",
+    "select_rows_plugins_1": "1 plugin selezionato",
+    "select_rows_plugins_plural": "%d plugin selezionati",
+    "select_rows_reports_0": "Nessun report selezionato",
+    "select_rows_reports_1": "1 report selezionato",
+    "select_rows_reports_plural": "%d report selezionati",
+    "select_rows_services_0": "Nessun servizio selezionato",
+    "select_rows_services_1": "1 servizio selezionato",
+    "select_rows_services_plural": "%d servizi selezionati",
+    "zero_records_bans": "Nessun ban corrispondente trovato",
+    "zero_records_cache": "Nessun file cache corrispondente trovato",
+    "zero_records_configs": "Nessuna configurazione personalizzata corrispondente trovata",
+    "zero_records_instances": "Nessuna istanza corrispondente trovata",
+    "zero_records_jobs": "Nessun processo corrispondente trovato",
+    "zero_records_plugins": "Nessun plugin corrispondente trovato",
+    "zero_records_reports": "Nessun report corrispondente trovato",
+    "zero_records_services": "Nessun servizio corrispondente trovato"
   },
   "dev_log": {
     "copy_failed": "Copia del testo fallita:",
@@ -518,24 +518,24 @@
   },
   "error": {
     "401": {
-      "help": "Devi essere loggato per accedere a questa risorsa.",
-      "message": "Effettua il login per continuare.",
-      "title": "Autenticazione Richiesta"
+      "help": "Devi effettuare l'accesso per accedere a questa risorsa.",
+      "message": "Effettua l'accesso per continuare.",
+      "title": "Autenticazione richiesta"
     },
     "403": {
       "help": "Verifica le tue credenziali o contatta un amministratore se credi sia un errore.",
       "message": "Non hai il permesso di accedere a questa pagina.",
-      "title": "Accesso Negato"
+      "title": "Accesso negato"
     },
     "404": {
       "help": "Verifica che l'URL sia corretto o contatta un amministratore se credi sia un errore.",
       "message": "La risorsa richiesta non è stata trovata.",
-      "title": "Non Trovato"
+      "title": "Non trovato"
     },
     "5xx": {
       "help": "Riprova più tardi o contatta un amministratore se il problema persiste.",
       "message": "Si è verificato un errore imprevisto del server.",
-      "title": "Errore del Server"
+      "title": "Errore del server"
     },
     "reports_load_error": "Errore durante il caricamento dei report. Riprova aggiornando la pagina."
   },
@@ -552,7 +552,7 @@
     "blog": "Blog",
     "documentation": "Documentazione",
     "license": "Licenza",
-    "made_by": "fatto da",
+    "made_by": "Fatto da",
     "privacy": "Privacy",
     "support": "Supporto"
   },
@@ -561,52 +561,52 @@
       "remember_me": "Ricordami"
     },
     "help": {
-      "ban_specific_service": "Il blocco verrà applicato solo a questo servizio specifico.",
+      "ban_specific_service": "Il ban verrà applicato solo a questo servizio specifico.",
       "hostname_length_limit": "Il nome host è limitato a 256 caratteri.",
       "hostname_special_chars": "Solo `/` e `:` sono consentiti per la specifica di protocollo/porta.",
       "photo_extensions": "Consentiti JPG, GIF o PNG. Dimensione massima: 800KB."
     },
     "label": {
       "2fa_code": "Codice 2FA",
-      "2fa_code_or_recovery": "Codice 2FA o Codice di Recupero",
-      "admin_email": "Email Amministratore",
-      "admin_password": "Password Amministratore",
-      "admin_username": "Nome Utente Admin",
+      "2fa_code_or_recovery": "Codice 2FA o codice di recupero",
+      "admin_email": "Email dell'amministratore",
+      "admin_password": "Password dell'amministratore",
+      "admin_username": "Nome utente dell'amministratore",
       "auto_lets_encrypt": "Let's Encrypt Automatico",
-      "ban_scope": "Ambito Blocco",
-      "certificate_priority": "Priorità Certificato",
-      "challenge_type": "Tipo di Sfida",
-      "config_type": "Tipo Configurazione",
-      "configuration_name": "Nome Configurazione",
-      "confirm_password": "Conferma Password",
-      "current_password": "Password Attuale",
-      "custom_ssl_certificate": "Certificato SSL Personalizzato",
-      "custom_ssl_certificate_data": "Dati Certificato SSL Pers. (Base64/PEM)",
-      "custom_ssl_key": "Chiave SSL Personalizzata",
-      "custom_ssl_key_data": "Dati Chiave SSL Pers. (Base64/PEM)",
-      "dns_credential_items": "Elementi Credenziali DNS Let's Encrypt",
-      "dns_propagation": "Ritardo Propagazione DNS",
+      "ban_scope": "Ambito del ban",
+      "certificate_priority": "Priorità del certificato",
+      "challenge_type": "Tipologia di challenge",
+      "config_type": "Tipologia di configurazione",
+      "configuration_name": "Nome della configurazione",
+      "confirm_password": "Conferma la password",
+      "current_password": "Password attuale",
+      "custom_ssl_certificate": "Certificato SSL personalizzato",
+      "custom_ssl_certificate_data": "Dati certificato SSL Pers. (Base64/PEM)",
+      "custom_ssl_key": "Chiave SSL personalizzata",
+      "custom_ssl_key_data": "Dati chiave SSL Pers. (Base64/PEM)",
+      "dns_credential_items": "Elementi credenziali DNS Let's Encrypt",
+      "dns_propagation": "Ritardo propagazione DNS",
       "dns_provider": "Provider DNS",
       "email": "Email",
       "email_for_lets_encrypt": "Email per Let's Encrypt",
-      "end_date": "Data Fine",
-      "hostname": "Nome Host",
+      "end_date": "Data di fine",
+      "hostname": "Nome dell'host",
       "ip_address": "Indirizzo IP",
       "keywords": "Parole chiave",
-      "lets_encrypt_dns_credential_items": "Elementi Credenziali DNS Let's Encrypt",
+      "lets_encrypt_dns_credential_items": "Elementi credenziali DNS Let's Encrypt",
       "lets_encrypt_profile": "Profilo Let's Encrypt",
-      "license_key": "Chiave di Licenza",
+      "license_key": "Chiave della licenza",
       "name": "Nome",
-      "new_password": "Nuova Password",
+      "new_password": "Nuova password",
       "optional": "(Opzionale)",
       "password": "Password",
-      "raw_configuration": "Configurazione Grezza",
+      "raw_configuration": "Configurazione in formato raw",
       "reason": "Motivo",
       "secret_token": "Token Segreto",
-      "server_name": "Nome Server",
-      "service_name": "Nome Servizio",
+      "server_name": "Nome del server",
+      "service_name": "Nome del servizio",
       "theme": "Tema",
-      "type": "Tipo",
+      "type": "Tipologia",
       "ui_host": "Host UI",
       "ui_url": "URL UI",
       "use_custom_ssl": "Usa SSL Personalizzato",
@@ -615,14 +615,14 @@
       "wildcard_certificates": "Certificati Wildcard"
     },
     "placeholder": {
-      "2fa_code": "Inserisci codice",
-      "2fa_or_recovery": "Inserisci codice o codice di recupero",
+      "2fa_code": "Inserisci il codice",
+      "2fa_or_recovery": "Inserisci il codice 2FA o il codice di recupero",
       "config_name": "mia-config-personalizzata",
       "enter_username": "Inserisci il tuo nome utente",
       "keywords": "Parole chiave...",
       "search": "Cerca...",
-      "select_service": "Seleziona Servizio",
-      "secret_token": "Token Segreto",
+      "select_service": "Seleziona il servizio",
+      "secret_token": "Token segreto",
       "username_example": "mariorossi"
     },
     "validation": {
@@ -648,20 +648,20 @@
   },
   "job": {
     "history": {
-      "end_date": "Data Fine",
-      "start_date": "Data Inizio",
+      "end_date": "Data di fine",
+      "start_date": "Data di inizio",
       "success": "Successo"
     }
   },
   "link": {
-    "back_to_login": "Torna al Login",
-    "forgot_password": "Password Dimenticata?",
-    "here": "qui",
-    "more_info": "Maggiori Info",
-    "more_news": "Altre Notizie",
+    "back_to_login": "Torna al login",
+    "forgot_password": "Password dimenticata?",
+    "here": "Qui",
+    "more_info": "Maggiori informazioni",
+    "more_news": "Altre notizie",
     "privacy_policy": "Politica sulla Privacy",
-    "read_more": "Leggi di Più",
-    "see_more": "Vedi Altro",
+    "read_more": "Leggi di più",
+    "see_more": "Vedi altro",
     "upgrade": "Aggiornare?"
   },
   "modal": {
@@ -686,34 +686,34 @@
       "unban_confirmation_alert_plural": "Sei sicuro di voler sbloccare gli indirizzi IP selezionati?"
     },
     "button": {
-      "reset_template_confirm": "Ripristina Configurazione Modello"
+      "reset_template_confirm": "Ripristina configurazione del template"
     },
     "section": {
-      "ban_details": "Dettagli Blocco",
-      "ban_scope": "Ambito Blocco",
+      "ban_details": "Dettagli ban",
+      "ban_scope": "Ambito del ban",
       "delete": "Elimina"
     },
     "title": {
-      "add_bans": "Aggiungi Blocco/i",
-      "add_plugins": "Aggiungi Plugin",
-      "confirm_conversion": "Conferma Conversione",
-      "confirm_deletion": "Conferma Eliminazione",
-      "confirm_unban": "Conferma Sblocco",
-      "create_new_instance": "Crea Nuova Istanza",
-      "delete_instance": "Elimina Istanze",
+      "add_bans": "Aggiungi ban",
+      "add_plugins": "Aggiungi plugin",
+      "confirm_conversion": "Conferma conversione",
+      "confirm_deletion": "Conferma eliminazione",
+      "confirm_unban": "Conferma la rimozione del ban",
+      "create_new_instance": "Crea nuova istanza",
+      "delete_instance": "Elimina l'istanza",
       "from_plugin": "da Plugin",
-      "full_url": "URL Completo",
-      "job_history": "Ultime 10 Esecuzioni Tarefas",
-      "job_history_count": "Ultime {{count}} esecuzioni della Tarefa",
-      "recovery_codes": "Codici di Recupero",
-      "reset_template_config": "Ripristinare Configurazione Modello?",
-      "server_name_not_unique": "Nome Server non è Unico"
+      "full_url": "URL completo",
+      "job_history": "Ultime 10 esecuzioni del processo",
+      "job_history_count": "Ultime {{count}} esecuzioni del processo",
+      "recovery_codes": "Codici di recupero",
+      "reset_template_config": "Ripristinare configurazione del template?",
+      "server_name_not_unique": "Il nome del server non è unico"
     }
   },
   "mode": {
     "advanced": "Avanzato",
     "easy": "Facile",
-    "raw": "Grezzo"
+    "raw": "Raw"
   },
   "navbar": {
     "button": {
@@ -729,28 +729,28 @@
   },
   "navigation": {
     "about": "Informazioni",
-    "bans": "Divieti",
+    "bans": "Ban",
     "cache": "Cache",
     "configs": "Configurazioni",
-    "extra_pages": "Pagine Extra",
-    "global_config": "Configurazione Globale",
+    "extra_pages": "Pagine extra",
+    "global_config": "Configurazione globale",
     "home": "Home",
     "instances": "Istanze",
     "jobs": "Processi",
     "logs": "Log",
     "misc": "Varie",
-    "mode_selection": "Selezione Modalità",
+    "mode_selection": "Selezione modalità",
     "more": "Altro...",
     "plugins": "Plugin",
-    "plugins_pages": "Pagine Plugin",
+    "plugins_pages": "Pagine plugin",
     "pro": "Pro",
     "reports": "Report",
     "services": "Servizi",
     "support": "Supporto",
-    "templates": "Modelli"
+    "templates": "Template"
   },
   "news": {
-    "image_alt": "Immagine notizia",
+    "image_alt": "Immagine della notizia",
     "posted_on": "Pubblicato il"
   },
   "newsletter": {
@@ -782,38 +782,38 @@
   },
   "pro": {
     "alert": {
-      "overlapped_1": "Hai più servizi attivi di quanto consentito dalla tua licenza!",
+      "overlapped_1": "Hai più servizi attivi di quanto è consentito dalla tua licenza!",
       "overlapped_2": "Elimina o converti alcuni servizi in modalità Bozza per raggiungere il limite di {{pro_services}} servizi."
     },
     "button": {
-      "all_features_available": "Tutte le Funzionalità Disponibili",
-      "awaiting_compliance": "In Attesa di Conformità...",
-      "renew_license": "Rinnova Licenza",
-      "suspended_license": "Licenza Sospesa",
-      "upgrade_to_pro": "Aggiorna a PRO"
+      "all_features_available": "Tutte le funzionalità disponibili",
+      "awaiting_compliance": "In attesa di conformità...",
+      "renew_license": "Rinnova licenza",
+      "suspended_license": "Licenza sospesa",
+      "upgrade_to_pro": "Aggiorna alla versione PRO"
     },
     "expiration_date": {
       "expires_in": "Scade tra",
-      "title": "Data Scadenza Pro",
+      "title": "Data scadenza della versione PRO",
       "unknown": "Data di scadenza sconosciuta"
     },
     "key": {
       "title": {
-        "activate": "Attiva Chiave",
-        "update": "Aggiorna Chiave"
+        "activate": "Attiva la chiave",
+        "update": "Aggiorna la chiave"
       }
     },
     "overlay": {
-      "pro_feature": "Funzionalità Pro",
-      "upgrade_required": "Aggiorna a Pro per accedere a questa funzionalità"
+      "pro_feature": "Funzionalità della versione PRO",
+      "upgrade_required": "Aggiorna alla versione PRO per accedere a questa funzionalità"
     },
     "status": {
-      "draft_services_count": "{{draft_services}} Servizio/i in Bozza",
+      "draft_services_count": "{{draft_services}} servizio/i in Bozza",
       "expired": "SCADUTO",
       "free_version": "Versione GRATUITA",
       "overlapped": "SUPERATO",
       "pro_version": "Versione PRO",
-      "services_count": "{{online_services}} Servizio/i Online / {{pro_services}} Servizio/i PRO",
+      "services_count": "{{online_services}} servizio/i online / {{pro_services}} servizio/i PRO",
       "suspended": "SOSPESO",
       "title": "Stato"
     }
@@ -827,14 +827,14 @@
       "refresh_recovery_codes": "Aggiornare i tuoi codici di recupero invaliderà quelli precedenti."
     },
     "card": {
-      "coming_soon": "Prossimamente",
+      "coming_soon": "Presto disponibile",
       "title": {
-        "2fa": "Autenticazione a Due Fattori (2FA)",
-        "change_password": "Cambia Password",
-        "change_theme": "Cambia Tema",
-        "coming_soon": "Prossimamente",
-        "edit_profile": "Modifica Profilo",
-        "refresh_recovery_codes": "Aggiorna Codici di Recupero",
+        "2fa": "Autenticazione a due fattori (2FA)",
+        "change_password": "Cambia password",
+        "change_theme": "Cambia tema",
+        "coming_soon": "Presto disponibile",
+        "edit_profile": "Modifica profilo",
+        "refresh_recovery_codes": "Aggiorna codici di recupero",
         "sessions": "Sessioni"
       }
     },
@@ -843,12 +843,12 @@
     },
     "session": {
       "browser": "Browser",
-      "creation_date": "Data Creazione",
-      "current_session": "Sessione Attuale",
+      "creation_date": "Data di creazione",
+      "current_session": "Sessione attuale",
       "device": "Dispositivo",
       "ip_address": "Indirizzo IP",
-      "last_activity": "Ultima Attività",
-      "os": "Sistema Operativo",
+      "last_activity": "Ultima attività",
+      "os": "Sistema operativo",
       "title": "Sessione"
     },
     "tab": {
@@ -858,7 +858,7 @@
     }
   },
   "scope": {
-    "all_services": "Tutti i Servizi",
+    "all_services": "Tutti i servizi",
     "global": "Globale",
     "global_all_services": "Globale (tutti i servizi)",
     "service_specific": "Specifico del servizio"
@@ -866,30 +866,30 @@
   "searchpane": {
     "active": "Attivo",
     "async": "Asincrono",
-    "clear": "Pulisci Tutto",
-    "collapse_0": "Pannelli di Ricerca",
-    "collapse_message": "Comprimi Tutto",
-    "collapse_plural": "Pannelli di Ricerca (%d)",
+    "clear": "Pulisci tutto",
+    "collapse_0": "Pannelli di ricerca",
+    "collapse_message": "Comprimi tutto",
+    "collapse_plural": "Pannelli di ricerca (%d)",
     "count": "{total}",
     "countFiltered": "{shown} ({total})",
     "country": "Paese",
     "created": "Creato",
     "data": "Dati",
     "empty": "Nessun pannello di ricerca disponibile",
-    "end_date": "Data Fine",
-    "first_seen": "Visto per la Prima Volta",
+    "end_date": "Data di fine",
+    "first_seen": "Visto per la prima volta",
     "future_30d": "Più di 30 giorni",
     "health": "Salute",
     "interval": "Intervallo",
     "ip_address": "Indirizzo IP",
-    "job_name": "Nome Tarefa",
+    "job_name": "Nome del processo",
     "last_24h": "Ultime 24 ore",
     "last_30d": "Ultimi 30 giorni",
     "last_7d": "Ultimi 7 giorni",
-    "last_run": "Ultima Esecuzione",
-    "last_seen": "Visto per l'Ultima Volta",
-    "last_update": "Ultimo Aggiornamento",
-    "loading": "Caricamento Pannelli di Ricerca...",
+    "last_run": "Ultima esecuzione",
+    "last_seen": "Visto per l'ultima volta",
+    "last_update": "Ultimo aggiornamento",
+    "loading": "Caricamento pannelli di ricerca...",
     "method": "Metodo",
     "next_24h": "Prossime 24 ore",
     "next_30d": "Prossimi 30 giorni",
@@ -897,61 +897,61 @@
     "older_30d": "Più di 30 giorni",
     "plugin": "Plugin",
     "reason": "Motivo",
-    "reload": "Ricarica Richiesta",
+    "reload": "Ricarica richiesta",
     "scope": "Ambito",
-    "security_mode": "Modalità Sicurezza",
-    "server_name": "Nome Server",
+    "security_mode": "Modalità di sicurezza",
+    "server_name": "Nome del server",
     "service": "Servizio",
-    "show_message": "Mostra Tutto",
-    "start_date": "Data Inizio",
-    "status_code": "Codice di Stato",
+    "show_message": "Mostra tutto",
+    "start_date": "Data di inizio",
+    "status_code": "Codice dello stato",
     "stream": "Supporto Stream",
-    "template": "Modello",
-    "title_0": "Nessun Filtro Attivo",
-    "title_1": "Filtro Attivo - 1",
-    "title_plural": "Filtri Attivi - %d",
-    "type": "Tipo",
+    "template": "Template",
+    "title_0": "Nessun filtro attivo",
+    "title_1": "Filtro attivo - 1",
+    "title_plural": "Filtri attivi - %d",
+    "type": "Tipologia",
     "url": "URL",
     "version": "Versione"
   },
   "settings": {
     "custom_config": {
-      "title": "Configurazione Personalizzata"
+      "title": "Configurazione personalizzata"
     },
     "multiple": {
       "description": "Configura qui multiple istanze di impostazioni per questo plugin.",
-      "title": "Impostazioni Multiple"
+      "title": "Impostazioni multiple"
     }
   },
   "setup": {
     "step1": {
       "subtitle": "Crea il tuo account amministratore.",
-      "title": "Utente Amministratore"
+      "title": "Utente amministratore"
     },
     "step2": {
       "section": {
-        "custom_certificate": "Certificato Personalizzato",
+        "custom_certificate": "Certificato personalizzato",
         "lets_encrypt": "Let's Encrypt",
         "reverse_proxy": "Proxy Inverso"
       },
       "subtitle": "Configura le impostazioni specifiche della UI web.",
-      "title": "Impostazioni UI"
+      "title": "Impostazioni della UI"
     },
     "step3": {
       "label": {
-        "final_url": "URL UI BunkerWeb"
+        "final_url": "URL UI per BunkerWeb"
       },
       "subtitle": "Rivedi le tue impostazioni prima di completare la configurazione.",
       "title": "Riepilogo"
     },
     "status": {
       "admin_user_exists": "🧑‍🚀 Esiste già un utente amministratore. Procedi al passo successivo.",
-      "reverse_proxy_configured": "↪️ Un proxy inverso è già configurato per l'interfaccia web. Procedi al passo successivo.",
-      "secure_password": "Password Sicura",
-      "unique_server_name": "Nome Server Unico"
+      "reverse_proxy_configured": "↪️ Il reverse proxy è già stato configurato per l'interfaccia web. Procedi al passo successivo.",
+      "secure_password": "Password sicura",
+      "unique_server_name": "Nome unico del server"
     },
     "subtitle": "Segui i passi per completare la procedura guidata di configurazione.",
-    "title": "Procedura Guidata di Configurazione"
+    "title": "Procedura guidata di configurazione"
   },
   "status": {
     "admin_user_exists": "🧑‍🚀 Esiste già un utente amministratore. Procedi al passo successivo.",
@@ -961,7 +961,7 @@
     "draft": "Bozza",
     "failed": "Fallito",
     "loading": "Caricamento...",
-    "loading_bans": "Caricamento divieti...",
+    "loading_bans": "Caricamento ban...",
     "loading_cache_file": "Caricamento file cache...",
     "loading_cache_files": "Caricamento file cache...",
     "loading_custom_config": "Caricamento configurazione personalizzata...",
@@ -976,10 +976,10 @@
     "no": "No",
     "no_data": "Nessun dato da mostrare.",
     "no_history": "Nessuna cronologia disponibile.",
-    "no_item": "Nessun Elemento",
+    "no_item": "Nessun elemento",
     "no_notifications": "Nessuna notifica da mostrare.",
-    "no_steps": "Nessun Passo Disponibile",
-    "no_steps_description": "Questo modello non ha passi da configurare.",
+    "no_steps": "Nessuno step disponibile",
+    "no_steps_description": "Questo template non ha step da configurare.",
     "online": "Online",
     "partial": "Parziale",
     "pinging_instances": "Ping delle istanze, attendere prego...",
@@ -990,13 +990,13 @@
         "not_available": "La pagina del plugin non è ancora disponibile durante la fase beta."
       }
     },
-    "reverse_proxy_configured": "↪️ Un proxy inverso è già configurato per l'interfaccia web. Procedi al passo successivo.",
-    "secure_password": "Password Sicura",
+    "reverse_proxy_configured": "↪️ Il reverse proxy è già stato configurato. Procedi al passo successivo.",
+    "secure_password": "Password sicura",
     "setting_up_bunkerweb": "Configurazione del tuo BunkerWeb, attendere prego...",
     "success": "Successo",
-    "template_in_use": "Questo servizio utilizza attualmente il modello \"{{template}}\" gestito tramite \"{{method}}\".",
-    "template_in_use_description": "Non sono consentite modifiche al di fuori del modello corrente. Effettua le modifiche utilizzando il modello corrente o passa alla modalità Avanzata/Grezza.",
-    "unique_server_name": "Nome Server Unico",
+    "template_in_use": "Questo servizio utilizza attualmente il template \"{{template}}\" gestito tramite \"{{method}}\".",
+    "template_in_use_description": "Non sono consentite modifiche al di fuori del template corrente. Effettua le modifiche utilizzando il template corrente o passa alla modalità Avanzata/Raw.",
+    "unique_server_name": "Nome unico del server",
     "up": "Attivo",
     "yes": "Sì"
   },
@@ -1008,18 +1008,18 @@
     "card": {
       "download_logs": {
         "help": "Tutti i dati privati saranno anonimizzati.",
-        "title": "Download Log"
+        "title": "Download log"
       },
       "extract_config": {
-        "title": "Estrai Configurazione"
+        "title": "Estrai configurazione"
       },
       "support_link": {
-        "title": "Link Supporto"
+        "title": "Link del supporto"
       }
     }
   },
   "tab": {
-    "custom_certificate": "Certificato Personalizzato",
+    "custom_certificate": "Certificato personalizzato",
     "lets_encrypt": "Let's Encrypt"
   },
   "table": {
@@ -1033,31 +1033,31 @@
       "data": "Dati",
       "date": "Data",
       "description": "Descrizione",
-      "end_date": "Data Fine",
-      "file_name": "Nome File",
+      "end_date": "Data di fine",
+      "file_name": "Nome del file",
       "health": "Salute",
-      "hostname": "Nome Host",
+      "hostname": "Nome dell'host",
       "id": "ID",
       "interval": "Intervallo",
       "ip_address": "Indirizzo IP",
-      "job_name": "Nome Tarefa",
-      "last_run": "Ultima Esecuzione",
-      "last_seen": "Visto l'Ultima Volta",
-      "last_update": "Ultimo Aggiornamento",
+      "job_name": "Nome del processo",
+      "last_run": "Ultima esecuzione",
+      "last_seen": "Visto l'ultima volta",
+      "last_update": "Ultimo aggiornamento",
       "method": "Metodo",
       "name": "Nome",
       "plugin": "Plugin",
       "reason": "Motivo",
       "reload": "Ricarica",
       "scope": "Ambito",
-      "security_mode": "Modalità Sicurezza",
-      "server_name": "Nome Server",
+      "security_mode": "Modalità sicurezza",
+      "server_name": "Nome del server",
       "service": "Servizio",
-      "service_name": "Nome Servizio",
-      "status_code": "Codice Stato",
+      "service_name": "Nome del servizio",
+      "status_code": "Codice dello stato",
       "stream": "Stream",
-      "template": "Modello",
-      "time_left": "Tempo Rimanente",
+      "template": "Template",
+      "time_left": "Tempo rimanente",
       "type": "Tipo",
       "url": "URL",
       "user_agent": "User-Agent",
@@ -1065,7 +1065,7 @@
     }
   },
   "template": {
-    "none": "Nessun Modello"
+    "none": "Nessun template"
   },
   "theme": {
     "dark": "Scuro",
@@ -1087,21 +1087,21 @@
   "tooltip": {
     "auto_lets_encrypt": "Se richiedere automaticamente un certificato Let's Encrypt.",
     "button": {
-      "convert_service_to_draft": "Converti Servizio {{name}} in Bozza",
-      "convert_service_to_online": "Converti Servizio {{name}} in Online",
-      "delete_config": "Elimina Configurazione Personalizzata {{name}}",
-      "delete_instance": "Elimina Istanza {{hostname}}",
-      "delete_plugin": "Elimina Plugin {{name}}",
-      "delete_service": "Elimina Servizio {{name}}",
-      "ping_instance": "Fai Ping all'Istanza {{hostname}}",
-      "reload_instance": "Ricarica Istanza {{hostname}}",
+      "convert_service_to_draft": "Converti il servizio {{name}} in Bozza",
+      "convert_service_to_online": "Converti il servizio {{name}} in Online",
+      "delete_config": "Elimina configurazione personalizzata {{name}}",
+      "delete_instance": "Elimina l'istanza {{hostname}}",
+      "delete_plugin": "Elimina il plugin {{name}}",
+      "delete_service": "Elimina il servizio {{name}}",
+      "ping_instance": "Fai il ping all'istanza {{hostname}}",
+      "reload_instance": "Ricarica istanza {{hostname}}",
       "reset_default": "Ripristina valore predefinito",
       "reset_global": "Ripristina valore globale",
-      "run_job": "Esegui Tarefa {{job}}",
-      "stop_instance": "Ferma Istanza {{hostname}}",
-      "unban_ip": "Sblocca {{ip}}"
+      "run_job": "Esegui il processo {{job}}",
+      "stop_instance": "Ferma istanza {{hostname}}",
+      "unban_ip": "Rimuovi il ban per l'IP {{ip}}"
     },
-    "cannot_delete_original_ban": "Impossibile eliminare la voce di blocco originale.",
+    "cannot_delete_original_ban": "Impossibile eliminare la voce di ban originale.",
     "cannot_remove_disabled": "Impossibile rimuovere perché una o più impostazioni sono disabilitate.",
     "certificate_priority": "Scegli se dare priorità al certificato dal percorso file o dai dati base64.",
     "challenge_type": "Il tipo di sfida da usare per la verifica Let's Encrypt (http o dns).",
@@ -1112,8 +1112,8 @@
       "http": "Configurazioni applicate globalmente a livello HTTP di Nginx.",
       "modsec": "Configurazioni ModSecurity applicate dopo il caricamento dell'OWASP Core Rule Set, o usate se il Core Rule Set non è caricato.",
       "modsec_crs": "Configurazioni ModSecurity applicate prima del caricamento dell'OWASP Core Rule Set.",
-      "server_http": "Configurazioni applicate a livello Server HTTP (host virtuale) di Nginx.",
-      "server_stream": "Configurazioni applicate a livello Server Stream di Nginx.",
+      "server_http": "Configurazioni applicate a livello server HTTP (host virtuale) di Nginx.",
+      "server_stream": "Configurazioni applicate a livello server Stream di Nginx.",
       "stream": "Configurazioni applicate globalmente a livello Stream di Nginx."
     },
     "confirm_password_match": "La password di conferma deve corrispondere alla password inserita sopra.",
@@ -1144,17 +1144,17 @@
     "latest_version_installed": "Stai usando l'ultima versione.",
     "license_key": "La tua chiave di licenza BunkerWeb PRO.",
     "link": {
-      "access_plugin_page": "Accedi alla Pagina {{name}}",
-      "access_service": "Accedi al Servizio {{name}}",
-      "clone_config": "Clona Configurazione Personalizzata {{name}}",
-      "clone_service": "Clona Servizio {{name}}",
+      "access_plugin_page": "Accedi alla pagina {{name}}",
+      "access_service": "Accedi al servizio {{name}}",
+      "clone_config": "Clona la configurazione personalizzata {{name}}",
+      "clone_service": "Clona il servizio {{name}}",
       "download_file": "Scarica {{filename}}",
-      "edit_config": "Modifica Configurazione Personalizzata {{name}}",
-      "edit_service": "Modifica Servizio {{service}}",
-      "export_service": "Esporta Configurazione Servizio {{name}}",
-      "view_config": "Visualizza Configurazione Personalizzata {{name}}",
+      "edit_config": "Modifica la configurazione personalizzata {{name}}",
+      "edit_service": "Modifica il servizio {{service}}",
+      "export_service": "Esporta la configurazione del servizio {{name}}",
+      "view_config": "Visualizza la configurazione personalizzata {{name}}",
       "view_file": "Visualizza {{filename}}",
-      "view_service": "Visualizza Servizio {{name}}"
+      "view_service": "Visualizza il servizio {{name}}"
     },
     "modal": {
       "title": {
@@ -1163,15 +1163,15 @@
     },
     "multisite_setting": "Questa è un'impostazione multisito, che influisce su più servizi se definita globalmente.",
     "new_version_available": "È disponibile una nuova versione!",
-    "no_cache": "Nessun file di cache trovato per questa tarefa.",
-    "no_history": "Nessuna cronologia di esecuzione trovata per questa tarefa.",
+    "no_cache": "Nessun file di cache trovato per questo processo.",
+    "no_history": "Nessuna cronologia di esecuzione trovata per questo processo.",
     "no_log_files": "Nessun file di log disponibile.",
     "no_page_available": "Nessuna pagina dedicata disponibile per questo plugin.",
     "password_requirements": "La password deve avere almeno 8 caratteri e includere 1 lettera maiuscola, 1 numero e 1 carattere speciale.",
-    "pro_feature": "Questo è un fitur PRO.",
+    "pro_feature": "Questo è una funzionalità della versione PRO.",
     "readonly_db_action_disabled": "Disabilitato: Il database è in modalità sola lettura.",
-    "readonly_user_action_disabled": "Disabilitato: Il tuo account è di sola lettura, azione '{{action}}' disabilitata.",
-    "remove_ban_entry": "Rimuovi questa voce di blocco dalla lista.",
+    "readonly_user_action_disabled": "Disabilitato: Il tuo account è in modalità di sola lettura, l'azione '{{action}}' è disabilitata.",
+    "remove_ban_entry": "Rimuovi questa voce di ban dalla lista.",
     "reset_template_settings": "Ripristina tutte le impostazioni nella vista del modello corrente ai loro valori predefiniti.",
     "server_name": "Il nome di dominio primario o nome del server per questo servizio.",
     "stream_support": {
@@ -1181,17 +1181,17 @@
     },
     "table": {
       "bans": {
-        "actions": "Azioni disponibili per questo Divieto",
-        "country": "Paese dell'indirizzo IP bloccato",
-        "date": "Data e ora di creazione del Divieto",
-        "details": "Mostra dettagli Divieto",
-        "end_date": "Data e ora di scadenza del Divieto",
-        "ip_address": "Indirizzo IP bloccato",
-        "reason": "Motivo del blocco",
-        "scope": "Ambito del blocco (Globale o Specifico del servizio)",
-        "select_all": "Seleziona tutti i Divieti",
-        "service": "Servizio da cui è originato il blocco (se l'ambito è Specifico)",
-        "time_left": "Tempo rimanente fino alla scadenza del Divieto"
+        "actions": "Azioni disponibili per questo ban",
+        "country": "Paese dell'indirizzo IP bannato",
+        "date": "Data e ora di creazione del ban",
+        "details": "Mostra dettagli del ban",
+        "end_date": "Data e ora di scadenza del ban",
+        "ip_address": "Indirizzo IP bannato",
+        "reason": "Motivo del ban",
+        "scope": "Ambito del ban (Globale o specifico del servizio)",
+        "select_all": "Seleziona tutti i ban",
+        "service": "Servizio da cui è originato il ban (se l'ambito è specifico)",
+        "time_left": "Tempo rimanente fino alla scadenza del ban"
       },
       "cache": {
         "actions": "Azioni disponibili per questo file cache",
@@ -1201,83 +1201,83 @@
         "job_name": "Tarefa che ha generato questo file cache",
         "last_update": "Data e ora dell'ultimo aggiornamento del file cache",
         "plugin": "Plugin associato alla tarefa che ha generato questo file cache",
-        "service": "Servizio associato a questo file cache (o Globale)"
+        "service": "Servizio associato a questo file cache (o globale)"
       },
       "configs": {
-        "actions": "Azioni disponibili per questa Configurazione Personalizzata",
-        "checksum": "Checksum del contenuto della Configurazione Personalizzata",
-        "details": "Mostra dettagli Configurazione Personalizzata",
-        "method": "Metodo di creazione della Configurazione Personalizzata (es. ui, file)",
-        "name": "Nome della Configurazione Personalizzata",
-        "select_all": "Seleziona tutte le Configurazioni Personalizzate",
-        "service": "Servizio associato alla Configurazione Personalizzata (o Globale)",
-        "template": "Indica se la Configurazione Personalizzata proviene da un modello",
-        "type": "Tipo o contesto della Configurazione Personalizzata (es. HTTP, MODSEC)"
+        "actions": "Azioni disponibili per questa configurazione personalizzata",
+        "checksum": "Checksum del contenuto della configurazione personalizzata",
+        "details": "Mostra dettagli configurazione personalizzata",
+        "method": "Metodo di creazione della configurazione personalizzata (es. ui, file)",
+        "name": "Nome della configurazione personalizzata",
+        "select_all": "Seleziona tutte le configurazioni personalizzate",
+        "service": "Servizio associato alla configurazione personalizzata (o globale)",
+        "template": "Indica se la configurazione personalizzata proviene da un modello",
+        "type": "Tipo o contesto della configurazione personalizzata (es. HTTP, MODSEC)"
       },
       "instances": {
-        "actions": "Azioni disponibili per questa Istanza",
-        "created": "Data e ora della prima registrazione dell'Istanza",
-        "details": "Mostra dettagli Istanza",
-        "health": "Stato di salute dell'Istanza (Attiva, Inattiva, Caricamento)",
-        "hostname": "Nome host o URL dell'Istanza",
-        "last_seen": "Data e ora dell'ultima volta vista dell'Istanza",
-        "method": "Metodo di creazione dell'Istanza (es. ui, autoconf)",
-        "name": "Nome definito dall'utente o autogenerato dell'Istanza",
-        "select_all": "Seleziona tutte le Istanze",
-        "type": "Tipo dell'Istanza (es. Container, Statico)"
+        "actions": "Azioni disponibili per questa istanza",
+        "created": "Data e ora della prima registrazione dell'istanza",
+        "details": "Mostra dettagli dell'istanza",
+        "health": "Stato di salute dell'istanza (Attiva, Inattiva, In caricamento)",
+        "hostname": "Nome dell'host o URL dell'istanza",
+        "last_seen": "Data e ora dell'ultima volta della vista dell'istanza",
+        "method": "Metodo di creazione dell'istanza (es. ui, autoconf)",
+        "name": "Nome definito dall'utente o autogenerato dell'istanza",
+        "select_all": "Seleziona tutte le istanze",
+        "type": "Tipo dell'istanza (es. Container, Statico)"
       },
       "jobs": {
-        "actions": "Azioni disponibili per questa Tarefa",
-        "async": "Indica se la Tarefa viene eseguita in modo asincrono",
-        "details": "Mostra dettagli Tarefa",
-        "interval": "Frequenza di esecuzione della Tarefa",
-        "last_run": "Stato dell'ultima esecuzione della Tarefa (Successo/Fallimento)",
-        "name": "Nome Tarefa",
-        "plugin": "Plugin associato alla Tarefa",
-        "reload": "Indica se la Tarefa attiva un ricaricamento di BunkerWeb",
-        "select_all": "Seleziona tutte le Tarefas"
+        "actions": "Azioni disponibili per questo processo",
+        "async": "Indica se il processo viene eseguita in modo asincrono",
+        "details": "Mostra dettagli del processo",
+        "interval": "Frequenza di esecuzione del processo",
+        "last_run": "Stato dell'ultima esecuzione del processo (Successo/Fallimento)",
+        "name": "Nome del processo",
+        "plugin": "Plugin associato al processo",
+        "reload": "Indica se il processo attiva un ricaricamento di BunkerWeb",
+        "select_all": "Seleziona tutti i processi"
       },
       "plugins": {
-        "actions": "Azioni disponibili per questo Plugin",
-        "description": "Descrizione del Plugin",
-        "details": "Mostra dettagli Plugin",
-        "id": "Identificatore unico del Plugin",
-        "method": "Metodo di creazione del Plugin (es. ui, core)",
-        "name": "Nome Plugin",
-        "select_all": "Seleziona tutti i Plugin",
+        "actions": "Azioni disponibili per questo plugin",
+        "description": "Descrizione del plugin",
+        "details": "Mostra dettagli del plugin",
+        "id": "Identificatore unico del plugin",
+        "method": "Metodo di creazione del plugin (es. ui, core)",
+        "name": "Nome del plugin",
+        "select_all": "Seleziona tutti i plugin",
         "stream": "Indica se il plugin supporta la modalità stream",
-        "type": "Tipo del Plugin (Core, Esterno, Pro, UI)",
-        "version": "Versione Plugin"
+        "type": "Tipologia del plugin (Core, Esterno, Pro, UI)",
+        "version": "Versione plugin"
       },
       "reports": {
         "country": "Paese associato all'indirizzo IP riportato",
         "data": "Dati aggiuntivi relativi al report",
         "date": "Data e ora di generazione del report",
-        "details": "Mostra dettagli Report",
+        "details": "Mostra dettagli report",
         "ip_address": "Indirizzo IP che ha attivato il report",
         "method": "Metodo HTTP della richiesta riportata",
         "reason": "Motivo per cui il report è stato generato",
         "security_mode": "Modalità di sicurezza attiva quando è stato generato il report",
-        "select_all": "Seleziona tutti i Report",
-        "server_name": "Nome server (vhost) che ha generato il report",
+        "select_all": "Seleziona tutti i report",
+        "server_name": "Nome del server (vhost) che ha generato il report",
         "status_code": "Codice di stato HTTP restituito per la richiesta riportata",
         "url": "URL target nella richiesta riportata",
         "user_agent": "Stringa User-Agent dalla richiesta riportata"
       },
       "select_rows_for_action": "Seleziona una o più righe per eseguire un'azione.",
       "services": {
-        "actions": "Azioni disponibili per questo Servizio",
-        "created": "Data e ora di creazione del Servizio",
-        "details": "Mostra dettagli Servizio",
-        "last_update": "Data e ora dell'ultimo aggiornamento del Servizio",
-        "method": "Metodo di creazione del Servizio (es. ui, file)",
-        "name": "Nome Servizio",
-        "select_all": "Seleziona tutti i Servizi",
-        "type": "Tipo Servizio (Online/Bozza)"
+        "actions": "Azioni disponibili per questo servizio",
+        "created": "Data e ora di creazione del servizio",
+        "details": "Mostra dettagli del servizio",
+        "last_update": "Data e ora dell'ultimo aggiornamento del servizio",
+        "method": "Metodo di creazione del servizio (es. ui, file)",
+        "name": "Nome del servizio",
+        "select_all": "Seleziona tutti i servizi",
+        "type": "Tipo del servizio (Online/Bozza)"
       }
     },
-    "ui_host": "Il nome host o indirizzo IP che servirà la UI di BunkerWeb tramite il proxy inverso.",
-    "ui_url": "Il percorso URL usato per accedere alla UI di BunkerWeb tramite il proxy inverso.",
+    "ui_host": "Il nome dell'host o indirizzo IP che servirà la UI di BunkerWeb tramite il reverse proxy.",
+    "ui_url": "Il percorso URL usato per accedere alla UI di BunkerWeb tramite il reverse proxy.",
     "ui_url_security": "L'uso di un percorso URL non standard e difficile da indovinare migliora la sicurezza.",
     "use_custom_ssl": "Se usare un certificato SSL personalizzato invece di Let's Encrypt.",
     "use_lets_encrypt_staging": "Se usare l'ambiente di staging di Let's Encrypt per i test (genera certificati non attendibili).",
@@ -1292,12 +1292,12 @@
   "validation": {
     "default_field_name": "Questo campo",
     "invalid_date": "Data non valida",
-    "ip_global_duplicate": "Questo indirizzo IP è già bloccato globalmente.",
+    "ip_global_duplicate": "Questo indirizzo IP è già stato bannato globalmente.",
     "ip_invalid": "Formato indirizzo IP non valido.",
     "ip_required": "Indirizzo IP è obbligatorio.",
-    "ip_service_duplicate": "Questo indirizzo IP è già bloccato per il servizio selezionato ({{service}}).",
+    "ip_service_duplicate": "Questo indirizzo IP è già stato bannato per il servizio selezionato ({{service}}).",
     "pattern": "Inserisci un valore valido per {{field}}.",
     "required": "{{field}} è obbligatorio.",
-    "service_required_for_ban": "È necessario selezionare un servizio per un blocco specifico del servizio."
+    "service_required_for_ban": "È necessario selezionare un servizio per un ban specifico del servizio."
   }
 }
