@@ -29,6 +29,7 @@
 - [LINUX] Support Fedora 42
 - [CONTRIBUTION] Thank you @nimro27 for your contribution to the Ingress controller (#2141 and #2143)
 - [CONTRIBUTION] Thank you @TomVivant for your contribution to the `letsencrypt` plugin (#2149)
+- [CONTRIBUTION] Thank you @wiseweb-works for your contribution to the `web UI` by adding the Turkish language (#2204)
 
 ## v1.6.2-rc1 - 2025/03/29
 
