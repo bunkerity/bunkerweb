@@ -115,7 +115,7 @@
                                    data-bs-placement="bottom"
                                    data-bs-original-title="..."
                                    data-i18n="{% if is_readonly %}tooltip.link.view_service{% else %}tooltip.link.edit_service{% endif %}"
-                                   data-i18n-options='{"name": "{{ service['id'] }}"}'>
+                                   data-i18n-options='{"service": "{{ service['id'] }}"}'>
                                     <i class="bx bx-{% if is_readonly %}show{% else %}edit{% endif %} bx-xs"></i>
                                 </a>
                                 <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Disabled by readonly"{% endif %}>
