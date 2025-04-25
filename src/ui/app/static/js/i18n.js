@@ -179,11 +179,13 @@ i18next
       applyTranslations();
       updateLanguageSelector(i18next.language);
       $("[name='language']").val(i18next.language);
+      $("#newsletter-locale").val(i18next.language);
 
       i18next.on("languageChanged", function (lng) {
         i18next.language = getAlpha2(lng);
         applyTranslations();
         updateLanguageSelector(lng);
+        $("#newsletter-locale").val(i18next.language);
       });
 
       // Handle language selection clicks
