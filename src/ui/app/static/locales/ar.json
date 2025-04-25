@@ -593,6 +593,8 @@
       "hostname": "اسم المضيف",
       "ip_address": "عنوان IP",
       "keywords": "الكلمات المفتاحية",
+      "lets_encrypt_dns_credential_items": "عناصر بيانات اعتماد DNS لـ Let's Encrypt",
+      "lets_encrypt_profile": "ملف تعريف Let's Encrypt",
       "license_key": "مفتاح الترخيص",
       "name": "الاسم",
       "new_password": "كلمة مرور جديدة",
@@ -1139,6 +1141,7 @@
     "global_config_source": "القيمة موروثة من التكوين العام.",
     "instance_not_up": "المثيل {{hostname}} لا يستجيب حاليًا ('up').",
     "latest_version_installed": "أنت تستخدم أحدث إصدار.",
+    "lets_encrypt_profile": "ملف التعريف الذي سيتم استخدامه لـ Let's Encrypt (classic، tlsserver، shortlived).",
     "license_key": "مفتاح ترخيص BunkerWeb PRO الخاص بك.",
     "link": {
       "access_plugin_page": "الوصول إلى صفحة {{name}}",

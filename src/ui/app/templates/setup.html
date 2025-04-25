@@ -165,7 +165,7 @@
                                                         <label id="label-username"
                                                                for="username"
                                                                class="form-label fw-semibold text-truncate">
-                                                            <span data-i18n="form.label.admin_email">Admin Email</span><span id="email-optional"> (<i><span data-i18n="form.label.optional">optional</span></i>)</span>
+                                                            <span data-i18n="form.label.admin_email">Admin Email</span><span id="email-optional"> <i><span data-i18n="form.label.optional">(optional)</span></i></span>
                                                         </label>
                                                         <div class="d-flex align-items-center">
                                                             <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
@@ -531,7 +531,7 @@
                                                                            {% if lets_encrypt_challenge == 'http' %}disabled{% endif %} />
                                                                 </div>
                                                             </div>
-                                                            <div class="col-md-6 pb-3">
+                                                            <div class="col-md-4 pb-3">
                                                                 <div class="d-flex justify-content-between align-items-center">
                                                                     <label id="label-EMAIL_LETS_ENCRYPT"
                                                                            for="EMAIL_LETS_ENCRYPT"
@@ -565,7 +565,7 @@
                                                                        aria-labelledby="label-EMAIL_LETS_ENCRYPT"
                                                                        pattern="{{ plugins_settings.get('EMAIL_LETS_ENCRYPT', {'regex': '^.*$'})['regex'] }}" />
                                                             </div>
-                                                            <div class="col-md-6 pb-3">
+                                                            <div class="col-md-4 pb-3">
                                                                 <div class="d-flex justify-content-between align-items-center">
                                                                     <label id="label-LETS_ENCRYPT_CHALLENGE"
                                                                            for="LETS_ENCRYPT_CHALLENGE"
@@ -599,6 +599,44 @@
                                                                         <option value="{{ challenge }}"
                                                                                 {% if lets_encrypt_challenge == challenge %}selected{% endif %}>
                                                                             {{ challenge }}
+                                                                        </option>
+                                                                    {% endfor %}
+                                                                </select>
+                                                            </div>
+                                                            <div class="col-md-4 pb-3">
+                                                                <div class="d-flex justify-content-between align-items-center">
+                                                                    <label id="label-LETS_ENCRYPT_PROFILE"
+                                                                           for="LETS_ENCRYPT_PROFILE"
+                                                                           class="form-label fw-semibold text-truncate"
+                                                                           data-i18n="form.label.lets_encrypt_profile">
+                                                                        Let's Encrypt Profile
+                                                                    </label>
+                                                                    <div class="d-flex align-items-center">
+                                                                        {% if lets_encrypt_profile != "classic" %}
+                                                                            <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                                                                                  data-bs-toggle="tooltip"
+                                                                                  data-bs-placement="top"
+                                                                                  data-bs-original-title="From global configuration">
+                                                                                <span class="bx bx-globe bx-xs"></span>
+                                                                            </span>
+                                                                        {% endif %}
+                                                                        <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
+                                                                              data-bs-toggle="tooltip"
+                                                                              data-bs-placement="top"
+                                                                              data-bs-original-title="The profile to use for Let's Encrypt (classic, tlsserver, shortlived)."
+                                                                              data-i18n="tooltip.lets_encrypt_profile">
+                                                                            <span class="bx bx-question-mark bx-xs"></span>
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                                <select id="LETS_ENCRYPT_PROFILE"
+                                                                        name="LETS_ENCRYPT_PROFILE"
+                                                                        class="form-select mt-1"
+                                                                        aria-labelledby="label-LETS_ENCRYPT_PROFILE">
+                                                                    {% for profile in plugins_settings.get('LETS_ENCRYPT_PROFILE', {'select': ["classic", "tlsserver", "shortlived"]})['select'] %}
+                                                                        <option value="{{ profile }}"
+                                                                                {% if lets_encrypt_profile == profile %}selected{% endif %}>
+                                                                            {{ profile }}
                                                                         </option>
                                                                     {% endfor %}
                                                                 </select>

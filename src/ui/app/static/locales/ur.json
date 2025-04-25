@@ -593,6 +593,8 @@
       "hostname": "ہوسٹ نام",
       "ip_address": "IP ایڈریس",
       "keywords": "کلیدی الفاظ",
+      "lets_encrypt_dns_credential_items": "Let's Encrypt DNS کریڈینشل آئٹمز",
+      "lets_encrypt_profile": "Let's Encrypt پروفائل",
       "license_key": "لائسنس کلید",
       "name": "نام",
       "new_password": "نیا پاس ورڈ",
@@ -1138,6 +1140,7 @@
     "email_length": "ای میل 1 اور 256 حروف کے درمیان ہونا چاہیے۔",
     "global_config_source": "قدر عالمی کنفیگریشن سے وراثت میں ملی ہے۔",
     "instance_not_up": "انسٹینس {{hostname}} فی الحال جواب نہیں دے رہا ہے ('up')۔",
+    "lets_encrypt_profile": "Let's Encrypt کے لیے استعمال ہونے والا پروفائل (classic، tlsserver، shortlived)۔",
     "latest_version_installed": "آپ تازہ ترین ورژن چلا رہے ہیں۔",
     "license_key": "آپ کی BunkerWeb PRO لائسنس کلید۔",
     "link": {
