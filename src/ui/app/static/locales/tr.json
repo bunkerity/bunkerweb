@@ -593,6 +593,8 @@
       "hostname": "Hostname",
       "ip_address": "IP Adresi",
       "keywords": "Anahtar Kelimeler",
+      "lets_encrypt_dns_credential_items": "Let's Encrypt DNS Kimlik Bilgileri",
+      "lets_encrypt_profile": "Let's Encrypt Profili",
       "license_key": "Lisans Anahtarı",
       "name": "Ad",
       "new_password": "Yeni Şifre",
@@ -1138,6 +1140,7 @@
     "email_length": "E-posta 1 ile 256 karakter arasında olmalıdır.",
     "global_config_source": "Değer global yapılandırmadan miras alınmıştır.",
     "instance_not_up": "Instance {{hostname}} şu anda yanıt vermiyor ('açık' değil).",
+    "lets_encrypt_profile": "Let's Encrypt için kullanılacak profil (classic, tlsserver, shortlived).",
     "latest_version_installed": "En son sürümü kullanıyorsunuz.",
     "license_key": "BunkerWeb PRO lisans anahtarınız.",
     "link": {
