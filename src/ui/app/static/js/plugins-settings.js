@@ -403,7 +403,7 @@ $(document).ready(() => {
         $("<input>", {
           type: "hidden",
           name: name,
-          value: $("<div>").text(value).html(), // Sanitize the value
+          value: value,
         }),
       );
     };
