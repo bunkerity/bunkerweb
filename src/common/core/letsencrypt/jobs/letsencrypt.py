@@ -47,9 +47,9 @@ class Provider(BaseModel):
 class CloudflareProvider(Provider):
     """Cloudflare DNS provider."""
 
-    dns_cloudflare_api_token: str
-    dns_cloudflare_email: str
-    dns_cloudflare_api_key: str
+    dns_cloudflare_api_token: str = ""
+    dns_cloudflare_email: str = ""
+    dns_cloudflare_api_key: str = ""
 
     _validate_aliases = alias_model_validator(
         {
@@ -58,6 +58,17 @@ class CloudflareProvider(Provider):
             "dns_cloudflare_api_key": ("dns_cloudflare_api_key", "cloudflare_api_key", "api_key"),
         }
     )
+
+    def get_formatted_credentials(self) -> bytes:
+        """Return the formatted credentials, excluding defaults."""
+        return "\n".join(f"{key} = {value}" for key, value in self.model_dump(exclude={"file_type"}, exclude_defaults=True).items()).encode("utf-8")
+
+    @model_validator(mode="after")
+    def validate_cloudflare_credentials(cls):
+        """Validate Cloudflare credentials."""
+        if not cls.dns_cloudflare_api_token and not (cls.dns_cloudflare_email and cls.dns_cloudflare_api_key):
+            raise ValueError("Either 'dns_cloudflare_api_token' or both 'dns_cloudflare_email' and 'dns_cloudflare_api_key' must be provided.")
+        return cls
 
 
 class DesecProvider(Provider):
