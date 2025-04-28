@@ -64,11 +64,11 @@ class CloudflareProvider(Provider):
         return "\n".join(f"{key} = {value}" for key, value in self.model_dump(exclude={"file_type"}, exclude_defaults=True).items()).encode("utf-8")
 
     @model_validator(mode="after")
-    def validate_cloudflare_credentials(cls):
+    def validate_cloudflare_credentials(self):
         """Validate Cloudflare credentials."""
-        if not cls.dns_cloudflare_api_token and not (cls.dns_cloudflare_email and cls.dns_cloudflare_api_key):
+        if not self.dns_cloudflare_api_token and not (self.dns_cloudflare_email and self.dns_cloudflare_api_key):
             raise ValueError("Either 'dns_cloudflare_api_token' or both 'dns_cloudflare_email' and 'dns_cloudflare_api_key' must be provided.")
-        return cls
+        return self
 
 
 class DesecProvider(Provider):
