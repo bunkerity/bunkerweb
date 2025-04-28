@@ -75,6 +75,7 @@ class UIDatabase(Database):
                 "method": ui_user.method,
                 "admin": ui_user.admin,
                 "theme": ui_user.theme,
+                "language": ui_user.language,
                 "totp_secret": ui_user.totp_secret,
                 "creation_date": ui_user.creation_date.astimezone(),
                 "update_date": ui_user.update_date.astimezone(),
