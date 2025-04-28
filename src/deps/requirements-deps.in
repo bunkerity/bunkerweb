@@ -1,4 +1,4 @@
-importlib-metadata==8.6.1
+importlib-metadata==8.7.0
 pip==25.0.1
 pip-compile-multi==3.0.0
 pip-tools==7.4.1
