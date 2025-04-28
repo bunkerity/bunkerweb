@@ -98,7 +98,7 @@ function updateLanguageSelector(lang) {
 function saveLanguage(rootUrl, language) {
   // Don't send request if we're in setup mode or readonly
   const isReadOnly = $("#is-read-only").val().trim() === "True";
-  if (window.location.pathname.includes("/setup") || isReadOnly) {
+  if (isSetup || isReadOnly) {
     return;
   }
 
@@ -206,16 +206,14 @@ function changeLanguage(lang) {
   localStorage.setItem("language", alpha2);
   i18next.changeLanguage(alpha2);
 
-  if (!isSetup) {
-    // Get the root URL for the API endpoint
-    const rootUrl = $("#home-path")
-      .val()
-      .trim()
-      .replace(/\/home$/, "/set_language");
+  // Get the root URL for the API endpoint
+  const rootUrl = $("#home-path")
+    .val()
+    .trim()
+    .replace(/\/home$/, "/set_language");
 
-    // Save language preference to server
-    debouncedSaveLanguage(rootUrl, alpha2);
-  }
+  // Save language preference to server
+  debouncedSaveLanguage(rootUrl, alpha2);
 }
 
 // Handle DataTables collection button translations
