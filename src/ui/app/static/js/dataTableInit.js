@@ -17,6 +17,19 @@ function initializeDataTable(config) {
     dataTableOptions,
   } = config;
 
+  // Consistent entityName logic
+  const allowedNames = [
+    "bans",
+    "cache",
+    "configs",
+    "instances",
+    "jobs",
+    "plugins",
+    "reports",
+    "services",
+  ];
+  const entityName = allowedNames.includes(tableName) ? tableName : "items";
+
   // Ensure dataTableOptions is always an object
   const safeDataTableOptions =
     dataTableOptions && typeof dataTableOptions === "object"
@@ -24,7 +37,7 @@ function initializeDataTable(config) {
       : {};
 
   const applyLanguageSettings = (dtInstance, translator) => {
-    const languageConfig = configureI18n(translator, tableName);
+    const languageConfig = configureI18n(translator, entityName);
     // Merge new settings into existing ones to preserve any custom settings
     dtInstance.settings()[0].oLanguage = $.extend(
       true,
@@ -39,11 +52,11 @@ function initializeDataTable(config) {
     typeof safeDataTableOptions.language === "object"
   ) {
     safeDataTableOptions.language = {
-      ...configureI18n(t, tableName),
+      ...configureI18n(t, entityName),
       ...safeDataTableOptions.language,
     };
   } else {
-    safeDataTableOptions.language = configureI18n(t, tableName);
+    safeDataTableOptions.language = configureI18n(t, entityName);
   }
 
   $.fn.dataTable.ext.buttons.toggle_filters = {
@@ -83,11 +96,11 @@ function initializeDataTable(config) {
     ) {
       if (total === 0) {
         return t(
-          `datatable.info_empty_${tableName}`,
-          `No ${tableName} available`,
+          `datatable.info_empty_${entityName}`,
+          `No ${entityName} available`,
         );
       }
-      return t(`datatable.info_${tableName}`, {
+      return t(`datatable.info_${entityName}`, {
         start: start,
         end: end,
         total: total,
@@ -340,14 +353,13 @@ function initializeDataTable(config) {
 /**
  * Configure DataTable internationalization using i18next
  * @param {Function} t - The i18next translation function
- * @param {string} tableName - The name of the table for context-specific translations
+ * @param {string} entityName - The name of the entity for context-specific translations
  * @returns {Object} - DataTables language configuration object
  */
-function configureI18n(t, tableName) {
+function configureI18n(t, entityName) {
   // Ensure t is a function, provide a fallback if not (e.g., during initial load before i18next is ready)
   const translate =
     typeof t === "function" ? t : (key, fallback) => fallback || key;
-  const entityName = tableName || "items";
 
   return {
     emptyTable: translate(
