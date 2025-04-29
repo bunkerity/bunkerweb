@@ -30,7 +30,7 @@ from werkzeug.routing.exceptions import BuildError
 from app.models.biscuit import BiscuitMiddleware
 from app.models.reverse_proxied import ReverseProxied
 
-from app.dependencies import BW_CONFIG, DATA, DB, EXTERNAL_PLUGINS_PATH, PRO_PLUGINS_PATH, safe_reload_plugins
+from app.dependencies import BW_CONFIG, DATA, DB, CORE_PLUGINS_PATH, EXTERNAL_PLUGINS_PATH, PRO_PLUGINS_PATH, safe_reload_plugins
 from app.models.models import AnonymousUser
 from app.utils import (
     BISCUIT_PUBLIC_KEY_FILE,
@@ -366,8 +366,10 @@ def refresh_app_context():
         app.config[hook_info["key"]] = []
 
     # Find all python files in ui directories
+    core_ui_py_files = list(CORE_PLUGINS_PATH.glob("*/ui/hooks.py"))
     external_ui_py_files = list(EXTERNAL_PLUGINS_PATH.glob("*/ui/hooks.py"))
     pro_ui_py_files = list(PRO_PLUGINS_PATH.glob("*/ui/hooks.py"))
+    core_bp_dirs = list(CORE_PLUGINS_PATH.glob("*/ui/blueprints"))
     external_bp_dirs = list(EXTERNAL_PLUGINS_PATH.glob("*/ui/blueprints"))
     pro_bp_dirs = list(PRO_PLUGINS_PATH.glob("*/ui/blueprints"))
 
@@ -378,7 +380,7 @@ def refresh_app_context():
     blueprint_registry = {}
 
     # --- LOAD HOOKS ---
-    for py_file in chain(external_ui_py_files, pro_ui_py_files):
+    for py_file in chain(core_ui_py_files, external_ui_py_files, pro_ui_py_files):
         if not py_file.is_file():
             continue
 
@@ -426,7 +428,7 @@ def refresh_app_context():
             LOGGER.debug(f"Removed {hook_dir} from sys.path for obsolete hook {module_name}")
 
     # --- LOAD BLUEPRINTS ---
-    for bp_dir in chain(pro_bp_dirs, external_bp_dirs):
+    for bp_dir in chain(pro_bp_dirs, external_bp_dirs, core_bp_dirs):
         if not bp_dir.is_dir():
             continue
 

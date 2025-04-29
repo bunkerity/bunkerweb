@@ -8,9 +8,9 @@ build==1.2.2.post1 \
     --hash=sha256:1d61c0887fa860c01971625baae8bdd338e517b836a2f70dd1f7aa3a6b2fc5b5 \
     --hash=sha256:b36993e92ca9375a219c99e606a122ff365a760a2d4bba0caa09bd5278b608b7
     # via pip-tools
-certifi==2025.1.31 \
-    --hash=sha256:3d5da6925056f6f18f119200434a4780a94263f10d1c21d032a6f6b2baa20651 \
-    --hash=sha256:ca78db4565a652026a4db2bcdf68f2fb589ea80d0be70e03929ed730746b84fe
+certifi==2025.4.26 \
+    --hash=sha256:0a816057ea3cdefcef70270d2c515e4506bbc954f417fa5ade2021213bb8f0c6 \
+    --hash=sha256:30350364dfe371162649852c63336a15c70c6510c2ad5015b21c2345311805f3
     # via requests
 charset-normalizer==3.4.1 \
     --hash=sha256:0167ddc8ab6508fe81860a57dd472b2ef4060e8d378f0cc555707126830f2537 \
@@ -123,9 +123,9 @@ idna==3.10 \
     --hash=sha256:12f65c9b470abda6dc35cf8e63cc574b1c52b11df2c86030af0ac09b01b13ea9 \
     --hash=sha256:946d195a0d259cbba61165e88e65941f16e9b36ea6ddb97f00452bae8b1287d3
     # via requests
-importlib-metadata==8.6.1 \
-    --hash=sha256:02a89390c1e15fdfdc0d7c6b25cb3e62650d0494005c97d6f148bf5b9787525e \
-    --hash=sha256:310b41d755445d74569f993ccfc22838295d9fe005425094fad953d7f15c8580
+importlib-metadata==8.7.0 \
+    --hash=sha256:d13b81ad223b890aa16c5471f2ac3056cf76c5f10f82d6f9292f0b415f389000 \
+    --hash=sha256:e5dd1551894c77868a30651cef00984d50e1002d06942a7101d34870c5f02afd
     # via
     #   -r requirements-deps.in
     #   build
@@ -168,9 +168,9 @@ requests==2.32.3 \
     # via
     #   -r requirements-deps.in
     #   pip-tools
-setuptools==79.0.1 \
-    --hash=sha256:128ce7b8f33c3079fd1b067ecbb4051a66e8526e7b65f6cec075dfc650ddfa88 \
-    --hash=sha256:e147c0549f27767ba362f9da434eab9c5dc0045d5304feb602a0af001089fc51
+setuptools==80.0.0 \
+    --hash=sha256:a38f898dcd6e5380f4da4381a87ec90bd0a7eec23d204a5552e80ee3cab6bd27 \
+    --hash=sha256:c40a5b3729d58dd749c0f08f1a07d134fb8a0a3d7f87dc33e7c5e1f762138650
     # via pip-upgrader
 terminaltables==3.1.10 \
     --hash=sha256:ba6eca5cb5ba02bba4c9f4f985af80c54ec3dccf94cfcd190154386255e47543 \

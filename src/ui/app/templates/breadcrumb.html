@@ -4,7 +4,7 @@
         {% with breadcrumbs = request.path.split("/") %}
             {% set breadcrumbs_ns = namespace(working_url="") %}
             {% for breadcrumb in breadcrumbs %}
-                {% set check_i18n = true %}
+                {% set check_i18n = breadcrumb != "letsencrypt" %}
                 {% set breadcrumb_prefix = "" %}
                 {% set breadcrumb_url = url_for(breadcrumb.replace('_', '-')) %}
                 {% if breadcrumb == current_endpoint %}

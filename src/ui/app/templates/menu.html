@@ -126,10 +126,7 @@
                             <li class="menu-item{% if current_endpoint == page|lower %} active{% endif %}">
                                 <a href="{{ url_for(page) }}" class="menu-link">
                                     <i class="menu-icon tf-icons bx bx-extension"></i>
-                                    <div class="text-truncate"
-                                         data-i18n="navigation.{{ page | replace('-', '_') }}">
-                                        {{ page | replace('-', ' ') | replace('_', ' ') |title }}
-                                    </div>
+                                    <div class="text-truncate">{{ page | replace('-', ' ') | replace('_', ' ') |title }}</div>
                                 </a>
                             </li>
                         {% endfor %}

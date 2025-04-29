@@ -22,7 +22,7 @@ certbot-dns-ionos==2024.11.9
 certbot-dns-scaleway==0.0.7
 
 cryptography==44.0.2
-importlib-metadata==8.6.1
+importlib-metadata==8.7.0
 maxminddb==2.6.3
 pydantic==2.11.3
 python-magic==0.4.27
