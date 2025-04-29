@@ -533,7 +533,7 @@ try:
 
         domains = domains.replace(" ", ",")
         LOGGER.info(
-            f"Asking certificates for domain(s) : {domains} (email = {data['email']}){' using staging' if data['staging'] else ''} with {data['challenge']} challenge..."
+            f"Asking certificates for domain(s) : {domains} (email = {data['email']}){' using staging' if data['staging'] else ''} with {data['challenge']} challenge, using {data['profile']!r} profile..."
         )
 
         if (
@@ -575,7 +575,7 @@ try:
 
                 staging = key == "staging"
                 LOGGER.info(
-                    f"Asking wildcard certificates for domain(s) : {domains} (email = {email}){' using staging ' if staging else ''} with {'dns' if provider in provider_classes else 'http'} challenge..."
+                    f"Asking wildcard certificates for domain(s) : {domains} (email = {email}){' using staging ' if staging else ''} with {'dns' if provider in provider_classes else 'http'} challenge, using {data['profile']!r} profile..."
                 )
 
                 # Add wildcard certificate names to active set
@@ -676,6 +676,28 @@ try:
 
                 if delete_proc.returncode == 0:
                     LOGGER.info(f"Successfully deleted certificate {cert_name}")
+                    # Remove any remaining files for this certificate
+                    cert_dir = DATA_PATH.joinpath("live", cert_name)
+                    archive_dir = DATA_PATH.joinpath("archive", cert_name)
+                    renewal_file = DATA_PATH.joinpath("renewal", f"{cert_name}.conf")
+                    for path in (cert_dir, archive_dir):
+                        if path.exists():
+                            try:
+                                for file in path.glob("*"):
+                                    try:
+                                        file.unlink()
+                                    except Exception as e:
+                                        LOGGER.error(f"Failed to remove file {file}: {e}")
+                                path.rmdir()
+                                LOGGER.info(f"Removed directory {path}")
+                            except Exception as e:
+                                LOGGER.error(f"Failed to remove directory {path}: {e}")
+                        if renewal_file.exists():
+                            try:
+                                renewal_file.unlink()
+                                LOGGER.info(f"Removed renewal file {renewal_file}")
+                            except Exception as e:
+                                LOGGER.error(f"Failed to remove renewal file {renewal_file}: {e}")
                 else:
                     LOGGER.error(f"Failed to delete certificate {cert_name}: {delete_proc.stdout}")
         else:
