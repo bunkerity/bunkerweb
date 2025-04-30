@@ -421,7 +421,7 @@
                                                          aria-labelledby="lets-encrypt-tab">
                                                         <div class="row pb-0">
                                                             <h6 class="mt-2 mb-2 fw-bold">Let's Encrypt</h6>
-                                                            <div class="col-4 pb-3">
+                                                            <div class="col-6 col-md-4 pb-3">
                                                                 <div class="d-flex justify-content-between align-items-center">
                                                                     <label id="label-AUTO_LETS_ENCRYPT"
                                                                            for="AUTO_LETS_ENCRYPT"
@@ -457,7 +457,7 @@
                                                                            {% if auto_lets_encrypt == "yes" %}checked{% endif %} />
                                                                 </div>
                                                             </div>
-                                                            <div class="col-4 pb-3">
+                                                            <div class="col-6 col-md-4 pb-3">
                                                                 <div class="d-flex justify-content-between align-items-center">
                                                                     <label id="label-USE_LETS_ENCRYPT_STAGING"
                                                                            for="USE_LETS_ENCRYPT_STAGING"
@@ -493,7 +493,7 @@
                                                                            {% if lets_encrypt_staging == "yes" %}checked{% endif %} />
                                                                 </div>
                                                             </div>
-                                                            <div class="col-4 pb-3"
+                                                            <div class="col-6 col-md-4 pb-3"
                                                                  {% if lets_encrypt_challenge == 'http' %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Wildcard certificates are only supported with DNS challenges." data-i18n="tooltip.wildcard_dns_only"{% endif %}>
                                                                 <div class="d-flex justify-content-between align-items-center">
                                                                     <label id="label-USE_LETS_ENCRYPT_WILDCARD"
@@ -531,16 +531,16 @@
                                                                            {% if lets_encrypt_challenge == 'http' %}disabled{% endif %} />
                                                                 </div>
                                                             </div>
-                                                            <div class="col-md-4 pb-3">
+                                                            <div class="col-6 col-md-4 pb-3">
                                                                 <div class="d-flex justify-content-between align-items-center">
-                                                                    <label id="label-EMAIL_LETS_ENCRYPT"
-                                                                           for="EMAIL_LETS_ENCRYPT"
+                                                                    <label id="label-LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES"
+                                                                           for="LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES"
                                                                            class="form-label fw-semibold text-truncate"
-                                                                           data-i18n="form.label.email_for_lets_encrypt">
-                                                                        Email for Let's Encrypt
+                                                                           data-i18n="form.label.lets_encrypt_disable_public_suffixes">
+                                                                        Disable Public Suffixes (PSL Blacklist)
                                                                     </label>
                                                                     <div class="d-flex align-items-center">
-                                                                        {% if email_lets_encrypt %}
+                                                                        {% if lets_encrypt_disable_public_suffixes == "no" %}
                                                                             <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
                                                                                   data-bs-toggle="tooltip"
                                                                                   data-bs-placement="top"
@@ -551,57 +551,21 @@
                                                                         <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
                                                                               data-bs-toggle="tooltip"
                                                                               data-bs-placement="top"
-                                                                              data-bs-original-title="The email address that will be used for Let's Encrypt"
-                                                                              data-i18n="tooltip.email_lets_encrypt">
+                                                                              data-bs-original-title="Disable certificate requests for domains matching the Public Suffix List (recommended)."
+                                                                              data-i18n="tooltip.lets_encrypt_disable_public_suffixes">
                                                                             <span class="bx bx-question-mark bx-xs"></span>
                                                                         </span>
                                                                     </div>
                                                                 </div>
-                                                                <input id="EMAIL_LETS_ENCRYPT"
-                                                                       name="EMAIL_LETS_ENCRYPT"
-                                                                       type="text"
-                                                                       placeholder="John.doe@example.com"
-                                                                       class="form-control plugin-setting mt-1"
-                                                                       aria-labelledby="label-EMAIL_LETS_ENCRYPT"
-                                                                       pattern="{{ plugins_settings.get('EMAIL_LETS_ENCRYPT', {'regex': '^.*$'})['regex'] }}" />
-                                                            </div>
-                                                            <div class="col-md-4 pb-3">
-                                                                <div class="d-flex justify-content-between align-items-center">
-                                                                    <label id="label-LETS_ENCRYPT_CHALLENGE"
-                                                                           for="LETS_ENCRYPT_CHALLENGE"
-                                                                           class="form-label fw-semibold text-truncate"
-                                                                           data-i18n="form.label.challenge_type">
-                                                                        Challenge Type
-                                                                    </label>
-                                                                    <div class="d-flex align-items-center">
-                                                                        {% if lets_encrypt_challenge == "dns" %}
-                                                                            <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
-                                                                                  data-bs-toggle="tooltip"
-                                                                                  data-bs-placement="top"
-                                                                                  data-bs-original-title="From global configuration">
-                                                                                <span class="bx bx-globe bx-xs"></span>
-                                                                            </span>
-                                                                        {% endif %}
-                                                                        <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
-                                                                              data-bs-toggle="tooltip"
-                                                                              data-bs-placement="top"
-                                                                              data-bs-original-title="The challenge type to use for Let's Encrypt (http or dns)."
-                                                                              data-i18n="tooltip.challenge_type">
-                                                                            <span class="bx bx-question-mark bx-xs"></span>
-                                                                        </span>
-                                                                    </div>
+                                                                <div class="form-check form-switch mt-1">
+                                                                    <input id="LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES"
+                                                                           name="LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES"
+                                                                           class="form-check-input"
+                                                                           type="checkbox"
+                                                                           role="switch"
+                                                                           aria-labelledby="label-LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES"
+                                                                           {% if lets_encrypt_disable_public_suffixes == "yes" %}checked{% endif %} />
                                                                 </div>
-                                                                <select id="LETS_ENCRYPT_CHALLENGE"
-                                                                        name="LETS_ENCRYPT_CHALLENGE"
-                                                                        class="form-select mt-1"
-                                                                        aria-labelledby="label-LETS_ENCRYPT_CHALLENGE">
-                                                                    {% for challenge in plugins_settings.get('LETS_ENCRYPT_CHALLENGE', {'select': ['http', 'dns']})['select'] %}
-                                                                        <option value="{{ challenge }}"
-                                                                                {% if lets_encrypt_challenge == challenge %}selected{% endif %}>
-                                                                            {{ challenge }}
-                                                                        </option>
-                                                                    {% endfor %}
-                                                                </select>
                                                             </div>
                                                             <div class="col-md-4 pb-3">
                                                                 <div class="d-flex justify-content-between align-items-center">
@@ -637,6 +601,114 @@
                                                                         <option value="{{ profile }}"
                                                                                 {% if lets_encrypt_profile == profile %}selected{% endif %}>
                                                                             {{ profile }}
+                                                                        </option>
+                                                                    {% endfor %}
+                                                                </select>
+                                                            </div>
+                                                            <div class="col-md-4 pb-3">
+                                                                <div class="d-flex justify-content-between align-items-center">
+                                                                    <label id="label-LETS_ENCRYPT_CUSTOM_PROFILE"
+                                                                           for="LETS_ENCRYPT_CUSTOM_PROFILE"
+                                                                           class="form-label fw-semibold text-truncate"
+                                                                           data-i18n="form.label.lets_encrypt_custom_profile">
+                                                                        Let's Encrypt Custom Profile
+                                                                    </label>
+                                                                    <div class="d-flex align-items-center">
+                                                                        {% if lets_encrypt_custom_profile %}
+                                                                            <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                                                                                  data-bs-toggle="tooltip"
+                                                                                  data-bs-placement="top"
+                                                                                  data-bs-original-title="From global configuration">
+                                                                                <span class="bx bx-globe bx-xs"></span>
+                                                                            </span>
+                                                                        {% endif %}
+                                                                        <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
+                                                                              data-bs-toggle="tooltip"
+                                                                              data-bs-placement="top"
+                                                                              data-bs-original-title="The custom profile to use for Let's Encrypt (e.g. 'my_custom_profile')."
+                                                                              data-i18n="tooltip.lets_encrypt_custom_profile">
+                                                                            <span class="bx bx-question-mark bx-xs"></span>
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                                <input id="LETS_ENCRYPT_CUSTOM_PROFILE"
+                                                                       name="LETS_ENCRYPT_CUSTOM_PROFILE"
+                                                                       type="text"
+                                                                       placeholder=""
+                                                                       value="{{ lets_encrypt_custom_profile }}"
+                                                                       class="form-control plugin-setting mt-1"
+                                                                       aria-labelledby="label-LETS_ENCRYPT_CUSTOM_PROFILE"
+                                                                       pattern="{{ plugins_settings.get('LETS_ENCRYPT_CUSTOM_PROFILE', {'regex': '^.*$'})['regex'] }}" />
+                                                            </div>
+                                                            <div class="col-md-6 pb-3">
+                                                                <div class="d-flex justify-content-between align-items-center">
+                                                                    <label id="label-EMAIL_LETS_ENCRYPT"
+                                                                           for="EMAIL_LETS_ENCRYPT"
+                                                                           class="form-label fw-semibold text-truncate"
+                                                                           data-i18n="form.label.email_for_lets_encrypt">
+                                                                        Email for Let's Encrypt
+                                                                    </label>
+                                                                    <div class="d-flex align-items-center">
+                                                                        {% if email_lets_encrypt %}
+                                                                            <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                                                                                  data-bs-toggle="tooltip"
+                                                                                  data-bs-placement="top"
+                                                                                  data-bs-original-title="From global configuration">
+                                                                                <span class="bx bx-globe bx-xs"></span>
+                                                                            </span>
+                                                                        {% endif %}
+                                                                        <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
+                                                                              data-bs-toggle="tooltip"
+                                                                              data-bs-placement="top"
+                                                                              data-bs-original-title="The email address that will be used for Let's Encrypt"
+                                                                              data-i18n="tooltip.email_lets_encrypt">
+                                                                            <span class="bx bx-question-mark bx-xs"></span>
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                                <input id="EMAIL_LETS_ENCRYPT"
+                                                                       name="EMAIL_LETS_ENCRYPT"
+                                                                       type="text"
+                                                                       placeholder="John.doe@example.com"
+                                                                       value="{{ email_lets_encrypt }}"
+                                                                       class="form-control plugin-setting mt-1"
+                                                                       aria-labelledby="label-EMAIL_LETS_ENCRYPT"
+                                                                       pattern="{{ plugins_settings.get('EMAIL_LETS_ENCRYPT', {'regex': '^.*$'})['regex'] }}" />
+                                                            </div>
+                                                            <div class="col-md-6 pb-3">
+                                                                <div class="d-flex justify-content-between align-items-center">
+                                                                    <label id="label-LETS_ENCRYPT_CHALLENGE"
+                                                                           for="LETS_ENCRYPT_CHALLENGE"
+                                                                           class="form-label fw-semibold text-truncate"
+                                                                           data-i18n="form.label.challenge_type">
+                                                                        Challenge Type
+                                                                    </label>
+                                                                    <div class="d-flex align-items-center">
+                                                                        {% if lets_encrypt_challenge == "dns" %}
+                                                                            <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                                                                                  data-bs-toggle="tooltip"
+                                                                                  data-bs-placement="top"
+                                                                                  data-bs-original-title="From global configuration">
+                                                                                <span class="bx bx-globe bx-xs"></span>
+                                                                            </span>
+                                                                        {% endif %}
+                                                                        <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
+                                                                              data-bs-toggle="tooltip"
+                                                                              data-bs-placement="top"
+                                                                              data-bs-original-title="The challenge type to use for Let's Encrypt (http or dns)."
+                                                                              data-i18n="tooltip.challenge_type">
+                                                                            <span class="bx bx-question-mark bx-xs"></span>
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                                <select id="LETS_ENCRYPT_CHALLENGE"
+                                                                        name="LETS_ENCRYPT_CHALLENGE"
+                                                                        class="form-select mt-1"
+                                                                        aria-labelledby="label-LETS_ENCRYPT_CHALLENGE">
+                                                                    {% for challenge in plugins_settings.get('LETS_ENCRYPT_CHALLENGE', {'select': ['http', 'dns']})['select'] %}
+                                                                        <option value="{{ challenge }}"
+                                                                                {% if lets_encrypt_challenge == challenge %}selected{% endif %}>
+                                                                            {{ challenge }}
                                                                         </option>
                                                                     {% endfor %}
                                                                 </select>
