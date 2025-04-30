@@ -25,7 +25,7 @@
 - [MISC] Add new container security using docker scout in CI/CD pipeline
 - [AUTOCONF] (Re) Remove possible infinite loop in Kubernetes integration
 - [UI] Integrate Biscuit authentication and key management
-- [DEPS] Update coreruleset-v4 version to v4.13.0
+- [DEPS] Update coreruleset-v4 version to v4.14.0
 - [DEPS] Update lua-resty-openssl version to v1.6.1
 - [DEPS] Update lua-resty-session version to v4.1.1
 - [LINUX] Support Fedora 42

@@ -4,7 +4,4 @@
 ##! Bash - Tilde Expansion
 ##! Detects the following patterns which are common in Unix shell scripts and one-liners
 
-~\+$
-~\+\d+
-~-$
-~-\d+
+~\d+

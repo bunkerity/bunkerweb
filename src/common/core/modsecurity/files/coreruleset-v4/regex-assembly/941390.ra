@@ -3,7 +3,7 @@
 
 ##!+ i
 ##!^ \b
-##!$ \s*\(
+##!$ \s*[({]
 
 eval
 settimeout
@@ -14,3 +14,7 @@ atob
 btoa
 prompt
 confirm
+import
+fetch
+console\.log
+console\.dir

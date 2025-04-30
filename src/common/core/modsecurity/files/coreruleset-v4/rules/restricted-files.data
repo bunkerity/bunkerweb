@@ -113,6 +113,39 @@
 .zsh_history
 .zshrc
 
+# Compressed database dumps
+.sql.001
+.sql.7z
+.sql.bz
+.sql.ace
+.sql.arj
+.sql.cpio
+.sql.gz
+.sql.lha
+.sql.lz
+.sql.pa
+.sql.pea
+.sql.r00
+.sql.r01
+.sql.r02
+.sql.r03
+.sql.r04
+.sql.r05
+.sql.r06
+.sql.r07
+.sql.r08
+.sql.r09
+.sql.rar
+.sql.rev
+.sql.tar
+.sql.taz
+.sql.tbz
+.sql.tgz
+.sql.txz
+.sql.uha
+.sql.xz
+.sql.yz1
+.sql.z
 # AWS cli
 aws.yaml
 aws.yml
