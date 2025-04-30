@@ -1,6 +1,7 @@
 SUPPORTED_LANGUAGES = [
     {"code": "en", "name": "English", "flag": "us.svg", "english_name": "English"},
-    {"code": "zh", "name": "中文", "flag": "cn.svg", "english_name": "Chinese"},
+    {"code": "zh", "name": "简体中文", "flag": "cn.svg", "english_name": "Simplified Chinese"},
+    {"code": "tw", "name": "繁體中文", "flag": "tw.svg", "english_name": "Traditional Chinese"},
     {"code": "hi", "name": "हिन्दी", "flag": "in.svg", "english_name": "Hindi"},
     {"code": "es", "name": "Español", "flag": "es.svg", "english_name": "Spanish"},
     {"code": "ar", "name": "العربية", "flag": "ae.svg", "english_name": "Arabic"},

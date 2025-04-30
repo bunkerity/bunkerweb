@@ -14,6 +14,7 @@ This directory contains translation files for the BunkerWeb UI. Below is a summa
 | ru.json | AI (Google:Gemini-2.5-pro) | AI (Google:Gemini-2.5-pro) |
 | ur.json | AI (Google:Gemini-2.5-pro) | AI (Google:Gemini-2.5-pro) |
 | zh.json | AI (Google:Gemini-2.5-pro) | AI (Google:Gemini-2.5-pro) |
+| tw.json | AI (Google:Gemini-2.5-pro) | AI (Google:Gemini-2.5-pro) |
 | de.json | AI (Google:Gemini-2.5-pro) | AI (Google:Gemini-2.5-pro) |
 | it.json | AI (Google:Gemini-2.5-pro) | AI (Google:Gemini-2.5-pro) |
 | tr.json | Manual (@wiseweb-works)    | Manual (@wiseweb-works)    |

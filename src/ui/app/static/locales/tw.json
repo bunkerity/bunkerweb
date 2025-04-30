@@ -1,0 +1,1312 @@
+{
+  "about": {
+    "build_with": "建置工具",
+    "gnu_license": "GNU Affero 通用公眾授權條款 v3.0",
+    "license_title": "授權",
+    "socials": "社群媒體",
+    "tagline": "強大保護，化繁為簡",
+    "version": "版本：{{version}}"
+  },
+  "alert": {
+    "important": "重要",
+    "no_changes_detected": "未偵測到任何變更。",
+    "notice": "注意",
+    "ping_error": "Ping 執行個體時發生錯誤。",
+    "readonly_mode": "此操作在唯讀模式下被禁用。"
+  },
+  "aria": {
+    "label": {
+      "close": "關閉",
+      "raw_configuration": "原始設定"
+    }
+  },
+  "badge": {
+    "from_template": "來自範本",
+    "new_version": "新版本",
+    "no_template": "無範本",
+    "unread_news": "未讀新聞",
+    "unread_notifications": "未讀通知"
+  },
+  "banner": {
+    "community": "加入 Bunker 社群，加入 <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://discord.bunkerweb.io/?utm_campaign=self&utm_source=banner\">Discord 聊天</a>並在 <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://www.linkedin.com/company/bunkerity/\">LinkedIn</a> 上關注我們。",
+    "link": {
+      "here": "這裡"
+    },
+    "pro": "升級至 PRO 版本，充分利用 BunkerWeb。更多資訊和免費試用請點擊<a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#pro\">這裡</a>。",
+    "support": "需要 BunkerWeb 的進階支援或客製化諮詢服務？查看我們的<a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">專業服務</a>。"
+  },
+  "breadcrumb": {
+    "about": "關於",
+    "bans": "封鎖",
+    "cache": "快取",
+    "configs": "設定",
+    "extra_pages": "附加頁面",
+    "global_config": "全域設定",
+    "home": "首頁",
+    "instances": "執行個體",
+    "jobs": "任務",
+    "logs": "日誌",
+    "misc": "雜項",
+    "mode_selection": "模式選擇",
+    "more": "更多...",
+    "new": "新增",
+    "plugins": "外掛程式",
+    "plugins_pages": "外掛程式頁面",
+    "pro": "Pro",
+    "reports": "報告",
+    "services": "服務",
+    "support": "支援",
+    "templates": "範本"
+  },
+  "button": {
+    "actions": "操作",
+    "activate_key": "啟用金鑰",
+    "add": "新增",
+    "add_ban_plural": "新增封鎖",
+    "add_plugin_plural": "新增外掛程式",
+    "add_plugins": "新增外掛程式",
+    "auto_refresh": "自動重新整理",
+    "ban": "封鎖",
+    "cache": "快取",
+    "cancel": "取消",
+    "clear": "清除",
+    "close": "關閉",
+    "columns": "欄",
+    "convert_services": "轉換服務",
+    "copy": "複製",
+    "copy_codes": "複製代碼",
+    "copy_visible": "複製可見部分",
+    "create_config": "建立自訂設定",
+    "create_instance": "建立執行個體",
+    "create_service": "建立新服務",
+    "delete": "刪除",
+    "delete_instance": "刪除執行個體",
+    "disable_totp": "停用 TOTP",
+    "download": "下載",
+    "enable_totp": "啟用 TOTP",
+    "entire_config": "完整設定",
+    "export": "匯出",
+    "filters_suffix": " 過濾器",
+    "github_stars": "星號",
+    "hide": "隱藏",
+    "history": "歷史記錄",
+    "login": "登入",
+    "multiple_add": "新增",
+    "multiple_hide": "隱藏",
+    "multiple_remove": "移除",
+    "multiple_show": "顯示",
+    "need_help": "需要協助？",
+    "news": "新聞",
+    "notifications": "通知",
+    "open_support_ticket": "提交支援工單",
+    "order_support": "訂購支援",
+    "ping": "Ping",
+    "plugin_page": "外掛程式頁面",
+    "proceed": "繼續",
+    "refresh_recovery_codes": "重新整理復原碼",
+    "reload": "重新載入",
+    "reset": "重設",
+    "reset_columns": "重設欄位",
+    "return_to_safety": "返回安全區域",
+    "run": "執行",
+    "run_selected_jobs": "執行選定的任務",
+    "save": "儲存",
+    "save_changes": "儲存變更",
+    "select_file": "選取檔案",
+    "select_page": "選取頁面",
+    "service": "服務",
+    "setup": "設定",
+    "show": "顯示",
+    "stop": "停止",
+    "submit": "提交",
+    "subscribe": "訂閱",
+    "unban": "解除封鎖",
+    "update_key": "更新金鑰",
+    "upload_photo": "上傳新相片",
+    "wipe_other_sessions": "清除其他工作階段"
+  },
+  "country": {
+    "AD": "安道爾",
+    "AE": "阿拉伯聯合大公國",
+    "AF": "阿富汗",
+    "AG": "安地卡及巴布達",
+    "AI": "安圭拉",
+    "AL": "阿爾巴尼亞",
+    "AM": "亞美尼亞",
+    "AO": "安哥拉",
+    "AQ": "南極洲",
+    "AR": "阿根廷",
+    "AS": "美屬薩摩亞",
+    "AT": "奧地利",
+    "AU": "澳洲",
+    "AW": "阿魯巴",
+    "AX": "奧蘭群島",
+    "AZ": "亞塞拜然",
+    "BA": "波士尼亞與赫塞哥維納",
+    "BB": "巴貝多",
+    "BD": "孟加拉",
+    "BE": "比利時",
+    "BF": "布吉納法索",
+    "BG": "保加利亞",
+    "BH": "巴林",
+    "BI": "蒲隆地",
+    "BJ": "貝南",
+    "BL": "聖巴瑟米",
+    "BM": "百慕達",
+    "BN": "汶萊",
+    "BO": "玻利維亞",
+    "BQ": "荷蘭加勒比區",
+    "BR": "巴西",
+    "BS": "巴哈馬",
+    "BT": "不丹",
+    "BV": "布韋島",
+    "BW": "波札那",
+    "BY": "白俄羅斯",
+    "BZ": "貝里斯",
+    "CA": "加拿大",
+    "CC": "科科斯（基林）群島",
+    "CD": "剛果民主共和國",
+    "CF": "中非共和國",
+    "CG": "剛果共和國",
+    "CH": "瑞士",
+    "CI": "象牙海岸",
+    "CK": "庫克群島",
+    "CL": "智利",
+    "CM": "喀麥隆",
+    "CN": "中國",
+    "CO": "哥倫比亞",
+    "CR": "哥斯大黎加",
+    "CU": "古巴",
+    "CV": "維德角",
+    "CW": "古拉索",
+    "CX": "聖誕島",
+    "CY": "賽普勒斯",
+    "CZ": "捷克共和國",
+    "DE": "德國",
+    "DJ": "吉布提",
+    "DK": "丹麥",
+    "DM": "多米尼克",
+    "DO": "多明尼加共和國",
+    "DZ": "阿爾及利亞",
+    "EC": "厄瓜多",
+    "EE": "愛沙尼亞",
+    "EG": "埃及",
+    "EH": "西撒哈拉",
+    "ER": "厄利垂亞",
+    "ES": "西班牙",
+    "ET": "衣索比亞",
+    "EU": "歐洲",
+    "FI": "芬蘭",
+    "FJ": "斐濟",
+    "FK": "福克蘭群島（馬爾維納斯）",
+    "FM": "密克羅尼西亞",
+    "FO": "法羅群島",
+    "FR": "法國",
+    "GA": "加彭",
+    "GB": "英國",
+    "GD": "格瑞那達",
+    "GE": "喬治亞",
+    "GF": "法屬圭亞那",
+    "GG": "根西",
+    "GH": "迦納",
+    "GI": "直布羅陀",
+    "GL": "格陵蘭",
+    "GM": "甘比亞",
+    "GN": "幾內亞",
+    "GP": "瓜地洛普",
+    "GQ": "赤道幾內亞",
+    "GR": "希臘",
+    "GS": "南喬治亞與南桑威奇群島",
+    "GT": "瓜地馬拉",
+    "GU": "關島",
+    "GW": "幾內亞比索",
+    "GY": "蓋亞那",
+    "HK": "香港",
+    "HM": "赫德島和麥克唐納群島",
+    "HN": "宏都拉斯",
+    "HR": "克羅埃西亞",
+    "HT": "海地",
+    "HU": "匈牙利",
+    "ID": "印尼",
+    "IE": "愛爾蘭",
+    "IL": "以色列",
+    "IM": "曼島",
+    "IN": "印度",
+    "IO": "英屬印度洋領地",
+    "IQ": "伊拉克",
+    "IR": "伊朗",
+    "IS": "冰島",
+    "IT": "義大利",
+    "JE": "澤西",
+    "JM": "牙買加",
+    "JO": "約旦",
+    "JP": "日本",
+    "KE": "肯亞",
+    "KG": "吉爾吉斯",
+    "KH": "柬埔寨",
+    "KI": "吉里巴斯",
+    "KM": "葛摩",
+    "KN": "聖克里斯多福及尼維斯",
+    "KP": "北韓",
+    "KR": "南韓",
+    "KW": "科威特",
+    "KY": "開曼群島",
+    "KZ": "哈薩克",
+    "LA": "寮國",
+    "LB": "黎巴嫩",
+    "LC": "聖露西亞",
+    "LI": "列支敦斯登",
+    "LK": "斯里蘭卡",
+    "LR": "賴比瑞亞",
+    "LS": "賴索托",
+    "LT": "立陶宛",
+    "LU": "盧森堡",
+    "LV": "拉脫維亞",
+    "LY": "利比亞",
+    "MA": "摩洛哥",
+    "MC": "摩納哥",
+    "MD": "摩爾多瓦",
+    "ME": "蒙特內哥羅",
+    "MF": "聖馬丁",
+    "MG": "馬達加斯加",
+    "MH": "馬紹爾群島",
+    "MK": "北馬其頓",
+    "ML": "馬利",
+    "MM": "緬甸",
+    "MN": "蒙古",
+    "MO": "澳門",
+    "MP": "北馬利安納群島",
+    "MQ": "馬丁尼克",
+    "MR": "茅利塔尼亞",
+    "MS": "蒙哲臘",
+    "MT": "馬爾他",
+    "MU": "模里西斯",
+    "MV": "馬爾地夫",
+    "MW": "馬拉威",
+    "MX": "墨西哥",
+    "MY": "馬來西亞",
+    "MZ": "莫三比克",
+    "NA": "納米比亞",
+    "NC": "新喀里多尼亞",
+    "NE": "尼日",
+    "NF": "諾福克島",
+    "NG": "奈及利亞",
+    "NI": "尼加拉瓜",
+    "NL": "荷蘭",
+    "NO": "挪威",
+    "NP": "尼泊爾",
+    "NR": "諾魯",
+    "NU": "紐埃",
+    "NZ": "紐西蘭",
+    "OM": "阿曼",
+    "PA": "巴拿馬",
+    "PE": "秘魯",
+    "PF": "法屬玻里尼西亞",
+    "PG": "巴布亞紐幾內亞",
+    "PH": "菲律賓",
+    "PK": "巴基斯坦",
+    "PL": "波蘭",
+    "PM": "聖皮埃與密克隆群島",
+    "PN": "皮特肯群島",
+    "PR": "波多黎各",
+    "PS": "巴勒斯坦",
+    "PT": "葡萄牙",
+    "PW": "帛琉",
+    "PY": "巴拉圭",
+    "QA": "卡達",
+    "RE": "留尼旺",
+    "RO": "羅馬尼亞",
+    "RS": "塞爾維亞",
+    "RU": "俄羅斯聯邦",
+    "RW": "盧安達",
+    "SA": "沙烏地阿拉伯",
+    "SB": "索羅門群島",
+    "SC": "塞席爾",
+    "SD": "蘇丹",
+    "SE": "瑞典",
+    "SG": "新加坡",
+    "SH": "聖赫勒拿、亞森欣和崔斯坦達庫尼亞",
+    "SI": "斯洛維尼亞",
+    "SJ": "斯瓦巴和揚馬延",
+    "SK": "斯洛伐克",
+    "SL": "獅子山",
+    "SM": "聖馬利諾",
+    "SN": "塞內加爾",
+    "SO": "索馬利亞",
+    "SR": "蘇利南",
+    "SS": "南蘇丹",
+    "ST": "聖多美普林西比",
+    "SV": "薩爾瓦多",
+    "SX": "聖馬丁（荷蘭部分）",
+    "SY": "敘利亞",
+    "SZ": "史瓦帝尼",
+    "TC": "特克斯與凱科斯群島",
+    "TD": "查德",
+    "TF": "法屬南部領地",
+    "TG": "多哥",
+    "TH": "泰國",
+    "TJ": "塔吉克",
+    "TK": "托克勞",
+    "TL": "東帝汶",
+    "TM": "土庫曼",
+    "TN": "突尼西亞",
+    "TO": "東加",
+    "TR": "土耳其",
+    "TT": "千里達及托巴哥",
+    "TV": "吐瓦魯",
+    "TW": "台灣",
+    "TZ": "坦尚尼亚",
+    "UA": "烏克蘭",
+    "UG": "烏干達",
+    "UM": "美國本土外小島嶼",
+    "US": "美國",
+    "UY": "烏拉圭",
+    "UZ": "烏茲別克",
+    "VA": "梵蒂岡",
+    "VC": "聖文森及格瑞那丁",
+    "VE": "委內瑞拉",
+    "VG": "英屬維京群島",
+    "VI": "美屬維京群島",
+    "VN": "越南",
+    "VU": "萬那杜",
+    "WF": "瓦利斯和富圖那",
+    "WS": "薩摩亞",
+    "XK": "科索沃",
+    "YE": "葉門",
+    "YT": "馬約特",
+    "ZA": "南非",
+    "ZM": "尚比亞",
+    "ZW": "辛巴威",
+    "not_applicable": "不適用"
+  },
+  "dashboard": {
+    "card": {
+      "blocked_requests": {
+        "title": "已封鎖的請求"
+      },
+      "blocked_unique_ips": {
+        "title": "已封鎖的唯一 IP"
+      },
+      "instances": {
+        "status": "{{up}} 執行中 / {{down}} 已停止 / {{loading}} 載入中",
+        "title": "執行個體"
+      },
+      "news": {
+        "title": "新聞"
+      },
+      "plan": {
+        "title": "方案"
+      },
+      "plugins": {
+        "status": "{{core}} 核心 / {{pro}} PRO / {{external}} 外部",
+        "title": "外掛程式"
+      },
+      "services": {
+        "status": "{{online}} 線上 / {{draft}} 草稿",
+        "title": "服務"
+      },
+      "total_requests": {
+        "title": "總請求數"
+      }
+    },
+    "chart": {
+      "blocked_request_countries": {
+        "title": "按國家/地區封鎖的請求"
+      },
+      "blocking_status": {
+        "title": "封鎖狀態隨時間變化",
+        "subtitle": "隨時間變化的已封鎖請求",
+        "blocked_requests": "已封鎖的請求",
+        "time": "時間",
+        "count": "數量"
+      },
+      "request_status": {
+        "title": "請求狀態分佈",
+        "blocked": "已封鎖的請求"
+      },
+      "top_blocked_ips": {
+        "title": "前 10 名被封鎖的 IP",
+        "most_blocked": "被封鎖最多的 IP"
+      }
+    },
+    "map": {
+      "blocked_requests": "已封鎖的請求",
+      "hover_info": "將滑鼠懸停在國家/地區上",
+      "no_data": "無資料",
+      "legend": "圖例"
+    }
+  },
+  "datatable": {
+    "info_bans": "顯示 {{start}} 到 {{end}} 個封鎖，共 {{total}} 個",
+    "info_cache": "顯示 {{start}} 到 {{end}} 個快取檔案，共 {{total}} 個",
+    "info_configs": "顯示 {{start}} 到 {{end}} 個自訂設定，共 {{total}} 個",
+    "info_empty_bans": "無可用封鎖",
+    "info_empty_cache": "無可用快取檔案",
+    "info_empty_configs": "無可用自訂設定",
+    "info_empty_instances": "無可用執行個體",
+    "info_empty_items": "無可用項目",
+    "info_empty_jobs": "無可用任務",
+    "info_empty_plugins": "無可用外掛程式",
+    "info_empty_reports": "無可用報告",
+    "info_empty_services": "無可用服務",
+    "info_filtered_bans": "（從 _MAX_ 個總封鎖中篩選）",
+    "info_filtered_cache": "（從 _MAX_ 個總快取檔案中篩選）",
+    "info_filtered_configs": "（從 _MAX_ 個總自訂設定中篩選）",
+    "info_filtered_instances": "（從 _MAX_ 個總執行個體中篩選）",
+    "info_filtered_items": "（從 _MAX_ 個總項目中篩選）",
+    "info_filtered_jobs": "（從 _MAX_ 個總任務中篩選）",
+    "info_filtered_plugins": "（從 _MAX_ 個總外掛程式中篩選）",
+    "info_filtered_reports": "（從 _MAX_ 個總報告中篩選）",
+    "info_filtered_services": "（從 _MAX_ 個總服務中篩選）",
+    "info_instances": "顯示 {{start}} 到 {{end}} 個執行個體，共 {{total}} 個",
+    "info_items": "顯示 {{start}} 到 {{end}} 個項目，共 {{total}} 個",
+    "info_jobs": "顯示 {{start}} 到 {{end}} 個任務，共 {{total}} 個",
+    "info_plugins": "顯示 {{start}} 到 {{end}} 個外掛程式，共 {{total}} 個",
+    "info_reports": "顯示 {{start}} 到 {{end}} 個報告，共 {{total}} 個",
+    "info_services": "顯示 {{start}} 到 {{end}} 個服務，共 {{total}} 個",
+    "length_all": "全部",
+    "length_menu_bans": "顯示 _MENU_ 個封鎖",
+    "length_menu_cache": "顯示 _MENU_ 個快取檔案",
+    "length_menu_configs": "顯示 _MENU_ 個自訂設定",
+    "length_menu_instances": "顯示 _MENU_ 個執行個體",
+    "length_menu_items": "顯示 _MENU_ 個項目",
+    "length_menu_jobs": "顯示 _MENU_ 個任務",
+    "length_menu_plugins": "顯示 _MENU_ 個外掛程式",
+    "length_menu_reports": "顯示 _MENU_ 個報告",
+    "length_menu_services": "顯示 _MENU_ 個服務",
+    "paginate": {
+      "first": "第一頁",
+      "last": "最後一頁",
+      "next": "下一頁",
+      "previous": "上一頁"
+    },
+    "processing": "處理中...",
+    "search": "搜尋：",
+    "select_rows_bans_0": "未選取封鎖",
+    "select_rows_bans_1": "已選取 1 個封鎖",
+    "select_rows_bans_plural": "已選取 %d 個封鎖",
+    "select_rows_cache_0": "未選取快取檔案",
+    "select_rows_cache_1": "已選取 1 個快取檔案",
+    "select_rows_cache_plural": "已選取 %d 個快取檔案",
+    "select_rows_configs_0": "未選取自訂設定",
+    "select_rows_configs_1": "已選取 1 個自訂設定",
+    "select_rows_configs_plural": "已選取 %d 個自訂設定",
+    "select_rows_instances_0": "未選取執行個體",
+    "select_rows_instances_1": "已選取 1 個執行個體",
+    "select_rows_instances_plural": "已選取 %d 個執行個體",
+    "select_rows_items_0": "未選取項目",
+    "select_rows_items_1": "已選取 1 個項目",
+    "select_rows_items_plural": "已選取 %d 個項目",
+    "select_rows_jobs_0": "未選取任務",
+    "select_rows_jobs_1": "已選取 1 個任務",
+    "select_rows_jobs_plural": "已選取 %d 個任務",
+    "select_rows_plugins_0": "未選取外掛程式",
+    "select_rows_plugins_1": "已選取 1 個外掛程式",
+    "select_rows_plugins_plural": "已選取 %d 個外掛程式",
+    "select_rows_reports_0": "未選取報告",
+    "select_rows_reports_1": "已選取 1 個報告",
+    "select_rows_reports_plural": "已選取 %d 個報告",
+    "select_rows_services_0": "未選取服務",
+    "select_rows_services_1": "已選取 1 個服務",
+    "select_rows_services_plural": "已選取 %d 個服務",
+    "zero_records_bans": "找不到相符的封鎖",
+    "zero_records_cache": "找不到相符的快取檔案",
+    "zero_records_configs": "找不到相符的自訂設定",
+    "zero_records_instances": "找不到相符的執行個體",
+    "zero_records_items": "找不到相符的項目",
+    "zero_records_jobs": "找不到相符的任務",
+    "zero_records_plugins": "找不到相符的外掛程式",
+    "zero_records_reports": "找不到相符的報告",
+    "zero_records_services": "找不到相符的服務"
+  },
+  "dev_log": {
+    "copy_failed": "複製文字失敗：",
+    "news_fetch_fail": "取得新聞失敗：",
+    "skipping_malformed_line": "跳過格式錯誤的行：{{line}}"
+  },
+  "error": {
+    "401": {
+      "help": "您必須登入才能存取此資源。",
+      "message": "請登入後繼續。",
+      "title": "需要驗證"
+    },
+    "403": {
+      "help": "請驗證您的憑證，如果您認為這是錯誤，請聯絡管理員。",
+      "message": "您無權存取此頁面。",
+      "title": "存取遭拒"
+    },
+    "404": {
+      "help": "請檢查 URL 是否正確，如果您認為這是錯誤，請聯絡管理員。",
+      "message": "找不到請求的資源。",
+      "title": "未找到"
+    },
+    "5xx": {
+      "help": "請稍後再試，如果問題仍然存在，請聯絡管理員。",
+      "message": "發生未預期的伺服器錯誤。",
+      "title": "伺服器錯誤"
+    },
+    "reports_load_error": "載入報告時發生錯誤。請嘗試重新整理頁面。"
+  },
+  "flash": {
+    "easter_egg": "如果你讀到這條訊息，表示你很好奇 👀",
+    "error": "錯誤",
+    "message": "訊息",
+    "time": {
+      "just_now": "剛才"
+    },
+    "warning": "警告"
+  },
+  "footer": {
+    "blog": "部落格",
+    "documentation": "文件",
+    "license": "授權",
+    "made_by": "由",
+    "privacy": "隱私權",
+    "support": "支援"
+  },
+  "form": {
+    "checkbox": {
+      "remember_me": "記住我"
+    },
+    "help": {
+      "ban_specific_service": "封鎖將僅適用於此特定服務。",
+      "hostname_length_limit": "主機名稱限制為 256 個字元。",
+      "hostname_special_chars": "協定/連接埠規範中只允許使用 `/` 和 `:`。",
+      "photo_extensions": "允許的格式：JPG、GIF 或 PNG。最大大小：800KB。"
+    },
+    "label": {
+      "2fa_code": "兩步驟驗證碼",
+      "2fa_code_or_recovery": "兩步驟驗證碼或恢復碼",
+      "admin_email": "管理員電子郵件",
+      "admin_password": "管理員密碼",
+      "admin_username": "管理員使用者名稱",
+      "auto_lets_encrypt": "自動 Let's Encrypt",
+      "ban_scope": "封鎖範圍",
+      "certificate_priority": "憑證優先順序",
+      "challenge_type": "挑戰類型",
+      "config_type": "設定類型",
+      "configuration_name": "設定名稱",
+      "confirm_password": "確認密碼",
+      "current_password": "目前密碼",
+      "custom_ssl_certificate": "自訂 SSL 憑證",
+      "custom_ssl_certificate_data": "自訂 SSL 憑證資料 (Base64/PEM)",
+      "custom_ssl_key": "自訂 SSL 金鑰",
+      "custom_ssl_key_data": "自訂 SSL 金鑰資料 (Base64/PEM)",
+      "dns_credential_items": "Let's Encrypt DNS 憑證項目",
+      "dns_propagation": "DNS 傳播延遲",
+      "dns_provider": "DNS 提供者",
+      "email": "電子郵件",
+      "email_for_lets_encrypt": "用於 Let's Encrypt 的電子郵件",
+      "end_date": "結束日期",
+      "hostname": "主機名稱",
+      "ip_address": "IP 位址",
+      "keywords": "關鍵字",
+      "lets_encrypt_dns_credential_items": "Let's Encrypt DNS 憑證項目",
+      "lets_encrypt_profile": "Let's Encrypt 設定檔",
+      "license_key": "授權金鑰",
+      "name": "名稱",
+      "new_password": "新密碼",
+      "optional": "（選填）",
+      "password": "密碼",
+      "raw_configuration": "原始設定",
+      "reason": "原因",
+      "secret_token": "密鑰",
+      "server_name": "伺服器名稱",
+      "service_name": "服務名稱",
+      "theme": "主題",
+      "type": "類型",
+      "ui_host": "UI 主機",
+      "ui_url": "UI URL",
+      "use_custom_ssl": "使用自訂 SSL",
+      "use_lets_encrypt_staging": "使用 Let's Encrypt Staging",
+      "username": "使用者名稱",
+      "wildcard_certificates": "萬用字元憑證"
+    },
+    "placeholder": {
+      "2fa_code": "輸入代碼",
+      "2fa_or_recovery": "輸入代碼或恢復碼",
+      "config_name": "我的自訂設定",
+      "enter_username": "輸入您的使用者名稱",
+      "keywords": "關鍵字...",
+      "search": "搜尋...",
+      "select_service": "選擇服務",
+      "secret_token": "密鑰",
+      "username_example": "王小明"
+    },
+    "validation": {
+      "confirm_password_match": "密碼不符。",
+      "password_length": "密碼必須至少包含 8 個字元。",
+      "password_number": "密碼必須至少包含 1 個數字。",
+      "password_special": "密碼必須至少包含 1 個特殊字元。",
+      "password_uppercase": "密碼必須至少包含 1 個大寫字母。"
+    }
+  },
+  "instance": {
+    "type": {
+      "container": "容器",
+      "pod": "Pod",
+      "static": "靜態"
+    }
+  },
+  "interval": {
+    "day": "每天",
+    "hour": "每小時",
+    "once": "一次",
+    "week": "每週"
+  },
+  "job": {
+    "history": {
+      "end_date": "結束日期",
+      "start_date": "開始日期",
+      "success": "成功"
+    }
+  },
+  "link": {
+    "back_to_login": "返回登入",
+    "forgot_password": "忘記密碼？",
+    "here": "這裡",
+    "more_info": "更多資訊",
+    "more_news": "更多新聞",
+    "privacy_policy": "隱私權政策",
+    "read_more": "閱讀更多",
+    "see_more": "查看更多",
+    "upgrade": "升級？"
+  },
+  "modal": {
+    "body": {
+      "add_plugin_dropzone": "將您的外掛程式封存拖放到此處或點擊以選取檔案。",
+      "confirm_configs_deletion_alert": "您確定要刪除選定的自訂設定嗎？",
+      "confirm_configs_deletion_alert_plural": "您確定要刪除選定的自訂設定嗎？",
+      "confirm_conversion_confirmation": "您確定要轉換選定的服務嗎？",
+      "confirm_next_step": "您確定要繼續下一步嗎？",
+      "confirm_plugin_deletion": "您確定要刪除選定的外掛程式嗎？",
+      "confirm_plugin_deletion_plural": "您確定要刪除選定的外掛程式嗎？",
+      "confirmation_instance_deletion": "您確定要刪除選定的執行個體嗎？",
+      "delete_confirmation_alert": "您確定要刪除選定的執行個體嗎？",
+      "delete_confirmation_alert_plural": "您確定要刪除選定的執行個體嗎？",
+      "instance_creation_alert": "您不需要提供連接埠或伺服器名稱；`API_HTTP_PORT` 和 `API_SERVER_NAME` 的值將用於執行個體設定。",
+      "next_step_in_case_of_issue": "如果遇到問題，您可以手動接受不安全的憑證：",
+      "recovery_codes_save_alert": "請將這些恢復碼儲存在安全的位置（例如密碼管理器或保險箱）。如果遺失驗證裝置，您可以使用它們存取您的帳戶。",
+      "recovery_codes_shown_once_alert": "這些恢復碼僅顯示一次。請確保將其安全儲存。",
+      "reset_template_alert": "您確定要重設目前的範本設定和自訂設定嗎？",
+      "services_deletion_confirmation": "您確定要刪除選定的服務嗎？",
+      "unban_confirmation_alert": "您確定要解除封鎖選定的 IP 位址嗎？",
+      "unban_confirmation_alert_plural": "您確定要解除封鎖選定的 IP 位址嗎？"
+    },
+    "button": {
+      "reset_template_confirm": "重設範本設定"
+    },
+    "section": {
+      "ban_details": "封鎖詳情",
+      "ban_scope": "封鎖範圍",
+      "delete": "刪除"
+    },
+    "title": {
+      "add_bans": "新增封鎖",
+      "add_plugins": "新增外掛程式",
+      "confirm_conversion": "確認轉換",
+      "confirm_deletion": "確認刪除",
+      "confirm_unban": "確認解除封鎖",
+      "create_new_instance": "建立新執行個體",
+      "delete_instance": "刪除執行個體",
+      "from_plugin": "來自外掛程式",
+      "full_url": "完整 URL",
+      "job_history": "最近 10 次任務執行",
+      "job_history_count": "任務 {{count}} 次執行",
+      "recovery_codes": "恢復碼",
+      "reset_template_config": "重設範本設定？",
+      "server_name_not_unique": "伺服器名稱不是唯一的"
+    }
+  },
+  "mode": {
+    "advanced": "進階",
+    "easy": "簡易",
+    "raw": "原始"
+  },
+  "navbar": {
+    "button": {
+      "upgrade_to_pro": "升級至 PRO"
+    },
+    "dropdown": {
+      "logout": "登出"
+    },
+    "link": {
+      "documentation": "文件"
+    },
+    "version": "版本"
+  },
+  "navigation": {
+    "about": "關於",
+    "bans": "封鎖",
+    "cache": "快取",
+    "configs": "設定",
+    "extra_pages": "附加頁面",
+    "global_config": "全域設定",
+    "home": "首頁",
+    "instances": "執行個體",
+    "jobs": "任務",
+    "logs": "日誌",
+    "misc": "雜項",
+    "mode_selection": "模式選擇",
+    "more": "更多...",
+    "plugins": "外掛程式",
+    "plugins_pages": "外掛程式頁面",
+    "pro": "Pro",
+    "reports": "報告",
+    "services": "服務",
+    "support": "支援",
+    "templates": "範本"
+  },
+  "news": {
+    "image_alt": "新聞圖片",
+    "posted_on": "發布於"
+  },
+  "newsletter": {
+    "legal_agreement": "我想要訂閱新聞通訊，並且我已經閱讀並同意：",
+    "title": "加入新聞通訊"
+  },
+  "pagination": {
+    "page": "頁"
+  },
+  "plan": {
+    "free": "免費",
+    "pro": "PRO"
+  },
+  "plugin": {
+    "page": {
+      "status": {
+        "deactivated": "外掛程式已停用；因此，沒有可用資訊。",
+        "metrics_deactivated": "指標外掛程式未啟用；因此，沒有可用資訊。",
+        "not_available": "外掛程式頁面在 Beta 階段尚不可用。"
+      }
+    },
+    "type": {
+      "all": "全部",
+      "core": "核心",
+      "external": "外部",
+      "pro": "Pro",
+      "ui": "UI"
+    }
+  },
+  "pro": {
+    "alert": {
+      "overlapped_1": "您的啟用服務數量超出授權允許的範圍！",
+      "overlapped_2": "刪除或將某些服務轉換為草稿模式，以達到 {{pro_services}} 個服務的限制。"
+    },
+    "button": {
+      "all_features_available": "所有功能可用",
+      "awaiting_compliance": "等待合規...",
+      "renew_license": "續訂授權",
+      "suspended_license": "授權已暫停",
+      "upgrade_to_pro": "升級至 PRO"
+    },
+    "expiration_date": {
+      "expires_in": "有效期至",
+      "title": "Pro 到期日期",
+      "unknown": "未知的到期日期"
+    },
+    "key": {
+      "title": {
+        "activate": "啟用金鑰",
+        "update": "更新金鑰"
+      }
+    },
+    "overlay": {
+      "pro_feature": "Pro 功能",
+      "upgrade_required": "升級至 Pro 以存取此功能"
+    },
+    "status": {
+      "draft_services_count": "{{draft_services}} 個草稿服務",
+      "expired": "已過期",
+      "free_version": "免費版本",
+      "overlapped": "已超額",
+      "pro_version": "PRO 版本",
+      "services_count": "{{online_services}} 個線上服務 / {{pro_services}} 個 PRO 服務",
+      "suspended": "已暫停",
+      "title": "狀態"
+    }
+  },
+  "profile": {
+    "2fa": {
+      "disable_title": "停用兩步驟驗證",
+      "enable_title": "啟用兩步驟驗證"
+    },
+    "alert": {
+      "refresh_recovery_codes": "重新整理恢復碼將使先前的代碼失效。"
+    },
+    "card": {
+      "coming_soon": "即將推出",
+      "title": {
+        "2fa": "兩步驟驗證 (2FA)",
+        "change_password": "變更密碼",
+        "change_theme": "變更主題",
+        "coming_soon": "即將推出",
+        "edit_profile": "編輯個人資料",
+        "refresh_recovery_codes": "重新整理恢復碼",
+        "sessions": "工作階段"
+      }
+    },
+    "help": {
+      "photo_extensions": "允許的格式：JPG、GIF 或 PNG。最大大小：800KB。"
+    },
+    "session": {
+      "browser": "瀏覽器",
+      "creation_date": "建立日期",
+      "current_session": "目前工作階段",
+      "device": "裝置",
+      "ip_address": "IP 位址",
+      "last_activity": "上次活動",
+      "os": "作業系統",
+      "title": "工作階段"
+    },
+    "tab": {
+      "profile": "個人資料",
+      "security": "安全性",
+      "sessions": "工作階段"
+    }
+  },
+  "scope": {
+    "all_services": "所有服務",
+    "global": "全域",
+    "global_all_services": "全域（所有服務）",
+    "service_specific": "特定服務"
+  },
+  "searchpane": {
+    "active": "啟用中",
+    "async": "非同步",
+    "clear": "全部清除",
+    "collapse_0": "搜尋窗格",
+    "collapse_message": "全部摺疊",
+    "collapse_plural": "搜尋窗格 (%d)",
+    "count": "{total}",
+    "countFiltered": "{shown} ({total})",
+    "country": "國家/地區",
+    "created": "建立時間",
+    "data": "資料",
+    "empty": "無可用搜尋窗格",
+    "end_date": "結束日期",
+    "first_seen": "首次出現",
+    "future_30d": "超過 30 天後",
+    "health": "健康狀況",
+    "interval": "間隔",
+    "ip_address": "IP 位址",
+    "job_name": "任務名稱",
+    "last_24h": "過去 24 小時",
+    "last_30d": "過去 30 天",
+    "last_7d": "過去 7 天",
+    "last_run_state": "上次執行狀態",
+    "last_seen": "最後出現",
+    "last_update": "最後更新",
+    "loading": "正在載入搜尋窗格...",
+    "method": "方法",
+    "next_24h": "未來 24 小時",
+    "next_30d": "未來 30 天",
+    "next_7d": "未來 7 天",
+    "older_30d": "超過 30 天前",
+    "plugin": "外掛程式",
+    "reason": "原因",
+    "reload": "需要重新載入",
+    "scope": "範圍",
+    "security_mode": "安全模式",
+    "server_name": "伺服器名稱",
+    "service": "服務",
+    "show_message": "全部顯示",
+    "start_date": "開始日期",
+    "status_code": "狀態碼",
+    "stream": "串流支援",
+    "template": "範本",
+    "title_0": "無啟用中篩選器",
+    "title_1": "啟用中篩選器 - 1",
+    "title_plural": "啟用中篩選器 - %d",
+    "type": "類型",
+    "url": "URL",
+    "version": "版本"
+  },
+  "settings": {
+    "custom_config": {
+      "title": "自訂設定"
+    },
+    "multiple": {
+      "description": "在此設定此外掛程式的多個設定執行個體。",
+      "title": "多個設定"
+    }
+  },
+  "setup": {
+    "step1": {
+      "subtitle": "建立您的管理員帳戶。",
+      "title": "管理員使用者"
+    },
+    "step2": {
+      "section": {
+        "custom_certificate": "自訂憑證",
+        "lets_encrypt": "Let's Encrypt",
+        "reverse_proxy": "反向代理"
+      },
+      "subtitle": "設定 Web UI 特定設定。",
+      "title": "UI 設定"
+    },
+    "step3": {
+      "label": {
+        "final_url": "BunkerWeb UI URL"
+      },
+      "subtitle": "在完成設定前檢查您的設定。",
+      "title": "概觀"
+    },
+    "status": {
+      "admin_user_exists": "🧑‍🚀 管理員使用者已存在。請繼續下一步。",
+      "reverse_proxy_configured": "↪️ Web 介面已設定反向代理。請繼續下一步。",
+      "secure_password": "安全密碼",
+      "unique_server_name": "唯一伺服器名稱"
+    },
+    "subtitle": "按照步驟完成設定精靈。",
+    "title": "設定精靈"
+  },
+  "status": {
+    "admin_user_exists": "🧑‍🚀 管理員使用者已存在。請繼續下一步。",
+    "blog_connection_fail": "無法連線至部落格以取得新聞更新。",
+    "default_server": "預設伺服器",
+    "down": "已停止",
+    "draft": "草稿",
+    "failed": "失敗",
+    "loading": "載入中...",
+    "loading_bans": "正在載入封鎖...",
+    "loading_cache_file": "正在載入快取檔案...",
+    "loading_cache_files": "正在載入快取檔案...",
+    "loading_custom_config": "正在載入自訂設定...",
+    "loading_custom_configs": "正在載入自訂設定...",
+    "loading_instances": "正在載入執行個體...",
+    "loading_items": "正在載入項目...",
+    "loading_jobs": "正在載入任務...",
+    "loading_logs": "正在載入日誌...",
+    "loading_plugins": "正在載入外掛程式...",
+    "loading_reports": "正在載入報告...",
+    "loading_services": "正在載入服務...",
+    "news_connection_error": "無法連線至部落格以取得新聞更新。",
+    "no": "否",
+    "no_data": "無資料可顯示。",
+    "no_history": "無可用歷史記錄。",
+    "no_item": "無項目",
+    "no_notifications": "無通知可顯示。",
+    "no_steps": "無可用步驟",
+    "no_steps_description": "此範本沒有任何可設定的步驟。",
+    "online": "線上",
+    "partial": "部分",
+    "pinging_instances": "正在 Ping 執行個體，請稍候...",
+    "plugin_page": {
+      "status": {
+        "deactivated": "外掛程式已停用；因此，沒有可用資訊。",
+        "metrics_deactivated": "指標外掛程式未啟用；因此，沒有可用資訊。",
+        "not_available": "外掛程式頁面在 Beta 階段尚不可用。"
+      }
+    },
+    "reverse_proxy_configured": "↪️ Web 介面已設定反向代理。請繼續下一步。",
+    "secure_password": "安全密碼",
+    "setting_up_bunkerweb": "正在設定您的 BunkerWeb，請稍候...",
+    "success": "成功",
+    "template_in_use": "此服務目前使用透過「{{method}}」管理的範本「{{template}}」。",
+    "template_in_use_description": "不允許在目前範本之外進行變更。請使用目前範本進行變更或切換到進階/原始模式。",
+    "unique_server_name": "唯一伺服器名稱",
+    "up": "執行中",
+    "yes": "是"
+  },
+  "step": {
+    "next": "下一步",
+    "previous": "上一步"
+  },
+  "support": {
+    "card": {
+      "download_logs": {
+        "help": "所有私人資料將被匿名化。",
+        "title": "下載日誌"
+      },
+      "extract_config": {
+        "title": "擷取設定"
+      },
+      "support_link": {
+        "title": "支援連結"
+      }
+    }
+  },
+  "tab": {
+    "custom_certificate": "自訂憑證",
+    "lets_encrypt": "Let's Encrypt"
+  },
+  "table": {
+    "header": {
+      "actions": "操作",
+      "active": "啟用中",
+      "async": "非同步",
+      "checksum": "校驗和",
+      "country": "國家/地區",
+      "created": "建立時間",
+      "data": "資料",
+      "date": "日期",
+      "description": "描述",
+      "end_date": "結束日期",
+      "file_name": "檔案名稱",
+      "health": "健康狀況",
+      "hostname": "主機名稱",
+      "id": "ID",
+      "interval": "間隔",
+      "ip_address": "IP 位址",
+      "job_name": "任務名稱",
+      "last_run": "上次執行",
+      "last_seen": "最後出現",
+      "last_update": "最後更新",
+      "method": "方法",
+      "name": "名稱",
+      "plugin": "外掛程式",
+      "reason": "原因",
+      "reload": "重新載入",
+      "scope": "範圍",
+      "security_mode": "安全模式",
+      "server_name": "伺服器名稱",
+      "service": "服務",
+      "service_name": "服務名稱",
+      "status_code": "狀態碼",
+      "stream": "串流",
+      "template": "範本",
+      "time_left": "剩餘時間",
+      "type": "類型",
+      "url": "URL",
+      "user_agent": "User-Agent",
+      "version": "版本"
+    }
+  },
+  "template": {
+    "none": "無範本"
+  },
+  "theme": {
+    "dark": "深色",
+    "light": "淺色"
+  },
+  "toast": {
+    "autoconf_disclaimer_bold": "如果服務被移除或重新啟動，您的 UI 設定將會遺失。",
+    "autoconf_disclaimer_detail": "這是因為服務的建立方法是 'autoconf'，旨在防止設定衝突。",
+    "body": {
+      "ping_succeed": "執行個體：{{instances}}"
+    },
+    "copied": "已複製！",
+    "disclaimer_title": "免責聲明",
+    "header": {
+      "ping_failed": "Ping 失敗",
+      "ping_succeed": "Ping 成功"
+    }
+  },
+  "tooltip": {
+    "auto_lets_encrypt": "是否自動請求 Let's Encrypt 憑證。",
+    "button": {
+      "convert_service_to_draft": "將服務 {{name}} 轉換為草稿",
+      "convert_service_to_online": "將服務 {{name}} 轉換為線上",
+      "delete_config": "刪除自訂設定 {{name}}",
+      "delete_instance": "刪除執行個體 {{hostname}}",
+      "delete_plugin": "刪除外掛程式 {{name}}",
+      "delete_service": "刪除服務 {{name}}",
+      "ping_instance": "Ping 執行個體 {{hostname}}",
+      "reload_instance": "重新載入執行個體 {{hostname}}",
+      "reset_default": "重設為預設值",
+      "reset_global": "重設為全域值",
+      "run_job": "執行任務 {{job}}",
+      "stop_instance": "停止執行個體 {{hostname}}",
+      "unban_ip": "解除封鎖 {{ip}}"
+    },
+    "cannot_delete_original_ban": "無法刪除原始封鎖項目。",
+    "cannot_remove_disabled": "無法移除，因為一或多個設定已停用。",
+    "certificate_priority": "選擇是優先使用檔案路徑中的憑證還是 base64 資料中的憑證。",
+    "challenge_type": "用於 Let's Encrypt 驗證的挑戰類型（http 或 dns）。",
+    "config_type": {
+      "crs_plugins_after": "在載入 OWASP 核心規則集外掛程式後套用的設定。",
+      "crs_plugins_before": "在載入 OWASP 核心規則集外掛程式前套用的設定。",
+      "default_server_http": "Nginx 伺服器層級的設定，特別用於「預設伺服器」區塊，當用戶端請求與任何設定的伺服器名稱不符時使用。",
+      "http": "全域套用於 Nginx HTTP 層級的設定。",
+      "modsec": "在載入 OWASP 核心規則集後套用的 ModSecurity 設定，或者在未載入核心規則集時使用。",
+      "modsec_crs": "在載入 OWASP 核心規則集前套用的 ModSecurity 設定。",
+      "server_http": "套用於 Nginx HTTP 伺服器（虛擬主機）層級的設定。",
+      "server_stream": "套用於 Nginx 串流伺服器層級的設定。",
+      "stream": "全域套用於 Nginx 串流層級的設定。"
+    },
+    "confirm_password_match": "確認密碼必須與上面輸入的密碼相符。",
+    "copied": "已複製！",
+    "copy_https_only": "複製功能僅在 HTTPS 下可用。",
+    "custom_ssl_cert_data": "自訂 SSL 憑證資料（PEM 格式或 Base64 編碼）。",
+    "custom_ssl_cert_path": "自訂 SSL 憑證檔案的路徑。",
+    "custom_ssl_key_data": "自訂 SSL 私密金鑰資料（PEM 格式或 Base64 編碼）。",
+    "custom_ssl_key_path": "自訂 SSL 私密金鑰檔案的路徑。",
+    "disabled_by_method": "已停用：透過方法 '{{method}}' 管理。",
+    "disabled_db_readonly": "已停用：資料庫處於唯讀模式。",
+    "disabled_draft": "已停用：服務處於草稿模式。",
+    "disabled_readonly": "已停用：唯讀模式已啟用。",
+    "dns_check_url": "如果頁面顯示 'ok'，則伺服器名稱很可能可用。",
+    "dns_credential_items": "DNS 提供者的憑證，用於 DNS 挑戰（例如 'cloudflare_api_token=123456'）。所需格式取決於提供者。",
+    "dns_credentials_dns_only": "憑證僅適用於 DNS 挑戰。",
+    "dns_propagation": "在 DNS 挑戰期間等待 DNS 變更傳播的時間（秒）。",
+    "dns_propagation_dns_only": "DNS 傳播延遲僅適用於 DNS 挑戰。",
+    "dns_provider": "用於 Let's Encrypt DNS 挑戰的 DNS 提供者。",
+    "dns_provider_dns_only": "DNS 提供者選擇僅適用於 DNS 挑戰。",
+    "download_file": "下載檔案",
+    "draft_toggle_disabled": "草稿模式只能在透過 UI 建立的服務上切換。",
+    "email_lets_encrypt": "用於向 Let's Encrypt 註冊以進行憑證管理和通知的電子郵件地址。",
+    "email_length": "電子郵件必須在 1 到 256 個字元之間。",
+    "global_config_source": "值繼承自全域設定。",
+    "instance_not_up": "執行個體 {{hostname}} 目前未回應 ('up')。",
+    "lets_encrypt_profile": "用於 Let's Encrypt 的設定檔（classic、tlsserver、shortlived）。",
+    "latest_version_installed": "您正在執行最新版本。",
+    "license_key": "您的 BunkerWeb PRO 授權金鑰。",
+    "link": {
+      "access_plugin_page": "存取 {{name}} 頁面",
+      "access_service": "存取服務 {{name}}",
+      "clone_config": "複製自訂設定 {{name}}",
+      "clone_service": "複製服務 {{name}}",
+      "download_file": "下載 {{filename}}",
+      "edit_config": "編輯自訂設定 {{name}}",
+      "edit_service": "編輯服務 {{service}}",
+      "export_service": "匯出服務 {{name}} 設定",
+      "view_config": "檢視自訂設定 {{name}}",
+      "view_file": "檢視 {{filename}}",
+      "view_service": "檢視服務 {{name}}"
+    },
+    "modal": {
+      "title": {
+        "full_url": "完整 URL"
+      }
+    },
+    "multisite_setting": "這是一個多站點設定，如果全域定義，將影響多個服務。",
+    "new_version_available": "有新版本可用！",
+    "no_cache": "找不到此任務的快取檔案。",
+    "no_history": "找不到此任務的執行歷史記錄。",
+    "no_log_files": "無可用日誌檔案。",
+    "no_page_available": "此外掛程式無專用頁面。",
+    "password_requirements": "密碼必須至少包含 8 個字元，並包括 1 個大寫字母、1 個數字和 1 個特殊字元。",
+    "pro_feature": "這是一個 PRO 功能。",
+    "readonly_db_action_disabled": "已停用：資料庫處於唯讀模式。",
+    "readonly_user_action_disabled": "已停用：您的帳戶是唯讀的，操作 '{{action}}' 已停用。",
+    "remove_ban_entry": "從清單中移除此封鎖項目。",
+    "reset_template_settings": "將目前範本檢視中的所有設定重設為其預設值。",
+    "server_name": "此服務的主要網域名稱或伺服器名稱。",
+    "stream_support": {
+      "no": "不支援 STREAM 模式。",
+      "partial": "部分支援 STREAM 模式。",
+      "yes": "支援 STREAM 模式。"
+    },
+    "table": {
+      "bans": {
+        "actions": "此封鎖可用的操作",
+        "country": "被封鎖 IP 位址的國家/地區",
+        "date": "封鎖建立的日期和時間",
+        "details": "顯示封鎖詳情",
+        "end_date": "封鎖到期的日期和時間",
+        "ip_address": "被封鎖的 IP 位址",
+        "reason": "封鎖的原因",
+        "scope": "封鎖的範圍（全域或特定服務）",
+        "select_all": "選取所有封鎖",
+        "service": "封鎖來源的服務（如果範圍是特定服務）",
+        "time_left": "封鎖到期前的剩餘時間"
+      },
+      "cache": {
+        "actions": "此快取檔案可用的操作",
+        "checksum": "快取檔案的校驗和",
+        "details": "顯示快取檔案詳情",
+        "file_name": "快取檔案的名稱",
+        "job_name": "產生此快取檔案的任務",
+        "last_update": "快取檔案最後更新的日期和時間",
+        "plugin": "與產生此快取檔案的任務關聯的外掛程式",
+        "service": "與此快取檔案關聯的服務（或全域）"
+      },
+      "configs": {
+        "actions": "此自訂設定可用的操作",
+        "checksum": "自訂設定內容的校驗和",
+        "details": "顯示自訂設定詳情",
+        "method": "自訂設定的建立方法（例如，ui, file）",
+        "name": "自訂設定的名稱",
+        "select_all": "選取所有自訂設定",
+        "service": "與自訂設定關聯的服務（或全域）",
+        "template": "指示自訂設定是否源自範本",
+        "type": "自訂設定的類型或上下文（例如，HTTP, MODSEC）"
+      },
+      "instances": {
+        "actions": "此執行個體可用的操作",
+        "created": "執行個體首次註冊的日期和時間",
+        "details": "顯示執行個體詳情",
+        "health": "執行個體的健康狀況（執行中、已停止、載入中）",
+        "hostname": "執行個體的主機名稱或 URL",
+        "last_seen": "執行個體最後出現的日期和時間",
+        "method": "執行個體的建立方法（例如，ui, autoconf）",
+        "name": "使用者定義或自動產生的執行個體名稱",
+        "select_all": "選取所有執行個體",
+        "type": "執行個體的類型（例如，容器、靜態）"
+      },
+      "jobs": {
+        "actions": "此任務可用的操作",
+        "async": "指示任務是否非同步執行",
+        "details": "顯示任務詳情",
+        "interval": "任務的執行頻率",
+        "last_run": "上次任務執行的狀態（成功/失敗）",
+        "name": "任務的名稱",
+        "plugin": "與任務關聯的外掛程式",
+        "reload": "指示任務是否觸發 BunkerWeb 重新載入",
+        "select_all": "選取所有任務"
+      },
+      "plugins": {
+        "actions": "此外掛程式可用的操作",
+        "description": "外掛程式的描述",
+        "details": "顯示外掛程式詳情",
+        "id": "外掛程式的唯一識別碼",
+        "method": "外掛程式的建立方法（例如，ui, core）",
+        "name": "外掛程式的名稱",
+        "select_all": "選取所有外掛程式",
+        "stream": "指示外掛程式是否支援串流模式",
+        "type": "外掛程式的類型（核心、外部、Pro、UI）",
+        "version": "外掛程式的版本"
+      },
+      "reports": {
+        "country": "與報告的 IP 位址關聯的國家/地區",
+        "data": "與報告相關的附加資料",
+        "date": "報告產生的日期和時間",
+        "details": "顯示報告詳情",
+        "ip_address": "觸發報告的 IP 位址",
+        "method": "報告的請求的 HTTP 方法",
+        "reason": "產生報告的原因",
+        "security_mode": "產生報告時啟用的安全模式",
+        "select_all": "選取所有報告",
+        "server_name": "產生報告的伺服器名稱 (vhost)",
+        "status_code": "為報告的請求傳回的 HTTP 狀態碼",
+        "url": "報告的請求中針對的 URL",
+        "user_agent": "報告的請求中的 User-Agent 字串"
+      },
+      "select_rows_for_action": "請選取一或多列以執行操作。",
+      "services": {
+        "actions": "此服務可用的操作",
+        "created": "服務建立的日期和時間",
+        "details": "顯示服務詳情",
+        "last_update": "服務最後更新的日期和時間",
+        "method": "服務的建立方法（例如，ui, file）",
+        "name": "服務的名稱",
+        "select_all": "選取所有服務",
+        "type": "服務類型（線上/草稿）"
+      }
+    },
+    "ui_host": "將透過反向代理提供 BunkerWeb UI 的主機名稱或 IP 位址。",
+    "ui_url": "透過反向代理存取 BunkerWeb UI 的 URL 路徑。",
+    "ui_url_security": "使用非標準、難以猜測的 URL 路徑可增強安全性。",
+    "use_custom_ssl": "是否使用自訂 SSL 憑證而不是 Let's Encrypt。",
+    "use_lets_encrypt_staging": "是否使用 Let's Encrypt 的 staging 環境進行測試（產生不受信任的憑證）。",
+    "username_length": "使用者名稱必須在 1 到 256 個字元之間。",
+    "view_full_url": "點擊檢視完整 URL",
+    "wildcard_certificates": "產生萬用字元憑證 (*.domain.com)。需要 DNS 挑戰。",
+    "wildcard_dns_only": "萬用字元憑證僅支援 DNS 挑戰類型。"
+  },
+  "totp": {
+    "prompt": "請輸入您的 TOTP 代碼。"
+  },
+  "validation": {
+    "default_field_name": "此欄位",
+    "invalid_date": "無效日期",
+    "ip_global_duplicate": "此 IP 位址已被全域封鎖。",
+    "ip_invalid": "IP 位址格式無效。",
+    "ip_required": "需要 IP 位址。",
+    "ip_service_duplicate": "此 IP 位址已針對所選服務 ({{service}}) 被封鎖。",
+    "pattern": "請輸入有效的 {{field}} 值。",
+    "required": "{{field}} 是必填項。",
+    "service_required_for_ban": "對於特定於服務的封鎖，必須選取一個服務。"
+  }
+}
