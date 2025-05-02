@@ -572,6 +572,7 @@
       "ban_specific_service": "Ban will apply only to this specific service.",
       "hostname_length_limit": "The hostname is limited to 256 characters.",
       "hostname_special_chars": "Only `/` and `:` are allowed for protocol/port specification.",
+      "permanent_ban": "If checked, the ban will never expire until manually removed",
       "photo_extensions": "Allowed JPG, GIF, or PNG. Max size: 800KB."
     },
     "label": {
@@ -610,6 +611,7 @@
       "new_password": "New Password",
       "optional": "(Optional)",
       "password": "Password",
+      "permanent_ban": "Permanent Ban",
       "raw_configuration": "Raw Configuration",
       "reason": "Reason",
       "secret_token": "Secret Token",
@@ -871,6 +873,7 @@
     "all_services": "All Services",
     "global": "Global",
     "global_all_services": "Global (all services)",
+    "permanent": "Permanent",
     "service_specific": "Service-specific"
   },
   "searchpane": {
@@ -905,6 +908,7 @@
     "next_30d": "Next 30 days",
     "next_7d": "Next 7 days",
     "older_30d": "More than 30 days ago",
+    "permanent": "Permanent",
     "plugin": "Plugin",
     "reason": "Reason",
     "reload": "Reload Required",

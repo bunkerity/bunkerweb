@@ -572,6 +572,7 @@
       "ban_specific_service": "پابندی صرف اس مخصوص سروس پر لاگو ہوگی۔",
       "hostname_length_limit": "ہوسٹ نام 256 حروف تک محدود ہے۔",
       "hostname_special_chars": "پروٹوکول/پورٹ تفصیلات کے لیے صرف `/` اور `:` کی اجازت ہے۔",
+      "permanent_ban": "اگر منتخب کیا گیا تو پابندی اس وقت تک ختم نہیں ہوگی جب تک اسے دستی طور پر ہٹایا نہ جائے۔",
       "photo_extensions": "JPG, GIF, یا PNG کی اجازت ہے۔ زیادہ سے زیادہ سائز: 800KB۔"
     },
     "label": {
@@ -610,6 +611,7 @@
       "new_password": "نیا پاس ورڈ",
       "optional": "(اختیاری)",
       "password": "پاس ورڈ",
+      "permanent_ban": "مستقل پابندی",
       "raw_configuration": "خام کنفیگریشن",
       "reason": "وجہ",
       "secret_token": "خفیہ ٹوکن",
@@ -871,6 +873,7 @@
     "all_services": "تمام خدمات",
     "global": "عالمی",
     "global_all_services": "عالمی (تمام خدمات)",
+    "permanent": "مستقل",
     "service_specific": "سروس-مخصوص"
   },
   "searchpane": {
@@ -905,6 +908,7 @@
     "next_30d": "اگلے 30 دن",
     "next_7d": "اگلے 7 دن",
     "older_30d": "30 دن سے زیادہ",
+    "permanent": "مستقل",
     "plugin": "پلگ ان",
     "reason": "وجہ",
     "reload": "دوبارہ لوڈ کی ضرورت ہے",

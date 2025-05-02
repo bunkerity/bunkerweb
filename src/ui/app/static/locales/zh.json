@@ -572,6 +572,7 @@
       "ban_specific_service": "封禁将仅适用于此特定服务。",
       "hostname_length_limit": "主机名限制为 256 个字符。",
       "hostname_special_chars": "协议/端口规范中只允许使用 `/` 和 `:`。",
+      "permanent_ban": "如果选中，封禁将永久有效，直到手动移除为止。",
       "photo_extensions": "允许的格式：JPG、GIF 或 PNG。最大大小：800KB。"
     },
     "label": {
@@ -610,6 +611,7 @@
       "new_password": "新密码",
       "optional": "（可选）",
       "password": "密码",
+      "permanent_ban": "永久封禁",
       "raw_configuration": "原始配置",
       "reason": "原因",
       "secret_token": "密钥",
@@ -871,6 +873,7 @@
     "all_services": "所有服务",
     "global": "全局",
     "global_all_services": "全局（所有服务）",
+    "permanent": "永久",
     "service_specific": "特定服务"
   },
   "searchpane": {
@@ -905,6 +908,7 @@
     "next_30d": "未来 30 天",
     "next_7d": "未来 7 天",
     "older_30d": "超过 30 天前",
+    "permanent": "永久",
     "plugin": "插件",
     "reason": "原因",
     "reload": "需要重新加载",

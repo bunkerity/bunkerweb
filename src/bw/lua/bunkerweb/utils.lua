@@ -697,6 +697,18 @@ utils.is_banned = function(ip, server_name)
 			local ttl
 			-- luacheck: ignore 311
 			ok, ttl = datastore:ttl(key)
+
+			-- Check if this is a permanent ban (ttl = -1)
+			local is_permanent = false
+			if ok and ban_data and ban_data.permanent then
+				is_permanent = ban_data.permanent
+			end
+
+			-- If permanent, override ttl to -1 for consistency
+			if is_permanent then
+				ttl = -1
+			end
+
 			return true, result, ttl or -1
 		elseif err ~= "not found" then
 			return nil, "datastore:get() error: " .. tostring(result)
@@ -785,8 +797,13 @@ utils.add_ban = function(ip, reason, ttl, service, country, ban_scope)
 		date = os.time(),
 		country = country or "local",
 		ban_scope = ban_scope or "global",
+		permanent = ttl == -1,
 	})
-	local ok, err = datastore:set(ban_key, ban_data, ttl)
+
+	-- Convert -1 TTL to nil for permanent bans in local datastore
+	local effective_ttl = ttl == -1 and nil or ttl
+
+	local ok, err = datastore:set(ban_key, ban_data, effective_ttl)
 	if not ok then
 		return false, "datastore:set() error : " .. err
 	end
@@ -805,8 +822,14 @@ utils.add_ban = function(ip, reason, ttl, service, country, ban_scope)
 	if not ok then
 		return false, "can't connect to redis server : " .. err
 	end
-	-- SET call
-	ok, err = clusterstore:call("set", ban_key, ban_data, "EX", ttl)
+
+	-- For Redis, set without expiration if permanent, otherwise with EX and ttl
+	if ttl == -1 then
+		ok, err = clusterstore:call("set", ban_key, ban_data)
+	else
+		ok, err = clusterstore:call("set", ban_key, ban_data, "EX", ttl)
+	end
+
 	if not ok then
 		clusterstore:close()
 		return false, "redis SET failed : " .. err

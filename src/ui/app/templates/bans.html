@@ -83,6 +83,19 @@
                                                                class="form-control"
                                                                required />
                                                     </div>
+                                                    <div class="mb-3 form-check">
+                                                        <input type="checkbox"
+                                                               class="form-check-input permanent-ban-checkbox"
+                                                               id="permanentBan-1"
+                                                               name="permanent">
+                                                        <label class="form-check-label"
+                                                               for="permanentBan-1"
+                                                               data-i18n="form.label.permanent_ban">Ban Forever</label>
+                                                        <div class="form-text text-muted"
+                                                             data-i18n="form.help.permanent_ban">
+                                                            If checked, the ban will never expire until manually removed
+                                                        </div>
+                                                    </div>
                                                     <div>
                                                         <label for="reason" class="form-label" data-i18n="form.label.reason">Reason</label>
                                                         <input type="text" name="reason" class="form-control" value="ui" required />

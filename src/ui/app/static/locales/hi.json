@@ -572,6 +572,7 @@
       "ban_specific_service": "प्रतिबंध केवल इस विशिष्ट सेवा पर लागू होगा।",
       "hostname_length_limit": "होस्टनाम 256 वर्णों तक सीमित है।",
       "hostname_special_chars": "प्रोटोकॉल/पोर्ट विनिर्देश के लिए केवल `/` और `:` की अनुमति है।",
+      "permanent_ban": "यदि चयनित है, तो प्रतिबंध मैन्युअल रूप से हटाए जाने तक कभी समाप्त नहीं होगा",
       "photo_extensions": "JPG, GIF, या PNG की अनुमति है। अधिकतम आकार: 800KB।"
     },
     "label": {
@@ -610,6 +611,7 @@
       "new_password": "नया पासवर्ड",
       "optional": "(वैकल्पिक)",
       "password": "पासवर्ड",
+      "permanent_ban": "स्थायी प्रतिबंध",
       "raw_configuration": "रॉ कॉन्फ़िगरेशन",
       "reason": "कारण",
       "secret_token": "गुप्त टोकन",
@@ -871,6 +873,7 @@
     "all_services": "सभी सेवाएं",
     "global": "वैश्विक",
     "global_all_services": "वैश्विक (सभी सेवाएं)",
+    "permanent": "स्थायी",
     "service_specific": "सेवा-विशिष्ट"
   },
   "searchpane": {
@@ -905,6 +908,7 @@
     "next_30d": "अगले 30 दिन",
     "next_7d": "अगले 7 दिन",
     "older_30d": "30 दिनों से अधिक पुराना",
+    "permanent": "स्थायी",
     "plugin": "प्लगइन",
     "reason": "कारण",
     "reload": "पुनः लोड आवश्यक",

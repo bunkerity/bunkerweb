@@ -572,6 +572,7 @@
       "ban_specific_service": "Le bannissement s'appliquera uniquement à ce service spécifique.",
       "hostname_length_limit": "Le nom d'hôte est limité à 256 caractères.",
       "hostname_special_chars": "Seuls `/` et `:` sont autorisés pour la spécification du protocole/port.",
+      "permanent_ban": "Si coché, le bannissement ne prendra jamais fin jusqu'à suppression manuelle",
       "photo_extensions": "JPG, GIF ou PNG autorisés. Taille max : 800 Ko."
     },
     "label": {
@@ -610,6 +611,7 @@
       "new_password": "Nouveau Mot de Passe",
       "optional": "(Optionnel)",
       "password": "Mot de Passe",
+      "permanent_ban": "Bannissement Permanent",
       "raw_configuration": "Configuration Brute",
       "reason": "Raison",
       "secret_token": "Jeton Secret",
@@ -871,6 +873,7 @@
     "all_services": "Tous les Services",
     "global": "Global",
     "global_all_services": "Global (tous les services)",
+    "permanent": "Permanent",
     "service_specific": "Spécifique au service"
   },
   "searchpane": {
@@ -905,6 +908,7 @@
     "next_30d": "Prochains 30 jours",
     "next_7d": "Prochains 7 jours",
     "older_30d": "Plus de 30 jours",
+    "permanent": "Permanent",
     "plugin": "Plugin",
     "reason": "Raison",
     "reload": "Rechargement Requis",

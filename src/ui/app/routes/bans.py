@@ -48,7 +48,13 @@ def bans_fetch():
                     ban_data = loads(data.decode("utf-8", "replace"))
                     # Ensure consistent scope for frontend display
                     ban_data["ban_scope"] = "global"
-                    bans.append({"ip": ip, "exp": exp} | ban_data)
+                    ban_data["permanent"] = ban_data.get("permanent", False) or exp == -1
+
+                    # Check if this is a permanent ban
+                    if ban_data.get("permanent", False):
+                        exp = -1  # Override TTL for permanent bans
+
+                    bans.append({"ip": ip, "exp": exp, "permanent": ban_data.get("permanent", False)} | ban_data)
                 except Exception as e:
                     LOGGER.debug(format_exc())
                     LOGGER.error(f"Failed to decode ban data for {ip}: {e}")
@@ -66,7 +72,13 @@ def bans_fetch():
                     # Ensure consistent scope for frontend display
                     ban_data["ban_scope"] = "service"
                     ban_data["service"] = service
-                    bans.append({"ip": ip, "exp": exp} | ban_data)
+                    ban_data["permanent"] = ban_data.get("permanent", False) or exp == -1
+
+                    # Check if this is a permanent ban
+                    if ban_data.get("permanent", False):
+                        exp = -1  # Override TTL for permanent bans
+
+                    bans.append({"ip": ip, "exp": exp, "permanent": ban_data.get("permanent", False)} | ban_data)
                 except Exception as e:
                     LOGGER.debug(format_exc())
                     LOGGER.error(f"Failed to decode ban data for {ip} on service {service}: {e}")
@@ -98,12 +110,19 @@ def bans_fetch():
     # Format ban times for display
     for ban in bans:
         exp = ban.pop("exp", 0)
-        # Calculate human-readable remaining time
-        remain = ("unknown", "unknown") if exp <= 0 else get_remain(exp)
-        ban["remain"] = remain[0]
-        # Format timestamps for start and end dates
-        ban["start_date"] = datetime.fromtimestamp(floor(ban["date"])).astimezone().isoformat()
-        ban["end_date"] = datetime.fromtimestamp(floor(timestamp_now + exp)).astimezone().isoformat()
+
+        # Handle permanent bans (exp = -1)
+        if exp == -1 or ban.get("permanent", False):
+            ban["remain"] = "permanent"
+            ban["permanent"] = True
+            ban["end_date"] = "permanent"
+        else:
+            # Calculate human-readable remaining time for non-permanent bans
+            remain = ("unknown", "unknown") if exp <= 0 else get_remain(exp)
+            ban["remain"] = remain[0]
+            # Format timestamps for start and end dates
+            ban["start_date"] = datetime.fromtimestamp(floor(ban["date"])).astimezone().isoformat()
+            ban["end_date"] = datetime.fromtimestamp(floor(timestamp_now + exp)).astimezone().isoformat()
 
     # DataTables parameters
     draw = int(request.form.get("draw", 1))
@@ -140,8 +159,9 @@ def bans_fetch():
             "reason": ban.get("reason", "N/A"),
             "scope": ban.get("ban_scope", "global"),
             "service": ban.get("service", None) or "_",
-            "end_date": ban.get("end_date", "N/A"),
-            "time_left": ban.get("remain", "N/A"),
+            "end_date": "permanent" if ban.get("permanent", False) else ban.get("end_date", "N/A"),
+            "time_left": "permanent" if ban.get("permanent", False) else ban.get("remain", "N/A"),
+            "permanent": ban.get("permanent", False),
         }
 
     # Apply searchPanes filters
@@ -184,8 +204,17 @@ def bans_fetch():
                 now = time()
 
                 def end_date_filter(ban):
+                    # Always include permanent bans in the "future_30d" category
+                    if ban.get("permanent", False) and "future_30d" in selected_values:
+                        return True
+
                     exp = ban.get("exp", 0)
+                    if ban.get("permanent", False):
+                        return "permanent" in selected_values
+
                     for val in selected_values:
+                        if val == "permanent" and ban.get("permanent", False):
+                            return True
                         if val == "next_24h" and exp < 86400:
                             return True
                         if val == "next_7d" and exp < 604800:
@@ -203,13 +232,26 @@ def bans_fetch():
 
     # Global search filtering
     def global_search_filter(ban):
+        # Special handling for permanent bans in search
+        if search_value == "permanent" and ban.get("permanent", False):
+            return True
+
         return any(search_value in str(ban.get(col, "")).lower() for col in columns)
 
     # Sort bans
     def sort_bans(bans):
         if 0 <= order_column_index < len(columns):
             sort_key = columns[order_column_index]
-            bans.sort(key=lambda x: x.get(sort_key, ""), reverse=(order_direction == "desc"))
+            # Special handling for end_date and time_left sorting for permanent bans
+            if sort_key in ("end_date", "time_left"):
+                # For these columns, permanent bans should sort either at the top or bottom
+                # depending on sort order
+                bans.sort(
+                    key=lambda x: ("0" if order_direction == "desc" else "z") if x.get("permanent", False) else x.get(sort_key, ""),
+                    reverse=(order_direction == "desc"),
+                )
+            else:
+                bans.sort(key=lambda x: x.get(sort_key, ""), reverse=(order_direction == "desc"))
 
     # Apply filters and sort
     filtered_bans = filter(global_search_filter, bans) if search_value else bans
@@ -276,7 +318,7 @@ def bans_fetch():
         country_code = str(code).lower()
         search_panes_options["country"].append(
             {
-                "label": f'<img src="{base_flags_url}/{"zz" if code == "unknown" else country_code}.svg" class="border border-1 p-0 me-1" height="17" />&nbsp;－&nbsp;<span data-i18n="country.{"not_applicable" if code == "unknown" else str(code).upper()}">{"N/A" if code == "unknown" else code}</span>',
+                "label": f'<img src="{base_flags_url}/{"zz" if code in ("unknown", "local", "n/a")  else country_code}.svg" class="border border-1 p-0 me-1" height="17" />&nbsp;－&nbsp;<span data-i18n="country.{"not_applicable" if code in ("unknown", "local") else str(code).upper()}">{"N/A" if code in ("unknown", "local") else code}</span>',
                 "value": code,
                 "total": counts["total"],
                 "count": counts["count"],
@@ -315,28 +357,34 @@ def bans_fetch():
     # Special handling for end_date searchpane options
     search_panes_options["end_date"] = [
         {
+            "label": '<span data-i18n="searchpane.permanent">Permanent</span>',
+            "value": "permanent",
+            "total": sum(1 for ban in bans if ban.get("permanent", False) or ban.get("exp", 0) == -1),
+            "count": sum(1 for ban in filtered_bans if ban.get("permanent", False) or ban.get("exp", 0) == -1),
+        },
+        {
             "label": '<span data-i18n="searchpane.next_24h">Next 24 hours</span>',
             "value": "next_24h",
-            "total": sum(1 for ban in bans if ban.get("exp", 0) < 86400),
-            "count": sum(1 for ban in filtered_bans if ban.get("exp", 0) < 86400),
+            "total": sum(1 for ban in bans if not ban.get("permanent", False) and ban.get("exp", 0) < 86400),
+            "count": sum(1 for ban in filtered_bans if not ban.get("permanent", False) and ban.get("exp", 0) < 86400),
         },
         {
             "label": '<span data-i18n="searchpane.next_7d">Next 7 days</span>',
             "value": "next_7d",
-            "total": sum(1 for ban in bans if ban.get("exp", 0) < 604800),
-            "count": sum(1 for ban in filtered_bans if ban.get("exp", 0) < 604800),
+            "total": sum(1 for ban in bans if not ban.get("permanent", False) and ban.get("exp", 0) < 604800),
+            "count": sum(1 for ban in filtered_bans if not ban.get("permanent", False) and ban.get("exp", 0) < 604800),
         },
         {
             "label": '<span data-i18n="searchpane.next_30d">Next 30 days</span>',
             "value": "next_30d",
-            "total": sum(1 for ban in bans if ban.get("exp", 0) < 2592000),
-            "count": sum(1 for ban in filtered_bans if ban.get("exp", 0) < 2592000),
+            "total": sum(1 for ban in bans if not ban.get("permanent", False) and ban.get("exp", 0) < 2592000),
+            "count": sum(1 for ban in filtered_bans if not ban.get("permanent", False) and ban.get("exp", 0) < 2592000),
         },
         {
             "label": '<span data-i18n="searchpane.future_30d">More than 30 days</span>',
             "value": "future_30d",
-            "total": sum(1 for ban in bans if ban.get("exp", 0) >= 2592000),
-            "count": sum(1 for ban in filtered_bans if ban.get("exp", 0) >= 2592000),
+            "total": sum(1 for ban in bans if not ban.get("permanent", False) and ban.get("exp", 0) >= 2592000),
+            "count": sum(1 for ban in filtered_bans if not ban.get("permanent", False) and ban.get("exp", 0) >= 2592000),
         },
     ]
 
@@ -400,6 +448,36 @@ def bans_ban():
         ban_scope = ban.get("ban_scope", "global")
         service = ban.get("service", "")
 
+        # Check for permanent ban
+        is_permanent = False
+        if ban.get("end_date") == "-1" or ban.get("exp") == -1:
+            is_permanent = True
+            ban_end = -1  # Set to -1 for permanent bans
+        else:
+            try:
+                # Parse and normalize the ban end date from ISO format
+                ban_end_str = ban["end_date"]
+                if "." in ban_end_str and "Z" in ban_end_str:
+                    ban_end_str = ban_end_str.split(".")[0] + "Z"
+
+                ban_end = datetime.fromisoformat(ban_end_str.replace("Z", "+00:00"))
+                # Ensure timezone awareness
+                if ban_end.tzinfo is None:
+                    ban_end = ban_end.replace(tzinfo=datetime.timezone.utc)
+
+                # Calculate seconds from now until ban end
+                current_time = datetime.now().astimezone()
+                ban_end = (ban_end - current_time).total_seconds()
+
+                # Ensure ban duration is positive
+                if ban_end <= 0:
+                    flask_flash(f"Invalid ban duration for IP {ip}, must be in the future", "error")
+                    continue
+
+            except ValueError as e:
+                flask_flash(f"Invalid ban date format: {ban['end_date']}, error: {e}", "error")
+                continue
+
         # Validate service name for service-specific bans
         if ban_scope == "service":
             services = BW_CONFIG.get_config(global_only=True, methods=False, with_drafts=True, filtered_settings=("SERVER_NAME",))["SERVER_NAME"]
@@ -412,30 +490,6 @@ def bans_ban():
                 ban_scope = "global"
                 service = "Web UI"
 
-        try:
-            # Parse and normalize the ban end date from ISO format
-            ban_end_str = ban["end_date"]
-            if "." in ban_end_str and "Z" in ban_end_str:
-                ban_end_str = ban_end_str.split(".")[0] + "Z"
-
-            ban_end = datetime.fromisoformat(ban_end_str.replace("Z", "+00:00"))
-            # Ensure timezone awareness
-            if ban_end.tzinfo is None:
-                ban_end = ban_end.replace(tzinfo=datetime.timezone.utc)
-
-            # Calculate seconds from now until ban end
-            current_time = datetime.now().astimezone()
-            ban_end = (ban_end - current_time).total_seconds()
-
-            # Ensure ban duration is positive
-            if ban_end <= 0:
-                flask_flash(f"Invalid ban duration for IP {ip}, must be in the future", "error")
-                continue
-
-        except ValueError as e:
-            flask_flash(f"Invalid ban date format: {ban['end_date']}, error: {e}", "error")
-            continue
-
         if redis_client:
             try:
                 # Generate the appropriate Redis key based on ban scope
@@ -446,11 +500,15 @@ def bans_ban():
                     ban_scope = "global"
 
                 # Store ban data in Redis with proper expiration
-                ban_data = {"reason": reason, "date": time(), "service": service, "ban_scope": ban_scope}
+                ban_data = {"reason": reason, "date": time(), "service": service, "ban_scope": ban_scope, "permanent": is_permanent}
+
                 ok = redis_client.set(ban_key, dumps(ban_data))
                 if not ok:
                     flash(f"Couldn't ban {ip} on redis", "error")
-                redis_client.expire(ban_key, int(ban_end))
+
+                # Only set expiration for non-permanent bans
+                if not is_permanent and ban_end > 0:
+                    redis_client.expire(ban_key, int(ban_end))
             except BaseException as e:
                 LOGGER.error(f"Couldn't ban {ip} on redis: {e}")
                 flash(f"Failed to ban {ip} on redis, see logs for more information.", "error")
@@ -461,9 +519,15 @@ def bans_ban():
             flash(f"Couldn't ban {ip} on the following instances: {', '.join(resp)}", "error")
         else:
             if ban_scope == "service":
-                flash(f"Successfully banned {ip} for service {service}")
+                if is_permanent:
+                    flash(f"Successfully banned {ip} permanently for service {service}")
+                else:
+                    flash(f"Successfully banned {ip} for service {service}")
             else:
-                flash(f"Successfully banned {ip} globally")
+                if is_permanent:
+                    flash(f"Successfully banned {ip} permanently globally")
+                else:
+                    flash(f"Successfully banned {ip} globally")
 
     return redirect(url_for("loading", next=url_for("bans.bans_page"), message=f"Banning {len(bans)} IP{'s' if len(bans) > 1 else ''}"))
 

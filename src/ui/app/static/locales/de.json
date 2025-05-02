@@ -572,6 +572,7 @@
       "ban_specific_service": "Die Sperre gilt nur für diesen spezifischen Dienst.",
       "hostname_length_limit": "Der Hostname ist auf 256 Zeichen begrenzt.",
       "hostname_special_chars": "Nur `/` und `:` sind für die Protokoll-/Port-Spezifikation erlaubt.",
+      "permanent_ban": "Wenn aktiviert, läuft die Sperre nie ab und muss manuell entfernt werden.",
       "photo_extensions": "Erlaubt sind JPG, GIF oder PNG. Max. Größe: 800 KB."
     },
     "label": {
@@ -610,6 +611,7 @@
       "new_password": "Neues Passwort",
       "optional": "(Optional)",
       "password": "Passwort",
+      "permanent_ban": "Dauerhafte Sperre",
       "raw_configuration": "Rohkonfiguration",
       "reason": "Grund",
       "secret_token": "Geheimer Token",
@@ -871,6 +873,7 @@
     "all_services": "Alle Dienste",
     "global": "Global",
     "global_all_services": "Global (alle Dienste)",
+    "permanent": "Dauerhaft",
     "service_specific": "Dienstspezifisch"
   },
   "searchpane": {
@@ -905,6 +908,7 @@
     "next_30d": "Nächste 30 Tage",
     "next_7d": "Nächste 7 Tage",
     "older_30d": "Älter als 30 Tage",
+    "permanent": "Dauerhaft",
     "plugin": "Plugin",
     "reason": "Grund",
     "reload": "Neuladen erforderlich",

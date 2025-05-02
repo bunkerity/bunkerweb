@@ -572,6 +572,7 @@
       "ban_specific_service": "封鎖將僅適用於此特定服務。",
       "hostname_length_limit": "主機名稱限制為 256 個字元。",
       "hostname_special_chars": "協定/連接埠規範中只允許使用 `/` 和 `:`。",
+      "permanent_ban": "如果勾選，封鎖將永久有效，直到手動移除為止。",
       "photo_extensions": "允許的格式：JPG、GIF 或 PNG。最大大小：800KB。"
     },
     "label": {
@@ -610,6 +611,7 @@
       "new_password": "新密碼",
       "optional": "（選填）",
       "password": "密碼",
+      "permanent_ban": "永久封鎖",
       "raw_configuration": "原始設定",
       "reason": "原因",
       "secret_token": "密鑰",
@@ -871,6 +873,7 @@
     "all_services": "所有服務",
     "global": "全域",
     "global_all_services": "全域（所有服務）",
+    "permanent": "永久",
     "service_specific": "特定服務"
   },
   "searchpane": {
@@ -905,6 +908,7 @@
     "next_30d": "未來 30 天",
     "next_7d": "未來 7 天",
     "older_30d": "超過 30 天前",
+    "permanent": "永久",
     "plugin": "外掛程式",
     "reason": "原因",
     "reload": "需要重新載入",

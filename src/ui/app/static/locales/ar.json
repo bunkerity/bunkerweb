@@ -572,6 +572,7 @@
       "ban_specific_service": "سيطبق الحظر فقط على هذه الخدمة المحددة.",
       "hostname_length_limit": "اسم المضيف محدود بـ 256 حرفًا.",
       "hostname_special_chars": "يُسمح فقط بـ `/` و `:` لتحديد البروتوكول/المنفذ.",
+      "permanent_ban": "إذا تم تحديده، لن تنتهي صلاحية الحظر أبدًا حتى تتم إزالته يدويًا.",
       "photo_extensions": "مسموح بـ JPG، GIF، أو PNG. الحجم الأقصى: 800KB."
     },
     "label": {
@@ -610,6 +611,7 @@
       "new_password": "كلمة مرور جديدة",
       "optional": "(اختياري)",
       "password": "كلمة المرور",
+      "permanent_ban": "حظر دائم",
       "raw_configuration": "التكوين الخام",
       "reason": "السبب",
       "secret_token": "الرمز السري",
@@ -871,6 +873,7 @@
     "all_services": "جميع الخدمات",
     "global": "عام",
     "global_all_services": "عام (جميع الخدمات)",
+    "permanent": "دائم",
     "service_specific": "خاص بالخدمة"
   },
   "searchpane": {
@@ -905,6 +908,7 @@
     "next_30d": "الـ 30 يومًا القادمة",
     "next_7d": "الـ 7 أيام القادمة",
     "older_30d": "أكثر من 30 يومًا",
+    "permanent": "دائم",
     "plugin": "الإضافة",
     "reason": "السبب",
     "reload": "إعادة التحميل مطلوبة",

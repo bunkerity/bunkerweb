@@ -62,7 +62,7 @@ $(document).ready(function () {
       const countryCode = $elem.data("country");
 
       const countryName = t(
-        countryCode === "unknown"
+        countryCode === "unknown" || countryCode === "local"
           ? "country.not_applicable"
           : `country.${countryCode}`,
         "Unknown",
@@ -274,7 +274,7 @@ $(document).ready(function () {
     { extend: "add_ban" },
     {
       extend: "colvis",
-      columns: "th:not(:nth-child(-n+3)):not(:last-child)",
+      columns: "th:not(:nth-child(-n+3))",
       text: `<span class="tf-icons bx bx-columns bx-18px me-md-2"></span><span class="d-none d-md-inline" data-i18n="button.columns">${t(
         "button.columns",
         "Columns",
@@ -508,7 +508,7 @@ $(document).ready(function () {
         { type: "ip-address", targets: 3 },
         { orderable: false, targets: -1 },
         {
-          targets: [2, 8],
+          targets: 2,
           render: function (data, type, row) {
             if (type === "display" || type === "filter") {
               const date = new Date(data);
@@ -528,24 +528,24 @@ $(document).ready(function () {
           targets: 4,
           render: function (data) {
             const countryCode = data.toLowerCase();
+            const isNotApplicable =
+              countryCode === "unknown" ||
+              countryCode === "local" ||
+              countryCode === "n/a";
             const tooltipContent = "N/A";
             return `
               <span data-bs-toggle="tooltip" data-bs-original-title="${tooltipContent}" data-i18n="country.${
-                countryCode === "unknown"
-                  ? "not_applicable"
-                  : countryCode.toUpperCase()
+                isNotApplicable ? "not_applicable" : countryCode.toUpperCase()
               }" data-country="${
-                countryCode === "unknown"
-                  ? "unknown"
-                  : countryCode.toUpperCase()
+                isNotApplicable ? "unknown" : countryCode.toUpperCase()
               }">
-                <img src="${baseFlagsUrl}/${
-                  countryCode === "unknown" ? "zz" : countryCode
-                }.svg"
-                     class="border border-1 p-0 me-1"
-                     height="17"
-                     loading="lazy" />
-                &nbsp;－&nbsp;${countryCode === "unknown" ? "N/A" : data}
+              <img src="${baseFlagsUrl}/${
+                isNotApplicable ? "zz" : countryCode
+              }.svg"
+                 class="border border-1 p-0 me-1"
+                 height="17"
+                 loading="lazy" />
+              &nbsp;－&nbsp;${isNotApplicable ? "N/A" : data}
               </span>`;
           },
         },
@@ -617,6 +617,37 @@ $(document).ready(function () {
             orderable: false,
           },
           targets: 8,
+          render: function (data, type, row) {
+            if (data === "permanent" || row["permanent"] === true) {
+              return `<span class="badge bg-danger">
+                <i class="bx bx-time-five me-1"></i>
+                <span data-i18n="scope.permanent">${t(
+                  "scope.permanent",
+                  "Permanent",
+                )}</span>
+              </span>`;
+            }
+            return data;
+          },
+        },
+        {
+          targets: 9,
+          render: function (data, type, row) {
+            if (data === "permanent" || row["permanent"] === true) {
+              return `<span class="badge bg-danger">
+              <i class="bx bx-infinite me-1"></i>
+              <span data-i18n="scope.permanent">${t(
+                "scope.permanent",
+                "Permanent",
+              )}</span>
+              </span>`;
+            }
+            const date = new Date(data);
+            if (!isNaN(date.getTime())) {
+              return date.toLocaleString();
+            }
+            return data;
+          },
         },
       ],
       order: [[2, "desc"]],
@@ -776,6 +807,7 @@ $(document).ready(function () {
 
   $("#add-ban").on("click", function () {
     const originalBan = $("#ban-1");
+    const lastBan = $("#bans-container").find("li.ban-item:last");
     const banClone = originalBan.clone();
     banClone.attr("id", `ban-${++addBanNumber}`);
 
@@ -783,18 +815,51 @@ $(document).ready(function () {
       .find("input[name='ip']")
       .removeClass("is-valid is-invalid")
       .val("");
+
     banClone.find("[readonly='readonly']").remove();
+
+    const lastReason = lastBan.find("input[name='reason']").val();
+    banClone.find("input[name='reason']").val(lastReason || "ui");
+
+    const lastScope = lastBan.find("select[name='ban_scope']").val();
+    banClone.find("select[name='ban_scope']").val(lastScope || "global");
+
+    if (lastScope === "service") {
+      const lastService = lastBan.find("select[name='service']").val();
+      banClone.find("select[name='service']").val(lastService || "");
+      banClone.find(".service-field").addClass("show");
+    } else {
+      banClone.find(".service-field").removeClass("show");
+    }
+
+    const isPermanent = lastBan.find(".permanent-ban-checkbox").is(":checked");
+    banClone.find(".permanent-ban-checkbox").prop("checked", isPermanent);
+
+    let defaultDate;
+    if (!isPermanent) {
+      const lastBanFlatpickr = lastBan.find(".flatpickr-input")[0]._flatpickr;
+      defaultDate = lastBanFlatpickr
+        ? lastBanFlatpickr.selectedDates[0]
+        : defaultDatetime;
+    } else {
+      defaultDate = defaultDatetime;
+    }
+
     banClone.find(".flatpickr-input").flatpickr({
       enableTime: true,
       dateFormat: "Y-m-d\\TH:i:S", // ISO format
       altInput: true,
       altFormat: "F j, Y h:i K",
       time_24hr: true,
-      defaultDate: defaultDatetime,
+      defaultDate: defaultDate,
       minDate: minDatetime,
       plugins: [new minMaxTimePlugin({ table: minMaxTable })],
     });
-    banClone.find("input[name='reason']").val("ui");
+
+    banClone.find("[type='flatpickr-datetime']").prop("disabled", isPermanent);
+    if (isPermanent) {
+      banClone.find(".input-group").addClass("opacity-50");
+    }
 
     const deleteButtonContainer = banClone.find(".col-12.col-md-1");
     deleteButtonContainer.html(`
@@ -854,6 +919,10 @@ $(document).ready(function () {
     firstBan.find(".invalid-feedback").remove();
     originalFlatpickr.setDate(defaultDatetime);
     firstBan.find(".ban-scope-select").val("global").trigger("change");
+    // Reset permanent checkbox
+    firstBan.find(".permanent-ban-checkbox").prop("checked", false);
+    // Re-enable datetime field
+    firstBan.find("[type='flatpickr-datetime']").prop("disabled", false);
   });
 
   const ipRegex = new RegExp(
@@ -938,6 +1007,34 @@ $(document).ready(function () {
     }, 100)();
   });
 
+  // Handle the permanent ban checkbox change
+  $(document).on("change", ".permanent-ban-checkbox", function () {
+    const $checkbox = $(this);
+    const $banItem = $checkbox.closest("li.ban-item");
+    const $datetimeInput = $banItem.find(".flatpickr-input");
+    const flatpickrInstance = $datetimeInput[0]._flatpickr;
+
+    if ($checkbox.is(":checked")) {
+      // If checked, disable the date/time picker
+      if (flatpickrInstance) {
+        flatpickrInstance.set("clickOpens", false);
+        flatpickrInstance.altInput.disabled = true;
+        flatpickrInstance.input.disabled = true;
+      }
+      $datetimeInput.prop("disabled", true);
+      $datetimeInput.parent().addClass("opacity-50");
+    } else {
+      // If unchecked, enable the date/time picker
+      if (flatpickrInstance) {
+        flatpickrInstance.set("clickOpens", true);
+        flatpickrInstance.altInput.disabled = false;
+        flatpickrInstance.input.disabled = false;
+      }
+      $datetimeInput.prop("disabled", false);
+      $datetimeInput.parent().removeClass("opacity-50");
+    }
+  });
+
   $("#bans-form").on("submit", function (e) {
     e.preventDefault();
     let allValid = true;
@@ -974,6 +1071,9 @@ $(document).ready(function () {
         // Changed selector slightly
         const $this = $(this);
         const ip = $this.find("input[name='ip']").val().trim();
+        const isPermanent = $this
+          .find(".permanent-ban-checkbox")
+          .is(":checked");
         const end_date = $this.find(".flatpickr-input").val();
         const reason = $this.find("input[name='reason']").val().trim();
         const ban_scope = $this.find("select[name='ban_scope']").val();
@@ -984,7 +1084,8 @@ $(document).ready(function () {
 
         bans.push({
           ip: ip,
-          end_date: `${end_date}${getTimeZoneOffset()}`,
+          end_date: isPermanent ? "-1" : `${end_date}${getTimeZoneOffset()}`,
+          exp: isPermanent ? -1 : null, // Set exp to -1 if permanent ban
           reason: reason,
           ban_scope: ban_scope,
           service: service,

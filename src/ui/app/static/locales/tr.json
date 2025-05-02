@@ -572,6 +572,7 @@
       "ban_specific_service": "Yasaklama yalnızca bu servise uygulanacaktır.",
       "hostname_length_limit": "Hostname 256 karakter ile sınırlıdır.",
       "hostname_special_chars": "Protokol/port belirtimi için yalnızca `/` ve `:` kullanılabilir.",
+      "permanent_ban": "Seçiliyse, yasaklama manuel olarak kaldırılana kadar asla sona ermeyecek",
       "photo_extensions": "İzin verilen JPG, GIF veya PNG. Maksimum boyut: 800KB."
     },
     "label": {
@@ -610,6 +611,7 @@
       "new_password": "Yeni Şifre",
       "optional": "(Opsiyonel)",
       "password": "Şifre",
+      "permanent_ban": "Kalıcı Yasaklama",
       "raw_configuration": "Ham Konfigürasyon",
       "reason": "Sebep",
       "secret_token": "Gizli Token",
@@ -871,6 +873,7 @@
     "all_services": "Tüm Servisler",
     "global": "Global",
     "global_all_services": "Global (tüm servisler)",
+    "permanent": "Kalıcı",
     "service_specific": "Servise özel"
   },
   "searchpane": {
@@ -905,6 +908,7 @@
     "next_30d": "Sonraki 30 gün",
     "next_7d": "Sonraki 7 gün",
     "older_30d": "30 günden daha eski",
+    "permanent": "Kalıcı",
     "plugin": "Eklenti",
     "reason": "Sebep",
     "reload": "Yeniden Yükleme Gerekli",

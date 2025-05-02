@@ -604,7 +604,7 @@ def before_request():
     metadata = None
     app.config["SCRIPT_NONCE"] = token_urlsafe(32)
 
-    if not request.path.startswith(("/css/", "/img/", "/js/", "/json/", "/fonts/", "/libs/")):
+    if not request.path.startswith(("/css/", "/img/", "/js/", "/json/", "/fonts/", "/libs/", "/locales/")):
         metadata = DB.get_metadata()
         worker_pid = str(getpid())
 
@@ -819,7 +819,11 @@ def set_security_headers(response):
 
 @app.teardown_request
 def teardown_request(teardown):
-    if not request.path.startswith(("/css/", "/img/", "/js/", "/json/", "/fonts/", "/libs/")) and current_user.is_authenticated and "session_id" in session:
+    if (
+        not request.path.startswith(("/css/", "/img/", "/js/", "/json/", "/fonts/", "/libs/", "/locales/"))
+        and current_user.is_authenticated
+        and "session_id" in session
+    ):
         Thread(target=mark_user_access, args=(current_user, session["session_id"])).start()
 
     for hook in app.config["TEARDOWN_REQUEST_HOOKS"]:

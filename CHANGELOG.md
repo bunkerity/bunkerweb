@@ -11,6 +11,7 @@
 - [FEATURE] Add `REVERSE_PROXY_UNDERSCORES_IN_HEADERS` setting to control if underscores in headers should be allowed or not in the `Reverse Proxy` plugin (default is `no`)
 - [FEATURE] Add `LETS_ENCRYPT_CUSTOM_PROFILE` setting to allow setting a custom profile for the `Let's Encrypt` plugin
 - [FEATURE] Add `LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES` setting to allow disabling the public suffixes check in the `Let's Encrypt` plugin (default is `yes`)
+- [FEATURE] Add permanent ban feature to `badbehavior` plugin, web UI and bwcli
 - [UI] Fix shenanigans when editing a service in easy mode
 - [UI] Fix false positive with the newer CRS version (v4.13.0) on the web UI when fetching fonts
 - [UI] Add reset functionality to settings with UI updates for input, checkbox, and select elements

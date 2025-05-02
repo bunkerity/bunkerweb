@@ -572,6 +572,7 @@
       "ban_specific_service": "El bloqueo solo se aplicará a este servicio específico.",
       "hostname_length_limit": "El nombre de host está limitado a 256 caracteres.",
       "hostname_special_chars": "Solo se permiten `/` y `:` para la especificación de protocolo/puerto.",
+      "permanent_ban": "Si está marcado, el bloqueo nunca expirará hasta que se elimine manualmente",
       "photo_extensions": "Permitido JPG, GIF o PNG. Tamaño máximo: 800KB."
     },
     "label": {
@@ -610,6 +611,7 @@
       "new_password": "Nueva Contraseña",
       "optional": "(Opcional)",
       "password": "Contraseña",
+      "permanent_ban": "Bloqueo Permanente",
       "raw_configuration": "Configuración sin Procesar",
       "reason": "Motivo",
       "secret_token": "Token Secreto",
@@ -871,6 +873,7 @@
     "all_services": "Todos los Servicios",
     "global": "Global",
     "global_all_services": "Global (todos los servicios)",
+    "permanent": "Permanente",
     "service_specific": "Específico del servicio"
   },
   "searchpane": {
@@ -905,6 +908,7 @@
     "next_30d": "Próximos 30 días",
     "next_7d": "Próximos 7 días",
     "older_30d": "Más de 30 días",
+    "permanent": "Permanente",
     "plugin": "Plugin",
     "reason": "Motivo",
     "reload": "Recarga Requerida",
