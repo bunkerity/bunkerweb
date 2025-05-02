@@ -57,7 +57,7 @@ BunkerWeb contains primary [security features](https://docs.bunkerweb.io/1.6.2-r
 
 ## Why BunkerWeb?
 
-https://github.com/bunkerity/bunkerweb/raw/dev/docs/assets/videos/demo.mp4
+<video src="https://github.com/bunkerity/bunkerweb/raw/dev/docs/assets/videos/demo.mp4"></video>
 
 - **Easy integration into existing environments**: Seamlessly integrate BunkerWeb into various environments such as Linux, Docker, Swarm, Kubernetes, and more. Enjoy a smooth transition and hassle-free implementation.
 - **Highly customizable**: Tailor BunkerWeb to your specific requirements with ease. Enable, disable, and configure features effortlessly, allowing you to customize the security settings according to your unique use case.
