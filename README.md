@@ -57,7 +57,7 @@ BunkerWeb contains primary [security features](https://docs.bunkerweb.io/1.6.2-r
 
 ## Why BunkerWeb?
 
-https://github.com/bunkerity/bunkerweb/raw/v1.6.2-rc2/docs/assets/videos/demo.mp4
+https://github.com/user-attachments/assets/c3fed740-28d8-4335-ab05-113a9e815b4f
 
 - **Easy integration into existing environments**: Seamlessly integrate BunkerWeb into various environments such as Linux, Docker, Swarm, Kubernetes, and more. Enjoy a smooth transition and hassle-free implementation.
 - **Highly customizable**: Tailor BunkerWeb to your specific requirements with ease. Enable, disable, and configure features effortlessly, allowing you to customize the security settings according to your unique use case.
@@ -84,13 +84,13 @@ Learn more about the core security features in the [security tuning](https://doc
 
 ## Demo
 
-https://github.com/bunkerity/bunkerweb/raw/v1.6.2-rc2/docs/assets/videos/demo-cli.mp4
+https://github.com/user-attachments/assets/6fc0e3c1-d353-4a84-bad0-15bf9b6623a5
 
 A demo website protected with BunkerWeb is available at [demo.bunkerweb.io](https://demo.bunkerweb.io/?utm_campaign=self&utm_source=github). Feel free to visit it and perform some security tests.
 
 ## Web UI
 
-https://github.com/bunkerity/bunkerweb/raw/v1.6.2-rc2/docs/assets/videos/demo-ui.mp4
+https://github.com/user-attachments/assets/a3ed56f8-c124-4ca9-b8b3-4be0913b3078
 
 BunkerWeb offers an optional [user interface](web-ui.md) to manage your instances and their configurations. An online read-only demo is available at [demo-ui.bunkerweb.io](https://demo-ui.bunkerweb.io/?utm_campaign=self&utm_source=doc), feel free to test it yourself.
 
@@ -349,7 +349,7 @@ Check the [features section](https://docs.bunkerweb.io/1.6.2-rc2/features/?utm_c
 
 # Web UI
 
-https://github.com/bunkerity/bunkerweb/raw/v1.6.2-rc2/docs/assets/videos/demo-ui.mp4
+https://github.com/user-attachments/assets/a3ed56f8-c124-4ca9-b8b3-4be0913b3078
 
 The "Web UI" is a web application that helps you manage your BunkerWeb instance using a user-friendly interface instead of the command-line one.
 
