@@ -1046,7 +1046,7 @@ The BunkerWeb UI supports multiple languages. Translations are managed in the `s
 - German (de)
 - Italian (it)
 
-See the [locales/README.md](../src/ui/app/static/locales/README.md) for details on translation provenance and review status.
+See the [locales/README.md](https://github.com/bunkerity/bunkerweb/raw/v1.6.2-rc2/src/ui/app/static/locales/README.md) for details on translation provenance and review status.
 
 ### Contributing Translations
 
@@ -1062,4 +1062,4 @@ We welcome contributions to improve or add new locale files!
 
 For updates, edit the relevant file and update the provenance table as needed.
 
-See the [locales/README.md](../src/ui/app/static/locales/README.md) for full guidelines.
+See the [locales/README.md](https://github.com/bunkerity/bunkerweb/raw/v1.6.2-rc2/src/ui/app/static/locales/README.md) for full guidelines.
