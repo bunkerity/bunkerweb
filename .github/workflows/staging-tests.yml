@@ -43,7 +43,7 @@ jobs:
       - name: Install Terraform
         uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3.1.2
         if: inputs.TYPE == 'k8s'
-      - uses: actions/download-artifact@v4.2.1
+      - uses: actions/download-artifact@v4.3.0
         with:
           name: tf-k8s
           path: /tmp
@@ -78,12 +78,15 @@ jobs:
       - name: Pull BW linux debian test image
         if: inputs.TYPE == 'linux'
         run: docker pull ghcr.io/bunkerity/debian-tests:testing && docker tag ghcr.io/bunkerity/debian-tests:testing local/debian:latest
-      - name: Pull BW linux fedora test image
+      - name: Pull BW linux fedora 40 test image
         if: inputs.TYPE == 'linux'
-        run: docker pull ghcr.io/bunkerity/fedora-tests:testing && docker tag ghcr.io/bunkerity/fedora-tests:testing local/fedora:latest
+        run: docker pull ghcr.io/bunkerity/fedora-40-tests:testing && docker tag ghcr.io/bunkerity/fedora-40-tests:testing local/fedora-40:latest
       - name: Pull BW linux fedora 41 test image
         if: inputs.TYPE == 'linux'
         run: docker pull ghcr.io/bunkerity/fedora-41-tests:testing && docker tag ghcr.io/bunkerity/fedora-41-tests:testing local/fedora-41:latest
+      - name: Pull BW linux fedora 42 test image
+        if: inputs.TYPE == 'linux'
+        run: docker pull ghcr.io/bunkerity/fedora-42-tests:testing && docker tag ghcr.io/bunkerity/fedora-42-tests:testing local/fedora-42:latest
       - name: Pull BW linux rhel test image
         if: inputs.TYPE == 'linux'
         run: docker pull ghcr.io/bunkerity/rhel-tests:testing && docker tag ghcr.io/bunkerity/rhel-tests:testing local/rhel:latest
@@ -127,15 +130,21 @@ jobs:
         env:
           TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
           ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
-      - name: Run Linux fedora tests
+      - name: Run Linux fedora 40 tests
         if: inputs.TYPE == 'linux'
-        run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "linux" "fedora"
+        run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "linux" "fedora-40"
         env:
           TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
           ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
       - name: Run Linux fedora 41 tests
         if: inputs.TYPE == 'linux'
         run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "linux" "fedora-41"
+        env:
+          TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
+          ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
+      - name: Run Linux fedora 42 tests
+        if: inputs.TYPE == 'linux'
+        run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "linux" "fedora-42"
         env:
           TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
           ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}

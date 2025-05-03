@@ -345,7 +345,7 @@ function _M:derive(outlen, options, options_count)
   local buf = self.buf or ctypes.uchar_array(outlen)
 
   if options_count then
-    options_count = options_count - 1
+    options_count = options_count
   else
     options_count = nkeys(options)
   end

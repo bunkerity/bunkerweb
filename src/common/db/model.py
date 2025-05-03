@@ -326,7 +326,7 @@ class Metadata(Base):
     failover = Column(Boolean, default=None, nullable=True)
     failover_message = Column(Text, nullable=True, default="")
     integration = Column(INTEGRATIONS_ENUM, default="Unknown", nullable=False)
-    version = Column(String(32), default="1.6.2-rc1", nullable=False)
+    version = Column(String(32), default="1.6.2-rc2", nullable=False)
 
 
 ## UI Models
@@ -372,6 +372,7 @@ class Users(Base):
     method = Column(METHODS_ENUM, nullable=False, default="manual")
     admin = Column(Boolean, nullable=False, default=False)
     theme = Column(THEMES_ENUM, nullable=False, default="light")
+    language = Column(String(2), nullable=False, default="en")
 
     # 2FA
     totp_secret = Column(String(256), nullable=True)

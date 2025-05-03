@@ -815,7 +815,7 @@ const Helpers = {
     // Initial binding for existing elements
     $(document).on(
       "click",
-      ".form-password-toggle i:not(.bx-copy-alt)",
+      ".form-password-toggle .cursor-pointer:not(:has(.bx-copy-alt))",
       function (e) {
         e.preventDefault();
         handlePasswordToggle.call(this);

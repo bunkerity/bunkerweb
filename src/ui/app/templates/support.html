@@ -8,7 +8,8 @@
                 <i class='bx bxs-file-txt bx-sm position-absolute top-0 end-0 m-3 text-secondary'></i>
                 <div class="card-header p-2">
                     <div class="card-title">
-                        <h5 class="me-2 text-secondary don-jose mb-0">Download logs</h5>
+                        <h5 class="me-2 text-secondary don-jose mb-0"
+                            data-i18n="support.card.download_logs.title">Download logs</h5>
                     </div>
                 </div>
                 <div class="card-body position-relative">
@@ -21,11 +22,12 @@
                                target="_blank"
                                rel="noopener">
                                 <span class="bx bx-download me-0 me-md-2"></span>
-                                <span class="d-none d-md-inline">Download</span>
+                                <span class="d-none d-md-inline" data-i18n="button.download">Download</span>
                             </a>
                         </div>
                     </div>
-                    <small class="position-absolute bottom-0 end-0 text-muted">All private data will be anonymized</small>
+                    <small class="position-absolute bottom-0 end-0 text-muted"
+                           data-i18n="support.card.download_logs.help">All private data will be anonymized</small>
                 </div>
             </div>
         </div>
@@ -34,7 +36,8 @@
                 <i class='bx bxs-file-json bx-sm position-absolute top-0 end-0 m-3 text-secondary'></i>
                 <div class="card-header p-2">
                     <div class="card-title">
-                        <h5 class="me-2 text-secondary don-jose mb-0">Extract configuration</h5>
+                        <h5 class="me-2 text-secondary don-jose mb-0"
+                            data-i18n="support.card.extract_config.title">Extract configuration</h5>
                     </div>
                 </div>
                 <div class="card-body position-relative d-flex align-items-center justify-content-evenly">
@@ -47,7 +50,7 @@
                                target="_blank"
                                rel="noopener">
                                 <i class="bx bx-cog me-0 me-md-2"></i>
-                                <span class="d-none d-md-inline">Entire config</span>
+                                <span class="d-none d-md-inline" data-i18n="button.entire_config">Entire config</span>
                             </a>
                         </div>
                     </div>
@@ -59,7 +62,7 @@
                                 aria-haspopup="true"
                                 aria-expanded="false">
                             <i class="bx bx-cube me-0 me-md-2"></i>
-                            <span class="d-none d-md-inline">Service</span>
+                            <span class="d-none d-md-inline" data-i18n="button.service">Service</span>
                         </button>
                         <ul id="services-dropdown-menu"
                             class="dropdown-menu nav-pills max-vh-60 overflow-auto pt-0"
@@ -92,7 +95,8 @@
                 <i class='bx bx-help-circle bx-sm position-absolute top-0 end-0 m-3'></i>
                 <div class="card-header p-2">
                     <div class="card-title">
-                        <h5 class="me-2 text-primary shine don-jose mb-0">Support link</h5>
+                        <h5 class="me-2 text-primary shine don-jose mb-0"
+                            data-i18n="support.card.support_link.title">Support link</h5>
                     </div>
                 </div>
                 <div class="card-body position-relative">
@@ -111,9 +115,9 @@
                                          height="15.5px">
                                 </span>
                                 {% if pro_status == "inactive" %}
-                                    Open a support ticket
+                                    <span data-i18n="button.open_support_ticket">Open a support ticket</span>
                                 {% else %}
-                                    Order support
+                                    <span data-i18n="button.order_support">Order support</span>
                                 {% endif %}
                             </a>
                         </div>

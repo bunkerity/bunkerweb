@@ -117,6 +117,24 @@
       "regex": "^(classic|tlsserver|shortlived)$",
       "type": "select",
       "select": ["classic", "tlsserver", "shortlived"]
+    },
+    "LETS_ENCRYPT_CUSTOM_PROFILE": {
+      "context": "multisite",
+      "default": "",
+      "help": "Custom certificate profile to use with ACME servers that support non-standard profiles. Overrides LETS_ENCRYPT_PROFILE if set.",
+      "id": "lets-encrypt-custom-profile",
+      "label": "Custom Certificate Profile (ACME)",
+      "regex": "^([a-zA-Z0-9_-]{0,64})$",
+      "type": "text"
+    },
+    "LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES": {
+      "context": "multisite",
+      "default": "yes",
+      "help": "Disable certificate requests for domains matching the Public Suffix List (recommended, default: yes).",
+      "id": "lets-encrypt-disable-public-suffixes",
+      "label": "Disable Public Suffixes (PSL Blacklist)",
+      "regex": "^(yes|no)$",
+      "type": "check"
     }
   },
   "jobs": [

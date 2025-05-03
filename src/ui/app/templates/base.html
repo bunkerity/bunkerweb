@@ -38,6 +38,16 @@
         <link rel="icon"
               type="image/x-icon"
               href="{{ url_for('static', filename='img/favicon.ico') }}" />
+        <!-- Preload critical CSS -->
+        <link rel="preload"
+              href="{{ url_for('static', filename='css/core.css') }}"
+              as="style" />
+        <link rel="preload"
+              href="{{ url_for('static', filename='css/theme-default.css') }}"
+              as="style" />
+        <link rel="preload"
+              href="{{ url_for('static', filename='css/main.css') }}"
+              as="style" />
         <!-- Fonts -->
         <link rel="stylesheet"
               href="{{ url_for('static', filename='fonts/Public_sans.css') }}"
@@ -54,12 +64,18 @@
               nonce="{{ style_nonce }}" />
         {% if current_endpoint in ("instances", "services", "configs", "plugins", "cache", "reports", "bans", "jobs") or "plugins" in request.path %}
             <!-- Datatables -->
+            <link rel="preload"
+                  href="{{ url_for('static', filename='libs/datatables/datatables.min.css') }}"
+                  as="style" />
             <link rel="stylesheet"
                   href="{{ url_for('static', filename='libs/datatables/datatables.min.css') }}"
                   nonce="{{ style_nonce }}" />
         {% endif %}
         {% if current_endpoint in ("bans", "pro") or current_endpoint != "plugins" and "plugins" in request.path %}
             <!-- Flatpickr -->
+            <link rel="preload"
+                  href="{{ url_for('static', filename='libs/flatpickr/flatpickr.min.css') }}"
+                  as="style" />
             <link rel="stylesheet"
                   href="{{ url_for('static', filename='libs/flatpickr/flatpickr.min.css') }}"
                   nonce="{{ style_nonce }}" />
@@ -72,7 +88,7 @@
                       nonce="{{ style_nonce }}" />
             {% endif %}
         {% endif %}
-        <!-- Core CSS -->
+        <!-- Core CSS (critical) -->
         <link rel="stylesheet"
               href="{{ url_for('static', filename='css/core.css') }}"
               nonce="{{ style_nonce }}" />
@@ -90,8 +106,11 @@
               href="{{ url_for('static', filename='libs/perfect-scrollbar/perfect-scrollbar.css') }}"
               nonce="{{ style_nonce }}" />
         {% if current_endpoint == "home" or current_endpoint != "plugins" and "plugins" in request.path %}
+            <link rel="preload"
+                  href="{{ url_for('static', filename='libs/apexcharts/apexcharts.min.css') }}"
+                  as="style" />
             <link rel="stylesheet"
-                  href="{{ url_for('static', filename='libs/apexcharts/apexcharts.css') }}"
+                  href="{{ url_for('static', filename='libs/apexcharts/apexcharts.min.css') }}"
                   nonce="{{ style_nonce }}" />
             <link rel="stylesheet"
                   href="{{ url_for('static', filename='libs/leaflet/leaflet.css') }}"
@@ -116,18 +135,14 @@
                   href="{{ url_for('static', filename='css/pages/home.css') }}"
                   nonce="{{ style_nonce }}" />
         {% endif %}
-        <!-- Helpers  -->
-        <script src="{{ url_for('static', filename='js/helpers.js') }}"
-                nonce="{{ script_nonce }}"></script>
-        <!-- Config  -->
-        <script src="{{ url_for('static', filename='js/config.js') }}"
-                nonce="{{ script_nonce }}"></script>
     </head>
     <body>
         {% if not starting %}<input type="hidden" id="home-path" value="{{ url_for('home') }}" />{% endif %}
         <input type="hidden" id="is-read-only" value="{{ is_readonly }}" />
         <input type="hidden" id="user-read-only" value="{{ user_readonly }}" />
         <input type="hidden" id="theme" value="{{ theme }}" />
+        <input type="hidden" id="language" value="{{ language }}" />
+        <textarea id="supported-languages-json" class="visually-hidden">{{ supported_languages|tojson }}</textarea>
         <input type="hidden"
                id="bw-logo"
                value="{{ url_for('static', filename='img/logo-menu.png') }}" />
@@ -145,7 +160,12 @@
             {% include "flash.html" %}
         {% endif %}
         {% block page %}{% endblock %}
-        <!-- Vendors JS -->
+        <!-- Helpers  -->
+        <script src="{{ url_for('static', filename='js/helpers.js') }}"
+                nonce="{{ script_nonce }}"></script>
+        <!-- Config  -->
+        <script src="{{ url_for('static', filename='js/config.js') }}"
+                nonce="{{ script_nonce }}"></script>
         <script src="{{ url_for('static', filename='libs/jquery/jquery.min.js') }}"
                 nonce="{{ script_nonce }}"></script>
         <script src="{{ url_for('static', filename='libs/popper/popper.min.js') }}"
@@ -155,6 +175,14 @@
         <script src="{{ url_for('static', filename='libs/perfect-scrollbar/perfect-scrollbar.min.js') }}"
                 nonce="{{ script_nonce }}"></script>
         <script src="{{ url_for('static', filename='libs/purify/purify.min.js') }}"
+                nonce="{{ script_nonce }}"></script>
+        <script src="{{ url_for('static', filename='libs/i18next/i18next.min.js') }}"
+                nonce="{{ script_nonce }}"></script>
+        <script src="{{ url_for('static', filename='libs/i18next/i18nextHttpBackend.min.js') }}"
+                nonce="{{ script_nonce }}"></script>
+        <script src="{{ url_for('static', filename='libs/i18next/i18nextBrowserLanguageDetector.min.js') }}"
+                nonce="{{ script_nonce }}"></script>
+        <script src="{{ url_for('static', filename='js/i18n.js') }}"
                 nonce="{{ script_nonce }}"></script>
         {% if current_endpoint in ("instances", "services", "configs", "plugins", "cache", "reports", "bans", "jobs") or "plugins" in request.path %}
             <script src="{{ url_for('static', filename='libs/datatables/datatables.min.js') }}"
@@ -192,14 +220,10 @@
                 nonce="{{ script_nonce }}"></script>
         <script src="{{ url_for('static', filename='js/common.js') }}"
                 nonce="{{ script_nonce }}"></script>
-        <script async
-                defer
-                src="{{ url_for('static', filename='js/utils.js') }}"
+        <script src="{{ url_for('static', filename='js/utils.js') }}"
                 nonce="{{ script_nonce }}"></script>
         {% if current_endpoint == "global-config" or (current_endpoint != "services" and "services" in request.path) %}
-            <script async
-                    defer
-                    src="{{ url_for('static', filename='js/plugins-settings.js') }}"
+            <script src="{{ url_for('static', filename='js/plugins-settings.js') }}"
                     nonce="{{ script_nonce }}"></script>
         {% endif %}
         <!-- Page JS -->
@@ -214,9 +238,7 @@
             <script src="{{ url_for('static', filename='js/pages/loading.js') }}"
                     nonce="{{ script_nonce }}"></script>
         {% elif current_endpoint == "home" %}
-            <script async
-                    defer
-                    src="{{ url_for('static', filename='js/pages/home.js') }}"
+            <script src="{{ url_for('static', filename='js/pages/home.js') }}"
                     nonce="{{ script_nonce }}"></script>
         {% elif current_endpoint == "profile" %}
             <script src="{{ url_for('static', filename='js/pages/profile.js') }}"
@@ -264,9 +286,8 @@
             <script src="{{ url_for('static', filename='js/pages/plugin_page.js') }}"
                     nonce="{{ script_nonce }}"></script>
         {% endif %}
-        <script async
-                defer
-                src="{{ url_for('static', filename='js/buttons.js') }}"
-                nonce="{{ script_nonce }}"></script>
+        <script src="{{ url_for('static', filename='js/buttons.js') }}"
+                nonce="{{ script_nonce }}"
+                defer></script>
     </body>
 </html>

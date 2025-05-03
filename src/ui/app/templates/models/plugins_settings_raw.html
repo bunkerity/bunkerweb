@@ -5,21 +5,21 @@
 <div class="position-absolute top-0 end-0 m-3" style="z-index: 1000">
     <div class="d-flex flex-wrap justify-content-center align-items-center">
         <div class="card mt-1 me-2"
-             {% if not request.is_secure %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The copy feature is only available over HTTPS"{% endif %}>
+             {% if not request.is_secure %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The copy feature is only available over HTTPS" data-i18n="tooltip.copy_https_only"{% endif %}>
             <button type="button"
                     class="btn btn-sm btn-outline-secondary copy-settings{% if not request.is_secure %} disabled{% endif %}">
                 <i class="bx bx-copy-alt bx-xs"></i>
-                <span class="d-none d-md-inline">&nbsp;Copy</span>
+                <span class="d-none d-md-inline">&nbsp;<span data-i18n="button.copy">Copy</span></span>
             </button>
         </div>
         <div class="card mt-1 me-1"
-             {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title={% if user_readonly %}"Readonly mode enabled"{% else %}"The database is in readonly, therefore the configuration is locked"{% endif %}
+             {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title={% if user_readonly %}"Readonly mode enabled" data-i18n="tooltip.disabled_readonly"{% else %}"The database is in readonly, therefore the configuration is locked" data-i18n="tooltip.disabled_db_readonly"{% endif %}
              {% endif %}>
             <!-- Save button container -->
             <button type="button"
                     class="btn btn-sm btn-outline-bw-green save-settings{% if is_readonly %} disabled{% endif %}">
                 <i class="bx bx-save bx-xs"></i>
-                <span class="d-none d-md-inline">&nbsp;Save</span>
+                <span class="d-none d-md-inline">&nbsp;<span data-i18n="button.save">Save</span></span>
             </button>
         </div>
     </div>
@@ -86,7 +86,10 @@
                   rows="35"
                   id="raw-config"
                   aria-label="Raw configuration"
+                  data-i18n="aria.label.raw_configuration"
                   {% if is_readonly %}readonly{% endif %}>{{ raw_config|safe }}</textarea>
-        <label for="raw-config" class="text-white">Raw configuration</label>
+        <label for="raw-config"
+               class="text-white"
+               data-i18n="form.label.raw_configuration">Raw configuration</label>
     </div>
 </div>

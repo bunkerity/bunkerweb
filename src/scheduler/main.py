@@ -117,6 +117,11 @@ IGNORE_FAIL_SENDING_CONFIG = getenv("IGNORE_FAIL_SENDING_CONFIG", "no").lower() 
 if IGNORE_FAIL_SENDING_CONFIG:
     LOGGER.warning("Ignoring fail sending config to some BunkerWeb instances ...")
 
+IGNORE_REGEX_CHECK = getenv("IGNORE_REGEX_CHECK", "no").lower() == "yes"
+
+if IGNORE_REGEX_CHECK:
+    LOGGER.warning("Ignoring regex check for settings (we hope you know what you're doing) ...")
+
 
 def handle_stop(signum, frame):
     current_time = datetime.now().astimezone()

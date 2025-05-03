@@ -401,7 +401,9 @@ def on_starting(server):
     if ADMIN_USER:
         if invalid_totp_secrets:
             LOGGER.warning("The TOTP secrets have changed, removing admin TOTP secrets ...")
-            err = DB.update_ui_user(ADMIN_USER["username"], ADMIN_USER["password"], None, method=ADMIN_USER["method"])
+            err = DB.update_ui_user(
+                ADMIN_USER["username"], ADMIN_USER["password"], None, theme=ADMIN_USER["theme"], method=ADMIN_USER["method"], language=ADMIN_USER["language"]
+            )
             if err:
                 LOGGER.error(f"Couldn't update the admin user in the database: {err}")
 
@@ -425,7 +427,14 @@ def on_starting(server):
                 if updated:
                     if override_admin_creds:
                         LOGGER.warning("Overriding the admin user credentials, as the OVERRIDE_ADMIN_CREDS environment variable is set to 'yes'.")
-                    err = DB.update_ui_user(ADMIN_USER["username"], ADMIN_USER["password"], ADMIN_USER["totp_secret"], method="manual")
+                    err = DB.update_ui_user(
+                        ADMIN_USER["username"],
+                        ADMIN_USER["password"],
+                        ADMIN_USER["totp_secret"],
+                        theme=ADMIN_USER["theme"],
+                        method="manual",
+                        language=ADMIN_USER["language"],
+                    )
                     if err:
                         LOGGER.error(f"Couldn't update the admin user in the database: {err}")
                     else:

@@ -1,4 +1,10 @@
 $(document).ready(function () {
+  // Ensure i18next is loaded before using it
+  const t =
+    typeof i18next !== "undefined"
+      ? i18next.t
+      : (key, fallback) => fallback || key; // Fallback
+
   var actionLock = false;
   const dragArea = $("#drag-area");
   const fileInput = $("#file-input");
@@ -13,14 +19,23 @@ $(document).ready(function () {
       `<ul class="list-group list-group-horizontal w-100">
       <li class="list-group-item bg-secondary text-white" style="flex: 1 1 0;">
         <div class="ms-2 me-auto">
-          <div class="fw-bold">Name</div>
+          <div class="fw-bold" data-i18n="table.header.name">${t(
+            "table.header.name",
+            "Name",
+          )}</div>
         </div>
       </li>
       <li class="list-group-item bg-secondary text-white" style="flex: 1 1 0;">
-        <div class="fw-bold">Version</div>
+        <div class="fw-bold" data-i18n="table.header.version">${t(
+          "table.header.version",
+          "Version",
+        )}</div>
       </li>
       <li class="list-group-item bg-secondary text-white" style="flex: 1 1 0;">
-        <div class="fw-bold">Type</div>
+        <div class="fw-bold" data-i18n="table.header.type">${t(
+          "table.header.type",
+          "Type",
+        )}</div>
       </li>
       </ul>`,
     );
@@ -63,9 +78,14 @@ $(document).ready(function () {
     delete_modal
       .find(".alert")
       .text(
-        `Are you sure you want to delete the selected plugin${"s".repeat(
-          plugins.length > 1,
-        )}?`,
+        t(
+          plugins.length > 1
+            ? "modal.body.delete_confirmation_alert_plural"
+            : "modal.body.delete_confirmation_alert",
+          `Are you sure you want to delete the selected plugin${"s".repeat(
+            plugins.length > 1,
+          )}?`,
+        ),
       );
     modal.show();
 
@@ -204,32 +224,56 @@ $(document).ready(function () {
     {
       extend: "colvis",
       columns: "th:not(:nth-child(-n+3)):not(:last-child)",
-      text: '<span class="tf-icons bx bx-columns bx-18px me-md-2"></span><span class="d-none d-md-inline">Columns</span>',
+      text: `<span class="tf-icons bx bx-columns bx-18px me-md-2"></span><span class="d-none d-md-inline" data-i18n="button.columns">${t(
+        "button.columns",
+        "Columns",
+      )}</span>`,
       className: "btn btn-sm btn-outline-primary rounded-start",
       columnText: function (dt, idx, title) {
-        return idx + 1 + ". " + title;
+        const headerCell = dt.column(idx).header();
+        const $header = $(headerCell);
+        const $translatableElement = $header.find("[data-i18n]");
+        let i18nKey = $translatableElement.data("i18n");
+        let translatedTitle = title;
+        if (i18nKey) {
+          translatedTitle = t(i18nKey, title);
+        } else {
+          translatedTitle = $header.text().trim() || title;
+        }
+        return `${idx + 1}. <span data-i18n="${
+          i18nKey || ""
+        }">${translatedTitle}</span>`;
       },
     },
     {
       extend: "colvisRestore",
-      text: '<span class="tf-icons bx bx-reset bx-18px me-2"></span>Reset columns',
+      text: `<span class="tf-icons bx bx-reset bx-18px me-2"></span><span class="d-none d-md-inline" data-i18n="button.reset_columns">${t(
+        "button.reset_columns",
+        "Reset columns",
+      )}</span>`,
       className: "btn btn-sm btn-outline-primary d-none d-md-inline",
     },
     {
       extend: "collection",
-      text: '<span class="tf-icons bx bx-export bx-18px me-md-2"></span><span class="d-none d-md-inline">Export</span>',
+      text: `<span class="tf-icons bx bx-export bx-18px me-md-2"></span><span class="d-none d-md-inline" data-i18n="button.export">${t(
+        "button.export",
+        "Export",
+      )}</span>`,
       className: "btn btn-sm btn-outline-primary",
       buttons: [
         {
           extend: "copy",
-          text: '<span class="tf-icons bx bx-copy bx-18px me-2"></span>Copy visible',
+          text: `<span class="tf-icons bx bx-copy bx-18px me-2"></span><span data-i18n="button.copy_visible">${t(
+            "button.copy_visible",
+            "Copy visible",
+          )}</span>`,
           exportOptions: {
             columns: ":visible:not(:nth-child(-n+2)):not(:last-child)",
           },
         },
         {
           extend: "csv",
-          text: '<span class="tf-icons bx bx-table bx-18px me-2"></span>CSV',
+          text: `<span class="tf-icons bx bx-table bx-18px me-2"></span>CSV`,
           bom: true,
           filename: "bw_plugins",
           exportOptions: {
@@ -241,7 +285,7 @@ $(document).ready(function () {
         },
         {
           extend: "excel",
-          text: '<span class="tf-icons bx bx-table bx-18px me-2"></span>Excel',
+          text: `<span class="tf-icons bx bx-table bx-18px me-2"></span>Excel`,
           filename: "bw_plugins",
           exportOptions: {
             modifier: {
@@ -254,7 +298,10 @@ $(document).ready(function () {
     },
     {
       extend: "collection",
-      text: '<span class="tf-icons bx bx-play bx-18px me-md-2"></span><span class="d-none d-md-inline">Actions</span>',
+      text: `<span class="tf-icons bx bx-play bx-18px me-md-2"></span><span class="d-none d-md-inline" data-i18n="button.actions">${t(
+        "button.actions",
+        "Actions",
+      )}</span>`,
       className: "btn btn-sm btn-outline-primary action-button disabled",
       buttons: [
         {
@@ -282,13 +329,21 @@ $(document).ready(function () {
   };
 
   $.fn.dataTable.ext.buttons.add_plugin = {
-    text: '<span class="tf-icons bx bx-plus"></span><span class="d-none d-md-inline">&nbsp;Add plugin(s)</span>',
+    text: `<span class="tf-icons bx bx-plus"></span><span class="d-none d-md-inline" data-i18n="button.add_plugin_plural"> ${t(
+      "button.add_plugin_plural",
+      "Add plugin(s)",
+    )}</span>`,
     className: `btn btn-sm rounded me-4 btn-bw-green${
       isReadOnly ? " disabled" : ""
     }`,
     action: function (e, dt, node, config) {
       if (isReadOnly) {
-        alert("This action is not allowed in read-only mode.");
+        alert(
+          t(
+            "alert.readonly_mode",
+            "This action is not allowed in read-only mode.",
+          ),
+        );
         return;
       }
       const plugin_modal = $("#modal-add-plugins");
@@ -298,10 +353,18 @@ $(document).ready(function () {
   };
 
   $.fn.dataTable.ext.buttons.delete_plugins = {
-    text: '<span class="tf-icons bx bx-trash bx-18px me-2"></span>Delete',
+    text: `<span class="tf-icons bx bx-trash bx-18px me-2"></span><span data-i18n="button.delete">${t(
+      "button.delete",
+      "Delete",
+    )}</span>`,
     action: function (e, dt, node, config) {
       if (isReadOnly) {
-        alert("This action is not allowed in read-only mode.");
+        alert(
+          t(
+            "alert.readonly_mode",
+            "This action is not allowed in read-only mode.",
+          ),
+        );
         return;
       }
       if (actionLock) {
@@ -322,7 +385,7 @@ $(document).ready(function () {
     },
   };
 
-  initializeDataTable({
+  const plugins_config = {
     tableSelector: "#plugins",
     tableName: "plugins",
     columnVisibilityCondition: (column) =>
@@ -350,24 +413,31 @@ $(document).ready(function () {
         {
           searchPanes: {
             show: true,
-            header: "Stream Support",
+            header: t("searchpane.stream", "Stream"),
             options: [
               {
-                label: '<i class="bx bx-xs bx-x text-danger"></i>&nbsp;No',
+                label: `<i class="bx bx-xs bx-x text-danger"></i>&nbsp;<span data-i18n="status.no">${t(
+                  "status.no",
+                  "No",
+                )}</span>`,
                 value: function (rowData, rowIdx) {
                   return rowData[6].includes("bx-x");
                 },
               },
               {
-                label:
-                  '<i class="bx bx-xs bx-check text-success"></i>&nbsp;Yes',
+                label: `<i class="bx bx-xs bx-check text-success"></i>&nbsp;<span data-i18n="status.yes">${t(
+                  "status.yes",
+                  "Yes",
+                )}</span>`,
                 value: function (rowData, rowIdx) {
                   return rowData[6].includes("bx-check");
                 },
               },
               {
-                label:
-                  '<i class="bx bx-xs bx-minus text-warning"></i>&nbsp;Partial',
+                label: `<i class="bx bx-xs bx-minus text-warning"></i>&nbsp;<span data-i18n="status.partial">${t(
+                  "status.partial",
+                  "Partial",
+                )}</span>`,
                 value: function (rowData, rowIdx) {
                   return rowData[6].includes("bx-minus");
                 },
@@ -381,31 +451,44 @@ $(document).ready(function () {
         {
           searchPanes: {
             show: true,
+            header: t("searchpane.type", "Type"),
             options: [
               {
                 label: `<img src="${$("#pro_diamond_url")
                   .val()
-                  .trim()}" alt="Pro plugin" width="16px" height="12.9125px" class="mb-1">&nbsp;PRO`,
+                  .trim()}" alt="Pro plugin" width="16px" height="12.9125px" class="mb-1">&nbsp;<span data-i18n="plugin.type.pro">${t(
+                  "plugin.type.pro",
+                  "PRO",
+                )}</span>`,
                 value: function (rowData, rowIdx) {
-                  return rowData[7].includes("PRO");
+                  return rowData[7].includes("plugin.type.pro");
                 },
               },
               {
-                label: '<i class="bx bx-plug bx-xs"></i>&nbsp;External',
+                label:
+                  '<i class="bx bx-xs bx-plug"></i>&nbsp;<span data-i18n="plugin.type.external">' +
+                  t("plugin.type.external", "EXTERNAL") +
+                  "</span>",
                 value: function (rowData, rowIdx) {
-                  return rowData[7].includes("EXTERNAL");
+                  return rowData[7].includes("plugin.type.external");
                 },
               },
               {
-                label: '<i class="bx bx-cloud-upload bx-xs"></i>&nbsp;UI',
+                label:
+                  '<i class="bx bx-xs bx-cloud-upload"></i>&nbsp;<span data-i18n="plugin.type.ui">' +
+                  t("plugin.type.ui", "UI") +
+                  "</span>",
                 value: function (rowData, rowIdx) {
-                  return rowData[7].includes("UI");
+                  return rowData[7].includes("plugin.type.ui");
                 },
               },
               {
-                label: '<i class="bx bx-shield bx-xs"></i>&nbsp;Core',
+                label:
+                  '<i class="bx bx-xs bx-shield"></i>&nbsp;<span data-i18n="plugin.type.core">' +
+                  t("plugin.type.core", "CORE") +
+                  "</span>",
                 value: function (rowData, rowIdx) {
-                  return rowData[7].includes("CORE");
+                  return rowData[7].includes("plugin.type.core");
                 },
               },
             ],
@@ -417,6 +500,7 @@ $(document).ready(function () {
         {
           searchPanes: {
             show: true,
+            header: t("searchpane.method", "Method"),
             combiner: "or",
             orderable: false,
           },
@@ -432,20 +516,6 @@ $(document).ready(function () {
         headerCheckbox: true,
       },
       layout: layout,
-      language: {
-        info: "Showing _START_ to _END_ of _TOTAL_ plugins",
-        infoEmpty: "No plugins available",
-        infoFiltered: "(filtered from _MAX_ total plugins)",
-        lengthMenu: "Display _MENU_ plugins",
-        zeroRecords: "No matching plugins found",
-        select: {
-          rows: {
-            _: "Selected %d plugins",
-            0: "No plugins selected",
-            1: "Selected 1 plugin",
-          },
-        },
-      },
       initComplete: function (settings, json) {
         $("#plugins_wrapper .btn-secondary").removeClass("btn-secondary");
         if (isReadOnly)
@@ -454,19 +524,44 @@ $(document).ready(function () {
               "data-bs-original-title",
               `${
                 userReadOnly
-                  ? "Your account is readonly"
-                  : "The database is in readonly"
-              }, therefore you cannot create add plugins.`,
+                  ? t(
+                      "tooltip.readonly_user_action_disabled",
+                      "Your account is readonly, action disabled.",
+                    )
+                  : t(
+                      "tooltip.readonly_db_action_disabled",
+                      "The database is in readonly, action disabled.",
+                    )
+              }`,
             )
             .attr("data-bs-placement", "right")
             .tooltip();
       },
     },
-  });
+  };
+
+  // Wait for window.i18nextReady = true before continuing
+  if (typeof window.i18nextReady === "undefined" || !window.i18nextReady) {
+    const waitForI18next = (resolve) => {
+      if (window.i18nextReady) {
+        resolve();
+      } else {
+        setTimeout(() => waitForI18next(resolve), 50);
+      }
+    };
+    new Promise((resolve) => {
+      waitForI18next(resolve);
+    }).then(() => initializeDataTable(plugins_config));
+  }
 
   $(document).on("click", ".delete-plugin", function () {
     if (isReadOnly) {
-      alert("This action is not allowed in read-only mode.");
+      alert(
+        t(
+          "alert.readonly_mode",
+          "This action is not allowed in read-only mode.",
+        ),
+      );
       return;
     }
     $this = $(this);

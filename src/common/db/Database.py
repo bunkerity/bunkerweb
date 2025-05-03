@@ -96,6 +96,7 @@ class Database:
         self.logger = logger
         self.readonly = False
         self.last_connection_retry = None
+        self.__ignore_regex_check = getenv("IGNORE_REGEX_CHECK", "no").lower() == "yes"
 
         if pool:
             self.logger.warning("The pool parameter is deprecated, it will be removed in the next version")
@@ -408,7 +409,7 @@ class Database:
 
                 if value is not None:
                     try:
-                        if search(db_setting.regex, value) is None:
+                        if not self.__ignore_regex_check and search(db_setting.regex, value) is None:
                             return False, f"not matching regex: {db_setting.regex!r}"
                     except RegexError:
                         return False, f"invalid regex: {db_setting.regex!r}"
@@ -458,7 +459,7 @@ class Database:
                 metadata = session.query(Metadata).with_entities(Metadata.version).filter_by(id=1).first()
                 if metadata:
                     return metadata.version
-                return "1.6.2-rc1"
+                return "1.6.2-rc2"
             except BaseException as e:
                 return f"Error: {e}"
 
@@ -490,7 +491,7 @@ class Database:
             "last_instances_change": None,
             "reload_ui_plugins": False,
             "integration": "unknown",
-            "version": "1.6.2-rc1",
+            "version": "1.6.2-rc2",
             "database_version": "Unknown",  # ? Extracted from the database
             "default": True,  # ? Extra field to know if the returned data is the default one
         }
@@ -1323,13 +1324,13 @@ class Database:
             if (is_global and not suffix) or (key not in config and key not in db_config):
                 return val == setting["default"]
 
-            if is_global and not suffix:
+            if is_global:
                 return False
 
             # Acceptable values are the ones from either config or db_config.
-            return val in (config.get(key), db_config.get(key))
+            return val in (config.get(key), db_config.get(key)) if not suffix else val in (config.get(f"{key}_{suffix}"), db_config.get(f"{key}_{suffix}"))
 
-        def check_value(key: str, value: str, setting: dict, template_default: Optional[str], suffix: int, original_key: str, is_global: bool = False) -> bool:
+        def check_value(key: str, value: str, setting: dict, template_default: Optional[str], suffix: int, is_global: bool = False) -> bool:
             """
             Determine if a configuration value should be considered default.
 
@@ -1341,12 +1342,7 @@ class Database:
             if not is_global and key == "SERVER_NAME":
                 return False
 
-            if not suffix:
-                return is_default_value(value, original_key, setting, template_default, suffix, is_global)
-
-            return is_default_value(value, key, setting, template_default, suffix, is_global) and is_default_value(
-                value, original_key, setting, template_default, suffix, is_global
-            )
+            return is_default_value(value, key, setting, template_default, suffix, is_global)
 
         with self._db_session() as session:
             if self.readonly:
@@ -1551,7 +1547,7 @@ class Database:
 
                             # Determine if we need to add, update, or delete
                             if not service_setting:
-                                if check_value(key, value, setting, template_setting_default, suffix, original_key):
+                                if check_value(key, value, setting, template_setting_default, suffix):
                                     continue
 
                                 self.logger.debug(f"Adding setting {key} for service {server_name}")
@@ -1566,7 +1562,7 @@ class Database:
                             ):
                                 local_changed_plugins.add(setting["plugin_id"])
 
-                                if check_value(key, value, setting, template_setting_default, suffix, original_key):
+                                if check_value(key, value, setting, template_setting_default, suffix):
                                     self.logger.debug(f"Removing setting {key} for service {server_name}")
                                     local_to_delete.append(
                                         {"model": Services_settings, "filter": {"service_id": server_name, "setting_id": key, "suffix": suffix}}
@@ -1612,7 +1608,7 @@ class Database:
                                 template_setting_default = templates.get(template, {}).get((key, suffix))
 
                             if not global_value:
-                                if check_value(key, value, setting, template_setting_default, suffix, original_key, True):
+                                if check_value(key, value, setting, template_setting_default, suffix, True):
                                     continue
 
                                 self.logger.debug(f"Adding global setting {key}")
@@ -1623,7 +1619,7 @@ class Database:
                             ):
                                 local_changed_plugins.add(setting["plugin_id"])
 
-                                if check_value(key, value, setting, template_setting_default, suffix, original_key, True):
+                                if check_value(key, value, setting, template_setting_default, suffix, True):
                                     self.logger.debug(f"Removing global setting {key}")
                                     local_to_delete.append({"model": Global_values, "filter": {"setting_id": key, "suffix": suffix}})
                                     continue
@@ -1982,7 +1978,7 @@ class Database:
                         continue
                     value = self._empty_if_none(result.value)
 
-                    if result.setting_id == "SERVER_NAME" and not search(r"^" + escape(result.service_id) + r"( |$)", value):
+                    if result.setting_id == "SERVER_NAME" and search(r"^" + escape(result.service_id) + r"( |$)", value) is None:
                         split = set(value.split(" "))
                         split.discard(result.service_id)
                         value = result.service_id + " " + " ".join(split)

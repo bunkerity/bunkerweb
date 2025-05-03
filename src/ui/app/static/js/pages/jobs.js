@@ -1,4 +1,10 @@
 $(document).ready(function () {
+  // Ensure i18next is loaded before using it
+  const t =
+    typeof i18next !== "undefined"
+      ? i18next.t
+      : (key, fallback) => fallback || key; // Fallback
+
   let actionLock = false;
   const jobNumber = parseInt($("#job_number").val());
   const isReadOnly = $("#is-read-only").val().trim() === "True";
@@ -39,7 +45,7 @@ $(document).ready(function () {
     if (jobNumber > 100) {
       menu.push(100);
     }
-    menu.push({ label: "All", value: -1 });
+    menu.push({ label: t("datatable.length_all", "All"), value: -1 });
     layout.bottomStart = {
       pageLength: {
         menu: menu,
@@ -53,32 +59,56 @@ $(document).ready(function () {
     {
       extend: "colvis",
       columns: "th:not(:nth-child(-n+3)):not(:last-child)",
-      text: '<span class="tf-icons bx bx-columns bx-18px me-2"></span>Columns',
+      text: `<span class="tf-icons bx bx-columns bx-18px me-2"></span><span class="d-none d-md-inline" data-i18n="button.columns">${t(
+        "button.columns",
+        "Columns",
+      )}</span>`,
       className: "btn btn-sm btn-outline-primary",
       columnText: function (dt, idx, title) {
-        return idx + 1 + ". " + title;
+        const headerCell = dt.column(idx).header();
+        const $header = $(headerCell);
+        const $translatableElement = $header.find("[data-i18n]");
+        let i18nKey = $translatableElement.data("i18n");
+        let translatedTitle = title;
+        if (i18nKey) {
+          translatedTitle = t(i18nKey, title);
+        } else {
+          translatedTitle = $header.text().trim() || title;
+        }
+        return `${idx + 1}. <span data-i18n="${
+          i18nKey || ""
+        }">${translatedTitle}</span>`;
       },
     },
     {
       extend: "colvisRestore",
-      text: '<span class="tf-icons bx bx-reset bx-18px me-md-2"></span><span class="d-none d-md-inline">Reset columns</span>',
+      text: `<span class="tf-icons bx bx-reset bx-18px me-md-2"></span><span class="d-none d-md-inline" data-i18n="button.reset_columns">${t(
+        "button.reset_columns",
+        "Reset columns",
+      )}</span>`,
       className: "btn btn-sm btn-outline-primary",
     },
     {
       extend: "collection",
-      text: '<span class="tf-icons bx bx-export bx-18px me-md-2"></span><span class="d-none d-md-inline">Export</span>',
+      text: `<span class="tf-icons bx bx-export bx-18px me-md-2"></span><span class="d-none d-md-inline" data-i18n="button.export">${t(
+        "button.export",
+        "Export",
+      )}</span>`,
       className: "btn btn-sm btn-outline-primary",
       buttons: [
         {
           extend: "copy",
-          text: '<span class="tf-icons bx bx-copy bx-18px me-2"></span>Copy visible',
+          text: `<span class="tf-icons bx bx-copy bx-18px me-2"></span><span data-i18n="button.copy_visible">${t(
+            "button.copy_visible",
+            "Copy visible",
+          )}</span>`,
           exportOptions: {
             columns: ":visible:not(:nth-child(-n+2)):not(:last-child)",
           },
         },
         {
           extend: "csv",
-          text: '<span class="tf-icons bx bx-table bx-18px me-2"></span>CSV',
+          text: `<span class="tf-icons bx bx-table bx-18px me-2"></span>CSV`,
           bom: true,
           filename: "bw_jobs",
           exportOptions: {
@@ -90,7 +120,7 @@ $(document).ready(function () {
         },
         {
           extend: "excel",
-          text: '<span class="tf-icons bx bx-table bx-18px me-2"></span>Excel',
+          text: `<span class="tf-icons bx bx-table bx-18px me-2"></span>Excel`,
           filename: "bw_jobs",
           exportOptions: {
             modifier: {
@@ -103,7 +133,10 @@ $(document).ready(function () {
     },
     {
       extend: "collection",
-      text: '<span class="tf-icons bx bx-play bx-18px me-md-2"></span><span class="d-none d-md-inline">Actions</span>',
+      text: `<span class="tf-icons bx bx-play bx-18px me-md-2"></span><span class="d-none d-md-inline" data-i18n="button.actions">${t(
+        "button.actions",
+        "Actions",
+      )}</span>`,
       className: "btn btn-sm btn-outline-primary action-button disabled",
       buttons: [
         {
@@ -151,11 +184,39 @@ $(document).ready(function () {
     form.appendTo("body").submit();
   };
 
+  $(".history-start-date, .history-end-date").each(function () {
+    const isoDateStr = $(this).text().trim();
+
+    // Parse the ISO format date string
+    const date = new Date(isoDateStr);
+
+    // Check if the date is valid
+    if (!isNaN(date)) {
+      // Convert to local date and time string
+      const localDateStr = date.toLocaleString();
+
+      // Update the text content with the local date string
+      $(this).text(localDateStr);
+    } else {
+      // Handle invalid date
+      console.error(`Invalid date string: ${isoDateStr}`);
+      $(this).text(t("validation.invalid_date", "Invalid date"));
+    }
+  });
+
   $.fn.dataTable.ext.buttons.run_jobs = {
-    text: '<span class="tf-icons bx bx-play bx-18px me-2"></span>Run selected jobs',
+    text: `<span class="tf-icons bx bx-play bx-18px me-2"></span><span data-i18n="button.run_selected_jobs">${t(
+      "button.run_selected_jobs",
+      "Run selected jobs",
+    )}</span>`,
     action: function (e, dt, node, config) {
       if (isReadOnly) {
-        alert("This action is not allowed in read-only mode.");
+        alert(
+          t(
+            "alert.readonly_mode",
+            "This action is not allowed in read-only mode.",
+          ),
+        );
         return;
       }
       if (actionLock) {
@@ -176,27 +237,7 @@ $(document).ready(function () {
     },
   };
 
-  $(".history-start-date, .history-end-date").each(function () {
-    const isoDateStr = $(this).text().trim();
-
-    // Parse the ISO format date string
-    const date = new Date(isoDateStr);
-
-    // Check if the date is valid
-    if (!isNaN(date)) {
-      // Convert to local date and time string
-      const localDateStr = date.toLocaleString();
-
-      // Update the text content with the local date string
-      $(this).text(localDateStr);
-    } else {
-      // Handle invalid date
-      console.error(`Invalid date string: ${isoDateStr}`);
-      $(this).text("Invalid date");
-    }
-  });
-
-  initializeDataTable({
+  const jobs_config = {
     tableSelector: "#jobs",
     tableName: "jobs",
     columnVisibilityCondition: (column) => column > 2 && column < 8,
@@ -219,6 +260,7 @@ $(document).ready(function () {
         {
           searchPanes: {
             show: true,
+            header: t("searchpane.plugin", "Plugin"),
             combiner: "or",
           },
           targets: 3,
@@ -226,31 +268,35 @@ $(document).ready(function () {
         {
           searchPanes: {
             show: true,
-            header: "Interval",
+            header: t("searchpane.interval", "Interval"),
             options: [
               {
-                label: "Every day",
-                value: function (rowData, rowIdx) {
-                  return rowData[4].includes("day");
-                },
+                label: `<span data-i18n="interval.day">${t(
+                  "interval.day",
+                  "Every day",
+                )}</span>`,
+                value: (rowData) => rowData[4].includes("interval.day"),
               },
               {
-                label: "Every hour",
-                value: function (rowData, rowIdx) {
-                  return rowData[4].includes("hour");
-                },
+                label: `<span data-i18n="interval.hour">${t(
+                  "interval.hour",
+                  "Every hour",
+                )}</span>`,
+                value: (rowData) => rowData[4].includes("interval.hour"),
               },
               {
-                label: "Every week",
-                value: function (rowData, rowIdx) {
-                  return rowData[4].includes("week");
-                },
+                label: `<span data-i18n="interval.week">${t(
+                  "interval.week",
+                  "Every week",
+                )}</span>`,
+                value: (rowData) => rowData[4].includes("interval.week"),
               },
               {
-                label: "Once",
-                value: function (rowData, rowIdx) {
-                  return rowData[4].includes("once");
-                },
+                label: `<span data-i18n="interval.once">${t(
+                  "interval.once",
+                  "Once",
+                )}</span>`,
+                value: (rowData) => rowData[4].includes("interval.once"),
               },
             ],
             combiner: "or",
@@ -261,20 +307,21 @@ $(document).ready(function () {
         {
           searchPanes: {
             show: true,
-            header: "Reload",
+            header: t("searchpane.reload", "Reload"),
             options: [
               {
-                label: '<i class="bx bx-xs bx-x text-danger"></i>&nbsp;No',
-                value: function (rowData, rowIdx) {
-                  return rowData[5].includes("bx-x");
-                },
+                label: `<i class=\"bx bx-xs bx-x text-danger\"></i>&nbsp;<span data-i18n="status.no">${t(
+                  "status.no",
+                  "No",
+                )}</span>`,
+                value: (rowData) => rowData[5].includes("bx-x"),
               },
               {
-                label:
-                  '<i class="bx bx-xs bx-check text-success"></i>&nbsp;Yes',
-                value: function (rowData, rowIdx) {
-                  return rowData[5].includes("bx-check");
-                },
+                label: `<i class=\"bx bx-xs bx-check text-success\"></i>&nbsp;<span data-i18n="status.yes">${t(
+                  "status.yes",
+                  "Yes",
+                )}</span>`,
+                value: (rowData) => rowData[5].includes("bx-check"),
               },
             ],
             combiner: "or",
@@ -285,20 +332,21 @@ $(document).ready(function () {
         {
           searchPanes: {
             show: true,
-            header: "Async",
+            header: t("searchpane.async", "Async"),
             options: [
               {
-                label: '<i class="bx bx-xs bx-x text-danger"></i>&nbsp;No',
-                value: function (rowData, rowIdx) {
-                  return rowData[6].includes("bx-x");
-                },
+                label: `<i class=\"bx bx-xs bx-x text-danger\"></i>&nbsp;<span data-i18n="status.no">${t(
+                  "status.no",
+                  "No",
+                )}</span>`,
+                value: (rowData) => rowData[6].includes("bx-x"),
               },
               {
-                label:
-                  '<i class="bx bx-xs bx-check text-success"></i>&nbsp;Yes',
-                value: function (rowData, rowIdx) {
-                  return rowData[6].includes("bx-check");
-                },
+                label: `<i class=\"bx bx-xs bx-check text-success\"></i>&nbsp;<span data-i18n="status.yes">${t(
+                  "status.yes",
+                  "Yes",
+                )}</span>`,
+                value: (rowData) => rowData[6].includes("bx-check"),
               },
             ],
             combiner: "or",
@@ -309,20 +357,21 @@ $(document).ready(function () {
         {
           searchPanes: {
             show: true,
-            header: "Last run state",
+            header: t("searchpane.last_run", "Last run state"),
             options: [
               {
-                label: '<i class="bx bx-xs bx-x text-danger"></i>&nbsp;Failed',
-                value: function (rowData, rowIdx) {
-                  return rowData[7].includes("bx-x");
-                },
+                label: `<i class=\"bx bx-xs bx-x text-danger\"></i>&nbsp;<span data-i18n="status.failed">${t(
+                  "status.failed",
+                  "Failed",
+                )}</span>`,
+                value: (rowData) => rowData[7].includes("bx-x"),
               },
               {
-                label:
-                  '<i class="bx bx-xs bx-check text-success"></i>&nbsp;Success',
-                value: function (rowData, rowIdx) {
-                  return rowData[7].includes("bx-check");
-                },
+                label: `<i class=\"bx bx-xs bx-check text-success\"></i>&nbsp;<span data-i18n="status.success">${t(
+                  "status.success",
+                  "Success",
+                )}</span>`,
+                value: (rowData) => rowData[7].includes("bx-check"),
               },
             ],
             combiner: "or",
@@ -340,25 +389,25 @@ $(document).ready(function () {
         headerCheckbox: true,
       },
       layout: layout,
-      language: {
-        info: "Showing _START_ to _END_ of _TOTAL_ jobs",
-        infoEmpty: "No jobs available",
-        infoFiltered: "(filtered from _MAX_ total jobs)",
-        lengthMenu: "Display _MENU_ jobs",
-        zeroRecords: "No matching jobs found",
-        select: {
-          rows: {
-            _: "Selected %d jobs",
-            0: "No jobs selected",
-            1: "Selected 1 job",
-          },
-        },
-      },
       initComplete: function (settings, json) {
         $("#jobs_wrapper .btn-secondary").removeClass("btn-secondary");
       },
     },
-  });
+  };
+
+  // Wait for window.i18nextReady = true before continuing
+  if (typeof window.i18nextReady === "undefined" || !window.i18nextReady) {
+    const waitForI18next = (resolve) => {
+      if (window.i18nextReady) {
+        resolve();
+      } else {
+        setTimeout(() => waitForI18next(resolve), 50);
+      }
+    };
+    new Promise((resolve) => {
+      waitForI18next(resolve);
+    }).then(() => initializeDataTable(jobs_config));
+  }
 
   $(document).on("click", ".show-history", function () {
     const historyModal = $("#modal-job-history");
@@ -370,9 +419,15 @@ $(document).ready(function () {
     historyModal
       .find(".modal-title")
       .html(
-        `Last${historyCount > 1 ? " " + historyCount : ""} execution${
-          historyCount > 1 ? "s" : ""
-        } of Job <span class="fw-bold fst-italic">${job}</span> from plugin <span class="fw-bold fst-italic">${plugin}</span>`,
+        `${t("modal.title.job_history", "Last 10 Job's executions")}<br>` +
+          `${t(
+            "modal.title.job_history_count",
+            "Last{{count}} execution(s) of Job",
+            { count: historyCount > 1 ? " " + historyCount : "" },
+          )} <span class="fw-bold fst-italic">${job}</span> ${t(
+            "modal.title.from_plugin",
+            "from plugin",
+          )} <span class="fw-bold fst-italic">${plugin}</span>`,
       );
     history.removeClass("visually-hidden");
     historyModal.find(".modal-body").html(history);
@@ -383,7 +438,12 @@ $(document).ready(function () {
 
   $(document).on("click", ".run-job", function () {
     if (isReadOnly) {
-      alert("This action is not allowed in read-only mode.");
+      alert(
+        t(
+          "alert.readonly_mode",
+          "This action is not allowed in read-only mode.",
+        ),
+      );
       return;
     }
     const job = {

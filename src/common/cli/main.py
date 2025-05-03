@@ -39,13 +39,13 @@ if __name__ == "__main__":
         parser_ban.add_argument(
             "-exp",
             type=int,
-            help=f"banning time in seconds (default : {ban_time})",
+            help=f"banning time in seconds (default: {ban_time}, use -1 for permanent ban)",
             default=ban_time,
         )
         parser_ban.add_argument(
             "-reason",
             type=str,
-            help="reason for ban (default : manual)",
+            help="reason for ban (default: manual)",
             default="manual",
         )
         parser_ban.add_argument(

@@ -20,6 +20,8 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
         sys_path.append(deps_path)
 
 from pydantic import ValidationError
+from requests import get
+
 from letsencrypt import (
     CloudflareProvider,
     DesecProvider,
@@ -58,6 +60,73 @@ CACHE_PATH = Path(sep, "var", "cache", "bunkerweb", "letsencrypt")
 DATA_PATH = CACHE_PATH.joinpath("etc")
 WORK_DIR = join(sep, "var", "lib", "bunkerweb", "letsencrypt")
 LOGS_DIR = join(sep, "var", "log", "bunkerweb", "letsencrypt")
+
+PSL_URL = "https://publicsuffix.org/list/public_suffix_list.dat"
+PSL_STATIC_FILE = "public_suffix_list.dat"
+
+
+def load_public_suffix_list(job):
+    job_cache = job.get_cache(PSL_STATIC_FILE, with_info=True, with_data=True)
+    if isinstance(job_cache, dict) and job_cache["last_update"] < (datetime.now().astimezone() - timedelta(days=1)).timestamp():
+        return job_cache["data"].decode("utf-8").splitlines()
+
+    try:
+        resp = get(PSL_URL, timeout=5)
+        resp.raise_for_status()
+        content = resp.text
+        cached, err = JOB.cache_file(PSL_STATIC_FILE, content.encode("utf-8"))
+        if not cached:
+            LOGGER.error(f"Error while saving public suffix list to cache : {err}")
+        return content.splitlines()
+    except BaseException as e:
+        LOGGER.debug(format_exc())
+        LOGGER.error(f"Error while downloading public suffix list : {e}")
+        if PSL_STATIC_FILE.exists():
+            with PSL_STATIC_FILE.open("r", encoding="utf-8") as f:
+                return f.read().splitlines()
+        return []
+
+
+def parse_psl(psl_lines):
+    # Parse PSL lines into rules and exceptions sets
+    rules = set()
+    exceptions = set()
+    for line in psl_lines:
+        line = line.strip()
+        if not line or line.startswith("//"):
+            continue  # Ignore empty lines and comments
+        if line.startswith("!"):
+            exceptions.add(line[1:])  # Exception rule
+            continue
+        rules.add(line)  # Normal or wildcard rule
+    return {"rules": rules, "exceptions": exceptions}
+
+
+def is_domain_blacklisted(domain, psl):
+    # Returns True if the domain is forbidden by PSL rules
+    domain = domain.lower().strip(".")
+    labels = domain.split(".")
+    for i in range(len(labels)):
+        candidate = ".".join(labels[i:])
+        # Allow if candidate is an exception
+        if candidate in psl["exceptions"]:
+            return False
+        # Block if candidate matches a PSL rule
+        if candidate in psl["rules"]:
+            if i == 0:
+                return True  # Block exact match
+            if i == 0 and domain.startswith("*."):
+                return True  # Block wildcard for the rule itself
+            if i == 0 or (i == 1 and labels[0] == "*"):
+                return True  # Block *.domain.tld
+            if len(labels[i:]) == len(labels):
+                return True  # Block domain.tld
+            # Allow subdomains
+        # Block if candidate matches a PSL wildcard rule
+        if f"*.{candidate}" in psl["rules"]:
+            if len(labels[i:]) == 2:
+                return True  # Block foo.bar and *.foo.bar
+    return False
 
 
 def certbot_new(
@@ -297,7 +366,7 @@ try:
             original_first_server = deepcopy(first_server)
 
             if letsencrypt_challenge == "dns" and getenv(f"{first_server}_USE_LETS_ENCRYPT_WILDCARD", getenv("USE_LETS_ENCRYPT_WILDCARD", "no")) == "yes":
-                wildcards = WILDCARD_GENERATOR.get_wildcards_from_domains((first_server,))
+                wildcards = WILDCARD_GENERATOR.extract_wildcards_from_domains((first_server,))
                 first_server = wildcards[0].lstrip("*.")
                 domains = set(wildcards)
             else:
@@ -373,6 +442,9 @@ try:
             domains_to_ask[first_server] = False
             LOGGER.info(f"[{original_first_server}] Certificates already exist for domain(s) {domains}, expiry date: {cert_domains.group('expiry_date')}")
 
+    psl_lines = None
+    psl_rules = None
+
     for first_server, domains in domains_server_names.items():
         if getenv(f"{first_server}_AUTO_LETS_ENCRYPT", getenv("AUTO_LETS_ENCRYPT", "no")) != "yes":
             LOGGER.info(f"Let's Encrypt is not activated for {first_server}, skipping...")
@@ -387,15 +459,21 @@ try:
             "provider": getenv(f"{first_server}_LETS_ENCRYPT_DNS_PROVIDER", getenv("LETS_ENCRYPT_DNS_PROVIDER", "")),
             "propagation": getenv(f"{first_server}_LETS_ENCRYPT_DNS_PROPAGATION", getenv("LETS_ENCRYPT_DNS_PROPAGATION", "default")),
             "profile": getenv(f"{first_server}_LETS_ENCRYPT_PROFILE", getenv("LETS_ENCRYPT_PROFILE", "classic")),
+            "check_psl": getenv(f"{first_server}_LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES", getenv("LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES", "yes")) == "yes",
             "credential_items": {},
         }
+
+        # Override profile if custom profile is set
+        custom_profile = getenv(f"{first_server}_LETS_ENCRYPT_CUSTOM_PROFILE", getenv("LETS_ENCRYPT_CUSTOM_PROFILE", "")).strip()
+        if custom_profile:
+            data["profile"] = custom_profile
 
         if data["challenge"] == "http" and data["use_wildcard"]:
             LOGGER.warning(f"Wildcard is not supported with HTTP challenge, disabling wildcard for service {first_server}...")
             data["use_wildcard"] = False
 
         if (not data["use_wildcard"] and not domains_to_ask.get(first_server)) or (
-            data["use_wildcard"] and not domains_to_ask.get(WILDCARD_GENERATOR.get_wildcards_from_domains((first_server,))[0].lstrip("*."))
+            data["use_wildcard"] and not domains_to_ask.get(WILDCARD_GENERATOR.extract_wildcards_from_domains((first_server,))[0].lstrip("*."))
         ):
             continue
 
@@ -434,7 +512,7 @@ try:
                 data["credential_items"] = {}
                 for key, value in credential_items.items():
                     # Check for base64 encoding
-                    if len(value) % 4 == 0 and match(r"^[A-Za-z0-9+/=]+$", value):
+                    if data["provider"] != "rfc2136" and len(value) % 4 == 0 and match(r"^[A-Za-z0-9+/=]+$", value):
                         try:
                             decoded = b64decode(value).decode("utf-8")
                             if decoded != value:
@@ -476,17 +554,20 @@ try:
         else:
             content = b"http_challenge"
 
+        is_blacklisted = False
+
         # * Adding the domains to Wildcard Generator if necessary
         file_type = provider.get_file_type() if data["challenge"] == "dns" else "txt"
         file_path = (first_server, f"credentials.{file_type}")
         if data["use_wildcard"]:
-            # Use the enhanced method for generating consistent group names
-            group = WILDCARD_GENERATOR.get_wildcard_group_name(
+            # Use the improved method for generating consistent group names
+            group = WILDCARD_GENERATOR.create_group_name(
                 domain=first_server,
                 provider=data["provider"] if data["challenge"] == "dns" else "http",
                 challenge_type=data["challenge"],
                 staging=data["staging"],
                 content_hash=bytes_hash(content, algorithm="sha1"),
+                profile=data["profile"],
             )
 
             LOGGER.info(
@@ -494,9 +575,42 @@ try:
                 + ("the propagation time will be the provider's default and " if data["challenge"] == "dns" else "")
                 + "the email will be the same as the first domain that created the group..."
             )
-            WILDCARD_GENERATOR.extend(group, domains.split(" "), data["email"], data["staging"])
-            file_path = (f"{group}.{file_type}",)
-            LOGGER.debug(f"[{first_server}] Wildcard group {group}")
+
+            if data["check_psl"]:
+                if psl_lines is None:
+                    psl_lines = load_public_suffix_list(JOB)
+                if psl_rules is None:
+                    psl_rules = parse_psl(psl_lines)
+                    LOGGER.debug(psl_rules)
+
+                wildcards = WILDCARD_GENERATOR.extract_wildcards_from_domains(domains.split(" "))
+
+                LOGGER.debug(f"Wildcard domains for {first_server} : {wildcards}")
+
+                for d in wildcards:
+                    if is_domain_blacklisted(d, psl_rules):
+                        LOGGER.error(f"Wildcard domain {d} is blacklisted by Public Suffix List, refusing certificate request for {first_server}.")
+                        is_blacklisted = True
+                        break
+
+            if not is_blacklisted:
+                WILDCARD_GENERATOR.extend(group, domains.split(" "), data["email"], data["staging"])
+                file_path = (f"{group}.{file_type}",)
+                LOGGER.debug(f"[{first_server}] Wildcard group {group}")
+        elif data["check_psl"]:
+            if psl_lines is None:
+                psl_lines = load_public_suffix_list(JOB)
+            if psl_rules is None:
+                psl_rules = parse_psl(psl_lines)
+
+            for d in domains.split():
+                if is_domain_blacklisted(d, psl_rules):
+                    LOGGER.error(f"Domain {d} is blacklisted by Public Suffix List, refusing certificate request for {first_server}.")
+                    is_blacklisted = True
+                    break
+
+        if is_blacklisted:
+            continue
 
         # * Generating the credentials file
         credentials_path = CACHE_PATH.joinpath(*file_path)
@@ -532,7 +646,7 @@ try:
 
         domains = domains.replace(" ", ",")
         LOGGER.info(
-            f"Asking certificates for domain(s) : {domains} (email = {data['email']}){' using staging' if data['staging'] else ''} with {data['challenge']} challenge..."
+            f"Asking certificates for domain(s) : {domains} (email = {data['email']}){' using staging' if data['staging'] else ''} with {data['challenge']} challenge, using {data['profile']!r} profile..."
         )
 
         if (
@@ -564,23 +678,29 @@ try:
             if not data:
                 continue
             # * Generating the certificate from the generated credentials
-            provider = group.split("_", 1)[0]
+            group_parts = group.split("_")
+            provider = group_parts[0]
+            profile = group_parts[2]
 
             email = data.pop("email")
             credentials_file = CACHE_PATH.joinpath(f"{group}.{provider_classes[provider].get_file_type() if provider in provider_classes else 'txt'}")
+
+            # Process different environment types (staging/prod)
             for key, domains in data.items():
                 if not domains:
                     continue
 
                 staging = key == "staging"
                 LOGGER.info(
-                    f"Asking wildcard certificates for domain(s) : {domains} (email = {email}){' using staging ' if staging else ''} with {'dns' if provider in provider_classes else 'http'} challenge..."
+                    f"Asking wildcard certificates for domain(s): {domains} (email = {email})"
+                    f"{' using staging ' if staging else ''} with {'dns' if provider in provider_classes else 'http'} challenge, "
+                    f"using {profile!r} profile..."
                 )
 
                 # Add wildcard certificate names to active set
                 for domain in domains.split(","):
                     # Extract the base domain from the wildcard domain
-                    base_domain = domain.lstrip("*.")
+                    base_domain = WILDCARD_GENERATOR.get_base_domain(domain)
                     active_cert_names.add(base_domain)
 
                 if (
@@ -591,6 +711,7 @@ try:
                         provider,
                         credentials_file,
                         staging=staging,
+                        profile=profile,
                         cmd_env=env.copy(),
                     )
                     != 0
@@ -599,7 +720,7 @@ try:
                     LOGGER.error(f"Certificate generation failed for domain(s) {domains} ...")
                 else:
                     status = 1 if status == 0 else status
-                    LOGGER.info(f"Certificate generation succeeded for domain(s) : {domains}")
+                    LOGGER.info(f"Certificate generation succeeded for domain(s): {domains}")
 
                 generated_domains.update(domains.split(","))
     else:
@@ -675,6 +796,28 @@ try:
 
                 if delete_proc.returncode == 0:
                     LOGGER.info(f"Successfully deleted certificate {cert_name}")
+                    # Remove any remaining files for this certificate
+                    cert_dir = DATA_PATH.joinpath("live", cert_name)
+                    archive_dir = DATA_PATH.joinpath("archive", cert_name)
+                    renewal_file = DATA_PATH.joinpath("renewal", f"{cert_name}.conf")
+                    for path in (cert_dir, archive_dir):
+                        if path.exists():
+                            try:
+                                for file in path.glob("*"):
+                                    try:
+                                        file.unlink()
+                                    except Exception as e:
+                                        LOGGER.error(f"Failed to remove file {file}: {e}")
+                                path.rmdir()
+                                LOGGER.info(f"Removed directory {path}")
+                            except Exception as e:
+                                LOGGER.error(f"Failed to remove directory {path}: {e}")
+                        if renewal_file.exists():
+                            try:
+                                renewal_file.unlink()
+                                LOGGER.info(f"Removed renewal file {renewal_file}")
+                            except Exception as e:
+                                LOGGER.error(f"Failed to remove renewal file {renewal_file}: {e}")
                 else:
                     LOGGER.error(f"Failed to delete certificate {cert_name}: {delete_proc.stdout}")
         else:

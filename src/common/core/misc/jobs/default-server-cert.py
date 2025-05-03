@@ -46,6 +46,9 @@ keyUsage = critical, digitalSignature, keyEncipherment, keyAgreement
 extendedKeyUsage = serverAuth
 subjectAltName = @alt_names
 basicConstraints = critical, CA:false
+
+[alt_names]
+DNS.1 = www.example.org
 """
             # Remove any leading whitespace which can cause parsing issues
             config_content = "\n".join(line.lstrip() for line in config_content.split("\n"))

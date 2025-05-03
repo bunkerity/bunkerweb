@@ -640,6 +640,20 @@ $(document).ready(() => {
         $("#LETS_ENCRYPT_CHALLENGE").find(":selected").val(),
       );
       formData.append(
+        "lets_encrypt_profile",
+        $("#LETS_ENCRYPT_PROFILE").find(":selected").val(),
+      );
+      formData.append(
+        "lets_encrypt_custom_profile",
+        $("#LETS_ENCRYPT_CUSTOM_PROFILE").val(),
+      );
+      formData.append(
+        "lets_encrypt_disable_public_suffixes",
+        $("#LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES").prop("checked")
+          ? "yes"
+          : "no",
+      );
+      formData.append(
         "lets_encrypt_dns_provider",
         $("#LETS_ENCRYPT_DNS_PROVIDER").find(":selected").val(),
       );
@@ -768,86 +782,139 @@ $(document).ready(() => {
   $("#LETS_ENCRYPT_CHALLENGE").on("change", function () {
     const challenge = $(this).find(":selected").val();
     const $wildcardCheckbox = $("#USE_LETS_ENCRYPT_WILDCARD");
+    const $wildcardCol = $wildcardCheckbox.closest(".col-4");
     const $dnsProvider = $("#LETS_ENCRYPT_DNS_PROVIDER");
+    const $dnsProviderParent = $dnsProvider.parent();
     const $dnsPropagation = $("#LETS_ENCRYPT_DNS_PROPAGATION");
+    const $dnsPropagationParent = $dnsPropagation.parent();
     const $dnsCredentialItems = $("#LETS_ENCRYPT_DNS_CREDENTIAL_ITEMS");
+    const $dnsCredentialItemsParent = $dnsCredentialItems.parent();
+
+    // Store original tooltip/i18n attributes if not already stored
+    if (!$wildcardCol.data("orig-title")) {
+      $wildcardCol.data(
+        "orig-title",
+        $wildcardCol.attr("data-bs-original-title") || "",
+      );
+      $wildcardCol.data("orig-i18n", $wildcardCol.attr("data-i18n") || "");
+    }
+    if (!$dnsProviderParent.data("orig-title")) {
+      $dnsProviderParent.data(
+        "orig-title",
+        $dnsProviderParent.attr("data-bs-original-title") || "",
+      );
+      $dnsProviderParent.data(
+        "orig-i18n",
+        $dnsProviderParent.attr("data-i18n") || "",
+      );
+    }
+    if (!$dnsPropagationParent.data("orig-title")) {
+      $dnsPropagationParent.data(
+        "orig-title",
+        $dnsPropagationParent.attr("data-bs-original-title") || "",
+      );
+      $dnsPropagationParent.data(
+        "orig-i18n",
+        $dnsPropagationParent.attr("data-i18n") || "",
+      );
+    }
+    if (!$dnsCredentialItemsParent.data("orig-title")) {
+      $dnsCredentialItemsParent.data(
+        "orig-title",
+        $dnsCredentialItemsParent.attr("data-bs-original-title") || "",
+      );
+      $dnsCredentialItemsParent.data(
+        "orig-i18n",
+        $dnsCredentialItemsParent.attr("data-i18n") || "",
+      );
+    }
 
     if (challenge === "http") {
       $wildcardCheckbox.prop("checked", false).prop("disabled", true);
-      $wildcardCheckbox
-        .closest(".col-4")
+      $wildcardCol
         .attr("data-bs-toggle", "tooltip")
         .attr("data-bs-placement", "top")
         .attr(
           "data-bs-original-title",
           "Wildcard certificates are only supported with DNS challenges.",
         )
+        .attr("data-i18n", "tooltip.wildcard_dns_only")
+        .tooltip("dispose")
         .tooltip();
 
       $dnsProvider.prop("disabled", true);
-      $dnsProvider
-        .parent()
+      $dnsProviderParent
         .attr("data-bs-toggle", "tooltip")
         .attr("data-bs-placement", "top")
         .attr(
           "data-bs-original-title",
           "DNS provider is only supported with DNS challenges.",
         )
+        .attr("data-i18n", "tooltip.dns_provider_dns_only")
+        .tooltip("dispose")
         .tooltip();
 
       $dnsPropagation.prop("disabled", true);
-      $dnsPropagation
-        .parent()
+      $dnsPropagationParent
         .attr("data-bs-toggle", "tooltip")
         .attr("data-bs-placement", "top")
         .attr(
           "data-bs-original-title",
           "DNS propagation is only supported with DNS challenges.",
         )
+        .attr("data-i18n", "tooltip.dns_propagation_dns_only")
+        .tooltip("dispose")
         .tooltip();
 
       $dnsCredentialItems.prop("disabled", true);
-      $dnsCredentialItems
-        .parent()
+      $dnsCredentialItemsParent
         .attr("data-bs-toggle", "tooltip")
         .attr("data-bs-placement", "top")
         .attr(
           "data-bs-original-title",
-          "Credentials are only supported with DNS challenges",
+          "Credentials are only supported with DNS challenges.",
         )
+        .attr("data-i18n", "tooltip.dns_credentials_dns_only")
+        .tooltip("dispose")
         .tooltip();
     } else {
       $wildcardCheckbox.prop("disabled", false);
-      $wildcardCheckbox
-        .closest(".col-4")
+      $wildcardCol
         .attr("data-bs-toggle", null)
         .attr("data-bs-placement", null)
-        .attr("data-bs-original-title", null)
-        .tooltip("dispose");
+        .attr("data-bs-original-title", $wildcardCol.data("orig-title"))
+        .attr("data-i18n", $wildcardCol.data("orig-i18n"));
+      $wildcardCol.tooltip("dispose");
 
       $dnsProvider.prop("disabled", false);
-      $dnsProvider
-        .parent()
+      $dnsProviderParent
         .attr("data-bs-toggle", null)
         .attr("data-bs-placement", null)
-        .attr("data-bs-original-title", null)
-        .tooltip("dispose");
+        .attr("data-bs-original-title", $dnsProviderParent.data("orig-title"))
+        .attr("data-i18n", $dnsProviderParent.data("orig-i18n"));
+      $dnsProviderParent.tooltip("dispose");
 
       $dnsPropagation.prop("disabled", false);
-      $dnsPropagation
-        .parent()
+      $dnsPropagationParent
         .attr("data-bs-toggle", null)
         .attr("data-bs-placement", null)
-        .attr("data-bs-original-title", null)
-        .tooltip("dispose");
+        .attr(
+          "data-bs-original-title",
+          $dnsPropagationParent.data("orig-title"),
+        )
+        .attr("data-i18n", $dnsPropagationParent.data("orig-i18n"));
+      $dnsPropagationParent.tooltip("dispose");
 
       $dnsCredentialItems.prop("disabled", false);
-      $dnsCredentialItems
-        .parent()
+      $dnsCredentialItemsParent
         .attr("data-bs-toggle", null)
         .attr("data-bs-placement", null)
-        .attr("data-bs-original-title", null)
-        .tooltip("dispose");
+        .attr(
+          "data-bs-original-title",
+          $dnsCredentialItemsParent.data("orig-title"),
+        )
+        .attr("data-i18n", $dnsCredentialItemsParent.data("orig-i18n"));
+      $dnsCredentialItemsParent.tooltip("dispose");
     }
   });
 

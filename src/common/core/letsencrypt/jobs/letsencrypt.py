@@ -47,9 +47,9 @@ class Provider(BaseModel):
 class CloudflareProvider(Provider):
     """Cloudflare DNS provider."""
 
-    dns_cloudflare_api_token: str
-    dns_cloudflare_email: str
-    dns_cloudflare_api_key: str
+    dns_cloudflare_api_token: str = ""
+    dns_cloudflare_email: str = ""
+    dns_cloudflare_api_key: str = ""
 
     _validate_aliases = alias_model_validator(
         {
@@ -58,6 +58,17 @@ class CloudflareProvider(Provider):
             "dns_cloudflare_api_key": ("dns_cloudflare_api_key", "cloudflare_api_key", "api_key"),
         }
     )
+
+    def get_formatted_credentials(self) -> bytes:
+        """Return the formatted credentials, excluding defaults."""
+        return "\n".join(f"{key} = {value}" for key, value in self.model_dump(exclude={"file_type"}, exclude_defaults=True).items()).encode("utf-8")
+
+    @model_validator(mode="after")
+    def validate_cloudflare_credentials(self):
+        """Validate Cloudflare credentials."""
+        if not self.dns_cloudflare_api_token and not (self.dns_cloudflare_email and self.dns_cloudflare_api_key):
+            raise ValueError("Either 'dns_cloudflare_api_token' or both 'dns_cloudflare_email' and 'dns_cloudflare_api_key' must be provided.")
+        return self
 
 
 class DesecProvider(Provider):
@@ -323,85 +334,152 @@ class ScalewayProvider(Provider):
 
 
 class WildcardGenerator:
+    """Manages the generation of wildcard domains across domain groups."""
+
     def __init__(self):
-        self.__domain_groups = {}
-        self.__wildcards = {}
+        self.__domain_groups = {}  # Stores raw domains grouped by identifier
+        self.__wildcards = {}  # Stores generated wildcard patterns
+
+    def extend(self, group: str, domains: List[str], email: str, staging: bool = False):
+        """
+        Add domains to a group and regenerate wildcards.
+
+        Args:
+            group: Group identifier for these domains
+            domains: List of domains to add
+            email: Contact email for this domain group
+            staging: Whether these domains are for staging environment
+        """
+        # Initialize group if it doesn't exist
+        if group not in self.__domain_groups:
+            self.__domain_groups[group] = {"staging": set(), "prod": set(), "email": email}
+
+        # Add domains to appropriate environment
+        env_type = "staging" if staging else "prod"
+        for domain in domains:
+            if domain := domain.strip():
+                self.__domain_groups[group][env_type].add(domain)
+
+        # Regenerate wildcards after adding new domains
+        self.__generate_wildcards(staging)
 
     def __generate_wildcards(self, staging: bool = False):
-        self.__wildcards.clear()
-        _type = "staging" if staging else "prod"
+        """
+        Generate wildcard patterns for the specified environment.
 
-        # * Loop through all the domains and generate wildcards
+        Args:
+            staging: Whether to generate wildcards for staging environment
+        """
+        self.__wildcards.clear()
+        env_type = "staging" if staging else "prod"
+
+        # Process each domain group
         for group, types in self.__domain_groups.items():
             if group not in self.__wildcards:
                 self.__wildcards[group] = {"staging": set(), "prod": set(), "email": types["email"]}
-            for domain in types[_type]:
-                parts = domain.split(".")
-                # ? Only take subdomains into account for wildcards generation
-                if len(parts) > 2:
-                    suffix = ".".join(parts[1:])
-                    # ? If the suffix is not already in the wildcards, add it
-                    if suffix not in self.__wildcards[group][_type]:
-                        self.__wildcards[group][_type].add(f"*.{suffix}")
-                        self.__wildcards[group][_type].add(suffix)
-                    continue
 
-                # ? Add the raw domain to the wildcards
-                self.__wildcards[group][_type].add(domain)
+            # Process each domain in the group
+            for domain in types[env_type]:
+                # Convert domain to wildcards and add to appropriate group
+                self.__add_domain_wildcards(domain, group, env_type)
 
-    def extend(self, group: str, domains: List[str], email: str, staging: bool = False):
-        if group not in self.__domain_groups:
-            self.__domain_groups[group] = {"staging": set(), "prod": set(), "email": email}
-        for domain in domains:
-            if domain := domain.strip():
-                self.__domain_groups[group]["staging" if staging else "prod"].add(domain)
-        self.__generate_wildcards(staging)
+    def __add_domain_wildcards(self, domain: str, group: str, env_type: str):
+        """
+        Convert a domain to wildcard patterns and add to the wildcards collection.
+
+        Args:
+            domain: Domain to process
+            group: Group identifier
+            env_type: Environment type (staging or prod)
+        """
+        parts = domain.split(".")
+
+        # Handle subdomains (domains with more than 2 parts)
+        if len(parts) > 2:
+            # Create wildcard for the base domain (e.g., *.example.com)
+            base_domain = ".".join(parts[1:])
+            self.__wildcards[group][env_type].add(f"*.{base_domain}")
+            self.__wildcards[group][env_type].add(base_domain)
+        else:
+            # Just add the raw domain for top-level domains
+            self.__wildcards[group][env_type].add(domain)
 
     def get_wildcards(self) -> Dict[str, Dict[Literal["staging", "prod", "email"], str]]:
-        ret_data = {}
+        """
+        Get formatted wildcard domains for each group.
+
+        Returns:
+            Dictionary of group data with formatted wildcard domains
+        """
+        result = {}
         for group, data in self.__wildcards.items():
-            ret_data[group] = {"email": data["email"]}
-            for _type, content in data.items():
-                if _type in ("staging", "prod"):
-                    # ? Sort domains while favoring wildcards first
-                    ret_data[group][_type] = ",".join(sorted(content, key=lambda x: x[0] != "*"))
-        return ret_data
+            result[group] = {"email": data["email"]}
+            for env_type in ("staging", "prod"):
+                if domains := data[env_type]:
+                    # Sort domains with wildcards first
+                    result[group][env_type] = ",".join(sorted(domains, key=lambda x: x[0] != "*"))
+        return result
 
     @staticmethod
-    def get_wildcards_from_domains(domains: List[str]) -> List[str]:
+    def extract_wildcards_from_domains(domains: List[str]) -> List[str]:
+        """
+        Generate wildcard patterns from a list of domains.
+
+        Args:
+            domains: List of domains to process
+
+        Returns:
+            List of extracted wildcard domains
+        """
         wildcards = set()
         for domain in domains:
             parts = domain.split(".")
-            # ? Only take subdomains into account for wildcards generation
+            # Generate wildcards for subdomains
             if len(parts) > 2:
-                suffix = ".".join(parts[1:])
-                # ? If the suffix is not already in the wildcards, add it
-                if suffix not in wildcards:
-                    wildcards.add(f"*.{suffix}")
-                    wildcards.add(suffix)
-                continue
+                base_domain = ".".join(parts[1:])
+                wildcards.add(f"*.{base_domain}")
+                wildcards.add(base_domain)
+            else:
+                # Just add the domain for top-level domains
+                wildcards.add(domain)
 
-            # ? Add the raw domain to the wildcards
-            wildcards.add(domain)
+        # Sort with wildcards first
         return sorted(wildcards, key=lambda x: x[0] != "*")
 
     @staticmethod
-    def get_wildcard_group_name(domain: str, provider: str, challenge_type: str, staging: bool, content_hash: str) -> str:
+    def get_base_domain(domain: str) -> str:
         """
-        Generate a consistent group name for wildcards based on the domain's TLD.
+        Extract the base domain from a domain name.
+
+        Args:
+            domain: Input domain name
+
+        Returns:
+            Base domain (without wildcard prefix if present)
+        """
+        return domain.lstrip("*.")
+
+    @staticmethod
+    def create_group_name(domain: str, provider: str, challenge_type: str, staging: bool, content_hash: str, profile: str = "classic") -> str:
+        """
+        Generate a consistent group name for wildcards.
 
         Args:
             domain: The domain name
-            provider: The DNS provider name
-            challenge_type: The challenge type (dns or http)
-            staging: Whether this is a staging certificate
-            content_hash: A hash of the credential content
+            provider: DNS provider name or 'http' for HTTP challenge
+            challenge_type: Challenge type (dns or http)
+            staging: Whether this is for staging environment
+            content_hash: Hash of credential content
+            profile: Certificate profile (classic, tlsserver or shortlived)
 
         Returns:
-            A string representing the group name
+            A formatted group name string
         """
-        base_domain = WildcardGenerator.get_wildcards_from_domains((domain,))[-1].replace(".", "-")
+        # Extract base domain and format it for the group name
+        base_domain = WildcardGenerator.get_base_domain(domain).replace(".", "-")
         env = "staging" if staging else "prod"
-        challenge = provider if challenge_type == "dns" else "http"
 
-        return f"{challenge}_{env}_{base_domain}_{content_hash}"
+        # Use provider name for DNS challenge, otherwise use 'http'
+        challenge_identifier = provider if challenge_type == "dns" else "http"
+
+        return f"{challenge_identifier}_{env}_{profile}_{base_domain}_{content_hash}"

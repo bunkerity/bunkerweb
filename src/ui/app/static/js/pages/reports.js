@@ -1,301 +1,86 @@
 $(document).ready(function () {
+  // Ensure i18next is loaded before using it
+  const t =
+    typeof i18next !== "undefined"
+      ? i18next.t
+      : (key, fallback) => fallback || key; // Fallback
   const baseFlagsUrl = $("#base_flags_url").val().trim();
 
   const headers = [
     {
       title: "Date",
       tooltip: "The date and time when the Report was created",
+      i18n: "tooltip.table.reports.date",
     },
-    { title: "IP Address", tooltip: "The reported IP address" },
+    {
+      title: "IP Address",
+      tooltip: "The reported IP address",
+      i18n: "tooltip.table.reports.ip_address",
+    },
     {
       title: "Country",
       tooltip: "The country of the reported IP address",
+      i18n: "tooltip.table.reports.country",
     },
-    { title: "Method", tooltip: "The method used by the attacker" },
+    {
+      title: "Method",
+      tooltip: "The method used by the attacker",
+      i18n: "tooltip.table.reports.method",
+    },
     {
       title: "URL",
       tooltip: "The URL that was targeted by the attacker",
+      i18n: "tooltip.table.reports.url",
     },
     {
       title: "Status Code",
       tooltip: "The HTTP status code returned by BunkerWeb",
+      i18n: "tooltip.table.reports.status_code",
     },
-    { title: "User-Agent", tooltip: "The User-Agent of the attacker" },
-    { title: "Reason", tooltip: "The reason why the Report was created" },
+    {
+      title: "User-Agent",
+      tooltip: "The User-Agent of the attacker",
+      i18n: "tooltip.table.reports.user_agent",
+    },
+    {
+      title: "Reason",
+      tooltip: "The reason why the Report was created",
+      i18n: "tooltip.table.reports.reason",
+    },
     {
       title: "Server name",
       tooltip: "The Server name that created the report",
+      i18n: "tooltip.table.reports.server_name",
     },
-    { title: "Data", tooltip: "Additional data about the Report" },
-    { title: "Security mode", tooltip: "Security mode" },
+    {
+      title: "Data",
+      tooltip: "Additional data about the Report",
+      i18n: "tooltip.table.reports.data",
+    },
+    {
+      title: "Security mode",
+      tooltip: "Security mode",
+      i18n: "tooltip.table.reports.security_mode",
+    },
   ];
-
-  const countriesDataNames = {
-    ad: "Andorra",
-    ae: "United Arab Emirates",
-    af: "Afghanistan",
-    ag: "Antigua and Barbuda",
-    ai: "Anguilla",
-    al: "Albania",
-    am: "Armenia",
-    ao: "Angola",
-    aq: "Antarctica",
-    ar: "Argentina",
-    as: "American Samoa",
-    at: "Austria",
-    au: "Australia",
-    aw: "Aruba",
-    ax: "Åland Islands",
-    az: "Azerbaijan",
-    ba: "Bosnia and Herzegovina",
-    bb: "Barbados",
-    bd: "Bangladesh",
-    be: "Belgium",
-    bf: "Burkina Faso",
-    bg: "Bulgaria",
-    bh: "Bahrain",
-    bi: "Burundi",
-    bj: "Benin",
-    bl: "Saint Barthélemy",
-    bm: "Bermuda",
-    bn: "Brunei Darussalam",
-    bo: "Bolivia, Plurinational State of",
-    bq: "Caribbean Netherlands",
-    br: "Brazil",
-    bs: "Bahamas",
-    bt: "Bhutan",
-    bv: "Bouvet Island",
-    bw: "Botswana",
-    by: "Belarus",
-    bz: "Belize",
-    ca: "Canada",
-    cc: "Cocos (Keeling) Islands",
-    cd: "Congo, the Democratic Republic of the",
-    cf: "Central African Republic",
-    cg: "Republic of the Congo",
-    ch: "Switzerland",
-    ci: "Côte d'Ivoire",
-    ck: "Cook Islands",
-    cl: "Chile",
-    cm: "Cameroon",
-    cn: "China (People's Republic of China)",
-    co: "Colombia",
-    cr: "Costa Rica",
-    cu: "Cuba",
-    cv: "Cape Verde",
-    cw: "Curaçao",
-    cx: "Christmas Island",
-    cy: "Cyprus",
-    cz: "Czech Republic",
-    de: "Germany",
-    dj: "Djibouti",
-    dk: "Denmark",
-    dm: "Dominica",
-    do: "Dominican Republic",
-    dz: "Algeria",
-    ec: "Ecuador",
-    ee: "Estonia",
-    eg: "Egypt",
-    eh: "Western Sahara",
-    er: "Eritrea",
-    es: "Spain",
-    et: "Ethiopia",
-    eu: "Europe",
-    fi: "Finland",
-    fj: "Fiji",
-    fk: "Falkland Islands (Malvinas)",
-    fm: "Micronesia, Federated States of",
-    fo: "Faroe Islands",
-    fr: "France",
-    ga: "Gabon",
-    gb: "United Kingdom",
-    gd: "Grenada",
-    ge: "Georgia",
-    gf: "French Guiana",
-    gg: "Guernsey",
-    gh: "Ghana",
-    gi: "Gibraltar",
-    gl: "Greenland",
-    gm: "Gambia",
-    gn: "Guinea",
-    gp: "Guadeloupe",
-    gq: "Equatorial Guinea",
-    gr: "Greece",
-    gs: "South Georgia and the South Sandwich Islands",
-    gt: "Guatemala",
-    gu: "Guam",
-    gw: "Guinea-Bissau",
-    gy: "Guyana",
-    hk: "Hong Kong",
-    hm: "Heard Island and McDonald Islands",
-    hn: "Honduras",
-    hr: "Croatia",
-    ht: "Haiti",
-    hu: "Hungary",
-    id: "Indonesia",
-    ie: "Ireland",
-    il: "Israel",
-    im: "Isle of Man",
-    in: "India",
-    io: "British Indian Ocean Territory",
-    iq: "Iraq",
-    ir: "Iran, Islamic Republic of",
-    is: "Iceland",
-    it: "Italy",
-    je: "Jersey",
-    jm: "Jamaica",
-    jo: "Jordan",
-    jp: "Japan",
-    ke: "Kenya",
-    kg: "Kyrgyzstan",
-    kh: "Cambodia",
-    ki: "Kiribati",
-    km: "Comoros",
-    kn: "Saint Kitts and Nevis",
-    kp: "Korea, Democratic People's Republic of",
-    kr: "Korea, Republic of",
-    kw: "Kuwait",
-    ky: "Cayman Islands",
-    kz: "Kazakhstan",
-    la: "Laos (Lao People's Democratic Republic)",
-    lb: "Lebanon",
-    lc: "Saint Lucia",
-    li: "Liechtenstein",
-    lk: "Sri Lanka",
-    lr: "Liberia",
-    ls: "Lesotho",
-    lt: "Lithuania",
-    lu: "Luxembourg",
-    lv: "Latvia",
-    ly: "Libya",
-    ma: "Morocco",
-    mc: "Monaco",
-    md: "Moldova, Republic of",
-    me: "Montenegro",
-    mf: "Saint Martin",
-    mg: "Madagascar",
-    mh: "Marshall Islands",
-    mk: "North Macedonia",
-    ml: "Mali",
-    mm: "Myanmar",
-    mn: "Mongolia",
-    mo: "Macao",
-    mp: "Northern Mariana Islands",
-    mq: "Martinique",
-    mr: "Mauritania",
-    ms: "Montserrat",
-    mt: "Malta",
-    mu: "Mauritius",
-    mv: "Maldives",
-    mw: "Malawi",
-    mx: "Mexico",
-    my: "Malaysia",
-    mz: "Mozambique",
-    na: "Namibia",
-    nc: "New Caledonia",
-    ne: "Niger",
-    nf: "Norfolk Island",
-    ng: "Nigeria",
-    ni: "Nicaragua",
-    nl: "Netherlands",
-    no: "Norway",
-    np: "Nepal",
-    nr: "Nauru",
-    nu: "Niue",
-    nz: "New Zealand",
-    om: "Oman",
-    pa: "Panama",
-    pe: "Peru",
-    pf: "French Polynesia",
-    pg: "Papua New Guinea",
-    ph: "Philippines",
-    pk: "Pakistan",
-    pl: "Poland",
-    pm: "Saint Pierre and Miquelon",
-    pn: "Pitcairn",
-    pr: "Puerto Rico",
-    ps: "Palestine",
-    pt: "Portugal",
-    pw: "Palau",
-    py: "Paraguay",
-    qa: "Qatar",
-    re: "Réunion",
-    ro: "Romania",
-    rs: "Serbia",
-    ru: "Russian Federation",
-    rw: "Rwanda",
-    sa: "Saudi Arabia",
-    sb: "Solomon Islands",
-    sc: "Seychelles",
-    sd: "Sudan",
-    se: "Sweden",
-    sg: "Singapore",
-    sh: "Saint Helena, Ascension and Tristan da Cunha",
-    si: "Slovenia",
-    sj: "Svalbard and Jan Mayen Islands",
-    sk: "Slovakia",
-    sl: "Sierra Leone",
-    sm: "San Marino",
-    sn: "Senegal",
-    so: "Somalia",
-    sr: "Suriname",
-    ss: "South Sudan",
-    st: "Sao Tome and Principe",
-    sv: "El Salvador",
-    sx: "Sint Maarten (Dutch part)",
-    sy: "Syrian Arab Republic",
-    sz: "Swaziland",
-    tc: "Turks and Caicos Islands",
-    td: "Chad",
-    tf: "French Southern Territories",
-    tg: "Togo",
-    th: "Thailand",
-    tj: "Tajikistan",
-    tk: "Tokelau",
-    tl: "Timor-Leste",
-    tm: "Turkmenistan",
-    tn: "Tunisia",
-    to: "Tonga",
-    tr: "Turkey",
-    tt: "Trinidad and Tobago",
-    tv: "Tuvalu",
-    tw: "Taiwan (Republic of China)",
-    tz: "Tanzania, United Republic of",
-    ua: "Ukraine",
-    ug: "Uganda",
-    um: "US Minor Outlying Islands",
-    us: "United States",
-    uy: "Uruguay",
-    uz: "Uzbekistan",
-    va: "Holy See (Vatican City State)",
-    vc: "Saint Vincent and the Grenadines",
-    ve: "Venezuela, Bolivarian Republic of",
-    vg: "Virgin Islands, British",
-    vi: "Virgin Islands, U.S.",
-    vn: "Vietnam",
-    vu: "Vanuatu",
-    wf: "Wallis and Futuna Islands",
-    ws: "Samoa",
-    xk: "Kosovo",
-    ye: "Yemen",
-    yt: "Mayotte",
-    za: "South Africa",
-    zm: "Zambia",
-    zw: "Zimbabwe",
-  };
 
   // Batch update tooltips
   const updateCountryTooltips = () => {
-    $("[data-bs-original-title]").each(function () {
+    $("[data-country]").each(function () {
       const $elem = $(this);
-      const countryCode = $elem.attr("data-bs-original-title");
-      const countryName = countriesDataNames[countryCode];
-      if (countryName) {
+      const countryCode = $elem.data("country");
+
+      const countryName = t(
+        countryCode === "unknown"
+          ? "country.not_applicable"
+          : `country.${countryCode}`,
+        "Unknown",
+      );
+      if (countryName && countryName !== "country.not_applicable") {
         $elem.attr("data-bs-original-title", countryName);
       }
     });
-    // Initialize tooltips once
-    $('[data-bs-toggle="tooltip"]').tooltip();
+    $('[data-bs-toggle="tooltip"]').tooltip("dispose").tooltip();
   };
 
   // Configure DataTable layout
@@ -335,25 +120,49 @@ $(document).ready(function () {
     {
       extend: "colvis",
       columns: "th:not(:nth-child(-n+3))",
-      text: '<span class="tf-icons bx bx-columns bx-18px me-2"></span>Columns',
-      className: "btn btn-sm btn-outline-primary",
+      text: `<span class="tf-icons bx bx-columns bx-18px me-md-2"></span><span class="d-none d-md-inline" data-i18n="button.columns">${t(
+        "button.columns",
+        "Columns",
+      )}</span>`,
+      className: "btn btn-sm btn-outline-primary rounded-start",
       columnText: function (dt, idx, title) {
-        return idx + 1 + ". " + title;
+        const headerCell = dt.column(idx).header();
+        const $header = $(headerCell);
+        const $translatableElement = $header.find("[data-i18n]");
+        let i18nKey = $translatableElement.data("i18n");
+        let translatedTitle = title;
+        if (i18nKey) {
+          translatedTitle = t(i18nKey, title);
+        } else {
+          translatedTitle = $header.text().trim() || title;
+        }
+        return `${idx + 1}. <span data-i18n="${
+          i18nKey || ""
+        }">${translatedTitle}</span>`;
       },
     },
     {
       extend: "colvisRestore",
-      text: '<span class="tf-icons bx bx-reset bx-18px me-md-2"></span><span class="d-none d-md-inline">Reset columns</span>',
-      className: "btn btn-sm btn-outline-primary",
+      text: `<span class="tf-icons bx bx-reset bx-18px me-2"></span><span class="d-none d-md-inline" data-i18n="button.reset_columns">${t(
+        "button.reset_columns",
+        "Reset columns",
+      )}</span>`,
+      className: "btn btn-sm btn-outline-primary d-none d-md-inline",
     },
     {
       extend: "collection",
-      text: '<span class="tf-icons bx bx-export bx-18px me-md-2"></span><span class="d-none d-md-inline">Export</span>',
+      text: `<span class="tf-icons bx bx-export bx-18px me-md-2"></span><span class="d-none d-md-inline" data-i18n="button.export">${t(
+        "button.export",
+        "Export",
+      )}</span>`,
       className: "btn btn-sm btn-outline-primary",
       buttons: [
         {
           extend: "copy",
-          text: '<span class="tf-icons bx bx-copy bx-18px me-2"></span>Copy visible',
+          text: `<span class="tf-icons bx bx-copy bx-18px me-2"></span><span data-i18n="button.copy_visible">${t(
+            "button.copy_visible",
+            "Copy visible",
+          )}</span>`,
           exportOptions: {
             columns: ":visible:not(:first-child)",
           },
@@ -398,7 +207,7 @@ $(document).ready(function () {
         if (!autoRefresh) {
           clearInterval(interval);
         } else {
-          reports_table.ajax.reload(null, false);
+          $("#reports").DataTable().ajax.reload(null, false);
         }
       }, 10000); // 10 seconds
     } else {
@@ -411,14 +220,14 @@ $(document).ready(function () {
   }
 
   $.fn.dataTable.ext.buttons.auto_refresh = {
-    text: '<span class="bx bx-loader bx-18px lh-1"></span>&nbsp;&nbsp;Auto refresh',
+    text: '<span class="bx bx-loader bx-18px lh-1"></span>&nbsp;&nbsp;<span data-i18n="button.auto_refresh">Auto refresh</span>',
     action: (e, dt, node, config) => {
       toggleAutoRefresh();
     },
   };
 
   // Initialize DataTable
-  const reports_table = initializeDataTable({
+  const reports_config = {
     tableSelector: "#reports",
     tableName: "reports",
     columnVisibilityCondition: (column) => column > 2 && column < 12,
@@ -426,7 +235,15 @@ $(document).ready(function () {
       columnDefs: [
         { orderable: false, targets: -1 },
         { visible: false, targets: [4, 5, 6, 7, 10] },
-        { type: "ip-address", targets: 2 },
+        {
+          searchPanes: {
+            show: true,
+            header: t("searchpane.ip_address", "IP Address"),
+            combiner: "or",
+          },
+          type: "ip-address",
+          targets: 2,
+        },
         {
           render: function (data, type, row) {
             if (type === "display" || type === "filter") {
@@ -442,14 +259,21 @@ $(document).ready(function () {
         {
           searchPanes: {
             show: true,
+            header: t("searchpane.country", "Country"),
             combiner: "or",
           },
           targets: 3,
           render: function (data) {
             const countryCode = data.toLowerCase();
-            const tooltipContent = countriesDataNames[countryCode] || "N/A";
+            const tooltipContent = "N/A";
             return `
-              <span data-bs-toggle="tooltip" data-bs-original-title="${tooltipContent}">
+              <span data-bs-toggle="tooltip" data-bs-original-title="${tooltipContent}" data-i18n="country.${
+                countryCode === "local"
+                  ? "not_applicable"
+                  : countryCode.toUpperCase()
+              }" data-country="${
+                countryCode === "local" ? "unknown" : countryCode.toUpperCase()
+              }">
                 <img src="${baseFlagsUrl}/${
                   countryCode === "local" ? "zz" : countryCode
                 }.svg"
@@ -461,6 +285,11 @@ $(document).ready(function () {
           },
         },
         {
+          searchPanes: {
+            show: true,
+            header: t("searchpane.url", "URL"),
+            combiner: "or",
+          },
           targets: 5,
           render: function (data, type, row) {
             if (type !== "display") {
@@ -490,6 +319,7 @@ $(document).ready(function () {
         {
           searchPanes: {
             show: true,
+            header: t("searchpane.server_name", "Server name"),
             combiner: "or",
           },
           targets: 9,
@@ -498,21 +328,74 @@ $(document).ready(function () {
           },
         },
         {
-          searchPanes: { show: true },
-          targets: [2, 4, 5, 6, 8, 11],
+          searchPanes: {
+            show: true,
+            header: t("searchpane.ip_address", "IP Address"),
+            combiner: "or",
+          },
+          targets: 2,
+        },
+        {
+          searchPanes: {
+            show: true,
+            header: t("searchpane.method", "Method"),
+            combiner: "or",
+          },
+          targets: 4,
+        },
+        {
+          searchPanes: {
+            show: true,
+            header: t("searchpane.url", "URL"),
+            combiner: "or",
+          },
+          targets: 5,
+        },
+        {
+          searchPanes: {
+            show: true,
+            header: t("searchpane.status_code", "Status Code"),
+            combiner: "or",
+          },
+          targets: 6,
+        },
+        {
+          searchPanes: {
+            show: true,
+            header: t("searchpane.reason", "Reason"),
+            combiner: "or",
+          },
+          targets: 8,
+        },
+        {
+          searchPanes: {
+            show: true,
+            header: t("searchpane.server_name", "Server name"),
+            combiner: "or",
+          },
+          targets: 9,
+        },
+        {
+          searchPanes: {
+            show: true,
+            header: t("searchpane.data", "Data"),
+            combiner: "or",
+          },
+          targets: 10,
+        },
+        {
+          searchPanes: {
+            show: true,
+            header: t("searchpane.security_mode", "Security mode"),
+            combiner: "or",
+          },
+          targets: 11,
         },
       ],
       order: [[1, "desc"]],
       autoFill: false,
       responsive: true,
       layout: layout,
-      language: {
-        info: "Showing _START_ to _END_ of _TOTAL_ reports",
-        infoEmpty: "No reports available",
-        infoFiltered: "(filtered from _MAX_ total reports)",
-        lengthMenu: "Display _MENU_ reports",
-        zeroRecords: "No matching reports found",
-      },
       processing: true,
       serverSide: true,
       ajax: {
@@ -541,18 +424,44 @@ $(document).ready(function () {
           orderable: false,
           className: "dtr-control",
         },
-        { data: "date", title: "Date" },
-        { data: "ip", title: "IP Address" },
-        { data: "country", title: "Country" },
-        { data: "method", title: "Method" },
-        { data: "url", title: "URL" },
-        { data: "status", title: "Status Code" },
-        { data: "user_agent", title: "User-Agent" },
-        { data: "reason", title: "Reason" },
-        { data: "server_name", title: "Server name" },
+        {
+          data: "date",
+          title: "<span data-i18n='table.header.date'>Date</span>",
+        },
+        {
+          data: "ip",
+          title: "<span data-i18n='table.header.ip_address'>IP Address</span>",
+        },
+        {
+          data: "country",
+          title: "<span data-i18n='table.header.country'>Country</span>",
+        },
+        {
+          data: "method",
+          title: "<span data-i18n='table.header.method'>Method</span>",
+        },
+        { data: "url", title: "<span data-i18n='table.header.url'>URL</span>" },
+        {
+          data: "status",
+          title:
+            "<span data-i18n='table.header.status_code'>Status Code</span>",
+        },
+        {
+          data: "user_agent",
+          title: "<span data-i18n='table.header.user_agent'>User-Agent</span>",
+        },
+        {
+          data: "reason",
+          title: "<span data-i18n='table.header.reason'>Reason</span>",
+        },
+        {
+          data: "server_name",
+          title:
+            "<span data-i18n='table.header.server_name'>Server name</span>",
+        },
         {
           data: "data",
-          title: "Data",
+          title: "<span data-i18n='table.header.data'>Data</span>",
           render: function (data, type, row) {
             if (type === "display" || type === "filter") {
               try {
@@ -570,13 +479,17 @@ $(document).ready(function () {
             return data;
           },
         },
-        { data: "security_mode", title: "Security mode" },
+        {
+          data: "security_mode",
+          title:
+            "<span data-i18n='table.header.security_mode'>Security mode</span>",
+        },
       ],
       headerCallback: function (thead) {
         updateHeaderTooltips(thead, headers);
       },
     },
-  });
+  };
 
   // Create the modal for displaying full URLs once at document ready
   $("body").append(`
@@ -624,51 +537,69 @@ $(document).ready(function () {
     $("#fullUrlContent").text(url);
   });
 
-  // Update tooltips when column visibility changes
-  reports_table.on("column-visibility.dt", function () {
-    updateHeaderTooltips("#reports thead", headers);
-  });
+  // Wait for window.i18nextReady = true before continuing
+  if (typeof window.i18nextReady === "undefined" || !window.i18nextReady) {
+    const waitForI18next = (resolve) => {
+      if (window.i18nextReady) {
+        resolve();
+      } else {
+        setTimeout(() => waitForI18next(resolve), 50);
+      }
+    };
+
+    new Promise((resolve) => {
+      waitForI18next(resolve);
+    }).then(() => {
+      const dt = initializeDataTable(reports_config);
+      dt.on("column-visibility.dt", function (e, settings, column, state) {
+        updateHeaderTooltips(dt.table().header(), headers);
+        $(".tooltip").remove();
+      });
+      dt.on("draw.dt", function () {
+        updateCountryTooltips();
+        updateHeaderTooltips(dt.table().header(), headers);
+        // Clean up any existing tooltips to prevent memory leaks
+        $(".tooltip").remove();
+      });
+      // Ensure tooltips are set after initialization
+      updateHeaderTooltips(dt.table().header(), headers);
+      $("#reports_wrapper").find(".btn-secondary").removeClass("btn-secondary");
+      return dt;
+    });
+  }
 
   // Utility function to manage header tooltips
   function updateHeaderTooltips(selector, headers) {
     $(selector)
       .find("th")
       .each((index, element) => {
-        const thText = $(element).text().trim();
-        headers.forEach((header) => {
-          if (thText === header.title) {
-            $(element).attr({
+        const $th = $(element);
+        // Try to get the data-i18n attribute from the header's span
+        const i18nKey =
+          $th.find("[data-i18n]").data("i18n") || $th.data("i18n");
+        if (i18nKey) {
+          const header = headers.find(
+            (h) =>
+              h.i18n ===
+              i18nKey.replace("table.header.", "tooltip.table.reports."),
+          );
+          if (header) {
+            $th.attr({
               "data-bs-toggle": "tooltip",
               "data-bs-placement": "bottom",
+              "data-i18n": header.i18n,
               title: header.tooltip,
             });
           }
-        });
+        }
       });
-
-    // Clean up and reinitialize tooltips
-    $('[data-bs-toggle="tooltip"]').each(function () {
-      const instance = bootstrap.Tooltip.getInstance(this);
-      if (instance) {
-        instance.dispose();
-      }
-    });
-    $('[data-bs-toggle="tooltip"]').tooltip();
+    applyTranslations();
+    $('[data-bs-toggle="tooltip"]').tooltip("dispose").tooltip();
   }
 
   if (sessionAutoRefresh === "true") {
     toggleAutoRefresh();
   }
-
-  $("#reports_wrapper").find(".btn-secondary").removeClass("btn-secondary");
-
-  // Update tooltips after table draw
-  reports_table.on("draw.dt", function () {
-    updateCountryTooltips();
-
-    // Clean up any existing tooltips to prevent memory leaks
-    $(".tooltip").remove();
-  });
 
   const hashValue = location.hash;
   if (hashValue) {

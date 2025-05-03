@@ -226,7 +226,7 @@ jobs:
 
     - name: Get changed files
       id: changed-files
-      uses: tj-actions/changed-files@v44
+      uses: tj-actions/changed-files@ed68ef82c095e0d48ec87eccea555d944a631a4c # v46
 
     - name: Run Valgrind
       if: contains(matrix.extras, 'valgrind')
@@ -246,7 +246,7 @@ jobs:
         fi
 
         echo "Files to run for valgrind: $files_to_test"
-        if [ -z "$files_to_test" ]; then return; fi
+        if [ -z "$files_to_test" ]; then exit 0; fi
 
         export LD_LIBRARY_PATH=$LUAJIT_LIB:$LD_LIBRARY_PATH
         export TEST_NGINX_USE_VALGRIND=1 TEST_NGINX_VALGRIND='--num-callers=100 -q --tool=memcheck --leak-check=full --show-possibly-lost=no --gen-suppressions=all --suppressions=valgrind.suppress --track-origins=yes' TEST_NGINX_TIMEOUT=60 TEST_NGINX_SLEEP=1

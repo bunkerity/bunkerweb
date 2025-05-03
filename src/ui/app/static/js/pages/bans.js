@@ -1,301 +1,77 @@
 $(document).ready(function () {
+  // Ensure i18next is loaded before using it
+  const t =
+    typeof i18next !== "undefined"
+      ? i18next.t
+      : (key, fallback) => fallback || key; // Fallback
+
   var actionLock = false;
   let addBanNumber = 1;
   const banNumber = parseInt($("#bans_number").val());
-  const dataCountries = ($("#countries").val() || "")
-    .split(",")
-    .filter((code) => code && code !== "local");
   const baseFlagsUrl = $("#base_flags_url").val().trim();
   const isReadOnly = $("#is-read-only").val().trim() === "True";
   const userReadOnly = $("#user-read-only").val().trim() === "True";
 
-  const countriesDataNames = {
-    AD: "Andorra",
-    AE: "United Arab Emirates",
-    AF: "Afghanistan",
-    AG: "Antigua and Barbuda",
-    AI: "Anguilla",
-    AL: "Albania",
-    AM: "Armenia",
-    AO: "Angola",
-    AQ: "Antarctica",
-    AR: "Argentina",
-    AS: "American Samoa",
-    AT: "Austria",
-    AU: "Australia",
-    AW: "Aruba",
-    AX: "Åland Islands",
-    AZ: "Azerbaijan",
-    BA: "Bosnia and Herzegovina",
-    BB: "Barbados",
-    BD: "Bangladesh",
-    BE: "Belgium",
-    BF: "Burkina Faso",
-    BG: "Bulgaria",
-    BH: "Bahrain",
-    BI: "Burundi",
-    BJ: "Benin",
-    BL: "Saint Barthélemy",
-    BM: "Bermuda",
-    BN: "Brunei Darussalam",
-    BO: "Bolivia, Plurinational State of",
-    BQ: "Caribbean Netherlands",
-    BR: "Brazil",
-    BS: "Bahamas",
-    BT: "Bhutan",
-    BV: "Bouvet Island",
-    BW: "Botswana",
-    BY: "Belarus",
-    BZ: "Belize",
-    CA: "Canada",
-    CC: "Cocos (Keeling) Islands",
-    CD: "Congo, the Democratic Republic of the",
-    CF: "Central African Republic",
-    CG: "Republic of the Congo",
-    CH: "Switzerland",
-    CI: "Côte d'Ivoire",
-    CK: "Cook Islands",
-    CL: "Chile",
-    CM: "Cameroon",
-    CN: "China (People's Republic of China)",
-    CO: "Colombia",
-    CR: "Costa Rica",
-    CU: "Cuba",
-    CV: "Cape Verde",
-    CW: "Curaçao",
-    CX: "Christmas Island",
-    CY: "Cyprus",
-    CZ: "Czech Republic",
-    DE: "Germany",
-    DJ: "Djibouti",
-    DK: "Denmark",
-    DM: "Dominica",
-    DO: "Dominican Republic",
-    DZ: "Algeria",
-    EC: "Ecuador",
-    EE: "Estonia",
-    EG: "Egypt",
-    EH: "Western Sahara",
-    ER: "Eritrea",
-    ES: "Spain",
-    ET: "Ethiopia",
-    EU: "Europe",
-    FI: "Finland",
-    FJ: "Fiji",
-    FK: "Falkland Islands (Malvinas)",
-    FM: "Micronesia, Federated States of",
-    FO: "Faroe Islands",
-    FR: "France",
-    GA: "Gabon",
-    GB: "United Kingdom",
-    GD: "Grenada",
-    GE: "Georgia",
-    GF: "French Guiana",
-    GG: "Guernsey",
-    GH: "Ghana",
-    GI: "Gibraltar",
-    GL: "Greenland",
-    GM: "Gambia",
-    GN: "Guinea",
-    GP: "Guadeloupe",
-    GQ: "Equatorial Guinea",
-    GR: "Greece",
-    GS: "South Georgia and the South Sandwich Islands",
-    GT: "Guatemala",
-    GU: "Guam",
-    GW: "Guinea-Bissau",
-    GY: "Guyana",
-    HK: "Hong Kong",
-    HM: "Heard Island and McDonald Islands",
-    HN: "Honduras",
-    HR: "Croatia",
-    HT: "Haiti",
-    HU: "Hungary",
-    ID: "Indonesia",
-    IE: "Ireland",
-    IL: "Israel",
-    IM: "Isle of Man",
-    IN: "India",
-    IO: "British Indian Ocean Territory",
-    IQ: "Iraq",
-    IR: "Iran, Islamic Republic of",
-    IS: "Iceland",
-    IT: "Italy",
-    JE: "Jersey",
-    JM: "Jamaica",
-    JO: "Jordan",
-    JP: "Japan",
-    KE: "Kenya",
-    KG: "Kyrgyzstan",
-    KH: "Cambodia",
-    KI: "Kiribati",
-    KM: "Comoros",
-    KN: "Saint Kitts and Nevis",
-    KP: "Korea, Democratic People's Republic of",
-    KR: "Korea, Republic of",
-    KW: "Kuwait",
-    KY: "Cayman Islands",
-    KZ: "Kazakhstan",
-    LA: "Laos (Lao People's Democratic Republic)",
-    LB: "Lebanon",
-    LC: "Saint Lucia",
-    LI: "Liechtenstein",
-    LK: "Sri Lanka",
-    LR: "Liberia",
-    LS: "Lesotho",
-    LT: "Lithuania",
-    LU: "Luxembourg",
-    LV: "Latvia",
-    LY: "Libya",
-    MA: "Morocco",
-    MC: "Monaco",
-    MD: "Moldova, Republic of",
-    ME: "Montenegro",
-    MF: "Saint Martin",
-    MG: "Madagascar",
-    MH: "Marshall Islands",
-    MK: "North Macedonia",
-    ML: "Mali",
-    MM: "Myanmar",
-    MN: "Mongolia",
-    MO: "Macao",
-    MP: "Northern Mariana Islands",
-    MQ: "Martinique",
-    MR: "Mauritania",
-    MS: "Montserrat",
-    MT: "Malta",
-    MU: "Mauritius",
-    MV: "Maldives",
-    MW: "Malawi",
-    MX: "Mexico",
-    MY: "Malaysia",
-    MZ: "Mozambique",
-    NA: "Namibia",
-    NC: "New Caledonia",
-    NE: "Niger",
-    NF: "Norfolk Island",
-    NG: "Nigeria",
-    NI: "Nicaragua",
-    NL: "Netherlands",
-    NO: "Norway",
-    NP: "Nepal",
-    NR: "Nauru",
-    NU: "Niue",
-    NZ: "New Zealand",
-    OM: "Oman",
-    PA: "Panama",
-    PE: "Peru",
-    PF: "French Polynesia",
-    PG: "Papua New Guinea",
-    PH: "Philippines",
-    PK: "Pakistan",
-    PL: "Poland",
-    PM: "Saint Pierre and Miquelon",
-    PN: "Pitcairn",
-    PR: "Puerto Rico",
-    PS: "Palestine",
-    PT: "Portugal",
-    PW: "Palau",
-    PY: "Paraguay",
-    QA: "Qatar",
-    RE: "Réunion",
-    RO: "Romania",
-    RS: "Serbia",
-    RU: "Russian Federation",
-    RW: "Rwanda",
-    SA: "Saudi Arabia",
-    SB: "Solomon Islands",
-    SC: "Seychelles",
-    SD: "Sudan",
-    SE: "Sweden",
-    SG: "Singapore",
-    SH: "Saint Helena, Ascension and Tristan da Cunha",
-    SI: "Slovenia",
-    SJ: "Svalbard and Jan Mayen Islands",
-    SK: "Slovakia",
-    SL: "Sierra Leone",
-    SM: "San Marino",
-    SN: "Senegal",
-    SO: "Somalia",
-    SR: "Suriname",
-    SS: "South Sudan",
-    ST: "Sao Tome and Principe",
-    SV: "El Salvador",
-    SX: "Sint Maarten (Dutch part)",
-    SY: "Syrian Arab Republic",
-    SZ: "Swaziland",
-    TC: "Turks and Caicos Islands",
-    TD: "Chad",
-    TF: "French Southern Territories",
-    TG: "Togo",
-    TH: "Thailand",
-    TJ: "Tajikistan",
-    TK: "Tokelau",
-    TL: "Timor-Leste",
-    TM: "Turkmenistan",
-    TN: "Tunisia",
-    TO: "Tonga",
-    TR: "Turkey",
-    TT: "Trinidad and Tobago",
-    TV: "Tuvalu",
-    TW: "Taiwan (Republic of China)",
-    TZ: "Tanzania, United Republic of",
-    UA: "Ukraine",
-    UG: "Uganda",
-    UM: "US Minor Outlying Islands",
-    US: "United States",
-    UY: "Uruguay",
-    UZ: "Uzbekistan",
-    VA: "Holy See (Vatican City State)",
-    VC: "Saint Vincent and the Grenadines",
-    VE: "Venezuela, Bolivarian Republic of",
-    VG: "Virgin Islands, British",
-    VI: "Virgin Islands, U.S.",
-    VN: "Vietnam",
-    VU: "Vanuatu",
-    WF: "Wallis and Futuna Islands",
-    WS: "Samoa",
-    XK: "Kosovo",
-    YE: "Yemen",
-    YT: "Mayotte",
-    ZA: "South Africa",
-    ZM: "Zambia",
-    ZW: "Zimbabwe",
-  };
-
-  // Filter countriesDataNames to include only necessary countries
-  const filteredCountriesDataNames = dataCountries.reduce((obj, code) => {
-    if (countriesDataNames[code]) {
-      obj[code] = countriesDataNames[code];
-    }
-    return obj;
-  }, {});
-
-  // Assuming baseFlagsUrl, dataCountries, and countriesDataNames are defined
-  const countriesSearchPanesOptions = [
+  const headers = [
     {
-      label: `<img src="${baseFlagsUrl}/zz.svg" class="border border-1 p-0 me-1" height="17" loading="lazy" />&nbsp;－&nbsp;N/A`,
-      value: (rowData) => rowData[4].includes("N/A"),
+      title: "Date",
+      tooltip: "The date and time when the Ban was created",
+      i18n: "tooltip.table.bans.date",
     },
-    ...Object.entries(filteredCountriesDataNames).map(([code, name]) => ({
-      label: `<img src="${baseFlagsUrl}/${code.toLowerCase()}.svg" class="border border-1 p-0 me-1" height="17" loading="lazy" />&nbsp;－&nbsp;${name}`,
-      value: (rowData) =>
-        rowData[4].includes(`data-bs-original-title="${code}"`),
-    })),
+    {
+      title: "IP Address",
+      tooltip: "The banned IP address",
+      i18n: "tooltip.table.bans.ip_address",
+    },
+    {
+      title: "Country",
+      tooltip: "The banned IP country",
+      i18n: "tooltip.table.bans.country",
+    },
+    {
+      title: "Reason",
+      tooltip: "The reason why the Report was created",
+      i18n: "tooltip.table.bans.reason",
+    },
+    {
+      title: "Scope",
+      tooltip: "The scope of the ban (global or service-specific)",
+      i18n: "tooltip.table.bans.scope",
+    },
+    {
+      title: "Service",
+      tooltip: "The service that created the ban",
+      i18n: "tooltip.table.bans.service",
+    },
+    {
+      title: "End date",
+      tooltip: "The end date of the Ban",
+      i18n: "tooltip.table.bans.end_date",
+    },
+    {
+      title: "Time left",
+      tooltip: "The time left until the Ban expires",
+      i18n: "tooltip.table.bans.time_left",
+    },
   ];
 
   // Batch update tooltips
   const updateCountryTooltips = () => {
-    $("[data-bs-original-title]").each(function () {
+    $("[data-country]").each(function () {
       const $elem = $(this);
-      const countryCode = $elem.attr("data-bs-original-title");
-      const countryName = countriesDataNames[countryCode];
-      if (countryName) {
+      const countryCode = $elem.data("country");
+
+      const countryName = t(
+        countryCode === "unknown" || countryCode === "local"
+          ? "country.not_applicable"
+          : `country.${countryCode}`,
+        "Unknown",
+      );
+      if (countryName && countryName !== "country.not_applicable") {
         $elem.attr("data-bs-original-title", countryName);
       }
     });
-    // Initialize tooltips once
-    $('[data-bs-toggle="tooltip"]').tooltip();
+    $('[data-bs-toggle="tooltip"]').tooltip("dispose").tooltip();
   };
 
   // Utility functions
@@ -378,79 +154,98 @@ $(document).ready(function () {
     ],
   });
 
+  // Function to set up the unban modal
   const setupUnbanModal = (bans) => {
-    const list = $(
-      `<ul class="list-group list-group-horizontal w-100">
-      <li class="list-group-item bg-secondary text-white" style="flex: 1 0;">
-        <div class="ms-2 me-auto">
-          <div class="fw-bold">IP Address</div>
-        </div>
-      </li>
-      <li class="list-group-item bg-secondary text-white" style="flex: 1 0;">
-        <div class="fw-bold">Scope</div>
-      </li>
-      <li class="list-group-item bg-secondary text-white" style="flex: 1 0;">
-        <div class="fw-bold">Time left</div>
-      </li>
-      </ul>`,
-    );
-    $("#selected-ips-unban").append(list);
+    const $modalBody = $("#selected-ips-unban");
+    $modalBody.empty(); // Clear previous content
 
+    // Create and append the header row
+    const $header = $(`
+      <ul class="list-group list-group-horizontal w-100">
+        <li class="list-group-item bg-secondary text-white" style="flex: 1 0;">
+          <div class="ms-2 me-auto">
+            <div class="fw-bold" data-i18n="table.header.ip_address">${t(
+              "table.header.ip_address",
+            )}</div>
+          </div>
+        </li>
+        <li class="list-group-item bg-secondary text-white" style="flex: 1 0;">
+          <div class="fw-bold" data-i18n="table.header.scope">${t(
+            "table.header.scope",
+          )}</div>
+        </li>
+        <li class="list-group-item bg-secondary text-white" style="flex: 1 0;">
+          <div class="fw-bold" data-i18n="table.header.time_left">${t(
+            "table.header.time_left",
+          )}</div>
+        </li>
+      </ul>
+    `);
+    $modalBody.append($header);
+
+    // Iterate over bans and append list items
     bans.forEach((ban) => {
-      // Create the list item using template literals
-      const list = $(
-        `<ul class="list-group list-group-horizontal w-100"></ul>`,
-      );
+      const scopeText =
+        ban.ban_scope === "global"
+          ? t("scope.global", "Global")
+          : t("scope.service_specific", "Service-specific");
+      const serviceText =
+        ban.service && ban.ban_scope === "service" ? ` (${ban.service})` : "";
 
-      const listItem = $(`<li class="list-group-item" style="flex: 1 0;">
-        <div class="ms-2 me-auto">
-          <div class="fw-bold">${ban.ip}</div>
-        </div>
-      </li>`);
-      list.append(listItem);
-
-      const scopeItem = $(`<li class="list-group-item" style="flex: 1 0;">
-        <div class="ms-2 me-auto">
-          ${ban.ban_scope || "global"}${
-            ban.service && ban.ban_scope === "service"
-              ? ` (${ban.service})`
-              : ""
-          }
-        </div>
-      </li>`);
-      list.append(scopeItem);
-
-      const timeLeft = $(`<li class="list-group-item" style="flex: 1 0;">
-        <div class="ms-2 me-auto">
-          ${ban.time_remaining}
-        </div>
-      </li>`);
-      list.append(timeLeft);
-
-      $("#selected-ips-unban").append(list);
+      const $row = $(`
+        <ul class="list-group list-group-horizontal w-100">
+          <li class="list-group-item" style="flex: 1 0;">
+            <div class="ms-2 me-auto">
+              <div class="fw-bold">${ban.ip}</div>
+            </div>
+          </li>
+          <li class="list-group-item" style="flex: 1 0;">
+            <div class="ms-2 me-auto">
+              ${scopeText}${serviceText}
+            </div>
+          </li>
+          <li class="list-group-item" style="flex: 1 0;">
+            <div class="ms-2 me-auto">
+              ${ban.time_remaining}
+            </div>
+          </li>
+        </ul>
+      `);
+      $modalBody.append($row);
     });
 
-    const unban_modal = $("#modal-unban-ips");
-    const modal = new bootstrap.Modal(unban_modal);
-    unban_modal
+    // Show the modal
+    const $unbanModal = $("#modal-unban-ips");
+    const modalInstance = new bootstrap.Modal($unbanModal[0]);
+
+    // Update the alert text using i18next (assuming keys exist)
+    const alertTextKey =
+      bans.length > 1
+        ? "modal.body.unban_confirmation_alert_plural"
+        : "modal.body.unban_confirmation_alert";
+    $unbanModal
       .find(".alert")
       .text(
-        `Are you sure you want to unban the selected IP address${"es".repeat(
-          bans.length > 1,
-        )}?`,
+        t(
+          alertTextKey,
+          "Are you sure you want to unban the selected IP address(es)?",
+        ),
       );
-    modal.show();
 
+    modalInstance.show();
+
+    // Set the hidden input value
     $("#selected-ips-input-unban").val(JSON.stringify(bans));
   };
 
+  // DataTable Layout and Buttons
   const layout = {
     top1: {
       searchPanes: {
         viewTotal: true,
         cascadePanes: true,
         collapse: false,
-        columns: [2, 4, 7, 8],
+        columns: [2, 4, 6, 7, 8],
       },
     },
     topStart: {},
@@ -458,88 +253,91 @@ $(document).ready(function () {
       search: true,
       buttons: [
         {
+          extend: "auto_refresh",
+          className: "btn btn-sm btn-outline-primary d-flex align-items-center",
+        },
+        {
           extend: "toggle_filters",
           className: "btn btn-sm btn-outline-primary toggle-filters",
         },
       ],
     },
     bottomStart: {
-      info: true,
-    },
-    bottomEnd: {},
-  };
-
-  if (banNumber > 10) {
-    const menu = [10];
-    if (banNumber > 25) {
-      menu.push(25);
-    }
-    if (banNumber > 50) {
-      menu.push(50);
-    }
-    if (banNumber > 100) {
-      menu.push(100);
-    }
-    menu.push({ label: "All", value: -1 });
-    layout.bottomStart = {
       pageLength: {
-        menu: menu,
+        menu: [10, 25, 50, 100, { label: "All", value: -1 }],
       },
       info: true,
-    };
-    layout.bottomEnd.paging = true;
-  }
+    },
+  };
 
   layout.topStart.buttons = [
-    {
-      extend: "add_ban",
-    },
+    { extend: "add_ban" },
     {
       extend: "colvis",
-      columns: "th:not(:nth-child(-n+3)):not(:last-child)",
-      text: '<span class="tf-icons bx bx-columns bx-18px me-md-2"></span><span class="d-none d-md-inline">Columns</span>',
+      columns: "th:not(:nth-child(-n+3))",
+      text: `<span class="tf-icons bx bx-columns bx-18px me-md-2"></span><span class="d-none d-md-inline" data-i18n="button.columns">${t(
+        "button.columns",
+        "Columns",
+      )}</span>`,
       className: "btn btn-sm btn-outline-primary rounded-start",
       columnText: function (dt, idx, title) {
-        return idx + 1 + ". " + title;
+        const headerCell = dt.column(idx).header();
+        const $header = $(headerCell);
+        const $translatableElement = $header.find("[data-i18n]");
+        let i18nKey = $translatableElement.data("i18n");
+        let translatedTitle = title;
+        if (i18nKey) {
+          translatedTitle = t(i18nKey, title);
+        } else {
+          translatedTitle = $header.text().trim() || title;
+        }
+        return `${idx + 1}. <span data-i18n="${
+          i18nKey || ""
+        }">${translatedTitle}</span>`;
       },
     },
     {
       extend: "colvisRestore",
-      text: '<span class="tf-icons bx bx-reset bx-18px me-2"></span>Reset columns',
+      text: `<span class="tf-icons bx bx-reset bx-18px me-2"></span><span class="d-none d-md-inline" data-i18n="button.reset_columns">${t(
+        "button.reset_columns",
+        "Reset columns",
+      )}</span>`,
       className: "btn btn-sm btn-outline-primary d-none d-md-inline",
     },
     {
       extend: "collection",
-      text: '<span class="tf-icons bx bx-export bx-18px me-md-2"></span><span class="d-none d-md-inline">Export</span>',
+      text: `<span class="tf-icons bx bx-export bx-18px me-md-2"></span><span class="d-none d-md-inline" data-i18n="button.export">${t(
+        "button.export",
+        "Export",
+      )}</span>`,
       className: "btn btn-sm btn-outline-primary",
       buttons: [
         {
           extend: "copy",
-          text: '<span class="tf-icons bx bx-copy bx-18px me-2"></span>Copy visible',
+          text: `<span class="tf-icons bx bx-copy bx-18px me-2"></span><span data-i18n="button.copy_visible">${t(
+            "button.copy_visible",
+            "Copy visible",
+          )}</span>`,
           exportOptions: {
             columns: ":visible:not(:nth-child(-n+2)):not(:last-child)",
           },
         },
         {
           extend: "csv",
-          text: '<span class="tf-icons bx bx-table bx-18px me-2"></span>CSV',
+          text: `<span class="tf-icons bx bx-table bx-18px me-2"></span>CSV`,
           bom: true,
           filename: "bw_bans",
           exportOptions: {
-            modifier: {
-              search: "none",
-            },
+            modifier: { search: "none" },
             columns: ":not(:nth-child(-n+2)):not(:last-child)",
           },
         },
         {
           extend: "excel",
-          text: '<span class="tf-icons bx bx-table bx-18px me-2"></span>Excel',
+          text: `<span class="tf-icons bx bx-table bx-18px me-2"></span>Excel`,
           filename: "bw_bans",
           exportOptions: {
-            modifier: {
-              search: "none",
-            },
+            modifier: { search: "none" },
             columns: ":not(:nth-child(-n+2)):not(:last-child)",
           },
         },
@@ -547,16 +345,53 @@ $(document).ready(function () {
     },
     {
       extend: "collection",
-      text: '<span class="tf-icons bx bx-play bx-18px me-md-2"></span><span class="d-none d-md-inline">Actions</span>',
+      text: `<span class="tf-icons bx bx-play bx-18px me-md-2"></span><span class="d-none d-md-inline" data-i18n="button.actions">${t(
+        "button.actions",
+        "Actions",
+      )}</span>`,
       className: "btn btn-sm btn-outline-primary action-button disabled",
-      buttons: [
-        {
-          extend: "unban_ips",
-          className: "text-danger",
-        },
-      ],
+      buttons: [{ extend: "unban_ips", className: "text-danger" }],
     },
   ];
+
+  let autoRefresh = false;
+  let autoRefreshInterval = null;
+  const sessionAutoRefresh = sessionStorage.getItem("bansAutoRefresh");
+
+  function toggleAutoRefresh() {
+    autoRefresh = !autoRefresh;
+    sessionStorage.setItem("bansAutoRefresh", autoRefresh);
+    if (autoRefresh) {
+      $(".bx-loader")
+        .addClass("bx-spin")
+        .closest(".btn")
+        .removeClass("btn-outline-primary")
+        .addClass("btn-primary");
+      if (autoRefreshInterval) clearInterval(autoRefreshInterval);
+      autoRefreshInterval = setInterval(() => {
+        if (!autoRefresh) {
+          clearInterval(autoRefreshInterval);
+          autoRefreshInterval = null;
+        } else {
+          $("#bans").DataTable().ajax.reload(null, false);
+        }
+      }, 10000); // 10 seconds
+    } else {
+      $(".bx-loader")
+        .removeClass("bx-spin")
+        .closest(".btn")
+        .removeClass("btn-primary")
+        .addClass("btn-outline-primary");
+      if (autoRefreshInterval) {
+        clearInterval(autoRefreshInterval);
+        autoRefreshInterval = null;
+      }
+    }
+  }
+
+  if (sessionAutoRefresh === "true") {
+    toggleAutoRefresh();
+  }
 
   $("#modal-unban-ips").on("hidden.bs.modal", function () {
     $("#selected-ips-unban").empty();
@@ -566,29 +401,65 @@ $(document).ready(function () {
   const getSelectedBans = () => {
     const bans = [];
     $("tr.selected").each(function () {
-      const ip = $(this).find("td:eq(3)").text().trim();
-      const time_remaining = $(this).find("td:eq(9)").text().trim();
-      const ban_scope = $(this).find("td:eq(6)").text().trim().toLowerCase();
-      const service = $(this).find("td:eq(7)").text().trim();
+      const $row = $(this);
+      const ip = $row.find("td:eq(3)").text().trim();
+      const time_remaining = $row.find("td:eq(9)").text().trim();
+      const scopeHtml = $row.find("td:eq(6)").html();
+      const serviceHtml = $row.find("td:eq(7)").html();
+
+      // Extract scope text, handling potential badge structure
+      const scopeText = $(scopeHtml).find("span[data-i18n]").length
+        ? $(scopeHtml).find("span[data-i18n]").text().trim()
+        : $(scopeHtml).text().trim();
+
+      // Extract service text, handling potential links or static text
+      const serviceText = $(serviceHtml).find("strong").length
+        ? $(serviceHtml).find("strong").text().trim()
+        : $(serviceHtml).find("span[data-i18n]").length
+          ? $(serviceHtml).find("span[data-i18n]").text().trim()
+          : $(serviceHtml).text().trim();
+
+      const ban_scope =
+        scopeText === t("scope.global", "Global") ? "global" : "service";
+      const service =
+        serviceText === t("scope.all_services", "All services")
+          ? null
+          : serviceText;
 
       bans.push({
         ip: ip,
         time_remaining: time_remaining,
         ban_scope: ban_scope,
-        service: service !== "All services" ? service : null,
+        service: service,
       });
     });
     return bans;
   };
 
+  $.fn.dataTable.ext.buttons.auto_refresh = {
+    text: '<span class="bx bx-loader bx-18px lh-1"></span>&nbsp;&nbsp;<span data-i18n="button.auto_refresh">Auto refresh</span>',
+    action: (e, dt, node, config) => {
+      toggleAutoRefresh();
+    },
+  };
+
+  // Custom Button Definitions
   $.fn.dataTable.ext.buttons.add_ban = {
-    text: '<span class="tf-icons bx bx-plus"></span><span class="d-none d-md-inline">&nbsp;Add ban(s)</span>',
+    text: `<span class="tf-icons bx bx-plus"></span><span class="d-none d-md-inline" data-i18n="button.add_ban_plural"> ${t(
+      "button.add_ban_plural",
+      "Add ban(s)",
+    )}</span>`,
     className: `btn btn-sm rounded me-4 btn-bw-green${
       isReadOnly ? " disabled" : ""
     }`,
     action: function (e, dt, node, config) {
       if (isReadOnly) {
-        alert("This action is not allowed in read-only mode.");
+        alert(
+          t(
+            "alert.readonly_mode",
+            "This action is not allowed in read-only mode.",
+          ),
+        );
         return;
       }
       const ban_modal = $("#modal-ban-ips");
@@ -598,15 +469,21 @@ $(document).ready(function () {
   };
 
   $.fn.dataTable.ext.buttons.unban_ips = {
-    text: '<span class="tf-icons bx bxs-buoy bx-18px me-2"></span>Unban',
+    text: `<span class="tf-icons bx bxs-buoy bx-18px me-2"></span><span data-i18n="button.unban">${t(
+      "button.unban",
+      "Unban",
+    )}</span>`,
     action: function (e, dt, node, config) {
       if (isReadOnly) {
-        alert("This action is not allowed in read-only mode.");
+        alert(
+          t(
+            "alert.readonly_mode",
+            "This action is not allowed in read-only mode.",
+          ),
+        );
         return;
       }
-      if (actionLock) {
-        return;
-      }
+      if (actionLock) return;
       actionLock = true;
       $(".dt-button-background").click();
 
@@ -615,36 +492,23 @@ $(document).ready(function () {
         actionLock = false;
         return;
       }
-
       setupUnbanModal(bans);
-
       actionLock = false;
     },
   };
 
-  const bans_table = initializeDataTable({
+  const bans_config = {
     tableSelector: "#bans",
     tableName: "bans",
-    columnVisibilityCondition: (column) => column > 2 && column < 8,
+    columnVisibilityCondition: (column) => column > 2 && column < 11,
     dataTableOptions: {
       columnDefs: [
+        { orderable: false, className: "dtr-control", targets: 0 },
+        { orderable: false, render: DataTable.render.select(), targets: 1 },
+        { type: "ip-address", targets: 3 },
+        { orderable: false, targets: -1 },
         {
-          orderable: false,
-          className: "dtr-control",
-          targets: 0,
-        },
-        {
-          orderable: false,
-          render: DataTable.render.select(),
-          targets: 1,
-        },
-        { type: "ip-address", targets: 2 },
-        {
-          orderable: false,
-          targets: -1,
-        },
-        {
-          targets: [2, 8],
+          targets: 2,
           render: function (data, type, row) {
             if (type === "display" || type === "filter") {
               const date = new Date(data);
@@ -658,40 +522,37 @@ $(document).ready(function () {
         {
           searchPanes: {
             show: true,
-            options: [
-              {
-                label: "Last 24 hours",
-                value: function (rowData, rowIdx) {
-                  const date = new Date(rowData[2]);
-                  const now = new Date();
-                  return now - date < 24 * 60 * 60 * 1000;
-                },
-              },
-              {
-                label: "Last 7 days",
-                value: function (rowData, rowIdx) {
-                  const date = new Date(rowData[2]);
-                  const now = new Date();
-                  return now - date < 7 * 24 * 60 * 60 * 1000;
-                },
-              },
-              {
-                label: "Last 30 days",
-                value: function (rowData, rowIdx) {
-                  const date = new Date(rowData[2]);
-                  const now = new Date();
-                  return now - date < 30 * 24 * 60 * 60 * 1000;
-                },
-              },
-              {
-                label: "More than 30 days",
-                value: function (rowData, rowIdx) {
-                  const date = new Date(rowData[2]);
-                  const now = new Date();
-                  return now - date >= 30 * 24 * 60 * 60 * 1000;
-                },
-              },
-            ],
+            combiner: "or",
+            header: t("searchpane.country", "Country"),
+          },
+          targets: 4,
+          render: function (data) {
+            const countryCode = data.toLowerCase();
+            const isNotApplicable =
+              countryCode === "unknown" ||
+              countryCode === "local" ||
+              countryCode === "n/a";
+            const tooltipContent = "N/A";
+            return `
+              <span data-bs-toggle="tooltip" data-bs-original-title="${tooltipContent}" data-i18n="country.${
+                isNotApplicable ? "not_applicable" : countryCode.toUpperCase()
+              }" data-country="${
+                isNotApplicable ? "unknown" : countryCode.toUpperCase()
+              }">
+              <img src="${baseFlagsUrl}/${
+                isNotApplicable ? "zz" : countryCode
+              }.svg"
+                 class="border border-1 p-0 me-1"
+                 height="17"
+                 loading="lazy" />
+              &nbsp;－&nbsp;${isNotApplicable ? "N/A" : data}
+              </span>`;
+          },
+        },
+        {
+          searchPanes: {
+            show: true,
+            header: t("searchpane.date", "Date"),
             combiner: "or",
             orderable: false,
           },
@@ -700,59 +561,96 @@ $(document).ready(function () {
         {
           searchPanes: {
             show: true,
+            header: t("searchpane.scope", "Scope"),
             combiner: "or",
-            options: countriesSearchPanesOptions,
+            orderable: false,
           },
-          targets: 4,
+          targets: 6,
+          render: function (data, type, row) {
+            if (data === "service") {
+              return `<span class="badge bg-info">
+                <i class="bx bx-server me-1"></i>
+                <span data-i18n="scope.service_specific">${t(
+                  "scope.service_specific",
+                  "Service",
+                )}</span>
+              </span>`;
+            } else {
+              return `<span class="badge bg-primary">
+                <i class="bx bx-globe me-1"></i>
+                <span data-i18n="scope.global">${t(
+                  "scope.global",
+                  "Global",
+                )}</span>
+              </span>`;
+            }
+          },
         },
         {
           searchPanes: {
             show: true,
-            options: [
-              {
-                label: "Next 24 hours",
-                value: function (rowData, rowIdx) {
-                  const date = new Date(rowData[8]);
-                  const now = new Date();
-                  return date - now < 24 * 60 * 60 * 1000;
-                },
-              },
-              {
-                label: "Next 7 days",
-                value: function (rowData, rowIdx) {
-                  const date = new Date(rowData[8]);
-                  const now = new Date();
-                  return date - now < 7 * 24 * 60 * 60 * 1000;
-                },
-              },
-              {
-                label: "Next 30 days",
-                value: function (rowData, rowIdx) {
-                  const date = new Date(rowData[8]);
-                  const now = new Date();
-                  return date - now < 30 * 24 * 60 * 60 * 1000;
-                },
-              },
-              {
-                label: "More than 30 days",
-                value: function (rowData, rowIdx) {
-                  const date = new Date(rowData[8]);
-                  const now = new Date();
-                  return date - now >= 30 * 24 * 60 * 60 * 1000;
-                },
-              },
-            ],
+            header: t("searchpane.service", "Service"),
+          },
+          targets: 7,
+          render: function (data, type, row) {
+            const scope = row["scope"];
+            const service = data;
+            if (scope === "service") {
+              const serviceLabel =
+                service === "_" || !service
+                  ? t("service.default_server", "default server")
+                  : service;
+              return `<strong>${serviceLabel}</strong>`;
+            } else {
+              return `<span class="text-muted fst-italic" data-i18n="scope.all_services">${t(
+                "scope.all_services",
+                "All services",
+              )}</span>`;
+            }
+          },
+        },
+        {
+          searchPanes: {
+            show: true,
+            header: t("searchpane.end_date", "End Date"),
             combiner: "or",
             orderable: false,
           },
           targets: 8,
+          render: function (data, type, row) {
+            if (data === "permanent" || row["permanent"] === true) {
+              return `<span class="badge bg-danger">
+                <i class="bx bx-time-five me-1"></i>
+                <span data-i18n="scope.permanent">${t(
+                  "scope.permanent",
+                  "Permanent",
+                )}</span>
+              </span>`;
+            }
+            return data;
+          },
         },
         {
-          searchPanes: { show: true },
-          targets: 7,
+          targets: 9,
+          render: function (data, type, row) {
+            if (data === "permanent" || row["permanent"] === true) {
+              return `<span class="badge bg-danger">
+              <i class="bx bx-infinite me-1"></i>
+              <span data-i18n="scope.permanent">${t(
+                "scope.permanent",
+                "Permanent",
+              )}</span>
+              </span>`;
+            }
+            const date = new Date(data);
+            if (!isNaN(date.getTime())) {
+              return date.toLocaleString();
+            }
+            return data;
+          },
         },
       ],
-      order: [[7, "asc"]],
+      order: [[2, "desc"]],
       autoFill: false,
       responsive: true,
       select: {
@@ -761,64 +659,155 @@ $(document).ready(function () {
         headerCheckbox: true,
       },
       layout: layout,
-      language: {
-        info: "Showing _START_ to _END_ of _TOTAL_ bans",
-        infoEmpty: "No bans available",
-        infoFiltered: "(filtered from _MAX_ total bans)",
-        lengthMenu: "Display _MENU_ bans",
-        zeroRecords: "No matching bans found",
-        select: {
-          rows: {
-            _: "Selected %d bans",
-            0: "No bans selected",
-            1: "Selected 1 ban",
-          },
+      processing: true,
+      serverSide: true,
+      ajax: {
+        url: `${window.location.pathname}/fetch`,
+        type: "POST",
+        data: function (d) {
+          d.csrf_token = $("#csrf_token").val(); // Add CSRF token if needed
+          return d;
+        },
+        // Add error handling for ajax requests
+        error: function (jqXHR, textStatus, errorThrown) {
+          console.error("DataTables AJAX error:", textStatus, errorThrown);
+          $("#bans").addClass("d-none");
+          $("#bans-waiting")
+            .removeClass("d-none")
+            .text("Error loading bans. Please try refreshing the page.")
+            .addClass("text-danger");
+          // Remove any loading indicators
+          $(".dataTables_processing").hide();
         },
       },
+      columns: [
+        {
+          data: null,
+          defaultContent: "",
+          orderable: false,
+          className: "dtr-control",
+        },
+        { data: null, defaultContent: "", orderable: false },
+        {
+          data: "date",
+          title: "<span data-i18n='table.header.date'>Date</span>",
+        },
+        {
+          data: "ip",
+          title: "<span data-i18n='table.header.ip_address'>IP Address</span>",
+        },
+        {
+          data: "country",
+          title: "<span data-i18n='table.header.country'>Country</span>",
+        },
+        {
+          data: "reason",
+          title: "<span data-i18n='table.header.reason'>Reason</span>",
+        },
+        {
+          data: "scope",
+          title: "<span data-i18n='table.header.scope'>Scope</span>",
+        },
+        {
+          data: "service",
+          title: "<span data-i18n='table.header.service'>Service</span>",
+        },
+        {
+          data: "end_date",
+          title: "<span data-i18n='table.header.end_date'>End Date</span>",
+        },
+        {
+          data: "time_left",
+          title: "<span data-i18n='table.header.time_left'>Time Left</span>",
+        },
+      ],
       initComplete: function (settings, json) {
         $("#bans_wrapper .btn-secondary").removeClass("btn-secondary");
-        if (isReadOnly)
+        if (isReadOnly) {
+          const titleKey = userReadOnly
+            ? "tooltip.readonly_user_action_disabled"
+            : "tooltip.readonly_db_action_disabled";
+          const defaultTitle = userReadOnly
+            ? "Your account is readonly, action disabled."
+            : "The database is in readonly, action disabled.";
           $("#bans_wrapper .dt-buttons")
             .attr(
               "data-bs-original-title",
-              `${
-                userReadOnly
-                  ? "Your account is readonly"
-                  : "The database is in readonly"
-              }, therefore you cannot add bans.`,
+              t(titleKey, defaultTitle, {
+                action: t("button.add_ban_plural"),
+              }),
             )
             .attr("data-bs-placement", "right")
             .tooltip();
+        }
         updateCountryTooltips();
       },
-    },
-  });
-
-  // Update tooltips after table draw
-  bans_table.on("draw.dt", updateCountryTooltips);
-
-  $(document).on("click", ".unban-ip", function () {
-    if (isReadOnly) {
-      alert("This action is not allowed in read-only mode.");
-      return;
-    }
-    $this = $(this);
-    const row = $this.closest("tr");
-    const ban_scope = row.find("td:eq(6)").text().trim().toLowerCase();
-    const service = row.find("td:eq(7)").text().trim();
-
-    setupUnbanModal([
-      {
-        ip: $this.data("ip"),
-        time_remaining: $this.data("time-left"),
-        ban_scope: ban_scope,
-        service: service !== "All services" ? service : null,
+      headerCallback: function (thead) {
+        updateHeaderTooltips(thead, headers);
       },
-    ]);
-  });
+    },
+  };
+
+  // Wait for window.i18nextReady = true before continuing
+  if (typeof window.i18nextReady === "undefined" || !window.i18nextReady) {
+    const waitForI18next = (resolve) => {
+      if (window.i18nextReady) {
+        resolve();
+      } else {
+        setTimeout(() => waitForI18next(resolve), 50);
+      }
+    };
+    new Promise((resolve) => {
+      waitForI18next(resolve);
+    }).then(() => {
+      const dt = initializeDataTable(bans_config);
+      dt.on("draw.dt", function () {
+        updateCountryTooltips();
+        updateHeaderTooltips(dt.table().header(), headers);
+        $(".tooltip").remove();
+      });
+      dt.on("column-visibility.dt", function (e, settings, column, state) {
+        updateHeaderTooltips(dt.table().header(), headers);
+        $(".tooltip").remove();
+      });
+      // Ensure tooltips are set after initialization
+      updateHeaderTooltips(dt.table().header(), headers);
+      return dt;
+    });
+  }
+
+  // Utility function to manage header tooltips
+  function updateHeaderTooltips(selector, headers) {
+    $(selector)
+      .find("th")
+      .each((index, element) => {
+        const $th = $(element);
+        // Try to get the data-i18n attribute from the header's span
+        const i18nKey =
+          $th.find("[data-i18n]").data("i18n") || $th.data("i18n");
+        if (i18nKey) {
+          const header = headers.find(
+            (h) =>
+              h.i18n ===
+              i18nKey.replace("table.header.", "tooltip.table.bans."),
+          );
+          if (header) {
+            $th.attr({
+              "data-bs-toggle": "tooltip",
+              "data-bs-placement": "bottom",
+              "data-i18n": header.i18n,
+              title: header.tooltip,
+            });
+          }
+        }
+      });
+    applyTranslations();
+    $('[data-bs-toggle="tooltip"]').tooltip("dispose").tooltip();
+  }
 
   $("#add-ban").on("click", function () {
     const originalBan = $("#ban-1");
+    const lastBan = $("#bans-container").find("li.ban-item:last");
     const banClone = originalBan.clone();
     banClone.attr("id", `ban-${++addBanNumber}`);
 
@@ -826,31 +815,59 @@ $(document).ready(function () {
       .find("input[name='ip']")
       .removeClass("is-valid is-invalid")
       .val("");
+
     banClone.find("[readonly='readonly']").remove();
+
+    const lastReason = lastBan.find("input[name='reason']").val();
+    banClone.find("input[name='reason']").val(lastReason || "ui");
+
+    const lastScope = lastBan.find("select[name='ban_scope']").val();
+    banClone.find("select[name='ban_scope']").val(lastScope || "global");
+
+    if (lastScope === "service") {
+      const lastService = lastBan.find("select[name='service']").val();
+      banClone.find("select[name='service']").val(lastService || "");
+      banClone.find(".service-field").addClass("show");
+    } else {
+      banClone.find(".service-field").removeClass("show");
+    }
+
+    const isPermanent = lastBan.find(".permanent-ban-checkbox").is(":checked");
+    banClone.find(".permanent-ban-checkbox").prop("checked", isPermanent);
+
+    let defaultDate;
+    if (!isPermanent) {
+      const lastBanFlatpickr = lastBan.find(".flatpickr-input")[0]._flatpickr;
+      defaultDate = lastBanFlatpickr
+        ? lastBanFlatpickr.selectedDates[0]
+        : defaultDatetime;
+    } else {
+      defaultDate = defaultDatetime;
+    }
+
     banClone.find(".flatpickr-input").flatpickr({
       enableTime: true,
       dateFormat: "Y-m-d\\TH:i:S", // ISO format
       altInput: true,
-      altFormat: "F j, Y h:i", // User-friendly display format
+      altFormat: "F j, Y h:i K",
       time_24hr: true,
-      defaultDate: defaultDatetime,
+      defaultDate: defaultDate,
       minDate: minDatetime,
-      plugins: [
-        new minMaxTimePlugin({
-          table: minMaxTable,
-        }),
-      ],
+      plugins: [new minMaxTimePlugin({ table: minMaxTable })],
     });
-    banClone.find("input[name='reason']").val("ui");
 
-    // Replace delete button with a functional one
+    banClone.find("[type='flatpickr-datetime']").prop("disabled", isPermanent);
+    if (isPermanent) {
+      banClone.find(".input-group").addClass("opacity-50");
+    }
+
     const deleteButtonContainer = banClone.find(".col-12.col-md-1");
     deleteButtonContainer.html(`
       <button type="button"
               class="btn btn-outline-danger btn-sm delete-ban"
               data-bs-toggle="tooltip"
               data-bs-placement="right"
-              title="Remove this ban entry">
+              title="${t("tooltip.remove_ban_entry", "Remove this ban entry")}">
         <i class="bx bx-trash bx-xs"></i>
       </button>
     `);
@@ -866,32 +883,26 @@ $(document).ready(function () {
 
   $("#clear-bans").on("click", function () {
     $("#bans-container")
-      .find("li")
+      .find("li.ban-item")
       .each(function () {
-        if (
-          $(this).attr("id") === "ban-1" ||
-          $(this).attr("id") === "bans-header"
-        )
-          return;
-        $(this).remove();
+        if ($(this).attr("id") !== "ban-1") {
+          $(this).remove();
+        }
       });
   });
 
   $(document).on("click", ".delete-ban", function () {
     if (isReadOnly) {
-      alert("This action is not allowed in read-only mode.");
+      alert(
+        t(
+          "alert.readonly_mode",
+          "This action is not allowed in read-only mode.",
+        ),
+      );
       return;
     }
-
-    // Get the ban item container and remove it
     const banContainer = $(this).closest("li.ban-item");
-
-    // Double check that we're not deleting the first ban entry
-    if (banContainer.attr("id") === "ban-1") {
-      return;
-    }
-
-    // Fade out and remove
+    if (banContainer.attr("id") === "ban-1") return;
     banContainer.fadeOut(300, function () {
       $(this).remove();
     });
@@ -900,227 +911,193 @@ $(document).ready(function () {
   $("#modal-ban-ips").on("hidden.bs.modal", function () {
     $("#clear-bans").trigger("click");
     const firstBan = $("#ban-1");
-    firstBan.find("input[name='ip']").val("");
+    firstBan
+      .find("input[name='ip']")
+      .val("")
+      .removeClass("is-invalid is-valid");
     firstBan.find("input[name='reason']").val("ui");
+    firstBan.find(".invalid-feedback").remove();
     originalFlatpickr.setDate(defaultDatetime);
+    firstBan.find(".ban-scope-select").val("global").trigger("change");
+    // Reset permanent checkbox
+    firstBan.find(".permanent-ban-checkbox").prop("checked", false);
+    // Re-enable datetime field
+    firstBan.find("[type='flatpickr-datetime']").prop("disabled", false);
   });
 
   const ipRegex = new RegExp(
     /^(?:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(?:\.(?!$)|$)){4}$|^((?:[A-Fa-f0-9]{1,4}:){7}[A-Fa-f0-9]{1,4}|(?:[A-Fa-f0-9]{1,4}:){1,7}:|:(?::[A-Fa-f0-9]{1,4}){1,7}|::)$/i,
   );
 
-  // Modified validateBan function to cleanly separate global and service bans
   const validateBan = (banIpInput, ipServiceMap) => {
     const value = banIpInput.val().trim();
-    let errorMessage = "";
+    let errorMessageKey = "";
     let isValid = true;
+    const banContainer = banIpInput.closest("li.ban-item");
 
     if (value === "") {
-      errorMessage = "Please enter an IP address.";
+      errorMessageKey = "validation.ip_required";
       isValid = false;
     } else if (!ipRegex.test(value)) {
-      errorMessage = "Please enter a valid IP address.";
+      errorMessageKey = "validation.ip_invalid";
       isValid = false;
     } else {
-      // Get the ban container
-      const banContainer = banIpInput.closest("li.ban-item");
       const banScope = banContainer.find('select[name="ban_scope"]').val();
 
       if (banScope === "global") {
-        // For global scope bans, check if this IP already has a global ban
         if (ipServiceMap.has(`${value}:global`)) {
-          errorMessage = "This IP address already has a global ban entry.";
+          errorMessageKey = "validation.ip_global_duplicate";
           isValid = false;
         }
-        // Note: We allow an IP to have both global and service-specific bans
       } else if (banScope === "service") {
         const service = banContainer.find('select[name="service"]').val();
-
-        // Check service is selected
         if (!service) {
-          errorMessage = "Please select a service for this ban.";
+          errorMessageKey = "validation.service_required_for_ban";
           isValid = false;
-        }
-        // Check for duplicate service ban
-        else if (ipServiceMap.has(`${value}:service:${service}`)) {
-          errorMessage = `This IP is already banned for the service "${service}".`;
+        } else if (ipServiceMap.has(`${value}:service:${service}`)) {
+          errorMessageKey = "validation.ip_service_duplicate";
           isValid = false;
         }
       }
     }
 
-    // Toggle valid/invalid classes
     banIpInput
       .toggleClass("is-valid", isValid)
       .toggleClass("is-invalid", !isValid);
 
-    // Manage the invalid-feedback element
     let $feedback = banIpInput.next(".invalid-feedback");
-    if (!$feedback.length) {
+    if (!$feedback.length && !isValid) {
       $feedback = $('<div class="invalid-feedback"></div>').insertAfter(
         banIpInput,
       );
     }
 
-    $feedback.text(errorMessage);
+    if (!isValid) {
+      const service = banContainer.find('select[name="service"]').val();
+      $feedback.text(t(errorMessageKey, { service: service }));
+    } else if ($feedback.length) {
+      $feedback.text("");
+    }
 
     return isValid;
   };
 
-  // Update input validation to use the new service-aware validation
   $("#bans-container").on("input", "input[name='ip']", function () {
     debounce(() => {
       const $input = $(this);
-      // Map to store IP:scope or IP:service combinations
       const ipServiceMap = new Map();
 
-      // Gather all other ban entries except the current one
       $("#bans-container")
         .find("li.ban-item")
         .not($input.closest("li.ban-item"))
         .each(function () {
           const $li = $(this);
           const ip = $li.find("input[name='ip']").val().trim();
-          if (!ip) return; // Skip empty IPs
+          if (!ip) return;
 
           const banScope = $li.find("select[name='ban_scope']").val();
           if (banScope === "global") {
             ipServiceMap.set(`${ip}:global`, true);
           } else if (banScope === "service") {
             const service = $li.find("select[name='service']").val();
-            if (service) {
-              ipServiceMap.set(`${ip}:service:${service}`, true);
-            }
+            if (service) ipServiceMap.set(`${ip}:service:${service}`, true);
           }
         });
-
       validateBan($input, ipServiceMap);
     }, 100)();
   });
 
-  // Also update form submission validation
+  // Handle the permanent ban checkbox change
+  $(document).on("change", ".permanent-ban-checkbox", function () {
+    const $checkbox = $(this);
+    const $banItem = $checkbox.closest("li.ban-item");
+    const $datetimeInput = $banItem.find(".flatpickr-input");
+    const flatpickrInstance = $datetimeInput[0]._flatpickr;
+
+    if ($checkbox.is(":checked")) {
+      // If checked, disable the date/time picker
+      if (flatpickrInstance) {
+        flatpickrInstance.set("clickOpens", false);
+        flatpickrInstance.altInput.disabled = true;
+        flatpickrInstance.input.disabled = true;
+      }
+      $datetimeInput.prop("disabled", true);
+      $datetimeInput.parent().addClass("opacity-50");
+    } else {
+      // If unchecked, enable the date/time picker
+      if (flatpickrInstance) {
+        flatpickrInstance.set("clickOpens", true);
+        flatpickrInstance.altInput.disabled = false;
+        flatpickrInstance.input.disabled = false;
+      }
+      $datetimeInput.prop("disabled", false);
+      $datetimeInput.parent().removeClass("opacity-50");
+    }
+  });
+
   $("#bans-form").on("submit", function (e) {
     e.preventDefault();
-
     let allValid = true;
     const ipServiceMap = new Map();
 
-    // First pass - collect all existing IP + scope/service combinations
     $("#bans-container")
       .find("li.ban-item")
       .each(function () {
         const $li = $(this);
         const $input = $li.find("input[name='ip']");
-        const ip = $input.val().trim();
-
-        if (!ip) return; // Skip empty IPs
-
-        const banScope = $li.find("select[name='ban_scope']").val();
-
-        // Validate global ban
-        if (banScope === "global") {
-          const key = `${ip}:global`;
-
-          if (ipServiceMap.has(key)) {
-            allValid = false;
-            $input.addClass("is-invalid");
-
-            let $feedback = $input.next(".invalid-feedback");
-            if (!$feedback.length) {
-              $feedback = $('<div class="invalid-feedback"></div>').insertAfter(
-                $input,
-              );
-            }
-            $feedback.text("Duplicate global ban for this IP");
-          } else {
-            ipServiceMap.set(key, true);
-          }
-        }
-        // Validate service ban
-        else if (banScope === "service") {
-          const service = $li.find("select[name='service']").val();
-
-          if (!service) {
-            allValid = false;
-            $input.addClass("is-invalid");
-
-            let $feedback = $input.next(".invalid-feedback");
-            if (!$feedback.length) {
-              $feedback = $('<div class="invalid-feedback"></div>').insertAfter(
-                $input,
-              );
-            }
-            $feedback.text("Please select a service for this ban");
-          } else {
-            const key = `${ip}:service:${service}`;
-
-            if (ipServiceMap.has(key)) {
-              allValid = false;
-              $input.addClass("is-invalid");
-
-              let $feedback = $input.next(".invalid-feedback");
-              if (!$feedback.length) {
-                $feedback = $(
-                  '<div class="invalid-feedback"></div>',
-                ).insertAfter($input);
-              }
-              $feedback.text(
-                `This IP is already banned for the service "${service}"`,
-              );
-            } else {
-              ipServiceMap.set(key, true);
-            }
-          }
-        }
-
-        // Always validate IP format
-        if (!ipRegex.test(ip)) {
+        if (!validateBan($input, ipServiceMap)) {
+          // Validate *and* update the map
           allValid = false;
-          $input.addClass("is-invalid");
-
-          let $feedback = $input.next(".invalid-feedback");
-          if (!$feedback.length) {
-            $feedback = $('<div class="invalid-feedback"></div>').insertAfter(
-              $input,
-            );
+        } else {
+          // If valid, add to map for subsequent checks
+          const ip = $input.val().trim();
+          const banScope = $li.find("select[name='ban_scope']").val();
+          if (banScope === "global") {
+            ipServiceMap.set(`${ip}:global`, true);
+          } else if (banScope === "service") {
+            const service = $li.find("select[name='service']").val();
+            if (service) ipServiceMap.set(`${ip}:service:${service}`, true);
           }
-          $feedback.text("Please enter a valid IP address");
         }
       });
 
-    if (!allValid) return;
+    if (!allValid) return; // Stop if any entry is invalid
 
-    // Rest of the form submission code
+    // Collect valid ban data
     const bans = [];
     $("#bans-container")
-      .find("li.rounded-0")
+      .find("li.ban-item")
       .each(function () {
-        $this = $(this);
+        // Changed selector slightly
+        const $this = $(this);
         const ip = $this.find("input[name='ip']").val().trim();
+        const isPermanent = $this
+          .find(".permanent-ban-checkbox")
+          .is(":checked");
         const end_date = $this.find(".flatpickr-input").val();
         const reason = $this.find("input[name='reason']").val().trim();
         const ban_scope = $this.find("select[name='ban_scope']").val();
         const service =
           ban_scope === "service"
             ? $this.find("select[name='service']").val()
-            : "Web UI";
+            : null; // Set service to null for global
 
         bans.push({
           ip: ip,
-          end_date: `${end_date}${getTimeZoneOffset()}`,
+          end_date: isPermanent ? "-1" : `${end_date}${getTimeZoneOffset()}`,
+          exp: isPermanent ? -1 : null, // Set exp to -1 if permanent ban
           reason: reason,
           ban_scope: ban_scope,
           service: service,
         });
       });
 
+    // Create and submit the form
     const form = $("<form>", {
       method: "POST",
       action: `${window.location.pathname}/ban`,
       class: "visually-hidden",
     });
-
-    // Add CSRF token and bans as hidden inputs
     form.append(
       $("<input>", {
         type: "hidden",
@@ -1135,61 +1112,49 @@ $(document).ready(function () {
         value: JSON.stringify(bans),
       }),
     );
-
-    // Append the form to the body and submit it
     form.appendTo("body").submit();
   });
 
-  // Add validation on service selection change
+  // Re-validate IP when service selection changes
   $("#bans-container").on("change", "select[name='service']", function () {
-    const $banItem = $(this).closest("li.ban-item");
-    const $ipInput = $banItem.find("input[name='ip']");
-
-    if ($ipInput.val().trim()) {
-      // Re-validate this IP if it already has a value
-      $ipInput.trigger("input");
-    }
+    const $ipInput = $(this).closest("li.ban-item").find("input[name='ip']");
+    if ($ipInput.val().trim()) $ipInput.trigger("input");
   });
 
-  // Initialize ban scope selection for the first ban item
+  // Initialize handlers for the initial ban item
   initializeBanScopeHandlers($("#ban-1"));
 
+  // Function to show/hide service selection based on scope
   function initializeBanScopeHandlers($banItem) {
     const $banScopeSelect = $banItem.find(".ban-scope-select");
     const $serviceField = $banItem.find(".service-field");
     const $serviceSelect = $serviceField.find('select[name="service"]');
 
-    // Initial setup
-    toggleServiceField($banScopeSelect.val(), $serviceField, $serviceSelect);
+    toggleServiceField($banScopeSelect.val(), $serviceField, $serviceSelect); // Initial state
 
-    // Handle change events
     $banScopeSelect.on("change", function () {
       const newScope = $(this).val();
       toggleServiceField(newScope, $serviceField, $serviceSelect);
-
-      // Clear any validation errors when switching scope
+      // Re-validate IP on scope change
       const $ipInput = $banItem.find("input[name='ip']");
-      $ipInput.removeClass("is-invalid");
-      const $feedback = $ipInput.next(".invalid-feedback");
-      if ($feedback.length) {
-        $feedback.text("");
-      }
-
-      // Re-validate after switching scope if we have an IP address
-      if ($ipInput.val().trim()) {
-        // Short delay to let the DOM update
+      if ($ipInput.val().trim())
         setTimeout(() => $ipInput.trigger("input"), 50);
-      }
     });
   }
 
+  // Helper to toggle service field visibility and requirement
   function toggleServiceField(scopeValue, $serviceField, $serviceSelect) {
-    if (scopeValue === "service") {
-      $serviceField.addClass("show");
+    const showService = scopeValue === "service";
+    $serviceField.toggleClass("show", showService); // Use 'show' class for visibility
+    if (showService) {
       $serviceSelect.attr("required", true);
     } else {
-      $serviceField.removeClass("show");
       $serviceSelect.removeAttr("required");
+      $serviceSelect.val(""); // Clear selection when hiding
+      // Clear potential validation errors on the service select itself
+      $serviceSelect.removeClass("is-invalid");
+      const $serviceFeedback = $serviceSelect.next(".invalid-feedback");
+      if ($serviceFeedback.length) $serviceFeedback.remove();
     }
   }
 });

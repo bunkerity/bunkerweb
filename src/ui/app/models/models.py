@@ -19,6 +19,7 @@ class AnonymousUser(AnonymousUserMixin):
     method = "manual"
     admin = False
     theme = "light"
+    language = "en"
     totp_secret = None
     creation_date = datetime.now().astimezone()
     update_date = datetime.now().astimezone()

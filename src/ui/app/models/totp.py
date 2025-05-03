@@ -35,7 +35,7 @@ class Totp:
         """Generate pretty key for manual input"""
         if not totp_secret:
             return ""
-        return self._totp.from_source(totp_secret).pretty_key()
+        return self._totp.from_source(totp_secret).pretty_key(sep=False)
 
     def generate_recovery_codes(self) -> List[str]:
         return ["-".join([pwd[i : i + 4] for i in range(0, len(pwd), 4)]) for pwd in genword(length=16, charset="hex", returns=6)]  # noqa: E203

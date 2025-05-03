@@ -16,7 +16,7 @@
                     aria-haspopup="true"
                     aria-expanded="false">
                 <i class="bx bx-extension"></i>
-                <span class="d-none d-md-inline">&nbsp;Plugins</span>
+                <span class="d-none d-md-inline">&nbsp;<span data-i18n="navigation.plugins">Plugins</span></span>
             </button>
             <ul id="plugins-dropdown-menu"
                 class="dropdown-menu nav-pills max-vh-60 overflow-auto pt-0"
@@ -27,7 +27,8 @@
                            type="text"
                            class="form-control border-0 border-primary border-bottom shadow-none"
                            placeholder="Search..."
-                           aria-label="Search...">
+                           aria-label="Search..."
+                           data-i18n="form.placeholder.search">
                 </div>
                 {% for plugin, plugin_data in plugins.items() if get_filtered_settings(plugin_data["settings"], current_endpoint == "global-config") %}
                     <li class="nav-item" data-type="{{ plugin_data['type'] }}">
@@ -49,42 +50,52 @@
                 <input id="plugin-keyword-search"
                        type="text"
                        class="form-control form-control-sm border-0 border-primary border-bottom shadow-none"
-                       placeholder="Keywords...">
-                <label for="plugin-keyword-search">Keywords</label>
+                       placeholder="Keywords..."
+                       data-i18n="form.placeholder.keywords">
+                <label for="plugin-keyword-search" data-i18n="form.label.keywords">Keywords</label>
             </div>
             <div class="col-auto form-floating ps-0 pe-0 d-none d-md-block">
                 <select id="plugin-type-select"
                         class="form-select form-select-sm border-0 border-primary border-bottom shadow-none">
-                    <option value="all"{% if type == "all" %} selected{% endif %} value="all">All</option>
-                    <option value="core"{% if type == "core" %} selected{% endif %}>Core</option>
-                    <option value="external"{% if type == "external" %} selected{% endif %}>External</option>
-                    <option value="pro"{% if type == "pro" %} selected{% endif %}>Pro</option>
+                    <option value="all"
+                            {% if type == "all" %}selected{% endif %}
+                            value="all"
+                            data-i18n="plugin.type.all">All</option>
+                    <option value="core"
+                            {% if type == "core" %}selected{% endif %}
+                            data-i18n="plugin.type.core">Core</option>
+                    <option value="external"
+                            {% if type == "external" %}selected{% endif %}
+                            data-i18n="plugin.type.external">External</option>
+                    <option value="pro"
+                            {% if type == "pro" %}selected{% endif %}
+                            data-i18n="plugin.type.pro">Pro</option>
                 </select>
-                <label for="plugin-type-select">Type</label>
+                <label for="plugin-type-select" data-i18n="form.label.type">Type</label>
             </div>
         </div>
         <div class="justify-content-center d-none d-sm-flex">
             {% if current_endpoint != "global-config" %}
-                <div {% if current_endpoint != 'new' and service_method != 'ui' %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The draft mode can only be toggled on UI created services"{% endif %}>
+                <div {% if current_endpoint != 'new' and service_method != 'ui' %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The draft mode can only be toggled on UI created services" data-i18n="tooltip.draft_toggle_disabled"{% endif %}>
                     <button type="button"
                             class="btn btn-sm btn-outline-secondary toggle-draft me-3 {% if current_endpoint != 'new' and service_method != 'ui' %}disabled{% endif %}">
                         <i class="bx bx-sm bx-{% if is_draft == 'yes' %}file-blank{% else %}globe{% endif %}"></i>
                         <span class="d-none d-md-inline">&nbsp;
                             {% if is_draft == 'yes' %}
-                                Draft
+                                <span data-i18n="status.draft">Draft</span>
                             {% else %}
-                                Online
+                                <span data-i18n="status.online">Online</span>
                             {% endif %}
                         </span>
                     </button>
                 </div>
             {% endif %}
-            <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title={% if user_readonly %}"Readonly mode enabled"{% else %}"The database is in readonly, therefore the configuration is locked"{% endif %}
+            <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title={% if user_readonly %}"Readonly mode enabled"  data-i18n="tooltip.disabled_readonly"{% else %}"The database is in readonly, therefore the configuration is locked" data-i18n="tooltip.disabled_db_readonly"{% endif %}
                  {% endif %}>
                 <button type="button"
                         class="btn btn-sm btn-bw-green save-settings{% if is_readonly %} disabled{% endif %}">
                     <i class="bx bx-save bx-sm"></i>
-                    <span class="d-none d-md-inline">&nbsp;Save</span>
+                    <span class="d-none d-md-inline">&nbsp;<span data-i18n="button.save">Save</span></span>
                 </button>
             </div>
         </div>
@@ -93,25 +104,25 @@
 <div class="d-flex justify-content-center position-fixed m-3 d-sm-none"
      id="floating-settings-button">
     {% if current_endpoint != "global-config" %}
-        <div {% if current_endpoint != 'new' and service_method != 'ui' %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The draft mode can only be toggled on UI created services"{% endif %}>
+        <div {% if current_endpoint != 'new' and service_method != 'ui' %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The draft mode can only be toggled on UI created services" data-i18n="tooltip.draft_toggle_disabled"{% endif %}>
             <button type="button"
                     class="btn btn-sm btn-outline-secondary toggle-draft p-1_5 me-1 {% if current_endpoint != 'new' and service_method != 'ui' %}disabled{% endif %}">
                 <i class="bx bx-xs bx-{% if is_draft == 'yes' %}file-blank{% else %}globe{% endif %}"></i>
                 &nbsp;
                 {% if is_draft == 'yes' %}
-                    Draft
+                    <span data-i18n="status.draft">Draft</span>
                 {% else %}
-                    Online
+                    <span data-i18n="status.online">Online</span>
                 {% endif %}
             </button>
         </div>
     {% endif %}
-    <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title={% if user_readonly %}"Readonly mode enabled"{% else %}"The database is in readonly, therefore the configuration is locked"{% endif %}
+    <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title={% if user_readonly %}"Readonly mode enabled" data-i18n="tooltip.disabled_readonly"{% else %}"The database is in readonly, therefore the configuration is locked" data-i18n="tooltip.disabled_db_readonly"{% endif %}
          {% endif %}>
         <button type="button"
                 class="btn btn-sm btn-bw-green save-settings p-1_5{% if is_readonly %} disabled{% endif %}">
             <i class="bx bx-save bx-xs"></i>
-            &nbsp;Save
+            &nbsp;<span data-i18n="button.save">Save</span>
         </button>
     </div>
 </div>
@@ -149,13 +160,13 @@
                            class="btn btn-sm btn-primary rounded-pill ms-2"
                            target="_blank"
                            rel="noopener">
-                            <i class="bx bx-link"></i><span class="d-none d-md-inline">&nbsp;More info</span>
+                            <i class="bx bx-link"></i><span class="d-none d-md-inline">&nbsp;<span data-i18n="link.more_info">More info</span></span>
                         </a>
                         {% if plugin_data["page"] %}
                             {% set plugin_blueprint = "#" if plugin_data["type"] == "core" else url_for(plugin) %}
                             <a href="{% if plugin_blueprint == '#' %}{{ url_for("plugins") }}/{{ plugin }}{% else %}{{ plugin_blueprint }}{% endif %}"
                                class="btn btn-sm btn-primary rounded-pill ms-2">
-                                <i class="bx bxs-file-html"></i><span class="d-none d-md-inline">&nbsp;Plugin page</span>
+                                <i class="bx bxs-file-html"></i><span class="d-none d-md-inline">&nbsp;<span data-i18n="button.plugin_page">Plugin page</span></span>
                             </a>
                         {% endif %}
                     </div>
@@ -164,7 +175,9 @@
                     {% if plugin_data["type"] == "pro" and not is_pro_version %}
                         <div class="blur-message">
                             <i class='bx bx-diamond bx-xs me-1'></i>
-                            <a href="{{ url_for('pro') }}" class="text-white-80 courier-prime">Upgrade to Pro to access this feature</a>
+                            <a href="{{ url_for('pro') }}"
+                               class="text-white-80 courier-prime"
+                               data-i18n="pro.overlay.upgrade_required">Upgrade to Pro to access this feature</a>
                         </div>
                     {% endif %}
                     <div class="card-body row g-2 gx-6 pb-0">
@@ -263,10 +276,12 @@
                     {% if plugin_multiples %}
                         {% set setting_id_prefix = "multiple-setting-" + plugin +"-" %}
                         <div class="card-header pb-2 mt-6">
-                            <h5 class="card-title d-inline border p-2{{ plugin_types[plugin_data['type']].get('text-class', '') }}{{ plugin_types[plugin_data['type']].get('title-class', '') }}">
-                                Multiple settings
-                            </h5>
-                            <p class="card-subtitle text-muted mt-2">This is where you can configure multiple settings for this plugin.</p>
+                            <h5 class="card-title d-inline border p-2{{ plugin_types[plugin_data['type']].get('text-class', '') }}{{ plugin_types[plugin_data['type']].get('title-class', '') }}"
+                                data-i18n="settings.multiple.title">Multiple settings</h5>
+                            <p class="card-subtitle text-muted mt-2"
+                               data-i18n="settings.multiple.description">
+                                This is where you can configure multiple settings for this plugin.
+                            </p>
                         </div>
                         <div class="card-body row g-2 gx-6 pt-0">
                             {% for multiple, multiples in plugin_multiples.items() %}
@@ -283,19 +298,19 @@
                                                 <div class="d-flex align-items-center">
                                                     {% if setting_suffix == "0" %}
                                                         <div class="me-1"
-                                                             {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title={% if user_readonly %}"Readonly mode enabled"{% else %}"The database is in readonly, therefore the configuration is locked"{% endif %}
+                                                             {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title={% if user_readonly %}"Readonly mode enabled" data-i18n="tooltip.disabled_readonly"{% else %}"The database is in readonly, therefore the configuration is locked" data-i18n="tooltip.disabled_db_readonly"{% endif %}
                                                              {% endif %}>
                                                             <button id="add-multiple-{{ plugin }}-{{ multiple }}"
                                                                     type="button"
                                                                     class="btn btn-xs btn-text-bw-green rounded-pill add-multiple p-0 pe-2{% if is_readonly %} disabled{% endif %}">
-                                                                <i class="bx bx-plus-circle bx-sm"></i>&nbsp;ADD
+                                                                <i class="bx bx-plus-circle bx-sm"></i>&nbsp;<span data-i18n="button.multiple_add">ADD</span>
                                                             </button>
                                                         </div>
                                                     {% else %}
                                                         <button id="remove-multiple-{{ plugin }}-{{ multiple }}-{{ setting_suffix }}"
                                                                 type="button"
                                                                 class="btn btn-xs btn-text-danger rounded-pill remove-multiple p-0 pe-2">
-                                                            <i class="bx bx-trash bx-sm"></i>&nbsp;REMOVE
+                                                            <i class="bx bx-trash bx-sm"></i>&nbsp;<span data-i18n="button.multiple_remove">REMOVE</span>
                                                         </button>
                                                     {% endif %}
                                                     <button id="show-multiple-{{ plugin }}-{{ multiple }}-{{ setting_suffix }}"
@@ -305,7 +320,7 @@
                                                             data-bs-target="#multiple-{{ plugin }}-{{ multiple }}-{{ setting_suffix }}"
                                                             aria-expanded="true"
                                                             aria-controls="multiple-{{ plugin }}-{{ multiple }}-{{ setting_suffix }}">
-                                                        <i class="bx bx-show-alt bx-sm"></i>&nbsp;HIDE
+                                                        <i class="bx bx-show-alt bx-sm"></i>&nbsp;<span data-i18n="button.multiple_hide">HIDE</span>
                                                     </button>
                                                 </div>
                                             </div>

@@ -1523,7 +1523,7 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
     services:
       bunkerweb:
         # This is the name that will be used to identify the instance in the Scheduler
-        image: bunkerity/bunkerweb:1.6.2-rc1
+        image: bunkerity/bunkerweb:1.6.2-rc2
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1540,7 +1540,7 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
             syslog-address: "udp://10.20.30.254:514" # The IP address of the syslog service
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.2-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.2-rc2
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
@@ -3375,7 +3375,7 @@ Follow these steps to configure and use ModSecurity:
 Select a CRS version to best match your security needs:
 
 - **`3`**: Stable [v3.3.7](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.7).
-- **`4`**: Stable [v4.13.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.13.0) (**default**).
+- **`4`**: Stable [v4.14.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.14.0) (**default**).
 - **`nightly`**: [Nightly build](https://github.com/coreruleset/coreruleset/releases/tag/nightly) offering the latest rule updates.
 
 !!! example "Nightly Build"
@@ -4129,10 +4129,12 @@ Follow these steps to configure and use the Reverse Proxy feature:
     | Setting                          | Default | Context   | Multiple | Description                                                                              |
     | -------------------------------- | ------- | --------- | -------- | ---------------------------------------------------------------------------------------- |
     | `USE_REVERSE_PROXY`              | `no`    | multisite | no       | **Enable Reverse Proxy:** Set to `yes` to enable reverse proxy functionality.            |
-    | `REVERSE_PROXY_INTERCEPT_ERRORS` | `yes`   | multisite | no       | **Intercept Errors:** Whether to intercept and rewrite error responses from the backend. |
-    | `REVERSE_PROXY_CUSTOM_HOST`      |         | multisite | no       | **Custom Host:** Override Host header sent to upstream server.                           |
     | `REVERSE_PROXY_HOST`             |         | multisite | yes      | **Backend Host:** Full URL of the proxied resource (proxy_pass).                         |
     | `REVERSE_PROXY_URL`              | `/`     | multisite | yes      | **Location URL:** Path that will be proxied to the backend server.                       |
+    | `REVERSE_PROXY_BUFFERING`        | `yes`   | multisite | yes      | **Response Buffering:** Enable or disable buffering of responses from proxied resource.  |
+    | `REVERSE_PROXY_KEEPALIVE`        | `no`    | multisite | yes      | **Keep-Alive:** Enable or disable keepalive connections with the proxied resource.       |
+    | `REVERSE_PROXY_CUSTOM_HOST`      |         | multisite | no       | **Custom Host:** Override Host header sent to upstream server.                           |
+    | `REVERSE_PROXY_INTERCEPT_ERRORS` | `yes`   | multisite | no       | **Intercept Errors:** Whether to intercept and rewrite error responses from the backend. |
 
     !!! tip "Best Practices"
         - Always specify the full URL in `REVERSE_PROXY_HOST` including the protocol (http:// or https://)
@@ -4155,8 +4157,6 @@ Follow these steps to configure and use the Reverse Proxy feature:
     | `REVERSE_PROXY_CONNECT_TIMEOUT` | `60s`   | multisite | yes      | **Connect Timeout:** Maximum time to establish a connection to the backend server.                      |
     | `REVERSE_PROXY_READ_TIMEOUT`    | `60s`   | multisite | yes      | **Read Timeout:** Maximum time between transmissions of two successive packets from the backend server. |
     | `REVERSE_PROXY_SEND_TIMEOUT`    | `60s`   | multisite | yes      | **Send Timeout:** Maximum time between transmissions of two successive packets to the backend server.   |
-    | `REVERSE_PROXY_BUFFERING`       | `yes`   | multisite | yes      | **Response Buffering:** Enable or disable buffering of responses from proxied resource.                 |
-    | `REVERSE_PROXY_KEEPALIVE`       | `no`    | multisite | yes      | **Keep-Alive:** Enable or disable keepalive connections with the proxied resource.                      |
     | `PROXY_BUFFERS`                 |         | multisite | no       | **Buffers:** Number and size of buffers for reading the response from the backend server.               |
     | `PROXY_BUFFER_SIZE`             |         | multisite | no       | **Buffer Size:** Size of the buffer for reading the first part of the response from the backend server. |
     | `PROXY_BUSY_BUFFERS_SIZE`       |         | multisite | no       | **Busy Buffers Size:** Size of buffers that can be busy sending response to the client.                 |
@@ -4220,10 +4220,11 @@ Follow these steps to configure and use the Reverse Proxy feature:
         - **Security Enhancement:** Add security-related headers or remove headers that might leak sensitive information
         - **Integration Support:** Provide necessary headers for authentication and proper backend operation
 
-    | Setting                        | Default | Context   | Multiple | Description                                                                    |
-    | ------------------------------ | ------- | --------- | -------- | ------------------------------------------------------------------------------ |
-    | `REVERSE_PROXY_HEADERS`        |         | multisite | yes      | **Custom Headers:** HTTP headers to send to backend separated with semicolons. |
-    | `REVERSE_PROXY_HEADERS_CLIENT` |         | multisite | yes      | **Client Headers:** HTTP headers to send to client separated with semicolons.  |
+    | Setting                                | Default | Context   | Multiple | Description                                                                           |
+    | -------------------------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------- |
+    | `REVERSE_PROXY_HEADERS`                |         | multisite | yes      | **Custom Headers:** HTTP headers to send to backend separated with semicolons.        |
+    | `REVERSE_PROXY_HEADERS_CLIENT`         |         | multisite | yes      | **Client Headers:** HTTP headers to send to client separated with semicolons.         |
+    | `REVERSE_PROXY_UNDERSCORES_IN_HEADERS` | `no`    | multisite | no       | **Underscores in Headers:** Enable or disable the `underscores_in_headers` directive. |
 
     !!! warning "Security Considerations"
         When using the reverse proxy feature, be cautious about what headers you forward to your backend applications. Certain headers might expose sensitive information about your infrastructure or bypass security controls.

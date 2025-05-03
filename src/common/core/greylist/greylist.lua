@@ -15,6 +15,7 @@ local get_rdns = utils.get_rdns
 local get_asn = utils.get_asn
 local regex_match = utils.regex_match
 local get_variable = utils.get_variable
+local deduplicate_list = utils.deduplicate_list
 local ipmatcher_new = ipmatcher.new
 local tostring = tostring
 local open = io.open
@@ -47,6 +48,7 @@ function greylist:initialize(ctx)
 					table.insert(self.lists[kind], data)
 				end
 			end
+			self.lists[kind] = deduplicate_list(self.lists[kind])
 		end
 	end
 end
@@ -103,6 +105,7 @@ function greylist:init()
 				end
 				f:close()
 			end
+			greylists[kind] = deduplicate_list(greylists[kind])
 		end
 
 		-- Load service specific ones into datastore

@@ -1,0 +1,23 @@
+# This list contains patterns of various web shells, backdoors and similar
+# software written in ASP language. There is no way how to automatically update
+# this list, so it must be done by hand. Here is a recommended way how to add
+# new malicious software:
+# 1.) As patterns are matched against RESPONSE_BODY, you need to run a malicious
+#     software (ideally in an isolated environment) and catch the output.
+# 2.) In the output, search for static pattern unique enough to match only
+#     the software in question and to not do any FPs. The best pick is usually
+#     a part of HTML code with software name.
+# 3.) Include software name and URL (if available) in the comment above
+#     the pattern.
+#
+# Data comes from multiple places of which some doesn't work anymore. Few are
+# listed below:
+# - https://www.localroot.net/
+# - Google search (keywords like webshells, asp backdoor and similar)
+
+# Akmal archtte id ASPX shell
+<title>Webshell Akmal archtte id</title>
+# ASPYDrv shell
+<html><title>ASPYDrvsInfo</title>
+# RHTOOLS shell
+<html><head><title>RHTOOLS

@@ -30,7 +30,7 @@ from werkzeug.routing.exceptions import BuildError
 from app.models.biscuit import BiscuitMiddleware
 from app.models.reverse_proxied import ReverseProxied
 
-from app.dependencies import BW_CONFIG, DATA, DB, EXTERNAL_PLUGINS_PATH, PRO_PLUGINS_PATH, safe_reload_plugins
+from app.dependencies import BW_CONFIG, DATA, DB, CORE_PLUGINS_PATH, EXTERNAL_PLUGINS_PATH, PRO_PLUGINS_PATH, safe_reload_plugins
 from app.models.models import AnonymousUser
 from app.utils import (
     BISCUIT_PUBLIC_KEY_FILE,
@@ -46,6 +46,7 @@ from app.utils import (
     human_readable_number,
     stop,
 )
+from app.lang_config import SUPPORTED_LANGUAGES
 
 signal(SIGINT, handle_stop)
 signal(SIGTERM, handle_stop)
@@ -365,8 +366,10 @@ def refresh_app_context():
         app.config[hook_info["key"]] = []
 
     # Find all python files in ui directories
+    core_ui_py_files = list(CORE_PLUGINS_PATH.glob("*/ui/hooks.py"))
     external_ui_py_files = list(EXTERNAL_PLUGINS_PATH.glob("*/ui/hooks.py"))
     pro_ui_py_files = list(PRO_PLUGINS_PATH.glob("*/ui/hooks.py"))
+    core_bp_dirs = list(CORE_PLUGINS_PATH.glob("*/ui/blueprints"))
     external_bp_dirs = list(EXTERNAL_PLUGINS_PATH.glob("*/ui/blueprints"))
     pro_bp_dirs = list(PRO_PLUGINS_PATH.glob("*/ui/blueprints"))
 
@@ -377,7 +380,7 @@ def refresh_app_context():
     blueprint_registry = {}
 
     # --- LOAD HOOKS ---
-    for py_file in chain(external_ui_py_files, pro_ui_py_files):
+    for py_file in chain(core_ui_py_files, external_ui_py_files, pro_ui_py_files):
         if not py_file.is_file():
             continue
 
@@ -425,7 +428,7 @@ def refresh_app_context():
             LOGGER.debug(f"Removed {hook_dir} from sys.path for obsolete hook {module_name}")
 
     # --- LOAD BLUEPRINTS ---
-    for bp_dir in chain(pro_bp_dirs, external_bp_dirs):
+    for bp_dir in chain(pro_bp_dirs, external_bp_dirs, core_bp_dirs):
         if not bp_dir.is_dir():
             continue
 
@@ -601,7 +604,7 @@ def before_request():
     metadata = None
     app.config["SCRIPT_NONCE"] = token_urlsafe(32)
 
-    if not request.path.startswith(("/css/", "/img/", "/js/", "/json/", "/fonts/", "/libs/")):
+    if not request.path.startswith(("/css/", "/img/", "/js/", "/json/", "/fonts/", "/libs/", "/locales/")):
         metadata = DB.get_metadata()
         worker_pid = str(getpid())
 
@@ -670,7 +673,7 @@ def before_request():
 
     current_endpoint = request.path.split("/")[-1]
     if request.path.startswith(("/check", "/setup", "/loading", "/login", "/totp")):
-        app.config["ENV"] = dict(current_endpoint=current_endpoint, script_nonce=app.config["SCRIPT_NONCE"])
+        app.config["ENV"] = dict(current_endpoint=current_endpoint, script_nonce=app.config["SCRIPT_NONCE"], supported_languages=SUPPORTED_LANGUAGES)
     else:
         if not metadata:
             metadata = DB.get_metadata()
@@ -731,6 +734,8 @@ def before_request():
             is_readonly=DATA.get("READONLY_MODE", False) or ("write" not in current_user.list_permissions and not request.path.startswith("/profile")),
             user_readonly="write" not in current_user.list_permissions,
             theme=current_user.theme if current_user.is_authenticated else "dark",
+            language=current_user.language if current_user.is_authenticated else "en",
+            supported_languages=SUPPORTED_LANGUAGES,
             columns_preferences_defaults=COLUMNS_PREFERENCES_DEFAULTS,
             extra_pages=app.config["EXTRA_PAGES"],
         )
@@ -814,7 +819,11 @@ def set_security_headers(response):
 
 @app.teardown_request
 def teardown_request(teardown):
-    if not request.path.startswith(("/css/", "/img/", "/js/", "/json/", "/fonts/", "/libs/")) and current_user.is_authenticated and "session_id" in session:
+    if (
+        not request.path.startswith(("/css/", "/img/", "/js/", "/json/", "/fonts/", "/libs/", "/locales/"))
+        and current_user.is_authenticated
+        and "session_id" in session
+    ):
         Thread(target=mark_user_access, args=(current_user, session["session_id"])).start()
 
     for hook in app.config["TEARDOWN_REQUEST_HOOKS"]:
@@ -883,11 +892,7 @@ def check_reloading():
 @app.route("/set_theme", methods=["POST"])
 @login_required
 def set_theme():
-    if "write" not in current_user.list_permissions:
-        return Response(
-            status=403, response=dumps({"message": "You don't have the required permissions to change the theme."}), content_type="application/json"
-        )
-    elif DB.readonly:
+    if DB.readonly:
         return Response(status=423, response=dumps({"message": "Database is in read-only mode"}), content_type="application/json")
     elif request.form["theme"] not in ("dark", "light"):
         return Response(status=400, response=dumps({"message": "Bad request"}), content_type="application/json")
@@ -899,6 +904,35 @@ def set_theme():
         "totp_secret": current_user.totp_secret,
         "method": current_user.method,
         "theme": request.form["theme"],
+        "language": current_user.language,
+    }
+
+    ret = DB.update_ui_user(**user_data, old_username=current_user.get_id())
+    if ret:
+        LOGGER.error(f"Couldn't update the user {current_user.get_id()}: {ret}")
+        return Response(status=500, response=dumps({"message": "Internal server error"}), content_type="application/json")
+
+    return Response(status=200, response=dumps({"message": "ok"}), content_type="application/json")
+
+
+@app.route("/set_language", methods=["POST"])
+@login_required
+def set_language():
+    allowed_languages = {lang["code"] for lang in SUPPORTED_LANGUAGES}
+    lang = request.form["language"].lower()
+    if DB.readonly:
+        return Response(status=423, response=dumps({"message": "Database is in read-only mode"}), content_type="application/json")
+    elif lang not in allowed_languages:
+        return Response(status=400, response=dumps({"message": "Bad request"}), content_type="application/json")
+
+    user_data = {
+        "username": current_user.get_id(),
+        "password": current_user.password.encode("utf-8"),
+        "email": current_user.email,
+        "totp_secret": current_user.totp_secret,
+        "method": current_user.method,
+        "theme": current_user.theme,
+        "language": lang,
     }
 
     ret = DB.update_ui_user(**user_data, old_username=current_user.get_id())
@@ -921,8 +955,7 @@ def set_columns_preferences():
         return Response(status=400, response=dumps({"message": "Bad request"}), content_type="application/json")
 
     if (
-        "write" not in current_user.list_permissions
-        or DB.readonly
+        DB.readonly
         or table_name not in COLUMNS_PREFERENCES_DEFAULTS
         or any(column not in COLUMNS_PREFERENCES_DEFAULTS[table_name] for column in columns_preferences)
     ):

@@ -46,7 +46,7 @@
                    target="_blank"
                    rel="noopener">
                     <span class="tf-icons bx bx-file me-md-2"></span>
-                    <span class="d-none d-lg-inline">Documentation</span>
+                    <span class="d-none d-lg-inline" data-i18n="navbar.link.documentation">Documentation</span>
                 </a>
                 <a role="button"
                    class="btn btn-outline-github p-1 p-md-2 ms-1 ms-md-2"
@@ -85,7 +85,7 @@
                                      width="18px"
                                      height="15.5px">
                             </span>
-                        Upgrade to PRO</a>
+                            <span data-i18n="navbar.button.upgrade_to_pro">Upgrade to PRO</span></a>
                     </div>
                 </li>
             {% endif %}
@@ -96,7 +96,8 @@
                    data-icon="octicon-star"
                    data-size="large"
                    data-show-count="true"
-                   aria-label="Star bunkerity/bunkerweb on GitHub">Stars</a>
+                   aria-label="Star bunkerity/bunkerweb on GitHub"
+                   data-i18n="button.github_stars">Stars</a>
             </li>
             <!--/ Stars -->
             <!-- Version -->
@@ -109,10 +110,11 @@
                    rel="noreferrer"
                    data-bs-toggle="tooltip"
                    data-bs-placement="bottom"
-                   data-bs-original-title="{% if bw_version != latest_version %}New version available{% else %}Latest version installed{% endif %}">
-                    Version {{ bw_version }}
+                   data-bs-original-title="..."
+                   data-i18n="{% if bw_version != latest_version %}tooltip.new_version_available{% else %}tooltip.latest_version_installed{% endif %}">
+                    <span data-i18n="navbar.version">Version</span>: {{ bw_version }}
                     <span class="badge-dot position-absolute top-0 start-100 translate-middle bg-{% if bw_version != latest_version %}danger{% else %}success{% endif %} border border-light rounded-circle">
-                        <span class="visually-hidden">New version</span>
+                        <span class="visually-hidden" data-i18n="badge.new_version">New version</span>
                     </span>
                 </a>
             </li>
@@ -152,7 +154,7 @@
                     <li>
                         <a class="dropdown-item d-flex align-items-center"
                            href="{{ url_for('logout') }}">
-                            <i class="bx bx-power-off bx-sm me-2"></i><span>Log Out</span>
+                            <i class="bx bx-power-off bx-sm me-2"></i><span data-i18n="navbar.dropdown.logout">Log Out</span>
                         </a>
                     </li>
                 </ul>
