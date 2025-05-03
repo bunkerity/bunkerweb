@@ -5,6 +5,7 @@
 - [BUGFIX] Fix draft services deletion when editing the global config in the web UI
 - [BUGFIX] Enhance the `Let's Encrypt` plugin's Cloudflare Provider with default values and validation for credentials to avoid having to set all of them all the time (`api_token` or `email` and `api_key`)
 - [BUGFIX] Remove settings form input sanitization as it was creating issues when saving settings in the web UI
+- [BUGFIX] Exclude the RFC2136 DNS provider from the base64 encoding validation for credential items in the `letsencrypt` plugin to prevent issues with the `secret` field being detected as base64 encoded
 - [FEATURE] Add the possibility to choose a profile when generating certificates with Let's Encrypt using the `LETS_ENCRYPT_PROFILE` setting (`classic` (default), `tlsserver` for server-only validation, and `shortlived` for reduced 7-day validity) to provide flexibility in certificate configuration based on security requirements
 - [FEATURE] Add the possibility to declare custom certificates and keys data as plaintext as well as base64-encoded data in the `customcert` plugin using the `CUSTOM_SSL_CERT_DATA` and `CUSTOM_SSL_KEY_DATA` settings
 - [FEATURE] Add `IONOS` as a DNS provider in the `letsencrypt` plugin
@@ -19,6 +20,7 @@
 - [UI] Update time formatting in requests chart to use 12-hour format in home page
 - [UI] Introduce multi‑language support in the web UI: `ar`, `bn`, `en`, `es`, `fr`, `hi`, `pt`, `ru`, `ur`, `zh`, `de`, `it` — covering the world’s top 10 and Europe’s top 5 languages.
 - [UI] Refactor TOTP Pretty key generation to avoid separating the parts with a `-` character (this was causing issues with some QR code readers)
+- [UI] Add the possibility to manually delete Let's Encrypt certificates in the web UI
 - [UI] Refactor bans management to process the data on the serverSide like done with the reports
 - [UI] Update apexcharts.js to version 4.6.0
 - [UI] Update ace editor to version 1.40.1
@@ -26,6 +28,7 @@
 - [MISC] Add algorithm normalization for self-signed certificate generation to avoid regenerating the certificate if the algorithm is already the right one but the setting is not set to the same value
 - [MISC] Refactor the way we fetch the entire config from the database to avoid issues with default values and multiple settings in the lua code
 - [MISC] Add new container security using docker scout in CI/CD pipeline
+- [MISC] Add warning for RHEL users regarding external database client installation and remove dependency on `mysql` and `postgresql` packages in the RHEL fpm file (it was causing issues when `mariadb` was installed)
 - [AUTOCONF] (Re) Remove possible infinite loop in Kubernetes integration
 - [UI] Integrate Biscuit authentication and key management
 - [DEPS] Update coreruleset-v4 version to v4.14.0
