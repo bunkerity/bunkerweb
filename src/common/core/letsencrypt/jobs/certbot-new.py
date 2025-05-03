@@ -512,7 +512,7 @@ try:
                 data["credential_items"] = {}
                 for key, value in credential_items.items():
                     # Check for base64 encoding
-                    if len(value) % 4 == 0 and match(r"^[A-Za-z0-9+/=]+$", value):
+                    if data["provider"] != "rfc2136" and len(value) % 4 == 0 and match(r"^[A-Za-z0-9+/=]+$", value):
                         try:
                             decoded = b64decode(value).decode("utf-8")
                             if decoded != value:
