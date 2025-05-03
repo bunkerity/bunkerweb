@@ -213,3 +213,25 @@ echo "  * Documentation: https://docs.bunkerweb.io"
 echo "  * Community Support: https://discord.bunkerity.com"
 echo "  * Commercial Support: https://panel.bunkerweb.io/order/support"
 echo "🛡 Thank you for using BunkerWeb!"
+
+# Detect if OS is RHEL-based for warning
+RHEL_OS=""
+if [ -f /etc/os-release ]; then
+    # shellcheck disable=SC1091
+    . /etc/os-release
+    DISTRO_ID=$(echo "$ID" | tr '[:upper:]' '[:lower:]')
+    case "$DISTRO_ID" in
+        rhel|centos|fedora|rocky|almalinux|redhat)
+            RHEL_OS=1
+            ;;
+    esac
+elif [ -f /etc/redhat-release ]; then
+    RHEL_OS=1
+fi
+
+if [ "$RHEL_OS" = "1" ]; then
+cat << EOF
+⚠️  WARNING for RHEL users:
+If you plan on using an external database (MariaDB, MySQL, or PostgreSQL), you must install the appropriate client package (e.g., mariadb, mysql, or postgresql client) on your system for the BunkerWeb Scheduler to connect properly.
+EOF
+fi
