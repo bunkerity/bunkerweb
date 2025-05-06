@@ -459,6 +459,9 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
       - apiGroups: ["networking.k8s.io"]
         resources: ["ingresses"]
         verbs: ["get", "watch", "list"]
+      - apiGroups: ["networking.k8s.io"]
+        resources: ["ingresses/status"]
+        verbs: ["update"]
     ---
     apiVersion: v1
     kind: ServiceAccount
