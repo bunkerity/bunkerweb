@@ -2,11 +2,13 @@ from collections import defaultdict
 from datetime import datetime
 from itertools import chain
 from json import dumps, loads
+from traceback import format_exc
 
-from flask import Blueprint, jsonify, render_template, request, url_for
+from flask import Blueprint, flash, jsonify, render_template, request, url_for
 from flask_login import login_required
 
 from app.dependencies import BW_INSTANCES_UTILS
+from app.utils import LOGGER
 
 from app.routes.utils import cors_required, get_redis_client
 
@@ -282,8 +284,14 @@ def reports_fetch():
     # Fetch reports
     def fetch_reports():
         if redis_client:
-            redis_reports = redis_client.lrange("requests", 0, -1)
-            redis_reports = (loads(report_raw) for report_raw in redis_reports)
+            try:
+                redis_reports = redis_client.lrange("requests", 0, -1)
+                redis_reports = (loads(report_raw.decode("utf-8", "replace")) for report_raw in redis_reports)
+            except BaseException as e:
+                LOGGER.debug(format_exc())
+                LOGGER.error(f"Failed to fetch reports from Redis: {e}")
+                flash("Failed to fetch reports from Redis, see logs for more information.", "error")
+                redis_reports = []
         else:
             redis_reports = []
         instance_reports = BW_INSTANCES_UTILS.get_reports() if BW_INSTANCES_UTILS else []

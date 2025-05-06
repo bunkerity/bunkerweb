@@ -172,7 +172,7 @@ try:
             else:
                 resp.raise_for_status()
                 break
-        except Exception as e:
+        except BaseException as e:
             LOGGER.warning(f"Attempt {attempt} failed with error: {e}")
 
         if attempt == 3:

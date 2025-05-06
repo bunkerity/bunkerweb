@@ -29,9 +29,8 @@ namespace modsecurity {
 namespace actions {
 
 
-bool NoLog::evaluate(RuleWithActions *rule, Transaction *transaction,
-    std::shared_ptr<RuleMessage> rm) {
-    rm->m_saveMessage = false;
+bool NoLog::evaluate(RuleWithActions *rule, Transaction *transaction, RuleMessage &ruleMessage) {
+    ruleMessage.m_saveMessage = false;
     return true;
 }
 

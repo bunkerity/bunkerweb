@@ -1,5 +1,60 @@
 # Changelog
 
+## v1.6.1 - ????/??/??
+
+- [BUGFIX] Enhance Alembic configuration to support database URIs args
+- [BUGFIX] Made `SERVER_NAME` setting's regex more permissive (removed the duplication check)
+- [BUGFIX] Add selective table support in `Backup` plugin to avoid issues when restoring the database
+- [DOCS] Document how to use BunkerWeb with and existing Ingress controller in Kubernetes
+- [DOCS] Add documentation about new `all-in-one` image for BunkerWeb in the Docker section of the Integrations page
+- [DOCS] Edit documentation about thew `User Manager` PRO plugin
+- [FEATURE] Add a new `all-in-one` image for BunkerWeb that includes all the services in one image (BunkerWeb, Scheduler, Autoconf, and UI)
+- [FEATURE] Add `CrowdSec` as a core plugin
+- [MISC] Improve update check output formatting for better readability
+- [MISC] Enhance `Let's Encrypt` DNS credential handling to support base64-encoded values, while also refining credential item processing to handle escape sequences and improve data integrity.
+- [UI] Enhance ban handling with improved validation and informative responses for ban scope and service
+- [UI] Improve plugin page template handling logic
+- [UI] Add a failover message reporting
+- [UI] Prevent interference with newsletter form checkbox click handler
+
+## v1.6.1-rc3 - 2025/03/05
+
+- [BUGFIX] Fix issue where Redis Server returns a `NOPERM` error, ensuring proper handling and preventing 500 errors in the web UI
+- [FEATURE] Enhance ban management with service-specific options and UI improvements
+- [FEATURE] Add `BAD_BEHAVIOR_BAN_SCOPE` setting to control the scope of the ban when using the `Bad Behavior` plugin (default is `service`) - before the bans were global
+- [FEATURE] Add verbose logging option for certbot commands based on log level (when set to `DEBUG`)
+- [FEATURE] Enhance `bwcli` rendering and added support for new service-specific ban options
+- [AUTOCONF] Add missing `redis` dependency
+- [MISC] improve Redis data handling and error logging in CLI and routes
+- [DEPS] Updated coreruleset-v4 version to v4.12.0
+
+## v1.6.1-rc2 - 2025/02/27
+
+- [BUGFIX] Fix shenanigans with settings' plugin_id when updating the config
+- [BUGFIX] Fix rare error where "python3" is not found in docker images
+- [BUGFIX] Fix jobs runs excess cleanup method in Database
+- [FEATURE] Add `PROXY_BUFFER_SIZE` and `PROXY_BUFFERS` settings to control the proxy buffer size and the number of buffers in `multisite` mode
+- [UI] Introduced a visual label in the UI to clearly mark service settings that were cloned from the original.
+- [UI] Added support for custom plugins: developers can now create hooks and blueprints to override existing functionalities, not just a plugin page.
+- [DEPS] Updated ModSecurity version to v3.0.14
+
+## v1.6.1-rc1 - 2025/02/20
+
+- [BUGFIX] Fix ModSecurity false positive on the web UI when the `UI_HOST` setting contains an IP address
+- [BUGFIX] Fix ModSecurity false positive when the web UI `SERVER_NAME` is set to an IP address
+- [BUGFIX] Fix PRO activation not working in the web UI
+- [BUGFIX] Fix log extraction was not working in the web UI when specific conditions were met (invalid UTF-8 characters)
+- [BUGFIX] Fix database migration logic to handle `dev` and `testing` versions
+- [BUGFIX] Fix web UI waiting for temporary web UI to stop indefinitely in some cases
+- [FEATURE] Add `deSEC` DNS provider support in `letsencrypt` plugin
+- [UI] Enhance UX here and there
+- [UI] Add an instance hostname validation in the `instances` page when adding a new instance
+- [UI] It is now possible to edit services created with the `autoconf` method
+- [UI] It is now possible to change the theme even if the database is in read-only mode
+- [UI] Added an auto-hide functionality to informative messages in the UI
+- [MISC] Update regex for `SERVER_NAME` to improve accuracy and avoid issues
+- [MISC] Revamped DNS credential validation to minimize configuration errors and enhance overall reliability.
+
 ## v1.6.0 - 2025/02/13
 
 - [BUGFIX] Fix CRS plugins not being included correctly in ModSecurity configuration

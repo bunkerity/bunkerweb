@@ -266,7 +266,7 @@ extern "C" RulesSet *msc_create_rules_set(void) {
 }
 
 
-extern "C" void msc_rules_dump(RulesSet *rules) {
+extern "C" void msc_rules_dump(const RulesSet *rules) {
     rules->dump();
 }
 

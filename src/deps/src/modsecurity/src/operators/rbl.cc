@@ -73,8 +73,8 @@ std::string Rbl::mapIpToAddress(const std::string &ipStr, Transaction *trans) co
 
 
 void Rbl::futherInfo_httpbl(struct sockaddr_in *sin, const std::string &ipStr,
-    Transaction *trans) {
-    char *respBl;
+    const Transaction *trans) {
+    const char *respBl;
     int first, days, score, type;
 #ifndef NO_LOGS
     std::string ptype;
@@ -131,7 +131,7 @@ void Rbl::futherInfo_httpbl(struct sockaddr_in *sin, const std::string &ipStr,
 
 
 void Rbl::futherInfo_spamhaus(unsigned int high8bits, const std::string &ipStr,
-    Transaction *trans) {
+    const Transaction *trans) {
     switch (high8bits) {
         case 2:
         case 3:
@@ -158,7 +158,7 @@ void Rbl::futherInfo_spamhaus(unsigned int high8bits, const std::string &ipStr,
 
 
 void Rbl::futherInfo_uribl(unsigned int high8bits, const std::string &ipStr,
-    Transaction *trans) {
+    const Transaction *trans) {
     switch (high8bits) {
         case 2:
             ms_dbg_a(trans, 4, "RBL lookup of " + ipStr + " succeeded (BLACK).");
@@ -185,7 +185,7 @@ void Rbl::futherInfo_uribl(unsigned int high8bits, const std::string &ipStr,
 
 
 void Rbl::furtherInfo(struct sockaddr_in *sin, const std::string &ipStr,
-    Transaction *trans, RblProvider provider) {
+    const Transaction *trans, RblProvider provider) {
     unsigned int high8bits = sin->sin_addr.s_addr >> 24;
 
     switch (provider) {
@@ -207,7 +207,7 @@ void Rbl::furtherInfo(struct sockaddr_in *sin, const std::string &ipStr,
 
 bool Rbl::evaluate(Transaction *t, RuleWithActions *rule,
         const std::string& ipStr,
-        std::shared_ptr<RuleMessage> ruleMessage) {
+        RuleMessage &ruleMessage) {
     struct addrinfo *info = NULL;
     std::string host = Rbl::mapIpToAddress(ipStr, t);
     int rc = 0;

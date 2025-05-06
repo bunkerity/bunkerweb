@@ -46,10 +46,9 @@ namespace modsecurity {
 namespace actions {
 
 
-bool Msg::evaluate(RuleWithActions *rule, Transaction *transaction,
-    std::shared_ptr<RuleMessage> rm) {
-    std::string msg = data(transaction);
-    rm->m_message = msg;
+bool Msg::evaluate(RuleWithActions *rule, Transaction *transaction, RuleMessage &ruleMessage) {
+    const auto msg = data(transaction);
+    ruleMessage.m_message = msg;
     ms_dbg_a(transaction, 9, "Saving msg: " + msg);
 
     return true;

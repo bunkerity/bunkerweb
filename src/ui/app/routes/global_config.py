@@ -3,13 +3,13 @@ from threading import Thread
 from time import time
 from typing import Dict
 
-from flask import Blueprint, flash as flask_flash, redirect, render_template, request, url_for
-from flask_login import login_required
+from flask import Blueprint, Response, redirect, render_template, request, url_for
+from flask_login import current_user, login_required
 
 from app.dependencies import BW_CONFIG, DATA, DB
-from app.utils import flash, get_blacklisted_settings
+from app.utils import get_blacklisted_settings
 
-from app.routes.utils import handle_error, manage_bunkerweb, wait_applying
+from app.routes.utils import handle_error, wait_applying
 
 
 global_config = Blueprint("global_config", __name__)
@@ -21,7 +21,9 @@ def global_config_page():
     global_config = DB.get_config(global_only=True, methods=True)
 
     if request.method == "POST":
-        if DB.readonly:
+        if "write" not in current_user.list_permissions:
+            return Response("You don't have the required permissions to edit the global configuration.", 403)
+        elif DB.readonly:
             return handle_error("Database is in read-only mode", "global_config")
         DATA.load_from_file()
 
@@ -29,7 +31,7 @@ def global_config_page():
         variables = request.form.to_dict().copy()
         del variables["csrf_token"]
 
-        def update_global_config(variables: Dict[str, str], threaded: bool = False):
+        def update_global_config(variables: Dict[str, str]):
             wait_applying()
 
             # Edit check fields and remove already existing ones
@@ -42,7 +44,7 @@ def global_config_page():
                 if setting["global"] and value == setting["value"]:
                     del variables_to_check[variable]
 
-            variables = BW_CONFIG.check_variables(variables, config, variables_to_check, global_config=True, threaded=threaded)
+            variables = BW_CONFIG.check_variables(variables, config, variables_to_check, global_config=True, threaded=True)
 
             no_removed_settings = True
             blacklist = get_blacklisted_settings(True)
@@ -53,10 +55,7 @@ def global_config_page():
 
             if no_removed_settings and not variables_to_check:
                 content = "The global configuration was not edited because no values were changed."
-                if threaded:
-                    DATA["TO_FLASH"].append({"content": content, "type": "warning"})
-                else:
-                    flash(content, "warning")
+                DATA["TO_FLASH"].append({"content": content, "type": "warning"})
                 DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
                 return
 
@@ -71,15 +70,24 @@ def global_config_page():
 
             with suppress(BaseException):
                 if config["PRO_LICENSE_KEY"]["value"] != variables["PRO_LICENSE_KEY"]:
-                    if threaded:
-                        DATA["TO_FLASH"].append({"content": "Checking license key to upgrade.", "type": "success", "save": False})
-                    else:
-                        flask_flash("Checking license key to upgrade.", "success")
+                    DATA["TO_FLASH"].append({"content": "Checking license key to upgrade.", "type": "success", "save": False})
 
-            manage_bunkerweb("global_config", variables, threaded=threaded)
+            operation, error = BW_CONFIG.edit_global_conf(variables, check_changes=True)
+
+            if not error:
+                operation = "Global configuration successfully saved."
+
+            if operation:
+                if operation.startswith(("Can't", "The database is read-only")):
+                    DATA["TO_FLASH"].append({"content": operation, "type": "error"})
+                else:
+                    DATA["TO_FLASH"].append({"content": operation, "type": "success"})
+                    DATA["TO_FLASH"].append({"content": "The Scheduler will be in charge of applying the changes.", "type": "success", "save": False})
+
+            DATA["RELOADING"] = False
 
         DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})
-        Thread(target=update_global_config, args=(variables, True)).start()
+        Thread(target=update_global_config, args=(variables,)).start()
 
         arguments = {}
         if request.args.get("mode", "advanced") != "advanced":

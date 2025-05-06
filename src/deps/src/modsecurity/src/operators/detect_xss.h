@@ -33,7 +33,7 @@ class DetectXSS : public Operator {
 
     bool evaluate(Transaction *t, RuleWithActions *rule,
         const std::string& input,
-        std::shared_ptr<RuleMessage> ruleMessage) override;
+        RuleMessage &ruleMessage) override;
 };
 
 }  // namespace operators

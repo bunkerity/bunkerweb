@@ -114,14 +114,14 @@ int Lua::blob_keeper(lua_State *L, const void *p, size_t sz, void *ud) {
 
 
 const char *Lua::blob_reader(lua_State *L, void *ud, size_t *size) {
-    LuaScriptBlob *lsb = static_cast<LuaScriptBlob *>(ud);
+    const LuaScriptBlob *lsb = static_cast<LuaScriptBlob *>(ud);
     const char *data = lsb->read(size);
     return data;
 }
 #endif
 
 
-int Lua::run(Transaction *t, const std::string &str) {
+int Lua::run(Transaction *t, const std::string &str) { // cppcheck-suppress constParameterPointer
 #ifdef WITH_LUA
     std::string luaRet;
     const char *a = NULL;

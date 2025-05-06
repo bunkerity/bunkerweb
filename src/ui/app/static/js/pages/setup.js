@@ -651,7 +651,7 @@ $(document).ready(() => {
         "lets_encrypt_dns_credential_items",
         $("#LETS_ENCRYPT_DNS_CREDENTIAL_ITEMS")
           .val()
-          .split("\n")
+          .split(/\r?\n/)
           .map((item) => item.trim())
           .filter((item) => item !== ""),
       );
@@ -862,7 +862,16 @@ $(document).ready(() => {
     $keyData.prop("disabled", !isChecked);
   });
 
+  // Fixed: Modify the newsletter form click handler to prevent interference with checkbox
   $("#setup-newsletter-form").on("click", function (e) {
+    // Don't handle clicks on the checkbox itself or its label
+    if (
+      $(e.target).is(
+        '#setup-subscribe-newsletter, label[for="privacyPolicyCheck"]',
+      )
+    ) {
+      return true;
+    }
     e.preventDefault();
     const $checkbox = $("#setup-subscribe-newsletter");
     $checkbox.prop("checked", !$checkbox.prop("checked"));

@@ -23,7 +23,7 @@ bool RuleScript::init(std::string *err) {
 }
 
 bool RuleScript::evaluate(Transaction *trans,
-    std::shared_ptr<RuleMessage> ruleMessage) {
+    RuleMessage &ruleMessage) {
 
     ms_dbg_a(trans, 4, " Executing script: " + m_name + ".");
 

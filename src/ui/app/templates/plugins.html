@@ -94,9 +94,10 @@
                         <td>
                             <div class="d-flex justify-content-evenly">
                                 <div {% if not plugin_data['page'] %}data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="No page available"{% endif %}>
+                                    {% set plugin_blueprint = "#" if plugin_data["type"] == "core" else url_for(plugin) %}
                                     <a role="button"
                                        class="btn btn-outline-primary btn-sm me-1{% if not plugin_data['page'] %} disabled{% endif %}"
-                                       href="{{ url_for("plugins") }}/{{ plugin }}"
+                                       href="{% if plugin_blueprint == '#' %}{{ url_for("plugins") }}/{{ plugin }}{% else %}{{ plugin_blueprint }}{% endif %}"
                                        data-bs-toggle="tooltip"
                                        data-bs-placement="bottom"
                                        data-bs-original-title="Access {{ plugin_data['name'] }} page">

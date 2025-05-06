@@ -289,6 +289,33 @@
       "label": "Reverse proxy bypass",
       "regex": "^.*$",
       "type": "text"
+    },
+    "PROXY_BUFFERS": {
+      "context": "multisite",
+      "default": "",
+      "help": "Value for proxy_buffers directive.",
+      "id": "proxy-buffers",
+      "label": "Proxy buffers",
+      "regex": "^.*$",
+      "type": "text"
+    },
+    "PROXY_BUFFER_SIZE": {
+      "context": "multisite",
+      "default": "",
+      "help": "Value for proxy_buffer_size directive.",
+      "id": "proxy-buffer-size",
+      "label": "Proxy buffer size",
+      "regex": "^.*$",
+      "type": "text"
+    },
+    "PROXY_BUSY_BUFFERS_SIZE": {
+      "context": "multisite",
+      "default": "",
+      "help": "Value for proxy_busy_buffers_size directive.",
+      "id": "proxy-busy-buffers-size",
+      "label": "Proxy busy buffers size",
+      "regex": "^.*$",
+      "type": "text"
     }
   }
 }

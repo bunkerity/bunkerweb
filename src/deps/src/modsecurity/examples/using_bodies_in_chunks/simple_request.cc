@@ -76,18 +76,18 @@ static void logCb(void *data, const void *ruleMessagev) {
     const modsecurity::RuleMessage *ruleMessage = \
         reinterpret_cast<const modsecurity::RuleMessage *>(ruleMessagev);
 
-    std::cout << "Rule Id: " << std::to_string(ruleMessage->m_ruleId);
-    std::cout << " phase: " << std::to_string(ruleMessage->m_phase);
+    std::cout << "Rule Id: " << std::to_string(ruleMessage->m_rule.m_ruleId);
+    std::cout << " phase: " << std::to_string(ruleMessage->getPhase());
     std::cout << std::endl;
     if (ruleMessage->m_isDisruptive) {
         std::cout << " * Disruptive action: ";
-        std::cout << modsecurity::RuleMessage::log(ruleMessage);
+        std::cout << modsecurity::RuleMessage::log(*ruleMessage);
         std::cout << std::endl;
         std::cout << " ** %d is meant to be informed by the webserver.";
         std::cout << std::endl;
     } else {
         std::cout << " * Match, but no disruptive action: ";
-        std::cout << modsecurity::RuleMessage::log(ruleMessage);
+        std::cout << modsecurity::RuleMessage::log(*ruleMessage);
         std::cout << std::endl;
     }
 }

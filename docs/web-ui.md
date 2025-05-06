@@ -102,7 +102,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.0
+        image: bunkerity/bunkerweb:1.6.1
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -115,7 +115,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.0
+        image: bunkerity/bunkerweb-scheduler:1.6.1
         environment:
           <<: *bw-ui-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
@@ -124,14 +124,14 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
           API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24" # We mirror the API_WHITELIST_IP from the bunkerweb service
           UI_HOST: "http://bw-ui:7000" # Change it if needed
         volumes:
-          - bw-data:/data # This is used to persist the cache and other data like the backups
+          - bw-storage:/data # This is used to persist the cache and other data like the backups
         restart: "unless-stopped"
         networks:
           - bw-universe
           - bw-db
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.0
+        image: bunkerity/bunkerweb-ui:1.6.1
         environment:
           <<: *bw-ui-env
           TOTP_SECRETS: "mysecret" # Remember to set a stronger secret key (see the Prerequisites section)
@@ -148,14 +148,14 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
           MYSQL_USER: "bunkerweb"
           MYSQL_PASSWORD: "changeme" # Remember to set a stronger password for the database
         volumes:
-          - bw-db:/var/lib/mysql
+          - bw-data:/var/lib/mysql
         restart: "unless-stopped"
         networks:
           - bw-db
 
     volumes:
       bw-data:
-      bw-db:
+      bw-storage:
 
     networks:
       bw-universe:
@@ -188,7 +188,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.0
+        image: bunkerity/bunkerweb:1.6.1
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -204,7 +204,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.0
+        image: bunkerity/bunkerweb-scheduler:1.6.1
         environment:
           <<: *bw-ui-env
           BUNKERWEB_INSTANCES: ""
@@ -213,14 +213,14 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
           MULTISITE: "yes"
           UI_HOST: "http://bw-ui:7000" # Change it if needed
         volumes:
-          - bw-data:/data # This is used to persist the cache and other data like the backups
+          - bw-storage:/data # This is used to persist the cache and other data like the backups
         restart: "unless-stopped"
         networks:
           - bw-universe
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.0
+        image: bunkerity/bunkerweb-autoconf:1.6.1
         depends_on:
           - bw-docker
         environment:
@@ -243,7 +243,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
           - bw-docker
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.0
+        image: bunkerity/bunkerweb-ui:1.6.1
         environment:
           <<: *bw-ui-env
           TOTP_SECRETS: "mysecret" # Remember to set a stronger secret key (see the Prerequisites section)
@@ -260,14 +260,14 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
           MYSQL_USER: "bunkerweb"
           MYSQL_PASSWORD: "changeme" # Remember to set a stronger password for the database
         volumes:
-          - bw-db:/var/lib/mysql
+          - bw-data:/var/lib/mysql
         restart: "unless-stopped"
         networks:
           - bw-db
 
     volumes:
       bw-data:
-      bw-db:
+      bw-storage:
 
     networks:
       bw-universe:
@@ -307,7 +307,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.0
+        image: bunkerity/bunkerweb:1.6.1
         ports:
           - published: 80
             target: 8080
@@ -337,7 +337,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
             - "bunkerweb.INSTANCE=yes"
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.0
+        image: bunkerity/bunkerweb-scheduler:1.6.1
         environment:
           <<: *bw-ui-env
           BUNKERWEB_INSTANCES: ""
@@ -348,14 +348,14 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
           REDIS_HOST: "bw-redis"
           UI_HOST: "http://bw-ui:7000" # Change it if needed
         volumes:
-          - bw-data:/data # This is used to persist the cache and other data like the backups
+          - bw-storage:/data # This is used to persist the cache and other data like the backups
         restart: "unless-stopped"
         networks:
           - bw-universe
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.0
+        image: bunkerity/bunkerweb-autoconf:1.6.1
         environment:
           <<: *bw-ui-env
           DOCKER_HOST: "tcp://bw-docker:2375"
@@ -384,7 +384,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
               - "node.role == manager"
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.0
+        image: bunkerity/bunkerweb-ui:1.6.1
         environment:
           <<: *bw-ui-env
           TOTP_SECRETS: "mysecret" # Remember to set a stronger secret key (see the Prerequisites section)
@@ -401,7 +401,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
           MYSQL_USER: "bunkerweb"
           MYSQL_PASSWORD: "changeme" # Remember to set a stronger password for the database
         volumes:
-          - bw-db:/var/lib/mysql
+          - bw-data:/var/lib/mysql
         restart: "unless-stopped"
         networks:
           - bw-db
@@ -412,8 +412,8 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
           - bw-universe
 
     volumes:
-      bw-db:
       bw-data:
+      bw-storage:
 
     networks:
       bw-universe:
@@ -503,7 +503,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
           containers:
             # using bunkerweb as name is mandatory
             - name: bunkerweb
-              image: bunkerity/bunkerweb:1.6.0
+              image: bunkerity/bunkerweb:1.6.1
               imagePullPolicy: Always
               securityContext:
                 runAsUser: 101
@@ -563,7 +563,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
           serviceAccountName: sa-bunkerweb
           containers:
             - name: bunkerweb-controller
-              image: bunkerity/bunkerweb-autoconf:1.6.0
+              image: bunkerity/bunkerweb-autoconf:1.6.1
               imagePullPolicy: Always
               env:
                 - name: KUBERNETES_MODE
@@ -590,7 +590,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
           serviceAccountName: sa-bunkerweb
           containers:
             - name: bunkerweb-scheduler
-              image: bunkerity/bunkerweb-scheduler:1.6.0
+              image: bunkerity/bunkerweb-scheduler:1.6.1
               imagePullPolicy: Always
               env:
                 - name: KUBERNETES_MODE
@@ -695,7 +695,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
           serviceAccountName: sa-bunkerweb
           containers:
             - name: bunkerweb-ui
-              image: bunkerity/bunkerweb-ui:1.6.0
+              image: bunkerity/bunkerweb-ui:1.6.1
               imagePullPolicy: Always
               env:
                 - name: KUBERNETES_MODE
@@ -782,6 +782,47 @@ Beginning with version `1.6`, the method of accessing logs has changed. This upd
 
 To keep the logs accessible from the web UI, we recommend you to use a syslog server such as `syslog-ng` to read the logs and creates the corresponding files in the `/var/log/bunkerweb` directory.
 
+!!! warning "Using local folder for logs"
+    The web UI runs as an **unprivileged user with UID 101 and GID 101** inside the container. The reason behind this is security : in case a vulnerability is exploited, the attacker won't have full root (UID/GID 0) privileges.
+
+    But there is a downside : if you use a **local folder for the logs**, you will need to **set the correct permissions** so the unprivileged user can read the log files. Something like that should do the trick :
+
+    ```shell
+    mkdir bw-logs && \
+    chown root:101 bw-logs && \
+    chmod 770 bw-logs
+    ```
+
+    Alternatively, if the folder already exists :
+
+    ```shell
+    chown -R root:101 bw-logs && \
+    chmod -R 770 bw-logs
+    ```
+
+    If you are using [Docker in rootless mode](https://docs.docker.com/engine/security/rootless) or [podman](https://podman.io/), UIDs and GIDs in the container will be mapped to different ones in the host. You will first need to check your initial subuid and subgid :
+
+    ```shell
+    grep ^$(whoami): /etc/subuid && \
+    grep ^$(whoami): /etc/subgid
+    ```
+
+    For example, if you have a value of **100000**, the mapped UID/GID will be **100100** (100000 + 100) :
+
+    ```shell
+    mkdir bw-logs && \
+    sudo chgrp 100100 bw-logs && \
+    chmod 770 bw-logs
+    ```
+
+    Or if the folder already exists :
+
+    ```shell
+    sudo chgrp -R 100100 bw-logs && \
+    sudo chmod -R 770 bw-logs
+    ```
+
+
 ### Compose boilerplates
 
 === "Docker"
@@ -795,7 +836,7 @@ To keep the logs accessible from the web UI, we recommend you to use a syslog se
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.0
+        image: bunkerity/bunkerweb:1.6.1
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -813,7 +854,7 @@ To keep the logs accessible from the web UI, we recommend you to use a syslog se
             syslog-address: "udp://10.20.30.254:514" # This is the syslog-ng container address
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.0
+        image: bunkerity/bunkerweb-scheduler:1.6.1
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
@@ -824,16 +865,12 @@ To keep the logs accessible from the web UI, we recommend you to use a syslog se
           DISABLE_DEFAULT_SERVER: "yes"
           USE_CLIENT_CACHE: "yes"
           USE_GZIP: "yes"
-          www.example.com_USE_UI: "yes"
+          www.example.com_USE_TEMPLATE: "ui"
           www.example.com_USE_REVERSE_PROXY: "yes"
           www.example.com_REVERSE_PROXY_URL: "/changeme" # Change it to a hard to guess URI
           www.example.com_REVERSE_PROXY_HOST: "http://bw-ui:7000"
-          www.example.com_INTERCEPTED_ERROR_CODES: "400 404 405 413 429 500 501 502 503 504"
-          www.example.com_GENERATE_SELF_SIGNED_SSL: "yes"
-          www.example.com_MAX_CLIENT_SIZE: "50m"
-          www.example.com_ALLOWED_METHODS: "GET|POST|PUT|DELETE"
         volumes:
-          - bw-data:/data # This is used to persist the cache and other data like the backups
+          - bw-storage:/data # This is used to persist the cache and other data like the backups
         restart: "unless-stopped"
         networks:
           - bw-universe
@@ -845,12 +882,12 @@ To keep the logs accessible from the web UI, we recommend you to use a syslog se
             syslog-address: "udp://10.20.30.254:514" # This is the syslog-ng container address
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.0
+        image: bunkerity/bunkerweb-ui:1.6.1
         environment:
           DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Remember to set a stronger password for the database
           ADMIN_USERNAME: "changeme"
           ADMIN_PASSWORD: "changeme" # Remember to set a stronger password for the admin user
-          TOPT_SECRETS: "mysecret" # Remember to set a stronger secret key (see the Prerequisites section)
+          TOTP_SECRETS: "mysecret" # Remember to set a stronger secret key (see the Prerequisites section)
         volumes:
           - bw-logs:/var/log/bunkerweb # This is the volume used to store the logs
         restart: "unless-stopped"
@@ -871,14 +908,22 @@ To keep the logs accessible from the web UI, we recommend you to use a syslog se
           MYSQL_USER: "bunkerweb"
           MYSQL_PASSWORD: "changeme" # Remember to set a stronger password for the database
         volumes:
-          - bw-db:/var/lib/mysql
+          - bw-data:/var/lib/mysql
         restart: "unless-stopped"
         networks:
           - bw-db
 
       bw-syslog:
-        image: balabit/syslog-ng:4.7.1
-        # image: lscr.io/linuxserver/syslog-ng:4.7.1-r1-ls116 # For aarch64 architecture
+        image: balabit/syslog-ng:4.8.0
+        # image: lscr.io/linuxserver/syslog-ng:4.8.1-r1-ls147 # For aarch64 architecture
+        cap_add:
+          - NET_BIND_SERVICE  # Bind to low ports
+          - NET_BROADCAST  # Send broadcasts
+          - NET_RAW  # Use raw sockets
+          - DAC_READ_SEARCH  # Read files bypassing permissions
+          - DAC_OVERRIDE  # Override file permissions
+          - CHOWN  # Change ownership
+          - SYSLOG  # Write to system logs
         volumes:
           - bw-logs:/var/log/bunkerweb # This is the volume used to store the logs
           - ./syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf # This is the syslog-ng configuration file
@@ -888,7 +933,7 @@ To keep the logs accessible from the web UI, we recommend you to use a syslog se
 
     volumes:
       bw-data:
-      bw-db:
+      bw-storage:
       bw-logs:
 
     networks:
@@ -916,7 +961,7 @@ To keep the logs accessible from the web UI, we recommend you to use a syslog se
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.0
+        image: bunkerity/bunkerweb:1.6.1
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -935,7 +980,7 @@ To keep the logs accessible from the web UI, we recommend you to use a syslog se
             syslog-address: "udp://10.20.30.254:514" # This is the syslog-ng container address
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.0
+        image: bunkerity/bunkerweb-scheduler:1.6.1
         environment:
           <<: *bw-ui-env
           BUNKERWEB_INSTANCES: "" # We don't need to specify the BunkerWeb instance here as they are automatically detected by the autoconf service
@@ -943,7 +988,7 @@ To keep the logs accessible from the web UI, we recommend you to use a syslog se
           MULTISITE: "yes" # Mandatory setting for autoconf / ui
           API_WHITELIST_IP: "127.0.0.0/24 10.20.30.0/24"
         volumes:
-          - bw-data:/data # This is used to persist the cache and other data like the backups
+          - bw-storage:/data # This is used to persist the cache and other data like the backups
         restart: "unless-stopped"
         networks:
           - bw-universe
@@ -955,7 +1000,7 @@ To keep the logs accessible from the web UI, we recommend you to use a syslog se
             syslog-address: "udp://10.20.30.254:514" # This is the syslog-ng container address
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.0
+        image: bunkerity/bunkerweb-autoconf:1.6.1
         depends_on:
           - bunkerweb
           - bw-docker
@@ -974,12 +1019,12 @@ To keep the logs accessible from the web UI, we recommend you to use a syslog se
             syslog-address: "udp://10.20.30.254:514" # This is the syslog-ng container address
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.0
+        image: bunkerity/bunkerweb-ui:1.6.1
         environment:
           <<: *bw-ui-env
           ADMIN_USERNAME: "changeme"
           ADMIN_PASSWORD: "changeme" # Remember to set a stronger password for the admin user
-          TOPT_SECRETS: "mysecret" # Remember to set a stronger secret key (see the Prerequisites section)
+          TOTP_SECRETS: "mysecret" # Remember to set a stronger secret key (see the Prerequisites section)
         volumes:
           - bw-logs:/var/log/bunkerweb
         restart: "unless-stopped"
@@ -988,14 +1033,10 @@ To keep the logs accessible from the web UI, we recommend you to use a syslog se
           - bw-db
         labels:
           - "bunkerweb.SERVER_NAME=www.example.com"
-          - "bunkerweb.USE_UI=yes"
+          - "bunkerweb.USE_TEMPLATE=ui"
           - "bunkerweb.USE_REVERSE_PROXY=yes"
           - "bunkerweb.REVERSE_PROXY_URL=/changeme" # Change it to a hard to guess URI
           - "bunkerweb.REVERSE_PROXY_HOST=http://bw-ui:7000"
-          - "bunkerweb.INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504"
-          - "bunkerweb.GENERATE_SELF_SIGNED_SSL=yes"
-          - "bunkerweb.MAX_CLIENT_SIZE=50m"
-          - "bunkerweb.ALLOWED_METHODS=GET|POST|PUT|DELETE"
         logging:
           driver: syslog
           options:
@@ -1010,7 +1051,7 @@ To keep the logs accessible from the web UI, we recommend you to use a syslog se
           MYSQL_USER: "bunkerweb"
           MYSQL_PASSWORD: "changeme" # Remember to set a stronger password for the database
         volumes:
-          - bw-db:/var/lib/mysql
+          - bw-data:/var/lib/mysql
         restart: "unless-stopped"
         networks:
           - bw-db
@@ -1027,8 +1068,16 @@ To keep the logs accessible from the web UI, we recommend you to use a syslog se
           - bw-docker
 
       bw-syslog:
-        image: balabit/syslog-ng:4.7.1
-        # image: lscr.io/linuxserver/syslog-ng:4.7.1-r1-ls116 # For aarch64 architecture
+        image: balabit/syslog-ng:4.8.0
+        # image: lscr.io/linuxserver/syslog-ng:4.8.1-r1-ls147 # For aarch64 architecture
+        cap_add:
+          - NET_BIND_SERVICE  # Bind to low ports
+          - NET_BROADCAST  # Send broadcasts
+          - NET_RAW  # Use raw sockets
+          - DAC_READ_SEARCH  # Read files bypassing permissions
+          - DAC_OVERRIDE  # Override file permissions
+          - CHOWN  # Change ownership
+          - SYSLOG  # Write to system logs
         volumes:
           - bw-logs:/var/log/bunkerweb # This is the volume used to store the logs
           - ./syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf # This is the syslog-ng configuration file
@@ -1038,7 +1087,7 @@ To keep the logs accessible from the web UI, we recommend you to use a syslog se
 
     volumes:
       bw-data:
-      bw-db:
+      bw-storage:
       bw-logs:
 
     networks:
@@ -1061,7 +1110,7 @@ To keep the logs accessible from the web UI, we recommend you to use a syslog se
 Here is an example of a `syslog-ng.conf` file that you can use to forward the logs to a file :
 
 ```conf
-@version: 4.7
+@version: 4.8
 
 # Source configuration to receive logs from Docker containers
 source s_net {
@@ -1254,14 +1303,10 @@ The web UI can be deployed and configured without going through the setup wizard
     API_LISTEN_IP=127.0.0.1
     SERVER_NAME=www.example.com
     MULTISITE=yes
-    www.example.com_USE_UI=yes
+    www.example.com_USE_TEMPLATE=ui
     www.example.com_USE_REVERSE_PROXY=yes
     www.example.com_REVERSE_PROXY_URL=/changeme
     www.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:7000
-    www.example.com_INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504
-    www.example.com_GENERATE_SELF_SIGNED_SSL=yes
-    www.example.com_MAX_CLIENT_SIZE=50m
-    www.example.com_ALLOWED_METHODS=GET|POST|PUT|DELETE
     ```
 
     Don't forget to reload the `bunkerweb` service:
@@ -1290,7 +1335,7 @@ The web UI can be deployed and configured without going through the setup wizard
 
     !!! info "Database backend"
 
-        If you want another Database backend than MariaDB please refer to the docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.0/misc/integrations) of the repository.
+        If you want another Database backend than MariaDB please refer to the docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.1/misc/integrations) of the repository.
 
     Here is the docker-compose boilerplate that you can use (don't forget to edit the `changeme` data):
 
@@ -1301,7 +1346,7 @@ The web UI can be deployed and configured without going through the setup wizard
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.0
+        image: bunkerity/bunkerweb:1.6.1
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1313,7 +1358,7 @@ The web UI can be deployed and configured without going through the setup wizard
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.0
+        image: bunkerity/bunkerweb-scheduler:1.6.1
         environment:
           <<: *ui-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
@@ -1324,22 +1369,18 @@ The web UI can be deployed and configured without going through the setup wizard
           DISABLE_DEFAULT_SERVER: "yes"
           USE_CLIENT_CACHE: "yes"
           USE_GZIP: "yes"
-          www.example.com_USE_UI: "yes"
+          www.example.com_USE_TEMPLATE: "ui"
           www.example.com_USE_REVERSE_PROXY: "yes"
           www.example.com_REVERSE_PROXY_URL: "/changeme" # Remember to set a stronger URI
           www.example.com_REVERSE_PROXY_HOST: "http://bw-ui:7000" # The web UI container is listening on the 7000 port by default
-          www.example.com_INTERCEPTED_ERROR_CODES: "400 404 405 413 429 500 501 502 503 504"
-          www.example.com_GENERATE_SELF_SIGNED_SSL: "yes"
-          www.example.com_MAX_CLIENT_SIZE: "50m"
-          www.example.com_ALLOWED_METHODS: "GET|POST|PUT|DELETE"
         volumes:
-          - bw-data:/data # This is used to persist the cache and other data like the backups
+          - bw-storage:/data # This is used to persist the cache and other data like the backups
         networks:
           - bw-universe
           - bw-db
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.0
+        image: bunkerity/bunkerweb-ui:1.6.1
         environment:
           <<: *ui-env
           ADMIN_USERNAME: "changeme"
@@ -1357,13 +1398,13 @@ The web UI can be deployed and configured without going through the setup wizard
           MYSQL_USER: "bunkerweb"
           MYSQL_PASSWORD: "changeme" # Remember to set a stronger password for the database
         volumes:
-          - bw-db:/var/lib/mysql
+          - bw-data:/var/lib/mysql
         networks:
           - bw-db
 
     volumes:
       bw-data:
-      bw-db:
+      bw-storage:
 
     networks:
       bw-universe:
@@ -1402,7 +1443,7 @@ The web UI can be deployed and configured without going through the setup wizard
 
     !!! info "Database backend"
 
-        If you want another Database backend than MariaDB please refer to the docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.0/misc/integrations) of the repository.
+        If you want another Database backend than MariaDB please refer to the docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.1/misc/integrations) of the repository.
 
     Here is the docker-compose boilerplate that you can use (don't forget to edit the `changeme` data):
 
@@ -1414,7 +1455,7 @@ The web UI can be deployed and configured without going through the setup wizard
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.0
+        image: bunkerity/bunkerweb:1.6.1
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1429,7 +1470,7 @@ The web UI can be deployed and configured without going through the setup wizard
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.0
+        image: bunkerity/bunkerweb-scheduler:1.6.1
         environment:
           <<: *ui-env
           BUNKERWEB_INSTANCES: ""
@@ -1437,13 +1478,13 @@ The web UI can be deployed and configured without going through the setup wizard
           API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
           MULTISITE: "yes"
         volumes:
-          - bw-data:/data # This is used to persist the cache and other data like the backups
+          - bw-storage:/data # This is used to persist the cache and other data like the backups
         networks:
           - bw-universe
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.0
+        image: bunkerity/bunkerweb-autoconf:1.6.1
         depends_on:
           - bw-docker
         environment:
@@ -1472,12 +1513,12 @@ The web UI can be deployed and configured without going through the setup wizard
           MYSQL_USER: "bunkerweb"
           MYSQL_PASSWORD: "changeme" # Remember to set a stronger password for the database
         volumes:
-          - bw-db:/var/lib/mysql
+          - bw-data:/var/lib/mysql
         networks:
           - bw-db
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.0
+        image: bunkerity/bunkerweb-ui:1.6.1
         environment:
           <<: *ui-env
           ADMIN_USERNAME: "changeme"
@@ -1485,21 +1526,17 @@ The web UI can be deployed and configured without going through the setup wizard
           TOTP_SECRETS: "mysecret" # Remember to set a stronger secret key (see the Prerequisites section)
         labels:
           - "bunkerweb.SERVER_NAME=www.example.com"
-          - "bunkerweb.USE_UI=yes"
+          - "bunkerweb.USE_TEMPLATE=ui"
           - "bunkerweb.USE_REVERSE_PROXY=yes"
           - "bunkerweb.REVERSE_PROXY_URL=/changeme"
           - "bunkerweb.REVERSE_PROXY_HOST=http://bw-ui:7000"
-          - "bunkerweb.INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504"
-          - "bunkerweb.GENERATE_SELF_SIGNED_SSL=yes"
-          - "bunkerweb.MAX_CLIENT_SIZE=50m"
-          - "bunkerweb.ALLOWED_METHODS=GET|POST|PUT|DELETE"
         networks:
           - bw-universe
           - bw-db
 
     volumes:
       bw-data:
-      bw-db:
+      bw-storage:
 
     networks:
       bw-universe:
@@ -1524,7 +1561,7 @@ The web UI can be deployed and configured without going through the setup wizard
 
     !!! info "Database backend"
 
-        If you want another Database backend than MariaDB please refer to the yaml files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.0/misc/integrations) of the repository.
+        If you want another Database backend than MariaDB please refer to the yaml files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.1/misc/integrations) of the repository.
 
     Here is the corresponding part of your values.yaml file that you can use:
 
@@ -1570,7 +1607,7 @@ The web UI can be deployed and configured without going through the setup wizard
 
     !!! info "Database backend"
 
-        If you want another Database backend than MariaDB please refer to the stack files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.0/misc/integrations) of the repository.
+        If you want another Database backend than MariaDB please refer to the stack files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.1/misc/integrations) of the repository.
 
     Here is the stack boilerplate that you can use (don't forget to edit the `changeme` data) :
 
@@ -1582,7 +1619,7 @@ The web UI can be deployed and configured without going through the setup wizard
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.0
+        image: bunkerity/bunkerweb:1.6.1
         ports:
           - published: 80
             target: 8080
@@ -1611,7 +1648,7 @@ The web UI can be deployed and configured without going through the setup wizard
             - "bunkerweb.INSTANCE=yes"
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.0
+        image: bunkerity/bunkerweb-scheduler:1.6.1
         environment:
           <<: *ui-env
           BUNKERWEB_INSTANCES: ""
@@ -1621,13 +1658,13 @@ The web UI can be deployed and configured without going through the setup wizard
           USE_REDIS: "yes"
           REDIS_HOST: "bw-redis"
         volumes:
-          - bw-data:/data # This is used to persist the cache and other data like the backups
+          - bw-storage:/data # This is used to persist the cache and other data like the backups
         networks:
           - bw-universe
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.0
+        image: bunkerity/bunkerweb-autoconf:1.6.1
         environment:
           <<: *ui-env
           DOCKER_HOST: "tcp://bw-docker:2375"
@@ -1662,7 +1699,7 @@ The web UI can be deployed and configured without going through the setup wizard
           MYSQL_USER: "bunkerweb"
           MYSQL_PASSWORD: "changeme" # Remember to set a stronger password for the database
         volumes:
-          - bw-db:/var/lib/mysql
+          - bw-data:/var/lib/mysql
         networks:
           - bw-db
 
@@ -1672,7 +1709,7 @@ The web UI can be deployed and configured without going through the setup wizard
           - bw-universe
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.0
+        image: bunkerity/bunkerweb-ui:1.6.1
         environment:
           <<: *ui-env
           ADMIN_USERNAME: "changeme"
@@ -1684,19 +1721,14 @@ The web UI can be deployed and configured without going through the setup wizard
         deploy:
           labels:
             - "bunkerweb.SERVER_NAME=www.example.com"
-            - "bunkerweb.USE_UI=yes"
+            - "bunkerweb.USE_TEMPLATE=ui"
             - "bunkerweb.USE_REVERSE_PROXY=yes"
             - "bunkerweb.REVERSE_PROXY_URL=/changeme"
             - "bunkerweb.REVERSE_PROXY_HOST=http://bw-ui:7000"
-            - "bunkerweb.REVERSE_PROXY_INTERCEPT_ERRORS=no"
-            - "bunkerweb.INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504"
-            - "bunkerweb.GENERATE_SELF_SIGNED_SSL=yes"
-            - "bunkerweb.MAX_CLIENT_SIZE=50m"
-            - "bunkerweb.ALLOWED_METHODS=GET|POST|PUT|DELETE"
 
     volumes:
-      bw-db:
       bw-data:
+      bw-storage:
 
     networks:
       bw-universe:

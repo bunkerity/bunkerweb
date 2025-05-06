@@ -1,4 +1,4 @@
-FROM python:3.13-alpine@sha256:bb2c06f24622d10187d0884b5b0a66426a9c8511c344492ed61b5d382bd6018c AS builder
+FROM python:3.13-alpine@sha256:323a717dc4a010fee21e3f1aac738ee10bb485de4e7593ce242b36ee48d6b352 AS builder
 
 # Export var for specific actions on linux/arm/v7
 ARG TARGETPLATFORM
@@ -35,7 +35,7 @@ COPY src/common/helpers helpers
 COPY src/VERSION VERSION
 COPY src/ui ui
 
-FROM python:3.13-alpine@sha256:bb2c06f24622d10187d0884b5b0a66426a9c8511c344492ed61b5d382bd6018c
+FROM python:3.13-alpine@sha256:323a717dc4a010fee21e3f1aac738ee10bb485de4e7593ce242b36ee48d6b352
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
@@ -52,7 +52,7 @@ RUN apk add --no-cache bash unzip mariadb-connector-c mariadb-client postgresql-
   adduser -h /usr/share/bunkerweb/ui -g ui -s /sbin/nologin -G ui -D -H -u 101 --disabled-password ui
 
 # Fix CVEs
-RUN apk add --no-cache "libssl3>=3.3.3-r0" "libcrypto3>=3.3.3-r0" # CVE-2024-12797
+# There are no CVEs for the following packages
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 /usr/share/bunkerweb /usr/share/bunkerweb
@@ -71,14 +71,10 @@ RUN echo "Docker" > INTEGRATION && \
   chmod -R 770 /data /var/cache/bunkerweb /var/lib/bunkerweb /var/www/html /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb && \
   chmod 750 gen/*.py ui/*.sh helpers/*.sh deps/python/bin/* && \
   find ui/ -type f -name "*.py" -print0 | xargs -0 chmod 750 && \
-  chmod 660 INTEGRATION && \
-  ln -s /proc/1/fd/1 /var/log/bunkerweb/ui-access.log && \
-  ln -s /proc/1/fd/2 /var/log/bunkerweb/ui.log && \
-  ln -s /proc/1/fd/1 /var/log/bunkerweb/tmp-ui-access.log && \
-  ln -s /proc/1/fd/2 /var/log/bunkerweb/tmp-ui.log
+  chmod 660 INTEGRATION
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
-LABEL version="1.6.0"
+LABEL version="1.6.1"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="ui"
 

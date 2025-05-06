@@ -72,18 +72,11 @@ bool ModSecurityTest<T>::load_test_json(const std::string &file) {
     for ( int i = 0; i < num_tests; i++ ) {
         yajl_val obj = node->u.array.values[i];
 
-        T *u = T::from_yajl_node(obj);
+        auto u = std::unique_ptr<T>(T::from_yajl_node(obj));
         u->filename = file;
 
-        if (this->count(u->filename + ":" + u->name) == 0) {
-            auto vec = new std::vector<T *>;
-            vec->push_back(u);
-            std::string filename(u->filename + ":" + u->name);
-            this->insert({filename, vec});
-        } else {
-            auto vec = this->at(u->filename + ":" + u->name);
-            vec->push_back(u);
-        }
+        const auto key = u->filename + ":" + u->name;
+        (*this)[key].push_back(std::move(u));
     }
 
     yajl_tree_free(node);
@@ -96,7 +89,7 @@ template <class T>
 void
 ModSecurityTest<T>::load_tests(const std::string &path) {
     DIR *dir;
-    struct dirent *ent;
+    const struct dirent *ent;
     struct stat buffer;
 
     if ((dir = opendir(path.c_str())) == nullptr) {

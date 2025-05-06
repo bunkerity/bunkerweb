@@ -49,7 +49,7 @@ Parallel::~Parallel() {
 }
 
 
-inline std::string Parallel::logFilePath(time_t *t,
+inline std::string Parallel::logFilePath(const time_t *t,
     int part) {
     std::string name;
 
@@ -123,7 +123,7 @@ bool Parallel::write(Transaction *transaction, int parts, std::string *error) {
     }
 
     const auto &logPath = m_audit->m_storage_dir;
-    fileName = logPath + fileName + "-" + *transaction->m_id.get();
+    fileName = logPath + fileName + "-" + transaction->m_id;
 
     if (logPath.empty()) {
         error->assign("Log path is not valid.");

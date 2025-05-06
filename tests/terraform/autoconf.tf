@@ -22,8 +22,12 @@ resource "scaleway_instance_server" "instance" {
   name = "cicd_bw_autoconf"
   type = "DEV1-M"
   image = "debian_bookworm"
-  routed_ip_enabled = true
+  # routed_ip_enabled = true
   ip_id = var.autoconf_ip_id
+  root_volume {
+    volume_type = "l_ssd"
+    size_in_gb = 30
+  }
 }
 
 # Create Ansible inventory file

@@ -1,5 +1,4 @@
 from base64 import b64encode
-from copy import deepcopy
 from datetime import datetime
 from functools import wraps
 from io import BytesIO
@@ -8,13 +7,12 @@ from typing import Any, Dict, Optional, Tuple, Union
 
 from flask import Response, redirect, request, url_for
 from qrcode.main import QRCode
-from redis import Redis, Sentinel
 from regex import compile as re_compile
 
-from app.models.instance import Instance
-
-from app.dependencies import BW_CONFIG, DATA, DB
+from app.dependencies import BW_CONFIG, DB
 from app.utils import LOGGER, flash
+
+from common_utils import get_redis_client as get_common_redis_client  # type: ignore
 
 
 LOG_RX = re_compile(r"^(?P<date>\d+/\d+/\d+\s\d+:\d+:\d+)\s\[(?P<level>[a-z]+)\]\s\d+#\d+:\s(?P<message>[^\n]+)$")
@@ -46,83 +44,6 @@ def wait_applying():
 
     if not ready:
         LOGGER.error("Too many retries while waiting for scheduler to apply configuration...")
-
-
-# TODO: Find a more elegant way to handle this
-def manage_bunkerweb(
-    method: str, *args, operation: str = "reloads", is_draft: bool = False, was_draft: bool = False, threaded: bool = False, override_method: str = "ui"
-) -> int:
-    # Do the operation
-    error = 0
-    DATA.load_from_file()
-
-    if method == "services":
-        if operation == "new":
-            operation, error = BW_CONFIG.new_service(args[0], is_draft=is_draft, override_method=override_method)
-        elif operation == "edit":
-            operation, error = BW_CONFIG.edit_service(
-                args[1], args[0], check_changes=(was_draft != is_draft or not is_draft), is_draft=is_draft, override_method=override_method
-            )
-        elif operation == "delete":
-            operation, error = BW_CONFIG.delete_service(args[2], check_changes=(was_draft != is_draft or not is_draft), override_method=override_method)
-    elif method == "global_config":
-        operation, error = BW_CONFIG.edit_global_conf(args[0], check_changes=True, override_method=override_method)
-
-    if operation == "reload":
-        instance = Instance.from_hostname(args[0], DB)
-        if instance:
-            operation = instance.reload()
-        else:
-            operation = "The instance does not exist."
-    elif operation == "start":
-        instance = Instance.from_hostname(args[0], DB)
-        if instance:
-            operation = instance.start()
-        else:
-            operation = "The instance does not exist."
-    elif operation == "stop":
-        instance = Instance.from_hostname(args[0], DB)
-        if instance:
-            operation = instance.stop()
-        else:
-            operation = "The instance does not exist."
-    elif operation == "restart":
-        instance = Instance.from_hostname(args[0], DB)
-        if instance:
-            operation = instance.restart()
-        else:
-            operation = "The instance does not exist."
-    elif operation == "ping":
-        instance = Instance.from_hostname(args[0], DB)
-        if instance:
-            operation = instance.ping()[0]
-        else:
-            operation = "The instance does not exist."
-    elif not error:
-        operation = "The scheduler will be in charge of applying the changes."
-
-    if operation:
-        if isinstance(operation, list):
-            for op in operation:
-                DATA["TO_FLASH"].append({"content": f"Reload failed for the instance {op}", "type": "error"})
-        elif operation.startswith(("Can't", "The database is read-only")):
-            DATA["TO_FLASH"].append({"content": operation, "type": "error"})
-        else:
-            DATA["TO_FLASH"].append({"content": operation, "type": "success"})
-
-    if not threaded:
-        seen = set()
-        for f in DATA.get("TO_FLASH", []):
-            content = f["content"]
-            if content in seen:
-                continue
-            seen.add(content)
-            flash(content, f["type"], save=f.get("save", True))
-        DATA["TO_FLASH"] = []
-
-    DATA["RELOADING"] = False
-
-    return error
 
 
 def verify_data_in_form(
@@ -219,102 +140,6 @@ def get_remain(seconds):
     return " ".join(time_parts), term
 
 
-def get_service_data(page_name: str):
-
-    verify_data_in_form(
-        data={"csrf_token": None},
-        err_message=f"Missing csrf_token parameter on /{page_name}.",
-        redirect_url="services",
-    )
-
-    verify_data_in_form(
-        data={"operation": None},
-        err_message=f"Missing operation parameter on /{page_name}.",
-        redirect_url="services",
-    )
-
-    verify_data_in_form(
-        data={"operation": ("edit", "new", "delete")},
-        err_message="Invalid operation parameter on /{page_name}.",
-        redirect_url="services",
-    )
-
-    config = DB.get_config(methods=True, with_drafts=True)
-    # Check variables
-    variables = deepcopy(request.form.to_dict())
-    mode = variables.pop("mode", None)
-
-    del variables["csrf_token"]
-    operation = variables.pop("operation")
-
-    # Delete custom client variables
-    variables.pop("SECURITY_LEVEL", None)
-
-    # Get server name and old one
-    old_server_name = ""
-    if variables.get("OLD_SERVER_NAME"):
-        old_server_name = variables.get("OLD_SERVER_NAME", "")
-        del variables["OLD_SERVER_NAME"]
-
-    server_name = variables["SERVER_NAME"].split(" ")[0] if "SERVER_NAME" in variables else old_server_name
-
-    # Get draft if exists
-    was_draft = config.get(f"{server_name}_IS_DRAFT", {"value": "no"})["value"] == "yes"
-    is_draft = was_draft if not variables.get("is_draft") else variables.get("is_draft") == "yes"
-    if variables.get("is_draft"):
-        del variables["is_draft"]
-
-    is_draft_unchanged = is_draft == was_draft
-
-    # Get all variables starting with custom_config and delete them from variables
-    custom_configs = []
-    config_types = (
-        "http",
-        "stream",
-        "server-http",
-        "server-stream",
-        "default-server-http",
-        "default-server-stream",
-        "modsec",
-        "modsec-crs",
-        "crs-plugins-before",
-        "crs-plugins-after",
-    )
-
-    for variable in variables:
-        if variable.startswith("custom_config_"):
-            custom_configs.append(variable)
-            del variables[variable]
-
-    # custom_config variable format is custom_config_<type>_<filename>
-    # we want a list of dict with each dict containing type, filename, action and server name
-    # after getting all configs, we want to save them after the end of current service action
-    # to avoid create config for none existing service or in case editing server name
-    format_configs = []
-    for custom_config in custom_configs:
-        # first remove custom_config_ prefix
-        custom_config = custom_config.split("custom_config_")[1]
-        # then split the config into type, filename, action
-        custom_config = custom_config.split("_")
-        # check if the config is valid
-        if len(custom_config) == 2 and custom_config[0] in config_types:
-            format_configs.append({"type": custom_config[0], "filename": custom_config[1], "action": operation, "server_name": server_name})
-        else:
-            return handle_error(err_message=f"Invalid custom config {custom_config}", redirect_url="services", next=True)
-
-    # Edit check fields and remove already existing ones
-    for variable, value in variables.copy().items():
-        if (
-            variable in variables
-            and variable != "SERVER_NAME"
-            and value == config.get(f"{server_name}_{variable}" if request.form["operation"] == "edit" else variable, {"value": None})["value"]
-        ):
-            del variables[variable]
-
-    variables = BW_CONFIG.check_variables(variables, config)
-    return config, variables, format_configs, server_name, old_server_name, operation, is_draft, was_draft, is_draft_unchanged, mode
-
-
 def cors_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -331,7 +156,9 @@ def cors_required(f):
 
 
 def get_redis_client():
-    redis_client = None
+    """
+    Get a Redis client using configuration from BW_CONFIG.
+    """
     db_config = BW_CONFIG.get_config(
         global_only=True,
         methods=False,
@@ -351,79 +178,27 @@ def get_redis_client():
             "REDIS_SENTINEL_MASTER",
         ),
     )
+
     use_redis = db_config.get("USE_REDIS", "no") == "yes"
-    redis_host = db_config.get("REDIS_HOST")
-    if use_redis and redis_host:
-        redis_port = db_config.get("REDIS_PORT", "6379")
-        if not redis_port.isdigit():
-            redis_port = "6379"
-        redis_port = int(redis_port)
 
-        redis_db = db_config.get("REDIS_DB", "0")
-        if not redis_db.isdigit():
-            redis_db = "0"
-        redis_db = int(redis_db)
+    redis_client = get_common_redis_client(
+        use_redis=use_redis,
+        redis_host=db_config.get("REDIS_HOST"),
+        redis_port=db_config.get("REDIS_PORT", "6379"),
+        redis_db=db_config.get("REDIS_DB", "0"),
+        redis_timeout=db_config.get("REDIS_TIMEOUT", "1000.0"),
+        redis_keepalive_pool=db_config.get("REDIS_KEEPALIVE_POOL", "10"),
+        redis_ssl=db_config.get("REDIS_SSL", "no") == "yes",
+        redis_username=db_config.get("REDIS_USERNAME") or None,
+        redis_password=db_config.get("REDIS_PASSWORD") or None,
+        redis_sentinel_hosts=db_config.get("REDIS_SENTINEL_HOSTS", []),
+        redis_sentinel_username=db_config.get("REDIS_SENTINEL_USERNAME") or None,
+        redis_sentinel_password=db_config.get("REDIS_SENTINEL_PASSWORD") or None,
+        redis_sentinel_master=db_config.get("REDIS_SENTINEL_MASTER", ""),
+        logger=LOGGER,
+    )
 
-        redis_timeout = db_config.get("REDIS_TIMEOUT", "1000.0")
-        try:
-            redis_timeout = float(redis_timeout)
-        except ValueError:
-            redis_timeout = 1000.0
+    if use_redis and not redis_client:
+        flash("Couldn't connect to redis", "error")
 
-        redis_keepalive_pool = db_config.get("REDIS_KEEPALIVE_POOL", "10")
-        if not redis_keepalive_pool.isdigit():
-            redis_keepalive_pool = "10"
-        redis_keepalive_pool = int(redis_keepalive_pool)
-
-        redis_ssl = db_config.get("REDIS_SSL", "no") == "yes"
-        username = db_config.get("REDIS_USERNAME", None) or None
-        password = db_config.get("REDIS_PASSWORD", None) or None
-        sentinel_hosts = db_config.get("REDIS_SENTINEL_HOSTS", [])
-
-        if isinstance(sentinel_hosts, str):
-            sentinel_hosts = [host.split(":") if ":" in host else (host, "26379") for host in sentinel_hosts.split(" ") if host]
-
-        if sentinel_hosts:
-            sentinel_username = db_config.get("REDIS_SENTINEL_USERNAME", None) or None
-            sentinel_password = db_config.get("REDIS_SENTINEL_PASSWORD", None) or None
-            sentinel_master = db_config.get("REDIS_SENTINEL_MASTER", "")
-
-            sentinel = Sentinel(
-                sentinel_hosts,
-                username=sentinel_username,
-                password=sentinel_password,
-                ssl=redis_ssl,
-                socket_timeout=redis_timeout,
-                socket_connect_timeout=redis_timeout,
-                socket_keepalive=True,
-                max_connections=redis_keepalive_pool,
-            )
-
-            redis_client = sentinel.slave_for(
-                sentinel_master,
-                db=redis_db,
-                username=username,
-                password=password,
-                decode_responses=True,
-            )
-        else:
-            redis_client = Redis(
-                host=redis_host,
-                port=redis_port,
-                db=redis_db,
-                username=username,
-                password=password,
-                socket_timeout=redis_timeout,
-                socket_connect_timeout=redis_timeout,
-                socket_keepalive=True,
-                max_connections=redis_keepalive_pool,
-                ssl=redis_ssl,
-                decode_responses=True,
-            )
-
-        try:
-            redis_client.ping()
-        except BaseException:
-            redis_client = None
-            flash("Couldn't connect to redis, ban list might be incomplete", "error")
     return redis_client

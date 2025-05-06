@@ -57,12 +57,11 @@ std::string Tag::getName(Transaction *transaction) {
 }
 
 
-bool Tag::evaluate(RuleWithActions *rule, Transaction *transaction,
-    std::shared_ptr<RuleMessage> rm) {
+bool Tag::evaluate(RuleWithActions *rule, Transaction *transaction, RuleMessage &ruleMessage) {
     std::string tag = getName(transaction);
     ms_dbg_a(transaction, 9, "Rule tag: " + tag);
 
-    rm->m_tags.push_back(tag);
+    ruleMessage.m_tags.push_back(tag);
 
     return true;
 }

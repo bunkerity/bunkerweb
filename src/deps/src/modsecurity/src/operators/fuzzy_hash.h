@@ -42,7 +42,7 @@ class FuzzyHash : public Operator {
         : Operator("FuzzyHash", std::move(param)),
         m_threshold(0),
         m_head(NULL) { }
-    ~FuzzyHash();
+    ~FuzzyHash() override;
 
     bool evaluate(Transaction *transaction, const std::string &std) override;
 

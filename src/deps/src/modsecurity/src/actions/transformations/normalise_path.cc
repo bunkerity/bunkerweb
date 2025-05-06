@@ -29,9 +29,6 @@ bool NormalisePath::transform(std::string &value, const Transaction *trans) cons
  * IMP1 Assumes NUL-terminated
  */
 bool NormalisePath::normalize_path_inplace(std::string &val, const bool win) {
-    unsigned char *src;
-    unsigned char *dst;
-    unsigned char *end;
     int hitroot = 0;
     int done = 0;
     int relative;
@@ -49,12 +46,12 @@ bool NormalisePath::normalize_path_inplace(std::string &val, const bool win) {
      * ENH: Deal with UNC and drive letters?
      */
 
-    src = dst = input;
-    end = input + (input_len - 1);
+    auto src = input;
+    auto dst = input;
+    const auto *end = input + (input_len - 1);
 
     relative = ((*input == '/') || (win && (*input == '\\'))) ? 0 : 1;
     trailing = ((*end == '/') || (win && (*end == '\\'))) ? 1 : 0;
-
 
     while (!done && (src <= end) && (dst <= end)) {
         /* Convert backslash to forward slash on Windows only. */
@@ -152,7 +149,7 @@ copy:
 
         /* Skip to the last forward slash when multiple are used. */
         if (*src == '/') {
-            unsigned char *oldsrc = src;
+            const unsigned char *oldsrc = src;
 
             while ((src < end)
                 && ((*(src + 1) == '/') || (win && (*(src + 1) == '\\'))) ) {

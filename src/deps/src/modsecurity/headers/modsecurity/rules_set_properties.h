@@ -70,7 +70,7 @@ class ConfigInt {
     bool m_set;
     int m_value;
 
-    void merge(ConfigInt *from) {
+    void merge(const ConfigInt *from) {
         if (m_set == true || from->m_set == false) {
             return;
         }
@@ -87,7 +87,7 @@ class ConfigDouble {
     bool m_set;
     double m_value;
 
-    void merge(ConfigDouble *from) {
+    void merge(const ConfigDouble *from) {
         if (m_set == true || from->m_set == false) {
             return;
         }
@@ -104,7 +104,7 @@ class ConfigString {
     bool m_set;
     std::string m_value;
 
-    void merge(ConfigString *from) {
+    void merge(const ConfigString *from) {
         if (m_set == true || from->m_set == false) {
             return;
         }
@@ -150,7 +150,7 @@ class ConfigUnicodeMap {
     static void loadConfig(std::string f, double codePage,
         RulesSetProperties *driver, std::string *errg);
 
-    void merge(ConfigUnicodeMap *from) {
+    void merge(const ConfigUnicodeMap *from) {
         if (from->m_set == false) {
             return;
         }

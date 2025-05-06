@@ -5,6 +5,7 @@ from os.path import join
 from pathlib import Path
 from subprocess import DEVNULL, run
 from sys import exit as sys_exit, path as sys_path
+from traceback import format_exc
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("db",))]:
     if deps_path not in sys_path:
@@ -72,6 +73,7 @@ try:
         LOGGER.info("Skipping generation of self-signed certificate for default server (already present)")
 except BaseException as e:
     status = 2
+    LOGGER.debug(format_exc())
     LOGGER.error(f"Exception while running default-server-cert.py :\n{e}")
 
 sys_exit(status)

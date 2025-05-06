@@ -13,15 +13,6 @@
  *
  */
 
-#ifdef __cplusplus
-#include <stack>
-#include <vector>
-#include <string>
-#include <list>
-#include <memory>
-#include <utility>
-#endif
-
 #ifndef HEADERS_MODSECURITY_RULE_MARKER_H_
 #define HEADERS_MODSECURITY_RULE_MARKER_H_
 
@@ -32,6 +23,9 @@
 
 #ifdef __cplusplus
 
+#include <string>
+#include <memory>
+
 namespace modsecurity {
 
 
@@ -39,48 +33,34 @@ class RuleMarker : public Rule {
  public:
     RuleMarker(
         const std::string &name,
-        std::unique_ptr<std::string> fileName,
+        const std::string &fileName,
         int lineNumber)
-        : Rule(std::move(fileName), lineNumber),
-        m_name(std::make_shared<std::string>(name)) { }
+        : Rule(fileName, lineNumber),
+        m_name(name) { }
 
-    RuleMarker(const RuleMarker& r) :
-        Rule(r),
-        m_name(r.m_name)
-    { }
+    RuleMarker(const RuleMarker &r) = delete;
 
-    RuleMarker &operator =(const RuleMarker& r) {
-        Rule::operator = (r);
-        m_name = r.m_name;
-        return *this;
-    }
-
-    virtual bool evaluate(Transaction *transaction,
-        std::shared_ptr<RuleMessage> rm) override {
+    RuleMarker &operator=(const RuleMarker &r) = delete;
+   
+    virtual bool evaluate(Transaction *transaction, RuleMessage &ruleMessage) override {
         return evaluate(transaction);
     }
 
     virtual bool evaluate(Transaction *transaction) override {
-        if (transaction->isInsideAMarker()) {
-            if (*transaction->getCurrentMarker() == *m_name) {
+        if (transaction->isInsideAMarker() &&
+            *transaction->getCurrentMarker() == m_name) {
                 transaction->removeMarker();
                 // FIXME: Move this to .cc
                 //        ms_dbg_a(transaction, 4, "Out of a SecMarker " + *m_name);
-            }
         }
 
         return true;
     };
 
-
-    std::shared_ptr<std::string> getName() {
-        return m_name;
-    }
-
     bool isMarker() override { return true; }
 
  private:
-    std::shared_ptr<std::string> m_name;
+    const std::string m_name;
 };
 
 

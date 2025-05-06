@@ -115,7 +115,7 @@ class Operator {
     bool evaluateInternal(Transaction *t, RuleWithActions *rule,
         const std::string& a);
     bool evaluateInternal(Transaction *t, RuleWithActions *rule,
-        const std::string& a, std::shared_ptr<RuleMessage> ruleMessage);
+        const std::string& a, RuleMessage &ruleMessage);
 
 
     virtual bool evaluate(Transaction *transaction, const std::string &str);
@@ -124,21 +124,19 @@ class Operator {
         return evaluate(transaction, str);
     }
     virtual bool evaluate(Transaction *transaction, RuleWithActions *rule,
-        const std::string &str, std::shared_ptr<RuleMessage> ruleMessage) {
+        const std::string &str, RuleMessage &ruleMessage) {
         return evaluate(transaction, str);
     }
 
-    static void logOffset(std::shared_ptr<RuleMessage> ruleMessage, int offset, int len) {
-        if (ruleMessage) {
-            ruleMessage->m_reference.append("o"
-                + std::to_string(offset) + ","
-                + std::to_string(len));
-        }
+    static void logOffset(RuleMessage &ruleMessage, int offset, int len) {
+        ruleMessage.m_reference.append("o"
+            + std::to_string(offset) + ","
+            + std::to_string(len));
     }
 
     std::string m_match_message;
     bool m_negation;
-    std::string m_op;
+    const std::string m_op;
     std::string m_param;
     std::unique_ptr<RunTimeString> m_string;
     bool m_couldContainsMacro;

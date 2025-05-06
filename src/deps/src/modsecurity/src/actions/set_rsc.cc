@@ -26,11 +26,6 @@ namespace modsecurity {
 namespace actions {
 
 
-bool SetRSC::init(std::string *error) {
-    return true;
-}
-
-
 bool SetRSC::evaluate(RuleWithActions *rule, Transaction *t) {
     std::string colNameExpanded(m_string->evaluate(t));
     ms_dbg_a(t, 8, "RESOURCE initiated with value: \'"

@@ -1,0 +1,107 @@
+services:
+  bunkerweb-all-in-one:
+    build:
+      context: ../..
+      dockerfile: ./src/all-in-one/Dockerfile
+    ports:
+      - 80:8080/tcp
+      - 443:8443/tcp
+      - 443:8443/udp
+      - 7000:7000/tcp
+    volumes:
+      - bw-storage:/data
+      - ../../src/ui/app:/usr/share/bunkerweb/ui/app:ro
+      - ../../src/ui/utils:/usr/share/bunkerweb/ui/utils:ro
+      - ../../src/ui/main.py:/usr/share/bunkerweb/ui/main.py:ro
+    environment:
+      SERVER_NAME: ""
+      MULTISITE: "yes"
+      DATABASE_URI: "mariadb+pymysql://bunkerweb:secret@bw-db:3306/db"
+      API_WHITELIST_IP: "127.0.0.0/24"
+      USE_BUNKERNET: "no"
+      USE_BLACKLIST: "no"
+      USE_WHITELIST: "no"
+      SEND_ANONYMOUS_REPORT: "no"
+      LOG_LEVEL: "info"
+      CUSTOM_LOG_LEVEL: "debug"
+      SERVE_FILES: "no"
+      USE_CLIENT_CACHE: "yes"
+      USE_GZIP: "yes"
+      SESSIONS_CHECK_IP: "no"
+      UI_HOST: "http://127.0.0.1:7000"
+
+      # Autoconf
+      AUTOCONF_MODE: "yes"
+      DOCKER_HOST: "tcp://bw-docker:2375"
+
+      # UI
+      CHECK_PRIVATE_IP: "no"
+      DEBUG: "1"
+      MAX_WORKERS: "1"
+      MAX_THREADS: "4"
+    restart: "unless-stopped"
+    networks:
+      bw-db:
+        aliases:
+          - bunkerweb-all-in-one
+      bw-docker:
+        aliases:
+          - bunkerweb-all-in-one
+      bw-services:
+        aliases:
+          - bunkerweb-all-in-one
+
+  bw-db:
+    image: mariadb:11
+    command: --max-allowed-packet=67108864
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+      MYSQL_DATABASE: "db"
+      MYSQL_USER: "bunkerweb"
+      MYSQL_PASSWORD: "secret"
+    volumes:
+      - bw-data:/var/lib/mysql
+    restart: "unless-stopped"
+    networks:
+      bw-db:
+        aliases:
+          - bw-db
+
+  bw-docker:
+    image: tecnativa/docker-socket-proxy:nightly
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      CONTAINERS: "1"
+      LOG_LEVEL: "warning"
+    restart: "unless-stopped"
+    networks:
+      bw-docker:
+        aliases:
+          - bw-docker
+
+  app1:
+    image: nginxdemos/nginx-hello
+    restart: "unless-stopped"
+    networks:
+      bw-services:
+        aliases:
+          - app1
+    labels:
+      - "bunkerweb.SERVER_NAME=app1.example.com"
+      - "bunkerweb.USE_REVERSE_PROXY=yes"
+      - "bunkerweb.REVERSE_PROXY_URL=/"
+      - "bunkerweb.REVERSE_PROXY_HOST=http://app1:8080"
+
+volumes:
+  bw-data:
+  bw-storage:
+  bw-logs:
+
+networks:
+  bw-services:
+    name: bw-services
+  bw-db:
+    name: bw-db
+  bw-docker:
+    name: bw-docker

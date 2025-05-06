@@ -59,7 +59,6 @@ class SetVar : public Action {
         m_variable(std::move(variable)) { }
 
     bool evaluate(RuleWithActions *rule, Transaction *transaction) override;
-    bool init(std::string *error) override;
 
  private:
     SetVarOperation m_operation;

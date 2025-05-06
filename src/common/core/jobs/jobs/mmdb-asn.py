@@ -8,6 +8,7 @@ from os.path import join
 from pathlib import Path
 from sys import exit as sys_exit, path as sys_path
 from time import sleep
+from traceback import format_exc
 from typing import Optional
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("db",))]:
@@ -43,6 +44,7 @@ def request_mmdb() -> Optional[Response]:
         response.raise_for_status()
         return response
     except RequestException:
+        LOGGER.debug(format_exc())
         return None
 
 
@@ -120,6 +122,7 @@ try:
                     LOGGER.info("New file is identical to cache file, reload is not needed")
                     sys_exit(0)
         except BaseException as e:
+            LOGGER.debug(format_exc())
             LOGGER.error(f"Error while downloading mmdb file from {mmdb_url}: {e}")
             if not tmp_path.is_file():
                 sys_exit(2)
@@ -148,6 +151,7 @@ except SystemExit as e:
     status = e.code
 except BaseException as e:
     status = 2
+    LOGGER.debug(format_exc())
     LOGGER.error(f"Exception while running mmdb-asn.py :\n{e}")
 
 sys_exit(status)

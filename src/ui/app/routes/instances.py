@@ -1,9 +1,10 @@
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from re import compile as re_compile
 from threading import Thread
 from time import time
 from typing import Literal
-from flask import Blueprint, jsonify, redirect, render_template, request, url_for
-from flask_login import login_required
+from flask import Blueprint, Response, jsonify, redirect, render_template, request, url_for
+from flask_login import current_user, login_required
 
 from app.dependencies import BW_CONFIG, BW_INSTANCES_UTILS, DATA, DB
 from app.utils import flash
@@ -30,7 +31,9 @@ def instances_page():
 @instances.route("/instances/new", methods=["POST"])
 @login_required
 def instances_new():
-    if DB.readonly:
+    if "write" not in current_user.list_permissions:
+        return Response("You don't have the required permissions to create new instances.", 403)
+    elif DB.readonly:
         return handle_error("Database is in read-only mode", "instances")
     verify_data_in_form(
         data={"hostname": None},
@@ -47,10 +50,20 @@ def instances_new():
 
     db_config = BW_CONFIG.get_config(global_only=True, methods=False, filtered_settings=("API_HTTP_PORT", "API_SERVER_NAME"))
 
+    port = None
+    hostname = request.form["hostname"].replace("http://", "").replace("https://", "").lower().split(":", 1)
+    if len(hostname) == 2:
+        port = hostname[1]
+    hostname = hostname[0]
+
+    domain_pattern = re_compile(r"^(?!.*\.\.)[^\s\/:]{1,256}$")
+    if not domain_pattern.match(hostname):
+        return handle_error(f"Invalid hostname: {hostname}. Please enter a valid domain.", "instances", True)
+
     instance = {
-        "hostname": request.form["hostname"].replace("http://", "").replace("https://", "").split(":")[0],
+        "hostname": hostname,
         "name": request.form["name"],
-        "port": db_config.get("API_HTTP_PORT", "5000"),
+        "port": port or db_config.get("API_HTTP_PORT", "5000"),
         "server_name": db_config.get("API_SERVER_NAME", "bwapi"),
         "method": "ui",
     }
@@ -63,13 +76,17 @@ def instances_new():
     if ret:
         return handle_error(f"Couldn't create the instance in the database: {ret}", "instances", True)
 
+    flash(f"Instance {instance['hostname']} created successfully.")
+
     return redirect(url_for("loading", next=url_for("instances.instances_page"), message=f"Creating new instance {instance['hostname']}"))
 
 
 @instances.route("/instances/<string:action>", methods=["POST"])
 @login_required
 def instances_action(action: Literal["ping", "reload", "stop", "delete"]):  # TODO: see if we can support start and restart
-    if DB.readonly:
+    if "write" not in current_user.list_permissions:
+        return Response("You don't have the required permissions to perform actions on instances.", 403)
+    elif DB.readonly:
         return handle_error("Database is in read-only mode", "instances")
 
     verify_data_in_form(
@@ -107,9 +124,6 @@ def instances_action(action: Literal["ping", "reload", "stop", "delete"]):  # TO
 
         return jsonify({"succeed": succeed, "failed": failed}), 200
     elif action == "delete":
-        if DB.readonly:
-            return handle_error("Database is in read-only mode", "instances")
-
         delete_instances = set()
         non_ui_instances = set()
         for instance in DB.get_instances():
@@ -132,7 +146,7 @@ def instances_action(action: Literal["ping", "reload", "stop", "delete"]):  # TO
         ret = DB.delete_instances(delete_instances)
         if ret:
             return handle_error(f"Couldn't delete the instance{'s' if len(delete_instances) > 1 else ''} in the database: {ret}", "instances", True)
-        flash(f"Instance{'s' if len(delete_instances) > 1 else ''} {', '.join(delete_instances)} Deleted successfully.", "success")
+        flash(f"Instance{'s' if len(delete_instances) > 1 else ''} {', '.join(delete_instances)} Deleted successfully.")
     else:
 
         def execute_action(instance):

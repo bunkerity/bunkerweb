@@ -44,7 +44,7 @@ char rules_file[] = "basic_rules.conf";
 
 const char* const help_message = "Usage: benchmark [num_iterations|-h|-?|--help]";
 
-int main(int argc, char *argv[]) {
+int main(int argc, const char *argv[]) {
 
     unsigned long long NUM_REQUESTS(1000000);
 

@@ -40,7 +40,7 @@ int main (int argc, char *argv[]) {
     modsec->setConnectorInformation("ModSecurity-test v0.0.1-alpha (Simple " \
         "example on how to use ModSecurity API");
 
-    char main_rule_uri[] = "basic_rules.conf";
+    const char main_rule_uri[] = "basic_rules.conf";
     auto rules = std::make_unique<modsecurity::RulesSet>();
     if (rules->loadFromUri(main_rule_uri) < 0) {
         std::cerr << "Problems loading the rules..." << std::endl;

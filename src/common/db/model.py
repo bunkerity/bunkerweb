@@ -314,15 +314,16 @@ class Metadata(Base):
     last_pro_plugins_change = Column(DateTime(timezone=True), nullable=True)
     instances_changed = Column(Boolean, default=False, nullable=True)
     last_instances_change = Column(DateTime(timezone=True), nullable=True)
+    reload_ui_plugins = Column(Boolean, default=False, nullable=True)
     failover = Column(Boolean, default=None, nullable=True)
+    failover_message = Column(TEXT, nullable=True)
     integration = Column(INTEGRATIONS_ENUM, default="Unknown", nullable=False)
-    version = Column(String(32), default="1.6.0", nullable=False)
+    version = Column(String(32), default="1.6.1", nullable=False)
 
 
 ## UI Models
 
 THEMES_ENUM = Enum("light", "dark", name="themes_enum")
-TABLES_ENUM = Enum("bans", "configs", "instances", "jobs", "plugins", "reports", "services", name="tables_enum")
 
 
 class JSONText(TypeDecorator):
@@ -447,7 +448,7 @@ class UserColumnsPreferences(Base):
 
     id = Column(Integer, Identity(start=1, increment=1), primary_key=True)
     user_name = Column(String(256), ForeignKey("bw_ui_users.username", onupdate="cascade", ondelete="cascade"), nullable=False)
-    table_name = Column(TABLES_ENUM, nullable=False)
+    table_name = Column(String(256), nullable=False)
     columns = Column(JSONText, nullable=False)
 
     user = relationship("Users", back_populates="columns_preferences")

@@ -7,6 +7,7 @@ $(document).ready(function () {
     .filter((code) => code && code !== "local");
   const baseFlagsUrl = $("#base_flags_url").val().trim();
   const isReadOnly = $("#is-read-only").val().trim() === "True";
+  const userReadOnly = $("#user-read-only").val().trim() === "True";
 
   const countriesDataNames = {
     AD: "Andorra",
@@ -386,6 +387,9 @@ $(document).ready(function () {
         </div>
       </li>
       <li class="list-group-item bg-secondary text-white" style="flex: 1 0;">
+        <div class="fw-bold">Scope</div>
+      </li>
+      <li class="list-group-item bg-secondary text-white" style="flex: 1 0;">
         <div class="fw-bold">Time left</div>
       </li>
       </ul>`,
@@ -404,6 +408,17 @@ $(document).ready(function () {
         </div>
       </li>`);
       list.append(listItem);
+
+      const scopeItem = $(`<li class="list-group-item" style="flex: 1 0;">
+        <div class="ms-2 me-auto">
+          ${ban.ban_scope || "global"}${
+            ban.service && ban.ban_scope === "service"
+              ? ` (${ban.service})`
+              : ""
+          }
+        </div>
+      </li>`);
+      list.append(scopeItem);
 
       const timeLeft = $(`<li class="list-group-item" style="flex: 1 0;">
         <div class="ms-2 me-auto">
@@ -435,18 +450,18 @@ $(document).ready(function () {
         viewTotal: true,
         cascadePanes: true,
         collapse: false,
-        columns: [2, 4, 6, 7],
+        columns: [2, 4, 7, 8],
       },
     },
     topStart: {},
     topEnd: {
+      search: true,
       buttons: [
         {
           extend: "toggle_filters",
           className: "btn btn-sm btn-outline-primary toggle-filters",
         },
       ],
-      search: true,
     },
     bottomStart: {
       info: true,
@@ -552,8 +567,16 @@ $(document).ready(function () {
     const bans = [];
     $("tr.selected").each(function () {
       const ip = $(this).find("td:eq(3)").text().trim();
-      const time_remaining = $(this).find("td:eq(6)").text().trim();
-      bans.push({ ip: ip, time_remaining: time_remaining });
+      const time_remaining = $(this).find("td:eq(9)").text().trim();
+      const ban_scope = $(this).find("td:eq(6)").text().trim().toLowerCase();
+      const service = $(this).find("td:eq(7)").text().trim();
+
+      bans.push({
+        ip: ip,
+        time_remaining: time_remaining,
+        ban_scope: ban_scope,
+        service: service !== "All services" ? service : null,
+      });
     });
     return bans;
   };
@@ -621,7 +644,7 @@ $(document).ready(function () {
           targets: -1,
         },
         {
-          targets: [2, 7],
+          targets: [2, 8],
           render: function (data, type, row) {
             if (type === "display" || type === "filter") {
               const date = new Date(data);
@@ -689,7 +712,7 @@ $(document).ready(function () {
               {
                 label: "Next 24 hours",
                 value: function (rowData, rowIdx) {
-                  const date = new Date(rowData[7]);
+                  const date = new Date(rowData[8]);
                   const now = new Date();
                   return date - now < 24 * 60 * 60 * 1000;
                 },
@@ -697,7 +720,7 @@ $(document).ready(function () {
               {
                 label: "Next 7 days",
                 value: function (rowData, rowIdx) {
-                  const date = new Date(rowData[7]);
+                  const date = new Date(rowData[8]);
                   const now = new Date();
                   return date - now < 7 * 24 * 60 * 60 * 1000;
                 },
@@ -705,7 +728,7 @@ $(document).ready(function () {
               {
                 label: "Next 30 days",
                 value: function (rowData, rowIdx) {
-                  const date = new Date(rowData[7]);
+                  const date = new Date(rowData[8]);
                   const now = new Date();
                   return date - now < 30 * 24 * 60 * 60 * 1000;
                 },
@@ -713,7 +736,7 @@ $(document).ready(function () {
               {
                 label: "More than 30 days",
                 value: function (rowData, rowIdx) {
-                  const date = new Date(rowData[7]);
+                  const date = new Date(rowData[8]);
                   const now = new Date();
                   return date - now >= 30 * 24 * 60 * 60 * 1000;
                 },
@@ -722,14 +745,14 @@ $(document).ready(function () {
             combiner: "or",
             orderable: false,
           },
-          targets: 7,
+          targets: 8,
         },
         {
           searchPanes: { show: true },
-          targets: 6,
+          targets: 7,
         },
       ],
-      order: [[6, "asc"]],
+      order: [[7, "asc"]],
       autoFill: false,
       responsive: true,
       select: {
@@ -758,7 +781,11 @@ $(document).ready(function () {
           $("#bans_wrapper .dt-buttons")
             .attr(
               "data-bs-original-title",
-              "The database is in readonly, therefore you cannot add bans.",
+              `${
+                userReadOnly
+                  ? "Your account is readonly"
+                  : "The database is in readonly"
+              }, therefore you cannot add bans.`,
             )
             .attr("data-bs-placement", "right")
             .tooltip();
@@ -776,8 +803,17 @@ $(document).ready(function () {
       return;
     }
     $this = $(this);
+    const row = $this.closest("tr");
+    const ban_scope = row.find("td:eq(6)").text().trim().toLowerCase();
+    const service = row.find("td:eq(7)").text().trim();
+
     setupUnbanModal([
-      { ip: $this.data("ip"), time_remaining: $this.data("time-left") },
+      {
+        ip: $this.data("ip"),
+        time_remaining: $this.data("time-left"),
+        ban_scope: ban_scope,
+        service: service !== "All services" ? service : null,
+      },
     ]);
   });
 
@@ -807,10 +843,25 @@ $(document).ready(function () {
     });
     banClone.find("input[name='reason']").val("ui");
 
-    const deleteButton = banClone.find(".delete-ban");
-    deleteButton.removeClass("disabled");
+    // Replace delete button with a functional one
+    const deleteButtonContainer = banClone.find(".col-12.col-md-1");
+    deleteButtonContainer.html(`
+      <button type="button"
+              class="btn btn-outline-danger btn-sm delete-ban"
+              data-bs-toggle="tooltip"
+              data-bs-placement="right"
+              title="Remove this ban entry">
+        <i class="bx bx-trash bx-xs"></i>
+      </button>
+    `);
+
+    // Initialize ban scope handlers for the cloned item
+    initializeBanScopeHandlers(banClone);
 
     $("#bans-container").append(banClone);
+
+    // Initialize tooltip for the new delete button
+    banClone.find('[data-bs-toggle="tooltip"]').tooltip();
   });
 
   $("#clear-bans").on("click", function () {
@@ -831,9 +882,19 @@ $(document).ready(function () {
       alert("This action is not allowed in read-only mode.");
       return;
     }
-    const banContainer = $(this).closest("li");
-    if (banContainer.attr("id") === "ban-1") return;
-    banContainer.remove();
+
+    // Get the ban item container and remove it
+    const banContainer = $(this).closest("li.ban-item");
+
+    // Double check that we're not deleting the first ban entry
+    if (banContainer.attr("id") === "ban-1") {
+      return;
+    }
+
+    // Fade out and remove
+    banContainer.fadeOut(300, function () {
+      $(this).remove();
+    });
   });
 
   $("#modal-ban-ips").on("hidden.bs.modal", function () {
@@ -848,8 +909,9 @@ $(document).ready(function () {
     /^(?:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(?:\.(?!$)|$)){4}$|^((?:[A-Fa-f0-9]{1,4}:){7}[A-Fa-f0-9]{1,4}|(?:[A-Fa-f0-9]{1,4}:){1,7}:|:(?::[A-Fa-f0-9]{1,4}){1,7}|::)$/i,
   );
 
-  const validateBan = (ban, ipSet) => {
-    const value = ban.val().trim();
+  // Modified validateBan function to cleanly separate global and service bans
+  const validateBan = (banIpInput, ipServiceMap) => {
+    const value = banIpInput.val().trim();
     let errorMessage = "";
     let isValid = true;
 
@@ -859,18 +921,45 @@ $(document).ready(function () {
     } else if (!ipRegex.test(value)) {
       errorMessage = "Please enter a valid IP address.";
       isValid = false;
-    } else if (ipSet.has(value)) {
-      errorMessage = "This IP address has already been entered.";
-      isValid = false;
+    } else {
+      // Get the ban container
+      const banContainer = banIpInput.closest("li.ban-item");
+      const banScope = banContainer.find('select[name="ban_scope"]').val();
+
+      if (banScope === "global") {
+        // For global scope bans, check if this IP already has a global ban
+        if (ipServiceMap.has(`${value}:global`)) {
+          errorMessage = "This IP address already has a global ban entry.";
+          isValid = false;
+        }
+        // Note: We allow an IP to have both global and service-specific bans
+      } else if (banScope === "service") {
+        const service = banContainer.find('select[name="service"]').val();
+
+        // Check service is selected
+        if (!service) {
+          errorMessage = "Please select a service for this ban.";
+          isValid = false;
+        }
+        // Check for duplicate service ban
+        else if (ipServiceMap.has(`${value}:service:${service}`)) {
+          errorMessage = `This IP is already banned for the service "${service}".`;
+          isValid = false;
+        }
+      }
     }
 
     // Toggle valid/invalid classes
-    ban.toggleClass("is-valid", isValid).toggleClass("is-invalid", !isValid);
+    banIpInput
+      .toggleClass("is-valid", isValid)
+      .toggleClass("is-invalid", !isValid);
 
     // Manage the invalid-feedback element
-    let $feedback = ban.next(".invalid-feedback");
+    let $feedback = banIpInput.next(".invalid-feedback");
     if (!$feedback.length) {
-      $feedback = $('<div class="invalid-feedback"></div>').insertAfter(ban);
+      $feedback = $('<div class="invalid-feedback"></div>').insertAfter(
+        banIpInput,
+      );
     }
 
     $feedback.text(errorMessage);
@@ -878,49 +967,130 @@ $(document).ready(function () {
     return isValid;
   };
 
+  // Update input validation to use the new service-aware validation
   $("#bans-container").on("input", "input[name='ip']", function () {
     debounce(() => {
       const $input = $(this);
-      const ipSet = new Set();
+      // Map to store IP:scope or IP:service combinations
+      const ipServiceMap = new Map();
 
-      // Gather all other IPs except the current one
+      // Gather all other ban entries except the current one
       $("#bans-container")
-        .find("input[name='ip']")
-        .not($input)
+        .find("li.ban-item")
+        .not($input.closest("li.ban-item"))
         .each(function () {
-          ipSet.add($(this).val().trim());
+          const $li = $(this);
+          const ip = $li.find("input[name='ip']").val().trim();
+          if (!ip) return; // Skip empty IPs
+
+          const banScope = $li.find("select[name='ban_scope']").val();
+          if (banScope === "global") {
+            ipServiceMap.set(`${ip}:global`, true);
+          } else if (banScope === "service") {
+            const service = $li.find("select[name='service']").val();
+            if (service) {
+              ipServiceMap.set(`${ip}:service:${service}`, true);
+            }
+          }
         });
 
-      validateBan($input, ipSet);
+      validateBan($input, ipServiceMap);
     }, 100)();
   });
 
-  $("#bans-container").on("focusout", "input[name='ip']", function () {
-    $(this).removeClass("is-valid");
-  });
-
+  // Also update form submission validation
   $("#bans-form").on("submit", function (e) {
     e.preventDefault();
 
     let allValid = true;
-    const ipSet = new Set();
+    const ipServiceMap = new Map();
 
+    // First pass - collect all existing IP + scope/service combinations
     $("#bans-container")
-      .find("input[name='ip']")
+      .find("li.ban-item")
       .each(function () {
-        const $input = $(this);
+        const $li = $(this);
+        const $input = $li.find("input[name='ip']");
         const ip = $input.val().trim();
 
-        // Validate and check for duplicates
-        if (!validateBan($input, ipSet)) {
+        if (!ip) return; // Skip empty IPs
+
+        const banScope = $li.find("select[name='ban_scope']").val();
+
+        // Validate global ban
+        if (banScope === "global") {
+          const key = `${ip}:global`;
+
+          if (ipServiceMap.has(key)) {
+            allValid = false;
+            $input.addClass("is-invalid");
+
+            let $feedback = $input.next(".invalid-feedback");
+            if (!$feedback.length) {
+              $feedback = $('<div class="invalid-feedback"></div>').insertAfter(
+                $input,
+              );
+            }
+            $feedback.text("Duplicate global ban for this IP");
+          } else {
+            ipServiceMap.set(key, true);
+          }
+        }
+        // Validate service ban
+        else if (banScope === "service") {
+          const service = $li.find("select[name='service']").val();
+
+          if (!service) {
+            allValid = false;
+            $input.addClass("is-invalid");
+
+            let $feedback = $input.next(".invalid-feedback");
+            if (!$feedback.length) {
+              $feedback = $('<div class="invalid-feedback"></div>').insertAfter(
+                $input,
+              );
+            }
+            $feedback.text("Please select a service for this ban");
+          } else {
+            const key = `${ip}:service:${service}`;
+
+            if (ipServiceMap.has(key)) {
+              allValid = false;
+              $input.addClass("is-invalid");
+
+              let $feedback = $input.next(".invalid-feedback");
+              if (!$feedback.length) {
+                $feedback = $(
+                  '<div class="invalid-feedback"></div>',
+                ).insertAfter($input);
+              }
+              $feedback.text(
+                `This IP is already banned for the service "${service}"`,
+              );
+            } else {
+              ipServiceMap.set(key, true);
+            }
+          }
+        }
+
+        // Always validate IP format
+        if (!ipRegex.test(ip)) {
           allValid = false;
-        } else {
-          ipSet.add(ip);
+          $input.addClass("is-invalid");
+
+          let $feedback = $input.next(".invalid-feedback");
+          if (!$feedback.length) {
+            $feedback = $('<div class="invalid-feedback"></div>').insertAfter(
+              $input,
+            );
+          }
+          $feedback.text("Please enter a valid IP address");
         }
       });
 
     if (!allValid) return;
 
+    // Rest of the form submission code
     const bans = [];
     $("#bans-container")
       .find("li.rounded-0")
@@ -929,10 +1099,18 @@ $(document).ready(function () {
         const ip = $this.find("input[name='ip']").val().trim();
         const end_date = $this.find(".flatpickr-input").val();
         const reason = $this.find("input[name='reason']").val().trim();
+        const ban_scope = $this.find("select[name='ban_scope']").val();
+        const service =
+          ban_scope === "service"
+            ? $this.find("select[name='service']").val()
+            : "Web UI";
+
         bans.push({
           ip: ip,
           end_date: `${end_date}${getTimeZoneOffset()}`,
           reason: reason,
+          ban_scope: ban_scope,
+          service: service,
         });
       });
 
@@ -961,4 +1139,57 @@ $(document).ready(function () {
     // Append the form to the body and submit it
     form.appendTo("body").submit();
   });
+
+  // Add validation on service selection change
+  $("#bans-container").on("change", "select[name='service']", function () {
+    const $banItem = $(this).closest("li.ban-item");
+    const $ipInput = $banItem.find("input[name='ip']");
+
+    if ($ipInput.val().trim()) {
+      // Re-validate this IP if it already has a value
+      $ipInput.trigger("input");
+    }
+  });
+
+  // Initialize ban scope selection for the first ban item
+  initializeBanScopeHandlers($("#ban-1"));
+
+  function initializeBanScopeHandlers($banItem) {
+    const $banScopeSelect = $banItem.find(".ban-scope-select");
+    const $serviceField = $banItem.find(".service-field");
+    const $serviceSelect = $serviceField.find('select[name="service"]');
+
+    // Initial setup
+    toggleServiceField($banScopeSelect.val(), $serviceField, $serviceSelect);
+
+    // Handle change events
+    $banScopeSelect.on("change", function () {
+      const newScope = $(this).val();
+      toggleServiceField(newScope, $serviceField, $serviceSelect);
+
+      // Clear any validation errors when switching scope
+      const $ipInput = $banItem.find("input[name='ip']");
+      $ipInput.removeClass("is-invalid");
+      const $feedback = $ipInput.next(".invalid-feedback");
+      if ($feedback.length) {
+        $feedback.text("");
+      }
+
+      // Re-validate after switching scope if we have an IP address
+      if ($ipInput.val().trim()) {
+        // Short delay to let the DOM update
+        setTimeout(() => $ipInput.trigger("input"), 50);
+      }
+    });
+  }
+
+  function toggleServiceField(scopeValue, $serviceField, $serviceSelect) {
+    if (scopeValue === "service") {
+      $serviceField.addClass("show");
+      $serviceSelect.attr("required", true);
+    } else {
+      $serviceField.removeClass("show");
+      $serviceSelect.removeAttr("required");
+    }
+  }
 });

@@ -110,21 +110,34 @@ if [ "$(id -u)" -ne 0 ]; then
 fi
 
 # Detect operating system
-if command -v lsb_release >/dev/null 2>&1; then
-    OS=$(lsb_release -is 2>/dev/null | tr '[:upper:]' '[:lower:]')
+DISTRO_ID=""
+
+# First try /etc/os-release as it's most commonly available
+if [ -f /etc/os-release ]; then
+    # Source the file to get variables directly
+    # shellcheck disable=SC1091
+    . /etc/os-release
+    DISTRO_ID=$(echo "$ID" | tr '[:upper:]' '[:lower:]')
+    echo "ℹ️ Detected OS from /etc/os-release: $DISTRO_ID"
+# Try lsb_release if os-release didn't work
+elif command -v lsb_release >/dev/null 2>&1; then
+    DISTRO_ID=$(lsb_release -is 2>/dev/null | tr '[:upper:]' '[:lower:]')
+    echo "ℹ️ Detected OS from lsb_release: $DISTRO_ID"
+# Final fallback - check for Debian/Ubuntu specific files
+elif [ -f /etc/debian_version ]; then
+    DISTRO_ID="debian"
+    echo "ℹ️ Detected Debian-based system from /etc/debian_version"
 else
-    # Fallback to parsing /etc/os-release
-    if [ -f /etc/os-release ]; then
-        OS=$(grep "^ID=" /etc/os-release | cut -d= -f2 | tr -d '"' | tr '[:upper:]' '[:lower:]')
-    else
-        echo "❌ Unable to detect operating system"
-        exit 1
-    fi
+    echo "❌ Unable to detect operating system"
+    exit 1
 fi
 
 # Support only Debian-based systems
-if ! [[ "$OS" =~ (debian|ubuntu) ]]; then
-    echo "❌ Unsupported operating system: $OS"
+if [[ "$DISTRO_ID" == "debian" ]] || [[ "$DISTRO_ID" == "ubuntu" ]] ||
+   [[ "$DISTRO_ID" == *"debian"* ]] || [[ "$DISTRO_ID" == *"ubuntu"* ]]; then
+    echo "ℹ️ Running on $DISTRO_ID"
+else
+    echo "❌ Unsupported operating system: $DISTRO_ID"
     exit 1
 fi
 

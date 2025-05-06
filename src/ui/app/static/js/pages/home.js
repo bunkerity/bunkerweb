@@ -447,7 +447,11 @@ $(function () {
     parseInt(value, 10),
   );
   const categories = Object.keys(blockingData).map((key) =>
-    new Date(key).toLocaleTimeString(),
+    new Date(key).toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    }),
   );
 
   const minValue = Math.min(...dataValues);
@@ -476,12 +480,14 @@ $(function () {
         toolbar: {
           show: false,
         },
+        fontFamily: "Public Sans, sans-serif",
       },
       title: {
         text: "Blocked Requests per Hour",
         align: "center",
         style: {
           color: headingColor,
+          fontFamily: "Public Sans, sans-serif",
         },
       },
       series: [
@@ -498,6 +504,9 @@ $(function () {
       },
       tooltip: {
         theme: theme,
+        style: {
+          fontFamily: "Public Sans, sans-serif",
+        },
       },
       xaxis: {
         categories: categories,
@@ -506,12 +515,14 @@ $(function () {
           hideOverlappingLabels: true,
           style: {
             colors: headingColor,
+            fontFamily: "Public Sans, sans-serif",
           },
         },
         title: {
           text: "Time",
           style: {
             color: headingColor,
+            fontFamily: "Public Sans, sans-serif",
           },
         },
       },
@@ -520,11 +531,18 @@ $(function () {
           text: "Number of Blocked Requests",
           style: {
             color: headingColor,
+            fontFamily: "Public Sans, sans-serif",
+          },
+        },
+        labels: {
+          style: {
+            fontFamily: "Public Sans, sans-serif",
           },
         },
       },
       legend: {
         show: false,
+        fontFamily: "Public Sans, sans-serif",
       },
       grid: {
         padding: {

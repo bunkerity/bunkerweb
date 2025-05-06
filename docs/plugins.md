@@ -8,13 +8,12 @@ Here is the list of "official" plugins that we maintain (see the [bunkerweb-plug
 
 |      Name      | Version | Description                                                                                                                      |                                                Link                                                 |
 | :------------: | :-----: | :------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------: |
-|   **ClamAV**   |   1.8   | Automatically scans uploaded files with the ClamAV antivirus engine and denies the request when a file is detected as malicious. |     [bunkerweb-plugins/clamav](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav)     |
-|   **Coraza**   |   1.8   | Inspect requests using a the Coraza WAF (alternative of ModSecurity).                                                            |     [bunkerweb-plugins/coraza](https://github.com/bunkerity/bunkerweb-plugins/tree/main/coraza)     |
-|  **CrowdSec**  |   1.8   | CrowdSec bouncer for BunkerWeb.                                                                                                  |   [bunkerweb-plugins/crowdsec](https://github.com/bunkerity/bunkerweb-plugins/tree/main/crowdsec)   |
-|  **Discord**   |   1.8   | Send security notifications to a Discord channel using a Webhook.                                                                |    [bunkerweb-plugins/discord](https://github.com/bunkerity/bunkerweb-plugins/tree/main/discord)    |
-|   **Slack**    |   1.8   | Send security notifications to a Slack channel using a Webhook.                                                                  |      [bunkerweb-plugins/slack](https://github.com/bunkerity/bunkerweb-plugins/tree/main/slack)      |
-| **VirusTotal** |   1.8   | Automatically scans uploaded files with the VirusTotal API and denies the request when a file is detected as malicious.          | [bunkerweb-plugins/virustotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal) |
-|  **WebHook**   |   1.8   | Send security notifications to a custom HTTP endpoint using a	Webhook.                                                           |    [bunkerweb-plugins/webhook](https://github.com/bunkerity/bunkerweb-plugins/tree/main/webhook)    |
+|   **ClamAV**   |   1.9   | Automatically scans uploaded files with the ClamAV antivirus engine and denies the request when a file is detected as malicious. |     [bunkerweb-plugins/clamav](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav)     |
+|   **Coraza**   |   1.9   | Inspect requests using a the Coraza WAF (alternative of ModSecurity).                                                            |     [bunkerweb-plugins/coraza](https://github.com/bunkerity/bunkerweb-plugins/tree/main/coraza)     |
+|  **Discord**   |   1.9   | Send security notifications to a Discord channel using a Webhook.                                                                |    [bunkerweb-plugins/discord](https://github.com/bunkerity/bunkerweb-plugins/tree/main/discord)    |
+|   **Slack**    |   1.9   | Send security notifications to a Slack channel using a Webhook.                                                                  |      [bunkerweb-plugins/slack](https://github.com/bunkerity/bunkerweb-plugins/tree/main/slack)      |
+| **VirusTotal** |   1.9   | Automatically scans uploaded files with the VirusTotal API and denies the request when a file is detected as malicious.          | [bunkerweb-plugins/virustotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal) |
+|  **WebHook**   |   1.9   | Send security notifications to a custom HTTP endpoint using a	Webhook.                                                           |    [bunkerweb-plugins/webhook](https://github.com/bunkerity/bunkerweb-plugins/tree/main/webhook)    |
 
 ## How to use a plugin
 
@@ -22,7 +21,7 @@ Here is the list of "official" plugins that we maintain (see the [bunkerweb-plug
 
 If you want to quickly install external plugins, you can use the `EXTERNAL_PLUGIN_URLS` setting. It takes a list of URLs, separated with space, pointing to compressed (zip format) archive containing one or more plugin(s).
 
-You can use the following value if you want to automatically install the official plugins : `EXTERNAL_PLUGIN_URLS=https://github.com/bunkerity/bunkerweb-plugins/archive/refs/tags/v1.8.zip`
+You can use the following value if you want to automatically install the official plugins : `EXTERNAL_PLUGIN_URLS=https://github.com/bunkerity/bunkerweb-plugins/archive/refs/tags/v1.9.zip`
 
 ### Manual
 
@@ -90,7 +89,7 @@ The first step is to install the plugin by putting the plugin files inside the c
     services:
     ...
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.0
+        image: bunkerity/bunkerweb-scheduler:1.6.1
         volumes:
           - ./bw-data:/data
     ...
@@ -126,7 +125,7 @@ The first step is to install the plugin by putting the plugin files inside the c
     services:
     ...
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.0
+        image: bunkerity/bunkerweb-scheduler:1.6.1
         volumes:
           - ./bw-data:/data
     ...
@@ -169,7 +168,7 @@ The first step is to install the plugin by putting the plugin files inside the c
     services:
     ...
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.0
+        image: bunkerity/bunkerweb-scheduler:1.6.1
         volumes:
           - /shared/bw-plugins:/data/plugins
     ...
@@ -216,7 +215,7 @@ The first step is to install the plugin by putting the plugin files inside the c
           serviceAccountName: sa-bunkerweb
           containers:
             - name: bunkerweb-scheduler
-              image: bunkerity/bunkerweb-scheduler:1.6.0
+              image: bunkerity/bunkerweb-scheduler:1.6.1
               imagePullPolicy: Always
               env:
                 - name: KUBERNETES_MODE
@@ -256,34 +255,42 @@ The first step is to install the plugin by putting the plugin files inside the c
 
 !!! tip "Existing plugins"
 
-    If the documentation is not enough, you can have a look at the existing source code of [official plugins](https://github.com/bunkerity/bunkerweb-plugins) and the [core plugins](https://github.com/bunkerity/bunkerweb/tree/v1.6.0/src/common/core) (already included in BunkerWeb but they are plugins, technically speaking).
+    If the documentation is not enough, you can have a look at the existing source code of [official plugins](https://github.com/bunkerity/bunkerweb-plugins) and the [core plugins](https://github.com/bunkerity/bunkerweb/tree/v1.6.1/src/common/core) (already included in BunkerWeb but they are plugins, technically speaking).
 
-What a plugin structure looks like :
+What a plugin structure looks like:
 ```
 plugin /
-        confs / conf_type / conf_name.conf
-        ui / actions.py
-             template.html
-        jobs / my-job.py
-        templates / my-template.json
-                    my-template / configs / conf_type / conf_name.conf
-        plugin.lua
-        plugin.json
+    confs / conf_type / conf_name.conf
+    ui / actions.py
+         hooks.py
+         template.html
+         blueprints / <blueprint_file(s)>
+              templates / <blueprint_template(s)>
+    jobs / my-job.py
+    templates / my-template.json
+          my-template / configs / conf_type / conf_name.conf
+    plugin.lua
+    plugin.json
 ```
 
-- **conf_name.conf** : add [custom NGINX configurations](advanced.md#custom-configurations) (as jinja2 templates)
+- **conf_name.conf** : Add [custom NGINX configurations](advanced.md#custom-configurations) (as Jinja2 templates).
 
-- **actions.py** : script to execute on flask server, this script is running on flask context, you have access to lib and utils like `jinja2`, `requests`, etc...
+- **actions.py** : Script to execute on the Flask server. This script runs in a Flask context, giving you access to libraries and utilities like `jinja2` and `requests`.
 
-- **template.html** : custom plugin page you can access from ui
+- **hooks.py** : Custom Python file that contains flask's hooks and will be executed when the plugin is loaded.
 
-- **jobs py file** : custom python files executed as jobs by the scheduler
+- **template.html** : Custom plugin page accessed via the UI.
 
-- **my-template.json** : add [custom templates](concepts.md#templates) for the plugin to override settings' default values and apply custom configurations in an easy way
+- **blueprints folder (within ui)**:
+  This folder is used to override existing Flask blueprints or create new ones. Inside, you can include blueprint files and an optional **templates** subfolder for blueprint-specific templates.
 
-- **plugin.lua** : code to execute on NGINX using [NGINX LUA module](https://github.com/openresty/lua-nginx-module)
+- **jobs py file** : Custom Python files executed as jobs by the scheduler.
 
-- **plugin.json** : metadata, settings and jobs for your settings
+- **my-template.json** : Add [custom templates](concepts.md#templates) to override the default values of settings and apply custom configurations easily.
+
+- **plugin.lua** : Code executed on NGINX using the [NGINX LUA module](https://github.com/openresty/lua-nginx-module).
+
+- **plugin.json** : Metadata, settings, and job definitions for your plugin.
 
 ### Getting started
 
@@ -534,7 +541,7 @@ end
 
 !!! tip "More examples"
 
-    If you want to see the full list of available functions, you can have a look at the files present in the [lua directory](https://github.com/bunkerity/bunkerweb/tree/v1.6.0/src/bw/lua/bunkerweb) of the repository.
+    If you want to see the full list of available functions, you can have a look at the files present in the [lua directory](https://github.com/bunkerity/bunkerweb/tree/v1.6.1/src/bw/lua/bunkerweb) of the repository.
 
 ### Jobs
 
@@ -650,3 +657,168 @@ def pre_render(**kwargs) :
 <!-- metadata + config -->
 <div>{{ pre_render }}</div>
 ```
+
+### Hooks.py
+
+This documentation outlines the lifecycle hooks used for managing different stages of a request within the application. Each hook is associated with a specific phase.
+
+=== "before_request"
+    These hooks are executed **before** processing an incoming request. They are typically used for pre-processing tasks such as authentication, validation, or logging.
+
+    If the hook returns a response object, Flask will skip the request handling and return the response directly. This can be useful for short-circuiting the request processing pipeline.
+
+    **Example:**
+
+    ```python
+    from flask import request, Response
+
+    def before_request():
+        print("Before-request: Validating request...", flush=True)
+        # Perform authentication, validation, or logging here
+        if not is_valid_request(request): # We are in the app context
+            return Response("Invalid request!", status=400)
+
+    def is_valid_request(request):
+        # Dummy validation logic
+        return "user" in request
+    ```
+=== "after_request"
+    These hooks that run **after** the request has been processed. They are ideal for post-processing tasks such as cleanup, additional logging, or modifying the response before it is sent back.
+
+    They receive the response object as an argument and can modify it before returning it. The first after_request hook to return a response will be used as the final response.
+
+    **Example:**
+
+    ```python
+    from flask import request
+
+    def after_request(response):
+        print("After-request: Logging response...", flush=True)
+        # Perform logging, cleanup, or response modifications here
+        log_response(response)
+        return response
+
+    def log_response(response):
+        # Dummy logging logic
+        print("Response logged:", response, flush=True)
+    ```
+=== "teardown_request"
+    These hooks are invoked when the request context is being torn down. These hooks are used for releasing resources or handling errors that occurred during the request lifecycle.
+
+    **Example:**
+
+    ```python
+    def teardown_request(error=None):
+        print("Teardown-request: Cleaning up resources...", flush=True)
+        # Perform cleanup, release resources, or handle errors here
+        if error:
+            handle_error(error)
+        cleanup_resources()
+
+    def handle_error(error):
+        # Dummy error handling logic
+        print("Error encountered:", error, flush=True)
+
+    def cleanup_resources():
+        # Dummy resource cleanup logic
+        print("Resources have been cleaned up.", flush=True)
+    ```
+=== "context_processor"
+    These hooks are used to inject additional context into templates or views. They enrich the runtime context by passing common data (like user information or configuration settings) to the templates.
+
+    If a context processor returns a dictionary, the keys and values will be added to the context for all templates. This allows you to share data across multiple views or templates.
+
+    **Example:**
+
+    ```python
+    def context_processor() -> dict:
+        print("Context-processor: Injecting context data...", flush=True)
+        # Return a dictionary containing context data for templates/views
+        return {
+            "current_user": "John Doe",
+            "app_version": "1.0.0",
+            "feature_flags": {"new_ui": True}
+        }
+    ```
+
+This lifecycle hook design provides a modular and systematic approach to managing various aspects of a request's lifecycle:
+
+- **Modularity:** Each hook is responsible for a distinct phase, ensuring that concerns are separated.
+- **Maintainability:** Developers can easily add, modify, or remove hook implementations without impacting other parts of the request lifecycle.
+- **Extensibility:** The framework is flexible, allowing for additional hooks or enhancements as application requirements evolve.
+
+By clearly defining the responsibilities of each hook and their associated logging prefixes, the system ensures that each stage of request processing is transparent and manageable.
+
+### Blueprints
+
+In Flask, **blueprints** serve as a modular way to organize related components—such as views, templates, and static files—within your application. They allow you to group functionality logically and can be used to create new sections of your app or override existing ones.
+
+#### Creating a Blueprint
+
+To define a blueprint, you create an instance of the `Blueprint` class, specifying its name and import path. You then define routes and views associated with this blueprint.
+
+**Example: Defining a New Blueprint**
+
+```python
+from os.path import dirname
+from flask import Blueprint, render_template
+
+# Define the blueprint
+my_blueprint = Blueprint('my_blueprint', __name__, template_folder=dirname(__file__) + '/templates') # The template_folder is set to avoid conflicts with the original blueprint
+
+# Define a route within the blueprint
+@my_blueprint.route('/my_blueprint')
+def my_blueprint_page():
+    return render_template('my_blueprint.html')
+```
+
+
+In this example, a blueprint named `my_blueprint` is created, and a route `/my_blueprint` is defined within it.
+
+#### Overriding an Existing Blueprint
+
+Blueprints can also override existing ones to modify or extend functionality. To do this, ensure that the new blueprint has the same name as the one you're overriding and register it after the original.
+
+**Example: Overriding an Existing Blueprint**
+
+```python
+from os.path import dirname
+from flask import Flask, Blueprint
+
+# Original blueprint
+instances = Blueprint('instances', __name__, template_folder=dirname(__file__) + '/templates') # The template_folder is set to avoid conflicts with the original blueprint
+
+@instances.route('/instances')
+def override_instances():
+    return "My new instances page"
+```
+
+In this scenario, accessing the URL `/instances` will display "My new instances page" because the `instances` blueprint, registered last, overrides the original `instances` blueprint.
+
+!!! warning "About overriding"
+    Be cautious when overriding existing blueprints, as it can impact the behavior of the application. Ensure that the changes align with the application's requirements and do not introduce unexpected side effects.
+
+    All existing routes will be removed from he original blueprint, so you will need to re-implement them if needed.
+
+#### Naming Conventions
+
+!!! danger "Important"
+    Ensure the blueprint’s name matches the blueprint variable name, else it will not be considered as a valid blueprint and will not be registered.
+
+For consistency and clarity, it's advisable to follow these naming conventions:
+
+- **Blueprint Names**: Use short, all-lowercase names. Underscores can be used for readability, e.g., `user_auth`.
+
+- **File Names**: Match the filename to the blueprint name, ensuring it's all lowercase with underscores as needed, e.g., `user_auth.py`.
+
+This practice aligns with Python's module naming conventions and helps maintain a clear project structure.
+
+**Example: Blueprint and File Naming**
+
+```
+plugin /
+    ui / blueprints / user_auth.py
+                      templates / user_auth.html
+```
+
+In this structure, `user_auth.py` contains the `user_auth` blueprint, and `user_auth.html` is the associated template, adhering to the recommended naming conventions.
