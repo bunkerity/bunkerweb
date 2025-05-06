@@ -48,6 +48,10 @@ class IngressController(Controller):
             self.__service_protocol = "http"
         self._logger.info(f"Using service protocol: {self.__service_protocol}")
 
+
+        self.__service_name = getenv("BUNKERWEB_SERVICE_NAME", "bunkerweb")
+        self.__namespace = getenv("BUNKERWEB_NAMESPACE", "bunkerweb")
+
     def _get_controller_instances(self) -> list:
         instances = []
         pods = self.__corev1.list_pod_for_all_namespaces(watch=False).items
@@ -442,9 +446,58 @@ class IngressController(Controller):
                     self._logger.warning("Got exception, retrying in 10 seconds ...")
                     sleep(10)
 
-    def apply_config(self) -> bool:
-        return self.apply(self._instances, self._services, configs=self._configs, first=not self._loaded, extra_config=self._extra_config)
+    def __get_loadbalancer_ip(self, name: str, namespace: str) -> str:
+        try:
+            service = self.__corev1.read_namespaced_service(name=name, namespace=namespace)
+            ingress_list = service.status.load_balancer.ingress
+            if ingress_list and ingress_list[0].ip:
+                return ingress_list[0].ip
+            elif ingress_list and ingress_list[0].hostname:
+                return ingress_list[0].hostname
+            else:
+                self._logger.warning(f"No IP found in LoadBalancer status for service {name} in {namespace}")
+        except ApiException as e:
+            self._logger.error(f"Error retrieving service {name} in {namespace}: {e}")
+        return None
 
+    def __patch_ingress_status(self, ingress, ip: str):
+        if not ip:
+            self._logger.warning("Cannot patch ingress without IP")
+            return
+
+        ingress_status = client.V1IngressStatus(
+            load_balancer=client.V1LoadBalancerStatus(
+                ingress=[client.V1LoadBalancerIngress(ip=ip)]
+            )
+        )
+
+        ingress_patch = client.V1Ingress(
+            metadata=client.V1ObjectMeta(name=ingress.metadata.name),
+            status=ingress_status
+        )
+        
+        try:
+            self.__networkingv1.replace_namespaced_ingress_status(
+                name=ingress.metadata.name,
+                namespace=ingress.metadata.namespace,
+                body=ingress_patch
+            )
+            self._logger.info(f"Patched status of ingress {ingress.metadata.name} with IP {ip}")
+        except ApiException as e:
+            self._logger.error(f"Failed to patch ingress {ingress.metadata.name}: {e}")
+
+    def apply_config(self) -> bool:
+        result = self.apply(
+                self._instances, self._services,
+                configs=self._configs, first=not
+                self._loaded, extra_config=self._extra_config
+        )
+        if result:
+            ip = self.__get_loadbalancer_ip(self.__service_name, self.__namespace)
+            for ingress in self._get_controller_services():
+                self.__patch_ingress_status(ingress, ip)
+        return result
+        
     def process_events(self):
         self._set_autoconf_load_db()
         watch_types = ("pod", "ingress", "configmap", "service", "secret")
