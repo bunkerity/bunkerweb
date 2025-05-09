@@ -65,13 +65,18 @@ def backup_database(current_time: datetime, db: Database = None, backup_dir: Pat
     stderr = "Table 'db.test_"
     current_time = datetime.now().astimezone()
 
+    # Get table names from the SQLAlchemy model
+    model_tables = list(Base.metadata.tables.keys())
+    LOGGER.info(f"Backing up {len(model_tables)} tables defined in the model")
+
     while "Table 'db.test_" in stderr and (datetime.now().astimezone() - current_time).total_seconds() < 10:
         if database == "sqlite":
             db_path = Path(database_url.database)
 
             LOGGER.info("Creating a backup for the SQLite database ...")
 
-            proc = run(["sqlite3", db_path.as_posix(), ".dump"], stdout=PIPE, stderr=PIPE)
+            # For SQLite, use a different approach to dump only specific tables
+            proc = run(["sqlite3", db_path.as_posix()], input="\n".join([f".dump {table}" for table in model_tables]).encode(), stdout=PIPE, stderr=PIPE)
         else:
             url = make_url(db.database_uri)
             db_user = url.username or ""
@@ -87,6 +92,9 @@ def backup_database(current_time: datetime, db: Database = None, backup_dir: Pat
                 if db_port:
                     cmd.extend(["-P", db_port])
 
+                # Add specific tables to backup
+                cmd.extend(model_tables)
+
                 proc = run(cmd, stdout=PIPE, stderr=PIPE, env=environ | {"MYSQL_PWD": db_password})
             elif database == "postgresql":
                 LOGGER.info("Creating a backup for the PostgreSQL database ...")
@@ -94,6 +102,10 @@ def backup_database(current_time: datetime, db: Database = None, backup_dir: Pat
                 cmd = ["pg_dump", "-h", db_host, "-U", db_user, db_database_name, "-w"]
                 if db_port:
                     cmd.extend(["-p", db_port])
+
+                # Add specific tables to backup
+                for table in model_tables:
+                    cmd.extend(["-t", table])
 
                 proc = run(cmd, stdout=PIPE, stderr=PIPE, env=environ | {"PGPASSWORD": db_password})
 

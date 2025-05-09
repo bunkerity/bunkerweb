@@ -2,11 +2,10 @@
 
 from datetime import datetime
 from io import BytesIO
-from itertools import chain
 from os import getenv, sep
 from os.path import join
 from pathlib import Path
-from stat import S_IEXEC
+from stat import S_IRGRP, S_IRUSR, S_IWUSR, S_IXGRP, S_IXUSR
 from sys import exit as sys_exit, path as sys_path
 from time import sleep
 from traceback import format_exc
@@ -59,8 +58,9 @@ def install_plugin(plugin_path: Path, db, preview: bool = True) -> bool:
     # Load plugin.json
     try:
         metadata = loads(plugin_file.read_text(encoding="utf-8"))
-    except JSONDecodeError:
-        LOGGER.error(f"Skipping installation of {'preview version of ' if preview else ''}Pro plugin {plugin_path.name} (plugin.json is not valid)")
+    except JSONDecodeError as e:
+        LOGGER.debug(format_exc())
+        LOGGER.error(f"Skipping installation of {'preview version of ' if preview else ''}Pro plugin {plugin_path.name} (plugin.json is not valid) :\n{e}")
         return False
 
     new_plugin_path = PRO_PLUGINS_DIR.joinpath(metadata["id"])
@@ -87,9 +87,16 @@ def install_plugin(plugin_path: Path, db, preview: bool = True) -> bool:
 
     # Copy the plugin
     copytree(plugin_path, new_plugin_path)
-    # Add u+x permissions to jobs files
-    for job_file in chain(new_plugin_path.joinpath("jobs").glob("*"), new_plugin_path.joinpath("bwcli").glob("*")):
-        job_file.chmod(job_file.stat().st_mode | S_IEXEC)
+    # Add u+x permissions to executable files
+    desired_perms = S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IXGRP  # 0o750
+    for subdir, pattern in (
+        ("jobs", "*"),
+        ("bwcli", "*"),
+        ("ui", "*.py"),
+    ):
+        for executable_file in new_plugin_path.joinpath(subdir).rglob(pattern):
+            if executable_file.stat().st_mode & 0o777 != desired_perms:
+                executable_file.chmod(desired_perms)
     LOGGER.info(f"✅ {'Preview version of ' if preview else ''}Pro plugin {metadata['id']} (version {metadata['version']}) installed successfully!")
     return True
 
@@ -129,7 +136,18 @@ try:
     if pro_license_key:
         LOGGER.info("BunkerWeb Pro license provided, checking if it's valid...")
         headers["Authorization"] = f"Bearer {pro_license_key}"
-        resp = get(f"{API_ENDPOINT}/pro/status", headers=headers, json=data, timeout=8, allow_redirects=True)
+        max_retries = 3
+        retry_count = 0
+        while retry_count < max_retries:
+            try:
+                resp = get(f"{API_ENDPOINT}/pro/status", headers=headers, json=data, timeout=8, allow_redirects=True)
+                break
+            except ConnectionError as e:
+                retry_count += 1
+                if retry_count == max_retries:
+                    raise e
+                LOGGER.warning(f"Connection refused, retrying in 3 seconds... ({retry_count}/{max_retries})")
+                sleep(3)
 
         if resp.status_code == 403:
             LOGGER.error(f"Access denied to {API_ENDPOINT}/pro-status - please check your BunkerWeb Pro access at https://panel.bunkerweb.io/")
@@ -183,7 +201,18 @@ try:
     if metadata["is_pro"]:
         LOGGER.info("🚀 Your BunkerWeb Pro license is valid, checking if there are new or updated Pro plugins...")
 
-        resp = get(f"{API_ENDPOINT}/pro/download", headers=headers, json=data, timeout=8, stream=True, allow_redirects=True)
+        max_retries = 3
+        retry_count = 0
+        while retry_count < max_retries:
+            try:
+                resp = get(f"{API_ENDPOINT}/pro/download", headers=headers, json=data, timeout=8, stream=True, allow_redirects=True)
+                break
+            except ConnectionError as e:
+                retry_count += 1
+                if retry_count == max_retries:
+                    raise e
+                LOGGER.warning(f"Connection refused, retrying in 3 seconds... ({retry_count}/{max_retries})")
+                sleep(3)
 
         if resp.status_code == 403:
             LOGGER.error(f"Access denied to {API_ENDPOINT}/pro - please check your BunkerWeb Pro access at https://panel.bunkerweb.io/")
@@ -282,8 +311,9 @@ try:
                     plugin_nbr += 1
             except FileExistsError:
                 LOGGER.warning(f"Skipping installation of pro plugin {plugin_path.name} (already installed)")
-    except:
-        LOGGER.exception("Exception while installing pro plugin(s)")
+    except BaseException as e:
+        LOGGER.debug(format_exc())
+        LOGGER.error(f"Exception while installing pro plugin(s) :\n{e}")
         status = 2
         sys_exit(status)
 
@@ -336,8 +366,8 @@ try:
 except SystemExit as e:
     status = e.code
 except BaseException as e:
-    LOGGER.debug(format_exc())
     status = 2
+    LOGGER.debug(format_exc())
     LOGGER.error(f"Exception while running download-pro-plugins.py :\n{e}")
 
 for plugin_tmp in TMP_DIR.glob("*"):

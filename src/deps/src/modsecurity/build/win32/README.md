@@ -18,7 +18,7 @@ The Windows build of libModSecurity uses Build Tools for Visual Studio 2022 (for
         * Windows SDK
         * CMake
         * Address Sanitizer
- * [Conan package manager 2.2.2](https://github.com/conan-io/conan/releases/download/2.2.2/conan-2.2.2-windows-x86_64-installer.exe)
+ * [Conan package manager 2.10.2](https://github.com/conan-io/conan/releases/download/2.10.2/conan-2.10.2-windows-x86_64-installer.exe)
     * Install and then setup the default Conan profile to use the MSVC C++ compiler:
       1. Open a command-prompt and set the MSVC C++ compiler environment by executing: `C:\BuildTools\VC\Auxiliary\Build\vcvars64.bat`
       2. Execute: `conan profile detect --force`
@@ -30,7 +30,7 @@ The Windows build of libModSecurity uses Build Tools for Visual Studio 2022 (for
 
 ## Build
 
-Install the prerequisites listsed in the previous section, checkout libModSecurity and from the directory where it's located execute:
+Install the prerequisites listed in the previous section, checkout libModSecurity and from the directory where it's located execute:
 
 ```
 vcbuild.bat [build_configuration] [arch] [USE_ASAN]

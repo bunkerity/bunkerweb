@@ -1,6 +1,6 @@
 from json import JSONDecodeError, loads
-from flask import Blueprint, redirect, render_template, request, url_for
-from flask_login import login_required
+from flask import Blueprint, Response, redirect, render_template, request, url_for
+from flask_login import current_user, login_required
 
 from app.dependencies import DB
 from app.utils import flash
@@ -19,7 +19,9 @@ def jobs_page():
 @jobs.route("/jobs/run", methods=["POST"])
 @login_required
 def jobs_run():
-    if DB.readonly:
+    if "write" not in current_user.list_permissions:
+        return Response("You don't have the required permissions to run jobs.", 403)
+    elif DB.readonly:
         return handle_error("Database is in read-only mode", "jobs")
 
     verify_data_in_form(
@@ -40,7 +42,7 @@ def jobs_run():
     if ret:
         return handle_error(ret, "jobs", True)
 
-    flash(f"Job{'s' if len(jobs) > 1 else ''}'s plugins will be run in the background by the scheduler.", "success")
+    flash(f"Job{'s' if len(jobs) > 1 else ''}'s plugins will be run in the background by the scheduler.")
     return redirect(
         url_for(
             "loading",

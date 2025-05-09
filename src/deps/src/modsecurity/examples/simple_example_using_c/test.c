@@ -47,7 +47,7 @@ int main (int argc, char **argv)
     msc_rules_dump(rules);
 
     ret = msc_rules_add_remote(rules, "test",
-        "https://www.modsecurity.org/modsecurity-regression-test-secremoterules.txt",
+        "https://raw.githubusercontent.com/owasp-modsecurity/ModSecurity/refs/heads/v3/master/test/modsecurity-regression-rules.txt",
         &error);
     if (ret < 0) {
         fprintf(stderr, "Problems loading the rules --\n");

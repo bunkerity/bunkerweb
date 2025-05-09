@@ -3,6 +3,7 @@ $(function () {
   let actionLock = false;
   const serviceNumber = parseInt($("#services_number").val(), 10) || 0;
   const isReadOnly = $("#is-read-only").val().trim() === "True";
+  const userReadOnly = $("#user-read-only").val().trim() === "True";
 
   const setupModal = (services, modal) => {
     const headerList = $(`
@@ -95,13 +96,13 @@ $(function () {
     },
     topStart: {},
     topEnd: {
+      search: true,
       buttons: [
         {
           extend: "toggle_filters",
           className: "btn btn-sm btn-outline-primary toggle-filters",
         },
       ],
-      search: true,
     },
     bottomStart: {
       info: true,
@@ -468,7 +469,11 @@ $(function () {
             .find(".dt-buttons")
             .attr(
               "data-bs-original-title",
-              "The database is in read-only mode; you cannot create new services.",
+              `${
+                userReadOnly
+                  ? "Your account is readonly"
+                  : "The database is in readonly"
+              }, therefore you cannot create new services.`,
             )
             .attr("data-bs-placement", "right")
             .tooltip();
@@ -484,5 +489,15 @@ $(function () {
     }
     const service = $(this).data("service-id");
     setupDeletionModal([service]);
+  });
+
+  $(document).on("click", ".convert-service", function () {
+    if (isReadOnly) {
+      alert("This action is not allowed in read-only mode.");
+      return;
+    }
+    const service = $(this).data("service-id");
+    const conversionType = $(this).data("value");
+    setupConversionModal([service], conversionType);
   });
 });

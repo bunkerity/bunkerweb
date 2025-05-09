@@ -171,13 +171,13 @@ endfunction()
 
 # unit tests
 file(GLOB unitTestSources ${BASE_DIR}/test/unit/*.cc)
-add_executable(unit_tests ${unitTestSources})
+add_executable(unit_tests ${unitTestSources} ${BASE_DIR}/test/common/custom_debug_log.cc)
 setTestTargetProperties(unit_tests)
 target_compile_options(unit_tests PRIVATE /wd4805)
 
 # regression tests
 file(GLOB regressionTestsSources ${BASE_DIR}/test/regression/*.cc)
-add_executable(regression_tests ${regressionTestsSources})
+add_executable(regression_tests ${regressionTestsSources} ${BASE_DIR}/test/common/custom_debug_log.cc)
 setTestTargetProperties(regression_tests)
 
 macro(add_regression_test_capability compile_definition flag)

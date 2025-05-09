@@ -135,7 +135,7 @@ bool VerifyCC::init(const std::string &param2, std::string *error) {
 
 
 bool VerifyCC::evaluate(Transaction *t, RuleWithActions *rule,
-    const std::string& i, std::shared_ptr<RuleMessage> ruleMessage) {
+    const std::string& i, RuleMessage &ruleMessage) {
 #ifdef WITH_PCRE2
     PCRE2_SIZE offset = 0;
     size_t target_length = i.length();

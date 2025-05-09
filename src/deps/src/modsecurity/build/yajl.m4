@@ -62,7 +62,7 @@ else
                 YAJL_DISPLAY="${YAJL_LDADD}, ${YAJL_CFLAGS}"
             else
                 # If pkg-config did not find anything useful, go over file lookup.
-                for x in ${YAJL_POSSIBLE_LIB_NAMES}; do
+                for x in ${YAJL_POSSIBLE_PATHS}; do
                     CHECK_FOR_YAJL_AT(${x})
                     if test -n "${YAJL_VERSION}"; then
                         break

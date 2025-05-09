@@ -37,7 +37,7 @@ bool RxGlobal::init(const std::string &arg, std::string *error) {
 
 
 bool RxGlobal::evaluate(Transaction *transaction, RuleWithActions *rule,
-    const std::string& input, std::shared_ptr<RuleMessage> ruleMessage) {
+    const std::string& input, RuleMessage &ruleMessage) {
     Regex *re;
 
     if (m_param.empty() && !m_string->m_containsMacro) {

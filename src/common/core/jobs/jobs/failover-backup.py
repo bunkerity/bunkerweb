@@ -3,6 +3,7 @@
 from os import sep
 from os.path import join
 from sys import exit as sys_exit, path as sys_path
+from traceback import format_exc
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("db",))]:
     if deps_path not in sys_path:
@@ -19,6 +20,7 @@ try:
     JOB = Job(LOGGER, __file__)
 except BaseException as e:
     status = 2
+    LOGGER.debug(format_exc())
     LOGGER.error(f"Exception while running failover-backup.py :\n{e}")
 
 sys_exit(status)

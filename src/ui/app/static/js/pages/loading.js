@@ -28,7 +28,7 @@ $(document).ready(function () {
 
   // Start the reloading interval to check every 2 seconds
   var reloadingInterval = setInterval(check_reloading, 2000);
-  check_reloading(); // Run immediately on load
+  setTimeout(check_reloading, 500); // Run after a brief delay
 
   // Function to check if reloading is needed
   function check_reloading() {

@@ -13,6 +13,9 @@
  *
  */
 
+#ifndef HEADERS_MODSECURITY_TRANSACTION_H_
+#define HEADERS_MODSECURITY_TRANSACTION_H_
+
 #ifdef __cplusplus
 #include <cassert>
 #include <ctime>
@@ -32,9 +35,6 @@
 
 #include <stdlib.h>
 #include <stddef.h>
-
-#ifndef HEADERS_MODSECURITY_TRANSACTION_H_
-#define HEADERS_MODSECURITY_TRANSACTION_H_
 
 #ifndef __cplusplus
 typedef struct ModSecurity_t ModSecurity;
@@ -57,7 +57,7 @@ typedef struct Rules_t RulesSet;
 #define ms_dbg(b, c) \
   do { \
       if (m_rules && m_rules->m_debugLog && m_rules->m_debugLog->m_debugLevel >= b) { \
-          m_rules->debug(b, *m_id.get(), m_uri, c); \
+          m_rules->debug(b, m_id, m_uri, c); \
       } \
   } while (0);
 #else
@@ -327,8 +327,8 @@ class TransactionSecMarkerManagement {
 /** @ingroup ModSecurity_CPP_API */
 class Transaction : public TransactionAnchoredVariables, public TransactionSecMarkerManagement {
  public:
-    Transaction(ModSecurity *transaction, RulesSet *rules, void *logCbData);
-    Transaction(ModSecurity *transaction, RulesSet *rules, char *id,
+    Transaction(ModSecurity *ms, RulesSet *rules, void *logCbData);
+    Transaction(ModSecurity *ms, RulesSet *rules, const char *id,
         void *logCbData);
     ~Transaction();
 
@@ -405,9 +405,9 @@ class Transaction : public TransactionAnchoredVariables, public TransactionSecMa
     size_t getRequestBodyLength();
 
 #ifndef NO_LOGS
-    void debug(int, const std::string &) const; // cppcheck-suppress functionStatic
+    void debug(int, const std::string &) const;
 #endif
-    void serverLog(std::shared_ptr<RuleMessage> rm);
+    void serverLog(const RuleMessage &rm);
 
     int getRuleEngineState() const;
 
@@ -426,12 +426,12 @@ class Transaction : public TransactionAnchoredVariables, public TransactionSecMa
 	 *       need to be filled if there is no rule using the variable
 	 *       `duration'.
      */
-    clock_t m_creationTimeStamp;
+    const clock_t m_creationTimeStamp;
 
     /**
      * Holds the client IP address.
      */
-    std::shared_ptr<std::string> m_clientIpAddress;
+    std::string m_clientIpAddress;
 
     /**
      * Holds the HTTP version: 1.2, 2.0, 3.0 and so on....
@@ -441,12 +441,12 @@ class Transaction : public TransactionAnchoredVariables, public TransactionSecMa
     /**
      * Holds the server IP Address
      */
-    std::shared_ptr<std::string> m_serverIpAddress;
+    std::string m_serverIpAddress;
 
     /**
      * Holds the request's hostname
      */
-    std::shared_ptr<std::string> m_requestHostName;
+    std::string m_requestHostName;
 
     /**
      * Holds the raw URI that was requested.
@@ -456,7 +456,7 @@ class Transaction : public TransactionAnchoredVariables, public TransactionSecMa
     /**
      * Holds the URI that was requests (without the query string).
      */
-    std::shared_ptr<std::string> m_uri_no_query_string_decoded;
+    std::string m_uri_no_query_string_decoded;
 
     /**
      * Holds the combined size of all arguments, later used to fill the
@@ -505,7 +505,7 @@ class Transaction : public TransactionAnchoredVariables, public TransactionSecMa
     /**
      * Rules object utilized during this specific transaction.
      */
-    RulesSet *m_rules;
+    RulesSet * const m_rules;
 
     /**
      *
@@ -568,7 +568,7 @@ class Transaction : public TransactionAnchoredVariables, public TransactionSecMa
      * Contains the unique ID of the transaction. Use by the variable
 	 * `UNIQUE_ID'. This unique id is also saved as part of the AuditLog.
      */
-    std::shared_ptr<std::string> m_id;
+    const std::string m_id;
 
     /**
      * Holds the amount of rules that should be skipped. If bigger than 0 the
@@ -600,7 +600,7 @@ class Transaction : public TransactionAnchoredVariables, public TransactionSecMa
      * TODO: m_timeStamp and m_creationTimeStamp may be merged into a single
      *       variable.
      */
-    time_t m_timeStamp;
+    const time_t m_timeStamp;
 
 
     /**
@@ -636,6 +636,10 @@ class Transaction : public TransactionAnchoredVariables, public TransactionSecMa
     std::vector<std::shared_ptr<RequestBodyProcessor::MultipartPartTmpFile>> m_multipartPartTmpFiles;
 
  private:
+
+    Transaction(ModSecurity *ms, RulesSet *rules, const char *id,
+        void *logCbData, const time_t timestamp);
+
     /**
      * Pointer to the callback function that will be called to fill
      * the web server (connector) log.
@@ -656,7 +660,7 @@ Transaction *msc_new_transaction(ModSecurity *ms,
 
 /** @ingroup ModSecurity_C_API */
 Transaction *msc_new_transaction_with_id(ModSecurity *ms,
-    RulesSet *rules, char *id, void *logCbData);
+    RulesSet *rules, const char *id, void *logCbData);
 
 /** @ingroup ModSecurity_C_API */
 int msc_process_connection(Transaction *transaction,
@@ -709,7 +713,7 @@ int msc_process_uri(Transaction *transaction, const char *uri,
     const char *protocol, const char *http_version);
 
 /** @ingroup ModSecurity_C_API */
-const char *msc_get_response_body(Transaction *transaction);
+const char *msc_get_response_body(const Transaction *transaction);
 
 /** @ingroup ModSecurity_C_API */
 size_t msc_get_response_body_length(Transaction *transaction);

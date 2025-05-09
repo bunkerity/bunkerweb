@@ -154,14 +154,26 @@ $(document).ready(function () {
       });
   });
 
-  $("#pluginsCollapse").on("shown.bs.collapse", () => {
-    $(".chevron-icon")
+  $("#pluginsCollapse").on("shown.bs.collapse", function () {
+    $('[data-bs-target="#pluginsCollapse"] .chevron-icon')
       .addClass("chevron-rotate")
       .removeClass("chevron-rotate-back");
   });
 
-  $("#pluginsCollapse").on("hidden.bs.collapse", () => {
-    $(".chevron-icon")
+  $("#pluginsCollapse").on("hidden.bs.collapse", function () {
+    $('[data-bs-target="#pluginsCollapse"] .chevron-icon')
+      .removeClass("chevron-rotate")
+      .addClass("chevron-rotate-back");
+  });
+
+  $("#extraPagesCollapse").on("shown.bs.collapse", function () {
+    $('[data-bs-target="#extraPagesCollapse"] .chevron-icon')
+      .addClass("chevron-rotate")
+      .removeClass("chevron-rotate-back");
+  });
+
+  $("#extraPagesCollapse").on("hidden.bs.collapse", function () {
+    $('[data-bs-target="#extraPagesCollapse"] .chevron-icon')
       .removeClass("chevron-rotate")
       .addClass("chevron-rotate-back");
   });

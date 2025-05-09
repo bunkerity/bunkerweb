@@ -1,11 +1,11 @@
 from datetime import datetime
 from threading import Thread
 from time import time
-from flask import Blueprint, redirect, render_template, request, url_for
-from flask_login import login_required
+from flask import Blueprint, Response, redirect, render_template, request, url_for
+from flask_login import current_user, login_required
 
 from app.dependencies import BW_CONFIG, DATA, DB
-from app.routes.utils import get_remain, handle_error, manage_bunkerweb, verify_data_in_form, wait_applying
+from app.routes.utils import get_remain, handle_error, verify_data_in_form, wait_applying
 from app.utils import flash
 
 
@@ -45,7 +45,9 @@ def pro_page():
 @pro.route("/pro/key", methods=["POST"])
 @login_required
 def pro_key():
-    if DB.readonly:
+    if "write" not in current_user.list_permissions:
+        return Response("You don't have the required permissions to update the license key.", 403)
+    elif DB.readonly:
         return handle_error("Database is in read-only mode", "pro")
 
     verify_data_in_form(
@@ -58,8 +60,14 @@ def pro_key():
     if not license_key:
         return handle_error("Invalid license key", "pro")
 
-    global_config = DB.get_config(global_only=True, methods=True, filtered_settings=("PRO_LICENSE_KEY",))
-    variables = BW_CONFIG.check_variables({"PRO_LICENSE_KEY": license_key}, global_config, global_config=True)
+    global_config = DB.get_config(global_only=True)
+    global_config_methods = DB.get_config(global_only=True, methods=True)
+    variables = BW_CONFIG.check_variables(
+        global_config | {"PRO_LICENSE_KEY": license_key},
+        global_config_methods,
+        {"PRO_LICENSE_KEY": license_key},
+        global_config=True,
+    )
 
     if not variables:
         flash("The license key is the same as the current one.", "warning")
@@ -67,9 +75,24 @@ def pro_key():
 
     DATA.load_from_file()
 
-    def update_license_key(license_key: str):
+    def update_license_key(variables: dict):
         wait_applying()
-        manage_bunkerweb("global_config", {"PRO_LICENSE_KEY": license_key}, threaded=True)
+
+        operation, error = BW_CONFIG.edit_global_conf(variables, check_changes=True)
+
+        if not error:
+            operation = "The PRO license key was updated successfully."
+
+        if operation:
+            if operation.startswith(("Can't", "The database is read-only")):
+                DATA["TO_FLASH"].append({"content": operation, "type": "error"})
+            else:
+                DATA["TO_FLASH"].append({"content": operation, "type": "success"})
+                DATA["TO_FLASH"].append(
+                    {"content": "The Scheduler will be in charge of applying the changes and downloading the PRO plugins.", "type": "success", "save": False}
+                )
+
+        DATA["RELOADING"] = False
 
     DATA.update(
         {
@@ -80,7 +103,7 @@ def pro_key():
         }
     )
     flash("Checking license key.")
-    Thread(target=update_license_key, args=(license_key,)).start()
+    Thread(target=update_license_key, args=(variables,)).start()
     return redirect(
         url_for(
             "loading",

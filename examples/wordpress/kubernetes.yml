@@ -6,7 +6,7 @@ metadata:
     bunkerweb.io/AUTO_LETS_ENCRYPT: "yes"
     bunkerweb.io/www.example.com_MAX_CLIENT_SIZE: "50m"
     # This is a CRS plugin specific to WordPress
-    bunkerweb.io/www.example.com_MODSECURITY_CRS_PLUGIN_URLS: "https://github.com/coreruleset/wordpress-rule-exclusions-plugin/archive/refs/tags/v1.0.1.tar.gz"
+    bunkerweb.io/www.example.com_MODSECURITY_CRS_PLUGINS: "wordpress-rule-exclusions"
 spec:
   rules:
     - host: www.example.com

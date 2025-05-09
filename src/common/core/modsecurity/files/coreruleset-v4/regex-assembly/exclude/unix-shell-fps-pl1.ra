@@ -26,7 +26,7 @@
 ##!   while read -r oword; do
 ##!     found=0
 ##!     while read -r eword; do
-##!       if grep -qE "^${eword}[@~]?" <<<"${oword}"; then
+##!       if grep -qE "^${eword}[@~]?$" <<<"${oword}"; then
 ##!         result="${result}${eword}${NL}"
 ##!         result="${result}${eword}@${NL}"
 ##!         result="${result}${eword}~${NL}"
@@ -63,6 +63,10 @@
 ##! q
 ##! EOF
 ##! echo "${result}" | sort | uniq >> regex-assembly/exclude/unix-shell-fps-pl1.ra
+
+##! Note: As part of the effort to reduce FPs mid-term (https://github.com/coreruleset/coreruleset/pull/3735)
+##!       we've decided to exclude some commands for which only the exact match is an issue
+##!       (mostly for 933236).
 
 GET
 GET@
@@ -162,6 +166,9 @@ check_memory
 check_raid
 check_ssl_cert
 check_statusfile
+chef
+chef@
+chef~
 chflags
 chmod
 choom
@@ -197,7 +204,10 @@ cpulimit
 crash
 crash@
 crash~
+cron
+cron@
 crontab
+cron~
 csplit
 csvtool
 cupsfilter
@@ -549,6 +559,11 @@ perms~
 pf
 pf@
 pg
+pg@
+pg~
+php
+php@
+php~
 pic
 pic@
 pico@
@@ -579,6 +594,10 @@ puppet
 puppet@
 puppet~
 pushd
+##! excluded as part of PR #3735
+pwd
+pwd@
+pwd~
 python
 python@
 python~
@@ -726,8 +745,12 @@ tic@
 tic~
 time
 time@
-timedatectl
 time~
+timedatectl
+##! excluded as part of PR #3735
+timeout
+timeout@
+timeout~
 tmux
 top
 top@
@@ -740,6 +763,10 @@ tshark
 ul
 ul@
 ulimit@
+##! excluded as part of PR #3735
+uname
+uname@
+uname~
 uncompress
 uncompress@
 uncompress~
@@ -789,6 +816,8 @@ whiptail~
 who
 who@
 whois
+whois@
+whois~
 who~
 wireshark
 wish

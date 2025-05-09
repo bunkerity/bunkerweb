@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 
 from io import BytesIO
-from itertools import chain
 from mimetypes import guess_type
 from os import getenv, sep
 from os.path import join
 from pathlib import Path
-from stat import S_IEXEC
+from stat import S_IRGRP, S_IRUSR, S_IWUSR, S_IXGRP, S_IXUSR
 from sys import exit as sys_exit, path as sys_path
 from time import sleep
+from traceback import format_exc
 from uuid import uuid4
 from json import JSONDecodeError, load as json_load, loads
 from shutil import copytree, rmtree
@@ -52,8 +52,9 @@ def install_plugin(plugin_path: Path, db) -> bool:
     # Load plugin.json
     try:
         metadata = loads(plugin_file.read_text(encoding="utf-8"))
-    except JSONDecodeError:
-        LOGGER.error(f"Skipping installation of plugin {plugin_path.name} (plugin.json is not valid)")
+    except JSONDecodeError as e:
+        LOGGER.debug(format_exc())
+        LOGGER.error(f"Skipping installation of plugin {plugin_path.name} (plugin.json is not valid) :\n{e}")
         return False
 
     new_plugin_path = EXTERNAL_PLUGINS_DIR.joinpath(metadata["id"])
@@ -78,10 +79,17 @@ def install_plugin(plugin_path: Path, db) -> bool:
 
     # Copy the plugin
     copytree(plugin_path, new_plugin_path)
-    # Add u+x permissions to jobs files
-    for job_file in chain(new_plugin_path.joinpath("jobs").glob("*"), new_plugin_path.joinpath("bwcli").glob("*")):
-        job_file.chmod(job_file.stat().st_mode | S_IEXEC)
-    LOGGER.info(f"Plugin {metadata['id']} installed")
+    # Add u+x permissions to executable files
+    desired_perms = S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IXGRP  # 0o750
+    for subdir, pattern in (
+        ("jobs", "*"),
+        ("bwcli", "*"),
+        ("ui", "*.py"),
+    ):
+        for executable_file in new_plugin_path.joinpath(subdir).rglob(pattern):
+            if executable_file.stat().st_mode & 0o777 != desired_perms:
+                executable_file.chmod(desired_perms)
+    LOGGER.info(f"✅ Plugin {metadata['id']} (version {metadata['version']}) installed successfully!")
     return True
 
 
@@ -128,6 +136,7 @@ try:
 
                     content.seek(0)
             except BaseException as e:
+                LOGGER.debug(format_exc())
                 LOGGER.error(f"Exception while downloading plugin(s) from {plugin_url} :\n{e}")
                 status = 2
                 continue
@@ -155,6 +164,7 @@ try:
                             zf.extractall(path=temp_dir)
                         LOGGER.info(f"Successfully extracted ZIP file to {temp_dir}")
                     except BadZipFile as e:
+                        LOGGER.debug(format_exc())
                         LOGGER.error(f"Invalid ZIP file: {e}")
                         continue
 
@@ -174,6 +184,7 @@ try:
                             tar.extractall(path=temp_dir)
                         LOGGER.info(f"Successfully extracted TAR file to {temp_dir}")
                     except TarError as e:
+                        LOGGER.debug(format_exc())
                         LOGGER.error(f"Invalid TAR file: {e}")
                         continue
 
@@ -181,7 +192,8 @@ try:
                     LOGGER.error(f"Unknown file type for {plugin_url}, either ZIP or TAR is supported, skipping...")
                     continue
 
-            except Exception as e:
+            except BaseException as e:
+                LOGGER.debug(format_exc())
                 LOGGER.error(f"Exception while decompressing plugin(s) from {plugin_url}:\n{e}")
                 continue
 
@@ -194,6 +206,7 @@ try:
                 except FileExistsError:
                     LOGGER.warning(f"Skipping installation of plugin {plugin_path.parent.name} (already installed)")
         except BaseException as e:
+            LOGGER.debug(format_exc())
             LOGGER.error(f"Exception while installing plugin(s) from {plugin_url} :\n{e}")
             status = 2
 
@@ -247,6 +260,7 @@ except SystemExit as e:
     status = e.code
 except BaseException as e:
     status = 2
+    LOGGER.debug(format_exc())
     LOGGER.error(f"Exception while running download-plugins.py :\n{e}")
 
 rmtree(TMP_DIR, ignore_errors=True)

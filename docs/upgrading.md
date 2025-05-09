@@ -74,16 +74,16 @@
                 ```yaml
                 services:
                     bunkerweb:
-                        image: bunkerity/bunkerweb:1.6.0
+                        image: bunkerity/bunkerweb:1.6.1
                         ...
                     bw-scheduler:
-                        image: bunkerity/bunkerweb-scheduler:1.6.0
+                        image: bunkerity/bunkerweb-scheduler:1.6.1
                         ...
                     bw-autoconf:
-                        image: bunkerity/bunkerweb-autoconf:1.6.0
+                        image: bunkerity/bunkerweb-autoconf:1.6.1
                         ...
                     bw-ui:
-                        image: bunkerity/bunkerweb-ui:1.6.0
+                        image: bunkerity/bunkerweb-ui:1.6.1
                         ...
                 ```
 
@@ -97,8 +97,9 @@
 
             3. **Stop the services**:
                 ```bash
-                systemctl stop bunkerweb
-                systemctl stop bunkerweb-ui
+                sudo systemctl stop bunkerweb
+                sudo systemctl stop bunkerweb-ui
+                sudo systemctl stop bunkerweb-scheduler
                 ```
 
             4. **Update BunkerWeb**:
@@ -110,19 +111,19 @@
                     You can print a list of packages on hold with `apt-mark showhold`
 
                     ```shell
-                    sudo apt-mark unhold bunkerweb
+                    sudo apt-mark unhold bunkerweb nginx
                     ```
 
                     Them, you can update BunkerWeb package :
 
                     ```shell
-                    sudo apt install -y bunkerweb=1.6.0
+                    sudo apt install -y bunkerweb=1.6.1
                     ```
 
                     To prevent upgrading BunkerWeb package when executing `apt upgrade`, you can use the following command :
 
                     ```shell
-                    sudo apt-mark hold bunkerweb
+                    sudo apt-mark hold bunkerweb nginx
                     ```
 
                     More details in the [integration Linux page](integrations.md#__tabbed_1_1).
@@ -134,22 +135,36 @@
                     You can print a list of packages on hold with `dnf versionlock list`
 
                     ```shell
-                    sudo dnf versionlock delete package bunkerweb
+                    sudo dnf versionlock delete package bunkerweb && \
+                    sudo dnf versionlock delete package nginx
                     ```
 
                     Them, you can update BunkerWeb package :
 
                     ```shell
-                    sudo dnf install -y bunkerweb-1.6.0
+                    sudo dnf install -y bunkerweb-1.6.1
                     ```
 
                     To prevent upgrading BunkerWeb package when executing `dnf upgrade`, you can use the following command :
 
                     ```shell
-                    sudo dnf versionlock add bunkerweb
+                    sudo dnf versionlock add bunkerweb && \
+                    sudo dnf versionlock add nginx
                     ```
 
                     More details in the [integration Linux page](integrations.md#__tabbed_1_3).
+
+            5. **Start the services**:
+                    ```bash
+                    sudo systemctl start bunkerweb
+                    sudo systemctl start bunkerweb-ui
+                    sudo systemctl start bunkerweb-scheduler
+                    ```
+                    Or reboot the system:
+                    ```bash
+                    sudo reboot
+                    ```
+
 
 3. **Check the logs**: Check the logs of the scheduler service to ensure that the migration was successful.
 
@@ -279,7 +294,7 @@
     4. **Stop the services**.
 
         ```bash
-        systemctl stop bunkerweb bunkerweb-ui
+        sudo systemctl stop bunkerweb bunkerweb-ui bunkerweb-scheduler
         ```
 
     5. **Restore the backup**.
@@ -319,7 +334,13 @@
                 psql -U <username> -d <database_name> < /path/to/backup/directory/backup.sql
                 ```
 
-    6. **Downgrade BunkerWeb**.
+    6. **Start the services**.
+
+        ```bash
+        sudo systemctl start bunkerweb bunkerweb-ui bunkerweb-scheduler
+        ```
+
+    7. **Downgrade BunkerWeb**.
         - Downgrade BunkerWeb to the previous version by following the same steps as when upgrading BunkerWeb in the [integration Linux page](integrations.md#linux)
 
 ## Upgrade from 1.5.X
@@ -510,16 +531,16 @@ We added a **namespace** feature to the autoconf integrations. Namespaces allow 
                 ```yaml
                 services:
                     bunkerweb:
-                        image: bunkerity/bunkerweb:1.6.0
+                        image: bunkerity/bunkerweb:1.6.1
                         ...
                     bw-scheduler:
-                        image: bunkerity/bunkerweb-scheduler:1.6.0
+                        image: bunkerity/bunkerweb-scheduler:1.6.1
                         ...
                     bw-autoconf:
-                        image: bunkerity/bunkerweb-autoconf:1.6.0
+                        image: bunkerity/bunkerweb-autoconf:1.6.1
                         ...
                     bw-ui:
-                        image: bunkerity/bunkerweb-ui:1.6.0
+                        image: bunkerity/bunkerweb-ui:1.6.1
                         ...
                 ```
 
@@ -533,8 +554,8 @@ We added a **namespace** feature to the autoconf integrations. Namespaces allow 
 
             3. **Stop the services**:
                 ```bash
-                systemctl stop bunkerweb
-                systemctl stop bunkerweb-ui
+                sudo systemctl stop bunkerweb
+                sudo systemctl stop bunkerweb-ui
                 ```
 
             4. **Update BunkerWeb**:
@@ -546,19 +567,19 @@ We added a **namespace** feature to the autoconf integrations. Namespaces allow 
                     You can print a list of packages on hold with `apt-mark showhold`
 
                     ```shell
-                    sudo apt-mark unhold bunkerweb
+                    sudo apt-mark unhold bunkerweb nginx
                     ```
 
                     Them, you can update BunkerWeb package :
 
                     ```shell
-                    sudo apt install -y bunkerweb=1.6.0
+                    sudo apt install -y bunkerweb=1.6.1
                     ```
 
                     To prevent upgrading BunkerWeb package when executing `apt upgrade`, you can use the following command :
 
                     ```shell
-                    sudo apt-mark hold bunkerweb
+                    sudo apt-mark hold bunkerweb nginx
                     ```
 
                     More details in the [integration Linux page](integrations.md#__tabbed_1_1).
@@ -570,22 +591,34 @@ We added a **namespace** feature to the autoconf integrations. Namespaces allow 
                     You can print a list of packages on hold with `dnf versionlock list`
 
                     ```shell
-                    sudo dnf versionlock delete package bunkerweb
+                    sudo dnf versionlock delete package bunkerweb && \
+                    sudo dnf versionlock delete package nginx
                     ```
 
                     Them, you can update BunkerWeb package :
 
                     ```shell
-                    sudo dnf install -y bunkerweb-1.6.0
+                    sudo dnf install -y bunkerweb-1.6.1
                     ```
 
                     To prevent upgrading BunkerWeb package when executing `dnf upgrade`, you can use the following command :
 
                     ```shell
-                    sudo dnf versionlock add bunkerweb
+                    sudo dnf versionlock add bunkerweb && \
+                    sudo dnf versionlock add nginx
                     ```
 
                     More details in the [integration Linux page](integrations.md#__tabbed_1_3).
+
+            5. **Start the services**:
+                    ```bash
+                    sudo systemctl start bunkerweb
+                    sudo systemctl start bunkerweb-ui
+                    ```
+                    Or reboot the system:
+                    ```bash
+                    sudo reboot
+                    ```
 
 3. **Check the logs**: Check the logs of the scheduler service to ensure that the migration was successful.
 
@@ -715,7 +748,7 @@ We added a **namespace** feature to the autoconf integrations. Namespaces allow 
     4. **Stop the services**.
 
         ```bash
-        systemctl stop bunkerweb bunkerweb-ui
+        systemctl stop bunkerweb bunkerweb-ui bunkerweb-scheduler
         ```
 
     5. **Restore the backup**.
@@ -755,5 +788,11 @@ We added a **namespace** feature to the autoconf integrations. Namespaces allow 
                 psql -U <username> -d <database_name> < /path/to/backup/directory/backup.sql
                 ```
 
-    6. **Downgrade BunkerWeb**.
+    6. **Start the services**.
+
+        ```bash
+        sudo systemctl start bunkerweb bunkerweb-ui
+        ```
+
+    7. **Downgrade BunkerWeb**.
         - Downgrade BunkerWeb to the previous version by following the same steps as when upgrading BunkerWeb in the [integration Linux page](integrations.md#linux)

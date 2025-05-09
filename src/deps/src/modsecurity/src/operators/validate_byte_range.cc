@@ -37,6 +37,11 @@ bool ValidateByteRange::getRange(const std::string &rangeRepresentation,
                 "' into a number");
             return false;
         }
+        if ((start < 0) || (start > 255)) {
+            error->assign("Invalid byte value: " +
+                std::to_string(start));
+            return false;
+        }
         table[start >> 3] = (table[start >> 3] | (1 << (start & 0x7)));
         return true;
     }
@@ -87,21 +92,29 @@ bool ValidateByteRange::getRange(const std::string &rangeRepresentation,
 bool ValidateByteRange::init(const std::string &file,
     std::string *error) {
     size_t pos = m_param.find_first_of(",");
+    bool rc;
 
     if (pos == std::string::npos) {
-        getRange(m_param, error);
+        rc = getRange(m_param, error);
     } else {
-        getRange(std::string(m_param, 0, pos), error);
+        rc = getRange(std::string(m_param, 0, pos), error);
+    }
+
+    if (rc == false) {
+        return false;
     }
 
     while (pos != std::string::npos) {
         size_t next_pos = m_param.find_first_of(",", pos + 1);
 
         if (next_pos == std::string::npos) {
-            getRange(std::string(m_param, pos + 1, m_param.length() -
+            rc = getRange(std::string(m_param, pos + 1, m_param.length() -
                 (pos + 1)), error);
         } else {
-            getRange(std::string(m_param, pos + 1, next_pos - (pos + 1)), error);
+            rc = getRange(std::string(m_param, pos + 1, next_pos - (pos + 1)), error);
+        }
+        if (rc == false) {
+            return false;
         }
         pos = next_pos;
     }
@@ -111,12 +124,12 @@ bool ValidateByteRange::init(const std::string &file,
 
 
 bool ValidateByteRange::evaluate(Transaction *transaction, RuleWithActions *rule,
-    const std::string &input, std::shared_ptr<RuleMessage> ruleMessage) {
+    const std::string &input, RuleMessage &ruleMessage) {
     bool ret = true;
 
     size_t count = 0;
-    for (int i = 0; i < input.length(); i++) {
-        int x = (unsigned char) input.at(i);
+    for (std::string::size_type i = 0; i < input.length(); i++) {
+        int x = (unsigned char) input[i];
         if (!(table[x >> 3] & (1 << (x & 0x7)))) {
             // debug(9, "Value " + std::to_string(x) + " in " +
             //     input + " ouside range: " + param);

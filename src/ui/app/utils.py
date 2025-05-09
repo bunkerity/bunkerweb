@@ -15,6 +15,7 @@ from requests import get
 
 from logger import setup_logger  # type: ignore
 
+
 TMP_DIR = Path(sep, "var", "tmp", "bunkerweb")
 LIB_DIR = Path(sep, "var", "lib", "bunkerweb")
 
@@ -31,6 +32,13 @@ COLUMNS_PREFERENCES_DEFAULTS = {
         "6": True,
         "7": True,
         "8": True,
+        "9": True,
+    },
+    "cache": {
+        "3": True,
+        "4": True,
+        "5": True,
+        "6": False,
     },
     "configs": {
         "3": True,

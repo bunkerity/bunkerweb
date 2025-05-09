@@ -4,6 +4,7 @@ from os import getenv, sep
 from os.path import join
 from pathlib import Path
 from sys import exit as sys_exit, path as sys_path
+from traceback import format_exc
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("api",), ("db",))]:
     if deps_path not in sys_path:
@@ -51,6 +52,7 @@ try:
         root_dir.joinpath(token).write_text(validation, encoding="utf-8")
 except BaseException as e:
     status = 1
+    LOGGER.debug(format_exc())
     LOGGER.error(f"Exception while running certbot-auth.py :\n{e}")
 
 sys_exit(status)

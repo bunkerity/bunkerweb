@@ -55,9 +55,9 @@ RuleWithOperator::RuleWithOperator(Operator *op,
     variables::Variables *_variables,
     std::vector<Action *> *actions,
     Transformations *transformations,
-    std::unique_ptr<std::string> fileName,
+    const std::string &fileName,
     int lineNumber)
-    : RuleWithActions(actions, transformations, std::move(fileName), lineNumber),
+    : RuleWithActions(actions, transformations, fileName, lineNumber),
     m_variables(_variables),
     m_operator(op) { /* */ }
 
@@ -102,7 +102,7 @@ void RuleWithOperator::cleanMatchedVars(Transaction *trans) {
 
 
 bool RuleWithOperator::executeOperatorAt(Transaction *trans, const std::string &key,
-    const std::string &value, std::shared_ptr<RuleMessage> ruleMessage) {
+    const std::string &value, RuleMessage &ruleMessage) {
 #if MSC_EXEC_CLOCK_ENABLED
     clock_t begin = clock();
     clock_t end;
@@ -176,7 +176,7 @@ inline void RuleWithOperator::getFinalVars(variables::Variables *vars,
         }
         if (std::find_if(trans->m_ruleRemoveTargetById.begin(),
                 trans->m_ruleRemoveTargetById.end(),
-                [&, variable, this](std::pair<int, std::string> &m) -> bool {
+                [&, variable, this](const auto &m) -> bool {
                     return m.first == m_ruleId
                         && m.second == *variable->m_fullName.get();
                 }) != trans->m_ruleRemoveTargetById.end()) {
@@ -185,7 +185,7 @@ inline void RuleWithOperator::getFinalVars(variables::Variables *vars,
         if (std::find_if(trans->m_ruleRemoveTargetByTag.begin(),
                     trans->m_ruleRemoveTargetByTag.end(),
                     [&, variable, trans, this](
-                        std::pair<std::string, std::string> &m) -> bool {
+                        const auto &m) -> bool {
                         return containsTag(m.first, trans)
                             && m.second == *variable->m_fullName.get();
                     }) != trans->m_ruleRemoveTargetByTag.end()) {
@@ -194,17 +194,15 @@ inline void RuleWithOperator::getFinalVars(variables::Variables *vars,
         vars->push_back(variable);
     }
 
-    for (int i = 0; i < addition.size(); i++) {
-        Variable *variable = addition.at(i);
+    for (auto *variable : addition) {
         vars->push_back(variable);
     }
 }
 
 
 bool RuleWithOperator::evaluate(Transaction *trans,
-    std::shared_ptr<RuleMessage> ruleMessage) {
+    RuleMessage &ruleMessage) {
     bool globalRet = false;
-    variables::Variables *variables = this->m_variables;
     bool recursiveGlobalRet;
     bool containsBlock = hasBlockAction();
     std::string eparam;
@@ -247,12 +245,12 @@ bool RuleWithOperator::evaluate(Transaction *trans,
         + "\" with param " \
         + eparam \
         + " against " \
-        + variables + ".");
+        + m_variables + ".");
     } else {
         ms_dbg_a(trans, 4, "(Rule: " + std::to_string(m_ruleId) \
             + ") Executing operator \"" + getOperatorName() \
             + " against " \
-            + variables + ".");
+            + m_variables + ".");
     }
 
 
@@ -271,23 +269,23 @@ bool RuleWithOperator::evaluate(Transaction *trans,
             if (exclusion.contains(v) ||
                 std::find_if(trans->m_ruleRemoveTargetById.begin(),
                     trans->m_ruleRemoveTargetById.end(),
-                    [&, v, this](std::pair<int, std::string> &m) -> bool {
+                    [&, v, this](const auto &m) -> bool {
                         return m.first == m_ruleId && m.second == v->getKeyWithCollection();
                     }) != trans->m_ruleRemoveTargetById.end()
             ) {
                 delete v;
-                v = NULL;
+                v = nullptr;
                 continue;
             }
             if (exclusion.contains(v) ||
                 std::find_if(trans->m_ruleRemoveTargetByTag.begin(),
                     trans->m_ruleRemoveTargetByTag.end(),
-                    [&, v, trans, this](std::pair<std::string, std::string> &m) -> bool {
+                    [&, v, trans, this](const auto &m) -> bool {
                         return containsTag(m.first, trans) && m.second == v->getKeyWithCollection();
                     }) != trans->m_ruleRemoveTargetByTag.end()
             ) {
                 delete v;
-                v = NULL;
+                v = nullptr;
                 continue;
             }
 
@@ -301,13 +299,13 @@ bool RuleWithOperator::evaluate(Transaction *trans,
                 const bool ret = executeOperatorAt(trans, key, valueAfterTrans, ruleMessage);
 
                 if (ret == true) {
-                    ruleMessage->m_match = m_operator->resolveMatchMessage(trans,
+                    ruleMessage.m_match = m_operator->resolveMatchMessage(trans,
                         key, value);
                     for (const auto &i : v->getOrigin()) {
-                        ruleMessage->m_reference.append(i.toText());
+                        ruleMessage.m_reference.append(i.toText());
                     }
 
-                    ruleMessage->m_reference.append(*valueTemp.second);
+                    ruleMessage.m_reference.append(*valueTemp.second);
                     updateMatchedVars(trans, key, valueAfterTrans);
                     executeActionsIndependentOfChainedRuleResult(trans,
                         &containsBlock, ruleMessage);
@@ -361,7 +359,7 @@ end_exec:
 }
 
 
-std::string RuleWithOperator::getOperatorName() const { return m_operator->m_op; }
+const std::string& RuleWithOperator::getOperatorName() const { return m_operator->m_op; }
 
 
 }  // namespace modsecurity

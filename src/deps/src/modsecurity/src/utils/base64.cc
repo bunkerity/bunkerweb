@@ -24,7 +24,7 @@
 #include "mbedtls/base64.h"
 
 template<typename Operation>
-inline std::string base64Helper(const char *data, const unsigned int len, Operation op) {
+inline std::string base64Helper(const char *data, const unsigned int len, Operation op) { // cppcheck-suppress syntaxError ; false positive
     size_t out_len = 0;
 
     op(nullptr, 0, &out_len,

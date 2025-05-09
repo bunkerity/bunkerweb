@@ -132,7 +132,7 @@ class KeyExclusionRegex : public KeyExclusion {
 
 class KeyExclusionString : public KeyExclusion {
  public:
-    explicit KeyExclusionString(std::string &a)
+    explicit KeyExclusionString(const std::string &a)
         : m_key(utils::string::toupper(a)) { }
 
     ~KeyExclusionString() override { }
@@ -379,7 +379,7 @@ class VariableMonkeyResolution {
 
     static std::string stringMatchResolve(Transaction *t,
         const std::string &variable) {
-        std::unique_ptr<std::string> vv = nullptr;
+        std::unique_ptr<std::string> vv;
         size_t collection = variable.find(".");
         if (collection == std::string::npos) {
             collection = variable.find(":");
@@ -589,7 +589,7 @@ class VariableMonkeyResolution {
 class Variable : public VariableMonkeyResolution {
  public:
     explicit Variable(const std::string &name);
-    explicit Variable(Variable *_name);
+    explicit Variable(const Variable *_name);
     virtual ~Variable() { }
 
 
@@ -608,7 +608,7 @@ class Variable : public VariableMonkeyResolution {
     }
 
 
-    void addsKeyExclusion(Variable *v);
+    void addsKeyExclusion(const Variable *v);
 
 
     bool operator==(const Variable& b) const {
@@ -718,8 +718,8 @@ class VariableModificatorCount : public Variable {
 };
 
 
-std::string operator+(const std::string &a, modsecurity::variables::Variable *v);
-std::string operator+(const std::string &a, modsecurity::variables::Variables *v);
+std::string operator+(const std::string &a, const modsecurity::variables::Variable *v);
+std::string operator+(const std::string &a, const modsecurity::variables::Variables *v);
 
 
 }  // namespace variables

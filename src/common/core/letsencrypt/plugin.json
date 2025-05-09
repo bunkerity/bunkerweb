@@ -39,11 +39,12 @@
       "help": "The DNS provider to use for DNS challenges.",
       "id": "auto-lets-encrypt-dns-provider",
       "label": "DNS Provider",
-      "regex": "^(cloudflare|digitalocean|dnsimple|dnsmadeeasy|gehirn|google|linode|luadns|nsone|ovh|rfc2136|route53|sakuracloud|scaleway)?$",
+      "regex": "^(cloudflare|desec|digitalocean|dnsimple|dnsmadeeasy|gehirn|google|linode|luadns|nsone|ovh|rfc2136|route53|sakuracloud|scaleway)?$",
       "type": "select",
       "select": [
         "",
         "cloudflare",
+        "desec",
         "digitalocean",
         "dnsimple",
         "dnsmadeeasy",
@@ -71,10 +72,10 @@
     "LETS_ENCRYPT_DNS_CREDENTIAL_ITEM": {
       "context": "multisite",
       "default": "",
-      "help": "Configuration item that will be added to the credentials.ini file for the DNS provider (e.g. 'cloudflare_api_token 123456') for DNS challenges.",
+      "help": "Configuration item that will be added to the credentials.ini file for the DNS provider (e.g. 'cloudflare_api_token 123456') for DNS challenges. (Values can also be base64 encoded or it can be a base64 encoded json object)",
       "id": "lets-encrypt-dns-credential-item",
       "label": "Credential Item",
-      "regex": "^(\\w+ .+)?$",
+      "regex": "^.*",
       "type": "password",
       "multiple": "lets-encrypt-dns-credential-item"
     },

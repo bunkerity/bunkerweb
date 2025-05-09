@@ -74,7 +74,7 @@ void MultipartPartTmpFile::Open() {
     strftime(tstr, std::size(tstr), "/%Y%m%d-%H%M%S", &timeinfo);
 
     std::string path = m_transaction->m_rules->m_uploadDirectory.m_value;
-    path = path + tstr + "-" + *m_transaction->m_id.get();
+    path = path + tstr + "-" + m_transaction->m_id;
     path += "-file-XXXXXX";
 
 #ifndef WIN32

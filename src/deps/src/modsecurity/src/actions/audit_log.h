@@ -35,8 +35,7 @@ class AuditLog : public Action {
     explicit AuditLog(const std::string &action) 
         : Action(action) { }
 
-    bool evaluate(RuleWithActions *rule, Transaction *transaction,
-        std::shared_ptr<RuleMessage> rm) override;
+    bool evaluate(RuleWithActions *rule, Transaction *transaction, RuleMessage &ruleMessage) override;
 };
 
 

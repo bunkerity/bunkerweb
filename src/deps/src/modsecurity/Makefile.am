@@ -63,9 +63,11 @@ cppcheck:
 		--enable=warning,style,performance,portability,unusedFunction,missingInclude \
 		--inconclusive \
 		--template="warning: {file},{line},{severity},{id},{message}" \
-		-I headers -I . -I others -I src -I others/mbedtls/include -I src/parser \
+		-I headers -I . -I others -I src -I others/mbedtls/include \
 		--error-exitcode=1 \
 		-i "src/parser/seclang-parser.cc" -i "src/parser/seclang-scanner.cc" \
+		-i others \
+		--std=c++17 \
 		--force --verbose .
 
 

@@ -35,11 +35,6 @@ namespace modsecurity {
 namespace actions {
 
 
-bool SetVar::init(std::string *error) {
-    return true;
-}
-
-
 bool SetVar::evaluate(RuleWithActions *rule, Transaction *t) {
     std::string targetValue;
     std::string resolvedPre;

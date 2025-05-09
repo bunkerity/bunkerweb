@@ -43,7 +43,7 @@ bool XmlNS::init(std::string *error) {
         return false;
     }
 
-    if (m_href.at(0) == '\'' && m_href.size() > 3) {
+    if (m_href[0] == '\'' && m_href.size() > 3) {
         m_href.erase(0, 1);
         m_href.pop_back();
     }

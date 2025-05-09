@@ -178,7 +178,7 @@ std::unique_ptr<std::string> LMDB::resolveFirst(const std::string& var) {
 
     collectionData.setFromSerialized(reinterpret_cast<char *>(mdb_value_ret.mv_data), mdb_value_ret.mv_size);
     if ((!collectionData.isExpired()) && (collectionData.hasValue())) {
-        ret = std::unique_ptr<std::string>(new std::string(collectionData.getValue()));
+        ret = std::make_unique<std::string>(collectionData.getValue());
     }
 
 end_get:
@@ -559,7 +559,7 @@ void LMDB::resolveMultiMatches(const std::string& var,
                 continue;
             }
 
-            char *a = reinterpret_cast<char *>(key.mv_data);
+            const char *a = reinterpret_cast<char *>(key.mv_data);
             if (strncmp(var.c_str(), a, keySize) == 0) {
                 std::string key_to_insert(reinterpret_cast<char *>(key.mv_data), key.mv_size);
                 l->insert(l->begin(), new VariableValue(&m_name, &key_to_insert, &collectionData.getValue()));

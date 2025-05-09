@@ -1,6 +1,6 @@
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.0
+    image: bunkerity/bunkerweb:1.6.1
     container_name: bunkerweb
     ports:
       - "80:8080/tcp"
@@ -14,7 +14,7 @@ services:
       - bw-services
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.0
+    image: bunkerity/bunkerweb-scheduler:1.6.1
     container_name: bw-scheduler
     depends_on:
       - bunkerweb
@@ -32,7 +32,7 @@ services:
       USE_REVERSE_PROXY: "yes"
       REVERSE_PROXY_URL: "/"
       REVERSE_PROXY_HOST: "http://mydrupal"
-      MODSECURITY_CRS_PLUGIN_URLS: "https://github.com/coreruleset/drupal-rule-exclusions-plugin/archive/refs/tags/v1.0.0.tar.gz" # This is a CRS plugin specific to Drupal
+      MODSECURITY_CRS_PLUGINS: "drupal-rule-exclusions" # This is a CRS plugin specific to Drupal
       # Once the installation is done, you can remove these lines
       LIMIT_REQ_URL_1: "/core/install.php"
       LIMIT_REQ_RATE_1: "5r/s"
