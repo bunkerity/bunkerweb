@@ -466,22 +466,19 @@ class IngressController(Controller):
             self._logger.warning("Cannot patch ingress without IP")
             return
 
-        ingress_status = client.V1IngressStatus(
-            load_balancer=client.V1LoadBalancerStatus(
-                ingress=[client.V1LoadBalancerIngress(ip=ip)]
-            )
-        )
-
-        ingress_patch = client.V1Ingress(
-            metadata=client.V1ObjectMeta(name=ingress.metadata.name),
-            status=ingress_status
-        )
+        patch_body = {
+            "status": {
+                "loadBalancer": {
+                    "ingress": [{"ip": ip}]
+                }
+            }
+        }
         
         try:
-            self.__networkingv1.replace_namespaced_ingress_status(
+            self.__networkingv1.patch_namespaced_ingress_status(
                 name=ingress.metadata.name,
                 namespace=ingress.metadata.namespace,
-                body=ingress_patch
+                body=patch_body
             )
             self._logger.info(f"Patched status of ingress {ingress.metadata.name} with IP {ip}")
         except ApiException as e:
