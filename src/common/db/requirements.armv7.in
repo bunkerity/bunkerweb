@@ -1,6 +1,6 @@
 alembic==1.15.2
 cryptography==44.0.3
 # oracledb==3.0.0
-psycopg[c,pool]==3.2.6
+psycopg[c,pool]==3.2.8
 PyMySQL==1.1.1
 sqlalchemy==2.0.40

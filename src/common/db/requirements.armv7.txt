@@ -240,12 +240,12 @@ markupsafe==3.0.2 \
     --hash=sha256:f8b3d067f2e40fe93e1ccdd6b2e1d16c43140e76f02fb1319a05cf2b79d99430 \
     --hash=sha256:fcabf5ff6eea076f859677f5f0b6b5c1a51e70a376b0579e0eadef8db48c6b50
     # via mako
-psycopg==3.2.6 \
-    --hash=sha256:16fa094efa2698f260f2af74f3710f781e4a6f226efe9d1fd0c37f384639ed8a \
-    --hash=sha256:f3ff5488525890abb0566c429146add66b329e20d6d4835662b920cbbf90ac58
+psycopg==3.2.8 \
+    --hash=sha256:0e960f1977d77de7f1ace4b54590f686b52c2f9ab1f61fff4141887fc711d9e7 \
+    --hash=sha256:cc995d836841e400c4f615d8dea351dc39697ad29df84d428f9c38c8040222f8
     # via -r requirements.armv7.in
-psycopg-c==3.2.6 \
-    --hash=sha256:b5fd4ce70f82766a122ca5076a36c4d5818eaa9df9bf76870bc83a064ffaed3a
+psycopg-c==3.2.8 \
+    --hash=sha256:e71439011e72c53e603d8a4e4ac8d7f7f9c46978ec5c78102198e8423adc5751
     # via psycopg
 psycopg-pool==3.2.6 \
     --hash=sha256:0f92a7817719517212fbfe2fd58b8c35c1850cdd2a80d36b581ba2085d9148e5 \
