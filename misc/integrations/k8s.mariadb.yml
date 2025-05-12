@@ -22,7 +22,7 @@ rules:
     verbs: ["get", "watch", "list"]
   - apiGroups: ["networking.k8s.io"]
     resources: ["ingresses/status"]
-    verbs: ["update"]
+    verbs: ["patch"]
 ---
 apiVersion: v1
 kind: ServiceAccount
