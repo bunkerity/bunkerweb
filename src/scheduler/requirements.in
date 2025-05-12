@@ -21,10 +21,10 @@ certbot-dns-infomaniak==0.2.3
 certbot-dns-ionos==2024.11.9
 certbot-dns-scaleway==0.0.7
 
-cryptography==44.0.2
+cryptography==44.0.3
 importlib-metadata==8.7.0
-maxminddb==2.6.3
-pydantic==2.11.3
+maxminddb==2.7.0
+pydantic==2.11.4
 python-magic==0.4.27
 requests==2.32.3
 schedule==1.2.2
