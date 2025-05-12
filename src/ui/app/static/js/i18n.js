@@ -13,7 +13,7 @@ function applyTranslations() {
     const optionsAttr = element.attr("data-i18n-options");
     if (optionsAttr) {
       try {
-        options = JSON.parse(optionsAttr.replace(/'/g, '"'));
+        options = JSON.parse(optionsAttr);
       } catch (e) {
         console.error(
           `Error parsing data-i18n-options for key "${key}":`,
@@ -22,7 +22,11 @@ function applyTranslations() {
         );
       }
     }
-    const translation = i18next.t(key, options);
+    // Prevent i18next from escaping single quotes to HTML entities
+    const translation = i18next.t(key, {
+      ...options,
+      interpolation: { escapeValue: false },
+    });
     if (element.is("[placeholder]")) {
       element.attr("placeholder", translation);
     } else if (element.is("[title]")) {
@@ -151,6 +155,26 @@ const localesPath = isSetup
       .trim()
       .replace(/\/home$/, "/locales");
 
+function loadPluginTranslations(lang) {
+  const path = window.BunkerWebExtraI18nPath;
+  if (!path) return Promise.resolve();
+
+  const url = path.replace("{{lng}}", lang);
+  return fetch(url)
+    .then((resp) => (resp.ok ? resp.json() : null))
+    .then((extra) => {
+      if (extra) {
+        const ns = "messages";
+        const existing = i18next.getResourceBundle(lang, ns) || {};
+        const merged = { ...existing, ...extra };
+        i18next.addResourceBundle(lang, ns, merged, true, true);
+      }
+    })
+    .catch((err) => {
+      console.error("Error loading plugin translations:", err);
+    });
+}
+
 i18next
   .use(i18nextHttpBackend)
   .use(i18nextBrowserLanguageDetector)
@@ -175,17 +199,20 @@ i18next
     function (err) {
       if (err) return console.error("Error initializing i18next:", err);
 
-      // Apply translation after i18next is initialized
-      applyTranslations();
-      updateLanguageSelector(i18next.language);
-      $("[name='language']").val(i18next.language);
-      $("#newsletter-locale").val(i18next.language);
+      loadPluginTranslations(i18next.language).then(function () {
+        applyTranslations();
+        updateLanguageSelector(i18next.language);
+        $("[name='language']").val(i18next.language);
+        $("#newsletter-locale").val(i18next.language);
+      });
 
       i18next.on("languageChanged", function (lng) {
         i18next.language = getAlpha2(lng);
-        applyTranslations();
-        updateLanguageSelector(lng);
-        $("#newsletter-locale").val(i18next.language);
+        loadPluginTranslations(i18next.language).then(function () {
+          applyTranslations();
+          updateLanguageSelector(lng);
+          $("#newsletter-locale").val(i18next.language);
+        });
       });
 
       // Handle language selection clicks

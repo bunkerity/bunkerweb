@@ -176,6 +176,7 @@ with app.app_context():
 
     # Session management
     app.config["SESSION_TYPE"] = "cachelib"
+    app.config["SESSION_PERMANENT"] = False
     app.config["SESSION_ID_LENGTH"] = 64
     app.config["SESSION_CACHELIB"] = FileSystemCache(threshold=500, cache_dir=LIB_DIR.joinpath("ui_sessions_cache"))
     sess = Session()
@@ -228,15 +229,18 @@ with app.app_context():
 
 @app.context_processor
 def inject_variables():
+    app_env = app.config["ENV"].copy()
     for hook in app.config["CONTEXT_PROCESSOR_HOOKS"]:
         try:
             resp = hook()
             if resp:
-                app.config["ENV"] = {**app.config["ENV"], **resp}
+                app_env = {**app_env, **resp}
         except Exception:
             LOGGER.exception("Error in context_processor hook")
 
-    return app.config["ENV"]
+    app.config["ENV"] = app_env
+
+    return app_env
 
 
 @login_manager.user_loader
@@ -417,6 +421,9 @@ def refresh_app_context():
                     hook_function = getattr(hook_module, hook_type)
                     app.config.setdefault(hook_info["key"], []).append(hook_function)
                     LOGGER.info(f"{hook_info['log_prefix']} hook '{hook_type}' from {py_file} loaded")
+
+            if hook_dir in sys_path:
+                sys_path.remove(hook_dir)
         except Exception as exc:
             LOGGER.error(f"Error loading potential hooks from {py_file}: {exc}")
 
@@ -436,6 +443,7 @@ def refresh_app_context():
         active_plugin_paths.add(bp_dir.parent.parent.parent)
         blueprint_dir = str(bp_dir)
         is_pro = bp_dir in (p.parent for p in pro_bp_dirs)
+        is_external = bp_dir in (p.parent for p in external_bp_dirs)
 
         # Add directory to sys_path
         if blueprint_dir not in sys_path:
@@ -476,7 +484,7 @@ def refresh_app_context():
                         plugin_blueprints.add(bp_name)
 
                         # Set plugin priority and path
-                        bp.plugin_priority = 2 if is_pro else 1
+                        bp.plugin_priority = 2 if is_pro else (1 if is_external else 0)
                         bp.import_path = blueprint_dir
                         app.plugin_sys_paths[bp_name] = blueprint_dir
 
