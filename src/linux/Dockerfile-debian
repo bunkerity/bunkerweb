@@ -1,4 +1,4 @@
-FROM debian:bookworm-slim@sha256:b1211f6d19afd012477bd34fdcabb6b663d680e0f4b0537da6e6b0fd057a3ec3 AS builder
+FROM debian:bookworm-slim@sha256:4b50eb66f977b4062683ff434ef18ac191da862dbe966961bc11990cf5791a8d AS builder
 
 ENV OS=debian
 ENV NGINX_VERSION=1.26.3
@@ -6,7 +6,7 @@ ENV NGINX_VERSION=1.26.3
 # Install Nginx and dependencies
 RUN apt update && \
     apt install -y --no-install-recommends gnupg2 ca-certificates wget \
-    bash curl libssl-dev git libpcre2-dev zlib1g-dev libyajl2 libyajl-dev yajl-tools pkgconf libcurl4-openssl-dev libgeoip-dev liblmdb-dev apt-utils build-essential autoconf libtool automake g++ gcc libxml2-dev make musl-dev gnupg patch libreadline-dev libpcre3-dev libgd-dev python3 python3-dev python3-pip python3-distutils python3-venv -y && \
+    bash curl libssl-dev git libpcre2-dev zlib1g-dev libyajl2 libyajl-dev yajl-tools pkgconf libcurl4-openssl-dev libgeoip-dev apt-utils build-essential autoconf libtool automake g++ gcc libxml2-dev make musl-dev gnupg patch libreadline-dev libpcre3-dev libgd-dev python3 python3-dev python3-pip python3-distutils python3-venv -y && \
     echo "deb https://nginx.org/packages/debian/ bookworm nginx" > /etc/apt/sources.list.d/nginx.list && \
     echo "deb-src https://nginx.org/packages/debian/ bookworm nginx" >> /etc/apt/sources.list.d/nginx.list && \
     apt-key adv --keyserver keyserver.ubuntu.com --recv-keys ABF5BD827BD9BF62 && \
@@ -57,7 +57,7 @@ COPY src/scheduler scheduler
 COPY src/VERSION VERSION
 COPY src/ui ui
 
-FROM debian:bookworm-slim@sha256:b1211f6d19afd012477bd34fdcabb6b663d680e0f4b0537da6e6b0fd057a3ec3
+FROM debian:bookworm-slim@sha256:4b50eb66f977b4062683ff434ef18ac191da862dbe966961bc11990cf5791a8d
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027

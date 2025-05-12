@@ -4,7 +4,7 @@
         {% with breadcrumbs = request.path.split("/") %}
             {% set breadcrumbs_ns = namespace(working_url="") %}
             {% for breadcrumb in breadcrumbs %}
-                {% set check_i18n = breadcrumb != "letsencrypt" %}
+                {% set check_i18n = breadcrumb not in extra_pages %}
                 {% set breadcrumb_prefix = "" %}
                 {% set breadcrumb_url = url_for(breadcrumb.replace('_', '-')) %}
                 {% if breadcrumb == current_endpoint %}
@@ -49,7 +49,7 @@
                 <li class="breadcrumb-item{% if breadcrumb == current_endpoint %} active{% endif %}"
                     {% if breadcrumb == current_endpoint %}aria-current="page"{% endif %}>
                     <a {% if breadcrumb and breadcrumb_url or (current_endpoint == "new" and loop.index > 1) %}href="{{ breadcrumb_url }}{{ breadcrumb_prefix }}"{% if check_i18n %} data-i18n="breadcrumb.{{ breadcrumb | lower | replace('-', '_') }}"{% endif %}
-                       {% elif loop.index == 2 %}
+                       {% elif loop.index == 2 and check_i18n %}
                        href="#"
                        data-i18n="breadcrumb.{{ current_endpoint | replace('-', '_') }}"
                        {% endif %}>{{ breadcrumb }}</a>

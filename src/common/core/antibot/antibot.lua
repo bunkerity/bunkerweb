@@ -169,6 +169,18 @@ function antibot:access()
 	self.session_data = session:get("antibot") or {}
 	self.ctx.bw.antibot_session_data = self.session_data
 
+	-- Check if session is valid
+	local msg = self:check_session()
+	self.logger:log(INFO, "check_session returned : " .. msg)
+
+	-- Don't go further if client resolved the challenge
+	if self.session_data.resolved then
+		if self.ctx.bw.uri == self.variables["ANTIBOT_URI"] then
+			return self:ret(true, "client already resolved the challenge", nil, self.session_data.original_uri)
+		end
+		return self:ret(true, "client already resolved the challenge")
+	end
+
 	-- Check the caches
 	local checks = {
 		["IP"] = "ip" .. self.ctx.bw.remote_addr,
@@ -189,12 +201,7 @@ function antibot:access()
 		if not ok then
 			self.logger:log(ERR, "error while checking cache : " .. cached)
 		elseif cached and cached ~= "ko" then
-			return self:ret(
-				true,
-				k .. " is in cached antibot ignored (info : " .. cached .. ")",
-				nil,
-				self.session_data.original_uri
-			)
+			return self:ret(true, k .. " is in cached antibot ignored (info : " .. cached .. ")")
 		end
 		if ok and cached then
 			already_cached[k] = true
@@ -204,7 +211,8 @@ function antibot:access()
 	if self.lists then
 		-- Perform checks
 		for k, _ in pairs(checks) do
-			if not already_cached[k] then
+			-- Skip URI ignore checks if current path is the challenge URI
+			if not already_cached[k] and not (k == "URI" and self.ctx.bw.uri == self.variables["ANTIBOT_URI"]) then
 				local ok, ignored = self:is_ignored(k)
 				if ok == nil then
 					self.logger:log(ERR, "error while checking if " .. k .. " is ignored : " .. ignored)
@@ -215,28 +223,11 @@ function antibot:access()
 						self.logger:log(ERR, "error while adding element to cache : " .. err)
 					end
 					if ignored ~= "ko" then
-						return self:ret(
-							true,
-							k .. " is ignored (info : " .. ignored .. ")",
-							nil,
-							self.session_data.original_uri
-						)
+						return self:ret(true, k .. " is ignored (info : " .. ignored .. ")")
 					end
 				end
 			end
 		end
-	end
-
-	-- Check if session is valid
-	local msg = self:check_session()
-	self.logger:log(INFO, "check_session returned : " .. msg)
-
-	-- Don't go further if client resolved the challenge
-	if self.session_data.resolved then
-		if self.ctx.bw.uri == self.variables["ANTIBOT_URI"] then
-			return self:ret(true, "client already resolved the challenge", nil, self.session_data.original_uri)
-		end
-		return self:ret(true, "client already resolved the challenge")
 	end
 
 	-- Prepare challenge if needed

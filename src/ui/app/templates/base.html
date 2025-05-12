@@ -135,6 +135,7 @@
                   href="{{ url_for('static', filename='css/pages/home.css') }}"
                   nonce="{{ style_nonce }}" />
         {% endif %}
+        {% block head %}{% endblock %}
     </head>
     <body>
         {% if not starting %}<input type="hidden" id="home-path" value="{{ url_for('home') }}" />{% endif %}
@@ -289,5 +290,6 @@
         <script src="{{ url_for('static', filename='js/buttons.js') }}"
                 nonce="{{ script_nonce }}"
                 defer></script>
+        {% block scripts %}{% endblock %}
     </body>
 </html>

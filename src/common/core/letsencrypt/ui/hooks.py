@@ -1,18 +1,16 @@
-from flask import current_app, request
+from flask import request
 
 # Default column visibility settings for letsencrypt tables
 COLUMNS_PREFERENCES_DEFAULTS = {
-    "letsencrypt": {
-        "3": True,
-        "4": True,
-        "5": True,
-        "6": True,
-        "7": True,
-        "8": True,
-        "9": False,
-        "10": False,
-        "11": True,
-    },
+    "3": True,
+    "4": True,
+    "5": True,
+    "6": True,
+    "7": True,
+    "8": True,
+    "9": False,
+    "10": False,
+    "11": True,
 }
 
 
@@ -27,11 +25,6 @@ def context_processor():
     if request.path.startswith(("/check", "/setup", "/loading", "/login", "/totp", "/logout")):
         return None
 
-    env_config = current_app.config["ENV"]
-
-    if "columns_preferences_defaults" in env_config:
-        data = {"columns_preferences_defaults": env_config["columns_preferences_defaults"] | COLUMNS_PREFERENCES_DEFAULTS}
-    else:
-        data = {"columns_preferences_defaults": COLUMNS_PREFERENCES_DEFAULTS}
+    data = {"columns_preferences_defaults_letsencrypt": COLUMNS_PREFERENCES_DEFAULTS}
 
     return data

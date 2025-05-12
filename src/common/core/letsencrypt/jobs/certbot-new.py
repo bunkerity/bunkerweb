@@ -382,7 +382,7 @@ try:
                     break
 
             if not certificate_block:
-                domains_to_ask[first_server] = True
+                domains_to_ask[first_server] = 1
                 LOGGER.warning(f"[{original_first_server}] Certificate block for {first_server} not found, asking new certificate...")
                 continue
 
@@ -399,17 +399,20 @@ try:
 
             cert_domains_list = cert_domains.group("domains").strip().split()
             cert_domains_set = set(cert_domains_list)
+            desired_domains_set = set(domains) if isinstance(domains, (list, set)) else set(domains.split())
 
-            if cert_domains_set != domains:
-                domains_to_ask[first_server] = True
-                LOGGER.warning(f"[{original_first_server}] Domains for {first_server} are not the same as in the certificate, asking new certificate...")
+            if cert_domains_set != desired_domains_set:
+                domains_to_ask[first_server] = 2
+                LOGGER.warning(
+                    f"[{original_first_server}] Domains for {first_server} differ from desired set (existing: {sorted(cert_domains_set)}, desired: {sorted(desired_domains_set)}), asking new certificate..."
+                )
                 continue
 
             use_letsencrypt_staging = getenv(f"{first_server}_USE_LETS_ENCRYPT_STAGING", getenv("USE_LETS_ENCRYPT_STAGING", "no")) == "yes"
             is_test_cert = "TEST_CERT" in cert_domains.group("expiry_date")
 
             if (is_test_cert and not use_letsencrypt_staging) or (not is_test_cert and use_letsencrypt_staging):
-                domains_to_ask[first_server] = True
+                domains_to_ask[first_server] = 2
                 LOGGER.warning(f"[{original_first_server}] Certificate environment (staging/production) changed for {first_server}, asking new certificate...")
                 continue
 
@@ -418,7 +421,7 @@ try:
             renewal_file = DATA_PATH.joinpath("renewal", f"{first_server}.conf")
             if not renewal_file.is_file():
                 LOGGER.error(f"[{original_first_server}] Renewal file for {first_server} not found, asking new certificate...")
-                domains_to_ask[first_server] = True
+                domains_to_ask[first_server] = 1
                 continue
 
             current_provider = None
@@ -431,15 +434,15 @@ try:
 
             if letsencrypt_challenge == "dns":
                 if letsencrypt_provider and current_provider != letsencrypt_provider:
-                    domains_to_ask[first_server] = True
+                    domains_to_ask[first_server] = 2
                     LOGGER.warning(f"[{original_first_server}] Provider for {first_server} is not the same as in the certificate, asking new certificate...")
                     continue
             elif current_provider != "manual" and letsencrypt_challenge == "http":
-                domains_to_ask[first_server] = True
+                domains_to_ask[first_server] = 2
                 LOGGER.warning(f"[{original_first_server}] {first_server} is no longer using DNS challenge, asking new certificate...")
                 continue
 
-            domains_to_ask[first_server] = False
+            domains_to_ask[first_server] = 0
             LOGGER.info(f"[{original_first_server}] Certificates already exist for domain(s) {domains}, expiry date: {cert_domains.group('expiry_date')}")
 
     psl_lines = None
@@ -657,8 +660,9 @@ try:
                 data["provider"],
                 credentials_path,
                 data["propagation"],
+                data["profile"],
                 data["staging"],
-                domains_to_ask[first_server],
+                domains_to_ask[first_server] == 2,
                 cmd_env=env.copy(),
             )
             != 0
@@ -705,14 +709,16 @@ try:
 
                 if (
                     certbot_new(
-                        "dns" if provider in provider_classes else "http",
+                        "dns",
                         domains,
                         email,
                         provider,
                         credentials_file,
-                        staging=staging,
-                        profile=profile,
-                        cmd_env=env.copy(),
+                        "default",
+                        profile,
+                        staging,
+                        domains_to_ask[group_parts[1]] == 2,
+                        env.copy(),
                     )
                     != 0
                 ):

@@ -6,7 +6,7 @@ ENV NGINX_VERSION=1.26.3
 # Install Nginx, fpm and dependencies
 RUN dnf update -y && \
     dnf install -y curl gnupg2 ca-certificates redhat-lsb-core make gcc && \
-    dnf install -y --setopt=install_weak_deps=False python3 python3-devel python3-pip brotli brotli-devel gperftools-devel perl libxslt-devel libxml2 yajl yajl-devel libxslt bash gd gd-devel gcc-c++ kernel-devel znc-modtcl libmpc-devel gmp-devel gawk mpfr-devel libtool pcre-devel automake autoconf readline-devel gcc make openssl-devel git zlib-devel libxml2-devel pkgconf libcurl-devel geoip-devel lmdb-devel && \
+    dnf install -y --setopt=install_weak_deps=False python3 python3-devel python3-pip brotli brotli-devel gperftools-devel perl libxslt-devel libxml2 yajl yajl-devel libxslt bash gd gd-devel gcc-c++ kernel-devel znc-modtcl libmpc-devel gmp-devel gawk mpfr-devel libtool pcre-devel automake autoconf readline-devel gcc make openssl-devel git zlib-devel libxml2-devel pkgconf libcurl-devel geoip-devel && \
     dnf install --enablerepo=updates-testing nginx-${NGINX_VERSION} -y
 
 WORKDIR /tmp/bunkerweb/deps
