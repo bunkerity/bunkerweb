@@ -41,7 +41,8 @@
 	🔎 <a href="https://forms.gle/e3VgymAteYPnwM1j9">Feedbacks</a>
 </p>
 
-> 🛡️ Make security by default great again !
+> 🛡️ Make “secure by default” not just a promise, but a reality — with BunkerWeb.
+# Contribution made by Ziyad2612 for the Pull Bunker(e)Quest event.
 
 # BunkerWeb
 
