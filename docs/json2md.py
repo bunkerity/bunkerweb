@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 from io import StringIO
 from json import loads
 from glob import glob
@@ -9,121 +7,108 @@ import requests
 import zipfile
 import shutil
 from contextlib import suppress
+import os
 
-from os import getenv
-
-
-def print_md_table(settings) -> MarkdownTableWriter:
+def print_md_table(settings) -> str:
     writer = MarkdownTableWriter(
         headers=["Setting", "Default", "Context", "Multiple", "Description"],
         value_matrix=[
             [
                 f"`{setting}`",
-                "" if data["default"] == "" else f"`{data['default']}`",
+                f"`{data['default']}`" if data["default"] else "",
                 data["context"],
-                "no" if "multiple" not in data else "yes",
+                "yes" if "multiple" in data else "no",
                 data["help"],
             ]
             for setting, data in settings.items()
         ],
     )
-    return writer
-
+    output = StringIO()
+    writer.stream = output
+    writer.write_table()
+    return output.getvalue()
 
 def stream_support(support) -> str:
-    md = "STREAM support "
-    if support == "no":
-        md += ":x:"
-    elif support == "yes":
-        md += ":white_check_mark:"
-    else:
-        md += ":warning:"
-    return md
+    symbols = {"no": ":x:", "yes": ":white_check_mark:"}
+    return f"STREAM support {symbols.get(support, ':warning:')}"
 
+def load_json_file(filepath: str) -> dict:
+    with open(filepath, "r", encoding="utf-8") as file:
+        return loads(file.read())
 
-def pro_title(title: str) -> str:
-    return f"## {title} <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'>\n"
+def write_doc_header(doc: StringIO):
+    doc.write("# Settings\n\n")
+    doc.write(
+        '!!! info "Settings generator tool"\n\n'
+        "    To help you tune BunkerWeb, we have made an easy-to-use settings generator tool available at "
+        "[config.bunkerweb.io](https://config.bunkerweb.io/?utm_campaign=self&utm_source=doc).\n\n"
+    )
+    doc.write(
+        "This section contains the full list of settings supported by BunkerWeb. "
+        "If you are not yet familiar with BunkerWeb, you should first read the [concepts](concepts.md) section. "
+        "Please follow the instructions for your own [integration](integrations.md) on how to apply the settings.\n\n"
+    )
+    doc.write(
+        "As a general rule when multisite mode is enabled, prefix settings with the primary server name, e.g., "
+        "`www.example.com_USE_ANTIBOT=captcha`.\n\n"
+    )
+    doc.write(
+        'When settings are "multiple", use numbered suffixes, e.g., `REVERSE_PROXY_URL_1`, `REVERSE_PROXY_HOST_1`, etc.\n\n'
+    )
 
-
-doc = StringIO()
-
-print("# Settings\n", file=doc)
-print(
-    '!!! info "Settings generator tool"\n\n    To help you tune BunkerWeb, we have made an easy-to-use settings generator tool available at [config.bunkerweb.io](https://config.bunkerweb.io/?utm_campaign=self&utm_source=doc).\n',
-    file=doc,
-)
-print(
-    "This section contains the full list of settings supported by BunkerWeb."
-    + " If you are not yet familiar with BunkerWeb, you should first read the [concepts](concepts.md) section of the documentation."
-    + " Please follow the instructions for your own [integration](integrations.md) on how to apply the settings.\n",
-    file=doc,
-)
-print(
-    "As a general rule when multisite mode is enabled, if you want to apply settings with multisite context to a specific server, you will need to add the primary"
-    + " (first) server name as a prefix like `www.example.com_USE_ANTIBOT=captcha` or `myapp.example.com_USE_GZIP=yes` for example.\n",
-    file=doc,
-)
-print(
-    'When settings are considered as "multiple", it means that you can have multiple groups of settings for the same feature by adding numbers as suffix like `REVERSE_PROXY_URL_1=/subdir`,'
-    + " `REVERSE_PROXY_HOST_1=http://myhost1`, `REVERSE_PROXY_URL_2=/anotherdir`, `REVERSE_PROXY_HOST_2=http://myhost2`, ... for example.\n",
-    file=doc,
-)
-
-# Print global settings
-print("## Global settings\n", file=doc)
-print(f"\n{stream_support('partial')}\n", file=doc)
-with open("src/common/settings.json", "r") as f:
-    print(print_md_table(loads(f.read())), file=doc)
-    print(file=doc)
-
-# Get core plugins
-core_settings = {}
-for core in glob("src/common/core/*/plugin.json"):
-    with open(core, "r") as f:
+def get_plugin_settings(folder_glob: str, is_pro=False) -> dict:
+    plugins = {}
+    for plugin_path in glob(folder_glob):
         with suppress(Exception):
-            core_plugin = loads(f.read())
-            if len(core_plugin["settings"]) > 0:
-                core_settings[core_plugin["name"]] = core_plugin
+            plugin_data = load_json_file(plugin_path)
+            if plugin_data.get("settings"):
+                plugin_data["is_pro"] = is_pro
+                plugins[plugin_data["name"]] = plugin_data
+    return plugins
 
-# Get PRO plugins
-if getenv("VERSION"):
-    version = getenv("VERSION")
-else:
-    with open("src/VERSION", "r") as f:
-        version = f.read().strip()
-url = f"https://assets.bunkerity.com/bw-pro/preview/v{version}.zip"
-response = requests.get(url)
-response.raise_for_status()
-Path(f"v{version}.zip").write_bytes(response.content)
-with zipfile.ZipFile(f"v{version}.zip", "r") as zip_ref:
-    zip_ref.extractall(f"v{version}")
-pro_settings = {}
-for pro in glob(f"v{version}/*/plugin.json"):
-    with open(pro, "r") as f:
-        with suppress(Exception):
-            pro_plugin = loads(f.read())
-            core_settings[pro_plugin["name"]] = pro_plugin
-            core_settings[pro_plugin["name"]]["is_pro"] = True
+def fetch_pro_plugins(version: str) -> str:
+    url = f"https://assets.bunkerity.com/bw-pro/preview/v{version}.zip"
+    zip_path = Path(f"v{version}.zip")
+    extract_path = Path(f"v{version}")
+    response = requests.get(url)
+    response.raise_for_status()
+    zip_path.write_bytes(response.content)
+    with zipfile.ZipFile(zip_path, "r") as zip_ref:
+        zip_ref.extractall(extract_path)
+    return str(extract_path)
 
-# Print plugins and their settings
-for data in dict(sorted(core_settings.items())).values():
-    pro_crown = ""
-    if "is_pro" in data:
-        pro_crown = " <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)\n"
-    print(f"## {data['name']}{pro_crown}\n", file=doc)
-    print(f"{stream_support(data['stream'])}\n", file=doc)
-    print(f"{data['description']}\n", file=doc)
-    if data["settings"]:
-        print(print_md_table(data["settings"]), file=doc)
+def main():
+    doc = StringIO()
+    write_doc_header(doc)
 
-# Remove zip file
-Path(f"v{version}.zip").unlink()
-# Remove folder using shutil
-shutil.rmtree(f"v{version}")
+    doc.write("## Global settings\n\n")
+    doc.write(f"{stream_support('partial')}\n\n")
+    settings = load_json_file("src/common/settings.json")
+    doc.write(print_md_table(settings) + "\n")
 
-doc.seek(0)
-content = doc.read()
-doc = StringIO(content.replace("\\|", "|"))
-doc.seek(0)
+    core_plugins = get_plugin_settings("src/common/core/*/plugin.json")
+    version = os.getenv("VERSION") or Path("src/VERSION").read_text().strip()
+    pro_path = fetch_pro_plugins(version)
+    pro_plugins = get_plugin_settings(f"{pro_path}/*/plugin.json", is_pro=True)
 
-Path("docs", "settings.md").write_text(doc.read(), encoding="utf-8")
+    all_plugins = {**core_plugins, **pro_plugins}
+
+    for plugin_name in sorted(all_plugins):
+        data = all_plugins[plugin_name]
+        pro_label = " <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)" if data.get("is_pro") else ""
+        doc.write(f"## {data['name']}{pro_label}\n\n")
+        doc.write(f"{stream_support(data.get('stream', 'unknown'))}\n\n")
+        doc.write(f"{data['description']}\n\n")
+        if data.get("settings"):
+            doc.write(print_md_table(data["settings"]) + "\n")
+
+    # Cleanup
+    shutil.rmtree(pro_path, ignore_errors=True)
+    Path(f"v{version}.zip").unlink(missing_ok=True)
+
+    # Final write
+    doc.seek(0)
+    final_content = doc.read().replace("\\|", "|")
+    Path("docs", "settings.md").write_text(final_content, encoding="utf-8")
+
+main()
