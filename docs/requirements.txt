@@ -20,9 +20,9 @@ cairocffi==1.7.1 \
     --hash=sha256:2e48ee864884ec4a3a34bfa8c9ab9999f688286eb714a15a43ec9d068c36557b \
     --hash=sha256:9803a0e11f6c962f3b0ae2ec8ba6ae45e957a146a004697a1ac1bbf16b073b3f
     # via cairosvg
-cairosvg==2.7.1 \
-    --hash=sha256:432531d72347291b9a9ebfb6777026b607563fd8719c46ee742db0aef7271ba0 \
-    --hash=sha256:8a5222d4e6c3f86f1f7046b63246877a63b49923a1cd202184c3a634ef546b3b
+cairosvg==2.8.0 \
+    --hash=sha256:d60fe75c238ffba3f8e21e06dad8727ecd2bcef8d3d55fc11f9286c08c5cc710 \
+    --hash=sha256:f15836feea67a680f79938edf2efdd162793526b0b1cc2fd9ec257ebeafe2946
     # via mkdocs-material
 certifi==2025.4.26 \
     --hash=sha256:0a816057ea3cdefcef70270d2c515e4506bbc954f417fa5ade2021213bb8f0c6 \
@@ -343,9 +343,9 @@ mkdocs-get-deps==0.2.0 \
     --hash=sha256:162b3d129c7fad9b19abfdcb9c1458a651628e4b1dea628ac68790fb3061c60c \
     --hash=sha256:2bf11d0b133e77a0dd036abeeb06dec8775e46efa526dc70667d8863eefc6134
     # via mkdocs
-mkdocs-material==9.6.13 \
-    --hash=sha256:3730730314e065f422cc04eacbc8c6084530de90f4654a1482472283a38e30d3 \
-    --hash=sha256:7bde7ebf33cfd687c1c86c08ed8f6470d9a5ba737bd89e7b3e5d9f94f8c72c16
+mkdocs-material==9.6.14 \
+    --hash=sha256:39d795e90dce6b531387c255bd07e866e027828b7346d3eba5ac3de265053754 \
+    --hash=sha256:3b9cee6d3688551bf7a8e8f41afda97a3c39a12f0325436d76c86706114b721b
     # via
     #   -r requirements.in
     #   mkdocs-print-site-plugin
@@ -553,9 +553,9 @@ pyyaml==6.0.2 \
     #   mkdocs-get-deps
     #   pymdown-extensions
     #   pyyaml-env-tag
-pyyaml-env-tag==1.0 \
-    --hash=sha256:37f081041b8dca44ed8eb931ce0056f97de17251450f0ed08773dc2bcaf9e683 \
-    --hash=sha256:bc952534a872b583f66f916e2dd83e7a7b9087847f4afca6d9c957c48b258ed2
+pyyaml-env-tag==1.1 \
+    --hash=sha256:17109e1a528561e32f026364712fee1264bc2ea6715120891174ed1b980d2e04 \
+    --hash=sha256:2eb38b75a2d21ee0475d6d97ec19c63287a7e140231e4214969d0eac923cd7ff
     # via
     #   mike
     #   mkdocs

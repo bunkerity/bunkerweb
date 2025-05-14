@@ -64,9 +64,8 @@ RUN umask 027
 RUN apk add --no-cache bash curl geoip grep libgcc libgd libmagic libpq libstdc++ libxml2 mariadb-client mariadb-connector-c openssl pcre postgresql-client python3 sed sqlite tzdata unzip yajl supervisor
 
 # Fix CVEs
-RUN apk add --no-cache "perl>=5.38.3-r1" # CVE-2024-56406
-RUN apk add --no-cache "xz-libs>=5.6.2-r1" # CVE-2025-31115
-RUN apk add --no-cache "sqlite>=3.45.3-r2" "sqlite-libs>=3.45.3-r2" # CVE-2025-29087
+RUN apk add --no-cache "libpq>=16.9-r0" "postgresql16-client>=16.9-r0" # CVE-2025-4207
+RUN apk add --no-cache "libxml2>=2.12.7-r3" # CVE-2025-32414 CVE-2025-32415
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 /usr/share/bunkerweb /usr/share/bunkerweb
