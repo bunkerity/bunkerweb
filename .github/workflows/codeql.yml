@@ -28,7 +28,6 @@ jobs:
       - name: Install python dependencies
         if: matrix.language == 'python'
         run: |
-          python -m pip install --no-cache-dir --ignore-installed --require-hashes -r src/deps/requirements.txt
           python -m pip install --no-cache-dir --require-hashes -r src/scheduler/requirements.txt
           python -m pip install --no-cache-dir --require-hashes -r src/ui/requirements.txt
           python -m pip install --no-cache-dir --require-hashes -r src/common/gen/requirements.txt
