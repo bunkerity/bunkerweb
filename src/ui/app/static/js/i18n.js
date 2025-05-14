@@ -101,8 +101,8 @@ function updateLanguageSelector(lang) {
 // Function to save language preference to the server
 function saveLanguage(rootUrl, language) {
   // Don't send request if we're in setup mode or readonly
-  const isReadOnly = $("#is-read-only").val().trim() === "True";
-  if (isSetup || isReadOnly) {
+  const dbReadOnly = $("#db-read-only").val().trim() === "True";
+  if (isSetup || dbReadOnly) {
     return;
   }
 

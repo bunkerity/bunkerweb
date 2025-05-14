@@ -740,6 +740,7 @@ def before_request():
             plugins=BW_CONFIG.get_plugins(),
             flash_messages=session.get("flash_messages", []),
             is_readonly=DATA.get("READONLY_MODE", False) or ("write" not in current_user.list_permissions and not request.path.startswith("/profile")),
+            db_readonly=DATA.get("READONLY_MODE", False),
             user_readonly="write" not in current_user.list_permissions,
             theme=current_user.theme if current_user.is_authenticated else "dark",
             language=current_user.language if current_user.is_authenticated else "en",

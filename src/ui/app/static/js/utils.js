@@ -297,7 +297,7 @@ $(document).ready(() => {
   const intervalTime = 7000;
   let interval;
   const $bannerText = $("#banner-text");
-  const isReadOnly = $("#is-read-only").val().trim() === "True";
+  const dbReadOnly = $("#db-read-only").val().trim() === "True";
 
   function calculateMinHeight() {
     // Create a hidden element to measure the max height
@@ -556,7 +556,7 @@ $(document).ready(() => {
     $("[name='theme']").val(theme);
     localStorage.setItem("theme", theme); // Save user preference
 
-    if (!rootUrl || window.location.pathname.includes("/setup") || isReadOnly)
+    if (!rootUrl || window.location.pathname.includes("/setup") || dbReadOnly)
       return;
 
     saveTheme(rootUrl.replace(/\/profile$/, "/set_theme"), theme);
