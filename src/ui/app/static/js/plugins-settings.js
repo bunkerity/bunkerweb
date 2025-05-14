@@ -1111,7 +1111,12 @@ $(document).ready(() => {
       }
 
       if (!allStepsValid) return;
-    } else if (currentMode === "raw") {
+    }
+
+    // If all validations pass, submit the form
+    const form = getFormFromSettings($(this));
+
+    if (currentMode === "raw") {
       // Raw mode validation logic
       const draftInput = $("#is-draft");
       const wasDraft = draftInput.data("original") === "yes";
@@ -1123,8 +1128,6 @@ $(document).ready(() => {
       }
     }
 
-    // If all validations pass, submit the form
-    const form = getFormFromSettings($(this));
     form.appendTo("body").submit();
   });
 
