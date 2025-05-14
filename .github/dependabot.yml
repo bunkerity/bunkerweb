@@ -10,8 +10,6 @@ updates:
       timezone: "Europe/Paris"
     assignees:
       - "TheophileDiot"
-    reviewers:
-      - "TheophileDiot"
     commit-message:
       prefix: "deps/gha"
     target-branch: "dev"
@@ -25,8 +23,6 @@ updates:
       timezone: "Europe/Paris"
     assignees:
       - "TheophileDiot"
-    reviewers:
-      - "TheophileDiot"
     commit-message:
       prefix: "deps/linux"
     target-branch: "dev"
@@ -37,8 +33,6 @@ updates:
       time: "09:00"
       timezone: "Europe/Paris"
     assignees:
-      - "TheophileDiot"
-    reviewers:
       - "TheophileDiot"
     commit-message:
       prefix: "deps/tests/linux"
@@ -53,8 +47,6 @@ updates:
       timezone: "Europe/Paris"
     assignees:
       - "TheophileDiot"
-    reviewers:
-      - "TheophileDiot"
     commit-message:
       prefix: "deps/bw"
     target-branch: "dev"
@@ -68,8 +60,6 @@ updates:
       timezone: "Europe/Paris"
     assignees:
       - "TheophileDiot"
-    reviewers:
-      - "TheophileDiot"
     commit-message:
       prefix: "deps/scheduler"
     target-branch: "dev"
@@ -80,8 +70,6 @@ updates:
       time: "09:00"
       timezone: "Europe/Paris"
     assignees:
-      - "TheophileDiot"
-    reviewers:
       - "TheophileDiot"
     commit-message:
       prefix: "deps/scheduler"
@@ -96,8 +84,6 @@ updates:
       timezone: "Europe/Paris"
     assignees:
       - "TheophileDiot"
-    reviewers:
-      - "TheophileDiot"
     commit-message:
       prefix: "deps/autoconf"
     target-branch: "dev"
@@ -108,8 +94,6 @@ updates:
       time: "09:00"
       timezone: "Europe/Paris"
     assignees:
-      - "TheophileDiot"
-    reviewers:
       - "TheophileDiot"
     commit-message:
       prefix: "deps/autoconf"
@@ -124,8 +108,6 @@ updates:
       timezone: "Europe/Paris"
     assignees:
       - "TheophileDiot"
-    reviewers:
-      - "TheophileDiot"
     commit-message:
       prefix: "deps/ui"
     target-branch: "dev"
@@ -136,8 +118,6 @@ updates:
       time: "09:00"
       timezone: "Europe/Paris"
     assignees:
-      - "TheophileDiot"
-    reviewers:
       - "TheophileDiot"
     commit-message:
       prefix: "deps/ui"
@@ -152,8 +132,6 @@ updates:
       timezone: "Europe/Paris"
     assignees:
       - "TheophileDiot"
-    reviewers:
-      - "TheophileDiot"
     commit-message:
       prefix: "deps/deps"
     target-branch: "dev"
@@ -165,8 +143,6 @@ updates:
       timezone: "Europe/Paris"
     assignees:
       - "TheophileDiot"
-    reviewers:
-      - "TheophileDiot"
     commit-message:
       prefix: "deps/common/gen"
     target-branch: "dev"
@@ -177,8 +153,6 @@ updates:
       time: "09:00"
       timezone: "Europe/Paris"
     assignees:
-      - "TheophileDiot"
-    reviewers:
       - "TheophileDiot"
     commit-message:
       prefix: "deps/common/db"
@@ -193,8 +167,6 @@ updates:
       timezone: "Europe/Paris"
     assignees:
       - "fl0ppy-d1sk"
-    reviewers:
-      - "fl0ppy-d1sk"
     commit-message:
       prefix: "deps/terraform"
     target-branch: "dev"
@@ -207,8 +179,6 @@ updates:
       time: "09:00"
       timezone: "Europe/Paris"
     assignees:
-      - "TheophileDiot"
-    reviewers:
       - "TheophileDiot"
     commit-message:
       prefix: "deps/migration"
