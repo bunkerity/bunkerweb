@@ -7,7 +7,9 @@ Copy the table of contents from the sidebar's.
 Only called when print-site-plugin option 'add_table_of_contents' is set to true
 */
 function generate_toc() {
-  const sidebar = document.body.getElementsByClassName("md-sidebar--secondary")[0];
+  const sidebar = document.body.getElementsByClassName("md-sidebar--secondary")[0] ??
+    document.getElementById("toc-collapse");
+
   const sidebarToc = sidebar.getElementsByTagName("ul")[0];
 
   var clonedToc = sidebarToc.cloneNode(true);
