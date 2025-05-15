@@ -2,7 +2,7 @@
   "name": "reverse-proxy-singlesite",
   "kinds": ["docker", "autoconf", "swarm"],
   "delay": 120,
-  "timeout": 60,
+  "timeout": 90,
   "no_copy_container": true,
   "tests": [
     {

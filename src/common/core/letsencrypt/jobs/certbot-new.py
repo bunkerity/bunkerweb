@@ -734,14 +734,15 @@ try:
     else:
         LOGGER.info("No wildcard domains found, skipping wildcard certificate(s) generation...")
 
-    # * Clearing all missing credentials files
-    for file in CACHE_PATH.rglob("*"):
-        if "etc" in file.parts or not file.is_file() or file.suffix not in (".ini", ".env", ".json"):
-            continue
-        # ? If the file is not in the wildcard groups, remove it
-        if file not in credential_paths:
-            LOGGER.debug(f"Removing old credentials file {file}")
-            JOB.del_cache(file.name, job_name="certbot-renew", service_id=file.parent.name if file.parent.name != "letsencrypt" else "")
+    if CACHE_PATH.is_dir():
+        # * Clearing all missing credentials files
+        for file in CACHE_PATH.rglob("*"):
+            if "etc" in file.parts or not file.is_file() or file.suffix not in (".ini", ".env", ".json"):
+                continue
+            # ? If the file is not in the wildcard groups, remove it
+            if file not in credential_paths:
+                LOGGER.debug(f"Removing old credentials file {file}")
+                JOB.del_cache(file.name, job_name="certbot-renew", service_id=file.parent.name if file.parent.name != "letsencrypt" else "")
 
     # * Clearing all no longer needed certificates
     if getenv("LETS_ENCRYPT_CLEAR_OLD_CERTS", "no") == "yes":
