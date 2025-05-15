@@ -133,6 +133,7 @@ jobs:
         env:
           TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db
       - name: Docker Scout Analysis
+        if: ${{ inputs.CACHE_SUFFIX != 'arm' }}
         uses: docker/scout-action@381b657c498a4d287752e7f2cfb2b41823f566d9 # v1.17.1
         with:
           command: cves,recommendations
