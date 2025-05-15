@@ -41,7 +41,7 @@
 	🔎 <a href="https://forms.gle/e3VgymAteYPnwM1j9">Feedback</a>
 </p>
 
-> 🛡️ Make security by default great again!
+> 🛡️ Make “secure by default” not just a promise, but a reality — with BunkerWeb.
 
 # BunkerWeb
 
