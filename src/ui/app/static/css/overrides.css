@@ -549,7 +549,7 @@ a.badge:hover {
   background-color: rgba(255, 255, 255, 0.88) !important;
   backdrop-filter: saturate(200%) blur(6px);
   top: 85px;
-  z-index: 1100;
+  z-index: 1070;
 }
 
 #floating-modes-menu {

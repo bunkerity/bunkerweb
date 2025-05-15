@@ -10,6 +10,7 @@ function initializeDataTable(config) {
   let t = typeof i18next !== "undefined" ? i18next.t : (key) => key; // Fallback
 
   const isReadOnly = $("#is-read-only").val().trim() === "True";
+  const dbReadOnly = $("#db-read-only").val().trim() === "True";
   const {
     tableSelector,
     tableName,
@@ -265,7 +266,7 @@ function initializeDataTable(config) {
         );
       }
 
-      if (isReadOnly || Object.keys(originalColumnsPreferences).length === 0)
+      if (dbReadOnly || Object.keys(originalColumnsPreferences).length === 0)
         return;
 
       saveColumnsPreferences();

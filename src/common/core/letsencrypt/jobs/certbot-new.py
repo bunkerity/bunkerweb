@@ -584,7 +584,6 @@ try:
                     psl_lines = load_public_suffix_list(JOB)
                 if psl_rules is None:
                     psl_rules = parse_psl(psl_lines)
-                    LOGGER.debug(psl_rules)
 
                 wildcards = WILDCARD_GENERATOR.extract_wildcards_from_domains(domains.split(" "))
 
@@ -685,6 +684,7 @@ try:
             group_parts = group.split("_")
             provider = group_parts[0]
             profile = group_parts[2]
+            base_domain = group_parts[3]
 
             email = data.pop("email")
             credentials_file = CACHE_PATH.joinpath(f"{group}.{provider_classes[provider].get_file_type() if provider in provider_classes else 'txt'}")
@@ -701,8 +701,10 @@ try:
                     f"using {profile!r} profile..."
                 )
 
+                domains_split = domains.split(",")
+
                 # Add wildcard certificate names to active set
-                for domain in domains.split(","):
+                for domain in domains_split:
                     # Extract the base domain from the wildcard domain
                     base_domain = WILDCARD_GENERATOR.get_base_domain(domain)
                     active_cert_names.add(base_domain)
@@ -717,7 +719,7 @@ try:
                         "default",
                         profile,
                         staging,
-                        domains_to_ask[group_parts[1]] == 2,
+                        domains_to_ask[base_domain] == 2,
                         env.copy(),
                     )
                     != 0
@@ -728,7 +730,7 @@ try:
                     status = 1 if status == 0 else status
                     LOGGER.info(f"Certificate generation succeeded for domain(s): {domains}")
 
-                generated_domains.update(domains.split(","))
+                generated_domains.update(domains_split)
     else:
         LOGGER.info("No wildcard domains found, skipping wildcard certificate(s) generation...")
 
