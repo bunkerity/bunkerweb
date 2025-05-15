@@ -125,9 +125,9 @@
     },
     {
       "id": "lua-resty-openssl",
-      "name": "lua-resty-openssl v1.5.2",
+      "name": "lua-resty-openssl v1.6.1",
       "url": "https://github.com/fffonion/lua-resty-openssl.git",
-      "commit": "e901ea8c98f6e159482611952891d3418ab893e0",
+      "commit": "e0f52762fef5c31532e60c7d58c7a6d9ae5a6905",
       "post_install": "rm -r src/deps/src/lua-resty-openssl/t"
     },
     {
@@ -152,9 +152,9 @@
     },
     {
       "id": "lua-resty-session",
-      "name": "lua-resty-session v4.0.5",
+      "name": "lua-resty-session v4.1.1",
       "url": "https://github.com/bungle/lua-resty-session.git",
-      "commit": "5f2aed616d16fa7ca04dc40e23d6941740cd634d",
+      "commit": "e4ee19ab9788293ee868f01e56a5303387cf7d04",
       "post_install": "rm -r src/deps/src/lua-resty-session/t"
     },
     {

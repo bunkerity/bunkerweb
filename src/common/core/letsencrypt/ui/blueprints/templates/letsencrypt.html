@@ -1,0 +1,82 @@
+{% extends "dashboard.html" %}
+{% block content %}
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='libs/datatables/datatables.min.css') }}"
+          nonce="{{ style_nonce }}" />
+    <div class="card table-responsive text-nowrap p-4 pb-8 min-vh-70">
+        <textarea type="hidden"
+                  id="columns_preferences_defaults"
+                  class="visually-hidden">{{ columns_preferences_defaults_letsencrypt|tojson }}</textarea>
+        <textarea type="hidden" id="columns_preferences" class="visually-hidden">{}</textarea>
+        <input type="hidden"
+               id="csrf_token"
+               name="csrf_token"
+               value="{{ csrf_token() }}" />
+        <p id="letsencrypt-waiting"
+           class="text-center relative w-full p-2 text-primary rounded-lg fw-bold">Loading certificates...</p>
+        <div id="letsencrypt-buttons" class="mb-3"></div>
+        <table id="letsencrypt"
+               class="table responsive nowrap position-relative w-100 d-none">
+        </table>
+        <span class="position-absolute bottom-0 start-50 translate-middle badge rounded-pill bg-secondary">
+            TZ: <script nonce="{{ script_nonce }}">document.write(Intl.DateTimeFormat().resolvedOptions().timeZone);</script>
+        </span>
+    </div>
+    <!-- Modal for confirming deletion -->
+    <div class="modal fade"
+         id="deleteCertModal"
+         tabindex="-1"
+         aria-labelledby="deleteCertModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteCertModalLabel">Confirm Deletion</h5>
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <span id="deleteCertContent" class="text-break"></span>
+                    </div>
+                    <div class="alert alert-danger" role="alert">Are you sure you want to delete the selected certificate(s)?</div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="confirmDeleteCertBtn" class="btn btn-danger me-2">Delete</button>
+                    <button type="button"
+                            class="btn btn-outline-secondary"
+                            data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Error Modal for Certificate Operations -->
+    <div class="modal fade" id="errorModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="errorModalLabel">Error</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="errorModalContent"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='libs/datatables/datatables.min.js') }}"
+            defer
+            nonce="{{ script_nonce }}"></script>
+    <script src="{{ url_for('static', filename='js/dataTableInit.js') }}"
+            defer
+            nonce="{{ script_nonce }}"></script>
+    <script src="{{ url_for('letsencrypt') }}/js/main.js"
+            defer
+            nonce="{{ script_nonce }}"
+            type="module"></script>
+{% endblock %}

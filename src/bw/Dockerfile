@@ -1,4 +1,4 @@
-FROM nginx:1.26.3-alpine-slim@sha256:b72dec66dea425356956e863bfbccca6c1f8748f5913e094d4ca20b71e4ba2c3 AS builder
+FROM nginx:1.26-alpine-slim@sha256:6d4f5fb02763f731c06f3e246d4edf89c3a2bbc5dd72eab2b02bc55ef4b8600e AS builder
 
 # Install temporary requirements for the dependencies
 RUN apk add --no-cache bash autoconf libtool automake geoip-dev g++ gcc curl-dev libxml2-dev pcre-dev make linux-headers musl-dev gd-dev gnupg brotli-dev openssl-dev patch readline-dev yajl yajl-dev yajl-tools py3-pip python3-dev
@@ -42,7 +42,7 @@ COPY src/common/utils utils
 COPY src/VERSION VERSION
 COPY misc/*.ascii misc/
 
-FROM nginx:1.26.3-alpine-slim@sha256:b72dec66dea425356956e863bfbccca6c1f8748f5913e094d4ca20b71e4ba2c3
+FROM nginx:1.26-alpine-slim@sha256:6d4f5fb02763f731c06f3e246d4edf89c3a2bbc5dd72eab2b02bc55ef4b8600e
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
@@ -51,7 +51,7 @@ RUN umask 027
 RUN apk add --no-cache openssl pcre bash python3 yajl geoip libxml2 libgd curl tzdata
 
 # Fix CVEs
-# There are no CVEs for the following packages
+RUN apk add --no-cache "libxml2>=2.12.7-r3" # CVE-2025-32414 CVE-2025-32415
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 /usr/share/bunkerweb /usr/share/bunkerweb
@@ -75,7 +75,7 @@ RUN cp helpers/bwcli /usr/bin/ && \
 	ln -s /proc/1/fd/1 /var/log/bunkerweb/access.log
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
-LABEL version="1.6.2-rc1"
+LABEL version="1.6.2-rc2"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="bunkerweb"
 LABEL bunkerweb.INSTANCE="bunkerweb"

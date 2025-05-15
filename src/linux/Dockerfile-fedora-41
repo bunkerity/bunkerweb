@@ -1,4 +1,4 @@
-FROM fedora:41@sha256:3ec60eb34fa1a095c0c34dd37cead9fd38afb62612d43892fcf1d3425c32bc1e AS builder
+FROM fedora:41@sha256:e10efcce862bea890d8d2fe6eeeb78d7b67aa1301280bd7853b4184acf5ec148 AS builder
 
 ENV OS=fedora
 ENV NGINX_VERSION=1.26.3
@@ -6,7 +6,7 @@ ENV NGINX_VERSION=1.26.3
 # Install Nginx, fpm and dependencies
 RUN dnf update -y && \
     dnf install -y curl gnupg2 ca-certificates redhat-lsb-core make gcc && \
-    dnf install -y --setopt=install_weak_deps=False python3 python3-devel python3-pip brotli brotli-devel gperftools-devel perl libxslt-devel libxml2 yajl yajl-devel libxslt bash gd gd-devel gcc-c++ kernel-devel znc-modtcl libmpc-devel gmp-devel gawk mpfr-devel libtool pcre-devel automake autoconf readline-devel gcc make openssl-devel git zlib-devel libxml2-devel pkgconf libcurl-devel geoip-devel lmdb-devel && \
+    dnf install -y --setopt=install_weak_deps=False python3 python3-devel python3-pip brotli brotli-devel gperftools-devel perl libxslt-devel libxml2 yajl yajl-devel libxslt bash gd gd-devel gcc-c++ kernel-devel znc-modtcl libmpc-devel gmp-devel gawk mpfr-devel libtool pcre-devel automake autoconf readline-devel gcc make openssl-devel git zlib-devel libxml2-devel pkgconf libcurl-devel geoip-devel && \
     dnf install --enablerepo=updates-testing nginx-${NGINX_VERSION} -y
 
 WORKDIR /tmp/bunkerweb/deps
@@ -53,7 +53,7 @@ COPY src/scheduler scheduler
 COPY src/VERSION VERSION
 COPY src/ui ui
 
-FROM fedora:41@sha256:3ec60eb34fa1a095c0c34dd37cead9fd38afb62612d43892fcf1d3425c32bc1e
+FROM fedora:41@sha256:e10efcce862bea890d8d2fe6eeeb78d7b67aa1301280bd7853b4184acf5ec148
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
@@ -93,7 +93,7 @@ COPY --chmod=660 src/bw/misc/country.mmdb /var/tmp/bunkerweb/country.mmdb
 # Copy Linux files
 COPY --chmod=740 src/linux/scripts scripts
 COPY --chmod=740 src/linux/fpm.sh /usr/share/fpm.sh
-COPY src/linux/fpm-fedora /usr/share/.fpm
+COPY src/linux/fpm-fedora-41 /usr/share/.fpm
 COPY --chmod=644 src/linux/*.service /lib/systemd/system/
 COPY --chmod=644 src/linux/bunkerweb.logrotate /etc/logrotate.d/bunkerweb
 

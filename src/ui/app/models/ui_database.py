@@ -75,6 +75,7 @@ class UIDatabase(Database):
                 "method": ui_user.method,
                 "admin": ui_user.admin,
                 "theme": ui_user.theme,
+                "language": ui_user.language,
                 "totp_secret": ui_user.totp_secret,
                 "creation_date": ui_user.creation_date.astimezone(),
                 "update_date": ui_user.update_date.astimezone(),
@@ -90,6 +91,7 @@ class UIDatabase(Database):
         email: Optional[str] = None,
         *,
         theme: Union[Literal["light"], Literal["dark"]] = "light",
+        language: str = "en",
         totp_secret: Optional[str] = None,
         totp_recovery_codes: Optional[List[str]] = None,
         creation_date: Optional[datetime] = None,
@@ -122,6 +124,7 @@ class UIDatabase(Database):
                     method=method,
                     admin=admin,
                     theme=theme,
+                    language=language,
                     totp_secret=totp_secret,
                     creation_date=creation_date or current_time,
                     update_date=current_time,
@@ -152,6 +155,7 @@ class UIDatabase(Database):
         email: Optional[str] = None,
         totp_recovery_codes: Optional[List[str]] = None,
         method: str = "manual",
+        language: str = "en",
     ) -> str:
         """Update ui user."""
         totp_changed = False
@@ -182,6 +186,7 @@ class UIDatabase(Database):
             user.totp_secret = totp_secret
             user.method = method
             user.theme = theme
+            user.language = language
             user.update_date = datetime.now().astimezone()
 
             try:

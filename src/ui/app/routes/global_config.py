@@ -3,8 +3,8 @@ from threading import Thread
 from time import time
 from typing import Dict
 
-from flask import Blueprint, Response, redirect, render_template, request, url_for
-from flask_login import current_user, login_required
+from flask import Blueprint, redirect, render_template, request, url_for
+from flask_login import login_required
 
 from app.dependencies import BW_CONFIG, DATA, DB
 from app.utils import get_blacklisted_settings
@@ -21,9 +21,7 @@ def global_config_page():
     global_config = DB.get_config(global_only=True, methods=True)
 
     if request.method == "POST":
-        if "write" not in current_user.list_permissions:
-            return Response("You don't have the required permissions to edit the global configuration.", 403)
-        elif DB.readonly:
+        if DB.readonly:
             return handle_error("Database is in read-only mode", "global_config")
         DATA.load_from_file()
 

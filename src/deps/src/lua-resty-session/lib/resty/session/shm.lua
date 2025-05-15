@@ -4,12 +4,12 @@
 -- @module resty.session.shm
 
 
-local table_new = require "table.new"
 local utils  = require "resty.session.utils"
 
 
 local meta_get_value = utils.meta_get_value
 local meta_get_next = utils.meta_get_next
+local table_new = utils.table_new
 local get_name = utils.get_name
 local errmsg = utils.errmsg
 

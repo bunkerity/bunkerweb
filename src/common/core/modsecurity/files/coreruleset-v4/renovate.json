@@ -7,5 +7,17 @@
   "ignorePaths": [],
   "enabledManagers": [
     "docker-compose"
+  ],
+  "packageRules": [
+    {
+      "matchUpdateTypes": [
+        "major",
+        "minor",
+        "patch",
+        "pin",
+        "digest"
+      ],
+      "addLabels": ["release:ignore"]
+    }
   ]
 }

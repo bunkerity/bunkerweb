@@ -96,3 +96,5 @@ docs/web-ui.md:hashicorp-tf-password:993
 docs/web-ui.md:hashicorp-tf-password:1149
 docs/web-ui.md:hashicorp-tf-password:1180
 src/common/core/antibot/files/recaptcha.html:generic-api-key:26
+src/common/core/customcert/README.md:private-key:84
+docs/features.md:private-key:1847

@@ -24,7 +24,8 @@
                                             aria-controls="mode-selection-floating"
                                             aria-expanded="false"
                                             aria-label="Toggle navigation">
-                                        <i class="bx bx-xs bx-menu"></i> Mode selection
+                                        <i class="bx bx-xs bx-menu"></i>&nbsp;
+                                        <span class="don-jose" data-i18n="navigation.mode_selection">Mode selection</span>
                                     </button>
                                     <!-- Collapsible floating menu -->
                                     <div class="collapse mt-2" id="mode-selection-floating">
@@ -41,7 +42,7 @@
                                                             {% if mode == 'easy' %}aria-selected="true"{% endif %}>
                                                         <i class="bx bx-customize bx-sm"></i>
                                                         &nbsp;
-                                                        <span class="don-jose">Easy</span>
+                                                        <span class="don-jose" data-i18n="mode.easy">Easy</span>
                                                     </button>
                                                 </li>
                                             {% endif %}
@@ -55,7 +56,7 @@
                                                         {% if mode == 'advanced' %}aria-selected="true"{% endif %}>
                                                     <i class="bx bx-shield-quarter bx-sm"></i>
                                                     &nbsp;
-                                                    <span class="don-jose">Advanced</span>
+                                                    <span class="don-jose" data-i18n="mode.advanced">Advanced</span>
                                                 </button>
                                             </li>
                                             <li class="nav-item" role="presentation">
@@ -68,7 +69,7 @@
                                                         {% if mode == 'raw' %}aria-selected="true"{% endif %}>
                                                     <i class="bx bx-notepad bx-sm"></i>
                                                     &nbsp;
-                                                    <span class="don-jose">Raw</span>
+                                                    <span class="don-jose" data-i18n="mode.raw">Raw</span>
                                                 </button>
                                             </li>
                                         </ul>
@@ -87,7 +88,7 @@
                                                     {% if mode == 'easy' %}aria-selected="true"{% endif %}>
                                                 <i class="bx bx-customize bx-xs"></i>
                                                 &nbsp;
-                                                <span class="d-none d-sm-inline don-jose">Easy</span>
+                                                <span class="d-none d-sm-inline don-jose" data-i18n="mode.easy">Easy</span>
                                             </button>
                                         </li>
                                     {% endif %}
@@ -101,7 +102,7 @@
                                                 {% if mode == 'advanced' %}aria-selected="true"{% endif %}>
                                             <i class="bx bx-shield-quarter bx-xs"></i>
                                             &nbsp;
-                                            <span class="d-none d-sm-inline don-jose">Advanced</span>
+                                            <span class="d-none d-sm-inline don-jose" data-i18n="mode.advanced">Advanced</span>
                                         </button>
                                     </li>
                                     <li class="nav-item" role="presentation">
@@ -114,7 +115,7 @@
                                                 {% if mode == 'raw' %}aria-selected="true"{% endif %}>
                                             <i class="bx bx-notepad bx-xs"></i>
                                             &nbsp;
-                                            <span class="d-none d-sm-inline don-jose">Raw</span>
+                                            <span class="d-none d-sm-inline don-jose" data-i18n="mode.raw">Raw</span>
                                         </button>
                                     </li>
                                 </ul>
@@ -128,7 +129,7 @@
                                        target="_blank"
                                        rel="noopener">
                                         <span class="bx bx-help-circle me-0 me-md-2"></span>
-                                        <span class="d-none d-md-inline">Need help?</span>
+                                        <span class="d-none d-md-inline" data-i18n="button.need_help">Need help?</span>
                                     </a>
                                 </li>
                                 <li class="me-3 position-relative">
@@ -140,13 +141,13 @@
                                             data-bs-target="#side-offcanvas-notifications"
                                             aria-controls="side-offcanvas-notifications">
                                         <span class="bx bx-bell me-0 me-md-2"></span>
-                                        <span class="d-none d-md-inline">Notifications</span>
+                                        <span class="d-none d-md-inline" data-i18n="button.notifications">Notifications</span>
                                     </button>
                                     {% if flash_messages %}
                                         <span id="unread-notifications"
                                               class="badge-dot-text position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none">
                                             {{ flash_messages|length }}
-                                            <span class="visually-hidden">unread notifications</span>
+                                            <span class="visually-hidden" data-i18n="badge.unread_notifications">unread notifications</span>
                                         </span>
                                     {% endif %}
                                 </li>
@@ -159,7 +160,7 @@
                                             data-bs-target="#side-offcanvas-news"
                                             aria-controls="side-offcanvas-news">
                                         <span class="bx bx-news me-0 me-md-2"></span>
-                                        <span class="d-none d-md-inline">News</span>
+                                        <span class="d-none d-md-inline" data-i18n="button.news">News</span>
                                     </button>
                                 </li>
                             </ul>

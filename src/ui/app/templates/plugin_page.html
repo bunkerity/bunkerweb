@@ -25,7 +25,8 @@
     {% if not is_used %}
         <div class="d-flex align-items-center justify-content-center">
             <div class="text-center text-primary">
-                <p class="text-center relative w-full p-2 text-primary rounded-lg fw-bold">
+                <p class="text-center relative w-full p-2 text-primary rounded-lg fw-bold"
+                   data-i18n="plugin.page.status.deactivated">
                     Plugin is deactivated, therefore no information is available.
                 </p>
             </div>
@@ -33,7 +34,8 @@
     {% elif not is_metrics %}
         <div class="d-flex align-items-center justify-content-center">
             <div class="text-center text-primary">
-                <p class="text-center relative w-full p-2 text-primary rounded-lg fw-bold">
+                <p class="text-center relative w-full p-2 text-primary rounded-lg fw-bold"
+                   data-i18n="plugin.page.status.metrics_deactivated">
                     Metrics plugin isn't activated, therefore no information is available.
                 </p>
             </div>
@@ -164,7 +166,8 @@
                                     {% else %}
                                         <div class="d-flex align-items-center justify-content-center h-100">
                                             <div class="text-center mt-2">
-                                                <p class="g-3 p-2 text-primary rounded-lg fw-bold">No data to show</p>
+                                                <p class="g-3 p-2 text-primary rounded-lg fw-bold"
+                                                   data-i18n="status.no_data">No data to show</p>
                                             </div>
                                         </div>
                                     {% endif %}
@@ -177,7 +180,8 @@
         {% else %}
             <div class="d-flex align-items-center justify-content-center">
                 <div class="text-center text-primary">
-                    <p class="text-center relative w-full p-2 text-primary rounded-lg fw-bold">
+                    <p class="text-center relative w-full p-2 text-primary rounded-lg fw-bold"
+                       data-i18n="plugin.page.status.not_available">
                         Plugin page not yet available during the beta phase.
                     </p>
                 </div>

@@ -20,7 +20,18 @@ Follow these steps to configure and use the Let's Encrypt feature:
 2. **Provide contact email:** Enter your email address using the `EMAIL_LETS_ENCRYPT` setting to receive important notifications about your certificates.
 3. **Choose challenge type:** Select either `http` or `dns` verification with the `LETS_ENCRYPT_CHALLENGE` setting.
 4. **Configure DNS provider:** If using DNS challenges, specify your DNS provider and credentials.
-5. **Let BunkerWeb handle the rest:** Once configured, certificates are automatically issued, installed, and renewed as needed.
+5. **Select certificate profile:** Choose your preferred certificate profile using the `LETS_ENCRYPT_PROFILE` setting (classic, tlsserver, or shortlived).
+6. **Let BunkerWeb handle the rest:** Once configured, certificates are automatically issued, installed, and renewed as needed.
+
+!!! tip "Certificate Profiles"
+    Let's Encrypt provides different certificate profiles for different use cases:
+    - **classic**: General-purpose certificates with 90-day validity (default)
+    - **tlsserver**: Optimized for TLS server authentication with 90-day validity and smaller payload
+    - **shortlived**: Enhanced security with 7-day validity for automated environments
+    - **custom**: If your ACME server supports a different profile, set it using `LETS_ENCRYPT_CUSTOM_PROFILE`.
+
+!!! info "Profile Availability"
+    Note that the `tlsserver` and `shortlived` profiles may not be available in all environments or with all ACME clients at this time. The `classic` profile has the widest compatibility and is recommended for most users. If a selected profile is not available, the system will automatically fall back to the `classic` profile.
 
 ### Configuration Settings
 
@@ -35,6 +46,8 @@ Follow these steps to configure and use the Let's Encrypt feature:
 | `USE_LETS_ENCRYPT_WILDCARD`        | `no`                     | multisite | no       | **Wildcard Certificates:** When set to `yes`, creates wildcard certificates for all domains. Only available with DNS challenges.                                                     |
 | `USE_LETS_ENCRYPT_STAGING`         | `no`                     | multisite | no       | **Use Staging:** When set to `yes`, uses Let's Encrypt's staging environment for testing. Staging has higher rate limits but produces certificates that are not trusted by browsers. |
 | `LETS_ENCRYPT_CLEAR_OLD_CERTS`     | `no`                     | global    | no       | **Clear Old Certificates:** When set to `yes`, removes old certificates that are no longer needed during renewal.                                                                    |
+| `LETS_ENCRYPT_PROFILE`             | `classic`                | multisite | no       | **Certificate Profile:** Select the certificate profile to use. Options: `classic` (general-purpose), `tlsserver` (optimized for TLS servers), or `shortlived` (7-day certificates). |
+| `LETS_ENCRYPT_CUSTOM_PROFILE`      |                          | multisite | no       | **Custom Certificate Profile:** Enter a custom certificate profile if your ACME server supports non-standard profiles. This overrides `LETS_ENCRYPT_PROFILE` if set.                 |
 
 !!! info "Information and behavior"
     - The `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` setting is a multiple setting and can be used to set multiple items for the DNS provider. The items will be saved as a cache file, and Certbot will read the credentials from it.
@@ -61,6 +74,7 @@ Follow these steps to configure and use the Let's Encrypt feature:
 !!! warning "Rate Limits"
     Let's Encrypt imposes rate limits on certificate issuance. When testing configurations, use the staging environment by setting `USE_LETS_ENCRYPT_STAGING` to `yes` to avoid hitting production rate limits. Staging certificates are not trusted by browsers but are useful for validating your setup.
 
+
 ### Supported DNS Providers
 
 The Let's Encrypt plugin supports a wide range of DNS providers for DNS challenges. Each provider requires specific credentials that must be provided using the `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` setting.
@@ -75,6 +89,7 @@ The Let's Encrypt plugin supports a wide range of DNS providers for DNS challeng
 | `gehirn`       | Gehirn DNS      | `api_token`<br>`api_secret`                                                                                  |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-gehirn.readthedocs.io/en/stable/)                 |
 | `google`       | Google Cloud    | `project_id`<br>`private_key_id`<br>`private_key`<br>`client_email`<br>`client_id`<br>`client_x509_cert_url` | `type` (default: `service_account`)<br>`auth_uri` (default: `https://accounts.google.com/o/oauth2/auth`)<br>`token_uri` (default: `https://accounts.google.com/o/oauth2/token`)<br>`auth_provider_x509_cert_url` (default: `https://www.googleapis.com/oauth2/v1/certs`) | [Documentation](https://certbot-dns-google.readthedocs.io/en/stable/)                 |
 | `infomaniak`   | Infomaniak      | `token`                                                                                                      |                                                                                                                                                                                                                                                                          | [Documentation](https://github.com/infomaniak/certbot-dns-infomaniak)                 |
+| `ionos`        | IONOS           | `prefix`<br>`secret`                                                                                         | `endpoint` (default: `https://api.hosting.ionos.com`)                                                                                                                                                                                                                    | [Documentation](https://github.com/helgeerbe/certbot-dns-ionos/blob/master/README.md) |
 | `linode`       | Linode          | `key`                                                                                                        |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-linode.readthedocs.io/en/stable/)                 |
 | `luadns`       | LuaDNS          | `email`<br>`token`                                                                                           |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-luadns.readthedocs.io/en/stable/)                 |
 | `nsone`        | NS1             | `api_key`                                                                                                    |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-nsone.readthedocs.io/en/stable/)                  |

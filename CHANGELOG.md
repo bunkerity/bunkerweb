@@ -1,6 +1,48 @@
 # Changelog
 
-## v1.6.2-rc1 - ????/??/??
+## v1.6.2-rc2 - ????/??/??
+
+- [BUGFIX] Fix draft services deletion when editing the global config in the web UI
+- [BUGFIX] Enhance the `Let's Encrypt` plugin's Cloudflare Provider with default values and validation for credentials to avoid having to set all of them all the time (`api_token` or `email` and `api_key`)
+- [BUGFIX] Remove settings form input sanitization as it was creating issues when saving settings in the web UI
+- [BUGFIX] Exclude the RFC2136 DNS provider from the base64 encoding validation for credential items in the `letsencrypt` plugin to prevent issues with the `secret` field being detected as base64 encoded
+- [BUGFIX] Avoid redirecting clients when they match an ignore list item in `antibot` plugin
+- [BUGFIX] Avoid always trying to regenerate a Let's Encrypt certificate that was using the staging production over and over at every restart
+- [FEATURE] Add the possibility to choose a profile when generating certificates with Let's Encrypt using the `LETS_ENCRYPT_PROFILE` setting (`classic` (default), `tlsserver` for server-only validation, and `shortlived` for reduced 7-day validity) to provide flexibility in certificate configuration based on security requirements
+- [FEATURE] Add the possibility to declare custom certificates and keys data as plaintext as well as base64-encoded data in the `customcert` plugin using the `CUSTOM_SSL_CERT_DATA` and `CUSTOM_SSL_KEY_DATA` settings
+- [FEATURE] Add `IONOS` as a DNS provider in the `letsencrypt` plugin
+- [FEATURE] Add `REVERSE_PROXY_UNDERSCORES_IN_HEADERS` setting to control if underscores in headers should be allowed or not in the `Reverse Proxy` plugin (default is `no`)
+- [FEATURE] Add `LETS_ENCRYPT_CUSTOM_PROFILE` setting to allow setting a custom profile for the `Let's Encrypt` plugin
+- [FEATURE] Add `LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES` setting to allow disabling the public suffixes check in the `Let's Encrypt` plugin (default is `yes`)
+- [FEATURE] Add permanent ban feature to `badbehavior` plugin, web UI and bwcli
+- [UI] Fix shenanigans when editing a service in easy mode
+- [UI] Fix false positive with the newer CRS version (v4.13.0) on the web UI when fetching fonts
+- [UI] Add reset functionality to settings with UI updates for input, checkbox, and select elements
+- [UI] Fix LEDNS credential handling in setup wizard and reset button visibility in settings templates
+- [UI] Update time formatting in requests chart to use 12-hour format in home page
+- [UI] Introduce multi‑language support in the web UI: `ar`, `bn`, `en`, `es`, `fr`, `hi`, `pt`, `ru`, `ur`, `zh`, `de`, `it` — covering the world’s top 10 and Europe’s top 5 languages.
+- [UI] Refactor TOTP Pretty key generation to avoid separating the parts with a `-` character (this was causing issues with some QR code readers)
+- [UI] Add the possibility to manually delete Let's Encrypt certificates in the web UI
+- [UI] Refactor bans management to process the data on the serverSide like done with the reports
+- [UI] Update apexcharts.js to version 4.6.0
+- [UI] Update ace editor to version 1.40.1
+- [UI] Update DOMPurify to version 3.2.5
+- [MISC] Add algorithm normalization for self-signed certificate generation to avoid regenerating the certificate if the algorithm is already the right one but the setting is not set to the same value
+- [MISC] Refactor the way we fetch the entire config from the database to avoid issues with default values and multiple settings in the lua code
+- [MISC] Add new container security using docker scout in CI/CD pipeline
+- [MISC] Add warning for RHEL users regarding external database client installation and remove dependency on `mysql` and `postgresql` packages in the RHEL fpm file (it was causing issues when `mariadb` was installed)
+- [AUTOCONF] (Re) Remove possible infinite loop in Kubernetes integration
+- [UI] Integrate Biscuit authentication and key management
+- [DEPS] Update coreruleset-v4 version to v4.14.0
+- [DEPS] Update lua-resty-openssl version to v1.6.1
+- [DEPS] Update lua-resty-session version to v4.1.1
+- [LINUX] Support Fedora 42
+- [CONTRIBUTION] Thank you @nimro27 for your contribution to the Ingress controller (#2141 and #2143)
+- [CONTRIBUTION] Thank you @TomVivant for your contribution to the `letsencrypt` plugin (#2149)
+- [CONTRIBUTION] Thank you @wiseweb-works for your contribution to the `web UI` by adding the Turkish language (#2204)
+- [CONTRIBUTION] Thank you @HongyiHank for your contribution to the `web UI` by adding the Traditional Chinese language and double checking the Simplified Chinese language (#2226)
+
+## v1.6.2-rc1 - 2025/03/29
 
 - [BUGFIX] Fix database migration issues when upgrading from older versions to v1.6.1-rc1 with a PostgreSQL database
 - [BUGFIX] Fix shenanigans with templates in the web UI when editing/creating a service using the easy mode

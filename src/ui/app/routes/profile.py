@@ -145,7 +145,9 @@ def totp_disable():
     ):
         return handle_error("The totp token is invalid.", "profile")
 
-    ret = DB.update_ui_user(current_user.get_id(), current_user.password.encode("utf-8"), None, theme=current_user.theme, method=current_user.method)
+    ret = DB.update_ui_user(
+        current_user.get_id(), current_user.password.encode("utf-8"), None, theme=current_user.theme, method=current_user.method, language=current_user.language
+    )
     if ret:
         return handle_error(f"Couldn't disable the two-factor authentication in the database: {ret}", "profile")
 
@@ -185,6 +187,7 @@ def totp_enable():
         theme=current_user.theme,
         totp_recovery_codes=totp_recovery_codes,
         method=current_user.method,
+        language=current_user.language,
     )
     if ret:
         return handle_error(f"Couldn't enable the two-factor authentication in the database: {ret}", "profile")
@@ -210,6 +213,7 @@ def edit_profile():
         "totp_secret": current_user.totp_secret,
         "method": current_user.method,
         "theme": current_user.theme,
+        "language": current_user.language,
     }
 
     if "username" in request.form:

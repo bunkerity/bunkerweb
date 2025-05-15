@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 
+from logging import getLogger
 from os import getenv, sep
 from pathlib import Path
+from traceback import format_exc
 from requests import request as requests_request, ReadTimeout
 from typing import Any, Dict, List, Literal, Optional, Tuple, Union
 
@@ -42,6 +44,7 @@ def request(
     except ReadTimeout:
         return False, None, "request timed out"
     except Exception as e:
+        getLogger("BUNKERNET.send").debug(format_exc())
         return False, None, f"request failed: {e}"
     return True, status, raw_data
 

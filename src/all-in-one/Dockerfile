@@ -1,4 +1,4 @@
-FROM nginx:1.26.3-alpine-slim@sha256:b72dec66dea425356956e863bfbccca6c1f8748f5913e094d4ca20b71e4ba2c3 AS builder
+FROM nginx:1.26-alpine-slim@sha256:6d4f5fb02763f731c06f3e246d4edf89c3a2bbc5dd72eab2b02bc55ef4b8600e AS builder
 
 # Export var for specific actions on linux/arm/v7
 ARG TARGETPLATFORM
@@ -55,13 +55,17 @@ COPY src/all-in-one all-in-one
 COPY src/VERSION VERSION
 COPY misc/*.ascii misc/
 
-FROM nginx:1.26.3-alpine-slim@sha256:b72dec66dea425356956e863bfbccca6c1f8748f5913e094d4ca20b71e4ba2c3
+FROM nginx:1.26-alpine-slim@sha256:6d4f5fb02763f731c06f3e246d4edf89c3a2bbc5dd72eab2b02bc55ef4b8600e
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
 
 # Install runtime dependencies including supervisord
 RUN apk add --no-cache bash curl geoip grep libgcc libgd libmagic libpq libstdc++ libxml2 mariadb-client mariadb-connector-c openssl pcre postgresql-client python3 sed sqlite tzdata unzip yajl supervisor
+
+# Fix CVEs
+RUN apk add --no-cache "libpq>=16.9-r0" "postgresql16-client>=16.9-r0" # CVE-2025-4207
+RUN apk add --no-cache "libxml2>=2.12.7-r3" # CVE-2025-32414 CVE-2025-32415
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 /usr/share/bunkerweb /usr/share/bunkerweb

@@ -9,6 +9,7 @@ repos:
         name: Fix requirements.txt and requirements.in files
         description: Sorts entries in requirements.txt and requirements.in files.
         files: (requirements|constraints).*\.(txt|in)$
+        exclude: ^src/scheduler/requirements.in$
       - id: trailing-whitespace
       - id: end-of-file-fixer
       - id: check-yaml
@@ -30,7 +31,7 @@ repos:
         name: Prettier Code Formatter
 
   - repo: https://github.com/JohnnyMorganz/StyLua
-    rev: d28c0d0a381ac3e2a8efcab1433c732fbc249d86 # frozen: v2.0.2
+    rev: c4616d3cdddb48779b0c4097752157cdb9903b52 # frozen: v2.1.0
     hooks:
       - id: stylua-github
         exclude: ^src/(bw/lua/middleclass.lua$|common/core/antibot/captcha.lua$|common/core/crowdsec/lib)
@@ -43,7 +44,7 @@ repos:
         args: ["--std", "min", "--codes", "--ranges", "--no-cache"]
 
   - repo: https://github.com/pycqa/flake8
-    rev: bddd87797f8dfc07d2a10c894776018d9bec590b # frozen: 7.1.2
+    rev: 4b5e89b4b108a6c1a000c591d334a99a80d34c7b # frozen: 7.2.0
     hooks:
       - id: flake8
         name: Flake8 Python Linter
@@ -62,13 +63,13 @@ repos:
     hooks:
       - id: codespell
         name: Codespell Spell Checker
-        exclude: (^src/(ui/templates|common/core/.+/files|bw/loading)/.+.html|modsecurity-rules.conf.*|src/ui/app/static/(fonts|libs)/.+)$
+        exclude: (^src/(ui/templates|common/core/.+/files|bw/loading)/.+.html|modsecurity-rules.conf.*|src/ui/app/static/(fonts|libs)/.+|src/ui/app/static/locales/.+)$
         entry: codespell --ignore-regex="(tabEl|Widgits)" --skip CHANGELOG.md,CODE_OF_CONDUCT.md,src/ui/client/build.py,src/ui/app/static/json/countries.geojson,src/ui/app/static/js/pages/bans.js,src/ui/app/static/json/periscop.min.json,src/ui/app/static/json/blockhaus.min.json,src/ui/app/routes/reports.py,src/ui/app/static/js/pages/reports.js
         language: python
         types: [text]
 
   - repo: https://github.com/gitleaks/gitleaks
-    rev: f565e4e10c6c8081e374235bb4e4bcb8c0c2fa63 # frozen: v8.24.0
+    rev: ee6b38352380ce52369d16b7873093c4b8bf829b # frozen: v8.24.3
     hooks:
       - id: gitleaks
 

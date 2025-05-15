@@ -49,12 +49,14 @@ local function construct(buf_t, length, types_map, types_size)
         buf = ffi_new("char[?]", size)
       end
     else
-      local numeric = type(value) == "number"
-      if (numeric and typ >= OSSL_PARAM_UTF8_STRING) or
-        (not numeric and typ <= OSSL_PARAM_UNSIGNED_INTEGER) then
+      local string_input = type(value) == "string"
+      -- binary input is also accepted as string
+      local integer_input = type(value) == "number" or string_input
+      if (not string_input and typ >= OSSL_PARAM_UTF8_STRING) or
+        (not integer_input and typ <= OSSL_PARAM_UNSIGNED_INTEGER) then
         local alter_typ = types_map[alter_type_key] and types_map[alter_type_key][key]
-        if alter_typ and ((numeric and alter_typ <= OSSL_PARAM_UNSIGNED_INTEGER) or
-                        (not numeric and alter_typ >= OSSL_PARAM_UTF8_STRING)) then
+        if alter_typ and ((not string_input and alter_typ <= OSSL_PARAM_UNSIGNED_INTEGER) or
+                        (not integer_input and alter_typ >= OSSL_PARAM_UTF8_STRING)) then
           typ = alter_typ
         else
           return nil, "param:construct: key \"" .. key .. "\" can't be a " .. type(value)
@@ -68,12 +70,22 @@ local function construct(buf_t, length, types_map, types_size)
       buf_param = buf_param or {}
       buf_param[key] = param
     elseif typ == OSSL_PARAM_INTEGER then
-      buf = value and ffi_new("int[1]", value) or ffi_new("int[1]")
-      param = C.OSSL_PARAM_construct_int(key, buf)
+      if value and type(value) == "string" then -- in only
+        local bin = ffi_cast("char *", value)
+        param = C.OSSL_PARAM_construct_BN(key, bin, #value)
+      else
+        buf = value and ffi_new("int[1]", value) or ffi_new("int[1]")
+        param = C.OSSL_PARAM_construct_int(key, buf)
+      end
     elseif typ == OSSL_PARAM_UNSIGNED_INTEGER then
-      buf = value and ffi_new("unsigned int[1]", value) or
-                      ffi_new("unsigned int[1]")
-      param = C.OSSL_PARAM_construct_uint(key, buf)
+      if value and type(value) == "string" then -- in only
+        local bin = ffi_cast("char *", value)
+        param = C.OSSL_PARAM_construct_BN(key, bin, #value)
+      else
+        buf = value and ffi_new("unsigned int[1]", value) or
+                        ffi_new("unsigned int[1]")
+        param = C.OSSL_PARAM_construct_uint(key, buf)
+      end
     elseif typ == OSSL_PARAM_UTF8_STRING then
       buf = value ~= nil and ffi_cast("char *", value) or buf
       param = C.OSSL_PARAM_construct_utf8_string(key, buf, value and #value or size)

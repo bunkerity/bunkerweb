@@ -9,15 +9,15 @@
 ##! <some command> ifconfig
 ##!> cmdline unix
   busybox
-  command
-  env
-  eval
+  command@
+  env@
+  eval@
   ltrace
   nohup
   strace
-  time
+  time@
   timeout
-  watch
+  watch@
 ##!<
 ##! ;ifconfig
 ;

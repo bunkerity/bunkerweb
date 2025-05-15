@@ -1,4 +1,7 @@
 $(function () {
+  // Ensure i18next is loaded before using it
+  const t = typeof i18next !== "undefined" ? i18next.t : (key) => key; // Fallback
+
   var headingColor = config.colors.headingColor;
   var legendColor = config.colors.bodyColor;
 
@@ -49,13 +52,15 @@ $(function () {
                   <h5 class="card-title mb-0">${props.ADMIN}</h5>
               </div>
               <div class="card-body p-1 pt-1">
-                  <p class="card-text">Blocked Requests: ${props.blocked}</p>
+                  <p class="card-text">${t(
+                    "dashboard.map.blocked_requests",
+                  )}: ${props.blocked}</p>
               </div>
           </div>
       `
       : `
           <div class="alert alert-primary" role="alert">
-              Hover over a country
+              ${t("dashboard.map.hover_info")}
           </div>
       `;
   };
@@ -186,10 +191,14 @@ $(function () {
   legend.onAdd = function () {
     const div = L.DomUtil.create("div", "legend shadow"),
       grades = [0, 10, 20, 50, 100, 200, 500, 1000],
-      labels = ['<i style="background:transparent"></i> No data'];
+      labels = [
+        `<i style="background:transparent"></i> ${t("dashboard.map.no_data")}`,
+      ];
 
     div.innerHTML =
-      '<div class="card mb-1"><div class="card-body text-center p-1"><strong>Legend</strong><br>';
+      '<div class="card mb-1"><div class="card-body text-center p-1"><strong>' +
+      t("dashboard.map.legend") +
+      "</strong><br>";
 
     for (let i = 0; i < grades.length; i++) {
       const from = grades[i];
@@ -304,7 +313,7 @@ $(function () {
                 show: true,
                 fontSize: "13px",
                 color: legendColor,
-                label: "Blocked",
+                label: t("dashboard.chart.request_status.blocked"),
                 formatter: function (w) {
                   return blockedRequestsPercent + "%";
                 },
@@ -413,7 +422,7 @@ $(function () {
                 show: true,
                 fontSize: "13px",
                 color: legendColor,
-                label: "Most blocked IP",
+                label: t("dashboard.chart.top_blocked_ips.most_blocked"),
                 formatter: function () {
                   const topIP = Object.keys(topIpsData)[0];
                   return `${topIP}`;
@@ -448,9 +457,9 @@ $(function () {
   );
   const categories = Object.keys(blockingData).map((key) =>
     new Date(key).toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
+      hour: "numeric",
+      minute: undefined,
+      hour12: true,
     }),
   );
 
@@ -483,7 +492,7 @@ $(function () {
         fontFamily: "Public Sans, sans-serif",
       },
       title: {
-        text: "Blocked Requests per Hour",
+        text: t("dashboard.chart.blocking_status.subtitle"),
         align: "center",
         style: {
           color: headingColor,
@@ -492,7 +501,7 @@ $(function () {
       },
       series: [
         {
-          name: "Blocked Requests",
+          name: t("dashboard.chart.blocking_status.blocked_requests"),
           data: dataValues,
         },
       ],
@@ -519,7 +528,7 @@ $(function () {
           },
         },
         title: {
-          text: "Time",
+          text: t("dashboard.chart.blocking_status.time"),
           style: {
             color: headingColor,
             fontFamily: "Public Sans, sans-serif",
@@ -528,7 +537,7 @@ $(function () {
       },
       yaxis: {
         title: {
-          text: "Number of Blocked Requests",
+          text: t("dashboard.chart.blocking_status.count"),
           style: {
             color: headingColor,
             fontFamily: "Public Sans, sans-serif",
@@ -586,6 +595,32 @@ $(function () {
 
   renderBlockingStatus();
 
+  // Handle theme changes and language changes for charts
+  function updateChartsWithTranslations() {
+    if (requestsChart) {
+      requestsChart.destroy();
+      renderStatsChart();
+    }
+    if ($ipsData.length && ipsChart) {
+      ipsChart.destroy();
+      renderIpsChart();
+    }
+    if (blockingChart) {
+      blockingChart.destroy();
+      renderBlockingStatus();
+    }
+
+    // Update map labels
+    if (map) {
+      info.update();
+      // Remove and re-add legend to update translations
+      if (legend) {
+        map.removeControl(legend);
+        legend.addTo(map);
+      }
+    }
+  }
+
   $("#dark-mode-toggle").on("change", function () {
     setTimeout(() => {
       theme = $("#theme").val();
@@ -596,14 +631,28 @@ $(function () {
         legendColor = config.colors.white;
       }
 
-      requestsChart.destroy();
-      renderStatsChart();
-      if ($ipsData.length) {
-        ipsChart.destroy();
-        renderIpsChart();
-      }
-      blockingChart.destroy();
-      renderBlockingStatus();
+      updateChartsWithTranslations();
     }, 30);
   });
+
+  // Listen for language changes and update charts
+  if (typeof i18next !== "undefined") {
+    i18next.on("languageChanged", () => {
+      updateChartsWithTranslations();
+    });
+  }
+
+  // Wait for window.i18nextReady = true before continuing
+  if (typeof window.i18nextReady === "undefined" || !window.i18nextReady) {
+    const waitForI18next = (resolve) => {
+      if (window.i18nextReady) {
+        resolve();
+      } else {
+        setTimeout(() => waitForI18next(resolve), 50);
+      }
+    };
+    new Promise((resolve) => {
+      waitForI18next(resolve);
+    }).then(() => updateChartsWithTranslations());
+  }
 });

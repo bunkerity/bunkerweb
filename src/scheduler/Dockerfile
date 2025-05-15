@@ -1,4 +1,4 @@
-FROM python:3.13-alpine@sha256:323a717dc4a010fee21e3f1aac738ee10bb485de4e7593ce242b36ee48d6b352 AS builder
+FROM python:3.13-alpine@sha256:452682e4648deafe431ad2f2391d726d7c52f0ff291be8bd4074b10379bb89ff AS builder
 
 # Export var for specific actions on linux/arm/v7
 ARG TARGETPLATFORM
@@ -35,7 +35,7 @@ COPY src/common/utils utils
 COPY src/scheduler scheduler
 COPY src/VERSION VERSION
 
-FROM python:3.13-alpine@sha256:323a717dc4a010fee21e3f1aac738ee10bb485de4e7593ce242b36ee48d6b352
+FROM python:3.13-alpine@sha256:452682e4648deafe431ad2f2391d726d7c52f0ff291be8bd4074b10379bb89ff
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
@@ -47,7 +47,6 @@ RUN apk add --no-cache bash unzip libgcc libstdc++ libpq openssl libmagic mariad
 
 # Fix CVEs
 # There are no CVEs for the following packages
-
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 /usr/share/bunkerweb /usr/share/bunkerweb
@@ -76,7 +75,7 @@ COPY --chown=root:scheduler --chmod=770 src/bw/misc/asn.mmdb /var/tmp/bunkerweb/
 COPY --chown=root:scheduler --chmod=770 src/bw/misc/country.mmdb /var/tmp/bunkerweb/country.mmdb
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
-LABEL version="1.6.2-rc1"
+LABEL version="1.6.2-rc2"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="scheduler"
 

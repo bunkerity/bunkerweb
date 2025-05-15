@@ -3,7 +3,6 @@
     <!-- Content -->
     <div class="card table-responsive text-nowrap p-4 pb-8 min-vh-70">
         {% set base_flags_url = url_for('static', filename='img/flags') %}
-        <input type="hidden" id="bans_number" value="{{ bans|length }}" />
         <input type="hidden" id="base_flags_url" value="{{ base_flags_url }}" />
         <textarea type="hidden"
                   id="columns_preferences_defaults"
@@ -14,117 +13,14 @@
                name="csrf_token"
                value="{{ csrf_token() }}" />
         <p id="bans-waiting"
-           class="text-center relative w-full p-2 text-primary rounded-lg fw-bold">Loading bans...</p>
+           class="text-center relative w-full p-2 text-primary rounded-lg fw-bold"
+           data-i18n="status.loading_bans">Loading bans...</p>
         <table id="bans"
                class="table responsive nowrap position-relative w-100 d-none">
-            <thead>
-                <tr>
-                    <th data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        data-bs-original-title="Show the Bans' details"></th>
-                    <th data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        data-bs-original-title="Select all Bans"></th>
-                    <th data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        data-bs-original-title="The date and time when the Ban was created">Date</th>
-                    <th data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        data-bs-original-title="The banned IP address">IP address</th>
-                    <th data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        data-bs-original-title="The banned IP country">Country</th>
-                    <th data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        data-bs-original-title="The reason why the Report was created">Reason</th>
-                    <th data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        data-bs-original-title="The scope of the ban (global or service-specific)">Scope</th>
-                    <th data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        data-bs-original-title="The service that created the ban">Service</th>
-                    <th data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        data-bs-original-title="The end date of the Ban">End date</th>
-                    <th data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        data-bs-original-title="The time left until the Ban expires">Time left</th>
-                    <th data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        data-bs-original-title="The actions that can be performed on the Ban">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% set ns = namespace(countries=[]) %}
-                {% for ban in bans %}
-                    {% if ban.get("country", "local") and ban.get('country', 'local') not in ns.countries %}
-                        {% set ns.countries = ns.countries + [ban.get('country', 'local')] %}
-                    {% endif %}
-                    <tr>
-                        <td></td>
-                        <td></td>
-                        <td class="ban-start-date">{{ ban["start_date"] }}</td>
-                        <td>{{ ban["ip"] }}</td>
-                        <td>
-                            <div class="d-flex align-items-center"
-                                 data-bs-toggle="tooltip"
-                                 data-bs-placement="top"
-                                 data-bs-original-title="{% if ban.get('country', 'local') in ("local", "unknown") %}N/A{% else %}{{ ban.get('country', 'local') }}{% endif %}">
-                                <img src="{{ base_flags_url }}/{% if ban.get('country', 'local') in ("local", "unknown") %}zz{% else %}{{ ban.get('country', 'local') |lower }}{% endif %}.svg"
-                                     class="border border-1 p-0 me-1"
-                                     height="17"
-                                     loading="lazy" />
-                                &nbsp;－&nbsp;
-                                {% if ban.get('country', 'local') in ("local", "unknown") %}
-                                    N/A
-                                {% else %}
-                                    {{ ban["country"] }}
-                                {% endif %}
-                            </div>
-                        </td>
-                        <td>{{ ban["reason"] }}</td>
-                        <td>
-                            {% if ban.get('ban_scope', 'global') == 'service' %}
-                                <span class="badge bg-info">
-                                    <i class="bx bx-server me-1"></i>Service
-                                </span>
-                            {% else %}
-                                <span class="badge bg-primary">
-                                    <i class="bx bx-globe me-1"></i>Global
-                                </span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if ban.get('ban_scope', 'global') == 'service' %}
-                                <strong>{{ ban["service"] if ban["service"] != "_" else "default server" }}</strong>
-                            {% else %}
-                                <span class="text-muted fst-italic">All services</span>
-                            {% endif %}
-                        </td>
-                        <td class="ban-end-date">{{ ban["end_date"] }}</td>
-                        <td>{{ ban["remain"] }}</td>
-                        <td>
-                            <div class="d-flex justify-content-center">
-                                <div data-bs-toggle="tooltip"
-                                     data-bs-placement="bottom"
-                                     data-bs-original-title="{% if is_readonly %}Disabled by readonly{% else %}Unban {{ ban['ip'] }}{% endif %}">
-                                    <button type="button"
-                                            data-ip="{{ ban['ip'] }}"
-                                            data-time-left="{{ ban['remain'] }}"
-                                            class="btn btn-outline-danger btn-sm me-1 unban-ip{% if is_readonly %} disabled{% endif %}">
-                                        <i class="bx bxs-buoy bx-xs"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-            <input type="hidden" id="countries" value="{{ ns.countries|join(',') }}" />
-            <span class="position-absolute bottom-0 start-50 translate-middle badge rounded-pill bg-secondary">
-                TZ: <script nonce="{{ script_nonce }}">document.write(Intl.DateTimeFormat().resolvedOptions().timeZone);</script>
-            </span>
         </table>
+        <span class="position-absolute bottom-0 start-50 translate-middle badge rounded-pill bg-secondary">
+            TZ: <script nonce="{{ script_nonce }}">document.write(Intl.DateTimeFormat().resolvedOptions().timeZone);</script>
+        </span>
     </div>
     {% if not is_readonly %}
         <div class="modal modal-xl fade"
@@ -136,21 +32,22 @@
             <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">Add Ban(s)</h5>
+                        <h5 class="modal-title" data-i18n="modal.title.add_bans">Add Ban(s)</h5>
                         <button id="add-ban"
                                 type="button"
                                 class="btn btn-text-bw-green rounded-pill p-0 ms-4 me-2">
-                            <i class="bx bx-plus-circle"></i>&nbsp;INSERT
+                            <i class="bx bx-plus-circle"></i>&nbsp;<span data-i18n="button.add">INSERT</span>
                         </button>
                         <button id="clear-bans"
                                 type="button"
                                 class="btn btn-text-danger rounded-pill p-0 ms-4">
-                            <i class="bx bx-trash"></i>&nbsp;CLEAR
+                            <i class="bx bx-trash"></i>&nbsp;<span data-i18n="button.clear">CLEAR</span>
                         </button>
                         <button type="button"
                                 class="btn-close"
                                 data-bs-dismiss="modal"
-                                aria-label="Close"></button>
+                                aria-label="Close"
+                                data-i18n="aria.label.close"></button>
                     </div>
                     <form id="bans-form" action="{{ url_for("bans") }}/ban" method="POST">
                         <div class="modal-body justify-content-center">
@@ -158,9 +55,12 @@
                             <ul id="bans-container" class="list-group rounded-top w-100">
                                 <li id="bans-header" class="list-group-item bg-secondary text-white">
                                     <div class="row">
-                                        <div class="col-12 col-md-5 text-center fw-bold">Ban Details</div>
-                                        <div class="col-12 col-md-6 border-start text-center fw-bold">Ban Scope</div>
-                                        <div class="col-12 col-md-1 border-start text-center fw-bold">Delete</div>
+                                        <div class="col-12 col-md-5 text-center fw-bold"
+                                             data-i18n="modal.section.ban_details">Ban Details</div>
+                                        <div class="col-12 col-md-6 border-start text-center fw-bold"
+                                             data-i18n="modal.section.ban_scope">Ban Scope</div>
+                                        <div class="col-12 col-md-1 border-start text-center fw-bold"
+                                             data-i18n="modal.section.delete">Delete</div>
                                     </div>
                                 </li>
                                 <li id="ban-1" class="list-group-item rounded-0 ban-item">
@@ -169,7 +69,7 @@
                                             <div class="card shadow-sm border-0 h-100">
                                                 <div class="card-body p-3">
                                                     <div class="mb-3">
-                                                        <label for="ip" class="form-label">IP Address</label>
+                                                        <label for="ip" class="form-label" data-i18n="form.label.ip_address">IP Address</label>
                                                         <input type="text"
                                                                name="ip"
                                                                class="form-control"
@@ -177,14 +77,26 @@
                                                                required />
                                                     </div>
                                                     <div class="mb-3">
-                                                        <label for="datetime" class="form-label">End Date</label>
+                                                        <label for="datetime" class="form-label" data-i18n="form.label.end_date">End Date</label>
                                                         <input type="flatpickr-datetime"
                                                                name="datetime"
                                                                class="form-control"
                                                                required />
                                                     </div>
+                                                    <div class="mb-3 form-check">
+                                                        <input type="checkbox"
+                                                               class="form-check-input permanent-ban-checkbox"
+                                                               id="permanentBan-1"
+                                                               name="permanent">
+                                                        <label class="form-check-label"
+                                                               for="permanentBan-1"
+                                                               data-i18n="form.label.permanent_ban">Ban Forever</label>
+                                                        <div class="form-text text-muted" data-i18n="form.help.permanent_ban">
+                                                            If checked, the ban will never expire until manually removed
+                                                        </div>
+                                                    </div>
                                                     <div>
-                                                        <label for="reason" class="form-label">Reason</label>
+                                                        <label for="reason" class="form-label" data-i18n="form.label.reason">Reason</label>
                                                         <input type="text" name="reason" class="form-control" value="ui" required />
                                                     </div>
                                                 </div>
@@ -194,19 +106,27 @@
                                             <div class="card shadow-sm border-0 h-100">
                                                 <div class="card-body p-3">
                                                     <div class="mb-3">
-                                                        <label for="ban_scope" class="form-label">Ban Scope</label>
+                                                        <label for="ban_scope" class="form-label" data-i18n="form.label.ban_scope">Ban Scope</label>
                                                         <select name="ban_scope" class="form-select ban-scope-select">
-                                                            <option value="global" selected>Global (all services)</option>
-                                                            <option value="service">Service-specific</option>
+                                                            <option value="global" selected data-i18n="scope.global_all_services">Global (all services)</option>
+                                                            <option value="service" data-i18n="scope.service_specific">Service-specific</option>
                                                         </select>
                                                     </div>
                                                     <div class="service-field mb-3">
-                                                        <label for="service" class="form-label">Service Name</label>
+                                                        <label for="service" class="form-label" data-i18n="form.label.service_name">Service Name</label>
                                                         <select name="service" class="form-select">
-                                                            <option value="" disabled selected>Select a service</option>
+                                                            <option value=""
+                                                                    disabled
+                                                                    selected
+                                                                    data-i18n="form.placeholder.select_service">
+                                                                Select a service
+                                                            </option>
                                                             {% for service in services %}<option value="{{ service }}">{{ service }}</option>{% endfor %}
                                                         </select>
-                                                        <div class="form-text text-muted">Ban will apply only to this specific service</div>
+                                                        <div class="form-text text-muted"
+                                                             data-i18n="form.help.ban_specific_service">
+                                                            Ban will apply only to this specific service
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -216,7 +136,8 @@
                                                     class="btn btn-outline-danger btn-sm disabled"
                                                     data-bs-toggle="tooltip"
                                                     data-bs-placement="right"
-                                                    title="Can't delete the original Ban">
+                                                    title="Can't delete the original Ban"
+                                                    data-i18n="tooltip.cannot_delete_original_ban">
                                                 <i class="bx bx-trash bx-xs"></i>
                                             </button>
                                         </div>
@@ -225,10 +146,11 @@
                             </ul>
                         </div>
                         <div class="modal-footer justify-content-center flex-wrap gap-2">
-                            <button type="submit" class="btn btn-danger">Ban</button>
+                            <button type="submit" class="btn btn-danger" data-i18n="button.ban">Ban</button>
                             <button type="reset"
                                     class="btn btn-outline-secondary"
-                                    data-bs-dismiss="modal">Cancel</button>
+                                    data-bs-dismiss="modal"
+                                    data-i18n="button.cancel">Cancel</button>
                         </div>
                     </form>
                 </div>
@@ -243,27 +165,31 @@
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">Confirm Unban</h5>
+                        <h5 class="modal-title" data-i18n="modal.title.confirm_unban">Confirm Unban</h5>
                         <button type="button"
                                 class="btn-close"
                                 data-bs-dismiss="modal"
-                                aria-label="Close"></button>
+                                aria-label="Close"
+                                data-i18n="aria.label.close"></button>
                     </div>
                     <form action="{{ url_for("bans") }}/unban" method="POST">
                         <div class="modal-body">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                             <input type="hidden" id="selected-ips-input-unban" name="ips" value="" />
-                            <div class="alert alert-danger text-center" role="alert">
+                            <div class="alert alert-danger text-center"
+                                 role="alert"
+                                 data-i18n="modal.body.unban_confirmation_alert">
                                 Are you sure you want to unban the selected IP addresses?
                             </div>
                             <ul id="selected-ips-unban" class="list-group w-100 mb-3">
                             </ul>
                         </div>
                         <div class="modal-footer justify-content-center">
-                            <button type="submit" class="btn btn-danger me-2">Unban</button>
+                            <button type="submit" class="btn btn-danger me-2" data-i18n="button.unban">Unban</button>
                             <button type="reset"
                                     class="btn btn-outline-secondary"
-                                    data-bs-dismiss="modal">Cancel</button>
+                                    data-bs-dismiss="modal"
+                                    data-i18n="button.cancel">Cancel</button>
                         </div>
                     </form>
                 </div>

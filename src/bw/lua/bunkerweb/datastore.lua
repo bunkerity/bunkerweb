@@ -50,8 +50,11 @@ function datastore:set(key, value, exptime, worker)
 		lru:set(key, value, exptime)
 		return true, "success"
 	end
-	exptime = exptime or 0
-	return self.dict:safe_set(key, value, exptime)
+	if exptime == nil or exptime < 0 then
+		return self.dict:safe_set(key, value)
+	else
+		return self.dict:safe_set(key, value, exptime)
+	end
 end
 
 function datastore:delete(key, worker)
@@ -82,8 +85,11 @@ function datastore:ttl(key, worker)
 	end
 	-- luacheck: ignore 431
 	local ttl, err = self.dict:ttl(key)
-	if not ttl then
+	if err then
 		return false, err
+	end
+	if ttl == nil or ttl < 0 then
+		return true, -1
 	end
 	return true, ttl
 end

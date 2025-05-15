@@ -45,7 +45,7 @@ class JobScheduler(ApiCaller):
         self.__thread_lock = Lock()
         self.__job_success = True
         self.__job_reload = False
-        self.__executor = ThreadPoolExecutor(max_workers=min(32, (cpu_count() or 1) * 4))
+        self.__executor = ThreadPoolExecutor(max_workers=min(8, (cpu_count() or 1) * 4))
         self.__compiled_regexes = self.__compile_regexes()
         self.__module_paths = set()
         self.update_jobs()
@@ -93,8 +93,7 @@ class JobScheduler(ApiCaller):
             return plugin_name, []
 
         # Load/validate plugins in parallel:
-        with ThreadPoolExecutor() as executor:
-            results = list(executor.map(load_plugin, plugin_files))
+        results = list(self.__executor.map(load_plugin, plugin_files))
 
         for plugin_name, valid_jobs in results:
             jobs[plugin_name] = valid_jobs

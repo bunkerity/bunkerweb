@@ -239,20 +239,18 @@ end
 -- @treturn table|nil session metadata
 -- @treturn string error message
 function metatable:read_metadata(name, audience, subject, current_time) -- luacheck: ignore
-  local res = {}
-
   local t = exec(self, fmt(GET_META, self.table_meta, self.table, audience, subject, current_time))
   if not t then
     return nil, "not found"
   end
 
+  local res = {}
   for _, v in ipairs(t) do
     local key = v.sid
     if key then
       res[key] = v.exp
     end
   end
-
   return res
 end
 

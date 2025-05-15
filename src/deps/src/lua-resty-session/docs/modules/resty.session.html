@@ -316,7 +316,7 @@
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example"><span class="keyword">local</span> session, err, exists = <span class="global">require</span> <span class="string">"resty.session"</span>.<span class="function-name">open</span>()
+        <pre class="example"><span class="keyword">local</span> session, err, exists = <span class="global">require</span>(<span class="string">"resty.session"</span>).<span class="function-name">open</span>()
 <span class="keyword">if</span> <span class="keyword">not</span> exists <span class="keyword">then</span>
   session:<span class="function-name">set_data</span>({
     cart = {},
@@ -346,7 +346,7 @@
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example"><span class="keyword">local</span> session, err, exists = <span class="global">require</span> <span class="string">"resty.session"</span>.<span class="function-name">open</span>()
+        <pre class="example"><span class="keyword">local</span> session, err, exists = <span class="global">require</span>(<span class="string">"resty.session"</span>).<span class="function-name">open</span>()
 <span class="keyword">if</span> exists <span class="keyword">then</span>
   <span class="keyword">local</span> data = session:<span class="function-name">get_data</span>()
   ngx.req.<span class="function-name">set_header</span>(<span class="string">"Authorization"</span>, <span class="string">"Bearer "</span> .. data.access_token)
@@ -371,9 +371,9 @@
         <li><span class="parameter">value</span>
          value</p>
 
-<p> local session, err, exists = require &ldquo;resty.session&rdquo;.open()
+<p> local session, err, exists = require("resty.session").open()
  if not exists then
-   session:set(&ldquo;access-token&rdquo;, &ldquo;eyJ&hellip;&rdquo;)
+   session:set("access-token", "eyJ...")
    session:save()
  end
         </li>
@@ -410,7 +410,7 @@
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example"><span class="keyword">local</span> session, err, exists = <span class="global">require</span> <span class="string">"resty.session"</span>.<span class="function-name">open</span>()
+        <pre class="example"><span class="keyword">local</span> session, err, exists = <span class="global">require</span>(<span class="string">"resty.session"</span>).<span class="function-name">open</span>()
 <span class="keyword">if</span> exists <span class="keyword">then</span>
   <span class="keyword">local</span> access_token = session:<span class="function-name">get</span>(<span class="string">"access-token"</span>)
   ngx.req.<span class="function-name">set_header</span>(<span class="string">"Authorization"</span>, <span class="string">"Bearer "</span> .. access_token)
@@ -439,7 +439,7 @@
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example"><span class="keyword">local</span> session = <span class="global">require</span> <span class="string">"resty.session"</span>.<span class="function-name">new</span>()
+        <pre class="example"><span class="keyword">local</span> session = <span class="global">require</span>(<span class="string">"resty.session"</span>).<span class="function-name">new</span>()
 session.<span class="function-name">set_audience</span>(<span class="string">"my-service"</span>)</pre>
     </ul>
 
@@ -485,7 +485,7 @@ session.<span class="function-name">set_audience</span>(<span class="string">"my
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example"><span class="keyword">local</span> session = <span class="global">require</span> <span class="string">"resty.session"</span>.<span class="function-name">new</span>()
+        <pre class="example"><span class="keyword">local</span> session = <span class="global">require</span>(<span class="string">"resty.session"</span>).<span class="function-name">new</span>()
 session.<span class="function-name">set_subject</span>(<span class="string">"john@doe.com"</span>)</pre>
     </ul>
 
@@ -510,7 +510,7 @@ session.<span class="function-name">set_subject</span>(<span class="string">"joh
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example"><span class="keyword">local</span> session, err, exists = <span class="global">require</span> <span class="string">"resty.session"</span>.<span class="function-name">open</span>()
+        <pre class="example"><span class="keyword">local</span> session, err, exists = <span class="global">require</span>(<span class="string">"resty.session"</span>).<span class="function-name">open</span>()
 <span class="keyword">if</span> exists <span class="keyword">then</span>
   <span class="keyword">local</span> subject = session.<span class="function-name">get_subject</span>()
 <span class="keyword">end</span></pre>
@@ -525,14 +525,14 @@ session.<span class="function-name">set_subject</span>(<span class="string">"joh
     Get session property. </p>
 
 <p> Possible property names:
- <em> <code>&quot;id&quot;</code>: 43 bytes session id (same as nonce, but base64 url-encoded)
- </em> <code>&quot;nonce&quot;</code>: 32 bytes nonce (same as session id but in raw bytes)
- <em> <code>&quot;audience&quot;</code>: Current session audience
- </em> <code>&quot;subject&quot;</code>: Current session subject
- <em> <code>&quot;timeout&quot;</code>: Closest timeout (in seconds) (what&rsquo;s left of it)
- </em> <code>&quot;idling-timeout</code>&ldquo;<code>: Session idling timeout (in seconds) (what&apos;s left of it)
- <em> </code>"rolling-timeout<code>&quot;</code>: Session rolling timeout (in seconds) (what&rsquo;s left of it)
- </em> <code>&quot;absolute-timeout</code>&rdquo;<code>: Session absolute timeout (in seconds) (what's left of it)</code>
+ * <code>&quot;id&quot;</code>: 43 bytes session id (same as nonce, but base64 url-encoded)
+ * <code>&quot;nonce&quot;</code>: 32 bytes nonce (same as session id but in raw bytes)
+ * <code>&quot;audience&quot;</code>: Current session audience
+ * <code>&quot;subject&quot;</code>: Current session subject
+ * <code>&quot;timeout&quot;</code>: Closest timeout (in seconds) (what's left of it)
+ * <code>&quot;idling-timeout</code>"<code>: Session idling timeout (in seconds) (what&apos;s left of it)
+ * </code>"rolling-timeout<code>&quot;</code>: Session rolling timeout (in seconds) (what's left of it)
+ * <code>&quot;absolute-timeout</code>"`: Session absolute timeout (in seconds) (what's left of it)
 
 
 
@@ -547,7 +547,7 @@ session.<span class="function-name">set_subject</span>(<span class="string">"joh
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example"><span class="keyword">local</span> session, err, exists = <span class="global">require</span> <span class="string">"resty.session"</span>.<span class="function-name">open</span>()
+        <pre class="example"><span class="keyword">local</span> session, err, exists = <span class="global">require</span>(<span class="string">"resty.session"</span>).<span class="function-name">open</span>()
 <span class="keyword">if</span> exists <span class="keyword">then</span>
   <span class="keyword">local</span> timeout = session.<span class="function-name">get_property</span>(<span class="string">"timeout"</span>)
 <span class="keyword">end</span></pre>
@@ -561,7 +561,7 @@ session.<span class="function-name">set_subject</span>(<span class="string">"joh
     <dd>
     Set persistent sessions on/off. </p>
 
-<p> In many login forms user is given an option for &ldquo;remember me&rdquo;.
+<p> In many login forms user is given an option for "remember me".
  You can call this function based on what user selected.
 
 
@@ -686,7 +686,7 @@ session.<span class="function-name">set_subject</span>(<span class="string">"joh
 
 <p> Either saves the session (creating a new session id) or touches the session
  depending on whether the rolling timeout is getting closer, which means
- by default when &frac34; of rolling timeout is spent &ndash; 45 minutes with default
+ by default when 3/4 of rolling timeout is spent - 45 minutes with default
  rolling timeout of an hour. The touch has a threshold, by default one minute,
  so it may be skipped in some cases (you can call <code>session:touch()</code> to force it).
 
@@ -782,11 +782,20 @@ session.<span class="function-name">set_subject</span>(<span class="string">"joh
 
 <p> Modifies the request headers by removing the session related
  cookies. This is useful when you use the session library on
- a proxy server and don&rsquo;t want the session cookies to be forwarded
+ a proxy server and don't want the session cookies to be forwarded
  to the upstream service.
 
 
 
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+           <span class="types"><span class="type">true</span> or <span class="type">nil</span></span>
+        ok</li>
+        <li>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+        error message</li>
+    </ol>
 
 
 
@@ -806,10 +815,20 @@ session.<span class="function-name">set_subject</span>(<span class="string">"joh
             <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
 
 
+
          (<em>optional</em>)
         </li>
     </ul>
 
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+           <span class="types"><span class="type">true</span> or <span class="type">nil</span></span>
+        ok</li>
+        <li>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+        error message</li>
+    </ol>
 
 
 
@@ -829,10 +848,20 @@ session.<span class="function-name">set_subject</span>(<span class="string">"joh
             <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
 
 
+
          (<em>optional</em>)
         </li>
     </ul>
 
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+           <span class="types"><span class="type">true</span> or <span class="type">nil</span></span>
+        ok</li>
+        <li>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+        error message</li>
+    </ol>
 
 
 
@@ -852,10 +881,20 @@ session.<span class="function-name">set_subject</span>(<span class="string">"joh
             <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
 
 
+
          (<em>optional</em>)
         </li>
     </ul>
 
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+           <span class="types"><span class="type">true</span> or <span class="type">nil</span></span>
+        ok</li>
+        <li>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+        error message</li>
+    </ol>
 
 
 
@@ -968,6 +1007,9 @@ session.<span class="function-name">set_subject</span>(<span class="string">"joh
         <li><span class="parameter">compression_threshold</span>
          Compression threshold controls when the data is deflated, e.g. <code>1024</code> (defaults to <code>1024</code>, or a kilobyte) (in bytes)
         </li>
+        <li><span class="parameter">bind</span>
+         Bind the session to data acquired from the HTTP request or connection, use <code>ip</code>, <code>scheme</code>, <code>user-agent</code>. E.g. <code>{ &quot;scheme&quot;, &quot;user-agent&quot; }</code> will calculate MAC utilizing also HTTP request <code>Scheme</code> and <code>User-Agent</code> header.
+        </li>
         <li><span class="parameter">request_headers</span>
          Set of headers to send to upstream, use <code>id</code>, <code>audience</code>, <code>subject</code>, <code>timeout</code>, <code>idling-timeout</code>, <code>rolling-timeout</code>, <code>absolute-timeout</code>. E.g. <code>{ &quot;id&quot;, &quot;timeout&quot; }</code> will set <code>Session-Id</code> and <code>Session-Timeout</code> request headers when <a href="../modules/resty.session.html#instance:set_headers">set_headers</a> is called.
         </li>
@@ -1038,7 +1080,7 @@ session.<span class="function-name">set_subject</span>(<span class="string">"joh
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example"><span class="global">require</span> <span class="string">"resty.session"</span>.<span class="function-name">init</span>({
+        <pre class="example"><span class="global">require</span>(<span class="string">"resty.session"</span>).<span class="function-name">init</span>({
   audience = <span class="string">"my-application"</span>,
   storage = <span class="string">"redis"</span>,
   redis = {
@@ -1083,9 +1125,9 @@ session.<span class="function-name">set_subject</span>(<span class="string">"joh
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example"><span class="keyword">local</span> session = <span class="global">require</span> <span class="string">"resty.session"</span>.<span class="function-name">new</span>()
+        <pre class="example"><span class="keyword">local</span> session = <span class="global">require</span>(<span class="string">"resty.session"</span>).<span class="function-name">new</span>()
 <span class="comment">-- OR
-</span><span class="keyword">local</span> session = <span class="global">require</span> <span class="string">"resty.session"</span>.<span class="function-name">new</span>({
+</span><span class="keyword">local</span> session = <span class="global">require</span>(<span class="string">"resty.session"</span>).<span class="function-name">new</span>({
   audience = <span class="string">"my-application"</span>,
 })</pre>
     </ul>
@@ -1132,9 +1174,9 @@ session.<span class="function-name">set_subject</span>(<span class="string">"joh
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example"><span class="keyword">local</span> session = <span class="global">require</span> <span class="string">"resty.session"</span>.<span class="function-name">open</span>()
+        <pre class="example"><span class="keyword">local</span> session = <span class="global">require</span>(<span class="string">"resty.session"</span>).<span class="function-name">open</span>()
 <span class="comment">-- OR
-</span><span class="keyword">local</span> session, err, exists = <span class="global">require</span> <span class="string">"resty.session"</span>.<span class="function-name">open</span>({
+</span><span class="keyword">local</span> session, err, exists = <span class="global">require</span>(<span class="string">"resty.session"</span>).<span class="function-name">open</span>({
   audience = <span class="string">"my-application"</span>,
 })</pre>
     </ul>
@@ -1181,9 +1223,9 @@ session.<span class="function-name">set_subject</span>(<span class="string">"joh
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example"><span class="keyword">local</span> session = <span class="global">require</span> <span class="string">"resty.session"</span>.<span class="function-name">start</span>()
+        <pre class="example"><span class="keyword">local</span> session = <span class="global">require</span>(<span class="string">"resty.session"</span>).<span class="function-name">start</span>()
 <span class="comment">-- OR
-</span><span class="keyword">local</span> session, err, exists, refreshed = <span class="global">require</span> <span class="string">"resty.session"</span>.<span class="function-name">start</span>({
+</span><span class="keyword">local</span> session, err, exists, refreshed = <span class="global">require</span>(<span class="string">"resty.session"</span>).<span class="function-name">start</span>({
   audience = <span class="string">"my-application"</span>,
 })</pre>
     </ul>
@@ -1204,7 +1246,7 @@ session.<span class="function-name">set_subject</span>(<span class="string">"joh
  audiences.</p>
 
 <p> When there is only a single audience, then this can be considered
- equal to <a href="../modules/resty.session.html#module.destroy">session.destroy</a>.</p>
+ equal to <a href="../modules/resty.session.html#instance:destroy">session.destroy</a>.</p>
 
 <p> When the last audience is logged out, the cookie will be destroyed
  as well and invalidated on a client.
@@ -1239,9 +1281,9 @@ session.<span class="function-name">set_subject</span>(<span class="string">"joh
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example"><span class="global">require</span> <span class="string">"resty.session"</span>.<span class="function-name">logout</span>()
+        <pre class="example"><span class="global">require</span>(<span class="string">"resty.session"</span>).<span class="function-name">logout</span>()
 <span class="comment">-- OR
-</span><span class="keyword">local</span> ok, err, exists, logged_out = <span class="global">require</span> <span class="string">"resty.session"</span>.<span class="function-name">logout</span>({
+</span><span class="keyword">local</span> ok, err, exists, logged_out = <span class="global">require</span>(<span class="string">"resty.session"</span>).<span class="function-name">logout</span>({
   audience = <span class="string">"my-application"</span>,
 })</pre>
     </ul>
@@ -1286,9 +1328,9 @@ session.<span class="function-name">set_subject</span>(<span class="string">"joh
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example"><span class="global">require</span> <span class="string">"resty.session"</span>.<span class="function-name">destroy</span>()
+        <pre class="example"><span class="global">require</span>(<span class="string">"resty.session"</span>).<span class="function-name">destroy</span>()
 <span class="comment">-- OR
-</span><span class="keyword">local</span> ok, err, exists, destroyed = <span class="global">require</span> <span class="string">"resty.session"</span>.<span class="function-name">destroy</span>({
+</span><span class="keyword">local</span> ok, err, exists, destroyed = <span class="global">require</span>(<span class="string">"resty.session"</span>).<span class="function-name">destroy</span>({
   cookie_name = <span class="string">"auth"</span>,
 })</pre>
     </ul>
@@ -1301,7 +1343,7 @@ session.<span class="function-name">set_subject</span>(<span class="string">"joh
 </div> <!-- id="main" -->
 <div id="about">
 <i>generated by <a href="http://github.com/lunarmodules/LDoc">LDoc 1.5.0</a></i>
-<i style="float:right;">Last updated 2023-08-16 18:11:28 </i>
+<i style="float:right;">Last updated 2025-04-16 06:31:49 </i>
 </div> <!-- id="about" -->
 </div> <!-- id="container" -->
 </body>

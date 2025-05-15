@@ -1,4 +1,4 @@
-FROM ubuntu:jammy@sha256:ed1544e454989078f5dec1bfdabd8c5cc9c48e0705d07b678ab6ae3fb61952d2
+FROM ubuntu:jammy@sha256:67cadaff1dca187079fce41360d5a7eb6f7dcd3745e53c79ad5efd8563118240
 
 ENV container=docker
 ENV LC_ALL=C

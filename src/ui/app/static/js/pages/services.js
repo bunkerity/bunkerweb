@@ -1,4 +1,18 @@
-$(function () {
+$(document).ready(function () {
+  // Ensure i18next is loaded before using it
+  const t =
+    typeof i18next !== "undefined"
+      ? i18next.t
+      : (key, fallback, options) => {
+          let translated = fallback || key;
+          if (options) {
+            for (const optKey in options) {
+              translated = translated.replace(`{{${optKey}}}`, options[optKey]);
+            }
+          }
+          return translated;
+        };
+
   let toastNum = 0;
   let actionLock = false;
   const serviceNumber = parseInt($("#services_number").val(), 10) || 0;
@@ -115,7 +129,7 @@ $(function () {
     [25, 50, 100].forEach((num) => {
       if (serviceNumber > num) menu.push(num);
     });
-    menu.push({ label: "All", value: -1 });
+    menu.push({ label: t("datatable.length_all", "All"), value: -1 });
     layout.bottomStart = {
       pageLength: {
         menu: menu,
@@ -132,30 +146,56 @@ $(function () {
     {
       extend: "colvis",
       columns: "th:not(:nth-child(-n+3)):not(:last-child)",
-      text: '<span class="tf-icons bx bx-columns bx-18px me-md-2"></span><span class="d-none d-md-inline">Columns</span>',
+      text: `<span class="tf-icons bx bx-columns bx-18px me-md-2"></span><span class="d-none d-md-inline" data-i18n="button.columns">${t(
+        "button.columns",
+        "Columns",
+      )}</span>`,
       className: "btn btn-sm btn-outline-primary rounded-start",
-      columnText: (dt, idx, title) => `${idx + 1}. ${title}`,
+      columnText: function (dt, idx, title) {
+        const headerCell = dt.column(idx).header();
+        const $header = $(headerCell);
+        const $translatableElement = $header.find("[data-i18n]");
+        let i18nKey = $translatableElement.data("i18n");
+        let translatedTitle = title;
+        if (i18nKey) {
+          translatedTitle = t(i18nKey, title);
+        } else {
+          translatedTitle = $header.text().trim() || title;
+        }
+        return `${idx + 1}. <span data-i18n="${
+          i18nKey || ""
+        }">${translatedTitle}</span>`;
+      },
     },
     {
       extend: "colvisRestore",
-      text: '<span class="tf-icons bx bx-reset bx-18px me-2"></span>Reset columns',
+      text: `<span class="tf-icons bx bx-reset bx-18px me-2"></span><span class="d-none d-md-inline" data-i18n="button.reset_columns">${t(
+        "button.reset_columns",
+        "Reset columns",
+      )}</span>`,
       className: "btn btn-sm btn-outline-primary d-none d-md-inline",
     },
     {
       extend: "collection",
-      text: '<span class="tf-icons bx bx-export bx-18px me-md-2"></span><span class="d-none d-md-inline">Export</span>',
+      text: `<span class="tf-icons bx bx-export bx-18px me-md-2"></span><span class="d-none d-md-inline" data-i18n="button.export">${t(
+        "button.export",
+        "Export",
+      )}</span>`,
       className: "btn btn-sm btn-outline-primary",
       buttons: [
         {
           extend: "copy",
-          text: '<span class="tf-icons bx bx-copy bx-18px me-2"></span>Copy visible',
+          text: `<span class="tf-icons bx bx-copy bx-18px me-2"></span><span data-i18n="button.copy_visible">${t(
+            "button.copy_visible",
+            "Copy visible",
+          )}</span>`,
           exportOptions: {
             columns: ":visible:not(:nth-child(-n+2)):not(:last-child)",
           },
         },
         {
           extend: "csv",
-          text: '<span class="tf-icons bx bx-table bx-18px me-2"></span>CSV',
+          text: `<span class="tf-icons bx bx-table bx-18px me-2"></span>CSV`,
           bom: true,
           filename: "bw_services",
           exportOptions: {
@@ -165,7 +205,7 @@ $(function () {
         },
         {
           extend: "excel",
-          text: '<span class="tf-icons bx bx-table bx-18px me-2"></span>Excel',
+          text: `<span class="tf-icons bx bx-table bx-18px me-2"></span>Excel`,
           filename: "bw_services",
           exportOptions: {
             modifier: { search: "none" },
@@ -176,7 +216,10 @@ $(function () {
     },
     {
       extend: "collection",
-      text: '<span class="tf-icons bx bx-play bx-18px me-md-2"></span><span class="d-none d-md-inline">Actions</span>',
+      text: `<span class="tf-icons bx bx-play bx-18px me-md-2"></span><span class="d-none d-md-inline" data-i18n="button.actions">${t(
+        "button.actions",
+        "Actions",
+      )}</span>`,
       className: "btn btn-sm btn-outline-primary action-button disabled",
       buttons: [
         {
@@ -229,13 +272,21 @@ $(function () {
       .get();
 
   $.fn.dataTable.ext.buttons.create_service = {
-    text: '<span class="tf-icons bx bx-plus"></span><span class="d-none d-md-inline">&nbsp;Create new service</span>',
+    text: `<span class="tf-icons bx bx-plus"></span><span class="d-none d-md-inline" data-i18n="button.create_service"> ${t(
+      "button.create_service",
+      "Create new service",
+    )}</span>`,
     className: `btn btn-sm rounded me-4 btn-bw-green${
       isReadOnly ? " disabled" : ""
     }`,
     action: function () {
       if (isReadOnly) {
-        alert("This action is not allowed in read-only mode.");
+        alert(
+          t(
+            "alert.readonly_mode",
+            "This action is not allowed in read-only mode.",
+          ),
+        );
         return;
       }
       window.location.href = `${window.location.href}/new`;
@@ -245,7 +296,12 @@ $(function () {
   $.fn.dataTable.ext.buttons.convert_services = {
     action: function (e, dt, node) {
       if (isReadOnly) {
-        alert("This action is not allowed in read-only mode.");
+        alert(
+          t(
+            "alert.readonly_mode",
+            "This action is not allowed in read-only mode.",
+          ),
+        );
         return;
       }
       if (actionLock) return;
@@ -308,7 +364,12 @@ $(function () {
     text: '<span class="tf-icons bx bx-trash bx-18px me-2"></span>Delete',
     action: function () {
       if (isReadOnly) {
-        alert("This action is not allowed in read-only mode.");
+        alert(
+          t(
+            "alert.readonly_mode",
+            "This action is not allowed in read-only mode.",
+          ),
+        );
         return;
       }
       if (actionLock) return;
@@ -326,7 +387,7 @@ $(function () {
     },
   };
 
-  initializeDataTable({
+  const services_config = {
     tableSelector: "#services",
     tableName: "services",
     columnVisibilityCondition: (column) => column > 2 && column < 7,
@@ -358,14 +419,17 @@ $(function () {
         {
           searchPanes: {
             show: true,
+            header: t("searchpane.type", "Type"),
             options: [
               {
-                label: '<i class="bx bx-xs bx-globe"></i>&nbsp;Online',
-                value: (rowData) => rowData[3].includes("Online"),
+                label:
+                  '<i class="bx bx-xs bx-globe"></i>&nbsp;<span data-i18n="status.online">Online</span>',
+                value: (rowData) => rowData[3].includes("status.online"),
               },
               {
-                label: '<i class="bx bx-xs bx-file-blank"></i>&nbsp;Draft',
-                value: (rowData) => rowData[3].includes("Draft"),
+                label:
+                  '<i class="bx bx-xs bx-file-blank"></i>&nbsp;<span data-i18n="status.draft">Draft</span>',
+                value: (rowData) => rowData[3].includes("status.draft"),
               },
             ],
             combiner: "or",
@@ -376,6 +440,7 @@ $(function () {
         {
           searchPanes: {
             show: true,
+            header: t("searchpane.method", "Method"),
             combiner: "or",
             orderable: false,
           },
@@ -384,21 +449,39 @@ $(function () {
         {
           searchPanes: {
             show: true,
+            header: t("searchpane.created", "Created"),
             options: [
               {
-                label: "Last 24 hours",
+                label: `<span data-i18n="searchpane.last_24h">${t(
+                  "searchpane.last_24h",
+                  "Last 24 hours",
+                )}</span>`,
                 value: (rowData) =>
                   new Date() - new Date(rowData[5]) < 86400000,
               },
               {
-                label: "Last 7 days",
+                label: `<span data-i18n="searchpane.last_7d">${t(
+                  "searchpane.last_7d",
+                  "Last 7 days",
+                )}</span>`,
                 value: (rowData) =>
                   new Date() - new Date(rowData[5]) < 604800000,
               },
               {
-                label: "Last 30 days",
+                label: `<span data-i18n="searchpane.last_30d">${t(
+                  "searchpane.last_30d",
+                  "Last 30 days",
+                )}</span>`,
                 value: (rowData) =>
                   new Date() - new Date(rowData[5]) < 2592000000,
+              },
+              {
+                label: `<span data-i18n="searchpane.older_30d">${t(
+                  "searchpane.older_30d",
+                  "More than 30 days",
+                )}</span>`,
+                value: (rowData) =>
+                  new Date() - new Date(rowData[5]) >= 2592000000,
               },
             ],
             combiner: "or",
@@ -409,21 +492,39 @@ $(function () {
         {
           searchPanes: {
             show: true,
+            header: t("searchpane.last_update", "Last update"),
             options: [
               {
-                label: "Last 24 hours",
+                label: `<span data-i18n="searchpane.last_24h">${t(
+                  "searchpane.last_24h",
+                  "Last 24 hours",
+                )}</span>`,
                 value: (rowData) =>
                   new Date() - new Date(rowData[6]) < 86400000,
               },
               {
-                label: "Last 7 days",
+                label: `<span data-i18n="searchpane.last_7d">${t(
+                  "searchpane.last_7d",
+                  "Last 7 days",
+                )}</span>`,
                 value: (rowData) =>
                   new Date() - new Date(rowData[6]) < 604800000,
               },
               {
-                label: "Last 30 days",
+                label: `<span data-i18n="searchpane.last_30d">${t(
+                  "searchpane.last_30d",
+                  "Last 30 days",
+                )}</span>`,
                 value: (rowData) =>
                   new Date() - new Date(rowData[6]) < 2592000000,
+              },
+              {
+                label: `<span data-i18n="searchpane.older_30d">${t(
+                  "searchpane.older_30d",
+                  "More than 30 days",
+                )}</span>`,
+                value: (rowData) =>
+                  new Date() - new Date(rowData[6]) >= 2592000000,
               },
             ],
             combiner: "or",
@@ -441,26 +542,6 @@ $(function () {
         headerCheckbox: true,
       },
       layout: layout,
-      language: {
-        info: "Showing _START_ to _END_ of _TOTAL_ services",
-        infoEmpty: "No services available",
-        infoFiltered: "(filtered from _MAX_ total services)",
-        lengthMenu: "Display _MENU_ services",
-        zeroRecords: "No matching services found",
-        select: {
-          rows: {
-            _: "Selected %d services",
-            0: "No services selected",
-            1: "Selected 1 service",
-          },
-        },
-        searchPanes: {
-          collapse: {
-            0: '<span class="tf-icons bx bx-search bx-18px me-2"></span>Filters',
-            _: '<span class="tf-icons bx bx-search bx-18px me-2"></span>Filters (%d)',
-          },
-        },
-      },
       initComplete: function () {
         const $wrapper = $("#services_wrapper");
         $wrapper.find(".btn-secondary").removeClass("btn-secondary");
@@ -480,11 +561,32 @@ $(function () {
         }
       },
     },
-  });
+  };
+
+  // Wait for window.i18nextReady = true before continuing
+  if (typeof window.i18nextReady === "undefined" || !window.i18nextReady) {
+    const waitForI18next = (resolve) => {
+      if (window.i18nextReady) {
+        resolve();
+      } else {
+        setTimeout(() => waitForI18next(resolve), 50);
+      }
+    };
+    new Promise((resolve) => {
+      waitForI18next(resolve);
+    }).then(() => initializeDataTable(services_config));
+  } else {
+    initializeDataTable(services_config);
+  }
 
   $(document).on("click", ".delete-service", function () {
     if (isReadOnly) {
-      alert("This action is not allowed in read-only mode.");
+      alert(
+        t(
+          "alert.readonly_mode",
+          "This action is not allowed in read-only mode.",
+        ),
+      );
       return;
     }
     const service = $(this).data("service-id");
@@ -493,7 +595,12 @@ $(function () {
 
   $(document).on("click", ".convert-service", function () {
     if (isReadOnly) {
-      alert("This action is not allowed in read-only mode.");
+      alert(
+        t(
+          "alert.readonly_mode",
+          "This action is not allowed in read-only mode.",
+        ),
+      );
       return;
     }
     const service = $(this).data("service-id");

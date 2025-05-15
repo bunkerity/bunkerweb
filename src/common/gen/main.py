@@ -36,7 +36,6 @@ if __name__ == "__main__":
         parser.add_argument("--output", default=join(sep, "etc", "nginx"), type=str, help="where to write the rendered files")
         parser.add_argument("--target", default=join(sep, "etc", "nginx"), type=str, help="where nginx will search for configurations files")
         parser.add_argument("--variables", type=str, help="path to the file containing environment variables")
-        parser.add_argument("--no-linux-reload", action="store_true", help="disable linux reload")
         args = parser.parse_args()
 
         settings_path = Path(args.settings)

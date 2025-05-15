@@ -5,6 +5,53 @@
   or the CRS Google Group at
 * https://groups.google.com/a/owasp.org/g/modsecurity-core-rule-set-project
 
+## Version 4.14.0 - 2025-04-29
+
+## What's Changed
+### 🆕 New features and detections 🎉
+* feat: detect ASP web shells by @Xhoenix in https://github.com/coreruleset/coreruleset/pull/4063
+* feat: detect compressed database dumps by @EsadCetiner in https://github.com/coreruleset/coreruleset/pull/4082
+* feat: detect javascript methods import fetch console.log `console.dir` by @EsadCetiner in https://github.com/coreruleset/coreruleset/pull/4076
+### 🧰 Other Changes
+* fix: fixing FPs related to rule 951220 by @azurit in https://github.com/coreruleset/coreruleset/pull/4079
+* fix: don't block ttf font files by @EsadCetiner in https://github.com/coreruleset/coreruleset/pull/4081
+* fix: 932270 FP by @Xhoenix in https://github.com/coreruleset/coreruleset/pull/3917
+* fix(954100): detect forward slash in path by @Xhoenix in https://github.com/coreruleset/coreruleset/pull/4094
+* fix: remove `.application` from restricted extensions by @EsadCetiner in https://github.com/coreruleset/coreruleset/pull/4103
+* fix: 44J-250329 by @EsadCetiner in https://github.com/coreruleset/coreruleset/pull/4107
+
+
+**Full Changelog**: https://github.com/coreruleset/coreruleset/compare/v4.13.0...v.4.14.0
+
+## Version 4.13.0 - 2025-03-31
+
+## What's Changed
+### ⭐ Important changes
+* fix(security): fixing double URL decode of REQUEST_URI by @azurit in https://github.com/coreruleset/coreruleset/pull/4047
+### 🆕 New features and detections 🎉
+* feat: block header related to CVE-2025-29927 (Next.js) by @azurit in https://github.com/coreruleset/coreruleset/pull/4053
+* feat: added new XSS payloads by @Xhoenix in https://github.com/coreruleset/coreruleset/pull/4055
+* feat: add potential malicious file extensions into tx.restricted_extensions by @Xhoenix in https://github.com/coreruleset/coreruleset/pull/4068
+* feat: add additional files commonly accessed by bots by @EsadCetiner in https://github.com/coreruleset/coreruleset/pull/4069
+### 🪦 Rule removals
+* feat: remove rule 952100 for detecting Java Source Code Leakage by @S0obi in https://github.com/coreruleset/coreruleset/pull/4052
+### 🧰 Other Changes
+* fix(934130): extend prototype pollution payload by @Xhoenix in https://github.com/coreruleset/coreruleset/pull/4036
+* fix: rule 930110 is not supposed to match bare '..' without (back)slashes by @azurit in https://github.com/coreruleset/coreruleset/pull/4050
+* fix: use boundary to fix false positive with email `firstname.dockery@host.tld` by @EsadCetiner in https://github.com/coreruleset/coreruleset/pull/4045
+* feat: refresh restricted-upload.data by @S0obi in https://github.com/coreruleset/coreruleset/pull/4046
+* fix: tag inconsistency per file by @Xhoenix in https://github.com/coreruleset/coreruleset/pull/4031
+* feat: adding .dist and .dpkg-dist into tx.restricted_extensions by @azurit in https://github.com/coreruleset/coreruleset/pull/4057
+* feat: add more default session cookie names by @Xhoenix in https://github.com/coreruleset/coreruleset/pull/4062
+* fix: added pre-check of unset TX variable by @airween in https://github.com/coreruleset/coreruleset/pull/4066
+* fix: false positive found in quantitative testing round 2 for unix rce rules (932230 PL-1, 932235 PL-1, 932250 PL-1, 932260 PL-1, 932231 PL-2, 932220 PL-2, 932236 PL-2, 932239 PL-2, 932232 PL-3, 932238 PL-3) by @EsadCetiner in https://github.com/coreruleset/coreruleset/pull/4019
+
+## New Contributors
+* @daum3ns made their first contribution in https://github.com/coreruleset/coreruleset/pull/4043
+* @S0obi made their first contribution in https://github.com/coreruleset/coreruleset/pull/4046
+
+**Full Changelog**: https://github.com/coreruleset/coreruleset/compare/v4.12.0...v4.13.0
+
 ## Version 4.12.0 - 2025-03-01
 
 ## What's Changed

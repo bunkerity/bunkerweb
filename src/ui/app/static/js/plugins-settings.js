@@ -1,4 +1,7 @@
 $(document).ready(() => {
+  // Ensure i18next is loaded before using it
+  const t = typeof i18next !== "undefined" ? i18next.t : (key) => key; // Fallback
+
   let toastNum = 0;
   let currentPlugin = "general";
   let currentStep = 1;
@@ -85,7 +88,10 @@ $(document).ready(() => {
     const templateContainer = $(`#navs-templates-${currentTemplate}`);
     templateContainer.find("input, select").each(function () {
       const type = $(this).attr("type");
-      const templateValue = $(`#${this.id}-template`).val();
+      const isNewEndpoint = window.location.pathname.endsWith("/new");
+      const templateValue = isNewEndpoint
+        ? $(`#${this.id}-template`).val()
+        : $(this).data("original");
       if ($(this).prop("disabled") || type === "hidden") {
         return;
       }
@@ -290,17 +296,29 @@ $(document).ready(() => {
       const value = $input.val();
       const isRequired = $input.prop("required");
       const pattern = $input.attr("pattern");
-      const fieldName =
-        $input.data("field-name") || $input.attr("name") || "This field";
+      const $label = $(`label[for="${$input.attr("id")}"]`);
+      let fieldName = $input.attr("name") || t("validation.default_field_name");
+
+      if ($label.length) {
+        const i18nKey = $label.attr("data-i18n");
+        const labelText = $label
+          .text()
+          .trim()
+          .replace(/\(optional\)$/i, "")
+          .trim();
+        fieldName = i18nKey ? t(i18nKey, labelText) : labelText;
+      }
+
+      // Custom error messages
+      const requiredMessage = t("validation.required", {
+        field: fieldName,
+      });
+      const patternMessage = t("validation.pattern", {
+        field: fieldName,
+      });
 
       let errorMessage = "";
       let isValid = true;
-
-      // Custom error messages
-      const requiredMessage =
-        $input.data("required-message") || `${fieldName} is required.`;
-      const patternMessage =
-        $input.data("pattern-message") || `Please enter a valid ${fieldName}.`;
 
       // Check if the field is required and not empty
       if (isRequired && value === "") {
@@ -310,9 +328,20 @@ $(document).ready(() => {
 
       // Validate based on pattern if the input is not empty
       if (isValid && pattern && value !== "") {
-        const regex = new RegExp(pattern);
-        if (!regex.test(value)) {
-          errorMessage = patternMessage;
+        try {
+          const regex = new RegExp(pattern);
+          if (!regex.test(value)) {
+            errorMessage = patternMessage;
+            isValid = false;
+          }
+        } catch (e) {
+          console.error(
+            "Invalid regex pattern:",
+            pattern,
+            "for input:",
+            $input.attr("id"),
+          );
+          errorMessage = t("validation.pattern", { field: fieldName }); // Generic pattern message on error
           isValid = false;
         }
       }
@@ -374,7 +403,7 @@ $(document).ready(() => {
         $("<input>", {
           type: "hidden",
           name: name,
-          value: $("<div>").text(value).html(), // Sanitize the value
+          value: value,
         }),
       );
     };
@@ -536,7 +565,9 @@ $(document).ready(() => {
       if (visibleItems === 0) {
         if ($pluginDropdownMenu.find(".no-plugin-items").length === 0) {
           $pluginDropdownMenu.append(
-            '<li class="no-plugin-items dropdown-item text-muted">No Item</li>',
+            `<li class="no-plugin-items dropdown-item text-muted">${t(
+              "status.no_item",
+            )}</li>`,
           );
         }
       } else {
@@ -567,7 +598,9 @@ $(document).ready(() => {
       if (visibleItems === 0) {
         if ($templateDropdownMenu.find(".no-template-items").length === 0) {
           $templateDropdownMenu.append(
-            '<li class="no-template-items dropdown-item text-muted">No Item</li>',
+            `<li class="no-template-items dropdown-item text-muted">${t(
+              "status.no_item",
+            )}</li>`,
           );
         }
       } else {
@@ -766,11 +799,16 @@ $(document).ready(() => {
   );
 
   $(document).on("click", ".show-multiple", function () {
-    const toggleText = $(this).text().trim() === "SHOW" ? "HIDE" : "SHOW";
+    const currentTextKey =
+      $(this).text().trim() === t("button.multiple_show")
+        ? "button.multiple_hide"
+        : "button.multiple_show";
+    const iconClass =
+      currentTextKey === "button.multiple_show" ? "hide" : "show-alt";
     $(this).html(
-      `<i class="bx bx-${
-        toggleText === "SHOW" ? "hide" : "show-alt"
-      } bx-sm"></i>&nbsp;${toggleText}`,
+      `<i class="bx bx-${iconClass} bx-sm"></i>&nbsp;<span data-i18n="${currentTextKey}">${t(
+        currentTextKey,
+      )}</span>`,
     );
   });
 
@@ -882,12 +920,18 @@ $(document).ready(() => {
     multipleShow.before(`
       <div>
         <button id="remove-${cloneId}" type="button" class="btn btn-xs btn-text-danger rounded-pill remove-multiple p-0 pe-2">
-          <i class="bx bx-trash bx-sm"></i>&nbsp;REMOVE
+          <i class="bx bx-trash bx-sm"></i>&nbsp;<span data-i18n="button.multiple_remove">${t(
+            "button.multiple_remove",
+          )}</span>
         </button>
       </div>
     `);
 
-    multipleShow.html(`<i class="bx bx-hide bx-sm"></i>&nbsp;SHOW`);
+    multipleShow.html(
+      `<i class="bx bx-hide bx-sm"></i>&nbsp;<span data-i18n="button.multiple_show">${t(
+        "button.multiple_show",
+      )}</span>`,
+    );
     multipleClone.find(".multiple-collapse").collapse("hide");
 
     // Insert the new element in the correct order based on suffix
@@ -1032,7 +1076,7 @@ $(document).ready(() => {
 
   $(".save-settings").on("click", function () {
     if (isReadOnly) {
-      alert("This action is not allowed in read-only mode.");
+      alert(t("alert.readonly_mode"));
       return;
     }
 
@@ -1067,20 +1111,23 @@ $(document).ready(() => {
       }
 
       if (!allStepsValid) return;
-    } else if (currentMode === "raw") {
+    }
+
+    // If all validations pass, submit the form
+    const form = getFormFromSettings($(this));
+
+    if (currentMode === "raw") {
       // Raw mode validation logic
       const draftInput = $("#is-draft");
       const wasDraft = draftInput.data("original") === "yes";
       const isDraft = form.find("input[name='IS_DRAFT']").val() === "yes";
 
       if (form.children().length < 2 && isDraft === wasDraft) {
-        alert("No changes detected.");
+        alert(t("alert.no_changes_detected"));
         return;
       }
     }
 
-    // If all validations pass, submit the form
-    const form = getFormFromSettings($(this));
     form.appendTo("body").submit();
   });
 
@@ -1089,10 +1136,13 @@ $(document).ready(() => {
     const isDraft = draftInput.val() === "yes";
 
     draftInput.val(isDraft ? "no" : "yes");
+    const newStatusKey = isDraft ? "status.online" : "status.draft";
     $(".toggle-draft").html(
       `<i class="bx bx-sm bx-${
         isDraft ? "globe" : "file-blank"
-      } bx-sm"></i>&nbsp;${isDraft ? "Online" : "Draft"}`,
+      }"></i>&nbsp; <span data-i18n="${newStatusKey}">${t(
+        newStatusKey,
+      )}</span>`,
     );
   });
 
@@ -1105,7 +1155,9 @@ $(document).ready(() => {
       .then(() => {
         // Show tooltip
         const button = $(this);
-        button.attr("data-bs-original-title", "Copied!").tooltip("show");
+        button
+          .attr("data-bs-original-title", t("tooltip.copied"))
+          .tooltip("show");
 
         // Hide tooltip after 2 seconds
         setTimeout(() => {
@@ -1301,10 +1353,7 @@ $(document).ready(() => {
         $(`#remove-${$(this).attr("id")}`).addClass("disabled");
         $(`#remove-${$(this).attr("id")}`)
           .parent()
-          .attr(
-            "title",
-            "Cannot remove because one or more settings are disabled",
-          );
+          .attr("title", t("tooltip.cannot_remove_disabled"));
 
         new bootstrap.Tooltip(
           $(`#remove-${$(this).attr("id")}`)
@@ -1393,9 +1442,17 @@ $(document).ready(() => {
       feedbackToast.attr("id", `feedback-toast-${toastNum++}`); // Corrected to set the ID for the failed toast
       feedbackToast.find("span").text("Disclaimer");
       feedbackToast
+        .find(".fw-medium")
+        .text(t("toast.disclaimer_title"))
+        .attr("data-i18n", "toast.disclaimer_title");
+      feedbackToast
         .find("div.toast-body")
         .html(
-          "<div class='fw-bolder'>If the service is removed or restarted, your UI configuration will be lost.</div>This is because the service's method is 'autoconf', designed to prevent configuration conflicts.",
+          `<div class='fw-bolder' data-i18n="toast.autoconf_disclaimer_bold">${t(
+            "toast.autoconf_disclaimer_bold",
+          )}</div><span data-i18n="toast.autoconf_disclaimer_detail">${t(
+            "toast.autoconf_disclaimer_detail",
+          )}</span>`,
         );
       feedbackToast.attr("data-bs-autohide", "false");
       feedbackToast.appendTo("#feedback-toast-container"); // Ensure the toast is appended to the container
@@ -1695,6 +1752,38 @@ $(document).ready(() => {
         styleStepNavItem($stepItem, isActive, !isStepValid);
       }
     }, 200)();
+  });
+
+  // Reset setting handler
+  $(document).on("click", ".reset-setting", function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    // Find the associated input/select/checkbox
+    const $settingField = $(this).closest("div").find(".plugin-setting");
+    const settingType = $settingField.attr("type");
+    const isGlobal = $(this).attr("data-bs-original-title").includes("global");
+
+    // Get default or global value depending on the button tooltip
+    const valueToSet = isGlobal
+      ? $settingField.data("original")
+      : $settingField.data("default");
+
+    // Apply the value based on field type
+    if ($settingField.is("select")) {
+      $settingField.find("option").each(function () {
+        $(this).prop("selected", $(this).val() === valueToSet);
+      });
+      $settingField.val(valueToSet).trigger("change");
+    } else if (settingType === "checkbox") {
+      $settingField.prop("checked", valueToSet === "yes").trigger("change");
+    } else {
+      $settingField.val(valueToSet).trigger("input");
+    }
+
+    // Highlight the field to indicate it's been reset
+    const $setting = $settingField.closest(".col-12");
+    highlightSettings($setting);
   });
 
   isInit = false;

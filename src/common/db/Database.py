@@ -87,6 +87,7 @@ class Database:
     READONLY_ERROR = ("readonly", "read-only", "command denied", "Access denied")
     RESTRICTED_TEMPLATE_SETTINGS = ("USE_TEMPLATE", "IS_DRAFT")
     MULTISITE_CUSTOM_CONFIG_TYPES = ("server-http", "modsec-crs", "modsec", "server-stream", "crs-plugins-before", "crs-plugins-after")
+    SUFFIX_RX = re_compile(r"(?P<setting>.+)_(?P<suffix>\d+)$")
 
     def __init__(
         self, logger: Logger, sqlalchemy_string: Optional[str] = None, *, ui: bool = False, pool: Optional[bool] = None, log: bool = True, **kwargs
@@ -95,6 +96,7 @@ class Database:
         self.logger = logger
         self.readonly = False
         self.last_connection_retry = None
+        self.__ignore_regex_check = getenv("IGNORE_REGEX_CHECK", "no").lower() == "yes"
 
         if pool:
             self.logger.warning("The pool parameter is deprecated, it will be removed in the next version")
@@ -249,7 +251,6 @@ class Database:
                 self.logger.error(f"Error when trying to connect to the database: {e}")
                 exit(1)
 
-        self.suffix_rx = re_compile(r"_\d+$")
         if log:
             self.logger.info(f"✅ Database connection established{'' if not self.readonly else ' in read-only mode'}")
 
@@ -379,7 +380,7 @@ class Database:
         def check_setting(session: scoped_session, setting: str, value: Optional[str], multisite: bool = False) -> Tuple[bool, str]:
             try:
                 multiple = False
-                if self.suffix_rx.search(setting):
+                if self.SUFFIX_RX.search(setting):
                     setting = setting.rsplit("_", 1)[0]
                     multiple = True
 
@@ -408,7 +409,7 @@ class Database:
 
                 if value is not None:
                     try:
-                        if search(db_setting.regex, value) is None:
+                        if not self.__ignore_regex_check and search(db_setting.regex, value) is None:
                             return False, f"not matching regex: {db_setting.regex!r}"
                     except RegexError:
                         return False, f"invalid regex: {db_setting.regex!r}"
@@ -458,7 +459,7 @@ class Database:
                 metadata = session.query(Metadata).with_entities(Metadata.version).filter_by(id=1).first()
                 if metadata:
                     return metadata.version
-                return "1.6.2-rc1"
+                return "1.6.2-rc2"
             except BaseException as e:
                 return f"Error: {e}"
 
@@ -490,7 +491,7 @@ class Database:
             "last_instances_change": None,
             "reload_ui_plugins": False,
             "integration": "unknown",
-            "version": "1.6.2-rc1",
+            "version": "1.6.2-rc2",
             "database_version": "Unknown",  # ? Extracted from the database
             "default": True,  # ? Extra field to know if the returned data is the default one
         }
@@ -881,7 +882,7 @@ class Database:
                                 # Check if setting exists globally
                                 setting_id = setting
                                 suffix = 0
-                                if hasattr(self, "suffix_rx") and self.suffix_rx.search(setting):
+                                if self.SUFFIX_RX.search(setting):
                                     setting_id, suffix = setting.rsplit("_", 1)
                                     suffix = int(suffix)  # noqa: FURB123
                                 if setting_id not in saved_settings:
@@ -1323,13 +1324,13 @@ class Database:
             if (is_global and not suffix) or (key not in config and key not in db_config):
                 return val == setting["default"]
 
-            if is_global and not suffix:
+            if is_global:
                 return False
 
             # Acceptable values are the ones from either config or db_config.
-            return val in (config.get(key), db_config.get(key))
+            return val in (config.get(key), db_config.get(key)) if not suffix else val in (config.get(f"{key}_{suffix}"), db_config.get(f"{key}_{suffix}"))
 
-        def check_value(key: str, value: str, setting: dict, template_default: Optional[str], suffix: int, original_key: str, is_global: bool = False) -> bool:
+        def check_value(key: str, value: str, setting: dict, template_default: Optional[str], suffix: int, is_global: bool = False) -> bool:
             """
             Determine if a configuration value should be considered default.
 
@@ -1341,12 +1342,7 @@ class Database:
             if not is_global and key == "SERVER_NAME":
                 return False
 
-            if not suffix:
-                return is_default_value(value, original_key, setting, template_default, suffix, is_global)
-
-            return is_default_value(value, key, setting, template_default, suffix, is_global) and is_default_value(
-                value, original_key, setting, template_default, suffix, is_global
-            )
+            return is_default_value(value, key, setting, template_default, suffix, is_global)
 
         with self._db_session() as session:
             if self.readonly:
@@ -1522,7 +1518,7 @@ class Database:
                         for original_key, value in service_config.items():
                             suffix = 0
                             key = deepcopy(original_key)
-                            if self.suffix_rx.search(key):
+                            if self.SUFFIX_RX.search(key):
                                 suffix = int(key.split("_")[-1])
                                 key = key[: -len(str(suffix)) - 1]
 
@@ -1551,7 +1547,7 @@ class Database:
 
                             # Determine if we need to add, update, or delete
                             if not service_setting:
-                                if check_value(key, value, setting, template_setting_default, suffix, original_key):
+                                if check_value(key, value, setting, template_setting_default, suffix):
                                     continue
 
                                 self.logger.debug(f"Adding setting {key} for service {server_name}")
@@ -1566,7 +1562,7 @@ class Database:
                             ):
                                 local_changed_plugins.add(setting["plugin_id"])
 
-                                if check_value(key, value, setting, template_setting_default, suffix, original_key):
+                                if check_value(key, value, setting, template_setting_default, suffix):
                                     self.logger.debug(f"Removing setting {key} for service {server_name}")
                                     local_to_delete.append(
                                         {"model": Services_settings, "filter": {"service_id": server_name, "setting_id": key, "suffix": suffix}}
@@ -1596,7 +1592,7 @@ class Database:
                         for original_key, value in global_config.items():
                             suffix = 0
                             key = deepcopy(original_key)
-                            if self.suffix_rx.search(key):
+                            if self.SUFFIX_RX.search(key):
                                 suffix = int(key.split("_")[-1])
                                 key = key[: -len(str(suffix)) - 1]
 
@@ -1612,7 +1608,7 @@ class Database:
                                 template_setting_default = templates.get(template, {}).get((key, suffix))
 
                             if not global_value:
-                                if check_value(key, value, setting, template_setting_default, suffix, original_key, True):
+                                if check_value(key, value, setting, template_setting_default, suffix, True):
                                     continue
 
                                 self.logger.debug(f"Adding global setting {key}")
@@ -1623,7 +1619,7 @@ class Database:
                             ):
                                 local_changed_plugins.add(setting["plugin_id"])
 
-                                if check_value(key, value, setting, template_setting_default, suffix, original_key, True):
+                                if check_value(key, value, setting, template_setting_default, suffix, True):
                                     self.logger.debug(f"Removing global setting {key}")
                                     local_to_delete.append({"model": Global_values, "filter": {"setting_id": key, "suffix": suffix}})
                                     continue
@@ -1688,7 +1684,7 @@ class Database:
 
                     for key, value in config.items():
                         suffix = 0
-                        if self.suffix_rx.search(key):
+                        if self.SUFFIX_RX.search(key):
                             suffix = int(key.split("_")[-1])
                             key = key[: -len(str(suffix)) - 1]
 
@@ -1982,7 +1978,7 @@ class Database:
                         continue
                     value = self._empty_if_none(result.value)
 
-                    if result.setting_id == "SERVER_NAME" and not search(r"^" + escape(result.service_id) + r"( |$)", value):
+                    if result.setting_id == "SERVER_NAME" and search(r"^" + escape(result.service_id) + r"( |$)", value) is None:
                         split = set(value.split(" "))
                         split.discard(result.service_id)
                         value = result.service_id + " " + " ".join(split)
@@ -2033,16 +2029,15 @@ class Database:
         if filtered_settings and not global_only:
             filtered_settings.update(("SERVER_NAME", "MULTISITE", "USE_TEMPLATE"))
 
+        config = {}
+        multisite = set()
+        multiple_groups = {}
         with self._db_session() as session:
-            config = {}
-            multisite = set()
-
             query = (
                 session.query(Settings)
                 .with_entities(
                     Settings.id,
                     Settings.context,
-                    Settings.default,
                     Settings.default,
                     Settings.multiple,
                 )
@@ -2062,6 +2057,8 @@ class Database:
                 }
                 if setting.context == "multisite":
                     multisite.add(setting.id)
+                if setting.multiple:
+                    multiple_groups[setting.id] = setting.multiple
 
         config = self.get_non_default_settings(
             global_only=global_only,
@@ -2073,8 +2070,9 @@ class Database:
             original_multisite=multisite,
         )
 
+        template_used = config.get("USE_TEMPLATE", {"value": ""})["value"]
+        templates = {"global": template_used} if template_used else {}
         with self._db_session() as session:
-            template_used = config.get("USE_TEMPLATE", {"value": ""})["value"]
             if template_used:
                 query = (
                     session.query(Template_settings)
@@ -2103,6 +2101,8 @@ class Database:
                 for service_id in config["SERVER_NAME"]["value"].split(" "):
                     service_template_used = config.get(f"{service_id}_USE_TEMPLATE", {"value": self._empty_if_none(template_used)})["value"]
                     if service_template_used:
+                        templates[service_id] = service_template_used
+
                         query = (
                             session.query(Template_settings)
                             .with_entities(Template_settings.setting_id, Template_settings.default, Template_settings.suffix)
@@ -2126,16 +2126,71 @@ class Database:
                                 "template": service_template_used,
                             }
 
-        if service:
-            for key in config.copy().keys():
+        multiple = {}
+        services = config["SERVER_NAME"]["value"].split(" ")
+        for key, data in config.copy().items():
+            new_value = None
+            if service:
+                data = config.pop(key)
                 if not key.startswith(f"{service}_"):
-                    del config[key]
                     continue
-                config[key.replace(f"{service}_", "")] = config.pop(key)
+                key = key.replace(f"{service}_", "")
+                new_value = data
 
-        if not methods:
-            for key, value in config.copy().items():
-                config[key] = value["value"]
+            if not methods:
+                new_value = data["value"]
+
+            match = self.SUFFIX_RX.search(key)
+            if match:
+                window = "global"
+                matched_group = multiple_groups.get(match.group("setting"), None)
+                if matched_group is None:
+                    for db_service in services:
+                        if key.startswith(f"{db_service}_"):
+                            window = db_service
+                            matched_group = multiple_groups.get(match.group("setting").replace(f"{db_service}_", ""), None)
+                            break
+
+                if matched_group is not None:
+                    multiple.setdefault(matched_group, {}).setdefault(window, set()).add(match.group("suffix"))
+
+            if new_value is not None:
+                config[key] = new_value
+
+        if multiple:
+            with self._db_session() as session:
+                query = session.query(Settings).with_entities(Settings.id, Settings.default).filter(Settings.multiple.in_(multiple.keys()))
+
+                for setting in query:
+                    for window, suffixes in multiple[multiple_groups[setting.id]].items():
+                        template = templates.get(window, "") or templates.get("global", "")
+                        for suffix in suffixes:
+                            if window == "global" or service:
+                                key = f"{setting.id}_{suffix}"
+                            else:
+                                key = f"{window}_{setting.id}_{suffix}"
+
+                            default = self._empty_if_none(setting.default)
+                            value = deepcopy(default)
+                            if template:
+                                template_setting = (
+                                    session.query(Template_settings).filter_by(template_id=template, setting_id=setting.id, suffix=suffix).first()
+                                )
+                                if template_setting is not None:
+                                    value = self._empty_if_none(template_setting.default)
+
+                            if key not in config:
+                                config[key] = (
+                                    {
+                                        "value": value,
+                                        "global": True,
+                                        "method": "default",
+                                        "default": default,
+                                        "template": template,
+                                    }
+                                    if methods
+                                    else value
+                                )
 
         return config
 
@@ -2865,7 +2920,7 @@ class Database:
 
                         order = 0
                         for setting, default in template.get("settings", {}).items():
-                            setting_id, suffix = setting.rsplit("_", 1) if self.suffix_rx.search(setting) else (setting, None)
+                            setting_id, suffix = setting.rsplit("_", 1) if self.SUFFIX_RX.search(setting) else (setting, None)
                             if suffix is not None:
                                 suffix = int(suffix)
 
@@ -3148,7 +3203,7 @@ class Database:
 
                     order = 0
                     for setting, default in template_data.get("settings", {}).items():
-                        setting_id, suffix = setting.rsplit("_", 1) if self.suffix_rx.search(setting) else (setting, None)
+                        setting_id, suffix = setting.rsplit("_", 1) if self.SUFFIX_RX.search(setting) else (setting, None)
                         if suffix is not None:
                             suffix = int(suffix)
 

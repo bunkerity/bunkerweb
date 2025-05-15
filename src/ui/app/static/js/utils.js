@@ -1,6 +1,7 @@
 class News {
-  constructor() {
+  constructor(t) {
     this.BASE_URL = "https://www.bunkerweb.io/";
+    this.t = t;
   }
 
   init() {
@@ -49,7 +50,9 @@ class News {
       );
       $("#news-button").after(
         DOMPurify.sanitize(
-          `<span class="badge-dot-text position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">${newsNumber}<span class="visually-hidden">unread news</span></span>`,
+          `<span class="badge-dot-text position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">${newsNumber}<span class="visually-hidden" data-i18n="badge.unread_news">${this.t(
+            "badge.unread_news",
+          )}</span></span>`,
         ),
       );
     }
@@ -142,7 +145,7 @@ class News {
         $("<img>", {
           class: "card-img card-img-left",
           src: img,
-          alt: "News image",
+          alt: this.t("news.image_alt"),
           loading: "lazy",
         }),
       );
@@ -175,7 +178,7 @@ class News {
         .append(
           $("<small>", {
             class: "text-muted courier-prime",
-            text: `Posted on: ${date}`,
+            text: `${this.t("news.posted_on")}: ${date}`,
           }),
         )
         .appendTo(cardFooter);
@@ -254,7 +257,7 @@ class News {
       const dateText = $("<p>", { class: "card-text" }).append(
         $("<small>", {
           class: "text-muted courier-prime",
-          text: `Posted on: ${date}`,
+          text: `${this.t("news.posted_on")}: ${date}`,
         }),
       );
 
@@ -274,18 +277,27 @@ class News {
 
 // Initialize the News class
 $(document).ready(() => {
+  // Ensure i18next is loaded before using it
+  const t = typeof i18next !== "undefined" ? i18next.t : (key) => key; // Fallback
+
   // Define news items array
-  let newsItems = [
-    `Get the most of BunkerWeb by upgrading to the PRO version. More info and free trial <a class="light-href text-white-80" target="_blank" rel="noopener" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#pro">here</a>.`,
-    `Need premium support or tailored consulting around BunkerWeb? Check out our <a class="light-href text-white-80" target="_blank" rel="noopener" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services">professional services</a>.`,
-    `Be part of the Bunker community by joining the <a class="light-href text-white-80" target="_blank" rel="noopener" href="https://discord.bunkerweb.io/?utm_campaign=self&utm_source=banner">Discord chat</a> and following us on <a class="light-href text-white-80" target="_blank" rel="noopener" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.`,
+  let newsItemsKeys = [
+    "banner.pro",
+    "banner.support",
+    "banner.community", // Example keys
   ];
+  // Store the original English fallbacks if needed, or rely on i18next fallbacks
+  const newsItemFallbacks = {
+    "banner.pro": `Get the most of BunkerWeb by upgrading to the PRO version. More info and free trial <a class="light-href text-white-80" target="_blank" rel="noopener" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#pro">here</a>.`,
+    "banner.support": `Need premium support or tailored consulting around BunkerWeb? Check out our <a class="light-href text-white-80" target="_blank" rel="noopener" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services">professional services</a>.`,
+    "banner.community": `Be part of the Bunker community by joining the <a class="light-href text-white-80" target="_blank" rel="noopener" href="https://discord.bunkerweb.io/?utm_campaign=self&utm_source=banner">Discord chat</a> and following us on <a class="light-href text-white-80" target="_blank" rel="noopener" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.`,
+  };
 
   let currentIndex = 0;
   const intervalTime = 7000;
   let interval;
   const $bannerText = $("#banner-text");
-  const isReadOnly = $("#is-read-only").val().trim() === "True";
+  const dbReadOnly = $("#db-read-only").val().trim() === "True";
 
   function calculateMinHeight() {
     // Create a hidden element to measure the max height
@@ -301,8 +313,11 @@ $(document).ready(() => {
 
     // Calculate the minimum height required for the banner text
     let minHeight = 0;
-    newsItems.forEach((item) => {
-      $measuringElement.html(item);
+    newsItemsKeys.forEach((key) => {
+      const translatedText = t(key, {
+        defaultValue: newsItemFallbacks[key] || key,
+      });
+      $measuringElement.html(translatedText);
       minHeight = Math.max(minHeight, $measuringElement.outerHeight());
     });
 
@@ -321,7 +336,7 @@ $(document).ready(() => {
     calculateMinHeight();
   });
 
-  const news = new News();
+  const news = new News(t);
   news.init();
 
   function loadData() {
@@ -339,7 +354,7 @@ $(document).ready(() => {
     if (bannerNews) {
       // Use cached data
       const data = JSON.parse(bannerNews);
-      newsItems = data.map((item) => item.content);
+      newsItemsKeys = data.map((item) => item.key);
     } else {
       // console.log("TODO: Fetch data from API when endpoint is available");
       // TODO: Fetch data from API when endpoint is available
@@ -349,14 +364,14 @@ $(document).ready(() => {
           const data = res.data[0].data;
           sessionStorage.setItem("bannerNews", JSON.stringify(data));
           sessionStorage.setItem("bannerRefetch", nowStamp + 3600); // Refetch after one hour
-          newsItems = data.map((item) => item.content);
+          newsItemsKeys = data.map((item) => item.key);
         })
         .fail(function (e) {
           console.error("Failed to fetch banner news:", e);
         });
       */
     }
-    newsItems.sort(() => Math.random() - 0.5);
+    newsItemsKeys.sort(() => Math.random() - 0.5);
     startInterval();
   }
 
@@ -368,8 +383,15 @@ $(document).ready(() => {
     setTimeout(() => {
       $bannerText.removeClass("slide-out");
 
+      const currentKey = newsItemsKeys[nextIndex];
+      const translatedText = t(currentKey, {
+        defaultValue: newsItemFallbacks[currentKey] || currentKey,
+      });
+
       // Update the text content
-      const sanitizedText = DOMPurify.sanitize(newsItems[nextIndex]);
+      const sanitizedText = DOMPurify.sanitize(translatedText, {
+        USE_PROFILES: { html: true },
+      });
       $bannerText.html(sanitizedText);
 
       // Trigger reflow to ensure the browser applies the changes
@@ -382,9 +404,9 @@ $(document).ready(() => {
 
   // Function to start the automatic news rotation
   function startInterval() {
-    if (newsItems.length > 0) {
+    if (newsItemsKeys.length > 0) {
       interval = setInterval(() => {
-        currentIndex = (currentIndex + 1) % newsItems.length;
+        currentIndex = (currentIndex + 1) % newsItemsKeys.length;
         updateBannerText(currentIndex);
       }, intervalTime);
     }
@@ -398,14 +420,17 @@ $(document).ready(() => {
 
   // Click event handler for the "next-news" icon
   $("#next-news").on("click", function () {
-    currentIndex = (currentIndex + 1) % newsItems.length;
+    currentIndex = (currentIndex + 1) % newsItemsKeys.length;
     updateBannerText(currentIndex);
     resetInterval();
   });
 
   if ($bannerText.length) {
     loadData();
-    $("#next-news").trigger("click");
+    if (newsItemsKeys.length > 0) {
+      // Initial display using the first key
+      updateBannerText(0);
+    }
   }
 
   var notificationsRead =
@@ -531,7 +556,7 @@ $(document).ready(() => {
     $("[name='theme']").val(theme);
     localStorage.setItem("theme", theme); // Save user preference
 
-    if (!rootUrl || window.location.pathname.includes("/setup") || isReadOnly)
+    if (!rootUrl || window.location.pathname.includes("/setup") || dbReadOnly)
       return;
 
     saveTheme(rootUrl.replace(/\/profile$/, "/set_theme"), theme);
@@ -566,5 +591,11 @@ $(document).ready(() => {
   $("#feedback-toast-container .bs-toast").each(function () {
     const toast = new bootstrap.Toast(this);
     toast.show();
+  });
+
+  i18next.on("languageChanged", () => {
+    if ($bannerText.length && newsItemsKeys.length > 0) {
+      updateBannerText(currentIndex); // Re-translate the current banner item
+    }
   });
 });

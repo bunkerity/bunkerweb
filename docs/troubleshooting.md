@@ -251,11 +251,11 @@ If it's a false-positive, you should then focus on both **930120** and **932160*
 
 ### Bad Behavior
 
-A common false-positive case is when the client is banned because of the "bad behavior" feature which means that too many suspicious HTTP status codes were generated within a time period (more info [here](advanced.md#bad-behavior)). You should start by reviewing the settings and then edit them according to your web application(s) like removing a suspicious HTTP code, decreasing the count time, increasing the threshold, ...
+A common false-positive case is when the client is banned because of the "bad behavior" feature which means that too many suspicious HTTP status codes were generated within a time period (more info [here](features.md#bad-behavior)). You should start by reviewing the settings and then edit them according to your web application(s) like removing a suspicious HTTP code, decreasing the count time, increasing the threshold, ...
 
 ### Whitelisting
 
-If you have bots (or admins) that need to access your website, the recommended way to avoid any false positive is to whitelist them using the [whitelisting feature](advanced.md#blacklisting-whitelisting-and-greylisting). We don't recommend using the `WHITELIST_URI*` or `WHITELIST_USER_AGENT*` settings unless they are set to secret and unpredictable values. Common use cases are :
+If you have bots (or admins) that need to access your website, the recommended way to avoid any false positive is to whitelist them using the [whitelisting feature](features.md#whitelist). We don't recommend using the `WHITELIST_URI*` or `WHITELIST_USER_AGENT*` settings unless they are set to secret and unpredictable values. Common use cases are :
 
 - Healthcheck / status bot
 - Callback like IPN or webhook

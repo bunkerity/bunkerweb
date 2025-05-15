@@ -108,7 +108,17 @@ jobs:
     needs: [create-arm]
     strategy:
       matrix:
-        linux: [ubuntu, debian, fedora, fedora-41, rhel, rhel9, ubuntu-jammy]
+        linux:
+          [
+            ubuntu,
+            debian,
+            fedora-40,
+            fedora-41,
+            fedora-42,
+            rhel,
+            rhel9,
+            ubuntu-jammy,
+          ]
         platforms: [linux/amd64, linux/arm64]
         include:
           - release: latest
@@ -116,9 +126,11 @@ jobs:
             package: deb
           - linux: debian
             package: deb
-          - linux: fedora
+          - linux: fedora-40
             package: rpm
           - linux: fedora-41
+            package: rpm
+          - linux: fedora-42
             package: rpm
           - linux: rhel
             package: rpm
@@ -208,7 +220,17 @@ jobs:
     needs: [wait-builds]
     strategy:
       matrix:
-        linux: [ubuntu, debian, fedora, fedora-41, el, el9, ubuntu-jammy]
+        linux:
+          [
+            ubuntu,
+            debian,
+            fedora-40,
+            fedora-41,
+            fedora-42,
+            el,
+            el9,
+            ubuntu-jammy,
+          ]
         arch: [amd64, arm64]
         include:
           - release: latest
@@ -223,7 +245,7 @@ jobs:
             suffix: ""
             version: bookworm
             package: deb
-          - linux: fedora
+          - linux: fedora-40
             separator: "-"
             suffix: "1."
             version: 40
@@ -232,6 +254,11 @@ jobs:
             separator: "-"
             suffix: "1."
             version: 41
+            package: rpm
+          - linux: fedora-42
+            separator: "-"
+            suffix: "1."
+            version: 42
             package: rpm
           - linux: el
             separator: "-"
@@ -254,10 +281,13 @@ jobs:
           - linux: debian
             arch: amd64
             package_arch: amd64
-          - linux: fedora
+          - linux: fedora-40
             arch: amd64
             package_arch: x86_64
           - linux: fedora-41
+            arch: amd64
+            package_arch: x86_64
+          - linux: fedora-42
             arch: amd64
             package_arch: x86_64
           - linux: el
@@ -275,10 +305,13 @@ jobs:
           - linux: debian
             arch: arm64
             package_arch: arm64
-          - linux: fedora
+          - linux: fedora-40
             arch: arm64
             package_arch: aarch64
           - linux: fedora-41
+            arch: arm64
+            package_arch: aarch64
+          - linux: fedora-42
             arch: arm64
             package_arch: aarch64
           - linux: el
