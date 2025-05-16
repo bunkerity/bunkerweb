@@ -737,7 +737,7 @@ try:
     if CACHE_PATH.is_dir():
         # * Clearing all missing credentials files
         for ext in ("*.ini", "*.env", "*.json"):
-            for file in CACHE_PATH.rglob(ext):
+            for file in list(CACHE_PATH.rglob(ext)):
                 if "etc" in file.parts or not file.is_file():
                     continue
                 # ? If the file is not in the wildcard groups, remove it

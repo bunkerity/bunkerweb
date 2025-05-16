@@ -124,7 +124,7 @@ class Job:
 
         with LOCK:
             if not manual and self.job_path.is_dir():
-                for file in self.job_path.rglob("*"):
+                for file in list(self.job_path.rglob("*")):
                     if file.as_posix().startswith(tuple(ignored_dirs)):
                         continue
 
