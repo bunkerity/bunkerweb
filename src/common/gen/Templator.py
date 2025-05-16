@@ -66,7 +66,7 @@ class Templator:
         self._jinja_cache_dir = Path(sep, "var", "cache", "bunkerweb", "jinja_cache")
         self._jinja_cache_dir.mkdir(parents=True, exist_ok=True)
         self._templates = templates
-        self._global_templates = [template.name for template in Path(self._templates).rglob("*.conf")]
+        self._global_templates = [template.name for template in list(Path(self._templates).rglob("*.conf"))]
         self._core = Path(core)
         self._plugins = Path(plugins)
         self._pro_plugins = Path(pro_plugins)

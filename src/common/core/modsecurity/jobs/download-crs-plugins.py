@@ -429,7 +429,7 @@ try:
             plugin_id = ""
 
             # Check if the plugins are valid, if they are already installed and if they need to be updated
-            for plugin_config in temp_dir.rglob("**/*-config.conf"):
+            for plugin_config in list(temp_dir.rglob("**/*-config.conf")):
                 try:
                     if plugin_config.is_dir():
                         LOGGER.debug(f"CRS plugin {plugin_config} is a directory, skipping...")
