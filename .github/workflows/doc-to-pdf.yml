@@ -25,9 +25,12 @@ jobs:
       - name: Install node
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: 18
+          node-version: lts
       - name: Install puppeteer
         run: cd docs && npm install
+        env:
+          PUPPETEER_SKIP_DOWNLOAD: "true"
+          PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: "true"
       - name: Run mkdocs serve in background
         run: mkdocs serve & sleep 10
       - name: Run pdf script
