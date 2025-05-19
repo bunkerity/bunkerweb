@@ -62,6 +62,7 @@ jobs:
         with:
           endpoint: ssh://root@arm
           platforms: linux/arm64,linux/arm/v7,linux/arm/v6
+          buildkitd-flags: --debug
       # Compute metadata
       - name: Extract metadata
         id: meta
