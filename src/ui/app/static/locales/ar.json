@@ -1138,6 +1138,7 @@
     "custom_ssl_cert_path": "المسار إلى ملف شهادة SSL المخصصة.",
     "custom_ssl_key_data": "بيانات مفتاح SSL الخاص المخصص (تنسيق PEM أو Base64 المشفرة).",
     "custom_ssl_key_path": "المسار إلى ملف مفتاح SSL الخاص المخصص.",
+    "different_from_template": "القيمة تختلف عن القيمة الافتراضية للقالب",
     "disabled_by_method": "معطل: مُدار عبر الطريقة '{{method}}'.",
     "disabled_db_readonly": "معطل: قاعدة البيانات في وضع القراءة فقط.",
     "disabled_draft": "معطل: الخدمة في وضع المسودة.",

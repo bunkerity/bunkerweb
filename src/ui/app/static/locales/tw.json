@@ -1138,6 +1138,7 @@
     "custom_ssl_cert_path": "自訂 SSL 憑證檔案的路徑。",
     "custom_ssl_key_data": "自訂 SSL 私密金鑰資料（PEM 格式或 Base64 編碼）。",
     "custom_ssl_key_path": "自訂 SSL 私密金鑰檔案的路徑。",
+    "different_from_template": "值與範本預設值不同",
     "disabled_by_method": "已停用：透過方法 '{{method}}' 管理。",
     "disabled_db_readonly": "已停用：資料庫處於唯讀模式。",
     "disabled_draft": "已停用：服務處於草稿模式。",

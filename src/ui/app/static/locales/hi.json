@@ -1138,6 +1138,7 @@
     "custom_ssl_cert_path": "कस्टम SSL प्रमाणपत्र फ़ाइल का पथ।",
     "custom_ssl_key_data": "कस्टम SSL निजी कुंजी डेटा (PEM प्रारूप या Base64 एन्कोडेड)।",
     "custom_ssl_key_path": "कस्टम SSL निजी कुंजी फ़ाइल का पथ।",
+    "different_from_template": "मान टेम्पलेट डिफ़ॉल्ट से भिन्न है",
     "disabled_by_method": "अक्षम: विधि '{{method}}' के माध्यम से प्रबंधित।",
     "disabled_db_readonly": "अक्षम: डेटाबेस रीड-ओनली मोड में है।",
     "disabled_draft": "अक्षम: सेवा ड्राफ्ट मोड में है।",

@@ -1138,6 +1138,7 @@
     "custom_ssl_cert_path": "Özel SSL sertifika dosyasının yolu.",
     "custom_ssl_key_data": "Özel SSL özel anahtar verisi (PEM formatında veya Base64 kodlu).",
     "custom_ssl_key_path": "Özel SSL özel anahtar dosyasının yolu.",
+    "different_from_template": "Değer, şablon varsayılanından farklı",
     "disabled_by_method": "Devre dışı: '{{method}}' yöntemiyle yönetiliyor.",
     "disabled_db_readonly": "Devre dışı: Veritabanı salt okunur modda.",
     "disabled_draft": "Devre dışı: Servis Taslak modunda.",

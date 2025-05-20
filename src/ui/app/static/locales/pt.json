@@ -1138,6 +1138,7 @@
     "custom_ssl_cert_path": "Caminho para o arquivo do certificado SSL personalizado.",
     "custom_ssl_key_data": "Os dados da chave privada SSL personalizada (formato PEM ou codificado em Base64).",
     "custom_ssl_key_path": "Caminho para o arquivo da chave privada SSL personalizada.",
+    "different_from_template": "O valor difere do padrão do modelo",
     "disabled_by_method": "Desabilitado: Gerenciado através do método '{{method}}'.",
     "disabled_db_readonly": "Desabilitado: O banco de dados está em modo somente leitura.",
     "disabled_draft": "Desabilitado: O serviço está em modo Rascunho.",

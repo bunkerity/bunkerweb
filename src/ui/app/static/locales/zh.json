@@ -1138,6 +1138,7 @@
     "custom_ssl_cert_path": "自定义 SSL 证书文件的路径。",
     "custom_ssl_key_data": "自定义 SSL 私钥数据（PEM 格式或 Base64 编码）。",
     "custom_ssl_key_path": "自定义 SSL 私钥文件的路径。",
+    "different_from_template": "值与模板默认值不同",
     "disabled_by_method": "已禁用：通过方法 '{{method}}' 管理。",
     "disabled_db_readonly": "已禁用：数据库处于只读模式。",
     "disabled_draft": "已禁用：服务处于草稿模式。",

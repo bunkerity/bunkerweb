@@ -1138,6 +1138,7 @@
     "custom_ssl_cert_path": "কাস্টম SSL শংসাপত্র ফাইলের পাথ।",
     "custom_ssl_key_data": "কাস্টম SSL ব্যক্তিগত কী ডেটা (PEM ফর্ম্যাট বা Base64 এনকোডেড)।",
     "custom_ssl_key_path": "কাস্টম SSL ব্যক্তিগত কী ফাইলের পাথ।",
+    "different_from_template": "মান টেমপ্লেটের ডিফল্ট থেকে ভিন্ন",
     "disabled_by_method": "নিষ্ক্রিয়: পদ্ধতি '{{method}}' এর মাধ্যমে পরিচালিত।",
     "disabled_db_readonly": "নিষ্ক্রিয়: ডাটাবেস শুধুমাত্র পঠন মোডে আছে।",
     "disabled_draft": "নিষ্ক্রিয়: পরিষেবাটি খসড়া মোডে আছে।",

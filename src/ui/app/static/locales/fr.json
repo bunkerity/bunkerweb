@@ -1138,6 +1138,7 @@
     "custom_ssl_cert_path": "Chemin vers le fichier du certificat SSL personnalisé.",
     "custom_ssl_key_data": "Les données de la clé privée SSL personnalisée (format PEM ou encodé en Base64).",
     "custom_ssl_key_path": "Chemin vers le fichier de la clé privée SSL personnalisée.",
+    "different_from_template": "La valeur diffère de la valeur par défaut du modèle",
     "disabled_by_method": "Désactivé : Géré via la méthode '{{method}}'.",
     "disabled_db_readonly": "Désactivé : La base de données est en lecture seule.",
     "disabled_draft": "Désactivé : Le service est en mode Brouillon.",

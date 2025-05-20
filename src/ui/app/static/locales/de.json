@@ -1138,6 +1138,7 @@
     "custom_ssl_cert_path": "Pfad zur benutzerdefinierten SSL-Zertifikatsdatei.",
     "custom_ssl_key_data": "Die benutzerdefinierten SSL-Privatschlüsseldaten (PEM-Format oder Base64-kodiert).",
     "custom_ssl_key_path": "Pfad zur benutzerdefinierten SSL-Privatschlüsselsdatei.",
+    "different_from_template": "Wert weicht vom Vorlagenstandard ab",
     "disabled_by_method": "Deaktiviert: Verwaltet über Methode '{{method}}'.",
     "disabled_db_readonly": "Deaktiviert: Die Datenbank befindet sich im schreibgeschützten Modus.",
     "disabled_draft": "Deaktiviert: Der Dienst befindet sich im Entwurfsmodus.",

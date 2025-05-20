@@ -1138,6 +1138,7 @@
     "custom_ssl_cert_path": "Path to the custom SSL certificate file.",
     "custom_ssl_key_data": "The custom SSL private key data (PEM format or Base64 encoded).",
     "custom_ssl_key_path": "Path to the custom SSL private key file.",
+    "different_from_template": "Value differs from template default",
     "disabled_by_method": "Disabled: Managed via method '{{method}}'.",
     "disabled_db_readonly": "Disabled: The database is in read-only mode.",
     "disabled_draft": "Disabled: Service is in Draft mode.",

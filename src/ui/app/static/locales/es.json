@@ -1138,6 +1138,7 @@
     "custom_ssl_cert_path": "Ruta al archivo del certificado SSL personalizado.",
     "custom_ssl_key_data": "Los datos de la clave privada SSL personalizada (formato PEM o codificado en Base64).",
     "custom_ssl_key_path": "Ruta al archivo de la clave privada SSL personalizada.",
+    "different_from_template": "El valor difiere del predeterminado de la plantilla",
     "disabled_by_method": "Deshabilitado: Gestionado mediante el método '{{method}}'.",
     "disabled_db_readonly": "Deshabilitado: La base de datos está en modo de solo lectura.",
     "disabled_draft": "Deshabilitado: El servicio está en modo Borrador.",

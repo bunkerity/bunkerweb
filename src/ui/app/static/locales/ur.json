@@ -1138,6 +1138,7 @@
     "custom_ssl_cert_path": "کسٹم SSL سرٹیفکیٹ فائل کا پاتھ۔",
     "custom_ssl_key_data": "کسٹم SSL نجی کلید ڈیٹا (PEM فارمیٹ یا Base64 انکوڈ شدہ)۔",
     "custom_ssl_key_path": "کسٹم SSL نجی کلید فائل کا پاتھ۔",
+    "different_from_template": "قدر ٹیمپلیٹ ڈیفالٹ سے مختلف ہے",
     "disabled_by_method": "غیر فعال: طریقہ '{{method}}' کے ذریعے منظم۔",
     "disabled_db_readonly": "غیر فعال: ڈیٹا بیس صرف پڑھنے کے موڈ میں ہے۔",
     "disabled_draft": "غیر فعال: سروس ڈرافٹ موڈ میں ہے۔",
