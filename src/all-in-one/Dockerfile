@@ -112,11 +112,18 @@ FROM nginx:1.26-alpine-slim@sha256:6d4f5fb02763f731c06f3e246d4edf89c3a2bbc5dd72e
 RUN umask 027
 
 # Install runtime dependencies including supervisord
-RUN apk add --no-cache bash curl geoip grep libgcc libgd libmagic libpq libstdc++ libxml2 mariadb-client mariadb-connector-c openssl pcre postgresql-client python3 sed sqlite tzdata unzip yajl supervisor
+RUN apk add --no-cache bash curl geoip grep libgcc libgd libmagic libpq libstdc++ libxml2 mariadb-client mariadb-connector-c openssl pcre postgresql-client python3 py3-pip sed sqlite tzdata unzip yajl supervisor
 
 # Fix CVEs
 RUN apk add --no-cache "libpq>=16.9-r0" "postgresql16-client>=16.9-r0" # CVE-2025-4207
 RUN apk add --no-cache "libxml2>=2.12.7-r3" # CVE-2025-32414 CVE-2025-32415
+
+COPY src/deps/requirements.txt /tmp/requirements-deps.txt
+
+# Install updated python requirements to fix CVEs
+RUN export MAKEFLAGS="-j$(nproc)" && \
+    pip install --no-cache-dir --require-hashes --break-system-packages -r /tmp/requirements-deps.txt && \
+    rm -f /tmp/requirements-deps.txt
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 /usr/share/bunkerweb /usr/share/bunkerweb
