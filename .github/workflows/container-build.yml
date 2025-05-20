@@ -139,8 +139,7 @@ jobs:
           command: cves,recommendations
           image: local/${{ inputs.IMAGE }}
           only-fixed: true
-          only-vex-affected: true
-          vex-location: misc/vex
+          only-package-types: apk,pypi
           exit-code: true
       # Push image
       - name: Push image
