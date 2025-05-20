@@ -2,6 +2,7 @@
 
 ## v1.6.2-rc3 - ????/??/??
 
+- [BUGFIX] Refactor CLI command handling to support additional arguments
 - [ALL-IN-ONE] Fully integrate CrowdSec in the all-in-one image
 
 ## v1.6.2-rc2 - 2025/05/19
