@@ -1717,7 +1717,7 @@ cat /var/cache/bunkerweb/bunkernet/instance.id
 
 **Step #3: Enroll your instance using the Panel**
 
-Once you have your BunkerNet ID and CrowdSec Console enroll key, [order the free product "BunkerNet / CrowdSec" on the Panel](https://panel.bunkerweb.io/order/bunkernet/11?utm_campaign=self&utm_source=doc). You may be prompted to create an account if you haven’t already.
+Once you have your BunkerNet ID and CrowdSec Console enroll key, [order the free product "BunkerNet / CrowdSec" on the Panel](https://panel.bunkerweb.io/store/bunkernet/11?utm_campaign=self&utm_source=doc). You may be prompted to create an account if you haven’t already.
 
 You can now select the "BunkerNet / CrowdSec" service and fill out the form by pasting your BunkerNet ID and CrowdSec Console enroll key:
 

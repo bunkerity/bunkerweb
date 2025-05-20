@@ -75,7 +75,7 @@ BunkerWeb offers an optional [user interface](web-ui.md) to manage your instance
 
 Don't want to self-host and manage your own BunkerWeb instance(s)? You might be interested in BunkerWeb Cloud, our fully managed SaaS offering for BunkerWeb.
 
-Try our [BunkerWeb Cloud beta offer for free](https://panel.bunkerweb.io/order/bunkerweb-cloud/14?utm_source=doc&utm_campaign=self) and get access to:
+Try our [BunkerWeb Cloud beta offer for free](https://panel.bunkerweb.io/store/bunkerweb-cloud?utm_source=doc&utm_campaign=self) and get access to:
 
 - A fully managed BunkerWeb instance hosted in our cloud
 - All BunkerWeb features, including PRO ones

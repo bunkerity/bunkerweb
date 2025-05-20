@@ -211,7 +211,7 @@ echo "For more information on BunkerWeb, visit:"
 echo "  * Official website: https://www.bunkerweb.io"
 echo "  * Documentation: https://docs.bunkerweb.io"
 echo "  * Community Support: https://discord.bunkerity.com"
-echo "  * Commercial Support: https://panel.bunkerweb.io/order/support"
+echo "  * Commercial Support: https://panel.bunkerweb.io/store/support"
 echo "🛡 Thank you for using BunkerWeb!"
 
 # Detect if OS is RHEL-based for warning
