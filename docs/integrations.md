@@ -338,7 +338,7 @@ For example, to disable the Web UI:
 docker run -d --name bunkerweb-aio -v bw-storage:/data -e SERVICE_UI=no -p 80:8080/tcp -p 443:8443/tcp -p 443:8443/udp bunkerity/bunkerweb-all-in-one:1.6.2-rc2
 ```
 
-### CrowdSec Integration
+#### CrowdSec Integration
 
 The BunkerWeb **All-In-One** Docker image comes with CrowdSec fully integrated—no extra containers or manual setup required. Follow the steps below to enable, configure, and extend CrowdSec in your deployment.
 
@@ -363,7 +363,7 @@ docker run -d \
 
 ---
 
-#### Default Collections & Parsers
+##### Default Collections & Parsers
 
 On first startup (or after upgrading), these assets are automatically installed and kept up to date:
 
@@ -390,7 +390,7 @@ cscli install parser     crowdsecurity/geoip-enrich
 
 ---
 
-#### Adding Extra Collections
+##### Adding Extra Collections
 
 Need more coverage? Define `CROWDSEC_EXTRA_COLLECTIONS` with a space-separated list of Hubb collections:
 
@@ -410,7 +410,7 @@ docker run -d \
 
 ---
 
-#### AppSec Toggle
+##### AppSec Toggle
 
 CrowdSec [AppSec](https://docs.crowdsec.net/docs/appsec/intro/?utm_source=external-docs&utm_medium=cta&utm_campaign=bunker-web-docs) features—powered by the `appsec-virtual-patching` and `appsec-generic-rules` collections—are **enabled by default**.
 
@@ -424,7 +424,7 @@ This effectively turns off the AppSec endpoint so no rules are applied.
 
 ---
 
-#### External CrowdSec API
+##### External CrowdSec API
 
 If you operate a remote CrowdSec instance, point the container to your API:
 
@@ -465,8 +465,8 @@ Supported Linux distributions for BunkerWeb (amd64/x86_64 and arm64/aarch64 arch
 - Fedora 40
 - Fedora 41
 - Fedora 42
-- Red Hat Enterprise Linux (RHEL) 8.9
-- Red Hat Enterprise Linux (RHEL) 9.4
+- Red Hat Enterprise Linux (RHEL) 8.10
+- Red Hat Enterprise Linux (RHEL) 9.6
 
 ### Installation using package manager
 

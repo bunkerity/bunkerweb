@@ -260,8 +260,8 @@ List of supported Linux distros:
 - Fedora 40
 - Fedora 41
 - Fedora 42
-- RHEL 8.9
-- RHEL 9.4
+- RHEL 8.10
+- RHEL 9.6
 
 You will find more information in the [Linux section](https://docs.bunkerweb.io/1.5.10/integrations/?utm_campaign=self&utm_source=github#linux) of the documentation.
 

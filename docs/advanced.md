@@ -1844,8 +1844,8 @@ The Backup S3 tool seamlessly automates data protection, similar to the communit
 
 By activating this feature, you're proactively safeguarding your **data's integrity**. Storing backups **remotely** shields crucial information from threats like **hardware failures**, **cyberattacks**, or **natural disasters**. This ensures both **security** and **availability**, enabling swift recovery during **unexpected events**, preserving **operational continuity**, and ensuring **peace of mind**.
 
-!!! warning "Information for Red Hat Enterprise Linux (RHEL) 8.9 users"
-    If you are using **RHEL 8.9** and plan on using an **external database**, you will need to install the `mysql-community-client` package to ensure the `mysqldump` command is available. You can install the package by executing the following commands:
+!!! warning "Information for Red Hat Enterprise Linux (RHEL) 8.10 users"
+    If you are using **RHEL 8.10** and plan on using an **external database**, you will need to install the `mysql-community-client` package to ensure the `mysqldump` command is available. You can install the package by executing the following commands:
 
     === "MySQL/MariaDB"
 
