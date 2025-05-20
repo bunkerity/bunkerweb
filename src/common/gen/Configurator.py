@@ -233,6 +233,7 @@ class Configurator:
                         "OLDPWD",
                         "SERVICE_SCHEDULER",
                         "SERVICE_UI",
+                        "CROWDSEC_EXTRA_COLLECTIONS",
                     )
                 )
             ):

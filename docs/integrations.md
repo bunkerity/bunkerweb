@@ -338,6 +338,118 @@ For example, to disable the Web UI:
 docker run -d --name bunkerweb-aio -v bw-storage:/data -e SERVICE_UI=no -p 80:8080/tcp -p 443:8443/tcp -p 443:8443/udp bunkerity/bunkerweb-all-in-one:1.6.2-rc2
 ```
 
+### CrowdSec Integration
+
+The BunkerWeb **All-In-One** Docker image comes with CrowdSec fully integrated—no extra containers or manual setup required. Follow the steps below to enable, configure, and extend CrowdSec in your deployment.
+
+By default, CrowdSec is **disabled**. To turn it on, simply add the `USE_CROWDSEC` environment variable:
+
+```bash
+docker run -d \
+  --name bunkerweb-aio \
+  -v bw-storage:/data \
+  -e USE_CROWDSEC=yes \
+  -p 80:8080/tcp \
+  -p 443:8443/tcp \
+  -p 443:8443/udp \
+  bunkerity/bunkerweb-all-in-one:1.6.2-rc2
+```
+
+* When `USE_CROWDSEC=yes`, the entrypoint will:
+
+  1. **Register** and **start** the local CrowdSec agent (via `cscli`).
+  2. **Install or upgrade** default collections & parsers.
+  3. **Configure** the `crowdsec-bunkerweb-bouncer/v1.6` bouncer.
+
+---
+
+#### Default Collections & Parsers
+
+On first startup (or after upgrading), these assets are automatically installed and kept up to date:
+
+| Type           | Name                                    | Purpose                                                                                                                                                                                                                            |
+| -------------- | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Collection** | `crowdsecurity/nginx`                   | Defend Nginx servers against a broad array of HTTP-based attacks, from brute-force to injection attempts.                                                                                                                          |
+| **Collection** | `crowdsecurity/appsec-virtual-patching` | Delivers a dynamically updated WAF-style rule set targeting known CVEs, automatically patched daily to shield web applications from newly discovered vulnerabilities.                                                              |
+| **Collection** | `crowdsecurity/appsec-generic-rules`    | Complements `crowdsecurity/appsec-virtual-patching` with heuristics for generic application-layer attack patterns—such as enumeration, path traversal, and automated probes—filling gaps where CVE-specific rules don’t yet exist. |
+| **Parser**     | `crowdsecurity/geoip-enrich`            | Enriches events with GeoIP context                                                                                                                                                                                                 |
+
+<details>
+<summary><strong>How it works internally</strong></summary>
+
+The entrypoint script invokes:
+
+```bash
+cscli install collection crowdsecurity/nginx
+cscli install collection crowdsecurity/appsec-virtual-patching
+cscli install collection crowdsecurity/appsec-generic-rules
+cscli install parser     crowdsecurity/geoip-enrich
+```
+
+</details>
+
+---
+
+#### Adding Extra Collections
+
+Need more coverage? Define `CROWDSEC_EXTRA_COLLECTIONS` with a space-separated list of Hubb collections:
+
+```bash
+docker run -d \
+  --name bunkerweb-aio \
+  -v bw-storage:/data \
+  -e USE_CROWDSEC=yes \
+  -e CROWDSEC_EXTRA_COLLECTIONS="crowdsecurity/apache2 crowdsecurity/mysql" \
+  -p 80:8080/tcp \
+  -p 443:8443/tcp \
+  -p 443:8443/udp \
+  bunkerity/bunkerweb-all-in-one:1.6.2-rc2
+```
+
+> **Tip:** The script loops through each name and installs or upgrades as needed—no manual steps required.
+
+---
+
+#### AppSec Toggle
+
+CrowdSec [AppSec](https://docs.crowdsec.net/docs/appsec/intro/?utm_source=external-docs&utm_medium=cta&utm_campaign=bunker-web-docs) features—powered by the `appsec-virtual-patching` and `appsec-generic-rules` collections—are **enabled by default**.
+
+To **disable** all AppSec (WAF/virtual-patching) functionality, set:
+
+```bash
+-e CROWDSEC_APPSEC_URL=""
+```
+
+This effectively turns off the AppSec endpoint so no rules are applied.
+
+---
+
+#### External CrowdSec API
+
+If you operate a remote CrowdSec instance, point the container to your API:
+
+```bash
+docker run -d \
+  --name bunkerweb-aio \
+  -v bw-storage:/data \
+  -e USE_CROWDSEC=yes \
+  -e CROWDSEC_API="https://crowdsec.example.com:8000" \
+  -p 80:8080/tcp \
+  -p 443:8443/tcp \
+  -p 443:8443/udp \
+  bunkerity/bunkerweb-all-in-one:1.6.2-rc2
+```
+
+* **Local registration** is skipped when `CROWDSEC_API` is not `127.0.0.1` or `localhost`.
+* **AppSec** is disabled by default when using an external API. To enable it, set `CROWDSEC_APPSEC_URL` to your desired endpoint.
+* Bouncer registration still occurs against the remote API.
+* To reuse an existing bouncer key, supply `CROWDSEC_API_KEY` with your pre-generated token.
+
+---
+
+!!! tip "More options"
+    For full coverage of all CrowdSec options (custom scenarios, logs, troubleshooting, and more), see the [BunkerWeb CrowdSec plugin docs](features.md#crowdsec) or visit the [official CrowdSec website](https://www.crowdsec.net/?utm_source=external-docs&utm_medium=cta&utm_campaign=bunker-web-docs).
+
 ## Linux
 
 <figure markdown>

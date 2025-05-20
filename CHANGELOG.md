@@ -1,6 +1,10 @@
 # Changelog
 
-## v1.6.2-rc2 - ????/??/??
+## v1.6.2-rc3 - ????/??/??
+
+- [ALL-IN-ONE] Fully integrate CrowdSec in the all-in-one image
+
+## v1.6.2-rc2 - 2025/05/19
 
 - [BUGFIX] Fix draft services deletion when editing the global config in the web UI
 - [BUGFIX] Enhance the `Let's Encrypt` plugin's Cloudflare Provider with default values and validation for credentials to avoid having to set all of them all the time (`api_token` or `email` and `api_key`)
