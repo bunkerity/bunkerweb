@@ -233,6 +233,7 @@ class Configurator:
                         "OLDPWD",
                         "SERVICE_SCHEDULER",
                         "SERVICE_UI",
+                        "IGNORE_REGEX_CHECK",
                         "CROWDSEC_EXTRA_COLLECTIONS",
                     )
                 )
