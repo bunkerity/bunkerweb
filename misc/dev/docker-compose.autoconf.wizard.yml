@@ -101,6 +101,8 @@ services:
     build:
       context: ../..
       dockerfile: ./src/ui/Dockerfile
+      args:
+        SKIP_MINIFY: "yes"
     ports:
       - 7000:7000
     volumes:

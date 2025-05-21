@@ -106,10 +106,17 @@ COPY src/all-in-one all-in-one
 COPY src/VERSION VERSION
 COPY misc/*.ascii misc/
 
-# Minify JS files
-RUN apk add --no-cache nodejs npm && \
+# Minify JS files (can be skipped with SKIP_MINIFY=yes)
+ARG SKIP_MINIFY=false
+RUN if [ "$SKIP_MINIFY" != "yes" ]; then \
+    apk add --no-cache nodejs npm && \
     npm install -g uglify-js && \
-    for file in $(find ui/app/static -type f -name "*.js") ; do uglifyjs "$file" --compress --mangle --verbose --output "$file" ; done
+    for file in $(find ui/app/static -type f -name "*.js") ; do \
+        uglifyjs "$file" --compress --mangle --verbose --output "$file" ; \
+    done ; \
+    else \
+    echo "Skipping JS minification"; \
+    fi
 
 FROM nginx:1.26-alpine-slim@sha256:6d4f5fb02763f731c06f3e246d4edf89c3a2bbc5dd72eab2b02bc55ef4b8600e
 

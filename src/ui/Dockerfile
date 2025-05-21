@@ -35,10 +35,17 @@ COPY src/common/helpers helpers
 COPY src/VERSION VERSION
 COPY src/ui ui
 
-# Minify JS files
-RUN apk add --no-cache nodejs npm && \
+# Minify JS files (can be skipped with SKIP_MINIFY=yes)
+ARG SKIP_MINIFY=false
+RUN if [ "$SKIP_MINIFY" != "yes" ]; then \
+  apk add --no-cache nodejs npm && \
   npm install -g uglify-js && \
-  for file in $(find ui/app/static -type f -name "*.js") ; do uglifyjs "$file" --compress --mangle --verbose --output "$file" ; done
+  for file in $(find ui/app/static -type f -name "*.js") ; do \
+    uglifyjs "$file" --compress --mangle --verbose --output "$file" ; \
+  done ; \
+  else \
+  echo "Skipping JS minification"; \
+  fi
 
 FROM python:3.13-alpine@sha256:452682e4648deafe431ad2f2391d726d7c52f0ff291be8bd4074b10379bb89ff
 
