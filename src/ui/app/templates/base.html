@@ -62,33 +62,7 @@
         <link rel="stylesheet"
               href="{{ url_for('static', filename='fonts/boxicons.min.css') }}"
               nonce="{{ style_nonce }}" />
-        {% if current_endpoint in ("instances", "services", "configs", "plugins", "cache", "reports", "bans", "jobs") or "plugins" in request.path %}
-            <!-- Datatables -->
-            <link rel="preload"
-                  href="{{ url_for('static', filename='libs/datatables/datatables.min.css') }}"
-                  as="style" />
-            <link rel="stylesheet"
-                  href="{{ url_for('static', filename='libs/datatables/datatables.min.css') }}"
-                  nonce="{{ style_nonce }}" />
-        {% endif %}
-        {% if current_endpoint in ("bans", "pro") or current_endpoint != "plugins" and "plugins" in request.path %}
-            <!-- Flatpickr -->
-            <link rel="preload"
-                  href="{{ url_for('static', filename='libs/flatpickr/flatpickr.min.css') }}"
-                  as="style" />
-            <link rel="stylesheet"
-                  href="{{ url_for('static', filename='libs/flatpickr/flatpickr.min.css') }}"
-                  nonce="{{ style_nonce }}" />
-            <link rel="stylesheet"
-                  href="{{ url_for('static', filename='libs/flatpickr/themes/airbnb.css') }}"
-                  nonce="{{ style_nonce }}" />
-            {% if theme == 'dark' %}
-                <link rel="stylesheet"
-                      href="{{ url_for('static', filename='libs/flatpickr/themes/airbnb.dark.css') }}"
-                      nonce="{{ style_nonce }}" />
-            {% endif %}
-        {% endif %}
-        <!-- Core CSS (critical) -->
+        <!-- Core CSS -->
         <link rel="stylesheet"
               href="{{ url_for('static', filename='css/core.css') }}"
               nonce="{{ style_nonce }}" />
@@ -105,36 +79,6 @@
         <link rel="stylesheet"
               href="{{ url_for('static', filename='libs/perfect-scrollbar/perfect-scrollbar.css') }}"
               nonce="{{ style_nonce }}" />
-        {% if current_endpoint == "home" or current_endpoint != "plugins" and "plugins" in request.path %}
-            <link rel="preload"
-                  href="{{ url_for('static', filename='libs/apexcharts/apexcharts.min.css') }}"
-                  as="style" />
-            <link rel="stylesheet"
-                  href="{{ url_for('static', filename='libs/apexcharts/apexcharts.min.css') }}"
-                  nonce="{{ style_nonce }}" />
-            <link rel="stylesheet"
-                  href="{{ url_for('static', filename='libs/leaflet/leaflet.css') }}"
-                  nonce="{{ style_nonce }}" />
-        {% endif %}
-        <!-- Page CSS -->
-        <!-- Page -->
-        {% if starting or current_endpoint in ("setup", "login", "totp", "loading") %}
-            <link rel="stylesheet"
-                  href="{{ url_for('static', filename='css/pages/login.css') }}"
-                  nonce="{{ style_nonce }}" />
-        {% elif current_endpoint in ("loading", "starting") %}
-            <link rel="stylesheet"
-                  href="{{ url_for('static', filename='css/pages/loading.css') }}"
-                  nonce="{{ style_nonce }}" />
-        {% elif current_endpoint == "profile" %}
-            <link rel="stylesheet"
-                  href="{{ url_for('static', filename='css/pages/profile.css') }}"
-                  nonce="{{ style_nonce }}" />
-        {% elif current_endpoint == "home" %}
-            <link rel="stylesheet"
-                  href="{{ url_for('static', filename='css/pages/home.css') }}"
-                  nonce="{{ style_nonce }}" />
-        {% endif %}
         {% block head %}{% endblock %}
     </head>
     <body>
@@ -164,133 +108,58 @@
         {% block page %}{% endblock %}
         <!-- Helpers  -->
         <script src="{{ url_for('static', filename='js/helpers.js') }}"
-                nonce="{{ script_nonce }}"></script>
-        <!-- Config  -->
-        <script src="{{ url_for('static', filename='js/config.js') }}"
-                nonce="{{ script_nonce }}"></script>
-        <script src="{{ url_for('static', filename='libs/jquery/jquery.min.js') }}"
-                nonce="{{ script_nonce }}"></script>
-        <script src="{{ url_for('static', filename='libs/popper/popper.min.js') }}"
-                nonce="{{ script_nonce }}"></script>
-        <script src="{{ url_for('static', filename='libs/bootstrap/bootstrap.bundle.min.js') }}"
-                nonce="{{ script_nonce }}"></script>
-        <script src="{{ url_for('static', filename='libs/perfect-scrollbar/perfect-scrollbar.min.js') }}"
-                nonce="{{ script_nonce }}"></script>
-        <script src="{{ url_for('static', filename='libs/purify/purify.min.js') }}"
-                nonce="{{ script_nonce }}"></script>
-        <script src="{{ url_for('static', filename='libs/i18next/i18next.min.js') }}"
-                nonce="{{ script_nonce }}"></script>
-        <script src="{{ url_for('static', filename='libs/i18next/i18nextHttpBackend.min.js') }}"
-                nonce="{{ script_nonce }}"></script>
-        <script src="{{ url_for('static', filename='libs/i18next/i18nextBrowserLanguageDetector.min.js') }}"
-                nonce="{{ script_nonce }}"></script>
-        <script src="{{ url_for('static', filename='js/i18n.js') }}"
-                nonce="{{ script_nonce }}"></script>
-        {% if current_endpoint in ("instances", "services", "configs", "plugins", "cache", "reports", "bans", "jobs") or "plugins" in request.path %}
-            <script src="{{ url_for('static', filename='libs/datatables/datatables.min.js') }}"
-                    nonce="{{ script_nonce }}"></script>
-            <script src="{{ url_for('static', filename='libs/datatables/plugins/ip-address.js') }}"
-                    nonce="{{ script_nonce }}"></script>
-            <script src="{{ url_for('static', filename='js/dataTableInit.js') }}"
-                    nonce="{{ script_nonce }}"></script>
-        {% endif %}
-        {% if current_endpoint == "home" or current_endpoint != "plugins" and "plugins" in request.path %}
-            <script src="{{ url_for('static', filename='libs/apexcharts/apexcharts.min.js') }}"
-                    nonce="{{ script_nonce }}"></script>
-            <script src="{{ url_for('static', filename='libs/leaflet/leaflet.min.js') }}"
-                    nonce="{{ script_nonce }}"></script>
-        {% endif %}
-        {% if current_endpoint in ("bans", "pro") or current_endpoint != "plugins" and "plugins" in request.path %}
-            <script src="{{ url_for('static', filename='libs/flatpickr/flatpickr.min.js') }}"
-                    nonce="{{ script_nonce }}"></script>
-            <script src="{{ url_for('static', filename='libs/flatpickr/plugins/minMaxTimePlugin.js') }}"
-                    nonce="{{ script_nonce }}"></script>
-        {% endif %}
-        {% if current_endpoint not in ("services", "configs", "cache", "plugins") and ("services" in request.path or "configs" in request.path or "cache" in request.path or current_endpoint == "logs" or "plugins" in request.path) %}
-            <script src="{{ url_for('static', filename='libs/ace/src-min/ace.js') }}"
-                    nonce="{{ script_nonce }}"></script>
-        {% endif %}
-        {% if starting or current_endpoint in ("setup", "loading", "instances") or (current_endpoint != "plugins" and "plugins" in request.path) %}
-            <script src="{{ url_for('static', filename='libs/lottie-player/lottie-player.min.js') }}"
-                    nonce="{{ script_nonce }}"></script>
-        {% endif %}
-        <!-- Core JS -->
-        <script src="{{ url_for('static', filename='js/menu.js') }}"
-                nonce="{{ script_nonce }}"></script>
-        <!-- Main JS -->
-        <script src="{{ url_for('static', filename='js/main.js') }}"
-                nonce="{{ script_nonce }}"></script>
-        <script src="{{ url_for('static', filename='js/common.js') }}"
-                nonce="{{ script_nonce }}"></script>
-        <script src="{{ url_for('static', filename='js/utils.js') }}"
-                nonce="{{ script_nonce }}"></script>
-        {% if current_endpoint == "global-config" or (current_endpoint != "services" and "services" in request.path) %}
-            <script src="{{ url_for('static', filename='js/plugins-settings.js') }}"
-                    nonce="{{ script_nonce }}"></script>
-        {% endif %}
-        <!-- Page JS -->
-        {% if starting %}
-            <script src="{{ url_for('static', filename='js/pages/starting.js') }}"
-                    nonce="{{ script_nonce }}"></script>
-        {% endif %}
-        {% if current_endpoint == "setup" %}
-            <script src="{{ url_for('static', filename='js/pages/setup.js') }}"
-                    nonce="{{ script_nonce }}"></script>
-        {% elif current_endpoint == "loading" %}
-            <script src="{{ url_for('static', filename='js/pages/loading.js') }}"
-                    nonce="{{ script_nonce }}"></script>
-        {% elif current_endpoint == "home" %}
-            <script src="{{ url_for('static', filename='js/pages/home.js') }}"
-                    nonce="{{ script_nonce }}"></script>
-        {% elif current_endpoint == "profile" %}
-            <script src="{{ url_for('static', filename='js/pages/profile.js') }}"
-                    nonce="{{ script_nonce }}"></script>
-        {% elif current_endpoint == "instances" %}
-            <script src="{{ url_for('static', filename='js/pages/instances.js') }}"
-                    nonce="{{ script_nonce }}"></script>
-        {% elif current_endpoint == "services" %}
-            <script src="{{ url_for('static', filename='js/pages/services.js') }}"
-                    nonce="{{ script_nonce }}"></script>
-        {% elif current_endpoint == "configs" %}
-            <script src="{{ url_for('static', filename='js/pages/configs.js') }}"
-                    nonce="{{ script_nonce }}"></script>
-        {% elif current_endpoint != "configs" and "configs" in request.path %}
-            <script src="{{ url_for('static', filename='js/pages/config_edit.js') }}"
-                    nonce="{{ script_nonce }}"></script>
-        {% elif current_endpoint == "plugins" %}
-            <script src="{{ url_for('static', filename='js/pages/plugins.js') }}"
-                    nonce="{{ script_nonce }}"></script>
-        {% elif current_endpoint == "cache" %}
-            <script src="{{ url_for('static', filename='js/pages/cache.js') }}"
-                    nonce="{{ script_nonce }}"></script>
-        {% elif current_endpoint != "cache" and "cache" in request.path %}
-            <script src="{{ url_for('static', filename='js/pages/cache_view.js') }}"
-                    nonce="{{ script_nonce }}"></script>
-        {% elif current_endpoint == "reports" %}
-            <script src="{{ url_for('static', filename='js/pages/reports.js') }}"
-                    nonce="{{ script_nonce }}"></script>
-        {% elif current_endpoint == "bans" %}
-            <script src="{{ url_for('static', filename='js/pages/bans.js') }}"
-                    nonce="{{ script_nonce }}"></script>
-        {% elif current_endpoint == "jobs" %}
-            <script src="{{ url_for('static', filename='js/pages/jobs.js') }}"
-                    nonce="{{ script_nonce }}"></script>
-        {% elif current_endpoint == "logs" %}
-            <script src="{{ url_for('static', filename='js/pages/logs.js') }}"
-                    nonce="{{ script_nonce }}"></script>
-        {% elif current_endpoint == "pro" %}
-            <script src="{{ url_for('static', filename='js/pages/pro.js') }}"
-                    nonce="{{ script_nonce }}"></script>
-        {% elif current_endpoint == "support" %}
-            <script src="{{ url_for('static', filename='js/pages/support.js') }}"
-                    nonce="{{ script_nonce }}"></script>
-        {% elif current_endpoint != "plugins" and "plugins" in request.path %}
-            <script src="{{ url_for('static', filename='js/pages/plugin_page.js') }}"
-                    nonce="{{ script_nonce }}"></script>
-        {% endif %}
-        <script src="{{ url_for('static', filename='js/buttons.js') }}"
                 nonce="{{ script_nonce }}"
                 defer></script>
+        <!-- Config  -->
+        <script src="{{ url_for('static', filename='js/config.js') }}"
+                nonce="{{ script_nonce }}"
+                defer></script>
+        <script src="{{ url_for('static', filename='libs/jquery/jquery.min.js') }}"
+                nonce="{{ script_nonce }}"
+                defer></script>
+        <script src="{{ url_for('static', filename='libs/popper/popper.min.js') }}"
+                nonce="{{ script_nonce }}"
+                defer></script>
+        <script src="{{ url_for('static', filename='libs/bootstrap/bootstrap.bundle.min.js') }}"
+                nonce="{{ script_nonce }}"
+                defer></script>
+        <script src="{{ url_for('static', filename='libs/perfect-scrollbar/perfect-scrollbar.min.js') }}"
+                nonce="{{ script_nonce }}"
+                defer></script>
+        <script src="{{ url_for('static', filename='libs/purify/purify.min.js') }}"
+                nonce="{{ script_nonce }}"
+                defer></script>
+        <!-- Main JS -->
+        <script src="{{ url_for('static', filename='js/menu.js') }}"
+                nonce="{{ script_nonce }}"
+                defer></script>
+        <script src="{{ url_for('static', filename='js/main.js') }}"
+                nonce="{{ script_nonce }}"
+                defer></script>
+        <script src="{{ url_for('static', filename='js/common.js') }}"
+                nonce="{{ script_nonce }}"
+                defer></script>
+        <script src="{{ url_for('static', filename='js/utils.js') }}"
+                nonce="{{ script_nonce }}"
+                defer></script>
+        <script src="{{ url_for('static', filename='libs/i18next/i18next.min.js') }}"
+                nonce="{{ script_nonce }}"
+                defer></script>
+        <script src="{{ url_for('static', filename='libs/i18next/i18nextHttpBackend.min.js') }}"
+                nonce="{{ script_nonce }}"
+                defer></script>
+        <script src="{{ url_for('static', filename='libs/i18next/i18nextBrowserLanguageDetector.min.js') }}"
+                nonce="{{ script_nonce }}"
+                defer></script>
+        <script src="{{ url_for('static', filename='js/i18n.js') }}"
+                nonce="{{ script_nonce }}"
+                defer></script>
+        <!-- Page Specific JS -->
         {% block scripts %}{% endblock %}
+        <!-- Buttons plugin -->
+        <script src="{{ url_for('static', filename='js/buttons.js') }}"
+                nonce="{{ script_nonce }}"
+                async
+                defer></script>
     </body>
 </html>

@@ -35,6 +35,11 @@ COPY src/common/helpers helpers
 COPY src/VERSION VERSION
 COPY src/ui ui
 
+# Minify JS files
+RUN apk add --no-cache nodejs npm && \
+  npm install -g uglify-js && \
+  for file in $(find ui/app/static -type f -name "*.js") ; do uglifyjs "$file" --compress --mangle --verbose --output "$file" ; done
+
 FROM python:3.13-alpine@sha256:452682e4648deafe431ad2f2391d726d7c52f0ff291be8bd4074b10379bb89ff
 
 # Set default umask to prevent huge recursive chmod increasing the final image size

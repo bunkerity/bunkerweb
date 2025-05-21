@@ -1,4 +1,21 @@
 {% extends "dashboard.html" %}
+{% block head %}
+    <link rel="preload"
+          href="{{ url_for('static', filename='libs/apexcharts/apexcharts.min.css') }}"
+          as="style" />
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='libs/apexcharts/apexcharts.min.css') }}"
+          nonce="{{ style_nonce }}" />
+    <link rel="preload"
+          href="{{ url_for('static', filename='libs/leaflet/leaflet.css') }}"
+          as="style" />
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='libs/leaflet/leaflet.css') }}"
+          nonce="{{ style_nonce }}" />
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/pages/home.css') }}"
+          nonce="{{ style_nonce }}" />
+{% endblock %}
 {% block content %}
     <!-- Content -->
     <div class="row g-4">
@@ -267,4 +284,16 @@
         </div>
     </div>
     <!-- / Content -->
+{% endblock %}
+{% block scripts %}
+    <script src="{{ url_for('static', filename='libs/apexcharts/apexcharts.min.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
+    <script src="{{ url_for('static', filename='libs/leaflet/leaflet.min.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
+    <script src="{{ url_for('static', filename='js/pages/home.js') }}"
+            nonce="{{ script_nonce }}"
+            defer
+            type="module"></script>
 {% endblock %}

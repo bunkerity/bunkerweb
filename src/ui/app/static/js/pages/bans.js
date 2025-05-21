@@ -673,9 +673,14 @@ $(document).ready(function () {
           console.error("DataTables AJAX error:", textStatus, errorThrown);
           $("#bans").addClass("d-none");
           $("#bans-waiting")
-            .removeClass("d-none")
-            .text("Error loading bans. Please try refreshing the page.")
-            .addClass("text-danger");
+            .removeClass("visually-hidden")
+            .addClass("text-danger")
+            .text(
+              t(
+                "status.error_loading_bans",
+                "Error loading bans. Please try refreshing the page.",
+              ),
+            );
           // Remove any loading indicators
           $(".dataTables_processing").hide();
         },
@@ -740,13 +745,29 @@ $(document).ready(function () {
             .attr("data-bs-placement", "right")
             .tooltip();
         }
-        updateCountryTooltips();
+        throttle(updateCountryTooltips, 200);
       },
       headerCallback: function (thead) {
-        updateHeaderTooltips(thead, headers);
+        throttle(updateHeaderTooltips, 200, thead, headers);
       },
     },
   };
+
+  // Add a fallback timeout to prevent infinite loading
+  setTimeout(function () {
+    if ($("#bans").hasClass("d-none")) {
+      $("#bans-waiting")
+        .removeClass("visually-hidden")
+        .addClass("text-danger")
+        .text(
+          t(
+            "status.error_loading_bans",
+            "Error loading bans. Please try refreshing the page.",
+          ),
+        );
+      $("#bans").addClass("d-none");
+    }
+  }, 5000); // 5 seconds fallback
 
   // Wait for window.i18nextReady = true before continuing
   if (typeof window.i18nextReady === "undefined" || !window.i18nextReady) {
@@ -762,16 +783,22 @@ $(document).ready(function () {
     }).then(() => {
       const dt = initializeDataTable(bans_config);
       dt.on("draw.dt", function () {
-        updateCountryTooltips();
-        updateHeaderTooltips(dt.table().header(), headers);
+        throttle(updateCountryTooltips, 200);
+        throttle(updateHeaderTooltips, 200, dt.table().header(), headers);
         $(".tooltip").remove();
+        // Hide waiting message and show table
+        $("#bans-waiting").addClass("visually-hidden");
+        $("#bans").removeClass("d-none");
       });
       dt.on("column-visibility.dt", function (e, settings, column, state) {
-        updateHeaderTooltips(dt.table().header(), headers);
+        throttle(updateHeaderTooltips, 200, dt.table().header(), headers);
         $(".tooltip").remove();
       });
       // Ensure tooltips are set after initialization
-      updateHeaderTooltips(dt.table().header(), headers);
+      throttle(updateHeaderTooltips, 200, dt.table().header(), headers);
+      // Hide waiting message and show table
+      $("#bans-waiting").addClass("visually-hidden");
+      $("#bans").removeClass("d-none");
       return dt;
     });
   }
@@ -1004,7 +1031,7 @@ $(document).ready(function () {
           }
         });
       validateBan($input, ipServiceMap);
-    }, 100)();
+    }, 200)();
   });
 
   // Handle the permanent ban checkbox change

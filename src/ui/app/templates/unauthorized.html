@@ -82,7 +82,7 @@
     </div>
     {% if next %}<input type="hidden" id="next-endpoint" value="{{ next }}" />{% endif %}
     {% if auto_redirect %}
-        <script nonce="{{ script_nonce }}">
+        <script nonce="{{ script_nonce }}" defer>
         document.addEventListener('DOMContentLoaded', function() {
             setTimeout(function() {
                 window.location.href = "{{ next }}";

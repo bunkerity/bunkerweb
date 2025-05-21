@@ -106,6 +106,11 @@ COPY src/all-in-one all-in-one
 COPY src/VERSION VERSION
 COPY misc/*.ascii misc/
 
+# Minify JS files
+RUN apk add --no-cache nodejs npm && \
+    npm install -g uglify-js && \
+    for file in $(find ui/app/static -type f -name "*.js") ; do uglifyjs "$file" --compress --mangle --verbose --output "$file" ; done
+
 FROM nginx:1.26-alpine-slim@sha256:6d4f5fb02763f731c06f3e246d4edf89c3a2bbc5dd72eab2b02bc55ef4b8600e
 
 # Set default umask to prevent huge recursive chmod increasing the final image size

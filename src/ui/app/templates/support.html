@@ -128,3 +128,9 @@
     </div>
     <!--/ Content -->
 {% endblock %}
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/pages/support.js') }}"
+            nonce="{{ script_nonce }}"
+            defer
+            type="module"></script>
+{% endblock %}

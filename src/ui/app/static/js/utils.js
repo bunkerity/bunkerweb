@@ -1,3 +1,15 @@
+function throttle(func, limit, ...throttleArgs) {
+  let inThrottle;
+  return function (...args) {
+    const context = this;
+    if (!inThrottle) {
+      func.apply(context, [...throttleArgs, ...args]);
+      inThrottle = true;
+      setTimeout(() => (inThrottle = false), limit);
+    }
+  };
+}
+
 class News {
   constructor(t) {
     this.BASE_URL = "https://www.bunkerweb.io/";
@@ -332,9 +344,7 @@ $(document).ready(() => {
   calculateMinHeight();
 
   // Recalculate the min-height on window resize
-  $(window).on("resize", function () {
-    calculateMinHeight();
-  });
+  $(window).on("resize", throttle(calculateMinHeight, 200));
 
   const news = new News(t);
   news.init();

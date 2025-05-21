@@ -410,9 +410,14 @@ $(document).ready(function () {
           console.error("DataTables AJAX error:", textStatus, errorThrown);
           $("#reports").addClass("d-none");
           $("#reports-waiting")
-            .removeClass("d-none")
-            .text("Error loading reports. Please try refreshing the page.")
-            .addClass("text-danger");
+            .removeClass("visually-hidden")
+            .addClass("text-danger")
+            .text(
+              t(
+                "status.error_loading_reports",
+                "Error loading reports. Please try refreshing the page.",
+              ),
+            );
           // Remove any loading indicators
           $(".dataTables_processing").hide();
         },
@@ -491,6 +496,22 @@ $(document).ready(function () {
     },
   };
 
+  // Add a fallback timeout to prevent infinite loading
+  setTimeout(function () {
+    if ($("#reports").hasClass("d-none")) {
+      $("#reports-waiting")
+        .removeClass("visually-hidden")
+        .addClass("text-danger")
+        .text(
+          t(
+            "status.error_loading_reports",
+            "Error loading reports. Please try refreshing the page.",
+          ),
+        );
+      $("#reports").addClass("d-none");
+    }
+  }, 5000); // 5 seconds fallback
+
   // Create the modal for displaying full URLs once at document ready
   $("body").append(`
     <div class="modal fade" id="fullUrlModal" tabindex="-1" aria-labelledby="fullUrlModalLabel" aria-hidden="true">
@@ -560,13 +581,38 @@ $(document).ready(function () {
         updateHeaderTooltips(dt.table().header(), headers);
         // Clean up any existing tooltips to prevent memory leaks
         $(".tooltip").remove();
+        // Hide waiting message and show table
+        $("#reports-waiting").addClass("visually-hidden");
+        $("#reports").removeClass("d-none");
       });
       // Ensure tooltips are set after initialization
       updateHeaderTooltips(dt.table().header(), headers);
       $("#reports_wrapper").find(".btn-secondary").removeClass("btn-secondary");
+      // Hide waiting message and show table
+      $("#reports-waiting").addClass("visually-hidden");
+      $("#reports").removeClass("d-none");
       return dt;
     });
   }
+
+  if (sessionAutoRefresh === "true") {
+    toggleAutoRefresh();
+  }
+
+  const hashValue = location.hash;
+  if (hashValue) {
+    $("#dt-length-0").val(hashValue.replace("#", ""));
+    $("#dt-length-0").trigger("change");
+  }
+
+  $("#dt-length-0").on("change", function () {
+    const value = $(this).val();
+    history.replaceState(
+      null,
+      "",
+      value === "10" ? location.pathname : `#${value}`,
+    );
+  });
 
   // Utility function to manage header tooltips
   function updateHeaderTooltips(selector, headers) {
@@ -596,23 +642,4 @@ $(document).ready(function () {
     applyTranslations();
     $('[data-bs-toggle="tooltip"]').tooltip("dispose").tooltip();
   }
-
-  if (sessionAutoRefresh === "true") {
-    toggleAutoRefresh();
-  }
-
-  const hashValue = location.hash;
-  if (hashValue) {
-    $("#dt-length-0").val(hashValue.replace("#", ""));
-    $("#dt-length-0").trigger("change");
-  }
-
-  $("#dt-length-0").on("change", function () {
-    const value = $(this).val();
-    history.replaceState(
-      null,
-      "",
-      value === "10" ? location.pathname : `#${value}`,
-    );
-  });
 });
