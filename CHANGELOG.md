@@ -4,8 +4,7 @@
 
 - [BUGFIX] Refactor CLI command handling to support additional arguments
 - [ALL-IN-ONE] Fully integrate CrowdSec in the all-in-one image
-- [UI] Refactor script and style handling to utilize Jinja2 blocks for better modularity
-- [UI] Apply optimization techniques to improve UI rendering performance
+- [UI] Add clear notifications feature to both UI and backend for improved notification management
 - [MISC] Refactor template rendering for improved performance and efficiency
 
 ## v1.6.2-rc2 - 2025/05/19

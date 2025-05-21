@@ -978,6 +978,14 @@ def set_columns_preferences():
     return Response(status=200, response=dumps({"message": "ok"}), content_type="application/json")
 
 
+@app.route("/clear_notifications", methods=["POST"])
+@login_required
+def clear_notifications():
+    session["flash_messages"] = []
+    session.modified = True
+    return Response(status=200, response=dumps({"message": "ok"}), content_type="application/json")
+
+
 from app.routes.about import about
 from app.routes.bans import bans
 from app.routes.cache import cache

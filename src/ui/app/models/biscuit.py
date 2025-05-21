@@ -109,6 +109,7 @@ class BiscuitMiddleware:
             authorizer.add_policy(Policy('allow if resource($resource_path), $resource_path == "/set_theme"'))
             authorizer.add_policy(Policy('allow if resource($resource_path), $resource_path == "/set_language"'))
             authorizer.add_policy(Policy('allow if resource($resource_path), $resource_path == "/set_columns_preferences"'))
+            authorizer.add_policy(Policy('allow if resource($resource_path), $resource_path == "/clear_notifications"'))
             authorizer.add_policy(Policy("allow if role($role_name, $permissions), operation($operation_name), $permissions.contains($operation_name)"))
 
             current_app.logger.debug(str(authorizer))

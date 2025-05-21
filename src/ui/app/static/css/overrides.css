@@ -1220,6 +1220,24 @@ span.cursor-pointer ~ .reset-setting {
   background-color: #0b354a;
 }
 
+#data-notifications-container {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  min-height: 0;
+}
+#notifications-toast-container {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.newsletter-signup {
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+}
+
 /*
 * Dark mode overrides
 ******************************************************************************/
