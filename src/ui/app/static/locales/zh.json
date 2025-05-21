@@ -632,6 +632,7 @@
       "config_name": "我的自定义配置",
       "enter_username": "输入您的用户名",
       "keywords": "关键词...",
+      "plugin_search": "搜索插件...",
       "search": "搜索...",
       "select_service": "选择服务",
       "secret_token": "密钥",

@@ -632,6 +632,7 @@
       "config_name": "ozel-konfig-adim",
       "enter_username": "Kullanıcı adı girin",
       "keywords": "Anahtar Kelimeler",
+      "plugin_search": "Eklenti ara...",
       "search": "Ara...",
       "select_service": "Servis Seç",
       "secret_token": "Gizli Token",

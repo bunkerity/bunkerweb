@@ -632,6 +632,7 @@
       "config_name": "mi-config-personalizada",
       "enter_username": "Introduce tu nombre de usuario",
       "keywords": "Palabras clave...",
+      "plugin_search": "Buscar plugins...",
       "search": "Buscar...",
       "select_service": "Seleccionar Servicio",
       "secret_token": "Token Secreto",

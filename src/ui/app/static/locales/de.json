@@ -632,6 +632,7 @@
       "config_name": "meine-benutzerdefinierte-konfig",
       "enter_username": "Benutzernamen eingeben",
       "keywords": "Schlüsselwörter...",
+      "plugin_search": "Plugins suchen...",
       "search": "Suchen...",
       "select_service": "Dienst auswählen",
       "secret_token": "Geheimer Token",

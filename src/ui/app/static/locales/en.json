@@ -632,6 +632,7 @@
       "config_name": "my-custom-config",
       "enter_username": "Enter username",
       "keywords": "Keywords",
+      "plugin_search": "Search for plugins...",
       "search": "Search...",
       "select_service": "Select Service",
       "secret_token": "Secret Token",

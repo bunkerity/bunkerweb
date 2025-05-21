@@ -632,6 +632,7 @@
       "config_name": "ma-config-perso",
       "enter_username": "Entrez votre nom d'utilisateur",
       "keywords": "Mots-clés...",
+      "plugin_search": "Rechercher des plugins...",
       "search": "Rechercher...",
       "select_service": "Sélectionner un Service",
       "secret_token": "Jeton Secret",

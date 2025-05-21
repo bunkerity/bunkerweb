@@ -632,6 +632,7 @@
       "config_name": "mia-config-personalizzata",
       "enter_username": "Inserisci il tuo nome utente",
       "keywords": "Parole chiave...",
+      "plugin_search": "Cerca plugin...",
       "search": "Cerca...",
       "select_service": "Seleziona Servizio",
       "secret_token": "Token Segreto",

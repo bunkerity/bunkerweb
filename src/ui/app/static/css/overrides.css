@@ -1238,6 +1238,82 @@ span.cursor-pointer ~ .reset-setting {
   z-index: 1;
 }
 
+/* Plugin navigation item styles */
+.plugin-navigation-item {
+  border-left: 3px solid transparent;
+  transition: all 0.25s ease;
+  margin-bottom: 0.5rem;
+  border-radius: 0.375rem;
+}
+
+.plugin-navigation-item.active {
+  border-left-color: var(--bs-primary);
+  background-color: rgba(var(--bs-primary-rgb), 0.08);
+  box-shadow: 0 2px 6px rgba(var(--bs-primary-rgb), 0.15);
+}
+
+.plugin-navigation-item:hover:not(.active) {
+  background-color: rgba(var(--bs-primary-rgb), 0.05);
+  border-left-color: rgba(var(--bs-primary-rgb), 0.4);
+}
+
+.plugin-navigation-item .step-number {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease-in-out;
+}
+
+.plugin-navigation-item.active .step-number {
+  transform: scale(1.1);
+}
+
+.plugin-navigation-item:hover .step-number:not(.active) {
+  transform: scale(1.05);
+}
+
+.plugin-navigation-item .step-details {
+  transition: all 0.25s ease;
+}
+
+.plugin-navigation-item.active .step-details .fw-bold {
+  color: var(--bs-primary) !important;
+}
+
+.plugin-navigation-item small.text-muted {
+  transition: opacity 0.2s ease;
+  opacity: 0.7;
+}
+
+.plugin-navigation-item:hover small.text-muted,
+.plugin-navigation-item.active small.text-muted {
+  opacity: 1;
+}
+
+/* Dark mode specific styles for plugin navigation */
+.dark-style .plugin-navigation-item.active {
+  background-color: rgba(var(--bs-primary-rgb), 0.2);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.dark-style .plugin-navigation-item:hover:not(.active) {
+  background-color: rgba(var(--bs-primary-rgb), 0.1);
+}
+
+/* Enhance the plugin search box */
+.plugin-steps-container .input-group-merge {
+  box-shadow: 0 2px 5px rgba(var(--bs-primary-rgb), 0.1);
+  border-radius: 0.375rem;
+  transition: all 0.3s ease;
+}
+
+.plugin-steps-container .input-group-merge:focus-within {
+  box-shadow: 0 3px 10px rgba(var(--bs-primary-rgb), 0.15);
+}
+
 /*
 * Dark mode overrides
 ******************************************************************************/

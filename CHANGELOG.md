@@ -5,6 +5,7 @@
 - [BUGFIX] Refactor CLI command handling to support additional arguments
 - [ALL-IN-ONE] Fully integrate CrowdSec in the all-in-one image
 - [UI] Add clear notifications feature to both UI and backend for improved notification management
+- [UI] Improve plugin navigation by displaying plugins as a vertical list on the left side of the card, replacing the dropdown combobox
 - [MISC] Refactor template rendering for improved performance and efficiency
 
 ## v1.6.2-rc2 - 2025/05/19
