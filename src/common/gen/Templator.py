@@ -86,7 +86,9 @@ class Templator:
 
         num_workers = min(max(1, (cpu_count() or 1) // 2), len(servers))
         with ProcessPoolExecutor(max_workers=num_workers) as executor:
-            list(executor.map(self._render_server, servers))
+            futures = [executor.submit(self._render_server, server) for server in servers]
+            for future in futures:
+                future.result()
 
     def _load_jinja_env(self) -> Environment:
         """Load the Jinja2 environment with the appropriate search paths.
@@ -160,13 +162,15 @@ class Templator:
         """
         prefix = f"{server}_"
         prefix_len = len(prefix)
-        config = {"NGINX_PREFIX": join(self._target, server) + "/"}
+        config = {}
 
         # Add non-prefixed values first (only if they won't be overridden)
         server_specific_keys = {k[prefix_len:] for k in self._config if k.startswith(prefix)}
         for k, v in self._config.items():
             if not k.startswith(prefix) and k not in server_specific_keys:
                 config[k] = v
+
+        config["NGINX_PREFIX"] = f"{join(self._target, server)}/"
 
         # Add server-specific overrides
         for k, v in self._config.items():
@@ -202,8 +206,9 @@ class Templator:
 
         max_workers = min(max(1, (cpu_count() or 1) // 2), len(templates))
         with ProcessPoolExecutor(max_workers=max_workers) as executor:
-            for template in templates:
-                executor.submit(self._render_template, template, template_vars)
+            futures = [executor.submit(self._render_template, template, template_vars) for template in templates]
+            for future in futures:
+                future.result()
 
     def _render_server(self, server: str) -> None:
         """Render templates for a specific server.
