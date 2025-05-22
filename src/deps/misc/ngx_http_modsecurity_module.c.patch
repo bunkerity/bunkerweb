@@ -1,21 +1,14 @@
-@@ -526,7 +526,7 @@
- ngx_http_modsecurity_init(ngx_conf_t *cf)
- {
+@@ -554,3 +554,3 @@
      ngx_http_handler_pt *h_rewrite;
 -    ngx_http_handler_pt *h_preaccess;
 +    ngx_http_handler_pt *h_access;
      ngx_http_handler_pt *h_log;
-     ngx_http_core_main_conf_t *cmcf;
-     int rc = 0;
-@@ -556,18 +556,18 @@
- 
-     /**
+@@ -584,3 +584,3 @@
       *
 -     * Processing the request body on the preaccess phase.
 +     * Processing the request body on the access phase.
       *
-      * TODO: check if hook into separated phases is the best thing to do.
-      *
+@@ -589,9 +589,9 @@
       */
 -    h_preaccess = ngx_array_push(&cmcf->phases[NGX_HTTP_PREACCESS_PHASE].handlers);
 -    if (h_preaccess == NULL)
@@ -29,5 +22,3 @@
 -    *h_preaccess = ngx_http_modsecurity_pre_access_handler;
 +    *h_access = ngx_http_modsecurity_access_handler;
  
-     /**
-      * Process the log phase.
