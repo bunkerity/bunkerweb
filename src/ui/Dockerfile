@@ -36,7 +36,7 @@ COPY src/VERSION VERSION
 COPY src/ui ui
 
 # Minify JS files (can be skipped with SKIP_MINIFY=yes)
-ARG SKIP_MINIFY=false
+ARG SKIP_MINIFY=no
 RUN if [ "$SKIP_MINIFY" != "yes" ]; then \
   apk add --no-cache nodejs npm && \
   npm install -g uglify-js && \

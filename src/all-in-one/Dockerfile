@@ -107,7 +107,7 @@ COPY src/VERSION VERSION
 COPY misc/*.ascii misc/
 
 # Minify JS files (can be skipped with SKIP_MINIFY=yes)
-ARG SKIP_MINIFY=false
+ARG SKIP_MINIFY=no
 RUN if [ "$SKIP_MINIFY" != "yes" ]; then \
     apk add --no-cache nodejs npm && \
     npm install -g uglify-js && \
@@ -174,15 +174,24 @@ RUN tar -xzf crowdsec-release.tgz && \
     cd crowdsec-v* && \
     ./wizard.sh --docker-mode && \
     cd .. && \
-    mv all-in-one/crowdsec/config.yaml /etc/crowdsec/config.yaml && \
-    mv all-in-one/crowdsec/acquis.yaml /etc/crowdsec/acquis.yaml && \
-    mv all-in-one/crowdsec/appsec.yaml /etc/crowdsec/acquis.d/appsec.yaml && \
-    rm -rf crowdsec* all-in-one/conf all-in-one/deps all-in-one/scripts && \
+    mv all-in-one/conf/config.yaml /etc/crowdsec/config.yaml && \
+    mv all-in-one/conf/acquis.yaml /etc/crowdsec/acquis.yaml && \
+    mv all-in-one/conf/appsec.yaml /etc/crowdsec/acquis.d/appsec.yaml && \
+    rm -rf crowdsec* all-in-one/deps all-in-one/scripts && \
     chown -R root:nginx /data /var/lib/crowdsec /etc/crowdsec /usr/local/lib/crowdsec && \
 	chmod -R 770 /data /var/lib/bunkerweb /etc/crowdsec /usr/local/lib/crowdsec && \
     find /etc/crowdsec/ -type f -name "*.yaml" -print0 | xargs -0 chmod 660 && \
     mv /etc/crowdsec/online_api_credentials.yaml /var/lib/crowdsec/online_api_credentials.yaml && \
     mv /etc/crowdsec/local_api_credentials.yaml /var/lib/crowdsec/local_api_credentials.yaml
+
+# Setup Redis
+RUN mkdir /data/redis && ln -s /data/redis /var/lib/redis && \
+    apk add --no-cache redis && \
+    mv all-in-one/conf/redis.conf /etc/redis.conf && \
+    rm -rf all-in-one/conf && \
+    chown -R root:nginx /data /var/lib/redis /etc/redis.conf && \
+    chmod -R 770 /data /var/lib/redis && \
+    chmod 660 /etc/redis.conf
 
 # Set up supervisor configuration
 RUN mv /usr/share/bunkerweb/all-in-one/supervisord.conf /etc/supervisord.conf && \
@@ -203,6 +212,7 @@ HEALTHCHECK --interval=10s --timeout=10s --start-period=30s --retries=6 CMD /usr
 ENV PYTHONPATH="/usr/share/bunkerweb/deps/python:/usr/share/bunkerweb/db"
 ENV SERVICE_UI="yes"
 ENV SERVICE_SCHEDULER="yes"
+ENV USE_REDIS="yes"
 
 USER nginx:nginx
 

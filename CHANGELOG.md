@@ -4,6 +4,7 @@
 
 - [BUGFIX] Refactor CLI command handling to support additional arguments
 - [ALL-IN-ONE] Fully integrate CrowdSec in the all-in-one image
+- [ALL-IN-ONE] Fully integrate Redis in the all-in-one image (activated by default)
 - [UI] Add clear notifications feature to both UI and backend for improved notification management
 - [UI] Improve plugin navigation by displaying plugins as a vertical list on the left side of the card, replacing the dropdown combobox
 - [UI] Display a small "enabled/disabled" icon next to each plugin name in the plugin sidebar and menu to indicate whether the plugin is active (e.g., show if Reverse Proxy is enabled)

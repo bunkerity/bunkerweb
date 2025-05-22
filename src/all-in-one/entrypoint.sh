@@ -238,6 +238,10 @@ if [ "${USE_CROWDSEC}" = "yes" ] && [[ "${CROWDSEC_API:-http://127.0.0.1:8000}" 
 	log "ENTRYPOINT" "✅" "[CROWDSEC] Configuration completed successfully."
 fi
 
+if [ "${USE_REDIS}" = "yes" ] && { [ "${REDIS_HOST:-127.0.0.1}" = "127.0.0.1" ] || [ "${REDIS_HOST:-127.0.0.1}" = "localhost" ]; }; then
+	export REDIS_HOST="${REDIS_HOST:-127.0.0.1}"
+fi
+
 # start supervisord in foreground
 log "ENTRYPOINT" "ℹ️" "Starting services ..."
 /usr/bin/supervisord -c /etc/supervisord.conf &
