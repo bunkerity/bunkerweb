@@ -3,6 +3,7 @@
 ## v1.6.2-rc3 - ????/??/??
 
 - [BUGFIX] Refactor CLI command handling to support additional arguments
+- [DOCS] Update the documentation about the `all-in-one` image to include the new features and improvements, also move it to its own section
 - [ALL-IN-ONE] Fully integrate CrowdSec in the all-in-one image
 - [ALL-IN-ONE] Fully integrate Redis in the all-in-one image (activated by default)
 - [UI] Add clear notifications feature to both UI and backend for improved notification management
