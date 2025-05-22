@@ -44,6 +44,7 @@ from app.utils import (
     get_multiples,
     handle_stop,
     human_readable_number,
+    is_plugin_active,
     stop,
 )
 from app.lang_config import SUPPORTED_LANGUAGES
@@ -216,6 +217,7 @@ with app.app_context():
         get_plugins_settings=BW_CONFIG.get_plugins_settings,
         human_readable_number=human_readable_number,
         url_for=custom_url_for,
+        is_plugin_active=is_plugin_active,
     )
 
     app.config.update({hook_info["key"]: [] for hook_info in HOOKS.values()})
@@ -747,6 +749,7 @@ def before_request():
             supported_languages=SUPPORTED_LANGUAGES,
             columns_preferences_defaults=COLUMNS_PREFERENCES_DEFAULTS,
             extra_pages=app.config["EXTRA_PAGES"],
+            config=DB.get_config(global_only=True, methods=True),
         )
 
         if current_endpoint in COLUMNS_PREFERENCES_DEFAULTS:

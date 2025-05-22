@@ -1314,6 +1314,19 @@ span.cursor-pointer ~ .reset-setting {
   box-shadow: 0 3px 10px rgba(var(--bs-primary-rgb), 0.15);
 }
 
+/* Fade effect for plugin tab panes */
+.plugin-tab-pane {
+  opacity: 0;
+  transition: opacity 0.2s;
+  display: none;
+}
+.plugin-tab-pane.show {
+  display: block;
+}
+.plugin-tab-pane.fade-in {
+  opacity: 1;
+}
+
 /*
 * Dark mode overrides
 ******************************************************************************/
