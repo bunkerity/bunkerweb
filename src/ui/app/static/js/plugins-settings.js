@@ -1740,31 +1740,62 @@ $(document).ready(() => {
   $(document).on("click", ".plugin-navigation-item", function () {
     const plugin = $(this).data("plugin");
     if (!plugin) return;
-    // Remove active and highlight classes from all
+
+    // Don't do anything if already active
+    if (currentPlugin === plugin) return;
+
+    // Remove active and highlight classes from all navigation items
     $(".plugin-navigation-item")
       .removeClass("active show")
       .attr("aria-selected", "false");
+
+    // Mark this navigation item as active
     $(this).addClass("active show").attr("aria-selected", "true");
-    // Fade out currently visible plugin pane
-    const $currentPane = $("div[id^='navs-plugins-'].show.active");
+
+    // Reference all plugin panes and the target pane
+    const $allPanes = $("div[id^='navs-plugins-']");
+    const $currentPane = $allPanes.filter(".show.active");
     const $nextPane = $(`#navs-plugins-${plugin}`);
+
+    // Ensure all panes except current are fully hidden
+    $allPanes.not($currentPane).removeClass("show active").hide();
+
+    // Smooth transition between panes
     if ($currentPane.length && !$currentPane.is($nextPane)) {
+      // Ensure transitions complete sequentially
       $currentPane.fadeOut(150, function () {
+        // Remove classes after fade-out completes
         $currentPane.removeClass("show active");
-        $nextPane.fadeIn(150, function () {
-          $nextPane.addClass("show active");
+
+        // Prepare the next pane and fade it in
+        $nextPane.css("opacity", 0).show();
+        $nextPane.addClass("active");
+
+        // Trigger reflow to ensure transitions work properly
+        $nextPane[0].offsetHeight;
+
+        $nextPane.animate({ opacity: 1 }, 150, function () {
+          $nextPane.addClass("show");
         });
       });
     } else {
-      // If no current or same, just show the next
-      $("div[id^='navs-plugins-']").removeClass("show active").hide();
-      $nextPane.fadeIn(150, function () {
-        $nextPane.addClass("show active");
-      });
+      // If no current pane or it's the same pane, just show the target
+      $nextPane.css("opacity", 0).show();
+      $nextPane.addClass("active");
+
+      // Short delay to ensure proper rendering
+      setTimeout(function () {
+        $nextPane.animate({ opacity: 1 }, 150, function () {
+          $nextPane.addClass("show");
+        });
+      }, 10);
     }
+
+    // Update global state and URL
     currentPlugin = plugin;
     window.location.hash = plugin;
-    // Update icon button in the plugin pane header
+
+    // Update visual styling for navigation
     $(".plugin-navigation-item .step-number")
       .removeClass("btn-primary")
       .addClass("btn-outline-primary disabled");
@@ -1823,14 +1854,29 @@ $(document).ready(() => {
       });
 
       if (matchedPlugin) {
+        // Only trigger navigation if we're changing plugins
         if (currentPlugin !== matchedPlugin) {
+          // Use the existing navigation mechanism to ensure clean transitions
           const $targetPlugin = $(
             `.plugin-navigation-item[data-plugin='${matchedPlugin}']`,
           );
-          $targetPlugin.trigger("click");
-        }
-        if (matchedSettings.length > 0) {
-          highlightSettings(matchedSettings, 1000);
+
+          // Allow previous animations to finish
+          setTimeout(() => {
+            $targetPlugin.trigger("click");
+
+            // Highlight settings after navigation is complete
+            setTimeout(() => {
+              if (matchedSettings.length > 0) {
+                highlightSettings(matchedSettings, 1000);
+              }
+            }, 200);
+          }, 10);
+        } else {
+          // If we're already on the correct plugin, just highlight
+          if (matchedSettings.length > 0) {
+            highlightSettings(matchedSettings, 1000);
+          }
         }
       }
     }, 100),

@@ -104,7 +104,7 @@
             </div>
             <ol class="list-group step-navigation-list" role="tablist">
                 {% for plugin, plugin_data in plugins.items() if get_filtered_settings(plugin_data["settings"], current_endpoint == "global-config") %}
-                    <li class="list-group-item plugin-navigation-item d-flex align-items-center p-2 cursor-pointer{% if loop.index == 1 %} show active{% endif %}"
+                    <li class="list-group-item plugin-navigation-item border-0 d-flex align-items-center p-2 cursor-pointer{% if loop.index == 1 %} show active{% endif %}"
                         role="tab"
                         id="plugin-nav-{{ plugin }}"
                         data-plugin="{{ plugin }}"

@@ -1293,27 +1293,6 @@ span.cursor-pointer ~ .reset-setting {
   opacity: 1;
 }
 
-/* Dark mode specific styles for plugin navigation */
-.dark-style .plugin-navigation-item.active {
-  background-color: rgba(var(--bs-primary-rgb), 0.2);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-}
-
-.dark-style .plugin-navigation-item:hover:not(.active) {
-  background-color: rgba(var(--bs-primary-rgb), 0.1);
-}
-
-/* Enhance the plugin search box */
-.plugin-steps-container .input-group-merge {
-  box-shadow: 0 2px 5px rgba(var(--bs-primary-rgb), 0.1);
-  border-radius: 0.375rem;
-  transition: all 0.3s ease;
-}
-
-.plugin-steps-container .input-group-merge:focus-within {
-  box-shadow: 0 3px 10px rgba(var(--bs-primary-rgb), 0.15);
-}
-
 /* Fade effect for plugin tab panes */
 .plugin-tab-pane {
   opacity: 0;
