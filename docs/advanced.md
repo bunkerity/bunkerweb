@@ -73,6 +73,25 @@ You will find more settings about real IP in the [settings section](features.md#
         sudo systemctl restart bunkerweb-scheduler
         ```
 
+    === "All-in-one"
+
+        You will need to add the settings to the environment variables when running the All-in-one container :
+
+        ```bash
+        docker run -d \
+            --name bunkerweb-aio \
+            -v bw-storage:/data \
+            -e USE_REAL_IP="yes" \
+            -e REAL_IP_FROM="1.2.3.0/24 100.64.0.0/10" \
+            -e REAL_IP_HEADER="X-Forwarded-For" \
+            -p 80:8080/tcp \
+            -p 443:8443/tcp \
+            -p 443:8443/udp \
+            bunkerity/bunkerweb-all-in-one:1.6.2-rc2
+        ```
+
+        Please note that if your container is already created, you will need to delete it and recreate it so the new environment variables will be updated.
+
     === "Docker"
 
         You will need to add the settings to the environment variables of both the BunkerWeb and scheduler containers:
@@ -216,6 +235,26 @@ You will find more settings about real IP in the [settings section](features.md#
         sudo systemctl restart bunkerweb && \
         sudo systemctl restart bunkerweb-scheduler
         ```
+
+    === "All-in-one"
+
+        You will need to add the settings to the environment variables when running the All-in-one container :
+
+        ```bash
+        docker run -d \
+            --name bunkerweb-aio \
+            -v bw-storage:/data \
+            -e USE_REAL_IP="yes" \
+            -e USE_PROXY_PROTOCOL="yes" \
+            -e REAL_IP_FROM="1.2.3.0/24 100.64.0.0/10" \
+            -e REAL_IP_HEADER="X-Forwarded-For" \
+            -p 80:8080/tcp \
+            -p 443:8443/tcp \
+            -p 443:8443/udp \
+            bunkerity/bunkerweb-all-in-one:1.6.2-rc2
+        ```
+
+        Please note that if your container is already created, you will need to delete it and recreate it so the new environment variables will be updated.
 
     === "Docker"
 
@@ -403,6 +442,78 @@ Some integrations provide more convenient ways to apply configurations, such as 
 
     ```shell
     systemctl start bunkerweb-scheduler
+    ```
+
+=== "All-in-one"
+
+    When using the [All-in-one image](integrations.md#all-in-one-aio-image), you have two choices for adding custom configurations:
+
+    - Using specific settings `*_CUSTOM_CONF_*` as environment variables when running the container (recommended).
+    - Writing `.conf` files to the `/data/configs/` directory within the volume mounted to `/data`.
+
+    **Using settings (Environment Variables)**
+
+    The settings to use must follow the pattern `<SITE>_CUSTOM_CONF_<TYPE>_<NAME>`:
+
+    - `<SITE>` : Optional primary server name if multisite mode is enabled and the config must be applied to a specific service.
+    - `<TYPE>` : The type of config, accepted values are `HTTP`, `DEFAULT_SERVER_HTTP`, `SERVER_HTTP`, `MODSEC`, `MODSEC_CRS`, `CRS_PLUGINS_BEFORE`, `CRS_PLUGINS_AFTER`, `STREAM` and `SERVER_STREAM`.
+    - `<NAME>` : The name of config without the `.conf` suffix.
+
+    Here is a dummy example when running the All-in-one container:
+
+    ```bash
+    docker run -d \
+        --name bunkerweb-aio \
+        -v bw-storage:/data \
+        -e "CUSTOM_CONF_SERVER_HTTP_hello-world=location /hello { \
+            default_type 'text/plain'; \
+            content_by_lua_block { \
+              ngx.say('world'); \
+            } \
+          }" \
+        -p 80:8080/tcp \
+        -p 443:8443/tcp \
+        bunkerity/bunkerweb-all-in-one:1.6.2-rc2
+    ```
+
+    Please note that if your container is already created, you will need to delete it and recreate it for the new environment variables to be applied.
+
+    **Using files**
+
+    The first thing to do is to create the folders :
+
+    ```shell
+    mkdir -p ./bw-data/configs/server-http
+    ```
+
+    You can now write your configurations :
+
+    ```shell
+    echo "location /hello {
+    	default_type 'text/plain';
+    	content_by_lua_block {
+    		ngx.say('world')
+    	}
+    }" > ./bw-data/configs/server-http/hello-world.conf
+    ```
+
+    Because the scheduler runs as an unprivileged user with UID and GID 101, you will need to edit the permissions :
+
+    ```shell
+    chown -R root:101 bw-data && \
+    chmod -R 770 bw-data
+    ```
+
+    When starting the scheduler container, you will need to mount the folder on /data :
+
+    ```bash
+    docker run -d \
+        --name bunkerweb-aio \
+        -v ./bw-data:/data \
+        -p 80:8080/tcp \
+        -p 443:8443/tcp \
+        -p 443:8443/udp \
+        bunkerity/bunkerweb-all-in-one:1.6.2-rc2
     ```
 
 === "Docker"
@@ -725,6 +836,40 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
     LISTEN_STREAM_PORT_SSL_1=4344
     ...
     ```
+
+=== "All-in-one"
+
+    You will need to add the settings to the environment variables when running the All-in-one container. You will also need to expose the stream ports.
+
+    This example configures BunkerWeb to proxy two stream-based applications, `app1.example.com` and `app2.example.com`.
+
+    ```bash
+    docker run -d \
+        --name bunkerweb-aio \
+        -v bw-storage:/data \
+        -e SERVICE_UI="no" \
+        -e SERVER_NAME="app1.example.com app2.example.com" \
+        -e MULTISITE="yes" \
+        -e USE_REVERSE_PROXY="yes" \
+        -e SERVER_TYPE="stream" \
+        -e app1.example.com_REVERSE_PROXY_HOST="myapp1:9000" \
+        -e app1.example.com_LISTEN_STREAM_PORT="10000" \
+        -e app2.example.com_REVERSE_PROXY_HOST="myapp2:9000" \
+        -e app2.example.com_LISTEN_STREAM_PORT="20000" \
+        -p 80:8080/tcp \
+        -p 443:8443/tcp \
+        -p 443:8443/udp \
+        -p 10000:10000/tcp \
+        -p 20000:20000/tcp \
+        bunkerity/bunkerweb-all-in-one:1.6.2-rc2
+    ```
+
+    Please note that if your container is already created, you will need to delete it and recreate it for the new environment variables to be applied.
+
+    Your applications (`myapp1`, `myapp2`) should be running in separate containers (or be otherwise accessible) and their hostnames/IPs (e.g., `myapp1`, `myapp2` used in `_REVERSE_PROXY_HOST`) must be resolvable and reachable from the `bunkerweb-aio` container. This typically involves connecting them to a shared Docker network.
+
+    !!! note "Deactivate UI Service"
+        Deactivating the UI service (e.g., by setting `SERVICE_UI=no` as an environment variable) is recommended as the Web UI is not compatible with `SERVER_TYPE=stream`.
 
 === "Docker"
 
@@ -1110,6 +1255,63 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 - `REMOTE_PHP_PORT` : Port of the remote PHP-FPM instance (*default is 9000*).
 - `LOCAL_PHP` : Path to the local socket file of PHP-FPM instance.
 - `LOCAL_PHP_PATH` : Root folder containing files in the local PHP-FPM instance.
+
+=== "All-in-one"
+
+    When using the [All-in-one image](integrations.md#all-in-one-aio-image), to support PHP applications, you will need to :
+
+    - Mount your PHP files into the `/var/www/html` folder of BunkerWeb.
+    - Set up a PHP-FPM container for your application and mount the folder containing PHP files.
+    - Use the specific settings `REMOTE_PHP` and `REMOTE_PHP_PATH` as environment variables when running BunkerWeb.
+
+    If you enable the [multisite mode](concepts.md#multisite-mode), you will need to create separate directories for each of your applications. Each subdirectory should be named using the first value of `SERVER_NAME`. Here is a dummy example :
+
+    ```
+    www
+    ├── app1.example.com
+    │   └── index.php
+    └── app2.example.com
+        └── index.php
+
+    2 directories, 2 files
+    ```
+
+    We will assume that your PHP apps are located into a folder named `www`. Please note that you will need to fix the permissions so BunkerWeb (UID/GID 101) can at least read files and list folders and PHP-FPM (UID/GID 33 if you use the `php:fpm` image) is the owner of the files and folders :
+
+    ```shell
+    chown -R 33:101 ./www && \
+    find ./www -type f -exec chmod 0640 {} \; && \
+    find ./www -type d -exec chmod 0750 {} \;
+    ```
+
+    You can now run BunkerWeb, configure it for your PHP application and also run the PHP apps. You will need to create a custom Docker network to allow BunkerWeb to communicate with your PHP-FPM containers.
+
+    ```bash
+    # Create a custom network
+    docker network create php-network
+
+    # Run PHP-FPM containers
+    docker run -d --name myapp1-php --network php-network -v ./www/app1.example.com:/app php:fpm
+    docker run -d --name myapp2-php --network php-network -v ./www/app2.example.com:/app php:fpm
+
+    # Run BunkerWeb All-in-one
+    docker run -d \
+        --name bunkerweb-aio \
+        --network php-network \
+        -v ./www:/var/www/html \
+        -v bw-storage:/data \
+        -e SERVER_NAME="app1.example.com app2.example.com" \
+        -e MULTISITE="yes" \
+        -e REMOTE_PHP_PATH="/app" \
+        -e app1.example.com_REMOTE_PHP="myapp1-php" \
+        -e app2.example.com_REMOTE_PHP="myapp2-php" \
+        -p 80:8080/tcp \
+        -p 443:8443/tcp \
+        -p 443:8443/udp \
+        bunkerity/bunkerweb-all-in-one:1.6.2-rc2
+    ```
+
+    Please note that if your container is already created, you will need to delete it and recreate it for the new environment variables to be applied.
 
 === "Docker"
 
@@ -1919,6 +2121,12 @@ To manually initiate a backup, execute the following command:
     docker exec -it <scheduler_container> bwcli plugin backup_s3 save
     ```
 
+=== "All-in-one"
+
+    ```bash
+    docker exec -it bunkerweb-aio bwcli plugin backup_s3 save
+    ```
+
 This command will create a backup of your database and store it in the S3 bucket specified in the `BACKUP_S3_BUCKET` setting.
 
 You can also specify a custom S3 bucket for the backup by providing the `BACKUP_S3_BUCKET` environment variable when executing the command:
@@ -1933,6 +2141,12 @@ You can also specify a custom S3 bucket for the backup by providing the `BACKUP_
 
     ```bash
     docker exec -it -e BACKUP_S3_BUCKET=your-bucket-name <scheduler_container> bwcli plugin backup_s3 save
+    ```
+
+=== "All-in-one"
+
+    ```bash
+    docker exec -it -e BACKUP_S3_BUCKET=your-bucket-name bunkerweb-aio bwcli plugin backup_s3 save
     ```
 
 !!! note "Specifications for MariaDB/MySQL"
@@ -1985,6 +2199,12 @@ To manually initiate a restore, execute the following command:
     docker exec -it <scheduler_container> bwcli plugin backup_s3 restore
     ```
 
+=== "All-in-one"
+
+    ```bash
+    docker exec -it bunkerweb-aio bwcli plugin backup_s3 restore
+    ```
+
 This command will create a temporary backup of your database in the S3 bucket specified in the `BACKUP_S3_BUCKET` setting and restore your database to the latest backup available in the bucket.
 
 You can also specify a custom backup file for the restore by providing the path to it as an argument when executing the command:
@@ -2001,6 +2221,12 @@ You can also specify a custom backup file for the restore by providing the path 
     docker exec -it <scheduler_container> bwcli plugin backup restore s3_backup_file.zip
     ```
 
+=== "All-in-one"
+
+    ```bash
+    docker exec -it bunkerweb-aio bwcli plugin backup_s3 restore s3_backup_file.zip
+    ```
+
 !!! example "In case of failure"
 
     Don't worry if the restore fails, you can always restore your database to the previous state by executing the command again as a backup is created before the restore:
@@ -2015,6 +2241,12 @@ You can also specify a custom backup file for the restore by providing the path 
 
         ```bash
         docker exec -it <scheduler_container> bwcli plugin backup_s3 restore
+        ```
+
+    === "All-in-one"
+
+        ```bash
+        docker exec -it bunkerweb-aio bwcli plugin backup_s3 restore
         ```
 
 ### Migration <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
@@ -2053,6 +2285,20 @@ To manually create a migration file, execute the following command:
 
         ```bash
         docker cp <scheduler_container>:/path/to/migration/file /path/to/migration/file
+        ```
+
+=== "All-in-one"
+
+    1. Create a migration file:
+
+        ```bash
+        docker exec -it bunkerweb-aio bwcli plugin migration create /path/to/migration/file
+        ```
+
+    2. Copy the migration file to your local machine:
+
+        ```bash
+        docker cp bunkerweb-aio:/path/to/migration/file /path/to/migration/file
         ```
 
 This command will create a backup of your database and store it in the backup directory specified in the command.
@@ -2113,6 +2359,20 @@ To manually initialize a migration, execute the following command:
 
         ```bash
         docker exec -it <scheduler_container> bwcli plugin migration migrate /path/to/migration/file
+        ```
+
+=== "All-in-one"
+
+    1. Copy the migration file to the container:
+
+        ```bash
+        docker cp /path/to/migration/file bunkerweb-aio:/path/to/migration/file
+        ```
+
+    2. Initialize the migration:
+
+        ```bash
+        docker exec -it bunkerweb-aio bwcli plugin migration migrate /path/to/migration/file
         ```
 
 This command seamlessly migrates your BunkerWeb data to precisely match the configuration outlined in the migration file.
